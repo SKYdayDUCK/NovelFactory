@@ -1,0 +1,248 @@
+{
+  "schema_version": "github-recovery-independent-check-1",
+  "checked_at_utc": "2026-11-10T13:32:49.929768+00:00",
+  "repository": "SKYdayDUCK/NovelFactory",
+  "verification_channel": "Authorized GitHub connector GET only; local Git read-only comparison",
+  "writes_performed": false,
+  "base": "0609f680fad782c827dd3834a073f8f9bcddaf0d",
+  "batches": {
+    "A": {
+      "local_commit": "0d8880e725f68a34c197d39eedbf4a130f714244",
+      "remote_commit": "2966667f7cb044812155c69b1a1c6bb0a24d0926",
+      "local_tree_sha": "5087b33cb7a440b0da3349ac7704b5b027091fa5",
+      "remote_tree_sha": "5087b33cb7a440b0da3349ac7704b5b027091fa5",
+      "expected_parent": "0609f680fad782c827dd3834a073f8f9bcddaf0d",
+      "remote_parents": [
+        "0609f680fad782c827dd3834a073f8f9bcddaf0d"
+      ],
+      "recursive_tree_truncated": false,
+      "local_entry_count": 2356,
+      "remote_entry_count": 2356,
+      "blob_count": 2226,
+      "tree_comparison": "EXACT_PATH_MODE_TYPE_SHA_MATCH",
+      "mismatches": [],
+      "content_reads": [
+        {
+          "path": "src/novel_factory/orchestration/short_volume.py",
+          "remote_blob_sha": "f7d5d9b3e9a3bbd7025b80f265863ed40847fde6",
+          "local_blob_sha": "f7d5d9b3e9a3bbd7025b80f265863ed40847fde6",
+          "git_blob_sha_of_read_content": "f7d5d9b3e9a3bbd7025b80f265863ed40847fde6",
+          "byte_count": 52168,
+          "bytes_identical": true,
+          "content_sha256": "97058a5c5d8aa900ded4377a62376ce1d341ac61e062de1766d00eef2c8aa943",
+          "passed": true
+        },
+        {
+          "path": "src/novel_factory/orchestration/short_volume_extraction.py",
+          "remote_blob_sha": "085f56ac3735b1756634a7cf7ac3a932b22dae76",
+          "local_blob_sha": "085f56ac3735b1756634a7cf7ac3a932b22dae76",
+          "git_blob_sha_of_read_content": "085f56ac3735b1756634a7cf7ac3a932b22dae76",
+          "byte_count": 15078,
+          "bytes_identical": true,
+          "content_sha256": "a9cc8581b0d43665c62be5658550c99a48d80057b39070116b454dd4573654e2",
+          "passed": true
+        },
+        {
+          "path": "tests/integration/test_short_volume.py",
+          "remote_blob_sha": "aa3125ec27640b34ddc32bbe068ac68e53242823",
+          "local_blob_sha": "aa3125ec27640b34ddc32bbe068ac68e53242823",
+          "git_blob_sha_of_read_content": "aa3125ec27640b34ddc32bbe068ac68e53242823",
+          "byte_count": 6539,
+          "bytes_identical": true,
+          "content_sha256": "a249e4cc170058ed0d01b02ce48a2c27bf3647e37890922ad216d1eb272af047",
+          "passed": true
+        },
+        {
+          "path": "tests/unit/test_short_volume_extraction.py",
+          "remote_blob_sha": "69a3979b1ba104bd8465e4790bac35dd0b502109",
+          "local_blob_sha": "69a3979b1ba104bd8465e4790bac35dd0b502109",
+          "git_blob_sha_of_read_content": "69a3979b1ba104bd8465e4790bac35dd0b502109",
+          "byte_count": 3814,
+          "bytes_identical": true,
+          "content_sha256": "4f48289aea6e5021680369e14894f9045a94c2389ad7a39502785c33b4a95fc1",
+          "passed": true
+        }
+      ],
+      "status": "PASS"
+    },
+    "B": {
+      "local_commit": "c5f6647803c0d942505832eb4bb6a3dc303f8b85",
+      "remote_commit": "6d44847159886ccf3d66f43877eafae46837e733",
+      "local_tree_sha": "7a6d259784e34930cbbc2566e4bd7499f8814371",
+      "remote_tree_sha": "7a6d259784e34930cbbc2566e4bd7499f8814371",
+      "expected_parent": "2966667f7cb044812155c69b1a1c6bb0a24d0926",
+      "remote_parents": [
+        "2966667f7cb044812155c69b1a1c6bb0a24d0926"
+      ],
+      "recursive_tree_truncated": false,
+      "local_entry_count": 2455,
+      "remote_entry_count": 2455,
+      "blob_count": 2309,
+      "tree_comparison": "EXACT_PATH_MODE_TYPE_SHA_MATCH",
+      "mismatches": [],
+      "content_reads": [
+        {
+          "path": "benchmarks/p2_behavioral_load.py",
+          "remote_blob_sha": "5b00dae49ff0174da872b9075366681e5388a1b8",
+          "local_blob_sha": "5b00dae49ff0174da872b9075366681e5388a1b8",
+          "git_blob_sha_of_read_content": "5b00dae49ff0174da872b9075366681e5388a1b8",
+          "byte_count": 35678,
+          "bytes_identical": true,
+          "content_sha256": "031160ee0eb602bc052610bd71733b2be6d9793c4dee35fd912cc39d85a01fca",
+          "passed": true
+        },
+        {
+          "path": "benchmarks/p2_acceptance_matrix.py",
+          "remote_blob_sha": "8f32db116487b893dc0250bcecc564c88971c516",
+          "local_blob_sha": "8f32db116487b893dc0250bcecc564c88971c516",
+          "git_blob_sha_of_read_content": "8f32db116487b893dc0250bcecc564c88971c516",
+          "byte_count": 19273,
+          "bytes_identical": true,
+          "content_sha256": "581a849deba84440806ed9717c3ddd0392cb97cedeb01c0be9bd42559f3f9f03",
+          "passed": true
+        },
+        {
+          "path": "tests/integration/test_p2_case_extensions.py",
+          "remote_blob_sha": "2796c550fb623e9c106212f4be0cb3bad2f513a7",
+          "local_blob_sha": "2796c550fb623e9c106212f4be0cb3bad2f513a7",
+          "git_blob_sha_of_read_content": "2796c550fb623e9c106212f4be0cb3bad2f513a7",
+          "byte_count": 17768,
+          "bytes_identical": true,
+          "content_sha256": "65e8e922baacb95a7aadab7a0cdaaa56ad95041e5e34e79db75bd7eac4b30958",
+          "passed": true
+        },
+        {
+          "path": "tests/service/test_p2_response_loss.py",
+          "remote_blob_sha": "41ef6108cbfc252b23e72e60355151dcae46cc90",
+          "local_blob_sha": "41ef6108cbfc252b23e72e60355151dcae46cc90",
+          "git_blob_sha_of_read_content": "41ef6108cbfc252b23e72e60355151dcae46cc90",
+          "byte_count": 8199,
+          "bytes_identical": true,
+          "content_sha256": "af4037bdfe3ee236206276673cf218c51105cebb49dac020ef60bcfc981bcc4f",
+          "passed": true
+        }
+      ],
+      "status": "PASS"
+    },
+    "C": {
+      "local_commit": "246a9e2b0285c790e9d509e4749f8ba3863975a3",
+      "remote_commit": "4c73a206241325ed331bc4d81c26767d9ee8fbea",
+      "local_tree_sha": "5386862efcf4f92e5c3ec11606d29148e0764183",
+      "remote_tree_sha": "5386862efcf4f92e5c3ec11606d29148e0764183",
+      "expected_parent": "6d44847159886ccf3d66f43877eafae46837e733",
+      "remote_parents": [
+        "6d44847159886ccf3d66f43877eafae46837e733"
+      ],
+      "recursive_tree_truncated": false,
+      "local_entry_count": 2494,
+      "remote_entry_count": 2494,
+      "blob_count": 2341,
+      "tree_comparison": "EXACT_PATH_MODE_TYPE_SHA_MATCH",
+      "mismatches": [],
+      "content_reads": [
+        {
+          "path": "src/novel_factory/application/queries.py",
+          "remote_blob_sha": "64447dd37d7a34c9cc9978c58501b4f84671d564",
+          "local_blob_sha": "64447dd37d7a34c9cc9978c58501b4f84671d564",
+          "git_blob_sha_of_read_content": "64447dd37d7a34c9cc9978c58501b4f84671d564",
+          "byte_count": 48165,
+          "bytes_identical": true,
+          "content_sha256": "4fde3a6742fea5491047dbf3b4599cf3b42fce577b385d96609cf19048e88428",
+          "passed": true
+        },
+        {
+          "path": "src/novel_factory/infrastructure/repository.py",
+          "remote_blob_sha": "dffd14d39b6d15310f0f3af3060daa5ba4ee732c",
+          "local_blob_sha": "dffd14d39b6d15310f0f3af3060daa5ba4ee732c",
+          "git_blob_sha_of_read_content": "dffd14d39b6d15310f0f3af3060daa5ba4ee732c",
+          "byte_count": 3884,
+          "bytes_identical": true,
+          "content_sha256": "13a227c24ef9edde4f4db7c4a828966a81c4328ce65261669f6b7ca857544cbf",
+          "passed": true
+        },
+        {
+          "path": "benchmarks/context_paired_profile.py",
+          "remote_blob_sha": "6e9998aaf1e96ac40a41e8a44a9ab5909b6b9b31",
+          "local_blob_sha": "6e9998aaf1e96ac40a41e8a44a9ab5909b6b9b31",
+          "git_blob_sha_of_read_content": "6e9998aaf1e96ac40a41e8a44a9ab5909b6b9b31",
+          "byte_count": 18959,
+          "bytes_identical": true,
+          "content_sha256": "e6f34c7001c6c67d1ef4da939ad110a463b7552ad107ba6e50a31c433518acfa",
+          "passed": true
+        },
+        {
+          "path": "tests/queries/test_context_dependency_atomicity.py",
+          "remote_blob_sha": "aff3c1c22223f608c464d48be91d255bcf3b45da",
+          "local_blob_sha": "aff3c1c22223f608c464d48be91d255bcf3b45da",
+          "git_blob_sha_of_read_content": "aff3c1c22223f608c464d48be91d255bcf3b45da",
+          "byte_count": 7037,
+          "bytes_identical": true,
+          "content_sha256": "3945c8a8d62a18eb02c69de45b753dd1d5452df7c330e2c6141cb78e7309429a",
+          "passed": true
+        }
+      ],
+      "status": "PASS"
+    },
+    "D": {
+      "local_commit": "3da4748b532ed1ea30fdbdbc078b4fe2a28d301f",
+      "remote_commit": "73f190e2f90147624b8a4fc50dce022bb68ae0a7",
+      "local_tree_sha": "00b28d21eab1bc6abbee6f1ee9bf75940c2c160c",
+      "remote_tree_sha": "00b28d21eab1bc6abbee6f1ee9bf75940c2c160c",
+      "expected_parent": "4c73a206241325ed331bc4d81c26767d9ee8fbea",
+      "remote_parents": [
+        "4c73a206241325ed331bc4d81c26767d9ee8fbea"
+      ],
+      "recursive_tree_truncated": false,
+      "local_entry_count": 2548,
+      "remote_entry_count": 2548,
+      "blob_count": 2383,
+      "tree_comparison": "EXACT_PATH_MODE_TYPE_SHA_MATCH",
+      "mismatches": [],
+      "content_reads": [
+        {
+          "path": "src/novel_factory/algorithms/memory_retrieval.py",
+          "remote_blob_sha": "d0b0e6393314a5103bbc8abf5d741e0fd83d48f6",
+          "local_blob_sha": "d0b0e6393314a5103bbc8abf5d741e0fd83d48f6",
+          "git_blob_sha_of_read_content": "d0b0e6393314a5103bbc8abf5d741e0fd83d48f6",
+          "byte_count": 5661,
+          "bytes_identical": true,
+          "content_sha256": "8c678fe022190671ab7a84a9258239e90db3308913fad74814c5e5a942a2ae21",
+          "passed": true
+        },
+        {
+          "path": "benchmarks/memory/service_probe.py",
+          "remote_blob_sha": "316d1d484fa2de1ef511602be0a714d23e9bea1c",
+          "local_blob_sha": "316d1d484fa2de1ef511602be0a714d23e9bea1c",
+          "git_blob_sha_of_read_content": "316d1d484fa2de1ef511602be0a714d23e9bea1c",
+          "byte_count": 14977,
+          "bytes_identical": true,
+          "content_sha256": "a65081b93516b7c33b44ff8fb41c0097dd4a84b7436db99ab91b6a78207fc626",
+          "passed": true
+        },
+        {
+          "path": "tests/integration/test_memory_service_probe.py",
+          "remote_blob_sha": "8c478006322ae6f6dae00e032487d4d85bbf5309",
+          "local_blob_sha": "8c478006322ae6f6dae00e032487d4d85bbf5309",
+          "git_blob_sha_of_read_content": "8c478006322ae6f6dae00e032487d4d85bbf5309",
+          "byte_count": 1089,
+          "bytes_identical": true,
+          "content_sha256": "9d70a6a39f91c5bfa002c8e18f8a4716a5c8746b9bff263d8b92e56e0044fb7d",
+          "passed": true
+        },
+        {
+          "path": "tests/unit/test_memory_retrieval.py",
+          "remote_blob_sha": "5dd546b956312a1cb02774d1f97a41e820a27229",
+          "local_blob_sha": "5dd546b956312a1cb02774d1f97a41e820a27229",
+          "git_blob_sha_of_read_content": "5dd546b956312a1cb02774d1f97a41e820a27229",
+          "byte_count": 5956,
+          "bytes_identical": true,
+          "content_sha256": "ef942ee1b5a0bd1745e2728cd2876cd9343697a17c28491d080bee8f649da71e",
+          "passed": true
+        }
+      ],
+      "status": "PASS"
+    }
+  },
+  "status": "PASS",
+  "scope_note": "Verifies complete Git trees and 16 critical source/test byte reads. Does not claim branch ref update or CI success; root verifies those separately."
+}

@@ -1,0 +1,178 @@
+{
+  "status": "PASS_ENGINEERING_ONLY",
+  "model_status": "NOT_EXECUTED",
+  "fixture": "r1_sword: formal event acceptance history",
+  "database": {
+    "server_version": "17.11 (Debian 17.11-0+deb13u1)",
+    "fsync": "on",
+    "synchronous_commit": "on",
+    "max_connections": "60"
+  },
+  "python": "3.12.14",
+  "repeats_per_strategy": 3,
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "synthetic_entity_ids": {
+    "sword": "4ef873a8-4f45-56f0-ad45-67928097cea9",
+    "sword2": "44de6f22-9c7d-59b8-a88d-192d9f04edfd",
+    "smith": "3e774eb4-a3c5-5f70-a324-4dd61d43b870",
+    "smith2": "dab220bc-0351-58ba-960d-92d4d1773a1d",
+    "protagonist": "3ab18f96-5526-56ce-96bc-9bf3d66de8d4",
+    "friend": "29d61dcb-4b40-5887-bea5-60da69b9ca0a",
+    "rival": "f33a8ee7-5766-5997-9bff-8585c31e3cc4",
+    "master": "5c6ebae3-716b-5401-bea9-5c4ee6853fbd",
+    "sect": "aec69381-08fd-5c2e-8b31-c15aee3740a9",
+    "north": "945f0961-25d7-5930-b781-afc369036117",
+    "south": "a0bdaea1-408d-5d84-a246-c572c171d208",
+    "warehouse": "02f97541-4880-57b0-9a50-ad9f84ed3bc0",
+    "relief": "2aff581c-1b38-5ec0-9555-4872e8fb61c9",
+    "reserve": "74cb6b98-4aab-5502-8359-cf86248757e5",
+    "recipient": "872c7d44-821c-503a-a226-295730b2a0d7",
+    "grain": "6b158617-1505-539f-88e1-19c1992574a7",
+    "guard1": "0d07ad2c-78aa-558a-accb-85c99790d89a",
+    "guard2": "f71075f8-7b59-5f67-9118-946b4431842b",
+    "traveler": "b8bd4b3e-3b2d-536f-a57e-15e40bdbc1ed",
+    "blocker": "11bf0dc6-d148-5d72-8879-a3fc7dbbe2bb",
+    "box": "b22ab33d-78e1-51b8-bba2-aa9bfeb52786",
+    "cart": "fb1adf16-f06a-579a-8dd2-466a9c7f1eaf"
+  },
+  "implementation_sha256": {
+    "query_service": "4fde3a6742fea5491047dbf3b4599cf3b42fce577b385d96609cf19048e88428",
+    "probe": "a65081b93516b7c33b44ff8fb41c0097dd4a84b7436db99ab91b6a78207fc626"
+  },
+  "sql_count_scope": "SQLAlchemy before_cursor_execute during context_compile only; task preparation excluded",
+  "comparisons": [
+    {
+      "sql_statements": 47,
+      "elapsed_ms": 36.06525,
+      "strategy": "focused_state",
+      "repeat": 0,
+      "gold_exact_state_correct": true,
+      "source_world_ref": {
+        "work_id": "5a827ba8-f886-4fb9-9b8e-aee91ef35b7a",
+        "branch_id": "564f09ca-2336-4e83-9e49-38a16ea2882a",
+        "world_revision_id": "b0b47b33-2134-428e-a9be-82a1b3f0211e"
+      },
+      "section_bytes": 1158,
+      "compiler_reported_estimate": 1158,
+      "tokenizer_version": "utf8-byte-upper-bound-1",
+      "context_bundle_id": "2e2c864c-66a4-4314-9492-f42812fe47a8",
+      "context_sha256": "e65d0b689b71e91154d1779c3df3ac3eae7bd5658f0f33c20d7ad45adf47ad5c",
+      "hard_requirements_status": "COMPLETE_FOR_RECIPE"
+    },
+    {
+      "sql_statements": 47,
+      "elapsed_ms": 33.709773,
+      "strategy": "focused_state",
+      "repeat": 1,
+      "gold_exact_state_correct": true,
+      "source_world_ref": {
+        "work_id": "5a827ba8-f886-4fb9-9b8e-aee91ef35b7a",
+        "branch_id": "564f09ca-2336-4e83-9e49-38a16ea2882a",
+        "world_revision_id": "b0b47b33-2134-428e-a9be-82a1b3f0211e"
+      },
+      "section_bytes": 1158,
+      "compiler_reported_estimate": 1158,
+      "tokenizer_version": "utf8-byte-upper-bound-1",
+      "context_bundle_id": "2a49b539-569b-48a6-bdb2-aad6f376be0e",
+      "context_sha256": "341cfef59eb2160b1b92aee78371ad253a0dee058dc075afc26c08c651b3b149",
+      "hard_requirements_status": "COMPLETE_FOR_RECIPE"
+    },
+    {
+      "sql_statements": 47,
+      "elapsed_ms": 36.09857,
+      "strategy": "focused_state",
+      "repeat": 2,
+      "gold_exact_state_correct": true,
+      "source_world_ref": {
+        "work_id": "5a827ba8-f886-4fb9-9b8e-aee91ef35b7a",
+        "branch_id": "564f09ca-2336-4e83-9e49-38a16ea2882a",
+        "world_revision_id": "b0b47b33-2134-428e-a9be-82a1b3f0211e"
+      },
+      "section_bytes": 1158,
+      "compiler_reported_estimate": 1158,
+      "tokenizer_version": "utf8-byte-upper-bound-1",
+      "context_bundle_id": "910e0d26-78f9-4135-92d6-bfce71e9d050",
+      "context_sha256": "bdbfbb30658c640747b7ec3cc0f11be662e055f5e3119ae57d188e0f9fa651fe",
+      "hard_requirements_status": "COMPLETE_FOR_RECIPE"
+    },
+    {
+      "sql_statements": 47,
+      "elapsed_ms": 57.773927,
+      "strategy": "broad_state",
+      "repeat": 0,
+      "gold_exact_state_correct": true,
+      "source_world_ref": {
+        "work_id": "5a827ba8-f886-4fb9-9b8e-aee91ef35b7a",
+        "branch_id": "564f09ca-2336-4e83-9e49-38a16ea2882a",
+        "world_revision_id": "b0b47b33-2134-428e-a9be-82a1b3f0211e"
+      },
+      "section_bytes": 2237,
+      "compiler_reported_estimate": 2237,
+      "tokenizer_version": "utf8-byte-upper-bound-1",
+      "context_bundle_id": "8e643967-9d9b-48e7-b9d1-547e573c9b55",
+      "context_sha256": "87158ca4ce1acb98f9c4799080e74ac1f36c7577fa3925ff9bbc405b65f4674f",
+      "hard_requirements_status": "COMPLETE_FOR_RECIPE"
+    },
+    {
+      "sql_statements": 47,
+      "elapsed_ms": 65.325749,
+      "strategy": "broad_state",
+      "repeat": 1,
+      "gold_exact_state_correct": true,
+      "source_world_ref": {
+        "work_id": "5a827ba8-f886-4fb9-9b8e-aee91ef35b7a",
+        "branch_id": "564f09ca-2336-4e83-9e49-38a16ea2882a",
+        "world_revision_id": "b0b47b33-2134-428e-a9be-82a1b3f0211e"
+      },
+      "section_bytes": 2237,
+      "compiler_reported_estimate": 2237,
+      "tokenizer_version": "utf8-byte-upper-bound-1",
+      "context_bundle_id": "a6c3a16c-9086-4496-8454-c410198d10c6",
+      "context_sha256": "ff4c4e3769a0808539f970fec73d04ffe4498eb74979f68e21e6c8d493213ae3",
+      "hard_requirements_status": "COMPLETE_FOR_RECIPE"
+    },
+    {
+      "sql_statements": 47,
+      "elapsed_ms": 62.907963,
+      "strategy": "broad_state",
+      "repeat": 2,
+      "gold_exact_state_correct": true,
+      "source_world_ref": {
+        "work_id": "5a827ba8-f886-4fb9-9b8e-aee91ef35b7a",
+        "branch_id": "564f09ca-2336-4e83-9e49-38a16ea2882a",
+        "world_revision_id": "b0b47b33-2134-428e-a9be-82a1b3f0211e"
+      },
+      "section_bytes": 2237,
+      "compiler_reported_estimate": 2237,
+      "tokenizer_version": "utf8-byte-upper-bound-1",
+      "context_bundle_id": "4fc83bb6-3297-4714-b770-ccbe155462f7",
+      "context_sha256": "1f168e7ecf8f90f1fbb882bca05b136af919e4a91a312e2bc63fa1cc56f434fb",
+      "hard_requirements_status": "COMPLETE_FOR_RECIPE"
+    }
+  ],
+  "gates": {
+    "focused_and_broad_exact_state": true,
+    "compiler_receipt_idempotency": true,
+    "belief_does_not_inherit_objective_theft": true,
+    "actor_world_and_other_actor_denied": true,
+    "warm_cache_and_compile_receipt_reauthorize": true,
+    "history_and_fixed_old_progress_cut": true,
+    "destroyed_and_pending_distinct": true,
+    "hard_context_budget_does_not_bind_partial": true,
+    "retrieval_has_zero_world_effects": true
+  },
+  "real_model_calls": 0,
+  "provider_tokens": null,
+  "model_cost": null,
+  "limitations": [
+    "Small real-service correctness/cost probe, not a 50/200 Agent capacity test.",
+    "Compiler focused/broad strategies are separate from offline literary retrieval methods.",
+    "Compiler estimated_tokens uses its declared UTF-8 bound, not a provider tokenizer.",
+    "No generated prose quality or independent author judgment is measured."
+  ],
+  "world_before_equals_after": true,
+  "raw_sha256": "f2519b3f2aa5e313abb529b73110e2499a02057f227752b92c51bef68016dc3e",
+  "raw_bytes": 114420,
+  "raw_location_at_measurement": "/workspace/scratch/b26d73243868/verification/p3_03/service/service_probe.json",
+  "storage_note": "Local service probe summary; final CI independently produces full memory-service/service_probe.json in its PostgreSQL artifact."
+}

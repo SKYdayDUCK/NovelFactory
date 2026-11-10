@@ -1,0 +1,115 @@
+{
+  "status": "PASS_STATIC_AND_OFFLINE_SCOPE_ONLY",
+  "reviewed_at_utc": "2026-11-10T13:44:40.360458+00:00",
+  "head": "a1a1cded8634ee4994ea5fbf9ee79f432db81c78",
+  "review_type": "Independent static review, new offline execution and isolated real PostgreSQL 17 service execution",
+  "files_sha256": {
+    ".github/workflows/p1-integrity.yml": "4f63f5db062a0a6fb373f58120be3a01e346ea4b95acce909bcf50ec9bbec45d",
+    ".github/workflows/p2-load.yml": "244193894f150111b2f8dc3899d70ef0f6936c17a79577735ccaed8bc3cccb79",
+    "benchmarks/p2_behavioral_load.py": "bc1e2c2cf50737a62e3c64ef17a6e560d4273dbc6fd12a3639b634d9712e62d4",
+    "benchmarks/p2_acceptance_matrix.py": "a623f7026bcf22c0b49e89d53dd918693150df6d3e5766f7df75ce8fa711ae18",
+    "benchmarks/p2_load_derived.py": "11657e610e7d7d2d7061244d14ae4538ee7ce073c5dfb058083a09cf5050abb3",
+    "tests/service/test_p2_retry_recovery.py": "185526720e6f34e9ceeb6606ef417dc06352e17fcd03d05763224bec03272d3b"
+  },
+  "checks": {
+    "explicit_bash_pipefail_semantics": true,
+    "no_continue_on_error": true,
+    "module_entrypoints_for_benchmark_imports": true,
+    "capacity_matrix_four_populations_profiles": true,
+    "capacity_cli_not_recovered_completion": true,
+    "per_sha_concurrency_groups": true,
+    "artifacts_retained_on_failure": true,
+    "retry_payload_serialized_once": true,
+    "only_declared_infrastructure_errors_retry": true,
+    "semantic_denials_never_reprepared": true,
+    "retry_deadline_rechecked_before_next_send": true,
+    "derived_arrival_count_excludes_retries": true,
+    "business_gate_requires_zero_unemitted_operations": true,
+    "recovered_completion_does_not_promote_capacity": true
+  },
+  "offline": {
+    "command_metadata": "/workspace/scratch/b26d73243868/verification/p3_03/offline-command.json",
+    "exit_status": 0,
+    "records": 420,
+    "all_non_timing_case_fields_equal_historical_final": true,
+    "excluded_field": "elapsed_ms only",
+    "summary": "/workspace/scratch/b26d73243868/verification/p3_03/offline/summary.json",
+    "raw": "/workspace/scratch/b26d73243868/verification/p3_03/offline/cases.jsonl"
+  },
+  "limitations": [
+    "Static workflow review is not Actions execution.",
+    "Integrity workflow uses 10-agent smoke and executed-tests matrix; it cannot close 50/200 capacity.",
+    "Capacity workflow intentionally fails when first attempt or offered-rate gates are not met.",
+    "Retry budget prevents new attempts after expiry; an already in-flight attempt can finish later within its HTTP timeout.",
+    "Derived first-attempt completion rate includes rejections and is not effective business throughput.",
+    "Offline summary baseline is fixed lead/tail extraction with source-coverage differences; no LLM summary or literary-quality claim."
+  ],
+  "service_probe": {
+    "exit_status": 0,
+    "database": {
+      "server_version": "17.11 (Debian 17.11-0+deb13u1)",
+      "fsync": "on",
+      "synchronous_commit": "on",
+      "max_connections": "60"
+    },
+    "gates": {
+      "focused_and_broad_exact_state": true,
+      "compiler_receipt_idempotency": true,
+      "belief_does_not_inherit_objective_theft": true,
+      "actor_world_and_other_actor_denied": true,
+      "warm_cache_and_compile_receipt_reauthorize": true,
+      "history_and_fixed_old_progress_cut": true,
+      "destroyed_and_pending_distinct": true,
+      "hard_context_budget_does_not_bind_partial": true,
+      "retrieval_has_zero_world_effects": true
+    },
+    "world_before_equals_after": true,
+    "comparisons": [
+      {
+        "strategy": "focused_state",
+        "repeat": 0,
+        "sql_statements": 47,
+        "section_bytes": 1158,
+        "elapsed_ms": 36.06525
+      },
+      {
+        "strategy": "focused_state",
+        "repeat": 1,
+        "sql_statements": 47,
+        "section_bytes": 1158,
+        "elapsed_ms": 33.709773
+      },
+      {
+        "strategy": "focused_state",
+        "repeat": 2,
+        "sql_statements": 47,
+        "section_bytes": 1158,
+        "elapsed_ms": 36.09857
+      },
+      {
+        "strategy": "broad_state",
+        "repeat": 0,
+        "sql_statements": 47,
+        "section_bytes": 2237,
+        "elapsed_ms": 57.773927
+      },
+      {
+        "strategy": "broad_state",
+        "repeat": 1,
+        "sql_statements": 47,
+        "section_bytes": 2237,
+        "elapsed_ms": 65.325749
+      },
+      {
+        "strategy": "broad_state",
+        "repeat": 2,
+        "sql_statements": 47,
+        "section_bytes": 2237,
+        "elapsed_ms": 62.907963
+      }
+    ],
+    "real_model_calls": 0,
+    "result_sha256": "f2519b3f2aa5e313abb529b73110e2499a02057f227752b92c51bef68016dc3e",
+    "result_file": "/workspace/scratch/b26d73243868/verification/p3_03/service/service_probe.json"
+  }
+}

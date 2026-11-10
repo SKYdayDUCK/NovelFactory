@@ -1,0 +1,131 @@
+{
+  "scope": "Read-only recomputation of historical raw failures; no old observation is relabelled as current performance",
+  "runs": [
+    {
+      "source_path": "evidence/p2/batch3/load/agents200-normal.json",
+      "source_sha256": "668426d4aaeec762483295bcba26de651278d0daccc2596cddd21a8deb64a6b4",
+      "new_commits": 7,
+      "expected_commits": 21,
+      "backpressure_by_stage": {
+        "certificate": 13,
+        "propose": 13,
+        "state_mixed": 11,
+        "graph": 2,
+        "history": 11
+      },
+      "proposals": {
+        "attempted": 40,
+        "successful": 27
+      },
+      "certificates": {
+        "attempted": 27,
+        "successful": 14
+      },
+      "operation_admission": {
+        "admitted": 1031,
+        "peak_active": 6,
+        "peak_queued": 24,
+        "completed": 1031,
+        "timed_out": 50,
+        "active": 0,
+        "queued": 0,
+        "capacity": 6,
+        "per_principal": 2,
+        "max_waiters": 64,
+        "wait_seconds_total": 221.08129257598375
+      },
+      "ingress": {
+        "admitted": 1081,
+        "peak_active": 35,
+        "peak_queued": 0,
+        "completed": 1081,
+        "active": 0,
+        "queued": 0,
+        "capacity": 128,
+        "per_principal": 128,
+        "max_waiters": 0,
+        "wait_seconds_total": 0.021040814983280143
+      },
+      "process_resources": {
+        "process_user_cpu_seconds": 85.56947100000001,
+        "process_system_cpu_seconds": 6.339659999999999,
+        "process_peak_rss_kib": 141432,
+        "minor_page_faults": 507431,
+        "major_page_faults": 0
+      },
+      "db_stats_delta": {
+        "xact_commit": 7022,
+        "xact_rollback": 674,
+        "blks_read": 0,
+        "blks_hit": 163802,
+        "temp_files": 0,
+        "temp_bytes": 0,
+        "deadlocks": 0
+      },
+      "infrastructure_retries": 0
+    },
+    {
+      "source_path": "evidence/p2/batch3/load/agents200-hot-overload.json",
+      "source_sha256": "792f04956a109637e372b48db8ac1fb877cf84569fd2098ccf502be3c6b4fdd0",
+      "new_commits": 8,
+      "expected_commits": 21,
+      "backpressure_by_stage": {
+        "certificate": 11,
+        "graph": 4,
+        "state_mixed": 14,
+        "propose": 14,
+        "history": 7
+      },
+      "proposals": {
+        "attempted": 40,
+        "successful": 26
+      },
+      "certificates": {
+        "attempted": 26,
+        "successful": 15
+      },
+      "operation_admission": {
+        "admitted": 2040,
+        "peak_active": 6,
+        "peak_queued": 25,
+        "completed": 2039,
+        "timed_out": 50,
+        "active": 0,
+        "queued": 0,
+        "capacity": 6,
+        "per_principal": 2,
+        "max_waiters": 64,
+        "wait_seconds_total": 253.06048711300355
+      },
+      "ingress": {
+        "admitted": 2089,
+        "peak_active": 34,
+        "peak_queued": 0,
+        "completed": 2089,
+        "active": 0,
+        "queued": 0,
+        "capacity": 128,
+        "per_principal": 128,
+        "max_waiters": 0,
+        "wait_seconds_total": 0.03248238401101844
+      },
+      "process_resources": {
+        "process_user_cpu_seconds": 124.81241399999999,
+        "process_system_cpu_seconds": 12.267957,
+        "process_peak_rss_kib": 151828,
+        "minor_page_faults": 733784,
+        "major_page_faults": 0
+      },
+      "db_stats_delta": {
+        "xact_commit": 12788,
+        "xact_rollback": 871,
+        "blks_read": 0,
+        "blks_hit": 238815,
+        "temp_files": 0,
+        "temp_bytes": 0,
+        "deadlocks": 0
+      },
+      "infrastructure_retries": 0
+    }
+  ]
+}

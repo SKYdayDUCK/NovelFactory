@@ -2,7 +2,7 @@
 
 [![P1 Integrity CI](https://github.com/SKYdayDUCK/NovelFactory/actions/workflows/p1-integrity.yml/badge.svg)](https://github.com/SKYdayDUCK/NovelFactory/actions/workflows/p1-integrity.yml)
 
-**当前阶段：P2 分批开发中（2026-11-10），保留 P1 已验收基线。** 在 Python 3.12 / PostgreSQL 17 可信内核上，已加入世界与卷规划、过程调度、共同裁决、受任务约束的 Agent 接入，以及正文对账、文学审核、编辑和固定快照内部发布。真实模型与文学验收独立记录，不能由模块数量或确定性夹具替代。当前进展见 [第一批报告](reports/P2_第一批开发报告.md) 与 [第二批报告](reports/P2_第二批开发报告.md)。
+**当前阶段：P2 第三批及有限 P3 已恢复，等待独立审核（2026-11-10）。** 在 Python 3.12 / PostgreSQL 17 可信内核上，六场景短卷、规划与意外重规划、任务和世界裁决、正文对账、审核编辑及不可变内部发布已接成可复现闭环。当前完整工程回归为 410 项通过；整体 P2 容量验收仍为 `NOT_MET`，200 Agent 的 GitHub 正常/热点负载分别完成 13/21、18/21 个目标提交。真实模型为 `BLOCKED_ENVIRONMENT`，作者全文评价为 `PENDING_AUTHOR`。最新结果见 [API 恢复交付报告](reports/P2_P3_API恢复交付.md)和[负载诊断](reports/P2_08_恢复后负载与重试验证.md)；[第一批](reports/P2_第一批开发报告.md)、[第二批](reports/P2_第二批开发报告.md)及历史证据保持原样。
 
 - **运行/复现：** [复现与运行指南](reports/复现与运行指南.md)，`uv sync --locked --group dev`；默认 Python 3.12，PostgreSQL 17。
 - **测试与 CI：** [P1 Integrity Workflow](.github/workflows/p1-integrity.yml) 对 Schema、单元、真实 PostgreSQL 集成/并发及恢复执行分组验证；原始 JUnit、日志和机器可读结果在每次 GitHub Actions Run 的 Artifacts 获取。CI 执行状态以 GitHub Actions 当次结果为准。

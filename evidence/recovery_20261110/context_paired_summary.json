@@ -1,0 +1,203 @@
+{
+  "schema_version": "context-paired-profile-1",
+  "status": "PASS_CANDIDATE_MEASUREMENT_ONLY",
+  "recorded_at_utc": "2026-11-10T13:50:16.371296+00:00",
+  "finished_at_utc": "2026-11-10T13:51:36.040643+00:00",
+  "execution_kind": "TEST_FIXTURE_REAL_POSTGRESQL",
+  "sources": {
+    "baseline_commit": "0609f680fad782c827dd3834a073f8f9bcddaf0d",
+    "baseline_query_sha256": "4f7273352c88f61cf1b1e5ac6bc142bb2721a885f78989e590d60771ddc7832c",
+    "baseline_repository_sha256": "ee0e8f5890b98f2885e6b672ad1de203ff0a99cdaa48044461ab7bf7da8ae2fd",
+    "original_repository_add_ast_unchanged": true,
+    "shared_core_matches_baseline": [
+      "src/novel_factory/application/kernel.py",
+      "src/novel_factory/application/query_policy.py",
+      "src/novel_factory/domain/world.py",
+      "src/novel_factory/domain/canonical.py",
+      "src/novel_factory/infrastructure/database.py",
+      "src/novel_factory/orchestration/tasks.py"
+    ],
+    "current_source_sha256": {
+      "src/novel_factory/application/kernel.py": "35a5dccbcf2ab04959316ff5d2daa8035a6bcbccceb9c68e56799c56639c4578",
+      "src/novel_factory/application/query_policy.py": "7f226c9cb1676e1d69d617cdced2c14fbbdd1bd4f5c32b3e05d017df3e6a560d",
+      "src/novel_factory/domain/world.py": "132c6a3c6864fe4e0dfe3812f4b82d6c7491432b5c66cddff01f8aa9f20b9780",
+      "src/novel_factory/domain/canonical.py": "3fc335ad00e3973b200683e953e5066a64ce6f0040035df000c3dfc350fa1571",
+      "src/novel_factory/infrastructure/database.py": "e8197611f2ee04a896041bc138f7f04ade5b60970d36c3da7997e5f7dfc4bad5",
+      "src/novel_factory/orchestration/tasks.py": "e0991c1036946778baebf74c52a7afd22566675386b1fa73179d128975ce9ad9",
+      "src/novel_factory/application/queries.py": "4fde3a6742fea5491047dbf3b4599cf3b42fce577b385d96609cf19048e88428",
+      "src/novel_factory/infrastructure/repository.py": "13a227c24ef9edde4f4db7c4a828966a81c4328ce65261669f6b7ca857544cbf",
+      "benchmarks/context_profile.py": "86c6f3164cb0463bfa662a5b6fd78a3570b03a1dc485d4080c0c6f20c736bedd",
+      "benchmarks/context_paired_profile.py": "e6f34c7001c6c67d1ef4da939ad110a463b7552ad107ba6e50a31c433518acfa"
+    }
+  },
+  "configuration": {
+    "output": "/workspace/scratch/b26d73243868/verification/p3_01/paired-run.json",
+    "entities": 1000,
+    "history": 12,
+    "subjects": [
+      1,
+      20,
+      100
+    ],
+    "repeats": 5
+  },
+  "environment": {
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "python": "3.12.14",
+    "cpu_count": 9,
+    "cpu_models": [
+      "AMD EPYC 9V74 80-Core Processor"
+    ],
+    "postgres": "PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+    "settings": {
+      "max_connections": "60",
+      "shared_buffers": "128MB",
+      "fsync": "on",
+      "synchronous_commit": "on"
+    },
+    "pool_size": 4,
+    "max_overflow": 0,
+    "sql_count_scope": "SQLAlchemy cursor execution during context_compile only; excludes task setup, post-compile inspection, pool pre-ping and result decoding"
+  },
+  "model_requests": 0,
+  "model_cost": null,
+  "comparison_policy": {
+    "facts": "Strict equality of complete facts, including all evidence identities; no fields removed.",
+    "query_ids": "Verify UUID5(task_id, subject_id) individually, then compare every other query field.",
+    "input_artifacts": "Distinct real tasks own independently created manifests; verify full payload/hash and exact expected artifact refs. Interpretation ref is shared and compared exactly.",
+    "dependency_rows": "Compare every scope/version/type/work/branch; context and dependency row IDs are local.",
+    "order": "Alternate baseline/candidate first for every pair. Task setup and persistence inspection excluded."
+  },
+  "limitations": [
+    "Same shared development host, not an isolated production benchmark or latency SLO.",
+    "One workload, one process, five default pairs per size; no confidence interval or 200-Agent claim.",
+    "PostgreSQL/OS buffers remain warm; no buffer flush or cold-disk claim.",
+    "Payload hash reuse and SQL batching change together; their timing effects are not isolated.",
+    "Baseline query class uses the shared current repository with verified unchanged original add method.",
+    "Original unpaired runs remain recorded and are not promoted to strict semantic equality."
+  ],
+  "summary": [
+    {
+      "subjects": 1,
+      "pairs": 5,
+      "median_seconds": {
+        "baseline": 0.07737304900001618,
+        "candidate": 0.07338668100055656
+      },
+      "median_elapsed_reduction_percent": 5.152140249066295,
+      "paired_elapsed_differences_seconds": [
+        0.003986367999459617,
+        0.009363605999169522,
+        0.005616591999569209,
+        0.0075352570001996355,
+        0.0015747349989396753
+      ],
+      "sql_counts": {
+        "baseline": [
+          51
+        ],
+        "candidate": [
+          47
+        ]
+      },
+      "dependency_insert_counts": {
+        "baseline": [
+          5
+        ],
+        "candidate": [
+          1
+        ]
+      }
+    },
+    {
+      "subjects": 20,
+      "pairs": 5,
+      "median_seconds": {
+        "baseline": 0.14630034699985117,
+        "candidate": 0.12480692499957513
+      },
+      "median_elapsed_reduction_percent": 14.691299399514001,
+      "paired_elapsed_differences_seconds": [
+        0.01666015699993295,
+        0.031031099000756512,
+        0.03686179200121842,
+        0.011211639999601175,
+        0.011413967000407865
+      ],
+      "sql_counts": {
+        "baseline": [
+          89
+        ],
+        "candidate": [
+          47
+        ]
+      },
+      "dependency_insert_counts": {
+        "baseline": [
+          43
+        ],
+        "candidate": [
+          1
+        ]
+      }
+    },
+    {
+      "subjects": 100,
+      "pairs": 5,
+      "median_seconds": {
+        "baseline": 0.42935868299900903,
+        "candidate": 0.23025667200090538
+      },
+      "median_elapsed_reduction_percent": 46.37195400530963,
+      "paired_elapsed_differences_seconds": [
+        0.1748666500006948,
+        0.22922201800065523,
+        0.19969202399988717,
+        0.18632388599871774,
+        0.18812833499941917
+      ],
+      "sql_counts": {
+        "baseline": [
+          249
+        ],
+        "candidate": [
+          47
+        ]
+      },
+      "dependency_insert_counts": {
+        "baseline": [
+          203
+        ],
+        "candidate": [
+          1
+        ]
+      }
+    }
+  ],
+  "all_complete_facts_and_evidence_identical": true,
+  "all_verified_dependency_guards_identical": true,
+  "compilation_has_zero_world_effects": true,
+  "raw_sha256": "88b8d5e580693a55167640c32817a04a11b7ef52097054e452422cb817e663a1",
+  "raw_bytes": 3578498,
+  "raw_location_at_measurement": "/workspace/scratch/b26d73243868/verification/p3_01/paired-run.json",
+  "dataset": {
+    "entities": 1001,
+    "genesis_relations": 1000,
+    "accepted_world_events": 12,
+    "world_ref": {
+      "work_id": "4b321cd3-45f5-43d2-97da-f28845667ba0",
+      "branch_id": "bdab4a2e-4be5-4dc6-b537-5efad405e1e5",
+      "world_revision_id": "020659e8-65b2-4454-a153-5928248dc6c4"
+    },
+    "fixture_namespace": "nf-context-profile-v1"
+  },
+  "world_before_and_after_identical": true,
+  "world_fields_compared": [
+    "event_count",
+    "head",
+    "manifest_hash",
+    "scope_versions",
+    "state_hash"
+  ],
+  "storage_note": "Local raw retained in execution environment; repository contains this derived summary and independent audit. New CI workflow separately reproduces raw paired-run.json in p1-postgres-concurrency artifact. Local and CI runs are distinct."
+}

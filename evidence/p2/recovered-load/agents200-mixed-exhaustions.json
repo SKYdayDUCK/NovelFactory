@@ -1,0 +1,217 @@
+[
+  {
+    "agent": 1,
+    "task_id": "54fa239e-ac6c-46ef-bbab-5ce679fb1cba",
+    "planned_class": "independent",
+    "stage": "certificate",
+    "operation_id": "659",
+    "elapsed_from_first_attempt_seconds": 34.116079,
+    "attempts": [
+      {
+        "attempt": 1,
+        "started_seconds": 65.13921,
+        "arrival_delay_ms": 0.014,
+        "latency_ms": 2411.1961,
+        "status": 429,
+        "code": "BACKPRESSURE",
+        "retry_after_seconds": 1.0,
+        "retry_wait_seconds": 1.0,
+        "retry_exhausted": null
+      },
+      {
+        "attempt": 2,
+        "started_seconds": 68.674791,
+        "arrival_delay_ms": 3535.5949,
+        "latency_ms": 30580.4985,
+        "status": 429,
+        "code": "BACKPRESSURE",
+        "retry_after_seconds": 1.0,
+        "retry_wait_seconds": null,
+        "retry_exhausted": true
+      }
+    ]
+  },
+  {
+    "agent": 15,
+    "task_id": "d3f769cd-a998-4fcc-8531-3ac2629a1960",
+    "planned_class": "independent",
+    "stage": "propose",
+    "operation_id": "753",
+    "elapsed_from_first_attempt_seconds": 28.170325,
+    "attempts": [
+      {
+        "attempt": 1,
+        "started_seconds": 75.735603,
+        "arrival_delay_ms": 807.1308,
+        "latency_ms": 16929.8232,
+        "status": 429,
+        "code": "BACKPRESSURE",
+        "retry_after_seconds": 1.0,
+        "retry_wait_seconds": 1.0,
+        "retry_exhausted": null
+      },
+      {
+        "attempt": 2,
+        "started_seconds": 94.386226,
+        "arrival_delay_ms": 19457.7534,
+        "latency_ms": 4877.2698,
+        "status": 429,
+        "code": "BACKPRESSURE",
+        "retry_after_seconds": 1.0,
+        "retry_wait_seconds": 2,
+        "retry_exhausted": null
+      },
+      {
+        "attempt": 3,
+        "started_seconds": 101.620232,
+        "arrival_delay_ms": 26691.7592,
+        "latency_ms": 2285.6964,
+        "status": 429,
+        "code": "BACKPRESSURE",
+        "retry_after_seconds": 1.0,
+        "retry_wait_seconds": null,
+        "retry_exhausted": true
+      }
+    ]
+  },
+  {
+    "agent": 5,
+    "task_id": "788501da-740a-4343-9578-e740bd24e6b2",
+    "planned_class": "independent",
+    "stage": "certificate",
+    "operation_id": "718",
+    "elapsed_from_first_attempt_seconds": 32.317186,
+    "attempts": [
+      {
+        "attempt": 1,
+        "started_seconds": 71.653078,
+        "arrival_delay_ms": 0.0145,
+        "latency_ms": 10051.8443,
+        "status": 429,
+        "code": "BACKPRESSURE",
+        "retry_after_seconds": 1.0,
+        "retry_wait_seconds": 1.0,
+        "retry_exhausted": null
+      },
+      {
+        "attempt": 2,
+        "started_seconds": 83.069913,
+        "arrival_delay_ms": 11416.8502,
+        "latency_ms": 16183.9958,
+        "status": 429,
+        "code": "BACKPRESSURE",
+        "retry_after_seconds": 1.0,
+        "retry_wait_seconds": 2,
+        "retry_exhausted": null
+      },
+      {
+        "attempt": 3,
+        "started_seconds": 101.619532,
+        "arrival_delay_ms": 29966.4692,
+        "latency_ms": 2350.7323,
+        "status": 429,
+        "code": "BACKPRESSURE",
+        "retry_after_seconds": 1.0,
+        "retry_wait_seconds": null,
+        "retry_exhausted": true
+      }
+    ]
+  },
+  {
+    "agent": 17,
+    "task_id": "4c828100-57c0-47d5-9ef9-0b6a5a92b89f",
+    "planned_class": "independent",
+    "stage": "propose",
+    "operation_id": "774",
+    "elapsed_from_first_attempt_seconds": 32.610406,
+    "attempts": [
+      {
+        "attempt": 1,
+        "started_seconds": 78.337906,
+        "arrival_delay_ms": 1409.4332,
+        "latency_ms": 20357.746,
+        "status": 429,
+        "code": "BACKPRESSURE",
+        "retry_after_seconds": 1.0,
+        "retry_wait_seconds": 1.0,
+        "retry_exhausted": null
+      },
+      {
+        "attempt": 2,
+        "started_seconds": 100.136334,
+        "arrival_delay_ms": 23207.8615,
+        "latency_ms": 4154.2478,
+        "status": 429,
+        "code": "BACKPRESSURE",
+        "retry_after_seconds": 1.0,
+        "retry_wait_seconds": 2,
+        "retry_exhausted": null
+      },
+      {
+        "attempt": 3,
+        "started_seconds": 106.378063,
+        "arrival_delay_ms": 29449.5902,
+        "latency_ms": 4570.2492,
+        "status": 429,
+        "code": "BACKPRESSURE",
+        "retry_after_seconds": 1.0,
+        "retry_wait_seconds": null,
+        "retry_exhausted": true
+      }
+    ]
+  },
+  {
+    "agent": 21,
+    "task_id": "59dc2ccf-1a71-44cc-9d6d-fd5261d93615",
+    "planned_class": "shared_candidate",
+    "stage": "propose",
+    "operation_id": "800",
+    "elapsed_from_first_attempt_seconds": 33.062922,
+    "attempts": [
+      {
+        "attempt": 1,
+        "started_seconds": 81.306887,
+        "arrival_delay_ms": 378.4143,
+        "latency_ms": 11411.0846,
+        "status": 429,
+        "code": "BACKPRESSURE",
+        "retry_after_seconds": 1.0,
+        "retry_wait_seconds": 1.0,
+        "retry_exhausted": null
+      },
+      {
+        "attempt": 2,
+        "started_seconds": 94.418058,
+        "arrival_delay_ms": 13489.5859,
+        "latency_ms": 4854.4329,
+        "status": 429,
+        "code": "BACKPRESSURE",
+        "retry_after_seconds": 1.0,
+        "retry_wait_seconds": 2,
+        "retry_exhausted": null
+      },
+      {
+        "attempt": 3,
+        "started_seconds": 101.66433,
+        "arrival_delay_ms": 20735.8571,
+        "latency_ms": 2239.9175,
+        "status": 429,
+        "code": "BACKPRESSURE",
+        "retry_after_seconds": 1.0,
+        "retry_wait_seconds": 4,
+        "retry_exhausted": null
+      },
+      {
+        "attempt": 4,
+        "started_seconds": 108.010745,
+        "arrival_delay_ms": 27082.2721,
+        "latency_ms": 6359.0637,
+        "status": 429,
+        "code": "BACKPRESSURE",
+        "retry_after_seconds": 1.0,
+        "retry_wait_seconds": null,
+        "retry_exhausted": true
+      }
+    ]
+  }
+]
