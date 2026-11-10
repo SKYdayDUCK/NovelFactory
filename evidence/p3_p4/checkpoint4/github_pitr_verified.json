@@ -1,0 +1,107 @@
+{
+  "integrity_commit": "9bf3794fbabb1074e1309e3217d6bbe78ce3c704",
+  "run_id": 42844947074,
+  "conclusion": "success",
+  "artifact": {
+    "artifact_id": 13777696710,
+    "run_id": 42844947074,
+    "head_sha": "9bf3794fbabb1074e1309e3217d6bbe78ce3c704",
+    "digest_verified": true,
+    "zip_sha256": "2c0c13c6baeb9c026c3f844c26f89dbc33421deda77381ac950511af34df03b1",
+    "result_keys": [
+      "status",
+      "postgres",
+      "execution_kind",
+      "source_port",
+      "restored_port",
+      "durability",
+      "model_calls",
+      "production_data_accessed",
+      "libpq_environment_isolated",
+      "cleared_pg_environment_names",
+      "pg_basebackup",
+      "base_backup_seconds",
+      "pg_verifybackup",
+      "archiver",
+      "target_world_ref",
+      "target_lsn",
+      "restored_state_sha256",
+      "snapshot_equal_before_fencing",
+      "table_count",
+      "object_count",
+      "recovery_seconds_to_verified_service",
+      "selected_recovery_point_age_seconds",
+      "target_commits_lost",
+      "deliberately_excluded_later_world_commits",
+      "restored_world_event_count",
+      "unknown_calls_retained",
+      "reserved_amount_retained",
+      "fenced_task_count",
+      "old_worker_rejected",
+      "original_commit_receipt_equal",
+      "limitation",
+      "total_seconds"
+    ],
+    "gates": {
+      "status": "PASS"
+    },
+    "top_metrics": {
+      "recovery_seconds_to_verified_service": 0.9915789919999938,
+      "selected_recovery_point_age_seconds": 0.474144,
+      "target_commits_lost": 0,
+      "table_count": 37,
+      "object_count": 19
+    }
+  },
+  "result": {
+    "status": "PASS",
+    "postgres": "postgres (PostgreSQL) 17.11 (Ubuntu 17.11-1.pgdg24.04+2)",
+    "execution_kind": "REAL_ISOLATED_POSTGRESQL",
+    "source_port": 57567,
+    "restored_port": 54267,
+    "durability": {
+      "fsync": true,
+      "synchronous_commit": true,
+      "data_checksums": true
+    },
+    "model_calls": 0,
+    "production_data_accessed": false,
+    "libpq_environment_isolated": true,
+    "cleared_pg_environment_names": [],
+    "pg_basebackup": {
+      "exit_code": 0,
+      "stdout": ""
+    },
+    "base_backup_seconds": 1.0541550050000055,
+    "pg_verifybackup": {
+      "exit_code": 0,
+      "stdout": "backup successfully verified"
+    },
+    "archiver": {
+      "archived_count": 4,
+      "failed_count": 0
+    },
+    "target_world_ref": {
+      "work_id": "c4de85fc-b7d9-4340-b68b-c75df033ab34",
+      "branch_id": "99447435-0ef6-48c1-88a0-4352f1348f7d",
+      "world_revision_id": "5ed1c6f8-23f6-4756-aaa8-7b95c35b213b"
+    },
+    "target_lsn": "0/30741F8",
+    "restored_state_sha256": "4a65a5ffe05359e6b7af2890afe2e5d81de965db0567cbf240a4fb428a596661",
+    "snapshot_equal_before_fencing": true,
+    "table_count": 37,
+    "object_count": 19,
+    "recovery_seconds_to_verified_service": 0.9915789919999938,
+    "selected_recovery_point_age_seconds": 0.474144,
+    "target_commits_lost": 0,
+    "deliberately_excluded_later_world_commits": 1,
+    "restored_world_event_count": 2,
+    "unknown_calls_retained": 1,
+    "reserved_amount_retained": "0.5",
+    "fenced_task_count": 1,
+    "old_worker_rejected": true,
+    "original_commit_receipt_equal": true,
+    "limitation": "Small isolated local fixture; selected-point RPO/RTO, not production SLO or remote storage test",
+    "total_seconds": 4.709448281
+  }
+}
