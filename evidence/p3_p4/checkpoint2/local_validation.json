@@ -5,7 +5,7 @@
   "tests": [
     {
       "name": "unit-contract-evaluation",
-      "command": "python -m pytest tests/unit tests/contracts tests/evaluation tests/service/test_http_boundary.py -q",
+      "command": "python -m pytest tests/unit tests/contracts tests/evaluation tests/service/test_admission.py -q",
       "junit_sha256": "894ee374c6b12dc2f29dac61304dc3a04e1cb1ff8c136d540db47eff1557e1dc",
       "suites": [
         {
