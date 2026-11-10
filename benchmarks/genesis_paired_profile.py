@@ -88,6 +88,8 @@ def run(output, *, agents=200, repeats=5):
                     'src/novel_factory/contracts/_schema_bundle.py',
                     'benchmarks/genesis_paired_profile.py')}}
             result['environment'] = hardware()
+            result['environment'].update(load_client_location='pure replay after PostgreSQL sampling; no HTTP transport',
+                                         api_processes=0, api_server_threads=0)
             result['environment']['cpu_affinity'] = sorted(os.sched_getaffinity(0)) if hasattr(os, 'sched_getaffinity') else None
             with db.engine.connect() as conn:
                 result['postgres_version'] = conn.scalar(text('SELECT version()'))
