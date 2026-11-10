@@ -4,7 +4,7 @@
 
 **当前分支范围：P2 小说生产链路与有限 P3-01/P3-03 基础，正在合并前收尾（2026-11-11）。** 在 Python 3.12 / PostgreSQL 17 可信内核上，六场景短卷、规划与意外重规划、任务和世界裁决、正文对账、审核编辑及不可变内部发布已接成可复现的工程闭环。本分支还包含 Context Compiler 的有限优化、独立 API 进程负载测量和确定性中文记忆检索评测；后续 P3/P4 高级模块由依赖本分支的 [PR #3](https://github.com/SKYdayDUCK/NovelFactory/pull/3) 单独交付。
 
-**容量验收仍为 `NOT_MET`，不能把工程回归通过当作容量通过。** 历史检查点 `e0b0f2b080f3225d8be8e202e13258bc480f5b84` 的完整 PostgreSQL 回归为 423 项通过；其 GitHub 独立进程 200 Agent 正常/热点负载分别完成 21/21、14/21 个新世界提交，热点业务和完整容量均未通过。后续修复与合并资格以实际提交对应的 CI 和重复实测为准。真实模型为 `BLOCKED_ENVIRONMENT`，作者全文评价为 `PENDING_AUTHOR`，文学质量未验收。参见 [有限性能优化与测量边界](reports/P2_P3_01_性能专项.md)、[历史 API 恢复交付](reports/P2_P3_API恢复交付.md)和[历史负载诊断](reports/P2_08_恢复后负载与重试验证.md)；[第一批](reports/P2_第一批开发报告.md)、[第二批](reports/P2_第二批开发报告.md)及所有失败证据保持原样。
+**容量验收仍为 `NOT_MET`，PR #2 未合并、保持 Draft。** 最终应用代码 `971fbef29eceb422d77271d11841bae1abdfd73f` 的 PR/push 完整 PostgreSQL 回归均为472项通过；20次实际CI负载的普通50/200全部完成且首试无失败，热点虽完成6/21个正式效果，仍有首试背压、部分过载读耗尽和实际发送速率不足。独立安装、迁移、真实HTTP及恢复通过，不能替代容量验收。初始e0b热点14/21和全部历史失败记录原样保留。真实模型为 `BLOCKED_ENVIRONMENT`，作者全文评价 `PENDING_AUTHOR`，文学质量 `NOT_EVALUATED`。见[合并前修复报告](reports/PR2_PR3_合并前修复报告.md)、[性能与容量对照](reports/性能与容量修复对照.md)、[PR与main记录](reports/PR合并与main验收记录.md)和[未通过目标](reports/未通过目标与后续工作.md)。main仍为P1，后续P3/P4高级能力留在PR #3。
 
 - **运行/复现：** [复现与运行指南](reports/复现与运行指南.md)，`uv sync --locked --group dev`；默认 Python 3.12，PostgreSQL 17。
 - **测试与 CI：** [P1 Integrity Workflow](.github/workflows/p1-integrity.yml) 对 Schema、单元、真实 PostgreSQL 集成/并发及恢复执行分组验证；原始 JUnit、日志和机器可读结果在每次 GitHub Actions Run 的 Artifacts 获取。CI 执行状态以 GitHub Actions 当次结果为准。
