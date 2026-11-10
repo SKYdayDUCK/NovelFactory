@@ -86,7 +86,7 @@ class AgentGateway:
         self.output_contracts = {**OUTPUT_CONTRACTS, **(output_contracts or {})}
 
     def prepare_input(self, principal, world_ref, *, role_id, task_kind, assignment,
-                      adapter_id, skill_name=None, material_refs=()):
+                      adapter_id=None, skill_name=None, material_refs=()):
         """Freeze safe instructions/configuration before creating a task.
 
         This is a controller-only operation. material_refs are not granted by
@@ -96,6 +96,9 @@ class AgentGateway:
         with self.kernel.db.uow(write=False) as repo:
             self.kernel.authorize(repo, principal, world_ref["work_id"], "ADMIN", world_ref["branch_id"])
             self.kernel.revision(repo, world_ref)
+        if adapter_id is None:
+            from novel_factory.application.upgrades import RuntimeUpgradeService
+            adapter_id = RuntimeUpgradeService(self.kernel, adapters=self.adapters).selected_model(principal, world_ref)
         require(adapter_id in self.adapters, "MODEL_UNAVAILABLE", "Model route is not configured")
         runtime = self.catalog.snapshot(role_id, task_kind, skill_name)
         contract = self.output_contracts.get((role_id, task_kind), ("AgentTextOutput", "agent"))

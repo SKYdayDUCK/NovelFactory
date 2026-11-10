@@ -1,0 +1,40 @@
+{
+  "scope": "P4-02 compatible metadata runtime upgrades, peer review and hardening",
+  "model_calls": 0,
+  "files": [
+    {
+      "filename": "upgrade-peer.xml",
+      "sha256": "72e9a82dabcfaac66bb08ef991fa030c0188bd3db7ff5d1c0c8e8b68e6602904",
+      "bytes": 3691,
+      "tests": {
+        "tests": "22",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "4.944"
+      }
+    },
+    {
+      "filename": "upgrade-peer-pg/postgres_session.json",
+      "sha256": "f9071184a5bcc4a86b341948a8dd4910e878bbee292eb6e20c3b5d53c86686a4",
+      "bytes": 667
+    },
+    {
+      "filename": "worker-upgrade-lock.xml",
+      "sha256": "889b75287ea000bb50f7bb6c31ab81d9ce8e9dae4e7c42b74c90f80d9ac61fa0",
+      "bytes": 5360,
+      "tests": {
+        "tests": "32",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "11.624"
+      }
+    },
+    {
+      "filename": "worker-upgrade-lock-pg/postgres_session.json",
+      "sha256": "7d1156178eab6a197a6b2842c9e743b2491a79f4bbfc92c68c944eb11b637164",
+      "bytes": 723
+    }
+  ]
+}

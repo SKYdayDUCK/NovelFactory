@@ -17,12 +17,17 @@ def main() -> None:
     parser.add_argument("path", type=Path, help="New backup directory or existing backup to verify/restore")
     parser.add_argument("--restore-object-root", type=Path)
     parser.add_argument("--report", type=Path)
+    parser.add_argument("--online", action="store_true", help="Create a consistent exported snapshot while application writes continue")
     args = parser.parse_args()
     if args.operation == "restore" and (not args.restore_object_root or not os.environ.get("NF_RESTORE_DATABASE_URL")):
         parser.error("restore requires NF_RESTORE_DATABASE_URL and --restore-object-root; target must be empty")
     database = Database()
     try:
-        service = BackupService(database.engine, ObjectStore(os.environ.get("NF_OBJECT_ROOT", "var/objects")))
+        service_class = BackupService
+        if args.online:
+            from novel_factory.infrastructure.online_backup import OnlineBackupService
+            service_class = OnlineBackupService
+        service = service_class(database.engine, ObjectStore(os.environ.get("NF_OBJECT_ROOT", "var/objects")))
         if args.operation == "create":
             result = service.create(args.path)
         elif args.operation == "verify":
