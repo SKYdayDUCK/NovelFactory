@@ -1,0 +1,1513 @@
+{
+  "baseline_cases_unchanged": true,
+  "source_files": [
+    "validation/case_matrix.json",
+    "validation/r1_case_matrix.json"
+  ],
+  "final_run": "evidence/integration/release_verified_results.json",
+  "final_passed": 237,
+  "mapping_policy": "映射证明列出的测试确实运行通过；保守地不将完整原业务场景批量标为PASSED。P0/P1任务验收采用本轮明确的最小范围，详见开发报告。",
+  "legacy_and_v2_cases": [
+    {
+      "source_case_id": "T01",
+      "title": "过去、现在与毁坏后的权属",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/integration/test_world_kernel.py::test_legacy_dates_preserved_as_separate_fixture",
+        "tests/integration/test_world_kernel.py::test_r1_sword_history_owner_holder_destroyed_and_belief",
+        "tests/queries/test_history_queries.py::test_actual_sword_acceptance_history_and_ryw"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "T02",
+      "title": "倒叙中的世界、角色与读者信息",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/queries/test_history_queries.py::test_formal_late_knowledge_preserves_target_time_and_supports_retrospection",
+        "tests/queries/test_queries.py::test_actor_context_rejects_world_plan_other_actor_and_future",
+        "tests/queries/test_queries.py::test_actor_hidden_and_nonexistent_have_identical_answer_shape",
+        "tests/unit/test_domain.py::test_r1_e_belief_does_not_read_world_or_upgrade_observation"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "T03",
+      "title": "承诺已经发生，承诺内容仍可能失败",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/queries/test_queries.py::test_future_plan_is_fixed_artifact_and_never_world_fact"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "T04",
+      "title": "容器位置推导与隐藏路径",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/queries/test_queries.py::test_graph_path_edges_share_story_time_and_worldref",
+        "tests/unit/test_domain.py::test_exclusive_relation_and_physical_cycle_rejected"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "T05",
+      "title": "Retcon 保留旧世界，并复核相关认知",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_repair_revalidates_later_closed_command_preconditions",
+        "tests/integration/test_history_epoch.py::test_repair_bumps_epoch_and_prevents_resigning_old_inputs",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_compares_both_canon_and_candidate_heads[candidate]",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_compares_both_canon_and_candidate_heads[canon]",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_rechecks_current_independent_review_authority",
+        "tests/integration/test_history_repair.py::test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+        "tests/queries/test_history_queries.py::test_formal_late_knowledge_preserves_target_time_and_supports_retrospection",
+        "tests/queries/test_queries.py::test_actor_context_rejects_world_plan_other_actor_and_future",
+        "tests/queries/test_queries.py::test_actor_hidden_and_nonexistent_have_identical_answer_shape",
+        "tests/unit/test_domain.py::test_r1_b_replace_loan_rebuilds_without_reapplying",
+        "tests/unit/test_domain.py::test_r1_e_belief_does_not_read_world_or_upgrade_observation"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "T06",
+      "title": "同名、传言与唯一身份",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/queries/test_history_queries.py::test_formal_late_knowledge_preserves_target_time_and_supports_retrospection",
+        "tests/queries/test_queries.py::test_actor_context_rejects_world_plan_other_actor_and_future",
+        "tests/queries/test_queries.py::test_actor_hidden_and_nonexistent_have_identical_answer_shape",
+        "tests/unit/test_domain.py::test_r1_e_belief_does_not_read_world_or_upgrade_observation"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "T07",
+      "title": "同一快照中的三方争夺",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_after_sample_change_does_not_refresh_certificate_tokens",
+        "tests/concurrency/test_world_races.py::test_guarded_independent_items_keep_original_base",
+        "tests/concurrency/test_world_races.py::test_guarded_independent_resources_share_one_world_chain",
+        "tests/concurrency/test_world_races.py::test_negative_range_phantom_invalidates_clear_route",
+        "tests/concurrency/test_world_races.py::test_write_skew_two_guards_cannot_both_leave",
+        "tests/integration/test_scope_identity.py::test_scope_identity_cannot_be_renamed_or_reset_for_aba"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "T08",
+      "title": "一个发生实例，多次叙述，一次效果",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_repair_revalidates_later_closed_command_preconditions",
+        "tests/concurrency/test_world_races.py::test_same_key_retry_and_new_key_do_not_repeat_effects",
+        "tests/concurrency/test_world_races.py::test_world_transaction_process_crash_and_retry[after_commit]",
+        "tests/concurrency/test_world_races.py::test_world_transaction_process_crash_and_retry[after_events]",
+        "tests/integration/test_history_epoch.py::test_repair_bumps_epoch_and_prevents_resigning_old_inputs",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_compares_both_canon_and_candidate_heads[candidate]",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_compares_both_canon_and_candidate_heads[canon]",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_rechecks_current_independent_review_authority",
+        "tests/integration/test_history_repair.py::test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+        "tests/integration/test_world_kernel.py::test_idempotent_accept_content_mismatch_and_proposal_uniqueness",
+        "tests/integration/test_world_kernel.py::test_lost_response_then_cancel_retrieves_original_receipt",
+        "tests/unit/test_domain.py::test_r1_b_replace_loan_rebuilds_without_reapplying"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "T09",
+      "title": "配方、数量单位与物品血缘",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_guarded_independent_resources_share_one_world_chain",
+        "tests/concurrency/test_world_races.py::test_shared_resource_rejects_overallocation",
+        "tests/integration/test_world_kernel.py::test_resource_transfer_conserves_white_bridge_original_consignment",
+        "tests/unit/test_domain.py::test_resource_invariants[float]",
+        "tests/unit/test_domain.py::test_resource_invariants[negative]",
+        "tests/unit/test_domain.py::test_resource_invariants[unbalanced]",
+        "tests/unit/test_domain.py::test_resource_invariants[wrong_unit]",
+        "tests/unit/test_domain.py::test_resource_transfer_is_atomic_conserved_and_historical",
+        "tests/unit/test_domain.py::test_resource_zero_requires_existing_identities_at_the_requested_time"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "T10",
+      "title": "失去矿脉不等于所有计划必然失败",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/queries/test_queries.py::test_future_plan_is_fixed_artifact_and_never_world_fact"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "T11",
+      "title": "发言为真，不等于发言内容为真",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/queries/test_history_queries.py::test_formal_late_knowledge_preserves_target_time_and_supports_retrospection",
+        "tests/queries/test_queries.py::test_actor_context_rejects_world_plan_other_actor_and_future",
+        "tests/queries/test_queries.py::test_actor_hidden_and_nonexistent_have_identical_answer_shape",
+        "tests/unit/test_domain.py::test_r1_e_belief_does_not_read_world_or_upgrade_observation"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "T12",
+      "title": "时间未知与时间约束矛盾",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/unit/test_domain.py::test_ambiguous_effect_never_guesses_an_occurrence_endpoint",
+        "tests/unit/test_domain.py::test_bounded_occurrence_allows_explicit_resolved_effect_boundary",
+        "tests/unit/test_domain.py::test_t12_acyclic_but_impossible_bounded_time_rejected",
+        "tests/unit/test_domain.py::test_time_value_objects_reject_bool_float_extra_and_outside_range"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "S01",
+      "title": "未来预计与命令不提前兑现",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/queries/test_queries.py::test_future_plan_is_fixed_artifact_and_never_world_fact"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "S02",
+      "title": "同刻交汇不按模型返回顺序决胜",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/unit/test_domain.py::test_ambiguous_effect_never_guesses_an_occurrence_endpoint",
+        "tests/unit/test_domain.py::test_bounded_occurrence_allows_explicit_resolved_effect_boundary",
+        "tests/unit/test_domain.py::test_t12_acyclic_but_impossible_bounded_time_rejected",
+        "tests/unit/test_domain.py::test_time_value_objects_reject_bool_float_extra_and_outside_range"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "S03",
+      "title": "D31只是这条信使通道的到达下界",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "NOT_EXECUTED_THIS_ROUND",
+      "passing_test_nodes": [],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "S04",
+      "title": "宏观结算与微观细写使用同一段历史",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "NOT_EXECUTED_THIS_ROUND",
+      "passing_test_nodes": [],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "S05",
+      "title": "相关域受阻，独立线仍能继续",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_after_sample_change_does_not_refresh_certificate_tokens",
+        "tests/concurrency/test_world_races.py::test_guarded_independent_items_keep_original_base",
+        "tests/concurrency/test_world_races.py::test_guarded_independent_resources_share_one_world_chain",
+        "tests/concurrency/test_world_races.py::test_negative_range_phantom_invalidates_clear_route",
+        "tests/concurrency/test_world_races.py::test_write_skew_two_guards_cannot_both_leave",
+        "tests/integration/test_scope_identity.py::test_scope_identity_cannot_be_renamed_or_reset_for_aba"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "S06",
+      "title": "预演可放弃，已接受世界不能随手丢弃",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/integration/test_history_repair.py::test_ordinary_approval_and_revocation_respect_actual_branch_grant",
+        "tests/integration/test_world_kernel.py::test_fork_inherits_selection_once_and_isolates_future",
+        "tests/queries/test_history_queries.py::test_fixed_latest_batch_and_compiler_rebind"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "S07",
+      "title": "卷导演接受失败，并产生有代价的改线",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "NOT_EXECUTED_THIS_ROUND",
+      "passing_test_nodes": [],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "S08",
+      "title": "现实任务超时不自动改变故事时间",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/integration/test_world_kernel.py::test_old_generation_and_cancelled_task_cannot_commit",
+        "tests/reliability/test_tasks.py::test_accept_in_world_transaction_closes_current_task[RESULT_STORED]",
+        "tests/reliability/test_tasks.py::test_accept_in_world_transaction_closes_current_task[RUNNING]",
+        "tests/reliability/test_tasks.py::test_accept_in_world_transaction_closes_current_task[VALIDATING]",
+        "tests/reliability/test_tasks.py::test_accept_in_world_transaction_closes_current_task[WAITING_REVIEW]",
+        "tests/reliability/test_tasks.py::test_acceptance_rolls_back_with_outer_transaction_and_preserves_call_accounting",
+        "tests/reliability/test_tasks.py::test_cancel_and_result_race_leaves_no_qualification",
+        "tests/reliability/test_tasks.py::test_expired_lease_recovery_fences_old_result",
+        "tests/service/test_http.py::test_http_real_task_cancellation_blocks_late_result"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "L01",
+      "title": "同样答应合作，不等于具有相同的人物成长",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "NOT_EXECUTED_THIS_ROUND",
+      "passing_test_nodes": [],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "L02",
+      "title": "八章各自合格，整卷仍可能反复空转",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "NOT_EXECUTED_THIS_ROUND",
+      "passing_test_nodes": [],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "L03",
+      "title": "丧友之后发笑，不自动构成情感连续性错误",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "NOT_EXECUTED_THIS_ROUND",
+      "passing_test_nodes": [],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "L04",
+      "title": "研究方法升级不自动统一全书语气",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "NOT_EXECUTED_THIS_ROUND",
+      "passing_test_nodes": [],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "L05",
+      "title": "关系摘要不能抹去不对称认知与长期余效",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "NOT_EXECUTED_THIS_ROUND",
+      "passing_test_nodes": [],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "F01",
+      "title": "旧租约晚返回",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/integration/test_world_kernel.py::test_old_generation_and_cancelled_task_cannot_commit",
+        "tests/reliability/test_tasks.py::test_accept_in_world_transaction_closes_current_task[RESULT_STORED]",
+        "tests/reliability/test_tasks.py::test_accept_in_world_transaction_closes_current_task[RUNNING]",
+        "tests/reliability/test_tasks.py::test_accept_in_world_transaction_closes_current_task[VALIDATING]",
+        "tests/reliability/test_tasks.py::test_accept_in_world_transaction_closes_current_task[WAITING_REVIEW]",
+        "tests/reliability/test_tasks.py::test_acceptance_rolls_back_with_outer_transaction_and_preserves_call_accounting",
+        "tests/reliability/test_tasks.py::test_cancel_and_result_race_leaves_no_qualification",
+        "tests/reliability/test_tasks.py::test_expired_lease_recovery_fences_old_result",
+        "tests/service/test_http.py::test_http_real_task_cancellation_blocks_late_result"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "F02",
+      "title": "模型调用回执未知",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/reliability/test_tasks.py::test_budget_race_unknown_reservation_and_settlement",
+        "tests/reliability/test_tasks.py::test_token_reservations_cannot_exceed_task_budget",
+        "tests/reliability/test_tasks.py::test_unknown_call_recovery_pauses_until_reconciled"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "F03",
+      "title": "批准后内容变化",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_expired_and_unissued_certificates_are_rejected",
+        "tests/concurrency/test_world_races.py::test_interpretation_epoch_invalidates_prepared_acceptance",
+        "tests/concurrency/test_world_races.py::test_repair_cannot_reference_nonexistent_rules_or_adjudication"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "F04",
+      "title": "空查询出现新结果",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_after_sample_change_does_not_refresh_certificate_tokens",
+        "tests/concurrency/test_world_races.py::test_guarded_independent_items_keep_original_base",
+        "tests/concurrency/test_world_races.py::test_guarded_independent_resources_share_one_world_chain",
+        "tests/concurrency/test_world_races.py::test_negative_range_phantom_invalidates_clear_route",
+        "tests/concurrency/test_world_races.py::test_write_skew_two_guards_cannot_both_leave",
+        "tests/integration/test_scope_identity.py::test_scope_identity_cannot_be_renamed_or_reset_for_aba"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "F05",
+      "title": "索引滞后",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/queries/test_history_queries.py::test_fixed_latest_batch_and_compiler_rebind",
+        "tests/queries/test_queries.py::test_actor_hidden_and_nonexistent_have_identical_answer_shape",
+        "tests/queries/test_queries.py::test_cache_hit_rechecks_revoked_grant",
+        "tests/queries/test_queries.py::test_fixed_cut_stale_search_is_not_unknown_world",
+        "tests/service/test_http.py::test_http_cached_response_does_not_survive_revocation"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "F06",
+      "title": "拒绝理由泄密",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_current_grant_and_approval_revocation_block_accept",
+        "tests/concurrency/test_world_races.py::test_task_authorization_is_rechecked_inside_mutation_transaction",
+        "tests/integration/test_history_repair.py::test_ordinary_approval_and_revocation_respect_actual_branch_grant",
+        "tests/queries/test_history_queries.py::test_fixed_latest_batch_and_compiler_rebind",
+        "tests/queries/test_queries.py::test_actor_context_rejects_world_plan_other_actor_and_future",
+        "tests/queries/test_queries.py::test_actor_hidden_and_nonexistent_have_identical_answer_shape",
+        "tests/queries/test_queries.py::test_cache_hit_rechecks_revoked_grant",
+        "tests/queries/test_queries.py::test_fixed_cut_stale_search_is_not_unknown_world",
+        "tests/service/test_http.py::test_http_actor_cannot_switch_plane_or_read_another_tasks_context",
+        "tests/service/test_http.py::test_http_cached_response_does_not_survive_revocation"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "F07",
+      "title": "分支revision不相容",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/integration/test_history_repair.py::test_ordinary_approval_and_revocation_respect_actual_branch_grant",
+        "tests/integration/test_world_kernel.py::test_fork_inherits_selection_once_and_isolates_future",
+        "tests/queries/test_history_queries.py::test_fixed_latest_batch_and_compiler_rebind"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "F08",
+      "title": "撤权或取消后的晚提交",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_current_grant_and_approval_revocation_block_accept",
+        "tests/concurrency/test_world_races.py::test_task_authorization_is_rechecked_inside_mutation_transaction",
+        "tests/integration/test_history_repair.py::test_ordinary_approval_and_revocation_respect_actual_branch_grant",
+        "tests/integration/test_world_kernel.py::test_old_generation_and_cancelled_task_cannot_commit",
+        "tests/queries/test_queries.py::test_actor_context_rejects_world_plan_other_actor_and_future",
+        "tests/reliability/test_tasks.py::test_accept_in_world_transaction_closes_current_task[RESULT_STORED]",
+        "tests/reliability/test_tasks.py::test_accept_in_world_transaction_closes_current_task[RUNNING]",
+        "tests/reliability/test_tasks.py::test_accept_in_world_transaction_closes_current_task[VALIDATING]",
+        "tests/reliability/test_tasks.py::test_accept_in_world_transaction_closes_current_task[WAITING_REVIEW]",
+        "tests/reliability/test_tasks.py::test_acceptance_rolls_back_with_outer_transaction_and_preserves_call_accounting",
+        "tests/reliability/test_tasks.py::test_cancel_and_result_race_leaves_no_qualification",
+        "tests/reliability/test_tasks.py::test_expired_lease_recovery_fences_old_result",
+        "tests/service/test_http.py::test_http_actor_cannot_switch_plane_or_read_another_tasks_context",
+        "tests/service/test_http.py::test_http_cached_response_does_not_survive_revocation",
+        "tests/service/test_http.py::test_http_real_task_cancellation_blocks_late_result"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "F09",
+      "title": "恢复时模型已变更",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/integration/test_world_recovery.py::test_real_world_history_and_authorization_survive_isolated_restore",
+        "tests/reliability/test_recovery.py::test_abrupt_database_process_exit_rolls_back",
+        "tests/reliability/test_recovery.py::test_backup_gate_freezes_authoritative_mutations",
+        "tests/reliability/test_recovery.py::test_backup_rejects_missing_object_and_interpretation",
+        "tests/reliability/test_recovery.py::test_backup_resolves_wheel_runtime_assets",
+        "tests/reliability/test_recovery.py::test_backup_runtime_profile_is_required_and_bound",
+        "tests/reliability/test_recovery.py::test_committed_task_process_exit_keeps_original_receipt",
+        "tests/reliability/test_recovery.py::test_pg_dump_restore_checks_data_objects_and_fences_old_workers",
+        "tests/reliability/test_tasks.py::test_outbox_failure_redelivery_and_inbox_atomicity"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "F10",
+      "title": "正文对象与数据库故障",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/integration/test_world_recovery.py::test_real_world_history_and_authorization_survive_isolated_restore",
+        "tests/reliability/test_objects.py::test_abrupt_process_exit_recovery[after_file_fsync]",
+        "tests/reliability/test_objects.py::test_abrupt_process_exit_recovery[after_publish]",
+        "tests/reliability/test_objects.py::test_abrupt_process_exit_recovery[after_write]",
+        "tests/reliability/test_objects.py::test_content_addressing_and_parallel_puts",
+        "tests/reliability/test_objects.py::test_corruption_and_missing_fail_closed",
+        "tests/reliability/test_objects.py::test_gc_keeps_referenced_and_young_objects",
+        "tests/reliability/test_objects.py::test_reference_transaction_excludes_gc",
+        "tests/reliability/test_objects.py::test_reuse_after_publish_crash_reconfirms_durable_directory_entry[put]",
+        "tests/reliability/test_objects.py::test_reuse_after_publish_crash_reconfirms_durable_directory_entry[verify]",
+        "tests/reliability/test_recovery.py::test_abrupt_database_process_exit_rolls_back",
+        "tests/reliability/test_recovery.py::test_backup_gate_freezes_authoritative_mutations",
+        "tests/reliability/test_recovery.py::test_backup_rejects_missing_object_and_interpretation",
+        "tests/reliability/test_recovery.py::test_backup_resolves_wheel_runtime_assets",
+        "tests/reliability/test_recovery.py::test_backup_runtime_profile_is_required_and_bound",
+        "tests/reliability/test_recovery.py::test_committed_task_process_exit_keeps_original_receipt",
+        "tests/reliability/test_recovery.py::test_pg_dump_restore_checks_data_objects_and_fences_old_workers",
+        "tests/reliability/test_tasks.py::test_object_database_reference_constraints",
+        "tests/reliability/test_tasks.py::test_outbox_failure_redelivery_and_inbox_atomicity"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "F11",
+      "title": "Outbox与发布回执未知",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_same_key_retry_and_new_key_do_not_repeat_effects",
+        "tests/concurrency/test_world_races.py::test_world_transaction_process_crash_and_retry[after_commit]",
+        "tests/concurrency/test_world_races.py::test_world_transaction_process_crash_and_retry[after_events]",
+        "tests/integration/test_world_kernel.py::test_idempotent_accept_content_mismatch_and_proposal_uniqueness",
+        "tests/integration/test_world_kernel.py::test_lost_response_then_cancel_retrieves_original_receipt",
+        "tests/integration/test_world_recovery.py::test_real_world_history_and_authorization_survive_isolated_restore",
+        "tests/reliability/test_recovery.py::test_abrupt_database_process_exit_rolls_back",
+        "tests/reliability/test_recovery.py::test_backup_gate_freezes_authoritative_mutations",
+        "tests/reliability/test_recovery.py::test_backup_rejects_missing_object_and_interpretation",
+        "tests/reliability/test_recovery.py::test_backup_resolves_wheel_runtime_assets",
+        "tests/reliability/test_recovery.py::test_backup_runtime_profile_is_required_and_bound",
+        "tests/reliability/test_recovery.py::test_committed_task_process_exit_keeps_original_receipt",
+        "tests/reliability/test_recovery.py::test_pg_dump_restore_checks_data_objects_and_fences_old_workers",
+        "tests/reliability/test_tasks.py::test_outbox_failure_redelivery_and_inbox_atomicity"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "F12",
+      "title": "规则例外及版本变化",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_expired_and_unissued_certificates_are_rejected",
+        "tests/concurrency/test_world_races.py::test_interpretation_epoch_invalidates_prepared_acceptance",
+        "tests/concurrency/test_world_races.py::test_repair_cannot_reference_nonexistent_rules_or_adjudication"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "F13",
+      "title": "缓存权限隔离",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/queries/test_history_queries.py::test_fixed_latest_batch_and_compiler_rebind",
+        "tests/queries/test_queries.py::test_actor_hidden_and_nonexistent_have_identical_answer_shape",
+        "tests/queries/test_queries.py::test_cache_hit_rechecks_revoked_grant",
+        "tests/queries/test_queries.py::test_fixed_cut_stale_search_is_not_unknown_world",
+        "tests/service/test_http.py::test_http_cached_response_does_not_survive_revocation"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "F14",
+      "title": "未知与完备库存的空集",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/integration/test_world_kernel.py::test_legacy_dates_preserved_as_separate_fixture",
+        "tests/integration/test_world_kernel.py::test_r1_sword_history_owner_holder_destroyed_and_belief",
+        "tests/queries/test_history_queries.py::test_actual_sword_acceptance_history_and_ryw",
+        "tests/queries/test_history_queries.py::test_fixed_latest_batch_and_compiler_rebind",
+        "tests/queries/test_queries.py::test_actor_hidden_and_nonexistent_have_identical_answer_shape",
+        "tests/queries/test_queries.py::test_cache_hit_rechecks_revoked_grant",
+        "tests/queries/test_queries.py::test_fixed_cut_stale_search_is_not_unknown_world",
+        "tests/service/test_http.py::test_http_cached_response_does_not_survive_revocation"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "F15",
+      "title": "依赖遗漏与语义漏抽",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_after_sample_change_does_not_refresh_certificate_tokens",
+        "tests/concurrency/test_world_races.py::test_guarded_independent_items_keep_original_base",
+        "tests/concurrency/test_world_races.py::test_guarded_independent_resources_share_one_world_chain",
+        "tests/concurrency/test_world_races.py::test_negative_range_phantom_invalidates_clear_route",
+        "tests/concurrency/test_world_races.py::test_write_skew_two_guards_cannot_both_leave",
+        "tests/integration/test_scope_identity.py::test_scope_identity_cannot_be_renamed_or_reset_for_aba"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "F16",
+      "title": "长期重复与预算耗尽",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/reliability/test_tasks.py::test_budget_race_unknown_reservation_and_settlement",
+        "tests/reliability/test_tasks.py::test_token_reservations_cannot_exceed_task_budget",
+        "tests/reliability/test_tasks.py::test_unknown_call_recovery_pauses_until_reconciled"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "F17",
+      "title": "Retcon后的失效展开窗口",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_after_sample_change_does_not_refresh_certificate_tokens",
+        "tests/concurrency/test_world_races.py::test_guarded_independent_items_keep_original_base",
+        "tests/concurrency/test_world_races.py::test_guarded_independent_resources_share_one_world_chain",
+        "tests/concurrency/test_world_races.py::test_negative_range_phantom_invalidates_clear_route",
+        "tests/concurrency/test_world_races.py::test_repair_revalidates_later_closed_command_preconditions",
+        "tests/concurrency/test_world_races.py::test_write_skew_two_guards_cannot_both_leave",
+        "tests/integration/test_history_epoch.py::test_repair_bumps_epoch_and_prevents_resigning_old_inputs",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_compares_both_canon_and_candidate_heads[candidate]",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_compares_both_canon_and_candidate_heads[canon]",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_rechecks_current_independent_review_authority",
+        "tests/integration/test_history_repair.py::test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+        "tests/integration/test_scope_identity.py::test_scope_identity_cannot_be_renamed_or_reset_for_aba",
+        "tests/unit/test_domain.py::test_r1_b_replace_loan_rebuilds_without_reapplying"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "F18",
+      "title": "发布乱序与撤回重发",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "NOT_EXECUTED_THIS_ROUND",
+      "passing_test_nodes": [],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "F19",
+      "title": "检索材料含越权指令",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "NOT_EXECUTED_THIS_ROUND",
+      "passing_test_nodes": [],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "V2-01",
+      "title": "同一query分别处于未知、未推进、计划、索引滞后",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/integration/test_world_kernel.py::test_legacy_dates_preserved_as_separate_fixture",
+        "tests/integration/test_world_kernel.py::test_r1_sword_history_owner_holder_destroyed_and_belief",
+        "tests/queries/test_history_queries.py::test_actual_sword_acceptance_history_and_ryw",
+        "tests/queries/test_history_queries.py::test_fixed_latest_batch_and_compiler_rebind",
+        "tests/queries/test_queries.py::test_actor_hidden_and_nonexistent_have_identical_answer_shape",
+        "tests/queries/test_queries.py::test_cache_hit_rechecks_revoked_grant",
+        "tests/queries/test_queries.py::test_fixed_cut_stale_search_is_not_unknown_world",
+        "tests/queries/test_queries.py::test_future_plan_is_fixed_artifact_and_never_world_fact",
+        "tests/service/test_http.py::test_http_cached_response_does_not_survive_revocation"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "V2-02",
+      "title": "相同幂等key、不同payload",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_same_key_retry_and_new_key_do_not_repeat_effects",
+        "tests/concurrency/test_world_races.py::test_world_transaction_process_crash_and_retry[after_commit]",
+        "tests/concurrency/test_world_races.py::test_world_transaction_process_crash_and_retry[after_events]",
+        "tests/integration/test_world_kernel.py::test_idempotent_accept_content_mismatch_and_proposal_uniqueness",
+        "tests/integration/test_world_kernel.py::test_lost_response_then_cancel_retrieves_original_receipt"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "V2-03",
+      "title": "fork继承了已施加effect，再引用同occurrence",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/integration/test_history_repair.py::test_ordinary_approval_and_revocation_respect_actual_branch_grant",
+        "tests/integration/test_world_kernel.py::test_fork_inherits_selection_once_and_isolates_future",
+        "tests/queries/test_history_queries.py::test_fixed_latest_batch_and_compiler_rebind"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "V2-04",
+      "title": "repair准备后main继续变化",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_repair_revalidates_later_closed_command_preconditions",
+        "tests/integration/test_history_epoch.py::test_repair_bumps_epoch_and_prevents_resigning_old_inputs",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_compares_both_canon_and_candidate_heads[candidate]",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_compares_both_canon_and_candidate_heads[canon]",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_rechecks_current_independent_review_authority",
+        "tests/integration/test_history_repair.py::test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+        "tests/unit/test_domain.py::test_r1_b_replace_loan_rebuilds_without_reapplying"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "V2-05",
+      "title": "两组细化终态相同，中间消息/持有/认知不同",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "NOT_EXECUTED_THIS_ROUND",
+      "passing_test_nodes": [],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "V2-06",
+      "title": "授权查询空结果后新增匹配范围事实",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_after_sample_change_does_not_refresh_certificate_tokens",
+        "tests/concurrency/test_world_races.py::test_guarded_independent_items_keep_original_base",
+        "tests/concurrency/test_world_races.py::test_guarded_independent_resources_share_one_world_chain",
+        "tests/concurrency/test_world_races.py::test_negative_range_phantom_invalidates_clear_route",
+        "tests/concurrency/test_world_races.py::test_write_skew_two_guards_cannot_both_leave",
+        "tests/integration/test_scope_identity.py::test_scope_identity_cannot_be_renamed_or_reset_for_aba"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "V2-07",
+      "title": "接受world成功，release重试、倒叙重用",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_same_key_retry_and_new_key_do_not_repeat_effects",
+        "tests/concurrency/test_world_races.py::test_world_transaction_process_crash_and_retry[after_commit]",
+        "tests/concurrency/test_world_races.py::test_world_transaction_process_crash_and_retry[after_events]",
+        "tests/integration/test_world_kernel.py::test_idempotent_accept_content_mismatch_and_proposal_uniqueness",
+        "tests/integration/test_world_kernel.py::test_lost_response_then_cancel_retrieves_original_receipt"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "V2-08",
+      "title": "不改世界，仅调换章节、POV或style",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "NOT_EXECUTED_THIS_ROUND",
+      "passing_test_nodes": [],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "V2-09",
+      "title": "人物普通猜测恰好命中秘密",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/queries/test_history_queries.py::test_formal_late_knowledge_preserves_target_time_and_supports_retrospection",
+        "tests/queries/test_queries.py::test_actor_context_rejects_world_plan_other_actor_and_future",
+        "tests/queries/test_queries.py::test_actor_hidden_and_nonexistent_have_identical_answer_shape",
+        "tests/unit/test_domain.py::test_r1_e_belief_does_not_read_world_or_upgrade_observation"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "V2-10",
+      "title": "读者已披露信息来自不可靠旁白",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "NOT_EXECUTED_THIS_ROUND",
+      "passing_test_nodes": [],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "V2-11",
+      "title": "Host有额外全知文件工具",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "NOT_EXECUTED_THIS_ROUND",
+      "passing_test_nodes": [],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "V2-12",
+      "title": "备份DB完整但缺一正文对象/旧规则解释器",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/integration/test_world_recovery.py::test_real_world_history_and_authorization_survive_isolated_restore",
+        "tests/reliability/test_recovery.py::test_abrupt_database_process_exit_rolls_back",
+        "tests/reliability/test_recovery.py::test_backup_gate_freezes_authoritative_mutations",
+        "tests/reliability/test_recovery.py::test_backup_rejects_missing_object_and_interpretation",
+        "tests/reliability/test_recovery.py::test_backup_resolves_wheel_runtime_assets",
+        "tests/reliability/test_recovery.py::test_backup_runtime_profile_is_required_and_bound",
+        "tests/reliability/test_recovery.py::test_committed_task_process_exit_keeps_original_receipt",
+        "tests/reliability/test_recovery.py::test_pg_dump_restore_checks_data_objects_and_fences_old_workers",
+        "tests/reliability/test_tasks.py::test_outbox_failure_redelivery_and_inbox_atomicity"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "V2-13",
+      "title": "研究方法更新，而旧任务仍跑",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "NOT_EXECUTED_THIS_ROUND",
+      "passing_test_nodes": [],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "V2-14",
+      "title": "公开发布v1回执未知时已请求v2",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "NOT_EXECUTED_THIS_ROUND",
+      "passing_test_nodes": [],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "V2-15",
+      "title": "两个任务同时预留最后一笔预算",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/reliability/test_tasks.py::test_budget_race_unknown_reservation_and_settlement",
+        "tests/reliability/test_tasks.py::test_token_reservations_cannot_exceed_task_budget",
+        "tests/reliability/test_tasks.py::test_unknown_call_recovery_pauses_until_reconciled"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    },
+    {
+      "source_case_id": "V2-16",
+      "title": "引入无关普通描写，然后后来用其支持因果",
+      "source_path": "validation/case_matrix.json",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "NOT_EXECUTED_THIS_ROUND",
+      "passing_test_nodes": [],
+      "full_original_scenario_passed": false,
+      "note": "本轮测试只覆盖所列P1内核不变量。原案例中的文学、读者、联合裁决、正文发布或规模条件不因该映射自动通过。"
+    }
+  ],
+  "r1_acceptance_checks": [
+    {
+      "source_test_id": "R1-A-01",
+      "criterion_unchanged": "四次关系变化均有事件版本与有效区间证据；范围查询不重复计入同一发生。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/integration/test_world_kernel.py::test_legacy_dates_preserved_as_separate_fixture",
+        "tests/integration/test_world_kernel.py::test_r1_sword_history_owner_holder_destroyed_and_belief",
+        "tests/queries/test_history_queries.py::test_actual_sword_acceptance_history_and_ryw"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-A-02",
+      "criterion_unchanged": "销毁后的活跃持有查询仅在 COMPLETE/EVALUATED 条件下返回 NONE；历史所有权仍可查。毁坏后的赔偿等法律关系只按已注册规则另行表示。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/integration/test_world_kernel.py::test_legacy_dates_preserved_as_separate_fixture",
+        "tests/integration/test_world_kernel.py::test_r1_sword_history_owner_holder_destroyed_and_belief",
+        "tests/queries/test_history_queries.py::test_actual_sword_acceptance_history_and_ryw"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-A-03",
+      "criterion_unchanged": "D50计划的当前适用性被阻断，后续选择的新计划版本可标INVALIDATED并安排重规划；原APPROVED版本及破坏前提的证据仍保留，不能把旧版原地改写。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/queries/test_queries.py::test_future_plan_is_fixed_artifact_and_never_world_fact"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-A-04",
+      "criterion_unchanged": "暂停异步依赖 worker 时，正式执行仍被同步屏障阻断；重启后追上且不重复重规划效果。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_after_sample_change_does_not_refresh_certificate_tokens",
+        "tests/concurrency/test_world_races.py::test_guarded_independent_items_keep_original_base",
+        "tests/concurrency/test_world_races.py::test_guarded_independent_resources_share_one_world_chain",
+        "tests/concurrency/test_world_races.py::test_negative_range_phantom_invalidates_clear_route",
+        "tests/concurrency/test_world_races.py::test_write_skew_two_guards_cannot_both_leave",
+        "tests/integration/test_scope_identity.py::test_scope_identity_cannot_be_renamed_or_reset_for_aba",
+        "tests/integration/test_world_recovery.py::test_real_world_history_and_authorization_survive_isolated_restore",
+        "tests/reliability/test_recovery.py::test_abrupt_database_process_exit_rolls_back",
+        "tests/reliability/test_recovery.py::test_backup_gate_freezes_authoritative_mutations",
+        "tests/reliability/test_recovery.py::test_backup_rejects_missing_object_and_interpretation",
+        "tests/reliability/test_recovery.py::test_backup_resolves_wheel_runtime_assets",
+        "tests/reliability/test_recovery.py::test_backup_runtime_profile_is_required_and_bound",
+        "tests/reliability/test_recovery.py::test_committed_task_process_exit_keeps_original_receipt",
+        "tests/reliability/test_recovery.py::test_pg_dump_restore_checks_data_objects_and_fences_old_workers",
+        "tests/reliability/test_tasks.py::test_outbox_failure_redelivery_and_inbox_atomicity"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-B-01",
+      "criterion_unchanged": "旧修订和旧发布可还原；不原地覆盖事件或对当前状态简单反向扣回。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_repair_revalidates_later_closed_command_preconditions",
+        "tests/integration/test_history_epoch.py::test_repair_bumps_epoch_and_prevents_resigning_old_inputs",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_compares_both_canon_and_candidate_heads[candidate]",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_compares_both_canon_and_candidate_heads[canon]",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_rechecks_current_independent_review_authority",
+        "tests/integration/test_history_repair.py::test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+        "tests/unit/test_domain.py::test_r1_b_replace_loan_rebuilds_without_reapplying"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-B-02",
+      "criterion_unchanged": "只重用选择清单、规则和投影器相容的快照；新历史中每个效果只生效一次。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_repair_revalidates_later_closed_command_preconditions",
+        "tests/integration/test_history_epoch.py::test_repair_bumps_epoch_and_prevents_resigning_old_inputs",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_compares_both_canon_and_candidate_heads[candidate]",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_compares_both_canon_and_candidate_heads[canon]",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_rechecks_current_independent_review_authority",
+        "tests/integration/test_history_repair.py::test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+        "tests/unit/test_domain.py::test_r1_b_replace_loan_rebuilds_without_reapplying"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-B-03",
+      "criterion_unchanged": "产权改变不自动删除曾发生的发言/误信；认知变化需要相应来源。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_repair_revalidates_later_closed_command_preconditions",
+        "tests/integration/test_history_epoch.py::test_repair_bumps_epoch_and_prevents_resigning_old_inputs",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_compares_both_canon_and_candidate_heads[candidate]",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_compares_both_canon_and_candidate_heads[canon]",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_rechecks_current_independent_review_authority",
+        "tests/integration/test_history_repair.py::test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+        "tests/queries/test_history_queries.py::test_formal_late_knowledge_preserves_target_time_and_supports_retrospection",
+        "tests/queries/test_queries.py::test_actor_context_rejects_world_plan_other_actor_and_future",
+        "tests/queries/test_queries.py::test_actor_hidden_and_nonexistent_have_identical_answer_shape",
+        "tests/unit/test_domain.py::test_r1_b_replace_loan_rebuilds_without_reapplying",
+        "tests/unit/test_domain.py::test_r1_e_belief_does_not_read_world_or_upgrade_observation"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-B-04",
+      "criterion_unchanged": "旧 canon 在重建期间新增事实或候选变化会使推广 CAS 拒绝；已有独立写入不丢失。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_repair_revalidates_later_closed_command_preconditions",
+        "tests/integration/test_history_epoch.py::test_repair_bumps_epoch_and_prevents_resigning_old_inputs",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_compares_both_canon_and_candidate_heads[candidate]",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_compares_both_canon_and_candidate_heads[canon]",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_rechecks_current_independent_review_authority",
+        "tests/integration/test_history_repair.py::test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+        "tests/unit/test_domain.py::test_r1_b_replace_loan_rebuilds_without_reapplying"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-B-05",
+      "criterion_unchanged": "受影响的文本/摘要/计划缺少新资格时不得套用旧批准进入新版本。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_expired_and_unissued_certificates_are_rejected",
+        "tests/concurrency/test_world_races.py::test_interpretation_epoch_invalidates_prepared_acceptance",
+        "tests/concurrency/test_world_races.py::test_repair_cannot_reference_nonexistent_rules_or_adjudication",
+        "tests/concurrency/test_world_races.py::test_repair_revalidates_later_closed_command_preconditions",
+        "tests/integration/test_history_epoch.py::test_repair_bumps_epoch_and_prevents_resigning_old_inputs",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_compares_both_canon_and_candidate_heads[candidate]",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_compares_both_canon_and_candidate_heads[canon]",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_rechecks_current_independent_review_authority",
+        "tests/integration/test_history_repair.py::test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+        "tests/unit/test_domain.py::test_r1_b_replace_loan_rebuilds_without_reapplying"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-C-01",
+      "criterion_unchanged": "对两行动的所有到达排列，封闭输入和已选裁决结果一致；不得用响应快慢判胜。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "NOT_EXECUTED_THIS_ROUND",
+      "passing_test_nodes": [],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-C-02",
+      "criterion_unchanged": "删除一个可能影响 bridge 的入站通道证明后必须阻断交汇接受。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "NOT_EXECUTED_THIS_ROUND",
+      "passing_test_nodes": [],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-C-03",
+      "criterion_unchanged": "将入站下界设为 D42 时只可确认严格早于 D42 的范围，不能越过未处理交汇。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/unit/test_domain.py::test_ambiguous_effect_never_guesses_an_occurrence_endpoint",
+        "tests/unit/test_domain.py::test_bounded_occurrence_allows_explicit_resolved_effect_boundary",
+        "tests/unit/test_domain.py::test_t12_acyclic_but_impossible_bounded_time_rejected",
+        "tests/unit/test_domain.py::test_time_value_objects_reject_bool_float_extra_and_outside_range"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-C-04",
+      "criterion_unchanged": "延迟/重复消息只产生一次获准观察或触发；尚未到达不进入角色上下文。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/integration/test_world_kernel.py::test_old_generation_and_cancelled_task_cannot_commit",
+        "tests/queries/test_history_queries.py::test_formal_late_knowledge_preserves_target_time_and_supports_retrospection",
+        "tests/queries/test_queries.py::test_actor_context_rejects_world_plan_other_actor_and_future",
+        "tests/queries/test_queries.py::test_actor_hidden_and_nonexistent_have_identical_answer_shape",
+        "tests/reliability/test_tasks.py::test_accept_in_world_transaction_closes_current_task[RESULT_STORED]",
+        "tests/reliability/test_tasks.py::test_accept_in_world_transaction_closes_current_task[RUNNING]",
+        "tests/reliability/test_tasks.py::test_accept_in_world_transaction_closes_current_task[VALIDATING]",
+        "tests/reliability/test_tasks.py::test_accept_in_world_transaction_closes_current_task[WAITING_REVIEW]",
+        "tests/reliability/test_tasks.py::test_acceptance_rolls_back_with_outer_transaction_and_preserves_call_accounting",
+        "tests/reliability/test_tasks.py::test_cancel_and_result_race_leaves_no_qualification",
+        "tests/reliability/test_tasks.py::test_expired_lease_recovery_fences_old_result",
+        "tests/service/test_http.py::test_http_real_task_cancellation_blocks_late_result",
+        "tests/unit/test_domain.py::test_r1_e_belief_does_not_read_world_or_upgrade_observation"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-C-05",
+      "criterion_unchanged": "真实数据库并发仅验证原子性，语义胜负由预先固定的裁决结果决定。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_after_sample_change_does_not_refresh_certificate_tokens",
+        "tests/concurrency/test_world_races.py::test_guarded_independent_items_keep_original_base",
+        "tests/concurrency/test_world_races.py::test_guarded_independent_resources_share_one_world_chain",
+        "tests/concurrency/test_world_races.py::test_negative_range_phantom_invalidates_clear_route",
+        "tests/concurrency/test_world_races.py::test_write_skew_two_guards_cannot_both_leave",
+        "tests/integration/test_scope_identity.py::test_scope_identity_cannot_be_renamed_or_reset_for_aba"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-D-01",
+      "criterion_unchanged": "缓存、上下文、索引和证据均带作品/分支/修订及权限绑定；不按实体ID跨分支复用事实答案。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/integration/test_history_repair.py::test_ordinary_approval_and_revocation_respect_actual_branch_grant",
+        "tests/integration/test_world_kernel.py::test_fork_inherits_selection_once_and_isolates_future",
+        "tests/queries/test_history_queries.py::test_fixed_latest_batch_and_compiler_rebind",
+        "tests/queries/test_queries.py::test_actor_hidden_and_nonexistent_have_identical_answer_shape",
+        "tests/queries/test_queries.py::test_cache_hit_rechecks_revoked_grant",
+        "tests/queries/test_queries.py::test_fixed_cut_stale_search_is_not_unknown_world",
+        "tests/service/test_http.py::test_http_cached_response_does_not_survive_revocation"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-D-02",
+      "criterion_unchanged": "采纳前 candidate 内容不进入 main 投影；采纳后每个事件效果只在目标历史中选择一次。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_repair_revalidates_later_closed_command_preconditions",
+        "tests/integration/test_history_epoch.py::test_repair_bumps_epoch_and_prevents_resigning_old_inputs",
+        "tests/integration/test_history_repair.py::test_ordinary_approval_and_revocation_respect_actual_branch_grant",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_compares_both_canon_and_candidate_heads[candidate]",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_compares_both_canon_and_candidate_heads[canon]",
+        "tests/integration/test_history_repair.py::test_r1_b_promotion_rechecks_current_independent_review_authority",
+        "tests/integration/test_history_repair.py::test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+        "tests/integration/test_world_kernel.py::test_fork_inherits_selection_once_and_isolates_future",
+        "tests/queries/test_history_queries.py::test_fixed_latest_batch_and_compiler_rebind",
+        "tests/unit/test_domain.py::test_r1_b_replace_loan_rebuilds_without_reapplying"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-D-03",
+      "criterion_unchanged": "自动切换 WorldRef 或直接复制候选投影不能通过正式接受门禁。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/integration/test_history_repair.py::test_ordinary_approval_and_revocation_respect_actual_branch_grant",
+        "tests/integration/test_world_kernel.py::test_fork_inherits_selection_once_and_isolates_future",
+        "tests/queries/test_history_queries.py::test_fixed_latest_batch_and_compiler_rebind"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-D-04",
+      "criterion_unchanged": "作者可查的候选信息不会进入无此 grant 的角色会话或错误消息。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_current_grant_and_approval_revocation_block_accept",
+        "tests/concurrency/test_world_races.py::test_task_authorization_is_rechecked_inside_mutation_transaction",
+        "tests/integration/test_history_repair.py::test_ordinary_approval_and_revocation_respect_actual_branch_grant",
+        "tests/queries/test_queries.py::test_actor_context_rejects_world_plan_other_actor_and_future",
+        "tests/service/test_http.py::test_http_actor_cannot_switch_plane_or_read_another_tasks_context",
+        "tests/service/test_http.py::test_http_cached_response_does_not_survive_revocation"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-E-01",
+      "criterion_unchanged": "检查正文、证据ID、计数、搜索分数、错误与缓存命中路径均不泄露秘密。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_current_grant_and_approval_revocation_block_accept",
+        "tests/concurrency/test_world_races.py::test_task_authorization_is_rechecked_inside_mutation_transaction",
+        "tests/integration/test_history_repair.py::test_ordinary_approval_and_revocation_respect_actual_branch_grant",
+        "tests/queries/test_history_queries.py::test_fixed_latest_batch_and_compiler_rebind",
+        "tests/queries/test_queries.py::test_actor_context_rejects_world_plan_other_actor_and_future",
+        "tests/queries/test_queries.py::test_actor_hidden_and_nonexistent_have_identical_answer_shape",
+        "tests/queries/test_queries.py::test_cache_hit_rechecks_revoked_grant",
+        "tests/queries/test_queries.py::test_fixed_cut_stale_search_is_not_unknown_world",
+        "tests/service/test_http.py::test_http_actor_cannot_switch_plane_or_read_another_tasks_context",
+        "tests/service/test_http.py::test_http_cached_response_does_not_survive_revocation"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-E-02",
+      "criterion_unchanged": "隐藏记录与不存在记录在受限接口具有一致可见行为；高敏感路径另测时间/大小侧信道风险。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/queries/test_history_queries.py::test_fixed_latest_batch_and_compiler_rebind",
+        "tests/queries/test_queries.py::test_actor_hidden_and_nonexistent_have_identical_answer_shape",
+        "tests/queries/test_queries.py::test_cache_hit_rechecks_revoked_grant",
+        "tests/queries/test_queries.py::test_fixed_cut_stale_search_is_not_unknown_world",
+        "tests/service/test_http.py::test_http_cached_response_does_not_survive_revocation"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "返回形状/内容隔离已测；未对网络时间或大小侧信道作完备证明。"
+    },
+    {
+      "source_test_id": "R1-E-03",
+      "criterion_unchanged": "用同一全知模型会话直接改提示词扮演 protagonist 的实现判为隔离失败。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "NOT_EXECUTED_THIS_ROUND",
+      "passing_test_nodes": [],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-E-04",
+      "criterion_unchanged": "角色猜中秘密只能标为推测，不能伪造知情证据；查询旧 D35 仍保留旧认知。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/queries/test_history_queries.py::test_formal_late_knowledge_preserves_target_time_and_supports_retrospection",
+        "tests/queries/test_queries.py::test_actor_context_rejects_world_plan_other_actor_and_future",
+        "tests/queries/test_queries.py::test_actor_hidden_and_nonexistent_have_identical_answer_shape",
+        "tests/unit/test_domain.py::test_r1_e_belief_does_not_read_world_or_upgrade_observation"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-F-01",
+      "criterion_unchanged": "20个独立命令在无其它变化夹具中均得到正确结果；是否通过守卫验证由实际 token 检查记录证明。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_after_sample_change_does_not_refresh_certificate_tokens",
+        "tests/concurrency/test_world_races.py::test_guarded_independent_items_keep_original_base",
+        "tests/concurrency/test_world_races.py::test_guarded_independent_resources_share_one_world_chain",
+        "tests/concurrency/test_world_races.py::test_negative_range_phantom_invalidates_clear_route",
+        "tests/concurrency/test_world_races.py::test_write_skew_two_guards_cannot_both_leave",
+        "tests/integration/test_scope_identity.py::test_scope_identity_cannot_be_renamed_or_reset_for_aba"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "实测两个独立命令的真实锁竞争；没有声称原20独立命令/数百Agent组合场景全部执行。"
+    },
+    {
+      "source_test_id": "R1-F-02",
+      "criterion_unchanged": "read/write集合、负向谓词或覆盖token变化不能靠只核对实体版本漏过；所有写路径同事务更新相关scope。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_after_sample_change_does_not_refresh_certificate_tokens",
+        "tests/concurrency/test_world_races.py::test_expired_and_unissued_certificates_are_rejected",
+        "tests/concurrency/test_world_races.py::test_guarded_independent_items_keep_original_base",
+        "tests/concurrency/test_world_races.py::test_guarded_independent_resources_share_one_world_chain",
+        "tests/concurrency/test_world_races.py::test_interpretation_epoch_invalidates_prepared_acceptance",
+        "tests/concurrency/test_world_races.py::test_negative_range_phantom_invalidates_clear_route",
+        "tests/concurrency/test_world_races.py::test_repair_cannot_reference_nonexistent_rules_or_adjudication",
+        "tests/concurrency/test_world_races.py::test_write_skew_two_guards_cannot_both_leave",
+        "tests/integration/test_scope_identity.py::test_scope_identity_cannot_be_renamed_or_reset_for_aba"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-F-03",
+      "criterion_unchanged": "联合裁决的胜负不因API/数据库到达顺序改变；单资源只有选定的有效效果。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "NOT_EXECUTED_THIS_ROUND",
+      "passing_test_nodes": [],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-F-04",
+      "criterion_unchanged": "已过期证书在txn内再次检查后拒绝；批准仅对不变候选及允许的复验方式适用。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_current_grant_and_approval_revocation_block_accept",
+        "tests/concurrency/test_world_races.py::test_expired_and_unissued_certificates_are_rejected",
+        "tests/concurrency/test_world_races.py::test_interpretation_epoch_invalidates_prepared_acceptance",
+        "tests/concurrency/test_world_races.py::test_repair_cannot_reference_nonexistent_rules_or_adjudication",
+        "tests/concurrency/test_world_races.py::test_task_authorization_is_rechecked_inside_mutation_transaction",
+        "tests/integration/test_history_repair.py::test_ordinary_approval_and_revocation_respect_actual_branch_grant",
+        "tests/queries/test_queries.py::test_actor_context_rejects_world_plan_other_actor_and_future",
+        "tests/service/test_http.py::test_http_actor_cannot_switch_plane_or_read_another_tasks_context",
+        "tests/service/test_http.py::test_http_cached_response_does_not_survive_revocation"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-F-05",
+      "criterion_unchanged": "分别报告真实冲突、仅HEAD变化、自动重验证成功、需要语义重做和基础设施重试的比例。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_after_sample_change_does_not_refresh_certificate_tokens",
+        "tests/concurrency/test_world_races.py::test_guarded_independent_items_keep_original_base",
+        "tests/concurrency/test_world_races.py::test_guarded_independent_resources_share_one_world_chain",
+        "tests/concurrency/test_world_races.py::test_negative_range_phantom_invalidates_clear_route",
+        "tests/concurrency/test_world_races.py::test_write_skew_two_guards_cannot_both_leave",
+        "tests/integration/test_scope_identity.py::test_scope_identity_cannot_be_renamed_or_reset_for_aba",
+        "tests/service/test_http.py::test_two_independent_http_processes_share_task_and_revocation_state",
+        "tests/service/test_http_load.py::test_open_loop_records_planned_emitted_and_all_outcomes",
+        "tests/service/test_http_load.py::test_real_http_logical_agents_fixed_cut_and_bounded_connections[10]",
+        "tests/service/test_http_load.py::test_real_http_logical_agents_fixed_cut_and_bounded_connections[50]",
+        "tests/service/test_http_write.py::test_http_task_to_guarded_accept_and_retry_uses_one_authoritative_commit"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-F-06",
+      "criterion_unchanged": "正式状态零重复效果、零越权接受、零不可还原记录；性能数字独立报告，不用快速拒绝替代成功吞吐。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_same_key_retry_and_new_key_do_not_repeat_effects",
+        "tests/concurrency/test_world_races.py::test_world_transaction_process_crash_and_retry[after_commit]",
+        "tests/concurrency/test_world_races.py::test_world_transaction_process_crash_and_retry[after_events]",
+        "tests/integration/test_world_kernel.py::test_idempotent_accept_content_mismatch_and_proposal_uniqueness",
+        "tests/integration/test_world_kernel.py::test_lost_response_then_cancel_retrieves_original_receipt",
+        "tests/service/test_http.py::test_two_independent_http_processes_share_task_and_revocation_state",
+        "tests/service/test_http_load.py::test_open_loop_records_planned_emitted_and_all_outcomes",
+        "tests/service/test_http_load.py::test_real_http_logical_agents_fixed_cut_and_bounded_connections[10]",
+        "tests/service/test_http_load.py::test_real_http_logical_agents_fixed_cut_and_bounded_connections[50]",
+        "tests/service/test_http_write.py::test_http_task_to_guarded_accept_and_retry_uses_one_authoritative_commit"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-G-01",
+      "criterion_unchanged": "正文前后世界有效effect选择数/资源余额/持有人/前沿完全一致。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "NOT_EXECUTED_THIS_ROUND",
+      "passing_test_nodes": [],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-G-02",
+      "criterion_unchanged": "新伤害、新消耗、新转交需明确变化提案与合法接受，不能隐藏在表层描写。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "NOT_EXECUTED_THIS_ROUND",
+      "passing_test_nodes": [],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-G-03",
+      "criterion_unchanged": "P3等价实验比较中间权属、消息、观察、伤势和终态；只比较最后余额不足以通过。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "NOT_EXECUTED_THIS_ROUND",
+      "passing_test_nodes": [],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-G-04",
+      "criterion_unchanged": "失败微观候选的认知和会话不混入已选分支。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "NOT_EXECUTED_THIS_ROUND",
+      "passing_test_nodes": [],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-H-01",
+      "criterion_unchanged": "同K不同载荷被拒绝；换key不能绕过同提案/效果唯一约束。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_same_key_retry_and_new_key_do_not_repeat_effects",
+        "tests/concurrency/test_world_races.py::test_world_transaction_process_crash_and_retry[after_commit]",
+        "tests/concurrency/test_world_races.py::test_world_transaction_process_crash_and_retry[after_events]",
+        "tests/integration/test_world_kernel.py::test_idempotent_accept_content_mismatch_and_proposal_uniqueness",
+        "tests/integration/test_world_kernel.py::test_lost_response_then_cancel_retrieves_original_receipt"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-H-02",
+      "criterion_unchanged": "任务取消先线性化则旧代不能产生新接受；接受先成功则之后取消不撤销原结果。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_same_key_retry_and_new_key_do_not_repeat_effects",
+        "tests/concurrency/test_world_races.py::test_world_transaction_process_crash_and_retry[after_commit]",
+        "tests/concurrency/test_world_races.py::test_world_transaction_process_crash_and_retry[after_events]",
+        "tests/integration/test_world_kernel.py::test_idempotent_accept_content_mismatch_and_proposal_uniqueness",
+        "tests/integration/test_world_kernel.py::test_lost_response_then_cancel_retrieves_original_receipt",
+        "tests/integration/test_world_kernel.py::test_old_generation_and_cancelled_task_cannot_commit",
+        "tests/reliability/test_tasks.py::test_accept_in_world_transaction_closes_current_task[RESULT_STORED]",
+        "tests/reliability/test_tasks.py::test_accept_in_world_transaction_closes_current_task[RUNNING]",
+        "tests/reliability/test_tasks.py::test_accept_in_world_transaction_closes_current_task[VALIDATING]",
+        "tests/reliability/test_tasks.py::test_accept_in_world_transaction_closes_current_task[WAITING_REVIEW]",
+        "tests/reliability/test_tasks.py::test_acceptance_rolls_back_with_outer_transaction_and_preserves_call_accounting",
+        "tests/reliability/test_tasks.py::test_cancel_and_result_race_leaves_no_qualification",
+        "tests/reliability/test_tasks.py::test_expired_lease_recovery_fences_old_result",
+        "tests/service/test_http.py::test_http_real_task_cancellation_blocks_late_result"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-H-03",
+      "criterion_unchanged": "outbox失败可重投且派生更新幂等；恢复不重调模型重新决定已接受结果。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/integration/test_world_recovery.py::test_real_world_history_and_authorization_survive_isolated_restore",
+        "tests/reliability/test_recovery.py::test_abrupt_database_process_exit_rolls_back",
+        "tests/reliability/test_recovery.py::test_backup_gate_freezes_authoritative_mutations",
+        "tests/reliability/test_recovery.py::test_backup_rejects_missing_object_and_interpretation",
+        "tests/reliability/test_recovery.py::test_backup_resolves_wheel_runtime_assets",
+        "tests/reliability/test_recovery.py::test_backup_runtime_profile_is_required_and_bound",
+        "tests/reliability/test_recovery.py::test_committed_task_process_exit_keeps_original_receipt",
+        "tests/reliability/test_recovery.py::test_pg_dump_restore_checks_data_objects_and_fences_old_workers",
+        "tests/reliability/test_tasks.py::test_outbox_failure_redelivery_and_inbox_atomicity"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-H-04",
+      "criterion_unchanged": "当前撤权时回执读取仍做权限检查，既不泄漏内容，也不再次执行命令。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_current_grant_and_approval_revocation_block_accept",
+        "tests/concurrency/test_world_races.py::test_task_authorization_is_rechecked_inside_mutation_transaction",
+        "tests/integration/test_history_repair.py::test_ordinary_approval_and_revocation_respect_actual_branch_grant",
+        "tests/queries/test_queries.py::test_actor_context_rejects_world_plan_other_actor_and_future",
+        "tests/service/test_http.py::test_http_actor_cannot_switch_plane_or_read_another_tasks_context",
+        "tests/service/test_http.py::test_http_cached_response_does_not_survive_revocation"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    },
+    {
+      "source_test_id": "R1-H-05",
+      "criterion_unchanged": "保留数据库回执、原始网络失败、重试关联、效应计数和索引追赶记录。",
+      "source_status_unchanged": "PLANNED_NOT_EXECUTED",
+      "development_coverage": "CORE_INVARIANTS_COVERED_NOT_FULL_SCENARIO",
+      "passing_test_nodes": [
+        "tests/concurrency/test_world_races.py::test_same_key_retry_and_new_key_do_not_repeat_effects",
+        "tests/concurrency/test_world_races.py::test_world_transaction_process_crash_and_retry[after_commit]",
+        "tests/concurrency/test_world_races.py::test_world_transaction_process_crash_and_retry[after_events]",
+        "tests/integration/test_world_kernel.py::test_idempotent_accept_content_mismatch_and_proposal_uniqueness",
+        "tests/integration/test_world_kernel.py::test_lost_response_then_cancel_retrieves_original_receipt",
+        "tests/integration/test_world_recovery.py::test_real_world_history_and_authorization_survive_isolated_restore",
+        "tests/reliability/test_recovery.py::test_abrupt_database_process_exit_rolls_back",
+        "tests/reliability/test_recovery.py::test_backup_gate_freezes_authoritative_mutations",
+        "tests/reliability/test_recovery.py::test_backup_rejects_missing_object_and_interpretation",
+        "tests/reliability/test_recovery.py::test_backup_resolves_wheel_runtime_assets",
+        "tests/reliability/test_recovery.py::test_backup_runtime_profile_is_required_and_bound",
+        "tests/reliability/test_recovery.py::test_committed_task_process_exit_keeps_original_receipt",
+        "tests/reliability/test_recovery.py::test_pg_dump_restore_checks_data_objects_and_fences_old_workers",
+        "tests/reliability/test_tasks.py::test_outbox_failure_redelivery_and_inbox_atomicity"
+      ],
+      "full_original_scenario_passed": false,
+      "note": "所列测试证明P1基础不变量，不代表原组合场景全部条件已执行。"
+    }
+  ]
+}

@@ -6,9 +6,11 @@ Dependencies are pinned in requirements-validation.txt. No network calls are mad
 from __future__ import annotations
 
 import hashlib
+import fnmatch
 import importlib.metadata
 import importlib.util
 import json
+import os
 import platform
 import re
 import sys
@@ -24,6 +26,24 @@ from referencing import Registry, Resource
 ROOT = Path(__file__).resolve().parents[1]
 FAILURES: list[str] = []
 COUNTS: Counter = Counter()
+GENERATED_DIRECTORIES = frozenset({
+    ".git", ".venv", "__pycache__", ".pytest_cache", ".ruff_cache",
+    ".tox", ".nox", ".runtime", "build", "dist", "node_modules",
+})
+
+
+def package_files(pattern):
+    """Walk the source package without installed dependencies or build caches.
+
+    In particular, installed wheel copies of contracts contain documentation
+    links relative to a source checkout. They are not a second design package.
+    Source docs, schemas, examples, baseline and Agent/skill files stay in scope.
+    """
+    for directory, children, filenames in os.walk(ROOT, topdown=True):
+        children[:] = sorted(name for name in children if name not in GENERATED_DIRECTORIES)
+        for name in sorted(filenames):
+            if fnmatch.fnmatch(name, pattern):
+                yield Path(directory) / name
 
 
 def check(condition, message, counter=None):
@@ -190,7 +210,7 @@ def skill_role_checks(tool_names):
                   "restricted_skill_tool_sets")
             check(metadata.get("handoff_role") in role_map,
                   f"unknown handoff role: {role_id}/{name}")
-    COUNTS["agents_files"] = len(list(ROOT.rglob("AGENTS.md")))
+    COUNTS["agents_files"] = len(list(package_files("AGENTS.md")))
     query_profiles = read_json(ROOT / "runtime/query_profiles.json")
     profile_map = {p["role_id"]: p for p in query_profiles["profiles"]}
     check(set(profile_map) == set(role_map), "role query profile set mismatch")
@@ -212,7 +232,7 @@ def skill_role_checks(tool_names):
 def markdown_checks():
     fence = chr(96) * 3
     link_pattern = re.compile(r"!?\[[^\]\n]*\]\((<[^>]+>|[^\s)]+)(?:\s+[^)]*)?\)")
-    for path in ROOT.rglob("*.md"):
+    for path in package_files("*.md"):
         text = path.read_text(encoding="utf-8")
         lines = text.splitlines()
         in_fence = False
@@ -328,7 +348,7 @@ def r1_checks():
 
 
 def main():
-    for path in ROOT.rglob("*.json"):
+    for path in package_files("*.json"):
         if path.name == "package_check_results.json":
             continue
         try:

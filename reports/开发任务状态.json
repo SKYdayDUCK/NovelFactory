@@ -1,0 +1,134 @@
+{
+  "phases": [
+    "P0",
+    "P1"
+  ],
+  "p2_started": false,
+  "tasks": [
+    {
+      "task_id": "P0-01",
+      "status": "PASSED",
+      "evidence": [
+        "environment/P0_environment_summary.json",
+        "integration/release_verified_results.json"
+      ]
+    },
+    {
+      "task_id": "P0-02",
+      "status": "PASSED",
+      "evidence": [
+        "environment/P0_environment_summary.json",
+        "integration/release_verified_results.json"
+      ]
+    },
+    {
+      "task_id": "P0-03",
+      "status": "PASSED",
+      "evidence": [
+        "environment/P0_environment_summary.json",
+        "integration/release_verified_results.json"
+      ]
+    },
+    {
+      "task_id": "P0-04",
+      "status": "PASSED",
+      "evidence": [
+        "environment/P0_environment_summary.json",
+        "integration/release_verified_results.json"
+      ]
+    },
+    {
+      "task_id": "P1-01",
+      "status": "PASSED",
+      "scope": "User-authorized minimal P1 scope; explicit boundaries in architecture deviations report",
+      "evidence": [
+        "integration/release_verified_results.json"
+      ]
+    },
+    {
+      "task_id": "P1-02",
+      "status": "PASSED",
+      "scope": "User-authorized minimal P1 scope; explicit boundaries in architecture deviations report",
+      "evidence": [
+        "integration/release_verified_results.json"
+      ]
+    },
+    {
+      "task_id": "P1-03",
+      "status": "PASSED",
+      "scope": "User-authorized minimal P1 scope; explicit boundaries in architecture deviations report",
+      "evidence": [
+        "integration/release_verified_results.json"
+      ]
+    },
+    {
+      "task_id": "P1-04",
+      "status": "PASSED",
+      "scope": "User-authorized minimal P1 scope; explicit boundaries in architecture deviations report",
+      "evidence": [
+        "integration/release_verified_results.json"
+      ]
+    },
+    {
+      "task_id": "P1-05",
+      "status": "PASSED",
+      "scope": "User-authorized minimal P1 scope; explicit boundaries in architecture deviations report",
+      "evidence": [
+        "integration/release_verified_results.json"
+      ]
+    },
+    {
+      "task_id": "P1-06",
+      "status": "PASSED",
+      "scope": "User-authorized minimal P1 scope; explicit boundaries in architecture deviations report",
+      "evidence": [
+        "integration/release_verified_results.json"
+      ]
+    },
+    {
+      "task_id": "P1-07",
+      "status": "PASSED",
+      "scope": "User-authorized minimal P1 scope; explicit boundaries in architecture deviations report",
+      "evidence": [
+        "integration/release_verified_results.json"
+      ]
+    },
+    {
+      "task_id": "P1-08",
+      "status": "PASSED",
+      "scope": "User-authorized minimal P1 scope; explicit boundaries in architecture deviations report",
+      "evidence": [
+        "integration/release_verified_results.json"
+      ]
+    },
+    {
+      "task_id": "P1-09",
+      "status": "PASSED",
+      "scope": "User-authorized minimal P1 scope; explicit boundaries in architecture deviations report",
+      "evidence": [
+        "integration/release_verified_results.json"
+      ]
+    },
+    {
+      "task_id": "P1-10",
+      "status": "PASSED",
+      "scope": "User-authorized minimal P1 scope; explicit boundaries in architecture deviations report",
+      "evidence": [
+        "integration/release_verified_results.json"
+      ]
+    },
+    {
+      "task_id": "P2",
+      "status": "NOT_STARTED",
+      "reason": "No authorization in this development round"
+    }
+  ],
+  "deferred_capabilities": [
+    "WAIT_EXISTING_ADVANCE",
+    "READER_LITERARY",
+    "GENERAL_SEMANTIC_MERGE",
+    "FULL_MCP_AND_MODEL_HOST",
+    "DISTRIBUTED_STORAGE",
+    "LARGE_HISTORY_PERFORMANCE"
+  ]
+}

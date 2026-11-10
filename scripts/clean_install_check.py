@@ -16,6 +16,8 @@ def main() -> None:
                         help="P0 checks only modules present in the engineering/contracts stage")
     parser.add_argument("--verify-postgres", action="store_true",
                         help="P1: run packaged-source CLI/migration/HTTP/restore smoke with the clean wheel")
+    parser.add_argument("--installer", choices=["uv", "pip"], default="uv",
+                        help="Use uv or CPython venv + pip for the independent installation check")
     args = parser.parse_args()
     if args.verify_postgres and (args.phase != "P1" or not os.environ.get("NF_TEST_DATABASE_URL")):
         parser.error("--verify-postgres requires phase P1 and NF_TEST_DATABASE_URL")
@@ -24,18 +26,19 @@ def main() -> None:
         root = Path(directory)
         venv = root / "venv"
         wheels = root / "wheels"
+        installer = (["uv", "pip", "install", "--python", str(venv / "bin/python")]
+                     if args.installer == "uv" else [str(venv / "bin/python"), "-m", "pip", "install"])
         steps = [
-            ["uv", "venv", "--python", sys.executable, str(venv)],
-            ["uv", "pip", "install", "--python", str(venv / "bin/python"), "--require-hashes",
-             "-r", str(project / "requirements.lock")],
+            (["uv", "venv", "--python", sys.executable, str(venv)] if args.installer == "uv"
+             else [sys.executable, "-m", "venv", str(venv)]),
+            [*installer, "--require-hashes", "-r", str(project / "requirements.lock")],
             ["uv", "build", "--wheel", "--out-dir", str(wheels), str(project)],
         ]
         for command in steps:
             print("RUN", json.dumps(command), flush=True)
             subprocess.run(command, check=True)
         wheel = next(wheels.glob("novel_factory-*.whl"))
-        subprocess.run(["uv", "pip", "install", "--python", str(venv / "bin/python"),
-                        "--no-deps", str(wheel)], check=True)
+        subprocess.run([*installer, "--no-deps", str(wheel)], check=True)
         env = os.environ.copy()
         env.pop("PYTHONPATH", None)
         subprocess.run([str(venv / "bin/python"), "-c", """

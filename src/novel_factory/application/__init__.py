@@ -1,0 +1,1 @@
+"""Authorized application use cases."""
