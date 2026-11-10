@@ -2,12 +2,27 @@ name: P3 scale experiments with strict unmet gates
 
 on:
   push:
-    branches: ["dev/p3-p4-*"]
+    branches: ["main", "dev/p3-p4-*"]
     paths:
-      - 'benchmarks/p3_open_arrival.py'
-      - 'benchmarks/p3_stability.py'
-      - 'benchmarks/p2_behavioral_load.py'
-      - 'benchmarks/process_server.py'
+      - 'src/**'
+      - 'tests/**'
+      - 'benchmarks/**'
+      - 'contracts/**'
+      - 'migrations/**'
+      - 'runtime/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/p3-scale-experiments.yml'
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'benchmarks/**'
+      - 'contracts/**'
+      - 'migrations/**'
+      - 'runtime/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
       - '.github/workflows/p3-scale-experiments.yml'
   workflow_dispatch:
 

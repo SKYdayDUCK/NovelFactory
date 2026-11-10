@@ -7,9 +7,11 @@ applies a corrective event to an already materialized balance.
 """
 from __future__ import annotations
 
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 from copy import deepcopy
 from decimal import Decimal, localcontext
+import json
+import threading
 from uuid import UUID, uuid5
 
 from novel_factory.contracts.registry import plain, validate_contract
@@ -31,6 +33,63 @@ PREDICATES = {
 ALIASES = {'owner': 'legal_owner', 'holder': 'possessed_by', 'active_holder': 'possessed_by',
            'last_confirmed_owner': 'legal_owner', 'location': 'located_in'}
 _TERMINAL = {'DESTROYED', 'CONSUMED', 'RETIRED'}
+
+
+class _InitialSnapshotMemo:
+    """Bounded pure-computation memo, containing only immutable byte strings.
+
+    This is not a revision or authorization cache. The full input bytes and
+    interpreter identity select a previously validated genesis computation.
+    Every caller receives its own decoded snapshot; no mutable world is shared.
+    """
+    def __init__(self, max_entries=8, max_bytes=16 * 1024 * 1024):
+        self.max_entries, self.max_bytes = max_entries, max_bytes
+        self._entries = OrderedDict()
+        self._bytes = 0
+        self._lock = threading.Lock()
+
+    def get(self, key):
+        with self._lock:
+            value = self._entries.get(key)
+            if value is not None:
+                self._entries.move_to_end(key)
+            return value
+
+    def put(self, key, value):
+        size = len(key[-1]) + len(value)
+        if self.max_entries < 1 or size > self.max_bytes:
+            return
+        with self._lock:
+            old = self._entries.pop(key, None)
+            if old is not None:
+                self._bytes -= len(key[-1]) + len(old)
+            self._entries[key] = value
+            self._bytes += size
+            while len(self._entries) > self.max_entries or self._bytes > self.max_bytes:
+                old_key, old_value = self._entries.popitem(last=False)
+                self._bytes -= len(old_key[-1]) + len(old_value)
+
+
+_initial_snapshot_memo = _InitialSnapshotMemo()
+
+
+def _initial_snapshot(genesis):
+    # replay has already applied the original strict canonical validation.
+    # Preserve dictionary order in the memo identity AND output: genesis entity
+    # order is reflected in lifecycle_history, so sorted-key serialization alone
+    # is not a sufficient key for this existing pure computation.
+    encoded = json.dumps(genesis, ensure_ascii=False, separators=(',', ':'),
+                         allow_nan=False).encode('utf-8')
+    key = (INTERPRETER_VERSION, PROJECTION_VERSION, tuple(sorted(PREDICATES.items())),
+           tuple(sorted(_TERMINAL)), encoded)
+    cached = _initial_snapshot_memo.get(key)
+    if cached is not None:
+        return json.loads(cached)
+    snapshot = _empty_snapshot(genesis)
+    encoded_snapshot = json.dumps(snapshot, ensure_ascii=False, separators=(',', ':'),
+                                  allow_nan=False).encode('utf-8')
+    _initial_snapshot_memo.put(key, encoded_snapshot)
+    return snapshot
 
 
 def resource_key(account_id: str, resource_id: str, unit: str) -> str:
@@ -333,7 +392,7 @@ supported; effects without resolved boundaries are conservatively rejected.
         selected.append(event)
     order = validate_temporal_constraints(selected)
     topo = {key: index for index, key in enumerate(order)}
-    snapshot = _empty_snapshot(data)
+    snapshot = _initial_snapshot(data)
     limit = point_key(at) if at is not None else None
     operations = []
     for event in selected:

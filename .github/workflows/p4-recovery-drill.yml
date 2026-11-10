@@ -2,7 +2,7 @@ name: P4 real isolated WAL PITR and verified recovery
 
 on:
   push:
-    branches: ["dev/p3-p4-*"]
+    branches: ["main", "dev/p3-p4-*"]
     paths:
       - 'src/novel_factory/infrastructure/recovery.py'
       - 'src/novel_factory/infrastructure/online_backup.py'

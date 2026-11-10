@@ -263,6 +263,16 @@ class BackupService:
         objects = ObjectStore(src / "objects")
         for digest, size in manifest["objects"].items():
             objects.verify(digest, expected_size=size)
+        if require_runtime:
+            # Extra installed members can change import resolution without
+            # altering any saved file (e.g. alpha/__init__.py shadows alpha.py).
+            # Match the whole interpretation inventory, as online creation does.
+            installed_files = dict(self._runtime_files())
+            if set(manifest["runtime_files"]) != set(installed_files):
+                raise DomainError("INTERPRETATION_UNAVAILABLE", "Installed interpretation file set differs from backup")
+            installed_schemas = {path.name for path in self._schema_directory().glob("*.schema.json")}
+            if set(manifest.get("schemas", {})) != installed_schemas:
+                raise DomainError("INTERPRETATION_UNAVAILABLE", "Installed schema set differs from backup")
         for relative, digest in manifest["runtime_files"].items():
             target = (src / "interpretation" / relative).resolve()
             if not target.is_relative_to(src / "interpretation") or not target.is_file() or _sha(target) != digest:

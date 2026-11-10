@@ -31,6 +31,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.engine import make_url
 
 from benchmarks.http_load import SqlMeasurements, loopback_server, percentiles
+from benchmarks.client_timings import ClientTimings
 from novel_factory.application.kernel import Kernel
 from novel_factory.application.queries import WorldQueryService
 from novel_factory.contracts.registry import validate_contract
@@ -65,6 +66,8 @@ def hardware() -> dict:
             cgroup[name] = path.read_text().strip()
     return {'platform': platform.platform(), 'python': sys.version,
             'logical_cpu_count': os.cpu_count(), 'cpu_models': cpu_models,
+            'affinity_cpus': sorted(os.sched_getaffinity(0)) if hasattr(os, 'sched_getaffinity') else None,
+            'load_average': list(os.getloadavg()),
             'memory': memory, 'cgroup': cgroup,
             'versions': {name: importlib.metadata.version(name) for name in
                          ('SQLAlchemy', 'psycopg', 'uvicorn', 'httpx')},
@@ -97,11 +100,12 @@ class DatabaseObserver:
         while not self.stop.is_set():
             try:
                 with self.engine.connect() as conn:
-                    rows = conn.execute(text("SELECT state, wait_event_type, count(*) AS count "
+                    rows = conn.execute(text("SELECT state, wait_event_type, wait_event, count(*) AS count, max(extract(epoch from clock_timestamp()-xact_start)) AS oldest_transaction_seconds "
                         "FROM pg_stat_activity WHERE datname=current_database() AND pid<>pg_backend_pid() "
-                        "GROUP BY state,wait_event_type")).mappings().all()
+                        "GROUP BY state,wait_event_type,wait_event")).mappings().all()
                 self.samples.append({'elapsed_seconds': round(time.monotonic()-self.started, 6),
-                                     'connections': [dict(row) for row in rows]})
+                                     'connections': [{key: float(value) if key == 'oldest_transaction_seconds' and value is not None else value
+                                                       for key, value in row.items()} for row in rows]})
             except Exception as exc:  # noqa: BLE001 - observer failures must be recorded, not hidden
                 self.error_types.append(type(exc).__name__)
             self.stop.wait(.2)
@@ -302,7 +306,7 @@ async def exercise(base_url, fixture, *, profile='mixed', arrival_rps=10,
         expected_calls += len(population)*rounds
     async with httpx.AsyncClient(base_url=base_url, timeout=30, trust_env=False,
             limits=httpx.Limits(max_connections=client_limit,
-                               max_keepalive_connections=client_limit, keepalive_expiry=2)) as http:
+                               max_keepalive_connections=client_limit, keepalive_expiry=2)) as http, ClientTimings() as timing:
         async def call(client, label, endpoint, payload, *, scheduled=None, duplicate=False):
             nonlocal logical_sequence
             logical_sequence += 1
@@ -324,10 +328,14 @@ async def exercise(base_url, fixture, *, profile='mixed', arrival_rps=10,
                     'duplicate_retry': duplicate, 'retryable': False,
                     'arrival_delay_ms': round(max(0, begin-scheduled_at)*1000, 4)}
                 body = None
+                timing_token = timing.begin(record, origin)
+                validation_started = None
                 try:
                     response = await http.post('/api/v1/' + endpoint,
                         headers={'Authorization': 'Bearer ' + client['token'],
-                                 'Content-Type': 'application/json'}, content=request_bytes)
+                                 'Content-Type': 'application/json'}, content=request_bytes,
+                        extensions={'trace': timing.trace})
+                    validation_started = time.thread_time()
                     body = response.json()
                     record.update(status=response.status_code, code=body.get('code'),
                         response_sha256=fingerprint(body), response_bytes=len(response.content))
@@ -374,6 +382,9 @@ async def exercise(base_url, fixture, *, profile='mixed', arrival_rps=10,
                     record['retryable'] = False
                     correctness_errors.append({**record, 'reason': type(exc).__name__})
                 finally:
+                    if validation_started is not None:
+                        record['client_response_validation_cpu_ms'] = (time.thread_time()-validation_started)*1000
+                    timing.end(timing_token)
                     active -= 1
                     record['latency_ms'] = round((time.monotonic()-begin)*1000, 4)
                     raw.append(record)
@@ -536,6 +547,10 @@ def summarize(result):
         'latency_rejections_and_failures': percentiles([r['latency_ms']/1000 for r in rejections]),
         'scheduled_to_completion_latency': percentiles([
             (r['arrival_delay_ms']+r['latency_ms'])/1000 for r in raw]),
+        'client_pool_wait_timing_note': 'HTTPcore wait_for_connection await wall time includes event-loop scheduling; not pure server or pool queue time.',
+        'client_pool_wait': percentiles([r.get('client_pool_wait_ms', 0)/1000 for r in raw]),
+        'client_response_validation_cpu_seconds': sum(r.get('client_response_validation_cpu_ms', 0)/1000 for r in raw),
+        'transport_headers_started': sum('wire_started_seconds' in r for r in raw),
         'arrival_schedule_delay': percentiles([r['arrival_delay_ms']/1000 for r in raw]),
         'per_operation': {label: {'calls': len(rows := [r for r in raw if r['label'] == label]),
             'successes': sum(r['status'] == 200 and 'error_type' not in r for r in rows),
@@ -556,7 +571,10 @@ def observed_open_loop(raw, target):
         return {'gate': 'NOT_APPLICABLE', 'target_rps': None, 'first_attempts': 0}
     span = max(row['started_seconds'] for row in rows) - min(row['started_seconds'] for row in rows)
     actual = (len(rows)-1)/max(span, 1e-9)
+    wire = [row['wire_started_seconds'] for row in rows if 'wire_started_seconds' in row]
+    wire_rate = (len(wire)-1)/max(max(wire)-min(wire), 1e-9) if len(wire) > 1 else None
     return {'gate': 'MET' if actual >= target * .95 else 'NOT_MET',
+            'transport_header_starts': len(wire), 'transport_header_start_rps': wire_rate,
             'target_rps': target, 'first_attempts': len(rows),
             'actual_call_start_rps': actual, 'start_window_seconds': span,
             'max_schedule_delay_ms': max(row['arrival_delay_ms'] for row in rows),
@@ -586,6 +604,7 @@ def run_benchmark(kernel, url, *, agents, hot_fraction=.2, profile='mixed', arri
     phases = []
     process_before = resource.getrusage(resource.RUSAGE_SELF)
     service_resources = {}
+    diagnostics = []
     if service_mode == 'isolated-process':
         from benchmarks.process_server import ServiceProcesses
         # Setup connections have no role in the load. Workers start their own
@@ -608,6 +627,7 @@ def run_benchmark(kernel, url, *, agents, hot_fraction=.2, profile='mixed', arri
         authentication_admission = service_metrics['authentication_admission']
         ingress = service_metrics['ingress']
         service_resources = service_metrics['resources']
+        diagnostics = service_metrics['diagnostics']
     else:
         service = WorldQueryService(kernel)
         app = create_app(kernel, query_service=service, settings=HttpSettings())
@@ -699,6 +719,7 @@ def run_benchmark(kernel, url, *, agents, hot_fraction=.2, profile='mixed', arri
             'minor_page_faults': process_after.ru_minflt-process_before.ru_minflt,
             'major_page_faults': process_after.ru_majflt-process_before.ru_majflt},
         'service_resources': service_resources,
+        'service_diagnostics': diagnostics,
         'admission': admission,
         'authentication_admission': authentication_admission,
         'ingress': ingress, 'correctness': correctness,

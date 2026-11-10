@@ -1,5 +1,6 @@
 """A backup must not publish a mixed package during a multi-file deployment."""
 from hashlib import sha256
+import json
 from pathlib import Path
 
 import pytest
@@ -96,3 +97,36 @@ def test_stable_deploy_after_database_cut_cannot_replace_the_pinned_runtime(pack
     with pytest.raises(DomainError) as denied:
         service._copy_interpretation(destination, initial=initial)
     assert denied.value.code == "INTERPRETATION_CHANGED"
+
+
+@pytest.mark.parametrize("group", ["module", "schema"])
+@pytest.mark.parametrize("asset_version", [1, 2])
+def test_restore_rejects_installed_members_not_in_the_saved_interpretation(package, group, asset_version):
+    service, paths, destination = package
+    inventory = service._copy_interpretation(destination)
+    if asset_version == 1:
+        # Preserve the original profile-only asset manifest compatibility.
+        inventory["runtime_asset_version"] = 1
+        inventory["runtime_assets"] = {"runtime/query_profiles.json":
+            inventory["runtime_assets"]["runtime/query_profiles.json"]}
+    dump = b"fixture dump; verification must reject before any restore tool"
+    (destination / "database.dump").write_bytes(dump)
+    manifest = {
+        "format": "novel-factory-logical-backup-1", "status": "COMPLETE",
+        "dump_sha256": sha256(dump).hexdigest(), "objects": {}, **inventory,
+    }
+    (destination / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    assert service.verify(destination) == manifest
+    if group == "module":
+        # Python selects a package before the same-named module. All saved
+        # module bytes can still match while an added package changes imports.
+        added = paths["module"].parent / "alpha" / "__init__.py"
+    else:
+        added = paths["schema"].parent / "new.schema.json"
+    added.parent.mkdir(parents=True, exist_ok=True)
+    added.write_text("# installed after the frozen backup\n", encoding="utf-8")
+    # Archive integrity remains useful without asserting installed compatibility.
+    assert service.verify(destination, require_runtime=False) == manifest
+    with pytest.raises(DomainError) as denied:
+        service.verify(destination)
+    assert denied.value.code == "INTERPRETATION_UNAVAILABLE"

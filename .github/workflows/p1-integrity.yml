@@ -124,12 +124,63 @@ jobs:
           uv run --no-sync python -m pytest tests -q \
             --junitxml=ci-evidence/postgres-all.xml --json-report --json-report-file=ci-evidence/postgres-all.json \
             2>&1 | tee ci-evidence/postgres-all.log
-      - name: Reproduce strict same-world Context Compiler comparison
+      - name: Compare current genesis replay with the pinned baseline
         run: |
-          uv run --no-sync python -m benchmarks.context_paired_profile \
-            --entities 1000 --history 12 --subjects 1 20 100 --repeats 5 \
-            --output ci-evidence/context/paired-run.json \
-            2>&1 | tee ci-evidence/context-paired.log
+          uv run --no-sync python -m benchmarks.genesis_paired_profile \
+            --agents 200 --repeats 5 --output ci-evidence/genesis-paired.json \
+            2>&1 | tee ci-evidence/genesis-paired.log
+      - name: Reproduce historical Context Compiler experiment at e0b0f2b
+        # The original experiment requires its shared core to match 0609f680.
+        # Preserve that assertion and the complete facts/guard comparison in its
+        # original source tree; this step does not validate the current kernel.
+        # Current-head regressions and replay comparison execute above, while
+        # p3-p4-evidence.yml compares current-core context facts and guard material.
+        run: |
+          historical_sha=e0b0f2b080f3225d8be8e202e13258bc480f5b84
+          historical_root="$RUNNER_TEMP/nf-context-e0b0f2b"
+          historical_output="$GITHUB_WORKSPACE/ci-evidence/context-historical-e0b0f2b"
+          current_python="$GITHUB_WORKSPACE/.venv/bin/python"
+          mkdir -p "$historical_output"
+          git worktree add --detach "$historical_root" "$historical_sha"
+          test "$(git -C "$historical_root" rev-parse HEAD)" = "$historical_sha"
+          (
+            cd "$historical_root"
+            PYTHONPATH="$historical_root/src:$historical_root" "$current_python" - \
+              "$historical_root" "$GITHUB_WORKSPACE" "$historical_output" <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+          import subprocess
+          import sys
+          import benchmarks.context_paired_profile as paired
+          from novel_factory.application import kernel
+          from novel_factory.domain import world
+
+          historical, current, output = map(Path, sys.argv[1:])
+          historical = historical.resolve()
+          origins = {}
+          for module in (paired, kernel, world):
+              source = Path(module.__file__).resolve()
+              assert source.is_relative_to(historical), "Historical experiment imported current source"
+              origins[module.__name__] = str(source.relative_to(historical))
+          metadata = {
+              "scope": "HISTORICAL_REPRODUCTION_NOT_CURRENT_HEAD_VALIDATION",
+              "historical_candidate_sha": subprocess.check_output(
+                  ["git", "rev-parse", "HEAD"], cwd=historical, text=True).strip(),
+              "workflow_checkout_sha": subprocess.check_output(
+                  ["git", "rev-parse", "HEAD"], cwd=current, text=True).strip(),
+              "original_source_checks": paired.source_checks(),
+              "verified_import_origins": origins,
+              "runtime": "Current workflow virtualenv; historical source via fixed PYTHONPATH",
+              "dependency_lock_sha256": hashlib.sha256((current / "uv.lock").read_bytes()).hexdigest(),
+          }
+          (output / "method.json").write_text(json.dumps(metadata, indent=2) + "\n")
+          PY
+            PYTHONPATH="$historical_root/src:$historical_root" "$current_python" \
+              -m benchmarks.context_paired_profile \
+              --entities 1000 --history 12 --subjects 1 20 100 --repeats 5 \
+              --output "$historical_output/paired-run.json"
+          ) 2>&1 | tee "$historical_output/run.log"
       - name: Probe actual memory services and authorization boundaries
         run: |
           uv run --no-sync python -m benchmarks.memory.service_probe \

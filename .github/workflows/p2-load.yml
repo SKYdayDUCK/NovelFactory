@@ -2,15 +2,28 @@ name: P2 measured capacity and recovery
 
 on:
   push:
-    branches: ["dev/p2-production-loop"]
+    branches: ["main", "dev/p2-production-loop", "dev/p3-p4-*"]
     paths:
       - '.github/workflows/p2-load.yml'
-      - 'benchmarks/p2*'
-      - 'src/novel_factory/application/queries.py'
-      - 'src/novel_factory/application/kernel.py'
-      - 'src/novel_factory/infrastructure/repository.py'
-      - 'src/novel_factory/interfaces/**'
-      - 'tests/service/test_p2_retry_recovery.py'
+      - 'benchmarks/**'
+      - 'src/**'
+      - 'tests/**'
+      - 'contracts/**'
+      - 'migrations/**'
+      - 'runtime/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
+  pull_request:
+    paths:
+      - '.github/workflows/p2-load.yml'
+      - 'benchmarks/**'
+      - 'src/**'
+      - 'tests/**'
+      - 'contracts/**'
+      - 'migrations/**'
+      - 'runtime/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
   workflow_dispatch:
 
 permissions:
@@ -54,6 +67,7 @@ jobs:
       NF_TEST_DATABASE_URL: postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/nf_test
       NF_POOL_SIZE: '8'
       NF_POOL_OVERFLOW: '0'
+      NF_BENCH_DIAGNOSTICS: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -69,11 +83,19 @@ jobs:
           mkdir -p ci-evidence
           hot_fraction=0.2
           if [[ '${{ matrix.profile }}' == 'overload' ]]; then hot_fraction=0.8; fi
-          uv run --no-sync python -m benchmarks.p2_behavioral_load \
-            --agents '${{ matrix.agents }}' --profile '${{ matrix.profile }}' \
-            --hot-fraction "$hot_fraction" --arrival-rps 10 --open-loop-rps 1000 --rounds 5 \
-            --max-attempts 5 --retry-budget-seconds 30 --gate-scope capacity \
-            --output ci-evidence/load.json 2>&1 | tee ci-evidence/load.log
+          status=0
+          for repeat in 1 2; do
+            mkdir -p "ci-evidence/run-${repeat}"
+            if ! uv run --no-sync python -m benchmarks.p2_behavioral_load \
+              --agents '${{ matrix.agents }}' --profile '${{ matrix.profile }}' \
+              --hot-fraction "$hot_fraction" --arrival-rps 10 --open-loop-rps 1000 --rounds 5 \
+              --max-attempts 5 --retry-budget-seconds 30 --gate-scope capacity \
+              --service-mode isolated-process --api-processes 1 \
+              --output "ci-evidence/run-${repeat}/load.json" 2>&1 | tee "ci-evidence/run-${repeat}/load.log"; then
+              status=1
+            fi
+          done
+          exit "$status"
       - name: Preserve raw attempts and honest capacity outcome
         if: always()
         uses: actions/upload-artifact@v4
