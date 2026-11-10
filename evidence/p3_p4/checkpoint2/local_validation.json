@@ -1,0 +1,61 @@
+{
+  "stage": 2,
+  "source_parent": "e0b0f2b080f3225d8be8e202e13258bc480f5b84",
+  "source_scope": "P3-02 finite exact-phase equivalence + P3-03 deterministic controlled memory evaluation + authenticated HTTP adapters",
+  "tests": [
+    {
+      "name": "unit-contract-evaluation",
+      "command": "python -m pytest tests/unit tests/contracts tests/evaluation tests/service/test_http_boundary.py -q",
+      "junit_sha256": "894ee374c6b12dc2f29dac61304dc3a04e1cb1ff8c136d540db47eff1557e1dc",
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "287",
+          "time": "8.653",
+          "timestamp": "2026-11-10T23:48:57.683214+09:00",
+          "hostname": "2be49009bab4"
+        }
+      ]
+    },
+    {
+      "name": "cross-module-postgres",
+      "command": "python -m pytest tests/integration/test_refinement.py tests/integration/test_simulation.py tests/integration/test_history_repair.py tests/integration/test_agent_gateway.py tests/integration/test_release.py -q",
+      "junit_sha256": "e4581de832e67a9c9736c3875edde435369e836c3e05895fcb68d1f5f2d3d670",
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "57",
+          "time": "72.265",
+          "timestamp": "2026-11-10T23:49:19.163770+09:00",
+          "hostname": "2be49009bab4"
+        }
+      ]
+    },
+    {
+      "name": "http-postgres",
+      "command": "python -m pytest tests/service/test_refinement_http.py -q",
+      "junit_sha256": "a75fd592b7146d87112f771085495c1bd9adcefcda048982583e8fec9c6d39a4",
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "2",
+          "time": "1.909",
+          "timestamp": "2026-11-10T23:50:55.425100+09:00",
+          "hostname": "2be49009bab4"
+        }
+      ]
+    }
+  ],
+  "model_calls": 0,
+  "model_status": "BLOCKED_ENVIRONMENT",
+  "literary_status": "PENDING_AUTHOR"
+}

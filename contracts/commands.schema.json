@@ -285,6 +285,9 @@
             "reason": {
               "type": "string",
               "minLength": 1
+            },
+            "equivalence_proof_ref": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
             }
           },
           "required": [

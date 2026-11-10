@@ -20,12 +20,7 @@ from novel_factory.domain.errors import DomainError
 
 _BY_ID = {schema["$id"]: schema for schema in SCHEMAS.values()}
 _REGISTRY = Registry().with_resources((key, Resource.from_contents(value)) for key, value in _BY_ID.items())
-_FILES = {"2.0": "core.schema.json", "2.1": "temporal_concurrency.schema.json",
-          "literary": "literary.schema.json", "kernel": "kernel.schema.json",
-          "commands": "commands.schema.json", "http": "http.schema.json",
-          "planning": "planning.schema.json", "simulation": "simulation.schema.json",
-          "agent": "agent.schema.json", "narrative": "narrative.schema.json",
-          "editorial": "editorial.schema.json", "release": "release.schema.json"}
+_FILES = {'2.0': 'core.schema.json', '2.1': 'temporal_concurrency.schema.json', 'literary': 'literary.schema.json', 'kernel': 'kernel.schema.json', 'commands': 'commands.schema.json', 'http': 'http.schema.json', 'planning': 'planning.schema.json', 'simulation': 'simulation.schema.json', 'agent': 'agent.schema.json', 'narrative': 'narrative.schema.json', 'editorial': 'editorial.schema.json', 'release': 'release.schema.json', 'refinement': 'refinement.schema.json'}
 
 
 def _source(name: str, version: str):

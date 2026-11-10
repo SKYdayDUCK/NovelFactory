@@ -322,6 +322,21 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
             principal, payload["task_id"], payload["generation"], command["template_id"],
             command["args"], payload["idempotency_key"]))
 
+    @app.post("/api/v1/refinements/prepare")
+    async def prepare_refinement(request: Request):
+        from novel_factory.application.refinement import WorldRepresentationService
+        payload = await _body(request, "RefinementRequest", "refinement")
+        return await execute(request, "write", lambda principal:
+                             WorldRepresentationService(kernel).prepare_refinement(principal, payload))
+
+    @app.post("/api/v1/refinements/proposals")
+    async def propose_refinement(request: Request):
+        from novel_factory.application.refinement import WorldRepresentationService
+        payload = await _body(request, "RefinementProposeRequest", "refinement")
+        return await execute(request, "write", lambda principal:
+            WorldRepresentationService(kernel).propose_refinement(
+                principal, payload["task_id"], payload["generation"], payload["proof_ref"], payload["idempotency_key"]))
+
     @app.post("/api/v1/tasks")
     async def create_task(request: Request):
         payload = await _body(request, "TaskCreateRequest", "http")

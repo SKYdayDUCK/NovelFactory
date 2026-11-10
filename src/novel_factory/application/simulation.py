@@ -155,8 +155,12 @@ def validate_schedule_command(kernel, r, principal, revision, template_id, args,
     """
     state = state_from_revision(revision)
     if template_id == "REPAIR_EVENT":
-        require(not state["processes"], "SCHEDULE_REPAIR_REQUIRED",
-                "Historical edits with registered processes require a reviewed schedule rebuild")
+        if args.get("equivalence_proof_ref") is not None:
+            from novel_factory.application.refinement import validate_refinement_command
+            validate_refinement_command(kernel, r, principal, revision, args)
+        else:
+            require(not state["processes"], "SCHEDULE_REPAIR_REQUIRED",
+                    "Historical edits with registered processes require a reviewed schedule rebuild")
         return
     if template_id == "REGISTER_PROCESS":
         artifact = kernel.artifact(r, args["record_ref"], revision["work_id"], kind="SIMULATION_PROCESS")
@@ -266,6 +270,12 @@ def attach_schedule_state(current, revision, proposal):
     content. A normal P1 command on a P2 world preserves its registry exactly.
     """
     previous = state_from_revision(current)
+    if proposal["template_id"] == "REPAIR_EVENT" and proposal["template_args"].get("equivalence_proof_ref"):
+        revision["provenance"]["equivalence_proof_ref"] = deepcopy(proposal["template_args"]["equivalence_proof_ref"])
+        revision["provenance"]["refinement_source_event_ref"] = {
+            "occurrence_id": proposal["template_args"]["occurrence_id"],
+            "event_version_id": current["selection"][proposal["template_args"]["occurrence_id"]],
+        }
     if not previous["processes"] and proposal["template_id"] not in SIMULATION_TEMPLATES:
         return
     events = [{key: e[key] for key in ("occurrence_id", "event_version_id")}
