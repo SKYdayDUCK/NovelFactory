@@ -60,20 +60,23 @@ class KernelRepository:
     def ancestor(self, older, newer):
         if any(older[k] != newer[k] for k in ("work_id", "branch_id")):
             return False
-        a = self.one("revisions", older)
-        b = self.one("revisions", newer)
-        if not a or not b or a["branch_seq"] > b["branch_seq"]:
-            return False
         # Immutable single-parent chain plus composite FKs; verify reachability,
-        # never infer cross-branch ancestry from integer sequence alone.
+        # never infer cross-branch ancestry from integer sequence alone. Only
+        # identity/parent metadata is needed: loading two full JSONB world
+        # projections here adds decoding and allocation to every guarded write.
+        # Scope BOTH the starting row and every recursive edge, so a forged
+        # work/branch around a real revision cannot prove ancestry.
         return bool(self.conn.execute(text("""
           WITH RECURSIVE chain AS (
-            SELECT world_revision_id,parent_revision_id FROM nf_revisions WHERE world_revision_id=:new
+            SELECT world_revision_id,parent_revision_id FROM nf_revisions
+            WHERE world_revision_id=:new AND work_id=:work AND branch_id=:branch
             UNION ALL
             SELECT r.world_revision_id,r.parent_revision_id FROM nf_revisions r
             JOIN chain c ON r.world_revision_id=c.parent_revision_id
+            WHERE r.work_id=:work AND r.branch_id=:branch
           ) SELECT EXISTS(SELECT 1 FROM chain WHERE world_revision_id=:old)
-        """), {"new":newer["world_revision_id"],"old":older["world_revision_id"]}).scalar_one())
+        """), {"new":newer["world_revision_id"],"old":older["world_revision_id"],
+                 "work": newer["work_id"], "branch": newer["branch_id"]}).scalar_one())
 
     def now(self):
         return self.conn.execute(select(func.clock_timestamp())).scalar_one()

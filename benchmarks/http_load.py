@@ -42,10 +42,20 @@ class SqlMeasurements:
         self.engine = engine
         self.lock = threading.Lock()
         self.sql = self.transactions = self.checked_out = self.peak_checked_out = 0
+        self.sql_seconds = self.max_sql_seconds = 0.0
+        self.statement_kinds = Counter()
 
     def _statement(self, conn, cursor, statement, parameters, context, executemany):
         with self.lock:
             self.sql += 1
+            self.statement_kinds[statement.split()[0].upper()] += 1
+        context.nf_measurement_started = time.perf_counter()
+
+    def _statement_done(self, conn, cursor, statement, parameters, context, executemany):
+        elapsed = time.perf_counter() - context.nf_measurement_started
+        with self.lock:
+            self.sql_seconds += elapsed
+            self.max_sql_seconds = max(self.max_sql_seconds, elapsed)
 
     def _begin(self, conn):
         with self.lock:
@@ -62,6 +72,7 @@ class SqlMeasurements:
 
     def __enter__(self):
         event.listen(self.engine, "before_cursor_execute", self._statement)
+        event.listen(self.engine, "after_cursor_execute", self._statement_done)
         event.listen(self.engine, "begin", self._begin)
         event.listen(self.engine, "checkout", self._checkout)
         event.listen(self.engine, "checkin", self._checkin)
@@ -69,12 +80,17 @@ class SqlMeasurements:
 
     def __exit__(self, *args):
         event.remove(self.engine, "before_cursor_execute", self._statement)
+        event.remove(self.engine, "after_cursor_execute", self._statement_done)
         event.remove(self.engine, "begin", self._begin)
         event.remove(self.engine, "checkout", self._checkout)
         event.remove(self.engine, "checkin", self._checkin)
 
     def result(self, duration: float) -> dict:
         return {"sql_statements": self.sql, "transactions": self.transactions,
+                "sql_cursor_execution_seconds": self.sql_seconds,
+                "max_sql_cursor_execution_seconds": self.max_sql_seconds,
+                "statement_kinds": dict(self.statement_kinds),
+                "sql_timing_excludes_result_decoding": True,
                 "sql_statements_per_second": round(self.sql / max(duration, 1e-9), 4),
                 "peak_checked_out_connections": self.peak_checked_out,
                 "checked_out_at_end": self.checked_out,

@@ -1,0 +1,132 @@
+name: P3 P4 measured evidence
+
+on:
+  push:
+    branches: ["dev/p2-production-loop", "dev/p3-p4-*"]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'benchmarks/**'
+      - 'scripts/**'
+      - 'contracts/**'
+      - '.github/workflows/p3-p4-evidence.yml'
+  pull_request:
+    paths:
+      - '.github/workflows/p3-p4-evidence.yml'
+      - 'src/**'
+      - 'tests/**'
+      - 'benchmarks/**'
+      - 'scripts/**'
+      - 'contracts/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: p3-p4-evidence-${{ github.ref }}-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  isolated-capacity:
+    name: Independent load process / 200 / ${{ matrix.profile }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [mixed, overload]
+    services:
+      postgres:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_DB: nf_test
+          POSTGRES_USER: nf_dev
+          POSTGRES_PASSWORD: nf_dev_ci_only
+          POSTGRES_INITDB_ARGS: --data-checksums
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U nf_dev -d nf_test"
+          --health-interval 2s --health-timeout 2s --health-retries 30
+    env:
+      NF_DATABASE_URL: postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/nf_test
+      NF_TEST_DATABASE_URL: postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/nf_test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - name: Install exact dependency lock
+        run: uv sync --locked --group dev --python 3.12
+      - name: Actual requests and strict capacity gate
+        run: |
+          mkdir -p ci-evidence
+          hot_fraction=0.2
+          if [[ '${{ matrix.profile }}' == 'overload' ]]; then hot_fraction=0.8; fi
+          uv run --no-sync python -m benchmarks.p2_behavioral_load \
+            --agents 200 --profile '${{ matrix.profile }}' --hot-fraction "$hot_fraction" \
+            --arrival-rps 10 --open-loop-rps 1000 --rounds 5 \
+            --max-attempts 5 --retry-budget-seconds 30 --gate-scope capacity \
+            --service-mode isolated-process --api-processes 1 \
+            --output ci-evidence/load.json 2>&1 | tee ci-evidence/load.log
+      - name: Upload all attempts including failed gates
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p3-isolated-200-${{ matrix.profile }}-${{ github.run_attempt }}
+          path: ci-evidence/
+          if-no-files-found: error
+          retention-days: 90
+
+  paired-context:
+    name: Same world CPU and SQL paired comparison
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_DB: nf_test
+          POSTGRES_USER: nf_dev
+          POSTGRES_PASSWORD: nf_dev_ci_only
+          POSTGRES_INITDB_ARGS: --data-checksums
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U nf_dev -d nf_test"
+          --health-interval 2s --health-timeout 2s --health-retries 30
+    env:
+      NF_DATABASE_URL: postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/nf_test
+      NF_TEST_DATABASE_URL: postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/nf_test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - name: Install and migrate isolated database
+        run: |
+          uv sync --locked --group dev --python 3.12
+          uv run --no-sync python -m alembic upgrade head
+      - name: Fixed source, facts, evidence and guards
+        run: |
+          mkdir -p ci-evidence
+          uv run --no-sync python -m benchmarks.p3_context_comparison \
+            --entities 300 --repeats 5 --output ci-evidence/context-p3.json \
+            2>&1 | tee ci-evidence/context-p3.log
+      - name: Upload raw paired profiles
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p3-context-paired-${{ github.run_attempt }}
+          path: ci-evidence/
+          if-no-files-found: error
+          retention-days: 90

@@ -573,24 +573,56 @@ def load_exit_code(result, scope):
 
 
 def run_benchmark(kernel, url, *, agents, hot_fraction=.2, profile='mixed', arrival_rps=10,
-                  open_loop_rps=1000, rounds=5, max_attempts=1, retry_budget_seconds=30):
+                  open_loop_rps=1000, rounds=5, max_attempts=1, retry_budget_seconds=30,
+                  service_mode='same-process', api_processes=1):
+    if service_mode not in {'same-process', 'isolated-process'} or api_processes not in {1, 2, 4}:
+        raise ValueError('unsupported service topology')
+    if service_mode == 'same-process' and api_processes != 1:
+        raise ValueError('multiple API processes require isolated-process mode')
     started_at_utc = datetime.now(UTC).isoformat()
     before_setup = time.monotonic()
     fixture = make_population(kernel, agents, hot_fraction)
     setup_seconds = time.monotonic()-before_setup
-    service = WorldQueryService(kernel)
-    app = create_app(kernel, query_service=service, settings=HttpSettings())
     phases = []
     process_before = resource.getrusage(resource.RUSAGE_SELF)
-    def phase_observer(label):
-        phases.append({'phase': label, 'checked_out_connections': kernel.db.engine.pool.checkedout(),
-                       'cache_hits': service.cache_hits, 'cache_misses': service.cache_misses})
-    with loopback_server(app) as base_url, SqlMeasurements(kernel.db.engine) as measured:
-        with DatabaseObserver(url) as observer:
-            result = asyncio.run(exercise(base_url, fixture, profile=profile, arrival_rps=arrival_rps,
-                open_loop_rps=open_loop_rps, rounds=rounds, observer=phase_observer,
-                max_attempts=max_attempts, retry_budget_seconds=retry_budget_seconds))
-        sql = measured.result(result['duration_seconds'])
+    service_resources = {}
+    if service_mode == 'isolated-process':
+        from benchmarks.process_server import ServiceProcesses
+        # Setup connections have no role in the load. Workers start their own
+        # pools after spawn; total API pool remains exactly eight slots.
+        kernel.db.engine.dispose()
+        with ServiceProcesses(url, kernel.objects.root, processes=api_processes) as services:
+            def phase_observer(label):
+                measured = services.snapshot()
+                phases.append({'phase': label,
+                    'checked_out_connections': measured['database']['checked_out_at_end'],
+                    'cache_hits': measured['cache_hits'], 'cache_misses': measured['cache_misses']})
+            with DatabaseObserver(url) as observer:
+                result = asyncio.run(exercise(services.base_url, fixture, profile=profile,
+                    arrival_rps=arrival_rps, open_loop_rps=open_loop_rps, rounds=rounds,
+                    observer=phase_observer, max_attempts=max_attempts,
+                    retry_budget_seconds=retry_budget_seconds))
+            service_metrics = services.snapshot(result['duration_seconds'])
+        sql = service_metrics['database']
+        admission = service_metrics['admission']
+        authentication_admission = service_metrics['authentication_admission']
+        ingress = service_metrics['ingress']
+        service_resources = service_metrics['resources']
+    else:
+        service = WorldQueryService(kernel)
+        app = create_app(kernel, query_service=service, settings=HttpSettings())
+        def phase_observer(label):
+            phases.append({'phase': label, 'checked_out_connections': kernel.db.engine.pool.checkedout(),
+                           'cache_hits': service.cache_hits, 'cache_misses': service.cache_misses})
+        with loopback_server(app) as base_url, SqlMeasurements(kernel.db.engine) as measured:
+            with DatabaseObserver(url) as observer:
+                result = asyncio.run(exercise(base_url, fixture, profile=profile, arrival_rps=arrival_rps,
+                    open_loop_rps=open_loop_rps, rounds=rounds, observer=phase_observer,
+                    max_attempts=max_attempts, retry_budget_seconds=retry_budget_seconds))
+            sql = measured.result(result['duration_seconds'])
+        admission = app.state.admission.snapshot()
+        authentication_admission = app.state.authentication_admission.snapshot()
+        ingress = app.state.ingress.snapshot()
     process_after = resource.getrusage(resource.RUSAGE_SELF)
     with kernel.db.uow(write=False) as repo:
         wr = kernel.head(repo, fixture['world']['world_ref']['work_id'])
@@ -632,7 +664,11 @@ def run_benchmark(kernel, url, *, agents, hot_fraction=.2, profile='mixed', arri
         'bounded_recovery_business_gate': 'PASS' if passed else 'NOT_MET',
         'recovery_scope': 'Same original commands only; a recovery PASS does not promote first-attempt capacity.',
         'logical_agent_task_count': agents, 'hot_subject_fraction': hot_fraction, 'profile': profile,
-        'seed': SEED, 'setup_seconds': round(setup_seconds, 6), 'environment': hardware(),
+        'seed': SEED, 'setup_seconds': round(setup_seconds, 6), 'environment': {**hardware(),
+            'load_client_location': ('separate spawned API process(es), real loopback TCP; shared host'
+                if service_mode == 'isolated-process' else 'same process, separate asyncio loop, real loopback TCP'),
+            'api_processes': api_processes, 'api_server_threads': api_processes,
+            'aggregate_api_pool_size': 8, 'service_mode': service_mode},
         'database_settings': settings, 'data': {'entities': fixture['genesis_entities'],
             'initial_relations': fixture['genesis_relations'], 'initial_accepted_events': 4,
             'final_table_counts': table_counts, 'scale': 'bounded synthetic small world; not 100k-event medium design'},
@@ -651,7 +687,7 @@ def run_benchmark(kernel, url, *, agents, hot_fraction=.2, profile='mixed', arri
             'shared_candidates': fixture['conflicted'], 'http_settings': HttpSettings().__dict__,
             'hot_fraction_meaning': 'Fraction of read subjects mapped to one shared item; '
                 'shared writer candidates remain agents/10 in every profile',
-            'cache_size': service.cache_size, 'cache_boundary': 'process query-result cache cold/warm; '
+            'cache_size': 256, 'cache_boundary': 'per-process query-result cache cold/warm; '
                 'PostgreSQL and OS caches are not flushed',
             'shared_conflict_policy': 'one predetermined TEST_FIXTURE control command before stale deliveries; '
                 'not resource arbitration by database arrival order'},
@@ -662,14 +698,15 @@ def run_benchmark(kernel, url, *, agents, hot_fraction=.2, profile='mixed', arri
             'process_peak_rss_kib': process_after.ru_maxrss,
             'minor_page_faults': process_after.ru_minflt-process_before.ru_minflt,
             'major_page_faults': process_after.ru_majflt-process_before.ru_majflt},
-        'admission': app.state.admission.snapshot(),
-        'authentication_admission': app.state.authentication_admission.snapshot(),
-        'ingress': app.state.ingress.snapshot(), 'correctness': correctness,
+        'service_resources': service_resources,
+        'admission': admission,
+        'authentication_admission': authentication_admission,
+        'ingress': ingress, 'correctness': correctness,
         'external_model': {'actual_calls': 0, 'peak_inflight_calls': 0, 'tokens': 0,
             'billed_cost_usd': None, 'status': 'NOT_DISPATCHED',
             'note': 'No real or fixture model dispatch; this measures service behavior, not model concurrency'},
         'raw_requests': result['raw'], 'world_commit_receipts': result['receipts'],
-        'limitations': ['One API process with eight pooled DB connections',
+        'limitations': [f'{api_processes} API process(es) with eight aggregate pooled DB connections',
             'Host is shared with other development tasks; wall-clock observations are not exclusive-host SLA',
             'No sustained capacity or multi-hour soak claim', 'No 200-model novel creation claim',
             'HTTP pipeline represents control commands; joint scheduler arbitration is validated separately']}
@@ -677,7 +714,7 @@ def run_benchmark(kernel, url, *, agents, hot_fraction=.2, profile='mixed', arri
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--agents', type=int, choices=[10, 50, 200], required=True)
+    parser.add_argument('--agents', type=int, choices=[10, 50, 200, 500, 1000], required=True)
     parser.add_argument('--profile', choices=['mixed', 'hotspot', 'overload'], default='mixed')
     parser.add_argument('--hot-fraction', type=float, default=.2)
     parser.add_argument('--arrival-rps', type=float, default=10)
@@ -687,6 +724,8 @@ def main():
     parser.add_argument('--max-attempts', type=int, default=1)
     parser.add_argument('--retry-budget-seconds', type=float, default=30)
     parser.add_argument('--gate-scope', choices=['capacity', 'recovered-completion'], default='capacity')
+    parser.add_argument('--service-mode', choices=['same-process', 'isolated-process'], default='same-process')
+    parser.add_argument('--api-processes', type=int, choices=[1, 2, 4], default=1)
     args = parser.parse_args()
     if not 0 <= args.hot_fraction <= 1 or min(args.arrival_rps, args.open_loop_rps) <= 0 or not 1 <= args.rounds <= 30:
         parser.error('invalid workload bounds')
@@ -705,7 +744,8 @@ def main():
         result = run_benchmark(kernel, database_url, agents=args.agents,
             hot_fraction=args.hot_fraction, profile=args.profile, arrival_rps=args.arrival_rps,
             open_loop_rps=args.open_loop_rps, rounds=args.rounds,
-            max_attempts=args.max_attempts, retry_budget_seconds=args.retry_budget_seconds)
+            max_attempts=args.max_attempts, retry_budget_seconds=args.retry_budget_seconds,
+            service_mode=args.service_mode, api_processes=args.api_processes)
     result['reproduction_argv'] = sys.argv
     result['source_snapshot'] = str(source_path)
     args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')

@@ -1,0 +1,31 @@
+{
+  "baseline": "206eaa5b655419d29bd6b15d618ae6eaf9048354",
+  "snapshot": "checkpoint1 isolated source export",
+  "results": [
+    {
+      "file": "stage1-unit.xml",
+      "sha256": "959a58852502d110014f9312db7c3bc67a7565b429fa40a2c52c2c13bf9f6f4d",
+      "tests": 230,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.554
+    },
+    {
+      "file": "postgres-all.xml",
+      "sha256": "2e08efa2856a31b222a3226e424225a59eb6ad76eb7ad700b64379eb32ed376d",
+      "tests": 423,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 266.014
+    }
+  ],
+  "remote_ci": "PENDING_STAGE_SUBMISSION",
+  "postgres": "17.11",
+  "python": "3.12.14",
+  "commands": [
+    "python -m pytest tests/unit tests/contracts tests/service/test_admission.py -q",
+    "python scripts/with_postgres.py -- python -m pytest tests -q"
+  ]
+}

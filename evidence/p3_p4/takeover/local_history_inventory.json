@@ -1,0 +1,855 @@
+{
+  "checked_at_utc": "2026-11-10T14:25:41.025214+00:00",
+  "baseline": "206eaa5b655419d29bd6b15d618ae6eaf9048354",
+  "tree": "1ed8fb45cff825f9dba14e8a4db0f5668828a36c",
+  "worktree_source": "/workspace/scratch/b26d73243868/NovelFactory",
+  "source_clean": true,
+  "older_workspaces_preserved": true,
+  "legacy_changes": [
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": " M",
+      "path": "benchmarks/p2_acceptance_matrix.py",
+      "sha256": "a623f7026bcf22c0b49e89d53dd918693150df6d3e5766f7df75ce8fa711ae18",
+      "present_in_baseline": true,
+      "same_as_baseline": true
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": " M",
+      "path": "benchmarks/p2_behavioral_load.py",
+      "sha256": "bc1e2c2cf50737a62e3c64ef17a6e560d4273dbc6fd12a3639b634d9712e62d4",
+      "present_in_baseline": true,
+      "same_as_baseline": true
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": " M",
+      "path": "benchmarks/p2_load_derived.py",
+      "sha256": "11657e610e7d7d2d7061244d14ae4538ee7ce073c5dfb058083a09cf5050abb3",
+      "present_in_baseline": true,
+      "same_as_baseline": true
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": " M",
+      "path": "tests/unit/test_p2_load_evidence.py",
+      "sha256": "1751dec2232155264f0f785576cf543fa848acd6b4512b581bc0e24b852cf600",
+      "present_in_baseline": true,
+      "same_as_baseline": true
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/agents200-mixed-command.json",
+      "sha256": "201c436eae7f4cac8cd6e6d8a3e0b456015b10a537048edc069cbd87bb2327dd",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/agents200-mixed-command.log",
+      "sha256": "3770f99c0d67a7098bce280a9e3ff794cbbd9be0ed5cfe5da2522736ae8bca52",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/agents200-mixed-exhaustions.json",
+      "sha256": "2288c07c932c985a3174f0dfd055941e11f0357fb55515d34bb2c840246b0767",
+      "present_in_baseline": true,
+      "same_as_baseline": true
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/agents200-mixed-pg/postgres_session.json",
+      "sha256": "152ac6579418ac8df2d08844ce1368d419934272ea3036543dfe9c9156c2bde4",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/agents200-mixed-pg/postgresql.log",
+      "sha256": "ace9c116ea787c3bc5cf694327187119eb6a586f7ca78528d753443cf6c24f23",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/agents200-mixed.json",
+      "sha256": "767ef8ebccbbca8b9e601d3d895228997d43d114e111675d7bfc58cc6feaee90",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/agents200-overload-command.json",
+      "sha256": "518e3d6d117a97b22e17ce5c9140657eb59698a97d44510a9314e630cf3df240",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/agents200-overload-command.log",
+      "sha256": "d9ff9323e8d0645cdbcafe145bb2d7aa3eea359c66489cac28feabfad512c36b",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/agents200-overload-exhaustions.json",
+      "sha256": "48ac701f432bc4e357b50c02c86aae9d68ec00c5aa39b221d26c56938c61d9cc",
+      "present_in_baseline": true,
+      "same_as_baseline": true
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/agents200-overload-pg/postgres_session.json",
+      "sha256": "a7ae57db5dfa6a1cec31f27f4e804e0f8c1b10179a90b787ba34a777a572c88b",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/agents200-overload-pg/postgresql.log",
+      "sha256": "105065eb6532d3c912d8dffc2e142ea4c1899e3e488c1640aec7a49d021eea03",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/agents200-overload.json",
+      "sha256": "275b1d728701c40a4a4a21a0dd164e0b5a5a31e5a8e628322594d9fb12190171",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/agents50-mixed-command.json",
+      "sha256": "c4c11ee2ee5b8b2016437cb1869d5fd55163b982aa118608bf431039e1a21a26",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/agents50-mixed-command.log",
+      "sha256": "ef98ce5eaee9b1441edca0e401b12bb194f994fe5a46a1aa84032d35b56e20b2",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/agents50-mixed-pg/postgres_session.json",
+      "sha256": "76f55a74cb16611e88b60c7a51ba30d229a019c7c900ca52a6e72f7c8f90502e",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/agents50-mixed-pg/postgresql.log",
+      "sha256": "974c36918c47f2abc5717f945a21cb0c10d5c701ac27d9c3ea968682be8c6dcf",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/agents50-mixed.json",
+      "sha256": "47fa3b61dbf89a387173a5e015812c511d1816adac09c4a6e16eb8288b9ade2f",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/agents50-overload-command.json",
+      "sha256": "f85660ea198f045840896232e1da4aecf67bf4efb30dd6b0375f6254bc97fb56",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/agents50-overload-command.log",
+      "sha256": "f3ea7907b9ff923b24497b1d0bcee945d0e2e83ae7057b932b7e36d903a8156c",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/agents50-overload-pg/postgres_session.json",
+      "sha256": "4a4cfce75be507138dbf3c675bd4677341cd6b806e4f01f0fe7b7e3e983e1f97",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/agents50-overload-pg/postgresql.log",
+      "sha256": "8a4a1e120ba875041f520f915a101ec0d136d37943129d1ecf2432e0b9dc8899",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/agents50-overload.json",
+      "sha256": "903771a74b4e6b35e7a676bb7db857d15ab47c09dfc3b37c3162924fe037c26f",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/historical_failure_diagnosis.json",
+      "sha256": "34638c5ceb7522398336e4ead46a2df441925f81622b24b1576f7e8338ea1b41",
+      "present_in_baseline": true,
+      "same_as_baseline": true
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/retry-service.xml",
+      "sha256": "904d69775c2559c5366fd3016de5a9a228cd2d647a59b1c4150f7ec4740bbd52",
+      "present_in_baseline": true,
+      "same_as_baseline": true
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/retry-unit.xml",
+      "sha256": "bc1a5c2e73da9b97e942a821c75e417af7228540474a3be10a2df0e961b3523c",
+      "present_in_baseline": true,
+      "same_as_baseline": true
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/source_manifest.json",
+      "sha256": "cd704b88301547d9c8fa6ff0f08e711004ee3723c8c17516538749594337e7df",
+      "present_in_baseline": true,
+      "same_as_baseline": true
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/source_snapshots/bc1e2c2cf50737a62e3c64ef17a6e560d4273dbc6fd12a3639b634d9712e62d4.py",
+      "sha256": "bc1e2c2cf50737a62e3c64ef17a6e560d4273dbc6fd12a3639b634d9712e62d4",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "evidence/p2/recovered-load/summary.json",
+      "sha256": "b677c46e6016d11ef42b8362aa48854eefd645a973dafa1fd3045c21aa94376b",
+      "present_in_baseline": true,
+      "same_as_baseline": true
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "reports/P2_08_恢复后负载与重试验证.md",
+      "sha256": "7e93c1e569c58d9c41e06bfbe3bdf8737cc00e99633df97df7cb4af6b1fb7c5d",
+      "present_in_baseline": true,
+      "same_as_baseline": true
+    },
+    {
+      "workspace": "b26d73243868/load-work",
+      "status": "??",
+      "path": "tests/service/test_p2_retry_recovery.py",
+      "sha256": "185526720e6f34e9ceeb6606ef417dc06352e17fcd03d05763224bec03272d3b",
+      "present_in_baseline": true,
+      "same_as_baseline": true
+    },
+    {
+      "workspace": "cf3ee8d0c6c4/NovelFactory",
+      "status": " M",
+      "path": "reports/P2_第三批与P3候选交接.md",
+      "sha256": "27dcbdb676be922f7542c911ad914b463f634d69c546cf240e5c939e41d3423a",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cf3ee8d0c6c4/NovelFactory",
+      "status": "??",
+      "path": "evidence/p2/batch3/github_upload_map.json",
+      "sha256": "1c7f9be9fc15e21dd75fd31d4cbc9be7308887657f6388f6814f4cd19212f6c8",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": " M",
+      "path": "src/novel_factory/application/planning.py",
+      "sha256": "d83eb0757860f65f7fafe0e1c421a676523edf28b507d12dc9ee990fc59fe3b7",
+      "present_in_baseline": true,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "docs/implementation/P3_03_评测基础.md",
+      "sha256": "20b7b96b940acc1ab3f3643ab46a54db57d6bf543435f91cf841dfd9ec43650d",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p2/batch3/retcon-memory/failures/attempt-01-promoted-canon-kind/postgres_session.json",
+      "sha256": "17db10bb68466f6e47e922c728917fff3b5e409bff41f3b661abffd7c5fffe70",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p2/batch3/retcon-memory/failures/attempt-01-promoted-canon-kind/tests.json",
+      "sha256": "70db81ab764aafdd9c1ea3316e46b3a32a86f6e93bda27ac292e7bb62d568feb",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p2/batch3/retcon-memory/failures/attempt-01-promoted-canon-kind/tests.xml",
+      "sha256": "7872e23c07b534c4685d02bc0499f150147cea25c6fa57fc8427b303a0717dad",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p2/batch3/retcon-memory/postgres_session.json",
+      "sha256": "17db10bb68466f6e47e922c728917fff3b5e409bff41f3b661abffd7c5fffe70",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p2/batch3/retcon-memory/postgresql.log",
+      "sha256": "84cb50e9948ed75f07761082e8ca1a4b5a71941607bd09f70ca5351e1e5a4c4f",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p2/batch3/retcon-memory/tests.json",
+      "sha256": "70db81ab764aafdd9c1ea3316e46b3a32a86f6e93bda27ac292e7bb62d568feb",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p2/batch3/retcon-memory/tests.xml",
+      "sha256": "7872e23c07b534c4685d02bc0499f150147cea25c6fa57fc8427b303a0717dad",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/.gitignore",
+      "sha256": "708bb7962e42c391c828ef7057be3f1124ce38c0722ef2a93e13c25c2150d65a",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/README.md",
+      "sha256": "44fa1218563e4d5d2b44a6c55d11ce45d69bb207e78f6cd9d25ce33c53527213",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/checkpoint.json",
+      "sha256": "22610d48fc58670e922026200884ce4fb00e81fa6351a4bc5d9041d89614b1db",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/coordinator/allocation.json",
+      "sha256": "30458e3a7b71303be2b258d29198ee97fa6dc5f0e485575f6d6cd7f984899c74",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/ledger.jsonl",
+      "sha256": "ef94ca08137ee1a6e2c50717e6eda236bac697725eddbf0344e72f2ae9d171fb",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/001ee988286079f2193c84da5175a9da476d7b9f18278dcc9256220aa9e98301",
+      "sha256": "001ee988286079f2193c84da5175a9da476d7b9f18278dcc9256220aa9e98301",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/140f78d3fb6cf895cc6f976644103450eafbdf1605dd7c7fa2040a11c70a1d28",
+      "sha256": "140f78d3fb6cf895cc6f976644103450eafbdf1605dd7c7fa2040a11c70a1d28",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/19db381e17a5d23528376e99b99b9057d28b5fe3df87a36572211222bdadb348",
+      "sha256": "19db381e17a5d23528376e99b99b9057d28b5fe3df87a36572211222bdadb348",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/1ca4b9742218eeeb76df518c93cbbd4070e74858af8e70deec7a1fe3db0e5231",
+      "sha256": "1ca4b9742218eeeb76df518c93cbbd4070e74858af8e70deec7a1fe3db0e5231",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/1dda6cbcd3daaafab6ca4d0b1cd2876be60fbcb4101cbc18fc22a1f685adf130",
+      "sha256": "1dda6cbcd3daaafab6ca4d0b1cd2876be60fbcb4101cbc18fc22a1f685adf130",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/2447c170781f35aef3ba50621e44d50add6c5858d7185b4f99f025651a54f05d",
+      "sha256": "2447c170781f35aef3ba50621e44d50add6c5858d7185b4f99f025651a54f05d",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/2caeb28bf56c314e6db5516e3ec1c94b2f82754582218e62f89ca59a571db7f6",
+      "sha256": "2caeb28bf56c314e6db5516e3ec1c94b2f82754582218e62f89ca59a571db7f6",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/370f0e873c728b3b5d44ef4cc38303b0272fce04ccb1e59a687da891d87af6e1",
+      "sha256": "370f0e873c728b3b5d44ef4cc38303b0272fce04ccb1e59a687da891d87af6e1",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/3bb38ecf5a37127db6dcc01c418d115b19397fa4e3335b1762ec8d2353cd5f8a",
+      "sha256": "3bb38ecf5a37127db6dcc01c418d115b19397fa4e3335b1762ec8d2353cd5f8a",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/4df0584fa99357471ac4556e7fb83095abd7b95f57a4a456b7cd66a25ed6706d",
+      "sha256": "4df0584fa99357471ac4556e7fb83095abd7b95f57a4a456b7cd66a25ed6706d",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/4e0ed1d3527d19b396e773370ca7f12be770def1237be14d14c030d4acc0e31a",
+      "sha256": "4e0ed1d3527d19b396e773370ca7f12be770def1237be14d14c030d4acc0e31a",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/59f07dc9f84301bc081cad19aef3a52935ba74d55e43df213d77626e5330a83b",
+      "sha256": "59f07dc9f84301bc081cad19aef3a52935ba74d55e43df213d77626e5330a83b",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/5afd0b386f58205cf0ff8752786800451905b7e69de4186ac3f03c5455b6b4cc",
+      "sha256": "5afd0b386f58205cf0ff8752786800451905b7e69de4186ac3f03c5455b6b4cc",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/5eb7755f514d6af289bb2e846f8431e3e2f32d61dafc36151690f31a66fa0e71",
+      "sha256": "5eb7755f514d6af289bb2e846f8431e3e2f32d61dafc36151690f31a66fa0e71",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/73c86ce5ad3dd2e3ec95bcf387c3ed8ae27c8532c6ed2b53c3de4b48236e3eac",
+      "sha256": "73c86ce5ad3dd2e3ec95bcf387c3ed8ae27c8532c6ed2b53c3de4b48236e3eac",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/7b04bba8ea72c4c675f61c8b3c6797146f587c2cd92d811276bbc74f6f5f957b",
+      "sha256": "7b04bba8ea72c4c675f61c8b3c6797146f587c2cd92d811276bbc74f6f5f957b",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/7e3f5688e067e594b4b99b81baa767f70c5a8105d70c0bb25d6a173ed60290b4",
+      "sha256": "7e3f5688e067e594b4b99b81baa767f70c5a8105d70c0bb25d6a173ed60290b4",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/8f2401c6891342a1962dcaf506442a9af2d6b066dedc7d573d67719e8e28e82b",
+      "sha256": "8f2401c6891342a1962dcaf506442a9af2d6b066dedc7d573d67719e8e28e82b",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/9a9fa642c8e344d3474b86964e3dbe1b89029a81f70d1dcfe6e0af8727ed4fdc",
+      "sha256": "9a9fa642c8e344d3474b86964e3dbe1b89029a81f70d1dcfe6e0af8727ed4fdc",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/9aa2050dda52c28322b7ee1e7dbce0007d98259c81736a552a9ebe20f7fb8827",
+      "sha256": "9aa2050dda52c28322b7ee1e7dbce0007d98259c81736a552a9ebe20f7fb8827",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/9d67999d6dd0fb6b4b1c5677709ddd09ae3c12fe55383d3d1327bc2682edc61c",
+      "sha256": "9d67999d6dd0fb6b4b1c5677709ddd09ae3c12fe55383d3d1327bc2682edc61c",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/b016fdd526191292847147ce87b62f13343dea650910cb2b861f0fc89bdc870b",
+      "sha256": "b016fdd526191292847147ce87b62f13343dea650910cb2b861f0fc89bdc870b",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/beffdf6fe2cdb4e5c0da6458a7c882b5cff323d5df97bc0ad0a665e84d8bf972",
+      "sha256": "beffdf6fe2cdb4e5c0da6458a7c882b5cff323d5df97bc0ad0a665e84d8bf972",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/c13deccd7546c9f86a72886c912bf914825d840375fb9d3169e42161bfaf2588",
+      "sha256": "c13deccd7546c9f86a72886c912bf914825d840375fb9d3169e42161bfaf2588",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/c1b81ce9b4bf54294c232c5324e332a9e0d55e232013a109ad28e2850791c34b",
+      "sha256": "c1b81ce9b4bf54294c232c5324e332a9e0d55e232013a109ad28e2850791c34b",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/ca4d50e5c4f37e525be27de85bdf9f0b2c277d3fda4d547e9bc78f671575b73c",
+      "sha256": "ca4d50e5c4f37e525be27de85bdf9f0b2c277d3fda4d547e9bc78f671575b73c",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/e0beae11e820c53750f502bec78afaa9710b101b7cdc66087c207d0f7668c1fe",
+      "sha256": "e0beae11e820c53750f502bec78afaa9710b101b7cdc66087c207d0f7668c1fe",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/e1aba4d22f08e4eb4d987b72898118284a2ba722a1f47e8349af8ab4609e5a00",
+      "sha256": "e1aba4d22f08e4eb4d987b72898118284a2ba722a1f47e8349af8ab4609e5a00",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/e26b8be0a8be4a692daf4b7bb5f129c470a152fdba3e458452d6fe629c366998",
+      "sha256": "e26b8be0a8be4a692daf4b7bb5f129c470a152fdba3e458452d6fe629c366998",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/ea76abacb77345d896b87a78abb25f13c40c2eb2836fe2dcaa42725f989aff45",
+      "sha256": "ea76abacb77345d896b87a78abb25f13c40c2eb2836fe2dcaa42725f989aff45",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/ef5d2786794967204c97e6dcccc8aa28f592ead2224174ae0f02a1c32ae747a6",
+      "sha256": "ef5d2786794967204c97e6dcccc8aa28f592ead2224174ae0f02a1c32ae747a6",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/objects/fb2ce37e2b26bcea61c40f6fd55446235361785666a66e6fd8e3ca2d83771d16",
+      "sha256": "fb2ce37e2b26bcea61c40f6fd55446235361785666a66e6fd8e3ca2d83771d16",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/experiment/plan.json",
+      "sha256": "f98c0a9ec3a21ef3daa38a1f9f8e8df60309e6556461cbb821983193da073049",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/report.json",
+      "sha256": "9447df236fbcc15a4c3d85f33b8f9ce09e783a269c7429510550dec0b2a0b341",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/reviewer/A.txt",
+      "sha256": "2caeb28bf56c314e6db5516e3ec1c94b2f82754582218e62f89ca59a571db7f6",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/reviewer/B.txt",
+      "sha256": "001ee988286079f2193c84da5175a9da476d7b9f18278dcc9256220aa9e98301",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/reviewer/README.txt",
+      "sha256": "010ad90421d277b64ca7bf20c77caa01003fb24bdb1d34c63983665061482246",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/reviewer/brief.txt",
+      "sha256": "19db381e17a5d23528376e99b99b9057d28b5fe3df87a36572211222bdadb348",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/example/reviewer/review.json",
+      "sha256": "f72bda12586748bc06bd769dd4fc2ef2f361190c7911f128752aa57f984772cb",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/failures/attempt-01-demo.json",
+      "sha256": "46c71385b9f36fcd516b2943ab0530d6429fc1e3f024b1894d9b8b76646528ca",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/root-review-pytest.json",
+      "sha256": "daf62f1b622aee006172988187ac57a9389cb56d818161ce885e5e2d2786ff06",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/root-review.json",
+      "sha256": "68f4133a9650f5de1ff4a2ecafa890d736d61e71bf873abedcf27a806b93b36f",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/root-review.log",
+      "sha256": "3835df082640b6837c11259ea843531d9718a7a2d4c6c899867d3e8b35257690",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/root-review.xml",
+      "sha256": "2cea103c06284f2a50ad253b366eccd8d0fa0c618674a6d096f9572ac098de9c",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/tests.json",
+      "sha256": "f47935c5cfb97d6306e7518d51a957bc7395d6d4bd17e1020d0a582c280663f6",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "evidence/p3/foundation/tests.xml",
+      "sha256": "1669d10f9808738702375514b1fa835105c91c39a3c03ed60388effd645ab499",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "scripts/run_p3_evaluation.py",
+      "sha256": "e35f6fe26ab71f68f3a3bc88c05622ba131b70820184ed87c33b0922aa88e1e5",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "src/novel_factory/evaluation/__init__.py",
+      "sha256": "d214189852920570e4ee8e67477833585095beba5ca2716b5a3695bea4d98e3d",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "src/novel_factory/evaluation/contracts.py",
+      "sha256": "00e229b835b3e378c95b9c2b4e5e51981962317df507bf060b8f0d7f49bbf9b9",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "src/novel_factory/evaluation/example.py",
+      "sha256": "f211c8deb3e84d81efc67809aaf489184c5bdcb4d3bff66f5cf6235e2bcd9ef4",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "src/novel_factory/evaluation/protocol.py",
+      "sha256": "1e65c2d3b992a8a88b600d512e12cd71629276b07d6b19a84105d557ac9be2ef",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "src/novel_factory/evaluation/schema.json",
+      "sha256": "48e0ccb0563edfc3568e0d355bbb56d6b6f0d5d6a8c8cc10607d019833c10a27",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "src/novel_factory/evaluation/store.py",
+      "sha256": "204285533e3b23a604dd045d46828139a2d19d86612926c41e40303d39fde0b3",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "tests/evaluation/test_foundation.py",
+      "sha256": "f12da715e6b797b4610001a87fa6dc729e4c5775daa9f66cae2119c1da7dbaff",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    },
+    {
+      "workspace": "cac4fdab7f30/NovelFactory",
+      "status": "??",
+      "path": "tests/integration/test_retcon_literary_memory.py",
+      "sha256": "58c9dba0e03226da4b59e971ad1ca781eff9ce7aaa6d758dfb0c397f4d088354",
+      "present_in_baseline": false,
+      "same_as_baseline": false
+    }
+  ],
+  "summary": {
+    "present_in_baseline": 14,
+    "same_as_baseline": 13,
+    "files": 105
+  }
+}

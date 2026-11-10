@@ -1,0 +1,733 @@
+{
+  "evidence_kind": "LOCAL_REAL_POSTGRESQL_HTTP_MEASUREMENTS",
+  "baseline_commit": "206eaa5b655419d29bd6b15d618ae6eaf9048354",
+  "raw_files": [
+    {
+      "file": "load-before-200mixed.json",
+      "sha256": "a5421c80990d084c07e5baff81dba5ecf2ef6e9c28fbc3e7aca6c963991d04d1",
+      "bytes": 1195816
+    },
+    {
+      "file": "load-after-200mixed-same.json",
+      "sha256": "ebc8ef3bc8744e85001d47f50ef60732bf5a1568bde91acdcf3d49d3ff8de60a",
+      "bytes": 1145370
+    },
+    {
+      "file": "load-after-200mixed-isolated.json",
+      "sha256": "9a525ae67c6a93991b9b0c92d1e5aa5455cfd65b82fdae186460a1d433f951bb",
+      "bytes": 1183508
+    },
+    {
+      "file": "load-after-200hot-isolated.json",
+      "sha256": "f529c08a787bd4229c4debba8f21664d8aeb5dadb16585962305d38ef9369032",
+      "bytes": 2914854
+    },
+    {
+      "file": "context-before.json",
+      "sha256": "9709bc2c79dbca909550ec236e5f30b63e3166e1c1d0c693994def0d4db40600",
+      "bytes": 28134
+    },
+    {
+      "file": "context-paired-p3.json",
+      "sha256": "abeb838e62372c495940633a4b368cc283b38db3907324ac41dd2fa7153b6f91",
+      "bytes": 3134218
+    },
+    {
+      "file": "focused.xml",
+      "sha256": "c628761fcbfd42b474842f61680e1a775244fb2e961359acbbae075a115c2a6a",
+      "bytes": 5122
+    },
+    {
+      "file": "process-smoke.json",
+      "sha256": "7f6ec99829e38d46086b2f13b38135dde25866486c6c20884278d1f23a66fa80",
+      "bytes": 75020
+    }
+  ],
+  "runs": [
+    {
+      "file": "load-before-200mixed.json",
+      "engineer_correctness": "FAIL",
+      "capacity_gate": "NOT_MET",
+      "bounded_recovery_business_gate": "NOT_MET",
+      "correctness": {
+        "new_world_revisions": 12,
+        "expected_new_world_revisions": 21,
+        "new_selected_effect_groups": 12,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99",
+        "independent_resource_final_quantities": [
+          "99",
+          "99",
+          "100",
+          "100",
+          "99",
+          "100",
+          "100",
+          "100",
+          "100",
+          "99",
+          "100",
+          "99",
+          "99",
+          "100",
+          "99",
+          "99",
+          "99",
+          "100",
+          "99",
+          "99"
+        ]
+      },
+      "resources": {
+        "process_user_cpu_seconds": 115.03440400000001,
+        "process_system_cpu_seconds": 7.768656999999999,
+        "process_peak_rss_kib": 149212,
+        "minor_page_faults": 608577,
+        "major_page_faults": 0
+      },
+      "environment": {
+        "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+        "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+        "logical_cpu_count": 9,
+        "cpu_models": [
+          "AMD EPYC 9V74 80-Core Processor"
+        ],
+        "memory": {
+          "MemTotal": "10206472 kB",
+          "MemAvailable": "8991616 kB",
+          "SwapTotal": "0 kB"
+        },
+        "cgroup": {},
+        "versions": {
+          "SQLAlchemy": "2.0.57",
+          "psycopg": "3.3.8",
+          "uvicorn": "0.54.0",
+          "httpx": "0.28.1"
+        },
+        "git_sha": "206eaa5b655419d29bd6b15d618ae6eaf9048354",
+        "git_dirty": true,
+        "benchmark_source_sha256": "bc1e2c2cf50737a62e3c64ef17a6e560d4273dbc6fd12a3639b634d9712e62d4",
+        "load_client_location": "same process, separate asyncio loop, real loopback TCP",
+        "api_processes": 1,
+        "api_server_threads": 1
+      },
+      "admission": {
+        "admitted": 1109,
+        "peak_active": 6,
+        "peak_queued": 28,
+        "completed": 1108,
+        "timed_out": 87,
+        "active": 0,
+        "queued": 0,
+        "capacity": 6,
+        "per_principal": 2,
+        "max_waiters": 64,
+        "wait_seconds_total": 184.94780433695996
+      },
+      "open_loop_offered_rate": {
+        "gate": "NOT_APPLICABLE",
+        "target_rps": null,
+        "first_attempts": 0
+      },
+      "setup_seconds": 16.938032,
+      "service_resources": null,
+      "database_application": {
+        "sql_statements": 31685,
+        "transactions": 3665,
+        "sql_statements_per_second": 183.8808,
+        "peak_checked_out_connections": 8,
+        "checked_out_at_end": 0,
+        "configured_pool_size": 8,
+        "pool_status_at_end": "Pool size: 8  Connections in pool: 8 Current Overflow: 0 Current Checked out connections: 0"
+      },
+      "database_wait_connection_samples": {
+        "('idle', 'Client')": 2996,
+        "('idle in transaction', 'Client')": 933,
+        "('active', 'IO')": 19,
+        "('active', None)": 43,
+        "('active', 'Client')": 4,
+        "('idle in transaction', None)": 14,
+        "('idle', None)": 2,
+        "('active', 'Lock')": 42,
+        "('active', 'LWLock')": 3
+      },
+      "metrics": {
+        "duration_seconds": 172.312688,
+        "planned_requests": 1141,
+        "emitted_requests": 1195,
+        "emitted_logical_operations": 1118,
+        "client_requests_never_emitted": 23,
+        "first_attempt_failure_count": 48,
+        "recovered_logical_operations": 37,
+        "latency_all_responses": {
+          "count": 1195,
+          "p50_ms": 105.4339,
+          "p95_ms": 10819.7524,
+          "p99_ms": 18282.5045
+        },
+        "logical_operation_completion_latency": {
+          "count": 1118,
+          "p50_ms": 92.5872,
+          "p95_ms": 17824.8406,
+          "p99_ms": 29336.3008
+        },
+        "effective_call_rps_excluding_duplicates": 6.2561,
+        "effective_world_commits_per_second": 0.0696
+      }
+    },
+    {
+      "file": "load-after-200mixed-same.json",
+      "engineer_correctness": "PASS",
+      "capacity_gate": "NOT_MET",
+      "bounded_recovery_business_gate": "PASS",
+      "correctness": {
+        "new_world_revisions": 21,
+        "expected_new_world_revisions": 21,
+        "new_selected_effect_groups": 21,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99",
+        "independent_resource_final_quantities": [
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99"
+        ]
+      },
+      "resources": {
+        "process_user_cpu_seconds": 76.182435,
+        "process_system_cpu_seconds": 5.561109999999999,
+        "process_peak_rss_kib": 141740,
+        "minor_page_faults": 555744,
+        "major_page_faults": 0
+      },
+      "environment": {
+        "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+        "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+        "logical_cpu_count": 9,
+        "cpu_models": [
+          "AMD EPYC 9V74 80-Core Processor"
+        ],
+        "memory": {
+          "MemTotal": "10206472 kB",
+          "MemAvailable": "9033908 kB",
+          "SwapTotal": "0 kB"
+        },
+        "cgroup": {},
+        "versions": {
+          "SQLAlchemy": "2.0.57",
+          "psycopg": "3.3.8",
+          "uvicorn": "0.54.0",
+          "httpx": "0.28.1"
+        },
+        "git_sha": "206eaa5b655419d29bd6b15d618ae6eaf9048354",
+        "git_dirty": true,
+        "benchmark_source_sha256": "c3533086aed8ef2ee309e44c16751d16804aa99ed78cc72cc4ed374cd5c6b940",
+        "load_client_location": "same process, separate asyncio loop, real loopback TCP",
+        "api_processes": 1,
+        "api_server_threads": 1,
+        "aggregate_api_pool_size": 8,
+        "service_mode": "same-process"
+      },
+      "admission": {
+        "admitted": 1141,
+        "peak_active": 6,
+        "peak_queued": 16,
+        "completed": 1141,
+        "timed_out": 10,
+        "active": 0,
+        "queued": 0,
+        "capacity": 6,
+        "per_principal": 2,
+        "max_waiters": 64,
+        "wait_seconds_total": 117.28206710602899
+      },
+      "open_loop_offered_rate": {
+        "gate": "NOT_APPLICABLE",
+        "target_rps": null,
+        "first_attempts": 0
+      },
+      "setup_seconds": 13.237474,
+      "service_resources": {},
+      "database_application": {
+        "sql_statements": 33013,
+        "transactions": 3692,
+        "sql_cursor_execution_seconds": 112.22201441006473,
+        "max_sql_cursor_execution_seconds": 0.28785568500097725,
+        "statement_kinds": {
+          "SELECT": 28760,
+          "INSERT": 3891,
+          "UPDATE": 242,
+          "WITH": 120
+        },
+        "sql_timing_excludes_result_decoding": true,
+        "sql_statements_per_second": 226.8838,
+        "peak_checked_out_connections": 8,
+        "checked_out_at_end": 0,
+        "configured_pool_size": 8,
+        "pool_status_at_end": "Pool size: 8  Connections in pool: 8 Current Overflow: 0 Current Checked out connections: 0"
+      },
+      "database_wait_connection_samples": {
+        "('idle', 'Client')": 2805,
+        "('idle in transaction', 'Client')": 590,
+        "('active', None)": 39,
+        "('idle in transaction', None)": 17,
+        "('active', 'IO')": 8,
+        "('idle', None)": 5,
+        "('active', 'Client')": 5,
+        "('active', 'Lock')": 5
+      },
+      "metrics": {
+        "duration_seconds": 145.506216,
+        "planned_requests": 1141,
+        "emitted_requests": 1151,
+        "emitted_logical_operations": 1141,
+        "client_requests_never_emitted": 0,
+        "first_attempt_failure_count": 6,
+        "recovered_logical_operations": 6,
+        "latency_all_responses": {
+          "count": 1151,
+          "p50_ms": 91.879,
+          "p95_ms": 1405.4732,
+          "p99_ms": 2574.6616
+        },
+        "logical_operation_completion_latency": {
+          "count": 1141,
+          "p50_ms": 92.9231,
+          "p95_ms": 1382.0197,
+          "p99_ms": 2913.7044
+        },
+        "effective_call_rps_excluding_duplicates": 7.5667,
+        "effective_world_commits_per_second": 0.1443
+      }
+    },
+    {
+      "file": "load-after-200mixed-isolated.json",
+      "engineer_correctness": "PASS",
+      "capacity_gate": "NOT_MET",
+      "bounded_recovery_business_gate": "PASS",
+      "correctness": {
+        "new_world_revisions": 21,
+        "expected_new_world_revisions": 21,
+        "new_selected_effect_groups": 21,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99",
+        "independent_resource_final_quantities": [
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99"
+        ]
+      },
+      "resources": {
+        "process_user_cpu_seconds": 6.639139999999999,
+        "process_system_cpu_seconds": 0.407316,
+        "process_peak_rss_kib": 87540,
+        "minor_page_faults": 1386,
+        "major_page_faults": 0
+      },
+      "environment": {
+        "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+        "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+        "logical_cpu_count": 9,
+        "cpu_models": [
+          "AMD EPYC 9V74 80-Core Processor"
+        ],
+        "memory": {
+          "MemTotal": "10206472 kB",
+          "MemAvailable": "9121264 kB",
+          "SwapTotal": "0 kB"
+        },
+        "cgroup": {},
+        "versions": {
+          "SQLAlchemy": "2.0.57",
+          "psycopg": "3.3.8",
+          "uvicorn": "0.54.0",
+          "httpx": "0.28.1"
+        },
+        "git_sha": "206eaa5b655419d29bd6b15d618ae6eaf9048354",
+        "git_dirty": true,
+        "benchmark_source_sha256": "c3533086aed8ef2ee309e44c16751d16804aa99ed78cc72cc4ed374cd5c6b940",
+        "load_client_location": "separate spawned API process(es), real loopback TCP; shared host",
+        "api_processes": 1,
+        "api_server_threads": 1,
+        "aggregate_api_pool_size": 8,
+        "service_mode": "isolated-process"
+      },
+      "admission": {
+        "max_waiters": 64,
+        "peak_active": 6,
+        "queued": 0,
+        "per_principal": 2,
+        "active": 0,
+        "peak_queued": 21,
+        "capacity": 6,
+        "completed": 1141,
+        "wait_seconds_total": 160.2173060471432,
+        "admitted": 1141,
+        "timed_out": 32,
+        "peak_note": "Sum of process peaks; see process snapshots for exact values"
+      },
+      "open_loop_offered_rate": {
+        "gate": "NOT_APPLICABLE",
+        "target_rps": null,
+        "first_attempts": 0
+      },
+      "setup_seconds": 12.714434,
+      "service_resources": {
+        "service_user_cpu_seconds": 75.944291,
+        "service_system_cpu_seconds": 5.289521,
+        "service_sum_peak_rss_kib": 130504
+      },
+      "database_application": {
+        "sql_statements": 33035,
+        "transactions": 3714,
+        "sql_cursor_execution_seconds": 149.40256435402262,
+        "checked_out_at_end": 0,
+        "configured_pool_size": 8,
+        "sql_statements_per_second": 231.0797029209804,
+        "statement_kinds": {
+          "SELECT": 28782,
+          "INSERT": 3891,
+          "UPDATE": 242,
+          "WITH": 120
+        },
+        "max_sql_cursor_execution_seconds": 0.29030323500046507,
+        "peak_checked_out_connections": 8,
+        "peak_connections_note": "Conservative sum of per-process peaks; not a simultaneous sample",
+        "sql_timing_excludes_result_decoding": true,
+        "per_process": [
+          {
+            "sql_statements": 33035,
+            "transactions": 3714,
+            "sql_cursor_execution_seconds": 149.40256435402262,
+            "max_sql_cursor_execution_seconds": 0.29030323500046507,
+            "statement_kinds": {
+              "SELECT": 28782,
+              "INSERT": 3891,
+              "UPDATE": 242,
+              "WITH": 120
+            },
+            "sql_timing_excludes_result_decoding": true,
+            "sql_statements_per_second": 231.0309,
+            "peak_checked_out_connections": 8,
+            "checked_out_at_end": 0,
+            "configured_pool_size": 8,
+            "pool_status_at_end": "Pool size: 8  Connections in pool: 8 Current Overflow: 0 Current Checked out connections: 0"
+          }
+        ]
+      },
+      "database_wait_connection_samples": {
+        "('idle', 'Client')": 3024,
+        "('idle', None)": 4,
+        "('idle in transaction', 'Client')": 927,
+        "('active', 'IO')": 17,
+        "('active', None)": 37,
+        "('idle in transaction', None)": 4,
+        "('active', 'LWLock')": 3,
+        "('active', 'Timeout')": 1,
+        "('active', 'Lock')": 11
+      },
+      "metrics": {
+        "duration_seconds": 142.959332,
+        "planned_requests": 1141,
+        "emitted_requests": 1173,
+        "emitted_logical_operations": 1141,
+        "client_requests_never_emitted": 0,
+        "first_attempt_failure_count": 20,
+        "recovered_logical_operations": 20,
+        "latency_all_responses": {
+          "count": 1173,
+          "p50_ms": 101.1003,
+          "p95_ms": 2025.4368,
+          "p99_ms": 2762.2693
+        },
+        "logical_operation_completion_latency": {
+          "count": 1141,
+          "p50_ms": 99.2921,
+          "p95_ms": 1645.3823,
+          "p99_ms": 6219.1865
+        },
+        "effective_call_rps_excluding_duplicates": 7.7015,
+        "effective_world_commits_per_second": 0.1469
+      }
+    },
+    {
+      "file": "load-after-200hot-isolated.json",
+      "engineer_correctness": "PASS",
+      "capacity_gate": "NOT_MET",
+      "bounded_recovery_business_gate": "PASS",
+      "correctness": {
+        "new_world_revisions": 21,
+        "expected_new_world_revisions": 21,
+        "new_selected_effect_groups": 21,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99",
+        "independent_resource_final_quantities": [
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99"
+        ]
+      },
+      "resources": {
+        "process_user_cpu_seconds": 40.016577999999996,
+        "process_system_cpu_seconds": 1.5682289999999999,
+        "process_peak_rss_kib": 101696,
+        "minor_page_faults": 4943,
+        "major_page_faults": 0
+      },
+      "environment": {
+        "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+        "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+        "logical_cpu_count": 9,
+        "cpu_models": [
+          "AMD EPYC 9V74 80-Core Processor"
+        ],
+        "memory": {
+          "MemTotal": "10206472 kB",
+          "MemAvailable": "9119304 kB",
+          "SwapTotal": "0 kB"
+        },
+        "cgroup": {},
+        "versions": {
+          "SQLAlchemy": "2.0.57",
+          "psycopg": "3.3.8",
+          "uvicorn": "0.54.0",
+          "httpx": "0.28.1"
+        },
+        "git_sha": "206eaa5b655419d29bd6b15d618ae6eaf9048354",
+        "git_dirty": true,
+        "benchmark_source_sha256": "c3533086aed8ef2ee309e44c16751d16804aa99ed78cc72cc4ed374cd5c6b940",
+        "load_client_location": "separate spawned API process(es), real loopback TCP; shared host",
+        "api_processes": 1,
+        "api_server_threads": 1,
+        "aggregate_api_pool_size": 8,
+        "service_mode": "isolated-process"
+      },
+      "admission": {
+        "wait_seconds_total": 1322.8810266250657,
+        "rejected": 77,
+        "queued": 0,
+        "per_principal": 2,
+        "capacity": 6,
+        "admitted": 2063,
+        "timed_out": 172,
+        "completed": 2050,
+        "peak_queued": 64,
+        "max_waiters": 64,
+        "peak_active": 6,
+        "active": 0,
+        "peak_note": "Sum of process peaks; see process snapshots for exact values"
+      },
+      "open_loop_offered_rate": {
+        "gate": "NOT_MET",
+        "target_rps": 1000.0,
+        "first_attempts": 1000,
+        "actual_call_start_rps": 47.84163585255064,
+        "start_window_seconds": 20.881393000000003,
+        "max_schedule_delay_ms": 19882.5016,
+        "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+        "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+      },
+      "setup_seconds": 13.823073,
+      "service_resources": {
+        "service_user_cpu_seconds": 109.149735,
+        "service_system_cpu_seconds": 10.363912000000001,
+        "service_sum_peak_rss_kib": 135124
+      },
+      "database_application": {
+        "sql_statements": 52341,
+        "transactions": 6658,
+        "sql_cursor_execution_seconds": 268.677502014285,
+        "checked_out_at_end": 0,
+        "configured_pool_size": 8,
+        "sql_statements_per_second": 284.3448459521411,
+        "statement_kinds": {
+          "SELECT": 48088,
+          "INSERT": 3891,
+          "UPDATE": 242,
+          "WITH": 120
+        },
+        "max_sql_cursor_execution_seconds": 0.23909193699728348,
+        "peak_checked_out_connections": 8,
+        "peak_connections_note": "Conservative sum of per-process peaks; not a simultaneous sample",
+        "sql_timing_excludes_result_decoding": true,
+        "per_process": [
+          {
+            "sql_statements": 52341,
+            "transactions": 6658,
+            "sql_cursor_execution_seconds": 268.677502014285,
+            "max_sql_cursor_execution_seconds": 0.23909193699728348,
+            "statement_kinds": {
+              "SELECT": 48088,
+              "INSERT": 3891,
+              "UPDATE": 242,
+              "WITH": 120
+            },
+            "sql_timing_excludes_result_decoding": true,
+            "sql_statements_per_second": 284.2804,
+            "peak_checked_out_connections": 8,
+            "checked_out_at_end": 0,
+            "configured_pool_size": 8,
+            "pool_status_at_end": "Pool size: 8  Connections in pool: 8 Current Overflow: 0 Current Checked out connections: 0"
+          }
+        ]
+      },
+      "database_wait_connection_samples": {
+        "('active', None)": 42,
+        "('idle', 'Client')": 3485,
+        "('idle in transaction', 'Client')": 1685,
+        "('active', 'IO')": 19,
+        "('idle', None)": 5,
+        "('active', 'Client')": 3,
+        "('idle in transaction', None)": 12,
+        "('active', 'LWLock')": 2,
+        "('active', 'Lock')": 3
+      },
+      "metrics": {
+        "duration_seconds": 184.075782,
+        "planned_requests": 2141,
+        "emitted_requests": 3254,
+        "emitted_logical_operations": 2141,
+        "client_requests_never_emitted": 0,
+        "first_attempt_failure_count": 575,
+        "recovered_logical_operations": 484,
+        "latency_all_responses": {
+          "count": 3254,
+          "p50_ms": 1841.5748,
+          "p95_ms": 13945.8828,
+          "p99_ms": 22017.8307
+        },
+        "logical_operation_completion_latency": {
+          "count": 2141,
+          "p50_ms": 688.3516,
+          "p95_ms": 36333.0377,
+          "p99_ms": 39195.2217
+        },
+        "effective_call_rps_excluding_duplicates": 10.9194,
+        "effective_world_commits_per_second": 0.1141
+      }
+    }
+  ],
+  "paired_context_summary": [
+    {
+      "subjects": 1,
+      "baseline": {
+        "median_seconds": 0.04789833900213125,
+        "sql_counts": [
+          47
+        ],
+        "median_cursor_execution_seconds": 0.01405063000129303
+      },
+      "candidate": {
+        "median_seconds": 0.045960284001921536,
+        "sql_counts": [
+          47
+        ],
+        "median_cursor_execution_seconds": 0.012107682985515567
+      }
+    },
+    {
+      "subjects": 20,
+      "baseline": {
+        "median_seconds": 0.08340342600058648,
+        "sql_counts": [
+          47
+        ],
+        "median_cursor_execution_seconds": 0.013533405006455723
+      },
+      "candidate": {
+        "median_seconds": 0.06029824600045686,
+        "sql_counts": [
+          47
+        ],
+        "median_cursor_execution_seconds": 0.01295489699987229
+      }
+    },
+    {
+      "subjects": 100,
+      "baseline": {
+        "median_seconds": 0.1708231189986691,
+        "sql_counts": [
+          47
+        ],
+        "median_cursor_execution_seconds": 0.02055955100149731
+      },
+      "candidate": {
+        "median_seconds": 0.13531187799890176,
+        "sql_counts": [
+          47
+        ],
+        "median_cursor_execution_seconds": 0.020294808982725954
+      }
+    }
+  ],
+  "paired_material_equality_count": 15,
+  "paired_world_unchanged": true,
+  "sources": {
+    "src/novel_factory/domain/temporal.py": "fc670d6146b7efd5c9f7f8851da92000ebe3c3b7fb789845194cee675f359b71",
+    "src/novel_factory/infrastructure/repository.py": "f3b1afd6191dde474fca47239ccd84eb071da26470ec9cd55f63ffbc2ae2e858",
+    "benchmarks/http_load.py": "c419a1055a6b878107b926faf897431872946065692fa9fe5eff74a51a842819",
+    "benchmarks/p2_behavioral_load.py": "c3533086aed8ef2ee309e44c16751d16804aa99ed78cc72cc4ed374cd5c6b940",
+    "benchmarks/process_server.py": "874f150dd21cfbecb416562d3b3108bb6655e57fcc9e5642119f4de8f9e99baf",
+    "benchmarks/p3_context_comparison.py": "7cbcdd73a88c0bc9a947b066ad732ed20b8500414c11f7ae8eb54e99fb5a4eaf",
+    "tests/unit/test_temporal_coordinate_cache.py": "4fbafab39f6501c0f5f7e909952d2d16ee1f72a866edf8fc428f89c3c5272453",
+    "tests/integration/test_ancestry_metadata.py": "83cd52dd79c18ed8929add23f4ef6b0055300e5383a9119f3a5281d704ef56c9",
+    "tests/service/test_process_isolation.py": "974b2cc83138e08b6ed7035f50cd97a7528d880facb181c07d42e4edc04a119d"
+  },
+  "raw_artifact_location_note": "Full raw JSON/logs retained in the task workspace; CI reruns upload their own raw files as Actions artifacts. These local hashes do not claim that local files already exist in a remote artifact.",
+  "sql_timing_note": "Original historical baseline driver had counts but no SQL duration counter; exact baseline/candidate SQL durations are available in paired context profile, not retrospectively fabricated for the old load run.",
+  "gate_note": "21/21 completed business does not change first-attempt or 1000/s offered-arrival failures. All capacity gates remain NOT_MET."
+}
