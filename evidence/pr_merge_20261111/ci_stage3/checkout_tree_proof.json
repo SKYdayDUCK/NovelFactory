@@ -1,0 +1,27 @@
+{
+  "collected_at": "2026-11-10T16:52:51.743Z",
+  "commits": [
+    {
+      "sha": "4eec0c5d8fa5a48fadde8fface13e3fb3dacf749",
+      "tree_sha": "e87b88d343e47361d16161f2721a596083a71085",
+      "parents": [
+        "721f155c9cc912cddfdae559afe4f2516d0967f2",
+        "971fbef29eceb422d77271d11841bae1abdfd73f"
+      ],
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/commit/4eec0c5d8fa5a48fadde8fface13e3fb3dacf749",
+      "message": "Merge 971fbef29eceb422d77271d11841bae1abdfd73f into 721f155c9cc912cddfdae559afe4f2516d0967f2"
+    },
+    {
+      "sha": "971fbef29eceb422d77271d11841bae1abdfd73f",
+      "tree_sha": "e87b88d343e47361d16161f2721a596083a71085",
+      "parents": [
+        "0a0af490c7768fe4b7d2da16dbaa74f0d9585f0d"
+      ],
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/commit/971fbef29eceb422d77271d11841bae1abdfd73f",
+      "message": "perf(p2): preserve strict canonical semantics while reducing repeated checks\n\nKeep exact native types, UTF-8 validation, safe integer bounds, JSON bytes and first-error order. Differential checks against frozen source include 500 generated nested inputs and explicit invalid types; 171 unit/contract and 41 PostgreSQL focused tests pass. Eight paired same-world query comparisons preserve complete payload, evidence and cut material with measured 5.72% median improvement, without a capacity claim.\n\nReject the slower Schema memo candidate and retain its negative evidence. Preserve all 20 first-checkpoint capacity measurements and four verified JUnit files with hashes beyond Actions retention. The first checkpoint passed 436 full PostgreSQL tests, but original hot/1000-RPS capacity gates remain NOT_MET; both PRs stay Draft."
+    }
+  ],
+  "tree_identical": true,
+  "expected_tree_sha": "e87b88d343e47361d16161f2721a596083a71085",
+  "matches_expected_tree": true
+}

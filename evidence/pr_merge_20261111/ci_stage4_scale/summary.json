@@ -1,0 +1,1734 @@
+{
+  "checkpoint": "e3c7b79b0058656f11257ea55edc75371382b73e",
+  "generated_at": "2026-11-10T17:08:31.434965+00:00",
+  "collection_status": "COMPLETE",
+  "runs": [
+    {
+      "run_id": 42859219338,
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "failure",
+      "head_sha": "e3c7b79b0058656f11257ea55edc75371382b73e",
+      "run_attempt": 1,
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42859219338",
+      "jobs": [
+        {
+          "id": 129980491722,
+          "name": "Measured 1000-read-open",
+          "status": "completed",
+          "conclusion": "failure",
+          "started_at": null,
+          "completed_at": null
+        },
+        {
+          "id": 129980492208,
+          "name": "Measured 500-read-soak",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": null,
+          "completed_at": null
+        },
+        {
+          "id": 129980492429,
+          "name": "Measured 500-mixed",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": null,
+          "completed_at": null
+        }
+      ]
+    },
+    {
+      "run_id": 42859219591,
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "e3c7b79b0058656f11257ea55edc75371382b73e",
+      "run_attempt": 2,
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42859219591",
+      "jobs": [
+        {
+          "id": 129981446743,
+          "name": "Physical base backup, SIGKILL, WAL replay and application verification",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": null,
+          "completed_at": null
+        }
+      ]
+    },
+    {
+      "run_id": 42859202367,
+      "event": "push",
+      "status": "completed",
+      "conclusion": "failure",
+      "head_sha": "e3c7b79b0058656f11257ea55edc75371382b73e",
+      "run_attempt": 1,
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42859202367",
+      "jobs": [
+        {
+          "id": 129980431920,
+          "name": "Measured 500-mixed",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": null,
+          "completed_at": null
+        },
+        {
+          "id": 129980432203,
+          "name": "Measured 1000-read-open",
+          "status": "completed",
+          "conclusion": "failure",
+          "started_at": null,
+          "completed_at": null
+        },
+        {
+          "id": 129980432548,
+          "name": "Measured 500-read-soak",
+          "status": "completed",
+          "conclusion": "failure",
+          "started_at": null,
+          "completed_at": null
+        }
+      ]
+    },
+    {
+      "run_id": 42859202666,
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "e3c7b79b0058656f11257ea55edc75371382b73e",
+      "run_attempt": 1,
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42859202666",
+      "jobs": [
+        {
+          "id": 129980431347,
+          "name": "Physical base backup, SIGKILL, WAL replay and application verification",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": null,
+          "completed_at": null
+        }
+      ]
+    }
+  ],
+  "run_attempts": [
+    {
+      "run_id": 42859202367,
+      "attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "metadata_snapshot": "metadata_snapshot8.json",
+      "job_ids": [
+        129980431920,
+        129980432203,
+        129980432548
+      ],
+      "failed_steps": [
+        {
+          "job_id": 129980432203,
+          "step": "Original targets and actual network evidence",
+          "conclusion": "failure"
+        },
+        {
+          "job_id": 129980432548,
+          "step": "Original targets and actual network evidence",
+          "conclusion": "failure"
+        }
+      ]
+    },
+    {
+      "run_id": 42859202666,
+      "attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "metadata_snapshot": "metadata_snapshot8.json",
+      "job_ids": [
+        129980431347
+      ],
+      "failed_steps": []
+    },
+    {
+      "run_id": 42859219338,
+      "attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "metadata_snapshot": "metadata_snapshot8.json",
+      "job_ids": [
+        129980491722,
+        129980492208,
+        129980492429
+      ],
+      "failed_steps": [
+        {
+          "job_id": 129980491722,
+          "step": "Original targets and actual network evidence",
+          "conclusion": "failure"
+        }
+      ]
+    },
+    {
+      "run_id": 42859219591,
+      "attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "metadata_snapshot": "metadata_snapshot1.json",
+      "job_ids": [
+        129980491802
+      ],
+      "failed_steps": [
+        {
+          "job_id": 129980491802,
+          "step": "Install PostgreSQL17 server and physical-backup tools",
+          "conclusion": "failure"
+        },
+        {
+          "job_id": 129980491802,
+          "step": "Hash retained evidence files",
+          "conclusion": "failure"
+        },
+        {
+          "job_id": 129980491802,
+          "step": "Verify manifest covers the retained artifact",
+          "conclusion": "failure"
+        },
+        {
+          "job_id": 129980491802,
+          "step": "Preserve recovery measurements and logs",
+          "conclusion": "failure"
+        }
+      ]
+    },
+    {
+      "run_id": 42859219591,
+      "attempt": 2,
+      "status": "completed",
+      "conclusion": "success",
+      "metadata_snapshot": "metadata_snapshot8.json",
+      "job_ids": [
+        129981446743
+      ],
+      "failed_steps": []
+    }
+  ],
+  "checkout_tree_proof": {
+    "target_head": "e3c7b79b0058656f11257ea55edc75371382b73e",
+    "target_tree": "72328df65eafff795a5df1a10117c68c2d899bb6",
+    "jobs": [
+      {
+        "run_id": 42859202367,
+        "job_id": 129980431920,
+        "log_path": "42859202367/jobs/129980431920.log",
+        "log_sha256": "1a4e9f9fd78c1a75c20ee2aa3b43dfef005695231d12de154c9767de7053bf1c",
+        "actual_checkout_sha": "e3c7b79b0058656f11257ea55edc75371382b73e",
+        "tree_sha": "72328df65eafff795a5df1a10117c68c2d899bb6",
+        "matches_target_tree": true
+      },
+      {
+        "run_id": 42859202367,
+        "job_id": 129980432203,
+        "log_path": "42859202367/jobs/129980432203.log",
+        "log_sha256": "d2cdf1cab3cd272778c606ff582a08b13030dc857f233311f92155e4e684bf4a",
+        "actual_checkout_sha": "e3c7b79b0058656f11257ea55edc75371382b73e",
+        "tree_sha": "72328df65eafff795a5df1a10117c68c2d899bb6",
+        "matches_target_tree": true
+      },
+      {
+        "run_id": 42859202367,
+        "job_id": 129980432548,
+        "log_path": "42859202367/jobs/129980432548.log",
+        "log_sha256": "a4a1b930f5b47b5fbcf7ee82dd38eeb09bb7f1fa57c32242f7ea8213fba4aefa",
+        "actual_checkout_sha": "e3c7b79b0058656f11257ea55edc75371382b73e",
+        "tree_sha": "72328df65eafff795a5df1a10117c68c2d899bb6",
+        "matches_target_tree": true
+      },
+      {
+        "run_id": 42859202666,
+        "job_id": 129980431347,
+        "log_path": "42859202666/jobs/129980431347.log",
+        "log_sha256": "21b1d8cbbea3742adacf3397e8ad5ca7e73bbf7fd5e7ca46ece40faf200558f0",
+        "actual_checkout_sha": "e3c7b79b0058656f11257ea55edc75371382b73e",
+        "tree_sha": "72328df65eafff795a5df1a10117c68c2d899bb6",
+        "matches_target_tree": true
+      },
+      {
+        "run_id": 42859219338,
+        "job_id": 129980491722,
+        "log_path": "42859219338/jobs/129980491722.log",
+        "log_sha256": "6abfb5dd1a66684327bd071259ac016a7f6085dc122958b516f8d781f7808277",
+        "actual_checkout_sha": "9fd27f6dae5a157e29d92b3797764d0d74683a5c",
+        "tree_sha": "72328df65eafff795a5df1a10117c68c2d899bb6",
+        "matches_target_tree": true
+      },
+      {
+        "run_id": 42859219338,
+        "job_id": 129980492208,
+        "log_path": "42859219338/jobs/129980492208.log",
+        "log_sha256": "d70582dc4629e31782bc3de941b72ec54e0a2db9fbc2c07a0e85d03048d3863d",
+        "actual_checkout_sha": "9fd27f6dae5a157e29d92b3797764d0d74683a5c",
+        "tree_sha": "72328df65eafff795a5df1a10117c68c2d899bb6",
+        "matches_target_tree": true
+      },
+      {
+        "run_id": 42859219338,
+        "job_id": 129980492429,
+        "log_path": "42859219338/jobs/129980492429.log",
+        "log_sha256": "3e5918eb927e75b45a32a778d23b57ed6d900a0bec4bae80107f1f7805b2ac79",
+        "actual_checkout_sha": "9fd27f6dae5a157e29d92b3797764d0d74683a5c",
+        "tree_sha": "72328df65eafff795a5df1a10117c68c2d899bb6",
+        "matches_target_tree": true
+      },
+      {
+        "run_id": 42859219591,
+        "job_id": 129980491802,
+        "log_path": "42859219591/jobs/129980491802.log",
+        "log_sha256": "be7e4ad8e2055dd11fa1a90c1d4d00436a8356f8e19a26cdc8cf6ecfae97c4b2",
+        "actual_checkout_sha": "9fd27f6dae5a157e29d92b3797764d0d74683a5c",
+        "tree_sha": "72328df65eafff795a5df1a10117c68c2d899bb6",
+        "matches_target_tree": true
+      },
+      {
+        "run_id": 42859219591,
+        "job_id": 129981446743,
+        "log_path": "42859219591/jobs/129981446743.log",
+        "log_sha256": "54b47f358a3db7c9cfd2e85144fa8ff0198a830e5ecf6153dfec021609923787",
+        "actual_checkout_sha": "9fd27f6dae5a157e29d92b3797764d0d74683a5c",
+        "tree_sha": "72328df65eafff795a5df1a10117c68c2d899bb6",
+        "matches_target_tree": true
+      }
+    ],
+    "all_available_logged_checkouts_match_target_tree": true,
+    "logged_job_count": 9,
+    "expected_observed_attempt_job_count": 9,
+    "artifact_git_contexts": [
+      {
+        "run_id": 42859202367,
+        "event": "push",
+        "artifact_id": 13783849273,
+        "path": "42859202367/13783849273/extracted/result.json",
+        "sha256": "03fc88d003c078f1e2cd2eea59a2214131c756332955478c5f51531901201908",
+        "recorded_git_sha": "e3c7b79b0058656f11257ea55edc75371382b73e",
+        "git_dirty": false,
+        "tree_sha": "72328df65eafff795a5df1a10117c68c2d899bb6",
+        "matches_target_tree": true
+      },
+      {
+        "run_id": 42859202367,
+        "event": "push",
+        "artifact_id": 13784786948,
+        "path": "42859202367/13784786948/extracted/result.json",
+        "sha256": "22c8b236f1cbc1c90a522f10214a31e2b00299a65f0e4f4b14453f036e0afd4d",
+        "recorded_git_sha": "e3c7b79b0058656f11257ea55edc75371382b73e",
+        "git_dirty": false,
+        "tree_sha": "72328df65eafff795a5df1a10117c68c2d899bb6",
+        "matches_target_tree": true
+      },
+      {
+        "run_id": 42859202367,
+        "event": "push",
+        "artifact_id": 13785051537,
+        "path": "42859202367/13785051537/extracted/result.json",
+        "sha256": "32ee6b348b437db4e5088ef51f8af677a8072199c28e3a76e8fe64c4b669422f",
+        "recorded_git_sha": "e3c7b79b0058656f11257ea55edc75371382b73e",
+        "git_dirty": true,
+        "tree_sha": "72328df65eafff795a5df1a10117c68c2d899bb6",
+        "matches_target_tree": true,
+        "retained_benchmark_snapshot_sha256": "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f",
+        "snapshot_hash_matches_environment": true
+      },
+      {
+        "run_id": 42859219338,
+        "event": "pull_request",
+        "artifact_id": 13783838560,
+        "path": "42859219338/13783838560/extracted/result.json",
+        "sha256": "4586e747bc1490eae1bc54d691c1d42607794004c4ff01ae94ed091ef4619f5b",
+        "recorded_git_sha": "9fd27f6dae5a157e29d92b3797764d0d74683a5c",
+        "git_dirty": false,
+        "tree_sha": "72328df65eafff795a5df1a10117c68c2d899bb6",
+        "matches_target_tree": true
+      },
+      {
+        "run_id": 42859219338,
+        "event": "pull_request",
+        "artifact_id": 13783894386,
+        "path": "42859219338/13783894386/extracted/result.json",
+        "sha256": "82422e9efde29c11f8a4d4354de4ea76d10ff2867dac7273aaf71aa5337d8332",
+        "recorded_git_sha": "9fd27f6dae5a157e29d92b3797764d0d74683a5c",
+        "git_dirty": false,
+        "tree_sha": "72328df65eafff795a5df1a10117c68c2d899bb6",
+        "matches_target_tree": true
+      },
+      {
+        "run_id": 42859219338,
+        "event": "pull_request",
+        "artifact_id": 13785011777,
+        "path": "42859219338/13785011777/extracted/result.json",
+        "sha256": "5fca28bc9b57c89e1d23ebbc0ada54e88920fd56f31c8b98751d39b50c9e8118",
+        "recorded_git_sha": "9fd27f6dae5a157e29d92b3797764d0d74683a5c",
+        "git_dirty": true,
+        "tree_sha": "72328df65eafff795a5df1a10117c68c2d899bb6",
+        "matches_target_tree": true,
+        "retained_benchmark_snapshot_sha256": "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f",
+        "snapshot_hash_matches_environment": true
+      }
+    ]
+  },
+  "pitr": [
+    {
+      "run_id": 42859202666,
+      "event": "push",
+      "artifact_id": 13785125246,
+      "path": "42859202666/13785125246/extracted/pitr/result.json",
+      "sha256": "515256eb801cc1d61c78ad6a27b0073379850779530340c7123dd9d8da07ec3c",
+      "result": {
+        "status": "PASS",
+        "postgres": "postgres (PostgreSQL) 17.11 (Ubuntu 17.11-1.pgdg24.04+2)",
+        "execution_kind": "REAL_ISOLATED_POSTGRESQL",
+        "source_port": 48119,
+        "restored_port": 59827,
+        "durability": {
+          "fsync": true,
+          "synchronous_commit": true,
+          "data_checksums": true
+        },
+        "model_calls": 0,
+        "production_data_accessed": false,
+        "libpq_environment_isolated": true,
+        "cleared_pg_environment_names": [],
+        "pg_basebackup": {
+          "exit_code": 0,
+          "stdout": ""
+        },
+        "base_backup_seconds": 0.2243031769999959,
+        "pg_verifybackup": {
+          "exit_code": 0,
+          "stdout": "backup successfully verified"
+        },
+        "archiver": {
+          "archived_count": 4,
+          "failed_count": 0
+        },
+        "target_world_ref": {
+          "work_id": "2cd7cbcd-388e-4cb4-9b75-2bd69f491066",
+          "branch_id": "077f4f0d-f335-46e9-99b3-1fb67a79ee8c",
+          "world_revision_id": "b32824bd-8acd-48ee-9e13-71bbee05be0a"
+        },
+        "target_lsn": "0/3074260",
+        "restored_state_sha256": "2f33ac9d3cc090553e46aaafea60eca3e9d3e808d99897a7027e2c025c238b17",
+        "snapshot_equal_before_fencing": true,
+        "table_count": 37,
+        "object_count": 19,
+        "recovery_seconds_to_verified_service": 0.4559486260000085,
+        "selected_recovery_point_age_seconds": 0.254522,
+        "target_commits_lost": 0,
+        "deliberately_excluded_later_world_commits": 1,
+        "restored_world_event_count": 2,
+        "unknown_calls_retained": 1,
+        "reserved_amount_retained": "0.5",
+        "fenced_task_count": 1,
+        "old_worker_rejected": true,
+        "original_commit_receipt_equal": true,
+        "limitation": "Small isolated local fixture; selected-point RPO/RTO, not production SLO or remote storage test",
+        "total_seconds": 3.127932826999995
+      },
+      "manifest_file_count": 11,
+      "actual_manifest_members": 11,
+      "all_hashes_match": true,
+      "exact_retained_members_including_manifest": true,
+      "file_hash_checks": [
+        {
+          "path": "pitr.log",
+          "expected": "ed30dd593ad989c58e99cb318a3cfed73ba3d0cda1d7c02b18d27b045ba6ee55",
+          "actual": "ed30dd593ad989c58e99cb318a3cfed73ba3d0cda1d7c02b18d27b045ba6ee55"
+        },
+        {
+          "path": "pitr/NF_ISOLATED_RECOVERY_DRILL.json",
+          "expected": "60797787fd519b8ba1539cf0382fe7194c03cf5e78824bf8ae481648e64ac8ec",
+          "actual": "60797787fd519b8ba1539cf0382fe7194c03cf5e78824bf8ae481648e64ac8ec"
+        },
+        {
+          "path": "pitr/archive_segment.py",
+          "expected": "672395d38fb8cfe2d7c36ab9133c3136e03c9bc4e5051010a697b7f3dd545dc5",
+          "actual": "672395d38fb8cfe2d7c36ab9133c3136e03c9bc4e5051010a697b7f3dd545dc5"
+        },
+        {
+          "path": "pitr/fenced_tasks.json",
+          "expected": "500f78f5b02b5930d539889c5b422f8c07c9ff97c73ba62713357bbf15091d89",
+          "actual": "500f78f5b02b5930d539889c5b422f8c07c9ff97c73ba62713357bbf15091d89"
+        },
+        {
+          "path": "pitr/file_checksums.json",
+          "expected": "9a956e9958a6e65a516b09a9ac570dbdf9da3870ecc6c1400d2dedad3222d374",
+          "actual": "9a956e9958a6e65a516b09a9ac570dbdf9da3870ecc6c1400d2dedad3222d374"
+        },
+        {
+          "path": "pitr/restore.conf",
+          "expected": "f796dfbcdf7af0069a5e1dea8e26c5ba898774892f75844e5c89e5b9cc387ffe",
+          "actual": "f796dfbcdf7af0069a5e1dea8e26c5ba898774892f75844e5c89e5b9cc387ffe"
+        },
+        {
+          "path": "pitr/restored.log",
+          "expected": "eed0e9a5b3b0ec6f511984a27a0be3194865063476e0b18ec259ff0ab22f9ed5",
+          "actual": "eed0e9a5b3b0ec6f511984a27a0be3194865063476e0b18ec259ff0ab22f9ed5"
+        },
+        {
+          "path": "pitr/result.json",
+          "expected": "515256eb801cc1d61c78ad6a27b0073379850779530340c7123dd9d8da07ec3c",
+          "actual": "515256eb801cc1d61c78ad6a27b0073379850779530340c7123dd9d8da07ec3c"
+        },
+        {
+          "path": "pitr/source.conf",
+          "expected": "57785ab8eff1be9ceaf085135393dd68b547aa8ea24885b7c0bcd8975d64c465",
+          "actual": "57785ab8eff1be9ceaf085135393dd68b547aa8ea24885b7c0bcd8975d64c465"
+        },
+        {
+          "path": "pitr/source.log",
+          "expected": "e59ffc195458643c3887a6b2fd16fe6571248d2f5a0682b2336dc5d2367e7e8a",
+          "actual": "e59ffc195458643c3887a6b2fd16fe6571248d2f5a0682b2336dc5d2367e7e8a"
+        },
+        {
+          "path": "pitr/target_database_digests.json",
+          "expected": "cb3d9a8d6fd57dec421200a3cc91a4543871c75c501d4e5168590e2f2851cc13",
+          "actual": "cb3d9a8d6fd57dec421200a3cc91a4543871c75c501d4e5168590e2f2851cc13"
+        }
+      ]
+    },
+    {
+      "run_id": 42859219591,
+      "event": "pull_request",
+      "artifact_id": 13784955992,
+      "path": "42859219591/13784955992/extracted/pitr/result.json",
+      "sha256": "8faf4c53a54b794ee8ba3beaae0f3fdab46786e9ee0f6dddbac6d8734335d047",
+      "result": {
+        "status": "PASS",
+        "postgres": "postgres (PostgreSQL) 17.11 (Ubuntu 17.11-1.pgdg24.04+2)",
+        "execution_kind": "REAL_ISOLATED_POSTGRESQL",
+        "source_port": 49649,
+        "restored_port": 52339,
+        "durability": {
+          "fsync": true,
+          "synchronous_commit": true,
+          "data_checksums": true
+        },
+        "model_calls": 0,
+        "production_data_accessed": false,
+        "libpq_environment_isolated": true,
+        "cleared_pg_environment_names": [],
+        "pg_basebackup": {
+          "exit_code": 0,
+          "stdout": ""
+        },
+        "base_backup_seconds": 0.24442222600000463,
+        "pg_verifybackup": {
+          "exit_code": 0,
+          "stdout": "backup successfully verified"
+        },
+        "archiver": {
+          "archived_count": 3,
+          "failed_count": 0
+        },
+        "target_world_ref": {
+          "work_id": "5cab5baf-0717-4fd7-bd28-866124785809",
+          "branch_id": "6726e597-b494-47c0-a57e-65655c935c1c",
+          "world_revision_id": "11c0cd95-793f-4893-a978-4260837c22a8"
+        },
+        "target_lsn": "0/3074260",
+        "restored_state_sha256": "9b8fb9f7b7d94601d6f1bf7c695200bfc68d778f1c733cc11530d3c7519a7f22",
+        "snapshot_equal_before_fencing": true,
+        "table_count": 37,
+        "object_count": 19,
+        "recovery_seconds_to_verified_service": 0.4864739979999939,
+        "selected_recovery_point_age_seconds": 0.293061,
+        "target_commits_lost": 0,
+        "deliberately_excluded_later_world_commits": 1,
+        "restored_world_event_count": 2,
+        "unknown_calls_retained": 1,
+        "reserved_amount_retained": "0.5",
+        "fenced_task_count": 1,
+        "old_worker_rejected": true,
+        "original_commit_receipt_equal": true,
+        "limitation": "Small isolated local fixture; selected-point RPO/RTO, not production SLO or remote storage test",
+        "total_seconds": 3.306159604000001
+      },
+      "manifest_file_count": 11,
+      "actual_manifest_members": 11,
+      "all_hashes_match": true,
+      "exact_retained_members_including_manifest": true,
+      "file_hash_checks": [
+        {
+          "path": "pitr.log",
+          "expected": "ec5e21f3f5dbd76a31ff122b66a0d4d2ab6fb13237819f91b280371e6dafe60d",
+          "actual": "ec5e21f3f5dbd76a31ff122b66a0d4d2ab6fb13237819f91b280371e6dafe60d"
+        },
+        {
+          "path": "pitr/NF_ISOLATED_RECOVERY_DRILL.json",
+          "expected": "60797787fd519b8ba1539cf0382fe7194c03cf5e78824bf8ae481648e64ac8ec",
+          "actual": "60797787fd519b8ba1539cf0382fe7194c03cf5e78824bf8ae481648e64ac8ec"
+        },
+        {
+          "path": "pitr/archive_segment.py",
+          "expected": "672395d38fb8cfe2d7c36ab9133c3136e03c9bc4e5051010a697b7f3dd545dc5",
+          "actual": "672395d38fb8cfe2d7c36ab9133c3136e03c9bc4e5051010a697b7f3dd545dc5"
+        },
+        {
+          "path": "pitr/fenced_tasks.json",
+          "expected": "5e4ded470ae53e1536346956caaac0bc0491af78f475cd9f388df69e951b1f2c",
+          "actual": "5e4ded470ae53e1536346956caaac0bc0491af78f475cd9f388df69e951b1f2c"
+        },
+        {
+          "path": "pitr/file_checksums.json",
+          "expected": "6e0a98c15e1a5ec794e9634d7d70849b75c64b800c8900078ca3a8a23e643838",
+          "actual": "6e0a98c15e1a5ec794e9634d7d70849b75c64b800c8900078ca3a8a23e643838"
+        },
+        {
+          "path": "pitr/restore.conf",
+          "expected": "73d76a33b157c0c2df1ff2e158674526ae6fe2113d93a14ce555c91bdd3656a9",
+          "actual": "73d76a33b157c0c2df1ff2e158674526ae6fe2113d93a14ce555c91bdd3656a9"
+        },
+        {
+          "path": "pitr/restored.log",
+          "expected": "ae3b6457c82b9d695b3206e632e675f89a48a3513cc6c4f8a83065a2d3039197",
+          "actual": "ae3b6457c82b9d695b3206e632e675f89a48a3513cc6c4f8a83065a2d3039197"
+        },
+        {
+          "path": "pitr/result.json",
+          "expected": "8faf4c53a54b794ee8ba3beaae0f3fdab46786e9ee0f6dddbac6d8734335d047",
+          "actual": "8faf4c53a54b794ee8ba3beaae0f3fdab46786e9ee0f6dddbac6d8734335d047"
+        },
+        {
+          "path": "pitr/source.conf",
+          "expected": "2c0bbffd0978b908175af82e57e79a7a62012655d88a9d3444f3845b4c5da4a2",
+          "actual": "2c0bbffd0978b908175af82e57e79a7a62012655d88a9d3444f3845b4c5da4a2"
+        },
+        {
+          "path": "pitr/source.log",
+          "expected": "73d6b6b430f92aedae04221375425b1c8de7f60b9480fc7322bc8b486c9279fa",
+          "actual": "73d6b6b430f92aedae04221375425b1c8de7f60b9480fc7322bc8b486c9279fa"
+        },
+        {
+          "path": "pitr/target_database_digests.json",
+          "expected": "745c3d8004f7d1646150c75c99903cfcc200009ae97f0a00efdf29a90835e7cb",
+          "actual": "745c3d8004f7d1646150c75c99903cfcc200009ae97f0a00efdf29a90835e7cb"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Only the specified e3c7b79 checkpoint is covered; later branch changes are not inferred.",
+    "PR temporary merge 9fd27f6 and push head e3c7b79 have the same Git tree 72328df; actual job checkout logs are retained.",
+    "Mixed harness git_dirty=true includes its generated benchmark source snapshot written before hardware() runs; the retained snapshot hash and recorded Git commit/tree are separately checked. No pristine full working-directory claim is made.",
+    "PR PITR attempt1 failed on curl(56) downloading the PostgreSQL signing key before application installation or recovery. Subsequent evidence-directory/upload errors are secondary. Complete original failed logs remain retained.",
+    "Root retried only that failed PITR job once without source/gate changes; attempt2 is separately retained and cannot erase attempt1.",
+    "All downloaded artifacts retain complete ZIP bytes and all raw records. Every nonvalid/error row is separately indexed; no best-run selection.",
+    "500 mixed business commits, 1000 read-only throughput, and 600-second read-only stability are different gates; no substitution is made.",
+    "Finished attempts are not valid successes. Wire/header-start is an HTTPcore event, not packet capture or proof of application acceptance.",
+    "600-second probe cannot satisfy the multi-hour production experiment; long_duration_gate remains NOT_EXECUTED.",
+    "Two API processes share the runner with the generator and PostgreSQL. The scale harness does not launch a derived worker; combined API/worker resource capacity remains unmeasured.",
+    "PITR is an isolated generated fixture with exact named-target recovery; its subsecond recovery measurement is not a production RTO promise."
+  ],
+  "validation": {
+    "all_current_artifacts_downloaded": true,
+    "all_zip_digests_match": true,
+    "all_observed_attempt_jobs_have_checkout_logs": true,
+    "all_checkout_and_recorded_trees_match": true,
+    "all_pitr_members_and_hashes_match": true,
+    "all_probe_records_complete": true,
+    "all_probe_backpressure_counts_reconcile": true,
+    "all_mixed_counts_and_receipts_match": true,
+    "retained_raw_attempts": 39702,
+    "indexed_error_or_nonvalid_rows_including_expected_409": 8006
+  },
+  "six_scenario_table": [
+    {
+      "run_id": 42859202367,
+      "event": "push",
+      "scenario": "500-mixed",
+      "new_world_commits": 51,
+      "expected_new_world_commits": 51,
+      "valid_successful_http_calls": 2802,
+      "http_attempts": 2851,
+      "status_counts": {
+        "200": 2802,
+        "409": 49
+      },
+      "latency": {
+        "count": 2851,
+        "p50_ms": 114.4989,
+        "p95_ms": 390.0694,
+        "p99_ms": 621.826
+      },
+      "latency_scope": "All first attempts, including expected 409 conflicts; no infrastructure retries occurred.",
+      "call_start_rps": 8.154322189750122,
+      "header_start_rps": 8.155399844903753,
+      "rate_scope": "All first attempts across mixed phases, including intentional phase spacing; not a constant offered-rate gate.",
+      "goodput_rps": 7.8696,
+      "goodput_scope": "Validated HTTP success calls excluding duplicate receipts, across mixed operations.",
+      "gate": "PASS",
+      "cpu_models": [
+        "Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz"
+      ]
+    },
+    {
+      "run_id": 42859219338,
+      "event": "pull_request",
+      "scenario": "500-mixed",
+      "new_world_commits": 51,
+      "expected_new_world_commits": 51,
+      "valid_successful_http_calls": 2802,
+      "http_attempts": 2851,
+      "status_counts": {
+        "200": 2802,
+        "409": 49
+      },
+      "latency": {
+        "count": 2851,
+        "p50_ms": 75.568,
+        "p95_ms": 241.0542,
+        "p99_ms": 394.0898
+      },
+      "latency_scope": "All first attempts, including expected 409 conflicts; no infrastructure retries occurred.",
+      "call_start_rps": 8.160948146171618,
+      "header_start_rps": 8.161826884220954,
+      "rate_scope": "All first attempts across mixed phases, including intentional phase spacing; not a constant offered-rate gate.",
+      "goodput_rps": 7.8765,
+      "goodput_scope": "Validated HTTP success calls excluding duplicate receipts, across mixed operations.",
+      "gate": "PASS",
+      "cpu_models": [
+        "AMD EPYC 9V45 96-Core Processor"
+      ]
+    },
+    {
+      "run_id": 42859202367,
+      "event": "push",
+      "scenario": "1000-read-open",
+      "validated_successes": 1181,
+      "scheduled_requests": 5000,
+      "status_counts": {
+        "429": 3731,
+        "200": 1181,
+        "transport_error": 88
+      },
+      "latency": {
+        "count": 5000,
+        "p50_ms": 3063.4504,
+        "p95_ms": 8761.0905,
+        "p99_ms": 11267.7594
+      },
+      "latency_scope": "All emitted attempts, including 429/transport errors; scheduled-to-completion is separately retained for the open-arrival probe.",
+      "call_start_rps": 38.24814703243797,
+      "header_start_rps": 38.16180157540549,
+      "rate_scope": "HTTPcore header-start observed separately from dispatch.",
+      "goodput_rps": 8.818680175533302,
+      "goodput_scope": "Fully validated successful read-only responses per network/probe window.",
+      "gate": "NOT_MET",
+      "long_duration_gate": null,
+      "cpu_models": [
+        "AMD EPYC 7763 64-Core Processor"
+      ]
+    },
+    {
+      "run_id": 42859219338,
+      "event": "pull_request",
+      "scenario": "1000-read-open",
+      "validated_successes": 1203,
+      "scheduled_requests": 5000,
+      "status_counts": {
+        "429": 3706,
+        "200": 1203,
+        "transport_error": 91
+      },
+      "latency": {
+        "count": 5000,
+        "p50_ms": 3110.9387,
+        "p95_ms": 8406.3466,
+        "p99_ms": 11360.3971
+      },
+      "latency_scope": "All emitted attempts, including 429/transport errors; scheduled-to-completion is separately retained for the open-arrival probe.",
+      "call_start_rps": 38.56329078074615,
+      "header_start_rps": 38.49025479052025,
+      "rate_scope": "HTTPcore header-start observed separately from dispatch.",
+      "goodput_rps": 9.04825929732162,
+      "goodput_scope": "Fully validated successful read-only responses per network/probe window.",
+      "gate": "NOT_MET",
+      "long_duration_gate": null,
+      "cpu_models": [
+        "AMD EPYC 7763 64-Core Processor"
+      ]
+    },
+    {
+      "run_id": 42859202367,
+      "event": "push",
+      "scenario": "500-read-soak-600s",
+      "validated_successes": 11708,
+      "scheduled_requests": 12000,
+      "status_counts": {
+        "200": 11708,
+        "429": 292
+      },
+      "latency": {
+        "count": 12000,
+        "p50_ms": 2068.9434,
+        "p95_ms": 2275.5909,
+        "p99_ms": 2326.5767
+      },
+      "latency_scope": "All emitted attempts, including 429/transport errors; scheduled-to-completion is separately retained for the open-arrival probe.",
+      "call_start_rps": 20.00098446299053,
+      "header_start_rps": null,
+      "rate_scope": "This original stability probe records call starts, not header-start trace events.",
+      "goodput_rps": 19.447725496292534,
+      "goodput_scope": "Fully validated successful read-only responses per network/probe window.",
+      "gate": "NOT_MET",
+      "long_duration_gate": "NOT_EXECUTED",
+      "cpu_models": [
+        "AMD EPYC 7763 64-Core Processor"
+      ]
+    },
+    {
+      "run_id": 42859219338,
+      "event": "pull_request",
+      "scenario": "500-read-soak-600s",
+      "validated_successes": 12000,
+      "scheduled_requests": 12000,
+      "status_counts": {
+        "200": 12000
+      },
+      "latency": {
+        "count": 12000,
+        "p50_ms": 181.5236,
+        "p95_ms": 446.5278,
+        "p99_ms": 589.4043
+      },
+      "latency_scope": "All emitted attempts, including 429/transport errors; scheduled-to-completion is separately retained for the open-arrival probe.",
+      "call_start_rps": 20.00094604038047,
+      "header_start_rps": null,
+      "rate_scope": "This original stability probe records call starts, not header-start trace events.",
+      "goodput_rps": 19.997369671176987,
+      "goodput_scope": "Fully validated successful read-only responses per network/probe window.",
+      "gate": "PASS",
+      "long_duration_gate": "NOT_EXECUTED",
+      "cpu_models": [
+        "AMD EPYC 7763 64-Core Processor"
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "run_id": 42859202367,
+      "artifact_id": 13783849273,
+      "artifact_name": "p3-scale-500-read-soak-1",
+      "github_digest": "sha256:6ee7fb6dca8d06f00f6ee536592ce3973b93b5921fbe51d726d4785ec51920d2",
+      "actual_sha256": "6ee7fb6dca8d06f00f6ee536592ce3973b93b5921fbe51d726d4785ec51920d2",
+      "digest_matches": true,
+      "bytes": 486473
+    },
+    {
+      "run_id": 42859202367,
+      "artifact_id": 13784786948,
+      "artifact_name": "p3-scale-1000-read-open-1",
+      "github_digest": "sha256:8e9f60781c4fb4d69064e5a96f48ba9b0818abfdc04d204180c1bd056bd6242c",
+      "actual_sha256": "8e9f60781c4fb4d69064e5a96f48ba9b0818abfdc04d204180c1bd056bd6242c",
+      "digest_matches": true,
+      "bytes": 501976
+    },
+    {
+      "run_id": 42859202367,
+      "artifact_id": 13785051537,
+      "artifact_name": "p3-scale-500-mixed-1",
+      "github_digest": "sha256:3c7279cb42feb05f6f441f7136d4bed1a84472b2bb55760c6412ef19c046aa1d",
+      "actual_sha256": "3c7279cb42feb05f6f441f7136d4bed1a84472b2bb55760c6412ef19c046aa1d",
+      "digest_matches": true,
+      "bytes": 646558
+    },
+    {
+      "run_id": 42859202666,
+      "artifact_id": 13785125246,
+      "artifact_name": "p4-real-pitr-1",
+      "github_digest": "sha256:966885b5822f90ca4e4ef3b84727c193698e3ef8e133e2f02ac28c776b7caf18",
+      "actual_sha256": "966885b5822f90ca4e4ef3b84727c193698e3ef8e133e2f02ac28c776b7caf18",
+      "digest_matches": true,
+      "bytes": 9661
+    },
+    {
+      "run_id": 42859219338,
+      "artifact_id": 13783838560,
+      "artifact_name": "p3-scale-1000-read-open-1",
+      "github_digest": "sha256:f237132266d003413bad5c014ce385ecc6cd24b2631424600fd87b9cc743dfbb",
+      "actual_sha256": "f237132266d003413bad5c014ce385ecc6cd24b2631424600fd87b9cc743dfbb",
+      "digest_matches": true,
+      "bytes": 499944
+    },
+    {
+      "run_id": 42859219338,
+      "artifact_id": 13783894386,
+      "artifact_name": "p3-scale-500-read-soak-1",
+      "github_digest": "sha256:3af068d9462a9ef8308cc974d0925bb2654bc449388f4fb6bfd5b22093b3f31f",
+      "actual_sha256": "3af068d9462a9ef8308cc974d0925bb2654bc449388f4fb6bfd5b22093b3f31f",
+      "digest_matches": true,
+      "bytes": 486401
+    },
+    {
+      "run_id": 42859219338,
+      "artifact_id": 13785011777,
+      "artifact_name": "p3-scale-500-mixed-1",
+      "github_digest": "sha256:273fb78373faeb1f9a02432bb9cba6a39b9dbb2beca6ebef544ac7c2ad19014e",
+      "actual_sha256": "273fb78373faeb1f9a02432bb9cba6a39b9dbb2beca6ebef544ac7c2ad19014e",
+      "digest_matches": true,
+      "bytes": 641380
+    },
+    {
+      "run_id": 42859219591,
+      "artifact_id": 13784955992,
+      "artifact_name": "p4-real-pitr-2",
+      "github_digest": "sha256:2cf96cbe3acdc60786ac0f888380a11f5aec16c8be2944437a08d3067eba2045",
+      "actual_sha256": "2cf96cbe3acdc60786ac0f888380a11f5aec16c8be2944437a08d3067eba2045",
+      "digest_matches": true,
+      "bytes": 9732
+    }
+  ],
+  "mixed_loads": [
+    {
+      "run_id": 42859202367,
+      "event": "push",
+      "artifact_id": 13785051537,
+      "path": "42859202367/13785051537/extracted/result.json",
+      "gates": {
+        "engineer_correctness": "PASS",
+        "capacity_gate": "PASS",
+        "bounded_recovery_business_gate": "PASS",
+        "first_attempt_capacity_gate": "PASS"
+      },
+      "correctness": {
+        "new_world_revisions": 51,
+        "expected_new_world_revisions": 51,
+        "new_selected_effect_groups": 51,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99",
+        "independent_resource_final_quantities": [
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99"
+        ]
+      },
+      "metrics": {
+        "duration_seconds": 349.57098,
+        "planned_requests": 2851,
+        "emitted_requests": 2851,
+        "completed_requests": 2851,
+        "client_requests_never_emitted": 0,
+        "emitted_logical_operations": 2851,
+        "completed_logical_operations": 2851,
+        "first_attempt_failure_count": 0,
+        "first_attempt_status_counts": {
+          "200": 2802,
+          "409": 49
+        },
+        "first_attempt_latency": {
+          "count": 2851,
+          "p50_ms": 114.4989,
+          "p95_ms": 390.0694,
+          "p99_ms": 621.826
+        },
+        "recovered_logical_operations": 0,
+        "logical_operation_completion_latency": {
+          "count": 2851,
+          "p50_ms": 115.4831,
+          "p95_ms": 391.9182,
+          "p99_ms": 623.3061
+        },
+        "status_counts": {
+          "200": 2802,
+          "409": 49
+        },
+        "valid_successful_calls": 2802,
+        "api_success_rps": 8.0155,
+        "successful_duplicate_receipts": 51,
+        "effective_call_rps_excluding_duplicates": 7.8696,
+        "new_world_commit_receipts": 51,
+        "effective_world_commits_per_second": 0.1459,
+        "infrastructure_retries": 0,
+        "peak_outstanding_client_requests": 12,
+        "client_connection_limit": 256,
+        "latency_all_responses": {
+          "count": 2851,
+          "p50_ms": 114.4989,
+          "p95_ms": 390.0694,
+          "p99_ms": 621.826
+        },
+        "latency_successes": {
+          "count": 2802,
+          "p50_ms": 115.9579,
+          "p95_ms": 390.927,
+          "p99_ms": 621.826
+        },
+        "latency_rejections_and_failures": {
+          "count": 49,
+          "p50_ms": 42.1022,
+          "p95_ms": 44.1279,
+          "p99_ms": 94.0366
+        },
+        "scheduled_to_completion_latency": {
+          "count": 2851,
+          "p50_ms": 115.4831,
+          "p95_ms": 391.9182,
+          "p99_ms": 623.3061
+        },
+        "client_pool_wait": {
+          "count": 2851,
+          "p50_ms": 0.002,
+          "p95_ms": 0.003,
+          "p99_ms": 0.0035
+        },
+        "client_response_validation_cpu_seconds": 11.290282319000184,
+        "transport_headers_started": 2851,
+        "arrival_schedule_delay": {
+          "count": 2851,
+          "p50_ms": 0.8902,
+          "p95_ms": 2.7702,
+          "p99_ms": 7.0999
+        },
+        "correctness_errors": [],
+        "unresolved_operational_errors": []
+      },
+      "retry_exhaustion": {
+        "recorded_exhausted_operations": 0,
+        "last_retryable_operations": 0,
+        "exhausted_below_max_attempts_due_to_time_budget": 0,
+        "exhausted_at_max_attempts_time_budget_may_also_apply": 0,
+        "final_code_counts": {},
+        "final_label_counts": {},
+        "max_attempts": 5,
+        "retry_budget_seconds": 30.0
+      },
+      "receipt_checks": {
+        "receipt_rows": 102,
+        "unique_command_ids": 51,
+        "unique_world_revisions": 51,
+        "count_matches_world_revisions": true,
+        "duplicate_receipts_equal_original": true
+      },
+      "raw_cross_checks": {
+        "raw_request_count_matches": true,
+        "first_status_counts_match": true,
+        "first_logical_count": 2851,
+        "overload_first_count": 0,
+        "response_validation_cpu_seconds_from_raw": 11.290282319000184,
+        "response_validation_cpu_sum_matches": true,
+        "response_bytes_total": 7700968,
+        "unique_operation_count": 2851,
+        "last_attempt_still_retryable_operation_ids": []
+      },
+      "all_error_rows": {
+        "path": "42859202367/13785051537/all_error_or_nonvalid_rows.json",
+        "sha256": "892b6cb0bede21d069c7e7afe3d8e731fcad3fba9d16d9e46f1f0465e651af77",
+        "records": 49,
+        "statuses": {
+          "409": 49
+        },
+        "codes": {
+          "DEPENDENCY_CONFLICT": 49
+        },
+        "error_types": {},
+        "labels_or_kinds": {
+          "accept_conflict": 49
+        }
+      },
+      "open_loop_offered_rate": {
+        "gate": "NOT_APPLICABLE",
+        "target_rps": null,
+        "first_attempts": 0
+      },
+      "observed_all_phase_rates": {
+        "call_start_rps": 8.154322189750122,
+        "header_start_rps": 8.155399844903753,
+        "scope": "All first attempts across mixed phases, including intentional phase spacing; not a constant offered-rate gate."
+      }
+    },
+    {
+      "run_id": 42859219338,
+      "event": "pull_request",
+      "artifact_id": 13785011777,
+      "path": "42859219338/13785011777/extracted/result.json",
+      "gates": {
+        "engineer_correctness": "PASS",
+        "capacity_gate": "PASS",
+        "bounded_recovery_business_gate": "PASS",
+        "first_attempt_capacity_gate": "PASS"
+      },
+      "correctness": {
+        "new_world_revisions": 51,
+        "expected_new_world_revisions": 51,
+        "new_selected_effect_groups": 51,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99",
+        "independent_resource_final_quantities": [
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99"
+        ]
+      },
+      "metrics": {
+        "duration_seconds": 349.266959,
+        "planned_requests": 2851,
+        "emitted_requests": 2851,
+        "completed_requests": 2851,
+        "client_requests_never_emitted": 0,
+        "emitted_logical_operations": 2851,
+        "completed_logical_operations": 2851,
+        "first_attempt_failure_count": 0,
+        "first_attempt_status_counts": {
+          "200": 2802,
+          "409": 49
+        },
+        "first_attempt_latency": {
+          "count": 2851,
+          "p50_ms": 75.568,
+          "p95_ms": 241.0542,
+          "p99_ms": 394.0898
+        },
+        "recovered_logical_operations": 0,
+        "logical_operation_completion_latency": {
+          "count": 2851,
+          "p50_ms": 76.4303,
+          "p95_ms": 242.7873,
+          "p99_ms": 395.7125
+        },
+        "status_counts": {
+          "200": 2802,
+          "409": 49
+        },
+        "valid_successful_calls": 2802,
+        "api_success_rps": 8.0225,
+        "successful_duplicate_receipts": 51,
+        "effective_call_rps_excluding_duplicates": 7.8765,
+        "new_world_commit_receipts": 51,
+        "effective_world_commits_per_second": 0.146,
+        "infrastructure_retries": 0,
+        "peak_outstanding_client_requests": 4,
+        "client_connection_limit": 256,
+        "latency_all_responses": {
+          "count": 2851,
+          "p50_ms": 75.568,
+          "p95_ms": 241.0542,
+          "p99_ms": 394.0898
+        },
+        "latency_successes": {
+          "count": 2802,
+          "p50_ms": 75.9028,
+          "p95_ms": 245.4041,
+          "p99_ms": 394.0898
+        },
+        "latency_rejections_and_failures": {
+          "count": 49,
+          "p50_ms": 28.6468,
+          "p95_ms": 32.6707,
+          "p99_ms": 39.2856
+        },
+        "scheduled_to_completion_latency": {
+          "count": 2851,
+          "p50_ms": 76.4303,
+          "p95_ms": 242.7873,
+          "p99_ms": 395.7125
+        },
+        "client_pool_wait": {
+          "count": 2851,
+          "p50_ms": 0.0018,
+          "p95_ms": 0.0025,
+          "p99_ms": 0.003
+        },
+        "client_response_validation_cpu_seconds": 6.450758298000139,
+        "transport_headers_started": 2851,
+        "arrival_schedule_delay": {
+          "count": 2851,
+          "p50_ms": 0.7846,
+          "p95_ms": 1.8962,
+          "p99_ms": 2.509
+        },
+        "correctness_errors": [],
+        "unresolved_operational_errors": []
+      },
+      "retry_exhaustion": {
+        "recorded_exhausted_operations": 0,
+        "last_retryable_operations": 0,
+        "exhausted_below_max_attempts_due_to_time_budget": 0,
+        "exhausted_at_max_attempts_time_budget_may_also_apply": 0,
+        "final_code_counts": {},
+        "final_label_counts": {},
+        "max_attempts": 5,
+        "retry_budget_seconds": 30.0
+      },
+      "receipt_checks": {
+        "receipt_rows": 102,
+        "unique_command_ids": 51,
+        "unique_world_revisions": 51,
+        "count_matches_world_revisions": true,
+        "duplicate_receipts_equal_original": true
+      },
+      "raw_cross_checks": {
+        "raw_request_count_matches": true,
+        "first_status_counts_match": true,
+        "first_logical_count": 2851,
+        "overload_first_count": 0,
+        "response_validation_cpu_seconds_from_raw": 6.450758298000139,
+        "response_validation_cpu_sum_matches": true,
+        "response_bytes_total": 7700968,
+        "unique_operation_count": 2851,
+        "last_attempt_still_retryable_operation_ids": []
+      },
+      "all_error_rows": {
+        "path": "42859219338/13785011777/all_error_or_nonvalid_rows.json",
+        "sha256": "167eb35ce1cf1471c1d8106cdf153f061170c1ec4cfd530e7386a307d6a0a3bf",
+        "records": 49,
+        "statuses": {
+          "409": 49
+        },
+        "codes": {
+          "DEPENDENCY_CONFLICT": 49
+        },
+        "error_types": {},
+        "labels_or_kinds": {
+          "accept_conflict": 49
+        }
+      },
+      "open_loop_offered_rate": {
+        "gate": "NOT_APPLICABLE",
+        "target_rps": null,
+        "first_attempts": 0
+      },
+      "observed_all_phase_rates": {
+        "call_start_rps": 8.160948146171618,
+        "header_start_rps": 8.161826884220954,
+        "scope": "All first attempts across mixed phases, including intentional phase spacing; not a constant offered-rate gate."
+      }
+    }
+  ],
+  "open_arrival": [
+    {
+      "run_id": 42859202367,
+      "event": "push",
+      "artifact_id": 13784786948,
+      "path": "42859202367/13784786948/extracted/result.json",
+      "sha256": "22c8b236f1cbc1c90a522f10214a31e2b00299a65f0e4f4b14453f036e0afd4d",
+      "schema_version": "p3-open-arrival-1",
+      "evidence_kind": "REAL_HTTP_POSTGRESQL_OPEN_ARRIVAL",
+      "configuration": {
+        "agents": 1000,
+        "rounds": 5,
+        "arrival_rps": 1000.0,
+        "hot_fraction": 0.8,
+        "api_processes": 2,
+        "output": "ci-evidence/result.json"
+      },
+      "source_sha256": "515ec1ec61e03317cd6f160a22a309aa38bc6df8bbfd4604e3dacfa43b14e9da",
+      "network_window_seconds": 133.92026658100002,
+      "client_validation_seconds": 3.882480059000045,
+      "scheduled_requests": 5000,
+      "completed_requests": 5000,
+      "dispatch_start_rps": 38.24814703243797,
+      "observed_wire_start_rps": 38.16180157540549,
+      "wire_started_requests": 5000,
+      "client_connections_limit": 256,
+      "first_attempts_only": true,
+      "validated_successes": 1181,
+      "successful_query_rps": 8.818680175533302,
+      "latency_all_attempts": {
+        "count": 5000,
+        "p50_ms": 3063.4504,
+        "p95_ms": 8761.0905,
+        "p99_ms": 11267.7594
+      },
+      "scheduled_to_network_completion": {
+        "count": 5000,
+        "p50_ms": 61682.9671,
+        "p95_ms": 120938.3566,
+        "p99_ms": 128571.2063
+      },
+      "status_counts": {
+        "429": 3731,
+        "200": 1181,
+        "transport_error": 88
+      },
+      "offered_wire_rate_gate": "NOT_MET",
+      "capacity_gate": "NOT_MET",
+      "correctness_errors": [],
+      "world_unchanged": true,
+      "new_world_commits": 0,
+      "real_model_calls": 0,
+      "limitations": [
+        "Read-only overload; mixed business commits are measured by p2_behavioral_load",
+        "Wire-start trace observes HTTP header send start, not packet capture or server acceptance",
+        "Schema validation runs after network timing but every success requires it",
+        "Shared host; short window does not establish sustained production SLO"
+      ],
+      "raw_checks": {
+        "records": 5000,
+        "expected": 5000,
+        "unique_index_count": 5000,
+        "index_set_exact": true,
+        "validated_successes": 1181,
+        "statuses": {
+          "200": 1181,
+          "429": 3731,
+          "transport_error": 88
+        },
+        "statuses_match": true,
+        "correctness_errors": 0,
+        "transport_errors": 88,
+        "client_drops": 0,
+        "max_arrival_delay_ms": 125718.32436500002,
+        "wire_starts": 5000,
+        "observed_header_start_rps_from_raw": 38.16180157540549,
+        "header_rate_matches": true,
+        "count_fields_match": true
+      },
+      "all_failure_rows": {
+        "path": "42859202367/13784786948/all_error_or_nonvalid_rows.json",
+        "sha256": "1554484c71683ed2c2ad95abccdcc232c2b17a2910f26bbbfdc726516adfe6d6",
+        "records": 3819,
+        "statuses": {
+          "429": 3731,
+          "transport_error": 88
+        },
+        "codes": {
+          "BACKPRESSURE": 3731,
+          "None": 88
+        },
+        "error_types": {
+          "ReadError": 88
+        },
+        "labels_or_kinds": {
+          "None": 3819
+        }
+      },
+      "backpressure_reconciliation": {
+        "http_429": 3731,
+        "service_rejection_locations": {
+          "admission": {
+            "rejected": 426,
+            "timed_out": 1814
+          },
+          "authentication_admission": {
+            "rejected": 1491,
+            "timed_out": 0
+          },
+          "ingress": {
+            "rejected": 0,
+            "timed_out": 0
+          }
+        },
+        "service_rejection_sum": 3731,
+        "sum_matches_http_429": true,
+        "pool_checked_out_at_end": 0,
+        "configured_aggregate_pool": 8
+      }
+    },
+    {
+      "run_id": 42859219338,
+      "event": "pull_request",
+      "artifact_id": 13783838560,
+      "path": "42859219338/13783838560/extracted/result.json",
+      "sha256": "4586e747bc1490eae1bc54d691c1d42607794004c4ff01ae94ed091ef4619f5b",
+      "schema_version": "p3-open-arrival-1",
+      "evidence_kind": "REAL_HTTP_POSTGRESQL_OPEN_ARRIVAL",
+      "configuration": {
+        "agents": 1000,
+        "rounds": 5,
+        "arrival_rps": 1000.0,
+        "hot_fraction": 0.8,
+        "api_processes": 2,
+        "output": "ci-evidence/result.json"
+      },
+      "source_sha256": "515ec1ec61e03317cd6f160a22a309aa38bc6df8bbfd4604e3dacfa43b14e9da",
+      "network_window_seconds": 132.95374949700002,
+      "client_validation_seconds": 3.959458213000005,
+      "scheduled_requests": 5000,
+      "completed_requests": 5000,
+      "dispatch_start_rps": 38.56329078074615,
+      "observed_wire_start_rps": 38.49025479052025,
+      "wire_started_requests": 5000,
+      "client_connections_limit": 256,
+      "first_attempts_only": true,
+      "validated_successes": 1203,
+      "successful_query_rps": 9.04825929732162,
+      "latency_all_attempts": {
+        "count": 5000,
+        "p50_ms": 3110.9387,
+        "p95_ms": 8406.3466,
+        "p99_ms": 11360.3971
+      },
+      "scheduled_to_network_completion": {
+        "count": 5000,
+        "p50_ms": 62176.3319,
+        "p95_ms": 119608.0342,
+        "p99_ms": 127388.6352
+      },
+      "status_counts": {
+        "429": 3706,
+        "200": 1203,
+        "transport_error": 91
+      },
+      "offered_wire_rate_gate": "NOT_MET",
+      "capacity_gate": "NOT_MET",
+      "correctness_errors": [],
+      "world_unchanged": true,
+      "new_world_commits": 0,
+      "real_model_calls": 0,
+      "limitations": [
+        "Read-only overload; mixed business commits are measured by p2_behavioral_load",
+        "Wire-start trace observes HTTP header send start, not packet capture or server acceptance",
+        "Schema validation runs after network timing but every success requires it",
+        "Shared host; short window does not establish sustained production SLO"
+      ],
+      "raw_checks": {
+        "records": 5000,
+        "expected": 5000,
+        "unique_index_count": 5000,
+        "index_set_exact": true,
+        "validated_successes": 1203,
+        "statuses": {
+          "200": 1203,
+          "429": 3706,
+          "transport_error": 91
+        },
+        "statuses_match": true,
+        "correctness_errors": 0,
+        "transport_errors": 91,
+        "client_drops": 0,
+        "max_arrival_delay_ms": 124650.03487900003,
+        "wire_starts": 5000,
+        "observed_header_start_rps_from_raw": 38.49025479052025,
+        "header_rate_matches": true,
+        "count_fields_match": true
+      },
+      "all_failure_rows": {
+        "path": "42859219338/13783838560/all_error_or_nonvalid_rows.json",
+        "sha256": "409d45ab3f9953aa23fa07f1f47583085397a9304ff256df1e0817949eb2a130",
+        "records": 3797,
+        "statuses": {
+          "429": 3706,
+          "transport_error": 91
+        },
+        "codes": {
+          "BACKPRESSURE": 3706,
+          "None": 91
+        },
+        "error_types": {
+          "ReadError": 91
+        },
+        "labels_or_kinds": {
+          "None": 3797
+        }
+      },
+      "backpressure_reconciliation": {
+        "http_429": 3706,
+        "service_rejection_locations": {
+          "admission": {
+            "rejected": 555,
+            "timed_out": 1750
+          },
+          "authentication_admission": {
+            "rejected": 1401,
+            "timed_out": 0
+          },
+          "ingress": {
+            "rejected": 0,
+            "timed_out": 0
+          }
+        },
+        "service_rejection_sum": 3706,
+        "sum_matches_http_429": true,
+        "pool_checked_out_at_end": 0,
+        "configured_aggregate_pool": 8
+      }
+    }
+  ],
+  "stability": [
+    {
+      "run_id": 42859202367,
+      "event": "push",
+      "artifact_id": 13783849273,
+      "path": "42859202367/13783849273/extracted/result.json",
+      "sha256": "03fc88d003c078f1e2cd2eea59a2214131c756332955478c5f51531901201908",
+      "duration_seconds": 602.024128849,
+      "scheduled_count": 12000,
+      "evidence_kind": "REAL_HTTP_POSTGRESQL_READ_ONLY_STABILITY_PROBE",
+      "configuration": {
+        "agents": 500,
+        "seconds": 600.0,
+        "read_rps": 20.0,
+        "api_processes": 2,
+        "output": "ci-evidence/result.json"
+      },
+      "schema_version": "p3-stability-1",
+      "source_sha256": "8ad0e0781fbec0464b6385cab9ac89f4a6e51705e456d6394012a016460ec7ed",
+      "actual_call_start_rps": 20.00098446299053,
+      "successful_query_rps": 19.447725496292534,
+      "latency_all_attempts": {
+        "count": 12000,
+        "p50_ms": 2068.9434,
+        "p95_ms": 2275.5909,
+        "p99_ms": 2326.5767
+      },
+      "status_counts": {
+        "200": 11708,
+        "429": 292
+      },
+      "correctness_errors": [],
+      "world_unchanged": true,
+      "new_world_commits": 0,
+      "real_model_calls": 0,
+      "probe_gate": "NOT_MET",
+      "long_duration_gate": "NOT_EXECUTED",
+      "limitations": [
+        "Synthetic small world; fixed historical reads, no model requests",
+        "Process crash/receipt recovery is a separate integration test",
+        "No claim of hosted Agent products being integrated",
+        "One-hour minimum long-duration label is an explicit probe convention, not a production SLO"
+      ],
+      "sample_count": 60,
+      "raw_checks": {
+        "records": 12000,
+        "expected": 12000,
+        "unique_index_count": 12000,
+        "index_set_exact": true,
+        "validated_successes": 11708,
+        "statuses": {
+          "200": 11708,
+          "429": 292
+        },
+        "statuses_match": true,
+        "correctness_errors": 0,
+        "transport_errors": 0,
+        "client_drops": 0,
+        "max_arrival_delay_ms": 108.70425600000999,
+        "actual_call_start_rps_from_raw": 20.00098446299053,
+        "call_rate_matches": true,
+        "count_fields_match": true
+      },
+      "all_failure_rows": {
+        "path": "42859202367/13783849273/all_error_or_nonvalid_rows.json",
+        "sha256": "b9529dbd42f2dcfd436c5559b423b5d7e21826bade9118933abbff54826a2516",
+        "records": 292,
+        "statuses": {
+          "429": 292
+        },
+        "codes": {
+          "BACKPRESSURE": 292
+        },
+        "error_types": {},
+        "labels_or_kinds": {
+          "graph": 12,
+          "history": 18,
+          "state": 262
+        }
+      },
+      "backpressure_reconciliation": {
+        "http_429": 292,
+        "service_rejection_locations": {
+          "admission": {
+            "rejected": 0,
+            "timed_out": 292
+          },
+          "authentication_admission": {
+            "rejected": 0,
+            "timed_out": 0
+          },
+          "ingress": {
+            "rejected": 0,
+            "timed_out": 0
+          }
+        },
+        "service_rejection_sum": 292,
+        "sum_matches_http_429": true,
+        "pool_checked_out_at_end": 0,
+        "configured_aggregate_pool": 8
+      }
+    },
+    {
+      "run_id": 42859219338,
+      "event": "pull_request",
+      "artifact_id": 13783894386,
+      "path": "42859219338/13783894386/extracted/result.json",
+      "sha256": "82422e9efde29c11f8a4d4354de4ea76d10ff2867dac7273aaf71aa5337d8332",
+      "duration_seconds": 600.0789202440001,
+      "scheduled_count": 12000,
+      "evidence_kind": "REAL_HTTP_POSTGRESQL_READ_ONLY_STABILITY_PROBE",
+      "configuration": {
+        "agents": 500,
+        "seconds": 600.0,
+        "read_rps": 20.0,
+        "api_processes": 2,
+        "output": "ci-evidence/result.json"
+      },
+      "schema_version": "p3-stability-1",
+      "source_sha256": "8ad0e0781fbec0464b6385cab9ac89f4a6e51705e456d6394012a016460ec7ed",
+      "actual_call_start_rps": 20.00094604038047,
+      "successful_query_rps": 19.997369671176987,
+      "latency_all_attempts": {
+        "count": 12000,
+        "p50_ms": 181.5236,
+        "p95_ms": 446.5278,
+        "p99_ms": 589.4043
+      },
+      "status_counts": {
+        "200": 12000
+      },
+      "correctness_errors": [],
+      "world_unchanged": true,
+      "new_world_commits": 0,
+      "real_model_calls": 0,
+      "probe_gate": "PASS",
+      "long_duration_gate": "NOT_EXECUTED",
+      "limitations": [
+        "Synthetic small world; fixed historical reads, no model requests",
+        "Process crash/receipt recovery is a separate integration test",
+        "No claim of hosted Agent products being integrated",
+        "One-hour minimum long-duration label is an explicit probe convention, not a production SLO"
+      ],
+      "sample_count": 60,
+      "raw_checks": {
+        "records": 12000,
+        "expected": 12000,
+        "unique_index_count": 12000,
+        "index_set_exact": true,
+        "validated_successes": 12000,
+        "statuses": {
+          "200": 12000
+        },
+        "statuses_match": true,
+        "correctness_errors": 0,
+        "transport_errors": 0,
+        "client_drops": 0,
+        "max_arrival_delay_ms": 49.647752999987915,
+        "actual_call_start_rps_from_raw": 20.00094604038047,
+        "call_rate_matches": true,
+        "count_fields_match": true
+      },
+      "all_failure_rows": {
+        "path": "42859219338/13783894386/all_error_or_nonvalid_rows.json",
+        "sha256": "4fe0f3a21b708fcc65b971dd18f9d5631bb463eada351ac2e9307fe40134e493",
+        "records": 0,
+        "statuses": {},
+        "codes": {},
+        "error_types": {},
+        "labels_or_kinds": {}
+      },
+      "backpressure_reconciliation": {
+        "http_429": 0,
+        "service_rejection_locations": {
+          "admission": {
+            "rejected": 0,
+            "timed_out": 0
+          },
+          "authentication_admission": {
+            "rejected": 0,
+            "timed_out": 0
+          },
+          "ingress": {
+            "rejected": 0,
+            "timed_out": 0
+          }
+        },
+        "service_rejection_sum": 0,
+        "sum_matches_http_429": true,
+        "pool_checked_out_at_end": 0,
+        "configured_aggregate_pool": 8
+      }
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "collected_at": "2026-11-10T16:59:15.730Z",
+  "commits": [
+    {
+      "sha": "9fd27f6dae5a157e29d92b3797764d0d74683a5c",
+      "tree_sha": "72328df65eafff795a5df1a10117c68c2d899bb6",
+      "parents": [
+        "971fbef29eceb422d77271d11841bae1abdfd73f",
+        "e3c7b79b0058656f11257ea55edc75371382b73e"
+      ],
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/commit/9fd27f6dae5a157e29d92b3797764d0d74683a5c",
+      "message": "Merge e3c7b79b0058656f11257ea55edc75371382b73e into 971fbef29eceb422d77271d11841bae1abdfd73f"
+    },
+    {
+      "sha": "e3c7b79b0058656f11257ea55edc75371382b73e",
+      "tree_sha": "72328df65eafff795a5df1a10117c68c2d899bb6",
+      "parents": [
+        "008fccf23291c6f74693e450a88c224a436be7f6",
+        "971fbef29eceb422d77271d11841bae1abdfd73f"
+      ],
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/commit/e3c7b79b0058656f11257ea55edc75371382b73e",
+      "message": "fix(p3): retain complete recovery evidence and calibrate actual client capacity\n\nIntegrate the verified P2 strict-canonical repair through a second parent without rewriting published history. Preserve the runtime inventory recovery guard and all original workload and capacity gates.\n\nThe fixed-byte independent client calibration preserves all 20,000 attempts and records 197-241 header starts/s on its stated CPU budget; it is not application capacity validation. Preserve raw bytes, executed source and metadata errata. Upload and verify the three generated PITR configuration/archive files previously missing from Actions artifacts. Historical missing-file evidence remains unchanged.\n\n500-Agent mixed business passed twice at checkpoint 008fccf, while 1000-Agent and both 600-second probes remain NOT_MET. Both PRs remain Draft pending original mandatory gates."
+    }
+  ],
+  "tree_identical": true,
+  "expected_tree_sha": "72328df65eafff795a5df1a10117c68c2d899bb6",
+  "matches_expected_tree": true
+}

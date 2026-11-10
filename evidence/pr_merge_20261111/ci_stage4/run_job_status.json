@@ -1,0 +1,1808 @@
+{
+  "checkpoint": "e3c7b79b0058656f11257ea55edc75371382b73e",
+  "metadata_collected_at": "2026-11-10T17:04:23.976Z",
+  "source_final_metadata_sha256": "7a187a5608f870d30d51f7a431cd8f94fb663e60bdf7fdc84048d64863cda43a",
+  "runs": [
+    {
+      "id": 42859219253,
+      "name": "P1 and P2 production integrity",
+      "head_sha": "e3c7b79b0058656f11257ea55edc75371382b73e",
+      "head_branch": "dev/p3-p4-continuity",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42859219253",
+      "run_attempt": 1,
+      "created_at": "2026-11-10T16:53:38Z",
+      "updated_at": "2026-11-10T16:59:19Z",
+      "run_started_at": "2026-11-10T16:53:38Z",
+      "path": ".github/workflows/p1-integrity.yml",
+      "jobs": [
+        {
+          "id": 129980489175,
+          "run_id": 42859219253,
+          "name": "Schema, domain, HTTP and production boundaries",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "number": 2,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 3,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 4,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install locked dependencies",
+              "number": 5,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Schema and original design validation",
+              "number": 6,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Original standalone mechanisms",
+              "number": 7,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Python unit, contract and ASGI slow-body regression tests",
+              "number": 8,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Deterministic Chinese memory retrieval evaluation",
+              "number": 9,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Same-source Chinese context and review ablations",
+              "number": 10,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Upload immutable unit and schema run evidence",
+              "number": 11,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 20,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 21,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "number": 22,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "number": 23,
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 129980489489,
+          "run_id": 42859219253,
+          "name": "PostgreSQL 17 integration, concurrency and restore",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "number": 2,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "number": 3,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 4,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 5,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install PostgreSQL 17 client for real pg_dump and pg_restore",
+              "number": 6,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install locked dependencies",
+              "number": 7,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Record runtime and initialize fresh PostgreSQL database",
+              "number": 8,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "All tests with real PostgreSQL 17, race and recovery evidence",
+              "number": 9,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Compare current genesis replay with the pinned baseline",
+              "number": 10,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Compare current strict canonical checks on the same world",
+              "number": 11,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Reproduce historical Context Compiler experiment at e0b0f2b",
+              "number": 12,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Probe actual memory services and authorization boundaries",
+              "number": 13,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Persist the complete six-scene TEST_FIXTURE production run",
+              "number": 14,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Exercise the real HTTP and PostgreSQL behavioral load harness",
+              "number": 15,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Join A-H design checks to executed JUnit evidence",
+              "number": 16,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Upload PostgreSQL, concurrency and recovery audit evidence",
+              "number": 17,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 31,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 32,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "number": 33,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "number": 34,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "number": 35,
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 42859219454,
+      "name": "P2 measured capacity and recovery",
+      "head_sha": "e3c7b79b0058656f11257ea55edc75371382b73e",
+      "head_branch": "dev/p3-p4-continuity",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "failure",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42859219454",
+      "run_attempt": 1,
+      "created_at": "2026-11-10T16:53:38Z",
+      "updated_at": "2026-11-10T17:01:14Z",
+      "run_started_at": "2026-11-10T16:53:38Z",
+      "path": ".github/workflows/p2-load.yml",
+      "jobs": [
+        {
+          "id": 129980492949,
+          "run_id": 42859219454,
+          "name": "200 agents / overload / full capacity gate",
+          "status": "completed",
+          "conclusion": "failure",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "number": 2,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "number": 3,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 4,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 5,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install locked dependencies",
+              "number": 6,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Measure fixed population, requests and business completion",
+              "number": 7,
+              "status": "completed",
+              "conclusion": "failure"
+            },
+            {
+              "name": "Preserve raw attempts and honest capacity outcome",
+              "number": 8,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 13,
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 14,
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "number": 15,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "number": 16,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "number": 17,
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 129980493402,
+          "run_id": 42859219454,
+          "name": "200 agents / mixed / full capacity gate",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "number": 2,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "number": 3,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 4,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 5,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install locked dependencies",
+              "number": 6,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Measure fixed population, requests and business completion",
+              "number": 7,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Preserve raw attempts and honest capacity outcome",
+              "number": 8,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 13,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 14,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "number": 15,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "number": 16,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "number": 17,
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 129980493471,
+          "run_id": 42859219454,
+          "name": "50 agents / mixed / full capacity gate",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "number": 2,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "number": 3,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 4,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 5,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install locked dependencies",
+              "number": 6,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Measure fixed population, requests and business completion",
+              "number": 7,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Preserve raw attempts and honest capacity outcome",
+              "number": 8,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 13,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 14,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "number": 15,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "number": 16,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "number": 17,
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 129980493482,
+          "run_id": 42859219454,
+          "name": "50 agents / overload / full capacity gate",
+          "status": "completed",
+          "conclusion": "failure",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "number": 2,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "number": 3,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 4,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 5,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install locked dependencies",
+              "number": 6,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Measure fixed population, requests and business completion",
+              "number": 7,
+              "status": "completed",
+              "conclusion": "failure"
+            },
+            {
+              "name": "Preserve raw attempts and honest capacity outcome",
+              "number": 8,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 13,
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 14,
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "number": 15,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "number": 16,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "number": 17,
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 42859219256,
+      "name": "P3 P4 measured evidence",
+      "head_sha": "e3c7b79b0058656f11257ea55edc75371382b73e",
+      "head_branch": "dev/p3-p4-continuity",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "failure",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42859219256",
+      "run_attempt": 1,
+      "created_at": "2026-11-10T16:53:38Z",
+      "updated_at": "2026-11-10T16:57:12Z",
+      "run_started_at": "2026-11-10T16:53:38Z",
+      "path": ".github/workflows/p3-p4-evidence.yml",
+      "jobs": [
+        {
+          "id": 129980489108,
+          "run_id": 42859219256,
+          "name": "Independent load process / 200 / overload",
+          "status": "completed",
+          "conclusion": "failure",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "number": 2,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "number": 3,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 4,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 5,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install exact dependency lock",
+              "number": 6,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Actual requests and strict capacity gate",
+              "number": 7,
+              "status": "completed",
+              "conclusion": "failure"
+            },
+            {
+              "name": "Upload all attempts including failed gates",
+              "number": 8,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 13,
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 14,
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "number": 15,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "number": 16,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "number": 17,
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 129980489328,
+          "run_id": 42859219256,
+          "name": "Same world CPU and SQL paired comparison",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "number": 2,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "number": 3,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 4,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 5,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install and migrate isolated database",
+              "number": 6,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Fixed source, facts, evidence and guards",
+              "number": 7,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Upload raw paired profiles",
+              "number": 8,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 13,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 14,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "number": 15,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "number": 16,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "number": 17,
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 129980489371,
+          "run_id": 42859219256,
+          "name": "Independent load process / 200 / mixed",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "number": 2,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "number": 3,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 4,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 5,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install exact dependency lock",
+              "number": 6,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Actual requests and strict capacity gate",
+              "number": 7,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Upload all attempts including failed gates",
+              "number": 8,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 13,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 14,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "number": 15,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "number": 16,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "number": 17,
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 42859202765,
+      "name": "P1 and P2 production integrity",
+      "head_sha": "e3c7b79b0058656f11257ea55edc75371382b73e",
+      "head_branch": "dev/p3-p4-continuity",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42859202765",
+      "run_attempt": 1,
+      "created_at": "2026-11-10T16:53:32Z",
+      "updated_at": "2026-11-10T17:03:17Z",
+      "run_started_at": "2026-11-10T16:53:32Z",
+      "path": ".github/workflows/p1-integrity.yml",
+      "jobs": [
+        {
+          "id": 129980432059,
+          "run_id": 42859202765,
+          "name": "Schema, domain, HTTP and production boundaries",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "number": 2,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 3,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 4,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install locked dependencies",
+              "number": 5,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Schema and original design validation",
+              "number": 6,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Original standalone mechanisms",
+              "number": 7,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Python unit, contract and ASGI slow-body regression tests",
+              "number": 8,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Deterministic Chinese memory retrieval evaluation",
+              "number": 9,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Same-source Chinese context and review ablations",
+              "number": 10,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Upload immutable unit and schema run evidence",
+              "number": 11,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 20,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 21,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "number": 22,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "number": 23,
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 129980432414,
+          "run_id": 42859202765,
+          "name": "PostgreSQL 17 integration, concurrency and restore",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "number": 2,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "number": 3,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 4,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 5,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install PostgreSQL 17 client for real pg_dump and pg_restore",
+              "number": 6,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install locked dependencies",
+              "number": 7,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Record runtime and initialize fresh PostgreSQL database",
+              "number": 8,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "All tests with real PostgreSQL 17, race and recovery evidence",
+              "number": 9,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Compare current genesis replay with the pinned baseline",
+              "number": 10,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Compare current strict canonical checks on the same world",
+              "number": 11,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Reproduce historical Context Compiler experiment at e0b0f2b",
+              "number": 12,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Probe actual memory services and authorization boundaries",
+              "number": 13,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Persist the complete six-scene TEST_FIXTURE production run",
+              "number": 14,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Exercise the real HTTP and PostgreSQL behavioral load harness",
+              "number": 15,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Join A-H design checks to executed JUnit evidence",
+              "number": 16,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Upload PostgreSQL, concurrency and recovery audit evidence",
+              "number": 17,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 31,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 32,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "number": 33,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "number": 34,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "number": 35,
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 42859202233,
+      "name": "P2 measured capacity and recovery",
+      "head_sha": "e3c7b79b0058656f11257ea55edc75371382b73e",
+      "head_branch": "dev/p3-p4-continuity",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "failure",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42859202233",
+      "run_attempt": 1,
+      "created_at": "2026-11-10T16:53:32Z",
+      "updated_at": "2026-11-10T17:00:39Z",
+      "run_started_at": "2026-11-10T16:53:32Z",
+      "path": ".github/workflows/p2-load.yml",
+      "jobs": [
+        {
+          "id": 129980429804,
+          "run_id": 42859202233,
+          "name": "50 agents / mixed / full capacity gate",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "number": 2,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "number": 3,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 4,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 5,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install locked dependencies",
+              "number": 6,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Measure fixed population, requests and business completion",
+              "number": 7,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Preserve raw attempts and honest capacity outcome",
+              "number": 8,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 13,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 14,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "number": 15,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "number": 16,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "number": 17,
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 129980430064,
+          "run_id": 42859202233,
+          "name": "50 agents / overload / full capacity gate",
+          "status": "completed",
+          "conclusion": "failure",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "number": 2,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "number": 3,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 4,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 5,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install locked dependencies",
+              "number": 6,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Measure fixed population, requests and business completion",
+              "number": 7,
+              "status": "completed",
+              "conclusion": "failure"
+            },
+            {
+              "name": "Preserve raw attempts and honest capacity outcome",
+              "number": 8,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 13,
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 14,
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "number": 15,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "number": 16,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "number": 17,
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 129980430322,
+          "run_id": 42859202233,
+          "name": "200 agents / overload / full capacity gate",
+          "status": "completed",
+          "conclusion": "failure",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "number": 2,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "number": 3,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 4,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 5,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install locked dependencies",
+              "number": 6,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Measure fixed population, requests and business completion",
+              "number": 7,
+              "status": "completed",
+              "conclusion": "failure"
+            },
+            {
+              "name": "Preserve raw attempts and honest capacity outcome",
+              "number": 8,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 13,
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 14,
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "number": 15,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "number": 16,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "number": 17,
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 129980430450,
+          "run_id": 42859202233,
+          "name": "200 agents / mixed / full capacity gate",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "number": 2,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "number": 3,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 4,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 5,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install locked dependencies",
+              "number": 6,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Measure fixed population, requests and business completion",
+              "number": 7,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Preserve raw attempts and honest capacity outcome",
+              "number": 8,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 13,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 14,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "number": 15,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "number": 16,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "number": 17,
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 42859202425,
+      "name": "P3 P4 measured evidence",
+      "head_sha": "e3c7b79b0058656f11257ea55edc75371382b73e",
+      "head_branch": "dev/p3-p4-continuity",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "failure",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42859202425",
+      "run_attempt": 1,
+      "created_at": "2026-11-10T16:53:32Z",
+      "updated_at": "2026-11-10T16:57:18Z",
+      "run_started_at": "2026-11-10T16:53:32Z",
+      "path": ".github/workflows/p3-p4-evidence.yml",
+      "jobs": [
+        {
+          "id": 129980431782,
+          "run_id": 42859202425,
+          "name": "Same world CPU and SQL paired comparison",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "number": 2,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "number": 3,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 4,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 5,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install and migrate isolated database",
+              "number": 6,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Fixed source, facts, evidence and guards",
+              "number": 7,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Upload raw paired profiles",
+              "number": 8,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 13,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 14,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "number": 15,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "number": 16,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "number": 17,
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 129980432198,
+          "run_id": 42859202425,
+          "name": "Independent load process / 200 / mixed",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "number": 2,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "number": 3,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 4,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 5,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install exact dependency lock",
+              "number": 6,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Actual requests and strict capacity gate",
+              "number": 7,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Upload all attempts including failed gates",
+              "number": 8,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 13,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 14,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "number": 15,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "number": 16,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "number": 17,
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 129980432569,
+          "run_id": 42859202425,
+          "name": "Independent load process / 200 / overload",
+          "status": "completed",
+          "conclusion": "failure",
+          "steps": [
+            {
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "number": 2,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "number": 3,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "number": 4,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 5,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install exact dependency lock",
+              "number": 6,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Actual requests and strict capacity gate",
+              "number": 7,
+              "status": "completed",
+              "conclusion": "failure"
+            },
+            {
+              "name": "Upload all attempts including failed gates",
+              "number": 8,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "number": 13,
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "number": 14,
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "number": 15,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Stop containers",
+              "number": 16,
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "number": 17,
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "note": "Terminal run/job/step statuses only. Signed artifact download responses, actor/repository expansions and credentials are not retained here."
+}

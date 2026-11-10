@@ -4,7 +4,7 @@
 
 **当前分支范围：P2 完整工程链路与 P3/P4 的已交付有限工程能力，正在合并前收尾（2026-11-11）。** 本分支对应依赖 [PR #2](https://github.com/SKYdayDUCK/NovelFactory/pull/2) 的 [PR #3](https://github.com/SKYdayDUCK/NovelFactory/pull/3)。在 Python 3.12 / PostgreSQL 17 内核上，已有完整短卷生产、宏微事件有限等效、跨卷继承、派生工作者、在线备份与隔离 WAL/PITR；本轮只修复重复计算、恢复校验和 CI 证据缺口，不增加业务功能。
 
-**原容量验收仍为 `NOT_MET`，工程回归通过不代表容量通过。** 历史交接 `24b203f6fcda5f36105dfd9a37cd833671d7215c` 为 578 项完整 PostgreSQL 回归通过，但最新 200 Agent 正常/热点均13/21；500 mixed、1000 open read 和600秒零失败探针也存在未通过记录。继承的 P2 修复和本轮恢复缺陷修复需要在新 HEAD 重新验收。真实外部模型 `BLOCKED_ENVIRONMENT`，作者全文评价 `PENDING_AUTHOR`，文学质量 `NOT_EVALUATED`。当前证据与范围见[合并前修复报告](reports/PR2_PR3_合并前修复报告.md)及[PR与main记录](reports/PR合并与main验收记录.md)；全部历史失败记录保持原样。
+**原容量验收仍为 `NOT_MET`，两条 PR 均未合并、保持 Draft。** 最终应用代码 `e3c7b79b0058656f11257ea55edc75371382b73e` 的实际工程结果、全部负载及CI链接见[合并前修复报告](reports/PR2_PR3_合并前修复报告.md)和[PR与main记录](reports/PR合并与main验收记录.md)。两次500混合均51/51正式效果、2851操作全发、首试0；1000读仅1203/5000和1181/5000有效，原热点和持续负载容量仍未过。PITR新附件11/11完整，首次外部网络失败记录保留。详见[性能与容量对照](reports/性能与容量修复对照.md)、[未通过目标](reports/未通过目标与后续工作.md)。真实模型 `BLOCKED_ENVIRONMENT`、作者全文评价 `PENDING_AUTHOR`、文学质量 `NOT_EVALUATED`；初始13/21及全部失败证据不改写。main仍为P1。
 
 - **运行/复现：** [复现与运行指南](reports/复现与运行指南.md)，`uv sync --locked --group dev`；默认 Python 3.12，PostgreSQL 17。
 - **测试与 CI：** [P1 Integrity Workflow](.github/workflows/p1-integrity.yml) 对 Schema、单元、真实 PostgreSQL 集成/并发及恢复执行分组验证；原始 JUnit、日志和机器可读结果在每次 GitHub Actions Run 的 Artifacts 获取。CI 执行状态以 GitHub Actions 当次结果为准。
