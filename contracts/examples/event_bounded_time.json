@@ -1,0 +1,44 @@
+{
+  "schema_version": "2.0",
+  "occurrence_id": "59682e90-0a7d-5958-879b-6ffdd6c9b095",
+  "event_version_id": "844a85c6-7291-5d41-80aa-08095b685e47",
+  "effect_group_id": "cfb2fdf6-129a-520f-ab7c-6e70eb1e498e",
+  "representation_id": "1891f370-e8f8-5bca-937e-54ddbcd1ceee",
+  "participants": [
+    "3df1a7e0-22de-569b-9519-13122a7843ad"
+  ],
+  "causal_parents": [],
+  "ruleset_ref": {
+    "artifact_id": "4cfec058-c46a-53e3-b72a-a7426391a615",
+    "artifact_revision_id": "8c9115f4-5a69-5d81-bc16-0d3f3748b7f5",
+    "sha256": "6c621d1a05138a7888d37d9269a9da8e2e11e4aced2f6cfd24b05ab1b9e61bb0"
+  },
+  "adjudication_ref": {
+    "artifact_id": "a7e97076-5015-540c-b2ad-a18637f6e1da",
+    "artifact_revision_id": "7e4f80e0-5357-50ac-9916-dad939f6ebee",
+    "sha256": "25135325b8a1c15ab6d1ebced745adf737710ed96beda03e029351ea09127f6f"
+  },
+  "effects": [
+    {
+      "kind": "RESOURCE_DELTA",
+      "effect_key": "transport-day20-grain-use",
+      "resource_id": "93264eb8-d7b6-51e4-8d77-78894055fb63",
+      "quantity": "-2.5",
+      "unit": "kg",
+      "account_id": "e422f579-aa75-58fa-bdea-675885e14642"
+    }
+  ],
+  "engine_version": "fixture-reducer-1",
+  "occurrence_time": {
+    "kind": "BOUNDED",
+    "earliest": {
+      "tick": 22,
+      "phase": 0
+    },
+    "latest": {
+      "tick": 25,
+      "phase": 0
+    },
+    "constraint_refs": []
+  }
+}

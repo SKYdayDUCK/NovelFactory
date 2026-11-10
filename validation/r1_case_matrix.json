@@ -1,0 +1,793 @@
+{
+  "schema_version": "1.0",
+  "package_revision": "v2.0-R1",
+  "fixture_rule": "R1-SWORD uses D01 manufacture/D10 gift/D20 loan/D30 theft/D40 destruction. Original v1.1 D12 fixture remains unchanged.",
+  "status": "PLANNED_NOT_EXECUTED",
+  "case_count": 8,
+  "source": "User supplementary research task, sections X and XI, 2026-11-10",
+  "cases": [
+    {
+      "case_id": "R1-A",
+      "title": "物品历史、未来计划与失效传播",
+      "initial_conditions": [
+        "独立作品 R1_SWORD；人物 smith、protagonist、friend、rival；剑 sword_1。规则：赠送转所有权，借用/盗窃仅变占有，毁坏后无活跃持有和使用。",
+        "D01 制造：smith 所有且持有；D10 赠给 protagonist；D20 借给 friend；D30 rival 盗窃成功；D40 销毁。以上实际动作须按顺序裁决和正式接受。",
+        "D15 创建并批准 D50 使用 sword_1 进入秘境的计划；硬前提是实例存在且可使用，批准不产生 D50 世界效果。",
+        "目标范围过程已求值到 D42 排他前沿，因此 D41 可查询而 D50 尚未求值；使用选定最终 WorldRef 查询历史，读者披露单独固定。"
+      ],
+      "operations": [
+        "以同一故事坐标和不同 plane 查询 D05/D15/D25/D35/D40 后状态，区分事件发生与关系有效范围。",
+        "在 D40 接受销毁事件和关键投影的同一事务写相关 scope 失效屏障；暂停依赖该实例可用性的计划执行资格。",
+        "异步展开计划/场景/摘要依赖，提交局部重规划任务；可以提出换剑或换入口，不能自动复活旧实例。",
+        "查询未来计划、依赖 sword_1 存续的计划、D50 前转移历史；世界 D50 若覆盖不足返回 PENDING，不返回计划结果作为事实。"
+      ],
+      "expected_states": [
+        {
+          "at": "D05",
+          "owner": "smith",
+          "holder": "smith",
+          "lifecycle": "ACTIVE"
+        },
+        {
+          "at": "D15",
+          "owner": "protagonist",
+          "holder": "protagonist",
+          "lifecycle": "ACTIVE"
+        },
+        {
+          "at": "D25",
+          "owner": "protagonist",
+          "holder": "friend",
+          "lifecycle": "ACTIVE"
+        },
+        {
+          "at": "D35",
+          "owner": "protagonist",
+          "holder": "rival",
+          "lifecycle": "ACTIVE"
+        },
+        {
+          "at": "D41",
+          "last_confirmed_owner": "protagonist",
+          "active_holder": "NONE",
+          "active_use": "NOT_APPLICABLE",
+          "lifecycle": "DESTROYED"
+        }
+      ],
+      "acceptance_criteria": [
+        "四次关系变化均有事件版本与有效区间证据；范围查询不重复计入同一发生。",
+        "销毁后的活跃持有查询仅在 COMPLETE/EVALUATED 条件下返回 NONE；历史所有权仍可查。毁坏后的赔偿等法律关系只按已注册规则另行表示。",
+        "D50计划的当前适用性被阻断，后续选择的新计划版本可标INVALIDATED并安排重规划；原APPROVED版本及破坏前提的证据仍保留，不能把旧版原地改写。",
+        "暂停异步依赖 worker 时，正式执行仍被同步屏障阻断；重启后追上且不重复重规划效果。"
+      ],
+      "failure_injections": [
+        "D40 提交后、派生索引更新前暂停 worker",
+        "重复提交销毁变化包",
+        "读取旧缓存中的 D50 可用性"
+      ],
+      "related_cases": [
+        "T01",
+        "T03",
+        "T08",
+        "F05",
+        "F14",
+        "F17"
+      ],
+      "phase_gates": [
+        "P1",
+        "P2"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "evidence_requirements": [
+        "精确 WorldRef、规则/策略版本及输入/输出产物哈希",
+        "接受回执、稳定 occurrence/effect 身份与实际投影查询",
+        "相关 scope/predicate/coverage token 前后值及任务代际",
+        "错误码、重试或重验证原因及被阻断候选",
+        "实际执行环境、测试版本与原始结果；未执行保持空 execution_evidence"
+      ],
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/04_事件溯源与版本体系.md",
+        "docs/05_世界模拟与调度引擎.md",
+        "docs/08_MCP与工具接口.md",
+        "docs/09_长期记忆与检索.md",
+        "docs/13_统一时间线与动态知识演化.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ],
+      "acceptance_checks": [
+        {
+          "test_id": "R1-A-01",
+          "criterion": "四次关系变化均有事件版本与有效区间证据；范围查询不重复计入同一发生。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-A-02",
+          "criterion": "销毁后的活跃持有查询仅在 COMPLETE/EVALUATED 条件下返回 NONE；历史所有权仍可查。毁坏后的赔偿等法律关系只按已注册规则另行表示。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-A-03",
+          "criterion": "D50计划的当前适用性被阻断，后续选择的新计划版本可标INVALIDATED并安排重规划；原APPROVED版本及破坏前提的证据仍保留，不能把旧版原地改写。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-A-04",
+          "criterion": "暂停异步依赖 worker 时，正式执行仍被同步屏障阻断；重启后追上且不重复重规划效果。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        }
+      ]
+    },
+    {
+      "case_id": "R1-B",
+      "title": "修改过去转交方式并重建两个版本",
+      "initial_conditions": [
+        "复用 R1-A 的独立副本；W_old 已接受至 D40，D20 是借用。",
+        "作者请求把 D20 改为赠与，保持原 occurrence_id，创建新 event_version；W_old 与旧文本保留。",
+        "后续计划存在“主角仍拥有 sword_1”的硬前提，朋友/反派的知识来源各不相同。"
+      ],
+      "operations": [
+        "固定 W_old、变更包、受保护发布范围和审批；从相容快照或初始状态创建 REPAIR。",
+        "显式 REPLACE D20；重建权属、必要认知、过程覆盖，复核 D30 盗窃/D40 毁坏是否仍成立。",
+        "比较 W_old 与 W_new 在 D25 的 owner/holder；对旧前提展开章节、伏笔、信念和摘要影响。",
+        "以最终候选绑定检查报告，复验旧 canon/head 与候选 head 后推广；相关计划局部重规划。"
+      ],
+      "expected_states": [
+        {
+          "world_ref": "W_old",
+          "at": "D25",
+          "owner": "protagonist",
+          "holder": "friend"
+        },
+        {
+          "world_ref": "W_new",
+          "at": "D25",
+          "owner": "friend",
+          "holder": "friend"
+        },
+        {
+          "world_ref": "W_new",
+          "at": "D35",
+          "owner": "friend",
+          "holder": "rival"
+        },
+        {
+          "world_ref": "W_new",
+          "at": "D41",
+          "last_confirmed_owner": "friend",
+          "active_holder": "NONE",
+          "lifecycle": "DESTROYED"
+        }
+      ],
+      "acceptance_criteria": [
+        "旧修订和旧发布可还原；不原地覆盖事件或对当前状态简单反向扣回。",
+        "只重用选择清单、规则和投影器相容的快照；新历史中每个效果只生效一次。",
+        "产权改变不自动删除曾发生的发言/误信；认知变化需要相应来源。",
+        "旧 canon 在重建期间新增事实或候选变化会使推广 CAS 拒绝；已有独立写入不丢失。",
+        "受影响的文本/摘要/计划缺少新资格时不得套用旧批准进入新版本。"
+      ],
+      "failure_injections": [
+        "重建中断后恢复",
+        "推广前 canon 产生新提交",
+        "替换候选后复用旧报告或 Approval"
+      ],
+      "related_cases": [
+        "T05",
+        "V2-04",
+        "F03",
+        "F17"
+      ],
+      "phase_gates": [
+        "P1",
+        "P2"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "evidence_requirements": [
+        "精确 WorldRef、规则/策略版本及输入/输出产物哈希",
+        "接受回执、稳定 occurrence/effect 身份与实际投影查询",
+        "相关 scope/predicate/coverage token 前后值及任务代际",
+        "错误码、重试或重验证原因及被阻断候选",
+        "实际执行环境、测试版本与原始结果；未执行保持空 execution_evidence"
+      ],
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/04_事件溯源与版本体系.md",
+        "docs/05_世界模拟与调度引擎.md",
+        "docs/08_MCP与工具接口.md",
+        "docs/09_长期记忆与检索.md",
+        "docs/13_统一时间线与动态知识演化.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ],
+      "acceptance_checks": [
+        {
+          "test_id": "R1-B-01",
+          "criterion": "旧修订和旧发布可还原；不原地覆盖事件或对当前状态简单反向扣回。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-B-02",
+          "criterion": "只重用选择清单、规则和投影器相容的快照；新历史中每个效果只生效一次。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-B-03",
+          "criterion": "产权改变不自动删除曾发生的发言/误信；认知变化需要相应来源。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-B-04",
+          "criterion": "旧 canon 在重建期间新增事实或候选变化会使推广 CAS 拒绝；已有独立写入不丢失。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-B-05",
+          "criterion": "受影响的文本/摘要/计划缺少新资格时不得套用旧批准进入新版本。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        }
+      ]
+    },
+    {
+      "case_id": "R1-C",
+      "title": "独立剧情线推进、消息同步与资源交汇",
+      "initial_conditions": [
+        "独立作品 R1_CROSSING，地区 east、west、remote；当前排他前沿分别 D41、D36、D21。",
+        "主角自 east D40 出发、反派自 west D35 出发，均按已接受旅行规则到达 bridge 的 D42 窗口；共享资源 bridge_key 唯一。",
+        "remote 已登记的最早外来影响为 D45；其它相关入站通道及资源参与者登记完整。",
+        "每个角色只得到自身认知，联合裁决者获授权读取该冲突组的客观状态与全部意图。"
+      ],
+      "operations": [
+        "east/west 在允许范围各自推进；remote 不必先追到 D42，但其通道下界不能被当成整个世界无事件证明。",
+        "封闭 D42 冲突组，收集主角/反派行动或明确合法弃权；未收到响应保持技术待处理。",
+        "对同一锁定世界切面联合裁决，再一次接受裁决结果、过程进度和外发消息。",
+        "传播给其它地区的消息有 send/arrival 和接收证据，接收前角色不知情；下一波因果任务受触发器驱动。"
+      ],
+      "expected_states": [
+        "D42 之前受影响范围可以推进，未登记完整通道的范围不能宣称 COMPLETE。",
+        "bridge_key 在窗口结束只有规则允许的持有结果；两者失败也允许，不能由锁先后选胜者。",
+        "remote 的故事进度可以保持 D20 已求值，而不冻结所有不依赖它的地区。"
+      ],
+      "acceptance_criteria": [
+        "对两行动的所有到达排列，封闭输入和已选裁决结果一致；不得用响应快慢判胜。",
+        "删除一个可能影响 bridge 的入站通道证明后必须阻断交汇接受。",
+        "将入站下界设为 D42 时只可确认严格早于 D42 的范围，不能越过未处理交汇。",
+        "延迟/重复消息只产生一次获准观察或触发；尚未到达不进入角色上下文。",
+        "真实数据库并发仅验证原子性，语义胜负由预先固定的裁决结果决定。"
+      ],
+      "failure_injections": [
+        "某角色调用超时",
+        "一个通道登记遗漏",
+        "重复消息投递",
+        "非相关地区继续接受事件"
+      ],
+      "related_cases": [
+        "T07",
+        "S02",
+        "S03",
+        "S05",
+        "S08"
+      ],
+      "phase_gates": [
+        "P2"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "evidence_requirements": [
+        "精确 WorldRef、规则/策略版本及输入/输出产物哈希",
+        "接受回执、稳定 occurrence/effect 身份与实际投影查询",
+        "相关 scope/predicate/coverage token 前后值及任务代际",
+        "错误码、重试或重验证原因及被阻断候选",
+        "实际执行环境、测试版本与原始结果；未执行保持空 execution_evidence"
+      ],
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/04_事件溯源与版本体系.md",
+        "docs/05_世界模拟与调度引擎.md",
+        "docs/08_MCP与工具接口.md",
+        "docs/09_长期记忆与检索.md",
+        "docs/13_统一时间线与动态知识演化.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ],
+      "acceptance_checks": [
+        {
+          "test_id": "R1-C-01",
+          "criterion": "对两行动的所有到达排列，封闭输入和已选裁决结果一致；不得用响应快慢判胜。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-C-02",
+          "criterion": "删除一个可能影响 bridge 的入站通道证明后必须阻断交汇接受。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-C-03",
+          "criterion": "将入站下界设为 D42 时只可确认严格早于 D42 的范围，不能越过未处理交汇。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-C-04",
+          "criterion": "延迟/重复消息只产生一次获准观察或触发；尚未到达不进入角色上下文。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-C-05",
+          "criterion": "真实数据库并发仅验证原子性，语义胜负由预先固定的裁决结果决定。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        }
+      ]
+    },
+    {
+      "case_id": "R1-D",
+      "title": "未来候选已推进而主分支未推进",
+      "initial_conditions": [
+        "独立作品 R1_FUTURE，main 的相关事件域只求值到 D61 排他前沿，candidate 从固定 main WorldRef fork 后求值到 D101。",
+        "candidate 在 D70 接受 sword_1 提前毁坏；main D60 该剑仍存在。main 有 D80 使用计划，但没有 D80 使用事实。"
+      ],
+      "operations": [
+        "使用统一查询入口分别固定 main/candidate WorldRef 查询 D60、D90；显式选择 WORLD/PLAN/SIMULATION 平面。",
+        "只在 candidate 内比较 D70 事件及后续后果；主分支受限角色请求 candidate 事实应拒绝或按授权安全隐藏。",
+        "择优采纳时生成面向目标分支的正式变化包、依赖复核及裁决/批准；main 已变时重新检查因果片段。"
+      ],
+      "expected_states": [
+        "candidate D90 可返回该分支已接受的毁坏事实；这不是 main 的未来事实。",
+        "main D90 相关过程不足时返回 PENDING/未定；可另行返回带计划类型的 D80 目标。",
+        "main D60 及其原引用不被 candidate 修改；共享 fork 效果身份不会重复施加。"
+      ],
+      "acceptance_criteria": [
+        "缓存、上下文、索引和证据均带作品/分支/修订及权限绑定；不按实体ID跨分支复用事实答案。",
+        "采纳前 candidate 内容不进入 main 投影；采纳后每个事件效果只在目标历史中选择一次。",
+        "自动切换 WorldRef 或直接复制候选投影不能通过正式接受门禁。",
+        "作者可查的候选信息不会进入无此 grant 的角色会话或错误消息。"
+      ],
+      "failure_injections": [
+        "同实体跨分支缓存键碰撞",
+        "main 在 candidate 推演后已产生独立或冲突提交",
+        "取消候选后返回迟到任务"
+      ],
+      "related_cases": [
+        "S06",
+        "F07",
+        "V2-03"
+      ],
+      "phase_gates": [
+        "P1",
+        "P2"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "evidence_requirements": [
+        "精确 WorldRef、规则/策略版本及输入/输出产物哈希",
+        "接受回执、稳定 occurrence/effect 身份与实际投影查询",
+        "相关 scope/predicate/coverage token 前后值及任务代际",
+        "错误码、重试或重验证原因及被阻断候选",
+        "实际执行环境、测试版本与原始结果；未执行保持空 execution_evidence"
+      ],
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/04_事件溯源与版本体系.md",
+        "docs/05_世界模拟与调度引擎.md",
+        "docs/08_MCP与工具接口.md",
+        "docs/09_长期记忆与检索.md",
+        "docs/13_统一时间线与动态知识演化.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ],
+      "acceptance_checks": [
+        {
+          "test_id": "R1-D-01",
+          "criterion": "缓存、上下文、索引和证据均带作品/分支/修订及权限绑定；不按实体ID跨分支复用事实答案。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-D-02",
+          "criterion": "采纳前 candidate 内容不进入 main 投影；采纳后每个事件效果只在目标历史中选择一次。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-D-03",
+          "criterion": "自动切换 WorldRef 或直接复制候选投影不能通过正式接受门禁。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-D-04",
+          "criterion": "作者可查的候选信息不会进入无此 grant 的角色会话或错误消息。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        }
+      ]
+    },
+    {
+      "case_id": "R1-E",
+      "title": "误信、客观状态与读者披露隔离",
+      "initial_conditions": [
+        "独立作品 R1_BELIEF，D20 friend 持剑已被 protagonist 看见；D30 rival 偷剑无人通知 protagonist。",
+        "客观 D35 holder=rival；protagonist 的 D35 记忆/信念仍指向 friend，来源只有 D20 观察。",
+        "第80章尚未披露盗窃；正文版本与 arrangement 固定。"
+      ],
+      "operations": [
+        "按同一 WorldRef 分别编译 protagonist 行动上下文、裁决上下文和第80章读者视图。",
+        "角色发问或推测：允许怀疑，但不凭客观图库补入其已知事实。",
+        "D36 信使报告盗窃并被接收后，写观察；角色可相信、怀疑或误解，信念更新独立表达。"
+      ],
+      "expected_states": [
+        "ACTOR 视图给出基于 D20 的 BELIEF 与来源，不暴露客观 rival 或作者候选计划。",
+        "裁决者在获准范围读到真实 holder=rival；读者视图只给已披露文本命题。",
+        "D36 报告发生可确定，但其内容为真或角色采信不能自动等同。"
+      ],
+      "acceptance_criteria": [
+        "检查正文、证据ID、计数、搜索分数、错误与缓存命中路径均不泄露秘密。",
+        "隐藏记录与不存在记录在受限接口具有一致可见行为；高敏感路径另测时间/大小侧信道风险。",
+        "用同一全知模型会话直接改提示词扮演 protagonist 的实现判为隔离失败。",
+        "角色猜中秘密只能标为推测，不能伪造知情证据；查询旧 D35 仍保留旧认知。"
+      ],
+      "failure_injections": [
+        "用全知缓存服务角色请求",
+        "撤销角色授权后读旧 ContextBundle",
+        "摘要遗漏来源或把传言升级为事实"
+      ],
+      "related_cases": [
+        "T02",
+        "T11",
+        "F06",
+        "F13",
+        "V2-09",
+        "V2-10"
+      ],
+      "phase_gates": [
+        "P1",
+        "P2"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "evidence_requirements": [
+        "精确 WorldRef、规则/策略版本及输入/输出产物哈希",
+        "接受回执、稳定 occurrence/effect 身份与实际投影查询",
+        "相关 scope/predicate/coverage token 前后值及任务代际",
+        "错误码、重试或重验证原因及被阻断候选",
+        "实际执行环境、测试版本与原始结果；未执行保持空 execution_evidence"
+      ],
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/04_事件溯源与版本体系.md",
+        "docs/05_世界模拟与调度引擎.md",
+        "docs/08_MCP与工具接口.md",
+        "docs/09_长期记忆与检索.md",
+        "docs/13_统一时间线与动态知识演化.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ],
+      "acceptance_checks": [
+        {
+          "test_id": "R1-E-01",
+          "criterion": "检查正文、证据ID、计数、搜索分数、错误与缓存命中路径均不泄露秘密。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-E-02",
+          "criterion": "隐藏记录与不存在记录在受限接口具有一致可见行为；高敏感路径另测时间/大小侧信道风险。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-E-03",
+          "criterion": "用同一全知模型会话直接改提示词扮演 protagonist 的实现判为隔离失败。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-E-04",
+          "criterion": "角色猜中秘密只能标为推测，不能伪造知情证据；查询旧 D35 仍保留旧认知。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        }
+      ]
+    },
+    {
+      "case_id": "R1-F",
+      "title": "数百 Agent、共享基线、独立与冲突写入",
+      "initial_conditions": [
+        "在200个逻辑 Agent 档位先执行；160只读/写作任务，20个封闭足迹的独立仓储命令，20个同故事窗口争夺同一 sword_1 的行动。",
+        "全部固定 W0 输入；每个独立命令具有服务端完整 read/write/predicate/规则/覆盖范围 token，涉及的区域互不依赖。",
+        "争剑20意图构成同一冲突组，由一次合法联合裁决给出确定候选；这些不是20个直接提交抢锁命令。"
+      ],
+      "operations": [
+        "让独立命令先后进入同一分支短提交序列；W0不再是head后以服务端 AcceptanceCertificate 重新核验完整范围。",
+        "保持原提案/批准内容和 input_world_ref 不变；记录实际接受parent、复验依据和回执。",
+        "对共享资源意图封闭后联合裁决，一次正式接受；其它有实际重叠的过期候选进入重新裁决/重规划。",
+        "加入write-skew、空查询后插入、规则换版、撤权、任务取消和未登记scope writer反例。"
+      ],
+      "expected_states": [
+        "独立候选不因无关 HEAD 前进一律重抽模型；在证据充分时允许 guarded 接受，分支仍形成完整提交序列。",
+        "资源与范围确实变化则不得自动放行；未知或未覆盖语义依赖回 strict 模式/显式复核。",
+        "只读/固定版本写作可继续；同一分支提交短临界区不扩张成所有作品/读请求/模型任务的全局锁。"
+      ],
+      "acceptance_criteria": [
+        "20个独立命令在无其它变化夹具中均得到正确结果；是否通过守卫验证由实际 token 检查记录证明。",
+        "read/write集合、负向谓词或覆盖token变化不能靠只核对实体版本漏过；所有写路径同事务更新相关scope。",
+        "联合裁决的胜负不因API/数据库到达顺序改变；单资源只有选定的有效效果。",
+        "已过期证书在txn内再次检查后拒绝；批准仅对不变候选及允许的复验方式适用。",
+        "分别报告真实冲突、仅HEAD变化、自动重验证成功、需要语义重做和基础设施重试的比例。",
+        "正式状态零重复效果、零越权接受、零不可还原记录；性能数字独立报告，不用快速拒绝替代成功吞吐。"
+      ],
+      "failure_injections": [
+        "证书准备后第三方提交相关scope",
+        "两个不同实体写入共同容量约束造成write-skew",
+        "负向查询后新增匹配记录",
+        "保持entity版本不变但变规则/授权/通道登记",
+        "一次未经登记scope更新的writer被测试探测"
+      ],
+      "related_cases": [
+        "F01",
+        "F03",
+        "F04",
+        "F08",
+        "F17",
+        "V2-06"
+      ],
+      "phase_gates": [
+        "P1",
+        "P2",
+        "P3"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "evidence_requirements": [
+        "精确 WorldRef、规则/策略版本及输入/输出产物哈希",
+        "接受回执、稳定 occurrence/effect 身份与实际投影查询",
+        "相关 scope/predicate/coverage token 前后值及任务代际",
+        "错误码、重试或重验证原因及被阻断候选",
+        "实际执行环境、测试版本与原始结果；未执行保持空 execution_evidence"
+      ],
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/04_事件溯源与版本体系.md",
+        "docs/05_世界模拟与调度引擎.md",
+        "docs/08_MCP与工具接口.md",
+        "docs/09_长期记忆与检索.md",
+        "docs/13_统一时间线与动态知识演化.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ],
+      "acceptance_checks": [
+        {
+          "test_id": "R1-F-01",
+          "criterion": "20个独立命令在无其它变化夹具中均得到正确结果；是否通过守卫验证由实际 token 检查记录证明。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-F-02",
+          "criterion": "read/write集合、负向谓词或覆盖token变化不能靠只核对实体版本漏过；所有写路径同事务更新相关scope。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-F-03",
+          "criterion": "联合裁决的胜负不因API/数据库到达顺序改变；单资源只有选定的有效效果。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-F-04",
+          "criterion": "已过期证书在txn内再次检查后拒绝；批准仅对不变候选及允许的复验方式适用。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-F-05",
+          "criterion": "分别报告真实冲突、仅HEAD变化、自动重验证成功、需要语义重做和基础设施重试的比例。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-F-06",
+          "criterion": "正式状态零重复效果、零越权接受、零不可还原记录；性能数字独立报告，不用快速拒绝替代成功吞吐。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        }
+      ]
+    },
+    {
+      "case_id": "R1-G",
+      "title": "宏观运输转为微观场景而不重复效果",
+      "initial_conditions": [
+        "独立作品 R1_REFINEMENT，D50粮食100、角色health100、crate由carrier占有；规则固定。",
+        "宏观运输 D50→D53 已接受：消耗粮食12、health减少3、crate在D53交receiver，旅行用时3日。",
+        "场景合同固定这些已接受occurrence/effect及中间可观察承诺。"
+      ],
+      "operations": [
+        "微观写作任务描写运输、受伤和交接；保存文本、抽取对账、审核和正文接受。",
+        "对同一事件进行闪回、不同视角重述及技术重试。",
+        "另建候选微观互动，改变 D51 知情人或发送消息，尝试声称终态相同故等价。"
+      ],
+      "expected_states": [
+        "正式资源仍为粮食88、health97、crate由receiver占有；叙述次数不改变数值和时间。",
+        "MVP新增微观方案仅能作为候选；改变中间认知/消息时不自动替换原事件。"
+      ],
+      "acceptance_criteria": [
+        "正文前后世界有效effect选择数/资源余额/持有人/前沿完全一致。",
+        "新伤害、新消耗、新转交需明确变化提案与合法接受，不能隐藏在表层描写。",
+        "P3等价实验比较中间权属、消息、观察、伤势和终态；只比较最后余额不足以通过。",
+        "失败微观候选的认知和会话不混入已选分支。"
+      ],
+      "failure_injections": [
+        "同一宏观effect以新技术请求ID再提交",
+        "微观抽取重复生成扣粮效果",
+        "候选带入新消息但终态相同"
+      ],
+      "related_cases": [
+        "T08",
+        "S04",
+        "V2-05",
+        "V2-07"
+      ],
+      "phase_gates": [
+        "P2",
+        "P3"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "evidence_requirements": [
+        "精确 WorldRef、规则/策略版本及输入/输出产物哈希",
+        "接受回执、稳定 occurrence/effect 身份与实际投影查询",
+        "相关 scope/predicate/coverage token 前后值及任务代际",
+        "错误码、重试或重验证原因及被阻断候选",
+        "实际执行环境、测试版本与原始结果；未执行保持空 execution_evidence"
+      ],
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/04_事件溯源与版本体系.md",
+        "docs/05_世界模拟与调度引擎.md",
+        "docs/08_MCP与工具接口.md",
+        "docs/09_长期记忆与检索.md",
+        "docs/13_统一时间线与动态知识演化.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ],
+      "acceptance_checks": [
+        {
+          "test_id": "R1-G-01",
+          "criterion": "正文前后世界有效effect选择数/资源余额/持有人/前沿完全一致。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-G-02",
+          "criterion": "新伤害、新消耗、新转交需明确变化提案与合法接受，不能隐藏在表层描写。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-G-03",
+          "criterion": "P3等价实验比较中间权属、消息、观察、伤势和终态；只比较最后余额不足以通过。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-G-04",
+          "criterion": "失败微观候选的认知和会话不混入已选分支。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        }
+      ]
+    },
+    {
+      "case_id": "R1-H",
+      "title": "接受成功、响应丢失、索引失败与恢复",
+      "initial_conditions": [
+        "独立作品 R1_RECOVERY，合法提案、当前任务grant/generation及内容绑定批准齐全。",
+        "命令键K在其work/principal/type幂等范围唯一，payload hash固定；数据库正式接受后API回包前注入连接丢失。"
+      ],
+      "operations": [
+        "确认数据库commit已完成但调用者未见响应；停止索引worker。",
+        "调用者以相同K和相同载荷重试，或通过有权的回执读取恢复结果。",
+        "用提交回执指定READ_YOUR_WRITES或固定已提交WorldRef读取关键状态；重启派生索引worker追赶。",
+        "同K改载荷、换key重复同提案、取消后旧worker新提交、部分子任务完成后父任务失败分别作为反例。"
+      ],
+      "expected_states": [
+        "重试返回原命令对应的可验证回执及接受版本；同一世界效果只一次。",
+        "权威查询能读提交结果；滞后搜索明确标注索引水位，不能伪装最新事实。",
+        "父任务失败保留已接受子事实；继续、显式反向事件或Retcon由上层流程决定，不自动删除已提交事件。"
+      ],
+      "acceptance_criteria": [
+        "同K不同载荷被拒绝；换key不能绕过同提案/效果唯一约束。",
+        "任务取消先线性化则旧代不能产生新接受；接受先成功则之后取消不撤销原结果。",
+        "outbox失败可重投且派生更新幂等；恢复不重调模型重新决定已接受结果。",
+        "当前撤权时回执读取仍做权限检查，既不泄漏内容，也不再次执行命令。",
+        "保留数据库回执、原始网络失败、重试关联、效应计数和索引追赶记录。"
+      ],
+      "failure_injections": [
+        "DB commit后/API响应前断连",
+        "outbox领取后崩溃",
+        "索引更新成功/ack前崩溃",
+        "父任务部分成功后崩溃"
+      ],
+      "related_cases": [
+        "F01",
+        "F02",
+        "F08",
+        "F10",
+        "F11",
+        "F17",
+        "V2-02"
+      ],
+      "phase_gates": [
+        "P1",
+        "P2"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "evidence_requirements": [
+        "精确 WorldRef、规则/策略版本及输入/输出产物哈希",
+        "接受回执、稳定 occurrence/effect 身份与实际投影查询",
+        "相关 scope/predicate/coverage token 前后值及任务代际",
+        "错误码、重试或重验证原因及被阻断候选",
+        "实际执行环境、测试版本与原始结果；未执行保持空 execution_evidence"
+      ],
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/04_事件溯源与版本体系.md",
+        "docs/05_世界模拟与调度引擎.md",
+        "docs/08_MCP与工具接口.md",
+        "docs/09_长期记忆与检索.md",
+        "docs/13_统一时间线与动态知识演化.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ],
+      "acceptance_checks": [
+        {
+          "test_id": "R1-H-01",
+          "criterion": "同K不同载荷被拒绝；换key不能绕过同提案/效果唯一约束。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-H-02",
+          "criterion": "任务取消先线性化则旧代不能产生新接受；接受先成功则之后取消不撤销原结果。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-H-03",
+          "criterion": "outbox失败可重投且派生更新幂等；恢复不重调模型重新决定已接受结果。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-H-04",
+          "criterion": "当前撤权时回执读取仍做权限检查，既不泄漏内容，也不再次执行命令。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        },
+        {
+          "test_id": "R1-H-05",
+          "criterion": "保留数据库回执、原始网络失败、重试关联、效应计数和索引追赶记录。",
+          "status": "PLANNED_NOT_EXECUTED",
+          "execution_evidence": []
+        }
+      ]
+    }
+  ],
+  "query_status_note": "本文PENDING默认指QueryAnswer.evaluation_status=PENDING；允许部分结果的UnifiedQueryResult仍可READY。只有等待已有推进任务的响应才使用顶层PENDING；不会因一次查询自行推进世界。"
+}

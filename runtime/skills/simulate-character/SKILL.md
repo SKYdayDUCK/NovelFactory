@@ -1,0 +1,49 @@
+---
+name: simulate-character
+description: 在需要一个人物或受权组织决策者基于当时认知提出行动、对白、拒绝、求证或合法反应时使用；不用于全知规划或判定行动成功。
+---
+
+# simulate-character
+
+适用角色/模式：character_actor。继承[运行时公共协议](../../roles/README.md)，权限来自当前任务grant；本文件只提供方法。
+
+## 取得输入
+
+服务端绑定actor的ContextBundle；WorldRef与story_time；合法观察、信念、当前目标、资源和本阶段可见反馈。
+
+先核验task_id、generation、context_bundle_id、policy_version与依赖；缺失关键输入时返回具体缺口，不假定“最新”即正确。实际执行先取本任务grant与角色模式；下列工具是该技能各模式的能力并集，只有所属模式明确允许且本次grant包含时才调用。缺少所需能力时，使用当前已有合法材料返回候选或NEEDS_INPUT，交控制面安排具备权限的后续任务，不换身份补权限。
+
+## 执行
+
+1. 只获取本任务context。角色身份、视图或故事时间不匹配时停止使用；不得手改actor_id扩大读取。
+2. 区分亲见、传闻、相信、猜测和不知道；需要时用memory_search/world_history回读自己的合法经历，保留消息源时间与接收时间。
+3. 选择人物有理由尝试的行动，允许失败、合作、拒绝、等待或离场；导演期望不是人物动机。
+4. 输出ActionProposal及对白、愿投入资源、前提、简短理由和信息来源。不要写成世界已经成功。
+5. 等待经裁剪的裁决反馈后，再在合法反应阶段产生新行动或认知候选；不读取他人的私有意图。
+
+## 交付
+
+ActionProposal；关键私有决定或信念更新作为有来源候选；必要缺口和不确定性明确。
+
+保存不可变产物和实际证据，回传当前任务信封。任务收件、世界接受、正文冻结及外部发布不是同一状态。
+
+## 依赖工具
+
+context_get、world_query、world_history、memory_search、evidence_read、action_propose、artifact_put、task_result_submit。
+
+工具名与错误语义见[08](../../../docs/08_MCP与工具接口.md)。可见工具是本次服务端授权的子集；不得换角色或修改技能文件绕过拒绝。
+
+## 完成与退出
+
+会话已读全知/未来材料时返回污染说明并要求新上下文。模型超时不等于故事内迟到；检索遗漏不等于角色遗忘；不得自行确立物品占有或胜负。
+
+完成规定产物、证据和未决项后结束；无新增证据的重复审美争论不无限返工。
+
+## 按需参考
+
+- [认知、时点和泄密边界](../../../docs/09_长期记忆与检索.md)
+- [共同快照与反应阶段](../../../docs/05_世界模拟与调度引擎.md)
+
+## R1时间与批量上下文
+
+优先使用任务已编译上下文；本角色profile和当次grant允许时，使用context_compile或timeline_query/query_batch减少重复读取。批量只有一个WorldRef与KnowledgeCut，不能逐项换身份/分支。ACTOR只使用BELIEF与合法known_at；计划、预测和承诺不当作目标结果。固定历史未推进返回未求值，不能等到新HEAD后冒充原版事实。遇TASK_REBIND_REQUIRED交控制面新建输入代际；遇真实依赖变化保留候选并定向返工，不自行改base/审批或签发接受证书。

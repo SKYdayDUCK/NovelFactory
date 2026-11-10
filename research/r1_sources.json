@@ -1,0 +1,664 @@
+{
+  "schema_version": "1.0",
+  "package_revision": "v2.0-R1",
+  "checked_date": "2026-11-10",
+  "scope": "Supplementary temporal/concurrency/load evidence. Reuses original source concepts where applicable, preserves baseline sources.json unchanged.",
+  "evidence_rule": "primary_checked means listed team reviewers opened the stated primary sections; it does not mean benchmarked, reproduced or full-document audit.",
+  "records": [
+    {
+      "source_id": "R1-E01",
+      "title": "SQLite Write-Ahead Logging",
+      "url": "https://sqlite.org/wal.html",
+      "visited_urls": [
+        "https://sqlite.org/wal.html"
+      ],
+      "checked_date": "2026-11-10",
+      "timezone": "Asia/Shanghai",
+      "evidence_status": "primary_checked",
+      "reviewed_by": [
+        "load_validation"
+      ],
+      "read_scope": [
+        "Overview",
+        "2.2 Concurrency"
+      ],
+      "source_statement": "WAL允许读写并行，但同一库同一时刻只有一个writer；默认WAL依赖同机共享内存。",
+      "project_inference": "SQLite用于隔离辅助或小工具；小说工厂生产并发验收仍使用PostgreSQL。",
+      "limitations": "不能由此推出任何数据库的具体吞吐。",
+      "project_reproduced": false,
+      "performance_measured": false,
+      "module_mapping": [
+        "docs/11_研发路线与测试计划.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ]
+    },
+    {
+      "source_id": "R1-E02",
+      "title": "PgBouncer Configuration",
+      "url": "https://www.pgbouncer.org/config.html",
+      "visited_urls": [
+        "https://www.pgbouncer.org/config.html"
+      ],
+      "checked_date": "2026-11-10",
+      "timezone": "Asia/Shanghai",
+      "evidence_status": "primary_checked",
+      "reviewed_by": [
+        "load_validation"
+      ],
+      "read_scope": [
+        "pool_mode",
+        "max_client_conn",
+        "default_pool_size",
+        "max_db_connections"
+      ],
+      "source_statement": "客户端连接上限与每user/database服务端池、数据库总连接上限是不同控制量。",
+      "project_inference": "所有进程的池与overflow合并做预算，再确定是否增加PgBouncer。",
+      "limitations": "配置限制不是实际占用或承载能力；池模式兼容另验。",
+      "project_reproduced": false,
+      "performance_measured": false,
+      "module_mapping": [
+        "docs/11_研发路线与测试计划.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ]
+    },
+    {
+      "source_id": "R1-E03",
+      "title": "Grafana k6 Open and closed models",
+      "url": "https://grafana.com/docs/k6/latest/using-k6/scenarios/concepts/open-vs-closed/",
+      "visited_urls": [
+        "https://grafana.com/docs/k6/latest/using-k6/scenarios/concepts/open-vs-closed/"
+      ],
+      "checked_date": "2026-11-10",
+      "timezone": "Asia/Shanghai",
+      "evidence_status": "primary_checked",
+      "reviewed_by": [
+        "load_validation"
+      ],
+      "read_scope": [
+        "Closed model drawbacks",
+        "Open model"
+      ],
+      "source_statement": "闭环到达受上一轮完成时间影响；open模型使到达独立于完成。",
+      "project_inference": "行为闭环与open-loop探索分别运行，避免变慢后自限负载掩盖过载。",
+      "limitations": "选择负载模型不保证消除所有测量偏差。",
+      "project_reproduced": false,
+      "performance_measured": false,
+      "module_mapping": [
+        "docs/11_研发路线与测试计划.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ]
+    },
+    {
+      "source_id": "R1-E04",
+      "title": "Grafana k6 Dropped iterations",
+      "url": "https://grafana.com/docs/k6/latest/using-k6/scenarios/concepts/dropped-iterations/",
+      "visited_urls": [
+        "https://grafana.com/docs/k6/latest/using-k6/scenarios/concepts/dropped-iterations/"
+      ],
+      "checked_date": "2026-11-10",
+      "timezone": "Asia/Shanghai",
+      "evidence_status": "primary_checked",
+      "reviewed_by": [
+        "load_validation"
+      ],
+      "read_scope": [
+        "Configuration-related drops",
+        "SUT-related drops"
+      ],
+      "source_statement": "未发出迭代需记录；负载机配置与SUT变慢均可能导致丢弃。",
+      "project_inference": "保存scheduled/sent/completed/dropped及负载机资源，不只看成功请求。",
+      "limitations": "错误原因需时序归因，不能把所有drop都判成服务故障。",
+      "project_reproduced": false,
+      "performance_measured": false,
+      "module_mapping": [
+        "docs/11_研发路线与测试计划.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ]
+    },
+    {
+      "source_id": "R1-E05",
+      "title": "PostgreSQL 17 Serialization Failure Handling",
+      "url": "https://www.postgresql.org/docs/17/mvcc-serialization-failure-handling.html",
+      "visited_urls": [
+        "https://www.postgresql.org/docs/17/mvcc-serialization-failure-handling.html"
+      ],
+      "checked_date": "2026-11-10",
+      "timezone": "Asia/Shanghai",
+      "evidence_status": "primary_checked",
+      "reviewed_by": [
+        "load_validation"
+      ],
+      "read_scope": [
+        "13.5"
+      ],
+      "source_statement": "40001要求重试完整事务决策；其它约束错误需区分暂态与持续问题。",
+      "project_inference": "短事务有限重试、回执幂等与语义重裁决分开。",
+      "limitations": "重新执行事务不意味着重新调用外部模型或重抽世界结果。",
+      "project_reproduced": false,
+      "performance_measured": false,
+      "module_mapping": [
+        "docs/11_研发路线与测试计划.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ]
+    },
+    {
+      "source_id": "R1-E06",
+      "title": "PostgreSQL 17 SELECT",
+      "url": "https://www.postgresql.org/docs/17/sql-select.html",
+      "visited_urls": [
+        "https://www.postgresql.org/docs/17/sql-select.html"
+      ],
+      "checked_date": "2026-11-10",
+      "timezone": "Asia/Shanghai",
+      "evidence_status": "primary_checked",
+      "reviewed_by": [
+        "load_validation",
+        "concurrency_design"
+      ],
+      "read_scope": [
+        "Locking Clause, SKIP LOCKED"
+      ],
+      "source_statement": "SKIP LOCKED可用于队列消费者，但返回不完整视图。",
+      "project_inference": "仅用于任务/outbox领取，不用于完整世界事实查询。",
+      "limitations": "任务领取仍需lease/generation和恢复协议。",
+      "project_reproduced": false,
+      "performance_measured": false,
+      "module_mapping": [
+        "docs/11_研发路线与测试计划.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ]
+    },
+    {
+      "source_id": "R1-E07",
+      "title": "SQLAlchemy 2.0 Session Basics",
+      "url": "https://docs.sqlalchemy.org/en/20/orm/session_basics.html",
+      "visited_urls": [
+        "https://docs.sqlalchemy.org/en/20/orm/session_basics.html"
+      ],
+      "checked_date": "2026-11-10",
+      "timezone": "Asia/Shanghai",
+      "evidence_status": "primary_checked",
+      "reviewed_by": [
+        "load_validation",
+        "concurrency_design"
+      ],
+      "read_scope": [
+        "Concurrent Session / AsyncSession FAQ"
+      ],
+      "source_statement": "Session/AsyncSession是有状态事务对象；并发线程/任务分别持有。",
+      "project_inference": "每用例短UoW；模型等待不持Session事务。",
+      "limitations": "文档事实不证明项目已正确关闭连接。",
+      "project_reproduced": false,
+      "performance_measured": false,
+      "module_mapping": [
+        "docs/11_研发路线与测试计划.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ]
+    },
+    {
+      "source_id": "R1-E08",
+      "title": "PostgreSQL 17 pg_stat_statements",
+      "url": "https://www.postgresql.org/docs/17/pgstatstatements.html",
+      "visited_urls": [
+        "https://www.postgresql.org/docs/17/pgstatstatements.html"
+      ],
+      "checked_date": "2026-11-10",
+      "timezone": "Asia/Shanghai",
+      "evidence_status": "primary_checked",
+      "reviewed_by": [
+        "load_validation"
+      ],
+      "read_scope": [
+        "Configuration and view columns"
+      ],
+      "source_statement": "提供聚合SQL计划/执行、块I/O和WAL等统计。",
+      "project_inference": "定位重SQL和扫描量；应用trace独立测请求P50/P95/P99。",
+      "limitations": "聚合均值不可替代请求尾延迟或权限正确性。",
+      "project_reproduced": false,
+      "performance_measured": false,
+      "module_mapping": [
+        "docs/11_研发路线与测试计划.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ]
+    },
+    {
+      "source_id": "R1-E09",
+      "title": "PostgreSQL 17 Multicolumn Indexes",
+      "url": "https://www.postgresql.org/docs/17/indexes-multicolumn.html",
+      "visited_urls": [
+        "https://www.postgresql.org/docs/17/indexes-multicolumn.html"
+      ],
+      "checked_date": "2026-11-10",
+      "timezone": "Asia/Shanghai",
+      "evidence_status": "primary_checked",
+      "reviewed_by": [
+        "load_validation",
+        "temporal_design"
+      ],
+      "read_scope": [
+        "11.3"
+      ],
+      "source_statement": "B-tree多列索引的前导列约束影响可缩小的扫描范围。",
+      "project_inference": "按真实时态查询选择索引列序、比较执行计划。",
+      "limitations": "索引越多不一定越快；需要考虑写入和存储代价。",
+      "project_reproduced": false,
+      "performance_measured": false,
+      "module_mapping": [
+        "docs/11_研发路线与测试计划.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ]
+    },
+    {
+      "source_id": "R1-E10",
+      "title": "PostgreSQL 17 Range Types",
+      "url": "https://www.postgresql.org/docs/17/rangetypes.html",
+      "visited_urls": [
+        "https://www.postgresql.org/docs/17/rangetypes.html"
+      ],
+      "checked_date": "2026-11-10",
+      "timezone": "Asia/Shanghai",
+      "evidence_status": "primary_checked",
+      "reviewed_by": [
+        "load_validation",
+        "root",
+        "temporal_design"
+      ],
+      "read_scope": [
+        "8.17.3",
+        "8.17.7",
+        "8.17.9",
+        "8.17.10"
+      ],
+      "source_statement": "范围的边界语义与GiST/SP-GiST范围索引、排斥约束具有明确用途。",
+      "project_inference": "关系valid interval使用清楚的半开边界，并以实际索引验证。",
+      "limitations": "范围类型不自动解决分支/修订与不确定发生时间语义。",
+      "project_reproduced": false,
+      "performance_measured": false,
+      "module_mapping": [
+        "docs/11_研发路线与测试计划.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ]
+    },
+    {
+      "source_id": "R1-E11",
+      "title": "PostgreSQL 17 Transaction Isolation",
+      "url": "https://www.postgresql.org/docs/17/transaction-iso.html",
+      "visited_urls": [
+        "https://www.postgresql.org/docs/17/transaction-iso.html"
+      ],
+      "checked_date": "2026-11-10",
+      "timezone": "Asia/Shanghai",
+      "evidence_status": "primary_checked",
+      "reviewed_by": [
+        "concurrency_design"
+      ],
+      "read_scope": [
+        "13.2.1",
+        "13.2.2",
+        "13.2.3"
+      ],
+      "source_statement": "READ COMMITTED逐语句快照；REPEATABLE READ仍有序列化异常边界。",
+      "project_inference": "固定业务版本与长任务依赖复验，不能依赖数据库短事务保护分钟级推理。",
+      "limitations": "项目scope守卫和语义冲突处理是新增设计，非数据库自动保证。",
+      "project_reproduced": false,
+      "performance_measured": false,
+      "module_mapping": [
+        "docs/11_研发路线与测试计划.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ]
+    },
+    {
+      "source_id": "R1-E12",
+      "title": "PostgreSQL 17 Explicit Locking",
+      "url": "https://www.postgresql.org/docs/17/explicit-locking.html",
+      "visited_urls": [
+        "https://www.postgresql.org/docs/17/explicit-locking.html"
+      ],
+      "checked_date": "2026-11-10",
+      "timezone": "Asia/Shanghai",
+      "evidence_status": "primary_checked",
+      "reviewed_by": [
+        "concurrency_design"
+      ],
+      "read_scope": [
+        "13.3.4",
+        "13.3.5"
+      ],
+      "source_statement": "固定锁序可降低死锁风险；事务级和会话级advisory lock不同。",
+      "project_inference": "锁序进入接受/取消协议，短临界区不等模型或人。",
+      "limitations": "数据库锁顺序不决定故事中争夺胜负。",
+      "project_reproduced": false,
+      "performance_measured": false,
+      "module_mapping": [
+        "docs/11_研发路线与测试计划.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ]
+    },
+    {
+      "source_id": "R1-E13",
+      "title": "SQLAlchemy 2.0 Connection Pooling",
+      "url": "https://docs.sqlalchemy.org/en/20/core/pooling.html",
+      "visited_urls": [
+        "https://docs.sqlalchemy.org/en/20/core/pooling.html"
+      ],
+      "checked_date": "2026-11-10",
+      "timezone": "Asia/Shanghai",
+      "evidence_status": "primary_checked",
+      "reviewed_by": [
+        "concurrency_design"
+      ],
+      "read_scope": [
+        "Using Connection Pools with Multiprocessing or os.fork"
+      ],
+      "source_statement": "跨fork共享连接存在不安全问题，应在子进程正确创建/重置池。",
+      "project_inference": "多进程启动流程显式管理engine/pool并核对总连接预算。",
+      "limitations": "增加进程未必改善吞吐，需要目标环境测试。",
+      "project_reproduced": false,
+      "performance_measured": false,
+      "module_mapping": [
+        "docs/11_研发路线与测试计划.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ]
+    },
+    {
+      "source_id": "R1-E14",
+      "title": "PgBouncer Features",
+      "url": "https://www.pgbouncer.org/features.html",
+      "visited_urls": [
+        "https://www.pgbouncer.org/features.html"
+      ],
+      "checked_date": "2026-11-10",
+      "timezone": "Asia/Shanghai",
+      "evidence_status": "primary_checked",
+      "reviewed_by": [
+        "concurrency_design"
+      ],
+      "read_scope": [
+        "Pooling mode feature table"
+      ],
+      "source_statement": "transaction模式与部分session特性不相容；prepared支持有条件。",
+      "project_inference": "需要池化时先检查会话状态、临时对象、prepared及身份传递。",
+      "limitations": "不能仅改pool_mode就宣称兼容已通过。",
+      "project_reproduced": false,
+      "performance_measured": false,
+      "module_mapping": [
+        "docs/11_研发路线与测试计划.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ]
+    },
+    {
+      "source_id": "R1-E15",
+      "title": "MCP 2026-07-28 Basic / Statelessness",
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic",
+      "visited_urls": [
+        "https://modelcontextprotocol.io/specification/2026-07-28/basic",
+        "https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/docs/specification/2026-07-28/basic/index.mdx"
+      ],
+      "checked_date": "2026-11-10",
+      "timezone": "Asia/Shanghai",
+      "evidence_status": "primary_checked",
+      "reviewed_by": [
+        "concurrency_design",
+        "root"
+      ],
+      "read_scope": [
+        "Statelessness",
+        "Authentication"
+      ],
+      "source_statement": "2026 profile的请求元数据、显式句柄与无协议会话规则须按该版处理。",
+      "project_inference": "业务task/generation/grant独立于网络连接；适配器先锁定profile。",
+      "limitations": "未在目标Host联调；旧版兼容适配不能混拼字段。",
+      "project_reproduced": false,
+      "performance_measured": false,
+      "module_mapping": [
+        "docs/11_研发路线与测试计划.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ]
+    },
+    {
+      "source_id": "R1-E16",
+      "title": "MCP 2026-07-28 Streamable HTTP",
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http",
+      "visited_urls": [
+        "https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http",
+        "https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/docs/specification/2026-07-28/basic/transports/streamable-http.mdx"
+      ],
+      "checked_date": "2026-11-10",
+      "timezone": "Asia/Shanghai",
+      "evidence_status": "primary_checked",
+      "reviewed_by": [
+        "concurrency_design",
+        "root"
+      ],
+      "read_scope": [
+        "POST transport",
+        "Security",
+        "Cancellation"
+      ],
+      "source_statement": "2026传输按每请求POST/metadata处理，取消请求与业务任务撤销须区分。",
+      "project_inference": "API取消只按应用授权显式作用到task；网络断流不回滚已接受世界。",
+      "limitations": "未测连接承载或Host能力，HTTP性能需独立测量。",
+      "project_reproduced": false,
+      "performance_measured": false,
+      "module_mapping": [
+        "docs/11_研发路线与测试计划.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ]
+    },
+    {
+      "source_id": "R1-E17",
+      "title": "PostgreSQL 17 Partial Indexes",
+      "url": "https://www.postgresql.org/docs/17/indexes-partial.html",
+      "visited_urls": [
+        "https://www.postgresql.org/docs/17/indexes-partial.html"
+      ],
+      "checked_date": "2026-11-10",
+      "timezone": "Asia/Shanghai",
+      "evidence_status": "primary_checked",
+      "reviewed_by": [
+        "root"
+      ],
+      "read_scope": [
+        "Predicate applicability and maintenance tradeoffs"
+      ],
+      "source_statement": "部分索引依查询谓词适用性，维护收益需结合实际分布。",
+      "project_inference": "当前选中/活跃记录可作为候选索引范围，不改变权威记录语义。",
+      "limitations": "不预设所有历史查询都使用部分索引。",
+      "project_reproduced": false,
+      "performance_measured": false,
+      "module_mapping": [
+        "docs/11_研发路线与测试计划.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ]
+    },
+    {
+      "source_id": "R1-E18",
+      "title": "MCP 2026-07-28 Changelog",
+      "url": "https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/docs/specification/2026-07-28/changelog.mdx",
+      "visited_urls": [
+        "https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/docs/specification/2026-07-28/changelog.mdx"
+      ],
+      "checked_date": "2026-11-10",
+      "timezone": "Asia/Shanghai",
+      "evidence_status": "primary_checked",
+      "reviewed_by": [
+        "root"
+      ],
+      "read_scope": [
+        "Major changes: sessions and initialization"
+      ],
+      "source_statement": "新版去除旧协议session/initialize相关机制，迁移有语义差异。",
+      "project_inference": "维护profile适配边界，不能仅替换protocolVersion字符串。",
+      "limitations": "main分支内容可变，实施时锁定工具/SDK/Host版本。",
+      "project_reproduced": false,
+      "performance_measured": false,
+      "module_mapping": [
+        "docs/11_研发路线与测试计划.md",
+        "docs/14_高并发服务与一致性协议.md",
+        "docs/15_并发压测与端到端验收.md"
+      ]
+    },
+    {
+      "source_id": "R1-E19",
+      "title": "PostgreSQL 17 Date/Time Types",
+      "url": "https://www.postgresql.org/docs/17/datatype-datetime.html",
+      "visited_urls": [
+        "https://www.postgresql.org/docs/17/datatype-datetime.html"
+      ],
+      "checked_date": "2026-11-10",
+      "timezone": "Asia/Shanghai",
+      "evidence_status": "primary_checked",
+      "reviewed_by": [
+        "temporal_design"
+      ],
+      "read_scope": [
+        "Date/time interpretation and types"
+      ],
+      "source_statement": "提供日期/时间类型及日期、时区解释规则。",
+      "project_inference": "虚构历法单独映射到StoryPoint，不直接使用主机日期代替故事时间。",
+      "limitations": "现实数据库日期类型不会自动理解作品历法。",
+      "project_reproduced": false,
+      "performance_measured": false,
+      "module_mapping": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/13_统一时间线与动态知识演化.md",
+        "docs/15_并发压测与端到端验收.md"
+      ]
+    },
+    {
+      "source_id": "R1-E20",
+      "title": "PostgreSQL 17 WITH Queries",
+      "url": "https://www.postgresql.org/docs/17/queries-with.html",
+      "visited_urls": [
+        "https://www.postgresql.org/docs/17/queries-with.html"
+      ],
+      "checked_date": "2026-11-10",
+      "timezone": "Asia/Shanghai",
+      "evidence_status": "primary_checked",
+      "reviewed_by": [
+        "temporal_design"
+      ],
+      "read_scope": [
+        "Recursive queries",
+        "CYCLE",
+        "Outer LIMIT caveats"
+      ],
+      "source_statement": "支持递归查询与CYCLE，并说明依赖外层LIMIT限制执行的条件。",
+      "project_inference": "图检索按服务预算限制深度、节点与时间；不能只依赖最外层LIMIT。",
+      "limitations": "SQL递归不自动施加角色认知和版本范围。",
+      "project_reproduced": false,
+      "performance_measured": false,
+      "module_mapping": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/13_统一时间线与动态知识演化.md",
+        "docs/15_并发压测与端到端验收.md"
+      ]
+    },
+    {
+      "source_id": "R1-E21",
+      "title": "PostgreSQL 17 btree_gist",
+      "url": "https://www.postgresql.org/docs/17/btree-gist.html",
+      "visited_urls": [
+        "https://www.postgresql.org/docs/17/btree-gist.html"
+      ],
+      "checked_date": "2026-11-10",
+      "timezone": "Asia/Shanghai",
+      "evidence_status": "primary_checked",
+      "reviewed_by": [
+        "temporal_design"
+      ],
+      "read_scope": [
+        "Supported scalar types and limitations"
+      ],
+      "source_statement": "标量GiST操作类可与范围组合，但不能替代普通唯一索引的全部能力。",
+      "project_inference": "适当结合分支/实体/谓词键与时间范围约束。",
+      "limitations": "候选DDL仍要在真实PostgreSQL版本执行验证。",
+      "project_reproduced": false,
+      "performance_measured": false,
+      "module_mapping": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/13_统一时间线与动态知识演化.md",
+        "docs/15_并发压测与端到端验收.md"
+      ]
+    },
+    {
+      "source_id": "R1-E22",
+      "title": "PostgreSQL 17 Constraints",
+      "url": "https://www.postgresql.org/docs/17/ddl-constraints.html",
+      "visited_urls": [
+        "https://www.postgresql.org/docs/17/ddl-constraints.html"
+      ],
+      "checked_date": "2026-11-10",
+      "timezone": "Asia/Shanghai",
+      "evidence_status": "primary_checked",
+      "reviewed_by": [
+        "temporal_design"
+      ],
+      "read_scope": [
+        "CHECK constraint limitations"
+      ],
+      "source_statement": "CHECK不能可靠承担引用其它行的全局不变量。",
+      "project_inference": "跨行资源和关系约束由合适约束及受控短事务共同保证。",
+      "limitations": "领域语义不能仅靠数据库行约束表达。",
+      "project_reproduced": false,
+      "performance_measured": false,
+      "module_mapping": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/13_统一时间线与动态知识演化.md",
+        "docs/15_并发压测与端到端验收.md"
+      ]
+    },
+    {
+      "source_id": "R1-E23",
+      "title": "PostgreSQL 17 Index Types",
+      "url": "https://www.postgresql.org/docs/17/indexes-types.html",
+      "visited_urls": [
+        "https://www.postgresql.org/docs/17/indexes-types.html"
+      ],
+      "checked_date": "2026-11-10",
+      "timezone": "Asia/Shanghai",
+      "evidence_status": "primary_checked",
+      "reviewed_by": [
+        "temporal_design"
+      ],
+      "read_scope": [
+        "B-tree",
+        "GIN",
+        "GiST",
+        "BRIN"
+      ],
+      "source_statement": "不同索引类型支持不同操作和数据分布。",
+      "project_inference": "按确定SQL与数据分布选择候选访问路径并测量。",
+      "limitations": "没有索引类型能够单独保证所有图/历史查询速度。",
+      "project_reproduced": false,
+      "performance_measured": false,
+      "module_mapping": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/13_统一时间线与动态知识演化.md",
+        "docs/15_并发压测与端到端验收.md"
+      ]
+    }
+  ],
+  "local_verification": {
+    "artifact": "benchmarks/load_model_result.json",
+    "status": "MODEL_CALCULATED_NOT_SERVICE_BENCHMARK",
+    "scope": "Declared-input arithmetic and seeded offered-arrival schedule; no PostgreSQL, network, Host or LLM."
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "schema_version": "2.0",
+  "volume_id": "20000000-0000-4000-8000-000000000040",
+  "contract_revision_id": "20000000-0000-4000-8000-000000000041",
+  "input_world_ref": {
+    "work_id": "20000000-0000-4000-8000-000000000001",
+    "branch_id": "20000000-0000-4000-8000-000000000002",
+    "world_revision_id": "20000000-0000-4000-8000-000000000003"
+  },
+  "creative_brief": "围绕救济受阻后的责任与合作，形成一段可收束但保留真实代价的故事。",
+  "focus_subject_ids": [
+    "20000000-0000-4000-8000-000000000042"
+  ],
+  "narrative_intents": [
+    "让合作条件体现人物独立判断；不要求所有目标成功。"
+  ],
+  "protected_commitments": [],
+  "open_choices": [
+    "粮食何时送达、通过什么合法路径均未确定。"
+  ],
+  "completion_or_stop_conditions": [
+    "完成阶段回应与整卷编辑，或预算耗尽并提交具体交接。"
+  ],
+  "budget": {
+    "max_semantic_calls": 24,
+    "max_candidate_branches": 2
+  },
+  "upstream_literary_refs": [
+    {
+      "artifact_id": "20000000-0000-4000-8000-000000000012",
+      "artifact_revision_id": "20000000-0000-4000-8000-000000000013",
+      "sha256": "6296160b159b990d662ba5b6192274faa8b4959a22a9b68392a698280bdd44bf"
+    }
+  ],
+  "dependency_fingerprint": "30647d9cb6bd845932dc297dc4ab671e80355051bd4e7ca06e3a571c68531395",
+  "world_effects": [
+    {
+      "credit_grain": 100
+    }
+  ]
+}

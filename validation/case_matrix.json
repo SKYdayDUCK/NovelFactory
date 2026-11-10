@@ -1,0 +1,3515 @@
+{
+  "schema_version": "2.0.0",
+  "title": "小说Agent工厂 v2.0 业务案例追溯与实施矩阵",
+  "generated_at": "2026-11-10",
+  "status_policy": {
+    "all_cases_status": "PLANNED_NOT_EXECUTED",
+    "meaning": "未来实现后的验收要求，不是本轮实测结果。",
+    "mechanism_experiments_do_not_satisfy_business_cases": true,
+    "results_must_be_recorded_separately": true,
+    "semantic_and_literary_disagreement_allowed": true
+  },
+  "counts": {
+    "V1_1_INHERITED": 44,
+    "T": 12,
+    "S": 8,
+    "L": 5,
+    "F": 19,
+    "V2_0_ADDED": 16,
+    "TOTAL": 60
+  },
+  "paths_are_relative_to": "PROJECT_ROOT",
+  "source_policy": "标题、输入、预期和原表取自项目内保留原文；v2_documents/phase_gates/test_methods为本轮工程映射，不冒称基线已指定。F系列保留原表表头和该完整原始行；T/S/L保留整段及完整案例表。",
+  "phase_definitions": {
+    "P0": "契约、环境与隔离夹具",
+    "P1": "最小可信内核、真实PG、首次异步任务门禁、基础修订与恢复",
+    "P2": "5–10场景真实短卷闭环及整卷编辑；MVP完成",
+    "P3": "受控并行、精细依赖、等效宏微替换、机制对照",
+    "P4": "跨卷、连载规模、升级与恢复"
+  },
+  "test_layer_definitions": {
+    "K": "知识与状态：身份、时间、权属、资源、分支、事件效果",
+    "Q": "查询与权限：视角、来源、完备性、缓存与索引",
+    "W": "工作流与提交：重试、租约、批准、并发、恢复与回执",
+    "S": "语义与文学：解释、动机、改线、误导；按证据评议，不伪造确定性真值"
+  },
+  "shared_context_sources": [
+    {
+      "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+      "heading": "2. 固定测试世界",
+      "usage": "青霜剑T系列共同身份、制度、时间与历史；扩展另起隔离分支。"
+    },
+    {
+      "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+      "heading": "4.1 独立作品的分时输入",
+      "usage": "白桥粮运S系列共同夹具；与青霜剑work_id隔离。"
+    },
+    {
+      "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+      "heading": "6. 首个短卷的端到端生产验收",
+      "usage": "未另编编号的整体闭环验收，不能只跑60个孤立单元测试替代。"
+    },
+    {
+      "path": "docs/11_研发路线与测试计划.md",
+      "heading": "6. 第一部样卷的执行脚本",
+      "usage": "P2实际生产顺序与人类完整阅读；夹具预置失败须与模型涌现分开标注。"
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "T01",
+      "series": "T",
+      "origin": "V1_1_INHERITED",
+      "title": "过去、现在与毁坏后的权属",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "T01｜过去、现在与毁坏后的权属",
+        "original_table_capture": "FULL_CASE_TABLE",
+        "original_table_markdown": "| 项目 | 验收要求 |\n|---|---|\n| 输入 | `main@rev_119`，世界视图，分别查询 D05、D13、D21、D32 的青霜剑 |\n| 预期 | D05：owner=宗门、possessor=师父；D13：owner=师父、possessor=主角；D21：owner=师父、possessor=反派；D32：destroyed，活跃持有/使用不适用，保留最后确认所有者与历史 |\n| 禁止结果 | 用当前持有人覆盖所有历史；盗窃自动转移合法所有权；毁坏后仍输出活跃持有者；将所有历史权利一并删除 |\n| 层级 | K、Q |\n| 证据 | 各时点适用的事件/关系版本、有效期、制度规则及状态投影依据 |",
+        "original_case_markdown": "### T01｜过去、现在与毁坏后的权属\n\n| 项目 | 验收要求 |\n|---|---|\n| 输入 | `main@rev_119`，世界视图，分别查询 D05、D13、D21、D32 的青霜剑 |\n| 预期 | D05：owner=宗门、possessor=师父；D13：owner=师父、possessor=主角；D21：owner=师父、possessor=反派；D32：destroyed，活跃持有/使用不适用，保留最后确认所有者与历史 |\n| 禁止结果 | 用当前持有人覆盖所有历史；盗窃自动转移合法所有权；毁坏后仍输出活跃持有者；将所有历史权利一并删除 |\n| 层级 | K、Q |\n| 证据 | 各时点适用的事件/关系版本、有效期、制度规则及状态投影依据 |\n\n判定需要针对查询时间，而非只读物品表的一行“最新状态”。“最后确认所有者”是历史信息，不能被误当作“此人当前持有可用宝剑”。\n\n"
+      },
+      "inputs": [
+        {
+          "label": "输入",
+          "text": "`main@rev_119`，世界视图，分别查询 D05、D13、D21、D32 的青霜剑"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "预期",
+          "text": "D05：owner=宗门、possessor=师父；D13：owner=师父、possessor=主角；D21：owner=师父、possessor=反派；D32：destroyed，活跃持有/使用不适用，保留最后确认所有者与历史"
+        }
+      ],
+      "prohibited_results": "用当前持有人覆盖所有历史；盗窃自动转移合法所有权；毁坏后仍输出活跃持有者；将所有历史权利一并删除",
+      "required_evidence": "各时点适用的事件/关系版本、有效期、制度规则及状态投影依据",
+      "source_test_layers": [
+        "K",
+        "Q"
+      ],
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/04_事件溯源与版本体系.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "历史时点/权属/生命周期权威查询"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q"
+      ],
+      "test_layer_assignment": "SOURCE_AND_V2_MAPPING",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "T02",
+      "series": "T",
+      "origin": "V1_1_INHERITED",
+      "title": "倒叙中的世界、角色与读者信息",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "T02｜倒叙中的世界、角色与读者信息",
+        "original_table_capture": "FULL_CASE_TABLE",
+        "original_table_markdown": "| 项目 | 验收要求 |\n|---|---|\n| 输入 | 采用与 `rev_119` 关联的正文版本，编写 C31 中发生于 D20 的倒叙；角色视图固定在 D20，读者披露截止取该场景之前，包含 C25 |\n| 预期 | 世界在 e04 后已失窃；D20 的主角尚不知道；文本在 C25 已向读者提供 D23 发现失窃的信息，C31 可进一步披露经过。读者披露与角色当时认知可以不同 |\n| 禁止结果 | 以 C31 的编号查询主角“最新认知”；让 D20 的主角引用 D23 才获得的消息；把读者已见信息自动同步给场景人物 |\n| 层级 | K、Q、S |\n| 证据 | D20 世界状态、主角观察/信念来源、C25 与 C31 的版本化文本片段及披露位置 |",
+        "original_case_markdown": "### T02｜倒叙中的世界、角色与读者信息\n\n| 项目 | 验收要求 |\n|---|---|\n| 输入 | 采用与 `rev_119` 关联的正文版本，编写 C31 中发生于 D20 的倒叙；角色视图固定在 D20，读者披露截止取该场景之前，包含 C25 |\n| 预期 | 世界在 e04 后已失窃；D20 的主角尚不知道；文本在 C25 已向读者提供 D23 发现失窃的信息，C31 可进一步披露经过。读者披露与角色当时认知可以不同 |\n| 禁止结果 | 以 C31 的编号查询主角“最新认知”；让 D20 的主角引用 D23 才获得的消息；把读者已见信息自动同步给场景人物 |\n| 层级 | K、Q、S |\n| 证据 | D20 世界状态、主角观察/信念来源、C25 与 C31 的版本化文本片段及披露位置 |\n\n审核不要求真实读者一定记住 C25；它只确认文本已经提供过哪些材料。若 C31 仍采用限知视角，旁白与台词还需遵守该视角的表达边界。\n\n"
+      },
+      "inputs": [
+        {
+          "label": "输入",
+          "text": "采用与 `rev_119` 关联的正文版本，编写 C31 中发生于 D20 的倒叙；角色视图固定在 D20，读者披露截止取该场景之前，包含 C25"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "预期",
+          "text": "世界在 e04 后已失窃；D20 的主角尚不知道；文本在 C25 已向读者提供 D23 发现失窃的信息，C31 可进一步披露经过。读者披露与角色当时认知可以不同"
+        }
+      ],
+      "prohibited_results": "以 C31 的编号查询主角“最新认知”；让 D20 的主角引用 D23 才获得的消息；把读者已见信息自动同步给场景人物",
+      "required_evidence": "D20 世界状态、主角观察/信念来源、C25 与 C31 的版本化文本片段及披露位置",
+      "source_test_layers": [
+        "K",
+        "Q",
+        "S"
+      ],
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/07_剧情与文学生产系统.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "历史认知与披露隔离"
+        },
+        {
+          "phase": "P2",
+          "scope": "真实倒叙片段与限知表达审核"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q",
+        "S"
+      ],
+      "test_layer_assignment": "SOURCE_AND_V2_MAPPING",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION",
+        "SEMANTIC_EVIDENCE_REVIEW"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "T03",
+      "series": "T",
+      "origin": "V1_1_INHERITED",
+      "title": "承诺已经发生，承诺内容仍可能失败",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "T03｜承诺已经发生，承诺内容仍可能失败",
+        "original_table_capture": "FULL_CASE_TABLE",
+        "original_table_markdown": "| 项目 | 验收要求 |\n|---|---|\n| 输入 | 查询 D30 的发言事件、D50 的赠剑计划；再加入已确认的 D31 毁坏影响 |\n| 预期 | e07 是已发生的许诺；D50 赠与仍为计划。e08 使“转赠完整真剑”路径不可执行，触发重规划；主角若未获知毁坏，仍可保留得剑预期 |\n| 禁止结果 | 因师父承诺就提前转移所有权；D50 自动生成赠剑事件；为了恢复计划复活唯一真剑；把计划失效自动改成主角已知失败 |\n| 层级 | K、Q、S |\n| 证据 | 许诺事件、计划前提、毁坏规则、计划失效依据及主角当前知情来源 |",
+        "original_case_markdown": "### T03｜承诺已经发生，承诺内容仍可能失败\n\n| 项目 | 验收要求 |\n|---|---|\n| 输入 | 查询 D30 的发言事件、D50 的赠剑计划；再加入已确认的 D31 毁坏影响 |\n| 预期 | e07 是已发生的许诺；D50 赠与仍为计划。e08 使“转赠完整真剑”路径不可执行，触发重规划；主角若未获知毁坏，仍可保留得剑预期 |\n| 禁止结果 | 因师父承诺就提前转移所有权；D50 自动生成赠剑事件；为了恢复计划复活唯一真剑；把计划失效自动改成主角已知失败 |\n| 层级 | K、Q、S |\n| 证据 | 许诺事件、计划前提、毁坏规则、计划失效依据及主角当前知情来源 |\n\n"
+      },
+      "inputs": [
+        {
+          "label": "输入",
+          "text": "查询 D30 的发言事件、D50 的赠剑计划；再加入已确认的 D31 毁坏影响"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "预期",
+          "text": "e07 是已发生的许诺；D50 赠与仍为计划。e08 使“转赠完整真剑”路径不可执行，触发重规划；主角若未获知毁坏，仍可保留得剑预期"
+        }
+      ],
+      "prohibited_results": "因师父承诺就提前转移所有权；D50 自动生成赠剑事件；为了恢复计划复活唯一真剑；把计划失效自动改成主角已知失败",
+      "required_evidence": "许诺事件、计划前提、毁坏规则、计划失效依据及主角当前知情来源",
+      "source_test_layers": [
+        "K",
+        "Q",
+        "S"
+      ],
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/05_世界模拟与调度引擎.md",
+        "docs/07_剧情与文学生产系统.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "许诺/未来计划/毁坏事实隔离"
+        },
+        {
+          "phase": "P2",
+          "scope": "计划失效和局部重规划"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q",
+        "S"
+      ],
+      "test_layer_assignment": "SOURCE_AND_V2_MAPPING",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION",
+        "SEMANTIC_EVIDENCE_REVIEW"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "T04",
+      "series": "T",
+      "origin": "V1_1_INHERITED",
+      "title": "容器位置推导与隐藏路径",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "T04｜容器位置推导与隐藏路径",
+        "original_table_capture": "FULL_CASE_TABLE",
+        "original_table_markdown": "| 项目 | 验收要求 |\n|---|---|\n| 输入 | `main@rev_119`，D26，分别以世界视图和主角视图查询青霜剑所在位置 |\n| 预期 | 世界视图沿有效路径“剑→匣→货车→青岩城”得到城市级位置；主角视图只返回获准材料支持的已知或未知结论 |\n| 禁止结果 | 向主角返回匣、货车或秘密路径；拥有货车就自动拥有/知道匣内的剑；沿失效边或循环包含关系推导位置 |\n| 层级 | K、Q |\n| 证据 | 同一版本/时点下的包含关系、位置关系和视图过滤记录；对外证据同样需要权限过滤 |",
+        "original_case_markdown": "### T04｜容器位置推导与隐藏路径\n\n| 项目 | 验收要求 |\n|---|---|\n| 输入 | `main@rev_119`，D26，分别以世界视图和主角视图查询青霜剑所在位置 |\n| 预期 | 世界视图沿有效路径“剑→匣→货车→青岩城”得到城市级位置；主角视图只返回获准材料支持的已知或未知结论 |\n| 禁止结果 | 向主角返回匣、货车或秘密路径；拥有货车就自动拥有/知道匣内的剑；沿失效边或循环包含关系推导位置 |\n| 层级 | K、Q |\n| 证据 | 同一版本/时点下的包含关系、位置关系和视图过滤记录；对外证据同样需要权限过滤 |\n\n"
+      },
+      "inputs": [
+        {
+          "label": "输入",
+          "text": "`main@rev_119`，D26，分别以世界视图和主角视图查询青霜剑所在位置"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "预期",
+          "text": "世界视图沿有效路径“剑→匣→货车→青岩城”得到城市级位置；主角视图只返回获准材料支持的已知或未知结论"
+        }
+      ],
+      "prohibited_results": "向主角返回匣、货车或秘密路径；拥有货车就自动拥有/知道匣内的剑；沿失效边或循环包含关系推导位置",
+      "required_evidence": "同一版本/时点下的包含关系、位置关系和视图过滤记录；对外证据同样需要权限过滤",
+      "source_test_layers": [
+        "K",
+        "Q"
+      ],
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "容器时态路径和证据权限裁剪"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q"
+      ],
+      "test_layer_assignment": "SOURCE_AND_V2_MAPPING",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "T05",
+      "series": "T",
+      "origin": "V1_1_INHERITED",
+      "title": "Retcon 保留旧世界，并复核相关认知",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "T05｜Retcon 保留旧世界，并复核相关认知",
+        "original_table_capture": "FULL_CASE_TABLE",
+        "original_table_markdown": "| 项目 | 验收要求 |\n|---|---|\n| 输入 | 对同一 D13 查询 `main@rev_119` 与 `main@rev_120`；后者明确批准 D12 借剑改为赠剑 |\n| 预期 | 旧版 owner=师父，新版 owner=主角；两个版本来源均可追溯。新版本重新评估 D12 参与者的相应记忆与台词；未接触此事的人不自动获知 |\n| 禁止结果 | 覆盖旧版查询；在编辑发生的系统时间生成全体人物心灵感应；把修订当第二次资源转移；无条件删除 D30 许诺发言 |\n| 层级 | K、Q、W、S |\n| 证据 | 修订批准、原版/新版关系、影响清单、认知依据、正文与摘要的失效状态 |",
+        "original_case_markdown": "### T05｜Retcon 保留旧世界，并复核相关认知\n\n| 项目 | 验收要求 |\n|---|---|\n| 输入 | 对同一 D13 查询 `main@rev_119` 与 `main@rev_120`；后者明确批准 D12 借剑改为赠剑 |\n| 预期 | 旧版 owner=师父，新版 owner=主角；两个版本来源均可追溯。新版本重新评估 D12 参与者的相应记忆与台词；未接触此事的人不自动获知 |\n| 禁止结果 | 覆盖旧版查询；在编辑发生的系统时间生成全体人物心灵感应；把修订当第二次资源转移；无条件删除 D30 许诺发言 |\n| 层级 | K、Q、W、S |\n| 证据 | 修订批准、原版/新版关系、影响清单、认知依据、正文与摘要的失效状态 |\n\n新历史中，赠剑的目击者可以经审核被认定在 D12 已知其含义；这与“现在编辑一下，故事里所有人马上知道”完全不同。D30 师父再说赠剑，可能是冗余承诺、误解，或需要改稿的问题；先保留“他说过”这一发生实例，语义评审不能只因产权变化就自动否认发言。\n\n旧发布版本继续绑定旧世界。新世界修订不自动使旧正文成为新版本的合格发布稿；相关段落应修订或明确解释后，再形成新的发布清单。\n\n"
+      },
+      "inputs": [
+        {
+          "label": "输入",
+          "text": "对同一 D13 查询 `main@rev_119` 与 `main@rev_120`；后者明确批准 D12 借剑改为赠剑"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "预期",
+          "text": "旧版 owner=师父，新版 owner=主角；两个版本来源均可追溯。新版本重新评估 D12 参与者的相应记忆与台词；未接触此事的人不自动获知"
+        }
+      ],
+      "prohibited_results": "覆盖旧版查询；在编辑发生的系统时间生成全体人物心灵感应；把修订当第二次资源转移；无条件删除 D30 许诺发言",
+      "required_evidence": "修订批准、原版/新版关系、影响清单、认知依据、正文与摘要的失效状态",
+      "source_test_layers": [
+        "K",
+        "Q",
+        "W",
+        "S"
+      ],
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/04_事件溯源与版本体系.md",
+        "docs/07_剧情与文学生产系统.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "修复分支/旧版还原/认知影响"
+        },
+        {
+          "phase": "P2",
+          "scope": "真实正文与摘要复核"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q",
+        "W",
+        "S"
+      ],
+      "test_layer_assignment": "SOURCE_AND_V2_MAPPING",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION",
+        "PG_INTEGRATION_AND_FAULT_INJECTION",
+        "SEMANTIC_EVIDENCE_REVIEW"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "T06",
+      "series": "T",
+      "origin": "V1_1_INHERITED",
+      "title": "同名、传言与唯一身份",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "T06｜同名、传言与唯一身份",
+        "original_table_capture": "FULL_CASE_TABLE",
+        "original_table_markdown": "| 项目 | 验收要求 |\n|---|---|\n| 输入 | C45 出现“另一柄青霜剑”的传言；尚无获准的复制、赝品或新物品证据 |\n| 预期 | 保存有来源的传言/断言，实体解析可以待定；不能仅凭名字确定它等于 `item_sword_001`，也不能确认第二件唯一真品 |\n| 禁止结果 | 恢复已毁真剑；自动复制唯一实例；以名字相同强制合并身份；把“尚未确认”判为“传言必然为假” |\n| 层级 | K、Q、S |\n| 证据 | 原文片段、实体候选、唯一性规则及是否存在身份确认或制造事件 |",
+        "original_case_markdown": "### T06｜同名、传言与唯一身份\n\n| 项目 | 验收要求 |\n|---|---|\n| 输入 | C45 出现“另一柄青霜剑”的传言；尚无获准的复制、赝品或新物品证据 |\n| 预期 | 保存有来源的传言/断言，实体解析可以待定；不能仅凭名字确定它等于 `item_sword_001`，也不能确认第二件唯一真品 |\n| 禁止结果 | 恢复已毁真剑；自动复制唯一实例；以名字相同强制合并身份；把“尚未确认”判为“传言必然为假” |\n| 层级 | K、Q、S |\n| 证据 | 原文片段、实体候选、唯一性规则及是否存在身份确认或制造事件 |\n\n"
+      },
+      "inputs": [
+        {
+          "label": "输入",
+          "text": "C45 出现“另一柄青霜剑”的传言；尚无获准的复制、赝品或新物品证据"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "预期",
+          "text": "保存有来源的传言/断言，实体解析可以待定；不能仅凭名字确定它等于 `item_sword_001`，也不能确认第二件唯一真品"
+        }
+      ],
+      "prohibited_results": "恢复已毁真剑；自动复制唯一实例；以名字相同强制合并身份；把“尚未确认”判为“传言必然为假”",
+      "required_evidence": "原文片段、实体候选、唯一性规则及是否存在身份确认或制造事件",
+      "source_test_layers": [
+        "K",
+        "Q",
+        "S"
+      ],
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/07_剧情与文学生产系统.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "唯一身份与传言分型"
+        },
+        {
+          "phase": "P2",
+          "scope": "真实片段实体消歧评测"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q",
+        "S"
+      ],
+      "test_layer_assignment": "SOURCE_AND_V2_MAPPING",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION",
+        "SEMANTIC_EVIDENCE_REVIEW"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "T07",
+      "series": "T",
+      "origin": "V1_1_INHERITED",
+      "title": "同一快照中的三方争夺",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "T07｜同一快照中的三方争夺",
+        "original_table_capture": "FULL_CASE_TABLE",
+        "original_table_markdown": "| 项目 | 验收要求 |\n|---|---|\n| 输入 | 从 D19 状态建立隔离测试支线；三方基于同一起始快照提交针对同一青霜剑的互斥行动 |\n| 预期 | 动作进入同一冲突组；按已选定的同时结算或有依据的先后规则裁决；结果可以一方获得、被阻止或全失败，但不能产生多个互斥独占者 |\n| 禁止结果 | 数据库先提交者即故事胜者；每个角色在独立沙箱中都成功后直接求并集；重试偷偷重抽胜负 |\n| 层级 | K、W、S |\n| 证据 | 共同快照、意图集合、领域裁决依据、选用结果及一次性施加的状态增量 |",
+        "original_case_markdown": "### T07｜同一快照中的三方争夺\n\n| 项目 | 验收要求 |\n|---|---|\n| 输入 | 从 D19 状态建立隔离测试支线；三方基于同一起始快照提交针对同一青霜剑的互斥行动 |\n| 预期 | 动作进入同一冲突组；按已选定的同时结算或有依据的先后规则裁决；结果可以一方获得、被阻止或全失败，但不能产生多个互斥独占者 |\n| 禁止结果 | 数据库先提交者即故事胜者；每个角色在独立沙箱中都成功后直接求并集；重试偷偷重抽胜负 |\n| 层级 | K、W、S |\n| 证据 | 共同快照、意图集合、领域裁决依据、选用结果及一次性施加的状态增量 |\n\n反应动作若允许，须来自明确的反应阶段和合法观察，不得让较晚提交者看见其他角色的全部私有意图。该测试支线不改写 main 的 e04。\n\n"
+      },
+      "inputs": [
+        {
+          "label": "输入",
+          "text": "从 D19 状态建立隔离测试支线；三方基于同一起始快照提交针对同一青霜剑的互斥行动"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "预期",
+          "text": "动作进入同一冲突组；按已选定的同时结算或有依据的先后规则裁决；结果可以一方获得、被阻止或全失败，但不能产生多个互斥独占者"
+        }
+      ],
+      "prohibited_results": "数据库先提交者即故事胜者；每个角色在独立沙箱中都成功后直接求并集；重试偷偷重抽胜负",
+      "required_evidence": "共同快照、意图集合、领域裁决依据、选用结果及一次性施加的状态增量",
+      "source_test_layers": [
+        "K",
+        "W",
+        "S"
+      ],
+      "v2_documents": [
+        "docs/04_事件溯源与版本体系.md",
+        "docs/05_世界模拟与调度引擎.md",
+        "docs/06_Agent编排与管理.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P2",
+          "scope": "共同快照与三方联合裁决"
+        },
+        {
+          "phase": "P3",
+          "scope": "并发压力及复杂共享资源"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "W",
+        "S"
+      ],
+      "test_layer_assignment": "SOURCE_AND_V2_MAPPING",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "PG_INTEGRATION_AND_FAULT_INJECTION",
+        "SEMANTIC_EVIDENCE_REVIEW"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "T08",
+      "series": "T",
+      "origin": "V1_1_INHERITED",
+      "title": "一个发生实例，多次叙述，一次效果",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "T08｜一个发生实例，多次叙述，一次效果",
+        "original_table_capture": "FULL_CASE_TABLE",
+        "original_table_markdown": "| 项目 | 验收要求 |\n|---|---|\n| 输入 | 已选模拟交剑事件被正文呈现，之后在倒叙/回忆中再次提及；同时注入同一提交请求的超时重试 |\n| 预期 | 模拟、正文和回忆关联同一个发生实例；每次状态构建中仅施加一次该事件效果，允许多个文本引用；请求重试不重复提交 |\n| 禁止结果 | 每提到一次交剑就再次改变库存；删除一段叙述就撤销真实交剑；将之后确实发生的另一次交剑误合并为原事件 |\n| 层级 | K、W、S |\n| 证据 | 发生实例身份/版本、正文引用映射、请求幂等记录、投影应用记录 |",
+        "original_case_markdown": "### T08｜一个发生实例，多次叙述，一次效果\n\n| 项目 | 验收要求 |\n|---|---|\n| 输入 | 已选模拟交剑事件被正文呈现，之后在倒叙/回忆中再次提及；同时注入同一提交请求的超时重试 |\n| 预期 | 模拟、正文和回忆关联同一个发生实例；每次状态构建中仅施加一次该事件效果，允许多个文本引用；请求重试不重复提交 |\n| 禁止结果 | 每提到一次交剑就再次改变库存；删除一段叙述就撤销真实交剑；将之后确实发生的另一次交剑误合并为原事件 |\n| 层级 | K、W、S |\n| 证据 | 发生实例身份/版本、正文引用映射、请求幂等记录、投影应用记录 |\n\n需要分别验证请求、事件身份与投影三层去重；只检查请求ID唯一，不能证明正文语义已经正确对齐。\n\n"
+      },
+      "inputs": [
+        {
+          "label": "输入",
+          "text": "已选模拟交剑事件被正文呈现，之后在倒叙/回忆中再次提及；同时注入同一提交请求的超时重试"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "预期",
+          "text": "模拟、正文和回忆关联同一个发生实例；每次状态构建中仅施加一次该事件效果，允许多个文本引用；请求重试不重复提交"
+        }
+      ],
+      "prohibited_results": "每提到一次交剑就再次改变库存；删除一段叙述就撤销真实交剑；将之后确实发生的另一次交剑误合并为原事件",
+      "required_evidence": "发生实例身份/版本、正文引用映射、请求幂等记录、投影应用记录",
+      "source_test_layers": [
+        "K",
+        "W",
+        "S"
+      ],
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/04_事件溯源与版本体系.md",
+        "docs/05_世界模拟与调度引擎.md",
+        "docs/07_剧情与文学生产系统.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "命令/发生/效果三层去重"
+        },
+        {
+          "phase": "P2",
+          "scope": "正文与回忆发生对齐"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "W",
+        "S"
+      ],
+      "test_layer_assignment": "SOURCE_AND_V2_MAPPING",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "PG_INTEGRATION_AND_FAULT_INJECTION",
+        "SEMANTIC_EVIDENCE_REVIEW"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "T09",
+      "series": "T",
+      "origin": "V1_1_INHERITED",
+      "title": "配方、数量单位与物品血缘",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "T09｜配方、数量单位与物品血缘",
+        "original_table_capture": "FULL_CASE_TABLE",
+        "original_table_markdown": "| 项目 | 验收要求 |\n|---|---|\n| 输入 | 在隔离制造案例中细化 e01 的材料依据：三份指定矿料经批准配方制成青霜剑，记录单位、损耗和产物；再重放 e08 毁坏 |\n| 预期 | 原料消耗、成品及必要副产物与同一制造事件关联；按配方的单位和换算校验。剑毁坏不会自动恢复矿料，身份与派生历史仍保留 |\n| 禁止结果 | 将“3份=1柄”当数值等式；同一矿料被重复消耗；回收未批准；毁坏后库存凭空返还；把同名产物当同一实例 |\n| 层级 | K、W |\n| 证据 | 材料批次、批准配方/损耗规则、制造和毁坏事件、资源账及血缘路径 |",
+        "original_case_markdown": "### T09｜配方、数量单位与物品血缘\n\n| 项目 | 验收要求 |\n|---|---|\n| 输入 | 在隔离制造案例中细化 e01 的材料依据：三份指定矿料经批准配方制成青霜剑，记录单位、损耗和产物；再重放 e08 毁坏 |\n| 预期 | 原料消耗、成品及必要副产物与同一制造事件关联；按配方的单位和换算校验。剑毁坏不会自动恢复矿料，身份与派生历史仍保留 |\n| 禁止结果 | 将“3份=1柄”当数值等式；同一矿料被重复消耗；回收未批准；毁坏后库存凭空返还；把同名产物当同一实例 |\n| 层级 | K、W |\n| 证据 | 材料批次、批准配方/损耗规则、制造和毁坏事件、资源账及血缘路径 |\n\n这里补充的是制造证据，不是声称主线又制造了第二把真剑。允许造物或回收的世界必须另有规则与代价，不能默认套用本案例的守恒范围。\n\n"
+      },
+      "inputs": [
+        {
+          "label": "输入",
+          "text": "在隔离制造案例中细化 e01 的材料依据：三份指定矿料经批准配方制成青霜剑，记录单位、损耗和产物；再重放 e08 毁坏"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "预期",
+          "text": "原料消耗、成品及必要副产物与同一制造事件关联；按配方的单位和换算校验。剑毁坏不会自动恢复矿料，身份与派生历史仍保留"
+        }
+      ],
+      "prohibited_results": "将“3份=1柄”当数值等式；同一矿料被重复消耗；回收未批准；毁坏后库存凭空返还；把同名产物当同一实例",
+      "required_evidence": "材料批次、批准配方/损耗规则、制造和毁坏事件、资源账及血缘路径",
+      "source_test_layers": [
+        "K",
+        "W"
+      ],
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/04_事件溯源与版本体系.md",
+        "docs/05_世界模拟与调度引擎.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "Decimal单位/配方/血缘及重放"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "W"
+      ],
+      "test_layer_assignment": "SOURCE_AND_V2_MAPPING",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "PG_INTEGRATION_AND_FAULT_INJECTION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "T10",
+      "series": "T",
+      "origin": "V1_1_INHERITED",
+      "title": "失去矿脉不等于所有计划必然失败",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "T10｜失去矿脉不等于所有计划必然失败",
+        "original_table_capture": "FULL_CASE_TABLE",
+        "original_table_markdown": "| 项目 | 验收要求 |\n|---|---|\n| 输入 | 一条隔离支线中矿脉被夺，相关计划需要制造十件法宝；分别设置“经核查材料不足且无可用替代”和“存在库存或合法替代来源” |\n| 预期 | 第一种情形可使具体制造路径的硬前提失败；第二种需要重算时间、成本和供应条件，不能仅凭失矿判定必然失败。“战力下降/战败”仍按证据作为推断或风险提示 |\n| 禁止结果 | 从图可达关系直接推出必然战败；忽视现有库存；自动删除整个宗门主题线；把模型预测写成已发生事件 |\n| 层级 | K、Q、S |\n| 证据 | 库存完备范围、需求配方、替代供应条件、依赖类型及规划复审依据 |",
+        "original_case_markdown": "### T10｜失去矿脉不等于所有计划必然失败\n\n| 项目 | 验收要求 |\n|---|---|\n| 输入 | 一条隔离支线中矿脉被夺，相关计划需要制造十件法宝；分别设置“经核查材料不足且无可用替代”和“存在库存或合法替代来源” |\n| 预期 | 第一种情形可使具体制造路径的硬前提失败；第二种需要重算时间、成本和供应条件，不能仅凭失矿判定必然失败。“战力下降/战败”仍按证据作为推断或风险提示 |\n| 禁止结果 | 从图可达关系直接推出必然战败；忽视现有库存；自动删除整个宗门主题线；把模型预测写成已发生事件 |\n| 层级 | K、Q、S |\n| 证据 | 库存完备范围、需求配方、替代供应条件、依赖类型及规划复审依据 |\n\n"
+      },
+      "inputs": [
+        {
+          "label": "输入",
+          "text": "一条隔离支线中矿脉被夺，相关计划需要制造十件法宝；分别设置“经核查材料不足且无可用替代”和“存在库存或合法替代来源”"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "预期",
+          "text": "第一种情形可使具体制造路径的硬前提失败；第二种需要重算时间、成本和供应条件，不能仅凭失矿判定必然失败。“战力下降/战败”仍按证据作为推断或风险提示"
+        }
+      ],
+      "prohibited_results": "从图可达关系直接推出必然战败；忽视现有库存；自动删除整个宗门主题线；把模型预测写成已发生事件",
+      "required_evidence": "库存完备范围、需求配方、替代供应条件、依赖类型及规划复审依据",
+      "source_test_layers": [
+        "K",
+        "Q",
+        "S"
+      ],
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/07_剧情与文学生产系统.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P2",
+          "scope": "替代供应与依赖分类的真实重规划"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q",
+        "S"
+      ],
+      "test_layer_assignment": "SOURCE_AND_V2_MAPPING",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION",
+        "SEMANTIC_EVIDENCE_REVIEW"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "T11",
+      "series": "T",
+      "origin": "V1_1_INHERITED",
+      "title": "发言为真，不等于发言内容为真",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "T11｜发言为真，不等于发言内容为真",
+        "original_table_capture": "FULL_CASE_TABLE",
+        "original_table_markdown": "| 项目 | 验收要求 |\n|---|---|\n| 输入 | 在隔离支线 D26 增加反派发言“剑已归还师父”，实际剑仍被其藏匿；主角经合法渠道听到这句话 |\n| 预期 | 可确认反派说过该话；“已经归还”作为命题不因此成立；主角可接受、怀疑或拒绝，由认知依据决定。若误信，保留与世界不一致的 belief |\n| 禁止结果 | 抽取台词后把 possessor 改为师父；收到消息必然相信；为了“一致性”删去有意的谎言或误信 |\n| 层级 | K、Q、S |\n| 证据 | 发言事件、原文片段、世界持有状态、传播路径与主角信念更新依据 |",
+        "original_case_markdown": "### T11｜发言为真，不等于发言内容为真\n\n| 项目 | 验收要求 |\n|---|---|\n| 输入 | 在隔离支线 D26 增加反派发言“剑已归还师父”，实际剑仍被其藏匿；主角经合法渠道听到这句话 |\n| 预期 | 可确认反派说过该话；“已经归还”作为命题不因此成立；主角可接受、怀疑或拒绝，由认知依据决定。若误信，保留与世界不一致的 belief |\n| 禁止结果 | 抽取台词后把 possessor 改为师父；收到消息必然相信；为了“一致性”删去有意的谎言或误信 |\n| 层级 | K、Q、S |\n| 证据 | 发言事件、原文片段、世界持有状态、传播路径与主角信念更新依据 |\n\n"
+      },
+      "inputs": [
+        {
+          "label": "输入",
+          "text": "在隔离支线 D26 增加反派发言“剑已归还师父”，实际剑仍被其藏匿；主角经合法渠道听到这句话"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "预期",
+          "text": "可确认反派说过该话；“已经归还”作为命题不因此成立；主角可接受、怀疑或拒绝，由认知依据决定。若误信，保留与世界不一致的 belief"
+        }
+      ],
+      "prohibited_results": "抽取台词后把 possessor 改为师父；收到消息必然相信；为了“一致性”删去有意的谎言或误信",
+      "required_evidence": "发言事件、原文片段、世界持有状态、传播路径与主角信念更新依据",
+      "source_test_layers": [
+        "K",
+        "Q",
+        "S"
+      ],
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/07_剧情与文学生产系统.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "发言/观察/信念分型"
+        },
+        {
+          "phase": "P2",
+          "scope": "谎言与误信语义评测"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q",
+        "S"
+      ],
+      "test_layer_assignment": "SOURCE_AND_V2_MAPPING",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION",
+        "SEMANTIC_EVIDENCE_REVIEW"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "T12",
+      "series": "T",
+      "origin": "V1_1_INHERITED",
+      "title": "时间未知与时间约束矛盾",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "T12｜时间未知与时间约束矛盾",
+        "original_table_capture": "FULL_CASE_TABLE",
+        "original_table_markdown": "| 项目 | 验收要求 |\n|---|---|\n| 输入A | 某事件 A 仅确定发生在 D22–D25，查询 D23 的相关状态 |\n| 预期A | 如现有约束无法确定，返回候选状态或 undetermined，并解释区间依据；不得凭章节号指定 D23 |\n| 输入B | A 位于 D22–D25，B 明确为 D20，同时要求严格 A before B |\n| 预期B | 判定时间约束不一致，即使 before 关系图没有环；修正或拒绝该组条件后才能接受相关结果 |\n| 禁止结果 | 将无环当作所有时间约束已满足；擅改 A 的日期；为了给唯一答案而丢弃已批准时间证据 |\n| 层级 | K、Q |\n| 证据 | 时间区间、严格先后关系、冲突的最小证据集合或等价解释 |",
+        "original_case_markdown": "### T12｜时间未知与时间约束矛盾\n\n| 项目 | 验收要求 |\n|---|---|\n| 输入A | 某事件 A 仅确定发生在 D22–D25，查询 D23 的相关状态 |\n| 预期A | 如现有约束无法确定，返回候选状态或 undetermined，并解释区间依据；不得凭章节号指定 D23 |\n| 输入B | A 位于 D22–D25，B 明确为 D20，同时要求严格 A before B |\n| 预期B | 判定时间约束不一致，即使 before 关系图没有环；修正或拒绝该组条件后才能接受相关结果 |\n| 禁止结果 | 将无环当作所有时间约束已满足；擅改 A 的日期；为了给唯一答案而丢弃已批准时间证据 |\n| 层级 | K、Q |\n| 证据 | 时间区间、严格先后关系、冲突的最小证据集合或等价解释 |\n\n"
+      },
+      "inputs": [
+        {
+          "label": "输入A",
+          "text": "某事件 A 仅确定发生在 D22–D25，查询 D23 的相关状态"
+        },
+        {
+          "label": "输入B",
+          "text": "A 位于 D22–D25，B 明确为 D20，同时要求严格 A before B"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "预期A",
+          "text": "如现有约束无法确定，返回候选状态或 undetermined，并解释区间依据；不得凭章节号指定 D23"
+        },
+        {
+          "label": "预期B",
+          "text": "判定时间约束不一致，即使 before 关系图没有环；修正或拒绝该组条件后才能接受相关结果"
+        }
+      ],
+      "prohibited_results": "将无环当作所有时间约束已满足；擅改 A 的日期；为了给唯一答案而丢弃已批准时间证据",
+      "required_evidence": "时间区间、严格先后关系、冲突的最小证据集合或等价解释",
+      "source_test_layers": [
+        "K",
+        "Q"
+      ],
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/04_事件溯源与版本体系.md",
+        "docs/05_世界模拟与调度引擎.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "模糊发生/区间约束与历史查询"
+        },
+        {
+          "phase": "P2",
+          "scope": "写作上下文中的不确定信息"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q"
+      ],
+      "test_layer_assignment": "SOURCE_AND_V2_MAPPING",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "S01",
+      "series": "S",
+      "origin": "V1_1_INHERITED",
+      "title": "未来预计与命令不提前兑现",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "S01｜未来预计与命令不提前兑现",
+        "original_table_capture": "FULL_CASE_TABLE",
+        "original_table_markdown": "| 项目 | 验收要求 |\n|---|---|\n| 输入 | 加载至D29的相应已接受前缀，以及预计抵达、征用、夺桥和信使交付四项未来安排；尚未接受D30结果 |\n| 预期 | 出发、下令和信使出发可以是事实；未来触发只是到时检查的工作。民仓/军仓不得因预计、命令或预约增加本批库存，角色也不因导演计划自动知道下一步 |\n| 禁止结果 | 将计划目标直接写成事件；把D30触发求值等同抵达成功；下征用令即把owner/possessor改为守军 |\n| 层级 | K、Q、W |\n| 证据 | 分时快照、计划与过程记录、触发求值状态、库存和权属来源 |",
+        "original_case_markdown": "### S01｜未来预计与命令不提前兑现\n\n| 项目 | 验收要求 |\n|---|---|\n| 输入 | 加载至D29的相应已接受前缀，以及预计抵达、征用、夺桥和信使交付四项未来安排；尚未接受D30结果 |\n| 预期 | 出发、下令和信使出发可以是事实；未来触发只是到时检查的工作。民仓/军仓不得因预计、命令或预约增加本批库存，角色也不因导演计划自动知道下一步 |\n| 禁止结果 | 将计划目标直接写成事件；把D30触发求值等同抵达成功；下征用令即把owner/possessor改为守军 |\n| 层级 | K、Q、W |\n| 证据 | 分时快照、计划与过程记录、触发求值状态、库存和权属来源 |\n\n这个案例应同时包含“尚未求值”和“已求值但条件失败”两种状态，避免把两者都记成笼统的未完成。\n\n"
+      },
+      "inputs": [
+        {
+          "label": "输入",
+          "text": "加载至D29的相应已接受前缀，以及预计抵达、征用、夺桥和信使交付四项未来安排；尚未接受D30结果"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "预期",
+          "text": "出发、下令和信使出发可以是事实；未来触发只是到时检查的工作。民仓/军仓不得因预计、命令或预约增加本批库存，角色也不因导演计划自动知道下一步"
+        }
+      ],
+      "prohibited_results": "将计划目标直接写成事件；把D30触发求值等同抵达成功；下征用令即把owner/possessor改为守军",
+      "required_evidence": "分时快照、计划与过程记录、触发求值状态、库存和权属来源",
+      "source_test_layers": [
+        "K",
+        "Q",
+        "W"
+      ],
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/05_世界模拟与调度引擎.md",
+        "docs/07_剧情与文学生产系统.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P2",
+          "scope": "已登记未来触发与实际状态隔离"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q",
+        "W"
+      ],
+      "test_layer_assignment": "SOURCE_AND_V2_MAPPING",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION",
+        "PG_INTEGRATION_AND_FAULT_INJECTION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "S02",
+      "series": "S",
+      "origin": "V1_1_INHERITED",
+      "title": "同刻交汇不按模型返回顺序决胜",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "S02｜同刻交汇不按模型返回顺序决胜",
+        "original_table_capture": "FULL_CASE_TABLE",
+        "original_table_markdown": "| 项目 | 验收要求 |\n|---|---|\n| 输入 | D30商队过桥、守军征用、对手夺桥的意图基于同一共同状态；分别改变三个模型任务的返回顺序；采用4.1所述选定裁决 |\n| 预期 | 相关意图及必要反应进入同一冲突簇，结果按选定裁决一次接受；对手在北桥头、商队在南岸、守军未取得粮。粮仍为一百袋，所有/保管关系不变 |\n| 禁止结果 | 商队任务先返回就先入库；守军worker先提交就征用成功；三个独立成功结果直接合并；后返回者偷看他人全部私有意图 |\n| 层级 | K、Q、W、S |\n| 证据 | 共同快照、相关输入集合、反应阶段依据、裁决存档、接受清单及权属/库存结果 |",
+        "original_case_markdown": "### S02｜同刻交汇不按模型返回顺序决胜\n\n| 项目 | 验收要求 |\n|---|---|\n| 输入 | D30商队过桥、守军征用、对手夺桥的意图基于同一共同状态；分别改变三个模型任务的返回顺序；采用4.1所述选定裁决 |\n| 预期 | 相关意图及必要反应进入同一冲突簇，结果按选定裁决一次接受；对手在北桥头、商队在南岸、守军未取得粮。粮仍为一百袋，所有/保管关系不变 |\n| 禁止结果 | 商队任务先返回就先入库；守军worker先提交就征用成功；三个独立成功结果直接合并；后返回者偷看他人全部私有意图 |\n| 层级 | K、Q、W、S |\n| 证据 | 共同快照、相关输入集合、反应阶段依据、裁决存档、接受清单及权属/库存结果 |\n\n若某个必要意图尚未返回，工作流等待或恢复该任务；不能用“角色没有及时响应”偷偷补上一个故事内失败。技术迟到另见S08。\n\n另设一个隔离反例：守军已明确在D30上午封桥，商队下午才到达。此时必须按已知先后使用封桥后的状态，不能因为都标作D30就共同读取封桥前状态。当前S02夹具明确采用同时结算；粗日期相同本身不是同时性的证明。\n\n"
+      },
+      "inputs": [
+        {
+          "label": "输入",
+          "text": "D30商队过桥、守军征用、对手夺桥的意图基于同一共同状态；分别改变三个模型任务的返回顺序；采用4.1所述选定裁决"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "预期",
+          "text": "相关意图及必要反应进入同一冲突簇，结果按选定裁决一次接受；对手在北桥头、商队在南岸、守军未取得粮。粮仍为一百袋，所有/保管关系不变"
+        }
+      ],
+      "prohibited_results": "商队任务先返回就先入库；守军worker先提交就征用成功；三个独立成功结果直接合并；后返回者偷看他人全部私有意图",
+      "required_evidence": "共同快照、相关输入集合、反应阶段依据、裁决存档、接受清单及权属/库存结果",
+      "source_test_layers": [
+        "K",
+        "Q",
+        "W",
+        "S"
+      ],
+      "v2_documents": [
+        "docs/04_事件溯源与版本体系.md",
+        "docs/05_世界模拟与调度引擎.md",
+        "docs/06_Agent编排与管理.md",
+        "docs/07_剧情与文学生产系统.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P2",
+          "scope": "白桥固定裁决及结果顺序置换"
+        },
+        {
+          "phase": "P3",
+          "scope": "多worker压力"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q",
+        "W",
+        "S"
+      ],
+      "test_layer_assignment": "SOURCE_AND_V2_MAPPING",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION",
+        "PG_INTEGRATION_AND_FAULT_INJECTION",
+        "SEMANTIC_EVIDENCE_REVIEW"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "S03",
+      "series": "S",
+      "origin": "V1_1_INHERITED",
+      "title": "D31只是这条信使通道的到达下界",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "S03｜D31只是这条信使通道的到达下界",
+        "original_table_capture": "FULL_CASE_TABLE",
+        "original_table_markdown": "| 项目 | 验收要求 |\n|---|---|\n| 输入 | A：D29出发、最短两日的信使路线，未提供其他获准信息来源；B：另加经过接受的D30守军现场宣告；C：信使途中发生合法阻碍 |\n| 预期 | A不能以该信使为来源支持D30已经收信；B允许D30从另一路径收到并按认知规则处理消息；C可以晚于D31到达或未到达。即使信使D31送达，仍保留消息形成时间、接收时间和是否相信的区别 |\n| 禁止结果 | 由一个通道下界推断所有人物D31前绝不可能获知；将最早到达写成必然到达；把收到D27旧令当作知道D30全部新局势；收到就必然相信 |\n| 层级 | K、Q、S |\n| 证据 | 路线与最短耗时、每条实际传播事件、来源/接收时间、人物观察和信念依据 |",
+        "original_case_markdown": "### S03｜D31只是这条信使通道的到达下界\n\n| 项目 | 验收要求 |\n|---|---|\n| 输入 | A：D29出发、最短两日的信使路线，未提供其他获准信息来源；B：另加经过接受的D30守军现场宣告；C：信使途中发生合法阻碍 |\n| 预期 | A不能以该信使为来源支持D30已经收信；B允许D30从另一路径收到并按认知规则处理消息；C可以晚于D31到达或未到达。即使信使D31送达，仍保留消息形成时间、接收时间和是否相信的区别 |\n| 禁止结果 | 由一个通道下界推断所有人物D31前绝不可能获知；将最早到达写成必然到达；把收到D27旧令当作知道D30全部新局势；收到就必然相信 |\n| 层级 | K、Q、S |\n| 证据 | 路线与最短耗时、每条实际传播事件、来源/接收时间、人物观察和信念依据 |\n\n缺乏其他来源时，系统应表达“没有支持该次获知的证据”，不借开放世界中的空查询证明人物永远不可能猜测。这与F14的完备性区分一致。\n\n"
+      },
+      "inputs": [
+        {
+          "label": "输入",
+          "text": "A：D29出发、最短两日的信使路线，未提供其他获准信息来源；B：另加经过接受的D30守军现场宣告；C：信使途中发生合法阻碍"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "预期",
+          "text": "A不能以该信使为来源支持D30已经收信；B允许D30从另一路径收到并按认知规则处理消息；C可以晚于D31到达或未到达。即使信使D31送达，仍保留消息形成时间、接收时间和是否相信的区别"
+        }
+      ],
+      "prohibited_results": "由一个通道下界推断所有人物D31前绝不可能获知；将最早到达写成必然到达；把收到D27旧令当作知道D30全部新局势；收到就必然相信",
+      "required_evidence": "路线与最短耗时、每条实际传播事件、来源/接收时间、人物观察和信念依据",
+      "source_test_layers": [
+        "K",
+        "Q",
+        "S"
+      ],
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/05_世界模拟与调度引擎.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P2",
+          "scope": "通道传播下界/合法替代渠道/认知来源"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q",
+        "S"
+      ],
+      "test_layer_assignment": "SOURCE_AND_V2_MAPPING",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION",
+        "SEMANTIC_EVIDENCE_REVIEW"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "S04",
+      "series": "S",
+      "origin": "V1_1_INHERITED",
+      "title": "宏观结算与微观细写使用同一段历史",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "S04｜宏观结算与微观细写使用同一段历史",
+        "original_table_capture": "FULL_CASE_TABLE",
+        "original_table_markdown": "| 项目 | 验收要求 |\n|---|---|\n| 输入 | 先接受4.1的D30聚合结果，再展开同一次交汇的微观记录与正文；注入重复抽取和任务重试，并另提供一份擅自写成“烧毁两袋粮”的草稿 |\n| 预期 | 聚合与细化指向同一发生范围，状态效果采用明确的一层表示；控制权、位置和相关已登记变化只施加一次。基准仍为一百袋且交汇无粮食损耗；烧粮草稿应被识别为改变已接受后果 |\n| 禁止结果 | 聚合和子事件叠加执行；细写就再消耗一次同一资源；为与草稿一致无痕把一百袋改为九十八袋；将文学细化称为又发生一次交汇 |\n| 层级 | K、W、S |\n| 证据 | 聚合/细化对应、有效效果表示、事件引用与应用记录、原裁决和新增差异 |",
+        "original_case_markdown": "### S04｜宏观结算与微观细写使用同一段历史\n\n| 项目 | 验收要求 |\n|---|---|\n| 输入 | 先接受4.1的D30聚合结果，再展开同一次交汇的微观记录与正文；注入重复抽取和任务重试，并另提供一份擅自写成“烧毁两袋粮”的草稿 |\n| 预期 | 聚合与细化指向同一发生范围，状态效果采用明确的一层表示；控制权、位置和相关已登记变化只施加一次。基准仍为一百袋且交汇无粮食损耗；烧粮草稿应被识别为改变已接受后果 |\n| 禁止结果 | 聚合和子事件叠加执行；细写就再消耗一次同一资源；为与草稿一致无痕把一百袋改为九十八袋；将文学细化称为又发生一次交汇 |\n| 层级 | K、W、S |\n| 证据 | 聚合/细化对应、有效效果表示、事件引用与应用记录、原裁决和新增差异 |\n\n若作者确实选择新增损耗，应评估为历史修订并检查后续依赖；不能将非等价变化混入“更详细的描述”。本案例不临时编造运输费用数值来填补原始材料。\n\n"
+      },
+      "inputs": [
+        {
+          "label": "输入",
+          "text": "先接受4.1的D30聚合结果，再展开同一次交汇的微观记录与正文；注入重复抽取和任务重试，并另提供一份擅自写成“烧毁两袋粮”的草稿"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "预期",
+          "text": "聚合与细化指向同一发生范围，状态效果采用明确的一层表示；控制权、位置和相关已登记变化只施加一次。基准仍为一百袋且交汇无粮食损耗；烧粮草稿应被识别为改变已接受后果"
+        }
+      ],
+      "prohibited_results": "聚合和子事件叠加执行；细写就再消耗一次同一资源；为与草稿一致无痕把一百袋改为九十八袋；将文学细化称为又发生一次交汇",
+      "required_evidence": "聚合/细化对应、有效效果表示、事件引用与应用记录、原裁决和新增差异",
+      "source_test_layers": [
+        "K",
+        "W",
+        "S"
+      ],
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/04_事件溯源与版本体系.md",
+        "docs/05_世界模拟与调度引擎.md",
+        "docs/07_剧情与文学生产系统.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P2",
+          "scope": "宏观后纯呈现细写与烧粮反例"
+        },
+        {
+          "phase": "P3",
+          "scope": "完整等效表示替换"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "W",
+        "S"
+      ],
+      "test_layer_assignment": "SOURCE_AND_V2_MAPPING",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "PG_INTEGRATION_AND_FAULT_INJECTION",
+        "SEMANTIC_EVIDENCE_REVIEW"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "S05",
+      "series": "S",
+      "origin": "V1_1_INHERITED",
+      "title": "相关域受阻，独立线仍能继续",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "S05｜相关域受阻，独立线仍能继续",
+        "original_table_capture": "FULL_CASE_TABLE",
+        "original_table_markdown": "| 项目 | 验收要求 |\n|---|---|\n| 输入 | 白桥关键入站影响尚未解析；南海支线已在明确通道与依赖范围内证明D35前不会影响关口，关口也无该时窗内所需的南海输入；再加入一个会缩短传播下界的新能力提案 |\n| 预期 | 白桥相关结果等待、细化或合并推进；南海可在已验证范围内继续。新能力若获准并使原边界不再成立，受影响的未接受结果重新验证，不沿用旧证明 |\n| 禁止结果 | 因桥头对白未完成而冻结全世界；因南海先到D34就宣布白桥也推进到D34；只凭地理遥远判定独立；忽略已登记但尚未生成任务的高影响过程 |\n| 层级 | K、Q、W |\n| 证据 | 各线推进覆盖、声明通道与入站过程、边界成立条件、失效与任务状态 |",
+        "original_case_markdown": "### S05｜相关域受阻，独立线仍能继续\n\n| 项目 | 验收要求 |\n|---|---|\n| 输入 | 白桥关键入站影响尚未解析；南海支线已在明确通道与依赖范围内证明D35前不会影响关口，关口也无该时窗内所需的南海输入；再加入一个会缩短传播下界的新能力提案 |\n| 预期 | 白桥相关结果等待、细化或合并推进；南海可在已验证范围内继续。新能力若获准并使原边界不再成立，受影响的未接受结果重新验证，不沿用旧证明 |\n| 禁止结果 | 因桥头对白未完成而冻结全世界；因南海先到D34就宣布白桥也推进到D34；只凭地理遥远判定独立；忽略已登记但尚未生成任务的高影响过程 |\n| 层级 | K、Q、W |\n| 证据 | 各线推进覆盖、声明通道与入站过程、边界成立条件、失效与任务状态 |\n\n这不是要求证明开放世界不存在任何未知因素。已知且相关的高影响过程不能靠一句“未纳入范围”跳过；真正未决定的背景则保留其覆盖限制。\n\n"
+      },
+      "inputs": [
+        {
+          "label": "输入",
+          "text": "白桥关键入站影响尚未解析；南海支线已在明确通道与依赖范围内证明D35前不会影响关口，关口也无该时窗内所需的南海输入；再加入一个会缩短传播下界的新能力提案"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "预期",
+          "text": "白桥相关结果等待、细化或合并推进；南海可在已验证范围内继续。新能力若获准并使原边界不再成立，受影响的未接受结果重新验证，不沿用旧证明"
+        }
+      ],
+      "prohibited_results": "因桥头对白未完成而冻结全世界；因南海先到D34就宣布白桥也推进到D34；只凭地理遥远判定独立；忽略已登记但尚未生成任务的高影响过程",
+      "required_evidence": "各线推进覆盖、声明通道与入站过程、边界成立条件、失效与任务状态",
+      "source_test_layers": [
+        "K",
+        "Q",
+        "W"
+      ],
+      "v2_documents": [
+        "docs/04_事件溯源与版本体系.md",
+        "docs/05_世界模拟与调度引擎.md",
+        "docs/06_Agent编排与管理.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P2",
+          "scope": "少域入站屏障及独立支线"
+        },
+        {
+          "phase": "P3",
+          "scope": "动态分域与精细依赖"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q",
+        "W"
+      ],
+      "test_layer_assignment": "SOURCE_AND_V2_MAPPING",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION",
+        "PG_INTEGRATION_AND_FAULT_INJECTION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "S06",
+      "series": "S",
+      "origin": "V1_1_INHERITED",
+      "title": "预演可放弃，已接受世界不能随手丢弃",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "S06｜预演可放弃，已接受世界不能随手丢弃",
+        "original_table_capture": "FULL_CASE_TABLE",
+        "original_table_markdown": "| 项目 | 验收要求 |\n|---|---|\n| 输入 | 从同一开卷快照产生“顺利过桥”等候选预演；另一路实际选择并接受4.1的D30结果，但正文尚未发布；导演随后偏好顺利交付路线 |\n| 预期 | 尚未发生的预测不进入人物记忆；角色可使用本分支已接受且合法获知的演练经历。未采用候选可放弃。已接受白桥结果继续约束所属分支，改路线须从其后果出发；改变该历史须修订。工作分支接受不自动成为main历史 |\n| 禁止结果 | 把候选未来写进人物记忆；因没有正文就把已接受结果恢复成随时可弃的草案；将反复重抽伪装为技术重试；挑选候选时删除既有规则已要求的后果 |\n| 层级 | K、Q、W、S |\n| 证据 | 候选基础版本、采用/拒绝决议、正式接受清单、角色实际上下文、重试与修订记录 |",
+        "original_case_markdown": "### S06｜预演可放弃，已接受世界不能随手丢弃\n\n| 项目 | 验收要求 |\n|---|---|\n| 输入 | 从同一开卷快照产生“顺利过桥”等候选预演；另一路实际选择并接受4.1的D30结果，但正文尚未发布；导演随后偏好顺利交付路线 |\n| 预期 | 尚未发生的预测不进入人物记忆；角色可使用本分支已接受且合法获知的演练经历。未采用候选可放弃。已接受白桥结果继续约束所属分支，改路线须从其后果出发；改变该历史须修订。工作分支接受不自动成为main历史 |\n| 禁止结果 | 把候选未来写进人物记忆；因没有正文就把已接受结果恢复成随时可弃的草案；将反复重抽伪装为技术重试；挑选候选时删除既有规则已要求的后果 |\n| 层级 | K、Q、W、S |\n| 证据 | 候选基础版本、采用/拒绝决议、正式接受清单、角色实际上下文、重试与修订记录 |\n\n另检查一项已批准但本卷未出场的远方设定：它仍保持权威。是否进入当前上下文、是否细化推进、是否已经接受分别判断，不能将不入卷的设定自动降为可随意替换的候选。\n\n"
+      },
+      "inputs": [
+        {
+          "label": "输入",
+          "text": "从同一开卷快照产生“顺利过桥”等候选预演；另一路实际选择并接受4.1的D30结果，但正文尚未发布；导演随后偏好顺利交付路线"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "预期",
+          "text": "尚未发生的预测不进入人物记忆；角色可使用本分支已接受且合法获知的演练经历。未采用候选可放弃。已接受白桥结果继续约束所属分支，改路线须从其后果出发；改变该历史须修订。工作分支接受不自动成为main历史"
+        }
+      ],
+      "prohibited_results": "把候选未来写进人物记忆；因没有正文就把已接受结果恢复成随时可弃的草案；将反复重抽伪装为技术重试；挑选候选时删除既有规则已要求的后果",
+      "required_evidence": "候选基础版本、采用/拒绝决议、正式接受清单、角色实际上下文、重试与修订记录",
+      "source_test_layers": [
+        "K",
+        "Q",
+        "W",
+        "S"
+      ],
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/04_事件溯源与版本体系.md",
+        "docs/07_剧情与文学生产系统.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P2",
+          "scope": "候选预演/分支接受/正式世界与角色经历隔离"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q",
+        "W",
+        "S"
+      ],
+      "test_layer_assignment": "SOURCE_AND_V2_MAPPING",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION",
+        "PG_INTEGRATION_AND_FAULT_INJECTION",
+        "SEMANTIC_EVIDENCE_REVIEW"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "S07",
+      "series": "S",
+      "origin": "V1_1_INHERITED",
+      "title": "卷导演接受失败，并产生有代价的改线",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "S07｜卷导演接受失败，并产生有代价的改线",
+        "original_table_capture": "FULL_CASE_TABLE",
+        "original_table_markdown": "| 项目 | 验收要求 |\n|---|---|\n| 输入 | 本卷希望D30完成救济交付；4.1结果已接受，准时抵达路线失败，各方仍有自己的目标与有限认知 |\n| 预期 | 保留真实未交付结果，区分“救济的叙事价值”与“按原路线准时到达”。可提出谈判、等待、既有可行通道或阶段失败等候选，逐项检查时间、资源、动机和代价；救济后果依据库存与分配求值 |\n| 禁止结果 | 命令对手无理由让路；凭空增加一座已被证明不存在的桥；一键把粮移入民仓；由一次运输受阻直接断言全城饿死；无限施压直到人物服从 |\n| 层级 | K、Q、S |\n| 证据 | 失败路线的具体前提、保留的世界后果、人物信息、备选差异、干预记录及选用理由 |",
+        "original_case_markdown": "### S07｜卷导演接受失败，并产生有代价的改线\n\n| 项目 | 验收要求 |\n|---|---|\n| 输入 | 本卷希望D30完成救济交付；4.1结果已接受，准时抵达路线失败，各方仍有自己的目标与有限认知 |\n| 预期 | 保留真实未交付结果，区分“救济的叙事价值”与“按原路线准时到达”。可提出谈判、等待、既有可行通道或阶段失败等候选，逐项检查时间、资源、动机和代价；救济后果依据库存与分配求值 |\n| 禁止结果 | 命令对手无理由让路；凭空增加一座已被证明不存在的桥；一键把粮移入民仓；由一次运输受阻直接断言全城饿死；无限施压直到人物服从 |\n| 层级 | K、Q、S |\n| 证据 | 失败路线的具体前提、保留的世界后果、人物信息、备选差异、干预记录及选用理由 |\n\n如果作者把D30准时交付明确列为保护性承诺，则应形成公开的承诺冲突决议，讨论调整承诺或正式修订的代价。不能把文学优先级偷渡为裁决偏袒。允许本卷以部分揭示、关系改变或承担失败结束，不要求无损补发同一奖励。\n\n"
+      },
+      "inputs": [
+        {
+          "label": "输入",
+          "text": "本卷希望D30完成救济交付；4.1结果已接受，准时抵达路线失败，各方仍有自己的目标与有限认知"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "预期",
+          "text": "保留真实未交付结果，区分“救济的叙事价值”与“按原路线准时到达”。可提出谈判、等待、既有可行通道或阶段失败等候选，逐项检查时间、资源、动机和代价；救济后果依据库存与分配求值"
+        }
+      ],
+      "prohibited_results": "命令对手无理由让路；凭空增加一座已被证明不存在的桥；一键把粮移入民仓；由一次运输受阻直接断言全城饿死；无限施压直到人物服从",
+      "required_evidence": "失败路线的具体前提、保留的世界后果、人物信息、备选差异、干预记录及选用理由",
+      "source_test_layers": [
+        "K",
+        "Q",
+        "S"
+      ],
+      "v2_documents": [
+        "docs/05_世界模拟与调度引擎.md",
+        "docs/07_剧情与文学生产系统.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P2",
+          "scope": "合法失败后的有代价改线与原文评阅"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q",
+        "S"
+      ],
+      "test_layer_assignment": "SOURCE_AND_V2_MAPPING",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION",
+        "SEMANTIC_EVIDENCE_REVIEW"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "S08",
+      "series": "S",
+      "origin": "V1_1_INHERITED",
+      "title": "现实任务超时不自动改变故事时间",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "S08｜现实任务超时不自动改变故事时间",
+        "original_table_capture": "FULL_CASE_TABLE",
+        "original_table_markdown": "| 项目 | 验收要求 |\n|---|---|\n| 输入 | D30交汇中的角色任务在现实运行中超时、限流或被替换；旧任务后来返回结果 |\n| 预期 | 工作流保存尝试状态、按预算与回执处理恢复；仍使用适用的故事快照和未决边界。旧代际不获得提交资格；已选结果按存档恢复。确无依赖的其他线可以继续 |\n| 禁止结果 | 模型慢十分钟就让军队晚十分钟到达；将技术超时当人物沉默、犹豫或战败；每次重试推动一天或重抽既定胜负 |\n| 层级 | K、W |\n| 证据 | 现实任务日志、故事时间与动作持续依据、任务代际、结果存档及实际生效记录 |",
+        "original_case_markdown": "### S08｜现实任务超时不自动改变故事时间\n\n| 项目 | 验收要求 |\n|---|---|\n| 输入 | D30交汇中的角色任务在现实运行中超时、限流或被替换；旧任务后来返回结果 |\n| 预期 | 工作流保存尝试状态、按预算与回执处理恢复；仍使用适用的故事快照和未决边界。旧代际不获得提交资格；已选结果按存档恢复。确无依赖的其他线可以继续 |\n| 禁止结果 | 模型慢十分钟就让军队晚十分钟到达；将技术超时当人物沉默、犹豫或战败；每次重试推动一天或重抽既定胜负 |\n| 层级 | K、W |\n| 证据 | 现实任务日志、故事时间与动作持续依据、任务代际、结果存档及实际生效记录 |\n\n人物在故事里错过时机必须有世界内原因，如旅行耗时、已发生的迟疑或消息延迟；不能从供应商响应速度推导。该案例与F01/F02/F08/F09共同验证两类时间的隔离。\n\n"
+      },
+      "inputs": [
+        {
+          "label": "输入",
+          "text": "D30交汇中的角色任务在现实运行中超时、限流或被替换；旧任务后来返回结果"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "预期",
+          "text": "工作流保存尝试状态、按预算与回执处理恢复；仍使用适用的故事快照和未决边界。旧代际不获得提交资格；已选结果按存档恢复。确无依赖的其他线可以继续"
+        }
+      ],
+      "prohibited_results": "模型慢十分钟就让军队晚十分钟到达；将技术超时当人物沉默、犹豫或战败；每次重试推动一天或重抽既定胜负",
+      "required_evidence": "现实任务日志、故事时间与动作持续依据、任务代际、结果存档及实际生效记录",
+      "source_test_layers": [
+        "K",
+        "W"
+      ],
+      "v2_documents": [
+        "docs/04_事件溯源与版本体系.md",
+        "docs/05_世界模拟与调度引擎.md",
+        "docs/06_Agent编排与管理.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "首次异步任务的代际与恢复门禁"
+        },
+        {
+          "phase": "P2",
+          "scope": "真实交汇时故事时间不受超时影响"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "W"
+      ],
+      "test_layer_assignment": "SOURCE_AND_V2_MAPPING",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "PG_INTEGRATION_AND_FAULT_INJECTION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "L01",
+      "series": "L",
+      "origin": "V1_1_INHERITED",
+      "title": "同样答应合作，不等于具有相同的人物成长",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "L01｜同样答应合作，不等于具有相同的人物成长",
+        "original_table_capture": "FULL_CASE_TABLE",
+        "original_table_markdown": "| 项目 | 验收要求 |\n|---|---|\n| 输入 | 两版场景的动作类型同为“答应合作”。A通过自定条件、独立判断和承担代价表达其选择；B主要由旁白或弧线计划宣称“他已独立”，缺少相应选择与后果。各版实际条件按原文登记；另加入已获准的私有决定作为认知事实 |\n| 预期 | 审稿分别核对创作意图、人物实际决定与文本呈现证据。A提供更多可核查的选择材料；B的成长宣称需要文本支持，不能仅凭动作标签判完成。已接受的私有决定仍是认知事实，表达薄弱不使它自动变成未发生 |\n| 禁止结果 | “仍答应合作，所以没有成长”；“作者计划写独立，所以已经塑造成功”；把重要私有决定一概降为编辑猜测；强迫人物通过拒绝合作才能证明成长 |\n| 层级 | K、Q、S |\n| 证据 | 两版关键原文、条件与代价、此前经历、私有决定的接受依据、弧线意图及独立评审理由 |",
+        "original_case_markdown": "### L01｜同样答应合作，不等于具有相同的人物成长\n\n| 项目 | 验收要求 |\n|---|---|\n| 输入 | 两版场景的动作类型同为“答应合作”。A通过自定条件、独立判断和承担代价表达其选择；B主要由旁白或弧线计划宣称“他已独立”，缺少相应选择与后果。各版实际条件按原文登记；另加入已获准的私有决定作为认知事实 |\n| 预期 | 审稿分别核对创作意图、人物实际决定与文本呈现证据。A提供更多可核查的选择材料；B的成长宣称需要文本支持，不能仅凭动作标签判完成。已接受的私有决定仍是认知事实，表达薄弱不使它自动变成未发生 |\n| 禁止结果 | “仍答应合作，所以没有成长”；“作者计划写独立，所以已经塑造成功”；把重要私有决定一概降为编辑猜测；强迫人物通过拒绝合作才能证明成长 |\n| 层级 | K、Q、S |\n| 证据 | 两版关键原文、条件与代价、此前经历、私有决定的接受依据、弧线意图及独立评审理由 |\n\n预期不是命令所有评阅者投A一票。真正可验收的是判断是否区分发生、意图与表达，是否能用原文说明其结论，并允许合作本身也体现独立选择。\n\n"
+      },
+      "inputs": [
+        {
+          "label": "输入",
+          "text": "两版场景的动作类型同为“答应合作”。A通过自定条件、独立判断和承担代价表达其选择；B主要由旁白或弧线计划宣称“他已独立”，缺少相应选择与后果。各版实际条件按原文登记；另加入已获准的私有决定作为认知事实"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "预期",
+          "text": "审稿分别核对创作意图、人物实际决定与文本呈现证据。A提供更多可核查的选择材料；B的成长宣称需要文本支持，不能仅凭动作标签判完成。已接受的私有决定仍是认知事实，表达薄弱不使它自动变成未发生"
+        }
+      ],
+      "prohibited_results": "“仍答应合作，所以没有成长”；“作者计划写独立，所以已经塑造成功”；把重要私有决定一概降为编辑猜测；强迫人物通过拒绝合作才能证明成长",
+      "required_evidence": "两版关键原文、条件与代价、此前经历、私有决定的接受依据、弧线意图及独立评审理由",
+      "source_test_layers": [
+        "K",
+        "Q",
+        "S"
+      ],
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/07_剧情与文学生产系统.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P2",
+          "scope": "实际决定/成长意图/表达证据分离"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q",
+        "S"
+      ],
+      "test_layer_assignment": "SOURCE_AND_V2_MAPPING",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION",
+        "SEMANTIC_EVIDENCE_REVIEW",
+        "LITERARY_FULL_TEXT_REVIEW"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "L02",
+      "series": "L",
+      "origin": "V1_1_INHERITED",
+      "title": "八章各自合格，整卷仍可能反复空转",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "L02｜八章各自合格，整卷仍可能反复空转",
+        "original_table_capture": "FULL_CASE_TABLE",
+        "original_table_markdown": "| 项目 | 验收要求 |\n|---|---|\n| 输入 | 构造八章追逃正文，局部检查均合格但反复承担相同功能；前三章已经发布，中间一次重要告知已被世界接受；未发布段有合法的不同POV声线 |\n| 预期 | 整卷编辑通读实际正文，识别重复与缺失的后果；可以压缩未发布段、调整焦点和情绪余波、保留有效声线差异。修改后复核场景依赖、披露顺序、人物认知与内容绑定批准；前三章保持原发布身份 |\n| 禁止结果 | 平均八章分数即宣布整卷成立；只有摘要却声称通读全文；静默重排或删除已发布前缀；把合法多声部统一成一套语气；删去告知描写就让角色恢复未知 |\n| 层级 | K、Q、W、S |\n| 证据 | 全文阅读覆盖记录、场景功能与重复原文、前后结构方案、发布清单、告知事件及认知来源、披露差异和新批准 |",
+        "original_case_markdown": "### L02｜八章各自合格，整卷仍可能反复空转\n\n| 项目 | 验收要求 |\n|---|---|\n| 输入 | 构造八章追逃正文，局部检查均合格但反复承担相同功能；前三章已经发布，中间一次重要告知已被世界接受；未发布段有合法的不同POV声线 |\n| 预期 | 整卷编辑通读实际正文，识别重复与缺失的后果；可以压缩未发布段、调整焦点和情绪余波、保留有效声线差异。修改后复核场景依赖、披露顺序、人物认知与内容绑定批准；前三章保持原发布身份 |\n| 禁止结果 | 平均八章分数即宣布整卷成立；只有摘要却声称通读全文；静默重排或删除已发布前缀；把合法多声部统一成一套语气；删去告知描写就让角色恢复未知 |\n| 层级 | K、Q、W、S |\n| 证据 | 全文阅读覆盖记录、场景功能与重复原文、前后结构方案、发布清单、告知事件及认知来源、披露差异和新批准 |\n\n这里有一对必须分别核验的结果：**可以缩短追逃的叙述，却不能凭压缩撤销已经发生的追逃与告知。** 已接受的告知可以转为场外发生；若要取消告知本身，则另作世界修订并复核后续行为。若确需调整已发布三章，必须产生明确的新版本，不能伪装成未发布缓冲区的普通编辑。\n\n"
+      },
+      "inputs": [
+        {
+          "label": "输入",
+          "text": "构造八章追逃正文，局部检查均合格但反复承担相同功能；前三章已经发布，中间一次重要告知已被世界接受；未发布段有合法的不同POV声线"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "预期",
+          "text": "整卷编辑通读实际正文，识别重复与缺失的后果；可以压缩未发布段、调整焦点和情绪余波、保留有效声线差异。修改后复核场景依赖、披露顺序、人物认知与内容绑定批准；前三章保持原发布身份"
+        }
+      ],
+      "prohibited_results": "平均八章分数即宣布整卷成立；只有摘要却声称通读全文；静默重排或删除已发布前缀；把合法多声部统一成一套语气；删去告知描写就让角色恢复未知",
+      "required_evidence": "全文阅读覆盖记录、场景功能与重复原文、前后结构方案、发布清单、告知事件及认知来源、披露差异和新批准",
+      "source_test_layers": [
+        "K",
+        "Q",
+        "W",
+        "S"
+      ],
+      "v2_documents": [
+        "docs/04_事件溯源与版本体系.md",
+        "docs/07_剧情与文学生产系统.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P2",
+          "scope": "整卷通读/结构编辑/前缀保护及新批准"
+        },
+        {
+          "phase": "P4",
+          "scope": "连载跨卷推广"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q",
+        "W",
+        "S"
+      ],
+      "test_layer_assignment": "SOURCE_AND_V2_MAPPING",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION",
+        "PG_INTEGRATION_AND_FAULT_INJECTION",
+        "SEMANTIC_EVIDENCE_REVIEW",
+        "LITERARY_FULL_TEXT_REVIEW"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "L03",
+      "series": "L",
+      "origin": "V1_1_INHERITED",
+      "title": "丧友之后发笑，不自动构成情感连续性错误",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "L03｜丧友之后发笑，不自动构成情感连续性错误",
+        "original_table_capture": "FULL_CASE_TABLE",
+        "original_table_markdown": "| 项目 | 验收要求 |\n|---|---|\n| 输入 | A在丧友后短暂发笑，语境为共同回忆或暂时喘息，后续选择仍承接其经历；B的摘要无依据地标记“悲伤已结束”，并使相关承诺与关系余效从写作材料中消失 |\n| 预期 | 对A依据场景功能、时间与人物状态判断，不能按“笑”字直接报错；对B检查压缩、检索与解释依据，必要时恢复原文和未竟后果。人物可以快乐、回避或转化经历，不必持续哭泣 |\n| 禁止结果 | 固定悲伤值锁住人物；每章强制出现哀悼台词；把检索遗漏当作人物已经遗忘；仅凭单一情绪标签宣布关系和承诺已经消化 |\n| 层级 | Q、S |\n| 证据 | 丧失与后续行为的原文、时间间隔、文学档案更新依据、实际任务上下文及评审解释 |",
+        "original_case_markdown": "### L03｜丧友之后发笑，不自动构成情感连续性错误\n\n| 项目 | 验收要求 |\n|---|---|\n| 输入 | A在丧友后短暂发笑，语境为共同回忆或暂时喘息，后续选择仍承接其经历；B的摘要无依据地标记“悲伤已结束”，并使相关承诺与关系余效从写作材料中消失 |\n| 预期 | 对A依据场景功能、时间与人物状态判断，不能按“笑”字直接报错；对B检查压缩、检索与解释依据，必要时恢复原文和未竟后果。人物可以快乐、回避或转化经历，不必持续哭泣 |\n| 禁止结果 | 固定悲伤值锁住人物；每章强制出现哀悼台词；把检索遗漏当作人物已经遗忘；仅凭单一情绪标签宣布关系和承诺已经消化 |\n| 层级 | Q、S |\n| 证据 | 丧失与后续行为的原文、时间间隔、文学档案更新依据、实际任务上下文及评审解释 |\n\n这一案例检查情感连续性的证据与表达空间，不预设某一种哀悼方式必然更好。确认的遗忘、释怀或私有决定仍可按03的认知机制成立，但不能由摘要器无来源宣布。\n\n"
+      },
+      "inputs": [
+        {
+          "label": "输入",
+          "text": "A在丧友后短暂发笑，语境为共同回忆或暂时喘息，后续选择仍承接其经历；B的摘要无依据地标记“悲伤已结束”，并使相关承诺与关系余效从写作材料中消失"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "预期",
+          "text": "对A依据场景功能、时间与人物状态判断，不能按“笑”字直接报错；对B检查压缩、检索与解释依据，必要时恢复原文和未竟后果。人物可以快乐、回避或转化经历，不必持续哭泣"
+        }
+      ],
+      "prohibited_results": "固定悲伤值锁住人物；每章强制出现哀悼台词；把检索遗漏当作人物已经遗忘；仅凭单一情绪标签宣布关系和承诺已经消化",
+      "required_evidence": "丧失与后续行为的原文、时间间隔、文学档案更新依据、实际任务上下文及评审解释",
+      "source_test_layers": [
+        "Q",
+        "S"
+      ],
+      "v2_documents": [
+        "docs/07_剧情与文学生产系统.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P2",
+          "scope": "情绪连续性的原文反例与摘要校验"
+        }
+      ],
+      "test_layers": [
+        "Q",
+        "S"
+      ],
+      "test_layer_assignment": "SOURCE_AND_V2_MAPPING",
+      "test_methods": [
+        "QUERY_PERMISSION",
+        "SEMANTIC_EVIDENCE_REVIEW",
+        "LITERARY_FULL_TEXT_REVIEW"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "L04",
+      "series": "L",
+      "origin": "V1_1_INHERITED",
+      "title": "研究方法升级不自动统一全书语气",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "L04｜研究方法升级不自动统一全书语气",
+        "original_table_capture": "FULL_CASE_TABLE",
+        "original_table_markdown": "| 项目 | 验收要求 |\n|---|---|\n| 输入 | 方法库新增“更多用行动承担情绪”的建议，或更换了默认偏好另一种语言风格的模型；当前作品已有风格宪章、多POV声线和跨卷变化安排 |\n| 预期 | 研究产物保留适用条件并形成可选提案；授权编辑比较样段、说明采用范围，再接受必要的作品风格版本。旧文本与合法差异继续可追溯，方法更新本身不改作品 |\n| 禁止结果 | 把建议升级为全书禁用直接抒情；未经决议重润色所有旧章；模型切换后默认语气覆盖作品宪章；把某种方法视作所有题材的唯一规则 |\n| 层级 | Q、W、S |\n| 证据 | 方法来源与版本、作品原约定、候选样段及选择理由、授权与生效范围、旧版/新版差异 |",
+        "original_case_markdown": "### L04｜研究方法升级不自动统一全书语气\n\n| 项目 | 验收要求 |\n|---|---|\n| 输入 | 方法库新增“更多用行动承担情绪”的建议，或更换了默认偏好另一种语言风格的模型；当前作品已有风格宪章、多POV声线和跨卷变化安排 |\n| 预期 | 研究产物保留适用条件并形成可选提案；授权编辑比较样段、说明采用范围，再接受必要的作品风格版本。旧文本与合法差异继续可追溯，方法更新本身不改作品 |\n| 禁止结果 | 把建议升级为全书禁用直接抒情；未经决议重润色所有旧章；模型切换后默认语气覆盖作品宪章；把某种方法视作所有题材的唯一规则 |\n| 层级 | Q、W、S |\n| 证据 | 方法来源与版本、作品原约定、候选样段及选择理由、授权与生效范围、旧版/新版差异 |\n\n文学研究必须能够影响创作，也必须允许经过比较后不采用。该测试不以“完全没有文风变化”为成功，而是检查变化是否有理由、有范围、可审议。\n\n"
+      },
+      "inputs": [
+        {
+          "label": "输入",
+          "text": "方法库新增“更多用行动承担情绪”的建议，或更换了默认偏好另一种语言风格的模型；当前作品已有风格宪章、多POV声线和跨卷变化安排"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "预期",
+          "text": "研究产物保留适用条件并形成可选提案；授权编辑比较样段、说明采用范围，再接受必要的作品风格版本。旧文本与合法差异继续可追溯，方法更新本身不改作品"
+        }
+      ],
+      "prohibited_results": "把建议升级为全书禁用直接抒情；未经决议重润色所有旧章；模型切换后默认语气覆盖作品宪章；把某种方法视作所有题材的唯一规则",
+      "required_evidence": "方法来源与版本、作品原约定、候选样段及选择理由、授权与生效范围、旧版/新版差异",
+      "source_test_layers": [
+        "Q",
+        "W",
+        "S"
+      ],
+      "v2_documents": [
+        "docs/06_Agent编排与管理.md",
+        "docs/07_剧情与文学生产系统.md",
+        "docs/09_长期记忆与检索.md",
+        "docs/10_论文与技术资料库.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P2",
+          "scope": "方法/风格选择与多声部"
+        },
+        {
+          "phase": "P4",
+          "scope": "跨卷变化与模型换版"
+        }
+      ],
+      "test_layers": [
+        "Q",
+        "W",
+        "S"
+      ],
+      "test_layer_assignment": "SOURCE_AND_V2_MAPPING",
+      "test_methods": [
+        "QUERY_PERMISSION",
+        "PG_INTEGRATION_AND_FAULT_INJECTION",
+        "SEMANTIC_EVIDENCE_REVIEW",
+        "LITERARY_FULL_TEXT_REVIEW"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "L05",
+      "series": "L",
+      "origin": "V1_1_INHERITED",
+      "title": "关系摘要不能抹去不对称认知与长期余效",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "L05｜关系摘要不能抹去不对称认知与长期余效",
+        "original_table_capture": "FULL_CASE_TABLE",
+        "original_table_markdown": "| 项目 | 验收要求 |\n|---|---|\n| 输入 | 甲私下决定暂不原谅但愿有条件合作，相关决定已接受；乙误以为已经和解。两人长期未同场后，摘要把关系简化为“双方已和解”，未来弧线又计划让其重新信任 |\n| 预期 | 摘要与实际证据对账并修正；甲、乙各自上下文保持相应认知，人物文学档案保留关系不对称和未竟后果。未来信任是可变意图，不发给人物充当现有经历；重返时回读关键原文 |\n| 禁止结果 | 对称亲密度覆盖双方不同状态；因长期未出场把记忆重置；用未来弧线纠正当前误信；以未经审核的文学解释覆盖已接受私有决定 |\n| 层级 | K、Q、S |\n| 证据 | 双方认知来源、私有决定、共同经历与原文锚点、摘要依赖、更新后的分视图任务材料 |",
+        "original_case_markdown": "### L05｜关系摘要不能抹去不对称认知与长期余效\n\n| 项目 | 验收要求 |\n|---|---|\n| 输入 | 甲私下决定暂不原谅但愿有条件合作，相关决定已接受；乙误以为已经和解。两人长期未同场后，摘要把关系简化为“双方已和解”，未来弧线又计划让其重新信任 |\n| 预期 | 摘要与实际证据对账并修正；甲、乙各自上下文保持相应认知，人物文学档案保留关系不对称和未竟后果。未来信任是可变意图，不发给人物充当现有经历；重返时回读关键原文 |\n| 禁止结果 | 对称亲密度覆盖双方不同状态；因长期未出场把记忆重置；用未来弧线纠正当前误信；以未经审核的文学解释覆盖已接受私有决定 |\n| 层级 | K、Q、S |\n| 证据 | 双方认知来源、私有决定、共同经历与原文锚点、摘要依赖、更新后的分视图任务材料 |\n\n误信是有价值的叙事材料；要修正的是失真的系统摘要，不是强迫乙立刻获得甲的秘密。\n\n"
+      },
+      "inputs": [
+        {
+          "label": "输入",
+          "text": "甲私下决定暂不原谅但愿有条件合作，相关决定已接受；乙误以为已经和解。两人长期未同场后，摘要把关系简化为“双方已和解”，未来弧线又计划让其重新信任"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "预期",
+          "text": "摘要与实际证据对账并修正；甲、乙各自上下文保持相应认知，人物文学档案保留关系不对称和未竟后果。未来信任是可变意图，不发给人物充当现有经历；重返时回读关键原文"
+        }
+      ],
+      "prohibited_results": "对称亲密度覆盖双方不同状态；因长期未出场把记忆重置；用未来弧线纠正当前误信；以未经审核的文学解释覆盖已接受私有决定",
+      "required_evidence": "双方认知来源、私有决定、共同经历与原文锚点、摘要依赖、更新后的分视图任务材料",
+      "source_test_layers": [
+        "K",
+        "Q",
+        "S"
+      ],
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/07_剧情与文学生产系统.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P2",
+          "scope": "不对称认知和文学记忆接续"
+        },
+        {
+          "phase": "P4",
+          "scope": "长间隔跨卷召回"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q",
+        "S"
+      ],
+      "test_layer_assignment": "SOURCE_AND_V2_MAPPING",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION",
+        "SEMANTIC_EVIDENCE_REVIEW",
+        "LITERARY_FULL_TEXT_REVIEW"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "F01",
+      "series": "F",
+      "origin": "V1_1_INHERITED",
+      "title": "旧租约晚返回",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "7. 长期运行与故障验收矩阵",
+        "table_row_key": "F01 旧租约晚返回",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| 编号与场景 | 注入条件 | 期望行为与禁止结果 | 主要证据 |\n|---|---|---|---|\n| F01 旧租约晚返回 | Worker A 租约过期，B已接管；A后来返回正文或提交请求 | A产物可作为隔离候选保留；不能凭旧租约提交正式结果或覆盖B。资源占用和费用仍如实计入 | 尝试/租约版本、最终有效任务归属、提交拒绝记录 |",
+        "original_table_row": "| F01 旧租约晚返回 | Worker A 租约过期，B已接管；A后来返回正文或提交请求 | A产物可作为隔离候选保留；不能凭旧租约提交正式结果或覆盖B。资源占用和费用仍如实计入 | 尝试/租约版本、最终有效任务归属、提交拒绝记录 |"
+      },
+      "inputs": [
+        {
+          "label": "注入条件",
+          "text": "Worker A 租约过期，B已接管；A后来返回正文或提交请求"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "期望行为与禁止结果",
+          "text": "A产物可作为隔离候选保留；不能凭旧租约提交正式结果或覆盖B。资源占用和费用仍如实计入"
+        }
+      ],
+      "prohibited_results": "与期望行为合并保留在原表第三列，不另造简化真值。",
+      "required_evidence": "尝试/租约版本、最终有效任务归属、提交拒绝记录",
+      "source_test_layers": null,
+      "v2_documents": [
+        "docs/04_事件溯源与版本体系.md",
+        "docs/06_Agent编排与管理.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "首次异步任务即阻断旧租约提交"
+        },
+        {
+          "phase": "P3",
+          "scope": "扩大多worker故障覆盖"
+        }
+      ],
+      "test_layers": [
+        "W"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "PG_INTEGRATION_AND_FAULT_INJECTION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "F02",
+      "series": "F",
+      "origin": "V1_1_INHERITED",
+      "title": "模型调用回执未知",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "7. 长期运行与故障验收矩阵",
+        "table_row_key": "F02 模型调用回执未知",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| 编号与场景 | 注入条件 | 期望行为与禁止结果 | 主要证据 |\n|---|---|---|---|\n| F02 模型调用回执未知 | 远端调用超时，无法判断已执行或计费 | 先用可用的请求/任务标识查账；不能把未知当失败后无限重发。保留潜在费用的预算占用，新尝试另占额度；无法确认则保留unknown，按预算选择等待或明确的新尝试 | 发送标识、查询结果、费用预留和重试决议 |",
+        "original_table_row": "| F02 模型调用回执未知 | 远端调用超时，无法判断已执行或计费 | 先用可用的请求/任务标识查账；不能把未知当失败后无限重发。保留潜在费用的预算占用，新尝试另占额度；无法确认则保留unknown，按预算选择等待或明确的新尝试 | 发送标识、查询结果、费用预留和重试决议 |"
+      },
+      "inputs": [
+        {
+          "label": "注入条件",
+          "text": "远端调用超时，无法判断已执行或计费"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "期望行为与禁止结果",
+          "text": "先用可用的请求/任务标识查账；不能把未知当失败后无限重发。保留潜在费用的预算占用，新尝试另占额度；无法确认则保留unknown，按预算选择等待或明确的新尝试"
+        }
+      ],
+      "prohibited_results": "与期望行为合并保留在原表第三列，不另造简化真值。",
+      "required_evidence": "发送标识、查询结果、费用预留和重试决议",
+      "source_test_layers": null,
+      "v2_documents": [
+        "docs/06_Agent编排与管理.md",
+        "docs/08_MCP与工具接口.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "调用账unknown与预算预留"
+        },
+        {
+          "phase": "P2",
+          "scope": "真实供应商超时查账"
+        }
+      ],
+      "test_layers": [
+        "W"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "PG_INTEGRATION_AND_FAULT_INJECTION",
+        "COST_AND_BUDGET_ACCOUNTING"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "F03",
+      "series": "F",
+      "origin": "V1_1_INHERITED",
+      "title": "批准后内容变化",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "7. 长期运行与故障验收矩阵",
+        "table_row_key": "F03 批准后内容变化",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| 编号与场景 | 注入条件 | 期望行为与禁止结果 | 主要证据 |\n|---|---|---|---|\n| F03 批准后内容变化 | 正文或知识增量在审核通过后被修改 | 原批准仅对原内容和相应依赖有效；新内容需重新获得必要批准，不能仅以相同文件名通过 | 内容哈希、变更摘要、批准绑定和提交核验 |",
+        "original_table_row": "| F03 批准后内容变化 | 正文或知识增量在审核通过后被修改 | 原批准仅对原内容和相应依赖有效；新内容需重新获得必要批准，不能仅以相同文件名通过 | 内容哈希、变更摘要、批准绑定和提交核验 |"
+      },
+      "inputs": [
+        {
+          "label": "注入条件",
+          "text": "正文或知识增量在审核通过后被修改"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "期望行为与禁止结果",
+          "text": "原批准仅对原内容和相应依赖有效；新内容需重新获得必要批准，不能仅以相同文件名通过"
+        }
+      ],
+      "prohibited_results": "与期望行为合并保留在原表第三列，不另造简化真值。",
+      "required_evidence": "内容哈希、变更摘要、批准绑定和提交核验",
+      "source_test_layers": null,
+      "v2_documents": [
+        "docs/04_事件溯源与版本体系.md",
+        "docs/06_Agent编排与管理.md",
+        "docs/07_剧情与文学生产系统.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "内容哈希/依赖绑定批准"
+        },
+        {
+          "phase": "P2",
+          "scope": "真实正文改写审核"
+        }
+      ],
+      "test_layers": [
+        "W"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "PG_INTEGRATION_AND_FAULT_INJECTION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "F04",
+      "series": "F",
+      "origin": "V1_1_INHERITED",
+      "title": "空查询出现新结果",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "7. 长期运行与故障验收矩阵",
+        "table_row_key": "F04 空查询出现新结果",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| 编号与场景 | 注入条件 | 期望行为与禁止结果 | 主要证据 |\n|---|---|---|---|\n| F04 空查询出现新结果 | 写手查询“此处没有其他持剑者/阻断事件”，随后相关范围新增事实 | 提交前复核范围或谓词依赖；“当时返回0行”也是依赖，不能只核验曾返回的行 | 原查询范围/条件、版本、复核结果、相关变更 |",
+        "original_table_row": "| F04 空查询出现新结果 | 写手查询“此处没有其他持剑者/阻断事件”，随后相关范围新增事实 | 提交前复核范围或谓词依赖；“当时返回0行”也是依赖，不能只核验曾返回的行 | 原查询范围/条件、版本、复核结果、相关变更 |"
+      },
+      "inputs": [
+        {
+          "label": "注入条件",
+          "text": "写手查询“此处没有其他持剑者/阻断事件”，随后相关范围新增事实"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "期望行为与禁止结果",
+          "text": "提交前复核范围或谓词依赖；“当时返回0行”也是依赖，不能只核验曾返回的行"
+        }
+      ],
+      "prohibited_results": "与期望行为合并保留在原表第三列，不另造简化真值。",
+      "required_evidence": "原查询范围/条件、版本、复核结果、相关变更",
+      "source_test_layers": null,
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/04_事件溯源与版本体系.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "严格head CAS保守拒绝"
+        },
+        {
+          "phase": "P3",
+          "scope": "范围/负向谓词精准重验证"
+        }
+      ],
+      "test_layers": [
+        "Q",
+        "W"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "QUERY_PERMISSION",
+        "PG_INTEGRATION_AND_FAULT_INJECTION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "F05",
+      "series": "F",
+      "origin": "V1_1_INHERITED",
+      "title": "索引滞后",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "7. 长期运行与故障验收矩阵",
+        "table_row_key": "F05 索引滞后",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| 编号与场景 | 注入条件 | 期望行为与禁止结果 | 主要证据 |\n|---|---|---|---|\n| F05 索引滞后 | 图或全文索引未包含已接受事件 | 关键判断回到权威记录或足够的新鲜投影；回源失败才暂停该任务。禁止用旧索引空结果证明无事实 | 投影覆盖范围、所需版本、回源证据、降级状态 |",
+        "original_table_row": "| F05 索引滞后 | 图或全文索引未包含已接受事件 | 关键判断回到权威记录或足够的新鲜投影；回源失败才暂停该任务。禁止用旧索引空结果证明无事实 | 投影覆盖范围、所需版本、回源证据、降级状态 |"
+      },
+      "inputs": [
+        {
+          "label": "注入条件",
+          "text": "图或全文索引未包含已接受事件"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "期望行为与禁止结果",
+          "text": "关键判断回到权威记录或足够的新鲜投影；回源失败才暂停该任务。禁止用旧索引空结果证明无事实"
+        }
+      ],
+      "prohibited_results": "与期望行为合并保留在原表第三列，不另造简化真值。",
+      "required_evidence": "投影覆盖范围、所需版本、回源证据、降级状态",
+      "source_test_layers": null,
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/04_事件溯源与版本体系.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "索引水位/权威回源/局部阻塞"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q",
+        "W"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION",
+        "PG_INTEGRATION_AND_FAULT_INJECTION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "F06",
+      "series": "F",
+      "origin": "V1_1_INHERITED",
+      "title": "拒绝理由泄密",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "7. 长期运行与故障验收矩阵",
+        "table_row_key": "F06 拒绝理由泄密",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| 编号与场景 | 注入条件 | 期望行为与禁止结果 | 主要证据 |\n|---|---|---|---|\n| F06 拒绝理由泄密 | 角色无权知道暗门或凶手；非法查询触发拒绝 | 对外返回其权限允许的说明；不得在错误信息、实体数量、路径长度或建议中泄漏隐藏对象存在。完整原因仅供授权审计 | 角色可见返回体、元数据、内部审计分离 |",
+        "original_table_row": "| F06 拒绝理由泄密 | 角色无权知道暗门或凶手；非法查询触发拒绝 | 对外返回其权限允许的说明；不得在错误信息、实体数量、路径长度或建议中泄漏隐藏对象存在。完整原因仅供授权审计 | 角色可见返回体、元数据、内部审计分离 |"
+      },
+      "inputs": [
+        {
+          "label": "注入条件",
+          "text": "角色无权知道暗门或凶手；非法查询触发拒绝"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "期望行为与禁止结果",
+          "text": "对外返回其权限允许的说明；不得在错误信息、实体数量、路径长度或建议中泄漏隐藏对象存在。完整原因仅供授权审计"
+        }
+      ],
+      "prohibited_results": "与期望行为合并保留在原表第三列，不另造简化真值。",
+      "required_evidence": "角色可见返回体、元数据、内部审计分离",
+      "source_test_layers": null,
+      "v2_documents": [
+        "docs/06_Agent编排与管理.md",
+        "docs/08_MCP与工具接口.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "服务返回体和错误侧信道检查"
+        },
+        {
+          "phase": "P2",
+          "scope": "真实角色Host路径"
+        }
+      ],
+      "test_layers": [
+        "Q",
+        "W"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "QUERY_PERMISSION",
+        "PG_INTEGRATION_AND_FAULT_INJECTION",
+        "REAL_HOST_AUTHORIZATION_INTEGRATION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "F07",
+      "series": "F",
+      "origin": "V1_1_INHERITED",
+      "title": "分支revision不相容",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "7. 长期运行与故障验收矩阵",
+        "table_row_key": "F07 分支revision不相容",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| 编号与场景 | 注入条件 | 期望行为与禁止结果 | 主要证据 |\n|---|---|---|---|\n| F07 分支revision不相容 | 请求声明main，却携带只属于救剑支线的revision | 校验该版本与目标分支/清单的合法关系；拒绝串读。不可用编号大小判断“更新版本” | 分支祖先/合并关系、指定清单和查询上下文 |",
+        "original_table_row": "| F07 分支revision不相容 | 请求声明main，却携带只属于救剑支线的revision | 校验该版本与目标分支/清单的合法关系；拒绝串读。不可用编号大小判断“更新版本” | 分支祖先/合并关系、指定清单和查询上下文 |"
+      },
+      "inputs": [
+        {
+          "label": "注入条件",
+          "text": "请求声明main，却携带只属于救剑支线的revision"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "期望行为与禁止结果",
+          "text": "校验该版本与目标分支/清单的合法关系；拒绝串读。不可用编号大小判断“更新版本”"
+        }
+      ],
+      "prohibited_results": "与期望行为合并保留在原表第三列，不另造简化真值。",
+      "required_evidence": "分支祖先/合并关系、指定清单和查询上下文",
+      "source_test_layers": null,
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/04_事件溯源与版本体系.md",
+        "docs/08_MCP与工具接口.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "WorldRef所属关系和分支隔离"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q",
+        "W"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION",
+        "PG_INTEGRATION_AND_FAULT_INJECTION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "F08",
+      "series": "F",
+      "origin": "V1_1_INHERITED",
+      "title": "撤权或取消后的晚提交",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "7. 长期运行与故障验收矩阵",
+        "table_row_key": "F08 撤权或取消后的晚提交",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| 编号与场景 | 注入条件 | 期望行为与禁止结果 | 主要证据 |\n|---|---|---|---|\n| F08 撤权或取消后的晚提交 | 任务执行中权限被撤回，或任务已取消；旧会话仍有结果 | 提交时按当前有效授权和任务状态复核，拒绝失效资格；不能因为启动时有权就继续正式写入 | 撤权/取消记录、提交时验证、产物隔离状态 |",
+        "original_table_row": "| F08 撤权或取消后的晚提交 | 任务执行中权限被撤回，或任务已取消；旧会话仍有结果 | 提交时按当前有效授权和任务状态复核，拒绝失效资格；不能因为启动时有权就继续正式写入 | 撤权/取消记录、提交时验证、产物隔离状态 |"
+      },
+      "inputs": [
+        {
+          "label": "注入条件",
+          "text": "任务执行中权限被撤回，或任务已取消；旧会话仍有结果"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "期望行为与禁止结果",
+          "text": "提交时按当前有效授权和任务状态复核，拒绝失效资格；不能因为启动时有权就继续正式写入"
+        }
+      ],
+      "prohibited_results": "与期望行为合并保留在原表第三列，不另造简化真值。",
+      "required_evidence": "撤权/取消记录、提交时验证、产物隔离状态",
+      "source_test_layers": null,
+      "v2_documents": [
+        "docs/04_事件溯源与版本体系.md",
+        "docs/06_Agent编排与管理.md",
+        "docs/08_MCP与工具接口.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "取消/撤权/提交竞态与缓存重授权"
+        }
+      ],
+      "test_layers": [
+        "Q",
+        "W"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "QUERY_PERMISSION",
+        "PG_INTEGRATION_AND_FAULT_INJECTION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "F09",
+      "series": "F",
+      "origin": "V1_1_INHERITED",
+      "title": "恢复时模型已变更",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "7. 长期运行与故障验收矩阵",
+        "table_row_key": "F09 恢复时模型已变更",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| 编号与场景 | 注入条件 | 期望行为与禁止结果 | 主要证据 |\n|---|---|---|---|\n| F09 恢复时模型已变更 | 服务恢复，原模型不再可用或返回不同结果 | 按存档输出、已选裁决和规则版本重放状态；不重新问模型决定过去。确需重生成则新建尝试并重新审查 | 原始产物/结果档案、规则版本、重放对照 |",
+        "original_table_row": "| F09 恢复时模型已变更 | 服务恢复，原模型不再可用或返回不同结果 | 按存档输出、已选裁决和规则版本重放状态；不重新问模型决定过去。确需重生成则新建尝试并重新审查 | 原始产物/结果档案、规则版本、重放对照 |"
+      },
+      "inputs": [
+        {
+          "label": "注入条件",
+          "text": "服务恢复，原模型不再可用或返回不同结果"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "期望行为与禁止结果",
+          "text": "按存档输出、已选裁决和规则版本重放状态；不重新问模型决定过去。确需重生成则新建尝试并重新审查"
+        }
+      ],
+      "prohibited_results": "与期望行为合并保留在原表第三列，不另造简化真值。",
+      "required_evidence": "原始产物/结果档案、规则版本、重放对照",
+      "source_test_layers": null,
+      "v2_documents": [
+        "docs/04_事件溯源与版本体系.md",
+        "docs/06_Agent编排与管理.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "存档重放不重新问模型"
+        },
+        {
+          "phase": "P2",
+          "scope": "真实供应商换用情形"
+        },
+        {
+          "phase": "P4",
+          "scope": "规模恢复"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "W"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "PG_INTEGRATION_AND_FAULT_INJECTION",
+        "ISOLATED_RECOVERY_DRILL"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "F10",
+      "series": "F",
+      "origin": "V1_1_INHERITED",
+      "title": "正文对象与数据库故障",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "7. 长期运行与故障验收矩阵",
+        "table_row_key": "F10 正文对象与数据库故障",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| 编号与场景 | 注入条件 | 期望行为与禁止结果 | 主要证据 |\n|---|---|---|---|\n| F10 正文对象与数据库故障 | 上传后提交失败，或正文对象暂不可用 | 未提交对象可作为孤立暂存清理；发布清单不得引用未确认可用的正文。已确认对象丢失应阻止受影响发布并恢复，不能伪报成功 | 对象哈希/可用性、数据库清单、提交结果 |",
+        "original_table_row": "| F10 正文对象与数据库故障 | 上传后提交失败，或正文对象暂不可用 | 未提交对象可作为孤立暂存清理；发布清单不得引用未确认可用的正文。已确认对象丢失应阻止受影响发布并恢复，不能伪报成功 | 对象哈希/可用性、数据库清单、提交结果 |"
+      },
+      "inputs": [
+        {
+          "label": "注入条件",
+          "text": "上传后提交失败，或正文对象暂不可用"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "期望行为与禁止结果",
+          "text": "未提交对象可作为孤立暂存清理；发布清单不得引用未确认可用的正文。已确认对象丢失应阻止受影响发布并恢复，不能伪报成功"
+        }
+      ],
+      "prohibited_results": "与期望行为合并保留在原表第三列，不另造简化真值。",
+      "required_evidence": "对象哈希/可用性、数据库清单、提交结果",
+      "source_test_layers": null,
+      "v2_documents": [
+        "docs/01_详细技术架构.md",
+        "docs/04_事件溯源与版本体系.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "对象与DB故障及隔离恢复"
+        }
+      ],
+      "test_layers": [
+        "W"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "PG_INTEGRATION_AND_FAULT_INJECTION",
+        "ISOLATED_RECOVERY_DRILL"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "F11",
+      "series": "F",
+      "origin": "V1_1_INHERITED",
+      "title": "Outbox与发布回执未知",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "7. 长期运行与故障验收矩阵",
+        "table_row_key": "F11 Outbox与发布回执未知",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| 编号与场景 | 注入条件 | 期望行为与禁止结果 | 主要证据 |\n|---|---|---|---|\n| F11 Outbox与发布回执未知 | 内部版本已冻结，投递后服务崩溃或平台回执丢失 | 持久化待办支持恢复；外部动作优先查回执或利用提供方幂等键，无法判定则标未知等待核对。不能宣称跨平台天然exactly-once或盲目重复发布 | 发布清单、outbox状态、外部标识、回执或未知状态 |",
+        "original_table_row": "| F11 Outbox与发布回执未知 | 内部版本已冻结，投递后服务崩溃或平台回执丢失 | 持久化待办支持恢复；外部动作优先查回执或利用提供方幂等键，无法判定则标未知等待核对。不能宣称跨平台天然exactly-once或盲目重复发布 | 发布清单、outbox状态、外部标识、回执或未知状态 |"
+      },
+      "inputs": [
+        {
+          "label": "注入条件",
+          "text": "内部版本已冻结，投递后服务崩溃或平台回执丢失"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "期望行为与禁止结果",
+          "text": "持久化待办支持恢复；外部动作优先查回执或利用提供方幂等键，无法判定则标未知等待核对。不能宣称跨平台天然exactly-once或盲目重复发布"
+        }
+      ],
+      "prohibited_results": "与期望行为合并保留在原表第三列，不另造简化真值。",
+      "required_evidence": "发布清单、outbox状态、外部标识、回执或未知状态",
+      "source_test_layers": null,
+      "v2_documents": [
+        "docs/01_详细技术架构.md",
+        "docs/04_事件溯源与版本体系.md",
+        "docs/06_Agent编排与管理.md",
+        "docs/08_MCP与工具接口.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "持久outbox与内部冻结/投递分离"
+        },
+        {
+          "phase": "P3",
+          "scope": "若接入外部渠道则在首次投递前完成实际门禁"
+        }
+      ],
+      "test_layers": [
+        "W"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "PG_INTEGRATION_AND_FAULT_INJECTION"
+      ],
+      "enablement_gate": "MVP可不启用外部投递；一旦启用，不论处于P几，必须先执行实际渠道授权、顺序与unknown回执验收。",
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "F12",
+      "series": "F",
+      "origin": "V1_1_INHERITED",
+      "title": "规则例外及版本变化",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "7. 长期运行与故障验收矩阵",
+        "table_row_key": "F12 规则例外及版本变化",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| 编号与场景 | 注入条件 | 期望行为与禁止结果 | 主要证据 |\n|---|---|---|---|\n| F12 规则例外及版本变化 | 新世界规则允许特殊造物/修复，旧版本不允许 | 仅按获准范围与版本应用例外并核对代价；旧历史仍按旧版解释。代码升级不能偷偷使旧版毁剑变成可恢复 | 规则/执行器版本、例外依据、适用范围与资源账 |",
+        "original_table_row": "| F12 规则例外及版本变化 | 新世界规则允许特殊造物/修复，旧版本不允许 | 仅按获准范围与版本应用例外并核对代价；旧历史仍按旧版解释。代码升级不能偷偷使旧版毁剑变成可恢复 | 规则/执行器版本、例外依据、适用范围与资源账 |"
+      },
+      "inputs": [
+        {
+          "label": "注入条件",
+          "text": "新世界规则允许特殊造物/修复，旧版本不允许"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "期望行为与禁止结果",
+          "text": "仅按获准范围与版本应用例外并核对代价；旧历史仍按旧版解释。代码升级不能偷偷使旧版毁剑变成可恢复"
+        }
+      ],
+      "prohibited_results": "与期望行为合并保留在原表第三列，不另造简化真值。",
+      "required_evidence": "规则/执行器版本、例外依据、适用范围与资源账",
+      "source_test_layers": null,
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/04_事件溯源与版本体系.md",
+        "docs/05_世界模拟与调度引擎.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "规则/解释器版本固定及例外代价"
+        },
+        {
+          "phase": "P4",
+          "scope": "模型与规则换版恢复"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "W"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "PG_INTEGRATION_AND_FAULT_INJECTION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "F13",
+      "series": "F",
+      "origin": "V1_1_INHERITED",
+      "title": "缓存权限隔离",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "7. 长期运行与故障验收矩阵",
+        "table_row_key": "F13 缓存权限隔离",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| 编号与场景 | 注入条件 | 期望行为与禁止结果 | 主要证据 |\n|---|---|---|---|\n| F13 缓存权限隔离 | 全知编辑先查秘密，角色随后发出相似查询；再测试撤权后的缓存 | 缓存按作品、版本、视图、披露范围等隔离，并验证当前权限；不得仅按query字符串命中全知结果 | 缓存命中依据、权限版本/复核、角色可见结果 |",
+        "original_table_row": "| F13 缓存权限隔离 | 全知编辑先查秘密，角色随后发出相似查询；再测试撤权后的缓存 | 缓存按作品、版本、视图、披露范围等隔离，并验证当前权限；不得仅按query字符串命中全知结果 | 缓存命中依据、权限版本/复核、角色可见结果 |"
+      },
+      "inputs": [
+        {
+          "label": "注入条件",
+          "text": "全知编辑先查秘密，角色随后发出相似查询；再测试撤权后的缓存"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "期望行为与禁止结果",
+          "text": "缓存按作品、版本、视图、披露范围等隔离，并验证当前权限；不得仅按query字符串命中全知结果"
+        }
+      ],
+      "prohibited_results": "与期望行为合并保留在原表第三列，不另造简化真值。",
+      "required_evidence": "缓存命中依据、权限版本/复核、角色可见结果",
+      "source_test_layers": null,
+      "v2_documents": [
+        "docs/06_Agent编排与管理.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "缓存视图分区与撤权后重授权"
+        }
+      ],
+      "test_layers": [
+        "Q",
+        "W"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "QUERY_PERMISSION",
+        "PG_INTEGRATION_AND_FAULT_INJECTION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "F14",
+      "series": "F",
+      "origin": "V1_1_INHERITED",
+      "title": "未知与完备库存的空集",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "7. 长期运行与故障验收矩阵",
+        "table_row_key": "F14 未知与完备库存的空集",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| 编号与场景 | 注入条件 | 期望行为与禁止结果 | 主要证据 |\n|---|---|---|---|\n| F14 未知与完备库存的空集 | 分别查询开放世界下未知持有人、已声明完备的某库存中的某物 | 前者返回unknown；后者在完备范围内可返回none/不存在。索引漏数不构成完备，不能混用两个结论 | 完备性声明、权威查询范围、时间/版本及结果语义 |",
+        "original_table_row": "| F14 未知与完备库存的空集 | 分别查询开放世界下未知持有人、已声明完备的某库存中的某物 | 前者返回unknown；后者在完备范围内可返回none/不存在。索引漏数不构成完备，不能混用两个结论 | 完备性声明、权威查询范围、时间/版本及结果语义 |"
+      },
+      "inputs": [
+        {
+          "label": "注入条件",
+          "text": "分别查询开放世界下未知持有人、已声明完备的某库存中的某物"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "期望行为与禁止结果",
+          "text": "前者返回unknown；后者在完备范围内可返回none/不存在。索引漏数不构成完备，不能混用两个结论"
+        }
+      ],
+      "prohibited_results": "与期望行为合并保留在原表第三列，不另造简化真值。",
+      "required_evidence": "完备性声明、权威查询范围、时间/版本及结果语义",
+      "source_test_layers": null,
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "未知/确定不存在/完备范围正交语义"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "F15",
+      "series": "F",
+      "origin": "V1_1_INHERITED",
+      "title": "依赖遗漏与语义漏抽",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "7. 长期运行与故障验收矩阵",
+        "table_row_key": "F15 依赖遗漏与语义漏抽",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| 编号与场景 | 注入条件 | 期望行为与禁止结果 | 主要证据 |\n|---|---|---|---|\n| F15 依赖遗漏与语义漏抽 | 正文隐含新伤势或秘密传播，但第一次抽取未发现 | 高影响终态与独立语义复核能发现则返工；未覆盖处如实记录残余风险。不能用“抽取无报错”证明全文无矛盾 | 场景契约、抽取候选、独立问题单、修复范围 |",
+        "original_table_row": "| F15 依赖遗漏与语义漏抽 | 正文隐含新伤势或秘密传播，但第一次抽取未发现 | 高影响终态与独立语义复核能发现则返工；未覆盖处如实记录残余风险。不能用“抽取无报错”证明全文无矛盾 | 场景契约、抽取候选、独立问题单、修复范围 |"
+      },
+      "inputs": [
+        {
+          "label": "注入条件",
+          "text": "正文隐含新伤势或秘密传播，但第一次抽取未发现"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "期望行为与禁止结果",
+          "text": "高影响终态与独立语义复核能发现则返工；未覆盖处如实记录残余风险。不能用“抽取无报错”证明全文无矛盾"
+        }
+      ],
+      "prohibited_results": "与期望行为合并保留在原表第三列，不另造简化真值。",
+      "required_evidence": "场景契约、抽取候选、独立问题单、修复范围",
+      "source_test_layers": null,
+      "v2_documents": [
+        "docs/07_剧情与文学生产系统.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P2",
+          "scope": "独立事实对账/高影响语义漏抽评测"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q",
+        "S"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION",
+        "SEMANTIC_EVIDENCE_REVIEW"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "F16",
+      "series": "F",
+      "origin": "V1_1_INHERITED",
+      "title": "长期重复与预算耗尽",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "7. 长期运行与故障验收矩阵",
+        "table_row_key": "F16 长期重复与预算耗尽",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| 编号与场景 | 注入条件 | 期望行为与禁止结果 | 主要证据 |\n|---|---|---|---|\n| F16 长期重复与预算耗尽 | 导演或审稿连续多轮无有效进展，候选分支不断增多 | 达到界限后结束本轮、缩小任务、改线或提交决议；保留最佳候选与未决问题。禁止通过无限运行隐藏失败 | 调用账、预算、进展依据、停机原因与交接材料 |",
+        "original_table_row": "| F16 长期重复与预算耗尽 | 导演或审稿连续多轮无有效进展，候选分支不断增多 | 达到界限后结束本轮、缩小任务、改线或提交决议；保留最佳候选与未决问题。禁止通过无限运行隐藏失败 | 调用账、预算、进展依据、停机原因与交接材料 |"
+      },
+      "inputs": [
+        {
+          "label": "注入条件",
+          "text": "导演或审稿连续多轮无有效进展，候选分支不断增多"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "期望行为与禁止结果",
+          "text": "达到界限后结束本轮、缩小任务、改线或提交决议；保留最佳候选与未决问题。禁止通过无限运行隐藏失败"
+        }
+      ],
+      "prohibited_results": "与期望行为合并保留在原表第三列，不另造简化真值。",
+      "required_evidence": "调用账、预算、进展依据、停机原因与交接材料",
+      "source_test_layers": null,
+      "v2_documents": [
+        "docs/06_Agent编排与管理.md",
+        "docs/07_剧情与文学生产系统.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "预算与调用账边界"
+        },
+        {
+          "phase": "P2",
+          "scope": "导演/审稿无进展的真实终止与交接"
+        }
+      ],
+      "test_layers": [
+        "W",
+        "S"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "PG_INTEGRATION_AND_FAULT_INJECTION",
+        "SEMANTIC_EVIDENCE_REVIEW",
+        "COST_AND_BUDGET_ACCOUNTING"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "F17",
+      "series": "F",
+      "origin": "V1_1_INHERITED",
+      "title": "Retcon后的失效展开窗口",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "7. 长期运行与故障验收矩阵",
+        "table_row_key": "F17 Retcon后的失效展开窗口",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| 编号与场景 | 注入条件 | 期望行为与禁止结果 | 主要证据 |\n|---|---|---|---|\n| F17 Retcon后的失效展开窗口 | 世界修订已经提交，但异步任务尚未逐个标记全部受影响场景、摘要和旧批准 | 提交时已同步登记受影响领域/依赖范围待重验证；新接受与发布不能在该范围借旧approved状态通过。仍允许明确读取旧revision，不必阻止无关任务 | 修订范围标记、所用revision、依赖验证状态、批准资格与提交结果 |",
+        "original_table_row": "| F17 Retcon后的失效展开窗口 | 世界修订已经提交，但异步任务尚未逐个标记全部受影响场景、摘要和旧批准 | 提交时已同步登记受影响领域/依赖范围待重验证；新接受与发布不能在该范围借旧approved状态通过。仍允许明确读取旧revision，不必阻止无关任务 | 修订范围标记、所用revision、依赖验证状态、批准资格与提交结果 |"
+      },
+      "inputs": [
+        {
+          "label": "注入条件",
+          "text": "世界修订已经提交，但异步任务尚未逐个标记全部受影响场景、摘要和旧批准"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "期望行为与禁止结果",
+          "text": "提交时已同步登记受影响领域/依赖范围待重验证；新接受与发布不能在该范围借旧approved状态通过。仍允许明确读取旧revision，不必阻止无关任务"
+        }
+      ],
+      "prohibited_results": "与期望行为合并保留在原表第三列，不另造简化真值。",
+      "required_evidence": "修订范围标记、所用revision、依赖验证状态、批准资格与提交结果",
+      "source_test_layers": null,
+      "v2_documents": [
+        "docs/04_事件溯源与版本体系.md",
+        "docs/07_剧情与文学生产系统.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "权威提交同步失效屏障"
+        },
+        {
+          "phase": "P2",
+          "scope": "正文与发布路径复核"
+        }
+      ],
+      "test_layers": [
+        "Q",
+        "W"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "QUERY_PERMISSION",
+        "PG_INTEGRATION_AND_FAULT_INJECTION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "F18",
+      "series": "F",
+      "origin": "V1_1_INHERITED",
+      "title": "发布乱序与撤回重发",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "7. 长期运行与故障验收矩阵",
+        "table_row_key": "F18 发布乱序与撤回重发",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| 编号与场景 | 注入条件 | 期望行为与禁止结果 | 主要证据 |\n|---|---|---|---|\n| F18 发布乱序与撤回重发 | 同一目标先发v1再发v2，或撤回v1后重发；v1投递/撤回操作晚到 | 校验目标期望版本及操作代际，保证有序执行；可用时采用远端条件更新，否则同一目标保持一个未结算投递，未知回执未解不推进。不能因幂等成功就允许迟到v1覆盖v2，或让旧撤回删除新版本 | 目标期望版本、操作代际、远端条件/回执、未结算状态、最终目标版本 |",
+        "original_table_row": "| F18 发布乱序与撤回重发 | 同一目标先发v1再发v2，或撤回v1后重发；v1投递/撤回操作晚到 | 校验目标期望版本及操作代际，保证有序执行；可用时采用远端条件更新，否则同一目标保持一个未结算投递，未知回执未解不推进。不能因幂等成功就允许迟到v1覆盖v2，或让旧撤回删除新版本 | 目标期望版本、操作代际、远端条件/回执、未结算状态、最终目标版本 |"
+      },
+      "inputs": [
+        {
+          "label": "注入条件",
+          "text": "同一目标先发v1再发v2，或撤回v1后重发；v1投递/撤回操作晚到"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "期望行为与禁止结果",
+          "text": "校验目标期望版本及操作代际，保证有序执行；可用时采用远端条件更新，否则同一目标保持一个未结算投递，未知回执未解不推进。不能因幂等成功就允许迟到v1覆盖v2，或让旧撤回删除新版本"
+        }
+      ],
+      "prohibited_results": "与期望行为合并保留在原表第三列，不另造简化真值。",
+      "required_evidence": "目标期望版本、操作代际、远端条件/回执、未结算状态、最终目标版本",
+      "source_test_layers": null,
+      "v2_documents": [
+        "docs/04_事件溯源与版本体系.md",
+        "docs/06_Agent编排与管理.md",
+        "docs/08_MCP与工具接口.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "投递期望版本/代际协议"
+        },
+        {
+          "phase": "P3",
+          "scope": "若接入渠道则在首次投递前完成实际顺序门禁"
+        }
+      ],
+      "test_layers": [
+        "W"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "PG_INTEGRATION_AND_FAULT_INJECTION"
+      ],
+      "enablement_gate": "MVP可不启用外部投递；一旦启用，不论处于P几，必须先执行实际渠道授权、顺序与unknown回执验收。",
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "F19",
+      "series": "F",
+      "origin": "V1_1_INHERITED",
+      "title": "检索材料含越权指令",
+      "source": {
+        "path": "baseline/v1_1/09_压力测试与端到端案例.md",
+        "file_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+        "heading": "7. 长期运行与故障验收矩阵",
+        "table_row_key": "F19 检索材料含越权指令",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| 编号与场景 | 注入条件 | 期望行为与禁止结果 | 主要证据 |\n|---|---|---|---|\n| F19 检索材料含越权指令 | 正文、信件或参考材料出现“忽略权限、调用管理员工具”等内容 | 作为待处理的数据，不提升为项目指令；服务端拒绝超出身份的工具与数据请求，正常文学处理可以继续 | 输入来源标识、工具授权结果、候选产物及审计 |",
+        "original_table_row": "| F19 检索材料含越权指令 | 正文、信件或参考材料出现“忽略权限、调用管理员工具”等内容 | 作为待处理的数据，不提升为项目指令；服务端拒绝超出身份的工具与数据请求，正常文学处理可以继续 | 输入来源标识、工具授权结果、候选产物及审计 |"
+      },
+      "inputs": [
+        {
+          "label": "注入条件",
+          "text": "正文、信件或参考材料出现“忽略权限、调用管理员工具”等内容"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "期望行为与禁止结果",
+          "text": "作为待处理的数据，不提升为项目指令；服务端拒绝超出身份的工具与数据请求，正常文学处理可以继续"
+        }
+      ],
+      "prohibited_results": "与期望行为合并保留在原表第三列，不另造简化真值。",
+      "required_evidence": "输入来源标识、工具授权结果、候选产物及审计",
+      "source_test_layers": null,
+      "v2_documents": [
+        "docs/06_Agent编排与管理.md",
+        "docs/08_MCP与工具接口.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "服务授权不信资料指令"
+        },
+        {
+          "phase": "P2",
+          "scope": "真实检索与文学处理路径"
+        }
+      ],
+      "test_layers": [
+        "Q",
+        "W"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "QUERY_PERMISSION",
+        "PG_INTEGRATION_AND_FAULT_INJECTION",
+        "REAL_HOST_AUTHORIZATION_INTEGRATION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "V2-01",
+      "series": "V2",
+      "origin": "V2_0_ADDED",
+      "title": "同一query分别处于未知、未推进、计划、索引滞后",
+      "title_source": "输入/故障原文（源表没有独立标题列）",
+      "source": {
+        "path": "docs/11_研发路线与测试计划.md",
+        "file_sha256": "c77d34912651b94bc2822335230ddb978073120846d6590f5d491dd7cb57aebf",
+        "heading": "5. v2.0新增验收",
+        "table_row_key": "V2-01",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| ID | 输入/故障 | 必须观察的结果 | 类型 |\n|---|---|---|---|\n| V2-01 | 同一query分别处于未知、未推进、计划、索引滞后 | AnswerEnvelope正交字段不同，绝不统一返回false | 契约/查询 |",
+        "original_table_row": "| V2-01 | 同一query分别处于未知、未推进、计划、索引滞后 | AnswerEnvelope正交字段不同，绝不统一返回false | 契约/查询 |"
+      },
+      "inputs": [
+        {
+          "label": "输入/故障",
+          "text": "同一query分别处于未知、未推进、计划、索引滞后"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "必须观察的结果",
+          "text": "AnswerEnvelope正交字段不同，绝不统一返回false"
+        }
+      ],
+      "source_test_type": "契约/查询",
+      "source_test_layers": null,
+      "required_evidence": "按docs/11相应测试层记录输入版本、实际输出、持久结果与失败证据；语义/文学项另保留原文、评阅分歧及编辑决定。",
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/08_MCP与工具接口.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "QueryAnswer正交状态与拒绝例"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "V2-02",
+      "series": "V2",
+      "origin": "V2_0_ADDED",
+      "title": "相同幂等key、不同payload",
+      "title_source": "输入/故障原文（源表没有独立标题列）",
+      "source": {
+        "path": "docs/11_研发路线与测试计划.md",
+        "file_sha256": "c77d34912651b94bc2822335230ddb978073120846d6590f5d491dd7cb57aebf",
+        "heading": "5. v2.0新增验收",
+        "table_row_key": "V2-02",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| ID | 输入/故障 | 必须观察的结果 | 类型 |\n|---|---|---|---|\n| V2-02 | 相同幂等key、不同payload | 拒绝而非返回旧结果假装新操作成功 | 事务 |",
+        "original_table_row": "| V2-02 | 相同幂等key、不同payload | 拒绝而非返回旧结果假装新操作成功 | 事务 |"
+      },
+      "inputs": [
+        {
+          "label": "输入/故障",
+          "text": "相同幂等key、不同payload"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "必须观察的结果",
+          "text": "拒绝而非返回旧结果假装新操作成功"
+        }
+      ],
+      "source_test_type": "事务",
+      "source_test_layers": null,
+      "required_evidence": "按docs/11相应测试层记录输入版本、实际输出、持久结果与失败证据；语义/文学项另保留原文、评阅分歧及编辑决定。",
+      "v2_documents": [
+        "docs/04_事件溯源与版本体系.md",
+        "docs/08_MCP与工具接口.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "真实PG幂等key/payload冲突"
+        }
+      ],
+      "test_layers": [
+        "W"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "PG_INTEGRATION_AND_FAULT_INJECTION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "V2-03",
+      "series": "V2",
+      "origin": "V2_0_ADDED",
+      "title": "fork继承了已施加effect，再引用同occurrence",
+      "title_source": "输入/故障原文（源表没有独立标题列）",
+      "source": {
+        "path": "docs/11_研发路线与测试计划.md",
+        "file_sha256": "c77d34912651b94bc2822335230ddb978073120846d6590f5d491dd7cb57aebf",
+        "heading": "5. v2.0新增验收",
+        "table_row_key": "V2-03",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| ID | 输入/故障 | 必须观察的结果 | 类型 |\n|---|---|---|---|\n| V2-03 | fork继承了已施加effect，再引用同occurrence | 新分支当前投影不二次施加；独立反事实分支仍能合法试不同结果 | 版本 |",
+        "original_table_row": "| V2-03 | fork继承了已施加effect，再引用同occurrence | 新分支当前投影不二次施加；独立反事实分支仍能合法试不同结果 | 版本 |"
+      },
+      "inputs": [
+        {
+          "label": "输入/故障",
+          "text": "fork继承了已施加effect，再引用同occurrence"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "必须观察的结果",
+          "text": "新分支当前投影不二次施加；独立反事实分支仍能合法试不同结果"
+        }
+      ],
+      "source_test_type": "版本",
+      "source_test_layers": null,
+      "required_evidence": "按docs/11相应测试层记录输入版本、实际输出、持久结果与失败证据；语义/文学项另保留原文、评阅分歧及编辑决定。",
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/04_事件溯源与版本体系.md",
+        "docs/05_世界模拟与调度引擎.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "fork效果继承与隔离反事实"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "W"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "PG_INTEGRATION_AND_FAULT_INJECTION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "V2-04",
+      "series": "V2",
+      "origin": "V2_0_ADDED",
+      "title": "repair准备后main继续变化",
+      "title_source": "输入/故障原文（源表没有独立标题列）",
+      "source": {
+        "path": "docs/11_研发路线与测试计划.md",
+        "file_sha256": "c77d34912651b94bc2822335230ddb978073120846d6590f5d491dd7cb57aebf",
+        "heading": "5. v2.0新增验收",
+        "table_row_key": "V2-04",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| ID | 输入/故障 | 必须观察的结果 | 类型 |\n|---|---|---|---|\n| V2-04 | repair准备后main继续变化 | promotion CAS失败；不丢失期间新接受历史 | 事务 |",
+        "original_table_row": "| V2-04 | repair准备后main继续变化 | promotion CAS失败；不丢失期间新接受历史 | 事务 |"
+      },
+      "inputs": [
+        {
+          "label": "输入/故障",
+          "text": "repair准备后main继续变化"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "必须观察的结果",
+          "text": "promotion CAS失败；不丢失期间新接受历史"
+        }
+      ],
+      "source_test_type": "事务",
+      "source_test_layers": null,
+      "required_evidence": "按docs/11相应测试层记录输入版本、实际输出、持久结果与失败证据；语义/文学项另保留原文、评阅分歧及编辑决定。",
+      "v2_documents": [
+        "docs/04_事件溯源与版本体系.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "真实PG promotion与canon推进竞态"
+        }
+      ],
+      "test_layers": [
+        "W"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "PG_INTEGRATION_AND_FAULT_INJECTION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "V2-05",
+      "series": "V2",
+      "origin": "V2_0_ADDED",
+      "title": "两组细化终态相同，中间消息/持有/认知不同",
+      "title_source": "输入/故障原文（源表没有独立标题列）",
+      "source": {
+        "path": "docs/11_研发路线与测试计划.md",
+        "file_sha256": "c77d34912651b94bc2822335230ddb978073120846d6590f5d491dd7cb57aebf",
+        "heading": "5. v2.0新增验收",
+        "table_row_key": "V2-05",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| ID | 输入/故障 | 必须观察的结果 | 类型 |\n|---|---|---|---|\n| V2-05 | 两组细化终态相同，中间消息/持有/认知不同 | 不认定等效，转revision或retcon审查 | 调度 |",
+        "original_table_row": "| V2-05 | 两组细化终态相同，中间消息/持有/认知不同 | 不认定等效，转revision或retcon审查 | 调度 |"
+      },
+      "inputs": [
+        {
+          "label": "输入/故障",
+          "text": "两组细化终态相同，中间消息/持有/认知不同"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "必须观察的结果",
+          "text": "不认定等效，转revision或retcon审查"
+        }
+      ],
+      "source_test_type": "调度",
+      "source_test_layers": null,
+      "required_evidence": "按docs/11相应测试层记录输入版本、实际输出、持久结果与失败证据；语义/文学项另保留原文、评阅分歧及编辑决定。",
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/04_事件溯源与版本体系.md",
+        "docs/05_世界模拟与调度引擎.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P3",
+          "scope": "等效替换须保留中间消息/权属/认知"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q",
+        "W",
+        "S"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION",
+        "PG_INTEGRATION_AND_FAULT_INJECTION",
+        "SEMANTIC_EVIDENCE_REVIEW"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "V2-06",
+      "series": "V2",
+      "origin": "V2_0_ADDED",
+      "title": "授权查询空结果后新增匹配范围事实",
+      "title_source": "输入/故障原文（源表没有独立标题列）",
+      "source": {
+        "path": "docs/11_研发路线与测试计划.md",
+        "file_sha256": "c77d34912651b94bc2822335230ddb978073120846d6590f5d491dd7cb57aebf",
+        "heading": "5. v2.0新增验收",
+        "table_row_key": "V2-06",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| ID | 输入/故障 | 必须观察的结果 | 类型 |\n|---|---|---|---|\n| V2-06 | 授权查询空结果后新增匹配范围事实 | 旧ContextBundle的负向依赖失效 | 并发 |",
+        "original_table_row": "| V2-06 | 授权查询空结果后新增匹配范围事实 | 旧ContextBundle的负向依赖失效 | 并发 |"
+      },
+      "inputs": [
+        {
+          "label": "输入/故障",
+          "text": "授权查询空结果后新增匹配范围事实"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "必须观察的结果",
+          "text": "旧ContextBundle的负向依赖失效"
+        }
+      ],
+      "source_test_type": "并发",
+      "source_test_layers": null,
+      "required_evidence": "按docs/11相应测试层记录输入版本、实际输出、持久结果与失败证据；语义/文学项另保留原文、评阅分歧及编辑决定。",
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/04_事件溯源与版本体系.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "严格CAS拒绝过期前提"
+        },
+        {
+          "phase": "P3",
+          "scope": "负向范围精细失效"
+        }
+      ],
+      "test_layers": [
+        "Q",
+        "W"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "QUERY_PERMISSION",
+        "PG_INTEGRATION_AND_FAULT_INJECTION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "V2-07",
+      "series": "V2",
+      "origin": "V2_0_ADDED",
+      "title": "接受world成功，release重试、倒叙重用",
+      "title_source": "输入/故障原文（源表没有独立标题列）",
+      "source": {
+        "path": "docs/11_研发路线与测试计划.md",
+        "file_sha256": "c77d34912651b94bc2822335230ddb978073120846d6590f5d491dd7cb57aebf",
+        "heading": "5. v2.0新增验收",
+        "table_row_key": "V2-07",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| ID | 输入/故障 | 必须观察的结果 | 类型 |\n|---|---|---|---|\n| V2-07 | 接受world成功，release重试、倒叙重用 | 世界余额、认知和effect数不变 | 集成 |",
+        "original_table_row": "| V2-07 | 接受world成功，release重试、倒叙重用 | 世界余额、认知和effect数不变 | 集成 |"
+      },
+      "inputs": [
+        {
+          "label": "输入/故障",
+          "text": "接受world成功，release重试、倒叙重用"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "必须观察的结果",
+          "text": "世界余额、认知和effect数不变"
+        }
+      ],
+      "source_test_type": "集成",
+      "source_test_layers": null,
+      "required_evidence": "按docs/11相应测试层记录输入版本、实际输出、持久结果与失败证据；语义/文学项另保留原文、评阅分歧及编辑决定。",
+      "v2_documents": [
+        "docs/04_事件溯源与版本体系.md",
+        "docs/07_剧情与文学生产系统.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P2",
+          "scope": "release重试和叙述重用不改变世界效果"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "W"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "PG_INTEGRATION_AND_FAULT_INJECTION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "V2-08",
+      "series": "V2",
+      "origin": "V2_0_ADDED",
+      "title": "不改世界，仅调换章节、POV或style",
+      "title_source": "输入/故障原文（源表没有独立标题列）",
+      "source": {
+        "path": "docs/11_研发路线与测试计划.md",
+        "file_sha256": "c77d34912651b94bc2822335230ddb978073120846d6590f5d491dd7cb57aebf",
+        "heading": "5. v2.0新增验收",
+        "table_row_key": "V2-08",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| ID | 输入/故障 | 必须观察的结果 | 类型 |\n|---|---|---|---|\n| V2-08 | 不改世界，仅调换章节、POV或style | 相关披露/接缝/整卷批准失效，事实批准可按依赖复用 | 生产 |",
+        "original_table_row": "| V2-08 | 不改世界，仅调换章节、POV或style | 相关披露/接缝/整卷批准失效，事实批准可按依赖复用 | 生产 |"
+      },
+      "inputs": [
+        {
+          "label": "输入/故障",
+          "text": "不改世界，仅调换章节、POV或style"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "必须观察的结果",
+          "text": "相关披露/接缝/整卷批准失效，事实批准可按依赖复用"
+        }
+      ],
+      "source_test_type": "生产",
+      "source_test_layers": null,
+      "required_evidence": "按docs/11相应测试层记录输入版本、实际输出、持久结果与失败证据；语义/文学项另保留原文、评阅分歧及编辑决定。",
+      "v2_documents": [
+        "docs/04_事件溯源与版本体系.md",
+        "docs/07_剧情与文学生产系统.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P2",
+          "scope": "重排/POV/文风的差异化失效"
+        }
+      ],
+      "test_layers": [
+        "Q",
+        "W",
+        "S"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "QUERY_PERMISSION",
+        "PG_INTEGRATION_AND_FAULT_INJECTION",
+        "SEMANTIC_EVIDENCE_REVIEW"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "V2-09",
+      "series": "V2",
+      "origin": "V2_0_ADDED",
+      "title": "人物普通猜测恰好命中秘密",
+      "title_source": "输入/故障原文（源表没有独立标题列）",
+      "source": {
+        "path": "docs/11_研发路线与测试计划.md",
+        "file_sha256": "c77d34912651b94bc2822335230ddb978073120846d6590f5d491dd7cb57aebf",
+        "heading": "5. v2.0新增验收",
+        "table_row_key": "V2-09",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| ID | 输入/故障 | 必须观察的结果 | 类型 |\n|---|---|---|---|\n| V2-09 | 人物普通猜测恰好命中秘密 | 不无条件判泄密；标为推测且不得伪造知情证据 | 语义/权限 |",
+        "original_table_row": "| V2-09 | 人物普通猜测恰好命中秘密 | 不无条件判泄密；标为推测且不得伪造知情证据 | 语义/权限 |"
+      },
+      "inputs": [
+        {
+          "label": "输入/故障",
+          "text": "人物普通猜测恰好命中秘密"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "必须观察的结果",
+          "text": "不无条件判泄密；标为推测且不得伪造知情证据"
+        }
+      ],
+      "source_test_type": "语义/权限",
+      "source_test_layers": null,
+      "required_evidence": "按docs/11相应测试层记录输入版本、实际输出、持久结果与失败证据；语义/文学项另保留原文、评阅分歧及编辑决定。",
+      "v2_documents": [
+        "docs/06_Agent编排与管理.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P2",
+          "scope": "原创秘密与合法猜测对照"
+        }
+      ],
+      "test_layers": [
+        "Q",
+        "S"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "QUERY_PERMISSION",
+        "SEMANTIC_EVIDENCE_REVIEW"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "V2-10",
+      "series": "V2",
+      "origin": "V2_0_ADDED",
+      "title": "读者已披露信息来自不可靠旁白",
+      "title_source": "输入/故障原文（源表没有独立标题列）",
+      "source": {
+        "path": "docs/11_研发路线与测试计划.md",
+        "file_sha256": "c77d34912651b94bc2822335230ddb978073120846d6590f5d491dd7cb57aebf",
+        "heading": "5. v2.0新增验收",
+        "table_row_key": "V2-10",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| ID | 输入/故障 | 必须观察的结果 | 类型 |\n|---|---|---|---|\n| V2-10 | 读者已披露信息来自不可靠旁白 | 保存“文本给出某说法”，不升级为世界真相或真实读者已相信 | 生产 |",
+        "original_table_row": "| V2-10 | 读者已披露信息来自不可靠旁白 | 保存“文本给出某说法”，不升级为世界真相或真实读者已相信 | 生产 |"
+      },
+      "inputs": [
+        {
+          "label": "输入/故障",
+          "text": "读者已披露信息来自不可靠旁白"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "必须观察的结果",
+          "text": "保存“文本给出某说法”，不升级为世界真相或真实读者已相信"
+        }
+      ],
+      "source_test_type": "生产",
+      "source_test_layers": null,
+      "required_evidence": "按docs/11相应测试层记录输入版本、实际输出、持久结果与失败证据；语义/文学项另保留原文、评阅分歧及编辑决定。",
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/07_剧情与文学生产系统.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P2",
+          "scope": "不可靠叙述/披露/世界事实隔离"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q",
+        "S"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION",
+        "SEMANTIC_EVIDENCE_REVIEW"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "V2-11",
+      "series": "V2",
+      "origin": "V2_0_ADDED",
+      "title": "Host有额外全知文件工具",
+      "title_source": "输入/故障原文（源表没有独立标题列）",
+      "source": {
+        "path": "docs/11_研发路线与测试计划.md",
+        "file_sha256": "c77d34912651b94bc2822335230ddb978073120846d6590f5d491dd7cb57aebf",
+        "heading": "5. v2.0新增验收",
+        "table_row_key": "V2-11",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| ID | 输入/故障 | 必须观察的结果 | 类型 |\n|---|---|---|---|\n| V2-11 | Host有额外全知文件工具 | 标记角色隔离未通过；改用受控工具网关验证 | 接入 |",
+        "original_table_row": "| V2-11 | Host有额外全知文件工具 | 标记角色隔离未通过；改用受控工具网关验证 | 接入 |"
+      },
+      "inputs": [
+        {
+          "label": "输入/故障",
+          "text": "Host有额外全知文件工具"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "必须观察的结果",
+          "text": "标记角色隔离未通过；改用受控工具网关验证"
+        }
+      ],
+      "source_test_type": "接入",
+      "source_test_layers": null,
+      "required_evidence": "按docs/11相应测试层记录输入版本、实际输出、持久结果与失败证据；语义/文学项另保留原文、评阅分歧及编辑决定。",
+      "v2_documents": [
+        "docs/06_Agent编排与管理.md",
+        "docs/08_MCP与工具接口.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P2",
+          "scope": "真实Host额外工具与权限逃逸验收"
+        }
+      ],
+      "test_layers": [
+        "Q",
+        "W"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "QUERY_PERMISSION",
+        "PG_INTEGRATION_AND_FAULT_INJECTION",
+        "REAL_HOST_AUTHORIZATION_INTEGRATION"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "V2-12",
+      "series": "V2",
+      "origin": "V2_0_ADDED",
+      "title": "备份DB完整但缺一正文对象/旧规则解释器",
+      "title_source": "输入/故障原文（源表没有独立标题列）",
+      "source": {
+        "path": "docs/11_研发路线与测试计划.md",
+        "file_sha256": "c77d34912651b94bc2822335230ddb978073120846d6590f5d491dd7cb57aebf",
+        "heading": "5. v2.0新增验收",
+        "table_row_key": "V2-12",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| ID | 输入/故障 | 必须观察的结果 | 类型 |\n|---|---|---|---|\n| V2-12 | 备份DB完整但缺一正文对象/旧规则解释器 | 恢复验收失败并给确切缺口，不假报可用 | 恢复 |",
+        "original_table_row": "| V2-12 | 备份DB完整但缺一正文对象/旧规则解释器 | 恢复验收失败并给确切缺口，不假报可用 | 恢复 |"
+      },
+      "inputs": [
+        {
+          "label": "输入/故障",
+          "text": "备份DB完整但缺一正文对象/旧规则解释器"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "必须观察的结果",
+          "text": "恢复验收失败并给确切缺口，不假报可用"
+        }
+      ],
+      "source_test_type": "恢复",
+      "source_test_layers": null,
+      "required_evidence": "按docs/11相应测试层记录输入版本、实际输出、持久结果与失败证据；语义/文学项另保留原文、评阅分歧及编辑决定。",
+      "v2_documents": [
+        "docs/01_详细技术架构.md",
+        "docs/04_事件溯源与版本体系.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "真实DB与正文/规则对象隔离恢复"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "W"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "PG_INTEGRATION_AND_FAULT_INJECTION",
+        "ISOLATED_RECOVERY_DRILL"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "V2-13",
+      "series": "V2",
+      "origin": "V2_0_ADDED",
+      "title": "研究方法更新，而旧任务仍跑",
+      "title_source": "输入/故障原文（源表没有独立标题列）",
+      "source": {
+        "path": "docs/11_研发路线与测试计划.md",
+        "file_sha256": "c77d34912651b94bc2822335230ddb978073120846d6590f5d491dd7cb57aebf",
+        "heading": "5. v2.0新增验收",
+        "table_row_key": "V2-13",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| ID | 输入/故障 | 必须观察的结果 | 类型 |\n|---|---|---|---|\n| V2-13 | 研究方法更新，而旧任务仍跑 | 旧任务绑定旧method/style版本；新策略经选择后生效 | 文学/版本 |",
+        "original_table_row": "| V2-13 | 研究方法更新，而旧任务仍跑 | 旧任务绑定旧method/style版本；新策略经选择后生效 | 文学/版本 |"
+      },
+      "inputs": [
+        {
+          "label": "输入/故障",
+          "text": "研究方法更新，而旧任务仍跑"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "必须观察的结果",
+          "text": "旧任务绑定旧method/style版本；新策略经选择后生效"
+        }
+      ],
+      "source_test_type": "文学/版本",
+      "source_test_layers": null,
+      "required_evidence": "按docs/11相应测试层记录输入版本、实际输出、持久结果与失败证据；语义/文学项另保留原文、评阅分歧及编辑决定。",
+      "v2_documents": [
+        "docs/06_Agent编排与管理.md",
+        "docs/07_剧情与文学生产系统.md",
+        "docs/09_长期记忆与检索.md",
+        "docs/10_论文与技术资料库.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P2",
+          "scope": "运行任务绑定旧方法/风格"
+        },
+        {
+          "phase": "P4",
+          "scope": "跨卷升级"
+        }
+      ],
+      "test_layers": [
+        "Q",
+        "W",
+        "S"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "QUERY_PERMISSION",
+        "PG_INTEGRATION_AND_FAULT_INJECTION",
+        "SEMANTIC_EVIDENCE_REVIEW"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "V2-14",
+      "series": "V2",
+      "origin": "V2_0_ADDED",
+      "title": "公开发布v1回执未知时已请求v2",
+      "title_source": "输入/故障原文（源表没有独立标题列）",
+      "source": {
+        "path": "docs/11_研发路线与测试计划.md",
+        "file_sha256": "c77d34912651b94bc2822335230ddb978073120846d6590f5d491dd7cb57aebf",
+        "heading": "5. v2.0新增验收",
+        "table_row_key": "V2-14",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| ID | 输入/故障 | 必须观察的结果 | 类型 |\n|---|---|---|---|\n| V2-14 | 公开发布v1回执未知时已请求v2 | 不盲发v2或旧撤回；每目标一个未结算操作并对账 | 投递 |",
+        "original_table_row": "| V2-14 | 公开发布v1回执未知时已请求v2 | 不盲发v2或旧撤回；每目标一个未结算操作并对账 | 投递 |"
+      },
+      "inputs": [
+        {
+          "label": "输入/故障",
+          "text": "公开发布v1回执未知时已请求v2"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "必须观察的结果",
+          "text": "不盲发v2或旧撤回；每目标一个未结算操作并对账"
+        }
+      ],
+      "source_test_type": "投递",
+      "source_test_layers": null,
+      "required_evidence": "按docs/11相应测试层记录输入版本、实际输出、持久结果与失败证据；语义/文学项另保留原文、评阅分歧及编辑决定。",
+      "v2_documents": [
+        "docs/04_事件溯源与版本体系.md",
+        "docs/06_Agent编排与管理.md",
+        "docs/08_MCP与工具接口.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "每目标一个未结算投递协议"
+        },
+        {
+          "phase": "P3",
+          "scope": "若接入渠道则在首次投递前完成实际回执核验"
+        }
+      ],
+      "test_layers": [
+        "W"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "PG_INTEGRATION_AND_FAULT_INJECTION"
+      ],
+      "enablement_gate": "MVP可不启用外部投递；一旦启用，不论处于P几，必须先执行实际渠道授权、顺序与unknown回执验收。",
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "V2-15",
+      "series": "V2",
+      "origin": "V2_0_ADDED",
+      "title": "两个任务同时预留最后一笔预算",
+      "title_source": "输入/故障原文（源表没有独立标题列）",
+      "source": {
+        "path": "docs/11_研发路线与测试计划.md",
+        "file_sha256": "c77d34912651b94bc2822335230ddb978073120846d6590f5d491dd7cb57aebf",
+        "heading": "5. v2.0新增验收",
+        "table_row_key": "V2-15",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| ID | 输入/故障 | 必须观察的结果 | 类型 |\n|---|---|---|---|\n| V2-15 | 两个任务同时预留最后一笔预算 | 事务内最多一个成功，未知调用继续占用额度 | 账本 |",
+        "original_table_row": "| V2-15 | 两个任务同时预留最后一笔预算 | 事务内最多一个成功，未知调用继续占用额度 | 账本 |"
+      },
+      "inputs": [
+        {
+          "label": "输入/故障",
+          "text": "两个任务同时预留最后一笔预算"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "必须观察的结果",
+          "text": "事务内最多一个成功，未知调用继续占用额度"
+        }
+      ],
+      "source_test_type": "账本",
+      "source_test_layers": null,
+      "required_evidence": "按docs/11相应测试层记录输入版本、实际输出、持久结果与失败证据；语义/文学项另保留原文、评阅分歧及编辑决定。",
+      "v2_documents": [
+        "docs/06_Agent编排与管理.md",
+        "docs/08_MCP与工具接口.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P1",
+          "scope": "真实PG两连接预算竞争与unknown占用"
+        }
+      ],
+      "test_layers": [
+        "W"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "PG_INTEGRATION_AND_FAULT_INJECTION",
+        "COST_AND_BUDGET_ACCOUNTING"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    },
+    {
+      "case_id": "V2-16",
+      "series": "V2",
+      "origin": "V2_0_ADDED",
+      "title": "引入无关普通描写，然后后来用其支持因果",
+      "title_source": "输入/故障原文（源表没有独立标题列）",
+      "source": {
+        "path": "docs/11_研发路线与测试计划.md",
+        "file_sha256": "c77d34912651b94bc2822335230ddb978073120846d6590f5d491dd7cb57aebf",
+        "heading": "5. v2.0新增验收",
+        "table_row_key": "V2-16",
+        "original_table_capture": "EXACT_HEADER_AND_SOURCE_ROW",
+        "original_table_markdown": "| ID | 输入/故障 | 必须观察的结果 | 类型 |\n|---|---|---|---|\n| V2-16 | 引入无关普通描写，然后后来用其支持因果 | 首次允许SURFACE_DETAIL；成为前提时必须升格并审查历史兼容 | 创作/对账 |",
+        "original_table_row": "| V2-16 | 引入无关普通描写，然后后来用其支持因果 | 首次允许SURFACE_DETAIL；成为前提时必须升格并审查历史兼容 | 创作/对账 |"
+      },
+      "inputs": [
+        {
+          "label": "输入/故障",
+          "text": "引入无关普通描写，然后后来用其支持因果"
+        }
+      ],
+      "expected_key_points": [
+        {
+          "label": "必须观察的结果",
+          "text": "首次允许SURFACE_DETAIL；成为前提时必须升格并审查历史兼容"
+        }
+      ],
+      "source_test_type": "创作/对账",
+      "source_test_layers": null,
+      "required_evidence": "按docs/11相应测试层记录输入版本、实际输出、持久结果与失败证据；语义/文学项另保留原文、评阅分歧及编辑决定。",
+      "v2_documents": [
+        "docs/03_数据模型与知识图谱.md",
+        "docs/07_剧情与文学生产系统.md",
+        "docs/09_长期记忆与检索.md"
+      ],
+      "phase_gates": [
+        {
+          "phase": "P2",
+          "scope": "表层细节升级与历史兼容性审查"
+        }
+      ],
+      "test_layers": [
+        "K",
+        "Q",
+        "S"
+      ],
+      "test_layer_assignment": "V2_DESIGN_MAPPING_SOURCE_HAS_NO_LAYER_ROW",
+      "test_methods": [
+        "DETERMINISTIC_DOMAIN",
+        "QUERY_PERMISSION",
+        "SEMANTIC_EVIDENCE_REVIEW"
+      ],
+      "status": "PLANNED_NOT_EXECUTED",
+      "execution_evidence": [],
+      "execution_note": "本轮仅完成设计映射；Schema/文件自检和内存机制实验不构成本业务案例通过。"
+    }
+  ],
+  "r1_note": "Source hashes refreshed after integrated R1 edits; original 44+16 IDs and case intent remain. All business cases are still planned, not executed."
+}

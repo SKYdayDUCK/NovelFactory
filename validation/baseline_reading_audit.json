@@ -1,0 +1,108 @@
+{
+  "audit_type": "compiled_baseline_equivalence",
+  "date": "2026-11-10",
+  "method": "Split compendium by generated doc anchors; normalize Markdown link targets and generated chapter footnote prefixes; compare every chapter body. All unmatched wrapper text was inspected.",
+  "result": "PASS",
+  "chapters_checked": 13,
+  "compendium_sha256": "f147f5a497999edcc6d8220ea216ecd488c91647c49b30ddcbaaaf38e06e3a7d",
+  "unique_compendium_content": "Only generated title, date/status, navigation anchors, contents list and separators; no independent substantive chapter content.",
+  "research_agent_complete_reads": [
+    "README.md",
+    "06_Agent规范与技能体系设计.md",
+    "07_论文与技术资料库.md"
+  ],
+  "note": "该审计证明合订本与分册对应关系，不替代团队对其余分册正文的实际阅读；完整阅读覆盖由总报告整合。",
+  "chapters": [
+    {
+      "chapter": "readme",
+      "source_file": "README.md",
+      "source_sha256": "378ed209b57817c879681502d218ef8564f0795b76217f4efc166cd550053e39",
+      "source_chars": 3820,
+      "normalized_equal": true
+    },
+    {
+      "chapter": "01",
+      "source_file": "01_总体架构设计.md",
+      "source_sha256": "08fbc811da4fa04bb99c304a22da0369453b3b78783b13f44000bb07cfe18b1d",
+      "source_chars": 6832,
+      "normalized_equal": true
+    },
+    {
+      "chapter": "02",
+      "source_file": "02_Agent组织与协作架构.md",
+      "source_sha256": "6d4ba86f2e51efcaf8c24e8c49667fb73ba69024a2b4839d89e8710344d4a489",
+      "source_chars": 8172,
+      "normalized_equal": true
+    },
+    {
+      "chapter": "03",
+      "source_file": "03_知识与动态世界架构.md",
+      "source_sha256": "21486fa4bf63ecd8d68717da4b56a55e04179fa06e8e2fa2cdd95d8d3c2918ff",
+      "source_chars": 17409,
+      "normalized_equal": true
+    },
+    {
+      "chapter": "04",
+      "source_file": "04_剧情模拟与小说生产架构.md",
+      "source_sha256": "8ce6d56cef38e233e9d1425f6a5422cd61c5ea300f257c103e8927d028c2bc6b",
+      "source_chars": 16650,
+      "normalized_equal": true
+    },
+    {
+      "chapter": "05",
+      "source_file": "05_技术体系与工程规划.md",
+      "source_sha256": "fd3355fedad97f4f48960d5f1cdb029ec8fe5d0563f00010c5de5e9703ba1ca9",
+      "source_chars": 12231,
+      "normalized_equal": true
+    },
+    {
+      "chapter": "06",
+      "source_file": "06_Agent规范与技能体系设计.md",
+      "source_sha256": "c32e76449c996f7486f7060ea43408451feaea5b5b426d92e38a9dec7bd0f3bd",
+      "source_chars": 5731,
+      "normalized_equal": true
+    },
+    {
+      "chapter": "07",
+      "source_file": "07_论文与技术资料库.md",
+      "source_sha256": "32dd18cd0d06110ae12eddead4ce7d273bbf355f8d549abc63cac42ac9e6da2c",
+      "source_chars": 23383,
+      "normalized_equal": true
+    },
+    {
+      "chapter": "08",
+      "source_file": "08_架构决策与研发路线.md",
+      "source_sha256": "d131de281a9f0bd9dd7090015d443ba53619fd5417ac000cde3312c78325825a",
+      "source_chars": 12424,
+      "normalized_equal": true
+    },
+    {
+      "chapter": "09",
+      "source_file": "09_压力测试与端到端案例.md",
+      "source_sha256": "86a417f7409738a2509ce6b13f711241faad9c29596111d641bfab0ca197982d",
+      "source_chars": 19338,
+      "normalized_equal": true
+    },
+    {
+      "chapter": "10",
+      "source_file": "10_世界事件调度与多线演化.md",
+      "source_sha256": "b524d1e8470b729f7d4b1822a5f31010afa46c3b62bf55880037242c99bfaac9",
+      "source_chars": 10650,
+      "normalized_equal": true
+    },
+    {
+      "chapter": "11",
+      "source_file": "11_文学研究与长程编辑.md",
+      "source_sha256": "bb917eb90bd4348978ba8197d632ce44a9f83b76d65fe6a83c0151a398ea1da8",
+      "source_chars": 16790,
+      "normalized_equal": true
+    },
+    {
+      "chapter": "12",
+      "source_file": "12_v1.0至v1.1架构变更说明.md",
+      "source_sha256": "a0d618280861f2d9977a0e0f929669daf3eeb22b6b751caafa5c7a847c856460",
+      "source_chars": 5165,
+      "normalized_equal": true
+    }
+  ]
+}

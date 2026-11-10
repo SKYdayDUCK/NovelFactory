@@ -1,0 +1,286 @@
+{
+  "catalog_version": "2.1",
+  "status": "v2.0-R1 design; adapters not implemented",
+  "tools": [
+    {
+      "name": "context_get",
+      "input_schema": "core.schema.json#/$defs/ContextGetRequest",
+      "output_schema": "core.schema.json#/$defs/ContextBundle",
+      "service": "ContextService",
+      "required_capability": "TASK_READ",
+      "first_phase": "P1",
+      "authorization": "Server binds principal, work, branch, role/actor, task generation and policy; caller fields never grant authority.",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope"
+    },
+    {
+      "name": "world_query",
+      "input_schema": "core.schema.json#/$defs/WorldQueryRequest",
+      "output_schema": "core.schema.json#/$defs/QueryAnswer",
+      "service": "WorldQueryService",
+      "required_capability": "VIEW_READ",
+      "first_phase": "P1",
+      "authorization": "Server binds principal, work, branch, role/actor, task generation and policy; caller fields never grant authority.",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope"
+    },
+    {
+      "name": "world_history",
+      "input_schema": "core.schema.json#/$defs/WorldHistoryRequest",
+      "output_schema": "core.schema.json#/$defs/QueryAnswer",
+      "service": "WorldQueryService",
+      "required_capability": "VIEW_READ",
+      "first_phase": "P1",
+      "authorization": "Server binds principal, work, branch, role/actor, task generation and policy; caller fields never grant authority.",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope"
+    },
+    {
+      "name": "graph_query",
+      "input_schema": "core.schema.json#/$defs/GraphQueryRequest",
+      "output_schema": "core.schema.json#/$defs/QueryAnswer",
+      "service": "WorldQueryService",
+      "required_capability": "VIEW_READ",
+      "first_phase": "P1",
+      "authorization": "Server binds principal, work, branch, role/actor, task generation and policy; caller fields never grant authority.",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope"
+    },
+    {
+      "name": "memory_search",
+      "input_schema": "core.schema.json#/$defs/MemorySearchRequest",
+      "output_schema": "core.schema.json#/$defs/QueryAnswer",
+      "service": "MemoryService",
+      "required_capability": "VIEW_READ",
+      "first_phase": "P2",
+      "authorization": "Server binds principal, work, branch, role/actor, task generation and policy; caller fields never grant authority.",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope"
+    },
+    {
+      "name": "evidence_read",
+      "input_schema": "core.schema.json#/$defs/EvidenceReadRequest",
+      "output_schema": "core.schema.json#/$defs/EvidenceContent",
+      "service": "ContextService",
+      "required_capability": "EVIDENCE_READ",
+      "first_phase": "P1",
+      "authorization": "Server binds principal, work, branch, role/actor, task generation and policy; caller fields never grant authority.",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope"
+    },
+    {
+      "name": "plan_get",
+      "input_schema": "core.schema.json#/$defs/ArtifactReferenceRequest",
+      "output_schema": "core.schema.json#/$defs/ArtifactRef",
+      "service": "PlanningService",
+      "required_capability": "PLAN_READ",
+      "first_phase": "P2",
+      "authorization": "Server binds principal, work, branch, role/actor, task generation and policy; caller fields never grant authority.",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope"
+    },
+    {
+      "name": "plan_propose",
+      "input_schema": "core.schema.json#/$defs/ArtifactProposalRequest",
+      "output_schema": "core.schema.json#/$defs/ArtifactRef",
+      "service": "PlanningService",
+      "required_capability": "PLAN_PROPOSE",
+      "first_phase": "P2",
+      "authorization": "Server binds principal, work, branch, role/actor, task generation and policy; caller fields never grant authority.",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope"
+    },
+    {
+      "name": "action_propose",
+      "input_schema": "core.schema.json#/$defs/ActionProposal",
+      "output_schema": "core.schema.json#/$defs/ArtifactRef",
+      "service": "AdjudicationService",
+      "required_capability": "ACT_AS_BOUND_ACTOR",
+      "first_phase": "P2",
+      "authorization": "Server binds principal, work, branch, role/actor, task generation and policy; caller fields never grant authority.",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope"
+    },
+    {
+      "name": "advance_prepare",
+      "input_schema": "core.schema.json#/$defs/AdvancePrepareRequest",
+      "output_schema": "core.schema.json#/$defs/ArtifactRef",
+      "service": "WorldSchedulerService",
+      "required_capability": "ADVANCE_PREPARE",
+      "first_phase": "P2",
+      "authorization": "Server binds principal, work, branch, role/actor, task generation and policy; caller fields never grant authority.",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope"
+    },
+    {
+      "name": "adjudication_propose",
+      "input_schema": "core.schema.json#/$defs/ArtifactProposalRequest",
+      "output_schema": "core.schema.json#/$defs/ArtifactRef",
+      "service": "AdjudicationService",
+      "required_capability": "ADJUDICATE_PROPOSE",
+      "first_phase": "P2",
+      "authorization": "Server binds principal, work, branch, role/actor, task generation and policy; caller fields never grant authority.",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope"
+    },
+    {
+      "name": "artifact_put",
+      "input_schema": "core.schema.json#/$defs/ArtifactPutRequest",
+      "output_schema": "core.schema.json#/$defs/ArtifactRef",
+      "service": "NarrativeService",
+      "required_capability": "ARTIFACT_WRITE",
+      "first_phase": "P1",
+      "authorization": "Server binds principal, work, branch, role/actor, task generation and policy; caller fields never grant authority.",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope"
+    },
+    {
+      "name": "draft_submit",
+      "input_schema": "core.schema.json#/$defs/DraftSubmitRequest",
+      "output_schema": "core.schema.json#/$defs/ArtifactRef",
+      "service": "NarrativeService",
+      "required_capability": "DRAFT_PROPOSE",
+      "first_phase": "P2",
+      "authorization": "Server binds principal, work, branch, role/actor, task generation and policy; caller fields never grant authority.",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope"
+    },
+    {
+      "name": "review_submit",
+      "input_schema": "core.schema.json#/$defs/ReviewSubmitRequest",
+      "output_schema": "core.schema.json#/$defs/ArtifactRef",
+      "service": "ReviewService",
+      "required_capability": "REVIEW_PROPOSE",
+      "first_phase": "P2",
+      "authorization": "Server binds principal, work, branch, role/actor, task generation and policy; caller fields never grant authority.",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope"
+    },
+    {
+      "name": "impact_analyze",
+      "input_schema": "core.schema.json#/$defs/ImpactAnalyzeRequest",
+      "output_schema": "core.schema.json#/$defs/ArtifactRef",
+      "service": "ImpactService",
+      "required_capability": "IMPACT_READ",
+      "first_phase": "P1",
+      "authorization": "Server binds principal, work, branch, role/actor, task generation and policy; caller fields never grant authority.",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope"
+    },
+    {
+      "name": "branch_create",
+      "input_schema": "core.schema.json#/$defs/BranchCreateRequest",
+      "output_schema": "core.schema.json#/$defs/WorldRef",
+      "service": "VersionService",
+      "required_capability": "BRANCH_PREPARE",
+      "first_phase": "P1",
+      "authorization": "Server binds principal, work, branch, role/actor, task generation and policy; caller fields never grant authority.",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope"
+    },
+    {
+      "name": "branch_compare",
+      "input_schema": "core.schema.json#/$defs/BranchCompareRequest",
+      "output_schema": "core.schema.json#/$defs/ArtifactRef",
+      "service": "VersionService",
+      "required_capability": "BRANCH_READ",
+      "first_phase": "P1",
+      "authorization": "Server binds principal, work, branch, role/actor, task generation and policy; caller fields never grant authority.",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope"
+    },
+    {
+      "name": "change_propose",
+      "input_schema": "core.schema.json#/$defs/ArtifactProposalRequest",
+      "output_schema": "core.schema.json#/$defs/ArtifactRef",
+      "service": "VersionService",
+      "required_capability": "CHANGE_PROPOSE",
+      "first_phase": "P1",
+      "authorization": "Server binds principal, work, branch, role/actor, task generation and policy; caller fields never grant authority.",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope"
+    },
+    {
+      "name": "commit_request",
+      "input_schema": "core.schema.json#/$defs/AcceptWorldRequest",
+      "output_schema": "core.schema.json#/$defs/CommitReceipt",
+      "service": "WorldCommitService",
+      "required_capability": "CONTROL_ACCEPT",
+      "first_phase": "P1",
+      "authorization": "Server binds principal, work, branch, role/actor, task generation and policy; caller fields never grant authority.",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope"
+    },
+    {
+      "name": "release_prepare",
+      "input_schema": "core.schema.json#/$defs/ArtifactProposalRequest",
+      "output_schema": "core.schema.json#/$defs/ArtifactRef",
+      "service": "ReleaseService",
+      "required_capability": "RELEASE_PREPARE",
+      "first_phase": "P2",
+      "authorization": "Server binds principal, work, branch, role/actor, task generation and policy; caller fields never grant authority.",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope"
+    },
+    {
+      "name": "task_get",
+      "input_schema": "core.schema.json#/$defs/TaskGetRequest",
+      "output_schema": "core.schema.json#/$defs/TaskSpec",
+      "service": "TaskService",
+      "required_capability": "TASK_READ",
+      "first_phase": "P1",
+      "authorization": "Server binds principal, work, branch, role/actor, task generation and policy; caller fields never grant authority.",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope"
+    },
+    {
+      "name": "task_result_submit",
+      "input_schema": "core.schema.json#/$defs/TaskResult",
+      "output_schema": "core.schema.json#/$defs/TaskReceipt",
+      "service": "TaskService",
+      "required_capability": "TASK_RESULT_WRITE",
+      "first_phase": "P1",
+      "authorization": "Server binds principal, work, branch, role/actor, task generation and policy; caller fields never grant authority.",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope"
+    },
+    {
+      "name": "task_cancel",
+      "input_schema": "core.schema.json#/$defs/TaskCancelRequest",
+      "output_schema": "core.schema.json#/$defs/TaskReceipt",
+      "service": "TaskService",
+      "required_capability": "TASK_CANCEL",
+      "first_phase": "P1",
+      "authorization": "Server binds principal, work, branch, role/actor, task generation and policy; caller fields never grant authority.",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope"
+    },
+    {
+      "name": "timeline_query",
+      "input_schema": "temporal_concurrency.schema.json#/$defs/UnifiedQueryRequest",
+      "output_schema": "temporal_concurrency.schema.json#/$defs/UnifiedQueryResult",
+      "service": "WorldQueryService",
+      "required_capability": "VIEW_READ",
+      "first_phase": "P1",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope",
+      "authorization": "Current task grant intersects role query profile, plane, operation, subject/time and source visibility. Control acceptance tools are not granted to ordinary runtime roles. Caller fields never create authority."
+    },
+    {
+      "name": "query_batch",
+      "input_schema": "temporal_concurrency.schema.json#/$defs/QueryBatchRequest",
+      "output_schema": "temporal_concurrency.schema.json#/$defs/QueryBatchResult",
+      "service": "WorldQueryService",
+      "required_capability": "VIEW_READ",
+      "first_phase": "P1",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope",
+      "authorization": "Current task grant intersects role query profile, plane, operation, subject/time and source visibility. Control acceptance tools are not granted to ordinary runtime roles. Caller fields never create authority."
+    },
+    {
+      "name": "context_compile",
+      "input_schema": "temporal_concurrency.schema.json#/$defs/ContextCompileRequest",
+      "output_schema": "temporal_concurrency.schema.json#/$defs/ContextCompileResult",
+      "service": "ContextService",
+      "required_capability": "CONTEXT_COMPILE",
+      "first_phase": "P1",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope",
+      "authorization": "Current task grant intersects role query profile, plane, operation, subject/time and source visibility. Control acceptance tools are not granted to ordinary runtime roles. Caller fields never create authority."
+    },
+    {
+      "name": "acceptance_prepare",
+      "input_schema": "temporal_concurrency.schema.json#/$defs/AcceptancePrepareRequest",
+      "output_schema": "core.schema.json#/$defs/ArtifactRef",
+      "service": "WorldCommitService",
+      "required_capability": "CONTROL_ACCEPT",
+      "first_phase": "P1",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope",
+      "authorization": "Current task grant intersects role query profile, plane, operation, subject/time and source visibility. Control acceptance tools are not granted to ordinary runtime roles. Caller fields never create authority."
+    },
+    {
+      "name": "commit_guarded_request",
+      "input_schema": "temporal_concurrency.schema.json#/$defs/GuardedAcceptRequest",
+      "output_schema": "temporal_concurrency.schema.json#/$defs/GuardedCommitReceipt",
+      "service": "WorldCommitService",
+      "required_capability": "CONTROL_ACCEPT",
+      "first_phase": "P1",
+      "error_schema": "core.schema.json#/$defs/ErrorEnvelope",
+      "authorization": "Current task grant intersects role query profile, plane, operation, subject/time and source visibility. Control acceptance tools are not granted to ordinary runtime roles. Caller fields never create authority."
+    }
+  ]
+}

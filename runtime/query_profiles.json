@@ -1,0 +1,243 @@
+{
+  "version": "2.1",
+  "status": "design metadata, not an active authorization policy",
+  "rule": "Each request intersects this role upper bound with current task grant, purpose, actor/time/entity bounds and operation capability. No returned scope existence is inferred from these lists. Aux cuts for compiler require independent grants. Plane capability is mandatory in addition to operation capability: TIMELINE over PLAN and compiler auxiliary PLAN both require PLAN_READ. No outer tool name grants inner operations.",
+  "profiles": [
+    {
+      "role_id": "chief_editor",
+      "allowed_planes": [
+        "PLAN",
+        "READER",
+        "LITERARY"
+      ],
+      "allowed_operations": [
+        "TIMELINE",
+        "PLAN_DEPENDENTS"
+      ],
+      "allowed_recipes": [
+        "EDITOR"
+      ],
+      "actor_binding": "EXPLICIT_TASK_SCOPE",
+      "operator_capabilities": {
+        "NEIGHBORHOOD": "GRAPH_READ",
+        "PLAN_DEPENDENTS": "PLAN_READ",
+        "STATE": "VIEW_READ",
+        "TIMELINE": "VIEW_READ"
+      }
+    },
+    {
+      "role_id": "world_designer",
+      "allowed_planes": [
+        "WORLD",
+        "SIMULATION"
+      ],
+      "allowed_operations": [
+        "STATE",
+        "TIMELINE",
+        "NEIGHBORHOOD"
+      ],
+      "allowed_recipes": [
+        "MAINTAINER"
+      ],
+      "actor_binding": "EXPLICIT_TASK_SCOPE",
+      "operator_capabilities": {
+        "NEIGHBORHOOD": "GRAPH_READ",
+        "PLAN_DEPENDENTS": "PLAN_READ",
+        "STATE": "VIEW_READ",
+        "TIMELINE": "VIEW_READ"
+      }
+    },
+    {
+      "role_id": "volume_director",
+      "allowed_planes": [
+        "WORLD",
+        "BELIEF",
+        "READER",
+        "PLAN",
+        "SIMULATION",
+        "LITERARY"
+      ],
+      "allowed_operations": [
+        "STATE",
+        "TIMELINE",
+        "PLAN_DEPENDENTS",
+        "NEIGHBORHOOD"
+      ],
+      "allowed_recipes": [
+        "DIRECTOR"
+      ],
+      "actor_binding": "EXPLICIT_TASK_SCOPE",
+      "operator_capabilities": {
+        "NEIGHBORHOOD": "GRAPH_READ",
+        "PLAN_DEPENDENTS": "PLAN_READ",
+        "STATE": "VIEW_READ",
+        "TIMELINE": "VIEW_READ"
+      }
+    },
+    {
+      "role_id": "character_actor",
+      "allowed_planes": [
+        "BELIEF"
+      ],
+      "allowed_operations": [
+        "STATE",
+        "TIMELINE"
+      ],
+      "allowed_recipes": [
+        "ACTOR"
+      ],
+      "actor_binding": "SELF_ONLY",
+      "operator_capabilities": {
+        "NEIGHBORHOOD": "GRAPH_READ",
+        "PLAN_DEPENDENTS": "PLAN_READ",
+        "STATE": "VIEW_READ",
+        "TIMELINE": "VIEW_READ"
+      }
+    },
+    {
+      "role_id": "environment_director",
+      "allowed_planes": [
+        "WORLD",
+        "SIMULATION"
+      ],
+      "allowed_operations": [
+        "STATE",
+        "TIMELINE",
+        "NEIGHBORHOOD"
+      ],
+      "allowed_recipes": [
+        "MAINTAINER"
+      ],
+      "actor_binding": "EXPLICIT_TASK_SCOPE",
+      "operator_capabilities": {
+        "NEIGHBORHOOD": "GRAPH_READ",
+        "PLAN_DEPENDENTS": "PLAN_READ",
+        "STATE": "VIEW_READ",
+        "TIMELINE": "VIEW_READ"
+      }
+    },
+    {
+      "role_id": "adjudication_advisor",
+      "allowed_planes": [
+        "WORLD",
+        "BELIEF",
+        "SIMULATION"
+      ],
+      "allowed_operations": [
+        "STATE",
+        "TIMELINE",
+        "NEIGHBORHOOD"
+      ],
+      "allowed_recipes": [
+        "ADJUDICATOR"
+      ],
+      "actor_binding": "EXPLICIT_TASK_SCOPE",
+      "operator_capabilities": {
+        "NEIGHBORHOOD": "GRAPH_READ",
+        "PLAN_DEPENDENTS": "PLAN_READ",
+        "STATE": "VIEW_READ",
+        "TIMELINE": "VIEW_READ"
+      }
+    },
+    {
+      "role_id": "writer",
+      "allowed_planes": [
+        "WORLD",
+        "BELIEF",
+        "READER",
+        "LITERARY"
+      ],
+      "allowed_operations": [
+        "STATE",
+        "TIMELINE"
+      ],
+      "allowed_recipes": [
+        "WRITER"
+      ],
+      "actor_binding": "EXPLICIT_TASK_SCOPE",
+      "operator_capabilities": {
+        "NEIGHBORHOOD": "GRAPH_READ",
+        "PLAN_DEPENDENTS": "PLAN_READ",
+        "STATE": "VIEW_READ",
+        "TIMELINE": "VIEW_READ"
+      }
+    },
+    {
+      "role_id": "evidence_maintainer",
+      "allowed_planes": [
+        "WORLD",
+        "BELIEF",
+        "READER",
+        "LITERARY"
+      ],
+      "allowed_operations": [
+        "STATE",
+        "TIMELINE"
+      ],
+      "allowed_recipes": [
+        "MAINTAINER"
+      ],
+      "actor_binding": "EXPLICIT_TASK_SCOPE",
+      "operator_capabilities": {
+        "NEIGHBORHOOD": "GRAPH_READ",
+        "PLAN_DEPENDENTS": "PLAN_READ",
+        "STATE": "VIEW_READ",
+        "TIMELINE": "VIEW_READ"
+      }
+    },
+    {
+      "role_id": "reviewer",
+      "allowed_planes": [
+        "WORLD",
+        "BELIEF",
+        "READER",
+        "LITERARY"
+      ],
+      "allowed_operations": [
+        "STATE",
+        "TIMELINE",
+        "NEIGHBORHOOD"
+      ],
+      "allowed_recipes": [
+        "REVIEWER"
+      ],
+      "actor_binding": "EXPLICIT_TASK_SCOPE",
+      "operator_capabilities": {
+        "NEIGHBORHOOD": "GRAPH_READ",
+        "PLAN_DEPENDENTS": "PLAN_READ",
+        "STATE": "VIEW_READ",
+        "TIMELINE": "VIEW_READ"
+      }
+    },
+    {
+      "role_id": "literary_editor",
+      "allowed_planes": [
+        "PLAN",
+        "READER",
+        "LITERARY"
+      ],
+      "allowed_operations": [
+        "TIMELINE",
+        "PLAN_DEPENDENTS"
+      ],
+      "allowed_recipes": [
+        "EDITOR"
+      ],
+      "actor_binding": "EXPLICIT_TASK_SCOPE",
+      "operator_capabilities": {
+        "NEIGHBORHOOD": "GRAPH_READ",
+        "PLAN_DEPENDENTS": "PLAN_READ",
+        "STATE": "VIEW_READ",
+        "TIMELINE": "VIEW_READ"
+      }
+    }
+  ],
+  "plane_capabilities": {
+    "WORLD": "WORLD_READ",
+    "BELIEF": "BELIEF_READ",
+    "READER": "READER_READ",
+    "PLAN": "PLAN_READ",
+    "SIMULATION": "SIMULATION_READ",
+    "LITERARY": "LITERARY_READ"
+  }
+}

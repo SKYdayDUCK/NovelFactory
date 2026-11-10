@@ -1,0 +1,12 @@
+stateDiagram-v2
+    [*] --> DRAFT
+    DRAFT --> VALIDATED: 结构与依赖检查
+    VALIDATED --> REVIEW_REQUIRED: 需要语义或授权决议
+    VALIDATED --> APPROVED: 既有策略授权
+    REVIEW_REQUIRED --> APPROVED: 内容绑定批准
+    REVIEW_REQUIRED --> REJECTED: 拒绝或改稿
+    APPROVED --> ACCEPTED: 短事务校验并提交
+    APPROVED --> STALE: 内容或前提变化
+    STALE --> DRAFT: 新提案版本
+    ACCEPTED --> [*]
+    REJECTED --> [*]

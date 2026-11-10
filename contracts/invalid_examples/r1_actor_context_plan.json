@@ -1,0 +1,95 @@
+{
+  "schema_version": "2.1",
+  "bundle": {
+    "schema_version": "2.0",
+    "task_id": "aef248a3-4fb3-57c5-8e96-6d5d6cdfc75d",
+    "generation": 2,
+    "context_bundle_id": "e7297a7b-50dc-56e6-8aff-fee6b5c5b11b",
+    "world_ref": {
+      "work_id": "871e02b5-4e88-50c5-889d-7ded437f23b1",
+      "branch_id": "e45cdd4a-64f1-5eea-958e-0095fb190d49",
+      "world_revision_id": "cea54e7f-7725-5f1d-8e53-0ba70373e5f7"
+    },
+    "story_time": {
+      "tick": 35,
+      "phase": 0
+    },
+    "role_id": "character_actor",
+    "actor_id": "f850c6a2-6e21-5c9f-9a4e-1720ce53ae91",
+    "policy_version": "policy-1",
+    "dependency_fingerprint": "f602aa4cefce6856f6c1409b8fadd2e10c22b0d64a3598d6651bb90aaf5d8533",
+    "dependency_handle": "a29315e3-2d61-509d-959a-80782b7f3e93",
+    "permitted_evidence_refs": [],
+    "facts": [
+      {
+        "statement": "D20交剑时观察到朋友接过宝剑；尚无之后转移的获知依据。",
+        "status": "BELIEF",
+        "evidence_refs": []
+      }
+    ],
+    "limitations": [
+      "未获知的通道不以秘密存在提示回显。"
+    ]
+  },
+  "read_cut": {
+    "world_ref": {
+      "work_id": "871e02b5-4e88-50c5-889d-7ded437f23b1",
+      "branch_id": "e45cdd4a-64f1-5eea-958e-0095fb190d49",
+      "world_revision_id": "cea54e7f-7725-5f1d-8e53-0ba70373e5f7"
+    },
+    "knowledge_cut": {
+      "plane": "BELIEF",
+      "actor_id": "f850c6a2-6e21-5c9f-9a4e-1720ce53ae91",
+      "known_at": {
+        "tick": 35,
+        "phase": 0
+      }
+    },
+    "policy_version": "policy-3",
+    "permission_epoch": 4,
+    "resolved_at": "2026-11-10T12:00:00+08:00",
+    "source_manifest_refs": [
+      {
+        "artifact_id": "5fae21ea-1193-5639-8e78-434638d36990",
+        "artifact_revision_id": "fdb6ff7e-245c-54ac-9582-71294d45f0fb",
+        "sha256": "510eef1af6f2b87501bc5f60c01f4ed15398855903dd5bc3813bc58678706610"
+      }
+    ],
+    "read_cut_id": "834cb113-df57-5e1d-b38a-2c1f8301ab73",
+    "interpretation_ref": {
+      "artifact_id": "e562617c-9293-5c45-b089-836d8b23e1ff",
+      "artifact_revision_id": "1940464e-07ec-5938-8349-72395352b23e",
+      "sha256": "58632d1f4067b6a6165ea169cf622636549c9a6a156f3420c376f591853596f6"
+    }
+  },
+  "compiler_version": "compiler-1",
+  "recipe_revision_ref": {
+    "artifact_id": "a859895b-2ed7-5a1b-9c6b-4f85c81eb873",
+    "artifact_revision_id": "5de0d1a1-3449-5758-b4d3-7825a09d6c94",
+    "sha256": "0aee1a12effdfac30fc33e8d23dbe3ffae638e61d386b817a409015708027fb2"
+  },
+  "input_manifest_ref": {
+    "artifact_id": "5fae21ea-1193-5639-8e78-434638d36990",
+    "artifact_revision_id": "fdb6ff7e-245c-54ac-9582-71294d45f0fb",
+    "sha256": "510eef1af6f2b87501bc5f60c01f4ed15398855903dd5bc3813bc58678706610"
+  },
+  "auxiliary_knowledge_cuts": [],
+  "sections": [
+    {
+      "section_kind": "ACTOR_KNOWLEDGE",
+      "content": "你记得D20把剑交给朋友，尚未收到后续消息。",
+      "source_refs": [],
+      "required": true
+    },
+    {
+      "section_kind": "PLAN",
+      "content": "作者计划让反派获胜。",
+      "source_refs": [],
+      "required": false
+    }
+  ],
+  "hard_requirements_status": "COMPLETE_FOR_RECIPE",
+  "tokenizer_version": "declared-tokenizer-1",
+  "estimated_tokens": 550,
+  "omitted_optional_scopes": []
+}

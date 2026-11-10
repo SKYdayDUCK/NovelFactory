@@ -1,0 +1,323 @@
+{
+  "schema_version": "2.1.0",
+  "purpose": "Runtime role metadata; not an authorization policy",
+  "permission_rule": "effective_tools = role_requested_tools ∩ server_task_grant; actor/work/branch/time are server-bound",
+  "roles": [
+    {
+      "role_id": "chief_editor",
+      "display_name": "总编与协调者",
+      "contract_path": "chief_editor.md",
+      "contract_version": "2.1.0",
+      "task_modes": [
+        "book_direction",
+        "editorial_decision",
+        "release_review"
+      ],
+      "requested_tools": [
+        "context_get",
+        "plan_get",
+        "memory_search",
+        "evidence_read",
+        "impact_analyze",
+        "review_submit",
+        "release_prepare",
+        "artifact_put",
+        "task_get",
+        "task_result_submit",
+        "timeline_query",
+        "query_batch",
+        "context_compile"
+      ],
+      "skill_names": [
+        "plan-volume",
+        "edit-volume"
+      ],
+      "restricted_skill_modes": {
+        "plan-volume": "editorial_decision_only"
+      },
+      "query_profile_id": "chief_editor"
+    },
+    {
+      "role_id": "world_designer",
+      "display_name": "世界设计与维护",
+      "contract_path": "world_designer.md",
+      "contract_version": "2.1.0",
+      "task_modes": [
+        "initial_world",
+        "world_extension",
+        "rule_review"
+      ],
+      "requested_tools": [
+        "context_get",
+        "world_query",
+        "world_history",
+        "graph_query",
+        "memory_search",
+        "evidence_read",
+        "change_propose",
+        "impact_analyze",
+        "artifact_put",
+        "task_result_submit",
+        "timeline_query",
+        "query_batch",
+        "context_compile"
+      ],
+      "skill_names": [
+        "prepare-world"
+      ],
+      "query_profile_id": "world_designer"
+    },
+    {
+      "role_id": "volume_director",
+      "display_name": "卷导演与剧情规划",
+      "contract_path": "volume_director.md",
+      "contract_version": "2.1.0",
+      "task_modes": [
+        "volume_contract",
+        "window_plan",
+        "scene_plan",
+        "replan"
+      ],
+      "requested_tools": [
+        "context_get",
+        "world_query",
+        "world_history",
+        "graph_query",
+        "memory_search",
+        "evidence_read",
+        "plan_get",
+        "plan_propose",
+        "advance_prepare",
+        "impact_analyze",
+        "branch_create",
+        "branch_compare",
+        "artifact_put",
+        "task_result_submit",
+        "timeline_query",
+        "query_batch",
+        "context_compile"
+      ],
+      "skill_names": [
+        "plan-volume"
+      ],
+      "query_profile_id": "volume_director"
+    },
+    {
+      "role_id": "character_actor",
+      "display_name": "角色与势力行动者",
+      "contract_path": "character_actor.md",
+      "contract_version": "2.1.0",
+      "task_modes": [
+        "character_action",
+        "faction_action",
+        "reaction"
+      ],
+      "requested_tools": [
+        "context_get",
+        "world_query",
+        "world_history",
+        "memory_search",
+        "evidence_read",
+        "action_propose",
+        "artifact_put",
+        "task_get",
+        "task_result_submit",
+        "timeline_query",
+        "query_batch",
+        "context_compile"
+      ],
+      "skill_names": [
+        "simulate-character"
+      ],
+      "query_profile_id": "character_actor"
+    },
+    {
+      "role_id": "environment_director",
+      "display_name": "环境与后台过程导演",
+      "contract_path": "environment_director.md",
+      "contract_version": "2.1.0",
+      "task_modes": [
+        "environment_change",
+        "process_semantics",
+        "observation_proposal"
+      ],
+      "requested_tools": [
+        "context_get",
+        "world_query",
+        "world_history",
+        "graph_query",
+        "evidence_read",
+        "change_propose",
+        "impact_analyze",
+        "artifact_put",
+        "task_result_submit",
+        "timeline_query",
+        "query_batch",
+        "context_compile"
+      ],
+      "skill_names": [
+        "prepare-world",
+        "adjudicate-actions"
+      ],
+      "restricted_skill_modes": {
+        "adjudicate-actions": "environment_proposal_only"
+      },
+      "query_profile_id": "environment_director"
+    },
+    {
+      "role_id": "adjudication_advisor",
+      "display_name": "独立语义裁决者",
+      "contract_path": "adjudication_advisor.md",
+      "contract_version": "2.1.0",
+      "task_modes": [
+        "joint_outcome",
+        "semantic_rule_gap",
+        "refinement_review"
+      ],
+      "requested_tools": [
+        "context_get",
+        "world_query",
+        "world_history",
+        "graph_query",
+        "evidence_read",
+        "adjudication_propose",
+        "impact_analyze",
+        "artifact_put",
+        "task_result_submit",
+        "timeline_query",
+        "query_batch",
+        "context_compile"
+      ],
+      "skill_names": [
+        "adjudicate-actions"
+      ],
+      "query_profile_id": "adjudication_advisor"
+    },
+    {
+      "role_id": "writer",
+      "display_name": "正文写作与修订",
+      "contract_path": "writer.md",
+      "contract_version": "2.1.0",
+      "task_modes": [
+        "scene_draft",
+        "chapter_draft",
+        "targeted_revision"
+      ],
+      "requested_tools": [
+        "context_get",
+        "memory_search",
+        "evidence_read",
+        "world_query",
+        "world_history",
+        "artifact_put",
+        "draft_submit",
+        "task_get",
+        "task_result_submit",
+        "timeline_query",
+        "query_batch",
+        "context_compile"
+      ],
+      "skill_names": [
+        "write-scene"
+      ],
+      "query_profile_id": "writer"
+    },
+    {
+      "role_id": "evidence_maintainer",
+      "display_name": "事实证据与记忆维护",
+      "contract_path": "evidence_maintainer.md",
+      "contract_version": "2.1.0",
+      "task_modes": [
+        "assertion_extract",
+        "event_alignment",
+        "summary",
+        "literary_memory"
+      ],
+      "requested_tools": [
+        "context_get",
+        "world_query",
+        "world_history",
+        "memory_search",
+        "evidence_read",
+        "artifact_put",
+        "task_result_submit",
+        "timeline_query",
+        "query_batch",
+        "context_compile"
+      ],
+      "skill_names": [
+        "maintain-memory",
+        "review-consistency"
+      ],
+      "restricted_skill_modes": {
+        "review-consistency": "evidence_collection_only"
+      },
+      "query_profile_id": "evidence_maintainer"
+    },
+    {
+      "role_id": "reviewer",
+      "display_name": "分维度审核者",
+      "contract_path": "reviewer.md",
+      "contract_version": "2.1.0",
+      "task_modes": [
+        "fact",
+        "epistemic",
+        "continuity",
+        "literary"
+      ],
+      "requested_tools": [
+        "context_get",
+        "world_query",
+        "world_history",
+        "graph_query",
+        "memory_search",
+        "evidence_read",
+        "review_submit",
+        "artifact_put",
+        "task_result_submit",
+        "timeline_query",
+        "query_batch",
+        "context_compile"
+      ],
+      "skill_names": [
+        "review-consistency"
+      ],
+      "query_profile_id": "reviewer"
+    },
+    {
+      "role_id": "literary_editor",
+      "display_name": "文学研究与整卷编辑",
+      "contract_path": "literary_editor.md",
+      "contract_version": "2.1.0",
+      "task_modes": [
+        "research",
+        "structure",
+        "seam",
+        "cross_volume"
+      ],
+      "requested_tools": [
+        "context_get",
+        "memory_search",
+        "evidence_read",
+        "plan_get",
+        "impact_analyze",
+        "artifact_put",
+        "review_submit",
+        "release_prepare",
+        "task_result_submit",
+        "timeline_query",
+        "query_batch",
+        "context_compile"
+      ],
+      "skill_names": [
+        "research-literature",
+        "edit-volume",
+        "maintain-memory"
+      ],
+      "restricted_skill_modes": {
+        "maintain-memory": "literary_evidence_only"
+      },
+      "query_profile_id": "literary_editor"
+    }
+  ]
+}

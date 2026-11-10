@@ -1,0 +1,3336 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novel-factory.example/contracts/2.0/core.schema.json",
+  "title": "Novel Factory v2.0 contract examples",
+  "$defs": {
+    "UUID": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "Sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "Decimal": {
+      "type": "string",
+      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+      "description": "Exact decimal string; unit-aware checks and precision limits are enforced by the domain."
+    },
+    "StoryPoint": {
+      "type": "object",
+      "properties": {
+        "tick": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "phase": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "tick",
+        "phase"
+      ],
+      "additionalProperties": false,
+      "description": "tick uses work calendar; phase is accepted causal stage, never database sequence or model completion order."
+    },
+    "StoryInterval": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "$ref": "#/$defs/StoryPoint"
+        },
+        "end": {
+          "$ref": "#/$defs/StoryPoint"
+        },
+        "bounds": {
+          "type": "string",
+          "enum": [
+            "[)"
+          ]
+        }
+      },
+      "required": [
+        "start",
+        "end",
+        "bounds"
+      ],
+      "additionalProperties": false,
+      "description": "Domain enforces start < end. Instant events use StoryPoint, not an empty interval."
+    },
+    "WorldRef": {
+      "type": "object",
+      "properties": {
+        "work_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "branch_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "world_revision_id": {
+          "$ref": "#/$defs/UUID"
+        }
+      },
+      "required": [
+        "work_id",
+        "branch_id",
+        "world_revision_id"
+      ],
+      "additionalProperties": false,
+      "description": "All three identifiers are checked together against an immutable branch/revision membership; main is resolved before issue."
+    },
+    "ArtifactRef": {
+      "type": "object",
+      "properties": {
+        "artifact_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "artifact_revision_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "sha256": {
+          "$ref": "#/$defs/Sha256"
+        }
+      },
+      "required": [
+        "artifact_id",
+        "artifact_revision_id",
+        "sha256"
+      ],
+      "additionalProperties": false
+    },
+    "EventRef": {
+      "type": "object",
+      "properties": {
+        "occurrence_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "event_version_id": {
+          "$ref": "#/$defs/UUID"
+        }
+      },
+      "required": [
+        "occurrence_id",
+        "event_version_id"
+      ],
+      "additionalProperties": false
+    },
+    "TextSpan": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "end": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unit": {
+          "type": "string",
+          "enum": [
+            "UNICODE_CODEPOINT"
+          ]
+        },
+        "quote_sha256": {
+          "$ref": "#/$defs/Sha256"
+        }
+      },
+      "required": [
+        "start",
+        "end",
+        "unit",
+        "quote_sha256"
+      ],
+      "additionalProperties": false,
+      "description": "Offsets address the exact UTF-8 decoded artifact without normalization. Domain enforces end > start and verifies quoted content."
+    },
+    "EvidenceRef": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "ARTIFACT"
+              ]
+            },
+            "artifact_ref": {
+              "$ref": "#/$defs/ArtifactRef"
+            },
+            "span": {
+              "$ref": "#/$defs/TextSpan"
+            }
+          },
+          "required": [
+            "kind",
+            "artifact_ref"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "EVENT"
+              ]
+            },
+            "world_ref": {
+              "$ref": "#/$defs/WorldRef"
+            },
+            "event_ref": {
+              "$ref": "#/$defs/EventRef"
+            }
+          },
+          "required": [
+            "kind",
+            "world_ref",
+            "event_ref"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "RULE"
+              ]
+            },
+            "artifact_ref": {
+              "$ref": "#/$defs/ArtifactRef"
+            }
+          },
+          "required": [
+            "kind",
+            "artifact_ref"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "DependencyManifest": {
+      "type": "object",
+      "properties": {
+        "world_ref": {
+          "$ref": "#/$defs/WorldRef"
+        },
+        "policy_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rule_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope_versions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "scope_key": {
+                "type": "string",
+                "minLength": 1
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "scope_key",
+              "version"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        },
+        "artifact_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ArtifactRef"
+          },
+          "minItems": 0
+        },
+        "queries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "query_id": {
+                "$ref": "#/$defs/UUID"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "POSITIVE",
+                  "NEGATIVE"
+                ]
+              },
+              "scope_key": {
+                "type": "string",
+                "minLength": 1
+              },
+              "predicate_sha256": {
+                "$ref": "#/$defs/Sha256"
+              },
+              "result_sha256": {
+                "$ref": "#/$defs/Sha256"
+              }
+            },
+            "required": [
+              "query_id",
+              "kind",
+              "scope_key",
+              "predicate_sha256",
+              "result_sha256"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        },
+        "unresolved_scopes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "world_ref",
+        "policy_version",
+        "rule_version",
+        "scope_versions",
+        "artifact_refs",
+        "queries",
+        "unresolved_scopes"
+      ],
+      "additionalProperties": false,
+      "description": "Server-internal complete manifest. Do not expose unauthorized scope names or predicates to restricted roles. Fingerprint uses canonical JSON of this object."
+    },
+    "ContextBundle": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "enum": [
+            "2.0"
+          ]
+        },
+        "context_bundle_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "world_ref": {
+          "$ref": "#/$defs/WorldRef"
+        },
+        "story_time": {
+          "$ref": "#/$defs/StoryPoint"
+        },
+        "role_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "actor_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UUID"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "policy_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dependency_fingerprint": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "dependency_handle": {
+          "$ref": "#/$defs/UUID"
+        },
+        "permitted_evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "minItems": 0
+        },
+        "facts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "statement": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "FACT",
+                  "BELIEF",
+                  "HYPOTHESIS"
+                ]
+              },
+              "evidence_refs": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/EvidenceRef"
+                },
+                "minItems": 0
+              }
+            },
+            "required": [
+              "statement",
+              "status",
+              "evidence_refs"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "schema_version",
+        "context_bundle_id",
+        "task_id",
+        "generation",
+        "world_ref",
+        "story_time",
+        "role_id",
+        "actor_id",
+        "policy_version",
+        "dependency_fingerprint",
+        "dependency_handle",
+        "permitted_evidence_refs",
+        "facts",
+        "limitations"
+      ],
+      "additionalProperties": false,
+      "description": "Server-issued and persisted; caller cannot grant itself role/actor/branch/time by editing this JSON. Public facts are already filtered."
+    },
+    "QueryAnswer": {
+      "type": "object",
+      "properties": {
+        "world_ref": {
+          "$ref": "#/$defs/WorldRef"
+        },
+        "story_time": {
+          "$ref": "#/$defs/StoryPoint"
+        },
+        "plane": {
+          "type": "string",
+          "enum": [
+            "WORLD",
+            "BELIEF",
+            "READER",
+            "PLAN",
+            "SIMULATION",
+            "LITERARY"
+          ]
+        },
+        "truth_status": {
+          "type": "string",
+          "enum": [
+            "DETERMINED",
+            "UNDETERMINED"
+          ]
+        },
+        "evaluation_status": {
+          "type": "string",
+          "enum": [
+            "EVALUATED",
+            "PENDING",
+            "BLOCKED",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "knowledge_status": {
+          "type": "string",
+          "enum": [
+            "KNOWN",
+            "UNKNOWN"
+          ]
+        },
+        "freshness": {
+          "type": "string",
+          "enum": [
+            "CURRENT",
+            "STALE",
+            "ABSENT",
+            "NOT_USED"
+          ]
+        },
+        "coverage": {
+          "type": "string",
+          "enum": [
+            "COMPLETE",
+            "PARTIAL",
+            "UNDECLARED"
+          ]
+        },
+        "value_status": {
+          "type": "string",
+          "enum": [
+            "VALUE",
+            "NONE",
+            "NOT_APPLICABLE",
+            "UNRESOLVED"
+          ]
+        },
+        "data": {},
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "minItems": 0
+        },
+        "dependency_handle": {
+          "$ref": "#/$defs/UUID"
+        },
+        "story_interval": {
+          "$ref": "#/$defs/StoryInterval"
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "world_ref",
+        "plane",
+        "truth_status",
+        "evaluation_status",
+        "knowledge_status",
+        "freshness",
+        "coverage",
+        "value_status",
+        "data",
+        "evidence_refs",
+        "dependency_handle"
+      ],
+      "additionalProperties": false,
+      "description": "truth_status is determinacy, not boolean truth. UNKNOWN is indistinguishable for hidden and absent records at the role view boundary. COMPLETE is relative to declared scope, model, time and permissions.",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "knowledge_status": {
+                "const": "UNKNOWN"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "type": "null"
+              },
+              "evidence_refs": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "plane": {
+                "const": "PLAN"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "evaluation_status": {
+                "const": "NOT_APPLICABLE"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "value_status": {
+                "const": "VALUE"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "not": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "value_status": {
+                "enum": [
+                  "NONE",
+                  "NOT_APPLICABLE",
+                  "UNRESOLVED"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "knowledge_status": {
+                "const": "UNKNOWN"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "truth_status": {
+                "const": "UNDETERMINED"
+              },
+              "value_status": {
+                "const": "UNRESOLVED"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "value_status": {
+                "const": "NONE"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "truth_status": {
+                "const": "DETERMINED"
+              },
+              "evaluation_status": {
+                "const": "EVALUATED"
+              },
+              "knowledge_status": {
+                "const": "KNOWN"
+              },
+              "coverage": {
+                "const": "COMPLETE"
+              },
+              "freshness": {
+                "enum": [
+                  "CURRENT",
+                  "NOT_USED"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "oneOf": [
+        {
+          "required": [
+            "story_time"
+          ],
+          "not": {
+            "required": [
+              "story_interval"
+            ]
+          }
+        },
+        {
+          "required": [
+            "story_interval"
+          ],
+          "not": {
+            "required": [
+              "story_time"
+            ]
+          }
+        }
+      ]
+    },
+    "ResourceRequest": {
+      "type": "object",
+      "properties": {
+        "resource_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "quantity": {
+          "$ref": "#/$defs/NonnegativeDecimal"
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "purpose": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "resource_id",
+        "quantity",
+        "unit",
+        "purpose"
+      ],
+      "additionalProperties": false
+    },
+    "ActionProposal": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "enum": [
+            "2.0"
+          ]
+        },
+        "proposal_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "context_bundle_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "world_ref": {
+          "$ref": "#/$defs/WorldRef"
+        },
+        "actor_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "intent": {
+          "type": "string",
+          "minLength": 1
+        },
+        "targets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UUID"
+          },
+          "minItems": 0
+        },
+        "story_interval": {
+          "$ref": "#/$defs/StoryInterval"
+        },
+        "resource_requests": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ResourceRequest"
+          },
+          "minItems": 0
+        },
+        "preconditions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "minItems": 0
+        },
+        "dependency_fingerprint": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "schema_version",
+        "proposal_id",
+        "task_id",
+        "generation",
+        "context_bundle_id",
+        "world_ref",
+        "actor_id",
+        "intent",
+        "targets",
+        "story_interval",
+        "resource_requests",
+        "preconditions",
+        "evidence_refs",
+        "dependency_fingerprint",
+        "idempotency_key"
+      ],
+      "additionalProperties": false,
+      "description": "Action actor_id is verified against task grant; intent does not assert success. Resource requests are not yet consumption."
+    },
+    "NormalizedEffect": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "RESOURCE_DELTA"
+              ]
+            },
+            "effect_key": {
+              "type": "string",
+              "minLength": 1
+            },
+            "resource_id": {
+              "$ref": "#/$defs/UUID"
+            },
+            "quantity": {
+              "$ref": "#/$defs/Decimal"
+            },
+            "unit": {
+              "type": "string",
+              "minLength": 1
+            },
+            "account_id": {
+              "$ref": "#/$defs/UUID"
+            }
+          },
+          "required": [
+            "kind",
+            "effect_key",
+            "resource_id",
+            "quantity",
+            "unit",
+            "account_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "RELATION_SET"
+              ]
+            },
+            "effect_key": {
+              "type": "string",
+              "minLength": 1
+            },
+            "subject_id": {
+              "$ref": "#/$defs/UUID"
+            },
+            "predicate": {
+              "type": "string",
+              "minLength": 1
+            },
+            "object_id": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/UUID"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "value_status": {
+              "type": "string",
+              "enum": [
+                "VALUE",
+                "NONE",
+                "NOT_APPLICABLE"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "effect_key",
+            "subject_id",
+            "predicate",
+            "object_id",
+            "value_status"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "value_status": {
+                    "const": "VALUE"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "object_id": {
+                    "$ref": "#/$defs/UUID"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "value_status": {
+                    "enum": [
+                      "NONE",
+                      "NOT_APPLICABLE"
+                    ]
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "object_id": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "LIFECYCLE_SET"
+              ]
+            },
+            "effect_key": {
+              "type": "string",
+              "minLength": 1
+            },
+            "entity_id": {
+              "$ref": "#/$defs/UUID"
+            },
+            "lifecycle": {
+              "type": "string",
+              "enum": [
+                "ACTIVE",
+                "DESTROYED",
+                "CONSUMED",
+                "RETIRED"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "effect_key",
+            "entity_id",
+            "lifecycle"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "COGNITIVE_RECORD_ADD"
+              ]
+            },
+            "effect_key": {
+              "type": "string",
+              "minLength": 1
+            },
+            "actor_id": {
+              "$ref": "#/$defs/UUID"
+            },
+            "statement": {
+              "type": "string",
+              "minLength": 1
+            },
+            "epistemic_mode": {
+              "type": "string",
+              "enum": [
+                "OBSERVED",
+                "HEARD",
+                "INFERRED",
+                "DECIDED"
+              ]
+            },
+            "evidence_refs": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/EvidenceRef"
+              },
+              "minItems": 0
+            },
+            "record_kind": {
+              "type": "string",
+              "enum": [
+                "OBSERVATION",
+                "BELIEF",
+                "PRIVATE_DECISION"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "effect_key",
+            "actor_id",
+            "statement",
+            "epistemic_mode",
+            "evidence_refs",
+            "record_kind"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "record_kind": {
+                    "const": "OBSERVATION"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "epistemic_mode": {
+                    "enum": [
+                      "OBSERVED",
+                      "HEARD"
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "description": "Recording that a statement was heard does not record belief in its contents. Belief and private decision require separate accepted records and evidence."
+        }
+      ]
+    },
+    "AdjudicationProposal": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "enum": [
+            "2.0"
+          ]
+        },
+        "proposal_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "input_world_ref": {
+          "$ref": "#/$defs/WorldRef"
+        },
+        "interaction_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "action_proposal_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ArtifactRef"
+          },
+          "minItems": 1
+        },
+        "ruleset_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "story_time": {
+          "$ref": "#/$defs/StoryPoint"
+        },
+        "effect_group_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "representation_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "effects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NormalizedEffect"
+          },
+          "minItems": 0
+        },
+        "reasoning_summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unresolved_questions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "dependency_fingerprint": {
+          "$ref": "#/$defs/Sha256"
+        }
+      },
+      "required": [
+        "schema_version",
+        "proposal_id",
+        "input_world_ref",
+        "interaction_id",
+        "action_proposal_refs",
+        "ruleset_ref",
+        "story_time",
+        "effect_group_id",
+        "representation_id",
+        "effects",
+        "reasoning_summary",
+        "unresolved_questions",
+        "dependency_fingerprint"
+      ],
+      "additionalProperties": false,
+      "description": "reasoning_summary is an auditable explanation, not hidden chain of thought. Hard constraints and scope checks happen before acceptance."
+    },
+    "AcceptedEvent": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "enum": [
+            "2.0"
+          ]
+        },
+        "occurrence_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "event_version_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "effect_group_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "representation_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "participants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UUID"
+          },
+          "minItems": 0
+        },
+        "causal_parents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EventRef"
+          },
+          "minItems": 0
+        },
+        "ruleset_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "adjudication_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "effects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NormalizedEffect"
+          },
+          "minItems": 0
+        },
+        "engine_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "occurrence_time": {
+          "$ref": "#/$defs/OccurrenceTime"
+        }
+      },
+      "required": [
+        "schema_version",
+        "occurrence_id",
+        "event_version_id",
+        "effect_group_id",
+        "representation_id",
+        "participants",
+        "causal_parents",
+        "ruleset_ref",
+        "adjudication_ref",
+        "effects",
+        "engine_version",
+        "occurrence_time"
+      ],
+      "additionalProperties": false,
+      "description": "Immutable selected event version. Replay applies this result, never regenerates model output. Causal ordering and effect coverage require semantic validation."
+    },
+    "Approval": {
+      "type": "object",
+      "properties": {
+        "approval_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "subject_type": {
+          "type": "string",
+          "enum": [
+            "WORLD_PROPOSAL",
+            "NARRATIVE",
+            "RELEASE",
+            "RETCON"
+          ]
+        },
+        "subject_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "principal_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "policy_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dependency_fingerprint": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "disposition": {
+          "type": "string",
+          "enum": [
+            "ACCEPTED",
+            "CONDITIONAL",
+            "REJECTED"
+          ]
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "approval_id",
+        "subject_type",
+        "subject_sha256",
+        "principal_id",
+        "policy_version",
+        "dependency_fingerprint",
+        "disposition",
+        "recorded_at",
+        "conditions"
+      ],
+      "additionalProperties": false,
+      "description": "World acceptance requires ACCEPTED plus satisfied policy. Approval is a stored server record, not authority granted by submitting this JSON."
+    },
+    "AcceptWorldRequest": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "enum": [
+            "2.0"
+          ]
+        },
+        "task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "context_bundle_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "expected_world_ref": {
+          "$ref": "#/$defs/WorldRef"
+        },
+        "proposal_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "approval_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UUID"
+          },
+          "minItems": 1
+        },
+        "dependency_fingerprint": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "schema_version",
+        "task_id",
+        "generation",
+        "context_bundle_id",
+        "expected_world_ref",
+        "proposal_ref",
+        "approval_refs",
+        "dependency_fingerprint",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "CommitReceipt": {
+      "type": "object",
+      "properties": {
+        "command_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "world_ref": {
+          "$ref": "#/$defs/WorldRef"
+        },
+        "branch_seq": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "accepted_event_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EventRef"
+          },
+          "minItems": 0
+        },
+        "manifest_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "command_id",
+        "world_ref",
+        "branch_seq",
+        "accepted_event_refs",
+        "manifest_sha256",
+        "recorded_at"
+      ],
+      "additionalProperties": false,
+      "description": "A duplicate command returns its original receipt. branch_seq orders only this branch and is not story time."
+    },
+    "Commitment": {
+      "type": "object",
+      "properties": {
+        "subject_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "predicate": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expected_value": {},
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "subject_id",
+        "predicate",
+        "expected_value",
+        "evidence_refs"
+      ],
+      "additionalProperties": false
+    },
+    "SceneContract": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "enum": [
+            "2.0"
+          ]
+        },
+        "scene_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "input_world_ref": {
+          "$ref": "#/$defs/WorldRef"
+        },
+        "story_interval": {
+          "$ref": "#/$defs/StoryInterval"
+        },
+        "event_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EventRef"
+          },
+          "minItems": 0
+        },
+        "entry_commitments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Commitment"
+          },
+          "minItems": 0
+        },
+        "exit_commitments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Commitment"
+          },
+          "minItems": 0
+        },
+        "pov_actor_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UUID"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "narrator_mode": {
+          "type": "string",
+          "minLength": 1
+        },
+        "narrative_revision_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "arrangement_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reader_cut_ordinal": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "allowed_invention": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "style_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ArtifactRef"
+          },
+          "minItems": 0
+        },
+        "dependency_fingerprint": {
+          "$ref": "#/$defs/Sha256"
+        }
+      },
+      "required": [
+        "schema_version",
+        "scene_id",
+        "input_world_ref",
+        "story_interval",
+        "event_refs",
+        "entry_commitments",
+        "exit_commitments",
+        "pov_actor_id",
+        "narrator_mode",
+        "narrative_revision_id",
+        "arrangement_version",
+        "reader_cut_ordinal",
+        "allowed_invention",
+        "style_refs",
+        "dependency_fingerprint"
+      ],
+      "additionalProperties": false,
+      "description": "Commitments describe already accepted facts at relevant points or explicitly declared pending work. Scene selection never applies world effects."
+    },
+    "TaskSpec": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "enum": [
+            "2.0"
+          ]
+        },
+        "task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "role_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "task_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "BLOCKED",
+            "READY",
+            "RUNNING",
+            "RESULT_STORED",
+            "VALIDATING",
+            "WAITING_REVIEW",
+            "ACCEPTED",
+            "STALE",
+            "PAUSED",
+            "CANCELLED",
+            "FAILED"
+          ]
+        },
+        "world_ref": {
+          "$ref": "#/$defs/WorldRef"
+        },
+        "story_time": {
+          "$ref": "#/$defs/StoryPoint"
+        },
+        "context_bundle_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UUID"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "policy_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dependency_fingerprint": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "runtime_contract_version": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "capability_grant_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "input_artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ArtifactRef"
+          },
+          "minItems": 0
+        },
+        "budget": {
+          "type": "object",
+          "properties": {
+            "currency": {
+              "type": "string",
+              "enum": [
+                "USD",
+                "CNY"
+              ]
+            },
+            "max_amount": {
+              "$ref": "#/$defs/NonnegativeDecimal"
+            },
+            "token_budget": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "currency",
+            "max_amount",
+            "token_budget"
+          ],
+          "additionalProperties": false
+        },
+        "wall_deadline": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "schema_version",
+        "task_id",
+        "generation",
+        "role_id",
+        "task_kind",
+        "state",
+        "world_ref",
+        "story_time",
+        "context_bundle_id",
+        "policy_version",
+        "dependency_fingerprint",
+        "runtime_contract_version",
+        "capability_grant_id",
+        "input_artifacts",
+        "budget",
+        "wall_deadline"
+      ],
+      "additionalProperties": false,
+      "description": "Wall deadline controls execution only. It cannot make a character late in the story. READY/BLOCKED or RUNNING preparation may have no bundle yet; before any external call the service must bind a persisted bundle/fingerprint to the current generation. Result receipt verifies task/generation/attempt/context together.",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "enum": [
+                  "RESULT_STORED",
+                  "VALIDATING",
+                  "WAITING_REVIEW",
+                  "ACCEPTED"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "context_bundle_id": {
+                "$ref": "#/$defs/UUID"
+              },
+              "dependency_fingerprint": {
+                "$ref": "#/$defs/Sha256"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "TaskResult": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "enum": [
+            "2.0"
+          ]
+        },
+        "result_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "attempt_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "context_bundle_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "dependency_fingerprint": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "SUCCEEDED",
+            "NEEDS_INPUT",
+            "FAILED"
+          ]
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ArtifactRef"
+          },
+          "minItems": 0
+        },
+        "safe_summary": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "schema_version",
+        "result_id",
+        "task_id",
+        "generation",
+        "attempt_id",
+        "context_bundle_id",
+        "dependency_fingerprint",
+        "status",
+        "artifacts",
+        "safe_summary"
+      ],
+      "additionalProperties": false,
+      "description": "Successful result receipt does not mean world acceptance or literary approval."
+    },
+    "ReviewIssue": {
+      "type": "object",
+      "properties": {
+        "issue_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "HARD_CONSISTENCY",
+            "CONTINUITY",
+            "LITERARY",
+            "STYLE",
+            "READER_DISCLOSURE"
+          ]
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "BLOCKER",
+            "SUGGESTION",
+            "QUESTION"
+          ]
+        },
+        "subject_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "minItems": 0
+        },
+        "suggested_change": {
+          "type": "string",
+          "minLength": 1
+        },
+        "disposition": {
+          "type": "string",
+          "enum": [
+            "OPEN",
+            "ACCEPT",
+            "REJECT_WITH_REASON",
+            "DEFER",
+            "RESOLVED"
+          ]
+        },
+        "issue_kind": {
+          "type": "string",
+          "enum": [
+            "HARD_CONFLICT",
+            "SEMANTIC_CONCERN",
+            "LITERARY_CHOICE",
+            "CHANGE_REQUEST"
+          ]
+        }
+      },
+      "required": [
+        "issue_id",
+        "category",
+        "severity",
+        "subject_ref",
+        "description",
+        "evidence_refs",
+        "suggested_change",
+        "disposition",
+        "issue_kind"
+      ],
+      "additionalProperties": false,
+      "description": "An issue must provide evidence; a literary preference cannot masquerade as a universal hard invariant."
+    },
+    "ReleaseManifest": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "enum": [
+            "2.0"
+          ]
+        },
+        "release_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "world_ref": {
+          "$ref": "#/$defs/WorldRef"
+        },
+        "narrative_revision_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "arrangement_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ordered_artifacts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ordinal": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "scene_id": {
+                "$ref": "#/$defs/UUID"
+              },
+              "artifact_ref": {
+                "$ref": "#/$defs/ArtifactRef"
+              }
+            },
+            "required": [
+              "ordinal",
+              "scene_id",
+              "artifact_ref"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "disclosure_revision_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "style_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ArtifactRef"
+          },
+          "minItems": 0
+        },
+        "literary_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ArtifactRef"
+          },
+          "minItems": 0
+        },
+        "approval_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UUID"
+          },
+          "minItems": 1
+        },
+        "prior_release_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UUID"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "policy_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dependency_fingerprint": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "manifest_sha256": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "schema_version",
+        "release_id",
+        "world_ref",
+        "narrative_revision_id",
+        "arrangement_version",
+        "ordered_artifacts",
+        "disclosure_revision_id",
+        "style_refs",
+        "literary_refs",
+        "approval_refs",
+        "prior_release_id",
+        "policy_version",
+        "dependency_fingerprint",
+        "manifest_sha256",
+        "recorded_at"
+      ],
+      "additionalProperties": false,
+      "description": "Local release. Domain verifies exact ordered content, disclosures, current authority, approved dependencies and world lineage. External delivery has separate status and receipt."
+    },
+    "ProcessRecord": {
+      "type": "object",
+      "properties": {
+        "process_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "world_ref": {
+          "$ref": "#/$defs/WorldRef"
+        },
+        "scope_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "next_due": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StoryInterval"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inbound_channels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "outbound_bounds": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "channel": {
+                "type": "string",
+                "minLength": 1
+              },
+              "earliest_possible_impact": {
+                "$ref": "#/$defs/StoryPoint"
+              },
+              "evidence_refs": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/EvidenceRef"
+                },
+                "minItems": 0
+              }
+            },
+            "required": [
+              "channel",
+              "earliest_possible_impact",
+              "evidence_refs"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        },
+        "registry_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "coverage": {
+          "type": "string",
+          "enum": [
+            "COMPLETE",
+            "PARTIAL",
+            "UNDECLARED"
+          ]
+        },
+        "world_stage": {
+          "type": "string",
+          "enum": [
+            "NOT_STARTED",
+            "ACTIVE",
+            "SUSPENDED",
+            "COMPLETED",
+            "TERMINATED"
+          ]
+        },
+        "evaluation_status": {
+          "type": "string",
+          "enum": [
+            "EVALUATED",
+            "PENDING",
+            "BLOCKED",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "evaluated_frontier": {
+          "$ref": "#/$defs/StoryPoint"
+        }
+      },
+      "required": [
+        "process_id",
+        "world_ref",
+        "scope_key",
+        "next_due",
+        "inbound_channels",
+        "outbound_bounds",
+        "registry_version",
+        "coverage",
+        "world_stage",
+        "evaluation_status",
+        "evaluated_frontier"
+      ],
+      "additionalProperties": false,
+      "description": "world_stage is fiction state; evaluation_status describes whether computation resolved the requested scope. evaluated_frontier is exclusive. Waiting for a model never suspends the caravan in the fiction."
+    },
+    "ErrorEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]+$"
+        },
+        "safe_message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "request_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "recovery": {
+          "type": "string",
+          "enum": [
+            "RETRY_SAME_COMMAND",
+            "REVALIDATE",
+            "REPLAN",
+            "WAIT",
+            "ASK_DECISION",
+            "NONE"
+          ]
+        }
+      },
+      "required": [
+        "code",
+        "safe_message",
+        "retryable",
+        "request_id",
+        "recovery"
+      ],
+      "additionalProperties": false
+    },
+    "NonnegativeDecimal": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+      "description": "Nonnegative exact decimal; domain enforces unit and finite precision."
+    },
+    "ProcessAdvance": {
+      "type": "object",
+      "properties": {
+        "process_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "expected_frontier": {
+          "$ref": "#/$defs/StoryPoint"
+        },
+        "evaluated_frontier": {
+          "$ref": "#/$defs/StoryPoint"
+        },
+        "coverage": {
+          "type": "string",
+          "enum": [
+            "COMPLETE",
+            "PARTIAL"
+          ]
+        },
+        "registry_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "proof_artifact_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        }
+      },
+      "required": [
+        "process_id",
+        "expected_frontier",
+        "evaluated_frontier",
+        "coverage",
+        "registry_version",
+        "proof_artifact_ref"
+      ],
+      "additionalProperties": false,
+      "description": "Scheduler-owned progress metadata, committed with a WorldChangeSet, not a world occurrence or resource effect. Coverage is strictly before evaluated_frontier; events at the frontier remain unresolved unless the frontier advances to a later causal phase."
+    },
+    "WorldChangeSet": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "enum": [
+            "2.0"
+          ]
+        },
+        "proposal_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "input_world_ref": {
+          "$ref": "#/$defs/WorldRef"
+        },
+        "event_candidates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AcceptedEvent"
+          }
+        },
+        "adjudication_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ArtifactRef"
+          }
+        },
+        "process_advances": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ProcessAdvance"
+          }
+        },
+        "dependency_fingerprint": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "record_operations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RecordSelectionProposal"
+          }
+        },
+        "trigger_evaluations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TriggerEvaluation"
+          }
+        },
+        "event_operations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EventSelectionOperation"
+          }
+        }
+      },
+      "required": [
+        "schema_version",
+        "proposal_id",
+        "input_world_ref",
+        "event_candidates",
+        "adjudication_refs",
+        "process_advances",
+        "dependency_fingerprint",
+        "record_operations",
+        "trigger_evaluations",
+        "event_operations"
+      ],
+      "additionalProperties": false,
+      "description": "Prepared by trusted application services. AcceptedEvent describes event payload shape only; existence in this proposal does not mean acceptance. Commit membership grants accepted status. Process advances are recomputed/verified by the scheduler, not accepted on model assertion.",
+      "allOf": [
+        {
+          "anyOf": [
+            {
+              "properties": {
+                "event_candidates": {
+                  "minItems": 1
+                }
+              }
+            },
+            {
+              "properties": {
+                "record_operations": {
+                  "minItems": 1
+                }
+              }
+            },
+            {
+              "properties": {
+                "process_advances": {
+                  "minItems": 1
+                }
+              }
+            },
+            {
+              "properties": {
+                "trigger_evaluations": {
+                  "minItems": 1
+                }
+              }
+            },
+            {
+              "properties": {
+                "event_operations": {
+                  "minItems": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "OccurrenceTime": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "EXACT"
+              ]
+            },
+            "at": {
+              "$ref": "#/$defs/StoryPoint"
+            }
+          },
+          "required": [
+            "kind",
+            "at"
+          ],
+          "additionalProperties": false,
+          "description": ""
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "BOUNDED"
+              ]
+            },
+            "earliest": {
+              "$ref": "#/$defs/StoryPoint"
+            },
+            "latest": {
+              "$ref": "#/$defs/StoryPoint"
+            },
+            "constraint_refs": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/ArtifactRef"
+              }
+            }
+          },
+          "required": [
+            "kind",
+            "earliest",
+            "latest",
+            "constraint_refs"
+          ],
+          "additionalProperties": false,
+          "description": ""
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "UNSPECIFIED"
+              ]
+            },
+            "constraint_refs": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/ArtifactRef"
+              }
+            }
+          },
+          "required": [
+            "kind",
+            "constraint_refs"
+          ],
+          "additionalProperties": false,
+          "description": ""
+        }
+      ],
+      "description": "Time of an occurrence, not a duration. BOUNDED endpoints are inclusive possible points; domain checks earliest <= latest and causal constraints. Do not sort an uncertain occurrence by an invented exact point."
+    },
+    "RecordSelectionProposal": {
+      "type": "object",
+      "properties": {
+        "record_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "record_version_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "record_kind": {
+          "type": "string",
+          "enum": [
+            "ENTITY_IDENTITY",
+            "WORLD_RULE",
+            "ASSERTION",
+            "PROCESS",
+            "TRIGGER",
+            "COGNITION"
+          ]
+        },
+        "operation": {
+          "type": "string",
+          "enum": [
+            "SELECT",
+            "REPLACE",
+            "DEACTIVATE"
+          ]
+        },
+        "prior_record_version_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UUID"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "payload_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        }
+      },
+      "required": [
+        "record_id",
+        "record_version_id",
+        "record_kind",
+        "operation",
+        "prior_record_version_id",
+        "payload_ref"
+      ],
+      "additionalProperties": false,
+      "description": "Typed immutable payload is domain-validated; replacing/deactivating checks the prior selected version. This field does not permit arbitrary table writes."
+    },
+    "TriggerEvaluation": {
+      "type": "object",
+      "properties": {
+        "trigger_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "trigger_record_version_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "FIRED",
+            "CONDITION_FALSE",
+            "REPLACED",
+            "CANCELLED"
+          ]
+        },
+        "produced_event_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EventRef"
+          }
+        },
+        "replacement_trigger_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UUID"
+          }
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          }
+        }
+      },
+      "required": [
+        "trigger_id",
+        "trigger_record_version_id",
+        "outcome",
+        "produced_event_refs",
+        "replacement_trigger_refs",
+        "evidence_refs"
+      ],
+      "additionalProperties": false,
+      "description": "Trigger closure is committed atomically with its resulting events and process advances; replay does not fire it again."
+    },
+    "ContextGetRequest": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "task_id",
+        "generation"
+      ],
+      "additionalProperties": false,
+      "description": ""
+    },
+    "WorldQueryRequest": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "context_bundle_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "world_ref": {
+          "$ref": "#/$defs/WorldRef"
+        },
+        "story_time": {
+          "$ref": "#/$defs/StoryPoint"
+        },
+        "subject_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "query_kind": {
+          "type": "string",
+          "enum": [
+            "POSSESSOR",
+            "OWNER",
+            "LOCATION",
+            "LIFECYCLE",
+            "RESOURCE_BALANCE",
+            "PROCESS_COVERAGE",
+            "RELATION",
+            "COGNITION"
+          ]
+        },
+        "require_complete": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "context_bundle_id",
+        "world_ref",
+        "story_time",
+        "subject_id",
+        "query_kind",
+        "require_complete"
+      ],
+      "additionalProperties": false,
+      "description": ""
+    },
+    "WorldHistoryRequest": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "context_bundle_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "world_ref": {
+          "$ref": "#/$defs/WorldRef"
+        },
+        "subject_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "story_interval": {
+          "$ref": "#/$defs/StoryInterval"
+        },
+        "page_size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "cursor": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "context_bundle_id",
+        "world_ref",
+        "subject_id",
+        "story_interval",
+        "page_size"
+      ],
+      "additionalProperties": false,
+      "description": ""
+    },
+    "GraphQueryRequest": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "context_bundle_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "world_ref": {
+          "$ref": "#/$defs/WorldRef"
+        },
+        "story_time": {
+          "$ref": "#/$defs/StoryPoint"
+        },
+        "root_entity_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "relation_types": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "max_hops": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "context_bundle_id",
+        "world_ref",
+        "story_time",
+        "root_entity_id",
+        "relation_types",
+        "max_hops"
+      ],
+      "additionalProperties": false,
+      "description": ""
+    },
+    "MemorySearchRequest": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "context_bundle_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "query": {
+          "type": "string",
+          "minLength": 1
+        },
+        "plane": {
+          "type": "string",
+          "enum": [
+            "BELIEF",
+            "READER",
+            "PLAN",
+            "LITERARY",
+            "WORLD"
+          ]
+        },
+        "max_results": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "context_bundle_id",
+        "query",
+        "plane",
+        "max_results"
+      ],
+      "additionalProperties": false,
+      "description": ""
+    },
+    "EvidenceReadRequest": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "context_bundle_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "artifact_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "span": {
+          "$ref": "#/$defs/TextSpan"
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "context_bundle_id",
+        "artifact_ref",
+        "span"
+      ],
+      "additionalProperties": false,
+      "description": ""
+    },
+    "ArtifactReferenceRequest": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "context_bundle_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "artifact_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "context_bundle_id",
+        "artifact_ref"
+      ],
+      "additionalProperties": false,
+      "description": ""
+    },
+    "ArtifactProposalRequest": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "context_bundle_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "candidate_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "world_ref": {
+          "$ref": "#/$defs/WorldRef"
+        },
+        "dependency_fingerprint": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "context_bundle_id",
+        "candidate_ref",
+        "world_ref",
+        "dependency_fingerprint",
+        "idempotency_key"
+      ],
+      "additionalProperties": false,
+      "description": ""
+    },
+    "AdvancePrepareRequest": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "context_bundle_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "world_ref": {
+          "$ref": "#/$defs/WorldRef"
+        },
+        "scope_keys": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "target_frontier": {
+          "$ref": "#/$defs/StoryPoint"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "context_bundle_id",
+        "world_ref",
+        "scope_keys",
+        "target_frontier",
+        "idempotency_key"
+      ],
+      "additionalProperties": false,
+      "description": ""
+    },
+    "ArtifactPutRequest": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "context_bundle_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "media_type": {
+          "type": "string",
+          "enum": [
+            "text/plain",
+            "text/markdown",
+            "application/json"
+          ]
+        },
+        "content": {
+          "type": "string",
+          "maxLength": 1000000
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "context_bundle_id",
+        "media_type",
+        "content",
+        "idempotency_key"
+      ],
+      "additionalProperties": false,
+      "description": ""
+    },
+    "DraftSubmitRequest": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "context_bundle_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "scene_contract_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "draft_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "world_ref": {
+          "$ref": "#/$defs/WorldRef"
+        },
+        "alignment_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "dependency_fingerprint": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "context_bundle_id",
+        "scene_contract_ref",
+        "draft_ref",
+        "world_ref",
+        "alignment_ref",
+        "dependency_fingerprint",
+        "idempotency_key"
+      ],
+      "additionalProperties": false,
+      "description": ""
+    },
+    "ReviewSubmitRequest": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "context_bundle_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "subject_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "issues": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ReviewIssue"
+          }
+        },
+        "dependency_fingerprint": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "context_bundle_id",
+        "subject_ref",
+        "issues",
+        "dependency_fingerprint",
+        "idempotency_key"
+      ],
+      "additionalProperties": false,
+      "description": ""
+    },
+    "ImpactAnalyzeRequest": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "context_bundle_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "candidate_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "target_world_ref": {
+          "$ref": "#/$defs/WorldRef"
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "context_bundle_id",
+        "candidate_ref",
+        "target_world_ref"
+      ],
+      "additionalProperties": false,
+      "description": ""
+    },
+    "BranchCreateRequest": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "context_bundle_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "base_world_ref": {
+          "$ref": "#/$defs/WorldRef"
+        },
+        "branch_kind": {
+          "type": "string",
+          "enum": [
+            "CANDIDATE",
+            "SIMULATION",
+            "REPAIR"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "context_bundle_id",
+        "base_world_ref",
+        "branch_kind",
+        "reason",
+        "idempotency_key"
+      ],
+      "additionalProperties": false,
+      "description": ""
+    },
+    "BranchCompareRequest": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "context_bundle_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "left": {
+          "$ref": "#/$defs/WorldRef"
+        },
+        "right": {
+          "$ref": "#/$defs/WorldRef"
+        },
+        "scope_keys": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "context_bundle_id",
+        "left",
+        "right",
+        "scope_keys"
+      ],
+      "additionalProperties": false,
+      "description": ""
+    },
+    "TaskGetRequest": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "target_task_id": {
+          "$ref": "#/$defs/UUID"
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "target_task_id"
+      ],
+      "additionalProperties": false,
+      "description": ""
+    },
+    "TaskCancelRequest": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "target_task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "expected_generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "target_task_id",
+        "expected_generation",
+        "reason",
+        "idempotency_key"
+      ],
+      "additionalProperties": false,
+      "description": ""
+    },
+    "TaskReceipt": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "receipt_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "RESULT_STORED",
+            "CANCELLED",
+            "ALREADY_RECORDED"
+          ]
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "receipt_id",
+        "status"
+      ],
+      "additionalProperties": false,
+      "description": ""
+    },
+    "EvidenceContent": {
+      "type": "object",
+      "properties": {
+        "artifact_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "span": {
+          "$ref": "#/$defs/TextSpan"
+        },
+        "content": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifact_ref",
+        "span",
+        "content"
+      ],
+      "additionalProperties": false,
+      "description": ""
+    },
+    "EventSelectionOperation": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "type": "string",
+          "enum": [
+            "ADD",
+            "REPLACE",
+            "DEACTIVATE"
+          ]
+        },
+        "occurrence_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "prior_event_version_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UUID"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "selected_event_version_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UUID"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "operation",
+        "occurrence_id",
+        "prior_event_version_id",
+        "selected_event_version_id"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "ADD"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "prior_event_version_id": {
+                "type": "null"
+              },
+              "selected_event_version_id": {
+                "$ref": "#/$defs/UUID"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "REPLACE"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "prior_event_version_id": {
+                "$ref": "#/$defs/UUID"
+              },
+              "selected_event_version_id": {
+                "$ref": "#/$defs/UUID"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "DEACTIVATE"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "prior_event_version_id": {
+                "$ref": "#/$defs/UUID"
+              },
+              "selected_event_version_id": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ],
+      "description": "Each selected version must exist as a validated immutable payload. Prior version must match target selection. ADD never reapplies an inherited occurrence. REPLACE/DEACTIVATE affecting accepted history require repair policy; ordinary accepts cannot bypass it."
+    },
+    "PrepareRetconRequest": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "enum": [
+            "2.0"
+          ]
+        },
+        "task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "context_bundle_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "expected_canon_world_ref": {
+          "$ref": "#/$defs/WorldRef"
+        },
+        "changeset_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "earliest_impact_point": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StoryPoint"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "protected_release_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UUID"
+          }
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dependency_fingerprint": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "schema_version",
+        "task_id",
+        "generation",
+        "context_bundle_id",
+        "expected_canon_world_ref",
+        "changeset_ref",
+        "earliest_impact_point",
+        "protected_release_ids",
+        "reason",
+        "dependency_fingerprint",
+        "idempotency_key"
+      ],
+      "additionalProperties": false,
+      "description": "Prepares an isolated repair. Null earliest impact means start from genesis or prove a conservative bound; it does not mean no impact. The referenced WorldChangeSet explicitly selects event replacements/deactivations."
+    },
+    "PromotionRequest": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "enum": [
+            "2.0"
+          ]
+        },
+        "task_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "context_bundle_id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "expected_canon_world_ref": {
+          "$ref": "#/$defs/WorldRef"
+        },
+        "candidate_world_ref": {
+          "$ref": "#/$defs/WorldRef"
+        },
+        "retcon_plan_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "impact_report_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "revalidation_report_ref": {
+          "$ref": "#/$defs/ArtifactRef"
+        },
+        "approval_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UUID"
+          },
+          "minItems": 1
+        },
+        "policy_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dependency_fingerprint": {
+          "$ref": "#/$defs/Sha256"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "schema_version",
+        "task_id",
+        "generation",
+        "context_bundle_id",
+        "expected_canon_world_ref",
+        "candidate_world_ref",
+        "retcon_plan_ref",
+        "impact_report_ref",
+        "revalidation_report_ref",
+        "approval_refs",
+        "policy_version",
+        "dependency_fingerprint",
+        "idempotency_key"
+      ],
+      "additionalProperties": false,
+      "description": "Privileged control-plane command. CAS both expected canon pointer/head and candidate head; verify approved manifest, projections and closure. This command is not exposed to ordinary runtime roles."
+    }
+  }
+}

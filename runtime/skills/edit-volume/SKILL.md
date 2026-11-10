@@ -1,0 +1,50 @@
+---
+name: edit-volume
+description: 在卷中回看、整卷结构编辑、相邻章节接缝、跨卷接续或已完成稿的文学结算时使用；先诊断结构再做语言修改。
+---
+
+# edit-volume
+
+适用角色/模式：literary_editor / chief_editor。继承[运行时公共协议](../../roles/README.md)，权限来自当前任务grant；本文件只提供方法。
+
+## 取得输入
+
+精确有序正文清单；WorldRef、narrative_revision_id、arrangement_version；风格与人物档案；已发布前缀；允许修改范围与本轮问题预算。
+
+先核验task_id、generation、context_bundle_id、policy_version与依赖；缺失关键输入时返回具体缺口，不假定“最新”即正确。实际执行先取本任务grant与角色模式；下列工具是该技能各模式的能力并集，只有所属模式明确允许且本次grant包含时才调用。缺少所需能力时，使用当前已有合法材料返回候选或NEEDS_INPUT，交控制面安排具备权限的后续任务，不换身份补权限。
+
+## 执行
+
+1. 分段通读原文并记录ReadingCoverage，保存问题如何随后文改变；摘要覆盖不能充当全文覆盖。
+2. 建立场景功能图和人物选择链，识别最重要的结构问题、有效成就与反解释。
+3. 比较少量保留/删并/重排/改聚焦/篇幅方案，说明对事实、披露、关系和读者承诺的影响。
+4. 在授权内作选择并派发定向修订；改世界交正式提案，改变未来交规划，已发布前缀改动交新版决议。
+5. 结构稳定后回读接缝与关键原文，检查声音、情绪、重复解释；保护有功能的差异。
+6. 形成文学结算、未解问题与release候选，达到预算上限结束循环。
+
+## 交付
+
+ReadingCoverage＋EditPlan/DecisionRecord＋有范围修订＋文学结算；release_prepare仅产生内部清单候选，不代表外部发布。
+
+保存不可变产物和实际证据，回传当前任务信封。任务收件、世界接受、正文冻结及外部发布不是同一状态。
+
+## 依赖工具
+
+context_get、memory_search、evidence_read、plan_get、impact_analyze、artifact_put、review_submit、release_prepare、task_result_submit。
+
+工具名与错误语义见[08](../../../docs/08_MCP与工具接口.md)。可见工具是本次服务端授权的子集；不得换角色或修改技能文件绕过拒绝。
+
+## 完成与退出
+
+不平均章节分数判全卷，不以删文撤销告知/伤势等世界后果，不强制人物正向成长，不把所有声线磨成一种语气。未通读不得声称全卷通过。
+
+完成规定产物、证据和未决项后结束；无新增证据的重复审美争论不无限返工。
+
+## 按需参考
+
+- [七步整卷编辑与发布边界](../../../docs/07_剧情与文学生产系统.md)
+- [文学记忆与锚点](../../../docs/09_长期记忆与检索.md)
+
+## R1时间与批量上下文
+
+优先使用任务已编译上下文；本角色profile和当次grant允许时，使用context_compile或timeline_query/query_batch减少重复读取。批量只有一个WorldRef与KnowledgeCut，不能逐项换身份/分支。ACTOR只使用BELIEF与合法known_at；计划、预测和承诺不当作目标结果。固定历史未推进返回未求值，不能等到新HEAD后冒充原版事实。遇TASK_REBIND_REQUIRED交控制面新建输入代际；遇真实依赖变化保留候选并定向返工，不自行改base/审批或签发接受证书。

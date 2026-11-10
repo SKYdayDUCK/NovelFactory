@@ -1,0 +1,78 @@
+{
+  "schema_version": "2.1",
+  "proposal_id": "5cfa272a-1e5f-5a8f-ab8a-7754491c211b",
+  "input_world_ref": {
+    "work_id": "871e02b5-4e88-50c5-889d-7ded437f23b1",
+    "branch_id": "e45cdd4a-64f1-5eea-958e-0095fb190d49",
+    "world_revision_id": "cea54e7f-7725-5f1d-8e53-0ba70373e5f7"
+  },
+  "event_candidates": [
+    {
+      "schema_version": "2.1",
+      "occurrence_id": "59682e90-0a7d-5958-879b-6ffdd6c9b095",
+      "event_version_id": "844a85c6-7291-5d41-80aa-08095b685e47",
+      "effect_group_id": "cfb2fdf6-129a-520f-ab7c-6e70eb1e498e",
+      "representation_id": "1891f370-e8f8-5bca-937e-54ddbcd1ceee",
+      "participants": [
+        "3df1a7e0-22de-569b-9519-13122a7843ad"
+      ],
+      "causal_parents": [],
+      "ruleset_ref": {
+        "artifact_id": "4cfec058-c46a-53e3-b72a-a7426391a615",
+        "artifact_revision_id": "8c9115f4-5a69-5d81-bc16-0d3f3748b7f5",
+        "sha256": "6c621d1a05138a7888d37d9269a9da8e2e11e4aced2f6cfd24b05ab1b9e61bb0"
+      },
+      "adjudication_ref": {
+        "artifact_id": "a7e97076-5015-540c-b2ad-a18637f6e1da",
+        "artifact_revision_id": "7e4f80e0-5357-50ac-9916-dad939f6ebee",
+        "sha256": "25135325b8a1c15ab6d1ebced745adf737710ed96beda03e029351ea09127f6f"
+      },
+      "effects": [
+        {
+          "kind": "RELATION_TRANSITION",
+          "effect_key": "loan:membership-open",
+          "relation_id": "753730f0-e18b-5773-b92d-a5e931f2c2fd",
+          "operation": "OPEN",
+          "subject_id": "f850c6a2-6e21-5c9f-9a4e-1720ce53ae91",
+          "predicate": "member_of",
+          "object_value": {
+            "kind": "ENTITY",
+            "entity_id": "b8584a5a-41dd-5a0f-9ce2-361cfa440f18"
+          },
+          "at": {
+            "tick": 20,
+            "phase": 0
+          },
+          "expected_relation_version_id": null
+        }
+      ],
+      "engine_version": "fixture-reducer-1",
+      "occurrence_time": {
+        "kind": "EXACT",
+        "at": {
+          "tick": 20,
+          "phase": 0
+        }
+      }
+    }
+  ],
+  "adjudication_refs": [
+    {
+      "artifact_id": "a7e97076-5015-540c-b2ad-a18637f6e1da",
+      "artifact_revision_id": "7e4f80e0-5357-50ac-9916-dad939f6ebee",
+      "sha256": "25135325b8a1c15ab6d1ebced745adf737710ed96beda03e029351ea09127f6f"
+    }
+  ],
+  "process_advances": [],
+  "dependency_fingerprint": "f602aa4cefce6856f6c1409b8fadd2e10c22b0d64a3598d6651bb90aaf5d8533",
+  "record_operations": [],
+  "trigger_evaluations": [],
+  "event_operations": [
+    {
+      "operation": "ADD",
+      "occurrence_id": "59682e90-0a7d-5958-879b-6ffdd6c9b095",
+      "prior_event_version_id": null,
+      "selected_event_version_id": "844a85c6-7291-5d41-80aa-08095b685e47"
+    }
+  ]
+}

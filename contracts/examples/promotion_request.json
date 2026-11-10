@@ -1,0 +1,37 @@
+{
+  "schema_version": "2.0",
+  "task_id": "5191cadd-9e77-5a93-b4b5-7560a563094f",
+  "generation": 1,
+  "context_bundle_id": "93e8356a-6f1b-5a07-9da2-5bec0390f421",
+  "expected_canon_world_ref": {
+    "work_id": "9d4b7766-062f-556b-873a-ba06e2b0173d",
+    "branch_id": "973804a7-303d-51c2-bcca-1661f1c5c22e",
+    "world_revision_id": "4ee9cddf-b8af-533d-8409-6803ce6c15cf"
+  },
+  "dependency_fingerprint": "b102d1ff1c427767f95d3477bad5696d19418b0cf6cc2573484f0bbc4779f39d",
+  "idempotency_key": "fixture-promote-repair",
+  "candidate_world_ref": {
+    "work_id": "9d4b7766-062f-556b-873a-ba06e2b0173d",
+    "branch_id": "10bdcb41-8cb6-5ce7-95a2-c32d9209d372",
+    "world_revision_id": "5c8a3860-6cac-5fe2-a6c1-cf5c470966b7"
+  },
+  "retcon_plan_ref": {
+    "artifact_id": "7a16e07a-6a78-5116-8ba6-dff3925224e1",
+    "artifact_revision_id": "3de80037-acea-57bd-9c89-843bebe23570",
+    "sha256": "49bd577ca83b5c7dd9fea534950272497b6482ae3b1bcd33c9ce6d6d378cbe2e"
+  },
+  "impact_report_ref": {
+    "artifact_id": "13985d45-127e-5487-a462-efca3c1fca50",
+    "artifact_revision_id": "ae1878fa-c68d-56dc-aae5-26bfe618d026",
+    "sha256": "eaedcb59cbeb9f2874defe0046a4552c753246a3717ab86490a5a34166cba4b1"
+  },
+  "revalidation_report_ref": {
+    "artifact_id": "3f7ccab7-8753-5c1e-a5af-585f352f7717",
+    "artifact_revision_id": "038f98a9-5156-5831-a2b7-62f60e3509d1",
+    "sha256": "feba645991f3c95d82e96fc8ce111209a017c2aa92669fce6185995a8b8c8baa"
+  },
+  "approval_refs": [
+    "c42f9f2f-b11a-5b56-a6f4-7188ead72e88"
+  ],
+  "policy_version": "policy-1"
+}

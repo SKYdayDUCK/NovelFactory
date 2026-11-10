@@ -1,0 +1,444 @@
+{
+  "schema_version": "1.0",
+  "revision": "v2.0-R1",
+  "status": "PROPOSED_INPUT_NOT_MEASURED",
+  "purpose": "Reproducible offered-traffic arithmetic and synthetic arrival schedule; no system capacity measurement.",
+  "seed": 20261110,
+  "horizon_seconds": 3600,
+  "agent_populations": [
+    10,
+    50,
+    200,
+    500,
+    1000
+  ],
+  "allocation": "largest_remainder; stable listed role order resolves ties",
+  "assumptions": {
+    "cycle_semantics": "Reference wall-time cycle including model wait, human-like planning/idle and nominal tool slots; not measured task latency.",
+    "agent_count_semantics": "Configured simultaneously live logical agent slots, not requests in flight, DB connections, model concurrency or accepted commits.",
+    "canonical_command_semantics": "Expected control-plane commit command opportunities amortized per role cycle; excludes retry amplification and does not grant runtime actors commit permission.",
+    "sql_fanout_semantics": "Illustrative statements per operation; authorization/revision checks remain uncached; actual fanout must be measured.",
+    "llm_semantics": "Offered calls and steady-state in-flight demand before provider quotas; price is intentionally unset.",
+    "arrival_semantics": "One seeded phase per agent; per-cycle +/-25% jitter and grouped request phases; no service or queue execution.",
+    "review_note": "Replace every assumption with observed traces before performance claims."
+  },
+  "roles": [
+    {
+      "role": "character",
+      "share": 0.3,
+      "cycle_seconds": 120,
+      "model_calls_per_cycle": 1,
+      "model_seconds_per_call": 60,
+      "input_tokens_per_call": 4500,
+      "output_tokens_per_call": 700,
+      "canonical_commands_per_cycle": 0.2,
+      "requests": [
+        [
+          "context_compile",
+          1,
+          0
+        ],
+        [
+          "state_query",
+          1,
+          0.02
+        ],
+        [
+          "evidence_read",
+          2,
+          0.04
+        ],
+        [
+          "proposal_submit",
+          1,
+          0.7
+        ],
+        [
+          "task_control",
+          2,
+          0.75
+        ]
+      ]
+    },
+    {
+      "role": "writer",
+      "share": 0.25,
+      "cycle_seconds": 300,
+      "model_calls_per_cycle": 1,
+      "model_seconds_per_call": 180,
+      "input_tokens_per_call": 12000,
+      "output_tokens_per_call": 2400,
+      "canonical_commands_per_cycle": 0.02,
+      "requests": [
+        [
+          "context_compile",
+          1,
+          0
+        ],
+        [
+          "evidence_read",
+          2,
+          0.03
+        ],
+        [
+          "draft_submit",
+          1,
+          0.8
+        ],
+        [
+          "task_control",
+          1,
+          0.85
+        ]
+      ]
+    },
+    {
+      "role": "reviewer",
+      "share": 0.2,
+      "cycle_seconds": 180,
+      "model_calls_per_cycle": 1,
+      "model_seconds_per_call": 90,
+      "input_tokens_per_call": 18000,
+      "output_tokens_per_call": 1600,
+      "canonical_commands_per_cycle": 0,
+      "requests": [
+        [
+          "context_compile",
+          1,
+          0
+        ],
+        [
+          "evidence_read",
+          3,
+          0.03
+        ],
+        [
+          "history_query",
+          1,
+          0.06
+        ],
+        [
+          "review_submit",
+          1,
+          0.75
+        ],
+        [
+          "task_control",
+          1,
+          0.85
+        ]
+      ]
+    },
+    {
+      "role": "director",
+      "share": 0.1,
+      "cycle_seconds": 240,
+      "model_calls_per_cycle": 1,
+      "model_seconds_per_call": 120,
+      "input_tokens_per_call": 15000,
+      "output_tokens_per_call": 1800,
+      "canonical_commands_per_cycle": 0.05,
+      "requests": [
+        [
+          "context_compile",
+          1,
+          0
+        ],
+        [
+          "history_query",
+          1,
+          0.02
+        ],
+        [
+          "graph_query",
+          2,
+          0.04
+        ],
+        [
+          "search",
+          1,
+          0.06
+        ],
+        [
+          "proposal_submit",
+          1,
+          0.75
+        ],
+        [
+          "task_control",
+          2,
+          0.8
+        ]
+      ]
+    },
+    {
+      "role": "knowledge",
+      "share": 0.1,
+      "cycle_seconds": 90,
+      "model_calls_per_cycle": 1,
+      "model_seconds_per_call": 35,
+      "input_tokens_per_call": 6000,
+      "output_tokens_per_call": 600,
+      "canonical_commands_per_cycle": 0.15,
+      "requests": [
+        [
+          "context_compile",
+          1,
+          0
+        ],
+        [
+          "state_query",
+          1,
+          0.02
+        ],
+        [
+          "evidence_read",
+          1,
+          0.04
+        ],
+        [
+          "proposal_submit",
+          1,
+          0.7
+        ],
+        [
+          "task_control",
+          2,
+          0.8
+        ]
+      ]
+    },
+    {
+      "role": "background",
+      "share": 0.05,
+      "cycle_seconds": 300,
+      "model_calls_per_cycle": 0.5,
+      "model_seconds_per_call": 40,
+      "input_tokens_per_call": 3000,
+      "output_tokens_per_call": 500,
+      "canonical_commands_per_cycle": 1,
+      "requests": [
+        [
+          "state_query",
+          1,
+          0
+        ],
+        [
+          "history_query",
+          1,
+          0.02
+        ],
+        [
+          "task_control",
+          1,
+          0.8
+        ]
+      ]
+    }
+  ],
+  "operation_sql_assumptions": {
+    "context_compile": {
+      "uncached_reads": 2,
+      "cacheable_reads": 8,
+      "writes": 0
+    },
+    "state_query": {
+      "uncached_reads": 1,
+      "cacheable_reads": 2,
+      "writes": 0
+    },
+    "history_query": {
+      "uncached_reads": 1,
+      "cacheable_reads": 3,
+      "writes": 0
+    },
+    "graph_query": {
+      "uncached_reads": 1,
+      "cacheable_reads": 5,
+      "writes": 0
+    },
+    "search": {
+      "uncached_reads": 1,
+      "cacheable_reads": 4,
+      "writes": 0
+    },
+    "evidence_read": {
+      "uncached_reads": 1,
+      "cacheable_reads": 1,
+      "writes": 0
+    },
+    "proposal_submit": {
+      "uncached_reads": 2,
+      "cacheable_reads": 0,
+      "writes": 2
+    },
+    "draft_submit": {
+      "uncached_reads": 2,
+      "cacheable_reads": 0,
+      "writes": 2
+    },
+    "review_submit": {
+      "uncached_reads": 2,
+      "cacheable_reads": 0,
+      "writes": 2
+    },
+    "task_control": {
+      "uncached_reads": 1,
+      "cacheable_reads": 0,
+      "writes": 1
+    }
+  },
+  "canonical_command_sql_assumption": {
+    "reads": 6,
+    "writes": 6
+  },
+  "cache_profiles": [
+    {
+      "name": "cold",
+      "cache_hit_ratio": 0
+    },
+    {
+      "name": "mixed",
+      "cache_hit_ratio": 0.5
+    },
+    {
+      "name": "warm",
+      "cache_hit_ratio": 0.8
+    }
+  ],
+  "open_loop_multipliers": [
+    0.5,
+    1,
+    1.5,
+    2
+  ],
+  "latency_sensitivity_added_seconds_per_tool": [
+    0,
+    1,
+    5
+  ],
+  "burst_profiles": [
+    {
+      "name": "staggered",
+      "description": "Seeded independent start phases, standard request bursts."
+    },
+    {
+      "name": "barrier_release",
+      "fraction_of_agents": 0.2,
+      "release_window_seconds": 5,
+      "description": "20% of agents request context after one scene/volume barrier; actual response and backlog must be measured."
+    },
+    {
+      "name": "retcon_invalidation",
+      "affected_context_fraction": 0.25,
+      "description": "Invalidate 25% of eligible working contexts, retain reusable immutable data, measure rebuild and lookup independently."
+    }
+  ],
+  "dataset_scales": [
+    {
+      "name": "small",
+      "events": 10000,
+      "entities": 2000,
+      "relation_versions": 40000,
+      "actors": 100,
+      "belief_records": 20000,
+      "artifact_revisions": 3000,
+      "branches": 3,
+      "max_branch_ancestry": 5,
+      "mean_entity_history": 20,
+      "max_entity_history": 2000,
+      "chapters_metadata_only": 100
+    },
+    {
+      "name": "medium",
+      "events": 100000,
+      "entities": 20000,
+      "relation_versions": 400000,
+      "actors": 1000,
+      "belief_records": 200000,
+      "artifact_revisions": 30000,
+      "branches": 10,
+      "max_branch_ancestry": 20,
+      "mean_entity_history": 20,
+      "max_entity_history": 20000,
+      "chapters_metadata_only": 1000
+    },
+    {
+      "name": "large",
+      "events": 1000000,
+      "entities": 200000,
+      "relation_versions": 4000000,
+      "actors": 10000,
+      "belief_records": 2000000,
+      "artifact_revisions": 300000,
+      "branches": 50,
+      "max_branch_ancestry": 100,
+      "mean_entity_history": 20,
+      "max_entity_history": 200000,
+      "chapters_metadata_only": 5000
+    }
+  ],
+  "query_dimensions": {
+    "history_time_percentiles": [
+      0.01,
+      0.5,
+      0.99
+    ],
+    "graph_hops": [
+      1,
+      2,
+      3
+    ],
+    "graph_node_caps": [
+      100,
+      1000
+    ],
+    "batch_sizes": [
+      1,
+      8,
+      32
+    ],
+    "context_evidence_caps": [
+      20,
+      100,
+      500
+    ],
+    "hot_resource_fractions": [
+      0,
+      0.2,
+      0.8
+    ],
+    "independent_regions": [
+      1,
+      8,
+      32
+    ],
+    "worlds": [
+      1,
+      10
+    ],
+    "accepted_events_per_transaction": [
+      1,
+      10,
+      50
+    ]
+  },
+  "pool_budget_example": {
+    "status": "ILLUSTRATIVE_NOT_TUNED",
+    "api_processes": 4,
+    "api_pool_size": 8,
+    "api_max_overflow": 4,
+    "worker_processes": 4,
+    "worker_pool_size": 4,
+    "worker_max_overflow": 0,
+    "maintenance_reserved": 16,
+    "configured_postgres_max_connections": 100
+  },
+  "pricing": {
+    "currency": null,
+    "input_per_million_tokens": null,
+    "output_per_million_tokens": null,
+    "status": "UNPRICED; fetch chosen provider price at actual evaluation time"
+  },
+  "results_policy": "Only offered-load arithmetic and seeded arrival counts may be computed from this file. Service throughput, latency, DB occupancy, cache hits, costs and correctness require real target measurements."
+}

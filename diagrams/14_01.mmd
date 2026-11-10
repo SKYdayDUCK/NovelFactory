@@ -1,0 +1,15 @@
+flowchart TD
+    A[外部 Agent 与作者工具] --> G[认证与有界接入]
+    G --> Q[查询与 Context Compiler]
+    G --> T[持久任务服务]
+    G --> C[裁决接收与正式接受]
+    Q --> K[版本与权限分区缓存]
+    Q --> D[(PostgreSQL 权威记录)]
+    T --> D
+    T --> W[通用 worker 池]
+    W --> M[外部模型与 Agent Host]
+    W --> C
+    C --> D
+    D --> O[Outbox 消费者]
+    O --> I[检索与摘要派生索引]
+    Q --> I

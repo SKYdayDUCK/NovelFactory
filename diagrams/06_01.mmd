@@ -1,0 +1,19 @@
+stateDiagram-v2
+    [*] --> BLOCKED
+    BLOCKED --> READY: 依赖和预算满足
+    READY --> RUNNING: 领取并增加 generation
+    RUNNING --> RESULT_STORED: 当前代际结果归档
+    RUNNING --> PAUSED: 回执未知或预算待核对
+    RUNNING --> READY: 确认可重试且撤销旧资格
+    RESULT_STORED --> VALIDATING
+    VALIDATING --> WAITING_REVIEW: 需要语义决定
+    VALIDATING --> ACCEPTED: 产物按类型接受
+    WAITING_REVIEW --> ACCEPTED
+    WAITING_REVIEW --> READY: 定向返工及新输入
+    VALIDATING --> STALE: 相关依赖变化
+    STALE --> BLOCKED: 创建更新后的任务输入
+    PAUSED --> RESULT_STORED: 对账找回结果
+    PAUSED --> READY: 明确新尝试决议
+    RUNNING --> CANCELLED
+    READY --> CANCELLED
+    VALIDATING --> FAILED: 无合法恢复路径

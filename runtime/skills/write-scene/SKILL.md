@@ -1,0 +1,49 @@
+---
+name: write-scene
+description: 在根据场景契约或章节细纲写正文、进行有范围修订、处理并行写作接缝时使用；适用于事件转文学呈现，不替代世界裁决。
+---
+
+# write-scene
+
+适用角色/模式：writer。继承[运行时公共协议](../../roles/README.md)，权限来自当前任务grant；本文件只提供方法。
+
+## 取得输入
+
+SceneContract；固定ContextBundle；WorldRef；narrative_revision_id与arrangement_version；POV/叙述者/披露边界；声音锚点；修订时的精确问题单。
+
+先核验task_id、generation、context_bundle_id、policy_version与依赖；缺失关键输入时返回具体缺口，不假定“最新”即正确。实际执行先取本任务grant与角色模式；下列工具是该技能各模式的能力并集，只有所属模式明确允许且本次grant包含时才调用。缺少所需能力时，使用当前已有合法材料返回候选或NEEDS_INPUT，交控制面安排具备权限的后续任务，不换身份补权限。
+
+## 执行
+
+1. 确认本场已接受结果、候选目标、入出状态和叙事作用。倒叙用当时角色认知，读者披露另按呈现位置处理。
+2. 按需回读关键原文与相邻场景，恢复关系和情感余效；不复制口头禅来替代声音。
+3. 自主组织对白、节奏、意象和留白。普通SURFACE_DETAIL保存在正文；持续伤势、交易、能力、认知、承诺等重要增量显式标记。
+4. 把已有发生实例的多次呈现关联同一event，不再次提交状态效果；提议改变已接受后果时返回相应变更。
+5. 以artifact_put保存新正文，用draft_submit提交正文和event alignment/重要增量说明；修订后批准需重新绑定。
+
+## 交付
+
+不可变TextArtifact＋event links＋重要增量/未决项；必要时附场景组织改进建议。表达本身不需要逐词结构化。
+
+保存不可变产物和实际证据，回传当前任务信封。任务收件、世界接受、正文冻结及外部发布不是同一状态。
+
+## 依赖工具
+
+context_get、memory_search、evidence_read、world_query、world_history、artifact_put、draft_submit、task_result_submit。
+
+工具名与错误语义见[08](../../../docs/08_MCP与工具接口.md)。可见工具是本次服务端授权的子集；不得换角色或修改技能文件绕过拒绝。
+
+## 完成与退出
+
+不悄改世界、不把删文当撤销事件、不静默改已发布前缀。基线不兼容或重要结果未定时保留草稿并返回，不能用流畅文本掩盖。
+
+完成规定产物、证据和未决项后结束；无新增证据的重复审美争论不无限返工。
+
+## 按需参考
+
+- [场景、对账与并行](../../../docs/07_剧情与文学生产系统.md)
+- [文学上下文](../../../docs/09_长期记忆与检索.md)
+
+## R1时间与批量上下文
+
+优先使用任务已编译上下文；本角色profile和当次grant允许时，使用context_compile或timeline_query/query_batch减少重复读取。批量只有一个WorldRef与KnowledgeCut，不能逐项换身份/分支。ACTOR只使用BELIEF与合法known_at；计划、预测和承诺不当作目标结果。固定历史未推进返回未求值，不能等到新HEAD后冒充原版事实。遇TASK_REBIND_REQUIRED交控制面新建输入代际；遇真实依赖变化保留候选并定向返工，不自行改base/审批或签发接受证书。

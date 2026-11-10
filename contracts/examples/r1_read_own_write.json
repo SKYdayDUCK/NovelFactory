@@ -1,0 +1,45 @@
+{
+  "schema_version": "2.1",
+  "task_id": "aef248a3-4fb3-57c5-8e96-6d5d6cdfc75d",
+  "generation": 2,
+  "read_contract": {
+    "revision": {
+      "mode": "READ_YOUR_WRITES",
+      "branch_selector": {
+        "kind": "EXPLICIT",
+        "work_id": "871e02b5-4e88-50c5-889d-7ded437f23b1",
+        "branch_id": "e45cdd4a-64f1-5eea-958e-0095fb190d49"
+      },
+      "min_receipt_ref": {
+        "artifact_id": "55e8586c-22cd-55c4-a5c4-dac9b52f7875",
+        "artifact_revision_id": "3dc30b85-2b6d-5f59-b569-3688a25c56ef",
+        "sha256": "cdb1a63c2819758b313253a0491780d9a4556686ed24efd968997fdbc2ad486a"
+      }
+    },
+    "process_policy": "REQUIRE_EVALUATED",
+    "index_policy": "AUTHORITATIVE",
+    "max_wait_ms": 0
+  },
+  "knowledge_cut": {
+    "plane": "WORLD"
+  },
+  "subject_time": {
+    "kind": "POINT",
+    "at": {
+      "tick": 25,
+      "phase": 0
+    }
+  },
+  "query": {
+    "kind": "STATE",
+    "subject_ids": [
+      "e7749c06-8763-5a71-8c8b-1d1ab37ee6a1"
+    ],
+    "predicates": [
+      "owner",
+      "active_holder"
+    ]
+  },
+  "page_size": 50,
+  "cursor": null
+}

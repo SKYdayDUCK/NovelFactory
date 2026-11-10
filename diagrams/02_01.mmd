@@ -1,0 +1,10 @@
+flowchart TD
+    I["interfaces"] --> A["application"]
+    O["orchestration"] --> A
+    A --> D["domain"]
+    A --> P["ports"]
+    D --> C["common 与纯算法"]
+    F["infrastructure"] --> P
+    B["bootstrap"] --> F
+    B --> I
+    B --> O

@@ -1,0 +1,37 @@
+{
+  "schema": "../literary.schema.json",
+  "examples": {
+    "literary_reading_full.json": "ReadingCoverage",
+    "literary_reading_summary.json": "ReadingCoverage",
+    "literary_memory.json": "MemoryCandidate",
+    "literary_volume_contract.json": "VolumeContract",
+    "literary_window_plan.json": "WindowPlan"
+  },
+  "invalid_examples": {
+    "../invalid_examples/literary_reading_wrong_unit.json": "ReadingCoverage",
+    "../invalid_examples/literary_summary_fake_coverage.json": "ReadingCoverage",
+    "../invalid_examples/literary_actor_memory_leak.json": "MemoryCandidate",
+    "../invalid_examples/literary_plan_world_effects.json": "VolumeContract",
+    "../invalid_examples/literary_window_closed_bounds.json": "WindowPlan"
+  },
+  "invalid_reasons": {
+    "../invalid_examples/literary_reading_wrong_unit.json": "TextSpan不接受UTF16偏移单位。",
+    "../invalid_examples/literary_summary_fake_coverage.json": "只读摘要不得声称原文跨度覆盖。",
+    "../invalid_examples/literary_actor_memory_leak.json": "ACTOR摘要必须绑定actor且使用BELIEF/ACTOR_EXPERIENCE_SUMMARY。",
+    "../invalid_examples/literary_plan_world_effects.json": "卷计划没有世界effects字段，目标不得直接执行。",
+    "../invalid_examples/literary_window_closed_bounds.json": "统一故事区间使用半开[)，不接受[]。"
+  },
+  "fixture_artifacts": {
+    "literary_source.txt": {
+      "artifact_id": "20000000-0000-4000-8000-000000000010",
+      "artifact_revision_id": "20000000-0000-4000-8000-000000000011",
+      "sha256": "a231f38ea5a2463c901b89f0b6d024a927fb9eb9c1e8ab26be998e292925b692"
+    },
+    "literary_summary.txt": {
+      "artifact_id": "20000000-0000-4000-8000-000000000012",
+      "artifact_revision_id": "20000000-0000-4000-8000-000000000013",
+      "sha256": "6296160b159b990d662ba5b6192274faa8b4959a22a9b68392a698280bdd44bf"
+    }
+  },
+  "notice": "Synthetic identifiers. Source text hashes/spans are real and use exact original UTF-8; schema validation alone does not establish authorization, world acceptance or literary quality."
+}

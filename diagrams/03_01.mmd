@@ -1,0 +1,11 @@
+erDiagram
+    WORK ||--o{ BRANCH : contains
+    BRANCH ||--o{ WORLD_REVISION : records
+    WORLD_REVISION ||--o{ COMMIT_OPERATION : selects
+    RECORD ||--o{ RECORD_VERSION : versions
+    COMMIT_OPERATION }o--|| RECORD_VERSION : chooses
+    RECORD_VERSION }o--o{ EVIDENCE_REF : supported_by
+    ARTIFACT_REVISION ||--o{ EVIDENCE_REF : anchors
+    WORLD_REVISION ||--o{ PROJECTION_GENERATION : derives
+    WORLD_REVISION ||--o{ RELEASE_MANIFEST : pins
+    ARTIFACT_REVISION }o--o{ RELEASE_MANIFEST : included_in

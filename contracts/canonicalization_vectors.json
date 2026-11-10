@@ -1,0 +1,26 @@
+{
+  "profile": "NF-CANON-1",
+  "vectors": [
+    {
+      "input": {
+        "b": 2,
+        "a": "青霜剑"
+      },
+      "canonical_utf8": "{\"a\":\"青霜剑\",\"b\":2}",
+      "sha256": "da61e714662b2964f769b3e9e69a9f8857089924d28cdf30a09c499c29110d9c"
+    },
+    {
+      "input": {
+        "text": "门外🦊\r\né",
+        "tick": 20,
+        "flags": [
+          true,
+          null,
+          "0.25"
+        ]
+      },
+      "canonical_utf8": "{\"flags\":[true,null,\"0.25\"],\"text\":\"门外🦊\\r\\né\",\"tick\":20}",
+      "sha256": "56cbd5fff61ad64d1f12e46d7ff4b3698286506f1d0fb5ae8ddb28e7bfb7c47b"
+    }
+  ]
+}

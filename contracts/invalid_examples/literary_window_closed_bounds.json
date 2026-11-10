@@ -1,0 +1,45 @@
+{
+  "schema_version": "2.0",
+  "window_plan_id": "20000000-0000-4000-8000-000000000050",
+  "volume_contract_revision_id": "20000000-0000-4000-8000-000000000041",
+  "input_world_ref": {
+    "work_id": "20000000-0000-4000-8000-000000000001",
+    "branch_id": "20000000-0000-4000-8000-000000000002",
+    "world_revision_id": "20000000-0000-4000-8000-000000000003"
+  },
+  "story_interval": {
+    "start": {
+      "tick": 30,
+      "phase": 0
+    },
+    "end": {
+      "tick": 31,
+      "phase": 0
+    },
+    "bounds": "[]"
+  },
+  "scope_ids": [
+    "20000000-0000-4000-8000-000000000051"
+  ],
+  "process_ids": [
+    "20000000-0000-4000-8000-000000000052"
+  ],
+  "focus_actor_ids": [
+    "20000000-0000-4000-8000-000000000042"
+  ],
+  "resolution_strategy": "MIXED",
+  "candidate_goals": [
+    "观察三方如何面对过桥受阻。"
+  ],
+  "next_decision_reason": "桥梁控制与粮食竞争需要同一交互边界。",
+  "assumptions": [
+    "示例仅请求窗口；调度仍须核验相关入站影响。"
+  ],
+  "adopted_event_refs": [],
+  "expected_outputs": [
+    "INTERACTION_BUNDLE",
+    "REPLAN_REPORT"
+  ],
+  "dependency_fingerprint": "5f46ed9e3c036750dea54ed6375e214f087469ef08eb827c2676e5c74dd8e32a",
+  "status": "DRAFT"
+}

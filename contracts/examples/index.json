@@ -1,0 +1,31 @@
+{
+  "schema": "../core.schema.json",
+  "examples": {
+    "dependency_manifest.json": "DependencyManifest",
+    "context_bundle.json": "ContextBundle",
+    "action_proposal.json": "ActionProposal",
+    "adjudication_proposal.json": "AdjudicationProposal",
+    "accepted_event.json": "AcceptedEvent",
+    "approval.json": "Approval",
+    "accept_world_request.json": "AcceptWorldRequest",
+    "commit_receipt.json": "CommitReceipt",
+    "scene_contract.json": "SceneContract",
+    "task_spec.json": "TaskSpec",
+    "task_result.json": "TaskResult",
+    "review_issue.json": "ReviewIssue",
+    "release_manifest.json": "ReleaseManifest",
+    "query_pending_process.json": "QueryAnswer",
+    "query_unknown.json": "QueryAnswer",
+    "query_plan.json": "QueryAnswer",
+    "query_stale_index.json": "QueryAnswer",
+    "query_known_none.json": "QueryAnswer",
+    "process_record.json": "ProcessRecord",
+    "error_envelope.json": "ErrorEnvelope",
+    "world_changeset.json": "WorldChangeSet",
+    "event_bounded_time.json": "AcceptedEvent",
+    "retcon_changeset.json": "WorldChangeSet",
+    "retcon_request.json": "PrepareRetconRequest",
+    "promotion_request.json": "PromotionRequest"
+  },
+  "notice": "All IDs/content/hash placeholders are synthetic illustrative fixtures; do not use them as accepted production records."
+}

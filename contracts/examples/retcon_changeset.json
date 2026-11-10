@@ -1,0 +1,69 @@
+{
+  "schema_version": "2.0",
+  "proposal_id": "0acf8e07-64bf-5f97-8b8c-d59c693c059d",
+  "input_world_ref": {
+    "work_id": "9d4b7766-062f-556b-873a-ba06e2b0173d",
+    "branch_id": "973804a7-303d-51c2-bcca-1661f1c5c22e",
+    "world_revision_id": "4ee9cddf-b8af-533d-8409-6803ce6c15cf"
+  },
+  "event_candidates": [
+    {
+      "schema_version": "2.0",
+      "occurrence_id": "618482dd-15ff-5959-8759-28cd9b267ea9",
+      "event_version_id": "fa724073-c583-544c-8019-975265de31c5",
+      "effect_group_id": "5a1aeb4b-ac36-5527-884f-339b29942f0c",
+      "representation_id": "2a91edc6-dd7b-51f0-b026-bca2565ec401",
+      "participants": [
+        "3df1a7e0-22de-569b-9519-13122a7843ad"
+      ],
+      "causal_parents": [],
+      "ruleset_ref": {
+        "artifact_id": "4cfec058-c46a-53e3-b72a-a7426391a615",
+        "artifact_revision_id": "8c9115f4-5a69-5d81-bc16-0d3f3748b7f5",
+        "sha256": "6c621d1a05138a7888d37d9269a9da8e2e11e4aced2f6cfd24b05ab1b9e61bb0"
+      },
+      "adjudication_ref": {
+        "artifact_id": "a7e97076-5015-540c-b2ad-a18637f6e1da",
+        "artifact_revision_id": "7e4f80e0-5357-50ac-9916-dad939f6ebee",
+        "sha256": "25135325b8a1c15ab6d1ebced745adf737710ed96beda03e029351ea09127f6f"
+      },
+      "effects": [
+        {
+          "kind": "RELATION_SET",
+          "effect_key": "d12-title-choice",
+          "subject_id": "4f4a3a91-86be-50a1-b484-e8a6bf801fc8",
+          "predicate": "legal_owner",
+          "object_id": "3df1a7e0-22de-569b-9519-13122a7843ad",
+          "value_status": "VALUE"
+        }
+      ],
+      "engine_version": "fixture-reducer-1",
+      "occurrence_time": {
+        "kind": "EXACT",
+        "at": {
+          "tick": 12,
+          "phase": 0
+        }
+      }
+    }
+  ],
+  "adjudication_refs": [
+    {
+      "artifact_id": "a7e97076-5015-540c-b2ad-a18637f6e1da",
+      "artifact_revision_id": "7e4f80e0-5357-50ac-9916-dad939f6ebee",
+      "sha256": "25135325b8a1c15ab6d1ebced745adf737710ed96beda03e029351ea09127f6f"
+    }
+  ],
+  "process_advances": [],
+  "dependency_fingerprint": "b102d1ff1c427767f95d3477bad5696d19418b0cf6cc2573484f0bbc4779f39d",
+  "record_operations": [],
+  "trigger_evaluations": [],
+  "event_operations": [
+    {
+      "operation": "REPLACE",
+      "occurrence_id": "618482dd-15ff-5959-8759-28cd9b267ea9",
+      "prior_event_version_id": "c28d206c-0056-5e47-a17f-0517c558c802",
+      "selected_event_version_id": "fa724073-c583-544c-8019-975265de31c5"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "world_ref": {
+    "work_id": "871e02b5-4e88-50c5-889d-7ded437f23b1",
+    "branch_id": "e45cdd4a-64f1-5eea-958e-0095fb190d49",
+    "world_revision_id": "cea54e7f-7725-5f1d-8e53-0ba70373e5f7"
+  },
+  "relation_id": "af5d9f7f-2f88-59cd-b823-180f40920036",
+  "relation_version_id": "6583bb9a-51b2-5260-a114-cb858339303b",
+  "subject_id": "e7749c06-8763-5a71-8c8b-1d1ab37ee6a1",
+  "predicate": "active_holder",
+  "object_value": {
+    "kind": "ENTITY",
+    "entity_id": "82ce0bf2-19b1-516c-b647-677f5d421cc2"
+  },
+  "valid_time": {
+    "start": {
+      "tick": 20,
+      "phase": 0
+    },
+    "end": {
+      "tick": 30,
+      "phase": 0
+    },
+    "bounds": "[)"
+  },
+  "plane": "WORLD",
+  "actor_id": null,
+  "origin": {
+    "kind": "EVENT",
+    "event_ref": {
+      "occurrence_id": "a45e7c3f-dc58-52ec-afe9-8ed773ffae31",
+      "event_version_id": "1ed0ca4e-fd4b-5a00-b7ef-1cf816c23d51"
+    }
+  },
+  "projection_generation": "proj-3",
+  "evidence_refs": [
+    {
+      "kind": "EVENT",
+      "world_ref": {
+        "work_id": "871e02b5-4e88-50c5-889d-7ded437f23b1",
+        "branch_id": "e45cdd4a-64f1-5eea-958e-0095fb190d49",
+        "world_revision_id": "cea54e7f-7725-5f1d-8e53-0ba70373e5f7"
+      },
+      "event_ref": {
+        "occurrence_id": "a45e7c3f-dc58-52ec-afe9-8ed773ffae31",
+        "event_version_id": "1ed0ca4e-fd4b-5a00-b7ef-1cf816c23d51"
+      }
+    },
+    {
+      "kind": "EVENT",
+      "world_ref": {
+        "work_id": "871e02b5-4e88-50c5-889d-7ded437f23b1",
+        "branch_id": "e45cdd4a-64f1-5eea-958e-0095fb190d49",
+        "world_revision_id": "cea54e7f-7725-5f1d-8e53-0ba70373e5f7"
+      },
+      "event_ref": {
+        "occurrence_id": "cf9f06fc-a516-56a4-b6fb-1994403df59d",
+        "event_version_id": "afcd5242-2139-561d-9538-43c3f60f976e"
+      }
+    }
+  ]
+}

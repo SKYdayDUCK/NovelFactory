@@ -1,0 +1,41 @@
+{
+  "schema_version": "2.0",
+  "proposal_id": "a7e97076-5015-540c-b2ad-a18637f6e1da",
+  "input_world_ref": {
+    "work_id": "5a57860a-0c16-5844-96ac-1a944ca70886",
+    "branch_id": "e3048e17-e8e4-52e1-9a2a-86a47189ff4b",
+    "world_revision_id": "99dc7bc0-4c95-5e4e-86eb-30a93dd526c1"
+  },
+  "interaction_id": "00e340fa-af40-5fd9-bd0e-1fc881b37ba2",
+  "action_proposal_refs": [
+    {
+      "artifact_id": "bf5f2df7-1284-54de-a129-c64a760d6dda",
+      "artifact_revision_id": "f9cd5246-ed27-5a26-84e1-48cd136621ef",
+      "sha256": "bd938c688f49b77c7fc537c6b9222e2c97ebddd63076b87f2feaec66fb9c05d0"
+    }
+  ],
+  "ruleset_ref": {
+    "artifact_id": "4cfec058-c46a-53e3-b72a-a7426391a615",
+    "artifact_revision_id": "8c9115f4-5a69-5d81-bc16-0d3f3748b7f5",
+    "sha256": "6c621d1a05138a7888d37d9269a9da8e2e11e4aced2f6cfd24b05ab1b9e61bb0"
+  },
+  "story_time": {
+    "tick": 20,
+    "phase": 1
+  },
+  "effect_group_id": "cfb2fdf6-129a-520f-ab7c-6e70eb1e498e",
+  "representation_id": "1891f370-e8f8-5bca-937e-54ddbcd1ceee",
+  "effects": [
+    {
+      "kind": "RESOURCE_DELTA",
+      "effect_key": "transport-day20-grain-use",
+      "resource_id": "93264eb8-d7b6-51e4-8d77-78894055fb63",
+      "quantity": "-2.5",
+      "unit": "kg",
+      "account_id": "e422f579-aa75-58fa-bdea-675885e14642"
+    }
+  ],
+  "reasoning_summary": "此夹具固定运输消耗；人物意图的成功与消耗分别裁决。",
+  "unresolved_questions": [],
+  "dependency_fingerprint": "f602aa4cefce6856f6c1409b8fadd2e10c22b0d64a3598d6651bb90aaf5d8533"
+}

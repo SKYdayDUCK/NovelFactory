@@ -1,0 +1,37 @@
+{
+  "none_without_coverage.json": {
+    "schema": "core.schema.json",
+    "definition": "QueryAnswer",
+    "expected": "INVALID"
+  },
+  "unknown_leaks_data.json": {
+    "schema": "core.schema.json",
+    "definition": "QueryAnswer",
+    "expected": "INVALID"
+  },
+  "value_is_null.json": {
+    "schema": "core.schema.json",
+    "definition": "QueryAnswer",
+    "expected": "INVALID"
+  },
+  "plan_is_evaluated_world.json": {
+    "schema": "core.schema.json",
+    "definition": "QueryAnswer",
+    "expected": "INVALID"
+  },
+  "negative_request.json": {
+    "schema": "core.schema.json",
+    "definition": "ActionProposal",
+    "expected": "INVALID"
+  },
+  "accepted_without_context.json": {
+    "schema": "core.schema.json",
+    "definition": "TaskSpec",
+    "expected": "INVALID"
+  },
+  "relation_value_null.json": {
+    "schema": "core.schema.json",
+    "definition": "NormalizedEffect",
+    "expected": "INVALID"
+  }
+}

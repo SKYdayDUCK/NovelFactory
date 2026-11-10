@@ -1,0 +1,1736 @@
+{
+  "schema_version": "1.0",
+  "project_version": "2.0",
+  "checked_date": "2026-11-10",
+  "timezone": "Asia/Shanghai",
+  "baseline_catalog": "baseline/v1_1/07_论文与技术资料库.md",
+  "coverage": {
+    "baseline_external_link_occurrences": 86,
+    "baseline_unique_urls": 79,
+    "primary_checked_records": 23,
+    "project_reproduced_papers": 0
+  },
+  "status_definitions": {
+    "primary_checked": "本轮访问一手来源并读取记录范围",
+    "baseline_inherited": "保留用户输入的v1.1记录，本轮未复核外站",
+    "metadata_only": "仅元数据或入口确认",
+    "project_verified": "实际项目实验另有记录",
+    "proposed": "项目提出尚待验证"
+  },
+  "records": [
+    {
+      "source_id": "P-M",
+      "title": "Generating Long-form Story Using Dynamic Hierarchical Outlining with Memory-Enhancement",
+      "source_type": "conference_paper",
+      "version": "NAACL 2025 published PDF",
+      "urls": [
+        "https://aclanthology.org/2025.naacl-long.63/",
+        "https://aclanthology.org/2025.naacl-long.63.pdf"
+      ],
+      "accessed_at": "2026-11-10",
+      "verification_status": "primary_checked",
+      "read_scope": "摘要；§4.1–4.2；图4和算法1；未重新精读全部附录/实验表",
+      "supported_claim": "动态近端细纲与正文交替；MEM第四项为章节号；抽取及语义筛选依赖LLM。",
+      "project_modules": [
+        "planning",
+        "retrieval",
+        "narrative"
+      ],
+      "limitations": "不是双时态分支库，也不支持直接声称百万字中文收益。",
+      "reproduction_status": "未复现；实施前锁定版本、依赖与输入，并保留测试输出。"
+    },
+    {
+      "source_id": "P-A",
+      "title": "Multi-Agent Based Character Simulation for Story Writing",
+      "source_type": "conference_paper",
+      "version": "In2Writing 2025 published PDF",
+      "urls": [
+        "https://aclanthology.org/2025.in2writing-1.9/",
+        "https://aclanthology.org/2025.in2writing-1.9.pdf"
+      ],
+      "accessed_at": "2026-11-10",
+      "verification_status": "primary_checked",
+      "read_scope": "摘要；§3.2；算法1；限制段",
+      "supported_claim": "发生顺序模拟后按叙述顺序重写；导演提供行动指令。",
+      "project_modules": [
+        "simulation",
+        "narrative",
+        "runtime"
+      ],
+      "limitations": "原文不支持场景时间重叠，且未显式强制隐私；项目需另做权限与偏序调度。",
+      "reproduction_status": "未复现；实施前锁定版本、依赖与输入，并保留测试输出。"
+    },
+    {
+      "source_id": "P-B",
+      "title": "BOOKWORLD: From Novels to Interactive Agent Societies for Creative Story Generation",
+      "source_type": "conference_paper",
+      "version": "ACL 2025 PDF；网页标题为for Story Creation",
+      "urls": [
+        "https://aclanthology.org/2025.acl-long.773/",
+        "https://aclanthology.org/2025.acl-long.773.pdf"
+      ],
+      "accessed_at": "2026-11-10",
+      "verification_status": "primary_checked",
+      "read_scope": "摘要；§3.1–3.3；图2",
+      "supported_claim": "离散地图、同地互动、scene时间与模拟转写；75.36%为论文摘要所报比较胜率。",
+      "project_modules": [
+        "simulation",
+        "narrative"
+      ],
+      "limitations": "不具备本项目资源事务与历史隔离保证；胜率非本项目结果。",
+      "reproduction_status": "未复现；实施前锁定版本、依赖与输入，并保留测试输出。"
+    },
+    {
+      "source_id": "P-D",
+      "title": "Steering Narrative Agents through a Dynamic Cognitive Framework for Guided Emergent Storytelling",
+      "source_type": "conference_paper",
+      "version": "AIIDE 2025 author PDF",
+      "urls": [
+        "https://cgl.ethz.ch/publications/papers/paperChe25b.php",
+        "https://cgl.ethz.ch/Downloads/Publications/Papers/2025/Che25b/Che25b.pdf"
+      ],
+      "accessed_at": "2026-11-10",
+      "verification_status": "primary_checked",
+      "read_scope": "Narrative Generation；Story Enforcement；Experiments Setup/Dataset相关段",
+      "supported_claim": "信念/理想世界张力解释行动；强化模式会注入指定动作并持续放大张力。",
+      "project_modules": [
+        "simulation",
+        "planning",
+        "runtime"
+      ],
+      "limitations": "五提示和单主角研究设置；不能推为多主角长期完全自主。",
+      "reproduction_status": "未复现；实施前锁定版本、依赖与输入，并保留测试输出。"
+    },
+    {
+      "source_id": "P-C",
+      "title": "Lost in Stories: Consistency Bugs in Long Story Generation by LLMs",
+      "source_type": "conference_paper",
+      "version": "Findings of ACL 2026 published PDF",
+      "urls": [
+        "https://aclanthology.org/2026.findings-acl.410/",
+        "https://aclanthology.org/2026.findings-acl.410.pdf"
+      ],
+      "accessed_at": "2026-11-10",
+      "verification_status": "primary_checked",
+      "read_scope": "摘要；§2；图1；§6 Limitations",
+      "supported_claim": "ConStory-Bench/Checker按证据配对检查，基准有2000提示、四任务、五大类/19子类。",
+      "project_modules": [
+        "review",
+        "narrative"
+      ],
+      "limitations": "英语/西方背景；二元一致性判断会混淆有意延迟揭示与真实矛盾；未重跑排名。",
+      "reproduction_status": "未复现；实施前锁定版本、依赖与输入，并保留测试输出。"
+    },
+    {
+      "source_id": "E01",
+      "title": "PostgreSQL Transaction Isolation",
+      "source_type": "official_docs",
+      "version": "17",
+      "urls": [
+        "https://www.postgresql.org/docs/17/transaction-iso.html"
+      ],
+      "accessed_at": "2026-11-10",
+      "verification_status": "primary_checked",
+      "read_scope": "§13.2及隔离级别表、Read Committed说明",
+      "supported_claim": "隔离级别提供事务内可见性和并发保证；有级别差异。",
+      "project_modules": [
+        "kernel",
+        "storage"
+      ],
+      "limitations": "不能替代跨长时模型任务的依赖复核。",
+      "reproduction_status": "未复现；实施前锁定版本、依赖与输入，并保留测试输出。"
+    },
+    {
+      "source_id": "E07",
+      "title": "LangGraph Persistence",
+      "source_type": "official_docs",
+      "version": "动态官方文档，2026-11-10快照",
+      "urls": [
+        "https://docs.langchain.com/oss/python/langgraph/persistence"
+      ],
+      "accessed_at": "2026-11-10",
+      "verification_status": "primary_checked",
+      "read_scope": "Checkpointer vs Store、Troubleshooting",
+      "supported_claim": "线程checkpoint与跨线程store分工；InMemorySaver不跨进程重启持久化。",
+      "project_modules": [
+        "orchestration"
+      ],
+      "limitations": "图状态不是小说权威事实，未测试具体LangGraph部署。",
+      "reproduction_status": "未复现；实施前锁定版本、依赖与输入，并保留测试输出。"
+    },
+    {
+      "source_id": "E08",
+      "title": "LangGraph Fault tolerance",
+      "source_type": "official_docs",
+      "version": "动态官方文档，2026-11-10快照",
+      "urls": [
+        "https://docs.langchain.com/oss/python/langgraph/fault-tolerance"
+      ],
+      "accessed_at": "2026-11-10",
+      "verification_status": "primary_checked",
+      "read_scope": "Retry boundaries and idempotency；missing acknowledgement",
+      "supported_claim": "重试整个节点会至少一次执行；副作用需要持久幂等key，丢回执按unknown处理。",
+      "project_modules": [
+        "orchestration",
+        "kernel"
+      ],
+      "limitations": "不提供本项目业务exactly-once；需提交收据和重复检测。",
+      "reproduction_status": "未复现；实施前锁定版本、依赖与输入，并保留测试输出。"
+    },
+    {
+      "source_id": "E10",
+      "title": "MCP specification version profiles",
+      "source_type": "official_spec",
+      "version": "2025-11-25与2026-07-28分别核查",
+      "urls": [
+        "https://modelcontextprotocol.io/specification/2025-11-25/basic/lifecycle",
+        "https://modelcontextprotocol.io/specification/2025-11-25/basic/transports",
+        "https://modelcontextprotocol.io/specification/2025-11-25/server/tools",
+        "https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization",
+        "https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/stdio",
+        "https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http",
+        "https://modelcontextprotocol.io/specification/2026-07-28/server/tools",
+        "https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization"
+      ],
+      "accessed_at": "2026-11-10",
+      "verification_status": "primary_checked",
+      "read_scope": "旧版initialize/版本/能力协商、stdio/HTTP、tools结构、授权范围；新版transport变化及tools请求/输出相关段",
+      "supported_claim": "2026现代profile有实质协议变化；stdio与HTTP权限入口不同；tools Schema不定义领域权限。",
+      "project_modules": [
+        "adapters/mcp"
+      ],
+      "limitations": "协议profile须随实际Host/SDK联调；本轮未运行MCP互通测试。",
+      "reproduction_status": "未复现；实施前锁定版本、依赖与输入，并保留测试输出。"
+    },
+    {
+      "source_id": "E12",
+      "title": "Codex project guidance / AGENTS.md",
+      "source_type": "official_docs",
+      "version": "2026-11-10官方页面",
+      "urls": [
+        "https://learn.chatgpt.com/docs/customization/overview"
+      ],
+      "accessed_at": "2026-11-10",
+      "verification_status": "primary_checked",
+      "read_scope": "AGENTS Guidance及分目录指导说明",
+      "supported_claim": "AGENTS提供项目指导，保持简短，靠近目录的规则用于相应范围。",
+      "project_modules": [
+        "development"
+      ],
+      "limitations": "指导文件不强制服务端权限。基线agents.md入口仍保留在baseline_links。",
+      "reproduction_status": "未复现；实施前锁定版本、依赖与输入，并保留测试输出。"
+    },
+    {
+      "source_id": "E13",
+      "title": "Agent Skills Specification",
+      "source_type": "official_spec",
+      "version": "2026-11-10页面",
+      "urls": [
+        "https://agentskills.io/specification"
+      ],
+      "accessed_at": "2026-11-10",
+      "verification_status": "primary_checked",
+      "read_scope": "目录结构、SKILL.md、frontmatter及命名规则",
+      "supported_claim": "标准入口为SKILL.md，name/description必需；allowed-tools为实验字段。",
+      "project_modules": [
+        "development",
+        "runtime/skills"
+      ],
+      "limitations": "SKILLS.md不属于通用强制入口；Host发现及扩展需要适配。",
+      "reproduction_status": "未复现；实施前锁定版本、依赖与输入，并保留测试输出。"
+    },
+    {
+      "source_id": "E15",
+      "title": "PostgreSQL Explicit Locking",
+      "source_type": "official_docs",
+      "version": "17",
+      "urls": [
+        "https://www.postgresql.org/docs/17/explicit-locking.html"
+      ],
+      "accessed_at": "2026-11-10",
+      "verification_status": "primary_checked",
+      "read_scope": "§13.3表锁、行锁、锁生命周期",
+      "supported_claim": "FOR UPDATE等锁控制并发修改，通常到事务结束释放。",
+      "project_modules": [
+        "kernel",
+        "storage"
+      ],
+      "limitations": "锁获取顺序不能决定小说事件胜负；仍须定义联合裁决。",
+      "reproduction_status": "未复现；实施前锁定版本、依赖与输入，并保留测试输出。"
+    },
+    {
+      "source_id": "E16",
+      "title": "PostgreSQL SELECT locking clause",
+      "source_type": "official_docs",
+      "version": "17",
+      "urls": [
+        "https://www.postgresql.org/docs/17/sql-select.html"
+      ],
+      "accessed_at": "2026-11-10",
+      "verification_status": "primary_checked",
+      "read_scope": "The Locking Clause，SKIP LOCKED及queue-like说明",
+      "supported_claim": "SKIP LOCKED适合队列消费者但视图可能不完整。",
+      "project_modules": [
+        "orchestration"
+      ],
+      "limitations": "不得用于需要完整世界/资源真值的读取。",
+      "reproduction_status": "未复现；实施前锁定版本、依赖与输入，并保留测试输出。"
+    },
+    {
+      "source_id": "E17",
+      "title": "PostgreSQL Constraints",
+      "source_type": "official_docs",
+      "version": "17",
+      "urls": [
+        "https://www.postgresql.org/docs/17/ddl-constraints.html"
+      ],
+      "accessed_at": "2026-11-10",
+      "verification_status": "primary_checked",
+      "read_scope": "CHECK限制、NOT NULL、FK和EXCLUDE相关段",
+      "supported_claim": "跨行限制应使用合适约束/事务；CHECK引用其他行不能可靠保证不变量。",
+      "project_modules": [
+        "kernel",
+        "storage"
+      ],
+      "limitations": "不提供业务因果和权限检查，SQL约束需在目标PostgreSQL验证。",
+      "reproduction_status": "未复现；实施前锁定版本、依赖与输入，并保留测试输出。"
+    },
+    {
+      "source_id": "E18",
+      "title": "PostgreSQL pg_dump",
+      "source_type": "official_docs",
+      "version": "17",
+      "urls": [
+        "https://www.postgresql.org/docs/17/app-pgdump.html"
+      ],
+      "accessed_at": "2026-11-10",
+      "verification_status": "primary_checked",
+      "read_scope": "Description及输出格式、single database说明",
+      "supported_claim": "一致备份涵盖单数据库；全局对象与外部文件需另管理。",
+      "project_modules": [
+        "operations"
+      ],
+      "limitations": "恢复需验证完整备份集；本轮未据此声明运行恢复实验。",
+      "reproduction_status": "未复现；实施前锁定版本、依赖与输入，并保留测试输出。"
+    },
+    {
+      "source_id": "E19",
+      "title": "PostgreSQL Versioning Policy",
+      "source_type": "official_docs",
+      "version": "2026-11-10官方页面",
+      "urls": [
+        "https://www.postgresql.org/support/versioning/"
+      ],
+      "accessed_at": "2026-11-10",
+      "verification_status": "primary_checked",
+      "read_scope": "支持周期与Releases表",
+      "supported_claim": "PostgreSQL17本轮查询时仍受支持。",
+      "project_modules": [
+        "operations"
+      ],
+      "limitations": "补丁版本会变化；实施时重新锁定，不以本条替代安全维护。",
+      "reproduction_status": "未复现；实施前锁定版本、依赖与输入，并保留测试输出。"
+    },
+    {
+      "source_id": "E20",
+      "title": "SQLAlchemy Session Basics",
+      "source_type": "official_docs",
+      "version": "2.0维护分支",
+      "urls": [
+        "https://docs.sqlalchemy.org/en/20/orm/session_basics.html"
+      ],
+      "accessed_at": "2026-11-10",
+      "verification_status": "primary_checked",
+      "read_scope": "Session并发FAQ、事务范围；页面版本元数据",
+      "supported_claim": "每线程Session/每async任务AsyncSession；2.0为维护分支。",
+      "project_modules": [
+        "storage"
+      ],
+      "limitations": "不能共享Session处理并行任务；2.1升级需实际兼容测试。",
+      "reproduction_status": "未复现；实施前锁定版本、依赖与输入，并保留测试输出。"
+    },
+    {
+      "source_id": "E21",
+      "title": "Pydantic Strict Mode",
+      "source_type": "official_docs",
+      "version": "Pydantic2接口体系；动态官方页",
+      "urls": [
+        "https://pydantic.dev/docs/validation/latest/concepts/strict_mode/"
+      ],
+      "accessed_at": "2026-11-10",
+      "verification_status": "primary_checked",
+      "read_scope": "Overview、validation parameter及JSON例外",
+      "supported_claim": "strict可减少转换，JSON输入仍有特定类型的宽松规则。",
+      "project_modules": [
+        "contracts"
+      ],
+      "limitations": "格式校验不替代业务约束或权限，需显式跨字段检查。",
+      "reproduction_status": "未复现；实施前锁定版本、依赖与输入，并保留测试输出。"
+    },
+    {
+      "source_id": "E22",
+      "title": "Codex Build skills",
+      "source_type": "official_docs",
+      "version": "2026-11-10官方页面",
+      "urls": [
+        "https://learn.chatgpt.com/docs/build-skills"
+      ],
+      "accessed_at": "2026-11-10",
+      "verification_status": "primary_checked",
+      "read_scope": "渐进加载；Where Codex loads local skills；Optional metadata",
+      "supported_claim": "repo .agents/skills发现及name/description渐进加载。",
+      "project_modules": [
+        "development"
+      ],
+      "limitations": "运行时技能目录不自动为Codex标准目录；本轮未安装个人技能。",
+      "reproduction_status": "未复现；实施前锁定版本、依赖与输入，并保留测试输出。"
+    },
+    {
+      "source_id": "E23",
+      "title": "Claude Code project instructions and skills",
+      "source_type": "official_docs",
+      "version": "2026-11-10页面；AGENTS门槛v2.1.277",
+      "urls": [
+        "https://code.claude.com/docs/en/memory",
+        "https://code.claude.com/docs/en/skills"
+      ],
+      "accessed_at": "2026-11-10",
+      "verification_status": "primary_checked",
+      "read_scope": "AGENTS.md的版本/默认优先级/不可用情形；project skill路径",
+      "supported_claim": "新版有条件支持AGENTS；CLAUDE存在影响默认加载；技能使用.claude/skills。",
+      "project_modules": [
+        "development/adapters"
+      ],
+      "limitations": "不同版本/会话模式行为不同，需要加载验收。",
+      "reproduction_status": "未复现；实施前锁定版本、依赖与输入，并保留测试输出。"
+    },
+    {
+      "source_id": "E24",
+      "title": "Event Sourcing pattern",
+      "source_type": "official_docs",
+      "version": "Azure Architecture Center动态页",
+      "urls": [
+        "https://learn.microsoft.com/en-us/azure/architecture/patterns/event-sourcing"
+      ],
+      "accessed_at": "2026-11-10",
+      "verification_status": "primary_checked",
+      "read_scope": "Context、Solution、tradeoffs说明",
+      "supported_claim": "追加事件可作为记录源并生成投影；采用有复杂性成本。",
+      "project_modules": [
+        "kernel"
+      ],
+      "limitations": "仅借鉴事件/投影思想，不照搬Azure服务或队列架构。",
+      "reproduction_status": "未复现；实施前锁定版本、依赖与输入，并保留测试输出。"
+    },
+    {
+      "source_id": "E25",
+      "title": "Alembic Tutorial",
+      "source_type": "official_docs",
+      "version": "文档显示1.20.1；未作为已安装版本",
+      "urls": [
+        "https://alembic.sqlalchemy.org/en/latest/tutorial.html"
+      ],
+      "accessed_at": "2026-11-10",
+      "verification_status": "primary_checked",
+      "read_scope": "The Migration Environment、脚本/SQLAlchemy关系",
+      "supported_claim": "迁移脚本随应用源码维护；env.py连接数据库并执行迁移。",
+      "project_modules": [
+        "migrations"
+      ],
+      "limitations": "autogenerate产物仍需审查；本文未核查全部迁移操作行为。",
+      "reproduction_status": "未复现；实施前锁定版本、依赖与输入，并保留测试输出。"
+    },
+    {
+      "source_id": "E26",
+      "title": "Psycopg Transactions management",
+      "source_type": "official_docs",
+      "version": "3.x；在线文档为开发分支，生产锁稳定发行",
+      "urls": [
+        "https://www.psycopg.org/psycopg3/docs/basic/transactions.html"
+      ],
+      "accessed_at": "2026-11-10",
+      "verification_status": "primary_checked",
+      "read_scope": "默认事务、context、autocommit和transaction contexts",
+      "supported_claim": "默认SELECT亦可开启事务；显式短事务和异常rollback需要设计。",
+      "project_modules": [
+        "storage"
+      ],
+      "limitations": "不能把开发分支文档版本直接作为生产锁定依赖。",
+      "reproduction_status": "未复现；实施前锁定版本、依赖与输入，并保留测试输出。"
+    },
+    {
+      "source_id": "P-R",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://aclanthology.org/2022.emnlp-main.296/",
+        "https://aclanthology.org/2022.emnlp-main.296.pdf"
+      ],
+      "title": "Re3: Generating Longer Stories With Recursive Reprompting and Revision",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "P-O",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://aclanthology.org/2023.acl-long.190/",
+        "https://aclanthology.org/2023.acl-long.190.pdf",
+        "https://github.com/yangkevin2/doc-story-generation"
+      ],
+      "title": "DOC: Improving Long Story Coherence With Detailed Outline Control",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "P-G",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://arxiv.org/html/2304.03442v2",
+        "https://github.com/joonspk-research/generative_agents"
+      ],
+      "title": "Generative Agents: Interactive Simulacra of Human Behavior",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "P-I",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://arxiv.org/pdf/1401.3841"
+      ],
+      "title": "Narrative Planning: Balancing Plot and Character / IPOCL",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "P-Z",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://arxiv.org/html/2501.13956v1",
+        "https://arxiv.org/abs/2501.13956",
+        "https://github.com/getzep/graphiti"
+      ],
+      "title": "Zep: A Temporal Knowledge Graph Architecture for Agent Memory",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "P-F",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://arxiv.org/html/2503.13657v2"
+      ],
+      "title": "Why Do Multi-Agent LLM Systems Fail? / MAST",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "P-L",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://aclanthology.org/2024.tacl-1.9/",
+        "https://aclanthology.org/2024.tacl-1.9.pdf"
+      ],
+      "title": "Lost in the Middle: How Language Models Use Long Contexts",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "MemGPT",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://arxiv.org/abs/2310.08560"
+      ],
+      "title": "MemGPT: Towards LLMs as Operating Systems",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核",
+      "baseline_limit": "v1.1也仅核查摘要和元数据，不能作为详细实现证据。"
+    },
+    {
+      "source_id": "N1",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://www.cs.uky.edu/~sgware/reading/papers/nelson2006declarative.pdf",
+        "https://doi.org/10.1109/MCG.2006.55",
+        "https://ojs.aaai.org/index.php/AIIDE/article/view/18761",
+        "https://eis.ucsc.edu/papers/Nelson_Ashmore_Mateas_-_Authoring_DODM_-_AIIDE06.pdf"
+      ],
+      "title": "Declarative Optimization-Based Drama Management in Interactive Fiction",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "N2",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://faculty.cc.gatech.edu/~riedl/pubs/riedl-young-aamas03.pdf"
+      ],
+      "title": "Managing Interaction Between Users and Agents in a Multi-agent Storytelling Environment",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "N3",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://ojs.aaai.org/index.php/AIIDE/article/view/18896",
+        "https://cdn.aaai.org/ojs/18896/18896-52-22662-1-2-20211004.pdf",
+        "https://cs.uky.edu/~sgware/projects/sabre/"
+      ],
+      "title": "Sabre: A Narrative Planner Supporting Intention and Deep Theory of Mind",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "S01",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://simpy.readthedocs.io/en/stable/topical_guides/time_and_scheduling.html"
+      ],
+      "title": "SimPy Time and Scheduling",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "S02",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://lamport.azurewebsites.net/pubs/time-clocks.pdf"
+      ],
+      "title": "Time, Clocks, and the Ordering of Events in a Distributed System",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "S03",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://eecs.ceas.uc.edu/~wilseypa/classes/ece975/sp2010/papers/fujimoto-90.pdf"
+      ],
+      "title": "Parallel Discrete Event Simulation",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "S04",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://sites.cc.gatech.edu/computing/pads/PAPERS/Exploiting_Temporal_Uncertainty.pdf"
+      ],
+      "title": "Exploiting Temporal Uncertainty in Parallel and Distributed Simulations",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "L-T0",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://www-archiv.fdm.uni-hamburg.de/lhn/node/54.html"
+      ],
+      "title": "Possible Worlds",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "L-T1",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://www-archiv.fdm.uni-hamburg.de/lhn/node/18.html"
+      ],
+      "title": "Focalization",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "L-T2",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://www-archiv.fdm.uni-hamburg.de/lhn/node/106.html"
+      ],
+      "title": "Time",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "L-T3",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://www-archiv.fdm.uni-hamburg.de/lhn/node/41.html"
+      ],
+      "title": "Character",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "L-T4",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://www-archiv.fdm.uni-hamburg.de/lhn/node/58.html",
+        "https://www-archiv.fdm.uni-hamburg.de/lhn/node/59.html"
+      ],
+      "title": "Implied Author / Implied Reader",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "L-T5",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://www-archiv.fdm.uni-hamburg.de/lhn/node/42.html"
+      ],
+      "title": "Narrative Empathy",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "L-T6",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://www-archiv.fdm.uni-hamburg.de/lhn/node/84.html"
+      ],
+      "title": "Telling vs. Showing",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "L-C1",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://www.chinawriter.com.cn/n1/2017/0707/c404032-29391168.html"
+      ],
+      "title": "汪曾祺：语言像树，一枝动，百枝摇",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "L-C2",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://www.chinawriter.com.cn/n1/2022/1207/c404024-32582252.html"
+      ],
+      "title": "李玮、爱潜水的乌贼：网络文学不断升级的奥术",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "L-E1",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC11244532/"
+      ],
+      "title": "Generative AI enhances individual creativity but reduces the collective diversity of novel content",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "L-E2",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://aclanthology.org/2025.acl-long.1254/"
+      ],
+      "title": "Help Me Write a Story: Evaluating LLMs’ Ability to Generate Writing Feedback",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "L-E3",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://arxiv.org/html/2604.22142v1"
+      ],
+      "title": "Voice Under Revision: Large Language Models and the Normalization of Personal Narrative",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "E02",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://www.postgresql.org/docs/18/mvcc-serialization-failure-handling.html"
+      ],
+      "title": "PostgreSQL Serialization Failure Handling",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "E03",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://www.postgresql.org/docs/current/rangetypes.html"
+      ],
+      "title": "PostgreSQL Range Types",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "E04",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://www.postgresql.org/docs/current/ddl-rowsecurity.html"
+      ],
+      "title": "PostgreSQL Row Security Policies",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "E05",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://www.postgresql.org/docs/current/continuous-archiving.html"
+      ],
+      "title": "PostgreSQL Continuous Archiving and PITR",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "E06",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://www.sqlite.org/whentouse.html"
+      ],
+      "title": "Appropriate Uses For SQLite",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "E09",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://docs.temporal.io/workflow-definition"
+      ],
+      "title": "Temporal Workflow Definition",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "E11",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://opentelemetry.io/docs/specs/semconv/gen-ai/"
+      ],
+      "title": "OpenTelemetry GenAI semantic conventions",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    },
+    {
+      "source_id": "E14",
+      "verification_status": "baseline_inherited",
+      "source_type": "baseline_research_record",
+      "source_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "read_scope": "本轮完整读取用户提供的v1.1资料库；外部来源阅读范围沿用该章对应编号记载。",
+      "accessed_at": null,
+      "baseline_read_at": "2026-11-10",
+      "limitations": "本轮没有重新复核该来源全部原文、运行代码或验证效果。",
+      "urls": [
+        "https://www.w3.org/TR/prov-o/"
+      ],
+      "title": "W3C PROV-O",
+      "version": "沿用基线原章所列版次；动态URL本轮未复核"
+    }
+  ],
+  "baseline_links": [
+    {
+      "baseline_link_id": "V11-URL-001",
+      "label": "会议条目",
+      "url": "https://aclanthology.org/2025.naacl-long.63/",
+      "baseline_section": "P-M：DOME——动态分层细纲与记忆增强",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "primary_checked",
+      "record_ids": [
+        "P-M"
+      ]
+    },
+    {
+      "baseline_link_id": "V11-URL-002",
+      "label": "原始论文",
+      "url": "https://aclanthology.org/2025.naacl-long.63.pdf",
+      "baseline_section": "P-M：DOME——动态分层细纲与记忆增强",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "primary_checked",
+      "record_ids": [
+        "P-M"
+      ]
+    },
+    {
+      "baseline_link_id": "V11-URL-003",
+      "label": "作者仓库",
+      "url": "https://github.com/Qianyue-Wang/DOME",
+      "baseline_section": "P-M：DOME——动态分层细纲与记忆增强",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-004",
+      "label": "会议条目",
+      "url": "https://aclanthology.org/2025.in2writing-1.9/",
+      "baseline_section": "P-A：多 Agent 角色模拟与重写",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "primary_checked",
+      "record_ids": [
+        "P-A"
+      ]
+    },
+    {
+      "baseline_link_id": "V11-URL-005",
+      "label": "原始论文",
+      "url": "https://aclanthology.org/2025.in2writing-1.9.pdf",
+      "baseline_section": "P-A：多 Agent 角色模拟与重写",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "primary_checked",
+      "record_ids": [
+        "P-A"
+      ]
+    },
+    {
+      "baseline_link_id": "V11-URL-006",
+      "label": "会议条目",
+      "url": "https://aclanthology.org/2025.acl-long.773/",
+      "baseline_section": "P-B：BOOKWORLD——小说世界中的交互式 Agent 社会",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "primary_checked",
+      "record_ids": [
+        "P-B"
+      ]
+    },
+    {
+      "baseline_link_id": "V11-URL-007",
+      "label": "原始论文",
+      "url": "https://aclanthology.org/2025.acl-long.773.pdf",
+      "baseline_section": "P-B：BOOKWORLD——小说世界中的交互式 Agent 社会",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "primary_checked",
+      "record_ids": [
+        "P-B"
+      ]
+    },
+    {
+      "baseline_link_id": "V11-URL-008",
+      "label": "作者项目页",
+      "url": "https://bookworld2025.github.io/",
+      "baseline_section": "P-B：BOOKWORLD——小说世界中的交互式 Agent 社会",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-009",
+      "label": "作者发表页",
+      "url": "https://cgl.ethz.ch/publications/papers/paperChe25b.php",
+      "baseline_section": "P-D：DiriGent——认知驱动与受引导的涌现叙事",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "primary_checked",
+      "record_ids": [
+        "P-D"
+      ]
+    },
+    {
+      "baseline_link_id": "V11-URL-010",
+      "label": "原始论文",
+      "url": "https://cgl.ethz.ch/Downloads/Publications/Papers/2025/Che25b/Che25b.pdf",
+      "baseline_section": "P-D：DiriGent——认知驱动与受引导的涌现叙事",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "primary_checked",
+      "record_ids": [
+        "P-D"
+      ]
+    },
+    {
+      "baseline_link_id": "V11-URL-011",
+      "label": "代码入口",
+      "url": "https://gitlab.inf.ethz.ch/prj-cgl/cgl-ai-character/dirigent",
+      "baseline_section": "P-D：DiriGent——认知驱动与受引导的涌现叙事",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-012",
+      "label": "会议条目",
+      "url": "https://aclanthology.org/2026.findings-acl.410/",
+      "baseline_section": "P-C：ConStory-Bench——长故事的一致性错误",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "primary_checked",
+      "record_ids": [
+        "P-C"
+      ]
+    },
+    {
+      "baseline_link_id": "V11-URL-013",
+      "label": "原始论文",
+      "url": "https://aclanthology.org/2026.findings-acl.410.pdf",
+      "baseline_section": "P-C：ConStory-Bench——长故事的一致性错误",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "primary_checked",
+      "record_ids": [
+        "P-C"
+      ]
+    },
+    {
+      "baseline_link_id": "V11-URL-014",
+      "label": "作者项目页",
+      "url": "https://picrew.github.io/constory-bench.github.io/",
+      "baseline_section": "P-C：ConStory-Bench——长故事的一致性错误",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-015",
+      "label": "会议条目",
+      "url": "https://aclanthology.org/2022.emnlp-main.296/",
+      "baseline_section": "P-R：Re3——递归重组上下文与局部修订",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-016",
+      "label": "原始论文",
+      "url": "https://aclanthology.org/2022.emnlp-main.296.pdf",
+      "baseline_section": "P-R：Re3——递归重组上下文与局部修订",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-017",
+      "label": "会议条目",
+      "url": "https://aclanthology.org/2023.acl-long.190/",
+      "baseline_section": "P-O：DOC——层级细纲与细节控制",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-018",
+      "label": "原始论文",
+      "url": "https://aclanthology.org/2023.acl-long.190.pdf",
+      "baseline_section": "P-O：DOC——层级细纲与细节控制",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-019",
+      "label": "作者实现",
+      "url": "https://github.com/yangkevin2/doc-story-generation",
+      "baseline_section": "P-O：DOC——层级细纲与细节控制",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-020",
+      "label": "原作者 arXiv 全文 HTML",
+      "url": "https://arxiv.org/html/2304.03442v2",
+      "baseline_section": "P-G：Generative Agents——经验、反思与计划",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-021",
+      "label": "作者仓库",
+      "url": "https://github.com/joonspk-research/generative_agents",
+      "baseline_section": "P-G：Generative Agents——经验、反思与计划",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-022",
+      "label": "原作者论文副本",
+      "url": "https://arxiv.org/pdf/1401.3841",
+      "baseline_section": "P-I：IPOCL——让因果计划具有角色意图",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-023",
+      "label": "原始论文",
+      "url": "https://arxiv.org/html/2501.13956v1",
+      "baseline_section": "P-Z：Zep——时态图谱与 Agent 记忆",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-024",
+      "label": "元数据",
+      "url": "https://arxiv.org/abs/2501.13956",
+      "baseline_section": "P-Z：Zep——时态图谱与 Agent 记忆",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-025",
+      "label": "Graphiti 实现入口",
+      "url": "https://github.com/getzep/graphiti",
+      "baseline_section": "P-Z：Zep——时态图谱与 Agent 记忆",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-026",
+      "label": "原始论文",
+      "url": "https://arxiv.org/html/2503.13657v2",
+      "baseline_section": "P-F：MAST——多 Agent 故障分类",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-027",
+      "label": "期刊条目",
+      "url": "https://aclanthology.org/2024.tacl-1.9/",
+      "baseline_section": "P-L：Lost in the Middle——长上下文的位置敏感性",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-028",
+      "label": "原始论文",
+      "url": "https://aclanthology.org/2024.tacl-1.9.pdf",
+      "baseline_section": "P-L：Lost in the Middle——长上下文的位置敏感性",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-029",
+      "label": "论文条目",
+      "url": "https://arxiv.org/abs/2310.08560",
+      "baseline_section": "补充阅读：MemGPT",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-030",
+      "label": "大学研究者托管原文",
+      "url": "https://www.cs.uky.edu/~sgware/reading/papers/nelson2006declarative.pdf",
+      "baseline_section": "N1：DODM——目标、干预与未来投影分开",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-031",
+      "label": "DOI",
+      "url": "https://doi.org/10.1109/MCG.2006.55",
+      "baseline_section": "N1：DODM——目标、干预与未来投影分开",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-032",
+      "label": "官方条目",
+      "url": "https://ojs.aaai.org/index.php/AIIDE/article/view/18761",
+      "baseline_section": "N1：DODM——目标、干预与未来投影分开",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-033",
+      "label": "作者实验室原文",
+      "url": "https://eis.ucsc.edu/papers/Nelson_Ashmore_Mateas_-_Authoring_DODM_-_AIIDE06.pdf",
+      "baseline_section": "N1：DODM——目标、干预与未来投影分开",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-034",
+      "label": "作者托管原文",
+      "url": "https://faculty.cc.gatech.edu/~riedl/pubs/riedl-young-aamas03.pdf",
+      "baseline_section": "N2：Mimesis / Narrative Mediation——容纳意外与替换动作效果",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-035",
+      "label": "官方条目",
+      "url": "https://ojs.aaai.org/index.php/AIIDE/article/view/18896",
+      "baseline_section": "N3：Sabre——意图与可能错误的信念",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-036",
+      "label": "官方原文",
+      "url": "https://cdn.aaai.org/ojs/18896/18896-52-22662-1-2-20211004.pdf",
+      "baseline_section": "N3：Sabre——意图与可能错误的信念",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-037",
+      "label": "作者项目",
+      "url": "https://cs.uky.edu/~sgware/projects/sabre/",
+      "baseline_section": "N3：Sabre——意图与可能错误的信念",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-038",
+      "label": "SimPy 4.1.2 官方 Time and Scheduling",
+      "url": "https://simpy.readthedocs.io/en/stable/topical_guides/time_and_scheduling.html",
+      "baseline_section": "S01：SimPy——同时间 FIFO 是执行策略",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-039",
+      "label": "作者原文",
+      "url": "https://lamport.azurewebsites.net/pubs/time-clocks.pdf",
+      "baseline_section": "S02：Lamport——因果偏序与实现全序",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-040",
+      "label": "大学托管原文",
+      "url": "https://eecs.ceas.uc.edu/~wilseypa/classes/ece975/sp2010/papers/fujimoto-90.pdf",
+      "baseline_section": "S03：Fujimoto——保守推进及其前提",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-041",
+      "label": "原文",
+      "url": "https://sites.cc.gatech.edu/computing/pads/PAPERS/Exploiting_Temporal_Uncertainty.pdf",
+      "baseline_section": "S04：时间不确定性与因果不能互相替代",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-042",
+      "label": "Possible Worlds",
+      "url": "https://www-archiv.fdm.uni-hamburg.de/lhn/node/54.html",
+      "baseline_section": "5.1 署名叙事学资料：为职责划分提供概念依据",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-043",
+      "label": "Focalization",
+      "url": "https://www-archiv.fdm.uni-hamburg.de/lhn/node/18.html",
+      "baseline_section": "5.1 署名叙事学资料：为职责划分提供概念依据",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-044",
+      "label": "Time",
+      "url": "https://www-archiv.fdm.uni-hamburg.de/lhn/node/106.html",
+      "baseline_section": "5.1 署名叙事学资料：为职责划分提供概念依据",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-045",
+      "label": "Character",
+      "url": "https://www-archiv.fdm.uni-hamburg.de/lhn/node/41.html",
+      "baseline_section": "5.1 署名叙事学资料：为职责划分提供概念依据",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-046",
+      "label": "Implied Author",
+      "url": "https://www-archiv.fdm.uni-hamburg.de/lhn/node/58.html",
+      "baseline_section": "5.1 署名叙事学资料：为职责划分提供概念依据",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-047",
+      "label": "Implied Reader",
+      "url": "https://www-archiv.fdm.uni-hamburg.de/lhn/node/59.html",
+      "baseline_section": "5.1 署名叙事学资料：为职责划分提供概念依据",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-048",
+      "label": "Narrative Empathy",
+      "url": "https://www-archiv.fdm.uni-hamburg.de/lhn/node/42.html",
+      "baseline_section": "5.1 署名叙事学资料：为职责划分提供概念依据",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-049",
+      "label": "Telling vs. Showing",
+      "url": "https://www-archiv.fdm.uni-hamburg.de/lhn/node/84.html",
+      "baseline_section": "5.1 署名叙事学资料：为职责划分提供概念依据",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-050",
+      "label": "原文",
+      "url": "https://www.chinawriter.com.cn/n1/2017/0707/c404032-29391168.html",
+      "baseline_section": "5.2 中文创作的一手经验",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-051",
+      "label": "完整访谈",
+      "url": "https://www.chinawriter.com.cn/n1/2022/1207/c404024-32582252.html",
+      "baseline_section": "5.2 中文创作的一手经验",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-052",
+      "label": "DOI",
+      "url": "https://doi.org/10.1126/sciadv.adn5290",
+      "baseline_section": "5.3 创作辅助实证：支持警惕，也限定结论",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-053",
+      "label": "作者论文全文",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11244532/",
+      "baseline_section": "5.3 创作辅助实证：支持警惕，也限定结论",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-054",
+      "label": "官方条目",
+      "url": "https://aclanthology.org/2025.acl-long.1254/",
+      "baseline_section": "5.3 创作辅助实证：支持警惕，也限定结论",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-055",
+      "label": "原文",
+      "url": "https://aclanthology.org/2025.acl-long.1254.pdf",
+      "baseline_section": "5.3 创作辅助实证：支持警惕，也限定结论",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-056",
+      "label": "作者原文",
+      "url": "https://arxiv.org/html/2604.22142v1",
+      "baseline_section": "5.3 创作辅助实证：支持警惕，也限定结论",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-057",
+      "label": "Graphiti",
+      "url": "https://github.com/getzep/graphiti",
+      "baseline_section": "5.4 本轮没有证据支持的强结论",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-058",
+      "label": "Microsoft GraphRAG",
+      "url": "https://microsoft.github.io/graphrag/index/overview/",
+      "baseline_section": "5.4 本轮没有证据支持的强结论",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-059",
+      "label": "架构",
+      "url": "https://github.com/microsoft/graphrag/blob/main/docs/index/architecture.md",
+      "baseline_section": "5.4 本轮没有证据支持的强结论",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-060",
+      "label": "默认数据流",
+      "url": "https://github.com/microsoft/graphrag/blob/main/docs/index/default_dataflow.md",
+      "baseline_section": "5.4 本轮没有证据支持的强结论",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-061",
+      "label": "输出说明",
+      "url": "https://microsoft.github.io/graphrag/index/outputs/",
+      "baseline_section": "5.4 本轮没有证据支持的强结论",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-062",
+      "label": "HKUDS LightRAG",
+      "url": "https://github.com/HKUDS/LightRAG",
+      "baseline_section": "5.4 本轮没有证据支持的强结论",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-063",
+      "label": "BOOKWORLD",
+      "url": "https://github.com/alienet1109/BookWorld",
+      "baseline_section": "5.4 本轮没有证据支持的强结论",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-064",
+      "label": "DOC",
+      "url": "https://github.com/yangkevin2/doc-story-generation",
+      "baseline_section": "5.4 本轮没有证据支持的强结论",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-065",
+      "label": "Generative Agents",
+      "url": "https://github.com/joonspk-research/generative_agents",
+      "baseline_section": "5.4 本轮没有证据支持的强结论",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-066",
+      "label": "DOME",
+      "url": "https://github.com/Qianyue-Wang/DOME",
+      "baseline_section": "5.4 本轮没有证据支持的强结论",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-067",
+      "label": "DiriGent",
+      "url": "https://gitlab.inf.ethz.ch/prj-cgl/cgl-ai-character/dirigent",
+      "baseline_section": "5.4 本轮没有证据支持的强结论",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-068",
+      "label": "Sabre",
+      "url": "https://cs.uky.edu/~sgware/projects/sabre/",
+      "baseline_section": "5.4 本轮没有证据支持的强结论",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-069",
+      "label": "SimPy",
+      "url": "https://simpy.readthedocs.io/en/stable/topical_guides/time_and_scheduling.html",
+      "baseline_section": "5.4 本轮没有证据支持的强结论",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-070",
+      "label": "PostgreSQL Transaction Isolation",
+      "url": "https://www.postgresql.org/docs/current/transaction-iso.html",
+      "baseline_section": "7.1 数据、事务、权限与恢复",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-071",
+      "label": "PostgreSQL Serialization Failure Handling",
+      "url": "https://www.postgresql.org/docs/18/mvcc-serialization-failure-handling.html",
+      "baseline_section": "7.1 数据、事务、权限与恢复",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-072",
+      "label": "PostgreSQL Range Types",
+      "url": "https://www.postgresql.org/docs/current/rangetypes.html",
+      "baseline_section": "7.1 数据、事务、权限与恢复",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-073",
+      "label": "PostgreSQL Row Security Policies",
+      "url": "https://www.postgresql.org/docs/current/ddl-rowsecurity.html",
+      "baseline_section": "7.1 数据、事务、权限与恢复",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-074",
+      "label": "PostgreSQL Continuous Archiving and PITR",
+      "url": "https://www.postgresql.org/docs/current/continuous-archiving.html",
+      "baseline_section": "7.1 数据、事务、权限与恢复",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-075",
+      "label": "Appropriate Uses For SQLite",
+      "url": "https://www.sqlite.org/whentouse.html",
+      "baseline_section": "7.1 数据、事务、权限与恢复",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-076",
+      "label": "LangGraph Persistence",
+      "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+      "baseline_section": "7.2 工作流、工具协议与观测",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "primary_checked",
+      "record_ids": [
+        "E07"
+      ]
+    },
+    {
+      "baseline_link_id": "V11-URL-077",
+      "label": "LangGraph Fault tolerance",
+      "url": "https://docs.langchain.com/oss/python/langgraph/fault-tolerance",
+      "baseline_section": "7.2 工作流、工具协议与观测",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "primary_checked",
+      "record_ids": [
+        "E08"
+      ]
+    },
+    {
+      "baseline_link_id": "V11-URL-078",
+      "label": "Temporal Workflow Definition",
+      "url": "https://docs.temporal.io/workflow-definition",
+      "baseline_section": "7.2 工作流、工具协议与观测",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-079",
+      "label": "MCP 2026-07-28",
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28",
+      "baseline_section": "7.2 工作流、工具协议与观测",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-080",
+      "label": "Tools",
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools",
+      "baseline_section": "7.2 工作流、工具协议与观测",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "primary_checked",
+      "record_ids": [
+        "E10"
+      ]
+    },
+    {
+      "baseline_link_id": "V11-URL-081",
+      "label": "Authorization",
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization",
+      "baseline_section": "7.2 工作流、工具协议与观测",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "primary_checked",
+      "record_ids": [
+        "E10"
+      ]
+    },
+    {
+      "baseline_link_id": "V11-URL-082",
+      "label": "OpenTelemetry GenAI 迁移说明",
+      "url": "https://opentelemetry.io/docs/specs/semconv/gen-ai/",
+      "baseline_section": "7.2 工作流、工具协议与观测",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-083",
+      "label": "官方语义约定仓库",
+      "url": "https://github.com/open-telemetry/semantic-conventions-genai",
+      "baseline_section": "7.2 工作流、工具协议与观测",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-084",
+      "label": "AGENTS.md",
+      "url": "https://agents.md/",
+      "baseline_section": "7.3 开发指导、技能和来源血缘",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    },
+    {
+      "baseline_link_id": "V11-URL-085",
+      "label": "Agent Skills Specification",
+      "url": "https://agentskills.io/specification",
+      "baseline_section": "7.3 开发指导、技能和来源血缘",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "primary_checked",
+      "record_ids": [
+        "E13"
+      ]
+    },
+    {
+      "baseline_link_id": "V11-URL-086",
+      "label": "W3C PROV-O",
+      "url": "https://www.w3.org/TR/prov-o/",
+      "baseline_section": "7.3 开发指导、技能和来源血缘",
+      "baseline_file": "baseline/v1_1/07_论文与技术资料库.md",
+      "verification_status": "baseline_inherited"
+    }
+  ]
+}

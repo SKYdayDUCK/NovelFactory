@@ -1,0 +1,40 @@
+{
+  "schema_version": "2.1",
+  "task_id": "aef248a3-4fb3-57c5-8e96-6d5d6cdfc75d",
+  "generation": 2,
+  "read_contract": {
+    "revision": {
+      "mode": "FIXED",
+      "world_ref": {
+        "work_id": "871e02b5-4e88-50c5-889d-7ded437f23b1",
+        "branch_id": "97d0b956-808c-5158-a232-62f998f1e781",
+        "world_revision_id": "29cb5d9d-9e0b-5bf2-a9b5-0531e6c28786"
+      }
+    },
+    "process_policy": "REQUIRE_EVALUATED",
+    "index_policy": "AUTHORITATIVE",
+    "max_wait_ms": 0
+  },
+  "knowledge_cut": {
+    "plane": "SIMULATION"
+  },
+  "subject_time": {
+    "kind": "POINT",
+    "at": {
+      "tick": 100,
+      "phase": 0
+    }
+  },
+  "query": {
+    "kind": "STATE",
+    "subject_ids": [
+      "e7749c06-8763-5a71-8c8b-1d1ab37ee6a1"
+    ],
+    "predicates": [
+      "owner",
+      "active_holder"
+    ]
+  },
+  "page_size": 50,
+  "cursor": null
+}

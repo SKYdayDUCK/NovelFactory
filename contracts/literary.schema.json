@@ -1,0 +1,584 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novel-factory.example/contracts/2.0/literary.schema.json",
+  "title": "Novel Factory v2.0 literary and planning contracts",
+  "$defs": {
+    "ReadingCoverage": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "2.0"
+        },
+        "coverage_id": {
+          "$ref": "./core.schema.json#/$defs/UUID"
+        },
+        "reader_task_id": {
+          "$ref": "./core.schema.json#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "server_receipt_id": {
+          "$ref": "./core.schema.json#/$defs/UUID"
+        },
+        "artifact_ref": {
+          "$ref": "./core.schema.json#/$defs/ArtifactRef"
+        },
+        "source_length_codepoints": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "read_mode": {
+          "enum": [
+            "FULL_TEXT",
+            "EXCERPT",
+            "SUMMARY"
+          ]
+        },
+        "spans": {
+          "type": "array",
+          "items": {
+            "$ref": "./core.schema.json#/$defs/TextSpan"
+          },
+          "minItems": 0
+        },
+        "summary_ref": {
+          "$ref": "./core.schema.json#/$defs/ArtifactRef"
+        },
+        "observations_ref": {
+          "$ref": "./core.schema.json#/$defs/ArtifactRef"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "schema_version",
+        "coverage_id",
+        "reader_task_id",
+        "generation",
+        "server_receipt_id",
+        "artifact_ref",
+        "source_length_codepoints",
+        "read_mode",
+        "spans",
+        "recorded_at"
+      ],
+      "additionalProperties": false,
+      "description": "Server records exact original text ranges supplied/read. FULL_TEXT can be a chunk in a whole-artifact reading plan; completeness is computed by union of FULL_TEXT spans for the same exact ArtifactRef. SUMMARY earns zero original-text coverage. Evidence of delivery/reading range is not proof of human-like understanding. Domain verifies end>start, bounds, hash and authorization.",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "read_mode": {
+                "const": "SUMMARY"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "summary_ref"
+            ],
+            "properties": {
+              "spans": {
+                "maxItems": 0
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "spans": {
+                "minItems": 1
+              }
+            },
+            "not": {
+              "required": [
+                "summary_ref"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "MemoryCandidate": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "2.0"
+        },
+        "candidate_id": {
+          "$ref": "./core.schema.json#/$defs/UUID"
+        },
+        "task_id": {
+          "$ref": "./core.schema.json#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "world_ref": {
+          "$ref": "./core.schema.json#/$defs/WorldRef"
+        },
+        "memory_kind": {
+          "enum": [
+            "FACT_SUMMARY",
+            "ACTOR_EXPERIENCE_SUMMARY",
+            "PLAN_SUMMARY",
+            "SCENE_FUNCTION_SUMMARY",
+            "LITERARY_MEMORY"
+          ]
+        },
+        "plane": {
+          "enum": [
+            "WORLD",
+            "BELIEF",
+            "READER",
+            "PLAN",
+            "SIMULATION",
+            "LITERARY"
+          ]
+        },
+        "audience": {
+          "enum": [
+            "ACTOR",
+            "WRITER",
+            "EDITOR",
+            "CONTROL"
+          ]
+        },
+        "actor_id": {
+          "anyOf": [
+            {
+              "$ref": "./core.schema.json#/$defs/UUID"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "./core.schema.json#/$defs/EvidenceRef"
+          },
+          "minItems": 1
+        },
+        "source_coverage": {
+          "enum": [
+            "COMPLETE",
+            "PARTIAL",
+            "UNDECLARED"
+          ]
+        },
+        "coverage_note": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary_ref": {
+          "$ref": "./core.schema.json#/$defs/ArtifactRef"
+        },
+        "method_revision_sha256": {
+          "$ref": "./core.schema.json#/$defs/Sha256"
+        },
+        "dependency_fingerprint": {
+          "$ref": "./core.schema.json#/$defs/Sha256"
+        },
+        "story_interval": {
+          "$ref": "./core.schema.json#/$defs/StoryInterval"
+        },
+        "narrative_revision_id": {
+          "$ref": "./core.schema.json#/$defs/UUID"
+        },
+        "entry_kind": {
+          "enum": [
+            "ARC_INTENT",
+            "EDITORIAL_INTERPRETATION",
+            "OPEN_EMOTIONAL_CONSEQUENCE",
+            "RELATIONSHIP_ASYMMETRY",
+            "VOICE_ANCHOR",
+            "READER_EXPECTATION",
+            "EDITORIAL_DECISION"
+          ]
+        },
+        "counterevidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "./core.schema.json#/$defs/EvidenceRef"
+          },
+          "minItems": 0
+        },
+        "unresolved_items": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "schema_version",
+        "candidate_id",
+        "task_id",
+        "generation",
+        "world_ref",
+        "memory_kind",
+        "plane",
+        "audience",
+        "actor_id",
+        "source_refs",
+        "source_coverage",
+        "coverage_note",
+        "summary_ref",
+        "method_revision_sha256",
+        "dependency_fingerprint",
+        "unresolved_items"
+      ],
+      "additionalProperties": false,
+      "description": "Candidate derived artifact only. No effects or authoritative world-write fields. source_coverage describes the declared source manifest, not completeness of the fictional world. Service validates current grant, source provenance, time/branch boundaries and semantic claims before editorial use.",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "audience": {
+                "const": "ACTOR"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "actor_id": {
+                "$ref": "./core.schema.json#/$defs/UUID"
+              },
+              "plane": {
+                "const": "BELIEF"
+              },
+              "memory_kind": {
+                "const": "ACTOR_EXPERIENCE_SUMMARY"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "memory_kind": {
+                "const": "LITERARY_MEMORY"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "entry_kind"
+            ],
+            "properties": {
+              "plane": {
+                "const": "LITERARY"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "memory_kind": {
+                "const": "FACT_SUMMARY"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "plane": {
+                "enum": [
+                  "WORLD",
+                  "SIMULATION"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "memory_kind": {
+                "const": "PLAN_SUMMARY"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "plane": {
+                "const": "PLAN"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "VolumeContract": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "2.0"
+        },
+        "volume_id": {
+          "$ref": "./core.schema.json#/$defs/UUID"
+        },
+        "contract_revision_id": {
+          "$ref": "./core.schema.json#/$defs/UUID"
+        },
+        "input_world_ref": {
+          "$ref": "./core.schema.json#/$defs/WorldRef"
+        },
+        "creative_brief": {
+          "type": "string",
+          "minLength": 1
+        },
+        "focus_subject_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "./core.schema.json#/$defs/UUID"
+          },
+          "minItems": 0
+        },
+        "narrative_intents": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "protected_commitments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "commitment_id": {
+                "$ref": "./core.schema.json#/$defs/UUID"
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1
+              },
+              "policy_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "evidence_refs": {
+                "type": "array",
+                "items": {
+                  "$ref": "./core.schema.json#/$defs/EvidenceRef"
+                },
+                "minItems": 0
+              }
+            },
+            "required": [
+              "commitment_id",
+              "description",
+              "policy_ref",
+              "evidence_refs"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        },
+        "open_choices": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "completion_or_stop_conditions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "budget": {
+          "type": "object",
+          "properties": {
+            "max_semantic_calls": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "max_candidate_branches": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "max_semantic_calls",
+            "max_candidate_branches"
+          ],
+          "additionalProperties": false
+        },
+        "upstream_literary_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "./core.schema.json#/$defs/ArtifactRef"
+          },
+          "minItems": 0
+        },
+        "dependency_fingerprint": {
+          "$ref": "./core.schema.json#/$defs/Sha256"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "hypotheses": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "schema_version",
+        "volume_id",
+        "contract_revision_id",
+        "input_world_ref",
+        "creative_brief",
+        "focus_subject_ids",
+        "narrative_intents",
+        "protected_commitments",
+        "open_choices",
+        "completion_or_stop_conditions",
+        "budget",
+        "upstream_literary_refs",
+        "dependency_fingerprint"
+      ],
+      "additionalProperties": false,
+      "description": "Versioned creative contract, not accepted future history. Goals, protected commitments and open choices are distinct. Counts are budget ceilings, not literary formulas. A protected commitment must refer to an existing authorization/policy; this object cannot create privileges or world effects."
+    },
+    "WindowPlan": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "2.0"
+        },
+        "window_plan_id": {
+          "$ref": "./core.schema.json#/$defs/UUID"
+        },
+        "volume_contract_revision_id": {
+          "$ref": "./core.schema.json#/$defs/UUID"
+        },
+        "input_world_ref": {
+          "$ref": "./core.schema.json#/$defs/WorldRef"
+        },
+        "story_interval": {
+          "$ref": "./core.schema.json#/$defs/StoryInterval"
+        },
+        "scope_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "./core.schema.json#/$defs/UUID"
+          },
+          "minItems": 1
+        },
+        "process_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "./core.schema.json#/$defs/UUID"
+          },
+          "minItems": 0
+        },
+        "focus_actor_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "./core.schema.json#/$defs/UUID"
+          },
+          "minItems": 0
+        },
+        "resolution_strategy": {
+          "enum": [
+            "MACRO_ONLY",
+            "MIXED",
+            "MICRO_INTERACTION"
+          ]
+        },
+        "candidate_goals": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "next_decision_reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "adopted_event_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "./core.schema.json#/$defs/EventRef"
+          },
+          "minItems": 0
+        },
+        "expected_outputs": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "ADVANCE_PROPOSAL",
+              "INTERACTION_BUNDLE",
+              "SCENE_CONTRACT",
+              "REPLAN_REPORT"
+            ]
+          },
+          "minItems": 1
+        },
+        "dependency_fingerprint": {
+          "$ref": "./core.schema.json#/$defs/Sha256"
+        },
+        "status": {
+          "enum": [
+            "DRAFT",
+            "VALIDATED",
+            "SELECTED",
+            "BLOCKED",
+            "ABANDONED"
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "window_plan_id",
+        "volume_contract_revision_id",
+        "input_world_ref",
+        "story_interval",
+        "scope_ids",
+        "process_ids",
+        "focus_actor_ids",
+        "resolution_strategy",
+        "candidate_goals",
+        "next_decision_reason",
+        "assumptions",
+        "adopted_event_refs",
+        "expected_outputs",
+        "dependency_fingerprint",
+        "status"
+      ],
+      "additionalProperties": false,
+      "description": "Request for a bounded future planning/simulation window. SELECTED means editorial selection, not world advance. adopted_event_refs must already be effective in input_world_ref. Scheduler alone can certify coverage; service checks interval order, processes, dependencies and authorization."
+    }
+  },
+  "description": "Design contracts. Structural examples are synthetic fixtures; production acceptance additionally requires service-side permission, temporal, provenance and consistency checks."
+}

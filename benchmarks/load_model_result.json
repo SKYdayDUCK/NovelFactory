@@ -1,0 +1,758 @@
+{
+  "status": "MODEL_CALCULATED_NOT_SERVICE_BENCHMARK",
+  "python": "3.12.14",
+  "input_sha256": "32aadbda01a62b795a40f4f72bf9e2648301fcdb305fce98f9edf8cc27ad7789",
+  "seed": 20261110,
+  "scope": "No target service, SQL, network or LLM calls were made.",
+  "checks": {
+    "role_allocation_preserves_population": true,
+    "warm_profile_reduces_estimated_reads": true,
+    "closed_loop_slows_with_added_latency": true,
+    "open_loop_schedule_is_unchanged": true
+  },
+  "illustrative_pool_budget": {
+    "application_connection_cap": 64,
+    "including_reserved": 80,
+    "configured_pg_limit": 100,
+    "fits_arithmetic_budget": true,
+    "actual_connection_occupancy": null
+  },
+  "cases": [
+    {
+      "population": 10,
+      "cache_cases": {
+        "cold": {
+          "population": 10,
+          "role_counts": {
+            "character": 3,
+            "writer": 3,
+            "reviewer": 2,
+            "director": 1,
+            "knowledge": 1,
+            "background": 0
+          },
+          "assumed_cache_hit_ratio": 0,
+          "agent_tool_rps": 0.402778,
+          "database_read_statement_demand_rps": 1.34995,
+          "database_write_statement_demand_rps": 0.266894,
+          "canonical_command_demand_rps": 0.007075,
+          "model_call_demand_rps": 0.061389,
+          "model_inflight_demand": 5.188889,
+          "input_token_demand_per_hour": 2022000.0,
+          "output_token_demand_per_hour": 264400.0,
+          "database_total_statement_demand_rps": 1.616844,
+          "by_operation_offered_rps": {
+            "context_compile": 0.061389,
+            "state_query": 0.036111,
+            "evidence_read": 0.114444,
+            "proposal_submit": 0.040278,
+            "task_control": 0.101667,
+            "draft_submit": 0.01,
+            "history_query": 0.015278,
+            "review_submit": 0.011111,
+            "graph_query": 0.008333,
+            "search": 0.004167
+          },
+          "accepted_commit_tps": null,
+          "measured_latency_ms": null,
+          "measured_cost": null,
+          "cache_profile": "cold"
+        },
+        "mixed": {
+          "population": 10,
+          "role_counts": {
+            "character": 3,
+            "writer": 3,
+            "reviewer": 2,
+            "director": 1,
+            "knowledge": 1,
+            "background": 0
+          },
+          "assumed_cache_hit_ratio": 0.5,
+          "agent_tool_rps": 0.402778,
+          "database_read_statement_demand_rps": 0.958978,
+          "database_write_statement_demand_rps": 0.266894,
+          "canonical_command_demand_rps": 0.007075,
+          "model_call_demand_rps": 0.061389,
+          "model_inflight_demand": 5.188889,
+          "input_token_demand_per_hour": 2022000.0,
+          "output_token_demand_per_hour": 264400.0,
+          "database_total_statement_demand_rps": 1.225872,
+          "by_operation_offered_rps": {
+            "context_compile": 0.061389,
+            "state_query": 0.036111,
+            "evidence_read": 0.114444,
+            "proposal_submit": 0.040278,
+            "task_control": 0.101667,
+            "draft_submit": 0.01,
+            "history_query": 0.015278,
+            "review_submit": 0.011111,
+            "graph_query": 0.008333,
+            "search": 0.004167
+          },
+          "accepted_commit_tps": null,
+          "measured_latency_ms": null,
+          "measured_cost": null,
+          "cache_profile": "mixed"
+        },
+        "warm": {
+          "population": 10,
+          "role_counts": {
+            "character": 3,
+            "writer": 3,
+            "reviewer": 2,
+            "director": 1,
+            "knowledge": 1,
+            "background": 0
+          },
+          "assumed_cache_hit_ratio": 0.8,
+          "agent_tool_rps": 0.402778,
+          "database_read_statement_demand_rps": 0.724394,
+          "database_write_statement_demand_rps": 0.266894,
+          "canonical_command_demand_rps": 0.007075,
+          "model_call_demand_rps": 0.061389,
+          "model_inflight_demand": 5.188889,
+          "input_token_demand_per_hour": 2022000.0,
+          "output_token_demand_per_hour": 264400.0,
+          "database_total_statement_demand_rps": 0.991289,
+          "by_operation_offered_rps": {
+            "context_compile": 0.061389,
+            "state_query": 0.036111,
+            "evidence_read": 0.114444,
+            "proposal_submit": 0.040278,
+            "task_control": 0.101667,
+            "draft_submit": 0.01,
+            "history_query": 0.015278,
+            "review_submit": 0.011111,
+            "graph_query": 0.008333,
+            "search": 0.004167
+          },
+          "accepted_commit_tps": null,
+          "measured_latency_ms": null,
+          "measured_cost": null,
+          "cache_profile": "warm"
+        }
+      },
+      "seeded_schedule": {
+        "synthetic_calls": 1430,
+        "synthetic_mean_offered_rps": 0.397222,
+        "synthetic_max_offered_calls_in_one_second": 5,
+        "synthetic_p95_offered_calls_in_one_second": 2,
+        "note": "Traffic schedule counts only; p95 here is an arrival count, not response latency."
+      },
+      "open_loop_targets_rps": {
+        "0.5": 0.201389,
+        "1": 0.402778,
+        "1.5": 0.604167,
+        "2": 0.805556
+      },
+      "closed_vs_open_arithmetic": [
+        {
+          "extra_seconds_per_tool": 0,
+          "closed_loop_offered_rps": 0.402778,
+          "open_loop_scheduled_rps_at_1x": 0.402778
+        },
+        {
+          "extra_seconds_per_tool": 1,
+          "closed_loop_offered_rps": 0.384159,
+          "open_loop_scheduled_rps_at_1x": 0.402778
+        },
+        {
+          "extra_seconds_per_tool": 5,
+          "closed_loop_offered_rps": 0.325325,
+          "open_loop_scheduled_rps_at_1x": 0.402778
+        }
+      ]
+    },
+    {
+      "population": 50,
+      "cache_cases": {
+        "cold": {
+          "population": 50,
+          "role_counts": {
+            "character": 15,
+            "writer": 13,
+            "reviewer": 10,
+            "director": 5,
+            "knowledge": 5,
+            "background": 2
+          },
+          "assumed_cache_hit_ratio": 0,
+          "agent_tool_rps": 2.000556,
+          "database_read_statement_demand_rps": 6.72895,
+          "database_write_statement_demand_rps": 1.360339,
+          "canonical_command_demand_rps": 0.041908,
+          "model_call_demand_rps": 0.303611,
+          "model_inflight_demand": 24.877778,
+          "input_token_demand_per_hour": 9858000.0,
+          "output_token_demand_per_hour": 1270400.0,
+          "database_total_statement_demand_rps": 8.089289,
+          "by_operation_offered_rps": {
+            "context_compile": 0.300278,
+            "state_query": 0.187222,
+            "evidence_read": 0.558889,
+            "proposal_submit": 0.201389,
+            "task_control": 0.508333,
+            "draft_submit": 0.043333,
+            "history_query": 0.083056,
+            "review_submit": 0.055556,
+            "graph_query": 0.041667,
+            "search": 0.020833
+          },
+          "accepted_commit_tps": null,
+          "measured_latency_ms": null,
+          "measured_cost": null,
+          "cache_profile": "cold"
+        },
+        "mixed": {
+          "population": 50,
+          "role_counts": {
+            "character": 15,
+            "writer": 13,
+            "reviewer": 10,
+            "director": 5,
+            "knowledge": 5,
+            "background": 2
+          },
+          "assumed_cache_hit_ratio": 0.5,
+          "agent_tool_rps": 2.000556,
+          "database_read_statement_demand_rps": 4.790756,
+          "database_write_statement_demand_rps": 1.360339,
+          "canonical_command_demand_rps": 0.041908,
+          "model_call_demand_rps": 0.303611,
+          "model_inflight_demand": 24.877778,
+          "input_token_demand_per_hour": 9858000.0,
+          "output_token_demand_per_hour": 1270400.0,
+          "database_total_statement_demand_rps": 6.151094,
+          "by_operation_offered_rps": {
+            "context_compile": 0.300278,
+            "state_query": 0.187222,
+            "evidence_read": 0.558889,
+            "proposal_submit": 0.201389,
+            "task_control": 0.508333,
+            "draft_submit": 0.043333,
+            "history_query": 0.083056,
+            "review_submit": 0.055556,
+            "graph_query": 0.041667,
+            "search": 0.020833
+          },
+          "accepted_commit_tps": null,
+          "measured_latency_ms": null,
+          "measured_cost": null,
+          "cache_profile": "mixed"
+        },
+        "warm": {
+          "population": 50,
+          "role_counts": {
+            "character": 15,
+            "writer": 13,
+            "reviewer": 10,
+            "director": 5,
+            "knowledge": 5,
+            "background": 2
+          },
+          "assumed_cache_hit_ratio": 0.8,
+          "agent_tool_rps": 2.000556,
+          "database_read_statement_demand_rps": 3.627839,
+          "database_write_statement_demand_rps": 1.360339,
+          "canonical_command_demand_rps": 0.041908,
+          "model_call_demand_rps": 0.303611,
+          "model_inflight_demand": 24.877778,
+          "input_token_demand_per_hour": 9858000.0,
+          "output_token_demand_per_hour": 1270400.0,
+          "database_total_statement_demand_rps": 4.988178,
+          "by_operation_offered_rps": {
+            "context_compile": 0.300278,
+            "state_query": 0.187222,
+            "evidence_read": 0.558889,
+            "proposal_submit": 0.201389,
+            "task_control": 0.508333,
+            "draft_submit": 0.043333,
+            "history_query": 0.083056,
+            "review_submit": 0.055556,
+            "graph_query": 0.041667,
+            "search": 0.020833
+          },
+          "accepted_commit_tps": null,
+          "measured_latency_ms": null,
+          "measured_cost": null,
+          "cache_profile": "warm"
+        }
+      },
+      "seeded_schedule": {
+        "synthetic_calls": 7098,
+        "synthetic_mean_offered_rps": 1.971667,
+        "synthetic_max_offered_calls_in_one_second": 9,
+        "synthetic_p95_offered_calls_in_one_second": 5,
+        "note": "Traffic schedule counts only; p95 here is an arrival count, not response latency."
+      },
+      "open_loop_targets_rps": {
+        "0.5": 1.000278,
+        "1": 2.000556,
+        "1.5": 3.000834,
+        "2": 4.001112
+      },
+      "closed_vs_open_arithmetic": [
+        {
+          "extra_seconds_per_tool": 0,
+          "closed_loop_offered_rps": 2.000556,
+          "open_loop_scheduled_rps_at_1x": 2.000556
+        },
+        {
+          "extra_seconds_per_tool": 1,
+          "closed_loop_offered_rps": 1.90781,
+          "open_loop_scheduled_rps_at_1x": 2.000556
+        },
+        {
+          "extra_seconds_per_tool": 5,
+          "closed_loop_offered_rps": 1.614906,
+          "open_loop_scheduled_rps_at_1x": 2.000556
+        }
+      ]
+    },
+    {
+      "population": 200,
+      "cache_cases": {
+        "cold": {
+          "population": 200,
+          "role_counts": {
+            "character": 60,
+            "writer": 50,
+            "reviewer": 40,
+            "director": 20,
+            "knowledge": 20,
+            "background": 10
+          },
+          "assumed_cache_hit_ratio": 0,
+          "agent_tool_rps": 7.988889,
+          "database_read_statement_demand_rps": 26.895,
+          "database_write_statement_demand_rps": 5.467222,
+          "canonical_command_demand_rps": 0.174167,
+          "model_call_demand_rps": 1.211111,
+          "model_inflight_demand": 98.444444,
+          "input_token_demand_per_hour": 39180000.0,
+          "output_token_demand_per_hour": 5030000.0,
+          "database_total_statement_demand_rps": 32.362222,
+          "by_operation_offered_rps": {
+            "context_compile": 1.194444,
+            "state_query": 0.755556,
+            "evidence_read": 2.222222,
+            "proposal_submit": 0.805556,
+            "task_control": 2.033333,
+            "draft_submit": 0.166667,
+            "history_query": 0.338889,
+            "review_submit": 0.222222,
+            "graph_query": 0.166667,
+            "search": 0.083333
+          },
+          "accepted_commit_tps": null,
+          "measured_latency_ms": null,
+          "measured_cost": null,
+          "cache_profile": "cold"
+        },
+        "mixed": {
+          "population": 200,
+          "role_counts": {
+            "character": 60,
+            "writer": 50,
+            "reviewer": 40,
+            "director": 20,
+            "knowledge": 20,
+            "background": 10
+          },
+          "assumed_cache_hit_ratio": 0.5,
+          "agent_tool_rps": 7.988889,
+          "database_read_statement_demand_rps": 19.158889,
+          "database_write_statement_demand_rps": 5.467222,
+          "canonical_command_demand_rps": 0.174167,
+          "model_call_demand_rps": 1.211111,
+          "model_inflight_demand": 98.444444,
+          "input_token_demand_per_hour": 39180000.0,
+          "output_token_demand_per_hour": 5030000.0,
+          "database_total_statement_demand_rps": 24.626111,
+          "by_operation_offered_rps": {
+            "context_compile": 1.194444,
+            "state_query": 0.755556,
+            "evidence_read": 2.222222,
+            "proposal_submit": 0.805556,
+            "task_control": 2.033333,
+            "draft_submit": 0.166667,
+            "history_query": 0.338889,
+            "review_submit": 0.222222,
+            "graph_query": 0.166667,
+            "search": 0.083333
+          },
+          "accepted_commit_tps": null,
+          "measured_latency_ms": null,
+          "measured_cost": null,
+          "cache_profile": "mixed"
+        },
+        "warm": {
+          "population": 200,
+          "role_counts": {
+            "character": 60,
+            "writer": 50,
+            "reviewer": 40,
+            "director": 20,
+            "knowledge": 20,
+            "background": 10
+          },
+          "assumed_cache_hit_ratio": 0.8,
+          "agent_tool_rps": 7.988889,
+          "database_read_statement_demand_rps": 14.517222,
+          "database_write_statement_demand_rps": 5.467222,
+          "canonical_command_demand_rps": 0.174167,
+          "model_call_demand_rps": 1.211111,
+          "model_inflight_demand": 98.444444,
+          "input_token_demand_per_hour": 39180000.0,
+          "output_token_demand_per_hour": 5030000.0,
+          "database_total_statement_demand_rps": 19.984444,
+          "by_operation_offered_rps": {
+            "context_compile": 1.194444,
+            "state_query": 0.755556,
+            "evidence_read": 2.222222,
+            "proposal_submit": 0.805556,
+            "task_control": 2.033333,
+            "draft_submit": 0.166667,
+            "history_query": 0.338889,
+            "review_submit": 0.222222,
+            "graph_query": 0.166667,
+            "search": 0.083333
+          },
+          "accepted_commit_tps": null,
+          "measured_latency_ms": null,
+          "measured_cost": null,
+          "cache_profile": "warm"
+        }
+      },
+      "seeded_schedule": {
+        "synthetic_calls": 28395,
+        "synthetic_mean_offered_rps": 7.8875,
+        "synthetic_max_offered_calls_in_one_second": 25,
+        "synthetic_p95_offered_calls_in_one_second": 14,
+        "note": "Traffic schedule counts only; p95 here is an arrival count, not response latency."
+      },
+      "open_loop_targets_rps": {
+        "0.5": 3.994445,
+        "1": 7.988889,
+        "1.5": 11.983334,
+        "2": 15.977778
+      },
+      "closed_vs_open_arithmetic": [
+        {
+          "extra_seconds_per_tool": 0,
+          "closed_loop_offered_rps": 7.988889,
+          "open_loop_scheduled_rps_at_1x": 7.988889
+        },
+        {
+          "extra_seconds_per_tool": 1,
+          "closed_loop_offered_rps": 7.618256,
+          "open_loop_scheduled_rps_at_1x": 7.988889
+        },
+        {
+          "extra_seconds_per_tool": 5,
+          "closed_loop_offered_rps": 6.4479,
+          "open_loop_scheduled_rps_at_1x": 7.988889
+        }
+      ]
+    },
+    {
+      "population": 500,
+      "cache_cases": {
+        "cold": {
+          "population": 500,
+          "role_counts": {
+            "character": 150,
+            "writer": 125,
+            "reviewer": 100,
+            "director": 50,
+            "knowledge": 50,
+            "background": 25
+          },
+          "assumed_cache_hit_ratio": 0,
+          "agent_tool_rps": 19.972222,
+          "database_read_statement_demand_rps": 67.2375,
+          "database_write_statement_demand_rps": 13.668056,
+          "canonical_command_demand_rps": 0.435417,
+          "model_call_demand_rps": 3.027778,
+          "model_inflight_demand": 246.111111,
+          "input_token_demand_per_hour": 97950000.0,
+          "output_token_demand_per_hour": 12575000.0,
+          "database_total_statement_demand_rps": 80.905556,
+          "by_operation_offered_rps": {
+            "context_compile": 2.986111,
+            "state_query": 1.888889,
+            "evidence_read": 5.555556,
+            "proposal_submit": 2.013889,
+            "task_control": 5.083333,
+            "draft_submit": 0.416667,
+            "history_query": 0.847222,
+            "review_submit": 0.555556,
+            "graph_query": 0.416667,
+            "search": 0.208333
+          },
+          "accepted_commit_tps": null,
+          "measured_latency_ms": null,
+          "measured_cost": null,
+          "cache_profile": "cold"
+        },
+        "mixed": {
+          "population": 500,
+          "role_counts": {
+            "character": 150,
+            "writer": 125,
+            "reviewer": 100,
+            "director": 50,
+            "knowledge": 50,
+            "background": 25
+          },
+          "assumed_cache_hit_ratio": 0.5,
+          "agent_tool_rps": 19.972222,
+          "database_read_statement_demand_rps": 47.897222,
+          "database_write_statement_demand_rps": 13.668056,
+          "canonical_command_demand_rps": 0.435417,
+          "model_call_demand_rps": 3.027778,
+          "model_inflight_demand": 246.111111,
+          "input_token_demand_per_hour": 97950000.0,
+          "output_token_demand_per_hour": 12575000.0,
+          "database_total_statement_demand_rps": 61.565278,
+          "by_operation_offered_rps": {
+            "context_compile": 2.986111,
+            "state_query": 1.888889,
+            "evidence_read": 5.555556,
+            "proposal_submit": 2.013889,
+            "task_control": 5.083333,
+            "draft_submit": 0.416667,
+            "history_query": 0.847222,
+            "review_submit": 0.555556,
+            "graph_query": 0.416667,
+            "search": 0.208333
+          },
+          "accepted_commit_tps": null,
+          "measured_latency_ms": null,
+          "measured_cost": null,
+          "cache_profile": "mixed"
+        },
+        "warm": {
+          "population": 500,
+          "role_counts": {
+            "character": 150,
+            "writer": 125,
+            "reviewer": 100,
+            "director": 50,
+            "knowledge": 50,
+            "background": 25
+          },
+          "assumed_cache_hit_ratio": 0.8,
+          "agent_tool_rps": 19.972222,
+          "database_read_statement_demand_rps": 36.293056,
+          "database_write_statement_demand_rps": 13.668056,
+          "canonical_command_demand_rps": 0.435417,
+          "model_call_demand_rps": 3.027778,
+          "model_inflight_demand": 246.111111,
+          "input_token_demand_per_hour": 97950000.0,
+          "output_token_demand_per_hour": 12575000.0,
+          "database_total_statement_demand_rps": 49.961111,
+          "by_operation_offered_rps": {
+            "context_compile": 2.986111,
+            "state_query": 1.888889,
+            "evidence_read": 5.555556,
+            "proposal_submit": 2.013889,
+            "task_control": 5.083333,
+            "draft_submit": 0.416667,
+            "history_query": 0.847222,
+            "review_submit": 0.555556,
+            "graph_query": 0.416667,
+            "search": 0.208333
+          },
+          "accepted_commit_tps": null,
+          "measured_latency_ms": null,
+          "measured_cost": null,
+          "cache_profile": "warm"
+        }
+      },
+      "seeded_schedule": {
+        "synthetic_calls": 70929,
+        "synthetic_mean_offered_rps": 19.7025,
+        "synthetic_max_offered_calls_in_one_second": 41,
+        "synthetic_p95_offered_calls_in_one_second": 29,
+        "note": "Traffic schedule counts only; p95 here is an arrival count, not response latency."
+      },
+      "open_loop_targets_rps": {
+        "0.5": 9.986111,
+        "1": 19.972222,
+        "1.5": 29.958333,
+        "2": 39.944444
+      },
+      "closed_vs_open_arithmetic": [
+        {
+          "extra_seconds_per_tool": 0,
+          "closed_loop_offered_rps": 19.972222,
+          "open_loop_scheduled_rps_at_1x": 19.972222
+        },
+        {
+          "extra_seconds_per_tool": 1,
+          "closed_loop_offered_rps": 19.04564,
+          "open_loop_scheduled_rps_at_1x": 19.972222
+        },
+        {
+          "extra_seconds_per_tool": 5,
+          "closed_loop_offered_rps": 16.119751,
+          "open_loop_scheduled_rps_at_1x": 19.972222
+        }
+      ]
+    },
+    {
+      "population": 1000,
+      "cache_cases": {
+        "cold": {
+          "population": 1000,
+          "role_counts": {
+            "character": 300,
+            "writer": 250,
+            "reviewer": 200,
+            "director": 100,
+            "knowledge": 100,
+            "background": 50
+          },
+          "assumed_cache_hit_ratio": 0,
+          "agent_tool_rps": 39.944444,
+          "database_read_statement_demand_rps": 134.475,
+          "database_write_statement_demand_rps": 27.336111,
+          "canonical_command_demand_rps": 0.870833,
+          "model_call_demand_rps": 6.055556,
+          "model_inflight_demand": 492.222222,
+          "input_token_demand_per_hour": 195900000.0,
+          "output_token_demand_per_hour": 25150000.0,
+          "database_total_statement_demand_rps": 161.811111,
+          "by_operation_offered_rps": {
+            "context_compile": 5.972222,
+            "state_query": 3.777778,
+            "evidence_read": 11.111111,
+            "proposal_submit": 4.027778,
+            "task_control": 10.166667,
+            "draft_submit": 0.833333,
+            "history_query": 1.694444,
+            "review_submit": 1.111111,
+            "graph_query": 0.833333,
+            "search": 0.416667
+          },
+          "accepted_commit_tps": null,
+          "measured_latency_ms": null,
+          "measured_cost": null,
+          "cache_profile": "cold"
+        },
+        "mixed": {
+          "population": 1000,
+          "role_counts": {
+            "character": 300,
+            "writer": 250,
+            "reviewer": 200,
+            "director": 100,
+            "knowledge": 100,
+            "background": 50
+          },
+          "assumed_cache_hit_ratio": 0.5,
+          "agent_tool_rps": 39.944444,
+          "database_read_statement_demand_rps": 95.794444,
+          "database_write_statement_demand_rps": 27.336111,
+          "canonical_command_demand_rps": 0.870833,
+          "model_call_demand_rps": 6.055556,
+          "model_inflight_demand": 492.222222,
+          "input_token_demand_per_hour": 195900000.0,
+          "output_token_demand_per_hour": 25150000.0,
+          "database_total_statement_demand_rps": 123.130556,
+          "by_operation_offered_rps": {
+            "context_compile": 5.972222,
+            "state_query": 3.777778,
+            "evidence_read": 11.111111,
+            "proposal_submit": 4.027778,
+            "task_control": 10.166667,
+            "draft_submit": 0.833333,
+            "history_query": 1.694444,
+            "review_submit": 1.111111,
+            "graph_query": 0.833333,
+            "search": 0.416667
+          },
+          "accepted_commit_tps": null,
+          "measured_latency_ms": null,
+          "measured_cost": null,
+          "cache_profile": "mixed"
+        },
+        "warm": {
+          "population": 1000,
+          "role_counts": {
+            "character": 300,
+            "writer": 250,
+            "reviewer": 200,
+            "director": 100,
+            "knowledge": 100,
+            "background": 50
+          },
+          "assumed_cache_hit_ratio": 0.8,
+          "agent_tool_rps": 39.944444,
+          "database_read_statement_demand_rps": 72.586111,
+          "database_write_statement_demand_rps": 27.336111,
+          "canonical_command_demand_rps": 0.870833,
+          "model_call_demand_rps": 6.055556,
+          "model_inflight_demand": 492.222222,
+          "input_token_demand_per_hour": 195900000.0,
+          "output_token_demand_per_hour": 25150000.0,
+          "database_total_statement_demand_rps": 99.922222,
+          "by_operation_offered_rps": {
+            "context_compile": 5.972222,
+            "state_query": 3.777778,
+            "evidence_read": 11.111111,
+            "proposal_submit": 4.027778,
+            "task_control": 10.166667,
+            "draft_submit": 0.833333,
+            "history_query": 1.694444,
+            "review_submit": 1.111111,
+            "graph_query": 0.833333,
+            "search": 0.416667
+          },
+          "accepted_commit_tps": null,
+          "measured_latency_ms": null,
+          "measured_cost": null,
+          "cache_profile": "warm"
+        }
+      },
+      "seeded_schedule": {
+        "synthetic_calls": 141696,
+        "synthetic_mean_offered_rps": 39.36,
+        "synthetic_max_offered_calls_in_one_second": 71,
+        "synthetic_p95_offered_calls_in_one_second": 53,
+        "note": "Traffic schedule counts only; p95 here is an arrival count, not response latency."
+      },
+      "open_loop_targets_rps": {
+        "0.5": 19.972222,
+        "1": 39.944444,
+        "1.5": 59.916666,
+        "2": 79.888888
+      },
+      "closed_vs_open_arithmetic": [
+        {
+          "extra_seconds_per_tool": 0,
+          "closed_loop_offered_rps": 39.944444,
+          "open_loop_scheduled_rps_at_1x": 39.944444
+        },
+        {
+          "extra_seconds_per_tool": 1,
+          "closed_loop_offered_rps": 38.091281,
+          "open_loop_scheduled_rps_at_1x": 39.944444
+        },
+        {
+          "extra_seconds_per_tool": 5,
+          "closed_loop_offered_rps": 32.239502,
+          "open_loop_scheduled_rps_at_1x": 39.944444
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "These are proposed traffic and fanout assumptions, not measured user traces.",
+    "No accepted throughput, latency, CPU, memory, I/O, correctness or provider capacity was measured.",
+    "Batching, retries, queue wait, failed calls and cache invalidation alter real demand.",
+    "In-flight model demand assumes steady state before quotas; real quota queues must be observed."
+  ]
+}

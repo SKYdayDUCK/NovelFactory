@@ -1,0 +1,42 @@
+{
+  "schema_version": "2.0",
+  "task_id": "331b5d96-694b-5c00-b41b-e19cda6e0ce6",
+  "generation": 3,
+  "context_bundle_id": "e71b65fa-fe5e-5e75-a498-e8d5a19234fd",
+  "proposal_id": "bf5f2df7-1284-54de-a129-c64a760d6dda",
+  "world_ref": {
+    "work_id": "5a57860a-0c16-5844-96ac-1a944ca70886",
+    "branch_id": "e3048e17-e8e4-52e1-9a2a-86a47189ff4b",
+    "world_revision_id": "99dc7bc0-4c95-5e4e-86eb-30a93dd526c1"
+  },
+  "actor_id": "3df1a7e0-22de-569b-9519-13122a7843ad",
+  "intent": "在桥头请求检查粮车，接受可能被拒绝。",
+  "targets": [
+    "271b1af1-1d0d-5b27-a2c4-e3f3024095f6"
+  ],
+  "story_interval": {
+    "start": {
+      "tick": 20,
+      "phase": 0
+    },
+    "end": {
+      "tick": 21,
+      "phase": 0
+    },
+    "bounds": "[)"
+  },
+  "resource_requests": [
+    {
+      "resource_id": "6f17d2b6-8e91-4dbf-80dd-a81c334bcb9e",
+      "quantity": "-1",
+      "unit": "kg",
+      "purpose": "invalid"
+    }
+  ],
+  "preconditions": [
+    "人物已在桥头且有提出请求的机会"
+  ],
+  "evidence_refs": [],
+  "dependency_fingerprint": "f602aa4cefce6856f6c1409b8fadd2e10c22b0d64a3598d6651bb90aaf5d8533",
+  "idempotency_key": "fixture-action-3"
+}
