@@ -1,0 +1,138 @@
+{
+  "schema_version": "1",
+  "purpose": "P4-01 engineering correctness; not performance or literary quality",
+  "python": "3.12.14",
+  "final_postgres_run": {
+    "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+    "port": 56453,
+    "command": [
+      ".venv/bin/python",
+      "-m",
+      "pytest",
+      "tests/integration/test_continuity.py",
+      "-q",
+      "--junitxml=/workspace/scratch/fe1ee59b659d/continuity-final.xml"
+    ],
+    "started_at_utc": "2026-11-10T14:49:41.976805+00:00",
+    "authentication": "loopback_trust_generated_test_data_only",
+    "fsync": true,
+    "synchronous_commit": true,
+    "max_connections": 60,
+    "data_directory_reused": true,
+    "exit_status": 0,
+    "postgres_exit_status": 0,
+    "duration_seconds": 31.338608,
+    "finished_at_utc": "2026-11-10T14:50:13.315451+00:00"
+  },
+  "result": {
+    "passed": 9,
+    "failed": 0,
+    "skipped": 0,
+    "pytest_duration_seconds": 30.43
+  },
+  "unit_result": {
+    "command": "python -m pytest tests/evaluation tests/unit/test_evidence_context.py tests/unit/test_continuity_rules.py -q",
+    "passed": 35,
+    "pytest_duration_seconds": 4.74,
+    "continuity_rule_tests": 4
+  },
+  "isolation": {
+    "data": "generated_disposable_test_database",
+    "port": 56453,
+    "host": "shared_with_other_development_work_not_a_load_measurement"
+  },
+  "source_files": {
+    "contracts/continuity.schema.json": {
+      "bytes": 12211,
+      "sha256": "cd2d0256f784544e1618a297a2e2a02e2322be9139de5675fd4aa7310b50f8b2"
+    },
+    "src/novel_factory/domain/continuity.py": {
+      "bytes": 4119,
+      "sha256": "efd913b5fd8e2ba0e67ce75f6eb5272aef8e57f106190d31a74f9914bb7cb806"
+    },
+    "src/novel_factory/application/continuity.py": {
+      "bytes": 33487,
+      "sha256": "ee6ee748187e56d2f2b7b972c387ca2c4c8ddf9c33a9a9a3ae2c25f6e1b35e84"
+    },
+    "src/novel_factory/application/release.py": {
+      "bytes": 32298,
+      "sha256": "b8c99e023a0b1d837f581fe673e439131febac907a466128389fa0d0046810d3"
+    },
+    "tests/unit/test_continuity_rules.py": {
+      "bytes": 2781,
+      "sha256": "bef71a845f6f6273b6307f8dd2918d8fb565dd20878536f3252d2b73284c523b"
+    },
+    "tests/integration/test_continuity.py": {
+      "bytes": 20196,
+      "sha256": "f0b32068a9ae1894fa834286d438c8576e305b67d5bb0512e46cbb51bf578ee4"
+    },
+    "tests/integration/test_release.py": {
+      "bytes": 25772,
+      "sha256": "085194aee694a9b3399d5700e7b551e2dcc01e225b1759b89f281871c6c64188"
+    },
+    "tests/integration/test_history_repair.py": {
+      "bytes": 13755,
+      "sha256": "90d72324ea56c3ebc4c42eba3e141834dd4d42b620de60f2aa108a13130b7fe7"
+    }
+  },
+  "raw_log_manifest": {
+    "continuity-final.log": {
+      "bytes": 452,
+      "sha256": "259c221a30b94d133e6ae7dbde92d3f57ef38b730b57aee7fc0cd1bc5183fe41"
+    },
+    "continuity-final.xml": {
+      "bytes": 1593,
+      "sha256": "855b7a8fa694116c7545b9653862de88005a1f0c13eacd8f4c097dae2eb62ab3"
+    },
+    "continuity-final-pg-logs/postgres_session.json": {
+      "bytes": 645,
+      "sha256": "574113dc91b9f1a467bd09198acbe650e2985facfb01d52f717f714eb4be6d0c"
+    },
+    "continuity-impact.log": {
+      "bytes": 466,
+      "sha256": "5523127c12fd26aef22330641aab240edec73b326724485a87a84555b895f120"
+    },
+    "continuity-impact.xml": {
+      "bytes": 545,
+      "sha256": "2e3e81d9673a6e8c993507fa5bed367cd5d48ee2d7cd748ca74f3ea9cce366bd"
+    },
+    "continuity-impact-pg-logs/postgres_session.json": {
+      "bytes": 685,
+      "sha256": "977cef5851b80ad871fe5f76f4a8cf38fe5413a287e25ffdf5f3c392884cf7d7"
+    },
+    "continuity-retcon.log": {
+      "bytes": 466,
+      "sha256": "7ae2ac79c87c85e220be9fc5e7e89df071100798ac20861f3b39c8e5dd2d98a9"
+    },
+    "continuity-retcon.xml": {
+      "bytes": 550,
+      "sha256": "0eff427959174a7e0d4e00f106dfd354f319c3cc7f5eb9a32206ce84b89bdd2d"
+    },
+    "continuity-retcon-pg-logs/postgres_session.json": {
+      "bytes": 687,
+      "sha256": "820c7e8776e5dfe625e73eaf2d5669ed9330422cca728375c8040f6afb798f7f"
+    },
+    "continuity-integration.log": {
+      "bytes": 3795,
+      "sha256": "1175da6d72102ce19ac22dcec4209039be3415cb5ae9d444e06137a24334c839"
+    }
+  },
+  "prior_failures": [
+    {
+      "issue": "shared-to-exclusive work-lock upgrade deadlock",
+      "disposition": "fixed by work exclusive guard before authorize; final concurrency test passed"
+    },
+    {
+      "issue": "baseline ReleaseService rejected canon-promoted REPAIR origin branch",
+      "disposition": "authority checked against works.canon_branch_id; real promoted-release test passed"
+    },
+    {
+      "issue": "reviewer lacked old history branch scope",
+      "disposition": "denial retained; explicit old/new scoped reviewer succeeds"
+    }
+  ],
+  "model_calls": 0,
+  "real_model_acceptance": "BLOCKED_ENVIRONMENT",
+  "literary_acceptance": "NOT_EVALUATED",
+  "remote_ci": "Parent stage integration records actual remote SHA and Actions result separately"
+}

@@ -1,0 +1,89 @@
+{
+  "scope": "P2 A04/H05 actual derived-world consumer and recovery, bounded P3-04 contribution",
+  "model_calls": 0,
+  "raw_artifacts": "Collect raw JUnit and PostgreSQL session files from CI; local paths are not durable delivery.",
+  "files": [
+    {
+      "filename": "worker.xml",
+      "sha256": "57d04f9397bf39366ee1cf5aa0eec116618254805e66bf43670178dcf9739ece",
+      "bytes": 1609,
+      "tests": {
+        "tests": "8",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "5.584"
+      }
+    },
+    {
+      "filename": "combined.xml",
+      "sha256": "a7c609aa92d72467b5b8bdea0ed38eea435db2bc03e1381472c29f737276a245",
+      "bytes": 3072,
+      "tests": {
+        "tests": "18",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "11.822"
+      }
+    },
+    {
+      "filename": "worker-final.xml",
+      "sha256": "9b0cdfcf00f4b5fdbc5aeb5093a6ae990b2d002ab553f581a4eafe46251b475d",
+      "bytes": 1765,
+      "tests": {
+        "tests": "9",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "6.395"
+      }
+    },
+    {
+      "filename": "worker-pg/postgres_session.json",
+      "sha256": "327933f35c59b849e0bc273fe5ea10eed185f47f5f1be1cefadb019920fa4619",
+      "bytes": 659
+    },
+    {
+      "filename": "combined-pg/postgres_session.json",
+      "sha256": "edc05fc1cc174ab304d9fbd4e91913349c114d2930d666cb7d9a43631987d5f4",
+      "bytes": 706
+    },
+    {
+      "filename": "worker-final-pg/postgres_session.json",
+      "sha256": "38a597111c4753b21d093ae2dcb0533ec62469b5a9ccb71798ed9f91630ee957",
+      "bytes": 664
+    },
+    {
+      "filename": "worker-upgrade-lock.xml",
+      "sha256": "889b75287ea000bb50f7bb6c31ab81d9ce8e9dae4e7c42b74c90f80d9ac61fa0",
+      "bytes": 5360,
+      "tests": {
+        "tests": "32",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "11.624"
+      }
+    },
+    {
+      "filename": "worker-upgrade-lock-pg/postgres_session.json",
+      "sha256": "7d1156178eab6a197a6b2842c9e743b2491a79f4bbfc92c68c944eb11b637164",
+      "bytes": 723
+    }
+  ],
+  "source_files": [
+    {
+      "filename": "src/novel_factory/application/derived_worker.py",
+      "sha256": "f42b74cd79e040e2467e265d5e15abeed18b1e41bed7ed5a5f1ce11421ded4d0"
+    },
+    {
+      "filename": "scripts/run_derived_worker.py",
+      "sha256": "8cf060b128a255ae656ddb343e2dfa02825be316440ce6db60d9623e59161cf7"
+    },
+    {
+      "filename": "tests/integration/test_derived_worker.py",
+      "sha256": "70985c16e3bad12032a74d6eb0066111968a9249cc6e44951ef822528fe14b6f"
+    }
+  ]
+}

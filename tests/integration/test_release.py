@@ -61,17 +61,18 @@ def runtime_grant(k, f, role):
         planes=["WORLD"], max_story_time=point(100))["principal"]
 
 
-def setup_batch(k, *, count=2, dependent=False):
-    f = load_fixture(k)
+def setup_batch(k, *, count=2, dependent=False, fixture=None):
+    f = fixture if fixture is not None else load_fixture(k)
     p, wr = f["principal"], f["world_ref"]
     planning, narrative, release = PlanningService(k), NarrativeService(k), ReleaseService(k)
     volume_id, narrative_id = uid(), uid()
+    key_prefix = volume_id + ":" if fixture is not None else ""
     volume = {"schema_version": "2.0", "volume_id": volume_id, "contract_revision_id": uid(), "input_world_ref": wr,
         "creative_brief": "固定世界下两条独立场景，交接不靠私聊", "focus_subject_ids": [f["ids"]["protagonist"]],
         "narrative_intents": ["保留人物的迟疑与不同声线"], "protected_commitments": [], "open_choices": ["后继仍须正式接受"],
         "completion_or_stop_conditions": ["通过精确版本的整卷审核"], "budget": {"max_semantic_calls": 20, "max_candidate_branches": 1},
         "upstream_literary_refs": [], "dependency_fingerprint": fingerprint(wr)}
-    volume_ref = planning.save_volume_contract(p, volume, "volume")
+    volume_ref = planning.save_volume_contract(p, volume, key_prefix + "volume")
     nodes = [{"node_id": uid(), "goal": "描写第" + str(i) + "条线的未决选择", "status": "VIABLE",
         "target_time": {"kind": "EXACT", "at": point(1)}, "subject_ids": [f["ids"]["protagonist"]],
         "hard_preconditions": [], "risk_notes": ["这是一份工程夹具"], "failure_exit": "保留未决问题", "fulfillment_event_refs": []} for i in range(count)]
@@ -79,15 +80,15 @@ def setup_batch(k, *, count=2, dependent=False):
         "input_world_ref": wr, "volume_contract_ref": volume_ref, "prior_plan_ref": None, "nodes": nodes,
         "published_prefix_node_ids": [], "dependencies": [], "decision": {"reason": "固定输入工程验收",
         "considered_options": [{"option_id": uid(), "summary": "显式前驱交接", "disposition": "SELECTED", "reason": "可验证"}]}}
-    plan_ref = planning.save_plan(p, plan, "plan")
-    planning.adopt_plan(p, wr, plan_ref, None, "adopt")
+    plan_ref = planning.save_plan(p, plan, key_prefix + "plan")
+    planning.adopt_plan(p, wr, plan_ref, None, key_prefix + "adopt")
     scene_ids = [uid() for _ in nodes]
     interval = {"start": point(1), "end": point(1, 1), "bounds": "[)"}
     slots = [{"scene_id": sid, "story_interval": interval, "reader_cut_ordinal": i,
               "required_predecessor_scene_ids": scene_ids[:2] if dependent and i == 2 else []} for i, sid in enumerate(scene_ids)]
     batch_request = {"schema_version": "2.2", "world_ref": wr, "volume_id": volume_id, "plan_ref": plan_ref,
         "style_refs": [], "narrative_revision_id": narrative_id, "arrangement_version": "arrangement-1", "scene_slots": slots}
-    batch_ref = release.create_writing_batch(p, batch_request, "batch")
+    batch_ref = release.create_writing_batch(p, batch_request, key_prefix + "batch")
     scenes, scene_refs = [], []
     for i, slot in enumerate(slots):
         contract = {"schema_version": "2.0", "scene_id": slot["scene_id"], "input_world_ref": wr,
@@ -102,7 +103,7 @@ def setup_batch(k, *, count=2, dependent=False):
             "plan_node_ids": [nodes[i]["node_id"]], "batch_ref": batch_ref, "prior_scene_ref": None,
             "required_event_refs": [], "required_predecessor_scene_ids": slot["required_predecessor_scene_ids"],
             "entry_checks": [check], "exit_checks": [], "allowed_disclosures": [], "literary_purpose": "保持独立叙事声线"}
-        scene_refs.append(narrative.save_scene(p, scene, "scene:" + str(i)))
+        scene_refs.append(narrative.save_scene(p, scene, key_prefix + "scene:" + str(i)))
         scenes.append(scene)
     return {**f, "plan": plan, "plan_ref": plan_ref, "volume_id": volume_id, "narrative_revision_id": narrative_id,
             "batch_ref": batch_ref, "batch_request": batch_request, "scenes": scenes, "scene_refs": scene_refs}

@@ -271,12 +271,16 @@ class ReleaseService:
         return ref
 
     def _collect(self, repo, principal, request):
+        from novel_factory.application.continuity import guard_serial_prefix
+        guard_serial_prefix(repo, request)
         wr, wid = request["world_ref"], request["world_ref"]["work_id"]
         self._authorize(repo, principal, wr, "APPROVE")
         plan = self._plan(repo, wr, request["plan_ref"], request["volume_id"])
         work = repo.one("works", {"work_id": wid})
-        branch = repo.one("branches", {"branch_id": wr["branch_id"]})
-        require(branch["kind"] == "CANON" and work["canon_branch_id"] == wr["branch_id"],
+        # Promotion deliberately preserves the branch's creation kind (REPAIR)
+        # and moves the authoritative work pointer. Canon authority therefore
+        # comes from that pointer, not the historical branch-origin label.
+        require(work["canon_branch_id"] == wr["branch_id"],
                 "BRANCH_CHANGED", "Formal internal releases require the current canonical branch")
         batches, slot_ids = {}, []
         for ref in request["batch_refs"]:
