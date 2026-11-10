@@ -1,0 +1,26 @@
+{
+  "command": [
+    ".venv/bin/python",
+    "-m",
+    "benchmarks.p2_acceptance_matrix",
+    "--junit",
+    "evidence/p2/batch3/baseline.xml",
+    "evidence/p2/batch3/case-extensions-attempt2.xml",
+    "evidence/p2/batch3/acceptance-attempt1.xml",
+    "--load",
+    "evidence/p2/batch3/load/agents50-stable.json",
+    "evidence/p2/batch3/load/agents50-hot-overload.json",
+    "evidence/p2/batch3/load/agents200-normal.json",
+    "evidence/p2/batch3/load/agents200-hot-overload.json",
+    "--output",
+    "evidence/p2/batch3/acceptance_matrix.json"
+  ],
+  "command_display": ".venv/bin/python -m benchmarks.p2_acceptance_matrix --junit evidence/p2/batch3/baseline.xml evidence/p2/batch3/case-extensions-attempt2.xml evidence/p2/batch3/acceptance-attempt1.xml --load evidence/p2/batch3/load/agents50-stable.json evidence/p2/batch3/load/agents50-hot-overload.json evidence/p2/batch3/load/agents200-normal.json evidence/p2/batch3/load/agents200-hot-overload.json --output evidence/p2/batch3/acceptance_matrix.json",
+  "cwd": "/workspace/scratch/cf3ee8d0c6c4/NovelFactory",
+  "started_at_utc": "2026-11-10T12:37:38.780247+00:00",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "exit_status": 1,
+  "duration_seconds": 0.071554,
+  "finished_at_utc": "2026-11-10T12:37:38.851827+00:00"
+}

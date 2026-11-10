@@ -1,0 +1,1522 @@
+{
+  "schema_version": "p2-acceptance-evidence-1",
+  "source_matrix": "validation/r1_case_matrix.json",
+  "source_matrix_modified": false,
+  "evidence_inputs": [
+    {
+      "path": "evidence/p2/batch3/baseline.xml",
+      "sha256": "20caa1d10cf690b49b8b7ee8fbc042622c4e75395f9243b79fd0010aabf9c2b7"
+    },
+    {
+      "path": "evidence/p2/batch3/case-extensions-attempt2.xml",
+      "sha256": "6fe5c759053e6f911b7dc610a2ef0123da53a1fdacf44e0607e76275cc4ea295"
+    },
+    {
+      "path": "evidence/p2/batch3/acceptance-attempt1.xml",
+      "sha256": "fc1ef42790b47ff882f8ad0eb80f3d6088a34d7ff1b3535b19b7f57be67616f8"
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "R1-A",
+      "title": "物品历史、未来计划与失效传播",
+      "engineering_coverage": "PARTIAL_WITH_STATED_BOUNDARIES",
+      "checks": [
+        {
+          "test_id": "R1-A-01",
+          "criterion": "四次关系变化均有事件版本与有效区间证据；范围查询不重复计入同一发生。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_actual_sword_acceptance_history_and_ryw",
+            "test_r1_sword_history_owner_holder_destroyed_and_belief"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_r1_sword_history_owner_holder_destroyed_and_belief",
+              "instance_name": "test_r1_sword_history_owner_holder_destroyed_and_belief",
+              "testcase": "tests.integration.test_world_kernel::test_r1_sword_history_owner_holder_destroyed_and_belief",
+              "status": "PASS",
+              "seconds": 1.57,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_actual_sword_acceptance_history_and_ryw",
+              "instance_name": "test_actual_sword_acceptance_history_and_ryw",
+              "testcase": "tests.queries.test_history_queries::test_actual_sword_acceptance_history_and_ryw",
+              "status": "PASS",
+              "seconds": 2.348,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": null
+        },
+        {
+          "test_id": "R1-A-02",
+          "criterion": "销毁后的活跃持有查询仅在 COMPLETE/EVALUATED 条件下返回 NONE；历史所有权仍可查。毁坏后的赔偿等法律关系只按已注册规则另行表示。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_r1_sword_history_owner_holder_destroyed_and_belief",
+            "test_real_query_world_belief_unknown_and_unadvanced_distinct"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_r1_sword_history_owner_holder_destroyed_and_belief",
+              "instance_name": "test_r1_sword_history_owner_holder_destroyed_and_belief",
+              "testcase": "tests.integration.test_world_kernel::test_r1_sword_history_owner_holder_destroyed_and_belief",
+              "status": "PASS",
+              "seconds": 1.57,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_real_query_world_belief_unknown_and_unadvanced_distinct",
+              "instance_name": "test_real_query_world_belief_unknown_and_unadvanced_distinct",
+              "testcase": "tests.queries.test_queries::test_real_query_world_belief_unknown_and_unadvanced_distinct",
+              "status": "PASS",
+              "seconds": 0.535,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": null
+        },
+        {
+          "test_id": "R1-A-03",
+          "criterion": "D50计划的当前适用性被阻断，后续选择的新计划版本可标INVALIDATED并安排重规划；原APPROVED版本及破坏前提的证据仍保留，不能把旧版原地改写。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_destroyed_future_prerequisite_fences_immediately_then_replans_locally"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_destroyed_future_prerequisite_fences_immediately_then_replans_locally",
+              "instance_name": "test_destroyed_future_prerequisite_fences_immediately_then_replans_locally",
+              "testcase": "tests.integration.test_planning::test_destroyed_future_prerequisite_fences_immediately_then_replans_locally",
+              "status": "PASS",
+              "seconds": 0.593,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": null
+        },
+        {
+          "test_id": "R1-A-04",
+          "criterion": "暂停异步依赖 worker 时，正式执行仍被同步屏障阻断；重启后追上且不重复重规划效果。",
+          "status": "PARTIAL_SYNC_FENCE_ONLY",
+          "required_test_names": [
+            "test_destroyed_future_prerequisite_fences_immediately_then_replans_locally",
+            "test_outbox_failure_redelivery_and_inbox_atomicity"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_destroyed_future_prerequisite_fences_immediately_then_replans_locally",
+              "instance_name": "test_destroyed_future_prerequisite_fences_immediately_then_replans_locally",
+              "testcase": "tests.integration.test_planning::test_destroyed_future_prerequisite_fences_immediately_then_replans_locally",
+              "status": "PASS",
+              "seconds": 0.593,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_outbox_failure_redelivery_and_inbox_atomicity",
+              "instance_name": "test_outbox_failure_redelivery_and_inbox_atomicity",
+              "testcase": "tests.reliability.test_tasks::test_outbox_failure_redelivery_and_inbox_atomicity",
+              "status": "PASS",
+              "seconds": 0.02,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": "Synchronous task fences work with no dependency consumer; explicit director replan and duplicate command replay are tested. A running dependency worker was not actually paused and resumed, so asynchronous catch-up is not established."
+        }
+      ],
+      "exact_variant": "SEE_PER_CHECK_QUALIFICATIONS"
+    },
+    {
+      "case_id": "R1-B",
+      "title": "修改过去转交方式并重建两个版本",
+      "engineering_coverage": "PASS_WITH_STATED_BOUNDARIES",
+      "checks": [
+        {
+          "test_id": "R1-B-01",
+          "criterion": "旧修订和旧发布可还原；不原地覆盖事件或对当前状态简单反向扣回。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+            "test_release_complete_exact_manifest_idempotency_and_immutable_prior"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+              "instance_name": "test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+              "testcase": "tests.integration.test_history_repair::test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+              "status": "PASS",
+              "seconds": 3.761,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_release_complete_exact_manifest_idempotency_and_immutable_prior",
+              "instance_name": "test_release_complete_exact_manifest_idempotency_and_immutable_prior",
+              "testcase": "tests.integration.test_release::test_release_complete_exact_manifest_idempotency_and_immutable_prior",
+              "status": "PASS",
+              "seconds": 4.651,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": "History retcon and immutable prior releases are composed from separate integration tests; old release text remains tied to its original WorldRef."
+        },
+        {
+          "test_id": "R1-B-02",
+          "criterion": "只重用选择清单、规则和投影器相容的快照；新历史中每个效果只生效一次。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+            "test_real_world_history_and_authorization_survive_isolated_restore"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+              "instance_name": "test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+              "testcase": "tests.integration.test_history_repair::test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+              "status": "PASS",
+              "seconds": 3.761,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_real_world_history_and_authorization_survive_isolated_restore",
+              "instance_name": "test_real_world_history_and_authorization_survive_isolated_restore",
+              "testcase": "tests.integration.test_world_recovery::test_real_world_history_and_authorization_survive_isolated_restore",
+              "status": "PASS",
+              "seconds": 2.541,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": null
+        },
+        {
+          "test_id": "R1-B-03",
+          "criterion": "产权改变不自动删除曾发生的发言/误信；认知变化需要相应来源。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+              "instance_name": "test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+              "testcase": "tests.integration.test_history_repair::test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+              "status": "PASS",
+              "seconds": 3.761,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": null
+        },
+        {
+          "test_id": "R1-B-04",
+          "criterion": "旧 canon 在重建期间新增事实或候选变化会使推广 CAS 拒绝；已有独立写入不丢失。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_r1_b_promotion_compares_both_canon_and_candidate_heads",
+            "test_promotion_cas_preserves_new_canon_and_repair_history"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [
+            "test_r1_b_promotion_compares_both_canon_and_candidate_heads[canon]",
+            "test_r1_b_promotion_compares_both_canon_and_candidate_heads[candidate]"
+          ],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_promotion_cas_preserves_new_canon_and_repair_history",
+              "instance_name": "test_promotion_cas_preserves_new_canon_and_repair_history",
+              "testcase": "tests.concurrency.test_world_races::test_promotion_cas_preserves_new_canon_and_repair_history",
+              "status": "PASS",
+              "seconds": 0.932,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_r1_b_promotion_compares_both_canon_and_candidate_heads",
+              "instance_name": "test_r1_b_promotion_compares_both_canon_and_candidate_heads[canon]",
+              "testcase": "tests.integration.test_history_repair::test_r1_b_promotion_compares_both_canon_and_candidate_heads[canon]",
+              "status": "PASS",
+              "seconds": 2.927,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_r1_b_promotion_compares_both_canon_and_candidate_heads",
+              "instance_name": "test_r1_b_promotion_compares_both_canon_and_candidate_heads[candidate]",
+              "testcase": "tests.integration.test_history_repair::test_r1_b_promotion_compares_both_canon_and_candidate_heads[candidate]",
+              "status": "PASS",
+              "seconds": 2.934,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": null
+        },
+        {
+          "test_id": "R1-B-05",
+          "criterion": "受影响的文本/摘要/计划缺少新资格时不得套用旧批准进入新版本。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_cross_branch_text_requires_new_scene_task_and_source_qualification",
+            "test_explicit_new_world_alignment_reuses_exact_text_but_requires_new_approval"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_cross_branch_text_requires_new_scene_task_and_source_qualification",
+              "instance_name": "test_cross_branch_text_requires_new_scene_task_and_source_qualification",
+              "testcase": "tests.integration.test_narrative::test_cross_branch_text_requires_new_scene_task_and_source_qualification",
+              "status": "PASS",
+              "seconds": 1.194,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_explicit_new_world_alignment_reuses_exact_text_but_requires_new_approval",
+              "instance_name": "test_explicit_new_world_alignment_reuses_exact_text_but_requires_new_approval",
+              "testcase": "tests.integration.test_release::test_explicit_new_world_alignment_reuses_exact_text_but_requires_new_approval",
+              "status": "PASS",
+              "seconds": 6.168,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": null
+        }
+      ],
+      "exact_variant": "SEE_PER_CHECK_QUALIFICATIONS"
+    },
+    {
+      "case_id": "R1-C",
+      "title": "独立剧情线推进、消息同步与资源交汇",
+      "engineering_coverage": "PASS_WITH_STATED_BOUNDARIES",
+      "checks": [
+        {
+          "test_id": "R1-C-01",
+          "criterion": "对两行动的所有到达排列，封闭输入和已选裁决结果一致；不得用响应快慢判胜。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_all_six_actor_completion_orders_preserve_selected_joint_world"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [
+            "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order0]",
+            "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order1]",
+            "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order2]",
+            "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order3]",
+            "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order4]",
+            "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order5]"
+          ],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_all_six_actor_completion_orders_preserve_selected_joint_world",
+              "instance_name": "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order0]",
+              "testcase": "tests.integration.test_simulation::test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order0]",
+              "status": "PASS",
+              "seconds": 0.82,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_all_six_actor_completion_orders_preserve_selected_joint_world",
+              "instance_name": "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order1]",
+              "testcase": "tests.integration.test_simulation::test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order1]",
+              "status": "PASS",
+              "seconds": 0.82,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_all_six_actor_completion_orders_preserve_selected_joint_world",
+              "instance_name": "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order2]",
+              "testcase": "tests.integration.test_simulation::test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order2]",
+              "status": "PASS",
+              "seconds": 0.809,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_all_six_actor_completion_orders_preserve_selected_joint_world",
+              "instance_name": "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order3]",
+              "testcase": "tests.integration.test_simulation::test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order3]",
+              "status": "PASS",
+              "seconds": 0.821,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_all_six_actor_completion_orders_preserve_selected_joint_world",
+              "instance_name": "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order4]",
+              "testcase": "tests.integration.test_simulation::test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order4]",
+              "status": "PASS",
+              "seconds": 0.866,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_all_six_actor_completion_orders_preserve_selected_joint_world",
+              "instance_name": "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order5]",
+              "testcase": "tests.integration.test_simulation::test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order5]",
+              "status": "PASS",
+              "seconds": 0.808,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": "All six orders of three actor outputs, plus reversed/forward twenty actor input orders with fixed selected decision. This is deterministic fixture arbitration."
+        },
+        {
+          "test_id": "R1-C-02",
+          "criterion": "删除一个可能影响 bridge 的入站通道证明后必须阻断交汇接受。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_r1_c_unproven_inbound_blocks_related_scope_but_not_remote"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [
+            "test_r1_c_unproven_inbound_blocks_related_scope_but_not_remote[True]",
+            "test_r1_c_unproven_inbound_blocks_related_scope_but_not_remote[False]"
+          ],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_r1_c_unproven_inbound_blocks_related_scope_but_not_remote",
+              "instance_name": "test_r1_c_unproven_inbound_blocks_related_scope_but_not_remote[True]",
+              "testcase": "tests.integration.test_p2_case_extensions::test_r1_c_unproven_inbound_blocks_related_scope_but_not_remote[True]",
+              "status": "PASS",
+              "seconds": 1.217,
+              "junit": "evidence/p2/batch3/case-extensions-attempt2.xml"
+            },
+            {
+              "name": "test_r1_c_unproven_inbound_blocks_related_scope_but_not_remote",
+              "instance_name": "test_r1_c_unproven_inbound_blocks_related_scope_but_not_remote[False]",
+              "testcase": "tests.integration.test_p2_case_extensions::test_r1_c_unproven_inbound_blocks_related_scope_but_not_remote[False]",
+              "status": "PASS",
+              "seconds": 0.613,
+              "junit": "evidence/p2/batch3/case-extensions-attempt2.xml"
+            }
+          ],
+          "qualification": null
+        },
+        {
+          "test_id": "R1-C-03",
+          "criterion": "将入站下界设为 D42 时只可确认严格早于 D42 的范围，不能越过未处理交汇。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_unrelated_region_can_advance_and_channel_exact_bound_is_respected"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_unrelated_region_can_advance_and_channel_exact_bound_is_respected",
+              "instance_name": "test_unrelated_region_can_advance_and_channel_exact_bound_is_respected",
+              "testcase": "tests.integration.test_simulation::test_unrelated_region_can_advance_and_channel_exact_bound_is_respected",
+              "status": "PASS",
+              "seconds": 0.924,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": "Exclusive incoming-bound semantics are tested at D31; this is the same rule as design example D42, not an assertion that the literal D42 dataset ran."
+        },
+        {
+          "test_id": "R1-C-04",
+          "criterion": "延迟/重复消息只产生一次获准观察或触发；尚未到达不进入角色上下文。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_r1_c_delayed_message_observation_and_duplicate_delivery_preserve_knowledge_time"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_r1_c_delayed_message_observation_and_duplicate_delivery_preserve_knowledge_time",
+              "instance_name": "test_r1_c_delayed_message_observation_and_duplicate_delivery_preserve_knowledge_time",
+              "testcase": "tests.integration.test_p2_case_extensions::test_r1_c_delayed_message_observation_and_duplicate_delivery_preserve_knowledge_time",
+              "status": "PASS",
+              "seconds": 1.249,
+              "junit": "evidence/p2/batch3/case-extensions-attempt2.xml"
+            }
+          ],
+          "qualification": null
+        },
+        {
+          "test_id": "R1-C-05",
+          "criterion": "真实数据库并发仅验证原子性，语义胜负由预先固定的裁决结果决定。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_three_actor_joint_result_is_atomic_idempotent_and_sealed",
+            "test_all_six_actor_completion_orders_preserve_selected_joint_world"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [
+            "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order0]",
+            "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order1]",
+            "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order2]",
+            "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order3]",
+            "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order4]",
+            "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order5]"
+          ],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_three_actor_joint_result_is_atomic_idempotent_and_sealed",
+              "instance_name": "test_three_actor_joint_result_is_atomic_idempotent_and_sealed",
+              "testcase": "tests.integration.test_simulation::test_three_actor_joint_result_is_atomic_idempotent_and_sealed",
+              "status": "PASS",
+              "seconds": 0.981,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_all_six_actor_completion_orders_preserve_selected_joint_world",
+              "instance_name": "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order0]",
+              "testcase": "tests.integration.test_simulation::test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order0]",
+              "status": "PASS",
+              "seconds": 0.82,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_all_six_actor_completion_orders_preserve_selected_joint_world",
+              "instance_name": "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order1]",
+              "testcase": "tests.integration.test_simulation::test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order1]",
+              "status": "PASS",
+              "seconds": 0.82,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_all_six_actor_completion_orders_preserve_selected_joint_world",
+              "instance_name": "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order2]",
+              "testcase": "tests.integration.test_simulation::test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order2]",
+              "status": "PASS",
+              "seconds": 0.809,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_all_six_actor_completion_orders_preserve_selected_joint_world",
+              "instance_name": "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order3]",
+              "testcase": "tests.integration.test_simulation::test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order3]",
+              "status": "PASS",
+              "seconds": 0.821,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_all_six_actor_completion_orders_preserve_selected_joint_world",
+              "instance_name": "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order4]",
+              "testcase": "tests.integration.test_simulation::test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order4]",
+              "status": "PASS",
+              "seconds": 0.866,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_all_six_actor_completion_orders_preserve_selected_joint_world",
+              "instance_name": "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order5]",
+              "testcase": "tests.integration.test_simulation::test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order5]",
+              "status": "PASS",
+              "seconds": 0.808,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": null
+        }
+      ],
+      "exact_variant": "SEE_PER_CHECK_QUALIFICATIONS"
+    },
+    {
+      "case_id": "R1-D",
+      "title": "未来候选已推进而主分支未推进",
+      "engineering_coverage": "PASS_WITH_STATED_BOUNDARIES",
+      "checks": [
+        {
+          "test_id": "R1-D-01",
+          "criterion": "缓存、上下文、索引和证据均带作品/分支/修订及权限绑定；不按实体ID跨分支复用事实答案。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_non_admin_artifact_must_match_live_task_generation_and_cut",
+            "test_pagination_pins_world_and_rejects_changed_query",
+            "test_fixed_cut_stale_search_is_not_unknown_world"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_non_admin_artifact_must_match_live_task_generation_and_cut",
+              "instance_name": "test_non_admin_artifact_must_match_live_task_generation_and_cut",
+              "testcase": "tests.queries.test_audit_regressions::test_non_admin_artifact_must_match_live_task_generation_and_cut",
+              "status": "PASS",
+              "seconds": 0.843,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_pagination_pins_world_and_rejects_changed_query",
+              "instance_name": "test_pagination_pins_world_and_rejects_changed_query",
+              "testcase": "tests.queries.test_history_queries::test_pagination_pins_world_and_rejects_changed_query",
+              "status": "PASS",
+              "seconds": 1.72,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_fixed_cut_stale_search_is_not_unknown_world",
+              "instance_name": "test_fixed_cut_stale_search_is_not_unknown_world",
+              "testcase": "tests.queries.test_queries::test_fixed_cut_stale_search_is_not_unknown_world",
+              "status": "PASS",
+              "seconds": 0.083,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": null
+        },
+        {
+          "test_id": "R1-D-02",
+          "criterion": "采纳前 candidate 内容不进入 main 投影；采纳后每个事件效果只在目标历史中选择一次。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_fork_inherits_selection_once_and_isolates_future",
+            "test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+              "instance_name": "test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+              "testcase": "tests.integration.test_history_repair::test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+              "status": "PASS",
+              "seconds": 3.761,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_fork_inherits_selection_once_and_isolates_future",
+              "instance_name": "test_fork_inherits_selection_once_and_isolates_future",
+              "testcase": "tests.integration.test_world_kernel::test_fork_inherits_selection_once_and_isolates_future",
+              "status": "PASS",
+              "seconds": 0.676,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": null
+        },
+        {
+          "test_id": "R1-D-03",
+          "criterion": "自动切换 WorldRef 或直接复制候选投影不能通过正式接受门禁。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_fixed_latest_batch_and_compiler_rebind",
+            "test_cross_branch_text_requires_new_scene_task_and_source_qualification"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_cross_branch_text_requires_new_scene_task_and_source_qualification",
+              "instance_name": "test_cross_branch_text_requires_new_scene_task_and_source_qualification",
+              "testcase": "tests.integration.test_narrative::test_cross_branch_text_requires_new_scene_task_and_source_qualification",
+              "status": "PASS",
+              "seconds": 1.194,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_fixed_latest_batch_and_compiler_rebind",
+              "instance_name": "test_fixed_latest_batch_and_compiler_rebind",
+              "testcase": "tests.queries.test_history_queries::test_fixed_latest_batch_and_compiler_rebind",
+              "status": "PASS",
+              "seconds": 0.63,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": null
+        },
+        {
+          "test_id": "R1-D-04",
+          "criterion": "作者可查的候选信息不会进入无此 grant 的角色会话或错误消息。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_actor_context_rejects_world_plan_other_actor_and_future",
+            "test_actor_material_errors_do_not_reveal_artifact_existence"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_actor_material_errors_do_not_reveal_artifact_existence",
+              "instance_name": "test_actor_material_errors_do_not_reveal_artifact_existence",
+              "testcase": "tests.integration.test_narrative::test_actor_material_errors_do_not_reveal_artifact_existence",
+              "status": "PASS",
+              "seconds": 0.342,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_actor_context_rejects_world_plan_other_actor_and_future",
+              "instance_name": "test_actor_context_rejects_world_plan_other_actor_and_future",
+              "testcase": "tests.queries.test_queries::test_actor_context_rejects_world_plan_other_actor_and_future",
+              "status": "PASS",
+              "seconds": 0.103,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": null
+        }
+      ],
+      "exact_variant": "SEE_PER_CHECK_QUALIFICATIONS"
+    },
+    {
+      "case_id": "R1-E",
+      "title": "误信、客观状态与读者披露隔离",
+      "engineering_coverage": "PASS_WITH_STATED_BOUNDARIES",
+      "checks": [
+        {
+          "test_id": "R1-E-01",
+          "criterion": "检查正文、证据ID、计数、搜索分数、错误与缓存命中路径均不泄露秘密。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_actor_context_rejects_world_plan_other_actor_and_future",
+            "test_actor_receives_only_own_compiled_belief_and_frozen_runtime",
+            "test_cache_hit_rechecks_revoked_grant",
+            "test_reader_inputs_do_not_grant_text_or_hidden_material_access"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_actor_receives_only_own_compiled_belief_and_frozen_runtime",
+              "instance_name": "test_actor_receives_only_own_compiled_belief_and_frozen_runtime",
+              "testcase": "tests.integration.test_agent_gateway::test_actor_receives_only_own_compiled_belief_and_frozen_runtime",
+              "status": "PASS",
+              "seconds": 0.176,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_reader_inputs_do_not_grant_text_or_hidden_material_access",
+              "instance_name": "test_reader_inputs_do_not_grant_text_or_hidden_material_access",
+              "testcase": "tests.integration.test_narrative::test_reader_inputs_do_not_grant_text_or_hidden_material_access",
+              "status": "PASS",
+              "seconds": 0.372,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_actor_context_rejects_world_plan_other_actor_and_future",
+              "instance_name": "test_actor_context_rejects_world_plan_other_actor_and_future",
+              "testcase": "tests.queries.test_queries::test_actor_context_rejects_world_plan_other_actor_and_future",
+              "status": "PASS",
+              "seconds": 0.103,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_cache_hit_rechecks_revoked_grant",
+              "instance_name": "test_cache_hit_rechecks_revoked_grant",
+              "testcase": "tests.queries.test_queries::test_cache_hit_rechecks_revoked_grant",
+              "status": "PASS",
+              "seconds": 0.08,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": null
+        },
+        {
+          "test_id": "R1-E-02",
+          "criterion": "隐藏记录与不存在记录在受限接口具有一致可见行为；高敏感路径另测时间/大小侧信道风险。",
+          "status": "PASS_VISIBLE_SHAPE_ONLY",
+          "required_test_names": [
+            "test_actor_hidden_and_nonexistent_have_identical_answer_shape",
+            "test_actor_material_errors_do_not_reveal_artifact_existence"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_actor_material_errors_do_not_reveal_artifact_existence",
+              "instance_name": "test_actor_material_errors_do_not_reveal_artifact_existence",
+              "testcase": "tests.integration.test_narrative::test_actor_material_errors_do_not_reveal_artifact_existence",
+              "status": "PASS",
+              "seconds": 0.342,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_actor_hidden_and_nonexistent_have_identical_answer_shape",
+              "instance_name": "test_actor_hidden_and_nonexistent_have_identical_answer_shape",
+              "testcase": "tests.queries.test_queries::test_actor_hidden_and_nonexistent_have_identical_answer_shape",
+              "status": "PASS",
+              "seconds": 0.068,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": "Visible payload/error shapes are checked. Statistical latency and response-size side-channel resistance under hostile traffic is not established."
+        },
+        {
+          "test_id": "R1-E-03",
+          "criterion": "用同一全知模型会话直接改提示词扮演 protagonist 的实现判为隔离失败。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_character_host_without_verified_isolation_cannot_dispatch",
+            "test_real_http_transport_shape_is_stateless_text_only"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_character_host_without_verified_isolation_cannot_dispatch",
+              "instance_name": "test_character_host_without_verified_isolation_cannot_dispatch",
+              "testcase": "tests.integration.test_agent_gateway::test_character_host_without_verified_isolation_cannot_dispatch",
+              "status": "PASS",
+              "seconds": 0.117,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_real_http_transport_shape_is_stateless_text_only",
+              "instance_name": "test_real_http_transport_shape_is_stateless_text_only",
+              "testcase": "tests.unit.test_agent_adapter_protocol::test_real_http_transport_shape_is_stateless_text_only",
+              "status": "PASS",
+              "seconds": 0.503,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": "Unsafe Host dispatch is rejected; the tested HTTP adapter uses independent stateless calls. A real model/Host end-to-end experiment remains BLOCKED_ENVIRONMENT."
+        },
+        {
+          "test_id": "R1-E-04",
+          "criterion": "角色猜中秘密只能标为推测，不能伪造知情证据；查询旧 D35 仍保留旧认知。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_valid_belief_cannot_cite_forged_or_other_actor_evidence",
+            "test_formal_late_knowledge_preserves_target_time_and_supports_retrospection",
+            "test_unreliable_reader_disclosure_is_accepted_text_without_world_truth"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_valid_belief_cannot_cite_forged_or_other_actor_evidence",
+              "instance_name": "test_valid_belief_cannot_cite_forged_or_other_actor_evidence",
+              "testcase": "tests.integration.test_narrative::test_valid_belief_cannot_cite_forged_or_other_actor_evidence",
+              "status": "PASS",
+              "seconds": 1.832,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_unreliable_reader_disclosure_is_accepted_text_without_world_truth",
+              "instance_name": "test_unreliable_reader_disclosure_is_accepted_text_without_world_truth",
+              "testcase": "tests.integration.test_narrative::test_unreliable_reader_disclosure_is_accepted_text_without_world_truth",
+              "status": "PASS",
+              "seconds": 0.569,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_formal_late_knowledge_preserves_target_time_and_supports_retrospection",
+              "instance_name": "test_formal_late_knowledge_preserves_target_time_and_supports_retrospection",
+              "testcase": "tests.queries.test_history_queries::test_formal_late_knowledge_preserves_target_time_and_supports_retrospection",
+              "status": "PASS",
+              "seconds": 2.447,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": null
+        }
+      ],
+      "exact_variant": "SEE_PER_CHECK_QUALIFICATIONS"
+    },
+    {
+      "case_id": "R1-F",
+      "title": "数百 Agent、共享基线、独立与冲突写入",
+      "engineering_coverage": "PASS_WITH_STATED_BOUNDARIES",
+      "checks": [
+        {
+          "test_id": "R1-F-01",
+          "criterion": "20个独立命令在无其它变化夹具中均得到正确结果；是否通过守卫验证由实际 token 检查记录证明。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_r1_f_200_slots_20_independent_and_20_intents_require_explicit_joint_requalification"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_r1_f_200_slots_20_independent_and_20_intents_require_explicit_joint_requalification",
+              "instance_name": "test_r1_f_200_slots_20_independent_and_20_intents_require_explicit_joint_requalification",
+              "testcase": "tests.integration.test_p2_r1_f_population::test_r1_f_200_slots_20_independent_and_20_intents_require_explicit_joint_requalification",
+              "status": "PASS",
+              "seconds": 21.837,
+              "junit": "evidence/p2/batch3/acceptance-attempt1.xml"
+            }
+          ],
+          "qualification": "Twenty independent commands retain W0 and guarded acceptance. The later joint interaction requires an explicit new common input cut after HEAD moves."
+        },
+        {
+          "test_id": "R1-F-02",
+          "criterion": "read/write集合、负向谓词或覆盖token变化不能靠只核对实体版本漏过；所有写路径同事务更新相关scope。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_write_skew_two_guards_cannot_both_leave",
+            "test_negative_range_phantom_invalidates_clear_route",
+            "test_scope_identity_cannot_be_renamed_or_reset_for_aba",
+            "test_new_registered_influence_invalidates_existing_guarded_certificate",
+            "test_interpretation_epoch_invalidates_prepared_acceptance"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_write_skew_two_guards_cannot_both_leave",
+              "instance_name": "test_write_skew_two_guards_cannot_both_leave",
+              "testcase": "tests.concurrency.test_world_races::test_write_skew_two_guards_cannot_both_leave",
+              "status": "PASS",
+              "seconds": 0.521,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_negative_range_phantom_invalidates_clear_route",
+              "instance_name": "test_negative_range_phantom_invalidates_clear_route",
+              "testcase": "tests.concurrency.test_world_races::test_negative_range_phantom_invalidates_clear_route",
+              "status": "PASS",
+              "seconds": 0.435,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_interpretation_epoch_invalidates_prepared_acceptance",
+              "instance_name": "test_interpretation_epoch_invalidates_prepared_acceptance",
+              "testcase": "tests.concurrency.test_world_races::test_interpretation_epoch_invalidates_prepared_acceptance",
+              "status": "PASS",
+              "seconds": 0.247,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_scope_identity_cannot_be_renamed_or_reset_for_aba",
+              "instance_name": "test_scope_identity_cannot_be_renamed_or_reset_for_aba",
+              "testcase": "tests.integration.test_scope_identity::test_scope_identity_cannot_be_renamed_or_reset_for_aba",
+              "status": "PASS",
+              "seconds": 0.526,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_new_registered_influence_invalidates_existing_guarded_certificate",
+              "instance_name": "test_new_registered_influence_invalidates_existing_guarded_certificate",
+              "testcase": "tests.integration.test_simulation::test_new_registered_influence_invalidates_existing_guarded_certificate",
+              "status": "PASS",
+              "seconds": 0.483,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": null
+        },
+        {
+          "test_id": "R1-F-03",
+          "criterion": "联合裁决的胜负不因API/数据库到达顺序改变；单资源只有选定的有效效果。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_all_six_actor_completion_orders_preserve_selected_joint_world",
+            "test_r1_f_200_slots_20_independent_and_20_intents_require_explicit_joint_requalification"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [
+            "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order0]",
+            "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order1]",
+            "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order2]",
+            "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order3]",
+            "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order4]",
+            "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order5]"
+          ],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_all_six_actor_completion_orders_preserve_selected_joint_world",
+              "instance_name": "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order0]",
+              "testcase": "tests.integration.test_simulation::test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order0]",
+              "status": "PASS",
+              "seconds": 0.82,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_all_six_actor_completion_orders_preserve_selected_joint_world",
+              "instance_name": "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order1]",
+              "testcase": "tests.integration.test_simulation::test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order1]",
+              "status": "PASS",
+              "seconds": 0.82,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_all_six_actor_completion_orders_preserve_selected_joint_world",
+              "instance_name": "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order2]",
+              "testcase": "tests.integration.test_simulation::test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order2]",
+              "status": "PASS",
+              "seconds": 0.809,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_all_six_actor_completion_orders_preserve_selected_joint_world",
+              "instance_name": "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order3]",
+              "testcase": "tests.integration.test_simulation::test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order3]",
+              "status": "PASS",
+              "seconds": 0.821,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_all_six_actor_completion_orders_preserve_selected_joint_world",
+              "instance_name": "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order4]",
+              "testcase": "tests.integration.test_simulation::test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order4]",
+              "status": "PASS",
+              "seconds": 0.866,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_all_six_actor_completion_orders_preserve_selected_joint_world",
+              "instance_name": "test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order5]",
+              "testcase": "tests.integration.test_simulation::test_all_six_actor_completion_orders_preserve_selected_joint_world[return_order5]",
+              "status": "PASS",
+              "seconds": 0.808,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_r1_f_200_slots_20_independent_and_20_intents_require_explicit_joint_requalification",
+              "instance_name": "test_r1_f_200_slots_20_independent_and_20_intents_require_explicit_joint_requalification",
+              "testcase": "tests.integration.test_p2_r1_f_population::test_r1_f_200_slots_20_independent_and_20_intents_require_explicit_joint_requalification",
+              "status": "PASS",
+              "seconds": 21.837,
+              "junit": "evidence/p2/batch3/acceptance-attempt1.xml"
+            }
+          ],
+          "qualification": "One fixed selected result is accepted after all twenty intents seal; no winner is selected by DB lock acquisition. The old joint proposal is rejected on HEAD change."
+        },
+        {
+          "test_id": "R1-F-04",
+          "criterion": "已过期证书在txn内再次检查后拒绝；批准仅对不变候选及允许的复验方式适用。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_after_sample_change_does_not_refresh_certificate_tokens",
+            "test_expired_and_unissued_certificates_are_rejected",
+            "test_current_grant_and_approval_revocation_block_accept"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_after_sample_change_does_not_refresh_certificate_tokens",
+              "instance_name": "test_after_sample_change_does_not_refresh_certificate_tokens",
+              "testcase": "tests.concurrency.test_world_races::test_after_sample_change_does_not_refresh_certificate_tokens",
+              "status": "PASS",
+              "seconds": 0.512,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_current_grant_and_approval_revocation_block_accept",
+              "instance_name": "test_current_grant_and_approval_revocation_block_accept",
+              "testcase": "tests.concurrency.test_world_races::test_current_grant_and_approval_revocation_block_accept",
+              "status": "PASS",
+              "seconds": 0.4,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_expired_and_unissued_certificates_are_rejected",
+              "instance_name": "test_expired_and_unissued_certificates_are_rejected",
+              "testcase": "tests.concurrency.test_world_races::test_expired_and_unissued_certificates_are_rejected",
+              "status": "PASS",
+              "seconds": 0.218,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": null
+        },
+        {
+          "test_id": "R1-F-05",
+          "criterion": "分别报告真实冲突、仅HEAD变化、自动重验证成功、需要语义重做和基础设施重试的比例。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_r1_f_200_slots_20_independent_and_20_intents_require_explicit_joint_requalification"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_r1_f_200_slots_20_independent_and_20_intents_require_explicit_joint_requalification",
+              "instance_name": "test_r1_f_200_slots_20_independent_and_20_intents_require_explicit_joint_requalification",
+              "testcase": "tests.integration.test_p2_r1_f_population::test_r1_f_200_slots_20_independent_and_20_intents_require_explicit_joint_requalification",
+              "status": "PASS",
+              "seconds": 21.837,
+              "junit": "evidence/p2/batch3/acceptance-attempt1.xml"
+            }
+          ],
+          "qualification": "Workload JSON separates true resource conflicts, old-base accepted receipts, duplicate retries and backpressure. Strict joint requires explicit requalification."
+        },
+        {
+          "test_id": "R1-F-06",
+          "criterion": "正式状态零重复效果、零越权接受、零不可还原记录；性能数字独立报告，不用快速拒绝替代成功吞吐。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_same_key_retry_and_new_key_do_not_repeat_effects",
+            "test_r1_f_200_slots_20_independent_and_20_intents_require_explicit_joint_requalification",
+            "test_real_world_history_and_authorization_survive_isolated_restore"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_same_key_retry_and_new_key_do_not_repeat_effects",
+              "instance_name": "test_same_key_retry_and_new_key_do_not_repeat_effects",
+              "testcase": "tests.concurrency.test_world_races::test_same_key_retry_and_new_key_do_not_repeat_effects",
+              "status": "PASS",
+              "seconds": 0.27,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_real_world_history_and_authorization_survive_isolated_restore",
+              "instance_name": "test_real_world_history_and_authorization_survive_isolated_restore",
+              "testcase": "tests.integration.test_world_recovery::test_real_world_history_and_authorization_survive_isolated_restore",
+              "status": "PASS",
+              "seconds": 2.541,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_r1_f_200_slots_20_independent_and_20_intents_require_explicit_joint_requalification",
+              "instance_name": "test_r1_f_200_slots_20_independent_and_20_intents_require_explicit_joint_requalification",
+              "testcase": "tests.integration.test_p2_r1_f_population::test_r1_f_200_slots_20_independent_and_20_intents_require_explicit_joint_requalification",
+              "status": "PASS",
+              "seconds": 21.837,
+              "junit": "evidence/p2/batch3/acceptance-attempt1.xml"
+            }
+          ],
+          "qualification": null
+        }
+      ],
+      "exact_variant": "NOT_SUPPORTED_STRICT_REBIND_REQUIRED"
+    },
+    {
+      "case_id": "R1-G",
+      "title": "宏观运输转为微观场景而不重复效果",
+      "engineering_coverage": "PASS_WITH_STATED_BOUNDARIES",
+      "checks": [
+        {
+          "test_id": "R1-G-01",
+          "criterion": "正文前后世界有效effect选择数/资源余额/持有人/前沿完全一致。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_r1_g_macro_transport_and_three_presentations_do_not_repeat_any_effect"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_r1_g_macro_transport_and_three_presentations_do_not_repeat_any_effect",
+              "instance_name": "test_r1_g_macro_transport_and_three_presentations_do_not_repeat_any_effect",
+              "testcase": "tests.integration.test_p2_case_extensions::test_r1_g_macro_transport_and_three_presentations_do_not_repeat_any_effect",
+              "status": "PASS",
+              "seconds": 2.588,
+              "junit": "evidence/p2/batch3/case-extensions-attempt2.xml"
+            }
+          ],
+          "qualification": "The exact food 100→88, health 100→97 and crate handoff fixture runs at D53. Health is an explicit conserved synthetic resource, not a general health simulation engine."
+        },
+        {
+          "test_id": "R1-G-02",
+          "criterion": "新伤害、新消耗、新转交需明确变化提案与合法接受，不能隐藏在表层描写。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_text_first_delta_must_use_formal_kernel_acceptance_then_exact_alignment",
+            "test_forged_clear_report_and_wrong_span_never_receive_acceptance"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_text_first_delta_must_use_formal_kernel_acceptance_then_exact_alignment",
+              "instance_name": "test_text_first_delta_must_use_formal_kernel_acceptance_then_exact_alignment",
+              "testcase": "tests.integration.test_narrative::test_text_first_delta_must_use_formal_kernel_acceptance_then_exact_alignment",
+              "status": "PASS",
+              "seconds": 1.105,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_forged_clear_report_and_wrong_span_never_receive_acceptance",
+              "instance_name": "test_forged_clear_report_and_wrong_span_never_receive_acceptance",
+              "testcase": "tests.integration.test_narrative::test_forged_clear_report_and_wrong_span_never_receive_acceptance",
+              "status": "PASS",
+              "seconds": 0.513,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": null
+        },
+        {
+          "test_id": "R1-G-03",
+          "criterion": "P3等价实验比较中间权属、消息、观察、伤势和终态；只比较最后余额不足以通过。",
+          "status": "NOT_IN_SCOPE_P3_02",
+          "required_test_names": [],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [],
+          "qualification": "Complex macro/micro equivalence replacement belongs to P3-02 and was explicitly excluded by the user. P2 only accepts presentation with zero new effects."
+        },
+        {
+          "test_id": "R1-G-04",
+          "criterion": "失败微观候选的认知和会话不混入已选分支。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_fork_inherits_selection_once_and_isolates_future",
+            "test_cross_branch_text_requires_new_scene_task_and_source_qualification"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_cross_branch_text_requires_new_scene_task_and_source_qualification",
+              "instance_name": "test_cross_branch_text_requires_new_scene_task_and_source_qualification",
+              "testcase": "tests.integration.test_narrative::test_cross_branch_text_requires_new_scene_task_and_source_qualification",
+              "status": "PASS",
+              "seconds": 1.194,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_fork_inherits_selection_once_and_isolates_future",
+              "instance_name": "test_fork_inherits_selection_once_and_isolates_future",
+              "testcase": "tests.integration.test_world_kernel::test_fork_inherits_selection_once_and_isolates_future",
+              "status": "PASS",
+              "seconds": 0.676,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": null
+        }
+      ],
+      "exact_variant": "SEE_PER_CHECK_QUALIFICATIONS"
+    },
+    {
+      "case_id": "R1-H",
+      "title": "接受成功、响应丢失、索引失败与恢复",
+      "engineering_coverage": "PASS_WITH_STATED_BOUNDARIES",
+      "checks": [
+        {
+          "test_id": "R1-H-01",
+          "criterion": "同K不同载荷被拒绝；换key不能绕过同提案/效果唯一约束。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_r1_h_real_tcp_lost_reply_retry_revocation_and_outbox_recovery"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_r1_h_real_tcp_lost_reply_retry_revocation_and_outbox_recovery",
+              "instance_name": "test_r1_h_real_tcp_lost_reply_retry_revocation_and_outbox_recovery",
+              "testcase": "tests.service.test_p2_response_loss::test_r1_h_real_tcp_lost_reply_retry_revocation_and_outbox_recovery",
+              "status": "PASS",
+              "seconds": 1.793,
+              "junit": "evidence/p2/batch3/acceptance-attempt1.xml"
+            }
+          ],
+          "qualification": null
+        },
+        {
+          "test_id": "R1-H-02",
+          "criterion": "任务取消先线性化则旧代不能产生新接受；接受先成功则之后取消不撤销原结果。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_old_generation_and_cancelled_task_cannot_commit",
+            "test_lost_response_then_cancel_retrieves_original_receipt",
+            "test_task_authorization_is_rechecked_inside_mutation_transaction"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_task_authorization_is_rechecked_inside_mutation_transaction",
+              "instance_name": "test_task_authorization_is_rechecked_inside_mutation_transaction",
+              "testcase": "tests.concurrency.test_world_races::test_task_authorization_is_rechecked_inside_mutation_transaction",
+              "status": "PASS",
+              "seconds": 0.053,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_lost_response_then_cancel_retrieves_original_receipt",
+              "instance_name": "test_lost_response_then_cancel_retrieves_original_receipt",
+              "testcase": "tests.integration.test_world_kernel::test_lost_response_then_cancel_retrieves_original_receipt",
+              "status": "PASS",
+              "seconds": 0.28,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_old_generation_and_cancelled_task_cannot_commit",
+              "instance_name": "test_old_generation_and_cancelled_task_cannot_commit",
+              "testcase": "tests.integration.test_world_kernel::test_old_generation_and_cancelled_task_cannot_commit",
+              "status": "PASS",
+              "seconds": 0.219,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": null
+        },
+        {
+          "test_id": "R1-H-03",
+          "criterion": "outbox失败可重投且派生更新幂等；恢复不重调模型重新决定已接受结果。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_outbox_failure_redelivery_and_inbox_atomicity",
+            "test_real_world_history_and_authorization_survive_isolated_restore",
+            "test_world_transaction_process_crash_and_retry"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [
+            "test_world_transaction_process_crash_and_retry[after_events]",
+            "test_world_transaction_process_crash_and_retry[after_commit]"
+          ],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_world_transaction_process_crash_and_retry",
+              "instance_name": "test_world_transaction_process_crash_and_retry[after_events]",
+              "testcase": "tests.concurrency.test_world_races::test_world_transaction_process_crash_and_retry[after_events]",
+              "status": "PASS",
+              "seconds": 0.722,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_world_transaction_process_crash_and_retry",
+              "instance_name": "test_world_transaction_process_crash_and_retry[after_commit]",
+              "testcase": "tests.concurrency.test_world_races::test_world_transaction_process_crash_and_retry[after_commit]",
+              "status": "PASS",
+              "seconds": 0.63,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_real_world_history_and_authorization_survive_isolated_restore",
+              "instance_name": "test_real_world_history_and_authorization_survive_isolated_restore",
+              "testcase": "tests.integration.test_world_recovery::test_real_world_history_and_authorization_survive_isolated_restore",
+              "status": "PASS",
+              "seconds": 2.541,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_outbox_failure_redelivery_and_inbox_atomicity",
+              "instance_name": "test_outbox_failure_redelivery_and_inbox_atomicity",
+              "testcase": "tests.reliability.test_tasks::test_outbox_failure_redelivery_and_inbox_atomicity",
+              "status": "PASS",
+              "seconds": 0.02,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            }
+          ],
+          "qualification": null
+        },
+        {
+          "test_id": "R1-H-04",
+          "criterion": "当前撤权时回执读取仍做权限检查，既不泄漏内容，也不再次执行命令。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_r1_h_real_tcp_lost_reply_retry_revocation_and_outbox_recovery"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_r1_h_real_tcp_lost_reply_retry_revocation_and_outbox_recovery",
+              "instance_name": "test_r1_h_real_tcp_lost_reply_retry_revocation_and_outbox_recovery",
+              "testcase": "tests.service.test_p2_response_loss::test_r1_h_real_tcp_lost_reply_retry_revocation_and_outbox_recovery",
+              "status": "PASS",
+              "seconds": 1.793,
+              "junit": "evidence/p2/batch3/acceptance-attempt1.xml"
+            }
+          ],
+          "qualification": null
+        },
+        {
+          "test_id": "R1-H-05",
+          "criterion": "保留数据库回执、原始网络失败、重试关联、效应计数和索引追赶记录。",
+          "status": "PASS",
+          "required_test_names": [
+            "test_r1_h_real_tcp_lost_reply_retry_revocation_and_outbox_recovery",
+            "test_world_transaction_process_crash_and_retry",
+            "test_fixed_cut_stale_search_is_not_unknown_world"
+          ],
+          "missing_tests": [],
+          "required_test_variants": [
+            "test_world_transaction_process_crash_and_retry[after_events]",
+            "test_world_transaction_process_crash_and_retry[after_commit]"
+          ],
+          "missing_test_variants": [],
+          "execution_evidence": [
+            {
+              "name": "test_world_transaction_process_crash_and_retry",
+              "instance_name": "test_world_transaction_process_crash_and_retry[after_events]",
+              "testcase": "tests.concurrency.test_world_races::test_world_transaction_process_crash_and_retry[after_events]",
+              "status": "PASS",
+              "seconds": 0.722,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_world_transaction_process_crash_and_retry",
+              "instance_name": "test_world_transaction_process_crash_and_retry[after_commit]",
+              "testcase": "tests.concurrency.test_world_races::test_world_transaction_process_crash_and_retry[after_commit]",
+              "status": "PASS",
+              "seconds": 0.63,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_fixed_cut_stale_search_is_not_unknown_world",
+              "instance_name": "test_fixed_cut_stale_search_is_not_unknown_world",
+              "testcase": "tests.queries.test_queries::test_fixed_cut_stale_search_is_not_unknown_world",
+              "status": "PASS",
+              "seconds": 0.083,
+              "junit": "evidence/p2/batch3/baseline.xml"
+            },
+            {
+              "name": "test_r1_h_real_tcp_lost_reply_retry_revocation_and_outbox_recovery",
+              "instance_name": "test_r1_h_real_tcp_lost_reply_retry_revocation_and_outbox_recovery",
+              "testcase": "tests.service.test_p2_response_loss::test_r1_h_real_tcp_lost_reply_retry_revocation_and_outbox_recovery",
+              "status": "PASS",
+              "seconds": 1.793,
+              "junit": "evidence/p2/batch3/acceptance-attempt1.xml"
+            }
+          ],
+          "qualification": "The real TCP failure and retry are retained, with an idempotent minimal index-watermark consumer. Separate stale-search tests preserve PARTIAL/STALE versus exact current state. A full production search-index worker was not stopped and recovered; watermark catch-up is not that broader claim."
+        }
+      ],
+      "exact_variant": "SEE_PER_CHECK_QUALIFICATIONS"
+    }
+  ],
+  "check_counts": {
+    "PASS": 34,
+    "PARTIAL_SYNC_FENCE_ONLY": 1,
+    "PASS_VISIBLE_SHAPE_ONLY": 1,
+    "NOT_IN_SCOPE_P3_02": 1
+  },
+  "real_service_load_runs": [
+    {
+      "path": "evidence/p2/batch3/load/agents50-stable.json",
+      "sha256": "aeb277f80c28d64ceb38ceb2f5a462174a5492c18bbdcf2a37612fcd399107b8",
+      "logical_agents": 50,
+      "result": "PASS",
+      "profile": "mixed",
+      "offered_query_rps": 10.0,
+      "hot_subject_fraction": 0.2,
+      "overload_arrival_rps": null,
+      "overload_rounds": null,
+      "actual_world_commits": 6,
+      "code_sha": "0609f680fad782c827dd3834a073f8f9bcddaf0d",
+      "working_tree_dirty": true
+    },
+    {
+      "path": "evidence/p2/batch3/load/agents50-hot-overload.json",
+      "sha256": "879e4f054da3ad22ad353d07a79678d532b37ca3f55d2faf39369e03dc56f99b",
+      "logical_agents": 50,
+      "result": "PASS",
+      "profile": "overload",
+      "offered_query_rps": 10.0,
+      "hot_subject_fraction": 0.8,
+      "overload_arrival_rps": 1000.0,
+      "overload_rounds": 5,
+      "actual_world_commits": 6,
+      "code_sha": "0609f680fad782c827dd3834a073f8f9bcddaf0d",
+      "working_tree_dirty": true
+    },
+    {
+      "path": "evidence/p2/batch3/load/agents200-normal.json",
+      "sha256": "668426d4aaeec762483295bcba26de651278d0daccc2596cddd21a8deb64a6b4",
+      "logical_agents": 200,
+      "result": "FAIL",
+      "profile": "mixed",
+      "offered_query_rps": 10.0,
+      "hot_subject_fraction": 0.2,
+      "overload_arrival_rps": null,
+      "overload_rounds": null,
+      "actual_world_commits": 7,
+      "code_sha": "0609f680fad782c827dd3834a073f8f9bcddaf0d",
+      "working_tree_dirty": true
+    },
+    {
+      "path": "evidence/p2/batch3/load/agents200-hot-overload.json",
+      "sha256": "792f04956a109637e372b48db8ac1fb877cf84569fd2098ccf502be3c6b4fdd0",
+      "logical_agents": 200,
+      "result": "FAIL",
+      "profile": "overload",
+      "offered_query_rps": 10.0,
+      "hot_subject_fraction": 0.8,
+      "overload_arrival_rps": 1000.0,
+      "overload_rounds": 5,
+      "actual_world_commits": 8,
+      "code_sha": "0609f680fad782c827dd3834a073f8f9bcddaf0d",
+      "working_tree_dirty": true
+    }
+  ],
+  "correctness_check_gate": "PARTIAL_WITH_STATED_BOUNDARIES",
+  "mapped_test_execution_gate": "PASS",
+  "load_gate": "NOT_MET",
+  "provided_load_run_gate": "NOT_MET",
+  "required_load_scenarios": [
+    {
+      "logical_agents": 50,
+      "scenario": "mixed",
+      "status": "PASS_FOR_PROVIDED_RUNS",
+      "evidence_paths": [
+        "evidence/p2/batch3/load/agents50-stable.json"
+      ]
+    },
+    {
+      "logical_agents": 50,
+      "scenario": "hotspot_overload",
+      "status": "PASS_FOR_PROVIDED_RUNS",
+      "evidence_paths": [
+        "evidence/p2/batch3/load/agents50-hot-overload.json"
+      ]
+    },
+    {
+      "logical_agents": 200,
+      "scenario": "mixed",
+      "status": "NOT_MET",
+      "evidence_paths": [
+        "evidence/p2/batch3/load/agents200-normal.json"
+      ]
+    },
+    {
+      "logical_agents": 200,
+      "scenario": "hotspot_overload",
+      "status": "NOT_MET",
+      "evidence_paths": [
+        "evidence/p2/batch3/load/agents200-hot-overload.json"
+      ]
+    }
+  ],
+  "load_coverage_gate": "EXECUTED",
+  "load_population_coverage": [
+    50,
+    200
+  ],
+  "overall_engineering_gate": "NOT_MET",
+  "independent_gates": {
+    "real_model_production": "BLOCKED_ENVIRONMENT",
+    "author_full_read": "PENDING_AUTHOR",
+    "overall_p2": "NOT_FULLY_ACCEPTED"
+  },
+  "coverage_policy": "Mappings are reviewed composition of real tests, not automatic proof from test names. Exact dataset deviations and untested subclaims stay visible. Source JUnit path+hash and concrete testcases support every executed claim.",
+  "cli_gate_scope": "full",
+  "cli_exit_code": 1
+}

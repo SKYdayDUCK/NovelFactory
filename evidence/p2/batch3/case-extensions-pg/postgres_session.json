@@ -1,0 +1,23 @@
+{
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "port": 53493,
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "tests/integration/test_p2_case_extensions.py",
+    "-q",
+    "--tb=short",
+    "--junitxml=evidence/p2/batch3/case-extensions-attempt1.xml"
+  ],
+  "started_at_utc": "2026-11-10T12:18:08.255384+00:00",
+  "authentication": "loopback_trust_generated_test_data_only",
+  "fsync": true,
+  "synchronous_commit": true,
+  "max_connections": 60,
+  "data_directory_reused": false,
+  "exit_status": 1,
+  "postgres_exit_status": 0,
+  "duration_seconds": 4.232059,
+  "finished_at_utc": "2026-11-10T12:18:12.487488+00:00"
+}

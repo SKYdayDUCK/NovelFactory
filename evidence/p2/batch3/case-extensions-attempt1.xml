@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="4" time="3.340" timestamp="2026-11-10T21:18:08.815989+09:00" hostname="2be49009bab4"><testcase classname="tests.integration.test_p2_case_extensions" name="test_r1_c_unproven_inbound_blocks_related_scope_but_not_remote[True]" time="1.216" /><testcase classname="tests.integration.test_p2_case_extensions" name="test_r1_c_unproven_inbound_blocks_related_scope_but_not_remote[False]" time="0.705" /><testcase classname="tests.integration.test_p2_case_extensions" name="test_r1_c_delayed_message_observation_and_duplicate_delivery_preserve_knowledge_time" time="0.953"><failure message="AssertionError: assert ('UNKNOWN' == 'KNOWN'&#10;  &#10;  - KNOWN&#10;  + UNKNOWN&#10;  ? ++)">tests/integration/test_p2_case_extensions.py:126: in test_r1_c_delayed_message_observation_and_duplicate_delivery_preserve_knowledge_time
+    assert answers[1]["knowledge_status"] == "KNOWN" and answers[1]["data"] == entity_value(ids["smith"])
+E   AssertionError: assert ('UNKNOWN' == 'KNOWN'
+E     
+E     - KNOWN
+E     + UNKNOWN
+E     ? ++)</failure></testcase><testcase classname="tests.integration.test_p2_case_extensions" name="test_r1_g_macro_transport_and_three_presentations_do_not_repeat_any_effect" time="0.376"><failure message="novel_factory.domain.errors.DomainError: Recipe writes outside its registered scopes">tests/integration/test_p2_case_extensions.py:167: in test_r1_g_macro_transport_and_three_presentations_do_not_repeat_any_effect
+    chosen = scheduler.evaluate_due(f["principal"], f["world_ref"], point(53), process["scope_ids"], "macro-due")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/novel_factory/application/simulation.py:546: in evaluate_due
+    commands, updates = deterministic_result(state, closure["process_ids"], revision["snapshot"], at, build)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/novel_factory/domain/scheduling.py:275: in deterministic_result
+    require(effects["scopes"] &lt;= set(definition["scope_ids"]),
+src/novel_factory/domain/scheduling.py:24: in require
+    raise DomainError(code, message)
+E   novel_factory.domain.errors.DomainError: Recipe writes outside its registered scopes</failure></testcase></testsuite></testsuites>

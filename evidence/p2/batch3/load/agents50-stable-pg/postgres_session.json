@@ -1,0 +1,25 @@
+{
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "port": 52089,
+  "command": [
+    ".venv/bin/python",
+    "-m",
+    "benchmarks.p2_behavioral_load",
+    "--agents",
+    "50",
+    "--arrival-rps",
+    "10",
+    "--output",
+    "evidence/p2/batch3/load/agents50-stable.json"
+  ],
+  "started_at_utc": "2026-11-10T12:20:58.565693+00:00",
+  "authentication": "loopback_trust_generated_test_data_only",
+  "fsync": true,
+  "synchronous_commit": true,
+  "max_connections": 60,
+  "data_directory_reused": false,
+  "exit_status": 0,
+  "postgres_exit_status": 0,
+  "duration_seconds": 40.054485,
+  "finished_at_utc": "2026-11-10T12:21:38.620224+00:00"
+}

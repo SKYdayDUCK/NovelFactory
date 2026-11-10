@@ -1,0 +1,704 @@
+{
+  "schema_version": "independent-p2-numeric-review-1",
+  "reviewed_at_utc": "2026-11-10T12:37:49.398242+00:00",
+  "review_type": "Independent read-only recomputation from retained raw requests, no benchmark imports, service calls or new performance measurement",
+  "limitations": [
+    "Arithmetic consistency does not convert a failed scenario into PASS.",
+    "Old driver attempts may omit planned/emitted fields; omitted data is not reconstructed.",
+    "No evidence of external-model execution is inferred from service-client concurrency."
+  ],
+  "inputs": [
+    {
+      "input_path": "evidence/p2/batch3/load/agents200-hot-overload.json",
+      "input_sha256": "792f04956a109637e372b48db8ac1fb877cf84569fd2098ccf502be3c6b4fdd0",
+      "original_scenario_result_unchanged": "FAIL",
+      "recorded_numeric_fields_consistent": true,
+      "historical_fields_not_recorded": [],
+      "checks": {
+        "api_tool_calls": {
+          "matches": true,
+          "recorded": 2089,
+          "recomputed": 2089
+        },
+        "emitted_requests": {
+          "matches": true,
+          "recorded": 2089,
+          "recomputed": 2089
+        },
+        "completed_requests": {
+          "matches": true,
+          "recorded": 2089,
+          "recomputed": 2089
+        },
+        "valid_successful_calls": {
+          "matches": true,
+          "recorded": 2032,
+          "recomputed": 2032
+        },
+        "successful_duplicate_receipts": {
+          "matches": true,
+          "recorded": 8,
+          "recomputed": 8
+        },
+        "new_world_commit_receipts": {
+          "matches": true,
+          "recorded": 8,
+          "recomputed": 8
+        },
+        "latency_all_responses_count": {
+          "matches": true,
+          "recorded": 2089,
+          "recomputed": 2089
+        },
+        "latency_successes_count": {
+          "matches": true,
+          "recorded": 2032,
+          "recomputed": 2032
+        },
+        "latency_rejections_and_failures_count": {
+          "matches": true,
+          "recorded": 57,
+          "recomputed": 57
+        },
+        "status_counts": {
+          "matches": true,
+          "recorded": {
+            "200": 2032,
+            "429": 50,
+            "409": 7
+          },
+          "recomputed": {
+            "200": 2032,
+            "429": 50,
+            "409": 7
+          }
+        },
+        "effective_call_rps_excluding_duplicates": {
+          "matches": true,
+          "recorded": 10.3898,
+          "recomputed": 10.389752,
+          "comparison_note": "Published duration rounded to six decimals; RPS to four decimals."
+        },
+        "unique_receipts_vs_actual_database_revision_delta": {
+          "matches": true,
+          "recorded": 8,
+          "recomputed": 8
+        },
+        "model_dispatch_not_claimed": {
+          "matches": true
+        }
+      }
+    },
+    {
+      "input_path": "evidence/p2/batch3/load/agents200-mixed.json",
+      "input_sha256": "8fbcf3e9b115d63080dc26f230745547eada47c4a7e44edfab91c03e3b21ac34",
+      "original_scenario_result_unchanged": "FAIL",
+      "recorded_numeric_fields_consistent": true,
+      "historical_fields_not_recorded": [],
+      "checks": {
+        "api_tool_calls": {
+          "matches": true,
+          "recorded": 1083,
+          "recomputed": 1083
+        },
+        "emitted_requests": {
+          "matches": true,
+          "recorded": 1083,
+          "recomputed": 1083
+        },
+        "completed_requests": {
+          "matches": true,
+          "recorded": 1083,
+          "recomputed": 1083
+        },
+        "valid_successful_calls": {
+          "matches": true,
+          "recorded": 1039,
+          "recomputed": 1039
+        },
+        "successful_duplicate_receipts": {
+          "matches": true,
+          "recorded": 7,
+          "recomputed": 7
+        },
+        "new_world_commit_receipts": {
+          "matches": true,
+          "recorded": 8,
+          "recomputed": 8
+        },
+        "latency_all_responses_count": {
+          "matches": true,
+          "recorded": 1083,
+          "recomputed": 1083
+        },
+        "latency_successes_count": {
+          "matches": true,
+          "recorded": 1039,
+          "recomputed": 1039
+        },
+        "latency_rejections_and_failures_count": {
+          "matches": true,
+          "recorded": 44,
+          "recomputed": 44
+        },
+        "status_counts": {
+          "matches": true,
+          "recorded": {
+            "200": 1039,
+            "429": 41,
+            "409": 3
+          },
+          "recomputed": {
+            "200": 1039,
+            "429": 41,
+            "409": 3
+          }
+        },
+        "effective_call_rps_excluding_duplicates": {
+          "matches": true,
+          "recorded": 6.2593,
+          "recomputed": 6.259324,
+          "comparison_note": "Published duration rounded to six decimals; RPS to four decimals."
+        },
+        "unique_receipts_vs_actual_database_revision_delta": {
+          "matches": true,
+          "recorded": 8,
+          "recomputed": 8
+        },
+        "model_dispatch_not_claimed": {
+          "matches": true
+        }
+      }
+    },
+    {
+      "input_path": "evidence/p2/batch3/load/agents200-normal.json",
+      "input_sha256": "668426d4aaeec762483295bcba26de651278d0daccc2596cddd21a8deb64a6b4",
+      "original_scenario_result_unchanged": "FAIL",
+      "recorded_numeric_fields_consistent": true,
+      "historical_fields_not_recorded": [],
+      "checks": {
+        "api_tool_calls": {
+          "matches": true,
+          "recorded": 1081,
+          "recomputed": 1081
+        },
+        "emitted_requests": {
+          "matches": true,
+          "recorded": 1081,
+          "recomputed": 1081
+        },
+        "completed_requests": {
+          "matches": true,
+          "recorded": 1081,
+          "recomputed": 1081
+        },
+        "valid_successful_calls": {
+          "matches": true,
+          "recorded": 1031,
+          "recomputed": 1031
+        },
+        "successful_duplicate_receipts": {
+          "matches": true,
+          "recorded": 7,
+          "recomputed": 7
+        },
+        "new_world_commit_receipts": {
+          "matches": true,
+          "recorded": 7,
+          "recomputed": 7
+        },
+        "latency_all_responses_count": {
+          "matches": true,
+          "recorded": 1081,
+          "recomputed": 1081
+        },
+        "latency_successes_count": {
+          "matches": true,
+          "recorded": 1031,
+          "recomputed": 1031
+        },
+        "latency_rejections_and_failures_count": {
+          "matches": true,
+          "recorded": 50,
+          "recomputed": 50
+        },
+        "status_counts": {
+          "matches": true,
+          "recorded": {
+            "200": 1031,
+            "429": 50
+          },
+          "recomputed": {
+            "200": 1031,
+            "429": 50
+          }
+        },
+        "effective_call_rps_excluding_duplicates": {
+          "matches": true,
+          "recorded": 6.7104,
+          "recomputed": 6.7104,
+          "comparison_note": "Published duration rounded to six decimals; RPS to four decimals."
+        },
+        "unique_receipts_vs_actual_database_revision_delta": {
+          "matches": true,
+          "recorded": 7,
+          "recomputed": 7
+        },
+        "model_dispatch_not_claimed": {
+          "matches": true
+        }
+      }
+    },
+    {
+      "input_path": "evidence/p2/batch3/load/agents50-hot-overload.json",
+      "input_sha256": "879e4f054da3ad22ad353d07a79678d532b37ca3f55d2faf39369e03dc56f99b",
+      "original_scenario_result_unchanged": "PASS",
+      "recorded_numeric_fields_consistent": true,
+      "historical_fields_not_recorded": [],
+      "checks": {
+        "api_tool_calls": {
+          "matches": true,
+          "recorded": 536,
+          "recomputed": 536
+        },
+        "emitted_requests": {
+          "matches": true,
+          "recorded": 536,
+          "recomputed": 536
+        },
+        "completed_requests": {
+          "matches": true,
+          "recorded": 536,
+          "recomputed": 536
+        },
+        "valid_successful_calls": {
+          "matches": true,
+          "recorded": 532,
+          "recomputed": 532
+        },
+        "successful_duplicate_receipts": {
+          "matches": true,
+          "recorded": 6,
+          "recomputed": 6
+        },
+        "new_world_commit_receipts": {
+          "matches": true,
+          "recorded": 6,
+          "recomputed": 6
+        },
+        "latency_all_responses_count": {
+          "matches": true,
+          "recorded": 536,
+          "recomputed": 536
+        },
+        "latency_successes_count": {
+          "matches": true,
+          "recorded": 532,
+          "recomputed": 532
+        },
+        "latency_rejections_and_failures_count": {
+          "matches": true,
+          "recorded": 4,
+          "recomputed": 4
+        },
+        "status_counts": {
+          "matches": true,
+          "recorded": {
+            "200": 532,
+            "409": 4
+          },
+          "recomputed": {
+            "200": 532,
+            "409": 4
+          }
+        },
+        "effective_call_rps_excluding_duplicates": {
+          "matches": true,
+          "recorded": 12.7003,
+          "recomputed": 12.700295,
+          "comparison_note": "Published duration rounded to six decimals; RPS to four decimals."
+        },
+        "unique_receipts_vs_actual_database_revision_delta": {
+          "matches": true,
+          "recorded": 6,
+          "recomputed": 6
+        },
+        "model_dispatch_not_claimed": {
+          "matches": true
+        }
+      }
+    },
+    {
+      "input_path": "evidence/p2/batch3/load/agents50-mixed-attempt1.json",
+      "input_sha256": "dd139d5fcf0ca794dd57846f07ac9beb4dfb29f69d9d23e8d2467f16839abfb1",
+      "original_scenario_result_unchanged": "FAIL",
+      "recorded_numeric_fields_consistent": true,
+      "historical_fields_not_recorded": [
+        "emitted_requests",
+        "latency_rejections_and_failures"
+      ],
+      "checks": {
+        "api_tool_calls": {
+          "matches": true,
+          "recorded": 279,
+          "recomputed": 279
+        },
+        "completed_requests": {
+          "matches": true,
+          "recorded": 279,
+          "recomputed": 279
+        },
+        "valid_successful_calls": {
+          "matches": true,
+          "recorded": 271,
+          "recomputed": 271
+        },
+        "successful_duplicate_receipts": {
+          "matches": true,
+          "recorded": 3,
+          "recomputed": 3
+        },
+        "new_world_commit_receipts": {
+          "matches": true,
+          "recorded": 3,
+          "recomputed": 3
+        },
+        "latency_all_responses_count": {
+          "matches": true,
+          "recorded": 279,
+          "recomputed": 279
+        },
+        "latency_successes_count": {
+          "matches": true,
+          "recorded": 271,
+          "recomputed": 271
+        },
+        "status_counts": {
+          "matches": true,
+          "recorded": {
+            "200": 271,
+            "transport_error": 1,
+            "429": 3,
+            "409": 4
+          },
+          "recomputed": {
+            "200": 271,
+            "transport_error": 1,
+            "429": 3,
+            "409": 4
+          }
+        },
+        "effective_call_rps_excluding_duplicates": {
+          "matches": true,
+          "recorded": 17.9811,
+          "recomputed": 17.981083,
+          "comparison_note": "Published duration rounded to six decimals; RPS to four decimals."
+        },
+        "unique_receipts_vs_actual_database_revision_delta": {
+          "matches": true,
+          "recorded": 3,
+          "recomputed": 3
+        },
+        "model_dispatch_not_claimed": {
+          "matches": true
+        }
+      }
+    },
+    {
+      "input_path": "evidence/p2/batch3/load/agents50-mixed.json",
+      "input_sha256": "e25a01b66b4ca4dcc6664883df65f309510b136677949f73145f8ca4efd77fd8",
+      "original_scenario_result_unchanged": "FAIL",
+      "recorded_numeric_fields_consistent": true,
+      "historical_fields_not_recorded": [
+        "latency_rejections_and_failures"
+      ],
+      "checks": {
+        "api_tool_calls": {
+          "matches": true,
+          "recorded": 279,
+          "recomputed": 279
+        },
+        "emitted_requests": {
+          "matches": true,
+          "recorded": 279,
+          "recomputed": 279
+        },
+        "completed_requests": {
+          "matches": true,
+          "recorded": 279,
+          "recomputed": 279
+        },
+        "valid_successful_calls": {
+          "matches": true,
+          "recorded": 273,
+          "recomputed": 273
+        },
+        "successful_duplicate_receipts": {
+          "matches": true,
+          "recorded": 4,
+          "recomputed": 4
+        },
+        "new_world_commit_receipts": {
+          "matches": true,
+          "recorded": 4,
+          "recomputed": 4
+        },
+        "latency_all_responses_count": {
+          "matches": true,
+          "recorded": 279,
+          "recomputed": 279
+        },
+        "latency_successes_count": {
+          "matches": true,
+          "recorded": 273,
+          "recomputed": 273
+        },
+        "status_counts": {
+          "matches": true,
+          "recorded": {
+            "200": 273,
+            "429": 3,
+            "409": 3
+          },
+          "recomputed": {
+            "200": 273,
+            "429": 3,
+            "409": 3
+          }
+        },
+        "effective_call_rps_excluding_duplicates": {
+          "matches": true,
+          "recorded": 12.5944,
+          "recomputed": 12.594386,
+          "comparison_note": "Published duration rounded to six decimals; RPS to four decimals."
+        },
+        "unique_receipts_vs_actual_database_revision_delta": {
+          "matches": true,
+          "recorded": 4,
+          "recomputed": 4
+        },
+        "model_dispatch_not_claimed": {
+          "matches": true
+        }
+      }
+    },
+    {
+      "input_path": "evidence/p2/batch3/load/agents50-stable.json",
+      "input_sha256": "aeb277f80c28d64ceb38ceb2f5a462174a5492c18bbdcf2a37612fcd399107b8",
+      "original_scenario_result_unchanged": "PASS",
+      "recorded_numeric_fields_consistent": true,
+      "historical_fields_not_recorded": [
+        "latency_rejections_and_failures"
+      ],
+      "checks": {
+        "api_tool_calls": {
+          "matches": true,
+          "recorded": 286,
+          "recomputed": 286
+        },
+        "emitted_requests": {
+          "matches": true,
+          "recorded": 286,
+          "recomputed": 286
+        },
+        "completed_requests": {
+          "matches": true,
+          "recorded": 286,
+          "recomputed": 286
+        },
+        "valid_successful_calls": {
+          "matches": true,
+          "recorded": 282,
+          "recomputed": 282
+        },
+        "successful_duplicate_receipts": {
+          "matches": true,
+          "recorded": 6,
+          "recomputed": 6
+        },
+        "new_world_commit_receipts": {
+          "matches": true,
+          "recorded": 6,
+          "recomputed": 6
+        },
+        "latency_all_responses_count": {
+          "matches": true,
+          "recorded": 286,
+          "recomputed": 286
+        },
+        "latency_successes_count": {
+          "matches": true,
+          "recorded": 282,
+          "recomputed": 282
+        },
+        "status_counts": {
+          "matches": true,
+          "recorded": {
+            "200": 282,
+            "409": 4
+          },
+          "recomputed": {
+            "200": 282,
+            "409": 4
+          }
+        },
+        "effective_call_rps_excluding_duplicates": {
+          "matches": true,
+          "recorded": 8.0907,
+          "recomputed": 8.090726,
+          "comparison_note": "Published duration rounded to six decimals; RPS to four decimals."
+        },
+        "unique_receipts_vs_actual_database_revision_delta": {
+          "matches": true,
+          "recorded": 6,
+          "recomputed": 6
+        },
+        "model_dispatch_not_claimed": {
+          "matches": true
+        }
+      }
+    },
+    {
+      "input_path": "evidence/p2/batch3/load/smoke-attempt1.json",
+      "input_sha256": "2c488f9528681519a094273804877bc8b79ba00bf59b531c278aba667a2fde29",
+      "original_scenario_result_unchanged": "FAIL",
+      "recorded_numeric_fields_consistent": true,
+      "historical_fields_not_recorded": [
+        "emitted_requests",
+        "latency_rejections_and_failures"
+      ],
+      "checks": {
+        "api_tool_calls": {
+          "matches": true,
+          "recorded": 10,
+          "recomputed": 10
+        },
+        "completed_requests": {
+          "matches": true,
+          "recorded": 10,
+          "recomputed": 10
+        },
+        "valid_successful_calls": {
+          "matches": true,
+          "recorded": 8,
+          "recomputed": 8
+        },
+        "successful_duplicate_receipts": {
+          "matches": true,
+          "recorded": 0,
+          "recomputed": 0
+        },
+        "new_world_commit_receipts": {
+          "matches": true,
+          "recorded": 0,
+          "recomputed": 0
+        },
+        "latency_all_responses_count": {
+          "matches": true,
+          "recorded": 10,
+          "recomputed": 10
+        },
+        "latency_successes_count": {
+          "matches": true,
+          "recorded": 8,
+          "recomputed": 8
+        },
+        "status_counts": {
+          "matches": true,
+          "recorded": {
+            "403": 2,
+            "200": 8
+          },
+          "recomputed": {
+            "403": 2,
+            "200": 8
+          }
+        },
+        "effective_call_rps_excluding_duplicates": {
+          "matches": true,
+          "recorded": 14.2839,
+          "recomputed": 14.283929,
+          "comparison_note": "Published duration rounded to six decimals; RPS to four decimals."
+        },
+        "unique_receipts_vs_actual_database_revision_delta": {
+          "matches": true,
+          "recorded": 0,
+          "recomputed": 0
+        },
+        "model_dispatch_not_claimed": {
+          "matches": true
+        }
+      }
+    },
+    {
+      "input_path": "evidence/p2/batch3/load/smoke-attempt2.json",
+      "input_sha256": "f2a669683e8e5ded606b85d2592189744604fdd8fa29e8bea2dc05aed1e05c51",
+      "original_scenario_result_unchanged": "PASS",
+      "recorded_numeric_fields_consistent": true,
+      "historical_fields_not_recorded": [
+        "emitted_requests",
+        "latency_rejections_and_failures"
+      ],
+      "checks": {
+        "api_tool_calls": {
+          "matches": true,
+          "recorded": 58,
+          "recomputed": 58
+        },
+        "completed_requests": {
+          "matches": true,
+          "recorded": 58,
+          "recomputed": 58
+        },
+        "valid_successful_calls": {
+          "matches": true,
+          "recorded": 58,
+          "recomputed": 58
+        },
+        "successful_duplicate_receipts": {
+          "matches": true,
+          "recorded": 2,
+          "recomputed": 2
+        },
+        "new_world_commit_receipts": {
+          "matches": true,
+          "recorded": 2,
+          "recomputed": 2
+        },
+        "latency_all_responses_count": {
+          "matches": true,
+          "recorded": 58,
+          "recomputed": 58
+        },
+        "latency_successes_count": {
+          "matches": true,
+          "recorded": 58,
+          "recomputed": 58
+        },
+        "status_counts": {
+          "matches": true,
+          "recorded": {
+            "200": 58
+          },
+          "recomputed": {
+            "200": 58
+          }
+        },
+        "effective_call_rps_excluding_duplicates": {
+          "matches": true,
+          "recorded": 17.4191,
+          "recomputed": 17.41911,
+          "comparison_note": "Published duration rounded to six decimals; RPS to four decimals."
+        },
+        "unique_receipts_vs_actual_database_revision_delta": {
+          "matches": true,
+          "recorded": 2,
+          "recomputed": 2
+        },
+        "model_dispatch_not_claimed": {
+          "matches": true
+        }
+      }
+    }
+  ]
+}

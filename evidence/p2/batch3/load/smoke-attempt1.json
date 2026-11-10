@@ -1,0 +1,495 @@
+{
+  "schema_version": "p2-load-1",
+  "evidence_kind": "REAL_HTTP_REAL_POSTGRESQL_TEST_FIXTURE",
+  "started_at_utc": "2026-11-10T12:14:21.664228+00:00",
+  "engineer_correctness": "FAIL",
+  "logical_agent_task_count": 10,
+  "hot_subject_fraction": 0.2,
+  "profile": "mixed",
+  "seed": 20261110,
+  "setup_seconds": 1.929834,
+  "environment": {
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "logical_cpu_count": 9,
+    "cpu_models": [
+      "AMD EPYC 9V74 80-Core Processor"
+    ],
+    "memory": {
+      "MemTotal": "10206472 kB",
+      "MemAvailable": "8707164 kB",
+      "SwapTotal": "0 kB"
+    },
+    "cgroup": {},
+    "versions": {
+      "SQLAlchemy": "2.0.57",
+      "psycopg": "3.3.8",
+      "uvicorn": "0.54.0",
+      "httpx": "0.28.1"
+    },
+    "git_sha": "0609f680fad782c827dd3834a073f8f9bcddaf0d",
+    "git_dirty": true,
+    "benchmark_source_sha256": "52b9aeb40827bd0304e6e3791e060b3a6d02734f22ab71db1f2edf50a2411fa8",
+    "load_client_location": "same process, separate asyncio loop, real loopback TCP",
+    "api_processes": 1,
+    "api_server_threads": 1
+  },
+  "database_settings": {
+    "server_version": "17.11 (Debian 17.11-0+deb13u1)",
+    "max_connections": "60",
+    "shared_buffers": "128MB",
+    "fsync": "on",
+    "synchronous_commit": "on"
+  },
+  "data": {
+    "entities": 34,
+    "initial_relations": 49,
+    "initial_accepted_events": 4,
+    "final_table_counts": {
+      "tasks": 14,
+      "contexts": 12,
+      "revisions": 5,
+      "events": 4,
+      "receipts": 24,
+      "scopes": 80
+    },
+    "scale": "bounded synthetic small world; not 100k-event medium design"
+  },
+  "load": {
+    "scheduled_phase_arrival_rps": 20.0,
+    "overload_arrival_rps": null,
+    "overload_rounds": null,
+    "independent_world_commands": 1,
+    "shared_candidates": 1,
+    "http_settings": {
+      "max_body_bytes": 262144,
+      "body_read_timeout_seconds": 5.0,
+      "max_body_chunks": 1024,
+      "max_inflight_requests": 128,
+      "max_queued_operations": 64,
+      "per_principal_concurrency": 2,
+      "queue_timeout_seconds": 2.0,
+      "rate_per_second": 20.0,
+      "rate_burst": 100,
+      "allowed_origins": []
+    },
+    "cache_size": 256,
+    "cache_boundary": "process query-result cache cold/warm; PostgreSQL and OS caches are not flushed",
+    "shared_conflict_policy": "one predetermined TEST_FIXTURE control command before stale deliveries; not resource arbitration by database arrival order"
+  },
+  "metrics": {
+    "duration_seconds": 0.56007,
+    "planned_and_emitted_requests": 10,
+    "completed_requests": 10,
+    "client_requests_never_emitted": 0,
+    "api_tool_calls": 10,
+    "mcp_tool_calls": 0,
+    "status_counts": {
+      "403": 2,
+      "200": 8
+    },
+    "valid_successful_calls": 8,
+    "api_success_rps": 14.2839,
+    "successful_duplicate_receipts": 0,
+    "effective_call_rps_excluding_duplicates": 14.2839,
+    "new_world_commit_receipts": 0,
+    "effective_world_commits_per_second": 0.0,
+    "conflict_count": 0,
+    "conflict_rate_all_requests": 0.0,
+    "failure_rate_all_requests": 0.2,
+    "idempotent_retry_rate_all_requests": 0.0,
+    "infrastructure_retries": 0,
+    "model_retries": 0,
+    "peak_inflight_http": 3,
+    "latency_all_responses": {
+      "count": 10,
+      "p50_ms": 61.4103,
+      "p95_ms": 115.3506,
+      "p99_ms": 115.3506
+    },
+    "latency_successes": {
+      "count": 8,
+      "p50_ms": 61.4103,
+      "p95_ms": 115.3506,
+      "p99_ms": 115.3506
+    },
+    "arrival_schedule_delay": {
+      "count": 10,
+      "p50_ms": 0.8827,
+      "p95_ms": 3.5425,
+      "p99_ms": 3.5425
+    },
+    "per_operation": {
+      "compile": {
+        "calls": 10,
+        "successes": 8,
+        "latency_all_responses": {
+          "count": 10,
+          "p50_ms": 61.4103,
+          "p95_ms": 115.3506,
+          "p99_ms": 115.3506
+        }
+      }
+    },
+    "successful_calls_by_agent": {
+      "2": 1,
+      "3": 1,
+      "4": 1,
+      "5": 1,
+      "6": 1,
+      "7": 1,
+      "8": 1,
+      "9": 1
+    },
+    "latency_warning": "P99 for individual write categories has few samples; descriptive only",
+    "correctness_errors": [
+      {
+        "agent": 0,
+        "task_id": "1b24dece-80cd-46ce-a09a-ada64cbf6f7a",
+        "label": "compile",
+        "endpoint": "contexts/compile",
+        "started_seconds": 0.012486,
+        "request_sha256": "56f5bda446c28a87f8d6f7e791481458e6fe1f821543483cdb4d03fbcaaf0881",
+        "duplicate_retry": false,
+        "arrival_delay_ms": 0.0596,
+        "status": 403,
+        "code": "VIEW_DENIED",
+        "response_sha256": "ec08d95d8f2e006d3bbd519c7880e74bf59e230b5102aa7c2a073c5c4a7c3594",
+        "response_bytes": 163,
+        "reason": "unexpected response"
+      },
+      {
+        "agent": 1,
+        "task_id": "807a478b-5ec9-4bf9-bb6d-21936753b17a",
+        "label": "compile",
+        "endpoint": "contexts/compile",
+        "started_seconds": 0.062919,
+        "request_sha256": "2f1e7df0ed65053457ad2b6c4a0889acde75b33eb2800a61806cee8c4807928a",
+        "duplicate_retry": false,
+        "arrival_delay_ms": 0.4918,
+        "status": 403,
+        "code": "VIEW_DENIED",
+        "response_sha256": "b35ede8089f41d89f55c2b76a40e53baeebeed94028363456226260614ca1a8a",
+        "response_bytes": 163,
+        "reason": "unexpected response"
+      }
+    ]
+  },
+  "database_application": {
+    "sql_statements": 458,
+    "transactions": 38,
+    "sql_statements_per_second": 817.7548,
+    "peak_checked_out_connections": 2,
+    "checked_out_at_end": 0,
+    "configured_pool_size": 8,
+    "pool_status_at_end": "Pool size: 8  Connections in pool: 2 Current Overflow: -6 Current Checked out connections: 0"
+  },
+  "database_observer": {
+    "sample_interval_seconds": 0.2,
+    "observer_connection_budget": 1,
+    "before": {
+      "database_bytes": 10327731,
+      "wal_lsn": "0/21421C0",
+      "stats": {
+        "xact_commit": 99,
+        "xact_rollback": 2,
+        "blks_read": 50,
+        "blks_hit": 35302,
+        "temp_files": 0,
+        "temp_bytes": 0,
+        "deadlocks": 0
+      }
+    },
+    "after": {
+      "database_bytes": 10475187,
+      "wal_lsn": "0/2165190",
+      "stats": {
+        "xact_commit": 276,
+        "xact_rollback": 4,
+        "blks_read": 50,
+        "blks_hit": 38765,
+        "temp_files": 0,
+        "temp_bytes": 0,
+        "deadlocks": 0
+      }
+    },
+    "wal_bytes": 143312,
+    "samples": [
+      {
+        "elapsed_seconds": 0.00262,
+        "connections": [
+          {
+            "state": "idle",
+            "wait_event_type": "Client",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "elapsed_seconds": 0.207269,
+        "connections": [
+          {
+            "state": "idle",
+            "wait_event_type": "Client",
+            "count": 2
+          }
+        ]
+      },
+      {
+        "elapsed_seconds": 0.409139,
+        "connections": [
+          {
+            "state": "idle",
+            "wait_event_type": "Client",
+            "count": 1
+          },
+          {
+            "state": "idle in transaction",
+            "wait_event_type": "Client",
+            "count": 1
+          }
+        ]
+      }
+    ],
+    "observer_errors": [],
+    "stats_note": "pg_stat_database cumulative counters may lag; application SQL and pool counters are separately measured by SQLAlchemy listeners"
+  },
+  "phase_boundaries": [
+    {
+      "phase": "compile",
+      "checked_out_connections": 0,
+      "cache_hits": 0,
+      "cache_misses": 0
+    }
+  ],
+  "resources": {
+    "process_user_cpu_seconds": 0.3802509999999999,
+    "process_system_cpu_seconds": 0.049468999999999985,
+    "process_peak_rss_kib": 79472,
+    "minor_page_faults": 1689,
+    "major_page_faults": 0
+  },
+  "admission": {
+    "admitted": 10,
+    "peak_active": 2,
+    "peak_queued": 0,
+    "completed": 10,
+    "active": 0,
+    "queued": 0,
+    "capacity": 6,
+    "per_principal": 2,
+    "max_waiters": 64,
+    "wait_seconds_total": 9.680799848865718e-05
+  },
+  "authentication_admission": {
+    "admitted": 10,
+    "peak_active": 1,
+    "peak_queued": 0,
+    "completed": 10,
+    "active": 0,
+    "queued": 0,
+    "capacity": 2,
+    "per_principal": 2,
+    "max_waiters": 64,
+    "wait_seconds_total": 0.00012343500202405266
+  },
+  "ingress": {
+    "admitted": 10,
+    "peak_active": 2,
+    "peak_queued": 0,
+    "completed": 10,
+    "active": 0,
+    "queued": 0,
+    "capacity": 128,
+    "per_principal": 128,
+    "max_waiters": 0,
+    "wait_seconds_total": 0.0001843470017774962
+  },
+  "correctness": {
+    "new_world_revisions": 0,
+    "expected_new_world_revisions": 2,
+    "new_selected_effect_groups": 0,
+    "all_grants_have_real_persisted_tasks": true,
+    "connections_released_between_phases": true,
+    "shared_resource_final_quantity": "100",
+    "independent_resource_final_quantities": [
+      "100"
+    ]
+  },
+  "external_model": {
+    "actual_calls": 0,
+    "peak_inflight_calls": 0,
+    "tokens": 0,
+    "billed_cost_usd": null,
+    "status": "NOT_DISPATCHED",
+    "note": "No real or fixture model dispatch; this measures service behavior, not model concurrency"
+  },
+  "raw_requests": [
+    {
+      "agent": 0,
+      "task_id": "1b24dece-80cd-46ce-a09a-ada64cbf6f7a",
+      "label": "compile",
+      "endpoint": "contexts/compile",
+      "started_seconds": 0.012486,
+      "request_sha256": "56f5bda446c28a87f8d6f7e791481458e6fe1f821543483cdb4d03fbcaaf0881",
+      "duplicate_retry": false,
+      "arrival_delay_ms": 0.0596,
+      "status": 403,
+      "code": "VIEW_DENIED",
+      "response_sha256": "ec08d95d8f2e006d3bbd519c7880e74bf59e230b5102aa7c2a073c5c4a7c3594",
+      "response_bytes": 163,
+      "latency_ms": 42.2542
+    },
+    {
+      "agent": 1,
+      "task_id": "807a478b-5ec9-4bf9-bb6d-21936753b17a",
+      "label": "compile",
+      "endpoint": "contexts/compile",
+      "started_seconds": 0.062919,
+      "request_sha256": "2f1e7df0ed65053457ad2b6c4a0889acde75b33eb2800a61806cee8c4807928a",
+      "duplicate_retry": false,
+      "arrival_delay_ms": 0.4918,
+      "status": 403,
+      "code": "VIEW_DENIED",
+      "response_sha256": "b35ede8089f41d89f55c2b76a40e53baeebeed94028363456226260614ca1a8a",
+      "response_bytes": 163,
+      "latency_ms": 63.8081
+    },
+    {
+      "agent": 2,
+      "task_id": "4cd5f5b8-bd2a-4513-ab9d-74e137a497bd",
+      "label": "compile",
+      "endpoint": "contexts/compile",
+      "started_seconds": 0.113138,
+      "request_sha256": "ca6d33981eb108ee38dbced7e28bd87f5f4f4c3508b4f99b155d276882dd7606",
+      "duplicate_retry": false,
+      "arrival_delay_ms": 0.7115,
+      "status": 200,
+      "code": null,
+      "response_sha256": "8dd21088b1604ec7bfb750b42f5bd2b839da335176d676e7e79ddae6d96d9ee7",
+      "response_bytes": 3143,
+      "latency_ms": 60.8462
+    },
+    {
+      "agent": 3,
+      "task_id": "463bde90-47d7-49e9-a999-2b1926a67883",
+      "label": "compile",
+      "endpoint": "contexts/compile",
+      "started_seconds": 0.16394,
+      "request_sha256": "86e50c3421df191af124c654ba264f7f47fb5c9d9ad4f62f2bfdaee49b69a637",
+      "duplicate_retry": false,
+      "arrival_delay_ms": 1.5128,
+      "status": 200,
+      "code": null,
+      "response_sha256": "51795f3b6f33054bef12c154b4facb6ce4d5fdd09bdf4f1b40a203a0acbc2989",
+      "response_bytes": 3143,
+      "latency_ms": 115.3506
+    },
+    {
+      "agent": 4,
+      "task_id": "f4cfaeaf-2a6c-42c8-9400-ca0b0d93061d",
+      "label": "compile",
+      "endpoint": "contexts/compile",
+      "started_seconds": 0.213639,
+      "request_sha256": "c73a3e6903703d9498807b608e7f802acedb0175a6babfa2238932015c172bd4",
+      "duplicate_retry": false,
+      "arrival_delay_ms": 1.2126,
+      "status": 200,
+      "code": null,
+      "response_sha256": "fa895f649743a91a25ba7b17a9ab092ea9d98e8f846ed585cbb632ded89105ca",
+      "response_bytes": 3143,
+      "latency_ms": 68.4412
+    },
+    {
+      "agent": 5,
+      "task_id": "1a619fef-dba5-4eb0-9766-e86941040ed5",
+      "label": "compile",
+      "endpoint": "contexts/compile",
+      "started_seconds": 0.262804,
+      "request_sha256": "49cd12917562cc90bfcd387a05ee9e1b4b2e99131f539a4b4dfeba5c3cb6d1ef",
+      "duplicate_retry": false,
+      "arrival_delay_ms": 0.3774,
+      "status": 200,
+      "code": null,
+      "response_sha256": "01b0719b97ac8c262d3b1999802fd32b47cc27de5588b76ff3054a1b3bc65eed",
+      "response_bytes": 3143,
+      "latency_ms": 78.2268
+    },
+    {
+      "agent": 6,
+      "task_id": "56aa6d6a-521e-452f-a1a5-a741f4306441",
+      "label": "compile",
+      "endpoint": "contexts/compile",
+      "started_seconds": 0.31331,
+      "request_sha256": "5fe16453988e8dcd7adee7090d0ee50d3c038be50d29d91ba0b04f4e9ab9b9b6",
+      "duplicate_retry": false,
+      "arrival_delay_ms": 0.8827,
+      "status": 200,
+      "code": null,
+      "response_sha256": "fa8e1cb1aed48cc44729169b79cee6774a90de0070f90881c14ce357d210900c",
+      "response_bytes": 3143,
+      "latency_ms": 61.4103
+    },
+    {
+      "agent": 7,
+      "task_id": "c9831656-2c4c-46f8-a74e-3dfb73952474",
+      "label": "compile",
+      "endpoint": "contexts/compile",
+      "started_seconds": 0.363498,
+      "request_sha256": "01b7bd2a6202dd39e35e7137acce25824e2aa6bf5ba569cd2206a5c0b75f0fa1",
+      "duplicate_retry": false,
+      "arrival_delay_ms": 1.0711,
+      "status": 200,
+      "code": null,
+      "response_sha256": "8d21cd2b2c55ab8873f8a2f49afeb5b8e52720778c8a7d2e85330cdf43e13a75",
+      "response_bytes": 3143,
+      "latency_ms": 52.4643
+    },
+    {
+      "agent": 8,
+      "task_id": "372159c3-dda6-471d-9806-d058d9ec92cb",
+      "label": "compile",
+      "endpoint": "contexts/compile",
+      "started_seconds": 0.415969,
+      "request_sha256": "dc99480344eff16572519e0b30d41c6ba153f15b72e53c21a6657758ca44a375",
+      "duplicate_retry": false,
+      "arrival_delay_ms": 3.5425,
+      "status": 200,
+      "code": null,
+      "response_sha256": "183491d946ed29f00da9c4a38661946cfe5e1437de411b57ed705a5c493d9eec",
+      "response_bytes": 3143,
+      "latency_ms": 48.9135
+    },
+    {
+      "agent": 9,
+      "task_id": "f21ff9bc-75d5-468d-ab61-9dd4d7301c49",
+      "label": "compile",
+      "endpoint": "contexts/compile",
+      "started_seconds": 0.464954,
+      "request_sha256": "2f7cadc99aedaa9b3e3ddcd7c5c7d4f57651466af202f72a43f04bb85cbae6dd",
+      "duplicate_retry": false,
+      "arrival_delay_ms": 2.5269,
+      "status": 200,
+      "code": null,
+      "response_sha256": "d5f2888f0b44d53c24ca7941848df8f6b49606907e89858713ae61d304e240da",
+      "response_bytes": 3143,
+      "latency_ms": 95.0322
+    }
+  ],
+  "world_commit_receipts": [],
+  "limitations": [
+    "One API process with eight pooled DB connections",
+    "No sustained capacity or multi-hour soak claim",
+    "No 200-model novel creation claim",
+    "HTTP pipeline represents control commands; joint scheduler arbitration is validated separately"
+  ],
+  "reproduction_argv": [
+    "/workspace/scratch/cf3ee8d0c6c4/NovelFactory/benchmarks/p2_behavioral_load.py",
+    "--agents",
+    "10",
+    "--arrival-rps",
+    "20",
+    "--output",
+    "evidence/p2/batch3/load/smoke-attempt1.json"
+  ]
+}

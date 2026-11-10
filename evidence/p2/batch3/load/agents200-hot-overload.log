@@ -1,0 +1,425 @@
+RUN ["/workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin/initdb", "-D", "/tmp/nf-pg17-vka2bcxl/data", "-U", "nf_dev", "--encoding=UTF8", "--locale=C", "--auth-local=reject", "--auth-host=trust", "--data-checksums"]
+The files belonging to this database system will be owned by user "agent".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "C".
+The default text search configuration will be set to "english".
+
+Data page checksums are enabled.
+
+creating directory /tmp/nf-pg17-vka2bcxl/data ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default "max_connections" ... 100
+selecting default "shared_buffers" ... 128MB
+selecting default time zone ... Asia/Tokyo
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+
+Success. You can now start the database server using:
+
+    /workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin/pg_ctl -D /tmp/nf-pg17-vka2bcxl/data -l logfile start
+
+RUN ["/workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin/createdb", "nf_test"]
+RUN ["/workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin/psql", "-Atc", "SELECT version(); SHOW fsync; SHOW synchronous_commit;"]
+PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+on
+on
+REAL_POSTGRES_READY postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1) port 47985
+{
+  "file": "evidence/p2/batch3/load/agents200-hot-overload.json",
+  "correctness": "FAIL",
+  "logical_agents": 200,
+  "metrics": {
+    "duration_seconds": 194.807347,
+    "planned_requests": 2141,
+    "emitted_requests": 2089,
+    "completed_requests": 2089,
+    "client_requests_never_emitted": 52,
+    "api_tool_calls": 2089,
+    "mcp_tool_calls": 0,
+    "status_counts": {
+      "200": 2032,
+      "429": 50,
+      "409": 7
+    },
+    "valid_successful_calls": 2032,
+    "api_success_rps": 10.4308,
+    "successful_duplicate_receipts": 8,
+    "effective_call_rps_excluding_duplicates": 10.3898,
+    "new_world_commit_receipts": 8,
+    "accepted_original_input_after_unrelated_head_progress": 7,
+    "cross_head_accept_rate_among_unique_commits": 0.875,
+    "semantic_replan_requests_in_load": 0,
+    "effective_world_commits_per_second": 0.0411,
+    "conflict_count": 7,
+    "conflict_rate_all_requests": 0.003350885591191958,
+    "failure_rate_all_requests": 0.027285782671134514,
+    "idempotent_retry_rate_all_requests": 0.003829583532790809,
+    "infrastructure_retries": 0,
+    "model_retries": 0,
+    "peak_inflight_http": 70,
+    "latency_all_responses": {
+      "count": 2089,
+      "p50_ms": 1318.4538,
+      "p95_ms": 5979.5075,
+      "p99_ms": 9544.1756
+    },
+    "latency_successes": {
+      "count": 2032,
+      "p50_ms": 1263.7397,
+      "p95_ms": 5958.2795,
+      "p99_ms": 9351.0374
+    },
+    "latency_rejections_and_failures": {
+      "count": 57,
+      "p50_ms": 2514.0469,
+      "p95_ms": 7548.7732,
+      "p99_ms": 12522.1308
+    },
+    "arrival_schedule_delay": {
+      "count": 2089,
+      "p50_ms": 1355.0701,
+      "p95_ms": 36321.5326,
+      "p99_ms": 40068.4633
+    },
+    "per_operation": {
+      "accept_conflict": {
+        "calls": 7,
+        "successes": 0,
+        "latency_all_responses": {
+          "count": 7,
+          "p50_ms": 72.5821,
+          "p95_ms": 96.992,
+          "p99_ms": 96.992
+        }
+      },
+      "accept_independent": {
+        "calls": 7,
+        "successes": 7,
+        "latency_all_responses": {
+          "count": 7,
+          "p50_ms": 1514.9263,
+          "p95_ms": 1822.067,
+          "p99_ms": 1822.067
+        }
+      },
+      "accept_retry": {
+        "calls": 8,
+        "successes": 8,
+        "latency_all_responses": {
+          "count": 8,
+          "p50_ms": 48.6186,
+          "p95_ms": 422.3011,
+          "p99_ms": 422.3011
+        }
+      },
+      "accept_selected_fixture": {
+        "calls": 1,
+        "successes": 1,
+        "latency_all_responses": {
+          "count": 1,
+          "p50_ms": 1109.1187,
+          "p95_ms": 1109.1187,
+          "p99_ms": 1109.1187
+        }
+      },
+      "certificate": {
+        "calls": 26,
+        "successes": 15,
+        "latency_all_responses": {
+          "count": 26,
+          "p50_ms": 2676.7526,
+          "p95_ms": 4786.4518,
+          "p99_ms": 7548.7732
+        }
+      },
+      "compile": {
+        "calls": 200,
+        "successes": 200,
+        "latency_all_responses": {
+          "count": 200,
+          "p50_ms": 58.8959,
+          "p95_ms": 104.0155,
+          "p99_ms": 109.2616
+        }
+      },
+      "graph": {
+        "calls": 20,
+        "successes": 16,
+        "latency_all_responses": {
+          "count": 20,
+          "p50_ms": 3480.918,
+          "p95_ms": 10170.6451,
+          "p99_ms": 16713.2704
+        }
+      },
+      "history": {
+        "calls": 200,
+        "successes": 193,
+        "latency_all_responses": {
+          "count": 200,
+          "p50_ms": 2397.6536,
+          "p95_ms": 5943.4836,
+          "p99_ms": 7129.9085
+        }
+      },
+      "overload": {
+        "calls": 1000,
+        "successes": 1000,
+        "latency_all_responses": {
+          "count": 1000,
+          "p50_ms": 1795.6633,
+          "p95_ms": 6275.0345,
+          "p99_ms": 9818.729
+        }
+      },
+      "propose": {
+        "calls": 40,
+        "successes": 26,
+        "latency_all_responses": {
+          "count": 40,
+          "p50_ms": 4185.1665,
+          "p95_ms": 6253.4583,
+          "p99_ms": 12522.1308
+        }
+      },
+      "state_cold": {
+        "calls": 200,
+        "successes": 200,
+        "latency_all_responses": {
+          "count": 200,
+          "p50_ms": 47.5942,
+          "p95_ms": 89.3222,
+          "p99_ms": 93.7069
+        }
+      },
+      "state_mixed": {
+        "calls": 180,
+        "successes": 166,
+        "latency_all_responses": {
+          "count": 180,
+          "p50_ms": 2835.4915,
+          "p95_ms": 8564.1487,
+          "p99_ms": 12911.73
+        }
+      },
+      "state_warm": {
+        "calls": 200,
+        "successes": 200,
+        "latency_all_responses": {
+          "count": 200,
+          "p50_ms": 51.2068,
+          "p95_ms": 87.1997,
+          "p99_ms": 103.5783
+        }
+      }
+    },
+    "successful_calls_by_agent": {
+      "0": 11,
+      "1": 11,
+      "2": 11,
+      "3": 11,
+      "4": 11,
+      "5": 14,
+      "6": 10,
+      "7": 14,
+      "8": 14,
+      "9": 10,
+      "10": 10,
+      "11": 10,
+      "12": 11,
+      "13": 14,
+      "14": 14,
+      "15": 11,
+      "16": 14,
+      "17": 10,
+      "18": 10,
+      "19": 14,
+      "20": 14,
+      "21": 11,
+      "22": 12,
+      "23": 10,
+      "24": 10,
+      "25": 11,
+      "26": 10,
+      "27": 10,
+      "28": 10,
+      "29": 10,
+      "30": 11,
+      "31": 9,
+      "32": 11,
+      "33": 9,
+      "34": 12,
+      "35": 11,
+      "36": 10,
+      "37": 12,
+      "38": 10,
+      "39": 12,
+      "40": 10,
+      "41": 10,
+      "42": 10,
+      "43": 10,
+      "44": 10,
+      "45": 10,
+      "46": 10,
+      "47": 10,
+      "48": 10,
+      "49": 10,
+      "50": 9,
+      "51": 10,
+      "52": 10,
+      "53": 10,
+      "54": 10,
+      "55": 10,
+      "56": 10,
+      "57": 10,
+      "58": 10,
+      "59": 9,
+      "60": 9,
+      "61": 9,
+      "62": 9,
+      "63": 10,
+      "64": 10,
+      "65": 9,
+      "66": 10,
+      "67": 10,
+      "68": 10,
+      "69": 9,
+      "70": 9,
+      "71": 10,
+      "72": 10,
+      "73": 10,
+      "74": 10,
+      "75": 10,
+      "76": 10,
+      "77": 10,
+      "78": 10,
+      "79": 9,
+      "80": 9,
+      "81": 10,
+      "82": 10,
+      "83": 10,
+      "84": 10,
+      "85": 9,
+      "86": 9,
+      "87": 10,
+      "88": 10,
+      "89": 10,
+      "90": 10,
+      "91": 10,
+      "92": 9,
+      "93": 10,
+      "94": 10,
+      "95": 9,
+      "96": 10,
+      "97": 9,
+      "98": 9,
+      "99": 10,
+      "100": 10,
+      "101": 10,
+      "102": 10,
+      "103": 10,
+      "104": 10,
+      "105": 10,
+      "106": 10,
+      "107": 10,
+      "108": 10,
+      "109": 10,
+      "110": 10,
+      "111": 10,
+      "112": 10,
+      "113": 10,
+      "114": 10,
+      "115": 10,
+      "116": 10,
+      "117": 10,
+      "118": 10,
+      "119": 10,
+      "120": 10,
+      "121": 10,
+      "122": 10,
+      "123": 9,
+      "124": 10,
+      "125": 10,
+      "126": 10,
+      "127": 10,
+      "128": 10,
+      "129": 10,
+      "130": 10,
+      "131": 10,
+      "132": 10,
+      "133": 10,
+      "134": 10,
+      "135": 10,
+      "136": 10,
+      "137": 10,
+      "138": 10,
+      "139": 10,
+      "140": 10,
+      "141": 10,
+      "142": 10,
+      "143": 10,
+      "144": 10,
+      "145": 10,
+      "146": 10,
+      "147": 10,
+      "148": 10,
+      "149": 10,
+      "150": 10,
+      "151": 10,
+      "152": 10,
+      "153": 10,
+      "154": 10,
+      "155": 10,
+      "156": 10,
+      "157": 10,
+      "158": 10,
+      "159": 10,
+      "160": 10,
+      "161": 10,
+      "162": 10,
+      "163": 10,
+      "164": 10,
+      "165": 10,
+      "166": 9,
+      "167": 10,
+      "168": 10,
+      "169": 10,
+      "170": 10,
+      "171": 10,
+      "172": 10,
+      "173": 10,
+      "174": 10,
+      "175": 10,
+      "176": 10,
+      "177": 10,
+      "178": 10,
+      "179": 10,
+      "180": 10,
+      "181": 10,
+      "182": 10,
+      "183": 10,
+      "184": 10,
+      "185": 10,
+      "186": 10,
+      "187": 10,
+      "188": 10,
+      "189": 10,
+      "190": 10,
+      "191": 10,
+      "192": 10,
+      "193": 10,
+      "194": 10,
+      "195": 10,
+      "196": 10,
+      "197": 10,
+      "198": 10,
+      "199": 10
+    },
+    "latency_warning": "P99 for individual write categories has few samples; descriptive only",
+    "correctness_errors": []
+  }
+}

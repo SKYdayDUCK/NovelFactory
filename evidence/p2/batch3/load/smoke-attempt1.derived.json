@@ -1,0 +1,161 @@
+{
+  "schema_version": "p2-load-derived-1",
+  "original_path": "evidence/p2/batch3/load/smoke-attempt1.json",
+  "original_sha256": "2c488f9528681519a094273804877bc8b79ba00bf59b531c278aba667a2fde29",
+  "original_scenario_result_unchanged": "FAIL",
+  "metrics": {
+    "duration_seconds": 0.56007,
+    "planned_requests": 10,
+    "emitted_requests": 10,
+    "completed_requests": 10,
+    "client_requests_never_emitted": 0,
+    "api_tool_calls": 10,
+    "mcp_tool_calls": 0,
+    "status_counts": {
+      "403": 2,
+      "200": 8
+    },
+    "valid_successful_calls": 8,
+    "api_success_rps": 14.2839,
+    "successful_duplicate_receipts": 0,
+    "effective_call_rps_excluding_duplicates": 14.2839,
+    "new_world_commit_receipts": 0,
+    "accepted_original_input_after_unrelated_head_progress": 0,
+    "cross_head_accept_rate_among_unique_commits": 0.0,
+    "semantic_replan_requests_in_load": 0,
+    "effective_world_commits_per_second": 0.0,
+    "conflict_count": 0,
+    "conflict_rate_all_requests": 0.0,
+    "failure_rate_all_requests": 0.2,
+    "idempotent_retry_rate_all_requests": 0.0,
+    "infrastructure_retries": 0,
+    "model_retries": 0,
+    "peak_outstanding_client_requests": 3,
+    "client_connection_limit": 256,
+    "outstanding_definition": "Includes HTTPX connection-pool wait; server ingress is measured separately",
+    "latency_all_responses": {
+      "count": 10,
+      "p50_ms": 61.4103,
+      "p95_ms": 115.3506,
+      "p99_ms": 115.3506
+    },
+    "latency_successes": {
+      "count": 8,
+      "p50_ms": 61.4103,
+      "p95_ms": 115.3506,
+      "p99_ms": 115.3506
+    },
+    "latency_rejections_and_failures": {
+      "count": 2,
+      "p50_ms": 42.2542,
+      "p95_ms": 63.8081,
+      "p99_ms": 63.8081
+    },
+    "scheduled_to_completion_latency": {
+      "count": 10,
+      "p50_ms": 62.293,
+      "p95_ms": 116.8634,
+      "p99_ms": 116.8634
+    },
+    "arrival_schedule_delay": {
+      "count": 10,
+      "p50_ms": 0.8827,
+      "p95_ms": 3.5425,
+      "p99_ms": 3.5425
+    },
+    "per_operation": {
+      "compile": {
+        "calls": 10,
+        "successes": 8,
+        "latency_all_responses": {
+          "count": 10,
+          "p50_ms": 61.4103,
+          "p95_ms": 115.3506,
+          "p99_ms": 115.3506
+        },
+        "scheduled_to_completion_latency": {
+          "count": 10,
+          "p50_ms": 62.293,
+          "p95_ms": 116.8634,
+          "p99_ms": 116.8634
+        }
+      }
+    },
+    "successful_calls_by_agent": {
+      "2": 1,
+      "3": 1,
+      "4": 1,
+      "5": 1,
+      "6": 1,
+      "7": 1,
+      "8": 1,
+      "9": 1
+    },
+    "latency_warning": "P99 for individual write categories has few samples; descriptive only",
+    "correctness_errors": [
+      {
+        "agent": 0,
+        "task_id": "1b24dece-80cd-46ce-a09a-ada64cbf6f7a",
+        "label": "compile",
+        "endpoint": "contexts/compile",
+        "started_seconds": 0.012486,
+        "request_sha256": "56f5bda446c28a87f8d6f7e791481458e6fe1f821543483cdb4d03fbcaaf0881",
+        "duplicate_retry": false,
+        "arrival_delay_ms": 0.0596,
+        "status": 403,
+        "code": "VIEW_DENIED",
+        "response_sha256": "ec08d95d8f2e006d3bbd519c7880e74bf59e230b5102aa7c2a073c5c4a7c3594",
+        "response_bytes": 163,
+        "reason": "unexpected response"
+      },
+      {
+        "agent": 1,
+        "task_id": "807a478b-5ec9-4bf9-bb6d-21936753b17a",
+        "label": "compile",
+        "endpoint": "contexts/compile",
+        "started_seconds": 0.062919,
+        "request_sha256": "2f1e7df0ed65053457ad2b6c4a0889acde75b33eb2800a61806cee8c4807928a",
+        "duplicate_retry": false,
+        "arrival_delay_ms": 0.4918,
+        "status": 403,
+        "code": "VIEW_DENIED",
+        "response_sha256": "b35ede8089f41d89f55c2b76a40e53baeebeed94028363456226260614ca1a8a",
+        "response_bytes": 163,
+        "reason": "unexpected response"
+      }
+    ]
+  },
+  "overload_observation": null,
+  "server_ingress": {
+    "admitted": 10,
+    "peak_active": 2,
+    "peak_queued": 0,
+    "completed": 10,
+    "active": 0,
+    "queued": 0,
+    "capacity": 128,
+    "per_principal": 128,
+    "max_waiters": 0,
+    "wait_seconds_total": 0.0001843470017774962
+  },
+  "application_sql_and_pool": {
+    "sql_statements": 458,
+    "transactions": 38,
+    "sql_statements_per_second": 817.7548,
+    "peak_checked_out_connections": 2,
+    "checked_out_at_end": 0,
+    "configured_pool_size": 8,
+    "pool_status_at_end": "Pool size: 8  Connections in pool: 2 Current Overflow: -6 Current Checked out connections: 0"
+  },
+  "hot_fraction": 0.2,
+  "hot_fraction_meaning": "Read-subject concentration only; number of shared writer candidates is always logical_agents/10, not hot_fraction*writers.",
+  "source_snapshot": null,
+  "source_snapshot_status": "NOT_RETAINED_FOR_DEVELOPMENT_ATTEMPT",
+  "derivation_source_sha256": "b3b08ce2c2f40c0ae8486d8b7e213245765c17cffc480ac5b45aac3d158fcf8d",
+  "reproduction_command": "python -m benchmarks.p2_load_derived --input evidence/p2/batch3/load/smoke-attempt1.json --output <new-path>",
+  "limitations": [
+    "Earlier planned counts are only as precise as originally recorded",
+    "No rejected response is promoted to success by post-processing",
+    "No performance re-run or model dispatch occurred during derivation"
+  ]
+}

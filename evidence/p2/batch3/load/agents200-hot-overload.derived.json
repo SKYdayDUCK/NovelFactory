@@ -1,0 +1,524 @@
+{
+  "schema_version": "p2-load-derived-1",
+  "original_path": "evidence/p2/batch3/load/agents200-hot-overload.json",
+  "original_sha256": "792f04956a109637e372b48db8ac1fb877cf84569fd2098ccf502be3c6b4fdd0",
+  "original_scenario_result_unchanged": "FAIL",
+  "metrics": {
+    "duration_seconds": 194.807347,
+    "planned_requests": 2141,
+    "emitted_requests": 2089,
+    "completed_requests": 2089,
+    "client_requests_never_emitted": 52,
+    "api_tool_calls": 2089,
+    "mcp_tool_calls": 0,
+    "status_counts": {
+      "200": 2032,
+      "429": 50,
+      "409": 7
+    },
+    "valid_successful_calls": 2032,
+    "api_success_rps": 10.4308,
+    "successful_duplicate_receipts": 8,
+    "effective_call_rps_excluding_duplicates": 10.3898,
+    "new_world_commit_receipts": 8,
+    "accepted_original_input_after_unrelated_head_progress": 7,
+    "cross_head_accept_rate_among_unique_commits": 0.875,
+    "semantic_replan_requests_in_load": 0,
+    "effective_world_commits_per_second": 0.0411,
+    "conflict_count": 7,
+    "conflict_rate_all_requests": 0.003350885591191958,
+    "failure_rate_all_requests": 0.027285782671134514,
+    "idempotent_retry_rate_all_requests": 0.003829583532790809,
+    "infrastructure_retries": 0,
+    "model_retries": 0,
+    "peak_outstanding_client_requests": 70,
+    "client_connection_limit": 256,
+    "outstanding_definition": "Includes HTTPX connection-pool wait; server ingress is measured separately",
+    "latency_all_responses": {
+      "count": 2089,
+      "p50_ms": 1318.4538,
+      "p95_ms": 5979.5075,
+      "p99_ms": 9544.1756
+    },
+    "latency_successes": {
+      "count": 2032,
+      "p50_ms": 1263.7397,
+      "p95_ms": 5958.2795,
+      "p99_ms": 9351.0374
+    },
+    "latency_rejections_and_failures": {
+      "count": 57,
+      "p50_ms": 2514.0469,
+      "p95_ms": 7548.7732,
+      "p99_ms": 12522.1308
+    },
+    "scheduled_to_completion_latency": {
+      "count": 2089,
+      "p50_ms": 4611.4096,
+      "p95_ms": 39149.0006,
+      "p99_ms": 42839.0896
+    },
+    "arrival_schedule_delay": {
+      "count": 2089,
+      "p50_ms": 1355.0701,
+      "p95_ms": 36321.5326,
+      "p99_ms": 40068.4633
+    },
+    "per_operation": {
+      "accept_conflict": {
+        "calls": 7,
+        "successes": 0,
+        "latency_all_responses": {
+          "count": 7,
+          "p50_ms": 72.5821,
+          "p95_ms": 96.992,
+          "p99_ms": 96.992
+        },
+        "scheduled_to_completion_latency": {
+          "count": 7,
+          "p50_ms": 74.1662,
+          "p95_ms": 98.9583,
+          "p99_ms": 98.9583
+        }
+      },
+      "accept_independent": {
+        "calls": 7,
+        "successes": 7,
+        "latency_all_responses": {
+          "count": 7,
+          "p50_ms": 1514.9263,
+          "p95_ms": 1822.067,
+          "p99_ms": 1822.067
+        },
+        "scheduled_to_completion_latency": {
+          "count": 7,
+          "p50_ms": 1515.3489,
+          "p95_ms": 1823.9274,
+          "p99_ms": 1823.9274
+        }
+      },
+      "accept_retry": {
+        "calls": 8,
+        "successes": 8,
+        "latency_all_responses": {
+          "count": 8,
+          "p50_ms": 48.6186,
+          "p95_ms": 422.3011,
+          "p99_ms": 422.3011
+        },
+        "scheduled_to_completion_latency": {
+          "count": 8,
+          "p50_ms": 48.6186,
+          "p95_ms": 425.6751,
+          "p99_ms": 425.6751
+        }
+      },
+      "accept_selected_fixture": {
+        "calls": 1,
+        "successes": 1,
+        "latency_all_responses": {
+          "count": 1,
+          "p50_ms": 1109.1187,
+          "p95_ms": 1109.1187,
+          "p99_ms": 1109.1187
+        },
+        "scheduled_to_completion_latency": {
+          "count": 1,
+          "p50_ms": 1109.1187,
+          "p95_ms": 1109.1187,
+          "p99_ms": 1109.1187
+        }
+      },
+      "certificate": {
+        "calls": 26,
+        "successes": 15,
+        "latency_all_responses": {
+          "count": 26,
+          "p50_ms": 2676.7526,
+          "p95_ms": 4786.4518,
+          "p99_ms": 7548.7732
+        },
+        "scheduled_to_completion_latency": {
+          "count": 26,
+          "p50_ms": 2676.7526,
+          "p95_ms": 4786.4518,
+          "p99_ms": 7548.7732
+        }
+      },
+      "compile": {
+        "calls": 200,
+        "successes": 200,
+        "latency_all_responses": {
+          "count": 200,
+          "p50_ms": 58.8959,
+          "p95_ms": 104.0155,
+          "p99_ms": 109.2616
+        },
+        "scheduled_to_completion_latency": {
+          "count": 200,
+          "p50_ms": 59.5789,
+          "p95_ms": 106.0736,
+          "p99_ms": 110.4953
+        }
+      },
+      "graph": {
+        "calls": 20,
+        "successes": 16,
+        "latency_all_responses": {
+          "count": 20,
+          "p50_ms": 3480.918,
+          "p95_ms": 10170.6451,
+          "p99_ms": 16713.2704
+        },
+        "scheduled_to_completion_latency": {
+          "count": 20,
+          "p50_ms": 3752.8744,
+          "p95_ms": 12063.8036,
+          "p99_ms": 17540.9313
+        }
+      },
+      "history": {
+        "calls": 200,
+        "successes": 193,
+        "latency_all_responses": {
+          "count": 200,
+          "p50_ms": 2397.6536,
+          "p95_ms": 5943.4836,
+          "p99_ms": 7129.9085
+        },
+        "scheduled_to_completion_latency": {
+          "count": 200,
+          "p50_ms": 2983.3234,
+          "p95_ms": 6665.9169,
+          "p99_ms": 8327.0114
+        }
+      },
+      "overload": {
+        "calls": 1000,
+        "successes": 1000,
+        "latency_all_responses": {
+          "count": 1000,
+          "p50_ms": 1795.6633,
+          "p95_ms": 6275.0345,
+          "p99_ms": 9818.729
+        },
+        "scheduled_to_completion_latency": {
+          "count": 1000,
+          "p50_ms": 22010.3125,
+          "p95_ms": 41519.4766,
+          "p99_ms": 43297.44
+        }
+      },
+      "propose": {
+        "calls": 40,
+        "successes": 26,
+        "latency_all_responses": {
+          "count": 40,
+          "p50_ms": 4185.1665,
+          "p95_ms": 6253.4583,
+          "p99_ms": 12522.1308
+        },
+        "scheduled_to_completion_latency": {
+          "count": 40,
+          "p50_ms": 4475.1513,
+          "p95_ms": 6774.6774,
+          "p99_ms": 12864.7691
+        }
+      },
+      "state_cold": {
+        "calls": 200,
+        "successes": 200,
+        "latency_all_responses": {
+          "count": 200,
+          "p50_ms": 47.5942,
+          "p95_ms": 89.3222,
+          "p99_ms": 93.7069
+        },
+        "scheduled_to_completion_latency": {
+          "count": 200,
+          "p50_ms": 48.8372,
+          "p95_ms": 89.6807,
+          "p99_ms": 94.3567
+        }
+      },
+      "state_mixed": {
+        "calls": 180,
+        "successes": 166,
+        "latency_all_responses": {
+          "count": 180,
+          "p50_ms": 2835.4915,
+          "p95_ms": 8564.1487,
+          "p99_ms": 12911.73
+        },
+        "scheduled_to_completion_latency": {
+          "count": 180,
+          "p50_ms": 3134.8748,
+          "p95_ms": 10843.492,
+          "p99_ms": 13987.6549
+        }
+      },
+      "state_warm": {
+        "calls": 200,
+        "successes": 200,
+        "latency_all_responses": {
+          "count": 200,
+          "p50_ms": 51.2068,
+          "p95_ms": 87.1997,
+          "p99_ms": 103.5783
+        },
+        "scheduled_to_completion_latency": {
+          "count": 200,
+          "p50_ms": 51.9999,
+          "p95_ms": 87.9473,
+          "p99_ms": 104.512
+        }
+      }
+    },
+    "successful_calls_by_agent": {
+      "0": 11,
+      "1": 11,
+      "2": 11,
+      "3": 11,
+      "4": 11,
+      "5": 14,
+      "6": 10,
+      "7": 14,
+      "8": 14,
+      "9": 10,
+      "10": 10,
+      "11": 10,
+      "12": 11,
+      "13": 14,
+      "14": 14,
+      "15": 11,
+      "16": 14,
+      "17": 10,
+      "18": 10,
+      "19": 14,
+      "20": 14,
+      "21": 11,
+      "22": 12,
+      "23": 10,
+      "24": 10,
+      "25": 11,
+      "26": 10,
+      "27": 10,
+      "28": 10,
+      "29": 10,
+      "30": 11,
+      "31": 9,
+      "32": 11,
+      "33": 9,
+      "34": 12,
+      "35": 11,
+      "36": 10,
+      "37": 12,
+      "38": 10,
+      "39": 12,
+      "40": 10,
+      "41": 10,
+      "42": 10,
+      "43": 10,
+      "44": 10,
+      "45": 10,
+      "46": 10,
+      "47": 10,
+      "48": 10,
+      "49": 10,
+      "50": 9,
+      "51": 10,
+      "52": 10,
+      "53": 10,
+      "54": 10,
+      "55": 10,
+      "56": 10,
+      "57": 10,
+      "58": 10,
+      "59": 9,
+      "60": 9,
+      "61": 9,
+      "62": 9,
+      "63": 10,
+      "64": 10,
+      "65": 9,
+      "66": 10,
+      "67": 10,
+      "68": 10,
+      "69": 9,
+      "70": 9,
+      "71": 10,
+      "72": 10,
+      "73": 10,
+      "74": 10,
+      "75": 10,
+      "76": 10,
+      "77": 10,
+      "78": 10,
+      "79": 9,
+      "80": 9,
+      "81": 10,
+      "82": 10,
+      "83": 10,
+      "84": 10,
+      "85": 9,
+      "86": 9,
+      "87": 10,
+      "88": 10,
+      "89": 10,
+      "90": 10,
+      "91": 10,
+      "92": 9,
+      "93": 10,
+      "94": 10,
+      "95": 9,
+      "96": 10,
+      "97": 9,
+      "98": 9,
+      "99": 10,
+      "100": 10,
+      "101": 10,
+      "102": 10,
+      "103": 10,
+      "104": 10,
+      "105": 10,
+      "106": 10,
+      "107": 10,
+      "108": 10,
+      "109": 10,
+      "110": 10,
+      "111": 10,
+      "112": 10,
+      "113": 10,
+      "114": 10,
+      "115": 10,
+      "116": 10,
+      "117": 10,
+      "118": 10,
+      "119": 10,
+      "120": 10,
+      "121": 10,
+      "122": 10,
+      "123": 9,
+      "124": 10,
+      "125": 10,
+      "126": 10,
+      "127": 10,
+      "128": 10,
+      "129": 10,
+      "130": 10,
+      "131": 10,
+      "132": 10,
+      "133": 10,
+      "134": 10,
+      "135": 10,
+      "136": 10,
+      "137": 10,
+      "138": 10,
+      "139": 10,
+      "140": 10,
+      "141": 10,
+      "142": 10,
+      "143": 10,
+      "144": 10,
+      "145": 10,
+      "146": 10,
+      "147": 10,
+      "148": 10,
+      "149": 10,
+      "150": 10,
+      "151": 10,
+      "152": 10,
+      "153": 10,
+      "154": 10,
+      "155": 10,
+      "156": 10,
+      "157": 10,
+      "158": 10,
+      "159": 10,
+      "160": 10,
+      "161": 10,
+      "162": 10,
+      "163": 10,
+      "164": 10,
+      "165": 10,
+      "166": 9,
+      "167": 10,
+      "168": 10,
+      "169": 10,
+      "170": 10,
+      "171": 10,
+      "172": 10,
+      "173": 10,
+      "174": 10,
+      "175": 10,
+      "176": 10,
+      "177": 10,
+      "178": 10,
+      "179": 10,
+      "180": 10,
+      "181": 10,
+      "182": 10,
+      "183": 10,
+      "184": 10,
+      "185": 10,
+      "186": 10,
+      "187": 10,
+      "188": 10,
+      "189": 10,
+      "190": 10,
+      "191": 10,
+      "192": 10,
+      "193": 10,
+      "194": 10,
+      "195": 10,
+      "196": 10,
+      "197": 10,
+      "198": 10,
+      "199": 10
+    },
+    "latency_warning": "P99 for individual write categories has few samples; descriptive only",
+    "correctness_errors": []
+  },
+  "overload_observation": {
+    "requests": 1000,
+    "target_arrival_rps": 1000.0,
+    "actual_call_start_window_seconds": 41.86200200000002,
+    "actual_call_starts_per_second": 23.864123841950978,
+    "completed_window_seconds": 44.558114500000016,
+    "completion_rps": 22.442601335835242,
+    "max_scheduling_delay_ms": 40863.0698,
+    "note": "Call starts include HTTPX connection wait; same-process load generator shares CPU with server. This is not proof of achieved target wire RPS."
+  },
+  "server_ingress": {
+    "admitted": 2089,
+    "peak_active": 34,
+    "peak_queued": 0,
+    "completed": 2089,
+    "active": 0,
+    "queued": 0,
+    "capacity": 128,
+    "per_principal": 128,
+    "max_waiters": 0,
+    "wait_seconds_total": 0.03248238401101844
+  },
+  "application_sql_and_pool": {
+    "sql_statements": 51213,
+    "transactions": 6400,
+    "sql_statements_per_second": 262.8905,
+    "peak_checked_out_connections": 8,
+    "checked_out_at_end": 0,
+    "configured_pool_size": 8,
+    "pool_status_at_end": "Pool size: 8  Connections in pool: 8 Current Overflow: 0 Current Checked out connections: 0"
+  },
+  "hot_fraction": 0.8,
+  "hot_fraction_meaning": "Read-subject concentration only; number of shared writer candidates is always logical_agents/10, not hot_fraction*writers.",
+  "source_snapshot": "evidence/p2/batch3/load/source_snapshots/e3af3c650cec9d48708f4a400b947f0740e7d5b6006a6b540b2bc9ff0d2888da.py",
+  "source_snapshot_status": "HASH_VERIFIED",
+  "derivation_source_sha256": "b3b08ce2c2f40c0ae8486d8b7e213245765c17cffc480ac5b45aac3d158fcf8d",
+  "reproduction_command": "python -m benchmarks.p2_load_derived --input evidence/p2/batch3/load/agents200-hot-overload.json --output <new-path>",
+  "limitations": [
+    "Earlier planned counts are only as precise as originally recorded",
+    "No rejected response is promoted to success by post-processing",
+    "No performance re-run or model dispatch occurred during derivation"
+  ]
+}

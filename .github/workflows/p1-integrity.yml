@@ -1,4 +1,4 @@
-name: P1 baseline integrity
+name: P1 and P2 production integrity
 
 on:
   push:
@@ -8,6 +8,10 @@ on:
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    shell: bash
 
 concurrency:
   group: p1-integrity-${{ github.workflow }}-${{ github.ref }}
@@ -71,6 +75,7 @@ jobs:
       NF_DATABASE_URL: postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/nf_test
       NF_TEST_DATABASE_URL: postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/nf_test
       NF_EVIDENCE_DIR: ci-evidence/recovery
+      NF_P2_ACCEPTANCE_EVIDENCE_DIR: ci-evidence/acceptance
       PG_BIN: /usr/lib/postgresql/17/bin
       NF_POOL_SIZE: '8'
       NF_POOL_OVERFLOW: '0'
@@ -107,6 +112,25 @@ jobs:
           uv run --no-sync python -m pytest tests -q \
             --junitxml=ci-evidence/postgres-all.xml --json-report --json-report-file=ci-evidence/postgres-all.json \
             2>&1 | tee ci-evidence/postgres-all.log
+      - name: Persist the complete six-scene TEST_FIXTURE production run
+        run: |
+          uv run --no-sync python scripts/run_short_volume.py \
+            --execution-kind TEST_FIXTURE --output ci-evidence/short-volume \
+            --object-root /tmp/nf-ci-short-volume-objects \
+            2>&1 | tee ci-evidence/short-volume.log
+      - name: Exercise the real HTTP and PostgreSQL behavioral load harness
+        run: |
+          uv run --no-sync python -m benchmarks.p2_behavioral_load \
+            --agents 10 --profile mixed --arrival-rps 10 \
+            --output ci-evidence/load-smoke-10.json \
+            2>&1 | tee ci-evidence/load-smoke-10.log
+      - name: Join A-H design checks to executed JUnit evidence
+        run: |
+          uv run --no-sync python -m benchmarks.p2_acceptance_matrix \
+            --junit ci-evidence/postgres-all.xml --load ci-evidence/load-smoke-10.json \
+            --gate-scope executed-tests \
+            --output ci-evidence/r1-acceptance.json \
+            2>&1 | tee ci-evidence/r1-acceptance.log
       - name: Upload PostgreSQL, concurrency and recovery audit evidence
         if: always()
         uses: actions/upload-artifact@v4
