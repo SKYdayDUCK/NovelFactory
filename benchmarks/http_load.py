@@ -43,7 +43,10 @@ class SqlMeasurements:
         self.lock = threading.Lock()
         self.sql = self.transactions = self.checked_out = self.peak_checked_out = 0
         self.sql_seconds = self.max_sql_seconds = 0.0
+        self.failed_statements = 0
         self.statement_kinds = Counter()
+        self.transaction_seconds = self.max_transaction_seconds = 0.0
+        self.finished_transactions = 0
 
     def _statement(self, conn, cursor, statement, parameters, context, executemany):
         with self.lock:
@@ -51,15 +54,38 @@ class SqlMeasurements:
             self.statement_kinds[statement.split()[0].upper()] += 1
         context.nf_measurement_started = time.perf_counter()
 
-    def _statement_done(self, conn, cursor, statement, parameters, context, executemany):
-        elapsed = time.perf_counter() - context.nf_measurement_started
+    def _record_statement_end(self, context, *, failed=False):
+        started = getattr(context, 'nf_measurement_started', None)
+        if started is None:
+            return
+        context.nf_measurement_started = None
+        elapsed = time.perf_counter() - started
         with self.lock:
             self.sql_seconds += elapsed
             self.max_sql_seconds = max(self.max_sql_seconds, elapsed)
+            self.failed_statements += int(failed)
+
+    def _statement_done(self, conn, cursor, statement, parameters, context, executemany):
+        self._record_statement_end(context)
+
+    def _statement_error(self, exception_context):
+        # Failed cursor execution skips after_cursor_execute. Count its wait
+        # once as well; do not swallow or replace the database exception.
+        self._record_statement_end(exception_context.execution_context, failed=True)
 
     def _begin(self, conn):
+        conn.info['nf_transaction_started'] = time.perf_counter()
         with self.lock:
             self.transactions += 1
+
+    def _transaction_done(self, conn):
+        started = conn.info.pop('nf_transaction_started', None)
+        if started is not None:
+            elapsed = time.perf_counter()-started
+            with self.lock:
+                self.finished_transactions += 1
+                self.transaction_seconds += elapsed
+                self.max_transaction_seconds = max(self.max_transaction_seconds, elapsed)
 
     def _checkout(self, *args):
         with self.lock:
@@ -73,7 +99,10 @@ class SqlMeasurements:
     def __enter__(self):
         event.listen(self.engine, "before_cursor_execute", self._statement)
         event.listen(self.engine, "after_cursor_execute", self._statement_done)
+        event.listen(self.engine, "handle_error", self._statement_error)
         event.listen(self.engine, "begin", self._begin)
+        event.listen(self.engine, "commit", self._transaction_done)
+        event.listen(self.engine, "rollback", self._transaction_done)
         event.listen(self.engine, "checkout", self._checkout)
         event.listen(self.engine, "checkin", self._checkin)
         return self
@@ -81,13 +110,22 @@ class SqlMeasurements:
     def __exit__(self, *args):
         event.remove(self.engine, "before_cursor_execute", self._statement)
         event.remove(self.engine, "after_cursor_execute", self._statement_done)
+        event.remove(self.engine, "handle_error", self._statement_error)
         event.remove(self.engine, "begin", self._begin)
+        event.remove(self.engine, "commit", self._transaction_done)
+        event.remove(self.engine, "rollback", self._transaction_done)
         event.remove(self.engine, "checkout", self._checkout)
         event.remove(self.engine, "checkin", self._checkin)
 
     def result(self, duration: float) -> dict:
         return {"sql_statements": self.sql, "transactions": self.transactions,
+                "transaction_seconds_before_commit": self.transaction_seconds,
+                "max_transaction_seconds_before_commit": self.max_transaction_seconds,
+                "finished_transactions": self.finished_transactions,
+                "transaction_timing_note": "SQLAlchemy begin to before commit/rollback; end callbacks are not successful commit counts, and timing excludes final server commit wait",
                 "sql_cursor_execution_seconds": self.sql_seconds,
+                "failed_statements": self.failed_statements,
+                "sql_timing_includes_failed_cursor_executions": True,
                 "max_sql_cursor_execution_seconds": self.max_sql_seconds,
                 "statement_kinds": dict(self.statement_kinds),
                 "sql_timing_excludes_result_decoding": True,

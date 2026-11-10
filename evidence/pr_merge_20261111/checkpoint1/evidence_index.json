@@ -1,0 +1,57 @@
+{
+  "format": "gzip-compressed original UTF-8 evidence, mtime=0",
+  "restore": "python -m gzip -d <archive.json.gz>; verify sha256 of decoded bytes against this index",
+  "baseline_pr2": "e0b0f2b080f3225d8be8e202e13258bc480f5b84",
+  "baseline_pr3": "24b203f6fcda5f36105dfd9a37cd833671d7215c",
+  "records": [
+    {
+      "source": "genesis_paired.json",
+      "archive": "genesis_paired.json.gz",
+      "bytes": 1753394,
+      "sha256": "443978b892be1abf7c519d55f49ad25edc873cdec0006b9801b1993defe6126e",
+      "gzip_sha256": "b106b6d3802a8a7301478d43a1900dd9e665e06df3f2fc46d3d3ea3682ce9774"
+    },
+    {
+      "source": "backend_unit.xml",
+      "archive": "backend_unit.xml.gz",
+      "bytes": 21361,
+      "sha256": "845cad94f17d26103c78652b4761a59a6d676b207739f6957b4abf7afb0a46aa",
+      "gzip_sha256": "a4ad74ae498cef8fcb55dd21337ed3ad4724b76cb05cf8541ed63d6045d4fb59"
+    },
+    {
+      "source": "backend_pg.xml",
+      "archive": "backend_pg.xml.gz",
+      "bytes": 5927,
+      "sha256": "7b159226e99a213904553cecf4b2f2a73f479094cda4c7ffeddd7c3819f8598b",
+      "gzip_sha256": "9f371c8baa3f5bd7ea12dd294f6f357fcf126a1ce9d856c2a412c08d6b8ea7ab"
+    },
+    {
+      "source": "backend_probe.json",
+      "archive": "backend_probe.json.gz",
+      "bytes": 152860,
+      "sha256": "45c7c7ae6f774a968d08714c79c2b5570c1b7c022e6f9a148b66046c4491dba9",
+      "gzip_sha256": "97ebd791760b2e2d7d318ddf85bd4b86b1df53118fde10bd896f66d8f7f39e94"
+    },
+    {
+      "source": "context_history_static_validation.json",
+      "archive": "context_history_static_validation.json.gz",
+      "bytes": 2433,
+      "sha256": "01cdfdea5a4718dc712770348e7c3f8cae5ea5a70d459b074bdfa54c7a41a024",
+      "gzip_sha256": "3f89fbe8a8ae7ce5bdb4e21566ce461906ea15e8d382a3372b7315d5a4850fd5"
+    },
+    {
+      "source": "compatibility/summary.json",
+      "archive": "summary.json.gz",
+      "bytes": 5547,
+      "sha256": "f46a3a2ce6d2fe4db7559f07b78ade2031226bd19c1c50011020ca6dba5a3136",
+      "gzip_sha256": "f47364bab30530f605aed4697e9c3bf6c6ac5c5e00cb45a9ef6f2cfb9f84fb7e"
+    },
+    {
+      "source": "evidence-local/smoke/load.json",
+      "archive": "load.json.gz",
+      "bytes": 112533,
+      "sha256": "b85ad2134f984ab574dd41f897e304ba75072071828656368fb956cb01669f7f",
+      "gzip_sha256": "5f92ae3ac8916391be19dfe40c12239607057de82136d0a047caf5ea92b4f73a"
+    }
+  ]
+}

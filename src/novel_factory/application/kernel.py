@@ -428,7 +428,13 @@ class Kernel:
             if template_id=="REPAIR_EVENT":
                 require("REPAIR" in g["capabilities"] and branch["kind"]=="REPAIR","VIEW_DENIED","Historical replacement requires a repair branch")
             genesis=r.one("genesis",{"work_id":wr["work_id"]})["payload"]
-            selected=[r.one("events",{"event_version_id":eid})["payload"] for eid in base["selection"].values()]
+            selected_ids=list(base["selection"].values())
+            selected_rows=r.many("events",{"work_id":wr["work_id"],"event_version_id":selected_ids}) if selected_ids else []
+            selected_by_id={row["event_version_id"]:row["payload"] for row in selected_rows}
+            require(all(eid in selected_by_id for eid in selected_ids),"HARD_RULE_VIOLATION","Selected event unavailable")
+            # PostgreSQL IN results have no implied order. Retain the exact
+            # selected-history order used by the unchanged full reducer.
+            selected=[selected_by_id[eid] for eid in selected_ids]
         proposal_id=str(uuid5(UUID(task_id),"proposal:"+idempotency_key))
         footprint=build(template_id,args,base["snapshot"],proposal_id)
         from novel_factory.application.simulation import validate_schedule_command, changeset_extras
@@ -578,7 +584,9 @@ class Kernel:
             validate_schedule_command(self, r, principal, current, p["template_id"], p["template_args"], actual)
             require(actual==p["footprint"],"DEPENDENCY_CONFLICT","Registered command inputs changed; prepare a new proposal")
             work=r.one("works",{"work_id":wr["work_id"]});branch=r.one("branches",{"branch_id":wr["branch_id"]})
-            original=self.revision(r,wr)
+            # Both refer to the same immutable row in this repeatable-read
+            # transaction. Reuse the validated value, never a cached HEAD.
+            original=current if parent==wr else self.revision(r,wr)
             require(original["provenance"].get("history_epoch",0)==branch["history_epoch"],"HISTORY_CHANGED","Historical repair requires a fresh task input and proposal")
             require(current["interpretation_ref"]==work["interpretation_ref"],"STALE_CERTIFICATE","Current interpretation requires a new reviewed world revision")
             reads,writes=self._tokens(r,wr,actual,grant,approvals,branch["history_epoch"],work)
@@ -732,12 +740,12 @@ class Kernel:
                 require(frontiers.get(scope,{"tick":0,"phase":0})==advance["expected_frontier"],"DEPENDENCY_CONFLICT","Process coverage changed")
                 frontiers[scope]=advance["evaluated_frontier"]
             require(len(selection)<=2000,"CAPACITY_LIMIT","P1 synchronous replay is bounded to 2000 selected events")
-            events=[]
-            for eid in selection.values():
-                event=candidates.get(eid)
-                if event is None:
-                    row=r.one("events",{"work_id":wr["work_id"],"event_version_id":eid});require(row,"HARD_RULE_VIOLATION","Selected event unavailable");event=row["payload"]
-                events.append(event)
+            persisted_ids=[eid for eid in selection.values() if eid not in candidates]
+            persisted=r.many("events",{"work_id":wr["work_id"],"event_version_id":persisted_ids}) if persisted_ids else []
+            selected_by_id={row["event_version_id"]:row["payload"] for row in persisted}
+            selected_by_id.update(candidates)
+            require(all(eid in selected_by_id for eid in selection.values()),"HARD_RULE_VIOLATION","Selected event unavailable")
+            events=[selected_by_id[eid] for eid in selection.values()]
             genesis=r.one("genesis",{"work_id":wr["work_id"]})["payload"]
             if p["template_id"]=="REPAIR_EVENT":self._revalidate_repair(r,wr["work_id"],genesis,events)
             snapshot=replay(genesis,events)
@@ -761,8 +769,9 @@ class Kernel:
             attach_schedule_state(current, rev, p)
             manifest=rev["manifest_hash"]
             r.add("revisions",rev)
-            for event in events:r.add("revision_events",{"world_revision_id":rid,"work_id":wr["work_id"],"branch_id":wr["branch_id"],
-                "occurrence_id":event["occurrence_id"],"event_version_id":event["event_version_id"],"effect_group_id":event["effect_group_id"]})
+            r.add_many("revision_events",[{"world_revision_id":rid,"work_id":wr["work_id"],"branch_id":wr["branch_id"],
+                "occurrence_id":event["occurrence_id"],"event_version_id":event["event_version_id"],"effect_group_id":event["effect_group_id"]}
+                for event in events])
             r.add("commits",{"world_revision_id":rid,"operations":p["payload"]["event_operations"],"request":request,"request_hash":fingerprint(request)})
             for key in sorted(changed):r.add("invalidations",{"invalidation_id":new_id(),"work_id":wr["work_id"],"branch_id":wr["branch_id"],"world_revision_id":rid,"scope_key":key,"version":scopes[key]})
             changed_count=r.change("branches",{"branch_id":wr["branch_id"],"head_revision_id":parent["world_revision_id"]},{"head_revision_id":rid,"history_epoch":history_epoch,"repair_ready":p["template_id"]=="REPAIR_EVENT" or branch["repair_ready"]})

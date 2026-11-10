@@ -9,6 +9,7 @@ No access tokens or payload bodies are written to disk.
 from __future__ import annotations
 
 import multiprocessing
+import os
 import resource
 import socket
 import threading
@@ -38,6 +39,10 @@ def _worker(channel, listener, url, objects, processes, pool_size):
                      connection_budget=budget)
     server = uvicorn.Server(uvicorn.Config(app, log_level='error', access_log=False,
         lifespan='off', timeout_keep_alive=5))
+    diagnostics = None
+    if os.environ.get('NF_BENCH_DIAGNOSTICS') == '1':
+        from benchmarks.service_diagnostics import ServiceDiagnostics
+        diagnostics = ServiceDiagnostics().install(db, kernel, service, app)
     before = resource.getrusage(resource.RUSAGE_SELF)
     started = time.monotonic()
     try:
@@ -64,13 +69,16 @@ def _worker(channel, listener, url, objects, processes, pool_size):
                     'ingress': app.state.ingress.snapshot(),
                     'resources': {'user_cpu_seconds': current.ru_utime - before.ru_utime,
                         'system_cpu_seconds': current.ru_stime - before.ru_stime,
-                        'peak_rss_kib': current.ru_maxrss}})
+                        'peak_rss_kib': current.ru_maxrss},
+                    'diagnostics': diagnostics.snapshot() if diagnostics else None})
     except (EOFError, BrokenPipeError):
         pass
     finally:
         server.should_exit = True
         if 'thread' in locals():
             thread.join(15)
+        if diagnostics:
+            diagnostics.close()
         db.close()
         listener.close()
         channel.close()
@@ -80,8 +88,8 @@ def aggregate(snapshots, duration):
     """Sum counters; preserve per-process peaks instead of inventing simultaneity."""
     databases = [row['database'] for row in snapshots]
     counters = {key: sum(row[key] for row in databases) for key in (
-        'sql_statements', 'transactions', 'sql_cursor_execution_seconds',
-        'checked_out_at_end', 'configured_pool_size')}
+        'sql_statements', 'transactions', 'sql_cursor_execution_seconds', 'failed_statements',
+        'checked_out_at_end', 'configured_pool_size', 'transaction_seconds_before_commit', 'finished_transactions')}
     kinds = Counter()
     for row in databases:
         kinds.update(row['statement_kinds'])
@@ -92,11 +100,13 @@ def aggregate(snapshots, duration):
         peak_checked_out_connections=sum(row['peak_checked_out_connections'] for row in databases),
         peak_connections_note='Conservative sum of per-process peaks; not a simultaneous sample',
         sql_timing_excludes_result_decoding=True,
+        max_transaction_seconds_before_commit=max(row['max_transaction_seconds_before_commit'] for row in databases),
         per_process=databases)
     result = {'database': counters,
         'cache_hits': sum(row['cache_hits'] for row in snapshots),
         'cache_misses': sum(row['cache_misses'] for row in snapshots),
-        'service_processes': snapshots}
+        'service_processes': snapshots,
+        'diagnostics': [row['diagnostics'] for row in snapshots if row.get('diagnostics')]}
     for kind in ('admission', 'authentication_admission', 'ingress'):
         keys = {key for row in snapshots for key in row[kind]}
         result[kind] = {key: sum(row[kind].get(key, 0) for row in snapshots) for key in keys}
