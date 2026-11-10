@@ -1,0 +1,24 @@
+{
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "port": 56951,
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "tests/queries",
+    "tests/concurrency/test_world_races.py",
+    "-q",
+    "--tb=short",
+    "--junitxml=evidence/p3/context/safety-after.xml"
+  ],
+  "started_at_utc": "2026-11-10T12:38:14.176591+00:00",
+  "authentication": "loopback_trust_generated_test_data_only",
+  "fsync": true,
+  "synchronous_commit": true,
+  "max_connections": 60,
+  "data_directory_reused": false,
+  "exit_status": 0,
+  "postgres_exit_status": 0,
+  "duration_seconds": 22.177385,
+  "finished_at_utc": "2026-11-10T12:38:36.354019+00:00"
+}

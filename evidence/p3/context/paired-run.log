@@ -1,0 +1,148 @@
+RUN ["/workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin/initdb", "-D", "/tmp/nf-pg17-6kj_weuz/data", "-U", "nf_dev", "--encoding=UTF8", "--locale=C", "--auth-local=reject", "--auth-host=trust", "--data-checksums"]
+The files belonging to this database system will be owned by user "agent".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "C".
+The default text search configuration will be set to "english".
+
+Data page checksums are enabled.
+
+creating directory /tmp/nf-pg17-6kj_weuz/data ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default "max_connections" ... 100
+selecting default "shared_buffers" ... 128MB
+selecting default time zone ... Asia/Tokyo
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+
+Success. You can now start the database server using:
+
+    /workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin/pg_ctl -D /tmp/nf-pg17-6kj_weuz/data -l logfile start
+
+RUN ["/workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin/createdb", "nf_test"]
+RUN ["/workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin/psql", "-Atc", "SELECT version(); SHOW fsync; SHOW synchronous_commit;"]
+PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+on
+on
+RUN ["/workspace/scratch/cf3ee8d0c6c4/NovelFactory/.venv/bin/python", "-m", "alembic", "upgrade", "head"]
+REAL_POSTGRES_READY postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1) port 36113
+{"subjects": 1, "repeat": 0, "order": ["baseline", "candidate"], "baseline_sql": 51, "candidate_sql": 47, "full_facts_equal": true, "guards_equal": true}
+{"subjects": 1, "repeat": 1, "order": ["candidate", "baseline"], "baseline_sql": 51, "candidate_sql": 47, "full_facts_equal": true, "guards_equal": true}
+{"subjects": 1, "repeat": 2, "order": ["baseline", "candidate"], "baseline_sql": 51, "candidate_sql": 47, "full_facts_equal": true, "guards_equal": true}
+{"subjects": 1, "repeat": 3, "order": ["candidate", "baseline"], "baseline_sql": 51, "candidate_sql": 47, "full_facts_equal": true, "guards_equal": true}
+{"subjects": 1, "repeat": 4, "order": ["baseline", "candidate"], "baseline_sql": 51, "candidate_sql": 47, "full_facts_equal": true, "guards_equal": true}
+{"subjects": 20, "repeat": 0, "order": ["candidate", "baseline"], "baseline_sql": 89, "candidate_sql": 47, "full_facts_equal": true, "guards_equal": true}
+{"subjects": 20, "repeat": 1, "order": ["baseline", "candidate"], "baseline_sql": 89, "candidate_sql": 47, "full_facts_equal": true, "guards_equal": true}
+{"subjects": 20, "repeat": 2, "order": ["candidate", "baseline"], "baseline_sql": 89, "candidate_sql": 47, "full_facts_equal": true, "guards_equal": true}
+{"subjects": 20, "repeat": 3, "order": ["baseline", "candidate"], "baseline_sql": 89, "candidate_sql": 47, "full_facts_equal": true, "guards_equal": true}
+{"subjects": 20, "repeat": 4, "order": ["candidate", "baseline"], "baseline_sql": 89, "candidate_sql": 47, "full_facts_equal": true, "guards_equal": true}
+{"subjects": 100, "repeat": 0, "order": ["baseline", "candidate"], "baseline_sql": 249, "candidate_sql": 47, "full_facts_equal": true, "guards_equal": true}
+{"subjects": 100, "repeat": 1, "order": ["candidate", "baseline"], "baseline_sql": 249, "candidate_sql": 47, "full_facts_equal": true, "guards_equal": true}
+{"subjects": 100, "repeat": 2, "order": ["baseline", "candidate"], "baseline_sql": 249, "candidate_sql": 47, "full_facts_equal": true, "guards_equal": true}
+{"subjects": 100, "repeat": 3, "order": ["candidate", "baseline"], "baseline_sql": 249, "candidate_sql": 47, "full_facts_equal": true, "guards_equal": true}
+{"subjects": 100, "repeat": 4, "order": ["baseline", "candidate"], "baseline_sql": 249, "candidate_sql": 47, "full_facts_equal": true, "guards_equal": true}
+{
+  "output": "evidence/p3/context/paired-run.json",
+  "status": "PASS_CANDIDATE_MEASUREMENT_ONLY",
+  "summary": [
+    {
+      "subjects": 1,
+      "pairs": 5,
+      "median_seconds": {
+        "baseline": 0.07389186699947459,
+        "candidate": 0.07530895200034138
+      },
+      "median_elapsed_reduction_percent": -1.9177821029706443,
+      "paired_elapsed_differences_seconds": [
+        -0.006231818000742351,
+        0.009139409999988857,
+        -0.0014170850008667912,
+        -0.020406704999913927,
+        0.002222089999122545
+      ],
+      "sql_counts": {
+        "baseline": [
+          51
+        ],
+        "candidate": [
+          47
+        ]
+      },
+      "dependency_insert_counts": {
+        "baseline": [
+          5
+        ],
+        "candidate": [
+          1
+        ]
+      }
+    },
+    {
+      "subjects": 20,
+      "pairs": 5,
+      "median_seconds": {
+        "baseline": 0.14233621700077492,
+        "candidate": 0.12561103200096113
+      },
+      "median_elapsed_reduction_percent": 11.750477392358071,
+      "paired_elapsed_differences_seconds": [
+        0.023236220000399044,
+        0.00773278099950403,
+        0.012078357998689171,
+        0.03901586900065013,
+        0.0410222859991336
+      ],
+      "sql_counts": {
+        "baseline": [
+          89
+        ],
+        "candidate": [
+          47
+        ]
+      },
+      "dependency_insert_counts": {
+        "baseline": [
+          43
+        ],
+        "candidate": [
+          1
+        ]
+      }
+    },
+    {
+      "subjects": 100,
+      "pairs": 5,
+      "median_seconds": {
+        "baseline": 0.4188360879998072,
+        "candidate": 0.2408532320005179
+      },
+      "median_elapsed_reduction_percent": 42.49463241079915,
+      "paired_elapsed_differences_seconds": [
+        0.17984419599815737,
+        0.1669913669993548,
+        0.17418957999871054,
+        0.20682866199967975,
+        0.1906669719992351
+      ],
+      "sql_counts": {
+        "baseline": [
+          249
+        ],
+        "candidate": [
+          47
+        ]
+      },
+      "dependency_insert_counts": {
+        "baseline": [
+          203
+        ],
+        "candidate": [
+          1
+        ]
+      }
+    }
+  ]
+}

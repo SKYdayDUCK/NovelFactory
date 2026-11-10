@@ -31,6 +31,16 @@ class KernelRepository:
             q = q.on_conflict_do_nothing()
         self.conn.execute(q)
 
+    def add_many(self, name, values):
+        """Insert bounded batches inside the caller's existing transaction.
+
+        No conflict is ignored and no commit is introduced. A later failure
+        rolls every batch back with the surrounding context/receipt changes.
+        """
+        values = list(values)
+        for offset in range(0, len(values), 256):
+            self.conn.execute(insert(self.tables[name]).values(values[offset:offset + 256]))
+
     def change(self, name, where, values):
         t = self.tables[name]
         q = update(t).where(*(t.c[k] == v for k, v in where.items())).values(**values)

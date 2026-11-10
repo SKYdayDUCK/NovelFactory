@@ -1,0 +1,28 @@
+{
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "port": 54135,
+  "command": [
+    "python",
+    "benchmarks/context_profile.py",
+    "--output",
+    "evidence/p3/context/before.json",
+    "--label",
+    "before",
+    "--entities",
+    "1000",
+    "--history",
+    "12",
+    "--repeats",
+    "5"
+  ],
+  "started_at_utc": "2026-11-10T12:14:29.773703+00:00",
+  "authentication": "loopback_trust_generated_test_data_only",
+  "fsync": true,
+  "synchronous_commit": true,
+  "max_connections": 60,
+  "data_directory_reused": false,
+  "exit_status": 0,
+  "postgres_exit_status": 0,
+  "duration_seconds": 75.428631,
+  "finished_at_utc": "2026-11-10T12:15:45.202387+00:00"
+}

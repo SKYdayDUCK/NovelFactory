@@ -1,0 +1,32 @@
+{
+  "command": [
+    "python",
+    "scripts/with_postgres.py",
+    "--pg-bin",
+    "/workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin",
+    "--migrate",
+    "--log-dir",
+    "evidence/p3/context/before-pg",
+    "--",
+    "python",
+    "benchmarks/context_profile.py",
+    "--output",
+    "evidence/p3/context/before.json",
+    "--label",
+    "before",
+    "--entities",
+    "1000",
+    "--history",
+    "12",
+    "--repeats",
+    "5"
+  ],
+  "command_display": "python scripts/with_postgres.py --pg-bin /workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin --migrate --log-dir evidence/p3/context/before-pg -- python benchmarks/context_profile.py --output evidence/p3/context/before.json --label before --entities 1000 --history 12 --repeats 5",
+  "cwd": "/workspace/scratch/cf3ee8d0c6c4/NovelFactory",
+  "started_at_utc": "2026-11-10T12:14:29.298471+00:00",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "exit_status": 0,
+  "duration_seconds": 75.924334,
+  "finished_at_utc": "2026-11-10T12:15:45.222847+00:00"
+}
