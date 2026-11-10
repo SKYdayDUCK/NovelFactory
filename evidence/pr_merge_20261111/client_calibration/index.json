@@ -1,0 +1,70 @@
+{
+  "schema_version": "client-calibration-evidence-1",
+  "evidence_kind": "GENERATOR_CALIBRATION_ONLY",
+  "novelfactory_capacity_verdict": "NOT_APPLICABLE",
+  "novelfactory_business_commits": "NOT_APPLICABLE",
+  "execution_git_head": "008fccf23291c6f74693e450a88c224a436be7f6",
+  "retained_runs": 4,
+  "retained_raw_attempts": 20000,
+  "original_raw_sha256": "ec6e278c09e76476e3f54bcd89b8a576a0ca9edc0216d57d8ad6798ca2c641cb",
+  "compression": "gzip level9 mtime0; decompress each archive and verify uncompressed_sha256",
+  "original_measurements_unchanged": true,
+  "metadata_erratum": "Original JSON environment inherited static P2 topology labels. Actual server was a separate spawned process (server CPU8, client CPU6-7). Current benchmark only corrects metadata; exact executed script and offer are retained. See summary.json and README.md.",
+  "credential_review": "Raw output contains synthetic agent indices and body hashes/counts, no authorization header, task tokens, request bodies or response bodies. Executed script contains only its explicit synthetic CALIBRATION_ONLY marker.",
+  "files": [
+    {
+      "archive": "calibration.json.gz",
+      "original_name": "calibration.json",
+      "original_path": "/workspace/scratch/f6d7dc8c770b/evidence-local/client-calibration/calibration.json",
+      "uncompressed_bytes": 11200581,
+      "uncompressed_sha256": "ec6e278c09e76476e3f54bcd89b8a576a0ca9edc0216d57d8ad6798ca2c641cb",
+      "compressed_bytes": 1310498,
+      "compressed_sha256": "41c771cef107d5449d9a27311e40dd40cc4abe0a3365bcf8fe0d098c9764740e"
+    },
+    {
+      "archive": "executed_client_calibration.py.gz",
+      "original_name": "executed_client_calibration.py",
+      "original_path": "/workspace/scratch/f6d7dc8c770b/evidence-local/client-calibration/executed_client_calibration.py",
+      "uncompressed_bytes": 12325,
+      "uncompressed_sha256": "b915bcb119bc38fdd8271ffd58b781fb96b0443473b71052ce18af8c279137a4",
+      "compressed_bytes": 4448,
+      "compressed_sha256": "01017929c08480aae610720b0c43791e2accbb7361ea4b12d19785183eae5171"
+    },
+    {
+      "archive": "executed_p3_open_arrival.py.gz",
+      "original_name": "executed_p3_open_arrival.py",
+      "original_path": "/workspace/scratch/f6d7dc8c770b/NovelFactory-pr3/benchmarks/p3_open_arrival.py",
+      "uncompressed_bytes": 9432,
+      "uncompressed_sha256": "515ec1ec61e03317cd6f160a22a309aa38bc6df8bbfd4604e3dacfa43b14e9da",
+      "compressed_bytes": 3440,
+      "compressed_sha256": "aedd0a95e8cab8e2f8076d9174b3df549e08a992cc855d8e3688234780a90fbc"
+    },
+    {
+      "archive": "summary.json.gz",
+      "original_name": "summary.json",
+      "original_path": "/workspace/scratch/f6d7dc8c770b/evidence-local/client-calibration/summary.json",
+      "uncompressed_bytes": 7091,
+      "uncompressed_sha256": "d9b3a4f9aa64846da9f3911231fa9091e5c96022b840aa17415eec5a3fede621",
+      "compressed_bytes": 2519,
+      "compressed_sha256": "07fdbd606412e2b53e2828070e2961b4a1527ca06e99361be7329dfd2001e37d"
+    },
+    {
+      "archive": "README.md.gz",
+      "original_name": "README.md",
+      "original_path": "/workspace/scratch/f6d7dc8c770b/evidence-local/client-calibration/README.md",
+      "uncompressed_bytes": 3964,
+      "uncompressed_sha256": "927c6db367eac03da907008c5537f352eb0754e94a18f13b77fe667f18c891ff",
+      "compressed_bytes": 2451,
+      "compressed_sha256": "79c52aa5e968c1e423132f358b375e0a5a73579055101dea6dcc32621e1b77e3"
+    },
+    {
+      "archive": "client-calibration.log.gz",
+      "original_name": "client-calibration.log",
+      "original_path": "/workspace/scratch/f6d7dc8c770b/control/client-calibration.log",
+      "uncompressed_bytes": 1173,
+      "uncompressed_sha256": "44b23af0a3aafbe6b45d019c1a08668c61e6c15e320aaf9d9427f2ddf9a659aa",
+      "compressed_bytes": 341,
+      "compressed_sha256": "c89edb70f9b9942fc6319bac4193e1b784a2315cbe0315fe6dad4f114949e469"
+    }
+  ]
+}

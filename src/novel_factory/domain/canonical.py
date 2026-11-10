@@ -10,27 +10,36 @@ MAX_SAFE_INTEGER = 9007199254740991
 
 
 def _check(value: Any) -> None:
-    if value is None or type(value) is bool:
-        return
-    if type(value) is int:
-        if abs(value) > MAX_SAFE_INTEGER:
-            raise DomainError("INVALID_ARGUMENT", "Integer outside the JSON safe range")
-        return
-    if type(value) is str:
+    kind = type(value)
+    # Strings dominate stored projections. Keep the same exact native-type and
+    # UTF-8 checks without repeatedly dispatching on their type.
+    if kind is str:
         try:
             value.encode("utf-8", "strict")
         except UnicodeEncodeError as exc:
             raise DomainError("INVALID_ARGUMENT", "Invalid Unicode") from exc
         return
-    if type(value) is list:
+    if value is None or kind is bool:
+        return
+    if kind is int:
+        if abs(value) > MAX_SAFE_INTEGER:
+            raise DomainError("INVALID_ARGUMENT", "Integer outside the JSON safe range")
+        return
+    if kind is list:
         for item in value:
             _check(item)
         return
-    if type(value) is dict:
+    if kind is dict:
         for key, item in value.items():
             if type(key) is not str:
                 raise DomainError("INVALID_ARGUMENT", "JSON object keys must be strings")
-            _check(key)
+            # The key type is already proved here. Validate its bytes directly,
+            # in the original key-before-value order, rather than recursing and
+            # repeating the type checks for every field of a large projection.
+            try:
+                key.encode("utf-8", "strict")
+            except UnicodeEncodeError as exc:
+                raise DomainError("INVALID_ARGUMENT", "Invalid Unicode") from exc
             _check(item)
         return
     raise DomainError("INVALID_ARGUMENT", "Canonical JSON accepts no floats or custom objects")

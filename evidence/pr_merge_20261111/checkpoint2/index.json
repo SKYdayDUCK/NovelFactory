@@ -1,0 +1,41 @@
+{
+  "records": [
+    {
+      "source": "canonical_paired.json",
+      "archive": "canonical_paired.json.gz",
+      "sha256": "bb6dcf06bde751ced698864a5c0aae57013a2d33f2be3f22f6c5372c9abcf1a5",
+      "gzip_sha256": "109c7697e1105f3c2a994b9d0d2f6843472d6e41cedadc591b13ad7be35ac826"
+    },
+    {
+      "source": "canonical_unit.xml",
+      "archive": "canonical_unit.xml.gz",
+      "sha256": "52b832bce70425f8650500aff9f8a1cc8c5bf4b5cf66f1fa582322549d9d9db3",
+      "gzip_sha256": "b228410e11b58ee79d1ea932b9aeecddb0a53ad59aa2c3ac8a431f14b9dff409"
+    },
+    {
+      "source": "canonical_pg.xml",
+      "archive": "canonical_pg.xml.gz",
+      "sha256": "e0c3ed95dee81c59b116cffbe32a4d362f46e6002fefeaef9ec1b1f6e274c595",
+      "gzip_sha256": "35a098b112390685822f16d2d8ebaeb8aa658d8eb90435c89e05b58eb1c0d442"
+    },
+    {
+      "source": "read_validation_probe.json",
+      "archive": "read_validation_probe.json.gz",
+      "sha256": "d47c0d2d5177fcd5b1f48b827487e8a74e3e16e4c65ba8d850a35f567ebec643",
+      "gzip_sha256": "9d2dda3cec05af77c8606aa7caa96e26dc29bed7358948d2fec46137eee3dbe5"
+    },
+    {
+      "source": "evidence-local/full-pr2/junit.xml",
+      "archive": "evidence-local_full-pr2_junit.xml.gz",
+      "sha256": "929d00e05b9f5114063546dd41d3edb111db4c3843b773d8e08df870a6d82727",
+      "gzip_sha256": "a6d12106d9d49e592b688d2020f85d33f2b8553711b871fa2984590133b58fc7"
+    },
+    {
+      "source": "evidence-local/sql-meter/junit.xml",
+      "archive": "evidence-local_sql-meter_junit.xml.gz",
+      "sha256": "543a9e07d514c6f6e0c876ef23bb2e1158c2455e4f042b56e5025c9c975e9b2a",
+      "gzip_sha256": "78efdfa90c3c48e51accfc353cf179887c9d9dc500698beb011412f893e439b0"
+    }
+  ],
+  "note": "Schema-validation memo was slower and was not added to production. Full regression435 predates the separately tested SQL instrumentation case."
+}

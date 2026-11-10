@@ -129,6 +129,11 @@ jobs:
           uv run --no-sync python -m benchmarks.genesis_paired_profile \
             --agents 200 --repeats 5 --output ci-evidence/genesis-paired.json \
             2>&1 | tee ci-evidence/genesis-paired.log
+      - name: Compare current strict canonical checks on the same world
+        run: |
+          uv run --no-sync python -m benchmarks.canonical_paired_profile \
+            --agents 200 --repeats 8 --output ci-evidence/canonical-paired.json \
+            2>&1 | tee ci-evidence/canonical-paired.log
       - name: Reproduce historical Context Compiler experiment at e0b0f2b
         # The original experiment requires its shared core to match 0609f680.
         # Preserve that assertion and the complete facts/guard comparison in its
