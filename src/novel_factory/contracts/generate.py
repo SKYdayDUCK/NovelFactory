@@ -12,8 +12,7 @@ import sys
 
 
 def generated(root: Path) -> str:
-    names = ['core.schema.json', 'temporal_concurrency.schema.json',
-             'literary.schema.json', 'kernel.schema.json', 'commands.schema.json', 'http.schema.json']
+    names = sorted(path.name for path in (root / 'contracts').glob('*.schema.json'))
     schemas = {name: json.loads((root / 'contracts' / name).read_text()) for name in names}
     hashes = {name: hashlib.sha256((root / 'contracts' / name).read_bytes()).hexdigest() for name in names}
     return ('# Generated from contracts/*.schema.json. Do not edit by hand.\n'

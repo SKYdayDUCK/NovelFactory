@@ -1,0 +1,76 @@
+{
+  "evidence_kind": "real_loopback_http_with_real_postgresql",
+  "started_at_utc": "2026-11-10T10:07:17.658977+00:00",
+  "duration_seconds": 2.234205,
+  "logical_agents": 10,
+  "rounds": 10,
+  "arrival_mode": "open_loop",
+  "arrival_rps_target": 150,
+  "seed": 20261110,
+  "modeled_think_seconds": 0,
+  "planned_requests": 100,
+  "emitted_requests": 100,
+  "completed_requests": 100,
+  "not_emitted": 0,
+  "successful_requests": 100,
+  "status_counts": {
+    "200": 100
+  },
+  "failures": [],
+  "tool_requests_per_second": 44.7586,
+  "valid_successes_per_second": 44.7586,
+  "latency_all_responses": {
+    "count": 100,
+    "p50_ms": 362.867,
+    "p95_ms": 1091.788,
+    "p99_ms": 1383.58
+  },
+  "latency_successes": {
+    "count": 100,
+    "p50_ms": 362.867,
+    "p95_ms": 1091.788,
+    "p99_ms": 1383.58
+  },
+  "arrival_schedule_delay": {
+    "count": 100,
+    "p50_ms": 392.2174,
+    "p95_ms": 842.8567,
+    "p99_ms": 897.9535
+  },
+  "successful_requests_by_agent": {
+    "0": 10,
+    "1": 10,
+    "2": 10,
+    "4": 10,
+    "3": 10,
+    "5": 10,
+    "6": 10,
+    "8": 10,
+    "7": 10,
+    "9": 10
+  },
+  "input_request_hashes": [
+    "4ea953b2cc0d43c1965f7a854521b1392e44fe275224dc88eb436a76c51cda4e",
+    "ccdb36748e05c2a05f93e3e69ae5e495771714eeae3f10bafe9b8c6f461d35d2",
+    "a755cd022ad420fdc61bffa27647619e8b1c35db2706a96ec7c59f107c8c41c2",
+    "25f4b3fac6c2ba44dffb7ba82026322d4711a777e223b9982470e99437119907",
+    "296c5af30fedd2de9f4daf2a1adb26b8c416515fce926b435ad925b30a98eff1",
+    "76d27d3ae3c37747f51cc2d500c5f185b87d0be8aca9b15670a736240b52cdd1",
+    "e73e0f790e0511b4cf34ab46425370142031cda2c234d0b6c969440619d2885a",
+    "bc1fb6af6016a6352e9e0d029e8a88fb3948ad0eb12428911e6f36325264dd60",
+    "d3657853ca15537dab44978df8abb263dbed2ba96e384d4f61f3a87c27cd414f",
+    "96bdf526128680e65e27fc34dbf42572d4cbd5c9203c04515bda4666e01d12ce"
+  ],
+  "new_world_revisions": 0,
+  "external_model_calls": 0,
+  "scope": "P1 small fixture query load; not novel-generation or large-history capacity",
+  "database": {
+    "sql_statements": 2100,
+    "transactions": 300,
+    "sql_statements_per_second": 939.9317,
+    "peak_checked_out_connections": 8,
+    "checked_out_at_end": 0,
+    "configured_pool_size": 8,
+    "pool_status_at_end": "Pool size: 8  Connections in pool: 8 Current Overflow: 0 Current Checked out connections: 0"
+  }
+}

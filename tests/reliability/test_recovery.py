@@ -193,6 +193,9 @@ def test_backup_runtime_profile_is_required_and_bound(rel_env, rel_scope, tmp_pa
     backup = BackupService(rel_env["db"].engine, rel_env["store"])
     manifest = backup.create(tmp_path / "backup")
     assert "runtime/query_profiles.json" in manifest["runtime_assets"]
+    assert manifest["runtime_asset_version"] == 2
+    assert "runtime/roles/character_actor.md" in manifest["runtime_assets"]
+    assert "runtime/skills/simulate-character/SKILL.md" in manifest["runtime_assets"]
     saved = tmp_path / "backup" / "runtime_assets" / "runtime" / "query_profiles.json"
     original = saved.read_bytes()
     saved.unlink()
@@ -200,6 +203,13 @@ def test_backup_runtime_profile_is_required_and_bound(rel_env, rel_scope, tmp_pa
         backup.verify(tmp_path / "backup")
     assert exc.value.code == "INTERPRETATION_UNAVAILABLE"
     saved.write_bytes(original)
+    role = tmp_path / "backup" / "runtime_assets" / "runtime" / "roles" / "character_actor.md"
+    original_role = role.read_bytes()
+    role.unlink()
+    with pytest.raises(DomainError) as exc:
+        backup.verify(tmp_path / "backup")
+    assert exc.value.code == "INTERPRETATION_UNAVAILABLE"
+    role.write_bytes(original_role)
     changed = tmp_path / "changed_profile.json"
     changed.write_bytes(original + b"\n")
     monkeypatch.setattr(backup, "_runtime_assets", lambda: {"runtime/query_profiles.json": changed})
@@ -215,6 +225,10 @@ def test_backup_resolves_wheel_runtime_assets(rel_env, tmp_path):
     schemas.mkdir(parents=True)
     profile.parent.mkdir(parents=True)
     profile.write_text('{"profiles": []}')
+    for kind in ("roles", "skills"):
+        catalog = profile.parent / kind / "catalog.json"
+        catalog.parent.mkdir()
+        catalog.write_text('{}')
     backup = BackupService(rel_env["db"].engine, rel_env["store"], package_root=package)
     assert backup._schema_directory() == schemas
     assert backup._runtime_assets()["runtime/query_profiles.json"] == profile

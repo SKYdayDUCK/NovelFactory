@@ -13,7 +13,8 @@ from novel_factory.domain.canonical import fingerprint
 from novel_factory.contracts.registry import validate_contract
 
 GUARDED = {"TRANSFER_ITEM","DESTROY_ITEM","RESOURCE_TRANSFER","GUARD_LEAVE","PASS_CLEAR_ROUTE"}
-ALL_TEMPLATES = GUARDED | {"SET_RELATION","ADVANCE_SCOPE","REPAIR_EVENT","RECORD_COGNITION"}
+ALL_TEMPLATES = GUARDED | {"SET_RELATION","ADVANCE_SCOPE","REPAIR_EVENT","RECORD_COGNITION",
+                           "REGISTER_PROCESS","SCHEDULE_ADVANCE","JOINT_INTERACTION"}
 
 def _fail(message,code="HARD_RULE_VIOLATION"):
     raise DomainError(code,message)
@@ -61,7 +62,7 @@ def build(template_id,args,snapshot,proposal_id):
     """
     validate_contract("TemplateCommand",{"template_id":template_id,"args":args},version="commands")
     if template_id not in ALL_TEMPLATES:_fail("Template is not registered","UNPROVEN_FOOTPRINT")
-    ns=UUID(proposal_id); effects=[]; read=set(); scopes=set()
+    ns=UUID(proposal_id); effects=[]; read=set(); scopes=set(); extra_bumps=set(); advance_targets=None
     at=args.get("at",args.get("target"))
     def relation(subject,predicate,value):
         _entity(snapshot,subject)
@@ -127,11 +128,38 @@ def build(template_id,args,snapshot,proposal_id):
         effects.append({"kind":"COGNITIVE_RECORD_ADD","effect_key":"cognition","actor_id":args["actor_id"],"statement":args["statement"],
                         "record_kind":args["record_kind"],"epistemic_mode":args["epistemic_mode"],"evidence_refs":args["evidence_refs"]})
         scopes.add(args["actor_id"])
+    elif template_id=="REGISTER_PROCESS":
+        # Registration selects a typed process record, not a fabricated event.
+        process=args["process"]
+        for eid in set(process["scope_ids"]) | set(process["participant_ids"]):
+            _entity(snapshot,eid);read.add("ENTITY:"+eid)
+        read.add("PROCESS_COVERAGE:"+process["process_id"])
+        extra_bumps|={"SCOPE_REGISTRY:world","CHANNEL_REGISTRY:closed-world",
+                      "PROCESS_COVERAGE:"+process["process_id"]}
+    elif template_id=="SCHEDULE_ADVANCE":
+        for scope in args["scope_ids"]:
+            _entity(snapshot,scope);scopes.add(scope);read.add("ENTITY:"+scope)
+        advance_targets={scope:args["target"] for scope in scopes}
+    elif template_id=="JOINT_INTERACTION":
+        from novel_factory.domain.scheduling import joint_effects
+        joint=joint_effects(args["commands"],snapshot,proposal_id,args["at"],build)
+        effects=joint["effects"];read|=joint["reads"]
+        scopes|=joint["scopes"] | set(args["scope_ids"])
+        for scope in args["scope_ids"]:_entity(snapshot,scope)
+        # Process frontiers are versioned record metadata; world subject scopes
+        # are advanced with the same accepted result, not in a second write.
+        extra_bumps|=joint["bumps"] | {"CONFLICT_GROUP:"+args["interaction_id"],"SCOPE_REGISTRY:world"}
+        read.add("CONFLICT_GROUP:"+args["interaction_id"])
+        for pid in args["process_ids"]:
+            read.add("PROCESS_COVERAGE:"+pid);extra_bumps.add("PROCESS_COVERAGE:"+pid)
+        for outgoing in args["outgoing_processes"]:
+            extra_bumps|={"CHANNEL_REGISTRY:closed-world","PROCESS_COVERAGE:"+outgoing["process"]["process_id"]}
     elif template_id=="REPAIR_EVENT":
         effects=args["replacement_event"]["effects"]
         # Repair replays the whole selected history. It is always strict.
         scopes=set(snapshot["entities"])
     er,ew=effects_footprint(effects)
+    ew|=extra_bumps
     read|=er|{"RULESET:world","SCOPE_REGISTRY:world","CHANNEL_REGISTRY:closed-world"}
     for scope in scopes:read.add("PROCESS_COVERAGE:"+scope);ew.add("PROCESS_COVERAGE:"+scope)
     # A closure identity is immutable and refers to the precise controlled
@@ -142,4 +170,6 @@ def build(template_id,args,snapshot,proposal_id):
     # serialize independent writers unless the template actually reads that
     # range (negative lookup / cross-row cardinality constraint).
     guarded_writes={k for k in ew if not k.startswith("PREDICATE_RANGE:") or k in read}
-    return {"effects":effects,"reads":sorted(read),"writes":sorted(guarded_writes),"bumps":sorted(ew),"process_scopes":sorted(scopes),"closure_key":closure_key}
+    result={"effects":effects,"reads":sorted(read),"writes":sorted(guarded_writes),"bumps":sorted(ew),"process_scopes":sorted(scopes),"closure_key":closure_key}
+    if advance_targets is not None:result["advance_targets"]=advance_targets
+    return result

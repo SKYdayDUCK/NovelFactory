@@ -1,0 +1,287 @@
+{
+  "source_postgres": "17.11 (Debian 17.11-0+deb13u1)",
+  "backup": {
+    "format": "novel-factory-logical-backup-1",
+    "created_at": "2026-11-10T10:06:56.080150+00:00",
+    "backup_id": "65a7e054-ac6b-40b0-ab6b-d9d845329466",
+    "status": "COMPLETE",
+    "postgres_version": "17.11 (Debian 17.11-0+deb13u1)",
+    "database_snapshot": {
+      "alembic_version": {
+        "rows": 1,
+        "sha256": "555ae7e617591827baa3a14730fd4fdb0b4a5a8a12a0762f4d0c501ee7031c53"
+      },
+      "nf_approvals": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "nf_artifacts": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "nf_branches": {
+        "rows": 3,
+        "sha256": "d5e9e992d977255b7f221e48f59e856cf1ae134018db1225782145ef805c7e02"
+      },
+      "nf_budgets": {
+        "rows": 2,
+        "sha256": "6abe3fac8ff204c5d94c09ef8d94dbf5e2d8333e02882ca72abfbb30d40b4d7f"
+      },
+      "nf_call_attempts": {
+        "rows": 1,
+        "sha256": "66ffb633eec8ec9a435f86a0a55edb6fb1e324752180bb5dcfb330d21b937a9e"
+      },
+      "nf_certificates": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "nf_commits": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "nf_contexts": {
+        "rows": 1,
+        "sha256": "1b156b5f538f4b876a66d983346617df4a064568ca17251853194d4d0bef92d6"
+      },
+      "nf_contract_baseline": {
+        "rows": 3,
+        "sha256": "4058fa5206cc227d0a428db4f59bc03dca72dbf7e10c10184a9174154af0416a"
+      },
+      "nf_dependencies": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "nf_events": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "nf_genesis": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "nf_grants": {
+        "rows": 3,
+        "sha256": "15cbcadb6c3046c9be3be60acac6dc775c741b37a768370ff13d2396d2934fe8"
+      },
+      "nf_inbox": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "nf_index_watermarks": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "nf_invalidations": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "nf_object_refs": {
+        "rows": 1,
+        "sha256": "78641557312be9a6c98841713fbc74a6156bc26ff0b7c1fb116e64e4f78f4842"
+      },
+      "nf_objects": {
+        "rows": 1,
+        "sha256": "392210504523a83b61e616bc12b21bef0c7443d70fc4f34f2f9a027579109a39"
+      },
+      "nf_outbox": {
+        "rows": 4,
+        "sha256": "22c0f1ed8c1cfc5b927d1953fbef8c7831f9c74556e60681a1c1982ffe2435bb"
+      },
+      "nf_promotions": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "nf_proposals": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "nf_receipts": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "nf_revision_events": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "nf_revisions": {
+        "rows": 3,
+        "sha256": "00c05d0c893fa10ff34e0faf6449524d2081f42c7b06fab56369e6cb71d1e297"
+      },
+      "nf_scopes": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "nf_selections": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "nf_simulation_intents": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "nf_simulation_interactions": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "nf_simulation_outcomes": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "nf_task_commands": {
+        "rows": 2,
+        "sha256": "4dc5f3bb9e62896274b5d820d6726a27cebbc6b7f1767647da39178866959cd7"
+      },
+      "nf_task_executions": {
+        "rows": 1,
+        "sha256": "39748bac8ad351a9282d05a830443cd44e99ade24194277cc6a51ee125647201"
+      },
+      "nf_task_fairness": {
+        "rows": 2,
+        "sha256": "617bd09756dbf75ce728b58e26df86baa93d41ea4de03b885fcb5d7b238806a0"
+      },
+      "nf_task_inputs": {
+        "rows": 3,
+        "sha256": "54ddb26fc32607f3c5b5834bb46eb7e2c0ce255e9388a24c4e1b23e67bcff78a"
+      },
+      "nf_task_results": {
+        "rows": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "nf_tasks": {
+        "rows": 2,
+        "sha256": "93250626eec53b03dc49a793e1846558a2af5364addb6d925fa8d47de3552821"
+      },
+      "nf_works": {
+        "rows": 3,
+        "sha256": "af7074e62d59575bfc49f18777101c4ca3d74ce56652aa8bbb6bab430dd39394"
+      }
+    },
+    "dump_sha256": "ffab092ba839485780d65ce866f8173dc55626080e8f247df8e1a0d1d77ba417",
+    "objects": {
+      "35ce845c8af6dd91bbd2a3206d5055755c936ddac93c48402bc334d9ab27b230": 661
+    },
+    "runtime_files": {
+      "__init__.py": "f9ce414b2ef71f5dae3e235be1e06e0e057a621ac1b7756e7c86b5b38ae4bfe5",
+      "application/__init__.py": "132c17dceb55fbf4640c90dcceebb7f87a8ac17f22a528c87cc71060dc59a006",
+      "application/agent_gateway.py": "de8c5082198b7bb1f7a1d60dc26851c6aa982a8078f8df0288fd3db9e877cb36",
+      "application/authorization.py": "2ebbb8957d6fd6b4d26206347e3424053283ed4b1469aa11df16f0217067a5da",
+      "application/kernel.py": "35a5dccbcf2ab04959316ff5d2daa8035a6bcbccceb9c68e56799c56639c4578",
+      "application/planning.py": "ea10b15e6628e599bc15296b2c5665c1d36ac8e7e3f0c0379208c1c89743c529",
+      "application/queries.py": "4f7273352c88f61cf1b1e5ac6bc142bb2721a885f78989e590d60771ddc7832c",
+      "application/query_policy.py": "7f226c9cb1676e1d69d617cdced2c14fbbdd1bd4f5c32b3e05d017df3e6a560d",
+      "application/simulation.py": "2838aa5bbff389584b405dcc1f5060956f166785b94e2d3fa15b18f726bf526d",
+      "application/templates.py": "77ed2b4772d52de3b214c7431481db23f8166de5705b8467aa7d8daafa0026a6",
+      "contracts/__init__.py": "d2a97e19a0747e0e55933174815b59620b982498b3bbca29bb46cc13bdae0e13",
+      "contracts/_schema_bundle.py": "b18de386a76ecf49446dff236bbeba5e87e5c22578dc4500902f97229e282d19",
+      "contracts/generate.py": "18e6854703a363899836252e5b99b9d11070089f32bd028cb8039f998d782e27",
+      "contracts/models.py": "b1c225f12b50eab305bd2798d6c24cfb18ac47e34c9b0ee451795e3119913de6",
+      "contracts/registry.py": "a3148bb052bebdc0510efd6635584c10f6f5ffd2d5f3ab4018a4a3c72cb03f86",
+      "domain/__init__.py": "de40d26fff2abc40c8565c2149366b16178a69b88ee0dc2838e6f7393d45d033",
+      "domain/canonical.py": "3fc335ad00e3973b200683e953e5066a64ce6f0040035df000c3dfc350fa1571",
+      "domain/errors.py": "15032d78e6c7feb9827ef0f81775c9b0a84bb559e81e590aeb48281365fc5d8b",
+      "domain/planning.py": "c71c7d74949b288fbd6287f16c99c0b7c8edd4cafb58f52f0ca2be187317f188",
+      "domain/propositions.py": "b910d214a5a18a9764439ffd33793c7c990d289b9345e3dbd838fc7734ee6602",
+      "domain/reducer.py": "04efb4d1b1980a66d9a7af10f101ce9f8540a77ed1e9efa3a538352a26eedaea",
+      "domain/scheduling.py": "6b152da861ec148ef0cf8e48386574248641d4bdf38c566cbc1dfdd3f9c7ef8f",
+      "domain/temporal.py": "1504b0b4c52a8922f4e3ef63927c0cccbf795b4bc436b13c41304eb63cf75ea7",
+      "domain/types.py": "fa6419c5f689927ac9914a6351e17db4fae2f561cececb6afad60e6042c56d81",
+      "domain/world.py": "132c6a3c6864fe4e0dfe3812f4b82d6c7491432b5c66cddff01f8aa9f20b9780",
+      "fixtures.py": "eb7247fa68926c64ee015d042bde91d68e43ebf86f1f8c441b653f7bddd178ed",
+      "infrastructure/__init__.py": "5567bf2d9723b516e22912faae2c87091715079d2b1f271404fe78f76ca1bb9b",
+      "infrastructure/database.py": "e8197611f2ee04a896041bc138f7f04ade5b60970d36c3da7997e5f7dfc4bad5",
+      "infrastructure/model_gateway.py": "7727ca497ec468ae0415baf55968511586b76028fbebf7d21e2579eb9c03d4e0",
+      "infrastructure/objects.py": "27e22ff4afd1ca1a491e071c3195f2b3593f68ad4ce3cd7dd498b5681617ace0",
+      "infrastructure/recovery.py": "c26dd82581d80401acbb1b800baaca226891108d8e3bed774ca82fded74b1ec7",
+      "infrastructure/reliability_tables.py": "02cdffd26b747fb4c3caa6d9444db76cb04bdc71f8472d1fa6eeb9862c471953",
+      "infrastructure/repository.py": "ee0e8f5890b98f2885e6b672ad1de203ff0a99cdaa48044461ab7bf7da8ae2fd",
+      "infrastructure/runtime_catalog.py": "996f0afc56ac82a9a09f8226c780df1058a2b8070d059e803a5e0d296d55e45f",
+      "infrastructure/simulation_tables.py": "3acc7c9380a89ee321aa12c15f7d95f56f165d55d26e77ff6a93818694dd3333",
+      "interfaces/__init__.py": "4ec6939794499bbcfdc24d01f6a5b7853fda9a9ef07452b7f164723c99bbeebd",
+      "interfaces/admission.py": "d90816e4d724c39d1292cd630b1b873d75ebb8cdc8ea2c153c39ea2c60394265",
+      "interfaces/http.py": "5208cf5043e7ca6143497175635c919ecb3a2bfd424018ab3b1e2b6b73a9d147",
+      "orchestration/tasks.py": "e0991c1036946778baebf74c52a7afd22566675386b1fa73179d128975ce9ad9"
+    },
+    "schemas": {
+      "agent.schema.json": "b75d516044b74a5937e1936e97c52610fa0a6c40c86e7589681ad1cad8bb6d76",
+      "commands.schema.json": "d261a84b577c980236ebabaf3438e01f79b2dee2f078fdc83fcdc609fdcc7342",
+      "core.schema.json": "472bfa809db9270b7b212969a3896f1567295c0fd68f70e94d9a404dd53ac552",
+      "http.schema.json": "52251014597789e4ee23a51bd37833cf8118a8245dcde2ed22e2da9633267df9",
+      "kernel.schema.json": "8457b6e89c7eb00573ed398bc47191549357f04223c37364b4c40c889a628239",
+      "literary.schema.json": "aea5e58465ee3ba008ab9de54002a304cddac6e405c3195201157a278c1433cc",
+      "planning.schema.json": "de0e7a051dbec434fb68057b6c15adb58cc2dfd67fd55a8412c513a7600d912d",
+      "simulation.schema.json": "67c95aef637756785643ab50bc5f3a2027ab7768769e0baea7296946b2e002b4",
+      "temporal_concurrency.schema.json": "677118bb3ea9ef7a89ac1fbd8a82a71ce611ac9efa00d67de566e7070b83d749"
+    },
+    "runtime_assets": {
+      "runtime/query_profiles.json": "38e858b0fbf9def2847f9acd5d828ee4a4ec29a820d3c311cf7c415364ef25b2",
+      "runtime/roles/README.md": "c97395dbfb15052140c17c543a1457dfcce46f6f5478bc3849946e3f121bae12",
+      "runtime/roles/adjudication_advisor.md": "1efb3a7797b9df39f10258922192504cd69cbba38e036e25353fbda963de668f",
+      "runtime/roles/catalog.json": "72dadabbbfc536bbdf8702b851a46385df5e54a55e589b7c911df2a2832a17df",
+      "runtime/roles/character_actor.md": "e6c522d3a7cfc7462a3286e926f9a76488717ed33983795aa9e227b5eba492bd",
+      "runtime/roles/chief_editor.md": "deebb8689806a564f0cfedafa7c8bcd003ff435818bf2c85533e52e9f0c87638",
+      "runtime/roles/environment_director.md": "87feeab87ca4da2c05619918319b9fcf217114bbc24262c0bcd473208eea0ab2",
+      "runtime/roles/evidence_maintainer.md": "e91042cd603a1caa596fa0c41f9436aaf3331abee9d6f44d2346f42846447e0f",
+      "runtime/roles/literary_editor.md": "5f2fa55fe5093c4e057ba5c6b7d5807f6c5b35a21a071efe73f6bf4cda41a7bd",
+      "runtime/roles/reviewer.md": "31f77700672a4b96302574e7a7675d435deef8a8c8cda107449ed0564e587471",
+      "runtime/roles/volume_director.md": "cfe5d0b5b145c588040ad263e3afd69da355d55f3507a0905b580bfe142c4d5a",
+      "runtime/roles/world_designer.md": "54d022b71d05a02f89905dc86b950905ad1429a5156719942ddcdbdab1f11754",
+      "runtime/roles/writer.md": "ee5217fd0df6770c517e7060274416e362184aa2e40df2d1b1c7e813b9678c9a",
+      "runtime/skills/adjudicate-actions/SKILL.md": "51ba68a631675f653cbded79c27edae829fff874b113ec995048c791b2dda831",
+      "runtime/skills/catalog.json": "cebca3c01339c75a80837e2f774a5cfef9791f556ce44a7fa2b86d9919e50adf",
+      "runtime/skills/edit-volume/SKILL.md": "43370fe98ac9628ce97ef7e30e68565499b135a7f6fc25916574b5f1668391d0",
+      "runtime/skills/maintain-memory/SKILL.md": "6b9e2bb3be6ab2f0f4d55f4d011c0184db0589896724f260248de778133ce8bb",
+      "runtime/skills/plan-volume/SKILL.md": "850855b80d0e763592f9d93bf89d9d434bb5afbdf47773a9d14c18e9afba2a34",
+      "runtime/skills/prepare-world/SKILL.md": "ee6f5e1263589a9e91cda9d4aa66d98a8eedc6e90c66d37d1c2d3658f7780031",
+      "runtime/skills/research-literature/SKILL.md": "4c0754883fdfcda12a5021b9056f2ea8b1773c7115a6fca4d62141cc84a5ba22",
+      "runtime/skills/review-consistency/SKILL.md": "b674a55185cc4396ab5a9dd6fdfa57e83aea49945bcab20d791cd535302a766d",
+      "runtime/skills/simulate-character/SKILL.md": "85b6acb7192067c81c0a5f0743d5640e5786a2306410a714b5dbbba35863ba60",
+      "runtime/skills/write-scene/SKILL.md": "08ad38b2b28a03efbfc9bcc4a7ba0b9a546855c87bc1f6e5f9445af910116c98"
+    },
+    "runtime_asset_version": 2,
+    "pg_dump": {
+      "tool": "pg_dump",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "limitations": [
+      "Logical backup; no WAL/PITR or cluster roles",
+      "All writers must participate in maintenance gate",
+      "External side effects require independent reconciliation"
+    ]
+  },
+  "restoration": {
+    "backup_id": "65a7e054-ac6b-40b0-ab6b-d9d845329466",
+    "snapshot_equal_before_fencing": true,
+    "object_count": 1,
+    "tables_verified": 37,
+    "fenced_tasks": [
+      {
+        "task_id": "32537c3a-6f80-4383-8809-9df0ed127fb3",
+        "old_generation": 1,
+        "generation": 2,
+        "state": "PAUSED"
+      },
+      {
+        "task_id": "ef1830a4-eded-465b-9993-b39c13171f68",
+        "old_generation": 0,
+        "generation": 1,
+        "state": "PAUSED"
+      }
+    ],
+    "pg_restore": {
+      "tool": "pg_restore",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "interpretation_verified": true
+  },
+  "business_assertions": [
+    "same immutable WorldRef",
+    "old workers fenced",
+    "unknown calls retain budget",
+    "outbox lease cannot acknowledge",
+    "object bytes/hash verified"
+  ]
+}

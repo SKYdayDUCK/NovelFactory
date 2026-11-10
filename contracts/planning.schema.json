@@ -1,0 +1,807 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novel-factory.example/contracts/2.1/planning.schema.json",
+  "title": "P2 evidence-bound world dossier and conditional volume plans",
+  "$defs": {
+    "WorldDossier": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "2.1"
+        },
+        "dossier_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "input_world_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"
+        },
+        "ruleset_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "initial_setup_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "background_entity_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+          },
+          "minItems": 1,
+          "maxItems": 100
+        },
+        "factions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "entity_id": {
+                "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+              },
+              "decision_maker_id": {
+                "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+              },
+              "independent_goal": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 20000
+              },
+              "without_protagonist_action": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 20000
+              },
+              "constraints": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 20000
+                },
+                "minItems": 1,
+                "maxItems": 30
+              }
+            },
+            "required": [
+              "entity_id",
+              "decision_maker_id",
+              "independent_goal",
+              "without_protagonist_action",
+              "constraints"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 30
+        },
+        "sections": {
+          "type": "object",
+          "properties": {
+            "geography": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20000
+            },
+            "history": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20000
+            },
+            "institutions": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20000
+            },
+            "resources": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20000
+            },
+            "powers": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20000
+            }
+          },
+          "required": [
+            "geography",
+            "history",
+            "institutions",
+            "resources",
+            "powers"
+          ],
+          "additionalProperties": false
+        },
+        "open_questions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 20000
+              },
+              "blocking": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "question",
+              "blocking"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0,
+          "maxItems": 100
+        },
+        "source_event_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EventRef"
+          },
+          "minItems": 0,
+          "maxItems": 100
+        },
+        "proposed_world_changes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20000
+          },
+          "minItems": 0,
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "schema_version",
+        "dossier_id",
+        "input_world_ref",
+        "ruleset_ref",
+        "initial_setup_ref",
+        "background_entity_ids",
+        "factions",
+        "sections",
+        "open_questions",
+        "source_event_refs",
+        "proposed_world_changes"
+      ],
+      "additionalProperties": false
+    },
+    "DossierReview": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "2.1"
+        },
+        "review_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "input_world_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"
+        },
+        "dossier_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "decision": {
+          "enum": [
+            "APPROVED",
+            "CHANGES_REQUESTED"
+          ]
+        },
+        "issues": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20000
+          },
+          "minItems": 0,
+          "maxItems": 100
+        },
+        "reviewer_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "review_basis": {
+          "const": "EVIDENCE_BOUND_REVIEWER_ATTESTATION"
+        },
+        "world_effects_applied": {
+          "const": 0
+        }
+      },
+      "required": [
+        "schema_version",
+        "review_id",
+        "input_world_ref",
+        "dossier_ref",
+        "decision",
+        "issues",
+        "reviewer_id",
+        "review_basis",
+        "world_effects_applied"
+      ],
+      "additionalProperties": false
+    },
+    "PlanPrecondition": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "ENTITY_ACTIVE"
+            },
+            "subject_id": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            }
+          },
+          "required": [
+            "kind",
+            "subject_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "STATE_EQUALS"
+            },
+            "subject_id": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            },
+            "predicate": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20000
+            },
+            "expected_value": {
+              "$ref": "https://novel-factory.example/contracts/2.1/temporal_concurrency.schema.json#/$defs/RelationValue"
+            }
+          },
+          "required": [
+            "kind",
+            "subject_id",
+            "predicate",
+            "expected_value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "RESOURCE_AT_LEAST"
+            },
+            "account_id": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            },
+            "resource_id": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            },
+            "unit": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "quantity": {
+              "type": "string",
+              "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+            }
+          },
+          "required": [
+            "kind",
+            "account_id",
+            "resource_id",
+            "unit",
+            "quantity"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "EVENT_SELECTED"
+            },
+            "event_ref": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EventRef"
+            }
+          },
+          "required": [
+            "kind",
+            "event_ref"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "PlanNode": {
+      "type": "object",
+      "properties": {
+        "node_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "goal": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        },
+        "status": {
+          "enum": [
+            "PROPOSED",
+            "VIABLE",
+            "BLOCKED",
+            "REVIEW_REQUIRED",
+            "ABANDONED",
+            "REALIZED"
+          ]
+        },
+        "target_time": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/OccurrenceTime"
+        },
+        "subject_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+          },
+          "minItems": 1,
+          "maxItems": 100
+        },
+        "hard_preconditions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PlanPrecondition"
+          },
+          "minItems": 0,
+          "maxItems": 50
+        },
+        "risk_notes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20000
+          },
+          "minItems": 0,
+          "maxItems": 50
+        },
+        "failure_exit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        },
+        "fulfillment_event_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EventRef"
+          },
+          "minItems": 0,
+          "maxItems": 50
+        }
+      },
+      "required": [
+        "node_id",
+        "goal",
+        "status",
+        "target_time",
+        "subject_ids",
+        "hard_preconditions",
+        "risk_notes",
+        "failure_exit",
+        "fulfillment_event_refs"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "REALIZED"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fulfillment_event_refs": {
+                "minItems": 1
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "fulfillment_event_refs": {
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    "PlanDependency": {
+      "type": "object",
+      "properties": {
+        "source_node_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "target_node_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "kind": {
+          "enum": [
+            "HARD_PREREQUISITE",
+            "ALTERNATIVE",
+            "CAUSAL_RISK",
+            "LITERARY_PROMISE"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        }
+      },
+      "required": [
+        "source_node_id",
+        "target_node_id",
+        "kind",
+        "reason"
+      ],
+      "additionalProperties": false
+    },
+    "PlanRevision": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "2.1"
+        },
+        "plan_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "plan_revision_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "volume_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "input_world_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"
+        },
+        "volume_contract_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "prior_plan_ref": {
+          "oneOf": [
+            {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PlanNode"
+          },
+          "minItems": 1,
+          "maxItems": 200
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PlanDependency"
+          },
+          "minItems": 0,
+          "maxItems": 500
+        },
+        "published_prefix_node_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+          },
+          "minItems": 0,
+          "maxItems": 200
+        },
+        "decision": {
+          "type": "object",
+          "properties": {
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20000
+            },
+            "considered_options": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "option_id": {
+                    "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+                  },
+                  "summary": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 20000
+                  },
+                  "disposition": {
+                    "enum": [
+                      "SELECTED",
+                      "REJECTED",
+                      "DEFERRED"
+                    ]
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 20000
+                  }
+                },
+                "required": [
+                  "option_id",
+                  "summary",
+                  "disposition",
+                  "reason"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 20
+            }
+          },
+          "required": [
+            "reason",
+            "considered_options"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schema_version",
+        "plan_id",
+        "plan_revision_id",
+        "volume_id",
+        "input_world_ref",
+        "volume_contract_ref",
+        "prior_plan_ref",
+        "nodes",
+        "dependencies",
+        "published_prefix_node_ids",
+        "decision"
+      ],
+      "additionalProperties": false
+    },
+    "ReplanRequest": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "2.1"
+        },
+        "prior_plan_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "input_world_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"
+        },
+        "replacements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PlanNode"
+          },
+          "minItems": 0,
+          "maxItems": 200
+        },
+        "additional_nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PlanNode"
+          },
+          "minItems": 0,
+          "maxItems": 50
+        },
+        "additional_dependencies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PlanDependency"
+          },
+          "minItems": 0,
+          "maxItems": 100
+        },
+        "decision": {
+          "type": "object",
+          "properties": {
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20000
+            },
+            "considered_options": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "option_id": {
+                    "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+                  },
+                  "summary": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 20000
+                  },
+                  "disposition": {
+                    "enum": [
+                      "SELECTED",
+                      "REJECTED",
+                      "DEFERRED"
+                    ]
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 20000
+                  }
+                },
+                "required": [
+                  "option_id",
+                  "summary",
+                  "disposition",
+                  "reason"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 20
+            }
+          },
+          "required": [
+            "reason",
+            "considered_options"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schema_version",
+        "prior_plan_ref",
+        "input_world_ref",
+        "replacements",
+        "additional_nodes",
+        "additional_dependencies",
+        "decision"
+      ],
+      "additionalProperties": false
+    },
+    "ReplanReport": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "2.1"
+        },
+        "prior_plan_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "new_plan_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "input_world_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"
+        },
+        "directly_broken_node_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+          },
+          "minItems": 0,
+          "maxItems": 200
+        },
+        "affected_node_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+          },
+          "minItems": 0,
+          "maxItems": 200
+        },
+        "preserved_node_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+          },
+          "minItems": 0,
+          "maxItems": 200
+        },
+        "review_node_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+          },
+          "minItems": 0,
+          "maxItems": 200
+        },
+        "replaced_node_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+          },
+          "minItems": 0,
+          "maxItems": 200
+        },
+        "world_effects_applied": {
+          "const": 0
+        }
+      },
+      "required": [
+        "schema_version",
+        "prior_plan_ref",
+        "new_plan_ref",
+        "input_world_ref",
+        "directly_broken_node_ids",
+        "affected_node_ids",
+        "preserved_node_ids",
+        "review_node_ids",
+        "replaced_node_ids",
+        "world_effects_applied"
+      ],
+      "additionalProperties": false
+    },
+    "PlanTaskBinding": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "2.1"
+        },
+        "task_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "plan_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "node_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+          },
+          "minItems": 1,
+          "maxItems": 200
+        },
+        "scope_versions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "scope_key": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 250
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "scope_key",
+              "version"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 200
+        }
+      },
+      "required": [
+        "schema_version",
+        "task_id",
+        "generation",
+        "plan_ref",
+        "node_ids",
+        "scope_versions"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

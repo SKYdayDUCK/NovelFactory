@@ -1,0 +1,804 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novel-factory.example/contracts/2.2/simulation.schema.json",
+  "title": "P2 versioned process registration and sealed joint arbitration",
+  "$defs": {
+    "ChannelBound": {
+      "type": "object",
+      "properties": {
+        "channel_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        },
+        "from_scope_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "to_scope_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "min_delay_ticks": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "earliest_possible_impact": {
+          "anyOf": [
+            {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/StoryPoint"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "completeness": {
+          "enum": [
+            "COMPLETE",
+            "UNDECLARED"
+          ]
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EvidenceRef"
+          },
+          "minItems": 0,
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "channel_id",
+        "from_scope_id",
+        "to_scope_id",
+        "min_delay_ticks",
+        "earliest_possible_impact",
+        "completeness",
+        "evidence_refs"
+      ],
+      "additionalProperties": false
+    },
+    "ProcessRegistration": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "2.2"
+        },
+        "process_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "process_kind": {
+          "enum": [
+            "TRAVEL",
+            "MESSAGE",
+            "PRODUCTION",
+            "CONSUMPTION",
+            "FACTION_ACTION",
+            "INTERACTION",
+            "WEATHER"
+          ]
+        },
+        "scope_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+          },
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true
+        },
+        "participant_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+          },
+          "minItems": 0,
+          "maxItems": 100,
+          "uniqueItems": true
+        },
+        "required_actor_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+          },
+          "minItems": 0,
+          "maxItems": 100,
+          "uniqueItems": true
+        },
+        "start_at": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/StoryPoint"
+        },
+        "due_at": {
+          "anyOf": [
+            {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/StoryPoint"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "world_stage": {
+          "enum": [
+            "NOT_STARTED",
+            "ACTIVE",
+            "SUSPENDED",
+            "COMPLETED",
+            "TERMINATED"
+          ]
+        },
+        "high_impact": {
+          "type": "boolean"
+        },
+        "channels": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.2/simulation.schema.json#/$defs/ChannelBound"
+          },
+          "minItems": 0,
+          "maxItems": 100
+        },
+        "goal": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        },
+        "evaluator_kind": {
+          "enum": [
+            "DETERMINISTIC",
+            "SEMANTIC"
+          ]
+        },
+        "rule_evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EvidenceRef"
+          },
+          "minItems": 1,
+          "maxItems": 100
+        },
+        "trigger_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "trigger_version_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "deterministic_commands": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.2/simulation.schema.json#/$defs/AtomicCommand"
+          },
+          "minItems": 1,
+          "maxItems": 20
+        }
+      },
+      "required": [
+        "schema_version",
+        "process_id",
+        "process_kind",
+        "scope_ids",
+        "participant_ids",
+        "required_actor_ids",
+        "start_at",
+        "due_at",
+        "world_stage",
+        "high_impact",
+        "channels",
+        "goal",
+        "evaluator_kind",
+        "rule_evidence_refs",
+        "trigger_id",
+        "trigger_version_id"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "evaluator_kind": {
+                "const": "DETERMINISTIC"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "deterministic_commands"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "deterministic_commands"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "ProcessEntry": {
+      "type": "object",
+      "properties": {
+        "definition": {
+          "$ref": "https://novel-factory.example/contracts/2.2/simulation.schema.json#/$defs/ProcessRegistration"
+        },
+        "record_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "registered_at": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/StoryPoint"
+        },
+        "next_due": {
+          "anyOf": [
+            {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/StoryPoint"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "world_stage": {
+          "enum": [
+            "NOT_STARTED",
+            "ACTIVE",
+            "SUSPENDED",
+            "COMPLETED",
+            "TERMINATED"
+          ]
+        },
+        "evaluation_status": {
+          "enum": [
+            "EVALUATED",
+            "PENDING",
+            "BLOCKED",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "evaluated_frontier": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/StoryPoint"
+        },
+        "trigger_version_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "evaluations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "interaction_id": {
+                "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+              },
+              "outcome": {
+                "enum": [
+                  "FIRED",
+                  "CONDITION_FALSE",
+                  "REPLACED",
+                  "CANCELLED"
+                ]
+              },
+              "at": {
+                "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/StoryPoint"
+              },
+              "event_refs": {
+                "type": "array",
+                "items": {
+                  "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EventRef"
+                },
+                "minItems": 0,
+                "maxItems": 100
+              }
+            },
+            "required": [
+              "interaction_id",
+              "outcome",
+              "at",
+              "event_refs"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0,
+          "maxItems": 2000
+        }
+      },
+      "required": [
+        "definition",
+        "record_ref",
+        "registered_at",
+        "next_due",
+        "world_stage",
+        "evaluation_status",
+        "evaluated_frontier",
+        "trigger_version_id",
+        "evaluations"
+      ],
+      "additionalProperties": false
+    },
+    "SimulationState": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "2.2"
+        },
+        "processes": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "https://novel-factory.example/contracts/2.2/simulation.schema.json#/$defs/ProcessEntry"
+          },
+          "maxProperties": 2000
+        },
+        "closed_interactions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "outcome_ref": {
+                "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+              },
+              "at": {
+                "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/StoryPoint"
+              },
+              "event_refs": {
+                "type": "array",
+                "items": {
+                  "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EventRef"
+                },
+                "minItems": 0,
+                "maxItems": 100
+              }
+            },
+            "required": [
+              "outcome_ref",
+              "at",
+              "event_refs"
+            ],
+            "additionalProperties": false
+          },
+          "maxProperties": 2000
+        }
+      },
+      "required": [
+        "schema_version",
+        "processes",
+        "closed_interactions"
+      ],
+      "additionalProperties": false
+    },
+    "ProcessOutcome": {
+      "type": "object",
+      "properties": {
+        "process_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "outcome": {
+          "enum": [
+            "FIRED",
+            "CONDITION_FALSE",
+            "REPLACED",
+            "CANCELLED"
+          ]
+        },
+        "world_stage": {
+          "enum": [
+            "NOT_STARTED",
+            "ACTIVE",
+            "SUSPENDED",
+            "COMPLETED",
+            "TERMINATED"
+          ]
+        },
+        "next_due": {
+          "anyOf": [
+            {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/StoryPoint"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "process_id",
+        "outcome",
+        "world_stage",
+        "next_due"
+      ],
+      "additionalProperties": false
+    },
+    "AtomicCommand": {
+      "oneOf": [
+        {
+          "$ref": "https://novel-factory.example/contracts/p1/commands.schema.json#/$defs/TRANSFER_ITEM"
+        },
+        {
+          "$ref": "https://novel-factory.example/contracts/p1/commands.schema.json#/$defs/DESTROY_ITEM"
+        },
+        {
+          "$ref": "https://novel-factory.example/contracts/p1/commands.schema.json#/$defs/RESOURCE_TRANSFER"
+        },
+        {
+          "$ref": "https://novel-factory.example/contracts/p1/commands.schema.json#/$defs/SET_RELATION"
+        },
+        {
+          "$ref": "https://novel-factory.example/contracts/p1/commands.schema.json#/$defs/GUARD_LEAVE"
+        },
+        {
+          "$ref": "https://novel-factory.example/contracts/p1/commands.schema.json#/$defs/PASS_CLEAR_ROUTE"
+        },
+        {
+          "$ref": "https://novel-factory.example/contracts/p1/commands.schema.json#/$defs/RECORD_COGNITION"
+        }
+      ]
+    },
+    "RegisteredProcess": {
+      "type": "object",
+      "properties": {
+        "process": {
+          "$ref": "https://novel-factory.example/contracts/2.2/simulation.schema.json#/$defs/ProcessRegistration"
+        },
+        "record_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        }
+      },
+      "required": [
+        "process",
+        "record_ref"
+      ],
+      "additionalProperties": false
+    },
+    "ParticipantSlot": {
+      "type": "object",
+      "properties": {
+        "actor_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "grant_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        }
+      },
+      "required": [
+        "actor_id",
+        "grant_id"
+      ],
+      "additionalProperties": false
+    },
+    "InteractionBundle": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "2.2"
+        },
+        "interaction_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "base_world_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"
+        },
+        "story_time": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/StoryPoint"
+        },
+        "scope_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+          },
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true
+        },
+        "process_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+          },
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true
+        },
+        "participant_slots": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.2/simulation.schema.json#/$defs/ParticipantSlot"
+          },
+          "minItems": 0,
+          "maxItems": 100
+        },
+        "registry_fingerprint": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/Sha256"
+        },
+        "phase_policy": {
+          "const": "SINGLE_STAGE"
+        },
+        "created_by": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        }
+      },
+      "required": [
+        "schema_version",
+        "interaction_id",
+        "base_world_ref",
+        "story_time",
+        "scope_ids",
+        "process_ids",
+        "participant_slots",
+        "registry_fingerprint",
+        "phase_policy",
+        "created_by"
+      ],
+      "additionalProperties": false
+    },
+    "SelectedOutcome": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "2.2"
+        },
+        "interaction_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "base_world_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"
+        },
+        "story_time": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/StoryPoint"
+        },
+        "bundle_hash": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/Sha256"
+        },
+        "action_proposal_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+          },
+          "minItems": 0,
+          "maxItems": 100
+        },
+        "commands": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.2/simulation.schema.json#/$defs/AtomicCommand"
+          },
+          "minItems": 0,
+          "maxItems": 50
+        },
+        "process_outcomes": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.2/simulation.schema.json#/$defs/ProcessOutcome"
+          },
+          "minItems": 1,
+          "maxItems": 100
+        },
+        "outgoing_processes": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.2/simulation.schema.json#/$defs/RegisteredProcess"
+          },
+          "minItems": 0,
+          "maxItems": 100
+        },
+        "reasoning_summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        },
+        "source_kind": {
+          "enum": [
+            "FIXTURE_SELECTED",
+            "RULE_DECISION",
+            "EXTERNAL_AGENT"
+          ]
+        },
+        "source_ref": {
+          "anyOf": [
+            {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rule_evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EvidenceRef"
+          },
+          "minItems": 1,
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "schema_version",
+        "interaction_id",
+        "base_world_ref",
+        "story_time",
+        "bundle_hash",
+        "action_proposal_refs",
+        "commands",
+        "process_outcomes",
+        "outgoing_processes",
+        "reasoning_summary",
+        "source_kind",
+        "source_ref",
+        "rule_evidence_refs"
+      ],
+      "additionalProperties": false
+    },
+    "REGISTER_PROCESS": {
+      "type": "object",
+      "properties": {
+        "template_id": {
+          "const": "REGISTER_PROCESS"
+        },
+        "args": {
+          "type": "object",
+          "properties": {
+            "at": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/StoryPoint"
+            },
+            "process": {
+              "$ref": "https://novel-factory.example/contracts/2.2/simulation.schema.json#/$defs/ProcessRegistration"
+            },
+            "record_ref": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+            }
+          },
+          "required": [
+            "at",
+            "process",
+            "record_ref"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "template_id",
+        "args"
+      ],
+      "additionalProperties": false
+    },
+    "SCHEDULE_ADVANCE": {
+      "type": "object",
+      "properties": {
+        "template_id": {
+          "const": "SCHEDULE_ADVANCE"
+        },
+        "args": {
+          "type": "object",
+          "properties": {
+            "scope_ids": {
+              "type": "array",
+              "items": {
+                "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+              },
+              "minItems": 1,
+              "maxItems": 100,
+              "uniqueItems": true
+            },
+            "target": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/StoryPoint"
+            }
+          },
+          "required": [
+            "scope_ids",
+            "target"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "template_id",
+        "args"
+      ],
+      "additionalProperties": false
+    },
+    "JOINT_INTERACTION": {
+      "type": "object",
+      "properties": {
+        "template_id": {
+          "const": "JOINT_INTERACTION"
+        },
+        "args": {
+          "type": "object",
+          "properties": {
+            "at": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/StoryPoint"
+            },
+            "interaction_ref": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+            },
+            "outcome_ref": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+            },
+            "scope_ids": {
+              "type": "array",
+              "items": {
+                "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+              },
+              "minItems": 1,
+              "maxItems": 100,
+              "uniqueItems": true
+            },
+            "process_ids": {
+              "type": "array",
+              "items": {
+                "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+              },
+              "minItems": 1,
+              "maxItems": 100,
+              "uniqueItems": true
+            },
+            "commands": {
+              "type": "array",
+              "items": {
+                "$ref": "https://novel-factory.example/contracts/2.2/simulation.schema.json#/$defs/AtomicCommand"
+              },
+              "minItems": 0,
+              "maxItems": 50
+            },
+            "process_outcomes": {
+              "type": "array",
+              "items": {
+                "$ref": "https://novel-factory.example/contracts/2.2/simulation.schema.json#/$defs/ProcessOutcome"
+              },
+              "minItems": 1,
+              "maxItems": 100
+            },
+            "outgoing_processes": {
+              "type": "array",
+              "items": {
+                "$ref": "https://novel-factory.example/contracts/2.2/simulation.schema.json#/$defs/RegisteredProcess"
+              },
+              "minItems": 0,
+              "maxItems": 100
+            },
+            "registry_fingerprint": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/Sha256"
+            },
+            "interaction_id": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            }
+          },
+          "required": [
+            "at",
+            "interaction_ref",
+            "outcome_ref",
+            "scope_ids",
+            "process_ids",
+            "commands",
+            "process_outcomes",
+            "outgoing_processes",
+            "registry_fingerprint",
+            "interaction_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "template_id",
+        "args"
+      ],
+      "additionalProperties": false
+    },
+    "SimulationCommand": {
+      "oneOf": [
+        {
+          "$ref": "https://novel-factory.example/contracts/2.2/simulation.schema.json#/$defs/REGISTER_PROCESS"
+        },
+        {
+          "$ref": "https://novel-factory.example/contracts/2.2/simulation.schema.json#/$defs/SCHEDULE_ADVANCE"
+        },
+        {
+          "$ref": "https://novel-factory.example/contracts/2.2/simulation.schema.json#/$defs/JOINT_INTERACTION"
+        }
+      ]
+    }
+  }
+}

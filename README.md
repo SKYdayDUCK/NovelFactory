@@ -2,7 +2,7 @@
 
 [![P1 Integrity CI](https://github.com/SKYdayDUCK/NovelFactory/actions/workflows/p1-integrity.yml/badge.svg)](https://github.com/SKYdayDUCK/NovelFactory/actions/workflows/p1-integrity.yml)
 
-**当前阶段：P1 收尾修复版（2026-11-10），未进入 P2。** 本仓库包含真实的 Python 3.12 / PostgreSQL 17 内核，而非只有设计文档。通过已认证任务及固定知识切面访问历史世界状态，提供不可变事件、分支与严格/有界依赖守卫提交、权限化 Context Compiler、可靠任务/Outbox、对象存储、真实数据库恢复和最小 HTTP 服务。当前实现不包含自动小说写作流水线。
+**当前阶段：P2 分批开发中（2026-11-10），保留 P1 已验收基线。** 本仓库包含 Python 3.12 / PostgreSQL 17 可信内核，新增世界与卷规划、过程调度、共同裁决及受任务约束的外部 Agent 接入。完整 P2 生产闭环、真实模型与文学验收分别记录，不能由模块数量或确定性夹具替代。当前进展见 [P2 第一批报告](reports/P2_第一批开发报告.md)。
 
 - **运行/复现：** [复现与运行指南](reports/复现与运行指南.md)，`uv sync --locked --group dev`；默认 Python 3.12，PostgreSQL 17。
 - **测试与 CI：** [P1 Integrity Workflow](.github/workflows/p1-integrity.yml) 对 Schema、单元、真实 PostgreSQL 集成/并发及恢复执行分组验证；原始 JUnit、日志和机器可读结果在每次 GitHub Actions Run 的 Artifacts 获取。CI 执行状态以 GitHub Actions 当次结果为准。

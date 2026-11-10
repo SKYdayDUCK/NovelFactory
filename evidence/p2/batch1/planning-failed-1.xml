@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="6" time="2.310" timestamp="2026-11-10T18:57:08.853211+09:00" hostname="2be49009bab4"><testcase classname="tests.integration.test_planning" name="test_world_dossier_preserves_offstage_entities_and_requires_review" time="0.634" /><testcase classname="tests.integration.test_planning" name="test_plan_adoption_exposes_future_cut_without_effects_or_actor_leak" time="0.245"><failure message="novel_factory.domain.errors.DomainError: Invalid UnifiedQueryRequest: contract constraints failed">kernel_env = {'db': &lt;novel_factory.infrastructure.database.Database object at 0x7f8bcc81c0b0&gt;, 'store': &lt;novel_factory.infrastructu...Kernel object at 0x7f8bcb5bee10&gt;, 'url': 'postgresql+psycopg://nf_dev@127.0.0.1:50185/nf_kernel_300015612955460d', ...}
+
+    def test_plan_adoption_exposes_future_cut_without_effects_or_actor_leak(kernel_env):
+        k = kernel_env["kernel"]; f = load_fixture(k); s = PlanningService(k)
+        plan, ref = make_plan(s, f)
+        result = s.adopt_plan(f["principal"], f["world_ref"], ref, None, "adopt")
+        assert s.adopt_plan(f["principal"], f["world_ref"], ref, None, "adopt") == result
+        with k.db.uow(write=False) as r:
+            assert k.head(r, f["world_ref"]["work_id"]) == f["world_ref"]
+            assert not r.many("events", {"work_id": f["world_ref"]["work_id"]})
+            manifest = k.artifact(r, result["plan_manifest_ref"], f["world_ref"]["work_id"])["payload"]
+            validate_contract("PlanManifest", manifest, "kernel")
+        task = create_bound_task(k, f["principal"], f["world_ref"], point(60))
+        request = {"schema_version": "2.1", "task_id": task["task_id"], "generation": task["generation"],
+            "read_contract": {"revision": {"mode": "FIXED", "world_ref": f["world_ref"]}, "process_policy": "ALLOW_PARTIAL", "index_policy": "AUTHORITATIVE", "max_wait_ms": 0},
+            "knowledge_cut": result["knowledge_cut"], "subject_time": {"kind": "POINT", "at": point(50)},
+            "query": {"kind": "TIMELINE", "subject_ids": [f["ids"]["sword"]], "entry_kinds": ["PLAN"], "time_axis": "TARGET", "include_inactive": True},
+            "page_size": 50}
+&gt;       answer = WorldQueryService(k).query(f["principal"], request)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_planning.py:124: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/novel_factory/application/queries.py:471: in query
+    request = validate_contract('UnifiedQueryRequest', request, '2.1')
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'UnifiedQueryRequest'
+payload = {'schema_version': '2.1', 'task_id': '7ae1780c-0237-4a84-8c4a-fb4ebb40f1f7', 'generation': 1, 'read_contract': {'revis...-44ab-bd53-910c2a4be2e0'}}, 'process_policy': 'ALLOW_PARTIAL', 'index_policy': 'AUTHORITATIVE', 'max_wait_ms': 0}, ...}
+version = '2.1'
+
+    def validate_contract(name: str, payload: Any, version: str = "2.0") -&gt; Any:
+        value = plain(payload)
+        errors = sorted(_validator(name, version).iter_errors(value), key=lambda e: str(list(e.path)))
+        if errors:
+            # Do not echo instance values: they can be secret or attacker-controlled.
+&gt;           raise DomainError("INVALID_ARGUMENT", f"Invalid {name}: contract constraints failed")
+E           novel_factory.domain.errors.DomainError: Invalid UnifiedQueryRequest: contract constraints failed
+
+src/novel_factory/contracts/registry.py:66: DomainError</failure></testcase><testcase classname="tests.integration.test_planning" name="test_destroyed_future_prerequisite_fences_immediately_then_replans_locally" time="0.587" /><testcase classname="tests.integration.test_planning" name="test_plan_cannot_claim_unaccepted_outcomes_or_stale_adoption" time="0.380" /><testcase classname="tests.integration.test_planning" name="test_two_concurrent_first_plan_selections_have_one_winner" time="0.192" /><testcase classname="tests.integration.test_planning" name="test_existing_policy_required_for_protected_commitments" time="0.182" /></testsuite></testsuites>

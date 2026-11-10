@@ -1,0 +1,426 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novel-factory.example/contracts/2.1/agent.schema.json",
+  "title": "P2 external Agent execution and accounting contracts",
+  "$defs": {
+    "OutputContract": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "version": {
+          "type": "string",
+          "enum": [
+            "2.0",
+            "2.1",
+            "literary",
+            "kernel",
+            "agent",
+            "pipeline",
+            "scheduler"
+          ]
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "additionalProperties": false
+    },
+    "AgentInput": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "2.1"
+        },
+        "role_id": {
+          "enum": [
+            "chief_editor",
+            "world_designer",
+            "volume_director",
+            "character_actor",
+            "environment_director",
+            "adjudication_advisor",
+            "writer",
+            "evidence_maintainer",
+            "reviewer",
+            "literary_editor"
+          ]
+        },
+        "task_kind": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "runtime_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "runtime_sha256": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/Sha256"
+        },
+        "adapter_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "model_config_sha256": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/Sha256"
+        },
+        "assignment": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32000
+        },
+        "material_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+          },
+          "maxItems": 32
+        },
+        "output_contract": {
+          "$ref": "#/$defs/OutputContract"
+        }
+      },
+      "required": [
+        "schema_version",
+        "role_id",
+        "task_kind",
+        "runtime_ref",
+        "runtime_sha256",
+        "adapter_id",
+        "model_config_sha256",
+        "assignment",
+        "material_refs",
+        "output_contract"
+      ],
+      "additionalProperties": false
+    },
+    "AgentDispatchRequest": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "2.1"
+        },
+        "task_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "worker_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "input_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "budget_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "call_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "reserve_amount": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/NonnegativeDecimal"
+        },
+        "token_reservation": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500000
+        }
+      },
+      "required": [
+        "schema_version",
+        "task_id",
+        "generation",
+        "worker_id",
+        "input_ref",
+        "budget_id",
+        "call_key",
+        "reserve_amount",
+        "token_reservation"
+      ],
+      "additionalProperties": false
+    },
+    "AgentModelResponse": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "2.1"
+        },
+        "task_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "context_bundle_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "world_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"
+        },
+        "role_id": {
+          "enum": [
+            "chief_editor",
+            "world_designer",
+            "volume_director",
+            "character_actor",
+            "environment_director",
+            "adjudication_advisor",
+            "writer",
+            "evidence_maintainer",
+            "reviewer",
+            "literary_editor"
+          ]
+        },
+        "actor_id": {
+          "anyOf": [
+            {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "enum": [
+            "SUCCEEDED",
+            "NEEDS_INPUT"
+          ]
+        },
+        "payload": {
+          "type": "object"
+        },
+        "unresolved_questions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "maxItems": 32
+        }
+      },
+      "required": [
+        "schema_version",
+        "task_id",
+        "generation",
+        "context_bundle_id",
+        "world_ref",
+        "role_id",
+        "actor_id",
+        "status",
+        "payload",
+        "unresolved_questions"
+      ],
+      "additionalProperties": false,
+      "description": "The payload is additionally validated against the exact server-selected output_contract in immutable AgentInput. A generic JSON payload is never accepted without that second validation."
+    },
+    "AgentTextOutput": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200000
+        },
+        "event_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EventRef"
+          },
+          "maxItems": 128
+        },
+        "important_deltas": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "maxItems": 32
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EvidenceRef"
+          },
+          "maxItems": 128
+        }
+      },
+      "required": [
+        "text",
+        "event_refs",
+        "important_deltas",
+        "evidence_refs"
+      ],
+      "additionalProperties": false
+    },
+    "AgentReviewOutput": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64000
+        },
+        "issues": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ReviewIssue"
+          },
+          "maxItems": 64
+        },
+        "counterinterpretations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "maxItems": 32
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EvidenceRef"
+          },
+          "maxItems": 128
+        }
+      },
+      "required": [
+        "summary",
+        "issues",
+        "counterinterpretations",
+        "evidence_refs"
+      ],
+      "additionalProperties": false
+    },
+    "AgentDecisionOutput": {
+      "type": "object",
+      "properties": {
+        "decision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64000
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        },
+        "deferred_questions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "maxItems": 32
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EvidenceRef"
+          },
+          "maxItems": 128
+        }
+      },
+      "required": [
+        "decision",
+        "reason",
+        "deferred_questions",
+        "evidence_refs"
+      ],
+      "additionalProperties": false
+    },
+    "AgentUsage": {
+      "type": "object",
+      "properties": {
+        "input_tokens": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "output_tokens": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cached_input_tokens": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "actual_amount": {
+          "anyOf": [
+            {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/NonnegativeDecimal"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "currency": {
+          "anyOf": [
+            {
+              "enum": [
+                "USD",
+                "CNY"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cost_status": {
+          "enum": [
+            "KNOWN",
+            "UNKNOWN_COST",
+            "NOT_SENT"
+          ]
+        }
+      },
+      "required": [
+        "input_tokens",
+        "output_tokens",
+        "cached_input_tokens",
+        "actual_amount",
+        "currency",
+        "cost_status"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

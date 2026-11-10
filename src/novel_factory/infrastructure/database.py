@@ -137,10 +137,13 @@ define("promotions", uid("promotion_id", primary_key=True), uid("work_id", nulla
 # Task tables use this exact metadata registry; no parallel authority/schema.
 from novel_factory.infrastructure.reliability_tables import define_reliability_tables
 tables.update(define_reliability_tables(metadata))
+from novel_factory.infrastructure.simulation_tables import define_simulation_tables
+tables.update(define_simulation_tables(metadata))
 
 IMMUTABLE_TABLES = ("genesis", "revisions", "events", "revision_events", "commits", "artifacts", "contexts",
                     "proposals", "certificates", "receipts", "invalidations", "promotions",
-                    "task_inputs", "task_executions", "task_results", "task_commands")
+                    "task_inputs", "task_executions", "task_results", "task_commands",
+                    "simulation_interactions", "simulation_intents", "simulation_outcomes")
 
 def mutation_gate(conn: Connection):
     conn.execute(text("SELECT pg_advisory_xact_lock_shared(:key)"), {"key": MAINTENANCE_LOCK})

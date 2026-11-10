@@ -2,7 +2,7 @@ name: P1 baseline integrity
 
 on:
   push:
-    branches: [main]
+    branches: [main, "dev/p2-*"]
   pull_request:
   workflow_dispatch:
 
@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   contract-unit:
-    name: Schema, domain, HTTP boundaries
+    name: Schema, domain, HTTP and production boundaries
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
