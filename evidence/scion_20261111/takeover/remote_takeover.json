@@ -1,0 +1,116 @@
+{
+  "checked_at_client_date": "2026-11-11 Asia/Shanghai",
+  "repository": "SKYdayDUCK/NovelFactory",
+  "branch": "experiment/scion-incremental-20261111",
+  "base": "23a61398278c9a13e6450d444d4a6d25a88ef5e0",
+  "prs": [
+    {
+      "number": 2,
+      "head": "dev/p2-production-loop",
+      "head_sha": "a9547bd651e177d48c9d0e810362e411f510d62d",
+      "base": "main",
+      "base_sha": "721f155c9cc912cddfdae559afe4f2516d0967f2",
+      "state": "open",
+      "merged": false,
+      "draft": true
+    },
+    {
+      "number": 3,
+      "head": "dev/p3-p4-continuity",
+      "head_sha": "23a61398278c9a13e6450d444d4a6d25a88ef5e0",
+      "base": "dev/p2-production-loop",
+      "base_sha": "a9547bd651e177d48c9d0e810362e411f510d62d",
+      "state": "open",
+      "merged": false,
+      "draft": true
+    }
+  ],
+  "runs": {
+    "pr3": [
+      {
+        "id": 42864582299,
+        "name": "P1 and P2 production integrity",
+        "status": "completed",
+        "conclusion": "success",
+        "run_number": 43,
+        "jobs_url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/42864582299/jobs",
+        "logs_url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/42864582299/logs",
+        "workflow_id": 413099311
+      },
+      {
+        "id": 42864580621,
+        "name": "P2 measured capacity and recovery",
+        "status": "completed",
+        "conclusion": "failure",
+        "run_number": 12,
+        "jobs_url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/42864580621/jobs",
+        "logs_url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/42864580621/logs",
+        "workflow_id": 413334917
+      },
+      {
+        "id": 42864580346,
+        "name": "P4 real isolated WAL PITR and verified recovery",
+        "status": "completed",
+        "conclusion": "success",
+        "run_number": 8,
+        "jobs_url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/42864580346/jobs",
+        "logs_url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/42864580346/logs",
+        "workflow_id": 413452240
+      },
+      {
+        "id": 42864580618,
+        "name": "P3 P4 measured evidence",
+        "status": "completed",
+        "conclusion": "failure",
+        "run_number": 21,
+        "jobs_url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/42864580618/jobs",
+        "logs_url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/42864580618/logs",
+        "workflow_id": 413403576
+      },
+      {
+        "id": 42864579931,
+        "name": "P3 scale experiments with strict unmet gates",
+        "status": "completed",
+        "conclusion": "failure",
+        "run_number": 6,
+        "jobs_url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/42864579931/jobs",
+        "logs_url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/42864579931/logs",
+        "workflow_id": 413441896
+      }
+    ],
+    "pr2": [
+      {
+        "id": 42863611810,
+        "name": "P3 P4 measured evidence",
+        "status": "completed",
+        "conclusion": "failure",
+        "run_number": 20,
+        "jobs_url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/42863611810/jobs",
+        "logs_url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/42863611810/logs",
+        "workflow_id": 413403576
+      },
+      {
+        "id": 42863611743,
+        "name": "P1 and P2 production integrity",
+        "status": "completed",
+        "conclusion": "success",
+        "run_number": 41,
+        "jobs_url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/42863611743/jobs",
+        "logs_url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/42863611743/logs",
+        "workflow_id": 413099311
+      },
+      {
+        "id": 42863611898,
+        "name": "P2 measured capacity and recovery",
+        "status": "completed",
+        "conclusion": "failure",
+        "run_number": 11,
+        "jobs_url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/42863611898/jobs",
+        "logs_url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/42863611898/logs",
+        "workflow_id": 413334917
+      }
+    ]
+  },
+  "main_sha": "721f155c9cc912cddfdae559afe4f2516d0967f2",
+  "audit_archive_ref_sha": "23a61398278c9a13e6450d444d4a6d25a88ef5e0"
+}

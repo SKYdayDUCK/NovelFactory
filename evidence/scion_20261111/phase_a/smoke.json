@@ -1,0 +1,2058 @@
+{
+  "schema_version": "scion-profile-1",
+  "status": "PROFILE_COMPLETE_WITH_INVARIANTS_CHECKED",
+  "kind": "REAL_POSTGRESQL_SEQUENTIAL_ATTRIBUTION",
+  "configuration": {
+    "agents": 10,
+    "entities": 20,
+    "histories": [
+      1
+    ],
+    "repeats": 1,
+    "profiles": false,
+    "output": "/workspace/scratch/3dd241864a32/NovelFactory/evidence/scion_20261111/phase_a/smoke.json"
+  },
+  "started_at_utc": "2026-11-10T17:51:57.228084+00:00",
+  "source_sha256": {
+    "benchmarks/scion_profile.py": "d3fa005258a69679a4c24225c0d7f6122d8cfc6811cd3902de38948f4d80f318",
+    "benchmarks/p2_behavioral_load.py": "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f",
+    "benchmarks/context_profile.py": "86c6f3164cb0463bfa662a5b6fd78a3570b03a1dc485d4080c0c6f20c736bedd",
+    "src/novel_factory/application/kernel.py": "5edd50ce4785808db3b45d57dba665d0f1922b410a7209bddb31abd3de81c584",
+    "src/novel_factory/application/queries.py": "4fde3a6742fea5491047dbf3b4599cf3b42fce577b385d96609cf19048e88428",
+    "src/novel_factory/application/templates.py": "77ed2b4772d52de3b214c7431481db23f8166de5705b8467aa7d8daafa0026a6",
+    "src/novel_factory/domain/world.py": "666de00b7f3a9090f9093ce939f44b489b0abc5deb34beab2a1ddfbdfd096471",
+    "src/novel_factory/domain/temporal.py": "fc670d6146b7efd5c9f7f8851da92000ebe3c3b7fb789845194cee675f359b71",
+    "src/novel_factory/domain/canonical.py": "019ad4d94016914ede2c6a4750a4a033076cb69b81b89873ec4d218ffb506e51",
+    "src/novel_factory/infrastructure/repository.py": "f3b1afd6191dde474fca47239ccd84eb071da26470ec9cd55f63ffbc2ae2e858",
+    "src/novel_factory/infrastructure/database.py": "e8197611f2ee04a896041bc138f7f04ade5b60970d36c3da7997e5f7dfc4bad5"
+  },
+  "environment": {
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "logical_cpu_count": 9,
+    "cpu_models": [
+      "AMD EPYC 9V74 80-Core Processor"
+    ],
+    "affinity_cpus": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "load_average": [
+      0.31689453125,
+      0.2236328125,
+      0.224609375
+    ],
+    "memory": {
+      "MemTotal": "10206472 kB",
+      "MemAvailable": "8946684 kB",
+      "SwapTotal": "0 kB"
+    },
+    "cgroup": {},
+    "versions": {
+      "SQLAlchemy": "2.0.57",
+      "psycopg": "3.3.8",
+      "uvicorn": "0.54.0",
+      "httpx": "0.28.1"
+    },
+    "git_sha": "23a61398278c9a13e6450d444d4a6d25a88ef5e0",
+    "git_dirty": true,
+    "benchmark_source_sha256": "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f",
+    "load_client_location": "direct synchronous Kernel calls",
+    "api_processes": 0,
+    "api_server_threads": 0,
+    "aggregate_application_pool": 8,
+    "observer_pool": 1,
+    "postgres": "PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+    "postgres_settings": {
+      "shared_buffers": "128MB",
+      "fsync": "on",
+      "synchronous_commit": "on",
+      "max_connections": "60"
+    }
+  },
+  "records": [
+    {
+      "operation": "state_query",
+      "suite": "population",
+      "selected_events_before": 4,
+      "cprofile_enabled": false,
+      "wall_seconds": 0.021180362997256452,
+      "process_cpu_seconds": 0.017540337999999878,
+      "rss_before_kib": 79892,
+      "rss_after_kib": 79904,
+      "process_lifetime_max_rss_kib": 79672,
+      "error": null,
+      "sql": {
+        "statements": 20,
+        "statement_kinds": {
+          "SELECT": 20
+        },
+        "referenced_tables": {
+          "nf_tasks": 2,
+          "nf_works": 6,
+          "nf_grants": 4,
+          "nf_task_inputs": 2,
+          "nf_revisions": 1,
+          "nf_branches": 1,
+          "nf_index_watermarks": 1
+        },
+        "cursor_seconds": 0.005130859000928467,
+        "max_cursor_seconds": 0.0006037940001988318,
+        "failed_statements": 0,
+        "selected_rows_reported_by_cursor": 19,
+        "parameters_retained": false,
+        "excludes_result_decoding_and_pool_pre_ping": true
+      },
+      "database_json_codec": {
+        "decode": {
+          "calls": 42,
+          "bytes": 71604,
+          "wall_seconds": 0.0018050840153591707,
+          "thread_cpu_seconds": 0.001798297999999754
+        }
+      },
+      "json_bytes_note": "Exact JSON codec input/output byte lengths, excluding scalar columns, PostgreSQL protocol overhead, compression and physical disk I/O.",
+      "replay_event_counts": [],
+      "replayed_events_total": 0,
+      "inclusive_stages": {
+        "Kernel.revision": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.0031927849995554425,
+          "thread_cpu_seconds": 0.002835365000000145,
+          "max_wall_seconds": 0.0031927849995554425
+        },
+        "WorldQueryService._sample": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.01064317599957576,
+          "thread_cpu_seconds": 0.008630021000000099,
+          "max_wall_seconds": 0.01064317599957576
+        },
+        "WorldQueryService._execute": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.0016449410031782463,
+          "thread_cpu_seconds": 0.0016477839999999855,
+          "max_wall_seconds": 0.0016449410031782463
+        },
+        "WorldQueryService._delivery_check": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.006150373999844305,
+          "thread_cpu_seconds": 0.004528237000000157,
+          "max_wall_seconds": 0.006150373999844305
+        },
+        "WorldQueryService.query": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.021172812001168495,
+          "thread_cpu_seconds": 0.017534939000000138,
+          "max_wall_seconds": 0.021172812001168495
+        }
+      },
+      "unit_of_work_scopes": [
+        {
+          "write": false,
+          "repeatable_read": true,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.01063031699959538,
+          "thread_cpu_seconds": 0.00861590000000012
+        },
+        {
+          "write": false,
+          "repeatable_read": false,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.006135690997325582,
+          "thread_cpu_seconds": 0.004512944000000019
+        }
+      ],
+      "timing_note": "Nested stage, codec, SQL and UOW timers overlap. UOW includes connection acquisition, application work and final commit/rollback wait; it is not lock time.",
+      "repeat": 0,
+      "result_cache_expected": "cold",
+      "stable_result_sha256": "99b0a6aaea471cdbdba317336c46177407cfa724bc92a840fe7f2b59960288c7",
+      "response_bytes": 2104,
+      "result_cache_hits": 0,
+      "result_cache_misses": 1
+    },
+    {
+      "operation": "state_query",
+      "suite": "population",
+      "selected_events_before": 4,
+      "cprofile_enabled": false,
+      "wall_seconds": 0.01767956299954676,
+      "process_cpu_seconds": 0.014118990999999914,
+      "rss_before_kib": 79912,
+      "rss_after_kib": 79916,
+      "process_lifetime_max_rss_kib": 79672,
+      "error": null,
+      "sql": {
+        "statements": 20,
+        "statement_kinds": {
+          "SELECT": 20
+        },
+        "referenced_tables": {
+          "nf_tasks": 2,
+          "nf_works": 6,
+          "nf_grants": 4,
+          "nf_task_inputs": 2,
+          "nf_revisions": 1,
+          "nf_branches": 1,
+          "nf_index_watermarks": 1
+        },
+        "cursor_seconds": 0.004649814007279929,
+        "max_cursor_seconds": 0.000494888998218812,
+        "failed_statements": 0,
+        "selected_rows_reported_by_cursor": 19,
+        "parameters_retained": false,
+        "excludes_result_decoding_and_pool_pre_ping": true
+      },
+      "database_json_codec": {
+        "decode": {
+          "calls": 42,
+          "bytes": 71604,
+          "wall_seconds": 0.0008176559967978392,
+          "thread_cpu_seconds": 0.0008112850000008276
+        }
+      },
+      "json_bytes_note": "Exact JSON codec input/output byte lengths, excluding scalar columns, PostgreSQL protocol overhead, compression and physical disk I/O.",
+      "replay_event_counts": [],
+      "replayed_events_total": 0,
+      "inclusive_stages": {
+        "Kernel.revision": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.0022342030024447013,
+          "thread_cpu_seconds": 0.0018559129999999868,
+          "max_wall_seconds": 0.0022342030024447013
+        },
+        "WorldQueryService._sample": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.009707370001706295,
+          "thread_cpu_seconds": 0.007325435000000047,
+          "max_wall_seconds": 0.009707370001706295
+        },
+        "WorldQueryService._delivery_check": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.005218332997174002,
+          "thread_cpu_seconds": 0.004042916000000174,
+          "max_wall_seconds": 0.005218332997174002
+        },
+        "WorldQueryService.query": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.017673943999398034,
+          "thread_cpu_seconds": 0.014114704000000033,
+          "max_wall_seconds": 0.017673943999398034
+        }
+      },
+      "unit_of_work_scopes": [
+        {
+          "write": false,
+          "repeatable_read": true,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.0096947710007953,
+          "thread_cpu_seconds": 0.007311743999999898
+        },
+        {
+          "write": false,
+          "repeatable_read": false,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.005203078999329591,
+          "thread_cpu_seconds": 0.004027312999999921
+        }
+      ],
+      "timing_note": "Nested stage, codec, SQL and UOW timers overlap. UOW includes connection acquisition, application work and final commit/rollback wait; it is not lock time.",
+      "repeat": 1,
+      "result_cache_expected": "warm",
+      "stable_result_sha256": "99b0a6aaea471cdbdba317336c46177407cfa724bc92a840fe7f2b59960288c7",
+      "response_bytes": 2104,
+      "result_cache_hits": 1,
+      "result_cache_misses": 1
+    },
+    {
+      "operation": "context_compile",
+      "suite": "population",
+      "selected_events_before": 4,
+      "cprofile_enabled": false,
+      "wall_seconds": 0.03815030099940486,
+      "process_cpu_seconds": 0.029922066999999997,
+      "rss_before_kib": 79936,
+      "rss_after_kib": 80004,
+      "process_lifetime_max_rss_kib": 79800,
+      "error": null,
+      "sql": {
+        "statements": 47,
+        "statement_kinds": {
+          "SELECT": 36,
+          "INSERT": 10,
+          "UPDATE": 1
+        },
+        "referenced_tables": {
+          "nf_tasks": 6,
+          "nf_works": 7,
+          "nf_grants": 4,
+          "nf_task_inputs": 5,
+          "nf_receipts": 3,
+          "nf_revisions": 1,
+          "nf_branches": 1,
+          "nf_artifacts": 3,
+          "nf_index_watermarks": 1,
+          "nf_objects": 2,
+          "nf_object_refs": 2,
+          "nf_contexts": 2,
+          "nf_dependencies": 1,
+          "nf_outbox": 1
+        },
+        "cursor_seconds": 0.012152226001489908,
+        "max_cursor_seconds": 0.0005639739974867553,
+        "failed_statements": 0,
+        "selected_rows_reported_by_cursor": 34,
+        "parameters_retained": false,
+        "excludes_result_decoding_and_pool_pre_ping": true
+      },
+      "database_json_codec": {
+        "decode": {
+          "calls": 53,
+          "bytes": 79398,
+          "wall_seconds": 0.0009921110104187392,
+          "thread_cpu_seconds": 0.0009825599999995216
+        },
+        "encode": {
+          "calls": 8,
+          "bytes": 10205,
+          "wall_seconds": 0.00010085499525303021,
+          "thread_cpu_seconds": 9.665200000008589e-05
+        }
+      },
+      "json_bytes_note": "Exact JSON codec input/output byte lengths, excluding scalar columns, PostgreSQL protocol overhead, compression and physical disk I/O.",
+      "replay_event_counts": [],
+      "replayed_events_total": 0,
+      "inclusive_stages": {
+        "Kernel.revision": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.002413505000731675,
+          "thread_cpu_seconds": 0.0020213879999999573,
+          "max_wall_seconds": 0.002413505000731675
+        },
+        "WorldQueryService._sample": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.010664618999726372,
+          "thread_cpu_seconds": 0.008480895999999793,
+          "max_wall_seconds": 0.010664618999726372
+        },
+        "WorldQueryService._execute": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.0012050850018567871,
+          "thread_cpu_seconds": 0.0012091029999998781,
+          "max_wall_seconds": 0.0012050850018567871
+        },
+        "WorldQueryService.context_compile": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.03814043699821923,
+          "thread_cpu_seconds": 0.02991599899999997,
+          "max_wall_seconds": 0.03814043699821923
+        }
+      },
+      "unit_of_work_scopes": [
+        {
+          "write": false,
+          "repeatable_read": false,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.005269859997497406,
+          "thread_cpu_seconds": 0.003880957000000018
+        },
+        {
+          "write": false,
+          "repeatable_read": true,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.010651870001311181,
+          "thread_cpu_seconds": 0.008465994999999893
+        },
+        {
+          "write": true,
+          "repeatable_read": false,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.01615008599765133,
+          "thread_cpu_seconds": 0.011497483000000086
+        }
+      ],
+      "timing_note": "Nested stage, codec, SQL and UOW timers overlap. UOW includes connection acquisition, application work and final commit/rollback wait; it is not lock time.",
+      "compiled_response_bytes": 3137,
+      "compiled_facts": 0
+    },
+    {
+      "operation": "propose",
+      "suite": "population",
+      "selected_events_before": 4,
+      "cprofile_enabled": false,
+      "wall_seconds": 0.04767964200073038,
+      "process_cpu_seconds": 0.03725201700000014,
+      "rss_before_kib": 80004,
+      "rss_after_kib": 80340,
+      "process_lifetime_max_rss_kib": 80184,
+      "error": null,
+      "sql": {
+        "statements": 56,
+        "statement_kinds": {
+          "SELECT": 33,
+          "INSERT": 23
+        },
+        "referenced_tables": {
+          "nf_tasks": 3,
+          "nf_works": 4,
+          "nf_grants": 3,
+          "nf_task_inputs": 3,
+          "nf_receipts": 3,
+          "nf_contexts": 4,
+          "nf_selections": 2,
+          "nf_revisions": 1,
+          "nf_branches": 2,
+          "nf_genesis": 1,
+          "nf_events": 1,
+          "nf_objects": 3,
+          "nf_artifacts": 5,
+          "nf_object_refs": 3,
+          "nf_proposals": 1,
+          "nf_approvals": 1,
+          "nf_dependencies": 11
+        },
+        "cursor_seconds": 0.015195887968729949,
+        "max_cursor_seconds": 0.0007705069983785506,
+        "failed_statements": 0,
+        "selected_rows_reported_by_cursor": 32,
+        "parameters_retained": false,
+        "excludes_result_decoding_and_pool_pre_ping": true
+      },
+      "database_json_codec": {
+        "decode": {
+          "calls": 56,
+          "bytes": 137998,
+          "wall_seconds": 0.0014091390003159177,
+          "thread_cpu_seconds": 0.0014000660000013099
+        },
+        "encode": {
+          "calls": 10,
+          "bytes": 12402,
+          "wall_seconds": 0.00011696599540300667,
+          "thread_cpu_seconds": 0.00011116700000024515
+        }
+      },
+      "json_bytes_note": "Exact JSON codec input/output byte lengths, excluding scalar columns, PostgreSQL protocol overhead, compression and physical disk I/O.",
+      "replay_event_counts": [
+        5
+      ],
+      "replayed_events_total": 5,
+      "inclusive_stages": {
+        "Kernel.revision": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.0025536169996485114,
+          "thread_cpu_seconds": 0.0020481779999999006,
+          "max_wall_seconds": 0.0025536169996485114
+        },
+        "world.replay": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.006083361997298198,
+          "thread_cpu_seconds": 0.006086767000000215,
+          "max_wall_seconds": 0.006083361997298198
+        },
+        "Kernel._event_sources": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.0016461230006825645,
+          "thread_cpu_seconds": 0.0013422810000001117,
+          "max_wall_seconds": 0.0016461230006825645
+        },
+        "Kernel.propose": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.047669576000771485,
+          "thread_cpu_seconds": 0.037245567999999896,
+          "max_wall_seconds": 0.047669576000771485
+        }
+      },
+      "unit_of_work_scopes": [
+        {
+          "write": false,
+          "repeatable_read": true,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.012675925001531141,
+          "thread_cpu_seconds": 0.009219623999999982
+        },
+        {
+          "write": false,
+          "repeatable_read": true,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.0033340890004183166,
+          "thread_cpu_seconds": 0.0026765300000000103
+        },
+        {
+          "write": true,
+          "repeatable_read": false,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.022053346001484897,
+          "thread_cpu_seconds": 0.015701074999999953
+        }
+      ],
+      "timing_note": "Nested stage, codec, SQL and UOW timers overlap. UOW includes connection acquisition, application work and final commit/rollback wait; it is not lock time."
+    },
+    {
+      "operation": "prepare",
+      "suite": "population",
+      "selected_events_before": 4,
+      "cprofile_enabled": false,
+      "wall_seconds": 0.031195008999929996,
+      "process_cpu_seconds": 0.024269191000000134,
+      "rss_before_kib": 80340,
+      "rss_after_kib": 80360,
+      "process_lifetime_max_rss_kib": 80184,
+      "error": null,
+      "sql": {
+        "statements": 35,
+        "statement_kinds": {
+          "SELECT": 26,
+          "WITH": 1,
+          "INSERT": 8
+        },
+        "referenced_tables": {
+          "nf_works": 4,
+          "nf_grants": 3,
+          "nf_receipts": 3,
+          "nf_artifacts": 3,
+          "nf_proposals": 1,
+          "nf_approvals": 1,
+          "nf_tasks": 1,
+          "nf_task_inputs": 1,
+          "nf_contexts": 2,
+          "nf_selections": 1,
+          "nf_branches": 3,
+          "nf_revisions": 2,
+          "nf_scopes": 1,
+          "nf_objects": 2,
+          "nf_object_refs": 2,
+          "nf_certificates": 1
+        },
+        "cursor_seconds": 0.010222839999187272,
+        "max_cursor_seconds": 0.0007507469999836758,
+        "failed_statements": 0,
+        "selected_rows_reported_by_cursor": 103,
+        "parameters_retained": false,
+        "excludes_result_decoding_and_pool_pre_ping": true
+      },
+      "database_json_codec": {
+        "decode": {
+          "calls": 46,
+          "bytes": 86623,
+          "wall_seconds": 0.0009920230077113956,
+          "thread_cpu_seconds": 0.0009860550000002632
+        },
+        "encode": {
+          "calls": 6,
+          "bytes": 25732,
+          "wall_seconds": 0.00013034799485467374,
+          "thread_cpu_seconds": 0.00012701899999978394
+        }
+      },
+      "json_bytes_note": "Exact JSON codec input/output byte lengths, excluding scalar columns, PostgreSQL protocol overhead, compression and physical disk I/O.",
+      "replay_event_counts": [],
+      "replayed_events_total": 0,
+      "inclusive_stages": {
+        "Kernel.revision": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.0025670380018709693,
+          "thread_cpu_seconds": 0.0020310020000000595,
+          "max_wall_seconds": 0.0025670380018709693
+        },
+        "Kernel._tokens": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.0009364379984617699,
+          "thread_cpu_seconds": 0.0007182850000000407,
+          "max_wall_seconds": 0.0009364379984617699
+        },
+        "Kernel.prepare": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.031184913001197856,
+          "thread_cpu_seconds": 0.0238719220000001,
+          "max_wall_seconds": 0.031184913001197856
+        }
+      },
+      "unit_of_work_scopes": [
+        {
+          "write": false,
+          "repeatable_read": true,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.016695051999704447,
+          "thread_cpu_seconds": 0.012300242000000017
+        },
+        {
+          "write": true,
+          "repeatable_read": false,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.009469439999520546,
+          "thread_cpu_seconds": 0.006604496000000015
+        }
+      ],
+      "timing_note": "Nested stage, codec, SQL and UOW timers overlap. UOW includes connection acquisition, application work and final commit/rollback wait; it is not lock time."
+    },
+    {
+      "operation": "accept",
+      "suite": "population",
+      "selected_events_before": 4,
+      "cprofile_enabled": false,
+      "wall_seconds": 0.05186633199991775,
+      "process_cpu_seconds": 0.03974028500000015,
+      "rss_before_kib": 80360,
+      "rss_after_kib": 80572,
+      "process_lifetime_max_rss_kib": 80312,
+      "error": null,
+      "sql": {
+        "statements": 61,
+        "statement_kinds": {
+          "SELECT": 40,
+          "WITH": 2,
+          "INSERT": 17,
+          "UPDATE": 2
+        },
+        "referenced_tables": {
+          "nf_works": 4,
+          "nf_grants": 3,
+          "nf_receipts": 4,
+          "nf_artifacts": 4,
+          "nf_proposals": 1,
+          "nf_approvals": 1,
+          "nf_branches": 3,
+          "nf_tasks": 3,
+          "nf_task_inputs": 2,
+          "nf_contexts": 3,
+          "nf_selections": 1,
+          "nf_certificates": 1,
+          "nf_revisions": 4,
+          "nf_scopes": 7,
+          "nf_events": 3,
+          "nf_genesis": 1,
+          "nf_revision_events": 1,
+          "nf_commits": 1,
+          "nf_invalidations": 5,
+          "nf_outbox": 2
+        },
+        "cursor_seconds": 0.018088274006004212,
+        "max_cursor_seconds": 0.0016739649981900584,
+        "failed_statements": 0,
+        "selected_rows_reported_by_cursor": 201,
+        "parameters_retained": false,
+        "excludes_result_decoding_and_pool_pre_ping": true
+      },
+      "database_json_codec": {
+        "decode": {
+          "calls": 62,
+          "bytes": 166809,
+          "wall_seconds": 0.0015286600137187634,
+          "thread_cpu_seconds": 0.0015175909999998183
+        },
+        "encode": {
+          "calls": 12,
+          "bytes": 71508,
+          "wall_seconds": 0.000345631007803604,
+          "thread_cpu_seconds": 0.00034087700000040577
+        }
+      },
+      "json_bytes_note": "Exact JSON codec input/output byte lengths, excluding scalar columns, PostgreSQL protocol overhead, compression and physical disk I/O.",
+      "replay_event_counts": [
+        5
+      ],
+      "replayed_events_total": 5,
+      "inclusive_stages": {
+        "Kernel._tokens": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.0009014050010591745,
+          "thread_cpu_seconds": 0.000695832999999979,
+          "max_wall_seconds": 0.0009014050010591745
+        },
+        "Kernel._verify_tokens": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.0009172789978038054,
+          "thread_cpu_seconds": 0.000709081999999972,
+          "max_wall_seconds": 0.0009172789978038054
+        },
+        "Kernel.revision": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.0023668840003665537,
+          "thread_cpu_seconds": 0.001960527000000045,
+          "max_wall_seconds": 0.0023668840003665537
+        },
+        "Kernel._event_sources": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.001320059000136098,
+          "thread_cpu_seconds": 0.0010603229999999186,
+          "max_wall_seconds": 0.001320059000136098
+        },
+        "world.replay": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.006168650001200149,
+          "thread_cpu_seconds": 0.006149429000000151,
+          "max_wall_seconds": 0.006168650001200149
+        },
+        "Kernel._accept_transaction": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.04393084500043187,
+          "thread_cpu_seconds": 0.03335433500000007,
+          "max_wall_seconds": 0.04393084500043187
+        },
+        "Kernel.accept": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.0518600930008688,
+          "thread_cpu_seconds": 0.039735308000000025,
+          "max_wall_seconds": 0.0518600930008688
+        }
+      },
+      "unit_of_work_scopes": [
+        {
+          "write": false,
+          "repeatable_read": false,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.004688991000875831,
+          "thread_cpu_seconds": 0.00349727699999991
+        },
+        {
+          "write": false,
+          "repeatable_read": false,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.002379223002208164,
+          "thread_cpu_seconds": 0.002036248999999879
+        },
+        {
+          "write": true,
+          "repeatable_read": false,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.043662317999405786,
+          "thread_cpu_seconds": 0.033082403000000093
+        }
+      ],
+      "timing_note": "Nested stage, codec, SQL and UOW timers overlap. UOW includes connection acquisition, application work and final commit/rollback wait; it is not lock time.",
+      "receipt_sha256": "4b89568ce85028c28f0da181a05e045d43ae8762513c6f738a304b0313338ac5",
+      "concurrency_mode": "DEPENDENCY_GUARDED",
+      "new_world_commits": 1
+    },
+    {
+      "operation": "accept_receipt_retry",
+      "suite": "population",
+      "selected_events_before": 4,
+      "cprofile_enabled": false,
+      "wall_seconds": 0.00418008899941924,
+      "process_cpu_seconds": 0.0033748129999999765,
+      "rss_before_kib": 80572,
+      "rss_after_kib": 80572,
+      "process_lifetime_max_rss_kib": 80312,
+      "error": null,
+      "sql": {
+        "statements": 3,
+        "statement_kinds": {
+          "SELECT": 3
+        },
+        "referenced_tables": {
+          "nf_works": 1,
+          "nf_grants": 1,
+          "nf_receipts": 1
+        },
+        "cursor_seconds": 0.0007225539957289584,
+        "max_cursor_seconds": 0.0002855319980881177,
+        "failed_statements": 0,
+        "selected_rows_reported_by_cursor": 3,
+        "parameters_retained": false,
+        "excludes_result_decoding_and_pool_pre_ping": true
+      },
+      "database_json_codec": {
+        "decode": {
+          "calls": 8,
+          "bytes": 2398,
+          "wall_seconds": 4.393600102048367e-05,
+          "thread_cpu_seconds": 4.2543000000172526e-05
+        }
+      },
+      "json_bytes_note": "Exact JSON codec input/output byte lengths, excluding scalar columns, PostgreSQL protocol overhead, compression and physical disk I/O.",
+      "replay_event_counts": [],
+      "replayed_events_total": 0,
+      "inclusive_stages": {
+        "Kernel.accept": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.0041735599988896865,
+          "thread_cpu_seconds": 0.0033703870000001412,
+          "max_wall_seconds": 0.0041735599988896865
+        }
+      },
+      "unit_of_work_scopes": [
+        {
+          "write": false,
+          "repeatable_read": false,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.0037806250002176967,
+          "thread_cpu_seconds": 0.0029753899999998
+        }
+      ],
+      "timing_note": "Nested stage, codec, SQL and UOW timers overlap. UOW includes connection acquisition, application work and final commit/rollback wait; it is not lock time.",
+      "new_world_commits": 0,
+      "receipt_sha256": "4b89568ce85028c28f0da181a05e045d43ae8762513c6f738a304b0313338ac5"
+    },
+    {
+      "operation": "state_query",
+      "suite": "history",
+      "selected_events_before": 1,
+      "cprofile_enabled": false,
+      "wall_seconds": 0.01755964999756543,
+      "process_cpu_seconds": 0.014579174999999722,
+      "rss_before_kib": 80756,
+      "rss_after_kib": 80816,
+      "process_lifetime_max_rss_kib": 80568,
+      "error": null,
+      "sql": {
+        "statements": 20,
+        "statement_kinds": {
+          "SELECT": 20
+        },
+        "referenced_tables": {
+          "nf_tasks": 2,
+          "nf_works": 6,
+          "nf_grants": 4,
+          "nf_task_inputs": 2,
+          "nf_revisions": 1,
+          "nf_branches": 1,
+          "nf_index_watermarks": 1
+        },
+        "cursor_seconds": 0.004078143010701751,
+        "max_cursor_seconds": 0.0003867760024149902,
+        "failed_statements": 0,
+        "selected_rows_reported_by_cursor": 19,
+        "parameters_retained": false,
+        "excludes_result_decoding_and_pool_pre_ping": true
+      },
+      "database_json_codec": {
+        "decode": {
+          "calls": 42,
+          "bytes": 36463,
+          "wall_seconds": 0.00043173299127374776,
+          "thread_cpu_seconds": 0.000425186999999827
+        }
+      },
+      "json_bytes_note": "Exact JSON codec input/output byte lengths, excluding scalar columns, PostgreSQL protocol overhead, compression and physical disk I/O.",
+      "replay_event_counts": [],
+      "replayed_events_total": 0,
+      "inclusive_stages": {
+        "Kernel.revision": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.0013929899978393223,
+          "thread_cpu_seconds": 0.0011159860000002908,
+          "max_wall_seconds": 0.0013929899978393223
+        },
+        "WorldQueryService._sample": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.008984896001493325,
+          "thread_cpu_seconds": 0.007123738999999851,
+          "max_wall_seconds": 0.008984896001493325
+        },
+        "WorldQueryService._execute": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.0007650490006199107,
+          "thread_cpu_seconds": 0.0007672180000000139,
+          "max_wall_seconds": 0.0007650490006199107
+        },
+        "WorldQueryService._delivery_check": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.005463712997880066,
+          "thread_cpu_seconds": 0.004347726999999857,
+          "max_wall_seconds": 0.005463712997880066
+        },
+        "WorldQueryService.query": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.01755349100130843,
+          "thread_cpu_seconds": 0.014574848000000085,
+          "max_wall_seconds": 0.01755349100130843
+        }
+      },
+      "unit_of_work_scopes": [
+        {
+          "write": false,
+          "repeatable_read": true,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.008971885999926599,
+          "thread_cpu_seconds": 0.007110088000000125
+        },
+        {
+          "write": false,
+          "repeatable_read": false,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.0054505329972016625,
+          "thread_cpu_seconds": 0.004334327000000027
+        }
+      ],
+      "timing_note": "Nested stage, codec, SQL and UOW timers overlap. UOW includes connection acquisition, application work and final commit/rollback wait; it is not lock time.",
+      "repeat": 0,
+      "result_cache_expected": "cold",
+      "stable_result_sha256": "aaf190187a9775703b9bf4132427f140136800cbbd343c64dc5043c7d2c99231",
+      "response_bytes": 1802,
+      "result_cache_hits": 0,
+      "result_cache_misses": 1
+    },
+    {
+      "operation": "state_query",
+      "suite": "history",
+      "selected_events_before": 1,
+      "cprofile_enabled": false,
+      "wall_seconds": 0.01801757499924861,
+      "process_cpu_seconds": 0.015349232999999796,
+      "rss_before_kib": 80816,
+      "rss_after_kib": 80848,
+      "process_lifetime_max_rss_kib": 80568,
+      "error": null,
+      "sql": {
+        "statements": 20,
+        "statement_kinds": {
+          "SELECT": 20
+        },
+        "referenced_tables": {
+          "nf_tasks": 2,
+          "nf_works": 6,
+          "nf_grants": 4,
+          "nf_task_inputs": 2,
+          "nf_revisions": 1,
+          "nf_branches": 1,
+          "nf_index_watermarks": 1
+        },
+        "cursor_seconds": 0.003595475991460262,
+        "max_cursor_seconds": 0.00038351100010913797,
+        "failed_statements": 0,
+        "selected_rows_reported_by_cursor": 19,
+        "parameters_retained": false,
+        "excludes_result_decoding_and_pool_pre_ping": true
+      },
+      "database_json_codec": {
+        "decode": {
+          "calls": 42,
+          "bytes": 36463,
+          "wall_seconds": 0.00040314200668944977,
+          "thread_cpu_seconds": 0.00039562599999998227
+        }
+      },
+      "json_bytes_note": "Exact JSON codec input/output byte lengths, excluding scalar columns, PostgreSQL protocol overhead, compression and physical disk I/O.",
+      "replay_event_counts": [],
+      "replayed_events_total": 0,
+      "inclusive_stages": {
+        "Kernel.revision": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.0013584170010290109,
+          "thread_cpu_seconds": 0.0010865020000001557,
+          "max_wall_seconds": 0.0013584170010290109
+        },
+        "WorldQueryService._sample": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.009828402999119135,
+          "thread_cpu_seconds": 0.008187600999999933,
+          "max_wall_seconds": 0.009828402999119135
+        },
+        "WorldQueryService._delivery_check": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.005377162997319829,
+          "thread_cpu_seconds": 0.004361539000000025,
+          "max_wall_seconds": 0.005377162997319829
+        },
+        "WorldQueryService.query": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.01801294699907885,
+          "thread_cpu_seconds": 0.015345497999999846,
+          "max_wall_seconds": 0.01801294699907885
+        }
+      },
+      "unit_of_work_scopes": [
+        {
+          "write": false,
+          "repeatable_read": true,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.00981551400036551,
+          "thread_cpu_seconds": 0.008174562000000218
+        },
+        {
+          "write": false,
+          "repeatable_read": false,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.005363582000427414,
+          "thread_cpu_seconds": 0.004347088999999915
+        }
+      ],
+      "timing_note": "Nested stage, codec, SQL and UOW timers overlap. UOW includes connection acquisition, application work and final commit/rollback wait; it is not lock time.",
+      "repeat": 1,
+      "result_cache_expected": "warm",
+      "stable_result_sha256": "aaf190187a9775703b9bf4132427f140136800cbbd343c64dc5043c7d2c99231",
+      "response_bytes": 1802,
+      "result_cache_hits": 1,
+      "result_cache_misses": 1
+    },
+    {
+      "operation": "context_compile",
+      "suite": "history",
+      "selected_events_before": 1,
+      "cprofile_enabled": false,
+      "wall_seconds": 0.03666665899800137,
+      "process_cpu_seconds": 0.029079003000000103,
+      "rss_before_kib": 80908,
+      "rss_after_kib": 80992,
+      "process_lifetime_max_rss_kib": 80824,
+      "error": null,
+      "sql": {
+        "statements": 47,
+        "statement_kinds": {
+          "SELECT": 36,
+          "INSERT": 10,
+          "UPDATE": 1
+        },
+        "referenced_tables": {
+          "nf_tasks": 6,
+          "nf_works": 7,
+          "nf_grants": 4,
+          "nf_task_inputs": 5,
+          "nf_receipts": 3,
+          "nf_revisions": 1,
+          "nf_branches": 1,
+          "nf_artifacts": 3,
+          "nf_index_watermarks": 1,
+          "nf_objects": 2,
+          "nf_object_refs": 2,
+          "nf_contexts": 2,
+          "nf_dependencies": 1,
+          "nf_outbox": 1
+        },
+        "cursor_seconds": 0.01061136801581597,
+        "max_cursor_seconds": 0.0005907239974476397,
+        "failed_statements": 0,
+        "selected_rows_reported_by_cursor": 34,
+        "parameters_retained": false,
+        "excludes_result_decoding_and_pool_pre_ping": true
+      },
+      "database_json_codec": {
+        "decode": {
+          "calls": 53,
+          "bytes": 43256,
+          "wall_seconds": 0.0006294840168266091,
+          "thread_cpu_seconds": 0.0006191859999984395
+        },
+        "encode": {
+          "calls": 8,
+          "bytes": 9698,
+          "wall_seconds": 0.00010222500350209884,
+          "thread_cpu_seconds": 9.753600000106388e-05
+        }
+      },
+      "json_bytes_note": "Exact JSON codec input/output byte lengths, excluding scalar columns, PostgreSQL protocol overhead, compression and physical disk I/O.",
+      "replay_event_counts": [],
+      "replayed_events_total": 0,
+      "inclusive_stages": {
+        "Kernel.revision": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.002015541998844128,
+          "thread_cpu_seconds": 0.0015772080000000521,
+          "max_wall_seconds": 0.002015541998844128
+        },
+        "WorldQueryService._sample": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.01105691399789066,
+          "thread_cpu_seconds": 0.008878617000000144,
+          "max_wall_seconds": 0.01105691399789066
+        },
+        "WorldQueryService._execute": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.0005999390014039818,
+          "thread_cpu_seconds": 0.0006021129999997932,
+          "max_wall_seconds": 0.0005999390014039818
+        },
+        "WorldQueryService.context_compile": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.03665838700180757,
+          "thread_cpu_seconds": 0.029074125000000173,
+          "max_wall_seconds": 0.03665838700180757
+        }
+      },
+      "unit_of_work_scopes": [
+        {
+          "write": false,
+          "repeatable_read": false,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.005750893000367796,
+          "thread_cpu_seconds": 0.004359805999999633
+        },
+        {
+          "write": false,
+          "repeatable_read": true,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.011018514996976592,
+          "thread_cpu_seconds": 0.008860250000000125
+        },
+        {
+          "write": true,
+          "repeatable_read": false,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.014988647999416571,
+          "thread_cpu_seconds": 0.01097460299999975
+        }
+      ],
+      "timing_note": "Nested stage, codec, SQL and UOW timers overlap. UOW includes connection acquisition, application work and final commit/rollback wait; it is not lock time.",
+      "compiled_response_bytes": 3137,
+      "compiled_facts": 0
+    },
+    {
+      "operation": "propose",
+      "suite": "history",
+      "selected_events_before": 1,
+      "cprofile_enabled": false,
+      "wall_seconds": 0.042546794000372756,
+      "process_cpu_seconds": 0.034891782000000315,
+      "rss_before_kib": 81004,
+      "rss_after_kib": 81212,
+      "process_lifetime_max_rss_kib": 80952,
+      "error": null,
+      "sql": {
+        "statements": 52,
+        "statement_kinds": {
+          "SELECT": 33,
+          "INSERT": 19
+        },
+        "referenced_tables": {
+          "nf_tasks": 3,
+          "nf_works": 4,
+          "nf_grants": 3,
+          "nf_task_inputs": 3,
+          "nf_receipts": 3,
+          "nf_contexts": 4,
+          "nf_selections": 2,
+          "nf_revisions": 1,
+          "nf_branches": 2,
+          "nf_genesis": 1,
+          "nf_events": 1,
+          "nf_objects": 3,
+          "nf_artifacts": 5,
+          "nf_object_refs": 3,
+          "nf_proposals": 1,
+          "nf_approvals": 1,
+          "nf_dependencies": 7
+        },
+        "cursor_seconds": 0.010893732986005489,
+        "max_cursor_seconds": 0.0004901020001852885,
+        "failed_statements": 0,
+        "selected_rows_reported_by_cursor": 29,
+        "parameters_retained": false,
+        "excludes_result_decoding_and_pool_pre_ping": true
+      },
+      "database_json_codec": {
+        "decode": {
+          "calls": 53,
+          "bytes": 70646,
+          "wall_seconds": 0.0008890849821909796,
+          "thread_cpu_seconds": 0.0008809800000011414
+        },
+        "encode": {
+          "calls": 10,
+          "bytes": 12105,
+          "wall_seconds": 0.00011859999722219072,
+          "thread_cpu_seconds": 0.00011342700000049888
+        }
+      },
+      "json_bytes_note": "Exact JSON codec input/output byte lengths, excluding scalar columns, PostgreSQL protocol overhead, compression and physical disk I/O.",
+      "replay_event_counts": [
+        2
+      ],
+      "replayed_events_total": 2,
+      "inclusive_stages": {
+        "Kernel.revision": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.0016234929971687961,
+          "thread_cpu_seconds": 0.0012896090000000804,
+          "max_wall_seconds": 0.0016234929971687961
+        },
+        "world.replay": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.004938378002407262,
+          "thread_cpu_seconds": 0.004941018000000241,
+          "max_wall_seconds": 0.004938378002407262
+        },
+        "Kernel._event_sources": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.0011870880007336382,
+          "thread_cpu_seconds": 0.0009665429999996533,
+          "max_wall_seconds": 0.0011870880007336382
+        },
+        "Kernel.propose": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.04253826099738944,
+          "thread_cpu_seconds": 0.03488587399999998,
+          "max_wall_seconds": 0.04253826099738944
+        }
+      },
+      "unit_of_work_scopes": [
+        {
+          "write": false,
+          "repeatable_read": true,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.011250120998738566,
+          "thread_cpu_seconds": 0.008577899000000055
+        },
+        {
+          "write": false,
+          "repeatable_read": true,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.0032826820024638437,
+          "thread_cpu_seconds": 0.0026550370000002488
+        },
+        {
+          "write": true,
+          "repeatable_read": false,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.018035942001006333,
+          "thread_cpu_seconds": 0.0136806070000004
+        }
+      ],
+      "timing_note": "Nested stage, codec, SQL and UOW timers overlap. UOW includes connection acquisition, application work and final commit/rollback wait; it is not lock time."
+    },
+    {
+      "operation": "prepare",
+      "suite": "history",
+      "selected_events_before": 1,
+      "cprofile_enabled": false,
+      "wall_seconds": 0.026960576000419678,
+      "process_cpu_seconds": 0.021639420999999714,
+      "rss_before_kib": 81244,
+      "rss_after_kib": 81260,
+      "process_lifetime_max_rss_kib": 81080,
+      "error": null,
+      "sql": {
+        "statements": 35,
+        "statement_kinds": {
+          "SELECT": 26,
+          "WITH": 1,
+          "INSERT": 8
+        },
+        "referenced_tables": {
+          "nf_works": 4,
+          "nf_grants": 3,
+          "nf_receipts": 3,
+          "nf_artifacts": 3,
+          "nf_proposals": 1,
+          "nf_approvals": 1,
+          "nf_tasks": 1,
+          "nf_task_inputs": 1,
+          "nf_contexts": 2,
+          "nf_selections": 1,
+          "nf_branches": 3,
+          "nf_revisions": 2,
+          "nf_scopes": 1,
+          "nf_objects": 2,
+          "nf_object_refs": 2,
+          "nf_certificates": 1
+        },
+        "cursor_seconds": 0.00768300699928659,
+        "max_cursor_seconds": 0.00047151399849099107,
+        "failed_statements": 0,
+        "selected_rows_reported_by_cursor": 69,
+        "parameters_retained": false,
+        "excludes_result_decoding_and_pool_pre_ping": true
+      },
+      "database_json_codec": {
+        "decode": {
+          "calls": 46,
+          "bytes": 49453,
+          "wall_seconds": 0.0004744469842989929,
+          "thread_cpu_seconds": 0.0004676159999994489
+        },
+        "encode": {
+          "calls": 6,
+          "bytes": 19053,
+          "wall_seconds": 0.00010713399751693942,
+          "thread_cpu_seconds": 0.00010425500000055266
+        }
+      },
+      "json_bytes_note": "Exact JSON codec input/output byte lengths, excluding scalar columns, PostgreSQL protocol overhead, compression and physical disk I/O.",
+      "replay_event_counts": [],
+      "replayed_events_total": 0,
+      "inclusive_stages": {
+        "Kernel.revision": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.0014155440003378317,
+          "thread_cpu_seconds": 0.0011529000000001233,
+          "max_wall_seconds": 0.0014155440003378317
+        },
+        "Kernel._tokens": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.0006676009979855735,
+          "thread_cpu_seconds": 0.00048349699999983287,
+          "max_wall_seconds": 0.0006676009979855735
+        },
+        "Kernel.prepare": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.026934546996926656,
+          "thread_cpu_seconds": 0.021615826000000116,
+          "max_wall_seconds": 0.026934546996926656
+        }
+      },
+      "unit_of_work_scopes": [
+        {
+          "write": false,
+          "repeatable_read": true,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.013476848002028419,
+          "thread_cpu_seconds": 0.010464999999999947
+        },
+        {
+          "write": true,
+          "repeatable_read": false,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.009356349000881892,
+          "thread_cpu_seconds": 0.007047361000000141
+        }
+      ],
+      "timing_note": "Nested stage, codec, SQL and UOW timers overlap. UOW includes connection acquisition, application work and final commit/rollback wait; it is not lock time."
+    },
+    {
+      "operation": "accept",
+      "suite": "history",
+      "selected_events_before": 1,
+      "cprofile_enabled": false,
+      "wall_seconds": 0.050904405001347186,
+      "process_cpu_seconds": 0.039918165000000005,
+      "rss_before_kib": 81264,
+      "rss_after_kib": 81488,
+      "process_lifetime_max_rss_kib": 81208,
+      "error": null,
+      "sql": {
+        "statements": 59,
+        "statement_kinds": {
+          "SELECT": 40,
+          "WITH": 2,
+          "INSERT": 15,
+          "UPDATE": 2
+        },
+        "referenced_tables": {
+          "nf_works": 4,
+          "nf_grants": 3,
+          "nf_receipts": 4,
+          "nf_artifacts": 4,
+          "nf_proposals": 1,
+          "nf_approvals": 1,
+          "nf_branches": 3,
+          "nf_tasks": 3,
+          "nf_task_inputs": 2,
+          "nf_contexts": 3,
+          "nf_selections": 1,
+          "nf_certificates": 1,
+          "nf_revisions": 4,
+          "nf_scopes": 6,
+          "nf_events": 3,
+          "nf_genesis": 1,
+          "nf_revision_events": 1,
+          "nf_commits": 1,
+          "nf_invalidations": 4,
+          "nf_outbox": 2
+        },
+        "cursor_seconds": 0.019362949020433007,
+        "max_cursor_seconds": 0.0032147579986485653,
+        "failed_statements": 0,
+        "selected_rows_reported_by_cursor": 130,
+        "parameters_retained": false,
+        "excludes_result_decoding_and_pool_pre_ping": true
+      },
+      "database_json_codec": {
+        "decode": {
+          "calls": 59,
+          "bytes": 93193,
+          "wall_seconds": 0.0010917320141743403,
+          "thread_cpu_seconds": 0.001235976999999444
+        },
+        "encode": {
+          "calls": 12,
+          "bytes": 36470,
+          "wall_seconds": 0.00020336000306997448,
+          "thread_cpu_seconds": 0.00019711100000030513
+        }
+      },
+      "json_bytes_note": "Exact JSON codec input/output byte lengths, excluding scalar columns, PostgreSQL protocol overhead, compression and physical disk I/O.",
+      "replay_event_counts": [
+        2
+      ],
+      "replayed_events_total": 2,
+      "inclusive_stages": {
+        "Kernel._tokens": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.0007103549978637602,
+          "thread_cpu_seconds": 0.0005423639999997398,
+          "max_wall_seconds": 0.0007103549978637602
+        },
+        "Kernel._verify_tokens": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.0007283129998540971,
+          "thread_cpu_seconds": 0.0005567360000000576,
+          "max_wall_seconds": 0.0007283129998540971
+        },
+        "Kernel.revision": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.0017022279971570242,
+          "thread_cpu_seconds": 0.0013853149999998315,
+          "max_wall_seconds": 0.0017022279971570242
+        },
+        "Kernel._event_sources": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.0013879720027034637,
+          "thread_cpu_seconds": 0.001111638000000248,
+          "max_wall_seconds": 0.0013879720027034637
+        },
+        "world.replay": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.004394704999867827,
+          "thread_cpu_seconds": 0.004397452000000079,
+          "max_wall_seconds": 0.004394704999867827
+        },
+        "Kernel._accept_transaction": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.042960045000654645,
+          "thread_cpu_seconds": 0.033236985000000274,
+          "max_wall_seconds": 0.042960045000654645
+        },
+        "Kernel.accept": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.050898326000606176,
+          "thread_cpu_seconds": 0.03991298700000012,
+          "max_wall_seconds": 0.050898326000606176
+        }
+      },
+      "unit_of_work_scopes": [
+        {
+          "write": false,
+          "repeatable_read": false,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.004672866998589598,
+          "thread_cpu_seconds": 0.003675803000000144
+        },
+        {
+          "write": false,
+          "repeatable_read": false,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.0024846319975040387,
+          "thread_cpu_seconds": 0.0022219149999997967
+        },
+        {
+          "write": true,
+          "repeatable_read": false,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.04280071399989538,
+          "thread_cpu_seconds": 0.03307503500000042
+        }
+      ],
+      "timing_note": "Nested stage, codec, SQL and UOW timers overlap. UOW includes connection acquisition, application work and final commit/rollback wait; it is not lock time.",
+      "receipt_sha256": "844c2f6b6fa05f442714204d45d78d3f40d49f51c1df4da0dfd70fd34bbb1c1c",
+      "concurrency_mode": "STRICT_HEAD",
+      "new_world_commits": 1
+    },
+    {
+      "operation": "accept_receipt_retry",
+      "suite": "history",
+      "selected_events_before": 1,
+      "cprofile_enabled": false,
+      "wall_seconds": 0.004869704000157071,
+      "process_cpu_seconds": 0.004037778999999908,
+      "rss_before_kib": 81584,
+      "rss_after_kib": 81584,
+      "process_lifetime_max_rss_kib": 81336,
+      "error": null,
+      "sql": {
+        "statements": 3,
+        "statement_kinds": {
+          "SELECT": 3
+        },
+        "referenced_tables": {
+          "nf_works": 1,
+          "nf_grants": 1,
+          "nf_receipts": 1
+        },
+        "cursor_seconds": 0.0008707180022611283,
+        "max_cursor_seconds": 0.0003725440001289826,
+        "failed_statements": 0,
+        "selected_rows_reported_by_cursor": 3,
+        "parameters_retained": false,
+        "excludes_result_decoding_and_pool_pre_ping": true
+      },
+      "database_json_codec": {
+        "decode": {
+          "calls": 8,
+          "bytes": 2398,
+          "wall_seconds": 4.291500590625219e-05,
+          "thread_cpu_seconds": 4.118199999947336e-05
+        }
+      },
+      "json_bytes_note": "Exact JSON codec input/output byte lengths, excluding scalar columns, PostgreSQL protocol overhead, compression and physical disk I/O.",
+      "replay_event_counts": [],
+      "replayed_events_total": 0,
+      "inclusive_stages": {
+        "Kernel.accept": {
+          "calls": 1,
+          "errors": 0,
+          "wall_seconds": 0.004861792000156129,
+          "thread_cpu_seconds": 0.004032189999999769,
+          "max_wall_seconds": 0.004861792000156129
+        }
+      },
+      "unit_of_work_scopes": [
+        {
+          "write": false,
+          "repeatable_read": false,
+          "failed": false,
+          "wall_seconds_including_acquire_and_commit": 0.004512544001045171,
+          "thread_cpu_seconds": 0.0036814910000000367
+        }
+      ],
+      "timing_note": "Nested stage, codec, SQL and UOW timers overlap. UOW includes connection acquisition, application work and final commit/rollback wait; it is not lock time.",
+      "new_world_commits": 0,
+      "receipt_sha256": "844c2f6b6fa05f442714204d45d78d3f40d49f51c1df4da0dfd70fd34bbb1c1c"
+    }
+  ],
+  "datasets": [
+    {
+      "suite": "population",
+      "world_ref": {
+        "work_id": "62780a78-4fa1-4345-a4b7-a7e83856f184",
+        "branch_id": "a394152e-c487-4f27-8169-34f17181c789",
+        "world_revision_id": "59679f3c-6fe1-4eb7-9028-1b1b99c94243"
+      },
+      "selected_events": 4,
+      "branch_seq": 4,
+      "state_hash": "46abbcec105916422f4d0c6f4b4913b7cfdd8ac233946827254338b5213027d5",
+      "manifest_hash": "223071f744446175b4490a96c5cad94f83011717c3acd22340e672e1e3068ad7",
+      "entities": 34,
+      "relations": 49,
+      "scope_versions": 80,
+      "snapshot_json_bytes": 57617,
+      "snapshot_stored_bytes": 12603,
+      "selection_json_bytes": 320,
+      "scope_json_bytes": 4471,
+      "all_revision_event_rows": 10,
+      "all_snapshot_stored_bytes": 60700
+    },
+    {
+      "suite": "history",
+      "world_ref": {
+        "work_id": "ae40099b-2f6f-4dde-a15d-2852cddae4bb",
+        "branch_id": "164d221d-c4dc-44da-9203-12d3c202fd1a",
+        "world_revision_id": "9a23e06d-531b-4af3-b361-6d154c9f467e"
+      },
+      "selected_events": 1,
+      "branch_seq": 1,
+      "state_hash": "660b042ab5699ec6685a37828cfb56f2baa6b0dd47e3cd6411f16ec2824345b8",
+      "manifest_hash": "b760f049da8644287b328823c182cdb793d59404111b598ab88f4bc4a2a98ee3",
+      "entities": 21,
+      "relations": 21,
+      "scope_versions": 46,
+      "snapshot_json_bytes": 25139,
+      "snapshot_stored_bytes": 5963,
+      "selection_json_bytes": 80,
+      "scope_json_bytes": 2477,
+      "all_revision_event_rows": 1,
+      "all_snapshot_stored_bytes": 11334
+    }
+  ],
+  "real_model_calls": 0,
+  "capacity_gate": "NOT_APPLICABLE",
+  "limitations": [
+    "No HTTP, admission-queue, client-dispatch or concurrent-lock throughput measured.",
+    "Shared host; stage timings include the same lightweight instrumentation in every sample.",
+    "cProfile samples are explicitly flagged and excluded from ordinary latency summaries.",
+    "Query cache cold means a fresh application result cache; PostgreSQL/OS buffers are warm.",
+    "One timed new acceptance per checkpoint is an observation, not a tail-latency estimate.",
+    "Historical events are generated by real official accepts; the 2000 selected-event cap is unchanged."
+  ],
+  "actual_loaded_modules": {
+    "novel_factory.application.kernel": {
+      "path": "/workspace/scratch/3dd241864a32/baseline/src/novel_factory/application/kernel.py",
+      "sha256": "5edd50ce4785808db3b45d57dba665d0f1922b410a7209bddb31abd3de81c584"
+    },
+    "novel_factory.application.queries": {
+      "path": "/workspace/scratch/3dd241864a32/baseline/src/novel_factory/application/queries.py",
+      "sha256": "4fde3a6742fea5491047dbf3b4599cf3b42fce577b385d96609cf19048e88428"
+    },
+    "novel_factory.domain.world": {
+      "path": "/workspace/scratch/3dd241864a32/baseline/src/novel_factory/domain/world.py",
+      "sha256": "666de00b7f3a9090f9093ce939f44b489b0abc5deb34beab2a1ddfbdfd096471"
+    },
+    "novel_factory.infrastructure.repository": {
+      "path": "/workspace/scratch/3dd241864a32/baseline/src/novel_factory/infrastructure/repository.py",
+      "sha256": "f3b1afd6191dde474fca47239ccd84eb071da26470ec9cd55f63ffbc2ae2e858"
+    }
+  },
+  "population_setup_seconds": 1.2235436809969542,
+  "history_suite_wall_seconds_including_setup": 0.5252987439998833,
+  "summary": [
+    {
+      "suite": "population",
+      "selected_events_before": 4,
+      "operation": "state_query",
+      "result_cache": "cold",
+      "samples": 1,
+      "latency": null,
+      "median_wall_seconds": 0.021180362997256452,
+      "median_process_cpu_seconds": 0.017540337999999878,
+      "sql_statements": [
+        20
+      ],
+      "decoded_json_bytes": [
+        71604
+      ],
+      "replayed_events": [
+        0
+      ]
+    },
+    {
+      "suite": "population",
+      "selected_events_before": 4,
+      "operation": "state_query",
+      "result_cache": "warm",
+      "samples": 1,
+      "latency": null,
+      "median_wall_seconds": 0.01767956299954676,
+      "median_process_cpu_seconds": 0.014118990999999914,
+      "sql_statements": [
+        20
+      ],
+      "decoded_json_bytes": [
+        71604
+      ],
+      "replayed_events": [
+        0
+      ]
+    },
+    {
+      "suite": "population",
+      "selected_events_before": 4,
+      "operation": "context_compile",
+      "result_cache": null,
+      "samples": 1,
+      "latency": null,
+      "median_wall_seconds": 0.03815030099940486,
+      "median_process_cpu_seconds": 0.029922066999999997,
+      "sql_statements": [
+        47
+      ],
+      "decoded_json_bytes": [
+        79398
+      ],
+      "replayed_events": [
+        0
+      ]
+    },
+    {
+      "suite": "population",
+      "selected_events_before": 4,
+      "operation": "propose",
+      "result_cache": null,
+      "samples": 1,
+      "latency": null,
+      "median_wall_seconds": 0.04767964200073038,
+      "median_process_cpu_seconds": 0.03725201700000014,
+      "sql_statements": [
+        56
+      ],
+      "decoded_json_bytes": [
+        137998
+      ],
+      "replayed_events": [
+        5
+      ]
+    },
+    {
+      "suite": "population",
+      "selected_events_before": 4,
+      "operation": "prepare",
+      "result_cache": null,
+      "samples": 1,
+      "latency": null,
+      "median_wall_seconds": 0.031195008999929996,
+      "median_process_cpu_seconds": 0.024269191000000134,
+      "sql_statements": [
+        35
+      ],
+      "decoded_json_bytes": [
+        86623
+      ],
+      "replayed_events": [
+        0
+      ]
+    },
+    {
+      "suite": "population",
+      "selected_events_before": 4,
+      "operation": "accept",
+      "result_cache": null,
+      "samples": 1,
+      "latency": null,
+      "median_wall_seconds": 0.05186633199991775,
+      "median_process_cpu_seconds": 0.03974028500000015,
+      "sql_statements": [
+        61
+      ],
+      "decoded_json_bytes": [
+        166809
+      ],
+      "replayed_events": [
+        5
+      ]
+    },
+    {
+      "suite": "population",
+      "selected_events_before": 4,
+      "operation": "accept_receipt_retry",
+      "result_cache": null,
+      "samples": 1,
+      "latency": null,
+      "median_wall_seconds": 0.00418008899941924,
+      "median_process_cpu_seconds": 0.0033748129999999765,
+      "sql_statements": [
+        3
+      ],
+      "decoded_json_bytes": [
+        2398
+      ],
+      "replayed_events": [
+        0
+      ]
+    },
+    {
+      "suite": "history",
+      "selected_events_before": 1,
+      "operation": "state_query",
+      "result_cache": "cold",
+      "samples": 1,
+      "latency": null,
+      "median_wall_seconds": 0.01755964999756543,
+      "median_process_cpu_seconds": 0.014579174999999722,
+      "sql_statements": [
+        20
+      ],
+      "decoded_json_bytes": [
+        36463
+      ],
+      "replayed_events": [
+        0
+      ]
+    },
+    {
+      "suite": "history",
+      "selected_events_before": 1,
+      "operation": "state_query",
+      "result_cache": "warm",
+      "samples": 1,
+      "latency": null,
+      "median_wall_seconds": 0.01801757499924861,
+      "median_process_cpu_seconds": 0.015349232999999796,
+      "sql_statements": [
+        20
+      ],
+      "decoded_json_bytes": [
+        36463
+      ],
+      "replayed_events": [
+        0
+      ]
+    },
+    {
+      "suite": "history",
+      "selected_events_before": 1,
+      "operation": "context_compile",
+      "result_cache": null,
+      "samples": 1,
+      "latency": null,
+      "median_wall_seconds": 0.03666665899800137,
+      "median_process_cpu_seconds": 0.029079003000000103,
+      "sql_statements": [
+        47
+      ],
+      "decoded_json_bytes": [
+        43256
+      ],
+      "replayed_events": [
+        0
+      ]
+    },
+    {
+      "suite": "history",
+      "selected_events_before": 1,
+      "operation": "propose",
+      "result_cache": null,
+      "samples": 1,
+      "latency": null,
+      "median_wall_seconds": 0.042546794000372756,
+      "median_process_cpu_seconds": 0.034891782000000315,
+      "sql_statements": [
+        52
+      ],
+      "decoded_json_bytes": [
+        70646
+      ],
+      "replayed_events": [
+        2
+      ]
+    },
+    {
+      "suite": "history",
+      "selected_events_before": 1,
+      "operation": "prepare",
+      "result_cache": null,
+      "samples": 1,
+      "latency": null,
+      "median_wall_seconds": 0.026960576000419678,
+      "median_process_cpu_seconds": 0.021639420999999714,
+      "sql_statements": [
+        35
+      ],
+      "decoded_json_bytes": [
+        49453
+      ],
+      "replayed_events": [
+        0
+      ]
+    },
+    {
+      "suite": "history",
+      "selected_events_before": 1,
+      "operation": "accept",
+      "result_cache": null,
+      "samples": 1,
+      "latency": null,
+      "median_wall_seconds": 0.050904405001347186,
+      "median_process_cpu_seconds": 0.039918165000000005,
+      "sql_statements": [
+        59
+      ],
+      "decoded_json_bytes": [
+        93193
+      ],
+      "replayed_events": [
+        2
+      ]
+    },
+    {
+      "suite": "history",
+      "selected_events_before": 1,
+      "operation": "accept_receipt_retry",
+      "result_cache": null,
+      "samples": 1,
+      "latency": null,
+      "median_wall_seconds": 0.004869704000157071,
+      "median_process_cpu_seconds": 0.004037778999999908,
+      "sql_statements": [
+        3
+      ],
+      "decoded_json_bytes": [
+        2398
+      ],
+      "replayed_events": [
+        0
+      ]
+    }
+  ],
+  "finished_at_utc": "2026-11-10T17:51:59.462743+00:00",
+  "database_observer": {
+    "sample_interval_seconds": 0.2,
+    "observer_connection_budget": 1,
+    "before": {
+      "database_bytes": 9139891,
+      "wal_lsn": "0/20A7818",
+      "stats": {
+        "xact_commit": 5,
+        "xact_rollback": 1,
+        "blks_read": 8,
+        "blks_hit": 28451,
+        "temp_files": 0,
+        "temp_bytes": 0,
+        "deadlocks": 0
+      }
+    },
+    "after": {
+      "database_bytes": 10802867,
+      "wal_lsn": "0/219B200",
+      "stats": {
+        "xact_commit": 406,
+        "xact_rollback": 18,
+        "blks_read": 50,
+        "blks_hit": 43583,
+        "temp_files": 0,
+        "temp_bytes": 0,
+        "deadlocks": 0
+      }
+    },
+    "wal_bytes": 997864,
+    "samples": [
+      {
+        "elapsed_seconds": 0.00203,
+        "connections": []
+      },
+      {
+        "elapsed_seconds": 0.203674,
+        "connections": []
+      },
+      {
+        "elapsed_seconds": 0.412239,
+        "connections": [
+          {
+            "state": "idle in transaction",
+            "wait_event_type": "Client",
+            "wait_event": "ClientRead",
+            "count": 1,
+            "oldest_transaction_seconds": 0.011109
+          }
+        ]
+      },
+      {
+        "elapsed_seconds": 0.615092,
+        "connections": [
+          {
+            "state": "active",
+            "wait_event_type": null,
+            "wait_event": null,
+            "count": 1,
+            "oldest_transaction_seconds": 0.000589
+          }
+        ]
+      },
+      {
+        "elapsed_seconds": 0.81695,
+        "connections": [
+          {
+            "state": "idle in transaction",
+            "wait_event_type": "Client",
+            "wait_event": "ClientRead",
+            "count": 1,
+            "oldest_transaction_seconds": 0.00777
+          }
+        ]
+      },
+      {
+        "elapsed_seconds": 1.026132,
+        "connections": [
+          {
+            "state": "idle",
+            "wait_event_type": "Client",
+            "wait_event": "ClientRead",
+            "count": 1,
+            "oldest_transaction_seconds": null
+          }
+        ]
+      },
+      {
+        "elapsed_seconds": 1.227699,
+        "connections": [
+          {
+            "state": "idle in transaction",
+            "wait_event_type": "Client",
+            "wait_event": "ClientRead",
+            "count": 1,
+            "oldest_transaction_seconds": 0.002157
+          }
+        ]
+      },
+      {
+        "elapsed_seconds": 1.429639,
+        "connections": [
+          {
+            "state": "idle in transaction",
+            "wait_event_type": "Client",
+            "wait_event": "ClientRead",
+            "count": 1,
+            "oldest_transaction_seconds": 0.000988
+          }
+        ]
+      },
+      {
+        "elapsed_seconds": 1.631067,
+        "connections": [
+          {
+            "state": "active",
+            "wait_event_type": "IO",
+            "wait_event": "WalSync",
+            "count": 1,
+            "oldest_transaction_seconds": 0.014582
+          }
+        ]
+      },
+      {
+        "elapsed_seconds": 1.834276,
+        "connections": [
+          {
+            "state": "idle in transaction",
+            "wait_event_type": "Client",
+            "wait_event": "ClientRead",
+            "count": 1,
+            "oldest_transaction_seconds": 0.000495
+          }
+        ]
+      },
+      {
+        "elapsed_seconds": 2.038313,
+        "connections": [
+          {
+            "state": "active",
+            "wait_event_type": null,
+            "wait_event": null,
+            "count": 1,
+            "oldest_transaction_seconds": 0.002847
+          }
+        ]
+      }
+    ],
+    "observer_errors": [],
+    "stats_note": "pg_stat_database cumulative counters may lag; application SQL and pool counters are separately measured by SQLAlchemy listeners"
+  }
+}
