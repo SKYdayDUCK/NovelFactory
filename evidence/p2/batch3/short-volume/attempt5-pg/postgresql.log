@@ -1,0 +1,13 @@
+2026-11-10 12:20:12.100 UTC [22] LOG:  starting PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+2026-11-10 12:20:12.100 UTC [22] LOG:  listening on IPv4 address "127.0.0.1", port 34389
+2026-11-10 12:20:12.101 UTC [26] LOG:  database system was shut down at 2026-11-10 12:20:12 UTC
+2026-11-10 12:20:12.104 UTC [22] LOG:  database system is ready to accept connections
+2026-11-10 12:20:12.152 UTC [31] FATAL:  database "nf_dev" does not exist
+2026-11-10 12:20:48.058 UTC [24] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:20:48.064 UTC [24] LOG:  checkpoint complete: wrote 935 buffers (5.7%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.005 s, sync=0.001 s, total=0.006 s; sync files=302, longest=0.001 s, average=0.000 s; distance=13229 kB, estimate=13229 kB; lsn=0/243F058, redo lsn=0/243F000
+2026-11-10 12:20:48.341 UTC [22] LOG:  received smart shutdown request
+2026-11-10 12:20:48.342 UTC [22] LOG:  background worker "logical replication launcher" (PID 29) exited with exit code 1
+2026-11-10 12:20:48.342 UTC [24] LOG:  shutting down
+2026-11-10 12:20:48.342 UTC [24] LOG:  checkpoint starting: shutdown immediate
+2026-11-10 12:20:48.342 UTC [24] LOG:  checkpoint complete: wrote 1 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.001 s; sync files=1, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=11906 kB; lsn=0/243F160, redo lsn=0/243F160
+2026-11-10 12:20:48.346 UTC [22] LOG:  database system is shut down

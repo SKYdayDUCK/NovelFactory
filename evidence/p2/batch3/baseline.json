@@ -1,0 +1,27 @@
+{
+  "command": [
+    "python",
+    "scripts/with_postgres.py",
+    "--pg-bin",
+    "/workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin",
+    "--log-dir",
+    "evidence/p2/batch3/baseline-pg",
+    "--",
+    "python",
+    "-m",
+    "pytest",
+    "tests",
+    "-q",
+    "--junitxml=evidence/p2/batch3/baseline.xml",
+    "--json-report",
+    "--json-report-file=evidence/p2/batch3/baseline-tests.json"
+  ],
+  "command_display": "python scripts/with_postgres.py --pg-bin /workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin --log-dir evidence/p2/batch3/baseline-pg -- python -m pytest tests -q --junitxml=evidence/p2/batch3/baseline.xml --json-report --json-report-file=evidence/p2/batch3/baseline-tests.json",
+  "cwd": "/workspace/scratch/cf3ee8d0c6c4/NovelFactory",
+  "started_at_utc": "2026-11-10T12:11:28.890359+00:00",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "exit_status": 0,
+  "duration_seconds": 176.34143,
+  "finished_at_utc": "2026-11-10T12:14:25.231818+00:00"
+}

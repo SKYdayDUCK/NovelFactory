@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="6.822" timestamp="2026-11-10T21:18:37.484836+09:00" hostname="2be49009bab4"><testcase classname="tests.integration.test_short_volume" name="test_six_scene_volume_uses_real_handoffs_and_retains_every_independent_gate" time="6.718"><failure message="novel_factory.domain.errors.DomainError: Invalid AssertionCandidate: contract constraints failed">tests/integration/test_short_volume.py:17: in test_six_scene_volume_uses_real_handoffs_and_retains_every_independent_gate
+    result = runner.run()
+             ^^^^^^^^^^^^
+src/novel_factory/orchestration/short_volume.py:546: in run
+    accepted = [self.reconcile(draft) for draft in initial_drafts]
+                ^^^^^^^^^^^^^^^^^^^^^
+src/novel_factory/orchestration/short_volume.py:425: in reconcile
+    extraction = self.narrative.submit_extraction(task.principal, tid, generation, draft["draft_ref"],
+src/novel_factory/application/narrative.py:400: in submit_extraction
+    assertions = [validate_contract("AssertionCandidate", a, "narrative") for a in assertions]
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/novel_factory/contracts/registry.py:66: in validate_contract
+    raise DomainError("INVALID_ARGUMENT", f"Invalid {name}: contract constraints failed")
+E   novel_factory.domain.errors.DomainError: Invalid AssertionCandidate: contract constraints failed</failure></testcase></testsuite></testsuites>

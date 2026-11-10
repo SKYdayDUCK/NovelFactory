@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="7.537" timestamp="2026-11-10T21:19:22.624961+09:00" hostname="2be49009bab4"><testcase classname="tests.integration.test_short_volume" name="test_six_scene_volume_uses_real_handoffs_and_retains_every_independent_gate" time="7.437"><failure message="novel_factory.domain.errors.DomainError: Invalid EditDecisionRequest: contract constraints failed">tests/integration/test_short_volume.py:17: in test_six_scene_volume_uses_real_handoffs_and_retains_every_independent_gate
+    result = runner.run()
+             ^^^^^^^^^^^^
+src/novel_factory/orchestration/short_volume.py:574: in run
+    self.edit(old_binding, old_reviews, issue_decisions=[decision], approve=False)
+src/novel_factory/orchestration/short_volume.py:520: in edit
+    decisions.append(self.review.record_decision(self.principal, request))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/novel_factory/application/editorial.py:502: in record_decision
+    request = validate_contract("EditDecisionRequest", request, "editorial")
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/novel_factory/contracts/registry.py:66: in validate_contract
+    raise DomainError("INVALID_ARGUMENT", f"Invalid {name}: contract constraints failed")
+E   novel_factory.domain.errors.DomainError: Invalid EditDecisionRequest: contract constraints failed</failure></testcase></testsuite></testsuites>

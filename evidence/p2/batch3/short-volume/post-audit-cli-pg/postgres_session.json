@@ -1,0 +1,27 @@
+{
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "port": 60321,
+  "command": [
+    "uv",
+    "run",
+    "--no-sync",
+    "python",
+    "scripts/run_short_volume.py",
+    "--execution-kind",
+    "TEST_FIXTURE",
+    "--output",
+    "evidence/p2/batch3/short-volume/run",
+    "--object-root",
+    "var/short-volume-objects"
+  ],
+  "started_at_utc": "2026-11-10T12:37:22.705434+00:00",
+  "authentication": "loopback_trust_generated_test_data_only",
+  "fsync": true,
+  "synchronous_commit": true,
+  "max_connections": 60,
+  "data_directory_reused": false,
+  "exit_status": 0,
+  "postgres_exit_status": 0,
+  "duration_seconds": 45.651299,
+  "finished_at_utc": "2026-11-10T12:38:08.356776+00:00"
+}
