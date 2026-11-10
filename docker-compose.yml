@@ -1,0 +1,32 @@
+name: novel-factory-kernel-test
+services:
+  postgres:
+    image: postgres:17.11-bookworm@sha256:665dc7b37ac52a17e298511414c21d23ffa4e6a6ef6225b3e5d59c7afb35e994
+    environment:
+      POSTGRES_DB: nf_test
+      POSTGRES_USER: nf_dev
+      POSTGRES_PASSWORD: nf_dev_local_only
+      POSTGRES_INITDB_ARGS: --data-checksums
+    ports:
+      - "127.0.0.1:55432:5432"
+    command:
+      - postgres
+      - -c
+      - max_connections=60
+      - -c
+      - shared_buffers=128MB
+      - -c
+      - fsync=on
+      - -c
+      - synchronous_commit=on
+      - -c
+      - timezone=UTC
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nf_dev -d nf_test"]
+      interval: 2s
+      timeout: 2s
+      retries: 20
+    volumes:
+      - nf_pg_data:/var/lib/postgresql/data
+volumes:
+  nf_pg_data:

@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novel-factory.example/contracts/2.1/kernel.schema.json",
+  "title": "P0/P1 implementation-only closed payloads",
+  "description": "Additive closed payloads; original core and R1 bytes unchanged. NF-PROP-1 is encoded in a legacy statement string and never upgrades belief to world fact.",
+  "$defs": {
+    "CognitiveProposition": {
+      "type": "object",
+      "properties": {
+        "subject_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "predicate": {
+          "type": "string",
+          "minLength": 1
+        },
+        "object_value": {
+          "$ref": "https://novel-factory.example/contracts/2.1/temporal_concurrency.schema.json#/$defs/RelationValue"
+        },
+        "subject_time": {
+          "$ref": "https://novel-factory.example/contracts/2.1/temporal_concurrency.schema.json#/$defs/SubjectTime"
+        }
+      },
+      "required": [
+        "subject_id",
+        "predicate",
+        "object_value"
+      ],
+      "additionalProperties": false
+    },
+    "InputManifest": {
+      "type": "object",
+      "properties": {
+        "subject_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+          },
+          "minItems": 1,
+          "maxItems": 100
+        },
+        "predicates": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "maxItems": 20
+        }
+      },
+      "required": [
+        "subject_ids",
+        "predicates"
+      ],
+      "additionalProperties": false
+    },
+    "PlanManifest": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "p1"
+        },
+        "plans": {
+          "type": "array",
+          "maxItems": 500,
+          "items": {
+            "type": "object",
+            "properties": {
+              "plan_id": {
+                "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+              },
+              "plan_ref": {
+                "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+              },
+              "status": {
+                "enum": [
+                  "DRAFT",
+                  "APPROVED",
+                  "READY",
+                  "BLOCKED",
+                  "INVALIDATED",
+                  "CANCELLED",
+                  "SUPERSEDED"
+                ]
+              },
+              "target_time": {
+                "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/OccurrenceTime"
+              },
+              "subject_ids": {
+                "type": "array",
+                "items": {
+                  "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+                },
+                "minItems": 1,
+                "maxItems": 100
+              },
+              "summary": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 10000
+              },
+              "requires_active": {
+                "type": "array",
+                "items": {
+                  "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+                },
+                "maxItems": 100
+              },
+              "fulfillment_event_refs": {
+                "type": "array",
+                "items": {
+                  "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EventRef"
+                },
+                "maxItems": 0
+              }
+            },
+            "required": [
+              "plan_id",
+              "plan_ref",
+              "status",
+              "target_time",
+              "subject_ids",
+              "summary",
+              "requires_active",
+              "fulfillment_event_refs"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "schema_version",
+        "plans"
+      ],
+      "additionalProperties": false,
+      "description": "P1 plan artifacts do not execute or certify fulfillment; the original R1 temporal schema remains compatible."
+    }
+  }
+}

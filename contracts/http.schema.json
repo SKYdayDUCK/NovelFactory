@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novel-factory.example/contracts/p1/http.schema.json",
+  "title": "P0/P1 HTTP transport wrappers; core and R1 types remain authoritative",
+  "$defs": {
+    "ProposalRequest": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "command": {
+          "$ref": "https://novel-factory.example/contracts/p1/commands.schema.json#/$defs/TemplateCommand"
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "idempotency_key",
+        "command"
+      ],
+      "additionalProperties": false
+    },
+    "TaskCreateRequest": {
+      "type": "object",
+      "properties": {
+        "spec": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/TaskSpec"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "spec",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "TaskClaimRequest": {
+      "type": "object",
+      "properties": {
+        "worker_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "lease_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300
+        },
+        "task_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        }
+      },
+      "required": [
+        "worker_id"
+      ],
+      "additionalProperties": false
+    },
+    "TaskCancelHttpRequest": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "TaskResultHttpRequest": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/TaskResult"
+        },
+        "worker_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "result",
+        "worker_id"
+      ],
+      "additionalProperties": false
+    },
+    "ForkRequest": {
+      "type": "object",
+      "properties": {
+        "base_world_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"
+        },
+        "kind": {
+          "enum": [
+            "CANDIDATE",
+            "SIMULATION",
+            "REPAIR"
+          ]
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "base_world_ref",
+        "kind",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "PromotionHttpRequest": {
+      "type": "object",
+      "properties": {
+        "old_world_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"
+        },
+        "candidate_world_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "old_world_ref",
+        "candidate_world_ref",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

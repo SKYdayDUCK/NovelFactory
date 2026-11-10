@@ -1,0 +1,395 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novel-factory.example/contracts/p1/commands.schema.json",
+  "title": "P1 closed command template envelopes",
+  "$defs": {
+    "TRANSFER_ITEM": {
+      "type": "object",
+      "properties": {
+        "template_id": {
+          "const": "TRANSFER_ITEM"
+        },
+        "args": {
+          "type": "object",
+          "properties": {
+            "item_id": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            },
+            "from_id": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            },
+            "to_id": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            },
+            "transfer_kind": {
+              "enum": [
+                "GIFT",
+                "LOAN",
+                "STEAL"
+              ]
+            },
+            "at": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/StoryPoint"
+            }
+          },
+          "required": [
+            "item_id",
+            "from_id",
+            "to_id",
+            "transfer_kind",
+            "at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "template_id",
+        "args"
+      ],
+      "additionalProperties": false
+    },
+    "DESTROY_ITEM": {
+      "type": "object",
+      "properties": {
+        "template_id": {
+          "const": "DESTROY_ITEM"
+        },
+        "args": {
+          "type": "object",
+          "properties": {
+            "item_id": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            },
+            "at": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/StoryPoint"
+            }
+          },
+          "required": [
+            "item_id",
+            "at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "template_id",
+        "args"
+      ],
+      "additionalProperties": false
+    },
+    "RESOURCE_TRANSFER": {
+      "type": "object",
+      "properties": {
+        "template_id": {
+          "const": "RESOURCE_TRANSFER"
+        },
+        "args": {
+          "type": "object",
+          "properties": {
+            "from_account": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            },
+            "to_account": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            },
+            "resource_id": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            },
+            "quantity": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/NonnegativeDecimal"
+            },
+            "unit": {
+              "type": "string",
+              "minLength": 1
+            },
+            "at": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/StoryPoint"
+            }
+          },
+          "required": [
+            "from_account",
+            "to_account",
+            "resource_id",
+            "quantity",
+            "unit",
+            "at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "template_id",
+        "args"
+      ],
+      "additionalProperties": false
+    },
+    "SET_RELATION": {
+      "type": "object",
+      "properties": {
+        "template_id": {
+          "const": "SET_RELATION"
+        },
+        "args": {
+          "type": "object",
+          "properties": {
+            "subject_id": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            },
+            "predicate": {
+              "type": "string",
+              "minLength": 1
+            },
+            "object_value": {
+              "$ref": "https://novel-factory.example/contracts/2.1/temporal_concurrency.schema.json#/$defs/RelationValue"
+            },
+            "at": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/StoryPoint"
+            }
+          },
+          "required": [
+            "subject_id",
+            "predicate",
+            "object_value",
+            "at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "template_id",
+        "args"
+      ],
+      "additionalProperties": false
+    },
+    "GUARD_LEAVE": {
+      "type": "object",
+      "properties": {
+        "template_id": {
+          "const": "GUARD_LEAVE"
+        },
+        "args": {
+          "type": "object",
+          "properties": {
+            "guard_id": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            },
+            "region_id": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            },
+            "at": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/StoryPoint"
+            }
+          },
+          "required": [
+            "guard_id",
+            "region_id",
+            "at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "template_id",
+        "args"
+      ],
+      "additionalProperties": false
+    },
+    "PASS_CLEAR_ROUTE": {
+      "type": "object",
+      "properties": {
+        "template_id": {
+          "const": "PASS_CLEAR_ROUTE"
+        },
+        "args": {
+          "type": "object",
+          "properties": {
+            "traveler_id": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            },
+            "region_id": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            },
+            "destination_id": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            },
+            "at": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/StoryPoint"
+            }
+          },
+          "required": [
+            "traveler_id",
+            "region_id",
+            "destination_id",
+            "at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "template_id",
+        "args"
+      ],
+      "additionalProperties": false
+    },
+    "ADVANCE_SCOPE": {
+      "type": "object",
+      "properties": {
+        "template_id": {
+          "const": "ADVANCE_SCOPE"
+        },
+        "args": {
+          "type": "object",
+          "properties": {
+            "scope_id": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            },
+            "target": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/StoryPoint"
+            }
+          },
+          "required": [
+            "scope_id",
+            "target"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "template_id",
+        "args"
+      ],
+      "additionalProperties": false
+    },
+    "REPAIR_EVENT": {
+      "type": "object",
+      "properties": {
+        "template_id": {
+          "const": "REPAIR_EVENT"
+        },
+        "args": {
+          "type": "object",
+          "properties": {
+            "occurrence_id": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            },
+            "replacement_event": {
+              "oneOf": [
+                {
+                  "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/AcceptedEvent"
+                },
+                {
+                  "$ref": "https://novel-factory.example/contracts/2.1/temporal_concurrency.schema.json#/$defs/AcceptedEventR1"
+                }
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "occurrence_id",
+            "replacement_event",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "template_id",
+        "args"
+      ],
+      "additionalProperties": false
+    },
+    "TemplateCommand": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/TRANSFER_ITEM"
+        },
+        {
+          "$ref": "#/$defs/DESTROY_ITEM"
+        },
+        {
+          "$ref": "#/$defs/RESOURCE_TRANSFER"
+        },
+        {
+          "$ref": "#/$defs/SET_RELATION"
+        },
+        {
+          "$ref": "#/$defs/GUARD_LEAVE"
+        },
+        {
+          "$ref": "#/$defs/PASS_CLEAR_ROUTE"
+        },
+        {
+          "$ref": "#/$defs/ADVANCE_SCOPE"
+        },
+        {
+          "$ref": "#/$defs/REPAIR_EVENT"
+        },
+        {
+          "$ref": "#/$defs/RECORD_COGNITION"
+        }
+      ]
+    },
+    "RECORD_COGNITION": {
+      "type": "object",
+      "properties": {
+        "template_id": {
+          "const": "RECORD_COGNITION"
+        },
+        "args": {
+          "type": "object",
+          "properties": {
+            "actor_id": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            },
+            "statement": {
+              "type": "string",
+              "minLength": 1
+            },
+            "record_kind": {
+              "enum": [
+                "OBSERVATION",
+                "BELIEF",
+                "PRIVATE_DECISION"
+              ]
+            },
+            "epistemic_mode": {
+              "enum": [
+                "OBSERVED",
+                "HEARD",
+                "INFERRED",
+                "DECIDED"
+              ]
+            },
+            "evidence_refs": {
+              "type": "array",
+              "items": {
+                "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EvidenceRef"
+              },
+              "minItems": 1
+            },
+            "at": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/StoryPoint"
+            }
+          },
+          "required": [
+            "actor_id",
+            "statement",
+            "record_kind",
+            "epistemic_mode",
+            "evidence_refs",
+            "at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "template_id",
+        "args"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

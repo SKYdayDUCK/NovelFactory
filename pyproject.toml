@@ -1,0 +1,56 @@
+[build-system]
+requires = ["hatchling==1.33.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "novel-factory"
+version = "2.0.1"
+description = "P0/P1 trusted temporal world kernel for external Agents"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "SQLAlchemy>=2.0.36,<2.1",
+  "alembic>=1.14,<2",
+  "psycopg[binary]>=3.2,<4",
+  "pydantic>=2.10,<3",
+  "jsonschema>=4.23,<5",
+  "referencing>=0.37,<1",
+  "PyYAML>=6.0.3,<7",
+  "fastapi>=0.115,<1",
+  "uvicorn>=0.34,<1",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3,<10",
+  "pytest-json-report>=1.5,<2",
+  "httpx>=0.28,<1",
+  "hypothesis>=6.120,<7",
+  "ruff>=0.9,<1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/novel_factory"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"contracts" = "novel_factory/data/contracts"
+"runtime/query_profiles.json" = "novel_factory/data/runtime/query_profiles.json"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+  "unit: pure deterministic rules without PostgreSQL",
+  "contract: public Schema and DTO compatibility",
+  "postgres: requires real PostgreSQL 17",
+  "integration: application/database integration",
+  "concurrency: independent PostgreSQL connections and actual races",
+  "fault: injected process/transaction/file failure",
+  "recovery: backup and isolated database restore",
+  "load: logical Agent load and admission control",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+

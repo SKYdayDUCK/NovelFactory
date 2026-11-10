@@ -1,0 +1,10 @@
+# Copy locally; use only isolated development data with these defaults.
+NF_DATABASE_URL=postgresql+psycopg://nf_dev:nf_dev_local_only@127.0.0.1:55432/nf_test
+NF_OBJECT_ROOT=./var/objects
+NF_POOL_SIZE=8
+NF_POOL_OVERFLOW=0
+NF_POOL_TIMEOUT=2
+NF_API_PROCESSES=1
+NF_WORKER_PROCESSES=1
+# Four worker connections and sixteen maintenance reserve => 28 < PG max 60.
+# Token/bootstrap settings are generated locally; no real credentials belong here.
