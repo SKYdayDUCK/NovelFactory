@@ -158,10 +158,21 @@ class WorldQueryService:
                 _require(branch['kind'] in {'SIMULATION', 'CANDIDATE'}, 'VIEW_DENIED', 'Simulation view requires an authorized candidate branch')
             if compile_context:
                 _require(wr == spec['world_ref'], 'TASK_REBIND_REQUIRED', 'Resolved world differs from immutable task input')
-            selected = list(revision['selection'].values())
-            _require(len(selected) <= self.max_scan, 'CAPACITY_LIMIT', 'Selected history exceeds the P1 query scan budget')
-            event_ids = [v['event_version_id'] if isinstance(v, dict) else v for v in selected]
-            events = repo.many('events', {'work_id': wr['work_id'], 'event_version_id': event_ids}) if event_ids else []
+            # STATE, graph, belief, plan and context compilation use the
+            # already materialized immutable revision projection. Only a FACT
+            # timeline requires the selected event bodies. QueryBatch gets the
+            # same fixed cut and needs bodies iff at least one item needs them.
+            _require(len(revision['selection']) <= self.max_scan, 'CAPACITY_LIMIT',
+                     'Selected history exceeds the P1 query scan budget')
+            queries = [request['query']] if 'query' in request else [item['query'] for item in request.get('items', [])]
+            needs_events = (not compile_context and plane in {'WORLD', 'SIMULATION'} and
+                            any(q['kind'] == 'TIMELINE' and 'FACT' in q['entry_kinds'] for q in queries))
+            events = []
+            if needs_events:
+                selected = revision['selection'].values()
+                event_ids = [v['event_version_id'] if isinstance(v, dict) else v for v in selected]
+                if event_ids:
+                    events = repo.many('events', {'work_id': wr['work_id'], 'event_version_id': event_ids})
             plans = None
             refs = []
             if plane == 'PLAN':

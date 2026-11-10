@@ -1,4 +1,4 @@
-"""Validate this design package, not a production Novel Factory implementation.
+"""Validate the preserved design and schema package, not runtime behavior.
 
 Run from any directory: python /path/to/package/validation/validate_package.py
 Dependencies are pinned in requirements-validation.txt. No network calls are made.

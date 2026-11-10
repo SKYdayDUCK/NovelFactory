@@ -34,6 +34,8 @@ log = logging.getLogger("novel_factory.http")
 @dataclass(frozen=True)
 class HttpSettings:
     max_body_bytes: int = 262144
+    body_read_timeout_seconds: float = 5.0
+    max_body_chunks: int = 1024
     max_inflight_requests: int = 128
     max_queued_operations: int = 64
     per_principal_concurrency: int = 2
@@ -54,6 +56,8 @@ def _status(code: str) -> int:
         return 503
     if code == "PAYLOAD_TOO_LARGE":
         return 413
+    if code == "REQUEST_TIMEOUT":
+        return 408
     if code in {"NOT_FOUND", "TASK_NOT_FOUND"}:
         return 404
     if code == "METHOD_NOT_ALLOWED":
@@ -115,11 +119,23 @@ class RequestBoundaryMiddleware:
                         raise DomainError("INVALID_ARGUMENT", "Invalid request length")
                     if length > self.settings.max_body_bytes:
                         raise DomainError("PAYLOAD_TOO_LARGE", "Request body exceeds configured limit")
-                chunks, size = [], 0
+                chunks, size, count = [], 0, 0
+                # An absolute deadline also defeats trickle uploads: every
+                # fragment shares one total budget, not a fresh timeout.
+                deadline = asyncio.get_running_loop().time() + self.settings.body_read_timeout_seconds
                 while True:
-                    message = await receive()
+                    try:
+                        async with asyncio.timeout_at(deadline):
+                            message = await receive()
+                    except TimeoutError:
+                        raise DomainError("REQUEST_TIMEOUT", "Request body deadline exceeded", True, "WAIT") from None
                     if message["type"] == "http.disconnect":
                         return
+                    if message["type"] != "http.request":
+                        raise DomainError("INVALID_ARGUMENT", "Invalid request body frame")
+                    count += 1
+                    if count > self.settings.max_body_chunks:
+                        raise DomainError("INVALID_ARGUMENT", "Too many request body fragments")
                     chunk = message.get("body", b"")
                     size += len(chunk)
                     if size > self.settings.max_body_bytes:
@@ -182,7 +198,8 @@ async def _finish_short_call(function, *args):
 def create_app(kernel, *, query_service=None, settings: HttpSettings | None = None,
                connection_budget: ConnectionBudget | None = None) -> FastAPI:
     settings = settings or HttpSettings()
-    if settings.max_body_bytes < 1024 or settings.max_inflight_requests < 1:
+    if (settings.max_body_bytes < 1024 or settings.max_inflight_requests < 1
+            or settings.body_read_timeout_seconds <= 0 or settings.max_body_chunks < 1):
         raise ValueError("invalid HTTP request budget")
     pool_size = kernel.db.engine.pool.size()
     connection_budget = connection_budget or ConnectionBudget(api_pool_size=pool_size)
@@ -368,8 +385,10 @@ def from_environment() -> FastAPI:
     budget.validate()
     database = Database(pool_size=pool, max_overflow=overflow,
                         pool_timeout=float(os.environ.get("NF_POOL_TIMEOUT", "2")))
-    settings = HttpSettings(allowed_origins=tuple(
-        value for value in os.environ.get("NF_ALLOWED_ORIGINS", "").split(",") if value
-    ))
+    settings = HttpSettings(
+        allowed_origins=tuple(value for value in os.environ.get("NF_ALLOWED_ORIGINS", "").split(",") if value),
+        body_read_timeout_seconds=float(os.environ.get("NF_BODY_READ_TIMEOUT_SECONDS", "5.0")),
+        max_body_chunks=int(os.environ.get("NF_MAX_BODY_CHUNKS", "1024")),
+    )
     return create_app(Kernel(database, ObjectStore(os.environ.get("NF_OBJECT_ROOT", "var/objects"))),
                       settings=settings, connection_budget=budget)

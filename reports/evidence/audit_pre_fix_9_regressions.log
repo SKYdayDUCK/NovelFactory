@@ -1,0 +1,230 @@
+FFFFFFFF.                                                                [100%]
+=================================== FAILURES ===================================
+_____ test_unqualified_context_from_prior_task_must_not_authorize_artifact _____
+
+    def test_unqualified_context_from_prior_task_must_not_authorize_artifact():
+        kernel, principal, work, ref, wr, rows, old, current, old_ctx, current_ctx = scenario()
+        # Regression reproduction: the original implementation grants this solely
+        # because *any* context exists for the same grant.
+>       with pytest.raises(DomainError) as rejected:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'novel_factory.domain.errors.DomainError'>
+
+tests/unit/test_audit_artifact_security.py:113: Failed
+______________ test_current_task_may_not_borrow_old_task_context _______________
+
+    def test_current_task_may_not_borrow_old_task_context():
+        kernel, principal, work, ref, wr, rows, old, current, old_ctx, current_ctx = scenario()
+        actor = rows["grants"][0]["actor_id"]
+        with pytest.raises(DomainError) as rejected:
+>           call(kernel, principal, work, ref, wr, current, old_ctx, generation=1,
+                 story_tick=20, known_tick=15, actor=actor)
+
+tests/unit/test_audit_artifact_security.py:122: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+kernel = <novel_factory.application.kernel.Kernel object at 0x7f0fbf7c7610>
+principal = Principal(grant_id='be27e238-249b-4b54-9147-a9b652c905d5', principal_id='97ee9f69-a0c3-4801-a4d5-17ba97a4878e')
+work = '40f40c64-1ea3-4930-a25f-4db11af422f8'
+ref = {'artifact_id': '0b9a853c-a8d6-4a26-9550-2f2cefbee5f3', 'artifact_revision_id': '4e214409-4889-4361-b702-87e2348e10e8', 'sha256': 'f8ba770cbd973d5231709ca276026f7d62debd2a239f8e10875d73e4cb3127e0'}
+wr = {'branch_id': '94f50b06-2240-445b-af5d-1afbb2eb33f3', 'work_id': '40f40c64-1ea3-4930-a25f-4db11af422f8', 'world_revision_id': '2ff371bc-4de3-4c56-8745-1879e4c0316c'}
+task = '4103c2a3-21d4-4fb6-abad-21749c588b92'
+context = 'b38519c0-22f8-4091-95b1-9a0cb1793ffd'
+
+    def call(kernel, principal, work, ref, wr, task, context, *, generation, story_tick, known_tick, actor):
+>       return kernel.get_artifact(
+            principal, work, ref, task_id=task, generation=generation,
+            context_bundle_id=context, world_ref=wr, story_time=at(story_tick),
+            knowledge_cut={"plane": "BELIEF", "actor_id": actor, "known_at": at(known_tick)})
+E       TypeError: Kernel.get_artifact() got an unexpected keyword argument 'task_id'
+
+tests/unit/test_audit_artifact_security.py:103: TypeError
+________ test_cut_and_story_time_cannot_be_swapped_within_same_context _________
+
+    def test_cut_and_story_time_cannot_be_swapped_within_same_context():
+        kernel, principal, work, ref, wr, rows, old, current, old_ctx, current_ctx = scenario()
+        actor = rows["grants"][0]["actor_id"]
+>       assert call(kernel, principal, work, ref, wr, old, old_ctx, generation=0,
+                    story_tick=40, known_tick=35, actor=actor) == b"confidential future cognition"
+
+tests/unit/test_audit_artifact_security.py:130: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+kernel = <novel_factory.application.kernel.Kernel object at 0x7f0fbf7c7b10>
+principal = Principal(grant_id='14f837bb-1a05-487f-b0de-4964712efebb', principal_id='eb9b7f21-5f5c-4b1c-974b-06b47d017743')
+work = 'bcacc466-fa91-40a8-aab7-070bc90a08cc'
+ref = {'artifact_id': '880717ed-9300-4c84-8167-6d8bcf9c6dc7', 'artifact_revision_id': '4e3124be-3675-4db0-b327-18040a9cba79', 'sha256': 'f8ba770cbd973d5231709ca276026f7d62debd2a239f8e10875d73e4cb3127e0'}
+wr = {'branch_id': 'b259956f-f351-4da6-a4ad-be16301cdfed', 'work_id': 'bcacc466-fa91-40a8-aab7-070bc90a08cc', 'world_revision_id': 'a215fa7b-15a5-4e5a-9112-0bb35e0bfd45'}
+task = '23fcb30e-5b6c-4c1e-b9ab-5379b0658472'
+context = '44bbd347-7e97-4b27-8d18-a18488de2331'
+
+    def call(kernel, principal, work, ref, wr, task, context, *, generation, story_tick, known_tick, actor):
+>       return kernel.get_artifact(
+            principal, work, ref, task_id=task, generation=generation,
+            context_bundle_id=context, world_ref=wr, story_time=at(story_tick),
+            knowledge_cut={"plane": "BELIEF", "actor_id": actor, "known_at": at(known_tick)})
+E       TypeError: Kernel.get_artifact() got an unexpected keyword argument 'task_id'
+
+tests/unit/test_audit_artifact_security.py:103: TypeError
+________ test_task_fence_revocation_and_grant_epoch_invalidate_evidence ________
+
+    def test_task_fence_revocation_and_grant_epoch_invalidate_evidence():
+        kernel, principal, work, ref, wr, rows, old, current, old_ctx, current_ctx = scenario()
+        actor = rows["grants"][0]["actor_id"]
+        def access():
+            return call(kernel, principal, work, ref, wr, old, old_ctx, generation=0,
+                        story_tick=40, known_tick=35, actor=actor)
+>       assert access() == b"confidential future cognition"
+               ^^^^^^^^
+
+tests/unit/test_audit_artifact_security.py:145: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_audit_artifact_security.py:143: in access
+    return call(kernel, principal, work, ref, wr, old, old_ctx, generation=0,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+kernel = <novel_factory.application.kernel.Kernel object at 0x7f0fbf622520>
+principal = Principal(grant_id='975a9acb-77e2-4ed9-92e7-e0cdc95936f7', principal_id='a47b220b-1579-4b0d-905b-dc3afe0be316')
+work = '4e154c96-3893-40ba-ad2b-e299c56364ba'
+ref = {'artifact_id': '612c31f8-78ac-478d-9a45-09faf3e6e597', 'artifact_revision_id': '46eec014-8e03-4c42-bc0b-4cf89979b357', 'sha256': 'f8ba770cbd973d5231709ca276026f7d62debd2a239f8e10875d73e4cb3127e0'}
+wr = {'branch_id': '72939106-739d-4656-806d-e439d21029ac', 'work_id': '4e154c96-3893-40ba-ad2b-e299c56364ba', 'world_revision_id': '13ec7299-7d63-47ce-9605-578ac6743b94'}
+task = '3afaf327-51e0-46d9-b52b-05b4e83f7fa3'
+context = 'd5d632d8-8d56-484d-ae98-b09343238a4a'
+
+    def call(kernel, principal, work, ref, wr, task, context, *, generation, story_tick, known_tick, actor):
+>       return kernel.get_artifact(
+            principal, work, ref, task_id=task, generation=generation,
+            context_bundle_id=context, world_ref=wr, story_time=at(story_tick),
+            knowledge_cut={"plane": "BELIEF", "actor_id": actor, "known_at": at(known_tick)})
+E       TypeError: Kernel.get_artifact() got an unexpected keyword argument 'task_id'
+
+tests/unit/test_audit_artifact_security.py:103: TypeError
+_______ test_slow_incomplete_upload_times_out_and_releases_ingress_slot ________
+
+    def test_slow_incomplete_upload_times_out_and_releases_ingress_slot():
+        async def scenario():
+            async def receive():
+                await asyncio.Event().wait()
+            return await run_case(receive, HttpSettings(max_body_bytes=1024,
+                                                       body_read_timeout_seconds=0.06))
+>       messages, called, snapshot, elapsed = asyncio.run(scenario())
+                                              ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_audit_http_boundary.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.13/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+/usr/lib/python3.13/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.13/asyncio/base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    async def scenario():
+        async def receive():
+            await asyncio.Event().wait()
+>       return await run_case(receive, HttpSettings(max_body_bytes=1024,
+                                                   body_read_timeout_seconds=0.06))
+E       TypeError: HttpSettings.__init__() got an unexpected keyword argument 'body_read_timeout_seconds'. Did you mean 'queue_timeout_seconds'?
+
+tests/unit/test_audit_http_boundary.py:43: TypeError
+_____________ test_trickle_upload_cannot_extend_absolute_deadline ______________
+
+    def test_trickle_upload_cannot_extend_absolute_deadline():
+        async def scenario():
+            async def receive():
+                await asyncio.sleep(0.025)
+                return {"type": "http.request", "body": b"x", "more_body": True}
+            return await run_case(receive, HttpSettings(max_body_bytes=8192,
+                                                       body_read_timeout_seconds=0.065))
+>       messages, called, snapshot, elapsed = asyncio.run(scenario())
+                                              ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_audit_http_boundary.py:60: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.13/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+/usr/lib/python3.13/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.13/asyncio/base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    async def scenario():
+        async def receive():
+            await asyncio.sleep(0.025)
+            return {"type": "http.request", "body": b"x", "more_body": True}
+>       return await run_case(receive, HttpSettings(max_body_bytes=8192,
+                                                   body_read_timeout_seconds=0.065))
+E       TypeError: HttpSettings.__init__() got an unexpected keyword argument 'body_read_timeout_seconds'. Did you mean 'queue_timeout_seconds'?
+
+tests/unit/test_audit_http_boundary.py:58: TypeError
+_____________ test_body_chunk_flood_and_size_limit_remain_bounded ______________
+
+    def test_body_chunk_flood_and_size_limit_remain_bounded():
+        async def scenario():
+            count = 0
+            async def receive():
+                nonlocal count
+                count += 1
+                return {"type": "http.request", "body": b"x", "more_body": count < 1000}
+            return await run_case(receive, HttpSettings(max_body_bytes=1024,
+                                                       max_body_chunks=8, body_read_timeout_seconds=1.0))
+>       messages, called, snapshot, elapsed = asyncio.run(scenario())
+                                              ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_audit_http_boundary.py:74: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.13/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+/usr/lib/python3.13/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.13/asyncio/base_events.py:725: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    async def scenario():
+        count = 0
+        async def receive():
+            nonlocal count
+            count += 1
+            return {"type": "http.request", "body": b"x", "more_body": count < 1000}
+>       return await run_case(receive, HttpSettings(max_body_bytes=1024,
+                                                   max_body_chunks=8, body_read_timeout_seconds=1.0))
+E       TypeError: HttpSettings.__init__() got an unexpected keyword argument 'max_body_chunks'. Did you mean 'max_body_bytes'?
+
+tests/unit/test_audit_http_boundary.py:72: TypeError
+__________ test_large_state_and_relation_timeline_do_not_fetch_events __________
+
+    def test_large_state_and_relation_timeline_do_not_fetch_events():
+        for kind, batch in [("STATE", False), ("STATE", True), ("TIMELINE", False), ("TIMELINE", True)]:
+            service, principal, request, repo, _ = fixture(kind, batch=batch)
+            packet = service._sample(principal, request)
+            assert packet["events"] == []
+>           assert repo.event_calls == 0, (kind, batch)
+E           AssertionError: ('STATE', False)
+E           assert 1 == 0
+E            +  where 1 = <test_audit_query_history.fixture.<locals>.Repo object at 0x7f0fbf5bd010>.event_calls
+
+tests/unit/test_audit_query_history.py:71: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_audit_artifact_security.py::test_unqualified_context_from_prior_task_must_not_authorize_artifact - Failed: DID NOT RAISE <class 'novel_factory.domain.errors.DomainError'>
+FAILED tests/unit/test_audit_artifact_security.py::test_current_task_may_not_borrow_old_task_context - TypeError: Kernel.get_artifact() got an unexpected keyword argument 'task_id'
+FAILED tests/unit/test_audit_artifact_security.py::test_cut_and_story_time_cannot_be_swapped_within_same_context - TypeError: Kernel.get_artifact() got an unexpected keyword argument 'task_id'
+FAILED tests/unit/test_audit_artifact_security.py::test_task_fence_revocation_and_grant_epoch_invalidate_evidence - TypeError: Kernel.get_artifact() got an unexpected keyword argument 'task_id'
+FAILED tests/unit/test_audit_http_boundary.py::test_slow_incomplete_upload_times_out_and_releases_ingress_slot - TypeError: HttpSettings.__init__() got an unexpected keyword argument 'body_read_timeout_seconds'. Did you mean 'queue_timeout_seconds'?
+FAILED tests/unit/test_audit_http_boundary.py::test_trickle_upload_cannot_extend_absolute_deadline - TypeError: HttpSettings.__init__() got an unexpected keyword argument 'body_read_timeout_seconds'. Did you mean 'queue_timeout_seconds'?
+FAILED tests/unit/test_audit_http_boundary.py::test_body_chunk_flood_and_size_limit_remain_bounded - TypeError: HttpSettings.__init__() got an unexpected keyword argument 'max_body_chunks'. Did you mean 'max_body_bytes'?
+FAILED tests/unit/test_audit_query_history.py::test_large_state_and_relation_timeline_do_not_fetch_events - AssertionError: ('STATE', False)
+assert 1 == 0
+ +  where 1 = <test_audit_query_history.fixture.<locals>.Repo object at 0x7f0fbf5bd010>.event_calls
+8 failed, 1 passed in 0.32s

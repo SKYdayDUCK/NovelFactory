@@ -201,19 +201,71 @@ class Kernel:
             self._register_artifact(r,ref,work_id,payload,kind,principal.principal_id)
         return ref
 
-    def get_artifact(self, principal, work_id, ref):
+    def _check_artifact_read(self, r, principal, work_id, ref, *, task_id, generation,
+                             context_bundle_id, world_ref, story_time, knowledge_cut):
+        """A context is a *task-generation capability*, never a grant-wide allowlist.
+
+        For non-admins the caller must identify the exact active context, its
+        immutable story point and knowledge cut. We verify these against the
+        database rather than trusting caller-supplied selectors. This is done
+        before AND after reading object bytes so a cancelled task or revoked
+        grant cannot expose bytes through a read/revocation race.
+        """
+        grant = self.authorize(r, principal, work_id, "READ")
+        self.artifact(r, ref, work_id)
+        if "ADMIN" in grant["capabilities"]:
+            return
+        from novel_factory.application.queries import WorldQueryService
+        from novel_factory.application.query_policy import check_profile
+        from novel_factory.domain.temporal import point_key
+
+        require(task_id is not None and generation is not None and context_bundle_id is not None
+                and world_ref is not None and story_time is not None and knowledge_cut is not None,
+                "VIEW_DENIED", "Current task and knowledge context are required")
+        task, current_grant, spec = WorldQueryService(self)._task(r, principal, task_id, generation)
+        require(task["work_id"] == work_id and task["context_bundle_id"] == context_bundle_id,
+                "VIEW_DENIED", "Context is not bound to the current task generation")
+        validate_contract("WorldRef", world_ref)
+        validate_contract("StoryPoint", story_time)
+        validate_contract("KnowledgeCut", knowledge_cut, "2.1")
+        context = r.one("contexts", {"context_bundle_id": context_bundle_id, "work_id": work_id,
+                                     "task_id": task_id, "generation": generation})
+        require(context is not None and context["grant_id"] == principal.grant_id
+                and context["principal_id"] == principal.principal_id,
+                "VIEW_DENIED", "Context is unavailable for this task generation")
+        read_cut, bundle = context["read_cut"], context["payload"]
+        require(world_ref == spec["world_ref"] == read_cut["world_ref"] == bundle["world_ref"]
+                and story_time == spec["story_time"] == bundle["story_time"]
+                and knowledge_cut == read_cut["knowledge_cut"]
+                and bundle["task_id"] == task_id and bundle["generation"] == generation
+                and bundle["policy_version"] == read_cut["policy_version"] == spec["policy_version"]
+                and read_cut["permission_epoch"] == current_grant["epoch"]
+                and bundle["role_id"] == current_grant["role_id"]
+                and bundle["actor_id"] == knowledge_cut.get("actor_id")
+                and point_key(story_time) <= point_key(current_grant["max_story_time"]),
+                "VIEW_DENIED", "Context is no longer valid at this story and authorization cut")
+        self.authorize(r, principal, work_id, "READ", world_ref["branch_id"])
+        check_profile(current_grant, knowledge_cut["plane"])
+        if knowledge_cut["plane"] == "BELIEF":
+            require(knowledge_cut["actor_id"] == current_grant["actor_id"]
+                    and point_key(knowledge_cut["known_at"]) <= point_key(story_time)
+                    and point_key(knowledge_cut["known_at"]) <= point_key(current_grant["max_story_time"]),
+                    "VIEW_DENIED", "Evidence belongs to a different actor or knowledge time")
+        allowed = [e["artifact_ref"] for e in bundle.get("permitted_evidence_refs", [])
+                   if e["kind"] in {"ARTIFACT", "RULE"} and "span" not in e]
+        require(ref in allowed, "VIEW_DENIED", "Artifact is outside the current task knowledge cut")
+
+    def get_artifact(self, principal, work_id, ref, *, task_id=None, generation=None,
+                     context_bundle_id=None, world_ref=None, story_time=None, knowledge_cut=None):
+        """Read immutable evidence; non-admin callers must supply the fixed context fence."""
+        context = {"task_id": task_id, "generation": generation,
+                   "context_bundle_id": context_bundle_id, "world_ref": world_ref,
+                   "story_time": story_time, "knowledge_cut": knowledge_cut}
         with self.db.uow(write=False) as r:
-            grant=self.authorize(r,principal,work_id)
-            a=self.artifact(r,ref,work_id)
-            # Restricted characters may only read evidence explicitly permitted
-            # by a context issued to their own grant. Never expose whole world
-            # artifacts merely because the caller knows a content hash.
-            if "ADMIN" not in grant["capabilities"]:
-                contexts=r.many("contexts",{"grant_id":grant["grant_id"]})
-                allowed=[e["artifact_ref"] for c in contexts for e in c["payload"].get("permitted_evidence_refs",[]) if e["kind"] in {"ARTIFACT","RULE"} and "span" not in e]
-                require(ref in allowed, "VIEW_DENIED", "Artifact unavailable")
-        content=self.objects.read(ref["sha256"])
-        with self.db.uow(write=False) as r: self.authorize(r,principal,work_id)
+            self._check_artifact_read(r, principal, work_id, ref, **context)
+        content = self.objects.read(ref["sha256"])
+        with self.db.uow(write=False) as r:
+            self._check_artifact_read(r, principal, work_id, ref, **context)
         return content
 
     def bootstrap_work(self, name, genesis, *, frontiers=None, work_id=None):

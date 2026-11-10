@@ -1,7 +1,7 @@
 # 开发 Agent 工作规范
 
 适用于修改代码、契约、测试和文档的开发 Agent；小说运行时角色另见 [角色契约](runtime/roles/README.md)。
-本包是详细设计交付，目录中的规范不表示业务代码已实现。先阅读当前任务涉及的文档，再开始对应模块。
+本仓库已实现 P0/P1 可信内核，并进入 P1 审计收尾阶段；P2 尚未授权开展。`src/`、`migrations/` 和 `tests/` 是有效运行代码。`docs/` 及 `baseline/v1_1/` 保留完整设计和历史验收基线。先阅读当前任务涉及的规范、实现和最新审计报告，再修改对应模块。
 
 ## 1. 开始任务
 
@@ -67,10 +67,10 @@
 - 只运行与变更风险相称的检查；不为低风险文字修改编写机械镜像测试。
 - 契约、权限、时间、并发、幂等、恢复变更应提供能暴露真实失败模式的反例或集成测试。
 - 文学质量保留证据、修改建议和编辑决定；工程通过不能代替文学通过。
-- 本设计包自检：`python validation/validate_package.py`。
+- 原始契约和设计包自检：`python validation/validate_package.py`。
 - 独立机制实验：`python -m unittest discover -s experiments -p 'test_*.py'`。
-- 上述命令仅覆盖已提供的设计检查和实验；项目实施后按实际工具链增加测试命令。
-- 不声称尚未运行的 PostgreSQL、Host、MCP、真实模型或业务测试已经通过。
+- 当前业务测试：`uv run python -m pytest tests/unit tests/contracts tests/service/test_admission.py -q`；PostgreSQL 17 环境下用 `uv run python -m pytest tests -q` 覆盖数据库、并发和恢复。GitHub CI 工作流见 `.github/workflows/p1-integrity.yml`。设计检查/机制实验不替代业务测试。
+- 仅对有可核对日志的 PostgreSQL/CI 测试声称通过；不把未执行的 Host、MCP、真实模型和 P2 业务测试视为通过。
 - 不删掉失败用例、弱化授权校验或直接改黄金答案来制造通过；先解释行为是否确需变化。
 - 结果报告说明修改目的、涉及契约、实际检查、观测结果、未覆盖风险和下一步。
 - 不在日志、示例、测试快照或提交中放入秘密、原始凭据或超出任务授权的数据。

@@ -1,12 +1,28 @@
-> **P0/P1 开发审核版已实现。** 当前运行说明见 [复现与运行指南](reports/复现与运行指南.md)，实际验收与限制见 [P0/P1 集成审计报告](reports/P0_P1_集成审计报告.md) 和 [架构差异与未完成问题](reports/架构差异与未完成问题.md)。以下保留原设计包说明；原设计验证文字不代表本轮业务测试结论。本轮停止于 P1。
+# NovelFactory — Agent 驱动的小说世界知识与状态内核
 
-# 小说 Agent 工厂 v2.0-R1：统一详细技术设计与开发交接包
+[![P1 Integrity CI](https://github.com/SKYdayDUCK/NovelFactory/actions/workflows/p1-integrity.yml/badge.svg)](https://github.com/SKYdayDUCK/NovelFactory/actions/workflows/p1-integrity.yml)
 
-**交付日期：2026-11-10。范围：研究、详细设计、规范编制、契约验证与独立小实验；完整业务系统尚待实施。**
+**当前阶段：P1 收尾修复版（2026-11-10），未进入 P2。** 本仓库包含真实的 Python 3.12 / PostgreSQL 17 内核，而非只有设计文档。通过已认证任务及固定知识切面访问历史世界状态，提供不可变事件、分支与严格/有界依赖守卫提交、权限化 Context Compiler、可靠任务/Outbox、对象存储、真实数据库恢复和最小 HTTP 服务。当前实现不包含自动小说写作流水线。
 
-本包将统一世界时间线、动态知识演化和大量外部 Agent 的并发访问，整合进入原 v2.0 设计。原 01–12 全部经过实质修订，新增 13–15 展开时间、并发及压测机制；不是另外拼接一套历史库、未来库或状态系统。v1.1 的世界/叙事分离、角色自主、动态剧情和文学创作原则保持不变。
+- **运行/复现：** [复现与运行指南](reports/复现与运行指南.md)，`uv sync --locked --group dev`；默认 Python 3.12，PostgreSQL 17。
+- **测试与 CI：** [P1 Integrity Workflow](.github/workflows/p1-integrity.yml) 对 Schema、单元、真实 PostgreSQL 集成/并发及恢复执行分组验证；原始 JUnit、日志和机器可读结果在每次 GitHub Actions Run 的 Artifacts 获取。CI 执行状态以 GitHub Actions 当次结果为准。
+- **最新修复：** [P1 独立审计收尾报告](reports/P1_收尾审计与交接.md)，包括修复前复现证据、查询大历史开销边界、HTTP 慢请求保护、已知限制。
+- **P0/P1 既有交付证据：** [P0 报告](reports/P0_开发与验收报告.md)、[P1 报告](reports/P1_开发与验收报告.md)、[集成审计](reports/P0_P1_集成审计报告.md)；本次修复保留历史报告不回写测试结论。
+- **设计与约束：** [AGENTS.md](AGENTS.md)、[SKILLS.md](SKILLS.md)、[详细技术架构](docs/01_详细技术架构.md) 和 [合同](contracts/README.md)；旧设计基线在 `baseline/v1_1`。
 
-先读 [00_交付总报告.md](00_交付总报告.md) 和 [R1 变更说明](CHANGELOG_R1.md)。开发 Agent 再读取 [AGENTS.md](AGENTS.md)、目标目录的局部规范及 [SKILLS.md](SKILLS.md)，按具体任务加载文档和技能。
+快速检查（本地必须已有 PostgreSQL 17，并设置 `NF_TEST_DATABASE_URL` 与 `NF_DATABASE_URL`，详见运行指南）：
+
+```bash
+uv sync --locked --group dev
+uv run python validation/validate_package.py
+uv run python -m pytest tests/unit tests/contracts tests/service/test_admission.py -q
+uv run python -m alembic upgrade head
+uv run python -m pytest tests -q
+```
+
+## 原始 v2.0-R1 设计材料（历史保留，不代表当前完成范围）
+
+**原设计交付日期：2026-11-10。** 下文的“设计包”“研究实验”“待实施”均为原始 R1 设计交接记录，不再描述当前 P0/P1 代码的状态。权威实现与测试取仓库的 `src/`、`tests/`、`migrations/` 和上方引用的报告；原设计文字保留以利历史审计。
 
 ## 1. 技术文档导航
 
@@ -70,4 +86,4 @@ v1.1 的 14 份 Markdown 原件保留在 [baseline/v1_1](baseline/v1_1/README.md
 
 建议顺序：P0 固定契约与环境；P1 建立可信状态、少量封闭命令的依赖守卫、统一查询和多工作者预算；P2 随即完成 5–10 场景的真实短卷生产闭环；P3/P4 再以实测决定扩展。不要因为文档覆盖完整就一次性实现所有可选组件。
 
-`MANIFEST.sha256` 列出最终交付文件内容哈希，不包含它自身。当前 `src/`、`tests/`、`migrations/` 只放必要规范；四个 Python 文件分别用于包检查、两组独立机制实验和负载计算，没有业务占位实现。
+`MANIFEST.sha256` 属于原始设计交付清单，不适用本次修复产生的新文件。当前 `src/`、`tests/` 和 `migrations/` 已包含真实 P0/P1 实现；请以本 README 顶部的阶段说明与实际 CI 验收为准。

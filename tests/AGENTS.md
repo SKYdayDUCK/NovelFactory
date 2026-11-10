@@ -11,8 +11,8 @@
 - 文学评测保存文本版本、评审证据和编辑裁决；不要把单个模型分数设为普遍质量真理。
 - 不为纯文字更正补机械测试，也不为绿灯删除失败断言或未经解释修改黄金答案。
 - 真实模型及外部调用成本明确受控；普通单元测试默认不依赖外部网络。
-- 本包先运行 `python validation/validate_package.py` 和 `python -m unittest discover -s experiments -p 'test_*.py'`。
-- 实施阶段再增加实际项目测试入口；不得把设计包检查报告为完整系统验收。
+- 原设计检查为 `python validation/validate_package.py` 与 `python -m unittest discover -s experiments -p 'test_*.py'`。
+- 当前 P0/P1 业务测试为 `uv run python -m pytest tests -q`；无 PostgreSQL 时只能跑 `tests/unit tests/contracts tests/service/test_admission.py`，并如实报告未运行的数据库检查。
 
 - R1案例A–H与37个验收检查见validation/r1_case_matrix.json；有限模型和负载算术通过不等于数据库并发或端到端通过。
 
