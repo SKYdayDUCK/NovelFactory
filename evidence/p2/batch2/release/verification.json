@@ -1,0 +1,108 @@
+{
+  "component": "P2-06",
+  "date": "2026-11-10",
+  "evidence_kind": "ACTUAL_POSTGRES_AND_DETERMINISTIC_TESTS",
+  "literary_quality_claim": false,
+  "real_model_calls_in_these_tests": 0,
+  "external_delivery": "NOT_REQUESTED",
+  "runs": [
+    {
+      "run": "pg-initial",
+      "junit": "evidence/p2/batch2/release/pg-initial.xml",
+      "tests": 2,
+      "failures": 1,
+      "errors": 0,
+      "seconds": 1.542
+    },
+    {
+      "run": "pg-progress",
+      "junit": "evidence/p2/batch2/release/pg-progress.xml",
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "seconds": 16.476
+    },
+    {
+      "run": "pg-full",
+      "junit": "evidence/p2/batch2/release/pg-full.xml",
+      "tests": 9,
+      "failures": 1,
+      "errors": 0,
+      "seconds": 26.525
+    },
+    {
+      "run": "release-verified",
+      "junit": "evidence/p2/batch2/release/release-verified.xml",
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "seconds": 32.038
+    },
+    {
+      "run": "release-final",
+      "junit": "evidence/p2/batch2/release/release-final.xml",
+      "tests": 21,
+      "failures": 2,
+      "errors": 0,
+      "seconds": 31.897
+    },
+    {
+      "run": "release-final2",
+      "junit": "evidence/p2/batch2/release/release-final2.xml",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "seconds": 39.365
+    },
+    {
+      "run": "release-privacy",
+      "junit": "evidence/p2/batch2/release/release-privacy.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "seconds": 0.763
+    }
+  ],
+  "failed_runs_retained": [
+    {
+      "file": "unit-initial.xml",
+      "expected": "Explicit DAG semantics on valid core StoryInterval",
+      "observed": "Three fixtures omitted required bounds and were rejected by the existing strict core schema. Added bounds to the fixtures; rejection rules unchanged."
+    },
+    {
+      "file": "pg-initial.xml",
+      "expected": "Real writers can deliver prose then extract/reconcile",
+      "observed": "Narrative schema referenced nonexistent /contracts/2.1/commands.schema.json. Corrected URI to immutable registered /contracts/p1/commands.schema.json and regenerated bundle."
+    },
+    {
+      "file": "pg-full.xml",
+      "expected": "Cancelled review rejects final release transaction",
+      "observed": "Commit was rejected as REVIEW_REVOKED, the explicit editorial authority code, rather than lower-level TASK_NOT_ACCEPTABLE expected in the test. Asserted the documented exact code; rejection not weakened."
+    },
+    {
+      "file": "release-final.xml",
+      "expected": "Replacement draft helper supplies exact prior source as fixed task input",
+      "observed": "A simultaneous P204 hardening added the correct immutable prior_draft_ref input check. Two helpers lacked it and were rejected VIEW_DENIED. Added prior source to the new writer TaskSpec, keeping the security requirement."
+    }
+  ],
+  "verified_invariants": [
+    "Two real writer grants and separate PostgreSQL tasks execute in parallel without PLAN query permission",
+    "Dependent scenes cannot bind before exact predecessor acceptances exist",
+    "Immutable task inputs cannot gain late handoffs",
+    "Complete exact batch coverage, ordered text and disclosure hash binding",
+    "Current narrative selection and changed predecessor handoff enforcement",
+    "Unrelated HEAD progress preserves explicit pinned cut; newer adopted cut needs new alignment and approval",
+    "One winner for competing initial release CAS",
+    "Rollback of release rows, pointer, receipts and outbox before commit",
+    "Same receipt and one version after lost post-commit reply",
+    "Approval revocation and review cancellation synchronously block commit",
+    "Core manifest unchanged; world_effects_applied stays zero; old releases immutable",
+    "Batch existence hidden from actor: known and absent references produce identical error code and safe message; authorization precedes lookup"
+  ],
+  "limits": [
+    "Engineering prose/review fixtures do not constitute real-model or human literary approval",
+    "No external publishing performed",
+    "Dense long DAG validation and 50/200 mixed behavioral load are separate P2-08 evidence",
+    "Canonical releases only; unknown or changed dependencies remain blocked"
+  ]
+}

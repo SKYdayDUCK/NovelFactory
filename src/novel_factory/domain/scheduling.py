@@ -145,7 +145,7 @@ def closure_at(state, requested_scopes, at):
                 continue
             process = entry["definition"]
             due = entry["next_due"]
-            directly_due = bool(scopes.intersection(process["scope_ids"])) and (
+            directly_due = bool(scopes.intersection(set(process["scope_ids"]) | set(process.get("participant_ids", [])))) and (
                 due is None or point_key(due) <= point_key(at))
             inbound_due = False
             for channel in process["channels"]:
@@ -164,6 +164,7 @@ def closure_at(state, requested_scopes, at):
                     "ADVANCE_BLOCKED", "An earlier or differently timed trigger must resolve first")
             process_ids.add(pid)
             scopes.update(process["scope_ids"])
+            scopes.update(process.get("participant_ids", []))
             changed = True
     require(process_ids, "INVALID_ARGUMENT", "No registered process is due in this interaction")
     actors = sorted({actor for pid in process_ids

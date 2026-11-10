@@ -113,3 +113,16 @@ def test_joint_actions_cannot_invent_phase_from_array_order():
     with pytest.raises(DomainError) as error:
         joint_effects([command], state, str(uuid4()), point(30), build)
     assert error.value.code == "TIME_AMBIGUOUS"
+
+
+def test_same_actor_couples_simultaneous_processes_even_with_disjoint_resources():
+    state = empty_state()
+    east = entry("east", ["stock-east"], point(42), actor="a")
+    west = entry("west", ["stock-west"], point(42), actor="a")
+    east["definition"]["participant_ids"] = ["a"]
+    west["definition"]["participant_ids"] = ["a"]
+    state["processes"] = {"east": east, "west": west}
+    closure = closure_at(state, ["stock-east"], point(42))
+    assert closure["process_ids"] == ["east", "west"]
+    assert closure["scope_ids"] == ["a", "stock-east", "stock-west"]
+    assert closure["actor_ids"] == ["a"]

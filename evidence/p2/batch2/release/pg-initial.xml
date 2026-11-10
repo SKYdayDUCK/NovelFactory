@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="1.542" timestamp="2026-11-10T19:23:25.381075+09:00" hostname="2be49009bab4"><testcase classname="tests.integration.test_release" name="test_batch_rejects_mixed_inputs_cycle_and_actor_access" time="0.668" /><testcase classname="tests.integration.test_release" name="test_two_real_writer_tasks_parallel_and_successor_cannot_skip_handoffs" time="0.772"><failure message="jsonschema.exceptions._WrappedReferencingError: Unresolvable: https://novel-factory.example/contracts/2.1/commands.schema.json#/$defs/TemplateCommand">.venv/lib/python3.12/site-packages/jsonschema/validators.py:462: in _validate_reference
+    resolved = self._resolver.lookup(ref)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/referencing/_core.py:684: in lookup
+    raise exceptions.Unresolvable(ref=ref) from None
+E   referencing.exceptions.Unresolvable: https://novel-factory.example/contracts/2.1/commands.schema.json#/$defs/TemplateCommand
+
+The above exception was the direct cause of the following exception:
+tests/integration/test_release.py:193: in test_two_real_writer_tasks_parallel_and_successor_cannot_skip_handoffs
+    accepted = [accept_draft(k, f, draft) for draft in drafts]
+                ^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_release.py:136: in accept_draft
+    extraction_ref = service.submit_extraction(reader, task["task_id"], task["generation"], draft["draft_ref"],
+src/novel_factory/application/narrative.py:367: in submit_extraction
+    assertions = [validate_contract("AssertionCandidate", a, "narrative") for a in assertions]
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/novel_factory/contracts/registry.py:63: in validate_contract
+    errors = sorted(_validator(name, version).iter_errors(value), key=lambda e: str(list(e.path)))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/jsonschema/validators.py:383: in iter_errors
+    for error in errors:
+                 ^^^^^^
+.venv/lib/python3.12/site-packages/jsonschema/_keywords.py:275: in ref
+    yield from validator._validate_reference(ref=ref, instance=instance)
+.venv/lib/python3.12/site-packages/jsonschema/validators.py:431: in descend
+    for error in errors:
+                 ^^^^^^
+.venv/lib/python3.12/site-packages/jsonschema/_keywords.py:296: in properties
+    yield from validator.descend(
+.venv/lib/python3.12/site-packages/jsonschema/validators.py:431: in descend
+    for error in errors:
+                 ^^^^^^
+.venv/lib/python3.12/site-packages/jsonschema/_keywords.py:355: in oneOf
+    errs = list(validator.descend(instance, subschema, schema_path=index))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/jsonschema/validators.py:431: in descend
+    for error in errors:
+                 ^^^^^^
+.venv/lib/python3.12/site-packages/jsonschema/_keywords.py:275: in ref
+    yield from validator._validate_reference(ref=ref, instance=instance)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/jsonschema/validators.py:464: in _validate_reference
+    raise exceptions._WrappedReferencingError(err) from err
+E   jsonschema.exceptions._WrappedReferencingError: Unresolvable: https://novel-factory.example/contracts/2.1/commands.schema.json#/$defs/TemplateCommand</failure></testcase></testsuite></testsuites>

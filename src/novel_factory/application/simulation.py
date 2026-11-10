@@ -472,7 +472,7 @@ class WorldSchedulerService:
                 require(slots.get(grant["actor_id"]) == principal.grant_id, "VIEW_DENIED", "Interaction unavailable")
                 own = r.one("simulation_intents", {"interaction_id": interaction_id, "actor_id": grant["actor_id"]})
                 return {"interaction_id": interaction_id, "own_input_stored": own is not None,
-                        "world_accepted": False, "status": "WAITING_CONTROL_REVIEW"}
+                        "status": "OWN_INPUT_STORED" if own else "PENDING_OWN_INPUT"}
             _control(k, r, principal, wr)
             intents = r.many("simulation_intents", {"interaction_id": interaction_id}, order=["actor_id"])
             missing = sorted({slot["actor_id"] for slot in interaction["participant_slots"]} - {x["actor_id"] for x in intents})

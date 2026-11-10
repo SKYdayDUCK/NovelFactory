@@ -483,3 +483,68 @@ class PlanningService:
                     "observed_version": scope["version"], "dependency_kind": "ARTIFACT_SELECTION"})
             self.kernel._receipt(repo, principal, wr, "PLAN_BIND_TASK", idempotency_key, request, ref)
         return ref
+
+    def bind_task_for_controller(self, principal, task_id, generation, plan_ref, node_ids, idempotency_key):
+        """Freeze a writer's plan guards without granting it PLAN visibility.
+
+        Only an ADMIN may authorize another principal's immutable execution.
+        The target keeps its own live grant, input cut and task provenance.
+        """
+        from novel_factory.application.authorization import Principal
+        self._key(idempotency_key)
+        request = {"task_id": task_id, "generation": generation, "plan_ref": plan_ref, "node_ids": sorted(set(node_ids))}
+
+        def check(repo):
+            task = repo.one("tasks", {"task_id": task_id})
+            require(task is not None, "VIEW_DENIED", "Task unavailable")
+            self.kernel.authorize(repo, principal, task["work_id"], "ADMIN", task["branch_id"])
+            target = Principal(task["grant_id"], task["principal_id"])
+            grant = self.kernel.authorize(repo, target, task["work_id"], "ARTIFACT_WRITE", task["branch_id"])
+            require(grant["role_id"] in {"writer", "volume_director", "control_operator"}, "VIEW_DENIED", "Role is outside controlled writing")
+            task = self.kernel.tasks.guard_task(repo.conn, task_id, generation)
+            spec = repo.one("task_inputs", {"task_id": task_id, "generation": generation})["spec"]
+            context = repo.one("contexts", {"context_bundle_id": task["context_bundle_id"]})
+            require(context["read_cut"]["permission_epoch"] == grant["epoch"], "VIEW_DENIED", "Target task authorization changed")
+            wr = spec["world_ref"]
+            self._authorize(repo, principal, wr, capability="ADMIN")
+            require(plan_ref in spec["input_artifacts"], "VIEW_DENIED", "Plan is absent from fixed target input")
+            plan = self.kernel.artifact(repo, plan_ref, wr["work_id"], kind="PLAN_REVISION")["payload"]
+            require(plan["input_world_ref"] == wr, "TASK_REBIND_REQUIRED", "Target plan and task world cuts differ")
+            current = repo.one("selections", {"work_id": wr["work_id"], "selection_kind": self.selection_key(plan["volume_id"])})
+            require(current and current["artifact_ref"] == plan_ref, "PLAN_SELECTION_CONFLICT", "Target plan is no longer selected")
+            require(request["node_ids"] and set(request["node_ids"]) <= {n["node_id"] for n in plan["nodes"]},
+                    "INVALID_ARGUMENT", "Target plan nodes are unavailable")
+            return task, wr, plan
+
+        with self.kernel.db.uow(write=False) as repo:
+            task, wr, plan = check(repo)
+            old = self.kernel._prior(repo, principal, wr["work_id"], "PLAN_BIND_CONTROLLED_TASK", idempotency_key, request)
+            if old:
+                return old
+            scopes = repo.scope_map(wr["work_id"], wr["branch_id"])
+            keys = ["ARTIFACT_SELECTION:PLAN_NODE:" + plan["volume_id"] + ":" + n for n in request["node_ids"]]
+        payload = validate_contract("PlanTaskBinding", {"schema_version": "2.1", "task_id": task_id, "generation": generation,
+            "plan_ref": plan_ref, "node_ids": request["node_ids"],
+            "scope_versions": [{"scope_key": key, "version": scopes.get(key, 0)} for key in keys]}, "planning")
+        ref = self.kernel._blob(payload)
+        with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
+            repo.one("works", {"work_id": wr["work_id"]}, lock="update")
+            task, wr, plan = check(repo)
+            old = self.kernel._prior(repo, principal, wr["work_id"], "PLAN_BIND_CONTROLLED_TASK", idempotency_key, request)
+            if old:
+                return old
+            key = "PLAN_TASK:" + task_id + ":" + str(generation)
+            require(repo.one("selections", {"work_id": wr["work_id"], "selection_kind": key}) is None,
+                    "TASK_REBIND_REQUIRED", "Target generation already has immutable plan guards")
+            current = repo.scope_map(wr["work_id"], wr["branch_id"])
+            require(all(current.get(s["scope_key"], 0) == s["version"] for s in payload["scope_versions"]),
+                    "PLAN_SELECTION_CONFLICT", "Plan guard changed during binding")
+            self.kernel._register_artifact(repo, ref, wr["work_id"], payload, "PLAN_TASK_BINDING", principal.principal_id)
+            repo.add("selections", {"work_id": wr["work_id"], "selection_kind": key, "artifact_ref": ref, "epoch": 1})
+            for scope in payload["scope_versions"]:
+                repo.add("dependencies", {"dependency_id": _id(), "work_id": wr["work_id"], "branch_id": wr["branch_id"],
+                    "owner_type": "planning_task", "owner_id": task_id + ":" + str(generation), "scope_key": scope["scope_key"],
+                    "observed_version": scope["version"], "dependency_kind": "ARTIFACT_SELECTION"})
+            validate_task_plan_binding(repo, self.kernel, task)
+            self.kernel._receipt(repo, principal, wr, "PLAN_BIND_CONTROLLED_TASK", idempotency_key, request, ref)
+        return ref

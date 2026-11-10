@@ -1,0 +1,86 @@
+FF...F...........                                                        [100%]
+=================================== FAILURES ===================================
+_ test_independent_scenes_ready_together_successor_waits_for_exact_predecessors _
+
+    def test_independent_scenes_ready_together_successor_waits_for_exact_predecessors():
+        slots = [slot("east", 0), slot("west", 1), slot("meeting", 2, ["east", "west"])]
+>       initial = scene_readiness(slots, [])
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_releasing.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/novel_factory/domain/releasing.py:42: in scene_readiness
+    by_id = validate_scene_slots(slots)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/novel_factory/domain/releasing.py:26: in validate_scene_slots
+    validate_interval(slot["story_interval"])
+src/novel_factory/domain/temporal.py:33: in validate_interval
+    validate_contract('StoryInterval', item)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'StoryInterval'
+payload = {'start': {'tick': 10, 'phase': 0}, 'end': {'tick': 11, 'phase': 0}}
+version = '2.0'
+
+    def validate_contract(name: str, payload: Any, version: str = "2.0") -> Any:
+        value = plain(payload)
+        errors = sorted(_validator(name, version).iter_errors(value), key=lambda e: str(list(e.path)))
+        if errors:
+            # Do not echo instance values: they can be secret or attacker-controlled.
+>           raise DomainError("INVALID_ARGUMENT", f"Invalid {name}: contract constraints failed")
+E           novel_factory.domain.errors.DomainError: Invalid StoryInterval: contract constraints failed
+
+src/novel_factory/contracts/registry.py:66: DomainError
+_ test_ambiguous_or_unresolvable_batch_dependencies_rejected[slots0-SCENE_DEPENDENCY_CYCLE] _
+
+slots = [{'scene_id': 'a', 'reader_cut_ordinal': 0, 'story_interval': {'start': {'tick': 10, 'phase': 0}, 'end': {'tick': 11, ...erval': {'start': {'tick': 10, 'phase': 0}, 'end': {'tick': 11, 'phase': 0}}, 'required_predecessor_scene_ids': ['a']}]
+code = 'SCENE_DEPENDENCY_CYCLE'
+
+    @pytest.mark.parametrize("slots,code", [
+        ([slot("a", 0, ["b"]), slot("b", 1, ["a"])], "SCENE_DEPENDENCY_CYCLE"),
+        ([slot("a", 0, ["missing"])], "INVALID_ARGUMENT"),
+        ([slot("a", 0), slot("b", 0)], "INVALID_ARGUMENT"),
+        ([slot("a", 0), slot("a", 1)], "INVALID_ARGUMENT"),
+    ])
+    def test_ambiguous_or_unresolvable_batch_dependencies_rejected(slots, code):
+        with pytest.raises(DomainError) as error:
+            validate_scene_slots(slots)
+>       assert error.value.code == code
+E       AssertionError: assert 'INVALID_ARGUMENT' == 'SCENE_DEPENDENCY_CYCLE'
+E         
+E         - SCENE_DEPENDENCY_CYCLE
+E         + INVALID_ARGUMENT
+
+tests/unit/test_releasing.py:45: AssertionError
+___________ test_flashback_story_time_does_not_rewrite_reader_order ____________
+
+    def test_flashback_story_time_does_not_rewrite_reader_order():
+        slots = [slot("later", 0, tick=30), slot("earlier_memory", 1, tick=10)]
+>       validate_scene_slots(slots)
+
+tests/unit/test_releasing.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/novel_factory/domain/releasing.py:26: in validate_scene_slots
+    validate_interval(slot["story_interval"])
+src/novel_factory/domain/temporal.py:33: in validate_interval
+    validate_contract('StoryInterval', item)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'StoryInterval'
+payload = {'start': {'tick': 30, 'phase': 0}, 'end': {'tick': 31, 'phase': 0}}
+version = '2.0'
+
+    def validate_contract(name: str, payload: Any, version: str = "2.0") -> Any:
+        value = plain(payload)
+        errors = sorted(_validator(name, version).iter_errors(value), key=lambda e: str(list(e.path)))
+        if errors:
+            # Do not echo instance values: they can be secret or attacker-controlled.
+>           raise DomainError("INVALID_ARGUMENT", f"Invalid {name}: contract constraints failed")
+E           novel_factory.domain.errors.DomainError: Invalid StoryInterval: contract constraints failed
+
+src/novel_factory/contracts/registry.py:66: DomainError
+=========================== short test summary info ============================
+FAILED tests/unit/test_releasing.py::test_independent_scenes_ready_together_successor_waits_for_exact_predecessors
+FAILED tests/unit/test_releasing.py::test_ambiguous_or_unresolvable_batch_dependencies_rejected[slots0-SCENE_DEPENDENCY_CYCLE]
+FAILED tests/unit/test_releasing.py::test_flashback_story_time_does_not_rewrite_reader_order
+3 failed, 14 passed in 0.15s

@@ -1,0 +1,713 @@
+﻿2026-11-10T10:10:00.4534125Z Current runner version: '2.338.2'
+2026-11-10T10:10:00.4561871Z ##[group]Runner Image Provisioner
+2026-11-10T10:10:00.4562789Z Hosted Compute Agent
+2026-11-10T10:10:00.4563528Z Version: 20261028.624
+2026-11-10T10:10:00.4564440Z Commit: 54898b74c23fde5556c9b3c3a2290865feef0dfe
+2026-11-10T10:10:00.4565289Z Build Date: 2026-10-28T21:51:42Z
+2026-11-10T10:10:00.4566467Z Worker ID: {a0ed90b4-1df2-41ee-95bf-342bb8871066}
+2026-11-10T10:10:00.4567251Z Region: westcentralus
+2026-11-10T10:10:00.4567942Z Cloud: Azure
+2026-11-10T10:10:00.4568587Z ##[endgroup]
+2026-11-10T10:10:00.4570037Z ##[group]Operating System
+2026-11-10T10:10:00.4570819Z Ubuntu
+2026-11-10T10:10:00.4571451Z 24.04.5
+2026-11-10T10:10:00.4572063Z LTS
+2026-11-10T10:10:00.4572700Z ##[endgroup]
+2026-11-10T10:10:00.4573347Z ##[group]Runner Image
+2026-11-10T10:10:00.4574080Z Image: ubuntu-24.04
+2026-11-10T10:10:00.4574721Z Version: 20261101.360.1
+2026-11-10T10:10:00.4576475Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261101.360/images/ubuntu/Ubuntu2404-Readme.md
+2026-11-10T10:10:00.4578151Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261101.360
+2026-11-10T10:10:00.4579313Z ##[endgroup]
+2026-11-10T10:10:00.4580492Z ##[group]GITHUB_TOKEN Permissions
+2026-11-10T10:10:00.4583011Z Contents: read
+2026-11-10T10:10:00.4583677Z Metadata: read
+2026-11-10T10:10:00.4584363Z ##[endgroup]
+2026-11-10T10:10:00.4587808Z Secret source: Actions
+2026-11-10T10:10:00.4588942Z Cache mode: write
+2026-11-10T10:10:00.4590472Z Prepare workflow directory
+2026-11-10T10:10:00.5039110Z Prepare all required actions
+2026-11-10T10:10:00.5087367Z Getting action download info
+2026-11-10T10:10:00.7972438Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-11-10T10:10:00.9035469Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-11-10T10:10:00.9877324Z Download action repository 'astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e' (SHA:07a047e608db84b3d8c06cd9a7c7dcc9c355c18e)
+2026-11-10T10:10:01.6127304Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-11-10T10:10:01.8407665Z Complete job name: PostgreSQL 17 integration, concurrency and restore
+2026-11-10T10:10:01.9042093Z ##[group]Checking docker version
+2026-11-10T10:10:01.9055960Z ##[command]/usr/bin/docker version --format '{{.Server.APIVersion}}'
+2026-11-10T10:10:01.9826756Z '1.48'
+2026-11-10T10:10:01.9847590Z Docker daemon API version: '1.48'
+2026-11-10T10:10:01.9848524Z ##[command]/usr/bin/docker version --format '{{.Client.APIVersion}}'
+2026-11-10T10:10:02.0056296Z '1.48'
+2026-11-10T10:10:02.0073027Z Docker client API version: '1.48'
+2026-11-10T10:10:02.0078565Z ##[endgroup]
+2026-11-10T10:10:02.0082262Z ##[group]Clean up resources from previous jobs
+2026-11-10T10:10:02.0087731Z ##[command]/usr/bin/docker ps --all --quiet --no-trunc --filter "label=b58621"
+2026-11-10T10:10:02.0280303Z ##[command]/usr/bin/docker network prune --force --filter "label=b58621"
+2026-11-10T10:10:02.0443698Z ##[endgroup]
+2026-11-10T10:10:02.0444321Z ##[group]Create local container network
+2026-11-10T10:10:02.0454691Z ##[command]/usr/bin/docker network create --label b58621 github_network_29a7f51345c94eec91567fff5fcd79c1
+2026-11-10T10:10:02.1084750Z 7a6b24eb88872e6ef3a652c3658abcae4802c5dc500eb6836dd0d7d4d9a54318
+2026-11-10T10:10:02.1110099Z ##[endgroup]
+2026-11-10T10:10:02.1135467Z ##[group]Starting postgres service container
+2026-11-10T10:10:02.1165003Z ##[command]/usr/bin/docker pull postgres:17.11-bookworm
+2026-11-10T10:10:02.8592329Z 17.11-bookworm: Pulling from library/postgres
+2026-11-10T10:10:03.0631215Z dd051e1b8c92: Pulling fs layer
+2026-11-10T10:10:03.0632627Z 4fd88e653359: Pulling fs layer
+2026-11-10T10:10:03.0633913Z 41e20cc91088: Pulling fs layer
+2026-11-10T10:10:03.0635133Z cecd59c0f4e8: Pulling fs layer
+2026-11-10T10:10:03.0636655Z fe98381fbf47: Pulling fs layer
+2026-11-10T10:10:03.0637854Z 2c502f9a0399: Pulling fs layer
+2026-11-10T10:10:03.0639511Z 9e6067604731: Pulling fs layer
+2026-11-10T10:10:03.0640809Z 32564e1f6308: Pulling fs layer
+2026-11-10T10:10:03.0642033Z 80ed7b53ecf0: Pulling fs layer
+2026-11-10T10:10:03.0643052Z 46db58682565: Pulling fs layer
+2026-11-10T10:10:03.0644019Z f17bd255b710: Pulling fs layer
+2026-11-10T10:10:03.0644978Z 277e6d734690: Pulling fs layer
+2026-11-10T10:10:03.0646147Z f4368716ea81: Pulling fs layer
+2026-11-10T10:10:03.0647125Z c200e4e2b35b: Pulling fs layer
+2026-11-10T10:10:03.0648045Z 32564e1f6308: Waiting
+2026-11-10T10:10:03.0648917Z 80ed7b53ecf0: Waiting
+2026-11-10T10:10:03.0650019Z 46db58682565: Waiting
+2026-11-10T10:10:03.0651183Z f17bd255b710: Waiting
+2026-11-10T10:10:03.0652326Z 277e6d734690: Waiting
+2026-11-10T10:10:03.0653489Z f4368716ea81: Waiting
+2026-11-10T10:10:03.0654717Z c200e4e2b35b: Waiting
+2026-11-10T10:10:03.0656152Z cecd59c0f4e8: Waiting
+2026-11-10T10:10:03.0657444Z fe98381fbf47: Waiting
+2026-11-10T10:10:03.0658620Z 2c502f9a0399: Waiting
+2026-11-10T10:10:03.0659796Z 9e6067604731: Waiting
+2026-11-10T10:10:03.2645936Z 4fd88e653359: Download complete
+2026-11-10T10:10:03.3788414Z 41e20cc91088: Verifying Checksum
+2026-11-10T10:10:03.3791198Z 41e20cc91088: Download complete
+2026-11-10T10:10:03.4781438Z dd051e1b8c92: Verifying Checksum
+2026-11-10T10:10:03.4785355Z dd051e1b8c92: Download complete
+2026-11-10T10:10:03.5537439Z cecd59c0f4e8: Verifying Checksum
+2026-11-10T10:10:03.5539800Z cecd59c0f4e8: Download complete
+2026-11-10T10:10:03.7116749Z fe98381fbf47: Verifying Checksum
+2026-11-10T10:10:03.7118693Z fe98381fbf47: Download complete
+2026-11-10T10:10:03.7567452Z 9e6067604731: Verifying Checksum
+2026-11-10T10:10:03.7568543Z 9e6067604731: Download complete
+2026-11-10T10:10:03.7707939Z 2c502f9a0399: Verifying Checksum
+2026-11-10T10:10:03.7708763Z 2c502f9a0399: Download complete
+2026-11-10T10:10:03.9282584Z 32564e1f6308: Verifying Checksum
+2026-11-10T10:10:03.9283152Z 32564e1f6308: Download complete
+2026-11-10T10:10:03.9603425Z 46db58682565: Verifying Checksum
+2026-11-10T10:10:03.9605243Z 46db58682565: Download complete
+2026-11-10T10:10:04.1349571Z f17bd255b710: Verifying Checksum
+2026-11-10T10:10:04.1351278Z f17bd255b710: Download complete
+2026-11-10T10:10:04.1566119Z 277e6d734690: Verifying Checksum
+2026-11-10T10:10:04.1566971Z 277e6d734690: Download complete
+2026-11-10T10:10:04.3408485Z f4368716ea81: Verifying Checksum
+2026-11-10T10:10:04.3409347Z f4368716ea81: Download complete
+2026-11-10T10:10:04.3563198Z c200e4e2b35b: Verifying Checksum
+2026-11-10T10:10:04.3564783Z c200e4e2b35b: Download complete
+2026-11-10T10:10:04.4252620Z 80ed7b53ecf0: Verifying Checksum
+2026-11-10T10:10:04.4253062Z 80ed7b53ecf0: Download complete
+2026-11-10T10:10:04.6603762Z dd051e1b8c92: Pull complete
+2026-11-10T10:10:04.9443639Z 4fd88e653359: Pull complete
+2026-11-10T10:10:05.0737530Z 41e20cc91088: Pull complete
+2026-11-10T10:10:05.1058255Z cecd59c0f4e8: Pull complete
+2026-11-10T10:10:05.3948861Z fe98381fbf47: Pull complete
+2026-11-10T10:10:05.4521833Z 2c502f9a0399: Pull complete
+2026-11-10T10:10:05.4589639Z 9e6067604731: Pull complete
+2026-11-10T10:10:05.4667010Z 32564e1f6308: Pull complete
+2026-11-10T10:10:08.4524289Z 80ed7b53ecf0: Pull complete
+2026-11-10T10:10:08.4633419Z 46db58682565: Pull complete
+2026-11-10T10:10:08.4734631Z f17bd255b710: Pull complete
+2026-11-10T10:10:08.4822465Z 277e6d734690: Pull complete
+2026-11-10T10:10:08.4906112Z f4368716ea81: Pull complete
+2026-11-10T10:10:08.4978880Z c200e4e2b35b: Pull complete
+2026-11-10T10:10:08.5017770Z Digest: sha256:665dc7b37ac52a17e298511414c21d23ffa4e6a6ef6225b3e5d59c7afb35e994
+2026-11-10T10:10:08.5037284Z Status: Downloaded newer image for postgres:17.11-bookworm
+2026-11-10T10:10:08.5049081Z docker.io/library/postgres:17.11-bookworm
+2026-11-10T10:10:08.5127053Z ##[command]/usr/bin/docker create --name d574e5d9a8a84fb7b65040e17e5b5609_postgres1711bookworm_0c8004 --label b58621 --network github_network_29a7f51345c94eec91567fff5fcd79c1 --network-alias postgres -p 5432:5432 --health-cmd "pg_isready -U nf_dev -d nf_test" --health-interval 2s --health-timeout 2s --health-retries 30 -e "POSTGRES_DB=nf_test" -e "POSTGRES_USER=nf_dev" -e "POSTGRES_PASSWORD=nf_dev_ci_only" -e "POSTGRES_INITDB_ARGS=--data-checksums" -e GITHUB_ACTIONS=true -e CI=true postgres:17.11-bookworm
+2026-11-10T10:10:08.5412930Z bc40f81a8dd5e08d02f32ff172549cb40afd2c916d7c4a41efa9cb47956bfe17
+2026-11-10T10:10:08.5440432Z ##[command]/usr/bin/docker start bc40f81a8dd5e08d02f32ff172549cb40afd2c916d7c4a41efa9cb47956bfe17
+2026-11-10T10:10:08.7577903Z bc40f81a8dd5e08d02f32ff172549cb40afd2c916d7c4a41efa9cb47956bfe17
+2026-11-10T10:10:08.7607596Z ##[command]/usr/bin/docker ps --all --filter id=bc40f81a8dd5e08d02f32ff172549cb40afd2c916d7c4a41efa9cb47956bfe17 --filter status=running --no-trunc --format "{{.ID}} {{.Status}}"
+2026-11-10T10:10:08.7810083Z bc40f81a8dd5e08d02f32ff172549cb40afd2c916d7c4a41efa9cb47956bfe17 Up Less than a second (health: starting)
+2026-11-10T10:10:08.7834534Z ##[command]/usr/bin/docker port bc40f81a8dd5e08d02f32ff172549cb40afd2c916d7c4a41efa9cb47956bfe17
+2026-11-10T10:10:08.7998527Z 5432/tcp -> 0.0.0.0:5432
+2026-11-10T10:10:08.7999388Z 5432/tcp -> [::]:5432
+2026-11-10T10:10:08.8061899Z ##[endgroup]
+2026-11-10T10:10:08.8073409Z ##[group]Waiting for all services to be ready
+2026-11-10T10:10:08.8091700Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" bc40f81a8dd5e08d02f32ff172549cb40afd2c916d7c4a41efa9cb47956bfe17
+2026-11-10T10:10:08.8258657Z starting
+2026-11-10T10:10:08.8286717Z postgres service is starting, waiting 2 seconds before checking again.
+2026-11-10T10:10:10.8293308Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" bc40f81a8dd5e08d02f32ff172549cb40afd2c916d7c4a41efa9cb47956bfe17
+2026-11-10T10:10:10.8449823Z healthy
+2026-11-10T10:10:10.8469346Z postgres service is healthy.
+2026-11-10T10:10:10.8469763Z ##[endgroup]
+2026-11-10T10:10:10.8778202Z ##[group]Run actions/checkout@v4
+2026-11-10T10:10:10.8778701Z with:
+2026-11-10T10:10:10.8778942Z   repository: SKYdayDUCK/NovelFactory
+2026-11-10T10:10:10.8781600Z   token: ***
+2026-11-10T10:10:10.8781823Z   ssh-strict: true
+2026-11-10T10:10:10.8782046Z   ssh-user: git
+2026-11-10T10:10:10.8782283Z   persist-credentials: true
+2026-11-10T10:10:10.8782541Z   clean: true
+2026-11-10T10:10:10.8782767Z   sparse-checkout-cone-mode: true
+2026-11-10T10:10:10.8783033Z   fetch-depth: 1
+2026-11-10T10:10:10.8783249Z   fetch-tags: false
+2026-11-10T10:10:10.8783475Z   show-progress: true
+2026-11-10T10:10:10.8783695Z   lfs: false
+2026-11-10T10:10:10.8783892Z   submodules: false
+2026-11-10T10:10:10.8784106Z   set-safe-directory: true
+2026-11-10T10:10:10.8784361Z   allow-unsafe-pr-checkout: false
+2026-11-10T10:10:10.8784771Z env:
+2026-11-10T10:10:10.8785283Z   NF_DATABASE_URL: ***127.0.0.1:5432/nf_test
+2026-11-10T10:10:10.8786009Z   NF_TEST_DATABASE_URL: ***127.0.0.1:5432/nf_test
+2026-11-10T10:10:10.8786382Z   NF_EVIDENCE_DIR: ci-evidence/recovery
+2026-11-10T10:10:10.8786674Z   PG_BIN: /usr/lib/postgresql/17/bin
+2026-11-10T10:10:10.8786933Z   NF_POOL_SIZE: 8
+2026-11-10T10:10:10.8787150Z   NF_POOL_OVERFLOW: 0
+2026-11-10T10:10:10.8787371Z ##[endgroup]
+2026-11-10T10:10:11.1095233Z Syncing repository: SKYdayDUCK/NovelFactory
+2026-11-10T10:10:11.1097343Z ##[group]Getting Git version info
+2026-11-10T10:10:11.1097991Z Working directory is '/home/runner/work/NovelFactory/NovelFactory'
+2026-11-10T10:10:11.1098913Z [command]/usr/bin/git version
+2026-11-10T10:10:11.1162366Z git version 2.56.0
+2026-11-10T10:10:11.1182581Z ##[endgroup]
+2026-11-10T10:10:11.1197311Z Temporarily overriding HOME='/home/runner/work/_temp/646d266f-8ca6-468f-a95d-20ff7ed8a087' before making global git config changes
+2026-11-10T10:10:11.1198709Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-10T10:10:11.1204389Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/NovelFactory/NovelFactory
+2026-11-10T10:10:11.1254259Z Deleting the contents of '/home/runner/work/NovelFactory/NovelFactory'
+2026-11-10T10:10:11.1258360Z ##[group]Initializing the repository
+2026-11-10T10:10:11.1262392Z [command]/usr/bin/git init /home/runner/work/NovelFactory/NovelFactory
+2026-11-10T10:10:11.1348992Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-10T10:10:11.1349893Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-10T10:10:11.1350711Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-10T10:10:11.1351352Z hint: call:
+2026-11-10T10:10:11.1351557Z hint:
+2026-11-10T10:10:11.1351852Z hint: 	git config --global init.defaultBranch <name>
+2026-11-10T10:10:11.1352360Z hint:
+2026-11-10T10:10:11.1352820Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-10T10:10:11.1353587Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-10T10:10:11.1354001Z hint:
+2026-11-10T10:10:11.1354315Z hint: 	git branch -m <name>
+2026-11-10T10:10:11.1354672Z hint:
+2026-11-10T10:10:11.1355011Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-10T10:10:11.1360822Z Initialized empty Git repository in /home/runner/work/NovelFactory/NovelFactory/.git/
+2026-11-10T10:10:11.1372741Z [command]/usr/bin/git remote add origin https://github.com/SKYdayDUCK/NovelFactory
+2026-11-10T10:10:11.1422511Z ##[endgroup]
+2026-11-10T10:10:11.1423217Z ##[group]Disabling automatic garbage collection
+2026-11-10T10:10:11.1427755Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-10T10:10:11.1469687Z ##[endgroup]
+2026-11-10T10:10:11.1470545Z ##[group]Setting up auth
+2026-11-10T10:10:11.1487065Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-10T10:10:11.1530663Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-10T10:10:11.1959307Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-10T10:10:11.2011446Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-10T10:10:11.2282493Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-10T10:10:11.2331421Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-10T10:10:11.2597063Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-10T10:10:11.2649758Z ##[endgroup]
+2026-11-10T10:10:11.2650199Z ##[group]Fetching the repository
+2026-11-10T10:10:11.2661989Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +98a95361ff46f6d2e6d4efa75e310a617d05c770:refs/remotes/origin/dev/p2-production-loop
+2026-11-10T10:10:12.0215552Z From https://github.com/SKYdayDUCK/NovelFactory
+2026-11-10T10:10:12.0216813Z  * [new ref]         98a95361ff46f6d2e6d4efa75e310a617d05c770 -> origin/dev/p2-production-loop
+2026-11-10T10:10:12.0221296Z ##[endgroup]
+2026-11-10T10:10:12.0222026Z ##[group]Determining the checkout info
+2026-11-10T10:10:12.0224554Z ##[endgroup]
+2026-11-10T10:10:12.0232655Z [command]/usr/bin/git sparse-checkout disable
+2026-11-10T10:10:12.0294226Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-10T10:10:12.0336708Z ##[group]Checking out the ref
+2026-11-10T10:10:12.0341524Z [command]/usr/bin/git checkout --progress --force -B dev/p2-production-loop refs/remotes/origin/dev/p2-production-loop
+2026-11-10T10:10:12.0736606Z Switched to a new branch 'dev/p2-production-loop'
+2026-11-10T10:10:12.0742155Z branch 'dev/p2-production-loop' set up to track 'origin/dev/p2-production-loop'.
+2026-11-10T10:10:12.0749298Z ##[endgroup]
+2026-11-10T10:10:12.0805259Z [command]/usr/bin/git log -1 --format=%H
+2026-11-10T10:10:12.0842714Z 98a95361ff46f6d2e6d4efa75e310a617d05c770
+2026-11-10T10:10:12.1111061Z ##[group]Run actions/setup-python@v5
+2026-11-10T10:10:12.1111348Z with:
+2026-11-10T10:10:12.1111557Z   python-version: 3.12
+2026-11-10T10:10:12.1111792Z   check-latest: false
+2026-11-10T10:10:12.1114332Z   token: ***
+2026-11-10T10:10:12.1114561Z   update-environment: true
+2026-11-10T10:10:12.1114817Z   allow-prereleases: false
+2026-11-10T10:10:12.1115047Z   freethreaded: false
+2026-11-10T10:10:12.1115259Z env:
+2026-11-10T10:10:12.1115937Z   NF_DATABASE_URL: ***127.0.0.1:5432/nf_test
+2026-11-10T10:10:12.1116571Z   NF_TEST_DATABASE_URL: ***127.0.0.1:5432/nf_test
+2026-11-10T10:10:12.1116887Z   NF_EVIDENCE_DIR: ci-evidence/recovery
+2026-11-10T10:10:12.1117172Z   PG_BIN: /usr/lib/postgresql/17/bin
+2026-11-10T10:10:12.1117437Z   NF_POOL_SIZE: 8
+2026-11-10T10:10:12.1117650Z   NF_POOL_OVERFLOW: 0
+2026-11-10T10:10:12.1117870Z ##[endgroup]
+2026-11-10T10:10:12.2504982Z ##[group]Installed versions
+2026-11-10T10:10:12.2607549Z (node:2929) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-10T10:10:12.2608525Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-10T10:10:12.2609168Z Successfully set up CPython (3.12.16)
+2026-11-10T10:10:12.2609836Z ##[endgroup]
+2026-11-10T10:10:12.2804545Z ##[group]Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+2026-11-10T10:10:12.2804947Z with:
+2026-11-10T10:10:12.2805159Z   enable-cache: true
+2026-11-10T10:10:12.2805421Z   activate-environment: false
+2026-11-10T10:10:12.2805678Z   no-project: false
+2026-11-10T10:10:12.2806252Z   working-directory: /home/runner/work/NovelFactory/NovelFactory
+2026-11-10T10:10:12.2808947Z   github-token: ***
+2026-11-10T10:10:12.2809520Z   cache-dependency-glob: **/*requirements*.txt
+**/*requirements*.in
+**/*constraints*.txt
+**/*constraints*.in
+**/pyproject.toml
+**/uv.lock
+**/*.py.lock
+
+2026-11-10T10:10:12.2810127Z   restore-cache: true
+2026-11-10T10:10:12.2810376Z   save-cache: auto
+2026-11-10T10:10:12.2810597Z   prune-cache: false
+2026-11-10T10:10:12.2810823Z   cache-python: false
+2026-11-10T10:10:12.2811058Z   ignore-nothing-to-cache: false
+2026-11-10T10:10:12.2811326Z   ignore-empty-workdir: false
+2026-11-10T10:10:12.2811599Z   download-from-astral-mirror: true
+2026-11-10T10:10:12.2811926Z   add-problem-matchers: true
+2026-11-10T10:10:12.2812178Z   quiet: false
+2026-11-10T10:10:12.2874838Z   resolution-strategy: highest
+2026-11-10T10:10:12.2875274Z env:
+2026-11-10T10:10:12.2876139Z   NF_DATABASE_URL: ***127.0.0.1:5432/nf_test
+2026-11-10T10:10:12.2876862Z   NF_TEST_DATABASE_URL: ***127.0.0.1:5432/nf_test
+2026-11-10T10:10:12.2877316Z   NF_EVIDENCE_DIR: ci-evidence/recovery
+2026-11-10T10:10:12.2877611Z   PG_BIN: /usr/lib/postgresql/17/bin
+2026-11-10T10:10:12.2877868Z   NF_POOL_SIZE: 8
+2026-11-10T10:10:12.2878076Z   NF_POOL_OVERFLOW: 0
+2026-11-10T10:10:12.2878364Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:12.2878797Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+2026-11-10T10:10:12.2879290Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:12.2879709Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:12.2880096Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:12.2880477Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+2026-11-10T10:10:12.2880802Z ##[endgroup]
+2026-11-10T10:10:12.4814053Z Trying to find version for uv in: /home/runner/work/NovelFactory/NovelFactory/uv.toml
+2026-11-10T10:10:12.4815204Z Could not find file: /home/runner/work/NovelFactory/NovelFactory/uv.toml
+2026-11-10T10:10:12.4816611Z Trying to find version for uv in: /home/runner/work/NovelFactory/NovelFactory/pyproject.toml
+2026-11-10T10:10:12.4820325Z Could not determine uv version from uv.toml or pyproject.toml. Falling back to latest.
+2026-11-10T10:10:12.4825039Z Fetching manifest data from https://raw.githubusercontent.com/astral-sh/versions/main/v1/uv.ndjson ...
+2026-11-10T10:10:12.5980921Z Downloading uv from "https://releases.astral.sh/github/uv/releases/download/0.13.7/uv-x86_64-unknown-linux-gnu.tar.gz" ...
+2026-11-10T10:10:12.9316889Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/bfba17c1-6e08-4f88-b235-58fd404cb1fe -f /home/runner/work/_temp/f3eef02e-969b-4528-820b-37168cec48bd
+2026-11-10T10:10:13.2531933Z Added /home/runner/.local/bin to the path
+2026-11-10T10:10:13.2535225Z Added /opt/hostedtoolcache/uv/0.13.7/x86_64 to the path
+2026-11-10T10:10:13.2537276Z Set UV_PYTHON_INSTALL_DIR to /home/runner/work/_temp/uv-python-dir
+2026-11-10T10:10:13.2537846Z Added /home/runner/work/_temp/uv-python-dir to the path
+2026-11-10T10:10:13.2548914Z Set UV_CACHE_DIR to /home/runner/work/_temp/setup-uv-cache
+2026-11-10T10:10:13.2549334Z Successfully installed uv version 0.13.7
+2026-11-10T10:10:13.6214310Z Searching files using cache dependency glob: /home/runner/work/NovelFactory/NovelFactory/**/*requirements*.txt,/home/runner/work/NovelFactory/NovelFactory/**/*requirements*.in,/home/runner/work/NovelFactory/NovelFactory/**/*constraints*.txt,/home/runner/work/NovelFactory/NovelFactory/**/*constraints*.in,/home/runner/work/NovelFactory/NovelFactory/**/pyproject.toml,/home/runner/work/NovelFactory/NovelFactory/**/uv.lock,/home/runner/work/NovelFactory/NovelFactory/**/*.py.lock
+2026-11-10T10:10:13.6946550Z /home/runner/work/NovelFactory/NovelFactory/pyproject.toml
+2026-11-10T10:10:13.7209312Z /home/runner/work/NovelFactory/NovelFactory/uv.lock
+2026-11-10T10:10:13.7233027Z /home/runner/work/NovelFactory/NovelFactory/validation/requirements-validation.txt
+2026-11-10T10:10:13.7239508Z Found 3 files to hash.
+2026-11-10T10:10:13.7327909Z Trying to restore cache from GitHub Actions cache with key: setup-uv-2-x86_64-unknown-linux-gnu-ubuntu-24.04-unknown-a976a1f1f4e195e7b28d0a9f3540df9614e67372b08104755e814ab33ebe6d51
+2026-11-10T10:10:13.9051936Z Cache hit for: setup-uv-2-x86_64-unknown-linux-gnu-ubuntu-24.04-unknown-a976a1f1f4e195e7b28d0a9f3540df9614e67372b08104755e814ab33ebe6d51
+2026-11-10T10:10:14.8948642Z Received 27982397 of 27982397 (100.0%), 34.3 MBs/sec
+2026-11-10T10:10:14.8956665Z Cache Size: ~27 MB (27982397 B)
+2026-11-10T10:10:14.8982446Z [command]/usr/bin/tar -xf /home/runner/work/_temp/a5825afa-a486-45d3-89bc-96d728d74e0d/cache.tzst -P -C /home/runner/work/NovelFactory/NovelFactory --use-compress-program unzstd
+2026-11-10T10:10:15.1463812Z Cache restored successfully
+2026-11-10T10:10:15.1484233Z cache restored from GitHub Actions cache with key: setup-uv-2-x86_64-unknown-linux-gnu-ubuntu-24.04-unknown-a976a1f1f4e195e7b28d0a9f3540df9614e67372b08104755e814ab33ebe6d51
+2026-11-10T10:10:15.2670086Z ##[group]Run sudo install -d -m 0755 /usr/share/postgresql-common/pgdg
+2026-11-10T10:10:15.2670702Z [36;1msudo install -d -m 0755 /usr/share/postgresql-common/pgdg[0m
+2026-11-10T10:10:15.2671494Z [36;1mcurl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo tee /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc > /dev/null[0m
+2026-11-10T10:10:15.2672700Z [36;1mecho "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list[0m
+2026-11-10T10:10:15.2673505Z [36;1msudo apt-get update -qq[0m
+2026-11-10T10:10:15.2673835Z [36;1msudo apt-get install -y postgresql-client-17[0m
+2026-11-10T10:10:15.2674253Z [36;1mtest -x "$PG_BIN/pg_dump" && test -x "$PG_BIN/pg_restore"[0m
+2026-11-10T10:10:15.2701677Z shell: /usr/bin/bash -e {0}
+2026-11-10T10:10:15.2701956Z env:
+2026-11-10T10:10:15.2703017Z   NF_DATABASE_URL: ***127.0.0.1:5432/nf_test
+2026-11-10T10:10:15.2703563Z   NF_TEST_DATABASE_URL: ***127.0.0.1:5432/nf_test
+2026-11-10T10:10:15.2703893Z   NF_EVIDENCE_DIR: ci-evidence/recovery
+2026-11-10T10:10:15.2704200Z   PG_BIN: /usr/lib/postgresql/17/bin
+2026-11-10T10:10:15.2704474Z   NF_POOL_SIZE: 8
+2026-11-10T10:10:15.2704698Z   NF_POOL_OVERFLOW: 0
+2026-11-10T10:10:15.2705001Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:15.2705649Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+2026-11-10T10:10:15.2706390Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:15.2706781Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:15.2707172Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:15.2707562Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+2026-11-10T10:10:15.2707987Z   UV_PYTHON_INSTALL_DIR: /home/runner/work/_temp/uv-python-dir
+2026-11-10T10:10:15.2708370Z   UV_CACHE_DIR: /home/runner/work/_temp/setup-uv-cache
+2026-11-10T10:10:15.2708683Z ##[endgroup]
+2026-11-10T10:10:15.9817157Z deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt noble-pgdg main
+2026-11-10T10:10:21.3951131Z Reading package lists...
+2026-11-10T10:10:21.6462917Z Building dependency tree...
+2026-11-10T10:10:21.6471037Z Reading state information...
+2026-11-10T10:10:21.8139935Z Suggested packages:
+2026-11-10T10:10:21.8140306Z   postgresql-17 postgresql-doc-17
+2026-11-10T10:10:21.8348021Z The following NEW packages will be installed:
+2026-11-10T10:10:21.8348653Z   postgresql-client-17
+2026-11-10T10:10:22.0745984Z 0 upgraded, 1 newly installed, 0 to remove and 36 not upgraded.
+2026-11-10T10:10:22.0746524Z Need to get 2053 kB of archives.
+2026-11-10T10:10:22.0746934Z After this operation, 10.0 MB of additional disk space will be used.
+2026-11-10T10:10:22.0747697Z Get:1 https://apt.postgresql.org/pub/repos/apt noble-pgdg/main amd64 postgresql-client-17 amd64 17.11-1.pgdg24.04+2 [2053 kB]
+2026-11-10T10:10:22.4527907Z Fetched 2053 kB in 0s (6306 kB/s)
+2026-11-10T10:10:22.4772861Z Selecting previously unselected package postgresql-client-17.
+2026-11-10T10:10:22.5088786Z (Reading database ... 
+2026-11-10T10:10:22.5089363Z (Reading database ... 5%
+2026-11-10T10:10:22.5089842Z (Reading database ... 10%
+2026-11-10T10:10:22.5090312Z (Reading database ... 15%
+2026-11-10T10:10:22.5090797Z (Reading database ... 20%
+2026-11-10T10:10:22.5091381Z (Reading database ... 25%
+2026-11-10T10:10:22.5091751Z (Reading database ... 30%
+2026-11-10T10:10:22.5092107Z (Reading database ... 35%
+2026-11-10T10:10:22.5092469Z (Reading database ... 40%
+2026-11-10T10:10:22.5092804Z (Reading database ... 45%
+2026-11-10T10:10:22.5093036Z (Reading database ... 50%
+2026-11-10T10:10:22.5132300Z (Reading database ... 55%
+2026-11-10T10:10:22.6914064Z (Reading database ... 60%
+2026-11-10T10:10:22.8541425Z (Reading database ... 65%
+2026-11-10T10:10:23.0966684Z (Reading database ... 70%
+2026-11-10T10:10:23.2487411Z (Reading database ... 75%
+2026-11-10T10:10:23.4375672Z (Reading database ... 80%
+2026-11-10T10:10:23.6405528Z (Reading database ... 85%
+2026-11-10T10:10:23.8497250Z (Reading database ... 90%
+2026-11-10T10:10:24.0149894Z (Reading database ... 95%
+2026-11-10T10:10:24.0150352Z (Reading database ... 100%
+2026-11-10T10:10:24.0150828Z (Reading database ... 215960 files and directories currently installed.)
+2026-11-10T10:10:24.0200368Z Preparing to unpack .../postgresql-client-17_17.11-1.pgdg24.04+2_amd64.deb ...
+2026-11-10T10:10:24.0225148Z Unpacking postgresql-client-17 (17.11-1.pgdg24.04+2) ...
+2026-11-10T10:10:24.2683284Z Setting up postgresql-client-17 (17.11-1.pgdg24.04+2) ...
+2026-11-10T10:10:24.6736041Z update-alternatives: using /usr/share/postgresql/17/man/man1/psql.1.gz to provide /usr/share/man/man1/psql.1.gz (psql.1.gz) in auto mode
+2026-11-10T10:10:24.7031003Z Processing triggers for postgresql-common (293.pgdg24.04+1) ...
+2026-11-10T10:10:24.8395097Z Building PostgreSQL dictionaries from installed myspell/hunspell packages...
+2026-11-10T10:10:24.8444444Z   en_us
+2026-11-10T10:10:24.9031773Z Removing obsolete dictionary files:
+2026-11-10T10:10:25.6176038Z 
+2026-11-10T10:10:25.6176662Z Running kernel seems to be up-to-date.
+2026-11-10T10:10:25.6176994Z 
+2026-11-10T10:10:25.6177150Z No services need to be restarted.
+2026-11-10T10:10:25.6177398Z 
+2026-11-10T10:10:25.6177942Z No containers need to be restarted.
+2026-11-10T10:10:25.6178196Z 
+2026-11-10T10:10:25.6178369Z No user sessions are running outdated binaries.
+2026-11-10T10:10:25.6178665Z 
+2026-11-10T10:10:25.6178939Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+2026-11-10T10:10:26.6938546Z ##[group]Run uv sync --locked --group dev --python 3.12
+2026-11-10T10:10:26.6938994Z [36;1muv sync --locked --group dev --python 3.12[0m
+2026-11-10T10:10:26.6961919Z shell: /usr/bin/bash -e {0}
+2026-11-10T10:10:26.6962185Z env:
+2026-11-10T10:10:26.6962826Z   NF_DATABASE_URL: ***127.0.0.1:5432/nf_test
+2026-11-10T10:10:26.6963373Z   NF_TEST_DATABASE_URL: ***127.0.0.1:5432/nf_test
+2026-11-10T10:10:26.6963727Z   NF_EVIDENCE_DIR: ci-evidence/recovery
+2026-11-10T10:10:26.6964043Z   PG_BIN: /usr/lib/postgresql/17/bin
+2026-11-10T10:10:26.6964334Z   NF_POOL_SIZE: 8
+2026-11-10T10:10:26.6964560Z   NF_POOL_OVERFLOW: 0
+2026-11-10T10:10:26.6964873Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:26.6965346Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+2026-11-10T10:10:26.6965990Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:26.6966579Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:26.6967028Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:26.6967432Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+2026-11-10T10:10:26.6967847Z   UV_PYTHON_INSTALL_DIR: /home/runner/work/_temp/uv-python-dir
+2026-11-10T10:10:26.6968225Z   UV_CACHE_DIR: /home/runner/work/_temp/setup-uv-cache
+2026-11-10T10:10:26.6968548Z ##[endgroup]
+2026-11-10T10:10:26.7098812Z Using CPython 3.12.16 interpreter at: /opt/hostedtoolcache/Python/3.12.16/x64/bin/python3.12
+2026-11-10T10:10:26.7099550Z Creating virtual environment at: .venv
+2026-11-10T10:10:26.7121110Z Resolved 43 packages in 0.89ms
+2026-11-10T10:10:26.7146306Z    Building novel-factory @ file:///home/runner/work/NovelFactory/NovelFactory
+2026-11-10T10:10:27.1420493Z       Built novel-factory @ file:///home/runner/work/NovelFactory/NovelFactory
+2026-11-10T10:10:27.1562218Z Prepared 1 package in 442ms
+2026-11-10T10:10:27.1827989Z Installed 41 packages in 26ms
+2026-11-10T10:10:27.1828855Z  + alembic==1.20.1
+2026-11-10T10:10:27.1829303Z  + annotated-doc==0.0.5
+2026-11-10T10:10:27.1829723Z  + annotated-types==0.8.0
+2026-11-10T10:10:27.1830115Z  + anyio==4.16.0
+2026-11-10T10:10:27.1830544Z  + attrs==26.1.0
+2026-11-10T10:10:27.1830996Z  + certifi==2026.10.23
+2026-11-10T10:10:27.1831477Z  + click==8.5.1
+2026-11-10T10:10:27.1831943Z  + fastapi==0.162.2
+2026-11-10T10:10:27.1832544Z  + greenlet==3.5.6
+2026-11-10T10:10:27.1832999Z  + h11==0.16.0
+2026-11-10T10:10:27.1833439Z  + httpcore==1.0.9
+2026-11-10T10:10:27.1833963Z  + httpx==0.28.1
+2026-11-10T10:10:27.1834488Z  + hypothesis==6.170.15
+2026-11-10T10:10:27.1834871Z  + idna==3.20
+2026-11-10T10:10:27.1835357Z  + iniconfig==2.3.1
+2026-11-10T10:10:27.1835982Z  + jsonschema==4.26.0
+2026-11-10T10:10:27.1836475Z  + jsonschema-specifications==2025.9.1
+2026-11-10T10:10:27.1836948Z  + mako==1.4.3
+2026-11-10T10:10:27.1837390Z  + markupsafe==3.0.4
+2026-11-10T10:10:27.1838384Z  + novel-factory==2.0.1 (from file:///home/runner/work/NovelFactory/NovelFactory)
+2026-11-10T10:10:27.1839121Z  + opentelemetry-api==1.45.2
+2026-11-10T10:10:27.1839538Z  + packaging==26.3
+2026-11-10T10:10:27.1839894Z  + pluggy==1.7.0
+2026-11-10T10:10:27.1840256Z  + psycopg==3.3.8
+2026-11-10T10:10:27.1840603Z  + psycopg-binary==3.3.8
+2026-11-10T10:10:27.1841008Z  + pydantic==2.14.3
+2026-11-10T10:10:27.1841351Z  + pydantic-core==2.50.4
+2026-11-10T10:10:27.1841750Z  + pygments==2.21.0
+2026-11-10T10:10:27.1842268Z  + pytest==9.2.0
+2026-11-10T10:10:27.1842659Z  + pytest-json-report==1.5.0
+2026-11-10T10:10:27.1843145Z  + pytest-metadata==3.1.1
+2026-11-10T10:10:27.1843661Z  + pyyaml==6.0.3
+2026-11-10T10:10:27.1844126Z  + referencing==0.37.0
+2026-11-10T10:10:27.1844606Z  + rpds-py==2026.9.1
+2026-11-10T10:10:27.1845093Z  + ruff==0.17.4
+2026-11-10T10:10:27.1845924Z  + sortedcontainers==2.4.0
+2026-11-10T10:10:27.1846338Z  + sqlalchemy==2.0.57
+2026-11-10T10:10:27.1846682Z  + starlette==1.10.0
+2026-11-10T10:10:27.1847075Z  + typing-extensions==4.16.0
+2026-11-10T10:10:27.1847589Z  + typing-inspection==0.4.5
+2026-11-10T10:10:27.1848132Z  + uvicorn==0.54.0
+2026-11-10T10:10:27.1966038Z ##[group]Run mkdir -p ci-evidence
+2026-11-10T10:10:27.1966413Z [36;1mmkdir -p ci-evidence[0m
+2026-11-10T10:10:27.1966806Z [36;1m{ uv run --no-sync python --version; "$PG_BIN/pg_dump" --version; \[0m
+2026-11-10T10:10:27.1967511Z [36;1m  "$PG_BIN/psql" -h 127.0.0.1 -U nf_dev -d nf_test -Atc 'SHOW server_version; SHOW fsync; SHOW synchronous_commit;'; } \[0m
+2026-11-10T10:10:27.1968079Z [36;1m  2>&1 | tee ci-evidence/environment.log[0m
+2026-11-10T10:10:27.1968561Z [36;1muv run --no-sync python -m alembic upgrade head 2>&1 | tee ci-evidence/migration.log[0m
+2026-11-10T10:10:27.1969158Z [36;1muv run --no-sync python -m alembic current 2>&1 | tee -a ci-evidence/migration.log[0m
+2026-11-10T10:10:27.1991991Z shell: /usr/bin/bash -e {0}
+2026-11-10T10:10:27.1992256Z env:
+2026-11-10T10:10:27.1992847Z   NF_DATABASE_URL: ***127.0.0.1:5432/nf_test
+2026-11-10T10:10:27.1993398Z   NF_TEST_DATABASE_URL: ***127.0.0.1:5432/nf_test
+2026-11-10T10:10:27.1993765Z   NF_EVIDENCE_DIR: ci-evidence/recovery
+2026-11-10T10:10:27.1994084Z   PG_BIN: /usr/lib/postgresql/17/bin
+2026-11-10T10:10:27.1994360Z   NF_POOL_SIZE: 8
+2026-11-10T10:10:27.1994581Z   NF_POOL_OVERFLOW: 0
+2026-11-10T10:10:27.1994892Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:27.1995342Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+2026-11-10T10:10:27.1996020Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:27.1996632Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:27.1997037Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:27.1997431Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+2026-11-10T10:10:27.1997889Z   UV_PYTHON_INSTALL_DIR: /home/runner/work/_temp/uv-python-dir
+2026-11-10T10:10:27.1998280Z   UV_CACHE_DIR: /home/runner/work/_temp/setup-uv-cache
+2026-11-10T10:10:27.1998610Z   PGPASSWORD: nf_dev_ci_only
+2026-11-10T10:10:27.1998862Z ##[endgroup]
+2026-11-10T10:10:27.2137310Z warning: Using incompatible environment (`.venv`) due to `--no-sync` (The project environment's Python version does not satisfy the request: `Python 3.12.14`)
+2026-11-10T10:10:27.2166018Z Python 3.12.16
+2026-11-10T10:10:27.2222815Z pg_dump (PostgreSQL) 17.11 (Ubuntu 17.11-1.pgdg24.04+2)
+2026-11-10T10:10:27.2368420Z 17.11 (Debian 17.11-1.pgdg12+2)
+2026-11-10T10:10:27.2368902Z on
+2026-11-10T10:10:27.2369187Z on
+2026-11-10T10:10:27.2457888Z warning: Using incompatible environment (`.venv`) due to `--no-sync` (The project environment's Python version does not satisfy the request: `Python 3.12.14`)
+2026-11-10T10:10:28.9536959Z warning: Using incompatible environment (`.venv`) due to `--no-sync` (The project environment's Python version does not satisfy the request: `Python 3.12.14`)
+2026-11-10T10:10:29.3817586Z 0003 (head)
+2026-11-10T10:10:29.4597249Z ##[group]Run uv run --no-sync python -m pytest tests -q \
+2026-11-10T10:10:29.4597978Z [36;1muv run --no-sync python -m pytest tests -q \[0m
+2026-11-10T10:10:29.4598966Z [36;1m  --junitxml=ci-evidence/postgres-all.xml --json-report --json-report-file=ci-evidence/postgres-all.json \[0m
+2026-11-10T10:10:29.4599921Z [36;1m  2>&1 | tee ci-evidence/postgres-all.log[0m
+2026-11-10T10:10:29.4630774Z shell: /usr/bin/bash -e {0}
+2026-11-10T10:10:29.4631186Z env:
+2026-11-10T10:10:29.4631993Z   NF_DATABASE_URL: ***127.0.0.1:5432/nf_test
+2026-11-10T10:10:29.4632855Z   NF_TEST_DATABASE_URL: ***127.0.0.1:5432/nf_test
+2026-11-10T10:10:29.4633381Z   NF_EVIDENCE_DIR: ci-evidence/recovery
+2026-11-10T10:10:29.4633882Z   PG_BIN: /usr/lib/postgresql/17/bin
+2026-11-10T10:10:29.4634302Z   NF_POOL_SIZE: 8
+2026-11-10T10:10:29.4634632Z   NF_POOL_OVERFLOW: 0
+2026-11-10T10:10:29.4635356Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:29.4636334Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+2026-11-10T10:10:29.4637368Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:29.4638218Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:29.4638871Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:29.4639560Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+2026-11-10T10:10:29.4640254Z   UV_PYTHON_INSTALL_DIR: /home/runner/work/_temp/uv-python-dir
+2026-11-10T10:10:29.4640897Z   UV_CACHE_DIR: /home/runner/work/_temp/setup-uv-cache
+2026-11-10T10:10:29.4641407Z ##[endgroup]
+2026-11-10T10:10:29.4837213Z warning: Using incompatible environment (`.venv`) due to `--no-sync` (The project environment's Python version does not satisfy the request: `Python 3.12.14`)
+2026-11-10T10:10:47.3593757Z ........................................................................ [ 23%]
+2026-11-10T10:11:24.3070663Z ........................................................................ [ 46%]
+2026-11-10T10:12:10.6188946Z ........................................................................ [ 70%]
+2026-11-10T10:12:45.2664677Z ........................................................................ [ 93%]
+2026-11-10T10:12:46.4657872Z ...................                                                      [100%]
+2026-11-10T10:12:46.4658580Z 307 passed in 135.34s (0:02:15)
+2026-11-10T10:12:46.8293541Z ##[group]Run actions/upload-artifact@v4
+2026-11-10T10:12:46.8293848Z with:
+2026-11-10T10:12:46.8294079Z   name: p1-postgres-concurrency-1
+2026-11-10T10:12:46.8294359Z   path: ci-evidence/
+2026-11-10T10:12:46.8294601Z   if-no-files-found: warn
+2026-11-10T10:12:46.8294846Z   retention-days: 90
+2026-11-10T10:12:46.8295079Z   compression-level: 6
+2026-11-10T10:12:46.8295314Z   overwrite: false
+2026-11-10T10:12:46.8295556Z   include-hidden-files: false
+2026-11-10T10:12:46.8296008Z env:
+2026-11-10T10:12:46.8296629Z   NF_DATABASE_URL: ***127.0.0.1:5432/nf_test
+2026-11-10T10:12:46.8297160Z   NF_TEST_DATABASE_URL: ***127.0.0.1:5432/nf_test
+2026-11-10T10:12:46.8297485Z   NF_EVIDENCE_DIR: ci-evidence/recovery
+2026-11-10T10:12:46.8297794Z   PG_BIN: /usr/lib/postgresql/17/bin
+2026-11-10T10:12:46.8298069Z   NF_POOL_SIZE: 8
+2026-11-10T10:12:46.8298293Z   NF_POOL_OVERFLOW: 0
+2026-11-10T10:12:46.8298607Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:12:46.8299084Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+2026-11-10T10:12:46.8299549Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:12:46.8299949Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:12:46.8300338Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:12:46.8300724Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+2026-11-10T10:12:46.8301140Z   UV_PYTHON_INSTALL_DIR: /home/runner/work/_temp/uv-python-dir
+2026-11-10T10:12:46.8301520Z   UV_CACHE_DIR: /home/runner/work/_temp/setup-uv-cache
+2026-11-10T10:12:46.8301833Z ##[endgroup]
+2026-11-10T10:12:47.0063352Z (node:5938) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-10T10:12:47.0064266Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-10T10:12:47.0147505Z With the provided path, there will be 8 files uploaded
+2026-11-10T10:12:47.0156625Z Artifact name is valid!
+2026-11-10T10:12:47.0157390Z Root directory input is valid!
+2026-11-10T10:12:47.3225616Z Beginning upload of artifact content to blob storage
+2026-11-10T10:12:47.3584903Z (node:5938) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-10T10:12:47.6482196Z Uploaded bytes 51793
+2026-11-10T10:12:47.7080634Z Finished uploading artifact content to blob storage!
+2026-11-10T10:12:47.7082335Z SHA256 digest of uploaded artifact zip is b0be469196ba6003689e78a6564730c8f74e28c7449c84a9e9429e66e0a2f080
+2026-11-10T10:12:47.7083329Z Finalizing artifact upload
+2026-11-10T10:12:48.0943714Z Artifact p1-postgres-concurrency-1.zip successfully finalized. Artifact ID 13754531308
+2026-11-10T10:12:48.0945001Z Artifact p1-postgres-concurrency-1 has been successfully uploaded! Final size is 51793 bytes. Artifact ID is 13754531308
+2026-11-10T10:12:48.0951528Z Artifact download URL: https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42796798483/artifacts/13754531308
+2026-11-10T10:12:48.1201555Z Post job cleanup.
+2026-11-10T10:12:48.2387168Z UV_CACHE_DIR is already set to /home/runner/work/_temp/setup-uv-cache
+2026-11-10T10:12:48.2392524Z UV_PYTHON_INSTALL_DIR is already set to /home/runner/work/_temp/uv-python-dir
+2026-11-10T10:12:48.2394971Z Cache hit occurred on key setup-uv-2-x86_64-unknown-linux-gnu-ubuntu-24.04-unknown-a976a1f1f4e195e7b28d0a9f3540df9614e67372b08104755e814ab33ebe6d51, not saving cache.
+2026-11-10T10:12:48.3504774Z Post job cleanup.
+2026-11-10T10:12:48.4779069Z (node:5960) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-10T10:12:48.4780271Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-10T10:12:48.4923321Z Post job cleanup.
+2026-11-10T10:12:48.6189925Z [command]/usr/bin/git version
+2026-11-10T10:12:48.6270535Z git version 2.56.0
+2026-11-10T10:12:48.6309056Z Temporarily overriding HOME='/home/runner/work/_temp/356adb7a-45ef-425a-8c9a-82993001b442' before making global git config changes
+2026-11-10T10:12:48.6310367Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-10T10:12:48.6314959Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/NovelFactory/NovelFactory
+2026-11-10T10:12:48.6367136Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-10T10:12:48.6412696Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-10T10:12:48.6737814Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-10T10:12:48.6775276Z http.https://github.com/.extraheader
+2026-11-10T10:12:48.6798926Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-11-10T10:12:48.6853128Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-10T10:12:48.7178200Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-10T10:12:48.7248985Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-10T10:12:48.7743649Z Print service container logs: d574e5d9a8a84fb7b65040e17e5b5609_postgres1711bookworm_0c8004
+2026-11-10T10:12:48.7748897Z ##[command]/usr/bin/docker logs --details bc40f81a8dd5e08d02f32ff172549cb40afd2c916d7c4a41efa9cb47956bfe17
+2026-11-10T10:12:48.7931770Z  initdb: warning: enabling "trust" authentication for local connections
+2026-11-10T10:12:48.7933015Z  initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+2026-11-10T10:12:48.7934262Z  The files belonging to this database system will be owned by user "postgres".
+2026-11-10T10:12:48.7935623Z  2026-11-10 10:10:09.727 UTC [1] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-11-10T10:12:48.7937056Z  2026-11-10 10:10:09.727 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2026-11-10T10:12:48.7937936Z  2026-11-10 10:10:09.727 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2026-11-10T10:12:48.7939189Z  2026-11-10 10:10:09.728 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-11-10T10:12:48.7940147Z  2026-11-10 10:10:09.731 UTC [64] LOG:  database system was shut down at 2026-11-10 10:10:09 UTC
+2026-11-10T10:12:48.7940998Z  2026-11-10 10:10:09.736 UTC [1] LOG:  database system is ready to accept connections
+2026-11-10T10:12:48.7941803Z  2026-11-10 10:10:40.424 UTC [171] ERROR:  immutable authoritative record: nf_events
+2026-11-10T10:12:48.7942729Z  2026-11-10 10:10:40.424 UTC [171] CONTEXT:  PL/pgSQL function nf_reject_immutable_mutation() line 1 at RAISE
+2026-11-10T10:12:48.7943790Z  2026-11-10 10:10:40.424 UTC [171] STATEMENT:  UPDATE nf_events SET payload=payload WHERE event_version_id=$1
+2026-11-10T10:12:48.7944699Z  2026-11-10 10:10:40.426 UTC [161] ERROR:  immutable authoritative record: nf_events
+2026-11-10T10:12:48.7945603Z  2026-11-10 10:10:40.426 UTC [161] CONTEXT:  PL/pgSQL function nf_reject_immutable_mutation() line 1 at RAISE
+2026-11-10T10:12:48.7946719Z  2026-11-10 10:10:40.426 UTC [161] STATEMENT:  DELETE FROM nf_events WHERE event_version_id=$1
+2026-11-10T10:12:48.7947622Z  2026-11-10 10:10:40.427 UTC [170] ERROR:  immutable authoritative record: nf_revisions
+2026-11-10T10:12:48.7948595Z  2026-11-10 10:10:40.427 UTC [170] CONTEXT:  PL/pgSQL function nf_reject_immutable_mutation() line 1 at RAISE
+2026-11-10T10:12:48.7949707Z  2026-11-10 10:10:40.427 UTC [170] STATEMENT:  UPDATE nf_revisions SET snapshot=snapshot WHERE world_revision_id=$1
+2026-11-10T10:12:48.7950640Z  2026-11-10 10:10:40.428 UTC [171] ERROR:  scope tombstone required
+2026-11-10T10:12:48.7951438Z  2026-11-10 10:10:40.428 UTC [171] CONTEXT:  PL/pgSQL function nf_scope_monotonic() line 1 at RAISE
+2026-11-10T10:12:48.7952307Z  2026-11-10 10:10:40.428 UTC [171] STATEMENT:  DELETE FROM nf_scopes WHERE work_id=$1
+2026-11-10T10:12:48.7953142Z  2026-11-10 10:10:41.414 UTC [197] LOG:  unexpected EOF on client connection with an open transaction
+2026-11-10T10:12:48.7954070Z  2026-11-10 10:10:47.025 UTC [170] FATAL:  terminating connection due to administrator command
+2026-11-10T10:12:48.7954836Z  2026-11-10 10:10:47.123 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-11-10T10:12:48.7957448Z  2026-11-10 10:10:47.147 UTC [62] LOG:  checkpoint complete: wrote 204 buffers (1.2%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.004 s, sync=0.019 s, total=0.024 s; sync files=216, longest=0.001 s, average=0.001 s; distance=10693 kB, estimate=10693 kB; lsn=0/25C4810, redo lsn=0/25C47B8
+2026-11-10T10:12:48.7958764Z  2026-11-10 10:10:51.825 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-11-10T10:12:48.7959838Z  2026-11-10 10:10:51.828 UTC [62] LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=6, longest=0.001 s, average=0.001 s; distance=6563 kB, estimate=10280 kB; lsn=0/2C2D528, redo lsn=0/2C2D4D0
+2026-11-10T10:12:48.7961167Z  2026-11-10 10:10:53.727 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-11-10T10:12:48.7962206Z  2026-11-10 10:10:53.729 UTC [62] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.001 s, sync=0.001 s, total=0.002 s; sync files=4, longest=0.001 s, average=0.001 s; distance=5645 kB, estimate=9817 kB; lsn=0/31B09F8, redo lsn=0/31B09A0
+2026-11-10T10:12:48.7963220Z  2026-11-10 10:11:12.565 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-11-10T10:12:48.7964231Z  2026-11-10 10:11:12.567 UTC [62] LOG:  checkpoint complete: wrote 46 buffers (0.3%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=13, longest=0.001 s, average=0.001 s; distance=9217 kB, estimate=9757 kB; lsn=0/3AB0EC8, redo lsn=0/3AB0E70
+2026-11-10T10:12:48.7965236Z  2026-11-10 10:11:14.756 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-11-10T10:12:48.7966458Z  2026-11-10 10:11:14.791 UTC [62] LOG:  checkpoint complete: wrote 1008 buffers (6.2%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.015 s, sync=0.020 s, total=0.035 s; sync files=458, longest=0.001 s, average=0.001 s; distance=10613 kB, estimate=10613 kB; lsn=0/450E598, redo lsn=0/450E540
+2026-11-10T10:12:48.7967649Z  2026-11-10 10:11:14.803 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-11-10T10:12:48.7968669Z  2026-11-10 10:11:14.805 UTC [62] LOG:  checkpoint complete: wrote 2 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.002 s; sync files=2, longest=0.001 s, average=0.001 s; distance=2 kB, estimate=9552 kB; lsn=0/450EE50, redo lsn=0/450EDF8
+2026-11-10T10:12:48.7969690Z  2026-11-10 10:11:17.816 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-11-10T10:12:48.7970695Z  2026-11-10 10:11:17.820 UTC [62] LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.004 s; sync files=6, longest=0.001 s, average=0.001 s; distance=5948 kB, estimate=9192 kB; lsn=0/4ADE128, redo lsn=0/4ADE0D0
+2026-11-10T10:12:48.7971691Z  2026-11-10 10:11:18.542 UTC [366] ERROR:  scope identity is immutable
+2026-11-10T10:12:48.7972201Z  2026-11-10 10:11:18.542 UTC [366] CONTEXT:  PL/pgSQL function nf_scope_monotonic() line 1 at RAISE
+2026-11-10T10:12:48.7972993Z  2026-11-10 10:11:18.542 UTC [366] STATEMENT:  UPDATE nf_scopes SET scope_key=scope_key||$1,version=version+1 WHERE work_id=$2 AND branch_id=$3 AND scope_key=$4
+2026-11-10T10:12:48.7973669Z  2026-11-10 10:11:18.544 UTC [366] ERROR:  scope version must increase
+2026-11-10T10:12:48.7974157Z  2026-11-10 10:11:18.544 UTC [366] CONTEXT:  PL/pgSQL function nf_scope_monotonic() line 1 at RAISE
+2026-11-10T10:12:48.7974848Z  2026-11-10 10:11:18.544 UTC [366] STATEMENT:  UPDATE nf_scopes SET version=version WHERE work_id=$1 AND branch_id=$2 AND scope_key=$3
+2026-11-10T10:12:48.7975494Z  2026-11-10 10:11:18.549 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-11-10T10:12:48.7976821Z  2026-11-10 10:11:18.551 UTC [62] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=4, longest=0.001 s, average=0.001 s; distance=5275 kB, estimate=8800 kB; lsn=0/5004E70, redo lsn=0/5004E18
+2026-11-10T10:12:48.7977866Z  2026-11-10 10:11:38.133 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-11-10T10:12:48.7978872Z  2026-11-10 10:11:38.135 UTC [62] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=4, longest=0.001 s, average=0.001 s; distance=10705 kB, estimate=10705 kB; lsn=0/5A79320, redo lsn=0/5A792C8
+2026-11-10T10:12:48.7979899Z  2026-11-10 10:11:45.667 UTC [453] ERROR:  immutable authoritative record: nf_events
+2026-11-10T10:12:48.7980473Z  2026-11-10 10:11:45.667 UTC [453] CONTEXT:  PL/pgSQL function nf_reject_immutable_mutation() line 1 at RAISE
+2026-11-10T10:12:48.7981284Z  2026-11-10 10:11:45.667 UTC [453] STATEMENT:  UPDATE nf_events SET payload='{}' WHERE event_version_id=$1
+2026-11-10T10:12:48.7981851Z  2026-11-10 10:11:47.609 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-11-10T10:12:48.7982873Z  2026-11-10 10:11:47.613 UTC [62] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.001 s, sync=0.001 s, total=0.004 s; sync files=4, longest=0.001 s, average=0.001 s; distance=7870 kB, estimate=10421 kB; lsn=0/6228E78, redo lsn=0/6228E20
+2026-11-10T10:12:48.7983875Z  2026-11-10 10:11:51.575 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-11-10T10:12:48.7984899Z  2026-11-10 10:11:51.605 UTC [62] LOG:  checkpoint complete: wrote 1210 buffers (7.4%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.017 s, sync=0.013 s, total=0.031 s; sync files=476, longest=0.001 s, average=0.001 s; distance=11892 kB, estimate=11892 kB; lsn=0/6DC6250, redo lsn=0/6DC61F8
+2026-11-10T10:12:48.7986319Z  2026-11-10 10:11:51.619 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-11-10T10:12:48.7987447Z  2026-11-10 10:11:51.621 UTC [62] LOG:  checkpoint complete: wrote 2 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=2, longest=0.001 s, average=0.001 s; distance=3 kB, estimate=10703 kB; lsn=0/6DC6EE0, redo lsn=0/6DC6E88
+2026-11-10T10:12:48.7988434Z  2026-11-10 10:11:52.992 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-11-10T10:12:48.7989424Z  2026-11-10 10:11:52.995 UTC [62] LOG:  checkpoint complete: wrote 5 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=4, longest=0.001 s, average=0.001 s; distance=5483 kB, estimate=10181 kB; lsn=0/7321DD8, redo lsn=0/7321D80
+2026-11-10T10:12:48.7990412Z  2026-11-10 10:12:03.503 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-11-10T10:12:48.7991405Z  2026-11-10 10:12:03.505 UTC [62] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.002 s; sync files=4, longest=0.001 s, average=0.001 s; distance=7707 kB, estimate=9934 kB; lsn=0/7AA8A50, redo lsn=0/7AA89F8
+2026-11-10T10:12:48.7992407Z  2026-11-10 10:12:05.779 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-11-10T10:12:48.7993375Z  2026-11-10 10:12:05.782 UTC [62] LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=6, longest=0.001 s, average=0.001 s; distance=5824 kB, estimate=9523 kB; lsn=0/8058AF8, redo lsn=0/8058AA0
+2026-11-10T10:12:48.7994441Z  2026-11-10 10:12:07.848 UTC [587] LOG:  unexpected EOF on client connection with an open transaction
+2026-11-10T10:12:48.7994980Z  2026-11-10 10:12:08.885 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-11-10T10:12:48.7996350Z  2026-11-10 10:12:08.920 UTC [62] LOG:  checkpoint complete: wrote 1073 buffers (6.5%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.015 s, sync=0.018 s, total=0.035 s; sync files=458, longest=0.003 s, average=0.001 s; distance=10527 kB, estimate=10527 kB; lsn=0/8AA0A50, redo lsn=0/8AA09F8
+2026-11-10T10:12:48.7997701Z  2026-11-10 10:12:09.483 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-11-10T10:12:48.7998715Z  2026-11-10 10:12:09.485 UTC [62] LOG:  checkpoint complete: wrote 2 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.002 s; sync files=2, longest=0.001 s, average=0.001 s; distance=39 kB, estimate=9479 kB; lsn=0/8AAAA20, redo lsn=0/8AAA9C8
+2026-11-10T10:12:48.7999746Z  2026-11-10 10:12:10.151 UTC [609] ERROR:  immutable authoritative record: nf_task_inputs
+2026-11-10T10:12:48.8000355Z  2026-11-10 10:12:10.151 UTC [609] CONTEXT:  PL/pgSQL function nf_reject_immutable_mutation() line 1 at RAISE
+2026-11-10T10:12:48.8001316Z  2026-11-10 10:12:10.151 UTC [609] STATEMENT:  UPDATE nf_task_inputs SET input_hash=$1::VARCHAR WHERE nf_task_inputs.task_id = $2::UUID
+2026-11-10T10:12:48.8002212Z  2026-11-10 10:12:10.978 UTC [609] ERROR:  insert or update on table "nf_object_refs" violates foreign key constraint "fk_nf_object_refs_object_hash_nf_objects"
+2026-11-10T10:12:48.8003253Z  2026-11-10 10:12:10.978 UTC [609] DETAIL:  Key (object_hash)=(ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) is not present in table "nf_objects".
+2026-11-10T10:12:48.8004290Z  2026-11-10 10:12:10.978 UTC [609] STATEMENT:  INSERT INTO nf_object_refs (owner_type, owner_id, object_hash) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR)
+2026-11-10T10:12:48.8004976Z  2026-11-10 10:12:11.062 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-11-10T10:12:48.8006316Z  2026-11-10 10:12:11.064 UTC [62] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=4, longest=0.001 s, average=0.001 s; distance=5534 kB, estimate=9084 kB; lsn=0/90125D8, redo lsn=0/9012580
+2026-11-10T10:12:48.8007463Z  2026-11-10 10:12:17.525 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-11-10T10:12:48.8008470Z  2026-11-10 10:12:17.527 UTC [62] LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=6, longest=0.001 s, average=0.001 s; distance=5974 kB, estimate=8773 kB; lsn=0/95E7F08, redo lsn=0/95E7EB0
+2026-11-10T10:12:48.8009521Z  2026-11-10 10:12:42.029 UTC [655] FATAL:  terminating connection due to administrator command
+2026-11-10T10:12:48.8010033Z  2026-11-10 10:12:42.129 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-11-10T10:12:48.8011041Z  2026-11-10 10:12:42.131 UTC [62] LOG:  checkpoint complete: wrote 40 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=11, longest=0.001 s, average=0.001 s; distance=7837 kB, estimate=8679 kB; lsn=0/9D8F410, redo lsn=0/9D8F3B8
+2026-11-10T10:12:48.8012072Z  2026-11-10 10:12:43.677 UTC [62] LOG:  checkpoint starting: immediate force wait
+2026-11-10T10:12:48.8013090Z  2026-11-10 10:12:43.680 UTC [62] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=4, longest=0.001 s, average=0.001 s; distance=5322 kB, estimate=8344 kB; lsn=0/A2C1DC8, redo lsn=0/A2C1D70
+2026-11-10T10:12:48.8014078Z  This user must also own the server process.
+2026-11-10T10:12:48.8014382Z  
+2026-11-10T10:12:48.8014688Z  The database cluster will be initialized with locale "en_US.utf8".
+2026-11-10T10:12:48.8015169Z  The default database encoding has accordingly been set to "UTF8".
+2026-11-10T10:12:48.8015611Z  The default text search configuration will be set to "english".
+2026-11-10T10:12:48.8016214Z  
+2026-11-10T10:12:48.8016504Z  Data page checksums are enabled.
+2026-11-10T10:12:48.8016783Z  
+2026-11-10T10:12:48.8017096Z  fixing permissions on existing directory /var/lib/postgresql/data ... ok
+2026-11-10T10:12:48.8017529Z  creating subdirectories ... ok
+2026-11-10T10:12:48.8017880Z  selecting dynamic shared memory implementation ... posix
+2026-11-10T10:12:48.8018255Z  selecting default "max_connections" ... 100
+2026-11-10T10:12:48.8018592Z  selecting default "shared_buffers" ... 128MB
+2026-11-10T10:12:48.8018905Z  selecting default time zone ... Etc/UTC
+2026-11-10T10:12:48.8019207Z  creating configuration files ... ok
+2026-11-10T10:12:48.8019502Z  running bootstrap script ... ok
+2026-11-10T10:12:48.8019821Z  performing post-bootstrap initialization ... ok
+2026-11-10T10:12:48.8020147Z  syncing data to disk ... ok
+2026-11-10T10:12:48.8020398Z  
+2026-11-10T10:12:48.8020595Z  
+2026-11-10T10:12:48.8020847Z  Success. You can now start the database server using:
+2026-11-10T10:12:48.8021170Z  
+2026-11-10T10:12:48.8021428Z      pg_ctl -D /var/lib/postgresql/data -l logfile start
+2026-11-10T10:12:48.8021750Z  
+2026-11-10T10:12:48.8022648Z  waiting for server to start....2026-11-10 10:10:09.413 UTC [48] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-11-10T10:12:48.8023600Z  2026-11-10 10:10:09.413 UTC [48] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-11-10T10:12:48.8024177Z  2026-11-10 10:10:09.416 UTC [51] LOG:  database system was shut down at 2026-11-10 10:10:09 UTC
+2026-11-10T10:12:48.8024703Z  2026-11-10 10:10:09.420 UTC [48] LOG:  database system is ready to accept connections
+2026-11-10T10:12:48.8025084Z   done
+2026-11-10T10:12:48.8025294Z  server started
+2026-11-10T10:12:48.8025521Z  CREATE DATABASE
+2026-11-10T10:12:48.8025732Z  
+2026-11-10T10:12:48.8026100Z  
+2026-11-10T10:12:48.8026450Z  /usr/local/bin/docker-entrypoint.sh: ignoring /docker-entrypoint-initdb.d/*
+2026-11-10T10:12:48.8026859Z  
+2026-11-10T10:12:48.8027237Z  waiting for server to shut down...2026-11-10 10:10:09.601 UTC [48] LOG:  received fast shutdown request
+2026-11-10T10:12:48.8027779Z  .2026-11-10 10:10:09.601 UTC [48] LOG:  aborting any active transactions
+2026-11-10T10:12:48.8028514Z  2026-11-10 10:10:09.603 UTC [48] LOG:  background worker "logical replication launcher" (PID 54) exited with exit code 1
+2026-11-10T10:12:48.8029073Z  2026-11-10 10:10:09.604 UTC [49] LOG:  shutting down
+2026-11-10T10:12:48.8029480Z  2026-11-10 10:10:09.605 UTC [49] LOG:  checkpoint starting: shutdown immediate
+2026-11-10T10:12:48.8030551Z  2026-11-10 10:10:09.620 UTC [49] LOG:  checkpoint complete: wrote 921 buffers (5.6%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.014 s, sync=0.002 s, total=0.016 s; sync files=301, longest=0.001 s, average=0.001 s; distance=4238 kB, estimate=4238 kB; lsn=0/1B53160, redo lsn=0/1B53160
+2026-11-10T10:12:48.8031587Z  2026-11-10 10:10:09.628 UTC [48] LOG:  database system is shut down
+2026-11-10T10:12:48.8031923Z   done
+2026-11-10T10:12:48.8032127Z  server stopped
+2026-11-10T10:12:48.8032350Z  
+2026-11-10T10:12:48.8032605Z  PostgreSQL init process complete; ready for start up.
+2026-11-10T10:12:48.8032942Z  
+2026-11-10T10:12:48.8039500Z Stop and remove container: d574e5d9a8a84fb7b65040e17e5b5609_postgres1711bookworm_0c8004
+2026-11-10T10:12:48.8044530Z ##[command]/usr/bin/docker rm --force bc40f81a8dd5e08d02f32ff172549cb40afd2c916d7c4a41efa9cb47956bfe17
+2026-11-10T10:12:48.9499598Z bc40f81a8dd5e08d02f32ff172549cb40afd2c916d7c4a41efa9cb47956bfe17
+2026-11-10T10:12:48.9537106Z Remove container network: github_network_29a7f51345c94eec91567fff5fcd79c1
+2026-11-10T10:12:48.9541895Z ##[command]/usr/bin/docker network rm github_network_29a7f51345c94eec91567fff5fcd79c1
+2026-11-10T10:12:49.0443114Z github_network_29a7f51345c94eec91567fff5fcd79c1
+2026-11-10T10:12:49.0529865Z Cleaning up orphan processes
+2026-11-10T10:12:49.0919096Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+

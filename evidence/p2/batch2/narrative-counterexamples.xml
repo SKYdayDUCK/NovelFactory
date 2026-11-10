@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="5" time="3.719" timestamp="2026-11-10T19:27:11.328985+09:00" hostname="2be49009bab4"><testcase classname="tests.integration.test_narrative" name="test_world_event_can_be_narrated_twice_without_effect_reapplication" time="0.747"><failure message="novel_factory.domain.errors.DomainError: Invalid TemplateCommand: contract constraints failed">kernel_env = {'db': &lt;novel_factory.infrastructure.database.Database object at 0x7f2e39951520&gt;, 'store': &lt;novel_factory.infrastructu...Kernel object at 0x7f2e39560710&gt;, 'url': 'postgresql+psycopg://nf_dev@127.0.0.1:53463/nf_kernel_22e7fe2088584339', ...}
+
+    def test_world_event_can_be_narrated_twice_without_effect_reapplication(kernel_env):
+        k = kernel_env["kernel"]; f = load_fixture(k, "white_bridge"); ids = f["ids"]
+&gt;       transfer = run_command(k, f["principal"], f["world_ref"], "RESOURCE_TRANSFER", {
+            "from_account_id": ids["warehouse"], "to_account_id": ids["relief"], "resource_id": ids["grain"],
+            "quantity": "10", "unit": "bag", "at": point(2)})
+
+tests/integration/test_narrative.py:78: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/novel_factory/fixtures.py:96: in run_command
+    prepared=prepare_command(kernel,principal,wr,template_id,args,**kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/novel_factory/fixtures.py:83: in prepare_command
+    proposal=kernel.propose(principal,task["task_id"],task["generation"],template_id,args,"proposal:"+key)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/novel_factory/application/kernel.py:433: in propose
+    footprint=build(template_id,args,base["snapshot"],proposal_id)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/novel_factory/application/templates.py:63: in build
+    validate_contract("TemplateCommand",{"template_id":template_id,"args":args},version="commands")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'TemplateCommand'
+payload = {'template_id': 'RESOURCE_TRANSFER', 'args': {'from_account_id': 'afe75f34-871f-5a3c-917d-85d7d721957a', 'to_account_id': 'a6494af2-0df7-5e2e-8447-cd3403425e61', 'resource_id': '589b732c-449a-5c6b-ae6c-c476618694e4', 'quantity': '10', ...}}
+version = 'commands'
+
+    def validate_contract(name: str, payload: Any, version: str = "2.0") -&gt; Any:
+        value = plain(payload)
+        errors = sorted(_validator(name, version).iter_errors(value), key=lambda e: str(list(e.path)))
+        if errors:
+            # Do not echo instance values: they can be secret or attacker-controlled.
+&gt;           raise DomainError("INVALID_ARGUMENT", f"Invalid {name}: contract constraints failed")
+E           novel_factory.domain.errors.DomainError: Invalid TemplateCommand: contract constraints failed
+
+src/novel_factory/contracts/registry.py:66: DomainError</failure></testcase><testcase classname="tests.integration.test_narrative" name="test_text_first_delta_must_use_formal_kernel_acceptance_then_exact_alignment" time="1.069" /><testcase classname="tests.integration.test_narrative" name="test_reader_inputs_do_not_grant_text_or_hidden_material_access" time="0.413" /><testcase classname="tests.integration.test_narrative" name="test_forged_clear_report_and_wrong_span_never_receive_acceptance" time="0.488" /><testcase classname="tests.integration.test_narrative" name="test_unrelated_head_progress_keeps_cut_but_revoked_writer_cannot_be_adopted" time="0.908" /></testsuite></testsuites>

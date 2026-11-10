@@ -73,9 +73,15 @@ def _inline_schema(name, version):
 
 
 class AgentGateway:
-    def __init__(self, kernel, adapters, *, catalog=None, output_contracts=None):
+    def __init__(self, kernel, adapters, *, catalog=None, output_contracts=None,
+                 material_reader=None):
         self.kernel, self.adapters = kernel, dict(adapters)
         self.catalog = catalog or RuntimeCatalog()
+        # Optional trusted application port for controller-bound scene/text
+        # deliveries. A task cannot supply this callable or add permissions.
+        # None from the port delegates to the original evidence read gate;
+        # a denied supported material must raise, never silently fall back.
+        self.material_reader = material_reader
         # Overrides are trusted server configuration, never dispatch inputs.
         self.output_contracts = {**OUTPUT_CONTRACTS, **(output_contracts or {})}
 
@@ -162,9 +168,16 @@ class AgentGateway:
         task, spec, context, data = (binding[k] for k in ("task", "spec", "context", "input"))
         material = []
         for ref in data["material_refs"]:
-            content = self.kernel.get_artifact(principal, task["work_id"], ref,
-                task_id=task["task_id"], generation=task["generation"], context_bundle_id=task["context_bundle_id"],
-                world_ref=spec["world_ref"], story_time=spec["story_time"], knowledge_cut=context["read_cut"]["knowledge_cut"])
+            content = None
+            if self.material_reader is not None:
+                content = self.material_reader(principal, task_id=task["task_id"],
+                    generation=task["generation"], context_bundle_id=task["context_bundle_id"],
+                    artifact_ref=ref)
+            if content is None:
+                content = self.kernel.get_artifact(principal, task["work_id"], ref,
+                    task_id=task["task_id"], generation=task["generation"], context_bundle_id=task["context_bundle_id"],
+                    world_ref=spec["world_ref"], story_time=spec["story_time"], knowledge_cut=context["read_cut"]["knowledge_cut"])
+            require(isinstance(content, bytes), "INVALID_MATERIAL", "Material delivery must be UTF-8 bytes")
             try:
                 value = content.decode("utf-8")
             except UnicodeError:
