@@ -1,0 +1,471 @@
+RUN ["/workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin/initdb", "-D", "/tmp/nf-pg17-myagpgjg/data", "-U", "nf_dev", "--encoding=UTF8", "--locale=C", "--auth-local=reject", "--auth-host=trust", "--data-checksums"]
+The files belonging to this database system will be owned by user "agent".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "C".
+The default text search configuration will be set to "english".
+
+Data page checksums are enabled.
+
+creating directory /tmp/nf-pg17-myagpgjg/data ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default "max_connections" ... 100
+selecting default "shared_buffers" ... 128MB
+selecting default time zone ... Asia/Tokyo
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+
+Success. You can now start the database server using:
+
+    /workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin/pg_ctl -D /tmp/nf-pg17-myagpgjg/data -l logfile start
+
+RUN ["/workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin/createdb", "nf_test"]
+RUN ["/workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin/psql", "-Atc", "SELECT version(); SHOW fsync; SHOW synchronous_commit;"]
+PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+on
+on
+RUN ["/workspace/scratch/cf3ee8d0c6c4/NovelFactory/.venv/bin/python", "-m", "alembic", "upgrade", "head"]
+REAL_POSTGRES_READY postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1) port 53277
+{
+  "status": "PASS_ENGINEERING_ONLY",
+  "model_status": "NOT_EXECUTED",
+  "fixture": "r1_sword: formal event acceptance history",
+  "database": {
+    "server_version": "17.11 (Debian 17.11-0+deb13u1)",
+    "fsync": "on",
+    "synchronous_commit": "on",
+    "max_connections": "60"
+  },
+  "python": "3.12.14",
+  "repeats_per_strategy": 3,
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "synthetic_entity_ids": {
+    "sword": "4ef873a8-4f45-56f0-ad45-67928097cea9",
+    "sword2": "44de6f22-9c7d-59b8-a88d-192d9f04edfd",
+    "smith": "3e774eb4-a3c5-5f70-a324-4dd61d43b870",
+    "smith2": "dab220bc-0351-58ba-960d-92d4d1773a1d",
+    "protagonist": "3ab18f96-5526-56ce-96bc-9bf3d66de8d4",
+    "friend": "29d61dcb-4b40-5887-bea5-60da69b9ca0a",
+    "rival": "f33a8ee7-5766-5997-9bff-8585c31e3cc4",
+    "master": "5c6ebae3-716b-5401-bea9-5c4ee6853fbd",
+    "sect": "aec69381-08fd-5c2e-8b31-c15aee3740a9",
+    "north": "945f0961-25d7-5930-b781-afc369036117",
+    "south": "a0bdaea1-408d-5d84-a246-c572c171d208",
+    "warehouse": "02f97541-4880-57b0-9a50-ad9f84ed3bc0",
+    "relief": "2aff581c-1b38-5ec0-9555-4872e8fb61c9",
+    "reserve": "74cb6b98-4aab-5502-8359-cf86248757e5",
+    "recipient": "872c7d44-821c-503a-a226-295730b2a0d7",
+    "grain": "6b158617-1505-539f-88e1-19c1992574a7",
+    "guard1": "0d07ad2c-78aa-558a-accb-85c99790d89a",
+    "guard2": "f71075f8-7b59-5f67-9118-946b4431842b",
+    "traveler": "b8bd4b3e-3b2d-536f-a57e-15e40bdbc1ed",
+    "blocker": "11bf0dc6-d148-5d72-8879-a3fc7dbbe2bb",
+    "box": "b22ab33d-78e1-51b8-bba2-aa9bfeb52786",
+    "cart": "fb1adf16-f06a-579a-8dd2-466a9c7f1eaf"
+  },
+  "seed_event_receipts": [
+    {
+      "command_id": "9c3b66e7-4a50-46d2-81fb-0b9ebaf40b25",
+      "world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "2f5a7689-6521-4337-b4ca-3ba305f4c9e1"
+      },
+      "branch_seq": 1,
+      "accepted_event_refs": [
+        {
+          "occurrence_id": "258b3211-9980-540d-a7a3-3117af948dcf",
+          "event_version_id": "3262d2f4-18b6-595a-b4ec-61a900e85696"
+        }
+      ],
+      "manifest_sha256": "cc93ba22cce5f8f0d81adb488de26531da5b95004729cc3b95d81322b10ecd81",
+      "recorded_at": "2026-11-10T12:49:56.199926+00:00",
+      "original_base_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "36edcf5d-da88-46f3-8219-61147869080e"
+      },
+      "validation_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "36edcf5d-da88-46f3-8219-61147869080e"
+      },
+      "parent_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "36edcf5d-da88-46f3-8219-61147869080e"
+      },
+      "acceptance_certificate_ref": {
+        "artifact_id": "f76218e0-b1b6-494e-aa1c-ecf8506127c1",
+        "artifact_revision_id": "678f4b74-b97b-403f-b87b-05a830fd455a",
+        "sha256": "6b1ba2659adb47157bde844d9c264307a5a2a3c00ebc845c2ecbd2fe53555b4e"
+      },
+      "proposal_ref": {
+        "sha256": "5d37ab2294c6d301baa8eea879fdd24724293a562cfa978e56a7fd5da4298dc5",
+        "artifact_id": "87b8e751-38a8-45f7-9cb4-bcddbd6bec14",
+        "artifact_revision_id": "e94ddfc2-9b6c-4cd4-8d90-0ecbd52455b7"
+      }
+    },
+    {
+      "command_id": "e132926a-fdcd-4a12-9f3d-c8962647dc40",
+      "world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "0d2b587d-bfea-4ee9-befd-434ee4e05895"
+      },
+      "branch_seq": 2,
+      "accepted_event_refs": [
+        {
+          "occurrence_id": "8e508979-5615-52a7-939b-6797d909dcf1",
+          "event_version_id": "78cb5aab-68a6-5de1-82c7-c4bb5197b3c9"
+        }
+      ],
+      "manifest_sha256": "8e48b7b8b1665f24b8c58f9a5650d71dea7866097d122db2fc10387f69be6ca4",
+      "recorded_at": "2026-11-10T12:49:56.459184+00:00",
+      "original_base_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "2f5a7689-6521-4337-b4ca-3ba305f4c9e1"
+      },
+      "validation_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "2f5a7689-6521-4337-b4ca-3ba305f4c9e1"
+      },
+      "parent_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "2f5a7689-6521-4337-b4ca-3ba305f4c9e1"
+      },
+      "acceptance_certificate_ref": {
+        "artifact_id": "eecd322f-bfb4-4bc5-9160-86091a521d48",
+        "artifact_revision_id": "6126b363-b033-47f8-a272-4f8a40523d1d",
+        "sha256": "a58fa7e46a37c5b51e98b72e6c62a208ba84e14c90ccdd653717e9759c2c6f52"
+      },
+      "proposal_ref": {
+        "sha256": "cbd0652cdecf5dab3a538d7edf22b5c93027bdc198f12a09f80ffe757a7870c9",
+        "artifact_id": "4f00611d-940f-4e2b-ae36-0b5e9168bec6",
+        "artifact_revision_id": "f5a3fd55-5379-499a-978d-f4700f6348c4"
+      }
+    },
+    {
+      "command_id": "5ced636a-9b77-4d1b-bb98-5e63ff66f2d4",
+      "world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "b0b19342-4e0a-42ab-b98c-a87c4f91f5ef"
+      },
+      "branch_seq": 3,
+      "accepted_event_refs": [
+        {
+          "occurrence_id": "be34bab0-253b-52e3-b47f-b99fe4d7723d",
+          "event_version_id": "515722a3-b789-5bc1-9462-95015c2b3bb8"
+        }
+      ],
+      "manifest_sha256": "14d65a3493b9aa239f3a623a8eb5d76d09761740d8c1180ad68d524219feee81",
+      "recorded_at": "2026-11-10T12:49:56.727047+00:00",
+      "original_base_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "0d2b587d-bfea-4ee9-befd-434ee4e05895"
+      },
+      "validation_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "0d2b587d-bfea-4ee9-befd-434ee4e05895"
+      },
+      "parent_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "0d2b587d-bfea-4ee9-befd-434ee4e05895"
+      },
+      "acceptance_certificate_ref": {
+        "artifact_id": "aaf46235-f535-4b0b-bd36-578e09263c11",
+        "artifact_revision_id": "2e35fa77-9af2-4061-a268-3a7b183b4e5c",
+        "sha256": "74e73c68dd28c137cab2346cb8a09b972318852a7bb0a627659f291e73576728"
+      },
+      "proposal_ref": {
+        "sha256": "61b31e1b3bb679a2c24e283f2bc3bf355bd63c39d9abe584b847959b46ba833d",
+        "artifact_id": "0a891d18-8611-409c-89b2-f9b2f79c7966",
+        "artifact_revision_id": "38344764-fbe1-457c-9cda-f87176743faf"
+      }
+    },
+    {
+      "command_id": "0b68e8bf-9dda-491e-aaeb-64dec161bd58",
+      "world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "98cded02-cdc0-489a-ad97-52bb15be1f68"
+      },
+      "branch_seq": 4,
+      "accepted_event_refs": [
+        {
+          "occurrence_id": "26e0177f-62ee-5bd5-9dc5-7250254513e6",
+          "event_version_id": "98121375-a47b-5400-88ee-a71094afc498"
+        }
+      ],
+      "manifest_sha256": "5ce2b7d24acce206b132910ea40ab67894a85cbc3ffbc8ac80a21faff89d07a2",
+      "recorded_at": "2026-11-10T12:49:56.987260+00:00",
+      "original_base_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "b0b19342-4e0a-42ab-b98c-a87c4f91f5ef"
+      },
+      "validation_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "b0b19342-4e0a-42ab-b98c-a87c4f91f5ef"
+      },
+      "parent_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "b0b19342-4e0a-42ab-b98c-a87c4f91f5ef"
+      },
+      "acceptance_certificate_ref": {
+        "artifact_id": "80129489-397e-4adb-b262-325c94e46abe",
+        "artifact_revision_id": "1c20b15f-7a60-41db-ab6e-0ca6ebbb2563",
+        "sha256": "7fde4d91a50a8cfb40cd13cf4d927a8ed906913aa359b51ecad2f24ce9f64ee1"
+      },
+      "proposal_ref": {
+        "sha256": "6e2995c7343bafaa95dfca943d482a0d3026c2b25a808418bf69e726b5fbd779",
+        "artifact_id": "a0add6c8-d185-441c-a246-05c25db525d7",
+        "artifact_revision_id": "7b948e12-4725-499a-bed0-fd8cc12a3bb3"
+      }
+    },
+    {
+      "command_id": "9fcc5aa2-da60-4ec4-bf5f-8b9b45fe030e",
+      "world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "05a79b80-e1b8-499e-99ee-912fc9c868a0"
+      },
+      "branch_seq": 5,
+      "accepted_event_refs": [
+        {
+          "occurrence_id": "e79c9d26-0624-5569-9c48-1eaa9684a3eb",
+          "event_version_id": "e2370bf1-5461-5200-acf2-85c172176030"
+        }
+      ],
+      "manifest_sha256": "324033533c2e5ac8ef6ffbaae30cfb3ba7a1363f9d95755930675c75ba223f99",
+      "recorded_at": "2026-11-10T12:49:57.242440+00:00",
+      "original_base_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "98cded02-cdc0-489a-ad97-52bb15be1f68"
+      },
+      "validation_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "98cded02-cdc0-489a-ad97-52bb15be1f68"
+      },
+      "parent_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "98cded02-cdc0-489a-ad97-52bb15be1f68"
+      },
+      "acceptance_certificate_ref": {
+        "artifact_id": "5d6db3d3-7439-4a34-9a72-c3c2e329007c",
+        "artifact_revision_id": "8f91a297-22f1-492a-867a-724231ec6e44",
+        "sha256": "032cd363fa16fdc00ff192841fe4e83a5599a72e116436c612e7b1fb18fd8df3"
+      },
+      "proposal_ref": {
+        "sha256": "56d1d3f097f554ae9153dfcec1a9d0d87fe9f5a38acb160b42daae95a3360994",
+        "artifact_id": "ec83055d-00ab-4bba-ade1-1eee829d6a87",
+        "artifact_revision_id": "50ef3201-d12d-4a77-bbe9-bd895b602518"
+      }
+    },
+    {
+      "command_id": "d963b527-b043-4305-b1c2-49dbedfd9cc4",
+      "world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+      },
+      "branch_seq": 6,
+      "accepted_event_refs": [],
+      "manifest_sha256": "9d431bcb6e1cb30b3d11752a474a816cb3e09e5e97f2914c272ba34a32395fc5",
+      "recorded_at": "2026-11-10T12:49:57.509982+00:00",
+      "original_base_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "05a79b80-e1b8-499e-99ee-912fc9c868a0"
+      },
+      "validation_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "05a79b80-e1b8-499e-99ee-912fc9c868a0"
+      },
+      "parent_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "05a79b80-e1b8-499e-99ee-912fc9c868a0"
+      },
+      "acceptance_certificate_ref": {
+        "artifact_id": "f1baa7d0-e390-4b8c-8230-32da895f7cf0",
+        "artifact_revision_id": "47d1a928-85c3-401f-9249-2a9ccb821a38",
+        "sha256": "a65bbcdee73412d4dccc1ab3652ca63762252d437c4c8506421fee0736e5dbf4"
+      },
+      "proposal_ref": {
+        "sha256": "bd55f8f65633b7c9b38eaafdf80541452feffe69ffeb106cb2c4875c672739b8",
+        "artifact_id": "ff5fbeae-35b0-4076-99ec-19086433e9bf",
+        "artifact_revision_id": "aa1a3d28-e89a-408c-bb32-ad702f4028b5"
+      }
+    }
+  ],
+  "implementation_sha256": {
+    "query_service": "4fde3a6742fea5491047dbf3b4599cf3b42fce577b385d96609cf19048e88428",
+    "probe": "a65081b93516b7c33b44ff8fb41c0097dd4a84b7436db99ab91b6a78207fc626"
+  },
+  "sql_count_scope": "SQLAlchemy before_cursor_execute during context_compile only; task preparation excluded",
+  "comparisons": [
+    {
+      "sql_statements": 47,
+      "elapsed_ms": 32.24206,
+      "strategy": "focused_state",
+      "repeat": 0,
+      "gold_exact_state_correct": true,
+      "source_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+      },
+      "section_bytes": 1158,
+      "compiler_reported_estimate": 1158,
+      "tokenizer_version": "utf8-byte-upper-bound-1",
+      "context_bundle_id": "a318f403-279d-4f92-aa7d-19c4ff3b8319",
+      "context_sha256": "64a3d8eea68456df27d20b1c3261245bc9a300a3785b9d79c42c3faab8b0ee1a",
+      "hard_requirements_status": "COMPLETE_FOR_RECIPE"
+    },
+    {
+      "sql_statements": 47,
+      "elapsed_ms": 33.362467,
+      "strategy": "focused_state",
+      "repeat": 1,
+      "gold_exact_state_correct": true,
+      "source_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+      },
+      "section_bytes": 1158,
+      "compiler_reported_estimate": 1158,
+      "tokenizer_version": "utf8-byte-upper-bound-1",
+      "context_bundle_id": "2802cc92-a36b-4f08-a84c-8af33fd0441e",
+      "context_sha256": "ed46a72d5e04f6002b31139a89de86a12736bb31adcf7636c61e5e3959d66881",
+      "hard_requirements_status": "COMPLETE_FOR_RECIPE"
+    },
+    {
+      "sql_statements": 47,
+      "elapsed_ms": 40.608184,
+      "strategy": "focused_state",
+      "repeat": 2,
+      "gold_exact_state_correct": true,
+      "source_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+      },
+      "section_bytes": 1158,
+      "compiler_reported_estimate": 1158,
+      "tokenizer_version": "utf8-byte-upper-bound-1",
+      "context_bundle_id": "7bf6322c-1baf-460f-8e2a-a37cbfd50598",
+      "context_sha256": "f497404dc1f275ec6ff430f2960e82b35223424ded3f897e75acdf92cb7e9bf9",
+      "hard_requirements_status": "COMPLETE_FOR_RECIPE"
+    },
+    {
+      "sql_statements": 47,
+      "elapsed_ms": 63.016686,
+      "strategy": "broad_state",
+      "repeat": 0,
+      "gold_exact_state_correct": true,
+      "source_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+      },
+      "section_bytes": 2237,
+      "compiler_reported_estimate": 2237,
+      "tokenizer_version": "utf8-byte-upper-bound-1",
+      "context_bundle_id": "f8752b41-dfd0-4a8e-b4ac-ac9389de307e",
+      "context_sha256": "dbc59fa2fe276a99454843fd749e95c84954b876b0a91e35b59c756174288f7b",
+      "hard_requirements_status": "COMPLETE_FOR_RECIPE"
+    },
+    {
+      "sql_statements": 47,
+      "elapsed_ms": 54.779852,
+      "strategy": "broad_state",
+      "repeat": 1,
+      "gold_exact_state_correct": true,
+      "source_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+      },
+      "section_bytes": 2237,
+      "compiler_reported_estimate": 2237,
+      "tokenizer_version": "utf8-byte-upper-bound-1",
+      "context_bundle_id": "134d8c3d-9890-4724-8400-ada0e29c7fda",
+      "context_sha256": "e12fcd650989029b959c6a571c6c79607ef97a953a6008ebd7c309ee89fd7790",
+      "hard_requirements_status": "COMPLETE_FOR_RECIPE"
+    },
+    {
+      "sql_statements": 47,
+      "elapsed_ms": 53.198067,
+      "strategy": "broad_state",
+      "repeat": 2,
+      "gold_exact_state_correct": true,
+      "source_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+      },
+      "section_bytes": 2237,
+      "compiler_reported_estimate": 2237,
+      "tokenizer_version": "utf8-byte-upper-bound-1",
+      "context_bundle_id": "d24b93c2-e8e2-481a-a3f3-36de8fdd2dbe",
+      "context_sha256": "5562915696dd6a68b6974fa29eb17861bdba83982cd604bdc880dcb4803e4cd1",
+      "hard_requirements_status": "COMPLETE_FOR_RECIPE"
+    }
+  ],
+  "gates": {
+    "focused_and_broad_exact_state": true,
+    "compiler_receipt_idempotency": true,
+    "belief_does_not_inherit_objective_theft": true,
+    "actor_world_and_other_actor_denied": true,
+    "warm_cache_and_compile_receipt_reauthorize": true,
+    "history_and_fixed_old_progress_cut": true,
+    "destroyed_and_pending_distinct": true,
+    "hard_context_budget_does_not_bind_partial": true,
+    "retrieval_has_zero_world_effects": true
+  },
+  "before": {
+    "head": {
+      "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+      "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+      "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+    },
+    "event_count": 5,
+    "state_hash": "467e22c3a7fd4ee1a8c96c3ce942a92bfc4a88518364b91b75c6bfd320f27077"
+  },
+  "after": {
+    "head": {
+      "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+      "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+      "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+    },
+    "event_count": 5,
+    "state_hash": "467e22c3a7fd4ee1a8c96c3ce942a92bfc4a88518364b91b75c6bfd320f27077"
+  },
+  "real_model_calls": 0,
+  "provider_tokens": null,
+  "model_cost": null,
+  "limitations": [
+    "Small real-service correctness/cost probe, not a 50/200 Agent capacity test.",
+    "Compiler focused/broad strategies are separate from offline literary retrieval methods.",
+    "Compiler estimated_tokens uses its declared UTF-8 bound, not a provider tokenizer.",
+    "No generated prose quality or independent author judgment is measured."
+  ]
+}

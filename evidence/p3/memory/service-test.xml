@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="2.843" timestamp="2026-11-10T21:22:17.425212+09:00" hostname="2be49009bab4"><testcase classname="tests.integration.test_memory_service_probe" name="test_real_memory_service_probe_preserves_sources_scope_and_world" time="2.738"><failure message="novel_factory.domain.errors.DomainError: Operation is outside this grant">kernel_env = {'db': &lt;novel_factory.infrastructure.database.Database object at 0x7fc838f574d0&gt;, 'store': &lt;novel_factory.infrastructu...Kernel object at 0x7fc837319f10&gt;, 'url': 'postgresql+psycopg://nf_dev@127.0.0.1:52837/nf_kernel_87e06012f46e4e2d', ...}
+record_property = &lt;function record_property.&lt;locals&gt;.append_property at 0x7fc8377ffce0&gt;
+
+    def test_real_memory_service_probe_preserves_sources_scope_and_world(kernel_env, record_property):
+&gt;       result = run_probe(kernel_env["kernel"], repeats=1)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_memory_service_probe.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+benchmarks/memory/service_probe.py:137: in run_probe
+    actor_task, actor_compile = prepare(kernel, actor_principal, wr, [ids["sword"]], ["possessed_by"],
+benchmarks/memory/service_probe.py:34: in prepare
+    manifest = kernel.put_artifact(principal, world_ref["work_id"],
+src/novel_factory/application/kernel.py:199: in put_artifact
+    with self.db.uow(write=False) as r: self.authorize(r,principal,work_id,"ARTIFACT_WRITE")
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/novel_factory/application/kernel.py:47: in authorize
+    require(capability in grant["capabilities"], "VIEW_DENIED", "Operation is outside this grant")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+condition = False, code = 'VIEW_DENIED'
+message = 'Operation is outside this grant'
+
+    def require(condition, code, message):
+&gt;       if not condition: raise DomainError(code, message)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       novel_factory.domain.errors.DomainError: Operation is outside this grant
+
+src/novel_factory/application/kernel.py:27: DomainError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,2459 @@
+{
+  "status": "PASS_ENGINEERING_ONLY",
+  "model_status": "NOT_EXECUTED",
+  "fixture": "r1_sword: formal event acceptance history",
+  "database": {
+    "server_version": "17.11 (Debian 17.11-0+deb13u1)",
+    "fsync": "on",
+    "synchronous_commit": "on",
+    "max_connections": "60"
+  },
+  "python": "3.12.14",
+  "repeats_per_strategy": 3,
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "synthetic_entity_ids": {
+    "sword": "4ef873a8-4f45-56f0-ad45-67928097cea9",
+    "sword2": "44de6f22-9c7d-59b8-a88d-192d9f04edfd",
+    "smith": "3e774eb4-a3c5-5f70-a324-4dd61d43b870",
+    "smith2": "dab220bc-0351-58ba-960d-92d4d1773a1d",
+    "protagonist": "3ab18f96-5526-56ce-96bc-9bf3d66de8d4",
+    "friend": "29d61dcb-4b40-5887-bea5-60da69b9ca0a",
+    "rival": "f33a8ee7-5766-5997-9bff-8585c31e3cc4",
+    "master": "5c6ebae3-716b-5401-bea9-5c4ee6853fbd",
+    "sect": "aec69381-08fd-5c2e-8b31-c15aee3740a9",
+    "north": "945f0961-25d7-5930-b781-afc369036117",
+    "south": "a0bdaea1-408d-5d84-a246-c572c171d208",
+    "warehouse": "02f97541-4880-57b0-9a50-ad9f84ed3bc0",
+    "relief": "2aff581c-1b38-5ec0-9555-4872e8fb61c9",
+    "reserve": "74cb6b98-4aab-5502-8359-cf86248757e5",
+    "recipient": "872c7d44-821c-503a-a226-295730b2a0d7",
+    "grain": "6b158617-1505-539f-88e1-19c1992574a7",
+    "guard1": "0d07ad2c-78aa-558a-accb-85c99790d89a",
+    "guard2": "f71075f8-7b59-5f67-9118-946b4431842b",
+    "traveler": "b8bd4b3e-3b2d-536f-a57e-15e40bdbc1ed",
+    "blocker": "11bf0dc6-d148-5d72-8879-a3fc7dbbe2bb",
+    "box": "b22ab33d-78e1-51b8-bba2-aa9bfeb52786",
+    "cart": "fb1adf16-f06a-579a-8dd2-466a9c7f1eaf"
+  },
+  "seed_event_receipts": [
+    {
+      "command_id": "9c3b66e7-4a50-46d2-81fb-0b9ebaf40b25",
+      "world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "2f5a7689-6521-4337-b4ca-3ba305f4c9e1"
+      },
+      "branch_seq": 1,
+      "accepted_event_refs": [
+        {
+          "occurrence_id": "258b3211-9980-540d-a7a3-3117af948dcf",
+          "event_version_id": "3262d2f4-18b6-595a-b4ec-61a900e85696"
+        }
+      ],
+      "manifest_sha256": "cc93ba22cce5f8f0d81adb488de26531da5b95004729cc3b95d81322b10ecd81",
+      "recorded_at": "2026-11-10T12:49:56.199926+00:00",
+      "original_base_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "36edcf5d-da88-46f3-8219-61147869080e"
+      },
+      "validation_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "36edcf5d-da88-46f3-8219-61147869080e"
+      },
+      "parent_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "36edcf5d-da88-46f3-8219-61147869080e"
+      },
+      "acceptance_certificate_ref": {
+        "artifact_id": "f76218e0-b1b6-494e-aa1c-ecf8506127c1",
+        "artifact_revision_id": "678f4b74-b97b-403f-b87b-05a830fd455a",
+        "sha256": "6b1ba2659adb47157bde844d9c264307a5a2a3c00ebc845c2ecbd2fe53555b4e"
+      },
+      "proposal_ref": {
+        "sha256": "5d37ab2294c6d301baa8eea879fdd24724293a562cfa978e56a7fd5da4298dc5",
+        "artifact_id": "87b8e751-38a8-45f7-9cb4-bcddbd6bec14",
+        "artifact_revision_id": "e94ddfc2-9b6c-4cd4-8d90-0ecbd52455b7"
+      }
+    },
+    {
+      "command_id": "e132926a-fdcd-4a12-9f3d-c8962647dc40",
+      "world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "0d2b587d-bfea-4ee9-befd-434ee4e05895"
+      },
+      "branch_seq": 2,
+      "accepted_event_refs": [
+        {
+          "occurrence_id": "8e508979-5615-52a7-939b-6797d909dcf1",
+          "event_version_id": "78cb5aab-68a6-5de1-82c7-c4bb5197b3c9"
+        }
+      ],
+      "manifest_sha256": "8e48b7b8b1665f24b8c58f9a5650d71dea7866097d122db2fc10387f69be6ca4",
+      "recorded_at": "2026-11-10T12:49:56.459184+00:00",
+      "original_base_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "2f5a7689-6521-4337-b4ca-3ba305f4c9e1"
+      },
+      "validation_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "2f5a7689-6521-4337-b4ca-3ba305f4c9e1"
+      },
+      "parent_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "2f5a7689-6521-4337-b4ca-3ba305f4c9e1"
+      },
+      "acceptance_certificate_ref": {
+        "artifact_id": "eecd322f-bfb4-4bc5-9160-86091a521d48",
+        "artifact_revision_id": "6126b363-b033-47f8-a272-4f8a40523d1d",
+        "sha256": "a58fa7e46a37c5b51e98b72e6c62a208ba84e14c90ccdd653717e9759c2c6f52"
+      },
+      "proposal_ref": {
+        "sha256": "cbd0652cdecf5dab3a538d7edf22b5c93027bdc198f12a09f80ffe757a7870c9",
+        "artifact_id": "4f00611d-940f-4e2b-ae36-0b5e9168bec6",
+        "artifact_revision_id": "f5a3fd55-5379-499a-978d-f4700f6348c4"
+      }
+    },
+    {
+      "command_id": "5ced636a-9b77-4d1b-bb98-5e63ff66f2d4",
+      "world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "b0b19342-4e0a-42ab-b98c-a87c4f91f5ef"
+      },
+      "branch_seq": 3,
+      "accepted_event_refs": [
+        {
+          "occurrence_id": "be34bab0-253b-52e3-b47f-b99fe4d7723d",
+          "event_version_id": "515722a3-b789-5bc1-9462-95015c2b3bb8"
+        }
+      ],
+      "manifest_sha256": "14d65a3493b9aa239f3a623a8eb5d76d09761740d8c1180ad68d524219feee81",
+      "recorded_at": "2026-11-10T12:49:56.727047+00:00",
+      "original_base_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "0d2b587d-bfea-4ee9-befd-434ee4e05895"
+      },
+      "validation_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "0d2b587d-bfea-4ee9-befd-434ee4e05895"
+      },
+      "parent_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "0d2b587d-bfea-4ee9-befd-434ee4e05895"
+      },
+      "acceptance_certificate_ref": {
+        "artifact_id": "aaf46235-f535-4b0b-bd36-578e09263c11",
+        "artifact_revision_id": "2e35fa77-9af2-4061-a268-3a7b183b4e5c",
+        "sha256": "74e73c68dd28c137cab2346cb8a09b972318852a7bb0a627659f291e73576728"
+      },
+      "proposal_ref": {
+        "sha256": "61b31e1b3bb679a2c24e283f2bc3bf355bd63c39d9abe584b847959b46ba833d",
+        "artifact_id": "0a891d18-8611-409c-89b2-f9b2f79c7966",
+        "artifact_revision_id": "38344764-fbe1-457c-9cda-f87176743faf"
+      }
+    },
+    {
+      "command_id": "0b68e8bf-9dda-491e-aaeb-64dec161bd58",
+      "world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "98cded02-cdc0-489a-ad97-52bb15be1f68"
+      },
+      "branch_seq": 4,
+      "accepted_event_refs": [
+        {
+          "occurrence_id": "26e0177f-62ee-5bd5-9dc5-7250254513e6",
+          "event_version_id": "98121375-a47b-5400-88ee-a71094afc498"
+        }
+      ],
+      "manifest_sha256": "5ce2b7d24acce206b132910ea40ab67894a85cbc3ffbc8ac80a21faff89d07a2",
+      "recorded_at": "2026-11-10T12:49:56.987260+00:00",
+      "original_base_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "b0b19342-4e0a-42ab-b98c-a87c4f91f5ef"
+      },
+      "validation_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "b0b19342-4e0a-42ab-b98c-a87c4f91f5ef"
+      },
+      "parent_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "b0b19342-4e0a-42ab-b98c-a87c4f91f5ef"
+      },
+      "acceptance_certificate_ref": {
+        "artifact_id": "80129489-397e-4adb-b262-325c94e46abe",
+        "artifact_revision_id": "1c20b15f-7a60-41db-ab6e-0ca6ebbb2563",
+        "sha256": "7fde4d91a50a8cfb40cd13cf4d927a8ed906913aa359b51ecad2f24ce9f64ee1"
+      },
+      "proposal_ref": {
+        "sha256": "6e2995c7343bafaa95dfca943d482a0d3026c2b25a808418bf69e726b5fbd779",
+        "artifact_id": "a0add6c8-d185-441c-a246-05c25db525d7",
+        "artifact_revision_id": "7b948e12-4725-499a-bed0-fd8cc12a3bb3"
+      }
+    },
+    {
+      "command_id": "9fcc5aa2-da60-4ec4-bf5f-8b9b45fe030e",
+      "world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "05a79b80-e1b8-499e-99ee-912fc9c868a0"
+      },
+      "branch_seq": 5,
+      "accepted_event_refs": [
+        {
+          "occurrence_id": "e79c9d26-0624-5569-9c48-1eaa9684a3eb",
+          "event_version_id": "e2370bf1-5461-5200-acf2-85c172176030"
+        }
+      ],
+      "manifest_sha256": "324033533c2e5ac8ef6ffbaae30cfb3ba7a1363f9d95755930675c75ba223f99",
+      "recorded_at": "2026-11-10T12:49:57.242440+00:00",
+      "original_base_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "98cded02-cdc0-489a-ad97-52bb15be1f68"
+      },
+      "validation_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "98cded02-cdc0-489a-ad97-52bb15be1f68"
+      },
+      "parent_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "98cded02-cdc0-489a-ad97-52bb15be1f68"
+      },
+      "acceptance_certificate_ref": {
+        "artifact_id": "5d6db3d3-7439-4a34-9a72-c3c2e329007c",
+        "artifact_revision_id": "8f91a297-22f1-492a-867a-724231ec6e44",
+        "sha256": "032cd363fa16fdc00ff192841fe4e83a5599a72e116436c612e7b1fb18fd8df3"
+      },
+      "proposal_ref": {
+        "sha256": "56d1d3f097f554ae9153dfcec1a9d0d87fe9f5a38acb160b42daae95a3360994",
+        "artifact_id": "ec83055d-00ab-4bba-ade1-1eee829d6a87",
+        "artifact_revision_id": "50ef3201-d12d-4a77-bbe9-bd895b602518"
+      }
+    },
+    {
+      "command_id": "d963b527-b043-4305-b1c2-49dbedfd9cc4",
+      "world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+      },
+      "branch_seq": 6,
+      "accepted_event_refs": [],
+      "manifest_sha256": "9d431bcb6e1cb30b3d11752a474a816cb3e09e5e97f2914c272ba34a32395fc5",
+      "recorded_at": "2026-11-10T12:49:57.509982+00:00",
+      "original_base_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "05a79b80-e1b8-499e-99ee-912fc9c868a0"
+      },
+      "validation_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "05a79b80-e1b8-499e-99ee-912fc9c868a0"
+      },
+      "parent_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "05a79b80-e1b8-499e-99ee-912fc9c868a0"
+      },
+      "acceptance_certificate_ref": {
+        "artifact_id": "f1baa7d0-e390-4b8c-8230-32da895f7cf0",
+        "artifact_revision_id": "47d1a928-85c3-401f-9249-2a9ccb821a38",
+        "sha256": "a65bbcdee73412d4dccc1ab3652ca63762252d437c4c8506421fee0736e5dbf4"
+      },
+      "proposal_ref": {
+        "sha256": "bd55f8f65633b7c9b38eaafdf80541452feffe69ffeb106cb2c4875c672739b8",
+        "artifact_id": "ff5fbeae-35b0-4076-99ec-19086433e9bf",
+        "artifact_revision_id": "aa1a3d28-e89a-408c-bb32-ad702f4028b5"
+      }
+    }
+  ],
+  "implementation_sha256": {
+    "query_service": "4fde3a6742fea5491047dbf3b4599cf3b42fce577b385d96609cf19048e88428",
+    "probe": "a65081b93516b7c33b44ff8fb41c0097dd4a84b7436db99ab91b6a78207fc626"
+  },
+  "sql_count_scope": "SQLAlchemy before_cursor_execute during context_compile only; task preparation excluded",
+  "comparisons": [
+    {
+      "sql_statements": 47,
+      "elapsed_ms": 32.24206,
+      "strategy": "focused_state",
+      "repeat": 0,
+      "gold_exact_state_correct": true,
+      "source_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+      },
+      "section_bytes": 1158,
+      "compiler_reported_estimate": 1158,
+      "tokenizer_version": "utf8-byte-upper-bound-1",
+      "context_bundle_id": "a318f403-279d-4f92-aa7d-19c4ff3b8319",
+      "context_sha256": "64a3d8eea68456df27d20b1c3261245bc9a300a3785b9d79c42c3faab8b0ee1a",
+      "hard_requirements_status": "COMPLETE_FOR_RECIPE"
+    },
+    {
+      "sql_statements": 47,
+      "elapsed_ms": 33.362467,
+      "strategy": "focused_state",
+      "repeat": 1,
+      "gold_exact_state_correct": true,
+      "source_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+      },
+      "section_bytes": 1158,
+      "compiler_reported_estimate": 1158,
+      "tokenizer_version": "utf8-byte-upper-bound-1",
+      "context_bundle_id": "2802cc92-a36b-4f08-a84c-8af33fd0441e",
+      "context_sha256": "ed46a72d5e04f6002b31139a89de86a12736bb31adcf7636c61e5e3959d66881",
+      "hard_requirements_status": "COMPLETE_FOR_RECIPE"
+    },
+    {
+      "sql_statements": 47,
+      "elapsed_ms": 40.608184,
+      "strategy": "focused_state",
+      "repeat": 2,
+      "gold_exact_state_correct": true,
+      "source_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+      },
+      "section_bytes": 1158,
+      "compiler_reported_estimate": 1158,
+      "tokenizer_version": "utf8-byte-upper-bound-1",
+      "context_bundle_id": "7bf6322c-1baf-460f-8e2a-a37cbfd50598",
+      "context_sha256": "f497404dc1f275ec6ff430f2960e82b35223424ded3f897e75acdf92cb7e9bf9",
+      "hard_requirements_status": "COMPLETE_FOR_RECIPE"
+    },
+    {
+      "sql_statements": 47,
+      "elapsed_ms": 63.016686,
+      "strategy": "broad_state",
+      "repeat": 0,
+      "gold_exact_state_correct": true,
+      "source_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+      },
+      "section_bytes": 2237,
+      "compiler_reported_estimate": 2237,
+      "tokenizer_version": "utf8-byte-upper-bound-1",
+      "context_bundle_id": "f8752b41-dfd0-4a8e-b4ac-ac9389de307e",
+      "context_sha256": "dbc59fa2fe276a99454843fd749e95c84954b876b0a91e35b59c756174288f7b",
+      "hard_requirements_status": "COMPLETE_FOR_RECIPE"
+    },
+    {
+      "sql_statements": 47,
+      "elapsed_ms": 54.779852,
+      "strategy": "broad_state",
+      "repeat": 1,
+      "gold_exact_state_correct": true,
+      "source_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+      },
+      "section_bytes": 2237,
+      "compiler_reported_estimate": 2237,
+      "tokenizer_version": "utf8-byte-upper-bound-1",
+      "context_bundle_id": "134d8c3d-9890-4724-8400-ada0e29c7fda",
+      "context_sha256": "e12fcd650989029b959c6a571c6c79607ef97a953a6008ebd7c309ee89fd7790",
+      "hard_requirements_status": "COMPLETE_FOR_RECIPE"
+    },
+    {
+      "sql_statements": 47,
+      "elapsed_ms": 53.198067,
+      "strategy": "broad_state",
+      "repeat": 2,
+      "gold_exact_state_correct": true,
+      "source_world_ref": {
+        "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+        "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+        "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+      },
+      "section_bytes": 2237,
+      "compiler_reported_estimate": 2237,
+      "tokenizer_version": "utf8-byte-upper-bound-1",
+      "context_bundle_id": "d24b93c2-e8e2-481a-a3f3-36de8fdd2dbe",
+      "context_sha256": "5562915696dd6a68b6974fa29eb17861bdba83982cd604bdc880dcb4803e4cd1",
+      "hard_requirements_status": "COMPLETE_FOR_RECIPE"
+    }
+  ],
+  "gates": {
+    "focused_and_broad_exact_state": true,
+    "compiler_receipt_idempotency": true,
+    "belief_does_not_inherit_objective_theft": true,
+    "actor_world_and_other_actor_denied": true,
+    "warm_cache_and_compile_receipt_reauthorize": true,
+    "history_and_fixed_old_progress_cut": true,
+    "destroyed_and_pending_distinct": true,
+    "hard_context_budget_does_not_bind_partial": true,
+    "retrieval_has_zero_world_effects": true
+  },
+  "before": {
+    "head": {
+      "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+      "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+      "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+    },
+    "event_count": 5,
+    "state_hash": "467e22c3a7fd4ee1a8c96c3ce942a92bfc4a88518364b91b75c6bfd320f27077"
+  },
+  "after": {
+    "head": {
+      "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+      "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+      "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+    },
+    "event_count": 5,
+    "state_hash": "467e22c3a7fd4ee1a8c96c3ce942a92bfc4a88518364b91b75c6bfd320f27077"
+  },
+  "traces": {
+    "focused_state:0": {
+      "request": {
+        "schema_version": "2.1",
+        "task_id": "c88b5c90-01d8-4a8b-964c-4a20dd732b76",
+        "generation": 1,
+        "recipe_id": "DIRECTOR",
+        "input_manifest_ref": {
+          "artifact_id": "b160238d-12f0-4bab-9087-1154fadc850c",
+          "artifact_revision_id": "626a4ed7-6e4d-469c-a563-e73b810ec75e",
+          "sha256": "f8683623e24e56fa141c2e3169886cebde37a087a0d260f09b0ff89936ea2106"
+        },
+        "read_contract": {
+          "revision": {
+            "mode": "FIXED",
+            "world_ref": {
+              "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+              "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+              "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+            }
+          },
+          "process_policy": "ALLOW_PARTIAL",
+          "index_policy": "AUTHORITATIVE",
+          "max_wait_ms": 0
+        },
+        "knowledge_cut": {
+          "plane": "WORLD"
+        },
+        "subject_time": {
+          "kind": "POINT",
+          "at": {
+            "tick": 35,
+            "phase": 0
+          }
+        },
+        "token_budget": 50000,
+        "idempotency_key": "memory-probe-compile:c88b5c90-01d8-4a8b-964c-4a20dd732b76"
+      },
+      "response": {
+        "schema_version": "2.1",
+        "status": "READY",
+        "compiled": {
+          "schema_version": "2.1",
+          "bundle": {
+            "schema_version": "2.0",
+            "context_bundle_id": "a318f403-279d-4f92-aa7d-19c4ff3b8319",
+            "task_id": "c88b5c90-01d8-4a8b-964c-4a20dd732b76",
+            "generation": 1,
+            "world_ref": {
+              "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+              "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+              "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+            },
+            "story_time": {
+              "tick": 35,
+              "phase": 0
+            },
+            "role_id": "control_operator",
+            "actor_id": null,
+            "policy_version": "nf-policy-1",
+            "dependency_fingerprint": "18e29fa4dcb7f6e918d57eb78aa39af1835d47f9103d3b7d4c0ff614581a9396",
+            "dependency_handle": "4106fe6a-e7c5-45b7-afb2-8a0957f80d74",
+            "permitted_evidence_refs": [
+              {
+                "kind": "EVENT",
+                "world_ref": {
+                  "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                  "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                  "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                },
+                "event_ref": {
+                  "occurrence_id": "26e0177f-62ee-5bd5-9dc5-7250254513e6",
+                  "event_version_id": "98121375-a47b-5400-88ee-a71094afc498"
+                }
+              },
+              {
+                "kind": "EVENT",
+                "world_ref": {
+                  "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                  "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                  "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                },
+                "event_ref": {
+                  "occurrence_id": "e79c9d26-0624-5569-9c48-1eaa9684a3eb",
+                  "event_version_id": "e2370bf1-5461-5200-acf2-85c172176030"
+                }
+              }
+            ],
+            "facts": [
+              {
+                "statement": "{\"predicate\":\"possessed_by\",\"subject_id\":\"4ef873a8-4f45-56f0-ad45-67928097cea9\",\"value\":{\"entity_id\":\"f33a8ee7-5766-5997-9bff-8585c31e3cc4\",\"kind\":\"ENTITY\"},\"value_status\":\"VALUE\"}",
+                "status": "FACT",
+                "evidence_refs": [
+                  {
+                    "kind": "EVENT",
+                    "world_ref": {
+                      "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                      "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                      "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                    },
+                    "event_ref": {
+                      "occurrence_id": "26e0177f-62ee-5bd5-9dc5-7250254513e6",
+                      "event_version_id": "98121375-a47b-5400-88ee-a71094afc498"
+                    }
+                  },
+                  {
+                    "kind": "EVENT",
+                    "world_ref": {
+                      "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                      "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                      "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                    },
+                    "event_ref": {
+                      "occurrence_id": "e79c9d26-0624-5569-9c48-1eaa9684a3eb",
+                      "event_version_id": "e2370bf1-5461-5200-acf2-85c172176030"
+                    }
+                  }
+                ]
+              }
+            ],
+            "limitations": []
+          },
+          "read_cut": {
+            "world_ref": {
+              "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+              "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+              "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+            },
+            "knowledge_cut": {
+              "plane": "WORLD"
+            },
+            "policy_version": "nf-policy-1",
+            "permission_epoch": 0,
+            "resolved_at": "2026-11-10T12:49:57.549225+00:00",
+            "source_manifest_refs": [
+              {
+                "artifact_id": "b160238d-12f0-4bab-9087-1154fadc850c",
+                "artifact_revision_id": "626a4ed7-6e4d-469c-a563-e73b810ec75e",
+                "sha256": "f8683623e24e56fa141c2e3169886cebde37a087a0d260f09b0ff89936ea2106"
+              }
+            ],
+            "read_cut_id": "69a748f0-63d3-4a4c-ae3a-8b4f8788328c",
+            "interpretation_ref": {
+              "sha256": "04bb4e1411bc9cf3c5a1760e08d5e8e0eb3e02a6abdf738ba8ea640c6d9478f5",
+              "artifact_id": "2e6b13fe-e271-440e-a935-fa32c2634892",
+              "artifact_revision_id": "c5143dfc-04ec-4ad9-9ba7-7694634ab661"
+            }
+          },
+          "compiler_version": "nf-context-1",
+          "recipe_revision_ref": {
+            "artifact_id": "06a6e2d5-3d05-4d34-a9ef-acaf7d44c4cc",
+            "artifact_revision_id": "b28c49df-1ec1-4519-bc23-9e142185c66d",
+            "sha256": "8f3a6b10aa3e238c6e84870950a09ed7274e7f582807ac9609308daffd660464"
+          },
+          "input_manifest_ref": {
+            "artifact_id": "b160238d-12f0-4bab-9087-1154fadc850c",
+            "artifact_revision_id": "626a4ed7-6e4d-469c-a563-e73b810ec75e",
+            "sha256": "f8683623e24e56fa141c2e3169886cebde37a087a0d260f09b0ff89936ea2106"
+          },
+          "auxiliary_knowledge_cuts": [],
+          "sections": [
+            {
+              "section_kind": "TASK",
+              "content": "Task c88b5c90-01d8-4a8b-964c-4a20dd732b76 generation 1; fixed story point {\"phase\":0,\"tick\":35}.",
+              "source_refs": [],
+              "required": true
+            },
+            {
+              "section_kind": "HARD_CONSTRAINTS",
+              "content": "Use only the supplied fixed-cut material. Unknown values remain unknown. Beliefs and plans are not objective world facts. State changes require the formal acceptance service.",
+              "source_refs": [],
+              "required": true
+            },
+            {
+              "section_kind": "WORLD",
+              "content": "[{\"evidence_refs\":[{\"event_ref\":{\"event_version_id\":\"98121375-a47b-5400-88ee-a71094afc498\",\"occurrence_id\":\"26e0177f-62ee-5bd5-9dc5-7250254513e6\"},\"kind\":\"EVENT\",\"world_ref\":{\"branch_id\":\"524e9737-afc3-48fa-90e6-61d39109964a\",\"work_id\":\"b439df7c-187f-4c4d-b8be-e88070452aea\",\"world_revision_id\":\"397e87da-59e2-4c1e-94d6-eabde7e5f994\"}},{\"event_ref\":{\"event_version_id\":\"e2370bf1-5461-5200-acf2-85c172176030\",\"occurrence_id\":\"e79c9d26-0624-5569-9c48-1eaa9684a3eb\"},\"kind\":\"EVENT\",\"world_ref\":{\"branch_id\":\"524e9737-afc3-48fa-90e6-61d39109964a\",\"work_id\":\"b439df7c-187f-4c4d-b8be-e88070452aea\",\"world_revision_id\":\"397e87da-59e2-4c1e-94d6-eabde7e5f994\"}}],\"statement\":\"{\\\"predicate\\\":\\\"possessed_by\\\",\\\"subject_id\\\":\\\"4ef873a8-4f45-56f0-ad45-67928097cea9\\\",\\\"value\\\":{\\\"entity_id\\\":\\\"f33a8ee7-5766-5997-9bff-8585c31e3cc4\\\",\\\"kind\\\":\\\"ENTITY\\\"},\\\"value_status\\\":\\\"VALUE\\\"}\",\"status\":\"FACT\"}]",
+              "source_refs": [
+                {
+                  "kind": "EVENT",
+                  "world_ref": {
+                    "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                    "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                    "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                  },
+                  "event_ref": {
+                    "occurrence_id": "26e0177f-62ee-5bd5-9dc5-7250254513e6",
+                    "event_version_id": "98121375-a47b-5400-88ee-a71094afc498"
+                  }
+                },
+                {
+                  "kind": "EVENT",
+                  "world_ref": {
+                    "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                    "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                    "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                  },
+                  "event_ref": {
+                    "occurrence_id": "e79c9d26-0624-5569-9c48-1eaa9684a3eb",
+                    "event_version_id": "e2370bf1-5461-5200-acf2-85c172176030"
+                  }
+                }
+              ],
+              "required": true
+            }
+          ],
+          "hard_requirements_status": "COMPLETE_FOR_RECIPE",
+          "tokenizer_version": "utf8-byte-upper-bound-1",
+          "estimated_tokens": 1158,
+          "omitted_optional_scopes": []
+        },
+        "compiled_artifact_ref": {
+          "artifact_id": "bf4f8dbd-3383-4f5a-9fc7-af877fa6b1cf",
+          "artifact_revision_id": "91e71b93-8f5e-4289-a354-e352e58664fc",
+          "sha256": "6796b682d3c9dab2b9d88882daee8f1b98d96a68ce4ad393c274728c17dce834"
+        }
+      }
+    },
+    "focused_state:1": {
+      "request": {
+        "schema_version": "2.1",
+        "task_id": "263c162d-b45e-465b-a39c-f5101012a68b",
+        "generation": 1,
+        "recipe_id": "DIRECTOR",
+        "input_manifest_ref": {
+          "artifact_id": "73bd1b0e-7fee-44cd-97a7-58eafdbdf3c7",
+          "artifact_revision_id": "c5098483-6112-4d18-a27e-f8ffdca8c64d",
+          "sha256": "f8683623e24e56fa141c2e3169886cebde37a087a0d260f09b0ff89936ea2106"
+        },
+        "read_contract": {
+          "revision": {
+            "mode": "FIXED",
+            "world_ref": {
+              "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+              "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+              "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+            }
+          },
+          "process_policy": "ALLOW_PARTIAL",
+          "index_policy": "AUTHORITATIVE",
+          "max_wait_ms": 0
+        },
+        "knowledge_cut": {
+          "plane": "WORLD"
+        },
+        "subject_time": {
+          "kind": "POINT",
+          "at": {
+            "tick": 35,
+            "phase": 0
+          }
+        },
+        "token_budget": 50000,
+        "idempotency_key": "memory-probe-compile:263c162d-b45e-465b-a39c-f5101012a68b"
+      },
+      "response": {
+        "schema_version": "2.1",
+        "status": "READY",
+        "compiled": {
+          "schema_version": "2.1",
+          "bundle": {
+            "schema_version": "2.0",
+            "context_bundle_id": "2802cc92-a36b-4f08-a84c-8af33fd0441e",
+            "task_id": "263c162d-b45e-465b-a39c-f5101012a68b",
+            "generation": 1,
+            "world_ref": {
+              "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+              "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+              "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+            },
+            "story_time": {
+              "tick": 35,
+              "phase": 0
+            },
+            "role_id": "control_operator",
+            "actor_id": null,
+            "policy_version": "nf-policy-1",
+            "dependency_fingerprint": "5b65f9d03e303782c45cd177c92bcb216198d20df76aa5f4638d336e9ec725dd",
+            "dependency_handle": "0672244b-683a-4bb7-8ffd-66e8e6271467",
+            "permitted_evidence_refs": [
+              {
+                "kind": "EVENT",
+                "world_ref": {
+                  "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                  "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                  "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                },
+                "event_ref": {
+                  "occurrence_id": "26e0177f-62ee-5bd5-9dc5-7250254513e6",
+                  "event_version_id": "98121375-a47b-5400-88ee-a71094afc498"
+                }
+              },
+              {
+                "kind": "EVENT",
+                "world_ref": {
+                  "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                  "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                  "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                },
+                "event_ref": {
+                  "occurrence_id": "e79c9d26-0624-5569-9c48-1eaa9684a3eb",
+                  "event_version_id": "e2370bf1-5461-5200-acf2-85c172176030"
+                }
+              }
+            ],
+            "facts": [
+              {
+                "statement": "{\"predicate\":\"possessed_by\",\"subject_id\":\"4ef873a8-4f45-56f0-ad45-67928097cea9\",\"value\":{\"entity_id\":\"f33a8ee7-5766-5997-9bff-8585c31e3cc4\",\"kind\":\"ENTITY\"},\"value_status\":\"VALUE\"}",
+                "status": "FACT",
+                "evidence_refs": [
+                  {
+                    "kind": "EVENT",
+                    "world_ref": {
+                      "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                      "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                      "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                    },
+                    "event_ref": {
+                      "occurrence_id": "26e0177f-62ee-5bd5-9dc5-7250254513e6",
+                      "event_version_id": "98121375-a47b-5400-88ee-a71094afc498"
+                    }
+                  },
+                  {
+                    "kind": "EVENT",
+                    "world_ref": {
+                      "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                      "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                      "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                    },
+                    "event_ref": {
+                      "occurrence_id": "e79c9d26-0624-5569-9c48-1eaa9684a3eb",
+                      "event_version_id": "e2370bf1-5461-5200-acf2-85c172176030"
+                    }
+                  }
+                ]
+              }
+            ],
+            "limitations": []
+          },
+          "read_cut": {
+            "world_ref": {
+              "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+              "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+              "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+            },
+            "knowledge_cut": {
+              "plane": "WORLD"
+            },
+            "policy_version": "nf-policy-1",
+            "permission_epoch": 0,
+            "resolved_at": "2026-11-10T12:49:57.605511+00:00",
+            "source_manifest_refs": [
+              {
+                "artifact_id": "73bd1b0e-7fee-44cd-97a7-58eafdbdf3c7",
+                "artifact_revision_id": "c5098483-6112-4d18-a27e-f8ffdca8c64d",
+                "sha256": "f8683623e24e56fa141c2e3169886cebde37a087a0d260f09b0ff89936ea2106"
+              }
+            ],
+            "read_cut_id": "326a4ac2-a3ab-43dc-a398-47946bb04131",
+            "interpretation_ref": {
+              "sha256": "04bb4e1411bc9cf3c5a1760e08d5e8e0eb3e02a6abdf738ba8ea640c6d9478f5",
+              "artifact_id": "2e6b13fe-e271-440e-a935-fa32c2634892",
+              "artifact_revision_id": "c5143dfc-04ec-4ad9-9ba7-7694634ab661"
+            }
+          },
+          "compiler_version": "nf-context-1",
+          "recipe_revision_ref": {
+            "artifact_id": "1e60546d-2db4-438b-96fc-a69a9957f8f6",
+            "artifact_revision_id": "4307be1d-6e25-4b52-b60e-dfb1114af682",
+            "sha256": "8f3a6b10aa3e238c6e84870950a09ed7274e7f582807ac9609308daffd660464"
+          },
+          "input_manifest_ref": {
+            "artifact_id": "73bd1b0e-7fee-44cd-97a7-58eafdbdf3c7",
+            "artifact_revision_id": "c5098483-6112-4d18-a27e-f8ffdca8c64d",
+            "sha256": "f8683623e24e56fa141c2e3169886cebde37a087a0d260f09b0ff89936ea2106"
+          },
+          "auxiliary_knowledge_cuts": [],
+          "sections": [
+            {
+              "section_kind": "TASK",
+              "content": "Task 263c162d-b45e-465b-a39c-f5101012a68b generation 1; fixed story point {\"phase\":0,\"tick\":35}.",
+              "source_refs": [],
+              "required": true
+            },
+            {
+              "section_kind": "HARD_CONSTRAINTS",
+              "content": "Use only the supplied fixed-cut material. Unknown values remain unknown. Beliefs and plans are not objective world facts. State changes require the formal acceptance service.",
+              "source_refs": [],
+              "required": true
+            },
+            {
+              "section_kind": "WORLD",
+              "content": "[{\"evidence_refs\":[{\"event_ref\":{\"event_version_id\":\"98121375-a47b-5400-88ee-a71094afc498\",\"occurrence_id\":\"26e0177f-62ee-5bd5-9dc5-7250254513e6\"},\"kind\":\"EVENT\",\"world_ref\":{\"branch_id\":\"524e9737-afc3-48fa-90e6-61d39109964a\",\"work_id\":\"b439df7c-187f-4c4d-b8be-e88070452aea\",\"world_revision_id\":\"397e87da-59e2-4c1e-94d6-eabde7e5f994\"}},{\"event_ref\":{\"event_version_id\":\"e2370bf1-5461-5200-acf2-85c172176030\",\"occurrence_id\":\"e79c9d26-0624-5569-9c48-1eaa9684a3eb\"},\"kind\":\"EVENT\",\"world_ref\":{\"branch_id\":\"524e9737-afc3-48fa-90e6-61d39109964a\",\"work_id\":\"b439df7c-187f-4c4d-b8be-e88070452aea\",\"world_revision_id\":\"397e87da-59e2-4c1e-94d6-eabde7e5f994\"}}],\"statement\":\"{\\\"predicate\\\":\\\"possessed_by\\\",\\\"subject_id\\\":\\\"4ef873a8-4f45-56f0-ad45-67928097cea9\\\",\\\"value\\\":{\\\"entity_id\\\":\\\"f33a8ee7-5766-5997-9bff-8585c31e3cc4\\\",\\\"kind\\\":\\\"ENTITY\\\"},\\\"value_status\\\":\\\"VALUE\\\"}\",\"status\":\"FACT\"}]",
+              "source_refs": [
+                {
+                  "kind": "EVENT",
+                  "world_ref": {
+                    "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                    "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                    "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                  },
+                  "event_ref": {
+                    "occurrence_id": "26e0177f-62ee-5bd5-9dc5-7250254513e6",
+                    "event_version_id": "98121375-a47b-5400-88ee-a71094afc498"
+                  }
+                },
+                {
+                  "kind": "EVENT",
+                  "world_ref": {
+                    "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                    "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                    "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                  },
+                  "event_ref": {
+                    "occurrence_id": "e79c9d26-0624-5569-9c48-1eaa9684a3eb",
+                    "event_version_id": "e2370bf1-5461-5200-acf2-85c172176030"
+                  }
+                }
+              ],
+              "required": true
+            }
+          ],
+          "hard_requirements_status": "COMPLETE_FOR_RECIPE",
+          "tokenizer_version": "utf8-byte-upper-bound-1",
+          "estimated_tokens": 1158,
+          "omitted_optional_scopes": []
+        },
+        "compiled_artifact_ref": {
+          "artifact_id": "07150391-5ed8-4b77-9284-9f4b015da432",
+          "artifact_revision_id": "b22adba8-1b93-4b63-ac82-bfb129ebf85c",
+          "sha256": "a83f0c039f2a3d3472521cc8e6aa101d9bb115dbcda7e8419c6dbc418906f871"
+        }
+      }
+    },
+    "focused_state:2": {
+      "request": {
+        "schema_version": "2.1",
+        "task_id": "e445abd8-b9d2-4fe9-bf51-f87bbb50b0a1",
+        "generation": 1,
+        "recipe_id": "DIRECTOR",
+        "input_manifest_ref": {
+          "artifact_id": "95aec074-40af-4b4a-90bc-9735a5461622",
+          "artifact_revision_id": "c66d55ba-86a5-4b7d-ad1c-bbf15a9fef7b",
+          "sha256": "f8683623e24e56fa141c2e3169886cebde37a087a0d260f09b0ff89936ea2106"
+        },
+        "read_contract": {
+          "revision": {
+            "mode": "FIXED",
+            "world_ref": {
+              "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+              "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+              "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+            }
+          },
+          "process_policy": "ALLOW_PARTIAL",
+          "index_policy": "AUTHORITATIVE",
+          "max_wait_ms": 0
+        },
+        "knowledge_cut": {
+          "plane": "WORLD"
+        },
+        "subject_time": {
+          "kind": "POINT",
+          "at": {
+            "tick": 35,
+            "phase": 0
+          }
+        },
+        "token_budget": 50000,
+        "idempotency_key": "memory-probe-compile:e445abd8-b9d2-4fe9-bf51-f87bbb50b0a1"
+      },
+      "response": {
+        "schema_version": "2.1",
+        "status": "READY",
+        "compiled": {
+          "schema_version": "2.1",
+          "bundle": {
+            "schema_version": "2.0",
+            "context_bundle_id": "7bf6322c-1baf-460f-8e2a-a37cbfd50598",
+            "task_id": "e445abd8-b9d2-4fe9-bf51-f87bbb50b0a1",
+            "generation": 1,
+            "world_ref": {
+              "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+              "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+              "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+            },
+            "story_time": {
+              "tick": 35,
+              "phase": 0
+            },
+            "role_id": "control_operator",
+            "actor_id": null,
+            "policy_version": "nf-policy-1",
+            "dependency_fingerprint": "fb643c2b501484d29f60b8bc992e38fb31a4c9344f9a41eba19d6314d71f4e6b",
+            "dependency_handle": "649a8fea-008e-40be-9115-2136c87eb178",
+            "permitted_evidence_refs": [
+              {
+                "kind": "EVENT",
+                "world_ref": {
+                  "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                  "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                  "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                },
+                "event_ref": {
+                  "occurrence_id": "26e0177f-62ee-5bd5-9dc5-7250254513e6",
+                  "event_version_id": "98121375-a47b-5400-88ee-a71094afc498"
+                }
+              },
+              {
+                "kind": "EVENT",
+                "world_ref": {
+                  "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                  "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                  "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                },
+                "event_ref": {
+                  "occurrence_id": "e79c9d26-0624-5569-9c48-1eaa9684a3eb",
+                  "event_version_id": "e2370bf1-5461-5200-acf2-85c172176030"
+                }
+              }
+            ],
+            "facts": [
+              {
+                "statement": "{\"predicate\":\"possessed_by\",\"subject_id\":\"4ef873a8-4f45-56f0-ad45-67928097cea9\",\"value\":{\"entity_id\":\"f33a8ee7-5766-5997-9bff-8585c31e3cc4\",\"kind\":\"ENTITY\"},\"value_status\":\"VALUE\"}",
+                "status": "FACT",
+                "evidence_refs": [
+                  {
+                    "kind": "EVENT",
+                    "world_ref": {
+                      "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                      "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                      "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                    },
+                    "event_ref": {
+                      "occurrence_id": "26e0177f-62ee-5bd5-9dc5-7250254513e6",
+                      "event_version_id": "98121375-a47b-5400-88ee-a71094afc498"
+                    }
+                  },
+                  {
+                    "kind": "EVENT",
+                    "world_ref": {
+                      "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                      "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                      "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                    },
+                    "event_ref": {
+                      "occurrence_id": "e79c9d26-0624-5569-9c48-1eaa9684a3eb",
+                      "event_version_id": "e2370bf1-5461-5200-acf2-85c172176030"
+                    }
+                  }
+                ]
+              }
+            ],
+            "limitations": []
+          },
+          "read_cut": {
+            "world_ref": {
+              "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+              "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+              "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+            },
+            "knowledge_cut": {
+              "plane": "WORLD"
+            },
+            "policy_version": "nf-policy-1",
+            "permission_epoch": 0,
+            "resolved_at": "2026-11-10T12:49:57.661853+00:00",
+            "source_manifest_refs": [
+              {
+                "artifact_id": "95aec074-40af-4b4a-90bc-9735a5461622",
+                "artifact_revision_id": "c66d55ba-86a5-4b7d-ad1c-bbf15a9fef7b",
+                "sha256": "f8683623e24e56fa141c2e3169886cebde37a087a0d260f09b0ff89936ea2106"
+              }
+            ],
+            "read_cut_id": "1f97f4c0-1aae-407a-ac33-9e9aba4409d3",
+            "interpretation_ref": {
+              "sha256": "04bb4e1411bc9cf3c5a1760e08d5e8e0eb3e02a6abdf738ba8ea640c6d9478f5",
+              "artifact_id": "2e6b13fe-e271-440e-a935-fa32c2634892",
+              "artifact_revision_id": "c5143dfc-04ec-4ad9-9ba7-7694634ab661"
+            }
+          },
+          "compiler_version": "nf-context-1",
+          "recipe_revision_ref": {
+            "artifact_id": "df74e2a6-648c-4660-9c5d-dbeeab4f943e",
+            "artifact_revision_id": "25ebb27b-844b-43e0-b4c9-94bfa4422f58",
+            "sha256": "8f3a6b10aa3e238c6e84870950a09ed7274e7f582807ac9609308daffd660464"
+          },
+          "input_manifest_ref": {
+            "artifact_id": "95aec074-40af-4b4a-90bc-9735a5461622",
+            "artifact_revision_id": "c66d55ba-86a5-4b7d-ad1c-bbf15a9fef7b",
+            "sha256": "f8683623e24e56fa141c2e3169886cebde37a087a0d260f09b0ff89936ea2106"
+          },
+          "auxiliary_knowledge_cuts": [],
+          "sections": [
+            {
+              "section_kind": "TASK",
+              "content": "Task e445abd8-b9d2-4fe9-bf51-f87bbb50b0a1 generation 1; fixed story point {\"phase\":0,\"tick\":35}.",
+              "source_refs": [],
+              "required": true
+            },
+            {
+              "section_kind": "HARD_CONSTRAINTS",
+              "content": "Use only the supplied fixed-cut material. Unknown values remain unknown. Beliefs and plans are not objective world facts. State changes require the formal acceptance service.",
+              "source_refs": [],
+              "required": true
+            },
+            {
+              "section_kind": "WORLD",
+              "content": "[{\"evidence_refs\":[{\"event_ref\":{\"event_version_id\":\"98121375-a47b-5400-88ee-a71094afc498\",\"occurrence_id\":\"26e0177f-62ee-5bd5-9dc5-7250254513e6\"},\"kind\":\"EVENT\",\"world_ref\":{\"branch_id\":\"524e9737-afc3-48fa-90e6-61d39109964a\",\"work_id\":\"b439df7c-187f-4c4d-b8be-e88070452aea\",\"world_revision_id\":\"397e87da-59e2-4c1e-94d6-eabde7e5f994\"}},{\"event_ref\":{\"event_version_id\":\"e2370bf1-5461-5200-acf2-85c172176030\",\"occurrence_id\":\"e79c9d26-0624-5569-9c48-1eaa9684a3eb\"},\"kind\":\"EVENT\",\"world_ref\":{\"branch_id\":\"524e9737-afc3-48fa-90e6-61d39109964a\",\"work_id\":\"b439df7c-187f-4c4d-b8be-e88070452aea\",\"world_revision_id\":\"397e87da-59e2-4c1e-94d6-eabde7e5f994\"}}],\"statement\":\"{\\\"predicate\\\":\\\"possessed_by\\\",\\\"subject_id\\\":\\\"4ef873a8-4f45-56f0-ad45-67928097cea9\\\",\\\"value\\\":{\\\"entity_id\\\":\\\"f33a8ee7-5766-5997-9bff-8585c31e3cc4\\\",\\\"kind\\\":\\\"ENTITY\\\"},\\\"value_status\\\":\\\"VALUE\\\"}\",\"status\":\"FACT\"}]",
+              "source_refs": [
+                {
+                  "kind": "EVENT",
+                  "world_ref": {
+                    "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                    "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                    "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                  },
+                  "event_ref": {
+                    "occurrence_id": "26e0177f-62ee-5bd5-9dc5-7250254513e6",
+                    "event_version_id": "98121375-a47b-5400-88ee-a71094afc498"
+                  }
+                },
+                {
+                  "kind": "EVENT",
+                  "world_ref": {
+                    "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                    "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                    "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                  },
+                  "event_ref": {
+                    "occurrence_id": "e79c9d26-0624-5569-9c48-1eaa9684a3eb",
+                    "event_version_id": "e2370bf1-5461-5200-acf2-85c172176030"
+                  }
+                }
+              ],
+              "required": true
+            }
+          ],
+          "hard_requirements_status": "COMPLETE_FOR_RECIPE",
+          "tokenizer_version": "utf8-byte-upper-bound-1",
+          "estimated_tokens": 1158,
+          "omitted_optional_scopes": []
+        },
+        "compiled_artifact_ref": {
+          "artifact_id": "a51e7826-8368-449f-83c3-fbb1a81ace49",
+          "artifact_revision_id": "423a91ef-afba-40b2-a232-2753f426b3d1",
+          "sha256": "2b4e31500c4af2ec92786dcf3fb3f8f5fc73bae3fa5e8ffbddc88db65b520e1c"
+        }
+      }
+    },
+    "broad_state:0": {
+      "request": {
+        "schema_version": "2.1",
+        "task_id": "a1856f60-ecfe-421b-b8da-432c0f30f15d",
+        "generation": 1,
+        "recipe_id": "DIRECTOR",
+        "input_manifest_ref": {
+          "artifact_id": "fd038fca-7b41-4bb7-b0ac-47f27345ad09",
+          "artifact_revision_id": "21356090-4ba3-410b-8330-9c76a3fffe43",
+          "sha256": "06de85f4a2e15b9fb0a9a9b3cc63110f38fbeb39bf8952279a28a0f87113c0cc"
+        },
+        "read_contract": {
+          "revision": {
+            "mode": "FIXED",
+            "world_ref": {
+              "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+              "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+              "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+            }
+          },
+          "process_policy": "ALLOW_PARTIAL",
+          "index_policy": "AUTHORITATIVE",
+          "max_wait_ms": 0
+        },
+        "knowledge_cut": {
+          "plane": "WORLD"
+        },
+        "subject_time": {
+          "kind": "POINT",
+          "at": {
+            "tick": 35,
+            "phase": 0
+          }
+        },
+        "token_budget": 50000,
+        "idempotency_key": "memory-probe-compile:a1856f60-ecfe-421b-b8da-432c0f30f15d"
+      },
+      "response": {
+        "schema_version": "2.1",
+        "status": "READY",
+        "compiled": {
+          "schema_version": "2.1",
+          "bundle": {
+            "schema_version": "2.0",
+            "context_bundle_id": "f8752b41-dfd0-4a8e-b4ac-ac9389de307e",
+            "task_id": "a1856f60-ecfe-421b-b8da-432c0f30f15d",
+            "generation": 1,
+            "world_ref": {
+              "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+              "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+              "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+            },
+            "story_time": {
+              "tick": 35,
+              "phase": 0
+            },
+            "role_id": "control_operator",
+            "actor_id": null,
+            "policy_version": "nf-policy-1",
+            "dependency_fingerprint": "8fcac1541382d3da19838a7f29a37f48e1c37e6178296f52c0aa35ef64767446",
+            "dependency_handle": "56ad530e-e38c-4277-839a-15bdda1a7988",
+            "permitted_evidence_refs": [
+              {
+                "kind": "EVENT",
+                "world_ref": {
+                  "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                  "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                  "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                },
+                "event_ref": {
+                  "occurrence_id": "258b3211-9980-540d-a7a3-3117af948dcf",
+                  "event_version_id": "3262d2f4-18b6-595a-b4ec-61a900e85696"
+                }
+              },
+              {
+                "kind": "EVENT",
+                "world_ref": {
+                  "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                  "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                  "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                },
+                "event_ref": {
+                  "occurrence_id": "26e0177f-62ee-5bd5-9dc5-7250254513e6",
+                  "event_version_id": "98121375-a47b-5400-88ee-a71094afc498"
+                }
+              },
+              {
+                "kind": "EVENT",
+                "world_ref": {
+                  "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                  "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                  "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                },
+                "event_ref": {
+                  "occurrence_id": "e79c9d26-0624-5569-9c48-1eaa9684a3eb",
+                  "event_version_id": "e2370bf1-5461-5200-acf2-85c172176030"
+                }
+              }
+            ],
+            "facts": [
+              {
+                "statement": "{\"predicate\":\"legal_owner\",\"subject_id\":\"4ef873a8-4f45-56f0-ad45-67928097cea9\",\"value\":{\"entity_id\":\"3ab18f96-5526-56ce-96bc-9bf3d66de8d4\",\"kind\":\"ENTITY\"},\"value_status\":\"VALUE\"}",
+                "status": "FACT",
+                "evidence_refs": [
+                  {
+                    "kind": "EVENT",
+                    "world_ref": {
+                      "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                      "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                      "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                    },
+                    "event_ref": {
+                      "occurrence_id": "258b3211-9980-540d-a7a3-3117af948dcf",
+                      "event_version_id": "3262d2f4-18b6-595a-b4ec-61a900e85696"
+                    }
+                  }
+                ]
+              },
+              {
+                "statement": "{\"predicate\":\"possessed_by\",\"subject_id\":\"4ef873a8-4f45-56f0-ad45-67928097cea9\",\"value\":{\"entity_id\":\"f33a8ee7-5766-5997-9bff-8585c31e3cc4\",\"kind\":\"ENTITY\"},\"value_status\":\"VALUE\"}",
+                "status": "FACT",
+                "evidence_refs": [
+                  {
+                    "kind": "EVENT",
+                    "world_ref": {
+                      "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                      "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                      "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                    },
+                    "event_ref": {
+                      "occurrence_id": "26e0177f-62ee-5bd5-9dc5-7250254513e6",
+                      "event_version_id": "98121375-a47b-5400-88ee-a71094afc498"
+                    }
+                  },
+                  {
+                    "kind": "EVENT",
+                    "world_ref": {
+                      "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                      "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                      "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                    },
+                    "event_ref": {
+                      "occurrence_id": "e79c9d26-0624-5569-9c48-1eaa9684a3eb",
+                      "event_version_id": "e2370bf1-5461-5200-acf2-85c172176030"
+                    }
+                  }
+                ]
+              },
+              {
+                "statement": "{\"predicate\":\"lifecycle\",\"subject_id\":\"4ef873a8-4f45-56f0-ad45-67928097cea9\",\"value\":{\"kind\":\"STRING\",\"value\":\"ACTIVE\"},\"value_status\":\"VALUE\"}",
+                "status": "FACT",
+                "evidence_refs": []
+              },
+              {
+                "statement": "{\"predicate\":\"active_use\",\"subject_id\":\"4ef873a8-4f45-56f0-ad45-67928097cea9\",\"value\":{\"kind\":\"BOOLEAN\",\"value\":true},\"value_status\":\"VALUE\"}",
+                "status": "FACT",
+                "evidence_refs": []
+              }
+            ],
+            "limitations": [
+              "Requested material is not available as a determined value at this knowledge cut."
+            ]
+          },
+          "read_cut": {
+            "world_ref": {
+              "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+              "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+              "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+            },
+            "knowledge_cut": {
+              "plane": "WORLD"
+            },
+            "policy_version": "nf-policy-1",
+            "permission_epoch": 0,
+            "resolved_at": "2026-11-10T12:49:57.730036+00:00",
+            "source_manifest_refs": [
+              {
+                "artifact_id": "fd038fca-7b41-4bb7-b0ac-47f27345ad09",
+                "artifact_revision_id": "21356090-4ba3-410b-8330-9c76a3fffe43",
+                "sha256": "06de85f4a2e15b9fb0a9a9b3cc63110f38fbeb39bf8952279a28a0f87113c0cc"
+              }
+            ],
+            "read_cut_id": "904d29c0-7a5a-4a19-92ba-47ca03b45cd7",
+            "interpretation_ref": {
+              "sha256": "04bb4e1411bc9cf3c5a1760e08d5e8e0eb3e02a6abdf738ba8ea640c6d9478f5",
+              "artifact_id": "2e6b13fe-e271-440e-a935-fa32c2634892",
+              "artifact_revision_id": "c5143dfc-04ec-4ad9-9ba7-7694634ab661"
+            }
+          },
+          "compiler_version": "nf-context-1",
+          "recipe_revision_ref": {
+            "artifact_id": "49145801-ead3-48e1-a687-84d6d1f5ecc5",
+            "artifact_revision_id": "3740f848-bab2-4dd3-b992-6fa02f764fe0",
+            "sha256": "7bc59462184a7f30ef5701eeb1290bb0fb64e616a07f0747a3f70172b19bbe2e"
+          },
+          "input_manifest_ref": {
+            "artifact_id": "fd038fca-7b41-4bb7-b0ac-47f27345ad09",
+            "artifact_revision_id": "21356090-4ba3-410b-8330-9c76a3fffe43",
+            "sha256": "06de85f4a2e15b9fb0a9a9b3cc63110f38fbeb39bf8952279a28a0f87113c0cc"
+          },
+          "auxiliary_knowledge_cuts": [],
+          "sections": [
+            {
+              "section_kind": "TASK",
+              "content": "Task a1856f60-ecfe-421b-b8da-432c0f30f15d generation 1; fixed story point {\"phase\":0,\"tick\":35}.",
+              "source_refs": [],
+              "required": true
+            },
+            {
+              "section_kind": "HARD_CONSTRAINTS",
+              "content": "Use only the supplied fixed-cut material. Unknown values remain unknown. Beliefs and plans are not objective world facts. State changes require the formal acceptance service.",
+              "source_refs": [],
+              "required": true
+            },
+            {
+              "section_kind": "WORLD",
+              "content": "[{\"evidence_refs\":[{\"event_ref\":{\"event_version_id\":\"3262d2f4-18b6-595a-b4ec-61a900e85696\",\"occurrence_id\":\"258b3211-9980-540d-a7a3-3117af948dcf\"},\"kind\":\"EVENT\",\"world_ref\":{\"branch_id\":\"524e9737-afc3-48fa-90e6-61d39109964a\",\"work_id\":\"b439df7c-187f-4c4d-b8be-e88070452aea\",\"world_revision_id\":\"397e87da-59e2-4c1e-94d6-eabde7e5f994\"}}],\"statement\":\"{\\\"predicate\\\":\\\"legal_owner\\\",\\\"subject_id\\\":\\\"4ef873a8-4f45-56f0-ad45-67928097cea9\\\",\\\"value\\\":{\\\"entity_id\\\":\\\"3ab18f96-5526-56ce-96bc-9bf3d66de8d4\\\",\\\"kind\\\":\\\"ENTITY\\\"},\\\"value_status\\\":\\\"VALUE\\\"}\",\"status\":\"FACT\"},{\"evidence_refs\":[{\"event_ref\":{\"event_version_id\":\"98121375-a47b-5400-88ee-a71094afc498\",\"occurrence_id\":\"26e0177f-62ee-5bd5-9dc5-7250254513e6\"},\"kind\":\"EVENT\",\"world_ref\":{\"branch_id\":\"524e9737-afc3-48fa-90e6-61d39109964a\",\"work_id\":\"b439df7c-187f-4c4d-b8be-e88070452aea\",\"world_revision_id\":\"397e87da-59e2-4c1e-94d6-eabde7e5f994\"}},{\"event_ref\":{\"event_version_id\":\"e2370bf1-5461-5200-acf2-85c172176030\",\"occurrence_id\":\"e79c9d26-0624-5569-9c48-1eaa9684a3eb\"},\"kind\":\"EVENT\",\"world_ref\":{\"branch_id\":\"524e9737-afc3-48fa-90e6-61d39109964a\",\"work_id\":\"b439df7c-187f-4c4d-b8be-e88070452aea\",\"world_revision_id\":\"397e87da-59e2-4c1e-94d6-eabde7e5f994\"}}],\"statement\":\"{\\\"predicate\\\":\\\"possessed_by\\\",\\\"subject_id\\\":\\\"4ef873a8-4f45-56f0-ad45-67928097cea9\\\",\\\"value\\\":{\\\"entity_id\\\":\\\"f33a8ee7-5766-5997-9bff-8585c31e3cc4\\\",\\\"kind\\\":\\\"ENTITY\\\"},\\\"value_status\\\":\\\"VALUE\\\"}\",\"status\":\"FACT\"},{\"evidence_refs\":[],\"statement\":\"{\\\"predicate\\\":\\\"lifecycle\\\",\\\"subject_id\\\":\\\"4ef873a8-4f45-56f0-ad45-67928097cea9\\\",\\\"value\\\":{\\\"kind\\\":\\\"STRING\\\",\\\"value\\\":\\\"ACTIVE\\\"},\\\"value_status\\\":\\\"VALUE\\\"}\",\"status\":\"FACT\"},{\"evidence_refs\":[],\"statement\":\"{\\\"predicate\\\":\\\"active_use\\\",\\\"subject_id\\\":\\\"4ef873a8-4f45-56f0-ad45-67928097cea9\\\",\\\"value\\\":{\\\"kind\\\":\\\"BOOLEAN\\\",\\\"value\\\":true},\\\"value_status\\\":\\\"VALUE\\\"}\",\"status\":\"FACT\"}]",
+              "source_refs": [
+                {
+                  "kind": "EVENT",
+                  "world_ref": {
+                    "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                    "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                    "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                  },
+                  "event_ref": {
+                    "occurrence_id": "258b3211-9980-540d-a7a3-3117af948dcf",
+                    "event_version_id": "3262d2f4-18b6-595a-b4ec-61a900e85696"
+                  }
+                },
+                {
+                  "kind": "EVENT",
+                  "world_ref": {
+                    "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                    "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                    "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                  },
+                  "event_ref": {
+                    "occurrence_id": "26e0177f-62ee-5bd5-9dc5-7250254513e6",
+                    "event_version_id": "98121375-a47b-5400-88ee-a71094afc498"
+                  }
+                },
+                {
+                  "kind": "EVENT",
+                  "world_ref": {
+                    "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                    "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                    "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                  },
+                  "event_ref": {
+                    "occurrence_id": "e79c9d26-0624-5569-9c48-1eaa9684a3eb",
+                    "event_version_id": "e2370bf1-5461-5200-acf2-85c172176030"
+                  }
+                }
+              ],
+              "required": true
+            },
+            {
+              "section_kind": "UNRESOLVED",
+              "content": "Requested material is not available as a determined value at this knowledge cut.",
+              "source_refs": [],
+              "required": true
+            }
+          ],
+          "hard_requirements_status": "COMPLETE_FOR_RECIPE",
+          "tokenizer_version": "utf8-byte-upper-bound-1",
+          "estimated_tokens": 2237,
+          "omitted_optional_scopes": []
+        },
+        "compiled_artifact_ref": {
+          "artifact_id": "1032c611-038a-497e-9bf4-9a0c8d18f368",
+          "artifact_revision_id": "33cccf06-7d91-424a-beac-f1fa5c5934d0",
+          "sha256": "f5fdd7b3cbe4a3b518401e03b3492698d6237635d6bd16e963fbf2cd65baf836"
+        }
+      }
+    },
+    "broad_state:1": {
+      "request": {
+        "schema_version": "2.1",
+        "task_id": "7cbf4fb2-5a86-41eb-9f23-fbc080f7f7a2",
+        "generation": 1,
+        "recipe_id": "DIRECTOR",
+        "input_manifest_ref": {
+          "artifact_id": "5ec069ff-f1da-4559-9ce4-693b749491aa",
+          "artifact_revision_id": "19b4f251-3e82-49f5-9c28-af6c3788d509",
+          "sha256": "06de85f4a2e15b9fb0a9a9b3cc63110f38fbeb39bf8952279a28a0f87113c0cc"
+        },
+        "read_contract": {
+          "revision": {
+            "mode": "FIXED",
+            "world_ref": {
+              "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+              "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+              "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+            }
+          },
+          "process_policy": "ALLOW_PARTIAL",
+          "index_policy": "AUTHORITATIVE",
+          "max_wait_ms": 0
+        },
+        "knowledge_cut": {
+          "plane": "WORLD"
+        },
+        "subject_time": {
+          "kind": "POINT",
+          "at": {
+            "tick": 35,
+            "phase": 0
+          }
+        },
+        "token_budget": 50000,
+        "idempotency_key": "memory-probe-compile:7cbf4fb2-5a86-41eb-9f23-fbc080f7f7a2"
+      },
+      "response": {
+        "schema_version": "2.1",
+        "status": "READY",
+        "compiled": {
+          "schema_version": "2.1",
+          "bundle": {
+            "schema_version": "2.0",
+            "context_bundle_id": "134d8c3d-9890-4724-8400-ada0e29c7fda",
+            "task_id": "7cbf4fb2-5a86-41eb-9f23-fbc080f7f7a2",
+            "generation": 1,
+            "world_ref": {
+              "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+              "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+              "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+            },
+            "story_time": {
+              "tick": 35,
+              "phase": 0
+            },
+            "role_id": "control_operator",
+            "actor_id": null,
+            "policy_version": "nf-policy-1",
+            "dependency_fingerprint": "29722b1bf21193c61cf99c51260ffc87266fc73c118285e2ea526bdee80680b6",
+            "dependency_handle": "25e2c508-4147-4035-9a0a-b8cd1cad5b7e",
+            "permitted_evidence_refs": [
+              {
+                "kind": "EVENT",
+                "world_ref": {
+                  "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                  "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                  "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                },
+                "event_ref": {
+                  "occurrence_id": "258b3211-9980-540d-a7a3-3117af948dcf",
+                  "event_version_id": "3262d2f4-18b6-595a-b4ec-61a900e85696"
+                }
+              },
+              {
+                "kind": "EVENT",
+                "world_ref": {
+                  "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                  "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                  "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                },
+                "event_ref": {
+                  "occurrence_id": "26e0177f-62ee-5bd5-9dc5-7250254513e6",
+                  "event_version_id": "98121375-a47b-5400-88ee-a71094afc498"
+                }
+              },
+              {
+                "kind": "EVENT",
+                "world_ref": {
+                  "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                  "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                  "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                },
+                "event_ref": {
+                  "occurrence_id": "e79c9d26-0624-5569-9c48-1eaa9684a3eb",
+                  "event_version_id": "e2370bf1-5461-5200-acf2-85c172176030"
+                }
+              }
+            ],
+            "facts": [
+              {
+                "statement": "{\"predicate\":\"legal_owner\",\"subject_id\":\"4ef873a8-4f45-56f0-ad45-67928097cea9\",\"value\":{\"entity_id\":\"3ab18f96-5526-56ce-96bc-9bf3d66de8d4\",\"kind\":\"ENTITY\"},\"value_status\":\"VALUE\"}",
+                "status": "FACT",
+                "evidence_refs": [
+                  {
+                    "kind": "EVENT",
+                    "world_ref": {
+                      "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                      "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                      "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                    },
+                    "event_ref": {
+                      "occurrence_id": "258b3211-9980-540d-a7a3-3117af948dcf",
+                      "event_version_id": "3262d2f4-18b6-595a-b4ec-61a900e85696"
+                    }
+                  }
+                ]
+              },
+              {
+                "statement": "{\"predicate\":\"possessed_by\",\"subject_id\":\"4ef873a8-4f45-56f0-ad45-67928097cea9\",\"value\":{\"entity_id\":\"f33a8ee7-5766-5997-9bff-8585c31e3cc4\",\"kind\":\"ENTITY\"},\"value_status\":\"VALUE\"}",
+                "status": "FACT",
+                "evidence_refs": [
+                  {
+                    "kind": "EVENT",
+                    "world_ref": {
+                      "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                      "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                      "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                    },
+                    "event_ref": {
+                      "occurrence_id": "26e0177f-62ee-5bd5-9dc5-7250254513e6",
+                      "event_version_id": "98121375-a47b-5400-88ee-a71094afc498"
+                    }
+                  },
+                  {
+                    "kind": "EVENT",
+                    "world_ref": {
+                      "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                      "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                      "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                    },
+                    "event_ref": {
+                      "occurrence_id": "e79c9d26-0624-5569-9c48-1eaa9684a3eb",
+                      "event_version_id": "e2370bf1-5461-5200-acf2-85c172176030"
+                    }
+                  }
+                ]
+              },
+              {
+                "statement": "{\"predicate\":\"lifecycle\",\"subject_id\":\"4ef873a8-4f45-56f0-ad45-67928097cea9\",\"value\":{\"kind\":\"STRING\",\"value\":\"ACTIVE\"},\"value_status\":\"VALUE\"}",
+                "status": "FACT",
+                "evidence_refs": []
+              },
+              {
+                "statement": "{\"predicate\":\"active_use\",\"subject_id\":\"4ef873a8-4f45-56f0-ad45-67928097cea9\",\"value\":{\"kind\":\"BOOLEAN\",\"value\":true},\"value_status\":\"VALUE\"}",
+                "status": "FACT",
+                "evidence_refs": []
+              }
+            ],
+            "limitations": [
+              "Requested material is not available as a determined value at this knowledge cut."
+            ]
+          },
+          "read_cut": {
+            "world_ref": {
+              "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+              "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+              "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+            },
+            "knowledge_cut": {
+              "plane": "WORLD"
+            },
+            "policy_version": "nf-policy-1",
+            "permission_epoch": 0,
+            "resolved_at": "2026-11-10T12:49:57.819525+00:00",
+            "source_manifest_refs": [
+              {
+                "artifact_id": "5ec069ff-f1da-4559-9ce4-693b749491aa",
+                "artifact_revision_id": "19b4f251-3e82-49f5-9c28-af6c3788d509",
+                "sha256": "06de85f4a2e15b9fb0a9a9b3cc63110f38fbeb39bf8952279a28a0f87113c0cc"
+              }
+            ],
+            "read_cut_id": "5b6f344f-ee37-4f85-b59a-8a10bbb6608e",
+            "interpretation_ref": {
+              "sha256": "04bb4e1411bc9cf3c5a1760e08d5e8e0eb3e02a6abdf738ba8ea640c6d9478f5",
+              "artifact_id": "2e6b13fe-e271-440e-a935-fa32c2634892",
+              "artifact_revision_id": "c5143dfc-04ec-4ad9-9ba7-7694634ab661"
+            }
+          },
+          "compiler_version": "nf-context-1",
+          "recipe_revision_ref": {
+            "artifact_id": "6431bf11-8f13-4d6f-8bed-ec2132c47591",
+            "artifact_revision_id": "621ad2a5-3a23-408f-acc5-7982a84e1b45",
+            "sha256": "7bc59462184a7f30ef5701eeb1290bb0fb64e616a07f0747a3f70172b19bbe2e"
+          },
+          "input_manifest_ref": {
+            "artifact_id": "5ec069ff-f1da-4559-9ce4-693b749491aa",
+            "artifact_revision_id": "19b4f251-3e82-49f5-9c28-af6c3788d509",
+            "sha256": "06de85f4a2e15b9fb0a9a9b3cc63110f38fbeb39bf8952279a28a0f87113c0cc"
+          },
+          "auxiliary_knowledge_cuts": [],
+          "sections": [
+            {
+              "section_kind": "TASK",
+              "content": "Task 7cbf4fb2-5a86-41eb-9f23-fbc080f7f7a2 generation 1; fixed story point {\"phase\":0,\"tick\":35}.",
+              "source_refs": [],
+              "required": true
+            },
+            {
+              "section_kind": "HARD_CONSTRAINTS",
+              "content": "Use only the supplied fixed-cut material. Unknown values remain unknown. Beliefs and plans are not objective world facts. State changes require the formal acceptance service.",
+              "source_refs": [],
+              "required": true
+            },
+            {
+              "section_kind": "WORLD",
+              "content": "[{\"evidence_refs\":[{\"event_ref\":{\"event_version_id\":\"3262d2f4-18b6-595a-b4ec-61a900e85696\",\"occurrence_id\":\"258b3211-9980-540d-a7a3-3117af948dcf\"},\"kind\":\"EVENT\",\"world_ref\":{\"branch_id\":\"524e9737-afc3-48fa-90e6-61d39109964a\",\"work_id\":\"b439df7c-187f-4c4d-b8be-e88070452aea\",\"world_revision_id\":\"397e87da-59e2-4c1e-94d6-eabde7e5f994\"}}],\"statement\":\"{\\\"predicate\\\":\\\"legal_owner\\\",\\\"subject_id\\\":\\\"4ef873a8-4f45-56f0-ad45-67928097cea9\\\",\\\"value\\\":{\\\"entity_id\\\":\\\"3ab18f96-5526-56ce-96bc-9bf3d66de8d4\\\",\\\"kind\\\":\\\"ENTITY\\\"},\\\"value_status\\\":\\\"VALUE\\\"}\",\"status\":\"FACT\"},{\"evidence_refs\":[{\"event_ref\":{\"event_version_id\":\"98121375-a47b-5400-88ee-a71094afc498\",\"occurrence_id\":\"26e0177f-62ee-5bd5-9dc5-7250254513e6\"},\"kind\":\"EVENT\",\"world_ref\":{\"branch_id\":\"524e9737-afc3-48fa-90e6-61d39109964a\",\"work_id\":\"b439df7c-187f-4c4d-b8be-e88070452aea\",\"world_revision_id\":\"397e87da-59e2-4c1e-94d6-eabde7e5f994\"}},{\"event_ref\":{\"event_version_id\":\"e2370bf1-5461-5200-acf2-85c172176030\",\"occurrence_id\":\"e79c9d26-0624-5569-9c48-1eaa9684a3eb\"},\"kind\":\"EVENT\",\"world_ref\":{\"branch_id\":\"524e9737-afc3-48fa-90e6-61d39109964a\",\"work_id\":\"b439df7c-187f-4c4d-b8be-e88070452aea\",\"world_revision_id\":\"397e87da-59e2-4c1e-94d6-eabde7e5f994\"}}],\"statement\":\"{\\\"predicate\\\":\\\"possessed_by\\\",\\\"subject_id\\\":\\\"4ef873a8-4f45-56f0-ad45-67928097cea9\\\",\\\"value\\\":{\\\"entity_id\\\":\\\"f33a8ee7-5766-5997-9bff-8585c31e3cc4\\\",\\\"kind\\\":\\\"ENTITY\\\"},\\\"value_status\\\":\\\"VALUE\\\"}\",\"status\":\"FACT\"},{\"evidence_refs\":[],\"statement\":\"{\\\"predicate\\\":\\\"lifecycle\\\",\\\"subject_id\\\":\\\"4ef873a8-4f45-56f0-ad45-67928097cea9\\\",\\\"value\\\":{\\\"kind\\\":\\\"STRING\\\",\\\"value\\\":\\\"ACTIVE\\\"},\\\"value_status\\\":\\\"VALUE\\\"}\",\"status\":\"FACT\"},{\"evidence_refs\":[],\"statement\":\"{\\\"predicate\\\":\\\"active_use\\\",\\\"subject_id\\\":\\\"4ef873a8-4f45-56f0-ad45-67928097cea9\\\",\\\"value\\\":{\\\"kind\\\":\\\"BOOLEAN\\\",\\\"value\\\":true},\\\"value_status\\\":\\\"VALUE\\\"}\",\"status\":\"FACT\"}]",
+              "source_refs": [
+                {
+                  "kind": "EVENT",
+                  "world_ref": {
+                    "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                    "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                    "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                  },
+                  "event_ref": {
+                    "occurrence_id": "258b3211-9980-540d-a7a3-3117af948dcf",
+                    "event_version_id": "3262d2f4-18b6-595a-b4ec-61a900e85696"
+                  }
+                },
+                {
+                  "kind": "EVENT",
+                  "world_ref": {
+                    "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                    "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                    "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                  },
+                  "event_ref": {
+                    "occurrence_id": "26e0177f-62ee-5bd5-9dc5-7250254513e6",
+                    "event_version_id": "98121375-a47b-5400-88ee-a71094afc498"
+                  }
+                },
+                {
+                  "kind": "EVENT",
+                  "world_ref": {
+                    "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                    "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                    "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                  },
+                  "event_ref": {
+                    "occurrence_id": "e79c9d26-0624-5569-9c48-1eaa9684a3eb",
+                    "event_version_id": "e2370bf1-5461-5200-acf2-85c172176030"
+                  }
+                }
+              ],
+              "required": true
+            },
+            {
+              "section_kind": "UNRESOLVED",
+              "content": "Requested material is not available as a determined value at this knowledge cut.",
+              "source_refs": [],
+              "required": true
+            }
+          ],
+          "hard_requirements_status": "COMPLETE_FOR_RECIPE",
+          "tokenizer_version": "utf8-byte-upper-bound-1",
+          "estimated_tokens": 2237,
+          "omitted_optional_scopes": []
+        },
+        "compiled_artifact_ref": {
+          "artifact_id": "72e9f334-a70b-4b43-9ea1-10eac4a1fffa",
+          "artifact_revision_id": "988be11a-2e9b-4b25-9550-e62ee3c6482a",
+          "sha256": "25b873930e5b33c96fedafea71d805d91cd23b98963fefe2d6a715d1f9267fdf"
+        }
+      }
+    },
+    "broad_state:2": {
+      "request": {
+        "schema_version": "2.1",
+        "task_id": "438fa8a4-b703-4c28-8199-19527bf0b0bf",
+        "generation": 1,
+        "recipe_id": "DIRECTOR",
+        "input_manifest_ref": {
+          "artifact_id": "129ae588-efd7-4935-8908-33e626a1a0d5",
+          "artifact_revision_id": "f1c920e8-8fb1-4c84-9df8-8b19bed66b29",
+          "sha256": "06de85f4a2e15b9fb0a9a9b3cc63110f38fbeb39bf8952279a28a0f87113c0cc"
+        },
+        "read_contract": {
+          "revision": {
+            "mode": "FIXED",
+            "world_ref": {
+              "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+              "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+              "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+            }
+          },
+          "process_policy": "ALLOW_PARTIAL",
+          "index_policy": "AUTHORITATIVE",
+          "max_wait_ms": 0
+        },
+        "knowledge_cut": {
+          "plane": "WORLD"
+        },
+        "subject_time": {
+          "kind": "POINT",
+          "at": {
+            "tick": 35,
+            "phase": 0
+          }
+        },
+        "token_budget": 50000,
+        "idempotency_key": "memory-probe-compile:438fa8a4-b703-4c28-8199-19527bf0b0bf"
+      },
+      "response": {
+        "schema_version": "2.1",
+        "status": "READY",
+        "compiled": {
+          "schema_version": "2.1",
+          "bundle": {
+            "schema_version": "2.0",
+            "context_bundle_id": "d24b93c2-e8e2-481a-a3f3-36de8fdd2dbe",
+            "task_id": "438fa8a4-b703-4c28-8199-19527bf0b0bf",
+            "generation": 1,
+            "world_ref": {
+              "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+              "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+              "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+            },
+            "story_time": {
+              "tick": 35,
+              "phase": 0
+            },
+            "role_id": "control_operator",
+            "actor_id": null,
+            "policy_version": "nf-policy-1",
+            "dependency_fingerprint": "8d8a83f13fb1b58aceb4a83324b523a1b190ff8a9eeceecb78380948489934bd",
+            "dependency_handle": "08c382d0-9eff-4f5f-afc9-abeab99f78a4",
+            "permitted_evidence_refs": [
+              {
+                "kind": "EVENT",
+                "world_ref": {
+                  "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                  "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                  "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                },
+                "event_ref": {
+                  "occurrence_id": "258b3211-9980-540d-a7a3-3117af948dcf",
+                  "event_version_id": "3262d2f4-18b6-595a-b4ec-61a900e85696"
+                }
+              },
+              {
+                "kind": "EVENT",
+                "world_ref": {
+                  "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                  "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                  "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                },
+                "event_ref": {
+                  "occurrence_id": "26e0177f-62ee-5bd5-9dc5-7250254513e6",
+                  "event_version_id": "98121375-a47b-5400-88ee-a71094afc498"
+                }
+              },
+              {
+                "kind": "EVENT",
+                "world_ref": {
+                  "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                  "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                  "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                },
+                "event_ref": {
+                  "occurrence_id": "e79c9d26-0624-5569-9c48-1eaa9684a3eb",
+                  "event_version_id": "e2370bf1-5461-5200-acf2-85c172176030"
+                }
+              }
+            ],
+            "facts": [
+              {
+                "statement": "{\"predicate\":\"legal_owner\",\"subject_id\":\"4ef873a8-4f45-56f0-ad45-67928097cea9\",\"value\":{\"entity_id\":\"3ab18f96-5526-56ce-96bc-9bf3d66de8d4\",\"kind\":\"ENTITY\"},\"value_status\":\"VALUE\"}",
+                "status": "FACT",
+                "evidence_refs": [
+                  {
+                    "kind": "EVENT",
+                    "world_ref": {
+                      "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                      "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                      "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                    },
+                    "event_ref": {
+                      "occurrence_id": "258b3211-9980-540d-a7a3-3117af948dcf",
+                      "event_version_id": "3262d2f4-18b6-595a-b4ec-61a900e85696"
+                    }
+                  }
+                ]
+              },
+              {
+                "statement": "{\"predicate\":\"possessed_by\",\"subject_id\":\"4ef873a8-4f45-56f0-ad45-67928097cea9\",\"value\":{\"entity_id\":\"f33a8ee7-5766-5997-9bff-8585c31e3cc4\",\"kind\":\"ENTITY\"},\"value_status\":\"VALUE\"}",
+                "status": "FACT",
+                "evidence_refs": [
+                  {
+                    "kind": "EVENT",
+                    "world_ref": {
+                      "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                      "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                      "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                    },
+                    "event_ref": {
+                      "occurrence_id": "26e0177f-62ee-5bd5-9dc5-7250254513e6",
+                      "event_version_id": "98121375-a47b-5400-88ee-a71094afc498"
+                    }
+                  },
+                  {
+                    "kind": "EVENT",
+                    "world_ref": {
+                      "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                      "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                      "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                    },
+                    "event_ref": {
+                      "occurrence_id": "e79c9d26-0624-5569-9c48-1eaa9684a3eb",
+                      "event_version_id": "e2370bf1-5461-5200-acf2-85c172176030"
+                    }
+                  }
+                ]
+              },
+              {
+                "statement": "{\"predicate\":\"lifecycle\",\"subject_id\":\"4ef873a8-4f45-56f0-ad45-67928097cea9\",\"value\":{\"kind\":\"STRING\",\"value\":\"ACTIVE\"},\"value_status\":\"VALUE\"}",
+                "status": "FACT",
+                "evidence_refs": []
+              },
+              {
+                "statement": "{\"predicate\":\"active_use\",\"subject_id\":\"4ef873a8-4f45-56f0-ad45-67928097cea9\",\"value\":{\"kind\":\"BOOLEAN\",\"value\":true},\"value_status\":\"VALUE\"}",
+                "status": "FACT",
+                "evidence_refs": []
+              }
+            ],
+            "limitations": [
+              "Requested material is not available as a determined value at this knowledge cut."
+            ]
+          },
+          "read_cut": {
+            "world_ref": {
+              "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+              "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+              "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+            },
+            "knowledge_cut": {
+              "plane": "WORLD"
+            },
+            "policy_version": "nf-policy-1",
+            "permission_epoch": 0,
+            "resolved_at": "2026-11-10T12:49:57.898665+00:00",
+            "source_manifest_refs": [
+              {
+                "artifact_id": "129ae588-efd7-4935-8908-33e626a1a0d5",
+                "artifact_revision_id": "f1c920e8-8fb1-4c84-9df8-8b19bed66b29",
+                "sha256": "06de85f4a2e15b9fb0a9a9b3cc63110f38fbeb39bf8952279a28a0f87113c0cc"
+              }
+            ],
+            "read_cut_id": "298f6ec7-33bd-497b-801c-5e2d43693619",
+            "interpretation_ref": {
+              "sha256": "04bb4e1411bc9cf3c5a1760e08d5e8e0eb3e02a6abdf738ba8ea640c6d9478f5",
+              "artifact_id": "2e6b13fe-e271-440e-a935-fa32c2634892",
+              "artifact_revision_id": "c5143dfc-04ec-4ad9-9ba7-7694634ab661"
+            }
+          },
+          "compiler_version": "nf-context-1",
+          "recipe_revision_ref": {
+            "artifact_id": "095de341-8357-4c49-8056-8914c735ff67",
+            "artifact_revision_id": "b38b7274-d551-43b9-9f8c-dfe733cb5beb",
+            "sha256": "7bc59462184a7f30ef5701eeb1290bb0fb64e616a07f0747a3f70172b19bbe2e"
+          },
+          "input_manifest_ref": {
+            "artifact_id": "129ae588-efd7-4935-8908-33e626a1a0d5",
+            "artifact_revision_id": "f1c920e8-8fb1-4c84-9df8-8b19bed66b29",
+            "sha256": "06de85f4a2e15b9fb0a9a9b3cc63110f38fbeb39bf8952279a28a0f87113c0cc"
+          },
+          "auxiliary_knowledge_cuts": [],
+          "sections": [
+            {
+              "section_kind": "TASK",
+              "content": "Task 438fa8a4-b703-4c28-8199-19527bf0b0bf generation 1; fixed story point {\"phase\":0,\"tick\":35}.",
+              "source_refs": [],
+              "required": true
+            },
+            {
+              "section_kind": "HARD_CONSTRAINTS",
+              "content": "Use only the supplied fixed-cut material. Unknown values remain unknown. Beliefs and plans are not objective world facts. State changes require the formal acceptance service.",
+              "source_refs": [],
+              "required": true
+            },
+            {
+              "section_kind": "WORLD",
+              "content": "[{\"evidence_refs\":[{\"event_ref\":{\"event_version_id\":\"3262d2f4-18b6-595a-b4ec-61a900e85696\",\"occurrence_id\":\"258b3211-9980-540d-a7a3-3117af948dcf\"},\"kind\":\"EVENT\",\"world_ref\":{\"branch_id\":\"524e9737-afc3-48fa-90e6-61d39109964a\",\"work_id\":\"b439df7c-187f-4c4d-b8be-e88070452aea\",\"world_revision_id\":\"397e87da-59e2-4c1e-94d6-eabde7e5f994\"}}],\"statement\":\"{\\\"predicate\\\":\\\"legal_owner\\\",\\\"subject_id\\\":\\\"4ef873a8-4f45-56f0-ad45-67928097cea9\\\",\\\"value\\\":{\\\"entity_id\\\":\\\"3ab18f96-5526-56ce-96bc-9bf3d66de8d4\\\",\\\"kind\\\":\\\"ENTITY\\\"},\\\"value_status\\\":\\\"VALUE\\\"}\",\"status\":\"FACT\"},{\"evidence_refs\":[{\"event_ref\":{\"event_version_id\":\"98121375-a47b-5400-88ee-a71094afc498\",\"occurrence_id\":\"26e0177f-62ee-5bd5-9dc5-7250254513e6\"},\"kind\":\"EVENT\",\"world_ref\":{\"branch_id\":\"524e9737-afc3-48fa-90e6-61d39109964a\",\"work_id\":\"b439df7c-187f-4c4d-b8be-e88070452aea\",\"world_revision_id\":\"397e87da-59e2-4c1e-94d6-eabde7e5f994\"}},{\"event_ref\":{\"event_version_id\":\"e2370bf1-5461-5200-acf2-85c172176030\",\"occurrence_id\":\"e79c9d26-0624-5569-9c48-1eaa9684a3eb\"},\"kind\":\"EVENT\",\"world_ref\":{\"branch_id\":\"524e9737-afc3-48fa-90e6-61d39109964a\",\"work_id\":\"b439df7c-187f-4c4d-b8be-e88070452aea\",\"world_revision_id\":\"397e87da-59e2-4c1e-94d6-eabde7e5f994\"}}],\"statement\":\"{\\\"predicate\\\":\\\"possessed_by\\\",\\\"subject_id\\\":\\\"4ef873a8-4f45-56f0-ad45-67928097cea9\\\",\\\"value\\\":{\\\"entity_id\\\":\\\"f33a8ee7-5766-5997-9bff-8585c31e3cc4\\\",\\\"kind\\\":\\\"ENTITY\\\"},\\\"value_status\\\":\\\"VALUE\\\"}\",\"status\":\"FACT\"},{\"evidence_refs\":[],\"statement\":\"{\\\"predicate\\\":\\\"lifecycle\\\",\\\"subject_id\\\":\\\"4ef873a8-4f45-56f0-ad45-67928097cea9\\\",\\\"value\\\":{\\\"kind\\\":\\\"STRING\\\",\\\"value\\\":\\\"ACTIVE\\\"},\\\"value_status\\\":\\\"VALUE\\\"}\",\"status\":\"FACT\"},{\"evidence_refs\":[],\"statement\":\"{\\\"predicate\\\":\\\"active_use\\\",\\\"subject_id\\\":\\\"4ef873a8-4f45-56f0-ad45-67928097cea9\\\",\\\"value\\\":{\\\"kind\\\":\\\"BOOLEAN\\\",\\\"value\\\":true},\\\"value_status\\\":\\\"VALUE\\\"}\",\"status\":\"FACT\"}]",
+              "source_refs": [
+                {
+                  "kind": "EVENT",
+                  "world_ref": {
+                    "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                    "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                    "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                  },
+                  "event_ref": {
+                    "occurrence_id": "258b3211-9980-540d-a7a3-3117af948dcf",
+                    "event_version_id": "3262d2f4-18b6-595a-b4ec-61a900e85696"
+                  }
+                },
+                {
+                  "kind": "EVENT",
+                  "world_ref": {
+                    "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                    "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                    "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                  },
+                  "event_ref": {
+                    "occurrence_id": "26e0177f-62ee-5bd5-9dc5-7250254513e6",
+                    "event_version_id": "98121375-a47b-5400-88ee-a71094afc498"
+                  }
+                },
+                {
+                  "kind": "EVENT",
+                  "world_ref": {
+                    "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                    "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                    "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                  },
+                  "event_ref": {
+                    "occurrence_id": "e79c9d26-0624-5569-9c48-1eaa9684a3eb",
+                    "event_version_id": "e2370bf1-5461-5200-acf2-85c172176030"
+                  }
+                }
+              ],
+              "required": true
+            },
+            {
+              "section_kind": "UNRESOLVED",
+              "content": "Requested material is not available as a determined value at this knowledge cut.",
+              "source_refs": [],
+              "required": true
+            }
+          ],
+          "hard_requirements_status": "COMPLETE_FOR_RECIPE",
+          "tokenizer_version": "utf8-byte-upper-bound-1",
+          "estimated_tokens": 2237,
+          "omitted_optional_scopes": []
+        },
+        "compiled_artifact_ref": {
+          "artifact_id": "906d4a2b-945b-4df8-baa0-702d98eb0cda",
+          "artifact_revision_id": "7a0020dc-c74e-446e-8562-023cfcc43a20",
+          "sha256": "715855dfab2d8084d49745dc60d7b46e923aa5062b5accc419d6a0b4483dfe16"
+        }
+      }
+    },
+    "actor_context": {
+      "request": {
+        "schema_version": "2.1",
+        "task_id": "af21779d-8cef-41bb-b301-823d1762de7a",
+        "generation": 1,
+        "recipe_id": "ACTOR",
+        "input_manifest_ref": {
+          "artifact_id": "63d912dd-f44c-4dfc-852d-34c9a685ee7f",
+          "artifact_revision_id": "be49c1f2-48ab-4768-981d-211b27d709f8",
+          "sha256": "f8683623e24e56fa141c2e3169886cebde37a087a0d260f09b0ff89936ea2106"
+        },
+        "read_contract": {
+          "revision": {
+            "mode": "FIXED",
+            "world_ref": {
+              "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+              "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+              "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+            }
+          },
+          "process_policy": "ALLOW_PARTIAL",
+          "index_policy": "AUTHORITATIVE",
+          "max_wait_ms": 0
+        },
+        "knowledge_cut": {
+          "plane": "BELIEF",
+          "actor_id": "3ab18f96-5526-56ce-96bc-9bf3d66de8d4",
+          "known_at": {
+            "tick": 35,
+            "phase": 0
+          }
+        },
+        "subject_time": {
+          "kind": "POINT",
+          "at": {
+            "tick": 35,
+            "phase": 0
+          }
+        },
+        "token_budget": 50000,
+        "idempotency_key": "memory-probe-compile:af21779d-8cef-41bb-b301-823d1762de7a"
+      },
+      "response": {
+        "schema_version": "2.1",
+        "status": "READY",
+        "compiled": {
+          "schema_version": "2.1",
+          "bundle": {
+            "schema_version": "2.0",
+            "context_bundle_id": "969e7e60-635d-4b50-9916-93dabed19a69",
+            "task_id": "af21779d-8cef-41bb-b301-823d1762de7a",
+            "generation": 1,
+            "world_ref": {
+              "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+              "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+              "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+            },
+            "story_time": {
+              "tick": 35,
+              "phase": 0
+            },
+            "role_id": "character_actor",
+            "actor_id": "3ab18f96-5526-56ce-96bc-9bf3d66de8d4",
+            "policy_version": "nf-policy-1",
+            "dependency_fingerprint": "ed4df47709ae7fd0e16829f8056f7242fa3cda780d3c79369ca415acddc07c34",
+            "dependency_handle": "2f3f3dd9-4682-4ebe-a5c5-baf920c1b5e6",
+            "permitted_evidence_refs": [
+              {
+                "kind": "EVENT",
+                "event_ref": {
+                  "occurrence_id": "8e508979-5615-52a7-939b-6797d909dcf1",
+                  "event_version_id": "78cb5aab-68a6-5de1-82c7-c4bb5197b3c9"
+                },
+                "world_ref": {
+                  "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                  "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                  "world_revision_id": "0d2b587d-bfea-4ee9-befd-434ee4e05895"
+                }
+              }
+            ],
+            "facts": [
+              {
+                "statement": "{\"predicate\":\"possessed_by\",\"subject_id\":\"4ef873a8-4f45-56f0-ad45-67928097cea9\",\"value\":{\"entity_id\":\"29d61dcb-4b40-5887-bea5-60da69b9ca0a\",\"kind\":\"ENTITY\"},\"value_status\":\"VALUE\"}",
+                "status": "BELIEF",
+                "evidence_refs": [
+                  {
+                    "kind": "EVENT",
+                    "event_ref": {
+                      "occurrence_id": "8e508979-5615-52a7-939b-6797d909dcf1",
+                      "event_version_id": "78cb5aab-68a6-5de1-82c7-c4bb5197b3c9"
+                    },
+                    "world_ref": {
+                      "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                      "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                      "world_revision_id": "0d2b587d-bfea-4ee9-befd-434ee4e05895"
+                    }
+                  }
+                ]
+              }
+            ],
+            "limitations": []
+          },
+          "read_cut": {
+            "world_ref": {
+              "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+              "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+              "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+            },
+            "knowledge_cut": {
+              "plane": "BELIEF",
+              "actor_id": "3ab18f96-5526-56ce-96bc-9bf3d66de8d4",
+              "known_at": {
+                "tick": 35,
+                "phase": 0
+              }
+            },
+            "policy_version": "nf-policy-1",
+            "permission_epoch": 0,
+            "resolved_at": "2026-11-10T12:49:57.974274+00:00",
+            "source_manifest_refs": [
+              {
+                "artifact_id": "63d912dd-f44c-4dfc-852d-34c9a685ee7f",
+                "artifact_revision_id": "be49c1f2-48ab-4768-981d-211b27d709f8",
+                "sha256": "f8683623e24e56fa141c2e3169886cebde37a087a0d260f09b0ff89936ea2106"
+              }
+            ],
+            "read_cut_id": "82971ff7-beed-4e9c-a8c3-e826f1e70802",
+            "interpretation_ref": {
+              "sha256": "04bb4e1411bc9cf3c5a1760e08d5e8e0eb3e02a6abdf738ba8ea640c6d9478f5",
+              "artifact_id": "2e6b13fe-e271-440e-a935-fa32c2634892",
+              "artifact_revision_id": "c5143dfc-04ec-4ad9-9ba7-7694634ab661"
+            }
+          },
+          "compiler_version": "nf-context-1",
+          "recipe_revision_ref": {
+            "artifact_id": "9f08b7cd-e609-4aa9-84a7-db1d760952c4",
+            "artifact_revision_id": "2f3da63d-788c-4667-a65c-5087bc5dfa58",
+            "sha256": "42a26385a5a6e3a97ff2779e7028cdd6e37a136d0f239ee2df0992bee88d3e88"
+          },
+          "input_manifest_ref": {
+            "artifact_id": "63d912dd-f44c-4dfc-852d-34c9a685ee7f",
+            "artifact_revision_id": "be49c1f2-48ab-4768-981d-211b27d709f8",
+            "sha256": "f8683623e24e56fa141c2e3169886cebde37a087a0d260f09b0ff89936ea2106"
+          },
+          "auxiliary_knowledge_cuts": [],
+          "sections": [
+            {
+              "section_kind": "TASK",
+              "content": "Task af21779d-8cef-41bb-b301-823d1762de7a generation 1; fixed story point {\"phase\":0,\"tick\":35}.",
+              "source_refs": [],
+              "required": true
+            },
+            {
+              "section_kind": "HARD_CONSTRAINTS",
+              "content": "Use only the supplied fixed-cut material. Unknown values remain unknown. Beliefs and plans are not objective world facts. State changes require the formal acceptance service.",
+              "source_refs": [],
+              "required": true
+            },
+            {
+              "section_kind": "ACTOR_KNOWLEDGE",
+              "content": "[{\"evidence_refs\":[{\"event_ref\":{\"event_version_id\":\"78cb5aab-68a6-5de1-82c7-c4bb5197b3c9\",\"occurrence_id\":\"8e508979-5615-52a7-939b-6797d909dcf1\"},\"kind\":\"EVENT\",\"world_ref\":{\"branch_id\":\"524e9737-afc3-48fa-90e6-61d39109964a\",\"work_id\":\"b439df7c-187f-4c4d-b8be-e88070452aea\",\"world_revision_id\":\"0d2b587d-bfea-4ee9-befd-434ee4e05895\"}}],\"statement\":\"{\\\"predicate\\\":\\\"possessed_by\\\",\\\"subject_id\\\":\\\"4ef873a8-4f45-56f0-ad45-67928097cea9\\\",\\\"value\\\":{\\\"entity_id\\\":\\\"29d61dcb-4b40-5887-bea5-60da69b9ca0a\\\",\\\"kind\\\":\\\"ENTITY\\\"},\\\"value_status\\\":\\\"VALUE\\\"}\",\"status\":\"BELIEF\"}]",
+              "source_refs": [
+                {
+                  "kind": "EVENT",
+                  "event_ref": {
+                    "occurrence_id": "8e508979-5615-52a7-939b-6797d909dcf1",
+                    "event_version_id": "78cb5aab-68a6-5de1-82c7-c4bb5197b3c9"
+                  },
+                  "world_ref": {
+                    "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                    "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                    "world_revision_id": "0d2b587d-bfea-4ee9-befd-434ee4e05895"
+                  }
+                }
+              ],
+              "required": true
+            }
+          ],
+          "hard_requirements_status": "COMPLETE_FOR_RECIPE",
+          "tokenizer_version": "utf8-byte-upper-bound-1",
+          "estimated_tokens": 843,
+          "omitted_optional_scopes": []
+        },
+        "compiled_artifact_ref": {
+          "artifact_id": "bc2922f7-5ff5-4f5b-bfc4-f3bbc8e30192",
+          "artifact_revision_id": "95bf7e62-c3c5-40c8-b8c3-8a76943d0534",
+          "sha256": "f6717c8360270ce225633da50d52448362b7620f860cc3e52c0e52c84ba67cc8"
+        }
+      },
+      "metrics": {
+        "sql_statements": 47,
+        "elapsed_ms": 30.831544
+      }
+    },
+    "actor_warm_query": {
+      "schema_version": "2.1",
+      "status": "READY",
+      "request_id": "4cac0222-38f3-4fa7-a527-81e5751d1fca",
+      "read_cut": {
+        "world_ref": {
+          "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+          "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+          "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+        },
+        "knowledge_cut": {
+          "plane": "BELIEF",
+          "actor_id": "3ab18f96-5526-56ce-96bc-9bf3d66de8d4",
+          "known_at": {
+            "tick": 35,
+            "phase": 0
+          }
+        },
+        "policy_version": "nf-policy-1",
+        "permission_epoch": 0,
+        "resolved_at": "2026-11-10T12:49:58.012872+00:00",
+        "source_manifest_refs": [],
+        "read_cut_id": "138ae965-71a2-4856-800a-03f59cc3fa8f",
+        "interpretation_ref": {
+          "sha256": "04bb4e1411bc9cf3c5a1760e08d5e8e0eb3e02a6abdf738ba8ea640c6d9478f5",
+          "artifact_id": "2e6b13fe-e271-440e-a935-fa32c2634892",
+          "artifact_revision_id": "c5143dfc-04ec-4ad9-9ba7-7694634ab661"
+        }
+      },
+      "payload": {
+        "kind": "STATE",
+        "state_items": [
+          {
+            "subject_id": "4ef873a8-4f45-56f0-ad45-67928097cea9",
+            "predicate": "possessed_by",
+            "answer": {
+              "world_ref": {
+                "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+              },
+              "story_time": {
+                "tick": 35,
+                "phase": 0
+              },
+              "plane": "BELIEF",
+              "truth_status": "DETERMINED",
+              "evaluation_status": "EVALUATED",
+              "knowledge_status": "KNOWN",
+              "freshness": "CURRENT",
+              "coverage": "COMPLETE",
+              "value_status": "VALUE",
+              "data": {
+                "kind": "ENTITY",
+                "entity_id": "29d61dcb-4b40-5887-bea5-60da69b9ca0a"
+              },
+              "evidence_refs": [
+                {
+                  "kind": "EVENT",
+                  "event_ref": {
+                    "occurrence_id": "8e508979-5615-52a7-939b-6797d909dcf1",
+                    "event_version_id": "78cb5aab-68a6-5de1-82c7-c4bb5197b3c9"
+                  },
+                  "world_ref": {
+                    "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                    "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                    "world_revision_id": "0d2b587d-bfea-4ee9-befd-434ee4e05895"
+                  }
+                }
+              ],
+              "dependency_handle": "5d49d77d-157b-5c63-b3f2-003af185dd4e"
+            }
+          }
+        ]
+      },
+      "freshness": "CURRENT",
+      "dependency_handle": "5d49d77d-157b-5c63-b3f2-003af185dd4e",
+      "consistency_status": "SATISFIED"
+    },
+    "actor_world_denial": {
+      "code": "VIEW_DENIED",
+      "status": "EXPECTED_REJECTION"
+    },
+    "other_actor_denial": {
+      "code": "VIEW_DENIED",
+      "status": "EXPECTED_REJECTION"
+    },
+    "revoked_warm_query": {
+      "code": "VIEW_DENIED",
+      "status": "EXPECTED_REJECTION"
+    },
+    "revoked_compile_receipt": {
+      "code": "VIEW_DENIED",
+      "status": "EXPECTED_REJECTION"
+    },
+    "historical_before_ownership_changes": {
+      "schema_version": "2.1",
+      "status": "READY",
+      "request_id": "a5627555-2cf3-43b7-aeda-dc41e74f4710",
+      "read_cut": {
+        "world_ref": {
+          "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+          "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+          "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+        },
+        "knowledge_cut": {
+          "plane": "WORLD"
+        },
+        "policy_version": "nf-policy-1",
+        "permission_epoch": 0,
+        "resolved_at": "2026-11-10T12:49:58.045389+00:00",
+        "source_manifest_refs": [],
+        "read_cut_id": "b00ea3a9-e547-4803-864a-bbe1e9fd61cd",
+        "interpretation_ref": {
+          "sha256": "04bb4e1411bc9cf3c5a1760e08d5e8e0eb3e02a6abdf738ba8ea640c6d9478f5",
+          "artifact_id": "2e6b13fe-e271-440e-a935-fa32c2634892",
+          "artifact_revision_id": "c5143dfc-04ec-4ad9-9ba7-7694634ab661"
+        }
+      },
+      "payload": {
+        "kind": "STATE",
+        "state_items": [
+          {
+            "subject_id": "4ef873a8-4f45-56f0-ad45-67928097cea9",
+            "predicate": "possessed_by",
+            "answer": {
+              "world_ref": {
+                "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+              },
+              "story_time": {
+                "tick": 5,
+                "phase": 0
+              },
+              "plane": "WORLD",
+              "truth_status": "DETERMINED",
+              "evaluation_status": "EVALUATED",
+              "knowledge_status": "KNOWN",
+              "freshness": "CURRENT",
+              "coverage": "COMPLETE",
+              "value_status": "VALUE",
+              "data": {
+                "kind": "ENTITY",
+                "entity_id": "3e774eb4-a3c5-5f70-a324-4dd61d43b870"
+              },
+              "evidence_refs": [
+                {
+                  "kind": "EVENT",
+                  "world_ref": {
+                    "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                    "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                    "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+                  },
+                  "event_ref": {
+                    "occurrence_id": "258b3211-9980-540d-a7a3-3117af948dcf",
+                    "event_version_id": "3262d2f4-18b6-595a-b4ec-61a900e85696"
+                  }
+                }
+              ],
+              "dependency_handle": "7d15c6df-2cbb-5c6b-8f87-637d24989334"
+            }
+          }
+        ]
+      },
+      "freshness": "CURRENT",
+      "dependency_handle": "7d15c6df-2cbb-5c6b-8f87-637d24989334",
+      "consistency_status": "SATISFIED"
+    },
+    "old_revision_still_pending": {
+      "schema_version": "2.1",
+      "status": "READY",
+      "request_id": "0a7c47e1-5b25-497d-ac3f-fbe3a002bacc",
+      "read_cut": {
+        "world_ref": {
+          "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+          "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+          "world_revision_id": "0d2b587d-bfea-4ee9-befd-434ee4e05895"
+        },
+        "knowledge_cut": {
+          "plane": "WORLD"
+        },
+        "policy_version": "nf-policy-1",
+        "permission_epoch": 0,
+        "resolved_at": "2026-11-10T12:49:58.060455+00:00",
+        "source_manifest_refs": [],
+        "read_cut_id": "56d65849-a230-447e-98fb-0c03805a86b8",
+        "interpretation_ref": {
+          "sha256": "04bb4e1411bc9cf3c5a1760e08d5e8e0eb3e02a6abdf738ba8ea640c6d9478f5",
+          "artifact_id": "2e6b13fe-e271-440e-a935-fa32c2634892",
+          "artifact_revision_id": "c5143dfc-04ec-4ad9-9ba7-7694634ab661"
+        }
+      },
+      "payload": {
+        "kind": "STATE",
+        "state_items": [
+          {
+            "subject_id": "4ef873a8-4f45-56f0-ad45-67928097cea9",
+            "predicate": "possessed_by",
+            "answer": {
+              "world_ref": {
+                "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                "world_revision_id": "0d2b587d-bfea-4ee9-befd-434ee4e05895"
+              },
+              "story_time": {
+                "tick": 35,
+                "phase": 0
+              },
+              "plane": "WORLD",
+              "truth_status": "UNDETERMINED",
+              "evaluation_status": "PENDING",
+              "knowledge_status": "UNKNOWN",
+              "freshness": "CURRENT",
+              "coverage": "PARTIAL",
+              "value_status": "UNRESOLVED",
+              "data": null,
+              "evidence_refs": [],
+              "dependency_handle": "1659778d-414a-5ac1-b591-2512100b44b7"
+            }
+          }
+        ]
+      },
+      "freshness": "CURRENT",
+      "dependency_handle": "1659778d-414a-5ac1-b591-2512100b44b7",
+      "consistency_status": "SATISFIED"
+    },
+    "destroyed_not_unknown": {
+      "schema_version": "2.1",
+      "status": "READY",
+      "request_id": "d39dac60-1492-4452-a866-bd14ac52dd8a",
+      "read_cut": {
+        "world_ref": {
+          "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+          "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+          "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+        },
+        "knowledge_cut": {
+          "plane": "WORLD"
+        },
+        "policy_version": "nf-policy-1",
+        "permission_epoch": 0,
+        "resolved_at": "2026-11-10T12:49:58.072852+00:00",
+        "source_manifest_refs": [],
+        "read_cut_id": "d1a25790-3853-4672-b69f-57e3b4836d6a",
+        "interpretation_ref": {
+          "sha256": "04bb4e1411bc9cf3c5a1760e08d5e8e0eb3e02a6abdf738ba8ea640c6d9478f5",
+          "artifact_id": "2e6b13fe-e271-440e-a935-fa32c2634892",
+          "artifact_revision_id": "c5143dfc-04ec-4ad9-9ba7-7694634ab661"
+        }
+      },
+      "payload": {
+        "kind": "STATE",
+        "state_items": [
+          {
+            "subject_id": "4ef873a8-4f45-56f0-ad45-67928097cea9",
+            "predicate": "active_use",
+            "answer": {
+              "world_ref": {
+                "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+              },
+              "story_time": {
+                "tick": 41,
+                "phase": 0
+              },
+              "plane": "WORLD",
+              "truth_status": "DETERMINED",
+              "evaluation_status": "EVALUATED",
+              "knowledge_status": "KNOWN",
+              "freshness": "CURRENT",
+              "coverage": "COMPLETE",
+              "value_status": "NOT_APPLICABLE",
+              "data": null,
+              "evidence_refs": [],
+              "dependency_handle": "670aa564-5466-5912-8f8c-0b14125de4d3"
+            }
+          }
+        ]
+      },
+      "freshness": "CURRENT",
+      "dependency_handle": "670aa564-5466-5912-8f8c-0b14125de4d3",
+      "consistency_status": "SATISFIED"
+    },
+    "future_not_evaluated": {
+      "schema_version": "2.1",
+      "status": "READY",
+      "request_id": "3ff92fab-b19a-40e3-b6b0-494c5f59790f",
+      "read_cut": {
+        "world_ref": {
+          "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+          "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+          "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+        },
+        "knowledge_cut": {
+          "plane": "WORLD"
+        },
+        "policy_version": "nf-policy-1",
+        "permission_epoch": 0,
+        "resolved_at": "2026-11-10T12:49:58.088461+00:00",
+        "source_manifest_refs": [],
+        "read_cut_id": "874b3ed8-c003-4b02-b7ba-7b2f837eca76",
+        "interpretation_ref": {
+          "sha256": "04bb4e1411bc9cf3c5a1760e08d5e8e0eb3e02a6abdf738ba8ea640c6d9478f5",
+          "artifact_id": "2e6b13fe-e271-440e-a935-fa32c2634892",
+          "artifact_revision_id": "c5143dfc-04ec-4ad9-9ba7-7694634ab661"
+        }
+      },
+      "payload": {
+        "kind": "STATE",
+        "state_items": [
+          {
+            "subject_id": "4ef873a8-4f45-56f0-ad45-67928097cea9",
+            "predicate": "active_use",
+            "answer": {
+              "world_ref": {
+                "work_id": "b439df7c-187f-4c4d-b8be-e88070452aea",
+                "branch_id": "524e9737-afc3-48fa-90e6-61d39109964a",
+                "world_revision_id": "397e87da-59e2-4c1e-94d6-eabde7e5f994"
+              },
+              "story_time": {
+                "tick": 50,
+                "phase": 0
+              },
+              "plane": "WORLD",
+              "truth_status": "UNDETERMINED",
+              "evaluation_status": "PENDING",
+              "knowledge_status": "UNKNOWN",
+              "freshness": "CURRENT",
+              "coverage": "PARTIAL",
+              "value_status": "UNRESOLVED",
+              "data": null,
+              "evidence_refs": [],
+              "dependency_handle": "440fbd0d-e8b1-5b47-b615-8c5bf4182957"
+            }
+          }
+        ]
+      },
+      "freshness": "CURRENT",
+      "dependency_handle": "440fbd0d-e8b1-5b47-b615-8c5bf4182957",
+      "consistency_status": "SATISFIED"
+    },
+    "budget_denial": {
+      "code": "CONTEXT_INCOMPLETE",
+      "status": "EXPECTED_REJECTION"
+    }
+  },
+  "real_model_calls": 0,
+  "provider_tokens": null,
+  "model_cost": null,
+  "limitations": [
+    "Small real-service correctness/cost probe, not a 50/200 Agent capacity test.",
+    "Compiler focused/broad strategies are separate from offline literary retrieval methods.",
+    "Compiler estimated_tokens uses its declared UTF-8 bound, not a provider tokenizer.",
+    "No generated prose quality or independent author judgment is measured."
+  ]
+}

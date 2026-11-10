@@ -43,6 +43,11 @@ jobs:
           uv run --no-sync python -m pytest tests/unit tests/contracts tests/service/test_admission.py -q \
             --junitxml=ci-evidence/unit.xml --json-report --json-report-file=ci-evidence/unit.json \
             2>&1 | tee ci-evidence/unit.log
+      - name: Deterministic Chinese memory retrieval evaluation
+        run: |
+          uv run --no-sync python benchmarks/memory/evaluate.py \
+            --output ci-evidence/memory \
+            2>&1 | tee ci-evidence/memory.log
       - name: Upload immutable unit and schema run evidence
         if: always()
         uses: actions/upload-artifact@v4

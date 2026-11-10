@@ -1,0 +1,1125 @@
+{
+  "schema_version": "nf-memory-gold-1",
+  "status": "TEST_FIXTURE",
+  "cases": [
+    {
+      "case_id": "M01",
+      "question": "为什么两人各写一次过闸经历，不能多扣朱灯？",
+      "query_entities": [
+        "gate",
+        "lamp"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "WORLD",
+          "LITERARY"
+        ],
+        "actor_id": null,
+        "story_tick": 48,
+        "known_at": 48,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [
+          "E01",
+          "E11",
+          "E19"
+        ],
+        "forbidden_source_ids": [],
+        "category": "world_rule",
+        "case_kind": "POSITIVE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M02",
+      "question": "旧日丧失与后来的笑能否同时成立，原文有哪些相反线索？",
+      "query_entities": [
+        "shen"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "LITERARY"
+        ],
+        "actor_id": null,
+        "story_tick": 48,
+        "known_at": 48,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [
+          "E03",
+          "E13",
+          "E14"
+        ],
+        "forbidden_source_ids": [],
+        "category": "long_emotion",
+        "case_kind": "POSITIVE",
+        "review_class": "SUBJECTIVE_LITERARY",
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M03",
+      "question": "沈禾前后对陆舟的依赖如何变化？",
+      "query_entities": [
+        "shen",
+        "lu"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "BELIEF"
+        ],
+        "actor_id": "shen",
+        "story_tick": 48,
+        "known_at": 48,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [
+          "E09",
+          "E25"
+        ],
+        "forbidden_source_ids": [],
+        "category": "relationship_evolution",
+        "case_kind": "POSITIVE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M04",
+      "question": "两人的合作为什么仍不能概括成彻底和解？",
+      "query_entities": [
+        "shen",
+        "lu"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "LITERARY"
+        ],
+        "actor_id": null,
+        "story_tick": 48,
+        "known_at": 48,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [
+          "E14",
+          "E27"
+        ],
+        "forbidden_source_ids": [],
+        "category": "asymmetric_relationship",
+        "case_kind": "POSITIVE",
+        "review_class": "SUBJECTIVE_LITERARY",
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M05",
+      "question": "桥下早先的异常记号后来如何回响？",
+      "query_entities": [
+        "reed"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "LITERARY"
+        ],
+        "actor_id": null,
+        "story_tick": 48,
+        "known_at": 48,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [
+          "E04",
+          "E23"
+        ],
+        "forbidden_source_ids": [],
+        "category": "foreshadow",
+        "case_kind": "POSITIVE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M06",
+      "question": "陆舟的新声线相对早先说话方式有哪些延续和变化？",
+      "query_entities": [
+        "lu"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "LITERARY"
+        ],
+        "actor_id": null,
+        "story_tick": 48,
+        "known_at": 48,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [
+          "E16",
+          "E35"
+        ],
+        "forbidden_source_ids": [],
+        "category": "voice_evolution",
+        "case_kind": "POSITIVE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M07",
+      "question": "沈禾对不同交谈对象为什么会改变句子长短？",
+      "query_entities": [
+        "shen"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "LITERARY"
+        ],
+        "actor_id": null,
+        "story_tick": 48,
+        "known_at": 48,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [
+          "E17"
+        ],
+        "forbidden_source_ids": [],
+        "category": "voice",
+        "case_kind": "POSITIVE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M08",
+      "question": "本作品怎样约束环境修辞，并允许多种声线？",
+      "query_entities": [
+        "style"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "LITERARY"
+        ],
+        "actor_id": null,
+        "story_tick": 48,
+        "known_at": 48,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [
+          "E15"
+        ],
+        "forbidden_source_ids": [],
+        "category": "style",
+        "case_kind": "POSITIVE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M09",
+      "question": "陆舟到第三十日是否履约，迟交以后如何保留代价？",
+      "query_entities": [
+        "lu",
+        "letter"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "LITERARY"
+        ],
+        "actor_id": null,
+        "story_tick": 48,
+        "known_at": 48,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [
+          "E30",
+          "E40"
+        ],
+        "forbidden_source_ids": [],
+        "category": "long_promise",
+        "case_kind": "POSITIVE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M10",
+      "question": "在第八日，客观上铜钥在谁那里？",
+      "query_entities": [
+        "key"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "WORLD"
+        ],
+        "actor_id": null,
+        "story_tick": 8,
+        "known_at": 8,
+        "reader_chapter": 48,
+        "history": false
+      },
+      "gold": {
+        "required_source_ids": [
+          "E08"
+        ],
+        "forbidden_source_ids": [
+          "E26"
+        ],
+        "category": "world_state",
+        "case_kind": "POSITIVE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M11",
+      "question": "第八日陆舟相信铜钥在谁那里？",
+      "query_entities": [
+        "lu",
+        "key"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "BELIEF"
+        ],
+        "actor_id": "lu",
+        "story_tick": 8,
+        "known_at": 8,
+        "reader_chapter": 48,
+        "history": false
+      },
+      "gold": {
+        "required_source_ids": [
+          "E07"
+        ],
+        "forbidden_source_ids": [
+          "E08",
+          "E10"
+        ],
+        "category": "false_belief",
+        "case_kind": "POSITIVE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M12",
+      "question": "陆舟第十七日如何纠正关于铜钥的传闻？",
+      "query_entities": [
+        "lu",
+        "key"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "BELIEF"
+        ],
+        "actor_id": "lu",
+        "story_tick": 17,
+        "known_at": 17,
+        "reader_chapter": 48,
+        "history": false
+      },
+      "gold": {
+        "required_source_ids": [
+          "E10"
+        ],
+        "forbidden_source_ids": [
+          "E08"
+        ],
+        "category": "late_knowledge",
+        "case_kind": "POSITIVE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M13",
+      "question": "祁雁最初怀疑严渚的依据有多充分？",
+      "query_entities": [
+        "qi",
+        "yan",
+        "seal"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "BELIEF"
+        ],
+        "actor_id": "qi",
+        "story_tick": 12,
+        "known_at": 12,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [
+          "E06"
+        ],
+        "forbidden_source_ids": [],
+        "category": "belief_evidence",
+        "case_kind": "POSITIVE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M14",
+      "question": "第十日陆舟能否说出祁雁的私下怀疑？",
+      "query_entities": [
+        "qi",
+        "seal"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "BELIEF"
+        ],
+        "actor_id": "lu",
+        "story_tick": 10,
+        "known_at": 10,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [],
+        "forbidden_source_ids": [
+          "E06"
+        ],
+        "category": "private_other_actor",
+        "case_kind": "NEGATIVE_SCOPE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M15",
+      "question": "第三十三日陆舟是否已经知道内页钱款性质？",
+      "query_entities": [
+        "lu",
+        "letter"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "BELIEF"
+        ],
+        "actor_id": "lu",
+        "story_tick": 33,
+        "known_at": 33,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [
+          "E33"
+        ],
+        "forbidden_source_ids": [
+          "E28",
+          "E38"
+        ],
+        "category": "unknown_is_not_none",
+        "case_kind": "POSITIVE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M16",
+      "question": "第十日的角色能否利用第十六日才听到的消息？",
+      "query_entities": [
+        "key",
+        "meng"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "BELIEF"
+        ],
+        "actor_id": "lu",
+        "story_tick": 10,
+        "known_at": 10,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [],
+        "forbidden_source_ids": [
+          "E10"
+        ],
+        "category": "future_acquisition",
+        "case_kind": "NEGATIVE_SCOPE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M17",
+      "question": "第五日清点库存有多少盐？",
+      "query_entities": [
+        "salt"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "WORLD"
+        ],
+        "actor_id": null,
+        "story_tick": 5,
+        "known_at": 5,
+        "reader_chapter": 48,
+        "history": false
+      },
+      "gold": {
+        "required_source_ids": [
+          "E05"
+        ],
+        "forbidden_source_ids": [
+          "E31"
+        ],
+        "category": "historical_state",
+        "case_kind": "POSITIVE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M18",
+      "question": "第三十三日当前库存为何不再是四十袋？",
+      "query_entities": [
+        "salt"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "WORLD"
+        ],
+        "actor_id": null,
+        "story_tick": 33,
+        "known_at": 33,
+        "reader_chapter": 48,
+        "history": false
+      },
+      "gold": {
+        "required_source_ids": [
+          "E31"
+        ],
+        "forbidden_source_ids": [
+          "E05"
+        ],
+        "category": "current_state",
+        "case_kind": "POSITIVE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M19",
+      "question": "历史中四十袋变为三十八袋的依据是什么？",
+      "query_entities": [
+        "salt"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "WORLD"
+        ],
+        "actor_id": null,
+        "story_tick": 48,
+        "known_at": 48,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [
+          "E05",
+          "E31"
+        ],
+        "forbidden_source_ids": [],
+        "category": "state_evolution",
+        "case_kind": "POSITIVE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M20",
+      "question": "改道与盐袋损坏谁是前因？",
+      "query_entities": [
+        "salt"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "WORLD"
+        ],
+        "actor_id": null,
+        "story_tick": 48,
+        "known_at": 48,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [
+          "E31",
+          "E32"
+        ],
+        "forbidden_source_ids": [],
+        "category": "causal_order",
+        "case_kind": "POSITIVE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M21",
+      "question": "保留 r1 版本在第三十一日还能靠完整铜钥开柜吗？",
+      "query_entities": [
+        "key"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "WORLD"
+        ],
+        "actor_id": null,
+        "story_tick": 31,
+        "known_at": 31,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [
+          "E20",
+          "E21"
+        ],
+        "forbidden_source_ids": [
+          "E22",
+          "E26"
+        ],
+        "category": "destroyed_not_absent",
+        "case_kind": "POSITIVE",
+        "review_class": "HARD_CONSISTENCY",
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M22",
+      "question": "repair 分支 r2 第廿三日铜钥状态有何不同？",
+      "query_entities": [
+        "key"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "repair",
+        "revision": "r2",
+        "planes": [
+          "WORLD"
+        ],
+        "actor_id": null,
+        "story_tick": 23,
+        "known_at": 23,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [
+          "E26"
+        ],
+        "forbidden_source_ids": [
+          "E20",
+          "E22"
+        ],
+        "category": "repair_branch",
+        "case_kind": "POSITIVE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M23",
+      "question": "正式世界的陆舟能否沿用未采用推演的开柜结论？",
+      "query_entities": [
+        "letter",
+        "key"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "BELIEF"
+        ],
+        "actor_id": "lu",
+        "story_tick": 23,
+        "known_at": 23,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [],
+        "forbidden_source_ids": [
+          "E22"
+        ],
+        "category": "candidate_isolation",
+        "case_kind": "NEGATIVE_SCOPE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M24",
+      "question": "原路线和调整路线之间保留与替换了什么？",
+      "query_entities": [
+        "letter",
+        "key"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "PLAN"
+        ],
+        "actor_id": null,
+        "story_tick": 48,
+        "known_at": 48,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [
+          "E18",
+          "E24"
+        ],
+        "forbidden_source_ids": [],
+        "category": "replan",
+        "case_kind": "POSITIVE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M25",
+      "question": "第三十章的读者是否已经看见雨封信内页？",
+      "query_entities": [
+        "letter",
+        "yan"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "LITERARY"
+        ],
+        "actor_id": null,
+        "story_tick": 48,
+        "known_at": 48,
+        "reader_chapter": 30,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [],
+        "forbidden_source_ids": [
+          "E28",
+          "E38"
+        ],
+        "category": "reader_cut",
+        "case_kind": "NEGATIVE_SCOPE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M26",
+      "question": "第三十八章之后如何查证内页内容及其披露位置？",
+      "query_entities": [
+        "letter"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "LITERARY"
+        ],
+        "actor_id": null,
+        "story_tick": 48,
+        "known_at": 48,
+        "reader_chapter": 40,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [
+          "E28",
+          "E38"
+        ],
+        "forbidden_source_ids": [],
+        "category": "reader_disclosure",
+        "case_kind": "POSITIVE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M27",
+      "question": "同名陆舟能否继承旱城人物的铸钟能力？",
+      "query_entities": [
+        "lu"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "LITERARY"
+        ],
+        "actor_id": null,
+        "story_tick": 48,
+        "known_at": 48,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [],
+        "forbidden_source_ids": [
+          "E29"
+        ],
+        "category": "work_isolation",
+        "case_kind": "NEGATIVE_SCOPE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M28",
+      "question": "删去擦杯动作与保留混合情绪的分歧依据是什么？",
+      "query_entities": [
+        "shen"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "LITERARY"
+        ],
+        "actor_id": null,
+        "story_tick": 48,
+        "known_at": 48,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [
+          "E36",
+          "E14"
+        ],
+        "forbidden_source_ids": [],
+        "category": "subjective_review",
+        "case_kind": "POSITIVE",
+        "review_class": "SUBJECTIVE_LITERARY",
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M29",
+      "question": "正文用完整铜钥而 r1 已接受断裂，应核对哪些证据？",
+      "query_entities": [
+        "key"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "WORLD",
+          "LITERARY"
+        ],
+        "actor_id": null,
+        "story_tick": 48,
+        "known_at": 48,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [
+          "E37",
+          "E20"
+        ],
+        "forbidden_source_ids": [],
+        "category": "hard_review",
+        "case_kind": "POSITIVE",
+        "review_class": "HARD_CONSISTENCY",
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M30",
+      "question": "沈禾何时才听到祁雁最初怀疑的解释？",
+      "query_entities": [
+        "shen",
+        "qi"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "BELIEF"
+        ],
+        "actor_id": "shen",
+        "story_tick": 40,
+        "known_at": 40,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [
+          "E39"
+        ],
+        "forbidden_source_ids": [
+          "E06"
+        ],
+        "category": "knowledge_transfer",
+        "case_kind": "POSITIVE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M31",
+      "question": "第六日的沈禾是否知道祁雁私页上的猜测？",
+      "query_entities": [
+        "shen",
+        "qi"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "BELIEF"
+        ],
+        "actor_id": "shen",
+        "story_tick": 6,
+        "known_at": 6,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [],
+        "forbidden_source_ids": [
+          "E06",
+          "E39"
+        ],
+        "category": "historical_knowledge",
+        "case_kind": "NEGATIVE_SCOPE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M32",
+      "question": "陆舟选择救人所付出的现实代价在哪里，而沈禾能否直接看见他的私下动机？",
+      "query_entities": [
+        "lu",
+        "shen"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "LITERARY"
+        ],
+        "actor_id": null,
+        "story_tick": 20,
+        "known_at": 20,
+        "reader_chapter": 20,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [
+          "E12"
+        ],
+        "forbidden_source_ids": [
+          "E02"
+        ],
+        "category": "motivation_boundary",
+        "case_kind": "POSITIVE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M33",
+      "question": "封签编号相合为什么不足以证明严渚的动机？",
+      "query_entities": [
+        "seal",
+        "yan"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "LITERARY"
+        ],
+        "actor_id": null,
+        "story_tick": 48,
+        "known_at": 48,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [
+          "E34"
+        ],
+        "forbidden_source_ids": [],
+        "category": "evidence_vs_inference",
+        "case_kind": "POSITIVE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M34",
+      "question": "第三十日的开柜计划是不是已经发生的世界事实？",
+      "query_entities": [
+        "key",
+        "letter"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "WORLD"
+        ],
+        "actor_id": null,
+        "story_tick": 30,
+        "known_at": 30,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [],
+        "forbidden_source_ids": [
+          "E18",
+          "E24"
+        ],
+        "category": "plan_isolation",
+        "case_kind": "NEGATIVE_SCOPE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    },
+    {
+      "case_id": "M35",
+      "question": "陆舟第二日真正优先考虑什么？",
+      "query_entities": [
+        "lu"
+      ],
+      "cut": {
+        "work_id": "fog_port",
+        "branch_id": "canon",
+        "revision": "r1",
+        "planes": [
+          "BELIEF"
+        ],
+        "actor_id": "lu",
+        "story_tick": 2,
+        "known_at": 2,
+        "reader_chapter": 48,
+        "history": true
+      },
+      "gold": {
+        "required_source_ids": [
+          "E02"
+        ],
+        "forbidden_source_ids": [],
+        "category": "motivation",
+        "case_kind": "POSITIVE",
+        "review_class": null,
+        "label_method": "Authored from source semantics before execution, not ranked output."
+      }
+    }
+  ],
+  "limitations": [
+    "Gold labels are authored by the developer, not independent human literary judgments.",
+    "Required-source recall is evidence availability, not generated-answer accuracy.",
+    "Negative-scope cases measure filtering, not model hallucination or semantic abstention."
+  ]
+}
