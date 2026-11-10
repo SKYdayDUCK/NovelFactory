@@ -14,7 +14,7 @@ defaults:
     shell: bash
 
 concurrency:
-  group: p1-integrity-${{ github.workflow }}-${{ github.ref }}
+  group: p1-integrity-${{ github.workflow }}-${{ github.ref }}-${{ github.sha }}
   cancel-in-progress: false
 
 jobs:

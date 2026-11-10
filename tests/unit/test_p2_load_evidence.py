@@ -147,3 +147,163 @@ def test_ten_agent_ci_smoke_only_gates_executed_work(tmp_path):
     assert result['load_gate'] == 'NOT_EXECUTED'
     assert result['overall_engineering_gate'] == 'NOT_MET'
     assert gate_exit_code(result, 'executed-tests') == 0
+
+
+def test_bounded_retry_freezes_bytes_and_key_and_accounts_budget():
+    import asyncio
+    from benchmarks.p2_behavioral_load import retry_same_request
+    payload = {'idempotency_key': 'same-key', 'generation': 4, 'certificate': 'fixed'}
+    sent, waits, outcomes = [], [], []
+
+    async def send(data, attempt):
+        sent.append(data)
+        # Simulate unrelated caller state changing while the request is in flight.
+        payload['generation'] += 1
+        row = {'retryable': True, 'retry_after_seconds': 2}
+        outcomes.append(row)
+        return (None, row) if attempt < 3 else ({'receipt': 'original'}, row)
+
+    async def wait(seconds):
+        waits.append(seconds)
+
+    result = asyncio.run(retry_same_request(send, payload, max_attempts=3, sleeper=wait))
+    assert result == {'receipt': 'original'}
+    assert sent[0] == sent[1] == sent[2]
+    assert json.loads(sent[0]) == {'idempotency_key': 'same-key', 'generation': 4, 'certificate': 'fixed'}
+    assert waits == [2, 2]
+    assert not any(row.get('retry_exhausted') for row in outcomes)
+
+
+def test_retry_exhaustion_is_bounded_and_does_not_turn_rejection_into_success():
+    import asyncio
+    from benchmarks.p2_behavioral_load import retry_same_request
+    records = []
+
+    async def send(data, attempt):
+        row = {'retryable': True}
+        records.append(row)
+        return None, row
+
+    async def wait(seconds):
+        pass
+
+    assert asyncio.run(retry_same_request(send, {}, max_attempts=2, sleeper=wait)) is None
+    assert len(records) == 2 and records[-1]['retry_exhausted']
+    # A Retry-After beyond the remaining wall-clock budget must terminate,
+    # rather than ignoring the server or sleeping indefinitely.
+    records.clear()
+
+    async def long_wait(data, attempt):
+        row = {'retryable': True, 'retry_after_seconds': 60}
+        records.append(row)
+        return None, row
+
+    assert asyncio.run(retry_same_request(long_wait, {}, max_attempts=8,
+                                         retry_budget_seconds=1, sleeper=wait)) is None
+    assert len(records) == 1 and records[-1]['retry_exhausted']
+
+
+def test_retry_policy_rejects_authority_generation_and_expired_certificate_failures():
+    import asyncio
+    from benchmarks.p2_behavioral_load import retry_same_request, retryable_failure
+    assert retryable_failure(429, {'code': 'BACKPRESSURE', 'retryable': True, 'recovery': 'WAIT'})
+    assert retryable_failure(503, {'code': 'SERVICE_UNAVAILABLE', 'retryable': True,
+                                   'recovery': 'RETRY_SAME_COMMAND'})
+    for code, status in [('GRANT_REVOKED', 403), ('STALE_CERTIFICATE', 409),
+                         ('GENERATION_MISMATCH', 409), ('DEPENDENCY_CONFLICT', 409),
+                         ('BACKPRESSURE', 500), ('UNAUTHORIZED', 429)]:
+        assert not retryable_failure(status, {'code': code, 'retryable': True, 'recovery': 'WAIT'})
+    assert not retryable_failure(429, {'code': 'BACKPRESSURE', 'retryable': False, 'recovery': 'WAIT'})
+    calls = []
+
+    async def denied(data, attempt):
+        calls.append(attempt)
+        return None, {'retryable': False, 'code': 'STALE_CERTIFICATE'}
+
+    assert asyncio.run(retry_same_request(denied, {}, max_attempts=8)) is None
+    assert calls == [1]
+
+
+def test_recovery_metrics_keep_original_logical_count_and_include_wait_in_completion():
+    raw = [
+        {'operation_id': 'one', 'attempt': 1, 'label': 'propose', 'status': 429,
+         'duplicate_retry': False, 'code': 'BACKPRESSURE', 'latency_ms': 2000,
+         'arrival_delay_ms': 0, 'agent': 0},
+        {'operation_id': 'one', 'attempt': 2, 'label': 'propose', 'status': 200,
+         'duplicate_retry': False, 'code': None, 'latency_ms': 100,
+         'arrival_delay_ms': 3100, 'agent': 0},
+    ]
+    measured = summarize({'raw': raw, 'duration_seconds': 4, 'receipts': [],
+        'peak_inflight_http': 1, 'planned_requests': 2, 'correctness_errors': [],
+        'operational_errors': []})
+    assert measured['emitted_requests'] == 2
+    assert measured['emitted_logical_operations'] == 1
+    assert measured['client_requests_never_emitted'] == 1
+    assert measured['infrastructure_retries'] == 1
+    assert measured['recovered_logical_operations'] == 1
+    assert measured['first_attempt_failure_count'] == 1
+    assert measured['effective_call_rps_excluding_duplicates'] == .25
+    assert measured['logical_operation_completion_latency']['p95_ms'] == 3200
+
+
+def test_recovery_pass_never_promotes_capacity_or_missing_open_arrival_rate(tmp_path):
+    from benchmarks.p2_behavioral_load import load_exit_code, observed_open_loop
+    path = synthetic_load(tmp_path, 200)
+    data = json.loads(path.read_text())
+    data.update(capacity_gate='NOT_MET', first_attempt_capacity_gate='NOT_MET',
+                bounded_recovery_business_gate='PASS')
+    path.write_text(json.dumps(data))
+    matrix = build_matrix([synthetic_junit(tmp_path)], [path])
+    assert matrix['provided_load_run_gate'] == 'PASS_FOR_PROVIDED_RUNS'
+    assert matrix['provided_capacity_run_gate'] == 'NOT_MET'
+    assert matrix['load_gate'] == 'NOT_MET'
+    assert gate_exit_code(matrix, 'full') == 1
+    assert load_exit_code(data, 'capacity') == 1
+    assert load_exit_code(data, 'recovered-completion') == 0
+    raw = [{'label': 'overload', 'attempt': 1, 'started_seconds': i,
+            'arrival_delay_ms': i*999} for i in range(5)]
+    # A very fast retry must not be counted as another planned arrival.
+    raw.append({'label': 'overload', 'attempt': 2, 'started_seconds': .0001,
+                'arrival_delay_ms': 10})
+    rate = observed_open_loop(raw, 1000)
+    assert rate['gate'] == 'NOT_MET' and rate['first_attempts'] == 5
+    assert rate['actual_call_start_rps'] == 1
+
+
+def test_retry_budget_rechecks_deadline_after_delayed_wakeup():
+    import asyncio
+    from benchmarks.p2_behavioral_load import retry_same_request
+    clock, records = [0.0], []
+
+    async def send(data, attempt):
+        row = {'retryable': True}
+        records.append(row)
+        return None, row
+
+    async def delayed_wakeup(seconds):
+        # Simulate overloaded event loop resuming well after requested sleep.
+        clock[0] += 31
+
+    assert asyncio.run(retry_same_request(send, {}, max_attempts=5, retry_budget_seconds=30,
+        sleeper=delayed_wakeup, clock=lambda: clock[0])) is None
+    assert len(records) == 1 and records[0]['retry_exhausted']
+
+
+def test_derived_open_loop_rate_excludes_retry_attempts(tmp_path):
+    from benchmarks.p2_load_derived import derive
+    raw = [{'operation_id': str(i), 'label': 'overload', 'attempt': 1, 'status': 200,
+            'duplicate_retry': False, 'code': None, 'latency_ms': 20, 'arrival_delay_ms': 0,
+            'agent': i, 'started_seconds': float(i)} for i in range(3)]
+    raw.append({**raw[-1], 'attempt': 2, 'started_seconds': 100.0})
+    original = {'raw_requests': raw, 'metrics': {'planned_requests': 3, 'duration_seconds': 101,
+        'peak_outstanding_client_requests': 1, 'correctness_errors': []},
+        'world_commit_receipts': [], 'load': {'overload_arrival_rps': 1000},
+        'environment': {'benchmark_source_sha256': '0'*64}, 'engineer_correctness': 'PASS',
+        'ingress': {}, 'database_application': {}, 'hot_subject_fraction': .8}
+    path = tmp_path/'retry-parser-fixture.json'
+    path.write_text(json.dumps(original))
+    derived = derive(path)
+    assert derived['overload_observation']['requests'] == 3
+    assert derived['overload_observation']['actual_call_starts_per_second'] == 1
+    assert derived['overload_observation']['infrastructure_retry_attempts'] == 1
+    assert derived['metrics']['client_requests_never_emitted'] == 0

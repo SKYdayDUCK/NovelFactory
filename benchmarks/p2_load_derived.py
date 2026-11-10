@@ -22,20 +22,24 @@ def derive(path: Path) -> dict:
         'duration_seconds': old_metrics['duration_seconds'],
         'planned_requests': expected, 'receipts': original['world_commit_receipts'],
         'peak_inflight_http': old_metrics.get('peak_outstanding_client_requests', old_metrics.get('peak_inflight_http')),
-        'correctness_errors': old_metrics['correctness_errors']})
-    overload = [row for row in original['raw_requests'] if row['label'] == 'overload']
+        'correctness_errors': old_metrics['correctness_errors'],
+        'operational_errors': old_metrics.get('unresolved_operational_errors', [])})
+    overload = [row for row in original['raw_requests'] if row['label'] == 'overload' and row.get('attempt', 1) == 1]
     if overload:
         start = min(row['started_seconds'] for row in overload)
         last_start = max(row['started_seconds'] for row in overload)
         finish = max(row['started_seconds']+row['latency_ms']/1000 for row in overload)
         overload_summary = {'requests': len(overload),
+            'infrastructure_retry_attempts': sum(row['label'] == 'overload' and row.get('attempt', 1) > 1
+                for row in original['raw_requests']),
             'target_arrival_rps': original['load']['overload_arrival_rps'],
             'actual_call_start_window_seconds': last_start-start,
             'actual_call_starts_per_second': (len(overload)-1)/max(last_start-start, 1e-9),
             'completed_window_seconds': finish-start,
             'completion_rps': len(overload)/max(finish-start, 1e-9),
             'max_scheduling_delay_ms': max(row['arrival_delay_ms'] for row in overload),
-            'note': 'Call starts include HTTPX connection wait; same-process load generator '
+            'note': 'First-attempt completion count includes rejected responses and is not effective business throughput. '
+                    'Call starts include HTTPX connection wait; same-process load generator '
                     'shares CPU with server. This is not proof of achieved target wire RPS.'}
     else:
         overload_summary = None
@@ -45,6 +49,8 @@ def derive(path: Path) -> dict:
     return {'schema_version': 'p2-load-derived-1', 'original_path': str(path),
         'original_sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
         'original_scenario_result_unchanged': original['engineer_correctness'],
+        'original_capacity_gate_unchanged': original.get('capacity_gate', 'LEGACY_NOT_SEPARATED'),
+        'original_recovery_gate_unchanged': original.get('bounded_recovery_business_gate', 'LEGACY_NOT_SEPARATED'),
         'metrics': result, 'overload_observation': overload_summary,
         'server_ingress': original['ingress'],
         'application_sql_and_pool': original['database_application'],

@@ -147,7 +147,7 @@ def load_coverage(loads: list[dict]) -> list[dict]:
                 and (run['overload_rounds'] or 0) > 0)]
             requirements.append({'logical_agents': agents, 'scenario': scenario,
                 'status': ('NOT_EXECUTED' if not matches else
-                           'NOT_MET' if any(run['result'] != 'PASS' for run in matches)
+                           'NOT_MET' if any(run.get('capacity_result', run['result']) != 'PASS' for run in matches)
                            else 'PASS_FOR_PROVIDED_RUNS'),
                 'evidence_paths': [run['path'] for run in matches]})
     return requirements
@@ -205,6 +205,10 @@ def build_matrix(junit_paths: list[Path], load_paths: list[Path]) -> dict:
         loads.append({'path': str(path), 'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
             'logical_agents': data['logical_agent_task_count'],
             'result': data['engineer_correctness'], 'profile': data['profile'],
+            'capacity_result': data.get('capacity_gate', data['engineer_correctness']),
+            'first_attempt_capacity_gate': data.get('first_attempt_capacity_gate', 'LEGACY_NOT_SEPARATED'),
+            'recovered_completion_gate': data.get('bounded_recovery_business_gate', 'LEGACY_NOT_SEPARATED'),
+            'open_loop_offered_rate': data.get('open_loop_offered_rate'),
             'offered_query_rps': data['load']['scheduled_phase_arrival_rps'],
             'hot_subject_fraction': data.get('hot_subject_fraction'),
             'overload_arrival_rps': data['load'].get('overload_arrival_rps'),
@@ -222,9 +226,11 @@ def build_matrix(junit_paths: list[Path], load_paths: list[Path]) -> dict:
     requirements = load_coverage(loads)
     load_run_gate = ('NOT_EXECUTED' if not loads else 'NOT_MET' if any(
         load['result'] != 'PASS' for load in loads) else 'PASS_FOR_PROVIDED_RUNS')
+    capacity_run_gate = ('NOT_EXECUTED' if not loads else 'NOT_MET' if any(
+        load['capacity_result'] != 'PASS' for load in loads) else 'PASS_FOR_PROVIDED_RUNS')
     coverage_gate = ('NOT_EXECUTED' if any(item['status'] == 'NOT_EXECUTED' for item in requirements)
                      else 'EXECUTED')
-    load_gate = ('NOT_MET' if load_run_gate == 'NOT_MET' else
+    load_gate = ('NOT_MET' if capacity_run_gate == 'NOT_MET' else
                  'NOT_EXECUTED' if coverage_gate == 'NOT_EXECUTED' else 'PASS_FOR_REQUIRED_SCENARIOS')
     return {'schema_version': 'p2-acceptance-evidence-1',
         'source_matrix': 'validation/r1_case_matrix.json', 'source_matrix_modified': False,
@@ -235,6 +241,7 @@ def build_matrix(junit_paths: list[Path], load_paths: list[Path]) -> dict:
         'mapped_test_execution_gate': mapped_test_gate,
         'load_gate': load_gate,
         'provided_load_run_gate': load_run_gate,
+        'provided_capacity_run_gate': capacity_run_gate,
         'required_load_scenarios': requirements,
         'load_coverage_gate': coverage_gate,
         'load_population_coverage': sorted({run['logical_agents'] for run in loads}),

@@ -1,0 +1,84 @@
+name: P2 measured capacity and recovery
+
+on:
+  push:
+    branches: ["dev/p2-production-loop"]
+    paths:
+      - '.github/workflows/p2-load.yml'
+      - 'benchmarks/p2*'
+      - 'src/novel_factory/application/queries.py'
+      - 'src/novel_factory/application/kernel.py'
+      - 'src/novel_factory/infrastructure/repository.py'
+      - 'src/novel_factory/interfaces/**'
+      - 'tests/service/test_p2_retry_recovery.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: p2-load-${{ github.ref }}-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  measured-load:
+    name: ${{ matrix.agents }} agents / ${{ matrix.profile }} / full capacity gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        agents: [50, 200]
+        profile: [mixed, overload]
+    services:
+      postgres:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_DB: nf_test
+          POSTGRES_USER: nf_dev
+          POSTGRES_PASSWORD: nf_dev_ci_only
+          POSTGRES_INITDB_ARGS: --data-checksums
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nf_dev -d nf_test"
+          --health-interval 2s
+          --health-timeout 2s
+          --health-retries 30
+    env:
+      NF_DATABASE_URL: postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/nf_test
+      NF_TEST_DATABASE_URL: postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/nf_test
+      NF_POOL_SIZE: '8'
+      NF_POOL_OVERFLOW: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          enable-cache: true
+      - name: Install locked dependencies
+        run: uv sync --locked --group dev --python 3.12
+      - name: Measure fixed population, requests and business completion
+        run: |
+          mkdir -p ci-evidence
+          hot_fraction=0.2
+          if [[ '${{ matrix.profile }}' == 'overload' ]]; then hot_fraction=0.8; fi
+          uv run --no-sync python -m benchmarks.p2_behavioral_load \
+            --agents '${{ matrix.agents }}' --profile '${{ matrix.profile }}' \
+            --hot-fraction "$hot_fraction" --arrival-rps 10 --open-loop-rps 1000 --rounds 5 \
+            --max-attempts 5 --retry-budget-seconds 30 --gate-scope capacity \
+            --output ci-evidence/load.json 2>&1 | tee ci-evidence/load.log
+      - name: Preserve raw attempts and honest capacity outcome
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p2-load-${{ matrix.agents }}-${{ matrix.profile }}-${{ github.run_attempt }}
+          path: ci-evidence/
+          if-no-files-found: error
+          retention-days: 90

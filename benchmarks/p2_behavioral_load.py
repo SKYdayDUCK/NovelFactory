@@ -248,10 +248,51 @@ def make_population(kernel, agents: int, hot_fraction: float, *, seed=SEED):
             'seed_accepted_events': 4, 'accounts': accounts}
 
 
+async def retry_same_request(send_once, payload, *, max_attempts=1,
+                             retry_budget_seconds=30, sleeper=asyncio.sleep, clock=time.monotonic):
+    """Retry only an explicitly retryable transport/admission outcome.
+
+    Serialize once: every attempt retains exactly the same payload, idempotency
+    key, generation and certificate. The caller validates all responses and marks
+    retryability. Authority/semantic failures, including expired certificates,
+    never cause this driver to prepare a new command or silently change its base.
+    """
+    if not 1 <= max_attempts <= 8 or not 0 < retry_budget_seconds <= 120:
+        raise ValueError('retry budget must be 1..8 attempts and 0..120 seconds')
+    request_bytes = json.dumps(payload, ensure_ascii=False, separators=(',', ':')).encode()
+    deadline = clock() + retry_budget_seconds
+    record = None
+    for attempt in range(1, max_attempts + 1):
+        if attempt > 1 and clock() >= deadline:
+            record['retry_exhausted'] = True
+            return None
+        value, record = await send_once(request_bytes, attempt)
+        if value is not None or not record.get('retryable'):
+            return value
+        # Respect Retry-After, add bounded exponential delay, and never retain
+        # a client request or database connection during this sleep.
+        delay = max(record.get('retry_after_seconds', 0), min(2**(attempt-1), 5))
+        if attempt == max_attempts or clock() + delay >= deadline:
+            record['retry_exhausted'] = True
+            return None
+        record['retry_wait_seconds'] = delay
+        await sleeper(delay)
+
+
+def retryable_failure(status, body):
+    """Do not infer safe recovery merely from a status code or error string."""
+    return (status in {429, 503}
+            and body.get('code') in {'BACKPRESSURE', 'RATE_LIMITED', 'SERVICE_UNAVAILABLE', 'POOL_TIMEOUT'}
+            and body.get('retryable') is True
+            and body.get('recovery') in {'WAIT', 'RETRY_SAME_COMMAND'})
+
+
 async def exercise(base_url, fixture, *, profile='mixed', arrival_rps=10,
-                   open_loop_rps=1000, rounds=5, observer=None):
+                   open_loop_rps=1000, rounds=5, observer=None, max_attempts=1,
+                   retry_budget_seconds=30):
     population = fixture['population']
-    raw, expected_errors, correctness_errors = [], [], []
+    raw, expected_errors, correctness_errors, operational_errors = [], [], [], []
+    logical_sequence = 0
     receipts = []
     active = peak_active = 0
     origin = time.monotonic()
@@ -263,55 +304,93 @@ async def exercise(base_url, fixture, *, profile='mixed', arrival_rps=10,
             limits=httpx.Limits(max_connections=client_limit,
                                max_keepalive_connections=client_limit, keepalive_expiry=2)) as http:
         async def call(client, label, endpoint, payload, *, scheduled=None, duplicate=False):
-            nonlocal active, peak_active
-            begin = time.monotonic()
-            active += 1
-            peak_active = max(peak_active, active)
-            record = {'agent': client['index'], 'task_id': client['task_id'], 'label': label,
-                'endpoint': endpoint, 'started_seconds': round(begin-origin, 6),
-                'request_sha256': fingerprint(payload), 'duplicate_retry': duplicate,
-                'arrival_delay_ms': round(max(0, begin-(scheduled or begin))*1000, 4)}
-            body = None
-            try:
-                response = await http.post('/api/v1/' + endpoint,
-                    headers={'Authorization': 'Bearer ' + client['token']}, json=payload)
-                body = response.json()
-                record.update(status=response.status_code, code=body.get('code'),
-                    response_sha256=fingerprint(body), response_bytes=len(response.content))
-                if response.status_code == 200:
-                    if endpoint == 'queries/timeline':
-                        validate_contract('UnifiedQueryResult', body, '2.1')
-                        if body['read_cut']['world_ref'] != fixture['world']['world_ref']:
-                            raise AssertionError('read did not preserve fixed WorldRef')
-                        if label in {'state_cold', 'state_warm', 'state_mixed', 'overload'}:
-                            items = body['payload']['state_items']
-                            expected = {'kind': 'ENTITY', 'entity_id': fixture['ids']['smith']}
-                            if len(items) != 2 or any(x['answer']['data'] != expected for x in items):
-                                raise AssertionError('fixed state payload changed under concurrent writes')
-                    elif endpoint == 'contexts/compile':
-                        validate_contract('ContextCompileResult', body, '2.1')
-                        if body['status'] != 'READY':
-                            raise AssertionError('context compilation incomplete')
-                    elif endpoint == 'world/accept-guarded':
-                        validate_contract('GuardedCommitReceipt', body, '2.1')
-                        receipts.append(body)
-                        if label == 'accept_conflict':
-                            raise AssertionError('stale shared candidate unexpectedly accepted')
-                else:
-                    validate_contract('ErrorEnvelope', body)
-                    if (response.status_code == 409 and client['conflicted']
-                            and label == 'accept_conflict' and body['code'] == 'DEPENDENCY_CONFLICT') or profile == 'overload' and response.status_code == 429:
-                        expected_errors.append(record)
+            nonlocal logical_sequence
+            logical_sequence += 1
+            operation_id = str(logical_sequence)
+            scheduled_at = scheduled if scheduled is not None else time.monotonic()
+            last_record = None
+
+            async def send_once(request_bytes, attempt):
+                nonlocal active, peak_active, last_record
+                begin = time.monotonic()
+                active += 1
+                peak_active = max(peak_active, active)
+                record = {'agent': client['index'], 'task_id': client['task_id'], 'label': label,
+                    'operation_id': operation_id, 'attempt': attempt,
+                    'infrastructure_retry': attempt > 1,
+                    'endpoint': endpoint, 'started_seconds': round(begin-origin, 6),
+                    'request_sha256': fingerprint(json.loads(request_bytes)),
+                    'request_bytes_sha256': hashlib.sha256(request_bytes).hexdigest(),
+                    'duplicate_retry': duplicate, 'retryable': False,
+                    'arrival_delay_ms': round(max(0, begin-scheduled_at)*1000, 4)}
+                body = None
+                try:
+                    response = await http.post('/api/v1/' + endpoint,
+                        headers={'Authorization': 'Bearer ' + client['token'],
+                                 'Content-Type': 'application/json'}, content=request_bytes)
+                    body = response.json()
+                    record.update(status=response.status_code, code=body.get('code'),
+                        response_sha256=fingerprint(body), response_bytes=len(response.content))
+                    if response.status_code == 200:
+                        if endpoint == 'queries/timeline':
+                            validate_contract('UnifiedQueryResult', body, '2.1')
+                            if body['read_cut']['world_ref'] != fixture['world']['world_ref']:
+                                raise AssertionError('read did not preserve fixed WorldRef')
+                            if label in {'state_cold', 'state_warm', 'state_mixed', 'overload'}:
+                                items = body['payload']['state_items']
+                                expected = {'kind': 'ENTITY', 'entity_id': fixture['ids']['smith']}
+                                if len(items) != 2 or any(x['answer']['data'] != expected for x in items):
+                                    raise AssertionError('fixed state payload changed under concurrent writes')
+                        elif endpoint == 'contexts/compile':
+                            validate_contract('ContextCompileResult', body, '2.1')
+                            if body['status'] != 'READY':
+                                raise AssertionError('context compilation incomplete')
+                        elif endpoint == 'world/accept-guarded':
+                            validate_contract('GuardedCommitReceipt', body, '2.1')
+                            receipts.append(body)
+                            if label == 'accept_conflict':
+                                raise AssertionError('stale shared candidate unexpectedly accepted')
                     else:
-                        correctness_errors.append({**record, 'reason': 'unexpected response'})
-            except Exception as exc:  # noqa: BLE001 - preserve every failed load request in raw evidence
-                record.update(status=record.get('status', 'transport_error'), error_type=type(exc).__name__)
-                correctness_errors.append({**record, 'reason': str(exc)[:160]})
-            finally:
-                active -= 1
-                record['latency_ms'] = round((time.monotonic()-begin)*1000, 4)
-                raw.append(record)
-            return body if record.get('status') == 200 and 'error_type' not in record else None
+                        validate_contract('ErrorEnvelope', body)
+                        record['retryable'] = retryable_failure(response.status_code, body)
+                        if record['retryable']:
+                            try:
+                                retry_after = float(response.headers.get('Retry-After', '1'))
+                                record['retry_after_seconds'] = retry_after if 0 <= retry_after <= 120 else 120
+                            except ValueError:
+                                record['retry_after_seconds'] = 1
+                        elif (response.status_code == 409 and client['conflicted']
+                                and label == 'accept_conflict' and body['code'] == 'DEPENDENCY_CONFLICT'):
+                            record['expected_conflict'] = True
+                            expected_errors.append(record)
+                        else:
+                            correctness_errors.append({**record, 'reason': 'unexpected response'})
+                except httpx.TransportError as exc:
+                    # Unknown delivery can only replay these already-idempotent
+                    # operations. No token, request body or exception URL is logged.
+                    record.update(status='transport_error', error_type=type(exc).__name__, retryable=True)
+                except Exception as exc:  # noqa: BLE001 - retain validation/correctness failures
+                    record.update(status=record.get('status', 'client_error'), error_type=type(exc).__name__)
+                    record['retryable'] = False
+                    correctness_errors.append({**record, 'reason': type(exc).__name__})
+                finally:
+                    active -= 1
+                    record['latency_ms'] = round((time.monotonic()-begin)*1000, 4)
+                    raw.append(record)
+                    last_record = record
+                value = body if record.get('status') == 200 and 'error_type' not in record else None
+                return value, record
+
+            value = await retry_same_request(send_once, payload, max_attempts=max_attempts,
+                                              retry_budget_seconds=retry_budget_seconds)
+            if value is None and last_record.get('retry_exhausted'):
+                # Overload rejection remains visible but is not a world-state
+                # correctness failure. Required business calls must all recover.
+                if label != 'overload':
+                    operational_errors.append({**last_record, 'reason': 'retry budget exhausted'})
+                else:
+                    expected_errors.append(last_record)
+            return value
 
         async def phase(label, fn, *, rate=arrival_rps, clients=population):
             start = time.monotonic()
@@ -329,7 +408,7 @@ async def exercise(base_url, fixture, *, profile='mixed', arrival_rps=10,
                                rate=min(arrival_rps, 10))
         if not all(compiled):
             return {'raw': raw, 'expected_errors': expected_errors,
-                'correctness_errors': correctness_errors, 'receipts': receipts,
+                'correctness_errors': correctness_errors, 'operational_errors': operational_errors, 'receipts': receipts,
                 'peak_inflight_http': peak_active, 'planned_requests': expected_calls,
                 'duration_seconds': time.monotonic()-origin}
         await phase('state_cold', lambda c, s: call(c, 'state_cold', 'queries/timeline', c['state'], scheduled=s))
@@ -398,13 +477,23 @@ async def exercise(base_url, fixture, *, profile='mixed', arrival_rps=10,
             await phase('overload', lambda c, s: call(c, 'overload', 'queries/timeline', c['state'], scheduled=s),
                         rate=open_loop_rps, clients=population*rounds)
     return {'raw': raw, 'expected_errors': expected_errors,
-            'correctness_errors': correctness_errors, 'receipts': receipts,
+            'correctness_errors': correctness_errors, 'operational_errors': operational_errors, 'receipts': receipts,
             'peak_inflight_http': peak_active, 'planned_requests': expected_calls,
             'duration_seconds': time.monotonic()-origin}
 
 
 def summarize(result):
     raw, duration = result['raw'], result['duration_seconds']
+    first_attempts = [row for row in raw if row.get('attempt', 1) == 1]
+    infrastructure_retries = len(raw) - len(first_attempts)
+    first_failures = [row for row in first_attempts if (row['status'] != 200 or 'error_type' in row)
+                      and not row.get('expected_conflict', row.get('code') == 'DEPENDENCY_CONFLICT'
+                                      and row.get('label') == 'accept_conflict')]
+    last_attempts = {}
+    for index, row in enumerate(raw):
+        key = row.get('operation_id', str(index))
+        if key not in last_attempts or row.get('attempt', 1) > last_attempts[key].get('attempt', 1):
+            last_attempts[key] = row
     labels = sorted({r['label'] for r in raw})
     counts = Counter(str(r['status']) for r in raw)
     successes = [r for r in raw if r['status'] == 200 and 'error_type' not in r]
@@ -416,7 +505,16 @@ def summarize(result):
     real_conflicts = [r for r in raw if r.get('code') in {'DEPENDENCY_CONFLICT', 'RESOURCE_CONFLICT'}]
     return {'duration_seconds': round(duration, 6), 'planned_requests': result['planned_requests'],
         'emitted_requests': len(raw), 'completed_requests': len(raw),
-        'client_requests_never_emitted': result['planned_requests']-len(raw),
+        'client_requests_never_emitted': result['planned_requests']-len(first_attempts),
+        'emitted_logical_operations': len(first_attempts),
+        'completed_logical_operations': len(last_attempts),
+        'first_attempt_failure_count': len(first_failures),
+        'first_attempt_status_counts': dict(Counter(str(row['status']) for row in first_attempts)),
+        'first_attempt_latency': percentiles([row['latency_ms']/1000 for row in first_attempts]),
+        'recovered_logical_operations': sum(row.get('attempt', 1) > 1 and row['status'] == 200
+            and 'error_type' not in row for row in last_attempts.values()),
+        'logical_operation_completion_latency': percentiles([
+            (row['arrival_delay_ms']+row['latency_ms'])/1000 for row in last_attempts.values()]),
         'api_tool_calls': len(raw), 'mcp_tool_calls': 0, 'status_counts': dict(counts),
         'valid_successful_calls': len(successes), 'api_success_rps': round(len(successes)/duration, 4),
         'successful_duplicate_receipts': duplicate_receipts,
@@ -429,7 +527,7 @@ def summarize(result):
         'conflict_count': len(real_conflicts), 'conflict_rate_all_requests': len(real_conflicts)/len(raw),
         'failure_rate_all_requests': (len(raw)-len(successes))/len(raw),
         'idempotent_retry_rate_all_requests': sum(r['duplicate_retry'] for r in raw)/len(raw),
-        'infrastructure_retries': 0, 'model_retries': 0,
+        'infrastructure_retries': infrastructure_retries, 'model_retries': 0,
         'peak_outstanding_client_requests': result['peak_inflight_http'],
         'client_connection_limit': 256,
         'outstanding_definition': 'Includes HTTPX connection-pool wait; server ingress is measured separately',
@@ -447,11 +545,35 @@ def summarize(result):
             for label in labels},
         'successful_calls_by_agent': dict(Counter(str(r['agent']) for r in successes)),
         'latency_warning': 'P99 for individual write categories has few samples; descriptive only',
-        'correctness_errors': result['correctness_errors']}
+        'correctness_errors': result['correctness_errors'],
+        'unresolved_operational_errors': result.get('operational_errors', [])}
+
+
+def observed_open_loop(raw, target):
+    """Measure actual first attempt starts; retries never improve offered rate."""
+    rows = [row for row in raw if row['label'] == 'overload' and row.get('attempt', 1) == 1]
+    if not rows:
+        return {'gate': 'NOT_APPLICABLE', 'target_rps': None, 'first_attempts': 0}
+    span = max(row['started_seconds'] for row in rows) - min(row['started_seconds'] for row in rows)
+    actual = (len(rows)-1)/max(span, 1e-9)
+    return {'gate': 'MET' if actual >= target * .95 else 'NOT_MET',
+            'target_rps': target, 'first_attempts': len(rows),
+            'actual_call_start_rps': actual, 'start_window_seconds': span,
+            'max_schedule_delay_ms': max(row['arrival_delay_ms'] for row in rows),
+            'criterion': 'Actual first call starts >=95% of frozen target; HTTPX waits still included',
+            'scope': 'Client call-start rate only, not a claim of network wire rate or sustained capacity'}
+
+
+def load_exit_code(result, scope):
+    if scope == 'recovered-completion':
+        return int(result['bounded_recovery_business_gate'] != 'PASS')
+    if scope == 'capacity':
+        return int(result['capacity_gate'] != 'PASS')
+    raise ValueError('unknown load gate scope')
 
 
 def run_benchmark(kernel, url, *, agents, hot_fraction=.2, profile='mixed', arrival_rps=10,
-                  open_loop_rps=1000, rounds=5):
+                  open_loop_rps=1000, rounds=5, max_attempts=1, retry_budget_seconds=30):
     started_at_utc = datetime.now(UTC).isoformat()
     before_setup = time.monotonic()
     fixture = make_population(kernel, agents, hot_fraction)
@@ -466,7 +588,8 @@ def run_benchmark(kernel, url, *, agents, hot_fraction=.2, profile='mixed', arri
     with loopback_server(app) as base_url, SqlMeasurements(kernel.db.engine) as measured:
         with DatabaseObserver(url) as observer:
             result = asyncio.run(exercise(base_url, fixture, profile=profile, arrival_rps=arrival_rps,
-                open_loop_rps=open_loop_rps, rounds=rounds, observer=phase_observer))
+                open_loop_rps=open_loop_rps, rounds=rounds, observer=phase_observer,
+                max_attempts=max_attempts, retry_budget_seconds=retry_budget_seconds))
         sql = measured.result(result['duration_seconds'])
     process_after = resource.getrusage(resource.RUSAGE_SELF)
     with kernel.db.uow(write=False) as repo:
@@ -489,21 +612,36 @@ def run_benchmark(kernel, url, *, agents, hot_fraction=.2, profile='mixed', arri
             fixture['ids']['grain'], 'bag', point(11))['quantity'],
         'independent_resource_final_quantities': [resource_at(final['snapshot'], pair[0],
             fixture['ids']['grain'], 'bag', point(11))['quantity'] for pair in fixture['accounts']]}
-    passed = (not summary['correctness_errors'] and actual_new == expected_new
+    passed = (not summary['correctness_errors'] and not summary['unresolved_operational_errors']
+        and summary['client_requests_never_emitted'] == 0
+        and actual_new == expected_new
         and correctness['new_selected_effect_groups'] == expected_new
         and correctness['connections_released_between_phases']
         and correctness['shared_resource_final_quantity'] == '99'
         and all(q == '99' for q in correctness['independent_resource_final_quantities'])
         and sql['peak_checked_out_connections'] <= 8 and sql['checked_out_at_end'] == 0)
-    return {'schema_version': 'p2-load-1', 'evidence_kind': 'REAL_HTTP_REAL_POSTGRESQL_TEST_FIXTURE',
+    open_loop = observed_open_loop(result['raw'], open_loop_rps)
+    first_passed = passed and not summary['first_attempt_failure_count']
+    capacity_passed = first_passed and open_loop['gate'] in {'MET', 'NOT_APPLICABLE'}
+    return {'schema_version': 'p2-load-2', 'evidence_kind': 'REAL_HTTP_REAL_POSTGRESQL_TEST_FIXTURE',
         'started_at_utc': started_at_utc,
         'engineer_correctness': 'PASS' if passed else 'FAIL',
+        'first_attempt_capacity_gate': 'PASS' if first_passed else 'NOT_MET',
+        'open_loop_offered_rate': open_loop,
+        'capacity_gate': 'PASS' if capacity_passed else 'NOT_MET',
+        'bounded_recovery_business_gate': 'PASS' if passed else 'NOT_MET',
+        'recovery_scope': 'Same original commands only; a recovery PASS does not promote first-attempt capacity.',
         'logical_agent_task_count': agents, 'hot_subject_fraction': hot_fraction, 'profile': profile,
         'seed': SEED, 'setup_seconds': round(setup_seconds, 6), 'environment': hardware(),
         'database_settings': settings, 'data': {'entities': fixture['genesis_entities'],
             'initial_relations': fixture['genesis_relations'], 'initial_accepted_events': 4,
             'final_table_counts': table_counts, 'scale': 'bounded synthetic small world; not 100k-event medium design'},
         'load': {'scheduled_phase_arrival_rps': arrival_rps,
+            'retry_policy': {'max_attempts': max_attempts, 'retry_budget_seconds': retry_budget_seconds,
+                'same_payload_and_key': True, 'semantic_reprepare': False,
+                'deadline_scope': 'No new retry starts after budget; in-flight attempt may finish later within HTTP timeout',
+                'individual_http_timeout_seconds': 30,
+                'retryable': ['validated 429/503 WAIT or RETRY_SAME_COMMAND', 'TransportError']},
             'context_arrival_rps': min(arrival_rps, 10), 'write_arrival_rps': min(arrival_rps, 1),
             'mixed_read_distribution': {'state_fraction': .9, 'graph_fraction': .1,
                 'history': 'one additional FACT timeline per task'},
@@ -546,9 +684,14 @@ def main():
     parser.add_argument('--open-loop-rps', type=float, default=1000)
     parser.add_argument('--rounds', type=int, default=5)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--max-attempts', type=int, default=1)
+    parser.add_argument('--retry-budget-seconds', type=float, default=30)
+    parser.add_argument('--gate-scope', choices=['capacity', 'recovered-completion'], default='capacity')
     args = parser.parse_args()
     if not 0 <= args.hot_fraction <= 1 or min(args.arrival_rps, args.open_loop_rps) <= 0 or not 1 <= args.rounds <= 30:
         parser.error('invalid workload bounds')
+    if not 1 <= args.max_attempts <= 8 or not 0 < args.retry_budget_seconds <= 120:
+        parser.error('invalid retry bounds')
     url = os.environ.get('NF_TEST_DATABASE_URL')
     if not url:
         parser.error('run under scripts/with_postgres.py or set NF_TEST_DATABASE_URL')
@@ -561,13 +704,17 @@ def main():
           isolated_kernel(url, Path(directory)) as (kernel, database_url)):
         result = run_benchmark(kernel, database_url, agents=args.agents,
             hot_fraction=args.hot_fraction, profile=args.profile, arrival_rps=args.arrival_rps,
-            open_loop_rps=args.open_loop_rps, rounds=args.rounds)
+            open_loop_rps=args.open_loop_rps, rounds=args.rounds,
+            max_attempts=args.max_attempts, retry_budget_seconds=args.retry_budget_seconds)
     result['reproduction_argv'] = sys.argv
     result['source_snapshot'] = str(source_path)
     args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps({'file': str(args.output), 'correctness': result['engineer_correctness'],
-        'logical_agents': args.agents, 'metrics': result['metrics']}, ensure_ascii=False, indent=2))
-    return 0 if result['engineer_correctness'] == 'PASS' else 1
+        'logical_agents': args.agents, 'first_attempt_capacity_gate': result['first_attempt_capacity_gate'],
+        'bounded_recovery_business_gate': result['bounded_recovery_business_gate'],
+        'capacity_gate': result['capacity_gate'], 'open_loop_offered_rate': result['open_loop_offered_rate'],
+        'gate_scope': args.gate_scope, 'metrics': result['metrics']}, ensure_ascii=False, indent=2))
+    return load_exit_code(result, args.gate_scope)
 
 
 if __name__ == '__main__':
