@@ -77,7 +77,8 @@ def test_legacy_paid_review_requires_own_nf_installation(isolated_database, tmp_
     dsn, config = isolated_database
     command.upgrade(config, "w004a")
     archive = tmp_path / "old.tar"
-    subprocess.run(["git", "archive", "--format=tar", "--output", archive, LEGACY, "workshop"], check=True)
+    subprocess.run(["git", "archive", "--format=tar", "--output", archive, LEGACY, "workshop"],
+                   cwd=Path(__file__).resolve().parents[2], check=True)
     with tarfile.open(archive) as contents:
         contents.extractall(tmp_path, filter="data")
     old = tmp_path / "workshop"
