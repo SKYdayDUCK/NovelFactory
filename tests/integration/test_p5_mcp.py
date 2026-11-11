@@ -31,16 +31,23 @@ async def exercise(params, callback):
     async with stdio_client(params) as streams, ClientSession(*streams) as session:
         result = await session.initialize()
         assert result.protocolVersion == "2025-11-25" and result.serverInfo.name == "NovelFactory"
-        await callback(session)
+        return await callback(session)
 
 
 async def error(session, name, arguments, code):
     result = await session.call_tool(name, arguments)
     assert result.isError and result.structuredContent == {"error": {"code": code}}
     assert result.content[0].text == code
+    return result.structuredContent["error"]["code"]
 
 
-def test_project_stdio_resume_is_scoped_and_live(kernel_env, tmp_path):
+async def discovered_tools(session, binding, record_testsuite_property):
+    tools = {tool.name: tool.inputSchema for tool in (await session.list_tools()).tools}
+    record_testsuite_property("nf_discovery." + binding, json.dumps(sorted(tools)))
+    return tools
+
+
+def test_project_stdio_resume_is_scoped_and_live(kernel_env, tmp_path, record_testsuite_property):
     kernel = kernel_env["kernel"]
     world = load_fixture(kernel)
     binding = {k: world["world_ref"][k] for k in ("work_id", "branch_id")}
@@ -48,8 +55,23 @@ def test_project_stdio_resume_is_scoped_and_live(kernel_env, tmp_path):
         capabilities=["PROJECT_RESUME"], branch_ids=[binding["branch_id"]],
         expires_at=datetime.now(UTC) + timedelta(hours=1))
 
+    async def unbound(session):
+        assert not (await session.list_tools()).tools
+        await error(session, "nf_project_status", {}, "VIEW_DENIED")
+
+    other_branch = kernel.fork(world["principal"], world["world_ref"], "CANDIDATE", "w0-scope")
+    other_work = load_fixture(kernel)["world_ref"]
+    for label, ref in (("other-branch", other_branch), ("other-work", other_work)):
+        other = {key: ref[key] for key in binding}
+        asyncio.run(exercise(config(tmp_path / (label + ".json"), kernel_env, scoped["token"], other), unbound))
+
     async def check(session):
-        assert {tool.name for tool in (await session.list_tools()).tools} == {"nf_project_status", "nf_resume_project"}
+        tools = await discovered_tools(session, "resume_operator", record_testsuite_property)
+        assert set(tools) == {"nf_project_status", "nf_resume_project"}
+        status = await session.call_tool("nf_project_status", {})
+        assert not status.isError and status.structuredContent["workflow_state"] == "IDLE"
+        assert status.structuredContent["counts"] == {"READY": 0, "WAITING": 0, "RUNNING": 0}
+        assert status.structuredContent["resume_grant_expires_at"]
         for _ in range(2):
             resp = await session.call_tool("nf_resume_project", {})
             assert resp.structuredContent["resume_grant_expires_at"]
@@ -58,7 +80,8 @@ def test_project_stdio_resume_is_scoped_and_live(kernel_env, tmp_path):
             assert not resp.isError and resp.structuredContent["counts"] == {"READY": 0, "WAITING": 0, "RUNNING": 0}
             assert resp.structuredContent["awakened"] == 0
         await error(session, "nf_resume_project", {"work_id": str(uuid4())}, "INVALID_ARGUMENT")
-        await error(session, "nf_context_get", {}, "VIEW_DENIED")
+        for name in ("nf_task_get", "nf_context_get", "nf_query_batch", "nf_artifact_put"):
+            await error(session, name, {}, "VIEW_DENIED")
         kernel.revoke_grant(world["principal"], scoped["principal"].grant_id)
         await error(session, "nf_resume_project", {}, "VIEW_DENIED")
         assert not (await session.list_tools()).tools
@@ -93,7 +116,7 @@ def test_operator_database_fences_apply_outside_mcp(kernel_env, fence):
         kernel.authorize(repo, scoped["principal"], wr["work_id"], "PROJECT_RESUME", wr["branch_id"])
 
 
-def test_actor_stdio_own_cut_only_and_candidate_replay(kernel_env, tmp_path):
+def test_actor_stdio_own_cut_only_and_candidate_replay(kernel_env, tmp_path, record_testsuite_property):
     kernel = kernel_env["kernel"]
     world = load_fixture(kernel)
     subject = world["ids"]["sword"]
@@ -106,8 +129,8 @@ def test_actor_stdio_own_cut_only_and_candidate_replay(kernel_env, tmp_path):
     binding = {"task_id": a.task["task_id"], "generation": a.task["generation"], "worker_id": a.worker_id}
 
     async def check(session):
-        tools = {tool.name for tool in (await session.list_tools()).tools}
-        assert tools == {"nf_context_get", "nf_task_get", "nf_query_batch", "nf_artifact_put"}
+        tools = await discovered_tools(session, "character_actor", record_testsuite_property)
+        assert set(tools) == {"nf_context_get", "nf_task_get", "nf_query_batch", "nf_artifact_put"}
         task_view = await session.call_tool("nf_task_get", {})
         assert not task_view.isError
         assert task_view.structuredContent["task_id"] == a.task["task_id"]
