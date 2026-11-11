@@ -61,7 +61,20 @@ def next_job(conn, work, branch, *, transport="postgres"):
         return None
     conn.execute(text("LOCK TABLE nf_dispatch_limits IN SHARE MODE"))
     conn.execute(text("DELETE FROM nf_dispatch_waiters WHERE valid_until <= statement_timestamp()"))
-    conn.execute(text("DELETE FROM nf_dispatch_slots WHERE expires_at <= statement_timestamp()"))
+    # A live generation owns its slot through its current lease. Older servers
+    # wrote only the initial expiry. For completed or superseded executions,
+    # retain the original crash-cleanup deadline until the host releases it.
+    conn.execute(text("""
+        MERGE INTO nf_dispatch_slots AS slot
+        USING (
+            SELECT s.attempt_id,
+                   CASE WHEN t.state='RUNNING' AND t.attempt_id=s.attempt_id
+                        THEN t.lease_expiry ELSE s.expires_at END AS valid_until
+            FROM nf_dispatch_slots s JOIN nf_tasks t USING(task_id)
+        ) AS lease ON slot.attempt_id=lease.attempt_id
+        WHEN MATCHED AND lease.valid_until <= statement_timestamp() THEN DELETE
+        WHEN MATCHED AND slot.expires_at <> lease.valid_until THEN UPDATE SET expires_at=lease.valid_until
+    """))
     conn.execute(text("""
         INSERT INTO nf_dispatch_waiters(branch_id,requested_at,valid_until)
         SELECT :branch, statement_timestamp(), statement_timestamp() + interval '2 minutes'

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1.555" timestamp="2026-11-11T22:30:54.913495+09:00" hostname="3048d295de1c"><testcase classname="tests.integration.test_p5_scheduler_admission" name="test_renewed_execution_keeps_its_slot_across_dispatch_and_restart" time="1.400"><failure message="assert datetime.datetime(2026, 11, 11, 13, 31, 26, 140677, tzinfo=datetime.timezone.utc) == datetime.datetime(2026, 11, 11, 13, 35, 56, 166124, tzinfo=datetime.timezone.utc)">kernel_env = {'db': &lt;novel_factory.infrastructure.database.Database object at 0x7f608ad0ffb0&gt;, 'store': &lt;novel_factory.infrastructu...Kernel object at 0x7f608ad72f90&gt;, 'url': 'postgresql+psycopg://nf_dev@127.0.0.1:58861/nf_kernel_2a6f3cf3d91546ee', ...}
+
+    def test_renewed_execution_keeps_its_slot_across_dispatch_and_restart(kernel_env):
+        from novel_factory.orchestration import dispatch
+    
+        kernel = kernel_env["kernel"]
+        world = load_fixture(kernel)
+        work, branch = (world["world_ref"][key] for key in ("work_id", "branch_id"))
+        with backend() as (route, requests, _):
+            gateway = AgentGateway(kernel, {"test": route})
+            supervisor = RuntimeSupervisor(kernel, gateway)
+            budget = kernel.tasks.create_budget(work, "2")
+            first, second = [_job(kernel, gateway, supervisor, world, budget, "READY").task["task_id"]
+                             for _ in range(2)]
+            with kernel.db.uow() as repo:
+                repo.add("dispatch_limits", {"scope": "WORK", "subject": work, "slots": 1})
+                assert dispatch.next_job(repo.conn, work, branch) == first
+                claim = kernel.tasks.claim_in_transaction(repo.conn, "live", task_id=first, lease_seconds=30)
+                dispatch.reserve(repo, claim)
+            slot_key = {"attempt_id": claim["attempt_id"]}
+            expiry = kernel.tasks.renew(first, claim["generation"], "live", lease_seconds=300)
+            with kernel.db.uow() as repo:
+&gt;               assert repo.one("dispatch_slots", slot_key)["expires_at"] == expiry
+E               assert datetime.datetime(2026, 11, 11, 13, 31, 26, 140677, tzinfo=datetime.timezone.utc) == datetime.datetime(2026, 11, 11, 13, 35, 56, 166124, tzinfo=datetime.timezone.utc)
+
+tests/integration/test_p5_scheduler_admission.py:117: AssertionError</failure></testcase></testsuite></testsuites>

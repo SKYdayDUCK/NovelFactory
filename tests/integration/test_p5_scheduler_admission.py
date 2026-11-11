@@ -94,6 +94,48 @@ def test_two_process_slots_fence_third_until_completion(kernel_env):
             assert kernel.head(repo, wr["work_id"], wr["branch_id"]) == wr
 
 
+def test_renewed_execution_keeps_its_slot_across_dispatch_and_restart(kernel_env, request):
+    from novel_factory.orchestration import dispatch
+
+    kernel = kernel_env["kernel"]
+    world = load_fixture(kernel)
+    work, branch = (world["world_ref"][key] for key in ("work_id", "branch_id"))
+    # Admission is global to all supervisors sharing this database. Remove the
+    # synthetic queue even if an assertion fails partway through the scenario.
+    def retire_test_queue():
+        with kernel.db.uow() as repo:
+            repo.conn.execute(text("DELETE FROM nf_dispatch_waiters WHERE branch_id=:branch"), {"branch": branch})
+            repo.conn.execute(text("DELETE FROM nf_dispatch_slots USING nf_tasks t WHERE t.task_id=nf_dispatch_slots.task_id AND t.work_id=:work"), {"work": work})
+            repo.conn.execute(text("DELETE FROM nf_dispatch_limits WHERE scope='WORK' AND subject=:work"), {"work": work})
+
+    request.addfinalizer(retire_test_queue)
+    with backend() as (route, requests, _):
+        gateway = AgentGateway(kernel, {"test": route})
+        supervisor = RuntimeSupervisor(kernel, gateway)
+        budget = kernel.tasks.create_budget(work, "2")
+        first, second = [_job(kernel, gateway, supervisor, world, budget, "READY").task["task_id"]
+                         for _ in range(2)]
+        with kernel.db.uow() as repo:
+            repo.add("dispatch_limits", {"scope": "WORK", "subject": work, "slots": 1})
+            assert dispatch.next_job(repo.conn, work, branch) == first
+            claim = kernel.tasks.claim_in_transaction(repo.conn, "live", task_id=first, lease_seconds=30)
+            dispatch.reserve(repo, claim)
+        slot_key = {"attempt_id": claim["attempt_id"]}
+        expiry = kernel.tasks.renew(first, claim["generation"], "live", lease_seconds=300)
+        with kernel.db.uow() as repo:
+            assert repo.one("dispatch_slots", slot_key)["expires_at"] == expiry
+            # A previous release persisted the original slot expiry even after a renewal.
+            repo.change("dispatch_slots", slot_key, {"expires_at": repo.now() - timedelta(seconds=1)})
+        with kernel.db.uow() as repo:
+            assert dispatch.next_job(repo.conn, work, branch) is None
+            assert repo.one("dispatch_slots", slot_key)["expires_at"] == expiry
+            repo.change("tasks", {"task_id": first}, {"lease_expiry": repo.now() - timedelta(seconds=1)})
+        with kernel.db.uow() as repo:
+            assert dispatch.next_job(repo.conn, work, branch) == second
+            assert repo.one("dispatch_slots", slot_key) is None
+        assert not requests
+
+
 def test_oldest_eligible_project_first_with_work_and_role_overrides(kernel_env):
     kernel = kernel_env["kernel"]
     first, second = load_fixture(kernel), load_fixture(kernel)
