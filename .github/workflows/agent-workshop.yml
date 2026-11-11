@@ -433,7 +433,7 @@ jobs:
           test -f "$AW_NF_SOURCE/src/novel_factory/interfaces/delegation_stdio.py"
           test "$(git -C "$AW_NF_SOURCE" rev-parse HEAD)" = "${EXPECTED_SOURCE}"
           git -C "$AW_NF_SOURCE" rev-parse HEAD
-          export PYTHONPATH="$PWD/src:$AW_NF_SOURCE/src"
+          export PYTHONPATH="$PWD/src:$AW_NF_SOURCE/src:$AW_NF_SOURCE"
           uv sync --project "$AW_NF_SOURCE" --locked
           export AW_ACCEPTANCE_OUTPUT="$PWD/ci-evidence"
           export AW_BENCH_RESULTS="$AW_ACCEPTANCE_OUTPUT"

@@ -7,7 +7,7 @@ Use disposable PostgreSQL 17 databases and a local Redis instance. The NovelFact
 Set `AW_NF_SOURCE` to the NovelFactory checkout that contains the delegation adapter and the banquet prerequisite fixture. Set `AW_DUAL_TEST_ADMIN_URL` to the SQLAlchemy psycopg URL for a disposable PostgreSQL administrator able to create roles and databases. Set `AW_ACCEPTANCE_OUTPUT` to a new directory. From the Workshop project directory run:
 
 ```sh
-export PYTHONPATH="$PWD/src:$AW_NF_SOURCE/src"
+export PYTHONPATH="$PWD/src:$AW_NF_SOURCE/src:$AW_NF_SOURCE"
 python -m pytest -q benchmarks/cross_service_scene.py --junitxml="$AW_ACCEPTANCE_OUTPUT/scenes.xml"
 ```
 
