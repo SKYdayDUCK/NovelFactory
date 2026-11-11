@@ -1,14 +1,26 @@
 name: Agent Workshop PostgreSQL and stdio
 on:
+  pull_request:
+    paths:
+      - 'workshop/**'
+      - '.github/workflows/agent-workshop.yml'
+      - 'runtime/roles/**'
+      - 'runtime/skills/**'
+      - 'src/novel_factory/application/mcp_runtime.py'
+      - 'src/novel_factory/interfaces/mcp_stdio.py'
+      - 'tests/integration/test_p5_mcp.py'
+      - 'tests/integration/test_p5_rolling.py'
   push:
     branches: [main]
     paths:
       - 'workshop/**'
       - '.github/workflows/agent-workshop.yml'
-  pull_request:
-    paths:
-      - 'workshop/**'
-      - '.github/workflows/agent-workshop.yml'
+      - 'runtime/roles/**'
+      - 'runtime/skills/**'
+      - 'src/novel_factory/application/mcp_runtime.py'
+      - 'src/novel_factory/interfaces/mcp_stdio.py'
+      - 'tests/integration/test_p5_mcp.py'
+      - 'tests/integration/test_p5_rolling.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -17,33 +29,67 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     services:
-      postgres:
-        image: postgres:17
+      workshop-db:
+        image: postgres:17.11-bookworm
         env:
-          POSTGRES_PASSWORD: local-ci-only
-          POSTGRES_DB: workshop_test
+          POSTGRES_PASSWORD: workshop-ci-admin
         ports: ['5432:5432']
-        options: --health-cmd pg_isready --health-interval 3s --health-timeout 5s --health-retries 20
-    defaults:
-      run:
-        working-directory: workshop
+        options: --health-cmd "pg_isready -U postgres" --health-interval 3s --health-timeout 5s --health-retries 20
+      nf-db:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_PASSWORD: nf-ci-admin
+        ports: ['5433:5432']
+        options: --health-cmd "pg_isready -U postgres" --health-interval 3s --health-timeout 5s --health-retries 20
     env:
-      AW_DATABASE_URL: postgresql://postgres:local-ci-only@127.0.0.1:5432/workshop_test
+      AW_DATABASE_URL: postgresql://aw_service:workshop-ci@127.0.0.1:5432/workshop_test
+      NF_DATABASE_URL: postgresql+psycopg://nf_service:nf-ci@127.0.0.1:5433/nf_test
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
-      - run: uv sync --locked
-      - run: uv run --locked alembic upgrade head
-      - run: uv run --locked pytest -q --junitxml=workshop-results.xml
-      - name: Check the nine granted NF tools over live stdio
-        working-directory: .
+      - name: Install both locked projects
+        run: |
+          uv sync --locked
+          uv sync --locked --project workshop
+      - name: Verify the frozen NF contracts against the checked-out runtime
+        run: |
+          git worktree add --detach "$RUNNER_TEMP/nf-catalog" "$(jq -r .nf_commit workshop/contracts/nf-catalog.json)"
+          python workshop/scripts/freeze_nf_catalog.py "$RUNNER_TEMP/nf-catalog" > "$RUNNER_TEMP/pinned-catalog.json"
+          diff -u workshop/contracts/nf-catalog.json "$RUNNER_TEMP/pinned-catalog.json"
+          python workshop/scripts/freeze_nf_catalog.py . > "$RUNNER_TEMP/current-catalog.json"
+          diff -u <(jq -S 'del(.nf_commit)' "$RUNNER_TEMP/pinned-catalog.json") <(jq -S 'del(.nf_commit)' "$RUNNER_TEMP/current-catalog.json")
+      - name: Provision separate service identities and databases
         env:
-          NF_TEST_DATABASE_URL: postgresql+psycopg://postgres:local-ci-only@127.0.0.1:5432/postgres
+          AW_POSTGRES: ${{ job.services.workshop-db.id }}
+          NF_POSTGRES: ${{ job.services.nf-db.id }}
+        run: |
+          docker exec -i "$AW_POSTGRES" psql -X -v ON_ERROR_STOP=1 -U postgres <<'SQL'
+          CREATE USER aw_service PASSWORD 'workshop-ci';
+          CREATE DATABASE workshop_test OWNER aw_service;
+          REVOKE CONNECT ON DATABASE workshop_test FROM PUBLIC;
+          SQL
+          docker exec -i "$NF_POSTGRES" psql -X -v ON_ERROR_STOP=1 -U postgres <<'SQL'
+          CREATE USER nf_service PASSWORD 'nf-ci';
+          CREATE DATABASE nf_test OWNER nf_service;
+          REVOKE CONNECT ON DATABASE nf_test FROM PUBLIC;
+          CREATE USER nf_fixture CREATEDB PASSWORD 'nf-fixture-ci';
+          SQL
+      - name: Migrate the two service databases
+        run: |
+          .venv/bin/python -m alembic upgrade head
+          (cd workshop && .venv/bin/python -m alembic upgrade head)
+      - name: Run Workshop contracts and stdio permissions
+        working-directory: workshop
+        run: .venv/bin/python -m pytest tests -q --junitxml=workshop-results.xml
+      - name: Check the nine granted NF tools over live stdio
+        env:
+          NF_TEST_DATABASE_URL: postgresql+psycopg://nf_fixture:nf-fixture-ci@127.0.0.1:5433/postgres
           NF_P5_CODEX_VERSION: 0.167.0-alpha.4
           NF_W0_TOOL_MATRIX: ${{ github.workspace }}/workshop/nf-tools.json
         run: |
@@ -52,8 +98,10 @@ jobs:
           native_bin="$prefix/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/bin"
           test "$("$native_bin/codex" --version)" = "codex-cli $NF_P5_CODEX_VERSION"
           export PATH="$native_bin:$PATH"
-          uv sync --locked
           PYTHONPATH="$PWD/workshop/qualification:$PWD/src" .venv/bin/python -m pytest -p matrix_probe -q tests/integration/test_p5_mcp.py tests/integration/test_p5_rolling.py --junitxml=workshop/nf-tools.xml
+      - name: Verify both live services and database isolation
+        run: |
+          .venv/bin/python -m pytest -c pyproject.toml workshop/acceptance/test_w0_dual_services.py -q -o junit_family=xunit1 --junitxml=workshop/dual-service-results.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -62,3 +110,5 @@ jobs:
             workshop/workshop-results.xml
             workshop/nf-tools.xml
             workshop/nf-tools.json
+            workshop/dual-service-results.xml
+          if-no-files-found: error

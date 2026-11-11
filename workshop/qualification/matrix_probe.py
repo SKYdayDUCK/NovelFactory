@@ -27,17 +27,6 @@ def capture_bound_tools(monkeypatch, request):
         seen[session] = names
         for name in names & TOOLS:
             record(name, "discovered")
-        if names & TOOLS:
-            for name in sorted(TOOLS - names):
-                if rows[name]["denied"]:
-                    continue
-                response = await call(session, name, {})
-                assert response.isError and response.structuredContent["error"]["code"] == "VIEW_DENIED"
-                record(name, "denied")
-            if "nf_project_status" in names and not rows["nf_project_status"]["success"]:
-                result_status = await call(session, "nf_project_status", {})
-                assert not result_status.isError and "workflow_state" in result_status.structuredContent
-                record("nf_project_status", "success")
         return result
 
     def record(name, outcome):
@@ -45,12 +34,16 @@ def capture_bound_tools(monkeypatch, request):
             rows[name][outcome].append(request.node.nodeid)
 
     async def observed(session, name, *args, **kwargs):
-        if name in TOOLS and session not in seen:
-            await discover(session)
         result = await call(session, name, *args, **kwargs)
-        if name in TOOLS and not result.isError:
-            assert name in seen[session]
+        if name not in TOOLS:
+            return result
+        advertised = seen.get(session)
+        if not result.isError:
+            assert advertised is not None and name in advertised
             record(name, "success")
+        elif (advertised is not None and name not in advertised
+              and result.structuredContent == {"error": {"code": "VIEW_DENIED"}}):
+            record(name, "denied")
         return result
 
     monkeypatch.setattr(ClientSession, "list_tools", discover)

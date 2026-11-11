@@ -65,7 +65,9 @@ def compile_woken(kernel, job, wr, story_time, cut, role_recipe, worker):
     return claimed
 
 
-def test_banquet_absence_pins_reference_and_limits_replanning(kernel_env, scene_backend, tmp_path):
+def test_banquet_absence_pins_reference_and_limits_replanning(
+    kernel_env, scene_backend, tmp_path, record_testsuite_property
+):
     k = kernel_env["kernel"]
     original = load_fixture(k, "white_bridge")
     process = process_definition(k, original)
@@ -340,7 +342,19 @@ def test_banquet_absence_pins_reference_and_limits_replanning(kernel_env, scene_
                              "alternative_direction": None, "rationale": "保留角色缺席的已接受后果"}}
     rejoin_request = {**ordinary, "idempotency_key": "change-rejoin", "assessment": rejoin}
     import asyncio
-    from test_p5_mcp import config, exercise
+    from test_p5_mcp import config, discovered_tools, error, exercise
+
+    async def editorial_tools(session, binding, allowed, common):
+        tools = await discovered_tools(session, binding, record_testsuite_property)
+        assert set(tools) == common | {allowed}
+        editorial_names = {"nf_change_point_request", "nf_rolling_window_submit", "nf_change_point_review"}
+        denied = {}
+        for name in sorted(editorial_names - {allowed}):
+            denied[name] = await error(session, name, {}, "VIEW_DENIED")
+        record_testsuite_property("nf_denials." + binding, json.dumps(denied))
+        return tools
+
+    director_tools = {"nf_context_get", "nf_query_batch", "nf_artifact_put"}
 
     def host_replay(binding_path, runtime, name, arguments, expected):
         if shutil.which("codex"):
@@ -350,7 +364,7 @@ def test_banquet_absence_pins_reference_and_limits_replanning(kernel_env, scene_
             assert result["model_turns"] == 0 and result["result"] == expected
 
     async def check_transport(session):
-        tools = {tool.name: tool.inputSchema for tool in (await session.list_tools()).tools}
+        tools = await editorial_tools(session, "volume_review", "nf_change_point_request", director_tools)
         assert "assessment" in tools["nf_change_point_request"]["properties"]
         response = await session.call_tool("nf_change_point_request", rejoin_request)
         assert not response.isError
@@ -414,19 +428,18 @@ def test_banquet_absence_pins_reference_and_limits_replanning(kernel_env, scene_
         "volume_director", "replan", "roll-window", [anchor, cp, base]
     )
     planner_mcp = McpRuntime(k, planner, TaskBinding(**planner_bind))
-    submitted = planner_mcp.submit_window(
-        change_point_ref=cp, window=window, idempotency_key="window"
-    )
-    assert submitted == planner_mcp.submit_window(
-        change_point_ref=cp, window=window, idempotency_key="window"
-    )
     async def check_window(session):
+        await editorial_tools(session, "replan", "nf_rolling_window_submit", director_tools)
         response = await session.call_tool("nf_rolling_window_submit", {
             "change_point_ref": cp, "window": window, "idempotency_key": "window",
         })
-        assert not response.isError and response.structuredContent == submitted
+        assert not response.isError
+        return response.structuredContent
 
-    asyncio.run(exercise(config(tmp_path / "planner.json", kernel_env, planner_token, planner_bind), check_window))
+    submitted = asyncio.run(exercise(config(tmp_path / "planner.json", kernel_env, planner_token, planner_bind), check_window))
+    assert submitted == planner_mcp.submit_window(
+        change_point_ref=cp, window=window, idempotency_key="window"
+    )
     host_replay(tmp_path / "planner.json", planner_mcp, "nf_rolling_window_submit",
                 {"change_point_ref": cp, "window": window, "idempotency_key": "window"}, submitted)
     candidate_plan, window_ref = submitted["plan_ref"], submitted["window_ref"]
@@ -455,26 +468,19 @@ def test_banquet_absence_pins_reference_and_limits_replanning(kernel_env, scene_
         "nf_change_point_review" in e_mcp.available_tools()
         and "nf_change_point_request" not in e_mcp.available_tools()
     )
-    seal = e_mcp.review_change(
-        change_point_ref=cp,
-        plan_ref=candidate_plan,
-        window_ref=window_ref,
-        decision="APPROVED",
-        reason="符合角色动机，信使可以恢复联络。",
-        idempotency_key="review",
-    )
-    async def check_review(session):
-        response = await session.call_tool("nf_change_point_review", {
-            "change_point_ref": cp, "plan_ref": candidate_plan, "window_ref": window_ref,
-            "decision": "APPROVED", "reason": "符合角色动机，信使可以恢复联络。", "idempotency_key": "review",
-        })
-        assert not response.isError and response.structuredContent == seal
-
-    asyncio.run(exercise(config(tmp_path / "upper.json", kernel_env, editor_token, approval), check_review))
-    host_replay(tmp_path / "upper.json", e_mcp, "nf_change_point_review", {
+    review_arguments = {
         "change_point_ref": cp, "plan_ref": candidate_plan, "window_ref": window_ref,
         "decision": "APPROVED", "reason": "符合角色动机，信使可以恢复联络。", "idempotency_key": "review",
-    }, seal)
+    }
+    async def check_review(session):
+        await editorial_tools(session, "editorial_decision", "nf_change_point_review", director_tools | {"nf_task_get"})
+        response = await session.call_tool("nf_change_point_review", review_arguments)
+        assert not response.isError
+        return response.structuredContent
+
+    seal = asyncio.run(exercise(config(tmp_path / "upper.json", kernel_env, editor_token, approval), check_review))
+    assert e_mcp.review_change(**review_arguments) == seal
+    host_replay(tmp_path / "upper.json", e_mcp, "nf_change_point_review", review_arguments, seal)
     returned = e_mcp.review_change(
         change_point_ref=cp,
         plan_ref=candidate_plan,
