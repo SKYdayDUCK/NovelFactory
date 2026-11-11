@@ -1,0 +1,212 @@
+{
+  "baseline_sha": "2c28acba6e1932657162c6e55b3288365ce3ea23",
+  "candidate_sha": "1db99217497c74f0e6ebb6fdf8c4ed977022963f",
+  "frozen_fixture": "Real Kernel setup once per case, PostgreSQL 17 CREATE DATABASE TEMPLATE plus object copies per arm. Credentials pass only in private process memory.",
+  "sample_interpretation": {
+    "effective_calls": "Validated HTTP 200 operations excluding duplicate commit receipts; expected semantic conflicts are accounted for in terminal business outcomes, not in effective RPS.",
+    "business_fraction": "For mixed HTTP, terminal validated 200 or expected shared-resource conflict divided by all planned logical operations, including never-emitted downstream work. For read-only HTTP, validated reads divided by scheduled reads.",
+    "server_arrivals": "Count and first-to-last monotonic time at the common ASGI boundary before admission. A failed transport can produce no ASGI request.",
+    "client_header_rps": "Application-observed HTTPX request-header-send starts; distinct from client scheduling and successful completions.",
+    "lock_samples": "Sampled wait_event_type=Lock connections; zero sampled locks cannot exclude shorter waits.",
+    "profile_replay_events": "Full replay wrapper only. A warm suffix still applies the new event and inspects/hashes the old prefix; zero full-replay events does not imply zero state work.",
+    "rate_target": "Original overload target 1000 RPS and required valid responses retained; bounded 10 RPS mixed and 20 RPS 600-second read provide different tests.",
+    "duration_limits": "600 seconds per tested arm; no claim of multi-hour soak or production hardware parity."
+  },
+  "campaigns": {
+    "attribution": {
+      "cpus": [
+        0,
+        1
+      ],
+      "cases": [
+        "history-1-10",
+        "history-20-10",
+        "history-100-10",
+        "population-200"
+      ],
+      "primary_replicates": [
+        2,
+        3
+      ],
+      "excluded_replicates": [
+        1
+      ],
+      "note": "First A pilot predates final whole-chain instrumentation. On history-1 repeat1 only git metadata initially showed A0 although imported tracked source hashes match the frozen version. All comparisons in summary exclude repeat1 on every attribution case.",
+      "driver_script": "benchmarks/scion_paired.py",
+      "driver_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda",
+      "shared_measuring_child_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda"
+    },
+    "retcon": {
+      "cpus": [
+        6
+      ],
+      "cases": [
+        "2-event repair with D10 causal parent, D20 replacement, distinct reviewer and promotion"
+      ],
+      "repetitions": 3,
+      "note": "Counters, full-source, selection and state equivalence are primary. Shared single-core lab timings are descriptive.",
+      "driver_script": "benchmarks/scion_retcon_profile.py",
+      "driver_sha256": "9ac8063aad44e30df2ec1a01abc5e6d9955ec9b70aa5bbcedd3175b88ca72829",
+      "shared_measuring_child_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda"
+    },
+    "exact": {
+      "cpus": [
+        6
+      ],
+      "repetitions": 3,
+      "cases": [
+        "history-20-10-exact",
+        "population-200-exact"
+      ],
+      "note": "Canonical request digests compared for every query/propose/prepare/accept/retry stage; same fixed earlier approval, certificate and proposal on both cloned arms.",
+      "driver_script": "benchmarks/scion_exact_requests.py",
+      "driver_sha256": "84dfc74f52a7a3c5d7abf2400315fe11b9b5e8261dd8dcd83e1eb3414c93ec67",
+      "shared_measuring_child_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda"
+    },
+    "ablation": {
+      "cpus": [
+        6
+      ],
+      "repetitions": 3,
+      "cases": [
+        "history-20-10",
+        "population-200"
+      ],
+      "variants": [
+        "off",
+        "columns",
+        "scopes",
+        "replay",
+        "all"
+      ],
+      "note": "Shared host and overlapping single-core workloads. Structural work counts identify flag attribution; timing estimates are exploratory.",
+      "driver_script": "benchmarks/scion_ablation.py",
+      "driver_sha256": "a21a3284356c44ef0cc9171c214d78498a3379135ea1d0525503f287b8153657",
+      "shared_measuring_child_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda"
+    },
+    "capacity": {
+      "cpus": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "cases": [
+        "open-1000",
+        "mixed-50",
+        "hotspot-200",
+        "mixed-200",
+        "mixed-500",
+        "steady-500"
+      ],
+      "note": "Main separate fixture pairs per case. First A of open-1000 and mixed-50 predates additional server and PG CPU counters; cite open-repeat and mixed50-repeat for instrument-matched pairs. Hotspot here means 80% shared-subject, ordinary paced traffic; consult ci-overload-repeat for full burst.",
+      "driver_script": "benchmarks/scion_paired.py",
+      "driver_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda",
+      "shared_measuring_child_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda"
+    },
+    "mixed50-repeat": {
+      "cpus": [
+        0,
+        1
+      ],
+      "cases": [
+        "mixed-50"
+      ],
+      "repetitions": 1,
+      "note": "Dedicated instrument-matched A/B for 50 logical agents.",
+      "driver_script": "benchmarks/scion_paired.py",
+      "driver_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda",
+      "shared_measuring_child_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda"
+    },
+    "open-repeat": {
+      "cpus": [
+        0,
+        1
+      ],
+      "cases": [
+        "open-1000"
+      ],
+      "repetitions": 1,
+      "note": "5,000 fixed byte-identical state reads, 1,000/s target, two API workers, no retries or writes.",
+      "driver_script": "benchmarks/scion_paired.py",
+      "driver_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda",
+      "shared_measuring_child_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda"
+    },
+    "ci-overload": {
+      "cpus": [
+        6
+      ],
+      "cases": [
+        "overload-200"
+      ],
+      "repetitions": 1,
+      "note": "Stress/exploratory only. First arm shared CPU6 with large history generation and ablation. Compile-stage budget exhaustion prevented 1,941 downstream emissions; offered traffic differs materially. No acceleration inference.",
+      "driver_script": "benchmarks/scion_ci_overload.py",
+      "driver_sha256": "e37544b61176a01d0f8a0cbb15e4384f0748fefac71a1ffb3bfa84bd42b8722a",
+      "shared_measuring_child_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda"
+    },
+    "ci-overload-repeat": {
+      "cpus": [
+        0,
+        1
+      ],
+      "cases": [
+        "overload-200"
+      ],
+      "repetitions": 1,
+      "note": "Original 200-agent mixed pipeline plus 5 x 200 hot read burst requests. Both full paired arms progress to commits. Independent of the single-core exploratory comparison.",
+      "driver_script": "benchmarks/scion_ci_overload.py",
+      "driver_sha256": "e37544b61176a01d0f8a0cbb15e4384f0748fefac71a1ffb3bfa84bd42b8722a",
+      "shared_measuring_child_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda"
+    },
+    "ablation-http": {
+      "cpus": [
+        6
+      ],
+      "cases": [
+        "mixed-50"
+      ],
+      "repetitions": 1,
+      "variants": [
+        "off",
+        "columns",
+        "scopes",
+        "replay",
+        "all"
+      ],
+      "note": "Same candidate SHA and fixture. Bounded mixed only. Cannot isolate a 200/500/1000-agent independent-flag effect from it.",
+      "driver_script": "benchmarks/scion_ablation.py",
+      "driver_sha256": "a21a3284356c44ef0cc9171c214d78498a3379135ea1d0525503f287b8153657",
+      "shared_measuring_child_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda"
+    },
+    "stability-repeat": {
+      "cpus": [
+        7,
+        8
+      ],
+      "cases": [
+        "steady-500"
+      ],
+      "repetitions": 1,
+      "note": "600 seconds, 20 requests/s, 12,000 scheduled each. A overlapped a separate CPU7 large-history campaign; interpret descriptive differences accordingly. Original stable client only records dispatch starts.",
+      "driver_script": "benchmarks/scion_paired.py",
+      "driver_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda",
+      "shared_measuring_child_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda"
+    },
+    "stability-headers": {
+      "cpus": [
+        0,
+        1
+      ],
+      "cases": [
+        "steady-500"
+      ],
+      "repetitions": 1,
+      "note": "Same 600-second public workload with additional HTTPX wire-header and ASGI counters; primary two-core comparison for matching actual sender and receiver rates.",
+      "driver_script": "benchmarks/scion_stability_meter.py",
+      "driver_sha256": "575db4d06beb9370a7387c14e370d8e39303442e7df46fab341f35ea79eb81c5",
+      "shared_measuring_child_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda"
+    }
+  },
+  "shared_host": "Affinities pin PG, service workers and load generator together within each campaign. Other operations still share OS/storage/hardware, so single-pair wall time is not a causal significance test."
+}

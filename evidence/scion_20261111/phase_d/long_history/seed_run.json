@@ -1,0 +1,267 @@
+{
+  "build_source_sha": "1db99217497c74f0e6ebb6fdf8c4ed977022963f",
+  "genesis": {
+    "entity_count": 3,
+    "relations": 0,
+    "resource_units": 1,
+    "alternating_single_unit_transfers": true
+  },
+  "public_kernel_entry_points_only": true,
+  "checks_at_each_checkpoint": [
+    "official_commit_count",
+    "branch_sequence",
+    "selected_event_count",
+    "per_revision_mapping_total",
+    "full_snapshot_against_original_reducer",
+    "state_hash",
+    "dump_sha256"
+  ],
+  "checkpoints": {
+    "20": {
+      "world_ref": {
+        "work_id": "c33a30f2-7aef-42de-be99-66efe77b2675",
+        "branch_id": "58ec4919-d631-4157-9522-403a7bf4468d",
+        "world_revision_id": "3501d9dc-ff66-4052-afb2-a658e211c5b3"
+      },
+      "state_hash": "0bbb42c5479c343bdb6e9dfc74e48369ec4e8b89c3181ed6fc6b5a28e7c85a32",
+      "dump_sha256": "02e6d0c3f5cd4d4cff25252cd41a5827ef862ff1ca21c7dd8b259e3f49ffa7f1",
+      "dump_bytes": 327530,
+      "selected_history_events": 20,
+      "number_of_commits": 20,
+      "per_version_selection_mapping_rows": 210,
+      "build_elapsed_and_reconstruction_seconds": 3.7535299529999975
+    },
+    "100": {
+      "world_ref": {
+        "work_id": "c33a30f2-7aef-42de-be99-66efe77b2675",
+        "branch_id": "58ec4919-d631-4157-9522-403a7bf4468d",
+        "world_revision_id": "66f37711-0938-405c-b726-f93befc8cebd"
+      },
+      "state_hash": "2bd141a3a52310b1ace4faa23c0854cabac644f61efc19ff9691142f7c7e528c",
+      "dump_sha256": "333c55d5d549f47407c471c0687d71551badbc1b4fc50fad0a02548b436c3991",
+      "dump_bytes": 1965150,
+      "selected_history_events": 100,
+      "number_of_commits": 100,
+      "per_version_selection_mapping_rows": 5050,
+      "build_elapsed_and_reconstruction_seconds": 17.918981122000105
+    },
+    "500": {
+      "world_ref": {
+        "work_id": "c33a30f2-7aef-42de-be99-66efe77b2675",
+        "branch_id": "58ec4919-d631-4157-9522-403a7bf4468d",
+        "world_revision_id": "1772ea12-2731-4011-a3b0-a1e3c0ebc321"
+      },
+      "state_hash": "45a25bee2a29dd597616e66b0955b0ef01b7ae6df77e1ff7f731a1ea542c050d",
+      "dump_sha256": "b8169374479aa20efa350d2a3132338b345c032a399fb19b871cb706f4689f6d",
+      "dump_bytes": 40318322,
+      "selected_history_events": 500,
+      "number_of_commits": 500,
+      "per_version_selection_mapping_rows": 125250,
+      "build_elapsed_and_reconstruction_seconds": 147.58660616800012
+    },
+    "1000": {
+      "world_ref": {
+        "work_id": "c33a30f2-7aef-42de-be99-66efe77b2675",
+        "branch_id": "58ec4919-d631-4157-9522-403a7bf4468d",
+        "world_revision_id": "e90abc84-b9e9-4cfa-af7b-b5498175223f"
+      },
+      "state_hash": "b3599e6e1ff2dca91fd4e1f53e05808bb882df5bfd3d6377e1d5cff31ebaa199",
+      "dump_sha256": "64d52bdf246b2cb751061de6fa75852235f593b92001f4f8d1847daf9c7541b8",
+      "dump_bytes": 153229056,
+      "selected_history_events": 1000,
+      "number_of_commits": 1000,
+      "per_version_selection_mapping_rows": 500500,
+      "build_elapsed_and_reconstruction_seconds": 889.9205143490001
+    }
+  },
+  "postgres_session": {
+    "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+    "port": 55551,
+    "command": [
+      "python",
+      "-m",
+      "benchmarks.scion_long_history",
+      "--output",
+      "../runtime/long-history",
+      "--candidate-sha",
+      "1db99217497c74f0e6ebb6fdf8c4ed977022963f",
+      "--checkpoints",
+      "20",
+      "100",
+      "500",
+      "1000"
+    ],
+    "started_at_utc": "2026-11-11T01:27:27.086064+00:00",
+    "authentication": "loopback_trust_generated_test_data_only",
+    "fsync": true,
+    "synchronous_commit": true,
+    "max_connections": 60,
+    "data_directory_reused": false,
+    "exit_status": 0,
+    "postgres_exit_status": 0,
+    "duration_seconds": 901.009848,
+    "finished_at_utc": "2026-11-11T01:42:28.095987+00:00"
+  },
+  "progress": [
+    [
+      25,
+      4.69
+    ],
+    [
+      50,
+      8.55
+    ],
+    [
+      75,
+      13.06
+    ],
+    [
+      100,
+      17.81
+    ],
+    [
+      125,
+      23.73
+    ],
+    [
+      150,
+      29.2
+    ],
+    [
+      175,
+      35.65
+    ],
+    [
+      200,
+      42.37
+    ],
+    [
+      225,
+      49.15
+    ],
+    [
+      250,
+      56.28
+    ],
+    [
+      275,
+      64.5
+    ],
+    [
+      300,
+      72.18
+    ],
+    [
+      325,
+      80.0
+    ],
+    [
+      350,
+      88.15
+    ],
+    [
+      375,
+      96.64
+    ],
+    [
+      400,
+      106.05
+    ],
+    [
+      425,
+      115.35
+    ],
+    [
+      450,
+      125.05
+    ],
+    [
+      475,
+      136.1
+    ],
+    [
+      500,
+      146.94
+    ],
+    [
+      525,
+      161.44
+    ],
+    [
+      550,
+      173.36
+    ],
+    [
+      575,
+      186.0
+    ],
+    [
+      600,
+      198.97
+    ],
+    [
+      625,
+      212.34
+    ],
+    [
+      650,
+      234.19
+    ],
+    [
+      675,
+      265.33
+    ],
+    [
+      700,
+      301.19
+    ],
+    [
+      725,
+      352.87
+    ],
+    [
+      750,
+      418.54
+    ],
+    [
+      775,
+      512.27
+    ],
+    [
+      800,
+      545.65
+    ],
+    [
+      825,
+      568.72
+    ],
+    [
+      850,
+      645.38
+    ],
+    [
+      875,
+      682.86
+    ],
+    [
+      900,
+      725.55
+    ],
+    [
+      925,
+      785.91
+    ],
+    [
+      950,
+      832.43
+    ],
+    [
+      975,
+      867.75
+    ],
+    [
+      1000,
+      888.69
+    ]
+  ]
+}

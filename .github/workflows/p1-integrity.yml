@@ -135,6 +135,25 @@ jobs:
           uv run --no-sync python -m pytest tests -q \
             --junitxml=ci-evidence/postgres-all.xml --json-report --json-report-file=ci-evidence/postgres-all.json \
             2>&1 | tee ci-evidence/postgres-all.log
+      - name: Compare Scion default and enabled traces with the frozen original
+        env:
+          PYTHONHASHSEED: '2411'
+        run: |
+          original="$RUNNER_TEMP/nf-scion-original"
+          evidence="$GITHUB_WORKSPACE/ci-evidence/scion-differential"
+          interpreter="$GITHUB_WORKSPACE/.venv/bin/python"
+          test_file=tests/integration/test_scion_differential.py
+          git worktree add --detach "$original" 2c28acba6e1932657162c6e55b3288365ce3ea23
+          cp "$test_file" "$original/$test_file"
+          mkdir -p "$evidence"
+          (
+            cd "$original"
+            PYTHONPATH="$original/src:$original" NF_SCION_DIFF_FROZEN=1 NF_SCION_DIFF_EVIDENCE="$evidence/frozen" \
+              "$interpreter" -m pytest "$test_file" -q
+          ) 2>&1 | tee "$evidence/frozen.log"
+          PYTHONPATH="$GITHUB_WORKSPACE/src:$GITHUB_WORKSPACE" NF_SCION_DIFF_ORACLE="$evidence/frozen" \
+            NF_SCION_DIFF_EVIDENCE="$evidence/current" "$interpreter" -m pytest "$test_file" -q \
+            2>&1 | tee "$evidence/current.log"
       - name: Compare current genesis replay with the pinned baseline
         run: |
           uv run --no-sync python -m benchmarks.genesis_paired_profile \

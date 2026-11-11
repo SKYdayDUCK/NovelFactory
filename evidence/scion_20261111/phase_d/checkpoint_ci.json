@@ -1,0 +1,418 @@
+[
+  {
+    "stage": "A0",
+    "head": "bc2c3b8bcbbd9d97ac5c875eaae94733d5e100e9",
+    "workflows": [
+      {
+        "workflow": "P3 P4 measured evidence",
+        "id": 42938464802,
+        "head_sha": "bc2c3b8bcbbd9d97ac5c875eaae94733d5e100e9",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938464802",
+        "status": "completed",
+        "conclusion": "failure",
+        "jobs": [
+          {
+            "job": "Same world CPU and SQL paired comparison",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938464802/job/130254251720",
+            "status": "completed",
+            "conclusion": "success",
+            "failed_steps": []
+          },
+          {
+            "job": "Independent load process / 200 / overload",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938464802/job/130254252110",
+            "status": "completed",
+            "conclusion": "failure",
+            "failed_steps": [
+              "Actual requests and strict capacity gate"
+            ]
+          },
+          {
+            "job": "Independent load process / 200 / mixed",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938464802/job/130254252189",
+            "status": "completed",
+            "conclusion": "success",
+            "failed_steps": []
+          }
+        ]
+      },
+      {
+        "workflow": "P3 scale experiments with strict unmet gates",
+        "id": 42938464812,
+        "head_sha": "bc2c3b8bcbbd9d97ac5c875eaae94733d5e100e9",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938464812",
+        "status": "completed",
+        "conclusion": "failure",
+        "jobs": [
+          {
+            "job": "Measured 1000-read-open",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938464812/job/130254251592",
+            "status": "completed",
+            "conclusion": "failure",
+            "failed_steps": [
+              "Original targets and actual network evidence"
+            ]
+          },
+          {
+            "job": "Measured 500-mixed",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938464812/job/130254251850",
+            "status": "completed",
+            "conclusion": "success",
+            "failed_steps": []
+          },
+          {
+            "job": "Measured 500-read-soak",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938464812/job/130254251900",
+            "status": "completed",
+            "conclusion": "success",
+            "failed_steps": []
+          }
+        ]
+      },
+      {
+        "workflow": "P2 measured capacity and recovery",
+        "id": 42938464771,
+        "head_sha": "bc2c3b8bcbbd9d97ac5c875eaae94733d5e100e9",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938464771",
+        "status": "completed",
+        "conclusion": "failure",
+        "jobs": [
+          {
+            "job": "50 agents / overload / full capacity gate",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938464771/job/130254251583",
+            "status": "completed",
+            "conclusion": "failure",
+            "failed_steps": [
+              "Measure fixed population, requests and business completion"
+            ]
+          },
+          {
+            "job": "200 agents / overload / full capacity gate",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938464771/job/130254251953",
+            "status": "completed",
+            "conclusion": "failure",
+            "failed_steps": [
+              "Measure fixed population, requests and business completion"
+            ]
+          },
+          {
+            "job": "200 agents / mixed / full capacity gate",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938464771/job/130254252011",
+            "status": "completed",
+            "conclusion": "success",
+            "failed_steps": []
+          },
+          {
+            "job": "50 agents / mixed / full capacity gate",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938464771/job/130254252029",
+            "status": "completed",
+            "conclusion": "success",
+            "failed_steps": []
+          }
+        ]
+      },
+      {
+        "workflow": "P1 and P2 production integrity",
+        "id": 42938464856,
+        "head_sha": "bc2c3b8bcbbd9d97ac5c875eaae94733d5e100e9",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938464856",
+        "status": "completed",
+        "conclusion": "success",
+        "jobs": [
+          {
+            "job": "PostgreSQL 17 integration, concurrency and restore",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938464856/job/130254252177",
+            "status": "completed",
+            "conclusion": "success",
+            "failed_steps": []
+          },
+          {
+            "job": "Schema, domain, HTTP and production boundaries",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938464856/job/130254252575",
+            "status": "completed",
+            "conclusion": "success",
+            "failed_steps": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "stage": "B",
+    "head": "1db99217497c74f0e6ebb6fdf8c4ed977022963f",
+    "workflows": [
+      {
+        "workflow": "P2 measured capacity and recovery",
+        "id": 42938942406,
+        "head_sha": "1db99217497c74f0e6ebb6fdf8c4ed977022963f",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938942406",
+        "status": "completed",
+        "conclusion": "failure",
+        "jobs": [
+          {
+            "job": "50 agents / overload / full capacity gate",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938942406/job/130255823966",
+            "status": "completed",
+            "conclusion": "failure",
+            "failed_steps": [
+              "Measure fixed population, requests and business completion"
+            ]
+          },
+          {
+            "job": "200 agents / overload / full capacity gate",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938942406/job/130255824389",
+            "status": "completed",
+            "conclusion": "failure",
+            "failed_steps": [
+              "Measure fixed population, requests and business completion"
+            ]
+          },
+          {
+            "job": "50 agents / mixed / full capacity gate",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938942406/job/130255824404",
+            "status": "completed",
+            "conclusion": "success",
+            "failed_steps": []
+          },
+          {
+            "job": "200 agents / mixed / full capacity gate",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938942406/job/130255824551",
+            "status": "completed",
+            "conclusion": "success",
+            "failed_steps": []
+          }
+        ]
+      },
+      {
+        "workflow": "P3 P4 measured evidence",
+        "id": 42938942453,
+        "head_sha": "1db99217497c74f0e6ebb6fdf8c4ed977022963f",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938942453",
+        "status": "completed",
+        "conclusion": "failure",
+        "jobs": [
+          {
+            "job": "Same world CPU and SQL paired comparison",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938942453/job/130255824549",
+            "status": "completed",
+            "conclusion": "success",
+            "failed_steps": []
+          },
+          {
+            "job": "Independent load process / 200 / overload",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938942453/job/130255824827",
+            "status": "completed",
+            "conclusion": "failure",
+            "failed_steps": [
+              "Actual requests and strict capacity gate"
+            ]
+          },
+          {
+            "job": "Independent load process / 200 / mixed",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938942453/job/130255825032",
+            "status": "completed",
+            "conclusion": "success",
+            "failed_steps": []
+          }
+        ]
+      },
+      {
+        "workflow": "P1 and P2 production integrity",
+        "id": 42938942422,
+        "head_sha": "1db99217497c74f0e6ebb6fdf8c4ed977022963f",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938942422",
+        "status": "completed",
+        "conclusion": "success",
+        "jobs": [
+          {
+            "job": "PostgreSQL 17 integration, concurrency and restore",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938942422/job/130255824029",
+            "status": "completed",
+            "conclusion": "success",
+            "failed_steps": []
+          },
+          {
+            "job": "Schema, domain, HTTP and production boundaries",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938942422/job/130255824642",
+            "status": "completed",
+            "conclusion": "success",
+            "failed_steps": []
+          }
+        ]
+      },
+      {
+        "workflow": "P3 scale experiments with strict unmet gates",
+        "id": 42938942413,
+        "head_sha": "1db99217497c74f0e6ebb6fdf8c4ed977022963f",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938942413",
+        "status": "completed",
+        "conclusion": "failure",
+        "jobs": [
+          {
+            "job": "Measured 500-mixed",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938942413/job/130255824075",
+            "status": "completed",
+            "conclusion": "success",
+            "failed_steps": []
+          },
+          {
+            "job": "Measured 1000-read-open",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938942413/job/130255824302",
+            "status": "completed",
+            "conclusion": "failure",
+            "failed_steps": [
+              "Original targets and actual network evidence"
+            ]
+          },
+          {
+            "job": "Measured 500-read-soak",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42938942413/job/130255824392",
+            "status": "completed",
+            "conclusion": "failure",
+            "failed_steps": [
+              "Original targets and actual network evidence"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "stage": "C",
+    "head": "a4c12be7df8548bbf7fd913bf2059cfd2b84cf3e",
+    "workflows": [
+      {
+        "workflow": "P3 P4 measured evidence",
+        "id": 42939421947,
+        "head_sha": "a4c12be7df8548bbf7fd913bf2059cfd2b84cf3e",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42939421947",
+        "status": "completed",
+        "conclusion": "failure",
+        "jobs": [
+          {
+            "job": "Independent load process / 200 / mixed",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42939421947/job/130257410180",
+            "status": "completed",
+            "conclusion": "success",
+            "failed_steps": []
+          },
+          {
+            "job": "Independent load process / 200 / overload",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42939421947/job/130257410626",
+            "status": "completed",
+            "conclusion": "failure",
+            "failed_steps": [
+              "Actual requests and strict capacity gate"
+            ]
+          },
+          {
+            "job": "Same world CPU and SQL paired comparison",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42939421947/job/130257410699",
+            "status": "completed",
+            "conclusion": "success",
+            "failed_steps": []
+          }
+        ]
+      },
+      {
+        "workflow": "P3 scale experiments with strict unmet gates",
+        "id": 42939421972,
+        "head_sha": "a4c12be7df8548bbf7fd913bf2059cfd2b84cf3e",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42939421972",
+        "status": "completed",
+        "conclusion": "failure",
+        "jobs": [
+          {
+            "job": "Measured 500-mixed",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42939421972/job/130257410794",
+            "status": "completed",
+            "conclusion": "success",
+            "failed_steps": []
+          },
+          {
+            "job": "Measured 1000-read-open",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42939421972/job/130257411138",
+            "status": "completed",
+            "conclusion": "failure",
+            "failed_steps": [
+              "Original targets and actual network evidence"
+            ]
+          },
+          {
+            "job": "Measured 500-read-soak",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42939421972/job/130257411158",
+            "status": "completed",
+            "conclusion": "success",
+            "failed_steps": []
+          }
+        ]
+      },
+      {
+        "workflow": "P1 and P2 production integrity",
+        "id": 42939422116,
+        "head_sha": "a4c12be7df8548bbf7fd913bf2059cfd2b84cf3e",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42939422116",
+        "status": "completed",
+        "conclusion": "success",
+        "jobs": [
+          {
+            "job": "PostgreSQL 17 integration, concurrency and restore",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42939422116/job/130257411135",
+            "status": "completed",
+            "conclusion": "success",
+            "failed_steps": []
+          },
+          {
+            "job": "Schema, domain, HTTP and production boundaries",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42939422116/job/130257411341",
+            "status": "completed",
+            "conclusion": "success",
+            "failed_steps": []
+          }
+        ]
+      },
+      {
+        "workflow": "P2 measured capacity and recovery",
+        "id": 42939422022,
+        "head_sha": "a4c12be7df8548bbf7fd913bf2059cfd2b84cf3e",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42939422022",
+        "status": "completed",
+        "conclusion": "failure",
+        "jobs": [
+          {
+            "job": "200 agents / mixed / full capacity gate",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42939422022/job/130257410548",
+            "status": "completed",
+            "conclusion": "success",
+            "failed_steps": []
+          },
+          {
+            "job": "50 agents / overload / full capacity gate",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42939422022/job/130257410767",
+            "status": "completed",
+            "conclusion": "failure",
+            "failed_steps": [
+              "Measure fixed population, requests and business completion"
+            ]
+          },
+          {
+            "job": "200 agents / overload / full capacity gate",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42939422022/job/130257410838",
+            "status": "completed",
+            "conclusion": "failure",
+            "failed_steps": [
+              "Measure fixed population, requests and business completion"
+            ]
+          },
+          {
+            "job": "50 agents / mixed / full capacity gate",
+            "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42939422022/job/130257410902",
+            "status": "completed",
+            "conclusion": "success",
+            "failed_steps": []
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -6,6 +6,7 @@ from sqlalchemy import event
 
 from novel_factory.application.templates import build
 from novel_factory.domain.errors import DomainError
+
 from .conftest import p, seed
 
 
@@ -33,9 +34,9 @@ def test_query_projection_checks_complete_state_and_schedule(query_env, monkeypa
 
             actual_one = repo.one
             for change in ("snapshot", "provenance"):
-                def corrupted(*args, **kwargs):
+                def corrupted(*args, field=change, **kwargs):
                     result = deepcopy(actual_one(*args, **kwargs))
-                    if change == "snapshot":
+                    if field == "snapshot":
                         result["snapshot"]["events"].append({})
                     else:
                         result["provenance"]["simulation_sha256"] = "0" * 64
