@@ -1,21 +1,22 @@
 import asyncio
-from datetime import UTC, datetime, timedelta
 import json
 import os
-from pathlib import Path
 import subprocess
 import sys
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
 from uuid import uuid4
 
 from agent_workshop.admin import enroll
 from agent_workshop.auth import connect
 from agent_workshop.organization import bootstrap
 from agent_workshop.reconcile import remote
+from test_dual_stdio import bound_process
+
 from novel_factory.application.kernel import Kernel
 from novel_factory.fixtures import load_fixture
 from novel_factory.infrastructure.database import Database
 from novel_factory.infrastructure.objects import ObjectStore
-from test_dual_stdio import bound_process
 
 
 def test_author_wakeup_recovers_through_real_nf_project_binding(
@@ -38,12 +39,12 @@ def test_author_wakeup_recovers_through_real_nf_project_binding(
         project = bound_process(
             tmp_path,
             "novel_factory.interfaces.mcp_stdio",
-            dict(
-                token=g["token"],
-                database_url=dual_databases["nf"],
-                binding=binding,
-                object_root=str(tmp_path / "objects"),
-            ),
+            {
+                "token": g["token"],
+                "database_url": dual_databases["nf"],
+                "binding": binding,
+                "object_root": str(tmp_path / "objects"),
+            },
             Path(os.environ["AW_NF_SOURCE"]) / "src",
         )
         org, installation = str(uuid4()), str(uuid4())
@@ -57,7 +58,7 @@ def test_author_wakeup_recovers_through_real_nf_project_binding(
             bound_process(
                 tmp_path,
                 "agent_workshop.server",
-                dict(token=token, database_url=dual_databases["aw"]),
+                {"token": token, "database_url": dual_databases["aw"]},
                 Path(__file__).resolve().parents[1] / "src",
             )
         )
@@ -75,12 +76,12 @@ def test_author_wakeup_recovers_through_real_nf_project_binding(
             str(marker),
         ]
         route = tmp_path / "route.json"
-        config = dict(
-            org_id=org,
-            installation_id=installation,
-            project=[project.command, *project.args],
-            delegation=unused,
-        )
+        config = {
+            "org_id": org,
+            "installation_id": installation,
+            "project": [project.command, *project.args],
+            "delegation": unused,
+        }
         with os.fdopen(os.open(route, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600), "w") as f:
             json.dump(config, f)
         env = {"PATH": os.defpath, "HOME": str(tmp_path), "AW_DATABASE_URL": dual_databases["aw"]}
