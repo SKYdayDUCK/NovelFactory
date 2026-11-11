@@ -44,13 +44,26 @@ def test_recover_pending_ack_and_rebuild_lost_stream():
         pass
     redis.xgroup_create(stream, group, id="0")
     entries = redis.xrange(stream)
-    pending = redis.xreadgroup(group, "interrupted", {stream: ">"}, count=2)[0][1]
-    assert len(pending) == 2 and redis.xpending(stream, group)["pending"] == 2
+    with connect(dsn) as conn:
+        own_events = {str(row["event_id"]) for row in conn.execute(
+            "SELECT event_id FROM aw_outbox WHERE org_id=%s", (org,)
+        )}
+    assert len(own_events) == 2
+    pending = redis.xreadgroup(group, "interrupted", {stream: ">"}, count=len(entries))[0][1]
+    outstanding = [fields["event_id"] for _, fields in pending if fields["event_id"] in own_events]
+    assert set(outstanding) == own_events and len(outstanding) == 2
+    assert redis.xpending(stream, group)["pending"] == len(entries)
     # First notification committed to SQL just before process loss. The second
     # was delivered by Redis but had no PostgreSQL transaction before the loss.
     with connect(dsn) as conn:
-        assert accept_notification(conn, group, pending[0][1]["event_id"])
-    assert receive_batch(dsn, redis, stream, group, "new-worker", limit=5000, idle_ms=0) == len(entries) - 1
+        assert accept_notification(conn, group, outstanding[0])
+    accepted = receive_batch(dsn, redis, stream, group, "new-worker", limit=5000, idle_ms=0)
+    with connect(dsn) as conn:
+        # Other organizations may have revoked or expired events in the full replay.
+        # Only the first of our two eligible hints had a committed receipt before this worker.
+        receipts = conn.execute("SELECT event_id FROM aw_inbox WHERE subscriber=%s", (group,)).fetchall()
+        assert accepted == len(receipts) - 1 and accepted >= 1
+        assert {str(row["event_id"]) for row in receipts} >= own_events
     assert redis.xpending(stream, group)["pending"] == 0
     redis.delete(stream)
     replay(dsn)
