@@ -14,6 +14,8 @@ from .recovery import frozen
 from .reviews_skills import expire_due_reviews
 from .reconcile import ELIGIBLE, reconcile, remote
 
+MAX_ATTEMPTS = 5
+
 
 def author_is_live(c, request_id, binding, installation, org):
     return c.execute(
@@ -59,6 +61,13 @@ def take(dsn, org, installation):
                 (row["request_id"],),
             )
             return None
+        if row["state"] == "RUNNING" and row["attempts"] >= MAX_ATTEMPTS:
+            c.execute(
+                """UPDATE aw_resume_requests SET state='WAITING_OPERATOR',result=%s
+                WHERE request_id=%s""",
+                (Jsonb({"error": "WORKER_LEASE_EXPIRED"}), row["request_id"]),
+            )
+            return None
         n = row["attempts"] + 1
         c.execute(
             """UPDATE aw_resume_requests SET attempts=%s,state='RUNNING',
@@ -68,11 +77,34 @@ def take(dsn, org, installation):
         return row["request_id"], n, row["binding_digest"]
 
 
+def before_peer_call(dsn, org, installation, request):
+    ident, attempt, binding = request
+    with connect(dsn) as c:
+        paused = frozen(c, installation)
+        current = c.execute(
+            """SELECT 1 FROM aw_resume_requests WHERE request_id=%s AND attempts=%s
+            AND state='RUNNING' AND eligible_at>clock_timestamp() FOR UPDATE""",
+            (ident, attempt),
+        ).fetchone()
+        if not current:
+            return "SUPERSEDED"
+        if paused:
+            c.execute(
+                """UPDATE aw_resume_requests SET state='PENDING',eligible_at=clock_timestamp()
+                WHERE request_id=%s""", (ident,),
+            )
+            return "RECOVERY_FENCED"
+        if not author_is_live(c, ident, binding, installation, org):
+            c.execute("UPDATE aw_resume_requests SET state='REVOKED' WHERE request_id=%s", (ident,))
+            return "REVOKED"
+        return None
+
+
 async def run_once(dsn, org, installation, nf_project, nf_delegation):
     request = take(dsn, org, installation)
     if request is None:
         return "IDLE"
-    ident, attempt, binding = request
+    ident, attempt, _ = request
     try:
         # Only broker-configured commands may select a project. An MCP caller never provides a path.
         with connect(dsn) as c:
@@ -83,21 +115,12 @@ async def run_once(dsn, org, installation, nf_project, nf_delegation):
                 (org, installation, list(ELIGIBLE)),
             ).fetchall()
         for row in operations:
+            if blocked := before_peer_call(dsn, org, installation, request):
+                return blocked
             await reconcile(dsn, installation, org, str(row["operation_id"]), nf_delegation)
-        # Reconciliation above may have discovered diverged partner history.
-        with connect(dsn) as c:
-            if frozen(c, installation):
-                c.execute(
-                    "UPDATE aw_resume_requests SET state='PENDING',eligible_at=clock_timestamp() WHERE request_id=%s AND attempts=%s AND state='RUNNING'",
-                    (ident, attempt),
-                )
-                return "RECOVERY_FENCED"
-            if not author_is_live(c, ident, binding, installation, org):
-                c.execute(
-                    "UPDATE aw_resume_requests SET state='REVOKED' WHERE request_id=%s AND attempts=%s AND state='RUNNING'",
-                    (ident, attempt),
-                )
-                return "REVOKED"
+        # Recovery may have frozen the installation or a new worker may own this wake.
+        if blocked := before_peer_call(dsn, org, installation, request):
+            return blocked
         async with asyncio.timeout(20):
             receipt = await nf_project("nf_resume_project", {})
         result = {
@@ -112,7 +135,7 @@ async def run_once(dsn, org, installation, nf_project, nf_delegation):
         }
         state = "DONE"
     except Exception:
-        state = "WAITING_OPERATOR" if attempt >= 5 else "PENDING"
+        state = "WAITING_OPERATOR" if attempt >= MAX_ATTEMPTS else "PENDING"
         result = {"error": "PEER_UNAVAILABLE"}
     with connect(dsn) as c:
         updated = c.execute(
