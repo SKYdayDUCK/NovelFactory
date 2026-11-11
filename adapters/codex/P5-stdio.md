@@ -145,3 +145,5 @@ cc -O2 -Wall -Wextra -Werror -static adapters/codex/role_relay.c -o /srv/novelfa
 每个角色的两次请求各有独立幂等键、预留、调用回执和 Thread/Turn。两步总额受原登记额度限制，货币额均分，第一步向下截到百万分之一，第二步使用余量。第一步按输入字节上界和最多 256 输出 Token 预留，余额给最终行动。一次读取的观察至多 32 KiB；超出最终预算会阻断发送。请求结果未知、无可核验费用、权限变动或无效选择时停止。同代有效租约恢复时复用已持久的成功选择。
 
 本路由接收具备供应商回执、货币、实际费用及 Token 数的适配器。对官方 OpenRouter 的精确 HTTPS Chat Completions 端点，服务读取响应 `usage.cost` 及 `gen-…` 生成 ID，原始 JSON 金额可由六位小数账本精确表达时才自动入账。供应商单请求回执可与账号活动另行核对。本次没有对真实账单进行验证。普通兼容端点仅返回 Token、没有确定费用，或费用精度超过账本表示能力时，保持 UNKNOWN 并等待对账。有关费用字段的语义见[供应商使用核算](https://openrouter.ai/docs/cookbook/administration/usage-accounting)和[官方 USD 说明](https://openrouter.ai/blog/insights/cost-vs-quality-tradeoff-framework-for-agent-models/)。
+
+首次设置作者工作区时，在已配置并验证服务端强制命令的 SSH 别名之后，运行 `python scripts/install_p5_project.py --project /小说项目路径 --ssh-alias nf-resume-service`。命令把本仓库的双工具配置写入该项目的 `.codex/config.toml`，保留其他服务器和设置；重复执行显示 ALREADY_CONFIGURED。若同名工具已连接其他服务，它会报告冲突。该步骤可在独立的作者账户执行，无需数据库连接。重新加载受信任项目后，使用 Codex 的 MCP 清单核对服务器和恢复工具。

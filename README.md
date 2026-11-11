@@ -6,7 +6,7 @@
 
 **生产容量仍为 `NOT_MET`。** 50/200 Agent 热点、1000 Agent 开放到达和 500 Agent 持续读的跨次稳定性仍有缺口。多小时混合负载尚未执行。短卷使用确定性夹具，真实模型调用为 0，作者全文评价待完成，文学质量尚未评价。[容量实测](reports/性能与容量修复对照.md) · [合并前容量缺口记录](reports/未通过目标与后续工作.md)
 
-本开发分支的 P5 入口是 Codex 中的 **“继续未完成的任务”**。首次接入与恢复步骤见 [P5 运行指南](reports/P5-07.md)，包括可运行的两任务样例、真实 Host 和数据库的验收范围。
+本分支接入完成后，作者在 VS Code 的 Codex 侧栏输入 **“继续未完成的任务”**。项目绑定的 `nf_resume_project({})` 返回工作状态、唤醒、恢复、终止等待和待审计数。独立 Supervisor 按数据库额度领取工作，收到提交通知或到了对账时间才重新检查。需要先运行 PostgreSQL 17、应用迁移并由管理员签发恢复凭据、安装后台服务。作者工作区使用 `python scripts/install_p5_project.py --project .` 安装项目 MCP 配置。[首次接入](adapters/codex/P5-stdio.md) · [服务与槽位](reports/P5_调度与事件唤醒收尾.md) · [连续场景与卷交接](reports/P5_自动剧情连续推进验收.md) · [角色运行边界](reports/P5_MCP与Codex角色隔离验收.md)
 
 Scion 增量版本实验保留在 [Draft PR #4](https://github.com/SKYdayDUCK/NovelFactory/pull/4)。B1/B2 待独立审核，B3 增量重放在实验分支默认关闭。
 
