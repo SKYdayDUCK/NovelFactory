@@ -1,0 +1,179 @@
+{
+  "raw/p2-load-200-overload-1/run-1/load.json": {
+    "criterion": "engineering correctness/recovery, no first-attempt failures, overload first call-start >= 0.95 * target (950/s)",
+    "candidate-695668b8": {
+      "result": "NOT_MET",
+      "duration_seconds": 177.825217,
+      "call_starts_per_second": 36.190080737208234,
+      "header_starts_per_second": 30.51072479463672,
+      "first_attempts": 1000,
+      "first_attempt_failures_across_phases": 562,
+      "recovery": "PASS",
+      "correctness": "PASS"
+    },
+    "main-15f606c9": {
+      "result": "NOT_MET",
+      "duration_seconds": 177.836405,
+      "call_starts_per_second": 32.72536977784258,
+      "header_starts_per_second": 30.675935487064475,
+      "first_attempts": 1000,
+      "first_attempt_failures_across_phases": 559,
+      "recovery": "PASS",
+      "correctness": "PASS"
+    }
+  },
+  "raw/p2-load-200-overload-1/run-2/load.json": {
+    "criterion": "engineering correctness/recovery, no first-attempt failures, overload first call-start >= 0.95 * target (950/s)",
+    "candidate-695668b8": {
+      "result": "NOT_MET",
+      "duration_seconds": 178.78278,
+      "call_starts_per_second": 34.85296444872029,
+      "header_starts_per_second": 33.958364393849294,
+      "first_attempts": 1000,
+      "first_attempt_failures_across_phases": 543,
+      "recovery": "PASS",
+      "correctness": "PASS"
+    },
+    "main-15f606c9": {
+      "result": "NOT_MET",
+      "duration_seconds": 179.390478,
+      "call_starts_per_second": 34.5821684785092,
+      "header_starts_per_second": 28.529441784203303,
+      "first_attempts": 1000,
+      "first_attempt_failures_across_phases": 565,
+      "recovery": "PASS",
+      "correctness": "PASS"
+    }
+  },
+  "raw/p2-load-50-overload-1/run-1/load.json": {
+    "criterion": "engineering correctness/recovery, no first-attempt failures, overload first call-start >= 0.95 * target (950/s)",
+    "candidate-695668b8": {
+      "result": "NOT_MET",
+      "duration_seconds": 39.771581,
+      "call_starts_per_second": 165.8621132964796,
+      "header_starts_per_second": 66.8030450383983,
+      "first_attempts": 250,
+      "first_attempt_failures_across_phases": 73,
+      "recovery": "PASS",
+      "correctness": "PASS"
+    },
+    "main-15f606c9": {
+      "result": "NOT_MET",
+      "duration_seconds": 37.98667,
+      "call_starts_per_second": 281.4373423272728,
+      "header_starts_per_second": 214.97968053501356,
+      "first_attempts": 250,
+      "first_attempt_failures_across_phases": 90,
+      "recovery": "PASS",
+      "correctness": "PASS"
+    }
+  },
+  "raw/p2-load-50-overload-1/run-2/load.json": {
+    "criterion": "engineering correctness/recovery, no first-attempt failures, overload first call-start >= 0.95 * target (950/s)",
+    "candidate-695668b8": {
+      "result": "NOT_MET",
+      "duration_seconds": 39.386641,
+      "call_starts_per_second": 227.50114207400566,
+      "header_starts_per_second": 128.53908362474024,
+      "first_attempts": 250,
+      "first_attempt_failures_across_phases": 105,
+      "recovery": "PASS",
+      "correctness": "PASS"
+    },
+    "main-15f606c9": {
+      "result": "NOT_MET",
+      "duration_seconds": 38.044465,
+      "call_starts_per_second": 216.23931178582396,
+      "header_starts_per_second": 71.5959984450154,
+      "first_attempts": 250,
+      "first_attempt_failures_across_phases": 84,
+      "recovery": "PASS",
+      "correctness": "PASS"
+    }
+  },
+  "raw/p3-isolated-200-overload-1/load.json": {
+    "criterion": "engineering correctness/recovery, no first-attempt failures, overload first call-start >= 0.95 * target (950/s)",
+    "candidate-695668b8": {
+      "result": "NOT_MET",
+      "duration_seconds": 179.188732,
+      "call_starts_per_second": 34.99947290583598,
+      "header_starts_per_second": 28.707175374289545,
+      "first_attempts": 1000,
+      "first_attempt_failures_across_phases": 553,
+      "recovery": "PASS",
+      "correctness": "PASS"
+    },
+    "main-15f606c9": {
+      "result": "NOT_MET",
+      "duration_seconds": 173.38246,
+      "call_starts_per_second": 52.12690014682677,
+      "header_starts_per_second": 39.54817535843056,
+      "first_attempts": 1000,
+      "first_attempt_failures_across_phases": 520,
+      "recovery": "PASS",
+      "correctness": "PASS"
+    }
+  },
+  "raw/p3-scale-1000-read-open-1/result.json": {
+    "criterion": "all scheduled requests complete and wire-start; wire-start >= 95% target (950/s); every request valid and no correctness errors",
+    "candidate-695668b8": {
+      "result": "NOT_MET",
+      "duration_seconds": 123.55373735499998,
+      "first_call_starts_per_second": 41.85690586984171,
+      "header_starts_per_second": 40.73451675770588,
+      "successful_per_second": 14.123409274024548,
+      "valid": 1745,
+      "planned": 5000,
+      "statuses": {
+        "429": 3242,
+        "200": 1745,
+        "transport_error": 13
+      },
+      "p99_ms": 9736.592
+    },
+    "main-15f606c9": {
+      "result": "NOT_MET",
+      "duration_seconds": 96.71260053599998,
+      "first_call_starts_per_second": 53.08766897014426,
+      "header_starts_per_second": 53.03695359420735,
+      "successful_per_second": 24.7847745455645,
+      "valid": 2397,
+      "planned": 5000,
+      "statuses": {
+        "429": 2600,
+        "200": 2397,
+        "transport_error": 3
+      },
+      "p99_ms": 9315.2976
+    }
+  },
+  "raw/p3-scale-500-read-soak-1/result.json": {
+    "criterion": "all scheduled requests valid, no correctness errors, first call starts at least 0.95 * target (19/s at 20 RPS), zero checked-out DB connections at end",
+    "candidate-695668b8": {
+      "result": "PASS",
+      "duration_seconds": 600.0395879949999,
+      "calls_started_per_second": 20.000482622163474,
+      "successful_per_second": 19.99868048722811,
+      "valid": 12000,
+      "planned": 12000,
+      "statuses": {
+        "200": 12000
+      },
+      "p99_ms": 126.4198,
+      "one_hour": "NOT_EXECUTED"
+    },
+    "main-15f606c9": {
+      "result": "PASS",
+      "duration_seconds": 600.134596029,
+      "calls_started_per_second": 20.000828756233915,
+      "successful_per_second": 19.995514471923777,
+      "valid": 12000,
+      "planned": 12000,
+      "statuses": {
+        "200": 12000
+      },
+      "p99_ms": 234.6994,
+      "one_hour": "NOT_EXECUTED"
+    }
+  }
+}
