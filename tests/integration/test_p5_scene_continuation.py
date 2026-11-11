@@ -165,7 +165,7 @@ def test_bounded_two_scene_chain(kernel_env, choice):
             if choice in {"single_end", "publish_approved"}:
                 assert not deliveries and len(requests) == 5
                 assert register_scene(kernel, gateway, owner, **registration) == scene
-                snapshot = exercise_independent_review(
+                snapshot, reader, decision, review_ref = exercise_independent_review(
                     kernel, fixture, settled, candidate, choice == "publish_approved"
                 )
                 if choice == "publish_approved":
@@ -179,6 +179,9 @@ def test_bounded_two_scene_chain(kernel_env, choice):
                         server,
                         requests,
                         statuses,
+                    )
+                    exercise_approval_receipt_recovery(
+                        kernel, fixture, reader, decision, review_ref
                     )
                 return
         else:
@@ -348,7 +351,7 @@ def exercise_independent_review(kernel, fixture, settled, candidate, auto_publis
     ]
     assert state["volumes"][-1]["release_ref"] == release["release_ref"]
 
-    return snapshot
+    return snapshot, reader, request, approved
 
 
 def authorize_next_volume_before_scene(kernel, fixture, gateway, registration, series):
@@ -469,3 +472,58 @@ def finish_next_volume(
             "paid_provider_usage": None,
         }
         Path(filename).write_text(json.dumps(evidence, indent=2, ensure_ascii=False) + "\n")
+
+
+def exercise_approval_receipt_recovery(kernel, fixture, reader, decision, review_ref):
+    """Recover an acknowledged native decision after response loss and a later world commit."""
+    from novel_factory.application.continuity import ContinuityService
+    from novel_factory.domain.errors import DomainError
+    from novel_factory.fixtures import run_command
+
+    service = ContinuityService(kernel)
+    original = fixture["world_ref"]
+    work, branch = original["work_id"], original["branch_id"]
+    owner = fixture["principal"]
+    with kernel.db.uow(write=False) as repo:
+        wr = kernel.head(repo, work, branch)
+        work_row = repo.one("works", {"work_id": work})
+
+        def counts(current_repo):
+            return [
+                len(current_repo.many("artifacts", {"work_id": work, "kind": k}))
+                for k in ("CONTINUITY_REVIEW", "CONTINUITY_SNAPSHOT")
+            ]
+
+        before = counts(repo)
+    advanced = run_command(
+        kernel,
+        owner,
+        wr,
+        "SET_RELATION",
+        {
+            "subject_id": fixture["ids"]["protagonist"],
+            "predicate": "located_in",
+            "object_value": {"kind": "ENTITY", "entity_id": fixture["ids"]["south"]},
+            "at": point(31),
+        },
+    )
+    assert advanced["world_ref"] != wr
+    assert service.review(reader, work, decision) == review_ref
+    with pytest.raises(DomainError) as mismatch:
+        service.review(reader, work, {**decision, "decision": "CHANGES_REQUIRED"})
+    assert mismatch.value.code == "IDEMPOTENCY_MISMATCH"
+    with pytest.raises(DomainError) as stale:
+        service.review(reader, work, {**decision, "idempotency_key": "new-review-on-old-cut"})
+    assert stale.value.code == "STALE_CONTINUITY_WORLD"
+    with kernel.db.uow() as repo:
+        assert counts(repo) == before
+        repo.change("works", {"work_id": work}, {"policy_version": "test-policy-after-review"})
+    with pytest.raises(DomainError) as changed_policy:
+        service.review(reader, work, decision)
+    assert changed_policy.value.code == "VIEW_DENIED"
+    with kernel.db.uow() as repo:
+        repo.change("works", {"work_id": work}, {"policy_version": work_row["policy_version"]})
+    kernel.revoke_grant(owner, reader.grant_id)
+    with pytest.raises(DomainError) as revoked:
+        service.review(reader, work, decision)
+    assert revoked.value.code == "VIEW_DENIED"

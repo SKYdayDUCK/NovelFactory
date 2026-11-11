@@ -265,13 +265,27 @@ class ContinuityService:
     def review(self, principal, work_id, payload):
         request = validate_contract("ContinuityReviewRequest", payload, "continuity")
         with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
-            repo.one("works", {"work_id": work_id}, lock="update")
+            work = repo.one("works", {"work_id": work_id}, lock="update")
             self._work_access(repo, principal, work_id, "APPROVE")
             candidate = self._candidate(repo, request["candidate_ref"], work_id)
             wr = candidate["request"]["world_ref"]
-            grant, _ = self._authorize(repo, principal, wr, "APPROVE", current=True)
+            grant, _ = self._authorize(repo, principal, wr, "APPROVE")
             prior = self.kernel._prior(repo, principal, work_id, "CONTINUITY_REVIEW", request["idempotency_key"], request)
             if prior:
+                saved = _payload(repo, self.kernel, prior, work_id, "CONTINUITY_REVIEW")
+                require(saved["request"] == request and saved["world_ref"] == wr
+                        and saved["principal_id"] == principal.principal_id
+                        and saved["grant_id"] == principal.grant_id and saved["grant_epoch"] == grant["epoch"],
+                        "VIEW_DENIED", "Review receipt is outside the current grant")
+                head = self.kernel.head(repo, work_id)
+                # Old review artifacts did not record a policy version. Retain their
+                # original same-HEAD replay rather than inventing a historical epoch.
+                if "policy_version" in saved:
+                    require(saved["policy_version"] == work["policy_version"], "VIEW_DENIED",
+                            "Policy changed after the review")
+                    require(repo.ancestor(wr, head), "STALE_CONTINUITY_WORLD", "Review belongs to another canonical history")
+                else:
+                    require(wr == head, "STALE_CONTINUITY_WORLD", "Legacy review needs its original canonical cut")
                 return prior
             _, _, impact = self._validate(repo, principal, candidate["request"])
             require(candidate["created_by"] != principal.principal_id, "SELF_APPROVAL_DENIED",
@@ -288,7 +302,8 @@ class ContinuityService:
                         "CONTINUITY_IMPACT_UNREVIEWED", "Every affected volume and downstream continuation needs review")
             review = {"request": request, "candidate_sha256": request["candidate_ref"]["sha256"],
                 "world_ref": wr, "impact_sha256": fingerprint(impact), "principal_id": principal.principal_id,
-                "grant_id": principal.grant_id, "grant_epoch": grant["epoch"], "recorded_at": repo.now().isoformat(),
+                "grant_id": principal.grant_id, "grant_epoch": grant["epoch"], "policy_version": work["policy_version"],
+                "recorded_at": repo.now().isoformat(),
                 "attestation": "AUTHENTICATED_REVIEW_DECISION_NOT_VERIFIED_LITERARY_QUALITY"}
             ref = self.kernel._blob(review)
             self.kernel._register_artifact(repo, ref, work_id, review, "CONTINUITY_REVIEW", principal.principal_id)
