@@ -6,3 +6,7 @@ args = ["-T", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "F
 enabled_tools = ["nf_project_status", "nf_resume_project"]
 startup_timeout_sec = 30
 tool_timeout_sec = 30
+
+# One authorized scan, on the work and branch in the server-side grant.
+[mcp_servers.novelfactory.tools.nf_resume_project]
+approval_mode = "approve"

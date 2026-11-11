@@ -25,6 +25,8 @@
 4. 在作者账户的 SSH 配置中将 `nf-resume-service` 绑定到已核实的服务主机、上述账户及专用私钥，设置 `IdentitiesOnly yes`。将同目录 `p5-mcp.toml` 中的条目加入 Codex 配置，重新加载 VS Code 扩展。在该作品的受信项目内输入“继续未完成的任务”。恢复工具负责一次数据库扫描。实际模型工作由独立启动的 Supervisor 领取已登记的工作，详见总运行指南。
 5. 恢复授权到期、撤销或策略版本改变后，服务会拒绝调用。管理员通过现有 `kernel.revoke_grant(admin, grant_id)` 撤销旧授权，按需重新签发独立绑定。
 
+模板给 `nf_resume_project` 配置预授权。此前在扩展里使用相同的项目权限但省略此工具的 `approval_mode` 时，作者界面要求单独确认。服务端仍逐次验证本作品、分支、策略、权限与到期时间。
+
 主机应只看到 `nf_project_status` 与 `nf_resume_project`，两个工具的输入都为 `{}`。前者返回当前任务计数。后者重验就绪与等待条件，返回恢复及唤醒计数。传输断开后再次调用会从数据库恢复。
 
 ## 在隔离测试库直连
@@ -41,9 +43,9 @@
 - `nf_query_batch({"lookups":[{"subject_id":"<uuid>","predicate":"owner"}]})` 在已编译清单中查询状态，认知平面、角色、时间与世界版本都从当前任务绑定派生。
 - `nf_artifact_put({"content":"我决定不赴宴。","idempotency_key":"scene-2-intent"})` 保存候选文本并返回对象引用。同一任务代际重放同一键和内容会取得同一收据，改动内容会触发幂等冲突。联合裁决、审批和世界接受继续经各自应用服务执行。
 
-## 在作者自己的 VS Code 补验扩展
+## 在作者自己的 VS Code 复验扩展
 
-本仓库的 SDK 与 `probe_codex_mcp.py` 已分别取得真实 stdio、Codex app-server 的恢复回执。隔离环境中的 VS Code 已激活 OpenAI 扩展，并收到了它启动的 app-server 的初始化响应。该环境中的 Codex 侧栏渲染超时，仍缺一份由扩展发起的 `tools/list` 和恢复工具回执。可以在作者日常可用的桌面 VS Code 完成以下步骤。
+VS Code 1.145.3 的独立 web 工作台实际加载了 OpenAI Codex 扩展 26.51106.51428。在最初的离线试验中，侧栏因为不能加载远程 webview 静态文件而超时。复验将同一 VS Code 发行包内的三个静态文件按原 URL 映射到受隔离的本机回环 HTTPS，使用专用测试凭据与 PostgreSQL 17.11。扩展、app-server 和 MCP 服务均执行真实代码。测试模型通过本地 Responses 端点产生工具请求。作者在扩展中输入“继续未完成的任务”，扩展进程所启动的 app-server 随即列出两个工具并调用 `nf_resume_project`。被动的双向 stdio 记录和数据库返回保存在[扩展验收证据](../../evidence/p5/mcp_vscode_extension.json)。下列步骤可在普通联网工作台复验。
 
 1. 在服务端选择独立测试作品，按 [P5-03 运行说明](../../reports/P5-03.md) 创建两任务样例与私有配置。首次验证可先只初始化样例。Supervisor 停止时，恢复调用仍能独立验证数据库就绪与等待计数。
 2. 在作者自己的桌面 VS Code 使用隔离测试配置，安装或启用官方 `openai.chatgpt` 扩展。记录「帮助 → 关于」中的 VS Code 版本和扩展详情中的版本号。按本文的 SSH 配置接入服务，打开该项目并只信任自己创建的测试目录。在命令面板执行 `Open Codex Sidebar`，确认侧栏能够加载。运行命令前关闭同一测试服务器上的其他 MCP 客户端，便于将服务侧记录与本次扩展操作对应。
@@ -74,3 +76,37 @@
 5. 启动独立 Supervisor，检查服务端两任务先后出现不同的 thread/turn ID，并在两次执行间出现持久的等待与唤醒。关闭侧栏只结束作者界面。Supervisor、PostgreSQL 和模型端点是否可用分别决定后续工作能否推进。
 
 角色 Host 的权限还需要独立验证。可以向测试作品植入只在角色 B 认知和作者计划中出现的两段合成文本，用角色 A 的派发记录核对上游实际收到的消息中没有这两段内容。同一 OS 账户的编辑器如果能读取私有绑定、对象目录或 Supervisor 的凭据，MCP 返回拒绝仍不足以证明该编辑器具备角色隔离能力。该部署应让角色继续使用无 shell 的单次文本 Gateway。切换为有 shell 的角色 Host 前，要在真实的角色账户与运行环境中验证上述私有资源的文件系统、数据库和工具访问限制。
+
+### 使用固定版本的离线工具请求复验
+
+验证端采用 Python 3.12、PostgreSQL 17.11、VS Code Server 1.145.3、发布版 Linux x64 `openai.chatgpt` 26.51106.51428 和 Codex CLI 0.167.0-alpha.4。为试验单独建立 HOME、CODEX_HOME、扩展目录、浏览器目录、测试 PostgreSQL 和作品。将这些进程放在同一仅含回环的 Linux 网络命名空间内。可以用 `unshare --user --map-current-user --net --keep-caps` 启动子环境，在里面启用 lo，检查 `/proc/net/dev` 只有 lo。启用 VS Code 的 `--telemetry-level off`、`telemetry.telemetryLevel=off` 和 Codex 的 `[analytics] enabled=false`。将测试工作区设为可信并将 `chatgpt.cliExecutable` 设为测试 CLI 的绝对路径。
+
+1. 从该 VS Code Server 安装目录取 `out/vs/workbench/contrib/webview/browser/pre`。为本次测试生成只用于回环的临时 TLS 证书，保留私钥在测试账户内。在命名空间内运行下面的服务。它只向浏览器供应 `index.html`、`service-worker.js`、`fake.html`，在另一回环端口模拟工具调用模型。MCP 使用独立的真实 stdio 服务。
+
+   ```bash
+   umask 077
+   openssl req -x509 -newkey rsa:2048 -nodes -days 1 \
+     -keyout loopback.key -out loopback.pem -subj '/CN=offline-vscode-webview' \
+     -addext 'subjectAltName=DNS:*.vscode-cdn.net'
+   .venv/bin/python scripts/probe_vscode_offline_transport.py serve \
+     --static-dir "$VSCODE_SERVER/out/vs/workbench/contrib/webview/browser/pre" \
+     --cert loopback.pem --key loopback.key
+   ```
+
+2. 为这一次的浏览器配置 `--host-resolver-rules=MAP *.vscode-cdn.net 127.0.0.1:31185`、`--no-proxy-server` 及 `--ignore-certificate-errors-spki-list=<测试证书公钥的 SHA256 Base64>`。证书指纹可由 `openssl x509 -pubkey -noout -in loopback.pem | openssl pkey -pubin -outform DER | openssl dgst -sha256 -binary | openssl base64 -A` 取得。访问回环地址上的正式工作台，打开相应测试目录和已安装的扩展。Chromium 使用 webview 的原有隔离源和 service worker。
+3. 在这一次的测试 CODEX_HOME 中选用下面的模型路由。在同一文件中配置实际项目绑定，把 MCP 的 `command` 设为项目虚拟环境 Python，`args` 设为 `["/repo/scripts/probe_vscode_offline_transport.py","capture","--record-dir","/private/new-trace-dir","--binding","/private/resume.json"]`。先创建仅当前账户可读的记录目录。保留模板中对 `nf_resume_project` 的单工具预授权。捕获器对每条连接逐行原样转发，在不同文件中保留方法名、工具名及数字计数。
+
+   ```toml
+   model = "nf-ui-test"
+   model_provider = "nf_ui"
+   [model_providers.nf_ui]
+   name = "Offline test"
+   base_url = "http://127.0.0.1:31186/v1"
+   wire_api = "responses"
+   supports_websockets = false
+   requires_openai_auth = false
+   request_max_retries = 0
+   stream_max_retries = 0
+   ```
+
+4. 在真实侧栏里连续两次输入“继续未完成的任务”。如需复现唤醒，预先建立等待 ACCEPTED 前置任务的 BLOCKED 工单，正式接受前置结果，在操作侧栏前停止其他恢复扫描。检查服务侧两份 `receipt.awakened` 先为 1、再为 0，且计数与 PostgreSQL 一致。试验用定序模型只选择回环工作台实际公开的项目恢复工具。外部模型推理质量、正式 SSH 跨账户部署和角色 Host 隔离需另行验证。

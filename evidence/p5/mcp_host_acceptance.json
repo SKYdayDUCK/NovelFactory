@@ -29,12 +29,13 @@
       "VS Code web workbench loaded",
       "VS Code launched the remote Node extension host process",
       "Isolated offline extension host activated openai.chatgpt",
-      "Extension spawned its own Codex app-server and received initialize id=1"
+      "Extension spawned its own Codex app-server and received initialize id=1",
+      "Typed 继续未完成的任务 in the live extension. Obtained the two-tool operator inventory and a PostgreSQL receipt.",
+      "Repeated the extension prompt with one satisfied wait: awakened=1 then awakened=0."
     ],
-    "extension_originated_tools_list": "UNVERIFIED",
-    "extension_originated_resume": "UNVERIFIED",
-    "status": "BLOCKED",
-    "reason": "Automatic approval review stopped the initial probe due to external Microsoft telemetry. In a separate kernel-enforced offline environment, VS Code activated the published Codex extension and it initialized its app-server. IPC listen returned EPERM and the extension reported renderer_ready_timeout after 30001 ms. No extension-originated NovelFactory MCP tools/list or resume receipt was observed.",
+    "extension_originated_tools_list": "PASS",
+    "extension_originated_resume": "PASS",
+    "status": "PASS",
     "offline_harness": {
       "kernel_network_namespace": "new network namespace with only loopback",
       "external_routing_probe": "TEST-NET returned ENETUNREACH",
@@ -45,9 +46,15 @@
     "extension_log_excerpt": [
       "Activating Codex extension",
       "[CodexMcpConnection] Spawning codex app-server",
-      "[CodexMcpConnection] Initialize received id=1",
-      "[CodexWebviewProvider] Webview renderer did not become ready; reason=renderer_ready_timeout receivedWebviewMessage=false role=sidebar"
-    ]
+      "[CodexMcpConnection] Initialize received id=1"
+    ],
+    "history": [
+      "Initial online probe stopped after automatic approval review identified telemetry egress.",
+      "First offline extension initialized its app-server then encountered renderer_ready_timeout with remote webview assets unreachable.",
+      "Serving the three matching official webview assets over isolated loopback TLS allowed the unmodified renderer and extension-originated MCP calls to complete."
+    ],
+    "evidence": "mcp_vscode_extension.json",
+    "model_route": "synthetic loopback Responses test model"
   },
   "isolation": {
     "database_grant_and_fixed_task_cut": "TESTED",
