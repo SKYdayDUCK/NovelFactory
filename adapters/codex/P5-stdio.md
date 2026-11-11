@@ -118,3 +118,18 @@ VS Code 1.145.3 的独立 web 工作台实际加载了 OpenAI Codex 扩展 26.51
 人工数只计当前代际有明确 `AUTHOR_DECISION_REQUIRED` 交付回执且仍待审的任务。旧版待审记录有些没有路由标记，会计入待审总数。凭据过期或撤权会使原会话失去工具；由管理端重新签发并替换服务侧绑定。用户端继续使用空参数的恢复命令。
 
 登记了屏障的任务遇到自己的截止时间、AND 中一个永久关闭的前置或 OR 中最后一个关闭的前置时，进入 FAILED。工作流以 `workflow.wait.closed` 记录本代的 WAIT_DEADLINE 或 PREREQUISITE_CLOSED，保留原意图和世界历史。尚有未对账调用的任务保留既有围栏。授权管理员可据此延期、重新规划或采用新任务；连续重试恢复不会替角色行动。
+
+## Linux 隔离角色 Host
+
+需要从受信控制器通过 Codex app-server 调用某个执行中角色的 MCP 工具时，可以使用单任务入口。服务账户准备已经领取、已编译上下文的角色私有绑定，安装可用的 util-linux、bubblewrap、静态链接的原生 Codex CLI，以及本项目的静态转发程序。转发程序和服务代码由管理员部署。
+
+```bash
+cc -O2 -Wall -Wextra -Werror -static adapters/codex/role_relay.c -o /srv/novelfactory/bin/role-mcp
+.venv/bin/python scripts/run_role_host.py \
+  --binding /var/lib/novelfactory/private/actor-task.json \
+  --relay /srv/novelfactory/bin/role-mcp --codex /srv/novelfactory/bin/codex --lifetime 90
+```
+
+控制器使用标准 app-server stdio RPC 连接此进程，在 `/work` 创建临时 Thread，用 `mcpServerStatus/list` 和 `mcpServer/tool/call` 访问 `novelfactory`。stdout 包含角色获准的正文，应交给该角色的控制器。一次启动服务一个任务和一个客户端。TaskBinding、DSN 和对象库只在容器外的 MCP 服务中使用。容器内可见两个静态程序和专用的双向 FIFO，工作目录为临时文件系统，网络与服务账户的本机回环隔离。服务端逐次检查当前 grant、代际和租约。角色传输最多接收 128 条消息，每条至多 1 MiB，进程有显式截止时间。命名空间、租约或程序配置不可用时启动失败。
+
+该入口已经用于角色工具发现、读取、候选提交和撤权验证。生产 Supervisor 的模型路由另见 [P5-03](../../reports/P5-03.md)。主动模型工具循环仍需要将每次供应商请求接入预算账本；本入口不配置外部模型路由。详细验收与复验命令见[角色隔离验收](../../reports/P5_MCP与Codex角色隔离验收.md)。

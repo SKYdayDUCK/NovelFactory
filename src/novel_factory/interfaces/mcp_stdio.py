@@ -121,11 +121,28 @@ def make_server(runtime):
     return server
 
 
-async def serve(config):
+async def character_input():
+    """Bound untrusted Host traffic before the SDK decodes JSON or queues work."""
+    for _ in range(128):
+        line = await asyncio.to_thread(sys.stdin.buffer.readline, 1_048_577)
+        if not line or len(line) > 1_048_576 or not line.endswith(b"\n"):
+            return
+        try:
+            yield line.decode("utf-8")
+        except UnicodeError:
+            return
+
+
+async def serve(config, *, character_only=False):
     runtime = runtime_from_config(config)
     try:
+        if character_only:
+            with runtime.kernel.db.uow(write=False) as repo:
+                _, grant, _ = runtime._task(repo)
+                if grant["role_id"] != "character_actor":
+                    raise ValueError("Character binding required")
         server = make_server(runtime)
-        async with stdio_server() as (reader, writer):
+        async with stdio_server(stdin=character_input() if character_only else None) as (reader, writer):
             await server.run(reader, writer, server.create_initialization_options())
     finally:
         runtime.kernel.db.close()
@@ -134,9 +151,10 @@ async def serve(config):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--binding", required=True)
+    parser.add_argument("--character-only", action="store_true", help="Require a live character task binding")
     args = parser.parse_args()
     try:
-        asyncio.run(serve(read_private_config(args.binding)))
+        asyncio.run(serve(read_private_config(args.binding), character_only=args.character_only))
     except KeyboardInterrupt:
         return
     except Exception:
