@@ -1,0 +1,824 @@
+[
+  {
+    "workflow_id": 43081588179,
+    "artifact_id": 13885670319,
+    "artifact_name": "p3-isolated-200-mixed-1",
+    "member": "load.json",
+    "source_sha256": "6d5bf047a0d9102f8ee825f5f88be5b472cc54c7ebc04f1aeeb9a3fa6e7e6dac",
+    "result": {
+      "evidence_kind": "REAL_HTTP_REAL_POSTGRESQL_TEST_FIXTURE",
+      "schema_version": "p2-load-2",
+      "seed": 20261110,
+      "profile": "mixed",
+      "logical_agent_task_count": 200,
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "PASS",
+      "capacity_gate": "PASS",
+      "bounded_recovery_business_gate": "PASS",
+      "external_model": {
+        "actual_calls": 0,
+        "tokens": 0,
+        "billed_cost_usd": null,
+        "status": "NOT_DISPATCHED"
+      },
+      "open_loop": {
+        "gate": "NOT_APPLICABLE",
+        "target_rps": null,
+        "first_attempts": 0
+      },
+      "metrics": {
+        "emitted_logical_operations": 1141,
+        "completed_logical_operations": 1141,
+        "first_attempt_failure_count": 0,
+        "client_requests_never_emitted": 0,
+        "first_attempt_status_counts": {
+          "200": 1122,
+          "409": 19
+        },
+        "status_counts": {
+          "200": 1122,
+          "409": 19
+        },
+        "new_world_commit_receipts": 21,
+        "latency_successes": {
+          "count": 1122,
+          "p50_ms": 49.4657,
+          "p95_ms": 171.2099,
+          "p99_ms": 300.0809
+        },
+        "model_retries": 0,
+        "correctness_errors": 0,
+        "unresolved_operational_errors": 0
+      },
+      "correctness": {
+        "new_world_revisions": 21,
+        "expected_new_world_revisions": 21,
+        "new_selected_effect_groups": 21,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99"
+      }
+    }
+  },
+  {
+    "workflow_id": 43081588179,
+    "artifact_id": 13883743514,
+    "artifact_name": "p3-isolated-200-overload-1",
+    "member": "load.json",
+    "source_sha256": "ae417f814a7ea9dfbf47186d5abb679623ed8a59bc3b9f5f20da7aebdab251df",
+    "result": {
+      "evidence_kind": "REAL_HTTP_REAL_POSTGRESQL_TEST_FIXTURE",
+      "schema_version": "p2-load-2",
+      "seed": 20261110,
+      "profile": "overload",
+      "logical_agent_task_count": 200,
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "NOT_MET",
+      "capacity_gate": "NOT_MET",
+      "bounded_recovery_business_gate": "PASS",
+      "external_model": {
+        "actual_calls": 0,
+        "tokens": 0,
+        "billed_cost_usd": null,
+        "status": "NOT_DISPATCHED"
+      },
+      "open_loop": {
+        "gate": "NOT_MET",
+        "actual_call_start_rps": 34.99947290583598,
+        "transport_header_start_rps": 28.707175374289545,
+        "target_rps": 1000.0,
+        "first_attempts": 1000
+      },
+      "metrics": {
+        "emitted_logical_operations": 2141,
+        "completed_logical_operations": 2141,
+        "first_attempt_failure_count": 553,
+        "client_requests_never_emitted": 0,
+        "first_attempt_status_counts": {
+          "200": 1569,
+          "409": 19,
+          "429": 553
+        },
+        "status_counts": {
+          "200": 2109,
+          "409": 19,
+          "429": 946
+        },
+        "new_world_commit_receipts": 21,
+        "latency_successes": {
+          "count": 2109,
+          "p50_ms": 183.3564,
+          "p95_ms": 7335.437,
+          "p99_ms": 11513.1724
+        },
+        "model_retries": 0,
+        "correctness_errors": 0,
+        "unresolved_operational_errors": 0
+      },
+      "correctness": {
+        "new_world_revisions": 21,
+        "expected_new_world_revisions": 21,
+        "new_selected_effect_groups": 21,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99"
+      }
+    }
+  },
+  {
+    "workflow_id": 43081588179,
+    "artifact_id": 13883384934,
+    "artifact_name": "p3-context-paired-1",
+    "member": "context-p3.json",
+    "source_sha256": "cd15374ddfaea06436a729074df7cc93e422e361ea703e321c26faaec5f18b74",
+    "result": {
+      "evidence_kind": "REAL_POSTGRESQL_SAME_WORLD_PAIRED_ENGINEERING",
+      "baseline_commit": "206eaa5b655419d29bd6b15d618ae6eaf9048354",
+      "entities": 300,
+      "repeats": 5,
+      "summary": [
+        {
+          "subjects": 1,
+          "baseline": {
+            "median_seconds": 0.054647318999997196,
+            "sql_counts": [
+              43
+            ],
+            "median_cursor_execution_seconds": 0.01915629600003399
+          },
+          "candidate": {
+            "median_seconds": 0.05157159400000211,
+            "sql_counts": [
+              43
+            ],
+            "median_cursor_execution_seconds": 0.018252130000021793
+          }
+        },
+        {
+          "subjects": 20,
+          "baseline": {
+            "median_seconds": 0.09535450300000292,
+            "sql_counts": [
+              43
+            ],
+            "median_cursor_execution_seconds": 0.019741879999990886
+          },
+          "candidate": {
+            "median_seconds": 0.08115448399999536,
+            "sql_counts": [
+              43
+            ],
+            "median_cursor_execution_seconds": 0.019563380999983337
+          }
+        },
+        {
+          "subjects": 100,
+          "baseline": {
+            "median_seconds": 0.26896757299999763,
+            "sql_counts": [
+              43
+            ],
+            "median_cursor_execution_seconds": 0.03085313500000808
+          },
+          "candidate": {
+            "median_seconds": 0.2123943920000002,
+            "sql_counts": [
+              43
+            ],
+            "median_cursor_execution_seconds": 0.03128028500002955
+          }
+        }
+      ],
+      "real_model_calls": 0,
+      "paired_count": 15,
+      "world_unchanged": true
+    }
+  },
+  {
+    "workflow_id": 43081588236,
+    "artifact_id": 13885670202,
+    "artifact_name": "p2-load-50-overload-1",
+    "member": "run-1/load.json",
+    "source_sha256": "3454da186bdabc614dc3001ae0ba35e11425fcc7cd48cfb68083a2f5c9958a8c",
+    "result": {
+      "evidence_kind": "REAL_HTTP_REAL_POSTGRESQL_TEST_FIXTURE",
+      "schema_version": "p2-load-2",
+      "seed": 20261110,
+      "profile": "overload",
+      "logical_agent_task_count": 50,
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "NOT_MET",
+      "capacity_gate": "NOT_MET",
+      "bounded_recovery_business_gate": "PASS",
+      "external_model": {
+        "actual_calls": 0,
+        "tokens": 0,
+        "billed_cost_usd": null,
+        "status": "NOT_DISPATCHED"
+      },
+      "open_loop": {
+        "gate": "NOT_MET",
+        "actual_call_start_rps": 165.8621132964796,
+        "transport_header_start_rps": 66.8030450383983,
+        "target_rps": 1000.0,
+        "first_attempts": 250
+      },
+      "metrics": {
+        "emitted_logical_operations": 536,
+        "completed_logical_operations": 536,
+        "first_attempt_failure_count": 73,
+        "client_requests_never_emitted": 0,
+        "first_attempt_status_counts": {
+          "200": 459,
+          "409": 4,
+          "429": 73
+        },
+        "status_counts": {
+          "200": 532,
+          "409": 4,
+          "429": 81
+        },
+        "new_world_commit_receipts": 6,
+        "latency_successes": {
+          "count": 532,
+          "p50_ms": 118.541,
+          "p95_ms": 3542.9336,
+          "p99_ms": 4067.8286
+        },
+        "model_retries": 0,
+        "correctness_errors": 0,
+        "unresolved_operational_errors": 0
+      },
+      "correctness": {
+        "new_world_revisions": 6,
+        "expected_new_world_revisions": 6,
+        "new_selected_effect_groups": 6,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99"
+      }
+    }
+  },
+  {
+    "workflow_id": 43081588236,
+    "artifact_id": 13885670202,
+    "artifact_name": "p2-load-50-overload-1",
+    "member": "run-2/load.json",
+    "source_sha256": "fda407f61908c09130e1584348840a40eff0a84dc508decaf7b4aa699396bb33",
+    "result": {
+      "evidence_kind": "REAL_HTTP_REAL_POSTGRESQL_TEST_FIXTURE",
+      "schema_version": "p2-load-2",
+      "seed": 20261110,
+      "profile": "overload",
+      "logical_agent_task_count": 50,
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "NOT_MET",
+      "capacity_gate": "NOT_MET",
+      "bounded_recovery_business_gate": "PASS",
+      "external_model": {
+        "actual_calls": 0,
+        "tokens": 0,
+        "billed_cost_usd": null,
+        "status": "NOT_DISPATCHED"
+      },
+      "open_loop": {
+        "gate": "NOT_MET",
+        "actual_call_start_rps": 227.50114207400566,
+        "transport_header_start_rps": 128.53908362474024,
+        "target_rps": 1000.0,
+        "first_attempts": 250
+      },
+      "metrics": {
+        "emitted_logical_operations": 536,
+        "completed_logical_operations": 536,
+        "first_attempt_failure_count": 105,
+        "client_requests_never_emitted": 0,
+        "first_attempt_status_counts": {
+          "200": 427,
+          "409": 4,
+          "429": 105
+        },
+        "status_counts": {
+          "200": 532,
+          "409": 4,
+          "429": 155
+        },
+        "new_world_commit_receipts": 6,
+        "latency_successes": {
+          "count": 532,
+          "p50_ms": 197.6383,
+          "p95_ms": 2435.4958,
+          "p99_ms": 3077.1701
+        },
+        "model_retries": 0,
+        "correctness_errors": 0,
+        "unresolved_operational_errors": 0
+      },
+      "correctness": {
+        "new_world_revisions": 6,
+        "expected_new_world_revisions": 6,
+        "new_selected_effect_groups": 6,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99"
+      }
+    }
+  },
+  {
+    "workflow_id": 43081588236,
+    "artifact_id": 13885391227,
+    "artifact_name": "p2-load-200-overload-1",
+    "member": "run-1/load.json",
+    "source_sha256": "f1a7df1e5ae03781195d0a650b44526540cbb3566764aac1c0f3fdc670154b69",
+    "result": {
+      "evidence_kind": "REAL_HTTP_REAL_POSTGRESQL_TEST_FIXTURE",
+      "schema_version": "p2-load-2",
+      "seed": 20261110,
+      "profile": "overload",
+      "logical_agent_task_count": 200,
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "NOT_MET",
+      "capacity_gate": "NOT_MET",
+      "bounded_recovery_business_gate": "PASS",
+      "external_model": {
+        "actual_calls": 0,
+        "tokens": 0,
+        "billed_cost_usd": null,
+        "status": "NOT_DISPATCHED"
+      },
+      "open_loop": {
+        "gate": "NOT_MET",
+        "actual_call_start_rps": 36.190080737208234,
+        "transport_header_start_rps": 30.51072479463672,
+        "target_rps": 1000.0,
+        "first_attempts": 1000
+      },
+      "metrics": {
+        "emitted_logical_operations": 2141,
+        "completed_logical_operations": 2141,
+        "first_attempt_failure_count": 562,
+        "client_requests_never_emitted": 0,
+        "first_attempt_status_counts": {
+          "200": 1560,
+          "409": 19,
+          "429": 562
+        },
+        "status_counts": {
+          "200": 2107,
+          "409": 19,
+          "429": 978
+        },
+        "new_world_commit_receipts": 21,
+        "latency_successes": {
+          "count": 2107,
+          "p50_ms": 184.9001,
+          "p95_ms": 7110.3757,
+          "p99_ms": 10629.3673
+        },
+        "model_retries": 0,
+        "correctness_errors": 0,
+        "unresolved_operational_errors": 0
+      },
+      "correctness": {
+        "new_world_revisions": 21,
+        "expected_new_world_revisions": 21,
+        "new_selected_effect_groups": 21,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99"
+      }
+    }
+  },
+  {
+    "workflow_id": 43081588236,
+    "artifact_id": 13885391227,
+    "artifact_name": "p2-load-200-overload-1",
+    "member": "run-2/load.json",
+    "source_sha256": "eda039a3dd0d0e438701be8123071a2c5aacfaba682f65679c3280dffd2230a4",
+    "result": {
+      "evidence_kind": "REAL_HTTP_REAL_POSTGRESQL_TEST_FIXTURE",
+      "schema_version": "p2-load-2",
+      "seed": 20261110,
+      "profile": "overload",
+      "logical_agent_task_count": 200,
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "NOT_MET",
+      "capacity_gate": "NOT_MET",
+      "bounded_recovery_business_gate": "PASS",
+      "external_model": {
+        "actual_calls": 0,
+        "tokens": 0,
+        "billed_cost_usd": null,
+        "status": "NOT_DISPATCHED"
+      },
+      "open_loop": {
+        "gate": "NOT_MET",
+        "actual_call_start_rps": 34.85296444872029,
+        "transport_header_start_rps": 33.958364393849294,
+        "target_rps": 1000.0,
+        "first_attempts": 1000
+      },
+      "metrics": {
+        "emitted_logical_operations": 2141,
+        "completed_logical_operations": 2141,
+        "first_attempt_failure_count": 543,
+        "client_requests_never_emitted": 0,
+        "first_attempt_status_counts": {
+          "200": 1579,
+          "409": 19,
+          "429": 543
+        },
+        "status_counts": {
+          "200": 2100,
+          "409": 19,
+          "429": 899
+        },
+        "new_world_commit_receipts": 21,
+        "latency_successes": {
+          "count": 2100,
+          "p50_ms": 195.8889,
+          "p95_ms": 7550.3086,
+          "p99_ms": 11549.703
+        },
+        "model_retries": 0,
+        "correctness_errors": 0,
+        "unresolved_operational_errors": 0
+      },
+      "correctness": {
+        "new_world_revisions": 21,
+        "expected_new_world_revisions": 21,
+        "new_selected_effect_groups": 21,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99"
+      }
+    }
+  },
+  {
+    "workflow_id": 43081588236,
+    "artifact_id": 13884432395,
+    "artifact_name": "p2-load-50-mixed-1",
+    "member": "run-1/load.json",
+    "source_sha256": "62c6cda7860537fd620db5d6d3e20132d2498a92ef5dde1383d08f75115a0a87",
+    "result": {
+      "evidence_kind": "REAL_HTTP_REAL_POSTGRESQL_TEST_FIXTURE",
+      "schema_version": "p2-load-2",
+      "seed": 20261110,
+      "profile": "mixed",
+      "logical_agent_task_count": 50,
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "PASS",
+      "capacity_gate": "PASS",
+      "bounded_recovery_business_gate": "PASS",
+      "external_model": {
+        "actual_calls": 0,
+        "tokens": 0,
+        "billed_cost_usd": null,
+        "status": "NOT_DISPATCHED"
+      },
+      "open_loop": {
+        "gate": "NOT_APPLICABLE",
+        "target_rps": null,
+        "first_attempts": 0
+      },
+      "metrics": {
+        "emitted_logical_operations": 286,
+        "completed_logical_operations": 286,
+        "first_attempt_failure_count": 0,
+        "client_requests_never_emitted": 0,
+        "first_attempt_status_counts": {
+          "200": 282,
+          "409": 4
+        },
+        "status_counts": {
+          "200": 282,
+          "409": 4
+        },
+        "new_world_commit_receipts": 6,
+        "latency_successes": {
+          "count": 282,
+          "p50_ms": 71.6342,
+          "p95_ms": 133.3407,
+          "p99_ms": 221.2146
+        },
+        "model_retries": 0,
+        "correctness_errors": 0,
+        "unresolved_operational_errors": 0
+      },
+      "correctness": {
+        "new_world_revisions": 6,
+        "expected_new_world_revisions": 6,
+        "new_selected_effect_groups": 6,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99"
+      }
+    }
+  },
+  {
+    "workflow_id": 43081588236,
+    "artifact_id": 13884432395,
+    "artifact_name": "p2-load-50-mixed-1",
+    "member": "run-2/load.json",
+    "source_sha256": "5f9fb7a771afd127f0565194101b16265f3340bf999a5e45897b348087c77af4",
+    "result": {
+      "evidence_kind": "REAL_HTTP_REAL_POSTGRESQL_TEST_FIXTURE",
+      "schema_version": "p2-load-2",
+      "seed": 20261110,
+      "profile": "mixed",
+      "logical_agent_task_count": 50,
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "PASS",
+      "capacity_gate": "PASS",
+      "bounded_recovery_business_gate": "PASS",
+      "external_model": {
+        "actual_calls": 0,
+        "tokens": 0,
+        "billed_cost_usd": null,
+        "status": "NOT_DISPATCHED"
+      },
+      "open_loop": {
+        "gate": "NOT_APPLICABLE",
+        "target_rps": null,
+        "first_attempts": 0
+      },
+      "metrics": {
+        "emitted_logical_operations": 286,
+        "completed_logical_operations": 286,
+        "first_attempt_failure_count": 0,
+        "client_requests_never_emitted": 0,
+        "first_attempt_status_counts": {
+          "200": 282,
+          "409": 4
+        },
+        "status_counts": {
+          "200": 282,
+          "409": 4
+        },
+        "new_world_commit_receipts": 6,
+        "latency_successes": {
+          "count": 282,
+          "p50_ms": 69.8017,
+          "p95_ms": 121.8991,
+          "p99_ms": 165.6447
+        },
+        "model_retries": 0,
+        "correctness_errors": 0,
+        "unresolved_operational_errors": 0
+      },
+      "correctness": {
+        "new_world_revisions": 6,
+        "expected_new_world_revisions": 6,
+        "new_selected_effect_groups": 6,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99"
+      }
+    }
+  },
+  {
+    "workflow_id": 43081588236,
+    "artifact_id": 13883854214,
+    "artifact_name": "p2-load-200-mixed-1",
+    "member": "run-1/load.json",
+    "source_sha256": "0017375fe4febaede01c993fb8a19a2bc004b1faa1124931247a467a104aa9da",
+    "result": {
+      "evidence_kind": "REAL_HTTP_REAL_POSTGRESQL_TEST_FIXTURE",
+      "schema_version": "p2-load-2",
+      "seed": 20261110,
+      "profile": "mixed",
+      "logical_agent_task_count": 200,
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "PASS",
+      "capacity_gate": "PASS",
+      "bounded_recovery_business_gate": "PASS",
+      "external_model": {
+        "actual_calls": 0,
+        "tokens": 0,
+        "billed_cost_usd": null,
+        "status": "NOT_DISPATCHED"
+      },
+      "open_loop": {
+        "gate": "NOT_APPLICABLE",
+        "target_rps": null,
+        "first_attempts": 0
+      },
+      "metrics": {
+        "emitted_logical_operations": 1141,
+        "completed_logical_operations": 1141,
+        "first_attempt_failure_count": 0,
+        "client_requests_never_emitted": 0,
+        "first_attempt_status_counts": {
+          "200": 1122,
+          "409": 19
+        },
+        "status_counts": {
+          "200": 1122,
+          "409": 19
+        },
+        "new_world_commit_receipts": 21,
+        "latency_successes": {
+          "count": 1122,
+          "p50_ms": 28.1423,
+          "p95_ms": 96.966,
+          "p99_ms": 179.4414
+        },
+        "model_retries": 0,
+        "correctness_errors": 0,
+        "unresolved_operational_errors": 0
+      },
+      "correctness": {
+        "new_world_revisions": 21,
+        "expected_new_world_revisions": 21,
+        "new_selected_effect_groups": 21,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99"
+      }
+    }
+  },
+  {
+    "workflow_id": 43081588236,
+    "artifact_id": 13883854214,
+    "artifact_name": "p2-load-200-mixed-1",
+    "member": "run-2/load.json",
+    "source_sha256": "6cb6e09f13dede52ff681405f5e1a50a31b85b97146e304e19cc7376c86f9f70",
+    "result": {
+      "evidence_kind": "REAL_HTTP_REAL_POSTGRESQL_TEST_FIXTURE",
+      "schema_version": "p2-load-2",
+      "seed": 20261110,
+      "profile": "mixed",
+      "logical_agent_task_count": 200,
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "PASS",
+      "capacity_gate": "PASS",
+      "bounded_recovery_business_gate": "PASS",
+      "external_model": {
+        "actual_calls": 0,
+        "tokens": 0,
+        "billed_cost_usd": null,
+        "status": "NOT_DISPATCHED"
+      },
+      "open_loop": {
+        "gate": "NOT_APPLICABLE",
+        "target_rps": null,
+        "first_attempts": 0
+      },
+      "metrics": {
+        "emitted_logical_operations": 1141,
+        "completed_logical_operations": 1141,
+        "first_attempt_failure_count": 0,
+        "client_requests_never_emitted": 0,
+        "first_attempt_status_counts": {
+          "200": 1122,
+          "409": 19
+        },
+        "status_counts": {
+          "200": 1122,
+          "409": 19
+        },
+        "new_world_commit_receipts": 21,
+        "latency_successes": {
+          "count": 1122,
+          "p50_ms": 27.8888,
+          "p95_ms": 89.9431,
+          "p99_ms": 139.9853
+        },
+        "model_retries": 0,
+        "correctness_errors": 0,
+        "unresolved_operational_errors": 0
+      },
+      "correctness": {
+        "new_world_revisions": 21,
+        "expected_new_world_revisions": 21,
+        "new_selected_effect_groups": 21,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99"
+      }
+    }
+  },
+  {
+    "workflow_id": 43081588056,
+    "artifact_id": 13885626628,
+    "artifact_name": "p3-scale-500-read-soak-1",
+    "member": "result.json",
+    "source_sha256": "537dbd816b407fd4e5ee48cac0b84ff5b6c14d622e5435644492ad8d534fa0ec",
+    "result": {
+      "evidence_kind": "REAL_HTTP_POSTGRESQL_READ_ONLY_STABILITY_PROBE",
+      "schema_version": "p3-stability-1",
+      "probe_gate": "PASS",
+      "long_duration_gate": "NOT_EXECUTED",
+      "real_model_calls": 0,
+      "new_world_commits": 0,
+      "world_unchanged": true,
+      "scheduled_count": 12000,
+      "actual_call_start_rps": 20.000482622163474,
+      "successful_query_rps": 19.99868048722811,
+      "duration_seconds": 600.0395879949999,
+      "status_counts": {
+        "200": 12000
+      },
+      "latency_all_attempts": {
+        "count": 12000,
+        "p50_ms": 86.0853,
+        "p95_ms": 98.7357,
+        "p99_ms": 126.4198
+      },
+      "correctness_errors": 0
+    }
+  },
+  {
+    "workflow_id": 43081588056,
+    "artifact_id": 13884298236,
+    "artifact_name": "p3-scale-500-mixed-1",
+    "member": "result.json",
+    "source_sha256": "797c0cc6655512d7e1f916bd617d49eed9e22ec8fa6f8ff7e577c67ac86a27bf",
+    "result": {
+      "evidence_kind": "REAL_HTTP_REAL_POSTGRESQL_TEST_FIXTURE",
+      "schema_version": "p2-load-2",
+      "seed": 20261110,
+      "profile": "mixed",
+      "logical_agent_task_count": 500,
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "PASS",
+      "capacity_gate": "PASS",
+      "bounded_recovery_business_gate": "PASS",
+      "external_model": {
+        "actual_calls": 0,
+        "tokens": 0,
+        "billed_cost_usd": null,
+        "status": "NOT_DISPATCHED"
+      },
+      "open_loop": {
+        "gate": "NOT_APPLICABLE",
+        "target_rps": null,
+        "first_attempts": 0
+      },
+      "metrics": {
+        "emitted_logical_operations": 2851,
+        "completed_logical_operations": 2851,
+        "first_attempt_failure_count": 0,
+        "client_requests_never_emitted": 0,
+        "first_attempt_status_counts": {
+          "200": 2802,
+          "409": 49
+        },
+        "status_counts": {
+          "200": 2802,
+          "409": 49
+        },
+        "new_world_commit_receipts": 51,
+        "latency_successes": {
+          "count": 2802,
+          "p50_ms": 75.8502,
+          "p95_ms": 147.7578,
+          "p99_ms": 371.2477
+        },
+        "model_retries": 0,
+        "correctness_errors": 0,
+        "unresolved_operational_errors": 0
+      },
+      "correctness": {
+        "new_world_revisions": 51,
+        "expected_new_world_revisions": 51,
+        "new_selected_effect_groups": 51,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99"
+      }
+    }
+  },
+  {
+    "workflow_id": 43081588056,
+    "artifact_id": 13884083234,
+    "artifact_name": "p3-scale-1000-read-open-1",
+    "member": "result.json",
+    "source_sha256": "fcb9a5bad3f83175029a6b019cb3ce042e4d27225828a20659539941170eafe2",
+    "result": {
+      "evidence_kind": "REAL_HTTP_POSTGRESQL_OPEN_ARRIVAL",
+      "schema_version": "p3-open-arrival-1",
+      "capacity_gate": "NOT_MET",
+      "offered_wire_rate_gate": "NOT_MET",
+      "real_model_calls": 0,
+      "new_world_commits": 0,
+      "world_unchanged": true,
+      "validated_successes": 1745,
+      "dispatch_start_rps": 41.85690586984171,
+      "observed_wire_start_rps": 40.73451675770588,
+      "successful_query_rps": 14.123409274024548,
+      "status_counts": {
+        "429": 3242,
+        "200": 1745,
+        "transport_error": 13
+      },
+      "latency_all_attempts": {
+        "count": 5000,
+        "p50_ms": 2676.6597,
+        "p95_ms": 6584.0724,
+        "p99_ms": 9736.592
+      },
+      "correctness_errors": 0
+    }
+  }
+]
