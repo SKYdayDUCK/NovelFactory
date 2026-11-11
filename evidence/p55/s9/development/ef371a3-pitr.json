@@ -1,0 +1,94 @@
+{
+  "status": "PASS",
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "execution_kind": "REAL_ISOLATED_POSTGRESQL",
+  "source_port": 39547,
+  "restored_port": 45969,
+  "durability": {
+    "fsync": true,
+    "synchronous_commit": true,
+    "data_checksums": true
+  },
+  "model_calls": 0,
+  "production_data_accessed": false,
+  "libpq_environment_isolated": true,
+  "cleared_pg_environment_names": [
+    "PGDATABASE",
+    "PGHOST",
+    "PGPORT",
+    "PGUSER"
+  ],
+  "pg_basebackup": {
+    "exit_code": 0,
+    "stdout": ""
+  },
+  "base_backup_seconds": 1.5859745160000784,
+  "pg_verifybackup": {
+    "exit_code": 0,
+    "stdout": "backup successfully verified"
+  },
+  "archiver": {
+    "archived_count": 4,
+    "failed_count": 0
+  },
+  "restored_semantic_conflict": {
+    "case_id": "1f6b3618-cc47-55cd-b568-8b9dfad0b955",
+    "receipt_id": "7eee7776-b60e-5577-b6c8-de930295d72c",
+    "conflict_type": "STALE_PRECONDITION",
+    "outcome": "REVIEW_REQUIRED",
+    "observation_ids": [
+      "25dd0b38-d0cd-5b43-9d6d-4b0f564ccdc3",
+      "7f5abbbd-b390-532a-83c7-dc5a28b3b78c"
+    ],
+    "change_revision": "fcd3773e-8b29-4288-b63a-075a19c90a65",
+    "contributions": {
+      "semantic.conflict.detected": {
+        "events": 1,
+        "conflict.candidates": 1,
+        "conflict.confirmed_by_guard": 1,
+        "conflict.type.STALE_PRECONDITION": 1,
+        "event.semantic.conflict.detected": 1
+      },
+      "semantic.conflict.resolved": {
+        "events": 1,
+        "conflict.actual_tokens": 0,
+        "conflict.review_escalations": 1,
+        "conflict.result.REVIEW_REQUIRED": 1,
+        "event.semantic.conflict.resolved": 1,
+        "conflict.strategy.ESCALATE_REVIEW": 1,
+        "conflict.additional_model_attempts": 0,
+        "conflict.cost_status.NO_MODEL_CALL": 1,
+        "duration_ms.semantic.conflict.resolved": "97.91"
+      }
+    }
+  },
+  "redis_pitr_reconciliation": {
+    "redis_version": "8.0.2",
+    "target_subscriber_receipts": 1,
+    "target_audit_rows": 1,
+    "excluded_redis_entries_quarantined": 1,
+    "excluded_world_revisions": 0
+  },
+  "target_world_ref": {
+    "work_id": "72236b5b-5c5c-40e7-9935-dd8fa620292f",
+    "branch_id": "fe3d33e9-f1f2-4135-bb71-73b4be53d1ae",
+    "world_revision_id": "e76791a4-3cfd-4cca-bb80-34251c16148f"
+  },
+  "target_lsn": "0/3107568",
+  "restored_state_sha256": "ebddc5dd34ca20268b992e6b107d08f9f9ec6b2d763c70dd7ef7a076f1b799c7",
+  "snapshot_equal_before_fencing": true,
+  "table_count": 65,
+  "object_count": 31,
+  "recovery_seconds_to_verified_service": 1.6795969310001055,
+  "selected_recovery_point_age_seconds": 0.545982,
+  "target_commits_lost": 0,
+  "deliberately_excluded_later_world_commits": 1,
+  "restored_world_event_count": 2,
+  "unknown_calls_retained": 1,
+  "reserved_amount_retained": "0.5",
+  "fenced_task_count": 3,
+  "old_worker_rejected": true,
+  "original_commit_receipt_equal": true,
+  "limitation": "Small isolated local fixture; selected-point RPO/RTO, not production SLO or remote storage test",
+  "total_seconds": 7.300570273000176
+}

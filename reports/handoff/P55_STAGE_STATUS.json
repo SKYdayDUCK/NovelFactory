@@ -1,0 +1,43 @@
+{
+  "stage": "B",
+  "status": "BLOCKED",
+  "source_sha": "b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5",
+  "tree": "057a3de8d6c3c28df016446ee7aa2b9acf05ceec",
+  "pr": 6,
+  "base": "main",
+  "actions_checkout_sha": "01876116289defc1f6a3b6f20ae563732c3d8a12",
+  "immutable_evidence": "evidence/p55/s9-local/final-b3b0e9b/verification.json",
+  "pytest_recovered": {
+    "passed": 802
+  },
+  "open_capacity_jobs": [
+    130535530269,
+    130535529772,
+    130535530103,
+    130535530409,
+    130535530542
+  ],
+  "next": "Check the new merged head CI and unchanged capacity gates before advancing stage B.",
+  "latest_fix": {
+    "parent": "d423007bd55d78952ad846729e735845f7f24284",
+    "paths": [
+      "src/novel_factory/application/queries.py",
+      "tests/queries/test_query_delivery.py"
+    ],
+    "before": "two new SQL-count assertions failed on predecessor code; two existing fence cases passed",
+    "after": {
+      "command": "python -m pytest tests/queries tests/integration/test_s9_query_coverage.py -q",
+      "passed": 33,
+      "junit": "evidence/p55/s9-local/query-sampling-junit.xml"
+    },
+    "new_sha_ci": "see PR #6 Actions for the tested head; pending at commit",
+    "capacity_status": "NOT_MET at previous source, not yet measured for fix"
+  },
+  "base_integration": {
+    "main": "a8f37b72286163e9117f8874a0e175c61204ff8b",
+    "p55": "bf0541a4ea2a07974c7230780e8202e07644cea9",
+    "method": "two-parent merge with unchanged histories",
+    "postgres17_tests": 12,
+    "junit": "evidence/p55/s9-local/main-integrated-junit.xml"
+  }
+}

@@ -1,0 +1,786 @@
+{
+  "scenario": "P2 measured capacity and recovery: 200 agents / overload / full capacity gate",
+  "artifacts": {
+    "baseline": {
+      "archive_sha256": "d736c8bf6eb5189bf3f40b5ce31d7b2f9deac629dbb4730498099756babac892",
+      "runs": [
+        {
+          "run": 1,
+          "commit": "47aa531a1ca2f29d4dca6fec070c2c4f9df6c302",
+          "cpu_models": [
+            "AMD EPYC 9V74 80-Core Processor"
+          ],
+          "duration_seconds": 184.425635,
+          "valid_successful_calls": 2045,
+          "aggregate_SQL": {
+            "sql_statements": 51891,
+            "transactions": 6683,
+            "sql_cursor_execution_seconds": 188.63306770600093,
+            "statement_kinds": {
+              "SELECT": 47932,
+              "INSERT": 3597,
+              "UPDATE": 242,
+              "WITH": 120
+            },
+            "failed_statements": 0,
+            "peak_checked_out_connections": 8,
+            "checked_out_at_end": 0,
+            "transaction_seconds_before_commit": 257.3049051989978,
+            "sql_statements_per_valid_successful_call": 25.375,
+            "cursor_ms_per_valid_successful_call": 92.241
+          },
+          "wal_bytes": 10451400,
+          "first_attempt_status_counts": {
+            "200": 1562,
+            "409": 19,
+            "429": 560
+          },
+          "open_loop": {
+            "gate": "NOT_MET",
+            "transport_header_starts": 1000,
+            "transport_header_start_rps": 29.3181668509495,
+            "target_rps": 1000.0,
+            "first_attempts": 1000,
+            "actual_call_start_rps": 46.072756399731894,
+            "start_window_seconds": 21.683095999999978,
+            "max_schedule_delay_ms": 20684.2348,
+            "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+            "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+          },
+          "client_pool_wait": {
+            "count": 3168,
+            "p50_ms": 0.0025,
+            "p95_ms": 28.2233,
+            "p99_ms": 326.3506
+          },
+          "arrival_delay": {
+            "count": 3168,
+            "p50_ms": 2396.4026,
+            "p95_ms": 32472.5839,
+            "p99_ms": 38305.9298
+          },
+          "first_attempt_latency": {
+            "count": 2141,
+            "p50_ms": 177.1588,
+            "p95_ms": 14130.6739,
+            "p99_ms": 22004.9615
+          },
+          "operation_p95_ms": {
+            "accept_conflict": {
+              "calls": 19,
+              "successes": 0,
+              "p95": 79.7804
+            },
+            "accept_independent": {
+              "calls": 20,
+              "successes": 20,
+              "p95": 234.9936
+            },
+            "accept_retry": {
+              "calls": 21,
+              "successes": 21,
+              "p95": 49.8837
+            },
+            "accept_selected_fixture": {
+              "calls": 1,
+              "successes": 1,
+              "p95": 216.005
+            },
+            "certificate": {
+              "calls": 40,
+              "successes": 40,
+              "p95": 237.3434
+            },
+            "compile": {
+              "calls": 200,
+              "successes": 200,
+              "p95": 440.6155
+            },
+            "graph": {
+              "calls": 20,
+              "successes": 20,
+              "p95": 123.1915
+            },
+            "history": {
+              "calls": 200,
+              "successes": 200,
+              "p95": 144.9699
+            },
+            "overload": {
+              "calls": 2027,
+              "successes": 923,
+              "p95": 18353.793
+            },
+            "propose": {
+              "calls": 40,
+              "successes": 40,
+              "p95": 366.0074
+            },
+            "state_cold": {
+              "calls": 200,
+              "successes": 200,
+              "p95": 98.7585
+            },
+            "state_mixed": {
+              "calls": 180,
+              "successes": 180,
+              "p95": 166.9585
+            },
+            "state_warm": {
+              "calls": 200,
+              "successes": 200,
+              "p95": 88.7376
+            }
+          },
+          "admission": {
+            "admission": {
+              "admitted": 2069,
+              "completed": 2064,
+              "timed_out": 168,
+              "queued": 0,
+              "wait_seconds_total": 1353.530949907999,
+              "rejected": 64
+            },
+            "authentication_admission": {
+              "admitted": 2300,
+              "completed": 2296,
+              "timed_out": 16,
+              "queued": 0,
+              "wait_seconds_total": 709.2984129929991,
+              "rejected": 834
+            },
+            "ingress": {
+              "admitted": 3146,
+              "completed": 3146,
+              "queued": 0,
+              "wait_seconds_total": 0.0399214140004176,
+              "rejected": 22
+            }
+          },
+          "diagnostics": {
+            "wait_stages": {
+              "ingress.queue": {
+                "calls": 3146,
+                "wall_seconds": 0.12699454900042895
+              },
+              "authentication_admission.queue": {
+                "calls": 2296,
+                "wall_seconds": 703.8606937110018
+              },
+              "http.executor_wait": {
+                "calls": 4360,
+                "wall_seconds": 9.656011973998702
+              },
+              "admission.queue": {
+                "calls": 2064,
+                "wall_seconds": 1350.1885234719994
+              }
+            },
+            "stage_count": 23
+          },
+          "cpu_seconds": {
+            "service_user_cpu_seconds": 84.001827,
+            "service_system_cpu_seconds": 8.884212,
+            "service_sum_peak_rss_kib": 149036
+          },
+          "database_activity_observations": {
+            "sample_count": 909,
+            "samples_with_any_lock_wait": 0,
+            "active_connection_sample_counts_by_wait": {
+              "IO.WalSync": 20,
+              "LWLock.WALWrite": 8,
+              "NoWait.NoEvent": 55,
+              "IO.WalWrite": 1,
+              "Client.ClientRead": 9
+            },
+            "sample_interval_seconds": 0.2
+          }
+        },
+        {
+          "run": 2,
+          "commit": "47aa531a1ca2f29d4dca6fec070c2c4f9df6c302",
+          "cpu_models": [
+            "AMD EPYC 9V74 80-Core Processor"
+          ],
+          "duration_seconds": 180.431914,
+          "valid_successful_calls": 2057,
+          "aggregate_SQL": {
+            "sql_statements": 52112,
+            "transactions": 6688,
+            "sql_cursor_execution_seconds": 180.566317643994,
+            "statement_kinds": {
+              "SELECT": 48153,
+              "INSERT": 3597,
+              "UPDATE": 242,
+              "WITH": 120
+            },
+            "failed_statements": 0,
+            "peak_checked_out_connections": 8,
+            "checked_out_at_end": 0,
+            "transaction_seconds_before_commit": 245.2672451829996,
+            "sql_statements_per_valid_successful_call": 25.334,
+            "cursor_ms_per_valid_successful_call": 87.781
+          },
+          "wal_bytes": 10189832,
+          "first_attempt_status_counts": {
+            "200": 1558,
+            "409": 19,
+            "429": 564
+          },
+          "open_loop": {
+            "gate": "NOT_MET",
+            "transport_header_starts": 1000,
+            "transport_header_start_rps": 30.43192867998784,
+            "target_rps": 1000.0,
+            "first_attempts": 1000,
+            "actual_call_start_rps": 41.62243501744202,
+            "start_window_seconds": 24.001479000000018,
+            "max_schedule_delay_ms": 23002.6128,
+            "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+            "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+          },
+          "client_pool_wait": {
+            "count": 3198,
+            "p50_ms": 0.0028,
+            "p95_ms": 0.0525,
+            "p99_ms": 193.3576
+          },
+          "arrival_delay": {
+            "count": 3198,
+            "p50_ms": 3571.2079,
+            "p95_ms": 32998.8115,
+            "p99_ms": 37467.3015
+          },
+          "first_attempt_latency": {
+            "count": 2141,
+            "p50_ms": 160.8178,
+            "p95_ms": 11341.2852,
+            "p99_ms": 19252.945
+          },
+          "operation_p95_ms": {
+            "accept_conflict": {
+              "calls": 19,
+              "successes": 0,
+              "p95": 44.3408
+            },
+            "accept_independent": {
+              "calls": 20,
+              "successes": 20,
+              "p95": 268.2676
+            },
+            "accept_retry": {
+              "calls": 21,
+              "successes": 21,
+              "p95": 49.6766
+            },
+            "accept_selected_fixture": {
+              "calls": 1,
+              "successes": 1,
+              "p95": 218.9374
+            },
+            "certificate": {
+              "calls": 40,
+              "successes": 40,
+              "p95": 149.9353
+            },
+            "compile": {
+              "calls": 200,
+              "successes": 200,
+              "p95": 209.1255
+            },
+            "graph": {
+              "calls": 20,
+              "successes": 20,
+              "p95": 123.1514
+            },
+            "history": {
+              "calls": 200,
+              "successes": 200,
+              "p95": 121.2791
+            },
+            "overload": {
+              "calls": 2057,
+              "successes": 935,
+              "p95": 15585.8706
+            },
+            "propose": {
+              "calls": 40,
+              "successes": 40,
+              "p95": 270.43
+            },
+            "state_cold": {
+              "calls": 200,
+              "successes": 200,
+              "p95": 87.7884
+            },
+            "state_mixed": {
+              "calls": 180,
+              "successes": 180,
+              "p95": 119.987
+            },
+            "state_warm": {
+              "calls": 200,
+              "successes": 200,
+              "p95": 84.709
+            }
+          },
+          "admission": {
+            "admission": {
+              "queued": 0,
+              "completed": 2076,
+              "wait_seconds_total": 1203.0977430689964,
+              "rejected": 75,
+              "timed_out": 126,
+              "admitted": 2086
+            },
+            "authentication_admission": {
+              "queued": 0,
+              "completed": 2277,
+              "wait_seconds_total": 631.1191494060031,
+              "rejected": 877,
+              "timed_out": 2,
+              "admitted": 2277
+            },
+            "ingress": {
+              "queued": 0,
+              "completed": 3156,
+              "wait_seconds_total": 0.044795247001388816,
+              "rejected": 42,
+              "admitted": 3156
+            }
+          },
+          "diagnostics": {
+            "wait_stages": {
+              "ingress.queue": {
+                "calls": 3156,
+                "wall_seconds": 0.13077511499938055
+              },
+              "authentication_admission.queue": {
+                "calls": 2277,
+                "wall_seconds": 633.0672705310003
+              },
+              "http.executor_wait": {
+                "calls": 4353,
+                "wall_seconds": 9.89232921300112
+              },
+              "admission.queue": {
+                "calls": 2076,
+                "wall_seconds": 1191.1395394980023
+              }
+            },
+            "stage_count": 23
+          },
+          "cpu_seconds": {
+            "service_user_cpu_seconds": 82.850837,
+            "service_system_cpu_seconds": 9.299598,
+            "service_sum_peak_rss_kib": 151220
+          },
+          "database_activity_observations": {
+            "sample_count": 889,
+            "samples_with_any_lock_wait": 0,
+            "active_connection_sample_counts_by_wait": {
+              "NoWait.NoEvent": 59,
+              "IO.WalWrite": 1,
+              "IO.WalSync": 12,
+              "LWLock.WALWrite": 9,
+              "Client.ClientRead": 5,
+              "IO.WalInitSync": 1
+            },
+            "sample_interval_seconds": 0.2
+          }
+        }
+      ],
+      "source_artifact_id": 13850290023,
+      "source_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43008211008/artifacts/13850290023"
+    },
+    "candidate": {
+      "archive_sha256": "65e357e584458708f6e6b19d5729575f2f5ed734c2fc10ce0e1d9a320f3551a7",
+      "runs": [
+        {
+          "run": 1,
+          "commit": "e6c01f005cbdba127d87f39fb3268d5e9001d900",
+          "cpu_models": [
+            "AMD EPYC 7763 64-Core Processor"
+          ],
+          "duration_seconds": 192.930051,
+          "valid_successful_calls": 1969,
+          "aggregate_SQL": {
+            "sql_statements": 55828,
+            "transactions": 6485,
+            "sql_cursor_execution_seconds": 255.4612905169974,
+            "statement_kinds": {
+              "SELECT": 49961,
+              "INSERT": 5505,
+              "UPDATE": 242,
+              "WITH": 120
+            },
+            "failed_statements": 0,
+            "peak_checked_out_connections": 8,
+            "checked_out_at_end": 0,
+            "transaction_seconds_before_commit": 345.2744504979988,
+            "sql_statements_per_valid_successful_call": 28.353,
+            "cursor_ms_per_valid_successful_call": 129.742
+          },
+          "wal_bytes": 12510104,
+          "first_attempt_status_counts": {
+            "200": 1454,
+            "409": 19,
+            "429": 668
+          },
+          "open_loop": {
+            "gate": "NOT_MET",
+            "transport_header_starts": 1000,
+            "transport_header_start_rps": 22.987875195949197,
+            "target_rps": 1000.0,
+            "first_attempts": 1000,
+            "actual_call_start_rps": 28.49382171800804,
+            "start_window_seconds": 35.060231999999985,
+            "max_schedule_delay_ms": 34061.3543,
+            "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+            "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+          },
+          "client_pool_wait": {
+            "count": 3433,
+            "p50_ms": 0.0037,
+            "p95_ms": 87.4089,
+            "p99_ms": 470.0847
+          },
+          "arrival_delay": {
+            "count": 3433,
+            "p50_ms": 5805.9405,
+            "p95_ms": 40915.9293,
+            "p99_ms": 48685.2396
+          },
+          "first_attempt_latency": {
+            "count": 2141,
+            "p50_ms": 236.8901,
+            "p95_ms": 13069.9498,
+            "p99_ms": 21243.4466
+          },
+          "operation_p95_ms": {
+            "accept_conflict": {
+              "calls": 19,
+              "successes": 0,
+              "p95": 48.0711
+            },
+            "accept_independent": {
+              "calls": 20,
+              "successes": 20,
+              "p95": 293.3801
+            },
+            "accept_retry": {
+              "calls": 21,
+              "successes": 21,
+              "p95": 53.6147
+            },
+            "accept_selected_fixture": {
+              "calls": 1,
+              "successes": 1,
+              "p95": 227.2262
+            },
+            "certificate": {
+              "calls": 40,
+              "successes": 40,
+              "p95": 387.5779
+            },
+            "compile": {
+              "calls": 200,
+              "successes": 200,
+              "p95": 131.6426
+            },
+            "graph": {
+              "calls": 20,
+              "successes": 20,
+              "p95": 355.7941
+            },
+            "history": {
+              "calls": 200,
+              "successes": 200,
+              "p95": 256.7662
+            },
+            "overload": {
+              "calls": 2292,
+              "successes": 847,
+              "p95": 17650.6133
+            },
+            "propose": {
+              "calls": 40,
+              "successes": 40,
+              "p95": 714.651
+            },
+            "state_cold": {
+              "calls": 200,
+              "successes": 200,
+              "p95": 106.0923
+            },
+            "state_mixed": {
+              "calls": 180,
+              "successes": 180,
+              "p95": 587.9328
+            },
+            "state_warm": {
+              "calls": 200,
+              "successes": 200,
+              "p95": 104.2773
+            }
+          },
+          "admission": {
+            "admission": {
+              "admitted": 2012,
+              "rejected": 12,
+              "queued": 0,
+              "timed_out": 250,
+              "wait_seconds_total": 1222.0685475119994,
+              "completed": 1988
+            },
+            "authentication_admission": {
+              "admitted": 2273,
+              "rejected": 1119,
+              "queued": 0,
+              "timed_out": 64,
+              "wait_seconds_total": 865.3594261409984,
+              "completed": 2250
+            },
+            "ingress": {
+              "admitted": 3433,
+              "queued": 0,
+              "wait_seconds_total": 0.050535646000810175,
+              "completed": 3433
+            }
+          },
+          "diagnostics": {
+            "wait_stages": {
+              "ingress.queue": {
+                "calls": 3433,
+                "wall_seconds": 0.16469444999958682
+              },
+              "authentication_admission.queue": {
+                "calls": 2250,
+                "wall_seconds": 822.7534423610005
+              },
+              "http.executor_wait": {
+                "calls": 4238,
+                "wall_seconds": 14.595400806002317
+              },
+              "admission.queue": {
+                "calls": 1988,
+                "wall_seconds": 1182.2370077030002
+              }
+            },
+            "stage_count": 22
+          },
+          "cpu_seconds": {
+            "service_user_cpu_seconds": 113.57431,
+            "service_system_cpu_seconds": 12.119327,
+            "service_sum_peak_rss_kib": 149568
+          },
+          "database_activity_observations": {
+            "sample_count": 942,
+            "samples_with_any_lock_wait": 16,
+            "active_connection_sample_counts_by_wait": {
+              "NoWait.NoEvent": 74,
+              "IO.WalSync": 5,
+              "Lock.transactionid": 20,
+              "Client.ClientRead": 5
+            },
+            "sample_interval_seconds": 0.2
+          }
+        },
+        {
+          "run": 2,
+          "commit": "e6c01f005cbdba127d87f39fb3268d5e9001d900",
+          "cpu_models": [
+            "AMD EPYC 7763 64-Core Processor"
+          ],
+          "duration_seconds": 195.176731,
+          "valid_successful_calls": 1969,
+          "aggregate_SQL": {
+            "sql_statements": 55796,
+            "transactions": 6453,
+            "sql_cursor_execution_seconds": 264.68879408001646,
+            "statement_kinds": {
+              "SELECT": 49929,
+              "INSERT": 5505,
+              "UPDATE": 242,
+              "WITH": 120
+            },
+            "failed_statements": 0,
+            "peak_checked_out_connections": 8,
+            "checked_out_at_end": 0,
+            "transaction_seconds_before_commit": 358.8766464349997,
+            "sql_statements_per_valid_successful_call": 28.337,
+            "cursor_ms_per_valid_successful_call": 134.428
+          },
+          "wal_bytes": 12007816,
+          "first_attempt_status_counts": {
+            "200": 1467,
+            "409": 19,
+            "429": 655
+          },
+          "open_loop": {
+            "gate": "NOT_MET",
+            "transport_header_starts": 1000,
+            "transport_header_start_rps": 22.717079086634246,
+            "target_rps": 1000.0,
+            "first_attempts": 1000,
+            "actual_call_start_rps": 29.175559152219595,
+            "start_window_seconds": 34.240988999999985,
+            "max_schedule_delay_ms": 33242.125,
+            "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+            "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+          },
+          "client_pool_wait": {
+            "count": 3420,
+            "p50_ms": 0.0041,
+            "p95_ms": 28.6245,
+            "p99_ms": 561.3587
+          },
+          "arrival_delay": {
+            "count": 3420,
+            "p50_ms": 5800.1565,
+            "p95_ms": 41327.5629,
+            "p99_ms": 48715.1545
+          },
+          "first_attempt_latency": {
+            "count": 2141,
+            "p50_ms": 259.7189,
+            "p95_ms": 12906.1133,
+            "p99_ms": 21473.8199
+          },
+          "operation_p95_ms": {
+            "accept_conflict": {
+              "calls": 19,
+              "successes": 0,
+              "p95": 47.3239
+            },
+            "accept_independent": {
+              "calls": 20,
+              "successes": 20,
+              "p95": 344.9326
+            },
+            "accept_retry": {
+              "calls": 21,
+              "successes": 21,
+              "p95": 53.6528
+            },
+            "accept_selected_fixture": {
+              "calls": 1,
+              "successes": 1,
+              "p95": 228.3216
+            },
+            "certificate": {
+              "calls": 40,
+              "successes": 40,
+              "p95": 414.8641
+            },
+            "compile": {
+              "calls": 200,
+              "successes": 200,
+              "p95": 134.0357
+            },
+            "graph": {
+              "calls": 20,
+              "successes": 20,
+              "p95": 353.637
+            },
+            "history": {
+              "calls": 200,
+              "successes": 200,
+              "p95": 280.8612
+            },
+            "overload": {
+              "calls": 2279,
+              "successes": 847,
+              "p95": 18524.8542
+            },
+            "propose": {
+              "calls": 40,
+              "successes": 40,
+              "p95": 726.7578
+            },
+            "state_cold": {
+              "calls": 200,
+              "successes": 200,
+              "p95": 107.5448
+            },
+            "state_mixed": {
+              "calls": 180,
+              "successes": 180,
+              "p95": 611.5383
+            },
+            "state_warm": {
+              "calls": 200,
+              "successes": 200,
+              "p95": 104.6077
+            }
+          },
+          "admission": {
+            "admission": {
+              "timed_out": 221,
+              "wait_seconds_total": 1218.169132518,
+              "rejected": 9,
+              "queued": 0,
+              "completed": 1988,
+              "admitted": 2003
+            },
+            "authentication_admission": {
+              "timed_out": 91,
+              "wait_seconds_total": 785.6117898380014,
+              "rejected": 1111,
+              "queued": 0,
+              "completed": 2218,
+              "admitted": 2224
+            },
+            "ingress": {
+              "wait_seconds_total": 0.05110219199639232,
+              "queued": 0,
+              "completed": 3420,
+              "admitted": 3420
+            }
+          },
+          "diagnostics": {
+            "wait_stages": {
+              "ingress.queue": {
+                "calls": 3420,
+                "wall_seconds": 0.16587729000053741
+              },
+              "authentication_admission.queue": {
+                "calls": 2218,
+                "wall_seconds": 777.2961669159995
+              },
+              "http.executor_wait": {
+                "calls": 4206,
+                "wall_seconds": 13.273060921001502
+              },
+              "admission.queue": {
+                "calls": 1988,
+                "wall_seconds": 1196.891807153002
+              }
+            },
+            "stage_count": 22
+          },
+          "cpu_seconds": {
+            "service_user_cpu_seconds": 115.936304,
+            "service_system_cpu_seconds": 12.665868,
+            "service_sum_peak_rss_kib": 144484
+          },
+          "database_activity_observations": {
+            "sample_count": 951,
+            "samples_with_any_lock_wait": 14,
+            "active_connection_sample_counts_by_wait": {
+              "NoWait.NoEvent": 72,
+              "IO.WalSync": 3,
+              "Lock.transactionid": 19,
+              "Timeout.VacuumDelay": 1,
+              "Client.ClientRead": 3
+            },
+            "sample_interval_seconds": 0.2
+          }
+        }
+      ],
+      "source_artifact_id": 13855611549,
+      "source_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43020922696/artifacts/13855611549"
+    }
+  },
+  "interpretation": "Counts are aggregates across the entire mixed operation stream, including unsuccessful calls and retries. SQL per valid successful call is an aggregate ratio, not a per-query SQL profile. Runners had different CPUs."
+}
