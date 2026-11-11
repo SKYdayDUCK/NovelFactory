@@ -278,7 +278,16 @@ jobs:
           bash scripts/ci_install_pg17.sh openssh-client openssh-server
           native="$RUNNER_TEMP/novelfactory-codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/bin/codex"
           bash workshop/acceptance/dual_codex/run.sh "$GITHUB_WORKSPACE" "$GITHUB_WORKSPACE/workshop" "$native" "$GITHUB_WORKSPACE/workshop/codex-dual"
-          test -s workshop/codex-dual/receipt.json
+          python - <<'PYCODE'
+          import json, os, re
+          from pathlib import Path
+          proof = json.loads(Path("workshop/codex-dual/receipt.json").read_text())
+          assert proof["workshop_sha"] == proof["nf_sha"] == os.environ["GITHUB_SHA"]
+          assert proof["separate_service_clusters"] and proof["separate_service_uids"]
+          assert proof["aw_postgres_system_identifier"] != proof["nf_postgres_system_identifier"]
+          assert re.fullmatch("[0-9a-f]{64}", proof["wheel_sha256"])
+          assert proof["model_turns"] == 0 and proof["cross_service_binding_reads_denied"] == 2
+          PYCODE
       - uses: actions/upload-artifact@v4
         if: always()
         with:
