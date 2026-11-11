@@ -18,11 +18,17 @@ GRANT CONNECT ON DATABASE novel_factory TO nf_service;
 
 1. 在 NF 目录执行 `uv sync --locked` 和 `uv run alembic upgrade head`。通过受权运维身份配置作品、分支、角色作用域与预算。用 `uv run python scripts/manage_workshop_binding.py --help` 创建安装并预置冻结任务槽位。按 NF 原有角色隔离方式运行 supervisor。
 2. 在 Workshop 目录执行 `uv sync --locked --extra streams` 和 `uv run aw-migrate upgrade`。安装 wheel 时可执行 `aw-migrate heads`、`aw-migrate current` 诊断迁移头。部署前用两侧账号分别验证对方数据库拒绝 CONNECT。
-3. 用 NF 返回的安装 ID 与实例 ID 执行 `aw-admin install INSTALL NF_INSTANCE`。执行 `aw-admin bootstrap ORG --preset Standard`，然后 `aw-admin enroll INSTALL ORG author /private/aw-author.json --revision 1`。可选 Minimal、Standard、Long-form 或 Research-Audit。经理和任期员工各自使用独立绑定。
+3. 用 NF 返回的安装 ID 与实例 ID 执行 `aw-admin install INSTALL NF_INSTANCE`。执行 `aw-admin bootstrap ORG --installation INSTALL --preset Standard` 将组织与该安装绑定，然后 `aw-admin enroll INSTALL ORG author /private/aw-author.json --revision 1`。可选 Minimal、Standard、Long-form 或 Research-Audit。经理和任期员工各自使用独立绑定。
 4. 用 `aw-provision budget ORG USD AMOUNT` 设置作者批准的组织上限。为每个授权槽执行 `aw-provision allow-slot ORG INSTALL SLOT EMPLOYEE policy.json`，保持作品/分支、角色、演员、作用域、模板、币种、额度、Token 与 NF 完全一致。
 5. 配置两条独立的私有 NF launcher，分别连接项目 resume 身份和安装 delegation 身份。给作者配置 Workshop 服务和目录内 adapters/codex 指令。运行 `aw-mcp --binding /private/aw-author.json`。在受信 broker 安装 `aw-manager.service` 与 timer；把示例路径替换为实际路径后运行 `systemctl enable --now aw-manager.timer`。
 6. 配置独立 Redis 8 测试或运行实例，执行 `python -m agent_workshop.notifications --help` 查看 publish/receive/replay。SQL 持久消息支持没有 Redis 时的手动送达。生产备份不得依赖 Redis。
 7. 检查 `aw_capabilities`、`aw_state_get`、`aw_history_get`，验证角色看不到管理预算。作者可把已分配的 operation_id 交给 `aw_progress_get` 查看场景负责人、NF 状态、WorldRef 与费用保留。员工只可读本人任期内已发送或接手任务的进度。经理用授权 REPORT 返回冻结 PlanRef 与 ArtifactRef，NF 会在打开引用时复核读取身份。先对一个受权作品执行无模型 smoke，再启用写作授权。作者说“继续未完成的任务”以恢复，`aw_resume_project` 收据可用同一键查询。
+
+### 从已部署的 Workshop 升级
+
+先备份并在隔离的还原库运行 `aw-migrate upgrade`，再用 `aw-migrate current` 与 `aw-migrate heads` 核对同一版本。核对旧目录、安装和 NF 实例的运维登记后，为原来缺少归属的目录执行 `aw-admin claim-org ORG INSTALL`。按当前在职任期为需要组织工具的员工重新运行 `aw-admin enroll`。W0 遗留绑定可继续协商协议，后续组织操作需要新签的成员身份。
+
+切换前按原操作标识核对在途委托、恢复请求、审核与费用。已发送且结算状态为 UNKNOWN 的请求保留原预留，用原操作标识向 NF 查询。历史消息缺少可核实的发送凭据时，数据库保留消息和收件序列，收件人看到 `UNAVAILABLE`。在停用旧服务前保存双侧账本、数据库迁移版本和冻结的 role/skill 哈希。
 
 ## 持续派工与诊断
 
