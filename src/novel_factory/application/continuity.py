@@ -265,13 +265,27 @@ class ContinuityService:
     def review(self, principal, work_id, payload):
         request = validate_contract("ContinuityReviewRequest", payload, "continuity")
         with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
-            repo.one("works", {"work_id": work_id}, lock="update")
+            work = repo.one("works", {"work_id": work_id}, lock="update")
             self._work_access(repo, principal, work_id, "APPROVE")
             candidate = self._candidate(repo, request["candidate_ref"], work_id)
             wr = candidate["request"]["world_ref"]
-            grant, _ = self._authorize(repo, principal, wr, "APPROVE", current=True)
+            grant, _ = self._authorize(repo, principal, wr, "APPROVE")
             prior = self.kernel._prior(repo, principal, work_id, "CONTINUITY_REVIEW", request["idempotency_key"], request)
             if prior:
+                saved = _payload(repo, self.kernel, prior, work_id, "CONTINUITY_REVIEW")
+                require(saved["request"] == request and saved["world_ref"] == wr
+                        and saved["principal_id"] == principal.principal_id
+                        and saved["grant_id"] == principal.grant_id and saved["grant_epoch"] == grant["epoch"],
+                        "VIEW_DENIED", "Review receipt is outside the current grant")
+                head = self.kernel.head(repo, work_id)
+                # Old review artifacts did not record a policy version. Retain their
+                # original same-HEAD replay rather than inventing a historical epoch.
+                if "policy_version" in saved:
+                    require(saved["policy_version"] == work["policy_version"], "VIEW_DENIED",
+                            "Policy changed after the review")
+                    require(repo.ancestor(wr, head), "STALE_CONTINUITY_WORLD", "Review belongs to another canonical history")
+                else:
+                    require(wr == head, "STALE_CONTINUITY_WORLD", "Legacy review needs its original canonical cut")
                 return prior
             _, _, impact = self._validate(repo, principal, candidate["request"])
             require(candidate["created_by"] != principal.principal_id, "SELF_APPROVAL_DENIED",
@@ -288,11 +302,15 @@ class ContinuityService:
                         "CONTINUITY_IMPACT_UNREVIEWED", "Every affected volume and downstream continuation needs review")
             review = {"request": request, "candidate_sha256": request["candidate_ref"]["sha256"],
                 "world_ref": wr, "impact_sha256": fingerprint(impact), "principal_id": principal.principal_id,
-                "grant_id": principal.grant_id, "grant_epoch": grant["epoch"], "recorded_at": repo.now().isoformat(),
+                "grant_id": principal.grant_id, "grant_epoch": grant["epoch"], "policy_version": work["policy_version"],
+                "recorded_at": repo.now().isoformat(),
                 "attestation": "AUTHENTICATED_REVIEW_DECISION_NOT_VERIFIED_LITERARY_QUALITY"}
             ref = self.kernel._blob(review)
             self.kernel._register_artifact(repo, ref, work_id, review, "CONTINUITY_REVIEW", principal.principal_id)
             self.kernel._receipt(repo, principal, wr, "CONTINUITY_REVIEW", request["idempotency_key"], request, ref)
+            if request["decision"] == "APPROVED":
+                from novel_factory.application.volume_settlement import publish_after_review
+                publish_after_review(self.kernel, repo, work_id, request["candidate_ref"], ref)
         return ref
 
     def publish(self, principal, work_id, payload, *, fault=None):
@@ -399,6 +417,27 @@ class ContinuityService:
                     "qualification": "HISTORICAL_EDITION_REVIEW_REQUIRED" if impact["status"] != "UNCHANGED" else "NO_NEW_IMPACT_SINCE_REVIEW",
                     "world_effects_applied": 0}
 
+    def _continuity_task(self, repo, principal, task_id, generation, snapshot_ref):
+        from novel_factory.application.narrative import NarrativeService
+        task, grant, spec, ctx = NarrativeService(self.kernel)._task(
+            repo, principal, task_id, generation, allow_accepted=True)
+        reader = grant["role_id"] in {"writer", "reviewer", "literary_editor", "chief_editor",
+                                      "evidence_maintainer", "control_operator"}
+        planner = grant["role_id"] == "volume_director" and spec["task_kind"] in {
+            "volume_contract", "window_plan", "replan"}
+        require(ctx["principal_id"] == principal.principal_id and ctx["read_cut"]["world_ref"] == spec["world_ref"]
+                and ctx["payload"]["policy_version"] == ctx["read_cut"]["policy_version"] == spec["policy_version"],
+                "TASK_REBIND_REQUIRED", "Continuity needs the original authorized context cut")
+        cut = ctx["read_cut"]["knowledge_cut"]
+        if planner and cut["plane"] == "PLAN":
+            from novel_factory.application.volume_successor import check_planner_cut
+            check_planner_cut(self.kernel, repo, task, spec, cut, snapshot_ref)
+        else:
+            require((reader or planner) and cut == {"plane": "WORLD"}, "VIEW_DENIED",
+                    "Continuity requires an assigned reader or planning task with a fixed cut")
+        check_profile(grant, cut["plane"])
+        return task, grant, spec
+
     def read_for_task(self, principal, task_id, generation, snapshot_ref, *, budget_bytes=100_000):
         """Deliver source-bound continuity only to the exact assigned task cut.
 
@@ -410,10 +449,8 @@ class ContinuityService:
         validate_contract("ArtifactRef", snapshot_ref)
         require(type(budget_bytes) is int and 0 < budget_bytes <= 2_000_000,
                 "INVALID_ARGUMENT", "Invalid continuity context byte budget")
-        from novel_factory.application.editorial import ReviewService
         with self.kernel.objects.lock(), self.kernel.db.uow(write=False, repeatable_read=True) as repo:
-            task, grant, spec = ReviewService(self.kernel)._task(repo, principal, task_id, generation)
-            check_profile(grant, "WORLD")
+            task, grant, spec = self._continuity_task(repo, principal, task_id, generation, snapshot_ref)
             require(grant["actor_id"] is None and snapshot_ref in spec["input_artifacts"],
                     "VIEW_DENIED", "Continuity is not assigned to this non-actor task generation")
             snapshot = self._snapshot(repo, snapshot_ref, task["work_id"])
@@ -458,5 +495,5 @@ class ContinuityService:
                 "authority": "DERIVED_EDITORIAL_MEMORY_NOT_WORLD_FACT_OR_ACTOR_BELIEF", "world_effects_applied": 0}
             require(len(canonical_bytes(result)) <= budget_bytes, "CONTEXT_BUDGET_EXCEEDED",
                     "The complete assigned continuity evidence exceeds this context budget")
-            ReviewService(self.kernel)._task(repo, principal, task_id, generation)
+            self._continuity_task(repo, principal, task_id, generation, snapshot_ref)
         return result

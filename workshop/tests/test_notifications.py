@@ -2,7 +2,8 @@ import os
 from uuid import uuid4
 
 import pytest
-from agent_workshop.auth import Session, connect
+from agent_workshop.admin import enroll
+from agent_workshop.auth import authenticate, connect
 from agent_workshop.messaging import mailbox, send
 from agent_workshop.notifications import notify_batch, receive_batch, replay
 from agent_workshop.organization import bootstrap
@@ -18,11 +19,15 @@ def test_recover_pending_ack_and_rebuild_lost_stream():
     redis = Redis.from_url(os.environ["AW_REDIS_TEST_URL"], decode_responses=True)
     org, stream, group = uuid4().hex, f"aw-test-{uuid4().hex}", uuid4().hex
     with connect(dsn) as conn:
-        bootstrap(conn, org)
+        conn.execute("INSERT INTO aw_installations VALUES(%s,%s,true)", (org, "nf-test"))
+        bootstrap(conn, org, installation_id=org)
+        director = authenticate(conn, enroll(conn, org, org, "volume", 1, 1))
+        actor_token = enroll(conn, org, org, "actor-1", 1, 1)
+        assert director.org_member
         for key in ("1", "2"):
             send(
                 conn,
-                Session(org, "volume", 1, 1, "i"),
+                director,
                 key,
                 "actor-1",
                 "ASSIGN",
@@ -43,5 +48,6 @@ def test_recover_pending_ack_and_rebuild_lost_stream():
         pass
     assert receive_batch(dsn, redis, stream, group, "new-worker", limit=5000, idle_ms=0) == 0
     with connect(dsn) as conn:
-        assert len(mailbox(conn, Session(org, "actor-1", 1, 1, "i"))["items"]) == 2
+        actor = authenticate(conn, actor_token)
+        assert actor.org_member and len(mailbox(conn, actor)["items"]) == 2
     redis.delete(stream)
