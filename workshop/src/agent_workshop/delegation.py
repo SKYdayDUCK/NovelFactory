@@ -23,6 +23,15 @@ def route(conn, org, sender, recipient=None, scope=None):
     return conn.execute(query + " LIMIT 1", params).fetchone() is not None
 
 
+def committed_budget(conn, org):
+    return conn.execute(
+        """SELECT COALESCE(SUM(CASE status WHEN 'HELD' THEN amount
+             WHEN 'SETTLED' THEN settled_amount ELSE 0 END),0) AS used
+           FROM aw_budget_holds WHERE org_id=%s""",
+        (org,),
+    ).fetchone()["used"]
+
+
 def delegate(conn, session, operation_id, slot_id, max_amount, token_limit):
     org, sender = session.org_id, session.employee_id
     require_employee(conn, session)
@@ -67,12 +76,7 @@ def delegate(conn, session, operation_id, slot_id, max_amount, token_limit):
         or account["currency"] != policy["currency"]
     ):
         raise Denied("BUDGET_EXCEEDED")
-    committed = conn.execute(
-        """SELECT COALESCE(SUM(CASE status WHEN 'HELD' THEN amount
-             WHEN 'SETTLED' THEN settled_amount ELSE 0 END),0) AS used FROM aw_budget_holds WHERE org_id=%s""",
-        (org,),
-    ).fetchone()["used"]
-    if committed + amount > account["limit_amount"]:
+    if committed_budget(conn, org) + amount > account["limit_amount"]:
         raise Denied("BUDGET_EXCEEDED")
     if conn.execute(
         "SELECT 1 FROM aw_delegations WHERE org_id=%s AND slot_id=%s", (org, slot_id)

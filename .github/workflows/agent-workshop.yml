@@ -177,6 +177,8 @@ jobs:
           AW_NF_SOURCE: ${{ github.workspace }}
           AW_DUAL_TEST_ADMIN_URL: postgresql://postgres:workshop-ci-admin@127.0.0.1:5432/postgres
           AW_DUAL_TEST_NF_ADMIN_URL: postgresql://postgres:nf-ci-admin@127.0.0.1:5433/postgres
+          AW_W3_REDIS_IMAGE: redis:8.0.2
+          AW_W3_REDIS_EVIDENCE: ${{ github.workspace }}/workshop/w3-redis-recovery.json
           AW_PAIRED_RESTORE_EVIDENCE: ${{ github.workspace }}/workshop/paired-restore.json
           PG_BIN: /usr/lib/postgresql/17/bin
         run: |
@@ -198,6 +200,7 @@ jobs:
             workshop/w3-legacy-upgrades.xml
             workshop/dual-results.xml
             workshop/paired-restore.json
+            workshop/w3-redis-recovery.json
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()

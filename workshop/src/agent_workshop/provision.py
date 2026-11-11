@@ -11,7 +11,7 @@ from psycopg.types.json import Jsonb
 
 from .auth import Denied, connect
 from .organization import IDENTIFIER, NF_ROLES, employee, lock_org, schema
-from .delegation import MAX_MONEY, UUID_FIELD
+from .delegation import MAX_MONEY, UUID_FIELD, committed_budget
 
 SLOT = schema(
     {
@@ -72,19 +72,19 @@ def main():
         if args.kind == "budget":
             if not args.limit.is_finite() or args.limit < 0:
                 parser.error("limit must be finite and nonnegative")
-            conn.execute(
+            account = conn.execute(
                 """INSERT INTO aw_budget_accounts VALUES (%s,%s,%s) ON CONFLICT(org_id)
                          DO UPDATE SET limit_amount=excluded.limit_amount
-                         WHERE aw_budget_accounts.currency=excluded.currency RETURNING org_id""",
+                         WHERE aw_budget_accounts.currency=excluded.currency RETURNING limit_amount""",
                 (args.org, args.limit, args.currency),
-            )
-            if (
-                conn.execute(
-                    "SELECT currency FROM aw_budget_accounts WHERE org_id=%s", (args.org,)
-                ).fetchone()["currency"]
-                != args.currency
-            ):
+            ).fetchone()
+            if account is None:
                 raise Denied("CURRENCY_MISMATCH")
+            # The upsert owns the same account row lock as delegate(). Read
+            # commitments in a new statement after any earlier reservation commits.
+            # A rejected limit rolls back with this CLI transaction.
+            if account["limit_amount"] < committed_budget(conn, args.org):
+                raise Denied("BUDGET_BELOW_COMMITTED")
         else:
             allow_slot(
                 conn,
