@@ -13,7 +13,7 @@ from sqlalchemy import text
 from novel_factory.application.kernel import require
 from novel_factory.domain.errors import DomainError
 
-CURRENT_VERSION = 4
+CURRENT_VERSION = 5
 _FILTERS = {"volume_id", "trace_id", "actor_id", "role_id", "experiment_id", "model", "task_id"}
 _SNAPSHOT = """a.event_id = ANY(CAST(:members AS uuid[]))"""
 
@@ -98,11 +98,37 @@ def _usage(conn, event, data, version):
 
 def calculate(conn, event, version):
     """A pure interpretation of immutable evidence for one version and event."""
-    if version not in {1, 2, 3, 4}:
+    if version not in range(1, CURRENT_VERSION + 1):
         raise DomainError("INVALID_ARGUMENT", "Unsupported metric version")
     kind = event["event_type"]
     result = {"events": 1, "event." + kind: 1}
-    if kind == "task.changed":
+    if kind == "semantic.conflict.detected" and version >= 5:
+        result["conflict.candidates"] = 1
+        outcome = event["outcome"]
+        result["conflict.type." + outcome] = 1
+        if outcome in {"STALE_PRECONDITION", "SHARED_CONSTRAINT_CONFLICT",
+                       "JOINT_ADJUDICATION_REQUIRED", "PLAN_SELECTION_CONFLICT",
+                       "HISTORY_REPAIR_REQUIRED", "BRANCH_DIVERGENCE"}:
+            result["conflict.confirmed_by_guard"] = 1
+    elif kind == "semantic.conflict.resolved" and version >= 5:
+        detail = event["conflict_details"]
+        outcome = event["outcome"]
+        result["conflict.result." + outcome] = 1
+        result["conflict.strategy." + detail["resolution_strategy"]] = 1
+        if outcome in {"REVALIDATED", "CERTIFICATE_REISSUED", "CONTEXT_RECOMPUTED"}:
+            result["conflict.auto_resolved"] = 1
+        if outcome == "REVIEW_REQUIRED":
+            result["conflict.review_escalations"] = 1
+        if outcome == "REPLAN_PROPOSED":
+            result["conflict.replan_proposals"] = 1
+        for key in ("additional_model_attempts", "actual_tokens", "retained_artifacts",
+                    "recomputed_tasks", "replans_applied"):
+            value = detail.get(key)
+            if type(value) is int and value >= 0:
+                result["conflict." + key] = value
+        if detail.get("cost_status"):
+            result["conflict.cost_status." + detail["cost_status"]] = 1
+    elif kind == "task.changed":
         result["task.state." + str(event["outcome"])] = 1
     elif kind == "mcp.finished":
         result["mcp." + event["outcome"]] = 1
@@ -287,7 +313,7 @@ class StatisticsService:
         start=None,
         end=None,
     ):
-        require(version in {1, 2, 3, 4}, "INVALID_ARGUMENT", "Unsupported metric version")
+        require(version in range(1, CURRENT_VERSION + 1), "INVALID_ARGUMENT", "Unsupported metric version")
         where, args = _scope(work_id, branch_id, filters, start, end)
         with self.kernel.db.uow() as repo:
             grant = self.kernel.authorize(repo, principal, work_id, "ADMIN", branch_id)
@@ -428,6 +454,14 @@ class StatisticsService:
                     "estimated_provider_cost": "Supply a pinned price book to ChapterCostService.report",
                 },
             }
+            if version >= 5:
+                # An independent labelled comparison is necessary for these rates.
+                # Scope mismatches and a reviewer handoff do not supply ground truth.
+                answer["measures"]["conflict_quality"] = {
+                    "false_positives": None, "false_negatives": None,
+                    "unnecessary_rework_fraction": None,
+                    "status": "NO_LABELLED_COMPARISON",
+                }
             if mode == "verify":
                 answer.update(
                     consistent=difference_count == 0,

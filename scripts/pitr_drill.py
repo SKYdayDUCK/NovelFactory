@@ -194,6 +194,7 @@ def main():
         if args.with_redis:
             from pitr_streams import StreamsDrill
             streams_drill = StreamsDrill(root, _port())
+            semantic_target = streams_drill.create_semantic_case(kernel)
             streams_drill.publish(database)
         backup_service = OnlineBackupService(database.engine, objects, pg_bin=pg_bin)
         logical = backup_service.create(root / "target-logical-snapshot")
@@ -277,6 +278,9 @@ def main():
         # Replaying a pre-disaster accepted command returns its exact receipt.
         _check(recovered.accept(principal, target["request"]) == target["receipt"], "Restored accepted receipt differs")
         if streams_drill:
+            restored_semantic = streams_drill.semantic_witness(recovered_database, semantic_target["case_id"])
+            _check(restored_semantic == semantic_target, "Restored semantic decision or statistics differs")
+            result["restored_semantic_conflict"] = restored_semantic
             result["redis_pitr_reconciliation"] = streams_drill.verify(recovered_database,
                 target["world_ref"]["world_revision_id"], later["world_ref"]["world_revision_id"])
         result.update(status="PASS", target_world_ref=target["world_ref"], target_lsn=str(target_lsn),

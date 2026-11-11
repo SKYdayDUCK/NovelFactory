@@ -157,6 +157,12 @@ class RuntimeSupervisor:
         return self.admit_model(controller, work_id, branch_id, executor=executor, summary=summary)
 
     def advance_world(self, controller, work_id, branch_id):
+        from novel_factory.application.conflict_resolution import ConflictResolutionService
+        resolution = ConflictResolutionService(self.kernel)
+        resolution.scan_one(controller, work_id, branch_id)
+        receipt = resolution.resolve_one(controller, work_id, branch_id)
+        if receipt:
+            return {"status": "CONFLICT_COORDINATED", **receipt}
         from novel_factory.application.volume_successor import advance_volume
         volume = advance_volume(self.kernel, self.gateway, controller, work_id, branch_id)
         if volume:

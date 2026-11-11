@@ -18,6 +18,7 @@ from novel_factory.domain.errors import DomainError
 from novel_factory.domain.temporal import point_key, contains, validate_interval
 from novel_factory.domain.world import (state_at, lifecycle_at, PREDICATES, ALIASES, PROJECTION_VERSION)
 from .query_policy import check_profile
+from .semantic_dependencies import record_query
 
 
 def _id():
@@ -52,8 +53,8 @@ class WorldQueryService:
         self._cache_lock = threading.RLock()
         self.cache_hits = self.cache_misses = 0
 
-    def _task(self, repo, principal, task_id, generation, capability='READ'):
-        task = repo.one('tasks', {'task_id': task_id})
+    def _task(self, repo, principal, task_id, generation, capability='READ', *, lock=None):
+        task = repo.one('tasks', {'task_id': task_id}, lock=lock)
         _require(task, 'VIEW_DENIED', 'Task is unavailable')
         grant = self.kernel.authorize(repo, principal, task['work_id'], capability, task['branch_id'])
         _require(task['principal_id'] == principal.principal_id and task['grant_id'] == principal.grant_id,
@@ -201,12 +202,18 @@ class WorldQueryService:
                     'read_cut': read_cut, 'events': [row['payload'] for row in events],
                     'plans': plans, 'manifest': manifest, 'indexes': indexes}
 
-    def _delivery_check(self, principal, request, packet):
-        with self.kernel.db.uow(write=False) as repo:
-            _, grant, _ = self._task(repo, principal, request['task_id'], request['generation'])
-            self.kernel.authorize(repo, principal, packet['read_cut']['world_ref']['work_id'], 'READ',
-                                  packet['read_cut']['world_ref']['branch_id'])
+    def _delivery_check(self, principal, request, packet, observations):
+        with self.kernel.db.uow() as repo:
+            wr = packet['read_cut']['world_ref']
+            self.kernel.authorize(repo, principal, wr['work_id'], 'READ', wr['branch_id'])
+            head = repo.one('branches', {'work_id': wr['work_id'], 'branch_id': wr['branch_id']}, lock='share')
+            # Fence concurrent result acceptance while the delivered query
+            # becomes a mandatory dependency of this exact generation.
+            _, grant, _ = self._task(repo, principal, request['task_id'], request['generation'], lock='share')
             _require(grant['epoch'] == packet['grant']['epoch'], 'VIEW_DENIED', 'Authorization changed before delivery')
+            for child, payload in observations:
+                record_query(repo, packet, child, payload, 'QUERY', head['head_revision_id'])
+
 
     def _time_check(self, packet, subject_time):
         if subject_time['kind'] == 'POINT':
@@ -494,7 +501,7 @@ class WorldQueryService:
                   'payload': payload, 'freshness': freshness, 'dependency_handle': handle, 'consistency_status': 'SATISFIED'}
         validate_contract('UnifiedQueryResult', result, '2.1')
         _require(len(canonical_bytes(result)) <= self.max_response_bytes, 'CAPACITY_LIMIT', 'Query response budget exceeded')
-        self._delivery_check(principal, request, packet)
+        self._delivery_check(principal, request, packet, [({**request, 'dependency_handle': handle}, payload)])
         return result
 
     def batch(self, principal, request):
@@ -505,13 +512,14 @@ class WorldQueryService:
                    len(item['query'].get('predicates', [None])) for item in request['items'])
         _require(cost <= 4000, 'CAPACITY_LIMIT', 'Aggregate batch query budget exceeded')
         packet = self._sample(principal, request); packet['principal'] = principal
-        results = []
+        results, observations = [], []
         for item in request['items']:
             child = {key: request[key] for key in ('schema_version', 'task_id', 'generation', 'read_contract', 'knowledge_cut')}
             child.update({key: item[key] for key in ('subject_time', 'query', 'page_size')}, cursor=None)
             try:
                 validate_contract('UnifiedQueryRequest', child, '2.1')
                 payload, freshness, handle = self._execute(packet, child)
+                observations.append(({**child, 'dependency_handle': handle}, payload))
                 results.append({'item_id': item['item_id'], 'status': 'SUCCESS', 'payload': payload,
                                 'freshness': freshness, 'dependency_handle': handle})
             except DomainError as exc:
@@ -520,7 +528,7 @@ class WorldQueryService:
                   'items': results, 'all_items_succeeded': all(item['status'] == 'SUCCESS' for item in results)}
         validate_contract('QueryBatchResult', result, '2.1')
         _require(len(canonical_bytes(result)) <= self.max_response_bytes, 'CAPACITY_LIMIT', 'Batch response budget exceeded')
-        self._delivery_check(principal, request, packet)
+        self._delivery_check(principal, request, packet, observations)
         return result
 
     def context_compile(self, principal, request):
@@ -632,6 +640,7 @@ class WorldQueryService:
             _require(grant['epoch'] == packet['grant']['epoch'], 'VIEW_DENIED', 'Authorization changed during compilation')
             # Locks and fencing are repeated in the same transaction that adds
             # the immutable bundle and binds it to this exact task generation.
+            branch = repo.one('branches', {'branch_id': wr['branch_id']}, lock='share')
             task = self.kernel.tasks.guard_task(repo.conn, request['task_id'], request['generation'], require_context=False)
             previous = repo.one('receipts', {'work_id': wr['work_id'], 'principal_id': principal.principal_id,
                                            'command_type': 'CONTEXT_COMPILE', 'idempotency_key': request['idempotency_key']})
@@ -648,6 +657,7 @@ class WorldQueryService:
                                   'read_cut': packet['read_cut'], 'dependency_fingerprint': dependency_hash})
             self.kernel.tasks.bind_context_in_transaction(repo.conn, request['task_id'], request['generation'], None,
                 context_bundle_id=context_id, dependency_fingerprint=dependency_hash, world_ref=wr)
+            record_query(repo, packet, child, payload, 'CONTEXT', branch['head_revision_id'], context_ref=compiled_ref)
             repo.add_many('dependencies', [
                 {'dependency_id': _id(), 'work_id': wr['work_id'], 'branch_id': wr['branch_id'],
                  'owner_type': 'context', 'owner_id': context_id, 'scope_key': scope,

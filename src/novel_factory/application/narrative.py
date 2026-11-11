@@ -693,6 +693,11 @@ class NarrativeService:
                 "NARRATIVE_BLOCKED", "Text has unresolved world, cognition, or disclosure changes")
         origin, grant, _, context = self._origin(repo, draft)
         extraction, extraction_task, extraction_grant = self._extraction(repo, report["extraction_ref"], draft_ref, draft)
+        # Both a new narrative acceptance and a subsequent release freeze pass
+        # this guard again under the branch lock. Existing release reads stay historical.
+        from novel_factory.application.semantic_dependencies import check_task_dependencies
+        for source_task in (origin, extraction_task):
+            check_task_dependencies(repo, source_task["task_id"], source_task["generation"])
         require(execution["origin_task_id"] == origin["task_id"] and execution["origin_generation"] == origin["generation"]
                 and execution["origin_grant_id"] == origin["grant_id"] and execution["origin_permission_epoch"] == grant["epoch"]
                 and execution["extraction_task_id"] == extraction_task["task_id"]

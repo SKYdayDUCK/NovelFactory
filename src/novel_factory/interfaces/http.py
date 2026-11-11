@@ -294,6 +294,12 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
         payload = await _body(request, "QueryBatchRequest", "2.1")
         return await execute(request, "query", lambda principal: query_service.batch(principal, payload))
 
+    @app.post("/api/v1/queries/semantic-assumptions")
+    async def semantic_assumption(request: Request):
+        from novel_factory.application.semantic_dependencies import add_assumption
+        payload = await _body(request, "SemanticAssumption", "kernel")
+        return await execute(request, "write", lambda principal: add_assumption(kernel, principal, payload))
+
     @app.post("/api/v1/contexts/compile")
     async def compile_context(request: Request):
         payload = await _body(request, "ContextCompileRequest", "2.1")

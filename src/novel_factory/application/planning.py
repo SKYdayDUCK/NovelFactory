@@ -514,6 +514,9 @@ class PlanningService:
                 repo.add("dependencies", {"dependency_id": _id(), "work_id": wr["work_id"], "branch_id": wr["branch_id"],
                     "owner_type": "planning_task", "owner_id": owner_id, "scope_key": scope["scope_key"],
                     "observed_version": scope["version"], "dependency_kind": "ARTIFACT_SELECTION"})
+            from .semantic_dependencies import record_plan
+            record_plan(repo, self.kernel.revision(repo, wr), task, payload, plan,
+                        self.kernel.head(repo, wr["work_id"], wr["branch_id"])["world_revision_id"])
             self.kernel._receipt(repo, principal, wr, "PLAN_BIND_TASK", idempotency_key, request, ref)
         return ref
 
@@ -579,5 +582,8 @@ class PlanningService:
                     "owner_type": "planning_task", "owner_id": task_id + ":" + str(generation), "scope_key": scope["scope_key"],
                     "observed_version": scope["version"], "dependency_kind": "ARTIFACT_SELECTION"})
             validate_task_plan_binding(repo, self.kernel, task)
+            from .semantic_dependencies import record_plan
+            record_plan(repo, self.kernel.revision(repo, wr), task, payload, plan,
+                        self.kernel.head(repo, wr["work_id"], wr["branch_id"])["world_revision_id"])
             self.kernel._receipt(repo, principal, wr, "PLAN_BIND_CONTROLLED_TASK", idempotency_key, request, ref)
         return ref

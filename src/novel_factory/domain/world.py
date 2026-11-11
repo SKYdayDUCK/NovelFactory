@@ -29,6 +29,10 @@ PREDICATES = {
     'controlled_by': ('ENTITY', True), 'vital_state': ('STRING', True),
     'ability_state': ('STRING', True), 'on_duty': ('BOOLEAN', True),
     'blocked_by': ('ENTITY', False),
+    # Carrier identity is the subject. Content and attributed readings point
+    # to immutable artifact versions. An attributed reading is not its truth.
+    'message_content_ref': ('STRING', True), 'attributed_reading_ref': ('STRING', True),
+    'message_authentic': ('BOOLEAN', True),
 }
 ALIASES = {'owner': 'legal_owner', 'holder': 'possessed_by', 'active_holder': 'possessed_by',
            'last_confirmed_owner': 'legal_owner', 'location': 'located_in'}

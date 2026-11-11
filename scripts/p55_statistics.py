@@ -31,7 +31,7 @@ def main():
             "register-experiment",
         ],
     )
-    parser.add_argument("--version", choices=[1, 2, 3, 4], type=int)
+    parser.add_argument("--version", choices=range(1, CURRENT_VERSION + 1), type=int)
     parser.add_argument("--source-cut")
     parser.add_argument("--chapter-bindings", type=Path)
     parser.add_argument("--trace-id", type=UUID)

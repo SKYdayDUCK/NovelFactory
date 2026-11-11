@@ -10,6 +10,9 @@ from redis.exceptions import ConnectionError
 from sqlalchemy import text
 
 from novel_factory.application.audit_log import LogService
+from novel_factory.application.queries import WorldQueryService
+from novel_factory.application.statistics import CURRENT_VERSION, StatisticsService
+from novel_factory.fixtures import create_bound_task, load_fixture, point, run_command
 from novel_factory.infrastructure.eventhub import EventHub
 
 
@@ -69,6 +72,72 @@ class StreamsDrill:
     def acknowledge_target(self, db):
         hub = EventHub(db, self.client)
         self.drain(lambda: hub.consume_once("log", "pitr-before", LogService.handle))
+
+    def create_semantic_case(self, kernel):
+        """Create decisions after the base backup so only WAL can bring them back."""
+        from novel_factory.application.conflict_resolution import ConflictResolutionService
+
+        world = load_fixture(kernel, "white_bridge")
+        owner, base = world["principal"], world["world_ref"]
+        guard = world["ids"]["guard1"]
+        task = create_bound_task(kernel, owner, base, point(20), [guard], ["on_duty"])
+        WorldQueryService(kernel).query(owner, {
+            "schema_version": "2.1", "task_id": task["task_id"], "generation": task["generation"],
+            "read_contract": {"revision": {"mode": "FIXED", "world_ref": base},
+                              "process_policy": "ALLOW_PARTIAL", "index_policy": "AUTHORITATIVE",
+                              "max_wait_ms": 0},
+            "knowledge_cut": {"plane": "WORLD"}, "subject_time": {"kind": "POINT", "at": point(20)},
+            "query": {"kind": "STATE", "subject_ids": [guard], "predicates": ["on_duty"]},
+            "page_size": 32, "cursor": None,
+        })
+        changed = run_command(kernel, owner, base, "SET_RELATION", {
+            "subject_id": guard, "predicate": "on_duty",
+            "object_value": {"kind": "BOOLEAN", "value": False}, "at": point(10),
+        })
+        resolver = ConflictResolutionService(kernel)
+        scope = (owner, base["work_id"], base["branch_id"])
+        for _ in range(8):
+            resolver.scan_one(*scope)
+            resolver.resolve_one(*scope)
+            with kernel.db.uow(write=False) as repo:
+                case_id = repo.conn.scalar(text("""
+                    SELECT c.case_id FROM nf_conflict_cases c JOIN nf_conflict_resolutions r USING(case_id)
+                    WHERE c.task_id=:task AND c.generation=:gen AND c.world_revision_id=:changed
+                """), {"task": task["task_id"], "gen": task["generation"],
+                       "changed": changed["world_ref"]["world_revision_id"]})
+            if case_id is not None:
+                break
+        else:
+            raise RuntimeError("Semantic recovery fixture did not reach a resolution")
+        self.publish(kernel.db)
+        hub = EventHub(kernel.db, self.client)
+        self.drain(lambda: hub.consume_once("statistics", "pitr-stats", StatisticsService.handle))
+        return self.semantic_witness(kernel.db, case_id)
+
+    @staticmethod
+    def semantic_witness(db, case_id):
+        """Read immutable, scoped receipts and their actual incremental metric contributions."""
+        with db.uow(write=False) as repo:
+            result = repo.conn.execute(text("""
+                SELECT c.case_id::text, r.receipt_id::text, c.conflict_type, r.outcome,
+                       (SELECT array_agg(o.observation_id::text ORDER BY o.observation_id)
+                        FROM nf_semantic_reads o WHERE o.task_id=c.task_id AND o.generation=c.generation)
+                           AS observation_ids,
+                       c.world_revision_id::text AS change_revision,
+                       (SELECT jsonb_object_agg(a.event_type,m.metrics) FROM nf_audit_events a
+                        JOIN nf_metric_contributions m USING(event_id)
+                        WHERE a.evidence_id=c.case_id AND m.metric_version=:v
+                        AND a.event_type IN ('semantic.conflict.detected','semantic.conflict.resolved'))
+                           AS contributions
+                FROM nf_conflict_cases c JOIN nf_conflict_resolutions r USING(case_id)
+                JOIN nf_semantic_changes ch USING(world_revision_id)
+                WHERE c.case_id=:id
+            """), {"id": case_id, "v": CURRENT_VERSION}).mappings().one()
+        contributions = result["contributions"] or {}
+        if not result["observation_ids"] or set(contributions) != {
+                "semantic.conflict.detected", "semantic.conflict.resolved"}:
+            raise RuntimeError("Incomplete semantic read, resolution, or metric witnesses")
+        return dict(result)
 
     def verify(self, db, target, later):
         hub = EventHub(db, self.client)

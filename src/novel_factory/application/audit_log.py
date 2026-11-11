@@ -1,4 +1,5 @@
 """Scoped, append-only references to original business evidence and MCP invocations."""
+import json
 from datetime import UTC, datetime
 from hashlib import sha256
 from uuid import UUID, uuid4
@@ -42,7 +43,7 @@ def _task_scope(conn, task_id, generation=None):
     return scope
 
 
-def record(conn, event_type, *, event_id=None, **fields):
+def record(conn, event_type, *, event_id=None, conflict_details=None, **fields):
     """Internal transaction boundary. Only typed identifiers, counters and bounded labels persist."""
     event_id = str(event_id or uuid4())
     values = dict.fromkeys(_FIELDS)
@@ -50,7 +51,15 @@ def record(conn, event_type, *, event_id=None, **fields):
     values["trace_id"] = values["trace_id"] or values["task_id"] or event_id
     values["span_id"] = values["span_id"] or event_id
     values["event_time"] = values["event_time"] or datetime.now(UTC)
-    inserted = conn.execute(_INSERT, values).scalar_one_or_none()
+    statement = _INSERT
+    if conflict_details is not None:
+        columns = ','.join(_FIELDS)
+        parameters = ','.join(':' + key for key in _FIELDS)
+        statement = text(f"""INSERT INTO nf_audit_events ({columns},conflict_details)
+            VALUES ({parameters},CAST(:conflict_details AS jsonb))
+            ON CONFLICT(event_id) DO NOTHING RETURNING event_id""")
+        values["conflict_details"] = json.dumps(conflict_details)
+    inserted = conn.execute(statement, values).scalar_one_or_none()
     if inserted:
         envelope = {k:str(values[k]) for k in ("work_id","branch_id","task_id","trace_id") if values[k]}
         if values["generation"] is not None:
@@ -70,7 +79,7 @@ class LogService:
     @staticmethod
     def record_domain(conn, row):
         topic, kind, resource, payload = row["topic"], row["aggregate_type"], row["aggregate_id"], row["payload"]
-        if topic == "audit.recorded" or not _uuid(resource):
+        if topic in {"audit.recorded", "semantic.conflict.detected", "semantic.conflict.resolved"} or not _uuid(resource):
             return
         wr = payload.get("world_ref") or {}
         task = resource if kind == "task" else payload.get("task_id")
@@ -137,6 +146,24 @@ class LogService:
             fields["error_code"] = payload["reason"]
         return record(conn, topic, event_id=row["outbox_id"], **fields, outcome=state, evidence_id=resource,
                       event_time=row["created_at"])
+
+    @staticmethod
+    def conflict(conn, phase, *, case_id, receipt_id, task_id, generation, outcome,
+                 details, duration_ms=None):
+        """Freeze the worker decision in its own transaction with the business effect."""
+        if phase not in {"detected", "resolved"}:
+            raise ValueError("Unsupported conflict phase")
+        scope = _task_scope(conn, task_id, generation)
+        if not scope or scope["generation"] != generation:
+            raise ValueError("Conflict has no matching frozen task generation")
+        # Internal writers supply evidence references. Nothing in this payload travels
+        # through Redis or a character-role MCP tool. Trace access requires branch ADMIN.
+        return record(
+            conn, "semantic.conflict." + phase, event_id=receipt_id,
+            evidence_id=case_id, outcome=outcome, duration_ms=duration_ms,
+            causation_id=case_id if phase == "resolved" else None,
+            conflict_details={**details, "conflict_case_id": str(case_id)}, **scope,
+        )
 
     @staticmethod
     def model(conn, evidence_id, data):

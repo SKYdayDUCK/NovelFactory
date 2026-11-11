@@ -72,6 +72,11 @@ def handler_for(group):
         raise ValueError("Unknown processor group")
 
     def signal(conn, envelope):
+        if group == "world" and envelope.event_type == "world.accepted":
+            from novel_factory.application.conflict_resolution import scan_event
+            from novel_factory.infrastructure.database import tables
+            from novel_factory.infrastructure.repository import KernelRepository
+            scan_event(KernelRepository(conn, tables), envelope.event_id)
         if envelope.work_id and envelope.branch_id:
             conn.execute(_SIGNAL, {"work": envelope.work_id, "branch": envelope.branch_id,
                                    "processor": group, "event": envelope.event_id})

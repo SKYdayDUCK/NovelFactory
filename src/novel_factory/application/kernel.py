@@ -28,6 +28,9 @@ def after(p):
 def require(condition, code, message):
     if not condition: raise DomainError(code, message)
 
+from .semantic_dependencies import check_task_dependencies, record_change, record_proposal
+
+
 class Kernel:
     def __init__(self, db, objects):
         self.db, self.objects = db, objects
@@ -149,6 +152,16 @@ class Kernel:
         for parent in event["causal_parents"]:
             source_event(parent,base_ref)
         for effect in event["effects"]:
+            if (effect["kind"] == "RELATION_TRANSITION" and effect["operation"] == "OPEN"
+                    and effect["predicate"] in {"message_content_ref", "attributed_reading_ref"}):
+                from novel_factory.domain.canonical import strict_json_loads
+                ref = strict_json_loads(effect["object_value"]["value"])
+                artifact = self.artifact(r, ref, wid)
+                require(artifact["kind"] in {"TEXT", "EVIDENCE"}, "INVALID_EVIDENCE",
+                        "Message content needs a registered immutable source")
+                require(base["snapshot"]["entities"].get(effect["subject_id"], {}).get("entity_kind")
+                        in {"KNOWLEDGE", "KNOWLEDGE_CARRIER"}, "INVALID_EVIDENCE", "Message needs a knowledge carrier")
+                self.objects.verify(ref["sha256"])
             if effect["kind"]!="COGNITIVE_RECORD_ADD":continue
             require(effect["evidence_refs"],"INVALID_EVIDENCE","Formal cognition requires a source")
             for evidence in effect["evidence_refs"]:
@@ -533,7 +546,7 @@ class Kernel:
         approval_id=new_id() if template_id!="REPAIR_EVENT" else None
         with self.objects.lock(),self.db.uow() as r:
             self.authorize(r,principal,wr["work_id"],"PROPOSE",wr["branch_id"])
-            r.one("branches",{"branch_id":wr["branch_id"]},lock="update")
+            locked_branch=r.one("branches",{"branch_id":wr["branch_id"]},lock="update")
             prior=self._prior(r,principal,wr["work_id"],"PROPOSE",idempotency_key,command)
             if prior:return prior
             self._task_binding(r,principal,task_id,generation,context["context_bundle_id"])
@@ -556,6 +569,7 @@ class Kernel:
             result={"proposal_ref":proposal_ref,"approval_id":approval_id,"base_world_ref":wr,"context_bundle_id":context["context_bundle_id"],
                     "dependency_fingerprint":context["dependency_fingerprint"],"dependency_handle":context["payload"]["dependency_handle"]}
             self._receipt(r,principal,wr,"PROPOSE",idempotency_key,command,result,proposal_id)
+            record_proposal(r, base, proposal_id, task_id, generation, footprint, proposal_ref, at, locked_branch["head_revision_id"])
             for key in sorted(set(footprint["reads"])|set(footprint["writes"])):
                 r.add("dependencies",{"dependency_id":new_id(),"work_id":wr["work_id"],"branch_id":wr["branch_id"],"owner_type":"proposal","owner_id":proposal_id,
                     "scope_key":key,"observed_version":base["scope_versions"].get(key,0),"dependency_kind":"HARD_PRECONDITION"})
@@ -632,6 +646,7 @@ class Kernel:
             original=current if parent==wr else self.revision(r,wr)
             require(original["provenance"].get("history_epoch",0)==branch["history_epoch"],"HISTORY_CHANGED","Historical repair requires a fresh task input and proposal")
             require(current["interpretation_ref"]==work["interpretation_ref"],"STALE_CERTIFICATE","Current interpretation requires a new reviewed world revision")
+            check_task_dependencies(r, task["task_id"], task["generation"])
             reads,writes=self._tokens(r,wr,actual,grant,approvals,branch["history_epoch"],work)
             sample={"validated_world_ref":parent,"state_hash":current["state_hash"],"reads":reads,"writes":writes,"command_sha256":fingerprint(p["template_args"]),"validator":"nf-validator-1"}
             dependency=deepcopy(context["dependency_manifest"])
@@ -762,6 +777,7 @@ class Kernel:
             if mode=="STRICT_HEAD":require(parent==wr,"HEAD_CONFLICT","Strict input HEAD changed")
             else:require(p["template_id"] in GUARDED and cert["coverage_status"]=="COMPLETE_FOR_TEMPLATE","UNPROVEN_FOOTPRINT","Unregistered guarded template")
             self._verify_tokens(r,wr,cert,p["footprint"],grant,approvals,branch,work)
+            check_task_dependencies(r, task["task_id"], task["generation"])
             current=self.revision(r,parent)
             from novel_factory.application.simulation import validate_schedule_command, attach_schedule_state
             validate_schedule_command(self, r, principal, current, p["template_id"], p["template_args"], p["footprint"])
@@ -812,6 +828,7 @@ class Kernel:
             attach_schedule_state(current, rev, p)
             manifest=rev["manifest_hash"]
             r.add("revisions",rev)
+            record_change(r, rev, p)
             r.add_many("revision_events",[{"world_revision_id":rid,"work_id":wr["work_id"],"branch_id":wr["branch_id"],
                 "occurrence_id":event["occurrence_id"],"event_version_id":event["event_version_id"],"effect_group_id":event["effect_group_id"]}
                 for event in events])

@@ -52,6 +52,8 @@ TOPICS = frozenset(
         "volume.settlement.recorded",
         "volume.settlement.continuity",
         "volume.settlement.publication",
+        "semantic.conflict.detected",
+        "semantic.conflict.resolved",
         "supervisor.handoff.blocked",
         "supervisor.task.expired",
         "supervisor.adjudication.delivery",

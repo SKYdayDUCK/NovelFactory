@@ -117,6 +117,8 @@ class AgentGateway:
     def _binding(self, repo, principal, request):
         task, grant, spec = WorldQueryService(self.kernel)._task(
             repo, principal, request["task_id"], request["generation"])
+        from novel_factory.application.semantic_dependencies import check_task_dependencies
+        check_task_dependencies(repo, task["task_id"], task["generation"])
         from novel_factory.application.planning import validate_task_plan_binding
         validate_task_plan_binding(repo, self.kernel, task, spec)
         require(task["lease_owner"] == request["worker_id"], "LEASE_OWNER_MISMATCH", "Worker does not own this task")

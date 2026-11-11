@@ -25,6 +25,10 @@ _NEXT = text("""
           AND NOT EXISTS(SELECT FROM nf_dispatch_slots s WHERE s.task_id=t.task_id
                          AND s.expires_at > statement_timestamp())
           AND NOT EXISTS(SELECT FROM nf_call_attempts c WHERE c.task_id=t.task_id)
+          AND NOT EXISTS(SELECT FROM nf_conflict_cases sc WHERE sc.task_id=t.task_id
+                         AND sc.generation=t.generation AND NOT EXISTS
+                         (SELECT FROM nf_conflict_resolutions sr WHERE sr.case_id=sc.case_id
+                          AND sr.outcome IN ('REVALIDATED','CERTIFICATE_REISSUED')))
           AND (SELECT count(*) FROM active) <
               (SELECT slots FROM nf_dispatch_limits WHERE scope='GLOBAL' AND subject='*')
           AND (SELECT count(*) FROM active a WHERE a.work_id=t.work_id) <
