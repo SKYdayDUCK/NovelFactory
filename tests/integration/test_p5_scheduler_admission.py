@@ -223,3 +223,19 @@ def test_idle_service_wakes_before_periodic_reconciliation(kernel_env, tmp_path)
             finally:
                 child.terminate()
                 child.wait(timeout=10)
+
+
+def test_unavailable_first_task_does_not_hide_ready_sibling(kernel_env):
+    kernel = kernel_env["kernel"]
+    world = load_fixture(kernel)
+    wr = world["world_ref"]
+    with backend() as (route, requests, _):
+        gateway = AgentGateway(kernel, {"test": route})
+        supervisor = RuntimeSupervisor(kernel, gateway)
+        budget = kernel.tasks.create_budget(wr["work_id"], "1")
+        first, second = [_job(kernel, gateway, supervisor, world, budget, "READY") for _ in range(2)]
+        with kernel.db.uow() as locker:
+            locker.one("tasks", {"task_id": first.task["task_id"]}, lock="update")
+            result = supervisor.run_once(world["principal"], wr["work_id"], wr["branch_id"])
+            assert result["status"] == "RESULT_STORED" and result["task_id"] == second.task["task_id"]
+        assert len(requests) == 1

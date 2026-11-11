@@ -34,6 +34,7 @@ _NEXT = text("""
               (SELECT slots FROM nf_dispatch_limits WHERE scope='ROLE' AND subject IN ('*',t.role_id)
                ORDER BY subject='*' LIMIT 1)
         ORDER BY q.requested_at, q.branch_id, f.last_served_at, t.created_at, t.task_id LIMIT 1
+        FOR UPDATE OF t SKIP LOCKED FOR SHARE OF g,w SKIP LOCKED
     )
     SELECT task_id::text FROM next_job WHERE branch_id=:branch
 """)
