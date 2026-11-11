@@ -1,5 +1,6 @@
 """Disposable database pair. Tests explicitly require a PG17 test administrator."""
 
+from contextlib import contextmanager
 import os
 import secrets
 import subprocess
@@ -15,7 +16,13 @@ from sqlalchemy.engine import make_url
 
 @pytest.fixture(scope="module")
 def dual_databases():
-    admin_url = make_url(os.environ["AW_DUAL_TEST_ADMIN_URL"])
+    with database_pair(os.environ["AW_DUAL_TEST_ADMIN_URL"]) as urls:
+        yield urls
+
+
+@contextmanager
+def database_pair(admin_dsn):
+    admin_url = make_url(admin_dsn)
     root = Path(os.environ["AW_NF_SOURCE"]).resolve()
     here = Path(__file__).resolve().parents[1]
     suffix = uuid4().hex[:16]

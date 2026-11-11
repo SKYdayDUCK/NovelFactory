@@ -39,7 +39,7 @@ def delegate(
     require_employee(conn, session)
     amount = Decimal(max_amount)
     signature = fingerprint([slot_id, str(amount.normalize()), token_limit])
-    key = (org, sender, session.employment_revision, operation_id)
+    key = (session.installation_id, org, sender, session.employment_revision, operation_id)
     account = conn.execute(
         "SELECT * FROM aw_budget_accounts WHERE org_id=%s FOR UPDATE", (org,)
     ).fetchone()
@@ -47,7 +47,7 @@ def delegate(
         raise Denied("BUDGET_UNCONFIGURED")
     old = conn.execute(
         """SELECT operation_id,state,request_sha FROM aw_delegations
-        WHERE (org_id,sender_id,sender_revision,client_key)=(%s,%s,%s,%s)""",
+        WHERE (installation_id,org_id,sender_id,sender_revision,client_key)=(%s,%s,%s,%s,%s)""",
         key,
     ).fetchone()
     if old:

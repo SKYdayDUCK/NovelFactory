@@ -106,6 +106,7 @@ def test_lost_reply_unknown_then_final_once():
             "task_state": "ACCEPTED" if final else "RUNNING",
             "accounting_state": "SETTLED" if final else "UNKNOWN",
             "actual_amount": "0.20" if final else "0",
+            "actual_tokens": 12 if final else 0,
             "attempt_ids": [attempt],
             "attempts": [detail],
         }
@@ -138,3 +139,105 @@ def test_revoke_committed_intent_before_send():
             ]
             == "RELEASED"
         )
+
+
+def test_crash_before_first_send_and_frozen_unsent_intent():
+    from agent_workshop.reconcile import claim
+    from agent_workshop.recovery import freeze, permit
+
+    dsn, org, install, token = setup_slot()
+    op = make(dsn, token)
+    with connect(dsn) as c:
+        assert claim(c, install, org, op)[0] == "submit"
+    # Process disappeared before issuing MCP. The next process queries the original key.
+    attempts = []
+
+    async def missing(tool, args):
+        attempts.append((tool, args["operation_id"]))
+        raise Denied("DELEGATION_NOT_FOUND")
+
+    ready(dsn, org, op)
+    assert asyncio.run(reconcile(dsn, install, org, op, missing)) == "REQUESTED"
+    with connect(dsn) as c:
+        freeze(c, install)
+    ready(dsn, org, op)
+    assert asyncio.run(reconcile(dsn, install, org, op, missing)) == "REQUESTED"
+    with connect(dsn) as c:
+        permit(c, install, {})
+    ready(dsn, org, op)
+    with connect(dsn) as c:
+        mode, _, args, *_ = claim(c, install, org, op)
+        assert mode == "submit" and args["operation_id"] == op
+    assert attempts == [("nf_delegation_get", op)] * 2
+
+
+def test_contradictory_peer_ledger_freezes_and_preserves_reservation():
+    from agent_workshop.recovery import frozen
+
+    dsn, org, install, token = setup_slot()
+    op = make(dsn, token)
+
+    async def inconsistent(tool, payload):
+        task, receipt, attempt = [str(uuid4()) for _ in range(3)]
+        return {
+            **payload,
+            "task_id": task,
+            "receipt_ref": receipt,
+            "task_state": "ACCEPTED",
+            "world_ref": {
+                "work_id": payload["work_id"],
+                "branch_id": payload["branch_id"],
+                "world_revision_id": task,
+            },
+            "actual_amount": "0",
+            "actual_tokens": 0,
+            "attempt_ids": [attempt],
+            "accounting_state": "SETTLED",
+            "attempts": [
+                {
+                    "attempt_id": attempt,
+                    "state": "UNKNOWN",
+                    "actual_amount": None,
+                    "actual_tokens": None,
+                }
+            ],
+        }
+
+    assert asyncio.run(reconcile(dsn, install, org, op, inconsistent)) == "WAITING_OPERATOR"
+    with connect(dsn) as c:
+        assert frozen(c, install)
+        assert (
+            c.execute("SELECT status FROM aw_budget_holds WHERE operation_id=%s", (op,)).fetchone()[
+                "status"
+            ]
+            == "HELD"
+        )
+        assert not c.execute(
+            "SELECT * FROM aw_cost_observations WHERE operation_id=%s", (op,)
+        ).fetchall()
+
+
+def test_manager_rechecks_author_after_delegation_and_before_resume():
+    from agent_workshop.manager import request_resume
+    from agent_workshop.manager_worker import run_once
+
+    dsn, org, install, token = setup_slot()
+    make(dsn, token)
+    with connect(dsn) as c:
+        manager = enroll(c, install, org, "author", 1, 1)
+        request_resume(c, authenticate(c, manager), "revoke-mid-run")
+    calls = []
+
+    async def revoke_during_lookup(tool, args):
+        calls.append(tool)
+        with connect(dsn) as c:
+            c.execute(
+                "UPDATE aw_bindings SET revoked=true WHERE token_digest=%s", (digest(manager),)
+            )
+        raise ConnectionError()
+
+    async def resume(tool, args):
+        pytest.fail("revoked author reached NF resume")
+
+    assert asyncio.run(run_once(dsn, org, install, resume, revoke_during_lookup)) == "REVOKED"
+    assert calls == ["nf_delegation_submit"]

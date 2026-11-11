@@ -274,6 +274,13 @@ def test_real_delegation_unblocks_banquet_actor(
                 mail = Mail(aw_dsn, org, installation, tmp_path)
                 async with mail.stack:
                     rev = 1
+                    m = await mail.message(
+                        "author",
+                        "manager",
+                        "GOAL",
+                        rev,
+                        content="Verify the warehouse record before the second actor makes a choice.",
+                    )
                     hires = [("clerk", "evidence_maintainer", "chief")]
                     if preset == "Minimal":
                         hires.extend(
@@ -297,13 +304,6 @@ def test_real_delegation_unblocks_banquet_actor(
                         )
                         rev = result["revision"]
                     state["org_revision"] = rev
-                    m = await mail.message(
-                        "author",
-                        "manager",
-                        "GOAL",
-                        rev,
-                        content="Verify the warehouse record before the second actor makes a choice.",
-                    )
                     m = await mail.message("manager", "script", "ASSIGN", rev, parent=m)
                     m = await mail.message("script", "chief", "PROPOSE_SCRIPT", rev, parent=m)
                     m = await mail.message("chief", "volume", "ASSIGN", rev, parent=m)
@@ -484,6 +484,22 @@ def test_real_delegation_unblocks_banquet_actor(
                 },
             )
             assert review["state"] == "PENDING"
+            assigned = await mail.call(
+                "reviewer", "aw_review_get", {"review_id": review["review_id"]}
+            )
+            assert assigned["content_sha"] == text_ref["sha256"]
+            assert assigned["evidence_refs"] == [
+                alignment["reconciliation_ref"]["artifact_revision_id"]
+            ]
+            state["reviewed_frozen_source"] = {
+                "artifact_revision": assigned["artifact_revision"],
+                "content_sha": assigned["content_sha"],
+            }
+            task_view = await mail.call(
+                "author", "aw_progress_get", {"operation_id": state["operation_id"]}
+            )
+            assert task_view["task_state"] == "ACCEPTED" and task_view["hold"] == "HELD"
+            state["author_task_progress"] = task_view
             decision = await mail.call(
                 "reviewer",
                 "aw_review_decide",

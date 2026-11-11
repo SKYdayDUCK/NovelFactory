@@ -51,3 +51,47 @@ def test_manager_restart_cut_and_idle():
             cursor = page["next_cursor"]
         own = history(c, actor)
         assert all(e["data"].get("employee_id") == "actor-1" for e in own["events"])
+
+
+def test_installation_isolates_progress_history_and_idempotency():
+    from agent_workshop.delegation import delegate
+    from agent_workshop.manager import progress
+    from agent_workshop.provision import allow_slot
+    from test_delegation import make, setup_slot
+
+    dsn, org, original, volume = setup_slot()
+    op = make(dsn, volume)
+    with connect(dsn) as c:
+        nf_instance = c.execute(
+            "SELECT nf_instance_id FROM aw_installations WHERE installation_id=%s", (original,)
+        ).fetchone()["nf_instance_id"]
+        other = str(uuid4())
+        c.execute("INSERT INTO aw_installations VALUES (%s,%s,true)", (other, nf_instance))
+        local = authenticate(c, enroll(c, original, org, "manager", 1, 1))
+        foreign = authenticate(c, enroll(c, other, org, "manager", 1, 1))
+        local_resume = request_resume(c, local, "same-author-request")
+        other_resume = request_resume(c, foreign, "same-author-request")
+        assert local_resume["request_id"] != other_resume["request_id"]
+        assert progress(c, local, op)["hold"] == "HELD"
+        actor = authenticate(c, enroll(c, original, org, "actor-1", 1, 1))
+        assert "hold" not in progress(c, actor, op)
+        for who in (foreign, authenticate(c, enroll(c, original, org, "script", 1, 1))):
+            with pytest.raises(Denied, match="VIEW_DENIED"):
+                progress(c, who, op)
+        foreign_events = history(c, foreign, limit=200)["events"]
+        assert not {op, local_resume["request_id"]}.intersection(
+            e["ref_id"] for e in foreign_events
+        )
+        assert other_resume["request_id"] in {e["ref_id"] for e in foreign_events}
+        assert state(c, foreign)["delegations"] == {}
+        other_volume = authenticate(c, enroll(c, other, org, "volume", 1, 1))
+        with pytest.raises(Denied, match="VIEW_DENIED"):
+            delegate(c, other_volume, "request-A", "scene-A", "1", 200)
+        policy = c.execute(
+            "SELECT config FROM aw_delegation_slots WHERE org_id=%s AND slot_id='scene-A'", (org,)
+        ).fetchone()["config"]
+        c.execute("UPDATE aw_budget_accounts SET limit_amount=2 WHERE org_id=%s", (org,))
+        allow_slot(c, org, other, "other-slot", "actor-1", policy)
+        second = delegate(c, other_volume, "request-A", "other-slot", "1", 200)
+        assert second["operation_id"] != op
+        assert delegate(c, other_volume, "request-A", "other-slot", "1", 200) == second

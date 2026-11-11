@@ -10,11 +10,27 @@ from mcp import StdioServerParameters
 from psycopg.types.json import Jsonb
 
 from .auth import connect
+from .recovery import frozen
+from .reviews_skills import expire_due_reviews
 from .reconcile import ELIGIBLE, reconcile, remote
+
+
+def author_is_live(c, binding, installation, org):
+    return c.execute(
+        """SELECT 1 FROM aw_bindings b JOIN aw_installations i USING(installation_id)
+            JOIN aw_employees e ON (b.org_id,b.employee_id)=(e.org_id,e.employee_id)
+            WHERE b.token_digest=%s AND i.enabled AND NOT b.revoked AND b.expires_at>clock_timestamp()
+            AND b.installation_id=%s AND b.org_id=%s AND e.status='ACTIVE' AND b.employment_revision=e.employment_revision
+            AND e.role_id IN ('author','workshop_manager') FOR SHARE""",
+        (binding, installation, org),
+    ).fetchone()
 
 
 def take(dsn, org, installation):
     with connect(dsn) as c:
+        if frozen(c, installation):
+            return None
+        expire_due_reviews(c, org)
         row = c.execute(
             """SELECT * FROM aw_resume_requests WHERE org_id=%s AND installation_id=%s
             AND state IN ('PENDING','RUNNING') AND eligible_at<=clock_timestamp()
@@ -23,14 +39,7 @@ def take(dsn, org, installation):
         ).fetchone()
         if not row:
             return None
-        live = c.execute(
-            """SELECT 1 FROM aw_bindings b JOIN aw_installations i USING(installation_id)
-            JOIN aw_employees e ON (b.org_id,b.employee_id)=(e.org_id,e.employee_id)
-            WHERE b.token_digest=%s AND i.enabled AND NOT b.revoked AND b.expires_at>clock_timestamp()
-            AND b.installation_id=%s AND b.org_id=%s AND e.status='ACTIVE' AND b.employment_revision=e.employment_revision
-            AND e.role_id IN ('author','workshop_manager') FOR SHARE""",
-            (row["binding_digest"], installation, org),
-        ).fetchone()
+        live = author_is_live(c, row["binding_digest"], installation, org)
         if not live:
             c.execute(
                 "UPDATE aw_resume_requests SET state='REVOKED' WHERE request_id=%s",
@@ -43,14 +52,14 @@ def take(dsn, org, installation):
             eligible_at=clock_timestamp()+interval '3 minutes' WHERE request_id=%s""",
             (n, row["request_id"]),
         )
-        return row["request_id"], n
+        return row["request_id"], n, row["binding_digest"]
 
 
 async def run_once(dsn, org, installation, nf_project, nf_delegation):
     request = take(dsn, org, installation)
     if request is None:
         return "IDLE"
-    ident, attempt = request
+    ident, attempt, binding = request
     try:
         # Only broker-configured commands may select a project. An MCP caller never provides a path.
         with connect(dsn) as c:
@@ -62,6 +71,20 @@ async def run_once(dsn, org, installation, nf_project, nf_delegation):
             ).fetchall()
         for row in operations:
             await reconcile(dsn, installation, org, str(row["operation_id"]), nf_delegation)
+        # Reconciliation above may have discovered diverged partner history.
+        with connect(dsn) as c:
+            if frozen(c, installation):
+                c.execute(
+                    "UPDATE aw_resume_requests SET state='PENDING',eligible_at=clock_timestamp() WHERE request_id=%s AND attempts=%s AND state='RUNNING'",
+                    (ident, attempt),
+                )
+                return "RECOVERY_FENCED"
+            if not author_is_live(c, binding, installation, org):
+                c.execute(
+                    "UPDATE aw_resume_requests SET state='REVOKED' WHERE request_id=%s AND attempts=%s AND state='RUNNING'",
+                    (ident, attempt),
+                )
+                return "REVOKED"
         async with asyncio.timeout(20):
             receipt = await nf_project("nf_resume_project", {})
         result = {

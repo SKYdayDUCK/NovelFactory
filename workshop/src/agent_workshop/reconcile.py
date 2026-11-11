@@ -14,6 +14,7 @@ from mcp.client.stdio import stdio_client
 from .auth import Denied, connect
 from .delegation import route
 from .organization import fingerprint, lock_org
+from .recovery import active_epoch, freeze, frozen, record_lookup
 
 GET_FIELDS = (
     "protocol_version",
@@ -31,11 +32,13 @@ SELECT_ITEM = """SELECT * FROM aw_delegations WHERE installation_id=%s AND org_i
 
 def claim(conn, installation, org, operation, lookup_only=False):
     lock_org(conn, org)
+    lookup_only = frozen(conn, installation) or lookup_only
+    epoch = active_epoch(conn, installation) if lookup_only else None
     row = conn.execute(SELECT_ITEM, (installation, org, operation)).fetchone()
     if not row:
         raise Denied("VIEW_DENIED")
     if (
-        row["state"] not in ELIGIBLE
+        not (row["state"] in ELIGIBLE or epoch and row["state"] in {"SETTLED", "WAITING_OPERATOR"})
         or row["next_check"] > conn.execute("SELECT clock_timestamp() AS t").fetchone()["t"]
     ):
         return None
@@ -87,7 +90,13 @@ def claim(conn, installation, org, operation, lookup_only=False):
         (org, operation),
     ).fetchone()["fence"]
     payload = row["payload"]
-    return mode, fence, (payload if mode == "submit" else {k: payload[k] for k in GET_FIELDS})
+    return (
+        mode,
+        fence,
+        (payload if mode == "submit" else {k: payload[k] for k in GET_FIELDS}),
+        lookup_only,
+        epoch,
+    )
 
 
 def validate_receipt(data, payload, previous):
@@ -110,6 +119,8 @@ def validate_receipt(data, payload, previous):
             str(previous["task_id"]) != data["task_id"]
             or str(previous["receipt_ref"]) != data["receipt_ref"]
             or previous["generation"] > data["generation"]
+            or previous["task_state"] in TERMINAL
+            and previous["task_state"] != data["task_state"]
         )
     ):
         raise Denied("REMOTE_HISTORY_MISMATCH")
@@ -124,45 +135,90 @@ def validate_receipt(data, payload, previous):
     ids = {a["attempt_id"] for a in data["attempts"]}
     if len(ids) != len(data["attempts"]) or ids != set(data["attempt_ids"]):
         raise Denied("ACCOUNTING_UNAVAILABLE")
-    amounts = []
+    amounts, tokens, states = [], [], set()
     for attempt in data["attempts"]:
         UUID(attempt["attempt_id"])
-        if attempt["actual_amount"] is not None:
+        status = attempt["state"]
+        states.add(status)
+        if status in {"SUCCEEDED", "FAILED"}:
             value = Decimal(str(attempt["actual_amount"]))
-            if not value.is_finite() or value < 0:
+            count = attempt["actual_tokens"]
+            if not value.is_finite() or value < 0 or type(count) is not int or count < 0:
                 raise Denied("ACCOUNTING_UNAVAILABLE")
             amounts.append(value)
-    if Decimal(data["actual_amount"]) != sum(amounts) or (
-        data["accounting_state"] == "NO_ATTEMPT" and ids
+            tokens.append(count)
+        elif status not in {"PREPARED", "SENT", "UNKNOWN"} or any(
+            attempt[k] is not None for k in ("actual_amount", "actual_tokens")
+        ):
+            raise Denied("ACCOUNTING_UNAVAILABLE")
+    expected_state = (
+        "UNKNOWN"
+        if "UNKNOWN" in states
+        else "RESERVED"
+        if states & {"PREPARED", "SENT"}
+        else "SETTLED"
+        if states
+        else "NO_ATTEMPT"
+    )
+    if (
+        data["accounting_state"] != expected_state
+        or Decimal(data["actual_amount"]) != sum(amounts)
+        or type(data["actual_tokens"]) is not int
+        or data["actual_tokens"] != sum(tokens)
     ):
         raise Denied("ACCOUNTING_UNAVAILABLE")
 
 
-def finish(conn, installation, org, operation, fence, data, failure):
+def finish(conn, installation, org, operation, fence, data, failure, mode, lookup_only, epoch):
+    recovery_mode = frozen(conn, installation, exclusive=True) or lookup_only
     row = conn.execute(SELECT_ITEM, (installation, org, operation)).fetchone()
     if row["fence"] != fence:
         return "SUPERSEDED"
+    if epoch is not None:
+        conn.execute(
+            "DELETE FROM aw_recovery_proofs WHERE installation_id=%s AND org_id=%s AND operation_id=%s AND epoch=%s",
+            (installation, org, operation, epoch),
+        )
     prev = conn.execute(
         "SELECT * FROM aw_remote_receipts WHERE org_id=%s AND operation_id=%s", (org, operation)
     ).fetchone()
     state = "RECONCILING"
     if failure == "DELEGATION_NOT_FOUND" and prev:
         state, failure = "WAITING_OPERATOR", "REMOTE_HISTORY_MISMATCH"
+        freeze(conn, installation, failure)
+    elif failure == "DELEGATION_NOT_FOUND" and mode == "get":
+        # A trusted exact-key lookup distinguishes a lost send from a lost reply.
+        # During restore only a subsequent operator permit may enable new sends.
+        state = "REQUESTED"
     elif not failure:
         try:
             validate_receipt(data, row["payload"], prev)
             previously_seen = conn.execute(
-                """SELECT DISTINCT attempt_id::text AS id FROM aw_cost_observations
+                """SELECT attempt_id::text AS id,state,actual_amount,actual_tokens FROM aw_cost_observations
                 WHERE org_id=%s AND operation_id=%s""",
                 (org, operation),
             ).fetchall()
-            if any(old["id"] not in data["attempt_ids"] for old in previously_seen):
-                raise Denied("REMOTE_HISTORY_MISMATCH")
+            current = {a["attempt_id"]: a for a in data["attempts"]}
+            ranks = {"PREPARED": 0, "SENT": 1, "UNKNOWN": 2, "SUCCEEDED": 3, "FAILED": 3}
+            for old in previously_seen:
+                item = current.get(old["id"])
+                if not item or ranks[item["state"]] < ranks[old["state"]]:
+                    raise Denied("REMOTE_HISTORY_MISMATCH")
+                if old["state"] in {"SUCCEEDED", "FAILED"} and (
+                    item["state"] != old["state"]
+                    or old["actual_amount"] != Decimal(item["actual_amount"])
+                    or old["actual_tokens"] != item["actual_tokens"]
+                ):
+                    raise Denied("REMOTE_HISTORY_MISMATCH")
             settled = Decimal(data["actual_amount"])
             if settled > Decimal(row["payload"]["max_amount"]):
                 raise Denied("BUDGET_DISCREPANCY")
+        except Denied as exc:
+            state, failure = "WAITING_OPERATOR", str(exc)
+            freeze(conn, installation, failure)
         except (ValueError, ArithmeticError, KeyError, TypeError):
             failure, state = "RECEIPT_DISCREPANCY", "WAITING_OPERATOR"
+            freeze(conn, installation, failure)
         else:
             conn.execute(
                 """INSERT INTO aw_remote_receipts (org_id,operation_id,task_id,receipt_ref,generation,task_state,accounting_state,world_ref) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
@@ -210,11 +266,16 @@ def finish(conn, installation, org, operation, fence, data, failure):
                     WHERE org_id=%s AND operation_id=%s AND status='HELD'""",
                     (settled, org, operation),
                 )
+    if epoch is not None and epoch == active_epoch(conn, installation) and mode == "get":
+        if state in {"BOUND", "SETTLED"}:
+            record_lookup(conn, installation, org, operation, epoch, data)
+        elif state == "REQUESTED" and failure == "DELEGATION_NOT_FOUND":
+            record_lookup(conn, installation, org, operation, epoch, None)
     conn.execute(
-        """UPDATE aw_delegations SET state=CASE WHEN %s='RECONCILING' AND deadline<=clock_timestamp()
+        """UPDATE aw_delegations SET state=CASE WHEN NOT %s AND %s IN ('REQUESTED','RECONCILING') AND deadline<=clock_timestamp()
         THEN 'WAITING_OPERATOR' ELSE %s END,last_error=%s,next_check=clock_timestamp()+interval '2 seconds'
         WHERE org_id=%s AND operation_id=%s""",
-        (state, state, failure, org, operation),
+        (recovery_mode, state, state, failure, org, operation),
     )
     return conn.execute(
         "SELECT state FROM aw_delegations WHERE org_id=%s AND operation_id=%s", (org, operation)
@@ -226,7 +287,7 @@ async def reconcile(dsn, installation, org, operation, invoke, lookup_only=False
         claimed = claim(conn, installation, org, operation, lookup_only)
     if not claimed:
         return "IDLE"
-    mode, fence, request = claimed
+    mode, fence, request, lookup_only, epoch = claimed
     try:
         async with asyncio.timeout(20):
             data = await invoke("nf_delegation_" + mode, request)
@@ -239,23 +300,26 @@ async def reconcile(dsn, installation, org, operation, invoke, lookup_only=False
     except Exception:
         data, failure = None, "REMOTE_UNAVAILABLE"
     with connect(dsn) as conn:
-        return finish(conn, installation, org, operation, fence, data, failure)
+        return finish(
+            conn, installation, org, operation, fence, data, failure, mode, lookup_only, epoch
+        )
 
 
 def remote(params):
     async def invoke(tool, request):
         async with stdio_client(params) as streams, ClientSession(*streams) as client:
             await client.initialize()
-            if tool not in {t.name for t in (await client.list_tools()).tools}:
-                raise Denied("VIEW_DENIED")
-            response = await client.call_tool(tool, request)
-            if response.isError:
-                raise Denied(
-                    (response.structuredContent or {})
-                    .get("error", {})
-                    .get("code", "REMOTE_REJECTED")
-                )
-            return response.structuredContent
+            advertised = {t.name for t in (await client.list_tools()).tools}
+            response = await client.call_tool(tool, request) if tool in advertised else None
+        # Raise after both anyio task groups have closed. An ExceptionGroup would
+        # otherwise erase the service error used to distinguish missing history.
+        if response is None:
+            raise Denied("VIEW_DENIED")
+        if response.isError:
+            raise Denied(
+                (response.structuredContent or {}).get("error", {}).get("code", "REMOTE_REJECTED")
+            )
+        return response.structuredContent
 
     return invoke
 
@@ -287,7 +351,14 @@ def main():
                     """SELECT operation_id FROM aw_delegations
                 WHERE installation_id=%s AND org_id=%s AND state=ANY(%s) AND next_check<=clock_timestamp()
                 ORDER BY next_check, created_at LIMIT %s""",
-                    (args.installation, args.org, list(ELIGIBLE), args.limit),
+                    (
+                        args.installation,
+                        args.org,
+                        [*ELIGIBLE, "SETTLED", "WAITING_OPERATOR"]
+                        if args.lookup_only
+                        else list(ELIGIBLE),
+                        args.limit,
+                    ),
                 )
             ]
     invoke = remote(StdioServerParameters(command=argv[0], args=argv[1:]))

@@ -1,0 +1,612 @@
+{
+  "preset": "Standard",
+  "organization": "ac07bc5f-a151-4980-a3c9-2d1d49d965b8",
+  "nf_instance_id": "557b55fd-d249-4679-9c84-93dca0e03307",
+  "source": {
+    "NovelFactory": {
+      "head": "a1a6b8e2ecb6e8331a3afa99326c30d8cf27d915",
+      "working_changes": [],
+      "source_sha256": "62ed3502edd735f5a05c933656b6441d8fcd7923459ea9aa935251fea7027eea"
+    },
+    "Workshop": {
+      "head": "c8ae27b6096ddfb38dc75ee9b5588892882336a2",
+      "working_changes": [],
+      "source_sha256": "34eb5cb6c9c550d9619847d6ec44d065e75db41e7633942a2afd63fdb2bcca78"
+    },
+    "harness_sha256": "4615d8f8c482dcbfe106f5c3747f167bf3deca1c09804632261623758bf0b714"
+  },
+  "installation": "271ee872-befa-47d4-a63c-600e337e4d43",
+  "org_revision": 2,
+  "operation_id": "07992024-33d6-47f8-a4be-31a540c19beb",
+  "production_mail": [
+    {
+      "sender": "author",
+      "recipient": "manager",
+      "kind": "GOAL",
+      "message_id": "67123589-fe09-48fc-adba-d97177936952",
+      "receipt": {
+        "status": "ACKNOWLEDGED",
+        "message_id": "67123589-fe09-48fc-adba-d97177936952",
+        "sequence": 1,
+        "acknowledged_at": "2026-11-11T14:08:58.578537+00:00"
+      },
+      "causation": null
+    },
+    {
+      "sender": "manager",
+      "recipient": "script",
+      "kind": "ASSIGN",
+      "message_id": "53da4bc1-9d1a-481c-a7af-dc4b6377edfb",
+      "receipt": {
+        "status": "ACKNOWLEDGED",
+        "message_id": "53da4bc1-9d1a-481c-a7af-dc4b6377edfb",
+        "sequence": 1,
+        "acknowledged_at": "2026-11-11T14:08:59.125287+00:00"
+      },
+      "causation": "67123589-fe09-48fc-adba-d97177936952"
+    },
+    {
+      "sender": "script",
+      "recipient": "chief",
+      "kind": "PROPOSE_SCRIPT",
+      "message_id": "b0c9acbb-1866-4bae-9471-34ec546ea977",
+      "receipt": {
+        "status": "ACKNOWLEDGED",
+        "message_id": "b0c9acbb-1866-4bae-9471-34ec546ea977",
+        "sequence": 1,
+        "acknowledged_at": "2026-11-11T14:08:59.578152+00:00"
+      },
+      "causation": "53da4bc1-9d1a-481c-a7af-dc4b6377edfb"
+    },
+    {
+      "sender": "chief",
+      "recipient": "volume",
+      "kind": "ASSIGN",
+      "message_id": "211b1117-cb1b-4812-a507-0223c8c39cc6",
+      "receipt": {
+        "status": "ACKNOWLEDGED",
+        "message_id": "211b1117-cb1b-4812-a507-0223c8c39cc6",
+        "sequence": 1,
+        "acknowledged_at": "2026-11-11T14:09:00.090580+00:00"
+      },
+      "causation": "b0c9acbb-1866-4bae-9471-34ec546ea977"
+    },
+    {
+      "sender": "volume",
+      "recipient": "actor-1",
+      "kind": "ASSIGN",
+      "message_id": "fbd7ecfd-4f73-4983-8d8d-a196e329b942",
+      "receipt": {
+        "status": "ACKNOWLEDGED",
+        "message_id": "fbd7ecfd-4f73-4983-8d8d-a196e329b942",
+        "sequence": 1,
+        "acknowledged_at": "2026-11-11T14:09:00.616188+00:00"
+      },
+      "causation": "211b1117-cb1b-4812-a507-0223c8c39cc6"
+    },
+    {
+      "sender": "volume",
+      "recipient": "actor-2",
+      "kind": "ASSIGN",
+      "message_id": "063d655a-f4a0-4106-8756-ceed86cb9a62",
+      "receipt": {
+        "status": "ACKNOWLEDGED",
+        "message_id": "063d655a-f4a0-4106-8756-ceed86cb9a62",
+        "sequence": 1,
+        "acknowledged_at": "2026-11-11T14:09:01.138247+00:00"
+      },
+      "causation": "211b1117-cb1b-4812-a507-0223c8c39cc6"
+    },
+    {
+      "sender": "volume",
+      "recipient": "actor-3",
+      "kind": "ASSIGN",
+      "message_id": "c37f6b4f-5c04-437a-82e7-a7612d7b0d6f",
+      "receipt": {
+        "status": "ACKNOWLEDGED",
+        "message_id": "c37f6b4f-5c04-437a-82e7-a7612d7b0d6f",
+        "sequence": 1,
+        "acknowledged_at": "2026-11-11T14:09:01.663608+00:00"
+      },
+      "causation": "211b1117-cb1b-4812-a507-0223c8c39cc6"
+    }
+  ],
+  "nf_delegation_receipt": "91d3d1a0-87e1-40a8-b789-bfee4e5fdf74",
+  "s9": {
+    "case_id": "df99b7da-1612-5ad4-81e7-9a08e8435311",
+    "affected_task": "a18e0da6-c742-40a7-b36a-a66ab55ee777",
+    "independent_task": "a262a9f0-2a3c-4aec-b523-eed30e7ed9bf",
+    "strategy_receipt": {
+      "outcome": "REVIEW_REQUIRED",
+      "resolution_strategy": "ESCALATE_REVIEW",
+      "suggested_strategy": "REVALIDATE",
+      "reason": "REVIEW_REQUIRED",
+      "review_task_id": "824badca-faea-5995-bf07-1bd640d5ad7d",
+      "case_id": "df99b7da-1612-5ad4-81e7-9a08e8435311",
+      "receipt_id": "00f3cfe3-883d-5cdb-b9c5-84597888b920",
+      "task_id": "a18e0da6-c742-40a7-b36a-a66ab55ee777",
+      "generation": 1,
+      "conflict_type": "STALE_PRECONDITION",
+      "additional_model_attempts": 0,
+      "actual_tokens": 0,
+      "cost_status": "NO_MODEL_CALL"
+    }
+  },
+  "prose": {
+    "source": "deterministic engineering fixture",
+    "accepted": {
+      "artifact_id": "cba78e77-78a1-46d6-a186-3c1e49f3a27e",
+      "artifact_revision_id": "2292fc73-43b6-4d5d-b206-e2bf87ce0caf",
+      "sha256": "d007f6db8ecc9d5e29bb8837518874e254ccc54bf7565a65e332f0492ebe315c"
+    },
+    "draft_ref": {
+      "artifact_id": "b6061e83-229d-47d4-b1b1-9c03e09cef23",
+      "artifact_revision_id": "768c0413-1dfb-4ed2-ac51-888f92bc030e",
+      "sha256": "44b03eab1a4718f7fa77999f8e76628b441a1cb07a6c073ba66752056f7a3cb8"
+    },
+    "text_ref": {
+      "sha256": "41c9ff95dfce31ba8ac471194a283a62258febab76e7839e55e9d03ded0faa3d",
+      "artifact_id": "c7b17763-e19a-450d-9de3-3506fd2fdf3b",
+      "artifact_revision_id": "17456560-b31e-4c8d-825c-ab28c8960cb5"
+    },
+    "reconciliation": {
+      "artifact_id": "e327b074-d1c0-453e-bdcd-a6cbbf9d2089",
+      "artifact_revision_id": "4bc0ac4a-b1a5-434e-b635-f22680e19c78",
+      "sha256": "54a165f30571b4b6ebff9f5f3ca451b8cab60ef91f637ed7f2d1357de2d11a6c"
+    }
+  },
+  "unknown_held_then_settled_attempt": "ae63bf00-ac6c-4e8d-baf2-168ef7b467ed",
+  "independent_workshop_review": {
+    "review_id": "ef51e498-e367-4ce5-8c78-f2532f6aa00c",
+    "state": "APPROVED",
+    "scope": "Programmed account exercise; no human literary rating."
+  },
+  "author_retrieval": [
+    {
+      "sender": "manager",
+      "recipient": "author",
+      "kind": "REPORT",
+      "message_id": "31d337a2-86e7-49a1-b068-ef24d3cdd140",
+      "receipt": {
+        "status": "ACKNOWLEDGED",
+        "message_id": "31d337a2-86e7-49a1-b068-ef24d3cdd140",
+        "sequence": 1,
+        "acknowledged_at": "2026-11-11T14:09:16.392496+00:00"
+      },
+      "causation": null
+    }
+  ],
+  "accepted_scene": {
+    "test": "test_one_author_resume_through_autonomous_banquet",
+    "provider": "deterministic HTTPS loopback fixture; no live inference or paid tokens",
+    "mcp": {
+      "client": "Python MCP SDK via child stdio",
+      "protocol": "2025-11-25",
+      "tools": [
+        "nf_project_status",
+        "nf_resume_project"
+      ],
+      "resume_calls": 1
+    },
+    "codex": "codex-cli 0.167.0-alpha.4",
+    "postgres": "17.11 (Debian 17.11-0+deb13u1)",
+    "initial": {
+      "READY": 3,
+      "WAITING": 4,
+      "RUNNING": 0,
+      "ACCEPTED": 2
+    },
+    "final": {
+      "READY": 0,
+      "WAITING": 0,
+      "RUNNING": 0,
+      "ACCEPTED": 11
+    },
+    "scene_provider_turns": 8,
+    "observations": [
+      {
+        "turn": "C",
+        "elapsed_s": 1.6032,
+        "states": {
+          "B": "BLOCKED",
+          "kernel_accept": "READY",
+          "joint": "BLOCKED",
+          "request_change": "BLOCKED",
+          "notification": "BLOCKED",
+          "A": "RUNNING",
+          "C": "RUNNING"
+        },
+        "counts": {
+          "READY": 1,
+          "WAITING": 4,
+          "RUNNING": 2,
+          "ACCEPTED": 2
+        },
+        "live_codex_pids": [
+          926,
+          944
+        ]
+      },
+      {
+        "turn": "A",
+        "elapsed_s": 1.6044,
+        "states": {
+          "B": "BLOCKED",
+          "kernel_accept": "READY",
+          "joint": "BLOCKED",
+          "request_change": "BLOCKED",
+          "notification": "BLOCKED",
+          "A": "RUNNING",
+          "C": "RUNNING"
+        },
+        "counts": {
+          "READY": 1,
+          "WAITING": 4,
+          "RUNNING": 2,
+          "ACCEPTED": 2
+        },
+        "live_codex_pids": [
+          926,
+          944
+        ]
+      },
+      {
+        "turn": "notification",
+        "elapsed_s": 2.1277,
+        "states": {
+          "B": "BLOCKED",
+          "kernel_accept": "READY",
+          "joint": "BLOCKED",
+          "request_change": "BLOCKED",
+          "notification": "RUNNING",
+          "A": "ACCEPTED",
+          "C": "ACCEPTED"
+        },
+        "counts": {
+          "READY": 1,
+          "WAITING": 3,
+          "RUNNING": 1,
+          "ACCEPTED": 4
+        },
+        "live_codex_pids": [
+          1062
+        ]
+      },
+      {
+        "turn": "B",
+        "elapsed_s": 2.6592,
+        "states": {
+          "kernel_accept": "READY",
+          "joint": "BLOCKED",
+          "request_change": "BLOCKED",
+          "notification": "ACCEPTED",
+          "B": "RUNNING",
+          "A": "ACCEPTED",
+          "C": "ACCEPTED"
+        },
+        "counts": {
+          "READY": 1,
+          "WAITING": 2,
+          "RUNNING": 1,
+          "ACCEPTED": 5
+        },
+        "live_codex_pids": [
+          1126
+        ]
+      },
+      {
+        "turn": "joint",
+        "elapsed_s": 3.3703,
+        "states": {
+          "kernel_accept": "READY",
+          "request_change": "BLOCKED",
+          "notification": "ACCEPTED",
+          "B": "ACCEPTED",
+          "joint": "RUNNING",
+          "A": "ACCEPTED",
+          "C": "ACCEPTED"
+        },
+        "counts": {
+          "READY": 1,
+          "WAITING": 1,
+          "RUNNING": 1,
+          "ACCEPTED": 6
+        },
+        "live_codex_pids": [
+          1193
+        ]
+      },
+      {
+        "turn": "request_change",
+        "elapsed_s": 4.2073,
+        "states": {
+          "notification": "ACCEPTED",
+          "B": "ACCEPTED",
+          "joint": "ACCEPTED",
+          "request_change": "RUNNING",
+          "A": "ACCEPTED",
+          "C": "ACCEPTED",
+          "kernel_accept": "ACCEPTED"
+        },
+        "counts": {
+          "READY": 0,
+          "WAITING": 0,
+          "RUNNING": 1,
+          "ACCEPTED": 8
+        },
+        "live_codex_pids": [
+          1260
+        ]
+      },
+      {
+        "turn": "propose_window",
+        "elapsed_s": 4.8335,
+        "states": {
+          "notification": "ACCEPTED",
+          "B": "ACCEPTED",
+          "joint": "ACCEPTED",
+          "request_change": "ACCEPTED",
+          "A": "ACCEPTED",
+          "C": "ACCEPTED",
+          "kernel_accept": "ACCEPTED",
+          "propose_window": "RUNNING"
+        },
+        "counts": {
+          "READY": 0,
+          "WAITING": 0,
+          "RUNNING": 1,
+          "ACCEPTED": 9
+        },
+        "live_codex_pids": [
+          1334
+        ]
+      },
+      {
+        "turn": "review_and_adopt",
+        "elapsed_s": 5.5108,
+        "states": {
+          "notification": "ACCEPTED",
+          "B": "ACCEPTED",
+          "joint": "ACCEPTED",
+          "request_change": "ACCEPTED",
+          "A": "ACCEPTED",
+          "C": "ACCEPTED",
+          "kernel_accept": "ACCEPTED",
+          "propose_window": "ACCEPTED",
+          "review_and_adopt": "RUNNING"
+        },
+        "counts": {
+          "READY": 0,
+          "WAITING": 0,
+          "RUNNING": 1,
+          "ACCEPTED": 10
+        },
+        "live_codex_pids": [
+          1399
+        ]
+      }
+    ],
+    "accept_to_ready_ms": {
+      "notification": 25.218,
+      "B": 11.554,
+      "joint": 12.31,
+      "request_change": 35.067
+    },
+    "scene_fixture_input_tokens": 88,
+    "scene_fixture_output_tokens": 56,
+    "tokens_by_turn": {
+      "notification": {
+        "input_tokens": 11,
+        "output_tokens": 7
+      },
+      "A": {
+        "input_tokens": 11,
+        "output_tokens": 7
+      },
+      "B": {
+        "input_tokens": 11,
+        "output_tokens": 7
+      },
+      "C": {
+        "input_tokens": 11,
+        "output_tokens": 7
+      },
+      "joint": {
+        "input_tokens": 11,
+        "output_tokens": 7
+      },
+      "request_change": {
+        "input_tokens": 11,
+        "output_tokens": 7
+      },
+      "propose_window": {
+        "input_tokens": 11,
+        "output_tokens": 7
+      },
+      "review_and_adopt": {
+        "input_tokens": 11,
+        "output_tokens": 7
+      }
+    },
+    "observed_request_sizes": {
+      "A": {
+        "prompt_utf8_bytes": 13343,
+        "inlined_schema_bytes": 5081,
+        "emitted_schema_bytes": 4464,
+        "authorized_materials": 0
+      },
+      "C": {
+        "prompt_utf8_bytes": 13343,
+        "inlined_schema_bytes": 5081,
+        "emitted_schema_bytes": 4464,
+        "authorized_materials": 0
+      },
+      "notification": {
+        "prompt_utf8_bytes": 12101,
+        "inlined_schema_bytes": 2736,
+        "emitted_schema_bytes": 2506,
+        "authorized_materials": 0
+      },
+      "B": {
+        "prompt_utf8_bytes": 13343,
+        "inlined_schema_bytes": 5081,
+        "emitted_schema_bytes": 4464,
+        "authorized_materials": 0
+      },
+      "joint": {
+        "prompt_utf8_bytes": 19640,
+        "inlined_schema_bytes": 7050,
+        "emitted_schema_bytes": 6141,
+        "authorized_materials": 0
+      },
+      "request_change": {
+        "prompt_utf8_bytes": 16029,
+        "inlined_schema_bytes": 4295,
+        "emitted_schema_bytes": 3941,
+        "authorized_materials": 0
+      },
+      "propose_window": {
+        "prompt_utf8_bytes": 17288,
+        "inlined_schema_bytes": 3335,
+        "emitted_schema_bytes": 3166,
+        "authorized_materials": 0
+      },
+      "review_and_adopt": {
+        "prompt_utf8_bytes": 17415,
+        "inlined_schema_bytes": 2536,
+        "emitted_schema_bytes": 2491,
+        "authorized_materials": 0
+      }
+    },
+    "completed_model_tasks_per_second": 1.1709,
+    "elapsed_s_including_restart": 6.8323,
+    "B_wake_source": "Distinct notification task completed after A; no private A text or in-world BELIEF is inferred",
+    "A_location_at_tick_31": {
+      "reference": "north",
+      "accepted": "south"
+    },
+    "active_host_processes_after_completion": 0,
+    "waiting_provider_calls": 0,
+    "human_interventions": 0,
+    "ordinary_approvals": 1,
+    "accepted_world_events": 1,
+    "sealed_actor_intents": [
+      "我不赴北岸晚宴，去南岸守粮。",
+      "我在北岸等来信，收到凭证再走。",
+      "我先核对库单。"
+    ],
+    "accepted_world_ref": {
+      "work_id": "01ed3fab-532a-4e57-89b0-6c91cb07b751",
+      "branch_id": "6587c644-d51e-4548-909f-5c20c1604765",
+      "world_revision_id": "4d33a25d-10d4-4474-8817-6777fafcc19f"
+    },
+    "base_world_ref": {
+      "work_id": "01ed3fab-532a-4e57-89b0-6c91cb07b751",
+      "branch_id": "6587c644-d51e-4548-909f-5c20c1604765",
+      "world_revision_id": "1890f13c-834d-4c8a-bda9-88c2d5ac2091"
+    },
+    "reference_timeline_ref": {
+      "sha256": "66c69542d7203a5e4efd78ba0dc30420956513d902ad1dc28cfb7480a4dd5e82",
+      "artifact_id": "a4d19bdd-7208-45c7-ba03-c53c12c2bb53",
+      "artifact_revision_id": "370b9c82-ff41-4c00-ae8a-d865d91c8ae3"
+    },
+    "initial_plan_ref": {
+      "artifact_id": "262b0a84-442f-4fe4-8096-35fb63595978",
+      "artifact_revision_id": "4e8b539a-5b5e-400b-ab2b-d309fac08d78",
+      "sha256": "bd8549a01fea2595916c60bfc9e7e63781fb147275aa7eaa94d708f60779725b"
+    },
+    "selected_plan_ref": {
+      "sha256": "f1a0a8c6b605a66cd7357da206cedc88679f9e0babe8667deddc65f73d21b2a9",
+      "artifact_id": "3a3add31-2d22-4097-9593-e2a3ecd0e925",
+      "artifact_revision_id": "41033ca5-eeb0-452d-9cbc-693b646a16ec"
+    },
+    "revised_future_nodes": [
+      0,
+      1
+    ],
+    "change_point_ref": {
+      "sha256": "b0d986ce70f84bc89cf64b845eee4c424041c8b744f0cd9bc0f3a43a028d54d9",
+      "artifact_id": "79d6d5c9-68e1-430d-b27c-a7ee307a0b7a",
+      "artifact_revision_id": "a13fea39-f65b-4cf0-abbd-4b0d56a7fa2a"
+    },
+    "window_ref": {
+      "sha256": "d2254e2a0a85130e857f8c3ed1345ddf18e5b528246a2fb405158c5b0805024a",
+      "artifact_id": "1f081e35-374d-4d4e-8e89-84e5f71fcfc0",
+      "artifact_revision_id": "2fecc7fd-17d4-4043-8777-78e4c099f3f4"
+    },
+    "host_journal": [
+      {
+        "task": "notification",
+        "thread_id": "01a1caf0-e383-7513-8076-47de6b01d11c",
+        "turn_id": "01a1caf0-e39b-7232-9b10-51b266fe090d",
+        "phase": "COMPLETED"
+      },
+      {
+        "task": "A",
+        "thread_id": "01a1caf0-e151-76e1-8bbb-876ace70cd12",
+        "turn_id": "01a1caf0-e16b-7720-bb86-927fbc799645",
+        "phase": "COMPLETED"
+      },
+      {
+        "task": "B",
+        "thread_id": "01a1caf0-e59f-7a31-8923-9271462ec4ac",
+        "turn_id": "01a1caf0-e5b2-7753-a79b-d19a297e54a5",
+        "phase": "COMPLETED"
+      },
+      {
+        "task": "C",
+        "thread_id": "01a1caf0-e162-7532-aa86-03c0ff41f034",
+        "turn_id": "01a1caf0-e187-7530-a2c7-d2b85bbe3aa9",
+        "phase": "COMPLETED"
+      },
+      {
+        "task": "joint",
+        "thread_id": "01a1caf0-e852-7b91-8901-a04868e251a7",
+        "turn_id": "01a1caf0-e866-7c61-b553-18b888bba9b3",
+        "phase": "COMPLETED"
+      },
+      {
+        "task": "request_change",
+        "thread_id": "01a1caf0-ebac-7d60-bbbd-7e2cfce04a36",
+        "turn_id": "01a1caf0-ebbf-7ea2-bb99-948c6710cc95",
+        "phase": "COMPLETED"
+      },
+      {
+        "task": "propose_window",
+        "thread_id": "01a1caf0-ee07-77e0-94a8-fec6e73429fd",
+        "turn_id": "01a1caf0-ee2d-7ad1-8b39-31bd8549d0a4",
+        "phase": "COMPLETED"
+      },
+      {
+        "task": "review_and_adopt",
+        "thread_id": "01a1caf0-f0b4-7c52-970b-027893d8d833",
+        "turn_id": "01a1caf0-f0c7-7ba0-bbd8-7a8dd5e40768",
+        "phase": "COMPLETED"
+      }
+    ],
+    "idle_restart": "IDLE",
+    "registration_replay": "same receipt, unchanged inventory before and after world advancement",
+    "failed_cyclic_registration": "transaction rolled back; no additional grants or tasks",
+    "errors": [],
+    "external_prerequisites": [
+      "a74cb953-80ed-4b3a-b9da-111402c92453"
+    ],
+    "dependent_actor_task": "fd3cb503-7842-4015-86d7-6c9cec6f65b1"
+  },
+  "delegated_task_id": "a74cb953-80ed-4b3a-b9da-111402c92453",
+  "cost_observations": [
+    {
+      "state": "UNKNOWN",
+      "actual_tokens": null
+    },
+    {
+      "state": "SUCCEEDED",
+      "actual_tokens": 18
+    }
+  ],
+  "hold": {
+    "status": "SETTLED",
+    "settled_fixture_amount": "0.020000"
+  },
+  "accounting_scope": "Deterministic loopback model usage; no external vendor or paid spend."
+}
