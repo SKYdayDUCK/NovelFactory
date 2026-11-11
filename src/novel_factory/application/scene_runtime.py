@@ -126,8 +126,8 @@ def register_scene(
     )
     wid, bid = world_ref["work_id"], world_ref["branch_id"]
     with kernel.objects.lock(), kernel.db.uow() as repo:
-        kernel.authorize(repo, controller, wid, "ADMIN", bid)
         repo.one("works", {"work_id": wid}, lock="update")
+        kernel.authorize(repo, controller, wid, "ADMIN", bid)
         previous = kernel._prior(
             repo, controller, wid, "REGISTER_SCENE_RUNTIME", idempotency_key, request
         )

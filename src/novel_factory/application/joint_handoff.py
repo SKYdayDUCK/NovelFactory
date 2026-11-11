@@ -101,8 +101,8 @@ def create_control_task(
     with kernel.objects.lock(), kernel.db.uow() as repo:
         row = repo.one("simulation_interactions", {"interaction_id": interaction_id})
         require(row, "VIEW_DENIED", "No authorized interaction")
-        grant = kernel.authorize(repo, controller, row["work_id"], "ADMIN", row["branch_id"])
         work = repo.one("works", {"work_id": row["work_id"]}, lock="update")
+        grant = kernel.authorize(repo, controller, row["work_id"], "ADMIN", row["branch_id"])
         row, _ = _interaction(kernel, repo, route)
         identity = fingerprint({"kind": "joint_accept", "route": route, "deadline_seconds": deadline_seconds})
         prior = repo.one("task_inputs", {"task_id": task_id, "generation": 0})

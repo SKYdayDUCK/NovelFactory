@@ -45,6 +45,12 @@ def main():
             return
         if args.enroll:
             enrollment = json.loads(args.enroll.read_text())
+            with db.uow(write=False) as repo:
+                kernel.authorize(repo, principal, access["work_id"], "ADMIN", access["branch_id"])
+                task = repo.one("tasks", {"work_id": access["work_id"], "branch_id": access["branch_id"],
+                                          "task_id": enrollment["task_id"]})
+                if task is None:
+                    raise DomainError("VIEW_DENIED", "Task outside the configured project")
             enrolled = supervisor.enroll(principal, **enrollment)
             print(json.dumps(enrolled))
             return

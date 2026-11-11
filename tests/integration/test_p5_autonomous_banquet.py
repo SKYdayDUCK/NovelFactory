@@ -2,6 +2,8 @@
 
 import asyncio
 import json
+from concurrent.futures import ThreadPoolExecutor
+from threading import Barrier
 import os
 import shutil
 import signal
@@ -263,7 +265,16 @@ def test_one_author_resume_through_autonomous_banquet(kernel_env, tmp_path):
             register_scene(kernel, gateway, owner, **{**registration, "participants": cycle})
         assert rejected.value.code == "WORKFLOW_CYCLE"
         assert inventory() == initial_inventory
-        scene = register_scene(kernel, gateway, owner, **registration)
+        # Two independent controllers can receive the same first-time registration.
+        start = Barrier(2)
+        def concurrent_register():
+            start.wait(timeout=10)
+            return register_scene(kernel, gateway, owner, **registration)
+        with ThreadPoolExecutor(max_workers=2) as workers:
+            first = workers.submit(concurrent_register)
+            second = workers.submit(concurrent_register)
+            scene = first.result(timeout=30)
+            assert second.result(timeout=30) == scene
         registered_inventory = inventory()
         assert register_scene(kernel, gateway, owner, **registration) == scene
         assert inventory() == registered_inventory
