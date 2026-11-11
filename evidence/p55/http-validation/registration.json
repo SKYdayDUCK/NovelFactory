@@ -1,0 +1,19 @@
+{
+  "baseline": "55d8979b5361a4837701d762feacd83036096b11",
+  "candidate": "df30c306057d26b7b32e3cec0df1ad9926a6824a",
+  "order": [
+    "baseline",
+    "candidate"
+  ],
+  "cases": [
+    {
+      "agents": 500,
+      "seconds": 600,
+      "read_rps": 20,
+      "api_processes": 2
+    }
+  ],
+  "resources": "Same ubuntu-24.04 runner and PostgreSQL 17.11 service; each arm calls the original make_population() with fresh identifiers and isolated databases. The original client, service capacity, validation and thresholds are preserved.",
+  "verification": "Run all query and HTTP regressions before collecting both raw reports and the unaltered gate exit codes. Preserve all refusals.",
+  "limits": "One baseline-then-candidate pair. Host load, OS caches and newly generated fixture identifiers limit causal inference. Independently triggered original gates remain necessary."
+}
