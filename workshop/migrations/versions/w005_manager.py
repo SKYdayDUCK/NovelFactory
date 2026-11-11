@@ -50,7 +50,7 @@ SOURCES = {
 
 def upgrade():
     op.execute("""
-        ALTER TABLE aw_remote_receipts ADD COLUMN world_ref jsonb;
+        ALTER TABLE aw_remote_receipts ADD COLUMN IF NOT EXISTS world_ref jsonb;
         CREATE TABLE aw_resume_requests (
             org_id text REFERENCES aw_organizations, request_id uuid PRIMARY KEY, installation_id text NOT NULL REFERENCES aw_installations,
             employee_id text NOT NULL, employment_revision bigint NOT NULL, binding_digest char(64) NOT NULL REFERENCES aw_bindings,
