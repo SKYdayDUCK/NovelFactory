@@ -413,11 +413,22 @@ class Kernel:
             r.outbox("authorization.revoked","grant",grant_id,{"epoch":target["epoch"]+1},f"revoke:{grant_id}:{target['epoch']+1}")
 
     def create_task(self, principal, spec, idempotency_key):
-        with self.db.uow() as repo:
-            return self.create_task_in_transaction(repo, principal, spec, idempotency_key)
+        validate_contract("TaskSpec", spec)
+
+        def authorize_task(conn):
+            from novel_factory.infrastructure.repository import KernelRepository
+            self._authorize_task_create(KernelRepository(conn, tables), principal, spec)
+
+        return self.tasks.create(spec, principal_id=principal.principal_id,
+                                 idempotency_key=idempotency_key, authorize_in_tx=authorize_task)
 
     def create_task_in_transaction(self, r, principal, spec, idempotency_key):
         validate_contract("TaskSpec", spec)
+        self._authorize_task_create(r, principal, spec)
+        return self.tasks.create_in_transaction(r.conn, spec, principal_id=principal.principal_id,
+                                                idempotency_key=idempotency_key)
+
+    def _authorize_task_create(self, r, principal, spec):
         wr = spec["world_ref"]
         g=self.authorize(r,principal,wr["work_id"],"TASK_CREATE",wr["branch_id"])
         self.revision(r,wr)
@@ -425,8 +436,6 @@ class Kernel:
         require(point_key(spec["story_time"])<=point_key(g["max_story_time"]),"VIEW_DENIED","Task time outside grant")
         require(spec["context_bundle_id"] is None and spec["dependency_fingerprint"] is None,"INVALID_ARGUMENT","Only compiler may bind task context")
         require(spec["policy_version"]==r.one("works",{"work_id":wr["work_id"]})["policy_version"],"INVALID_ARGUMENT","Task policy version is not current")
-        return self.tasks.create_in_transaction(r.conn, spec, principal_id=principal.principal_id,
-                                                idempotency_key=idempotency_key)
 
     def claim_task(self, principal, worker_id, *, lease_seconds=30, task_id=None):
         with self.db.uow(write=False) as r:
