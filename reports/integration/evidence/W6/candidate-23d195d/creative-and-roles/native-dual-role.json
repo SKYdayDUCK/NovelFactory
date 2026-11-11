@@ -1,0 +1,45 @@
+{
+  "stage": "W6",
+  "source": "23d195d9dcd901506f6571d902e68fd48e5a0ab7",
+  "actual_tested_checkout": "4280c00134e0627521a936e7892950ebe2b18748",
+  "official_artifact_sha256": "f3136e2746e9c86c0c45155fc13c248c44b5cc26b33a9b9a2355e03a129e327a",
+  "receipt": {
+    "authenticated_reads": [
+      "nf_task_get",
+      "aw_roster_get"
+    ],
+    "aw_postgres_system_identifier": "7707053789810139174",
+    "codex": "codex-cli 0.167.0-alpha.4",
+    "cross_service_binding_reads_denied": 2,
+    "employee_roster_matched": true,
+    "model_turns": 0,
+    "nf_postgres_system_identifier": "7707053793616932902",
+    "nf_sha": "4280c00134e0627521a936e7892950ebe2b18748",
+    "role_binding_reads_denied": 2,
+    "role_signing_private_keys_unreadable": true,
+    "separate_service_clusters": true,
+    "separate_service_uids": true,
+    "servers": {
+      "novelfactory": [
+        "nf_artifact_put",
+        "nf_context_get",
+        "nf_query_batch",
+        "nf_task_get"
+      ],
+      "workshop": [
+        "aw_capabilities",
+        "aw_delivery_ack",
+        "aw_mailbox_get",
+        "aw_message_body_get",
+        "aw_message_body_put",
+        "aw_message_send",
+        "aw_roster_get"
+      ]
+    },
+    "task_identity_matched": true,
+    "thread_id": "01a1ccdf-f7d5-7af3-a6a4-e4dacde87bb4",
+    "transport": "OpenSSH forced commands",
+    "wheel_sha256": "05f0b1994a65d132afc865417dbe9236a973562b4bebfa86c6e11683967a7088",
+    "workshop_sha": "4280c00134e0627521a936e7892950ebe2b18748"
+  }
+}

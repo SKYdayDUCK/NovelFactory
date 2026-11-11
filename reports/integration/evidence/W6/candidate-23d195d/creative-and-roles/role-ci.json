@@ -1,0 +1,178 @@
+{
+  "run": 43116965757,
+  "job": 130847330624,
+  "conclusion": "success",
+  "source": "23d195d9dcd901506f6571d902e68fd48e5a0ab7",
+  "actual_checkout": "4280c00134e0627521a936e7892950ebe2b18748",
+  "checkout_log": [
+    "2026-11-11T23:05:13.2400823Z [command]/usr/bin/git log -1 --format=%H",
+    "2026-11-11T23:05:13.2435467Z 4280c00134e0627521a936e7892950ebe2b18748"
+  ],
+  "native_step": {
+    "name": "Verify two independent SSH brokers in a single native Codex role thread",
+    "status": "completed",
+    "conclusion": "success",
+    "number": 22
+  },
+  "steps": [
+    {
+      "name": "Set up job",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Initialize containers",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/checkout@v4",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/setup-python@v5",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Install both locked projects",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Verify the frozen NF contracts against the checked-out runtime",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Provision separate service identities and databases",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Migrate the two service databases",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check delegated calls, recovery and the released NF database upgrade",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check the limited NF interface beside the live Workshop service",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run Workshop contracts and stdio permissions",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Verify W4 review modes, Skill scopes and populated W3 and W4 upgrades",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Upgrade populated W4c and each deployed W5 database",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Verify the signed W5 and deployed W6 upgrade histories",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Upgrade the released W0 service and verify existing bindings",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Upgrade previously deployed W1 and W2 databases",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Upgrade existing W3 queues, preserve all historical rows and reconcile accepted NF work",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check the nine granted NF tools over live stdio",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Verify both live services and database isolation",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Verify dual-ledger recovery on the integrated NF source and native PG17",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Verify two independent SSH brokers in a single native Codex role thread",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/upload-artifact@v4",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/upload-artifact@v4",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/setup-python@v5",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/checkout@v4",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Stop containers",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Complete job",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 13899561317,
+      "name": "workshop-results",
+      "digest": "sha256:f3136e2746e9c86c0c45155fc13c248c44b5cc26b33a9b9a2355e03a129e327a",
+      "size_in_bytes": 61771
+    },
+    {
+      "id": 13899377360,
+      "name": "nf-bridge-results",
+      "digest": "sha256:a76fa4829f8ac57a1950ab99f78ab303ad41c4ba816990ccf1eec478ff6c43db",
+      "size_in_bytes": 1959
+    }
+  ]
+}
