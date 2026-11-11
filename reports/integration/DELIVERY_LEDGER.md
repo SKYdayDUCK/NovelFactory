@@ -18,3 +18,5 @@
 NF Bridge #11 的公开候选现为 `695668b87f6a76acbe7e27c71fcb259b7b3f0795`。实际 PostgreSQL 双服务专项 23 项全部通过。等待此候选的完整工程和原条件容量回执。[候选专项、WAL、权限和工作流](https://github.com/SKYdayDUCK/NovelFactory/blob/e8529cd74cef2b8cf556396da8006409eeda66b0/reports/integration/evidence/NF-Bridge/candidate-695668b/README.md)
 
 NF Bridge [#11](https://github.com/SKYdayDUCK/NovelFactory/pull/11) 已于北京时间 2026-11-12 03:02:35 合入 `main`。合并提交为 `15f606c99c765deeffd904ad540441eb6476b3af`，与合格候选 `695668b8` 同树。当前阶段为 `MERGED_AWAITING_MAIN_VERIFICATION`。[合并双亲、树及两轮工作流](https://github.com/SKYdayDUCK/NovelFactory/blob/e8529cd74cef2b8cf556396da8006409eeda66b0/reports/integration/evidence/NF-Bridge/main-15f606c/merge.json)
+
+W3 已在 #10 接续已签收主线。真实 `w003`、`w003a` 已部署数据库升级到 `w003b`，并复演双服务回执遗失与两方向物理 WAL。[预演环境及原始数据](https://github.com/SKYdayDUCK/NovelFactory/tree/aecc83aa98345d5f153b104203d542de56be1c15/reports/integration/evidence/W3/preflight-d8c4e97-nf15f606c)。最终签收待合并后复验。

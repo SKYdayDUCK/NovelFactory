@@ -144,7 +144,7 @@ def validate_receipt(data, payload, previous):
     ):
         raise Denied("REMOTE_SCOPE_MISMATCH")
     UUID(data["world_ref"]["world_revision_id"])
-    if previous and previous["world_ref"] and any(
+    if previous and previous["world_ref"] is not None and any(
         previous["world_ref"][key] != data["world_ref"][key]
         for key in ("work_id", "branch_id", "world_revision_id")
     ):
@@ -199,7 +199,10 @@ def finish(conn, installation, org, operation, fence, data, failure, mode, looku
             (installation, org, operation, epoch),
         )
     prev = conn.execute(
-        "SELECT * FROM aw_remote_receipts WHERE org_id=%s AND operation_id=%s", (org, operation)
+        """SELECT r.*,h.status AS hold_status,h.settled_amount
+        FROM aw_remote_receipts r LEFT JOIN aw_budget_holds h USING(org_id,operation_id)
+        WHERE r.org_id=%s AND r.operation_id=%s""",
+        (org, operation),
     ).fetchone()
     state = "RECONCILING"
     if failure == "DELEGATION_NOT_FOUND" and prev:
@@ -218,9 +221,12 @@ def finish(conn, installation, org, operation, fence, data, failure, mode, looku
                 (org, operation),
             ).fetchall()
             current = {a["attempt_id"]: a for a in data["attempts"]}
-            if (prev and prev["task_state"] in TERMINAL
-                    and prev["accounting_state"] in {"NO_ATTEMPT", "SETTLED"}
-                    and set(current) != {old["id"] for old in previously_seen}):
+            closed = prev and (
+                prev["hold_status"] == "SETTLED"
+                or prev["task_state"] in TERMINAL
+                and prev["accounting_state"] in {"NO_ATTEMPT", "SETTLED"}
+            )
+            if closed and current.keys() != {old["id"] for old in previously_seen}:
                 raise Denied("REMOTE_HISTORY_MISMATCH")
             ranks = {"PREPARED": 0, "SENT": 1, "UNKNOWN": 2, "SUCCEEDED": 3, "FAILED": 3}
             for old in previously_seen:
@@ -234,6 +240,8 @@ def finish(conn, installation, org, operation, fence, data, failure, mode, looku
                 ):
                     raise Denied("REMOTE_HISTORY_MISMATCH")
             settled = Decimal(data["actual_amount"])
+            if prev and prev["hold_status"] == "SETTLED" and prev["settled_amount"] != settled:
+                raise Denied("REMOTE_HISTORY_MISMATCH")
             if (settled > Decimal(row["payload"]["max_amount"])
                     or data["actual_tokens"] > row["payload"]["token_limit"]):
                 raise Denied("BUDGET_DISCREPANCY")

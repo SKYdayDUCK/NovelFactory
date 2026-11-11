@@ -45,22 +45,28 @@ uv run python scripts/manage_workshop_binding.py --access-file /srv/nf/private/a
 
 ## 用真实 Workshop 对端复验回执和恢复
 
-从待验收的 NF 检出运行。测试需要 Python 3.12、项目锁定依赖、PostgreSQL 17 的服务端与备份工具，以及可创建测试角色和数据库的隔离实例。先设置 `NF_TEST_DATABASE_URL` 和 `AW_DUAL_TEST_ADMIN_URL` 指向一次性的测试环境，并将 `PG_BIN` 指向 PostgreSQL 17 的 bin 目录。双服务测试分别创建受限数据库身份，恢复测试另建临时集群并执行物理 WAL 回放。
+在集成 W3 的仓库根目录运行。Workshop 和 NF 使用同一个检出的两个包。为 NF 回归设置 `NF_TEST_DATABASE_URL`。双服务复验分别设置 `AW_DUAL_TEST_ADMIN_URL` 和 `AW_DUAL_TEST_NF_ADMIN_URL`，指向 Workshop 和 NF 各自可创建临时数据库和角色的隔离 PostgreSQL 17 实例，`PG_BIN` 指向包含服务端和备份工具的 PostgreSQL 17 bin 目录。物理恢复测试应以能启动临时 PostgreSQL 的普通系统账户运行。
 
 ```sh
 export AW_NF_SOURCE="$(git rev-parse --show-toplevel)"
 export NF_REPLAY="$(mktemp -d)"
-git worktree add --detach "$NF_REPLAY/peer" ac579e0b89b55e613d32750ce1c07210e0b07022
 uv sync --locked
+uv sync --locked --project workshop --extra streams
 export AW_PAIRED_RESTORE_EVIDENCE="$NF_REPLAY/paired.json"
-git rev-parse HEAD HEAD^{tree} > "$NF_REPLAY/nf-revision.txt"
-git -C "$NF_REPLAY/peer" rev-parse HEAD HEAD^{tree} > "$NF_REPLAY/peer-revision.txt"
-.venv/bin/python -m pytest -q tests/integration/test_workshop_delegation.py --junitxml="$NF_REPLAY/nf.xml"
-(
-  cd "$NF_REPLAY/peer/workshop" || exit 1
-  export PYTHONPATH="$PWD/src:$AW_NF_SOURCE/src"
-  "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q integration/test_dual_stdio.py integration/test_paired_restore.py --junitxml="$NF_REPLAY/peer.xml"
-)
+git rev-parse HEAD HEAD^{tree} > "$NF_REPLAY/revision.txt"
+.venv/bin/python -m pytest -q tests/integration/test_workshop_delegation*.py --junitxml="$NF_REPLAY/nf.xml"
+PYTHONPATH="$AW_NF_SOURCE/workshop/src:$AW_NF_SOURCE/src" .venv/bin/python -m pytest -q \
+  workshop/integration/test_dual_stdio.py workshop/integration/test_paired_restore.py \
+  --junitxml="$NF_REPLAY/peer.xml"
 ```
 
-核对 `paired.json` 中两组目标和回放 LSN、恢复后唯一 NF 任务、缺失 Attempt 时仍保留的恢复围栏，以及终态账本。测试使用回环模拟供应商，外部供应商调用次数应为零。两侧的实际源码版本和 JUnit 应与该回执一同归档。
+核对 `paired.json` 中两组目标和回放 LSN、恢复后唯一 NF 任务、缺失 Attempt 时仍保留的恢复围栏，以及终态账本。测试使用回环模拟供应商，外部供应商调用次数应为零。历史 #11 的独立 Workshop 对端提交为 `ac579e0b89b55e613d32750ce1c07210e0b07022`，复演该历史验收时按对应提交的运行手册执行。
+
+## 两库恢复时的操作顺序
+
+1. 停止两端派发和正常对账 worker。保留现有数据库和对象存储，将备份与 WAL 恢复到新的隔离实例，在启动 NF worker 前完成 NF 恢复围栏。
+2. 在 Workshop 服务环境对需要恢复的每个安装执行 `python -m agent_workshop.recovery freeze --installation "$INSTALLATION_ID"`。先让每笔仍需核对的委托通过 `aw-reconcile --lookup-only` 查询原 operation。批量查询有上限，可对尚未产生本 epoch 证明的委托指定 `--operation`。保持两端正常派发停止，直至两边账本核对完成。
+3. 使用私有目录与 `umask 077`，在 NF 端执行 `manage_workshop_binding.py … snapshot --installation-id "$INSTALLATION_ID"` 导出 NF 账本，在 Workshop 端执行 `python -m agent_workshop.recovery snapshot --installation "$INSTALLATION_ID"` 导出本冻结 epoch 的核对结果。按部署时的服务账户安全传递这两份记录。核对收据、代际、每笔 Attempt 状态、Token 与金额。
+4. NF 管理员用 Workshop 导出的账本执行上文的 `reconcile`。Workshop 管理员用 NF 导出的账本执行 `python -m agent_workshop.recovery permit --installation "$INSTALLATION_ID" --nf-receipts /private/nf-ledger.json`。两端都成功后恢复普通 worker。仍处于 UNKNOWN 的预留继续占用，沿用原 Attempt 对账。发现缺单、历史倒退或金额不一致时保留围栏和原始记录，核对双方备份切点。
+
+从 `w003` 或 `w003a` 升级时先保留配对备份，在原库执行 Workshop 的 `alembic upgrade head` 接续 W2 安装归属与 W3 对账历史。旧版凭据应由管理员按已核对的组织归属和员工任期重新签发。需要回退时恢复配对备份到新实例并按上述步骤核对。

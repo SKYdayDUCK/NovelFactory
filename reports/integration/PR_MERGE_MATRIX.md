@@ -7,7 +7,7 @@
 | Workshop W1 | [#8](https://github.com/SKYdayDUCK/NovelFactory/pull/8) | `f59ac5e442bd5a434ded2e65526d5750c5488e9b` | `dev/aw-w0` | MERGED_AND_VERIFIED，main `d039839fe68f` |
 | Workshop W2 | [#9](https://github.com/SKYdayDUCK/NovelFactory/pull/9) | `0da5b7c8fab5321fa50d2a04a516f3fd95432539` | `dev/aw-w1` | MERGED_AND_VERIFIED，main `f2c584ec8e73` |
 | NF 受限委托桥接 | [#11](https://github.com/SKYdayDUCK/NovelFactory/pull/11) | `90cac947c6f1b176f20df6a579027f24e96d7b4c` | `dev/p5-5-redis-eventhub` | MERGED_AND_VERIFIED，main `15f606c99c76` |
-| Workshop W3 | [#10](https://github.com/SKYdayDUCK/NovelFactory/pull/10) | `15d1cf51c357627866d06bd49fd326798dda56a3` | `dev/aw-w2` | 唯一开放，待集成至 main |
+| Workshop W3 | [#10](https://github.com/SKYdayDUCK/NovelFactory/pull/10) | `15d1cf51c357627866d06bd49fd326798dda56a3` | `dev/aw-w2` | 以 main 为目标，W3 复验中 |
 | Workshop W4 | [#12](https://github.com/SKYdayDUCK/NovelFactory/pull/12) | `71b471416c9407e348d4bdce817588def5f11d5b` | `dev/aw-w3` | 冻结 |
 | Workshop W5 | [#14](https://github.com/SKYdayDUCK/NovelFactory/pull/14) | `609e92278476c60a893658ef53b6ff15f659b153` | `dev/aw-w4` | 冻结 |
 | Workshop W6 | [#15](https://github.com/SKYdayDUCK/NovelFactory/pull/15) | `a0d8c7e0ac4e775fdb3190af6f254aecac0ca256` | `dev/aw-w5` | 冻结 |
