@@ -15,6 +15,7 @@ from .reviews_skills import expire_due_reviews
 from .reconcile import ELIGIBLE, reconcile, remote
 
 MAX_ATTEMPTS = 5
+LEASE_SECONDS = 180
 
 
 def author_is_live(c, request_id, binding, installation, org):
@@ -71,8 +72,8 @@ def take(dsn, org, installation):
         n = row["attempts"] + 1
         c.execute(
             """UPDATE aw_resume_requests SET attempts=%s,state='RUNNING',
-            eligible_at=clock_timestamp()+interval '3 minutes' WHERE request_id=%s""",
-            (n, row["request_id"]),
+            eligible_at=clock_timestamp()+%s * interval '1 second' WHERE request_id=%s""",
+            (n, LEASE_SECONDS, row["request_id"]),
         )
         return row["request_id"], n, row["binding_digest"]
 
@@ -97,7 +98,13 @@ def before_peer_call(dsn, org, installation, request):
         if not author_is_live(c, ident, binding, installation, org):
             c.execute("UPDATE aw_resume_requests SET state='REVOKED' WHERE request_id=%s", (ident,))
             return "REVOKED"
-        return None
+        # Give the bounded peer call a full lease after any time spent reconciling.
+        renewed = c.execute(
+            """UPDATE aw_resume_requests SET eligible_at=clock_timestamp()+%s * interval '1 second'
+            WHERE request_id=%s AND eligible_at>clock_timestamp() RETURNING request_id""",
+            (LEASE_SECONDS, ident),
+        ).fetchone()
+        return None if renewed else "SUPERSEDED"
 
 
 async def run_once(dsn, org, installation, nf_project, nf_delegation):

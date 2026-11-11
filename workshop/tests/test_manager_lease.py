@@ -68,3 +68,34 @@ def test_repeated_worker_crashes_exhaust_the_existing_five_attempt_allowance():
         assert row == {"state": "WAITING_OPERATOR", "attempts": 5}
         old = request_resume(conn, authenticate(conn, token), "old-request")
         assert old["request_id"] == request and old["state"] == "WAITING_OPERATOR"
+
+
+def test_project_call_started_near_lease_end_keeps_its_generation(monkeypatch):
+    from agent_workshop import manager_worker
+
+    dsn, org, installation, _, request = queued_wake()
+    old_deadlines = []
+    competing_claims = []
+
+    def near_expiry(*args):
+        claim = take(*args)
+        with connect(dsn) as conn:
+            old_deadlines.append(conn.execute(
+                """UPDATE aw_resume_requests SET eligible_at=clock_timestamp()+interval '2 seconds'
+                WHERE request_id=%s RETURNING eligible_at""", (request,),
+            ).fetchone()["eligible_at"])
+        return claim
+
+    async def project(name, args):
+        # A real timer sees the original lease expire while this bounded call is running.
+        with connect(dsn) as conn:
+            conn.execute("SELECT pg_sleep(greatest(extract(epoch FROM %s-clock_timestamp()),0)+0.1)",
+                         (old_deadlines[0],))
+        competing_claims.append(take(dsn, org, installation))
+        return dict(workflow_state="IDLE", ready_count=0, awakened=0,
+                    recovered=0, pending_review_count=0)
+
+    monkeypatch.setattr(manager_worker, "take", near_expiry)
+    outcome = asyncio.run(run_once(dsn, org, installation, project, project))
+    assert competing_claims == [None]
+    assert outcome == "DONE"
