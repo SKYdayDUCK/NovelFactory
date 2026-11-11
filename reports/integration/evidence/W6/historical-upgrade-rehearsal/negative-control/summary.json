@@ -1,0 +1,27 @@
+{
+  "base": "028c003d1e6b22428e5112a0191252e493f46f6f",
+  "source_variant": "same-name history graph joined, pre-fix W010 upgrade() had no effect",
+  "source_fix": "27d8d0aa6e169bc471d759a8204a2662586d1b1b",
+  "original_sha256": {
+    "upgrade.xml": "3a94c8061bef6c58e9e062add9029bcd31d7bbbd71833b1e9adab0f20e389702",
+    "pytest.log": "8671e53386dabb5b93e2f8e527a4b4333856eee6fc6bcfb3b4bc2f8c862b3eb8"
+  },
+  "archive_sha256": "8c3c14dc175fab5cb6941d823b2f43acd26213cd9ca9ef9c8b73aa4e65544349",
+  "entries_sha256": {
+    "catalog-delta.py": "52a4a7ec09311c1b7d1e2b1860b16d8f7873ad362881e4250e013c3f835980fd",
+    "early-catalog-difference.json": "a90fe70c1fcb22afbdd972955e10a1eb5260e78d8abb1fc3a0149cac47420c1f",
+    "pytest.log": "da508b050aaf125c49a86f9817269b1fef690cf614cd8971509f39981b297d9b",
+    "upgrade.xml": "4e84bf5ce5fd24235fcb2e74a24a1b671e19205eec27439dad37a74962851047"
+  },
+  "environment_keyword_row_removed": {
+    "upgrade.xml": 1,
+    "pytest.log": 1
+  },
+  "first_failed_database": "w6_from_rehearsal_early",
+  "result": {
+    "tests": 8,
+    "passes": 7,
+    "failures": 1,
+    "skips": 0
+  }
+}
