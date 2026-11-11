@@ -330,7 +330,7 @@ _READY = text("""
     WHERE s.work_id=:work AND s.selection_kind LIKE :prefix AND (
         (s.epoch=1 AND (snap.payload->'volumes'->-1->>'volume_id'=a.payload->>'from_volume_id'
                        OR (a.payload->>'deadline')::timestamptz <= clock_timestamp()))
-        OR (s.epoch=2 AND t.state='RESULT_STORED'))
+        OR (s.epoch=2 AND t.state IN ('RESULT_STORED','CANCELLED','FAILED','STALE')))
     ORDER BY s.selection_kind LIMIT 1
 """)
 
@@ -402,6 +402,8 @@ def advance_volume(kernel, gateway, controller, work, branch):
                 else:
                     job = bound.artifact(repo, ref, work, kind="NEXT_VOLUME_JOB")["payload"]
                     task = repo.one("tasks", {"task_id": job["task_id"]}, lock="update")
+                    if task["state"] in ("CANCELLED", "FAILED", "STALE"):
+                        raise DomainError("TASK_" + task["state"], "The next-volume planner closed")
                     spec = repo.one(
                         "task_inputs",
                         {"task_id": task["task_id"], "generation": task["generation"]},

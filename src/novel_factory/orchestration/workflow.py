@@ -241,6 +241,21 @@ class WorkflowService:
                 conn.execute(t.update().where(t.c.task_id == task_id).values(
                     state="STALE", updated_at=func.clock_timestamp()))
                 self.tasks._emit(conn, task_id, generation, "STALE")
+            overdue = conn.execute(text("""
+                SELECT t.task_id, t.generation
+                FROM nf_tasks t JOIN nf_supervisor_jobs j USING (task_id)
+                WHERE t.work_id=:work AND t.branch_id=:branch AND t.state='READY'
+                  AND t.deadline <= statement_timestamp()
+                  AND NOT EXISTS (SELECT FROM nf_call_attempts c WHERE c.task_id=t.task_id)
+                ORDER BY t.deadline,t.task_id LIMIT :limit FOR UPDATE OF t SKIP LOCKED
+            """), {"work": work_id, "branch": branch_id, "limit": limit}).all()
+            for task_id, generation in overdue:
+                conn.execute(t.update().where(t.c.task_id == task_id).values(
+                    state="FAILED", updated_at=func.clock_timestamp()))
+                self.tasks._emit(conn, str(task_id), generation, "FAILED")
+                enqueue_outbox(conn, self.tables, "supervisor.task.expired", "task", task_id,
+                               {"generation": generation, "reason": "DEADLINE_EXCEEDED"},
+                               f"supervisor:{task_id}:{generation}:expired")
             closed = conn.execute(_CLOSED_WAITS, {"work": work_id, "branch": branch_id, "limit": limit}).all()
             for task_id, generation, reason in closed:
                 conn.execute(t.update().where(t.c.task_id == task_id).values(
@@ -269,7 +284,7 @@ class WorkflowService:
                 self.tasks._emit(conn, target, generation, "READY")
                 awakened += 1
             return {**self._counts(conn, work_id, branch_id), "awakened": awakened, "recovered": len(expired),
-                    "closed_waits": len(closed)}
+                    "closed_waits": len(closed), "expired_ready": len(overdue)}
 
 
 def review_acceptance(conn, task, spec):

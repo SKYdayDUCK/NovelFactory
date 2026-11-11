@@ -10,6 +10,7 @@ from test_p5_supervisor import backend
 from test_planning import make_plan
 
 from novel_factory.application.agent_gateway import AgentGateway
+from novel_factory.application.authorization import Principal
 from novel_factory.application.continuity import ContinuityService
 from novel_factory.application.planning import PlanningService
 from novel_factory.application.rolling_plans import RollingPlanning
@@ -20,8 +21,8 @@ from novel_factory.fixtures import point, run_command
 pytestmark = [pytest.mark.integration, pytest.mark.postgres]
 
 
-@pytest.mark.parametrize("over_limit", [False, True])
-def test_publication_starts_and_saves_one_planner(kernel_env, over_limit):
+@pytest.mark.parametrize("disposition", ["bounded", "over-limit", "cancelled"])
+def test_publication_starts_and_saves_one_planner(kernel_env, disposition):
     kernel = kernel_env["kernel"]
     f, release, _ = volume(kernel)
     owner, original = f["principal"], f["world_ref"]
@@ -83,6 +84,27 @@ def test_publication_starts_and_saves_one_planner(kernel_env, over_limit):
         snapshot = continuity.publish(owner, work, approval)["snapshot_ref"]
         assert register_next_volume(kernel, gateway, owner, **opts) == receipt
 
+        if disposition == "cancelled":
+            ready = tick()
+            assert ready["status"] == "VOLUME_PLANNER_READY"
+            task = kernel.tasks.get(ready["task_id"])
+            actor = Principal(task["grant_id"], task["principal_id"])
+            kernel.cancel_task(actor, task["task_id"], task["generation"], "cancel-next-volume")
+            stopped = tick()
+            assert stopped == {
+                "status": "VOLUME_SUCCESSOR_STOPPED",
+                "reason": "TASK_CANCELLED",
+                "task_id": task["task_id"],
+            }
+            assert tick()["status"] == "IDLE" and not requests
+            with kernel.db.uow(write=False) as repo:
+                transitions = repo.many("outbox", {
+                    "topic": "volume.successor.changed", "aggregate_id": target["volume_id"],
+                })
+                assert [e["payload"] for e in transitions].count(stopped) == 1
+                assert kernel.head(repo, work, branch) == live["world_ref"]
+            return
+
         def candidate(ctx):
             packet = json.loads(requests[-1]["messages"][1]["content"])
             assert target["nodes"][0]["goal"] in packet["assignment"]
@@ -107,7 +129,7 @@ def test_publication_starts_and_saves_one_planner(kernel_env, over_limit):
                 "focus_actor_ids": [f["ids"]["protagonist"]],
                 "resolution_strategy": "MIXED",
                 "candidate_goals": ["人物在南岸求证前卷未解的问题"]
-                + (["另一个未授权场次"] if over_limit else []),
+                + (["另一个未授权场次"] if disposition == "over-limit" else []),
                 "next_decision_reason": "等待人物的独立选择",
                 "assumptions": [],
                 "adopted_event_refs": [],
@@ -121,7 +143,7 @@ def test_publication_starts_and_saves_one_planner(kernel_env, over_limit):
             results = list(pool.map(lambda _: tick(), range(2)))
         results.extend([tick(), tick(), tick()])
         assert [r["status"] for r in results].count("VOLUME_PLANNER_READY") == 1, results
-        if over_limit:
+        if disposition == "over-limit":
             (stopped,) = [r for r in results if r["status"] == "VOLUME_SUCCESSOR_STOPPED"]
             assert stopped["reason"] == "WINDOW_CONFLICT"
             assert tick()["status"] == "IDLE" and len(requests) == 1

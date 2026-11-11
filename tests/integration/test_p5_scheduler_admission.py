@@ -1,4 +1,5 @@
 """Real PG notifications, process-wide slots, weighted scope limits and FIFO eligibility."""
+from datetime import timedelta
 from threading import Barrier, Event
 from uuid import uuid4
 
@@ -239,3 +240,34 @@ def test_unavailable_first_task_does_not_hide_ready_sibling(kernel_env):
             result = supervisor.run_once(world["principal"], wr["work_id"], wr["branch_id"])
             assert result["status"] == "RESULT_STORED" and result["task_id"] == second.task["task_id"]
         assert len(requests) == 1
+
+def test_overdue_ready_job_closes_its_dependent_without_an_external_call(kernel_env):
+    from novel_factory.infrastructure.repository import KernelRepository
+    from novel_factory.infrastructure.database import tables
+
+    kernel = kernel_env["kernel"]
+    world = load_fixture(kernel)
+    wr, owner = world["world_ref"], world["principal"]
+    work, branch = wr["work_id"], wr["branch_id"]
+
+    def authorize(conn):
+        kernel.authorize(KernelRepository(conn, tables), owner, work, "ADMIN", branch)
+
+    with backend() as (route, requests, _):
+        gateway = AgentGateway(kernel, {"test": route})
+        supervisor = RuntimeSupervisor(kernel, gateway)
+        budget = kernel.tasks.create_budget(work, "1")
+        first = _job(kernel, gateway, supervisor, world, budget, "READY").task["task_id"]
+        dependent = _job(kernel, gateway, supervisor, world, budget, "BLOCKED").task["task_id"]
+        supervisor.workflow.wait(dependent, 0, [first], mode="AND", work_id=work,
+                                 branch_id=branch, authorize_in_tx=authorize)
+        with kernel.db.uow() as repo:
+            repo.change("tasks", {"task_id": first}, {"deadline": repo.now() - timedelta(seconds=1)})
+        result = supervisor.run_once(owner, work, branch)
+        assert (result["expired_ready"], result["closed_waits"], result["counts"]["FAILED"]) == (1, 1, 2)
+        assert result["workflow_state"] == "NEEDS_ATTENTION" and not requests
+        result = supervisor.run_once(owner, work, branch)
+        assert (result["expired_ready"], result["closed_waits"]) == (0, 0)
+        with kernel.db.uow(write=False) as repo:
+            assert repo.one("outbox", {"dedupe_key": f"supervisor:{first}:0:expired"})["payload"]["reason"] == "DEADLINE_EXCEEDED"
+            assert repo.one("outbox", {"dedupe_key": f"workflow:{dependent}:0:closed"})["payload"]["reason"] == "PREREQUISITE_CLOSED"
