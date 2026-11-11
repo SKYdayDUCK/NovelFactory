@@ -30,3 +30,5 @@ W3 主线验收。原四项 AT-30 继续在 #13 跟踪，未涉及付费模型�
 - W5 合并点 `b30e76978830` 已通过候选两项 CI。原生本地 Docker 跳过与托管 PG 的 17 项命名空间跳过均在候选有逐项同源码补验，新的 main 重新验证这些范围。[合并双亲、时间与主线工作流](evidence/W5/main-b30e769/independent/merge-checkpoint.json)。
 
 - W5 主线 `b30e76978830bec4c596c04194d749fd01f67402` 的本地 Docker 项另经原生 Redis 进程停启复验通过。托管 PG 的 17 项宿主限制已同 SHA 逐节点对应。既有 AT-30 性能事实与 Issue #13 继续保留。[W5 主线签收](W5_主线签收.md)。
+
+W6 已复现主管调任后的两项不相容岗位扩编，修复及红绿原件可追溯。[红绿 JUnit、复演脚本与 633cf1a 补丁](evidence/W6/preset-supervisor/W6-preset-supervisor-633cf1a.zip)。八条旧库升级路径还发现两套同名 w009_rehearsal 中早期部署缺少岗位列和唯一索引，按真实旧库修复复验。AT-30 保持 Issue #13 原始口径。

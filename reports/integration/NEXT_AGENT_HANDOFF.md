@@ -10,3 +10,5 @@ W5 已在 `b30e76978830bec4c596c04194d749fd01f67402` 完成正式主线签收。
 4. 最终执行主线回归，归档 `reports/integration/FINAL_DELIVERY_REPORT.md`。逐项查清存量 PR 的实际合并或等价落点，保留原提交及证据，最终仅 Scion PR #4 开放。长期跟踪的 Issue 可继续开放。
 
 [历次 W4 事故和 W5 合并前检查点的历史交接](https://github.com/SKYdayDUCK/NovelFactory/blob/d831b0a53cffa12551fe785ad45b756136ffb999/reports/integration/NEXT_AGENT_HANDOFF.md)。
+
+W5 主线签收 b30e76978830，当前只有 W6 #15。核实集成候选的八条部署升级、四个预设、两个受限 SSH 代理、双库恢复与十/五十/二百员工；提交、CI、实际合并、同 main 重跑后再签收。随后独立进行 P5.6 主线全系统验收。

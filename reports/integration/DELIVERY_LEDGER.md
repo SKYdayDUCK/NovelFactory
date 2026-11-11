@@ -24,3 +24,5 @@ NF Bridge [#11](https://github.com/SKYdayDUCK/NovelFactory/pull/11) 已于北京
 
 
 W3 已签收。真实双服务委托与交接、预算与恢复均通过，两个托管工作流完成。[记录](W3_主线签收.md)。
+
+W6 在两个主管已合法调任的 PostgreSQL 用例中，一例新岗位、一例已停岗位，旧版扩编预览都未拒绝。接入现有岗位矩阵后，18 项预设、路由、通信与租期用例通过。[红绿 JUnit、复演脚本与 633cf1a 补丁](evidence/W6/preset-supervisor/W6-preset-supervisor-633cf1a.zip)。

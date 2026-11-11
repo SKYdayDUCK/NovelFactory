@@ -25,3 +25,5 @@ NF Bridge [#11](https://github.com/SKYdayDUCK/NovelFactory/pull/11) 已于北京
 
 
 W3 已签收于 `e6763d844f023d7c6a13060dbaebca0416fe3099`，下一阶段为 W4。[记录](W3_主线签收.md)。
+
+W6 #15 当前指向 main，接管时 Draft 头为 ac579e0b89b55e613d32750ce1c07210e0b07022。此次整理继承 34e4e7658b8a、73050eab6c5b 的已交付历史。正式合并和 main 验收仍待执行。
