@@ -16,6 +16,7 @@ streams = ["redis>=6.4,<7"]
 dev = ["pytest>=8.3,<10"]
 
 [project.scripts]
+aw-migrate = "agent_workshop.migrate:main"
 aw-manager-run = "agent_workshop.manager_worker:main"
 aw-reconcile = "agent_workshop.reconcile:main"
 aw-provision = "agent_workshop.provision:main"
@@ -25,3 +26,7 @@ aw-admin = "agent_workshop.admin:main"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"migrations" = "agent_workshop/migrations"
+"contracts/nf-catalog.json" = "agent_workshop/contracts/nf-catalog.json"

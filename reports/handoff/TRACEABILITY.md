@@ -10,3 +10,4 @@
 | FR-XSYS-01–07 / AT-46,47 | evidence/workshop/w3/{dual,saga}.xml；独立数据库角色、双 MCP、原键回收、Hold 与 NF 取消结算；双库 PITR 验收尚未完成 | PARTIAL |
 | FR-AW-10–13,17 / AT-44,45 | evidence/workshop/w4/staged.xml；五类分享、冻结哈希、七类审核、实质代理回避、审核专属额度守卫 | PASS（本地专项） |
 | FR-AW-14–16,18 / AT-48,49 | evidence/workshop/w5；持久 wake request，重启后恢复到真实 NF，空闲调用计数、隔离游标与固定切面 | PASS（专项） |
+| FR-XSYS, FR-AW / AT-40–49 | evidence/workshop/w6；Minimal 和 Standard 双向场景、三演员、S9 和独审回执。单独的 10/50/200 消息、逻辑委托与预算试验 | PARTIAL（两库恢复与最终复核另计） |

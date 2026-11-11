@@ -13,12 +13,13 @@
   "B": {
     "status": "IN_PROGRESS",
     "result": "NOT_MET",
-    "inspected_sha": "b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5",
+    "inspected_sha": "9630d95fa5c11b9327f223b8316d7c277e9d20f2",
     "pr": 6,
     "blocker": "three inherited workflows failed",
-    "next": "fix and rerun same-head gates before merge",
+    "next": "wait for retargeted head CI; audit inherited capacity",
     "local_hotspot_passed": 33,
-    "remote_fix_short": "bf0541a4"
+    "remote_fix_short": "bf0541a4",
+    "target": "main"
   },
   "W0": {
     "status": "VERIFIED",
@@ -83,14 +84,23 @@
     "ci": 43032647213
   },
   "W5": {
-    "status": "IN_PROGRESS",
-    "result": "PARTIAL",
+    "status": "VERIFIED",
+    "result": "PASS",
     "evidence": "evidence/workshop/w5",
-    "next": "same-head CI and fault runs"
+    "next": "same-head CI and fault runs",
+    "source_sha": "609e92278476c60a893658ef53b6ff15f659b153",
+    "pr": 14,
+    "local_tests": {
+      "workshop": 33,
+      "dual_mcp": 2
+    }
   },
   "W6": {
-    "status": "NOT_STARTED",
-    "result": "NOT_EXECUTED"
+    "status": "IN_PROGRESS",
+    "result": "PARTIAL",
+    "nf_sha": "348b389d025b9576e8185eebe53917d04d8681e1",
+    "evidence": "evidence/workshop/w6",
+    "next": "independent review fixes, physical paired recovery, exact SHA CI"
   },
   "C": {
     "status": "BLOCKED",
