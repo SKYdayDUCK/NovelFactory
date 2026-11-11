@@ -1,0 +1,442 @@
+{
+  "phase": "main",
+  "source_sha": "b30e76978830bec4c596c04194d749fd01f67402",
+  "tree": "d6cf8513c8df97902eb08fe1666492097d3d025a",
+  "environment": "Linux, Python 3.12.14, DBs PG17.11, Redis 8.0.2, Codex CLI 0.167.0-alpha.4",
+  "aw_schema": "w005c",
+  "suites": {
+    "manager-cli.xml": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "nf-tools.xml": {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dual-delegation.xml": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "released-w5.xml": {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "bridge-nf.xml": {
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "released-w3.xml": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "w4-paid.xml": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "paired-physical.xml": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "w4-reviews.xml": {
+      "tests": 27,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "released-w4.xml": {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dual-services.xml": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "released-w1-w2.xml": {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "bridge-profiles.xml": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "workshop.xml": {
+      "tests": 75,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "released-w0.xml": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "local_passed": 144,
+  "local_skipped": 1,
+  "local_skipped_test": [
+    "test_postgres_mail_during_redis_outage_and_new_worker_processes"
+  ],
+  "native_redis": {
+    "checkout": "b30e76978830bec4c596c04194d749fd01f67402",
+    "checkout_tree": "d6cf8513c8df97902eb08fe1666492097d3d025a",
+    "original_test": "workshop/tests/test_notifications.py::test_postgres_mail_during_redis_outage_and_new_worker_processes",
+    "source_blob": "3f6b1468e431ac8bc5c42fa5b38055bd0662d5c2",
+    "source_sha256": "1ed684acd8ce552d9f95b7ef1c6a0c56459c94f339c8286d3009106b42cfb848",
+    "adapted_sha256": "767b4611f6a5fdc98ac0edbfca829fa3e9c2c41b7fc9d70f900b4987b9538862",
+    "postgres_version": 170011,
+    "schema_revision": "w005c",
+    "original_redis": {
+      "redis_version": "8.0.2",
+      "process_id": 39,
+      "run_id": "2cac3b7b5afec8c05b30d3a7f38c2b9f7035e800"
+    },
+    "restarted_redis": {
+      "redis_version": "8.0.2",
+      "process_id": 50,
+      "run_id": "07822c79348121846cf6ad5d4e3e27ce788bf9d5"
+    },
+    "postgres_mail_after_recovery": {
+      "event_id": "e38a4780-88e3-436a-886c-06c953b0db28",
+      "message_id": "700ec2a3-95a1-4250-95e1-775c9e373ce1",
+      "acknowledged": true,
+      "notified": true,
+      "inbox_rows": 1
+    },
+    "native_execution": {
+      "tests": 1,
+      "passed": 1,
+      "skipped": 0
+    },
+    "docker_sidecar_execution": "skipped on the local host, recorded separately in the original candidate archive",
+    "source_changes": "only subprocess stop/start and the corresponding native test fixture selector; application calls, worker processes, SQL, ACK and pending assertions run from the public test",
+    "external_provider_calls": 0
+  },
+  "linux_role": {
+    "tests": 17,
+    "skipped": 0,
+    "errors": 0,
+    "failures": 0
+  },
+  "known_capacity_issue": 13,
+  "real_provider_calls": 0,
+  "paid_review": {
+    "review_id": "d1bc2608-109a-45ad-bf53-a43506796500",
+    "operation_id": "b1d399e3-fba5-4837-93c2-8e75a2b1de03",
+    "task_id": "7d92c38c-a97f-48b4-9662-b35f647a386d",
+    "nf_receipt": "277e6b44-1602-42a8-913f-199ad817ef12",
+    "nf_report": {
+      "artifact_id": "9860b4d0-bdd6-4dae-889d-b9f1172122fb",
+      "artifact_revision_id": "03bbdea1-21d5-4782-9e98-3551de042f3e",
+      "sha256": "fe02cff5736330dd8d130f854b2576bbd8bdeefefbb383a9baed2fa76320e1c7"
+    },
+    "source_sha": "13159dacccc69fe7d51e2b82d3394941de25c9a1308cc8056a9afae6392537c8",
+    "skill_sha": "def31cff6d127e5203945818743e1718d12f25d0f41788ad841bf09536b83b76",
+    "attempt_id": "952d44e0-3e87-493b-b25f-793bec0d11ea",
+    "tokens": 18,
+    "settled": "0.020000",
+    "reserved": "0.10",
+    "generation": 1,
+    "result": "APPROVED",
+    "loopback_http_requests": 1,
+    "commercial_calls": 0
+  },
+  "paid_coverage": {
+    "task_id": "7d92c38c-a97f-48b4-9662-b35f647a386d",
+    "generation": 1,
+    "coverage_ref": {
+      "artifact_id": "c462c192-14ce-4020-a251-547307ac69d0",
+      "artifact_revision_id": "bfdb87db-21ae-46d5-9c8a-5c6d6e6a8123",
+      "sha256": "235941f646cb8beb0d20983cfe5b471f885c7381fd5d35cbb3f1e864a39fcb32"
+    },
+    "delivery_ref": {
+      "artifact_id": "70c03805-07f2-478c-b661-a7ca49aa95f4",
+      "artifact_revision_id": "1dd08558-b55f-4b98-99d3-f422671574c3",
+      "sha256": "71b7e9624aeff4acbabd19f0eebaab41e6f20776b26791f52114029136cd2d08"
+    },
+    "text_ref": {
+      "sha256": "13159dacccc69fe7d51e2b82d3394941de25c9a1308cc8056a9afae6392537c8",
+      "artifact_id": "afddf60e-dd30-4730-acf7-e1906f3e6e48",
+      "artifact_revision_id": "ab177b20-9aee-4101-9f0e-de132d2d0266"
+    },
+    "draft_ref": {
+      "artifact_id": "0d9433a0-3fdb-4f80-b5bf-5bd30c154a4e",
+      "artifact_revision_id": "25e0445c-06ce-443b-b754-98add73a84f6",
+      "sha256": "5e5328db7425afb224fab745db5c0ec7106669378bbc21f3958513528c7cf444"
+    },
+    "span": {
+      "start": 0,
+      "end": 25,
+      "unit": "UNICODE_CODEPOINT",
+      "quote_sha256": "13159dacccc69fe7d51e2b82d3394941de25c9a1308cc8056a9afae6392537c8"
+    },
+    "read_mode": "FULL_TEXT",
+    "delivered_codepoints": 25,
+    "delivered_bytes": 71,
+    "delivered_sha256": "13159dacccc69fe7d51e2b82d3394941de25c9a1308cc8056a9afae6392537c8"
+  },
+  "archives": {
+    "local-qualification.zip": "dc67e5779ffea86c5dafbd3793d3eb3b374bf1f76b3ac972f470ae5ec7f7e733",
+    "native-notification-outage.zip": "53d8fd555046c83539e9e7a4508c0d93ac8ebe463e1c34cf7e1a8bee8ca47ddd",
+    "role-namespaces.zip": "dee4e9628e970ade7ad6042c16838414114f2576f84e916692a84879dc7fd2d1",
+    "observed-coverage.zip": "9a6fd5bbc5199831d9d555e98ef513c8317c137f18c41a8211845d231e3728a8",
+    "package-validation.json": "aea7c2af6e4f49deee4287bc306d43cba020d7a3702a8e9cde76f534d68d85c4"
+  },
+  "old_deployments": {
+    "w004c": {
+      "old_source": "6c711adf794842bdf4469ab51e89093d37761bcc",
+      "old_tables": 34,
+      "catalog_sha256": "8c15c79de44a96050f514908b104e84296331fc2a03b2015d06d6d7333820ca4",
+      "old_wakes_after_restart": [],
+      "history_trigger_modes": []
+    },
+    "w005": {
+      "old_source": "609e92278476c60a893658ef53b6ff15f659b153",
+      "old_tables": 34,
+      "catalog_sha256": "8c15c79de44a96050f514908b104e84296331fc2a03b2015d06d6d7333820ca4",
+      "old_wakes_after_restart": [
+        [
+          "REVOKED",
+          0
+        ]
+      ],
+      "history_trigger_modes": [
+        [
+          "aw_budget_holds",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_delegations",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_deliveries",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_employment_versions",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_remote_receipts",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_resume_requests",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_reviews",
+          "aw_history",
+          "O"
+        ]
+      ]
+    },
+    "w005a": {
+      "old_source": "d308e1ce1986a33e4781be97fba8a862b89dd76f",
+      "old_tables": 37,
+      "catalog_sha256": "8c15c79de44a96050f514908b104e84296331fc2a03b2015d06d6d7333820ca4",
+      "old_wakes_after_restart": [
+        [
+          "REVOKED",
+          0
+        ]
+      ],
+      "history_trigger_modes": [
+        [
+          "aw_budget_holds",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_delegations",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_deliveries",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_employment_versions",
+          "aw_history",
+          "A"
+        ],
+        [
+          "aw_remote_receipts",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_resume_requests",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_reviews",
+          "aw_history",
+          "O"
+        ]
+      ]
+    },
+    "w005b": {
+      "old_source": "bfb74f681435b12a385eb54e596c658e64629276",
+      "old_tables": 37,
+      "catalog_sha256": "8c15c79de44a96050f514908b104e84296331fc2a03b2015d06d6d7333820ca4",
+      "old_wakes_after_restart": [
+        [
+          "DONE",
+          1
+        ]
+      ],
+      "history_trigger_modes": [
+        [
+          "aw_budget_holds",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_delegations",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_deliveries",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_employment_versions",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_remote_receipts",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_resume_requests",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_reviews",
+          "aw_history",
+          "O"
+        ]
+      ]
+    }
+  },
+  "real_aw_outage": {
+    "status": "PASS",
+    "operation_id": "2d43401b-14f9-427b-a7a9-8457888a45d3",
+    "recorded_utc": "2026-11-11T22:35:24.143835+00:00",
+    "scope": "Workshop database refused connections across two real NF supervisor scans.",
+    "aw_database_allowed_connections": false,
+    "aw_live_client_backends": 0,
+    "aw_author_mcp_during_outage": "VIEW_DENIED",
+    "pending_wake_preserved": "a2b0c8e7-7f94-4208-b191-0684b7eb04cf",
+    "aw_unchanged_while_offline": {
+      "delegation": "BOUND",
+      "task_id": "1626f0c5-6841-4c64-a7e9-99aebceafed1",
+      "receipt_ref": "d77f5216-35dd-4990-9888-beae6baf23fc",
+      "task_state": "READY",
+      "accounting_state": "NO_ATTEMPT",
+      "budget_hold": "HELD",
+      "attempts_observed": 0
+    },
+    "nf_supervisor_scans": [
+      {
+        "before": {
+          "state": "READY",
+          "attempts": []
+        },
+        "after": {
+          "state": "RESULT_STORED",
+          "attempts": [
+            "ee06c5d5-190d-43dc-b46b-8eade48f3211"
+          ]
+        },
+        "status": "RESULT_STORED"
+      },
+      {
+        "before": {
+          "state": "RESULT_STORED",
+          "attempts": [
+            "ee06c5d5-190d-43dc-b46b-8eade48f3211"
+          ]
+        },
+        "after": {
+          "state": "ACCEPTED",
+          "attempts": [
+            "ee06c5d5-190d-43dc-b46b-8eade48f3211"
+          ]
+        },
+        "status": "IDLE"
+      }
+    ],
+    "nf_stdio_during_outage": {
+      "receipt_ref": "d77f5216-35dd-4990-9888-beae6baf23fc",
+      "attempt_ids": [
+        "ee06c5d5-190d-43dc-b46b-8eade48f3211"
+      ]
+    },
+    "aw_after_reconciliation": {
+      "delegation": "BOUND",
+      "task_id": "1626f0c5-6841-4c64-a7e9-99aebceafed1",
+      "receipt_ref": "d77f5216-35dd-4990-9888-beae6baf23fc",
+      "task_state": "ACCEPTED",
+      "accounting_state": "UNKNOWN",
+      "budget_hold": "HELD",
+      "attempts_observed": 1
+    },
+    "production_provider_calls": 0
+  },
+  "real_installed_manager": {
+    "nf_workflow": "IDLE",
+    "peer_launched_while_idle": false,
+    "request_id": "4f40199d-7047-4080-8e01-1ed6b4af4ac1",
+    "states": [
+      "PENDING",
+      "DONE",
+      "IDLE"
+    ]
+  },
+  "wal_targets": [
+    "0/4026790",
+    "0/407A3C0"
+  ],
+  "physical_drill_seconds": 14.48
+}
