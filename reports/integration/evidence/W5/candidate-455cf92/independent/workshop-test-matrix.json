@@ -1,0 +1,377 @@
+{
+  "phase": "candidate",
+  "verified_sha": "455cf92cc6fe5e1d0e565d627a4d5651a56bc8d4",
+  "verified_git_tree": "d6cf8513c8df97902eb08fe1666492097d3d025a",
+  "ci_checkout": "4de78767e03cc08c7940602737f08d559b170370",
+  "ci_runs": [
+    {
+      "name": "Agent Workshop PostgreSQL and stdio",
+      "id": 43110195132,
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "job": {
+        "id": 130823854539,
+        "name": "workshop",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 43110195132,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Initialize containers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Install both locked projects",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Verify the frozen NF contracts against the checked-out runtime",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Provision separate service identities and databases",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Migrate the two service databases",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Check delegated calls, recovery and the released NF database upgrade",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Check the limited NF interface beside the live Workshop service",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11
+          },
+          {
+            "name": "Run Workshop contracts and stdio permissions",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12
+          },
+          {
+            "name": "Verify W4 review modes, Skill scopes and populated W3 and W4 upgrades",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13
+          },
+          {
+            "name": "Upgrade populated W4c and each deployed W5 database",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14
+          },
+          {
+            "name": "Upgrade the released W0 service and verify existing bindings",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15
+          },
+          {
+            "name": "Upgrade previously deployed W1 and W2 databases",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16
+          },
+          {
+            "name": "Upgrade existing W3 queues, preserve all historical rows and reconcile accepted NF work",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17
+          },
+          {
+            "name": "Check the nine granted NF tools over live stdio",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18
+          },
+          {
+            "name": "Verify both live services and database isolation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19
+          },
+          {
+            "name": "Verify dual-ledger recovery on the integrated NF source and native PG17",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 22
+          },
+          {
+            "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 41
+          },
+          {
+            "name": "Post Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 42
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 43
+          },
+          {
+            "name": "Stop containers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 44
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 45
+          }
+        ]
+      }
+    }
+  ],
+  "hosted_suites": {
+    "workshop-results/workshop-results.xml": {
+      "tests": 75,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 75
+    },
+    "workshop-results/nf-tools.xml": {
+      "tests": 5,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 5
+    },
+    "workshop-results/dual-service-results.xml": {
+      "tests": 2,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 2
+    },
+    "workshop-results/w1-legacy-upgrade.xml": {
+      "tests": 1,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 1
+    },
+    "workshop-results/w2-legacy-upgrades.xml": {
+      "tests": 3,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 3
+    },
+    "workshop-results/w3-legacy-upgrades.xml": {
+      "tests": 2,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 2
+    },
+    "workshop-results/w4-reviews-skills-upgrades.xml": {
+      "tests": 27,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 27
+    },
+    "workshop-results/w4-historical-upgrades.xml": {
+      "tests": 3,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 3
+    },
+    "workshop-results/w5-historical-upgrades.xml": {
+      "tests": 4,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 4
+    },
+    "workshop-results/dual-results.xml": {
+      "tests": 4,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 4
+    },
+    "nf-bridge-results/dual-service.xml": {
+      "tests": 1,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 1
+    },
+    "nf-bridge-results/nf-delegation.xml": {
+      "tests": 18,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 18
+    }
+  },
+  "local_suites": {
+    "manager-cli.xml": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "nf-tools.xml": {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dual-delegation.xml": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "released-w5.xml": {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "bridge-nf.xml": {
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "released-w3.xml": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "w4-paid.xml": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "paired-physical.xml": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "w4-reviews.xml": {
+      "tests": 27,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "released-w4.xml": {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dual-services.xml": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "released-w1-w2.xml": {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "bridge-profiles.xml": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "workshop.xml": {
+      "tests": 75,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "released-w0.xml": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "local_passed": 144,
+  "local_skips": 1,
+  "physical_recovery": {
+    "status": "PASS",
+    "target_lsn": "0/4026790",
+    "replayed_lsn": "0/4026790",
+    "second_target_lsn": "0/407A3C0",
+    "second_replay_lsn": "0/407A3C0",
+    "resulting_nf_tasks": 1,
+    "supplier_model_calls": 0
+  },
+  "local_zip_sha256": "614465930e636eaaedccaabde1835146fcb752da8a3a911b68919819fb3881a6",
+  "aw_migration": "w005c"
+}

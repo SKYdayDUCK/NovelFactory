@@ -1,0 +1,326 @@
+{
+  "source_sha": "455cf92cc6fe5e1d0e565d627a4d5651a56bc8d4",
+  "actual_ci_checkout": "4de78767e03cc08c7940602737f08d559b170370",
+  "product_tree": "d6cf8513c8df97902eb08fe1666492097d3d025a",
+  "actions_id": 43110195132,
+  "passed": 145,
+  "suites": {
+    "workshop-results/workshop-results.xml": {
+      "tests": 75,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 75
+    },
+    "workshop-results/nf-tools.xml": {
+      "tests": 5,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 5
+    },
+    "workshop-results/dual-service-results.xml": {
+      "tests": 2,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 2
+    },
+    "workshop-results/w1-legacy-upgrade.xml": {
+      "tests": 1,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 1
+    },
+    "workshop-results/w2-legacy-upgrades.xml": {
+      "tests": 3,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 3
+    },
+    "workshop-results/w3-legacy-upgrades.xml": {
+      "tests": 2,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 2
+    },
+    "workshop-results/w4-reviews-skills-upgrades.xml": {
+      "tests": 27,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 27
+    },
+    "workshop-results/w4-historical-upgrades.xml": {
+      "tests": 3,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 3
+    },
+    "workshop-results/w5-historical-upgrades.xml": {
+      "tests": 4,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 4
+    },
+    "workshop-results/dual-results.xml": {
+      "tests": 4,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 4
+    },
+    "nf-bridge-results/dual-service.xml": {
+      "tests": 1,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 1
+    },
+    "nf-bridge-results/nf-delegation.xml": {
+      "tests": 18,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 18
+    }
+  },
+  "old_deployments": {
+    "w004c": {
+      "old_source": "6c711adf794842bdf4469ab51e89093d37761bcc",
+      "old_tables": 34,
+      "catalog_sha256": "8c15c79de44a96050f514908b104e84296331fc2a03b2015d06d6d7333820ca4",
+      "old_wakes_after_restart": [],
+      "history_trigger_modes": []
+    },
+    "w005": {
+      "old_source": "609e92278476c60a893658ef53b6ff15f659b153",
+      "old_tables": 34,
+      "catalog_sha256": "8c15c79de44a96050f514908b104e84296331fc2a03b2015d06d6d7333820ca4",
+      "old_wakes_after_restart": [
+        [
+          "REVOKED",
+          0
+        ]
+      ],
+      "history_trigger_modes": [
+        [
+          "aw_budget_holds",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_delegations",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_deliveries",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_employment_versions",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_remote_receipts",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_resume_requests",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_reviews",
+          "aw_history",
+          "O"
+        ]
+      ]
+    },
+    "w005a": {
+      "old_source": "d308e1ce1986a33e4781be97fba8a862b89dd76f",
+      "old_tables": 37,
+      "catalog_sha256": "8c15c79de44a96050f514908b104e84296331fc2a03b2015d06d6d7333820ca4",
+      "old_wakes_after_restart": [
+        [
+          "REVOKED",
+          0
+        ]
+      ],
+      "history_trigger_modes": [
+        [
+          "aw_budget_holds",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_delegations",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_deliveries",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_employment_versions",
+          "aw_history",
+          "A"
+        ],
+        [
+          "aw_remote_receipts",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_resume_requests",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_reviews",
+          "aw_history",
+          "O"
+        ]
+      ]
+    },
+    "w005b": {
+      "old_source": "bfb74f681435b12a385eb54e596c658e64629276",
+      "old_tables": 37,
+      "catalog_sha256": "8c15c79de44a96050f514908b104e84296331fc2a03b2015d06d6d7333820ca4",
+      "old_wakes_after_restart": [
+        [
+          "DONE",
+          1
+        ]
+      ],
+      "history_trigger_modes": [
+        [
+          "aw_budget_holds",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_delegations",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_deliveries",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_employment_versions",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_remote_receipts",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_resume_requests",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_reviews",
+          "aw_history",
+          "O"
+        ]
+      ]
+    }
+  },
+  "real_aw_outage": {
+    "status": "PASS",
+    "operation_id": "40ae6537-7266-4523-abb8-20098d4dad75",
+    "recorded_utc": "2026-11-11T22:19:12.383012+00:00",
+    "scope": "Workshop database refused connections across two real NF supervisor scans.",
+    "aw_database_allowed_connections": false,
+    "aw_live_client_backends": 0,
+    "aw_author_mcp_during_outage": "VIEW_DENIED",
+    "pending_wake_preserved": "1bd8aebe-b981-41fa-a29f-b98734e42109",
+    "aw_unchanged_while_offline": {
+      "delegation": "BOUND",
+      "task_id": "89879c7c-e7a6-4fee-98de-82ca2249ba3e",
+      "receipt_ref": "22cab69a-8a98-4fd2-9b7f-315fac1ff79d",
+      "task_state": "READY",
+      "accounting_state": "NO_ATTEMPT",
+      "budget_hold": "HELD",
+      "attempts_observed": 0
+    },
+    "nf_supervisor_scans": [
+      {
+        "before": {
+          "state": "READY",
+          "attempts": []
+        },
+        "after": {
+          "state": "RESULT_STORED",
+          "attempts": [
+            "ade1fbd9-3dee-4bcb-ab2f-9e8e14fb3b51"
+          ]
+        },
+        "status": "RESULT_STORED"
+      },
+      {
+        "before": {
+          "state": "RESULT_STORED",
+          "attempts": [
+            "ade1fbd9-3dee-4bcb-ab2f-9e8e14fb3b51"
+          ]
+        },
+        "after": {
+          "state": "ACCEPTED",
+          "attempts": [
+            "ade1fbd9-3dee-4bcb-ab2f-9e8e14fb3b51"
+          ]
+        },
+        "status": "IDLE"
+      }
+    ],
+    "nf_stdio_during_outage": {
+      "receipt_ref": "22cab69a-8a98-4fd2-9b7f-315fac1ff79d",
+      "attempt_ids": [
+        "ade1fbd9-3dee-4bcb-ab2f-9e8e14fb3b51"
+      ]
+    },
+    "aw_after_reconciliation": {
+      "delegation": "BOUND",
+      "task_id": "89879c7c-e7a6-4fee-98de-82ca2249ba3e",
+      "receipt_ref": "22cab69a-8a98-4fd2-9b7f-315fac1ff79d",
+      "task_state": "ACCEPTED",
+      "accounting_state": "UNKNOWN",
+      "budget_hold": "HELD",
+      "attempts_observed": 1
+    },
+    "production_provider_calls": 0
+  },
+  "real_installed_manager": {
+    "nf_workflow": "IDLE",
+    "peer_launched_while_idle": false,
+    "request_id": "b1d1a693-18fb-4a13-9a2c-fe4d6490e67f",
+    "states": [
+      "PENDING",
+      "DONE",
+      "IDLE"
+    ]
+  },
+  "wal_targets": [
+    "0/4026790",
+    "0/407A3C0"
+  ],
+  "physical_drill_seconds": 13.2
+}
