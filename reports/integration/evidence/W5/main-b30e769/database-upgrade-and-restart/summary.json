@@ -1,0 +1,110 @@
+{
+  "commit": "b30e76978830bec4c596c04194d749fd01f67402",
+  "tree": "d6cf8513c8df97902eb08fe1666492097d3d025a",
+  "parent_commits": [
+    "6c711adf794842bdf4469ab51e89093d37761bcc",
+    "455cf92cc6fe5e1d0e565d627a4d5651a56bc8d4"
+  ],
+  "run": {
+    "tests": "4",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "28.923"
+  },
+  "rehearsal_and_negative_control_evidence": "741e465ef9374541f610ff209af093f653bf4c97",
+  "receipts": {
+    "w005": {
+      "old_application": "609e92278476c60a893658ef53b6ff15f659b153",
+      "target": "w005c",
+      "historical_tables": 34,
+      "historical_rows": 375,
+      "catalog": {
+        "objects": 577,
+        "triggers": 7,
+        "functions": 8,
+        "sha256": "8c15c79de44a96050f514908b104e84296331fc2a03b2015d06d6d7333820ca4"
+      },
+      "old_wakes": [
+        [
+          "REVOKED",
+          0
+        ]
+      ]
+    },
+    "w005b": {
+      "old_application": "bfb74f681435b12a385eb54e596c658e64629276",
+      "target": "w005c",
+      "historical_tables": 37,
+      "historical_rows": 403,
+      "catalog": {
+        "objects": 577,
+        "triggers": 7,
+        "functions": 8,
+        "sha256": "8c15c79de44a96050f514908b104e84296331fc2a03b2015d06d6d7333820ca4"
+      },
+      "old_wakes": [
+        [
+          "DONE",
+          1
+        ]
+      ]
+    },
+    "w005a": {
+      "old_application": "d308e1ce1986a33e4781be97fba8a862b89dd76f",
+      "target": "w005c",
+      "historical_tables": 37,
+      "historical_rows": 375,
+      "catalog": {
+        "objects": 577,
+        "triggers": 7,
+        "functions": 8,
+        "sha256": "8c15c79de44a96050f514908b104e84296331fc2a03b2015d06d6d7333820ca4"
+      },
+      "old_wakes": [
+        [
+          "REVOKED",
+          0
+        ]
+      ]
+    },
+    "w004c": {
+      "old_application": "6c711adf794842bdf4469ab51e89093d37761bcc",
+      "target": "w005c",
+      "historical_tables": 34,
+      "historical_rows": 358,
+      "catalog": {
+        "objects": 577,
+        "triggers": 7,
+        "functions": 8,
+        "sha256": "8c15c79de44a96050f514908b104e84296331fc2a03b2015d06d6d7333820ca4"
+      },
+      "old_wakes": []
+    }
+  },
+  "postgres_restart": {
+    "before": {
+      "system_identifier": "7707045331529433139",
+      "started": "2026-11-12 07:32:39.365898+09",
+      "version": 170011
+    },
+    "after": {
+      "system_identifier": "7707045331529433139",
+      "started": "2026-11-12 07:32:39.770422+09",
+      "version": 170011
+    },
+    "unchanged_database_sha256": "c3181010450dd267881469041bc521eb2350ffd12b820ba2e6428229e90b1de9"
+  },
+  "archive_sha256": "a0ca4bf4d05c21cc80f2487f2a4f47db30df1f6c4ea881d2e11a2b14d7f1b4c6",
+  "archive_contents_sha256": {
+    "physical-restart.json": "7c7048b40f4daf3fc486325b3f31b13d943b158504cacc9c62513c91957861d8",
+    "physical-restart.py": "2a80dac5f886db28e928c5b4cd784ca539eeaa13c06bd04bb9c6f0d78c5a0108",
+    "pytest.log": "3edad1b004b47b9c50d63845d830f3f5c9d7aa2606f2d0454840578e10436097",
+    "source-checkout.txt": "12df28b61f8a07f38c049c48d02c5f80ff9b35ccd6d2d1429e74e22321d186a5",
+    "upgrade.xml": "472bd7024ee0cd418338f3543cc212e05018321c6dcf0908792ebfc79a4007df",
+    "w5/w004c.json": "58d83f31b01841290d38ebc0be9d2470c302184ee0c8e220c4d11649de951b34",
+    "w5/w005.json": "b4b3426d04cbbc72d6ab22924af627d3af533de1f1ffd4b59aff8b54d1e5e077",
+    "w5/w005a.json": "d73d6d8124701caadf86d2e626882df7d193393ea8a41743e5fd46210b9f7e3f",
+    "w5/w005b.json": "bbba66391cd74a6a68beedc8f385b5ff2b5ac1446925bf5871ee9e8b5ced5697"
+  }
+}
