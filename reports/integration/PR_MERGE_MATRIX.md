@@ -16,3 +16,5 @@
 | Scion 实验 | [#4](https://github.com/SKYdayDUCK/NovelFactory/pull/4) | `4f249d520c921c8d6effee9978f7338b912f1dd0` | `dev/p3-p4-continuity` | 冻结 |
 
 阶段状态详见 [交付台账](DELIVERY_LEDGER.md)，接管字段为历史快照。
+
+#11 现以 `main` 为目标，候选 `26bf0337`，双库专项通过，托管验收进行中。[原始回执](evidence/NF-Bridge/candidate-26bf033/README.md)
