@@ -16,3 +16,10 @@ restrict,command="/srv/agent-workshop/.venv/bin/aw-mcp --binding /var/lib/agent-
 作者继续项目使用 `config.example.toml` 的 `aw-author-service`，其强制命令选择作者或管理者的独立 Workshop 绑定。保留仓库 `adapters/codex/p5-mcp.toml` 中 `nf-resume-service` 的作者配置，并沿用本目录 `AGENTS.md` 所述的一次幂等续跑请求。
 
 `workshop/acceptance/dual_codex/probe.py` 使用原生 Codex app-server 创建一个临时只读线程，核验两个服务器的发现与实际只读回复。隔离验收使用回环 OpenSSH 的强制命令、两个服务 OS 账户、两组独立 PostgreSQL 凭据以及真实角色任务。生产部署仍需核对操作系统权限、远端主机指纹和服务端授权。
+
+在专用临时 Linux runner 上，安装 Git、uv、Python 3.12、OpenSSH 客户端与服务器，并提供原生 `codex-cli 0.167.0-alpha.4`。将 `AW_DUAL_TEST_ADMIN_URL` 指向可创建临时数据库与登录角色的测试用 PG17。验收脚本需要非交互 sudo 创建短期 POSIX 用户及回环 sshd。它使用随机账户、随机端口、两个空数据库以及临时 SSH 密钥，在正常退出或步骤失败后清理。工件目录仅写入 `receipt.json`。脚本从两个检出当前的确切 Git 对象导出代码，将 SHA 与线程、授权读取一起记录。
+
+```bash
+bash workshop/acceptance/dual_codex/run.sh \
+  "$NF_CHECKOUT" "$WORKSHOP_CHECKOUT/workshop" "$CODEX_BINARY" "$ARTIFACT_DIR"
+```
