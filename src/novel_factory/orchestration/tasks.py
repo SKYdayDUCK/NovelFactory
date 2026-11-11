@@ -16,6 +16,7 @@ from uuid import uuid4
 
 from sqlalchemy import and_, func, or_, select, text
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.exc import NoResultFound
 
 from novel_factory.contracts.registry import validate_contract
 from novel_factory.domain.errors import DomainError
@@ -448,10 +449,10 @@ class TaskService:
             conn.execute(insert(self.tables["budgets"]).values(budget_id=budget_id, work_id=str(work_id), currency=currency, limit_amount=amount))
         return budget_id
 
-    def _allow_delegated_inference(self, conn, task_id):
+    def _lock_delegation_authority(self, conn, task_id):
         if "delegation_receipts" not in self.tables:
             return
-        row = conn.execute(text("""
+        return conn.execute(text("""
             SELECT i.expires_at, i.active AND NOT i.outbound_fenced AND i.expires_at > clock_timestamp()
                AND i.policy_version = w.policy_version AND g.active AND g.epoch = s.grant_epoch AS allowed
             FROM nf_delegation_receipts r
@@ -461,6 +462,13 @@ class TaskService:
             JOIN nf_grants g ON g.grant_id = s.grant_id
             WHERE r.task_id=:task FOR SHARE OF i, w, g
         """), {"task": task_id}).mappings().one_or_none()
+
+    def _authorize_model_spend(self, conn, task_id, authorize_in_tx):
+        # Lock in the same order as installation revocation. Disclose business
+        # state only after the caller has passed its own authority check.
+        row = self._lock_delegation_authority(conn, task_id)
+        if authorize_in_tx is not None:
+            authorize_in_tx(conn)
         if row and not row["allowed"]:
             raise _error("DELEGATION_RECOVERY_FENCED", "Delegated inference is fenced")
         return row["expires_at"] if row else None
@@ -476,11 +484,7 @@ class TaskService:
         if len(request_hash) != 64 or not call_key:
             raise _error("INVALID_ARGUMENT", "Call requires request hash and stable identity")
         with self._tx() as conn:
-            # Revocation locks the installation before the role grant. Take the
-            # same order before the gateway authorizes the grant and task.
-            deadline = self._allow_delegated_inference(conn, task_id)
-            if authorize_in_tx is not None:
-                authorize_in_tx(conn)
+            deadline = self._authorize_model_spend(conn, task_id, authorize_in_tx)
             task = self.guard_task(conn, task_id, generation, worker_id)
             if task["state"] != "RUNNING":
                 raise _error("TASK_NOT_ACCEPTABLE", "External calls require a live RUNNING execution")
@@ -518,10 +522,10 @@ class TaskService:
         """
         with self._tx() as conn:
             calls = self.tables["call_attempts"]
-            call = conn.execute(select(calls).where(calls.c.attempt_id == attempt_id)).mappings().one()
-            deadline = self._allow_delegated_inference(conn, call["task_id"])
-            if authorize_in_tx is not None:
-                authorize_in_tx(conn)
+            call = conn.execute(select(calls).where(calls.c.attempt_id == attempt_id)).mappings().one_or_none()
+            deadline = self._authorize_model_spend(conn, call["task_id"] if call else None, authorize_in_tx)
+            if call is None:
+                raise NoResultFound("No row was found when one was required")
             task = self.guard_task(conn, call["task_id"], call["generation"], worker_id)
             if task["state"] != "RUNNING":
                 raise _error("TASK_NOT_ACCEPTABLE", "External dispatch requires a live RUNNING execution")
