@@ -67,6 +67,7 @@ def register_scene(
     deadline_seconds=3600,
     alternative_destination_ids=None,
     following_scenes=None,
+    volume_end=None,
     allowed_item_gift=None,
 ):
     """Preauthorize one registered interaction, one location allowance, and its editorial response.
@@ -129,6 +130,11 @@ def register_scene(
         deadline_seconds=deadline_seconds,
         **location_options,
     )
+    if volume_end is not None:
+        from novel_factory.application.scene_continuation import validate_volume_end
+        validate_volume_end(volume_end)
+        require(following_scenes is None, "INVALID_ARGUMENT", "Only the final scene can close a volume")
+        request["volume_end"] = volume_end
     if following_scenes is not None:
         from novel_factory.application.scene_continuation import validate_slots
         validate_slots(following_scenes, scene_limit)
@@ -331,7 +337,7 @@ def register_scene(
             continue_editorial=True,
         )
         wait(director, [control["task_id"]])
-        if following_scenes is not None:
+        if following_scenes is not None or volume_end is not None:
             from novel_factory.application.scene_continuation import authorize_slots
             authorize_slots(bound, repo, controller, director.task["task_id"], request, plan["artifact_ref"])
         result = {

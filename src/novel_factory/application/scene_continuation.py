@@ -12,18 +12,27 @@ from novel_factory.domain.scheduling import closure_at, state_from_revision
 from novel_factory.domain.temporal import point_key
 
 
+def validate_volume_end(value):
+    require(isinstance(value, dict) and set(value) == {"series_id"}, "INVALID_ARGUMENT",
+            "An explicit end marker requires one authorized continuity series")
+    validate_contract("UUID", value["series_id"])
+
+
 def validate_slots(slots, limit):
     require(
         isinstance(slots, list) and 1 <= len(slots) <= limit,
         "INVALID_ARGUMENT",
         "Future slots must fit the authorized rolling window",
     )
-    for slot in slots:
+    for index, slot in enumerate(slots):
         require(
-            isinstance(slot, dict) and set(slot) == {"node_id", "process_id"},
+            isinstance(slot, dict) and set(slot) - {"volume_end"} == {"node_id", "process_id"},
             "INVALID_ARGUMENT",
             "Each future slot binds a plan node and a world process",
         )
+        if "volume_end" in slot:
+            require(index == len(slots) - 1, "INVALID_ARGUMENT", "Only the last slot can close a volume")
+            validate_volume_end(slot["volume_end"])
         for field in ("node_id", "process_id"):
             validate_contract("UUID", slot[field])
     for field in ("node_id", "process_id"):
@@ -43,7 +52,7 @@ def authorize_slots(kernel, repo, owner, director_id, request, plan_ref):
     plan = kernel.artifact(repo, plan_ref, work, kind="PLAN_REVISION")["payload"]
     ids = {node["node_id"] for node in plan["nodes"]}
     require(
-        all(item["node_id"] in ids for item in request["following_scenes"]),
+        all(item["node_id"] in ids for item in request.get("following_scenes", [])),
         "INVALID_ARGUMENT",
         "Future slots must name adopted plan nodes",
     )
@@ -56,6 +65,8 @@ def authorize_slots(kernel, repo, owner, director_id, request, plan_ref):
         k: v for k, v in request.items() if k not in {"world_ref", "story_time", "deadline_seconds", "allowed_item_gift"}
     }
     allowance["model_config_sha256"] = agent_input["model_config_sha256"]
+    if "volume_end" in request or any("volume_end" in slot for slot in request.get("following_scenes", [])):
+        allowance["review_task_id"] = director_id
     # The private authorization never becomes a role's task input.
     ref = kernel._blob(allowance)
     kernel._register_artifact(repo, ref, work, allowance, "SCENE_CONTINUATION", owner.principal_id)
@@ -139,7 +150,7 @@ def _start_next(kernel, repo, gateway, owner, task, spec, allowance):
     settings = {
         k: v
         for k, v in allowance.items()
-        if k not in {"following_scenes", "idempotency_key", "model_config_sha256"}
+        if k not in {"following_scenes", "idempotency_key", "model_config_sha256", "review_task_id", "volume_end"}
     }
     result = register_scene(
         kernel,
@@ -149,6 +160,7 @@ def _start_next(kernel, repo, gateway, owner, task, spec, allowance):
         world_ref=wr,
         story_time=at,
         following_scenes=rest or None,
+        volume_end=slot.get("volume_end"),
         deadline_seconds=min(86400, remaining),
         idempotency_key=fingerprint(
             {"parent_task": task["task_id"], "generation": task["generation"], "slot": slot}
@@ -212,14 +224,22 @@ def continue_after_review(kernel, repo, gateway, owner, task, spec, outcome):
     )["payload"]
     try:
         with repo.conn.begin_nested():
-            outcome["continuation"] = _start_next(
-                kernel, repo, gateway, owner, task, spec, allowance
-            )
+            from novel_factory.application import volume_settlement
+            scenes = None
+            if "review_task_id" in allowance:
+                scenes = volume_settlement.record_scene(kernel, repo, owner, allowance, task, spec, outcome)
+            if "volume_end" in allowance:
+                outcome["settlement"] = volume_settlement.finish(kernel, repo, owner, task, spec, allowance, scenes)
+            else:
+                result = _start_next(kernel, repo, gateway, owner, task, spec, allowance)
+                if scenes is not None:
+                    volume_settlement.carry(kernel, repo, owner, task, result["director_task_id"], scenes)
+                outcome["continuation"] = result
     except DomainError as error:
         # Keep the valid editorial decision. An invalidated allowance ends explicitly
         # without partial child grants, world changes, model calls, or a retry loop.
         outcome["continuation"] = {
             "status": "STOPPED",
             "reason": error.code,
-            "node_id": allowance["following_scenes"][0]["node_id"],
+            **({"node_id": allowance["following_scenes"][0]["node_id"]} if allowance.get("following_scenes") else {}),
         }

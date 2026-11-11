@@ -18,7 +18,7 @@ from novel_factory.fixtures import load_fixture, point
 pytestmark = [pytest.mark.integration, pytest.mark.postgres]
 
 
-@pytest.mark.parametrize("choice", ["approved", "no_major_change", "wrong_trigger"])
+@pytest.mark.parametrize("choice", ["approved", "no_major_change", "wrong_trigger", "single_end"])
 def test_bounded_two_scene_chain(kernel_env, choice):
     kernel = kernel_env["kernel"]
     fixture = load_fixture(kernel, "white_bridge")
@@ -42,6 +42,9 @@ def test_bounded_two_scene_chain(kernel_env, choice):
         "node_id": plan["nodes"][0]["node_id"],
         "process_id": str(uuid4()) if choice == "wrong_trigger" else process["process_id"],
     }
+    series = str(uuid4())
+    if choice == "approved":
+        slot["volume_end"] = {"series_id": series}
     with backend() as (http, requests, server):
         gateway = AgentGateway(kernel, {"test": http})
         registration = {
@@ -60,6 +63,28 @@ def test_bounded_two_scene_chain(kernel_env, choice):
             "following_scenes": [slot],
             "idempotency_key": "two-scenes",
         }
+        if choice == "single_end":
+            from novel_factory.domain.errors import DomainError
+
+            with pytest.raises(DomainError, match="final scene"):
+                register_scene(
+                    kernel, gateway, owner, **registration, volume_end={"series_id": series}
+                )
+            with pytest.raises(DomainError, match="last slot"):
+                register_scene(
+                    kernel,
+                    gateway,
+                    owner,
+                    **{
+                        **registration,
+                        "following_scenes": [
+                            {**slot, "volume_end": {"series_id": series}},
+                            {"node_id": str(uuid4()), "process_id": str(uuid4())},
+                        ],
+                    },
+                )
+            del registration["following_scenes"]
+            registration["volume_end"] = {"series_id": series}
         scene = register_scene(kernel, gateway, owner, **registration)
 
         def candidate(ctx):
@@ -70,21 +95,66 @@ def test_bounded_two_scene_chain(kernel_env, choice):
                 body["story_interval"] = {"start": at, "end": point(at["tick"] + 1), "bounds": "[)"}
                 assert slot["node_id"] not in requests[-1]["messages"][1]["content"]
             if packet.get("editorial", {}).get("operation") == "request_change" and (
-                choice != "approved" or ctx["story_time"]["tick"] == 50
+                choice not in {"approved", "single_end"} or ctx["story_time"]["tick"] == 50
             ):
                 body["important_deltas"] = []
             return body
 
         server.candidate = candidate
-        deliveries = []
+        deliveries, settlements = [], []
         for _ in range(28):
             # Each iteration constructs a new worker against the same persisted queue.
             receipt = RuntimeSupervisor(kernel, gateway).run_once(owner, work, branch)
             assert receipt["status"] not in {"FAILED", "WAITING_REVIEW", "PAUSED"}, receipt
+            if "settlement" in receipt:
+                settlements.append(receipt["settlement"])
             if "continuation" in receipt:
                 deliveries.append(receipt["continuation"])
             if receipt["status"] == "IDLE":
                 break
+        if choice in {"approved", "single_end"}:
+            (settled,) = settlements
+            assert settled["accepted_scenes"] == (2 if choice == "approved" else 1)
+            with kernel.db.uow(write=False) as repo:
+                candidate = kernel.artifact(
+                    repo, settled["settlement_ref"], work, kind="VOLUME_SETTLEMENT_CANDIDATE"
+                )["payload"]
+                assert (
+                    candidate["world_ref"] == kernel.head(repo, work, branch)
+                    and candidate["world_effects_applied"] == 0
+                )
+                assert (
+                    len({step["receipt"]["command_id"] for step in candidate["scenes"]})
+                    == settled["accepted_scenes"]
+                )
+                assert (
+                    repo.one(
+                        "selections", {"work_id": work, "selection_kind": "CONTINUITY:" + series}
+                    )
+                    is None
+                )
+                assert (
+                    repo.one(
+                        "selections",
+                        {"work_id": work, "selection_kind": "RELEASE:" + plan["volume_id"]},
+                    )
+                    is None
+                )
+                assert (
+                    candidate["published_prefix_node_ids"] == []
+                    and candidate["prior_continuity_ref"] is None
+                )
+            if choice == "single_end":
+                assert not deliveries and len(requests) == 5
+                assert register_scene(kernel, gateway, owner, **registration) == scene
+                exercise_independent_review(kernel, fixture, settled, candidate)
+                return
+        else:
+            assert not settlements
+            with kernel.db.uow(write=False) as repo:
+                assert not repo.many(
+                    "artifacts", {"work_id": work, "kind": "VOLUME_SETTLEMENT_CANDIDATE"}
+                )
         assert len(deliveries) == 1, (deliveries, receipt)
         next_scene = deliveries[0]
         calls = len(requests)
@@ -126,3 +196,84 @@ def test_bounded_two_scene_chain(kernel_env, choice):
                     repo.one("tasks", {"task_id": registered["director_task_id"]})["state"]
                     == "ACCEPTED"
                 )
+
+
+def exercise_independent_review(kernel, fixture, settled, candidate):
+    from editorial_helpers import approve_binding, binding_for
+    from test_continuity import reviewer
+    from test_release import accept_draft, batch_for_plan, release_request, write_scene
+
+    from novel_factory.application.continuity import ContinuityService
+    from novel_factory.application.release import ReleaseService
+    from novel_factory.domain.errors import DomainError
+
+    wr = candidate["world_ref"]
+    work, owner = wr["work_id"], fixture["principal"]
+    with kernel.db.uow(write=False) as repo:
+        plan = kernel.artifact(repo, candidate["plan_ref"], work, kind="PLAN_REVISION")["payload"]
+    f = batch_for_plan(
+        kernel,
+        {**fixture, "world_ref": wr},
+        plan,
+        candidate["plan_ref"],
+        narrative_id=str(uuid4()),
+        key_prefix="terminal:",
+    )
+    accepted = [
+        accept_draft(kernel, f, write_scene(kernel, f, i, text))
+        for i, text in enumerate(["雨静了。", "两人到岸。", "等候回音。"])
+    ]
+    binding = binding_for(f, accepted)
+    proof = approve_binding(kernel, f, binding)
+    freeze = release_request(f, binding, proof["approval_ref"])
+    release = ReleaseService(kernel).freeze(owner, freeze, "settled-release")
+    assert ReleaseService(kernel).freeze(owner, freeze, "settled-release") == release
+    with kernel.db.uow(write=False) as repo:
+        (row,) = repo.many(
+            "outbox",
+            {"topic": "volume.settlement.continuity", "aggregate_id": candidate["volume_id"]},
+        )
+        handoff = row["payload"]
+        assert (
+            handoff["status"] == "AWAITING_INDEPENDENT_REVIEW"
+            and handoff["settlement_ref"] == settled["settlement_ref"]
+        )
+        assert handoff["release_ref"] == release["release_ref"]
+        assert (
+            repo.one(
+                "selections",
+                {"work_id": work, "selection_kind": "CONTINUITY:" + candidate["series_id"]},
+            )
+            is None
+        )
+    service = ContinuityService(kernel)
+    reader = reviewer(kernel, f)
+    read = service.read_candidate(reader, work, handoff["candidate_ref"], "read-ending")
+    request = {
+        "schema_version": "2.3",
+        "candidate_ref": handoff["candidate_ref"],
+        "reading_ref": read["reading_ref"],
+        "decision": "APPROVED",
+        "reason": "已核实已接受证据及卷末正式版本。",
+        "acknowledged_affected_ordinals": [],
+        "idempotency_key": "settlement-review",
+    }
+    with pytest.raises(DomainError):
+        service.review(owner, work, request)
+    approved = service.review(reader, work, request)
+    snapshot = service.publish(
+        owner,
+        work,
+        {
+            "schema_version": "2.3",
+            "candidate_ref": handoff["candidate_ref"],
+            "review_ref": approved,
+            "idempotency_key": "publish-settlement",
+        },
+    )["snapshot_ref"]
+    state = service.inspect(owner, work, snapshot)["snapshot"]
+    assert state["request"]["entries"][0]["source_events"] == [
+        {"world_ref": wr, "event_ref": ref}
+        for ref in candidate["scenes"][0]["receipt"]["accepted_event_refs"]
+    ]
+    assert state["volumes"][-1]["release_ref"] == release["release_ref"]
