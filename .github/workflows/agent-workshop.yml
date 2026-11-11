@@ -1,7 +1,16 @@
 name: Agent Workshop PostgreSQL and stdio
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'workshop/**'
+      - 'src/novel_factory/application/delegation*.py'
+      - 'src/novel_factory/interfaces/delegation_stdio.py'
+      - '.github/workflows/agent-workshop.yml'
   pull_request:
     paths:
+      - 'src/novel_factory/application/delegation*.py'
+      - 'src/novel_factory/interfaces/delegation_stdio.py'
       - 'workshop/**'
       - '.github/workflows/agent-workshop.yml'
   workflow_dispatch:
@@ -63,7 +72,7 @@ jobs:
           done
       - uses: actions/checkout@v4
         with:
-          ref: becc8e7a400756c67832e0aca16cac78000df661
+          ref: 74350760dfd063f3596e5b6838a56a40d3006ad6
           path: nf-peer
           persist-credentials: false
       - name: Install pinned NF host and role isolation tools
@@ -88,6 +97,10 @@ jobs:
       - name: Test the pinned NF peer over independent PostgreSQL accounts and stdio
         run: |
           export AW_NF_SOURCE="$GITHUB_WORKSPACE/nf-peer"
+          if test -f "$GITHUB_WORKSPACE/src/novel_factory/interfaces/delegation_stdio.py"; then
+            export AW_NF_SOURCE="$GITHUB_WORKSPACE"
+          fi
+          git -C "$AW_NF_SOURCE" rev-parse HEAD
           export AW_DUAL_TEST_ADMIN_URL="$AW_DATABASE_URL"
           export PYTHONPATH="$PWD/src:$AW_NF_SOURCE/src"
           uv sync --project "$AW_NF_SOURCE" --locked

@@ -26,6 +26,12 @@ aw-admin = "agent_workshop.admin:main"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+markers = [
+  "postgres: uses real PostgreSQL",
+  "integration: integrates services or persistent storage",
+  "fault: exercises failure and recovery",
+  "concurrency: exercises concurrent operations",
+]
 
 [tool.hatch.build.targets.wheel.force-include]
 "migrations" = "agent_workshop/migrations"
