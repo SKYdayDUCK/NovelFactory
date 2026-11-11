@@ -33,11 +33,17 @@
   },
   "W1": {
     "status": "MERGED_AND_VERIFIED",
+    "result": "PASS",
     "pr": 8,
     "source_sha": "48c20a10c1e28af608a4c52f207351eaa1c45e06",
     "main_sha": "d039839fe68f6403ea6e5590af3ed787318d5b5f",
-    "merged_at": "2026-11-11T17:48:11Z",
-    "evidence": "https://github.com/SKYdayDUCK/NovelFactory/blob/acc7e87047df2f47962f5459e9aeda1a9f46fc0b/reports/integration/W1_主线签收.md"
+    "evidence": "https://github.com/SKYdayDUCK/NovelFactory/blob/8fec0c9042b6ea85e8ff6f7712d195f028c071b2/evidence/workshop/main-verification/W1/MERGED_AND_VERIFIED.json",
+    "hosted_main_junit": {
+      "workshop": 16,
+      "historical_upgrade": 1,
+      "nf": 5,
+      "dual_services": 2
+    }
   },
   "W2": {
     "status": "IN_PROGRESS",
@@ -46,7 +52,9 @@
     "historical_source": "0da5b7c8fab5321fa50d2a04a516f3fd95432539",
     "origin_guard_source": "ec713a437b28a18c965ec58da0fb4cb8503470bb",
     "previous_evidence": "evidence/workshop/w2",
-    "next": "Qualify on the integrated main base"
+    "next": "Qualify on the integrated main base",
+    "result": "AWAITING_MAIN_ACCEPTANCE",
+    "dependency_main_sha": "d039839fe68f6403ea6e5590af3ed787318d5b5f"
   },
   "W3": {
     "status": "NOT_STARTED",

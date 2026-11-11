@@ -46,6 +46,8 @@ jobs:
         ports: ['5433:5432']
         options: --health-cmd "pg_isready -U postgres" --health-interval 3s --health-timeout 5s --health-retries 20
     env:
+      AW_ROUTE_MATRIX_EVIDENCE: ${{ github.workspace }}/workshop/routing-matrix.json
+      AW_W2_TRANSPORT_EVIDENCE: ${{ github.workspace }}/workshop/w2-transport.json
       AW_REDIS_TEST_URL: redis://127.0.0.1:6379/0
       AW_DATABASE_URL: postgresql://aw_service:workshop-ci@127.0.0.1:5432/workshop_test
       NF_DATABASE_URL: postgresql+psycopg://nf_service:nf-ci@127.0.0.1:5433/nf_test
@@ -137,4 +139,6 @@ jobs:
             workshop/dual-service-results.xml
             workshop/w1-legacy-upgrade.xml
             workshop/w2-legacy-upgrades.xml
+            workshop/routing-matrix.json
+            workshop/w2-transport.json
           if-no-files-found: error
