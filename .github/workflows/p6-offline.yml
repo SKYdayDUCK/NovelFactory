@@ -19,7 +19,7 @@ permissions:
 jobs:
   offline:
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
         with:
@@ -59,12 +59,29 @@ jobs:
             sudo apt-get -o Acquire::Retries=3 install -y postgresql-17 postgresql-client-17
           fi
           /usr/lib/postgresql/17/bin/pg_verifybackup --version
+      - uses: actions/checkout@v4
+        with:
+          repository: redis/redis
+          ref: 994bc96bb1744cb153392fc96bdba43eae56e17f
+          path: .ci-redis8
+          persist-credentials: false
+      - name: Build the pinned Redis 8 server with TLS and jemalloc
+        run: |
+          test "$(git -C .ci-redis8 rev-parse HEAD)" = 994bc96bb1744cb153392fc96bdba43eae56e17f
+          if ! command -v g++ >/dev/null || ! pkg-config --exists openssl; then
+            sudo apt-get -o Acquire::Retries=3 install -y build-essential pkg-config libssl-dev
+          fi
+          make -C .ci-redis8/src -j2 BUILD_TLS=yes MALLOC=jemalloc redis-server redis-cli redis-check-aof redis-check-rdb
+          export PATH="$PWD/.ci-redis8/src:$PATH"
+          redis-server --version | grep 'v=8.0.2 .*malloc=jemalloc-'
+          redis-cli --help | grep -F -- --tls
+          echo "$PWD/.ci-redis8/src" >> "$GITHUB_PATH"
       - name: Restore the shared token budget and its original UNKNOWN attempt
         run: |
           cd "$NF_SOURCE"
           git apply --check "$GITHUB_WORKSPACE/evidence/p6/shared-token-pitr/drill.patch"
           git apply "$GITHUB_WORKSPACE/evidence/p6/shared-token-pitr/drill.patch"
-          .venv/bin/python scripts/pitr_drill.py --output "$RUNNER_TEMP/p6-budget-drill"
+          .venv/bin/python scripts/pitr_drill.py --output "$RUNNER_TEMP/p6-budget-drill" --with-redis
       - uses: actions/upload-artifact@v4
         if: always()
         with:
