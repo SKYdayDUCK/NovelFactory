@@ -1,0 +1,111 @@
+{
+  "main": "c4939e24b6b5501d82127f528f2054e9c1992856",
+  "tree": "013e2acd2e19a1cfa391dc40c813bc7c76714551",
+  "parents": [
+    "df1e0cc904e3b94a360d86e3a3e00bfec3258673",
+    "e5a47f51f39e3ad618e822e451eb89110395e7dc"
+  ],
+  "pr": 7,
+  "merged_at": "2026-11-11T17:11:10Z",
+  "suite": "W0",
+  "event": "push",
+  "run": 43065668722,
+  "job": 130679831033,
+  "conclusion": "success",
+  "github_checked_out": "c4939e24b6b5501d82127f528f2054e9c1992856",
+  "migrations": [
+    "NF Alembic head",
+    "AW w000"
+  ],
+  "databases": "two PostgreSQL 17.11 authorities, distinct nonprivileged service roles",
+  "mcp": "real stdio NF and AW, protocol 2025-11-25",
+  "workshop_tests": 3,
+  "nf_tests": 5,
+  "nf_tool_count": 9,
+  "dual_service_tests": 2,
+  "skipped": 0,
+  "artifacts": [
+    {
+      "id": 13876266107,
+      "file": "workshop-results",
+      "size": 2624,
+      "digest": "sha256:915dbd763aaa8a6b3252a709643e5653e16e16c7e95694bad0232dd0bfaba7e1",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43065668722/artifacts/13876266107"
+    }
+  ],
+  "local_main_replay": "unavailable; actual main workflow executed",
+  "steps": [
+    {
+      "name": "Set up job",
+      "conclusion": "success"
+    },
+    {
+      "name": "Initialize containers",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/checkout@v4",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/setup-python@v5",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+      "conclusion": "success"
+    },
+    {
+      "name": "Install both locked projects",
+      "conclusion": "success"
+    },
+    {
+      "name": "Verify the frozen NF contracts against the checked-out runtime",
+      "conclusion": "success"
+    },
+    {
+      "name": "Provision separate service identities and databases",
+      "conclusion": "success"
+    },
+    {
+      "name": "Migrate the two service databases",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run Workshop contracts and stdio permissions",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check the nine granted NF tools over live stdio",
+      "conclusion": "success"
+    },
+    {
+      "name": "Verify both live services and database isolation",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/upload-artifact@v4",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/setup-python@v5",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/checkout@v4",
+      "conclusion": "success"
+    },
+    {
+      "name": "Stop containers",
+      "conclusion": "success"
+    },
+    {
+      "name": "Complete job",
+      "conclusion": "success"
+    }
+  ]
+}

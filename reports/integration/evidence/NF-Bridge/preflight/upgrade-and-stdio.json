@@ -1,0 +1,53 @@
+{
+  "candidate": "0fe6535e5ca31bf227e71b355af23eaf63b1591f",
+  "tree": "e62486d60b4ef45feb59169e225335258ab584c9",
+  "upgraded_release": "f2c584ec8e738e09d31b05ddd5c032bb2b8f96b1",
+  "postgres": "17.11",
+  "completion_utc": "2026-11-11T18:38:51.503920+00:00",
+  "clean_checkout": true,
+  "local_db_layout": "separate non-superuser roles and databases, one PostgreSQL cluster; cross-connect denied; no model supplier used. Original supervisor tests use a synthetic HTTP model.",
+  "suites": {
+    "kernel": {
+      "pytest": "7 passed in 19.21s",
+      "tests": 7,
+      "junit_properties": {
+        "bridge.upgrade_from_commit": "f2c584ec8e738e09d31b05ddd5c032bb2b8f96b1",
+        "bridge.previous_table_count": "67"
+      },
+      "cases": [
+        "test_released_world_survives_bridge_upgrade_and_guarded_downgrade",
+        "test_published_checkpoint_receipts_survive_and_partial_reads_fail_closed",
+        "test_observed_scopes_upgrade_fences_existing_graph_and_material_candidates",
+        "test_stdio_receipt_survives_lost_reply_and_supervisor_execution",
+        "test_atomic_rejection_concurrent_replay_and_revocation",
+        "test_restored_installation_requires_partner_reconciliation",
+        "test_receipt_match_cannot_unlock_missing_attempt_or_resume_model"
+      ],
+      "exit": 0
+    },
+    "dual": {
+      "pytest": "2 passed in 9.65s",
+      "tests": 2,
+      "junit_properties": {
+        "NovelFactory.Delegation.initialize": "{\"server\": \"NovelFactory.Delegation\", \"version\": \"1.0\", \"protocolVersion\": \"2025-11-25\"}",
+        "AgentWorkshop.initialize": "{\"server\": \"AgentWorkshop\", \"version\": \"0.1.0\", \"protocolVersion\": \"2025-11-25\"}",
+        "bridge.operation": "{\"accounting_state\": \"NO_ATTEMPT\", \"generation\": 0, \"operation_id\": \"b5dc738f-0739-412b-9612-415d3abb0b2d\", \"receipt_ref\": \"7859eca2-256b-435f-9492-8e9fee202c69\", \"task_id\": \"242184d3-468d-4e75-b4e3-7354a2c06a98\"}",
+        "nf_works.postgres_version": "170011",
+        "nf_works.cross_database_login": "denied",
+        "aw_installations.postgres_version": "170011",
+        "aw_installations.cross_database_login": "denied"
+      },
+      "cases": [
+        "test_two_live_profiles_bind_one_operation_to_its_nf_installation",
+        "test_separate_postgres_authorities"
+      ],
+      "exit": 0
+    }
+  },
+  "sha256": {
+    "dual.log": "dff5267cdd9ba5702bcb881cac3aeed0484ce80ad6cb8ff4d924211407f7b8a0",
+    "dual.xml": "501a72b292aa5df8b62134658682760166c5efd4f49f9ebd66e60ece08f581ae",
+    "kernel.log": "2d0bbc606deb14e29019de2ce0498fdf5382724c4246ae79f8ed362fd29ab2eb",
+    "kernel.xml": "f6aa3444313437e6187a6658193cbfd0d8ec3700e2fe09a2c2d4a2fe947d30e8"
+  }
+}

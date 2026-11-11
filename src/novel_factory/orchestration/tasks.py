@@ -451,13 +451,23 @@ class TaskService:
     def _allow_delegated_inference(self, conn, task_id):
         if "delegation_receipts" not in self.tables:
             return
-        allowed = conn.scalar(text("""
-            SELECT i.active AND NOT i.outbound_fenced AND i.expires_at > clock_timestamp()
-            FROM nf_delegation_receipts r JOIN nf_delegation_installations i USING(installation_id)
-            WHERE r.task_id=:task FOR SHARE OF i
-        """), {"task":task_id})
-        if allowed is False:
+        row = conn.execute(text("""
+            SELECT i.expires_at, i.active AND NOT i.outbound_fenced AND i.expires_at > clock_timestamp()
+               AND i.policy_version = w.policy_version AND g.active AND g.epoch = s.grant_epoch AS allowed
+            FROM nf_delegation_receipts r
+            JOIN nf_delegation_installations i USING (installation_id)
+            JOIN nf_delegation_slots s USING (installation_id, scope_ref)
+            JOIN nf_works w ON w.work_id = i.work_id
+            JOIN nf_grants g ON g.grant_id = s.grant_id
+            WHERE r.task_id=:task FOR SHARE OF i, w, g
+        """), {"task": task_id}).mappings().one_or_none()
+        if row and not row["allowed"]:
             raise _error("DELEGATION_RECOVERY_FENCED", "Delegated inference is fenced")
+        return row["expires_at"] if row else None
+
+    def _check_delegation_deadline(self, conn, deadline):
+        if deadline is not None and deadline <= self._now(conn):
+            raise _error("DELEGATION_RECOVERY_FENCED", "Delegated installation expired")
 
     def reserve_call(self, task_id, generation, worker_id, *, budget_id, amount, call_key, request_hash, token_amount=0, authorize_in_tx=None):
         reserve = _money(amount)
@@ -465,8 +475,12 @@ class TaskService:
             raise _error("INVALID_ARGUMENT", "Token reservation must be a nonnegative integer")
         if len(request_hash) != 64 or not call_key:
             raise _error("INVALID_ARGUMENT", "Call requires request hash and stable identity")
-        with self._tx(authorize_in_tx) as conn:
-            self._allow_delegated_inference(conn, task_id)
+        with self._tx() as conn:
+            # Revocation locks the installation before the role grant. Take the
+            # same order before the gateway authorizes the grant and task.
+            deadline = self._allow_delegated_inference(conn, task_id)
+            if authorize_in_tx is not None:
+                authorize_in_tx(conn)
             task = self.guard_task(conn, task_id, generation, worker_id)
             if task["state"] != "RUNNING":
                 raise _error("TASK_NOT_ACCEPTABLE", "External calls require a live RUNNING execution")
@@ -490,6 +504,7 @@ class TaskService:
             task_spent_tokens = conn.scalar(select(func.coalesce(func.sum(calls.c.actual_tokens), 0)).where(calls.c.task_id == task_id, calls.c.state.in_(["SUCCEEDED", "FAILED"])))
             if task_reserved_tokens + task_spent_tokens + token_amount > spec["budget"]["token_budget"]:
                 raise _error("BUDGET_EXCEEDED", "Task token budget would be exceeded")
+            self._check_delegation_deadline(conn, deadline)
             attempt_id = str(uuid4())
             conn.execute(budgets.update().where(budgets.c.budget_id == budget_id).values(reserved_amount=budgets.c.reserved_amount + reserve))
             conn.execute(insert(calls).values(attempt_id=attempt_id, task_id=task_id, generation=generation, budget_id=budget_id, call_key=call_key, request_hash=request_hash, state="PREPARED", reserved_amount=reserve, reserved_tokens=token_amount))
@@ -501,10 +516,12 @@ class TaskService:
         False means another worker has already taken that right. It never means
         the remote provider did not execute; unknown calls require reconciliation.
         """
-        with self._tx(authorize_in_tx) as conn:
+        with self._tx() as conn:
             calls = self.tables["call_attempts"]
             call = conn.execute(select(calls).where(calls.c.attempt_id == attempt_id)).mappings().one()
-            self._allow_delegated_inference(conn, call["task_id"])
+            deadline = self._allow_delegated_inference(conn, call["task_id"])
+            if authorize_in_tx is not None:
+                authorize_in_tx(conn)
             task = self.guard_task(conn, call["task_id"], call["generation"], worker_id)
             if task["state"] != "RUNNING":
                 raise _error("TASK_NOT_ACCEPTABLE", "External dispatch requires a live RUNNING execution")
@@ -513,6 +530,7 @@ class TaskService:
                 return False
             if call["state"] != "PREPARED":
                 raise _error("INVALID_CALL_TRANSITION", "Call is not prepared")
+            self._check_delegation_deadline(conn, deadline)
             conn.execute(calls.update().where(calls.c.attempt_id == attempt_id).values(state="SENT", updated_at=self._now(conn)))
         # Only now may a worker release the connection and perform network IO.
         return True

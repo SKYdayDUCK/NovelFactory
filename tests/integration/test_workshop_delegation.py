@@ -132,6 +132,7 @@ def test_stdio_receipt_survives_lost_reply_and_supervisor_execution(site):
         and receipt["accounting_state"] == "NO_ATTEMPT"
         and not requests
     )
+    assert receipt["result_ref"] is None and receipt["wait_reason"] is None
     assert asyncio.run(call_once("nf_delegation_submit", submit)) == receipt
     for _ in range(2):
         supervisor.run_once(owner, get["work_id"], get["branch_id"])
@@ -158,6 +159,10 @@ def test_stdio_receipt_survives_lost_reply_and_supervisor_execution(site):
     assert settled["actual_tokens"] == 18 and settled["accounting_state"] == "SETTLED"
     assert settled["actual_amount"] == "0.020000"
     with runtime.kernel.db.uow(write=False) as repo:
+        result = repo.one("task_results", {"result_id": settled["result_ref"]})
+        assert result["task_id"] == final["task_id"] and result["generation"] == final["generation"]
+        assert result["disposition"] == "CURRENT" and final["result_ref"] == settled["result_ref"]
+        assert final["wait_reason"] is None and result["payload_hash"] not in json.dumps(final)
         assert len(repo.many("tasks", {"work_id": get["work_id"]})) == 1
         assert (
             len(repo.many("delegation_receipts", {"installation_id": runtime.installation_id})) == 1
@@ -231,6 +236,7 @@ def test_restored_installation_requires_partner_reconciliation(site):
     assert (
         current["receipt_ref"] == bound["receipt_ref"]
         and current["task_state"] == "PAUSED"
+        and current["wait_reason"] == "DELEGATION_RECOVERY_FENCED"
         and not requests
     )
 
@@ -287,17 +293,24 @@ def expire_installation(runtime):
 
 
 @pytest.mark.parametrize("boundary", ["reserve_call", "mark_call_sent"])
-def test_installation_expiry_fences_new_model_spend(site, monkeypatch, boundary):
-    runtime, submit, get, _, supervisor, owner, requests, _ = site
+@pytest.mark.parametrize("authority_change", ["expiry", "policy", "slot_revocation"])
+def test_current_delegation_authority_fences_new_model_spend(site, monkeypatch, boundary, authority_change):
+    runtime, submit, get, _, supervisor, owner, requests, frozen = site
     bound = runtime.call("nf_delegation_submit", submit)
     ledger = runtime.kernel.tasks
     original = getattr(ledger, boundary)
 
-    def expire_before_authorization(*args, **kwargs):
-        expire_installation(runtime)
+    def change_before_authorization(*args, **kwargs):
+        if authority_change == "expiry":
+            expire_installation(runtime)
+        elif authority_change == "slot_revocation":
+            runtime.kernel.revoke_grant(owner, frozen.principal.grant_id)
+        else:
+            with runtime.kernel.db.uow() as repo:
+                repo.change("works", {"work_id": get["work_id"]}, {"policy_version": "nf-policy-next"})
         return original(*args, **kwargs)
 
-    monkeypatch.setattr(ledger, boundary, expire_before_authorization)
+    monkeypatch.setattr(ledger, boundary, change_before_authorization)
     result = supervisor.admit_model(owner, get["work_id"], get["branch_id"])
     assert result["status"] == "BLOCKED" and result["reason"] == "DELEGATION_RECOVERY_FENCED"
     assert not requests
@@ -332,3 +345,86 @@ def test_expiry_allows_settling_an_existing_unknown_invoice(site):
         budget = repo.one("budgets", {"budget_id": attempt["budget_id"]})
         assert budget["spent_amount"] == attempt["actual_amount"] and budget["reserved_amount"] == 0
     assert len(requests) == 1
+
+
+def test_two_installations_can_use_the_same_operation_and_hold(site):
+    runtime, submit, get, _, supervisor, owner, requests, frozen = site
+    kernel = runtime.kernel
+    ticket = install(
+        kernel,
+        owner,
+        nf_instance_id=get["nf_instance_id"],
+        org_id=str(uuid4()),
+        work_id=get["work_id"],
+        branch_id=get["branch_id"],
+        expires_at=datetime.now(UTC) + timedelta(hours=1),
+    )
+    peer = Delegations(kernel, ticket["installation_id"], ticket["token"])
+    with kernel.db.uow(write=False) as repo:
+        manifest = kernel.artifact(repo, frozen.manifest_ref, get["work_id"])["payload"]
+    other = RuntimeTaskService(kernel, supervisor.gateway).define(
+        owner,
+        frozen.spec["world_ref"],
+        role_id=submit["role_id"],
+        task_kind="summary",
+        story_time=point(1),
+        subject_ids=manifest["subject_ids"],
+        predicates=manifest["predicates"],
+        assignment="Summarize observed state.",
+        adapter_id="fixture",
+        max_amount=submit["max_amount"],
+        token_budget=submit["token_limit"],
+    )
+    provision_slot(
+        supervisor,
+        owner,
+        peer.installation_id,
+        scope_ref=submit["scope_ref"],
+        task_template_id=submit["task_template_id"],
+        frozen=other,
+        budget_id=kernel.tasks.create_budget(get["work_id"], "2"),
+        reserve_amount=submit["max_amount"],
+        token_reservation=submit["token_limit"],
+    )
+    with ThreadPoolExecutor(2) as pool:
+        left, right = pool.map(
+            lambda service: service.call("nf_delegation_submit", submit), (runtime, peer)
+        )
+    assert left["task_id"] == frozen.spec["task_id"] and right["task_id"] == other.spec["task_id"]
+    assert left["receipt_ref"] != right["receipt_ref"]
+    assert (
+        runtime.call("nf_delegation_get", get) == left
+        and peer.call("nf_delegation_get", get) == right
+    )
+    assert not requests
+
+
+def test_expiry_while_dispatch_authorization_waits_keeps_attempt_unsent(site, monkeypatch):
+    from sqlalchemy import text
+
+    runtime, submit, get, _, supervisor, owner, requests, _ = site
+    bound = runtime.call("nf_delegation_submit", submit)
+    tasks = runtime.kernel.tasks
+    mark_sent = tasks.mark_call_sent
+
+    def expire_during_authorization(attempt_id, *, worker_id, authorize_in_tx):
+        with runtime.kernel.db.uow() as repo:
+            deadline = repo.now() + timedelta(seconds=2)
+            repo.change(
+                "delegation_installations",
+                {"installation_id": runtime.installation_id},
+                {"expires_at": deadline},
+            )
+
+        def slow_authorization(conn):
+            authorize_in_tx(conn)
+            conn.execute(text("SELECT pg_sleep_until(:deadline)"), {"deadline": deadline})
+
+        return mark_sent(attempt_id, worker_id=worker_id, authorize_in_tx=slow_authorization)
+
+    monkeypatch.setattr(tasks, "mark_call_sent", expire_during_authorization)
+    result = supervisor.admit_model(owner, get["work_id"], get["branch_id"])
+    assert result["status"] == "BLOCKED" and result["reason"] == "DELEGATION_RECOVERY_FENCED"
+    with runtime.kernel.db.uow(write=False) as repo:
+        [attempt] = repo.many("call_attempts", {"task_id": bound["task_id"]})
+        assert attempt["state"] == "PREPARED" and not requests

@@ -165,7 +165,7 @@ def test_one_author_resume_through_autonomous_banquet(kernel_env, tmp_path):
     run_banquet(kernel_env, tmp_path)
 
 
-def run_banquet(kernel_env, tmp_path, *, redis_workers=None, prepare_prerequisite=None):
+def run_banquet(kernel_env, tmp_path, *, redis_workers=None):
     if not shutil.which("codex") or not Path("/proc/self/task").is_dir():
         required = "This process-level acceptance requires an installed Codex CLI on Linux"
         if os.environ.get("CI", "").lower() in {"true", "1"}:
@@ -225,11 +225,6 @@ def run_banquet(kernel_env, tmp_path, *, redis_workers=None, prepare_prerequisit
         )
         sup = RuntimeSupervisor(kernel, gateway)
         budget = kernel.tasks.create_budget(work, "20")
-        # External integration tests may provision a real same-branch prerequisite
-        # through another service. Its receipt is an ordinary NF task dependency.
-        extra_dependencies = (
-            [prepare_prerequisite(world, budget, ids)] if prepare_prerequisite else []
-        )
         signal_job = RuntimeTaskService(kernel, gateway).prepare(
             owner,
             wr,
@@ -257,7 +252,7 @@ def run_banquet(kernel_env, tmp_path, *, redis_workers=None, prepare_prerequisit
         )
         participants = [
             {"actor_id": actors[0]},
-            {"actor_id": actors[1], "after_tasks": [signal_id, *extra_dependencies]},
+            {"actor_id": actors[1], "after_tasks": [signal_id]},
             {"actor_id": actors[2]},
         ]
         registration = {
@@ -338,7 +333,7 @@ def run_banquet(kernel_env, tmp_path, *, redis_workers=None, prepare_prerequisit
         }
         dependencies = {
             signal_id: [actor_tasks[0]],
-            actor_tasks[1]: [signal_id, *extra_dependencies],
+            actor_tasks[1]: [signal_id],
             joint_id: actor_tasks,
             director_id: [control_id],
         }
@@ -651,7 +646,4 @@ def run_banquet(kernel_env, tmp_path, *, redis_workers=None, prepare_prerequisit
                     "failed_cyclic_registration": "transaction rolled back; no additional grants or tasks",
                     "errors": callback_errors,
                 }
-                if extra_dependencies:
-                    report["external_prerequisites"] = extra_dependencies
-                    report["dependent_actor_task"] = actor_tasks[1]
                 Path(output).write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")

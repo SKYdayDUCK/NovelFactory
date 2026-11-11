@@ -28,6 +28,8 @@ NF 在模型调用预留和发送前分别按数据库时钟检查安装有效�
 
 NF 已提交但回应丢失时，客户端保持组织侧的费用预留，用原 `operation_id` 查询。`get` 返回 `receipt_ref`、`task_id`、`world_ref`、`generation`、`task_state`、`accounting_state`、币种及每个 attempt 的状态、金额和 Token，适于按 attempt 标识去重。`actual_amount` 与 `actual_tokens` 汇总的是已入账部分。某条明细字段为 null 表示该数值尚未结算。任务可以已经 `ACCEPTED`，而外部费用仍 `UNKNOWN`。两侧不得据此释放预留或重新发起模型调用。
 
+委托回执的 `result_ref` 在该任务当前代际正式 ACCEPTED 后指向 NF 结果 UUID。操作方可据此对账。源文、散列、角色私有上下文和冲突详情不随回执传输。`wait_reason` 返回该代际当前的语义依赖冲突、待对账调用、恢复围栏、人工审核或前置依赖等待码；没有这些等待原因时为 null。费用状态独立于任务和结果状态。
+
 ## 恢复和撤权
 
 物理或逻辑恢复后在启动服务前照常执行 NF 恢复围栏。此步骤还会冻结所有安装的新委托。既有回执可查。由授权管理员在核对 Workshop 的所有待处理与已绑定操作后，提供 Workshop 当前冻结 epoch 的完整对账结果。每个 operation 的条目包括 receipt_ref、task_id、generation、任务状态、账本状态及逐 attempt 状态/金额/Token。使用本地 snapshot 子命令导出 NF 侧同格式的账本。任一条目不符会阻止解冻。恢复期间账本拒绝 delegated task 的新预留与派发，即使普通调度已经唤醒该任务。缺失的对端操作必须先对账，再恢复外发。撤销安装同时撤销所有所属 slot 的角色授权，历史回执和已发生费用保存在 NF。

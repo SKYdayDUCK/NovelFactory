@@ -10,6 +10,15 @@ on:
       - 'src/novel_factory/interfaces/mcp_stdio.py'
       - 'tests/integration/test_p5_mcp.py'
       - 'tests/integration/test_p5_rolling.py'
+      - 'migrations/versions/0017_nf_workshop_delegation.py'
+      - 'scripts/manage_workshop_binding.py'
+      - 'src/novel_factory/application/delegation.py'
+      - 'src/novel_factory/application/runtime_tasks.py'
+      - 'src/novel_factory/application/supervisor.py'
+      - 'src/novel_factory/infrastructure/delegation_tables.py'
+      - 'src/novel_factory/infrastructure/recovery.py'
+      - 'src/novel_factory/interfaces/delegation_stdio.py'
+      - 'tests/integration/test_workshop_delegation*.py'
   push:
     branches: [main]
     paths:
@@ -21,6 +30,15 @@ on:
       - 'src/novel_factory/interfaces/mcp_stdio.py'
       - 'tests/integration/test_p5_mcp.py'
       - 'tests/integration/test_p5_rolling.py'
+      - 'migrations/versions/0017_nf_workshop_delegation.py'
+      - 'scripts/manage_workshop_binding.py'
+      - 'src/novel_factory/application/delegation.py'
+      - 'src/novel_factory/application/runtime_tasks.py'
+      - 'src/novel_factory/application/supervisor.py'
+      - 'src/novel_factory/infrastructure/delegation_tables.py'
+      - 'src/novel_factory/infrastructure/recovery.py'
+      - 'src/novel_factory/interfaces/delegation_stdio.py'
+      - 'tests/integration/test_workshop_delegation*.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -97,6 +115,19 @@ jobs:
         run: |
           .venv/bin/python -m alembic upgrade head
           (cd workshop && .venv/bin/python -m alembic upgrade head)
+      - name: Check delegated calls, recovery and the released NF database upgrade
+        env:
+          NF_TEST_DATABASE_URL: postgresql+psycopg://nf_fixture:nf-fixture-ci@127.0.0.1:5433/postgres
+        run: |
+          mkdir -p bridge-results
+          git show -s --format='commit=%H%ntree=%T%nparents=%P' HEAD > bridge-results/checkout.txt
+          .venv/bin/python -m pytest -q -o junit_family=xunit1 \
+            tests/integration/test_workshop_delegation*.py \
+            --junitxml=bridge-results/nf-delegation.xml
+      - name: Check the limited NF interface beside the live Workshop service
+        run: |
+          .venv/bin/python -m pytest -c pyproject.toml -q -o junit_family=xunit1 \
+            workshop/acceptance/test_nf_bridge_stdio.py --junitxml=bridge-results/dual-service.xml
       - name: Run Workshop contracts and stdio permissions
         env:
           AW_REDIS_TEST_CONTAINER: ${{ job.services.redis.id }}
@@ -141,4 +172,10 @@ jobs:
             workshop/w2-legacy-upgrades.xml
             workshop/routing-matrix.json
             workshop/w2-transport.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nf-bridge-results
+          path: bridge-results/
           if-no-files-found: error
