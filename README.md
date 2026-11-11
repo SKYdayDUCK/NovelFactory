@@ -1,10 +1,12 @@
 # NovelFactory — Agent 驱动的小说世界知识与状态内核
 
-[![P1 Integrity CI](https://github.com/SKYdayDUCK/NovelFactory/actions/workflows/p1-integrity.yml/badge.svg)](https://github.com/SKYdayDUCK/NovelFactory/actions/workflows/p1-integrity.yml)
+[![main 工程 CI](https://github.com/SKYdayDUCK/NovelFactory/actions/workflows/p1-integrity.yml/badge.svg?branch=main)](https://github.com/SKYdayDUCK/NovelFactory/actions/workflows/p1-integrity.yml)
 
-**当前分支范围：P2 完整工程链路与 P3/P4 的已交付有限工程能力，正在合并前收尾（2026-11-11）。** 本分支对应依赖 [PR #2](https://github.com/SKYdayDUCK/NovelFactory/pull/2) 的 [PR #3](https://github.com/SKYdayDUCK/NovelFactory/pull/3)。在 Python 3.12 / PostgreSQL 17 内核上，已有完整短卷生产、宏微事件有限等效、跨卷继承、派生工作者、在线备份与隔离 WAL/PITR；本轮只修复重复计算、恢复校验和 CI 证据缺口，不增加业务功能。
+**当前 `main` 为 P2/P3/P4 研发工程集成基线。** P2 包含从卷级规划、六场短卷写作到内部发布的工程闭环。P3/P4 包含有限范围的宏微事件等效、跨卷继承与权限控制、派生工作者、在线备份及隔离 PostgreSQL 17 的 WAL 时间点恢复。合并提交、回归结果与回退步骤见[工程基线合并记录](reports/main_工程基线合并记录.md)。
 
-**原容量验收仍为 `NOT_MET`，两条 PR 均未合并、保持 Draft。** 最终应用代码 `e3c7b79b0058656f11257ea55edc75371382b73e` 的实际工程结果、全部负载及CI链接见[合并前修复报告](reports/PR2_PR3_合并前修复报告.md)和[PR与main记录](reports/PR合并与main验收记录.md)。两次500混合均51/51正式效果、2851操作全发、首试0；1000读仅1203/5000和1181/5000有效，原热点和持续负载容量仍未过。PITR新附件11/11完整，首次外部网络失败记录保留。详见[性能与容量对照](reports/性能与容量修复对照.md)、[未通过目标](reports/未通过目标与后续工作.md)。真实模型 `BLOCKED_ENVIRONMENT`、作者全文评价 `PENDING_AUTHOR`、文学质量 `NOT_EVALUATED`；初始13/21及全部失败证据不改写。main仍为P1。
+**生产容量仍为 `NOT_MET`。** 50/200 Agent 热点、1000 Agent 开放到达和 500 Agent 持续读的跨次稳定性仍有缺口。多小时混合负载尚未执行。短卷使用确定性夹具，真实模型调用为 0，作者全文评价待完成，文学质量尚未评价。[容量实测](reports/性能与容量修复对照.md) · [合并前容量缺口记录](reports/未通过目标与后续工作.md)
+
+Scion 增量版本实验保留在 [Draft PR #4](https://github.com/SKYdayDUCK/NovelFactory/pull/4)。B1/B2 待独立审核，B3 增量重放在实验分支默认关闭。
 
 - **运行/复现：** [复现与运行指南](reports/复现与运行指南.md)，`uv sync --locked --group dev`；默认 Python 3.12，PostgreSQL 17。
 - **测试与 CI：** [P1 Integrity Workflow](.github/workflows/p1-integrity.yml) 对 Schema、单元、真实 PostgreSQL 集成/并发及恢复执行分组验证；原始 JUnit、日志和机器可读结果在每次 GitHub Actions Run 的 Artifacts 获取。CI 执行状态以 GitHub Actions 当次结果为准。
@@ -88,4 +90,4 @@ v1.1 的 14 份 Markdown 原件保留在 [baseline/v1_1](baseline/v1_1/README.md
 
 建议顺序：P0 固定契约与环境；P1 建立可信状态、少量封闭命令的依赖守卫、统一查询和多工作者预算；P2 随即完成 5–10 场景的真实短卷生产闭环；P3/P4 再以实测决定扩展。不要因为文档覆盖完整就一次性实现所有可选组件。
 
-`MANIFEST.sha256` 属于原始设计交付清单，不适用本次修复产生的新文件。当前 `src/`、`tests/` 和 `migrations/` 已包含 P0/P1 内核、P2 工程链路与上述有限 P3 基础；请以本 README 顶部的阶段说明与实际 CI 验收为准。
+`MANIFEST.sha256` 属于原始设计交付清单，不适用本次修复产生的新文件。当前 `src/`、`tests/` 和 `migrations/` 已包含 P0/P1 内核、P2 工程链路及本页列出的 P3/P4 工程能力；请以本 README 顶部的阶段说明与实际 CI 验收为准。
