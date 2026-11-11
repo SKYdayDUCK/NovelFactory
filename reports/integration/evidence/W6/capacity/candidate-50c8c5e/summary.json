@@ -1,0 +1,290 @@
+{
+  "head": "50c8c5ed36cc2cfb83d6624c65ed33336e0f1771",
+  "messages": [
+    {
+      "employees": 10,
+      "unique_completed_exchanges": 30,
+      "receipt_counts": {
+        "messages": 30,
+        "acknowledged": 30,
+        "pending_hints": 30,
+        "durable_inbox": 30
+      },
+      "latency": {
+        "send": {
+          "p50_ms": 36.426919999939855,
+          "p95_ms": 58.59020000207238,
+          "p99_ms": 65.55578000188689
+        },
+        "ack": {
+          "p50_ms": 28.132800001912983,
+          "p95_ms": 36.85453499929281,
+          "p99_ms": 37.00106500036782
+        }
+      },
+      "notification_loss_and_restart": {
+        "replayed_outbox": 30,
+        "rebuilt_stream": 30,
+        "distinct_consumed": 30,
+        "seconds": 0.5168020970013458
+      },
+      "message_gate": "PASS",
+      "raw": "message/messages-10.json",
+      "sha256": "7e0fc2ca53805b7a88174a6ee61a1b06c42d2f12e7f338260c17c72b0a77ec02"
+    },
+    {
+      "employees": 200,
+      "unique_completed_exchanges": 600,
+      "receipt_counts": {
+        "messages": 600,
+        "acknowledged": 600,
+        "pending_hints": 600,
+        "durable_inbox": 600
+      },
+      "latency": {
+        "send": {
+          "p50_ms": 43.9071300024807,
+          "p95_ms": 74.28448800055776,
+          "p99_ms": 118.7799650033412
+        },
+        "ack": {
+          "p50_ms": 31.276716999855125,
+          "p95_ms": 50.26807700050995,
+          "p99_ms": 144.69357300185948
+        }
+      },
+      "notification_loss_and_restart": {
+        "replayed_outbox": 600,
+        "rebuilt_stream": 600,
+        "distinct_consumed": 600,
+        "seconds": 13.18101684299836
+      },
+      "message_gate": "PASS",
+      "raw": "message/messages-200.json",
+      "sha256": "e1fa5de6f628e4856150f22d9b05afde3e17e33596c77df8afea042525e88817"
+    },
+    {
+      "employees": 50,
+      "unique_completed_exchanges": 150,
+      "receipt_counts": {
+        "messages": 150,
+        "acknowledged": 150,
+        "pending_hints": 150,
+        "durable_inbox": 150
+      },
+      "latency": {
+        "send": {
+          "p50_ms": 42.066195001098095,
+          "p95_ms": 69.50109399986104,
+          "p99_ms": 81.11234799798694
+        },
+        "ack": {
+          "p50_ms": 29.650582997419406,
+          "p95_ms": 41.3026770002034,
+          "p99_ms": 46.362950997718144
+        }
+      },
+      "notification_loss_and_restart": {
+        "replayed_outbox": 150,
+        "rebuilt_stream": 150,
+        "distinct_consumed": 150,
+        "seconds": 2.6607722580010886
+      },
+      "message_gate": "PASS",
+      "raw": "message/messages-50.json",
+      "sha256": "a0b6fc053e8ac2d8b8f31b9b734300ba6da7694c539c62e87a59ae5b9ebe54d4"
+    }
+  ],
+  "delegations": [
+    {
+      "registered_members": 10,
+      "policy": "adaptive-2",
+      "accepted": 10,
+      "unique_tasks": 10,
+      "settled": 10,
+      "held": 0,
+      "provider_requests": 10,
+      "synthetic_reported_tokens": 180,
+      "observed_peak_model_calls": 1,
+      "model_calls_while_idle": 0,
+      "elapsed_s": 6.6609808600005636,
+      "latency_ms": {
+        "p50": 6368.460969999433,
+        "p95": 6403.994574997341,
+        "p99": 6403.994574997341
+      },
+      "raw": "delegation/delegations-10-adaptive-2.json",
+      "sha256": "9e15934c776e9ae396074e16e9859c8a4651f3590288b11126bc1c0c9e5349a7"
+    },
+    {
+      "registered_members": 10,
+      "policy": "fixed-2",
+      "accepted": 10,
+      "unique_tasks": 10,
+      "settled": 10,
+      "held": 0,
+      "provider_requests": 10,
+      "synthetic_reported_tokens": 180,
+      "observed_peak_model_calls": 1,
+      "model_calls_while_idle": 0,
+      "elapsed_s": 4.263943150002888,
+      "latency_ms": {
+        "p50": 4015.3827739995904,
+        "p95": 4067.7441480002017,
+        "p99": 4067.7441480002017
+      },
+      "raw": "delegation/delegations-10-fixed-2.json",
+      "sha256": "975006cdebed3146110c817ce95228d3939d6505ed7850e24e7e894af1f59bc3"
+    },
+    {
+      "registered_members": 10,
+      "policy": "fixed-1",
+      "accepted": 10,
+      "unique_tasks": 10,
+      "settled": 10,
+      "held": 0,
+      "provider_requests": 10,
+      "synthetic_reported_tokens": 180,
+      "observed_peak_model_calls": 1,
+      "model_calls_while_idle": 0,
+      "elapsed_s": 4.456032558999141,
+      "latency_ms": {
+        "p50": 4053.050483998959,
+        "p95": 4162.737450998975,
+        "p99": 4162.737450998975
+      },
+      "raw": "delegation/delegations-10.json",
+      "sha256": "520a2103d9971bae5f35570ecb13b0a73c6ac353e7d59d50ed3a997a65da1353"
+    },
+    {
+      "registered_members": 200,
+      "policy": "adaptive-2",
+      "accepted": 200,
+      "unique_tasks": 200,
+      "settled": 200,
+      "held": 0,
+      "provider_requests": 200,
+      "synthetic_reported_tokens": 3600,
+      "observed_peak_model_calls": 2,
+      "model_calls_while_idle": 0,
+      "elapsed_s": 63.288331040999765,
+      "latency_ms": {
+        "p50": 50332.146529002785,
+        "p95": 56474.70247200181,
+        "p99": 57131.82365999819
+      },
+      "raw": "delegation/delegations-200-adaptive-2.json",
+      "sha256": "474b92294e496d0bd0d37289c1b3fce568098479e12c82b36ca3d478ee1837d3"
+    },
+    {
+      "registered_members": 200,
+      "policy": "fixed-2",
+      "accepted": 200,
+      "unique_tasks": 200,
+      "settled": 200,
+      "held": 0,
+      "provider_requests": 200,
+      "synthetic_reported_tokens": 3600,
+      "observed_peak_model_calls": 1,
+      "model_calls_while_idle": 0,
+      "elapsed_s": 190.1328727939981,
+      "latency_ms": {
+        "p50": 176342.19225100242,
+        "p95": 183917.97378199772,
+        "p99": 184564.32694699834
+      },
+      "raw": "delegation/delegations-200-fixed-2.json",
+      "sha256": "9b1be19d4574d7fd6c6d40b82506d7468c5eea77ab5824ddf59e3acb50bf4a6b"
+    },
+    {
+      "registered_members": 200,
+      "policy": "fixed-1",
+      "accepted": 200,
+      "unique_tasks": 200,
+      "settled": 200,
+      "held": 0,
+      "provider_requests": 200,
+      "synthetic_reported_tokens": 3600,
+      "observed_peak_model_calls": 1,
+      "model_calls_while_idle": 0,
+      "elapsed_s": 125.16934588799995,
+      "latency_ms": {
+        "p50": 119028.5103640017,
+        "p95": 119478.62833800173,
+        "p99": 119528.89715900164
+      },
+      "raw": "delegation/delegations-200.json",
+      "sha256": "8c2a7f31759c81c69dc2131db15d5c9abb812704909bab95b959e83181e9c4dc"
+    },
+    {
+      "registered_members": 50,
+      "policy": "adaptive-2",
+      "accepted": 50,
+      "unique_tasks": 50,
+      "settled": 50,
+      "held": 0,
+      "provider_requests": 50,
+      "synthetic_reported_tokens": 900,
+      "observed_peak_model_calls": 1,
+      "model_calls_while_idle": 0,
+      "elapsed_s": 36.93399765800132,
+      "latency_ms": {
+        "p50": 35585.43824500157,
+        "p95": 35633.08994199906,
+        "p99": 35636.57373599926
+      },
+      "raw": "delegation/delegations-50-adaptive-2.json",
+      "sha256": "b48551498fadc79b268bda15860060f9f13401f94320033ef1eb82777ef610ba"
+    },
+    {
+      "registered_members": 50,
+      "policy": "fixed-2",
+      "accepted": 50,
+      "unique_tasks": 50,
+      "settled": 50,
+      "held": 0,
+      "provider_requests": 50,
+      "synthetic_reported_tokens": 900,
+      "observed_peak_model_calls": 1,
+      "model_calls_while_idle": 0,
+      "elapsed_s": 14.861619548999442,
+      "latency_ms": {
+        "p50": 13407.994600001985,
+        "p95": 13514.122098997177,
+        "p99": 13514.870131999487
+      },
+      "raw": "delegation/delegations-50-fixed-2.json",
+      "sha256": "bbb141ddd750d0960dd341f5395383acbc0c88dbdc4b1120d328c45583652981"
+    },
+    {
+      "registered_members": 50,
+      "policy": "fixed-1",
+      "accepted": 50,
+      "unique_tasks": 50,
+      "settled": 50,
+      "held": 0,
+      "provider_requests": 50,
+      "synthetic_reported_tokens": 900,
+      "observed_peak_model_calls": 1,
+      "model_calls_while_idle": 0,
+      "elapsed_s": 24.995554566001374,
+      "latency_ms": {
+        "p50": 22723.403601998143,
+        "p95": 23565.697561996785,
+        "p99": 23616.711747999943
+      },
+      "raw": "delegation/delegations-50.json",
+      "sha256": "4a2317aba1424ead9ecc88df4ea03f3936fe663e13a8d79bc11bab47e558caf1"
+    }
+  ],
+  "delegation_junit": {
+    "name": "pytest",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "tests": "9",
+    "time": "547.629",
+    "timestamp": "2026-11-12T08:13:08.524554+09:00",
+    "hostname": "8468d52686a3"
+  }
+}
