@@ -31,7 +31,14 @@ if [[ "${1:-}" != "--broker-session" ]]; then
     git -C "$aw_repo" archive "$aw_tree" | tar -xf - -C "$r/aw"
     unset UV_PROJECT_ENVIRONMENT VIRTUAL_ENV PYTHONPATH
     uv sync --project "$r/nf" --locked --group dev --python "${DUAL_SYSTEM_PYTHON:-/usr/bin/python3.12}"
-    uv sync --project "$r/aw" --locked --extra streams --python "${DUAL_SYSTEM_PYTHON:-/usr/bin/python3.12}"
+    uv sync --project "$r/aw" --locked --extra streams --no-install-project --python "${DUAL_SYSTEM_PYTHON:-/usr/bin/python3.12}"
+    uv build --wheel "$r/aw" --out-dir "$r/aw/dist"
+    wheels=("$r/aw"/dist/*.whl)
+    test "${#wheels[@]}" = 1
+    uv pip install --python "$r/aw/.venv/bin/python" --no-deps "${wheels[0]}"
+    "$r/aw/.venv/bin/python" -I -c 'from pathlib import Path; import sys, agent_workshop.server as s; assert Path(s.__file__).resolve().is_relative_to(Path(sys.prefix))'
+    export PROOF_AW_WHEEL_SHA
+    PROOF_AW_WHEEL_SHA=$(sha256sum "${wheels[0]}" | cut -d' ' -f1)
     export AW_NF_SOURCE="$r/nf" PYTHONPATH="$r/aw/integration:$r/aw/src:$r/nf:$r/nf/src"
     "$r/nf/.venv/bin/python" - "$r" "$out" <<'PY'
 from pathlib import Path
@@ -39,12 +46,32 @@ import os
 import subprocess
 import sys
 from conftest import database_pair
+import psycopg
+from sqlalchemy.engine import make_url
 
 root = Path(sys.argv[1])
-with database_pair(os.environ["AW_DUAL_TEST_ADMIN_URL"]) as urls:
+aw_admin = os.environ["AW_DUAL_TEST_ADMIN_URL"]
+nf_admin = os.environ.get("AW_DUAL_TEST_NF_ADMIN_URL")
+with database_pair(aw_admin, nf_admin) as urls:
+    systems = {}
+    for service, admin in (("aw", aw_admin), ("nf", nf_admin or aw_admin)):
+        # Inspect the actual new database's owner and physical cluster via its fixture admin.
+        identity = make_url(urls[service])
+        control = make_url(admin).set(drivername="postgresql", database=identity.database)
+        with psycopg.connect(control.render_as_string(hide_password=False)) as conn:
+            system, owner = conn.execute(
+                """SELECT system_identifier::text, pg_get_userbyid(datdba)
+                   FROM pg_control_system(), pg_database WHERE datname = current_database()"""
+            ).fetchone()
+        assert owner == identity.username
+        systems[service] = system
+    if nf_admin:
+        assert systems["aw"] != systems["nf"]
     env = {**os.environ, "NF_DATABASE_URL": urls["nf"], "AW_DATABASE_URL": urls["aw"],
-           "DUAL_FIXTURE_ROOT": str(root)}
-    env.pop("AW_DUAL_TEST_ADMIN_URL", None)
+           "DUAL_FIXTURE_ROOT": str(root), "PROOF_AW_SYSTEM": systems["aw"],
+           "PROOF_NF_SYSTEM": systems["nf"]}
+    for key in ("AW_DUAL_TEST_ADMIN_URL", "AW_DUAL_TEST_NF_ADMIN_URL"):
+        env.pop(key, None)
     subprocess.run(["bash", str(root / "aw/acceptance/dual_codex/run.sh"), "--broker-session",
                     str(root), sys.argv[2]], env=env, check=True)
 PY
@@ -168,7 +195,11 @@ from pathlib import Path
 
 receipt = json.loads(Path(sys.argv[1]).read_bytes())
 assert receipt["model_turns"] == 0 and receipt["role_binding_reads_denied"] == 2
-receipt.update(nf_sha=os.environ["PROOF_NF_SHA"], workshop_sha=os.environ["PROOF_AW_SHA"],
+receipt.update(aw_postgres_system_identifier=os.environ["PROOF_AW_SYSTEM"],
+               nf_postgres_system_identifier=os.environ["PROOF_NF_SYSTEM"],
+               separate_service_clusters=os.environ["PROOF_AW_SYSTEM"] != os.environ["PROOF_NF_SYSTEM"],
+               wheel_sha256=os.environ["PROOF_AW_WHEEL_SHA"],
+               nf_sha=os.environ["PROOF_NF_SHA"], workshop_sha=os.environ["PROOF_AW_SHA"],
                transport="OpenSSH forced commands", separate_service_uids=True,
                role_signing_private_keys_unreadable=True, cross_service_binding_reads_denied=2)
 with tempfile.NamedTemporaryFile("w", dir=sys.argv[2], delete=False) as f:

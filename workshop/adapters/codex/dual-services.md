@@ -17,7 +17,7 @@ restrict,command="/srv/agent-workshop/.venv/bin/aw-mcp --binding /var/lib/agent-
 
 `workshop/acceptance/dual_codex/probe.py` 使用原生 Codex app-server 创建一个临时只读线程，核验两个服务器的发现与实际只读回复。隔离验收使用回环 OpenSSH 的强制命令、两个服务 OS 账户、两组独立 PostgreSQL 凭据以及真实角色任务。生产部署仍需核对操作系统权限、远端主机指纹和服务端授权。
 
-在专用临时 Linux runner 上，安装 Git、uv、Python 3.12、OpenSSH 客户端与服务器，并提供原生 `codex-cli 0.167.0-alpha.4`。将 `AW_DUAL_TEST_ADMIN_URL` 指向可创建临时数据库与登录角色的测试用 PG17。验收脚本需要非交互 sudo 创建短期 POSIX 用户及回环 sshd。它使用随机账户、随机端口、两个空数据库以及临时 SSH 密钥，在正常退出或步骤失败后清理。工件目录仅写入 `receipt.json`。脚本从两个检出当前的确切 Git 对象导出代码，将 SHA 与线程、授权读取一起记录。
+在专用临时 Linux runner 上，安装 Git、uv、Python 3.12、OpenSSH 客户端与服务器，并提供原生 `codex-cli 0.167.0-alpha.4`。将 `AW_DUAL_TEST_ADMIN_URL` 指向可创建临时数据库与登录角色的测试用 PG17。验收脚本需要非交互 sudo 创建短期 POSIX 用户及回环 sshd。它使用随机账户、随机端口、两个空数据库以及临时 SSH 密钥，在正常退出或步骤失败后清理。工件目录仅写入 `receipt.json`。使用两个数据库集群时，同时提供 `AW_DUAL_TEST_ADMIN_URL`（Workshop）和 `AW_DUAL_TEST_NF_ADMIN_URL`（NovelFactory）。脚本从确切 Git 对象导出代码，由构建的 wheel 安装 Workshop 服务。回执记录两个集群的 PostgreSQL 标识、wheel SHA-256、代码 SHA、线程及实际授权读取。
 
 ```bash
 bash workshop/acceptance/dual_codex/run.sh \
