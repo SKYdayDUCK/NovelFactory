@@ -6,3 +6,5 @@
 - 付费创作与人工文学验收尚无本轮授权和实际结果。合成路径按 fixture 登记。
 
 - W1 旧候选在带延迟外键事件的历史事务中迁移失败（SQLSTATE 55006），`ac5962e0` 修复；最终 `48c20a10` 的同一失败用例及旧发行服务升级均在 PostgreSQL 17.11 上通过。[原故障和修复回执](evidence/W1/candidate-48c20a1/workshop-ci.json)
+
+- W2 早期候选 `772ee36f` 的 PEL 测试错误地假定全库随机顺序前两项均可采纳；终态使用两笔真实授权事件，仍全量重放并覆盖拒绝和去重。[原失败](evidence/W2/candidate-162af26/previous-pel-failure.log) · [修复及主线验收](W2_主线签收.md)
