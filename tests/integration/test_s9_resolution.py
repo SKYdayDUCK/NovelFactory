@@ -90,7 +90,9 @@ def test_unknown_call_paused_and_original_reservation_survives(kernel_env):
         assert repo.one("tasks", {"task_id": result["review_task_id"]})["state"] == "WAITING_REVIEW"
 
 
-def test_automatically_prepares_bounded_future_candidate(kernel_env):
+@pytest.mark.parametrize("window_limit", [1, 2, 8])
+def test_automatically_prepares_bounded_future_candidate(kernel_env, monkeypatch, window_limit):
+    monkeypatch.setenv("NF_S9_MAX_WINDOW", str(window_limit))
     k = kernel_env["kernel"]
     f = load_fixture(k)
     wr, user = f["world_ref"], f["principal"]
@@ -102,6 +104,14 @@ def test_automatically_prepares_bounded_future_candidate(kernel_env):
     change = run_command(k, user, wr, "DESTROY_ITEM", {"item_id": f["ids"]["sword"], "at": point(40)})
     svc, args, case = case_for(k, f, task)
     result = svc.resolve(*args, case)
+    if window_limit == 1:
+        assert (result["outcome"], result["reason"]) == ("REVIEW_REQUIRED", "WINDOW_CONFLICT")
+        with k.db.uow() as repo:
+            ticket = repo.one("task_inputs", {"task_id": result["review_task_id"], "generation": 0})["spec"]
+            scope = k.artifact(repo, ticket["input_artifacts"][0], wr["work_id"])["payload"]
+            assert scope["maximum_future_nodes"] == 1
+            assert repo.one("selections", {"work_id": wr["work_id"], "selection_kind": "PLAN:" + plan["volume_id"]})["artifact_ref"] == plan_ref
+        return
     assert result["outcome"] == "REPLAN_PROPOSED"
     revised = plans.get_plan(user, wr["work_id"], result["plan_ref"])
     assert revised["input_world_ref"] == change["world_ref"]
@@ -232,7 +242,7 @@ def test_branch_comparison_preserves_both_existing_selections(kernel_env):
         assert k.head(repo, wr["work_id"]) == wr
 
 
-def test_unique_item_competition_refers_one_sealed_group_without_granting_a_winner(kernel_env):
+def test_unique_item_competition_refers_one_sealed_group_without_granting_a_winner(kernel_env, monkeypatch):
     from novel_factory.domain.canonical import fingerprint
     from novel_factory.fixtures import prepare_command
     from test_simulation import process_definition, register
@@ -259,6 +269,12 @@ def test_unique_item_competition_refers_one_sealed_group_without_granting_a_winn
     evidence = k.put_artifact(reviewer, wr["work_id"], {"case_id": case, "world_ref": current,
         "decision": "JOINT_ADJUDICATION", "reason": "后续处置由参与人共同裁决",
         "interaction_sha256": fingerprint(interaction)}, "EVIDENCE")
+    with monkeypatch.context() as stricter:
+        stricter.setenv("NF_S9_MAX_IMPACT", str(len(grants) - 1))
+        with pytest.raises(DomainError) as above_limit:
+            ConflictResolutionService(k).decide_review(reviewer, current, case, decision="JOINT_ADJUDICATION",
+                                                       evidence_ref=evidence, interaction=interaction)
+        assert above_limit.value.code == "INVALID_ARGUMENT"
     decision = svc.decide_review(reviewer, current, case, decision="JOINT_ADJUDICATION",
                                  evidence_ref=evidence, interaction=interaction)
     bundle = decision["joint"]
@@ -312,3 +328,77 @@ def test_inflight_model_output_is_audited_but_never_accepted_or_resent(kernel_en
             assert audit["payload"]["output_ref"] and repo.one("tasks", {"task_id": job.task["task_id"]})["state"] in {"STALE", "PAUSED"}
             assert repo.one("task_results", {"task_id": job.task["task_id"]}) is None
             assert k.head(repo, wr["work_id"]) == change
+
+
+@pytest.mark.parametrize("configured,limit", [(None, 2), ("1", 1), ("0", 0)])
+def test_supervisor_bounds_repeated_refreshes_and_preserves_original_receipt(kernel_env, monkeypatch, configured, limit):
+    from novel_factory.application.queries import WorldQueryService
+    from novel_factory.application.supervisor import RuntimeSupervisor
+    from test_s9_dependencies import set_fact, world
+
+    if configured is None:
+        monkeypatch.delenv("NF_S9_MAX_REFRESHES", raising=False)
+    else:
+        monkeypatch.setenv("NF_S9_MAX_REFRESHES", configured)
+    k = kernel_env["kernel"]
+    f = world(k)
+    user, wr, guard = f["principal"], f["world_ref"], f["ids"]["guard1"]
+    truth = {"kind": "BOOLEAN", "value": True}
+    wr = set_fact(k, f, wr, guard, "on_duty", truth, 2)
+    reader = create_bound_task(k, user, wr, point(2), [guard], ["on_duty"])
+    tid = reader["task_id"]
+    args = (user, wr["work_id"], wr["branch_id"])
+    supervisor = RuntimeSupervisor(k, None)
+    for step in range(limit + 1):
+        wr = set_fact(k, f, wr, guard, "on_duty", {"kind": "BOOLEAN", "value": bool(step % 2)}, 3 + step)
+        for _ in range(32):
+            result = supervisor.advance_world(*args)
+            if result and result.get("task_id") == tid:
+                break
+        assert result and result["task_id"] == tid
+        if step == limit:
+            break
+        assert result["outcome"] == "RECOMPUTE_QUEUED"
+        assert result["repair_limits"]["max_refreshes"] == limit
+        ready = k.claim_task(user, "refresh", task_id=tid)
+        compiled = WorldQueryService(k).context_compile(user, {
+            "schema_version": "2.1", "task_id": tid, "generation": ready["generation"],
+            "recipe_id": "ADJUDICATOR", "input_manifest_ref": reader["manifest_ref"],
+            "read_contract": {"revision": {"mode": "FIXED", "world_ref": wr}, "process_policy": "ALLOW_PARTIAL",
+                              "index_policy": "AUTHORITATIVE", "max_wait_ms": 0},
+            "knowledge_cut": {"plane": "WORLD"}, "subject_time": {"kind": "POINT", "at": point(2)},
+            "token_budget": 50000, "idempotency_key": f"refresh-context-{step}",
+        })
+        assert compiled["status"] == "READY"
+
+    assert (result["outcome"], result["reason"]) == ("REVIEW_REQUIRED", "REPAIR_BUDGET_EXHAUSTED")
+    with k.db.uow() as repo:
+        assert repo.one("tasks", {"task_id": result["review_task_id"]})["state"] == "WAITING_REVIEW"
+        assert repo.many("call_attempts", {"task_id": tid}) == []
+        count = repo.conn.scalar(text("""SELECT count(*) FROM nf_conflict_resolutions
+            WHERE task_id=:task AND outcome='RECOMPUTE_QUEUED'"""), {"task": tid})
+        assert count == limit
+    monkeypatch.setenv("NF_S9_MAX_REFRESHES", "5")
+    replay = ConflictResolutionService(k).resolve(*args, result["case_id"])
+    assert replay["receipt_id"] == result["receipt_id"] and replay["repair_limits"]["max_refreshes"] == limit
+
+
+def test_invalid_service_limit_does_not_consume_case_or_dispatch(kernel_env, monkeypatch):
+    from novel_factory.application.supervisor import RuntimeSupervisor
+
+    k = kernel_env["kernel"]
+    fixture, task, _, _ = changed_reader(k)
+    _, args, case = case_for(k, fixture, task)
+    supervisor = RuntimeSupervisor(k, None)
+    monkeypatch.setenv("NF_S9_MAX_IMPACT", "-1")
+    with pytest.raises(ValueError, match="NF_S9_MAX_IMPACT"):
+        supervisor.advance_world(*args)
+    with k.db.uow() as repo:
+        assert repo.conn.scalar(text("SELECT count(*) FROM nf_conflict_resolutions WHERE case_id=:id"),
+                                {"id": case}) == 0
+    monkeypatch.setenv("NF_S9_MAX_IMPACT", "0")
+    receipt = ConflictResolutionService(k).resolve(*args, case)
+    assert (receipt["outcome"], receipt["reason"]) == ("REVIEW_REQUIRED", "IMPACT_LIMIT")
+    with k.db.uow() as repo:
+        assert repo.one("tasks", {"task_id": receipt["review_task_id"]})["state"] == "WAITING_REVIEW"
+        assert repo.many("call_attempts", {"task_id": task["task_id"]}) == []

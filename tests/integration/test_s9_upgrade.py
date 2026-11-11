@@ -18,6 +18,21 @@ from novel_factory.infrastructure.recovery import database_snapshot
 pytestmark = [pytest.mark.postgres, pytest.mark.integration]
 
 
+def assert_downgrade_preserves_database(db, env, root, current, target, reason):
+    with db.uow(write=False) as repo:
+        assert repo.conn.scalar(text("SELECT version_num FROM alembic_version")) == current
+        before = database_snapshot(repo.conn)
+    downgrade = subprocess.run(
+        [sys.executable, "-m", "alembic", "downgrade", target], cwd=root,
+        env=env, capture_output=True, text=True,
+    )
+    assert downgrade.returncode != 0
+    assert f"psycopg.errors.RaiseException: {reason}" in downgrade.stderr
+    with db.uow(write=False) as repo:
+        assert repo.conn.scalar(text("SELECT version_num FROM alembic_version")) == current
+        assert database_snapshot(repo.conn) == before
+
+
 def test_published_checkpoint_receipts_survive_and_partial_reads_fail_closed(release_database, tmp_path):
     db, env = release_database
     k = Kernel(db, ObjectStore(tmp_path / "objects"))
@@ -63,6 +78,15 @@ finally:
         old_reads = r.conn.execute(text(
             "SELECT to_jsonb(r) FROM nf_semantic_reads r ORDER BY observation_id")).scalars().all()
     assert old_reads and old["receipt"]["outcome"] == "RECOMPUTE_QUEUED"
+    assert before["nf_conflict_resolutions"]["rows"] > 0
+    assert_downgrade_preserves_database(
+        db, env, repo_root, "0014_p55_resolution", "0013_p55_semantic",
+        "Archive conflict receipts and drain semantic scans before downgrade",
+    )
+    with db.uow(write=False) as r:
+        assert r.conn.scalar(text("""SELECT EXISTS (SELECT FROM pg_trigger
+            WHERE tgrelid='nf_outbox'::regclass AND tgname='nf_semantic_scan_enqueue'
+              AND tgenabled='O')"""))
     subprocess.run([sys.executable, "-m", "alembic", "upgrade", "head"], cwd=repo_root,
                    env=env, check=True, capture_output=True)
     head = old["world_ref"]
@@ -170,6 +194,13 @@ finally:
             assert after[table] == before[table], table
         assert after["nf_semantic_scans"]["rows"] >= 2
         assert after["nf_semantic_read_supplements"]["rows"] >= 2
+    assert_downgrade_preserves_database(
+        db, env, root, "0016_p55_observed_scopes", "0015_p55_revalidation",
+        "Retain or archive semantic index corrections before downgrade",
+    )
+    with db.uow(write=False) as r:
+        assert r.conn.scalar(text("SELECT indisvalid FROM pg_index WHERE indexrelid="
+                                  "to_regclass('nf_sem_window_candidate')"))
     for request in old["candidates"]:
         with pytest.raises(DomainError) as rejected:
             kernel.accept(user, request)
