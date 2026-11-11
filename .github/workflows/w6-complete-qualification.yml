@@ -1,0 +1,246 @@
+name: Qualify all three W6 integrated engineering gates
+on:
+  push:
+    branches: ['audit/w6-all-engineering-gates']
+    paths: ['.github/workflows/w6-complete-qualification.yml']
+permissions:
+  contents: read
+jobs:
+  identity:
+    name: Workshop identity and upgrade verification
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      workshop-db:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_PASSWORD: workshop-ci-admin
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U postgres" --health-interval 3s --health-timeout 5s --health-retries 20
+      nf-db:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_PASSWORD: nf-ci-admin
+        ports: ['5433:5432']
+        options: --health-cmd "pg_isready -U postgres" --health-interval 3s --health-timeout 5s --health-retries 20
+      redis:
+        image: redis:8.0.2
+        ports: ['6379:6379']
+        options: --health-cmd "redis-cli ping" --health-interval 2s --health-timeout 2s --health-retries 20
+    env:
+      AW_REDIS_TEST_URL: redis://127.0.0.1:6379/0
+      AW_DATABASE_URL: postgresql://aw_service:workshop-ci@127.0.0.1:5432/workshop_test
+      NF_DATABASE_URL: postgresql+psycopg://nf_service:nf-ci@127.0.0.1:5433/nf_test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 2c4b51c29534b2c6e12e60ca4713d10fc4392692
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - name: Install both locked projects
+        run: |
+          uv sync --locked
+          uv sync --locked --project workshop --extra streams
+      - name: Verify the frozen NF contracts against the checked-out runtime
+        run: |
+          git worktree add --detach "$RUNNER_TEMP/nf-catalog" "$(jq -r .nf_commit workshop/contracts/nf-catalog.json)"
+          python workshop/scripts/freeze_nf_catalog.py "$RUNNER_TEMP/nf-catalog" > "$RUNNER_TEMP/pinned-catalog.json"
+          diff -u workshop/contracts/nf-catalog.json "$RUNNER_TEMP/pinned-catalog.json"
+          python workshop/scripts/freeze_nf_catalog.py . > "$RUNNER_TEMP/current-catalog.json"
+          diff -u <(jq -S 'del(.nf_commit)' "$RUNNER_TEMP/pinned-catalog.json") <(jq -S 'del(.nf_commit)' "$RUNNER_TEMP/current-catalog.json")
+      - name: Provision separate service identities and databases
+        env:
+          AW_POSTGRES: ${{ job.services.workshop-db.id }}
+          NF_POSTGRES: ${{ job.services.nf-db.id }}
+        run: |
+          docker exec -i "$AW_POSTGRES" psql -X -v ON_ERROR_STOP=1 -U postgres <<'SQL'
+          CREATE USER aw_service PASSWORD 'workshop-ci';
+          CREATE DATABASE workshop_test OWNER aw_service;
+          REVOKE CONNECT ON DATABASE workshop_test FROM PUBLIC;
+          CREATE DATABASE aw_upgrade_test OWNER aw_service;
+          REVOKE CONNECT ON DATABASE aw_upgrade_test FROM PUBLIC;
+          SQL
+          docker exec -i "$NF_POSTGRES" psql -X -v ON_ERROR_STOP=1 -U postgres <<'SQL'
+          CREATE USER nf_service PASSWORD 'nf-ci';
+          CREATE DATABASE nf_test OWNER nf_service;
+          REVOKE CONNECT ON DATABASE nf_test FROM PUBLIC;
+          CREATE USER nf_fixture CREATEDB PASSWORD 'nf-fixture-ci';
+          SQL
+      - name: Migrate the two service databases
+        run: |
+          .venv/bin/python -m alembic upgrade head
+          (cd workshop && .venv/bin/python -m alembic upgrade head)
+      - name: Run Workshop contracts and stdio permissions
+        working-directory: workshop
+        run: .venv/bin/python -m pytest tests -q --junitxml=workshop-results.xml
+      - name: Upgrade the released W0 service and verify existing bindings
+        working-directory: workshop
+        run: |
+          export AW_UPGRADE_DATABASE_URL="${AW_DATABASE_URL%/*}/aw_upgrade_test"
+          .venv/bin/python -m pytest -c pyproject.toml acceptance/test_w1_historical_upgrade.py -q -o junit_family=xunit1 --junitxml=w1-legacy-upgrade.xml
+      - name: Check the nine granted NF tools over live stdio
+        env:
+          NF_TEST_DATABASE_URL: postgresql+psycopg://nf_fixture:nf-fixture-ci@127.0.0.1:5433/postgres
+          NF_P5_CODEX_VERSION: 0.167.0-alpha.4
+          NF_W0_TOOL_MATRIX: ${{ github.workspace }}/workshop/nf-tools.json
+        run: |
+          prefix="$RUNNER_TEMP/novelfactory-codex"
+          npm install --prefix "$prefix" --no-save --no-audit --no-fund "@openai/codex@$NF_P5_CODEX_VERSION"
+          native_bin="$prefix/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/bin"
+          test "$("$native_bin/codex" --version)" = "codex-cli $NF_P5_CODEX_VERSION"
+          export PATH="$native_bin:$PATH"
+          PYTHONPATH="$PWD/workshop/qualification:$PWD/src" .venv/bin/python -m pytest -p matrix_probe -q tests/integration/test_p5_mcp.py tests/integration/test_p5_rolling.py --junitxml=workshop/nf-tools.xml
+      - name: Verify both live services and database isolation
+        run: |
+          .venv/bin/python -m pytest -c pyproject.toml workshop/acceptance/test_w0_dual_services.py -q -o junit_family=xunit1 --junitxml=workshop/dual-service-results.xml
+      - name: Verify dual-ledger recovery on the integrated NF source and native PG17
+        env:
+          AW_NF_SOURCE: ${{ github.workspace }}
+          AW_DUAL_TEST_ADMIN_URL: postgresql://postgres:nf-ci-admin@127.0.0.1:5433/postgres
+          AW_OFFLINE_WITNESS: ${{ github.workspace }}/workshop/aw-offline.json
+          AW_PAIRED_RESTORE_EVIDENCE: ${{ github.workspace }}/workshop/paired-restore.json
+          PG_BIN: /usr/lib/postgresql/17/bin
+        run: |
+          bash scripts/ci_install_pg17.sh postgresql-17 postgresql-client-17
+          PYTHONPATH="$PWD/workshop/qualification:$PWD/workshop/src:$PWD/src" .venv/bin/python -m pytest -p offline_witness -q workshop/integration --junitxml=workshop/dual-results.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: workshop-results
+          path: |
+            workshop/workshop-results.xml
+            workshop/nf-tools.xml
+            workshop/nf-tools.json
+            workshop/dual-service-results.xml
+            workshop/w1-legacy-upgrade.xml
+            workshop/dual-results.xml
+            workshop/paired-restore.json
+            workshop/aw-offline.json
+          if-no-files-found: error
+  workshop:
+    name: ${{ matrix.job_name }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - suite: original
+            job_name: workshop
+            minutes: 25
+          - suite: comparison
+            job_name: Matched admission and extended scene presets
+            minutes: 40
+    timeout-minutes: ${{ matrix.minutes }}
+    services:
+      redis:
+        image: redis:8
+        ports: ['6379:6379']
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: local-ci-only
+          POSTGRES_DB: workshop_test
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 3s --health-timeout 5s --health-retries 20
+    defaults:
+      run:
+        working-directory: workshop
+    env:
+      AW_CI_SUITE: ${{ matrix.suite }}
+      PG_BIN: /usr/lib/postgresql/17/bin
+      AW_REDIS_TEST_URL: redis://127.0.0.1:6379/0
+      AW_DATABASE_URL: postgresql://postgres:local-ci-only@127.0.0.1:5432/workshop_test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 2c4b51c29534b2c6e12e60ca4713d10fc4392692
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - run: uv sync --locked --extra streams
+      - name: Exercise installed wheel and packaged migrations
+        if: matrix.suite == 'original'
+        run: |
+          wheel_root=$(mktemp -d "$RUNNER_TEMP/aw-installed.XXXXXX")
+          uv build --wheel --out-dir "$wheel_root/dist"
+          uv export --locked --no-dev --extra streams --no-emit-project --format requirements-txt --output-file "$wheel_root/requirements.txt" >/dev/null
+          uv venv "$wheel_root/venv"
+          py="$wheel_root/venv/bin/python"
+          uv pip sync --python "$py" --require-hashes "$wheel_root/requirements.txt"
+          wheels=("$wheel_root"/dist/*.whl)
+          test "${#wheels[@]}" = 1
+          uv pip install --python "$py" --no-deps "${wheels[0]}"
+          mkdir -p "$GITHUB_WORKSPACE/workshop/ci-evidence"
+          cd "$wheel_root"
+          "$py" -I "$GITHUB_WORKSPACE/workshop/scripts/verify_installed_wheel.py" \
+            --manifest "$GITHUB_WORKSPACE/workshop/contracts/nf-catalog.json" \
+            --wheel "${wheels[0]}" | tee "$GITHUB_WORKSPACE/workshop/ci-evidence/installed-wheel.json"
+      - if: matrix.suite == 'original'
+        run: uv run --locked --extra streams pytest -q --junitxml=workshop-results.xml
+      - name: Measure message delivery and rebuild each isolated Redis stream
+        if: matrix.suite == 'original'
+        env:
+          PGPASSWORD: local-ci-only
+          AW_REDIS_URL: redis://127.0.0.1:6379/0
+        run: |
+          mkdir -p ci-evidence
+          for n in 10 50 200; do
+            database="aw_benchmark_$n"
+            createdb -h 127.0.0.1 -U postgres "$database"
+            export AW_DATABASE_URL="postgresql://postgres:local-ci-only@127.0.0.1:5432/$database"
+            .venv/bin/aw-migrate upgrade
+            .venv/bin/python benchmarks/message_capacity.py --employees "$n" --output "ci-evidence/messages-$n.json"
+          done
+      - name: Install pinned NF host and role isolation tools
+        run: |
+          bash "$GITHUB_WORKSPACE/scripts/ci_install_pg17.sh" postgresql-17 postgresql-client-17 bubblewrap util-linux gcc libc6-dev
+          "$PG_BIN/pg_verifybackup" --version
+          prefix="$RUNNER_TEMP/aw-codex"
+          npm install --prefix "$prefix" --no-save --no-audit --no-fund @openai/codex@0.167.0-alpha.4
+          native="$prefix/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/bin"
+          test "$("$native/codex" --version)" = "codex-cli 0.167.0-alpha.4"
+          echo "$native" >> "$GITHUB_PATH"
+      - name: Test this integrated NF revision over independent PostgreSQL accounts and stdio
+        env:
+          EXPECTED_SOURCE: 2c4b51c29534b2c6e12e60ca4713d10fc4392692
+        run: |
+          export AW_NF_SOURCE="$GITHUB_WORKSPACE"
+          test -f "$AW_NF_SOURCE/src/novel_factory/interfaces/delegation_stdio.py"
+          test "$(git -C "$AW_NF_SOURCE" rev-parse HEAD)" = "${EXPECTED_SOURCE}"
+          git -C "$AW_NF_SOURCE" rev-parse HEAD
+          export AW_DUAL_TEST_ADMIN_URL="$AW_DATABASE_URL"
+          export PYTHONPATH="$PWD/src:$AW_NF_SOURCE/src"
+          uv sync --project "$AW_NF_SOURCE" --locked
+          export AW_ACCEPTANCE_OUTPUT="$PWD/ci-evidence"
+          export AW_BENCH_RESULTS="$AW_ACCEPTANCE_OUTPUT"
+          export PATH="$AW_NF_SOURCE/.venv/bin:$PATH"
+          mkdir -p "$AW_ACCEPTANCE_OUTPUT"
+          if test "$AW_CI_SUITE" = comparison; then
+            "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q benchmarks/cross_service_scene.py -k 'Long-form or Research-Audit' --junitxml=scene-results.xml
+            "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q benchmarks/delegation_capacity.py -k 'fixed-2 or adaptive-2' --junitxml=capacity-results.xml
+            exit 0
+          fi
+          "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q benchmarks/actor_directory_isolation.py benchmarks/running_workshop_outage.py --junitxml="$AW_ACCEPTANCE_OUTPUT/at43-at49-junit.xml"
+          export AW_PAIRED_RESTORE_EVIDENCE="$AW_ACCEPTANCE_OUTPUT/paired.json"
+          "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q integration/test_dual_stdio.py integration/test_manager_resume.py --junitxml=dual-results.xml
+          "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q integration/test_paired_restore.py --junitxml=paired-results.xml
+          "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q benchmarks/cross_service_scene.py -k 'Minimal or Standard' --junitxml=scene-results.xml
+          "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q benchmarks/delegation_capacity.py -k 'fixed-1' --junitxml=capacity-results.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ${{ matrix.suite == 'original' && 'workshop-scene-recovery-results' || 'workshop-comparisons' }}
+          path: |
+            workshop/workshop-results.xml
+            workshop/dual-results.xml
+            workshop/paired-results.xml
+            workshop/scene-results.xml
+            workshop/capacity-results.xml
+            workshop/ci-evidence
