@@ -18,8 +18,19 @@ permissions:
   contents: read
 jobs:
   workshop:
+    name: ${{ matrix.job_name }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - suite: original
+            job_name: workshop
+            minutes: 25
+          - suite: comparison
+            job_name: Matched admission and extended scene presets
+            minutes: 40
+    timeout-minutes: ${{ matrix.minutes }}
     services:
       redis:
         image: redis:8
@@ -35,6 +46,7 @@ jobs:
       run:
         working-directory: workshop
     env:
+      AW_CI_SUITE: ${{ matrix.suite }}
       PG_BIN: /usr/lib/postgresql/17/bin
       AW_REDIS_TEST_URL: redis://127.0.0.1:6379/0
       AW_DATABASE_URL: postgresql://postgres:local-ci-only@127.0.0.1:5432/workshop_test
@@ -48,6 +60,7 @@ jobs:
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
       - run: uv sync --locked --extra streams
       - name: Exercise installed wheel and packaged migrations
+        if: matrix.suite == 'original'
         run: |
           uv build --wheel
           uv venv "$RUNNER_TEMP/aw-wheel"
@@ -56,8 +69,10 @@ jobs:
           installed=$("$RUNNER_TEMP/aw-wheel/bin/python" -c 'import site;print(site.getsitepackages()[0])')
           PYTHONPATH="$installed" .venv/bin/python -m agent_workshop.migrate upgrade
           PYTHONPATH="$installed" .venv/bin/python -m agent_workshop.migrate current
-      - run: uv run --locked --extra streams pytest -q --junitxml=workshop-results.xml
+      - if: matrix.suite == 'original'
+        run: uv run --locked --extra streams pytest -q --junitxml=workshop-results.xml
       - name: Measure message delivery and rebuild each isolated Redis stream
+        if: matrix.suite == 'original'
         env:
           PGPASSWORD: local-ci-only
           AW_REDIS_URL: redis://127.0.0.1:6379/0
@@ -108,15 +123,20 @@ jobs:
           export AW_BENCH_RESULTS="$AW_ACCEPTANCE_OUTPUT"
           export PATH="$AW_NF_SOURCE/.venv/bin:$PATH"
           mkdir -p "$AW_ACCEPTANCE_OUTPUT"
+          if test "$AW_CI_SUITE" = comparison; then
+            "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q benchmarks/cross_service_scene.py -k 'Long-form or Research-Audit' --junitxml=scene-results.xml
+            "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q benchmarks/delegation_capacity.py -k 'fixed-2 or adaptive-2' --junitxml=capacity-results.xml
+            exit 0
+          fi
           export AW_PAIRED_RESTORE_EVIDENCE="$AW_ACCEPTANCE_OUTPUT/paired.json"
           "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q integration/test_dual_stdio.py integration/test_manager_resume.py --junitxml=dual-results.xml
           "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q integration/test_paired_restore.py --junitxml=paired-results.xml
-          "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q benchmarks/cross_service_scene.py --junitxml=scene-results.xml
-          "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q benchmarks/delegation_capacity.py --junitxml=capacity-results.xml
+          "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q benchmarks/cross_service_scene.py -k 'Minimal or Standard' --junitxml=scene-results.xml
+          "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q benchmarks/delegation_capacity.py -k 'fixed-1' --junitxml=capacity-results.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: workshop-results
+          name: ${{ matrix.suite == 'original' && 'workshop-results' || 'workshop-comparisons' }}
           path: |
             workshop/workshop-results.xml
             workshop/dual-results.xml
