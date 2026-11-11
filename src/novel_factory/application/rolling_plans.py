@@ -158,6 +158,7 @@ class RollingPlanning:
         event_refs,
         reason,
         idempotency_key,
+        assessment=None,
     ):
         """Record the volume director's causal account after world acceptance."""
         validate_contract("UUID", volume)
@@ -219,6 +220,14 @@ class RollingPlanning:
                 "permission_epoch": grant["epoch"],
                 "policy_version": spec["policy_version"],
             }
+
+            # Omitted by older MCP callers: retain the byte-identical original
+            # command payload so a pre-upgrade idempotency receipt still matches.
+            if assessment is not None:
+                from novel_factory.application.deviation_review import validate_assessment
+                payload["assessment"] = validate_assessment(self.kernel, repo, spec, binding,
+                    anchor["initial_plan_ref"], prior, window, event_refs, assessment)
+                payload["acceptance_command_id"] = receipt["command_id"]
 
         def check(repo, revision):
             require(

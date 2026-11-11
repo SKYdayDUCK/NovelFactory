@@ -7,4 +7,4 @@ description: 复核当轮角色行动、认知来源、资源与联合裁决，�
 
 只处理当前任务和授权切面提供的材料。信息不足时返回具体待决事项，结束本次模型轮次。
 
-在 volume_review 模式输出 AgentTextOutput。text 写明因果，event_refs 列出本轮已接受证据，important_deltas 只列需要上报的重大偏离。
+按本任务固定的输出契约回复。text 写明因果，event_refs 列出本轮已接受证据，important_deltas 填入需要上报的重大偏离。VolumeReviewOutput 的 assessment 记录原参考节点、窗口内受影响节点、获授权角色的弧线变化、行为合理性及所据事件，并交代回归可能、代价或分化后的替代方向。对角色动机的推论须标明依据。信息不足时分别使用 INSUFFICIENT_EVIDENCE、UNDETERMINED，留空未获证实的方向。角色当时的私有认知由独立受权的控制面核对。

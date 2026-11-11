@@ -7,6 +7,7 @@ from uuid import uuid4
 import pytest
 
 from novel_factory.application.agent_gateway import AgentGateway
+from novel_factory.application.deviation_review import action_time_audit, unknown_assessment
 from novel_factory.application.planning import PlanningService
 from novel_factory.application.rolling_plans import RollingPlanning
 from novel_factory.application.runtime_tasks import RuntimeTaskService
@@ -100,12 +101,21 @@ def test_model_candidate_drives_change_window_and_editor(kernel_env, monkeypatch
         receipt = kernel.accept(admin, joint["request"])
         now = receipt["world_ref"]
 
+        assessment = {"reference_node_ids": [plan["nodes"][0]["node_id"]],
+            "affected_node_ids": [plan["nodes"][1]["node_id"]],
+            "characters": [{"actor_id": process["required_actor_ids"][0],
+                "plausibility": "PLAUSIBLE", "basis": "依据已接受的物资转移，调整交接在资源上说得通；角色动机未明。",
+                "arc_impact": "原定交接需要另行安排。", "basis_event_refs": receipt["accepted_event_refs"]}],
+            "trajectory": {"disposition": "DIVERGENCE", "return_direction": None,
+                "alternative_direction": "按实际交付情况改用书信。", "rationale": "不撤销已发生的物资变更。"}}
+
         def candidate(ctx):
             packet = json.loads(requests[-1]["messages"][1]["content"])["editorial"]
             materials = packet["materials"]
             if packet["operation"] == "request_change":
                 return {"text":"实际调度改变了物资安排，应更改接下来的会面。", "important_deltas":["会面延期"],
-                        "event_refs":packet["accepted_event_refs"], "evidence_refs":[]}
+                        "event_refs":packet["accepted_event_refs"], "evidence_refs":[],
+                        **({"assessment":assessment} if decision == "APPROVED" else {})}
             if packet["operation"] == "propose_window":
                 cp = materials["change_point_ref"]["content"]
                 return {"schema_version":"2.0","window_plan_id":str(uuid4()),
@@ -120,6 +130,8 @@ def test_model_candidate_drives_change_window_and_editor(kernel_env, monkeypatch
         server.candidate = candidate
         assert sup.run_once(admin, work, branch)["status"] == "RESULT_STORED"
         body = json.loads(requests[0]["messages"][1]["content"])
+        assert body["editorial"]["future_window_node_ids"] == [n["node_id"] for n in plan["nodes"][:2]]
+        assert body["editorial"]["reference_node_ids_in_window"] == body["editorial"]["future_window_node_ids"]
         projection = body["editorial"]["accepted_effects"]
         assert projection == [{"event_ref":receipt["accepted_event_refs"][0],"occurrence_time":{"kind":"EXACT","at":point(30)},
             "effects":[{"kind":"RESOURCE_DELTA","account_id":ids["warehouse"],"resource_id":ids["grain"],"unit":"bag","quantity":"-30"}]}]
@@ -130,6 +142,20 @@ def test_model_candidate_drives_change_window_and_editor(kernel_env, monkeypatch
             assert past["receipt"]["accepted_event_refs"][0] not in body["editorial"]["accepted_event_refs"]
         director_delivery = sup.run_once(admin, work, branch)
         cp = director_delivery["change_point_ref"]
+        with kernel.db.uow(write=False) as repo:
+            saved = kernel.artifact(repo, cp, work, kind="CHANGE_POINT")["payload"]
+            assert saved["assessment"] == (assessment if decision == "APPROVED" else unknown_assessment())
+            assert saved["acceptance_command_id"] == receipt["command_id"]
+        audit = action_time_audit(kernel, admin, now, cp)
+        assert {row["actor_id"] for row in audit["actors"]} == set(process["required_actor_ids"])
+        for row in audit["actors"]:
+            assert row["world_ref"] == wr and row["known_at"] == row["story_time"] == point(30)
+            with kernel.db.uow(write=False) as repo:
+                sealed = kernel.artifact(repo, row["intent_ref"], work, kind="SIMULATION_INTENT")["payload"]
+                assert sealed["actor_id"] == row["actor_id"]
+        with pytest.raises(DomainError) as denied:
+            action_time_audit(kernel, director.principal, now, cp)
+        assert denied.value.code == "VIEW_DENIED"
         if decision == "APPROVED":
             middle_id = director_delivery["successor_task_id"]
         else:
@@ -151,6 +177,10 @@ def test_model_candidate_drives_change_window_and_editor(kernel_env, monkeypatch
         for request in requests[1:]:
             other = json.loads(request["messages"][1]["content"])["editorial"]
             assert "accepted_effects" not in other and "accepted_event_refs" not in other
+            assert other["deviation_assessment"] == saved["assessment"]
+            serialized = json.dumps(other)
+            for row in audit["actors"]:
+                assert row["intent_ref"]["sha256"] not in serialized and row["context_ref"]["sha256"] not in serialized
         if decision == "APPROVED":
             original = PlanningService.adopt_plan
             def fault(*args, **kwargs):

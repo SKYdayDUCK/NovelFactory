@@ -4,10 +4,11 @@ from novel_factory.application.authorization import Principal
 from novel_factory.application.kernel import require
 from novel_factory.application.planning import PlanningService
 from novel_factory.application.queries import WorldQueryService
-from novel_factory.application.rolling_plans import RollingPlanning
+from novel_factory.application.rolling_plans import RollingPlanning, _future_window
 from novel_factory.contracts.registry import validate_contract
 from novel_factory.application.candidate_delivery import CandidateDelivery
 from novel_factory.application.editorial_effects import review_effects
+from novel_factory.application.deviation_review import unknown_assessment
 
 
 # All refs in a row are pinned both by the server enrollment and the TaskSpec.
@@ -100,6 +101,16 @@ def prompt_material(kernel, principal, binding):
         if route["operation"] == "request_change":
             packet.update(review_effects(kernel, repo, current, live_spec, job["config"]["manifest_ref"],
                                          binding["context"]["read_cut"]))
+            prior = material["prior_plan_ref"]
+            anchor = material["reference_timeline_ref"]
+            original = kernel.artifact(repo, anchor["initial_plan_ref"], task["work_id"], kind="PLAN_REVISION")["payload"]
+            initial_ids = {node["node_id"] for node in original["nodes"]}
+            window = _future_window(prior, live_spec["story_time"], anchor["scene_limit"])
+            packet["future_window_node_ids"] = window
+            packet["reference_node_ids_in_window"] = [node for node in window if node in initial_ids]
+        if "change_point_ref" in material:
+            cp = material["change_point_ref"]
+            packet["deviation_assessment"] = cp.get("assessment", unknown_assessment())
         return packet
 
 
@@ -124,7 +135,8 @@ class EditorialDelivery(CandidateDelivery):
         if route["operation"] == "request_change":
             if candidate["important_deltas"]:
                 outcome["change_point_ref"] = rolling.request_change(owner, wr, **binding, volume=route["volume_id"],
-                    prior_plan_ref=route["prior_plan_ref"], event_refs=candidate["event_refs"], reason=candidate["text"])
+                    prior_plan_ref=route["prior_plan_ref"], event_refs=candidate["event_refs"], reason=candidate["text"],
+                    assessment=candidate.get("assessment", unknown_assessment()))
             else:
                 outcome["decision"] = "NO_MAJOR_CHANGE"
         elif route["operation"] == "propose_window":

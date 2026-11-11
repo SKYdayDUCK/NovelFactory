@@ -64,7 +64,7 @@ def compile_woken(kernel, job, wr, story_time, cut, role_recipe, worker):
     return claimed
 
 
-def test_banquet_absence_pins_reference_and_limits_replanning(kernel_env, scene_backend):
+def test_banquet_absence_pins_reference_and_limits_replanning(kernel_env, scene_backend, tmp_path):
     k = kernel_env["kernel"]
     original = load_fixture(k, "white_bridge")
     process = process_definition(k, original)
@@ -315,6 +315,44 @@ def test_banquet_absence_pins_reference_and_limits_replanning(kernel_env, scene_
     )
     cp = d_mcp.request_change(**{key: value for key, value in args.items() if key not in bind})
     assert cp == rolling.request_change(director, now, **args)
+    # A pre-upgrade call without assessment retains its exact command hash.
+    from novel_factory.application.deviation_review import unknown_assessment
+    from novel_factory.interfaces.mcp_stdio import _VALIDATORS
+    ordinary = {key: value for key, value in args.items() if key not in bind}
+    assert _VALIDATORS["nf_change_point_request"].is_valid(ordinary)
+    assessed = {**ordinary, "idempotency_key": "change-assessed", "assessment": unknown_assessment()}
+    assert _VALIDATORS["nf_change_point_request"].is_valid(assessed)
+    assert d_mcp.request_change(**assessed) == d_mcp.request_change(**assessed)
+    for field, invalid_id in [("reference_node_ids", str(uuid4())),
+                              ("affected_node_ids", plan["nodes"][2]["node_id"])]:
+        with pytest.raises(DomainError) as invalid:
+            d_mcp.request_change(**{**assessed, "assessment": {**assessed["assessment"], field: [invalid_id]}})
+        assert invalid.value.code == "INVALID_EVIDENCE"
+    with pytest.raises(DomainError) as forged:
+        d_mcp.request_change(**{**assessed, "assessment": {**assessed["assessment"], "characters": [
+            {"actor_id": actors[1], "plausibility": "PLAUSIBLE", "basis": "猜测", "arc_impact": None,
+             "basis_event_refs": receipt["accepted_event_refs"]}]}})
+    assert forged.value.code == "INVALID_EVIDENCE"
+    target = plan["nodes"][0]["node_id"]
+    rejoin = {**assessed["assessment"], "reference_node_ids": [target], "affected_node_ids": [target],
+              "trajectory": {"disposition": "POSSIBLE_RETURN", "return_direction": "回信送达后重议结盟",
+                             "alternative_direction": None, "rationale": "保留角色缺席的已接受后果"}}
+    rejoin_request = {**ordinary, "idempotency_key": "change-rejoin", "assessment": rejoin}
+    import asyncio
+    from test_p5_mcp import config, exercise
+
+    async def check_transport(session):
+        tools = {tool.name: tool.inputSchema for tool in (await session.list_tools()).tools}
+        assert "assessment" in tools["nf_change_point_request"]["properties"]
+        response = await session.call_tool("nf_change_point_request", rejoin_request)
+        assert not response.isError
+        assert response.structuredContent == d_mcp.request_change(**rejoin_request)
+
+    asyncio.run(exercise(config(tmp_path / "editor.json", kernel_env, gate.private_token, bind), check_transport))
+    with pytest.raises(DomainError) as missing_path:
+        d_mcp.request_change(**{**ordinary, "assessment": {**rejoin, "trajectory":
+            {**rejoin["trajectory"], "return_direction": None}}})
+    assert missing_path.value.code == "INVALID_EVIDENCE"
     revised = deepcopy(plan)
     revised.update(input_world_ref=now, prior_plan_ref=base, plan_revision_id=str(uuid4()))
     revised["nodes"][0]["goal"] = "派信使去仓库"
