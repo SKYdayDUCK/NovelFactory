@@ -135,6 +135,48 @@
       ],
       "additionalProperties": false,
       "description": "P1 plan artifacts do not execute or certify fulfillment; the original R1 temporal schema remains compatible."
+    },
+    "SemanticAssumption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "task_id",
+        "generation",
+        "dependency_handle",
+        "dependency_kind",
+        "statement"
+      ],
+      "properties": {
+        "task_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "dependency_handle": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "dependency_kind": {
+          "enum": [
+            "SOURCE_OF",
+            "DERIVED_FROM",
+            "BELIEVES",
+            "ASSUMES_TRUE",
+            "REQUIRES",
+            "EVIDENCE_FOR",
+            "CONTRADICTS",
+            "RESOURCE_DEPENDENCY",
+            "TEMPORAL_DEPENDENCY",
+            "COMMUNICATION_DEPENDENCY"
+          ]
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      }
     }
   }
 }

@@ -1,0 +1,21 @@
+{
+  "postgres": "17.11",
+  "provider": "synthetic loopback HTTP, no commercial inference",
+  "workflow_status_counts": {
+    "RESULT_STORED": 6,
+    "JOINT_ACCEPTED": 1,
+    "EDITORIAL_DELIVERED": 3,
+    "IDLE": 2,
+    "VOLUME_PLANNER_READY": 1,
+    "VOLUME_WINDOW_STORED": 1
+  },
+  "provider_requests": 6,
+  "next_volume_requests": 1,
+  "additional_requests_on_idle_replay": 0,
+  "terminal_scenes": 1,
+  "next_volume_window_status": "DRAFT",
+  "test_inputs": "Three fixture prose drafts. Independent reading, literary approval and continuity approval supplied by authenticated test identities.",
+  "funded_model_stages": "Source actor, joint decision, volume review, replanning, upper review, destination planner",
+  "preauthorized_before_first_scene": true,
+  "paid_provider_usage": null
+}

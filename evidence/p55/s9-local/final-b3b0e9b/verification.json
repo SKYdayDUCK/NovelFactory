@@ -1,0 +1,240 @@
+{
+  "check_results": {
+    "schema_validation": "PASS",
+    "original_mechanism_tests": 35,
+    "pitr_status": "PASS",
+    "recovery_tables": 67,
+    "recovery_objects": 31,
+    "target_commits_lost": 0,
+    "semantic_index": {
+      "unrelated": 20000,
+      "affected": 1,
+      "actual_gin_index": "nf_sem_read_keys"
+    },
+    "p3_paired_guards": {
+      "entities": 300,
+      "repeats": 5,
+      "pairs": 15,
+      "stable_world": true
+    }
+  },
+  "end_to_end_fixture_files_by_shard": {
+    "p5-process-resume.json": "final-b3b0e9b-s3",
+    "p5-autonomous-banquet.json": "final-b3b0e9b-s3",
+    "p55-redis-banquet.json": "final-b3b0e9b-s1"
+  },
+  "exact_commit": "b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5",
+  "exact_tree": "057a3de8d6c3c28df016446ee7aa2b9acf05ceec",
+  "collected_ids": 802,
+  "unexecuted_ids": 0,
+  "duplicate_ids": 0,
+  "pytest": {
+    "passed": 802
+  },
+  "skipped": 0,
+  "failed": 0,
+  "errors": 0,
+  "pytest_elapsed_wall_seconds": 215.896489,
+  "shards": [
+    {
+      "start": {
+        "utc": "2026-11-11T13:03:22.728460+00:00",
+        "commit": "b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5",
+        "tree": "057a3de8d6c3c28df016446ee7aa2b9acf05ceec",
+        "status_porcelain": ""
+      },
+      "end": {
+        "utc": "2026-11-11T13:06:50.825290+00:00",
+        "commit": "b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5",
+        "tree": "057a3de8d6c3c28df016446ee7aa2b9acf05ceec",
+        "status_porcelain": "",
+        "exit_code": 0
+      },
+      "shard": 1,
+      "counts": {
+        "passed": 283
+      },
+      "junit_seconds": "204.566",
+      "pg": {
+        "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+        "fsync": true,
+        "synchronous_commit": true,
+        "data_directory_reused": false,
+        "exit_status": 0
+      },
+      "fixture_services": [
+        "Python 3.12.14",
+        "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+        "Redis server v=8.0.2 sha=00000000:0 malloc=jemalloc-5.3.0 bits=64 build=b843bbd074c0e1da",
+        "codex-cli 0.167.0-alpha.4",
+        "bubblewrap 0.12.0",
+        "unshare from util-linux 2.41.5",
+        "cc (Debian 14.2.0-19) 14.2.0"
+      ],
+      "command": "python -m pytest $(cat shard-1-modules.txt) -q --junitxml=junit-shard-1.xml --json-report --json-report-file=pytest.json"
+    },
+    {
+      "start": {
+        "utc": "2026-11-11T13:03:22.732365+00:00",
+        "commit": "b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5",
+        "tree": "057a3de8d6c3c28df016446ee7aa2b9acf05ceec",
+        "status_porcelain": ""
+      },
+      "end": {
+        "utc": "2026-11-11T13:06:54.756266+00:00",
+        "commit": "b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5",
+        "tree": "057a3de8d6c3c28df016446ee7aa2b9acf05ceec",
+        "status_porcelain": "",
+        "exit_code": 0
+      },
+      "shard": 2,
+      "counts": {
+        "passed": 266
+      },
+      "junit_seconds": "208.159",
+      "pg": {
+        "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+        "fsync": true,
+        "synchronous_commit": true,
+        "data_directory_reused": false,
+        "exit_status": 0
+      },
+      "fixture_services": [
+        "Python 3.12.14",
+        "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+        "Redis server v=8.0.2 sha=00000000:0 malloc=jemalloc-5.3.0 bits=64 build=b843bbd074c0e1da",
+        "codex-cli 0.167.0-alpha.4",
+        "bubblewrap 0.12.0",
+        "unshare from util-linux 2.41.5",
+        "cc (Debian 14.2.0-19) 14.2.0"
+      ],
+      "command": "python -m pytest $(cat shard-2-modules.txt) -q --junitxml=junit-shard-2.xml --json-report --json-report-file=pytest.json"
+    },
+    {
+      "start": {
+        "utc": "2026-11-11T13:03:22.720149+00:00",
+        "commit": "b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5",
+        "tree": "057a3de8d6c3c28df016446ee7aa2b9acf05ceec",
+        "status_porcelain": ""
+      },
+      "end": {
+        "utc": "2026-11-11T13:06:58.616638+00:00",
+        "commit": "b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5",
+        "tree": "057a3de8d6c3c28df016446ee7aa2b9acf05ceec",
+        "status_porcelain": "",
+        "exit_code": 0
+      },
+      "shard": 3,
+      "counts": {
+        "passed": 253
+      },
+      "junit_seconds": "212.447",
+      "pg": {
+        "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+        "fsync": true,
+        "synchronous_commit": true,
+        "data_directory_reused": false,
+        "exit_status": 0
+      },
+      "fixture_services": [
+        "Python 3.12.14",
+        "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+        "Redis server v=8.0.2 sha=00000000:0 malloc=jemalloc-5.3.0 bits=64 build=b843bbd074c0e1da",
+        "codex-cli 0.167.0-alpha.4",
+        "bubblewrap 0.12.0",
+        "unshare from util-linux 2.41.5",
+        "cc (Debian 14.2.0-19) 14.2.0"
+      ],
+      "command": "python -m pytest $(cat shard-3-modules.txt) -q --junitxml=junit-shard-3.xml --json-report --json-report-file=pytest.json"
+    }
+  ],
+  "pitr": {
+    "start": {
+      "utc": "2026-11-11T13:03:22.729559+00:00",
+      "commit": "b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5",
+      "tree": "057a3de8d6c3c28df016446ee7aa2b9acf05ceec",
+      "status_porcelain": ""
+    },
+    "end": {
+      "utc": "2026-11-11T13:03:33.046948+00:00",
+      "commit": "b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5",
+      "tree": "057a3de8d6c3c28df016446ee7aa2b9acf05ceec",
+      "status_porcelain": "",
+      "exit_code": 0
+    }
+  },
+  "isolated_benchmarks": {
+    "arms": {
+      "start": {
+        "utc": "2026-11-11T12:55:26.575929+00:00",
+        "commit": "b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5",
+        "tree": "057a3de8d6c3c28df016446ee7aa2b9acf05ceec",
+        "status_porcelain": ""
+      },
+      "end": {
+        "utc": "2026-11-11T12:55:30.028615+00:00",
+        "commit": "b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5",
+        "tree": "057a3de8d6c3c28df016446ee7aa2b9acf05ceec",
+        "status_porcelain": "",
+        "exit_code": 0
+      }
+    },
+    "index": {
+      "start": {
+        "utc": "2026-11-11T12:55:30.072115+00:00",
+        "commit": "b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5",
+        "tree": "057a3de8d6c3c28df016446ee7aa2b9acf05ceec",
+        "status_porcelain": ""
+      },
+      "end": {
+        "utc": "2026-11-11T12:55:32.815681+00:00",
+        "commit": "b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5",
+        "tree": "057a3de8d6c3c28df016446ee7aa2b9acf05ceec",
+        "status_porcelain": "",
+        "exit_code": 0
+      }
+    },
+    "context": {
+      "start": {
+        "utc": "2026-11-11T12:55:32.858983+00:00",
+        "commit": "b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5",
+        "tree": "057a3de8d6c3c28df016446ee7aa2b9acf05ceec",
+        "status_porcelain": ""
+      },
+      "end": {
+        "utc": "2026-11-11T12:55:41.130268+00:00",
+        "commit": "b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5",
+        "tree": "057a3de8d6c3c28df016446ee7aa2b9acf05ceec",
+        "status_porcelain": "",
+        "exit_code": 0
+      },
+      "uncompressed_sha256": "2dc2f48205cc41a80c2d74337f4a9f0f84b262e8adc5a51216c95b12c6e3c5d8"
+    }
+  },
+  "warnings": [
+    {
+      "category": "StarletteDeprecationWarning",
+      "message": "Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead."
+    }
+  ],
+  "model_route": "Test fixtures on loopback only. No paid model or production data.",
+  "limits": "All three pytest shards ran in independent isolated PostgreSQL 17 and Redis 8 processes on Linux. PITR is a local single-host fixture. No literary quality, paid-model behavior or production-scale SLO was measured.",
+  "sha256": {
+    "junit-shard-1.xml": "1b495ba42ab62a8d3ce2c4107e9aa24be307e5d77e0fb923c9d766f9f6b90248",
+    "shard-1-modules.txt": "351f721400e5449e6d72bf1e65408bf7e7b05a51aa7fc21af62254946a469d21",
+    "junit-shard-2.xml": "140f0e6be8723c9be0cd0cfe2865c94c4cba15a77996e5268f7e0ba3538dc06b",
+    "shard-2-modules.txt": "5452d00caf1f664cb6186a6ef3eef76955583dadfac28a02ce8079762a86f6d8",
+    "junit-shard-3.xml": "5a2a3f104cccdc821680e640efc29c135b1f52fe9c07bdcf115c9160fe007016",
+    "shard-3-modules.txt": "520845ac0116a45a3122956380fe054e864f2dd9880cd366ac922897a50daff7",
+    "collection.txt": "e30740e7a649f3cd1ce9436bca4f24136816c66391b07cdd4021acf7bb4b7676",
+    "pitr.json": "64398e428820a87e7e4d3b14ff38d8bd60f9604b873c42f29b92ee348a7925fa",
+    "guard-comparison.json": "f93ab31c18022c9f35d2fdadd7dca2b51a08f3aca26e493ee774e153a2ddad2d",
+    "semantic-index-plan.json": "d264eb9e6d760dd64aa9174782bf20c15c469a087573baa41484aa0a2e1c798c",
+    "context-p3.json.gz": "cddb8a4e5cf1a445bb26f60a90daf06644a009a02cbd26c48b2e6f49f96d5eb0",
+    "schema.log": "e10fb68c7395c06ccd169db90e14e51da6a79e6bcfecd4808e3a7346a7e093a4",
+    "original-mechanisms.log": "96a09ea37ee1d701027577522d3425398e05da7b23bfc8108619ad51c89edbcf",
+    "p5-process-resume.json": "32838e0f4db9cd97d72c29d5ab3252092176f217d54d705402460f3cb94956f1",
+    "p5-autonomous-banquet.json": "3eae5f9732229b1e4f30c15eac1e8839fceafec9ce9b98c99faf174f69f0bd08",
+    "p55-redis-banquet.json": "11c27e028eafa50b1839c94b9ea22bb5dfd01502ed7bdaef01854ed12db9c7cd"
+  }
+}

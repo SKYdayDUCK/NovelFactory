@@ -83,6 +83,8 @@ define("grants", uid("grant_id", primary_key=True), uid("principal_id", nullable
        js("branch_ids", nullable=False), js("capabilities", nullable=False), js("planes", nullable=False), js("max_story_time", nullable=False),
        Column("active", Boolean, nullable=False, server_default="true"), Column("epoch", BigInteger, nullable=False, server_default="0"),
        ForeignKeyConstraint(["work_id"], ["nf_works.work_id"]), ts())
+define("resume_grants", uid("grant_id", primary_key=True), Column("expires_at", DateTime(timezone=True), nullable=False),
+       Column("policy_version", Text, nullable=False), ForeignKeyConstraint(["grant_id"], ["nf_grants.grant_id"]))
 define("artifacts", uid("artifact_revision_id", primary_key=True), uid("artifact_id", nullable=False), uid("work_id", nullable=False),
        Column("sha256", String(64), nullable=False), Column("kind", Text, nullable=False), js("payload"), uid("created_by", nullable=False), ts(),
        ForeignKeyConstraint(["sha256"], ["nf_objects.hash"]), ForeignKeyConstraint(["work_id"], ["nf_works.work_id"]),
@@ -137,6 +139,8 @@ define("promotions", uid("promotion_id", primary_key=True), uid("work_id", nulla
 # Task tables use this exact metadata registry; no parallel authority/schema.
 from novel_factory.infrastructure.reliability_tables import define_reliability_tables
 tables.update(define_reliability_tables(metadata))
+from novel_factory.infrastructure.workflow_tables import define_workflow_tables
+tables.update(define_workflow_tables(metadata))
 from novel_factory.infrastructure.simulation_tables import define_simulation_tables
 tables.update(define_simulation_tables(metadata))
 
@@ -147,6 +151,15 @@ IMMUTABLE_TABLES = ("genesis", "revisions", "events", "revision_events", "commit
 
 def mutation_gate(conn: Connection):
     conn.execute(text("SELECT pg_advisory_xact_lock_shared(:key)"), {"key": MAINTENANCE_LOCK})
+
+define("supervisor_jobs", uid("task_id", primary_key=True), js("config", nullable=False), ts(),
+       ForeignKeyConstraint(["task_id"], ["nf_tasks.task_id"]))
+define("host_turns", uid("attempt_id", primary_key=True), Column("thread_id", Text, nullable=False, unique=True),
+       Column("turn_id", Text, unique=True), Column("phase", Text, nullable=False), ts("updated_at"),
+       ForeignKeyConstraint(["attempt_id"], ["nf_call_attempts.attempt_id"]),
+       CheckConstraint("phase IN ('THREAD_STARTED','TURN_STARTED','COMPLETED')"),
+       CheckConstraint("(turn_id IS NULL) = (phase = 'THREAD_STARTED')"))
+
 
 class Database:
     def __init__(self, url: str | None = None, *, pool_size: int = 5, max_overflow: int = 0, pool_timeout: float = 2):

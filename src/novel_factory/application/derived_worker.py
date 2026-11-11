@@ -8,7 +8,9 @@ world facts, tasks, permissions, canon selection or published text.
 from __future__ import annotations
 
 from copy import deepcopy
-from uuid import UUID, uuid5
+from uuid import UUID, uuid4, uuid5
+
+from sqlalchemy import text
 
 from novel_factory.application.kernel import require
 from novel_factory.application.query_policy import check_profile
@@ -17,7 +19,7 @@ from novel_factory.domain.canonical import canonical_bytes, fingerprint
 from novel_factory.domain.temporal import point_key
 from novel_factory.infrastructure.database import tables
 from novel_factory.infrastructure.repository import KernelRepository
-from novel_factory.orchestration.tasks import OutboxService
+from novel_factory.orchestration.tasks import MAINTENANCE_GATE, OutboxService
 
 PROJECTOR_VERSION = "nf-derived-world-1"
 CONSUMER = "derived-world:" + PROJECTOR_VERSION
@@ -78,6 +80,56 @@ class DerivedWorldWorker:
         cannot expose a watermark without its durable artifact, acknowledge an
         obsolete lease, or apply a second world effect on redelivery.
         """
+        require(bool(worker_id), "INVALID_ARGUMENT", "A delivery lease owner is required")
+        return self._materialize(lease, worker_id=worker_id, fault=fault)
+
+    def rebuild_one(self, principal, work_id, branch_id):
+        """Repair one immutable index missing its durable receipt, even after legacy delivery."""
+        lease = self.reserve_index(principal, work_id, branch_id)
+        return self.process_reserved(principal, work_id, branch_id, lease) if lease else None
+
+    def reserve_index(self, principal, work_id, branch_id):
+        scope = {"work": work_id, "branch": branch_id, "consumer": CONSUMER,
+                 "gate": MAINTENANCE_GATE + 1, "token": str(uuid4()), "work_text": work_id, "branch_text": branch_id}
+        with self.kernel.db.uow() as repo:
+            self.kernel.authorize(repo, principal, work_id, "ADMIN", branch_id)
+            repo.conn.execute(text("SELECT pg_advisory_xact_lock(:gate)"), scope)
+            repo.conn.execute(text("LOCK TABLE nf_dispatch_limits IN SHARE MODE"))
+            event = repo.conn.scalar(text("""
+                WITH active AS MATERIALIZED (
+                    SELECT t.work_id,t.role_id FROM nf_dispatch_slots s JOIN nf_tasks t USING(task_id)
+                    WHERE s.expires_at>now() UNION ALL
+                    SELECT work_id,'derived_index' FROM nf_index_leases WHERE expires_at>now()
+                )
+                SELECT o.outbox_id FROM nf_outbox o WHERE o.topic='world.accepted'
+                  AND EXISTS(SELECT FROM nf_redis_branches WHERE branch_id=:branch AND work_id=:work)
+                  AND (SELECT count(*) FROM active)<(SELECT slots FROM nf_dispatch_limits WHERE scope='GLOBAL' AND subject='*')
+                  AND (SELECT count(*) FROM active WHERE work_id=:work)<(SELECT slots FROM nf_dispatch_limits
+                    WHERE scope='WORK' AND subject IN ('*',:work_text) ORDER BY subject='*' LIMIT 1)
+                  AND (SELECT count(*) FROM active WHERE role_id='derived_index')<(SELECT slots FROM nf_dispatch_limits
+                    WHERE scope='ROLE' AND subject IN ('*','derived_index') ORDER BY subject='*' LIMIT 1)
+                  AND o.payload->'world_ref'->>'work_id'=:work_text AND o.payload->'world_ref'->>'branch_id'=:branch_text
+                  AND NOT EXISTS (SELECT FROM nf_index_leases l WHERE l.event_id=o.outbox_id AND l.expires_at>now())
+                  AND NOT EXISTS (SELECT FROM nf_inbox i WHERE i.consumer=:consumer AND i.message_id=o.outbox_id)
+                ORDER BY o.created_at,o.outbox_id LIMIT 1 FOR UPDATE OF o SKIP LOCKED
+            """), scope)
+            if event is None:
+                return None
+            repo.conn.execute(text("""
+                INSERT INTO nf_index_leases(event_id,token,work_id,branch_id,expires_at)
+                VALUES(:id,:token,:work,:branch,now()+interval '120 seconds')
+                ON CONFLICT(event_id) DO UPDATE SET token=EXCLUDED.token,expires_at=EXCLUDED.expires_at
+            """), {**scope, "id": event})
+        return {"outbox_id": str(event), "token": scope["token"]}
+
+    def process_reserved(self, principal, work_id, branch_id, lease):
+        try:
+            return self._materialize(lease, scope=(principal, work_id, branch_id))
+        finally:
+            with self.kernel.db.uow() as repo:
+                repo.conn.execute(text("DELETE FROM nf_index_leases WHERE event_id=:outbox_id AND token=:token"), lease)
+
+    def _materialize(self, lease, *, worker_id=None, scope=None, fault=None):
         kernel = self.kernel
         payload, ref = self._material(lease)
         stored = kernel.objects.put(canonical_bytes(payload))
@@ -89,9 +141,18 @@ class DerivedWorldWorker:
         def handler(conn, persisted_payload):
             repo = KernelRepository(conn, tables)
             row = repo.one("outbox", {"outbox_id": lease["outbox_id"]}, lock="update")
-            require(row and row["state"] == "DELIVERING" and row["generation"] == lease["generation"]
-                    and row["lease_owner"] == worker_id and row["lease_expiry"] > repo.now(),
-                    "LEASE_EXPIRED", "Derived worker delivery lease is stale")
+            if scope is None:
+                require(row and row["state"] == "DELIVERING" and row["generation"] == lease["generation"]
+                        and row["lease_owner"] == worker_id and row["lease_expiry"] > repo.now(),
+                        "LEASE_EXPIRED", "Derived worker delivery lease is stale")
+            else:
+                principal, work_id, branch_id = scope
+                valid = repo.conn.scalar(text("""SELECT event_id FROM nf_index_leases
+                    WHERE event_id=:outbox_id AND token=:token AND expires_at>clock_timestamp() FOR UPDATE"""), lease)
+                require(valid, "LEASE_EXPIRED", "Index preparation lease expired")
+                self.kernel.authorize(repo, principal, work_id, "ADMIN", branch_id)
+                require(payload["world_ref"]["work_id"] == work_id and payload["world_ref"]["branch_id"] == branch_id,
+                        "VIEW_DENIED", "Derived source outside project")
             wr = payload["world_ref"]
             require(row["topic"] == "world.accepted" and persisted_payload["world_ref"] == wr,
                     "INVALID_EVIDENCE", "Outbox source changed after material preparation")
@@ -148,7 +209,8 @@ class DerivedWorldWorker:
             consumed = self.outbox.consume(CONSUMER, lease["outbox_id"], handler)
         if fault:
             fault("after_consume_before_ack")
-        self.outbox.ack(lease["outbox_id"], lease["generation"], worker_id)
+        if scope is None:
+            self.outbox.ack(lease["outbox_id"], lease["generation"], worker_id)
         return {"message_id": lease["outbox_id"], "consumed": consumed, "artifact_ref": ref,
                 "world_ref": payload["world_ref"], **status}
 

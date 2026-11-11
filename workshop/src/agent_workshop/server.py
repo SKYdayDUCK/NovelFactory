@@ -10,6 +10,7 @@ from mcp.server.lowlevel import Server
 from mcp.server.stdio import stdio_server
 
 from . import delegation, messaging, organization
+from .roster_projection import catalog_binding
 from .auth import Denied, authenticate, connect, private_binding
 
 PROTOCOL = "aw-nf.v1"
@@ -23,7 +24,8 @@ def negotiate(conn, session, protocol_version):
                             (session.installation_id,)).fetchone()
     return {"protocol_version": PROTOCOL, "installation_id": session.installation_id,
             "nf_instance_id": instance["nf_instance_id"], "grant_epoch": session.grant_epoch,
-            "max_argument_bytes": MAX_ARGUMENT_BYTES, "max_ttl_seconds": 86400}
+            "max_argument_bytes": MAX_ARGUMENT_BYTES, "max_ttl_seconds": 86400,
+            **catalog_binding()}
 
 
 TOOLS = {"aw_capabilities": ("Negotiate this connection's organization protocol.",
@@ -37,12 +39,14 @@ def dispatch(config, name=None, arguments=None):
         # Validate the member even when listing tools on an already open pipe.
         # Mutating organization commands take the exclusive lock first.
         changes = {"aw_hire", "aw_suspend", "aw_transfer", "aw_end", "aw_route_grant", "aw_route_revoke"}
-        if name in changes:
-            organization.lock_org(conn, session.org_id, write=True)
-        viewer = organization.require_employee(conn, session)
-        visible = set(TOOLS)
-        if viewer["role_id"] != "workshop_manager":
-            visible -= changes | {'aw_handoff'}
+        visible = {"aw_capabilities"}
+        if session.org_member:
+            if name in changes:
+                organization.lock_org(conn, session.org_id, write=True)
+            viewer = organization.require_employee(conn, session)
+            visible = set(TOOLS)
+            if viewer["role_id"] != "workshop_manager":
+                visible -= changes | {"aw_handoff"}
         if name is None:
             return sorted(visible)
         if name not in visible:

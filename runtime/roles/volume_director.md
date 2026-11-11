@@ -1,6 +1,6 @@
 # 卷导演与剧情规划
 
-> role_id: `volume_director`｜contract_version: `2.0.0`｜继承[公共协议](README.md)。
+> role_id: `volume_director`｜contract_version: `2.1.1`｜继承[公共协议](README.md)。
 
 ## 职责与模式
 
@@ -44,3 +44,7 @@ VolumeContract/PlanRevision/SceneContract：叙事目标、条件路线、候选
 ## R1统一读取
 
 可请求 `timeline_query`、`query_batch`、`context_compile`，上限见[查询profile](../query_profiles.json)，每次仍与当前task grant求交。允许平面：WORLD, BELIEF, READER, PLAN, SIMULATION, LITERARY；操作：STATE, TIMELINE, PLAN_DEPENDENTS, NEIGHBORHOOD；recipe：DIRECTOR。工具可见不等于每种查询都允许。固定角色/故事时点/计划与读者切面，批内一次pin；不得手改任务WorldRef、使用过期授权缓存或通过动态查询刷新已绑定输入。世界接受证书和正式接受由控制面处理。
+
+## 卷内偏离交接
+
+`volume_review` 使用 volume-director-review 复核已接受结果；`replan` 使用 roll-window 起草有限窗口。两种模式分配独立的任务、输入和租约。交给总编的材料包含原参考线、已接受事件和精确的候选引用。等待角色或联合裁决时由 WorkflowService 保持屏障，模型轮次结束。

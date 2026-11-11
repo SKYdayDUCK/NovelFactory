@@ -1,0 +1,51 @@
+{
+  "status": "PASS",
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "execution_kind": "REAL_ISOLATED_POSTGRESQL",
+  "source_port": 53457,
+  "restored_port": 46303,
+  "durability": {
+    "fsync": true,
+    "synchronous_commit": true,
+    "data_checksums": true
+  },
+  "model_calls": 0,
+  "production_data_accessed": false,
+  "libpq_environment_isolated": true,
+  "cleared_pg_environment_names": [],
+  "pg_basebackup": {
+    "exit_code": 0,
+    "stdout": ""
+  },
+  "base_backup_seconds": 1.0955438210003194,
+  "pg_verifybackup": {
+    "exit_code": 0,
+    "stdout": "backup successfully verified"
+  },
+  "archiver": {
+    "archived_count": 4,
+    "failed_count": 0
+  },
+  "target_world_ref": {
+    "work_id": "9a2b2237-6598-48d3-a385-106e2899549e",
+    "branch_id": "e73a2eea-dc6c-4b11-ab74-073d3b32e5c0",
+    "world_revision_id": "b8d34119-f408-4662-a12d-54b1e32102ca"
+  },
+  "target_lsn": "0/3086258",
+  "restored_state_sha256": "2d8d9d045af118940072f1cfe0a5abe45421c4833c3c38449d44b902fa89ba6a",
+  "snapshot_equal_before_fencing": true,
+  "table_count": 45,
+  "object_count": 19,
+  "recovery_seconds_to_verified_service": 1.2213959859982424,
+  "selected_recovery_point_age_seconds": 0.387201,
+  "target_commits_lost": 0,
+  "deliberately_excluded_later_world_commits": 1,
+  "restored_world_event_count": 2,
+  "unknown_calls_retained": 1,
+  "reserved_amount_retained": "0.5",
+  "fenced_task_count": 1,
+  "old_worker_rejected": true,
+  "original_commit_receipt_equal": true,
+  "limitation": "Small isolated local fixture; selected-point RPO/RTO, not production SLO or remote storage test",
+  "total_seconds": 4.732554564998281
+}

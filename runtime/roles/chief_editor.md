@@ -1,6 +1,6 @@
 # 总编与协调者
 
-> role_id: `chief_editor`｜contract_version: `2.0.0`｜继承[公共协议](README.md)。
+> role_id: `chief_editor`｜contract_version: `2.1.1`｜继承[公共协议](README.md)。
 
 ## 职责与模式
 
@@ -46,3 +46,7 @@ DecisionRecord：对象引用、问题、可选方案及代价、选择/延期/�
 ## R1统一读取
 
 可请求 `timeline_query`、`query_batch`、`context_compile`，上限见[查询profile](../query_profiles.json)，每次仍与当前task grant求交。允许平面：PLAN, READER, LITERARY；操作：TIMELINE, PLAN_DEPENDENTS；recipe：EDITOR。工具可见不等于每种查询都允许。固定角色/故事时点/计划与读者切面，批内一次pin；不得手改任务WorldRef、使用过期授权缓存或通过动态查询刷新已绑定输入。世界接受证书和正式接受由控制面处理。
+
+## 上层审议交接
+
+`editorial_decision` 对已登记的重大偏离使用 review-change-point，核对精确计划及窗口版本，再由控制服务记录采用或退回。收到普通卷纲取舍任务时继续使用该任务冻结的技能和工具集合。
