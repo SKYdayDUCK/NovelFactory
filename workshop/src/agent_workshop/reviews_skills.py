@@ -211,6 +211,15 @@ def skill_history(conn, session, task_ref, skill_id):
     ).fetchone()
     if not result:
         raise Denied("TASK_SCOPE_DENIED")
+    # A historical freeze is immutable, including across revocation. Preserve its
+    # originating installation fence even when a legacy organization is claimed later.
+    origins = conn.execute(
+        """SELECT execution,operation_id FROM aw_reviews WHERE org_id=%s AND review_id=%s
+        UNION ALL SELECT 'BUDGETED_NF',operation_id FROM aw_remote_receipts WHERE org_id=%s AND task_id=%s""",
+        (session.org_id, task_ref, session.org_id, task_ref),
+    ).fetchall()
+    if any(not _review_origin_matches(conn, session, origin) for origin in origins):
+        raise Denied("TASK_SCOPE_DENIED")
     return {**result, "historical": True}
 
 

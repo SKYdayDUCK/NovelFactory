@@ -62,6 +62,9 @@ def seed_legacy():
         manager = authenticate(conn, enroll(conn, "west", org, "manager", 1, 1))
         reviews.register_skill(conn, org, "voice", "v1", "creative", "PROSE", b"frozen-voice")
         requests["skill"] = reviews.share(conn, manager, "voice", "voice", "v1", "PUBLIC_SHARED", 3600)["binding_id"]
+        for ref, origin in (("west-paid", "west"), ("east-paid", "east"), ("manual", "west")):
+            member = authenticate(conn, enroll(conn, origin, org, "reviewer", 1, 1))
+            assert reviews.freeze(conn, member, requests["skill"], "PROSE", requests[ref])["skill_id"] == "voice"
         print(json.dumps(requests))
 
 
@@ -96,6 +99,7 @@ def test_legacy_paid_review_requires_own_nf_installation(isolated_database, tmp_
     command.upgrade(config, "head")
     with connect(dsn) as conn:
         assert conn.execute(history_sql).fetchall() == before
+        assert conn.execute("SELECT count(*) AS n FROM aw_skill_snapshots").fetchone()["n"] == 3
         assert conn.execute("SELECT owner_installation_id FROM aw_organizations").fetchone()["owner_installation_id"] is None
         claim_organization(conn, "legacy-film", "west")
         reviewer = {"database_url": dsn, "token": enroll(conn, "west", "legacy-film", "reviewer", 1, 1)}
@@ -106,18 +110,23 @@ def test_legacy_paid_review_requires_own_nf_installation(isolated_database, tmp_
         return dispatch(reviewer, "aw_review_get", {"review_id": refs[ref]})
     def freeze(ref):
         return dispatch(reviewer, "aw_skill_freeze", {"binding_id": refs["skill"], "task_ref": refs[ref], "mode": "PROSE"})
+    def frozen_history(ref):
+        return dispatch(reviewer, "aw_skill_history", {"task_ref": refs[ref], "skill_id": "voice"})
     def decide(ref):
         return dispatch(reviewer, "aw_review_decide", {"review_id": refs[ref], "operation_id": "sign-" + ref,
                         "outcome": "APPROVED", "reason": "VOICE", "evidence_ref": ref + "-evidence"})
     for ref in ("manual", "west-paid"):
         assert read(ref)["artifact_ref"] == ref
         assert freeze(ref)["skill_id"] == "voice"
+        assert frozen_history(ref)["historical"] is True
         assert decide(ref)["state"] == "APPROVED"
         assert decide(ref)["state"] == "APPROVED"
     with pytest.raises(Denied, match="REVIEW_DENIED"):
         read("east-paid")
     with pytest.raises(Denied, match="TASK_SCOPE_DENIED"):
         freeze("east-paid")
+    with pytest.raises(Denied, match="TASK_SCOPE_DENIED"):
+        frozen_history("east-paid")
     with pytest.raises(Denied, match="REVIEW_DENIED"):
         decide("east-paid")
     summary = dispatch(lead, "aw_review_get", {"review_id": refs["east-paid"]})
