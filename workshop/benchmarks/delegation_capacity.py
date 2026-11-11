@@ -1,6 +1,7 @@
 """Opt-in two-database capacity acceptance; pytest supplies disposable isolated credentials."""
 
 import asyncio
+from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from dataclasses import replace
 from threading import Lock
 from datetime import UTC, datetime, timedelta
@@ -11,7 +12,7 @@ from math import ceil
 import os
 from pathlib import Path
 import sys
-from time import perf_counter
+from time import perf_counter, sleep
 from uuid import uuid4
 
 import pytest
@@ -42,12 +43,54 @@ from novel_factory.application.kernel import Kernel
 from novel_factory.application.runtime_tasks import RuntimeTaskService
 from novel_factory.application.supervisor import RuntimeSupervisor
 from novel_factory.fixtures import load_fixture, point
+from novel_factory.infrastructure.capacity import AdaptiveController
 from novel_factory.infrastructure.database import Database
 from novel_factory.infrastructure.objects import ObjectStore
 
 
+def drain_paired_run(supervisor, owner, world_ref, size, policy):
+    work, branch = world_ref["work_id"], world_ref["branch_id"]
+    ceiling = 2
+    controller = None
+    if policy == "adaptive-2":
+        controller = AdaptiveController(
+            supervisor.kernel.db, "model", ceiling, "model", work=work, branch=branch, interval=0.5
+        )
+    admitted = completed = 0
+    pending = {}
+    targets = []
+    deadline = perf_counter() + 600
+    with ThreadPoolExecutor(max_workers=ceiling) as pool:
+        while completed < size:
+            assert perf_counter() < deadline, (policy, admitted, completed)
+            target = controller.limit() if controller else ceiling
+            if not targets or targets[-1]["target"] != target:
+                targets.append({"admitted": admitted, "completed": completed, "target": target})
+            while admitted < size and len(pending) < target:
+                result = supervisor.run_once(owner, work, branch, executor=pool)
+                if isinstance(result, Future):
+                    pending[result] = perf_counter()
+                    admitted += 1
+                else:
+                    assert result["status"] == "IDLE", result["status"]
+                    break
+            if not pending:
+                sleep(0.01)
+                continue
+            done, _ = wait(pending, timeout=0.1, return_when=FIRST_COMPLETED)
+            for future in done:
+                result = future.result()
+                assert result["status"] == "RESULT_STORED", result["status"]
+                elapsed = perf_counter() - pending.pop(future)
+                if controller:
+                    controller.monitor.completed(elapsed)
+                completed += 1
+    return targets
+
+
 @pytest.mark.parametrize("size", [10, 50, 200])
-def test_logical_delegation_backlog(dual_databases, tmp_path, size):
+@pytest.mark.parametrize("policy", ["fixed-1", "fixed-2", "adaptive-2"])
+def test_logical_delegation_backlog(dual_databases, tmp_path, size, policy):
     dsn = dual_databases["aw"]
     db = Database(dual_databases["nf"])
     kernel = Kernel(db, ObjectStore(tmp_path / "objs"))
@@ -95,7 +138,7 @@ def test_logical_delegation_backlog(dual_databases, tmp_path, size):
         nf_budget = kernel.tasks.create_budget(wr["work_id"], str(size + 1))
         resultdir = Path(os.environ["AW_BENCH_RESULTS"])
         resultdir.mkdir(parents=True, exist_ok=True)
-        with backend() as (http, requests, _):
+        with backend(concurrent=policy != "fixed-1") as (http, requests, _):
             # The HTTP fixture reports tokens but no invoice. Supply a separately
             # declared synthetic tariff; never treat missing real pricing as zero.
             class MeteredFixture(SyntheticHTTP):
@@ -107,6 +150,8 @@ def test_logical_delegation_backlog(dual_databases, tmp_path, size):
                         self.active += 1
                         self.peak = max(self.peak, self.active)
                     try:
+                        if policy != "fixed-1":
+                            sleep(0.05)
                         response = super().generate(request)
                         with self.lock:
                             self.tokens += response.input_tokens + response.output_tokens
@@ -156,7 +201,7 @@ def test_logical_delegation_backlog(dual_databases, tmp_path, size):
                     token_reservation=100000,
                     accept_summary=True,
                 )
-                policy = dict(
+                slot_policy = dict(
                     work_id=wr["work_id"],
                     branch_id=wr["branch_id"],
                     nf_instance_id=instance,
@@ -171,7 +216,7 @@ def test_logical_delegation_backlog(dual_databases, tmp_path, size):
                     token_limit=100000,
                 )
                 with connect(dsn) as c:
-                    allow_slot(c, org, inst, ref, members[i % len(members)], policy)
+                    allow_slot(c, org, inst, ref, members[i % len(members)], slot_policy)
             params = bound_process(
                 tmp_path,
                 "novel_factory.interfaces.delegation_stdio",
@@ -214,9 +259,13 @@ def test_logical_delegation_backlog(dual_databases, tmp_path, size):
                         starts[op] = begun
                     for op in starts:
                         assert await reconcile(dsn, inst, org, op, invoke) == "BOUND"
-                    for _ in starts:
-                        r = sup.run_once(owner, wr["work_id"], wr["branch_id"])
-                        assert r["status"] == "RESULT_STORED", r.get("status")
+                    if policy == "fixed-1":
+                        targets = [{"admitted": 0, "completed": 0, "target": 1}]
+                        for _ in starts:
+                            r = sup.run_once(owner, wr["work_id"], wr["branch_id"])
+                            assert r["status"] == "RESULT_STORED", r.get("status")
+                    else:
+                        targets = drain_paired_run(sup, owner, wr, size, policy)
                     assert sup.run_once(owner, wr["work_id"], wr["branch_id"])["status"] == "IDLE"
                     for op in starts:
                         # Respect the worker's eligibility time even at the smallest tier.
@@ -227,9 +276,9 @@ def test_logical_delegation_backlog(dual_databases, tmp_path, size):
                             await asyncio.sleep(0.25)
                         assert status == "SETTLED", status
                         latencies.append((perf_counter() - starts[op]) * 1000)
-                    return sorted(latencies), perf_counter() - t0
+                    return sorted(latencies), perf_counter() - t0, targets
 
-            ms, elapsed = asyncio.run(asyncio.wait_for(run(), timeout=600))
+            ms, elapsed, targets = asyncio.run(asyncio.wait_for(run(), timeout=600))
             with connect(dsn) as c:
                 counts = c.execute(
                     """SELECT count(*) AS tasks,count(DISTINCT task_id) AS unique_tasks,
@@ -246,6 +295,8 @@ def test_logical_delegation_backlog(dual_databases, tmp_path, size):
                     "SELECT count(*) AS n FROM aw_employees WHERE org_id=%s AND status='ACTIVE'",
                     (org,),
                 ).fetchone()["n"]
+            ceiling = 1 if policy == "fixed-1" else 2
+            contract = "delegation-contract.json" if ceiling == 1 else "admission-comparison.json"
             data = dict(
                 registered_members=roster,
                 delegations=size,
@@ -255,7 +306,9 @@ def test_logical_delegation_backlog(dual_databases, tmp_path, size):
                 **holds,
                 provider="local HTTP synthetic",
                 provider_requests=len(requests),
-                concurrency_policy=1,
+                concurrency_policy=ceiling,
+                policy=policy,
+                admission_targets=targets,
                 model_calls_while_idle=len(requests) - size,
                 observed_peak_model_calls=meter.peak,
                 synthetic_reported_tokens=meter.tokens,
@@ -264,10 +317,11 @@ def test_logical_delegation_backlog(dual_databases, tmp_path, size):
                 latency_ms={f"p{q}": ms[ceil(len(ms) * q / 100) - 1] for q in (50, 95, 99)},
                 per_operation_ms=ms,
                 contract_sha256=hashlib.sha256(
-                    (AW / "benchmarks/delegation-contract.json").read_bytes()
+                    (AW / "benchmarks" / contract).read_bytes()
                 ).hexdigest(),
             )
-            (resultdir / f"delegations-{size}.json").write_text(json.dumps(data, indent=2) + "\n")
+            suffix = "" if ceiling == 1 else "-" + policy
+            (resultdir / f"delegations-{size}{suffix}.json").write_text(json.dumps(data, indent=2) + "\n")
             assert (
                 roster
                 == counts["tasks"]
@@ -277,6 +331,7 @@ def test_logical_delegation_backlog(dual_databases, tmp_path, size):
                 == len(requests)
                 == size
             )
-            assert holds["held"] == 0 and meter.peak == 1
+            assert holds["held"] == 0 and 1 <= meter.peak <= ceiling
+            assert elapsed <= 600 and all(1 <= row["target"] <= ceiling for row in targets)
     finally:
         db.close()
