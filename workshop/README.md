@@ -6,6 +6,7 @@ Independent stdio MCP application for organization management. Run from this dir
     export AW_DATABASE_URL='<private Workshop PostgreSQL DSN>'
     uv run alembic upgrade head
     uv run aw-admin install my-installation my-nf-instance
+    uv run aw-admin bootstrap my-org --preset Minimal
     uv run aw-admin enroll my-installation my-org manager /private/aw.json --revision 1
     uv run aw-mcp --binding /private/aw.json
 

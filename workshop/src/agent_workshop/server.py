@@ -9,6 +9,7 @@ from mcp import types
 from mcp.server.lowlevel import Server
 from mcp.server.stdio import stdio_server
 
+from . import organization
 from .auth import Denied, authenticate, connect, private_binding
 
 PROTOCOL = "aw-nf.v1"
@@ -27,15 +28,24 @@ def negotiate(conn, session, protocol_version):
 
 TOOLS = {"aw_capabilities": ("Negotiate this connection's organization protocol.",
          {"type": "object", "required": ["protocol_version"], "additionalProperties": False,
-          "properties": {"protocol_version": {"type": "string", "maxLength": 32}}}, negotiate)}
+          "properties": {"protocol_version": {"type": "string", "maxLength": 32}}}, negotiate), **organization.TOOLS}
 
 
 def dispatch(config, name=None, arguments=None):
     with connect(config["database_url"]) as conn:
         session = authenticate(conn, config["token"])
+        # Validate the member even when listing tools on an already open pipe.
+        # Mutating organization commands take the exclusive lock first.
+        changes = {"aw_hire", "aw_suspend", "aw_transfer", "aw_end"}
+        if name in changes:
+            organization.lock_org(conn, session.org_id, write=True)
+        viewer = organization.require_employee(conn, session)
+        visible = set(TOOLS)
+        if viewer["role_id"] != "workshop_manager":
+            visible -= changes
         if name is None:
-            return list(TOOLS)
-        if name not in TOOLS:
+            return sorted(visible)
+        if name not in visible:
             raise Denied("VIEW_DENIED")
         _, schema, handler = TOOLS[name]
         if (len(json.dumps(arguments, ensure_ascii=False).encode()) > MAX_ARGUMENT_BYTES

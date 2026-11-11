@@ -26,6 +26,9 @@ def main():
     installation = sub.add_parser("install")
     installation.add_argument("installation_id")
     installation.add_argument("nf_instance_id")
+    org = sub.add_parser("bootstrap")
+    org.add_argument("org_id")
+    org.add_argument("--preset", default="Minimal")
     issue = sub.add_parser("enroll")
     for name in ("installation_id", "org_id", "employee_id", "out"):
         issue.add_argument(name)
@@ -40,6 +43,9 @@ def main():
         if args.action == "install":
             conn.execute("INSERT INTO aw_installations (installation_id,nf_instance_id) VALUES (%s,%s)",
                          (args.installation_id, args.nf_instance_id))
+        elif args.action == "bootstrap":
+            from .organization import bootstrap
+            bootstrap(conn, args.org_id, args.preset)
         elif args.action == "enroll":
             token = enroll(conn, args.installation_id, args.org_id, args.employee_id, args.revision, args.hours)
             with os.fdopen(os.open(args.out, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600), "w") as dest:
