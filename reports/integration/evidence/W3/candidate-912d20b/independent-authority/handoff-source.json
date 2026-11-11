@@ -1,0 +1,23 @@
+{
+  "purpose": "Historical W3 handoff positive control, separate from exact W3 candidate replay",
+  "before_head": "607a1f746bd5d953626321a61bad8842b70d2646",
+  "before_head_tree": "2f4b472bd8685b48971fc0dd2075097765893c95",
+  "before_executed_tree_with_only_positive_test": "dc935a80bf423be535dcf84877c2bfcb62e55183",
+  "before_qualification": "Real director handing off its accepted task to another eligible employee returned VIEW_DENIED. Unmodified product; test-only overlay. Fresh pytest --tb=line run for publishable original JUnit.",
+  "authority_source": "646252438688ee453766c2605821936b39ebb089",
+  "authority_source_tree": "ee454258182c5ead1681f316ffe86d0c7f48a7a0",
+  "authority_source_parent": "b89d0c17ecfb517b6dfa23e73f701474a80dc95f",
+  "after_independent_checkout": "c9579e795c52eb1812773fcbb6ac318944f5b77e",
+  "after_tree": "334dcae45fdedb853f6ff0542eaaabe8e0402f75",
+  "exact_candidate_replayed_separately": "912d20b5f42cb39b0955e5015ac13cec182c75fe",
+  "after_results": "5 scoped permission/delegation plus 2 dual stdio and physical recovering cases passed.",
+  "members_sha256": {
+    "normal-handoff-before.xml": "544edf9a88f880534e895469a88e62a5c6518b6c706c46ed0e5a7eaa29b3d1b1",
+    "normal-handoff-after.xml": "09a382ec1d12700b5d69480e85cb3e37c4af7982379a1cafe55d35ec4a1fe00b",
+    "authorized-roles-after.xml": "704588bd7623c225dfd2df7a299e1f3ed977d18f2aca503e674bfff21bc616d4",
+    "paired-restore-after.json": "7c6e1f0349908aa0a6b3a33ca37ea19a411a1d772d67c38c9634a7c6b7db1d86",
+    "positive-control-test.patch": "69225c8c4eecf016091d91c155ef1a672dd8adf229301d591b43f26062cb8b10",
+    "released-authority.patch": "fe6cb8f0a856c4f194df5a27af466d77decd42c738b2c3905f4f6735a4373fb2"
+  },
+  "zip_sha256": "ac62c3946b334cf876ee5d60bf2c8b00e9cad1ce8b8b2d1f225817aac28017d9"
+}

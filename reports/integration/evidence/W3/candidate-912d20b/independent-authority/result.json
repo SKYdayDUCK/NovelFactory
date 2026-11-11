@@ -1,0 +1,91 @@
+{
+  "checkout": "912d20b5f42cb39b0955e5015ac13cec182c75fe",
+  "tree": "b49d1c054a78ae06bcb92354c094d6171707b9ea",
+  "parents": [
+    "91feec34cb298d514ef4fde40e95098b69b2b079"
+  ],
+  "source_status": "clean before and after running fixed checkout",
+  "nf_bridge_baseline": "15f606c99c765deeffd904ad540441eb6476b3af",
+  "same_input_git_objects": {
+    "src/novel_factory": {
+      "nf_bridge": "cf218ea5f63f2f6fcf1bdecbf3a5d87ff20243e2",
+      "checked_out": "cf218ea5f63f2f6fcf1bdecbf3a5d87ff20243e2"
+    },
+    "migrations": {
+      "nf_bridge": "30f752d145a80a2d8a24a92099bd7759c9ee9571",
+      "checked_out": "30f752d145a80a2d8a24a92099bd7759c9ee9571"
+    },
+    "runtime": {
+      "nf_bridge": "8ce340b1541360d95f722c7b66471c2dcf5fe1a1",
+      "checked_out": "8ce340b1541360d95f722c7b66471c2dcf5fe1a1"
+    },
+    "adapters": {
+      "nf_bridge": "e9fad4639d1fc090c22672c92fa389bfacea83d9",
+      "checked_out": "e9fad4639d1fc090c22672c92fa389bfacea83d9"
+    },
+    "pyproject.toml": {
+      "nf_bridge": "528066c4dad37c7801244a196ac1e4b2909322f6",
+      "checked_out": "528066c4dad37c7801244a196ac1e4b2909322f6"
+    },
+    "uv.lock": {
+      "nf_bridge": "aac229bffc9434731f80436e1bf2054ee40c85e9",
+      "checked_out": "aac229bffc9434731f80436e1bf2054ee40c85e9"
+    },
+    "scripts/with_postgres.py": {
+      "nf_bridge": "8311140a93ef8253e9402801a64d1c2f17e380ab",
+      "checked_out": "8311140a93ef8253e9402801a64d1c2f17e380ab"
+    },
+    "tests/integration/test_p5_actor_tool_choice.py": {
+      "nf_bridge": "69c9c48d5ea88136e9db4ca385ea0e0cdb9b5e21",
+      "checked_out": "69c9c48d5ea88136e9db4ca385ea0e0cdb9b5e21"
+    },
+    "tests/integration/test_p5_role_container.py": {
+      "nf_bridge": "16bb8e36b5238a9589664c36a4ad07b42076b1c7",
+      "checked_out": "16bb8e36b5238a9589664c36a4ad07b42076b1c7"
+    },
+    "tests/integration/test_p5_supervised_role_read.py": {
+      "nf_bridge": "4fcd593987704f1cbf59bb5e36fdb6dd2ef701be",
+      "checked_out": "4fcd593987704f1cbf59bb5e36fdb6dd2ef701be"
+    },
+    "tests/integration/test_workshop_delegation.py": {
+      "nf_bridge": "d5dd24787eefa62651919f26e0cf654c2529a335",
+      "checked_out": "d5dd24787eefa62651919f26e0cf654c2529a335"
+    }
+  },
+  "run_test_modules": {
+    "nf": [
+      "-q",
+      "tests/integration/test_p5_actor_tool_choice.py",
+      "tests/integration/test_p5_role_container.py",
+      "tests/integration/test_p5_supervised_role_read.py",
+      "tests/integration/test_workshop_delegation.py"
+    ],
+    "workshop": [
+      "tests/test_delegation_upgrade_authority.py",
+      "tests/test_delegation_permissions.py",
+      "tests/test_message_membership_origins.py"
+    ]
+  },
+  "pytest_classes": {
+    "tests.integration.test_p5_actor_tool_choice": 13,
+    "tests.integration.test_p5_role_container": 2,
+    "tests.integration.test_p5_supervised_role_read": 2,
+    "tests.integration.test_workshop_delegation": 16,
+    "tests.test_delegation_upgrade_authority": 9,
+    "tests.test_delegation_permissions": 1,
+    "tests.test_message_membership_origins": 5
+  },
+  "total_passed": 48,
+  "total_skipped": 0,
+  "runner_restricted_set": 17,
+  "environment": [
+    "codex-cli 0.167.0-alpha.4",
+    "bubblewrap 0.12.0",
+    "unshare from util-linux 2.41.5",
+    "cc (Debian 14.2.0-19) 14.2.0",
+    "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+    "Python 3.12.14"
+  ],
+  "scope": "Independent Linux/PG17 with real role containers and deterministic loopback provider; exceptional host capability tested here; not a rerun on the GitHub runner.",
+  "original_archive_sha256": "dd8c2c7f19ebb2ebc5b89b1b4a195fefa8987c886c896e61f36e0d4645260109"
+}
