@@ -1,0 +1,19 @@
+{
+  "baseline": "55d8979b5361a4837701d762feacd83036096b11",
+  "candidate": "8f245a51729308fc892396d3a10d70a7ef1d7853",
+  "independent_source": "b3e63bb9cf3e4819951245aedebe677979f2f3d5",
+  "order": [
+    "baseline",
+    "candidate"
+  ],
+  "cases": [
+    {
+      "agents": 500,
+      "seconds": 600,
+      "read_rps": 20,
+      "api_processes": 2
+    }
+  ],
+  "acceptance": "Candidate must pass the original unchanged 600-second production probe. Independently registered real PostgreSQL cases change only schedule metadata on a warm projection and concurrently alternate work-qualified snapshots. The candidate adds exact-size corruption after warm reads. Raw result and JUnit are retained regardless of the decision.",
+  "limits": "Same runner and deterministic workload seed with isolated role/task IDs and fresh databases. One ordered pair cannot establish performance on every machine."
+}
