@@ -55,6 +55,18 @@ def history(conn, session, cursor=None, limit=50):
             WHEN source='aw_resume_requests' THEN EXISTS (
                 SELECT 1 FROM aw_resume_requests r WHERE r.org_id=h.org_id AND
                     r.request_id=h.ref_id::uuid AND r.installation_id=%s)
+            WHEN source='aw_reviews' AND NOT %s THEN EXISTS (
+                SELECT 1 FROM aw_reviews r WHERE r.org_id=h.org_id AND r.review_id=h.ref_id::uuid
+                AND (r.execution<>'BUDGETED_NF' OR EXISTS (
+                    SELECT 1 FROM aw_delegations d JOIN aw_delegation_slots s USING(org_id,slot_id)
+                    WHERE d.org_id=r.org_id AND d.operation_id=r.operation_id
+                    AND d.installation_id=%s AND s.installation_id=d.installation_id)))
+            WHEN source='aw_deliveries' THEN EXISTS (
+                SELECT 1 FROM aw_message_origins o JOIN aw_messages m USING(org_id,message_id)
+                JOIN aw_bindings b ON b.token_digest=o.token_digest
+                WHERE o.org_id=h.org_id AND o.message_id=h.ref_id::uuid AND b.installation_id=%s
+                AND b.org_member AND (b.org_id,b.employee_id,b.employment_revision)=
+                    (m.org_id,m.sender,m.sender_revision))
             ELSE true END
         ORDER BY seq LIMIT %s""",
         (
@@ -64,6 +76,9 @@ def history(conn, session, cursor=None, limit=50):
             whole,
             session.employee_id,
             session.employment_revision,
+            session.installation_id,
+            session.installation_id,
+            whole,
             session.installation_id,
             session.installation_id,
             limit + 1,
