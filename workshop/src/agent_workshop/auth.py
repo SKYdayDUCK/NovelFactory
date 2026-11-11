@@ -19,6 +19,7 @@ class Session:
     employment_revision: int
     grant_epoch: int
     installation_id: str
+    binding_digest: str = ''
 
 
 def connect(dsn):
@@ -37,7 +38,7 @@ def authenticate(conn, token, lock=True):
     row = conn.execute(query + (" FOR SHARE" if lock else ""), (digest(token),)).fetchone()
     if row is None:
         raise Denied("VIEW_DENIED")
-    return Session(**row)
+    return Session(**row, binding_digest=digest(token))
 
 
 def private_binding(path):
