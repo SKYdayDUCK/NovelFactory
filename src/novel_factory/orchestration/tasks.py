@@ -116,28 +116,31 @@ class TaskService:
                               f"task:{task_id}:{generation}:{state}")
 
     def create(self, spec: dict, *, principal_id: str, idempotency_key: str, authorize_in_tx=None):
+        with self._tx(authorize_in_tx) as conn:
+            return self.create_in_transaction(conn, spec, principal_id=principal_id, idempotency_key=idempotency_key)
+
+    def create_in_transaction(self, conn, spec, *, principal_id, idempotency_key):
         validate_contract("TaskSpec", spec, version="2.0")
         if spec["generation"] != 0 or spec["state"] not in {"READY", "BLOCKED"}:
             raise _error("INVALID_ARGUMENT", "New tasks start in generation zero, READY or BLOCKED")
         deadline = datetime.fromisoformat(spec["wall_deadline"].replace("Z", "+00:00"))
         content = {"operation": "create", "spec": spec}
-        with self._tx(authorize_in_tx) as conn:
-            prior = self._command_prior(conn, principal_id, idempotency_key, content)
-            if prior:
-                return prior
-            if deadline <= self._now(conn):
-                raise _error("DEADLINE_EXCEEDED", "Task deadline has passed")
-            t = self.tables["tasks"]
-            if conn.scalar(select(t.c.task_id).where(t.c.task_id == spec["task_id"])):
-                raise _error("ALREADY_EXISTS", "Task identity is already assigned")
-            wr = spec["world_ref"]
-            conn.execute(insert(t).values(task_id=spec["task_id"], work_id=wr["work_id"], branch_id=wr["branch_id"], principal_id=str(principal_id), grant_id=spec["capability_grant_id"], role_id=spec["role_id"], task_kind=spec["task_kind"], state=spec["state"], generation=0, context_bundle_id=spec["context_bundle_id"], dependency_fingerprint=spec["dependency_fingerprint"], deadline=deadline))
-            self._save_input(conn, spec["task_id"], 0, spec, spec["state"])
-            conn.execute(insert(self.tables["task_fairness"]).values(work_id=wr["work_id"], task_kind=spec["task_kind"]).on_conflict_do_nothing())
-            receipt = {"task_id": spec["task_id"], "generation": 0, "state": spec["state"]}
-            self._command_record(conn, principal_id, idempotency_key, content, receipt)
-            self._emit(conn, spec["task_id"], 0, spec["state"])
-            return receipt
+        prior = self._command_prior(conn, principal_id, idempotency_key, content)
+        if prior:
+            return prior
+        if deadline <= self._now(conn):
+            raise _error("DEADLINE_EXCEEDED", "Task deadline has passed")
+        t = self.tables["tasks"]
+        if conn.scalar(select(t.c.task_id).where(t.c.task_id == spec["task_id"])):
+            raise _error("ALREADY_EXISTS", "Task identity is already assigned")
+        wr = spec["world_ref"]
+        conn.execute(insert(t).values(task_id=spec["task_id"], work_id=wr["work_id"], branch_id=wr["branch_id"], principal_id=str(principal_id), grant_id=spec["capability_grant_id"], role_id=spec["role_id"], task_kind=spec["task_kind"], state=spec["state"], generation=0, context_bundle_id=spec["context_bundle_id"], dependency_fingerprint=spec["dependency_fingerprint"], deadline=deadline))
+        self._save_input(conn, spec["task_id"], 0, spec, spec["state"])
+        conn.execute(insert(self.tables["task_fairness"]).values(work_id=wr["work_id"], task_kind=spec["task_kind"]).on_conflict_do_nothing())
+        receipt = {"task_id": spec["task_id"], "generation": 0, "state": spec["state"]}
+        self._command_record(conn, principal_id, idempotency_key, content, receipt)
+        self._emit(conn, spec["task_id"], 0, spec["state"])
+        return receipt
 
     def get(self, task_id):
         with self.engine.connect() as conn:

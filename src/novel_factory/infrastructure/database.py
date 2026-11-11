@@ -161,6 +161,11 @@ define("host_turns", uid("attempt_id", primary_key=True), Column("thread_id", Te
        CheckConstraint("(turn_id IS NULL) = (phase = 'THREAD_STARTED')"))
 
 
+from novel_factory.infrastructure.delegation_tables import define_delegation_tables
+
+tables.update(define_delegation_tables(metadata))
+
+
 class Database:
     def __init__(self, url: str | None = None, *, pool_size: int = 5, max_overflow: int = 0, pool_timeout: float = 2):
         url = url or os.environ.get("NF_DATABASE_URL")
