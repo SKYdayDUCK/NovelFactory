@@ -20,8 +20,13 @@
     "local_hotspot_passed": 33,
     "remote_fix_short": "bf0541a4",
     "target": "main",
-    "independent_pg_checks": 33,
-    "requested_merge_target": "main"
+    "independent_pg_checks": 38,
+    "requested_merge_target": "main",
+    "local_full": 807,
+    "local_failed": 0,
+    "local_skipped": 0,
+    "local_pitr": "PASS",
+    "evidence": "evidence/p55/s9-local/acceptance-55d8979/verification.json"
   },
   "W0": {
     "status": "VERIFIED",
@@ -132,6 +137,11 @@
     "scenes_dispatched": 0,
     "assigned_readers": 0,
     "spend": null,
-    "next": "Verify optional shared token ceiling on the NF peer and obtain a project-bound experiment authorization and readers before paid dispatch."
+    "next": "Verify optional shared token ceiling on the NF peer and obtain a project-bound experiment authorization and readers before paid dispatch.",
+    "pr": 16,
+    "first_source_sha": "5800299aafdc4495ba031c3d139a32d0a98c3d70",
+    "offline_workflow": 43036958091,
+    "offline_workflow_result": "PASS",
+    "combined_rehearsal": "evidence/p6/integrated-rehearsal"
   }
 }
