@@ -9,6 +9,7 @@ from contextlib import nullcontext
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from hashlib import sha256
+import json
 import secrets
 from types import SimpleNamespace
 from uuid import uuid4, uuid5, UUID
@@ -33,6 +34,7 @@ def require(condition, code, message):
 class Kernel:
     def __init__(self, db, objects):
         self.db, self.objects = db, objects
+        self._last_verified_projection = None
         self.tasks = TaskService(db.engine, tables, object_store=objects)
 
     def in_transaction(self, repo):
@@ -82,9 +84,18 @@ class Kernel:
 
     def revision(self, r, wr):
         validate_contract("WorldRef", wr)
-        row = r.one("revisions", wr)
+        row = r.revision_with_snapshot_text(wr)
         require(row, "VIEW_DENIED", "Requested version is unavailable")
-        require(fingerprint(row["snapshot"]) == row["state_hash"], "PROJECTION_CORRUPT", "Projection integrity failed")
+        raw = row["snapshot"]
+        witness = (row["state_hash"], raw)
+        # Return a private Python object even on a hit. Only evidence that these
+        # exact bytes passed the NF-CANON-1 digest is reused between callers.
+        row["snapshot"] = json.loads(raw)
+        if witness != self._last_verified_projection:
+            require(fingerprint(row["snapshot"]) == row["state_hash"],
+                    "PROJECTION_CORRUPT", "Projection integrity failed")
+            if len(raw) <= 1_000_000:
+                self._last_verified_projection = witness
         from novel_factory.application.simulation import verify_schedule_revision
         verify_schedule_revision(row)
         return row

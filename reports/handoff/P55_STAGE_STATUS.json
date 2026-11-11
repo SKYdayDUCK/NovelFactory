@@ -39,5 +39,18 @@
     "method": "two-parent merge with unchanged histories",
     "postgres17_tests": 12,
     "junit": "evidence/p55/s9-local/main-integrated-junit.xml"
+  },
+  "projection_integrity_fix": {
+    "parent": "9630d95fa5c11b9327f223b8316d7c277e9d20f2",
+    "prior_capacity": "NOT_MET",
+    "corruption_regressions": [
+      "changed stored digest",
+      "changed live snapshot preserving the recorded digest"
+    ],
+    "method": "Fresh exact PG snapshot text and recorded digest for each read. Reuse successful canonical validation only for identical pairs within a bounded single-entry witness. Fresh decoded result per caller. Verify schedule provenance every time.",
+    "junit": "evidence/p55/s9-local/projection-witness/junit.xml",
+    "paired_sql": "evidence/p55/s9-local/projection-witness/pair.json",
+    "prior_remote_soak": "evidence/p55/s9-local/projection-witness/previous-soak.json",
+    "release": "PITR at previous source hit runner apt DNS before checkout tests ran. Re-run in progress. Await exact candidate CI and independent review."
   }
 }
