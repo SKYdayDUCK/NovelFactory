@@ -1,0 +1,61 @@
+2026-11-11T18:02:38.1885453Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261101.360
+2026-11-11T18:02:38.1894605Z Cache mode: write
+2026-11-11T18:02:38.1895335Z Prepare workflow directory
+2026-11-11T18:02:38.2426508Z Prepare all required actions
+2026-11-11T18:02:39.6014116Z Complete job name: workshop
+2026-11-11T18:02:56.8564454Z Deleting the contents of '/home/runner/work/NovelFactory/NovelFactory'
+2026-11-11T18:02:56.8720980Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-11T18:02:59.6972903Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-11-11T18:02:59.6976002Z state without impacting any branches by switching back to a branch.
+2026-11-11T18:02:59.7081860Z [command]/usr/bin/git log -1 --format=%H
+2026-11-11T18:02:59.9964279Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-11T18:03:01.9254631Z Cache hit for: setup-uv-2-x86_64-unknown-linux-gnu-ubuntu-24.04-unknown-0caf8ee1e9f123ad49868caf1daa16f463d462445d00b8a17433af453543691a
+2026-11-11T18:03:03.0676018Z Cache Size: ~32 MB (33523733 B)
+2026-11-11T18:03:03.3672471Z Cache restored successfully
+2026-11-11T18:03:03.3694619Z cache restored from GitHub Actions cache with key: setup-uv-2-x86_64-unknown-linux-gnu-ubuntu-24.04-unknown-0caf8ee1e9f123ad49868caf1daa16f463d462445d00b8a17433af453543691a
+2026-11-11T18:03:06.1191904Z CREATE ROLE
+2026-11-11T18:03:06.1690493Z CREATE DATABASE
+2026-11-11T18:03:06.1969294Z CREATE DATABASE
+2026-11-11T18:03:06.2336783Z CREATE DATABASE
+2026-11-11T18:03:06.2607274Z CREATE DATABASE
+2026-11-11T18:03:06.3496228Z CREATE ROLE
+2026-11-11T18:03:06.3898792Z CREATE DATABASE
+2026-11-11T18:03:06.3946338Z CREATE ROLE
+2026-11-11T18:03:22.4480934Z         assert len(pending) == 2 and redis.xpending(stream, group)["pending"] == 2
+2026-11-11T18:03:22.4483611Z E           AssertionError: assert False
+2026-11-11T18:03:22.4484731Z E            +  where False = accept_notification(<psycopg.Connection [INTRANS] (host=127.0.0.1 user=aw_service database=workshop_test) at 0x7f07f23266f0>, '4e1cee0309474276acb6483d48d42897', '0e461f44-656a-438b-9be4-9cebbebfb101')
+2026-11-11T18:03:22.4487084Z FAILED tests/test_notifications.py::test_recover_pending_ack_and_rebuild_lost_stream - AssertionError: assert False
+2026-11-11T18:03:22.4488416Z  +  where False = accept_notification(<psycopg.Connection [INTRANS] (host=127.0.0.1 user=aw_service database=workshop_test) at 0x7f07f23266f0>, '4e1cee0309474276acb6483d48d42897', '0e461f44-656a-438b-9be4-9cebbebfb101')
+2026-11-11T18:03:22.4489427Z 1 failed, 31 passed in 12.80s
+2026-11-11T18:03:22.7852331Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-11T18:03:22.7940018Z Multiple search paths detected. Calculating the least common ancestor of all paths
+2026-11-11T18:03:22.7950698Z The least common ancestor is /home/runner/work/NovelFactory/NovelFactory/workshop. This will be the root directory of the artifact
+2026-11-11T18:03:22.7953233Z With the provided path, there will be 1 file uploaded
+2026-11-11T18:03:23.4373714Z SHA256 digest of uploaded artifact zip is a406343682f3b06a5ad6e858f4536fdc045cadafca10d99d3c09ac3a381756f1
+2026-11-11T18:03:24.1261752Z  1:C 11 Nov 2026 18:02:43.302 * Redis version=8.0.2, bits=64, commit=00000000, modified=1, pid=1, just started
+2026-11-11T18:03:24.1291350Z  1:M 11 Nov 2026 18:02:43.308 * Server initialized
+2026-11-11T18:03:24.1291705Z  1:M 11 Nov 2026 18:02:43.308 * Ready to accept connections tcp
+2026-11-11T18:03:24.1292561Z  1:M 11 Nov 2026 18:03:13.331 * User requested shutdown...
+2026-11-11T18:03:24.1293742Z  1:M 11 Nov 2026 18:03:13.333 # Redis is now ready to exit, bye bye...
+2026-11-11T18:03:24.1298144Z  1:C 11 Nov 2026 18:03:14.717 * Redis version=8.0.2, bits=64, commit=00000000, modified=1, pid=1, just started
+2026-11-11T18:03:24.1324610Z  1:M 11 Nov 2026 18:03:14.722 * Server initialized
+2026-11-11T18:03:24.1344920Z  1:M 11 Nov 2026 18:03:14.723 * Ready to accept connections tcp
+2026-11-11T18:03:24.2801282Z  The files belonging to this database system will be owned by user "postgres".
+2026-11-11T18:03:24.2803424Z  The database cluster will be initialized with locale "en_US.utf8".
+2026-11-11T18:03:24.2804021Z  The default database encoding has accordingly been set to "UTF8".
+2026-11-11T18:03:24.2806344Z  2026-11-11 18:02:50.699 UTC [1] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-11-11T18:03:24.2808220Z  The default text search configuration will be set to "english".
+2026-11-11T18:03:24.2810471Z  2026-11-11 18:02:50.709 UTC [1] LOG:  database system is ready to accept connections
+2026-11-11T18:03:24.2814795Z  Data page checksums are disabled.
+2026-11-11T18:03:24.2821813Z  waiting for server to start....2026-11-11 18:02:50.451 UTC [48] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-11-11T18:03:24.2824289Z  2026-11-11 18:02:50.459 UTC [48] LOG:  database system is ready to accept connections
+2026-11-11T18:03:24.4551222Z  The files belonging to this database system will be owned by user "postgres".
+2026-11-11T18:03:24.4556964Z  2026-11-11 18:02:51.463 UTC [1] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-11-11T18:03:24.4562744Z  2026-11-11 18:02:51.473 UTC [1] LOG:  database system is ready to accept connections
+2026-11-11T18:03:24.4563569Z  The database cluster will be initialized with locale "en_US.utf8".
+2026-11-11T18:03:24.4564088Z  The default database encoding has accordingly been set to "UTF8".
+2026-11-11T18:03:24.4564600Z  The default text search configuration will be set to "english".
+2026-11-11T18:03:24.4565184Z  Data page checksums are disabled.
+2026-11-11T18:03:24.4572610Z  waiting for server to start....2026-11-11 18:02:51.220 UTC [48] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-11-11T18:03:24.4575024Z  2026-11-11 18:02:51.228 UTC [48] LOG:  database system is ready to accept connections
+2026-11-11T18:03:24.5855504Z Remove container network: github_network_29919b8842514e6383f8a2b2528e2486

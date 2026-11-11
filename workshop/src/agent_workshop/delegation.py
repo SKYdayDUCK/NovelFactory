@@ -13,15 +13,23 @@ MAX_MONEY = {"type": "string", "pattern": r"^(0|[1-9][0-9]{0,11})(\.[0-9]{1,6})?
 UUID_FIELD = {"type": "string", "format": "uuid"}
 
 
-def route(conn, org, sender, recipient, scope):
-    return bool(
-        conn.execute(
-            """SELECT 1 FROM aw_edges e JOIN aw_organizations o
-        ON o.org_id=e.org_id AND o.active_revision=e.graph_revision
-        WHERE e.org_id=%s AND src=%s AND dst=%s AND e.scope_ref=%s AND kind IN ('ASSIGN','ASSIGN_REVIEW')""",
-            (org, sender, recipient, scope),
-        ).fetchone()
-    )
+def route(conn, org, sender, recipient=None, scope=None):
+    query = """SELECT 1 FROM aw_current_message_edges
+               WHERE org_id=%s AND src=%s AND kind IN ('ASSIGN','ASSIGN_REVIEW')"""
+    params = (org, sender)
+    if recipient is not None:
+        query += " AND dst=%s AND scope_ref=%s"
+        params += (recipient, scope)
+    return conn.execute(query + " LIMIT 1", params).fetchone() is not None
+
+
+def committed_budget(conn, org):
+    return conn.execute(
+        """SELECT COALESCE(SUM(CASE status WHEN 'HELD' THEN amount
+             WHEN 'SETTLED' THEN settled_amount ELSE 0 END),0) AS used
+           FROM aw_budget_holds WHERE org_id=%s""",
+        (org,),
+    ).fetchone()["used"]
 
 
 def delegate(conn, session, operation_id, slot_id, max_amount, token_limit, *, _review_request=False):
@@ -29,21 +37,12 @@ def delegate(conn, session, operation_id, slot_id, max_amount, token_limit, *, _
     require_employee(conn, session)
     amount = Decimal(max_amount)
     signature = fingerprint([slot_id, str(amount.normalize()), token_limit])
-    key = (org, sender, session.employment_revision, operation_id)
+    key = (session.installation_id, org, sender, session.employment_revision, operation_id)
     account = conn.execute(
         "SELECT * FROM aw_budget_accounts WHERE org_id=%s FOR UPDATE", (org,)
     ).fetchone()
     if not account:
         raise Denied("BUDGET_UNCONFIGURED")
-    old = conn.execute(
-        """SELECT operation_id,state,request_sha FROM aw_delegations
-        WHERE (org_id,sender_id,sender_revision,client_key)=(%s,%s,%s,%s)""",
-        key,
-    ).fetchone()
-    if old:
-        if old["request_sha"] != signature:
-            raise Denied("IDEMPOTENCY_MISMATCH")
-        return {"operation_id": str(old["operation_id"]), "state": old["state"]}
     slot = conn.execute(
         """SELECT * FROM aw_delegation_slots WHERE org_id=%s AND slot_id=%s
         AND installation_id=%s AND enabled FOR SHARE""",
@@ -56,12 +55,22 @@ def delegate(conn, session, operation_id, slot_id, max_amount, token_limit, *, _
     target = employee(conn, org, slot["employee_id"])
     policy = slot["config"]
     if (
-        target["status"] != "ACTIVE"
+        not target
+        or target["status"] != "ACTIVE"
         or target["employment_revision"] != slot["employment_revision"]
         or policy["role_id"] not in NF_ROLES[target["role_id"]]
         or not route(conn, org, sender, target["employee_id"], target["scope_ref"])
     ):
         raise Denied("VIEW_DENIED")
+    old = conn.execute(
+        """SELECT operation_id,state,request_sha FROM aw_delegations
+        WHERE (installation_id,org_id,sender_id,sender_revision,client_key)=(%s,%s,%s,%s,%s)""",
+        key,
+    ).fetchone()
+    if old:
+        if old["request_sha"] != signature:
+            raise Denied("IDEMPOTENCY_MISMATCH")
+        return {"operation_id": str(old["operation_id"]), "state": old["state"]}
     if (
         amount <= 0
         or amount != Decimal(policy["max_amount"])
@@ -69,12 +78,7 @@ def delegate(conn, session, operation_id, slot_id, max_amount, token_limit, *, _
         or account["currency"] != policy["currency"]
     ):
         raise Denied("BUDGET_EXCEEDED")
-    committed = conn.execute(
-        """SELECT COALESCE(SUM(CASE status WHEN 'HELD' THEN amount
-             WHEN 'SETTLED' THEN settled_amount ELSE 0 END),0) AS used FROM aw_budget_holds WHERE org_id=%s""",
-        (org,),
-    ).fetchone()["used"]
-    if committed + amount > account["limit_amount"]:
+    if committed_budget(conn, org) + amount > account["limit_amount"]:
         raise Denied("BUDGET_EXCEEDED")
     if conn.execute(
         "SELECT 1 FROM aw_delegations WHERE org_id=%s AND slot_id=%s", (org, slot_id)
@@ -118,42 +122,49 @@ def delegate(conn, session, operation_id, slot_id, max_amount, token_limit, *, _
 
 
 def handoff(conn, session, operation_id, handoff_id, recipient):
-    viewer = require_employee(conn, session)
+    require_employee(conn, session)
     org = session.org_id
-    item = conn.execute(
-        "SELECT * FROM aw_delegations WHERE org_id=%s AND operation_id=%s FOR UPDATE",
-        (org, operation_id),
-    ).fetchone()
     dest = employee(conn, org, recipient)
-    if (
-        not item
-        or not dest
-        or dest["status"] != "ACTIVE"
-        or viewer["role_id"] != "workshop_manager"
+    if not dest or dest["status"] != "ACTIVE" or not route(
+        conn, org, session.employee_id, recipient, dest["scope_ref"]
     ):
         raise Denied("VIEW_DENIED")
-    if (
-        item["installation_id"] != session.installation_id
-        or dest["scope_ref"] != viewer["scope_ref"]
-        or item["payload"]["role_id"] not in NF_ROLES[dest["role_id"]]
-    ):
-        raise Denied("VIEW_DENIED")
-    sig = fingerprint([operation_id, recipient, dest["employment_revision"]])
-    prev = conn.execute(
-        "SELECT request_sha FROM aw_handoffs WHERE org_id=%s AND sender=%s AND handoff_id=%s",
-        (org, session.employee_id, handoff_id),
+    request = [operation_id, recipient, dest["employment_revision"]]
+    sig = fingerprint([*request, session.employment_revision])
+    # An owner who transferred responsibility may retry the same receipt while
+    # their original tenure and route are still live.
+    item = conn.execute(
+        """SELECT * FROM aw_delegations d WHERE installation_id=%s AND org_id=%s AND operation_id=%s
+           AND ((sender_id=%s AND sender_revision=%s) OR (owner_id=%s AND owner_revision=%s)
+                OR EXISTS (SELECT 1 FROM aw_handoffs h
+                           WHERE h.org_id=d.org_id AND h.operation_id=d.operation_id
+                           AND h.sender=%s AND h.handoff_id=%s AND h.request_sha=%s))
+           FOR UPDATE""",
+        (session.installation_id, org, operation_id, session.employee_id, session.employment_revision,
+         session.employee_id, session.employment_revision, session.employee_id, handoff_id, sig),
     ).fetchone()
-    if prev and prev["request_sha"] != sig:
-        raise Denied("IDEMPOTENCY_MISMATCH")
-    if not prev:
-        conn.execute(
-            "INSERT INTO aw_handoffs(org_id,handoff_id,operation_id,sender,request_sha,recipient) VALUES (%s,%s,%s,%s,%s,%s)",
-            (org, handoff_id, operation_id, session.employee_id, sig, recipient),
-        )
+    if not item or item["payload"]["role_id"] not in NF_ROLES[dest["role_id"]]:
+        raise Denied("VIEW_DENIED")
+    created = conn.execute(
+        """INSERT INTO aw_handoffs(org_id,handoff_id,operation_id,sender,request_sha,recipient)
+           VALUES (%s,%s,%s,%s,%s,%s)
+           ON CONFLICT (org_id,sender,handoff_id) DO NOTHING RETURNING handoff_id""",
+        (org, handoff_id, operation_id, session.employee_id, sig, recipient),
+    ).fetchone()
+    if created:
         conn.execute(
             "UPDATE aw_delegations SET owner_id=%s,owner_revision=%s WHERE org_id=%s AND operation_id=%s",
             (recipient, dest["employment_revision"], org, operation_id),
         )
+    else:
+        previous = conn.execute(
+            "SELECT request_sha FROM aw_handoffs WHERE org_id=%s AND sender=%s AND handoff_id=%s",
+            (org, session.employee_id, handoff_id),
+        ).fetchone()
+        # Legacy receipts omitted the sender revision. The query above only
+        # admits a legacy retry from the currently authorized source or owner.
+        if previous["request_sha"] not in (sig, fingerprint(request)):
+            raise Denied("IDEMPOTENCY_MISMATCH")
     return {"operation_id": operation_id, "handoff_id": handoff_id, "recipient": recipient}
 
 

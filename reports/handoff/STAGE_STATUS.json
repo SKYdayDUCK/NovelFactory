@@ -1,81 +1,81 @@
 {
   "A": {
-    "status": "IN_PROGRESS",
-    "result": "NOT_MET",
-    "inspected_sha": "f2e6d38534214e79630b807cec9a720d99e975b1",
+    "status": "MERGED_AND_VERIFIED",
     "pr": 5,
-    "blocker": "three inherited workflows failed",
-    "next": "fix and rerun same-head gates before merge",
-    "local_passed": 722
+    "source_sha": "f2e6d38534214e79630b807cec9a720d99e975b1",
+    "main_sha": "a8f37b72286163e9117f8874a0e175c61204ff8b",
+    "merged_at": "2026-11-11T13:50:16Z",
+    "capacity_issue": 13,
+    "evidence": "https://github.com/SKYdayDUCK/NovelFactory/pull/5"
   },
   "B": {
-    "status": "IN_PROGRESS",
-    "result": "NOT_MET",
-    "inspected_sha": "b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5",
+    "status": "MERGED_AND_VERIFIED",
     "pr": 6,
-    "blocker": "three inherited workflows failed",
-    "next": "fix and rerun same-head gates before merge",
-    "local_hotspot_passed": 33,
-    "remote_fix_short": "bf0541a4"
+    "source_sha": "67e8836fd8aceb5d4b8d054594f5f3bdfdddaac9",
+    "main_sha": "df1e0cc904e3b94a360d86e3a3e00bfec3258673",
+    "merged_at": "2026-11-11T16:33:42Z",
+    "capacity_issue": 13,
+    "evidence": "reports/integration/p55-main/README.md"
   },
   "W0": {
-    "status": "VERIFIED",
+    "status": "MERGED_AND_VERIFIED",
     "result": "PASS",
-    "evidence": "evidence/W0",
-    "tests": {
-      "nf": 4,
-      "aw": 2
-    },
-    "next": "merge in dependency order",
-    "source_sha": "c18e53959807a35816eaa1258a3b7c64b80b4637",
     "pr": 7,
-    "ci": 43030289759
+    "source_sha": "e5a47f51f39e3ad618e822e451eb89110395e7dc",
+    "main_sha": "c4939e24b6b5501d82127f528f2054e9c1992856",
+    "evidence": "https://github.com/SKYdayDUCK/NovelFactory/blob/157342ba2fa7d04333d5ef56d450c880ff8ce9b5/evidence/workshop/main-verification/W0/MERGED_AND_VERIFIED.json",
+    "hosted_main_junit": {
+      "workshop": 3,
+      "nf_tools": 5,
+      "dual_services": 2
+    },
+    "issue_13": "4 capacity subjobs NOT_MET"
   },
   "W1": {
-    "status": "VERIFIED",
+    "status": "MERGED_AND_VERIFIED",
     "result": "PASS",
-    "tests": {
-      "integrated": 9
-    },
-    "evidence": "evidence/workshop/w1",
-    "next": "integration in dependency order",
-    "source_sha": "f59ac5e442bd5a434ded2e65526d5750c5488e9b",
-    "ci": 43030513699,
-    "pr": 8
+    "pr": 8,
+    "source_sha": "48c20a10c1e28af608a4c52f207351eaa1c45e06",
+    "main_sha": "d039839fe68f6403ea6e5590af3ed787318d5b5f",
+    "evidence": "https://github.com/SKYdayDUCK/NovelFactory/blob/8fec0c9042b6ea85e8ff6f7712d195f028c071b2/evidence/workshop/main-verification/W1/MERGED_AND_VERIFIED.json",
+    "hosted_main_junit": {
+      "workshop": 16,
+      "historical_upgrade": 1,
+      "nf": 5,
+      "dual_services": 2
+    }
   },
   "W2": {
-    "status": "VERIFIED",
-    "result": "PASS",
-    "tests": {
-      "w1_and_w2": 13
-    },
-    "evidence": "evidence/workshop/w2",
-    "next": "integration in dependency order",
-    "source_sha": "0da5b7c8fab5321fa50d2a04a516f3fd95432539",
+    "status": "MERGED_AND_VERIFIED",
     "pr": 9,
-    "ci": 43031076636
+    "base": "d039839fe68f6403ea6e5590af3ed787318d5b5f",
+    "historical_source": "0da5b7c8fab5321fa50d2a04a516f3fd95432539",
+    "origin_guard_source": "ec713a437b28a18c965ec58da0fb4cb8503470bb",
+    "previous_evidence": "evidence/workshop/w2",
+    "next": "NF Bridge #11",
+    "result": "PASS",
+    "dependency_main_sha": "d039839fe68f6403ea6e5590af3ed787318d5b5f",
+    "source_sha": "162af2695b76b20c0257b28217a3eb5b4096d7f6",
+    "main_sha": "f2c584ec8e738e09d31b05ddd5c032bb2b8f96b1",
+    "evidence": "reports/integration/W2_主线签收.md"
   },
   "W3": {
-    "status": "IN_PROGRESS",
-    "result": "PARTIAL",
-    "evidence": "evidence/workshop/w3",
-    "next": "pin NF branch; rerun dual-service CI; PITR drill",
-    "local_tests": {
-      "local_saga_and_stdio": 4,
-      "dual_mcp": 1
-    },
-    "source_sha": "15d1cf51c357627866d06bd49fd326798dda56a3",
+    "status": "MERGED_AND_VERIFIED",
+    "result": "PASS",
     "pr": 10,
-    "ci": 43032253677,
-    "nf_sha": "795b17f243613282aaa147668f0f5c384cf32bf8",
-    "nf_pr": 11
+    "dependency_main_sha": "15f606c99c765deeffd904ad540441eb6476b3af",
+    "historical_source": "15d1cf51c357627866d06bd49fd326798dda56a3",
+    "qualified_workshop_source": "d8c4e9707a76f35e9f9dfdaca929c1767c650a02",
+    "source_sha": "a15f41b40ed4a0cd4716e7335954ec0a1c5efadf",
+    "main_sha": "e6763d844f023d7c6a13060dbaebca0416fe3099",
+    "merged_at": "2026-11-11T19:53:57Z",
+    "evidence": "reports/integration/W3_主线签收.md"
   },
   "W4": {
     "status": "IN_PROGRESS",
-    "result": "PARTIAL",
-    "local_tests": 32,
-    "evidence": "evidence/workshop/w4",
-    "next": "same-head CI; dual-service CI now pins NF #11"
+    "result": "AWAITING_MAIN_ACCEPTANCE",
+    "pr": 12,
+    "dependency_main_sha": "e6763d844f023d7c6a13060dbaebca0416fe3099"
   },
   "W5": {
     "status": "NOT_STARTED",
@@ -92,5 +92,14 @@
       "project-authorized provider binding and spend limits",
       "two independent literary reviews"
     ]
+  },
+  "NF_BRIDGE": {
+    "status": "MERGED_AND_VERIFIED",
+    "result": "PASS",
+    "pr": 11,
+    "source_sha": "695668b87f6a76acbe7e27c71fcb259b7b3f0795",
+    "main_sha": "15f606c99c765deeffd904ad540441eb6476b3af",
+    "evidence": "reports/integration/NF_Bridge_主线签收.md",
+    "capacity_issue": 13
   }
 }

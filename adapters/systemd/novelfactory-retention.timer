@@ -1,0 +1,10 @@
+[Unit]
+Description=Periodically reclaim acknowledged NovelFactory Redis entries
+
+[Timer]
+OnBootSec=1min
+OnUnitInactiveSec=15s
+AccuracySec=5s
+
+[Install]
+WantedBy=timers.target

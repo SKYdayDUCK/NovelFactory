@@ -19,7 +19,8 @@ class Session:
     employment_revision: int
     grant_epoch: int
     installation_id: str
-    binding_digest: str = ''
+    org_member: bool = False
+    binding_digest: str = ""
 
 
 def connect(dsn):
@@ -31,7 +32,7 @@ def digest(value):
 
 
 def authenticate(conn, token, lock=True):
-    query = """SELECT org_id, employee_id, employment_revision, grant_epoch, installation_id
+    query = """SELECT org_id, employee_id, employment_revision, grant_epoch, installation_id, org_member
                FROM aw_bindings JOIN aw_installations USING (installation_id)
                WHERE token_digest=%s AND NOT revoked AND enabled
                  AND expires_at > clock_timestamp()"""

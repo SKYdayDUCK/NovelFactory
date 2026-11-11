@@ -43,6 +43,10 @@ class RuntimeCatalog:
             raise DomainError("RUNTIME_UNAVAILABLE", "Selected runtime skill is unavailable")
         role_text = self._read("roles/" + role["contract_path"])
         skill_text = self._read("skills/" + skill["path"])
+        requested = set(role["requested_tools"])
+        mode = skill.get("restricted_role_modes", {}).get(role_id)
+        if mode is not None:
+            requested.intersection_update(mode["tools_used"])
         snapshot = {
             "schema_version": "2.1",
             "role_id": role_id,
@@ -56,6 +60,7 @@ class RuntimeCatalog:
             "catalog_versions": [roles["schema_version"], skills["schema_version"]],
             # Text-only model calls expose no tools. Catalog requested_tools
             # remains documentation, never an executable permission grant.
+            "mcp_requested_tools": sorted(requested),
             "effective_model_tools": [],
         }
         return {"snapshot": snapshot, "sha256": fingerprint(snapshot)}

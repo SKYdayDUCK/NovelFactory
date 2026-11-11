@@ -9,6 +9,7 @@ from __future__ import annotations
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 from collections import OrderedDict, deque
 from copy import deepcopy
+import json
 import threading
 from uuid import UUID, uuid4, uuid5
 
@@ -18,6 +19,7 @@ from novel_factory.domain.errors import DomainError
 from novel_factory.domain.temporal import point_key, contains, validate_interval
 from novel_factory.domain.world import (state_at, lifecycle_at, PREDICATES, ALIASES, PROJECTION_VERSION)
 from .query_policy import check_profile
+from .semantic_dependencies import record_query
 
 
 def _id():
@@ -42,6 +44,19 @@ def _wr(revision):
     return {key: revision[key] for key in ('work_id', 'branch_id', 'world_revision_id')}
 
 
+class PreparedWorldQuery(bytes):
+    """Immutable JSON produced only after applying the public request contract."""
+
+    __slots__ = ()
+
+    def __new__(cls, request):
+        value = validate_contract('UnifiedQueryRequest', request, '2.1')
+        return super().__new__(cls, json.dumps(value, separators=(',', ':'), allow_nan=False).encode('ascii'))
+
+    def materialize(self):
+        return json.loads(self)
+
+
 class WorldQueryService:
     def __init__(self, kernel, *, cache_size=256, max_scan=10000, max_response_bytes=2_000_000):
         self.kernel = kernel
@@ -52,10 +67,13 @@ class WorldQueryService:
         self._cache_lock = threading.RLock()
         self.cache_hits = self.cache_misses = 0
 
-    def _task(self, repo, principal, task_id, generation, capability='READ'):
-        task = repo.one('tasks', {'task_id': task_id})
+    def _task(self, repo, principal, task_id, generation, capability='READ', *, lock=None):
+        task = repo.one('tasks', {'task_id': task_id}, lock=lock)
         _require(task, 'VIEW_DENIED', 'Task is unavailable')
-        grant = self.kernel.authorize(repo, principal, task['work_id'], capability, task['branch_id'])
+        work, grant = self.kernel._authorize_with_work(repo, principal, task['work_id'], capability, task['branch_id'])
+        return self._qualify_task(repo, principal, task, generation, grant, work=work)
+
+    def _qualify_task(self, repo, principal, task, generation, grant, *, work):
         _require(task['principal_id'] == principal.principal_id and task['grant_id'] == principal.grant_id,
                  'VIEW_DENIED', 'Task is unavailable')
         _require(task['generation'] == generation, 'STALE_GENERATION', 'Task generation is no longer current')
@@ -66,15 +84,14 @@ class WorldQueryService:
         if task['state'] == 'RUNNING':
             _require(task['lease_expiry'] is not None and task['lease_expiry'] > now,
                      'LEASE_EXPIRED', 'Task execution lease has expired')
-        record = repo.one('task_inputs', {'task_id': task_id, 'generation': generation})
+        record = repo.one('task_inputs', {'task_id': task['task_id'], 'generation': generation})
         _require(record, 'TASK_NOT_ACCEPTABLE', 'Task input is unavailable')
         spec = record['spec']
-        work = repo.one('works', {'work_id': task['work_id']})
         _require(spec['policy_version'] == work['policy_version'], 'TASK_REBIND_REQUIRED', 'Task policy is no longer current')
         _require(fingerprint(spec) == record['input_hash'], 'TASK_NOT_ACCEPTABLE', 'Task input integrity failed')
         return task, grant, spec
 
-    def _selector(self, repo, principal, read_contract, task, cursor=None):
+    def _selector(self, repo, principal, read_contract, task, task_grant, cursor=None):
         selector = read_contract['revision']
         if cursor:
             wr = cursor['world_ref']
@@ -95,7 +112,11 @@ class WorldQueryService:
             _require(target['work_id'] == task['work_id'], 'VIEW_DENIED', 'World is outside the task grant')
             wr = self.kernel.head(repo, target['work_id'], target.get('branch_id'))
         _require(wr['work_id'] == task['work_id'], 'VIEW_DENIED', 'World is outside the task grant')
-        self.kernel.authorize(repo, principal, wr['work_id'], 'READ', wr['branch_id'])
+        # Only reuse the grant SHARE-locked by _task in this sampling transaction.
+        # A compile grant may lack READ, and a resume grant has a live expiry.
+        if (wr['branch_id'] != task['branch_id'] or 'READ' not in task_grant['capabilities']
+                or task_grant['role_id'] == 'resume_operator'):
+            self.kernel.authorize(repo, principal, wr['work_id'], 'READ', wr['branch_id'])
         if selector['mode'] == 'READ_YOUR_WRITES':
             receipt = self.kernel.artifact(repo, selector['min_receipt_ref'], wr['work_id'])
             proof = repo.one('receipts', {'work_id': wr['work_id'], 'principal_id': principal.principal_id,
@@ -138,7 +159,7 @@ class WorldQueryService:
         with self.kernel.db.uow(write=False, repeatable_read=True) as repo:
             task, grant, spec = self._task(repo, principal, request['task_id'], request['generation'],
                                           'COMPILE' if compile_context else 'READ')
-            wr = self._selector(repo, principal, request['read_contract'], task, cursor)
+            wr = self._selector(repo, principal, request['read_contract'], task, grant, cursor)
             revision = self.kernel.revision(repo, wr)
             plane = request['knowledge_cut']['plane']
             if plane not in {'WORLD', 'BELIEF', 'PLAN', 'SIMULATION'}:
@@ -191,7 +212,10 @@ class WorldQueryService:
                 _require(ref in spec['input_artifacts'], 'VIEW_DENIED', 'Input manifest is not bound to this task generation')
                 manifest = validate_contract('InputManifest', a['payload'], 'kernel')
                 refs.append(ref)
-            indexes = repo.many('index_watermarks', {'branch_id': wr['branch_id']})
+            # STATE and BELIEF are resolved from the fixed authoritative projection.
+            # Only graph/timeline payloads use watermarks for freshness and caching.
+            needs_indexes = plane != 'BELIEF' and any(q['kind'] != 'STATE' for q in queries)
+            indexes = repo.many('index_watermarks', {'branch_id': wr['branch_id']}) if needs_indexes else []
             read_cut = {'world_ref': wr, 'knowledge_cut': deepcopy(request['knowledge_cut']),
                         'policy_version': spec['policy_version'], 'permission_epoch': grant['epoch'],
                         'resolved_at': repo.now().isoformat(), 'source_manifest_refs': refs,
@@ -201,12 +225,26 @@ class WorldQueryService:
                     'read_cut': read_cut, 'events': [row['payload'] for row in events],
                     'plans': plans, 'manifest': manifest, 'indexes': indexes}
 
-    def _delivery_check(self, principal, request, packet):
-        with self.kernel.db.uow(write=False) as repo:
-            _, grant, _ = self._task(repo, principal, request['task_id'], request['generation'])
-            self.kernel.authorize(repo, principal, packet['read_cut']['world_ref']['work_id'], 'READ',
-                                  packet['read_cut']['world_ref']['branch_id'])
+    def _delivery_check(self, principal, request, packet, observations):
+        with self.kernel.db.uow() as repo:
+            wr = packet['read_cut']['world_ref']
+            work, grant = self.kernel._authorize_with_work(repo, principal, wr['work_id'], 'READ', wr['branch_id'])
+            head = repo.one('branches', {'work_id': wr['work_id'], 'branch_id': wr['branch_id']}, lock='share')
+            # Fence concurrent result acceptance while the delivered query
+            # becomes a mandatory dependency of this exact generation.
+            task = repo.one('tasks', {'task_id': request['task_id']}, lock='share')
+            _require(task, 'VIEW_DENIED', 'Task is unavailable')
+            # The read and task can have different branch permissions. Time-limited
+            # resume grants also need their expiration rechecked after locking the task.
+            if ((task['work_id'], task['branch_id']) != (wr['work_id'], wr['branch_id'])
+                    or grant['role_id'] == 'resume_operator'):
+                work, grant = self.kernel._authorize_with_work(
+                    repo, principal, task['work_id'], 'READ', task['branch_id'])
+            self._qualify_task(repo, principal, task, request['generation'], grant, work=work)
             _require(grant['epoch'] == packet['grant']['epoch'], 'VIEW_DENIED', 'Authorization changed before delivery')
+            for child, payload in observations:
+                record_query(repo, packet, child, payload, 'QUERY', head['head_revision_id'])
+
 
     def _time_check(self, packet, subject_time):
         if subject_time['kind'] == 'POINT':
@@ -225,6 +263,8 @@ class WorldQueryService:
         if entity is None:
             return False
         scope = entity.get('scope_id', subject_id)
+        if 'coverage_scopes' in packet:
+            packet['coverage_scopes'].add(scope)
         frontier = packet['revision']['frontiers'].get(scope)
         if frontier is None:
             return False
@@ -233,7 +273,8 @@ class WorldQueryService:
         return point_key(subject_time['interval']['end']) <= point_key(frontier)
 
     def _handle(self, packet, request):
-        digest = fingerprint({'world_ref': packet['read_cut']['world_ref'],
+        digest = fingerprint({'world_ref': packet['read_cut']['world_ref'], 'task_id': request['task_id'],
+                              'generation':request['generation'], 'page_size':request['page_size'], 'cursor':request.get('cursor'),
                               'permission_epoch': packet['grant']['epoch'], 'principal': packet['grant']['principal_id'],
                               'knowledge_cut': request['knowledge_cut'], 'subject_time': request['subject_time'], 'query': request['query']})
         return str(uuid5(UUID(packet['read_cut']['world_ref']['world_revision_id']), digest))
@@ -386,7 +427,13 @@ class WorldQueryService:
         page = entries[offset:offset + request['page_size']]
         next_offset = offset + len(page)
         cursor = self._next_cursor(packet['principal'], request, wr, next_offset) if next_offset < len(entries) else None
-        coverage = 'COMPLETE' if plane == 'PLAN' or (plane != 'BELIEF' and all(self._covered(packet, s, request['subject_time']) for s in subjects)) else 'UNDECLARED' if plane == 'BELIEF' else 'PARTIAL'
+        if plane == 'PLAN':
+            coverage = 'COMPLETE'
+        elif plane == 'BELIEF':
+            coverage = 'UNDECLARED'
+        else:
+            evaluated = [self._covered(packet, subject, request['subject_time']) for subject in subjects]
+            coverage = 'COMPLETE' if all(evaluated) else 'PARTIAL'
         if cursor:
             coverage = 'PARTIAL'
         for entry in page:
@@ -440,6 +487,7 @@ class WorldQueryService:
                 'truncated': truncated or cursor is not None, 'next_cursor': cursor}
 
     def _execute(self, packet, request, offset=0):
+        packet['coverage_scopes'] = set()
         self._time_check(packet, request['subject_time'])
         operation = request['query']['kind']; plane = request['knowledge_cut']['plane']
         check_profile(packet['grant'], plane, operation=operation)
@@ -468,7 +516,10 @@ class WorldQueryService:
         return payload, 'CURRENT', handle
 
     def query(self, principal, request):
-        request = validate_contract('UnifiedQueryRequest', request, '2.1')
+        if type(request) is PreparedWorldQuery:
+            request = request.materialize()
+        else:
+            request = validate_contract('UnifiedQueryRequest', request, '2.1')
         cursor = self._cursor(principal, request)
         packet = self._sample(principal, request, cursor=cursor); packet['principal'] = principal
         key = fingerprint({'request': request, 'world_ref': packet['read_cut']['world_ref'],
@@ -484,17 +535,17 @@ class WorldQueryService:
                 self.cache_misses += 1
         if cached is None:
             payload, freshness, handle = self._execute(packet, request, cursor['offset'] if cursor else 0)
-            cached = (payload, freshness, handle)
+            cached = (payload, freshness, handle, sorted(packet['coverage_scopes']))
             with self._cache_lock:
                 self._cache[key] = deepcopy(cached)
                 while len(self._cache) > self.cache_size:
                     self._cache.popitem(last=False)
-        payload, freshness, handle = deepcopy(cached)
+        payload, freshness, handle, coverage_scopes = deepcopy(cached)
         result = {'schema_version': '2.1', 'status': 'READY', 'request_id': _id(), 'read_cut': packet['read_cut'],
                   'payload': payload, 'freshness': freshness, 'dependency_handle': handle, 'consistency_status': 'SATISFIED'}
         validate_contract('UnifiedQueryResult', result, '2.1')
         _require(len(canonical_bytes(result)) <= self.max_response_bytes, 'CAPACITY_LIMIT', 'Query response budget exceeded')
-        self._delivery_check(principal, request, packet)
+        self._delivery_check(principal, request, packet, [({**request, 'dependency_handle': handle, 'coverage_scopes': coverage_scopes}, payload)])
         return result
 
     def batch(self, principal, request):
@@ -505,13 +556,15 @@ class WorldQueryService:
                    len(item['query'].get('predicates', [None])) for item in request['items'])
         _require(cost <= 4000, 'CAPACITY_LIMIT', 'Aggregate batch query budget exceeded')
         packet = self._sample(principal, request); packet['principal'] = principal
-        results = []
+        results, observations = [], []
         for item in request['items']:
             child = {key: request[key] for key in ('schema_version', 'task_id', 'generation', 'read_contract', 'knowledge_cut')}
             child.update({key: item[key] for key in ('subject_time', 'query', 'page_size')}, cursor=None)
             try:
                 validate_contract('UnifiedQueryRequest', child, '2.1')
                 payload, freshness, handle = self._execute(packet, child)
+                observations.append(({**child, 'dependency_handle': handle,
+                                      'coverage_scopes': sorted(packet['coverage_scopes'])}, payload))
                 results.append({'item_id': item['item_id'], 'status': 'SUCCESS', 'payload': payload,
                                 'freshness': freshness, 'dependency_handle': handle})
             except DomainError as exc:
@@ -520,7 +573,7 @@ class WorldQueryService:
                   'items': results, 'all_items_succeeded': all(item['status'] == 'SUCCESS' for item in results)}
         validate_contract('QueryBatchResult', result, '2.1')
         _require(len(canonical_bytes(result)) <= self.max_response_bytes, 'CAPACITY_LIMIT', 'Batch response budget exceeded')
-        self._delivery_check(principal, request, packet)
+        self._delivery_check(principal, request, packet, observations)
         return result
 
     def context_compile(self, principal, request):
@@ -632,6 +685,7 @@ class WorldQueryService:
             _require(grant['epoch'] == packet['grant']['epoch'], 'VIEW_DENIED', 'Authorization changed during compilation')
             # Locks and fencing are repeated in the same transaction that adds
             # the immutable bundle and binds it to this exact task generation.
+            branch = repo.one('branches', {'branch_id': wr['branch_id']}, lock='share')
             task = self.kernel.tasks.guard_task(repo.conn, request['task_id'], request['generation'], require_context=False)
             previous = repo.one('receipts', {'work_id': wr['work_id'], 'principal_id': principal.principal_id,
                                            'command_type': 'CONTEXT_COMPILE', 'idempotency_key': request['idempotency_key']})
@@ -648,6 +702,7 @@ class WorldQueryService:
                                   'read_cut': packet['read_cut'], 'dependency_fingerprint': dependency_hash})
             self.kernel.tasks.bind_context_in_transaction(repo.conn, request['task_id'], request['generation'], None,
                 context_bundle_id=context_id, dependency_fingerprint=dependency_hash, world_ref=wr)
+            record_query(repo, packet, child, payload, 'CONTEXT', branch['head_revision_id'], context_ref=compiled_ref)
             repo.add_many('dependencies', [
                 {'dependency_id': _id(), 'work_id': wr['work_id'], 'branch_id': wr['branch_id'],
                  'owner_type': 'context', 'owner_id': context_id, 'scope_key': scope,

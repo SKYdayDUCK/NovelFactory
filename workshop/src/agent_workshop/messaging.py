@@ -87,7 +87,8 @@ def issue_route(
 ):
     org = lock_org(conn, session.org_id, write=True)
     issuer = require_employee(conn, session)
-    if issuer["role_id"] != "workshop_manager" or kind not in KINDS or kind == "INCIDENT":
+    if (issuer["role_id"] != "workshop_manager" or issuer["scope_ref"] != scope_ref
+            or kind not in KINDS or kind == "INCIDENT"):
         raise Denied("ROUTE_DENIED")
     fields = [sender, recipient, kind, scope_ref, ttl_seconds, max_uses, expected_revision]
     with operation(conn, session, "ISSUE_ROUTE", operation_id, fields) as (old, receipt):
@@ -146,56 +147,71 @@ def revoke_route(conn, session, operation_id, grant_id):
 
 def register_body(conn, session, operation_id, recipient, scope_ref, content):
     sender = require_employee(conn, session)
-    target = _peer(conn, session.org_id, recipient, scope_ref)
-    if sender["scope_ref"] != scope_ref or not 0 < len(content.encode()) <= 16384:
-        raise Denied("INVALID_BODY")
+    if sender["scope_ref"] != scope_ref:
+        raise Denied("ROUTE_DENIED")
     with operation(
         conn, session, "REGISTER_BODY", operation_id, [recipient, scope_ref, content]
     ) as (old, receipt):
-        if not old:
-            key = uuid4()
-            conn.execute(
-                "INSERT INTO aw_message_bodies VALUES (%s,%s,%s,%s,%s,%s,%s,%s)",
-                (
-                    session.org_id,
-                    key,
-                    session.employee_id,
-                    recipient,
-                    session.employment_revision,
-                    target["employment_revision"],
-                    scope_ref,
-                    content,
-                ),
-            )
-            receipt.update(body_ref=str(key))
+        if old:
+            # Only the same principal, tenure and request hash can replay this opaque receipt.
+            return receipt
+        target = _peer(conn, session.org_id, recipient, scope_ref)
+        direct = conn.execute(
+            """SELECT 1 FROM aw_current_message_edges
+               WHERE org_id=%s AND src=%s AND dst=%s AND scope_ref=%s AND kind<>'INCIDENT' LIMIT 1""",
+            (session.org_id, session.employee_id, recipient, scope_ref),
+        ).fetchone()
+        if not direct and not _grant(
+            conn, session.org_id, session.employee_id, recipient, scope_ref,
+            session.employment_revision, target["employment_revision"], remaining=True,
+        ):
+            raise Denied("ROUTE_DENIED")
+        if not 0 < len(content.encode()) <= 16384:
+            raise Denied("INVALID_BODY")
+        key = uuid4()
+        conn.execute(
+            """INSERT INTO aw_message_bodies VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""",
+            (session.org_id, key, session.employee_id, recipient, session.employment_revision,
+             target["employment_revision"], scope_ref, content),
+        )
+        receipt.update(body_ref=str(key))
         return receipt
 
 
-def _route(conn, org, rev, sender, recipient, kind, scope, grant, src_rev, dst_rev, consume=False):
+def _grant(conn, org, sender, recipient, scope, src_rev, dst_rev, *, grant_id=None, kind=None,
+           remaining=False):
+    conditions = []
+    params = [org, sender, recipient, scope, src_rev, dst_rev]
+    if grant_id is not None:
+        conditions.extend(("g.grant_id=%s", "g.allowed_kind=%s"))
+        params.extend((_uuid(grant_id), kind))
+    if remaining:
+        conditions.append("g.consumed_uses < g.max_uses")
+    extra = "".join(" AND " + condition for condition in conditions)
+    return conn.execute(
+        """SELECT g.grant_id,g.revocation_epoch FROM aw_route_grants g
+           JOIN aw_employees i ON (i.org_id,i.employee_id)=(g.org_id,g.issuer)
+           WHERE g.org_id=%s AND g.src=%s AND g.dst=%s AND g.scope_ref=%s
+           AND g.src_revision=%s AND g.dst_revision=%s AND NOT g.revoked AND g.allowed_kind<>'INCIDENT'
+           AND g.expires_at>clock_timestamp() AND i.status='ACTIVE' AND i.employment_revision=g.issuer_revision
+           AND i.role_id='workshop_manager' AND i.scope_ref=g.scope_ref"""
+        + extra + " ORDER BY g.grant_id LIMIT 1 FOR UPDATE OF g", params,
+    ).fetchone()
+
+
+def _route(conn, org, rev, sender, recipient, kind, scope, grant, src_rev, dst_rev, *, remaining=False):
     if grant:
-        row = conn.execute(
-            """SELECT g.revocation_epoch,g.consumed_uses,g.max_uses FROM aw_route_grants g
-            JOIN aw_employees i ON (i.org_id,i.employee_id)=(g.org_id,g.issuer)
-            WHERE g.org_id=%s AND g.grant_id=%s AND g.src=%s AND g.dst=%s AND g.allowed_kind=%s
-            AND g.scope_ref=%s AND g.src_revision=%s AND g.dst_revision=%s AND NOT g.revoked
-            AND g.expires_at>clock_timestamp() AND i.status='ACTIVE' AND i.employment_revision=g.issuer_revision
-            FOR UPDATE OF g""",
-            (org, _uuid(grant), sender, recipient, kind, scope, src_rev, dst_rev),
-        ).fetchone()
-        if not row or (consume and row["consumed_uses"] >= row["max_uses"]):
+        row = _grant(conn, org, sender, recipient, scope, src_rev, dst_rev,
+                     grant_id=grant, kind=kind, remaining=remaining)
+        if not row:
             raise Denied("ROUTE_DENIED")
-        if consume:
-            conn.execute(
-                "UPDATE aw_route_grants SET consumed_uses=consumed_uses+1 WHERE org_id=%s AND grant_id=%s",
-                (org, _uuid(grant)),
-            )
         return row["revocation_epoch"]
     if kind == "INCIDENT":
         if employee(conn, org, recipient)["role_id"] != "maintenance":
             raise Denied("ROUTE_DENIED")
         return None
     if not conn.execute(
-        """SELECT 1 FROM aw_edges WHERE
+        """SELECT 1 FROM aw_current_message_edges WHERE
         (org_id,graph_revision,src,dst,kind,scope_ref)=(%s,%s,%s,%s,%s,%s)""",
         (org, rev, sender, recipient, kind, scope),
     ).fetchone():
@@ -204,6 +220,18 @@ def _route(conn, org, rev, sender, recipient, kind, scope, grant, src_rev, dst_r
 
 
 def _live(conn, org, rev, m):
+    origin = conn.execute(
+        """SELECT 1 FROM aw_message_origins o JOIN aw_bindings b USING(token_digest)
+        JOIN aw_installations i USING(installation_id)
+        JOIN aw_organizations g ON g.org_id=o.org_id AND g.owner_installation_id=b.installation_id
+        WHERE o.org_id=%s AND o.message_id=%s AND b.org_member
+        AND b.org_id=o.org_id AND b.employee_id=%s AND b.employment_revision=%s
+        AND b.grant_epoch=o.grant_epoch AND b.expires_at>clock_timestamp() AND NOT b.revoked AND i.enabled
+        FOR SHARE OF b,i""",
+        (org, m["message_id"], m["sender"], m["sender_revision"]),
+    ).fetchone()
+    if not origin:
+        raise Denied("SENDER_BINDING_UNVERIFIED")
     if not m["live"]:
         raise Denied("DELIVERY_EXPIRED")
     src = _peer(conn, org, m["sender"], m["scope_ref"])
@@ -253,6 +281,23 @@ def send(
 ):
     org = lock_org(conn, session.org_id)
     src = require_employee(conn, session)
+    origin = conn.execute(
+        """SELECT token_digest,b.grant_epoch FROM aw_bindings b JOIN aw_installations i USING(installation_id)
+        JOIN aw_organizations g ON g.org_id=b.org_id AND g.owner_installation_id=b.installation_id
+        WHERE b.org_member AND b.token_digest=%s AND b.grant_epoch=%s AND b.employee_id=%s AND b.org_id=%s
+        AND b.installation_id=%s AND b.employment_revision=%s AND b.expires_at>clock_timestamp() AND NOT revoked AND enabled
+        FOR SHARE OF b,i""",
+        (
+            session.binding_digest,
+            session.grant_epoch,
+            session.employee_id,
+            session.org_id,
+            session.installation_id,
+            session.employment_revision,
+        ),
+    ).fetchone()
+    if not origin:
+        raise Denied("SENDER_BINDING_UNVERIFIED")
     fields = [
         recipient,
         kind,
@@ -272,6 +317,10 @@ def send(
         if src["scope_ref"] != scope_ref or kind not in KINDS or not 0 < ttl_seconds <= 86400:
             raise Denied("ROUTE_DENIED")
         dst = _peer(conn, session.org_id, recipient, scope_ref)
+        # Authorize the address and kind before inspecting private bodies or predecessor messages.
+        epoch = _route(conn, session.org_id, graph_revision, session.employee_id, recipient, kind,
+                       scope_ref, route_grant_id, session.employment_revision, dst["employment_revision"],
+                       remaining=True)
         if kind == "INCIDENT":
             if (
                 incident_code not in INCIDENT_CODES
@@ -321,19 +370,13 @@ def send(
             ).fetchone()
         ):
             raise Denied("BODY_DENIED")
-        epoch = _route(
-            conn,
-            session.org_id,
-            graph_revision,
-            session.employee_id,
-            recipient,
-            kind,
-            scope_ref,
-            route_grant_id,
-            session.employment_revision,
-            dst["employment_revision"],
-            True,
-        )
+        if route_grant_id and not conn.execute(
+            """UPDATE aw_route_grants SET consumed_uses=consumed_uses+1
+               WHERE org_id=%s AND grant_id=%s AND NOT revoked AND expires_at>clock_timestamp()
+               AND consumed_uses < max_uses RETURNING grant_id""",
+            (session.org_id, _uuid(route_grant_id)),
+        ).fetchone():
+            raise Denied("ROUTE_DENIED")
         conn.execute(
             """INSERT INTO aw_messages
             (org_id,message_id,operation_id,sender,sender_revision,recipient,recipient_revision,graph_revision,
@@ -360,6 +403,10 @@ def send(
                 incident_code,
                 ttl_seconds,
             ),
+        )
+        conn.execute(
+            "INSERT INTO aw_message_origins VALUES (%s,%s,%s,%s)",
+            (session.org_id, mid, origin["token_digest"], origin["grant_epoch"]),
         )
         seq = conn.execute(
             """INSERT INTO aw_mailboxes VALUES (%s,%s,%s,1)
@@ -460,12 +507,24 @@ def mailbox(conn, session, after=0, limit=50):
 
 def accept_notification(conn, subscriber, event_id):
     """Trusted relay hint. An unknown notification cannot add a delivery or execute work."""
+    event = _uuid(event_id)
+    row = conn.execute(
+        """SELECT m.*,g.active_revision,m.expires_at>clock_timestamp() AS live
+           FROM aw_outbox e JOIN aw_messages m USING (org_id,message_id)
+           JOIN aw_organizations g USING (org_id) WHERE e.event_id=%s FOR SHARE OF g""",
+        (event,),
+    ).fetchone()
+    if not row:
+        return False
+    try:
+        _live(conn, row["org_id"], row["active_revision"], row)
+    except Denied:
+        return False
     return bool(
         conn.execute(
-            """INSERT INTO aw_inbox(subscriber,event_id)
-        SELECT %s,event_id FROM aw_outbox WHERE event_id=%s
-        ON CONFLICT DO NOTHING RETURNING event_id""",
-            (subscriber, _uuid(event_id)),
+            """INSERT INTO aw_inbox(subscriber,event_id) VALUES (%s,%s)
+               ON CONFLICT DO NOTHING RETURNING event_id""",
+            (subscriber, event),
         ).fetchone()
     )
 

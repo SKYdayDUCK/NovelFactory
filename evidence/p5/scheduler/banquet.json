@@ -1,0 +1,363 @@
+{
+  "test": "test_one_author_resume_through_autonomous_banquet",
+  "provider": "deterministic HTTPS loopback fixture; no live inference or paid tokens",
+  "mcp": {
+    "client": "Python MCP SDK via child stdio",
+    "protocol": "2025-11-25",
+    "tools": [
+      "nf_project_status",
+      "nf_resume_project"
+    ],
+    "resume_calls": 1
+  },
+  "codex": "codex-cli 0.167.0-alpha.4",
+  "postgres": "17.11 (Debian 17.11-0+deb13u1)",
+  "initial": {
+    "READY": 3,
+    "WAITING": 4,
+    "RUNNING": 0,
+    "ACCEPTED": 1
+  },
+  "final": {
+    "READY": 0,
+    "WAITING": 0,
+    "RUNNING": 0,
+    "ACCEPTED": 10
+  },
+  "scene_provider_turns": 8,
+  "observations": [
+    {
+      "turn": "C",
+      "elapsed_s": 1.8759,
+      "states": {
+        "B": "BLOCKED",
+        "kernel_accept": "READY",
+        "joint": "BLOCKED",
+        "request_change": "BLOCKED",
+        "notification": "BLOCKED",
+        "A": "RUNNING",
+        "C": "RUNNING"
+      },
+      "counts": {
+        "READY": 1,
+        "WAITING": 4,
+        "RUNNING": 2,
+        "ACCEPTED": 1
+      },
+      "live_codex_pids": [
+        87,
+        105
+      ]
+    },
+    {
+      "turn": "A",
+      "elapsed_s": 1.876,
+      "states": {
+        "B": "BLOCKED",
+        "kernel_accept": "READY",
+        "joint": "BLOCKED",
+        "request_change": "BLOCKED",
+        "notification": "BLOCKED",
+        "A": "RUNNING",
+        "C": "RUNNING"
+      },
+      "counts": {
+        "READY": 1,
+        "WAITING": 4,
+        "RUNNING": 2,
+        "ACCEPTED": 1
+      },
+      "live_codex_pids": [
+        87,
+        105
+      ]
+    },
+    {
+      "turn": "notification",
+      "elapsed_s": 2.5492,
+      "states": {
+        "notification": "RUNNING",
+        "B": "BLOCKED",
+        "kernel_accept": "READY",
+        "joint": "BLOCKED",
+        "request_change": "BLOCKED",
+        "C": "ACCEPTED",
+        "A": "ACCEPTED"
+      },
+      "counts": {
+        "READY": 1,
+        "WAITING": 3,
+        "RUNNING": 1,
+        "ACCEPTED": 3
+      },
+      "live_codex_pids": [
+        237
+      ]
+    },
+    {
+      "turn": "B",
+      "elapsed_s": 3.0271,
+      "states": {
+        "kernel_accept": "READY",
+        "joint": "BLOCKED",
+        "request_change": "BLOCKED",
+        "notification": "ACCEPTED",
+        "C": "ACCEPTED",
+        "A": "ACCEPTED",
+        "B": "RUNNING"
+      },
+      "counts": {
+        "READY": 1,
+        "WAITING": 2,
+        "RUNNING": 1,
+        "ACCEPTED": 4
+      },
+      "live_codex_pids": [
+        312
+      ]
+    },
+    {
+      "turn": "joint",
+      "elapsed_s": 3.642,
+      "states": {
+        "kernel_accept": "READY",
+        "request_change": "BLOCKED",
+        "notification": "ACCEPTED",
+        "C": "ACCEPTED",
+        "A": "ACCEPTED",
+        "B": "ACCEPTED",
+        "joint": "RUNNING"
+      },
+      "counts": {
+        "READY": 1,
+        "WAITING": 1,
+        "RUNNING": 1,
+        "ACCEPTED": 5
+      },
+      "live_codex_pids": [
+        383
+      ]
+    },
+    {
+      "turn": "request_change",
+      "elapsed_s": 4.4047,
+      "states": {
+        "request_change": "RUNNING",
+        "notification": "ACCEPTED",
+        "C": "ACCEPTED",
+        "A": "ACCEPTED",
+        "B": "ACCEPTED",
+        "kernel_accept": "ACCEPTED",
+        "joint": "ACCEPTED"
+      },
+      "counts": {
+        "READY": 0,
+        "WAITING": 0,
+        "RUNNING": 1,
+        "ACCEPTED": 7
+      },
+      "live_codex_pids": [
+        453
+      ]
+    },
+    {
+      "turn": "propose_window",
+      "elapsed_s": 4.9471,
+      "states": {
+        "notification": "ACCEPTED",
+        "C": "ACCEPTED",
+        "A": "ACCEPTED",
+        "B": "ACCEPTED",
+        "request_change": "ACCEPTED",
+        "kernel_accept": "ACCEPTED",
+        "joint": "ACCEPTED",
+        "propose_window": "RUNNING"
+      },
+      "counts": {
+        "READY": 0,
+        "WAITING": 0,
+        "RUNNING": 1,
+        "ACCEPTED": 8
+      },
+      "live_codex_pids": [
+        529
+      ]
+    },
+    {
+      "turn": "review_and_adopt",
+      "elapsed_s": 5.5185,
+      "states": {
+        "notification": "ACCEPTED",
+        "C": "ACCEPTED",
+        "A": "ACCEPTED",
+        "B": "ACCEPTED",
+        "request_change": "ACCEPTED",
+        "kernel_accept": "ACCEPTED",
+        "joint": "ACCEPTED",
+        "propose_window": "ACCEPTED",
+        "review_and_adopt": "RUNNING"
+      },
+      "counts": {
+        "READY": 0,
+        "WAITING": 0,
+        "RUNNING": 1,
+        "ACCEPTED": 9
+      },
+      "live_codex_pids": [
+        605
+      ]
+    }
+  ],
+  "accept_to_ready_ms": {
+    "notification": 25.265,
+    "B": 13.469,
+    "joint": 10.052,
+    "request_change": 21.629
+  },
+  "scene_fixture_input_tokens": 88,
+  "scene_fixture_output_tokens": 56,
+  "tokens_by_turn": {
+    "notification": {
+      "input_tokens": 11,
+      "output_tokens": 7
+    },
+    "A": {
+      "input_tokens": 11,
+      "output_tokens": 7
+    },
+    "B": {
+      "input_tokens": 11,
+      "output_tokens": 7
+    },
+    "C": {
+      "input_tokens": 11,
+      "output_tokens": 7
+    },
+    "joint": {
+      "input_tokens": 11,
+      "output_tokens": 7
+    },
+    "request_change": {
+      "input_tokens": 11,
+      "output_tokens": 7
+    },
+    "propose_window": {
+      "input_tokens": 11,
+      "output_tokens": 7
+    },
+    "review_and_adopt": {
+      "input_tokens": 11,
+      "output_tokens": 7
+    }
+  },
+  "completed_model_tasks_per_second": 1.245,
+  "elapsed_s_including_restart": 6.4257,
+  "B_wake_source": "Distinct notification task completed after A; no private A text or in-world BELIEF is inferred",
+  "A_location_at_tick_31": {
+    "reference": "north",
+    "accepted": "south"
+  },
+  "active_host_processes_after_completion": 0,
+  "waiting_provider_calls": 0,
+  "human_interventions": 0,
+  "ordinary_approvals": 1,
+  "accepted_world_events": 1,
+  "sealed_actor_intents": [
+    "我不赴北岸晚宴，去南岸守粮。",
+    "我在北岸等来信，收到凭证再走。",
+    "我先核对库单。"
+  ],
+  "accepted_world_ref": {
+    "work_id": "02a7a2eb-ce91-40aa-8b02-c4b72a8a4a34",
+    "branch_id": "43b6a81b-3892-4999-ad92-292cb2916481",
+    "world_revision_id": "f5eb8ee0-39f9-40ca-96ae-27b82c110574"
+  },
+  "base_world_ref": {
+    "work_id": "02a7a2eb-ce91-40aa-8b02-c4b72a8a4a34",
+    "branch_id": "43b6a81b-3892-4999-ad92-292cb2916481",
+    "world_revision_id": "f4b6a3f6-9827-48ee-bdba-3654412c5ef6"
+  },
+  "reference_timeline_ref": {
+    "sha256": "f19704d29f8a7ae460658d33323bcb05bb2900f83ce01000fc030a01807d94f7",
+    "artifact_id": "9e8b2c62-6bda-45eb-bf70-d0fc979c6bc1",
+    "artifact_revision_id": "f12c1f9b-026e-4771-bd46-d38c6e4a4898"
+  },
+  "initial_plan_ref": {
+    "artifact_id": "2831b1f1-6231-4d17-a5a3-a700381e35d0",
+    "artifact_revision_id": "a8447efd-63e3-47d4-8f7a-90941a891b37",
+    "sha256": "5b1331b6a487ec116ca8b7c62873f90a182a30d542fb6fbc84604f2081782de0"
+  },
+  "selected_plan_ref": {
+    "sha256": "72b8622bd86e950cbd430b697e3d0c384ff7c82b766f741c1624c9c00033009a",
+    "artifact_id": "01de3518-9519-46b9-ba05-d7fcc4e66e0a",
+    "artifact_revision_id": "a94194b7-2efd-4193-be6c-7bfcdb67139b"
+  },
+  "revised_future_nodes": [
+    0,
+    1
+  ],
+  "change_point_ref": {
+    "sha256": "c7cbe5e34ade9b439a192a5af56257c7e65f3104630c1091d659721553634b44",
+    "artifact_id": "e5061767-6aff-4a2c-bd17-aaf9c210fc43",
+    "artifact_revision_id": "3ba4931a-cb4b-4dc3-abee-ee4faed6544f"
+  },
+  "window_ref": {
+    "sha256": "253aedf9da2a9e116e2e29ededb9fb8ac36fe30b4993fbe425fb84fbd514929c",
+    "artifact_id": "068c3f1c-20e7-47a9-be4b-9d60dd221b1d",
+    "artifact_revision_id": "f52c7981-b8f3-4bc1-b6b2-8198a6c54f9b"
+  },
+  "host_journal": [
+    {
+      "task": "notification",
+      "thread_id": "01a1c970-0f52-72f1-a001-dd9f315ab768",
+      "turn_id": "01a1c970-0fa9-7a43-8187-cbf3d99479d5",
+      "phase": "COMPLETED"
+    },
+    {
+      "task": "A",
+      "thread_id": "01a1c970-0c95-7783-808f-72ab153ed7c0",
+      "turn_id": "01a1c970-0cb8-73d0-a596-c233b63cc70c",
+      "phase": "COMPLETED"
+    },
+    {
+      "task": "B",
+      "thread_id": "01a1c970-117f-70e2-9f1a-271549dec2f4",
+      "turn_id": "01a1c970-119a-7043-a85e-840013b0004f",
+      "phase": "COMPLETED"
+    },
+    {
+      "task": "C",
+      "thread_id": "01a1c970-0cf1-7103-9753-353a4bf7f01b",
+      "turn_id": "01a1c970-0d12-7e13-8906-0f6a86447fae",
+      "phase": "COMPLETED"
+    },
+    {
+      "task": "joint",
+      "thread_id": "01a1c970-13d1-7e03-a813-f75fae508102",
+      "turn_id": "01a1c970-13e6-73f2-b830-db8e13aa8b26",
+      "phase": "COMPLETED"
+    },
+    {
+      "task": "request_change",
+      "thread_id": "01a1c970-16e9-7de1-9a7d-8ca715bd767d",
+      "turn_id": "01a1c970-1700-7c21-a6dc-42a45004bca0",
+      "phase": "COMPLETED"
+    },
+    {
+      "task": "propose_window",
+      "thread_id": "01a1c970-1909-7781-abf4-165c17c50f4d",
+      "turn_id": "01a1c970-191e-7b13-9ef7-6065ca1e4c6b",
+      "phase": "COMPLETED"
+    },
+    {
+      "task": "review_and_adopt",
+      "thread_id": "01a1c970-1b43-7ee0-9502-bff0d8ed6826",
+      "turn_id": "01a1c970-1b59-79b0-bdf2-86040f5c9cdd",
+      "phase": "COMPLETED"
+    }
+  ],
+  "idle_restart": "IDLE",
+  "registration_replay": "same receipt, unchanged inventory before and after world advancement",
+  "failed_cyclic_registration": "transaction rolled back; no additional grants or tasks",
+  "errors": []
+}

@@ -1,0 +1,85 @@
+{
+  "head_sha": "162af2695b76b20c0257b28217a3eb5b4096d7f6",
+  "event": "pull_request",
+  "runs": [
+    {
+      "id": 43074357014,
+      "name": "Agent Workshop PostgreSQL and stdio",
+      "event": "pull_request",
+      "conclusion": "success",
+      "status": "completed",
+      "head_sha": "162af2695b76b20c0257b28217a3eb5b4096d7f6",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43074357014",
+      "attempt": 1,
+      "jobs": [
+        {
+          "id": 130710188207,
+          "name": "workshop",
+          "started_at": "2026-11-11T18:05:14Z",
+          "completed_at": "2026-11-11T18:06:49Z",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43074357014/job/130710188207"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13880262189,
+          "name": "workshop-results",
+          "size": 5797,
+          "digest": "sha256:dfa7ffcac46f7a86ff0aa9537746fdb4df4679441e8156e01230a37b42d3fb5b",
+          "expires_at": "2027-02-09T18:05:12Z",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43074357014/artifacts/13880262189"
+        }
+      ]
+    },
+    {
+      "id": 43074357009,
+      "name": "P1 and P2 production integrity",
+      "event": "pull_request",
+      "conclusion": "success",
+      "status": "completed",
+      "head_sha": "162af2695b76b20c0257b28217a3eb5b4096d7f6",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43074357009",
+      "attempt": 1,
+      "jobs": [
+        {
+          "id": 130710188773,
+          "name": "Schema, domain, HTTP and production boundaries",
+          "started_at": "2026-11-11T18:05:14Z",
+          "completed_at": "2026-11-11T18:05:52Z",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43074357009/job/130710188773"
+        },
+        {
+          "id": 130710189234,
+          "name": "PostgreSQL 17 integration, concurrency and restore",
+          "started_at": "2026-11-11T18:05:15Z",
+          "completed_at": "2026-11-11T18:16:12Z",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43074357009/job/130710189234"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13882855238,
+          "name": "p1-schema-unit-1",
+          "size": 301132,
+          "digest": "sha256:2ffe079ea5b7897e08eddd6e06fea1d9ea1cfcd385eb4b0e1b1d0aed5c99a926",
+          "expires_at": "2027-02-09T18:05:12Z",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43074357009/artifacts/13882855238"
+        },
+        {
+          "id": 13881742167,
+          "name": "p1-postgres-concurrency-1",
+          "size": 1777091,
+          "digest": "sha256:525b20d9f853d25505903c63bc639dd80f202bef15e7dae93ccfd4190c2eba54",
+          "expires_at": "2027-02-09T18:05:12Z",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43074357009/artifacts/13881742167"
+        }
+      ]
+    }
+  ]
+}

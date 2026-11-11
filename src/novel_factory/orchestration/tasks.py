@@ -16,6 +16,7 @@ from uuid import uuid4
 
 from sqlalchemy import and_, func, or_, select, text
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.exc import NoResultFound
 
 from novel_factory.contracts.registry import validate_contract
 from novel_factory.domain.errors import DomainError
@@ -116,28 +117,31 @@ class TaskService:
                               f"task:{task_id}:{generation}:{state}")
 
     def create(self, spec: dict, *, principal_id: str, idempotency_key: str, authorize_in_tx=None):
+        with self._tx(authorize_in_tx) as conn:
+            return self.create_in_transaction(conn, spec, principal_id=principal_id, idempotency_key=idempotency_key)
+
+    def create_in_transaction(self, conn, spec, *, principal_id, idempotency_key):
         validate_contract("TaskSpec", spec, version="2.0")
         if spec["generation"] != 0 or spec["state"] not in {"READY", "BLOCKED"}:
             raise _error("INVALID_ARGUMENT", "New tasks start in generation zero, READY or BLOCKED")
         deadline = datetime.fromisoformat(spec["wall_deadline"].replace("Z", "+00:00"))
         content = {"operation": "create", "spec": spec}
-        with self._tx(authorize_in_tx) as conn:
-            prior = self._command_prior(conn, principal_id, idempotency_key, content)
-            if prior:
-                return prior
-            if deadline <= self._now(conn):
-                raise _error("DEADLINE_EXCEEDED", "Task deadline has passed")
-            t = self.tables["tasks"]
-            if conn.scalar(select(t.c.task_id).where(t.c.task_id == spec["task_id"])):
-                raise _error("ALREADY_EXISTS", "Task identity is already assigned")
-            wr = spec["world_ref"]
-            conn.execute(insert(t).values(task_id=spec["task_id"], work_id=wr["work_id"], branch_id=wr["branch_id"], principal_id=str(principal_id), grant_id=spec["capability_grant_id"], role_id=spec["role_id"], task_kind=spec["task_kind"], state=spec["state"], generation=0, context_bundle_id=spec["context_bundle_id"], dependency_fingerprint=spec["dependency_fingerprint"], deadline=deadline))
-            self._save_input(conn, spec["task_id"], 0, spec, spec["state"])
-            conn.execute(insert(self.tables["task_fairness"]).values(work_id=wr["work_id"], task_kind=spec["task_kind"]).on_conflict_do_nothing())
-            receipt = {"task_id": spec["task_id"], "generation": 0, "state": spec["state"]}
-            self._command_record(conn, principal_id, idempotency_key, content, receipt)
-            self._emit(conn, spec["task_id"], 0, spec["state"])
-            return receipt
+        prior = self._command_prior(conn, principal_id, idempotency_key, content)
+        if prior:
+            return prior
+        if deadline <= self._now(conn):
+            raise _error("DEADLINE_EXCEEDED", "Task deadline has passed")
+        t = self.tables["tasks"]
+        if conn.scalar(select(t.c.task_id).where(t.c.task_id == spec["task_id"])):
+            raise _error("ALREADY_EXISTS", "Task identity is already assigned")
+        wr = spec["world_ref"]
+        conn.execute(insert(t).values(task_id=spec["task_id"], work_id=wr["work_id"], branch_id=wr["branch_id"], principal_id=str(principal_id), grant_id=spec["capability_grant_id"], role_id=spec["role_id"], task_kind=spec["task_kind"], state=spec["state"], generation=0, context_bundle_id=spec["context_bundle_id"], dependency_fingerprint=spec["dependency_fingerprint"], deadline=deadline))
+        self._save_input(conn, spec["task_id"], 0, spec, spec["state"])
+        conn.execute(insert(self.tables["task_fairness"]).values(work_id=wr["work_id"], task_kind=spec["task_kind"]).on_conflict_do_nothing())
+        receipt = {"task_id": spec["task_id"], "generation": 0, "state": spec["state"]}
+        self._command_record(conn, principal_id, idempotency_key, content, receipt)
+        self._emit(conn, spec["task_id"], 0, spec["state"])
+        return receipt
 
     def get(self, task_id):
         with self.engine.connect() as conn:
@@ -145,42 +149,63 @@ class TaskService:
             row["world_ref"] = self._spec(conn, row)["world_ref"]
             return row
 
+    def plan_binding_exists(self, task_id, work_id):
+        """An immutable plan selection pins its node guards to one task generation."""
+        inputs, selections = self.tables["task_inputs"], self.tables["selections"]
+        key = func.concat_ws(":", "PLAN_TASK", inputs.c.task_id, inputs.c.generation)
+        return (select(1).select_from(inputs.join(selections, selections.c.selection_kind == key))
+                .where(inputs.c.task_id == task_id, selections.c.work_id == work_id)
+                .correlate_except(inputs, selections).exists())
+
     def claim(self, worker_id: str, *, work_id=None, task_kinds=None, principal_id=None, grant_id=None, task_id=None, lease_seconds=30, authorize_in_tx=None):
+        with self._tx(authorize_in_tx) as conn:
+            return self.claim_in_transaction(conn, worker_id, work_id=work_id, task_kinds=task_kinds,
+                principal_id=principal_id, grant_id=grant_id, task_id=task_id, lease_seconds=lease_seconds)
+
+    def claim_in_transaction(self, conn, worker_id, *, work_id=None, task_kinds=None, principal_id=None,
+                             grant_id=None, task_id=None, lease_seconds=30):
         if not worker_id or not 0 < lease_seconds <= 3600:
             raise _error("INVALID_ARGUMENT", "Invalid worker lease")
         t, fair = self.tables["tasks"], self.tables["task_fairness"]
-        with self._tx(authorize_in_tx) as conn:
-            now = self._now(conn)
-            # A short queue-only scheduler lock produces persistent round-robin
-            # shares. It never participates in world acceptance or model waits.
-            conn.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": MAINTENANCE_GATE + 1})
-            conditions = [t.c.state == "READY", t.c.deadline > now]
-            if work_id:
-                conditions.append(t.c.work_id == str(work_id))
-            if task_kinds:
-                conditions.append(t.c.task_kind.in_(task_kinds))
-            if principal_id:
-                conditions.append(t.c.principal_id == str(principal_id))
-            if grant_id:
-                conditions.append(t.c.grant_id == str(grant_id))
-            if task_id:
-                conditions.append(t.c.task_id == str(task_id))
-            q = select(t).join(fair, and_(t.c.work_id == fair.c.work_id, t.c.task_kind == fair.c.task_kind)).where(*conditions).order_by(fair.c.last_served_at, t.c.created_at, t.c.task_id).limit(1).with_for_update(skip_locked=True, of=t)
-            row = conn.execute(q).mappings().one_or_none()
-            if row is None:
-                return None
-            task = dict(row)
-            spec = {**self._spec(conn, task), "context_bundle_id": None, "dependency_fingerprint": None}
-            generation = task["generation"] + 1
-            attempt_id = str(uuid4())
-            updates = {"state": "RUNNING", "generation": generation, "attempt_id": attempt_id,
-                       "lease_owner": worker_id, "lease_expiry": now + timedelta(seconds=lease_seconds), "updated_at": now, "current_result_id": None, "context_bundle_id": None, "dependency_fingerprint": None}
-            conn.execute(t.update().where(t.c.task_id == task["task_id"]).values(**updates))
-            self._save_input(conn, task["task_id"], generation, spec, "RUNNING")
-            conn.execute(insert(self.tables["task_executions"]).values(attempt_id=attempt_id, task_id=task["task_id"], generation=generation, worker_id=worker_id))
-            conn.execute(fair.update().where(fair.c.work_id == task["work_id"], fair.c.task_kind == task["task_kind"]).values(last_served_at=now, claims=fair.c.claims + 1))
-            self._emit(conn, task["task_id"], generation, "RUNNING")
-            return {**task, **updates, "world_ref": spec["world_ref"]}
+        now = self._now(conn)
+        # A short queue-only scheduler lock produces persistent round-robin
+        # shares. It never participates in world acceptance or model waits.
+        conn.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": MAINTENANCE_GATE + 1})
+        conditions = [t.c.state == "READY", t.c.deadline > now,
+                      text("""NOT EXISTS(SELECT FROM nf_conflict_cases sc
+                            WHERE sc.task_id=nf_tasks.task_id AND sc.generation=nf_tasks.generation
+                            AND NOT EXISTS(SELECT FROM nf_conflict_resolutions sr WHERE sr.case_id=sc.case_id
+                                           AND sr.outcome IN ('REVALIDATED','CERTIFICATE_REISSUED')))"""),
+                      or_(t.c.generation == 0, ~self.plan_binding_exists(t.c.task_id, t.c.work_id))]
+        if work_id:
+            conditions.append(t.c.work_id == str(work_id))
+        if task_kinds:
+            conditions.append(t.c.task_kind.in_(task_kinds))
+        if principal_id:
+            conditions.append(t.c.principal_id == str(principal_id))
+        if grant_id:
+            conditions.append(t.c.grant_id == str(grant_id))
+        if task_id:
+            conditions.append(t.c.task_id == str(task_id))
+        q = select(t).join(fair, and_(t.c.work_id == fair.c.work_id, t.c.task_kind == fair.c.task_kind)).where(*conditions).order_by(fair.c.last_served_at, t.c.created_at, t.c.task_id).limit(1).with_for_update(skip_locked=True, of=t)
+        row = conn.execute(q).mappings().one_or_none()
+        if row is None:
+            return None
+        task = dict(row)
+        spec = {**self._spec(conn, task), "context_bundle_id": None, "dependency_fingerprint": None}
+        if (task["role_id"], task["task_kind"]) == ("volume_director", "volume_review"):
+            from novel_factory.orchestration.workflow import review_acceptance
+            spec["world_ref"] = review_acceptance(conn, task, spec)["world_ref"]
+        generation = task["generation"] + 1
+        attempt_id = str(uuid4())
+        updates = {"state": "RUNNING", "generation": generation, "attempt_id": attempt_id,
+                   "lease_owner": worker_id, "lease_expiry": now + timedelta(seconds=lease_seconds), "updated_at": now, "current_result_id": None, "context_bundle_id": None, "dependency_fingerprint": None}
+        conn.execute(t.update().where(t.c.task_id == task["task_id"]).values(**updates))
+        self._save_input(conn, task["task_id"], generation, spec, "RUNNING")
+        conn.execute(insert(self.tables["task_executions"]).values(attempt_id=attempt_id, task_id=task["task_id"], generation=generation, worker_id=worker_id))
+        conn.execute(fair.update().where(fair.c.work_id == task["work_id"], fair.c.task_kind == task["task_kind"]).values(last_served_at=now, claims=fair.c.claims + 1))
+        self._emit(conn, task["task_id"], generation, "RUNNING")
+        return {**task, **updates, "world_ref": spec["world_ref"]}
 
     def guard_task(self, conn, task_id, generation, worker_id=None, *, require_context=True):
         task = self._task(conn, task_id)
@@ -234,12 +259,17 @@ class TaskService:
         if not 0 < lease_seconds <= 3600:
             raise _error("INVALID_ARGUMENT", "Invalid lease duration")
         with self._tx() as conn:
+            # Renewals share the admission gate; cleanup and new claims take it
+            # exclusively. Keep its acquisition before the task row lock.
+            conn.execute(text("SELECT pg_advisory_xact_lock_shared(:key)"), {"key": MAINTENANCE_GATE + 1})
             task = self.guard_task(conn, task_id, generation, worker_id, require_context=False)
             if task["state"] != "RUNNING":
                 raise _error("TASK_NOT_ACCEPTABLE", "Only RUNNING tasks can renew a lease")
             expiry = min(self._now(conn) + timedelta(seconds=lease_seconds), task["deadline"])
             t = self.tables["tasks"]
             conn.execute(t.update().where(t.c.task_id == task_id).values(lease_expiry=expiry, updated_at=self._now(conn)))
+            slots = self.tables["dispatch_slots"]
+            conn.execute(slots.update().where(slots.c.attempt_id == task["attempt_id"]).values(expires_at=expiry))
             return expiry
 
     def _register_object(self, conn, ref, owner_type, owner_id):
@@ -358,7 +388,25 @@ class TaskService:
         unresolved = conn.scalar(select(func.count()).select_from(calls).where(calls.c.task_id == task["task_id"], calls.c.state.in_(["UNKNOWN", "PREPARED"])))
         # PREPARED reservations also require explicit reconciliation before a
         # new external attempt; they cannot silently disappear on restart.
-        state = "PAUSED" if unresolved else ("FAILED" if task["deadline"] <= self._now(conn) else "READY")
+        from novel_factory.application.semantic_dependencies import check_task_dependencies
+        from novel_factory.infrastructure.repository import KernelRepository
+        try:
+            check_task_dependencies(KernelRepository(conn, self.tables), task["task_id"], task["generation"])
+            stale_input = False
+        except DomainError as exc:
+            if exc.code != "DEPENDENCY_CONFLICT":
+                raise
+            stale_input = True
+        if unresolved:
+            state = "PAUSED"
+        elif stale_input:
+            state = "STALE"
+        elif task["deadline"] <= self._now(conn):
+            state = "FAILED"
+        elif conn.scalar(select(self.plan_binding_exists(task["task_id"], task["work_id"]))):
+            state = "STALE"
+        else:
+            state = "READY"
         next_generation = task["generation"] + 1
         spec = self._spec(conn, task)
         spec = {**spec, "context_bundle_id": task["context_bundle_id"], "dependency_fingerprint": task["dependency_fingerprint"]}
@@ -379,11 +427,15 @@ class TaskService:
     def resume(self, task_id, expected_generation):
         with self._tx() as conn:
             task = self._task(conn, task_id)
-            if task["generation"] != expected_generation or task["state"] not in {"PAUSED", "BLOCKED"}:
+            if task["state"] == "BLOCKED":
+                raise _error("WAIT_CONDITION_REQUIRED", "Blocked tasks require a verified workflow event")
+            if task["generation"] != expected_generation or task["state"] != "PAUSED":
                 raise _error("INVALID_TASK_TRANSITION", "Task is not awaiting an authorized resume")
             calls = self.tables["call_attempts"]
             if conn.scalar(select(func.count()).select_from(calls).where(calls.c.task_id == task_id, calls.c.state.in_(["PREPARED", "SENT", "UNKNOWN"]))):
                 raise _error("CALL_RECONCILIATION_REQUIRED", "Unresolved calls still occupy budget")
+            if conn.scalar(select(self.plan_binding_exists(task["task_id"], task["work_id"]))):
+                raise _error("TASK_REBIND_REQUIRED", "Provision fresh plan guards for a new task")
             t = self.tables["tasks"]
             conn.execute(t.update().where(t.c.task_id == task_id).values(state="READY", updated_at=self._now(conn)))
             self._emit(conn, task_id, expected_generation, "READY")
@@ -397,13 +449,42 @@ class TaskService:
             conn.execute(insert(self.tables["budgets"]).values(budget_id=budget_id, work_id=str(work_id), currency=currency, limit_amount=amount))
         return budget_id
 
+    def _lock_delegation_authority(self, conn, task_id):
+        if "delegation_receipts" not in self.tables:
+            return
+        return conn.execute(text("""
+            SELECT i.expires_at, i.active AND NOT i.outbound_fenced AND i.expires_at > clock_timestamp()
+               AND i.policy_version = w.policy_version AND g.active AND g.epoch = s.grant_epoch AS allowed
+            FROM nf_delegation_receipts r
+            JOIN nf_delegation_installations i USING (installation_id)
+            JOIN nf_delegation_slots s USING (installation_id, scope_ref)
+            JOIN nf_works w ON w.work_id = i.work_id
+            JOIN nf_grants g ON g.grant_id = s.grant_id
+            WHERE r.task_id=:task FOR SHARE OF i, w, g
+        """), {"task": task_id}).mappings().one_or_none()
+
+    def _authorize_model_spend(self, conn, task_id, authorize_in_tx):
+        # Lock in the same order as installation revocation. Disclose business
+        # state only after the caller has passed its own authority check.
+        row = self._lock_delegation_authority(conn, task_id)
+        if authorize_in_tx is not None:
+            authorize_in_tx(conn)
+        if row and not row["allowed"]:
+            raise _error("DELEGATION_RECOVERY_FENCED", "Delegated inference is fenced")
+        return row["expires_at"] if row else None
+
+    def _check_delegation_deadline(self, conn, deadline):
+        if deadline is not None and deadline <= self._now(conn):
+            raise _error("DELEGATION_RECOVERY_FENCED", "Delegated installation expired")
+
     def reserve_call(self, task_id, generation, worker_id, *, budget_id, amount, call_key, request_hash, token_amount=0, authorize_in_tx=None):
         reserve = _money(amount)
         if type(token_amount) is not int or token_amount < 0:
             raise _error("INVALID_ARGUMENT", "Token reservation must be a nonnegative integer")
         if len(request_hash) != 64 or not call_key:
             raise _error("INVALID_ARGUMENT", "Call requires request hash and stable identity")
-        with self._tx(authorize_in_tx) as conn:
+        with self._tx() as conn:
+            deadline = self._authorize_model_spend(conn, task_id, authorize_in_tx)
             task = self.guard_task(conn, task_id, generation, worker_id)
             if task["state"] != "RUNNING":
                 raise _error("TASK_NOT_ACCEPTABLE", "External calls require a live RUNNING execution")
@@ -427,6 +508,7 @@ class TaskService:
             task_spent_tokens = conn.scalar(select(func.coalesce(func.sum(calls.c.actual_tokens), 0)).where(calls.c.task_id == task_id, calls.c.state.in_(["SUCCEEDED", "FAILED"])))
             if task_reserved_tokens + task_spent_tokens + token_amount > spec["budget"]["token_budget"]:
                 raise _error("BUDGET_EXCEEDED", "Task token budget would be exceeded")
+            self._check_delegation_deadline(conn, deadline)
             attempt_id = str(uuid4())
             conn.execute(budgets.update().where(budgets.c.budget_id == budget_id).values(reserved_amount=budgets.c.reserved_amount + reserve))
             conn.execute(insert(calls).values(attempt_id=attempt_id, task_id=task_id, generation=generation, budget_id=budget_id, call_key=call_key, request_hash=request_hash, state="PREPARED", reserved_amount=reserve, reserved_tokens=token_amount))
@@ -438,9 +520,12 @@ class TaskService:
         False means another worker has already taken that right. It never means
         the remote provider did not execute; unknown calls require reconciliation.
         """
-        with self._tx(authorize_in_tx) as conn:
+        with self._tx() as conn:
             calls = self.tables["call_attempts"]
-            call = conn.execute(select(calls).where(calls.c.attempt_id == attempt_id)).mappings().one()
+            call = conn.execute(select(calls).where(calls.c.attempt_id == attempt_id)).mappings().one_or_none()
+            deadline = self._authorize_model_spend(conn, call["task_id"] if call else None, authorize_in_tx)
+            if call is None:
+                raise NoResultFound("No row was found when one was required")
             task = self.guard_task(conn, call["task_id"], call["generation"], worker_id)
             if task["state"] != "RUNNING":
                 raise _error("TASK_NOT_ACCEPTABLE", "External dispatch requires a live RUNNING execution")
@@ -449,6 +534,7 @@ class TaskService:
                 return False
             if call["state"] != "PREPARED":
                 raise _error("INVALID_CALL_TRANSITION", "Call is not prepared")
+            self._check_delegation_deadline(conn, deadline)
             conn.execute(calls.update().where(calls.c.attempt_id == attempt_id).values(state="SENT", updated_at=self._now(conn)))
         # Only now may a worker release the connection and perform network IO.
         return True
@@ -481,6 +567,16 @@ class TaskService:
             if state != "UNKNOWN":
                 conn.execute(budgets.update().where(budgets.c.budget_id == call["budget_id"]).values(reserved_amount=budgets.c.reserved_amount - call["reserved_amount"], spent_amount=budgets.c.spent_amount + actual))
             conn.execute(calls.update().where(calls.c.attempt_id == attempt_id).values(state=state, actual_amount=actual, actual_tokens=settled_tokens, provider_receipt=provider_receipt, updated_at=self._now(conn)))
+            if state != "UNKNOWN" and call["state"] in {"UNKNOWN","PREPARED","SENT"}:
+                conflict = conn.execute(text("""
+                    SELECT c.work_id::text,c.branch_id::text FROM nf_conflict_resolutions r
+                    JOIN nf_conflict_cases c USING(case_id) WHERE r.task_id=:task
+                    AND r.outcome='CALL_RECONCILIATION_REQUIRED' LIMIT 1
+                """), {"task": call["task_id"]}).mappings().one_or_none()
+                if conflict:
+                    enqueue_outbox(conn, self.tables, "world.requested", "task", str(call["task_id"]),
+                        {**conflict, "generation": call["generation"]}, "semantic:settled:" + str(attempt_id))
+                    conn.exec_driver_sql("NOTIFY nf_supervisor_wake")
             return {"attempt_id": str(attempt_id), "state": state, "actual_amount": actual, "actual_tokens": settled_tokens}
 
 

@@ -1,0 +1,21 @@
+{
+  "source": "two actual supervised jobs with HTTPS loopback model",
+  "observations": [
+    {
+      "scope": "project_executor",
+      "window_seconds": 0.5001887309999802,
+      "busy_slot_seconds": 1.0003774619999604,
+      "available_slot_seconds": 1.0003774619999604,
+      "worker_utilization_pct": 100.0
+    },
+    {
+      "scope": "project_executor",
+      "window_seconds": 0.5001822909998737,
+      "busy_slot_seconds": 0.0,
+      "available_slot_seconds": 1.0003645819997473,
+      "worker_utilization_pct": 0.0
+    }
+  ],
+  "provider_calls": 2,
+  "real_inference": false
+}

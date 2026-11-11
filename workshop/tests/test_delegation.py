@@ -18,7 +18,7 @@ def setup_slot():
     ids = [str(uuid4()) for _ in range(4)]
     with connect(dsn) as c:
         c.execute("INSERT INTO aw_installations VALUES (%s,%s,true)", (install, ids[0]))
-        bootstrap(c, org)
+        bootstrap(c, org, installation_id=install)
         token = enroll(c, install, org, "volume", 1, 1)
         c.execute("INSERT INTO aw_budget_accounts VALUES (%s,1,'USD')", (org,))
         policy = dict(
@@ -95,13 +95,18 @@ def test_lost_reply_unknown_then_final_once():
                     "currency",
                 )
             },
-            "world_ref": {"work_id": payload["work_id"], "branch_id": payload["branch_id"]},
+            "world_ref": {
+                "world_revision_id": remote_task,
+                "work_id": payload["work_id"],
+                "branch_id": payload["branch_id"],
+            },
             "task_id": remote_task,
             "receipt_ref": receipt,
             "generation": 0,
             "task_state": "ACCEPTED" if final else "RUNNING",
             "accounting_state": "SETTLED" if final else "UNKNOWN",
             "actual_amount": "0.20" if final else "0",
+            "actual_tokens": 12 if final else 0,
             "attempt_ids": [attempt],
             "attempts": [detail],
         }
@@ -134,3 +139,182 @@ def test_revoke_committed_intent_before_send():
             ]
             == "RELEASED"
         )
+
+
+def test_crash_before_first_send_and_frozen_unsent_intent():
+    from agent_workshop.reconcile import claim
+    from agent_workshop.recovery import freeze, permit
+
+    dsn, org, install, token = setup_slot()
+    op = make(dsn, token)
+    with connect(dsn) as c:
+        assert claim(c, install, org, op)[0] == "submit"
+    # Process disappeared before issuing MCP. The next process queries the original key.
+    attempts = []
+
+    async def missing(tool, args):
+        attempts.append((tool, args["operation_id"]))
+        raise Denied("DELEGATION_NOT_FOUND")
+
+    ready(dsn, org, op)
+    assert asyncio.run(reconcile(dsn, install, org, op, missing)) == "REQUESTED"
+    with connect(dsn) as c:
+        freeze(c, install)
+    ready(dsn, org, op)
+    assert asyncio.run(reconcile(dsn, install, org, op, missing)) == "REQUESTED"
+    with connect(dsn) as c:
+        permit(c, install, {})
+    ready(dsn, org, op)
+    with connect(dsn) as c:
+        mode, _, args, *_ = claim(c, install, org, op)
+        assert mode == "submit" and args["operation_id"] == op
+    assert attempts == [("nf_delegation_get", op)] * 2
+
+
+def test_contradictory_peer_ledger_freezes_and_preserves_reservation():
+    from agent_workshop.recovery import frozen
+
+    dsn, org, install, token = setup_slot()
+    op = make(dsn, token)
+
+    async def inconsistent(tool, payload):
+        task, receipt, attempt = [str(uuid4()) for _ in range(3)]
+        return {
+            **payload,
+            "task_id": task,
+            "receipt_ref": receipt,
+            "task_state": "ACCEPTED",
+            "world_ref": {
+                "work_id": payload["work_id"],
+                "branch_id": payload["branch_id"],
+                "world_revision_id": task,
+            },
+            "actual_amount": "0",
+            "actual_tokens": 0,
+            "attempt_ids": [attempt],
+            "accounting_state": "SETTLED",
+            "attempts": [
+                {
+                    "attempt_id": attempt,
+                    "state": "UNKNOWN",
+                    "actual_amount": None,
+                    "actual_tokens": None,
+                }
+            ],
+        }
+
+    assert asyncio.run(reconcile(dsn, install, org, op, inconsistent)) == "WAITING_OPERATOR"
+    with connect(dsn) as c:
+        assert frozen(c, install)
+        assert (
+            c.execute("SELECT status FROM aw_budget_holds WHERE operation_id=%s", (op,)).fetchone()[
+                "status"
+            ]
+            == "HELD"
+        )
+        assert not c.execute(
+            "SELECT * FROM aw_cost_observations WHERE operation_id=%s", (op,)
+        ).fetchall()
+
+
+@pytest.mark.parametrize("change", ["tokens", "world_revision", "extra_settled_attempt"])
+def test_contradictory_receipt_cannot_replace_the_verified_hold(change):
+    from copy import deepcopy
+    from decimal import Decimal
+
+    from agent_workshop.recovery import freeze, frozen
+
+    dsn, org, install, token = setup_slot()
+    op = make(dsn, token)
+    with connect(dsn) as conn:
+        payload = conn.execute(
+            "SELECT payload FROM aw_delegations WHERE operation_id=%s", (op,)
+        ).fetchone()["payload"]
+    attempt = {
+        "attempt_id": str(uuid4()),
+        "state": "SUCCEEDED",
+        "actual_amount": "0.20",
+        "actual_tokens": 12,
+    }
+    receipt = dict(
+        payload,
+        task_id=str(uuid4()),
+        receipt_ref=str(uuid4()),
+        task_state="ACCEPTED",
+        accounting_state="SETTLED",
+        actual_amount="0.20",
+        actual_tokens=12,
+        attempts=[attempt],
+        attempt_ids=[attempt["attempt_id"]],
+        world_ref={
+            "work_id": payload["work_id"],
+            "branch_id": payload["branch_id"],
+            "world_revision_id": str(uuid4()),
+        },
+    )
+
+    async def peer(tool, request):
+        return receipt
+
+    if change == "tokens":
+        receipt["attempts"][0]["actual_tokens"] = receipt["actual_tokens"] = (
+            payload["token_limit"] + 1
+        )
+    else:
+        assert asyncio.run(reconcile(dsn, install, org, op, peer)) == "SETTLED"
+        with connect(dsn) as conn:
+            freeze(conn, install)
+        receipt = deepcopy(receipt)
+        if change == "world_revision":
+            receipt["world_ref"]["world_revision_id"] = str(uuid4())
+        else:
+            added = dict(attempt, attempt_id=str(uuid4()))
+            receipt["attempts"].append(added)
+            receipt["attempt_ids"].append(added["attempt_id"])
+            receipt.update(actual_amount="0.40", actual_tokens=24)
+    ready(dsn, org, op)
+    assert asyncio.run(reconcile(dsn, install, org, op, peer)) == "WAITING_OPERATOR"
+    with connect(dsn) as conn:
+        assert frozen(conn, install)
+        hold = conn.execute(
+            "SELECT status,settled_amount FROM aw_budget_holds WHERE operation_id=%s", (op,)
+        ).fetchone()
+        assert (hold["status"], hold["settled_amount"]) == (
+            ("HELD", None) if change == "tokens" else ("SETTLED", Decimal("0.20"))
+        )
+        assert conn.execute(
+            "SELECT count(*) AS n FROM aw_cost_observations WHERE operation_id=%s", (op,)
+        ).fetchone()["n"] == (0 if change == "tokens" else 1)
+
+
+def test_revoked_intent_with_unconfirmed_submit_retains_its_hold():
+    dsn, org, install, token = setup_slot()
+    op = make(dsn, token)
+    calls = []
+
+    async def peer(tool, request):
+        calls.append(tool)
+        if tool == "nf_delegation_submit":
+            raise ConnectionError()
+        raise Denied("DELEGATION_NOT_FOUND")
+
+    assert asyncio.run(reconcile(dsn, install, org, op, peer)) == "RECONCILING"
+    ready(dsn, org, op)
+    assert asyncio.run(reconcile(dsn, install, org, op, peer)) == "REQUESTED"
+    with connect(dsn) as conn:
+        conn.execute("UPDATE aw_bindings SET revoked=true WHERE token_digest=%s", (digest(token),))
+    ready(dsn, org, op)
+    asyncio.run(reconcile(dsn, install, org, op, peer))
+    with connect(dsn) as conn:
+        row = conn.execute(
+            """SELECT d.state,d.last_error,h.status FROM aw_delegations d
+                              JOIN aw_budget_holds h USING(org_id,operation_id)
+                              WHERE d.operation_id=%s""",
+            (op,),
+        ).fetchone()
+        assert row == {
+            "state": "WAITING_OPERATOR",
+            "last_error": "SUBMISSION_UNCONFIRMED",
+            "status": "HELD",
+        }
+    assert calls == ["nf_delegation_submit", "nf_delegation_get"]

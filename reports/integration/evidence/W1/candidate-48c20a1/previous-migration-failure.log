@@ -1,0 +1,39 @@
+2026-11-11T17:27:45.1247329Z Commit: 54898b74c23fde5556c9b3c3a2290865feef0dfe
+2026-11-11T17:27:46.6430901Z 6cb219f634b123c9ccdabfb277d8d3c81305af2bbb18a845115be5d9eca98d2c
+2026-11-11T17:27:55.6315376Z Digest: sha256:665dc7b37ac52a17e298511414c21d23ffa4e6a6ef6225b3e5d59c7afb35e994
+2026-11-11T17:27:55.6676481Z 88655e44d99b5598c358879dd437713bc495293baed8618f20c9f8502c0120ef
+2026-11-11T17:27:55.6692755Z ##[command]/usr/bin/docker start 88655e44d99b5598c358879dd437713bc495293baed8618f20c9f8502c0120ef
+2026-11-11T17:27:55.8438263Z 88655e44d99b5598c358879dd437713bc495293baed8618f20c9f8502c0120ef
+2026-11-11T17:27:55.8631217Z ##[command]/usr/bin/docker port 88655e44d99b5598c358879dd437713bc495293baed8618f20c9f8502c0120ef
+2026-11-11T17:27:56.5407777Z Digest: sha256:665dc7b37ac52a17e298511414c21d23ffa4e6a6ef6225b3e5d59c7afb35e994
+2026-11-11T17:27:56.5892433Z 2fc87f04bf471c5d768414413142476f70c9be7785a4095f5acf8d906615256e
+2026-11-11T17:27:56.5906414Z ##[command]/usr/bin/docker start 2fc87f04bf471c5d768414413142476f70c9be7785a4095f5acf8d906615256e
+2026-11-11T17:27:56.7054685Z 2fc87f04bf471c5d768414413142476f70c9be7785a4095f5acf8d906615256e
+2026-11-11T17:27:56.7243125Z ##[command]/usr/bin/docker port 2fc87f04bf471c5d768414413142476f70c9be7785a4095f5acf8d906615256e
+2026-11-11T17:27:56.7429711Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" 88655e44d99b5598c358879dd437713bc495293baed8618f20c9f8502c0120ef
+2026-11-11T17:27:58.7573148Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" 88655e44d99b5598c358879dd437713bc495293baed8618f20c9f8502c0120ef
+2026-11-11T17:28:02.8425208Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" 88655e44d99b5598c358879dd437713bc495293baed8618f20c9f8502c0120ef
+2026-11-11T17:28:02.8566242Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" 2fc87f04bf471c5d768414413142476f70c9be7785a4095f5acf8d906615256e
+2026-11-11T17:28:06.1824628Z HEAD is now at 8531d56 Merge b0be8ead12d7c5c67ab4ad904b98d67fb0994bd0 into c4939e24b6b5501d82127f528f2054e9c1992856
+2026-11-11T17:28:06.1903229Z 8531d56a4430c0ea7deb09f94b9f8dc21c9f1e52
+2026-11-11T17:28:06.4173918Z ##[group]Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+2026-11-11T17:28:08.0488136Z Trying to restore cache from GitHub Actions cache with key: setup-uv-2-x86_64-unknown-linux-gnu-ubuntu-24.04-unknown-956ede083be37361200ded5fc0cdbfa9068e9beddb45495e72aed40453657858
+2026-11-11T17:28:08.2096934Z Cache hit for: setup-uv-2-x86_64-unknown-linux-gnu-ubuntu-24.04-unknown-956ede083be37361200ded5fc0cdbfa9068e9beddb45495e72aed40453657858
+2026-11-11T17:28:11.2593612Z cache restored from GitHub Actions cache with key: setup-uv-2-x86_64-unknown-linux-gnu-ubuntu-24.04-unknown-956ede083be37361200ded5fc0cdbfa9068e9beddb45495e72aed40453657858
+2026-11-11T17:28:13.6877739Z   AW_POSTGRES: 88655e44d99b5598c358879dd437713bc495293baed8618f20c9f8502c0120ef
+2026-11-11T17:28:13.6878217Z   NF_POSTGRES: 2fc87f04bf471c5d768414413142476f70c9be7785a4095f5acf8d906615256e
+2026-11-11T17:28:20.9384481Z E           psycopg.errors.ObjectInUse: cannot ALTER TABLE "aw_employees" because it has pending trigger events
+2026-11-11T17:28:20.9385038Z .venv/lib/python3.12/site-packages/psycopg/cursor.py:117: ObjectInUse
+2026-11-11T17:28:20.9910829Z E           sqlalchemy.exc.OperationalError: (psycopg.errors.ObjectInUse) cannot ALTER TABLE "aw_employees" because it has pending trigger events
+2026-11-11T17:28:20.9913962Z FAILED tests/test_roster_projection.py::test_existing_w001_directory_and_tenure_backfill - sqlalchemy.exc.OperationalError: (psycopg.errors.ObjectInUse) cannot ALTER TABLE "aw_employees" because it has pending trigger events
+2026-11-11T17:28:20.9915720Z 1 failed, 15 passed in 4.34s
+2026-11-11T17:28:21.7785899Z SHA256 digest of uploaded artifact zip is 9c292c17e34191bab474352384b2482d022ff9effeb5f51c16bd45a9526e9a6c
+2026-11-11T17:28:22.1550957Z Artifact workshop-results.zip successfully finalized. Artifact ID 13875674277
+2026-11-11T17:28:22.1552292Z Artifact workshop-results has been successfully uploaded! Final size is 3319 bytes. Artifact ID is 13875674277
+2026-11-11T17:28:22.3397113Z ##[command]/usr/bin/docker logs --details 88655e44d99b5598c358879dd437713bc495293baed8618f20c9f8502c0120ef
+2026-11-11T17:28:22.3540475Z  2026-11-11 17:28:18.306 UTC [189] ERROR:  cannot ALTER TABLE "aw_employees" because it has pending trigger events
+2026-11-11T17:28:22.3569194Z ##[command]/usr/bin/docker rm --force 88655e44d99b5598c358879dd437713bc495293baed8618f20c9f8502c0120ef
+2026-11-11T17:28:25.5277190Z 88655e44d99b5598c358879dd437713bc495293baed8618f20c9f8502c0120ef
+2026-11-11T17:28:25.5296207Z ##[command]/usr/bin/docker logs --details 2fc87f04bf471c5d768414413142476f70c9be7785a4095f5acf8d906615256e
+2026-11-11T17:28:25.5459121Z ##[command]/usr/bin/docker rm --force 2fc87f04bf471c5d768414413142476f70c9be7785a4095f5acf8d906615256e
+2026-11-11T17:28:25.6465258Z 2fc87f04bf471c5d768414413142476f70c9be7785a4095f5acf8d906615256e

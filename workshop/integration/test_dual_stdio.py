@@ -3,10 +3,12 @@ from datetime import UTC, datetime, timedelta
 import json
 import os
 from pathlib import Path
+import subprocess
 import sys
 from uuid import uuid4
 
 from mcp import StdioServerParameters
+from redis_rebuild import rebuild_outboxes
 
 from agent_workshop.admin import enroll
 from agent_workshop.auth import connect
@@ -100,8 +102,8 @@ def test_two_live_mcp_servers_recover_accepted_task_after_lost_reply(dual_databa
             token_limit=2000,
         )
         with connect(dsn) as c:
-            bootstrap(c, org)
             c.execute("INSERT INTO aw_installations VALUES (%s,%s,true)", (installation, instance))
+            bootstrap(c, org, installation_id=installation)
             c.execute("INSERT INTO aw_budget_accounts VALUES (%s,1,'USD')", (org,))
             allow_slot(c, org, installation, "scene-A", "actor-1", policy)
             token = enroll(c, installation, org, "volume", 1, 1)
@@ -113,19 +115,18 @@ def test_two_live_mcp_servers_recover_accepted_task_after_lost_reply(dual_databa
                 Path(__file__).resolve().parents[1] / "src",
             )
         )
-        nf = remote(
-            bound_process(
-                tmp_path,
-                "novel_factory.interfaces.delegation_stdio",
-                dict(
-                    token=grant["token"],
-                    installation_id=installation,
-                    database_url=dual_databases["nf"],
-                    object_root=str(tmp_path / "objects"),
-                ),
-                Path(os.environ["AW_NF_SOURCE"]) / "src",
-            )
+        nf_params = bound_process(
+            tmp_path,
+            "novel_factory.interfaces.delegation_stdio",
+            dict(
+                token=grant["token"],
+                installation_id=installation,
+                database_url=dual_databases["nf"],
+                object_root=str(tmp_path / "objects"),
+            ),
+            Path(os.environ["AW_NF_SOURCE"]) / "src",
         )
+        nf = remote(nf_params)
 
         async def run():
             args = dict(operation_id="initial", slot_id="scene-A", max_amount="1", token_limit=2000)
@@ -133,12 +134,26 @@ def test_two_live_mcp_servers_recover_accepted_task_after_lost_reply(dual_databa
             op = requested["operation_id"]
             assert requested == await aw("aw_delegate", args)
 
+            message = await aw("aw_message_send", {
+                "operation_id": op, "recipient": "actor-1", "kind": "ASSIGN",
+                "scope_ref": "organization", "graph_revision": 1, "ttl_seconds": 600,
+            })
+            committed = {}
+
             async def fail_after_commit(tool, request):
                 result = await nf(tool, request)
                 assert result["task_state"] == "READY"
+                committed.update(result)
                 raise ConnectionError("injected after confirmed NF commit")
 
             assert await reconcile(dsn, installation, org, op, fail_after_commit) == "RECONCILING"
+
+            streams = rebuild_outboxes(tmp_path, dsn, db, org, message["message_id"], committed["task_id"])
+            # remote() launches a new AW stdio process for each call.
+            assert await aw("aw_delegate", args) == {"operation_id": op, "state": "RECONCILING"}
+            with connect(dsn) as c:
+                hold = c.execute("SELECT status,amount FROM aw_budget_holds WHERE operation_id=%s", (op,)).fetchone()
+                assert hold["status"] == "HELD" and hold["amount"] == 1
 
             def wake():
                 with connect(dsn) as c:
@@ -147,7 +162,40 @@ def test_two_live_mcp_servers_recover_accepted_task_after_lost_reply(dual_databa
                     )
 
             wake()
-            assert await reconcile(dsn, installation, org, op, nf) == "BOUND"
+            worker = subprocess.run(
+                [sys.executable, "-m", "agent_workshop.reconcile", "--installation", installation,
+                 "--org", org, "--operation", op, "--", nf_params.command, *nf_params.args],
+                env={**os.environ, "AW_DATABASE_URL": dsn}, capture_output=True, text=True, check=True,
+            )
+            restarted_worker = json.loads(worker.stdout)
+            assert restarted_worker == {"operation_id": op, "state": "BOUND"}
+            get = {
+                name: policy[name] for name in ("nf_instance_id", "work_id", "branch_id", "grant_epoch")
+            }
+            get.update(protocol_version="aw-nf.v1", operation_id=op)
+            bound = await nf("nf_delegation_get", get)
+            assert bound == committed
+            receipt_path = os.environ.get("AW_W3_REDIS_EVIDENCE")
+            if receipt_path:
+                Path(receipt_path).write_text(json.dumps({
+                    **streams, "operation_id": op, "task_id": bound["task_id"],
+                    "generation": bound["generation"], "receipt_ref": bound["receipt_ref"],
+                    "hold_after_loss": hold["status"], "reserved_amount": str(hold["amount"]),
+                    "world_ref": bound["world_ref"], "restarted_aw_state": "RECONCILING",
+                    "restarted_worker": restarted_worker, "nf_after_get_matches_lost_reply": True,
+                }, indent=2) + "\n")
+            handoff = {"operation_id": op, "handoff_id": "transfer-follow-up", "recipient": "actor-2"}
+            handed = await aw("aw_handoff", handoff)
+            assert handed == handoff and await aw("aw_handoff", handoff) == handed
+            assert await nf("nf_delegation_get", get) == bound
+            with connect(dsn) as c:
+                moved = c.execute(
+                    """SELECT d.owner_id,d.owner_revision,d.payload,h.status AS hold
+                       FROM aw_delegations d JOIN aw_budget_holds h USING (org_id,operation_id)
+                       WHERE d.org_id=%s AND d.operation_id=%s""", (org, op),
+                ).fetchone()
+                assert (moved["owner_id"], moved["owner_revision"], moved["hold"]) == ("actor-2", 1, "HELD")
+                assert moved["payload"]["actor_binding_ref"] == actor
             with kernel.db.uow(write=False) as repo:
                 rows = repo.many("delegation_receipts", {"installation_id": installation})
                 assert len(rows) == 1 and rows[0]["operation_id"] == op
