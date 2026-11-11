@@ -175,7 +175,10 @@ def test_one_resume_drives_real_process_restart(kernel_env, tmp_path):
                 assert receipt == kernel.accept(owner, command["request"])
                 resumed = await call("nf_resume_project")
                 assert resumed["awakened"] == 1 and resumed["counts"]["READY"] == 1
-                assert (await call("nf_resume_project"))["awakened"] == 0
+                for _ in range(99):
+                    replay = await call("nf_resume_project")
+                    assert replay["awakened"] == 0 and replay["counts"]["READY"] == 1
+                assert not requests
                 await snapshot("MCP woke producer")
                 await cycle(jobs[0])
                 await snapshot("first supervisor and host exited")

@@ -251,12 +251,17 @@ class TaskService:
         if not 0 < lease_seconds <= 3600:
             raise _error("INVALID_ARGUMENT", "Invalid lease duration")
         with self._tx() as conn:
+            # Renewals share the admission gate; cleanup and new claims take it
+            # exclusively. Keep its acquisition before the task row lock.
+            conn.execute(text("SELECT pg_advisory_xact_lock_shared(:key)"), {"key": MAINTENANCE_GATE + 1})
             task = self.guard_task(conn, task_id, generation, worker_id, require_context=False)
             if task["state"] != "RUNNING":
                 raise _error("TASK_NOT_ACCEPTABLE", "Only RUNNING tasks can renew a lease")
             expiry = min(self._now(conn) + timedelta(seconds=lease_seconds), task["deadline"])
             t = self.tables["tasks"]
             conn.execute(t.update().where(t.c.task_id == task_id).values(lease_expiry=expiry, updated_at=self._now(conn)))
+            slots = self.tables["dispatch_slots"]
+            conn.execute(slots.update().where(slots.c.attempt_id == task["attempt_id"]).values(expires_at=expiry))
             return expiry
 
     def _register_object(self, conn, ref, owner_type, owner_id):
