@@ -11,12 +11,12 @@
     "merge_sha": "a8f37b72286163e9117f8874a0e175c61204ff8b"
   },
   "B": {
-    "status": "UNDER_REVIEW",
-    "result": "NOT_MET",
+    "status": "ENGINEERING_PASSED_CAPACITY_UNDER_REVIEW",
+    "result": "PARTIAL",
     "inspected_sha": "55d8979b5361a4837701d762feacd83036096b11",
     "pr": 6,
     "blocker": "three inherited workflows failed",
-    "next": "Check the real 600 s original gates and readiness before merge.",
+    "next": "Compare independent candidates #20 and #21 on preregistered same-runner tests in #18 and #22.",
     "local_hotspot_passed": 33,
     "remote_fix_short": "bf0541a4",
     "target": "main",
@@ -26,7 +26,23 @@
     "local_failed": 0,
     "local_skipped": 0,
     "local_pitr": "PASS",
-    "evidence": "evidence/p55/s9-local/acceptance-55d8979/verification.json"
+    "evidence": "evidence/p55/s9-local/acceptance-55d8979/verification.json",
+    "functional_ci": 43036514325,
+    "pitr_ci": 43036514910,
+    "native_ci": 43036514896,
+    "read_soak_600s": {
+      "first": {
+        "passed_requests": 11508,
+        "backpressure": 492
+      },
+      "repeat": {
+        "passed_requests": 11954,
+        "backpressure": 46
+      },
+      "scheduled_per_attempt": 12000,
+      "result": "NOT_MET"
+    },
+    "evidence_remote": "evidence/p55/s9-local/remote-55d897"
   },
   "W0": {
     "status": "VERIFIED",
@@ -106,7 +122,7 @@
   "W6": {
     "status": "IN_REVIEW",
     "result": "PASS_LOCAL",
-    "nf_sha": "becc8e7a400756c67832e0aca16cac78000df661",
+    "nf_sha": "74350760dfd063f3596e5b6838a56a40d3006ad6",
     "evidence": "evidence/workshop/w6",
     "next": "Verify latest release candidate on its exact GitHub head, merge by dependency.",
     "pr": 15,
@@ -122,8 +138,12 @@
       "dual_services_and_scenes": 4,
       "physical_pitr": 1
     },
-    "source_sha": "657a4e1e2460b55757c99a4b21c5ce55ba0b1419",
-    "ci": 43036228913
+    "source_sha": "a0d8c7e0ac4e775fdb3190af6f254aecac0ca256",
+    "ci": 43038309410,
+    "previous_pass": {
+      "sha": "657a4e1e2460b55757c99a4b21c5ce55ba0b1419",
+      "ci": 43036228913
+    }
   },
   "C": {
     "status": "BLOCKED_ENVIRONMENT",
@@ -145,6 +165,8 @@
     "combined_rehearsal": "evidence/p6/integrated-rehearsal",
     "nf_budget_pr": 17,
     "nf_budget_sha": "013ebcadf4f7d3a64838096361c6432e4e679b8d",
-    "quota_receipt_test": "P6_SHARED_BUDGET_DRILL.json"
+    "quota_receipt_test": "P6_SHARED_BUDGET_DRILL.json",
+    "validation_sha": "b3e63bb9cf3e4819951245aedebe677979f2f3d5",
+    "physical_shared_budget_ci": 43039967383
   }
 }

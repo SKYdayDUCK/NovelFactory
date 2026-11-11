@@ -1,5 +1,13 @@
 name: P6 offline experiment and authorization checks
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/P6_*'
+      - 'scripts/p6_budget.py'
+      - 'src/novel_factory/application/budget_limits.py'
+      - 'reports/handoff/ENGINEERING_RELEASE.json'
+      - '.github/workflows/p6-offline.yml'
   pull_request:
     paths:
       - 'scripts/P6_*'
@@ -25,10 +33,18 @@ jobs:
         with:
           python-version: '3.12'
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - name: Select the integrated NF source or the pinned peer
+        run: |
+          source_dir="$GITHUB_WORKSPACE/nf-peer"
+          if test -f "$GITHUB_WORKSPACE/scripts/p6_budget.py"; then
+            source_dir="$GITHUB_WORKSPACE"
+          fi
+          git -C "$source_dir" rev-parse HEAD
+          echo "NF_SOURCE=$source_dir" >> "$GITHUB_ENV"
       - name: Install locked NF and verify preflight with synthetic local input
         run: |
-          uv sync --project nf-peer --locked
-          nf-peer/.venv/bin/python scripts/P6_preflight_smoke.py --nf-checkout "$PWD/nf-peer"
+          uv sync --project "$NF_SOURCE" --locked
+          "$NF_SOURCE/.venv/bin/python" scripts/P6_preflight_smoke.py --nf-checkout "$NF_SOURCE"
       - name: Install physical PostgreSQL 17 restore tools
         run: |
           set -euo pipefail
@@ -44,10 +60,10 @@ jobs:
           fi
           /usr/lib/postgresql/17/bin/pg_verifybackup --version
       - name: Restore the shared token budget and its original UNKNOWN attempt
-        working-directory: nf-peer
         run: |
-          git apply --check ../evidence/p6/shared-token-pitr/drill.patch
-          git apply ../evidence/p6/shared-token-pitr/drill.patch
+          cd "$NF_SOURCE"
+          git apply --check "$GITHUB_WORKSPACE/evidence/p6/shared-token-pitr/drill.patch"
+          git apply "$GITHUB_WORKSPACE/evidence/p6/shared-token-pitr/drill.patch"
           .venv/bin/python scripts/pitr_drill.py --output "$RUNNER_TEMP/p6-budget-drill"
       - uses: actions/upload-artifact@v4
         if: always()

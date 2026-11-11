@@ -14,3 +14,4 @@
 | FR-AW / AT-44,45 | evidence/workshop/w6/independent-review.md、独审回归；源材料风险、审核人退场、截止期限、可信审批 | PASS（工程身份） |
 | FR-ENTRY, FR-XSYS / AT-46–49 | evidence/workshop/w6/w008；相同作者键以安装分别幂等、隔离历史和进度、两套 stdio、审读冻结材料与取件 | PASS（PG17.11） |
 | FR-EXP / AT-50 | reports/handoff/P6_ROUTE_PROBE.json、P6_LOCAL_PREFLIGHT.json；金额、模型、演员、作品 revision 和 Skill 固定检查 | 离线前检已实跑；商业运行与独立审读 BLOCKED_ENVIRONMENT |
+| FR-SEM / AT-31–39 | evidence/p55/s9-local/remote-55d897；冻结的三样本四臂实际判决中 A、B、C、D 的 FP/FN 分别为 1/0、0/1、0/1、0/0 | 仅限已标注样本；实际小说总体误漏和供应商用量未测 |
