@@ -13,6 +13,7 @@ from .organization import (
     NF_ROLES,
     POSITIVE,
     PRESETS,
+    SUPERVISORS,
     UP,
     _graph,
     _insert_employee,
@@ -85,6 +86,7 @@ def _plan(conn, session, target):
         _, role, sup, team = new[key]
         if sup not in add + resume and (
             sup not in people or people[sup]["status"] != "ACTIVE" or sup in park
+            or people[sup]["role_id"] not in SUPERVISORS[role]
         ):
             blocked.append(key)
         scope_allowed(org, role, team, org["scope_ref"])

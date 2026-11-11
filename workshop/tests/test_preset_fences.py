@@ -234,3 +234,40 @@ def test_upgrade_from_w002_keeps_mail_without_inventing_an_origin(monkeypatch, t
     finally:
         with connect(base) as conn:
             conn.execute(sql.SQL("DROP SCHEMA {} CASCADE").format(sql.Identifier(name)))
+
+
+@pytest.mark.parametrize("parked", [False, True], ids=["new-slot", "parked-slot"])
+def test_preset_expansion_observes_supervisors_current_role(team, parked):
+    dsn, org, tokens = team
+    with connect(dsn) as conn:
+        manager = authenticate(conn, tokens["manager"])
+        revision = 1
+        if parked:
+            switch(conn, manager, "Research-Audit", "create-stats")
+            revision = switch(conn, manager, "Standard", "park-stats")["revision"]
+        previous_stats = employee(conn, org, "stats")
+        transfer = TOOLS["aw_transfer"][2]
+        transfer(
+            conn, manager, expected_revision=revision, operation_id="move-reviewer",
+            employee_id="reviewer", role_id="writer", supervisor_id="volume", team_id="production",
+        )
+        transfer(
+            conn, manager, expected_revision=revision + 1, operation_id="move-lead",
+            employee_id="review-lead", role_id="maintenance", supervisor_id="manager", team_id="ops",
+        )
+
+        preview = presets.preview(conn, manager, "Research-Audit")
+        assert "stats" in preview["blocked"]
+        with pytest.raises(Denied, match="PRESET_CONFLICT"):
+            presets.apply_preset(conn, manager, "Research-Audit", "expand", revision + 2,
+                                preview["preview_sha"])
+        assert employee(conn, org, "stats") == previous_stats
+        assert presets.preview(conn, manager, "Research-Audit") == preview
+
+        transfer(
+            conn, manager, expected_revision=revision + 2, operation_id="restore-lead",
+            employee_id="review-lead", role_id="review_lead", supervisor_id="manager", team_id="audit",
+        )
+        assert switch(conn, manager, "Research-Audit", "expand-with-lead")["revision"] == revision + 4
+        assert employee(conn, org, "reviewer")["role_id"] == "writer"
+        assert employee(conn, org, "stats")["supervisor_id"] == "review-lead"
