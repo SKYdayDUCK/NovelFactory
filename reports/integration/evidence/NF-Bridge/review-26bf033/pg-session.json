@@ -1,0 +1,24 @@
+{
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "port": 43765,
+  "command": [
+    "/workspace/scratch/eb2b53c756d0/bridge-merged-authority/.venv/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/integration/test_workshop_delegation.py",
+    "tests/integration/test_p5_supervisor.py",
+    "tests/integration/test_agent_gateway.py",
+    "--junitxml=/workspace/scratch/eb2b53c756d0/bridge-qualification-results/current-authority/observed.xml"
+  ],
+  "started_at_utc": "2026-11-11T18:44:16.886397+00:00",
+  "authentication": "loopback_trust_generated_test_data_only",
+  "fsync": true,
+  "synchronous_commit": true,
+  "max_connections": 60,
+  "data_directory_reused": false,
+  "exit_status": 0,
+  "postgres_exit_status": 0,
+  "duration_seconds": 29.886762,
+  "finished_at_utc": "2026-11-11T18:44:46.773206+00:00"
+}

@@ -1,0 +1,7 @@
+# Bridge candidate review
+
+The old S9 migration test on `26bf0337` advanced to 0017 while asserting the state at 0016. [Original control and paired tests](upgrade-controls.zip) retain the failure and the successful rerun. The repaired historic test targets 0016, and a separate test signs the W2-to-0017 upgrade, empty downgrade, populated downgrade refusal, and unchanged pre-existing data across 67 tables. A separate stdio case verifies NF/Workshop identity isolation.
+
+[Runtime patch](guard-order.patch) qualifies the revision which first locks delegation authority, checks policy and grant changes and checks the expiry again immediately before writing a reservation or dispatch. The incremental patch checks caller authorization before returning business-state errors, including missing attempts. The verified local patch spans `77c862677feaf6fbabcd69dcce324b92562438db..700d1f052484290ceb5bd7124f7afff294910120`. Apply it on a matching base and rerun on the final public candidate.
+
+[JUnit](guard-order.xml) and [PostgreSQL session](pg-session.json) cover 35 passing tests including the real revocation versus spend overlap. The test observes the waiting PostgreSQL backend before releasing the revoking transaction, for both reservation and dispatch. The authorized normal gateway on `26bf0337` already blocked stale policy and revoked grants. The new controls also cover lower-level calls, ordering, and indistinguishable denied responses.

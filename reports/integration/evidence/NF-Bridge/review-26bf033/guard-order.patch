@@ -1,0 +1,176 @@
+diff --git a/src/novel_factory/orchestration/tasks.py b/src/novel_factory/orchestration/tasks.py
+index b7869e2..dd55667 100644
+--- a/src/novel_factory/orchestration/tasks.py
++++ b/src/novel_factory/orchestration/tasks.py
+@@ -16,6 +16,7 @@ from uuid import uuid4
+ 
+ from sqlalchemy import and_, func, or_, select, text
+ from sqlalchemy.dialects.postgresql import insert
++from sqlalchemy.exc import NoResultFound
+ 
+ from novel_factory.contracts.registry import validate_contract
+ from novel_factory.domain.errors import DomainError
+@@ -448,10 +449,10 @@ class TaskService:
+             conn.execute(insert(self.tables["budgets"]).values(budget_id=budget_id, work_id=str(work_id), currency=currency, limit_amount=amount))
+         return budget_id
+ 
+-    def _allow_delegated_inference(self, conn, task_id):
++    def _lock_delegation_authority(self, conn, task_id):
+         if "delegation_receipts" not in self.tables:
+             return
+-        row = conn.execute(text("""
++        return conn.execute(text("""
+             SELECT i.expires_at, i.active AND NOT i.outbound_fenced AND i.expires_at > clock_timestamp()
+                AND i.policy_version = w.policy_version AND g.active AND g.epoch = s.grant_epoch AS allowed
+             FROM nf_delegation_receipts r
+@@ -461,6 +462,13 @@ class TaskService:
+             JOIN nf_grants g ON g.grant_id = s.grant_id
+             WHERE r.task_id=:task FOR SHARE OF i, w, g
+         """), {"task": task_id}).mappings().one_or_none()
++
++    def _authorize_model_spend(self, conn, task_id, authorize_in_tx):
++        # Lock in the same order as installation revocation. Disclose business
++        # state only after the caller has passed its own authority check.
++        row = self._lock_delegation_authority(conn, task_id)
++        if authorize_in_tx is not None:
++            authorize_in_tx(conn)
+         if row and not row["allowed"]:
+             raise _error("DELEGATION_RECOVERY_FENCED", "Delegated inference is fenced")
+         return row["expires_at"] if row else None
+@@ -476,11 +484,7 @@ class TaskService:
+         if len(request_hash) != 64 or not call_key:
+             raise _error("INVALID_ARGUMENT", "Call requires request hash and stable identity")
+         with self._tx() as conn:
+-            # Revocation locks the installation before the role grant. Take the
+-            # same order before the gateway authorizes the grant and task.
+-            deadline = self._allow_delegated_inference(conn, task_id)
+-            if authorize_in_tx is not None:
+-                authorize_in_tx(conn)
++            deadline = self._authorize_model_spend(conn, task_id, authorize_in_tx)
+             task = self.guard_task(conn, task_id, generation, worker_id)
+             if task["state"] != "RUNNING":
+                 raise _error("TASK_NOT_ACCEPTABLE", "External calls require a live RUNNING execution")
+@@ -518,10 +522,10 @@ class TaskService:
+         """
+         with self._tx() as conn:
+             calls = self.tables["call_attempts"]
+-            call = conn.execute(select(calls).where(calls.c.attempt_id == attempt_id)).mappings().one()
+-            deadline = self._allow_delegated_inference(conn, call["task_id"])
+-            if authorize_in_tx is not None:
+-                authorize_in_tx(conn)
++            call = conn.execute(select(calls).where(calls.c.attempt_id == attempt_id)).mappings().one_or_none()
++            deadline = self._authorize_model_spend(conn, call["task_id"] if call else None, authorize_in_tx)
++            if call is None:
++                raise NoResultFound("No row was found when one was required")
+             task = self.guard_task(conn, call["task_id"], call["generation"], worker_id)
+             if task["state"] != "RUNNING":
+                 raise _error("TASK_NOT_ACCEPTABLE", "External dispatch requires a live RUNNING execution")
+diff --git a/tests/integration/test_workshop_delegation.py b/tests/integration/test_workshop_delegation.py
+index 7fb587e..484745e 100644
+--- a/tests/integration/test_workshop_delegation.py
++++ b/tests/integration/test_workshop_delegation.py
+@@ -4,6 +4,8 @@ import asyncio
+ import json
+ import os
+ import sys
++import time
++from threading import Event, current_thread, main_thread
+ from concurrent.futures import ThreadPoolExecutor
+ from datetime import UTC, datetime, timedelta
+ from uuid import uuid4
+@@ -11,6 +13,7 @@ from uuid import uuid4
+ import pytest
+ from mcp import ClientSession, StdioServerParameters
+ from mcp.client.stdio import stdio_client
++from sqlalchemy import event, text
+ from test_p5_supervisor import backend
+ 
+ from novel_factory.application.agent_gateway import AgentGateway
+@@ -311,7 +314,8 @@ def test_current_delegation_authority_fences_new_model_spend(site, monkeypatch,
+ 
+     monkeypatch.setattr(ledger, boundary, change_before_authorization)
+     result = supervisor.admit_model(owner, get["work_id"], get["branch_id"])
+-    assert result["status"] == "BLOCKED" and result["reason"] == "DELEGATION_RECOVERY_FENCED"
++    expected = {"expiry": "DELEGATION_RECOVERY_FENCED", "policy": "TASK_REBIND_REQUIRED", "slot_revocation": "VIEW_DENIED"}
++    assert (result["status"], result["reason"]) == ("BLOCKED", expected[authority_change])
+     assert not requests
+     with runtime.kernel.db.uow(write=False) as repo:
+         attempts = repo.many("call_attempts", {"task_id": bound["task_id"]})
+@@ -427,3 +431,77 @@ def test_expiry_while_dispatch_authorization_waits_keeps_attempt_unsent(site, mo
+     with runtime.kernel.db.uow(write=False) as repo:
+         [attempt] = repo.many("call_attempts", {"task_id": bound["task_id"]})
+         assert attempt["state"] == "PREPARED" and not requests
++
++@pytest.mark.parametrize("boundary", ["reserve_call", "mark_call_sent"])
++def test_installation_revoke_racing_model_spend_has_one_lock_order(site, monkeypatch, boundary):
++    runtime, submit, get, _, supervisor, owner, requests, _ = site
++    kernel = runtime.kernel
++    runtime.call("nf_delegation_submit", submit)
++    installation_locked, spending_at_installation = Event(), Event()
++    spender_pid = None
++    authorize = kernel.authorize
++    spend = getattr(kernel.tasks, boundary)
++
++    def pause_revoker(*args, **kwargs):
++        if current_thread() is not main_thread() and args[3] == "ADMIN":
++            # revoke() has already acquired FOR UPDATE on the installation.
++            installation_locked.set()
++            assert spending_at_installation.wait(10)
++            conn = args[0].conn
++            deadline = time.monotonic() + 10
++            while not conn.scalar(
++                text("SELECT pg_backend_pid() = ANY(pg_blocking_pids(:spender))"),
++                {"spender": spender_pid},
++            ):
++                assert time.monotonic() < deadline, "spending transaction never waited on revocation"
++                time.sleep(0.01)
++        return authorize(*args, **kwargs)
++
++    def before_sql(conn, cursor, statement, parameters, context, many):
++        nonlocal spender_pid
++        if installation_locked.is_set() and current_thread() is main_thread():
++            if "FOR SHARE OF i" in statement:
++                spender_pid = conn.connection.driver_connection.info.backend_pid
++                spending_at_installation.set()
++
++    def contend(*args, **kwargs):
++        with ThreadPoolExecutor(1) as worker:
++            revoked = worker.submit(revoke, kernel, owner, runtime.installation_id)
++            assert installation_locked.wait(10)
++            try:
++                return spend(*args, **kwargs)
++            finally:
++                revoked.result(timeout=10)
++
++    monkeypatch.setattr(kernel, "authorize", pause_revoker)
++    monkeypatch.setattr(kernel.tasks, boundary, contend)
++    event.listen(kernel.db.engine, "before_cursor_execute", before_sql)
++    try:
++        result = supervisor.admit_model(owner, get["work_id"], get["branch_id"])
++    finally:
++        event.remove(kernel.db.engine, "before_cursor_execute", before_sql)
++    assert installation_locked.is_set() and spending_at_installation.is_set()
++    assert result["status"] == "BLOCKED" and not requests
++
++
++def test_denied_accounting_caller_cannot_distinguish_missing_from_expired(site):
++    runtime, submit, get, _, supervisor, owner, requests, _ = site
++    bound = runtime.call("nf_delegation_submit", submit)
++    ledger = runtime.kernel.tasks
++    supervisor.admit_model(owner, get["work_id"], get["branch_id"])
++    [attempt_id] = runtime.call("nf_delegation_get", get)["attempt_ids"]
++    expire_installation(runtime)
++
++    def deny(_conn):
++        raise DomainError("VIEW_DENIED", "Caller unavailable")
++
++    for task in [bound["task_id"], str(uuid4())]:
++        with pytest.raises(DomainError) as blocked:
++            ledger.reserve_call(task, 1, "denied", budget_id=str(uuid4()), amount="0.01",
++                                call_key="denied", request_hash="a" * 64, authorize_in_tx=deny)
++        assert blocked.value.as_dict("same") == DomainError("VIEW_DENIED", "Caller unavailable").as_dict("same")
++    for attempt in [attempt_id, str(uuid4())]:
++        with pytest.raises(DomainError) as blocked:
++            ledger.mark_call_sent(attempt, worker_id="denied", authorize_in_tx=deny)
++        assert blocked.value.as_dict("same") == DomainError("VIEW_DENIED", "Caller unavailable").as_dict("same")
++    assert len(requests) == 1
