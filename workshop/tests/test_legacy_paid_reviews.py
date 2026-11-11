@@ -25,8 +25,9 @@ def seed_legacy():
     """Executed in a subprocess with the archived W4a application, before membership existed."""
     org, dsn = "legacy-film", os.environ["AW_DATABASE_URL"]
     with connect(dsn) as conn:
-        for inst in ("west", "east"):
-            conn.execute("INSERT INTO aw_installations VALUES (%s,%s,true)", (inst, "nf-" + inst))
+        instances = {inst: str(uuid4()) for inst in ("west", "east")}
+        for inst, nf_id in instances.items():
+            conn.execute("INSERT INTO aw_installations VALUES (%s,%s,true)", (inst, nf_id))
         bootstrap(conn, org, "Standard")
         subject(conn, org, "writer", "writer-id")
         subject(conn, org, "reviewer", "reviewer-id")
@@ -39,7 +40,7 @@ def seed_legacy():
             paid = {}
             if inst:
                 allow_slot(conn, org, inst, ref, "reviewer", {
-                    "nf_instance_id": "nf-" + inst, "work_id": str(uuid4()), "branch_id": str(uuid4()),
+                    "nf_instance_id": instances[inst], "work_id": str(uuid4()), "branch_id": str(uuid4()),
                     "actor_binding_ref": None, "role_id": "reviewer", "task_template_id": "prose-review",
                     "scope_ref": "text", "generation": 0, "grant_epoch": 1, "max_amount": "0.10",
                     "currency": "USD", "token_limit": 100,
