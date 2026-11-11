@@ -1,0 +1,824 @@
+[
+  {
+    "workflow_id": 43079135154,
+    "artifact_id": 13884865579,
+    "artifact_name": "p3-context-paired-1",
+    "member": "context-p3.json",
+    "source_sha256": "3a001b816d564942a536ffdb841bd71de665c6145cddfb65755a30a4f91c9028",
+    "result": {
+      "evidence_kind": "REAL_POSTGRESQL_SAME_WORLD_PAIRED_ENGINEERING",
+      "baseline_commit": "206eaa5b655419d29bd6b15d618ae6eaf9048354",
+      "entities": 300,
+      "repeats": 5,
+      "summary": [
+        {
+          "subjects": 1,
+          "baseline": {
+            "median_seconds": 0.05469663699999927,
+            "sql_counts": [
+              43
+            ],
+            "median_cursor_execution_seconds": 0.018768414999996708
+          },
+          "candidate": {
+            "median_seconds": 0.05462825000000038,
+            "sql_counts": [
+              43
+            ],
+            "median_cursor_execution_seconds": 0.019617138000000978
+          }
+        },
+        {
+          "subjects": 20,
+          "baseline": {
+            "median_seconds": 0.09428752000000173,
+            "sql_counts": [
+              43
+            ],
+            "median_cursor_execution_seconds": 0.019375795999991396
+          },
+          "candidate": {
+            "median_seconds": 0.08315987399999614,
+            "sql_counts": [
+              43
+            ],
+            "median_cursor_execution_seconds": 0.02070145399999035
+          }
+        },
+        {
+          "subjects": 100,
+          "baseline": {
+            "median_seconds": 0.26946845799999863,
+            "sql_counts": [
+              43
+            ],
+            "median_cursor_execution_seconds": 0.03109903499999689
+          },
+          "candidate": {
+            "median_seconds": 0.21443410099999483,
+            "sql_counts": [
+              43
+            ],
+            "median_cursor_execution_seconds": 0.031393463999997095
+          }
+        }
+      ],
+      "real_model_calls": 0,
+      "paired_count": 15,
+      "world_unchanged": true
+    }
+  },
+  {
+    "workflow_id": 43079135154,
+    "artifact_id": 13883532560,
+    "artifact_name": "p3-isolated-200-overload-1",
+    "member": "load.json",
+    "source_sha256": "84f641f8c43232e4c475287c4508ffef94addeb1aadaf72cbe119edaa8d4ab5a",
+    "result": {
+      "evidence_kind": "REAL_HTTP_REAL_POSTGRESQL_TEST_FIXTURE",
+      "schema_version": "p2-load-2",
+      "seed": 20261110,
+      "profile": "overload",
+      "logical_agent_task_count": 200,
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "NOT_MET",
+      "capacity_gate": "NOT_MET",
+      "bounded_recovery_business_gate": "PASS",
+      "external_model": {
+        "actual_calls": 0,
+        "tokens": 0,
+        "billed_cost_usd": null,
+        "status": "NOT_DISPATCHED"
+      },
+      "open_loop": {
+        "gate": "NOT_MET",
+        "actual_call_start_rps": 37.524472604618346,
+        "transport_header_start_rps": 31.35125608383836,
+        "target_rps": 1000.0,
+        "first_attempts": 1000
+      },
+      "metrics": {
+        "emitted_logical_operations": 2141,
+        "completed_logical_operations": 2141,
+        "first_attempt_failure_count": 521,
+        "client_requests_never_emitted": 0,
+        "first_attempt_status_counts": {
+          "200": 1601,
+          "409": 19,
+          "429": 521
+        },
+        "status_counts": {
+          "200": 2103,
+          "409": 19,
+          "429": 913
+        },
+        "new_world_commit_receipts": 21,
+        "latency_successes": {
+          "count": 2103,
+          "p50_ms": 185.2527,
+          "p95_ms": 7245.2939,
+          "p99_ms": 11721.9647
+        },
+        "model_retries": 0,
+        "correctness_errors": 0,
+        "unresolved_operational_errors": 0
+      },
+      "correctness": {
+        "new_world_revisions": 21,
+        "expected_new_world_revisions": 21,
+        "new_selected_effect_groups": 21,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99"
+      }
+    }
+  },
+  {
+    "workflow_id": 43079135154,
+    "artifact_id": 13881819738,
+    "artifact_name": "p3-isolated-200-mixed-1",
+    "member": "load.json",
+    "source_sha256": "581996f681cfa6912fc94e2397a54a7414c3b3de05d9287acaf7bbc89daf1728",
+    "result": {
+      "evidence_kind": "REAL_HTTP_REAL_POSTGRESQL_TEST_FIXTURE",
+      "schema_version": "p2-load-2",
+      "seed": 20261110,
+      "profile": "mixed",
+      "logical_agent_task_count": 200,
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "PASS",
+      "capacity_gate": "PASS",
+      "bounded_recovery_business_gate": "PASS",
+      "external_model": {
+        "actual_calls": 0,
+        "tokens": 0,
+        "billed_cost_usd": null,
+        "status": "NOT_DISPATCHED"
+      },
+      "open_loop": {
+        "gate": "NOT_APPLICABLE",
+        "target_rps": null,
+        "first_attempts": 0
+      },
+      "metrics": {
+        "emitted_logical_operations": 1141,
+        "completed_logical_operations": 1141,
+        "first_attempt_failure_count": 0,
+        "client_requests_never_emitted": 0,
+        "first_attempt_status_counts": {
+          "200": 1122,
+          "409": 19
+        },
+        "status_counts": {
+          "200": 1122,
+          "409": 19
+        },
+        "new_world_commit_receipts": 21,
+        "latency_successes": {
+          "count": 1122,
+          "p50_ms": 68.615,
+          "p95_ms": 373.5841,
+          "p99_ms": 683.4425
+        },
+        "model_retries": 0,
+        "correctness_errors": 0,
+        "unresolved_operational_errors": 0
+      },
+      "correctness": {
+        "new_world_revisions": 21,
+        "expected_new_world_revisions": 21,
+        "new_selected_effect_groups": 21,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99"
+      }
+    }
+  },
+  {
+    "workflow_id": 43079135306,
+    "artifact_id": 13883896314,
+    "artifact_name": "p2-load-200-mixed-1",
+    "member": "run-1/load.json",
+    "source_sha256": "9af7887fb3afb035f39e86ef3797e432b7035e10377c0d75bfabd62272230a6c",
+    "result": {
+      "evidence_kind": "REAL_HTTP_REAL_POSTGRESQL_TEST_FIXTURE",
+      "schema_version": "p2-load-2",
+      "seed": 20261110,
+      "profile": "mixed",
+      "logical_agent_task_count": 200,
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "PASS",
+      "capacity_gate": "PASS",
+      "bounded_recovery_business_gate": "PASS",
+      "external_model": {
+        "actual_calls": 0,
+        "tokens": 0,
+        "billed_cost_usd": null,
+        "status": "NOT_DISPATCHED"
+      },
+      "open_loop": {
+        "gate": "NOT_APPLICABLE",
+        "target_rps": null,
+        "first_attempts": 0
+      },
+      "metrics": {
+        "emitted_logical_operations": 1141,
+        "completed_logical_operations": 1141,
+        "first_attempt_failure_count": 0,
+        "client_requests_never_emitted": 0,
+        "first_attempt_status_counts": {
+          "200": 1122,
+          "409": 19
+        },
+        "status_counts": {
+          "200": 1122,
+          "409": 19
+        },
+        "new_world_commit_receipts": 21,
+        "latency_successes": {
+          "count": 1122,
+          "p50_ms": 73.3036,
+          "p95_ms": 216.3276,
+          "p99_ms": 277.6524
+        },
+        "model_retries": 0,
+        "correctness_errors": 0,
+        "unresolved_operational_errors": 0
+      },
+      "correctness": {
+        "new_world_revisions": 21,
+        "expected_new_world_revisions": 21,
+        "new_selected_effect_groups": 21,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99"
+      }
+    }
+  },
+  {
+    "workflow_id": 43079135306,
+    "artifact_id": 13883896314,
+    "artifact_name": "p2-load-200-mixed-1",
+    "member": "run-2/load.json",
+    "source_sha256": "d6f1080d31f425056f0b40252ebdffe643076410a7e4961c26f715880d0e6c9c",
+    "result": {
+      "evidence_kind": "REAL_HTTP_REAL_POSTGRESQL_TEST_FIXTURE",
+      "schema_version": "p2-load-2",
+      "seed": 20261110,
+      "profile": "mixed",
+      "logical_agent_task_count": 200,
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "PASS",
+      "capacity_gate": "PASS",
+      "bounded_recovery_business_gate": "PASS",
+      "external_model": {
+        "actual_calls": 0,
+        "tokens": 0,
+        "billed_cost_usd": null,
+        "status": "NOT_DISPATCHED"
+      },
+      "open_loop": {
+        "gate": "NOT_APPLICABLE",
+        "target_rps": null,
+        "first_attempts": 0
+      },
+      "metrics": {
+        "emitted_logical_operations": 1141,
+        "completed_logical_operations": 1141,
+        "first_attempt_failure_count": 0,
+        "client_requests_never_emitted": 0,
+        "first_attempt_status_counts": {
+          "200": 1122,
+          "409": 19
+        },
+        "status_counts": {
+          "200": 1122,
+          "409": 19
+        },
+        "new_world_commit_receipts": 21,
+        "latency_successes": {
+          "count": 1122,
+          "p50_ms": 67.6483,
+          "p95_ms": 221.939,
+          "p99_ms": 328.3879
+        },
+        "model_retries": 0,
+        "correctness_errors": 0,
+        "unresolved_operational_errors": 0
+      },
+      "correctness": {
+        "new_world_revisions": 21,
+        "expected_new_world_revisions": 21,
+        "new_selected_effect_groups": 21,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99"
+      }
+    }
+  },
+  {
+    "workflow_id": 43079135306,
+    "artifact_id": 13883716679,
+    "artifact_name": "p2-load-200-overload-1",
+    "member": "run-1/load.json",
+    "source_sha256": "3841a832e8bfdaf7ad04d6868f33223a0921a926449c572f9b05d27831c79eca",
+    "result": {
+      "evidence_kind": "REAL_HTTP_REAL_POSTGRESQL_TEST_FIXTURE",
+      "schema_version": "p2-load-2",
+      "seed": 20261110,
+      "profile": "overload",
+      "logical_agent_task_count": 200,
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "NOT_MET",
+      "capacity_gate": "NOT_MET",
+      "bounded_recovery_business_gate": "PASS",
+      "external_model": {
+        "actual_calls": 0,
+        "tokens": 0,
+        "billed_cost_usd": null,
+        "status": "NOT_DISPATCHED"
+      },
+      "open_loop": {
+        "gate": "NOT_MET",
+        "actual_call_start_rps": 36.95875676513582,
+        "transport_header_start_rps": 31.030159358039104,
+        "target_rps": 1000.0,
+        "first_attempts": 1000
+      },
+      "metrics": {
+        "emitted_logical_operations": 2141,
+        "completed_logical_operations": 2141,
+        "first_attempt_failure_count": 510,
+        "client_requests_never_emitted": 0,
+        "first_attempt_status_counts": {
+          "200": 1612,
+          "409": 19,
+          "429": 510
+        },
+        "status_counts": {
+          "200": 2103,
+          "409": 19,
+          "429": 863
+        },
+        "new_world_commit_receipts": 21,
+        "latency_successes": {
+          "count": 2103,
+          "p50_ms": 200.0032,
+          "p95_ms": 8472.9739,
+          "p99_ms": 14542.5281
+        },
+        "model_retries": 0,
+        "correctness_errors": 0,
+        "unresolved_operational_errors": 0
+      },
+      "correctness": {
+        "new_world_revisions": 21,
+        "expected_new_world_revisions": 21,
+        "new_selected_effect_groups": 21,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99"
+      }
+    }
+  },
+  {
+    "workflow_id": 43079135306,
+    "artifact_id": 13883716679,
+    "artifact_name": "p2-load-200-overload-1",
+    "member": "run-2/load.json",
+    "source_sha256": "55647deb037ba889ae9b0d665041111d202807228bb170bcf7eb6ca6bfeb71be",
+    "result": {
+      "evidence_kind": "REAL_HTTP_REAL_POSTGRESQL_TEST_FIXTURE",
+      "schema_version": "p2-load-2",
+      "seed": 20261110,
+      "profile": "overload",
+      "logical_agent_task_count": 200,
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "NOT_MET",
+      "capacity_gate": "NOT_MET",
+      "bounded_recovery_business_gate": "PASS",
+      "external_model": {
+        "actual_calls": 0,
+        "tokens": 0,
+        "billed_cost_usd": null,
+        "status": "NOT_DISPATCHED"
+      },
+      "open_loop": {
+        "gate": "NOT_MET",
+        "actual_call_start_rps": 36.69456126730013,
+        "transport_header_start_rps": 30.330753680973963,
+        "target_rps": 1000.0,
+        "first_attempts": 1000
+      },
+      "metrics": {
+        "emitted_logical_operations": 2141,
+        "completed_logical_operations": 2141,
+        "first_attempt_failure_count": 538,
+        "client_requests_never_emitted": 0,
+        "first_attempt_status_counts": {
+          "200": 1584,
+          "409": 19,
+          "429": 538
+        },
+        "status_counts": {
+          "200": 2099,
+          "409": 19,
+          "429": 939
+        },
+        "new_world_commit_receipts": 21,
+        "latency_successes": {
+          "count": 2099,
+          "p50_ms": 191.6142,
+          "p95_ms": 7875.004,
+          "p99_ms": 12873.207
+        },
+        "model_retries": 0,
+        "correctness_errors": 0,
+        "unresolved_operational_errors": 0
+      },
+      "correctness": {
+        "new_world_revisions": 21,
+        "expected_new_world_revisions": 21,
+        "new_selected_effect_groups": 21,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99"
+      }
+    }
+  },
+  {
+    "workflow_id": 43079135306,
+    "artifact_id": 13883467468,
+    "artifact_name": "p2-load-50-mixed-1",
+    "member": "run-1/load.json",
+    "source_sha256": "5e960d6c3084cb665c7533b97f85368d42ac8b7eca83ec8d929fd6af0328ff34",
+    "result": {
+      "evidence_kind": "REAL_HTTP_REAL_POSTGRESQL_TEST_FIXTURE",
+      "schema_version": "p2-load-2",
+      "seed": 20261110,
+      "profile": "mixed",
+      "logical_agent_task_count": 50,
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "PASS",
+      "capacity_gate": "PASS",
+      "bounded_recovery_business_gate": "PASS",
+      "external_model": {
+        "actual_calls": 0,
+        "tokens": 0,
+        "billed_cost_usd": null,
+        "status": "NOT_DISPATCHED"
+      },
+      "open_loop": {
+        "gate": "NOT_APPLICABLE",
+        "target_rps": null,
+        "first_attempts": 0
+      },
+      "metrics": {
+        "emitted_logical_operations": 286,
+        "completed_logical_operations": 286,
+        "first_attempt_failure_count": 0,
+        "client_requests_never_emitted": 0,
+        "first_attempt_status_counts": {
+          "200": 282,
+          "409": 4
+        },
+        "status_counts": {
+          "200": 282,
+          "409": 4
+        },
+        "new_world_commit_receipts": 6,
+        "latency_successes": {
+          "count": 282,
+          "p50_ms": 50.8216,
+          "p95_ms": 265.7542,
+          "p99_ms": 698.6687
+        },
+        "model_retries": 0,
+        "correctness_errors": 0,
+        "unresolved_operational_errors": 0
+      },
+      "correctness": {
+        "new_world_revisions": 6,
+        "expected_new_world_revisions": 6,
+        "new_selected_effect_groups": 6,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99"
+      }
+    }
+  },
+  {
+    "workflow_id": 43079135306,
+    "artifact_id": 13883467468,
+    "artifact_name": "p2-load-50-mixed-1",
+    "member": "run-2/load.json",
+    "source_sha256": "9d8a13f99f0694f5d8f570faccff96f84521b84698182ccfd3f23b3f75aa6426",
+    "result": {
+      "evidence_kind": "REAL_HTTP_REAL_POSTGRESQL_TEST_FIXTURE",
+      "schema_version": "p2-load-2",
+      "seed": 20261110,
+      "profile": "mixed",
+      "logical_agent_task_count": 50,
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "PASS",
+      "capacity_gate": "PASS",
+      "bounded_recovery_business_gate": "PASS",
+      "external_model": {
+        "actual_calls": 0,
+        "tokens": 0,
+        "billed_cost_usd": null,
+        "status": "NOT_DISPATCHED"
+      },
+      "open_loop": {
+        "gate": "NOT_APPLICABLE",
+        "target_rps": null,
+        "first_attempts": 0
+      },
+      "metrics": {
+        "emitted_logical_operations": 286,
+        "completed_logical_operations": 286,
+        "first_attempt_failure_count": 0,
+        "client_requests_never_emitted": 0,
+        "first_attempt_status_counts": {
+          "200": 282,
+          "409": 4
+        },
+        "status_counts": {
+          "200": 282,
+          "409": 4
+        },
+        "new_world_commit_receipts": 6,
+        "latency_successes": {
+          "count": 282,
+          "p50_ms": 43.6423,
+          "p95_ms": 111.0283,
+          "p99_ms": 221.0728
+        },
+        "model_retries": 0,
+        "correctness_errors": 0,
+        "unresolved_operational_errors": 0
+      },
+      "correctness": {
+        "new_world_revisions": 6,
+        "expected_new_world_revisions": 6,
+        "new_selected_effect_groups": 6,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99"
+      }
+    }
+  },
+  {
+    "workflow_id": 43079135306,
+    "artifact_id": 13882989692,
+    "artifact_name": "p2-load-50-overload-1",
+    "member": "run-1/load.json",
+    "source_sha256": "7f250cc0a8f1245edce399b1d4d653b2b52c55d9192a8237024474302e2b241b",
+    "result": {
+      "evidence_kind": "REAL_HTTP_REAL_POSTGRESQL_TEST_FIXTURE",
+      "schema_version": "p2-load-2",
+      "seed": 20261110,
+      "profile": "overload",
+      "logical_agent_task_count": 50,
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "NOT_MET",
+      "capacity_gate": "NOT_MET",
+      "bounded_recovery_business_gate": "PASS",
+      "external_model": {
+        "actual_calls": 0,
+        "tokens": 0,
+        "billed_cost_usd": null,
+        "status": "NOT_DISPATCHED"
+      },
+      "open_loop": {
+        "gate": "NOT_MET",
+        "actual_call_start_rps": 78.64413717432556,
+        "transport_header_start_rps": 52.27635169010082,
+        "target_rps": 1000.0,
+        "first_attempts": 250
+      },
+      "metrics": {
+        "emitted_logical_operations": 536,
+        "completed_logical_operations": 536,
+        "first_attempt_failure_count": 74,
+        "client_requests_never_emitted": 0,
+        "first_attempt_status_counts": {
+          "200": 458,
+          "409": 4,
+          "429": 74
+        },
+        "status_counts": {
+          "200": 532,
+          "409": 4,
+          "429": 76
+        },
+        "new_world_commit_receipts": 6,
+        "latency_successes": {
+          "count": 532,
+          "p50_ms": 113.8723,
+          "p95_ms": 4628.4532,
+          "p99_ms": 5510.5145
+        },
+        "model_retries": 0,
+        "correctness_errors": 0,
+        "unresolved_operational_errors": 0
+      },
+      "correctness": {
+        "new_world_revisions": 6,
+        "expected_new_world_revisions": 6,
+        "new_selected_effect_groups": 6,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99"
+      }
+    }
+  },
+  {
+    "workflow_id": 43079135306,
+    "artifact_id": 13882989692,
+    "artifact_name": "p2-load-50-overload-1",
+    "member": "run-2/load.json",
+    "source_sha256": "fb470ec4f54837b3d1c97551845174b3bf057ab6f7f2f92202ff1115aaa23c10",
+    "result": {
+      "evidence_kind": "REAL_HTTP_REAL_POSTGRESQL_TEST_FIXTURE",
+      "schema_version": "p2-load-2",
+      "seed": 20261110,
+      "profile": "overload",
+      "logical_agent_task_count": 50,
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "NOT_MET",
+      "capacity_gate": "NOT_MET",
+      "bounded_recovery_business_gate": "PASS",
+      "external_model": {
+        "actual_calls": 0,
+        "tokens": 0,
+        "billed_cost_usd": null,
+        "status": "NOT_DISPATCHED"
+      },
+      "open_loop": {
+        "gate": "NOT_MET",
+        "actual_call_start_rps": 87.58554099900266,
+        "transport_header_start_rps": 53.23584119043043,
+        "target_rps": 1000.0,
+        "first_attempts": 250
+      },
+      "metrics": {
+        "emitted_logical_operations": 536,
+        "completed_logical_operations": 536,
+        "first_attempt_failure_count": 81,
+        "client_requests_never_emitted": 0,
+        "first_attempt_status_counts": {
+          "200": 451,
+          "409": 4,
+          "429": 81
+        },
+        "status_counts": {
+          "200": 532,
+          "409": 4,
+          "429": 83
+        },
+        "new_world_commit_receipts": 6,
+        "latency_successes": {
+          "count": 532,
+          "p50_ms": 126.3574,
+          "p95_ms": 4957.0477,
+          "p99_ms": 5655.6649
+        },
+        "model_retries": 0,
+        "correctness_errors": 0,
+        "unresolved_operational_errors": 0
+      },
+      "correctness": {
+        "new_world_revisions": 6,
+        "expected_new_world_revisions": 6,
+        "new_selected_effect_groups": 6,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99"
+      }
+    }
+  },
+  {
+    "workflow_id": 43079135239,
+    "artifact_id": 13885075198,
+    "artifact_name": "p3-scale-500-mixed-1",
+    "member": "result.json",
+    "source_sha256": "4835ad8d6da8681b412c4dac0274eba4dcdcabccbe44e3f0ae32493b5480a5e5",
+    "result": {
+      "evidence_kind": "REAL_HTTP_REAL_POSTGRESQL_TEST_FIXTURE",
+      "schema_version": "p2-load-2",
+      "seed": 20261110,
+      "profile": "mixed",
+      "logical_agent_task_count": 500,
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "PASS",
+      "capacity_gate": "PASS",
+      "bounded_recovery_business_gate": "PASS",
+      "external_model": {
+        "actual_calls": 0,
+        "tokens": 0,
+        "billed_cost_usd": null,
+        "status": "NOT_DISPATCHED"
+      },
+      "open_loop": {
+        "gate": "NOT_APPLICABLE",
+        "target_rps": null,
+        "first_attempts": 0
+      },
+      "metrics": {
+        "emitted_logical_operations": 2851,
+        "completed_logical_operations": 2851,
+        "first_attempt_failure_count": 0,
+        "client_requests_never_emitted": 0,
+        "first_attempt_status_counts": {
+          "200": 2802,
+          "409": 49
+        },
+        "status_counts": {
+          "200": 2802,
+          "409": 49
+        },
+        "new_world_commit_receipts": 51,
+        "latency_successes": {
+          "count": 2802,
+          "p50_ms": 85.626,
+          "p95_ms": 327.4306,
+          "p99_ms": 619.3532
+        },
+        "model_retries": 0,
+        "correctness_errors": 0,
+        "unresolved_operational_errors": 0
+      },
+      "correctness": {
+        "new_world_revisions": 51,
+        "expected_new_world_revisions": 51,
+        "new_selected_effect_groups": 51,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99"
+      }
+    }
+  },
+  {
+    "workflow_id": 43079135239,
+    "artifact_id": 13883822243,
+    "artifact_name": "p3-scale-500-read-soak-1",
+    "member": "result.json",
+    "source_sha256": "c639e68ac21c0ea6ddac9333b308970fe315d8b1a531ed5431be4a4ede55a9da",
+    "result": {
+      "evidence_kind": "REAL_HTTP_POSTGRESQL_READ_ONLY_STABILITY_PROBE",
+      "schema_version": "p3-stability-1",
+      "probe_gate": "PASS",
+      "long_duration_gate": "NOT_EXECUTED",
+      "real_model_calls": 0,
+      "new_world_commits": 0,
+      "world_unchanged": true,
+      "scheduled_count": 12000,
+      "actual_call_start_rps": 20.000699436277348,
+      "successful_query_rps": 19.999481137227942,
+      "duration_seconds": 600.0155662870001,
+      "status_counts": {
+        "200": 12000
+      },
+      "latency_all_attempts": {
+        "count": 12000,
+        "p50_ms": 87.0258,
+        "p95_ms": 127.4297,
+        "p99_ms": 143.3205
+      },
+      "correctness_errors": 0
+    }
+  },
+  {
+    "workflow_id": 43079135239,
+    "artifact_id": 13883123098,
+    "artifact_name": "p3-scale-1000-read-open-1",
+    "member": "result.json",
+    "source_sha256": "46fff286fd76638bcbf5a32707a0b83d9a63fc35cdb928fb8350d3c9c2351db6",
+    "result": {
+      "evidence_kind": "REAL_HTTP_POSTGRESQL_OPEN_ARRIVAL",
+      "schema_version": "p3-open-arrival-1",
+      "capacity_gate": "NOT_MET",
+      "offered_wire_rate_gate": "NOT_MET",
+      "real_model_calls": 0,
+      "new_world_commits": 0,
+      "world_unchanged": true,
+      "validated_successes": 1856,
+      "dispatch_start_rps": 42.16918289783423,
+      "observed_wire_start_rps": 40.96236741425179,
+      "successful_query_rps": 15.12768433536407,
+      "status_counts": {
+        "429": 3126,
+        "200": 1856,
+        "transport_error": 18
+      },
+      "latency_all_attempts": {
+        "count": 5000,
+        "p50_ms": 2641.0459,
+        "p95_ms": 6134.9023,
+        "p99_ms": 9954.1075
+      },
+      "correctness_errors": 0
+    }
+  }
+]
