@@ -1,0 +1,235 @@
+{
+  "stage": "W6",
+  "candidate_or_main": "50c8c5ed36cc2cfb83d6624c65ed33336e0f1771",
+  "github_checked_out": "a1f1021ade678261159d2d855617b1b9913e9283",
+  "artifacts": {
+    "workshop-results": {
+      "archive_sha256": "f006c4ec13ff8296012ef482a321a944825e779ec10cec36f0cbd08a44dce29e",
+      "junit": {
+        "workshop-results.xml": {
+          "tests": 84,
+          "skipped": 0,
+          "errors": 0,
+          "failures": 0
+        },
+        "nf-tools.xml": {
+          "tests": 5,
+          "skipped": 0,
+          "errors": 0,
+          "failures": 0
+        },
+        "dual-service-results.xml": {
+          "tests": 2,
+          "skipped": 0,
+          "errors": 0,
+          "failures": 0
+        },
+        "w1-legacy-upgrade.xml": {
+          "tests": 1,
+          "skipped": 0,
+          "errors": 0,
+          "failures": 0
+        },
+        "w2-legacy-upgrades.xml": {
+          "tests": 3,
+          "skipped": 0,
+          "errors": 0,
+          "failures": 0
+        },
+        "w3-legacy-upgrades.xml": {
+          "tests": 2,
+          "skipped": 0,
+          "errors": 0,
+          "failures": 0
+        },
+        "w4-reviews-skills-upgrades.xml": {
+          "tests": 27,
+          "skipped": 0,
+          "errors": 0,
+          "failures": 0
+        },
+        "w4-historical-upgrades.xml": {
+          "tests": 3,
+          "skipped": 0,
+          "errors": 0,
+          "failures": 0
+        },
+        "w5-historical-upgrades.xml": {
+          "tests": 4,
+          "skipped": 0,
+          "errors": 0,
+          "failures": 0
+        },
+        "w6-historical-upgrades.xml": {
+          "tests": 8,
+          "skipped": 0,
+          "errors": 0,
+          "failures": 0
+        },
+        "dual-results.xml": {
+          "tests": 4,
+          "skipped": 0,
+          "errors": 0,
+          "failures": 0
+        }
+      }
+    },
+    "workshop-scene-recovery-results": {
+      "archive_sha256": "f1dd20b3e95bdbd6ef288eab94f87669c0cb581c64ee385eee55f2cf3dbb4ce0",
+      "junit": {
+        "scene-results.xml": {
+          "tests": 2,
+          "skipped": 0,
+          "errors": 0,
+          "failures": 0
+        },
+        "capacity-results.xml": {
+          "tests": 3,
+          "skipped": 0,
+          "errors": 0,
+          "failures": 0
+        },
+        "ci-evidence/at43-at49-junit.xml": {
+          "tests": 2,
+          "skipped": 0,
+          "errors": 0,
+          "failures": 0
+        }
+      }
+    },
+    "workshop-comparisons": {
+      "archive_sha256": "01b9f94b88e754ec73c000664360393f76cdd58614a37ea8eb82df89c8337407",
+      "junit": {
+        "scene-results.xml": {
+          "tests": 2,
+          "skipped": 0,
+          "errors": 0,
+          "failures": 0
+        },
+        "capacity-results.xml": {
+          "tests": 6,
+          "skipped": 0,
+          "errors": 0,
+          "failures": 0
+        }
+      }
+    },
+    "nf-bridge-results": {
+      "archive_sha256": "cde933fb6d4747b6518f179e5523f8cfd177ab2c98cf5e012c464c5944c3103a",
+      "junit": {
+        "dual-service.xml": {
+          "tests": 1,
+          "skipped": 0,
+          "errors": 0,
+          "failures": 0
+        },
+        "nf-delegation.xml": {
+          "tests": 18,
+          "skipped": 0,
+          "errors": 0,
+          "failures": 0
+        }
+      }
+    }
+  },
+  "engineering_fixtures": {
+    "Minimal": {
+      "sha256": "1d1354676452504d1612dc9dd7f511063b4d02e9b5153e79849362d992006f23",
+      "scheduled_lookups": [
+        {
+          "wait_seconds": 0.0,
+          "result": "BOUND"
+        },
+        {
+          "wait_seconds": 0.0,
+          "result": "SETTLED"
+        }
+      ],
+      "text_ref": {
+        "sha256": "41c9ff95dfce31ba8ac471194a283a62258febab76e7839e55e9d03ded0faa3d",
+        "artifact_id": "5a4507a2-bfda-4a33-8539-aa983f9dc4cf",
+        "artifact_revision_id": "5531b19b-c8bd-4b9f-a831-49f4cb64656e"
+      },
+      "settled_hold": {
+        "status": "SETTLED",
+        "settled_fixture_amount": "0.020000"
+      },
+      "accepted_tasks": 11
+    },
+    "Standard": {
+      "sha256": "805329d61db780fd2a4714a8bc99111b467566e0b5c165d4984774043a976e33",
+      "scheduled_lookups": [
+        {
+          "wait_seconds": 0.0,
+          "result": "BOUND"
+        },
+        {
+          "wait_seconds": 0.038979,
+          "result": "SETTLED"
+        }
+      ],
+      "text_ref": {
+        "sha256": "41c9ff95dfce31ba8ac471194a283a62258febab76e7839e55e9d03ded0faa3d",
+        "artifact_id": "b3b9a270-42e3-4851-b72f-007a994bece3",
+        "artifact_revision_id": "7f464fa1-1aba-4f19-a777-8784497edeb1"
+      },
+      "settled_hold": {
+        "status": "SETTLED",
+        "settled_fixture_amount": "0.020000"
+      },
+      "accepted_tasks": 11
+    },
+    "Long-form": {
+      "sha256": "699a95f40a10f0a8d066ab7e22dce8c423b7cc7314cab20ca4a9500908084909",
+      "scheduled_lookups": [
+        {
+          "wait_seconds": 0.0,
+          "result": "BOUND"
+        },
+        {
+          "wait_seconds": 0.0,
+          "result": "SETTLED"
+        }
+      ],
+      "text_ref": {
+        "sha256": "41c9ff95dfce31ba8ac471194a283a62258febab76e7839e55e9d03ded0faa3d",
+        "artifact_id": "5ff1382f-fc62-4179-a801-623aeedb9a6d",
+        "artifact_revision_id": "75ab490b-3dbe-4d9d-9ba6-dd8ffa8978f4"
+      },
+      "settled_hold": {
+        "status": "SETTLED",
+        "settled_fixture_amount": "0.020000"
+      },
+      "accepted_tasks": 11
+    },
+    "Research-Audit": {
+      "sha256": "533d94e8c4c3dfa6574140b7539d0ffe67f97e63f4fef6cda6525dfbc8143114",
+      "scheduled_lookups": [
+        {
+          "wait_seconds": 0.0,
+          "result": "BOUND"
+        },
+        {
+          "wait_seconds": 0.0,
+          "result": "SETTLED"
+        }
+      ],
+      "text_ref": {
+        "sha256": "41c9ff95dfce31ba8ac471194a283a62258febab76e7839e55e9d03ded0faa3d",
+        "artifact_id": "d0bcfd5e-87c6-404a-ba3a-2d63c30d2773",
+        "artifact_revision_id": "6746919d-c323-4b25-bf6d-d19da380bfb7"
+      },
+      "settled_hold": {
+        "status": "SETTLED",
+        "settled_fixture_amount": "0.020000"
+      },
+      "accepted_tasks": 11
+    }
+  },
+  "two_distinct_db_system_identifiers": [
+    "7707055919437807654",
+    "7707055923323346982"
+  ],
+  "commercial_model_calls": 0,
+  "human_literary_blind_evaluation": false
+}
