@@ -1,0 +1,142 @@
+{
+  "qualifier": "independent local staged code before candidate PR; original live product SHA retained per fixture",
+  "qualifier_commit": "21527c9937138db6a93a22a0d11e4df5cef6968f",
+  "tree": "5d72443032173ab8dd308272cc975c20bdf390dd",
+  "unjoined_heads": [
+    "w004c",
+    "w005b"
+  ],
+  "negative_control": {
+    "without_roster_trigger_fix": [
+      "test_historical_ledger_and_wake_authority[original-w5]",
+      "test_historical_ledger_and_wake_authority[w5a]"
+    ],
+    "historical_event_rows_before_after": [
+      45,
+      81
+    ],
+    "source_cuts_changed": true
+  },
+  "positive": {
+    "w004c": {
+      "app_sha": "6c711adf794842bdf4469ab51e89093d37761bcc",
+      "target": "w005c",
+      "retained_tables": 34,
+      "total_old_rows": 358,
+      "catalog": {
+        "objects": 577,
+        "triggers": 7,
+        "functions": 8,
+        "sha256": "8c15c79de44a96050f514908b104e84296331fc2a03b2015d06d6d7333820ca4"
+      },
+      "prior_wake": []
+    },
+    "w005": {
+      "app_sha": "609e92278476c60a893658ef53b6ff15f659b153",
+      "target": "w005c",
+      "retained_tables": 34,
+      "total_old_rows": 375,
+      "catalog": {
+        "objects": 577,
+        "triggers": 7,
+        "functions": 8,
+        "sha256": "8c15c79de44a96050f514908b104e84296331fc2a03b2015d06d6d7333820ca4"
+      },
+      "prior_wake": [
+        [
+          "REVOKED",
+          0
+        ]
+      ]
+    },
+    "w005a": {
+      "app_sha": "d308e1ce1986a33e4781be97fba8a862b89dd76f",
+      "target": "w005c",
+      "retained_tables": 37,
+      "total_old_rows": 375,
+      "catalog": {
+        "objects": 577,
+        "triggers": 7,
+        "functions": 8,
+        "sha256": "8c15c79de44a96050f514908b104e84296331fc2a03b2015d06d6d7333820ca4"
+      },
+      "prior_wake": [
+        [
+          "REVOKED",
+          0
+        ]
+      ]
+    },
+    "w005b": {
+      "app_sha": "bfb74f681435b12a385eb54e596c658e64629276",
+      "target": "w005c",
+      "retained_tables": 37,
+      "total_old_rows": 403,
+      "catalog": {
+        "objects": 577,
+        "triggers": 7,
+        "functions": 8,
+        "sha256": "8c15c79de44a96050f514908b104e84296331fc2a03b2015d06d6d7333820ca4"
+      },
+      "prior_wake": [
+        [
+          "DONE",
+          1
+        ]
+      ]
+    }
+  },
+  "suites": {
+    "w5/upgrade.xml": {
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "23.160"
+    },
+    "negative/upgrade.xml": {
+      "tests": "4",
+      "failures": "2",
+      "errors": "0",
+      "skipped": "0",
+      "time": "16.147"
+    },
+    "retained/retained-w0-through-w3.xml": {
+      "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "20.894"
+    },
+    "retained/w4-historical-upgrades.xml": {
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "9.208"
+    },
+    "retained/w4-reviews-skills-upgrades.xml": {
+      "tests": "27",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "23.405"
+    }
+  },
+  "archived_sha256": "32ef4e2f3ade0578ac2284d716ee71d696d5355e33900911b053733ff1bcde69",
+  "contents": {
+    "negative/pytest.log": "e5a05f84105b3a1f11f8ec8774756513bea5b42e3068beab437550268aba0d5d",
+    "negative/upgrade.xml": "949800ebe6cc1cffb0203725c996d77dc3eef38878e854dcf3845e39c50e7380",
+    "physical-restart.json": "26bf16c386bdcc225e36cef1a2119b88b0c29e9f206f7e5e8b38c981f0de7576",
+    "physical-restart.py": "2a80dac5f886db28e928c5b4cd784ca539eeaa13c06bd04bb9c6f0d78c5a0108",
+    "retained/retained-w0-through-w3.xml": "3976361edb236f409b7c2c4e57633b3528ac1b6b881d9495c52ccbe8118f0b90",
+    "retained/w4-historical-upgrades.xml": "912099771c9bf9b1132001076ea802802b336df93268fd163c8f053692fe7509",
+    "retained/w4-reviews-skills-upgrades.xml": "7f6cebeb7eb65a08095742b329c69a44946738f6ffa914afc0b0453c45bdf786",
+    "w5/pytest.log": "7714581d199e95e8becf9e93cfccb63ea1acdca819c944383cb874986539329d",
+    "w5/upgrade.xml": "357832d09b7b88059a33328a13cebdb81993fbc3090d36fd6416d31ad0cd1757",
+    "w5/w004c.json": "840685fbffa86c65f6bc9a98acb50ece4843f578ef653cee6a82c84946cd1e50",
+    "w5/w005.json": "1e13cb742b0c440c0e081b3fa7fcb13396ea76dd44d43d8f62d07cf022b36631",
+    "w5/w005a.json": "ad94bc1540882c6051b3d4823f6073bda0b445596224a8afbe20d3c84367f41f",
+    "w5/w005b.json": "c36a82fb75e065ab5766707de0526ec8366a966c3e5fd9be6881d51230c64a12"
+  }
+}
