@@ -9,7 +9,7 @@
 | W2 | [#9](https://github.com/SKYdayDUCK/NovelFactory/pull/9) | MERGED_AND_VERIFIED；[主线签收](W2_主线签收.md) | `f2c584ec8e738e09d31b05ddd5c032bb2b8f96b1`，2026-11-11T18:16:58Z |
 | NF Bridge | [#11](https://github.com/SKYdayDUCK/NovelFactory/pull/11) | MERGED_AND_VERIFIED；[主线签收](NF_Bridge_主线签收.md) | `15f606c99c765deeffd904ad540441eb6476b3af`，2026-11-11T19:02:35Z |
 | W3 | [#10](https://github.com/SKYdayDUCK/NovelFactory/pull/10) | MERGED_AND_VERIFIED，[主线签收](W3_主线签收.md) | `e6763d844f023d7c6a13060dbaebca0416fe3099`，2026-11-11T19:53:57Z |
-| W4 | [#12](https://github.com/SKYdayDUCK/NovelFactory/pull/12) | 新候选 `1cc12ca`，本地 123 通过、1 Docker 跳过。正式 [Workshop](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43102959511) / [P1](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43102959607) 已建作业。[当前候选原件](evidence/W4/candidate-1cc12ca/independent/README.md) · [前一候选 834/834 原件](https://github.com/SKYdayDUCK/NovelFactory/blob/5f07125458a0249c3203c9c0d5b03ff92abdcd50/reports/integration/evidence/W4/candidate-3ed83ff/independent/local-nf-full.md) | 尚待正式合并，主线 `e6763d844f02` |
+| W4 | [#12](https://github.com/SKYdayDUCK/NovelFactory/pull/12) | MERGED_AWAITING_MAIN_VERIFICATION，[合并双亲、同树和两轮工作流](evidence/W4/main-6c711ad/independent/merge-checkpoint.json) | `6c711adf794842bdf4469ab51e89093d37761bcc`，2026-11-11T21:42:09Z |
 | W5–W6、P6 | [矩阵](PR_MERGE_MATRIX.md) | 冻结 | 待前一阶段关闭 |
 
 每阶段的原 PR 讨论保存合并后的完整 SHA、时间、主线验收作业、遗留问题和下一阶段是否开放。后续阶段 PR 将前一阶段已确认的回执归入本表，保留原 PR 上可即时复查的记录。

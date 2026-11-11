@@ -1,5 +1,9 @@
 # 当前唯一阶段
 
+W4 [#12](https://github.com/SKYdayDUCK/NovelFactory/pull/12) 已于 2026-11-11 21:42:09 UTC 正常合入主线 `6c711adf794842bdf4469ab51e89093d37761bcc`。候选 `1cc12ca` 正式门禁通过。当前状态为 **MERGED_AWAITING_MAIN_VERIFICATION**，办理真实主线双服务、升级/故障、权限及两条 push CI 的复验；W5 仍冻结。[主线 Workshop](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43105371336) · [主线 P1](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43105371181) · [合并双亲、同树和两轮工作流](evidence/W4/main-6c711ad/independent/merge-checkpoint.json)。
+
+## 先前的候选检查
+
 当前 W4 [#12](https://github.com/SKYdayDUCK/NovelFactory/pull/12) 的新候选是 `1cc12cab018213e05b70c226dcdf63974ee7dd93`。GitHub Actions 事故结案后，这次普通快进只重触发 CI，唯一父提交为 `3ed83ffe779bf15e7965f2b2fc8236abaf90ff72`，相同的产品树为 `cb601579cceafd8cd33d35664a31f8d9dd38c879`。21:26:37 UTC 新 P1 已分配两项作业，Workshop 已建作业；旧两运行仍为零作业。新的精确 SHA 已独立跑完 13 套，123 项通过、1 个本地 Docker 检查跳过，另有 17 项原生角色测试及实际阅读覆盖、NF 报告和费用的附加复验。主线仍为 `e6763d844f023d7c6a13060dbaebca0416fe3099`，W4 必须取得正式 CI 和合并后复验才签收。[Workshop](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43102959511) · [P1](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43102959607) · [当前候选原件](evidence/W4/candidate-1cc12ca/independent/README.md) · [正式运行、合并模拟树和父提交](evidence/W4/candidate-1cc12ca/independent/candidate-checkpoint.json)。
 
 ## 先前候选的检查记录

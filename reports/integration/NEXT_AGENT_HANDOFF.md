@@ -1,5 +1,9 @@
 # 恢复入口
 
+W4 [#12](https://github.com/SKYdayDUCK/NovelFactory/pull/12) 已于 2026-11-11 21:42:09 UTC 正常合入主线 `6c711adf794842bdf4469ab51e89093d37761bcc`。候选 `1cc12ca` 正式门禁通过。当前状态为 **MERGED_AWAITING_MAIN_VERIFICATION**，办理真实主线双服务、升级/故障、权限及两条 push CI 的复验；W5 仍冻结。[主线 Workshop](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43105371336) · [主线 P1](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43105371181) · [合并双亲、同树和两轮工作流](evidence/W4/main-6c711ad/independent/merge-checkpoint.json)。
+
+## 先前的候选检查
+
 **先恢复 W4 新候选。** [#12](https://github.com/SKYdayDUCK/NovelFactory/pull/12) 当前 head `1cc12cab018213e05b70c226dcdf63974ee7dd93`，main 基线 `e6763d844f023d7c6a13060dbaebca0416fe3099`，旧候选 `3ed83ffe779bf15e7965f2b2fc8236abaf90ff72` 是唯一父提交。先复查新 [Workshop](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43102959511) / [P1](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43102959607) 及各自作业、原始工件、检出与树；独立 13 套和精确覆盖回执已归档。若两条正式 CI 全部通过，正常合并，然后在真实 main 重跑双 MCP、PG17、Redis、Skills/审核、原文覆盖、历史升级和适用 CI，发布 W4 签收之后才处理 W5。历史两项 queued 的原运行与完整本地 NF 回归保存在旧候选目录。[当前候选原件](evidence/W4/candidate-1cc12ca/independent/README.md) · [正式运行、合并模拟树和父提交](evidence/W4/candidate-1cc12ca/independent/candidate-checkpoint.json) · [前一候选 834/834 原件](https://github.com/SKYdayDUCK/NovelFactory/blob/5f07125458a0249c3203c9c0d5b03ff92abdcd50/reports/integration/evidence/W4/candidate-3ed83ff/independent/local-nf-full.md)。
 
 Workshop W4 [#12](https://github.com/SKYdayDUCK/NovelFactory/pull/12)。启动时远端既有分支 `dev/aw-w4`、头 `71b471416c9407e348d4bdce817588def5f11d5b`、原目标 `dev/aw-w3`。正式集成以最新 `main` 为目标。已签收的基线为 [W3 `e6763d844f023d7c6a13060dbaebca0416fe3099`](W3_主线签收.md)。
