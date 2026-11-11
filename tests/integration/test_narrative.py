@@ -39,9 +39,9 @@ def arrange(k, f=None):
     return {**f, "plan": plan, "plan_ref": plan_ref, "narrative_id": uid()}
 
 
-def scene_for(k, f, *, event_refs=(), checks=(), ordinal=0, disclosures=()):
+def scene_for(k, f, *, event_refs=(), checks=(), ordinal=0, disclosures=(), interval=None):
     scene = {"schema_version": "2.2", "scene_contract": {"schema_version": "2.0", "scene_id": uid(),
-        "input_world_ref": f["world_ref"], "story_interval": {"start": point(1), "end": point(2, 1), "bounds": "[)"},
+        "input_world_ref": f["world_ref"], "story_interval": interval or {"start": point(1), "end": point(2, 1), "bounds": "[)"},
         "event_refs": list(event_refs), "entry_commitments": [], "exit_commitments": [],
         "pov_actor_id": f["ids"]["protagonist"], "narrator_mode": "limited", "narrative_revision_id": f["narrative_id"],
         "arrangement_version": "narrative-tests-1", "reader_cut_ordinal": ordinal, "allowed_invention": ["surface detail"],
@@ -51,7 +51,7 @@ def scene_for(k, f, *, event_refs=(), checks=(), ordinal=0, disclosures=()):
         "entry_checks": [], "exit_checks": list(checks), "allowed_disclosures": list(disclosures), "literary_purpose": "counterexample evidence"}
     ref = NarrativeService(k).save_scene(f["principal"], scene, "scene:" + scene["scene_contract"]["scene_id"])
     writer = runtime_grant(k, f, "writer")
-    task = task_for(k, f, writer, [ref, f["plan_ref"]], story_time=point(2, 1))
+    task = task_for(k, f, writer, [ref, f["plan_ref"]], story_time=scene["scene_contract"]["story_interval"]["end"])
     PlanningService(k).bind_task_for_controller(f["principal"], task["task_id"], task["generation"], f["plan_ref"], scene["plan_node_ids"], "bind:" + task["task_id"])
     return {"scene": scene, "scene_ref": ref, "writer": writer, "task": task}
 
@@ -66,7 +66,7 @@ def draft_for(k, f, text, *, deltas=(), **scene_options):
 def extract(k, f, item, assertions):
     s = NarrativeService(k)
     reader = runtime_grant(k, f, "reviewer")
-    task = task_for(k, f, reader, [item["draft_ref"]], "extract", story_time=point(2, 1))
+    task = task_for(k, f, reader, [item["draft_ref"]], "extract", story_time=item["scene"]["scene_contract"]["story_interval"]["end"])
     s.bind_reader_task(f["principal"], task["task_id"], task["generation"], [item["draft_ref"]], "reader:" + task["task_id"])
     read = s.read_text(reader, task["task_id"], task["generation"], item["draft_ref"])
     ref = s.submit_extraction(reader, task["task_id"], task["generation"], item["draft_ref"], read["delivery_ref"], assertions, "extract:" + task["task_id"])

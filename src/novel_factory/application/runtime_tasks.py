@@ -30,17 +30,27 @@ class PreparedRuntimeTask:
     private_token: str = field(repr=False)
 
 
+@dataclass(frozen=True)
+class RuntimeDefinition:
+    principal: Principal
+    spec: dict
+    agent_input: dict
+    manifest_ref: dict
+    cut: dict
+    private_token: str = field(repr=False)
+
+
 class RuntimeTaskService:
     def __init__(self, kernel, gateway):
         self.kernel, self.gateway = kernel, gateway
 
-    def prepare(self, controller, world_ref, *, role_id, task_kind, story_time,
+    def define(self, controller, world_ref, *, role_id, task_kind, story_time,
                 subject_ids, predicates, assignment, adapter_id,
                 knowledge_cut=None, actor_id=None, input_artifacts=(), material_refs=(),
-                max_amount="1", token_budget=200_000, context_token_budget=20_000,
+                max_amount="1", token_budget=200_000,
                 currency="USD", lease_seconds=600, deadline_seconds=3600,
                 skill_name=None, queue_state=None):
-        """Create, lease and compile a task using a fixed world and runtime.
+        """Freeze authorized inputs and issue a fresh role grant, without enqueueing work.
 
         The controller must possess ADMIN already. Runtime grants receive only
         READ/COMPILE/TASK_CREATE/TASK_CLAIM/ARTIFACT_WRITE and, solely for a
@@ -91,20 +101,27 @@ class RuntimeTaskService:
             "capability_grant_id": principal.grant_id, "input_artifacts": inputs,
             "budget": {"currency": currency, "max_amount": max_amount, "token_budget": token_budget},
             "wall_deadline": (datetime.now(timezone.utc) + timedelta(seconds=deadline_seconds)).isoformat()}
+        return RuntimeDefinition(principal, spec, prepared, manifest, cut, granted["token"])
+
+    def prepare(self, controller, world_ref, *, context_token_budget=20_000, lease_seconds=600,
+                queue_state=None, **definition):
+        frozen = self.define(controller, world_ref, lease_seconds=lease_seconds, queue_state=queue_state, **definition)
+        principal, spec = frozen.principal, frozen.spec
+        task_id, prepared, manifest = spec["task_id"], frozen.agent_input, frozen.manifest_ref
         created = self.kernel.create_task(principal, spec, "runtime-create:" + task_id)
         if queue_state is not None:
-            return PreparedRuntimeTask(principal, created, spec, prepared, manifest, None, None, granted["token"])
+            return PreparedRuntimeTask(principal, created, spec, prepared, manifest, None, None, frozen.private_token)
         worker = "runtime:" + task_id
         task = self.kernel.claim_task(principal, worker, task_id=task_id, lease_seconds=lease_seconds)
         context = WorldQueryService(self.kernel).context_compile(principal, {
             "schema_version": "2.1", "task_id": task_id, "generation": task["generation"],
-            "recipe_id": role["allowed_recipes"][0], "input_manifest_ref": manifest,
+            "recipe_id": profiles()[spec["role_id"]]["allowed_recipes"][0], "input_manifest_ref": manifest,
             "read_contract": {"revision": {"mode": "FIXED", "world_ref": world_ref},
                               "process_policy": "ALLOW_PARTIAL", "index_policy": "AUTHORITATIVE", "max_wait_ms": 0},
-            "knowledge_cut": cut, "subject_time": {"kind": "POINT", "at": story_time},
+            "knowledge_cut": frozen.cut, "subject_time": {"kind": "POINT", "at": spec["story_time"]},
             "token_budget": context_token_budget, "idempotency_key": "runtime-compile:" + task_id})
         require(context["status"] == "READY", "CONTEXT_REQUIRED", "Runtime compilation is blocked")
         with self.kernel.db.uow(write=False) as repo:
             current = repo.one("tasks", {"task_id": task_id})
         return PreparedRuntimeTask(principal, task, spec, prepared, manifest,
-                                   current["context_bundle_id"], worker, granted["token"])
+                                   current["context_bundle_id"], worker, frozen.private_token)
