@@ -1,0 +1,94 @@
+{
+  "stage": "Workshop W4",
+  "status": "MERGED_AND_VERIFIED",
+  "pr": 12,
+  "merged_at_utc": "2026-11-11T21:42:09Z",
+  "main_sha": "6c711adf794842bdf4469ab51e89093d37761bcc",
+  "tree_sha": "cb601579cceafd8cd33d35664a31f8d9dd38c879",
+  "base_sha": "e6763d844f023d7c6a13060dbaebca0416fe3099",
+  "source_sha": "1cc12cab018213e05b70c226dcdf63974ee7dd93",
+  "hosted": {
+    "workshop": 43105371336,
+    "p1": 43105371181,
+    "workshop_passed": 124,
+    "workshop_skipped": 0,
+    "unit_passed": 398,
+    "postgres_passed": 817,
+    "postgres_skipped_host_support": 17,
+    "all_17_skipped_cases_matched_to_native_passes": true
+  },
+  "main_native_nf": {
+    "tests": "834",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "time": "686.900"
+  },
+  "native_workshop": {
+    "passed": 123,
+    "docker_unavailable": 1,
+    "independent_linux_role_passes": 17
+  },
+  "physical_pitr_replay_lsns": [
+    "0/4020B10",
+    "0/406F0E8"
+  ],
+  "paid_review_fixture": {
+    "review_id": "cc792d07-c900-4e82-8f74-a7e0ef86bc49",
+    "operation_id": "6f30abce-3651-44e7-a4f5-3053ef968f35",
+    "task_id": "859fd228-768f-4142-b658-59259c2ab56b",
+    "nf_receipt": "811aaa97-6e93-4e8f-bca6-7db0664822d1",
+    "nf_report": {
+      "artifact_id": "d64b215e-b60e-4e51-84f0-0842e2ab5c1c",
+      "artifact_revision_id": "4f3008e0-5a7f-465f-9b7f-94e5ea8bc603",
+      "sha256": "9e718e7b68e435cfc2c3cb33f3e98c91084147587a736b4ab30f49318f8799b3"
+    },
+    "source_sha": "13159dacccc69fe7d51e2b82d3394941de25c9a1308cc8056a9afae6392537c8",
+    "skill_sha": "def31cff6d127e5203945818743e1718d12f25d0f41788ad841bf09536b83b76",
+    "attempt_id": "b6f190fd-214c-4e37-bcc3-77232cf1983e",
+    "tokens": 18,
+    "settled": "0.020000",
+    "reserved": "0.10",
+    "generation": 1,
+    "result": "APPROVED",
+    "loopback_http_requests": 1,
+    "commercial_calls": 0
+  },
+  "observed_source_coverage": {
+    "task_id": "b8318d4a-fd36-4aaf-8a0f-bc27092c62e2",
+    "generation": 1,
+    "coverage_ref": {
+      "artifact_id": "a0e5c56a-0080-460b-9179-73b6bf25a677",
+      "artifact_revision_id": "3f6dd652-1e2b-413e-baab-e44088e2562a",
+      "sha256": "cc3912a5f799bc31609e6429c12df052f97f17d108e4379048ba24ed8bc4f7ab"
+    },
+    "delivery_ref": {
+      "artifact_id": "ecb830f1-e3fd-4027-ad30-abab1fff43cd",
+      "artifact_revision_id": "6a57d8aa-8095-4aec-a24e-47ac6ee2c8ca",
+      "sha256": "ce37044a3757a246912dbedf556be544bf7174f50bacbf448b0ac9db0a180ed5"
+    },
+    "text_ref": {
+      "sha256": "13159dacccc69fe7d51e2b82d3394941de25c9a1308cc8056a9afae6392537c8",
+      "artifact_id": "654d9818-eeb1-43d4-a91e-120864e74fb4",
+      "artifact_revision_id": "b867d645-e819-4962-ac97-a32fe7d98805"
+    },
+    "draft_ref": {
+      "artifact_id": "5d190209-e088-4df9-9cbd-edaef3f271d7",
+      "artifact_revision_id": "d5202d2e-338e-414b-872a-c23cdd23cd37",
+      "sha256": "2fb4b6a126c7056c20c4e571473e6fbd4e3de7c33bc26b1157fa08a936bd79b8"
+    },
+    "span": {
+      "start": 0,
+      "end": 25,
+      "unit": "UNICODE_CODEPOINT",
+      "quote_sha256": "13159dacccc69fe7d51e2b82d3394941de25c9a1308cc8056a9afae6392537c8"
+    },
+    "read_mode": "FULL_TEXT",
+    "delivered_codepoints": 25,
+    "delivered_bytes": 71,
+    "delivered_sha256": "13159dacccc69fe7d51e2b82d3394941de25c9a1308cc8056a9afae6392537c8"
+  },
+  "provider_commercial_calls": 0,
+  "historical_limits": "Issue #13 original AT-30 measurements; no W4 volume-load workflow triggered. P6_REAL_CREATION = BLOCKED_LOCAL_AUTHORIZATION",
+  "only_next_eligible_stage": "Workshop W5 #14"
+}
