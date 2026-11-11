@@ -6,6 +6,14 @@ Workshop W4 [#12](https://github.com/SKYdayDUCK/NovelFactory/pull/12)。启动�
 
 [交付台账](DELIVERY_LEDGER.md) · [完整矩阵](PR_MERGE_MATRIX.md) · [已知限制](KNOWN_FAILURES.md)。
 
+## W4 托管 CI 恢复
+
+2026-11-11 21:02:59 UTC，#12 候选 `3ed83ffe779bf15e7965f2b2fc8236abaf90ff72`、树 `cb601579cceafd8cd33d35664a31f8d9dd38c879`，基线 `e6763d844f023d7c6a13060dbaebca0416fe3099`。GitHub Actions 组件已于 20:48:25 UTC 标为 `major_outage`。[GitHub 平台事件](https://www.githubstatus.com/incidents/dvy0t3mvh1lg) · [该时点的 GitHub 状态、PR、main、作业与部署审批回执](evidence/W4/candidate-3ed83ff/platform-outage-20261111T210259Z/checkpoint.json)。
+
+1. 复查 #12 的 head、main、原 [Workshop CI](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43096271063)、原 [P1 CI](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43096270977)。此快照两项均 queued、0 jobs、无待部署审批。候选同 SHA 已有 NF 834/834 和双服务专项证据。[NF 全量原件及三次运行](https://github.com/SKYdayDUCK/NovelFactory/blob/5f07125458a0249c3203c9c0d5b03ff92abdcd50/reports/integration/evidence/W4/candidate-3ed83ff/independent/local-nf-full.md) · [双库、124 个候选用例和附加阅读覆盖](https://github.com/SKYdayDUCK/NovelFactory/blob/57f5c3e0b08112330b77d2016465f78587d81ea6/reports/integration/evidence/W4/candidate-3ed83ff/independent/README.md)。
+2. 原运行获得 runner 后持续核对作业、实际 checkout、两份 Workshop 工件和 P1 原始 JUnit。若 head、base 或树发生变化，按实际变更重新确认候选依据。等待实际托管成功后按正式 PR 合并。
+3. 以 GitHub 产生的真实合并 SHA 再跑新旧库升级、双 MCP、阅读覆盖、Skills 权限、两侧 WAL、Redis 恢复及适用主线 CI，保存主线回执，签收 W4 后才允许 W5。
+
 ## 后续串行交付顺序
 
 1. W3 #10 已签收。当前只集成 **W4 #12**，随后依次验收 W5 #14、W6 #15。每个阶段必须完成开发、测试、PR、CI、正式合并、主线复验和签收，之后才能开启下一阶段。W6 签收后执行 P5.6 全系统主线验收，包括实际双 MCP/双 PostgreSQL/Redis、权限与角色认知、历史升级、故障恢复和容量。AT-30 与 Issue #13 保留原指标和未达标结果。
