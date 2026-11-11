@@ -127,6 +127,7 @@ jobs:
             "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q benchmarks/delegation_capacity.py -k 'fixed-2 or adaptive-2' --junitxml=capacity-results.xml
             exit 0
           fi
+          "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q benchmarks/actor_directory_isolation.py benchmarks/running_workshop_outage.py --junitxml="$AW_ACCEPTANCE_OUTPUT/at43-at49-junit.xml"
           export AW_PAIRED_RESTORE_EVIDENCE="$AW_ACCEPTANCE_OUTPUT/paired.json"
           "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q integration/test_dual_stdio.py integration/test_manager_resume.py --junitxml=dual-results.xml
           "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q integration/test_paired_restore.py --junitxml=paired-results.xml
