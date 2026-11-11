@@ -59,7 +59,7 @@ def request(conn, identity, mode="PROSE", op="r", **kw):
     )
 
 
-@pytest.mark.parametrize("mode", rs.MODES)
+@pytest.mark.parametrize("mode", ["SCRIPT", "DIRECTION", "CHARACTER", "PROSE", "WORLD", "STABILITY", "STATISTICS"])
 def test_modes_and_deterministic_first(team, mode):
     dsn, idn = team
     with connect(dsn) as c:

@@ -1,4 +1,4 @@
-"""Upgrade populated W4a from its original application before signing an existing review."""
+"""Upgrade populated original W4 revisions before signing an existing review."""
 from hashlib import sha256
 import json
 import os
@@ -63,8 +63,12 @@ def seed_legacy():
         east_reviewer = authenticate(conn, enroll(conn, "east", org, "reviewer", 1, 1))
         assert reviews.decide(conn, east_reviewer, "sign-east-signed", requests["east-signed"],
                               "APPROVED", "VOICE", "east-signed-evidence")["state"] == "APPROVED"
-        east_lead = authenticate(conn, enroll(conn, "east", org, "review-lead", 1, 1))
-        assert reviews.reconcile_review(conn, east_lead, "escalate-origin", requests["east-paid"])["state"] == "PENDING"
+        # The first W4 release could sign a review, but its API lacked reconciliation.
+        reconcile = getattr(reviews, "reconcile_review", None)
+        requests["prior_reconcile_recorded"] = reconcile is not None
+        if reconcile is not None:
+            east_lead = authenticate(conn, enroll(conn, "east", org, "review-lead", 1, 1))
+            assert reconcile(conn, east_lead, "escalate-origin", requests["east-paid"])["state"] == "PENDING"
         manager = authenticate(conn, enroll(conn, "west", org, "manager", 1, 1))
         reviews.register_skill(conn, org, "voice", "v1", "creative", "PROSE", b"frozen-voice")
         requests["skill"] = reviews.share(conn, manager, "voice", "voice", "v1", "PUBLIC_SHARED", 3600)["binding_id"]
@@ -77,35 +81,68 @@ def seed_legacy():
 if __name__ == "__main__":
     seed_legacy()
 else:
+    import psycopg
     from test_installation_ownership import isolated_database
+    from test_w4_routing_upgrade import route_view, rows, save_receipt, verify_signed_catalog
 
 
-def test_legacy_paid_review_requires_own_nf_installation(isolated_database, tmp_path, record_property):
+def archived_app(source, directory):
+    directory.mkdir()
+    archive = directory / "source.tar"
+    subprocess.run(["git", "archive", "--format=tar", "--output", archive, source, "workshop"],
+                   cwd=Path(__file__).resolve().parents[2], check=True)
+    with tarfile.open(archive) as contents:
+        contents.extractall(directory, filter="data")
+    return directory / "workshop"
+
+
+def old_upgrade(app, dsn):
+    env = {**os.environ, "PYTHONPATH": str(app / "src"), "AW_DATABASE_URL": dsn}
+    subprocess.run([sys.executable, "-m", "alembic", "upgrade", "head"], cwd=app, env=env, check=True)
+    return env
+
+
+@pytest.mark.parametrize(("old_revision", "deployed"), [
+    ("w004", "71b471416c9407e348d4bdce817588def5f11d5b"),
+    ("w004a", LEGACY),
+    ("w004b", "4f7d8ca35bdf0e04045986950edf5819bd572e80"),
+], ids=["w004", "w004a", "w004b"])
+def test_legacy_paid_review_requires_own_nf_installation(isolated_database, tmp_path, record_property,
+                                                         old_revision, deployed):
     from agent_workshop.organization import claim_organization
     from agent_workshop.server import dispatch
 
     dsn, config = isolated_database
-    archive = tmp_path / "old.tar"
-    subprocess.run(["git", "archive", "--format=tar", "--output", archive, LEGACY, "workshop"],
-                   cwd=Path(__file__).resolve().parents[2], check=True)
-    with tarfile.open(archive) as contents:
-        contents.extractall(tmp_path, filter="data")
-    old = tmp_path / "workshop"
-    subprocess.run([sys.executable, "-m", "alembic", "upgrade", "head"], cwd=old, check=True,
-                   env={**os.environ, "PYTHONPATH": str(old / "src"), "AW_DATABASE_URL": dsn})
-    with connect(dsn) as conn:
-        assert conn.execute("SELECT version_num FROM aw_alembic_version").fetchone()["version_num"] == "w004a"
-    seeded = subprocess.check_output([sys.executable, str(Path(__file__).resolve())], cwd=old, text=True,
-                                    env={**os.environ, "PYTHONPATH": str(old / "src"), "AW_DATABASE_URL": dsn})
+    source = LEGACY if old_revision == "w004b" else deployed
+    old = archived_app(source, tmp_path / "original")
+    env = old_upgrade(old, dsn)
+    seeded = subprocess.check_output([sys.executable, str(Path(__file__).resolve())], cwd=old, text=True, env=env)
+    if old_revision == "w004b":
+        old_upgrade(archived_app(deployed, tmp_path / "deployment"), dsn)
+    with psycopg.connect(dsn) as conn:
+        assert conn.execute("SELECT version_num FROM aw_alembic_version").fetchone() == (old_revision,)
+        assert route_view(conn) is None
+        fields, history_rows = rows(conn)
     refs = json.loads(seeded)
+    assert refs["prior_reconcile_recorded"] == (old_revision != "w004")
     history_sql = """SELECT d.operation_id::text,d.installation_id,d.state,r.receipt_ref::text,r.task_state,
                      r.accounting_state,h.status,h.settled_amount::text FROM aw_delegations d
                      JOIN aw_remote_receipts r USING(org_id,operation_id) JOIN aw_budget_holds h USING(org_id,operation_id)
-                     ORDER BY d.installation_id, d.operation_id"""
+                     ORDER BY d.installation_id,d.operation_id"""
     with connect(dsn) as conn:
         before = conn.execute(history_sql).fetchall()
         assert sorted(row["installation_id"] for row in before) == ["east", "east", "west"]
     command.upgrade(config, "head")
+    command.upgrade(config, "head")
+    with psycopg.connect(dsn) as conn:
+        assert route_view(conn)
+        assert rows(conn, fields)[1] == history_rows
+        # Preserve the stored early ASK edge but apply the signed live routing policy.
+        edge = "WHERE src='reviewer' AND dst='review-lead' AND kind='ASK'"
+        assert conn.execute("SELECT EXISTS (SELECT FROM aw_edges " + edge + ")").fetchone() == (True,)
+        assert conn.execute("SELECT EXISTS (SELECT FROM aw_current_message_edges " + edge + ")").fetchone() == (False,)
+        assert conn.execute("SELECT EXISTS (SELECT FROM aw_current_message_edges WHERE kind='REPORT')").fetchone() == (True,)
+    catalog_hash = verify_signed_catalog(dsn)
     with connect(dsn) as conn:
         assert conn.execute(history_sql).fetchall() == before
         assert conn.execute("SELECT count(*) AS n FROM aw_skill_snapshots").fetchone()["n"] == 3
@@ -166,13 +203,20 @@ def test_legacy_paid_review_requires_own_nf_installation(isolated_database, tmp_
     assert {r["artifact_ref"]: r["state"] for r in dispositions} == {
         "manual": "APPROVED", "west-paid": "APPROVED", "east-paid": "ESCALATED", "east-signed": "APPROVED",
     }
-    if out := os.environ.get("AW_W4_LEGACY_REVIEW_EVIDENCE"):
+    save_receipt(old_revision, {"deployed_source_sha": deployed, "seed_source_sha": source,
+                               "previous_revision": old_revision, "upgraded_revision": revision,
+                               "prior_reconcile_recorded": refs["prior_reconcile_recorded"],
+                               "preserved_table_digests": history_rows, "catalog_sha256": catalog_hash,
+                               "old_receipts": before, "preserved_receipts": after, "dispositions": dispositions})
+    if old_revision == "w004a" and (out := os.environ.get("AW_W4_LEGACY_REVIEW_EVIDENCE")):
         Path(out).write_text(json.dumps({
             "legacy_application_sha": LEGACY, "upgraded_aw_revision": revision, "claimed_installation": "west",
             "source_scope": "Historical application requests backed by controlled settled NF receipt fixtures.",
             "old_receipts": before, "preserved_receipts": after, "dispositions": dispositions,
             "foreign_assignment_history": history, "paid_provider_requests": 0,
         }, indent=2) + "\n")
-    record_property("legacy_w4a_sha", LEGACY)
+    if old_revision == "w004a":
+        record_property("legacy_w4a_sha", LEGACY)
+    record_property("deployed_sha", deployed)
     record_property("old_paid_receipts_and_holds_preserved", len(before))
     record_property("review_dispositions", "manual=APPROVED,west-paid=APPROVED,east-paid=ESCALATED,east-signed=APPROVED")

@@ -17,3 +17,6 @@
 
 
 W3 主线验收。原四项 AT-30 继续在 #13 跟踪，未涉及付费模型创作。[签收](W3_主线签收.md)。
+
+- W4 初版的付费签署未检查 W3 恢复后的当前委托状态；另有跨直属主管的人工分派。两者均由 PostgreSQL 红绿用例覆盖。[原始回执与修复](https://github.com/SKYdayDUCK/NovelFactory/tree/3b396e664f001a89d03a3d28d4bbee945f63d85b/reports/integration/evidence/W4/review-controls)
+- 历史 W4b 数据库使用过同号空迁移，缺少签收的 W2 路由视图。w004c 在当前 schema 中核验对象并补齐缺失的正式视图。历史 w004 夹具按发行 API 填充，w004a 和 w004b 另验首次 reconcile 的旧收据。[W4 验收入口](W4_契约验收.md)

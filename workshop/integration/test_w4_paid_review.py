@@ -1,113 +1,113 @@
-"""Exercise a paid-review slot across live services using the local synthetic HTTP provider."""
+"""Exercise a paid-slot review with two service identities and one loopback provider invoice."""
 
 import asyncio
-import hashlib
 import json
 import os
-from contextlib import closing
+from contextlib import ExitStack
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import uuid4
 
 import pytest
-
 from agent_workshop.admin import enroll
 from agent_workshop.auth import Denied, connect
 from agent_workshop.organization import bootstrap
 from agent_workshop.provision import allow_slot
 from agent_workshop.reconcile import GET_FIELDS, remote
 from agent_workshop.review_admin import review_slot, subject
-from agent_workshop.reviews_skills import register_artifact
-from novel_factory.application.agent_gateway import AgentGateway
-from novel_factory.application.delegation import install, provision_slot
-from novel_factory.application.kernel import Kernel
-from novel_factory.application.runtime_tasks import RuntimeTaskService
-from novel_factory.application.supervisor import RuntimeSupervisor
-from novel_factory.fixtures import load_fixture, point
-from novel_factory.infrastructure.database import Database
-from novel_factory.infrastructure.objects import ObjectStore
+from agent_workshop.reviews_skills import register_artifact, register_skill
 from test_dual_stdio import bound_process
 from test_paired_restore import aw_state, tick
 
+from novel_factory.application.agent_gateway import AgentGateway
+from novel_factory.application.delegation import install, provision_slot
+from novel_factory.application.editorial import ReviewService
+from novel_factory.application.kernel import Kernel
+from novel_factory.application.narrative import NarrativeService
+from novel_factory.application.runtime_tasks import RuntimeTaskService
+from novel_factory.application.supervisor import RuntimeSupervisor
+from novel_factory.fixtures import point
+from novel_factory.infrastructure.database import Database
+from novel_factory.infrastructure.objects import ObjectStore
 
-def test_review_waits_for_accepted_nf_result_and_settled_original_attempt(
+
+def test_independent_review_uses_original_nf_result_and_single_invoice(
     dual_databases, tmp_path, monkeypatch, record_property
 ):
     root = Path(os.environ["AW_NF_SOURCE"])
     monkeypatch.syspath_prepend(str(root / "tests/integration"))
+    from editorial_helpers import review_request
+    from test_editorial_service import prepared
     from test_p5_supervisor import backend
 
-    aw_dsn, nf_dsn = dual_databases["aw"], dual_databases["nf"]
-    org, instance = str(uuid4()), str(uuid4())
-    objects = tmp_path / "objects"
-
-    def service(identity, module, config, source):
-        folder = tmp_path / identity
-        folder.mkdir()
-        return remote(bound_process(folder, module, config, source))
-
-    with closing(Database(nf_dsn)) as db, backend() as (adapter, requests, http):
-        kernel = Kernel(db, ObjectStore(objects))
-        world = load_fixture(kernel)
-        wr, controller = world["world_ref"], world["principal"]
-        grant = install(
+    aw_dsn = dual_databases["aw"]
+    with ExitStack() as stack:
+        db = Database(dual_databases["nf"])
+        stack.callback(db.close)
+        kernel = Kernel(db, ObjectStore(tmp_path / "objects"))
+        fixture, _, binding = prepared(kernel)
+        owner, wr = fixture["principal"], binding["world_ref"]
+        work, branch = wr["work_id"], wr["branch_id"]
+        draft = binding["ordered_draft_refs"][0]
+        source_text = NarrativeService(kernel).load_draft(owner, work, draft)["text_ref"]
+        artifact, revision = draft["artifact_id"], draft["artifact_revision_id"]
+        org, instance = str(uuid4()), str(uuid4())
+        installation = install(
             kernel,
-            controller,
+            owner,
             nf_instance_id=instance,
             org_id=org,
-            work_id=wr["work_id"],
-            branch_id=wr["branch_id"],
+            work_id=work,
+            branch_id=branch,
             expires_at=datetime.now(UTC) + timedelta(hours=1),
         )
-        inst = grant["installation_id"]
-        http.candidate = lambda ctx: {
-            "summary": "Fixture reviewed the assigned material.",
+        inst = installation["installation_id"]
+        adapter, requests, server = stack.enter_context(backend())
+        candidate = {
+            "summary": "工程样本已阅读。",
             "issues": [],
-            "counterinterpretations": [],
+            "counterinterpretations": ["保留多义解释。"],
             "evidence_refs": [],
         }
+        server.candidate = lambda context: candidate
         gateway = AgentGateway(kernel, {"fixture": adapter})
         supervisor = RuntimeSupervisor(kernel, gateway)
-        frozen = RuntimeTaskService(kernel, gateway).define(
-            controller,
+        definition = RuntimeTaskService(kernel, gateway).define(
+            owner,
             wr,
             role_id="reviewer",
             task_kind="literary",
-            story_time=point(1),
-            subject_ids=[world["ids"]["sword"]],
-            predicates=["owner"],
-            assignment="Review the authorized material.",
+            story_time=point(1000),
+            subject_ids=[fixture["ids"]["sword"]],
+            predicates=["possessed_by"],
+            assignment="Review the assigned scene.",
+            input_artifacts=binding["ordered_draft_refs"],
             adapter_id="fixture",
             max_amount="0.10",
             token_budget=100000,
         )
-        budget = kernel.tasks.create_budget(wr["work_id"], "2")
-        policy = dict(
-            nf_instance_id=instance,
-            work_id=wr["work_id"],
-            branch_id=wr["branch_id"],
-            scope_ref="text",
-            task_template_id="prose-review",
-            generation=0,
-            grant_epoch=grant["grant_epoch"],
-            actor_binding_ref=None,
-            role_id="reviewer",
-            max_amount="0.10",
-            currency="USD",
-            token_limit=100000,
-        )
+        slot = "scene.review"
         provision_slot(
             supervisor,
-            controller,
+            owner,
             inst,
-            scope_ref="text",
-            task_template_id="prose-review",
-            frozen=frozen,
-            budget_id=budget,
+            scope_ref=slot,
+            task_template_id="PROSE",
+            frozen=definition,
+            budget_id=kernel.tasks.create_budget(work, "1"),
             reserve_amount="0.10",
             token_reservation=100000,
-            context_tokens=20000,
         )
+
+        def client(label, module, config, source):
+            directory = tmp_path / label
+            directory.mkdir()
+            return remote(bound_process(directory, module, config, source))
+
+        def call(peer, name, **arguments):
+            return asyncio.run(peer(name, arguments))
+
+        aw_clients = {}
         with connect(aw_dsn) as conn:
             conn.execute("INSERT INTO aw_installations VALUES (%s,%s,true)", (inst, instance))
             bootstrap(conn, org, "Research-Audit", installation_id=inst)
@@ -116,136 +116,210 @@ def test_review_waits_for_accepted_nf_result_and_settled_original_attempt(
             register_artifact(
                 conn,
                 org,
-                "text",
-                "v1",
-                hashlib.sha256(b"source").hexdigest(),
+                artifact,
+                revision,
+                source_text["sha256"],
                 "organization",
                 "source-receipt",
                 ["writer"],
-                ["source-A"],
+                ["source-span"],
                 {},
             )
-            allow_slot(conn, org, inst, "review.slot", "reviewer", policy)
-            review_slot(conn, org, "review.slot", "text", "v1", "PROSE")
-            conn.execute("INSERT INTO aw_budget_accounts VALUES(%s,1,'USD')", (org,))
-            members = {
-                employee: enroll(conn, inst, org, employee, 1, 1)
-                for employee in ("review-lead", "reviewer")
-            }
-        lead, reviewer = [
-            service(
-                identity,
-                "agent_workshop.server",
-                {"token": token, "database_url": aw_dsn},
-                root / "workshop/src",
+            register_skill(
+                conn, org, "close-reading", "v1", "creative", "PROSE", b"Read the assigned scene."
             )
-            for identity, token in members.items()
-        ]
-        nf = service(
+            conn.execute("INSERT INTO aw_budget_accounts VALUES (%s,1,'USD')", (org,))
+            allow_slot(
+                conn,
+                org,
+                inst,
+                slot,
+                "reviewer",
+                {
+                    "nf_instance_id": instance,
+                    "work_id": work,
+                    "branch_id": branch,
+                    "actor_binding_ref": None,
+                    "role_id": "reviewer",
+                    "task_template_id": "PROSE",
+                    "scope_ref": slot,
+                    "generation": 0,
+                    "grant_epoch": installation["grant_epoch"],
+                    "max_amount": "0.10",
+                    "currency": "USD",
+                    "token_limit": 100000,
+                },
+            )
+            review_slot(conn, org, slot, artifact, revision, "PROSE")
+            for name in ("manager", "review-lead", "reviewer", "writer"):
+                aw_clients[name] = client(
+                    name,
+                    "agent_workshop.server",
+                    {"database_url": aw_dsn, "token": enroll(conn, inst, org, name, 1, 1)},
+                    Path(__file__).resolve().parents[1] / "src",
+                )
+        nf = client(
             "nf",
             "novel_factory.interfaces.delegation_stdio",
             {
-                "token": grant["token"],
+                "token": installation["token"],
                 "installation_id": inst,
-                "database_url": nf_dsn,
-                "object_root": str(objects),
+                "database_url": dual_databases["nf"],
+                "object_root": str(tmp_path / "objects"),
             },
             root / "src",
         )
-        request = dict(
-            operation_id="paid-review",
-            artifact_ref="text",
-            artifact_revision="v1",
-            mode="PROSE",
-            risk_reason="MATERIAL_CHANGE",
+        lead, reviewer = aw_clients["review-lead"], aw_clients["reviewer"]
+        args = {
+            "operation_id": "paid-review",
+            "artifact_ref": artifact,
+            "artifact_revision": revision,
+            "mode": "PROSE",
+            "risk_reason": "MATERIAL_CHANGE",
+            "ttl_seconds": 600,
+            "reviewer_id": "reviewer",
+            "slot_id": slot,
+            "max_amount": "0.10",
+            "token_limit": 100000,
+        }
+        pending = call(lead, "aw_review_request", **args)
+        assert call(lead, "aw_review_request", **args) == pending
+        operation, review = pending["operation_id"], pending["review_id"]
+        share = call(
+            aw_clients["manager"],
+            "aw_skill_share",
+            operation_id="share",
+            skill_id="close-reading",
+            source_revision="v1",
+            policy="ROLE_SCOPED",
             ttl_seconds=600,
-            reviewer_id="reviewer",
-            slot_id="review.slot",
-            max_amount="0.10",
-            token_limit=100000,
+            target="reviewer",
         )
-        initial = asyncio.run(lead("aw_review_request", request))
-        assert asyncio.run(lead("aw_review_request", request)) == initial
-        op = initial["operation_id"]
-        decision = dict(
-            operation_id="decision",
-            review_id=initial["review_id"],
-            outcome="APPROVED",
-            reason="VOICE",
-            evidence_ref="source-A",
+        frozen = call(
+            reviewer,
+            "aw_skill_freeze",
+            binding_id=share["binding_id"],
+            mode="PROSE",
+            task_ref=review,
         )
-        with pytest.raises(Denied, match="WAITING_NF"):
-            asyncio.run(reviewer("aw_review_decide", decision))
-        assert tick(aw_dsn, inst, org, op, nf) == "BOUND"
-        supervisor.run_once(controller, wr["work_id"], wr["branch_id"])
+        assert frozen["content_sha"] == share["content_sha"]
+        decision = {
+            "operation_id": "decision",
+            "review_id": review,
+            "outcome": "APPROVED",
+            "reason": "VOICE",
+            "evidence_ref": "source-span",
+        }
+        with pytest.raises(Denied, match="VIEW_DENIED"):
+            call(aw_clients["writer"], "aw_review_decide", **decision)
+        with pytest.raises(Denied, match="WAITING_NF_RECONCILIATION"):
+            call(reviewer, "aw_review_decide", **decision)
+        assert tick(aw_dsn, inst, org, operation, nf) == "BOUND"
         with connect(aw_dsn) as conn:
             payload = conn.execute(
-                "SELECT payload FROM aw_delegations WHERE operation_id=%s", (op,)
+                "SELECT payload FROM aw_delegations WHERE operation_id=%s", (operation,)
             ).fetchone()["payload"]
-        lookup = {k: payload[k] for k in GET_FIELDS}
-        result = asyncio.run(nf("nf_delegation_get", lookup))
-        assert result["task_state"] == "RESULT_STORED" and result["accounting_state"] == "UNKNOWN"
-        assert len(result["attempt_ids"]) == len(requests) == 1
-        # The NF operator verifies the current task result before accepting it.
-        with db.uow() as repo:
-            task = repo.one("tasks", {"task_id": result["task_id"]})
-            stored = repo.one("task_results", {"result_id": task["current_result_id"]})
-            audit = gateway._read_audit(repo, result["attempt_ids"][0])
+        lookup = {name: payload[name] for name in GET_FIELDS}
+        supervisor.run_once(owner, work, branch)
+        assert len(requests) == 1
+        task_id = definition.spec["task_id"]
+        task = kernel.get_task(definition.principal, task_id)
+        received = call(nf, "nf_delegation_get", **lookup)
+        assert received["task_state"] == task["state"] == "RESULT_STORED"
+        assert received["task_id"] == task_id and received["accounting_state"] == "UNKNOWN"
+        assert len(received["attempt_ids"]) == 1
+        gen = task["generation"]
+        NarrativeService(kernel).bind_reader_task(
+            owner, task_id, gen, binding["ordered_draft_refs"], "bind-reads"
+        )
+        service = ReviewService(kernel)
+        reading = service.read_text(
+            definition.principal,
+            task_id,
+            gen,
+            draft,
+            0,
+            len(kernel.objects.read(source_text["sha256"]).decode()),
+            idempotency_key="read",
+        )
+        submission = review_request(
+            binding, task, [reading["coverage_ref"]], "SCENE", "LITERARY", [draft]
+        )
+        with db.uow(write=False) as repo:
+            result = repo.one("task_results", {"result_id": task["current_result_id"]})
+            audit = gateway._read_audit(repo, received["attempt_ids"][0])["payload"]
+            assert result["task_id"] == task_id and result["generation"] == received["generation"]
             assert (
-                stored["task_id"] == result["task_id"]
-                and stored["generation"] == result["generation"]
+                audit["outcome"] == "VALIDATED_CANDIDATE" and audit["result_status"] == "SUCCEEDED"
             )
-            assert audit["payload"]["outcome"] == "VALIDATED_CANDIDATE"
-            assert audit["payload"]["result_status"] == "SUCCEEDED"
-            assert stored["payload"]["artifacts"][1] == audit["payload"]["output_ref"]
-        kernel.tasks.transition_result(result["task_id"], result["generation"], "VALIDATING")
-        kernel.tasks.transition_result(result["task_id"], result["generation"], "ACCEPTED")
-        assert tick(aw_dsn, inst, org, op, nf) == "BOUND"
-        assert aw_state(aw_dsn, op)["hold"] == "HELD"
-        with pytest.raises(Denied, match="WAITING_NF"):
-            asyncio.run(reviewer("aw_review_decide", decision))
-        attempt = result["attempt_ids"][0]
+            assert result["payload"]["artifacts"][1] == audit["output_ref"]
+        submission.update(
+            summary=candidate["summary"],
+            counterinterpretations=candidate["counterinterpretations"],
+            agent_output_ref=result["payload"]["artifacts"][1],
+        )
+        report = service.submit_review(definition.principal, submission)
+        assert report == service.submit_review(definition.principal, submission)
+        # The fixture controller accepts the delivered NF report; the reviewer's Workshop decision is separate.
+        kernel.tasks.transition_result(task_id, gen, "VALIDATING")
+        kernel.tasks.transition_result(task_id, gen, "ACCEPTED")
+        assert tick(aw_dsn, inst, org, operation, nf) == "BOUND"
+        assert aw_state(aw_dsn, operation)["accounting_state"] == "UNKNOWN"
+        with pytest.raises(Denied, match="WAITING_NF_RECONCILIATION"):
+            call(reviewer, "aw_review_decide", **decision)
+        with connect(aw_dsn) as conn:
+            attempt = conn.execute(
+                "SELECT attempt_id FROM aw_cost_observations WHERE operation_id=%s", (operation,)
+            ).fetchone()["attempt_id"]
         kernel.tasks.settle_call(
-            attempt,
+            str(attempt),
             state="SUCCEEDED",
             actual_amount="0.02",
             actual_tokens=18,
-            provider_receipt="synthetic-W4-invoice",
+            provider_receipt="w4-loopback-invoice",
         )
-        assert tick(aw_dsn, inst, org, op, nf) == "SETTLED"
-        final = asyncio.run(reviewer("aw_review_decide", decision))
+        assert tick(aw_dsn, inst, org, operation, nf) == "SETTLED"
+        closed = call(reviewer, "aw_review_decide", **decision)
         assert (
-            final["state"] == "APPROVED"
-            and asyncio.run(reviewer("aw_review_decide", decision)) == final
+            closed["state"] == "APPROVED"
+            and call(reviewer, "aw_review_decide", **decision) == closed
         )
-        account = aw_state(aw_dsn, op)
-        assert account["observations"] == 2 and str(account["settled_amount"]) == "0.020000"
+        settled = aw_state(aw_dsn, operation)
         with connect(aw_dsn) as conn:
-            observed = conn.execute(
-                "SELECT attempt_id::text, state FROM aw_cost_observations "
-                "WHERE org_id=%s AND operation_id=%s",
-                (org, op),
-            ).fetchall()
-        assert {(row["attempt_id"], row["state"]) for row in observed} == {
-            (attempt, "UNKNOWN"),
-            (attempt, "SUCCEEDED"),
-        }
-        paid = asyncio.run(nf("nf_delegation_get", lookup))
-        assert paid["task_id"] == result["task_id"] and paid["attempt_ids"] == [attempt]
-        assert paid["accounting_state"] == "SETTLED" and paid["actual_tokens"] == 18
+            invoice = conn.execute(
+                """SELECT actual_tokens, actual_amount FROM aw_cost_observations
+                   WHERE operation_id=%s AND attempt_id=%s AND state='SUCCEEDED'""",
+                (operation, attempt),
+            ).fetchone()
+        assert (
+            invoice["actual_tokens"] == 18 and invoice["actual_amount"] == settled["settled_amount"]
+        )
+        paid = call(nf, "nf_delegation_get", **lookup)
+        assert paid["task_id"] == task_id and paid["receipt_ref"] == settled["receipt_ref"]
+        assert paid["attempt_ids"] == [str(attempt)] == received["attempt_ids"]
+        assert (
+            paid["accounting_state"] == "SETTLED"
+            and paid["actual_tokens"] == invoice["actual_tokens"]
+        )
+        assert settled["observations"] == 2
+        assert str(settled["settled_amount"]) == "0.020000" and len(requests) == 1
         record_property(
             "paid_review",
             json.dumps(
                 {
-                    "operation_id": op,
-                    "review_id": initial["review_id"],
-                    "task_id": paid["task_id"],
+                    "review_id": review,
+                    "operation_id": operation,
+                    "task_id": task_id,
+                    "nf_receipt": settled["receipt_ref"],
+                    "nf_report": report,
+                    "source_sha": source_text["sha256"],
+                    "skill_sha": frozen["content_sha"],
+                    "attempt_id": str(attempt),
+                    "tokens": invoice["actual_tokens"],
+                    "settled": str(invoice["actual_amount"]),
+                    "reserved": args["max_amount"],
                     "generation": paid["generation"],
-                    "attempt_id": attempt,
-                    "reserved": "0.10",
-                    "settled": str(account["settled_amount"]),
-                    "tokens": 18,
-                    "result": final["state"],
+                    "result": closed["state"],
                     "loopback_http_requests": len(requests),
                     "commercial_calls": 0,
                 }
