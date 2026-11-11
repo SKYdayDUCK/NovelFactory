@@ -1,0 +1,7 @@
+# First W6 release candidate 23d195d
+
+Exact public head `23d195d9dcd901506f6571d902e68fd48e5a0ab7`, tree `1ef8c2b9568f8ca161d80fc9be2286ed4c18d8a2`. PostgreSQL 17.11, Redis 8.0.2, Python 3.12.14, Linux shared runner, synthetic loopback HTTP only. The archived setup, source manifests, per-process boot logs, unit and raw JSON data identify the workload.
+
+The message gate passed 30, 150 and 600 deliveries from 10, 50 and 200 installed members with eight workers. The full routing matrix recorded 79 accepted and 439 denied operations, including 154 non-edges checked. The 21 application controls also verified the final concurrent hire slot and restored supervisor tenure rules.
+
+The registered delegation command failed during pytest collection, before any delegation or provider call. The signed W3 stdio harness now imports shared NF recovery helpers in the repository root. The inherited W6 workflow exported only the two src paths. `delegation/` retains the original failing JUnit and logs. `collection-fixed/` added the checkout root to PYTHONPATH, against the same unchanged source. Its fixed-single 10 fixture completed all 10 unique tasks and settled holds with 10 synthetic calls. The corrected registered nine-arm results are recorded under the subsequent release candidate. The portable reproduction files in this archive contain the restored three-entry PYTHONPATH. Remove its final checkout root only when reproducing this candidate's original failure.
