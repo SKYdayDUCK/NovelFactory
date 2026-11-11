@@ -150,6 +150,15 @@ IMMUTABLE_TABLES = ("genesis", "revisions", "events", "revision_events", "commit
 def mutation_gate(conn: Connection):
     conn.execute(text("SELECT pg_advisory_xact_lock_shared(:key)"), {"key": MAINTENANCE_LOCK})
 
+define("supervisor_jobs", uid("task_id", primary_key=True), js("config", nullable=False), ts(),
+       ForeignKeyConstraint(["task_id"], ["nf_tasks.task_id"]))
+define("host_turns", uid("attempt_id", primary_key=True), Column("thread_id", Text, nullable=False, unique=True),
+       Column("turn_id", Text, unique=True), Column("phase", Text, nullable=False), ts("updated_at"),
+       ForeignKeyConstraint(["attempt_id"], ["nf_call_attempts.attempt_id"]),
+       CheckConstraint("phase IN ('THREAD_STARTED','TURN_STARTED','COMPLETED')"),
+       CheckConstraint("(turn_id IS NULL) = (phase = 'THREAD_STARTED')"))
+
+
 class Database:
     def __init__(self, url: str | None = None, *, pool_size: int = 5, max_overflow: int = 0, pool_timeout: float = 2):
         url = url or os.environ.get("NF_DATABASE_URL")

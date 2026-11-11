@@ -24,6 +24,7 @@ class ModelRequest:
     messages: tuple[dict, ...]
     request_sha256: str
     max_output_tokens: int
+    attempt_id: str | None = None
 
 
 @dataclass(frozen=True)

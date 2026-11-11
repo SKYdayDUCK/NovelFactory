@@ -24,8 +24,8 @@ class PreparedRuntimeTask:
     spec: dict
     agent_input: dict
     manifest_ref: dict
-    context_bundle_id: str
-    worker_id: str
+    context_bundle_id: str | None
+    worker_id: str | None
     # Only a caller's private credential file may serialize this field.
     private_token: str = field(repr=False)
 
@@ -39,7 +39,7 @@ class RuntimeTaskService:
                 knowledge_cut=None, actor_id=None, input_artifacts=(), material_refs=(),
                 max_amount="1", token_budget=200_000, context_token_budget=20_000,
                 currency="USD", lease_seconds=600, deadline_seconds=3600,
-                skill_name=None):
+                skill_name=None, queue_state=None):
         """Create, lease and compile a task using a fixed world and runtime.
 
         The controller must possess ADMIN already. Runtime grants receive only
@@ -47,6 +47,7 @@ class RuntimeTaskService:
         selected PLAN cut, PLAN_READ. They never receive world acceptance,
         approval, repair, promotion, branch administration or model tools.
         """
+        require(queue_state in {None, "READY", "BLOCKED"}, "INVALID_ARGUMENT", "Invalid initial queue state")
         validate_contract("WorldRef", world_ref)
         validate_contract("StoryPoint", story_time)
         require(type(deadline_seconds) is int and 1 <= deadline_seconds <= 86400,
@@ -83,13 +84,15 @@ class RuntimeTaskService:
                 inputs.append(ref)
         task_id = str(uuid4())
         spec = {"schema_version": "2.0", "task_id": task_id, "generation": 0,
-            "role_id": role_id, "task_kind": task_kind, "state": "READY", "world_ref": world_ref,
+            "role_id": role_id, "task_kind": task_kind, "state": queue_state or "READY", "world_ref": world_ref,
             "story_time": story_time, "context_bundle_id": None, "policy_version": policy_version,
             "dependency_fingerprint": None, "runtime_contract_version": prepared["runtime_contract_version"],
             "capability_grant_id": principal.grant_id, "input_artifacts": inputs,
             "budget": {"currency": currency, "max_amount": max_amount, "token_budget": token_budget},
             "wall_deadline": (datetime.now(timezone.utc) + timedelta(seconds=deadline_seconds)).isoformat()}
-        self.kernel.create_task(principal, spec, "runtime-create:" + task_id)
+        created = self.kernel.create_task(principal, spec, "runtime-create:" + task_id)
+        if queue_state is not None:
+            return PreparedRuntimeTask(principal, created, spec, prepared, manifest, None, None, granted["token"])
         worker = "runtime:" + task_id
         task = self.kernel.claim_task(principal, worker, task_id=task_id, lease_seconds=lease_seconds)
         context = WorldQueryService(self.kernel).context_compile(principal, {

@@ -7,6 +7,7 @@ never approves or accepts a world event, a narrative, or a release.
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import replace
 from datetime import datetime, timezone
 from decimal import Decimal
 import json
@@ -312,6 +313,12 @@ class AgentGateway:
             # race; an earlier generation's UNKNOWN also keeps its fence.
             repo.one("tasks", {"task_id": request["task_id"]}, lock="update")
             pending = repo.many("call_attempts", {"task_id": request["task_id"]})
+            if repo.one("supervisor_jobs", {"task_id": request["task_id"]}):
+                # An enrolled allowance buys one generation's candidate. A
+                # terminal billing receipt does not prove task delivery.
+                require(not any((c["generation"], c["call_key"]) !=
+                        (request["generation"], request["call_key"]) for c in pending),
+                        "CALL_RECONCILIATION_REQUIRED", "Prior dispatch needs delivery reconciliation")
             require(not any(c["state"] in {"PREPARED", "SENT", "UNKNOWN"}
                             and (c["generation"], c["call_key"]) != (request["generation"], request["call_key"])
                             for c in pending), "CALL_OUTCOME_UNKNOWN",
@@ -330,7 +337,7 @@ class AgentGateway:
                  "actual_amount": None, "currency": None, "cost_status": "UNKNOWN_COST"}
         outcome, result_status, reason, provider_receipt = "UNKNOWN", "FAILED", None, None
         try:
-            response = adapter.generate(model_request)
+            response = adapter.generate(replace(model_request, attempt_id=attempt))
             provider_receipt = response.provider_receipt
             require(response.request_sha256 == request_hash, "HOST_BINDING_MISMATCH", "Response is not bound to the dispatched request")
             require(isinstance(response.text, str) and len(response.text.encode("utf-8")) <= 2_000_000,
