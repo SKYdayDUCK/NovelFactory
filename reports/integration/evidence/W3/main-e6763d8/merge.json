@@ -1,0 +1,45 @@
+{
+  "sha": "e6763d844f023d7c6a13060dbaebca0416fe3099",
+  "time": "2026-11-11T19:53:57Z",
+  "base": "15f606c99c765deeffd904ad540441eb6476b3af",
+  "head": "a15f41b40ed4a0cd4716e7335954ec0a1c5efadf",
+  "tree": "7edb5550e8cbe3c1feb70ff8baa0c79974cf8155",
+  "pr": 10,
+  "pre_merge_p1": [
+    [
+      "p1-postgres-concurrency-1",
+      [
+        {
+          "tests": 834,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 17
+        }
+      ]
+    ],
+    [
+      "p1-schema-unit-1",
+      [
+        {
+          "tests": 398,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    ]
+  ],
+  "pre_merge_workshop": 93,
+  "post_merge_runs": [
+    [
+      43091453166,
+      "P1 and P2 production integrity",
+      "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43091453166"
+    ],
+    [
+      43091453200,
+      "Agent Workshop PostgreSQL and stdio",
+      "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43091453200"
+    ]
+  ]
+}

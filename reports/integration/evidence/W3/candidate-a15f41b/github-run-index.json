@@ -45,8 +45,8 @@
       "id": 43088712892,
       "name": "P1 and P2 production integrity",
       "event": "pull_request",
-      "conclusion": null,
-      "status": "in_progress",
+      "conclusion": "success",
+      "status": "completed",
       "head_sha": "a15f41b40ed4a0cd4716e7335954ec0a1c5efadf",
       "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43088712892",
       "attempt": 1,
@@ -55,9 +55,9 @@
           "id": 130759773179,
           "name": "PostgreSQL 17 integration, concurrency and restore",
           "started_at": "2026-11-11T19:36:06Z",
-          "completed_at": null,
-          "status": "in_progress",
-          "conclusion": null,
+          "completed_at": "2026-11-11T19:53:29Z",
+          "status": "completed",
+          "conclusion": "success",
           "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43088712892/job/130759773179"
         },
         {
@@ -71,6 +71,14 @@
         }
       ],
       "artifacts": [
+        {
+          "id": 13889415615,
+          "name": "p1-postgres-concurrency-1",
+          "size": 1779680,
+          "digest": "sha256:5d95d60fe03a1bced3a1cd4481e74bb8d7c35aaeaf32393bd504714294a86c11",
+          "expires_at": "2027-02-09T19:36:04Z",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43088712892/artifacts/13889415615"
+        },
         {
           "id": 13887068561,
           "name": "p1-schema-unit-1",
