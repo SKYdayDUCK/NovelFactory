@@ -325,10 +325,47 @@ class PlanningService:
         else:
             repo.add("selections", {"work_id": wr["work_id"], "selection_kind": name, "artifact_ref": ref, "epoch": 1})
 
-    def adopt_plan(self, principal, world_ref, plan_ref, expected_plan_ref, idempotency_key, *, rolling_review_ref=None):
+    def review_independent_windows(self, reviewer, world_ref, candidate_ref, selected_ref, reason, idempotency_key):
+        """An independent PLAN reviewer attests the literary relation of two exact patches."""
+        from novel_factory.application.plan_independence import compose_independent
+        require(isinstance(reason, str) and 0 < len(reason.strip()) <= 10000,
+                "INVALID_ARGUMENT", "Record why the literary meanings can coexist")
+        with self.kernel.db.uow(write=False) as repo:
+            grant, _ = self._authorize(repo, reviewer, world_ref, capability="APPROVE")
+            epoch = grant["epoch"]
+        payload = {"reviewer_grant_id": reviewer.grant_id, "grant_epoch": epoch, "world_ref": world_ref,
+                   "candidate_ref": candidate_ref, "selected_ref": selected_ref, "reason": reason}
+
+        def validate(repo, revision):
+            work = world_ref["work_id"]
+            a, b = [self.kernel.artifact(repo, ref, work, kind="PLAN_REVISION")
+                    for ref in (candidate_ref, selected_ref)]
+            require(reviewer.principal_id not in {a["created_by"], b["created_by"]}, "VIEW_DENIED",
+                    "The two candidate authors cannot certify their own literary independence")
+            original = a["payload"]["prior_plan_ref"]
+            selected = repo.one("selections", {"work_id": work, "selection_kind": self.selection_key(a["payload"]["volume_id"])})
+            require(original and selected and selected["artifact_ref"] == selected_ref and
+                    a["payload"]["input_world_ref"] == world_ref and self.kernel.head(repo, work, world_ref["branch_id"]) == world_ref,
+                    "PLAN_SELECTION_CONFLICT", "Review the two current selections on their frozen world")
+            compose_independent(self.kernel, repo, world_ref, original, a["payload"], selected_ref)
+
+        def authorize(repo):
+            current, _ = self._authorize(repo, reviewer, world_ref, capability="APPROVE")
+            require(current["epoch"] == epoch, "VIEW_DENIED", "Review grant changed")
+
+        return self._save(reviewer, world_ref, payload, "PLAN_INDEPENDENCE_REVIEW", idempotency_key, validate,
+                          authorize_request=authorize)
+
+    def adopt_plan(self, principal, world_ref, plan_ref, expected_plan_ref, idempotency_key, *, rolling_review_ref=None, preserve_independent=False, independence_review_ref=None):
         """Select an exact candidate with CAS; return a UnifiedQuery PLAN cut."""
         self._key(idempotency_key)
         request = {"world_ref": world_ref, "plan_ref": plan_ref, "expected_plan_ref": expected_plan_ref}
+        require(type(preserve_independent) is bool, "INVALID_ARGUMENT", "Invalid plan composition policy")
+        if preserve_independent:
+            request["preserve_independent"] = True
+        if independence_review_ref is not None:
+            validate_contract("ArtifactRef", independence_review_ref)
+            request["independence_review_ref"] = independence_review_ref
         if rolling_review_ref is not None:
             request["rolling_review_ref"] = rolling_review_ref
         with self.kernel.db.uow(write=False) as repo:
@@ -356,12 +393,51 @@ class PlanningService:
             self._validate_plan(repo, self.kernel.revision(repo, world_ref), plan)
             key = self.selection_key(plan["volume_id"])
             current = repo.one("selections", {"work_id": world_ref["work_id"], "selection_kind": key})
-            require((current["artifact_ref"] if current else None) == expected_plan_ref,
-                    "PLAN_SELECTION_CONFLICT", "Selected plan changed; review the new selection")
+            selected_ref = current["artifact_ref"] if current else None
             require(plan["prior_plan_ref"] == expected_plan_ref, "PLAN_SELECTION_CONFLICT",
                     "Candidate does not descend from the expected active plan")
+            compose = selected_ref != expected_plan_ref
+            require(not compose or (preserve_independent and selected_ref and expected_plan_ref),
+                    "PLAN_SELECTION_CONFLICT", "Selected plan changed; review the new selection")
             from novel_factory.application.rolling_plans import RollingPlanning
-            rolling = RollingPlanning(self.kernel).finalize_adoption(repo, world_ref, plan, plan_ref, rolling_review_ref)
+            rolling = RollingPlanning(self.kernel).finalize_adoption(
+                repo, world_ref, plan, plan_ref, rolling_review_ref, composing=compose)
+            composed_from = None
+            if compose:
+                from novel_factory.application.plan_independence import compose_independent
+                window_ids = ()
+                if rolling:
+                    cp = self.kernel.artifact(repo, rolling["change_point_ref"], world_ref["work_id"],
+                                              kind="CHANGE_POINT")["payload"]
+                    window_ids = cp["node_ids"]
+                # Structural checks cannot certify the meaning of a prose goal.
+                # Preserve the candidate unless a separate reviewer saw this exact pair.
+                if independence_review_ref is None:
+                    # Run the deterministic overlap proof even without a literary decision.
+                    compose_independent(self.kernel, repo, world_ref, expected_plan_ref, plan,
+                                        selected_ref, window_ids=window_ids)
+                    require(False, "REVIEW_REQUIRED", "Independent literary review of both patches is required")
+                opinion = self.kernel.artifact(repo, independence_review_ref, world_ref["work_id"],
+                                               kind="PLAN_INDEPENDENCE_REVIEW")
+                from novel_factory.application.authorization import Principal
+                signed = opinion["payload"]
+                reviewer = Principal(signed["reviewer_grant_id"], opinion["created_by"])
+                grant, _ = self._authorize(repo, reviewer, world_ref, capability="APPROVE")
+                require(grant["epoch"] == signed["grant_epoch"] and signed["world_ref"] == world_ref
+                        and signed["candidate_ref"] == plan_ref and signed["selected_ref"] == selected_ref,
+                        "REVIEW_REQUIRED", "Independent review is stale or references different selections")
+                composed_from = {"candidate_ref": plan_ref, "base_plan_ref": expected_plan_ref,
+                                 "selected_parent_ref": selected_ref}
+                plan = compose_independent(self.kernel, repo, world_ref, expected_plan_ref,
+                                           plan, selected_ref, window_ids=window_ids)
+                self._validate_plan(repo, self.kernel.revision(repo, world_ref), plan)
+                plan_ref = self.kernel._blob(plan)
+                self.kernel._register_artifact(repo, plan_ref, world_ref["work_id"], plan,
+                                               "PLAN_REVISION", principal.principal_id)
+                manifest = future_manifest(plan, plan_ref)
+                validate_contract("PlanManifest", manifest, "kernel")
+                manifest_ref = self.kernel._blob(manifest)
+                expected_plan_ref = selected_ref
             previous = self.kernel.artifact(repo, expected_plan_ref, world_ref["work_id"], kind="PLAN_REVISION")["payload"] if expected_plan_ref else None
             previous_nodes = {n["node_id"]: n for n in previous["nodes"]} if previous else {}
             changed = [n["node_id"] for n in plan["nodes"] if previous_nodes.get(n["node_id"]) != n]
@@ -405,10 +481,16 @@ class PlanningService:
                       "knowledge_cut": {"plane": "PLAN", "plan_manifest_ref": manifest_ref},
                       "changed_node_ids": changed, "fenced_task_ids": sorted(set(fenced)), "world_effects_applied": 0,
                       "selection_scope": "ARTIFACT_SELECTION:" + key, "selection_epoch": updated["ARTIFACT_SELECTION:" + key]}
+            if composed_from:
+                result["composed_from"] = composed_from
+                result["independence_review_ref"] = independence_review_ref
             if rolling:
                 result.update(rolling)
                 self._select(repo, world_ref, "WINDOW_PLAN:" + plan["volume_id"], rolling["window_ref"])
             self.kernel._receipt(repo, principal, world_ref, "PLAN_ADOPT", idempotency_key, request, result)
+            if expected_plan_ref:
+                from novel_factory.application.conflict_resolution import record_adopted_window
+                record_adopted_window(repo, world_ref, request["plan_ref"], plan_ref)
             repo.outbox("planning.selected", "volume", plan["volume_id"], result,
                         "plan-selection:" + plan_ref["artifact_revision_id"])
         return result
@@ -514,6 +596,9 @@ class PlanningService:
                 repo.add("dependencies", {"dependency_id": _id(), "work_id": wr["work_id"], "branch_id": wr["branch_id"],
                     "owner_type": "planning_task", "owner_id": owner_id, "scope_key": scope["scope_key"],
                     "observed_version": scope["version"], "dependency_kind": "ARTIFACT_SELECTION"})
+            from .semantic_dependencies import record_plan
+            record_plan(repo, self.kernel.revision(repo, wr), task, payload, plan,
+                        self.kernel.head(repo, wr["work_id"], wr["branch_id"])["world_revision_id"])
             self.kernel._receipt(repo, principal, wr, "PLAN_BIND_TASK", idempotency_key, request, ref)
         return ref
 
@@ -579,5 +664,8 @@ class PlanningService:
                     "owner_type": "planning_task", "owner_id": task_id + ":" + str(generation), "scope_key": scope["scope_key"],
                     "observed_version": scope["version"], "dependency_kind": "ARTIFACT_SELECTION"})
             validate_task_plan_binding(repo, self.kernel, task)
+            from .semantic_dependencies import record_plan
+            record_plan(repo, self.kernel.revision(repo, wr), task, payload, plan,
+                        self.kernel.head(repo, wr["work_id"], wr["branch_id"])["world_revision_id"])
             self.kernel._receipt(repo, principal, wr, "PLAN_BIND_CONTROLLED_TASK", idempotency_key, request, ref)
         return ref

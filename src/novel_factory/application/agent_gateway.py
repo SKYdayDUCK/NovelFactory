@@ -117,6 +117,8 @@ class AgentGateway:
     def _binding(self, repo, principal, request):
         task, grant, spec = WorldQueryService(self.kernel)._task(
             repo, principal, request["task_id"], request["generation"])
+        from novel_factory.application.semantic_dependencies import check_task_dependencies
+        check_task_dependencies(repo, task["task_id"], task["generation"])
         from novel_factory.application.planning import validate_task_plan_binding
         validate_task_plan_binding(repo, self.kernel, task, spec)
         require(task["lease_owner"] == request["worker_id"], "LEASE_OWNER_MISMATCH", "Worker does not own this task")
@@ -162,7 +164,7 @@ class AgentGateway:
 
     def _messages(self, principal, binding):
         task, spec, context, data = (binding[k] for k in ("task", "spec", "context", "input"))
-        material = []
+        material, specialized = [], []
         continuity = set()
         if data["material_refs"]:
             artifacts = tables["artifacts"]
@@ -180,7 +182,9 @@ class AgentGateway:
                 content = self.material_reader(principal, task_id=task["task_id"],
                     generation=task["generation"], context_bundle_id=task["context_bundle_id"],
                     artifact_ref=ref)
-            if content is None:
+            if content is not None:
+                specialized.append(ref)
+            else:
                 content = self.kernel.get_artifact(principal, task["work_id"], ref,
                     task_id=task["task_id"], generation=task["generation"], context_bundle_id=task["context_bundle_id"],
                     world_ref=spec["world_ref"], story_time=spec["story_time"], knowledge_cut=context["read_cut"]["knowledge_cut"])
@@ -190,6 +194,17 @@ class AgentGateway:
             except UnicodeError:
                 raise DomainError("INVALID_ARGUMENT", "Agent material must be UTF-8 text") from None
             material.append({"artifact_ref": ref, "content": value})
+        if specialized and context["read_cut"]["knowledge_cut"]["plane"] != "BELIEF":
+            from .semantic_dependencies import record_material_read
+            wr = spec["world_ref"]
+            with self.kernel.db.uow() as repo:
+                self.kernel.authorize(repo, principal, wr["work_id"], "READ", wr["branch_id"])
+                branch = repo.one("branches", {"branch_id":wr["branch_id"]}, lock="share")
+                self.kernel._task_binding(repo, principal, task["task_id"], task["generation"], task["context_bundle_id"])
+                revision = self.kernel.revision(repo, wr)
+                for ref in specialized:
+                    record_material_read(repo, task["task_id"], task["generation"], revision, ref,
+                                         context["read_cut"]["knowledge_cut"], spec["story_time"], branch["head_revision_id"])
         runtime = binding["runtime"]
         output = data["output_contract"]
         contract_text = prompt_schema(output["name"], output["version"])
@@ -236,6 +251,12 @@ class AgentGateway:
                         "IDEMPOTENCY_CONFLICT", "Recorded model artifact differs")
             else:
                 self.kernel._register_artifact(repo, ref, binding["task"]["work_id"], payload, kind, binding["task"]["principal_id"])
+                from novel_factory.application.audit_log import LogService
+                if kind == "AGENT_CALL_EVIDENCE":
+                    LogService.model(repo.conn, artifact_revision_id, payload)
+                else:
+                    LogService.model_stage(repo.conn, binding["task"], identity, kind, artifact_revision_id,
+                                           model=binding["config"]["model"] if kind=="AGENT_ROLE_TOOL_RESPONSE" else None)
         return ref
 
     def _read_audit(self, repo, attempt_id):

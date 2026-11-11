@@ -84,6 +84,8 @@ def test_role_container_calls_actual_task_mcp(kernel_env, tmp_path):
                 response = await rpc("mcpServer/tool/call", {**base, "tool": "nf_context_get", "arguments": {}}, 4)
                 assert not response["isError"]
                 assert response["structuredContent"]["actor_id"] == world["ids"]["protagonist"]
+                identity = await rpc("mcpServer/tool/call", {**base, "tool": "nf_task_get", "arguments": {}}, 10)
+                assert not identity["isError"] and identity["structuredContent"]["task_id"] == task.task["task_id"]
                 for number, subject in enumerate([world["ids"]["rival"], "00000000-0000-4000-b000-000000000001"], start=5):
                     response = await rpc("mcpServer/tool/call", {**base, "tool": "nf_query_batch",
                         "arguments": {"lookups": [{"subject_id": subject, "predicate": "owner"}]}}, number)

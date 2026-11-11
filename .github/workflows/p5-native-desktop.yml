@@ -3,6 +3,9 @@ on:
   pull_request:
     paths:
       - '.github/workflows/p5-native-desktop.yml'
+      - 'src/novel_factory/interfaces/mcp_stdio.py'
+      - 'src/novel_factory/application/mcp_runtime.py'
+      - 'src/novel_factory/application/audit_log.py'
       - 'scripts/probe_vscode_desktop.py'
       - 'scripts/probe_vscode_offline_transport.py'
   workflow_dispatch:

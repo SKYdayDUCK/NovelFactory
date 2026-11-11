@@ -117,7 +117,10 @@ def read_stage(gateway, adapter, principal, binding, request, messages):
             gateway._audit_artifact(binding, attempt, "lookup-response", {"text": response.text,
                 "request_sha256": digest, "provider_receipt": receipt, "input_tokens": response.input_tokens,
                 "output_tokens": response.output_tokens, "actual_amount": str(amount_used) if amount_used is not None else None,
-                "currency": response.currency}, "AGENT_ROLE_TOOL_RESPONSE")
+                "currency": response.currency, "cached_input_tokens": response.cached_input_tokens,
+                "cost_receipt_checked": known, "model_configuration": {key:binding["config"][key]
+                   for key in ("execution_kind","adapter_kind","model","provider","endpoint")
+                   if key in binding["config"]}}, "AGENT_ROLE_TOOL_RESPONSE")
             require(response.output_tokens is None or response.output_tokens <= maximum,
                     "BUDGET_EXCEEDED", "Selector output exceeds its token limit")
             choice = _selection(response.text)

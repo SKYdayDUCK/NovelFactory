@@ -151,7 +151,7 @@ class EditorialDelivery(CandidateDelivery):
             outcome.update(decision=decision, review_ref=reviewed)
             if decision == "APPROVED":
                 outcome["adopted"] = planning.adopt_plan(enrolled_by, wr, route["plan_ref"],
-                    materials["change_point_ref"]["prior_plan_ref"], key, rolling_review_ref=reviewed)
+                    materials["change_point_ref"]["prior_plan_ref"], key, rolling_review_ref=reviewed, preserve_independent=True)
         if repo.one("tasks", {"task_id": task_id})["state"] != "ACCEPTED":
             kernel.tasks.accept_in_transaction(repo.conn, task_id, gen)
         if cfg.get("continue_editorial"):

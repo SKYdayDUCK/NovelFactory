@@ -134,7 +134,38 @@ def _candidate(packet, choices, scopes):
     }
 
 
+def _task_diagnostics(repo, gateway, tasks):
+    """Only durable IDs, phases and bounded application codes cross the CI log boundary."""
+    report = []
+    for task in tasks:
+        attempts = []
+        for attempt in repo.many("call_attempts", {"task_id": task["task_id"]}):
+            identity = attempt["attempt_id"]
+            host = repo.one("host_turns", {"attempt_id": identity})
+            audit = gateway._read_audit(repo, identity)
+            detail = {"attempt_id": identity, "call_state": attempt["state"],
+                      "host_phase": host["phase"] if host else None,
+                      "thread_started": bool(host and host["thread_id"]),
+                      "turn_started": bool(host and host["turn_id"])}
+            if audit:
+                reason = audit["payload"]["reason"]
+                detail["reason"] = reason if reason in {
+                    None, "MODEL_ADAPTER_FAILURE", "CODEX_HOST_START_FAILED", "CODEX_HOST_CLEANUP_FAILED",
+                    "CODEX_TRANSPORT_UNKNOWN", "CODEX_RPC_ERROR", "CODEX_TURN_INCOMPLETE",
+                    "UNEXPECTED_HOST_TOOL_REQUEST", "HOST_BINDING_MISMATCH", "MODEL_HTTP_ERROR",
+                    "MODEL_RATE_LIMITED", "MODEL_TRANSPORT_UNKNOWN", "INVALID_MODEL_OUTPUT",
+                    "MODEL_IDENTITY_MISMATCH", "CALL_RECONCILIATION_REQUIRED",
+                } else "OTHER_DOMAIN_ERROR"
+            attempts.append(detail)
+        report.append({"task_id": task["task_id"], "state": task["state"], "attempts": attempts})
+    return report
+
+
 def test_one_author_resume_through_autonomous_banquet(kernel_env, tmp_path):
+    run_banquet(kernel_env, tmp_path)
+
+
+def run_banquet(kernel_env, tmp_path, *, redis_workers=None):
     if not shutil.which("codex") or not Path("/proc/self/task").is_dir():
         required = "This process-level acceptance requires an installed Codex CLI on Linux"
         if os.environ.get("CI", "").lower() in {"true", "1"}:
@@ -356,7 +387,7 @@ def test_one_author_resume_through_autonomous_banquet(kernel_env, tmp_path):
                     actor_overlap.wait(timeout=20)
                 return _candidate(packet, choices, process["scope_ids"])
             except Exception as exc:
-                callback_errors.append(repr(exc))
+                callback_errors.append(type(exc).__name__)
                 raise
 
         server.packet_candidate = respond
@@ -379,6 +410,9 @@ def test_one_author_resume_through_autonomous_banquet(kernel_env, tmp_path):
                     "--access-file",
                     str(access),
                 ]
+                if redis_workers is not None:
+                    await asyncio.to_thread(redis_workers.start, command, env)
+                    command.extend(["--processor", "model"])
                 with stdout_path.open("w") as stdout, stderr_path.open("w") as stderr:
                     proc = await asyncio.create_subprocess_exec(
                         *command,
@@ -397,27 +431,21 @@ def test_one_author_resume_through_autonomous_banquet(kernel_env, tmp_path):
                                 changed = (
                                     repo.one("selections", selection)["artifact_ref"] != reference
                                 )
-                                held = [
-                                    r["task_id"]
-                                    for r in repo.many("tasks", {"work_id": work})
-                                    if r["state"]
-                                    in {"WAITING_REVIEW", "STALE", "FAILED", "PAUSED", "UNKNOWN"}
-                                ]
-                            assert proc.returncode is None and not held and not callback_errors, (
-                                held,
-                                callback_errors,
-                                stdout_path.read_text(),
-                                stderr_path.read_text()[-2000:],
-                            )
+                                tasks = repo.many("tasks", {"work_id": work})
+                                held = [task for task in tasks if task["state"] in {
+                                    "WAITING_REVIEW", "STALE", "FAILED", "PAUSED", "UNKNOWN"}]
+                                if proc.returncode is not None or held or callback_errors:
+                                    pytest.fail(json.dumps({
+                                        "supervisor_exit": proc.returncode, "fixture_error_count": len(callback_errors),
+                                        "tasks": _task_diagnostics(repo, gateway, held or tasks),
+                                    }))
                             if changed:
                                 break
                             await asyncio.sleep(0.12)
                         else:
-                            pytest.fail(
-                                "Supervisor stalled: "
-                                + stdout_path.read_text()
-                                + stderr_path.read_text()[-2000:]
-                            )
+                            with kernel.db.uow(write=False) as repo:
+                                tasks = repo.many("tasks", {"work_id": work})
+                                pytest.fail("Supervisor stalled " + json.dumps(_task_diagnostics(repo, gateway, tasks)))
                         result = await session.call_tool("nf_project_status", {})
                         assert not result.isError
                         final = result.structuredContent["counts"]
@@ -440,6 +468,8 @@ def test_one_author_resume_through_autonomous_banquet(kernel_env, tmp_path):
                 return handshake.protocolVersion, tools, initial, final
 
         protocol, tools, initial, final = asyncio.run(drive())
+        if redis_workers is not None:
+            redis_workers.check(kernel, owner, work, branch, iid)
         elapsed = time.monotonic() - started
         completed_inventory = inventory()
         assert register_scene(kernel, gateway, owner, **registration) == scene
@@ -549,7 +579,7 @@ def test_one_author_resume_through_autonomous_banquet(kernel_env, tmp_path):
                 == 8
             )
             assert all(item == {"input_tokens": 11, "output_tokens": 7} for item in usage.values())
-            if output := os.environ.get("NF_P5_BANQUET_EVIDENCE"):
+            if output := os.environ.get("NF_P55_BANQUET_EVIDENCE" if redis_workers else "NF_P5_BANQUET_EVIDENCE"):
                 from novel_factory.application.prompt_schema import inline_schema
                 from novel_factory.domain.canonical import canonical_bytes
 

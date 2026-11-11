@@ -29,10 +29,14 @@ PREDICATES = {
     'controlled_by': ('ENTITY', True), 'vital_state': ('STRING', True),
     'ability_state': ('STRING', True), 'on_duty': ('BOOLEAN', True),
     'blocked_by': ('ENTITY', False),
+    # Carrier identity is the subject. Content and attributed readings point
+    # to immutable artifact versions. An attributed reading is not its truth.
+    'message_content_ref': ('STRING', True), 'attributed_reading_ref': ('STRING', True),
+    'message_authentic': ('BOOLEAN', True),
 }
 ALIASES = {'owner': 'legal_owner', 'holder': 'possessed_by', 'active_holder': 'possessed_by',
            'last_confirmed_owner': 'legal_owner', 'location': 'located_in'}
-_TERMINAL = {'DESTROYED', 'CONSUMED', 'RETIRED'}
+TERMINAL_LIFECYCLES = {'DESTROYED', 'CONSUMED', 'RETIRED'}
 
 
 class _InitialSnapshotMemo:
@@ -81,7 +85,7 @@ def _initial_snapshot(genesis):
     encoded = json.dumps(genesis, ensure_ascii=False, separators=(',', ':'),
                          allow_nan=False).encode('utf-8')
     key = (INTERPRETER_VERSION, PROJECTION_VERSION, tuple(sorted(PREDICATES.items())),
-           tuple(sorted(_TERMINAL)), encoded)
+           tuple(sorted(TERMINAL_LIFECYCLES)), encoded)
     cached = _initial_snapshot_memo.get(key)
     if cached is not None:
         return json.loads(cached)
@@ -150,7 +154,7 @@ def _validate_relation(snapshot: dict, subject: str, predicate: str, value: dict
         kind = snapshot['entities'][subject]['entity_kind']
         if kind not in {'ITEM', 'CONTAINER', 'RESOURCE', 'BATCH', 'KNOWLEDGE_CARRIER'}:
             raise DomainError('HARD_RULE_VIOLATION', 'Possession predicate needs an ownable entity')
-    if predicate in {'possessed_by', 'custody'} and lifecycle_at(snapshot, subject, at) in _TERMINAL:
+    if predicate in {'possessed_by', 'custody'} and lifecycle_at(snapshot, subject, at) in TERMINAL_LIFECYCLES:
         raise DomainError('HARD_RULE_VIOLATION', 'Inactive items cannot be actively held')
 
 
@@ -214,7 +218,7 @@ def _empty_snapshot(genesis: dict) -> dict:
         if entity.get('scope_id') is not None:
             validate_contract('UUID', entity['scope_id'])
         lifecycle = value.get('lifecycle', {}).get(identifier, 'ACTIVE')
-        if lifecycle not in {'ACTIVE', *_TERMINAL}:
+        if lifecycle not in {'ACTIVE', *TERMINAL_LIFECYCLES}:
             raise DomainError('INVALID_ARGUMENT', 'Invalid initial lifecycle')
         snapshot['lifecycle'][identifier] = lifecycle
         snapshot['lifecycle_history'].append({'entity_id': identifier, 'lifecycle': lifecycle,
@@ -514,12 +518,12 @@ def _apply_group(snapshot: dict, event: dict, effects: list[dict], at: dict):
             subject = effect['entity_id']
             _entity(snapshot, subject, at)
             current = lifecycle_at(snapshot, subject, at)
-            if current in _TERMINAL:
+            if current in TERMINAL_LIFECYCLES:
                 raise DomainError('HARD_RULE_VIOLATION', 'Terminal lifecycle cannot be reapplied or resurrected')
             snapshot['lifecycle'][subject] = effect['lifecycle']
             snapshot['lifecycle_history'].append({'entity_id': subject, 'lifecycle': effect['lifecycle'],
                                                   'at': deepcopy(at), 'event_ref': _event_ref(event)})
-            if effect['lifecycle'] in _TERMINAL:
+            if effect['lifecycle'] in TERMINAL_LIFECYCLES:
                 for predicate in ('possessed_by', 'custody'):
                     for relation in _active(snapshot, subject, predicate, at):
                         _close(relation, at, event)
@@ -635,12 +639,12 @@ never turns a world relation into actor knowledge.
             answer.update(value_status='VALUE', data={'kind': 'STRING', 'value': lifecycle})
         return answer
     if predicate == 'active_use':
-        if lifecycle in _TERMINAL:
+        if lifecycle in TERMINAL_LIFECYCLES:
             answer['value_status'] = 'NOT_APPLICABLE'
         elif lifecycle == 'ACTIVE':
             answer.update(value_status='VALUE', data={'kind': 'BOOLEAN', 'value': True})
         return answer
-    if canonical_predicate in {'possessed_by', 'custody'} and lifecycle in _TERMINAL:
+    if canonical_predicate in {'possessed_by', 'custody'} and lifecycle in TERMINAL_LIFECYCLES:
         answer['value_status'] = 'NONE'
         return answer
     if canonical_predicate not in PREDICATES:

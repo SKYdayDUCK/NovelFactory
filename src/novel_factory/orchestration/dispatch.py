@@ -3,11 +3,11 @@ from sqlalchemy import text
 
 from novel_factory.orchestration.tasks import MAINTENANCE_GATE
 
-
 _NEXT = text("""
     WITH active AS MATERIALIZED (
         SELECT t.work_id, t.role_id FROM nf_dispatch_slots s
         JOIN nf_tasks t USING(task_id) WHERE s.expires_at > statement_timestamp()
+        UNION ALL SELECT work_id, 'derived_index' AS role_id FROM nf_index_leases WHERE expires_at > statement_timestamp()
     ), next_job AS (
         SELECT t.task_id, t.branch_id
         FROM nf_dispatch_waiters q
@@ -25,6 +25,10 @@ _NEXT = text("""
           AND NOT EXISTS(SELECT FROM nf_dispatch_slots s WHERE s.task_id=t.task_id
                          AND s.expires_at > statement_timestamp())
           AND NOT EXISTS(SELECT FROM nf_call_attempts c WHERE c.task_id=t.task_id)
+          AND NOT EXISTS(SELECT FROM nf_conflict_cases sc WHERE sc.task_id=t.task_id
+                         AND sc.generation=t.generation AND NOT EXISTS
+                         (SELECT FROM nf_conflict_resolutions sr WHERE sr.case_id=sc.case_id
+                          AND sr.outcome IN ('REVALIDATED','CERTIFICATE_REISSUED')))
           AND (SELECT count(*) FROM active) <
               (SELECT slots FROM nf_dispatch_limits WHERE scope='GLOBAL' AND subject='*')
           AND (SELECT count(*) FROM active a WHERE a.work_id=t.work_id) <
@@ -40,7 +44,12 @@ _NEXT = text("""
 """)
 
 
-def next_job(conn, work, branch):
+def redis_enabled(conn, work, branch):
+    return conn.scalar(text("""SELECT EXISTS (SELECT FROM nf_redis_branches
+        WHERE work_id=:work AND branch_id=:branch)"""), {"work": work, "branch": branch})
+
+
+def next_job(conn, work, branch, *, transport="postgres"):
     """Install/refresh this branch's ticket and pick the oldest eligible live queue.
 
     All supervisors use the existing short queue gate. The caller must reserve
@@ -48,6 +57,8 @@ def next_job(conn, work, branch):
     """
     params = {"work": work, "branch": branch}
     conn.execute(text("SELECT pg_advisory_xact_lock(:gate)"), {"gate": MAINTENANCE_GATE + 1})
+    if (transport == "redis") != redis_enabled(conn, work, branch):
+        return None
     conn.execute(text("LOCK TABLE nf_dispatch_limits IN SHARE MODE"))
     conn.execute(text("DELETE FROM nf_dispatch_waiters WHERE valid_until <= statement_timestamp()"))
     # A live generation owns its slot through its current lease. Older servers

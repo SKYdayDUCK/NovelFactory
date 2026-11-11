@@ -168,6 +168,10 @@ class TaskService:
         # shares. It never participates in world acceptance or model waits.
         conn.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": MAINTENANCE_GATE + 1})
         conditions = [t.c.state == "READY", t.c.deadline > now,
+                      text("""NOT EXISTS(SELECT FROM nf_conflict_cases sc
+                            WHERE sc.task_id=nf_tasks.task_id AND sc.generation=nf_tasks.generation
+                            AND NOT EXISTS(SELECT FROM nf_conflict_resolutions sr WHERE sr.case_id=sc.case_id
+                                           AND sr.outcome IN ('REVALIDATED','CERTIFICATE_REISSUED')))"""),
                       or_(t.c.generation == 0, ~self.plan_binding_exists(t.c.task_id, t.c.work_id))]
         if work_id:
             conditions.append(t.c.work_id == str(work_id))
@@ -380,8 +384,19 @@ class TaskService:
         unresolved = conn.scalar(select(func.count()).select_from(calls).where(calls.c.task_id == task["task_id"], calls.c.state.in_(["UNKNOWN", "PREPARED"])))
         # PREPARED reservations also require explicit reconciliation before a
         # new external attempt; they cannot silently disappear on restart.
+        from novel_factory.application.semantic_dependencies import check_task_dependencies
+        from novel_factory.infrastructure.repository import KernelRepository
+        try:
+            check_task_dependencies(KernelRepository(conn, self.tables), task["task_id"], task["generation"])
+            stale_input = False
+        except DomainError as exc:
+            if exc.code != "DEPENDENCY_CONFLICT":
+                raise
+            stale_input = True
         if unresolved:
             state = "PAUSED"
+        elif stale_input:
+            state = "STALE"
         elif task["deadline"] <= self._now(conn):
             state = "FAILED"
         elif conn.scalar(select(self.plan_binding_exists(task["task_id"], task["work_id"]))):
@@ -514,6 +529,16 @@ class TaskService:
             if state != "UNKNOWN":
                 conn.execute(budgets.update().where(budgets.c.budget_id == call["budget_id"]).values(reserved_amount=budgets.c.reserved_amount - call["reserved_amount"], spent_amount=budgets.c.spent_amount + actual))
             conn.execute(calls.update().where(calls.c.attempt_id == attempt_id).values(state=state, actual_amount=actual, actual_tokens=settled_tokens, provider_receipt=provider_receipt, updated_at=self._now(conn)))
+            if state != "UNKNOWN" and call["state"] in {"UNKNOWN","PREPARED","SENT"}:
+                conflict = conn.execute(text("""
+                    SELECT c.work_id::text,c.branch_id::text FROM nf_conflict_resolutions r
+                    JOIN nf_conflict_cases c USING(case_id) WHERE r.task_id=:task
+                    AND r.outcome='CALL_RECONCILIATION_REQUIRED' LIMIT 1
+                """), {"task": call["task_id"]}).mappings().one_or_none()
+                if conflict:
+                    enqueue_outbox(conn, self.tables, "world.requested", "task", str(call["task_id"]),
+                        {**conflict, "generation": call["generation"]}, "semantic:settled:" + str(attempt_id))
+                    conn.exec_driver_sql("NOTIFY nf_supervisor_wake")
             return {"attempt_id": str(attempt_id), "state": state, "actual_amount": actual, "actual_tokens": settled_tokens}
 
 
