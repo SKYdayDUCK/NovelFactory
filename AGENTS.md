@@ -3,6 +3,8 @@
 适用于修改代码、契约、测试和文档的开发 Agent；小说运行时角色另见 [角色契约](runtime/roles/README.md)。
 PR #2、#3 已合入 main，形成 P0–P4 工程基线。Scion 是独立的 Draft PR #4。P5 在独立开发分支接入受权 MCP 和可恢复的任务执行器。以当前分支的源码、迁移和测试判断可用能力，容量基线继续为 `NOT_MET`。详见[合并记录](reports/main_工程基线合并记录.md)和[P5 接管与验收矩阵](reports/P5-00.md)。
 
+作者在 Codex 输入“继续未完成的任务”以恢复小说生产时，执行 [nf-resume](.agents/skills/nf-resume/SKILL.md)，使用当前项目已绑定的 MCP 授权。明确要求继续开发代码时按下列开发规范执行。
+
 ## 1. 开始任务
 
 - 阅读本文件、目标目录及祖先目录中的局部 `AGENTS.md`；局部规范细化本目录责任。

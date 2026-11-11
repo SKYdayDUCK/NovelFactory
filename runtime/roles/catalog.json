@@ -30,7 +30,8 @@
       ],
       "skill_names": [
         "plan-volume",
-        "edit-volume"
+        "edit-volume",
+        "review-change-point"
       ],
       "restricted_skill_modes": {
         "plan-volume": "editorial_decision_only"
@@ -76,7 +77,8 @@
         "volume_contract",
         "window_plan",
         "scene_plan",
-        "replan"
+        "replan",
+        "volume_review"
       ],
       "requested_tools": [
         "context_get",
@@ -98,7 +100,9 @@
         "context_compile"
       ],
       "skill_names": [
-        "plan-volume"
+        "plan-volume",
+        "volume-director-review",
+        "roll-window"
       ],
       "query_profile_id": "volume_director"
     },
