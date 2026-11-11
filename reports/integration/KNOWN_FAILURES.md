@@ -10,3 +10,5 @@
 - W2 早期候选 `772ee36f` 的 PEL 测试错误地假定全库随机顺序前两项均可采纳；终态使用两笔真实授权事件，仍全量重放并覆盖拒绝和去重。[原失败](evidence/W2/candidate-162af26/previous-pel-failure.log) · [修复及主线验收](W2_主线签收.md)
 
 - NF Bridge 原实现允许已过期安装触及新预留或发送。相同数据库和发送前拦截协议下，旧实现失败两项，修复后通过两项。此前 UNKNOWN 的原始费用仍可对账。[对照证据](evidence/NF-Bridge/candidate-26bf033/expiry-control.zip)
+
+- 桥接初版 `26bf0337` 的托管 PG 套件有 1 项失败、805 项通过、17 项跳过。历史 S9 用例的目标迁移写成 head，导致以 0016 断言查验 0017。新版本将历史边界固定在 0016，另验从发布库升级到 0017、非空降级拒绝和原 67 张表内容。[失败与修复原件](evidence/NF-Bridge/review-26bf033/upgrade-controls.zip)

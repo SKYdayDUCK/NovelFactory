@@ -18,3 +18,5 @@
 阶段状态详见 [交付台账](DELIVERY_LEDGER.md)，接管字段为历史快照。
 
 #11 现以 `main` 为目标，候选 `26bf0337`，双库专项通过，托管验收进行中。[原始回执](evidence/NF-Bridge/candidate-26bf033/README.md)
+
+NF Bridge #11 的公开候选现为 `695668b87f6a76acbe7e27c71fcb259b7b3f0795`。实际 PostgreSQL 双服务专项 23 项全部通过。等待此候选的完整工程和原条件容量回执。[候选专项、WAL、权限和工作流](evidence/NF-Bridge/candidate-695668b/README.md)
