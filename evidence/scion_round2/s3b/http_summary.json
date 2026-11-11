@@ -1,0 +1,341 @@
+{
+  "design": "PG17 HTTP matched pair for each size; original S3 lazy (A) and repeated-parent proof candidate (P). One pair per size.",
+  "candidate_tested_source": "2650f472daa2e81de442e92596dd9c33ca66a563",
+  "verified_source": "1959ef65df7afbc03a8bb879fc860a68e3c88cb9",
+  "verified_change": "Conservative full replay on optional proof/suffix exceptions and added PG/parallel fault tests; HTTP sampled the earlier frozen source.",
+  "groups": {
+    "200": {
+      "A": {
+        "source": "6719ec3cd0272bde88c13f280f727b122f0bd35a",
+        "flags": {
+          "NF_SCION_COLUMNS": "0",
+          "NF_SCION_WORKER_COLUMNS": "0",
+          "NF_SCION_REVIEW_COLUMNS": "0",
+          "NF_SCION_QUERY_COLUMNS": "0",
+          "NF_SCION_SCOPES": "0",
+          "NF_SCION_REPLAY": "1",
+          "NF_SCION_REPLAY_LAZY": "1",
+          "NF_SCION_SCHEMA_LINKS": "0",
+          "NF_SCION_REPLAY_PRIME": "0"
+        },
+        "cpu_affinity": [
+          1
+        ],
+        "input_sha256": "d3e684d671ef3fca6a1e42c9e2f3c01de66215da1685f04834e6017faa29a013",
+        "meter_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda",
+        "raw_json_sha256": "3f16ff7126081e58dd9bca5f9da411ef7ee7363e6e5ccdc73cfe2ab56382ba14",
+        "phase_counts": {
+          "accept_conflict": 19,
+          "accept_independent": 20,
+          "accept_retry": 21,
+          "accept_selected_fixture": 1,
+          "certificate": 57,
+          "compile": 200,
+          "graph": 20,
+          "history": 265,
+          "propose": 55,
+          "state_cold": 200,
+          "state_mixed": 180,
+          "state_warm": 200
+        },
+        "counters": {
+          "replay.unverified_parent": 41,
+          "replay_proof.cold_proposal_skipped": 40,
+          "replay.not_strictly_later": 20,
+          "replay_proof.full_replay_seed": 20
+        },
+        "accepted_operations_including_expected_conflicts": 1141,
+        "complete_agents": 200,
+        "planned_minus_fulfilled": 0,
+        "emitted_logical_minus_fulfilled": 0,
+        "replay_calls": 61,
+        "suffix_executions": 0,
+        "paid_priming_hits": 0,
+        "pure_reuse_hits": 0,
+        "paid_full_replay_calls_at_least": 61,
+        "service_cpu": {
+          "service_user_cpu_seconds": 63.260104,
+          "service_system_cpu_seconds": 3.9619869999999997,
+          "service_sum_peak_rss_kib": 133016
+        },
+        "pg_cluster_cpu_seconds": 10.75,
+        "metrics": {
+          "planned_requests": 1141,
+          "emitted_logical_operations": 1141,
+          "completed_logical_operations": 1141,
+          "client_requests_never_emitted": 0,
+          "emitted_requests": 1238,
+          "duration_seconds": 150.013718,
+          "first_attempt_status_counts": {
+            "200": 1057,
+            "429": 65,
+            "409": 19
+          },
+          "status_counts": {
+            "200": 1122,
+            "429": 97,
+            "409": 19
+          },
+          "effective_call_rps_excluding_duplicates": 7.3393,
+          "effective_world_commits_per_second": 0.14,
+          "infrastructure_retries": 97,
+          "new_world_commit_receipts": 21,
+          "successful_duplicate_receipts": 21,
+          "first_attempt_latency": {
+            "count": 1141,
+            "p50_ms": 284.9684,
+            "p95_ms": 2643.656,
+            "p99_ms": 3195.274
+          }
+        }
+      },
+      "P": {
+        "source": "2650f472daa2e81de442e92596dd9c33ca66a563",
+        "flags": {
+          "NF_SCION_COLUMNS": "0",
+          "NF_SCION_WORKER_COLUMNS": "0",
+          "NF_SCION_REVIEW_COLUMNS": "0",
+          "NF_SCION_QUERY_COLUMNS": "0",
+          "NF_SCION_SCOPES": "0",
+          "NF_SCION_REPLAY": "1",
+          "NF_SCION_REPLAY_LAZY": "1",
+          "NF_SCION_SCHEMA_LINKS": "0",
+          "NF_SCION_REPLAY_PRIME": "1"
+        },
+        "cpu_affinity": [
+          1
+        ],
+        "input_sha256": "d3e684d671ef3fca6a1e42c9e2f3c01de66215da1685f04834e6017faa29a013",
+        "meter_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda",
+        "raw_json_sha256": "a207e77f7ea8f1dfb57228def36116fe62166816089bab9d921f1ccf825936f5",
+        "phase_counts": {
+          "accept_conflict": 19,
+          "accept_independent": 20,
+          "accept_retry": 21,
+          "accept_selected_fixture": 1,
+          "certificate": 40,
+          "compile": 200,
+          "graph": 20,
+          "history": 200,
+          "propose": 40,
+          "state_cold": 200,
+          "state_mixed": 180,
+          "state_warm": 200
+        },
+        "counters": {
+          "replay_proof.prime_first": 1,
+          "replay.unverified_parent": 1,
+          "replay_proof.cold_proposal_skipped": 1,
+          "replay_proof.prime_attempt": 1,
+          "replay_proof.primed_hit": 1,
+          "replay.hit": 40,
+          "replay_proof.reuse_hit": 39,
+          "replay.not_strictly_later": 20,
+          "replay_proof.full_replay_seed": 20
+        },
+        "accepted_operations_including_expected_conflicts": 1141,
+        "complete_agents": 200,
+        "planned_minus_fulfilled": 0,
+        "emitted_logical_minus_fulfilled": 0,
+        "replay_calls": 61,
+        "suffix_executions": 40,
+        "paid_priming_hits": 1,
+        "pure_reuse_hits": 39,
+        "paid_full_replay_calls_at_least": 22,
+        "service_cpu": {
+          "service_user_cpu_seconds": 53.778385,
+          "service_system_cpu_seconds": 2.924512,
+          "service_sum_peak_rss_kib": 119032
+        },
+        "pg_cluster_cpu_seconds": 10.180000000000001,
+        "metrics": {
+          "planned_requests": 1141,
+          "emitted_logical_operations": 1141,
+          "completed_logical_operations": 1141,
+          "client_requests_never_emitted": 0,
+          "emitted_requests": 1141,
+          "duration_seconds": 139.313835,
+          "first_attempt_status_counts": {
+            "200": 1122,
+            "409": 19
+          },
+          "status_counts": {
+            "200": 1122,
+            "409": 19
+          },
+          "effective_call_rps_excluding_duplicates": 7.903,
+          "effective_world_commits_per_second": 0.1507,
+          "infrastructure_retries": 0,
+          "new_world_commit_receipts": 21,
+          "successful_duplicate_receipts": 21,
+          "first_attempt_latency": {
+            "count": 1141,
+            "p50_ms": 86.1775,
+            "p95_ms": 521.3562,
+            "p99_ms": 789.9928
+          }
+        }
+      },
+      "compared_source_differences": [
+        "benchmarks/round2_capacity.py",
+        "benchmarks/scion_round2_matrix.py",
+        "src/novel_factory/application/replay_proofs.py",
+        "src/novel_factory/application/scion.py",
+        "src/novel_factory/contracts/linked.py",
+        "src/novel_factory/contracts/registry.py"
+      ],
+      "archive": {
+        "path": "mixed200.tar.xz",
+        "sha256": "e59f2e2c6094bce2c542cb817b8e41e5353f5d2983fb6ebec0076b9af8776cde",
+        "bytes": 340980
+      }
+    },
+    "500": {
+      "A": {
+        "source": "6719ec3cd0272bde88c13f280f727b122f0bd35a",
+        "flags": {
+          "NF_SCION_COLUMNS": "0",
+          "NF_SCION_WORKER_COLUMNS": "0",
+          "NF_SCION_REVIEW_COLUMNS": "0",
+          "NF_SCION_QUERY_COLUMNS": "0",
+          "NF_SCION_SCOPES": "0",
+          "NF_SCION_REPLAY": "1",
+          "NF_SCION_REPLAY_LAZY": "1",
+          "NF_SCION_SCHEMA_LINKS": "0",
+          "NF_SCION_REPLAY_PRIME": "0"
+        },
+        "cpu_affinity": [
+          3
+        ],
+        "input_sha256": "1316d045b33ea7af6d8707dde57c4bae5f7b05278af57557898e16e0399f2b09",
+        "meter_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda",
+        "raw_json_sha256": "5bf18482764fe092fe82d85ccdb18b379b35735718b4c2159dc7524db3a36a00",
+        "phase_counts": {
+          "compile": 1403
+        },
+        "counters": {},
+        "accepted_operations_including_expected_conflicts": 414,
+        "complete_agents": 0,
+        "planned_minus_fulfilled": 2437,
+        "emitted_logical_minus_fulfilled": 86,
+        "replay_calls": 0,
+        "suffix_executions": 0,
+        "paid_priming_hits": 0,
+        "pure_reuse_hits": 0,
+        "paid_full_replay_calls_at_least": 0,
+        "service_cpu": {
+          "service_user_cpu_seconds": 41.964839999999995,
+          "service_system_cpu_seconds": 2.593622,
+          "service_sum_peak_rss_kib": 244824
+        },
+        "pg_cluster_cpu_seconds": 7.76,
+        "metrics": {
+          "planned_requests": 2851,
+          "emitted_logical_operations": 500,
+          "completed_logical_operations": 500,
+          "client_requests_never_emitted": 2351,
+          "emitted_requests": 1403,
+          "duration_seconds": 71.697894,
+          "first_attempt_status_counts": {
+            "200": 169,
+            "429": 331
+          },
+          "status_counts": {
+            "200": 414,
+            "429": 989
+          },
+          "effective_call_rps_excluding_duplicates": 5.7742,
+          "effective_world_commits_per_second": 0.0,
+          "infrastructure_retries": 903,
+          "new_world_commit_receipts": 0,
+          "successful_duplicate_receipts": 0,
+          "first_attempt_latency": {
+            "count": 500,
+            "p50_ms": 2351.7983,
+            "p95_ms": 5406.533,
+            "p99_ms": 7070.0152
+          }
+        }
+      },
+      "P": {
+        "source": "2650f472daa2e81de442e92596dd9c33ca66a563",
+        "flags": {
+          "NF_SCION_COLUMNS": "0",
+          "NF_SCION_WORKER_COLUMNS": "0",
+          "NF_SCION_REVIEW_COLUMNS": "0",
+          "NF_SCION_QUERY_COLUMNS": "0",
+          "NF_SCION_SCOPES": "0",
+          "NF_SCION_REPLAY": "1",
+          "NF_SCION_REPLAY_LAZY": "1",
+          "NF_SCION_SCHEMA_LINKS": "0",
+          "NF_SCION_REPLAY_PRIME": "1"
+        },
+        "cpu_affinity": [
+          3
+        ],
+        "input_sha256": "1316d045b33ea7af6d8707dde57c4bae5f7b05278af57557898e16e0399f2b09",
+        "meter_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda",
+        "raw_json_sha256": "70b28605b10997aa62c398f60e61b5071e92bb61a3981becd1e1f7b8c68562fd",
+        "phase_counts": {
+          "compile": 1060
+        },
+        "counters": {},
+        "accepted_operations_including_expected_conflicts": 468,
+        "complete_agents": 0,
+        "planned_minus_fulfilled": 2383,
+        "emitted_logical_minus_fulfilled": 32,
+        "replay_calls": 0,
+        "suffix_executions": 0,
+        "paid_priming_hits": 0,
+        "pure_reuse_hits": 0,
+        "paid_full_replay_calls_at_least": 0,
+        "service_cpu": {
+          "service_user_cpu_seconds": 42.349556,
+          "service_system_cpu_seconds": 2.7360439999999997,
+          "service_sum_peak_rss_kib": 243364
+        },
+        "pg_cluster_cpu_seconds": 8.38,
+        "metrics": {
+          "planned_requests": 2851,
+          "emitted_logical_operations": 500,
+          "completed_logical_operations": 500,
+          "client_requests_never_emitted": 2351,
+          "emitted_requests": 1060,
+          "duration_seconds": 64.927157,
+          "first_attempt_status_counts": {
+            "200": 262,
+            "429": 238
+          },
+          "status_counts": {
+            "200": 468,
+            "429": 592
+          },
+          "effective_call_rps_excluding_duplicates": 7.2081,
+          "effective_world_commits_per_second": 0.0,
+          "infrastructure_retries": 560,
+          "new_world_commit_receipts": 0,
+          "successful_duplicate_receipts": 0,
+          "first_attempt_latency": {
+            "count": 500,
+            "p50_ms": 2183.7886,
+            "p95_ms": 2782.9058,
+            "p99_ms": 3118.2357
+          }
+        }
+      },
+      "compared_source_differences": [
+        "benchmarks/round2_capacity.py",
+        "benchmarks/scion_round2_matrix.py",
+        "src/novel_factory/application/replay_proofs.py",
+        "src/novel_factory/application/scion.py",
+        "src/novel_factory/contracts/linked.py",
+        "src/novel_factory/contracts/registry.py"
+      ],
+      "archive": {
+        "path": "mixed500.tar.xz",
+        "sha256": "9aca926a8a279a621a2aec5ffef4fbdeee5ff27db2029c13e5ab6dc01bd991e7",
+        "bytes": 324400
+      }
+    }
+  }
+}

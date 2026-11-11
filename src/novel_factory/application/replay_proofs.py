@@ -58,16 +58,73 @@ class ReplayProofs:
     """
     def __init__(self, capacity=256):
         self._proofs = OrderedDict()
+        self._prime_hints = OrderedDict()
+        self._priming = set()
         self._capacity = capacity
         self._lock = Lock()
 
     def _remember(self, context, event_hashes, snapshot):
-        proof = (context, fingerprint(sorted(event_hashes)), fingerprint(snapshot))
+        self._store_proof((context, fingerprint(sorted(event_hashes)), fingerprint(snapshot)))
+
+    def _store_proof(self, proof):
         with self._lock:
             self._proofs[proof] = None
             self._proofs.move_to_end(proof)
             if len(self._proofs) > self._capacity:
                 self._proofs.popitem(last=False)
+
+    def _reserve_prime(self, key):
+        # Repeated cold proposals are a workload hint, never a proof. Cap the
+        # backlog and allow at most two independent parent checks per process.
+        with self._lock:
+            if self._capacity <= 0 or key in self._priming:
+                return "busy"
+            if key not in self._prime_hints:
+                self._prime_hints[key] = False
+                if len(self._prime_hints) > self._capacity:
+                    self._prime_hints.popitem(last=False)
+                return "first"
+            if self._prime_hints[key]:
+                return "already_tried"
+            if len(self._priming) >= 2:
+                return "busy"
+            self._prime_hints[key] = True
+            self._prime_hints.move_to_end(key)
+            self._priming.add(key)
+            return "attempt"
+
+    def _prime_parent(self, options, genesis, prefix, parent, work):
+        key = (parent["work_id"], parent["branch_id"], parent.get("world_revision_id"), parent["state_hash"])
+        reservation = self._reserve_prime(key)
+        if reservation != "attempt":
+            options.record("replay_proof", "prime_" + reservation)
+            return False
+        try:
+            options.record("replay_proof", "prime_attempt")
+            # The parent was originally reduced in the order visible in its
+            # event-summary list. PostgreSQL may reorder keys in selection
+            # JSONB. Use the recorded order solely to *try* a full replay of
+            # authoritative event bodies; demand exact whole-state equality.
+            selected = {e["event_version_id"]: e for e in prefix}
+            order = [e["event_ref"]["event_version_id"] for e in parent["snapshot"]["events"]]
+            if len(order) != len(prefix) or len(selected) != len(prefix) or set(order) != selected.keys():
+                options.record("replay_proof", "prime_mismatch")
+                return False
+            original = reducer.replay(genesis, [selected[eid] for eid in order])
+            if fingerprint(original) != parent["state_hash"] or original != parent["snapshot"]:
+                options.record("replay_proof", "prime_mismatch")
+                return False
+            context = _context(genesis, parent, work)
+            prefix_hash = fingerprint(sorted(fingerprint(e) for e in prefix))
+            self._store_proof((context, prefix_hash, parent["state_hash"]))
+            return True
+        except Exception:
+            # Optional proof work must not change the ordinary full replay error.
+            options.record("replay_proof", "prime_failed")
+            return False
+        finally:
+            with self._lock:
+                self._priming.discard(key)
 
     def evaluate(self, options, genesis, events, candidates, template, parent, work, *, proposal=False):
         lazy = getattr(options, "replay_lazy", False)
@@ -95,8 +152,19 @@ class ReplayProofs:
             with self._lock:
                 possible = any(proof[2] == parent["state_hash"] for proof in self._proofs)
             if not possible:
-                # A negative prefilter can only send a request to full replay.
-                # A hash match still needs the complete guard and content proof.
+                if getattr(options, "replay_prime", False) and self._prime_parent(
+                        options, genesis, events[:-1], parent, work):
+                    # A successful prime paid a complete parent replay on this
+                    # request. Keep its hit separate from later proof reuse.
+                    try:
+                        result = world._append_verified_suffix(parent["snapshot"], events[:-1], events[-1])
+                    except Exception:
+                        options.record("replay_proof", "prime_suffix_failed")
+                    else:
+                        options.record("replay_proof", "primed_hit")
+                        options.record("replay", "hit")
+                        return result
+                # A negative prefilter can only select the complete reducer.
                 options.record("replay", "unverified_parent")
                 options.record("replay_proof", "cold_proposal_skipped")
                 return reducer.replay(genesis, events)
@@ -114,8 +182,18 @@ class ReplayProofs:
         with self._lock:
             known = (context, prefix_hash, parent["state_hash"]) in self._proofs
         if known:
+            priming = lazy and getattr(options, "replay_prime", False)
+            try:
+                result = world._append_verified_suffix(parent["snapshot"], prefix, events[-1])
+            except Exception:
+                if not priming:
+                    options.record("replay", "hit")
+                    raise
+                options.record("replay", "suffix_recheck")
+                return reducer.replay(genesis, events)
             options.record("replay", "hit")
-            result = world._append_verified_suffix(parent["snapshot"], prefix, events[-1])
+            if priming:
+                options.record("replay_proof", "reuse_hit")
         else:
             options.record("replay", "unverified_parent")
             result = reducer.replay(genesis, events)

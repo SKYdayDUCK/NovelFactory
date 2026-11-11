@@ -15,6 +15,7 @@ class ScionOptions:
         self.scopes = os.environ.get("NF_SCION_SCOPES") == "1"
         self.replay = os.environ.get("NF_SCION_REPLAY") == "1"
         self.replay_lazy = os.environ.get("NF_SCION_REPLAY_LAZY") == "1"
+        self.replay_prime = os.environ.get("NF_SCION_REPLAY_PRIME") == "1"
         self._counts = Counter()
         self._lock = Lock()
 

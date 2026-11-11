@@ -25,11 +25,12 @@ from benchmarks.p2_behavioral_load import isolated_kernel
 FLAGS = (
     "NF_SCION_COLUMNS", "NF_SCION_WORKER_COLUMNS", "NF_SCION_REVIEW_COLUMNS",
     "NF_SCION_QUERY_COLUMNS", "NF_SCION_SCOPES", "NF_SCION_REPLAY",
-    "NF_SCION_REPLAY_LAZY", "NF_SCION_SCHEMA_LINKS",
+    "NF_SCION_REPLAY_LAZY", "NF_SCION_SCHEMA_LINKS", "NF_SCION_REPLAY_PRIME",
 )
 WORKER, REVIEW, SCOPE = FLAGS[1], FLAGS[2], FLAGS[4]
 ENABLED = {"A": (), "B": (WORKER, REVIEW), "C": (SCOPE,), "D": (WORKER, REVIEW, SCOPE),
-           "E": ("NF_SCION_REPLAY", "NF_SCION_REPLAY_LAZY")}
+           "E": ("NF_SCION_REPLAY", "NF_SCION_REPLAY_LAZY"),
+           "P": ("NF_SCION_REPLAY", "NF_SCION_REPLAY_LAZY", "NF_SCION_REPLAY_PRIME")}
 
 
 def check_source(root, expected):
@@ -76,7 +77,9 @@ def main():
     parser.add_argument("--candidate", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--cases", required=True, nargs="+")
-    parser.add_argument("--arms", nargs="+", choices=list("ABCDEF"), default=list("ABCDEF"))
+    parser.add_argument("--arms", nargs="+", choices=list("ABCDEFP"), default=list("ABCDEF"))
+    parser.add_argument("--baseline-mode", choices=("off", "lazy"), default="off",
+                        help="Use lazy as the reference for the separate E/P replay-admission pair.")
     parser.add_argument("--repetitions", type=int, default=1)
     args = parser.parse_args()
     if args.repetitions < 1:
@@ -114,6 +117,8 @@ def main():
                             source = json.loads(args.candidate.read_bytes())
                             check_source(Path(source["root"]), source["sha"])
                         enabled = source["final_env"] if arm == "F" else ENABLED[arm]
+                        if arm == "A" and args.baseline_mode == "lazy":
+                            enabled = ENABLED["E"]
                         if set(enabled) - set(FLAGS):
                             raise ValueError("unrecognized feature switch")
                         flags = {k: str(int(k in enabled)) for k in FLAGS}

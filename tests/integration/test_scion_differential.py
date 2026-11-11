@@ -276,17 +276,18 @@ def test_same_postgres_trace(kernel_env, tmp_path, monkeypatch, scenario):
     configurations = {"reference": set(), "candidate": set(FLAGS)}
     worker, review, query = ("NF_SCION_WORKER_COLUMNS", "NF_SCION_REVIEW_COLUMNS", "NF_SCION_QUERY_COLUMNS")
     lazy, links = "NF_SCION_REPLAY_LAZY", "NF_SCION_SCHEMA_LINKS"
+    prime = "NF_SCION_REPLAY_PRIME"
     scope, replay = FLAGS[1:]
     if os.environ.get("NF_SCION_DIFF_ROUND2") == "1":
         configurations.update({
             "B_metadata": {worker, review}, "C_scopes": {scope},
             "D_metadata_scopes": {worker, review, scope}, "E_lazy": {replay, lazy},
-            "F_worker": {worker},
+            "F_worker": {worker}, "P_repeated_parent": {replay, lazy, prime},
             "schema_service": {links}, "all_round2": {*FLAGS, lazy, links},
         })
     for mode, active in ({"frozen": set()} if frozen else configurations).items():
         with monkeypatch.context() as patch:
-            for flag in (*FLAGS, lazy, links):
+            for flag in (*FLAGS, lazy, links, prime):
                 patch.setenv(flag, "1" if flag in active else "0")
             for flag in (worker, review, query):
                 patch.setenv(flag, "1" if flag in active or FLAGS[0] in active else "0")
@@ -315,6 +316,7 @@ def test_same_postgres_trace(kernel_env, tmp_path, monkeypatch, scenario):
                     assert kernel.scion.scopes == (scope in active)
                     assert kernel.scion.replay == (replay in active)
                     assert kernel.scion.replay_lazy == (lazy in active)
+                    assert kernel.scion.replay_prime == (prime in active)
                     diagnostics[mode] = kernel.scion.counts()
                 modes[mode] = {"tables": table_fingerprints(kernel), "errors": errors,
                                "responses": dict(returns)}
