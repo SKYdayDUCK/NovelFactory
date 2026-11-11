@@ -1,0 +1,14 @@
+{
+  "stage": "W3 NF delegation capability",
+  "status": "IN_PROGRESS",
+  "nf_parent": "b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5",
+  "source": "Commit containing this file, migration 0017_nf_workshop_delegation",
+  "protocol_version": "aw-nf.v1",
+  "schema_revision_nf": "0017_nf_workshop_delegation",
+  "aw_source": null,
+  "test_environment": "Python 3.12.14 / PostgreSQL 17.11 / stdio MCP / generated fixture / Codex CLI 0.167.0-alpha.4",
+  "targeted": {"result": "PASS", "passed": 45, "skipped": 0, "junit": "evidence/workshop-delegation/pg17.xml"},
+  "negative_cases": ["one operation racing four callers", "rollback after task insertion", "restart after lost acknowledgement", "epoch mismatch and live revoke", "unknown invoice then same-attempt settlement", "restored partner mismatch denies new bindings"],
+  "next": "Integrate the Workshop Saga, verify both independent databases and MCP receipts, then recheck same-head CI and merge after P5.5.",
+  "real_supplier": "BLOCKED_ENVIRONMENT"
+}

@@ -1,0 +1,64 @@
+2026-11-11T18:05:15.5979671Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261101.360
+2026-11-11T18:05:15.5989169Z Cache mode: write
+2026-11-11T18:05:15.5989895Z Prepare workflow directory
+2026-11-11T18:05:15.6620935Z Prepare all required actions
+2026-11-11T18:05:16.5982265Z Complete job name: workshop
+2026-11-11T18:05:32.9689504Z Deleting the contents of '/home/runner/work/NovelFactory/NovelFactory'
+2026-11-11T18:05:32.9846141Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-11T18:05:35.5268484Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-11-11T18:05:35.5270673Z state without impacting any branches by switching back to a branch.
+2026-11-11T18:05:35.5361280Z [command]/usr/bin/git log -1 --format=%H
+2026-11-11T18:05:35.8322181Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-11T18:05:37.5738090Z Cache hit for: setup-uv-2-x86_64-unknown-linux-gnu-ubuntu-24.04-unknown-0caf8ee1e9f123ad49868caf1daa16f463d462445d00b8a17433af453543691a
+2026-11-11T18:05:37.8814522Z Cache Size: ~32 MB (33523733 B)
+2026-11-11T18:05:38.2016886Z Cache restored successfully
+2026-11-11T18:05:38.2035903Z cache restored from GitHub Actions cache with key: setup-uv-2-x86_64-unknown-linux-gnu-ubuntu-24.04-unknown-0caf8ee1e9f123ad49868caf1daa16f463d462445d00b8a17433af453543691a
+2026-11-11T18:05:40.8910564Z CREATE ROLE
+2026-11-11T18:05:40.9435727Z CREATE DATABASE
+2026-11-11T18:05:40.9723912Z CREATE DATABASE
+2026-11-11T18:05:41.0123436Z CREATE DATABASE
+2026-11-11T18:05:41.0455655Z CREATE DATABASE
+2026-11-11T18:05:41.1406535Z CREATE ROLE
+2026-11-11T18:05:41.1823418Z CREATE DATABASE
+2026-11-11T18:05:41.1870147Z CREATE ROLE
+2026-11-11T18:06:03.4739694Z 35 passed in 19.05s
+2026-11-11T18:06:07.9435661Z 1 passed in 4.05s
+2026-11-11T18:06:15.1110665Z 2 passed in 6.80s
+2026-11-11T18:06:40.6251782Z 5 passed in 17.37s
+2026-11-11T18:06:45.2155117Z 2 passed in 4.05s
+2026-11-11T18:06:45.5723323Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-11T18:06:45.5844686Z Multiple search paths detected. Calculating the least common ancestor of all paths
+2026-11-11T18:06:45.5867601Z The least common ancestor is /home/runner/work/NovelFactory/NovelFactory/workshop. This will be the root directory of the artifact
+2026-11-11T18:06:45.5868839Z With the provided path, there will be 8 files uploaded
+2026-11-11T18:06:45.8955305Z SHA256 digest of uploaded artifact zip is dfa7ffcac46f7a86ff0aa9537746fdb4df4679441e8156e01230a37b42d3fb5b
+2026-11-11T18:06:46.3830429Z Cache hit occurred on key setup-uv-2-x86_64-unknown-linux-gnu-ubuntu-24.04-unknown-0caf8ee1e9f123ad49868caf1daa16f463d462445d00b8a17433af453543691a, not saving cache.
+2026-11-11T18:06:46.6243049Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-11T18:06:46.8898383Z  1:C 11 Nov 2026 18:05:19.898 * Redis version=8.0.2, bits=64, commit=00000000, modified=1, pid=1, just started
+2026-11-11T18:06:46.8927696Z  1:M 11 Nov 2026 18:05:19.904 * Server initialized
+2026-11-11T18:06:46.8928041Z  1:M 11 Nov 2026 18:05:19.904 * Ready to accept connections tcp
+2026-11-11T18:06:46.8928871Z  1:M 11 Nov 2026 18:05:51.949 * User requested shutdown...
+2026-11-11T18:06:46.8929995Z  1:M 11 Nov 2026 18:05:51.950 # Redis is now ready to exit, bye bye...
+2026-11-11T18:06:46.8934648Z  1:C 11 Nov 2026 18:05:53.024 * Redis version=8.0.2, bits=64, commit=00000000, modified=1, pid=1, just started
+2026-11-11T18:06:46.8976724Z  1:M 11 Nov 2026 18:05:53.029 * Server initialized
+2026-11-11T18:06:46.8980651Z  1:M 11 Nov 2026 18:05:53.030 * Ready to accept connections tcp
+2026-11-11T18:06:47.5755219Z  The files belonging to this database system will be owned by user "postgres".
+2026-11-11T18:06:47.5757450Z  The database cluster will be initialized with locale "en_US.utf8".
+2026-11-11T18:06:47.5758395Z  The default database encoding has accordingly been set to "UTF8".
+2026-11-11T18:06:47.5759175Z  The default text search configuration will be set to "english".
+2026-11-11T18:06:47.5764296Z  2026-11-11 18:05:26.771 UTC [1] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-11-11T18:06:47.5767309Z  2026-11-11 18:05:26.782 UTC [1] LOG:  database system is ready to accept connections
+2026-11-11T18:06:47.5770034Z  2026-11-11 18:06:41.695 UTC [742] FATAL:  password authentication failed for user "nf_service"
+2026-11-11T18:06:47.5771630Z  Data page checksums are disabled.
+2026-11-11T18:06:47.5777651Z  waiting for server to start....2026-11-11 18:05:26.525 UTC [48] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-11-11T18:06:47.5780979Z  2026-11-11 18:05:26.535 UTC [48] LOG:  database system is ready to accept connections
+2026-11-11T18:06:47.7629261Z  The files belonging to this database system will be owned by user "postgres".
+2026-11-11T18:06:47.7634235Z  The database cluster will be initialized with locale "en_US.utf8".
+2026-11-11T18:06:47.7634979Z  The default database encoding has accordingly been set to "UTF8".
+2026-11-11T18:06:47.7635716Z  The default text search configuration will be set to "english".
+2026-11-11T18:06:47.7636650Z  Data page checksums are disabled.
+2026-11-11T18:06:47.7646063Z  waiting for server to start....2026-11-11 18:05:26.900 UTC [48] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-11-11T18:06:47.7649572Z  2026-11-11 18:05:26.907 UTC [48] LOG:  database system is ready to accept connections
+2026-11-11T18:06:47.7662649Z  2026-11-11 18:05:27.141 UTC [1] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-11-11T18:06:47.7665930Z  2026-11-11 18:05:27.152 UTC [1] LOG:  database system is ready to accept connections
+2026-11-11T18:06:47.7670740Z  2026-11-11 18:06:41.710 UTC [286] FATAL:  password authentication failed for user "aw_service"
+2026-11-11T18:06:47.9117757Z Remove container network: github_network_66afaf9c8c0b47dbbfa03b47c9e76a7b
