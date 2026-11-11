@@ -379,7 +379,9 @@ class TaskService:
     def resume(self, task_id, expected_generation):
         with self._tx() as conn:
             task = self._task(conn, task_id)
-            if task["generation"] != expected_generation or task["state"] not in {"PAUSED", "BLOCKED"}:
+            if task["state"] == "BLOCKED":
+                raise _error("WAIT_CONDITION_REQUIRED", "Blocked tasks require a verified workflow event")
+            if task["generation"] != expected_generation or task["state"] != "PAUSED":
                 raise _error("INVALID_TASK_TRANSITION", "Task is not awaiting an authorized resume")
             calls = self.tables["call_attempts"]
             if conn.scalar(select(func.count()).select_from(calls).where(calls.c.task_id == task_id, calls.c.state.in_(["PREPARED", "SENT", "UNKNOWN"]))):
