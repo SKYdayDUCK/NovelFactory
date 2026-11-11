@@ -53,7 +53,7 @@ def authorize_slots(kernel, repo, owner, director_id, request, plan_ref):
         repo, director_job["dispatch"]["input_ref"], work, kind="AGENT_INPUT"
     )["payload"]
     allowance = {
-        k: v for k, v in request.items() if k not in {"world_ref", "story_time", "deadline_seconds"}
+        k: v for k, v in request.items() if k not in {"world_ref", "story_time", "deadline_seconds", "allowed_item_gift"}
     }
     allowance["model_config_sha256"] = agent_input["model_config_sha256"]
     # The private authorization never becomes a role's task input.

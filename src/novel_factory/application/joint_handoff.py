@@ -1,4 +1,4 @@
-"""A preauthorized, single-process joint decision with one bounded location effect."""
+"""A preauthorized, single-process joint decision with one bounded location change or specifically authorized item gift."""
 
 from datetime import timedelta
 from uuid import UUID, uuid5
@@ -17,10 +17,33 @@ def _destinations(route):
     return [route["destination_id"], *route.get("alternative_destination_ids", [])]
 
 
+
+def joint_manifest(route):
+    subjects = [route["subject_id"], *_destinations(route)]
+    predicates = ["located_in"]
+    if gift := route.get("allowed_item_gift"):
+        subjects.extend([gift["item_id"], gift["from_id"], *gift["recipient_ids"]])
+        predicates.extend(["legal_owner", "possessed_by"])
+    return {"subject_ids": list(dict.fromkeys(subjects)), "predicates": predicates}
+
+
+def validate_item_gift(gift, actors):
+    require(isinstance(gift, dict) and set(gift) == {"item_id", "from_id", "recipient_ids"},
+            "INVALID_ARGUMENT", "Item grant requires an item, holder and explicit recipients")
+    recipients = gift["recipient_ids"]
+    require(isinstance(recipients, list) and 1 <= len(recipients) <= 128,
+            "INVALID_ARGUMENT", "Item grant needs a bounded recipient list")
+    for value in [gift["item_id"], gift["from_id"], *recipients]:
+        validate_contract("UUID", value)
+    require(len(set(recipients)) == len(recipients) and set(recipients) <= set(actors)
+            and gift["from_id"] not in recipients and gift["item_id"] not in [gift["from_id"], *actors],
+            "VIEW_DENIED", "Gift recipients must be distinct registered participants")
+
+
 def _interaction(kernel, repo, route):
     require(
         isinstance(route, dict)
-        and set(route) - {"alternative_destination_ids"}
+        and set(route) - {"alternative_destination_ids", "allowed_item_gift"}
         == {"interaction_id", "subject_id", "destination_id", "control_task_id"},
         "INVALID_ARGUMENT",
         "Joint authorization must specify one interaction, participant, destination and control task",
@@ -49,6 +72,8 @@ def _interaction(kernel, repo, route):
         "VIEW_DENIED",
         "Location is outside the registered participant and scope",
     )
+    if "allowed_item_gift" in route:
+        validate_item_gift(route["allowed_item_gift"], [slot["actor_id"] for slot in interaction["participant_slots"]])
     revision = kernel.revision(repo, interaction["base_world_ref"])
     process = state_from_revision(revision)["processes"][interaction["process_ids"][0]]["definition"]
     rules = repo.one("works", {"work_id": row["work_id"]})["rules_ref"]
@@ -77,6 +102,7 @@ def create_control_task(
     subject_id,
     destination_id,
     alternative_destination_ids=(),
+    allowed_item_gift=None,
     deadline_seconds=3600,
 ):
     """Reserve one deterministic Kernel task. No lease, model grant or provider call is created."""
@@ -96,6 +122,8 @@ def create_control_task(
     require(
         isinstance(alternative_destination_ids, (tuple, list)), "INVALID_ARGUMENT", "Expected destination list"
     )
+    if allowed_item_gift is not None:
+        route["allowed_item_gift"] = allowed_item_gift
     if alternative_destination_ids:
         route["alternative_destination_ids"] = list(alternative_destination_ids)
     with kernel.objects.lock(), kernel.db.uow() as repo:
@@ -118,7 +146,7 @@ def create_control_task(
         manifest = scoped.put_artifact(
             controller,
             row["work_id"],
-            {"subject_ids": [subject_id, *_destinations(route)], "predicates": ["located_in"]},
+            joint_manifest(route),
             "INPUT_MANIFEST",
         )
         spec = {
@@ -156,7 +184,7 @@ def check_enrollment(kernel, repo, controller, task, spec, cut, agent_input, rou
     require(runtime["payload"]["skill_name"] == "adjudicate-actions", "VIEW_DENIED", "Wrong adjudication skill")
     row, rules = _interaction(kernel, repo, route)
     interaction = row["payload"]
-    expected = {"subject_ids": [route["subject_id"], *_destinations(route)], "predicates": ["located_in"]}
+    expected = joint_manifest(route)
     require(
         interaction["base_world_ref"] == spec["world_ref"]
         and interaction["story_time"] == spec["story_time"]
@@ -254,6 +282,8 @@ def _enrolled_cut(kernel, repo, owner, task, config):
             "no_movement_allowed": True,
         },
     }
+    if "allowed_item_gift" in route:
+        packet["allowed_item_gift"] = route["allowed_item_gift"]
     return controller, spec, control, interaction, packet
 
 
@@ -272,16 +302,24 @@ def prompt_material(kernel, principal, binding):
     return None
 
 
-def _location_commands(candidate, packet):
+def _joint_commands(candidate, packet):
     effects = candidate["effects"]
     require(
         not candidate["unresolved_questions"] and len(effects) <= 1,
         "REVIEW_REQUIRED",
-        "Automatic adjudication requires a resolved decision with at most one movement",
+        "Automatic adjudication requires a resolved decision with at most one authorized command",
     )
     if not effects:
         return []
     effect = effects[0]
+    if effect.get("predicate") == "legal_owner":
+        gift = packet.get("allowed_item_gift")
+        require(gift and effect["kind"] == "RELATION_SET" and effect["value_status"] == "VALUE"
+                and effect["subject_id"] == gift["item_id"] and effect["object_id"] in gift["recipient_ids"],
+                "VIEW_DENIED", "Candidate exceeds the registered item grant")
+        return [{"template_id": "TRANSFER_ITEM", "args": {"item_id": gift["item_id"],
+                 "from_id": gift["from_id"], "to_id": effect["object_id"], "transfer_kind": "GIFT",
+                 "at": packet["story_time"]}}]
     scope = packet["allowed_location"]
     require(
         effect["kind"] == "RELATION_SET"
@@ -325,7 +363,7 @@ class JointDelivery(CandidateDelivery):
             "INVALID_EVIDENCE",
             "Adjudication does not bind its sealed cut",
         )
-        commands = _location_commands(candidate, packet)
+        commands = _joint_commands(candidate, packet)
         simulation = WorldSchedulerService(kernel)
         selected = simulation.choose_outcome(
             controller,

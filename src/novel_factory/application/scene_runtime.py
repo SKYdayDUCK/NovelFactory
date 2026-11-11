@@ -1,6 +1,6 @@
 """Register a bounded scene once, without exposing planning data to its participants."""
 
-from novel_factory.application.joint_handoff import create_control_task
+from novel_factory.application.joint_handoff import create_control_task, joint_manifest, validate_item_gift
 from novel_factory.application.kernel import after, require
 from novel_factory.application.planning import PlanningService
 from novel_factory.application.rolling_plans import RollingPlanning, _anchor_name
@@ -67,6 +67,7 @@ def register_scene(
     deadline_seconds=3600,
     alternative_destination_ids=None,
     following_scenes=None,
+    allowed_item_gift=None,
 ):
     """Preauthorize one registered interaction, one location allowance, and its editorial response.
 
@@ -109,6 +110,9 @@ def register_scene(
     )
     location_options = {"alternative_destination_ids": alternatives} if alternatives else {}
     slots = _participants(participants)
+    if allowed_item_gift is not None:
+        validate_item_gift(allowed_item_gift, slots)
+        location_options["allowed_item_gift"] = allowed_item_gift
     request = dict(
         world_ref=world_ref,
         story_time=story_time,
@@ -186,6 +190,7 @@ def register_scene(
             subjects,
             *,
             state,
+            predicates=None,
             at=story_time,
             refs=(),
             actor=None,
@@ -201,7 +206,7 @@ def register_scene(
                 knowledge_cut=cut,
                 actor_id=actor,
                 subject_ids=subjects,
-                predicates=["located_in"],
+                predicates=predicates or ["located_in"],
                 input_artifacts=refs,
                 story_time=at,
                 queue_state=state,
@@ -276,13 +281,15 @@ def register_scene(
             deadline_seconds=deadline_seconds,
             **location_options,
         )
-        targets = [subject_id, *location_ids]
+        visible = joint_manifest({"subject_id": subject_id, "destination_id": destination_id, **location_options})
+        targets = visible["subject_ids"]
         joint = prepare(
             "adjudication_advisor",
             "joint_outcome",
             "根据规则和已齐的密封意图，提出一次联合裁决。",
             {"plane": "WORLD"},
             targets,
+            predicates=visible["predicates"],
             refs=[group["interaction_ref"]],
             skill="adjudicate-actions",
             state="BLOCKED",
@@ -306,6 +313,7 @@ def register_scene(
             "复核已接受的后果，有重大偏离时请求有限重规划。",
             plan_cut,
             targets,
+            predicates=visible["predicates"],
             refs=[plan_cut["plan_manifest_ref"], plan["artifact_ref"], anchor_ref],
             at=after(story_time),
             skill="volume-director-review",

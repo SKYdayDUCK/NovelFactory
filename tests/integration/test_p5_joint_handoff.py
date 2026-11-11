@@ -27,6 +27,9 @@ pytestmark = [pytest.mark.postgres, pytest.mark.integration]
         "primary",
         "alternative",
         "no-movement",
+        "item-winner",
+        "item-two-winners",
+        "item-unlisted-recipient",
         "other-place",
         "resource",
         "unresolved",
@@ -36,7 +39,7 @@ pytestmark = [pytest.mark.postgres, pytest.mark.integration]
     ],
 )
 def test_joint_adjudication_is_bounded_durable_and_wakes_director(kernel_env, case, monkeypatch):
-    rejected = case not in {"primary", "alternative", "no-movement"}
+    rejected = case not in {"primary", "alternative", "no-movement", "item-winner"}
     kernel = kernel_env["kernel"]
     world = load_fixture(kernel, "white_bridge")
     west = world["ids"]["south"]
@@ -47,6 +50,12 @@ def test_joint_adjudication_is_bounded_durable_and_wakes_director(kernel_env, ca
     work, branch = wr["work_id"], wr["branch_id"]
     actors = process["required_actor_ids"]
     choices = dict(zip(actors, ["今晚不赴宴，我留守粮仓。", "只在收到消息后出发。", "核对库单。"], strict=True))
+    item_case = case.startswith("item-")
+    gift = {"item_id": world["ids"]["sword"], "from_id": world["ids"]["smith"],
+            "recipient_ids": actors[:2]} if item_case else None
+    gift_options = {"allowed_item_gift": gift} if item_case else {}
+    if item_case:
+        choices.update({actor: "我要求领取这件物品。" for actor in actors[:2]})
     at = process["due_at"]
     with backend() as (http, requests, provider):
         gateway = AgentGateway(kernel, {"test": http})
@@ -97,7 +106,7 @@ def test_joint_adjudication_is_bounded_durable_and_wakes_director(kernel_env, ca
         for actor, job in zip(actors, jobs):
             enroll(job, {"plane": "BELIEF", "actor_id": actor, "known_at": at}, seal_interaction_id=iid)
         control = create_control_task(
-            kernel, admin, iid, subject_id=actors[0], destination_id=west, alternative_destination_ids=alternatives
+            kernel, admin, iid, subject_id=actors[0], destination_id=west, alternative_destination_ids=alternatives, **gift_options
         )
         assert (
             create_control_task(
@@ -106,7 +115,7 @@ def test_joint_adjudication_is_bounded_durable_and_wakes_director(kernel_env, ca
                 iid,
                 subject_id=actors[0],
                 destination_id=west,
-                alternative_destination_ids=alternatives,
+                alternative_destination_ids=alternatives, **gift_options,
             )
             == control
         )
@@ -117,15 +126,16 @@ def test_joint_adjudication_is_bounded_durable_and_wakes_director(kernel_env, ca
             task_kind="joint_outcome",
             skill_name="adjudicate-actions",
             story_time=at,
-            subject_ids=[actors[0], west, *alternatives],
-            predicates=["located_in"],
+            subject_ids=list(dict.fromkeys([actors[0], west, *alternatives,
+                                            *([gift["item_id"], gift["from_id"], *actors[:2]] if item_case else [])])),
+            predicates=["located_in", "legal_owner", "possessed_by"] if item_case else ["located_in"],
             input_artifacts=[bundle["interaction_ref"]],
             assignment="依规则裁决三个密封提案。",
             adapter_id="test",
             queue_state="BLOCKED",
         )
         location = dict(
-            interaction_id=iid, subject_id=actors[0], destination_id=west, control_task_id=control["task_id"]
+            interaction_id=iid, subject_id=actors[0], destination_id=west, control_task_id=control["task_id"], **gift_options
         )
         if alternatives:
             location["alternative_destination_ids"] = alternatives
@@ -201,6 +211,13 @@ def test_joint_adjudication_is_bounded_durable_and_wakes_director(kernel_env, ca
                     "unit": "bag",
                     "account_id": west,
                 }
+            if item_case:
+                assert data["allowed_item_gift"] == gift
+                effect.update(predicate="legal_owner", subject_id=gift["item_id"],
+                              object_id=actors[2] if case == "item-unlisted-recipient" else actors[0])
+            effects = [] if case == "no-movement" else [effect]
+            if case == "item-two-winners":
+                effects.append(dict(effect, object_id=actors[1], effect_key="second"))
             refs = [p["ref"] for p in data["action_proposals"]]
             return {
                 "schema_version": "2.0",
@@ -212,7 +229,7 @@ def test_joint_adjudication_is_bounded_durable_and_wakes_director(kernel_env, ca
                 "story_time": at,
                 "effect_group_id": str(uuid4()),
                 "representation_id": str(uuid4()),
-                "effects": [] if case == "no-movement" else [effect],
+                "effects": effects,
                 "reasoning_summary": "角色自主留守，宴会照常。",
                 "unresolved_questions": ["需要确认"] if case == "unresolved" else [],
                 "dependency_fingerprint": ctx["dependency_fingerprint"],
@@ -276,7 +293,13 @@ def test_joint_adjudication_is_bounded_durable_and_wakes_director(kernel_env, ca
                 assert kernel.head(repo, work, branch) == result["world_ref"]
                 snapshot = kernel.revision(repo, result["world_ref"])["snapshot"]
                 actual = state_at(snapshot, actors[0], "located_in", at)
-                if case == "no-movement":
+                if case == "item-winner":
+                    assert len(selected["payload"]["commands"]) == 1
+                    assert selected["payload"]["commands"][0]["template_id"] == "TRANSFER_ITEM"
+                    assert len(result["accepted_event_refs"]) == 1
+                    for predicate in ("legal_owner", "possessed_by"):
+                        assert state_at(snapshot, gift["item_id"], predicate, at)["data"]["entity_id"] == actors[0]
+                elif case == "no-movement":
                     assert result["accepted_event_refs"] == [] and selected["payload"]["commands"] == []
                     assert actual == state_at(kernel.revision(repo, wr)["snapshot"], actors[0], "located_in", at)
                 else:

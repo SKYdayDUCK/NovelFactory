@@ -10,7 +10,7 @@ import sys
 import tempfile
 
 
-async def probe(codex, binding):
+async def probe(codex, binding, *, status_only=False):
     binary = shutil.which(codex)
     if not binary:
         raise RuntimeError("Codex CLI executable unavailable")
@@ -53,10 +53,11 @@ async def probe(codex, binding):
                 servers = [s for s in inventory["data"] if s["name"] == "novelfactory"]
                 if len(servers) != 1 or set(servers[0]["tools"]) != {"nf_project_status", "nf_resume_project"}:
                     raise RuntimeError("Unexpected live operator tool inventory")
-                request = {"threadId": thread_id, "server": "novelfactory", "tool": "nf_resume_project", "arguments": {}}
+                tool = "nf_project_status" if status_only else "nf_resume_project"
+                request = {"threadId": thread_id, "server": "novelfactory", "tool": tool, "arguments": {}}
                 response = await rpc("mcpServer/tool/call", request, 4)
                 if response.get("isError") or "counts" not in response["structuredContent"]:
-                    raise RuntimeError("Resume was denied or lacked its workflow receipt")
+                    raise RuntimeError("Bound project tool was denied or lacked its workflow receipt")
                 return {"host": subprocess.check_output([binary, "--version"], text=True).strip(),
                         "transport": "Codex app-server to local stdio MCP", "server": "NovelFactory",
                         "tools": sorted(servers[0]["tools"]), "thread_id": thread_id, "model_turns": 0,
@@ -71,5 +72,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--codex", default="codex")
     parser.add_argument("--binding", type=Path, required=True)
+    parser.add_argument("--status-only", action="store_true",
+                        help="Check Host, MCP discovery, grant expiry and project state without waking tasks")
     args = parser.parse_args()
-    print(json.dumps(asyncio.run(probe(args.codex, args.binding.resolve())), indent=2))
+    try:
+        receipt = asyncio.run(probe(args.codex, args.binding.resolve(), status_only=args.status_only))
+    except (RuntimeError, OSError, TimeoutError) as exc:
+        # No db URLs, role input, access-file contents or Host stderr in diagnostics.
+        reason = str(exc) if type(exc) is RuntimeError else type(exc).__name__
+        raise SystemExit(json.dumps({"status": "FAILED", "reason": reason})) from None
+    print(json.dumps(receipt, indent=2))
