@@ -14,3 +14,5 @@
 冻结输入：v2.3 设计包 SHA256 `00ed0fa956dfd1298f9f26b2e779aedab404a42e6b601103320427d8f9f2c63e`。独立下载的 00 与上传执行指令逐字节相同。Workshop 对照 `workshop/contracts/nf-catalog.json`。各阶段以 STAGE_STATUS.json 与 evidence/ 为准，合并阻断按原门槛处理。P6 缺本作品的模型端点与消费限额及实际双人审读。
 
 W0 提交 c18e53959807a35816eaa1258a3b7c64b80b4637，PR #7，独立 PostgreSQL 与 stdio 工作流 43030289759 成功。W1 在干净 PG17.11 依序升级，通过 9 项组织与 stdio 检查，原始报告位于 evidence/workshop/w1。
+
+W1 PR #8 的 f59ac5e44 通过 Workshop CI 43030513699。W2 从 w001 迁移至 w002，PG17.11 与 Redis 8.0.2 上 13 项通过，包含有限次数路由竞争、重复投递、消费中断和删流后恢复。

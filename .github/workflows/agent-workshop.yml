@@ -29,6 +29,10 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     services:
+      redis:
+        image: redis:8.0.2
+        ports: ['6379:6379']
+        options: --health-cmd "redis-cli ping" --health-interval 2s --health-timeout 2s --health-retries 30
       workshop-db:
         image: postgres:17.11-bookworm
         env:
@@ -42,6 +46,9 @@ jobs:
         ports: ['5433:5432']
         options: --health-cmd "pg_isready -U postgres" --health-interval 3s --health-timeout 5s --health-retries 20
     env:
+      AW_ROUTE_MATRIX_EVIDENCE: ${{ github.workspace }}/workshop/routing-matrix.json
+      AW_W2_TRANSPORT_EVIDENCE: ${{ github.workspace }}/workshop/w2-transport.json
+      AW_REDIS_TEST_URL: redis://127.0.0.1:6379/0
       AW_DATABASE_URL: postgresql://aw_service:workshop-ci@127.0.0.1:5432/workshop_test
       NF_DATABASE_URL: postgresql+psycopg://nf_service:nf-ci@127.0.0.1:5433/nf_test
     steps:
@@ -56,7 +63,7 @@ jobs:
       - name: Install both locked projects
         run: |
           uv sync --locked
-          uv sync --locked --project workshop
+          uv sync --locked --project workshop --extra streams
       - name: Verify the frozen NF contracts against the checked-out runtime
         run: |
           git worktree add --detach "$RUNNER_TEMP/nf-catalog" "$(jq -r .nf_commit workshop/contracts/nf-catalog.json)"
@@ -75,6 +82,10 @@ jobs:
           REVOKE CONNECT ON DATABASE workshop_test FROM PUBLIC;
           CREATE DATABASE aw_upgrade_test OWNER aw_service;
           REVOKE CONNECT ON DATABASE aw_upgrade_test FROM PUBLIC;
+          CREATE DATABASE w2_from_w1 OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w2_from_w1 FROM PUBLIC;
+          CREATE DATABASE w2_from_w2 OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w2_from_w2 FROM PUBLIC;
           SQL
           docker exec -i "$NF_POSTGRES" psql -X -v ON_ERROR_STOP=1 -U postgres <<'SQL'
           CREATE USER nf_service PASSWORD 'nf-ci';
@@ -87,6 +98,8 @@ jobs:
           .venv/bin/python -m alembic upgrade head
           (cd workshop && .venv/bin/python -m alembic upgrade head)
       - name: Run Workshop contracts and stdio permissions
+        env:
+          AW_REDIS_TEST_CONTAINER: ${{ job.services.redis.id }}
         working-directory: workshop
         run: .venv/bin/python -m pytest tests -q --junitxml=workshop-results.xml
       - name: Upgrade the released W0 service and verify existing bindings
@@ -94,6 +107,12 @@ jobs:
         run: |
           export AW_UPGRADE_DATABASE_URL="${AW_DATABASE_URL%/*}/aw_upgrade_test"
           .venv/bin/python -m pytest -c pyproject.toml acceptance/test_w1_historical_upgrade.py -q -o junit_family=xunit1 --junitxml=w1-legacy-upgrade.xml
+      - name: Upgrade previously deployed W1 and W2 databases
+        working-directory: workshop
+        run: |
+          export AW_W2_FROM_W1_DATABASE_URL="${AW_DATABASE_URL%/*}/w2_from_w1"
+          export AW_W2_FROM_W2_DATABASE_URL="${AW_DATABASE_URL%/*}/w2_from_w2"
+          .venv/bin/python -m pytest -c pyproject.toml acceptance/test_w2_historical_upgrades.py -q -o junit_family=xunit1 --junitxml=w2-legacy-upgrades.xml
       - name: Check the nine granted NF tools over live stdio
         env:
           NF_TEST_DATABASE_URL: postgresql+psycopg://nf_fixture:nf-fixture-ci@127.0.0.1:5433/postgres
@@ -119,4 +138,7 @@ jobs:
             workshop/nf-tools.json
             workshop/dual-service-results.xml
             workshop/w1-legacy-upgrade.xml
+            workshop/w2-legacy-upgrades.xml
+            workshop/routing-matrix.json
+            workshop/w2-transport.json
           if-no-files-found: error

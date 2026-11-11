@@ -382,7 +382,7 @@ def roster(conn, session):
         (session.org_id, org["active_revision"], session.employee_id),
     ).fetchall()
     routes = conn.execute(
-        """SELECT src,dst,kind,scope_ref FROM aw_edges WHERE org_id=%s AND graph_revision=%s
+        """SELECT src,dst,kind,scope_ref FROM aw_current_message_edges WHERE org_id=%s AND graph_revision=%s
         AND (%s OR src=%s OR dst=%s) ORDER BY src,dst,kind,scope_ref""",
         (session.org_id, org["active_revision"], whole, session.employee_id, session.employee_id),
     ).fetchall()
