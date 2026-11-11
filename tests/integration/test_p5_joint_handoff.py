@@ -30,6 +30,7 @@ pytestmark = [pytest.mark.postgres, pytest.mark.integration]
         "item-winner",
         "item-two-winners",
         "item-unlisted-recipient",
+        "item-wrong-source",
         "other-place",
         "resource",
         "unresolved",
@@ -53,6 +54,8 @@ def test_joint_adjudication_is_bounded_durable_and_wakes_director(kernel_env, ca
     item_case = case.startswith("item-")
     gift = {"item_id": world["ids"]["sword"], "from_id": world["ids"]["smith"],
             "recipient_ids": actors[:2]} if item_case else None
+    if case == "item-wrong-source":
+        gift["from_id"] = world["ids"]["master"]
     gift_options = {"allowed_item_gift": gift} if item_case else {}
     if item_case:
         choices.update({actor: "我要求领取这件物品。" for actor in actors[:2]})

@@ -118,6 +118,8 @@ def read_stage(gateway, adapter, principal, binding, request, messages):
                 "request_sha256": digest, "provider_receipt": receipt, "input_tokens": response.input_tokens,
                 "output_tokens": response.output_tokens, "actual_amount": str(amount_used) if amount_used is not None else None,
                 "currency": response.currency}, "AGENT_ROLE_TOOL_RESPONSE")
+            require(response.output_tokens is None or response.output_tokens <= maximum,
+                    "BUDGET_EXCEEDED", "Selector output exceeds its token limit")
             choice = _selection(response.text)
             gateway._audit_artifact(binding, attempt, "selection", {"choice": choice, "request_hash": digest,
                 "provider_receipt": receipt, "input_tokens": response.input_tokens,
