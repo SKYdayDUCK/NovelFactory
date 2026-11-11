@@ -34,7 +34,7 @@ def main():
         store = ObjectStore(private / "nf/objects")
         kernel = Kernel(db, store)
         world = load_fixture(kernel)
-        stub = OpenAICompatibleAdapter(endpoint="http://127.0.0.1:1/v1/chat/completions", model="test", api_key=None)
+        stub = OpenAICompatibleAdapter(endpoint="https://example.invalid/v1/chat/completions", model="test", api_key=None)
         task = RuntimeTaskService(kernel, AgentGateway(kernel, {"external":stub})).prepare(
             world["principal"], world["world_ref"], role_id="character_actor", task_kind="character_action",
             actor_id=world["ids"]["protagonist"], story_time=point(1), subject_ids=[world["ids"]["sword"]],
