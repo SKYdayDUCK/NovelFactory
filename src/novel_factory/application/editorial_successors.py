@@ -1,5 +1,7 @@
 """Create the two preauthorized planning successors inside their parent's delivery transaction."""
 
+from sqlalchemy import text
+
 from novel_factory.application.kernel import require
 from novel_factory.application.runtime_tasks import RuntimeTaskService
 from novel_factory.application.supervisor import RuntimeSupervisor
@@ -102,4 +104,9 @@ def provision_successor(kernel, gateway, controller, task, spec, cfg, outcome):
         editorial=child_route,
         continue_editorial=(operation == "request_change"),
     )
+    with kernel.db.uow() as repo:
+        repo.conn.execute(text("""
+            INSERT INTO nf_trace_tasks(task_id,trace_id,volume_id,parent_task_id)
+            SELECT :child,trace_id,volume_id,task_id FROM nf_trace_tasks WHERE task_id=:parent
+        """), {"child":task_id,"parent":task["task_id"]})
     return task_id

@@ -295,6 +295,9 @@ class NarrativeService:
             check(repo)
             self.kernel._register_artifact(repo, text_ref, task["work_id"], text.encode("utf-8"), "TEXT", principal.principal_id)
             self.kernel._register_artifact(repo, ref, task["work_id"], payload, "NARRATIVE_DRAFT", principal.principal_id)
+            from novel_factory.application.audit_log import LogService
+            LogService.artifact(repo.conn, "NARRATIVE_DRAFT", ref["artifact_revision_id"], task["work_id"],
+                                payload, principal.principal_id, text_characters=len(text))
             self.kernel._receipt(repo, principal, spec["world_ref"], "NARRATIVE_DRAFT", idempotency_key, request, ref)
             repo.outbox("narrative.draft", "artifact", ref["artifact_revision_id"], {"draft_ref": ref, "world_ref": spec["world_ref"]}, "draft:" + ref["artifact_revision_id"])
         return ref

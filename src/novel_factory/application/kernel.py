@@ -101,6 +101,9 @@ class Kernel:
         r.add("objects", {"hash":ref["sha256"],"size":verified.size}, ignore_conflict=True)
         r.add("artifacts", {**ref,"work_id":work_id,"kind":kind,"payload":None if isinstance(payload,bytes) else payload,"created_by":principal_id})
         r.add("object_refs", {"owner_type":"artifact","owner_id":ref["artifact_revision_id"],"object_hash":ref["sha256"]})
+        if kind in {"CHANGE_POINT", "REVIEW_REPORT"}:
+            from novel_factory.application.audit_log import LogService
+            LogService.artifact(r.conn, kind, ref["artifact_revision_id"], work_id, payload, principal_id)
 
     def artifact(self, r, ref, work_id, *, kind=None):
         validate_contract("ArtifactRef",ref)

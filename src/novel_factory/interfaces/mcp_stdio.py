@@ -5,6 +5,7 @@ import json
 import os
 import stat
 import sys
+import time
 from pathlib import Path
 
 from jsonschema import Draft202012Validator, FormatChecker
@@ -12,6 +13,7 @@ from mcp import types
 from mcp.server.lowlevel import Server
 from mcp.server.stdio import stdio_server
 
+from novel_factory.application.audit_log import LogService
 from novel_factory.application.agent_gateway import _inline_schema
 from novel_factory.application.kernel import Kernel
 from novel_factory.application.mcp_runtime import McpRuntime, ProjectBinding, TaskBinding
@@ -101,8 +103,7 @@ def make_server(runtime, *, ceiling=None):
         return [types.Tool(name=name, description=_TOOLS[name][0], inputSchema=_TOOLS[name][1])
                 for name in names if ceiling is None or name in ceiling]
 
-    @server.call_tool(validate_input=False)
-    async def call_tool(name, arguments):
+    async def invoke(name, arguments):
         try:
             if (ceiling is not None and name not in ceiling) or name not in await asyncio.to_thread(runtime.available_tools):
                 return tool_error("VIEW_DENIED")
@@ -119,6 +120,27 @@ def make_server(runtime, *, ceiling=None):
         except Exception:
             # Drivers and providers may embed DSNs, paths or supplied data in exception messages.
             return tool_error("SERVICE_UNAVAILABLE")
+
+    @server.call_tool(validate_input=False)
+    async def call_tool(name, arguments):
+        started = time.monotonic()
+        try:
+            invocation, scope = await asyncio.to_thread(
+                LogService.begin_tool, runtime, name if name in _TOOLS else "UNREGISTERED",
+                server.request_context.request_id,
+            )
+        except Exception:
+            return tool_error("SERVICE_UNAVAILABLE")
+        result = await invoke(name, arguments)
+        error = result.structuredContent["error"]["code"] if isinstance(result, types.CallToolResult) and result.isError else None
+        try:
+            await asyncio.to_thread(LogService.finish_tool, runtime, invocation, scope, error,
+                                    round((time.monotonic()-started)*1000, 3))
+        except Exception:
+            # The attempt is already durable. A mutating tool has its own authoritative
+            # idempotency receipt; a missing diagnostic must not turn success into a retry.
+            print("NovelFactory MCP completion audit unavailable", file=sys.stderr)
+        return result
 
     return server
 

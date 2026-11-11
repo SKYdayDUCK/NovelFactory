@@ -1,5 +1,7 @@
 """Register a bounded scene once, without exposing planning data to its participants."""
 
+from sqlalchemy import text
+
 from novel_factory.application.joint_handoff import create_control_task, joint_manifest, validate_item_gift
 from novel_factory.application.kernel import after, require
 from novel_factory.application.planning import PlanningService
@@ -348,6 +350,14 @@ def register_scene(
             "director_task_id": director.task["task_id"],
             "reference_timeline_ref": anchor_ref,
         }
+        repo.conn.execute(text("""
+            INSERT INTO nf_trace_tasks(task_id,trace_id,volume_id) VALUES (:task,:scene,:volume)
+        """), [{"task":task_id, "scene":interaction_id, "volume":volume_id}
+               for task_id in [*actor_tasks.values(), control["task_id"], joint.task["task_id"], director.task["task_id"]]])
+        from novel_factory.application.audit_log import record
+        record(repo.conn, "scene.registered", event_id=interaction_id, work_id=wid, branch_id=bid,
+               trace_id=interaction_id, volume_id=volume_id, world_revision_id=world_ref["world_revision_id"],
+               principal_id=controller.principal_id, evidence_id=interaction_id)
         bound._receipt(
             repo, controller, world_ref, "REGISTER_SCENE_RUNTIME", idempotency_key, request, result
         )

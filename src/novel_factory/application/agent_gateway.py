@@ -236,6 +236,11 @@ class AgentGateway:
                         "IDEMPOTENCY_CONFLICT", "Recorded model artifact differs")
             else:
                 self.kernel._register_artifact(repo, ref, binding["task"]["work_id"], payload, kind, binding["task"]["principal_id"])
+                from novel_factory.application.audit_log import LogService
+                if kind == "AGENT_CALL_EVIDENCE":
+                    LogService.model(repo.conn, artifact_revision_id, payload)
+                else:
+                    LogService.model_stage(repo.conn, binding["task"], identity, kind, artifact_revision_id)
         return ref
 
     def _read_audit(self, repo, attempt_id):
