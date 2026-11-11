@@ -1,0 +1,35 @@
+{
+  "phase": "Workshop W3",
+  "state": "MERGED_AND_VERIFIED",
+  "pr": 10,
+  "merged_utc": "2026-11-11T19:53:57Z",
+  "previous_main": "15f606c99c765deeffd904ad540441eb6476b3af",
+  "candidate": "a15f41b40ed4a0cd4716e7335954ec0a1c5efadf",
+  "main": "e6763d844f023d7c6a13060dbaebca0416fe3099",
+  "tree": "7edb5550e8cbe3c1feb70ff8baa0c79974cf8155",
+  "hosted_workshop_run": 43091453200,
+  "hosted_p1_run": 43091453166,
+  "workshop_hosted_passed": 93,
+  "workshop_hosted_skipped": 0,
+  "workshop_native_passed": 92,
+  "workshop_native_skipped_docker": 1,
+  "unit_passed": 398,
+  "pg_passed": 817,
+  "pg_skipped_host_namespaces": 17,
+  "same_skipped_case_ids_passed_locally": 17,
+  "wal_targets": [
+    "0/40153E8",
+    "0/4063330"
+  ],
+  "wal_replayed": [
+    "0/40153E8",
+    "0/4063330"
+  ],
+  "redis_empty_restart_distinct_processes": true,
+  "recovered_original_operation": "562e0530-a63b-4030-8599-d652ff92ab0c",
+  "recover_new_worker_state": "BOUND",
+  "commercial_model_requests": 0,
+  "next_eligible": "Workshop W4 #12",
+  "capacity_issue": 13,
+  "capacity_scope": "W3 main triggers Workshop and P1 two push workflows only. NF AT-30 same previous signed NF base, absent new load adjudication."
+}
