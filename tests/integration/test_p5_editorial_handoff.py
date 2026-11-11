@@ -168,7 +168,11 @@ def test_model_candidate_drives_change_window_and_editor(kernel_env, monkeypatch
             kernel.revoke_grant(admin, executing_grant)
         completed = RuntimeSupervisor(kernel, gateway).run_once(admin, work, branch)
         if decision in {"UNRESOLVED","REVOKED"}:
-            assert completed["status"] == "WAITING_REVIEW" and completed["reason"] in {"REVIEW_REQUIRED","VIEW_DENIED"}
+            assert completed["status"] == "WAITING_REVIEW"
+            assert completed["reason"] == ("AUTHOR_DECISION_REQUIRED" if decision == "UNRESOLVED" else "VIEW_DENIED")
+            summary = sup.workflow.status(work, branch, authorize_in_tx=lambda conn:
+                kernel.authorize(KernelRepository(conn, tables), admin, work, "ADMIN", branch))
+            assert summary["pending_author_approval_count"] == int(decision == "UNRESOLVED")
             with kernel.db.uow(write=False) as repo:
                 assert repo.one("selections", {"work_id":work,"selection_kind":planning.selection_key(volume)})["artifact_ref"] == reference
                 assert kernel.head(repo, work, branch) == now

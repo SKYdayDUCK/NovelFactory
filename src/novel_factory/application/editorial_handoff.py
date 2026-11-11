@@ -133,7 +133,7 @@ class EditorialDelivery(CandidateDelivery):
         else:
             decision = candidate["decision"]
             require(decision in {"APPROVED", "RETURNED"} and not candidate["deferred_questions"],
-                    "REVIEW_REQUIRED", "Upper planning did not reach a final decision")
+                    "AUTHOR_DECISION_REQUIRED", "Upper planning did not reach a final decision")
             reviewed = rolling.review(owner, wr, **binding, change_point_ref=route["change_point_ref"],
                         plan_ref=route["plan_ref"], window_ref=route["window_ref"], decision=decision, reason=candidate["reason"])
             outcome.update(decision=decision, review_ref=reviewed)
@@ -147,4 +147,6 @@ class EditorialDelivery(CandidateDelivery):
             child = provision_successor(kernel, self.gateway, enrolled_by, task, spec, cfg, outcome)
             if child:
                 outcome["successor_task_id"] = child
+        from novel_factory.application.scene_continuation import continue_after_review
+        continue_after_review(kernel, repo, self.gateway, enrolled_by, task, spec, outcome)
         return outcome

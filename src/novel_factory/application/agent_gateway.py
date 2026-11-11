@@ -343,6 +343,8 @@ class AgentGateway:
             pending = repo.many("call_attempts", {"task_id": request["task_id"]})
             job = repo.one("supervisor_jobs", {"task_id": request["task_id"]})
             if job:
+                from novel_factory.application.volume_successor import guard_volume_send
+                guard_volume_send(self.kernel, repo, binding["task"], binding["spec"], job["config"], request)
                 if job["config"].get("editorial"):
                     from novel_factory.application.editorial_handoff import check_authorizer
                     check_authorizer(self.kernel, repo, job["config"], binding["task"])

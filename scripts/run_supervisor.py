@@ -64,6 +64,7 @@ def main():
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--once", action="store_true")
     mode.add_argument("--enroll", type=Path, help="Private JSON with task_id, fixed input/manifest refs, cut and budget")
+    mode.add_argument("--register-next-volume", type=Path, help="Preauthorize one next-volume planner on continuity publication")
     mode.add_argument("--register-scene", type=Path, help="Register a bounded scene from an authorized private JSON file")
     args = parser.parse_args()
     if not .1 <= args.interval <= 60:
@@ -79,13 +80,16 @@ def main():
         gateway = AgentGateway(kernel, {"external": backend,
             "codex-text": CodexAppServerAdapter(backend, HostJournal(kernel))})
         supervisor = RuntimeSupervisor(kernel, gateway)
-        if args.register_scene:
+        if args.register_scene or args.register_next_volume:
             from novel_factory.application.scene_runtime import register_scene
-            scene = json.loads(args.register_scene.read_text())
+            from novel_factory.application.volume_successor import register_next_volume
+            source = args.register_scene or args.register_next_volume
+            scene = json.loads(source.read_text())
             if not isinstance(scene, dict) or not isinstance(scene.get("world_ref"), dict) or any(
                     scene["world_ref"].get(key) != access[key] for key in ("work_id", "branch_id")):
                 parser.error("Scene must belong to the configured work and branch")
-            print(json.dumps(register_scene(kernel, gateway, principal, **scene), ensure_ascii=False))
+            register = register_scene if args.register_scene else register_next_volume
+            print(json.dumps(register(kernel, gateway, principal, **scene), ensure_ascii=False))
             return
         if args.enroll:
             enrollment = json.loads(args.enroll.read_text())

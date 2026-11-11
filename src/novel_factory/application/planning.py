@@ -365,6 +365,15 @@ class PlanningService:
             previous = self.kernel.artifact(repo, expected_plan_ref, world_ref["work_id"], kind="PLAN_REVISION")["payload"] if expected_plan_ref else None
             previous_nodes = {n["node_id"]: n for n in previous["nodes"]} if previous else {}
             changed = [n["node_id"] for n in plan["nodes"] if previous_nodes.get(n["node_id"]) != n]
+            if previous:
+                current_ids = {n["node_id"] for n in plan["nodes"]}
+                changed.extend(sorted(previous_nodes.keys() - current_ids))
+                def incoming(edges):
+                    return {(e["source_node_id"], e["target_node_id"], e["kind"]) for e in edges}
+                changed_edges = incoming(previous["dependencies"]) ^ incoming(plan["dependencies"])
+                changed_policy = {target for _, target, _ in changed_edges}
+                changed_policy.update(set(plan["published_prefix_node_ids"]) ^ set(previous["published_prefix_node_ids"]))
+                changed.extend(sorted(changed_policy - set(changed)))
             self.kernel._register_artifact(repo, manifest_ref, world_ref["work_id"], manifest, "PLAN_MANIFEST", principal.principal_id)
             self._select(repo, world_ref, key, plan_ref)
             self._select(repo, world_ref, "PLAN_MANIFEST:" + plan["volume_id"], manifest_ref)
@@ -384,6 +393,14 @@ class PlanningService:
                     repo.change("tasks", {"task_id": task_id}, {"state": "STALE", "lease_expiry": None, "updated_at": repo.now()})
                     self.kernel.tasks._emit(repo.conn, task_id, task["generation"], "STALE")
                     fenced.append(task_id)
+            for entry in repo.many("dependencies", {"work_id": world_ref["work_id"], "branch_id": world_ref["branch_id"],
+                                                     "owner_type": "scene_task", "scope_key": list(keys)}):
+                task = repo.one("tasks", {"task_id": entry["owner_id"]}, lock="update")
+                if task and task["state"] in {"BLOCKED", "READY", "RUNNING", "RESULT_STORED", "VALIDATING", "WAITING_REVIEW"}:
+                    repo.change("tasks", {"task_id": task["task_id"]}, {"state": "STALE", "lease_owner": None,
+                                "lease_expiry": None, "updated_at": repo.now()})
+                    self.kernel.tasks._emit(repo.conn, task["task_id"], task["generation"], "STALE")
+                    fenced.append(task["task_id"])
             result = {"plan_ref": plan_ref, "plan_manifest_ref": manifest_ref, "world_ref": world_ref,
                       "knowledge_cut": {"plane": "PLAN", "plan_manifest_ref": manifest_ref},
                       "changed_node_ids": changed, "fenced_task_ids": sorted(set(fenced)), "world_effects_applied": 0,

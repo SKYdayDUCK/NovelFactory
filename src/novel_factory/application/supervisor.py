@@ -30,6 +30,9 @@ class HostJournal:
             owner = Principal(task["grant_id"], task["principal_id"])
             _, grant, spec = WorldQueryService(self.kernel)._task(repo, owner, task["task_id"], task["generation"])
             job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})
+            if job:
+                from novel_factory.application.volume_successor import guard_volume_send
+                guard_volume_send(self.kernel, repo, task, spec, job["config"])
             if job and job["config"].get("editorial"):
                 from novel_factory.application.editorial_handoff import check_authorizer
                 check_authorizer(self.kernel, repo, job["config"], task)
@@ -143,6 +146,10 @@ class RuntimeSupervisor:
     def run_once(self, controller, work_id, branch_id, *, executor=None):
         def authorize(conn):
             self.kernel.authorize(KernelRepository(conn, tables), controller, work_id, "ADMIN", branch_id)
+        from novel_factory.application.volume_successor import advance_volume
+        volume = advance_volume(self.kernel, self.gateway, controller, work_id, branch_id)
+        if volume:
+            return volume
         from novel_factory.application.editorial_handoff import EditorialDelivery
         decided = EditorialDelivery(self.kernel, self.gateway).deliver_one(controller, work_id, branch_id)
         if decided:

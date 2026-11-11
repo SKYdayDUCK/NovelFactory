@@ -66,6 +66,7 @@ def register_scene(
     idempotency_key,
     deadline_seconds=3600,
     alternative_destination_ids=None,
+    following_scenes=None,
 ):
     """Preauthorize one registered interaction, one location allowance, and its editorial response.
 
@@ -124,6 +125,10 @@ def register_scene(
         deadline_seconds=deadline_seconds,
         **location_options,
     )
+    if following_scenes is not None:
+        from novel_factory.application.scene_continuation import validate_slots
+        validate_slots(following_scenes, scene_limit)
+        request["following_scenes"] = following_scenes
     wid, bid = world_ref["work_id"], world_ref["branch_id"]
     with kernel.objects.lock(), kernel.db.uow() as repo:
         repo.one("works", {"work_id": wid}, lock="update")
@@ -318,6 +323,9 @@ def register_scene(
             continue_editorial=True,
         )
         wait(director, [control["task_id"]])
+        if following_scenes is not None:
+            from novel_factory.application.scene_continuation import authorize_slots
+            authorize_slots(bound, repo, controller, director.task["task_id"], request, plan["artifact_ref"])
         result = {
             "interaction_id": interaction_id,
             "actor_tasks": actor_tasks,

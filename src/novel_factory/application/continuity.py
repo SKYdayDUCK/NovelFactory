@@ -399,7 +399,7 @@ class ContinuityService:
                     "qualification": "HISTORICAL_EDITION_REVIEW_REQUIRED" if impact["status"] != "UNCHANGED" else "NO_NEW_IMPACT_SINCE_REVIEW",
                     "world_effects_applied": 0}
 
-    def _continuity_task(self, repo, principal, task_id, generation):
+    def _continuity_task(self, repo, principal, task_id, generation, snapshot_ref):
         from novel_factory.application.narrative import NarrativeService
         task, grant, spec, ctx = NarrativeService(self.kernel)._task(
             repo, principal, task_id, generation, allow_accepted=True)
@@ -410,8 +410,14 @@ class ContinuityService:
         require(ctx["principal_id"] == principal.principal_id and ctx["read_cut"]["world_ref"] == spec["world_ref"]
                 and ctx["payload"]["policy_version"] == ctx["read_cut"]["policy_version"] == spec["policy_version"],
                 "TASK_REBIND_REQUIRED", "Continuity needs the original authorized context cut")
-        require((reader or planner) and ctx["read_cut"]["knowledge_cut"] == {"plane": "WORLD"}, "VIEW_DENIED",
-                "Continuity requires an assigned reader or planning task with a fixed world cut")
+        cut = ctx["read_cut"]["knowledge_cut"]
+        if planner and cut["plane"] == "PLAN":
+            from novel_factory.application.volume_successor import check_planner_cut
+            check_planner_cut(self.kernel, repo, task, spec, cut, snapshot_ref)
+        else:
+            require((reader or planner) and cut == {"plane": "WORLD"}, "VIEW_DENIED",
+                    "Continuity requires an assigned reader or planning task with a fixed cut")
+        check_profile(grant, cut["plane"])
         return task, grant, spec
 
     def read_for_task(self, principal, task_id, generation, snapshot_ref, *, budget_bytes=100_000):
@@ -426,8 +432,7 @@ class ContinuityService:
         require(type(budget_bytes) is int and 0 < budget_bytes <= 2_000_000,
                 "INVALID_ARGUMENT", "Invalid continuity context byte budget")
         with self.kernel.objects.lock(), self.kernel.db.uow(write=False, repeatable_read=True) as repo:
-            task, grant, spec = self._continuity_task(repo, principal, task_id, generation)
-            check_profile(grant, "WORLD")
+            task, grant, spec = self._continuity_task(repo, principal, task_id, generation, snapshot_ref)
             require(grant["actor_id"] is None and snapshot_ref in spec["input_artifacts"],
                     "VIEW_DENIED", "Continuity is not assigned to this non-actor task generation")
             snapshot = self._snapshot(repo, snapshot_ref, task["work_id"])
@@ -472,5 +477,5 @@ class ContinuityService:
                 "authority": "DERIVED_EDITORIAL_MEMORY_NOT_WORLD_FACT_OR_ACTOR_BELIEF", "world_effects_applied": 0}
             require(len(canonical_bytes(result)) <= budget_bytes, "CONTEXT_BUDGET_EXCEEDED",
                     "The complete assigned continuity evidence exceeds this context budget")
-            self._continuity_task(repo, principal, task_id, generation)
+            self._continuity_task(repo, principal, task_id, generation, snapshot_ref)
         return result
