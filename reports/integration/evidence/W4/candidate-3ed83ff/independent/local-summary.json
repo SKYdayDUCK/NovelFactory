@@ -1,0 +1,203 @@
+{
+  "phase": "candidate",
+  "source_sha": "3ed83ffe779bf15e7965f2b2fc8236abaf90ff72",
+  "tree": "cb601579cceafd8cd33d35664a31f8d9dd38c879",
+  "aw_schema": "w004c",
+  "environment": "Linux, Python 3.12.14, DBs PG17.11, Redis 8.0.2, Codex CLI 0.167.0-alpha.4",
+  "postgresql_native_suites": {
+    "nf-tools.xml": {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dual-delegation.xml": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "bridge-nf.xml": {
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "released-w3.xml": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "w4-paid.xml": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "paired-physical.xml": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "w4-reviews.xml": {
+      "tests": 27,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "released-w4.xml": {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dual-services.xml": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "released-w1-w2.xml": {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "bridge-profiles.xml": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "workshop.xml": {
+      "tests": 59,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "released-w0.xml": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "native_passed": 123,
+  "native_skipped": 1,
+  "supplemental_linux_role_tests": 17,
+  "paid_review_primary": {
+    "review_id": "33cf5cfb-ffdf-4de8-abda-1db87e32133f",
+    "operation_id": "6533e282-7c17-432e-95cc-47dcc9ffaa53",
+    "task_id": "1541a709-e842-40f7-88d6-cde725e382a6",
+    "nf_receipt": "eaa32237-df54-4bd0-a730-1e015b520c1f",
+    "nf_report": {
+      "artifact_id": "80eb184e-b54a-45fa-bf95-66a15f701b94",
+      "artifact_revision_id": "9a14b76a-cdb6-44eb-9d2c-98e7c7e4caa8",
+      "sha256": "13bfb72b8b87fc3ea35229b18d84a0244912aec28ffcf1cd774253eb60c3b730"
+    },
+    "source_sha": "13159dacccc69fe7d51e2b82d3394941de25c9a1308cc8056a9afae6392537c8",
+    "skill_sha": "def31cff6d127e5203945818743e1718d12f25d0f41788ad841bf09536b83b76",
+    "attempt_id": "dc7686be-1533-44ce-8666-df1cb70aff08",
+    "tokens": 18,
+    "settled": "0.020000",
+    "reserved": "0.10",
+    "generation": 1,
+    "result": "APPROVED",
+    "loopback_http_requests": 1,
+    "commercial_calls": 0
+  },
+  "duplicate_paid_review_observation": {
+    "read": {
+      "task_id": "e097ddca-c1f5-4c4f-b71c-65fbaf35fde9",
+      "generation": 1,
+      "coverage_ref": {
+        "artifact_id": "16e7ead6-6d32-4177-9943-0a7f890fb4c9",
+        "artifact_revision_id": "593a364e-8c10-45f5-b18e-11ba8d2062af",
+        "sha256": "175a0cda85e7d648353f4bd5f0f00e13929aa8cea4024c9a2539cc36ebfd342c"
+      },
+      "delivery_ref": {
+        "artifact_id": "b777148e-a35e-41ce-b712-79c8ec3be09a",
+        "artifact_revision_id": "20f8d8c9-6c41-47d1-b84a-94e487f574d8",
+        "sha256": "1fcd9823400de25f7d727c4a9d14283127c1e550336cdd57b3456783fdd6d81e"
+      },
+      "text_ref": {
+        "sha256": "13159dacccc69fe7d51e2b82d3394941de25c9a1308cc8056a9afae6392537c8",
+        "artifact_id": "0a195a35-49c9-4cce-8869-624902204f9e",
+        "artifact_revision_id": "cda5b2c2-baeb-47be-8809-24a51975f10c"
+      },
+      "draft_ref": {
+        "artifact_id": "0d3cdcf3-3932-424e-9c5d-cac3e431499c",
+        "artifact_revision_id": "22508821-dc8a-4db0-ae9c-c028401b1dac",
+        "sha256": "ad82c58c8b89777c7212c6e80d2dada0cea4aeb53b8f766c0c533a0bacc2b8dc"
+      },
+      "span": {
+        "start": 0,
+        "end": 25,
+        "unit": "UNICODE_CODEPOINT",
+        "quote_sha256": "13159dacccc69fe7d51e2b82d3394941de25c9a1308cc8056a9afae6392537c8"
+      },
+      "read_mode": "FULL_TEXT",
+      "delivered_codepoints": 25,
+      "delivered_bytes": 71,
+      "delivered_sha256": "13159dacccc69fe7d51e2b82d3394941de25c9a1308cc8056a9afae6392537c8"
+    },
+    "submitted_review": {
+      "task_id": "e097ddca-c1f5-4c4f-b71c-65fbaf35fde9",
+      "generation": 1,
+      "nf_report": {
+        "artifact_id": "1f9687b1-405d-4ed1-9034-3c6bf1373f96",
+        "artifact_revision_id": "7a1e04d9-b105-45a3-b0fe-3ded45877eb2",
+        "sha256": "1bf0e7c0b88674f206ffc7c845945571b38760937e5e6e1738982f33ca49a025"
+      },
+      "coverage_refs": [
+        {
+          "artifact_id": "16e7ead6-6d32-4177-9943-0a7f890fb4c9",
+          "artifact_revision_id": "593a364e-8c10-45f5-b18e-11ba8d2062af",
+          "sha256": "175a0cda85e7d648353f4bd5f0f00e13929aa8cea4024c9a2539cc36ebfd342c"
+        }
+      ],
+      "scale": "SCENE",
+      "dimension": "LITERARY"
+    },
+    "idempotent_report_submissions": 2
+  },
+  "schema_convergence": {
+    "w004": {
+      "sha": "5a3903dc7368ca7a8fc69c2f7cd46bac0eefc82605a18f026200a5733995103f",
+      "prior_rows_tables": 31
+    },
+    "w004a": {
+      "sha": "5a3903dc7368ca7a8fc69c2f7cd46bac0eefc82605a18f026200a5733995103f",
+      "prior_rows_tables": 34
+    },
+    "w004b": {
+      "sha": "5a3903dc7368ca7a8fc69c2f7cd46bac0eefc82605a18f026200a5733995103f",
+      "prior_rows_tables": 34
+    },
+    "signed-view": {
+      "sha": "5a3903dc7368ca7a8fc69c2f7cd46bac0eefc82605a18f026200a5733995103f",
+      "prior_rows_tables": 0
+    }
+  },
+  "skills_policies": [
+    "CONTROL_ONLY",
+    "PRIVATE",
+    "PUBLIC_SHARED",
+    "ROLE_SCOPED",
+    "TEAM_SCOPED"
+  ],
+  "redis_recovery_operation": "676cc441-344b-476e-b192-f685782a54ca",
+  "pitr_lsn": [
+    "0/4020B10",
+    "0/406F0E8"
+  ],
+  "commercial_calls": 0,
+  "archive_sha256": {
+    "local-qualification.zip": "3373ff0fff2ffb842c29fa90cd216421800ced959b283dc8decbdea85e7d3ec7",
+    "observed-coverage.zip": "c1ed4bf421992e1bd3d66790210769fb7a33f5be367307da6c6add3ffa96b20d",
+    "role-namespaces.zip": "d121967be9696eb062d02777f53fd6c9fe131e11e095e1483fafa58e6f0c51eb",
+    "package-validation.json": "6d621b380af278d4b1bc9b1f18cf6ef077606021cece3a989c10c15982febbf3"
+  }
+}
