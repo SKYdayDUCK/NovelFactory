@@ -1,0 +1,41 @@
+{
+  "before_loss": {
+    "run_id": "4799f6ca4313c430ff02033f5ef0096e202bc11e",
+    "redis_version": "8.0.2",
+    "initial_keys": 0,
+    "aw_event_id": "5c1abf05-8af0-46ff-819f-53451802b1bb",
+    "nf_task_events": [
+      "287cba10-5547-449f-90c2-2f4df37dc59a",
+      "3f716b8e-8579-4c27-8eab-e43e9b8c471b",
+      "9c37bb62-ee30-4b82-b2a8-ff193370ee59"
+    ]
+  },
+  "after_rebuild": {
+    "run_id": "e432ad33b4d161cee6d8df72767a07c44ef16d5d",
+    "redis_version": "8.0.2",
+    "initial_keys": 0,
+    "aw_event_id": "5c1abf05-8af0-46ff-819f-53451802b1bb",
+    "nf_task_events": [
+      "287cba10-5547-449f-90c2-2f4df37dc59a",
+      "3f716b8e-8579-4c27-8eab-e43e9b8c471b",
+      "9c37bb62-ee30-4b82-b2a8-ff193370ee59"
+    ]
+  },
+  "operation_id": "65b119d6-9401-4135-a273-5c1d86207419",
+  "task_id": "5bc44303-f09f-42a8-9a57-c31a5ab5aeb5",
+  "generation": 0,
+  "receipt_ref": "8f0e1ae7-b063-4e7e-8d2b-c9d67db569c2",
+  "hold_after_loss": "HELD",
+  "reserved_amount": "1.000000",
+  "world_ref": {
+    "work_id": "411830b6-fe38-4992-84cf-e896f2fc3143",
+    "branch_id": "ab61bff5-dba7-4e8b-88de-6cd92d51068b",
+    "world_revision_id": "3bd31f12-a684-4509-9d8d-126ea10dc17a"
+  },
+  "restarted_aw_state": "RECONCILING",
+  "restarted_worker": {
+    "operation_id": "65b119d6-9401-4135-a273-5c1d86207419",
+    "state": "BOUND"
+  },
+  "nf_after_get_matches_lost_reply": true
+}
