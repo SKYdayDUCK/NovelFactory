@@ -1,0 +1,4 @@
+# Configure only the trusted broker launcher on the author's machine.
+[mcp_servers.workshop]
+command = "/opt/agent-workshop/bin/aw-mcp"
+args = ["--binding", "/etc/agent-workshop/author.json"]

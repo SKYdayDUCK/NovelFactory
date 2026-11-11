@@ -215,3 +215,29 @@ def test_contradictory_peer_ledger_freezes_and_preserves_reservation():
         assert not c.execute(
             "SELECT * FROM aw_cost_observations WHERE operation_id=%s", (op,)
         ).fetchall()
+
+
+def test_manager_rechecks_author_after_delegation_and_before_resume():
+    from agent_workshop.manager import request_resume
+    from agent_workshop.manager_worker import run_once
+
+    dsn, org, install, token = setup_slot()
+    make(dsn, token)
+    with connect(dsn) as c:
+        manager = enroll(c, install, org, "author", 1, 1)
+        request_resume(c, authenticate(c, manager), "revoke-mid-run")
+    calls = []
+
+    async def revoke_during_lookup(tool, args):
+        calls.append(tool)
+        with connect(dsn) as c:
+            c.execute(
+                "UPDATE aw_bindings SET revoked=true WHERE token_digest=%s", (digest(manager),)
+            )
+        raise ConnectionError()
+
+    async def resume(tool, args):
+        pytest.fail("revoked author reached NF resume")
+
+    assert asyncio.run(run_once(dsn, org, install, resume, revoke_during_lookup)) == "REVOKED"
+    assert calls == ["nf_delegation_submit"]
