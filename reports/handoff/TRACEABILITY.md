@@ -7,3 +7,4 @@
 | FR-EXP / AT-50 | 缺项目消费限额、端点、双人审读 | BLOCKED_ENVIRONMENT |
 | FR-AW-01–04 / AT-40 | evidence/workshop/w1/integrated.xml；四预设、CAS 竞争、失效任期、读者范围、真实 stdio | PASS（专项） |
 | FR-AW-05–09 / AT-41–43 | evidence/workshop/w2/junit.xml；越级/任期/临时授权/回执/Redis 故障 | PASS（专项） |
+| FR-XSYS-01–07 / AT-46,47 | evidence/workshop/w3/{dual,saga}.xml；独立数据库角色、双 MCP、原键回收、Hold 与 NF 取消结算；双库 PITR 验收尚未完成 | PARTIAL |

@@ -19,6 +19,7 @@ from test_w1_historical_upgrade import WORKSHOP, client, only_capabilities, run
 
 W1 = "d039839fe68f6403ea6e5590af3ed787318d5b5f"
 W2 = "0da5b7c8fab5321fa50d2a04a516f3fd95432539"
+RELEASED_BRIDGE = "15f606c99c765deeffd904ad540441eb6476b3af"
 OLD_MESSAGE = """
 import json
 import sys
@@ -64,7 +65,8 @@ def snapshot(conn, tables):
 @pytest.mark.parametrize(("source", "start", "db_var"), [
     (W1, "w001b", "AW_W2_FROM_W1_DATABASE_URL"),
     (W2, "w002", "AW_W2_FROM_W2_DATABASE_URL"),
-], ids=["released-w1", "historical-w2"])
+    (RELEASED_BRIDGE, "w002c", "AW_W3_FROM_W2C_DATABASE_URL"),
+], ids=["released-w1", "historical-w2", "released-bridge"])
 def test_upgrade_historical_service(source, start, db_var, tmp_path, record_property):
     dsn = os.environ[db_var]
     with psycopg.connect(dsn) as conn:
@@ -80,10 +82,10 @@ def test_upgrade_historical_service(source, start, db_var, tmp_path, record_prop
     director = tmp_path / "director.json"
     run(old, dsn, "alembic", "upgrade", "head")
     run(old, dsn, "agent_workshop.admin", "install", "install", "historical-nf")
-    owner = ["--installation", "install"] if start == "w001b" else []
+    owner = [] if start == "w002" else ["--installation", "install"]
     run(old, dsn, "agent_workshop.admin", "bootstrap", "org", "--preset", "Standard", *owner)
     run(old, dsn, "agent_workshop.admin", "enroll", "install", "org", "actor-1", actor, "--revision", "1")
-    if start == "w002":
+    if start != "w001b":
         run(old, dsn, "agent_workshop.admin", "enroll", "install", "org", "volume", director, "--revision", "1")
         subprocess.run([sys.executable, "-c", OLD_MESSAGE, director, actor], check=True, cwd=old,
                        env={**os.environ, "PYTHONPATH": str(old / "src")})
@@ -92,22 +94,24 @@ def test_upgrade_historical_service(source, start, db_var, tmp_path, record_prop
         tables = columns(conn)
         before = snapshot(conn, tables)
         assert before["aw_employees"][0] > 2 and before["aw_employment_versions"][0] > 2
-        if start == "w002":
+        if start != "w001b":
             for table in ("aw_deliveries", "aw_outbox", "aw_messages", "aw_message_bodies"):
                 assert before[table][0] == 1
     scripts = ScriptDirectory.from_config(Config(str(WORKSHOP / "alembic.ini")))
-    assert scripts.get_heads() == ["w002c"]
+    current = scripts.get_current_head()
+    assert current is not None
+    assert "w002c" in {rev.revision for rev in scripts.walk_revisions(base="base", head=current)}
     assert set(scripts.get_revision("w002c").down_revision) == {"w001b", "w002b"}
     run(WORKSHOP, dsn, "alembic", "upgrade", "head")
     run(WORKSHOP, dsn, "alembic", "upgrade", "head")
     with psycopg.connect(dsn) as conn:
-        assert conn.execute("SELECT version_num FROM aw_alembic_version").fetchall() == [("w002c",)]
+        assert conn.execute("SELECT version_num FROM aw_alembic_version").fetchall() == [(current,)]
         assert snapshot(conn, tables) == before
-        assert conn.execute("SELECT count(*) FROM aw_message_origins").fetchone() == (0,)
-        assert conn.execute("SELECT bool_and(org_member) FROM aw_bindings").fetchone() == (start == "w001b",)
+        assert conn.execute("SELECT count(*) FROM aw_message_origins").fetchone() == (int(start == "w002c"),)
+        assert conn.execute("SELECT bool_and(org_member) FROM aw_bindings").fetchone() == (start != "w002",)
     record_property("source_sha", source)
     record_property("starting_revision", start)
-    record_property("ending_revision", "w002c")
+    record_property("ending_revision", current)
     record_property("preserved_table_row_counts", json.dumps({k: v[0] for k, v in before.items()}, sort_keys=True))
 
     async def verify():
@@ -115,6 +119,13 @@ def test_upgrade_historical_service(source, start, db_var, tmp_path, record_prop
             if start == "w001b":
                 reply = await original.call_tool("aw_roster_get", {})
                 assert not reply.isError and reply.structuredContent["org_id"] == "org"
+            elif start == "w002c":
+                mailbox = await original.call_tool("aw_mailbox_get", {})
+                assert not mailbox.isError
+                item, = mailbox.structuredContent["items"]
+                assert (item["sequence"], item["status"], item["sender"]) == (1, "ACKNOWLEDGED", "volume")
+                body = await original.call_tool("aw_message_body_get", {"message_id": item["message_id"]})
+                assert not body.isError and body.structuredContent == {"content": "historical message"}
             else:
                 await only_capabilities(original)
                 run(WORKSHOP, dsn, "agent_workshop.admin", "claim-org", "org", "install")

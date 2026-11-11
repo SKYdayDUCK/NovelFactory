@@ -60,8 +60,12 @@
     "evidence": "reports/integration/W2_主线签收.md"
   },
   "W3": {
-    "status": "NOT_STARTED",
-    "result": "NOT_EXECUTED"
+    "status": "IN_PROGRESS",
+    "result": "AWAITING_MAIN_ACCEPTANCE",
+    "pr": 10,
+    "dependency_main_sha": "15f606c99c765deeffd904ad540441eb6476b3af",
+    "historical_source": "15d1cf51c357627866d06bd49fd326798dda56a3",
+    "qualified_workshop_source": "d8c4e9707a76f35e9f9dfdaca929c1767c650a02"
   },
   "W4": {
     "status": "NOT_STARTED",
@@ -82,5 +86,14 @@
       "project-authorized provider binding and spend limits",
       "two independent literary reviews"
     ]
+  },
+  "NF_BRIDGE": {
+    "status": "MERGED_AND_VERIFIED",
+    "result": "PASS",
+    "pr": 11,
+    "source_sha": "695668b87f6a76acbe7e27c71fcb259b7b3f0795",
+    "main_sha": "15f606c99c765deeffd904ad540441eb6476b3af",
+    "evidence": "reports/integration/NF_Bridge_主线签收.md",
+    "capacity_issue": 13
   }
 }
