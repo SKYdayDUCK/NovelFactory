@@ -1,7 +1,7 @@
 # 当前唯一阶段
 
-Workshop W3 [#10](https://github.com/SKYdayDUCK/NovelFactory/pull/10) → main。NF 受限委托桥接已签收，当前正式主线 `15f606c99c765deeffd904ad540441eb6476b3af`、`788dc4b190299894509593a23982452f0362f9ef`。[签收与全部候选、主线原件](NF_Bridge_主线签收.md)。
+Workshop W4 [#12](https://github.com/SKYdayDUCK/NovelFactory/pull/12)。启动时远端既有分支 `dev/aw-w4`、头 `71b471416c9407e348d4bdce817588def5f11d5b`、原目标 `dev/aw-w3`。正式集成以最新 `main` 为目标。已签收的基线为 [W3 `e6763d844f023d7c6a13060dbaebca0416fe3099`](W3_主线签收.md)。
 
-复核原 #10 及现有 W3 预演，保留原始分支，去除旧堆叠重复；基于已签收 W2 及 NF Bridge 验收委托、交接、预算、失回应、双库恢复和冻结，真实双 MCP/PG/Redis。必须是当前 PR → main → 主线验收及保存；W4 尚未获准启动。
+复用 W4 的技能版本与五类共享、七种审核模式，核验权限回避、版本冻结、配额和历史库升级。先厘清旧堆叠、按当前阶段精确运行真实门禁，通过正常 PR 合并，复验 main 并存档。其他阶段继续冻结。
 
-预候选 `08954a3c33d799e15c9ee9270fc578e10156379c` 的 Workshop CI 已通过。后续 W3 修复覆盖已发送意图的保留、冻结源版本和已入账费用的核对，以及当前组织路由上的合法派工交接。以最终候选与合并后主线的独立回执签收。[双库预演原件](https://github.com/SKYdayDUCK/NovelFactory/tree/aecc83aa98345d5f153b104203d542de56be1c15/reports/integration/evidence/W3/preflight-d8c4e97-nf15f606c)
+#12 已指向已签收的 W3 主线。当前 W4 资格涵盖真实原文阅读与双侧审核账本、五类共享、历史签署重放、跨主管分配以及 w004c 存量升级。[验收入口](W4_契约验收.md)

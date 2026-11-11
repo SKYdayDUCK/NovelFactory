@@ -100,6 +100,14 @@ jobs:
           REVOKE CONNECT ON DATABASE workshop_test FROM PUBLIC;
           CREATE DATABASE aw_upgrade_test OWNER aw_service;
           REVOKE CONNECT ON DATABASE aw_upgrade_test FROM PUBLIC;
+          CREATE DATABASE w4_from_w3 OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w4_from_w3 FROM PUBLIC;
+          CREATE DATABASE w4_from_w3_route OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w4_from_w3_route FROM PUBLIC;
+          CREATE DATABASE w4_from_w4 OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w4_from_w4 FROM PUBLIC;
+          CREATE DATABASE w4_from_w4b OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w4_from_w4b FROM PUBLIC;
           CREATE DATABASE w3_from_w3 OWNER aw_service;
           REVOKE CONNECT ON DATABASE w3_from_w3 FROM PUBLIC;
           CREATE DATABASE w3_from_w2c OWNER aw_service;
@@ -138,7 +146,32 @@ jobs:
         env:
           AW_REDIS_TEST_CONTAINER: ${{ job.services.redis.id }}
         working-directory: workshop
-        run: .venv/bin/python -m pytest tests -q --junitxml=workshop-results.xml
+        run: |
+          .venv/bin/python -m pytest tests -q --junitxml=workshop-results.xml \
+            --ignore-glob='tests/test_review*.py' --ignore=tests/test_w4_skills_stdio.py --ignore=tests/test_legacy_paid_reviews.py \
+            --ignore=tests/test_w4_routing_upgrade.py
+      - name: Verify W4 review modes, Skill scopes and populated W3 and W4 upgrades
+        working-directory: workshop
+        env:
+          AW_W4_SKILLS_EVIDENCE: ${{ github.workspace }}/workshop/w4-skills-stdio.json
+          AW_W4_LEGACY_REVIEW_EVIDENCE: ${{ github.workspace }}/workshop/w4-legacy-review.json
+          AW_W4_ROUTING_UPGRADE_EVIDENCE_DIR: ${{ github.workspace }}/workshop/w4-route-upgrades
+        run: |
+          mkdir -p "$AW_W4_ROUTING_UPGRADE_EVIDENCE_DIR"
+          export AW_W4_FROM_W3_DATABASE_URL="${AW_DATABASE_URL%/*}/w4_from_w3"
+          .venv/bin/python -m pytest -c pyproject.toml -q -o junit_family=xunit1 \
+            tests/test_review*.py tests/test_w4_skills_stdio.py tests/test_legacy_paid_reviews.py tests/test_w4_routing_upgrade.py \
+            acceptance/test_w4_historical_upgrade.py \
+            --junitxml=w4-reviews-skills-upgrades.xml
+          test -s w4-legacy-review.json
+          test -s w4-skills-stdio.json
+          export AW_W4_FROM_W3_DATABASE_URL="${AW_DATABASE_URL%/*}/w4_from_w3_route"
+          export AW_W4_FROM_W4_DATABASE_URL="${AW_DATABASE_URL%/*}/w4_from_w4"
+          export AW_W4_FROM_W4B_DATABASE_URL="${AW_DATABASE_URL%/*}/w4_from_w4b"
+          .venv/bin/python -m pytest -c pyproject.toml acceptance/test_w4_historical_upgrades.py -q -o junit_family=xunit1 --junitxml=w4-historical-upgrades.xml
+          for origin in w004 w004a w004b signed-view; do
+            test -s "$AW_W4_ROUTING_UPGRADE_EVIDENCE_DIR/$origin.json"
+          done
       - name: Upgrade the released W0 service and verify existing bindings
         working-directory: workshop
         run: |
@@ -183,7 +216,8 @@ jobs:
           PG_BIN: /usr/lib/postgresql/17/bin
         run: |
           bash scripts/ci_install_pg17.sh postgresql-17 postgresql-client-17
-          PYTHONPATH="$PWD/workshop/src:$PWD/src" .venv/bin/python -m pytest -q workshop/integration --junitxml=workshop/dual-results.xml
+          PYTHONPATH="$PWD/workshop/src:$PWD/src" .venv/bin/python -m pytest \
+            -c pyproject.toml -o junit_family=xunit1 -q workshop/integration --junitxml=workshop/dual-results.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -198,6 +232,11 @@ jobs:
             workshop/routing-matrix.json
             workshop/w2-transport.json
             workshop/w3-legacy-upgrades.xml
+            workshop/w4-reviews-skills-upgrades.xml
+            workshop/w4-skills-stdio.json
+            workshop/w4-historical-upgrades.xml
+            workshop/w4-legacy-review.json
+            workshop/w4-route-upgrades/*.json
             workshop/dual-results.xml
             workshop/paired-restore.json
             workshop/w3-redis-recovery.json
