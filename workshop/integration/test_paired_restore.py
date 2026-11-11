@@ -71,7 +71,9 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
     nf_source = Path(os.environ["AW_NF_SOURCE"]).resolve()
     monkeypatch.syspath_prepend(str(nf_source / "scripts"))
     monkeypatch.syspath_prepend(str(nf_source / "tests/integration"))
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / "qualification"))
     import pitr_drill as pg
+    from offline_witness import nf_snapshot, workshop_disconnected, workshop_snapshot
     from test_p5_supervisor import backend
 
     pg_bin = Path(os.environ.get("PG_BIN", "/usr/lib/postgresql/17/bin"))
@@ -255,12 +257,9 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
                 ),
             )
         )["operation_id"]
-        assert (
-            asyncio.run(aw_author("aw_resume_project", {"operation_id": "pending-before-pitr"}))[
-                "state"
-            ]
-            == "PENDING"
-        )
+        wake_key = {"operation_id": "pending-before-pitr"}
+        wake = asyncio.run(aw_author("aw_resume_project", wake_key))
+        assert wake["state"] == "PENDING"
         target = "aw_intent_before_nf"
         lsn = admin.execute("SELECT pg_create_restore_point(%s)", (target,)).fetchone()[0]
         shutil.copytree(tmp_path / "objects", tmp_path / "objects-at-target")
@@ -269,21 +268,61 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
         bound_lsn = admin.execute("SELECT pg_create_restore_point(%s)", (bound_target,)).fetchone()[
             0
         ]
-        for _ in range(2):
-            supervisor.run_once(owner, wr["work_id"], wr["branch_id"])
-        assert tick(urls["aw"], inst, org, op, nf) == "BOUND"
-        later = aw_state(urls["aw"], op)
-        assert later["hold"] == "HELD" and later["accounting_state"] == "UNKNOWN"
+        initial = workshop_snapshot(urls["aw"], op)
+        task = initial["task_id"]
         with connect(urls["aw"]) as c:
             payload = c.execute(
                 "SELECT payload FROM aw_delegations WHERE operation_id=%s", (op,)
             ).fetchone()["payload"]
         get = {k: payload[k] for k in GET_FIELDS}
-        accepted = asyncio.run(nf("nf_delegation_get", get))
-        assert (
-            accepted["task_state"] == "ACCEPTED"
-            and len(accepted["attempt_ids"]) == len(requests) == 1
-        )
+        scans = []
+        with workshop_disconnected(admin, urls["aw"]):
+            # The bound stdio service fails closed while its database is unavailable.
+            with pytest.raises(Denied, match="^VIEW_DENIED$"):
+                asyncio.run(aw_author("aw_resume_project", wake_key))
+            for _ in range(2):
+                before = nf_snapshot(supervisor, task)
+                result = supervisor.run_once(owner, wr["work_id"], wr["branch_id"])
+                scans.append(
+                    {
+                        "before": before,
+                        "after": nf_snapshot(supervisor, task),
+                        "status": result["status"],
+                    }
+                )
+            accepted = asyncio.run(nf("nf_delegation_get", get))
+            assert scans[0]["before"]["state"] != "ACCEPTED" and not scans[0]["before"]["attempts"]
+            assert scans[-1]["after"] == {"state": "ACCEPTED", "attempts": accepted["attempt_ids"]}
+            assert accepted["task_state"] == "ACCEPTED"
+            assert len(accepted["attempt_ids"]) == len(requests) == 1
+
+        assert workshop_snapshot(urls["aw"], op) == initial
+        assert asyncio.run(aw_author("aw_resume_project", wake_key)) == wake
+        assert tick(urls["aw"], inst, org, op, nf) == "BOUND"
+        reconnected = workshop_snapshot(urls["aw"], op)
+        assert initial["task_state"] != "ACCEPTED" and reconnected["task_state"] == "ACCEPTED"
+        assert initial["receipt_ref"] == reconnected["receipt_ref"] == accepted["receipt_ref"]
+        assert reconnected["task_id"] == task and reconnected["attempts_observed"] == 1
+        later = aw_state(urls["aw"], op)
+        assert later["hold"] == "HELD" and later["accounting_state"] == "UNKNOWN"
+        offline = {
+            "status": "PASS",
+            "operation_id": op,
+            "recorded_utc": datetime.now(UTC).isoformat(),
+            "scope": "Workshop database refused connections across two real NF supervisor scans.",
+            "aw_database_allowed_connections": False,
+            "aw_live_client_backends": 0,
+            "aw_author_mcp_during_outage": "VIEW_DENIED",
+            "pending_wake_preserved": wake["request_id"],
+            "aw_unchanged_while_offline": initial,
+            "nf_supervisor_scans": scans,
+            "nf_stdio_during_outage": {
+                "receipt_ref": accepted["receipt_ref"],
+                "attempt_ids": accepted["attempt_ids"],
+            },
+            "aw_after_reconciliation": reconnected,
+            "production_provider_calls": 0,
+        }
         wal = admin.execute("SELECT pg_walfile_name(pg_current_wal_lsn())").fetchone()[0]
         admin.execute("SELECT pg_switch_wal()")
         until = time.monotonic() + 60
@@ -439,6 +478,8 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
         with db.uow(write=False) as repo:
             assert len(repo.many("tasks", {"work_id": wr["work_id"]})) == 1
             assert kernel.head(repo, wr["work_id"], wr["branch_id"]) == wr
+        if witness := os.environ.get("AW_OFFLINE_WITNESS"):
+            Path(witness).write_text(json.dumps(offline, indent=2) + "\n")
         out = os.environ.get("AW_PAIRED_RESTORE_EVIDENCE")
         if out:
             Path(out).write_text(
@@ -468,6 +509,7 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
                         supplier_model_calls=0,
                         recovery_mcp_calls=calls,
                         frozen_manager="IDLE",
+                        workshop_offline=offline,
                         elapsed_seconds=round(time.monotonic() - started, 2),
                     ),
                     default=str,
