@@ -108,6 +108,10 @@ def test_actor_stdio_own_cut_only_and_candidate_replay(kernel_env, tmp_path):
     async def check(session):
         tools = {tool.name for tool in (await session.list_tools()).tools}
         assert tools == {"nf_context_get", "nf_task_get", "nf_query_batch", "nf_artifact_put"}
+        task_view = await session.call_tool("nf_task_get", {})
+        assert not task_view.isError
+        assert task_view.structuredContent["task_id"] == a.task["task_id"]
+        assert task_view.structuredContent["generation"] == a.task["generation"]
         await error(session, "nf_resume_project", {}, "VIEW_DENIED")
         for override in ({"actor_id": world["ids"]["rival"]}, {"task_id": b.task["task_id"]},
                          {"generation": -1}, {"knowledge_cut": {"plane": "PLAN"}},

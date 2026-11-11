@@ -2,6 +2,7 @@
 
 import json
 import os
+import shutil
 from copy import deepcopy
 from pathlib import Path
 from time import monotonic
@@ -276,7 +277,7 @@ def test_banquet_absence_pins_reference_and_limits_replanning(kernel_env, scene_
             adapter_id="fixture",
             input_artifacts=[current["plan_manifest_ref"], *refs],
         )
-        return job.principal, {
+        return job.private_token, job.principal, {
             "task_id": job.task["task_id"],
             "generation": job.task["generation"],
             "worker_id": job.worker_id,
@@ -341,6 +342,13 @@ def test_banquet_absence_pins_reference_and_limits_replanning(kernel_env, scene_
     import asyncio
     from test_p5_mcp import config, exercise
 
+    def host_replay(binding_path, runtime, name, arguments, expected):
+        if shutil.which("codex"):
+            from scripts.probe_codex_mcp import probe_bound_tool
+            result = asyncio.run(probe_bound_tool("codex", binding_path, runtime.available_tools(),
+                                                  name, arguments))
+            assert result["model_turns"] == 0 and result["result"] == expected
+
     async def check_transport(session):
         tools = {tool.name: tool.inputSchema for tool in (await session.list_tools()).tools}
         assert "assessment" in tools["nf_change_point_request"]["properties"]
@@ -349,6 +357,8 @@ def test_banquet_absence_pins_reference_and_limits_replanning(kernel_env, scene_
         assert response.structuredContent == d_mcp.request_change(**rejoin_request)
 
     asyncio.run(exercise(config(tmp_path / "editor.json", kernel_env, gate.private_token, bind), check_transport))
+    host_replay(tmp_path / "editor.json", d_mcp, "nf_change_point_request", rejoin_request,
+                d_mcp.request_change(**rejoin_request))
     with pytest.raises(DomainError) as missing_path:
         d_mcp.request_change(**{**ordinary, "assessment": {**rejoin, "trajectory":
             {**rejoin["trajectory"], "return_direction": None}}})
@@ -380,7 +390,7 @@ def test_banquet_absence_pins_reference_and_limits_replanning(kernel_env, scene_
         "dependency_fingerprint": fingerprint(now),
         "status": "DRAFT",
     }
-    planner, planner_bind = editorial(
+    planner_token, planner, planner_bind = editorial(
         "volume_director", "replan", "roll-window", [anchor, cp, base]
     )
     planner_mcp = McpRuntime(k, planner, TaskBinding(**planner_bind))
@@ -390,8 +400,17 @@ def test_banquet_absence_pins_reference_and_limits_replanning(kernel_env, scene_
     assert submitted == planner_mcp.submit_window(
         change_point_ref=cp, window=window, idempotency_key="window"
     )
+    async def check_window(session):
+        response = await session.call_tool("nf_rolling_window_submit", {
+            "change_point_ref": cp, "window": window, "idempotency_key": "window",
+        })
+        assert not response.isError and response.structuredContent == submitted
+
+    asyncio.run(exercise(config(tmp_path / "planner.json", kernel_env, planner_token, planner_bind), check_window))
+    host_replay(tmp_path / "planner.json", planner_mcp, "nf_rolling_window_submit",
+                {"change_point_ref": cp, "window": window, "idempotency_key": "window"}, submitted)
     candidate_plan, window_ref = submitted["plan_ref"], submitted["window_ref"]
-    editor, approval = editorial(
+    editor_token, editor, approval = editorial(
         "chief_editor",
         "editorial_decision",
         "review-change-point",
@@ -424,6 +443,18 @@ def test_banquet_absence_pins_reference_and_limits_replanning(kernel_env, scene_
         reason="符合角色动机，信使可以恢复联络。",
         idempotency_key="review",
     )
+    async def check_review(session):
+        response = await session.call_tool("nf_change_point_review", {
+            "change_point_ref": cp, "plan_ref": candidate_plan, "window_ref": window_ref,
+            "decision": "APPROVED", "reason": "符合角色动机，信使可以恢复联络。", "idempotency_key": "review",
+        })
+        assert not response.isError and response.structuredContent == seal
+
+    asyncio.run(exercise(config(tmp_path / "upper.json", kernel_env, editor_token, approval), check_review))
+    host_replay(tmp_path / "upper.json", e_mcp, "nf_change_point_review", {
+        "change_point_ref": cp, "plan_ref": candidate_plan, "window_ref": window_ref,
+        "decision": "APPROVED", "reason": "符合角色动机，信使可以恢复联络。", "idempotency_key": "review",
+    }, seal)
     returned = e_mcp.review_change(
         change_point_ref=cp,
         plan_ref=candidate_plan,

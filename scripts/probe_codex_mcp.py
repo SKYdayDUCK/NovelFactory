@@ -11,6 +11,15 @@ import tempfile
 
 
 async def probe(codex, binding, *, status_only=False):
+    tool = "nf_project_status" if status_only else "nf_resume_project"
+    receipt = await probe_bound_tool(codex, binding, {"nf_project_status","nf_resume_project"}, tool, {})
+    if "counts" not in receipt["result"]:
+        raise RuntimeError("Bound project tool lacked its workflow receipt")
+    return receipt
+
+
+async def probe_bound_tool(codex, binding, expected_tools, tool, arguments):
+    """Trusted Host conformance probe; the server still authorizes each request."""
     binary = shutil.which(codex)
     if not binary:
         raise RuntimeError("Codex CLI executable unavailable")
@@ -51,13 +60,12 @@ async def probe(codex, binding, *, status_only=False):
                 thread_id = thread["thread"]["id"]
                 inventory = await rpc("mcpServerStatus/list", {"threadId": thread_id, "serverName": "novelfactory"}, 3)
                 servers = [s for s in inventory["data"] if s["name"] == "novelfactory"]
-                if len(servers) != 1 or set(servers[0]["tools"]) != {"nf_project_status", "nf_resume_project"}:
-                    raise RuntimeError("Unexpected live operator tool inventory")
-                tool = "nf_project_status" if status_only else "nf_resume_project"
-                request = {"threadId": thread_id, "server": "novelfactory", "tool": tool, "arguments": {}}
+                if len(servers) != 1 or set(servers[0]["tools"]) != set(expected_tools) or tool not in expected_tools:
+                    raise RuntimeError("Unexpected live bound tool inventory")
+                request = {"threadId": thread_id, "server": "novelfactory", "tool": tool, "arguments": arguments}
                 response = await rpc("mcpServer/tool/call", request, 4)
-                if response.get("isError") or "counts" not in response["structuredContent"]:
-                    raise RuntimeError("Bound project tool was denied or lacked its workflow receipt")
+                if response.get("isError") or "structuredContent" not in response:
+                    raise RuntimeError("Bound tool was denied or lacked its receipt")
                 return {"host": subprocess.check_output([binary, "--version"], text=True).strip(),
                         "transport": "Codex app-server to local stdio MCP", "server": "NovelFactory",
                         "tools": sorted(servers[0]["tools"]), "thread_id": thread_id, "model_turns": 0,
