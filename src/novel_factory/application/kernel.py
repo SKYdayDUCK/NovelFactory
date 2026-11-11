@@ -5,10 +5,12 @@ only supply intentions; a sealed, reviewed joint result is accepted here once.
 """
 from __future__ import annotations
 
+from contextlib import nullcontext
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 import secrets
+from types import SimpleNamespace
 from uuid import uuid4, uuid5, UUID
 
 from novel_factory.application.authorization import Principal, ADMIN_CAPABILITIES
@@ -30,6 +32,17 @@ class Kernel:
     def __init__(self, db, objects):
         self.db, self.objects = db, objects
         self.tasks = TaskService(db.engine, tables, object_store=objects)
+
+    def in_transaction(self, repo):
+        """Join an existing write unit of work; nested service calls share its commit."""
+        def connection():
+            return nullcontext(repo.conn)
+
+        bound = SimpleNamespace(
+            engine=SimpleNamespace(begin=connection, connect=connection),
+            uow=lambda **kwargs: nullcontext(repo),
+        )
+        return Kernel(bound, self.objects)
 
     def authenticate(self, token: str) -> Principal:
         require(isinstance(token,str) and 16 <= len(token) <= 256, "VIEW_DENIED", "Credentials unavailable")

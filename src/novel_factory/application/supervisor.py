@@ -32,6 +32,9 @@ class HostJournal:
             if job and job["config"].get("editorial"):
                 from novel_factory.application.editorial_handoff import check_authorizer
                 check_authorizer(self.kernel, repo, job["config"], task)
+            if job and job["config"].get("joint"):
+                from novel_factory.application.joint_handoff import authorize_dispatch
+                authorize_dispatch(self.kernel, repo, owner, task, job["config"])
             ctx = repo.one("contexts", {"context_bundle_id": task["context_bundle_id"]})
             require(task["state"] == "RUNNING" and ctx and ctx["grant_id"] == grant["grant_id"]
                     and ctx["read_cut"]["permission_epoch"] == grant["epoch"]
@@ -61,7 +64,7 @@ class RuntimeSupervisor:
         self.workflow = WorkflowService(kernel.tasks)
 
     def enroll(self, controller, task_id, *, manifest_ref, knowledge_cut, context_tokens,
-               input_ref, budget_id, reserve_amount, token_reservation, accept_summary=False, seal_interaction_id=None, editorial=None, continue_editorial=False):
+               input_ref, budget_id, reserve_amount, token_reservation, accept_summary=False, seal_interaction_id=None, editorial=None, continue_editorial=False, joint=None):
         """Freeze one dispatch allowance. Nothing in the model prompt selects a route or owner."""
         with self.kernel.db.uow() as repo:
             task = repo.one("tasks", {"task_id": task_id})
@@ -120,6 +123,13 @@ class RuntimeSupervisor:
                                                    "epoch": authorizer["epoch"]}
                 if continue_editorial:
                     config["continue_editorial"] = True
+            if joint is not None:
+                from novel_factory.application.joint_handoff import check_enrollment
+                check_enrollment(self.kernel, repo, controller, task, spec, knowledge_cut, payload, joint, manifest_ref)
+                grant = self.kernel.authorize(repo, controller, task["work_id"], "ADMIN", task["branch_id"])
+                config["joint"] = joint
+                config["joint_authorizer"] = {"grant_id": controller.grant_id, "principal_id": controller.principal_id,
+                                              "epoch": grant["epoch"]}
             old = repo.one("supervisor_jobs", {"task_id": task_id})
             if old:
                 require(old["config"] == config, "IDEMPOTENCY_CONFLICT", "Task dispatch allowance already exists")
@@ -136,6 +146,10 @@ class RuntimeSupervisor:
         decided = EditorialDelivery(self.kernel, self.gateway).deliver_one(controller, work_id, branch_id)
         if decided:
             return decided
+        from novel_factory.application.joint_handoff import JointDelivery
+        joint = JointDelivery(self.kernel, self.gateway).deliver_one(controller, work_id, branch_id)
+        if joint:
+            return joint
         self._deliver_candidates(controller, work_id, branch_id)
         summary = self.workflow.resume_project(work_id, branch_id, authorize_in_tx=authorize)
         with self.kernel.db.uow() as repo:

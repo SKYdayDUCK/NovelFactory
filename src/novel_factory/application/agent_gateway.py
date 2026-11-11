@@ -90,6 +90,11 @@ class AgentGateway:
         # Overrides are trusted server configuration, never dispatch inputs.
         self.output_contracts = {**OUTPUT_CONTRACTS, **(output_contracts or {})}
 
+    def with_kernel(self, kernel):
+        """Keep the trusted catalog and routes while joining a local service transaction."""
+        return AgentGateway(kernel, self.adapters, catalog=self.catalog,
+                            output_contracts=self.output_contracts, material_reader=self.material_reader)
+
     def prepare_input(self, principal, world_ref, *, role_id, task_kind, assignment,
                       adapter_id=None, skill_name=None, material_refs=()):
         """Freeze safe instructions/configuration before creating a task.
@@ -223,6 +228,10 @@ class AgentGateway:
         editorial = prompt_material(self.kernel, principal, binding)
         if editorial:
             user["editorial"] = editorial
+        from novel_factory.application.joint_handoff import prompt_material as joint_material
+        joint = joint_material(self.kernel, principal, binding)
+        if joint:
+            user["joint"] = joint
         return ({"role": "system", "content": system},
                 {"role": "user", "content": canonical_bytes(user).decode()})
 
@@ -337,6 +346,12 @@ class AgentGateway:
                 if job["config"].get("editorial"):
                     from novel_factory.application.editorial_handoff import check_authorizer
                     check_authorizer(self.kernel, repo, job["config"], binding["task"])
+                if job["config"].get("joint"):
+                    from novel_factory.application.joint_handoff import authorize_dispatch as authorize_joint
+                    require(request["call_key"] == "supervised-candidate"
+                            and all(request[k] == v for k, v in job["config"]["dispatch"].items()),
+                            "VIEW_DENIED", "Joint delivery requires the enrolled call and budget")
+                    authorize_joint(self.kernel, repo, principal, binding["task"], job["config"])
                 # An enrolled allowance buys one generation's candidate. A
                 # terminal billing receipt does not prove task delivery.
                 require(not any((c["generation"], c["call_key"]) !=

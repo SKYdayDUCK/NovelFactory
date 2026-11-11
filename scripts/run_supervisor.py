@@ -22,6 +22,7 @@ def main():
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--once", action="store_true")
     mode.add_argument("--enroll", type=Path, help="Private JSON with task_id, fixed input/manifest refs, cut and budget")
+    mode.add_argument("--register-scene", type=Path, help="Register a bounded scene from an authorized private JSON file")
     args = parser.parse_args()
     if not .1 <= args.interval <= 60:
         parser.error("interval must be between 0.1 and 60 seconds")
@@ -34,6 +35,14 @@ def main():
         gateway = AgentGateway(kernel, {"external": backend,
             "codex-text": CodexAppServerAdapter(backend, HostJournal(kernel))})
         supervisor = RuntimeSupervisor(kernel, gateway)
+        if args.register_scene:
+            from novel_factory.application.scene_runtime import register_scene
+            scene = json.loads(args.register_scene.read_text())
+            if not isinstance(scene, dict) or not isinstance(scene.get("world_ref"), dict) or any(
+                    scene["world_ref"].get(key) != access[key] for key in ("work_id", "branch_id")):
+                parser.error("Scene must belong to the configured work and branch")
+            print(json.dumps(register_scene(kernel, gateway, principal, **scene), ensure_ascii=False))
+            return
         if args.enroll:
             enrollment = json.loads(args.enroll.read_text())
             enrolled = supervisor.enroll(principal, **enrollment)

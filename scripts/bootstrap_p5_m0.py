@@ -1,6 +1,5 @@
 """Prepare an isolated, two-turn P5 sample project without starting a model."""
 import argparse
-from contextlib import nullcontext
 from datetime import UTC, datetime, timedelta
 import fcntl
 import json
@@ -8,7 +7,6 @@ import os
 from pathlib import Path
 import stat
 import tempfile
-from types import SimpleNamespace
 from uuid import uuid4
 
 from novel_factory.application.agent_gateway import AgentGateway
@@ -63,9 +61,7 @@ def provision(db, store, private, route_name, hours):
             principal = verification.authenticate(access["token"])
             verification.authorize(repo, principal, marker["work_id"], "ADMIN", access["branch_id"])
             return {"status": "EXISTS", "work_id": marker["work_id"], "branch_id": access["branch_id"]}
-        engine = SimpleNamespace(begin=lambda: nullcontext(repo.conn))
-        bound = SimpleNamespace(engine=engine, uow=lambda **kwargs: nullcontext(repo))
-        kernel = Kernel(bound, store)
+        kernel = Kernel(db, store).in_transaction(repo)
         world = load_fixture(kernel, "r1_sword", work_id=marker["work_id"])
         wr, controller = world["world_ref"], world["principal"]
         work, branch = wr["work_id"], wr["branch_id"]

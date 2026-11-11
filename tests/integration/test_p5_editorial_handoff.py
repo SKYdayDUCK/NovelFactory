@@ -11,13 +11,14 @@ from novel_factory.application.planning import PlanningService
 from novel_factory.application.rolling_plans import RollingPlanning
 from novel_factory.application.runtime_tasks import RuntimeTaskService
 from novel_factory.application.supervisor import RuntimeSupervisor
+from novel_factory.application.simulation import outcome_command
 from novel_factory.domain.errors import DomainError
-from novel_factory.fixtures import load_fixture, point, prepare_command
+from novel_factory.fixtures import load_fixture, point, prepare_command, run_command
 from novel_factory.infrastructure.database import tables
 from novel_factory.infrastructure.repository import KernelRepository
 from test_p5_supervisor import backend
 from test_planning import make_plan
-from test_simulation import group, process_definition, register, selected
+from test_simulation import group, process_definition, register, rules, selected
 
 pytestmark = [pytest.mark.postgres, pytest.mark.integration]
 
@@ -26,12 +27,38 @@ pytestmark = [pytest.mark.postgres, pytest.mark.integration]
 def test_model_candidate_drives_change_window_and_editor(kernel_env, monkeypatch, decision):
     kernel = kernel_env["kernel"]
     base_world = load_fixture(kernel, "white_bridge")
+    ids = base_world["ids"]
+    if decision == "APPROVED":
+        past = run_command(kernel, base_world["principal"], base_world["world_ref"], "SET_RELATION",
+            {"subject_id":ids["protagonist"], "predicate":"vital_state",
+             "object_value":{"kind":"STRING","value":"UNRELATED_PAST_EVENT_CANARY"}, "at":point(1,2)})
+        base_world["world_ref"] = past["world_ref"]
     process = process_definition(kernel, base_world)
     world, _ = register(kernel, base_world, process)
     wr, admin = world["world_ref"], world["principal"]
     work, branch = wr["work_id"], wr["branch_id"]
     world_service, interaction, _, _, _ = group(kernel, world, process)
-    _, cmd = selected(kernel, world, process, world_service, interaction)
+    if decision == "APPROVED":
+        commands = [
+            {"template_id":"RESOURCE_TRANSFER", "args":{"from_account":ids["warehouse"], "to_account":ids["relief"],
+                "resource_id":ids["grain"], "unit":"bag", "quantity":"30", "at":point(30)}},
+            {"template_id":"RECORD_COGNITION", "args":{"actor_id":ids["protagonist"], "statement":"PRIVATE_BELIEF_CANARY",
+                "record_kind":"BELIEF", "epistemic_mode":"INFERRED", "evidence_refs":rules(kernel, wr), "at":point(30)}},
+            {"template_id":"SET_RELATION", "args":{"subject_id":ids["protagonist"], "predicate":"ability_state",
+                "object_value":{"kind":"STRING","value":"EXCLUDED_PREDICATE_CANARY"}, "at":point(30)}},
+            {"template_id":"SET_RELATION", "args":{"subject_id":ids["relief"], "predicate":"vital_state",
+                "object_value":{"kind":"STRING","value":"EXCLUDED_SUBJECT_CANARY"}, "at":point(30)}},
+            {"template_id":"SET_RELATION", "args":{"subject_id":ids["protagonist"], "predicate":"located_in",
+                "object_value":{"kind":"ENTITY","entity_id":ids["south"]}, "at":point(30)}},
+        ]
+        output = world_service.choose_outcome(admin, interaction["interaction_id"], commands=commands,
+            process_outcomes=[{"process_id":process["process_id"],"outcome":"FIRED","world_stage":"COMPLETED","next_due":None}],
+            reasoning_summary="PRIVATE_ARBITRATION_CANARY", rule_evidence_refs=rules(kernel, wr), source_kind="FIXTURE_SELECTED")
+        with kernel.db.uow(write=False) as repo:
+            row = repo.one("simulation_interactions", {"interaction_id":interaction["interaction_id"]})
+            cmd = outcome_command(row["artifact_ref"], row["payload"], output, kernel.artifact(repo, output, work)["payload"])
+    else:
+        _, cmd = selected(kernel, world, process, world_service, interaction)
     planning = PlanningService(kernel)
     plan, _ = make_plan(planning, world)
     for i, node in enumerate(plan["nodes"]):
@@ -50,7 +77,8 @@ def test_model_candidate_drives_change_window_and_editor(kernel_env, monkeypatch
         def task(world_ref, role, mode, skill, route, *, initial="READY", auto=False):
             refs = [v for k,v in route.items() if k.endswith("_ref")]
             job = runtime.prepare(admin, world_ref, role_id=role, task_kind=mode, skill_name=skill,
-                knowledge_cut=cut, story_time=point(31), subject_ids=process["required_actor_ids"], predicates=["location"],
+                knowledge_cut=cut, story_time=point(31), subject_ids=[*process["required_actor_ids"], ids["grain"], ids["warehouse"]],
+                predicates=["location", "vital_state", f"resource:{ids['grain']}:bag"],
                 assignment="仅使用已绑定的编辑资料完成本阶段", adapter_id="test", queue_state=initial,
                 input_artifacts=[cut["plan_manifest_ref"], *refs])
             opts = dict(knowledge_cut=cut, context_tokens=20000, manifest_ref=job.manifest_ref,
@@ -91,6 +119,15 @@ def test_model_candidate_drives_change_window_and_editor(kernel_env, monkeypatch
                     "deferred_questions":["该动机是否符合作者保留的取舍？"] if decision == "UNRESOLVED" else [], "evidence_refs":[]}
         server.candidate = candidate
         assert sup.run_once(admin, work, branch)["status"] == "RESULT_STORED"
+        body = json.loads(requests[0]["messages"][1]["content"])
+        projection = body["editorial"]["accepted_effects"]
+        assert projection == [{"event_ref":receipt["accepted_event_refs"][0],"occurrence_time":{"kind":"EXACT","at":point(30)},
+            "effects":[{"kind":"RESOURCE_DELTA","account_id":ids["warehouse"],"resource_id":ids["grain"],"unit":"bag","quantity":"-30"}]}]
+        transmitted = json.dumps(requests[0], ensure_ascii=False)
+        assert all(marker not in transmitted for marker in ("PRIVATE_BELIEF_CANARY", "EXCLUDED_PREDICATE_CANARY",
+            "EXCLUDED_SUBJECT_CANARY", "PRIVATE_ARBITRATION_CANARY", "UNRELATED_PAST_EVENT_CANARY", "不知道其他人的密封意图"))
+        if decision == "APPROVED":
+            assert past["receipt"]["accepted_event_refs"][0] not in body["editorial"]["accepted_event_refs"]
         director_delivery = sup.run_once(admin, work, branch)
         cp = director_delivery["change_point_ref"]
         if decision == "APPROVED":
@@ -111,6 +148,9 @@ def test_model_candidate_drives_change_window_and_editor(kernel_env, monkeypatch
                 {"operation":"review_and_adopt", "volume_id":volume, "change_point_ref":cp, "plan_ref":next_plan,
                  "window_ref":window, "reference_timeline_ref":anchor}).task["task_id"]
         assert sup.run_once(admin, work, branch)["task_id"] == editor_id
+        for request in requests[1:]:
+            other = json.loads(request["messages"][1]["content"])["editorial"]
+            assert "accepted_effects" not in other and "accepted_event_refs" not in other
         if decision == "APPROVED":
             original = PlanningService.adopt_plan
             def fault(*args, **kwargs):
@@ -151,6 +191,7 @@ def test_model_candidate_drives_change_window_and_editor(kernel_env, monkeypatch
                 Path(report_dir).mkdir(exist_ok=True, parents=True)
                 Path(report_dir, decision.lower() + ".json").write_text(json.dumps({
                     "upstream":"synthetic-loopback-http", "provider_requests":len(requests),
+                    "enrolled_warehouse_effect":projection, "director_only_projection":True,
                     "author_interventions":0, "before_wake_requests":0, "head_after_joint_accept":now,
                     "head_after_planning":now, "initial_plan_ref":reference,"selected_plan_ref":chosen,
                     "decision":decision,"auto_provisioned_successors":2 if decision=="APPROVED" else 0,"outbox_receipts":traces}, ensure_ascii=False, indent=2) + "\n")

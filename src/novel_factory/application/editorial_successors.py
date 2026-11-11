@@ -1,6 +1,5 @@
 """Create the two preauthorized planning successors inside their parent's delivery transaction."""
 
-from novel_factory.application.agent_gateway import AgentGateway
 from novel_factory.application.kernel import require
 from novel_factory.application.runtime_tasks import RuntimeTaskService
 from novel_factory.application.supervisor import RuntimeSupervisor
@@ -66,13 +65,7 @@ def provision_successor(kernel, gateway, controller, task, spec, cfg, outcome):
         "MODEL_CONFIG_CHANGED",
         "Parent's model route changed",
     )
-    bound_gateway = AgentGateway(
-        kernel,
-        gateway.adapters,
-        catalog=gateway.catalog,
-        output_contracts=gateway.output_contracts,
-        material_reader=gateway.material_reader,
-    )
+    bound_gateway = gateway.with_kernel(kernel)
     child = RuntimeTaskService(kernel, bound_gateway).prepare(
         controller,
         wr,
