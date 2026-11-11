@@ -1,0 +1,21 @@
+{
+  "stage": "B",
+  "status": "BLOCKED",
+  "source_sha": "b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5",
+  "tree": "057a3de8d6c3c28df016446ee7aa2b9acf05ceec",
+  "pr": 6,
+  "base": "dev/p5-agent-runtime",
+  "actions_checkout_sha": "01876116289defc1f6a3b6f20ae563732c3d8a12",
+  "immutable_evidence": "evidence/p55/s9-local/final-b3b0e9b/verification.json",
+  "pytest_recovered": {
+    "passed": 802
+  },
+  "open_capacity_jobs": [
+    130535530269,
+    130535529772,
+    130535530103,
+    130535530409,
+    130535530542
+  ],
+  "next": "Profile the failed read-only soak and overload jobs. Rerun unchanged gates. Retarget only after PR #5 merges."
+}
