@@ -1,0 +1,26 @@
+name: Dispatch original native desktop gate for merged P55
+on:
+  push:
+    branches: ['evidence/p55-55d897-guard']
+    paths: ['.github/workflows/p55-main-desktop-receipt.yml']
+permissions:
+  contents: read
+  actions: write
+jobs:
+  original-workflow:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - name: Verify immutable merge identity and dispatch the existing workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE: df1e0cc904e3b94a360d86e3a3e00bfec3258673
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = SKYdayDUCK/NovelFactory
+          test "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha)" = "$SOURCE"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/git/commits/$SOURCE" --jq .tree.sha)" = 6355c1814d840cc3f2fd1dae94777df9dba4ad76
+          count=$(gh api --method GET "repos/$GITHUB_REPOSITORY/actions/workflows/p5-native-desktop.yml/runs" -f head_sha="$SOURCE" -f event=workflow_dispatch --jq .total_count)
+          if test "$count" = 0; then
+            gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/p5-native-desktop.yml/dispatches" -f ref=main
+          fi
