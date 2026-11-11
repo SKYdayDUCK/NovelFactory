@@ -1,0 +1,215 @@
+{
+  "commit": "08954a3c33d799e15c9ee9270fc578e10156379c",
+  "checkout": "c6c13d4f6b59c930114a9cda761d0c2e9a242323",
+  "tree": "2f4b472bd8685b48971fc0dd2075097765893c95",
+  "base": "15f606c99c765deeffd904ad540441eb6476b3af",
+  "aw_source": "d8c4e9707a76f35e9f9dfdaca929c1767c650a02",
+  "stage": "W3",
+  "scope": "INTERMEDIATE_PUBLIC_CANDIDATE_WORKSHOP_JOB_ONLY",
+  "run_id": 43086830875,
+  "job_id": 130753295169,
+  "checkout_log": [
+    "2026-11-11T19:24:24.4144379Z HEAD is now at c6c13d4 Merge 08954a3c33d799e15c9ee9270fc578e10156379c into 15f606c99c765deeffd904ad540441eb6476b3af\n2026-11-11T19:24:24.4184722Z ##[endgroup]",
+    "2026-11-11T19:24:24.4258121Z [command]/usr/bin/git log -1 --format=%H\n2026-11-11T19:24:24.4293761Z c6c13d4f6b59c930114a9cda761d0c2e9a242323"
+  ],
+  "jobs": [
+    {
+      "name": "workshop",
+      "id": 130753295169,
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Initialize containers",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 4,
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 5,
+          "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Install both locked projects",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 7,
+          "name": "Verify the frozen NF contracts against the checked-out runtime",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 8,
+          "name": "Provision separate service identities and databases",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 9,
+          "name": "Migrate the two service databases",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 10,
+          "name": "Check delegated calls, recovery and the released NF database upgrade",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 11,
+          "name": "Check the limited NF interface beside the live Workshop service",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 12,
+          "name": "Run Workshop contracts and stdio permissions",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 13,
+          "name": "Upgrade the released W0 service and verify existing bindings",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 14,
+          "name": "Upgrade previously deployed W1 and W2 databases",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 15,
+          "name": "Upgrade existing W3 queues, preserve all historical rows and reconcile accepted NF work",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 16,
+          "name": "Check the nine granted NF tools over live stdio",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 17,
+          "name": "Verify both live services and database isolation",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 18,
+          "name": "Verify dual-ledger recovery on the integrated NF source and native PG17",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 19,
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 20,
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 37,
+          "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 38,
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 39,
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 40,
+          "name": "Stop containers",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 41,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "workshop-results",
+      "id": 13886403124,
+      "digest": "sha256:ec54aca86744c9e5f898c4dfd7a832831eb7f88ba08f70e6d77f405612d3aef2",
+      "size_in_bytes": 8608
+    },
+    {
+      "name": "nf-bridge-results",
+      "id": 13886353271,
+      "digest": "sha256:5e7580f7501dc7e05a40e28def0ac7063ec73d0479c3b68c19b7557346018d9d",
+      "size_in_bytes": 1968
+    }
+  ],
+  "source_comparisons": [
+    {
+      "before": "d8c4e9707a76f35e9f9dfdaca929c1767c650a02",
+      "after": "08954a3c33d799e15c9ee9270fc578e10156379c",
+      "paths": [
+        "workshop"
+      ],
+      "diff": [
+        [
+          "A",
+          "workshop/acceptance/test_nf_bridge_stdio.py"
+        ]
+      ]
+    },
+    {
+      "before": "15f606c99c765deeffd904ad540441eb6476b3af",
+      "after": "08954a3c33d799e15c9ee9270fc578e10156379c",
+      "paths": [
+        "src",
+        "migrations",
+        "tests",
+        "runtime"
+      ],
+      "diff": []
+    }
+  ]
+}
