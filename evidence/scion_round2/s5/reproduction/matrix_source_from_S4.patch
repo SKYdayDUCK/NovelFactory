@@ -1,0 +1,68 @@
+diff --git a/src/novel_factory/contracts/linked.py b/src/novel_factory/contracts/linked.py
+index b5a1a2f..fcbcefe 100644
+--- a/src/novel_factory/contracts/linked.py
++++ b/src/novel_factory/contracts/linked.py
+@@ -28,10 +28,6 @@ _SUPPORTED = {
+ }
+ 
+ 
+-def _plain_name(name):
+-    return name.isascii() and name.isidentifier()
+-
+-
+ class _UseRegistry(Exception):
+     pass
+ 
+@@ -39,10 +35,6 @@ class _UseRegistry(Exception):
+ @lru_cache(maxsize=256)
+ def linked_validator(document_uri, name):
+     """Return None when evaluation requires the original registry."""
+-    if not _plain_name(name):
+-        # The original root validator uses a JSON Pointer built from this
+-        # name. Preserve its RFC 6901 and URI fragment decoding rules.
+-        return None
+     resolved = {}
+ 
+     def definition(uri, key, seen):
+@@ -65,12 +57,7 @@ def linked_validator(document_uri, name):
+             parts = fragment.split("/")
+             if len(node) != 1 or len(parts) != 3 or parts[:2] != ["", "$defs"]:
+                 raise _UseRegistry
+-            # Escaped or percent-encoded JSON Pointer segments must be resolved
+-            # by the registry, even if the literal escaped name also exists.
+-            key = parts[2]
+-            if not _plain_name(key):
+-                raise _UseRegistry
+-            return definition(dest, key, seen)
++            return definition(dest, parts[2], seen)
+         result = dict(node)
+         for key in _SCHEMA_MAPS:
+             if key in result:
+diff --git a/src/novel_factory/contracts/registry.py b/src/novel_factory/contracts/registry.py
+index 9af7b24..d3895d4 100644
+--- a/src/novel_factory/contracts/registry.py
++++ b/src/novel_factory/contracts/registry.py
+@@ -6,9 +6,9 @@ through the Draft 2020-12 validator. No schema retrieval uses the network.
+ """
+ from __future__ import annotations
+ 
+-import os
+ from copy import deepcopy
+ from functools import lru_cache
++import os
+ from typing import Any, Annotated, ClassVar, Literal, Union
+ from urllib.parse import urljoin
+ 
+@@ -16,11 +16,11 @@ from jsonschema import Draft202012Validator, FormatChecker
+ from referencing import Registry, Resource
+ from pydantic import BaseModel, ConfigDict, Field, RootModel, create_model, model_validator
+ 
+-from novel_factory.domain.errors import DomainError
+ from ._schema_bundle import SCHEMAS
+ from .linked import linked_validator
+ 
+ _STATIC_SCHEMA_LINKS = os.environ.get("NF_SCION_SCHEMA_LINKS") == "1"
++from novel_factory.domain.errors import DomainError
+ 
+ _BY_ID = {schema["$id"]: schema for schema in SCHEMAS.values()}
+ _REGISTRY = Registry().with_resources((key, Resource.from_contents(value)) for key, value in _BY_ID.items())

@@ -1,0 +1,13 @@
+{
+  "matrix_baseline_commit": "e757419aea6f00b9388fee14a92f4ea3b97444c0",
+  "matrix_candidate_local_commit": "01a5ba555cf995353b32edaf5cf200b559386bdb",
+  "matrix_candidate_src_tree": "a928d3d9fde165e615a959c8ec1fb909d3b7feba",
+  "S4_commit": "0f1a974babbc5642381b046438e1a845850b936a",
+  "S4_src_tree": "344503d25cd13128e58132c4dc179adbfb2119fb",
+  "changed_production_files": [
+    "src/novel_factory/contracts/linked.py",
+    "src/novel_factory/contracts/registry.py"
+  ],
+  "patch_sha256": "f2b2a7c555c996c725ea3d65a9a56eafc15c25341927662443c04f86e1344600",
+  "restore": "In a disposable checkout of S4, use git apply --index evidence/scion_round2/s5/reproduction/matrix_source_from_S4.patch and verify git write-tree (src subtree). Per-file SHA-256 digests also accompany every original measurement. The A\u2013F matrix did not enable the S4 schema-linking option."
+}

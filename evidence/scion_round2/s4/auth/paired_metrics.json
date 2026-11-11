@@ -1,0 +1,324 @@
+{
+  "server": "PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+  "affinity": [
+    4,
+    5
+  ],
+  "fixture": "make_population(kernel, 200, 0.20), generator default seed 20261110",
+  "processes": 1,
+  "concurrent_auth_calls": 1,
+  "operations_per_arm_per_repeat": 200,
+  "warmup": "200 original + 200 projection before instrumented pairs; DB and pool warm",
+  "timing": "monotonic wall and process CPU; same pool & SQL observer, no retry or HTTP admission in this microbenchmark",
+  "size_definition": "libpq PGresult bytes and reconstructed DataRow framing; excludes RowDescription, network/TLS/TCP and other SQL commands",
+  "source_sha256": {
+    "src/novel_factory/application/kernel.py": "99368b65b408c2a67aa3d3e10af18beaf4623a0c77e2218d9a57f298f09fca79",
+    "src/novel_factory/infrastructure/repository.py": "1595f300086daf2fac1648945f9fff31ef6d58eb9d992830b44868a0498d93fa",
+    "benchmarks/scion_profile.py": "177ec088737fcd8b88a012f7ed8bdb310e854dc914664a3868a1bc838b9d5667",
+    "benchmarks/p2_behavioral_load.py": "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f"
+  },
+  "samples": [
+    {
+      "repeat": 1,
+      "arm": "original",
+      "wall_ms": 98.39935800027888,
+      "cpu_ms": 77.67342300000024,
+      "SQL_count": 200,
+      "SELECT_count": 200,
+      "result_rows": 200,
+      "SQL_cursor_ms": 30.660732004434976,
+      "json_decoded_bytes": 32240,
+      "json_decode_calls": 800
+    },
+    {
+      "repeat": 1,
+      "arm": "projection",
+      "wall_ms": 123.94671299989568,
+      "cpu_ms": 86.17368300000017,
+      "SQL_count": 200,
+      "SELECT_count": 200,
+      "result_rows": 200,
+      "SQL_cursor_ms": 44.08786799922382,
+      "json_decoded_bytes": 0,
+      "json_decode_calls": 0
+    },
+    {
+      "repeat": 2,
+      "arm": "projection",
+      "wall_ms": 106.85404899959394,
+      "cpu_ms": 88.37138999999894,
+      "SQL_count": 200,
+      "SELECT_count": 200,
+      "result_rows": 200,
+      "SQL_cursor_ms": 29.097251005623548,
+      "json_decoded_bytes": 0,
+      "json_decode_calls": 0
+    },
+    {
+      "repeat": 2,
+      "arm": "original",
+      "wall_ms": 218.86710400031006,
+      "cpu_ms": 174.47690699999896,
+      "SQL_count": 200,
+      "SELECT_count": 200,
+      "result_rows": 200,
+      "SQL_cursor_ms": 54.822328995214775,
+      "json_decoded_bytes": 32240,
+      "json_decode_calls": 800
+    },
+    {
+      "repeat": 3,
+      "arm": "original",
+      "wall_ms": 120.46368899973459,
+      "cpu_ms": 97.06474100000051,
+      "SQL_count": 200,
+      "SELECT_count": 200,
+      "result_rows": 200,
+      "SQL_cursor_ms": 34.95454199855885,
+      "json_decoded_bytes": 32240,
+      "json_decode_calls": 800
+    },
+    {
+      "repeat": 3,
+      "arm": "projection",
+      "wall_ms": 102.14909900059865,
+      "cpu_ms": 84.83744000000115,
+      "SQL_count": 200,
+      "SELECT_count": 200,
+      "result_rows": 200,
+      "SQL_cursor_ms": 27.232042991272465,
+      "json_decoded_bytes": 0,
+      "json_decode_calls": 0
+    },
+    {
+      "repeat": 4,
+      "arm": "projection",
+      "wall_ms": 95.5681410005127,
+      "cpu_ms": 72.7475860000002,
+      "SQL_count": 200,
+      "SELECT_count": 200,
+      "result_rows": 200,
+      "SQL_cursor_ms": 24.375835000682855,
+      "json_decoded_bytes": 0,
+      "json_decode_calls": 0
+    },
+    {
+      "repeat": 4,
+      "arm": "original",
+      "wall_ms": 136.6653459999725,
+      "cpu_ms": 100.76682999999953,
+      "SQL_count": 200,
+      "SELECT_count": 200,
+      "result_rows": 200,
+      "SQL_cursor_ms": 37.800929993863974,
+      "json_decoded_bytes": 32240,
+      "json_decode_calls": 800
+    },
+    {
+      "repeat": 5,
+      "arm": "original",
+      "wall_ms": 97.89975500007131,
+      "cpu_ms": 81.19731599999902,
+      "SQL_count": 200,
+      "SELECT_count": 200,
+      "result_rows": 200,
+      "SQL_cursor_ms": 26.981625003827503,
+      "json_decoded_bytes": 32240,
+      "json_decode_calls": 800
+    },
+    {
+      "repeat": 5,
+      "arm": "projection",
+      "wall_ms": 118.16848000034952,
+      "cpu_ms": 97.29053199999882,
+      "SQL_count": 200,
+      "SELECT_count": 200,
+      "result_rows": 200,
+      "SQL_cursor_ms": 32.17870500520803,
+      "json_decoded_bytes": 0,
+      "json_decode_calls": 0
+    },
+    {
+      "repeat": 6,
+      "arm": "projection",
+      "wall_ms": 122.0815369997581,
+      "cpu_ms": 100.31212199999828,
+      "SQL_count": 200,
+      "SELECT_count": 200,
+      "result_rows": 200,
+      "SQL_cursor_ms": 33.16913699381985,
+      "json_decoded_bytes": 0,
+      "json_decode_calls": 0
+    },
+    {
+      "repeat": 6,
+      "arm": "original",
+      "wall_ms": 144.16319500014652,
+      "cpu_ms": 118.12642099999948,
+      "SQL_count": 200,
+      "SELECT_count": 200,
+      "result_rows": 200,
+      "SQL_cursor_ms": 38.17603700372274,
+      "json_decoded_bytes": 32240,
+      "json_decode_calls": 800
+    },
+    {
+      "repeat": 7,
+      "arm": "original",
+      "wall_ms": 144.355755000106,
+      "cpu_ms": 120.24919399999945,
+      "SQL_count": 200,
+      "SELECT_count": 200,
+      "result_rows": 200,
+      "SQL_cursor_ms": 39.09828900395951,
+      "json_decoded_bytes": 32240,
+      "json_decode_calls": 800
+    },
+    {
+      "repeat": 7,
+      "arm": "projection",
+      "wall_ms": 112.33614100001432,
+      "cpu_ms": 92.61747500000084,
+      "SQL_count": 200,
+      "SELECT_count": 200,
+      "result_rows": 200,
+      "SQL_cursor_ms": 30.62574399427831,
+      "json_decoded_bytes": 0,
+      "json_decode_calls": 0
+    },
+    {
+      "repeat": 8,
+      "arm": "projection",
+      "wall_ms": 95.2047840000887,
+      "cpu_ms": 77.55669500000195,
+      "SQL_count": 200,
+      "SELECT_count": 200,
+      "result_rows": 200,
+      "SQL_cursor_ms": 26.80978600255912,
+      "json_decoded_bytes": 0,
+      "json_decode_calls": 0
+    },
+    {
+      "repeat": 8,
+      "arm": "original",
+      "wall_ms": 1019.2555520006863,
+      "cpu_ms": 233.5147279999994,
+      "SQL_count": 200,
+      "SELECT_count": 200,
+      "result_rows": 200,
+      "SQL_cursor_ms": 419.85104200011847,
+      "json_decoded_bytes": 32240,
+      "json_decode_calls": 800
+    },
+    {
+      "repeat": 9,
+      "arm": "original",
+      "wall_ms": 1766.5135770002962,
+      "cpu_ms": 145.94155800000053,
+      "SQL_count": 200,
+      "SELECT_count": 200,
+      "result_rows": 200,
+      "SQL_cursor_ms": 737.8509170030156,
+      "json_decoded_bytes": 32240,
+      "json_decode_calls": 800
+    },
+    {
+      "repeat": 9,
+      "arm": "projection",
+      "wall_ms": 495.75585599995975,
+      "cpu_ms": 138.8305119999984,
+      "SQL_count": 200,
+      "SELECT_count": 200,
+      "result_rows": 200,
+      "SQL_cursor_ms": 194.92167599855748,
+      "json_decoded_bytes": 0,
+      "json_decode_calls": 0
+    },
+    {
+      "repeat": 10,
+      "arm": "projection",
+      "wall_ms": 127.62562799980515,
+      "cpu_ms": 90.7012629999997,
+      "SQL_count": 200,
+      "SELECT_count": 200,
+      "result_rows": 200,
+      "SQL_cursor_ms": 30.568809993383184,
+      "json_decoded_bytes": 0,
+      "json_decode_calls": 0
+    },
+    {
+      "repeat": 10,
+      "arm": "original",
+      "wall_ms": 572.8878129993973,
+      "cpu_ms": 143.67350799999912,
+      "SQL_count": 200,
+      "SELECT_count": 200,
+      "result_rows": 200,
+      "SQL_cursor_ms": 185.43703800241929,
+      "json_decoded_bytes": 32240,
+      "json_decode_calls": 800
+    }
+  ],
+  "pg_result_size": {
+    "original": {
+      "selects": 200,
+      "rows": 200,
+      "number_of_fields_per_row": 13,
+      "result_field_value_bytes": 76660,
+      "data_row_message_bytes": 88460
+    },
+    "projection": {
+      "selects": 200,
+      "rows": 200,
+      "number_of_fields_per_row": 3,
+      "result_field_value_bytes": 14600,
+      "data_row_message_bytes": 18400
+    }
+  },
+  "negative_cases": {
+    "cases": [
+      "revoked",
+      "unknown",
+      "short",
+      "nonstring"
+    ],
+    "public_errors": [
+      [
+        "VIEW_DENIED",
+        "Credentials unavailable"
+      ],
+      [
+        "VIEW_DENIED",
+        "Credentials unavailable"
+      ],
+      [
+        "VIEW_DENIED",
+        "Credentials unavailable"
+      ],
+      [
+        "VIEW_DENIED",
+        "Credentials unavailable"
+      ]
+    ],
+    "unrevoked_identities_still_match": 199
+  },
+  "medians_per_call": {
+    "original": {
+      "wall_ms": 0.7212973750006313,
+      "cpu_ms": 0.5959390374999973,
+      "SELECT_count": 1.0,
+      "result_rows": 1.0,
+      "json_decoded_bytes": 161.2,
+      "SQL_cursor_ms": 0.19318581501920562
+    },
+    "projection": {
+      "wall_ms": 0.5762615525009096,
+      "cpu_ms": 0.4476816324999966,
+      "SELECT_count": 1.0,
+      "result_rows": 1.0,
+      "json_decoded_bytes": 0.0,
+      "SQL_cursor_ms": 0.15298638496915373
+    }
+  },
+  "benchmark_sha256": "ff99d0995f56685a2da5a10a6456ae06184f551e2153204fdecfb35e171d5cb7"
+}
