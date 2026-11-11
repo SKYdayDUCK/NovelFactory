@@ -1,5 +1,10 @@
 name: Agent Workshop PostgreSQL and stdio
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'workshop/**'
+      - '.github/workflows/agent-workshop.yml'
   pull_request:
     paths:
       - 'workshop/**'
@@ -35,8 +40,25 @@ jobs:
       - run: uv sync --locked
       - run: uv run --locked alembic upgrade head
       - run: uv run --locked pytest -q --junitxml=workshop-results.xml
+      - name: Check the nine granted NF tools over live stdio
+        working-directory: .
+        env:
+          NF_TEST_DATABASE_URL: postgresql+psycopg://postgres:local-ci-only@127.0.0.1:5432/postgres
+          NF_P5_CODEX_VERSION: 0.167.0-alpha.4
+          NF_W0_TOOL_MATRIX: ${{ github.workspace }}/workshop/nf-tools.json
+        run: |
+          prefix="$RUNNER_TEMP/novelfactory-codex"
+          npm install --prefix "$prefix" --no-save --no-audit --no-fund "@openai/codex@$NF_P5_CODEX_VERSION"
+          native_bin="$prefix/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/bin"
+          test "$("$native_bin/codex" --version)" = "codex-cli $NF_P5_CODEX_VERSION"
+          export PATH="$native_bin:$PATH"
+          uv sync --locked
+          PYTHONPATH="$PWD/workshop/qualification:$PWD/src" .venv/bin/python -m pytest -p matrix_probe -q tests/integration/test_p5_mcp.py tests/integration/test_p5_rolling.py --junitxml=workshop/nf-tools.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: workshop-results
-          path: workshop/workshop-results.xml
+          path: |
+            workshop/workshop-results.xml
+            workshop/nf-tools.xml
+            workshop/nf-tools.json
