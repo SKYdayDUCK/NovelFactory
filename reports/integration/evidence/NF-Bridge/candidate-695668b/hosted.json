@@ -1,0 +1,195 @@
+{
+  "source": "GitHub Actions",
+  "head": "695668b87f6a76acbe7e27c71fcb259b7b3f0795",
+  "expected_tree": "788dc4b190299894509593a23982452f0362f9ef",
+  "jobs": [
+    {
+      "id": 130735238773,
+      "name": "workshop",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 43081588087,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Initialize containers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Install both locked projects",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Verify the frozen NF contracts against the checked-out runtime",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Provision separate service identities and databases",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Migrate the two service databases",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Check delegated calls, recovery and the released NF database upgrade",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Check the limited NF interface beside the live Workshop service",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Run Workshop contracts and stdio permissions",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Upgrade the released W0 service and verify existing bindings",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Upgrade previously deployed W1 and W2 databases",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14
+        },
+        {
+          "name": "Check the nine granted NF tools over live stdio",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15
+        },
+        {
+          "name": "Verify both live services and database isolation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18
+        },
+        {
+          "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 33
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 34
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 35
+        },
+        {
+          "name": "Stop containers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 36
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 37
+        }
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 13884352448,
+      "name": "workshop-results",
+      "size_in_bytes": 5817,
+      "url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/artifacts/13884352448",
+      "archive_download_url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/artifacts/13884352448/zip",
+      "expired": false,
+      "created_at": "2026-11-11T18:52:59Z",
+      "expires_at": "2027-02-09T18:50:41Z",
+      "updated_at": "2026-11-11T18:52:59Z",
+      "digest": "sha256:8c7e0d0053884c737c97dc347f42108611db2d0808d839fe25a3c7c7268a05d4",
+      "workflow_run": {
+        "id": 43081588087,
+        "repository_id": 1452373944,
+        "head_repository_id": 1452373944,
+        "head_branch": "dev/nf-workshop-delegation",
+        "head_sha": "695668b87f6a76acbe7e27c71fcb259b7b3f0795"
+      }
+    },
+    {
+      "id": 13884287722,
+      "name": "nf-bridge-results",
+      "size_in_bytes": 1973,
+      "url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/artifacts/13884287722",
+      "archive_download_url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/artifacts/13884287722/zip",
+      "expired": false,
+      "created_at": "2026-11-11T18:53:01Z",
+      "expires_at": "2027-02-09T18:50:41Z",
+      "updated_at": "2026-11-11T18:53:01Z",
+      "digest": "sha256:79ca6f709cdd164a4eac59c718dac275daa80a72f9d7fc059d76d518495b7a9c",
+      "workflow_run": {
+        "id": 43081588087,
+        "repository_id": 1452373944,
+        "head_repository_id": 1452373944,
+        "head_branch": "dev/nf-workshop-delegation",
+        "head_sha": "695668b87f6a76acbe7e27c71fcb259b7b3f0795"
+      }
+    }
+  ]
+}

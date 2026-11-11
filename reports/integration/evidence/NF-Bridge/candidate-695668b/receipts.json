@@ -1,0 +1,652 @@
+{
+  "workshop-results": {
+    "id": 13884352448,
+    "zip_sha256": "8c7e0d0053884c737c97dc347f42108611db2d0808d839fe25a3c7c7268a05d4",
+    "files": {
+      "workshop-results.xml": {
+        "size": 4614,
+        "sha256": "8a7b3f5692d9229c82080ba8abafb20e0ab18332be31a0c1eda044829d5a29a8",
+        "suites": [
+          {
+            "name": "pytest",
+            "time": "17.777",
+            "status": {
+              "tests": 35,
+              "errors": 0,
+              "failures": 0,
+              "skipped": 0
+            },
+            "suite_properties": [],
+            "cases": [
+              {
+                "case": "test_negotiated_catalog_identifies_the_frozen_manifest",
+                "class": "tests.test_catalog",
+                "properties": []
+              },
+              {
+                "case": "test_w000_and_populated_w001_upgrade_keeps_old_tokens_scoped",
+                "class": "tests.test_installation_ownership",
+                "properties": []
+              },
+              {
+                "case": "test_new_org_has_one_provisioning_installation",
+                "class": "tests.test_installation_ownership",
+                "properties": []
+              },
+              {
+                "case": "test_persistent_mailbox_after_stream_loss_and_sender_revocation",
+                "class": "tests.test_live_mailbox",
+                "properties": []
+              },
+              {
+                "case": "test_stored_origin_must_still_belong_to_the_active_installation[capability_only]",
+                "class": "tests.test_message_membership_origins",
+                "properties": []
+              },
+              {
+                "case": "test_stored_origin_must_still_belong_to_the_active_installation[foreign_installation]",
+                "class": "tests.test_message_membership_origins",
+                "properties": []
+              },
+              {
+                "case": "test_stored_origin_must_still_belong_to_the_active_installation[expired]",
+                "class": "tests.test_message_membership_origins",
+                "properties": []
+              },
+              {
+                "case": "test_revoked_recipient_binding_cannot_read_or_ack",
+                "class": "tests.test_message_membership_origins",
+                "properties": []
+              },
+              {
+                "case": "test_private_attachment_and_causation_failure_do_not_consume_the_final_use",
+                "class": "tests.test_message_membership_origins",
+                "properties": []
+              },
+              {
+                "case": "test_sender_credential_revoke_blocks_delivery_with_preserved_receipt",
+                "class": "tests.test_message_origins",
+                "properties": []
+              },
+              {
+                "case": "test_upgrade_from_w002_keeps_mail_without_inventing_an_origin",
+                "class": "tests.test_message_origins",
+                "properties": []
+              },
+              {
+                "case": "test_directed_routes_causation_body_and_durable_cursor",
+                "class": "tests.test_messaging",
+                "properties": []
+              },
+              {
+                "case": "test_grant_revocation_fences_inflight_body_and_ack",
+                "class": "tests.test_messaging",
+                "properties": []
+              },
+              {
+                "case": "test_departure_expiry_and_isolation",
+                "class": "tests.test_messaging",
+                "properties": []
+              },
+              {
+                "case": "test_concurrent_last_grant_use",
+                "class": "tests.test_messaging",
+                "properties": []
+              },
+              {
+                "case": "test_incident_whitelist_and_rate_limit",
+                "class": "tests.test_messaging",
+                "properties": []
+              },
+              {
+                "case": "test_default_edges_enforce_each_direction_and_message_type",
+                "class": "tests.test_messaging",
+                "properties": []
+              },
+              {
+                "case": "test_recover_pending_ack_and_rebuild_lost_stream",
+                "class": "tests.test_notifications",
+                "properties": []
+              },
+              {
+                "case": "test_postgres_mail_during_redis_outage_and_new_worker_processes",
+                "class": "tests.test_notifications",
+                "properties": []
+              },
+              {
+                "case": "test_frozen_presets_repeated_bootstrap[Minimal]",
+                "class": "tests.test_organization",
+                "properties": []
+              },
+              {
+                "case": "test_frozen_presets_repeated_bootstrap[Standard]",
+                "class": "tests.test_organization",
+                "properties": []
+              },
+              {
+                "case": "test_frozen_presets_repeated_bootstrap[Long-form]",
+                "class": "tests.test_organization",
+                "properties": []
+              },
+              {
+                "case": "test_frozen_presets_repeated_bootstrap[Research-Audit]",
+                "class": "tests.test_organization",
+                "properties": []
+              },
+              {
+                "case": "test_tenure_acl_history_and_reactivation",
+                "class": "tests.test_organization",
+                "properties": []
+              },
+              {
+                "case": "test_competing_hires_use_postgres_connections[True]",
+                "class": "tests.test_organization",
+                "properties": []
+              },
+              {
+                "case": "test_competing_hires_use_postgres_connections[False]",
+                "class": "tests.test_organization",
+                "properties": []
+              },
+              {
+                "case": "test_w002a_origin_hash_does_not_inherit_new_organization_membership",
+                "class": "tests.test_retained_w002a_message",
+                "properties": []
+              },
+              {
+                "case": "test_roster_privacy_and_persistent_public_names",
+                "class": "tests.test_roster_projection",
+                "properties": []
+              },
+              {
+                "case": "test_competing_employees_cannot_claim_one_active_slot",
+                "class": "tests.test_roster_projection",
+                "properties": []
+              },
+              {
+                "case": "test_existing_w001_directory_and_tenure_backfill",
+                "class": "tests.test_roster_projection",
+                "properties": []
+              },
+              {
+                "case": "test_complete_ordinary_message_matrix",
+                "class": "tests.test_routing_matrix",
+                "properties": []
+              },
+              {
+                "case": "test_binding_rejects_public_files_or_symlinks",
+                "class": "tests.test_stdio",
+                "properties": []
+              },
+              {
+                "case": "test_live_negotiation_scope_and_revocation",
+                "class": "tests.test_stdio",
+                "properties": []
+              },
+              {
+                "case": "test_hiring_tenure_and_restart_over_stdio",
+                "class": "tests.test_w1_stdio",
+                "properties": []
+              },
+              {
+                "case": "test_temporary_route_and_private_mail_are_scoped_over_stdio",
+                "class": "tests.test_w2_stdio",
+                "properties": []
+              }
+            ]
+          }
+        ]
+      },
+      "nf-tools.json": {
+        "size": 4240,
+        "sha256": "84db29b891df3884a04ec0e1cdf3b56ac7999edb69fdbe2060366b7d1a0313d4"
+      },
+      "nf-tools.xml": {
+        "size": 2285,
+        "sha256": "561a4d6fe8ea2f0d106cb2f28ab85c6ffa2f0e5e7d9647ee2c549cc9b9255462",
+        "suites": [
+          {
+            "name": "pytest",
+            "time": "17.633",
+            "status": {
+              "tests": 5,
+              "errors": 0,
+              "failures": 0,
+              "skipped": 0
+            },
+            "suite_properties": [
+              {
+                "name": "nf_discovery.resume_operator",
+                "value": "[\"nf_project_status\", \"nf_resume_project\"]"
+              },
+              {
+                "name": "nf_discovery.character_actor",
+                "value": "[\"nf_artifact_put\", \"nf_context_get\", \"nf_query_batch\", \"nf_task_get\"]"
+              },
+              {
+                "name": "nf_discovery.volume_review",
+                "value": "[\"nf_artifact_put\", \"nf_change_point_request\", \"nf_context_get\", \"nf_query_batch\"]"
+              },
+              {
+                "name": "nf_denials.volume_review",
+                "value": "{\"nf_change_point_review\": \"VIEW_DENIED\", \"nf_rolling_window_submit\": \"VIEW_DENIED\"}"
+              },
+              {
+                "name": "nf_discovery.replan",
+                "value": "[\"nf_artifact_put\", \"nf_context_get\", \"nf_query_batch\", \"nf_rolling_window_submit\"]"
+              },
+              {
+                "name": "nf_denials.replan",
+                "value": "{\"nf_change_point_request\": \"VIEW_DENIED\", \"nf_change_point_review\": \"VIEW_DENIED\"}"
+              },
+              {
+                "name": "nf_discovery.editorial_decision",
+                "value": "[\"nf_artifact_put\", \"nf_change_point_review\", \"nf_context_get\", \"nf_query_batch\", \"nf_task_get\"]"
+              },
+              {
+                "name": "nf_denials.editorial_decision",
+                "value": "{\"nf_change_point_request\": \"VIEW_DENIED\", \"nf_rolling_window_submit\": \"VIEW_DENIED\"}"
+              }
+            ],
+            "cases": [
+              {
+                "case": "test_project_stdio_resume_is_scoped_and_live",
+                "class": "tests.integration.test_p5_mcp",
+                "properties": []
+              },
+              {
+                "case": "test_operator_database_fences_apply_outside_mcp[expiry]",
+                "class": "tests.integration.test_p5_mcp",
+                "properties": []
+              },
+              {
+                "case": "test_operator_database_fences_apply_outside_mcp[policy]",
+                "class": "tests.integration.test_p5_mcp",
+                "properties": []
+              },
+              {
+                "case": "test_actor_stdio_own_cut_only_and_candidate_replay",
+                "class": "tests.integration.test_p5_mcp",
+                "properties": []
+              },
+              {
+                "case": "test_banquet_absence_pins_reference_and_limits_replanning",
+                "class": "tests.integration.test_p5_rolling",
+                "properties": []
+              }
+            ]
+          }
+        ]
+      },
+      "dual-service-results.xml": {
+        "size": 2686,
+        "sha256": "1ea1026859bb7374dc4f2ac4db9e552ad1f43d716919746eb4b6125134764503",
+        "suites": [
+          {
+            "name": "pytest",
+            "time": "4.365",
+            "status": {
+              "tests": 2,
+              "errors": 0,
+              "failures": 0,
+              "skipped": 0
+            },
+            "suite_properties": [],
+            "cases": [
+              {
+                "case": "test_separate_postgres_authorities",
+                "class": "workshop.acceptance.test_w0_dual_services",
+                "properties": [
+                  {
+                    "name": "nf_works.postgres_version",
+                    "value": "170011"
+                  },
+                  {
+                    "name": "nf_works.cross_database_login",
+                    "value": "denied"
+                  },
+                  {
+                    "name": "aw_installations.postgres_version",
+                    "value": "170011"
+                  },
+                  {
+                    "name": "aw_installations.cross_database_login",
+                    "value": "denied"
+                  }
+                ]
+              },
+              {
+                "case": "test_both_stdio_services_and_revoked_session",
+                "class": "workshop.acceptance.test_w0_dual_services",
+                "properties": [
+                  {
+                    "name": "NovelFactory.initialize",
+                    "value": "{\"server\": \"NovelFactory\", \"version\": \"2.1.0\", \"protocolVersion\": \"2025-11-25\"}"
+                  },
+                  {
+                    "name": "AgentWorkshop.initialize",
+                    "value": "{\"server\": \"AgentWorkshop\", \"version\": \"0.1.0\", \"protocolVersion\": \"2025-11-25\"}"
+                  },
+                  {
+                    "name": "nf.project_tools",
+                    "value": "[\"nf_project_status\", \"nf_resume_project\"]"
+                  },
+                  {
+                    "name": "aw.tools",
+                    "value": "[\"aw_capabilities\"]"
+                  },
+                  {
+                    "name": "aw.negotiation",
+                    "value": "{\"grant_epoch\": 1, \"installation_id\": \"d51aa4a6584442d092ee5617f39d153d\", \"max_argument_bytes\": 32768, \"max_ttl_seconds\": 86400, \"nf_commit\": \"df1e0cc904e3b94a360d86e3a3e00bfec3258673\", \"nf_instance_id\": \"nf-d51aa4a6584442d092ee5617f39d153d\", \"protocol_version\": \"aw-nf.v1\", \"role_catalog_hash\": \"5477dd96125081665d0ff545d26b0487f949b12b34e3d81cc0f4e811be276bef\", \"skill_catalog_hash\": \"c9036422791a0319312367db4fc1e554d0e2bf5b27387d41a6efbedc428e70db\"}"
+                  },
+                  {
+                    "name": "cross_service.aw_capabilities",
+                    "value": "VIEW_DENIED"
+                  },
+                  {
+                    "name": "cross_service.nf_project_status",
+                    "value": "VIEW_DENIED"
+                  },
+                  {
+                    "name": "AgentWorkshop.initialize",
+                    "value": "{\"server\": \"AgentWorkshop\", \"version\": \"0.1.0\", \"protocolVersion\": \"2025-11-25\"}"
+                  },
+                  {
+                    "name": "AgentWorkshop.initialize",
+                    "value": "{\"server\": \"AgentWorkshop\", \"version\": \"0.1.0\", \"protocolVersion\": \"2025-11-25\"}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "w1-legacy-upgrade.xml": {
+        "size": 620,
+        "sha256": "7689781f2330df0e82d7d495b0801190449f661c5c10831aa10d55daab948339",
+        "suites": [
+          {
+            "name": "pytest",
+            "time": "4.343",
+            "status": {
+              "tests": 1,
+              "errors": 0,
+              "failures": 0,
+              "skipped": 0
+            },
+            "suite_properties": [],
+            "cases": [
+              {
+                "case": "test_w0_binding_survives_upgrade_without_acquiring_membership",
+                "class": "acceptance.test_w1_historical_upgrade",
+                "properties": [
+                  {
+                    "name": "archived_w0_sha",
+                    "value": "c4939e24b6b5501d82127f528f2054e9c1992856"
+                  },
+                  {
+                    "name": "upgraded_revision",
+                    "value": "w002c"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "routing-matrix.json": {
+        "size": 16391,
+        "sha256": "107c7e3ca832c5cad8acaa6f9f5f1a3a38faf71dae514e09404e1b3673475a20"
+      },
+      "w2-legacy-upgrades.xml": {
+        "size": 1916,
+        "sha256": "0685df764c87f26ea118f6de6675ccbaa691f7a8f63260b15392e0820073bf24",
+        "suites": [
+          {
+            "name": "pytest",
+            "time": "7.364",
+            "status": {
+              "tests": 2,
+              "errors": 0,
+              "failures": 0,
+              "skipped": 0
+            },
+            "suite_properties": [],
+            "cases": [
+              {
+                "case": "test_upgrade_historical_service[released-w1]",
+                "class": "acceptance.test_w2_historical_upgrades",
+                "properties": [
+                  {
+                    "name": "source_sha",
+                    "value": "d039839fe68f6403ea6e5590af3ed787318d5b5f"
+                  },
+                  {
+                    "name": "starting_revision",
+                    "value": "w001b"
+                  },
+                  {
+                    "name": "ending_revision",
+                    "value": "w002c"
+                  },
+                  {
+                    "name": "preserved_table_row_counts",
+                    "value": "{\"aw_bindings\": 1, \"aw_edges\": 66, \"aw_employees\": 11, \"aw_employment_versions\": 11, \"aw_installations\": 1, \"aw_org_operations\": 0, \"aw_org_revisions\": 1, \"aw_organizations\": 1}"
+                  }
+                ]
+              },
+              {
+                "case": "test_upgrade_historical_service[historical-w2]",
+                "class": "acceptance.test_w2_historical_upgrades",
+                "properties": [
+                  {
+                    "name": "source_sha",
+                    "value": "0da5b7c8fab5321fa50d2a04a516f3fd95432539"
+                  },
+                  {
+                    "name": "starting_revision",
+                    "value": "w002"
+                  },
+                  {
+                    "name": "ending_revision",
+                    "value": "w002c"
+                  },
+                  {
+                    "name": "preserved_table_row_counts",
+                    "value": "{\"aw_bindings\": 2, \"aw_deliveries\": 1, \"aw_edges\": 66, \"aw_employees\": 11, \"aw_employment_versions\": 11, \"aw_inbox\": 0, \"aw_installations\": 1, \"aw_mailboxes\": 1, \"aw_message_bodies\": 1, \"aw_message_operations\": 2, \"aw_messages\": 1, \"aw_org_operations\": 0, \"aw_org_revisions\": 1, \"aw_organizations\": 1, \"aw_outbox\": 1, \"aw_route_grants\": 0}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "w2-transport.json": {
+        "size": 178,
+        "sha256": "601bbd93526649ec724794596f8887a1bc6be3c0b0c3ff03c14c4cefa65b5c0d"
+      }
+    }
+  },
+  "nf-bridge-results": {
+    "id": 13884287722,
+    "zip_sha256": "79ca6f709cdd164a4eac59c718dac275daa80a72f9d7fc059d76d518495b7a9c",
+    "files": {
+      "dual-service.xml": {
+        "size": 2073,
+        "sha256": "423c21cd2f393c7ee62a01f1d44ce4dd67e80e7843bfac077f15b0eeb5545015",
+        "suites": [
+          {
+            "name": "pytest",
+            "time": "10.036",
+            "status": {
+              "tests": 1,
+              "errors": 0,
+              "failures": 0,
+              "skipped": 0
+            },
+            "suite_properties": [],
+            "cases": [
+              {
+                "case": "test_two_live_profiles_bind_one_operation_to_its_nf_installation",
+                "class": "workshop.acceptance.test_nf_bridge_stdio",
+                "properties": [
+                  {
+                    "name": "NovelFactory.Delegation.initialize",
+                    "value": "{\"server\": \"NovelFactory.Delegation\", \"version\": \"1.0\", \"protocolVersion\": \"2025-11-25\"}"
+                  },
+                  {
+                    "name": "AgentWorkshop.initialize",
+                    "value": "{\"server\": \"AgentWorkshop\", \"version\": \"0.1.0\", \"protocolVersion\": \"2025-11-25\"}"
+                  },
+                  {
+                    "name": "AgentWorkshop.initialize",
+                    "value": "{\"server\": \"AgentWorkshop\", \"version\": \"0.1.0\", \"protocolVersion\": \"2025-11-25\"}"
+                  },
+                  {
+                    "name": "NovelFactory.Delegation.initialize",
+                    "value": "{\"server\": \"NovelFactory.Delegation\", \"version\": \"1.0\", \"protocolVersion\": \"2025-11-25\"}"
+                  },
+                  {
+                    "name": "NovelFactory.Delegation.initialize",
+                    "value": "{\"server\": \"NovelFactory.Delegation\", \"version\": \"1.0\", \"protocolVersion\": \"2025-11-25\"}"
+                  },
+                  {
+                    "name": "NovelFactory.Delegation.initialize",
+                    "value": "{\"server\": \"NovelFactory.Delegation\", \"version\": \"1.0\", \"protocolVersion\": \"2025-11-25\"}"
+                  },
+                  {
+                    "name": "bridge.operation",
+                    "value": "{\"accounting_state\": \"NO_ATTEMPT\", \"generation\": 0, \"operation_id\": \"0851af04-3b9d-451f-a421-b5ecb8e8c255\", \"receipt_ref\": \"12470d3c-358e-45fa-bce3-0af95c745e4e\", \"task_id\": \"6f2f54e9-7bf3-4de4-be80-1d4f8c0a15a4\"}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "nf-delegation.xml": {
+        "size": 4457,
+        "sha256": "3ca83175d121f71077105e6687329fb91d6a757fdd46e2639e14169ddcc53e25",
+        "suites": [
+          {
+            "name": "pytest",
+            "time": "24.285",
+            "status": {
+              "tests": 18,
+              "errors": 0,
+              "failures": 0,
+              "skipped": 0
+            },
+            "suite_properties": [
+              {
+                "name": "bridge.upgrade_from_commit",
+                "value": "f2c584ec8e738e09d31b05ddd5c032bb2b8f96b1"
+              },
+              {
+                "name": "bridge.previous_table_count",
+                "value": "67"
+              }
+            ],
+            "cases": [
+              {
+                "case": "test_stdio_receipt_survives_lost_reply_and_supervisor_execution",
+                "class": "tests.integration.test_workshop_delegation",
+                "properties": []
+              },
+              {
+                "case": "test_atomic_rejection_concurrent_replay_and_revocation",
+                "class": "tests.integration.test_workshop_delegation",
+                "properties": []
+              },
+              {
+                "case": "test_restored_installation_requires_partner_reconciliation",
+                "class": "tests.integration.test_workshop_delegation",
+                "properties": []
+              },
+              {
+                "case": "test_receipt_match_cannot_unlock_missing_attempt_or_resume_model",
+                "class": "tests.integration.test_workshop_delegation",
+                "properties": []
+              },
+              {
+                "case": "test_current_delegation_authority_fences_new_model_spend[expiry-reserve_call]",
+                "class": "tests.integration.test_workshop_delegation",
+                "properties": []
+              },
+              {
+                "case": "test_current_delegation_authority_fences_new_model_spend[expiry-mark_call_sent]",
+                "class": "tests.integration.test_workshop_delegation",
+                "properties": []
+              },
+              {
+                "case": "test_current_delegation_authority_fences_new_model_spend[policy-reserve_call]",
+                "class": "tests.integration.test_workshop_delegation",
+                "properties": []
+              },
+              {
+                "case": "test_current_delegation_authority_fences_new_model_spend[policy-mark_call_sent]",
+                "class": "tests.integration.test_workshop_delegation",
+                "properties": []
+              },
+              {
+                "case": "test_current_delegation_authority_fences_new_model_spend[slot_revocation-reserve_call]",
+                "class": "tests.integration.test_workshop_delegation",
+                "properties": []
+              },
+              {
+                "case": "test_current_delegation_authority_fences_new_model_spend[slot_revocation-mark_call_sent]",
+                "class": "tests.integration.test_workshop_delegation",
+                "properties": []
+              },
+              {
+                "case": "test_expiry_allows_settling_an_existing_unknown_invoice",
+                "class": "tests.integration.test_workshop_delegation",
+                "properties": []
+              },
+              {
+                "case": "test_two_installations_can_use_the_same_operation_and_hold",
+                "class": "tests.integration.test_workshop_delegation",
+                "properties": []
+              },
+              {
+                "case": "test_expiry_while_dispatch_authorization_waits_keeps_attempt_unsent",
+                "class": "tests.integration.test_workshop_delegation",
+                "properties": []
+              },
+              {
+                "case": "test_installation_revoke_racing_model_spend_has_one_lock_order[reserve_call]",
+                "class": "tests.integration.test_workshop_delegation",
+                "properties": []
+              },
+              {
+                "case": "test_installation_revoke_racing_model_spend_has_one_lock_order[mark_call_sent]",
+                "class": "tests.integration.test_workshop_delegation",
+                "properties": []
+              },
+              {
+                "case": "test_denied_accounting_caller_cannot_distinguish_missing_from_expired",
+                "class": "tests.integration.test_workshop_delegation",
+                "properties": []
+              },
+              {
+                "case": "test_only_current_delegation_generation_reports_dependency_conflict",
+                "class": "tests.integration.test_workshop_delegation_progress",
+                "properties": []
+              },
+              {
+                "case": "test_released_world_survives_bridge_upgrade_and_guarded_downgrade",
+                "class": "tests.integration.test_workshop_delegation_upgrade",
+                "properties": []
+              }
+            ]
+          }
+        ]
+      },
+      "checkout.txt": {
+        "size": 184,
+        "sha256": "b5fbc99ed93eb2d105f7126b7ae4a5e38985be568fc0cc8e586cf88ee93f89d1",
+        "text": "commit=dff58688fdb1f931a5906f885ed513ed12134026\ntree=788dc4b190299894509593a23982452f0362f9ef\nparents=f2c584ec8e738e09d31b05ddd5c032bb2b8f96b1 695668b87f6a76acbe7e27c71fcb259b7b3f0795\n"
+      }
+    }
+  }
+}
