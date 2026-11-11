@@ -9,6 +9,7 @@ from __future__ import annotations
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 from collections import OrderedDict, deque
 from copy import deepcopy
+import json
 import threading
 from uuid import UUID, uuid4, uuid5
 
@@ -41,6 +42,19 @@ def _dedupe(values):
 
 def _wr(revision):
     return {key: revision[key] for key in ('work_id', 'branch_id', 'world_revision_id')}
+
+
+class PreparedWorldQuery(bytes):
+    """Immutable JSON produced only after applying the public request contract."""
+
+    __slots__ = ()
+
+    def __new__(cls, request):
+        value = validate_contract('UnifiedQueryRequest', request, '2.1')
+        return super().__new__(cls, json.dumps(value, separators=(',', ':'), allow_nan=False).encode('ascii'))
+
+    def materialize(self):
+        return json.loads(self)
 
 
 class WorldQueryService:
@@ -502,7 +516,10 @@ class WorldQueryService:
         return payload, 'CURRENT', handle
 
     def query(self, principal, request):
-        request = validate_contract('UnifiedQueryRequest', request, '2.1')
+        if type(request) is PreparedWorldQuery:
+            request = request.materialize()
+        else:
+            request = validate_contract('UnifiedQueryRequest', request, '2.1')
         cursor = self._cursor(principal, request)
         packet = self._sample(principal, request, cursor=cursor); packet['principal'] = principal
         key = fingerprint({'request': request, 'world_ref': packet['read_cut']['world_ref'],

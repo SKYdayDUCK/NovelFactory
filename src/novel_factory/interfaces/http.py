@@ -171,7 +171,7 @@ def _strict_object(pairs):
     return result
 
 
-async def _body(request: Request, contract: str, version: str) -> dict:
+async def _json_body(request: Request):
     if request.headers.get("content-type", "").split(";", 1)[0].lower() != "application/json":
         raise DomainError("UNSUPPORTED_MEDIA_TYPE", "Content-Type must be application/json")
     try:
@@ -179,7 +179,11 @@ async def _body(request: Request, contract: str, version: str) -> dict:
                            parse_constant=lambda value: (_ for _ in ()).throw(ValueError("non-finite number")))
     except (ValueError, UnicodeError, RecursionError):
         raise DomainError("INVALID_ARGUMENT", "Request body must be valid JSON") from None
-    return validate_contract(contract, value, version)
+    return value
+
+
+async def _body(request: Request, contract: str, version: str) -> dict:
+    return validate_contract(contract, await _json_body(request), version)
 
 
 async def _finish_short_call(function, *args):
@@ -208,8 +212,8 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
         raise ValueError("declared API pool budget differs from actual SQLAlchemy pool")
     if pool_size < 2:
         raise ValueError("HTTP needs at least two pool slots for auth and operations")
+    from novel_factory.application.queries import PreparedWorldQuery, WorldQueryService
     if query_service is None:
-        from novel_factory.application.queries import WorldQueryService
         query_service = WorldQueryService(kernel)
     auth_capacity = min(2, pool_size - 1)
     operation_capacity = pool_size - auth_capacity
@@ -286,7 +290,12 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
 
     @app.post("/api/v1/queries/timeline")
     async def query(request: Request):
-        payload = await _body(request, "UnifiedQueryRequest", "2.1")
+        value = await _json_body(request)
+        if type(query_service) is WorldQueryService:
+            payload = PreparedWorldQuery(value)
+        else:
+            # Existing custom query services receive their validated, mutable dictionary.
+            payload = validate_contract("UnifiedQueryRequest", value, "2.1")
         return await execute(request, "query", lambda principal: query_service.query(principal, payload))
 
     @app.post("/api/v1/queries/batch")
