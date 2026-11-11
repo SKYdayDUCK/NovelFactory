@@ -8,6 +8,7 @@ from contextlib import ExitStack
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import signal
 import socket
@@ -115,8 +116,6 @@ approval_mode = "approve"
         "HOME": str(base / "home"), "CODEX_HOME": str(base / "codex"), "PATH": os.defpath,
         "XDG_RUNTIME_DIR": str(base / "run"), "DISPLAY": os.environ["DISPLAY"],
         "XAUTHORITY": os.environ["XAUTHORITY"], "LANG": "C.UTF-8", "NO_PROXY": "*",
-        **({"CHROME_DEVEL_SANDBOX": os.environ["CHROME_DEVEL_SANDBOX"]}
-           if "CHROME_DEVEL_SANDBOX" in os.environ else {}),
     }
 
 
@@ -145,6 +144,30 @@ def terminate(process):
     except subprocess.TimeoutExpired:
         os.killpg(process.pid, signal.SIGKILL)
         process.wait(timeout=5)
+
+
+def startup_diagnostics(base, desktop, helper):
+    # Retain fixed categories only. Chromium and the extension may log private paths or payloads.
+    raw = (base / "desktop.log").read_text(errors="replace").lower()
+    patterns = {
+        "sandbox_helper_permissions": r"suid sandbox helper binary|owned by root and has mode 4755",
+        "namespace_permission": r"failed to move to new namespace|namespace sandbox.*not permitted",
+        "no_usable_sandbox": r"no usable sandbox|no supported sandbox",
+        "zygote_failure": r"fatal.*zygote|zygote.*failed",
+        "missing_x_server": r"missing x server|cannot open display|unable to open x display",
+        "x_authorization": r"authorization required|invalid mit-magic-cookie",
+        "shared_library_missing": r"error while loading shared libraries",
+        "shared_memory_failure": r"unable to access.*dev/shm|no space left on device",
+        "profile_lock": r"processsingleton|failed to create.*singleton",
+        "crashpad_failure": r"crashpad.*(failed|required|denied)",
+        "debug_listener_started": r"devtools listening",
+        "address_in_use": r"address already in use",
+        "fatal": r"fatal[:\]]",
+    }
+    meta = helper.stat()
+    return {"exit_code": desktop.poll(), "adjacent_sandbox_mode": oct(meta.st_mode & 0o7777),
+            "adjacent_sandbox_uid": meta.st_uid,
+            "stderr_markers": [key for key, pattern in patterns.items() if re.search(pattern, raw)]}
 
 
 def exercise(base, desktop, cdp_port, evidence):
@@ -308,11 +331,13 @@ def main():
             with socket.socket() as free_port:
                 free_port.bind(("127.0.0.1", 0))
                 cdp_port = free_port.getsockname()[1]
+            desktop_log = stack.enter_context((base / "desktop.log").open("wb"))
             desktop = subprocess.Popen(
                 [args.desktop / "code", *dirs, "--disable-gpu", "--password-store=basic",
-                 "--disable-updates", "--disable-crash-reporter", f"--remote-debugging-port={cdp_port}",
+                 "--disable-updates", "--disable-crash-reporter", "--enable-logging=stderr",
+                 f"--remote-debugging-port={cdp_port}",
                  "--remote-debugging-address=127.0.0.1", "--skip-welcome", base / "project"],
-                env=env, cwd=base, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                env=env, cwd=base, stdout=desktop_log, stderr=subprocess.STDOUT,
                 start_new_session=True,
             )
             stack.callback(terminate, desktop)
@@ -321,6 +346,8 @@ def main():
                 evidence["stage"] = "verify_postgres_and_mcp"
                 verify(base, sample, evidence)
             finally:
+                evidence["desktop_startup"] = startup_diagnostics(
+                    base, desktop, args.desktop / "chrome-sandbox")
                 evidence["stdio_by_connection"] = observations(base)
         evidence.update(status="PASS", stage="complete")
     except Exception as exc:
@@ -331,7 +358,8 @@ def main():
     finally:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + "\n")
-        print(json.dumps({k: evidence[k] for k in ("status", "stage")}), flush=True)
+        print(json.dumps({k: evidence[k] for k in ("status", "stage", "desktop_startup")
+                          if k in evidence}), flush=True)
 
 
 if __name__ == "__main__":

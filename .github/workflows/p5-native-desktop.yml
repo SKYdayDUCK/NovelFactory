@@ -42,7 +42,13 @@ jobs:
           cd "$assets"
           curl -fLSs --retry 3 --max-time 300 'https://update.code.visualstudio.com/1.145.3/linux-x64/stable' -o desktop.tgz
           echo '567e067c3ce043605af1b466e916173193100cf8c7da911b85e4c5c0869fe621  desktop.tgz' | sha256sum --check
-          tar -xzf desktop.tgz
+          sudo install -d -o root -g root -m 0755 /opt/nf-vscode
+          sudo tar --no-same-owner --no-same-permissions -xzf desktop.tgz -C /opt/nf-vscode
+          # Electron selects its adjacent helper before any system fallback.
+          helper=/opt/nf-vscode/VSCode-linux-x64/chrome-sandbox
+          sudo chown root:root "$helper"
+          sudo chmod 4755 "$helper"
+          test "$(stat -c '%u:%g:%a' "$helper")" = '0:0:4755'
           curl -fLSs --retry 3 --max-time 300 'https://marketplace.visualstudio.com/_apis/public/gallery/publishers/openai/vsextensions/chatgpt/26.51106.51428/vspackage?targetPlatform=linux-x64' -o marketplace.bin
           if gzip -t marketplace.bin 2>/dev/null; then
             gzip -dc marketplace.bin > codex.vsix
@@ -50,8 +56,6 @@ jobs:
             mv marketplace.bin codex.vsix
           fi
           echo '4af1f59f7d8a0145943c2ec583e0bf09a495c258304d113052e74cbaeb73d6f6  codex.vsix' | sha256sum --check
-          # The native Electron sandbox helper requires a root-owned setuid install on Ubuntu.
-          sudo install -o root -g root -m 4755 VSCode-linux-x64/chrome-sandbox /usr/local/sbin/nf-desktop-sandbox
       - name: Send two Chinese prompts in the ordinary-user desktop with only loopback
         shell: bash
         timeout-minutes: 7
@@ -63,11 +67,11 @@ jobs:
             ip link set lo up
             exec setpriv --reuid="$1" --regid="$2" --init-groups env -i \
               HOME="$3" PATH=/usr/local/bin:/usr/bin:/bin LANG=C.UTF-8 \
-              CHROME_DEVEL_SANDBOX=/usr/local/sbin/nf-desktop-sandbox PG_BIN=/usr/lib/postgresql/17/bin \
+              PG_BIN=/usr/lib/postgresql/17/bin \
               xvfb-run --auto-servernum --server-args="-screen 0 1680x1100x24 -nolisten tcp" \
               "$4/.venv/bin/python" "$4/scripts/with_postgres.py" --migrate -- \
               "$4/.venv/bin/python" "$4/scripts/probe_vscode_desktop.py" \
-              --desktop "$5/VSCode-linux-x64" --vsix "$5/codex.vsix" \
+              --desktop /opt/nf-vscode/VSCode-linux-x64 --vsix "$5/codex.vsix" \
               --output "$4/ci-evidence/p5-desktop/native.json"
           ' _ "$(id -u)" "$(id -g)" "$HOME" "$GITHUB_WORKSPACE" "$assets"
       - name: Publish filtered UI and MCP evidence
