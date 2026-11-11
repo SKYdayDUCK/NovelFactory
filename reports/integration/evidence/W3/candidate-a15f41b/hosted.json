@@ -1,0 +1,54 @@
+{
+  "stage": "W3",
+  "source": "GitHub Actions",
+  "head": "a15f41b40ed4a0cd4716e7335954ec0a1c5efadf",
+  "expected_tree": "7edb5550e8cbe3c1feb70ff8baa0c79974cf8155",
+  "event": "pull_request",
+  "jobs": [
+    {
+      "id": 130759776341,
+      "name": "workshop",
+      "started_at": "2026-11-11T19:36:06Z",
+      "completed_at": "2026-11-11T19:39:17Z",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43088713932/job/130759776341"
+    },
+    {
+      "id": 130759773179,
+      "name": "PostgreSQL 17 integration, concurrency and restore",
+      "started_at": "2026-11-11T19:36:06Z",
+      "completed_at": null,
+      "status": "in_progress",
+      "conclusion": null,
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43088712892/job/130759773179"
+    },
+    {
+      "id": 130759773739,
+      "name": "Schema, domain, HTTP and production boundaries",
+      "started_at": "2026-11-11T19:36:06Z",
+      "completed_at": "2026-11-11T19:36:54Z",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43088712892/job/130759773739"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 13888475479,
+      "name": "nf-bridge-results",
+      "size": 1983,
+      "digest": "sha256:ad87af5ff473349b0e764b329fa8e5ad4308e9838e70e0c61f1d99d599b743c7",
+      "expires_at": "2027-02-09T19:36:04Z",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43088713932/artifacts/13888475479"
+    },
+    {
+      "id": 13887342609,
+      "name": "workshop-results",
+      "size": 9667,
+      "digest": "sha256:ca21c8d138bb3352070c5ffa74398a76ecee9858710d143dbfdbf12977d568ca",
+      "expires_at": "2027-02-09T19:36:04Z",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43088713932/artifacts/13887342609"
+    }
+  ]
+}
