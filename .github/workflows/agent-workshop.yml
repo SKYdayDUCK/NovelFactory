@@ -62,13 +62,20 @@ jobs:
       - name: Exercise installed wheel and packaged migrations
         if: matrix.suite == 'original'
         run: |
-          uv build --wheel
-          uv venv "$RUNNER_TEMP/aw-wheel"
-          uv pip install --python "$RUNNER_TEMP/aw-wheel/bin/python" --no-deps dist/*.whl
-          # Use the isolated locked dependencies; prefer wheel modules to the checkout.
-          installed=$("$RUNNER_TEMP/aw-wheel/bin/python" -c 'import site;print(site.getsitepackages()[0])')
-          PYTHONPATH="$installed" .venv/bin/python -m agent_workshop.migrate upgrade
-          PYTHONPATH="$installed" .venv/bin/python -m agent_workshop.migrate current
+          wheel_root=$(mktemp -d "$RUNNER_TEMP/aw-installed.XXXXXX")
+          uv build --wheel --out-dir "$wheel_root/dist"
+          uv export --locked --no-dev --extra streams --no-emit-project --format requirements-txt --output-file "$wheel_root/requirements.txt" >/dev/null
+          uv venv "$wheel_root/venv"
+          py="$wheel_root/venv/bin/python"
+          uv pip sync --python "$py" --require-hashes "$wheel_root/requirements.txt"
+          wheels=("$wheel_root"/dist/*.whl)
+          test "${#wheels[@]}" = 1
+          uv pip install --python "$py" --no-deps "${wheels[0]}"
+          mkdir -p "$GITHUB_WORKSPACE/workshop/ci-evidence"
+          cd "$wheel_root"
+          "$py" -I "$GITHUB_WORKSPACE/workshop/scripts/verify_installed_wheel.py" \
+            --manifest "$GITHUB_WORKSPACE/workshop/contracts/nf-catalog.json" \
+            --wheel "${wheels[0]}" | tee "$GITHUB_WORKSPACE/workshop/ci-evidence/installed-wheel.json"
       - if: matrix.suite == 'original'
         run: uv run --locked --extra streams pytest -q --junitxml=workshop-results.xml
       - name: Measure message delivery and rebuild each isolated Redis stream
