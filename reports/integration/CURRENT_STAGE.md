@@ -1,5 +1,5 @@
 # 当前唯一阶段
 
-Workshop W3 已于 2026-11-11T19:53:57Z 通过 [#10](https://github.com/SKYdayDUCK/NovelFactory/pull/10) 合并。状态 `MERGED_AWAITING_MAIN_VERIFICATION`。当前 `main` 为 `e6763d844f023d7c6a13060dbaebca0416fe3099`，候选 `a15f41b40ed4a0cd4716e7335954ec0a1c5efadf`，同树 `7edb5550e8cbe3c1feb70ff8baa0c79974cf8155`。本阶段范围为受限委托、交接、账本、故障恢复与真实双服务；[精确合并证据](evidence/W3/main-e6763d8/merge.json)。
+Workshop W4 [#12](https://github.com/SKYdayDUCK/NovelFactory/pull/12)。启动时远端既有分支 `dev/aw-w4`、头 `71b471416c9407e348d4bdce817588def5f11d5b`、原目标 `dev/aw-w3`。正式集成以最新 `main` 为目标。已签收的基线为 [W3 `e6763d844f023d7c6a13060dbaebca0416fe3099`](W3_主线签收.md)。
 
-候选托管专项 93/93、工程单元 398/398、PostgreSQL 817 通过及 17 项宿主跳过，本地双库 36/36 与 Linux 角色 17/17。按实际合并 SHA 在两个干净检出重跑，再验证 [主线 Workshop 工作流](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43091453200) 及 [主线工程完整性](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43091453166)。W4 尚未放行。
+复用 W4 的技能版本与五类共享、七种审核模式，核验权限回避、版本冻结、配额和历史库升级。先厘清旧堆叠、按当前阶段精确运行真实门禁，通过正常 PR 合并，复验 main 并存档。其他阶段继续冻结。

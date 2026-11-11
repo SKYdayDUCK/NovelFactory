@@ -1,6 +1,10 @@
 # 恢复入口
 
-当前仅 [W3 #10](https://github.com/SKYdayDUCK/NovelFactory/pull/10)。先核 GitHub 最新 main/heads、PR 目标和 CI；对照 [当前阶段](CURRENT_STAGE.md)、[交付台账](DELIVERY_LEDGER.md)、[矩阵](PR_MERGE_MATRIX.md)、[已知失败](KNOWN_FAILURES.md)。NF Bridge 已在 `15f606c99c765deeffd904ad540441eb6476b3af` 签收，真实 WAL/角色/负载原件见 [签收](NF_Bridge_主线签收.md)。保留全部原提交，禁止强推和跳门禁。
+Workshop W4 [#12](https://github.com/SKYdayDUCK/NovelFactory/pull/12)。启动时远端既有分支 `dev/aw-w4`、头 `71b471416c9407e348d4bdce817588def5f11d5b`、原目标 `dev/aw-w3`。正式集成以最新 `main` 为目标。已签收的基线为 [W3 `e6763d844f023d7c6a13060dbaebca0416fe3099`](W3_主线签收.md)。
+
+复用 W4 的技能版本与五类共享、七种审核模式，核验权限回避、版本冻结、配额和历史库升级。先厘清旧堆叠、按当前阶段精确运行真实门禁，通过正常 PR 合并，复验 main 并存档。其他阶段继续冻结。
+
+[交付台账](DELIVERY_LEDGER.md) · [完整矩阵](PR_MERGE_MATRIX.md) · [已知限制](KNOWN_FAILURES.md)。
 
 ## 后续串行交付顺序
 
