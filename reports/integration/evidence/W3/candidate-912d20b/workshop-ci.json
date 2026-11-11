@@ -1,0 +1,197 @@
+{
+  "phase": "candidate_workshop_ci",
+  "tested_sha": "912d20b5f42cb39b0955e5015ac13cec182c75fe",
+  "tree": "b49d1c054a78ae06bcb92354c094d6171707b9ea",
+  "checkout": "6330f7e94ad5522348274be89674f399e6ff9d5f",
+  "parents": [
+    "15f606c99c765deeffd904ad540441eb6476b3af",
+    "912d20b5f42cb39b0955e5015ac13cec182c75fe"
+  ],
+  "checkout_log": [
+    "2026-11-11T19:32:30.0801154Z HEAD is now at 6330f7e Merge 912d20b5f42cb39b0955e5015ac13cec182c75fe into 15f606c99c765deeffd904ad540441eb6476b3af\n2026-11-11T19:32:30.0832381Z ##[endgroup]",
+    "2026-11-11T19:32:30.0892374Z [command]/usr/bin/git log -1 --format=%H\n2026-11-11T19:32:30.0929595Z 6330f7e94ad5522348274be89674f399e6ff9d5f"
+  ],
+  "runs": [
+    {
+      "name": "Agent Workshop PostgreSQL and stdio",
+      "id": 43088086899,
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "job": {
+        "id": 130757630341,
+        "name": "workshop",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 43088086899,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Initialize containers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Install both locked projects",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Verify the frozen NF contracts against the checked-out runtime",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Provision separate service identities and databases",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Migrate the two service databases",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Check delegated calls, recovery and the released NF database upgrade",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Check the limited NF interface beside the live Workshop service",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11
+          },
+          {
+            "name": "Run Workshop contracts and stdio permissions",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12
+          },
+          {
+            "name": "Upgrade the released W0 service and verify existing bindings",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13
+          },
+          {
+            "name": "Upgrade previously deployed W1 and W2 databases",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14
+          },
+          {
+            "name": "Upgrade existing W3 queues, preserve all historical rows and reconcile accepted NF work",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15
+          },
+          {
+            "name": "Check the nine granted NF tools over live stdio",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16
+          },
+          {
+            "name": "Verify both live services and database isolation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17
+          },
+          {
+            "name": "Verify dual-ledger recovery on the integrated NF source and native PG17",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20
+          },
+          {
+            "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 37
+          },
+          {
+            "name": "Post Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 38
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 39
+          },
+          {
+            "name": "Stop containers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 40
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 41
+          }
+        ]
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "nf-bridge-results",
+      "id": 13887452008,
+      "digest": "sha256:77df8790f9a57ebaa2abc802e001594d2c761e8ff8f11bc2569cedf1218503ea",
+      "size_in_bytes": 1967
+    },
+    {
+      "name": "workshop-results",
+      "id": 13887217139,
+      "digest": "sha256:6ebba7e912f38349a73d997ef3002ca09a63018ddef6d353d25c8dc4e5c21e8a",
+      "size_in_bytes": 8885
+    }
+  ]
+}
