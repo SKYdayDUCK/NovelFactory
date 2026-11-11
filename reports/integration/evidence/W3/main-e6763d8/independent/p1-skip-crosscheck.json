@@ -1,0 +1,126 @@
+{
+  "hosted": {
+    "unit.xml": {
+      "tests": 398,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "postgres-all.xml": {
+      "tests": 834,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 17
+    }
+  },
+  "local_matching_ids": [
+    {
+      "classname": "tests.integration.test_p5_actor_tool_choice",
+      "name": "test_model_selects_scoped_lookup_before_final_candidate[budget-prevents-final-states5]",
+      "hosted_skip_reason": "Linux container setup denied by this runner",
+      "independent_result": "PASS"
+    },
+    {
+      "classname": "tests.integration.test_p5_actor_tool_choice",
+      "name": "test_model_selects_scoped_lookup_before_final_candidate[concurrent-reentry-states3]",
+      "hosted_skip_reason": "Linux container setup denied by this runner",
+      "independent_result": "PASS"
+    },
+    {
+      "classname": "tests.integration.test_p5_actor_tool_choice",
+      "name": "test_model_selects_scoped_lookup_before_final_candidate[invalid-uuid-states6]",
+      "hosted_skip_reason": "Linux container setup denied by this runner",
+      "independent_result": "PASS"
+    },
+    {
+      "classname": "tests.integration.test_p5_actor_tool_choice",
+      "name": "test_model_selects_scoped_lookup_before_final_candidate[out-of-scope-states2]",
+      "hosted_skip_reason": "Linux container setup denied by this runner",
+      "independent_result": "PASS"
+    },
+    {
+      "classname": "tests.integration.test_p5_actor_tool_choice",
+      "name": "test_model_selects_scoped_lookup_before_final_candidate[over-token-cap-states8]",
+      "hosted_skip_reason": "Linux container setup denied by this runner",
+      "independent_result": "PASS"
+    },
+    {
+      "classname": "tests.integration.test_p5_actor_tool_choice",
+      "name": "test_model_selects_scoped_lookup_before_final_candidate[oversized-choice-states7]",
+      "hosted_skip_reason": "Linux container setup denied by this runner",
+      "independent_result": "PASS"
+    },
+    {
+      "classname": "tests.integration.test_p5_actor_tool_choice",
+      "name": "test_model_selects_scoped_lookup_before_final_candidate[read-states0]",
+      "hosted_skip_reason": "Linux container setup denied by this runner",
+      "independent_result": "PASS"
+    },
+    {
+      "classname": "tests.integration.test_p5_actor_tool_choice",
+      "name": "test_model_selects_scoped_lookup_before_final_candidate[resume-after-choice-states1]",
+      "hosted_skip_reason": "Linux container setup denied by this runner",
+      "independent_result": "PASS"
+    },
+    {
+      "classname": "tests.integration.test_p5_actor_tool_choice",
+      "name": "test_model_selects_scoped_lookup_before_final_candidate[revoke-observation-states4]",
+      "hosted_skip_reason": "Linux container setup denied by this runner",
+      "independent_result": "PASS"
+    },
+    {
+      "classname": "tests.integration.test_p5_actor_tool_choice",
+      "name": "test_model_selects_scoped_lookup_before_final_candidate[skip-states9]",
+      "hosted_skip_reason": "Linux container setup denied by this runner",
+      "independent_result": "PASS"
+    },
+    {
+      "classname": "tests.integration.test_p5_actor_tool_choice",
+      "name": "test_model_selects_scoped_lookup_before_final_candidate[unknown-final-states11]",
+      "hosted_skip_reason": "Linux container setup denied by this runner",
+      "independent_result": "PASS"
+    },
+    {
+      "classname": "tests.integration.test_p5_actor_tool_choice",
+      "name": "test_model_selects_scoped_lookup_before_final_candidate[unknown-first-states10]",
+      "hosted_skip_reason": "Linux container setup denied by this runner",
+      "independent_result": "PASS"
+    },
+    {
+      "classname": "tests.integration.test_p5_actor_tool_choice",
+      "name": "test_model_selects_scoped_lookup_before_final_candidate[wrong-tool-states12]",
+      "hosted_skip_reason": "Linux container setup denied by this runner",
+      "independent_result": "PASS"
+    },
+    {
+      "classname": "tests.integration.test_p5_role_container",
+      "name": "test_namespace_hides_service_resources",
+      "hosted_skip_reason": "Linux container setup denied by this runner",
+      "independent_result": "PASS"
+    },
+    {
+      "classname": "tests.integration.test_p5_role_container",
+      "name": "test_role_container_calls_actual_task_mcp",
+      "hosted_skip_reason": "Linux container setup denied by this runner",
+      "independent_result": "PASS"
+    },
+    {
+      "classname": "tests.integration.test_p5_supervised_role_read",
+      "name": "test_supervisor_uses_bounded_role_read[fail-before-reserving]",
+      "hosted_skip_reason": "Linux container setup denied by this runner",
+      "independent_result": "PASS"
+    },
+    {
+      "classname": "tests.integration.test_p5_supervised_role_read",
+      "name": "test_supervisor_uses_bounded_role_read[single-send]",
+      "hosted_skip_reason": "Linux container setup denied by this runner",
+      "independent_result": "PASS"
+    }
+  ],
+  "local_passes": 17,
+  "sources": {
+    "role-namespaces.zip": "9d2c2e1c9de8bac13c9692e24c98795943deccbe4720e1bb18c25665e491f74f",
+    "p1-postgres-concurrency-1.zip": "8bdcfed1f6c6124d81787646c181e35a03869dac02e972a6a7756e14a1a6a650",
+    "p1-schema-unit-1.zip": "b629c25d2a365947144974884b13cabd88b5af2ac0f601a5faa13c9e22648859"
+  }
+}
