@@ -24,7 +24,7 @@ from novel_factory.contracts.registry import schema_for, validate_contract
 from novel_factory.domain.canonical import canonical_bytes, fingerprint
 from novel_factory.domain.errors import DomainError
 from novel_factory.domain.temporal import point_key
-from novel_factory.infrastructure.codex_host import CodexRoleContextAdapter
+from novel_factory.infrastructure.codex_host import CodexRoleContextAdapter, CodexRoleLookupAdapter
 from novel_factory.infrastructure.database import tables
 from novel_factory.infrastructure.model_gateway import ModelCallFailure, ModelRequest
 from novel_factory.infrastructure.repository import KernelRepository
@@ -279,15 +279,23 @@ class AgentGateway:
             if prior:
                 return prior
         messages = self._messages(principal, binding)
+        adapter = self.adapters[binding["input"]["adapter_id"]]
+        lookup = None
+        if isinstance(adapter, CodexRoleLookupAdapter) and binding["task"]["role_id"] == "character_actor":
+            from novel_factory.application.actor_lookup import read_stage
+            lookup = read_stage(self, adapter, principal, binding, request, messages)
+            messages = lookup.messages
+        reserve_amount = lookup.final_amount if lookup else request["reserve_amount"]
+        token_reservation = lookup.final_tokens if lookup else request["token_reservation"]
         prompt = {"messages": list(messages), "model_configuration": binding["config"],
                   "task_id": request["task_id"], "generation": request["generation"], "call_key": request["call_key"],
                   "input_ref": request["input_ref"], "budget_id": request["budget_id"],
-                  "reserve_amount": request["reserve_amount"], "token_reservation": request["token_reservation"]}
+                  "reserve_amount": reserve_amount, "token_reservation": token_reservation}
         request_hash = fingerprint(prompt)
         maximum = binding["config"]["max_output_tokens"]
         # The byte-based upper bound is deliberately conservative and is not a
         # provider token count. Actual usage is retained separately.
-        require(len(canonical_bytes(list(messages))) + maximum <= request["token_reservation"],
+        require(len(canonical_bytes(list(messages))) + maximum <= token_reservation,
                 "BUDGET_EXCEEDED", "Input and maximum output exceed the reserved token budget")
         model_request = ModelRequest(messages, request_hash, maximum)
         adapter = self.adapters[binding["input"]["adapter_id"]]
@@ -310,7 +318,7 @@ class AgentGateway:
         role_read = None
         try:
             adapter.check_available()
-            if isinstance(adapter, CodexRoleContextAdapter) and binding["task"]["role_id"] == "character_actor":
+            if not lookup and isinstance(adapter, CodexRoleContextAdapter) and binding["task"]["role_id"] == "character_actor":
                 scoped, thread_id = adapter.read_actor_context(principal, binding["task"])
                 user_packet = json.loads(messages[1]["content"])
                 require(scoped == user_packet["context"], "HOST_BINDING_MISMATCH", "Role context differs from the frozen prompt")
@@ -350,8 +358,10 @@ class AgentGateway:
                     authorize_joint(self.kernel, repo, principal, binding["task"], job["config"])
                 # An enrolled allowance buys one generation's candidate. A
                 # terminal billing receipt does not prove task delivery.
-                require(not any((c["generation"], c["call_key"]) !=
-                        (request["generation"], request["call_key"]) for c in pending),
+                other = [c for c in pending if (c["generation"], c["call_key"]) !=
+                         (request["generation"], request["call_key"])]
+                require(not other or (lookup and len(other) == 1 and str(other[0]["attempt_id"]) == lookup.attempt_id
+                            and other[0]["generation"] == request["generation"] and other[0]["state"] == "SUCCEEDED"),
                         "CALL_RECONCILIATION_REQUIRED", "Prior dispatch needs delivery reconciliation")
             require(not any(c["state"] in {"PREPARED", "SENT", "UNKNOWN"}
                             and (c["generation"], c["call_key"]) != (request["generation"], request["call_key"])
@@ -359,8 +369,8 @@ class AgentGateway:
                     "Another prepared or unresolved call must be reconciled before dispatch")
 
         call = self.kernel.tasks.reserve_call(request["task_id"], request["generation"], request["worker_id"],
-            budget_id=request["budget_id"], amount=request["reserve_amount"], call_key=request["call_key"],
-            request_hash=request_hash, token_amount=request["token_reservation"], authorize_in_tx=authorize_dispatch)
+            budget_id=request["budget_id"], amount=reserve_amount, call_key=request["call_key"],
+            request_hash=request_hash, token_amount=token_reservation, authorize_in_tx=authorize_dispatch)
         attempt = call["attempt_id"]
         prompt_ref = self._audit_artifact(binding, attempt, "prompt", prompt, "AGENT_PROMPT")
         if not self.kernel.tasks.mark_call_sent(attempt, worker_id=request["worker_id"], authorize_in_tx=authorize_dispatch):
@@ -419,9 +429,13 @@ class AgentGateway:
         actual_tokens = None if usage["input_tokens"] is None or usage["output_tokens"] is None else usage["input_tokens"] + usage["output_tokens"]
         known = (usage["actual_amount"] is not None and actual_tokens is not None
                  and usage["currency"] == binding["spec"]["budget"]["currency"]
-                 and Decimal(usage["actual_amount"]) <= Decimal(request["reserve_amount"])
-                 and actual_tokens <= request["token_reservation"])
+                 and Decimal(usage["actual_amount"]) <= Decimal(reserve_amount)
+                 and actual_tokens <= token_reservation)
+        if lookup:
+            known = known and bool(provider_receipt) and Decimal(usage["actual_amount"]) == Decimal(usage["actual_amount"]).quantize(Decimal("0.000001"))
         accounting_state = "SUCCEEDED" if known and outcome == "VALIDATED_CANDIDATE" else "FAILED" if known else "UNKNOWN"
+        if lookup and accounting_state == "UNKNOWN":
+            outcome, result_status, reason = "UNKNOWN", "FAILED", "CALL_RECONCILIATION_REQUIRED"
         self.kernel.tasks.settle_call(attempt, state=accounting_state,
             actual_amount=usage["actual_amount"] if known else None,
             actual_tokens=actual_tokens if known else 0, provider_receipt=provider_receipt)

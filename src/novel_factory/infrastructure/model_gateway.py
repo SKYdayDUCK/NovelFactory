@@ -38,6 +38,24 @@ class ModelResponse:
     currency: str | None = None
     raw_response: dict = field(default_factory=dict)
     request_sha256: str | None = None
+    provider_reported_usd: Decimal | None = None
+
+
+def _openrouter_charge(endpoint, content, generation_id):
+    if (endpoint != "https://openrouter.ai/api/v1/chat/completions"
+            or not isinstance(generation_id, str) or not generation_id.startswith("gen-")):
+        return None
+    # Preserve the provider's JSON number exactly rather than rounding a float
+    # into the six-place monetary ledger. Only the explicitly enrolled lookup
+    # adapter uses this per-request receipt for automatic settlement.
+    exact = (json.loads(content, parse_float=Decimal).get("usage") or {}).get("cost")
+    if type(exact) not in (int, Decimal):
+        return None
+    amount = Decimal(exact)
+    if (amount.is_finite() and 0 <= amount < Decimal("1e14")
+            and amount == amount.quantize(Decimal("0.000001"))):
+        return amount
+    return None
 
 
 class ModelCallFailure(Exception):
@@ -143,7 +161,8 @@ class OpenAICompatibleAdapter:
                 input_tokens=usage_value(usage.get("prompt_tokens")),
                 output_tokens=usage_value(usage.get("completion_tokens")),
                 cached_input_tokens=usage_value((usage.get("prompt_tokens_details") or {}).get("cached_tokens")),
-                raw_response=raw, request_sha256=request.request_sha256)
+                raw_response=raw, request_sha256=request.request_sha256,
+                provider_reported_usd=_openrouter_charge(self.endpoint, content, raw.get("id")))
         except (KeyError, IndexError, TypeError, ValueError):
             raise ModelCallFailure("MODEL_PROTOCOL_ERROR") from None
 

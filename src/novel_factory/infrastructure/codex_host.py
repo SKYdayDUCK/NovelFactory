@@ -228,3 +228,27 @@ class CodexRoleContextAdapter(CodexAppServerAdapter):
 
     def read_actor_context(self, principal, task):
         return self.context_reader(self.journal.kernel, principal, task, shutil.which(self.binary), self.relay)
+
+
+
+class CodexRoleLookupAdapter(CodexRoleContextAdapter):
+    """Enroll at most one optional model-selected role lookup and one final inference."""
+
+    @property
+    def configuration(self):
+        return {**super().configuration, "host_protocol": "codex-app-server:actor-select-lookup-v1",
+                "isolation_evidence": "Two separately reserved text requests; scoped actor MCP lookup between them"}
+
+    def generate(self, request):
+        response = super().generate(request)
+        # Only this explicitly enrolled route interprets billing metadata. A
+        # model's answer, token-price estimate or custom origin cannot set costs.
+        if (response.actual_amount is None and response.provider_reported_usd is not None
+                and self.backend.endpoint == "https://openrouter.ai/api/v1/chat/completions"):
+            response = replace(response, actual_amount=response.provider_reported_usd, currency="USD",
+                               provider_receipt=response.raw_response["id"])
+        return response
+
+    def actor_lookup(self, principal, task, arguments):
+        return self.context_reader(self.journal.kernel, principal, task, shutil.which(self.binary), self.relay,
+                                   tool="nf_query_batch", arguments=arguments)

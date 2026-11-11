@@ -45,9 +45,9 @@ class ReplyPipe(asyncio.Protocol):
         await self.ready.wait()
 
 
-async def _read_context(kernel, principal, binding, codex, relay, channel):
+async def _read_context(kernel, principal, binding, codex, relay, channel, tool, arguments):
     runtime = McpRuntime(kernel, principal, binding)
-    server = make_server(runtime, ceiling={"nf_context_get"})
+    server = make_server(runtime, ceiling={tool})
     loop = asyncio.get_running_loop()
     for name in ("requests", "replies"):
         os.mkfifo(channel / name, 0o600)
@@ -58,8 +58,8 @@ async def _read_context(kernel, principal, binding, codex, relay, channel):
         for name in ("requests", "replies"):
             keeper = os.open(channel / name, os.O_RDWR | os.O_CLOEXEC)
             stack.callback(os.close, keeper)
-        requests = stack.enter_context(open(channel / "requests", "rb", buffering=0))
-        replies = stack.enter_context(open(channel / "replies", "wb", buffering=0))
+        requests = stack.enter_context(os.fdopen(os.open(channel / "requests", os.O_RDONLY | os.O_NONBLOCK), "rb", buffering=0))
+        replies = stack.enter_context(os.fdopen(os.open(channel / "replies", os.O_WRONLY | os.O_NONBLOCK), "wb", buffering=0))
         reader = asyncio.StreamReader(limit=1_048_576)
         input_transport, _ = await loop.connect_read_pipe(lambda: asyncio.StreamReaderProtocol(reader), requests)
         try:
@@ -78,7 +78,7 @@ async def _read_context(kernel, principal, binding, codex, relay, channel):
             args = container_command(codex, relay, channel) + [
                 "/bin/codex", "app-server", "--listen", "stdio://", "-c", "project_doc_max_bytes=0",
                 "-c", "analytics.enabled=false", "-c", 'mcp_servers.novelfactory.command="/bin/role-mcp"',
-                "-c", 'mcp_servers.novelfactory.enabled_tools=["nf_context_get"]',
+                "-c", "mcp_servers.novelfactory.enabled_tools=" + json.dumps([tool]),
             ]
             host = await asyncio.create_subprocess_exec(*args, env={"PATH": os.defpath},
                 stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE,
@@ -87,7 +87,7 @@ async def _read_context(kernel, principal, binding, codex, relay, channel):
                 async with stdio_server(stdin=lines(), stdout=output) as (rx, tx):
                     task = asyncio.create_task(server.run(rx, tx, server.create_initialization_options()))
                     try:
-                        return await _call(host)
+                        return await _call(host, tool, arguments)
                     finally:
                         task.cancel()
                         with suppress(asyncio.CancelledError):
@@ -103,7 +103,7 @@ async def _read_context(kernel, principal, binding, codex, relay, channel):
             output_transport.close()
 
 
-async def _call(host):
+async def _call(host, tool, arguments):
     async def rpc(method, params, rpc_id=None):
         message = {"method": method, "params": params}
         if rpc_id is not None:
@@ -127,22 +127,23 @@ async def _call(host):
                        "sandbox": "read-only", "approvalPolicy": "never"}, 2)
     thread_id = thread["thread"]["id"]
     inventory = await rpc("mcpServerStatus/list", {"threadId": thread_id, "serverName": "novelfactory"}, 3)
-    require(any(s.get("name") == "novelfactory" and set(s["tools"]) == {"nf_context_get"}
+    require(any(s.get("name") == "novelfactory" and set(s["tools"]) == {tool}
                 for s in inventory["data"]), "VIEW_DENIED", "Role tool unavailable")
     response = await rpc("mcpServer/tool/call", {"threadId": thread_id, "server": "novelfactory",
-                         "tool": "nf_context_get", "arguments": {}}, 4)
+                         "tool": tool, "arguments": arguments}, 4)
     require(not response.get("isError") and isinstance(response.get("structuredContent"), dict),
             "VIEW_DENIED", "Role context is unavailable")
     return response["structuredContent"], thread_id
 
 
-def read_context(kernel, principal, task, codex, relay):
+def read_context(kernel, principal, task, codex, relay, *, tool="nf_context_get", arguments=None):
     """Called in a worker before provider send, with no DB transaction held."""
+    require(tool in {"nf_context_get", "nf_query_batch"}, "VIEW_DENIED", "Unsupported role read")
     binding = TaskBinding(task["task_id"], task["generation"], task["lease_owner"])
 
     async def bounded(channel):
         async with asyncio.timeout(30):
-            return await _read_context(kernel, principal, binding, codex, relay, channel)
+            return await _read_context(kernel, principal, binding, codex, relay, channel, tool, arguments or {})
 
     try:
         with tempfile.TemporaryDirectory(prefix="nf-role-context-") as directory:

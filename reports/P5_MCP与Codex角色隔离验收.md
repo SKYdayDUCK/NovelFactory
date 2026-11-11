@@ -10,7 +10,7 @@
 | J 标准 MCP 与真实 Codex | DONE（协议、工具） | Python SDK 1.29.0／协议 2025-11-25，当前分支复测。实际 Host 的工具调用由受信测试控制器驱动，全程零模型 Turn。 |
 | J 官方 IDE | PARTIAL | 基线的官方 VS Code Web 1.145.3、扩展 26.51106.51428 录到了工具发现及两次恢复，唤醒数 1、0。该记录使用回环合成模型。普通用户桌面安装、受限 SSH 实例和商业模型本轮为 BLOCKED_ENVIRONMENT。参见[历史 IDE 回执](../evidence/p5/mcp_vscode_extension.json)。 |
 | M OS 执行隔离 | DONE（等效 Linux 容器，非双账户 SSH） | user、mount、PID、IPC、UTS、network 命名空间，清空环境、删除 capabilities、禁用嵌套 user namespace。静态探针在相同边界内无法看到服务文件、服务环境或 shell，无法连接本轮真实测试 PostgreSQL。 |
-| 按需模型自主选择工具 | PARTIAL | 原生产 Supervisor 继续使用 `codex-text`。新 `run_role_host.py` 提供角色专属真实工具通道；生产模型的每个工具后续推理尚无独立的供应商预算/回执与恢复接线。保留现有单请求消费约束。 |
+| 按需模型自主选择工具 | DONE（有界合成供应商）；真实商业运行 BLOCKED_ENVIRONMENT | R3c 的显式新路由允许模型选择一次角色查询或跳过，真实 MCP 工具与两次独立模型账本连接到普通 Supervisor。详见本报告 R3c 与运行记录。 |
 | 真实付费模型及费用 | BLOCKED_ENVIRONMENT | 本轮没有调用商业供应商。模型质量、Token 及账单不能由本次 Host 工具调用推导。 |
 
 ## 实现与负向检查
@@ -34,3 +34,18 @@ uv run --no-sync python scripts/with_postgres.py --migrate -- \
 新增显式路由 `codex-role-mcp`。登记时选用此路由的角色任务经 `RuntimeSupervisor.run_once` 正常领取，冻结输入后，隔离 Codex Thread 使用仅开放 `nf_context_get` 的服务读取角色上下文。返回值经逐字段比对构成实际供应商请求，仍在发送事务中复核授权。场景中的其他岗位使用相同路由时沿用原单次文本派发。旧登记保持旧路由。
 
 正例使用真实 Codex 工具 Thread、独立的模型 Thread/Turn、PostgreSQL 和定序 HTTP 模型。一个模型账本记录对应一个 HTTP 请求，产物通过 ActionProposal 校验；空闲再恢复时没有新增请求。反例移除角色转发器，任务在模型预留和发送前停止，账本与 HTTP 调用计数均为零。该工具由服务选择；多轮模型根据工具结果继续推理需要额外、独立的预算与发送回执。[派发实测](../evidence/p5/verification/supervised_role_read.json)
+
+## R3c 模型选择工具并读取后继续
+
+显式配置 `codex-role-tools` 的角色现可在自己的第一个模型轮次决定是否读取一条状态。模型输出一个严格的工具选择对象，控制器通过真实的隔离 Codex Thread 将其转换为 `mcpServer/tool/call`。本次服务器仅开放 `nf_query_batch`，与该角色被冻结的运行时工具、清单、grant、租约、代际及 BELIEF 相交。第二个独立模型轮次从已获准的观察生成最终行动。选择不查询时省去 MCP 查询和观察工件。
+
+| 验收 | 实测 |
+|---|---|
+| 正常自主查询 | 两次模型发送各有不同持久 call key 和 Codex Thread/Turn。模型选中的查询返回角色未知状态，后一次请求准确携带该观察且行动候选通过校验。 |
+| 跳过、超范围与错误工具 | 选择跳过时没有查询产物。选择真实但未授权对象时停止在读取，选择非白名单工具时确定性拒绝。两者都不发送后续模型请求。 |
+| 收费与恢复 | 对任一步的未知费用或结果保留 UNKNOWN，不自动重新发送。已知成本的无效选择记为 FAILED 并按其实测回执结算。服务端在原任务额度内分别预留两笔，并复核每次发送权限。第一步成功、读取前中断时，在仍有效的同一 worker 租约重入可复用已持久选择；已失效 generation 按原恢复围栏暂停对账。 |
+| 成本证据范围 | 反例与端到端使用确定性供应商夹具、真实 Codex 进程和 PG17。合成计费仅验证账本。OpenRouter 可从官方响应中精确读取单请求美元扣费，支持范围及精度见接入说明。外部商业模型和发票核对仍为 BLOCKED_ENVIRONMENT。 |
+
+[逐步 Host、MCP 和账本回执](../evidence/p5/verification/actor_tool_choice.json)与[正反例](../tests/integration/test_p5_actor_tool_choice.py)。本路由将模型可选择的动作限定为零次或一次只读查询，后续模型提交领域候选。官方工作台、普通桌面、角色间任意工具对话及开放式多轮循环各有独立的验证范围。
+
+本轮 R3c 联合回归在有真实 Codex、PG 17.11 和可用命名空间的主机运行，43 项通过，33.83 秒，零跳过。第一次把临时数据库放在共享内存文件系统，WAL 写入因磁盘已满失败；改用独立工作区的临时目录后完成上述检查。

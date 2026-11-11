@@ -137,3 +137,11 @@ cc -O2 -Wall -Wextra -Werror -static adapters/codex/role_relay.c -o /srv/novelfa
 ### 在 Supervisor 的角色派发中读取 MCP 上下文
 
 服务启动前设置 `NF_ROLE_MCP_RELAY` 为上面编译的转发程序绝对路径。登记新的任务或场景时，选择 `adapter_id: codex-role-mcp`。该路由在角色仍持有租约时由隔离 Codex Thread 发起一次 `nf_context_get`。只有角色授权的工具回执与冻结的 ContextBundle 完全相符，才预留并发出原先的一次模型请求。工具回执没有单独追加到模型输入。生成候选后原始响应审计保留 MCP Thread 标识、上下文哈希及模型 Thread/Turn 标识。工具阶段的决策由服务固定，模型的单次文本返回仍然只提交候选。
+
+### 允许角色自己选择一次查询
+
+设置同一服务端 `NF_ROLE_MCP_RELAY`，在新任务或新场景的登记中显式选择 `adapter_id: codex-role-tools`。角色首先在独立、可审计的模型轮次中阅读自己的 BELIEF 和任务要求，返回不查询或一次 `nf_query_batch`（一条 subject/predicate）的选择。控制器验证选择，经真实隔离 Codex MCP Thread 发出请求。合法读取结果出现在第二个模型轮次的行动提案输入中。其他岗位仍按其固定单次文本请求执行。
+
+每个角色的两次请求各有独立幂等键、预留、调用回执和 Thread/Turn。两步总额受原登记额度限制，货币额均分，第一步向下截到百万分之一，第二步使用余量。第一步按输入字节上界和最多 256 输出 Token 预留，余额给最终行动。一次读取的观察至多 32 KiB；超出最终预算会阻断发送。请求结果未知、无可核验费用、权限变动或无效选择时停止。同代有效租约恢复时复用已持久的成功选择。
+
+本路由接收具备供应商回执、货币、实际费用及 Token 数的适配器。对官方 OpenRouter 的精确 HTTPS Chat Completions 端点，服务读取响应 `usage.cost` 及 `gen-…` 生成 ID，原始 JSON 金额可由六位小数账本精确表达时才自动入账。供应商单请求回执可与账号活动另行核对。本次没有对真实账单进行验证。普通兼容端点仅返回 Token、没有确定费用，或费用精度超过账本表示能力时，保持 UNKNOWN 并等待对账。有关费用字段的语义见[供应商使用核算](https://openrouter.ai/docs/cookbook/administration/usage-accounting)和[官方 USD 说明](https://openrouter.ai/blog/insights/cost-vs-quality-tradeoff-framework-for-agent-models/)。
