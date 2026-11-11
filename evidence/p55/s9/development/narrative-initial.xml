@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="1.776" timestamp="2026-11-11T11:52:09.955100+00:00" hostname="3048d295de1c"><testcase classname="tests.integration.test_s9_message_narrative" name="test_message_versions_preserve_belief_evidence_across_candidate_branches" time="1.275" /><testcase classname="tests.integration.test_s9_message_narrative" name="test_finished_unpublished_draft_fenced_when_its_explicit_world_read_changes" time="0.333"><failure message="novel_factory.domain.errors.DomainError: Invalid UnifiedQueryRequest: contract constraints failed">kernel_env = {'db': &lt;novel_factory.infrastructure.database.Database object at 0x7ff5f82d3710&gt;, 'store': &lt;novel_factory.infrastructu...Kernel object at 0x7ff5f82c0470&gt;, 'url': 'postgresql+psycopg://nf_dev@127.0.0.1:55607/nf_kernel_b051c8fb29ec4203', ...}
+
+    def test_finished_unpublished_draft_fenced_when_its_explicit_world_read_changes(kernel_env):
+        from novel_factory.application.queries import WorldQueryService
+        k = kernel_env["kernel"]
+        f = arrange(k)
+        admin, wr, ids = f["principal"], f["world_ref"], f["ids"]
+        item = draft_for(k, f, "他把准备好的运粮清单压在桌上。")
+        task = item["task"]
+        # The writer checks the premise independently of the literal text. A surface
+        # extraction alone cannot rediscover that the draft assumed this holder.
+        request = {"schema_version": "2.1", "task_id": task["task_id"], "generation": task["generation"],
+            "read_contract": {"revision": {"mode": "FIXED", "world_ref": wr}, "process_policy": "ALLOW_PARTIAL",
+                              "index_policy": "AUTHORITATIVE", "max_wait_ms": 0},
+            "knowledge_cut": {"plane": "WORLD"}, "subject_time": {"kind": "POINT", "at": point(2, 1)},
+            "query": {"kind": "STATE", "lookups": [{"subject_id": ids["sword"], "predicate": "possessed_by"}]},
+            "page_size": 16, "cursor": None}
+&gt;       WorldQueryService(k).query(item["writer"], request)
+
+tests/integration/test_s9_message_narrative.py:71: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/novel_factory/application/queries.py:482: in query
+    request = validate_contract('UnifiedQueryRequest', request, '2.1')
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'UnifiedQueryRequest'
+payload = {'schema_version': '2.1', 'task_id': 'efb0b0eb-f69a-4247-894b-4507ecc81e9c', 'generation': 1, 'read_contract': {'revis...-4d1d-9b36-3e3940a0cbb3'}}, 'process_policy': 'ALLOW_PARTIAL', 'index_policy': 'AUTHORITATIVE', 'max_wait_ms': 0}, ...}
+version = '2.1'
+
+    def validate_contract(name: str, payload: Any, version: str = "2.0") -&gt; Any:
+        value = plain(payload)
+        errors = sorted(_validator(name, version).iter_errors(value), key=lambda e: str(list(e.path)))
+        if errors:
+            # Do not echo instance values: they can be secret or attacker-controlled.
+&gt;           raise DomainError("INVALID_ARGUMENT", f"Invalid {name}: contract constraints failed")
+E           novel_factory.domain.errors.DomainError: Invalid UnifiedQueryRequest: contract constraints failed
+
+src/novel_factory/contracts/registry.py:67: DomainError</failure></testcase></testsuite></testsuites>

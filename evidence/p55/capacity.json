@@ -1,0 +1,187 @@
+{
+  "measured_at": "2026-11-11T09:49:07.882877+00:00",
+  "system": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "python": "3.12.14",
+  "affinity": 9,
+  "postgres": [
+    17,
+    11
+  ],
+  "load": "closed loop drain of simultaneously READY fixed-shape world revisions",
+  "model": "no provider call or synthetic usage",
+  "parent_pool": 3,
+  "child_pool_per_process": 1,
+  "cpu_quota_reported": null,
+  "trials": [
+    {
+      "mode": "fixed",
+      "jobs": 24,
+      "successful": 24,
+      "failures": 0,
+      "elapsed_s": 0.315303915999948,
+      "jobs_per_s": 76.11703750613728,
+      "mean_completion_s": 0.17897644795836717,
+      "p95_completion_s": 0.3106929969999328,
+      "p99_completion_s": 0.31529752599999483,
+      "p95_service_s": 0.03812513000002582,
+      "mean_cpu_pct": 26.511,
+      "mean_cpu_psi_avg10": null,
+      "mean_parent_rss_kib": 63482.667,
+      "mean_available_bytes": 6363145557.333,
+      "warm_processes": 2,
+      "capacity_series": [
+        [
+          0.001,
+          2
+        ],
+        [
+          0.112,
+          2
+        ],
+        [
+          0.215,
+          2
+        ]
+      ],
+      "scale_decisions": [],
+      "provider_calls": 0,
+      "provider_invoice": null
+    },
+    {
+      "mode": "adaptive",
+      "jobs": 24,
+      "successful": 24,
+      "failures": 0,
+      "elapsed_s": 0.3579174859999057,
+      "jobs_per_s": 67.05456128512907,
+      "mean_completion_s": 0.2271889084166124,
+      "p95_completion_s": 0.35106413799985603,
+      "p99_completion_s": 0.3579073609998886,
+      "p95_service_s": 0.035609920000069906,
+      "mean_cpu_pct": 37.47,
+      "mean_cpu_psi_avg10": null,
+      "mean_parent_rss_kib": 63872.0,
+      "mean_available_bytes": 6274759680.0,
+      "warm_processes": 2,
+      "capacity_series": [
+        [
+          0.001,
+          1
+        ],
+        [
+          0.119,
+          1
+        ],
+        [
+          0.222,
+          2
+        ],
+        [
+          0.331,
+          2
+        ]
+      ],
+      "scale_decisions": [
+        {
+          "previous": 1,
+          "target": 2,
+          "reason": "backlog_and_headroom"
+        }
+      ],
+      "provider_calls": 0,
+      "provider_invoice": null
+    },
+    {
+      "mode": "adaptive",
+      "jobs": 24,
+      "successful": 24,
+      "failures": 0,
+      "elapsed_s": 0.5289967720000277,
+      "jobs_per_s": 45.368896882415655,
+      "mean_completion_s": 0.34140948037493973,
+      "p95_completion_s": 0.5234549659999175,
+      "p99_completion_s": 0.5289920749999055,
+      "p95_service_s": 0.04823851400010426,
+      "mean_cpu_pct": 25.812,
+      "mean_cpu_psi_avg10": null,
+      "mean_parent_rss_kib": 63924.0,
+      "mean_available_bytes": 6526838374.4,
+      "warm_processes": 2,
+      "capacity_series": [
+        [
+          0.001,
+          1
+        ],
+        [
+          0.109,
+          1
+        ],
+        [
+          0.275,
+          2
+        ],
+        [
+          0.376,
+          1
+        ],
+        [
+          0.484,
+          2
+        ]
+      ],
+      "scale_decisions": [
+        {
+          "previous": 1,
+          "target": 2,
+          "reason": "backlog_and_headroom"
+        },
+        {
+          "previous": 2,
+          "target": 1,
+          "reason": "throughput_and_tail_regressed"
+        },
+        {
+          "previous": 1,
+          "target": 2,
+          "reason": "backlog_and_headroom"
+        }
+      ],
+      "provider_calls": 0,
+      "provider_invoice": null
+    },
+    {
+      "mode": "fixed",
+      "jobs": 24,
+      "successful": 24,
+      "failures": 0,
+      "elapsed_s": 0.2712783389999913,
+      "jobs_per_s": 88.47001971654201,
+      "mean_completion_s": 0.15593981725006265,
+      "p95_completion_s": 0.2658246959999815,
+      "p99_completion_s": 0.27127365199999076,
+      "p95_service_s": 0.03491764099999273,
+      "mean_cpu_pct": 21.618,
+      "mean_cpu_psi_avg10": null,
+      "mean_parent_rss_kib": 64040.0,
+      "mean_available_bytes": 6552442197.333,
+      "warm_processes": 2,
+      "capacity_series": [
+        [
+          0.001,
+          2
+        ],
+        [
+          0.103,
+          2
+        ],
+        [
+          0.204,
+          2
+        ]
+      ],
+      "scale_decisions": [],
+      "provider_calls": 0,
+      "provider_invoice": null
+    }
+  ]
+}

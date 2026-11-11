@@ -18,7 +18,7 @@ def team():
     install = uuid4().hex
     with connect(url) as conn:
         conn.execute("INSERT INTO aw_installations VALUES(%s,%s,true)", (install, "nf-test"))
-        bootstrap(conn, org, "Research-Audit")
+        bootstrap(conn, org, "Research-Audit", installation_id=install)
         names = conn.execute(
             "SELECT employee_id FROM aw_employees WHERE org_id=%s", (org,)
         ).fetchall()

@@ -66,6 +66,8 @@ def scenario():
              "branch_ids": [branch], "epoch": 0}
     now = datetime.now(timezone.utc)
     rows = {"works": [{"work_id": work, "policy_version": "nf-policy-1"}],
+            "branches": [{"branch_id": branch, "work_id": work, "head_revision_id": revision}],
+            "revisions": [{**wr, "snapshot": {}, "state_hash": fingerprint({}), "branch_seq": 0}],
             "grants": [grant],
             "artifacts": [{"work_id": work, **ref, "kind": "EVIDENCE"}],
             "tasks": [], "task_inputs": [], "contexts": []}
@@ -124,7 +126,17 @@ def test_current_task_may_not_borrow_old_task_context():
     assert rejected.value.code == "VIEW_DENIED"
 
 
-def test_cut_and_story_time_cannot_be_swapped_within_same_context():
+@pytest.fixture
+def material_receipts(monkeypatch):
+    """Observe the SQL receipt boundary after the real authorization and fence checks."""
+    rows = []
+    def record(repo, task, generation, revision, ref, cut, story_time, head):
+        rows.append((task, generation, revision["world_revision_id"], ref, cut, story_time, head))
+    monkeypatch.setattr("novel_factory.application.semantic_dependencies.record_material_read", record)
+    return rows
+
+
+def test_cut_and_story_time_cannot_be_swapped_within_same_context(material_receipts):
     kernel, principal, work, ref, wr, rows, old, current, old_ctx, current_ctx = scenario()
     actor = rows["grants"][0]["actor_id"]
     assert call(kernel, principal, work, ref, wr, old, old_ctx, generation=0,
@@ -134,9 +146,11 @@ def test_cut_and_story_time_cannot_be_swapped_within_same_context():
             call(kernel, principal, work, ref, wr, old, old_ctx, generation=0,
                  story_tick=story_tick, known_tick=known_tick, actor=actor)
         assert rejected.value.code == "VIEW_DENIED"
+    assert material_receipts == [(old, 0, wr["world_revision_id"], ref,
+        {"plane": "BELIEF", "actor_id": actor, "known_at": at(35)}, at(40), wr["world_revision_id"])]
 
 
-def test_task_fence_revocation_and_grant_epoch_invalidate_evidence():
+def test_task_fence_revocation_and_grant_epoch_invalidate_evidence(material_receipts):
     kernel, principal, work, ref, wr, rows, old, current, old_ctx, current_ctx = scenario()
     actor = rows["grants"][0]["actor_id"]
     def access():
@@ -153,3 +167,4 @@ def test_task_fence_revocation_and_grant_epoch_invalidate_evidence():
     with pytest.raises(DomainError): access()
     rows["grants"][0]["active"] = False
     with pytest.raises(DomainError): access()
+    assert len(material_receipts) == 1

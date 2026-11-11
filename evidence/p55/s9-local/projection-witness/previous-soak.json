@@ -1,0 +1,33 @@
+{
+  "duration_seconds": 602.029952334,
+  "configuration": {
+    "agents": 500,
+    "seconds": 600.0,
+    "read_rps": 20.0,
+    "api_processes": 2,
+    "output": "ci-evidence/result.json"
+  },
+  "scheduled_count": 12000,
+  "actual_call_start_rps": 20.001092330311906,
+  "successful_query_rps": 19.092073335286894,
+  "latency_all_attempts": {
+    "count": 12000,
+    "p50_ms": 2115.3797,
+    "p95_ms": 2319.8242,
+    "p99_ms": 2369.4623
+  },
+  "status_counts": {
+    "200": 11494,
+    "429": 506
+  },
+  "correctness_errors": [],
+  "world_unchanged": true,
+  "new_world_commits": 0,
+  "real_model_calls": 0,
+  "probe_gate": "NOT_MET",
+  "long_duration_gate": "NOT_EXECUTED",
+  "head_sha": "bf0541a4ea2a07974c7230780e8202e07644cea9",
+  "actions_checkout_sha": "0d8f4702f94aa6a2f5e83c6d4f8d2be5cab52399",
+  "artifact_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030826741/artifacts/13861357181",
+  "archive_sha256": "b154503229789debf18ee7f5be28e96c67127831a3ee442a94afe97c51fe1e7e"
+}

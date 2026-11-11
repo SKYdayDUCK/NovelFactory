@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "NovelFactory Redis Streams EventEnvelope v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "event_type",
+    "schema_version",
+    "trace_id",
+    "causation_id",
+    "correlation_id",
+    "work_id",
+    "branch_id",
+    "task_id",
+    "generation",
+    "world_ref",
+    "producer",
+    "created_at",
+    "payload_ref",
+    "sensitivity",
+    "routing_key"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "event_type": {
+      "enum": [
+        "approval.revoked",
+        "audit.recorded",
+        "authorization.revoked",
+        "branch.created",
+        "canon.promoted",
+        "compute.requested",
+        "context.compiled",
+        "continuity.published",
+        "domain.changed",
+        "narrative.accepted",
+        "narrative.draft",
+        "planning.candidate",
+        "planning.replanned",
+        "planning.selected",
+        "planning.window_proposed",
+        "planning.world_reviewed",
+        "recovery.requested",
+        "refinement.proved",
+        "release.frozen",
+        "semantic.conflict.detected",
+        "semantic.conflict.resolved",
+        "supervisor.adjudication.delivery",
+        "supervisor.editorial.delivery",
+        "supervisor.enrolled",
+        "supervisor.handoff.blocked",
+        "supervisor.joint.delivery",
+        "supervisor.narrative.delivery",
+        "supervisor.planning.delivery",
+        "supervisor.task.expired",
+        "task.changed",
+        "volume.settlement.continuity",
+        "volume.settlement.publication",
+        "volume.settlement.recorded",
+        "volume.successor.changed",
+        "volume.successor.registered",
+        "workflow.wait.closed",
+        "world.accepted",
+        "world.initialized",
+        "world.requested"
+      ]
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "trace_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "causation_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "uuid"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "correlation_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "work_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "uuid"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "branch_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "uuid"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "task_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "uuid"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "generation": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 9223372036854775807
+    },
+    "world_ref": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "work_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "branch_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "world_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "required": [
+            "work_id",
+            "branch_id",
+            "world_revision_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "producer": {
+      "const": "nf.outbox"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "payload_ref": {
+      "type": "string",
+      "pattern": "^outbox:[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+    },
+    "sensitivity": {
+      "const": "reference_only"
+    },
+    "routing_key": {
+      "enum": [
+        "domain",
+        "model",
+        "world",
+        "compute",
+        "observability",
+        "maintenance"
+      ]
+    }
+  }
+}
