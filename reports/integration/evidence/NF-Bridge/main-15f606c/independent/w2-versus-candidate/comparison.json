@@ -1,0 +1,278 @@
+{
+  "workflow": ".github/workflows/p3-scale-experiments.yml Measured 1000-read-open, original targets retained",
+  "ordered_arms": [
+    "w2",
+    "nfbridge"
+  ],
+  "raw_compressed_with_lossless_gzip": true,
+  "results": {
+    "w2": {
+      "network_window_seconds": 104.85511878299985,
+      "client_validation_seconds": 3.8629795319998266,
+      "scheduled_requests": 5000,
+      "completed_requests": 5000,
+      "wire_started_requests": 5000,
+      "validated_successes": 2016,
+      "dispatch_start_rps": 48.965801208040816,
+      "observed_wire_start_rps": 48.984539542117474,
+      "successful_query_rps": 19.22652917090447,
+      "latency_all_attempts": {
+        "count": 5000,
+        "p50_ms": 2337.741,
+        "p95_ms": 6412.4489,
+        "p99_ms": 9336.7881
+      },
+      "status_counts": {
+        "429": 2978,
+        "200": 2016,
+        "transport_error": 6
+      },
+      "offered_wire_rate_gate": "NOT_MET",
+      "capacity_gate": "NOT_MET",
+      "world_unchanged": true,
+      "new_world_commits": 0,
+      "real_model_calls": 0,
+      "tree": "bb41e0bb3d2deaaccbbb26bd18a18676718cd7c8",
+      "commit": "f2c584ec8e738e09d31b05ddd5c032bb2b8f96b1",
+      "start": "2026-11-11T18:57:00Z",
+      "finished": "2026-11-11T19:00:29Z",
+      "host_load_start": "2.23 1.84 1.21 3/338 41",
+      "host_load_finish": "5.45 3.43 1.95 3/275 134",
+      "correctness_errors": 0,
+      "core_sql": {
+        "sql_statements": 36028,
+        "transactions": 7804,
+        "failed_statements": 0,
+        "statement_kinds": {
+          "SELECT": 34012,
+          "INSERT": 2016
+        },
+        "sql_cursor_execution_seconds": 174.01805713704516,
+        "configured_pool_size": 8
+      },
+      "preexisting_429_counts": {
+        "BACKPRESSURE": 2978
+      },
+      "transport_errors_by_type": {
+        "ReadError": 6
+      },
+      "raw_result_sha256": "0a0348cd24f0c207bdee47a82523f84385a00ee82c86ff74d473fb127f51df1b",
+      "environment": {
+        "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+        "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+        "logical_cpu_count": 9,
+        "cpu_models": [
+          "AMD EPYC 9V74 80-Core Processor"
+        ],
+        "affinity_cpus": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "load_average": [
+          5.6650390625,
+          3.4375,
+          1.9453125
+        ],
+        "memory": {
+          "MemTotal": "10206472 kB",
+          "MemAvailable": "7375520 kB",
+          "SwapTotal": "0 kB"
+        },
+        "cgroup": {},
+        "versions": {
+          "SQLAlchemy": "2.0.57",
+          "psycopg": "3.3.8",
+          "uvicorn": "0.54.0",
+          "httpx": "0.28.1"
+        },
+        "git_sha": "f2c584ec8e738e09d31b05ddd5c032bb2b8f96b1",
+        "git_dirty": false,
+        "benchmark_source_sha256": "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f",
+        "load_client_location": "separate spawned service processes; read validation after network window",
+        "api_processes": 2,
+        "api_server_threads": 1
+      },
+      "original_exit": 1
+    },
+    "nfbridge": {
+      "network_window_seconds": 105.16933758899995,
+      "client_validation_seconds": 4.0843384089998835,
+      "scheduled_requests": 5000,
+      "completed_requests": 5000,
+      "wire_started_requests": 5000,
+      "validated_successes": 2063,
+      "dispatch_start_rps": 48.78312883058563,
+      "observed_wire_start_rps": 48.663789901233024,
+      "successful_query_rps": 19.615983586985877,
+      "latency_all_attempts": {
+        "count": 5000,
+        "p50_ms": 2323.6538,
+        "p95_ms": 6495.4469,
+        "p99_ms": 9145.8451
+      },
+      "status_counts": {
+        "429": 2924,
+        "200": 2063,
+        "transport_error": 13
+      },
+      "offered_wire_rate_gate": "NOT_MET",
+      "capacity_gate": "NOT_MET",
+      "world_unchanged": true,
+      "new_world_commits": 0,
+      "real_model_calls": 0,
+      "tree": "788dc4b190299894509593a23982452f0362f9ef",
+      "commit": "695668b87f6a76acbe7e27c71fcb259b7b3f0795",
+      "start": "2026-11-11T19:00:29Z",
+      "finished": "2026-11-11T19:03:56Z",
+      "host_load_start": "5.45 3.43 1.95 3/275 138",
+      "host_load_finish": "5.59 4.10 2.49 6/362 231",
+      "correctness_errors": 0,
+      "core_sql": {
+        "sql_statements": 36984,
+        "transactions": 8102,
+        "failed_statements": 0,
+        "statement_kinds": {
+          "SELECT": 34921,
+          "INSERT": 2063
+        },
+        "sql_cursor_execution_seconds": 184.65184129905083,
+        "configured_pool_size": 8
+      },
+      "preexisting_429_counts": {
+        "BACKPRESSURE": 2924
+      },
+      "transport_errors_by_type": {
+        "ReadError": 13
+      },
+      "raw_result_sha256": "03c3be525ad13a92fd0389aa9fa9463bae2327074f1bd82ebaa9e0d077168ffd",
+      "environment": {
+        "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+        "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+        "logical_cpu_count": 9,
+        "cpu_models": [
+          "AMD EPYC 9V74 80-Core Processor"
+        ],
+        "affinity_cpus": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "load_average": [
+          5.59423828125,
+          4.10107421875,
+          2.48828125
+        ],
+        "memory": {
+          "MemTotal": "10206472 kB",
+          "MemAvailable": "6368628 kB",
+          "SwapTotal": "0 kB"
+        },
+        "cgroup": {},
+        "versions": {
+          "SQLAlchemy": "2.0.57",
+          "psycopg": "3.3.8",
+          "uvicorn": "0.54.0",
+          "httpx": "0.28.1"
+        },
+        "git_sha": "695668b87f6a76acbe7e27c71fcb259b7b3f0795",
+        "git_dirty": false,
+        "benchmark_source_sha256": "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f",
+        "load_client_location": "separate spawned service processes; read validation after network window",
+        "api_processes": 2,
+        "api_server_threads": 1
+      },
+      "original_exit": 1
+    }
+  },
+  "candidate_minus_baseline": {
+    "validated_successes": 47,
+    "observed_wire_start_rps": -0.32074964088445057,
+    "successful_query_rps": 0.3894544160814064,
+    "network_window_seconds": 0.314218806000099
+  },
+  "separate_request_shape_probe": {
+    "hot_first": {
+      "ordered_sql_identical": true,
+      "statement_count": {
+        "w2": 17,
+        "nfbridge": 17
+      },
+      "delegation_table_hits": {
+        "w2": 0,
+        "nfbridge": 0
+      },
+      "validated": {
+        "w2": true,
+        "nfbridge": true
+      }
+    },
+    "hot_repeat": {
+      "ordered_sql_identical": true,
+      "statement_count": {
+        "w2": 17,
+        "nfbridge": 17
+      },
+      "delegation_table_hits": {
+        "w2": 0,
+        "nfbridge": 0
+      },
+      "validated": {
+        "w2": true,
+        "nfbridge": true
+      }
+    },
+    "cold_first": {
+      "ordered_sql_identical": true,
+      "statement_count": {
+        "w2": 17,
+        "nfbridge": 17
+      },
+      "delegation_table_hits": {
+        "w2": 0,
+        "nfbridge": 0
+      },
+      "validated": {
+        "w2": true,
+        "nfbridge": true
+      }
+    }
+  },
+  "limitations": [
+    "One baseline-then-candidate pair on a shared host. The host and affinity were the same. Concurrent activity elsewhere, warm filesystem caches and run order were not controlled. The fixture uses deterministic subject construction but fresh UUIDs, tokens, task generation, and databases. No statistical inference about equivalence, overhead or cause.",
+    "PostgreSQL 17.11 from Debian on the local host via with_postgres.py; two fresh clusters with 60 allowed connections, loopback-only generated data and matching durability. GitHub uses its own Ubuntu runner and postgres:17.11-bookworm service with its own connection settings. Local absolute throughput is not pooled with the hosted numbers.",
+    "Only the original 1000-read-open job was timed. Unsaturated SQL trace after both timed runs uses the real HTTP endpoint and the identical STATE request logic for three selected calls; it records SQL-shape hashes, never values. SQL of every concurrent request in the 5000-request timed windows was not individually traced.",
+    "The read-only designation refers to unchanged authoritative history. Existing pre-bridge S9 observations may be recorded as writes. The published workload counts SQL statement kinds separately.",
+    "Each raw result retains every request and gate; this comparison does not relax or close issue #13."
+  ],
+  "files_sha256": {
+    "code-mapping.json": "e50d06b495daaaecf99888de13f2217924f68dde4ffa345a8abcafd67e46a204",
+    "mapping.py": "19782f87d1f398fe93790fb12d3ce0630afd2f1ae51547fc2013d736e6b76745",
+    "nfbridge/diagnostic-postgres.json": "a719203d3036d3037cda168ad5cd9ebdb771dcc5bc86fc691a090ad8158feff6",
+    "nfbridge/original-result.json.gz": "d41db5bc7b9937cc575cb6b28433b2b4fe684d1007fbd9ccf7d1066bbbd3922b",
+    "nfbridge/original-run.log": "40a04055080792f2eff1b657aed5826d4567b7b76df68bba2d483ad6b6cc024d",
+    "nfbridge/postgres.json": "915e8ce2b5d5015d8007770bc1031a6c70e6bc90d15bda1972ac8996f6469398",
+    "nfbridge/query-trace.json": "389e7ac2ce851c37699db5d4659b1718059ff62d4edaa3461763ac530d66b778",
+    "request-sql.py": "6ea120b1a4570a718026815960fc0d4548908c8314c58f8dc26f3a7721edab9a",
+    "run-pair.sh": "0ada1a27ed2ed759daf5ff94dcbb043c53c7a250deba9a707de9ecb9594ab958",
+    "run-sql.sh": "a051290fa2785b4aec87b6da8d74d380342d7ae1a378f674421fe525c8309ee1",
+    "summarize.py": "648ff7e2b1c65e3d3fcecd1969d31587ab991f57b19eb7ee34a50bfad13a9640",
+    "w2/diagnostic-postgres.json": "901c9f701f97842a762d8a049d9cd5ccab73a74f22d23ebe4a92252e3049bedf",
+    "w2/original-result.json.gz": "5120097d8afdf87c84e21ab3ecf619483c8a350e63dbf41145f22b989d6aa140",
+    "w2/original-run.log": "ce350532f1110fe54e89b5bcef23839485efa7aa73bda76a6731436ad6b57295",
+    "w2/postgres.json": "fd8cd252b66bf9a135ddff79de92f4516d81e37254880e54232f98a515bd2114",
+    "w2/query-trace.json": "389e7ac2ce851c37699db5d4659b1718059ff62d4edaa3461763ac530d66b778"
+  }
+}

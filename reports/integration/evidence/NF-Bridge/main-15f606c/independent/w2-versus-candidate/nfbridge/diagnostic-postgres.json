@@ -1,0 +1,19 @@
+{
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "port": 40621,
+  "command": [
+    "/workspace/scratch/eb2b53c756d0/published-bridge-audit/.venv/bin/python",
+    "/workspace/scratch/eb2b53c756d0/bridge-qualification-results/open1000-pair/request-sql.py",
+    "/workspace/scratch/eb2b53c756d0/bridge-qualification-results/open1000-pair/nfbridge/query-trace.json"
+  ],
+  "started_at_utc": "2026-11-11T19:04:13.923441+00:00",
+  "authentication": "loopback_trust_generated_test_data_only",
+  "fsync": true,
+  "synchronous_commit": true,
+  "max_connections": 60,
+  "data_directory_reused": false,
+  "exit_status": 0,
+  "postgres_exit_status": 0,
+  "duration_seconds": 3.912001,
+  "finished_at_utc": "2026-11-11T19:04:17.835552+00:00"
+}

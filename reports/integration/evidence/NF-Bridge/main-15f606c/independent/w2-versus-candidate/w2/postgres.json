@@ -1,0 +1,31 @@
+{
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "port": 44113,
+  "command": [
+    "/workspace/scratch/eb2b53c756d0/published-w2-capacity/.venv/bin/python",
+    "-m",
+    "benchmarks.p3_open_arrival",
+    "--agents",
+    "1000",
+    "--rounds",
+    "5",
+    "--arrival-rps",
+    "1000",
+    "--hot-fraction",
+    ".8",
+    "--api-processes",
+    "2",
+    "--output",
+    "/workspace/scratch/eb2b53c756d0/bridge-qualification-results/open1000-pair/w2/result.json"
+  ],
+  "started_at_utc": "2026-11-11T18:57:01.283092+00:00",
+  "authentication": "loopback_trust_generated_test_data_only",
+  "fsync": true,
+  "synchronous_commit": true,
+  "max_connections": 60,
+  "data_directory_reused": false,
+  "exit_status": 1,
+  "postgres_exit_status": 0,
+  "duration_seconds": 208.572442,
+  "finished_at_utc": "2026-11-11T19:00:29.855571+00:00"
+}

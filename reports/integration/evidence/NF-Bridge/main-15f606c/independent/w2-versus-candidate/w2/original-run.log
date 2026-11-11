@@ -1,0 +1,43 @@
+RUN ["/workspace/scratch/eb2b53c756d0/qualification-w2/pg17/usr/lib/postgresql/17/bin/initdb", "-D", "/tmp/nf-pg17-kq7417dz/data", "-U", "nf_dev", "--encoding=UTF8", "--locale=C", "--auth-local=reject", "--auth-host=trust", "--data-checksums"]
+The files belonging to this database system will be owned by user "agent".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "C".
+The default text search configuration will be set to "english".
+
+Data page checksums are enabled.
+
+creating directory /tmp/nf-pg17-kq7417dz/data ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default "max_connections" ... 100
+selecting default "shared_buffers" ... 128MB
+selecting default time zone ... Asia/Tokyo
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+
+Success. You can now start the database server using:
+
+    /workspace/scratch/eb2b53c756d0/qualification-w2/pg17/usr/lib/postgresql/17/bin/pg_ctl -D /tmp/nf-pg17-kq7417dz/data -l logfile start
+
+RUN ["/workspace/scratch/eb2b53c756d0/qualification-w2/pg17/usr/lib/postgresql/17/bin/createdb", "nf_test"]
+RUN ["/workspace/scratch/eb2b53c756d0/qualification-w2/pg17/usr/lib/postgresql/17/bin/psql", "-Atc", "SELECT version(); SHOW fsync; SHOW synchronous_commit;"]
+PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+on
+on
+RUN ["/workspace/scratch/eb2b53c756d0/published-w2-capacity/.venv/bin/python", "-m", "alembic", "upgrade", "head"]
+REAL_POSTGRES_READY postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1) port 44113
+{
+  "capacity_gate": "NOT_MET",
+  "offered_wire_rate_gate": "NOT_MET",
+  "dispatch_start_rps": 48.965801208040816,
+  "observed_wire_start_rps": 48.984539542117474,
+  "successful_query_rps": 19.22652917090447,
+  "status_counts": {
+    "429": 2978,
+    "200": 2016,
+    "transport_error": 6
+  }
+}

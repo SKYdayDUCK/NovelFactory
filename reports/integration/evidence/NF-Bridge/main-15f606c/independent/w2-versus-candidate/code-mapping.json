@@ -1,0 +1,83 @@
+{
+  "ordered_shas": [
+    "f2c584ec8e738e09d31b05ddd5c032bb2b8f96b1",
+    "695668b87f6a76acbe7e27c71fcb259b7b3f0795"
+  ],
+  "file_sha256": {
+    ".github/workflows/p3-scale-experiments.yml": [
+      "5e84c404c5ac52f63b31133dca1320cbebfe7e72bd18e9c51f8427c69c4e2238",
+      "5e84c404c5ac52f63b31133dca1320cbebfe7e72bd18e9c51f8427c69c4e2238"
+    ],
+    "benchmarks/p3_open_arrival.py": [
+      "515ec1ec61e03317cd6f160a22a309aa38bc6df8bbfd4604e3dacfa43b14e9da",
+      "515ec1ec61e03317cd6f160a22a309aa38bc6df8bbfd4604e3dacfa43b14e9da"
+    ],
+    "benchmarks/p2_behavioral_load.py": [
+      "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f",
+      "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f"
+    ],
+    "benchmarks/process_server.py": [
+      "2b0d7d46dc49ec0b9f782fdeeaab3902fa5f44075e7e12ea5aff3938b80b594f",
+      "2b0d7d46dc49ec0b9f782fdeeaab3902fa5f44075e7e12ea5aff3938b80b594f"
+    ],
+    "benchmarks/http_load.py": [
+      "50423a60d7cf72201c773ab10f6e80303b9bfcff3650b84db2431f579d61ae14",
+      "50423a60d7cf72201c773ab10f6e80303b9bfcff3650b84db2431f579d61ae14"
+    ],
+    "src/novel_factory/interfaces/http.py": [
+      "d9ca7af6886e37da59efc2a908a7c90848d402ee935048e7e7b0e45837aad008",
+      "d9ca7af6886e37da59efc2a908a7c90848d402ee935048e7e7b0e45837aad008"
+    ],
+    "src/novel_factory/interfaces/admission.py": [
+      "d90816e4d724c39d1292cd630b1b873d75ebb8cdc8ea2c153c39ea2c60394265",
+      "d90816e4d724c39d1292cd630b1b873d75ebb8cdc8ea2c153c39ea2c60394265"
+    ],
+    "src/novel_factory/application/queries.py": [
+      "40cd2d18d6f87b8ad98a534419e00d9b29888cc3ba1a3fdd4623e870ccc49513",
+      "40cd2d18d6f87b8ad98a534419e00d9b29888cc3ba1a3fdd4623e870ccc49513"
+    ],
+    "src/novel_factory/application/semantic_dependencies.py": [
+      "3acfb9da9d62d09f0de7b980bc4a96d156ed4d568dc4a0ab6674709a06378505",
+      "3acfb9da9d62d09f0de7b980bc4a96d156ed4d568dc4a0ab6674709a06378505"
+    ],
+    "src/novel_factory/infrastructure/repository.py": [
+      "594fab543243f8116beff1c68d0e9143e433ed4c538abfea6e04f0332e53d947",
+      "594fab543243f8116beff1c68d0e9143e433ed4c538abfea6e04f0332e53d947"
+    ],
+    "src/novel_factory/infrastructure/objects.py": [
+      "27e22ff4afd1ca1a491e071c3195f2b3593f68ad4ce3cd7dd498b5681617ace0",
+      "27e22ff4afd1ca1a491e071c3195f2b3593f68ad4ce3cd7dd498b5681617ace0"
+    ],
+    "src/novel_factory/contracts/registry.py": [
+      "c2d9a9cf20476f4fa25e34518a9d60e538949b8dd9568c3fff9a9ef314a55c7b",
+      "c2d9a9cf20476f4fa25e34518a9d60e538949b8dd9568c3fff9a9ef314a55c7b"
+    ],
+    "uv.lock": [
+      "91fd656532f18f52bf034e5a10ca7f4a2f5007316eedeba37bc63d5f5a7cc716",
+      "91fd656532f18f52bf034e5a10ca7f4a2f5007316eedeba37bc63d5f5a7cc716"
+    ]
+  },
+  "class_method_source_diffs": {
+    "src/novel_factory/application/kernel.py": [
+      "Kernel._authorize_task_create",
+      "Kernel.create_task",
+      "Kernel.create_task_in_transaction"
+    ],
+    "src/novel_factory/orchestration/tasks.py": [
+      "TaskService._authorize_model_spend",
+      "TaskService._check_delegation_deadline",
+      "TaskService._lock_delegation_authority",
+      "TaskService.create",
+      "TaskService.create_in_transaction",
+      "TaskService.mark_call_sent",
+      "TaskService.reserve_call"
+    ],
+    "src/novel_factory/infrastructure/database.py": []
+  },
+  "source_observations": [
+    "The benchmark only submits /api/v1/queries/timeline requests with query.kind=STATE; each targets one subject and requires both owner and active_holder state items on the fixed WorldRef. It records offered header starts with HTTPX and verifies every response after the network window.",
+    "Kernel.create_task and TaskService.create are refactored for transactional delegation and are used during make_population before services and the timed network window start. Loader tables and migrations differ between the two released schemas.",
+    "Authenticated read operation, admission queues, fixture generator, validation, two-process HTTP server, timeline/STATE query implementation, repository and object store read code are byte-for-byte unchanged.",
+    "A dispatched model attempt requires reserve_call/mark_call_sent. The read overload uses neither. The ordinary HTTP query may still register its pre-existing query/semantic observations; absence of NF delegation access is distinct from absence of all PostgreSQL writes."
+  ]
+}
