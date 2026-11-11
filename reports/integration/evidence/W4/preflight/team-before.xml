@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="3.963" timestamp="2026-11-12T05:25:38.150875+09:00" hostname="8468d52686a3"><testcase classname="tests.test_review_team_assignment" name="test_automatic_and_manual_assignment_follow_the_review_leads_team" file="tests/test_review_team_assignment.py" line="10" time="0.094" /><testcase classname="tests.test_review_team_assignment" name="test_other_lead_cannot_observe_escalate_or_replay_reassigned_work" file="tests/test_review_team_assignment.py" line="45" time="2.999"><failure message="AssertionError(&quot;assert {'other_team_...r', ...}, ...} == {'other_team_...ENIED'}}, ...}\n  \n  Differing items:\n  {'other_team_rule': {'mode': 'STABILITY', 'state': 'RULE_PASSED', 'round_no': 1, 'reviewer_id': None, ...}} != {'other_team_rule': {'error': {'code': 'REVIEW_DENIED'}}}\n  {'former_lead_summary': {'mode': 'PROSE', 'state': 'PENDING', 'round_no': 1, 'reviewer_id': 'second-reviewer', ...}} != {'former_lead_summary': {'error': {'code': 'REVIEW_DENIED'}}}\n  {'other_team_summary': {'mod...&#10;[truncated; full report in element text]">+ Exception Group Traceback (most recent call last):
+  |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/tests/test_review_team_assignment.py", line 111, in test_other_lead_cannot_observe_escalate_or_replay_reassigned_work
+  |     asyncio.run(run())
+  |   File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/runners.py", line 195, in run
+  |     return runner.run(main)
+  |            ^^^^^^^^^^^^^^^^
+  |   File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/runners.py", line 118, in run
+  |     return self._loop.run_until_complete(task)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
+  |     return future.result()
+  |            ^^^^^^^^^^^^^^^
+  |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/tests/test_review_team_assignment.py", line 73, in run
+  |     async with AsyncExitStack() as stack:
+  |                ^^^^^^^^^^^^^^^^
+  |   File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 754, in __aexit__
+  |     raise exc_details[1]
+  |   File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 737, in __aexit__
+  |     cb_suppress = await cb(*exc_details)
+  |                   ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 231, in __aexit__
+  |     await self.gen.athrow(value)
+  |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/tests/test_w1_stdio.py", line 23, in live_session
+  |     async with stdio_client(process) as pipes, ClientSession(*pipes) as client:
+  |                ^^^^^^^^^^^^^^^^^^^^^
+  |   File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 231, in __aexit__
+  |     await self.gen.athrow(value)
+  |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/.venv/lib/python3.12/site-packages/mcp/client/stdio/__init__.py", line 183, in stdio_client
+  |     anyio.create_task_group() as tg,
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 871, in __aexit__
+  |     raise BaseExceptionGroup(
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Exception Group Traceback (most recent call last):
+    |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/.venv/lib/python3.12/site-packages/mcp/client/stdio/__init__.py", line 189, in stdio_client
+    |     yield read_stream, write_stream
+    |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/tests/test_w1_stdio.py", line 23, in live_session
+    |     async with stdio_client(process) as pipes, ClientSession(*pipes) as client:
+    |                                                ^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/.venv/lib/python3.12/site-packages/mcp/shared/session.py", line 238, in __aexit__
+    |     return await self._task_group.__aexit__(exc_type, exc_val, exc_tb)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 871, in __aexit__
+    |     raise BaseExceptionGroup(
+    | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+    +-+---------------- 1 ----------------
+      | Exception Group Traceback (most recent call last):
+      |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/tests/test_w1_stdio.py", line 25, in live_session
+      |     yield client
+      |   File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 737, in __aexit__
+      |     cb_suppress = await cb(*exc_details)
+      |                   ^^^^^^^^^^^^^^^^^^^^^^
+      |   File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 231, in __aexit__
+      |     await self.gen.athrow(value)
+      |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/tests/test_w1_stdio.py", line 23, in live_session
+      |     async with stdio_client(process) as pipes, ClientSession(*pipes) as client:
+      |                ^^^^^^^^^^^^^^^^^^^^^
+      |   File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 231, in __aexit__
+      |     await self.gen.athrow(value)
+      |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/.venv/lib/python3.12/site-packages/mcp/client/stdio/__init__.py", line 183, in stdio_client
+      |     anyio.create_task_group() as tg,
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+      |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 871, in __aexit__
+      |     raise BaseExceptionGroup(
+      | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+      +-+---------------- 1 ----------------
+        | Exception Group Traceback (most recent call last):
+        |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/.venv/lib/python3.12/site-packages/mcp/client/stdio/__init__.py", line 189, in stdio_client
+        |     yield read_stream, write_stream
+        |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/tests/test_w1_stdio.py", line 23, in live_session
+        |     async with stdio_client(process) as pipes, ClientSession(*pipes) as client:
+        |                                                ^^^^^^^^^^^^^^^^^^^^^
+        |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/.venv/lib/python3.12/site-packages/mcp/shared/session.py", line 238, in __aexit__
+        |     return await self._task_group.__aexit__(exc_type, exc_val, exc_tb)
+        |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 871, in __aexit__
+        |     raise BaseExceptionGroup(
+        | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+        +-+---------------- 1 ----------------
+          | Exception Group Traceback (most recent call last):
+          |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/tests/test_w1_stdio.py", line 25, in live_session
+          |     yield client
+          |   File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 737, in __aexit__
+          |     cb_suppress = await cb(*exc_details)
+          |                   ^^^^^^^^^^^^^^^^^^^^^^
+          |   File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 231, in __aexit__
+          |     await self.gen.athrow(value)
+          |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/tests/test_w1_stdio.py", line 23, in live_session
+          |     async with stdio_client(process) as pipes, ClientSession(*pipes) as client:
+          |                ^^^^^^^^^^^^^^^^^^^^^
+          |   File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 231, in __aexit__
+          |     await self.gen.athrow(value)
+          |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/.venv/lib/python3.12/site-packages/mcp/client/stdio/__init__.py", line 183, in stdio_client
+          |     anyio.create_task_group() as tg,
+          |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+          |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 871, in __aexit__
+          |     raise BaseExceptionGroup(
+          | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+          +-+---------------- 1 ----------------
+            | Exception Group Traceback (most recent call last):
+            |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/.venv/lib/python3.12/site-packages/mcp/client/stdio/__init__.py", line 189, in stdio_client
+            |     yield read_stream, write_stream
+            |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/tests/test_w1_stdio.py", line 23, in live_session
+            |     async with stdio_client(process) as pipes, ClientSession(*pipes) as client:
+            |                                                ^^^^^^^^^^^^^^^^^^^^^
+            |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/.venv/lib/python3.12/site-packages/mcp/shared/session.py", line 238, in __aexit__
+            |     return await self._task_group.__aexit__(exc_type, exc_val, exc_tb)
+            |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 871, in __aexit__
+            |     raise BaseExceptionGroup(
+            | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+            +-+---------------- 1 ----------------
+              | Exception Group Traceback (most recent call last):
+              |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/tests/test_w1_stdio.py", line 25, in live_session
+              |     yield client
+              |   File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 737, in __aexit__
+              |     cb_suppress = await cb(*exc_details)
+              |                   ^^^^^^^^^^^^^^^^^^^^^^
+              |   File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 231, in __aexit__
+              |     await self.gen.athrow(value)
+              |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/tests/test_w1_stdio.py", line 23, in live_session
+              |     async with stdio_client(process) as pipes, ClientSession(*pipes) as client:
+              |                ^^^^^^^^^^^^^^^^^^^^^
+              |   File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 231, in __aexit__
+              |     await self.gen.athrow(value)
+              |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/.venv/lib/python3.12/site-packages/mcp/client/stdio/__init__.py", line 183, in stdio_client
+              |     anyio.create_task_group() as tg,
+              |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+              |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 871, in __aexit__
+              |     raise BaseExceptionGroup(
+              | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+              +-+---------------- 1 ----------------
+                | Exception Group Traceback (most recent call last):
+                |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/.venv/lib/python3.12/site-packages/mcp/client/stdio/__init__.py", line 189, in stdio_client
+                |     yield read_stream, write_stream
+                |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/tests/test_w1_stdio.py", line 23, in live_session
+                |     async with stdio_client(process) as pipes, ClientSession(*pipes) as client:
+                |                                                ^^^^^^^^^^^^^^^^^^^^^
+                |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/.venv/lib/python3.12/site-packages/mcp/shared/session.py", line 238, in __aexit__
+                |     return await self._task_group.__aexit__(exc_type, exc_val, exc_tb)
+                |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 871, in __aexit__
+                |     raise BaseExceptionGroup(
+                | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+                +-+---------------- 1 ----------------
+                  | Traceback (most recent call last):
+                  |   File "/workspace/scratch/280a737fadfd/w4-final-spec-60369e0/workshop/tests/test_review_team_assignment.py", line 108, in run
+                  |     assert observed == {key: {"error": {"code": "REVIEW_DENIED"}} for key in observed}
+                  | AssertionError: assert {'other_team_...r', ...}, ...} == {'other_team_...ENIED'}}, ...}
+                  |   
+                  |   Differing items:
+                  |   {'other_team_rule': {'mode': 'STABILITY', 'state': 'RULE_PASSED', 'round_no': 1, 'reviewer_id': None, ...}} != {'other_team_rule': {'error': {'code': 'REVIEW_DENIED'}}}
+                  |   {'former_lead_summary': {'mode': 'PROSE', 'state': 'PENDING', 'round_no': 1, 'reviewer_id': 'second-reviewer', ...}} != {'former_lead_summary': {'error': {'code': 'REVIEW_DENIED'}}}
+                  |   {'other_team_summary': {'mode': 'PROSE', 'state': 'PENDING', 'round_no': 1, 'reviewer_id': 'reviewer', ...}} != {'other_team_summary': {'error': {'code': 'REVIEW_DENIED'}}}
+                  |   {'former_lead_request_replay': {'state'...
+                  |   
+                  |   ...Full output truncated, use '-vv' to show
+                  +------------------------------------</failure></testcase></testsuite></testsuites>
