@@ -1,0 +1,206 @@
+{
+  "status": "PASS",
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "execution_kind": "REAL_ISOLATED_POSTGRESQL",
+  "source_port": 46505,
+  "restored_port": 39673,
+  "durability": {
+    "fsync": true,
+    "synchronous_commit": true,
+    "data_checksums": true
+  },
+  "model_calls": 1,
+  "production_data_accessed": false,
+  "libpq_environment_isolated": true,
+  "cleared_pg_environment_names": [],
+  "bridge_rows_at_basebackup": {
+    "installations": 0,
+    "slots": 0,
+    "receipts": 0
+  },
+  "pg_basebackup": {
+    "exit_code": 0,
+    "stdout": ""
+  },
+  "base_backup_seconds": 1.3813276470000346,
+  "pg_verifybackup": {
+    "exit_code": 0,
+    "stdout": "backup successfully verified"
+  },
+  "bridge_excluded_post_target_settlement": {
+    "attempt_id": "8ba3c977-8e2e-4dba-b32c-871f2cbb3feb",
+    "state": "SUCCEEDED",
+    "reserved_amount": "0.100000",
+    "reserved_tokens": 100000,
+    "actual_amount": "0.020000",
+    "actual_tokens": 18,
+    "budget_id": "8eb02b0e-8f25-4ec5-a509-c31a0e9b19c6",
+    "budget_reserved": "0.000000",
+    "budget_spent": "0.020000"
+  },
+  "archiver": {
+    "archived_count": 4,
+    "failed_count": 0
+  },
+  "restored_semantic_conflict": {
+    "case_id": "14bb33f8-a696-5e13-b904-0e6bebd23357",
+    "receipt_id": "5a68f0bf-e4b5-551c-87fa-6b5a5fbb58e1",
+    "conflict_type": "STALE_PRECONDITION",
+    "outcome": "REVIEW_REQUIRED",
+    "observation_ids": [
+      "6c91c326-189a-5e18-b0fd-e81aeb056455",
+      "ec2d35f0-d775-5019-bf4e-852d72dd6fdd"
+    ],
+    "change_revision": "fd477c7a-8d12-40a9-9a8a-02e7b07bc140",
+    "contributions": {
+      "semantic.conflict.detected": {
+        "events": 1,
+        "conflict.candidates": 1,
+        "conflict.confirmed_by_guard": 1,
+        "conflict.type.STALE_PRECONDITION": 1,
+        "event.semantic.conflict.detected": 1
+      },
+      "semantic.conflict.resolved": {
+        "events": 1,
+        "conflict.actual_tokens": 0,
+        "conflict.review_escalations": 1,
+        "conflict.result.REVIEW_REQUIRED": 1,
+        "event.semantic.conflict.resolved": 1,
+        "conflict.strategy.ESCALATE_REVIEW": 1,
+        "conflict.additional_model_attempts": 0,
+        "conflict.cost_status.NO_MODEL_CALL": 1,
+        "duration_ms.semantic.conflict.resolved": "86.216"
+      }
+    }
+  },
+  "redis_pitr_reconciliation": {
+    "redis_version": "8.0.2",
+    "target_subscriber_receipts": 1,
+    "target_audit_rows": 1,
+    "excluded_redis_entries_quarantined": 1,
+    "excluded_world_revisions": 0
+  },
+  "target_world_ref": {
+    "work_id": "0d9ad603-df7a-462b-974a-92ead5694ac9",
+    "branch_id": "5a6a7938-a5df-437a-a34e-22e989d6749d",
+    "world_revision_id": "9d1a7240-584d-49e1-ad47-09c974109dd6"
+  },
+  "target_lsn": "0/312CA60",
+  "restored_state_sha256": "a221a4fe2233f064520710ac34610270c619faf5306f544860cac58db7cbccfa",
+  "snapshot_equal_before_fencing": true,
+  "table_count": 70,
+  "object_count": 42,
+  "recovery_seconds_to_verified_service": 1.6921903370002838,
+  "selected_recovery_point_age_seconds": 0.515139,
+  "target_commits_lost": 0,
+  "deliberately_excluded_later_world_commits": 1,
+  "restored_world_event_count": 2,
+  "unknown_calls_retained": 1,
+  "reserved_amount_retained": "0.5",
+  "fenced_task_count": 4,
+  "old_worker_rejected": true,
+  "original_commit_receipt_equal": true,
+  "limitation": "Small isolated local fixture; selected-point RPO/RTO, not production SLO or remote storage test",
+  "bridge_physical_witness": {
+    "source_stdio": {
+      "protocol_version": "aw-nf.v1",
+      "nf_instance_id": "8eeca843-6044-4557-9641-7aba8ff9b0f0",
+      "work_id": "dd158abe-d330-492a-8d32-3bf129ec7807",
+      "branch_id": "00caeeae-00eb-4704-a372-04cf74afc012",
+      "operation_id": "ff39f1cd-66f4-40fa-9b47-42e27033c15e",
+      "task_id": "7a9f9c4c-4b3f-426f-92be-800487c0e66b",
+      "receipt_ref": "8ce48a83-6694-4f61-82f4-467bca1e17f8",
+      "world_ref": {
+        "work_id": "dd158abe-d330-492a-8d32-3bf129ec7807",
+        "branch_id": "00caeeae-00eb-4704-a372-04cf74afc012",
+        "world_revision_id": "a03a48d2-8c57-4e77-b490-fc5acfb52960"
+      },
+      "generation": 1,
+      "task_state": "RESULT_STORED",
+      "accounting_state": "UNKNOWN",
+      "currency": "USD",
+      "actual_amount": "0",
+      "actual_tokens": 0,
+      "attempt_ids": [
+        "8ba3c977-8e2e-4dba-b32c-871f2cbb3feb"
+      ],
+      "attempts": [
+        {
+          "attempt_id": "8ba3c977-8e2e-4dba-b32c-871f2cbb3feb",
+          "state": "UNKNOWN",
+          "actual_amount": null,
+          "actual_tokens": null
+        }
+      ],
+      "result_ref": null,
+      "wait_reason": null
+    },
+    "restored_stdio": {
+      "protocol_version": "aw-nf.v1",
+      "nf_instance_id": "8eeca843-6044-4557-9641-7aba8ff9b0f0",
+      "work_id": "dd158abe-d330-492a-8d32-3bf129ec7807",
+      "branch_id": "00caeeae-00eb-4704-a372-04cf74afc012",
+      "operation_id": "ff39f1cd-66f4-40fa-9b47-42e27033c15e",
+      "task_id": "7a9f9c4c-4b3f-426f-92be-800487c0e66b",
+      "receipt_ref": "8ce48a83-6694-4f61-82f4-467bca1e17f8",
+      "world_ref": {
+        "work_id": "dd158abe-d330-492a-8d32-3bf129ec7807",
+        "branch_id": "00caeeae-00eb-4704-a372-04cf74afc012",
+        "world_revision_id": "a03a48d2-8c57-4e77-b490-fc5acfb52960"
+      },
+      "generation": 2,
+      "task_state": "PAUSED",
+      "accounting_state": "UNKNOWN",
+      "currency": "USD",
+      "actual_amount": "0",
+      "actual_tokens": 0,
+      "attempt_ids": [
+        "8ba3c977-8e2e-4dba-b32c-871f2cbb3feb"
+      ],
+      "attempts": [
+        {
+          "attempt_id": "8ba3c977-8e2e-4dba-b32c-871f2cbb3feb",
+          "state": "UNKNOWN",
+          "actual_amount": null,
+          "actual_tokens": null
+        }
+      ],
+      "result_ref": null,
+      "wait_reason": "CALL_RECONCILIATION_REQUIRED"
+    },
+    "source_and_restored_accounting": {
+      "attempt_id": "8ba3c977-8e2e-4dba-b32c-871f2cbb3feb",
+      "state": "UNKNOWN",
+      "reserved_amount": "0.100000",
+      "reserved_tokens": 100000,
+      "actual_amount": null,
+      "actual_tokens": null,
+      "budget_id": "8eb02b0e-8f25-4ec5-a509-c31a0e9b19c6",
+      "budget_reserved": "0.100000",
+      "budget_spent": "0.000000"
+    },
+    "same_operation_same_receipt": true,
+    "new_operation_denial": {
+      "error": {
+        "code": "DELEGATION_RECOVERY_FENCED"
+      }
+    },
+    "both_inference_fences": true,
+    "post_fence_supervisor": "IDLE",
+    "bridge_rows": {
+      "installations": 1,
+      "slots": 1,
+      "receipts": 1
+    },
+    "local_fixture_provider_http_calls": 1,
+    "paid_external_model_calls": 0
+  },
+  "product_sha": "695668b87f6a76acbe7e27c71fcb259b7b3f0795",
+  "product_tree": "788dc4b190299894509593a23982452f0362f9ef",
+  "p4_script_sha256": "6c85161502ba526736ec423bc21a8533d84b7755f99194fb1b1d0237bc2d9c71",
+  "fixture_driver_sha256": "e2ca3e10d974a2d447eba8e7fc8a9268e5b4fae1a20e249993c66a51971ab779",
+  "paid_external_model_calls": 0,
+  "model_call_kind": "local synthetic provider HTTP; no commercial model",
+  "all_unknown_call_count": 2,
+  "total_seconds": 12.108796598000026
+}
