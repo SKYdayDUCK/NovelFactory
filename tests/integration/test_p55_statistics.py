@@ -193,6 +193,10 @@ def test_archived_world_outbox_rebuilds_only_new_effects(kernel_env):
     selector = "SELECT outbox_id FROM nf_outbox WHERE topic='world.accepted' AND payload->'world_ref'->>'work_id'=:w"
     with kernel.db.uow() as repo:
         # Isolated fixture represents an archive made before P5.5 was installed.
+        # No P5.5/S9 transport bookkeeping or pending scan existed at that time.
+        repo.conn.execute(
+            text(f"DELETE FROM nf_semantic_scans WHERE event_id IN ({selector})"), {"w": work}
+        )
         repo.conn.execute(
             text(f"DELETE FROM nf_bus_publications WHERE event_id IN ({selector})"), {"w": work}
         )

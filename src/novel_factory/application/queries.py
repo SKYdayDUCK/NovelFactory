@@ -240,7 +240,8 @@ class WorldQueryService:
         return point_key(subject_time['interval']['end']) <= point_key(frontier)
 
     def _handle(self, packet, request):
-        digest = fingerprint({'world_ref': packet['read_cut']['world_ref'],
+        digest = fingerprint({'world_ref': packet['read_cut']['world_ref'], 'task_id': request['task_id'],
+                              'generation':request['generation'], 'page_size':request['page_size'], 'cursor':request.get('cursor'),
                               'permission_epoch': packet['grant']['epoch'], 'principal': packet['grant']['principal_id'],
                               'knowledge_cut': request['knowledge_cut'], 'subject_time': request['subject_time'], 'query': request['query']})
         return str(uuid5(UUID(packet['read_cut']['world_ref']['world_revision_id']), digest))

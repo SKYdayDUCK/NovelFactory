@@ -222,6 +222,23 @@ class LogService:
                    error_code=error, duration_ms=elapsed_ms, evidence_id=_uuid(evidence_id) if not error else None)
 
     @staticmethod
+    def recent_conflicts(kernel, principal, work_id, branch_id, *, limit=30):
+        """Operator-only index of case IDs and review state, without message contents."""
+        if type(limit) is not int or not 1 <= limit <= 100:
+            raise ValueError("Limit must be between 1 and 100")
+        with kernel.db.uow(write=False) as repo:
+            kernel.authorize(repo, principal, work_id, "ADMIN", branch_id)
+            return [dict(row) for row in repo.conn.execute(text("""
+                SELECT c.case_id,c.task_id,c.generation,c.conflict_type,c.strategy,
+                    c.world_revision_id,c.created_at,r.outcome,r.receipt_id,
+                    r.details->>'review_task_id' AS review_task_id, t.state AS review_task_state
+                FROM nf_conflict_cases c LEFT JOIN nf_conflict_resolutions r USING(case_id)
+                LEFT JOIN nf_tasks t ON t.task_id=(r.details->>'review_task_id')::uuid
+                WHERE c.work_id=:work AND c.branch_id=:branch
+                ORDER BY c.created_at DESC,c.case_id DESC LIMIT :limit
+            """), {"work":work_id, "branch":branch_id, "limit":limit}).mappings()]
+
+    @staticmethod
     def trace(kernel, principal, work_id, branch_id, trace_id):
         with kernel.db.uow(write=False) as repo:
             kernel.authorize(repo, principal, work_id, "ADMIN", branch_id)

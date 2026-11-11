@@ -159,10 +159,19 @@ class RuntimeSupervisor:
     def advance_world(self, controller, work_id, branch_id):
         from novel_factory.application.conflict_resolution import ConflictResolutionService
         resolution = ConflictResolutionService(self.kernel)
-        resolution.scan_one(controller, work_id, branch_id)
+        # Notifications may coalesce or arrive while Redis is offline. Drain a
+        # bounded batch and retain a runnable signal when there is more work.
+        for _ in range(8):
+            if resolution.scan_one(controller, work_id, branch_id) is None:
+                break
+        else:
+            return {"status": "SEMANTIC_SCAN_PENDING"}
         receipt = resolution.resolve_one(controller, work_id, branch_id)
         if receipt:
             return {"status": "CONFLICT_COORDINATED", **receipt}
+        settled = resolution.reconcile_one(controller, work_id, branch_id)
+        if settled:
+            return {"status": "CONFLICT_COORDINATED", **settled}
         from novel_factory.application.volume_successor import advance_volume
         volume = advance_volume(self.kernel, self.gateway, controller, work_id, branch_id)
         if volume:
@@ -184,6 +193,14 @@ class RuntimeSupervisor:
         summary = self.workflow.resume_project(work_id, branch_id, authorize_in_tx=authorize)
         with self.kernel.db.uow() as repo:
             authorize(repo.conn)
+            expired_reviews = repo.conn.execute(text("""
+                SELECT task_id::text,generation FROM nf_tasks WHERE work_id=:work AND branch_id=:branch
+                AND task_kind='semantic_conflict_review' AND state='WAITING_REVIEW'
+                AND deadline<=statement_timestamp() ORDER BY deadline LIMIT 32 FOR UPDATE SKIP LOCKED
+            """), {"work": work_id, "branch": branch_id}).all()
+            for task_id, generation in expired_reviews:
+                repo.change("tasks", {"task_id": task_id}, {"state": "FAILED", "updated_at": repo.now()})
+                self.kernel.tasks._emit(repo.conn, task_id, generation, "FAILED")
             stale = repo.conn.execute(text("""
                 SELECT t.task_id::text,t.generation FROM nf_tasks t JOIN nf_supervisor_jobs j USING(task_id)
                 WHERE t.work_id=:work AND t.branch_id=:branch AND t.state='READY'
@@ -194,7 +211,7 @@ class RuntimeSupervisor:
                 repo.change("tasks", {"task_id": task_id}, {"state": "PAUSED", "lease_owner": None,
                             "lease_expiry": None, "updated_at": repo.now()})
                 self.kernel.tasks._emit(repo.conn, task_id, generation, "PAUSED")
-        if stale:
+        if stale or expired_reviews:
             summary.update(self.workflow.status(work_id, branch_id, authorize_in_tx=authorize))
         return summary
 
@@ -244,6 +261,7 @@ class RuntimeSupervisor:
         """
         with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
             self.kernel.authorize(repo, controller, work_id, "ADMIN", branch_id)
+            repo.one("branches", {"work_id": work_id, "branch_id": branch_id}, lock="share")
             rows = repo.conn.execute(text("""
                 SELECT t.task_id::text AS task_id, j.config FROM nf_tasks t JOIN nf_supervisor_jobs j USING(task_id)
                 JOIN nf_grants g ON t.grant_id=g.grant_id
@@ -266,6 +284,13 @@ class RuntimeSupervisor:
             """), {"work": work_id, "branch": branch_id}).mappings().all()
             for row in rows:
                 task = repo.one("tasks", {"task_id": row["task_id"]})
+                from novel_factory.application.semantic_dependencies import check_task_dependencies
+                try:
+                    check_task_dependencies(repo, task["task_id"], task["generation"])
+                except DomainError as exc:
+                    if exc.code != "DEPENDENCY_CONFLICT":
+                        raise
+                    continue
                 owner = Principal(task["grant_id"], task["principal_id"])
                 _, grant, _ = WorldQueryService(self.kernel)._task(repo, owner, task["task_id"], task["generation"])
                 if grant["epoch"] != row["config"]["grant_epoch"]:

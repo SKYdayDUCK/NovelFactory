@@ -58,3 +58,52 @@ def test_replay_counts_only_completed_outcomes_and_denies_actor(kernel_env):
                  lambda: LogService.trace(kernel, actor, *scope[1:], task["task_id"])):
         with pytest.raises(DomainError):
             read()
+
+
+def test_only_claim_from_exact_recompute_receipt_is_attributed(kernel_env):
+    from novel_factory.application.statistics import _is_conflict_reexecution
+    from test_s9_resolution import case_for, changed_reader
+    k = kernel_env["kernel"]
+    f, t, _, _ = changed_reader(k)
+    svc, args, case = case_for(k, f, t)
+    assert svc.resolve(*args, case)["outcome"] == "RECOMPUTE_QUEUED"
+    new = k.claim_task(args[0], "newly-routed-employee", task_id=t["task_id"])
+    with k.db.uow(write=False) as repo:
+        assert _is_conflict_reexecution(repo.conn, new)
+        assert not _is_conflict_reexecution(repo.conn, t)
+
+
+def test_character_stdio_hides_an_actual_conflict_and_unknown_case_equally(kernel_env, tmp_path):
+    import asyncio
+    from novel_factory.application.agent_gateway import AgentGateway
+    from novel_factory.application.runtime_tasks import RuntimeTaskService
+    from novel_factory.infrastructure.model_gateway import OpenAICompatibleAdapter
+    from test_p5_mcp import config, error, exercise
+    from test_s9_resolution import case_for, changed_reader
+
+    k = kernel_env["kernel"]
+    story, source, change, _ = changed_reader(k)
+    svc, scope, case = case_for(k, story, source)
+    svc.resolve(*scope, case)
+    rows = LogService.recent_conflicts(k, *scope)
+    assert any(str(row["case_id"]) == case and row["receipt_id"] for row in rows)
+    adapter = OpenAICompatibleAdapter(endpoint="https://fixture.invalid/v1/chat/completions",
+                                      model="fixture", api_key=None)
+    character = RuntimeTaskService(k, AgentGateway(k, {"test": adapter})).prepare(
+        scope[0], change["world_ref"], role_id="character_actor", task_kind="character_action",
+        actor_id=story["ids"]["rival"], story_time=point(40), subject_ids=[story["ids"]["sword"]],
+        predicates=["owner"], assignment="Describe your own intention", adapter_id="test")
+    binding = {**{key: character.task[key] for key in ("task_id", "generation")},
+               "worker_id": character.worker_id}
+
+    with pytest.raises(DomainError):
+        LogService.recent_conflicts(k, character.principal, *scope[1:])
+
+    async def check(session):
+        for ref in (case, str(uuid4())):
+            await error(session, "nf_conflict_trace", {"case_id": ref}, "VIEW_DENIED")
+        received = (await session.call_tool("nf_context_get", {})).structuredContent
+        assert received["actor_id"] == story["ids"]["rival"]
+        assert case not in str(received) and source["task_id"] not in str(received)
+
+    asyncio.run(exercise(config(tmp_path / "actor.json", kernel_env, character.private_token, binding), check))

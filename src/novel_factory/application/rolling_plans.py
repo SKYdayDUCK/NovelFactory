@@ -483,17 +483,17 @@ class RollingPlanning:
             selection_name=_decision_name(change_point_ref, plan_ref),
         )
 
-    def _validate_candidate(self, repo, wr, cp, plan_ref, window_ref):
+    def _validate_candidate(self, repo, wr, cp, plan_ref, window_ref, *, composing=False):
         work = wr["work_id"]
         plan = self.kernel.artifact(repo, plan_ref, work, kind="PLAN_REVISION")["payload"]
         window = self.kernel.artifact(repo, window_ref, work, kind="WINDOW_PLAN")["payload"]
-        self._check_window(repo, wr, cp, plan, window)
+        self._check_window(repo, wr, cp, plan, window, composing=composing)
 
-    def _check_window(self, repo, wr, cp, plan, window):
+    def _check_window(self, repo, wr, cp, plan, window, *, composing=False):
         work = wr["work_id"]
         require(
-            _selection(repo, work, self.plans.selection_key(cp["volume_id"]))
-            == cp["prior_plan_ref"]
+            (composing or _selection(repo, work, self.plans.selection_key(cp["volume_id"]))
+             == cp["prior_plan_ref"])
             and _selection(repo, work, _anchor_name(wr, cp["volume_id"]))
             == cp["reference_timeline_ref"],
             "PLAN_SELECTION_CONFLICT",
@@ -554,7 +554,7 @@ class RollingPlanning:
             "Window interval exceeds authorized future scenes",
         )
 
-    def finalize_adoption(self, repo, wr, plan, plan_ref, review_ref):
+    def finalize_adoption(self, repo, wr, plan, plan_ref, review_ref, *, composing=False):
         """Revalidate the decision and close the editorial tasks inside the adoption transaction."""
         anchor = _selection(repo, wr["work_id"], _anchor_name(wr, plan["volume_id"]))
         if anchor is None:
@@ -603,7 +603,7 @@ class RollingPlanning:
                 self.kernel.tasks.guard_task(
                     repo.conn, task["task_id"], task["generation"], record["worker_id"]
                 )
-        self._validate_candidate(repo, wr, cp, plan_ref, review["window_ref"])
+        self._validate_candidate(repo, wr, cp, plan_ref, review["window_ref"], composing=composing)
         # Close each editorial task in the same transaction as adoption. The
         # corresponding Outbox events can safely release a later planning stage.
         for record in (cp, review):

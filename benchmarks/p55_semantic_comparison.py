@@ -95,11 +95,13 @@ def measure(kernel, repeats):
             observations.append({"scenario": scenario, "oracle_affected": scenario != "independent",
                                  "invalidated": affected, "context_reexecutions": int(affected), "samples_ms": durations})
         samples = sorted(x for row in observations for x in row["samples_ms"])
+        independent = [row for row in observations if not row["oracle_affected"]]
+        retained_fraction = sum(not row["invalidated"] for row in independent) / len(independent) if independent else None
         rows.append({"arm": arm, "observations": observations,
             "false_positives": sum(r["invalidated"] and not r["oracle_affected"] for r in observations),
             "false_negatives": sum(not r["invalidated"] and r["oracle_affected"] for r in observations),
             "affected_fraction": sum(r["invalidated"] for r in observations) / len(observations),
-            "valid_retention_fraction": sum(not r["invalidated"] and not r["oracle_affected"] for r in observations),
+            "valid_retention_fraction": retained_fraction,
             "context_reexecutions": sum(r["context_reexecutions"] for r in observations),
             "mean_decision_ms": mean(samples), "p95_decision_ms": samples[ceil(.95 * len(samples)) - 1],
             "p99_decision_ms": samples[ceil(.99 * len(samples)) - 1], "serial_decisions_per_second": 1000 / mean(samples),

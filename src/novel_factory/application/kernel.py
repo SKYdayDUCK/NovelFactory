@@ -14,6 +14,7 @@ from types import SimpleNamespace
 from uuid import uuid4, uuid5, UUID
 
 from novel_factory.application.authorization import Principal, ADMIN_CAPABILITIES
+from novel_factory.application.semantic_dependencies import check_task_dependencies, record_change, record_proposal
 from novel_factory.contracts.registry import validate_contract
 from novel_factory.domain.canonical import canonical_bytes, fingerprint
 from novel_factory.domain.errors import DomainError
@@ -27,8 +28,6 @@ def after(p):
     return {"tick": p["tick"], "phase": p["phase"]+1} if p["phase"] < 2147483647 else {"tick": p["tick"]+1, "phase":0}
 def require(condition, code, message):
     if not condition: raise DomainError(code, message)
-
-from .semantic_dependencies import check_task_dependencies, record_change, record_proposal
 
 
 class Kernel:
@@ -306,8 +305,22 @@ class Kernel:
         with self.db.uow(write=False) as r:
             self._check_artifact_read(r, principal, work_id, ref, **context)
         content = self.objects.read(ref["sha256"])
-        with self.db.uow(write=False) as r:
+        scoped = all(value is not None for value in context.values())
+        with self.db.uow(write=scoped) as r:
             self._check_artifact_read(r, principal, work_id, ref, **context)
+            if scoped:
+                from .queries import WorldQueryService
+                from .semantic_dependencies import record_material_read
+                self.authorize(r, principal, work_id, "READ", world_ref["branch_id"])
+                branch = r.one("branches", {"branch_id": world_ref["branch_id"]}, lock="share")
+                task, _, spec = WorldQueryService(self)._task(r, principal, task_id, generation, lock="share")
+                bundle = r.one("contexts", {"context_bundle_id":context_bundle_id, "task_id":task_id,
+                                             "generation":generation})
+                require(bundle and task["context_bundle_id"]==context_bundle_id and spec["world_ref"]==world_ref
+                        and spec["story_time"]==story_time and bundle["read_cut"]["knowledge_cut"]==knowledge_cut,
+                        "VIEW_DENIED", "Artifact read is outside the bound task")
+                record_material_read(r, task_id, generation, self.revision(r, world_ref), ref,
+                                     knowledge_cut, story_time, branch["head_revision_id"])
         return content
 
     def bootstrap_work(self, name, genesis, *, frontiers=None, work_id=None):
@@ -569,7 +582,8 @@ class Kernel:
             result={"proposal_ref":proposal_ref,"approval_id":approval_id,"base_world_ref":wr,"context_bundle_id":context["context_bundle_id"],
                     "dependency_fingerprint":context["dependency_fingerprint"],"dependency_handle":context["payload"]["dependency_handle"]}
             self._receipt(r,principal,wr,"PROPOSE",idempotency_key,command,result,proposal_id)
-            record_proposal(r, base, proposal_id, task_id, generation, footprint, proposal_ref, at, locked_branch["head_revision_id"])
+            record_proposal(r, base, proposal_id, task_id, generation, footprint, proposal_ref, at,
+                            locked_branch["head_revision_id"], template_id)
             for key in sorted(set(footprint["reads"])|set(footprint["writes"])):
                 r.add("dependencies",{"dependency_id":new_id(),"work_id":wr["work_id"],"branch_id":wr["branch_id"],"owner_type":"proposal","owner_id":proposal_id,
                     "scope_key":key,"observed_version":base["scope_versions"].get(key,0),"dependency_kind":"HARD_PRECONDITION"})

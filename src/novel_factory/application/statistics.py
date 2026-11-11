@@ -96,6 +96,18 @@ def _usage(conn, event, data, version):
     return metrics
 
 
+
+def _is_conflict_reexecution(conn, event):
+    """A refresh creates a READY generation, whose next claim freezes the new input."""
+    return conn.scalar(text("""SELECT EXISTS(
+        SELECT FROM nf_conflict_resolutions r
+        JOIN nf_task_inputs i ON i.task_id=r.task_id AND i.generation=:gen
+        WHERE r.task_id=:task AND r.outcome='RECOMPUTE_QUEUED'
+        AND (r.details->>'new_generation')::int + 1 = i.generation
+        AND i.spec->'world_ref' = r.details->'input_world_ref'
+    )"""), {"task": event["task_id"], "gen": event["generation"]})
+
+
 def calculate(conn, event, version):
     """A pure interpretation of immutable evidence for one version and event."""
     if version not in range(1, CURRENT_VERSION + 1):
@@ -117,8 +129,11 @@ def calculate(conn, event, version):
         result["conflict.strategy." + detail["resolution_strategy"]] = 1
         if outcome in {"REVALIDATED", "CERTIFICATE_REISSUED", "CONTEXT_RECOMPUTED"}:
             result["conflict.auto_resolved"] = 1
-        if outcome == "REVIEW_REQUIRED":
-            result["conflict.review_escalations"] = 1
+        if detail.get("review_task_id") or outcome == "REVIEW_REQUIRED":
+            if event["causation_id"] == event["evidence_id"] and outcome in {
+                "REVIEW_REQUIRED", "REPLAN_PROPOSED", "JOINT_DECISION_REQUIRED", "CANDIDATE_PRESERVED"
+            }:
+                result["conflict.review_escalations"] = 1
         if outcome == "REPLAN_PROPOSED":
             result["conflict.replan_proposals"] = 1
         for key in ("additional_model_attempts", "actual_tokens", "retained_artifacts",
@@ -191,6 +206,17 @@ def calculate(conn, event, version):
         result["literary.revisions"] = int(_source(conn, event)["prior_draft_ref"] is not None)
         if event["text_characters"] is not None:
             result["literary.draft_unicode_characters"] = event["text_characters"]
+    if version >= 5 and event["task_id"] and (
+        kind in {"model.completed", "artifact.agent_role_tool_response"}
+        or (kind == "task.changed" and event["outcome"] == "ACCEPTED")
+    ) and _is_conflict_reexecution(conn, event):
+        if kind == "task.changed":
+            result["conflict.recomputations_accepted"] = 1
+        else:
+            # Retain provider provenance and currency under the normal receipt rules.
+            # This is a breakdown of model usage, not an additional billable charge.
+            result.update({"conflict.reexecution." + key: value for key, value in list(result.items())
+                           if key.startswith("model.")})
     if version >= 2 and event["duration_ms"] is not None:
         result["duration_ms." + kind] = str(event["duration_ms"])
     return result

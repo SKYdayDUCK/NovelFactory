@@ -164,7 +164,7 @@ class AgentGateway:
 
     def _messages(self, principal, binding):
         task, spec, context, data = (binding[k] for k in ("task", "spec", "context", "input"))
-        material = []
+        material, specialized = [], []
         continuity = set()
         if data["material_refs"]:
             artifacts = tables["artifacts"]
@@ -182,7 +182,9 @@ class AgentGateway:
                 content = self.material_reader(principal, task_id=task["task_id"],
                     generation=task["generation"], context_bundle_id=task["context_bundle_id"],
                     artifact_ref=ref)
-            if content is None:
+            if content is not None:
+                specialized.append(ref)
+            else:
                 content = self.kernel.get_artifact(principal, task["work_id"], ref,
                     task_id=task["task_id"], generation=task["generation"], context_bundle_id=task["context_bundle_id"],
                     world_ref=spec["world_ref"], story_time=spec["story_time"], knowledge_cut=context["read_cut"]["knowledge_cut"])
@@ -192,6 +194,15 @@ class AgentGateway:
             except UnicodeError:
                 raise DomainError("INVALID_ARGUMENT", "Agent material must be UTF-8 text") from None
             material.append({"artifact_ref": ref, "content": value})
+        if specialized and context["read_cut"]["knowledge_cut"]["plane"] != "BELIEF":
+            from .semantic_dependencies import inherit_material
+            wr = spec["world_ref"]
+            with self.kernel.db.uow() as repo:
+                self.kernel.authorize(repo, principal, wr["work_id"], "READ", wr["branch_id"])
+                branch = repo.one("branches", {"branch_id":wr["branch_id"]}, lock="share")
+                self.kernel._task_binding(repo, principal, task["task_id"], task["generation"], task["context_bundle_id"])
+                inherit_material(repo, task["task_id"], task["generation"], self.kernel.revision(repo, wr),
+                                 specialized, context["read_cut"]["knowledge_cut"], branch["head_revision_id"])
         runtime = binding["runtime"]
         output = data["output_contract"]
         contract_text = prompt_schema(output["name"], output["version"])

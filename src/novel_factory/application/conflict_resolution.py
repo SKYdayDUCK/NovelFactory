@@ -92,6 +92,8 @@ class ConflictResolutionService:
             prior = repo.conn.scalar(text("SELECT details FROM nf_conflict_resolutions WHERE case_id=:case"),
                                      {"case": found})
             if prior:
+                for wr in prior.get("compared_world_refs", []):
+                    self.kernel.authorize(repo, controller, work_id, "BRANCH", wr["branch_id"])
                 return prior if case_id else None
             task = repo.one("tasks", {"task_id": case["task_id"], "work_id": work_id,
                                       "branch_id": branch_id}, lock="update")
@@ -127,6 +129,16 @@ class ConflictResolutionService:
     def _decide(self, kernel, repo, controller, head, case, task):
         if task["generation"] != case["generation"] or task["state"] in {"CANCELLED", "FAILED"}:
             return {"outcome": "SUPERSEDED"}
+        if task["state"] == "STALE":
+            previous = repo.conn.scalar(text("""SELECT case_id::text FROM nf_conflict_resolutions
+                WHERE task_id=:id AND generation=:gen ORDER BY created_at LIMIT 1"""),
+                {"id": task["task_id"], "gen": task["generation"]})
+            if previous:
+                return {"outcome": "ALREADY_FENCED", "prior_case_id": previous}
+        if task["task_kind"] == "semantic_conflict_review":
+            # Tickets identify immutable case evidence. A review never spawns
+            # a review of itself; an independent decision rechecks current HEAD.
+            return {"outcome": "REVIEW_SCOPE_PRESERVED"}
         if task["state"] == "ACCEPTED":
             return {"outcome": "HISTORY_PRESERVED", "resolution_strategy": "REPAIR_HISTORY"}
         calls = repo.many("call_attempts", {"task_id": task["task_id"]})
@@ -139,18 +151,26 @@ class ConflictResolutionService:
                     [str(c["attempt_id"]) for c in calls if c["state"] in {"PREPARED", "SENT", "UNKNOWN"}]}
         spec = repo.one("task_inputs", {"task_id": task["task_id"], "generation": task["generation"]})["spec"]
         strategy = case["strategy"]
+        if strategy == "CANDIDATE_BRANCH" and case["conflict_type"] == "BRANCH_DIVERGENCE":
+            refs = case["details"]["source_world_refs"]
+            require(len(refs) == 2, "INVALID_EVIDENCE", "Expected two immutable branch selections")
+            comparison = kernel.compare(controller, *refs)
+            result = self._review(kernel, repo, controller, head, case, task, "BRANCH_SELECTION_REQUIRED")
+            result.update(outcome="CANDIDATE_PRESERVED", resolution_strategy=strategy,
+                          compared_world_refs=refs, changed_selections=len(comparison["event_changes"]))
+            return result
         if strategy in {"REPAIR_HISTORY", "CANDIDATE_BRANCH"}:
             # Preserve candidates; a fork alone never accepts, rewrites or promotes.
             kind = "REPAIR" if strategy == "REPAIR_HISTORY" else "CANDIDATE"
             ref = kernel.fork(controller, head, kind, "semantic:" + case["case_id"])
             result = self._review(kernel, repo, controller, head, case, task, "INDEPENDENT_DECISION_REQUIRED")
-            result.update(outcome="CANDIDATE_PRESERVED", candidate_world_ref=ref)
+            result.update(outcome="CANDIDATE_PRESERVED", resolution_strategy=strategy, candidate_world_ref=ref)
             return result
         if strategy == "REPLAN_WINDOW":
             return self._plan(kernel, repo, controller, head, case, task, spec)
         if strategy == "JOINT_ADJUDICATION":
             result = self._review(kernel, repo, controller, head, case, task, "JOINT_DECISION_REQUIRED")
-            result["outcome"] = "JOINT_DECISION_REQUIRED"
+            result.update(outcome="JOINT_DECISION_REQUIRED", resolution_strategy=strategy)
             # Bind an enrolled interaction if one exists, never invent participants
             # or a winner from Redis delivery order.
             job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})
@@ -163,16 +183,24 @@ class ConflictResolutionService:
             return result
         if strategy == "ESCALATE_REVIEW":
             return self._review(kernel, repo, controller, head, case, task, "UNCERTAIN_MEANING")
-        from novel_factory.application.semantic_dependencies import check_task_dependencies
+        from novel_factory.application.semantic_dependencies import check_task_dependencies, revalidate_task
         try:
             check_task_dependencies(repo, task["task_id"], task["generation"])
+            valid = True
         except DomainError as exc:
             if exc.code != "DEPENDENCY_CONFLICT":
                 raise
-        else:
-            if strategy == "REBASE_CANDIDATE":
+            valid = revalidate_task(repo, kernel, task["task_id"], task["generation"], head)
+        if valid:
+            check_task_dependencies(repo, task["task_id"], task["generation"])
+            candidate = repo.one("proposals", {"task_id": task["task_id"], "generation": task["generation"]})
+            if candidate:
                 return self._certificate(kernel, repo, head, case, task, spec)
-            return {"outcome": "REVALIDATED", "validated_world_ref": head}
+            evidence = repo.one("task_results", {"result_id": task["current_result_id"]}) if task["current_result_id"] else None
+            retained = evidence["payload"]["artifacts"] if evidence and evidence["disposition"] == "CURRENT" else []
+            return {"outcome": "REVALIDATED", "resolution_strategy": "REVALIDATE",
+                    "validated_world_ref": head, "retained_artifacts": len(retained),
+                    "retained_artifact_refs": retained}
         if strategy in {"RECOMPUTE_DEPENDENTS", "REVALIDATE", "REBASE_CANDIDATE"} and not calls:
             return self._refresh(kernel, repo, head, case, task, spec)
         return self._review(kernel, repo, controller, head, case, task, "NEW_COMPUTATION_REQUIRES_REVIEW")
@@ -190,7 +218,9 @@ class ConflictResolutionService:
             "concurrency_mode": "DEPENDENCY_GUARDED", "base_world_ref": spec["world_ref"],
             "proposal_ref": proposal["artifact_ref"], "dependency_handle": context["payload"]["dependency_handle"],
             "approval_refs": [a["approval_id"] for a in approvals], "idempotency_key": "semantic:" + case["case_id"]})
-        return {"outcome": "CERTIFICATE_REISSUED", "certificate_ref": ref, "validated_world_ref": head}
+        return {"outcome": "CERTIFICATE_REISSUED", "resolution_strategy": "REBASE_CANDIDATE",
+                "certificate_ref": ref, "validated_world_ref": head, "retained_artifacts": 1,
+                "retained_artifact_refs": [proposal["artifact_ref"]]}
 
     @staticmethod
     def _refresh(kernel, repo, head, case, task, spec):
@@ -255,6 +285,8 @@ class ConflictResolutionService:
         require(affected.intersection(pinned["node_ids"]) and len(affected) <= MAX_WINDOW,
                 "WINDOW_CONFLICT", "Impact exceeds or misses this finite window")
         cuts = [spec["story_time"]]
+        cuts.extend(e for e in case["details"].get("story_time_constraints", [])
+                    if isinstance(e, dict) and "tick" in e and "phase" in e)
         cuts.extend(e["at"] for e in case["details"].get("story_time_constraints", [])
                     if isinstance(e, dict) and isinstance(e.get("at"), dict))
         boundary = max(map(point_key, cuts))
@@ -279,7 +311,7 @@ class ConflictResolutionService:
                      "disposition": "REJECTED", "reason": "硬前提已经失效或无法确定"}]}},
             "semantic:" + case["case_id"])
         result = self._review(kernel, repo, controller, head, case, task, "PLAN_SELECTION_REQUIRES_REVIEW")
-        result.update(outcome="REPLAN_PROPOSED", plan_ref=candidate["plan_ref"], report_ref=candidate["report_ref"],
+        result.update(outcome="REPLAN_PROPOSED", resolution_strategy="REPLAN_WINDOW", plan_ref=candidate["plan_ref"], report_ref=candidate["report_ref"],
                       affected_node_ids=sorted(affected), preserved_node_ids=candidate["report"]["preserved_node_ids"])
         return result
 
@@ -294,17 +326,160 @@ class ConflictResolutionService:
         scope = {"case_id": case_id, "affected_task_id": task["task_id"], "generation": case["generation"],
              "input_world_ref": head, "strategy": case["strategy"], "reason": reason,
              "maximum_model_calls": 0, "maximum_future_nodes": MAX_WINDOW}
+        if grant["role_id"] != "control_operator" or not {
+                "TASK_CREATE", "TASK_CLAIM", "COMPILE", "ARTIFACT_WRITE", "READ"} <= set(grant["capabilities"]):
+            return {"outcome": "DEFERRED", "reason": "REVIEW_PROVISIONING_GRANT_REQUIRED",
+                    "resolution_strategy": "ESCALATE_REVIEW", "suggested_strategy": case["strategy"]}
         ref = kernel._blob(scope)
         kernel._register_artifact(repo, ref, head["work_id"], scope, "SEMANTIC_REVIEW_SCOPE",
                                   controller.principal_id)
+        # Review holds references to an immutable disagreement. Its ordinary
+        # ContextBundle is only a fixed-cut execution fence. No model is enrolled.
+        original = repo.one("task_inputs", {"task_id": task["task_id"], "generation": task["generation"]})["spec"]
+        manifests = (kernel.artifact(repo, item, head["work_id"]) for item in original["input_artifacts"])
+        subject = next((row["payload"]["subject_ids"][0] for row in manifests if row["kind"] == "INPUT_MANIFEST"),
+                       task["task_id"])
+        manifest = kernel.put_artifact(controller, head["work_id"],
+            {"subject_ids": [subject], "predicates": ["lifecycle"]}, "INPUT_MANIFEST")
         spec = {"schema_version": "2.0", "task_id": review_id, "generation": 0,
-                "role_id": grant["role_id"], "task_kind": "semantic_conflict_review", "state": "BLOCKED",
+                "role_id": grant["role_id"], "task_kind": "semantic_conflict_review", "state": "READY",
                 "world_ref": head, "story_time": {"tick": 0, "phase": 0}, "context_bundle_id": None,
                 "dependency_fingerprint": None, "policy_version": work["policy_version"],
                 "runtime_contract_version": fingerprint("nf-semantic-review-1"), "capability_grant_id": grant["grant_id"],
-                "input_artifacts": [ref], "budget": {"currency": "USD", "max_amount": "0", "token_budget": 0},
+                "input_artifacts": [ref, manifest], "budget": {"currency": "USD", "max_amount": "0", "token_budget": 4096},
                 "wall_deadline": (repo.now() + timedelta(days=1)).isoformat()}
         kernel.create_task(controller, spec, "semantic:review:" + case_id)
+        worker = "semantic-review:" + case_id
+        claimed = kernel.claim_task(controller, worker, task_id=review_id)
+        require(claimed, "REVIEW_REQUIRED", "Could not bind review task")
+        from novel_factory.application.queries import WorldQueryService
+        compiled = WorldQueryService(kernel).context_compile(controller, {
+            "schema_version": "2.1", "task_id": review_id, "generation": claimed["generation"],
+            "recipe_id": "ADJUDICATOR", "input_manifest_ref": manifest, "knowledge_cut": {"plane": "WORLD"},
+            "subject_time": {"kind": "POINT", "at": spec["story_time"]}, "token_budget": 4096,
+            "read_contract": {"revision": {"mode": "FIXED", "world_ref": head},
+                              "process_policy": "ALLOW_PARTIAL", "index_policy": "AUTHORITATIVE", "max_wait_ms": 0},
+            "idempotency_key": "semantic:review:context:" + case_id})
+        require(compiled["status"] == "READY", "CONTEXT_REQUIRED", "Review context is unavailable")
+        _set_state(kernel, repo, claimed, "WAITING_REVIEW")
         if task["state"] not in {"ACCEPTED", "CANCELLED", "FAILED", "STALE"}:
             _set_state(kernel, repo, task, "STALE")
-        return {"outcome": "REVIEW_REQUIRED", "reason": reason, "review_task_id": review_id}
+        return {"outcome": "REVIEW_REQUIRED", "resolution_strategy": "ESCALATE_REVIEW",
+                "suggested_strategy": case["strategy"], "reason": reason, "review_task_id": review_id}
+
+    def reconcile_one(self, controller, work_id, branch_id):
+        """After ledger settlement, route the frozen result once; never dispatch the provider."""
+        params = {"work": work_id, "branch": branch_id}
+        statement = text("""
+            SELECT c.case_id::text,c.task_id::text,c.generation,c.strategy,c.conflict_type,c.details
+            FROM nf_conflict_resolutions r JOIN nf_conflict_cases c USING(case_id)
+            WHERE c.work_id=:work AND c.branch_id=:branch AND r.outcome='CALL_RECONCILIATION_REQUIRED'
+            AND NOT EXISTS(SELECT FROM nf_call_attempts a WHERE a.task_id=c.task_id
+                           AND a.state IN ('PREPARED','UNKNOWN','SENT'))
+            AND NOT EXISTS(SELECT FROM nf_receipts p WHERE p.work_id=c.work_id
+                           AND p.command_type='SEMANTIC_RECONCILE' AND p.idempotency_key=c.case_id::text)
+            ORDER BY r.created_at LIMIT 1
+        """)
+        with self.kernel.db.uow(write=False) as repo:
+            self.kernel.authorize(repo, controller, work_id, "ADMIN", branch_id)
+            if not repo.conn.execute(statement, params).first():
+                return None
+        with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
+            repo.one("works", {"work_id": work_id}, lock="update")
+            self.kernel.authorize(repo, controller, work_id, "ADMIN", branch_id)
+            repo.one("branches", {"work_id": work_id, "branch_id": branch_id}, lock="update")
+            case = repo.conn.execute(statement, params).mappings().one_or_none()
+            if not case:
+                return None
+            kernel = self.kernel.in_transaction(repo)
+            task = repo.one("tasks", {"task_id": case["task_id"]}, lock="update")
+            head = kernel.head(repo, work_id, branch_id)
+            if task["generation"] != case["generation"] or task["state"] in {"ACCEPTED","CANCELLED","FAILED","STALE"}:
+                result = {"outcome": "SUPERSEDED"}
+            else:
+                result = self._review(kernel, repo, controller, head, case, task, "ORIGINAL_ATTEMPT_RECONCILED")
+            result.update(case_id=case["case_id"], additional_model_attempts=0, actual_tokens=0, cost_status="NO_MODEL_CALL")
+            kernel._receipt(repo, controller, head, "SEMANTIC_RECONCILE", case["case_id"], {"case_id": case["case_id"]}, result)
+            from novel_factory.application.audit_log import LogService
+            LogService.conflict(repo.conn, "resolved", case_id=case["case_id"], receipt_id=_id(case["case_id"], "reconciliation"),
+                                task_id=task["task_id"], generation=case["generation"], outcome=result["outcome"], details=result)
+            return result
+
+    def decide_review(self, reviewer, expected_head, case_id, *, decision, evidence_ref, interaction=None):
+        """Apply an independent, explicit decision. Actual world acceptance stays in Kernel."""
+        from novel_factory.contracts.registry import validate_contract
+        validate_contract("WorldRef", expected_head)
+        validate_contract("ArtifactRef", evidence_ref)
+        validate_contract("UUID", case_id)
+        require(decision in {"RETAIN_HISTORY", "DISCARD_CANDIDATE", "CANDIDATE_BRANCH",
+                             "REPAIR_HISTORY", "JOINT_ADJUDICATION"},
+                "INVALID_ARGUMENT", "Unknown review decision")
+        require((decision == "JOINT_ADJUDICATION") == (interaction is not None),
+                "INVALID_ARGUMENT", "Only a joint referral needs a registered interaction request")
+        request = {"world_ref": expected_head, "case_id": case_id, "decision": decision,
+                   "evidence_ref": evidence_ref, "interaction": interaction}
+        work, branch = expected_head["work_id"], expected_head["branch_id"]
+        with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
+            repo.one("works", {"work_id": work}, lock="update")
+            self.kernel.authorize(repo, reviewer, work, "ADMIN", branch)
+            self.kernel.authorize(repo, reviewer, work, "APPROVE", branch)
+            repo.one("branches", {"work_id": work, "branch_id": branch}, lock="update")
+            prior = self.kernel._prior(repo, reviewer, work, "SEMANTIC_REVIEW", case_id, request)
+            if prior:
+                return prior
+            case = repo.conn.execute(text("""
+                SELECT c.task_id::text,c.source_task_id::text,c.conflict_type,c.details AS detection,r.details
+                FROM nf_conflict_cases c JOIN nf_conflict_resolutions r USING(case_id)
+                WHERE c.work_id=:work AND c.branch_id=:branch AND c.case_id=:case
+            """), {"work": work, "branch": branch, "case": case_id}).mappings().one_or_none()
+            require(case, "VIEW_DENIED", "Review is unavailable")
+            review_id = case["details"].get("review_task_id")
+            if not review_id and case["details"]["outcome"] == "CALL_RECONCILIATION_REQUIRED":
+                receipt = repo.one("receipts", {"work_id": work, "branch_id": branch,
+                                   "command_type": "SEMANTIC_RECONCILE", "idempotency_key": case_id})
+                review_id = receipt and receipt["payload"].get("review_task_id")
+            require(review_id, "VIEW_DENIED", "Review is unavailable")
+            ticket = repo.one("tasks", {"task_id": review_id}, lock="update")
+            require(ticket and ticket["state"] == "WAITING_REVIEW" and ticket["deadline"] > repo.now(),
+                    "REVIEW_CLOSED", "Review is no longer open")
+            producers = {repo.one("tasks", {"task_id": tid})["principal_id"] for tid
+                         in (case["task_id"], case["source_task_id"]) if tid}
+            require(reviewer.principal_id not in producers, "VIEW_DENIED", "Review requires an independent identity")
+            signed = self.kernel.artifact(repo, evidence_ref, work, kind="EVIDENCE")
+            evidence = signed["payload"]
+            require(signed["created_by"] == reviewer.principal_id and isinstance(evidence, dict)
+                    and evidence.get("case_id") == case_id and evidence.get("decision") == decision
+                    and evidence.get("world_ref") == expected_head and isinstance(evidence.get("reason"), str)
+                    and 0 < len(evidence["reason"].strip()) <= 10000
+                    and fingerprint(evidence) == evidence_ref["sha256"],
+                    "INVALID_EVIDENCE", "Review evidence must bind the decision, case and world")
+            require(self.kernel.head(repo, work, branch) == expected_head, "HEAD_CONFLICT", "Review the current world")
+            kernel = self.kernel.in_transaction(repo)
+            result = {"outcome": "REVIEW_DECIDED", "decision": decision, "case_id": case_id,
+                      "review_task_id": ticket["task_id"], "evidence_ref": evidence_ref,
+                      "validated_world_ref": expected_head, "reviewer_id": reviewer.principal_id}
+            if decision in {"REPAIR_HISTORY", "CANDIDATE_BRANCH"}:
+                kind = "REPAIR" if decision == "REPAIR_HISTORY" else "CANDIDATE"
+                result["candidate_world_ref"] = kernel.fork(reviewer, expected_head, kind, "semantic:review:" + case_id)
+            if decision == "JOINT_ADJUDICATION":
+                from novel_factory.application.simulation import WorldSchedulerService
+                require(case["conflict_type"] in {"JOINT_ADJUDICATION_REQUIRED", "SHARED_CONSTRAINT_CONFLICT"}
+                        and isinstance(interaction, dict) and set(interaction) == {"at", "scope_ids", "participant_grants"}
+                        and isinstance(interaction["scope_ids"], list) and 1 <= len(interaction["scope_ids"]) <= MAX_IMPACT
+                        and isinstance(interaction["participant_grants"], dict)
+                        and len(interaction["participant_grants"]) <= MAX_IMPACT,
+                        "INVALID_ARGUMENT", "Expected a bounded common interaction")
+                affected_scopes = {part for key in case["detection"]["scopes"] for part in key.split(":")}
+                require(affected_scopes.intersection(interaction["scope_ids"]) and
+                        evidence.get("interaction_sha256") == fingerprint(interaction),
+                        "INVALID_EVIDENCE", "Independent decision must bind the affected shared scope")
+                result["joint"] = WorldSchedulerService(kernel).prepare_interaction(reviewer, expected_head,
+                    interaction["at"], interaction["scope_ids"], interaction["participant_grants"], "semantic:joint:" + case_id)
+            kernel.tasks.accept_in_transaction(repo.conn, ticket["task_id"], ticket["generation"])
+            kernel._receipt(repo, reviewer, expected_head, "SEMANTIC_REVIEW", case_id, request, result)
+            from novel_factory.application.audit_log import LogService
+            LogService.conflict(repo.conn, "resolved", case_id=case_id, receipt_id=_id(case_id, "review-decision"),
+                                task_id=ticket["task_id"], generation=ticket["generation"],
+                                outcome=result["outcome"], details={**result, "resolution_strategy": decision,
+                                "additional_model_attempts": 0, "actual_tokens": 0, "cost_status": "NO_MODEL_CALL"})
+            return result

@@ -16,6 +16,28 @@ from novel_factory.fixtures import create_bound_task, load_fixture, point, run_c
 from novel_factory.infrastructure.eventhub import EventHub
 
 
+def stage_semantic_conflict(kernel):
+    """Read on one workflow, accept an earlier effective change on another."""
+    world = load_fixture(kernel, "white_bridge")
+    owner, base = world["principal"], world["world_ref"]
+    guard = world["ids"]["guard1"]
+    task = create_bound_task(kernel, owner, base, point(20), [guard], ["on_duty"])
+    WorldQueryService(kernel).query(owner, {
+        "schema_version": "2.1", "task_id": task["task_id"], "generation": task["generation"],
+        "read_contract": {"revision": {"mode": "FIXED", "world_ref": base},
+                          "process_policy": "ALLOW_PARTIAL", "index_policy": "AUTHORITATIVE",
+                          "max_wait_ms": 0},
+        "knowledge_cut": {"plane": "WORLD"}, "subject_time": {"kind": "POINT", "at": point(20)},
+        "query": {"kind": "STATE", "subject_ids": [guard], "predicates": ["on_duty"]},
+        "page_size": 32, "cursor": None,
+    })
+    changed = run_command(kernel, owner, base, "SET_RELATION", {
+        "subject_id": guard, "predicate": "on_duty",
+        "object_value": {"kind": "BOOLEAN", "value": False}, "at": point(10),
+    })
+    return (owner, base["work_id"], base["branch_id"]), task, changed
+
+
 class StreamsDrill:
     def __init__(self, root, port):
         binary = shutil.which("redis-server")
@@ -77,25 +99,8 @@ class StreamsDrill:
         """Create decisions after the base backup so only WAL can bring them back."""
         from novel_factory.application.conflict_resolution import ConflictResolutionService
 
-        world = load_fixture(kernel, "white_bridge")
-        owner, base = world["principal"], world["world_ref"]
-        guard = world["ids"]["guard1"]
-        task = create_bound_task(kernel, owner, base, point(20), [guard], ["on_duty"])
-        WorldQueryService(kernel).query(owner, {
-            "schema_version": "2.1", "task_id": task["task_id"], "generation": task["generation"],
-            "read_contract": {"revision": {"mode": "FIXED", "world_ref": base},
-                              "process_policy": "ALLOW_PARTIAL", "index_policy": "AUTHORITATIVE",
-                              "max_wait_ms": 0},
-            "knowledge_cut": {"plane": "WORLD"}, "subject_time": {"kind": "POINT", "at": point(20)},
-            "query": {"kind": "STATE", "subject_ids": [guard], "predicates": ["on_duty"]},
-            "page_size": 32, "cursor": None,
-        })
-        changed = run_command(kernel, owner, base, "SET_RELATION", {
-            "subject_id": guard, "predicate": "on_duty",
-            "object_value": {"kind": "BOOLEAN", "value": False}, "at": point(10),
-        })
+        scope, task, changed = stage_semantic_conflict(kernel)
         resolver = ConflictResolutionService(kernel)
-        scope = (owner, base["work_id"], base["branch_id"])
         for _ in range(8):
             resolver.scan_one(*scope)
             resolver.resolve_one(*scope)

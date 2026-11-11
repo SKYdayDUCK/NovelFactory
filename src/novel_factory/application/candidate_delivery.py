@@ -39,6 +39,8 @@ class CandidateDelivery:
             key = f"{self.route}:{task_id}:{generation}"
             try:
                 with repo.conn.begin_nested():
+                    from novel_factory.application.semantic_dependencies import check_task_dependencies
+                    check_task_dependencies(repo, task_id, generation)
                     result = self._deliver(repo, task, key)
             except DomainError as exc:
                 repo.change(
