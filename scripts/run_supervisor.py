@@ -16,6 +16,7 @@ from novel_factory.infrastructure.codex_host import CodexAppServerAdapter, Codex
 from novel_factory.infrastructure.database import Database
 from novel_factory.infrastructure.model_gateway import OpenAICompatibleAdapter
 from novel_factory.infrastructure.objects import ObjectStore
+from novel_factory.orchestration.processors import PROCESSORS, SCOPED, TaskDispatcher
 from novel_factory.infrastructure.supervisor_wake import wait_for_change, wake_listener
 
 
@@ -24,13 +25,13 @@ def log_result(result):
                       if key in result}), flush=True)
 
 
-def serve(supervisor, principal, work, branch, *, workers, interval):
+def serve(supervisor, principal, work, branch, *, workers, interval, processor=None, controller=None):
     pending = set()
     with ThreadPoolExecutor(max_workers=workers) as pool:
         while True:
             try:
                 with wake_listener(supervisor.kernel.db.engine) as listener:
-                    _drain(supervisor, principal, work, branch, pool, workers, pending, listener, interval)
+                    _drain(supervisor, principal, work, branch, pool, workers, pending, listener, interval, processor, controller)
             except psycopg.OperationalError:
                 # A new LISTEN session always begins with a durable scan.
                 # Already admitted futures remain owned by this pool.
@@ -38,7 +39,9 @@ def serve(supervisor, principal, work, branch, *, workers, interval):
                 time.sleep(min(interval, 5))
 
 
-def _drain(supervisor, principal, work, branch, pool, workers, pending, listener, interval):
+def _drain(supervisor, principal, work, branch, pool, workers, pending, listener, interval, processor=None, controller=None):
+    dispatcher = TaskDispatcher(supervisor, principal, work, branch) if processor else None
+    next_reconciliation = 0.0
     while True:
         for future in tuple(pending):
             if future.done():
@@ -47,7 +50,14 @@ def _drain(supervisor, principal, work, branch, pool, workers, pending, listener
         if len(pending) == workers:
             wait(pending, return_when=FIRST_COMPLETED)
             continue
-        result = supervisor.run_once(principal, work, branch, executor=pool)
+        if dispatcher:
+            now = time.monotonic()
+            reconcile = now >= next_reconciliation
+            if reconcile:
+                next_reconciliation = now + interval
+            result = dispatcher.run_once(processor, executor=pool, reconcile=reconcile)
+        else:
+            result = supervisor.run_once(principal, work, branch, executor=pool)
         if isinstance(result, Future):
             pending.add(result)
         elif result["status"] == "IDLE":
@@ -61,7 +71,9 @@ def main():
     parser.add_argument("--access-file", required=True, type=Path, help="Private JSON with token, work_id and branch_id")
     parser.add_argument("--interval", type=float, default=60, help="Maximum seconds between durable reconciliations")
     parser.add_argument("--workers", type=int, default=2, help="Maximum concurrent Host tasks in this process")
+    parser.add_argument("--processor", choices=SCOPED, help="Run this Redis-mode project processor")
     mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--set-transport", choices=("postgres", "redis"), help="Set admission mode for the authorized branch")
     mode.add_argument("--once", action="store_true")
     mode.add_argument("--enroll", type=Path, help="Private JSON with task_id, fixed input/manifest refs, cut and budget")
     mode.add_argument("--register-next-volume", type=Path, help="Preauthorize one next-volume planner on continuity publication")
@@ -71,20 +83,29 @@ def main():
         parser.error("interval must be between 0.1 and 60 seconds")
     if not 1 <= args.workers <= 16:
         parser.error("workers must be between 1 and 16")
+    if args.processor and args.workers > PROCESSORS[args.processor].max_workers:
+        parser.error("workers exceeds this processor limit")
     access = json.loads(args.access_file.read_text())
     db = Database(pool_size=max(5, args.workers + 2))
     try:
         kernel = Kernel(db, ObjectStore(os.environ.get("NF_OBJECT_ROOT", "var/objects")))
         principal = kernel.authenticate(access["token"])
-        backend = OpenAICompatibleAdapter.from_environment()
-        journal = HostJournal(kernel)
-        adapters = {"external": backend, "codex-text": CodexAppServerAdapter(backend, journal)}
-        if relay := os.environ.get("NF_ROLE_MCP_RELAY"):
+        adapters = {}
+        model_needed = not args.set_transport and args.processor not in {"world", "compute", "recovery"}
+        configured = os.environ.get("NF_MODEL_ENDPOINT") and os.environ.get("NF_MODEL_NAME")
+        if model_needed or configured:
+            backend = OpenAICompatibleAdapter.from_environment()
+            journal = HostJournal(kernel)
+            adapters = {"external": backend, "codex-text": CodexAppServerAdapter(backend, journal)}
+        if adapters and (relay := os.environ.get("NF_ROLE_MCP_RELAY")):
             from novel_factory.interfaces.role_context_host import read_context
             adapters["codex-role-mcp"] = CodexRoleContextAdapter(backend, journal, relay=relay, context_reader=read_context)
             adapters["codex-role-tools"] = CodexRoleLookupAdapter(backend, journal, relay=relay, context_reader=read_context)
         gateway = AgentGateway(kernel, adapters)
         supervisor = RuntimeSupervisor(kernel, gateway)
+        if args.set_transport:
+            print(json.dumps(TaskDispatcher(supervisor, principal, access["work_id"], access["branch_id"]).switch(args.set_transport)))
+            return
         if args.register_scene or args.register_next_volume:
             from novel_factory.application.scene_runtime import register_scene
             from novel_factory.application.volume_successor import register_next_volume
@@ -108,10 +129,14 @@ def main():
             print(json.dumps(enrolled))
             return
         if args.once:
-            log_result(supervisor.run_once(principal, access["work_id"], access["branch_id"]))
+            if args.processor:
+                dispatcher = TaskDispatcher(supervisor, principal, access["work_id"], access["branch_id"])
+                log_result(dispatcher.run_once(args.processor, reconcile=True))
+            else:
+                log_result(supervisor.run_once(principal, access["work_id"], access["branch_id"]))
             return
         serve(supervisor, principal, access["work_id"], access["branch_id"],
-              workers=args.workers, interval=args.interval)
+              workers=args.workers, interval=args.interval, processor=args.processor)
     except DomainError as exc:
         raise SystemExit(exc.code) from None
     finally:

@@ -40,7 +40,12 @@ _NEXT = text("""
 """)
 
 
-def next_job(conn, work, branch):
+def redis_enabled(conn, work, branch):
+    return conn.scalar(text("""SELECT EXISTS (SELECT FROM nf_redis_branches
+        WHERE work_id=:work AND branch_id=:branch)"""), {"work": work, "branch": branch})
+
+
+def next_job(conn, work, branch, *, transport="postgres"):
     """Install/refresh this branch's ticket and pick the oldest eligible live queue.
 
     All supervisors use the existing short queue gate. The caller must reserve
@@ -48,6 +53,8 @@ def next_job(conn, work, branch):
     """
     params = {"work": work, "branch": branch}
     conn.execute(text("SELECT pg_advisory_xact_lock(:gate)"), {"gate": MAINTENANCE_GATE + 1})
+    if (transport == "redis") != redis_enabled(conn, work, branch):
+        return None
     conn.execute(text("LOCK TABLE nf_dispatch_limits IN SHARE MODE"))
     conn.execute(text("DELETE FROM nf_dispatch_waiters WHERE valid_until <= statement_timestamp()"))
     conn.execute(text("DELETE FROM nf_dispatch_slots WHERE expires_at <= statement_timestamp()"))

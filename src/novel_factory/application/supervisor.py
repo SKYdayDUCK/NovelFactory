@@ -141,11 +141,22 @@ class RuntimeSupervisor:
                 require(task["state"] in {"BLOCKED", "READY", "RUNNING"}, "INVALID_TASK_TRANSITION",
                         "Cannot enroll a finished task")
                 repo.add("supervisor_jobs", {"task_id": task_id, "config": config})
+                repo.outbox("supervisor.enrolled", "task", task_id, {"generation": task["generation"]},
+                            f"supervisor:enroll:{task_id}")
             return {"task_id": task_id, "enrolled": True}
 
     def run_once(self, controller, work_id, branch_id, *, executor=None):
-        def authorize(conn):
-            self.kernel.authorize(KernelRepository(conn, tables), controller, work_id, "ADMIN", branch_id)
+        with self.kernel.db.uow(write=False) as repo:
+            self.kernel.authorize(repo, controller, work_id, "ADMIN", branch_id)
+            if dispatch.redis_enabled(repo.conn, work_id, branch_id):
+                return {"status": "IDLE"}
+        result = self.advance_world(controller, work_id, branch_id)
+        if result:
+            return result
+        summary = self.recover_project(controller, work_id, branch_id)
+        return self.admit_model(controller, work_id, branch_id, executor=executor, summary=summary)
+
+    def advance_world(self, controller, work_id, branch_id):
         from novel_factory.application.volume_successor import advance_volume
         volume = advance_volume(self.kernel, self.gateway, controller, work_id, branch_id)
         if volume:
@@ -159,6 +170,11 @@ class RuntimeSupervisor:
         if joint:
             return joint
         self._deliver_candidates(controller, work_id, branch_id)
+        return None
+
+    def recover_project(self, controller, work_id, branch_id):
+        def authorize(conn):
+            self.kernel.authorize(KernelRepository(conn, tables), controller, work_id, "ADMIN", branch_id)
         summary = self.workflow.resume_project(work_id, branch_id, authorize_in_tx=authorize)
         with self.kernel.db.uow() as repo:
             authorize(repo.conn)
@@ -174,9 +190,13 @@ class RuntimeSupervisor:
                 self.kernel.tasks._emit(repo.conn, task_id, generation, "PAUSED")
         if stale:
             summary.update(self.workflow.status(work_id, branch_id, authorize_in_tx=authorize))
+        return summary
+
+    def admit_model(self, controller, work_id, branch_id, *, executor=None, transport="postgres", summary=None):
+        summary = summary or {}
         with self.kernel.db.uow() as repo:
-            authorize(repo.conn)
-            task_id = dispatch.next_job(repo.conn, work_id, branch_id)
+            self.kernel.authorize(repo, controller, work_id, "ADMIN", branch_id)
+            task_id = dispatch.next_job(repo.conn, work_id, branch_id, transport=transport)
             if task_id is None:
                 return {"status": "IDLE", **summary}
             task = repo.one("tasks", {"task_id": task_id})

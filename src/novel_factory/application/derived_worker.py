@@ -10,6 +10,8 @@ from __future__ import annotations
 from copy import deepcopy
 from uuid import UUID, uuid5
 
+from sqlalchemy import text
+
 from novel_factory.application.kernel import require
 from novel_factory.application.query_policy import check_profile
 from novel_factory.contracts.registry import validate_contract
@@ -78,6 +80,26 @@ class DerivedWorldWorker:
         cannot expose a watermark without its durable artifact, acknowledge an
         obsolete lease, or apply a second world effect on redelivery.
         """
+        require(bool(worker_id), "INVALID_ARGUMENT", "A delivery lease owner is required")
+        return self._materialize(lease, worker_id=worker_id, fault=fault)
+
+    def rebuild_one(self, principal, work_id, branch_id):
+        """Repair one immutable index missing its durable receipt, even after legacy delivery."""
+        scope = {"work": work_id, "branch": branch_id, "consumer": CONSUMER}
+        with self.kernel.db.uow(write=False) as repo:
+            self.kernel.authorize(repo, principal, work_id, "ADMIN", branch_id)
+            event = repo.conn.scalar(text("""
+                SELECT o.outbox_id FROM nf_outbox o
+                WHERE o.topic='world.accepted' AND o.payload->'world_ref'->>'work_id'=:work
+                  AND o.payload->'world_ref'->>'branch_id'=:branch
+                  AND NOT EXISTS (SELECT FROM nf_inbox i WHERE i.consumer=:consumer AND i.message_id=o.outbox_id)
+                ORDER BY o.created_at, o.outbox_id LIMIT 1
+            """), scope)
+        if event:
+            return self._materialize({"outbox_id": str(event)}, scope=(principal, work_id, branch_id))
+        return None
+
+    def _materialize(self, lease, *, worker_id=None, scope=None, fault=None):
         kernel = self.kernel
         payload, ref = self._material(lease)
         stored = kernel.objects.put(canonical_bytes(payload))
@@ -89,9 +111,15 @@ class DerivedWorldWorker:
         def handler(conn, persisted_payload):
             repo = KernelRepository(conn, tables)
             row = repo.one("outbox", {"outbox_id": lease["outbox_id"]}, lock="update")
-            require(row and row["state"] == "DELIVERING" and row["generation"] == lease["generation"]
-                    and row["lease_owner"] == worker_id and row["lease_expiry"] > repo.now(),
-                    "LEASE_EXPIRED", "Derived worker delivery lease is stale")
+            if scope is None:
+                require(row and row["state"] == "DELIVERING" and row["generation"] == lease["generation"]
+                        and row["lease_owner"] == worker_id and row["lease_expiry"] > repo.now(),
+                        "LEASE_EXPIRED", "Derived worker delivery lease is stale")
+            else:
+                principal, work_id, branch_id = scope
+                self.kernel.authorize(repo, principal, work_id, "ADMIN", branch_id)
+                require(payload["world_ref"]["work_id"] == work_id and payload["world_ref"]["branch_id"] == branch_id,
+                        "VIEW_DENIED", "Derived source outside project")
             wr = payload["world_ref"]
             require(row["topic"] == "world.accepted" and persisted_payload["world_ref"] == wr,
                     "INVALID_EVIDENCE", "Outbox source changed after material preparation")
@@ -148,7 +176,8 @@ class DerivedWorldWorker:
             consumed = self.outbox.consume(CONSUMER, lease["outbox_id"], handler)
         if fault:
             fault("after_consume_before_ack")
-        self.outbox.ack(lease["outbox_id"], lease["generation"], worker_id)
+        if scope is None:
+            self.outbox.ack(lease["outbox_id"], lease["generation"], worker_id)
         return {"message_id": lease["outbox_id"], "consumed": consumed, "artifact_ref": ref,
                 "world_ref": payload["world_ref"], **status}
 
