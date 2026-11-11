@@ -1,0 +1,52 @@
+{
+  "head_sha": "75273ab96cf16b0f1ae9c4cd809835a37c7cf2aa",
+  "run_id": 42843359134,
+  "status": "completed",
+  "conclusion": "success",
+  "artifacts": [
+    {
+      "artifact_id": 13779360127,
+      "run_id": 42843359134,
+      "head_sha": "75273ab96cf16b0f1ae9c4cd809835a37c7cf2aa",
+      "digest_verified": true,
+      "zip_sha256": "90755cf715dc405ff39571efdf97ab4e6b06ac12d4267fa65d6174ac68657ea6",
+      "junit": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "518",
+          "time": "426.833",
+          "timestamp": "2026-11-10T15:21:26.669805+00:00",
+          "hostname": "runnervm7aw5e"
+        }
+      ]
+    },
+    {
+      "artifact_id": 13776508323,
+      "run_id": 42843359134,
+      "head_sha": "75273ab96cf16b0f1ae9c4cd809835a37c7cf2aa",
+      "zip_sha256": "218623a2461e708489a24ccdf42a29f91d80b51bc26e6565427642908fe6de74",
+      "digest_verified": true,
+      "results": [
+        {
+          "name": "unit.xml",
+          "junit_sha256": "65312af38400614719c07a0b0d3e92e186e93a3cd1c71bded249b1878e142a8c",
+          "junit": [
+            {
+              "name": "pytest",
+              "errors": "0",
+              "failures": "0",
+              "skipped": "0",
+              "tests": "294",
+              "time": "13.037",
+              "timestamp": "2026-11-10T15:21:05.632982+00:00",
+              "hostname": "runnervm7aw5e"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

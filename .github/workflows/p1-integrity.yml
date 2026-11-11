@@ -2,7 +2,7 @@ name: P1 and P2 production integrity
 
 on:
   push:
-    branches: [main, "dev/p2-*"]
+    branches: [main, "dev/p2-*", "dev/p3-p4-*"]
   pull_request:
   workflow_dispatch:
 
@@ -40,7 +40,7 @@ jobs:
         run: uv run --no-sync python -m unittest discover -s experiments -p 'test_*.py' -v 2>&1 | tee ci-evidence/original-mechanisms.log
       - name: Python unit, contract and ASGI slow-body regression tests
         run: |
-          uv run --no-sync python -m pytest tests/unit tests/contracts tests/service/test_admission.py -q \
+          uv run --no-sync python -m pytest tests/unit tests/contracts tests/evaluation tests/service/test_admission.py -q \
             --junitxml=ci-evidence/unit.xml --json-report --json-report-file=ci-evidence/unit.json \
             2>&1 | tee ci-evidence/unit.log
       - name: Deterministic Chinese memory retrieval evaluation
@@ -48,6 +48,11 @@ jobs:
           uv run --no-sync python benchmarks/memory/evaluate.py \
             --output ci-evidence/memory \
             2>&1 | tee ci-evidence/memory.log
+      - name: Same-source Chinese context and review ablations
+        run: |
+          uv run --no-sync python -m benchmarks.memory.controlled_evaluate \
+            --output ci-evidence/memory-controlled \
+            2>&1 | tee ci-evidence/memory-controlled.log
       - name: Upload immutable unit and schema run evidence
         if: always()
         uses: actions/upload-artifact@v4

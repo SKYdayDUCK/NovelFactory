@@ -2,9 +2,9 @@
 
 [![P1 Integrity CI](https://github.com/SKYdayDUCK/NovelFactory/actions/workflows/p1-integrity.yml/badge.svg)](https://github.com/SKYdayDUCK/NovelFactory/actions/workflows/p1-integrity.yml)
 
-**当前分支范围：P2 小说生产链路与有限 P3-01/P3-03 基础，正在合并前收尾（2026-11-11）。** 在 Python 3.12 / PostgreSQL 17 可信内核上，六场景短卷、规划与意外重规划、任务和世界裁决、正文对账、审核编辑及不可变内部发布已接成可复现的工程闭环。本分支还包含 Context Compiler 的有限优化、独立 API 进程负载测量和确定性中文记忆检索评测；后续 P3/P4 高级模块由依赖本分支的 [PR #3](https://github.com/SKYdayDUCK/NovelFactory/pull/3) 单独交付。
+**当前分支范围：P2 完整工程链路与 P3/P4 的已交付有限工程能力，正在合并前收尾（2026-11-11）。** 本分支对应依赖 [PR #2](https://github.com/SKYdayDUCK/NovelFactory/pull/2) 的 [PR #3](https://github.com/SKYdayDUCK/NovelFactory/pull/3)。在 Python 3.12 / PostgreSQL 17 内核上，已有完整短卷生产、宏微事件有限等效、跨卷继承、派生工作者、在线备份与隔离 WAL/PITR；本轮只修复重复计算、恢复校验和 CI 证据缺口，不增加业务功能。
 
-**容量验收仍为 `NOT_MET`，PR #2 未合并、保持 Draft。** 最终应用代码 `971fbef29eceb422d77271d11841bae1abdfd73f` 的 PR/push 完整 PostgreSQL 回归均为472项通过；20次实际CI负载的普通50/200全部完成且首试无失败，热点虽完成6/21个正式效果，仍有首试背压、部分过载读耗尽和实际发送速率不足。独立安装、迁移、真实HTTP及恢复通过，不能替代容量验收。初始e0b热点14/21和全部历史失败记录原样保留。真实模型为 `BLOCKED_ENVIRONMENT`，作者全文评价 `PENDING_AUTHOR`，文学质量 `NOT_EVALUATED`。见[合并前修复报告](reports/PR2_PR3_合并前修复报告.md)、[性能与容量对照](reports/性能与容量修复对照.md)、[PR与main记录](reports/PR合并与main验收记录.md)和[未通过目标](reports/未通过目标与后续工作.md)。main仍为P1，后续P3/P4高级能力留在PR #3。
+**原容量验收仍为 `NOT_MET`，两条 PR 均未合并、保持 Draft。** 最终应用代码 `e3c7b79b0058656f11257ea55edc75371382b73e` 的实际工程结果、全部负载及CI链接见[合并前修复报告](reports/PR2_PR3_合并前修复报告.md)和[PR与main记录](reports/PR合并与main验收记录.md)。两次500混合均51/51正式效果、2851操作全发、首试0；1000读仅1203/5000和1181/5000有效，原热点和持续负载容量仍未过。PITR新附件11/11完整，首次外部网络失败记录保留。详见[性能与容量对照](reports/性能与容量修复对照.md)、[未通过目标](reports/未通过目标与后续工作.md)。真实模型 `BLOCKED_ENVIRONMENT`、作者全文评价 `PENDING_AUTHOR`、文学质量 `NOT_EVALUATED`；初始13/21及全部失败证据不改写。main仍为P1。
 
 - **运行/复现：** [复现与运行指南](reports/复现与运行指南.md)，`uv sync --locked --group dev`；默认 Python 3.12，PostgreSQL 17。
 - **测试与 CI：** [P1 Integrity Workflow](.github/workflows/p1-integrity.yml) 对 Schema、单元、真实 PostgreSQL 集成/并发及恢复执行分组验证；原始 JUnit、日志和机器可读结果在每次 GitHub Actions Run 的 Artifacts 获取。CI 执行状态以 GitHub Actions 当次结果为准。

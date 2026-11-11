@@ -1,0 +1,1187 @@
+{
+  "schema_version": "1.0",
+  "recorded_at_utc": "2026-11-10T15:49:45.702366+00:00",
+  "repository": "SKYdayDUCK/NovelFactory",
+  "baseline": {
+    "commit": "206eaa5b655419d29bd6b15d618ae6eaf9048354",
+    "tree": "1ed8fb45cff825f9dba14e8a4db0f5668828a36c",
+    "history_protection": "evidence/p3_p4/takeover/local_history_inventory.json"
+  },
+  "application_code_head": "9bf3794fbabb1074e1309e3217d6bbe78ce3c704",
+  "application_code_tree": "8591e40df3c0fb50616c45c23f63e5d394e23402",
+  "documentation_delivery": {
+    "scope": "Reports and evidence only; this file is committed after the verified application-code commit. Its enclosing Git commit identifies the final handoff; self-referential commit IDs are intentionally not embedded.",
+    "source_hashes_match_code_commit": true
+  },
+  "pull_requests": [
+    {
+      "number": 2,
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/pull/2",
+      "head_branch": "dev/p2-production-loop",
+      "base": "main",
+      "draft": true,
+      "merged": false,
+      "code_head": "e0b0f2b080f3225d8be8e202e13258bc480f5b84"
+    },
+    {
+      "number": 3,
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/pull/3",
+      "head_branch": "dev/p3-p4-continuity",
+      "base": "dev/p2-production-loop",
+      "draft": true,
+      "merged": false,
+      "code_head": "9bf3794fbabb1074e1309e3217d6bbe78ce3c704"
+    }
+  ],
+  "remote_write_protocol": {
+    "connector_only": true,
+    "create_blobs_and_base_tree": true,
+    "parent_is_rechecked_current_branch_head": true,
+    "update_ref_force": false,
+    "expected_sha_checked": true,
+    "head_full_recursive_tree_and_key_files_read_back": true,
+    "cli_remote_writes": false,
+    "main_modified": false
+  },
+  "checkpoints": [
+    {
+      "stage": 1,
+      "branch": "dev/p2-production-loop",
+      "parent": "206eaa5b655419d29bd6b15d618ae6eaf9048354",
+      "commit": "e0b0f2b080f3225d8be8e202e13258bc480f5b84",
+      "tree": "e1a8b5b4e3c72314a5f26152215de8d90c5b9e29",
+      "remote_blob_count": 2419,
+      "remote_readback": "REMOTE_HEAD_AND_FULL_TREE_VERIFIED",
+      "ci_evidence": [
+        "evidence/p3_p4/checkpoint1/github_verified.json"
+      ],
+      "uploaded_blobs": [
+        {
+          "path": "src/novel_factory/domain/temporal.py",
+          "size": 4736,
+          "sha": "e87ff4be693630a47cf4e00500af3d1be755de0b",
+          "sha256": "fc670d6146b7efd5c9f7f8851da92000ebe3c3b7fb789845194cee675f359b71"
+        },
+        {
+          "path": "src/novel_factory/infrastructure/repository.py",
+          "size": 4200,
+          "sha": "bdb4df0ab5b0596171f2861e8a6d5516a3116935",
+          "sha256": "f3b1afd6191dde474fca47239ccd84eb071da26470ec9cd55f63ffbc2ae2e858"
+        },
+        {
+          "path": "benchmarks/http_load.py",
+          "size": 12164,
+          "sha": "bd001065875895870d63e816f7101edc22e43e1f",
+          "sha256": "c419a1055a6b878107b926faf897431872946065692fa9fe5eff74a51a842819"
+        },
+        {
+          "path": "benchmarks/p2_behavioral_load.py",
+          "size": 47819,
+          "sha": "308c33c0f747fab5be3357e48a6342cac8936b65",
+          "sha256": "c3533086aed8ef2ee309e44c16751d16804aa99ed78cc72cc4ed374cd5c6b940"
+        },
+        {
+          "path": "benchmarks/process_server.py",
+          "size": 7961,
+          "sha": "fbf7a3252314c846f4f55dad452c3540c4f22731",
+          "sha256": "874f150dd21cfbecb416562d3b3108bb6655e57fcc9e5642119f4de8f9e99baf"
+        },
+        {
+          "path": "benchmarks/p3_context_comparison.py",
+          "size": 8226,
+          "sha": "5d85de2b7108b67f227c8a06ce38c9466c058da1",
+          "sha256": "7cbcdd73a88c0bc9a947b066ad732ed20b8500414c11f7ae8eb54e99fb5a4eaf"
+        },
+        {
+          "path": "tests/unit/test_temporal_coordinate_cache.py",
+          "size": 2118,
+          "sha": "9d2ca330cf9ad5cd0cc334fe457a5653d5f6c552",
+          "sha256": "4fbafab39f6501c0f5f7e909952d2d16ee1f72a866edf8fc428f89c3c5272453"
+        },
+        {
+          "path": "tests/integration/test_ancestry_metadata.py",
+          "size": 1988,
+          "sha": "1256ac6ec3f3e945f5a4dc3f500b613b9a1374a1",
+          "sha256": "83cd52dd79c18ed8929add23f4ef6b0055300e5383a9119f3a5281d704ef56c9"
+        },
+        {
+          "path": "tests/service/test_process_isolation.py",
+          "size": 3254,
+          "sha": "869ece0e35feef7f35fc73a90d4a77787d45db5b",
+          "sha256": "974b2cc83138e08b6ed7035f50cd97a7528d880facb181c07d42e4edc04a119d"
+        },
+        {
+          "path": ".github/workflows/p3-p4-evidence.yml",
+          "size": 4485,
+          "sha": "482860b7fa0708b8b15b4aa4829bb3f6f86327df",
+          "sha256": "0dc8eb8b68fa38be8a2a1fe7f61534bf340bc69f627051effc7826898faf355d"
+        },
+        {
+          "path": "reports/下一轮开发接管记录.md",
+          "size": 2879,
+          "sha": "d83acf185ec1409f71aee294b2f239f5616f6421",
+          "sha256": "56cf2feadab1c119af6947f92a548ee481184e7ae6ecb9c54c34684e93a63dff"
+        },
+        {
+          "path": "evidence/p3_p4/takeover/local_history_inventory.json",
+          "size": 34129,
+          "sha": "1b5babb7fde5e4744c7d9eb9cfdbeab8dc978039",
+          "sha256": "a73eace9cc8bcf629e9a4a1181a7e0e5a9504f19d5b09c17cee4f5422ab9c6e3"
+        },
+        {
+          "path": "evidence/p3_p4/takeover/model_environment.json",
+          "size": 1314,
+          "sha": "677efd5887777d373bd4964cc90eceb6ebcb8d18",
+          "sha256": "3446270e8cdcf6a0c322492649985b5441a6fbd81d13a1cf871a4b6db24df5cf"
+        },
+        {
+          "path": "reports/P2_P3_01_性能专项.md",
+          "size": 10325,
+          "sha": "8feca3563ac4c9a7bf4f3d9c4c895a70ba0a3d5f",
+          "sha256": "54afbb5ed55d19606de5e1f51e23dd636dce411c7c66a69aacea1ca14dadbff9"
+        },
+        {
+          "path": "evidence/p3_p4/checkpoint1/performance_summary.json",
+          "size": 24430,
+          "sha": "e43bd1f451c752b4acb2ef8a460e040bb18095a6",
+          "sha256": "af0998a1fd2ce33ea2e235b461b2a77bae375a4af6fff488ab0a4befe2a20351"
+        },
+        {
+          "path": "evidence/p3_p4/checkpoint1/focused.xml",
+          "size": 5122,
+          "sha": "84d2b62752a95dc9df542fc3131fe2b432434ddc",
+          "sha256": "c628761fcbfd42b474842f61680e1a775244fb2e961359acbbae075a115c2a6a"
+        },
+        {
+          "path": "evidence/p3_p4/checkpoint1/regression_summary.json",
+          "size": 864,
+          "sha": "3145d6ccfdefcc454d90f8d1c29769eeec0b2f5c",
+          "sha256": "81c527b77f01640a3aed6dffabaeb40a8a313ad0fa6e05f2824d51ed028960ba"
+        }
+      ],
+      "deletions": []
+    },
+    {
+      "stage": 2,
+      "branch": "dev/p3-p4-continuity",
+      "parent": "e0b0f2b080f3225d8be8e202e13258bc480f5b84",
+      "commit": "6de6e15ae3051736eedfadde7a53b47f2d07b913",
+      "tree": "3132c2dd35cefd51a45a81c62784e2a79aa5e4a5",
+      "remote_blob_count": 2444,
+      "remote_readback": "REMOTE_HEAD_AND_FULL_TREE_VERIFIED",
+      "ci_evidence": [
+        "evidence/p3_p4/checkpoint2/github_verified.json"
+      ],
+      "uploaded_blobs": [
+        {
+          "path": "contracts/refinement.schema.json",
+          "size": 3425,
+          "sha": "d2dd058513ef895a13388fc51b89ae9a645b410a",
+          "sha256": "88affbc5697427ec9ab4c56764ec0d753c5f0b25a7b1095087a6036be3cfcca3"
+        },
+        {
+          "path": "contracts/commands.schema.json",
+          "size": 11086,
+          "sha": "aaafb3eea7124e889c4f0b41749228c8f12dc3d1",
+          "sha256": "3dff553f8b7b1b3b4ab3cc4b77ce8a97ca96b7c1253a99a976e477a2add671fd"
+        },
+        {
+          "path": "src/novel_factory/contracts/registry.py",
+          "size": 6838,
+          "sha": "4f49a36ffcb28e28ac0bf32ebe652a30ae652e7f",
+          "sha256": "f03a49a247db04c90ab9a313eb331c1005dc72b2ce5947a007c2afab1c438a1a"
+        },
+        {
+          "path": "src/novel_factory/domain/refinement.py",
+          "size": 14764,
+          "sha": "0346a322372584d3bb6785d680876562c8b13c90",
+          "sha256": "47fb1f24cdadc4749056226633698ae156046ae8aac184c236915c44b094e6bd"
+        },
+        {
+          "path": "src/novel_factory/application/refinement.py",
+          "size": 10712,
+          "sha": "97d4638cac8ad99a5658ba42043de5a766ac50a9",
+          "sha256": "308f8354fc11ddfd1e95a1a683269447833782550f7df1ba30f4b62457155401"
+        },
+        {
+          "path": "src/novel_factory/application/simulation.py",
+          "size": 38665,
+          "sha": "0f6f2260ff60402881446ffd28732004241018e3",
+          "sha256": "99c4c5ddd2ecfff5a222b6ad63f9d566eec126d4492055a7c027845038dc94d2"
+        },
+        {
+          "path": "tests/unit/test_refinement.py",
+          "size": 11506,
+          "sha": "824e622e947bdd0a82d0d2cb9c8e25ca74ca3906",
+          "sha256": "51e9739658b9dfdba53cc3a467612b47dd3611e6ad5637ec4077fe9425bd5993"
+        },
+        {
+          "path": "tests/integration/test_refinement.py",
+          "size": 14774,
+          "sha": "509501874ec0a58789b02af47074e9741bcffc9b",
+          "sha256": "84a1fd4a41c750d7d98ab71525a2488b9da75fc90586b6710b8404a0c31e8d06"
+        },
+        {
+          "path": "reports/P3_02_宏微等效替换.md",
+          "size": 6383,
+          "sha": "d20ff8a25f074cb202a3a0fb2847a04f3ea6ebe0",
+          "sha256": "6f5ad03e91fc9400a478db14edc933676679019030d43591de6fb5d161ec5186"
+        },
+        {
+          "path": "evidence/p3/refinement/validation_index.json",
+          "size": 1950,
+          "sha": "5826ff9253b0412075bc9e686cb8234b6ddad208",
+          "sha256": "4ada295bcc06c4ebdafebea90f420bff28d928c0ae347201b2776af28684767e"
+        },
+        {
+          "path": "src/novel_factory/algorithms/evidence_context.py",
+          "size": 5620,
+          "sha": "5660bb88996a65d10b8bbe23ecc38cef3a18ed4c",
+          "sha256": "cc4fc3067983351ffe969dea824473b949fa9746e24f9483628dca52b6c553a5"
+        },
+        {
+          "path": "benchmarks/memory/controlled_evaluate.py",
+          "size": 10564,
+          "sha": "714ff10c5cf86f447176e0268d8e824756bb02bf",
+          "sha256": "9f1bf4459f83b34ff756e7fd38fc3dca94b4081edcd739d4c6e71a34f8b2272e"
+        },
+        {
+          "path": "benchmarks/memory/review_cases.json",
+          "size": 758,
+          "sha": "141d16e7683dc42c223f70c13adacb78e09e3137",
+          "sha256": "8c693852dd75665487ce2947fa2deb24864970096eb322613a4dc1316fdb325c"
+        },
+        {
+          "path": "tests/unit/test_evidence_context.py",
+          "size": 5458,
+          "sha": "881b06aa1ac1eb9834605d664602e6c66e476ad0",
+          "sha256": "a03720afbece04f6581d3fc26b090ace1c5f9756aeca410db0481bb48f35edea"
+        },
+        {
+          "path": "scripts/run_p3_evaluation.py",
+          "size": 3305,
+          "sha": "2e1b6840b3585d00c09ef67bac18c8fff4131e4e",
+          "sha256": "e35f6fe26ab71f68f3a3bc88c05622ba131b70820184ed87c33b0922aa88e1e5"
+        },
+        {
+          "path": "reports/P3_03_受控记忆评测与历史成果恢复.md",
+          "size": 4358,
+          "sha": "7190f74403166f7df86f5acbaf1e0bf5b5139b29",
+          "sha256": "0ff8b3bd2a50730a27483901531f2e51685bc1d13c2bc893b8125d2cbdd6c546"
+        },
+        {
+          "path": "evidence/p3_p4/memory/controlled_summary.json",
+          "size": 12509,
+          "sha": "d5324b9b49da7ed2b6a6b4ecbd6397ed097ce8ae",
+          "sha256": "d02df42bb575f7073ed42ebce564c7e23475c07be4754efeca43099fb141fb8d"
+        },
+        {
+          "path": "tests/evaluation/test_foundation.py",
+          "size": 14236,
+          "sha": "ba8f854ac3df05f82bd21584b98e727545ae9fee",
+          "sha256": "26d5745c25dbbc6e14047d9e4d0569a39ee2fd502245e23f7f3c5b6d86369b4f"
+        },
+        {
+          "path": "src/novel_factory/evaluation/store.py",
+          "size": 25307,
+          "sha": "bce760be743d65d5fd1614150823747a72184cc8",
+          "sha256": "ff9e736e5142a36d54c9d1297423bf8d13201bdd394547a04cac856d931ac81f"
+        },
+        {
+          "path": "src/novel_factory/evaluation/__init__.py",
+          "size": 146,
+          "sha": "0b4c31a6ef887e733d1d732aba3c95c447c1be27",
+          "sha256": "d214189852920570e4ee8e67477833585095beba5ca2716b5a3695bea4d98e3d"
+        },
+        {
+          "path": "src/novel_factory/evaluation/contracts.py",
+          "size": 1396,
+          "sha": "dfbdc8612bd753a7707f653d54319032fa705f1f",
+          "sha256": "00e229b835b3e378c95b9c2b4e5e51981962317df507bf060b8f0d7f49bbf9b9"
+        },
+        {
+          "path": "src/novel_factory/evaluation/protocol.py",
+          "size": 13512,
+          "sha": "7f8f4466b02ca8ffcbccde059ae9ab0597f64402",
+          "sha256": "1e65c2d3b992a8a88b600d512e12cd71629276b07d6b19a84105d557ac9be2ef"
+        },
+        {
+          "path": "src/novel_factory/evaluation/schema.json",
+          "size": 24396,
+          "sha": "fdf3cabffd348dd3dc9914632d06f7ca91026849",
+          "sha256": "48e0ccb0563edfc3568e0d355bbb56d6b6f0d5d6a8c8cc10607d019833c10a27"
+        },
+        {
+          "path": "src/novel_factory/evaluation/example.py",
+          "size": 10705,
+          "sha": "2efa19c379f46ffb5577b488da6508628b9d1492",
+          "sha256": "f211c8deb3e84d81efc67809aaf489184c5bdcb4d3bff66f5cf6235e2bcd9ef4"
+        },
+        {
+          "path": "src/novel_factory/contracts/_schema_bundle.py",
+          "size": 698405,
+          "sha": "6070a9d3cfaae838296d66bc2eedb69417656986",
+          "sha256": "c3b932023df10693f3587629ed27ce85912525735b9976970e420ec2c177b5aa"
+        },
+        {
+          "path": "src/novel_factory/interfaces/http.py",
+          "size": 20431,
+          "sha": "4afaae8b3921b488d5485dd285413d0b3e33ead2",
+          "sha256": "0c30d9098401f587f946b3f86c778ecd91fa423c9aa0cb0791ef1f68d8733738"
+        },
+        {
+          "path": "tests/service/test_refinement_http.py",
+          "size": 2011,
+          "sha": "189b2b9f98976f93c21e0688bc00b6fd4ef4d669",
+          "sha256": "96bd90cf06168e9fb1b7387677bb1c06dc59c272ce5061250efdeb12957e9e73"
+        },
+        {
+          "path": ".github/workflows/p1-integrity.yml",
+          "size": 7352,
+          "sha": "09716b8abcef9679e39f1a0439458629e51a9721",
+          "sha256": "f8fd3cd6f5681b454ec2196c6e10251748323b7f5fe5369f301f2f9541480d18"
+        },
+        {
+          "path": "evidence/p3_p4/checkpoint1/github_verified.json",
+          "size": 19945,
+          "sha": "cd04da28f461a3ddb1bd59d549869a3a56965eae",
+          "sha256": "b7b356ccf5f5eec51e41cf80e48e1a6b21d2936d059e0918ae7ca9045538683b"
+        },
+        {
+          "path": "evidence/p3_p4/checkpoint2/local_validation.json",
+          "size": 2085,
+          "sha": "8c98f7228c21aca2cf0a79149ee25c5066724044",
+          "sha256": "5b081626af0c9a0743c72e402f9ba8c18cc78d5858a0f9df8bf3363d30844034"
+        },
+        {
+          "path": "reports/P3_第二检查点集成记录.md",
+          "size": 2844,
+          "sha": "07eede56d9880a3a44ab6961ee7ef4032b9d89fd",
+          "sha256": "c32505b293ce078350f9034a3e7c5f90b927fbd17260249aba2ac9deb73d518a"
+        }
+      ],
+      "deletions": []
+    },
+    {
+      "stage": "2.1",
+      "parent": "6de6e15ae3051736eedfadde7a53b47f2d07b913",
+      "commit": "f6d48def76b982dfd9fbd5fca60a20f937576e8b",
+      "tree": "7eca257ef51fca3023fc85bc63c7f59737b79260",
+      "branch": "dev/p3-p4-continuity",
+      "remote_readback": "REMOTE_HEAD_AND_FULL_TREE_VERIFIED",
+      "ci_evidence": [
+        "evidence/p3_p4/checkpoint2/github_verified.json"
+      ],
+      "uploaded_blobs": [
+        {
+          "path": "tests/unit/test_refinement_rules.py",
+          "size": 11506,
+          "sha": "824e622e947bdd0a82d0d2cb9c8e25ca74ca3906",
+          "sha256": "51e9739658b9dfdba53cc3a467612b47dd3611e6ad5637ec4077fe9425bd5993"
+        },
+        {
+          "path": "reports/P3_02_宏微等效替换.md",
+          "size": 6389,
+          "sha": "97a80f641115931e431fd56360aad87d0cc1913c",
+          "sha256": "e73fbec17480ce160545a7df9b206418f2240c8b0b10af6d895241121b6fc9fa"
+        },
+        {
+          "path": "evidence/p3/refinement/validation_index.json",
+          "size": 1950,
+          "sha": "5826ff9253b0412075bc9e686cb8234b6ddad208",
+          "sha256": "4ada295bcc06c4ebdafebea90f420bff28d928c0ae347201b2776af28684767e"
+        },
+        {
+          "path": "evidence/p3_p4/checkpoint2/local_validation.json",
+          "size": 2081,
+          "sha": "8255bf3910f187968c86ebbdca2cde3ea2d3ec48",
+          "sha256": "5e2a1b2ebd17d292c26ddb0fc79fa999536d69962e0315f10efb9527ea668ecb"
+        },
+        {
+          "path": "reports/P3_第二检查点集成记录.md",
+          "size": 3379,
+          "sha": "f9b2409ce792848b73ff34a6d79a64cbbb53259d",
+          "sha256": "f01753b7628c56efdcc3d2681e5eaa749d8f8e7c356b3c05a6ffd939707dab31"
+        }
+      ],
+      "deletions": [
+        "tests/unit/test_refinement.py"
+      ]
+    },
+    {
+      "stage": 3,
+      "branch": "dev/p3-p4-continuity",
+      "parent": "f6d48def76b982dfd9fbd5fca60a20f937576e8b",
+      "commit": "75273ab96cf16b0f1ae9c4cd809835a37c7cf2aa",
+      "tree": "e8293035075b34c7396a0e53a54f713da011140a",
+      "remote_blob_count": 2467,
+      "remote_readback": "REMOTE_HEAD_AND_FULL_TREE_VERIFIED",
+      "ci_evidence": [
+        "evidence/p3_p4/checkpoint3/github_regression_verified.json",
+        "evidence/p3_p4/checkpoint3/github_scale_verified.json"
+      ],
+      "uploaded_blobs": [
+        {
+          "path": "contracts/continuity.schema.json",
+          "size": 14077,
+          "sha": "ff490d632999c05d578dc910dafe387550b129d2",
+          "sha256": "cd0138779ce4a89557b0a6fb955891309d4190e5d47202ecb79861874d1dd446"
+        },
+        {
+          "path": "src/novel_factory/domain/continuity.py",
+          "size": 4119,
+          "sha": "79c28cf9350d40f5971d2d37b4e4053ac0b9569c",
+          "sha256": "efd913b5fd8e2ba0e67ce75f6eb5272aef8e57f106190d31a74f9914bb7cb806"
+        },
+        {
+          "path": "src/novel_factory/application/continuity.py",
+          "size": 33487,
+          "sha": "bf4b2e453827f09b2027c0cd06db69741ee577cf",
+          "sha256": "ee6ee748187e56d2f2b7b972c387ca2c4c8ddf9c33a9a9a3ae2c25f6e1b35e84"
+        },
+        {
+          "path": "src/novel_factory/application/release.py",
+          "size": 32298,
+          "sha": "0fc24863a8bd71efe2e1b68a3986c0b1c92c61d5",
+          "sha256": "b8c99e023a0b1d837f581fe673e439131febac907a466128389fa0d0046810d3"
+        },
+        {
+          "path": "tests/unit/test_continuity_rules.py",
+          "size": 2781,
+          "sha": "d530529ed4b0db63a46b8217bed614d932f6a150",
+          "sha256": "bef71a845f6f6273b6307f8dd2918d8fb565dd20878536f3252d2b73284c523b"
+        },
+        {
+          "path": "tests/integration/test_continuity.py",
+          "size": 20196,
+          "sha": "4a4e3ea0f2656db884b2bdfa87c5ef9f0936eee2",
+          "sha256": "f0b32068a9ae1894fa834286d438c8576e305b67d5bb0512e46cbb51bf578ee4"
+        },
+        {
+          "path": "tests/integration/test_release.py",
+          "size": 25772,
+          "sha": "a12a1395693d5de11b10ef543c8e7a063559aa95",
+          "sha256": "085194aee694a9b3399d5700e7b551e2dcc01e225b1759b89f281871c6c64188"
+        },
+        {
+          "path": "tests/integration/test_history_repair.py",
+          "size": 13755,
+          "sha": "d7474834c69df0aa6599e7d58bb0e9416b38b826",
+          "sha256": "90d72324ea56c3ebc4c42eba3e141834dd4d42b620de60f2aa108a13130b7fe7"
+        },
+        {
+          "path": "docs/implementation/P4_01_跨卷连续性.md",
+          "size": 6939,
+          "sha": "e6d28b78ed80ccf2468968ae2e10c3f73209573a",
+          "sha256": "e98cdd77925502c8309c98138d7cd342c7a0e15a972294a4f63481552627b09a"
+        },
+        {
+          "path": "reports/P4_01_跨卷连续性验收.md",
+          "size": 3533,
+          "sha": "4167f33a6d8f5aa9696a32410e1581ad66ee824f",
+          "sha256": "4dd43033302b552064926c3eccd0a69565b64ec90d27580a211cfa270550a258"
+        },
+        {
+          "path": "evidence/p3_p4/continuity/local_validation.json",
+          "size": 4945,
+          "sha": "2787329625d06b6a82adf4918059985a32d942c3",
+          "sha256": "3ed239d6d00320c92dbb22e907096860ee35b536f53d1e6be4e30446949749d1"
+        },
+        {
+          "path": "src/novel_factory/application/derived_worker.py",
+          "size": 12323,
+          "sha": "5195aad9b99d16ddaee4e43b798123c5bcb98d81",
+          "sha256": "f42b74cd79e040e2467e265d5e15abeed18b1e41bed7ed5a5f1ce11421ded4d0"
+        },
+        {
+          "path": "scripts/run_derived_worker.py",
+          "size": 1242,
+          "sha": "d8c13149096725ef534ba82e6841e53ddf9d4ecb",
+          "sha256": "8cf060b128a255ae656ddb343e2dfa02825be316440ce6db60d9623e59161cf7"
+        },
+        {
+          "path": "tests/integration/test_derived_worker.py",
+          "size": 13257,
+          "sha": "15f7526298dd7795976b4104275b1fef98b8e40f",
+          "sha256": "70985c16e3bad12032a74d6eb0066111968a9249cc6e44951ef822528fe14b6f"
+        },
+        {
+          "path": "reports/P3_04_异步派生工作者.md",
+          "size": 5712,
+          "sha": "e48cd015fc54abe9d777619ae6df4a25182dd2f3",
+          "sha256": "37f331310087a780c2be46989af25430fb6ea7cd4c770408f381de8effc4efff"
+        },
+        {
+          "path": "evidence/p3/derived_worker/validation_index.json",
+          "size": 2640,
+          "sha": "101a75c2a3bb2aa8fda7f42c51eb378ca3f71815",
+          "sha256": "61b845e06e29e828eab79c3f4536c78b49c6af706a8918fe06dcc14de440e91a"
+        },
+        {
+          "path": "benchmarks/p3_open_arrival.py",
+          "size": 9432,
+          "sha": "58d7c72d11d30d15adc81272a4101385d5a70d7c",
+          "sha256": "515ec1ec61e03317cd6f160a22a309aa38bc6df8bbfd4604e3dacfa43b14e9da"
+        },
+        {
+          "path": "benchmarks/p3_stability.py",
+          "size": 8400,
+          "sha": "7be225ec3ad25dfd4e6199d9180041db35edde1c",
+          "sha256": "8ad0e0781fbec0464b6385cab9ac89f4a6e51705e456d6394012a016460ec7ed"
+        },
+        {
+          "path": "tests/unit/test_open_arrival_evidence.py",
+          "size": 1505,
+          "sha": "68cf45cbcb0e652008c21766e9fa32a5bea5bc9e",
+          "sha256": "cec01ecc318ee84014280bed88a9340a0aee8b741e896bb5f15ba08fc95ea95c"
+        },
+        {
+          "path": ".github/workflows/p3-scale-experiments.yml",
+          "size": 3142,
+          "sha": "6c0dbfdd7e148023095643f054cf41c91fcd4ed6",
+          "sha256": "498717b78b57a25460fb5e7c32eedae6fb63a059477009f562e42eb40cbc2740"
+        },
+        {
+          "path": "src/novel_factory/interfaces/http.py",
+          "size": 23336,
+          "sha": "754475909940557074b44e8b1ba04eb429cf9f88",
+          "sha256": "14413a3f3a90633ee2188988d3f40baad1d797613bf69784c82fedebf5bf03f3"
+        },
+        {
+          "path": "tests/integration/test_continuity_http.py",
+          "size": 3234,
+          "sha": "b48e2b1e4afdc5ecad3059be3fd3b64272afdcb5",
+          "sha256": "1efbf4718aef4407d0330dfaad88c6c8d36162824fdd1be92d26e4bc10deb2c5"
+        },
+        {
+          "path": "src/novel_factory/contracts/registry.py",
+          "size": 6878,
+          "sha": "afe57d11cf1563812a7f1be34f5590fa7d201269",
+          "sha256": "99ec1dfcccb0552124fc12ea8e32d9fb6dde12abcc9604f6c052c424199edf68"
+        },
+        {
+          "path": "src/novel_factory/contracts/_schema_bundle.py",
+          "size": 727047,
+          "sha": "d58db6c65abc59369d9f325c1bed5dc011f6a808",
+          "sha256": "2ee10bf8c61f2de2e48e18fc211c331113edffb4400539a3b2c6d07d41e23647"
+        },
+        {
+          "path": "evidence/p3_p4/checkpoint3/local_validation.json",
+          "size": 1970,
+          "sha": "8d6a27554e3713bda93872b46abc6758c172990f",
+          "sha256": "d1ba21ecfb04bd5ef8c1a2091d49bcc3575e9aa1f5bbe6b9e6fba448ae4fffb9"
+        },
+        {
+          "path": "reports/P3_P4_第三检查点集成记录.md",
+          "size": 2826,
+          "sha": "e259083d3aa35ef5cca29a06c951f8c881f899d5",
+          "sha256": "d10fc33561eb63d96421dceda39c03549d317f86a8b9aff6aea8ebab4f4277ac"
+        },
+        {
+          "path": "evidence/p3_p4/checkpoint2/github_verified.json",
+          "size": 1561,
+          "sha": "61da134336996bd5faf2c4bbdf6587ebe8617dcf",
+          "sha256": "4d6f91f8d0898d053584bd1b5a145cc779d4a422c816662b2919a99bb001565d"
+        },
+        {
+          "path": "reports/P3_04_并发扩展与长稳验证.md",
+          "size": 13425,
+          "sha": "ce8496d2542c2ac183c986f6caa860da38d1f176",
+          "sha256": "bb2216c137416adf308372c034e5375b21ca3e7d02d25a5cabe9e297dd13c0fc"
+        },
+        {
+          "path": "evidence/p3_p4/checkpoint3/performance_summary.json",
+          "size": 53065,
+          "sha": "bd84222c4650dd164da98c1a677c9f21facb0b16",
+          "sha256": "9b754507c30b6423bdabaca39554db8fe1d1cca7e0bd0ae71b21373ce09a3b06"
+        }
+      ],
+      "deletions": []
+    },
+    {
+      "stage": 4,
+      "branch": "dev/p3-p4-continuity",
+      "parent": "75273ab96cf16b0f1ae9c4cd809835a37c7cf2aa",
+      "commit": "9bf3794fbabb1074e1309e3217d6bbe78ce3c704",
+      "tree": "8591e40df3c0fb50616c45c23f63e5d394e23402",
+      "remote_blob_count": 2487,
+      "remote_readback": "REMOTE_HEAD_AND_FULL_TREE_VERIFIED",
+      "ci_evidence": [
+        "evidence/p3_p4/checkpoint4/github_regression_verified.json",
+        "evidence/p3_p4/checkpoint4/github_pitr_verified.json",
+        "evidence/p3_p4/checkpoint4/github_capacity_verified.json"
+      ],
+      "uploaded_blobs": [
+        {
+          "path": "contracts/upgrades.schema.json",
+          "size": 5627,
+          "sha": "5e82e44de70ec581c716c5e5dd795b71e600b7c8",
+          "sha256": "6ec08ef373a5de1870db24e10f100d335e9bc35b7180bd39a1acd413e9619932"
+        },
+        {
+          "path": "src/novel_factory/contracts/registry.py",
+          "size": 6974,
+          "sha": "a4e979856a25e7487ae394e5873f50d822c7bc70",
+          "sha256": "c2d9a9cf20476f4fa25e34518a9d60e538949b8dd9568c3fff9a9ef314a55c7b"
+        },
+        {
+          "path": "src/novel_factory/contracts/_schema_bundle.py",
+          "size": 739946,
+          "sha": "9722a6ee37bbc75d166c773c56ae5ec8168bee61",
+          "sha256": "4f1edb486eade49cd2021a573b0b13d572f0763f46cbc7430c5caadd8d6e9efa"
+        },
+        {
+          "path": "src/novel_factory/application/upgrades.py",
+          "size": 20023,
+          "sha": "72f3605ae98f88978db54883d56819e286a5b1fd",
+          "sha256": "253a536fd5b70e221fa974cb015f583901b6d2f8d5ba8de4684b7f54d92c0d3f"
+        },
+        {
+          "path": "src/novel_factory/application/agent_gateway.py",
+          "size": 29383,
+          "sha": "4f5d4bc4cd455b6e7cea7316427663401aa8eebd",
+          "sha256": "11441a418c7b912f077d9b2464a662e3c8f695a4190049ed80fa53f3817646f4"
+        },
+        {
+          "path": "src/novel_factory/infrastructure/online_backup.py",
+          "size": 7165,
+          "sha": "420810f8ffffab3c522b83339c03a6847ec42da3",
+          "sha256": "42a27efe329ec30f7b353b9543979ddeb30f0e4a31dbd622edf5fe95bac37920"
+        },
+        {
+          "path": "src/novel_factory/infrastructure/recovery.py",
+          "size": 19782,
+          "sha": "163f96605512baddbb8a141de77e816c69bfa397",
+          "sha256": "3fce2ddcf4f2a25f37d8ec7180cef832d11bc80f5cf1771c8ec12566931b1f5a"
+        },
+        {
+          "path": "src/novel_factory/interfaces/http.py",
+          "size": 25096,
+          "sha": "5feb5a370dae9fa188b7943725dae7cdf319864f",
+          "sha256": "a2fe79bcf16953c3c2ae73e63e589444252da5612351b7ce349449f2a066de97"
+        },
+        {
+          "path": "scripts/backup.py",
+          "size": 2534,
+          "sha": "dc4e88f591caccef67f830004fc2cefa5730e002",
+          "sha256": "575853c5b15f65e14fa4baf0977327244bd1179d3d41930b7f8109e56e1f7a69"
+        },
+        {
+          "path": "scripts/pitr_drill.py",
+          "size": 17089,
+          "sha": "d86001921ec8e4bae855fcc858c8d968289c93fd",
+          "sha256": "7f7fd1aa95a57cc6c3c73243740fe630edc254df2e544779957e69cae69617d9"
+        },
+        {
+          "path": "tests/unit/test_online_backup_runtime.py",
+          "size": 4613,
+          "sha": "da8d4e3abb00deb0367ab51129ae344a3c7cb1eb",
+          "sha256": "7f708822abdf9376709b637e89f4cae3bc777fe98a4b0bbd7258a5dad99513b0"
+        },
+        {
+          "path": "tests/unit/test_backup_connection_environment.py",
+          "size": 5235,
+          "sha": "a7c3b7a8240fd38f040ff4fd32ee63031d0ce50b",
+          "sha256": "77162463c94cc0c11a25fea687c2a91c420e7214647a7a3d435c1d796b984f25"
+        },
+        {
+          "path": "tests/integration/test_online_backup.py",
+          "size": 3404,
+          "sha": "f7d5672a8b83ef316d2985e7534137b1f97e47b0",
+          "sha256": "1a03aac66bc0c9dea81a9d7619f91229b02aadb6c3da29bdea207697192587af"
+        },
+        {
+          "path": "tests/integration/test_runtime_upgrades.py",
+          "size": 17220,
+          "sha": "4fe16587fec417fd6ec56fd54de95bb7f6cf7cc2",
+          "sha256": "a9656778c4dda9d7a51e6573b5e9b3d312a8aa4ee663ddfe60245a4f0141594e"
+        },
+        {
+          "path": "tests/integration/test_runtime_upgrade_http.py",
+          "size": 3297,
+          "sha": "8e6422e2df85d4a549c4fa6a3ba8dba1fe0ea15f",
+          "sha256": "dc9abd72ee4bf1857feeb2c4523964e8962f35b053be9ad4cc00f55cef4d8c9f"
+        },
+        {
+          "path": ".github/workflows/p4-recovery-drill.yml",
+          "size": 3052,
+          "sha": "0768209dc2c2b26c8d279739726a67bbc9df08e4",
+          "sha256": "fd943bea5200d27566d210a4fe73a67f9da473a8702bd495eee504f2b0fc0254"
+        },
+        {
+          "path": "docs/implementation/P4_02_恢复与升级运行手册.md",
+          "size": 12357,
+          "sha": "b7299e35968257f04d5c178a9e952d8cdfad24c2",
+          "sha256": "98d0e8ba0890a1096ab137a48204375852746ef0ae1ad08ddcfc63154c0f71fa"
+        },
+        {
+          "path": "reports/P4_02_恢复与升级验收.md",
+          "size": 7552,
+          "sha": "3e9cbdccaec0e6f466a677bc9b33094712823f3c",
+          "sha256": "2e270b5cc29ec344657302ce4f33567d4bb0dfc199455efc13c598a627eb76ec"
+        },
+        {
+          "path": "reports/P4_02_运行升级独立复核.md",
+          "size": 4189,
+          "sha": "70e0600e3199ebb3b526ee0f36c5aa4bcb69168a",
+          "sha256": "6edc353ba4df1112945369f31aba7f60c9337ec0dd356c94187438eb74850eba"
+        },
+        {
+          "path": "reports/P4_03_基础设施架构评估.md",
+          "size": 13737,
+          "sha": "59daa27719e0babf8c62bfca5f6da04bda9082d5",
+          "sha256": "e60a995b5a91ef11bc799a9fdcbf1fcb9b4bee63f3f60fa47ea43b969ab7aef8"
+        },
+        {
+          "path": "evidence/p3_p4/runtime_upgrade_peer_validation.json",
+          "size": 1089,
+          "sha": "bed0510d8b134192c257f76353eefae10ec5ff34",
+          "sha256": "014588d07e17929e45968a617c5c2cc282feb1e3fc4c37905bd92e7549918b24"
+        },
+        {
+          "path": "evidence/p3_p4/backup_target_validation.json",
+          "size": 1646,
+          "sha": "dca40c1eb17e058c4a5c2e4523808af9e77cbc40",
+          "sha256": "013215d43eb5a8fa1f42fc3107be7e613ab5f4b8cd15cc31f8100e10bd0950bf"
+        },
+        {
+          "path": "evidence/p3_p4/checkpoint4/local_pitr_verified.json",
+          "size": 2922,
+          "sha": "4f3c71e8dc400ee3fe625121bcbef77b9a6c9e2c",
+          "sha256": "39fab2c87415a92fc5a773cb52de6b615b3dff0403b9fe412156feaa5039d58b"
+        },
+        {
+          "path": "evidence/p3_p4/checkpoint4/pitr_final_isolation.json",
+          "size": 3775,
+          "sha": "bb8101257cc367d6e804235685cb07ba77d14863",
+          "sha256": "befd894227345846da6b7e3a2500fb5559f3934cf3f15889efc71f8480b067d6"
+        },
+        {
+          "path": "reports/P3_P4_第四检查点集成记录.md",
+          "size": 4014,
+          "sha": "5dedf82e55f074feccc22d7fe8ec308b505f0a86",
+          "sha256": "033bbb0f911661be8cc6afee3a666cc49d93bca3bb24aac4e5122c4f32ac4878"
+        },
+        {
+          "path": "evidence/p3_p4/checkpoint4/local_validation.json",
+          "size": 1356,
+          "sha": "5af4b21b29b474301551e5d964a76287e72e88d9",
+          "sha256": "bdddc04d5ec250d6d6e5b1d2ef297ef88fa5bf809d95f327793d15bd340ce0a2"
+        }
+      ],
+      "deletions": []
+    }
+  ],
+  "synthetic_pr_merge": {
+    "sha": "07ab548c2da85b0cfdc5e35875dbeb5fe173aaab",
+    "parents": [
+      "e0b0f2b080f3225d8be8e202e13258bc480f5b84",
+      "9bf3794fbabb1074e1309e3217d6bbe78ce3c704"
+    ],
+    "tree": "8591e40df3c0fb50616c45c23f63e5d394e23402",
+    "same_as_application_code_tree": true,
+    "verified_from": "GitHub Git Commit API and PR API",
+    "actual_pr_merge_performed": false
+  },
+  "source_inventory": {
+    "scope": "All source/contracts/tests/benchmarks/scripts/workflows changed in the checkpoint ledger; other repository blobs preserved and checked against full remote tree.",
+    "file_count": 63,
+    "files": [
+      {
+        "path": ".github/workflows/p1-integrity.yml",
+        "size": 7352,
+        "git_blob_sha": "09716b8abcef9679e39f1a0439458629e51a9721",
+        "sha256": "f8fd3cd6f5681b454ec2196c6e10251748323b7f5fe5369f301f2f9541480d18"
+      },
+      {
+        "path": ".github/workflows/p3-p4-evidence.yml",
+        "size": 4485,
+        "git_blob_sha": "482860b7fa0708b8b15b4aa4829bb3f6f86327df",
+        "sha256": "0dc8eb8b68fa38be8a2a1fe7f61534bf340bc69f627051effc7826898faf355d"
+      },
+      {
+        "path": ".github/workflows/p3-scale-experiments.yml",
+        "size": 3142,
+        "git_blob_sha": "6c0dbfdd7e148023095643f054cf41c91fcd4ed6",
+        "sha256": "498717b78b57a25460fb5e7c32eedae6fb63a059477009f562e42eb40cbc2740"
+      },
+      {
+        "path": ".github/workflows/p4-recovery-drill.yml",
+        "size": 3052,
+        "git_blob_sha": "0768209dc2c2b26c8d279739726a67bbc9df08e4",
+        "sha256": "fd943bea5200d27566d210a4fe73a67f9da473a8702bd495eee504f2b0fc0254"
+      },
+      {
+        "path": "benchmarks/http_load.py",
+        "size": 12164,
+        "git_blob_sha": "bd001065875895870d63e816f7101edc22e43e1f",
+        "sha256": "c419a1055a6b878107b926faf897431872946065692fa9fe5eff74a51a842819"
+      },
+      {
+        "path": "benchmarks/memory/controlled_evaluate.py",
+        "size": 10564,
+        "git_blob_sha": "714ff10c5cf86f447176e0268d8e824756bb02bf",
+        "sha256": "9f1bf4459f83b34ff756e7fd38fc3dca94b4081edcd739d4c6e71a34f8b2272e"
+      },
+      {
+        "path": "benchmarks/memory/review_cases.json",
+        "size": 758,
+        "git_blob_sha": "141d16e7683dc42c223f70c13adacb78e09e3137",
+        "sha256": "8c693852dd75665487ce2947fa2deb24864970096eb322613a4dc1316fdb325c"
+      },
+      {
+        "path": "benchmarks/p2_behavioral_load.py",
+        "size": 47819,
+        "git_blob_sha": "308c33c0f747fab5be3357e48a6342cac8936b65",
+        "sha256": "c3533086aed8ef2ee309e44c16751d16804aa99ed78cc72cc4ed374cd5c6b940"
+      },
+      {
+        "path": "benchmarks/p3_context_comparison.py",
+        "size": 8226,
+        "git_blob_sha": "5d85de2b7108b67f227c8a06ce38c9466c058da1",
+        "sha256": "7cbcdd73a88c0bc9a947b066ad732ed20b8500414c11f7ae8eb54e99fb5a4eaf"
+      },
+      {
+        "path": "benchmarks/p3_open_arrival.py",
+        "size": 9432,
+        "git_blob_sha": "58d7c72d11d30d15adc81272a4101385d5a70d7c",
+        "sha256": "515ec1ec61e03317cd6f160a22a309aa38bc6df8bbfd4604e3dacfa43b14e9da"
+      },
+      {
+        "path": "benchmarks/p3_stability.py",
+        "size": 8400,
+        "git_blob_sha": "7be225ec3ad25dfd4e6199d9180041db35edde1c",
+        "sha256": "8ad0e0781fbec0464b6385cab9ac89f4a6e51705e456d6394012a016460ec7ed"
+      },
+      {
+        "path": "benchmarks/process_server.py",
+        "size": 7961,
+        "git_blob_sha": "fbf7a3252314c846f4f55dad452c3540c4f22731",
+        "sha256": "874f150dd21cfbecb416562d3b3108bb6655e57fcc9e5642119f4de8f9e99baf"
+      },
+      {
+        "path": "contracts/commands.schema.json",
+        "size": 11086,
+        "git_blob_sha": "aaafb3eea7124e889c4f0b41749228c8f12dc3d1",
+        "sha256": "3dff553f8b7b1b3b4ab3cc4b77ce8a97ca96b7c1253a99a976e477a2add671fd"
+      },
+      {
+        "path": "contracts/continuity.schema.json",
+        "size": 14077,
+        "git_blob_sha": "ff490d632999c05d578dc910dafe387550b129d2",
+        "sha256": "cd0138779ce4a89557b0a6fb955891309d4190e5d47202ecb79861874d1dd446"
+      },
+      {
+        "path": "contracts/refinement.schema.json",
+        "size": 3425,
+        "git_blob_sha": "d2dd058513ef895a13388fc51b89ae9a645b410a",
+        "sha256": "88affbc5697427ec9ab4c56764ec0d753c5f0b25a7b1095087a6036be3cfcca3"
+      },
+      {
+        "path": "contracts/upgrades.schema.json",
+        "size": 5627,
+        "git_blob_sha": "5e82e44de70ec581c716c5e5dd795b71e600b7c8",
+        "sha256": "6ec08ef373a5de1870db24e10f100d335e9bc35b7180bd39a1acd413e9619932"
+      },
+      {
+        "path": "scripts/backup.py",
+        "size": 2534,
+        "git_blob_sha": "dc4e88f591caccef67f830004fc2cefa5730e002",
+        "sha256": "575853c5b15f65e14fa4baf0977327244bd1179d3d41930b7f8109e56e1f7a69"
+      },
+      {
+        "path": "scripts/pitr_drill.py",
+        "size": 17089,
+        "git_blob_sha": "d86001921ec8e4bae855fcc858c8d968289c93fd",
+        "sha256": "7f7fd1aa95a57cc6c3c73243740fe630edc254df2e544779957e69cae69617d9"
+      },
+      {
+        "path": "scripts/run_derived_worker.py",
+        "size": 1242,
+        "git_blob_sha": "d8c13149096725ef534ba82e6841e53ddf9d4ecb",
+        "sha256": "8cf060b128a255ae656ddb343e2dfa02825be316440ce6db60d9623e59161cf7"
+      },
+      {
+        "path": "scripts/run_p3_evaluation.py",
+        "size": 3305,
+        "git_blob_sha": "2e1b6840b3585d00c09ef67bac18c8fff4131e4e",
+        "sha256": "e35f6fe26ab71f68f3a3bc88c05622ba131b70820184ed87c33b0922aa88e1e5"
+      },
+      {
+        "path": "src/novel_factory/algorithms/evidence_context.py",
+        "size": 5620,
+        "git_blob_sha": "5660bb88996a65d10b8bbe23ecc38cef3a18ed4c",
+        "sha256": "cc4fc3067983351ffe969dea824473b949fa9746e24f9483628dca52b6c553a5"
+      },
+      {
+        "path": "src/novel_factory/application/agent_gateway.py",
+        "size": 29383,
+        "git_blob_sha": "4f5d4bc4cd455b6e7cea7316427663401aa8eebd",
+        "sha256": "11441a418c7b912f077d9b2464a662e3c8f695a4190049ed80fa53f3817646f4"
+      },
+      {
+        "path": "src/novel_factory/application/continuity.py",
+        "size": 33487,
+        "git_blob_sha": "bf4b2e453827f09b2027c0cd06db69741ee577cf",
+        "sha256": "ee6ee748187e56d2f2b7b972c387ca2c4c8ddf9c33a9a9a3ae2c25f6e1b35e84"
+      },
+      {
+        "path": "src/novel_factory/application/derived_worker.py",
+        "size": 12323,
+        "git_blob_sha": "5195aad9b99d16ddaee4e43b798123c5bcb98d81",
+        "sha256": "f42b74cd79e040e2467e265d5e15abeed18b1e41bed7ed5a5f1ce11421ded4d0"
+      },
+      {
+        "path": "src/novel_factory/application/refinement.py",
+        "size": 10712,
+        "git_blob_sha": "97d4638cac8ad99a5658ba42043de5a766ac50a9",
+        "sha256": "308f8354fc11ddfd1e95a1a683269447833782550f7df1ba30f4b62457155401"
+      },
+      {
+        "path": "src/novel_factory/application/release.py",
+        "size": 32298,
+        "git_blob_sha": "0fc24863a8bd71efe2e1b68a3986c0b1c92c61d5",
+        "sha256": "b8c99e023a0b1d837f581fe673e439131febac907a466128389fa0d0046810d3"
+      },
+      {
+        "path": "src/novel_factory/application/simulation.py",
+        "size": 38665,
+        "git_blob_sha": "0f6f2260ff60402881446ffd28732004241018e3",
+        "sha256": "99c4c5ddd2ecfff5a222b6ad63f9d566eec126d4492055a7c027845038dc94d2"
+      },
+      {
+        "path": "src/novel_factory/application/upgrades.py",
+        "size": 20023,
+        "git_blob_sha": "72f3605ae98f88978db54883d56819e286a5b1fd",
+        "sha256": "253a536fd5b70e221fa974cb015f583901b6d2f8d5ba8de4684b7f54d92c0d3f"
+      },
+      {
+        "path": "src/novel_factory/contracts/_schema_bundle.py",
+        "size": 739946,
+        "git_blob_sha": "9722a6ee37bbc75d166c773c56ae5ec8168bee61",
+        "sha256": "4f1edb486eade49cd2021a573b0b13d572f0763f46cbc7430c5caadd8d6e9efa"
+      },
+      {
+        "path": "src/novel_factory/contracts/registry.py",
+        "size": 6974,
+        "git_blob_sha": "a4e979856a25e7487ae394e5873f50d822c7bc70",
+        "sha256": "c2d9a9cf20476f4fa25e34518a9d60e538949b8dd9568c3fff9a9ef314a55c7b"
+      },
+      {
+        "path": "src/novel_factory/domain/continuity.py",
+        "size": 4119,
+        "git_blob_sha": "79c28cf9350d40f5971d2d37b4e4053ac0b9569c",
+        "sha256": "efd913b5fd8e2ba0e67ce75f6eb5272aef8e57f106190d31a74f9914bb7cb806"
+      },
+      {
+        "path": "src/novel_factory/domain/refinement.py",
+        "size": 14764,
+        "git_blob_sha": "0346a322372584d3bb6785d680876562c8b13c90",
+        "sha256": "47fb1f24cdadc4749056226633698ae156046ae8aac184c236915c44b094e6bd"
+      },
+      {
+        "path": "src/novel_factory/domain/temporal.py",
+        "size": 4736,
+        "git_blob_sha": "e87ff4be693630a47cf4e00500af3d1be755de0b",
+        "sha256": "fc670d6146b7efd5c9f7f8851da92000ebe3c3b7fb789845194cee675f359b71"
+      },
+      {
+        "path": "src/novel_factory/evaluation/__init__.py",
+        "size": 146,
+        "git_blob_sha": "0b4c31a6ef887e733d1d732aba3c95c447c1be27",
+        "sha256": "d214189852920570e4ee8e67477833585095beba5ca2716b5a3695bea4d98e3d"
+      },
+      {
+        "path": "src/novel_factory/evaluation/contracts.py",
+        "size": 1396,
+        "git_blob_sha": "dfbdc8612bd753a7707f653d54319032fa705f1f",
+        "sha256": "00e229b835b3e378c95b9c2b4e5e51981962317df507bf060b8f0d7f49bbf9b9"
+      },
+      {
+        "path": "src/novel_factory/evaluation/example.py",
+        "size": 10705,
+        "git_blob_sha": "2efa19c379f46ffb5577b488da6508628b9d1492",
+        "sha256": "f211c8deb3e84d81efc67809aaf489184c5bdcb4d3bff66f5cf6235e2bcd9ef4"
+      },
+      {
+        "path": "src/novel_factory/evaluation/protocol.py",
+        "size": 13512,
+        "git_blob_sha": "7f8f4466b02ca8ffcbccde059ae9ab0597f64402",
+        "sha256": "1e65c2d3b992a8a88b600d512e12cd71629276b07d6b19a84105d557ac9be2ef"
+      },
+      {
+        "path": "src/novel_factory/evaluation/schema.json",
+        "size": 24396,
+        "git_blob_sha": "fdf3cabffd348dd3dc9914632d06f7ca91026849",
+        "sha256": "48e0ccb0563edfc3568e0d355bbb56d6b6f0d5d6a8c8cc10607d019833c10a27"
+      },
+      {
+        "path": "src/novel_factory/evaluation/store.py",
+        "size": 25307,
+        "git_blob_sha": "bce760be743d65d5fd1614150823747a72184cc8",
+        "sha256": "ff9e736e5142a36d54c9d1297423bf8d13201bdd394547a04cac856d931ac81f"
+      },
+      {
+        "path": "src/novel_factory/infrastructure/online_backup.py",
+        "size": 7165,
+        "git_blob_sha": "420810f8ffffab3c522b83339c03a6847ec42da3",
+        "sha256": "42a27efe329ec30f7b353b9543979ddeb30f0e4a31dbd622edf5fe95bac37920"
+      },
+      {
+        "path": "src/novel_factory/infrastructure/recovery.py",
+        "size": 19782,
+        "git_blob_sha": "163f96605512baddbb8a141de77e816c69bfa397",
+        "sha256": "3fce2ddcf4f2a25f37d8ec7180cef832d11bc80f5cf1771c8ec12566931b1f5a"
+      },
+      {
+        "path": "src/novel_factory/infrastructure/repository.py",
+        "size": 4200,
+        "git_blob_sha": "bdb4df0ab5b0596171f2861e8a6d5516a3116935",
+        "sha256": "f3b1afd6191dde474fca47239ccd84eb071da26470ec9cd55f63ffbc2ae2e858"
+      },
+      {
+        "path": "src/novel_factory/interfaces/http.py",
+        "size": 25096,
+        "git_blob_sha": "5feb5a370dae9fa188b7943725dae7cdf319864f",
+        "sha256": "a2fe79bcf16953c3c2ae73e63e589444252da5612351b7ce349449f2a066de97"
+      },
+      {
+        "path": "tests/evaluation/test_foundation.py",
+        "size": 14236,
+        "git_blob_sha": "ba8f854ac3df05f82bd21584b98e727545ae9fee",
+        "sha256": "26d5745c25dbbc6e14047d9e4d0569a39ee2fd502245e23f7f3c5b6d86369b4f"
+      },
+      {
+        "path": "tests/integration/test_ancestry_metadata.py",
+        "size": 1988,
+        "git_blob_sha": "1256ac6ec3f3e945f5a4dc3f500b613b9a1374a1",
+        "sha256": "83cd52dd79c18ed8929add23f4ef6b0055300e5383a9119f3a5281d704ef56c9"
+      },
+      {
+        "path": "tests/integration/test_continuity.py",
+        "size": 20196,
+        "git_blob_sha": "4a4e3ea0f2656db884b2bdfa87c5ef9f0936eee2",
+        "sha256": "f0b32068a9ae1894fa834286d438c8576e305b67d5bb0512e46cbb51bf578ee4"
+      },
+      {
+        "path": "tests/integration/test_continuity_http.py",
+        "size": 3234,
+        "git_blob_sha": "b48e2b1e4afdc5ecad3059be3fd3b64272afdcb5",
+        "sha256": "1efbf4718aef4407d0330dfaad88c6c8d36162824fdd1be92d26e4bc10deb2c5"
+      },
+      {
+        "path": "tests/integration/test_derived_worker.py",
+        "size": 13257,
+        "git_blob_sha": "15f7526298dd7795976b4104275b1fef98b8e40f",
+        "sha256": "70985c16e3bad12032a74d6eb0066111968a9249cc6e44951ef822528fe14b6f"
+      },
+      {
+        "path": "tests/integration/test_history_repair.py",
+        "size": 13755,
+        "git_blob_sha": "d7474834c69df0aa6599e7d58bb0e9416b38b826",
+        "sha256": "90d72324ea56c3ebc4c42eba3e141834dd4d42b620de60f2aa108a13130b7fe7"
+      },
+      {
+        "path": "tests/integration/test_online_backup.py",
+        "size": 3404,
+        "git_blob_sha": "f7d5672a8b83ef316d2985e7534137b1f97e47b0",
+        "sha256": "1a03aac66bc0c9dea81a9d7619f91229b02aadb6c3da29bdea207697192587af"
+      },
+      {
+        "path": "tests/integration/test_refinement.py",
+        "size": 14774,
+        "git_blob_sha": "509501874ec0a58789b02af47074e9741bcffc9b",
+        "sha256": "84a1fd4a41c750d7d98ab71525a2488b9da75fc90586b6710b8404a0c31e8d06"
+      },
+      {
+        "path": "tests/integration/test_release.py",
+        "size": 25772,
+        "git_blob_sha": "a12a1395693d5de11b10ef543c8e7a063559aa95",
+        "sha256": "085194aee694a9b3399d5700e7b551e2dcc01e225b1759b89f281871c6c64188"
+      },
+      {
+        "path": "tests/integration/test_runtime_upgrade_http.py",
+        "size": 3297,
+        "git_blob_sha": "8e6422e2df85d4a549c4fa6a3ba8dba1fe0ea15f",
+        "sha256": "dc9abd72ee4bf1857feeb2c4523964e8962f35b053be9ad4cc00f55cef4d8c9f"
+      },
+      {
+        "path": "tests/integration/test_runtime_upgrades.py",
+        "size": 17220,
+        "git_blob_sha": "4fe16587fec417fd6ec56fd54de95bb7f6cf7cc2",
+        "sha256": "a9656778c4dda9d7a51e6573b5e9b3d312a8aa4ee663ddfe60245a4f0141594e"
+      },
+      {
+        "path": "tests/service/test_process_isolation.py",
+        "size": 3254,
+        "git_blob_sha": "869ece0e35feef7f35fc73a90d4a77787d45db5b",
+        "sha256": "974b2cc83138e08b6ed7035f50cd97a7528d880facb181c07d42e4edc04a119d"
+      },
+      {
+        "path": "tests/service/test_refinement_http.py",
+        "size": 2011,
+        "git_blob_sha": "189b2b9f98976f93c21e0688bc00b6fd4ef4d669",
+        "sha256": "96bd90cf06168e9fb1b7387677bb1c06dc59c272ce5061250efdeb12957e9e73"
+      },
+      {
+        "path": "tests/unit/test_backup_connection_environment.py",
+        "size": 5235,
+        "git_blob_sha": "a7c3b7a8240fd38f040ff4fd32ee63031d0ce50b",
+        "sha256": "77162463c94cc0c11a25fea687c2a91c420e7214647a7a3d435c1d796b984f25"
+      },
+      {
+        "path": "tests/unit/test_continuity_rules.py",
+        "size": 2781,
+        "git_blob_sha": "d530529ed4b0db63a46b8217bed614d932f6a150",
+        "sha256": "bef71a845f6f6273b6307f8dd2918d8fb565dd20878536f3252d2b73284c523b"
+      },
+      {
+        "path": "tests/unit/test_evidence_context.py",
+        "size": 5458,
+        "git_blob_sha": "881b06aa1ac1eb9834605d664602e6c66e476ad0",
+        "sha256": "a03720afbece04f6581d3fc26b090ace1c5f9756aeca410db0481bb48f35edea"
+      },
+      {
+        "path": "tests/unit/test_online_backup_runtime.py",
+        "size": 4613,
+        "git_blob_sha": "da8d4e3abb00deb0367ab51129ae344a3c7cb1eb",
+        "sha256": "7f708822abdf9376709b637e89f4cae3bc777fe98a4b0bbd7258a5dad99513b0"
+      },
+      {
+        "path": "tests/unit/test_open_arrival_evidence.py",
+        "size": 1505,
+        "git_blob_sha": "68cf45cbcb0e652008c21766e9fa32a5bea5bc9e",
+        "sha256": "cec01ecc318ee84014280bed88a9340a0aee8b741e896bb5f15ba08fc95ea95c"
+      },
+      {
+        "path": "tests/unit/test_refinement_rules.py",
+        "size": 11506,
+        "git_blob_sha": "824e622e947bdd0a82d0d2cb9c8e25ca74ca3906",
+        "sha256": "51e9739658b9dfdba53cc3a467612b47dd3611e6ad5637ec4077fe9425bd5993"
+      },
+      {
+        "path": "tests/unit/test_temporal_coordinate_cache.py",
+        "size": 2118,
+        "git_blob_sha": "9d2ca330cf9ad5cd0cc334fe457a5653d5f6c552",
+        "sha256": "4fbafab39f6501c0f5f7e909952d2d16ee1f72a866edf8fc428f89c3c5272453"
+      }
+    ]
+  },
+  "acceptance_matrix": "evidence/p3_p4/final/acceptance_matrix.json",
+  "independent_performance_check": "evidence/p3_p4/final/performance_independent_check.json",
+  "artifact_policy": {
+    "raw_logs": "GitHub Actions Artifacts",
+    "workflow_retention_days": 90,
+    "zip_digest_and_inner_file_hash_are_distinct": true,
+    "expired_artifacts_require_separately_preserved_downloads": true
+  },
+  "remaining_acceptance": {
+    "capacity": "NOT_MET",
+    "multi_hour_mixed_soak": "NOT_EXECUTED",
+    "real_model": "BLOCKED_ENVIRONMENT",
+    "literary_quality": "NOT_EVALUATED",
+    "author_full_read": "PENDING_AUTHOR",
+    "production_disaster_recovery": "NOT_EXECUTED"
+  },
+  "local_git_note": "Shared development worktree HEAD remains 206eaa5; API-committed contents are not represented by local HEAD. Audit remote immutable commits and Tree/blob hashes."
+}

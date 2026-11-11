@@ -1,0 +1,106 @@
+name: P4 real isolated WAL PITR and verified recovery
+
+on:
+  push:
+    branches: ["main", "dev/p3-p4-*"]
+    paths:
+      - 'src/novel_factory/infrastructure/recovery.py'
+      - 'src/novel_factory/infrastructure/online_backup.py'
+      - 'src/novel_factory/application/upgrades.py'
+      - 'scripts/pitr_drill.py'
+      - '.github/workflows/p4-recovery-drill.yml'
+  pull_request:
+    paths:
+      - 'src/novel_factory/infrastructure/recovery.py'
+      - 'src/novel_factory/infrastructure/online_backup.py'
+      - 'src/novel_factory/application/upgrades.py'
+      - 'scripts/pitr_drill.py'
+      - '.github/workflows/p4-recovery-drill.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  isolated-pitr:
+    name: Physical base backup, SIGKILL, WAL replay and application verification
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      PG_BIN: /usr/lib/postgresql/17/bin
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - name: Install PostgreSQL17 server and physical-backup tools
+        run: |
+          sudo install -d -m 0755 /usr/share/postgresql-common/pgdg
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo tee /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc > /dev/null
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-17 postgresql-client-17
+          "$PG_BIN/postgres" --version
+          test -x "$PG_BIN/pg_basebackup" && test -x "$PG_BIN/pg_verifybackup"
+      - name: Install locked application
+        run: uv sync --locked --group dev --python 3.12
+      - name: Restore actual isolated clusters to an explicit target
+        run: |
+          mkdir -p ci-evidence
+          uv run --no-sync python scripts/pitr_drill.py --output ci-evidence/pitr \
+            2>&1 | tee ci-evidence/pitr.log
+      - name: Hash retained evidence files
+        if: always()
+        run: |
+          python - <<'PYCODE'
+          from pathlib import Path
+          import hashlib, json
+          root = Path('ci-evidence')
+          files = {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
+                   for p in sorted(root.rglob('*')) if p.is_file() and p.stat().st_size < 32 * 1024 * 1024}
+          (root / 'SHA256.json').write_text(json.dumps(files, sort_keys=True, indent=2) + '\n')
+          PYCODE
+      - name: Verify manifest covers the retained artifact
+        if: always()
+        run: |
+          python - <<'PYCODE'
+          from pathlib import Path
+          import hashlib, json
+          root = Path('ci-evidence')
+          manifest = json.loads((root / 'SHA256.json').read_text())
+          generated = {'pitr/archive_segment.py', 'pitr/restore.conf', 'pitr/source.conf'}
+          retained = {str(p.relative_to(root)) for p in root.rglob('*')
+                      if p.is_file() and (p.suffix in {'.json', '.log'}
+                                         or str(p.relative_to(root)) in generated)}
+          retained.discard('SHA256.json')
+          if retained != set(manifest):
+              raise RuntimeError(f'Artifact/manifest mismatch: missing={sorted(set(manifest) - retained)}, '
+                                 f'unhashed={sorted(retained - set(manifest))}')
+          result_path = root / 'pitr/result.json'
+          if result_path.is_file() and json.loads(result_path.read_text()).get('status') == 'PASS':
+              if not generated <= retained:
+                  raise RuntimeError(f'Passing recovery omitted generated files: {sorted(generated - retained)}')
+          for name, expected in manifest.items():
+              path = root / name
+              if path.is_symlink() or hashlib.sha256(path.read_bytes()).hexdigest() != expected:
+                  raise RuntimeError(f'Retained artifact checksum mismatch: {name}')
+          print(f'Verified {len(manifest)} retained files against SHA256.json')
+          PYCODE
+      - name: Preserve recovery measurements and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p4-real-pitr-${{ github.run_attempt }}
+          path: |
+            ci-evidence/**/*.json
+            ci-evidence/**/*.log
+            ci-evidence/pitr/archive_segment.py
+            ci-evidence/pitr/restore.conf
+            ci-evidence/pitr/source.conf
+          if-no-files-found: error
+          retention-days: 90

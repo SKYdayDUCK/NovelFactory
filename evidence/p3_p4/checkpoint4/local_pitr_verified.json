@@ -1,0 +1,65 @@
+{
+  "result": {
+    "status": "PASS",
+    "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+    "execution_kind": "REAL_ISOLATED_POSTGRESQL",
+    "source_port": 58141,
+    "restored_port": 41465,
+    "durability": {
+      "fsync": true,
+      "synchronous_commit": true,
+      "data_checksums": true
+    },
+    "model_calls": 0,
+    "production_data_accessed": false,
+    "pg_basebackup": {
+      "exit_code": 0,
+      "stdout": ""
+    },
+    "base_backup_seconds": 0.8890283580003597,
+    "pg_verifybackup": {
+      "exit_code": 0,
+      "stdout": "backup successfully verified"
+    },
+    "archiver": {
+      "archived_count": 4,
+      "failed_count": 0
+    },
+    "target_world_ref": {
+      "work_id": "c5dac81b-382b-4387-9a90-c681fa5c2894",
+      "branch_id": "2adf80d7-da94-48b3-9dd7-94d16e8d79b3",
+      "world_revision_id": "13f27868-3055-4348-a454-211988fe6ee3"
+    },
+    "target_lsn": "0/3074200",
+    "restored_state_sha256": "ec563ff802a6f28f4214000283a9c0dcfb5d59eda6f55e634802804cb366c660",
+    "snapshot_equal_before_fencing": true,
+    "table_count": 37,
+    "object_count": 19,
+    "recovery_seconds_to_verified_service": 0.9694267220002075,
+    "selected_recovery_point_age_seconds": 0.2598,
+    "target_commits_lost": 0,
+    "deliberately_excluded_later_world_commits": 1,
+    "restored_world_event_count": 2,
+    "unknown_calls_retained": 1,
+    "reserved_amount_retained": "0.5",
+    "fenced_task_count": 1,
+    "old_worker_rejected": true,
+    "original_commit_receipt_equal": true,
+    "limitation": "Small isolated local fixture; selected-point RPO/RTO, not production SLO or remote storage test",
+    "total_seconds": 3.638934579998022
+  },
+  "files": {
+    "file_checksums.json": "92065e74cb83e4b8b080736504a64a2bd9340d9eb216f0a26e172cbde66a4264",
+    "NF_ISOLATED_RECOVERY_DRILL.json": "d8ef4d14e3970b9f60b6ca9ac4f43ba72c1c7e3d50984a5230a5affeaefcda5a",
+    "result.json": "8761e2945c0fb785dadb643191f2e7698da18c06e07c9eabf4d56367a560182b",
+    "target_database_digests.json": "6baae3cc0459edcbc0571bbb3f031d8ba7a4e9f02b354bce4e03d84eafde3081",
+    "fenced_tasks.json": "5435480092b7ec44c4158d4922672d41eeb0b5f672264f0533426b32c54aa0a9"
+  },
+  "source_sha256": {
+    "scripts/pitr_drill.py": "23e46b58e7bd87c4f83f046e16da899eeb8e3b7874ed7a9304f0fa865b124c77",
+    "src/novel_factory/infrastructure/online_backup.py": "83ed3c1543965d30eafd48320518ba4fd98fd42da193e52990bb4b7ac8903025",
+    "src/novel_factory/infrastructure/recovery.py": "9f52be805070ab28f86c41a8dfbb85d3212eda690ee6ec317b5871ea9741792b"
+  },
+  "scope": "Actual isolated source SIGKILL and physical base backup+archived WAL named-point replay, second run after online runtime-inventory hardening.",
+  "source_note": "Second run after runtime-inventory hardening; subsequent explicit-check replacement in pitr_drill.py is separately re-run with python -O. Source hash here identifies the second run exactly."
+}

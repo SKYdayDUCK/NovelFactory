@@ -1,0 +1,58 @@
+{
+  "source_parent": "f6d48def76b982dfd9fbd5fca60a20f937576e8b",
+  "stage": 3,
+  "validation": [
+    {
+      "name": "cp2-full",
+      "command": "python -m pytest tests -q",
+      "sha256": "223eba96e8cea631cc825c251564eb7760fa7f7428dabc31151e2914279916f3",
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "491",
+          "time": "277.026",
+          "timestamp": "2026-11-11T00:04:57.322134+09:00",
+          "hostname": "2be49009bab4"
+        }
+      ]
+    },
+    {
+      "name": "cp3-unit",
+      "command": "python -m pytest tests/unit tests/contracts tests/evaluation tests/service/test_admission.py -q",
+      "sha256": "7c73ba7c41603ca165f96464a9f009949cecb57755cca0d4c70b2d2848769228",
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "294",
+          "time": "9.694",
+          "timestamp": "2026-11-11T00:06:40.645608+09:00",
+          "hostname": "2be49009bab4"
+        }
+      ]
+    },
+    {
+      "name": "cp3-cross-module",
+      "command": "python -m pytest tests/integration/test_continuity.py tests/integration/test_continuity_http.py tests/integration/test_derived_worker.py tests/integration/test_release.py tests/integration/test_history_repair.py tests/service/test_process_isolation.py -q",
+      "sha256": "0add2001d2f5cc71a76149801401b4ed70cc29e076316bc2370e325f28479a0d",
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "37",
+          "time": "91.599",
+          "timestamp": "2026-11-11T00:06:42.406164+09:00",
+          "hostname": "2be49009bab4"
+        }
+      ]
+    }
+  ],
+  "note": "Frozen CP3 snapshot excludes runtime upgrades and online/PITR recovery changes. Full CP2 fixed snapshot has separately passed491 tests."
+}

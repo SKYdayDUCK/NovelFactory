@@ -1,0 +1,72 @@
+{
+  "records": [
+    {
+      "source": "control/pr3-runtime-before.xml",
+      "archive": "control_pr3-runtime-before.xml.gz",
+      "sha256": "5a5daa690cafe8a135d523f8b79507253bf39e0026be0cd3b26e61489df75f0b",
+      "gzip_sha256": "d1ee565d6c8236a52ca8d4f23c3bacc4dfe33e95aa1a97135ea7a0652e4df030"
+    },
+    {
+      "source": "control/pr3-runtime-after-v1.xml",
+      "archive": "control_pr3-runtime-after-v1.xml.gz",
+      "sha256": "1df07e534b6cd96382ffdc5d6ce770aa3e175d239b54b0511d5c7dc997d62b48",
+      "gzip_sha256": "d4a3e1f0fd7228c00d0d044751d7b191483ba6e1b7ad698e82fe1831ffe94914"
+    },
+    {
+      "source": "control/pr3-recovery-migration-worker.xml",
+      "archive": "control_pr3-recovery-migration-worker.xml.gz",
+      "sha256": "3857ada37500f77288590d7c5da56dba26fb2aa43a741794bf76319ceae40dfa",
+      "gzip_sha256": "cf03e881336e2b88b0ef31a86cce173be9d095345f024e0ebad721ecb8ba94da"
+    },
+    {
+      "source": "control/pr3_audit_evidence.json",
+      "archive": "control_pr3_audit_evidence.json.gz",
+      "sha256": "de723dfb63226d7600a61b84261f88212d9e6b2ade7921d20a0c7e14551c2c71",
+      "gzip_sha256": "e71a2ca66c70e572346a80d02724f206636b6eea7fdbf299a1a329b8e1d1ca13"
+    },
+    {
+      "source": "compatibility/summary.json",
+      "archive": "compatibility_summary.json.gz",
+      "sha256": "f46a3a2ce6d2fe4db7559f07b78ade2031226bd19c1c50011020ca6dba5a3136",
+      "gzip_sha256": "f47364bab30530f605aed4697e9c3bf6c6ac5c5e00cb45a9ef6f2cfb9f84fb7e"
+    },
+    {
+      "source": "compatibility/run03/p1.json",
+      "archive": "compatibility_run03_p1.json.gz",
+      "sha256": "3c3f15e312a9ba47956c3c38f3c41b55b4d04d8eaf3d69205c6dc32aa3e682d9",
+      "gzip_sha256": "713660966d37dfdd0ef8efb420e35fcb0718d965b576d229aae025bd2c1543ac"
+    },
+    {
+      "source": "compatibility/run03/p2.json",
+      "archive": "compatibility_run03_p2.json.gz",
+      "sha256": "1c0ab46ae5dc35e870a0c18689a0f3bd28554c8ee4a6ed09f830b4e3c38dbb45",
+      "gzip_sha256": "3e2d622aecf375f738328d7a8a99d2ed69319111ef0fd747058eb6cb262ba036"
+    },
+    {
+      "source": "compatibility/run03/p3.json",
+      "archive": "compatibility_run03_p3.json.gz",
+      "sha256": "60f2bca34099160014e76387a794987070852d9e6ab807f80c1b54ae241f2400",
+      "gzip_sha256": "919258fd346b3c9bf2e0bcb50dbbd666011396bdbdff1eb22445232e192ead54"
+    },
+    {
+      "source": "compatibility/run03.log",
+      "archive": "compatibility_run03.log.gz",
+      "sha256": "52e57f7a5f47f67c096ed3b999f1e00fdef2f5ff7805340c24d07d1192da5a16",
+      "gzip_sha256": "bda023e970b5c9ac2507c51a2823972de6de43ecb1dc7b8c3801df73a2fe2cb6"
+    },
+    {
+      "source": "compatibility/p2-source-manifest.json",
+      "archive": "compatibility_p2-source-manifest.json.gz",
+      "sha256": "b15d911cf41d7f81ba9299ad1b84f8320df5cb42b369cc926c3f356f0b5246d5",
+      "gzip_sha256": "a8a31596b64dfd3200f4c656749b2cdfdc6e15fe54220f62c56a8e854fc5fb77"
+    },
+    {
+      "source": "compatibility/p3-source-manifest.json",
+      "archive": "compatibility_p3-source-manifest.json.gz",
+      "sha256": "7f2d3ce553ee36700c904722eaaf66f3462f59efa575e2709df2fd82e82d1450",
+      "gzip_sha256": "a42ef6d639965b937f9259f5bb62cbf7f8c95b59c224d309076ba9be6e267c22"
+    }
+  ],
+  "private_state_excluded": true,
+  "note": "Historical P1 code generated only synthetic isolated data; private token state is excluded."
+}

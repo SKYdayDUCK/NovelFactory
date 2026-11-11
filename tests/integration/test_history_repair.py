@@ -25,8 +25,8 @@ def _revision(kernel, wr):
         return kernel.revision(repo, wr)
 
 
-def _reviewed_gift_repair(kernel):
-    fixture = seed_sword_history(kernel, load_fixture(kernel, 'r1_sword'))
+def _reviewed_gift_repair(kernel, *, fixture=None):
+    fixture = seed_sword_history(kernel, fixture if fixture is not None else load_fixture(kernel, 'r1_sword'))
     principal = fixture['principal']; old = fixture['world_ref']
     loan_ref = fixture['loan']['receipt']['accepted_event_refs'][0]
     with kernel.db.uow(write=False) as repo:

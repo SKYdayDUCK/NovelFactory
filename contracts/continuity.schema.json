@@ -1,0 +1,512 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novel-factory.example/contracts/2.3/continuity.schema.json",
+  "title": "P4 cross-volume evidence and serial edition continuity",
+  "description": "Immutable derived continuity artifacts referencing existing world revisions and published release records; no new world authority or external publication.",
+  "$defs": {
+    "ContinuityTextEvidence": {
+      "type": "object",
+      "properties": {
+        "release_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "text_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "span": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/TextSpan"
+        }
+      },
+      "required": [
+        "release_ref",
+        "text_ref",
+        "span"
+      ],
+      "additionalProperties": false
+    },
+    "ContinuityEventEvidence": {
+      "type": "object",
+      "properties": {
+        "world_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"
+        },
+        "event_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EventRef"
+        }
+      },
+      "required": [
+        "world_ref",
+        "event_ref"
+      ],
+      "additionalProperties": false
+    },
+    "ContinuityEntry": {
+      "type": "object",
+      "properties": {
+        "entry_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "thread_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "volume_ordinal": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "kind": {
+          "enum": [
+            "CHARACTER_GROWTH",
+            "RELATIONSHIP_EVOLUTION",
+            "RESOURCE_HISTORY",
+            "FORESHADOW",
+            "WORLD_INHERITANCE",
+            "READER_DISCLOSURE"
+          ]
+        },
+        "plane": {
+          "enum": [
+            "LITERARY",
+            "WORLD_EVIDENCE",
+            "READER"
+          ]
+        },
+        "status": {
+          "enum": [
+            "OPEN",
+            "DEVELOPING",
+            "RESOLVED",
+            "REINTERPRETED"
+          ]
+        },
+        "entity_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+          },
+          "minItems": 0,
+          "maxItems": 128,
+          "uniqueItems": true
+        },
+        "story_interval": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/StoryInterval"
+        },
+        "interpretation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8000
+        },
+        "epistemic_status": {
+          "enum": [
+            "LITERARY_INTERPRETATION",
+            "EVENT_REFERENCE",
+            "TEXT_ASSERTION_NOT_WORLD_FACT"
+          ]
+        },
+        "source_events": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.3/continuity.schema.json#/$defs/ContinuityEventEvidence"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "source_texts": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.3/continuity.schema.json#/$defs/ContinuityTextEvidence"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "supersedes_entry_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+          },
+          "minItems": 0,
+          "maxItems": 128,
+          "uniqueItems": true
+        },
+        "planned_payoff_at": {
+          "anyOf": [
+            {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/StoryPoint"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "entry_id",
+        "thread_id",
+        "volume_ordinal",
+        "kind",
+        "plane",
+        "status",
+        "entity_ids",
+        "story_interval",
+        "interpretation",
+        "epistemic_status",
+        "source_events",
+        "source_texts",
+        "supersedes_entry_ids",
+        "planned_payoff_at"
+      ],
+      "additionalProperties": false
+    },
+    "ContinuityRequest": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "2.3"
+        },
+        "series_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "operation": {
+          "enum": [
+            "APPEND",
+            "REVISE"
+          ]
+        },
+        "world_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"
+        },
+        "expected_prior_ref": {
+          "anyOf": [
+            {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ordered_release_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+          },
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.3/continuity.schema.json#/$defs/ContinuityEntry"
+          },
+          "minItems": 0,
+          "maxItems": 2000
+        },
+        "revision_reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "schema_version",
+        "series_id",
+        "operation",
+        "world_ref",
+        "expected_prior_ref",
+        "ordered_release_refs",
+        "entries",
+        "revision_reason",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "ContinuityAffectedVolume": {
+      "type": "object",
+      "properties": {
+        "ordinal": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "volume_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "release_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "minItems": 1,
+          "maxItems": 20,
+          "uniqueItems": true
+        },
+        "requires_downstream_review": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "ordinal",
+        "volume_id",
+        "release_ref",
+        "reasons",
+        "requires_downstream_review"
+      ],
+      "additionalProperties": false
+    },
+    "ContinuityImpact": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "UNCHANGED",
+            "REVIEW_REQUIRED"
+          ]
+        },
+        "target_world_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"
+        },
+        "affected_volumes": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.3/continuity.schema.json#/$defs/ContinuityAffectedVolume"
+          },
+          "minItems": 0,
+          "maxItems": 100
+        },
+        "changed_occurrence_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+          },
+          "minItems": 0,
+          "maxItems": 10000,
+          "uniqueItems": true
+        },
+        "world_effects_applied": {
+          "const": 0
+        }
+      },
+      "required": [
+        "status",
+        "target_world_ref",
+        "affected_volumes",
+        "changed_occurrence_ids",
+        "world_effects_applied"
+      ],
+      "additionalProperties": false
+    },
+    "ContinuityCandidate": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "2.3"
+        },
+        "candidate_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "request": {
+          "$ref": "https://novel-factory.example/contracts/2.3/continuity.schema.json#/$defs/ContinuityRequest"
+        },
+        "impact": {
+          "$ref": "https://novel-factory.example/contracts/2.3/continuity.schema.json#/$defs/ContinuityImpact"
+        },
+        "input_sha256": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/Sha256"
+        },
+        "created_by": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "recorded_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "authority": {
+          "const": "DERIVED_CONTINUITY_NOT_WORLD_HISTORY"
+        },
+        "world_effects_applied": {
+          "const": 0
+        }
+      },
+      "required": [
+        "schema_version",
+        "candidate_id",
+        "request",
+        "impact",
+        "input_sha256",
+        "created_by",
+        "recorded_at",
+        "authority",
+        "world_effects_applied"
+      ],
+      "additionalProperties": false
+    },
+    "ContinuityReviewRequest": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "2.3"
+        },
+        "candidate_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "reading_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "decision": {
+          "enum": [
+            "APPROVED",
+            "CHANGES_REQUIRED"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8000
+        },
+        "acknowledged_affected_ordinals": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "minItems": 0,
+          "maxItems": 100,
+          "uniqueItems": true
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "schema_version",
+        "candidate_ref",
+        "reading_ref",
+        "decision",
+        "reason",
+        "acknowledged_affected_ordinals",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "ContinuityPublishRequest": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "2.3"
+        },
+        "candidate_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "review_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "schema_version",
+        "candidate_ref",
+        "review_ref",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "ContinuityReadRequest": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "2.3"
+        },
+        "candidate_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "schema_version",
+        "candidate_ref",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "ContinuityInspectRequest": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "2.3"
+        },
+        "snapshot_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "target_world_ref": {
+          "anyOf": [
+            {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "snapshot_ref"
+      ],
+      "additionalProperties": false
+    },
+    "ContinuityTaskReadRequest": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "2.3"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "snapshot_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "budget_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        }
+      },
+      "required": [
+        "schema_version",
+        "generation",
+        "snapshot_ref"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

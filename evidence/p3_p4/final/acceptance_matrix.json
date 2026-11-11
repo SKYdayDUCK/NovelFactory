@@ -1,0 +1,760 @@
+{
+  "schema_version": "1.0",
+  "code_head": "9bf3794fbabb1074e1309e3217d6bbe78ce3c704",
+  "final_code_integrity_run": 42844946941,
+  "final_code_junit_sha256": "49755a49607eda70c93274a58c4b4874456de1cd9b328b111288ebead0644379",
+  "executed_test_count": 578,
+  "test_counting_note": "Rows overlap existing and new cases. Counts describe executed finite cases, not independent universal proofs. Unit subset330 overlaps full578.",
+  "rows": [
+    {
+      "id": "P2-reliability",
+      "engineering": "PASS_IN_EXECUTED_SCOPE",
+      "capacity": "NOT_MET",
+      "scope": "Existing finite retries and receipt recovery, real process restart/revocation, durable derived worker crash/duplicate/reorder handling. Latest 200 normal 18/21; hot 21/21 but 19 pure overload reads remain failed.",
+      "tests": [
+        {
+          "module": "tests.service.test_process_isolation",
+          "count": 1,
+          "passed_cases": [
+            "test_spawned_workers_restart_after_lost_reply_without_reapplying_world"
+          ]
+        },
+        {
+          "module": "tests.integration.test_derived_worker",
+          "count": 10,
+          "passed_cases": [
+            "test_abrupt_worker_exit_recovers_atomic_inbox_artifact_and_watermarks[after_object_before_consume-False]",
+            "test_abrupt_worker_exit_recovers_atomic_inbox_artifact_and_watermarks[after_artifact_before_watermark-False]",
+            "test_abrupt_worker_exit_recovers_atomic_inbox_artifact_and_watermarks[after_watermark_before_commit-False]",
+            "test_abrupt_worker_exit_recovers_atomic_inbox_artifact_and_watermarks[after_consume_before_ack-True]",
+            "test_out_of_order_materialization_never_regresses_watermark",
+            "test_duplicate_consumers_and_stale_lease_cannot_double_materialize",
+            "test_candidate_branch_index_cannot_replace_canon_or_other_branch_index",
+            "test_later_artifact_invalidation_cannot_change_fixed_world_index_identity",
+            "test_worker_takes_work_before_branch_to_coexist_with_runtime_upgrade",
+            "test_delayed_index_is_explicitly_stale_and_dependency_guard_does_not_wait_for_worker"
+          ]
+        },
+        {
+          "module": "tests.service.test_p2_response_loss",
+          "count": 1,
+          "passed_cases": [
+            "test_r1_h_real_tcp_lost_reply_retry_revocation_and_outbox_recovery"
+          ]
+        },
+        {
+          "module": "tests.service.test_p2_retry_recovery",
+          "count": 1,
+          "passed_cases": [
+            "test_bounded_driver_replays_same_bytes_after_real_commit_response_loss"
+          ]
+        }
+      ],
+      "evidence": [
+        "evidence/p3_p4/checkpoint4/github_capacity_verified.json",
+        "evidence/p3/derived_worker/validation_index.json"
+      ],
+      "remaining": [
+        "Stable 200 business completion and all original capacity gates",
+        "Statistical side-channel distribution test not established"
+      ]
+    },
+    {
+      "id": "P3-01",
+      "engineering": "PASS_IN_EXECUTED_SCOPE",
+      "overall": "PARTIAL",
+      "scope": "Bounded immutable temporal-coordinate validation cache and scoped ancestor metadata CTE; equal-WorldRef context evidence preserved.",
+      "tests": [
+        {
+          "module": "tests.unit.test_temporal_coordinate_cache",
+          "count": 11,
+          "passed_cases": [
+            "test_cached_coordinates_match_authoritative_schema",
+            "test_warm_cache_never_accepts_extra_fields_or_skips_original_type_rules[value0]",
+            "test_warm_cache_never_accepts_extra_fields_or_skips_original_type_rules[value1]",
+            "test_warm_cache_never_accepts_extra_fields_or_skips_original_type_rules[value2]",
+            "test_warm_cache_never_accepts_extra_fields_or_skips_original_type_rules[value3]",
+            "test_warm_cache_never_accepts_extra_fields_or_skips_original_type_rules[value4]",
+            "test_warm_cache_never_accepts_extra_fields_or_skips_original_type_rules[value5]",
+            "test_warm_cache_never_accepts_extra_fields_or_skips_original_type_rules[value6]",
+            "test_warm_cache_never_accepts_extra_fields_or_skips_original_type_rules[None]",
+            "test_warm_cache_never_accepts_extra_fields_or_skips_original_type_rules[value8]",
+            "test_input_mutation_cannot_poison_cached_coordinate_and_cache_is_bounded"
+          ]
+        },
+        {
+          "module": "tests.integration.test_ancestry_metadata",
+          "count": 1,
+          "passed_cases": [
+            "test_ancestry_uses_scoped_parent_chain_and_never_selects_projection"
+          ]
+        },
+        {
+          "module": "tests.queries.test_context_dependency_atomicity",
+          "count": 3,
+          "passed_cases": [
+            "test_context_preserves_positive_negative_alias_and_coverage_dependencies",
+            "test_failed_dependency_write_rolls_back_context_binding_receipt_and_outbox",
+            "test_revocation_after_sampling_prevents_any_dependency_binding"
+          ]
+        }
+      ],
+      "evidence": [
+        "evidence/p3_p4/checkpoint1/performance_summary.json",
+        "evidence/p3_p4/checkpoint1/github_verified.json"
+      ],
+      "remaining": [
+        "Production capacity",
+        "Long-history materialization/JSONB cost",
+        "Precise lock-owner and lock-hold segmentation"
+      ]
+    },
+    {
+      "id": "P3-02",
+      "engineering": "PASS_FINITE_MECHANISM",
+      "scope": "Registered finite effects in the same atomic phase; observable traces, message/cognition times, ownership/holding, gross resource transfers, shared initial resource and causal identity. Reject unproven substitutions; existing repair/approval/promotion remains authoritative.",
+      "tests": [
+        {
+          "module": "tests.unit.test_refinement_rules",
+          "count": 26,
+          "passed_cases": [
+            "test_three_way_atomic_partition_preserves_identity_all_cuts_and_exact_resources",
+            "test_same_final_delivery_with_early_partial_delivery_is_not_equivalent",
+            "test_intermediate_message_knowledge_private_decision_and_source_must_match[time-OBSERVATION-HEARD]",
+            "test_intermediate_message_knowledge_private_decision_and_source_must_match[time-OBSERVATION-OBSERVED]",
+            "test_intermediate_message_knowledge_private_decision_and_source_must_match[time-BELIEF-INFERRED]",
+            "test_intermediate_message_knowledge_private_decision_and_source_must_match[time-PRIVATE_DECISION-DECIDED]",
+            "test_intermediate_message_knowledge_private_decision_and_source_must_match[actor-OBSERVATION-HEARD]",
+            "test_intermediate_message_knowledge_private_decision_and_source_must_match[actor-OBSERVATION-OBSERVED]",
+            "test_intermediate_message_knowledge_private_decision_and_source_must_match[actor-BELIEF-INFERRED]",
+            "test_intermediate_message_knowledge_private_decision_and_source_must_match[actor-PRIVATE_DECISION-DECIDED]",
+            "test_intermediate_message_knowledge_private_decision_and_source_must_match[evidence-OBSERVATION-HEARD]",
+            "test_intermediate_message_knowledge_private_decision_and_source_must_match[evidence-OBSERVATION-OBSERVED]",
+            "test_intermediate_message_knowledge_private_decision_and_source_must_match[evidence-BELIEF-INFERRED]",
+            "test_intermediate_message_knowledge_private_decision_and_source_must_match[evidence-PRIVATE_DECISION-DECIDED]",
+            "test_intermediate_message_knowledge_private_decision_and_source_must_match[statement-OBSERVATION-HEARD]",
+            "test_intermediate_message_knowledge_private_decision_and_source_must_match[statement-OBSERVATION-OBSERVED]",
+            "test_intermediate_message_knowledge_private_decision_and_source_must_match[statement-BELIEF-INFERRED]",
+            "test_intermediate_message_knowledge_private_decision_and_source_must_match[statement-PRIVATE_DECISION-DECIDED]",
+            "test_temporary_owner_or_holder_excursion_is_not_an_endpoint_equivalence",
+            "test_existing_owner_and_holder_intervals_keep_their_boundary_and_identity",
+            "test_unknown_interpreter_cannot_obtain_equivalence_claim",
+            "test_injury_validity_boundary_is_part_of_equivalence",
+            "test_net_zero_round_trip_cannot_hide_extra_shared_resource_use",
+            "test_common_start_balance_rejects_three_way_overcommit_even_with_net_return",
+            "test_exact_causal_parent_reference_is_not_silently_rebound",
+            "test_unsupported_semantic_fields_and_duplicate_effect_identities_fail_closed"
+          ]
+        },
+        {
+          "module": "tests.integration.test_refinement",
+          "count": 9,
+          "passed_cases": [
+            "test_resource_refinement_replays_once_preserves_history_and_needs_independent_review",
+            "test_false_early_delivery_cannot_issue_proof_or_change_formal_world",
+            "test_proof_issuance_is_idempotent_under_real_competing_transactions",
+            "test_untrusted_or_rebound_proofs_are_rejected[forged_kind]",
+            "test_untrusted_or_rebound_proofs_are_rejected[changed_effect]",
+            "test_untrusted_or_rebound_proofs_are_rejected[cross_work]",
+            "test_untrusted_or_rebound_proofs_are_rejected[wrong_fork]",
+            "test_actor_plane_story_horizon_and_cancelled_generation_cannot_use_proof",
+            "test_registered_message_schedule_and_three_actor_decision_are_preserved"
+          ]
+        },
+        {
+          "module": "tests.service.test_refinement_http",
+          "count": 2,
+          "passed_cases": [
+            "test_http_refinement_is_idempotent_and_does_not_accept_world_effects",
+            "test_http_refinement_denies_character_view"
+          ]
+        }
+      ],
+      "evidence": [
+        "evidence/p3/refinement/validation_index.json",
+        "reports/P3_02_宏微等效替换.md"
+      ],
+      "not_claimed": [
+        "General real-world simulator",
+        "Arbitrary asynchronous multi-stage equivalence"
+      ]
+    },
+    {
+      "id": "P3-03",
+      "engineering": "PASS_DETERMINISTIC_EVALUATION",
+      "literary_quality": "NOT_EVALUATED",
+      "real_model": "BLOCKED_ENVIRONMENT",
+      "scope": "630 equal-candidate-pool representation/link observations plus 30 deliberately different history-availability review observations; independent gold, byte budgets, access scopes and evidence integrity.",
+      "tests": [
+        {
+          "module": "tests.unit.test_evidence_context",
+          "count": 8,
+          "passed_cases": [
+            "test_summary_is_literal_ranges_and_never_claims_full_original",
+            "test_citation_overhead_and_unicode_ranges_fit_exact_budget",
+            "test_hidden_link_is_neither_followed_nor_exposed_in_returned_context",
+            "test_pool_is_identical_across_representation_and_graph_arms",
+            "test_gold_cannot_change_retrieval_or_packing",
+            "test_review_comparison_exposes_missing_prior_originals_without_faking_verdict",
+            "test_actor_view_and_small_budget_remain_partial",
+            "test_duplicate_or_corrupt_source_and_noninteger_budget_fail_closed"
+          ]
+        },
+        {
+          "module": "tests.evaluation.test_foundation",
+          "count": 23,
+          "passed_cases": [
+            "test_strict_plan_preserves_one_factor_and_fixed_controls[unknown-field]",
+            "test_strict_plan_preserves_one_factor_and_fixed_controls[two-variables-changed]",
+            "test_strict_plan_preserves_one_factor_and_fixed_controls[tuning-world-leak]",
+            "test_strict_plan_preserves_one_factor_and_fixed_controls[inconsistent-target]",
+            "test_editing_pair_requires_identical_memory_and_materials",
+            "test_attempt_cannot_change_model_world_permissions_or_budget_fingerprint",
+            "test_unknown_cost_keeps_reservation_and_reconciliation_never_erases_failure",
+            "test_known_cost_candidate_and_usage_cannot_be_rewritten",
+            "test_corruption_fails_closed_and_is_not_auto_repaired[modified-row]",
+            "test_corruption_fails_closed_and_is_not_auto_repaired[partial-tail]",
+            "test_corruption_fails_closed_and_is_not_auto_repaired[changed-object]",
+            "test_external_checkpoint_detects_valid_tail_truncation",
+            "test_own_summary_or_generated_text_cannot_be_gold[memory]",
+            "test_own_summary_or_generated_text_cannot_be_gold[generated-draft]",
+            "test_independent_gold_provenance_must_match_exact_sources",
+            "test_seeded_blind_pack_is_reproducible_and_separate_from_key",
+            "test_blind_pack_rejects_colocated_or_polluted_reviewer_directory",
+            "test_whole_original_and_length_are_checked_without_dropping_bad_draft",
+            "test_actual_overrun_is_retained_and_blocks_comparison",
+            "test_concurrent_append_preserves_sequence_and_all_started_attempts",
+            "test_claimed_human_reading_never_becomes_authenticated_literary_winner",
+            "test_cli_verifies_external_checkpoint_and_has_no_model_route",
+            "test_later_generated_candidate_cannot_reuse_previously_registered_gold"
+          ]
+        },
+        {
+          "module": "tests.unit.test_memory_retrieval",
+          "count": 11,
+          "passed_cases": [
+            "test_chinese_terms_are_reproducible_without_provider_token_claim",
+            "test_budget_counts_headers_and_multibyte_text_without_splitting_sources",
+            "test_source_hash_and_duplicate_id_are_rejected",
+            "test_graph_expansion_cannot_cross_missing_hidden_node_or_count_it",
+            "test_link_expansion_is_one_hop_and_deterministic",
+            "test_fixture_regeneration_and_all_anchors_are_exact",
+            "test_gold_labels_never_change_the_retrieved_candidate_order",
+            "test_actor_knowledge_time_and_objective_truth_remain_different",
+            "test_scopes_filter_branch_other_work_plan_and_reader_before_ranking",
+            "test_incorrect_gold_and_corrupted_source_fail_before_scoring",
+            "test_low_budget_misses_are_retained_and_never_called_complete"
+          ]
+        }
+      ],
+      "evidence": [
+        "evidence/p3_p4/memory/controlled_summary.json",
+        "reports/P3_03_受控记忆评测与历史成果恢复.md"
+      ],
+      "not_claimed": [
+        "Universal equal recall at all budgets",
+        "Graph retrieval superiority",
+        "Semantic review correctness",
+        "Literary quality improvement"
+      ]
+    },
+    {
+      "id": "P3-04",
+      "engineering": "PASS_EXECUTABLE_HARNESS_AND_FINITE_FAULTS",
+      "capacity": "NOT_MET",
+      "multi_hour_mixed_soak": "NOT_EXECUTED",
+      "scope": "Real TCP single/two API processes with total pool eight; 500 mixed, 1000 open read, 600-second read probes and actual worker process exits.",
+      "tests": [
+        {
+          "module": "tests.unit.test_open_arrival_evidence",
+          "count": 3,
+          "passed_cases": [
+            "test_deferred_invalid_200_stays_failure_and_raw_response_is_removed",
+            "test_explicit_overload_rejection_is_not_counted_as_a_success",
+            "test_no_wire_samples_or_one_wire_sample_cannot_establish_an_offered_rate"
+          ]
+        },
+        {
+          "module": "tests.integration.test_derived_worker",
+          "count": 10,
+          "passed_cases": [
+            "test_abrupt_worker_exit_recovers_atomic_inbox_artifact_and_watermarks[after_object_before_consume-False]",
+            "test_abrupt_worker_exit_recovers_atomic_inbox_artifact_and_watermarks[after_artifact_before_watermark-False]",
+            "test_abrupt_worker_exit_recovers_atomic_inbox_artifact_and_watermarks[after_watermark_before_commit-False]",
+            "test_abrupt_worker_exit_recovers_atomic_inbox_artifact_and_watermarks[after_consume_before_ack-True]",
+            "test_out_of_order_materialization_never_regresses_watermark",
+            "test_duplicate_consumers_and_stale_lease_cannot_double_materialize",
+            "test_candidate_branch_index_cannot_replace_canon_or_other_branch_index",
+            "test_later_artifact_invalidation_cannot_change_fixed_world_index_identity",
+            "test_worker_takes_work_before_branch_to_coexist_with_runtime_upgrade",
+            "test_delayed_index_is_explicitly_stale_and_dependency_guard_does_not_wait_for_worker"
+          ]
+        },
+        {
+          "module": "tests.service.test_process_isolation",
+          "count": 1,
+          "passed_cases": [
+            "test_spawned_workers_restart_after_lost_reply_without_reapplying_world"
+          ]
+        }
+      ],
+      "evidence": [
+        "evidence/p3_p4/checkpoint3/github_scale_verified.json",
+        "evidence/p3_p4/final/performance_independent_check.json"
+      ],
+      "remaining": [
+        "500 mixed 17/51 business commits",
+        "1000 1403/5000 valid responses; offered-wire rate below target",
+        "600-second remote probe 11997/12000; zero-failure gate NOT_MET",
+        "Independent load-host calibration",
+        "1000 mixed writes",
+        "Multi-hour growing-world mixed read/write fault recovery",
+        "Commercial Agent Host/provider-limited deployment compatibility"
+      ]
+    },
+    {
+      "id": "P4-01",
+      "engineering": "PASS_FINITE_CONTINUITY",
+      "scope": "Unified authoritative world timeline; immutable series artifacts, exact published prefix, explicit REVISE/review/CAS, downstream Retcon, task generation/horizon and source checks. Four-volume engineering fixture.",
+      "tests": [
+        {
+          "module": "tests.unit.test_continuity_rules",
+          "count": 4,
+          "passed_cases": [
+            "test_reader_disclosure_cannot_be_promoted_into_objective_evidence",
+            "test_evolution_requires_same_thread_plane_and_explicit_predecessor",
+            "test_revision_preserves_old_entry_even_when_new_edition_supersedes_it",
+            "test_contract_rejects_opaque_unbounded_extra_fields"
+          ]
+        },
+        {
+          "module": "tests.integration.test_continuity",
+          "count": 9,
+          "passed_cases": [
+            "test_cross_volume_growth_disclosure_and_foreshadow_keep_original_history",
+            "test_serial_prefix_is_protected_and_reordered_edition_requires_explicit_review",
+            "test_distinct_review_delivery_and_live_authorization_are_required",
+            "test_actor_and_restricted_horizon_cannot_use_series_artifact_as_a_read_bypass",
+            "test_same_series_concurrent_publish_has_one_winner_and_no_world_effect",
+            "test_publish_rollback_and_lost_reply_recover_exact_receipt",
+            "test_retcon_propagates_to_later_volumes_and_requires_fresh_evidence",
+            "test_task_delivery_is_generation_bound_and_never_exposes_future_plan_fields",
+            "test_event_added_after_release_still_invalidates_derived_volume_memory"
+          ]
+        },
+        {
+          "module": "tests.integration.test_continuity_http",
+          "count": 1,
+          "passed_cases": [
+            "test_http_continuity_review_publish_inspect_and_character_denial"
+          ]
+        },
+        {
+          "module": "tests.integration.test_release",
+          "count": 11,
+          "passed_cases": [
+            "test_batch_rejects_mixed_inputs_cycle_and_actor_access",
+            "test_two_real_writer_tasks_parallel_and_successor_cannot_skip_handoffs",
+            "test_release_complete_exact_manifest_idempotency_and_immutable_prior",
+            "test_competing_first_releases_use_cas_not_completion_order_overwrite",
+            "test_release_rollback_and_lost_receipt_recovery_do_not_duplicate_effects",
+            "test_approval_revocation_between_preflight_and_freeze_is_synchronous",
+            "test_review_cancellation_between_preflight_and_freeze_blocks_commit",
+            "test_approval_cannot_be_reused_for_other_disclosure_order_or_missing_scene",
+            "test_explicit_new_world_alignment_reuses_exact_text_but_requires_new_approval",
+            "test_newly_accepted_draft_invalidates_old_manifest_even_when_scene_is_unchanged",
+            "test_changed_predecessor_requires_new_successor_handoff_even_after_independent_reviews"
+          ]
+        }
+      ],
+      "evidence": [
+        "evidence/p3_p4/continuity/local_validation.json",
+        "reports/P4_01_跨卷连续性验收.md"
+      ],
+      "not_claimed": [
+        "Unlimited novel length",
+        "Complete multi-volume literary validation"
+      ]
+    },
+    {
+      "id": "P4-02",
+      "engineering": "PASS_IMPLEMENTED_SCOPE",
+      "overall": "PARTIAL",
+      "scope": "Online exported-snapshot backup, pinned runtime/object inventory, real physical isolated WAL/PITR, existing 0002->0003 migration, metadata-compatible runtime upgrade, server-registered model route with frozen old inputs, UNKNOWN and task fencing.",
+      "tests": [
+        {
+          "module": "tests.unit.test_backup_connection_environment",
+          "count": 24,
+          "passed_cases": [
+            "test_ambient_route_fails_before_backup_connection_or_output[PGHOSTADDR-BackupService]",
+            "test_ambient_route_fails_before_backup_connection_or_output[PGHOSTADDR-OnlineBackupService]",
+            "test_ambient_route_fails_before_backup_connection_or_output[PGSERVICE-BackupService]",
+            "test_ambient_route_fails_before_backup_connection_or_output[PGSERVICE-OnlineBackupService]",
+            "test_ambient_route_fails_before_backup_connection_or_output[PGSERVICEFILE-BackupService]",
+            "test_ambient_route_fails_before_backup_connection_or_output[PGSERVICEFILE-OnlineBackupService]",
+            "test_ambient_route_fails_before_restore_engine_or_object_write[PGHOSTADDR]",
+            "test_ambient_route_fails_before_restore_engine_or_object_write[PGSERVICE]",
+            "test_ambient_route_fails_before_restore_engine_or_object_write[PGSERVICEFILE]",
+            "test_unportable_url_options_fail_before_restore_engine[query0]",
+            "test_unportable_url_options_fail_before_restore_engine[query1]",
+            "test_unportable_url_options_fail_before_restore_engine[query2]",
+            "test_unportable_url_options_fail_before_restore_engine[query3]",
+            "test_unportable_url_options_fail_before_restore_engine[query4]",
+            "test_unportable_url_options_fail_before_restore_engine[query5]",
+            "test_target_requires_one_explicit_host_user_and_database[changes0]",
+            "test_target_requires_one_explicit_host_user_and_database[changes1]",
+            "test_target_requires_one_explicit_host_user_and_database[changes2]",
+            "test_target_requires_one_explicit_host_user_and_database[changes3]",
+            "test_target_requires_one_explicit_host_user_and_database[changes4]",
+            "test_target_requires_one_explicit_host_user_and_database[changes5]",
+            "test_target_requires_one_explicit_host_user_and_database[changes6]",
+            "test_missing_port_cannot_silently_use_ambient_pgport",
+            "test_pg_tool_uses_exact_supported_url_without_editing_parent_environment"
+          ]
+        },
+        {
+          "module": "tests.unit.test_online_backup_runtime",
+          "count": 12,
+          "passed_cases": [
+            "test_unchanged_runtime_schema_and_policy_inventory_is_complete",
+            "test_late_deployment_change_rejects_the_complete_package[modify_already_copied-module]",
+            "test_late_deployment_change_rejects_the_complete_package[modify_already_copied-schema]",
+            "test_late_deployment_change_rejects_the_complete_package[modify_already_copied-asset]",
+            "test_late_deployment_change_rejects_the_complete_package[add_member-module]",
+            "test_late_deployment_change_rejects_the_complete_package[add_member-schema]",
+            "test_late_deployment_change_rejects_the_complete_package[add_member-asset]",
+            "test_late_deployment_change_rejects_the_complete_package[remove_member-module]",
+            "test_late_deployment_change_rejects_the_complete_package[remove_member-schema]",
+            "test_late_deployment_change_rejects_the_complete_package[remove_member-asset]",
+            "test_copy_must_match_the_initial_inventory_even_if_source_changes_before_copy",
+            "test_stable_deploy_after_database_cut_cannot_replace_the_pinned_runtime"
+          ]
+        },
+        {
+          "module": "tests.integration.test_online_backup",
+          "count": 1,
+          "passed_cases": [
+            "test_online_backup_restores_exact_cut_without_blocking_world_writers"
+          ]
+        },
+        {
+          "module": "tests.integration.test_runtime_upgrades",
+          "count": 22,
+          "passed_cases": [
+            "test_upgrade_appends_revision_preserves_history_and_fences_old_certificate",
+            "test_unproven_semantic_upgrade_is_rejected[resource_floor]",
+            "test_unproven_semantic_upgrade_is_rejected[calendar]",
+            "test_unproven_semantic_upgrade_is_rejected[reducer]",
+            "test_upgrade_requires_independent_active_reviewer_and_current_head",
+            "test_upgrade_does_not_move_head_after_concurrent_world_accept",
+            "test_model_switch_preserves_frozen_inputs_and_rejects_route_reuse",
+            "test_runtime_upgrade_rejects_actor_or_insufficient_story_horizon[actor]",
+            "test_runtime_upgrade_rejects_actor_or_insufficient_story_horizon[story_horizon]",
+            "test_upgrade_does_not_activate_with_unavailable_evidence[missing-package_ref]",
+            "test_upgrade_does_not_activate_with_unavailable_evidence[missing-approval_ref]",
+            "test_upgrade_does_not_activate_with_unavailable_evidence[missing-source_rules_ref]",
+            "test_upgrade_does_not_activate_with_unavailable_evidence[missing-source_interpretation_ref]",
+            "test_upgrade_does_not_activate_with_unavailable_evidence[corrupt-package_ref]",
+            "test_upgrade_does_not_activate_with_unavailable_evidence[corrupt-approval_ref]",
+            "test_upgrade_does_not_activate_with_unavailable_evidence[corrupt-source_rules_ref]",
+            "test_upgrade_does_not_activate_with_unavailable_evidence[corrupt-source_interpretation_ref]",
+            "test_upgrade_prepare_requires_durable_source_artifacts[rules_ref]",
+            "test_upgrade_prepare_requires_durable_source_artifacts[interpretation_ref]",
+            "test_runtime_prepare_and_review_are_idempotent_under_concurrent_retries",
+            "test_model_route_mutations_require_canonical_current_cut_and_keep_prior_receipt",
+            "test_selected_model_rejects_corrupt_route_evidence"
+          ]
+        },
+        {
+          "module": "tests.integration.test_runtime_upgrade_http",
+          "count": 1,
+          "passed_cases": [
+            "test_http_runtime_review_activation_receipt_and_server_only_model_route"
+          ]
+        },
+        {
+          "module": "tests.integration.test_p2_upgrade",
+          "count": 1,
+          "passed_cases": [
+            "test_p1_accepted_world_is_preserved_by_p2_additive_migration"
+          ]
+        },
+        {
+          "module": "tests.reliability.test_recovery",
+          "count": 7,
+          "passed_cases": [
+            "test_abrupt_database_process_exit_rolls_back",
+            "test_committed_task_process_exit_keeps_original_receipt",
+            "test_pg_dump_restore_checks_data_objects_and_fences_old_workers",
+            "test_backup_rejects_missing_object_and_interpretation",
+            "test_backup_gate_freezes_authoritative_mutations",
+            "test_backup_runtime_profile_is_required_and_bound",
+            "test_backup_resolves_wheel_runtime_assets"
+          ]
+        }
+      ],
+      "evidence": [
+        "evidence/p3_p4/checkpoint4/github_pitr_verified.json",
+        "evidence/p3_p4/checkpoint4/pitr_final_isolation.json",
+        "evidence/p3_p4/backup_target_validation.json"
+      ],
+      "remaining": [
+        "Production-scale RPO/RTO",
+        "Remote object-store crash consistency at arbitrary WAL points",
+        "Cross-PostgreSQL-major migration",
+        "Arbitrary rule/interpreter semantics migration",
+        "Real provider UNKNOWN reconciliation"
+      ],
+      "compatibility_change": "Backup/restore requires explicit single TCP user@host:port/database and limited SSL URL parameters; ambiguous libpq routing is rejected before target actions."
+    },
+    {
+      "id": "P4-03",
+      "engineering": "PASS_EVIDENCE_BASED_DECISION",
+      "decision": "Keep PostgreSQL and modular monolith. Do not add graph/vector/Redis/MQ/read replicas/distributed orchestration without measured benefit under same semantics and budget.",
+      "evidence": [
+        "reports/P4_03_基础设施架构评估.md",
+        "evidence/p3_p4/checkpoint3/github_scale_verified.json",
+        "evidence/p3_p4/checkpoint4/github_capacity_verified.json"
+      ],
+      "remaining": [
+        "Significant internal replay/validation/lock/flow-control engineering still required; retaining infrastructure does not imply capacity passed."
+      ]
+    }
+  ],
+  "preserved_kernel": {
+    "engineering": "PASS_IN_REGRESSION_SCOPE",
+    "tests": [
+      {
+        "module": "tests.contracts.test_schema_compatibility",
+        "count": 91,
+        "passed_cases": [
+          "test_unchanged_contract_examples[2.0-dependency_manifest]",
+          "test_unchanged_contract_examples[2.0-context_bundle]",
+          "test_unchanged_contract_examples[2.0-action_proposal]",
+          "test_unchanged_contract_examples[2.0-adjudication_proposal]",
+          "test_unchanged_contract_examples[2.0-accepted_event]",
+          "test_unchanged_contract_examples[2.0-approval]",
+          "test_unchanged_contract_examples[2.0-accept_world_request]",
+          "test_unchanged_contract_examples[2.0-commit_receipt]",
+          "test_unchanged_contract_examples[2.0-scene_contract]",
+          "test_unchanged_contract_examples[2.0-task_spec]",
+          "test_unchanged_contract_examples[2.0-task_result]",
+          "test_unchanged_contract_examples[2.0-review_issue]",
+          "test_unchanged_contract_examples[2.0-release_manifest]",
+          "test_unchanged_contract_examples[2.0-query_pending_process]",
+          "test_unchanged_contract_examples[2.0-query_unknown]",
+          "test_unchanged_contract_examples[2.0-query_plan]",
+          "test_unchanged_contract_examples[2.0-query_stale_index]",
+          "test_unchanged_contract_examples[2.0-query_known_none]",
+          "test_unchanged_contract_examples[2.0-process_record]",
+          "test_unchanged_contract_examples[2.0-error_envelope]",
+          "test_unchanged_contract_examples[2.0-world_changeset]",
+          "test_unchanged_contract_examples[2.0-event_bounded_time]",
+          "test_unchanged_contract_examples[2.0-retcon_changeset]",
+          "test_unchanged_contract_examples[2.0-retcon_request]",
+          "test_unchanged_contract_examples[2.0-promotion_request]",
+          "test_unchanged_contract_examples[2.0-none_without_coverage]",
+          "test_unchanged_contract_examples[2.0-unknown_leaks_data]",
+          "test_unchanged_contract_examples[2.0-value_is_null]",
+          "test_unchanged_contract_examples[2.0-plan_is_evaluated_world]",
+          "test_unchanged_contract_examples[2.0-negative_request]",
+          "test_unchanged_contract_examples[2.0-accepted_without_context]",
+          "test_unchanged_contract_examples[2.0-relation_value_null]",
+          "test_unchanged_contract_examples[literary-literary_reading_full]",
+          "test_unchanged_contract_examples[literary-literary_reading_summary]",
+          "test_unchanged_contract_examples[literary-literary_memory]",
+          "test_unchanged_contract_examples[literary-literary_volume_contract]",
+          "test_unchanged_contract_examples[literary-literary_window_plan]",
+          "test_unchanged_contract_examples[literary-literary_reading_wrong_unit]",
+          "test_unchanged_contract_examples[literary-literary_summary_fake_coverage]",
+          "test_unchanged_contract_examples[literary-literary_actor_memory_leak]",
+          "test_unchanged_contract_examples[literary-literary_plan_world_effects]",
+          "test_unchanged_contract_examples[literary-literary_window_closed_bounds]",
+          "test_unchanged_contract_examples[2.1-r1_fixed_owner_d25]",
+          "test_unchanged_contract_examples[2.1-r1_latest_history]",
+          "test_unchanged_contract_examples[2.1-r1_future_plan_query]",
+          "test_unchanged_contract_examples[2.1-r1_belief_d35]",
+          "test_unchanged_contract_examples[2.1-r1_reader_chapter80]",
+          "test_unchanged_contract_examples[2.1-r1_candidate_future]",
+          "test_unchanged_contract_examples[2.1-r1_read_own_write]",
+          "test_unchanged_contract_examples[2.1-r1_query_batch]",
+          "test_unchanged_contract_examples[2.1-r1_invalidated_plan_entry]",
+          "test_unchanged_contract_examples[2.1-r1_intent_entry]",
+          "test_unchanged_contract_examples[2.1-r1_plan_query_result]",
+          "test_unchanged_contract_examples[2.1-r1_wait_result]",
+          "test_unchanged_contract_examples[2.1-r1_temporal_relation]",
+          "test_unchanged_contract_examples[2.1-r1_initial_relation_record]",
+          "test_unchanged_contract_examples[2.1-r1_relation_open]",
+          "test_unchanged_contract_examples[2.1-r1_relation_close]",
+          "test_unchanged_contract_examples[2.1-r1_accepted_event_payload]",
+          "test_unchanged_contract_examples[2.1-r1_world_changeset]",
+          "test_unchanged_contract_examples[2.1-r1_scope_token]",
+          "test_unchanged_contract_examples[2.1-r1_acceptance_certificate]",
+          "test_unchanged_contract_examples[2.1-r1_acceptance_prepare]",
+          "test_unchanged_contract_examples[2.1-r1_guarded_accept]",
+          "test_unchanged_contract_examples[2.1-r1_guarded_receipt]",
+          "test_unchanged_contract_examples[2.1-r1_actor_compile_request]",
+          "test_unchanged_contract_examples[2.1-r1_compiled_actor_context]",
+          "test_unchanged_contract_examples[2.1-r1_context_compile_result]",
+          "test_unchanged_contract_examples[2.1-r1_destroyed_holder_result]",
+          "test_unchanged_contract_examples[2.1-r1_belief_result]",
+          "test_unchanged_contract_examples[2.1-r1_fixed_wait]",
+          "test_unchanged_contract_examples[2.1-r1_belief_without_actor]",
+          "test_unchanged_contract_examples[2.1-r1_reader_without_arrangement]",
+          "test_unchanged_contract_examples[2.1-r1_plan_as_fact]",
+          "test_unchanged_contract_examples[2.1-r1_fulfilled_without_event]",
+          "test_unchanged_contract_examples[2.1-r1_open_reuses_relation]",
+          "test_unchanged_contract_examples[2.1-r1_close_without_prior]",
+          "test_unchanged_contract_examples[2.1-r1_float_quantity]",
+          "test_unchanged_contract_examples[2.1-r1_guarded_strict_approval]",
+          "test_unchanged_contract_examples[2.1-r1_guarded_unproven_coverage]",
+          "test_unchanged_contract_examples[2.1-r1_accept_without_certificate]",
+          "test_unchanged_contract_examples[2.1-r1_plan_query_world_plane]",
+          "test_unchanged_contract_examples[2.1-r1_actor_compile_world]",
+          "test_unchanged_contract_examples[2.1-r1_actor_context_plan]",
+          "test_unchanged_contract_examples[2.1-r1_work_scope_with_branch]",
+          "test_unchanged_contract_examples[2.1-r1_oversized_batch]",
+          "test_unchanged_contract_examples[2.1-r1_stale_exact_state]",
+          "test_unchanged_contract_examples[2.1-r1_certificate_without_interpretation]",
+          "test_unchanged_contract_examples[2.1-r1_untyped_state_value]",
+          "test_generated_bundle_matches_source_and_hashes",
+          "test_core_schema_bytes_still_match_original_manifest"
+        ]
+      },
+      {
+        "module": "tests.concurrency.test_world_races",
+        "count": 20,
+        "passed_cases": [
+          "test_strict_head_competing_connections_allow_one",
+          "test_guarded_independent_items_keep_original_base",
+          "test_guarded_independent_resources_share_one_world_chain",
+          "test_shared_resource_rejects_overallocation",
+          "test_write_skew_two_guards_cannot_both_leave",
+          "test_negative_range_phantom_invalidates_clear_route",
+          "test_after_sample_change_does_not_refresh_certificate_tokens",
+          "test_current_grant_and_approval_revocation_block_accept",
+          "test_expired_and_unissued_certificates_are_rejected",
+          "test_interpretation_epoch_invalidates_prepared_acceptance",
+          "test_same_key_retry_and_new_key_do_not_repeat_effects",
+          "test_direct_sql_cannot_rewrite_events_or_delete_scope_tokens",
+          "test_world_transaction_process_crash_and_retry[after_events]",
+          "test_world_transaction_process_crash_and_retry[after_commit]",
+          "test_missing_cognitive_evidence_cannot_become_formal_knowledge",
+          "test_repair_cannot_reference_nonexistent_rules_or_adjudication",
+          "test_task_authorization_is_rechecked_inside_mutation_transaction",
+          "test_repair_revalidates_later_closed_command_preconditions",
+          "test_promotion_rechecks_current_repair_approval",
+          "test_promotion_cas_preserves_new_canon_and_repair_history"
+        ]
+      },
+      {
+        "module": "tests.integration.test_world_kernel",
+        "count": 11,
+        "passed_cases": [
+          "test_bootstrap_repeatable_and_world_scoped",
+          "test_r1_sword_history_owner_holder_destroyed_and_belief",
+          "test_legacy_dates_preserved_as_separate_fixture",
+          "test_idempotent_accept_content_mismatch_and_proposal_uniqueness",
+          "test_lost_response_then_cancel_retrieves_original_receipt",
+          "test_failed_transaction_leaves_no_partial_events_or_head",
+          "test_database_rejects_direct_immutable_event_edit",
+          "test_resource_transfer_conserves_white_bridge_original_consignment",
+          "test_fork_inherits_selection_once_and_isolates_future",
+          "test_legacy_strict_entry_uses_same_writer",
+          "test_old_generation_and_cancelled_task_cannot_commit"
+        ]
+      },
+      {
+        "module": "tests.integration.test_history_repair",
+        "count": 5,
+        "passed_cases": [
+          "test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+          "test_r1_b_promotion_compares_both_canon_and_candidate_heads[canon]",
+          "test_r1_b_promotion_compares_both_canon_and_candidate_heads[candidate]",
+          "test_r1_b_promotion_rechecks_current_independent_review_authority",
+          "test_ordinary_approval_and_revocation_respect_actual_branch_grant"
+        ]
+      },
+      {
+        "module": "tests.integration.test_scope_identity",
+        "count": 1,
+        "passed_cases": [
+          "test_scope_identity_cannot_be_renamed_or_reset_for_aba"
+        ]
+      },
+      {
+        "module": "tests.reliability.test_tasks",
+        "count": 18,
+        "passed_cases": [
+          "test_task_create_idempotency_and_immutable_input",
+          "test_two_connections_cannot_claim_same_task",
+          "test_authenticated_claim_filters_before_mutation",
+          "test_context_requires_persisted_current_binding",
+          "test_expired_lease_recovery_fences_old_result",
+          "test_cancel_and_result_race_leaves_no_qualification",
+          "test_result_lifecycle_and_response_loss_retry",
+          "test_accept_in_world_transaction_closes_current_task[RUNNING]",
+          "test_accept_in_world_transaction_closes_current_task[RESULT_STORED]",
+          "test_accept_in_world_transaction_closes_current_task[VALIDATING]",
+          "test_accept_in_world_transaction_closes_current_task[WAITING_REVIEW]",
+          "test_acceptance_rolls_back_with_outer_transaction_and_preserves_call_accounting",
+          "test_budget_race_unknown_reservation_and_settlement",
+          "test_unknown_call_recovery_pauses_until_reconciled",
+          "test_persistent_scheduler_fairness_across_task_classes",
+          "test_outbox_failure_redelivery_and_inbox_atomicity",
+          "test_object_database_reference_constraints",
+          "test_token_reservations_cannot_exceed_task_budget"
+        ]
+      },
+      {
+        "module": "tests.queries.test_audit_regressions",
+        "count": 2,
+        "passed_cases": [
+          "test_non_admin_artifact_must_match_live_task_generation_and_cut",
+          "test_actual_query_snapshots_skip_events_but_fact_timeline_keeps_semantics"
+        ]
+      },
+      {
+        "module": "tests.queries.test_context_dependency_atomicity",
+        "count": 3,
+        "passed_cases": [
+          "test_context_preserves_positive_negative_alias_and_coverage_dependencies",
+          "test_failed_dependency_write_rolls_back_context_binding_receipt_and_outbox",
+          "test_revocation_after_sampling_prevents_any_dependency_binding"
+        ]
+      }
+    ],
+    "not_claimed": "Exhaustive absence of security bugs or a formal proof of all possible workloads"
+  },
+  "historical_A_H_interpretation": [
+    {
+      "case": "A04/asynchronous projections",
+      "historical_generator_preserved": true,
+      "current_scope": "New durable derived worker cases are linked above; finite crash/ordering correctness only."
+    },
+    {
+      "case": "G03/macro-micro",
+      "historical_generator_preserved": true,
+      "current_scope": "New finite refinement rules and PG/HTTP cases are linked above; arbitrary simulation equivalence not claimed."
+    },
+    {
+      "case": "H05/outbox workers",
+      "historical_generator_preserved": true,
+      "current_scope": "New atomic artifacts/inbox/watermark and real process exits supplement the original minimal worker."
+    },
+    {
+      "case": "E02/statistical side-channel",
+      "current_status": "NOT_EXECUTED",
+      "reason": "No new distributional noninterference experiment; passing finite permission tests is not an equivalent gate."
+    }
+  ],
+  "quality_layers": {
+    "engineering": "PASS_IN_IMPLEMENTED_AND_EXECUTED_SCOPES",
+    "capacity": "NOT_MET",
+    "model_calls": 0,
+    "real_model": "BLOCKED_ENVIRONMENT",
+    "author_full_read": "PENDING_AUTHOR",
+    "literary_quality": "NOT_EVALUATED"
+  },
+  "merge_recommendation": "Keep draft pending independent review; original full capacity and production/literary acceptance are not satisfied."
+}

@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novel-factory.example/contracts/2.1/upgrades.schema.json",
+  "title": "Reviewed compatible runtime upgrades; no silent historical reinterpretation",
+  "$defs": {
+    "RuntimeUpgradePrepare": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "2.1"
+        },
+        "world_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "rules": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "closed_world": {
+              "type": "boolean"
+            },
+            "resource_floor": {
+              "type": "string",
+              "pattern": "^[0-9]+(?:\\.[0-9]+)?$"
+            },
+            "item_destroy_irreversible": {
+              "type": "boolean"
+            },
+            "templates": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "uniqueItems": true,
+              "minItems": 1,
+              "maxItems": 100
+            }
+          },
+          "required": [
+            "version",
+            "closed_world",
+            "resource_floor",
+            "item_destroy_irreversible",
+            "templates"
+          ]
+        },
+        "interpretation": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "reducer": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "projector": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "calendar": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "predicates": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "package_release": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          },
+          "required": [
+            "reducer",
+            "projector",
+            "calendar",
+            "predicates",
+            "package_release"
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "world_ref",
+        "idempotency_key",
+        "rules",
+        "interpretation"
+      ]
+    },
+    "RuntimeUpgradeReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "2.1"
+        },
+        "world_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "package_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "decision": {
+          "const": "APPROVE"
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        }
+      },
+      "required": [
+        "schema_version",
+        "world_ref",
+        "idempotency_key",
+        "package_ref",
+        "decision",
+        "notes"
+      ]
+    },
+    "RuntimeUpgradeActivate": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "2.1"
+        },
+        "world_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "package_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "approval_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        }
+      },
+      "required": [
+        "schema_version",
+        "world_ref",
+        "idempotency_key",
+        "package_ref",
+        "approval_ref"
+      ]
+    },
+    "ModelRouteSelect": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "2.1"
+        },
+        "world_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "adapter_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "expected_ref": {
+          "oneOf": [
+            {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "world_ref",
+        "idempotency_key",
+        "adapter_id",
+        "expected_ref"
+      ]
+    }
+  }
+}

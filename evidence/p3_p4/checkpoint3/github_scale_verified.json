@@ -1,0 +1,357 @@
+{
+  "head_sha": "75273ab96cf16b0f1ae9c4cd809835a37c7cf2aa",
+  "run_id": 42843349105,
+  "scope": "Actual GitHub scale run completed/failure; all three downloaded artifact ZIP digests verified. Each gate and local/remote measurement remains separate.",
+  "results": {
+    "scale_500_mixed": {
+      "artifact_id": 13777003882,
+      "zip_sha256": "ea0941fe0c258cf0a0df9b09eb0594588ee1a717a5c2c8101e8b1bfd5657be37",
+      "digest_verified": true,
+      "result_sha256": "15d45187eda9749c0e6376005409441eb5a9d3c593d084cfd1bcc59d54967c4c",
+      "environment": {
+        "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+        "python": "3.12.16 (main, Oct 26 2026, 02:50:49) [GCC 13.3.0]",
+        "logical_cpu_count": 4,
+        "cpu_models": [
+          "AMD EPYC 7763 64-Core Processor"
+        ],
+        "memory": {
+          "MemTotal": "16367520 kB",
+          "MemAvailable": "15195416 kB",
+          "SwapTotal": "3145724 kB"
+        },
+        "cgroup": {},
+        "versions": {
+          "SQLAlchemy": "2.0.57",
+          "psycopg": "3.3.8",
+          "uvicorn": "0.54.0",
+          "httpx": "0.28.1"
+        },
+        "git_sha": "75273ab96cf16b0f1ae9c4cd809835a37c7cf2aa",
+        "git_dirty": true,
+        "benchmark_source_sha256": "c3533086aed8ef2ee309e44c16751d16804aa99ed78cc72cc4ed374cd5c6b940",
+        "load_client_location": "separate spawned API process(es), real loopback TCP; shared host",
+        "api_processes": 2,
+        "api_server_threads": 2,
+        "aggregate_api_pool_size": 8,
+        "service_mode": "isolated-process"
+      },
+      "gates": {
+        "engineer_correctness": "FAIL",
+        "first_attempt_capacity_gate": "NOT_MET",
+        "capacity_gate": "NOT_MET",
+        "bounded_recovery_business_gate": "NOT_MET"
+      },
+      "correctness": {
+        "new_world_revisions": 17,
+        "expected_new_world_revisions": 51,
+        "new_selected_effect_groups": 17,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "100"
+      },
+      "metrics": {
+        "duration_seconds": 381.241332,
+        "planned_requests": 2851,
+        "emitted_requests": 5277,
+        "completed_requests": 5277,
+        "client_requests_never_emitted": 148,
+        "emitted_logical_operations": 2703,
+        "completed_logical_operations": 2703,
+        "first_attempt_failure_count": 876,
+        "first_attempt_status_counts": {
+          "200": 1827,
+          "429": 876
+        },
+        "first_attempt_latency": {
+          "count": 2703,
+          "p50_ms": 139.1542,
+          "p95_ms": 2968.3712,
+          "p99_ms": 5156.1475
+        },
+        "recovered_logical_operations": 543,
+        "logical_operation_completion_latency": {
+          "count": 2703,
+          "p50_ms": 140.4523,
+          "p95_ms": 24547.8773,
+          "p99_ms": 26252.5165
+        },
+        "api_tool_calls": 5277,
+        "mcp_tool_calls": 0,
+        "status_counts": {
+          "200": 2370,
+          "429": 2907
+        },
+        "valid_successful_calls": 2370,
+        "api_success_rps": 6.2165,
+        "successful_duplicate_receipts": 17,
+        "effective_call_rps_excluding_duplicates": 6.1719,
+        "new_world_commit_receipts": 17,
+        "accepted_original_input_after_unrelated_head_progress": 16,
+        "cross_head_accept_rate_among_unique_commits": 0.9411764705882353,
+        "semantic_replan_requests_in_load": 0,
+        "effective_world_commits_per_second": 0.0446,
+        "conflict_count": 0,
+        "conflict_rate_all_requests": 0.0,
+        "failure_rate_all_requests": 0.5508811824900511,
+        "idempotent_retry_rate_all_requests": 0.0032215273829827554,
+        "infrastructure_retries": 2574,
+        "model_retries": 0,
+        "peak_outstanding_client_requests": 147,
+        "client_connection_limit": 256,
+        "outstanding_definition": "Includes HTTPX connection-pool wait; server ingress is measured separately",
+        "latency_all_responses": {
+          "count": 5277,
+          "p50_ms": 2163.8167,
+          "p95_ms": 3487.3098,
+          "p99_ms": 5314.0561
+        },
+        "latency_successes": {
+          "count": 2370,
+          "p50_ms": 136.1628,
+          "p95_ms": 3430.3977,
+          "p99_ms": 6422.4182
+        },
+        "latency_rejections_and_failures": {
+          "count": 2907,
+          "p50_ms": 2236.7016,
+          "p95_ms": 3504.1253,
+          "p99_ms": 4036.2568
+        },
+        "scheduled_to_completion_latency": {
+          "count": 5277,
+          "p50_ms": 3445.5307,
+          "p95_ms": 23551.3722,
+          "p99_ms": 25561.0933
+        },
+        "arrival_schedule_delay": {
+          "count": 5277,
+          "p50_ms": 5.8168,
+          "p95_ms": 21216.6696,
+          "p99_ms": 22990.3911
+        },
+        "latency_warning": "P99 for individual write categories has few samples; descriptive only",
+        "correctness_errors": []
+      },
+      "unresolved_by_operation": {
+        "state_mixed": 151,
+        "certificate": 25,
+        "propose": 31,
+        "graph": 16,
+        "history": 110
+      },
+      "database_application": {
+        "sql_statements": 70733,
+        "transactions": 10558,
+        "sql_cursor_execution_seconds": 298.13280349800647,
+        "checked_out_at_end": 0,
+        "configured_pool_size": 8,
+        "sql_statements_per_second": 185.53339849939564,
+        "statement_kinds": {
+          "SELECT": 62689,
+          "INSERT": 7432,
+          "UPDATE": 534,
+          "WITH": 78
+        },
+        "max_sql_cursor_execution_seconds": 1.6385033849999786,
+        "peak_checked_out_connections": 8,
+        "peak_connections_note": "Conservative sum of per-process peaks; not a simultaneous sample",
+        "sql_timing_excludes_result_decoding": true,
+        "per_process": [
+          {
+            "sql_statements": 39150,
+            "transactions": 5868,
+            "sql_cursor_execution_seconds": 153.25462072000244,
+            "max_sql_cursor_execution_seconds": 1.6385033849999786,
+            "statement_kinds": {
+              "SELECT": 35031,
+              "INSERT": 3801,
+              "UPDATE": 272,
+              "WITH": 46
+            },
+            "sql_timing_excludes_result_decoding": true,
+            "sql_statements_per_second": 102.672,
+            "peak_checked_out_connections": 4,
+            "checked_out_at_end": 0,
+            "configured_pool_size": 4,
+            "pool_status_at_end": "Pool size: 4  Connections in pool: 4 Current Overflow: 0 Current Checked out connections: 0"
+          },
+          {
+            "sql_statements": 31583,
+            "transactions": 4690,
+            "sql_cursor_execution_seconds": 144.87818277800403,
+            "max_sql_cursor_execution_seconds": 1.491097353999976,
+            "statement_kinds": {
+              "SELECT": 27658,
+              "INSERT": 3631,
+              "UPDATE": 262,
+              "WITH": 32
+            },
+            "sql_timing_excludes_result_decoding": true,
+            "sql_statements_per_second": 82.8273,
+            "peak_checked_out_connections": 4,
+            "checked_out_at_end": 0,
+            "configured_pool_size": 4,
+            "pool_status_at_end": "Pool size: 4  Connections in pool: 4 Current Overflow: 0 Current Checked out connections: 0"
+          }
+        ]
+      },
+      "load": {
+        "scheduled_phase_arrival_rps": 10.0,
+        "retry_policy": {
+          "max_attempts": 5,
+          "retry_budget_seconds": 30.0,
+          "same_payload_and_key": true,
+          "semantic_reprepare": false,
+          "deadline_scope": "No new retry starts after budget; in-flight attempt may finish later within HTTP timeout",
+          "individual_http_timeout_seconds": 30,
+          "retryable": [
+            "validated 429/503 WAIT or RETRY_SAME_COMMAND",
+            "TransportError"
+          ]
+        },
+        "context_arrival_rps": 10.0,
+        "write_arrival_rps": 1,
+        "mixed_read_distribution": {
+          "state_fraction": 0.9,
+          "graph_fraction": 0.1,
+          "history": "one additional FACT timeline per task"
+        },
+        "overload_arrival_rps": null,
+        "overload_rounds": null,
+        "independent_world_commands": 50,
+        "shared_candidates": 50,
+        "http_settings": {
+          "max_body_bytes": 262144,
+          "body_read_timeout_seconds": 5.0,
+          "max_body_chunks": 1024,
+          "max_inflight_requests": 128,
+          "max_queued_operations": 64,
+          "per_principal_concurrency": 2,
+          "queue_timeout_seconds": 2.0,
+          "rate_per_second": 20.0,
+          "rate_burst": 100,
+          "allowed_origins": []
+        },
+        "hot_fraction_meaning": "Fraction of read subjects mapped to one shared item; shared writer candidates remain agents/10 in every profile",
+        "cache_size": 256,
+        "cache_boundary": "per-process query-result cache cold/warm; PostgreSQL and OS caches are not flushed",
+        "shared_conflict_policy": "one predetermined TEST_FIXTURE control command before stale deliveries; not resource arbitration by database arrival order"
+      }
+    },
+    "scale_1000_open": {
+      "artifact_id": 13778070231,
+      "zip_sha256": "7cf32b8a31b0dcfb6e116cd995d75f51b769da850941c770bfafc475d9b0af9a",
+      "digest_verified": true,
+      "result_sha256": "85c15218a3296d7c5311cc74645b60d7182d7c2792b36dce81c8ab45dc633b3e",
+      "environment": {
+        "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+        "python": "3.12.16 (main, Oct 26 2026, 02:50:49) [GCC 13.3.0]",
+        "logical_cpu_count": 4,
+        "cpu_models": [
+          "Intel(R) Xeon(R) 6973P-C"
+        ],
+        "memory": {
+          "MemTotal": "16366508 kB",
+          "MemAvailable": "15116220 kB",
+          "SwapTotal": "3145724 kB"
+        },
+        "cgroup": {},
+        "versions": {
+          "SQLAlchemy": "2.0.57",
+          "psycopg": "3.3.8",
+          "uvicorn": "0.54.0",
+          "httpx": "0.28.1"
+        },
+        "git_sha": "75273ab96cf16b0f1ae9c4cd809835a37c7cf2aa",
+        "git_dirty": false,
+        "benchmark_source_sha256": "c3533086aed8ef2ee309e44c16751d16804aa99ed78cc72cc4ed374cd5c6b940",
+        "load_client_location": "separate spawned service processes; read validation after network window",
+        "api_processes": 2,
+        "api_server_threads": 1
+      },
+      "gates": {
+        "offered_wire_rate_gate": "NOT_MET",
+        "capacity_gate": "NOT_MET"
+      },
+      "configuration": {
+        "agents": 1000,
+        "rounds": 5,
+        "arrival_rps": 1000.0,
+        "hot_fraction": 0.8,
+        "api_processes": 2,
+        "output": "ci-evidence/result.json"
+      },
+      "observed_wire_start_rps": 45.045175669714425,
+      "dispatch_start_rps": 46.28229933789474,
+      "successful_query_rps": 12.388909191801778,
+      "status_counts": {
+        "429": 3506,
+        "200": 1403,
+        "transport_error": 91
+      },
+      "latency_all_attempts": {
+        "count": 5000,
+        "p50_ms": 2880.6702,
+        "p95_ms": 8433.7128,
+        "p99_ms": 10798.8176
+      },
+      "world_unchanged": true,
+      "correctness_errors": []
+    },
+    "scale_500_soak": {
+      "artifact_id": 13777208861,
+      "run_id": 42843349105,
+      "head_sha": "75273ab96cf16b0f1ae9c4cd809835a37c7cf2aa",
+      "zip_sha256": "452d1a394ed51740d68bd2bb022d95b70205955041faa0e421117e0e1bc71ec3",
+      "digest_verified": true,
+      "result_sha256": "9ad19b7985e5bfeeb79cbca415db60eca6328913226d945bd3a0ed7e653bbf94",
+      "probe_gate": "NOT_MET",
+      "long_duration_gate": "NOT_EXECUTED",
+      "duration_seconds": 600.092877306,
+      "actual_call_start_rps": 20.00276035835779,
+      "successful_query_rps": 19.991905342816587,
+      "status_counts": {
+        "200": 11997,
+        "429": 3
+      },
+      "latency_all_attempts": {
+        "count": 12000,
+        "p50_ms": 172.8712,
+        "p95_ms": 487.9752,
+        "p99_ms": 1585.9529
+      },
+      "world_unchanged": true,
+      "new_world_commits": 0,
+      "correctness_errors": [],
+      "environment": {
+        "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+        "python": "3.12.16 (main, Oct 26 2026, 02:50:49) [GCC 13.3.0]",
+        "logical_cpu_count": 4,
+        "cpu_models": [
+          "AMD EPYC 9V74 80-Core Processor"
+        ],
+        "memory": {
+          "MemTotal": "16367528 kB",
+          "MemAvailable": "15218384 kB",
+          "SwapTotal": "3145724 kB"
+        },
+        "cgroup": {},
+        "versions": {
+          "SQLAlchemy": "2.0.57",
+          "psycopg": "3.3.8",
+          "uvicorn": "0.54.0",
+          "httpx": "0.28.1"
+        },
+        "git_sha": "75273ab96cf16b0f1ae9c4cd809835a37c7cf2aa",
+        "git_dirty": false,
+        "benchmark_source_sha256": "c3533086aed8ef2ee309e44c16751d16804aa99ed78cc72cc4ed374cd5c6b940",
+        "load_client_location": "separate API processes, shared host",
+        "api_processes": 2,
+        "api_server_threads": 1,
+        "aggregate_api_pool": 8
+      }
+    }
+  },
+  "conclusion": "failure"
+}

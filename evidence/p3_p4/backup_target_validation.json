@@ -1,0 +1,54 @@
+{
+  "scope": "P4-02 reject ambiguous libpq routing before backup/restore connections; retain existing recovery behavior",
+  "model_calls": 0,
+  "supported_target": "Explicit PostgreSQL single TCP host, port, user, database; only single-valued sslmode/sslrootcert/sslcert/sslkey query options",
+  "unsupported_ambient_routes": [
+    "PGHOSTADDR",
+    "PGSERVICE",
+    "PGSERVICEFILE"
+  ],
+  "parent_environment_modified_by_service": false,
+  "files": [
+    {
+      "filename": "backup-target-unit.xml",
+      "sha256": "749d65fd6fd72d8ee53911dc3e678075b1f3dec0bf2eb0418492f0680d454e53",
+      "bytes": 4147,
+      "tests": {
+        "tests": "24",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "0.067"
+      }
+    },
+    {
+      "filename": "backup-target-regression.xml",
+      "sha256": "60080b7fc5b68373cf119996dd6681f0ff1d2141ca7117ee4afac22f1d759cdc",
+      "bytes": 5338,
+      "tests": {
+        "tests": "33",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "5.261"
+      }
+    },
+    {
+      "filename": "backup-target-pg/postgres_session.json",
+      "sha256": "c2124b8e332ecc18964e0617d3a09bdf13f4885362f2c1fc64ef253764cec890",
+      "bytes": 822
+    }
+  ],
+  "source_files": [
+    {
+      "filename": "src/novel_factory/infrastructure/recovery.py",
+      "sha256": "3fce2ddcf4f2a25f37d8ec7180cef832d11bc80f5cf1771c8ec12566931b1f5a",
+      "bytes": 19782
+    },
+    {
+      "filename": "tests/unit/test_backup_connection_environment.py",
+      "sha256": "77162463c94cc0c11a25fea687c2a91c420e7214647a7a3d435c1d796b984f25",
+      "bytes": 5235
+    }
+  ]
+}

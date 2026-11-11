@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0",
+  "kind": "REAL_ISOLATED_POSTGRESQL_PITR",
+  "result": {
+    "status": "PASS",
+    "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+    "execution_kind": "REAL_ISOLATED_POSTGRESQL",
+    "source_port": 38599,
+    "restored_port": 60945,
+    "durability": {
+      "fsync": true,
+      "synchronous_commit": true,
+      "data_checksums": true
+    },
+    "model_calls": 0,
+    "production_data_accessed": false,
+    "libpq_environment_isolated": true,
+    "cleared_pg_environment_names": [
+      "PGHOSTADDR",
+      "PGOPTIONS",
+      "PGSERVICE"
+    ],
+    "pg_basebackup": {
+      "exit_code": 0,
+      "stdout": ""
+    },
+    "base_backup_seconds": 1.0612822099974437,
+    "pg_verifybackup": {
+      "exit_code": 0,
+      "stdout": "backup successfully verified"
+    },
+    "archiver": {
+      "archived_count": 4,
+      "failed_count": 0
+    },
+    "target_world_ref": {
+      "work_id": "048a7418-0c15-4d98-b121-ba538893634c",
+      "branch_id": "29e9caeb-7b1e-497d-ba21-e6bf955e5501",
+      "world_revision_id": "fd1db591-82e3-469e-b77a-4dea16bf7d8a"
+    },
+    "target_lsn": "0/3074250",
+    "restored_state_sha256": "57f109d231b7a55940703363457d601bd5b6d3be4664084eb9f9d26f5d851c76",
+    "snapshot_equal_before_fencing": true,
+    "table_count": 37,
+    "object_count": 19,
+    "recovery_seconds_to_verified_service": 1.3583974169996509,
+    "selected_recovery_point_age_seconds": 0.429726,
+    "target_commits_lost": 0,
+    "deliberately_excluded_later_world_commits": 1,
+    "restored_world_event_count": 2,
+    "unknown_calls_retained": 1,
+    "reserved_amount_retained": "0.5",
+    "fenced_task_count": 1,
+    "old_worker_rejected": true,
+    "original_commit_receipt_equal": true,
+    "limitation": "Small isolated local fixture; selected-point RPO/RTO, not production SLO or remote storage test",
+    "total_seconds": 5.559279425997374
+  },
+  "command": "PGHOSTADDR=127.0.0.2 PGSERVICE=nf_unconfigured_isolation_probe PGOPTIONS=\"-c synchronous_commit=off\" PYTHONOPTIMIZE=1 PG_BIN=/path/to/pg17/bin python -O scripts/pitr_drill.py --output /new/isolated/evidence",
+  "source_sha256": {
+    "scripts/pitr_drill.py": "7f7fd1aa95a57cc6c3c73243740fe630edc254df2e544779957e69cae69617d9",
+    "src/novel_factory/infrastructure/recovery.py": "3fce2ddcf4f2a25f37d8ec7180cef832d11bc80f5cf1771c8ec12566931b1f5a",
+    "src/novel_factory/infrastructure/online_backup.py": "42a27efe329ec30f7b353b9543979ddeb30f0e4a31dbd622edf5fe95bac37920"
+  },
+  "files": {
+    "NF_ISOLATED_RECOVERY_DRILL.json": "d8ef4d14e3970b9f60b6ca9ac4f43ba72c1c7e3d50984a5230a5affeaefcda5a",
+    "archive_segment.py": "672395d38fb8cfe2d7c36ab9133c3136e03c9bc4e5051010a697b7f3dd545dc5",
+    "fenced_tasks.json": "5fd7fb4813f412b23894b11fc64b32a2be5f09165acd0a0070063a9b323adc20",
+    "file_checksums.json": "e8291fe12c8802a6012da9b4aab1149007e5490f465b43cdd464e4e0b792bae4",
+    "restore.conf": "9cde477c7688f8aee94c39e5486c8b07625856df0a9eebc6bcc6938745471864",
+    "restored.log": "5f1275b73eae5f8bcc6148ea6a5fe75fa99f8eadcacc3cde30dbd8eb3790aed5",
+    "result.json": "2609760b8492592ae0cdb9b7ab88cf00b5e66be5ac99d60afa10bd28d6059354",
+    "source.conf": "843df5de81fd3e7a270c74baecc8133cb319bc295317f40706874b30324cdf75",
+    "source.log": "0b06d4f15e465c8027da8c7deb943c55db1af9dff60cd3cb32a50f6d0212f5cd",
+    "target_database_digests.json": "760bccfd8a42091e8187da0eea93d582e4753e1f1402ffadb37bdd3b19a87231"
+  },
+  "limitations": [
+    "Small generated fixture, not production RTO/RPO",
+    "Same host POSIX objects, no remote bucket or multi-host outage",
+    "Named target and logical object cut have no intervening application writes in this drill",
+    "Source data created by the script; no production credentials or database URL accepted"
+  ]
+}

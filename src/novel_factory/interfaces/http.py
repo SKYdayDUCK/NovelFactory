@@ -196,7 +196,7 @@ async def _finish_short_call(function, *args):
 
 
 def create_app(kernel, *, query_service=None, settings: HttpSettings | None = None,
-               connection_budget: ConnectionBudget | None = None) -> FastAPI:
+               connection_budget: ConnectionBudget | None = None, model_adapters=None) -> FastAPI:
     settings = settings or HttpSettings()
     if (settings.max_body_bytes < 1024 or settings.max_inflight_requests < 1
             or settings.body_read_timeout_seconds <= 0 or settings.max_body_chunks < 1):
@@ -321,6 +321,93 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
         return await execute(request, "write", lambda principal: kernel.propose(
             principal, payload["task_id"], payload["generation"], command["template_id"],
             command["args"], payload["idempotency_key"]))
+
+    @app.post("/api/v1/refinements/prepare")
+    async def prepare_refinement(request: Request):
+        from novel_factory.application.refinement import WorldRepresentationService
+        payload = await _body(request, "RefinementRequest", "refinement")
+        return await execute(request, "write", lambda principal:
+                             WorldRepresentationService(kernel).prepare_refinement(principal, payload))
+
+    @app.post("/api/v1/refinements/proposals")
+    async def propose_refinement(request: Request):
+        from novel_factory.application.refinement import WorldRepresentationService
+        payload = await _body(request, "RefinementProposeRequest", "refinement")
+        return await execute(request, "write", lambda principal:
+            WorldRepresentationService(kernel).propose_refinement(
+                principal, payload["task_id"], payload["generation"], payload["proof_ref"], payload["idempotency_key"]))
+
+    @app.post("/api/v1/continuity/prepare")
+    async def prepare_continuity(request: Request):
+        from novel_factory.application.continuity import ContinuityService
+        payload = await _body(request, "ContinuityRequest", "continuity")
+        return await execute(request, "write", lambda principal: ContinuityService(kernel).prepare(principal, payload))
+
+    @app.post("/api/v1/works/{work_id}/continuity/readings")
+    async def read_continuity_candidate(request: Request, work_id: str):
+        from novel_factory.application.continuity import ContinuityService
+        validate_contract("UUID", work_id)
+        payload = await _body(request, "ContinuityReadRequest", "continuity")
+        return await execute(request, "query", lambda principal: ContinuityService(kernel).read_candidate(
+            principal, work_id, payload["candidate_ref"], payload["idempotency_key"]))
+
+    @app.post("/api/v1/works/{work_id}/continuity/reviews")
+    async def review_continuity(request: Request, work_id: str):
+        from novel_factory.application.continuity import ContinuityService
+        validate_contract("UUID", work_id)
+        payload = await _body(request, "ContinuityReviewRequest", "continuity")
+        return await execute(request, "write", lambda principal: ContinuityService(kernel).review(principal, work_id, payload))
+
+    @app.post("/api/v1/works/{work_id}/continuity/publish")
+    async def publish_continuity(request: Request, work_id: str):
+        from novel_factory.application.continuity import ContinuityService
+        validate_contract("UUID", work_id)
+        payload = await _body(request, "ContinuityPublishRequest", "continuity")
+        return await execute(request, "write", lambda principal: ContinuityService(kernel).publish(principal, work_id, payload))
+
+    @app.post("/api/v1/works/{work_id}/continuity/inspect")
+    async def inspect_continuity(request: Request, work_id: str):
+        from novel_factory.application.continuity import ContinuityService
+        validate_contract("UUID", work_id)
+        payload = await _body(request, "ContinuityInspectRequest", "continuity")
+        return await execute(request, "query", lambda principal: ContinuityService(kernel).inspect(
+            principal, work_id, payload["snapshot_ref"], target_world_ref=payload.get("target_world_ref")))
+
+    @app.post("/api/v1/tasks/{task_id}/continuity")
+    async def read_task_continuity(request: Request, task_id: str):
+        from novel_factory.application.continuity import ContinuityService
+        validate_contract("UUID", task_id)
+        payload = await _body(request, "ContinuityTaskReadRequest", "continuity")
+        return await execute(request, "context", lambda principal: ContinuityService(kernel).read_for_task(
+            principal, task_id, payload["generation"], payload["snapshot_ref"],
+            budget_bytes=payload.get("budget_bytes", 100_000)))
+
+    @app.post("/api/v1/runtime-upgrades/prepare")
+    async def prepare_runtime_upgrade(request: Request):
+        from novel_factory.application.upgrades import RuntimeUpgradeService
+        payload = await _body(request, "RuntimeUpgradePrepare", "upgrades")
+        return await execute(request, "write", lambda principal: RuntimeUpgradeService(kernel).prepare(principal, payload))
+
+    @app.post("/api/v1/runtime-upgrades/reviews")
+    async def review_runtime_upgrade(request: Request):
+        from novel_factory.application.upgrades import RuntimeUpgradeService
+        payload = await _body(request, "RuntimeUpgradeReview", "upgrades")
+        return await execute(request, "write", lambda principal: RuntimeUpgradeService(kernel).review(principal, payload))
+
+    @app.post("/api/v1/runtime-upgrades/activate")
+    async def activate_runtime_upgrade(request: Request):
+        from novel_factory.application.upgrades import RuntimeUpgradeService
+        payload = await _body(request, "RuntimeUpgradeActivate", "upgrades")
+        return await execute(request, "write", lambda principal: RuntimeUpgradeService(kernel).activate(principal, payload))
+
+    @app.post("/api/v1/model-routes/select")
+    async def select_model_route(request: Request):
+        from novel_factory.application.upgrades import RuntimeUpgradeService
+        payload = await _body(request, "ModelRouteSelect", "upgrades")
+        # Only server-injected, preconfigured adapters can be selected. No
+        # provider credentials, endpoint URLs or model configs come from HTTP.
+        return await execute(request, "write", lambda principal:
+                             RuntimeUpgradeService(kernel, adapters=model_adapters).select_model(principal, payload))
 
     @app.post("/api/v1/tasks")
     async def create_task(request: Request):

@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novel-factory.example/contracts/2.3/refinement.schema.json",
+  "title": "Finite exact-phase effect representation refinement; source event identity is retained",
+  "$defs": {
+    "MicroStep": {
+      "type": "object",
+      "properties": {
+        "step_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "at": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/StoryPoint"
+        },
+        "participant_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+          },
+          "minItems": 0,
+          "maxItems": 64,
+          "uniqueItems": true
+        },
+        "depends_on": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+          },
+          "minItems": 0,
+          "maxItems": 64,
+          "uniqueItems": true
+        },
+        "effects": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/NormalizedEffect"
+              },
+              {
+                "$ref": "https://novel-factory.example/contracts/2.1/temporal_concurrency.schema.json#/$defs/RelationTransition"
+              }
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 128
+        }
+      },
+      "required": [
+        "step_id",
+        "at",
+        "participant_ids",
+        "depends_on",
+        "effects"
+      ],
+      "additionalProperties": false
+    },
+    "RefinementRequest": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "2.3"
+        },
+        "source_world_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"
+        },
+        "macro_event_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EventRef"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MicroStep"
+          },
+          "minItems": 1,
+          "maxItems": 64
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "schema_version",
+        "source_world_ref",
+        "macro_event_ref",
+        "steps",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "RefinementProposeRequest": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "proof_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "proof_ref",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "head_sha": "9bf3794fbabb1074e1309e3217d6bbe78ce3c704",
+  "run_id": 42844946941,
+  "status": "completed",
+  "conclusion": "success",
+  "artifacts": [
+    {
+      "artifact_id": 13777777808,
+      "run_id": 42844946941,
+      "head_sha": "9bf3794fbabb1074e1309e3217d6bbe78ce3c704",
+      "zip_sha256": "0e82300c94f99309bf0cc2d586d78f6a3fd152cb1d3bbd126f24cb0baa841b53",
+      "digest_verified": true,
+      "junit_sha256": "49755a49607eda70c93274a58c4b4874456de1cd9b328b111288ebead0644379",
+      "junit": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "578",
+          "time": "448.867",
+          "timestamp": "2026-11-10T15:30:34.434042+00:00",
+          "hostname": "runnervm7aw5e"
+        }
+      ]
+    },
+    {
+      "artifact_id": 13778131265,
+      "run_id": 42844946941,
+      "head_sha": "9bf3794fbabb1074e1309e3217d6bbe78ce3c704",
+      "zip_sha256": "c38a02b03db5571a81bb6148e05e514b6ceb2857724b2a08c8a7aa4e220c0bcd",
+      "digest_verified": true,
+      "junit_sha256": "f4fcfa60c8cb5f04ce1a610fd1886c5a60bdee0ebdbde6ee428260f25c9fec06",
+      "junit": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "330",
+          "time": "13.512",
+          "timestamp": "2026-11-10T15:30:15.628294+00:00",
+          "hostname": "runnervm7aw5e"
+        }
+      ]
+    }
+  ],
+  "synthetic_merge": {
+    "sha": "07ab548c2da85b0cfdc5e35875dbeb5fe173aaab",
+    "parents": [
+      "e0b0f2b080f3225d8be8e202e13258bc480f5b84",
+      "9bf3794fbabb1074e1309e3217d6bbe78ce3c704"
+    ],
+    "tree": "8591e40df3c0fb50616c45c23f63e5d394e23402",
+    "same_as_head_tree": true,
+    "verified_using_github_git_commit_and_pr_api": true
+  }
+}

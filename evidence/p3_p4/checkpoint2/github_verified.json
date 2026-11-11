@@ -1,0 +1,53 @@
+{
+  "head_sha": "f6d48def76b982dfd9fbd5fca60a20f937576e8b",
+  "run_id": 42840814094,
+  "conclusion": "success",
+  "initial_collection_failure": {
+    "commit": "6de6e15ae3051736eedfadde7a53b47f2d07b913",
+    "run_id": 42839864534,
+    "reason": "duplicate pytest import module basename",
+    "fixed_in": "f6d48def76b982dfd9fbd5fca60a20f937576e8b"
+  },
+  "artifacts": [
+    {
+      "artifact_id": 13775862937,
+      "run_id": 42840814094,
+      "head_sha": "f6d48def76b982dfd9fbd5fca60a20f937576e8b",
+      "zip_sha256": "e0c0997bbb2f241097e9d57b889ff7574bd1537e121dead715ab31397397429a",
+      "digest_verified": true,
+      "junit": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "491",
+          "time": "386.249",
+          "timestamp": "2026-11-10T15:06:31.700488+00:00",
+          "hostname": "runnervm7aw5e",
+          "file": "postgres-all.xml"
+        }
+      ]
+    },
+    {
+      "artifact_id": 13776726222,
+      "run_id": 42840814094,
+      "head_sha": "f6d48def76b982dfd9fbd5fca60a20f937576e8b",
+      "zip_sha256": "385b27d5e3ecb6eee7e42f0b3e6efa03d7fa9b184ad2c116e3a5d7b633f186dd",
+      "digest_verified": true,
+      "junit": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "287",
+          "time": "15.699",
+          "timestamp": "2026-11-10T15:06:12.373015+00:00",
+          "hostname": "runnervm7aw5e",
+          "file": "unit.xml"
+        }
+      ]
+    }
+  ]
+}

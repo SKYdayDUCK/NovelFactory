@@ -1,0 +1,553 @@
+{
+  "schema_version": "1.0",
+  "commit": "e0b0f2b080f3225d8be8e202e13258bc480f5b84",
+  "tree": "e1a8b5b4e3c72314a5f26152215de8d90c5b9e29",
+  "integrity_run": 42837414167,
+  "performance_run": 42837414314,
+  "integrity_conclusion": "success",
+  "performance_conclusion": "failure",
+  "source_note": "Pull request Actions may checkout a synthetic merge SHA; head_sha is the delivery commit and benchmark source hashes are recorded separately. All artifact ZIP hashes were verified against GitHub digests.",
+  "results": {
+    "cp1_200_mixed": {
+      "artifact_id": 13774971932,
+      "zip_sha256": "6e20041707600395e07968555725398b239b0fa3c46f2914c784eac3fe4752bd",
+      "digest_verified": true,
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "PASS",
+      "capacity_gate": "PASS",
+      "bounded_recovery_business_gate": "PASS",
+      "open_loop_offered_rate": {
+        "gate": "NOT_APPLICABLE",
+        "target_rps": null,
+        "first_attempts": 0
+      },
+      "correctness": {
+        "new_world_revisions": 21,
+        "expected_new_world_revisions": 21,
+        "new_selected_effect_groups": 21,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99"
+      },
+      "environment": {
+        "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+        "python": "3.12.16 (main, Oct 26 2026, 02:50:49) [GCC 13.3.0]",
+        "logical_cpu_count": 4,
+        "cpu_models": [
+          "Intel(R) Xeon(R) 6973P-C"
+        ],
+        "memory": {
+          "MemTotal": "16366512 kB",
+          "MemAvailable": "15247300 kB",
+          "SwapTotal": "3145724 kB"
+        },
+        "cgroup": {},
+        "versions": {
+          "SQLAlchemy": "2.0.57",
+          "psycopg": "3.3.8",
+          "uvicorn": "0.54.0",
+          "httpx": "0.28.1"
+        },
+        "git_sha": "efafed5e7121d2bc1e5254a71667937799d71035",
+        "git_dirty": true,
+        "benchmark_source_sha256": "c3533086aed8ef2ee309e44c16751d16804aa99ed78cc72cc4ed374cd5c6b940",
+        "load_client_location": "separate spawned API process(es), real loopback TCP; shared host",
+        "api_processes": 1,
+        "api_server_threads": 1,
+        "aggregate_api_pool_size": 8,
+        "service_mode": "isolated-process"
+      },
+      "database_application": {
+        "sql_statements": 33003,
+        "transactions": 3682,
+        "sql_cursor_execution_seconds": 46.888946099001494,
+        "checked_out_at_end": 0,
+        "configured_pool_size": 8,
+        "sql_statements_per_second": 236.82630924099504,
+        "statement_kinds": {
+          "SELECT": 28750,
+          "INSERT": 3891,
+          "UPDATE": 242,
+          "WITH": 120
+        },
+        "max_sql_cursor_execution_seconds": 0.11419574000001376,
+        "peak_checked_out_connections": 6,
+        "peak_connections_note": "Conservative sum of per-process peaks; not a simultaneous sample",
+        "sql_timing_excludes_result_decoding": true,
+        "per_process": [
+          {
+            "sql_statements": 33003,
+            "transactions": 3682,
+            "sql_cursor_execution_seconds": 46.888946099001494,
+            "max_sql_cursor_execution_seconds": 0.11419574000001376,
+            "statement_kinds": {
+              "SELECT": 28750,
+              "INSERT": 3891,
+              "UPDATE": 242,
+              "WITH": 120
+            },
+            "sql_timing_excludes_result_decoding": true,
+            "sql_statements_per_second": 236.7618,
+            "peak_checked_out_connections": 6,
+            "checked_out_at_end": 0,
+            "configured_pool_size": 8,
+            "pool_status_at_end": "Pool size: 8  Connections in pool: 6 Current Overflow: -2 Current Checked out connections: 0"
+          }
+        ]
+      },
+      "load": {
+        "scheduled_phase_arrival_rps": 10.0,
+        "retry_policy": {
+          "max_attempts": 5,
+          "retry_budget_seconds": 30.0,
+          "same_payload_and_key": true,
+          "semantic_reprepare": false,
+          "deadline_scope": "No new retry starts after budget; in-flight attempt may finish later within HTTP timeout",
+          "individual_http_timeout_seconds": 30,
+          "retryable": [
+            "validated 429/503 WAIT or RETRY_SAME_COMMAND",
+            "TransportError"
+          ]
+        },
+        "context_arrival_rps": 10.0,
+        "write_arrival_rps": 1,
+        "mixed_read_distribution": {
+          "state_fraction": 0.9,
+          "graph_fraction": 0.1,
+          "history": "one additional FACT timeline per task"
+        },
+        "overload_arrival_rps": null,
+        "overload_rounds": null,
+        "independent_world_commands": 20,
+        "shared_candidates": 20,
+        "http_settings": {
+          "max_body_bytes": 262144,
+          "body_read_timeout_seconds": 5.0,
+          "max_body_chunks": 1024,
+          "max_inflight_requests": 128,
+          "max_queued_operations": 64,
+          "per_principal_concurrency": 2,
+          "queue_timeout_seconds": 2.0,
+          "rate_per_second": 20.0,
+          "rate_burst": 100,
+          "allowed_origins": []
+        },
+        "hot_fraction_meaning": "Fraction of read subjects mapped to one shared item; shared writer candidates remain agents/10 in every profile",
+        "cache_size": 256,
+        "cache_boundary": "per-process query-result cache cold/warm; PostgreSQL and OS caches are not flushed",
+        "shared_conflict_policy": "one predetermined TEST_FIXTURE control command before stale deliveries; not resource arbitration by database arrival order"
+      },
+      "metrics": {
+        "duration_seconds": 139.355294,
+        "planned_requests": 1141,
+        "emitted_requests": 1141,
+        "completed_requests": 1141,
+        "client_requests_never_emitted": 0,
+        "emitted_logical_operations": 1141,
+        "completed_logical_operations": 1141,
+        "first_attempt_failure_count": 0,
+        "first_attempt_status_counts": {
+          "200": 1122,
+          "409": 19
+        },
+        "first_attempt_latency": {
+          "count": 1141,
+          "p50_ms": 74.9039,
+          "p95_ms": 487.3404,
+          "p99_ms": 660.4851
+        },
+        "recovered_logical_operations": 0,
+        "logical_operation_completion_latency": {
+          "count": 1141,
+          "p50_ms": 75.7689,
+          "p95_ms": 488.6354,
+          "p99_ms": 661.3485
+        },
+        "api_tool_calls": 1141,
+        "mcp_tool_calls": 0,
+        "status_counts": {
+          "200": 1122,
+          "409": 19
+        },
+        "valid_successful_calls": 1122,
+        "api_success_rps": 8.0514,
+        "successful_duplicate_receipts": 21,
+        "effective_call_rps_excluding_duplicates": 7.9007,
+        "new_world_commit_receipts": 21,
+        "accepted_original_input_after_unrelated_head_progress": 20,
+        "cross_head_accept_rate_among_unique_commits": 0.9523809523809523,
+        "semantic_replan_requests_in_load": 0,
+        "effective_world_commits_per_second": 0.1507,
+        "conflict_count": 19,
+        "conflict_rate_all_requests": 0.016652059596844872,
+        "failure_rate_all_requests": 0.016652059596844872,
+        "idempotent_retry_rate_all_requests": 0.018404907975460124,
+        "infrastructure_retries": 0,
+        "model_retries": 0,
+        "peak_outstanding_client_requests": 7,
+        "client_connection_limit": 256,
+        "outstanding_definition": "Includes HTTPX connection-pool wait; server ingress is measured separately",
+        "latency_all_responses": {
+          "count": 1141,
+          "p50_ms": 74.9039,
+          "p95_ms": 487.3404,
+          "p99_ms": 660.4851
+        },
+        "latency_successes": {
+          "count": 1122,
+          "p50_ms": 75.156,
+          "p95_ms": 487.6808,
+          "p99_ms": 660.4851
+        },
+        "latency_rejections_and_failures": {
+          "count": 19,
+          "p50_ms": 26.7599,
+          "p95_ms": 30.799,
+          "p99_ms": 30.799
+        },
+        "scheduled_to_completion_latency": {
+          "count": 1141,
+          "p50_ms": 75.7689,
+          "p95_ms": 488.6354,
+          "p99_ms": 661.3485
+        },
+        "arrival_schedule_delay": {
+          "count": 1141,
+          "p50_ms": 0.7161,
+          "p95_ms": 1.8099,
+          "p99_ms": 2.1797
+        },
+        "latency_warning": "P99 for individual write categories has few samples; descriptive only",
+        "correctness_errors": [],
+        "unresolved_operational_errors": []
+      }
+    },
+    "cp1_200_overload": {
+      "artifact_id": 13774762758,
+      "zip_sha256": "88dfdb6960c2c6b930bb76888f2ca3118dd61079cb14c78dca6e820776c531ef",
+      "digest_verified": true,
+      "engineer_correctness": "FAIL",
+      "first_attempt_capacity_gate": "NOT_MET",
+      "capacity_gate": "NOT_MET",
+      "bounded_recovery_business_gate": "NOT_MET",
+      "open_loop_offered_rate": {
+        "gate": "NOT_MET",
+        "target_rps": 1000.0,
+        "first_attempts": 1000,
+        "actual_call_start_rps": 32.574871418113275,
+        "start_window_seconds": 30.667811,
+        "max_schedule_delay_ms": 29668.9376,
+        "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+        "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+      },
+      "correctness": {
+        "new_world_revisions": 14,
+        "expected_new_world_revisions": 21,
+        "new_selected_effect_groups": 14,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "100"
+      },
+      "environment": {
+        "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+        "python": "3.12.16 (main, Oct 26 2026, 02:50:49) [GCC 13.3.0]",
+        "logical_cpu_count": 4,
+        "cpu_models": [
+          "AMD EPYC 7763 64-Core Processor"
+        ],
+        "memory": {
+          "MemTotal": "16367524 kB",
+          "MemAvailable": "15222836 kB",
+          "SwapTotal": "3145724 kB"
+        },
+        "cgroup": {},
+        "versions": {
+          "SQLAlchemy": "2.0.57",
+          "psycopg": "3.3.8",
+          "uvicorn": "0.54.0",
+          "httpx": "0.28.1"
+        },
+        "git_sha": "efafed5e7121d2bc1e5254a71667937799d71035",
+        "git_dirty": true,
+        "benchmark_source_sha256": "c3533086aed8ef2ee309e44c16751d16804aa99ed78cc72cc4ed374cd5c6b940",
+        "load_client_location": "separate spawned API process(es), real loopback TCP; shared host",
+        "api_processes": 1,
+        "api_server_threads": 1,
+        "aggregate_api_pool_size": 8,
+        "service_mode": "isolated-process"
+      },
+      "database_application": {
+        "sql_statements": 49378,
+        "transactions": 6468,
+        "sql_cursor_execution_seconds": 419.6222701670047,
+        "checked_out_at_end": 0,
+        "configured_pool_size": 8,
+        "sql_statements_per_second": 236.94621209562936,
+        "statement_kinds": {
+          "SELECT": 45639,
+          "INSERT": 3453,
+          "UPDATE": 228,
+          "WITH": 58
+        },
+        "max_sql_cursor_execution_seconds": 0.27865029099999106,
+        "peak_checked_out_connections": 8,
+        "peak_connections_note": "Conservative sum of per-process peaks; not a simultaneous sample",
+        "sql_timing_excludes_result_decoding": true,
+        "per_process": [
+          {
+            "sql_statements": 49378,
+            "transactions": 6468,
+            "sql_cursor_execution_seconds": 419.6222701670047,
+            "max_sql_cursor_execution_seconds": 0.27865029099999106,
+            "statement_kinds": {
+              "SELECT": 45639,
+              "INSERT": 3453,
+              "UPDATE": 228,
+              "WITH": 58
+            },
+            "sql_timing_excludes_result_decoding": true,
+            "sql_statements_per_second": 236.8735,
+            "peak_checked_out_connections": 8,
+            "checked_out_at_end": 0,
+            "configured_pool_size": 8,
+            "pool_status_at_end": "Pool size: 8  Connections in pool: 8 Current Overflow: 0 Current Checked out connections: 0"
+          }
+        ]
+      },
+      "load": {
+        "scheduled_phase_arrival_rps": 10.0,
+        "retry_policy": {
+          "max_attempts": 5,
+          "retry_budget_seconds": 30.0,
+          "same_payload_and_key": true,
+          "semantic_reprepare": false,
+          "deadline_scope": "No new retry starts after budget; in-flight attempt may finish later within HTTP timeout",
+          "individual_http_timeout_seconds": 30,
+          "retryable": [
+            "validated 429/503 WAIT or RETRY_SAME_COMMAND",
+            "TransportError"
+          ]
+        },
+        "context_arrival_rps": 10.0,
+        "write_arrival_rps": 1,
+        "mixed_read_distribution": {
+          "state_fraction": 0.9,
+          "graph_fraction": 0.1,
+          "history": "one additional FACT timeline per task"
+        },
+        "overload_arrival_rps": 1000.0,
+        "overload_rounds": 5,
+        "independent_world_commands": 20,
+        "shared_candidates": 20,
+        "http_settings": {
+          "max_body_bytes": 262144,
+          "body_read_timeout_seconds": 5.0,
+          "max_body_chunks": 1024,
+          "max_inflight_requests": 128,
+          "max_queued_operations": 64,
+          "per_principal_concurrency": 2,
+          "queue_timeout_seconds": 2.0,
+          "rate_per_second": 20.0,
+          "rate_burst": 100,
+          "allowed_origins": []
+        },
+        "hot_fraction_meaning": "Fraction of read subjects mapped to one shared item; shared writer candidates remain agents/10 in every profile",
+        "cache_size": 256,
+        "cache_boundary": "per-process query-result cache cold/warm; PostgreSQL and OS caches are not flushed",
+        "shared_conflict_policy": "one predetermined TEST_FIXTURE control command before stale deliveries; not resource arbitration by database arrival order"
+      },
+      "metrics": {
+        "duration_seconds": 208.393287,
+        "planned_requests": 2141,
+        "emitted_requests": 3573,
+        "completed_requests": 3573,
+        "client_requests_never_emitted": 37,
+        "emitted_logical_operations": 2104,
+        "completed_logical_operations": 2104,
+        "first_attempt_failure_count": 760,
+        "first_attempt_status_counts": {
+          "200": 1344,
+          "429": 760
+        },
+        "first_attempt_latency": {
+          "count": 2104,
+          "p50_ms": 1767.274,
+          "p95_ms": 13978.9516,
+          "p99_ms": 21160.2432
+        },
+        "recovered_logical_operations": 603,
+        "logical_operation_completion_latency": {
+          "count": 2104,
+          "p50_ms": 5135.3216,
+          "p95_ms": 46344.4076,
+          "p99_ms": 49808.2325
+        },
+        "api_tool_calls": 3573,
+        "mcp_tool_calls": 0,
+        "status_counts": {
+          "200": 1947,
+          "429": 1626
+        },
+        "valid_successful_calls": 1947,
+        "api_success_rps": 9.3429,
+        "successful_duplicate_receipts": 14,
+        "effective_call_rps_excluding_duplicates": 9.2757,
+        "new_world_commit_receipts": 14,
+        "accepted_original_input_after_unrelated_head_progress": 13,
+        "cross_head_accept_rate_among_unique_commits": 0.9285714285714286,
+        "semantic_replan_requests_in_load": 0,
+        "effective_world_commits_per_second": 0.0672,
+        "conflict_count": 0,
+        "conflict_rate_all_requests": 0.0,
+        "failure_rate_all_requests": 0.4550797649034425,
+        "idempotent_retry_rate_all_requests": 0.003918275958578225,
+        "infrastructure_retries": 1469,
+        "model_retries": 0,
+        "peak_outstanding_client_requests": 505,
+        "client_connection_limit": 256,
+        "outstanding_definition": "Includes HTTPX connection-pool wait; server ingress is measured separately",
+        "latency_all_responses": {
+          "count": 3573,
+          "p50_ms": 2664.9144,
+          "p95_ms": 15043.8687,
+          "p99_ms": 23109.1727
+        },
+        "latency_successes": {
+          "count": 1947,
+          "p50_ms": 2109.3027,
+          "p95_ms": 14046.6988,
+          "p99_ms": 21763.0517
+        },
+        "latency_rejections_and_failures": {
+          "count": 1626,
+          "p50_ms": 3600.7321,
+          "p95_ms": 16576.486,
+          "p99_ms": 25171.1035
+        },
+        "scheduled_to_completion_latency": {
+          "count": 3573,
+          "p50_ms": 10449.1199,
+          "p95_ms": 44146.6139,
+          "p99_ms": 49255.9302
+        },
+        "arrival_schedule_delay": {
+          "count": 3573,
+          "p50_ms": 6219.2706,
+          "p95_ms": 39165.6644,
+          "p99_ms": 47264.1575
+        },
+        "latency_warning": "P99 for individual write categories has few samples; descriptive only",
+        "correctness_errors": [],
+        "unresolved_operational_errors": [
+          {
+            "agent": 2,
+            "label": "certificate",
+            "attempt": 5,
+            "status": 429,
+            "code": "BACKPRESSURE",
+            "retry_exhausted": true,
+            "reason": "retry budget exhausted"
+          },
+          {
+            "agent": 8,
+            "label": "certificate",
+            "attempt": 5,
+            "status": 429,
+            "code": "BACKPRESSURE",
+            "retry_exhausted": true,
+            "reason": "retry budget exhausted"
+          },
+          {
+            "agent": 12,
+            "label": "propose",
+            "attempt": 5,
+            "status": 429,
+            "code": "BACKPRESSURE",
+            "retry_exhausted": true,
+            "reason": "retry budget exhausted"
+          },
+          {
+            "agent": 10,
+            "label": "certificate",
+            "attempt": 5,
+            "status": 429,
+            "code": "BACKPRESSURE",
+            "retry_exhausted": true,
+            "reason": "retry budget exhausted"
+          },
+          {
+            "agent": 11,
+            "label": "certificate",
+            "attempt": 5,
+            "status": 429,
+            "code": "BACKPRESSURE",
+            "retry_exhausted": true,
+            "reason": "retry budget exhausted"
+          },
+          {
+            "agent": 15,
+            "label": "propose",
+            "attempt": 5,
+            "status": 429,
+            "code": "BACKPRESSURE",
+            "retry_exhausted": true,
+            "reason": "retry budget exhausted"
+          },
+          {
+            "agent": 20,
+            "label": "certificate",
+            "attempt": 5,
+            "status": 429,
+            "code": "BACKPRESSURE",
+            "retry_exhausted": true,
+            "reason": "retry budget exhausted"
+          },
+          {
+            "agent": 24,
+            "label": "propose",
+            "attempt": 5,
+            "status": 429,
+            "code": "BACKPRESSURE",
+            "retry_exhausted": true,
+            "reason": "retry budget exhausted"
+          },
+          {
+            "agent": 25,
+            "label": "propose",
+            "attempt": 5,
+            "status": 429,
+            "code": "BACKPRESSURE",
+            "retry_exhausted": true,
+            "reason": "retry budget exhausted"
+          },
+          {
+            "agent": 23,
+            "label": "certificate",
+            "attempt": 5,
+            "status": 429,
+            "code": "BACKPRESSURE",
+            "retry_exhausted": true,
+            "reason": "retry budget exhausted"
+          }
+        ]
+      }
+    },
+    "cp1_postgres": {
+      "artifact_id": 13773204064,
+      "zip_sha256": "e41b0bb7a3b5a60c225279d775e69e13dd34c9e00b5a94685f9cf1d42d6226cb",
+      "digest_verified": true,
+      "junit": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "423",
+          "time": "198.328",
+          "timestamp": "2026-11-10T14:46:33.187753+00:00",
+          "hostname": "runnervm7aw5e"
+        }
+      ]
+    }
+  }
+}

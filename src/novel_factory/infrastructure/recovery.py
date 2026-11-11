@@ -7,17 +7,18 @@ Restoration only accepts an empty, explicitly supplied isolated database.
 """
 from __future__ import annotations
 
-from datetime import datetime, timezone
 import hashlib
 import json
 import os
-from pathlib import Path
 import shutil
 import subprocess
+from datetime import UTC, datetime
+from pathlib import Path
 from uuid import uuid4
 
 from sqlalchemy import create_engine, inspect, select, text
 from sqlalchemy.engine import make_url
+from sqlalchemy.exc import ArgumentError
 
 from novel_factory.domain.errors import DomainError
 from novel_factory.infrastructure.objects import ObjectStore
@@ -55,6 +56,38 @@ def database_snapshot(conn) -> dict:
     return result
 
 
+def fence_recovered_tasks(engine, object_store, *, tables=None):
+    """Fence a verified isolated restore before starting any API or workers.
+
+    Works for a logical restore and a physically recovered cluster. Unknown
+    external calls retain reservations; this function never sends a request.
+    The caller must keep ingress stopped until this transaction commits.
+    """
+    if tables is None:
+        from novel_factory.infrastructure.database import tables
+    service = TaskService(engine, tables, object_store)
+    fenced = []
+    with engine.begin() as conn:
+        mutation_gate(conn)
+        task_table, calls, outbox = tables["tasks"], tables["call_attempts"], tables["outbox"]
+        rows = conn.execute(select(task_table).where(task_table.c.state.not_in(
+            ["ACCEPTED", "CANCELLED", "FAILED"])).order_by(task_table.c.task_id).with_for_update()).mappings().all()
+        for row in rows:
+            task = dict(row)
+            spec = {**service._spec(conn, task), "context_bundle_id": task["context_bundle_id"],
+                    "dependency_fingerprint": task["dependency_fingerprint"]}
+            generation = task["generation"] + 1
+            service._save_input(conn, task["task_id"], generation, spec, "PAUSED")
+            conn.execute(task_table.update().where(task_table.c.task_id == task["task_id"]).values(
+                generation=generation, state="PAUSED", lease_owner=None, lease_expiry=None, attempt_id=None))
+            fenced.append({"task_id": task["task_id"], "old_generation": task["generation"],
+                           "generation": generation, "state": "PAUSED"})
+        conn.execute(calls.update().where(calls.c.state == "SENT").values(state="UNKNOWN"))
+        conn.execute(outbox.update().where(outbox.c.state == "DELIVERING").values(
+            state="PENDING", generation=outbox.c.generation + 1, lease_owner=None, lease_expiry=None))
+    return fenced
+
+
 class BackupService:
     def __init__(self, engine, object_store: ObjectStore, *, pg_bin=None, package_root=None):
         self.engine, self.objects = engine, object_store
@@ -62,13 +95,43 @@ class BackupService:
         self.package_root = Path(package_root or Path(__file__).resolve().parents[1])
 
     @staticmethod
+    def validate_connection_target(url):
+        """Fail before connecting if Python and libpq tools could disagree.
+
+        This finite recovery interface supports one explicit TCP endpoint,
+        user and database, plus the SSL options reproduced by _pg_env. It
+        deliberately rejects service files, hostaddr overrides, multi-host or
+        socket routing and connection-string database names. The caller's
+        process environment is never edited, including in a threaded service.
+        """
+        try:
+            url = make_url(url)
+            explicit = (url.get_backend_name() == "postgresql" and url.host and url.username
+                        and url.database and url.port is not None and 1 <= url.port <= 65535)
+        except (ArgumentError, TypeError, ValueError):
+            raise DomainError("BACKUP_TARGET_AMBIGUOUS", "Recovery requires an explicit PostgreSQL connection target") from None
+        if not explicit:
+            raise DomainError("BACKUP_TARGET_AMBIGUOUS", "Recovery requires explicit PostgreSQL host, port, user and database")
+        if any(mark in url.host for mark in (",", "/", "\\")) or any(char.isspace() for char in url.host):
+            raise DomainError("BACKUP_TARGET_AMBIGUOUS", "Recovery supports one explicit TCP host")
+        if "=" in url.database or "://" in url.database or "\x00" in url.database:
+            raise DomainError("BACKUP_TARGET_AMBIGUOUS", "A recovery database name must not be a connection string")
+        allowed = {"sslmode", "sslrootcert", "sslcert", "sslkey"}
+        if any(key not in allowed or not isinstance(value, str) or not value
+               for key, value in url.query.items()):
+            raise DomainError("BACKUP_TARGET_AMBIGUOUS", "Recovery URL options must be explicitly supported single SSL values")
+        if any(os.environ.get(key) for key in ("PGHOSTADDR", "PGSERVICE", "PGSERVICEFILE")):
+            raise DomainError("BACKUP_TARGET_AMBIGUOUS", "Remove ambient PostgreSQL hostaddr/service routing before recovery")
+        return url
+
+    @staticmethod
     def _pg_env(url):
-        url = make_url(url) if isinstance(url, str) else url
+        url = BackupService.validate_connection_target(url)
         env = os.environ.copy()
-        for key in ("PGSERVICE", "PGSERVICEFILE", "PGOPTIONS"):
+        for key in ("PGHOSTADDR", "PGSERVICE", "PGSERVICEFILE", "PGOPTIONS"):
             env.pop(key, None)
-        env.update({"PGHOST": url.host or "127.0.0.1", "PGPORT": str(url.port or 5432),
-                    "PGUSER": url.username or "postgres", "PGDATABASE": url.database or "postgres",
+        env.update({"PGHOST": url.host, "PGPORT": str(url.port),
+                    "PGUSER": url.username, "PGDATABASE": url.database,
                     "PGCONNECT_TIMEOUT": "10", "PGAPPNAME": "novel_factory_backup"})
         if url.password:
             env["PGPASSWORD"] = url.password
@@ -83,7 +146,7 @@ class BackupService:
         executable = self.pg_bin / name
         if not executable.is_file():
             raise DomainError("BACKUP_TOOL_UNAVAILABLE", f"Required PostgreSQL tool {name} is unavailable")
-        completed = subprocess.run([str(executable), *args], env=self._pg_env(url), capture_output=True, text=True, timeout=180)
+        completed = subprocess.run([str(executable), *args], env=self._pg_env(url), capture_output=True, text=True, timeout=180, check=False)
         if completed.returncode:
             # No credentials/DSN are included in the public error. Raw tool
             # stderr is retained only in the caller's private exception chain.
@@ -113,78 +176,78 @@ class BackupService:
         return assets
 
     def create(self, destination: str | Path):
+        self.validate_connection_target(self.engine.url)
         dest = Path(destination).resolve()
         if dest.exists():
             raise DomainError("BACKUP_DESTINATION_EXISTS", "Backup destination must be new")
         dest.mkdir(parents=True)
         ObjectStore._fsync_dir(dest.parent)
-        manifest = {"format": "novel-factory-logical-backup-1", "created_at": datetime.now(timezone.utc).isoformat(),
+        manifest = {"format": "novel-factory-logical-backup-1", "created_at": datetime.now(UTC).isoformat(),
                     "backup_id": str(uuid4()), "status": "INCOMPLETE"}
         _write_json(dest / "manifest.json", manifest)
-        with self.objects.lock():
-            with self.engine.connect() as conn:
-                locked = False
-                try:
-                    conn.execute(text("SELECT pg_advisory_lock(:key)"), {"key": MAINTENANCE_GATE})
-                    locked = True
-                    conn.commit()  # Session lock survives this transaction.
-                    conn.execute(text("SET TIME ZONE 'UTC'"))
-                    manifest["postgres_version"] = conn.scalar(text("SHOW server_version"))
-                    manifest["database_snapshot"] = database_snapshot(conn)
-                    object_rows = conn.execute(text("SELECT hash, size FROM nf_objects ORDER BY hash")).mappings().all()
-                    conn.commit()
-                    result = self._tool("pg_dump", ["--format=custom", "--no-owner", "--no-acl", "--file", str(dest / "database.dump")], self.engine.url)
-                    with (dest / "database.dump").open("rb") as stream:
+        with self.objects.lock(), self.engine.connect() as conn:
+            locked = False
+            try:
+                conn.execute(text("SELECT pg_advisory_lock(:key)"), {"key": MAINTENANCE_GATE})
+                locked = True
+                conn.commit()  # Session lock survives this transaction.
+                conn.execute(text("SET TIME ZONE 'UTC'"))
+                manifest["postgres_version"] = conn.scalar(text("SHOW server_version"))
+                manifest["database_snapshot"] = database_snapshot(conn)
+                object_rows = conn.execute(text("SELECT hash, size FROM nf_objects ORDER BY hash")).mappings().all()
+                conn.commit()
+                result = self._tool("pg_dump", ["--format=custom", "--no-owner", "--no-acl", "--file", str(dest / "database.dump")], self.engine.url)
+                with (dest / "database.dump").open("rb") as stream:
+                    os.fsync(stream.fileno())
+                backup_objects = ObjectStore(dest / "objects")
+                hashes = {}
+                for row in object_rows:
+                    ref = self.objects.verify(row["hash"], expected_size=row["size"])
+                    copied = backup_objects.put(self.objects.path(ref.sha256).read_bytes())
+                    if copied != ref:
+                        raise DomainError("BACKUP_OBJECT_MISMATCH", "Copied object failed verification")
+                    hashes[ref.sha256] = ref.size
+                runtime_hashes = {}
+                for relative, source in self._runtime_files():
+                    target = dest / "interpretation" / relative
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copyfile(source, target)
+                    with target.open("rb") as stream:
                         os.fsync(stream.fileno())
-                    backup_objects = ObjectStore(dest / "objects")
-                    hashes = {}
-                    for row in object_rows:
-                        ref = self.objects.verify(row["hash"], expected_size=row["size"])
-                        copied = backup_objects.put(self.objects.path(ref.sha256).read_bytes())
-                        if copied != ref:
-                            raise DomainError("BACKUP_OBJECT_MISMATCH", "Copied object failed verification")
-                        hashes[ref.sha256] = ref.size
-                    runtime_hashes = {}
-                    for relative, source in self._runtime_files():
-                        target = dest / "interpretation" / relative
-                        target.parent.mkdir(parents=True, exist_ok=True)
+                    runtime_hashes[relative] = _sha(target)
+                # Include original/public schemas with interpretation code.
+                schema_dir = self._schema_directory()
+                schema_hashes = {}
+                if schema_dir.is_dir():
+                    for source in sorted(schema_dir.glob("*.schema.json")):
+                        target = dest / "schemas" / source.name
+                        target.parent.mkdir(exist_ok=True)
                         shutil.copyfile(source, target)
                         with target.open("rb") as stream:
                             os.fsync(stream.fileno())
-                        runtime_hashes[relative] = _sha(target)
-                    # Include original/public schemas with interpretation code.
-                    schema_dir = self._schema_directory()
-                    schema_hashes = {}
-                    if schema_dir.is_dir():
-                        for source in sorted(schema_dir.glob("*.schema.json")):
-                            target = dest / "schemas" / source.name
-                            target.parent.mkdir(exist_ok=True)
-                            shutil.copyfile(source, target)
-                            with target.open("rb") as stream:
-                                os.fsync(stream.fileno())
-                            schema_hashes[source.name] = _sha(target)
-                    asset_hashes = {}
-                    for relative, source in self._runtime_assets().items():
-                        target = dest / "runtime_assets" / relative
-                        target.parent.mkdir(parents=True, exist_ok=True)
-                        shutil.copyfile(source, target)
-                        with target.open("rb") as stream:
-                            os.fsync(stream.fileno())
-                        asset_hashes[relative] = _sha(target)
-                    manifest.update({"status": "COMPLETE", "dump_sha256": _sha(dest / "database.dump"),
-                                     "objects": hashes, "runtime_files": runtime_hashes, "schemas": schema_hashes, "runtime_assets": asset_hashes,
-                                     "runtime_asset_version": 2,
-                                     "pg_dump": result, "limitations": ["Logical backup; no WAL/PITR or cluster roles", "All writers must participate in maintenance gate", "External side effects require independent reconciliation"]})
-                    for directory in sorted((p for p in dest.rglob("*") if p.is_dir()), key=lambda p: len(p.parts), reverse=True):
-                        ObjectStore._fsync_dir(directory)
-                    _write_json(dest / "manifest.json", manifest)
-                    ObjectStore._fsync_dir(dest)
-                finally:
-                    if locked:
-                        if conn.in_transaction():
-                            conn.rollback()
-                        conn.execute(text("SELECT pg_advisory_unlock(:key)"), {"key": MAINTENANCE_GATE})
-                        conn.commit()
+                        schema_hashes[source.name] = _sha(target)
+                asset_hashes = {}
+                for relative, source in self._runtime_assets().items():
+                    target = dest / "runtime_assets" / relative
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copyfile(source, target)
+                    with target.open("rb") as stream:
+                        os.fsync(stream.fileno())
+                    asset_hashes[relative] = _sha(target)
+                manifest.update({"status": "COMPLETE", "dump_sha256": _sha(dest / "database.dump"),
+                                 "objects": hashes, "runtime_files": runtime_hashes, "schemas": schema_hashes, "runtime_assets": asset_hashes,
+                                 "runtime_asset_version": 2,
+                                 "pg_dump": result, "limitations": ["Logical backup; no WAL/PITR or cluster roles", "All writers must participate in maintenance gate", "External side effects require independent reconciliation"]})
+                for directory in sorted((p for p in dest.rglob("*") if p.is_dir()), key=lambda p: len(p.parts), reverse=True):
+                    ObjectStore._fsync_dir(directory)
+                _write_json(dest / "manifest.json", manifest)
+                ObjectStore._fsync_dir(dest)
+            finally:
+                if locked:
+                    if conn.in_transaction():
+                        conn.rollback()
+                    conn.execute(text("SELECT pg_advisory_unlock(:key)"), {"key": MAINTENANCE_GATE})
+                    conn.commit()
         return manifest
 
     def verify(self, source: str | Path, *, require_runtime=True):
@@ -200,6 +263,16 @@ class BackupService:
         objects = ObjectStore(src / "objects")
         for digest, size in manifest["objects"].items():
             objects.verify(digest, expected_size=size)
+        if require_runtime:
+            # Extra installed members can change import resolution without
+            # altering any saved file (e.g. alpha/__init__.py shadows alpha.py).
+            # Match the whole interpretation inventory, as online creation does.
+            installed_files = dict(self._runtime_files())
+            if set(manifest["runtime_files"]) != set(installed_files):
+                raise DomainError("INTERPRETATION_UNAVAILABLE", "Installed interpretation file set differs from backup")
+            installed_schemas = {path.name for path in self._schema_directory().glob("*.schema.json")}
+            if set(manifest.get("schemas", {})) != installed_schemas:
+                raise DomainError("INTERPRETATION_UNAVAILABLE", "Installed schema set differs from backup")
         for relative, digest in manifest["runtime_files"].items():
             target = (src / "interpretation" / relative).resolve()
             if not target.is_relative_to(src / "interpretation") or not target.is_file() or _sha(target) != digest:
@@ -237,6 +310,7 @@ class BackupService:
         return manifest
 
     def restore(self, source: str | Path, target_url, object_root: str | Path, *, tables=None, fence_tasks=True):
+        target_url = self.validate_connection_target(target_url)
         src = Path(source).resolve()
         manifest = self.verify(src)
         target = create_engine(target_url, pool_size=2, max_overflow=0)
@@ -263,23 +337,7 @@ class BackupService:
                     raise DomainError("RESTORE_VERIFICATION_FAILED", "Restored database differs from frozen backup")
             fenced = []
             if fence_tasks:
-                if tables is None:
-                    from novel_factory.infrastructure.database import tables
-                task_service = TaskService(target, tables, restored_store)
-                with target.begin() as conn:
-                    mutation_gate(conn)
-                    t, calls, outbox = tables["tasks"], tables["call_attempts"], tables["outbox"]
-                    tasks = conn.execute(select(t).where(t.c.state.not_in(["ACCEPTED", "CANCELLED", "FAILED"])).order_by(t.c.task_id).with_for_update()).mappings().all()
-                    for row in tasks:
-                        task = dict(row)
-                        spec = task_service._spec(conn, task)
-                        spec = {**spec, "context_bundle_id": task["context_bundle_id"], "dependency_fingerprint": task["dependency_fingerprint"]}
-                        generation = task["generation"] + 1
-                        task_service._save_input(conn, task["task_id"], generation, spec, "PAUSED")
-                        conn.execute(t.update().where(t.c.task_id == task["task_id"]).values(generation=generation, state="PAUSED", lease_owner=None, lease_expiry=None, attempt_id=None))
-                        fenced.append({"task_id": task["task_id"], "old_generation": task["generation"], "generation": generation, "state": "PAUSED"})
-                    conn.execute(calls.update().where(calls.c.state == "SENT").values(state="UNKNOWN"))
-                    conn.execute(outbox.update().where(outbox.c.state == "DELIVERING").values(state="PENDING", generation=outbox.c.generation + 1, lease_owner=None, lease_expiry=None))
+                fenced = fence_recovered_tasks(target, restored_store, tables=tables)
             verification = {"backup_id": manifest["backup_id"], "snapshot_equal_before_fencing": True,
                             "object_count": len(manifest["objects"]), "tables_verified": len(snapshot),
                             "fenced_tasks": fenced, "pg_restore": result,

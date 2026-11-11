@@ -1,0 +1,1267 @@
+{
+  "schema_version": "final-performance-independent-check-1",
+  "checked_at_utc": "2026-11-10T15:41:14.428669+00:00",
+  "method": "Read-only recomputation from downloaded raw JSON; no benchmarks, tests, service starts, database writes, or report edits. Request attempts/grouping/statuses/hashes, receipt identities/content, rates and percentile order statistics recomputed without calling benchmark summarizers.",
+  "scope": "Five downloaded artifacts. Artifact ZIP digest verification was performed by parent and recorded in the verified inputs; this check independently hashes extracted raw JSON and compares every source-backed field in those five curated entries.",
+  "verified_input_files": [
+    {
+      "path": "evidence/p3_p4/checkpoint4/github_capacity_verified.json",
+      "sha256": "bc65ca5d00a6037530b5334eb38e16f5c278d69b5c226da11f040302e534ad85"
+    },
+    {
+      "path": "evidence/p3_p4/checkpoint3/github_scale_verified.json",
+      "sha256": "9c9242621f6d83ac517bbfbf17878c47171b83a47b0e55581cfc3a6ce6c4019d"
+    }
+  ],
+  "results": {
+    "cp4_200_mixed": {
+      "raw_file": "remote-evidence/cp4_200_mixed/load.json",
+      "raw_sha256": "5063b125f133455585e4ea80710f56fd86eb6acc9336fd2cf7414d65100badaf",
+      "raw_bytes": 1299097,
+      "delivery_head_sha": "9bf3794fbabb1074e1309e3217d6bbe78ce3c704",
+      "run_id": 42844947164,
+      "recorded_checkout_sha": "07ab548c2da85b0cfdc5e35875dbeb5fe173aaab",
+      "environment": {
+        "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+        "python": "3.12.16 (main, Oct 26 2026, 02:50:49) [GCC 13.3.0]",
+        "logical_cpu_count": 4,
+        "cpu_models": [
+          "AMD EPYC 7763 64-Core Processor"
+        ],
+        "memory": {
+          "MemTotal": "16367524 kB",
+          "MemAvailable": "15249124 kB",
+          "SwapTotal": "3145724 kB"
+        },
+        "cgroup": {},
+        "versions": {
+          "SQLAlchemy": "2.0.57",
+          "psycopg": "3.3.8",
+          "uvicorn": "0.54.0",
+          "httpx": "0.28.1"
+        },
+        "git_sha": "07ab548c2da85b0cfdc5e35875dbeb5fe173aaab",
+        "git_dirty": true,
+        "benchmark_source_sha256": "c3533086aed8ef2ee309e44c16751d16804aa99ed78cc72cc4ed374cd5c6b940",
+        "load_client_location": "separate spawned API process(es), real loopback TCP; shared host",
+        "api_processes": 1,
+        "api_server_threads": 1,
+        "aggregate_api_pool_size": 8,
+        "service_mode": "isolated-process"
+      },
+      "curated_summary_source_fields_match": true,
+      "summary_discrepancies": [],
+      "database": {
+        "sql_statements": 32227,
+        "transactions": 3783,
+        "sql_cursor_execution_seconds": 202.74890223299965,
+        "checked_out_at_end": 0,
+        "configured_pool_size": 8,
+        "sql_statements_per_second": 211.27930826581849,
+        "statement_kinds": {
+          "SELECT": 28281,
+          "INSERT": 3608,
+          "UPDATE": 236,
+          "WITH": 102
+        },
+        "max_sql_cursor_execution_seconds": 0.3931919780000044,
+        "peak_checked_out_connections": 8,
+        "peak_connections_note": "Conservative sum of per-process peaks; not a simultaneous sample",
+        "sql_timing_excludes_result_decoding": true
+      },
+      "database_aggregation_checks": {
+        "sql_kind_total_matches": true,
+        "per_process_sql_total_matches": true,
+        "per_process_cursor_sum_matches": true,
+        "per_process_final_checkouts_match": true
+      },
+      "per_process_final_checkouts": [
+        0
+      ],
+      "admission_final": {
+        "admission": {
+          "active": 0,
+          "queued": 0,
+          "admitted": 1124,
+          "completed": 1121,
+          "rejected": 0,
+          "timed_out": 169,
+          "peak_active": 6,
+          "peak_queued": 47,
+          "capacity": 6,
+          "max_waiters": 64
+        },
+        "authentication_admission": {
+          "active": 0,
+          "queued": 0,
+          "admitted": 1290,
+          "completed": 1290,
+          "rejected": 0,
+          "timed_out": 0,
+          "peak_active": 2,
+          "peak_queued": 20,
+          "capacity": 2,
+          "max_waiters": 64
+        },
+        "ingress": {
+          "active": 0,
+          "queued": 0,
+          "admitted": 1290,
+          "completed": 1290,
+          "rejected": 0,
+          "timed_out": 0,
+          "peak_active": 60,
+          "peak_queued": 0,
+          "capacity": 128,
+          "max_waiters": 0
+        }
+      },
+      "all_application_connections_returned_at_snapshot": true,
+      "all_admission_active_and_queued_zero_at_snapshot": true,
+      "service_resources": {
+        "service_user_cpu_seconds": 92.204415,
+        "service_system_cpu_seconds": 5.751933,
+        "service_sum_peak_rss_kib": 139396
+      },
+      "client_resources": {
+        "process_user_cpu_seconds": 8.968125999999998,
+        "process_system_cpu_seconds": 0.3327319999999999,
+        "process_peak_rss_kib": 104728,
+        "minor_page_faults": 1710,
+        "major_page_faults": 0
+      },
+      "observer": {
+        "sample_count": 755,
+        "connection_observations": [
+          {
+            "state": "idle",
+            "wait_event_type": "Client",
+            "count": 2903
+          },
+          {
+            "state": "idle in transaction",
+            "wait_event_type": "Client",
+            "count": 1268
+          },
+          {
+            "state": "idle in transaction",
+            "wait_event_type": null,
+            "count": 8
+          },
+          {
+            "state": "active",
+            "wait_event_type": null,
+            "count": 36
+          },
+          {
+            "state": "idle",
+            "wait_event_type": null,
+            "count": 1
+          },
+          {
+            "state": "active",
+            "wait_event_type": "IO",
+            "count": 3
+          },
+          {
+            "state": "active",
+            "wait_event_type": "Lock",
+            "count": 11
+          },
+          {
+            "state": "active",
+            "wait_event_type": "Client",
+            "count": 1
+          }
+        ],
+        "observer_errors": [],
+        "counter_delta": {
+          "deadlocks": 0,
+          "temp_files": 0,
+          "blks_read": 0
+        },
+        "note": "Connection observations are not wait-duration fractions; no full database replay is possible from these artifacts alone."
+      },
+      "recomputed_all_attempt_percentiles_ms": {
+        "count": 1290,
+        "p50_ms": 388.0877,
+        "p95_ms": 2893.0986,
+        "p99_ms": 3814.6784
+      },
+      "limitations": [
+        "Application counters and final resource snapshot are evidence for this run, not a proof that no connection can ever leak.",
+        "SQL cursor timing includes waiting and excludes result decoding; multi-process RSS is sum of process lifetime peaks, not simultaneous/current RSS.",
+        "Raw read response bodies are not retained; independent check verifies recorded validation flags and hashes, not a new full schema/payload validation."
+      ],
+      "recomputed": {
+        "planned_requests": 1141,
+        "emitted_requests": 1290,
+        "completed_requests": 1290,
+        "client_requests_never_emitted": 14,
+        "emitted_logical_operations": 1127,
+        "completed_logical_operations": 1127,
+        "first_attempt_failure_count": 84,
+        "first_attempt_status_counts": {
+          "200": 1027,
+          "429": 84,
+          "409": 16
+        },
+        "recovered_logical_operations": 78,
+        "status_counts": {
+          "200": 1105,
+          "429": 169,
+          "409": 16
+        },
+        "valid_successful_calls": 1105,
+        "infrastructure_retries": 163,
+        "successful_duplicate_receipts": 18,
+        "new_world_commit_receipts": 18,
+        "effective_call_rps_excluding_duplicates": 7.1263,
+        "effective_world_commits_per_second": 0.118,
+        "latency_all_responses": {
+          "count": 1290,
+          "p50_ms": 388.0877,
+          "p95_ms": 2893.0986,
+          "p99_ms": 3814.6784
+        }
+      },
+      "retry_checks": {
+        "logical_operation_count": 1127,
+        "groups_with_retry": 84,
+        "attempt_numbers_contiguous_from_one": true,
+        "maximum_attempt": 5,
+        "all_attempts_at_most_configured_limit": true,
+        "same_request_bytes_every_retry": true,
+        "same_canonical_request_every_retry": true,
+        "same_agent_task_endpoint_every_retry": true,
+        "retry_flag_matches_attempt_number": true,
+        "successful_explicit_replay_matches_original_request_and_response": true
+      },
+      "receipt_checks": {
+        "total_receipts": 36,
+        "unique_commands": 18,
+        "unique_world_revisions": 18,
+        "unique_accepted_event_id_pairs": 18,
+        "unique_occurrence_ids": 18,
+        "receipt_copies_per_command_counts": {
+          "2": 18
+        },
+        "all_copies_for_command_exactly_equal": true,
+        "one_distinct_revision_per_distinct_command": true,
+        "no_event_identity_reused_between_distinct_commands": true,
+        "receipt_canonical_hashes_match_recorded_accept_responses": true,
+        "reported_revision_and_selected_group_counts_match_receipts": true,
+        "reported_independent_quantity_counts": {
+          "99": 17,
+          "100": 3
+        },
+        "reported_shared_quantity": "99",
+        "reported_resources_never_below_99": true,
+        "scope": "Finite fixture accepted receipt/event identities and original reported final counters/balances. No independent post-run database scan, full event replay, unobserved effects, arbitrary workload safety or authorization proof is claimed."
+      },
+      "terminal_failed_by_operation": {
+        "certificate": 1,
+        "propose": 5
+      },
+      "reported_unresolved_business_by_operation": {
+        "certificate": 1,
+        "propose": 5
+      },
+      "duration_seconds": 152.532684,
+      "recorded_correctness_error_count": 0,
+      "gates": {
+        "engineer_correctness": "FAIL",
+        "first_attempt_capacity_gate": "NOT_MET",
+        "capacity_gate": "NOT_MET",
+        "bounded_recovery_business_gate": "NOT_MET"
+      },
+      "recomputation_discrepancies": [],
+      "recomputed_record_metrics_match": true
+    },
+    "cp4_200_overload": {
+      "raw_file": "remote-evidence/cp4_200_overload/load.json",
+      "raw_sha256": "fc4bf6027dd9a4ad5c28e3001a97451e5a13966945ea13471c39a28fd96b29e4",
+      "raw_bytes": 2809600,
+      "delivery_head_sha": "9bf3794fbabb1074e1309e3217d6bbe78ce3c704",
+      "run_id": 42844947164,
+      "recorded_checkout_sha": "07ab548c2da85b0cfdc5e35875dbeb5fe173aaab",
+      "environment": {
+        "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+        "python": "3.12.16 (main, Oct 26 2026, 02:50:49) [GCC 13.3.0]",
+        "logical_cpu_count": 4,
+        "cpu_models": [
+          "AMD EPYC 9V45 96-Core Processor"
+        ],
+        "memory": {
+          "MemTotal": "16367524 kB",
+          "MemAvailable": "15232628 kB",
+          "SwapTotal": "3145724 kB"
+        },
+        "cgroup": {},
+        "versions": {
+          "SQLAlchemy": "2.0.57",
+          "psycopg": "3.3.8",
+          "uvicorn": "0.54.0",
+          "httpx": "0.28.1"
+        },
+        "git_sha": "07ab548c2da85b0cfdc5e35875dbeb5fe173aaab",
+        "git_dirty": true,
+        "benchmark_source_sha256": "c3533086aed8ef2ee309e44c16751d16804aa99ed78cc72cc4ed374cd5c6b940",
+        "load_client_location": "separate spawned API process(es), real loopback TCP; shared host",
+        "api_processes": 1,
+        "api_server_threads": 1,
+        "aggregate_api_pool_size": 8,
+        "service_mode": "isolated-process"
+      },
+      "curated_summary_source_fields_match": true,
+      "summary_discrepancies": [],
+      "database": {
+        "sql_statements": 53835,
+        "transactions": 6856,
+        "sql_cursor_execution_seconds": 171.7205761969984,
+        "checked_out_at_end": 0,
+        "configured_pool_size": 8,
+        "sql_statements_per_second": 307.72119014014606,
+        "statement_kinds": {
+          "SELECT": 49582,
+          "INSERT": 3891,
+          "UPDATE": 242,
+          "WITH": 120
+        },
+        "max_sql_cursor_execution_seconds": 0.14159289700000954,
+        "peak_checked_out_connections": 8,
+        "peak_connections_note": "Conservative sum of per-process peaks; not a simultaneous sample",
+        "sql_timing_excludes_result_decoding": true
+      },
+      "database_aggregation_checks": {
+        "sql_kind_total_matches": true,
+        "per_process_sql_total_matches": true,
+        "per_process_cursor_sum_matches": true,
+        "per_process_final_checkouts_match": true
+      },
+      "per_process_final_checkouts": [
+        0
+      ],
+      "admission_final": {
+        "admission": {
+          "active": 0,
+          "queued": 0,
+          "admitted": 2124,
+          "completed": 2122,
+          "rejected": 138,
+          "timed_out": 93,
+          "peak_active": 6,
+          "peak_queued": 64,
+          "capacity": 6,
+          "max_waiters": 64
+        },
+        "authentication_admission": {
+          "active": 0,
+          "queued": 0,
+          "admitted": 2353,
+          "completed": 2353,
+          "rejected": 760,
+          "timed_out": 0,
+          "peak_active": 2,
+          "peak_queued": 64,
+          "capacity": 2,
+          "max_waiters": 64
+        },
+        "ingress": {
+          "active": 0,
+          "queued": 0,
+          "admitted": 3113,
+          "completed": 3113,
+          "rejected": 63,
+          "timed_out": 0,
+          "peak_active": 128,
+          "peak_queued": 0,
+          "capacity": 128,
+          "max_waiters": 0
+        }
+      },
+      "all_application_connections_returned_at_snapshot": true,
+      "all_admission_active_and_queued_zero_at_snapshot": true,
+      "service_resources": {
+        "service_user_cpu_seconds": 82.090126,
+        "service_system_cpu_seconds": 6.7471499999999995,
+        "service_sum_peak_rss_kib": 143824
+      },
+      "client_resources": {
+        "process_user_cpu_seconds": 32.666308,
+        "process_system_cpu_seconds": 1.898418,
+        "process_peak_rss_kib": 116696,
+        "minor_page_faults": 4787,
+        "major_page_faults": 0
+      },
+      "observer": {
+        "sample_count": 865,
+        "connection_observations": [
+          {
+            "state": "active",
+            "wait_event_type": "IO",
+            "count": 9
+          },
+          {
+            "state": "idle",
+            "wait_event_type": "Client",
+            "count": 3310
+          },
+          {
+            "state": "idle in transaction",
+            "wait_event_type": "Client",
+            "count": 1113
+          },
+          {
+            "state": "active",
+            "wait_event_type": null,
+            "count": 42
+          },
+          {
+            "state": "active",
+            "wait_event_type": "Client",
+            "count": 2
+          },
+          {
+            "state": "idle in transaction",
+            "wait_event_type": null,
+            "count": 7
+          },
+          {
+            "state": "active",
+            "wait_event_type": "LWLock",
+            "count": 2
+          },
+          {
+            "state": "idle",
+            "wait_event_type": null,
+            "count": 1
+          }
+        ],
+        "observer_errors": [],
+        "counter_delta": {
+          "deadlocks": 0,
+          "temp_files": 0,
+          "blks_read": 0
+        },
+        "note": "Connection observations are not wait-duration fractions; no full database replay is possible from these artifacts alone."
+      },
+      "recomputed_all_attempt_percentiles_ms": {
+        "count": 3176,
+        "p50_ms": 1580.8178,
+        "p95_ms": 12022.9282,
+        "p99_ms": 18078.7888
+      },
+      "limitations": [
+        "Application counters and final resource snapshot are evidence for this run, not a proof that no connection can ever leak.",
+        "SQL cursor timing includes waiting and excludes result decoding; multi-process RSS is sum of process lifetime peaks, not simultaneous/current RSS.",
+        "Raw read response bodies are not retained; independent check verifies recorded validation flags and hashes, not a new full schema/payload validation."
+      ],
+      "recomputed": {
+        "planned_requests": 2141,
+        "emitted_requests": 3176,
+        "completed_requests": 3176,
+        "client_requests_never_emitted": 0,
+        "emitted_logical_operations": 2141,
+        "completed_logical_operations": 2141,
+        "first_attempt_failure_count": 555,
+        "first_attempt_status_counts": {
+          "200": 1567,
+          "409": 19,
+          "429": 555
+        },
+        "recovered_logical_operations": 536,
+        "status_counts": {
+          "200": 2103,
+          "409": 19,
+          "429": 1054
+        },
+        "valid_successful_calls": 2103,
+        "infrastructure_retries": 1035,
+        "successful_duplicate_receipts": 21,
+        "new_world_commit_receipts": 21,
+        "effective_call_rps_excluding_duplicates": 11.9007,
+        "effective_world_commits_per_second": 0.12,
+        "latency_all_responses": {
+          "count": 3176,
+          "p50_ms": 1580.8178,
+          "p95_ms": 12022.9282,
+          "p99_ms": 18078.7888
+        }
+      },
+      "retry_checks": {
+        "logical_operation_count": 2141,
+        "groups_with_retry": 555,
+        "attempt_numbers_contiguous_from_one": true,
+        "maximum_attempt": 5,
+        "all_attempts_at_most_configured_limit": true,
+        "same_request_bytes_every_retry": true,
+        "same_canonical_request_every_retry": true,
+        "same_agent_task_endpoint_every_retry": true,
+        "retry_flag_matches_attempt_number": true,
+        "successful_explicit_replay_matches_original_request_and_response": true
+      },
+      "receipt_checks": {
+        "total_receipts": 42,
+        "unique_commands": 21,
+        "unique_world_revisions": 21,
+        "unique_accepted_event_id_pairs": 21,
+        "unique_occurrence_ids": 21,
+        "receipt_copies_per_command_counts": {
+          "2": 21
+        },
+        "all_copies_for_command_exactly_equal": true,
+        "one_distinct_revision_per_distinct_command": true,
+        "no_event_identity_reused_between_distinct_commands": true,
+        "receipt_canonical_hashes_match_recorded_accept_responses": true,
+        "reported_revision_and_selected_group_counts_match_receipts": true,
+        "reported_independent_quantity_counts": {
+          "99": 20
+        },
+        "reported_shared_quantity": "99",
+        "reported_resources_never_below_99": true,
+        "scope": "Finite fixture accepted receipt/event identities and original reported final counters/balances. No independent post-run database scan, full event replay, unobserved effects, arbitrary workload safety or authorization proof is claimed."
+      },
+      "terminal_failed_by_operation": {
+        "overload": 19
+      },
+      "reported_unresolved_business_by_operation": {},
+      "duration_seconds": 174.947328,
+      "recorded_correctness_error_count": 0,
+      "gates": {
+        "engineer_correctness": "PASS",
+        "first_attempt_capacity_gate": "NOT_MET",
+        "capacity_gate": "NOT_MET",
+        "bounded_recovery_business_gate": "PASS"
+      },
+      "recomputed_open_loop_first_call_start_rps": 54.64432153331415,
+      "overload_terminal_failure_count_excluded_from_business_gate": 19,
+      "recomputation_discrepancies": [],
+      "recomputed_record_metrics_match": true
+    },
+    "scale_500_mixed": {
+      "raw_file": "remote-evidence/scale_500_mixed/result.json",
+      "raw_sha256": "15d45187eda9749c0e6376005409441eb5a9d3c593d084cfd1bcc59d54967c4c",
+      "raw_bytes": 5190809,
+      "delivery_head_sha": "75273ab96cf16b0f1ae9c4cd809835a37c7cf2aa",
+      "run_id": 42843349105,
+      "recorded_checkout_sha": "75273ab96cf16b0f1ae9c4cd809835a37c7cf2aa",
+      "environment": {
+        "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+        "python": "3.12.16 (main, Oct 26 2026, 02:50:49) [GCC 13.3.0]",
+        "logical_cpu_count": 4,
+        "cpu_models": [
+          "AMD EPYC 7763 64-Core Processor"
+        ],
+        "memory": {
+          "MemTotal": "16367520 kB",
+          "MemAvailable": "15195416 kB",
+          "SwapTotal": "3145724 kB"
+        },
+        "cgroup": {},
+        "versions": {
+          "SQLAlchemy": "2.0.57",
+          "psycopg": "3.3.8",
+          "uvicorn": "0.54.0",
+          "httpx": "0.28.1"
+        },
+        "git_sha": "75273ab96cf16b0f1ae9c4cd809835a37c7cf2aa",
+        "git_dirty": true,
+        "benchmark_source_sha256": "c3533086aed8ef2ee309e44c16751d16804aa99ed78cc72cc4ed374cd5c6b940",
+        "load_client_location": "separate spawned API process(es), real loopback TCP; shared host",
+        "api_processes": 2,
+        "api_server_threads": 2,
+        "aggregate_api_pool_size": 8,
+        "service_mode": "isolated-process"
+      },
+      "curated_summary_source_fields_match": true,
+      "summary_discrepancies": [],
+      "database": {
+        "sql_statements": 70733,
+        "transactions": 10558,
+        "sql_cursor_execution_seconds": 298.13280349800647,
+        "checked_out_at_end": 0,
+        "configured_pool_size": 8,
+        "sql_statements_per_second": 185.53339849939564,
+        "statement_kinds": {
+          "SELECT": 62689,
+          "INSERT": 7432,
+          "UPDATE": 534,
+          "WITH": 78
+        },
+        "max_sql_cursor_execution_seconds": 1.6385033849999786,
+        "peak_checked_out_connections": 8,
+        "peak_connections_note": "Conservative sum of per-process peaks; not a simultaneous sample",
+        "sql_timing_excludes_result_decoding": true
+      },
+      "database_aggregation_checks": {
+        "sql_kind_total_matches": true,
+        "per_process_sql_total_matches": true,
+        "per_process_cursor_sum_matches": true,
+        "per_process_final_checkouts_match": true
+      },
+      "per_process_final_checkouts": [
+        0,
+        0
+      ],
+      "admission_final": {
+        "admission": {
+          "active": 0,
+          "queued": 0,
+          "admitted": 2420,
+          "completed": 2370,
+          "rejected": 46,
+          "timed_out": 2833,
+          "peak_active": 4,
+          "peak_queued": 128,
+          "capacity": 4,
+          "max_waiters": 128
+        },
+        "authentication_admission": {
+          "active": 0,
+          "queued": 0,
+          "admitted": 5257,
+          "completed": 5249,
+          "rejected": 0,
+          "timed_out": 28,
+          "peak_active": 4,
+          "peak_queued": 88,
+          "capacity": 4,
+          "max_waiters": 128
+        },
+        "ingress": {
+          "active": 0,
+          "queued": 0,
+          "admitted": 5277,
+          "completed": 5277,
+          "rejected": 0,
+          "timed_out": 0,
+          "peak_active": 147,
+          "peak_queued": 0,
+          "capacity": 256,
+          "max_waiters": 0
+        }
+      },
+      "all_application_connections_returned_at_snapshot": true,
+      "all_admission_active_and_queued_zero_at_snapshot": true,
+      "service_resources": {
+        "service_user_cpu_seconds": 404.188805,
+        "service_system_cpu_seconds": 15.095069000000002,
+        "service_sum_peak_rss_kib": 327032
+      },
+      "client_resources": {
+        "process_user_cpu_seconds": 33.880212,
+        "process_system_cpu_seconds": 1.458885,
+        "process_peak_rss_kib": 121012,
+        "minor_page_faults": 2219,
+        "major_page_faults": 0
+      },
+      "observer": {
+        "sample_count": 1880,
+        "connection_observations": [
+          {
+            "state": "active",
+            "wait_event_type": null,
+            "count": 198
+          },
+          {
+            "state": "idle",
+            "wait_event_type": "Client",
+            "count": 9343
+          },
+          {
+            "state": "idle in transaction",
+            "wait_event_type": "Client",
+            "count": 2374
+          },
+          {
+            "state": "active",
+            "wait_event_type": "IO",
+            "count": 10
+          },
+          {
+            "state": "idle in transaction",
+            "wait_event_type": null,
+            "count": 13
+          },
+          {
+            "state": "active",
+            "wait_event_type": "Client",
+            "count": 3
+          },
+          {
+            "state": "idle",
+            "wait_event_type": null,
+            "count": 4
+          },
+          {
+            "state": "active",
+            "wait_event_type": "Lock",
+            "count": 69
+          }
+        ],
+        "observer_errors": [],
+        "counter_delta": {
+          "deadlocks": 0,
+          "temp_files": 0,
+          "blks_read": 0
+        },
+        "note": "Connection observations are not wait-duration fractions; no full database replay is possible from these artifacts alone."
+      },
+      "recomputed_all_attempt_percentiles_ms": {
+        "count": 5277,
+        "p50_ms": 2163.8167,
+        "p95_ms": 3487.3098,
+        "p99_ms": 5314.0561
+      },
+      "limitations": [
+        "Application counters and final resource snapshot are evidence for this run, not a proof that no connection can ever leak.",
+        "SQL cursor timing includes waiting and excludes result decoding; multi-process RSS is sum of process lifetime peaks, not simultaneous/current RSS.",
+        "Raw read response bodies are not retained; independent check verifies recorded validation flags and hashes, not a new full schema/payload validation."
+      ],
+      "recomputed": {
+        "planned_requests": 2851,
+        "emitted_requests": 5277,
+        "completed_requests": 5277,
+        "client_requests_never_emitted": 148,
+        "emitted_logical_operations": 2703,
+        "completed_logical_operations": 2703,
+        "first_attempt_failure_count": 876,
+        "first_attempt_status_counts": {
+          "200": 1827,
+          "429": 876
+        },
+        "recovered_logical_operations": 543,
+        "status_counts": {
+          "200": 2370,
+          "429": 2907
+        },
+        "valid_successful_calls": 2370,
+        "infrastructure_retries": 2574,
+        "successful_duplicate_receipts": 17,
+        "new_world_commit_receipts": 17,
+        "effective_call_rps_excluding_duplicates": 6.1719,
+        "effective_world_commits_per_second": 0.0446,
+        "latency_all_responses": {
+          "count": 5277,
+          "p50_ms": 2163.8167,
+          "p95_ms": 3487.3098,
+          "p99_ms": 5314.0561
+        }
+      },
+      "retry_checks": {
+        "logical_operation_count": 2703,
+        "groups_with_retry": 876,
+        "attempt_numbers_contiguous_from_one": true,
+        "maximum_attempt": 5,
+        "all_attempts_at_most_configured_limit": true,
+        "same_request_bytes_every_retry": true,
+        "same_canonical_request_every_retry": true,
+        "same_agent_task_endpoint_every_retry": true,
+        "retry_flag_matches_attempt_number": true,
+        "successful_explicit_replay_matches_original_request_and_response": true
+      },
+      "receipt_checks": {
+        "total_receipts": 34,
+        "unique_commands": 17,
+        "unique_world_revisions": 17,
+        "unique_accepted_event_id_pairs": 17,
+        "unique_occurrence_ids": 17,
+        "receipt_copies_per_command_counts": {
+          "2": 17
+        },
+        "all_copies_for_command_exactly_equal": true,
+        "one_distinct_revision_per_distinct_command": true,
+        "no_event_identity_reused_between_distinct_commands": true,
+        "receipt_canonical_hashes_match_recorded_accept_responses": true,
+        "reported_revision_and_selected_group_counts_match_receipts": true,
+        "reported_independent_quantity_counts": {
+          "99": 17,
+          "100": 33
+        },
+        "reported_shared_quantity": "100",
+        "reported_resources_never_below_99": true,
+        "scope": "Finite fixture accepted receipt/event identities and original reported final counters/balances. No independent post-run database scan, full event replay, unobserved effects, arbitrary workload safety or authorization proof is claimed."
+      },
+      "terminal_failed_by_operation": {
+        "state_mixed": 151,
+        "certificate": 25,
+        "propose": 31,
+        "graph": 16,
+        "history": 110
+      },
+      "reported_unresolved_business_by_operation": {
+        "state_mixed": 151,
+        "certificate": 25,
+        "propose": 31,
+        "graph": 16,
+        "history": 110
+      },
+      "duration_seconds": 381.241332,
+      "recorded_correctness_error_count": 0,
+      "gates": {
+        "engineer_correctness": "FAIL",
+        "first_attempt_capacity_gate": "NOT_MET",
+        "capacity_gate": "NOT_MET",
+        "bounded_recovery_business_gate": "NOT_MET"
+      },
+      "recomputation_discrepancies": [],
+      "recomputed_record_metrics_match": true
+    },
+    "scale_1000_open": {
+      "raw_file": "remote-evidence/scale_1000_open/result.json",
+      "raw_sha256": "85c15218a3296d7c5311cc74645b60d7182d7c2792b36dce81c8ab45dc633b3e",
+      "raw_bytes": 2752731,
+      "delivery_head_sha": "75273ab96cf16b0f1ae9c4cd809835a37c7cf2aa",
+      "run_id": 42843349105,
+      "recorded_checkout_sha": "75273ab96cf16b0f1ae9c4cd809835a37c7cf2aa",
+      "environment": {
+        "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+        "python": "3.12.16 (main, Oct 26 2026, 02:50:49) [GCC 13.3.0]",
+        "logical_cpu_count": 4,
+        "cpu_models": [
+          "Intel(R) Xeon(R) 6973P-C"
+        ],
+        "memory": {
+          "MemTotal": "16366508 kB",
+          "MemAvailable": "15116220 kB",
+          "SwapTotal": "3145724 kB"
+        },
+        "cgroup": {},
+        "versions": {
+          "SQLAlchemy": "2.0.57",
+          "psycopg": "3.3.8",
+          "uvicorn": "0.54.0",
+          "httpx": "0.28.1"
+        },
+        "git_sha": "75273ab96cf16b0f1ae9c4cd809835a37c7cf2aa",
+        "git_dirty": false,
+        "benchmark_source_sha256": "c3533086aed8ef2ee309e44c16751d16804aa99ed78cc72cc4ed374cd5c6b940",
+        "load_client_location": "separate spawned service processes; read validation after network window",
+        "api_processes": 2,
+        "api_server_threads": 1
+      },
+      "curated_summary_source_fields_match": true,
+      "summary_discrepancies": [],
+      "database": {
+        "sql_statements": 31626,
+        "transactions": 6372,
+        "sql_cursor_execution_seconds": 162.03538880800048,
+        "checked_out_at_end": 0,
+        "configured_pool_size": 8,
+        "sql_statements_per_second": 279.26702929431434,
+        "statement_kinds": {
+          "SELECT": 31626
+        },
+        "max_sql_cursor_execution_seconds": 0.20285984299999882,
+        "peak_checked_out_connections": 8,
+        "peak_connections_note": "Conservative sum of per-process peaks; not a simultaneous sample",
+        "sql_timing_excludes_result_decoding": true
+      },
+      "database_aggregation_checks": {
+        "sql_kind_total_matches": true,
+        "per_process_sql_total_matches": true,
+        "per_process_cursor_sum_matches": true,
+        "per_process_final_checkouts_match": true
+      },
+      "per_process_final_checkouts": [
+        0,
+        0
+      ],
+      "admission_final": {
+        "admission": {
+          "active": 0,
+          "queued": 0,
+          "admitted": 1426,
+          "completed": 1403,
+          "rejected": 675,
+          "timed_out": 1488,
+          "peak_active": 4,
+          "peak_queued": 128,
+          "capacity": 4,
+          "max_waiters": 128
+        },
+        "authentication_admission": {
+          "active": 0,
+          "queued": 0,
+          "admitted": 3566,
+          "completed": 3566,
+          "rejected": 1343,
+          "timed_out": 0,
+          "peak_active": 4,
+          "peak_queued": 128,
+          "capacity": 4,
+          "max_waiters": 128
+        },
+        "ingress": {
+          "active": 0,
+          "queued": 0,
+          "admitted": 4909,
+          "completed": 4909,
+          "rejected": 0,
+          "timed_out": 0,
+          "peak_active": 214,
+          "peak_queued": 0,
+          "capacity": 256,
+          "max_waiters": 0
+        }
+      },
+      "all_application_connections_returned_at_snapshot": true,
+      "all_admission_active_and_queued_zero_at_snapshot": true,
+      "service_resources": {
+        "service_user_cpu_seconds": 197.102922,
+        "service_system_cpu_seconds": 9.298446,
+        "service_sum_peak_rss_kib": 372240
+      },
+      "client_resources": null,
+      "observer": {
+        "sample_count": 541,
+        "connection_observations": [
+          {
+            "state": "idle",
+            "wait_event_type": "Client",
+            "count": 2198
+          },
+          {
+            "state": "idle in transaction",
+            "wait_event_type": "Client",
+            "count": 1921
+          },
+          {
+            "state": "active",
+            "wait_event_type": null,
+            "count": 173
+          },
+          {
+            "state": "active",
+            "wait_event_type": "IO",
+            "count": 3
+          },
+          {
+            "state": "idle in transaction",
+            "wait_event_type": null,
+            "count": 18
+          },
+          {
+            "state": "idle",
+            "wait_event_type": null,
+            "count": 2
+          },
+          {
+            "state": "active",
+            "wait_event_type": "Client",
+            "count": 2
+          }
+        ],
+        "observer_errors": [],
+        "counter_delta": {
+          "deadlocks": 0,
+          "temp_files": 0,
+          "blks_read": 0
+        },
+        "note": "Connection observations are not wait-duration fractions; no full database replay is possible from these artifacts alone."
+      },
+      "recomputed_all_attempt_percentiles_ms": {
+        "count": 5000,
+        "p50_ms": 2880.6702,
+        "p95_ms": 8433.7128,
+        "p99_ms": 10798.8176
+      },
+      "limitations": [
+        "Application counters and final resource snapshot are evidence for this run, not a proof that no connection can ever leak.",
+        "SQL cursor timing includes waiting and excludes result decoding; multi-process RSS is sum of process lifetime peaks, not simultaneous/current RSS.",
+        "Raw read response bodies are not retained; independent check verifies recorded validation flags and hashes, not a new full schema/payload validation."
+      ],
+      "recomputed": {
+        "records": 5000,
+        "unique_request_indices": 5000,
+        "validated_successes": 1403,
+        "status_counts": {
+          "429": 3506,
+          "200": 1403,
+          "transport_error": 91
+        },
+        "correctness_error_count": 0,
+        "client_drop_count": 0,
+        "successful_query_rps": 12.388909191801778,
+        "call_start_rps": 46.28229933789474,
+        "latency_all_attempts": {
+          "count": 5000,
+          "p50_ms": 2880.6702,
+          "p95_ms": 8433.7128,
+          "p99_ms": 10798.8176
+        },
+        "each_valid_response_is_200": true,
+        "indices_cover_exact_scheduled_range": true,
+        "wire_started_requests": 5000,
+        "observed_wire_start_rps": 45.045175669714425
+      },
+      "duration_seconds": 113.246451183,
+      "gates": {
+        "offered_wire_rate_gate": "NOT_MET",
+        "capacity_gate": "NOT_MET"
+      },
+      "recorded_world_unchanged": true,
+      "recorded_new_world_commits": 0,
+      "recorded_correctness_error_count": 0,
+      "response_revalidation_limit": "Raw read payloads were deliberately removed; fixed-world/state checking is the original validated result, not an independently replayed verification.",
+      "recomputation_discrepancies": [],
+      "recomputed_record_metrics_match": true
+    },
+    "scale_500_soak": {
+      "raw_file": "remote-evidence/scale_500_soak/result.json",
+      "raw_sha256": "9ad19b7985e5bfeeb79cbca415db60eca6328913226d945bd3a0ed7e653bbf94",
+      "raw_bytes": 4727578,
+      "delivery_head_sha": "75273ab96cf16b0f1ae9c4cd809835a37c7cf2aa",
+      "run_id": 42843349105,
+      "recorded_checkout_sha": "75273ab96cf16b0f1ae9c4cd809835a37c7cf2aa",
+      "environment": {
+        "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+        "python": "3.12.16 (main, Oct 26 2026, 02:50:49) [GCC 13.3.0]",
+        "logical_cpu_count": 4,
+        "cpu_models": [
+          "AMD EPYC 9V74 80-Core Processor"
+        ],
+        "memory": {
+          "MemTotal": "16367528 kB",
+          "MemAvailable": "15218384 kB",
+          "SwapTotal": "3145724 kB"
+        },
+        "cgroup": {},
+        "versions": {
+          "SQLAlchemy": "2.0.57",
+          "psycopg": "3.3.8",
+          "uvicorn": "0.54.0",
+          "httpx": "0.28.1"
+        },
+        "git_sha": "75273ab96cf16b0f1ae9c4cd809835a37c7cf2aa",
+        "git_dirty": false,
+        "benchmark_source_sha256": "c3533086aed8ef2ee309e44c16751d16804aa99ed78cc72cc4ed374cd5c6b940",
+        "load_client_location": "separate API processes, shared host",
+        "api_processes": 2,
+        "api_server_threads": 1,
+        "aggregate_api_pool": 8
+      },
+      "curated_summary_source_fields_match": true,
+      "summary_discrepancies": [],
+      "database": {
+        "sql_statements": 252540,
+        "transactions": 35994,
+        "sql_cursor_execution_seconds": 480.27868149297467,
+        "checked_out_at_end": 0,
+        "configured_pool_size": 8,
+        "sql_statements_per_second": 420.83485665373854,
+        "statement_kinds": {
+          "SELECT": 252540
+        },
+        "max_sql_cursor_execution_seconds": 0.10758959899999354,
+        "peak_checked_out_connections": 8,
+        "peak_connections_note": "Conservative sum of per-process peaks; not a simultaneous sample",
+        "sql_timing_excludes_result_decoding": true
+      },
+      "database_aggregation_checks": {
+        "sql_kind_total_matches": true,
+        "per_process_sql_total_matches": true,
+        "per_process_cursor_sum_matches": true,
+        "per_process_final_checkouts_match": true
+      },
+      "per_process_final_checkouts": [
+        0,
+        0
+      ],
+      "admission_final": {
+        "admission": {
+          "active": 0,
+          "queued": 0,
+          "admitted": 11998,
+          "completed": 11997,
+          "rejected": 0,
+          "timed_out": 3,
+          "peak_active": 4,
+          "peak_queued": 34,
+          "capacity": 4,
+          "max_waiters": 128
+        },
+        "authentication_admission": {
+          "active": 0,
+          "queued": 0,
+          "admitted": 12000,
+          "completed": 12000,
+          "rejected": 0,
+          "timed_out": 0,
+          "peak_active": 4,
+          "peak_queued": 2,
+          "capacity": 4,
+          "max_waiters": 128
+        },
+        "ingress": {
+          "active": 0,
+          "queued": 0,
+          "admitted": 12000,
+          "completed": 12000,
+          "rejected": 0,
+          "timed_out": 0,
+          "peak_active": 38,
+          "peak_queued": 0,
+          "capacity": 256,
+          "max_waiters": 0
+        }
+      },
+      "all_application_connections_returned_at_snapshot": true,
+      "all_admission_active_and_queued_zero_at_snapshot": true,
+      "service_resources": {
+        "service_user_cpu_seconds": 814.020528,
+        "service_system_cpu_seconds": 44.203906,
+        "service_sum_peak_rss_kib": 271528
+      },
+      "client_resources": null,
+      "observer": {
+        "sample_count": 2965,
+        "connection_observations": [
+          {
+            "state": "active",
+            "wait_event_type": null,
+            "count": 647
+          },
+          {
+            "state": "idle",
+            "wait_event_type": "Client",
+            "count": 17080
+          },
+          {
+            "state": "idle in transaction",
+            "wait_event_type": "Client",
+            "count": 5329
+          },
+          {
+            "state": "active",
+            "wait_event_type": "Client",
+            "count": 20
+          },
+          {
+            "state": "active",
+            "wait_event_type": "IO",
+            "count": 151
+          },
+          {
+            "state": "active",
+            "wait_event_type": "LWLock",
+            "count": 233
+          },
+          {
+            "state": "idle in transaction",
+            "wait_event_type": null,
+            "count": 54
+          },
+          {
+            "state": "idle",
+            "wait_event_type": null,
+            "count": 17
+          },
+          {
+            "state": "idle in transaction",
+            "wait_event_type": "IO",
+            "count": 4
+          }
+        ],
+        "observer_errors": [],
+        "counter_delta": {
+          "deadlocks": 0,
+          "temp_files": 0,
+          "blks_read": 0
+        },
+        "note": "Connection observations are not wait-duration fractions; no full database replay is possible from these artifacts alone."
+      },
+      "recomputed_all_attempt_percentiles_ms": {
+        "count": 12000,
+        "p50_ms": 172.8712,
+        "p95_ms": 487.9752,
+        "p99_ms": 1585.9529
+      },
+      "limitations": [
+        "Application counters and final resource snapshot are evidence for this run, not a proof that no connection can ever leak.",
+        "SQL cursor timing includes waiting and excludes result decoding; multi-process RSS is sum of process lifetime peaks, not simultaneous/current RSS.",
+        "Raw read response bodies are not retained; independent check verifies recorded validation flags and hashes, not a new full schema/payload validation."
+      ],
+      "recomputed": {
+        "records": 12000,
+        "unique_request_indices": 12000,
+        "validated_successes": 11997,
+        "status_counts": {
+          "200": 11997,
+          "429": 3
+        },
+        "correctness_error_count": 0,
+        "client_drop_count": 0,
+        "successful_query_rps": 19.991905342816587,
+        "call_start_rps": 20.00276035835779,
+        "latency_all_attempts": {
+          "count": 12000,
+          "p50_ms": 172.8712,
+          "p95_ms": 487.9752,
+          "p99_ms": 1585.9529
+        },
+        "each_valid_response_is_200": true,
+        "indices_cover_exact_scheduled_range": true
+      },
+      "duration_seconds": 600.092877306,
+      "gates": {
+        "probe_gate": "NOT_MET",
+        "long_duration_gate": "NOT_EXECUTED"
+      },
+      "recorded_world_unchanged": true,
+      "recorded_new_world_commits": 0,
+      "recorded_correctness_error_count": 0,
+      "response_revalidation_limit": "Raw read payloads were deliberately removed; fixed-world/state checking is the original validated result, not an independently replayed verification.",
+      "non_successful_records": [
+        {
+          "index": 4852,
+          "agent": 352,
+          "kind": "state",
+          "started_seconds": 242.60104803000002,
+          "arrival_delay_ms": 1.0480300000494935,
+          "valid": false,
+          "status": 429,
+          "code": "BACKPRESSURE",
+          "latency_ms": 2057.233781999969
+        },
+        {
+          "index": 4858,
+          "agent": 358,
+          "kind": "state",
+          "started_seconds": 242.900918425,
+          "arrival_delay_ms": 0.9184249999520944,
+          "valid": false,
+          "status": 429,
+          "code": "BACKPRESSURE",
+          "latency_ms": 2006.9286780000084
+        },
+        {
+          "index": 5017,
+          "agent": 17,
+          "kind": "state",
+          "started_seconds": 250.85097801400002,
+          "arrival_delay_ms": 0.9780140000543724,
+          "valid": false,
+          "status": 429,
+          "code": "BACKPRESSURE",
+          "latency_ms": 2008.8568129999658
+        }
+      ],
+      "recomputation_discrepancies": [],
+      "recomputed_record_metrics_match": true
+    }
+  },
+  "findings": [
+    "All five curated result entries match their raw JSON fields; extracted raw SHA-256 values match the recorded verified digests.",
+    "All recomputed attempt/logical/first-failure/retry/receipt/rate/percentile metrics match recorded metrics within the declared rounding tolerance. All same-operation retries preserve canonical and byte request hashes and use at most five attempts.",
+    "The latest 200 overload run completes 21 distinct world effects and 21 exact receipt replays but has 19 terminally failed overload-only read operations; those are intentionally excluded from the bounded business gate, not recovered successes.",
+    "The latest 200 normal run has 6 terminal critical failures and 14 never-emitted planned operations; the 500 mixed run has 333 terminal failures and 148 never-emitted planned operations.",
+    "All five final snapshots show zero checked-out application connections and zero active/queued admission counters. Admitted and completed counters can differ under timeout/cancellation; they are not business-completion counts.",
+    "No duplicate effect identity or altered duplicate receipt is observed in the accepted fixture receipts. This bounded evidence does not substitute for a full database replay, arbitrary-world safety proof or separate permission tests.",
+    "The 600-second remote read probe contains three BACKPRESSURE responses and remains NOT_MET; it must not be replaced with the earlier local PASS. The one-hour/mixed-duration gate is NOT_EXECUTED.",
+    "Runner CPU models differ across the five jobs. Their results are deployment observations, not a single-hardware before/after comparison."
+  ],
+  "overall_recomputation_pass": true,
+  "original_capacity_gates_promoted": false
+}

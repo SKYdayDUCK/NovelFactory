@@ -1,0 +1,47 @@
+{
+  "stage": 4,
+  "parent": "75273ab96cf16b0f1ae9c4cd809835a37c7cf2aa",
+  "tests": [
+    {
+      "name": "complete",
+      "command": "python scripts/with_postgres.py --pg-bin \"$PG_BIN\" -- python -m pytest tests -q --junitxml=ci-evidence/all.xml",
+      "junit_sha256": "2765f51404a1f51f22e6c3f31cdabe4f3f453b0de95548037fbdc849d9755f49",
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "578",
+          "time": "314.169",
+          "timestamp": "2026-11-11T00:22:22.375377+09:00",
+          "hostname": "2be49009bab4"
+        }
+      ]
+    },
+    {
+      "name": "unit-contract-evaluation",
+      "command": "python -m pytest tests/unit tests/contracts tests/evaluation tests/service/test_admission.py -q",
+      "junit_sha256": "d5a245d2e3e9feb31683d14cd8416572107440082f25656abfe419b4319692ab",
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "330",
+          "time": "8.291",
+          "timestamp": "2026-11-11T00:23:17.958966+09:00",
+          "hostname": "2be49009bab4"
+        }
+      ]
+    }
+  ],
+  "postgres": "17.11",
+  "python": "3.12.14",
+  "durability": {
+    "fsync": true,
+    "synchronous_commit": true
+  },
+  "model_calls": 0
+}
