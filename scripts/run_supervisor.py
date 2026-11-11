@@ -1,10 +1,17 @@
 """Run the deterministic project scheduler. A stopped service resumes on restart."""
-from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 import argparse
 import json
+import multiprocessing
 import os
-from pathlib import Path
 import time
+from concurrent.futures import (
+    FIRST_COMPLETED,
+    Future,
+    ProcessPoolExecutor,
+    ThreadPoolExecutor,
+    wait,
+)
+from pathlib import Path
 
 import psycopg
 
@@ -12,12 +19,22 @@ from novel_factory.application.agent_gateway import AgentGateway
 from novel_factory.application.kernel import Kernel
 from novel_factory.application.supervisor import HostJournal, RuntimeSupervisor
 from novel_factory.domain.errors import DomainError
-from novel_factory.infrastructure.codex_host import CodexAppServerAdapter, CodexRoleContextAdapter, CodexRoleLookupAdapter
+from novel_factory.infrastructure.capacity import AdaptiveController
+from novel_factory.infrastructure.codex_host import (
+    CodexAppServerAdapter,
+    CodexRoleContextAdapter,
+    CodexRoleLookupAdapter,
+)
 from novel_factory.infrastructure.database import Database
 from novel_factory.infrastructure.model_gateway import OpenAICompatibleAdapter
 from novel_factory.infrastructure.objects import ObjectStore
-from novel_factory.orchestration.processors import PROCESSORS, SCOPED, TaskDispatcher
 from novel_factory.infrastructure.supervisor_wake import wait_for_change, wake_listener
+from novel_factory.orchestration.processors import (
+    PROCESSORS,
+    SCOPED,
+    TaskDispatcher,
+    initialize_index_worker,
+)
 
 
 def log_result(result):
@@ -26,8 +43,14 @@ def log_result(result):
 
 
 def serve(supervisor, principal, work, branch, *, workers, interval, processor=None, controller=None):
-    pending = set()
-    with ThreadPoolExecutor(max_workers=workers) as pool:
+    pending = {}
+    if processor == "compute":
+        url = supervisor.kernel.db.engine.url.render_as_string(hide_password=False)
+        pool = ProcessPoolExecutor(max_workers=workers, mp_context=multiprocessing.get_context("spawn"),
+                                   initializer=initialize_index_worker, initargs=(url, str(supervisor.kernel.objects.root)))
+    else:
+        pool = ThreadPoolExecutor(max_workers=workers)
+    with pool:
         while True:
             try:
                 with wake_listener(supervisor.kernel.db.engine) as listener:
@@ -45,10 +68,17 @@ def _drain(supervisor, principal, work, branch, pool, workers, pending, listener
     while True:
         for future in tuple(pending):
             if future.done():
-                pending.remove(future)
-                log_result(future.result())
-        if len(pending) == workers:
-            wait(pending, return_when=FIRST_COMPLETED)
+                started = pending.pop(future)
+                try:
+                    result = future.result()
+                except DomainError as exc:
+                    result = {"status": "BLOCKED", "reason": exc.code}
+                if controller:
+                    controller.monitor.completed(time.monotonic() - started, result["status"] not in {"BLOCKED", "FAILED"})
+                log_result(result)
+        target = controller.limit() if controller else workers
+        if len(pending) >= target:
+            wait(pending, timeout=controller.interval if controller else None, return_when=FIRST_COMPLETED)
             continue
         if dispatcher:
             now = time.monotonic()
@@ -59,9 +89,13 @@ def _drain(supervisor, principal, work, branch, pool, workers, pending, listener
         else:
             result = supervisor.run_once(principal, work, branch, executor=pool)
         if isinstance(result, Future):
-            pending.add(result)
+            pending[result] = time.monotonic()
         elif result["status"] == "IDLE":
-            wait_for_change(listener, interval)
+            # Completion of CPU work, and changes in the target, can predate the periodic rescan.
+            if pending:
+                wait(pending, timeout=min(interval, .25), return_when=FIRST_COMPLETED)
+            else:
+                wait_for_change(listener, interval)
         else:
             log_result(result)
 
@@ -72,6 +106,8 @@ def main():
     parser.add_argument("--interval", type=float, default=60, help="Maximum seconds between durable reconciliations")
     parser.add_argument("--workers", type=int, default=2, help="Maximum concurrent Host tasks in this process")
     parser.add_argument("--processor", choices=SCOPED, help="Run this Redis-mode project processor")
+    parser.add_argument("--adaptive", action="store_true", help="Adjust new admissions under the fixed worker ceiling")
+    parser.add_argument("--sample-seconds", type=float, default=3)
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--set-transport", choices=("postgres", "redis"), help="Set admission mode for the authorized branch")
     mode.add_argument("--once", action="store_true")
@@ -83,6 +119,8 @@ def main():
         parser.error("interval must be between 0.1 and 60 seconds")
     if not 1 <= args.workers <= 16:
         parser.error("workers must be between 1 and 16")
+    if not .1 <= args.sample_seconds <= 60:
+        parser.error("sample-seconds must be between 0.1 and 60")
     if args.processor and args.workers > PROCESSORS[args.processor].max_workers:
         parser.error("workers exceeds this processor limit")
     access = json.loads(args.access_file.read_text())
@@ -135,8 +173,11 @@ def main():
             else:
                 log_result(supervisor.run_once(principal, access["work_id"], access["branch_id"]))
             return
+        processor = args.processor or "model"
+        controller = AdaptiveController(db, processor, args.workers, PROCESSORS[processor].resource,
+            work=access["work_id"], branch=access["branch_id"], interval=args.sample_seconds) if args.adaptive else None
         serve(supervisor, principal, access["work_id"], access["branch_id"],
-              workers=args.workers, interval=args.interval, processor=args.processor)
+              workers=args.workers, interval=args.interval, processor=args.processor, controller=controller)
     except DomainError as exc:
         raise SystemExit(exc.code) from None
     finally:

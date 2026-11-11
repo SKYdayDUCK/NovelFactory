@@ -3,11 +3,11 @@ from sqlalchemy import text
 
 from novel_factory.orchestration.tasks import MAINTENANCE_GATE
 
-
 _NEXT = text("""
     WITH active AS MATERIALIZED (
         SELECT t.work_id, t.role_id FROM nf_dispatch_slots s
         JOIN nf_tasks t USING(task_id) WHERE s.expires_at > statement_timestamp()
+        UNION ALL SELECT work_id, 'derived_index' AS role_id FROM nf_index_leases WHERE expires_at > statement_timestamp()
     ), next_job AS (
         SELECT t.task_id, t.branch_id
         FROM nf_dispatch_waiters q

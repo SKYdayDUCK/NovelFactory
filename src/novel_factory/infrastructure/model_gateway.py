@@ -141,7 +141,8 @@ class OpenAICompatibleAdapter:
                     raise ModelCallFailure("MODEL_RESPONSE_TOO_LARGE")
                 provider_receipt = response.headers.get("x-request-id")
         except HTTPError as exc:
-            raise ModelCallFailure("MODEL_HTTP_ERROR", http_status=exc.code) from None
+            code = "MODEL_RATE_LIMITED" if exc.code == 429 else "MODEL_HTTP_ERROR"
+            raise ModelCallFailure(code, http_status=exc.code) from None
         except (URLError, TimeoutError, OSError):
             raise ModelCallFailure("MODEL_TRANSPORT_UNKNOWN") from None
         try:

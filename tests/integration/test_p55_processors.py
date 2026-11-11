@@ -3,12 +3,12 @@ from uuid import uuid4
 
 import pytest
 from sqlalchemy import text
+from test_p5_supervisor import _job, backend
 
 from novel_factory.application.agent_gateway import AgentGateway
 from novel_factory.application.supervisor import RuntimeSupervisor
 from novel_factory.fixtures import load_fixture
 from novel_factory.orchestration.processors import PROCESSORS, TaskDispatcher, handler_for
-from test_p5_supervisor import _job, backend
 
 pytestmark = [pytest.mark.postgres, pytest.mark.integration]
 

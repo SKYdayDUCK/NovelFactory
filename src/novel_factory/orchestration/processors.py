@@ -111,14 +111,59 @@ class TaskDispatcher:
             result = self.supervisor.advance_world(*args) or {"status": "IDLE"}
         elif processor == "compute":
             from novel_factory.application.derived_worker import DerivedWorldWorker
-            receipt = DerivedWorldWorker(self.kernel).rebuild_one(*args)
-            result = {"status": "INDEXED", "message_id": receipt["message_id"]} if receipt else {"status": "IDLE"}
+            worker = DerivedWorldWorker(self.kernel)
+            if executor is not None:
+                lease = worker.reserve_index(*args)
+                result = executor.submit(process_reserved_index, *args, lease) if lease else {"status": "IDLE"}
+            else:
+                receipt = worker.rebuild_one(*args)
+                result = {"status": "INDEXED", "message_id": receipt["message_id"]} if receipt else {"status": "IDLE"}
         else:
             summary = self.supervisor.recover_project(*args)
             result = {"status": "IDLE", **summary}
-        if occurrence and isinstance(result, dict) and result["status"] == "IDLE":
+        busy = not isinstance(result, dict) or result["status"] != "IDLE"
+        if reconcile and not occurrence and busy:
+            with self.kernel.db.uow() as repo:
+                repo.conn.execute(_SIGNAL, {**params, "work": self.work, "event": str(uuid4())})
+        if occurrence and not busy:
             # Compare the occurrence, not the clock. A new concurrent arrival survives this clear.
             with self.kernel.db.uow() as repo:
+                # Capacity/fairness may temporarily hide READY or unindexed work.
+                # A completion notification must be enough to resume the drain.
+                if processor == "model" and repo.conn.scalar(text("""SELECT EXISTS (SELECT
+                    FROM nf_tasks t JOIN nf_supervisor_jobs j USING(task_id)
+                    WHERE t.branch_id=:branch AND t.state='READY')"""), params):
+                    return result
+                if processor == "compute" and repo.conn.scalar(text("""SELECT EXISTS (SELECT
+                    FROM nf_outbox o WHERE o.topic='world.accepted' AND o.payload->'world_ref'->>'branch_id'=:branch
+                    AND NOT EXISTS(SELECT FROM nf_inbox i WHERE i.consumer=:consumer AND i.message_id=o.outbox_id))"""),
+                    {**params, "consumer": "derived-world:nf-derived-world-1"}):
+                    return result
                 repo.conn.execute(text("""DELETE FROM nf_processor_hints WHERE branch_id=:branch
                     AND processor=:processor AND occurrence=:occurrence"""), {**params, "occurrence": occurrence})
         return result
+
+
+# Spawn workers build their own SQLAlchemy engine. Never pickle a live connection.
+_index_db = None
+_index_kernel = None
+
+
+def initialize_index_worker(database_url, object_root):
+    import atexit
+
+    from novel_factory.application.kernel import Kernel
+    from novel_factory.infrastructure.database import Database
+    from novel_factory.infrastructure.objects import ObjectStore
+
+    global _index_db, _index_kernel
+    _index_db = Database(database_url, pool_size=1)
+    _index_kernel = Kernel(_index_db, ObjectStore(object_root))
+    atexit.register(_index_db.close)
+
+
+def process_reserved_index(principal, work, branch, lease):
+    from novel_factory.application.derived_worker import DerivedWorldWorker
+
+    receipt = DerivedWorldWorker(_index_kernel).process_reserved(principal, work, branch, lease)
+    return {"status": "INDEXED", "message_id": receipt["message_id"]}
