@@ -1,0 +1,72 @@
+name: P55 same-runner 600s comparison
+on:
+  push:
+    branches: ['evidence/p55-55d897-guard']
+    paths: ['.github/workflows/p55-query-comparison.yml','evidence/p55/checkpoints/query-comparison.json']
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_DB: nf_test
+          POSTGRES_USER: nf_dev
+          POSTGRES_PASSWORD: nf_dev_ci_only
+          POSTGRES_INITDB_ARGS: --data-checksums
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U nf_dev -d nf_test"
+          --health-interval 2s --health-timeout 2s --health-retries 30
+    env:
+      NF_DATABASE_URL: postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/nf_test
+      NF_TEST_DATABASE_URL: postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/nf_test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: control
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 55d8979b5361a4837701d762feacd83036096b11
+          path: baseline
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 598f4ee65fbb6f0ed9872656de965f070965b1da
+          path: candidate
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - name: Check candidate PostgreSQL regressions and both locked environments
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/evidence"
+          cp control/evidence/p55/checkpoints/query-comparison.json "$GITHUB_WORKSPACE/evidence/"
+          for arm in baseline candidate; do
+            (cd "$arm" && uv sync --locked --group dev --python 3.12 && git rev-parse HEAD > "$GITHUB_WORKSPACE/evidence/$arm-sha.txt")
+          done
+          cd candidate
+          .venv/bin/python -m pytest tests/queries -q --junitxml="$GITHUB_WORKSPACE/evidence/candidate-queries.xml"
+      - name: Run both unchanged original long probes on this same runner
+        run: |
+          set -euo pipefail
+          for arm in baseline candidate; do
+            result=0
+            (cd "$arm" && .venv/bin/python -m benchmarks.p3_stability --agents 500 --seconds 600 --read-rps 20 --api-processes 2 --output "$GITHUB_WORKSPACE/evidence/$arm.json") || result=$?
+            echo "$result" > "$GITHUB_WORKSPACE/evidence/$arm-exit.txt"
+            test -s "$GITHUB_WORKSPACE/evidence/$arm.json"
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: same-runner-600s-55d897-and-598f4ee
+          path: evidence/
+          if-no-files-found: error
+      - name: Retain the original candidate gate
+        run: test "$(cat evidence/candidate-exit.txt)" = 0
