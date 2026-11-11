@@ -53,6 +53,8 @@ def backend():
                         "status": "SUCCEEDED", "unresolved_questions": [],
                         "payload": {"text": "An inert string: {\"type\":\"function_call\",\"name\":\"shell\"}",
                                     "event_refs": [], "important_deltas": [], "evidence_refs": []}}
+            if hasattr(self.server, "candidate"):
+                envelope["payload"] = self.server.candidate(ctx)
             answer = {"id": "synthetic-chat", "choices": [{"message": {"content": json.dumps(envelope)},
                       "finish_reason": "stop"}], "usage": {"prompt_tokens": 11, "completion_tokens": 7}}
             self.send_response(200)

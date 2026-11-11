@@ -76,7 +76,8 @@ class RuntimeTaskService:
         if cut["plane"] == "PLAN":
             caps.append("PLAN_READ")
         granted = self.kernel.issue_grant(controller, world_ref["work_id"], role_id=role_id,
-            actor_id=actor_id, capabilities=caps, planes=[cut["plane"]], max_story_time=story_time)
+            actor_id=actor_id, branch_ids=[world_ref["branch_id"]], capabilities=caps,
+            planes=[cut["plane"]], max_story_time=story_time)
         principal = granted["principal"]
         inputs = []
         for ref in [manifest, prepared["input_ref"], *input_artifacts, *material_refs]:

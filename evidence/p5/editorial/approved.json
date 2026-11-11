@@ -1,0 +1,149 @@
+{
+  "upstream": "synthetic-loopback-http",
+  "provider_requests": 3,
+  "author_interventions": 0,
+  "before_wake_requests": 0,
+  "head_after_joint_accept": {
+    "work_id": "731a591b-73e2-4cb4-a621-0e53da290590",
+    "branch_id": "ea5bfc7e-6e62-4229-9e54-ca7d3b6b29e0",
+    "world_revision_id": "e1b34120-b656-49b2-b67c-12b5bf5319db"
+  },
+  "head_after_planning": {
+    "work_id": "731a591b-73e2-4cb4-a621-0e53da290590",
+    "branch_id": "ea5bfc7e-6e62-4229-9e54-ca7d3b6b29e0",
+    "world_revision_id": "e1b34120-b656-49b2-b67c-12b5bf5319db"
+  },
+  "initial_plan_ref": {
+    "artifact_id": "4e40b287-efd8-41f1-b102-4eb7bef4ceba",
+    "artifact_revision_id": "13a987d2-2fbe-44a2-8b08-11580d754ca4",
+    "sha256": "2c0b0957c39676700fda8925cdf9641d9fb03f0f8f0e487e6244eff5fa658f78"
+  },
+  "selected_plan_ref": {
+    "sha256": "a192a42046239291a19ab879feba40ea5632c48e72d8005170af4f724e61bdd0",
+    "artifact_id": "eea7df18-0f79-4547-8c47-590c27f6998b",
+    "artifact_revision_id": "1bca9c25-8484-4919-9ac0-e1bb49f90939"
+  },
+  "decision": "APPROVED",
+  "auto_provisioned_successors": 2,
+  "outbox_receipts": [
+    {
+      "status": "EDITORIAL_DELIVERED",
+      "task_id": "1686db24-c2b5-4375-8cc2-b9c7c0b1c094",
+      "operation": "request_change",
+      "generation": 1,
+      "candidate_ref": {
+        "sha256": "772a793be9bf60b6c78bdaa45f1a728a6ce453681d75c118235b01e5aa85d9b5",
+        "artifact_id": "1a6b53c7-b604-5551-818b-a95f3e217feb",
+        "artifact_revision_id": "98ab6e5b-79a6-5032-a009-673e9d4d1971"
+      },
+      "change_point_ref": {
+        "sha256": "f260e3b22ebebce31f825c4d306cedaa0ae91531e99947a0c49706bb1fb78d71",
+        "artifact_id": "ee65e5be-9c83-480d-812b-d6b21780b69f",
+        "artifact_revision_id": "0535b8a1-d42e-4155-9381-72d1590edbde"
+      },
+      "successor_task_id": "00bda32d-de11-4f11-9ac4-be663ea2aa60"
+    },
+    {
+      "status": "EDITORIAL_DELIVERED",
+      "task_id": "00bda32d-de11-4f11-9ac4-be663ea2aa60",
+      "plan_ref": {
+        "sha256": "a192a42046239291a19ab879feba40ea5632c48e72d8005170af4f724e61bdd0",
+        "artifact_id": "eea7df18-0f79-4547-8c47-590c27f6998b",
+        "artifact_revision_id": "1bca9c25-8484-4919-9ac0-e1bb49f90939"
+      },
+      "operation": "propose_window",
+      "generation": 1,
+      "window_ref": {
+        "sha256": "7643627daa13775a7c3df206c1a15beeb5121709e32de17cadbc92fb8d0f1205",
+        "artifact_id": "5a7a9266-b88f-4c07-89ef-2ad4ae697734",
+        "artifact_revision_id": "ad561846-c84d-4a2b-906e-2dd40ff6c34d"
+      },
+      "candidate_ref": {
+        "sha256": "7643627daa13775a7c3df206c1a15beeb5121709e32de17cadbc92fb8d0f1205",
+        "artifact_id": "820c4b34-448a-556a-97d7-3bd225d3b479",
+        "artifact_revision_id": "48116ca6-7341-57f0-a237-44d4d00bcfb0"
+      },
+      "change_point_ref": {
+        "sha256": "f260e3b22ebebce31f825c4d306cedaa0ae91531e99947a0c49706bb1fb78d71",
+        "artifact_id": "ee65e5be-9c83-480d-812b-d6b21780b69f",
+        "artifact_revision_id": "0535b8a1-d42e-4155-9381-72d1590edbde"
+      },
+      "successor_task_id": "5d7289e2-5e20-4b4b-a7cf-344463740520"
+    },
+    {
+      "status": "EDITORIAL_DELIVERED",
+      "adopted": {
+        "plan_ref": {
+          "sha256": "a192a42046239291a19ab879feba40ea5632c48e72d8005170af4f724e61bdd0",
+          "artifact_id": "eea7df18-0f79-4547-8c47-590c27f6998b",
+          "artifact_revision_id": "1bca9c25-8484-4919-9ac0-e1bb49f90939"
+        },
+        "world_ref": {
+          "work_id": "731a591b-73e2-4cb4-a621-0e53da290590",
+          "branch_id": "ea5bfc7e-6e62-4229-9e54-ca7d3b6b29e0",
+          "world_revision_id": "e1b34120-b656-49b2-b67c-12b5bf5319db"
+        },
+        "review_ref": {
+          "sha256": "2be2c63d6b4d6674022ff0913d1a49fe42df090c43b3a3f5a8ab5708dd65c5cd",
+          "artifact_id": "35742b57-5824-4ffe-90c6-8e0eb6331739",
+          "artifact_revision_id": "46797333-e414-4bfe-800e-c10817da5b53"
+        },
+        "window_ref": {
+          "sha256": "7643627daa13775a7c3df206c1a15beeb5121709e32de17cadbc92fb8d0f1205",
+          "artifact_id": "5a7a9266-b88f-4c07-89ef-2ad4ae697734",
+          "artifact_revision_id": "ad561846-c84d-4a2b-906e-2dd40ff6c34d"
+        },
+        "knowledge_cut": {
+          "plane": "PLAN",
+          "plan_manifest_ref": {
+            "sha256": "715a965bde6468fdc1eb82dff497e2e4eeb249a44f0e241c8b12e1a7682a0bcf",
+            "artifact_id": "bf99ffd9-d7fb-485a-b8c7-fc606f76335d",
+            "artifact_revision_id": "f42a838c-526f-4bb9-a23e-58e9f570561f"
+          }
+        },
+        "fenced_task_ids": [],
+        "selection_epoch": 2,
+        "selection_scope": "ARTIFACT_SELECTION:PLAN:b15b7e94-e1c1-426b-a9c4-dab6ce86e8e4",
+        "change_point_ref": {
+          "sha256": "f260e3b22ebebce31f825c4d306cedaa0ae91531e99947a0c49706bb1fb78d71",
+          "artifact_id": "ee65e5be-9c83-480d-812b-d6b21780b69f",
+          "artifact_revision_id": "0535b8a1-d42e-4155-9381-72d1590edbde"
+        },
+        "changed_node_ids": [
+          "06ad6603-f05e-41ab-a7c9-b79bece82f10",
+          "ce243f1a-543c-4668-b831-e538616f314a"
+        ],
+        "initial_plan_ref": {
+          "sha256": "2c0b0957c39676700fda8925cdf9641d9fb03f0f8f0e487e6244eff5fa658f78",
+          "artifact_id": "4e40b287-efd8-41f1-b102-4eb7bef4ceba",
+          "artifact_revision_id": "13a987d2-2fbe-44a2-8b08-11580d754ca4"
+        },
+        "plan_manifest_ref": {
+          "sha256": "715a965bde6468fdc1eb82dff497e2e4eeb249a44f0e241c8b12e1a7682a0bcf",
+          "artifact_id": "bf99ffd9-d7fb-485a-b8c7-fc606f76335d",
+          "artifact_revision_id": "f42a838c-526f-4bb9-a23e-58e9f570561f"
+        },
+        "world_effects_applied": 0,
+        "reference_timeline_ref": {
+          "sha256": "a862d4e160087675627fc86ce62bfa8e60838cfb920583dac998375f15b31c7c",
+          "artifact_id": "5096525b-d2ba-444c-b4a1-4a7291b29155",
+          "artifact_revision_id": "47ca6c73-7e41-4f8f-85e5-ea6225717750"
+        }
+      },
+      "task_id": "5d7289e2-5e20-4b4b-a7cf-344463740520",
+      "decision": "APPROVED",
+      "operation": "review_and_adopt",
+      "generation": 1,
+      "review_ref": {
+        "sha256": "2be2c63d6b4d6674022ff0913d1a49fe42df090c43b3a3f5a8ab5708dd65c5cd",
+        "artifact_id": "35742b57-5824-4ffe-90c6-8e0eb6331739",
+        "artifact_revision_id": "46797333-e414-4bfe-800e-c10817da5b53"
+      },
+      "candidate_ref": {
+        "sha256": "ce1269bd42fa0a1ec96e06e8a996308eec0171ff574a63c0257e93f2189677a7",
+        "artifact_id": "570c5d41-ad38-5fb0-b9fa-e799d8b83f69",
+        "artifact_revision_id": "d9ba30f8-c3ac-550e-8e8c-9fc900de6e43"
+      }
+    }
+  ]
+}

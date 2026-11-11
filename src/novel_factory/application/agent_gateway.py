@@ -219,6 +219,10 @@ class AgentGateway:
                   + "\nPayload JSON Schema: " + canonical_bytes(contract).decode())
         user = {"assignment": data["assignment"], "context": context["payload"], "read_cut": context["read_cut"],
                 "authorized_materials": material}
+        from novel_factory.application.editorial_handoff import prompt_material
+        editorial = prompt_material(self.kernel, principal, binding)
+        if editorial:
+            user["editorial"] = editorial
         return ({"role": "system", "content": system},
                 {"role": "user", "content": canonical_bytes(user).decode()})
 
@@ -328,7 +332,11 @@ class AgentGateway:
             # race; an earlier generation's UNKNOWN also keeps its fence.
             repo.one("tasks", {"task_id": request["task_id"]}, lock="update")
             pending = repo.many("call_attempts", {"task_id": request["task_id"]})
-            if repo.one("supervisor_jobs", {"task_id": request["task_id"]}):
+            job = repo.one("supervisor_jobs", {"task_id": request["task_id"]})
+            if job:
+                if job["config"].get("editorial"):
+                    from novel_factory.application.editorial_handoff import check_authorizer
+                    check_authorizer(self.kernel, repo, job["config"], binding["task"])
                 # An enrolled allowance buys one generation's candidate. A
                 # terminal billing receipt does not prove task delivery.
                 require(not any((c["generation"], c["call_key"]) !=

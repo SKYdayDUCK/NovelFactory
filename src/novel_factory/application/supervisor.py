@@ -28,6 +28,10 @@ class HostJournal:
             task = self.kernel.tasks.guard_task(repo.conn, call["task_id"], call["generation"])
             owner = Principal(task["grant_id"], task["principal_id"])
             _, grant, spec = WorldQueryService(self.kernel)._task(repo, owner, task["task_id"], task["generation"])
+            job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})
+            if job and job["config"].get("editorial"):
+                from novel_factory.application.editorial_handoff import check_authorizer
+                check_authorizer(self.kernel, repo, job["config"], task)
             ctx = repo.one("contexts", {"context_bundle_id": task["context_bundle_id"]})
             require(task["state"] == "RUNNING" and ctx and ctx["grant_id"] == grant["grant_id"]
                     and ctx["read_cut"]["permission_epoch"] == grant["epoch"]
@@ -57,12 +61,13 @@ class RuntimeSupervisor:
         self.workflow = WorkflowService(kernel.tasks)
 
     def enroll(self, controller, task_id, *, manifest_ref, knowledge_cut, context_tokens,
-               input_ref, budget_id, reserve_amount, token_reservation, accept_summary=False):
+               input_ref, budget_id, reserve_amount, token_reservation, accept_summary=False, seal_interaction_id=None, editorial=None, continue_editorial=False):
         """Freeze one dispatch allowance. Nothing in the model prompt selects a route or owner."""
         with self.kernel.db.uow() as repo:
-            task = repo.one("tasks", {"task_id": task_id}, lock="update")
+            task = repo.one("tasks", {"task_id": task_id})
             require(task, "VIEW_DENIED", "Task unavailable")
             self.kernel.authorize(repo, controller, task["work_id"], "ADMIN", task["branch_id"])
+            task = repo.one("tasks", {"task_id": task_id}, lock="update")
             spec = repo.one("task_inputs", {"task_id": task_id, "generation": task["generation"]})["spec"]
             owner = Principal(task["grant_id"], task["principal_id"])
             _, grant = self.kernel._task_owner(repo, owner, task_id, "COMPILE")
@@ -91,6 +96,30 @@ class RuntimeSupervisor:
                     "VIEW_DENIED", "Automatic completion is limited to an explicitly enrolled evidence summary")
             config = {"accept_summary": accept_summary, "manifest_ref": manifest_ref, "knowledge_cut": knowledge_cut, "context_tokens": context_tokens,
                       "dispatch": dispatch, "grant_epoch": grant["epoch"], "policy_version": spec["policy_version"]}
+            if seal_interaction_id is not None:
+                validate_contract("UUID", seal_interaction_id)
+                interaction = repo.one("simulation_interactions", {"interaction_id": seal_interaction_id,
+                    "work_id": task["work_id"], "branch_id": task["branch_id"]})
+                slot = {"actor_id": grant["actor_id"], "grant_id": grant["grant_id"]}
+                require(task["role_id"] == "character_actor" and payload["output_contract"] ==
+                        {"name": "ActionProposal", "version": "2.0"} and interaction
+                        and interaction["payload"]["base_world_ref"] == spec["world_ref"]
+                        and interaction["payload"]["story_time"] == spec["story_time"]
+                        and slot in interaction["payload"]["participant_slots"], "VIEW_DENIED",
+                        "Sealed handoff requires this actor's exact slot, time, world and grant")
+                config["seal_interaction_id"] = seal_interaction_id
+            require(type(continue_editorial) is bool and (not continue_editorial or isinstance(editorial, dict)
+                    and editorial.get("operation") in {"request_change", "propose_window"}),
+                    "INVALID_ARGUMENT", "Only review and window jobs may create a bounded successor")
+            if editorial is not None:
+                from novel_factory.application.editorial_handoff import check_enrollment
+                check_enrollment(self.kernel, repo, owner, task, spec, knowledge_cut, payload, editorial)
+                config["editorial"] = editorial
+                authorizer = self.kernel.authorize(repo, controller, task["work_id"], "ADMIN", task["branch_id"])
+                config["editorial_authorizer"] = {"grant_id": controller.grant_id, "principal_id": controller.principal_id,
+                                                   "epoch": authorizer["epoch"]}
+                if continue_editorial:
+                    config["continue_editorial"] = True
             old = repo.one("supervisor_jobs", {"task_id": task_id})
             if old:
                 require(old["config"] == config, "IDEMPOTENCY_CONFLICT", "Task dispatch allowance already exists")
@@ -103,7 +132,11 @@ class RuntimeSupervisor:
     def run_once(self, controller, work_id, branch_id):
         def authorize(conn):
             self.kernel.authorize(KernelRepository(conn, tables), controller, work_id, "ADMIN", branch_id)
-        self._complete_summaries(controller, work_id, branch_id)
+        from novel_factory.application.editorial_handoff import EditorialDelivery
+        decided = EditorialDelivery(self.kernel, self.gateway).deliver_one(controller, work_id, branch_id)
+        if decided:
+            return decided
+        self._deliver_candidates(controller, work_id, branch_id)
         summary = self.workflow.resume_project(work_id, branch_id, authorize_in_tx=authorize)
         with self.kernel.db.uow() as repo:
             authorize(repo.conn)
@@ -156,13 +189,13 @@ class RuntimeSupervisor:
                 return self._execute(owner, claimed, worker, config)
         return {"status": "IDLE", **summary}
 
-    def _complete_summaries(self, controller, work_id, branch_id):
+    def _deliver_candidates(self, controller, work_id, branch_id):
         """Recover the completion/outbox boundary even if the prior worker died.
 
-        Accept only delivery of the validated summary. Published content,
-        adjudication decisions and world effects have their own approval paths.
+        Accept validated summaries or seal one specifically enrolled actor
+        slot. World effects and joint adjudication use independent decisions.
         """
-        with self.kernel.db.uow() as repo:
+        with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
             self.kernel.authorize(repo, controller, work_id, "ADMIN", branch_id)
             rows = repo.conn.execute(text("""
                 SELECT t.task_id::text AS task_id, j.config FROM nf_tasks t JOIN nf_supervisor_jobs j USING(task_id)
@@ -175,12 +208,13 @@ class RuntimeSupervisor:
                   AND a.kind='AGENT_CALL_EVIDENCE' AND a.payload->>'attempt_id'=c.attempt_id::text
                   AND a.payload->>'outcome'='VALIDATED_CANDIDATE' AND a.payload->>'result_status'='SUCCEEDED'
                 WHERE t.work_id=:work AND t.branch_id=:branch AND t.state='RESULT_STORED'
-                  AND t.role_id='evidence_maintainer' AND t.task_kind='summary'
+                  AND ((t.role_id='evidence_maintainer' AND t.task_kind='summary' AND j.config->>'accept_summary'='true')
+                      OR (t.role_id='character_actor' AND j.config->>'seal_interaction_id' IS NOT NULL))
                   AND t.deadline>clock_timestamp() AND g.active AND g.epoch=(j.config->>'grant_epoch')::bigint
                   AND g.principal_id::text=t.principal_id AND g.work_id=t.work_id AND g.role_id=t.role_id
                   AND (g.branch_ids='["*"]'::jsonb OR g.branch_ids @> jsonb_build_array(t.branch_id))
                   AND g.capabilities @> '["READ"]'::jsonb
-                  AND w.policy_version=j.config->>'policy_version' AND j.config->>'accept_summary'='true'
+                  AND w.policy_version=j.config->>'policy_version'
                 ORDER BY t.updated_at LIMIT 32 FOR UPDATE OF t SKIP LOCKED
             """), {"work": work_id, "branch": branch_id}).mappings().all()
             for row in rows:
@@ -202,6 +236,25 @@ class RuntimeSupervisor:
                         and task["current_result_id"] == result_id and audit["payload"]["outcome"] == "VALIDATED_CANDIDATE"
                         and audit["payload"]["result_status"] == "SUCCEEDED"
                         and audit["payload"]["context_bundle_id"] == task["context_bundle_id"]):
+                    interaction_id = row["config"].get("seal_interaction_id")
+                    if interaction_id:
+                        from novel_factory.application.simulation import WorldSchedulerService
+                        try:
+                            with repo.conn.begin_nested():
+                                candidate = self.kernel.artifact(repo, audit["payload"]["output_ref"], work_id,
+                                                                 kind="AGENT_CANDIDATE")
+                                WorldSchedulerService(self.kernel).seal_in_transaction(repo, owner, interaction_id,
+                                                                                      candidate["payload"])
+                        except DomainError as exc:
+                            # The stored result remains auditable. Repeated scans
+                            # cannot spend again or spin on this rejected handoff.
+                            repo.change("tasks", {"task_id": task["task_id"]}, {"state": "WAITING_REVIEW",
+                                        "lease_owner": None, "lease_expiry": None, "updated_at": repo.now()})
+                            self.kernel.tasks._emit(repo.conn, task["task_id"], task["generation"], "WAITING_REVIEW")
+                            repo.outbox("supervisor.handoff.blocked", "task", task["task_id"],
+                                {"generation": task["generation"], "reason": exc.code},
+                                f"handoff:{task['task_id']}:{task['generation']}:blocked")
+                            continue
                     self.kernel.tasks.accept_in_transaction(repo.conn, task["task_id"], task["generation"])
 
     def _execute(self, owner, task, worker, config):
