@@ -1,0 +1,50 @@
+{
+  "status": "PASS_ENGINEERING",
+  "workshop": "b1c3e1519e4900673a6d3d2e0755d62a45b0ea9e",
+  "novelfactory": "43dc369ab73e2faacb509b6ca16995848fc92c28",
+  "database": "PostgreSQL 17.11, fsync=on and synchronous_commit=on, distinct NF/AW databases and roles",
+  "native_host": "codex-cli 0.167.0-alpha.4",
+  "transport": "independent MCP stdio",
+  "provider": "loopback deterministic engineering fixture",
+  "commercial_calls": 0,
+  "literary_readers": 0,
+  "suites": "scenes.xml",
+  "presets": {
+    "long-form": {
+      "review_mode": "PROSE",
+      "reviewer": "reviewer",
+      "delegated_to": "memory",
+      "changed_future_nodes": 2,
+      "retained_independent_nodes": 1,
+      "stale_read_disposition": "DISCARD_CANDIDATE",
+      "settled": "SETTLED"
+    },
+    "minimal": {
+      "review_mode": "PROSE",
+      "reviewer": "reviewer",
+      "delegated_to": "clerk",
+      "changed_future_nodes": 2,
+      "retained_independent_nodes": 1,
+      "stale_read_disposition": "DISCARD_CANDIDATE",
+      "settled": "SETTLED"
+    },
+    "research-audit": {
+      "review_mode": "STATISTICS",
+      "reviewer": "stats",
+      "delegated_to": "clerk",
+      "changed_future_nodes": 2,
+      "retained_independent_nodes": 1,
+      "stale_read_disposition": "DISCARD_CANDIDATE",
+      "settled": "SETTLED"
+    },
+    "standard": {
+      "review_mode": "PROSE",
+      "reviewer": "reviewer",
+      "delegated_to": "clerk",
+      "changed_future_nodes": 2,
+      "retained_independent_nodes": 1,
+      "stale_read_disposition": "DISCARD_CANDIDATE",
+      "settled": "SETTLED"
+    }
+  }
+}

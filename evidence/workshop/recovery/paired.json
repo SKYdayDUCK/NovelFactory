@@ -1,0 +1,137 @@
+{
+  "status": "PASS",
+  "pg": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "basebackup": "physical pg_basebackup -Fp -Xstream",
+  "verification": {
+    "exit_code": 0,
+    "stdout": "backup successfully verified"
+  },
+  "manifest_sha256": "802beb014f80884d04f52d3990d39f68dad254fcc90dd2b391b429de8aad05ef",
+  "target": "aw_intent_before_nf",
+  "target_lsn": "0/40293E0",
+  "replayed_lsn": "0/40293E0",
+  "second_wal_target": "nf_bound_before_inference",
+  "second_target_lsn": "0/4058A58",
+  "second_replay_lsn": "0/4058A58",
+  "same_receipt_missing_attempt_peer": {
+    "task_id": "e8cc6c99-bec6-4ae5-81cb-d6947c2543ce",
+    "receipt_ref": "74b15792-2ac7-4f71-9287-693bb7ca7e88",
+    "generation": 1,
+    "task_state": "PAUSED",
+    "accounting_state": "NO_ATTEMPT",
+    "attempts": []
+  },
+  "after_settled_history_mismatch": {
+    "state": "WAITING_OPERATOR",
+    "last_error": "REMOTE_HISTORY_MISMATCH",
+    "hold": "SETTLED",
+    "receipt_ref": "74b15792-2ac7-4f71-9287-693bb7ca7e88",
+    "task_id": "e8cc6c99-bec6-4ae5-81cb-d6947c2543ce",
+    "accounting_state": "SETTLED",
+    "settled_amount": "0.020000",
+    "observations": 2
+  },
+  "rolled_back_nf_task_count": 0,
+  "rolled_back_aw_intent": {
+    "state": "REQUESTED",
+    "last_error": null,
+    "hold": "HELD",
+    "receipt_ref": null,
+    "task_id": null,
+    "accounting_state": null,
+    "settled_amount": null,
+    "observations": 0
+  },
+  "live_nf": {
+    "protocol_version": "aw-nf.v1",
+    "nf_instance_id": "15e5265e-eaeb-4d59-8b9e-b6c3fb937a83",
+    "work_id": "03caa7a8-8cd0-4f71-8b9b-6d8f2fe33eb0",
+    "branch_id": "afd2815d-36b6-4004-b5d8-c3afa07cb52e",
+    "operation_id": "ae4087d8-0311-4bbf-ba43-102a181278a7",
+    "task_id": "e8cc6c99-bec6-4ae5-81cb-d6947c2543ce",
+    "receipt_ref": "74b15792-2ac7-4f71-9287-693bb7ca7e88",
+    "world_ref": {
+      "work_id": "03caa7a8-8cd0-4f71-8b9b-6d8f2fe33eb0",
+      "branch_id": "afd2815d-36b6-4004-b5d8-c3afa07cb52e",
+      "world_revision_id": "48b967d3-766d-4ccb-8032-acf2be46acc7"
+    },
+    "generation": 1,
+    "task_state": "ACCEPTED",
+    "accounting_state": "UNKNOWN",
+    "currency": "USD",
+    "actual_amount": "0",
+    "actual_tokens": 0,
+    "attempt_ids": [
+      "fb666d4f-6f2a-4bf5-8923-f609d221bc20"
+    ],
+    "attempts": [
+      {
+        "attempt_id": "fb666d4f-6f2a-4bf5-8923-f609d221bc20",
+        "state": "UNKNOWN",
+        "actual_amount": null,
+        "actual_tokens": null
+      }
+    ]
+  },
+  "nf_restored_aw_live": {
+    "state": "WAITING_OPERATOR",
+    "last_error": "REMOTE_HISTORY_MISMATCH",
+    "hold": "HELD",
+    "receipt_ref": "74b15792-2ac7-4f71-9287-693bb7ca7e88",
+    "task_id": "e8cc6c99-bec6-4ae5-81cb-d6947c2543ce",
+    "accounting_state": "UNKNOWN",
+    "settled_amount": null,
+    "observations": 1
+  },
+  "aw_restored_nf_live_before_invoice": {
+    "state": "BOUND",
+    "last_error": null,
+    "hold": "HELD",
+    "receipt_ref": "74b15792-2ac7-4f71-9287-693bb7ca7e88",
+    "task_id": "e8cc6c99-bec6-4ae5-81cb-d6947c2543ce",
+    "accounting_state": "UNKNOWN",
+    "settled_amount": null,
+    "observations": 1
+  },
+  "after_explicit_synthetic_invoice": {
+    "state": "SETTLED",
+    "last_error": null,
+    "hold": "SETTLED",
+    "receipt_ref": "74b15792-2ac7-4f71-9287-693bb7ca7e88",
+    "task_id": "e8cc6c99-bec6-4ae5-81cb-d6947c2543ce",
+    "accounting_state": "SETTLED",
+    "settled_amount": "0.020000",
+    "observations": 2
+  },
+  "resulting_nf_tasks": 1,
+  "loopback_synthetic_http_requests": 1,
+  "supplier_model_calls": 0,
+  "recovery_mcp_calls": [
+    [
+      "nf_delegation_get",
+      "ae4087d8-0311-4bbf-ba43-102a181278a7"
+    ],
+    [
+      "nf_delegation_get",
+      "ae4087d8-0311-4bbf-ba43-102a181278a7"
+    ],
+    [
+      "nf_delegation_get",
+      "ae4087d8-0311-4bbf-ba43-102a181278a7"
+    ],
+    [
+      "nf_delegation_get",
+      "ae4087d8-0311-4bbf-ba43-102a181278a7"
+    ],
+    [
+      "nf_delegation_get",
+      "ae4087d8-0311-4bbf-ba43-102a181278a7"
+    ],
+    [
+      "nf_delegation_get",
+      "ae4087d8-0311-4bbf-ba43-102a181278a7"
+    ]
+  ],
+  "frozen_manager": "IDLE",
+  "elapsed_seconds": 14.39
+}

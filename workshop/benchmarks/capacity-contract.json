@@ -1,0 +1,23 @@
+{
+  "contract_version": 1,
+  "tiers": [10, 50, 200],
+  "rounds": 3,
+  "workers": 8,
+  "preset": "Minimal",
+  "timeout_seconds": 60,
+  "quantile": "nearest rank",
+  "transport": "Authenticated Workshop MCP dispatch function and database transaction per call; excludes stdio transport time.",
+  "load": "All N installed members each send a directed typed message once per round; acknowledge every receipt; redeliver every fifth operation and acknowledgment with the same identity. Withhold Redis notifications, publish to a private stream, remove it, and rebuild all hints from the SQL outbox.",
+  "gates": {
+    "active_employees_equal_tier": true,
+    "unique_messages_per_employee": 3,
+    "acknowledged_fraction": 1.0,
+    "duplicate_business_effects": 0,
+    "unacknowledged_deliveries_after_recovery": 0,
+    "inbox_events_per_message": 1,
+    "max_notification_recovery_seconds": 60,
+    "p99_send_ms": 2000,
+    "p99_ack_ms": 2000
+  },
+  "scope": "Closed-loop functional and bounded drain gates for this fixture. NF logical delegation completions, model concurrency with real providers, hard budget enforcement and literary quality require other evidence."
+}
