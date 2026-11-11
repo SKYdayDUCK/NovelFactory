@@ -1,0 +1,12 @@
+[Unit]
+Description=Deliver and acknowledge Workshop Redis notifications
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=aw-broker
+EnvironmentFile=/etc/agent-workshop/worker.env
+ExecStart=/opt/agent-workshop/bin/python -m agent_workshop.notifications publish
+ExecStart=/opt/agent-workshop/bin/python -m agent_workshop.notifications receive
+NoNewPrivileges=true
+PrivateTmp=true

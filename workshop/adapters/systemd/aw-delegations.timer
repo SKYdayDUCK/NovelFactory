@@ -1,0 +1,10 @@
+[Unit]
+Description=Wake the deterministic Workshop delegation worker
+
+[Timer]
+OnBootSec=10s
+OnUnitInactiveSec=5s
+Unit=aw-delegations.service
+
+[Install]
+WantedBy=timers.target

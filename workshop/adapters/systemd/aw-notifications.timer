@@ -1,0 +1,10 @@
+[Unit]
+Description=Wake the Workshop Redis relay
+
+[Timer]
+OnBootSec=10s
+OnUnitInactiveSec=5s
+Unit=aw-notifications.service
+
+[Install]
+WantedBy=timers.target

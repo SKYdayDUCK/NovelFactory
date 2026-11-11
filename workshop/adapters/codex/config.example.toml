@@ -1,4 +1,7 @@
-# Configure only the trusted broker launcher on the author's machine.
+# Author workspace. Use alongside the existing NovelFactory resume configuration
+# in adapters/codex/p5-mcp.toml. For a fictional role, use role-dual.example.toml.
 [mcp_servers.workshop]
-command = "/opt/agent-workshop/bin/aw-mcp"
-args = ["--binding", "/etc/agent-workshop/author.json"]
+command = "ssh"
+args = ["-T", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "ForwardAgent=no", "-o", "ClearAllForwardings=yes", "aw-author-service"]
+startup_timeout_sec = 30
+tool_timeout_sec = 30
