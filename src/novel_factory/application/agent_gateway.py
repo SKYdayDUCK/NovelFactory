@@ -240,7 +240,8 @@ class AgentGateway:
                 if kind == "AGENT_CALL_EVIDENCE":
                     LogService.model(repo.conn, artifact_revision_id, payload)
                 else:
-                    LogService.model_stage(repo.conn, binding["task"], identity, kind, artifact_revision_id)
+                    LogService.model_stage(repo.conn, binding["task"], identity, kind, artifact_revision_id,
+                                           model=binding["config"]["model"] if kind=="AGENT_ROLE_TOOL_RESPONSE" else None)
         return ref
 
     def _read_audit(self, repo, attempt_id):

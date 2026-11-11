@@ -101,6 +101,8 @@ def main():
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--pg-bin", default=os.environ.get("PG_BIN", "/usr/lib/postgresql/17/bin"), type=Path)
     parser.add_argument("--keep-clusters", action="store_true")
+    parser.add_argument("--with-redis", action="store_true",
+                        help="Exercise a separate, disposable Redis left ahead of the recovered PG cluster")
     args = parser.parse_args()
     root, pg_bin = args.output.resolve(), args.pg_bin.resolve()
     # This is a dedicated CLI process with generated credentials and clusters.
@@ -148,7 +150,7 @@ def main():
                 "archive_command": f"{shlex.quote(sys.executable)} {shlex.quote(str(archiver))} %p {shlex.quote(str(archive))}/%f"}
     source_config = root / "source.conf"
     _config(source_config, settings)
-    source = restored = database = recovered_database = None
+    source = restored = database = recovered_database = streams_drill = None
     result = {"status": "FAILED", "postgres": version, "execution_kind": "REAL_ISOLATED_POSTGRESQL",
               "source_port": source_port, "restored_port": restored_port,
               "durability": {"fsync": True, "synchronous_commit": True, "data_checksums": True},
@@ -189,6 +191,10 @@ def main():
         result["base_backup_seconds"] = time.monotonic() - base_started
         result["pg_verifybackup"] = _run([str(pg_bin / "pg_verifybackup"), str(base)])
         target = transfer(first["world_ref"], "5", 20)
+        if args.with_redis:
+            from pitr_streams import StreamsDrill
+            streams_drill = StreamsDrill(root, _port())
+            streams_drill.publish(database)
         backup_service = OnlineBackupService(database.engine, objects, pg_bin=pg_bin)
         logical = backup_service.create(root / "target-logical-snapshot")
         # This workload is exclusively owned by the drill. No application write
@@ -197,7 +203,11 @@ def main():
             target_at = conn.scalar(text("SELECT clock_timestamp()"))
             target_lsn = conn.scalar(text("SELECT pg_create_restore_point('nf_p4_verified_target')"))
             conn.commit()
+        if streams_drill:
+            streams_drill.acknowledge_target(database)
         later = transfer(target["world_ref"], "7", 30)
+        if streams_drill:
+            streams_drill.publish(database)
         with database.engine.connect() as conn:
             wal_file = conn.scalar(text("SELECT pg_walfile_name(pg_current_wal_lsn())"))
             conn.execute(text("SELECT pg_switch_wal()"))
@@ -266,6 +276,9 @@ def main():
             raise AssertionError("A worker from before the disaster was allowed to resume")
         # Replaying a pre-disaster accepted command returns its exact receipt.
         _check(recovered.accept(principal, target["request"]) == target["receipt"], "Restored accepted receipt differs")
+        if streams_drill:
+            result["redis_pitr_reconciliation"] = streams_drill.verify(recovered_database,
+                target["world_ref"]["world_revision_id"], later["world_ref"]["world_revision_id"])
         result.update(status="PASS", target_world_ref=target["world_ref"], target_lsn=str(target_lsn),
                       restored_state_sha256=expected_state_hash, snapshot_equal_before_fencing=True,
                       table_count=len(recovered_snapshot), object_count=len(logical["objects"]),
@@ -279,6 +292,8 @@ def main():
         _write(root / "target_database_digests.json", recovered_snapshot)
         _write(root / "fenced_tasks.json", fenced)
     finally:
+        if streams_drill:
+            streams_drill.close()
         if recovered_database:
             recovered_database.close()
         if database:

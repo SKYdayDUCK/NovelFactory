@@ -114,7 +114,7 @@ def test_paused_worker_catches_up_then_rebuilds_without_redis(kernel_env):
         StatisticsService.handle(repo.conn, SimpleNamespace(event_id=msg))
         StatisticsService.handle(repo.conn, SimpleNamespace(event_id=msg))
         repo.conn.execute(
-            text("""UPDATE nf_metric_contributions SET metrics=jsonb_build_object('events',100000)
+            text("""UPDATE nf_metric_contributions SET metrics=jsonb_build_object('events',100000,'malformed','invalid-number')
            WHERE event_id=(SELECT event_id FROM nf_audit_events WHERE work_id=:work LIMIT 1)"""),
             {"work": work},
         )
@@ -207,3 +207,49 @@ def test_archived_world_outbox_rebuilds_only_new_effects(kernel_env):
         len(step["receipt"]["accepted_event_refs"]) for step in world["steps"]
     )
     assert stats.verify_statistics(owner, work, branch)["consistent"]
+
+
+def test_selector_usage_and_unverified_host_amount_have_distinct_provenance(kernel_env):
+    # A synthetic role-tool response plus the independent main generated candidate.
+    # The same artifact writer, task grant, query and rebuilder run on PG17.
+    item = setup_gateway(kernel_env)
+    kernel, world, gateway = item["kernel"], item["world"], item["gateway"]
+    with kernel.db.uow(write=False) as repo:
+        binding = gateway._binding(repo, item["principal"], item["request"])
+    data = {
+        "text": "private",
+        "input_tokens": 5,
+        "output_tokens": 9,
+        "cached_input_tokens": 2,
+        "actual_amount": "0.02",
+        "currency": "USD",
+        "provider_receipt": "fixture",
+        "cost_receipt_checked": True,
+        "model_configuration": binding["config"],
+    }
+    gateway._audit_artifact(
+        binding, str(uuid4()), "lookup-response", data, "AGENT_ROLE_TOOL_RESPONSE"
+    )
+    gateway.execute(item["principal"], item["request"])
+    stats = StatisticsService(kernel)
+    work, branch = (world["world_ref"][key] for key in ("work_id", "branch_id"))
+    result = stats.rebuild(world["principal"], work, branch)
+    assert result["metrics"]["model.fixture.total_tokens"] == 79
+    assert result["metrics"]["model.fixture.calls"] == 2
+    assert result["metrics"]["model.fixture.cost.USD"] == "0.03"
+    assert result["measures"]["invoiced_supplier_cost"] is None
+    from novel_factory.application.statistics import _usage
+
+    source = {
+        "usage": data,
+        "accounting_state": "SUCCEEDED",
+        "provider_receipt": "trusted-host-receipt",
+        "model_configuration": {
+            "adapter_kind": "TRUSTED_HOST",
+            "execution_kind": "REAL_HOST",
+            "provider": "organization",
+        },
+    }
+    assert _usage(None, {}, source, 3)["model.host_reported_amount.USD"] == "0.02"
+    source["model_configuration"]["endpoint"] = "https://openrouter.ai/api/v1/chat/completions"
+    assert _usage(None, {}, source, 3)["model.provider_reported_charge.USD"] == "0.02"

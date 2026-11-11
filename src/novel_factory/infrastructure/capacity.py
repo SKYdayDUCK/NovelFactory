@@ -121,8 +121,20 @@ class ResourceMonitor:
                           COALESCE(max(EXTRACT(epoch FROM now()-updated_at)) FILTER(WHERE state='READY'),0)::float8 AS oldest_ready_s
                         FROM nf_tasks WHERE branch_id=:branch AND work_id=:work
                     """), scope).mappings().one())
-                stats["queue_backlog"] = repo.conn.scalar(text("""SELECT count(*) FROM nf_bus_subscriptions
-                    WHERE consumer=:group AND status='PENDING'"""), scope)
+                if work is None:
+                    stats["queue_backlog"] = repo.conn.scalar(text("""SELECT count(*) FROM nf_bus_subscriptions
+                        WHERE consumer=:group AND status='PENDING'"""), scope)
+                elif group == "model":
+                    stats["enrolled_ready"] = repo.conn.scalar(text("""SELECT count(*) FROM (
+                        SELECT t.task_id FROM nf_tasks t JOIN nf_supervisor_jobs j USING(task_id)
+                        WHERE t.branch_id=:branch AND t.work_id=:work AND t.state='READY'
+                          AND t.deadline > statement_timestamp()
+                          AND NOT EXISTS (SELECT FROM nf_call_attempts c WHERE c.task_id=t.task_id) LIMIT 1024
+                    ) eligible"""), scope)
+                elif group in {"world", "recovery"}:
+                    stats["project_hint"] = repo.conn.scalar(text("""SELECT count(*) FROM nf_processor_hints h
+                        JOIN nf_redis_branches b USING(branch_id) WHERE h.branch_id=:branch AND b.work_id=:work
+                        AND h.processor=:group"""), scope)
                 if group == "compute" and work is not None:
                     stats["index_backlog"] = repo.conn.scalar(text("""
                         SELECT count(*) FROM (SELECT 1 FROM nf_outbox o WHERE o.topic='world.accepted'
@@ -165,7 +177,11 @@ class ResourceMonitor:
                             pending += row["pending"]
                             lag += row.get("lag") or 0
                 stats.update(redis_pending=pending, redis_lag=lag)
-            stats["backlog"] = max(stats.get(k, 0) for k in ("ready", "queue_backlog", "index_backlog", "redis_lag"))
+            if work is None:
+                stats["backlog"] = max(stats.get("queue_backlog", 0), stats.get("redis_lag", 0))
+            else:
+                # Stream groups span every work. Only dispatchable local work can grow this project executor.
+                stats["backlog"] = max(stats.get(k, 0) for k in ("enrolled_ready", "index_backlog", "project_hint"))
             stats["available"] = stats.get("available_bytes") is not None
         except PoolTimeout:
             self.pool_timeouts += 1

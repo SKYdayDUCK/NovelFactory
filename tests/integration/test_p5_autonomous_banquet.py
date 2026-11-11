@@ -135,6 +135,10 @@ def _candidate(packet, choices, scopes):
 
 
 def test_one_author_resume_through_autonomous_banquet(kernel_env, tmp_path):
+    run_banquet(kernel_env, tmp_path)
+
+
+def run_banquet(kernel_env, tmp_path, *, redis_workers=None):
     if not shutil.which("codex") or not Path("/proc/self/task").is_dir():
         required = "This process-level acceptance requires an installed Codex CLI on Linux"
         if os.environ.get("CI", "").lower() in {"true", "1"}:
@@ -379,6 +383,9 @@ def test_one_author_resume_through_autonomous_banquet(kernel_env, tmp_path):
                     "--access-file",
                     str(access),
                 ]
+                if redis_workers is not None:
+                    await asyncio.to_thread(redis_workers.start, command, env)
+                    command.extend(["--processor", "model"])
                 with stdout_path.open("w") as stdout, stderr_path.open("w") as stderr:
                     proc = await asyncio.create_subprocess_exec(
                         *command,
@@ -440,6 +447,8 @@ def test_one_author_resume_through_autonomous_banquet(kernel_env, tmp_path):
                 return handshake.protocolVersion, tools, initial, final
 
         protocol, tools, initial, final = asyncio.run(drive())
+        if redis_workers is not None:
+            redis_workers.check(kernel, owner, work, branch, iid)
         elapsed = time.monotonic() - started
         completed_inventory = inventory()
         assert register_scene(kernel, gateway, owner, **registration) == scene
@@ -549,7 +558,7 @@ def test_one_author_resume_through_autonomous_banquet(kernel_env, tmp_path):
                 == 8
             )
             assert all(item == {"input_tokens": 11, "output_tokens": 7} for item in usage.values())
-            if output := os.environ.get("NF_P5_BANQUET_EVIDENCE"):
+            if output := os.environ.get("NF_P55_BANQUET_EVIDENCE" if redis_workers else "NF_P5_BANQUET_EVIDENCE"):
                 from novel_factory.application.prompt_schema import inline_schema
                 from novel_factory.domain.canonical import canonical_bytes
 

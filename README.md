@@ -6,6 +6,8 @@
 
 **生产容量仍为 `NOT_MET`。** 50/200 Agent 热点、1000 Agent 开放到达和 500 Agent 持续读的跨次稳定性仍有缺口。多小时混合负载尚未执行。短卷使用确定性夹具，真实模型调用为 0，作者全文评价待完成，文学质量尚未评价。[容量实测](reports/性能与容量修复对照.md) · [合并前容量缺口记录](reports/未通过目标与后续工作.md)
 
+**P5.5 堆叠分支支持 Redis Streams。** PostgreSQL 保存权威任务、调用和世界回执。每个作品分支可逐步启用 Redis 调度；项目初始使用原有固定并发模式。服务部署与回退、并发压测和已知限制分别见[安装指南](docs/implementation/P5.5_安装与运维.md)、[动态并行评测](reports/P5.5_动态并发性能评测.md)和[本轮交接](reports/P5.5_最终开发与PR交接.md)。
+
 本分支接入完成后，作者在 VS Code 的 Codex 侧栏输入 **“继续未完成的任务”**。项目绑定的 `nf_resume_project({})` 返回工作状态、唤醒、恢复、终止等待和待审计数。独立 Supervisor 按数据库额度领取工作，收到提交通知或到了对账时间才重新检查。需要先运行 PostgreSQL 17、应用迁移并由管理员签发恢复凭据、安装后台服务。作者工作区使用 `python scripts/install_p5_project.py --project .` 安装项目 MCP 配置。[首次接入](adapters/codex/P5-stdio.md) · [服务与槽位](reports/P5_调度与事件唤醒收尾.md) · [连续场景与卷交接](reports/P5_自动剧情连续推进验收.md) · [角色运行边界](reports/P5_MCP与Codex角色隔离验收.md) · [P5 最终验收与未达项](reports/P5_最终集成与PR交接.md) 官方扩展已在普通 Linux 测试账户中完成两次原生桌面恢复，实际唤醒数为 1、0。[桌面运行记录](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42982135338)
 
 Scion 增量版本实验保留在 [Draft PR #4](https://github.com/SKYdayDUCK/NovelFactory/pull/4)。B1/B2 待独立审核，B3 增量重放在实验分支默认关闭。

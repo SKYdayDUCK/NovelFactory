@@ -1,0 +1,25 @@
+[Unit]
+Description=NovelFactory project processor %i
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=novelfactory
+Group=novelfactory
+WorkingDirectory=/srv/novelfactory
+EnvironmentFile=/etc/novelfactory/project-%i.env
+ExecStart=/srv/novelfactory/.venv/bin/python /srv/novelfactory/scripts/run_supervisor.py --access-file ${NF_ACCESS_FILE} --processor %i --workers ${NF_WORKERS}
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=30
+KillMode=control-group
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/novelfactory
+
+[Install]
+WantedBy=multi-user.target

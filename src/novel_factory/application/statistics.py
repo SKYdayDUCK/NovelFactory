@@ -3,7 +3,7 @@
 import json
 from collections import Counter, defaultdict
 from datetime import UTC, datetime
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from hashlib import sha256
 from math import ceil
 from urllib.parse import urlsplit
@@ -13,7 +13,7 @@ from sqlalchemy import text
 from novel_factory.application.kernel import require
 from novel_factory.domain.errors import DomainError
 
-CURRENT_VERSION = 2
+CURRENT_VERSION = 3
 _FILTERS = {"volume_id", "trace_id", "actor_id", "role_id", "experiment_id", "model", "task_id"}
 _SNAPSHOT = """a.event_id = ANY(CAST(:members AS uuid[]))"""
 
@@ -22,6 +22,7 @@ def _source(conn, event):
     if event["event_type"] not in {
         "model.completed",
         "artifact.review_report",
+        "artifact.agent_role_tool_response",
         "artifact.narrative_draft",
     }:
         return {}
@@ -32,7 +33,7 @@ def _source(conn, event):
     ).scalar_one()
 
 
-def _usage(conn, event, data):
+def _usage(conn, event, data, version):
     usage = data["usage"]
     config = data["model_configuration"]
     host = urlsplit(config.get("endpoint", "")).hostname or ""
@@ -60,24 +61,43 @@ def _usage(conn, event, data):
         )
         if raw and raw.isdecimal() and len(raw) <= 16:
             metrics[f"model.{origin}.reasoning_tokens"] = int(raw)
-    if (
-        not fixture
-        and host == "openrouter.ai"
-        and usage.get("actual_amount") is not None
-        and data["accounting_state"] in {"SUCCEEDED", "FAILED"}
-        and data.get("provider_receipt")
-    ):
-        metrics["model.actual_cost." + usage["currency"]] = str(Decimal(usage["actual_amount"]))
-    elif fixture and usage.get("actual_amount") is not None:
-        metrics["model.fixture.cost." + usage["currency"]] = str(Decimal(usage["actual_amount"]))
-    elif data["accounting_state"] == "UNKNOWN" or usage.get("actual_amount") is None:
-        metrics[f"model.{origin}.unsettled_calls"] = 1
+    amount = usage.get("actual_amount")
+    if version >= 3:
+        if fixture and amount is not None and usage.get("currency"):
+            metrics["model.fixture.cost." + usage["currency"]] = str(Decimal(amount))
+        elif (
+            amount is not None
+            and data.get("provider_receipt")
+            and data["accounting_state"] in {"SUCCEEDED", "FAILED", "RECEIPT_CHECKED"}
+        ):
+            # This is a generation receipt. Neither an HTTP success nor an authorized
+            # Host's accounting value establishes the user's supplier invoice.
+            provider = config.get("endpoint") == "https://openrouter.ai/api/v1/chat/completions"
+            label = "model.provider_reported_charge." if provider else "model.host_reported_amount."
+            metrics[label + usage["currency"]] = str(Decimal(amount))
+        else:
+            metrics[f"model.{origin}.unsettled_calls"] = 1
+    else:
+        if (
+            not fixture
+            and host == "openrouter.ai"
+            and usage.get("actual_amount") is not None
+            and data["accounting_state"] in {"SUCCEEDED", "FAILED"}
+            and data.get("provider_receipt")
+        ):
+            metrics["model.actual_cost." + usage["currency"]] = str(Decimal(usage["actual_amount"]))
+        elif fixture and usage.get("actual_amount") is not None:
+            metrics["model.fixture.cost." + usage["currency"]] = str(
+                Decimal(usage["actual_amount"])
+            )
+        elif data["accounting_state"] == "UNKNOWN" or usage.get("actual_amount") is None:
+            metrics[f"model.{origin}.unsettled_calls"] = 1
     return metrics
 
 
 def calculate(conn, event, version):
     """A pure interpretation of immutable evidence for one version and event."""
-    if version not in {1, 2}:
+    if version not in {1, 2, 3}:
         raise DomainError("INVALID_ARGUMENT", "Unsupported metric version")
     kind = event["event_type"]
     result = {"events": 1, "event." + kind: 1}
@@ -103,7 +123,27 @@ def calculate(conn, event, version):
         else:
             result["world.unmeasured_commits"] = 1
     elif kind == "model.completed":
-        result.update(_usage(conn, event, _source(conn, event)))
+        result.update(_usage(conn, event, _source(conn, event), version))
+    elif kind == "artifact.agent_role_tool_response" and version >= 3:
+        data = _source(conn, event)
+        if "model_configuration" in data:
+            result.update(
+                _usage(
+                    conn,
+                    event,
+                    {
+                        "model_configuration": data["model_configuration"],
+                        "usage": data,
+                        "provider_receipt": data["provider_receipt"],
+                        "accounting_state": "RECEIPT_CHECKED"
+                        if data["cost_receipt_checked"]
+                        else "UNKNOWN",
+                    },
+                    version,
+                )
+            )
+        else:
+            result["model.unclassified_selector_responses"] = 1
     elif kind == "artifact.review_report":
         report = _source(conn, event)["submission"]
         for issue in report["issues"]:
@@ -192,7 +232,7 @@ class StatisticsService:
         start=None,
         end=None,
     ):
-        require(version in {1, 2}, "INVALID_ARGUMENT", "Unsupported metric version")
+        require(version in {1, 2, 3}, "INVALID_ARGUMENT", "Unsupported metric version")
         where, args = _scope(work_id, branch_id, filters, start, end)
         with self.kernel.db.uow() as repo:
             grant = self.kernel.authorize(repo, principal, work_id, "ADMIN", branch_id)
@@ -268,7 +308,13 @@ class StatisticsService:
                 if actual is not None:
                     processed += 1
                     last_applied = event["event_time"]
-                    metrics.update({k: Decimal(str(v)) for k, v in actual.items()})
+                    for key, value in actual.items():
+                        try:
+                            number = Decimal(str(value))
+                        except InvalidOperation:
+                            continue
+                        if number.is_finite() and number.adjusted() <= 30:
+                            metrics[key] += number
                     kind = event["event_type"]
                     if kind == "task.changed" and event["task_id"]:
                         tasks.add(event["task_id"])
@@ -352,10 +398,12 @@ class StatisticsService:
                     if start and end and end > start
                     else None
                 ),
+                "invoiced_supplier_cost": None,
                 "chapter_cost": None,
                 "literary_quality_score": None,
                 "estimated_provider_cost": None,
                 "unavailable_reasons": {
+                    "invoiced_supplier_cost": "No independently reconciled supplier invoice registered",
                     "chapter_cost": "No stable chapter-to-call binding in P5",
                     "literary_quality_score": "Reviews carry issues and decisions without a calibrated score",
                     "estimated_provider_cost": "No versioned provider rate card registered",

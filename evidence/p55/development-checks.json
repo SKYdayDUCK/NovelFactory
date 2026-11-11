@@ -1,0 +1,50 @@
+{
+  "p5_head": "9dc9c6b806b8ac43f56d0893194a5b402f3f16ca",
+  "p5_isolated_locked_suite": {
+    "tests": 721,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "seconds": 392.806
+  },
+  "development_sweep": {
+    "tests": 729,
+    "errors": 0,
+    "failures": 2,
+    "skipped": 0,
+    "seconds": 403.952
+  },
+  "failed_cases": [
+    {
+      "name": "test_paused_worker_catches_up_then_rebuilds_without_redis",
+      "cause": "A literal JSON token in the test mutation was parsed as a SQLAlchemy bind parameter.",
+      "resolution": "Construct the intentional corrupt value with jsonb_build_object."
+    },
+    {
+      "name": "test_one_author_resume_through_autonomous_banquet",
+      "cause": "The development sweep crossed a change to the migration graph and the running process loaded newer dispatch SQL.",
+      "resolution": "Recreate a database from the complete migration chain and rerun."
+    }
+  ],
+  "targeted_rerun": {
+    "tests": 5,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "seconds": 9.337
+  },
+  "s7_stdio_transport": {
+    "tests": 5,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "seconds": 9.948
+  },
+  "redis_cli_scene": {
+    "tests": 1,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "seconds": 13.689
+  }
+}

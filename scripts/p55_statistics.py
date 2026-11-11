@@ -29,7 +29,7 @@ def main():
             "register-experiment",
         ],
     )
-    parser.add_argument("--version", choices=[1, 2], type=int, default=2)
+    parser.add_argument("--version", choices=[1, 2, 3], type=int, default=3)
     parser.add_argument("--source-cut")
     parser.add_argument("--trace-id", type=UUID)
     parser.add_argument("--volume-id", type=UUID)

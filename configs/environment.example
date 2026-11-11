@@ -8,3 +8,11 @@ NF_API_PROCESSES=1
 NF_WORKER_PROCESSES=1
 # Four worker connections and sixteen maintenance reserve => 28 < PG max 60.
 # Token/bootstrap settings are generated locally; no real credentials belong here.
+
+# Opt-in server-side transport. Supply a distinct private ACL credential per process.
+# NF_REDIS_URL=redis://127.0.0.1:6379/0
+# NF_TEST_REDIS_URL=redis://127.0.0.1:6380/0
+# Project worker systemd templates use the following per-instance settings.
+# NF_ACCESS_FILE=/var/lib/novelfactory/private/m0/supervisor.json
+# NF_WORKERS=1
+# NF_RETENTION_SECONDS=86400

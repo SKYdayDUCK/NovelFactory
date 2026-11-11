@@ -169,3 +169,10 @@ def test_model_selects_scoped_lookup_before_final_candidate(kernel_env, tmp_path
             assert not obs
     assert scheduler.run_once(admin, wr["work_id"], wr["branch_id"])["status"] == "IDLE"
     assert len(provider.calls) == len(states)
+
+    if mode == "read":
+        from novel_factory.application.statistics import StatisticsService
+        summary = StatisticsService(kernel).rebuild(admin,wr["work_id"],wr["branch_id"])
+        assert summary["metrics"]["model.fixture.calls"] == 2
+        assert summary["metrics"]["model.fixture.total_tokens"] == 58
+        assert Decimal(summary["metrics"]["model.fixture.cost.USD"]) == Decimal("0.10")

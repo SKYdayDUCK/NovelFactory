@@ -36,7 +36,10 @@ def _task_scope(conn, task_id, generation=None):
         LEFT JOIN nf_task_inputs i ON i.task_id=t.task_id AND i.generation=coalesce(:gen,t.generation)
         LEFT JOIN nf_trace_tasks tt ON tt.task_id=t.task_id WHERE t.task_id=:task
     """), {"task": task_id, "gen": generation}).mappings().one_or_none()
-    return dict(row) if row else {}
+    scope = dict(row) if row else {}
+    if scope:
+        scope["principal_id"] = _uuid(scope["principal_id"])
+    return scope
 
 
 def record(conn, event_type, *, event_id=None, **fields):
@@ -144,10 +147,10 @@ class LogService:
                       duration_ms=int(float(data["elapsed_seconds"])*1000))
 
     @staticmethod
-    def model_stage(conn, task, identity, kind, evidence_id):
+    def model_stage(conn, task, identity, kind, evidence_id, *, model=None):
         scope = _task_scope(conn, task["task_id"], task["generation"])
         record(conn, "artifact."+kind.lower(), event_id=evidence_id, evidence_id=evidence_id,
-               attempt_id=identity if kind != "AGENT_BLOCKED" else None, **scope)
+               attempt_id=identity if kind != "AGENT_BLOCKED" else None, model=model, **scope)
 
     @staticmethod
     def artifact(conn, kind, evidence_id, work_id, payload, principal_id, *, text_characters=None):
@@ -185,11 +188,11 @@ class LogService:
             return invocation, scope
 
     @staticmethod
-    def finish_tool(runtime, invocation, scope, error, elapsed_ms):
+    def finish_tool(runtime, invocation, scope, error, elapsed_ms, evidence_id=None):
         with runtime.kernel.db.uow() as repo:
             record(repo.conn, "mcp.finished", **{**scope, "parent_span_id":invocation},
                    causation_id=invocation, outcome="ERROR" if error else "OK",
-                   error_code=error, duration_ms=elapsed_ms)
+                   error_code=error, duration_ms=elapsed_ms, evidence_id=_uuid(evidence_id) if not error else None)
 
     @staticmethod
     def trace(kernel, principal, work_id, branch_id, trace_id):

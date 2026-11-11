@@ -133,9 +133,20 @@ def make_server(runtime, *, ceiling=None):
             return tool_error("SERVICE_UNAVAILABLE")
         result = await invoke(name, arguments)
         error = result.structuredContent["error"]["code"] if isinstance(result, types.CallToolResult) and result.isError else None
+        evidence_id = None
+        if isinstance(result,dict):
+            # Only a recognized successful response can bind an audit object. Never
+            # copy a rejected lookup, candidate content, or caller-supplied ID.
+            for key in ("artifact_ref","change_point_ref","window_ref","review_ref"):
+                ref = result.get(key)
+                if isinstance(ref,dict) and ref.get("artifact_revision_id"):
+                    evidence_id = ref["artifact_revision_id"]
+                    break
+            if evidence_id is None and name in {"nf_task_get","nf_context_get"}:
+                evidence_id = result.get("context_bundle_id")
         try:
             await asyncio.to_thread(LogService.finish_tool, runtime, invocation, scope, error,
-                                    round((time.monotonic()-started)*1000, 3))
+                                    round((time.monotonic()-started)*1000, 3), evidence_id)
         except Exception:
             # The attempt is already durable. A mutating tool has its own authoritative
             # idempotency receipt; a missing diagnostic must not turn success into a retry.

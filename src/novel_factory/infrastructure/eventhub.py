@@ -74,13 +74,17 @@ class EventHub:
             return _sql(
                 repo.conn,
                 """
-                INSERT INTO nf_bus_publications(event_id)
-                SELECT o.outbox_id FROM nf_outbox o
-                WHERE NOT EXISTS (SELECT FROM nf_bus_publications p WHERE p.event_id=o.outbox_id)
-                ORDER BY o.created_at,o.outbox_id LIMIT :n ON CONFLICT DO NOTHING
+                WITH batch AS MATERIALIZED (
+                    SELECT o.outbox_id FROM nf_outbox o WHERE NOT EXISTS (
+                        SELECT FROM nf_bus_publications p WHERE p.event_id=o.outbox_id)
+                    ORDER BY o.created_at,o.outbox_id LIMIT :n
+                ), written AS (
+                    INSERT INTO nf_bus_publications(event_id)
+                    SELECT outbox_id FROM batch ON CONFLICT DO NOTHING
+                ) SELECT count(*) FROM batch
             """,
                 n=_bound(limit),
-            ).rowcount
+            ).scalar_one()
 
     def _claim(self, limit, lease_seconds):
         token = str(uuid4())
@@ -396,46 +400,51 @@ class EventHub:
         removed = 0
         for key, stream in STREAMS.items():
             entries = self.redis.xrange(stream, count=_bound(limit))
-            eligible = []
+            if not entries:
+                continue
+            candidates = []
+            for rid, fields in entries:
+                raw = fields.get("envelope", fields.get(b"envelope"))
+                try:
+                    if not isinstance(raw, (bytes, str)) or len(raw) > 4096:
+                        raise ValueError
+                    ident = str(UUID(json.loads(raw)["event_id"]))
+                except (TypeError, ValueError, AttributeError, KeyError, RecursionError):
+                    ident = None
+                candidates.append({"rid": _str(rid), "event_id": ident})
+            groups = list(SUBSCRIBERS[key])
             with self.db.uow(write=False) as repo:
-                for rid, fields in entries:
-                    try:
-                        raw = fields.get("envelope", fields.get(b"envelope"))
-                        ident = str(UUID(json.loads(raw)["event_id"]))
-                    except (TypeError, ValueError, AttributeError, KeyError, RecursionError):
-                        ident = None
-                    safe = _sql(
+                safe = set(
+                    _sql(
                         repo.conn,
                         """
-                        SELECT 1 FROM nf_bus_publications p JOIN nf_outbox o ON o.outbox_id=p.event_id
-                        WHERE p.event_id=:id AND p.stream_key=:key AND p.redis_id IS NOT NULL
-                        AND p.created_at < now()-make_interval(secs=>:age)
+                    WITH entries AS (
+                        SELECT * FROM jsonb_to_recordset(CAST(:entries AS jsonb)) AS e(rid text,event_id uuid)
+                    )
+                    SELECT e.rid FROM entries e
+                    WHERE NOT EXISTS (SELECT FROM nf_bus_subscriptions s
+                        WHERE s.event_id=e.event_id AND s.status<>'DONE')
+                    AND (EXISTS (
+                        SELECT FROM nf_bus_publications p JOIN nf_outbox o ON o.outbox_id=p.event_id
+                        WHERE p.event_id=e.event_id AND p.stream_key=:key AND p.redis_id IS NOT NULL
+                        AND p.created_at<now()-make_interval(secs=>:age)
                         AND EXISTS(SELECT FROM nf_bus_subscriptions s WHERE s.event_id=p.event_id)
-                        AND NOT EXISTS(SELECT FROM nf_bus_subscriptions s WHERE s.event_id=p.event_id AND s.status<>'DONE')
-                    """,
-                        id=ident,
+                    ) OR (SELECT count(*) FROM nf_bus_quarantine q
+                        WHERE q.stream_key=:key AND q.redis_id=e.rid AND q.consumer=ANY(CAST(:groups AS text[]))
+                        AND q.created_at<now()-make_interval(secs=>:age))=:count)
+                """,
+                        entries=json.dumps(candidates),
                         key=key,
                         age=retention_seconds,
-                    ).scalar()
-                    if not safe:
-                        # Invalid transport data is also reclaimable once every required group
-                        # has durably recorded its quarantine and the retention window passes.
-                        archived = _sql(
-                            repo.conn,
-                            """
-                            SELECT count(*) FROM nf_bus_quarantine WHERE stream_key=:key AND redis_id=:rid
-                            AND consumer=ANY(CAST(:groups AS text[]))
-                            AND created_at < now()-make_interval(secs=>:age)
-                        """,
-                            key=key,
-                            rid=_str(rid),
-                            groups=list(SUBSCRIBERS[key]),
-                            age=retention_seconds,
-                        ).scalar_one()
-                        safe = archived == len(SUBSCRIBERS[key])
-                    if not safe:
-                        break
-                    eligible.append(rid)
+                        groups=groups,
+                        count=len(groups),
+                    ).scalars()
+                )
+            eligible = []
+            for item in candidates:
+                if item["rid"] not in safe:
+                    break
+                eligible.append(item["rid"])
             if eligible:
                 removed += self.redis.xdel(stream, *eligible)
         return removed
