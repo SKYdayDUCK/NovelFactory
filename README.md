@@ -6,6 +6,8 @@
 
 **生产容量仍为 `NOT_MET`。** 50/200 Agent 热点、1000 Agent 开放到达和 500 Agent 持续读的跨次稳定性仍有缺口。多小时混合负载尚未执行。短卷使用确定性夹具，真实模型调用为 0，作者全文评价待完成，文学质量尚未评价。[容量实测](reports/性能与容量修复对照.md) · [合并前容量缺口记录](reports/未通过目标与后续工作.md)
 
+本开发分支的 P5 入口是 Codex 中的 **“继续未完成的任务”**。首次接入与恢复步骤见 [P5 运行指南](reports/P5-07.md)，包括可运行的两任务样例、真实 Host 和数据库的验收范围。
+
 Scion 增量版本实验保留在 [Draft PR #4](https://github.com/SKYdayDUCK/NovelFactory/pull/4)。B1/B2 待独立审核，B3 增量重放在实验分支默认关闭。
 
 - **运行/复现：** [复现与运行指南](reports/复现与运行指南.md)，`uv sync --locked --group dev`；默认 Python 3.12，PostgreSQL 17。
