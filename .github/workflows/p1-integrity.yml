@@ -102,13 +102,16 @@ jobs:
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           enable-cache: true
-      - name: Install PostgreSQL 17 client for real pg_dump and pg_restore
+      - name: Install PostgreSQL 17 client and Linux role isolation dependencies
         run: |
           sudo install -d -m 0755 /usr/share/postgresql-common/pgdg
           curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo tee /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc > /dev/null
           echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
           sudo apt-get update -qq
-          sudo apt-get install -y postgresql-client-17
+          sudo apt-get install -y postgresql-client-17 bubblewrap util-linux gcc libc6-dev
+          bwrap --version
+          unshare --version
+          cc --version
           test -x "$PG_BIN/pg_dump" && test -x "$PG_BIN/pg_restore"
       - name: Install the pinned native Codex app-server for the restart test
         run: |
