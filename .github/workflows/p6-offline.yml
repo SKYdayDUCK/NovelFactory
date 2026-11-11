@@ -1,0 +1,31 @@
+name: P6 offline experiment and authorization checks
+on:
+  pull_request:
+    paths:
+      - 'scripts/P6_*'
+      - 'reports/handoff/P6*'
+      - '.github/workflows/p6-offline.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/checkout@v4
+        with:
+          ref: becc8e7a400756c67832e0aca16cac78000df661
+          path: nf-peer
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - name: Install locked NF and verify preflight with synthetic local input
+        run: |
+          uv sync --project nf-peer --locked
+          nf-peer/.venv/bin/python scripts/P6_preflight_smoke.py --nf-checkout "$PWD/nf-peer"

@@ -13,7 +13,7 @@
   "B": {
     "status": "UNDER_REVIEW",
     "result": "NOT_MET",
-    "inspected_sha": "e2f0fabadcf673984fddacc9bd7a924d6588b816",
+    "inspected_sha": "55d8979b5361a4837701d762feacd83036096b11",
     "pr": 6,
     "blocker": "three inherited workflows failed",
     "next": "Check the real 600 s original gates and readiness before merge.",
@@ -116,14 +116,22 @@
       "pg_redis": 44,
       "dual_services_and_scenes": 4,
       "physical_pitr": 1
-    }
+    },
+    "source_sha": "657a4e1e2460b55757c99a4b21c5ce55ba0b1419",
+    "ci": 43036228913
   },
   "C": {
-    "status": "BLOCKED",
+    "status": "BLOCKED_ENVIRONMENT",
     "result": "BLOCKED_ENVIRONMENT",
     "missing": [
       "project-authorized provider binding and spend limits",
       "two independent literary reviews"
-    ]
+    ],
+    "offline_checks": 5,
+    "production_model_calls": 0,
+    "scenes_dispatched": 0,
+    "assigned_readers": 0,
+    "spend": null,
+    "next": "Verify optional shared token ceiling on the NF peer and obtain a project-bound experiment authorization and readers before paid dispatch."
   }
 }

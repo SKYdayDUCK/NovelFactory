@@ -13,3 +13,4 @@
 | FR-XSYS, FR-AW / AT-40–49 | evidence/workshop/w6；Minimal 和 Standard 双向场景、三演员、S9 和独审回执。单独的 10/50/200 消息、逻辑委托与预算试验 | PASS（本地，远端最终 SHA 另记） |
 | FR-AW / AT-44,45 | evidence/workshop/w6/independent-review.md、独审回归；源材料风险、审核人退场、截止期限、可信审批 | PASS（工程身份） |
 | FR-ENTRY, FR-XSYS / AT-46–49 | evidence/workshop/w6/w008；相同作者键以安装分别幂等、隔离历史和进度、两套 stdio、审读冻结材料与取件 | PASS（PG17.11） |
+| FR-EXP / AT-50 | reports/handoff/P6_ROUTE_PROBE.json、P6_LOCAL_PREFLIGHT.json；金额、模型、演员、作品 revision 和 Skill 固定检查 | 离线前检已实跑；商业运行与独立审读 BLOCKED_ENVIRONMENT |
