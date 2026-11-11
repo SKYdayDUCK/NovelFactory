@@ -1,0 +1,146 @@
+{
+  "43072737280": {
+    "jobs": [
+      {
+        "id": 130704600295,
+        "name": "workshop",
+        "conclusion": "success",
+        "status": "completed"
+      }
+    ],
+    "artifacts": [
+      {
+        "id": 13879266226,
+        "name": "workshop-results",
+        "size_in_bytes": 7143,
+        "digest": "sha256:265e4c819fcb6196c3ab2fda9738be0dad1efd443ff6af0ccccfdeeeef263982",
+        "expired": false,
+        "junit": {
+          "nf-tools.xml": {
+            "tests": 5,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "workshop-results.xml": {
+            "tests": 67,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "dual-service-results.xml": {
+            "tests": 2,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "w1-legacy-upgrade.xml": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "dual-results.xml": {
+            "tests": 3,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        }
+      }
+    ],
+    "subject": "bc6fbbe71078b825872d313d5ef4f2d95aa2ddcb",
+    "qualified": [
+      "2026-11-11T17:55:28.5470630Z W5 candidate 85e443d68cd242595e124dcaca27844d34ddba39 tree c9f09eb2295c098710c6109efff7d03ebe55b210"
+    ],
+    "observed_manager_downtime": {
+      "task": "4fdc99f8-650e-43e3-937f-df04eac90156",
+      "scope": "No Workshop worker runs between initial NF binding and original-key reconciliation. NF runs two actual supervisor scans.",
+      "commercial_calls": 0,
+      "aw_database_disconnected": false
+    }
+  },
+  "43033428612": {
+    "jobs": [
+      {
+        "id": 130566005256,
+        "name": "PostgreSQL 17 integration, concurrency and restore",
+        "conclusion": "success",
+        "status": "completed"
+      },
+      {
+        "id": 130566005947,
+        "name": "Schema, domain, HTTP and production boundaries",
+        "conclusion": "success",
+        "status": "completed"
+      }
+    ],
+    "artifacts": [
+      {
+        "id": 13863112452,
+        "name": "p1-postgres-concurrency-1",
+        "size_in_bytes": 1738707,
+        "digest": "sha256:e901fd3bfe2db8aa9efe7f7ee3fcf01ab8638ab3d7ab2a9c6b57957ef60b2f49",
+        "expired": false,
+        "junit": {
+          "postgres-all.xml": {
+            "tests": 631,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        }
+      },
+      {
+        "id": 13861956713,
+        "name": "p1-schema-unit-1",
+        "size_in_bytes": 298787,
+        "digest": "sha256:ea7bd6416ff1018f11cd9174873688484e9268b3bb69ed1f4b8310b5527b3756",
+        "expired": false,
+        "junit": {
+          "unit.xml": {
+            "tests": 380,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        }
+      }
+    ],
+    "subject": "609e92278476c60a893658ef53b6ff15f659b153"
+  },
+  "43033428508": {
+    "jobs": [
+      {
+        "id": 130566004617,
+        "name": "workshop",
+        "conclusion": "success",
+        "status": "completed"
+      }
+    ],
+    "artifacts": [
+      {
+        "id": 13862980433,
+        "name": "workshop-results",
+        "size_in_bytes": 1578,
+        "digest": "sha256:c4ad1cc88bcaef067d7ee4e385bb55f5ae15af83ab95e669055d571ed3832650",
+        "expired": false,
+        "junit": {
+          "workshop-results.xml": {
+            "tests": 33,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "dual-results.xml": {
+            "tests": 2,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        }
+      }
+    ],
+    "subject": "609e92278476c60a893658ef53b6ff15f659b153"
+  }
+}

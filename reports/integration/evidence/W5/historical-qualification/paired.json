@@ -1,0 +1,204 @@
+{
+  "status": "PASS",
+  "pg": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "basebackup": "physical pg_basebackup -Fp -Xstream",
+  "verification": {
+    "exit_code": 0,
+    "stdout": "backup successfully verified"
+  },
+  "manifest_sha256": "af066953bd9c906f26a8a3e626961a413c33362bfa30461d0531f939f831b242",
+  "target": "aw_intent_before_nf",
+  "target_lsn": "0/4026790",
+  "replayed_lsn": "0/4026790",
+  "second_wal_target": "nf_bound_before_inference",
+  "second_target_lsn": "0/407A3C0",
+  "second_replay_lsn": "0/407A3C0",
+  "same_receipt_missing_attempt_peer": {
+    "task_id": "8a2683ef-f3d8-4895-8fbe-5c82115c456d",
+    "receipt_ref": "f05e6e24-e1de-454f-87fb-c3e7922e13f1",
+    "generation": 1,
+    "task_state": "PAUSED",
+    "accounting_state": "NO_ATTEMPT",
+    "attempts": []
+  },
+  "after_settled_history_mismatch": {
+    "state": "WAITING_OPERATOR",
+    "last_error": "REMOTE_HISTORY_MISMATCH",
+    "hold": "SETTLED",
+    "receipt_ref": "f05e6e24-e1de-454f-87fb-c3e7922e13f1",
+    "task_id": "8a2683ef-f3d8-4895-8fbe-5c82115c456d",
+    "accounting_state": "SETTLED",
+    "settled_amount": "0.020000",
+    "observations": 2
+  },
+  "rolled_back_nf_task_count": 0,
+  "rolled_back_aw_intent": {
+    "state": "REQUESTED",
+    "last_error": null,
+    "hold": "HELD",
+    "receipt_ref": null,
+    "task_id": null,
+    "accounting_state": null,
+    "settled_amount": null,
+    "observations": 0
+  },
+  "live_nf": {
+    "protocol_version": "aw-nf.v1",
+    "nf_instance_id": "d0a60bd6-bb9c-4271-8abc-f0784402e003",
+    "work_id": "03e09292-7500-4c3e-af66-fb1fb31c0516",
+    "branch_id": "e2c00580-ca0a-4f19-bdb1-2205ff366d14",
+    "operation_id": "6f684876-d06f-4abb-8e12-97f229eab50c",
+    "task_id": "8a2683ef-f3d8-4895-8fbe-5c82115c456d",
+    "receipt_ref": "f05e6e24-e1de-454f-87fb-c3e7922e13f1",
+    "world_ref": {
+      "work_id": "03e09292-7500-4c3e-af66-fb1fb31c0516",
+      "branch_id": "e2c00580-ca0a-4f19-bdb1-2205ff366d14",
+      "world_revision_id": "75494bff-f474-4a6b-84fe-d5a0db718685"
+    },
+    "generation": 1,
+    "task_state": "ACCEPTED",
+    "accounting_state": "UNKNOWN",
+    "currency": "USD",
+    "actual_amount": "0",
+    "actual_tokens": 0,
+    "attempt_ids": [
+      "12499238-b3b8-4965-a719-95b1e0092283"
+    ],
+    "attempts": [
+      {
+        "attempt_id": "12499238-b3b8-4965-a719-95b1e0092283",
+        "state": "UNKNOWN",
+        "actual_amount": null,
+        "actual_tokens": null
+      }
+    ],
+    "result_ref": "c56a84e0-2ea3-5552-9ba0-da5f495f0c5b",
+    "wait_reason": null
+  },
+  "nf_restored_aw_live": {
+    "state": "WAITING_OPERATOR",
+    "last_error": "REMOTE_HISTORY_MISMATCH",
+    "hold": "HELD",
+    "receipt_ref": "f05e6e24-e1de-454f-87fb-c3e7922e13f1",
+    "task_id": "8a2683ef-f3d8-4895-8fbe-5c82115c456d",
+    "accounting_state": "UNKNOWN",
+    "settled_amount": null,
+    "observations": 1
+  },
+  "aw_restored_nf_live_before_invoice": {
+    "state": "BOUND",
+    "last_error": null,
+    "hold": "HELD",
+    "receipt_ref": "f05e6e24-e1de-454f-87fb-c3e7922e13f1",
+    "task_id": "8a2683ef-f3d8-4895-8fbe-5c82115c456d",
+    "accounting_state": "UNKNOWN",
+    "settled_amount": null,
+    "observations": 1
+  },
+  "after_explicit_synthetic_invoice": {
+    "state": "SETTLED",
+    "last_error": null,
+    "hold": "SETTLED",
+    "receipt_ref": "f05e6e24-e1de-454f-87fb-c3e7922e13f1",
+    "task_id": "8a2683ef-f3d8-4895-8fbe-5c82115c456d",
+    "accounting_state": "SETTLED",
+    "settled_amount": "0.020000",
+    "observations": 2
+  },
+  "resulting_nf_tasks": 1,
+  "loopback_synthetic_http_requests": 1,
+  "supplier_model_calls": 0,
+  "recovery_mcp_calls": [
+    [
+      "nf_delegation_get",
+      "6f684876-d06f-4abb-8e12-97f229eab50c"
+    ],
+    [
+      "nf_delegation_get",
+      "6f684876-d06f-4abb-8e12-97f229eab50c"
+    ],
+    [
+      "nf_delegation_get",
+      "6f684876-d06f-4abb-8e12-97f229eab50c"
+    ],
+    [
+      "nf_delegation_get",
+      "6f684876-d06f-4abb-8e12-97f229eab50c"
+    ],
+    [
+      "nf_delegation_get",
+      "6f684876-d06f-4abb-8e12-97f229eab50c"
+    ],
+    [
+      "nf_delegation_get",
+      "6f684876-d06f-4abb-8e12-97f229eab50c"
+    ]
+  ],
+  "frozen_manager": "IDLE",
+  "workshop_offline": {
+    "status": "PASS",
+    "operation_id": "6f684876-d06f-4abb-8e12-97f229eab50c",
+    "recorded_utc": "2026-11-11T22:10:47.945974+00:00",
+    "scope": "Workshop database refused connections across two real NF supervisor scans.",
+    "aw_database_allowed_connections": false,
+    "aw_live_client_backends": 0,
+    "aw_author_mcp_during_outage": "VIEW_DENIED",
+    "pending_wake_preserved": "08f18823-d356-4ea7-8b7f-14f438d78d95",
+    "aw_unchanged_while_offline": {
+      "delegation": "BOUND",
+      "task_id": "8a2683ef-f3d8-4895-8fbe-5c82115c456d",
+      "receipt_ref": "f05e6e24-e1de-454f-87fb-c3e7922e13f1",
+      "task_state": "READY",
+      "accounting_state": "NO_ATTEMPT",
+      "budget_hold": "HELD",
+      "attempts_observed": 0
+    },
+    "nf_supervisor_scans": [
+      {
+        "before": {
+          "state": "READY",
+          "attempts": []
+        },
+        "after": {
+          "state": "RESULT_STORED",
+          "attempts": [
+            "12499238-b3b8-4965-a719-95b1e0092283"
+          ]
+        },
+        "status": "RESULT_STORED"
+      },
+      {
+        "before": {
+          "state": "RESULT_STORED",
+          "attempts": [
+            "12499238-b3b8-4965-a719-95b1e0092283"
+          ]
+        },
+        "after": {
+          "state": "ACCEPTED",
+          "attempts": [
+            "12499238-b3b8-4965-a719-95b1e0092283"
+          ]
+        },
+        "status": "IDLE"
+      }
+    ],
+    "nf_stdio_during_outage": {
+      "receipt_ref": "f05e6e24-e1de-454f-87fb-c3e7922e13f1",
+      "attempt_ids": [
+        "12499238-b3b8-4965-a719-95b1e0092283"
+      ]
+    },
+    "aw_after_reconciliation": {
+      "delegation": "BOUND",
+      "task_id": "8a2683ef-f3d8-4895-8fbe-5c82115c456d",
+      "receipt_ref": "f05e6e24-e1de-454f-87fb-c3e7922e13f1",
+      "task_state": "ACCEPTED",
+      "accounting_state": "UNKNOWN",
+      "budget_hold": "HELD",
+      "attempts_observed": 1
+    },
+    "production_provider_calls": 0
+  },
+  "elapsed_seconds": 15.92
+}
