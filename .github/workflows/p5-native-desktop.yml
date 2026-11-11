@@ -1,0 +1,80 @@
+name: P5 native desktop resume
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/p5-native-desktop.yml'
+      - 'scripts/probe_vscode_desktop.py'
+      - 'scripts/probe_vscode_offline_transport.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-desktop:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - name: Install disposable database, X11 display and locked application
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo install -d -m 0755 /usr/share/postgresql-common/pgdg
+          curl -fsSL --retry 3 https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo tee /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc >/dev/null
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt noble-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-17 xvfb xauth libasound2t64 libgtk-3-0t64 libnss3 libgbm1
+          uv sync --locked --group dev --python 3.12
+          uv pip install --python .venv/bin/python playwright==1.62.0
+      - name: Verify the pinned Microsoft desktop and OpenAI Marketplace extension
+        shell: bash
+        run: |
+          set -euo pipefail
+          assets="$RUNNER_TEMP/nf-desktop-assets"
+          mkdir -p "$assets"
+          cd "$assets"
+          curl -fLSs --retry 3 --max-time 300 'https://update.code.visualstudio.com/1.145.3/linux-x64/stable' -o desktop.tgz
+          echo '567e067c3ce043605af1b466e916173193100cf8c7da911b85e4c5c0869fe621  desktop.tgz' | sha256sum --check
+          tar -xzf desktop.tgz
+          curl -fLSs --retry 3 --max-time 300 'https://marketplace.visualstudio.com/_apis/public/gallery/publishers/openai/vsextensions/chatgpt/26.51106.51428/vspackage?targetPlatform=linux-x64' -o marketplace.bin
+          if gzip -t marketplace.bin 2>/dev/null; then
+            gzip -dc marketplace.bin > codex.vsix
+          else
+            mv marketplace.bin codex.vsix
+          fi
+          echo '4af1f59f7d8a0145943c2ec583e0bf09a495c258304d113052e74cbaeb73d6f6  codex.vsix' | sha256sum --check
+          # The native Electron sandbox helper requires a root-owned setuid install on Ubuntu.
+          sudo install -o root -g root -m 4755 VSCode-linux-x64/chrome-sandbox /usr/local/sbin/nf-desktop-sandbox
+      - name: Send two Chinese prompts in the ordinary-user desktop with only loopback
+        shell: bash
+        timeout-minutes: 7
+        run: |
+          set -euo pipefail
+          assets="$RUNNER_TEMP/nf-desktop-assets"
+          mkdir -p ci-evidence/p5-desktop
+          sudo unshare --net -- bash -ceu '
+            ip link set lo up
+            exec setpriv --reuid="$1" --regid="$2" --init-groups env -i \
+              HOME="$3" PATH=/usr/local/bin:/usr/bin:/bin LANG=C.UTF-8 \
+              CHROME_DEVEL_SANDBOX=/usr/local/sbin/nf-desktop-sandbox PG_BIN=/usr/lib/postgresql/17/bin \
+              xvfb-run --auto-servernum --server-args="-screen 0 1680x1100x24 -nolisten tcp" \
+              "$4/.venv/bin/python" "$4/scripts/with_postgres.py" --migrate -- \
+              "$4/.venv/bin/python" "$4/scripts/probe_vscode_desktop.py" \
+              --desktop "$5/VSCode-linux-x64" --vsix "$5/codex.vsix" \
+              --output "$4/ci-evidence/p5-desktop/native.json"
+          ' _ "$(id -u)" "$(id -g)" "$HOME" "$GITHUB_WORKSPACE" "$assets"
+      - name: Publish filtered UI and MCP evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p5-native-codex-desktop-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ci-evidence/p5-desktop/native.json
+          if-no-files-found: warn
+          retention-days: 30
