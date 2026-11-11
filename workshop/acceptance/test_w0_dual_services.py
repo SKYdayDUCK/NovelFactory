@@ -109,7 +109,8 @@ def test_both_stdio_services_and_revoked_session(tmp_path, record_property):
                 nf_tools = {t.name for t in (await nf_client.list_tools()).tools}
                 aw_tools = {t.name for t in (await aw.list_tools()).tools}
                 assert nf_tools == {"nf_project_status", "nf_resume_project"}
-                assert "aw_capabilities" in aw_tools and all(name.startswith("aw_") for name in aw_tools)
+                # This connection was enrolled without a Workshop organization or employee.
+                assert aw_tools == {"aw_capabilities"}
                 record_property("nf.project_tools", json.dumps(sorted(nf_tools)))
                 record_property("aw.tools", json.dumps(sorted(aw_tools)))
                 negotiated = (await capabilities(aw)).structuredContent

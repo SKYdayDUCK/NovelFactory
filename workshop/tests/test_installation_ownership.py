@@ -73,20 +73,32 @@ def test_w000_and_populated_w001_upgrade_keeps_old_tokens_scoped(isolated_databa
         conn.execute("""INSERT INTO aw_org_operations VALUES
                         ('legacy','manager',1,'legacy-key','legacy-request','{"revision":1}')""")
 
-    def history():
-        # Compare every original column even if a later migration adds metadata to the same row.
+    tables = (
+        "aw_organizations", "aw_employees", "aw_employment_versions", "aw_org_revisions",
+        "aw_edges", "aw_org_operations", "aw_bindings", "aw_installations",
+    )
+    # Capture the actual w001 projection before the upgrade; new columns cannot hide a changed old value.
+    with connect(dsn) as conn:
         columns = {
-            "aw_employees": "org_id employee_id employment_revision role_id team_id supervisor_id scope_ref status",
-            "aw_employment_versions": "org_id employee_id employment_revision org_revision role_id team_id supervisor_id scope_ref status",
-            "aw_org_revisions": "org_id revision preset preset_sha changed_by change_kind created_at",
-            "aw_edges": "org_id graph_revision src dst kind scope_ref",
-            "aw_org_operations": "org_id employee_id employment_revision operation_id request_sha receipt",
+            table: [
+                row["attname"] for row in conn.execute(
+                    """SELECT attname FROM pg_catalog.pg_attribute
+                       WHERE attrelid=to_regclass(%s) AND attnum > 0 AND NOT attisdropped ORDER BY attnum""",
+                    (table,),
+                )
+            ]
+            for table in tables
         }
+    assert all(columns.values())
+
+    def history():
         with connect(dsn) as conn:
             return {
                 table: conn.execute(
-                    sql.SQL("SELECT {} FROM {} WHERE org_id='legacy' ORDER BY 1,2,3").format(
-                        sql.SQL(",").join(map(sql.Identifier, names.split())), sql.Identifier(table)
+                    sql.SQL("SELECT {projection} FROM {table} ORDER BY {key}").format(
+                        projection=sql.SQL(",").join(map(sql.Identifier, names)),
+                        table=sql.Identifier(table),
+                        key=sql.SQL(",").join(map(sql.Identifier, names[:3])),
                     )
                 ).fetchall()
                 for table, names in columns.items()
@@ -94,6 +106,7 @@ def test_w000_and_populated_w001_upgrade_keeps_old_tokens_scoped(isolated_databa
 
     before = history()
     command.upgrade(config, "head")
+    assert history() == before
     for owner, token in tokens.items():
         capabilities_only(dsn, token, "nf-" + owner)
     with connect(dsn) as conn:
@@ -115,7 +128,13 @@ def test_w000_and_populated_w001_upgrade_keeps_old_tokens_scoped(isolated_databa
     assert "aw_hire" in dispatch(binding)
     view = dispatch(binding, "aw_roster_get", {})
     assert view["revision"] == 1 and {row["employee_id"] for row in view["employees"]} == {"manager", "author"}
-    assert history() == before
+    # Only the explicit re-enrollment has inserted a new token.
+    after = history()
+    assert len(after["aw_bindings"]) == len(before["aw_bindings"]) + 1
+    assert all(binding in after["aw_bindings"] for binding in before["aw_bindings"])
+    assert {key: rows for key, rows in after.items() if key != "aw_bindings"} == {
+        key: rows for key, rows in before.items() if key != "aw_bindings"
+    }
 
 
 def test_new_org_has_one_provisioning_installation(isolated_database):

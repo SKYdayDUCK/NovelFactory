@@ -7,6 +7,7 @@ import re
 from psycopg.types.json import Jsonb
 
 from .auth import Denied
+from .roster_projection import project_employees
 
 IDENTIFIER = {"type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,96}$"}
 POSITIVE = {"type": "integer", "minimum": 1}
@@ -143,12 +144,14 @@ def require_employee(conn, session):
     return row
 
 
-def _insert_employee(conn, org, revision, emp, role, supervisor, team, scope):
+def _insert_employee(conn, org, revision, emp, role, supervisor, team, scope, *,
+                     display_name=None, slot_id=None):
     conn.execute(
         """INSERT INTO aw_employees
-        (org_id,employee_id,employment_revision,role_id,supervisor_id,team_id,scope_ref,status)
-        VALUES (%s,%s,1,%s,%s,%s,%s,'ACTIVE')""",
-        (org, emp, role, supervisor, team, scope),
+        (org_id,employee_id,employment_revision,role_id,supervisor_id,team_id,scope_ref,status,
+         display_name,slot_id)
+        VALUES (%s,%s,1,%s,%s,%s,%s,'ACTIVE',%s,%s)""",
+        (org, emp, role, supervisor, team, scope, display_name or emp, slot_id or emp),
     )
     _snapshot(conn, org, revision, emp)
 
@@ -156,7 +159,10 @@ def _insert_employee(conn, org, revision, emp, role, supervisor, team, scope):
 def _snapshot(conn, org, revision, emp):
     conn.execute(
         """INSERT INTO aw_employment_versions
-        SELECT org_id,employee_id,employment_revision,%s,role_id,team_id,supervisor_id,scope_ref,status
+        (org_id,employee_id,employment_revision,org_revision,role_id,team_id,supervisor_id,
+         scope_ref,status,display_name,slot_id)
+        SELECT org_id,employee_id,employment_revision,%s,role_id,team_id,supervisor_id,
+               scope_ref,status,display_name,slot_id
         FROM aw_employees WHERE org_id=%s AND employee_id=%s""",
         (revision, org, emp),
     )
@@ -308,16 +314,28 @@ def _change(conn, session, action, expected_revision, operation_id, employee_id,
                 if ancestor["supervisor_id"]
                 else None
             )
+        slot_id = _id(fields.get("slot_id", row["slot_id"] if row else employee_id))
+        display_name = fields.get("display_name", row["display_name"] if row else employee_id)
+        if (not isinstance(display_name, str) or not 1 <= len(display_name) <= 128
+                or not display_name.strip() or not display_name.isprintable()):
+            raise Denied("INVALID_DISPLAY_NAME")
+        if conn.execute(
+            """SELECT 1 FROM aw_employees WHERE org_id=%s AND slot_id=%s
+               AND status='ACTIVE' AND employee_id<>%s""",
+            (org_id, slot_id, employee_id),
+        ).fetchone():
+            raise Denied("SLOT_OCCUPIED")
         if action == "HIRE":
             _insert_employee(
-                conn, org_id, newrev, employee_id, role, sup_id, team, org["scope_ref"]
+                conn, org_id, newrev, employee_id, role, sup_id, team, org["scope_ref"],
+                display_name=display_name, slot_id=slot_id,
             )
         else:
             conn.execute(
                 """UPDATE aw_employees SET employment_revision=employment_revision+1,
-                role_id=%s,supervisor_id=%s,team_id=%s,status='ACTIVE'
+                role_id=%s,supervisor_id=%s,team_id=%s,status='ACTIVE',display_name=%s,slot_id=%s
                 WHERE org_id=%s AND employee_id=%s""",
-                (role, sup_id, team, org_id, employee_id),
+                (role, sup_id, team, display_name, slot_id, org_id, employee_id),
             )
     else:
         if (action == "SUSPEND" and row["status"] != "ACTIVE") or conn.execute(
@@ -357,8 +375,10 @@ def roster(conn, session):
     org = lock_org(conn, session.org_id)
     whole = viewer["role_id"] in ("workshop_manager", "author")
     visible = conn.execute(
-        """SELECT employee_id,role_id,team_id,supervisor_id,employment_revision,status
-        FROM aw_roster_views WHERE org_id=%s AND revision=%s AND audience=%s ORDER BY employee_id""",
+        """SELECT v.employee_id,v.role_id,v.team_id,v.supervisor_id,v.employment_revision,
+                  v.status,e.display_name
+           FROM aw_roster_views v JOIN aw_employees e USING (org_id,employee_id)
+           WHERE v.org_id=%s AND v.revision=%s AND v.audience=%s ORDER BY v.employee_id""",
         (session.org_id, org["active_revision"], session.employee_id),
     ).fetchall()
     routes = conn.execute(
@@ -370,14 +390,17 @@ def roster(conn, session):
         "org_id": session.org_id,
         "revision": org["active_revision"],
         "preset": org["preset"],
-        "employees": visible,
+        "employees": project_employees(visible, viewer, routes, NF_ROLES[viewer["role_id"]]),
         "routes": routes,
     }
 
 
 def state(conn, session):
     view = roster(conn, session)
-    return {k: v for k, v in view.items() if k != "routes"}
+    view.pop("routes")
+    for member in view["employees"]:
+        member.pop("allowed_routes", None)
+    return view
 
 
 def _handler(action):
@@ -403,7 +426,11 @@ TOOLS = {
     **{
         "aw_" + action.lower(): (
             f"{action.title()} an employee using organization revision CAS.",
-            schema(CHANGE | (ROLE if action in ("HIRE", "TRANSFER") else {})),
+            schema(
+                CHANGE | ROLE | {"slot_id": IDENTIFIER, "display_name":
+                                {"type": "string", "minLength": 1, "maxLength": 128}},
+                required=[*CHANGE, *ROLE],
+            ) if action in ("HIRE", "TRANSFER") else schema(CHANGE),
             _handler(action),
         )
         for action in ("HIRE", "TRANSFER", "SUSPEND", "END")
