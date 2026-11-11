@@ -9,7 +9,7 @@ from mcp import types
 from mcp.server.lowlevel import Server
 from mcp.server.stdio import stdio_server
 
-from . import messaging, organization
+from . import delegation, messaging, organization
 from .roster_projection import catalog_binding
 from .auth import Denied, authenticate, connect, private_binding
 
@@ -30,7 +30,7 @@ def negotiate(conn, session, protocol_version):
 
 TOOLS = {"aw_capabilities": ("Negotiate this connection's organization protocol.",
          {"type": "object", "required": ["protocol_version"], "additionalProperties": False,
-          "properties": {"protocol_version": {"type": "string", "maxLength": 32}}}, negotiate), **organization.TOOLS, **messaging.TOOLS}
+          "properties": {"protocol_version": {"type": "string", "maxLength": 32}}}, negotiate), **organization.TOOLS, **messaging.TOOLS, **delegation.TOOLS}
 
 
 def dispatch(config, name=None, arguments=None):
@@ -46,7 +46,7 @@ def dispatch(config, name=None, arguments=None):
             viewer = organization.require_employee(conn, session)
             visible = set(TOOLS)
             if viewer["role_id"] != "workshop_manager":
-                visible -= changes
+                visible -= changes | {"aw_handoff"}
         if name is None:
             return sorted(visible)
         if name not in visible:

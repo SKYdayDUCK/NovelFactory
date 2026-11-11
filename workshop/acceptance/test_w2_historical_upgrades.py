@@ -96,18 +96,20 @@ def test_upgrade_historical_service(source, start, db_var, tmp_path, record_prop
             for table in ("aw_deliveries", "aw_outbox", "aw_messages", "aw_message_bodies"):
                 assert before[table][0] == 1
     scripts = ScriptDirectory.from_config(Config(str(WORKSHOP / "alembic.ini")))
-    assert scripts.get_heads() == ["w002c"]
+    current = scripts.get_current_head()
+    assert current is not None
+    assert "w002c" in {rev.revision for rev in scripts.walk_revisions(base="base", head=current)}
     assert set(scripts.get_revision("w002c").down_revision) == {"w001b", "w002b"}
     run(WORKSHOP, dsn, "alembic", "upgrade", "head")
     run(WORKSHOP, dsn, "alembic", "upgrade", "head")
     with psycopg.connect(dsn) as conn:
-        assert conn.execute("SELECT version_num FROM aw_alembic_version").fetchall() == [("w002c",)]
+        assert conn.execute("SELECT version_num FROM aw_alembic_version").fetchall() == [(current,)]
         assert snapshot(conn, tables) == before
         assert conn.execute("SELECT count(*) FROM aw_message_origins").fetchone() == (0,)
         assert conn.execute("SELECT bool_and(org_member) FROM aw_bindings").fetchone() == (start == "w001b",)
     record_property("source_sha", source)
     record_property("starting_revision", start)
-    record_property("ending_revision", "w002c")
+    record_property("ending_revision", current)
     record_property("preserved_table_row_counts", json.dumps({k: v[0] for k, v in before.items()}, sort_keys=True))
 
     async def verify():
