@@ -2,6 +2,10 @@
 
 当前只开放 W5 [#14](https://github.com/SKYdayDUCK/NovelFactory/pull/14)。W4 的实际主线基线为 `6c711adf794842bdf4469ab51e89093d37761bcc`。先核远端最新 main、#14 状态、旧分支和实际差异。保留原始工件，逐阶段独立验证并签收。[W4 主线签收](W4_主线签收.md) · [当前阶段](CURRENT_STAGE.md) · [台账](DELIVERY_LEDGER.md) · [矩阵](PR_MERGE_MATRIX.md) · [已知问题](KNOWN_FAILURES.md)。
 
+## W5 候选检查点
+
+2026-11-11 22:23 UTC，先核 #14、`455cf92cc6fe5e1d0e565d627a4d5651a56bc8d4`、主线和两个运行。已核 [Workshop 145/145](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43110195132)，[NF PostgreSQL](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43110195167) 待终态。完成后正常合并，以真实 main 运行相同双服务、四历史库、恢复、权限和 834 项 NF 回归，保存签收后才能开启 W6。[候选实测与原件](evidence/W5/candidate-455cf92/independent/README.md)。
+
 ## 后续串行交付顺序
 
 1. W4 #12 已签收。当前只集成 **W5 #14**，随后为 W6 #15。每个阶段完成独立开发、测试、PR、托管 CI、正常合并与主线复验后签收。W6 验收完成后，在真实 main 开展 P5.6 双服务、人员组织、角色认知、Skills/审核、成本、迁移/PITR 和 10/50/200、历史 NF 容量验收。保留原 AT-30 门槛及 #13。

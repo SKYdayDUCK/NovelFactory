@@ -10,7 +10,7 @@
 | NF Bridge | [#11](https://github.com/SKYdayDUCK/NovelFactory/pull/11) | MERGED_AND_VERIFIED；[主线签收](NF_Bridge_主线签收.md) | `15f606c99c765deeffd904ad540441eb6476b3af`，2026-11-11T19:02:35Z |
 | W3 | [#10](https://github.com/SKYdayDUCK/NovelFactory/pull/10) | MERGED_AND_VERIFIED，[主线签收](W3_主线签收.md) | `e6763d844f023d7c6a13060dbaebca0416fe3099`，2026-11-11T19:53:57Z |
 | W4 | [#12](https://github.com/SKYdayDUCK/NovelFactory/pull/12) | MERGED_AND_VERIFIED，[W4 主线签收](W4_主线签收.md) | `6c711adf794842bdf4469ab51e89093d37761bcc`，2026-11-11T21:42:09Z |
-| W5 | [#14](https://github.com/SKYdayDUCK/NovelFactory/pull/14) | 当前唯一阶段 | 待正常合并 |
+| W5 | [#14](https://github.com/SKYdayDUCK/NovelFactory/pull/14) | 唯一当前阶段，候选 `455cf92` 的 Workshop 正式 145/145；[候选实测与原件](evidence/W5/candidate-455cf92/independent/README.md) | 待正常合并与主线复验 |
 | W6 与 P6 | [矩阵](PR_MERGE_MATRIX.md) | 冻结 | 待上一阶段签收 |
 
 每阶段的原 PR 讨论保存合并后的完整 SHA、时间、主线验收作业、遗留问题和下一阶段是否开放。后续阶段 PR 将前一阶段已确认的回执归入本表，保留原 PR 上可即时复查的记录。
