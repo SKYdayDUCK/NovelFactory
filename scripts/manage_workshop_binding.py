@@ -9,6 +9,7 @@ from pathlib import Path
 from novel_factory.application.agent_gateway import AgentGateway
 from novel_factory.application.delegation import (
     install,
+    installation_ledger,
     provision_slot,
     reconcile_restored_installation,
     revoke,
@@ -31,10 +32,10 @@ def main():
     add = sub.add_parser("install")
     for name in ["org-id", "nf-instance-id", "expires-at", "binding-output"]:
         add.add_argument("--" + name, required=True)
-    for name in ["slot", "revoke", "reconcile"]:
+    for name in ["slot", "revoke", "reconcile", "snapshot"]:
         p = sub.add_parser(name)
         p.add_argument("--installation-id", required=True)
-        if name != "revoke":
+        if name in {"slot", "reconcile"}:
             p.add_argument("--input", type=Path, required=True)
     args = parser.parse_args()
     access = read_private_config(args.access_file)
@@ -95,6 +96,8 @@ def main():
                     }
                 )
             )
+        elif args.command == "snapshot":
+            print(json.dumps(installation_ledger(kernel, owner, args.installation_id)))
         elif args.command == "revoke":
             revoke(kernel, owner, args.installation_id)
         elif args.command == "reconcile":

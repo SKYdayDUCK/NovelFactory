@@ -117,8 +117,40 @@ def revoke(kernel, controller, installation_id):
         )
 
 
+RECOVERY_FIELDS = (
+    "task_id",
+    "receipt_ref",
+    "generation",
+    "task_state",
+    "accounting_state",
+    "attempts",
+)
+
+
+def _installation_ledger(repo, row):
+    result = {}
+    for receipt in repo.many("delegation_receipts", {"installation_id": row["installation_id"]}):
+        slot = repo.one(
+            "delegation_slots",
+            {"installation_id": row["installation_id"], "scope_ref": receipt["scope_ref"]},
+        )
+        view = Delegations._read(repo, row, receipt, slot)
+        result[receipt["operation_id"]] = {k: view[k] for k in RECOVERY_FIELDS}
+    return result
+
+
+def installation_ledger(kernel, controller, installation_id):
+    with kernel.db.uow(repeatable_read=True) as repo:
+        row = repo.one(
+            "delegation_installations", {"installation_id": installation_id}, lock="share"
+        )
+        require(row, "VIEW_DENIED", "Installation unavailable")
+        kernel.authorize(repo, controller, row["work_id"], "ADMIN", row["branch_id"])
+        return _installation_ledger(repo, row)
+
+
 def reconcile_restored_installation(kernel, controller, installation_id, expected_receipts):
-    """Local NF administrator supplies the partner's durable operation/receipt mapping."""
+    """Local NF administrator supplies the partner's reconciled operation and attempt ledger."""
     with kernel.db.uow() as repo:
         row = repo.one(
             "delegation_installations", {"installation_id": installation_id}, lock="update"
@@ -129,8 +161,7 @@ def reconcile_restored_installation(kernel, controller, installation_id, expecte
             "Installation is not fenced",
         )
         kernel.authorize(repo, controller, row["work_id"], "ADMIN", row["branch_id"])
-        receipts = repo.many("delegation_receipts", {"installation_id": installation_id})
-        local = {r["operation_id"]: r["receipt_ref"] for r in receipts}
+        local = _installation_ledger(repo, row)
         require(expected_receipts == local, "DELEGATION_RECOVERY_FENCED", "Receipts disagree")
         repo.change(
             "delegation_installations",

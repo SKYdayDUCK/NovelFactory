@@ -448,6 +448,17 @@ class TaskService:
             conn.execute(insert(self.tables["budgets"]).values(budget_id=budget_id, work_id=str(work_id), currency=currency, limit_amount=amount))
         return budget_id
 
+    def _allow_delegated_inference(self, conn, task_id):
+        if "delegation_receipts" not in self.tables:
+            return
+        allowed = conn.scalar(text("""
+            SELECT i.active AND NOT i.outbound_fenced
+            FROM nf_delegation_receipts r JOIN nf_delegation_installations i USING(installation_id)
+            WHERE r.task_id=:task FOR SHARE OF i
+        """), {"task":task_id})
+        if allowed is False:
+            raise _error("DELEGATION_RECOVERY_FENCED", "Delegated inference is fenced")
+
     def reserve_call(self, task_id, generation, worker_id, *, budget_id, amount, call_key, request_hash, token_amount=0, authorize_in_tx=None):
         reserve = _money(amount)
         if type(token_amount) is not int or token_amount < 0:
@@ -455,6 +466,7 @@ class TaskService:
         if len(request_hash) != 64 or not call_key:
             raise _error("INVALID_ARGUMENT", "Call requires request hash and stable identity")
         with self._tx(authorize_in_tx) as conn:
+            self._allow_delegated_inference(conn, task_id)
             task = self.guard_task(conn, task_id, generation, worker_id)
             if task["state"] != "RUNNING":
                 raise _error("TASK_NOT_ACCEPTABLE", "External calls require a live RUNNING execution")
@@ -492,6 +504,7 @@ class TaskService:
         with self._tx(authorize_in_tx) as conn:
             calls = self.tables["call_attempts"]
             call = conn.execute(select(calls).where(calls.c.attempt_id == attempt_id)).mappings().one()
+            self._allow_delegated_inference(conn, call["task_id"])
             task = self.guard_task(conn, call["task_id"], call["generation"], worker_id)
             if task["state"] != "RUNNING":
                 raise _error("TASK_NOT_ACCEPTABLE", "External dispatch requires a live RUNNING execution")

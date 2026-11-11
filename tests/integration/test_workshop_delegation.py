@@ -233,3 +233,45 @@ def test_restored_installation_requires_partner_reconciliation(site):
         and current["task_state"] == "PAUSED"
         and not requests
     )
+
+
+def test_receipt_match_cannot_unlock_missing_attempt_or_resume_model(site):
+    from novel_factory.application.delegation import (
+        installation_ledger,
+        reconcile_restored_installation,
+    )
+    from novel_factory.infrastructure.recovery import fence_recovered_tasks
+
+    runtime, submit, get, _, _, owner, requests, _ = site
+    bound = runtime.call("nf_delegation_submit", submit)
+    fence_recovered_tasks(runtime.kernel.db.engine, runtime.kernel.objects)
+    snapshot = installation_ledger(runtime.kernel, owner, runtime.installation_id)
+    assert snapshot[get["operation_id"]]["receipt_ref"] == bound["receipt_ref"]
+    future = {
+        k: dict(
+            v,
+            attempts=[
+                {
+                    "attempt_id": str(uuid4()),
+                    "state": "UNKNOWN",
+                    "actual_amount": None,
+                    "actual_tokens": None,
+                }
+            ],
+        )
+        for k, v in snapshot.items()
+    }
+    with pytest.raises(DomainError, match="Receipts disagree"):
+        reconcile_restored_installation(runtime.kernel, owner, runtime.installation_id, future)
+    with pytest.raises(DomainError) as blocked:
+        runtime.kernel.tasks.reserve_call(
+            bound["task_id"],
+            1,
+            "stale-worker",
+            budget_id=str(uuid4()),
+            amount="0.1",
+            call_key="retry",
+            request_hash="a" * 64,
+        )
+    assert blocked.value.code == "DELEGATION_RECOVERY_FENCED" and not requests
+    reconcile_restored_installation(runtime.kernel, owner, runtime.installation_id, snapshot)

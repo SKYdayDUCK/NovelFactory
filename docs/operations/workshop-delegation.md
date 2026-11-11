@@ -28,7 +28,7 @@ NF 已提交但回应丢失时，客户端保持组织侧的费用预留，用�
 
 ## 恢复和撤权
 
-物理或逻辑恢复后在启动服务前照常执行 NF 恢复围栏。此步骤还会冻结所有安装的新委托。既有回执可查。由授权管理员在核对 Workshop 的所有待处理与已绑定操作后，提供完整的 `{operation_id: receipt_ref}` JSON。两侧回执集合不同会阻止解冻。缺失的对端操作必须先对账，再恢复外发。撤销安装同时撤销所有所属 slot 的角色授权，历史回执和已发生费用保存在 NF。
+物理或逻辑恢复后在启动服务前照常执行 NF 恢复围栏。此步骤还会冻结所有安装的新委托。既有回执可查。由授权管理员在核对 Workshop 的所有待处理与已绑定操作后，提供 Workshop 当前冻结 epoch 的完整对账结果。每个 operation 的条目包括 receipt_ref、task_id、generation、任务状态、账本状态及逐 attempt 状态/金额/Token。使用本地 snapshot 子命令导出 NF 侧同格式的账本。任一条目不符会阻止解冻。恢复期间账本拒绝 delegated task 的新预留与派发，即使普通调度已经唤醒该任务。缺失的对端操作必须先对账，再恢复外发。撤销安装同时撤销所有所属 slot 的角色授权，历史回执和已发生费用保存在 NF。
 
 ```sh
 uv run python scripts/manage_workshop_binding.py --access-file /srv/nf/private/admin.json reconcile \
