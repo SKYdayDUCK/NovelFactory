@@ -69,6 +69,15 @@ def test_roster_privacy_and_persistent_public_names(organization):
         assert "authorized_scope" not in admin_rows["performer-a"]
         assert admin_rows["manager"]["skill_manifest_ref"] is None
         assert admin_rows["manager"]["capability_profile"]["nf_role_modes"] == []
+        # The proposed edge closes the existing manager chain chief -> volume -> chief.
+        with pytest.raises(Denied, match="REASSIGN_REPORTS_FIRST|SUPERVISOR_CYCLE"):
+            TOOLS["aw_transfer"][2](
+                conn, manager, operation_id="cycle", expected_revision=3, employee_id="chief",
+                role_id="character_actor", supervisor_id="volume", team_id="production",
+            )
+        unchanged = roster(conn, manager)
+        assert unchanged["revision"] == 3
+        assert next(r for r in unchanged["employees"] if r["employee_id"] == "chief")["supervisor_id"] == "manager"
         assert "routes" not in state(conn, actor)
         assert all("allowed_routes" not in row for row in state(conn, actor)["employees"])
         assert conn.execute(
