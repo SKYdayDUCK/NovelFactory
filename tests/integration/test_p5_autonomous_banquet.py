@@ -550,6 +550,28 @@ def test_one_author_resume_through_autonomous_banquet(kernel_env, tmp_path):
             )
             assert all(item == {"input_tokens": 11, "output_tokens": 7} for item in usage.values())
             if output := os.environ.get("NF_P5_BANQUET_EVIDENCE"):
+                from novel_factory.application.prompt_schema import inline_schema
+                from novel_factory.domain.canonical import canonical_bytes
+
+                payload_sizes = {}
+                for request in requests:
+                    messages = request["messages"]
+                    packet = json.loads(messages[1]["content"])
+                    ctx = packet["context"]
+                    task = kernel.tasks.get(ctx["task_id"])
+                    cfg = repo.one("supervisor_jobs", {"task_id": task["task_id"]})["config"]
+                    frozen = kernel.artifact(repo, cfg["dispatch"]["input_ref"], work, kind="AGENT_INPUT")
+                    contract = frozen["payload"]["output_contract"]
+                    emitted = messages[0]["content"].split("Payload JSON Schema: ", 1)[1]
+                    payload_sizes[labels[task["task_id"]]] = {
+                        "prompt_utf8_bytes": sum(len(m["content"].encode()) for m in messages),
+                        "inlined_schema_bytes": len(canonical_bytes(inline_schema(contract["name"], contract["version"]))),
+                        "emitted_schema_bytes": len(emitted.encode()),
+                        "authorized_materials": len(packet["authorized_materials"]),
+                    }
+                assert len(payload_sizes) == len(requests) == 8
+                assert len({row["context_bundle_id"] for row in repo.many("contexts", {"work_id": work})
+                            if row["task_id"] in labels and row["task_id"] != control_id}) == 8
                 report = {
                     "test": "test_one_author_resume_through_autonomous_banquet",
                     "provider": "deterministic HTTPS loopback fixture; no live inference or paid tokens",
@@ -569,6 +591,7 @@ def test_one_author_resume_through_autonomous_banquet(kernel_env, tmp_path):
                     "scene_fixture_input_tokens": sum(v["input_tokens"] for v in usage.values()),
                     "scene_fixture_output_tokens": sum(v["output_tokens"] for v in usage.values()),
                     "tokens_by_turn": usage,
+                    "observed_request_sizes": payload_sizes,
                     "completed_model_tasks_per_second": round(len(usage) / elapsed, 4),
                     "elapsed_s_including_restart": round(elapsed, 4),
                     "B_wake_source": "Distinct notification task completed after A; no private A text or in-world BELIEF is inferred",

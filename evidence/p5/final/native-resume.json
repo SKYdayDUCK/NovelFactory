@@ -1,0 +1,89 @@
+[
+  {
+    "host": "codex-cli 0.167.0-alpha.4",
+    "transport": "Codex app-server to local stdio MCP",
+    "server": "NovelFactory",
+    "tools": [
+      "nf_project_status",
+      "nf_resume_project"
+    ],
+    "thread_id": "01a1c972-f614-7400-bc33-df6dd28ca00d",
+    "model_turns": 0,
+    "call": "nf_project_status",
+    "result": {
+      "counts": {
+        "READY": 1,
+        "WAITING": 1,
+        "RUNNING": 0
+      },
+      "ready_count": 1,
+      "workflow_state": "READY",
+      "blockers": {
+        "WAITING": 1
+      },
+      "pending_review_count": 0,
+      "pending_author_approval_count": 0,
+      "resume_grant_expires_at": "2026-11-12T07:09:05.314898+00:00"
+    }
+  },
+  {
+    "host": "codex-cli 0.167.0-alpha.4",
+    "transport": "Codex app-server to local stdio MCP",
+    "server": "NovelFactory",
+    "tools": [
+      "nf_project_status",
+      "nf_resume_project"
+    ],
+    "thread_id": "01a1c972-f958-71e0-a3fd-986db0089a40",
+    "model_turns": 0,
+    "call": "nf_resume_project",
+    "result": {
+      "counts": {
+        "READY": 1,
+        "WAITING": 1,
+        "RUNNING": 0
+      },
+      "ready_count": 1,
+      "workflow_state": "READY",
+      "blockers": {
+        "WAITING": 1
+      },
+      "pending_review_count": 0,
+      "pending_author_approval_count": 0,
+      "awakened": 0,
+      "recovered": 0,
+      "closed_waits": 0,
+      "resume_grant_expires_at": "2026-11-12T07:09:05.314898+00:00"
+    }
+  },
+  {
+    "host": "codex-cli 0.167.0-alpha.4",
+    "transport": "Codex app-server to local stdio MCP",
+    "server": "NovelFactory",
+    "tools": [
+      "nf_project_status",
+      "nf_resume_project"
+    ],
+    "thread_id": "01a1c972-fc57-7d53-844f-47741563918d",
+    "model_turns": 0,
+    "call": "nf_resume_project",
+    "result": {
+      "counts": {
+        "READY": 1,
+        "WAITING": 1,
+        "RUNNING": 0
+      },
+      "ready_count": 1,
+      "workflow_state": "READY",
+      "blockers": {
+        "WAITING": 1
+      },
+      "pending_review_count": 0,
+      "pending_author_approval_count": 0,
+      "awakened": 0,
+      "recovered": 0,
+      "closed_waits": 0,
+      "resume_grant_expires_at": "2026-11-12T07:09:05.314898+00:00"
+    }
+  }
+]

@@ -12,7 +12,6 @@ from datetime import datetime, timezone
 from decimal import Decimal
 import json
 import time
-from urllib.parse import urljoin
 from uuid import UUID, uuid5
 
 from sqlalchemy import select
@@ -20,6 +19,7 @@ from sqlalchemy import select
 from novel_factory.application.kernel import require
 from novel_factory.application.queries import WorldQueryService
 from novel_factory.application.query_policy import check_profile
+from novel_factory.application.prompt_schema import inline_schema, prompt_schema
 from novel_factory.contracts.registry import schema_for, validate_contract
 from novel_factory.domain.canonical import canonical_bytes, fingerprint
 from novel_factory.domain.errors import DomainError
@@ -30,6 +30,9 @@ from novel_factory.infrastructure.model_gateway import ModelCallFailure, ModelRe
 from novel_factory.infrastructure.repository import KernelRepository
 from novel_factory.infrastructure.runtime_catalog import RuntimeCatalog
 
+
+# The stdio adapter and earlier callers request the fully inlined wire schema.
+_inline_schema = inline_schema
 
 OUTPUT_CONTRACTS = {
     **{("character_actor", kind): ("ActionProposal", "2.0")
@@ -55,27 +58,6 @@ def _unique_pairs(pairs):
             raise ValueError("Duplicate JSON key")
         result[key] = value
     return result
-
-
-def _inline_schema(name, version):
-    """Give the model the selected schema, not every unrelated contract."""
-    from novel_factory.contracts._schema_bundle import SCHEMAS
-    documents = {s["$id"]: s for s in SCHEMAS.values()}
-    source = schema_for(name, version)
-    def expand(value, document, seen=()):
-        if isinstance(value, list):
-            return [expand(item, document, seen) for item in value]
-        if not isinstance(value, dict):
-            return value
-        if "$ref" in value:
-            ref = value["$ref"]
-            root, definition = ref.split("#/$defs/")
-            target = documents[urljoin(document["$id"], root)] if root else document
-            identity = target["$id"] + "#/$defs/" + definition
-            require(identity not in seen, "INVALID_MODEL_CONFIG", "Recursive model output schemas require a bounded adapter")
-            return expand(target["$defs"][definition], target, seen + (identity,))
-        return {k: expand(v, document, seen) for k, v in value.items()}
-    return expand(source["$defs"][name], source)
 
 
 class AgentGateway:
@@ -210,7 +192,7 @@ class AgentGateway:
             material.append({"artifact_ref": ref, "content": value})
         runtime = binding["runtime"]
         output = data["output_contract"]
-        contract = _inline_schema(output["name"], output["version"])
+        contract_text = prompt_schema(output["name"], output["version"])
         identity = {"schema_version": "2.1", "task_id": task["task_id"], "generation": task["generation"],
                     "context_bundle_id": task["context_bundle_id"], "world_ref": spec["world_ref"],
                     "role_id": spec["role_id"], "actor_id": binding["grant"]["actor_id"]}
@@ -222,7 +204,7 @@ class AgentGateway:
                   + runtime["role_contract"] + "\n" + runtime["skill_instructions"]
                   + "\nRestricted mode: " + str(runtime["restricted_mode"])
                   + "\nIdentity: " + canonical_bytes(identity).decode()
-                  + "\nPayload JSON Schema: " + canonical_bytes(contract).decode())
+                  + "\nPayload JSON Schema: " + contract_text)
         user = {"assignment": data["assignment"], "context": context["payload"], "read_cut": context["read_cut"],
                 "authorized_materials": material}
         from novel_factory.application.editorial_handoff import prompt_material
