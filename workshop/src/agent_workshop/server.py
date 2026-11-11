@@ -3,6 +3,8 @@ import argparse
 import asyncio
 import json
 import sys
+from functools import cache
+from pathlib import Path
 
 from jsonschema import Draft202012Validator, FormatChecker
 from mcp import types
@@ -15,6 +17,21 @@ PROTOCOL = "aw-nf.v1"
 MAX_ARGUMENT_BYTES = 32768
 
 
+@cache
+def catalog_binding():
+    # Wheels contain the frozen manifest beside this module; source checkouts
+    # retain it at the existing contracts path used by operators and CI.
+    path = Path(__file__).with_name("nf-catalog.json")
+    if not path.is_file():
+        path = Path(__file__).resolve().parents[2] / "contracts" / "nf-catalog.json"
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    return {
+        "nf_commit": manifest["nf_commit"],
+        "role_catalog_hash": manifest["catalogs"]["runtime/roles/catalog.json"],
+        "skill_catalog_hash": manifest["catalogs"]["runtime/skills/catalog.json"],
+    }
+
+
 def negotiate(conn, session, protocol_version):
     if protocol_version != PROTOCOL:
         raise Denied("PROTOCOL_UNSUPPORTED")
@@ -22,7 +39,8 @@ def negotiate(conn, session, protocol_version):
                             (session.installation_id,)).fetchone()
     return {"protocol_version": PROTOCOL, "installation_id": session.installation_id,
             "nf_instance_id": instance["nf_instance_id"], "grant_epoch": session.grant_epoch,
-            "max_argument_bytes": MAX_ARGUMENT_BYTES, "max_ttl_seconds": 86400}
+            "max_argument_bytes": MAX_ARGUMENT_BYTES, "max_ttl_seconds": 86400,
+            **catalog_binding()}
 
 
 TOOLS = {"aw_capabilities": ("Negotiate this connection's organization protocol.",
