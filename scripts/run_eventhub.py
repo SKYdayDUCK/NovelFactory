@@ -7,6 +7,8 @@ import time
 
 from redis import Redis
 from redis.exceptions import RedisError
+from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import TimeoutError as PoolTimeout
 
 from novel_factory.infrastructure.database import Database
 from novel_factory.infrastructure.eventhub import EventHub
@@ -47,7 +49,10 @@ def main():
                 try:
                     replay = 0
                     if time.monotonic() >= next_check:
-                        replay = hub.repair_once(args.limit)
+                        hub.diagnostics.run("relay", client.ping, ping_only=True)
+                        replay = hub.diagnostics.run(
+                            "relay", lambda: hub.repair_once(args.limit), ping_only=True
+                        )
                         next_check = time.monotonic() + 5
                     n = hub.relay_once(args.limit)
                     result = {"published": n, "requeued": replay}
@@ -55,13 +60,15 @@ def main():
                         break
                     if not n:
                         time.sleep(0.25)
-                except RedisError:
+                except (RedisError, OperationalError, PoolTimeout):
                     if args.once:
                         return 1
-                    print('{"redis":"UNAVAILABLE","action":"retry"}', flush=True)
                     time.sleep(2)
         print(json.dumps(result, default=str))
         return 0
+    except (RedisError, OperationalError, PoolTimeout):
+        print('{"error":"SERVICE_UNAVAILABLE"}', flush=True)
+        return 1
     finally:
         client.close()
         db.close()

@@ -174,6 +174,9 @@ class Streams:
         return self.client.xadd(STREAMS[envelope.routing_key], {"envelope": envelope.encode()})
 
     def messages(self, key, group, worker, count, idle):
+        return self.read_batch(key, group, worker, count, idle)[0]
+
+    def read_batch(self, key, group, worker, count, idle):
         self.register(key, group)
         stream = STREAMS[key]
         cursor_key = (key, group, worker)
@@ -182,8 +185,9 @@ class Streams:
         )
         self._cursors[cursor_key] = result[0]
         claimed = list(result[1])
+        reclaimed = len(claimed)
         if len(claimed) < count:
             fresh = self.client.xreadgroup(group, worker, {stream: ">"}, count=count - len(claimed))
             for _, entries in fresh:
                 claimed.extend(entries)
-        return claimed
+        return claimed, reclaimed

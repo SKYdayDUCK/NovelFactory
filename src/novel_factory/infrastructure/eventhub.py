@@ -7,7 +7,10 @@ from uuid import UUID, uuid4
 
 from redis.exceptions import RedisError
 from sqlalchemy import text
+from sqlalchemy.exc import DBAPIError
+from sqlalchemy.exc import TimeoutError as PoolTimeout
 
+from novel_factory.infrastructure.diagnostics import OperationsJournal, db_error_code
 from novel_factory.infrastructure.event_streams import (
     GROUPS,
     STREAMS,
@@ -65,6 +68,7 @@ class EventHub:
     def __init__(self, db, redis_client, *, max_failures=5):
         self.db, self.redis = db, redis_client
         self.streams = Streams(redis_client)
+        self.diagnostics = OperationsJournal(db)
         self.max_failures = _bound(max_failures, 100)
         self._rotation = {}
         self._backfill_done = False
@@ -132,6 +136,9 @@ class EventHub:
         return token, events
 
     def relay_once(self, limit=32, lease_seconds=30):
+        return self.diagnostics.run("relay", lambda: self._relay(limit, lease_seconds))
+
+    def _relay(self, limit, lease_seconds):
         if not self._backfill_done:
             self._backfill_done = self.backfill(limit) < limit
         token, events = self._claim(limit, lease_seconds)
@@ -145,6 +152,7 @@ class EventHub:
                     pipe.xadd(STREAMS[event.routing_key], {"envelope": event.encode()})
                 ids = pipe.execute()
         except RedisError:
+            self.diagnostics.record("relay", "PUBLISH_FAILED")
             with self.db.uow() as repo:
                 _sql(
                     repo.conn,
@@ -231,7 +239,13 @@ class EventHub:
                     ).scalar()
                     if inserted:
                         handler(conn, event)
-            except Exception:  # noqa: BLE001 -- an isolated processor may raise any application error.
+            except Exception as exc:
+                if isinstance(exc, (PoolTimeout, DBAPIError)) and db_error_code(exc) in {
+                    "DATABASE_TIMEOUT",
+                    "DATABASE_UNAVAILABLE",
+                }:
+                    # Keep pending. Infrastructure pressure must not exhaust the poison-message budget.
+                    raise
                 # SAVEPOINT rolls back both the receipt and any partial SQL effect.
                 status = "DEAD" if delivery["attempts"] + 1 >= self.max_failures else "PENDING"
                 _sql(
@@ -259,6 +273,13 @@ class EventHub:
             return True
 
     def consume_once(self, group, worker_id, handler, *, limit=32, reclaim_idle_ms=30000):
+        return self.diagnostics.run(
+            group,
+            lambda: self._consume(group, worker_id, handler, limit, reclaim_idle_ms),
+            confirmed_on_empty=True,
+        )
+
+    def _consume(self, group, worker_id, handler, limit, reclaim_idle_ms):
         if group not in GROUPS or not worker_id or len(worker_id) > 128:
             raise ValueError("Invalid consumer identity")
         _bound(limit)
@@ -269,7 +290,11 @@ class EventHub:
         self._rotation[group] = (start + 1) % len(keys)
         handled = 0
         for key in keys[start:] + keys[:start]:
-            entries = self.streams.messages(key, group, worker_id, limit - handled, reclaim_idle_ms)
+            entries, reclaimed = self.streams.read_batch(
+                key, group, worker_id, limit - handled, reclaim_idle_ms
+            )
+            if reclaimed:
+                self.diagnostics.record(group, "PENDING_RECLAIMED", reclaimed)
             for rid, fields in entries:
                 if self._apply(key, group, _str(rid), fields, handler):
                     # Only after the PG transaction has committed.

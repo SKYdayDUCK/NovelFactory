@@ -1,7 +1,6 @@
 """Consume one versioned EventHub group with bounded concurrency."""
 import argparse
 import json
-import logging
 import os
 import socket
 import time
@@ -11,7 +10,7 @@ from uuid import uuid4
 
 from redis import Redis
 from redis.exceptions import RedisError
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import OperationalError, TimeoutError as PoolTimeout
 
 from novel_factory.infrastructure.capacity import AdaptiveController
 from novel_factory.infrastructure.database import Database
@@ -44,7 +43,10 @@ def main():
     controller = AdaptiveController(db, args.group, args.workers, "observability", redis=client) if args.adaptive else None
     try:
         if args.once:
-            print(json.dumps({"group": args.group, "processed": consume()}))
+            try:
+                print(json.dumps({"group": args.group, "processed": consume()}))
+            except (RedisError, OperationalError, PoolTimeout):
+                return 1
             return
         pending = {}
         with ThreadPoolExecutor(max_workers=args.workers) as pool:
@@ -58,8 +60,7 @@ def main():
                     start = pending.pop(future)
                     try:
                         count = future.result()
-                    except (RedisError, OperationalError):
-                        logging.getLogger(__name__).warning("Processor temporarily unavailable")
+                    except (RedisError, OperationalError, PoolTimeout):
                         if controller:
                             controller.monitor.completed(time.monotonic() - start, False)
                         continue
@@ -74,4 +75,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

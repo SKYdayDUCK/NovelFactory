@@ -201,6 +201,49 @@ def _scope(work_id, branch_id, filters, start, end):
     return " AND ".join(terms), args
 
 
+def resolve_cut(conn, work_id, branch_id, source_cut):
+    """Resolve immutable membership inside an already authorized transaction."""
+    args = {"work": work_id, "branch": branch_id}
+    # A content-addressed, immutable membership cut also survives logical
+    # restore into a different PostgreSQL XID space. Only distinct requested
+    # cuts use storage. Ordinary worker updates never materialize manifests.
+    scope_key = f"statistics-cut:{work_id}:{branch_id}"
+    conn.execute(
+        text("SELECT pg_advisory_xact_lock(hashtextextended(:scope,0))"),
+        {"scope": scope_key},
+    )
+    if source_cut is None:
+        members = conn.scalar(
+            text("""SELECT coalesce(array_agg(event_id ORDER BY event_id),ARRAY[]::uuid[])
+            FROM nf_audit_events WHERE work_id=:work AND (CAST(:branch AS uuid) IS NULL OR branch_id=:branch)"""),
+            args,
+        )
+        digest = sha256((str(work_id) + str(branch_id)).encode())
+        for member in members:
+            digest.update(member.bytes)
+        cut = digest.hexdigest()
+        conn.execute(
+            text("""INSERT INTO nf_metric_cuts(cut_id,work_id,branch_id,event_ids)
+            VALUES (:cut,:work,:branch,CAST(:members AS uuid[])) ON CONFLICT(cut_id) DO UPDATE SET last_used_at=clock_timestamp()"""),
+            {**args, "cut": cut, "members": members},
+        )
+        conn.execute(
+            text("""DELETE FROM nf_metric_cuts WHERE cut_id IN (
+            SELECT cut_id FROM nf_metric_cuts WHERE work_id=:work AND branch_id IS NOT DISTINCT FROM CAST(:branch AS uuid)
+            ORDER BY last_used_at DESC,cut_id OFFSET 16)"""),
+            args,
+        )
+    else:
+        cut = source_cut
+        members = conn.scalar(
+            text("""UPDATE nf_metric_cuts SET last_used_at=clock_timestamp()
+            WHERE cut_id=:cut AND work_id=:work AND branch_id IS NOT DISTINCT FROM CAST(:branch AS uuid) RETURNING event_ids"""),
+            {**args, "cut": cut},
+        )
+        require(members is not None, "VIEW_DENIED", "Unavailable statistics cut")
+    return cut, members
+
+
 class StatisticsService:
     @staticmethod
     def handle(conn, envelope):
@@ -242,43 +285,7 @@ class StatisticsService:
                 "Work-wide grant required",
             )
             conn = repo.conn
-            # A content-addressed, immutable membership cut also survives logical
-            # restore into a different PostgreSQL XID space. Only distinct requested
-            # cuts use storage. Ordinary worker updates never materialize manifests.
-            scope_key = f"statistics-cut:{work_id}:{branch_id}"
-            conn.execute(
-                text("SELECT pg_advisory_xact_lock(hashtextextended(:scope,0))"),
-                {"scope": scope_key},
-            )
-            if source_cut is None:
-                members = conn.scalar(
-                    text("""SELECT coalesce(array_agg(event_id ORDER BY event_id),ARRAY[]::uuid[])
-                    FROM nf_audit_events WHERE work_id=:work AND (CAST(:branch AS uuid) IS NULL OR branch_id=:branch)"""),
-                    args,
-                )
-                digest = sha256((str(work_id) + str(branch_id)).encode())
-                for member in members:
-                    digest.update(member.bytes)
-                cut = digest.hexdigest()
-                conn.execute(
-                    text("""INSERT INTO nf_metric_cuts(cut_id,work_id,branch_id,event_ids)
-                    VALUES (:cut,:work,:branch,CAST(:members AS uuid[])) ON CONFLICT(cut_id) DO UPDATE SET last_used_at=clock_timestamp()"""),
-                    {**args, "cut": cut, "members": members},
-                )
-                conn.execute(
-                    text("""DELETE FROM nf_metric_cuts WHERE cut_id IN (
-                    SELECT cut_id FROM nf_metric_cuts WHERE work_id=:work AND branch_id IS NOT DISTINCT FROM CAST(:branch AS uuid)
-                    ORDER BY last_used_at DESC,cut_id OFFSET 16)"""),
-                    args,
-                )
-            else:
-                cut = source_cut
-                members = conn.scalar(
-                    text("""UPDATE nf_metric_cuts SET last_used_at=clock_timestamp()
-                    WHERE cut_id=:cut AND work_id=:work AND branch_id IS NOT DISTINCT FROM CAST(:branch AS uuid) RETURNING event_ids"""),
-                    {**args, "cut": cut},
-                )
-                require(members is not None, "VIEW_DENIED", "Unavailable statistics cut")
+            cut, members = resolve_cut(conn, work_id, branch_id, source_cut)
             args.update(members=members, v=version)
             if mode == "rebuild":
                 # One transaction publishes a coherent replacement of this slice. Writers
@@ -404,9 +411,9 @@ class StatisticsService:
                 "estimated_provider_cost": None,
                 "unavailable_reasons": {
                     "invoiced_supplier_cost": "No independently reconciled supplier invoice registered",
-                    "chapter_cost": "No stable chapter-to-call binding in P5",
+                    "chapter_cost": "Supply a pinned chapter map to ChapterCostService.report",
                     "literary_quality_score": "Reviews carry issues and decisions without a calibrated score",
-                    "estimated_provider_cost": "No versioned provider rate card registered",
+                    "estimated_provider_cost": "Supply a pinned price book to ChapterCostService.report",
                 },
             }
             if mode == "verify":
