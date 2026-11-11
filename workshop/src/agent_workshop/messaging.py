@@ -204,6 +204,16 @@ def _route(conn, org, rev, sender, recipient, kind, scope, grant, src_rev, dst_r
 
 
 def _live(conn, org, rev, m):
+    origin = conn.execute(
+        """SELECT 1 FROM aw_message_origins o JOIN aw_bindings b USING(token_digest)
+        JOIN aw_installations i USING(installation_id) WHERE o.org_id=%s AND o.message_id=%s
+        AND b.org_id=o.org_id AND b.employee_id=%s AND b.employment_revision=%s
+        AND b.grant_epoch=o.grant_epoch AND b.expires_at>clock_timestamp() AND NOT b.revoked AND i.enabled
+        FOR SHARE OF b,i""",
+        (org, m["message_id"], m["sender"], m["sender_revision"]),
+    ).fetchone()
+    if not origin:
+        raise Denied("SENDER_BINDING_UNVERIFIED")
     if not m["live"]:
         raise Denied("DELIVERY_EXPIRED")
     src = _peer(conn, org, m["sender"], m["scope_ref"])
@@ -253,6 +263,22 @@ def send(
 ):
     org = lock_org(conn, session.org_id)
     src = require_employee(conn, session)
+    origin = conn.execute(
+        """SELECT token_digest,b.grant_epoch FROM aw_bindings b JOIN aw_installations i USING(installation_id)
+        WHERE b.token_digest=%s AND b.grant_epoch=%s AND b.employee_id=%s AND b.org_id=%s
+        AND b.installation_id=%s AND b.employment_revision=%s AND b.expires_at>clock_timestamp() AND NOT revoked AND enabled
+        FOR SHARE OF b,i""",
+        (
+            session.binding_digest,
+            session.grant_epoch,
+            session.employee_id,
+            session.org_id,
+            session.installation_id,
+            session.employment_revision,
+        ),
+    ).fetchone()
+    if not origin:
+        raise Denied("SENDER_BINDING_UNVERIFIED")
     fields = [
         recipient,
         kind,
@@ -360,6 +386,10 @@ def send(
                 incident_code,
                 ttl_seconds,
             ),
+        )
+        conn.execute(
+            "INSERT INTO aw_message_origins VALUES (%s,%s,%s,%s)",
+            (session.org_id, mid, origin["token_digest"], origin["grant_epoch"]),
         )
         seq = conn.execute(
             """INSERT INTO aw_mailboxes VALUES (%s,%s,%s,1)

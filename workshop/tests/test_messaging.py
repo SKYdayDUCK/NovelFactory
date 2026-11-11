@@ -5,7 +5,8 @@ from uuid import uuid4
 
 import pytest
 from agent_workshop import messaging as msg
-from agent_workshop.auth import Denied, Session, connect
+from agent_workshop.admin import enroll
+from agent_workshop.auth import Denied, authenticate, connect
 from agent_workshop.organization import TOOLS, bootstrap
 from jsonschema import Draft202012Validator
 
@@ -14,11 +15,20 @@ from jsonschema import Draft202012Validator
 def team():
     url = os.environ["AW_DATABASE_URL"]
     org = uuid4().hex
+    install = uuid4().hex
     with connect(url) as conn:
+        conn.execute("INSERT INTO aw_installations VALUES(%s,%s,true)", (install, "nf-test"))
         bootstrap(conn, org, "Research-Audit")
+        names = conn.execute(
+            "SELECT employee_id FROM aw_employees WHERE org_id=%s", (org,)
+        ).fetchall()
+        ids = {
+            r["employee_id"]: authenticate(conn, enroll(conn, install, org, r["employee_id"], 1, 1))
+            for r in names
+        }
 
     def identity(name):
-        return Session(org, name, 1, 1, "installation")
+        return ids[name]
 
     return url, identity
 
