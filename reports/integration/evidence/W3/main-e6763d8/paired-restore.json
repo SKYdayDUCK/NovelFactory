@@ -1,0 +1,138 @@
+{
+  "status": "PASS",
+  "pg": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "basebackup": "physical pg_basebackup -Fp -Xstream",
+  "verification": {
+    "exit_code": 0,
+    "stdout": "backup successfully verified"
+  },
+  "manifest_sha256": "2c6581c3ed281ad60ef41a882972492a04cf06696e2f14bc212909961e0a067d",
+  "target": "aw_intent_before_nf",
+  "target_lsn": "0/40153E8",
+  "replayed_lsn": "0/40153E8",
+  "second_wal_target": "nf_bound_before_inference",
+  "second_target_lsn": "0/4063330",
+  "second_replay_lsn": "0/4063330",
+  "same_receipt_missing_attempt_peer": {
+    "task_id": "b092bf7f-1baa-4f79-9d72-62ce26845187",
+    "receipt_ref": "55ab4280-2c56-4c60-b8d0-dbd742b2b25d",
+    "generation": 1,
+    "task_state": "PAUSED",
+    "accounting_state": "NO_ATTEMPT",
+    "attempts": []
+  },
+  "after_settled_history_mismatch": {
+    "state": "WAITING_OPERATOR",
+    "last_error": "REMOTE_HISTORY_MISMATCH",
+    "hold": "SETTLED",
+    "receipt_ref": "55ab4280-2c56-4c60-b8d0-dbd742b2b25d",
+    "task_id": "b092bf7f-1baa-4f79-9d72-62ce26845187",
+    "accounting_state": "SETTLED",
+    "settled_amount": "0.020000",
+    "observations": 2
+  },
+  "rolled_back_nf_task_count": 0,
+  "rolled_back_aw_intent": {
+    "state": "REQUESTED",
+    "last_error": null,
+    "hold": "HELD",
+    "receipt_ref": null,
+    "task_id": null,
+    "accounting_state": null,
+    "settled_amount": null,
+    "observations": 0
+  },
+  "live_nf": {
+    "protocol_version": "aw-nf.v1",
+    "nf_instance_id": "d621e42c-2206-49ba-84f7-fbb62b787a2e",
+    "work_id": "fcfd592c-1312-49f6-b55a-7f224bfeb6d2",
+    "branch_id": "fdf33392-dafc-4f6c-8189-4ed451e9adce",
+    "operation_id": "59215375-e8d8-4745-8552-1c45d4dd03dd",
+    "task_id": "b092bf7f-1baa-4f79-9d72-62ce26845187",
+    "receipt_ref": "55ab4280-2c56-4c60-b8d0-dbd742b2b25d",
+    "world_ref": {
+      "work_id": "fcfd592c-1312-49f6-b55a-7f224bfeb6d2",
+      "branch_id": "fdf33392-dafc-4f6c-8189-4ed451e9adce",
+      "world_revision_id": "1fec85a0-34a4-432f-89f8-b92a9b162889"
+    },
+    "generation": 1,
+    "task_state": "ACCEPTED",
+    "accounting_state": "UNKNOWN",
+    "currency": "USD",
+    "actual_amount": "0",
+    "actual_tokens": 0,
+    "attempt_ids": [
+      "74880899-1bd1-4bc6-b17b-7cc7f6630c61"
+    ],
+    "attempts": [
+      {
+        "attempt_id": "74880899-1bd1-4bc6-b17b-7cc7f6630c61",
+        "state": "UNKNOWN",
+        "actual_amount": null,
+        "actual_tokens": null
+      }
+    ],
+    "result_ref": "f5a949bc-bdf5-5e5d-9ca6-e1386ff731e1",
+    "wait_reason": null
+  },
+  "nf_restored_aw_live": {
+    "state": "WAITING_OPERATOR",
+    "last_error": "REMOTE_HISTORY_MISMATCH",
+    "hold": "HELD",
+    "receipt_ref": "55ab4280-2c56-4c60-b8d0-dbd742b2b25d",
+    "task_id": "b092bf7f-1baa-4f79-9d72-62ce26845187",
+    "accounting_state": "UNKNOWN",
+    "settled_amount": null,
+    "observations": 1
+  },
+  "aw_restored_nf_live_before_invoice": {
+    "state": "BOUND",
+    "last_error": null,
+    "hold": "HELD",
+    "receipt_ref": "55ab4280-2c56-4c60-b8d0-dbd742b2b25d",
+    "task_id": "b092bf7f-1baa-4f79-9d72-62ce26845187",
+    "accounting_state": "UNKNOWN",
+    "settled_amount": null,
+    "observations": 1
+  },
+  "after_explicit_synthetic_invoice": {
+    "state": "SETTLED",
+    "last_error": null,
+    "hold": "SETTLED",
+    "receipt_ref": "55ab4280-2c56-4c60-b8d0-dbd742b2b25d",
+    "task_id": "b092bf7f-1baa-4f79-9d72-62ce26845187",
+    "accounting_state": "SETTLED",
+    "settled_amount": "0.020000",
+    "observations": 2
+  },
+  "resulting_nf_tasks": 1,
+  "loopback_synthetic_http_requests": 1,
+  "supplier_model_calls": 0,
+  "recovery_mcp_calls": [
+    [
+      "nf_delegation_get",
+      "59215375-e8d8-4745-8552-1c45d4dd03dd"
+    ],
+    [
+      "nf_delegation_get",
+      "59215375-e8d8-4745-8552-1c45d4dd03dd"
+    ],
+    [
+      "nf_delegation_get",
+      "59215375-e8d8-4745-8552-1c45d4dd03dd"
+    ],
+    [
+      "nf_delegation_get",
+      "59215375-e8d8-4745-8552-1c45d4dd03dd"
+    ],
+    [
+      "nf_delegation_get",
+      "59215375-e8d8-4745-8552-1c45d4dd03dd"
+    ],
+    [
+      "nf_delegation_get",
+      "59215375-e8d8-4745-8552-1c45d4dd03dd"
+    ]
+  ],
+  "elapsed_seconds": 12.87
+}

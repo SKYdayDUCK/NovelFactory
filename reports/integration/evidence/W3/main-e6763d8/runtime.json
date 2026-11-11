@@ -1,0 +1,54 @@
+{
+  "source": {
+    "head": "e6763d844f023d7c6a13060dbaebca0416fe3099",
+    "tree": "7edb5550e8cbe3c1feb70ff8baa0c79974cf8155",
+    "changed_paths": [],
+    "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "redis": "Redis server v=8.0.2 sha=00000000:0 malloc=jemalloc-5.3.0 bits=64 build=b52b02bf0759f5b4",
+  "utc_started": "2026-11-11T19:54:44.065172+00:00",
+  "runner_sha256": "05baaafa51643d8cddc6082c91736bec2bad7b8eb12ff8099826325bb9bb5a01",
+  "redis_scope": "Dedicated Redis server process; real Streams delivery and consumer-group restart.",
+  "postgres_system_ids": {
+    "aw": "7707004782736666722",
+    "nf": "7707004785634709625"
+  },
+  "aw_postgres_port": 49055,
+  "nf_postgres_port": 59819,
+  "redis_port": 45085,
+  "postgres_authentication": "scram-sha-256",
+  "cross_server_access": "both rejected",
+  "authority": {
+    "aw": {
+      "login": "aw_service",
+      "database": "aw_w3",
+      "superuser": false,
+      "createrole": false,
+      "createdb": false,
+      "schema_revision": "w003b"
+    },
+    "nf": {
+      "login": "nf_service",
+      "database": "nf_w3",
+      "superuser": false,
+      "createrole": false,
+      "createdb": false,
+      "schema_revision": "0017_nf_workshop_delegation"
+    }
+  },
+  "suites": {
+    "stage-pg": 25,
+    "historical-upgrades": 6,
+    "bridge-stdio": 3,
+    "dual-stdio-pitr": 2
+  },
+  "utc_finished": "2026-11-11T19:56:26.428992+00:00",
+  "source_after": {
+    "head": "e6763d844f023d7c6a13060dbaebca0416fe3099",
+    "tree": "7edb5550e8cbe3c1feb70ff8baa0c79974cf8155",
+    "changed_paths": [],
+    "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "verified_clean_checkout": true
+}
