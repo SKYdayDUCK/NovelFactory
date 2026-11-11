@@ -8,13 +8,13 @@ class KernelRepository:
     def __init__(self, conn, tables):
         self.conn, self.tables = conn, tables
 
-    def one(self, name, where, *, lock=None):
-        rows = self.many(name, where, lock=lock, limit=1)
+    def one(self, name, where, *, lock=None, columns=None):
+        rows = self.many(name, where, lock=lock, limit=1, columns=columns)
         return rows[0] if rows else None
 
-    def many(self, name, where=None, *, lock=None, order=None, limit=None):
+    def many(self, name, where=None, *, lock=None, order=None, limit=None, columns=None):
         t = self.tables[name]
-        q = select(t)
+        q = select(t) if columns is None else select(*(t.c[key] for key in columns))
         for key, value in (where or {}).items():
             q = q.where(t.c[key].in_(value) if isinstance(value, (list, set, tuple)) else t.c[key] == value)
         if order:
@@ -56,6 +56,14 @@ class KernelRepository:
 
     def scope_map(self, work_id, branch_id):
         return {r["scope_key"]:r["version"] for r in self.many("scopes", {"work_id":work_id,"branch_id":branch_id}, order=["scope_key"])}
+
+    def scope_versions_for(self, work_id, branch_id, keys):
+        """Return existing versions for the server-computed certificate footprint."""
+        if not keys:
+            return {}
+        rows = self.many("scopes", {"work_id": work_id, "branch_id": branch_id,
+                                    "scope_key": sorted(keys)}, columns=("scope_key", "version"))
+        return {row["scope_key"]: row["version"] for row in rows}
 
     def ancestor(self, older, newer):
         if any(older[k] != newer[k] for k in ("work_id", "branch_id")):

@@ -11,7 +11,9 @@ from hashlib import sha256
 import secrets
 from uuid import uuid4, uuid5, UUID
 
+from novel_factory.application.scion import ScionOptions
 from novel_factory.application.authorization import Principal, ADMIN_CAPABILITIES
+from novel_factory.application.replay_proofs import ReplayProofs
 from novel_factory.contracts.registry import validate_contract
 from novel_factory.domain.canonical import canonical_bytes, fingerprint
 from novel_factory.domain.errors import DomainError
@@ -29,7 +31,9 @@ def require(condition, code, message):
 class Kernel:
     def __init__(self, db, objects):
         self.db, self.objects = db, objects
+        self.scion = ScionOptions()
         self.tasks = TaskService(db.engine, tables, object_store=objects)
+        self.replay_proofs = ReplayProofs()
 
     def authenticate(self, token: str) -> Principal:
         require(isinstance(token,str) and 16 <= len(token) <= 256, "VIEW_DENIED", "Credentials unavailable")
@@ -51,7 +55,22 @@ class Kernel:
 
     def revision(self, r, wr):
         validate_contract("WorldRef", wr)
-        row = r.one("revisions", wr)
+        return self._checked_projection(r.one("revisions", wr))
+
+    def query_revision(self, r, wr):
+        """Fixed-cut state/graph/timeline reads still validate the complete snapshot."""
+        if not self.scion.columns:
+            return self.revision(r, wr)
+        validate_contract("WorldRef", wr)
+        row = r.one("revisions", wr, columns=(
+            "work_id", "branch_id", "world_revision_id", "selection", "frontiers",
+            "interpretation_ref", "snapshot", "state_hash", "provenance", "manifest_hash"))
+        checked = self._checked_projection(row)
+        self.scion.record("columns", "query_hit")
+        return checked
+
+    @staticmethod
+    def _checked_projection(row):
         require(row, "VIEW_DENIED", "Requested version is unavailable")
         require(fingerprint(row["snapshot"]) == row["state_hash"], "PROJECTION_CORRUPT", "Projection integrity failed")
         from novel_factory.application.simulation import verify_schedule_revision
@@ -468,7 +487,10 @@ class Kernel:
             event_candidates=[event]
             operations=[{"operation":"ADD","occurrence_id":event["occurrence_id"],"prior_event_version_id":None,"selected_event_version_id":event["event_version_id"]}]
             selected.append(event)
-        replay(genesis,selected)  # Deterministic validation outside DB transaction.
+        if self.scion.replay:
+            self.replay_proofs.evaluate(self.scion, genesis, selected, event_candidates, template_id, base, work)
+        else:
+            replay(genesis,selected)  # Deterministic validation outside DB transaction.
         advances=[]
         if template_id!="REPAIR_EVENT":
             for scope in footprint["process_scopes"]:
@@ -547,7 +569,12 @@ class Kernel:
         return rows
 
     def _tokens(self,r,wr,footprint,grant,approvals,history_epoch,work):
-        versions=r.scope_map(wr["work_id"],wr["branch_id"])
+        if self.scion.scopes:
+            keys = set(footprint["reads"]).union(footprint["writes"])
+            versions = r.scope_versions_for(wr["work_id"], wr["branch_id"], keys)
+            self.scion.record("scopes", "hit")
+        else:
+            versions = r.scope_map(wr["work_id"], wr["branch_id"])
         def token(key,version,owner="BRANCH"):
             kind=key.split(":",1)[0]
             return {"owner_kind":owner,"work_id":wr["work_id"],"branch_id":wr["branch_id"] if owner=="BRANCH" else None,
@@ -748,7 +775,11 @@ class Kernel:
             events=[selected_by_id[eid] for eid in selection.values()]
             genesis=r.one("genesis",{"work_id":wr["work_id"]})["payload"]
             if p["template_id"]=="REPAIR_EVENT":self._revalidate_repair(r,wr["work_id"],genesis,events)
-            snapshot=replay(genesis,events)
+            if self.scion.replay:
+                snapshot = self.replay_proofs.evaluate(self.scion, genesis, events, list(candidates.values()),
+                                                       p["template_id"], current, work)
+            else:
+                snapshot=replay(genesis,events)
             # All effect/causal/resource constraints have passed before writing.
             for eid,event in candidates.items():
                 previous=r.one("events",{"event_version_id":eid})
@@ -833,7 +864,11 @@ class Kernel:
             events=[r.one("events",{"event_version_id":eid,"work_id":wid})["payload"] for eid in candidate["selection"].values()]
             genesis=r.one("genesis",{"work_id":wid})["payload"]
             revalidation=self._revalidate_repair(r,wid,genesis,events)
-            candidate_revisions=r.many("revisions",{"work_id":wid,"branch_id":candidate_world_ref["branch_id"]})
+            review_columns = ("world_revision_id", "provenance") if self.scion.columns else None
+            candidate_revisions = r.many("revisions", {"work_id": wid, "branch_id": candidate_world_ref["branch_id"]},
+                                         columns=review_columns)
+            if review_columns:
+                self.scion.record("columns", "repair_review_hit")
             repair_reviews=[]
             for rev in candidate_revisions:
                 commit=r.one("commits",{"world_revision_id":rev["world_revision_id"]})
