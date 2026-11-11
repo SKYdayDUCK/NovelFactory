@@ -1,0 +1,79 @@
+{
+  "commit": "3ed83ffe779bf15e7965f2b2fc8236abaf90ff72",
+  "tree": "cb601579cceafd8cd33d35664a31f8d9dd38c879",
+  "parents": [
+    "6f07f8eb8e29187bea24e0c90ce7798996dcfc42"
+  ],
+  "tested_worktree": "clean detached source before and after; CLI worktree receipt inside raw ZIP",
+  "signed_w3_baseline": "e6763d844f023d7c6a13060dbaebca0416fe3099",
+  "identical_nf_git_objects": {
+    "src/novel_factory": "cf218ea5f63f2f6fcf1bdecbf3a5d87ff20243e2",
+    "runtime": "8ce340b1541360d95f722c7b66471c2dcf5fe1a1",
+    "migrations": "30f752d145a80a2d8a24a92099bd7759c9ee9571",
+    "adapters": "e9fad4639d1fc090c22672c92fa389bfacea83d9",
+    "pyproject.toml": "528066c4dad37c7801244a196ac1e4b2909322f6",
+    "uv.lock": "aac229bffc9434731f80436e1bf2054ee40c85e9",
+    "scripts/with_postgres.py": "8311140a93ef8253e9402801a64d1c2f17e380ab"
+  },
+  "environment": [
+    "codex-cli 0.167.0-alpha.4",
+    "bubblewrap 0.12.0",
+    "unshare from util-linux 2.41.5",
+    "cc (Debian 14.2.0-19) 14.2.0",
+    "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+    "Python 3.12.14"
+  ],
+  "suites": {
+    "role-and-bridge.xml": {
+      "tests": 33,
+      "seconds": 45.76,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "owner-and-installation.xml": {
+      "tests": 21,
+      "seconds": 24.488,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "cases_by_module": {
+    "tests.integration.test_p5_actor_tool_choice": 13,
+    "tests.integration.test_p5_role_container": 2,
+    "tests.integration.test_p5_supervised_role_read": 2,
+    "tests.integration.test_workshop_delegation": 16,
+    "tests.test_delegation_budget_limit": 1,
+    "tests.test_delegation_permissions": 1,
+    "tests.test_delegation_upgrade_authority": 9,
+    "tests.test_message_membership_origins": 5,
+    "tests.test_review_stdio": 1,
+    "tests.test_review_team_assignment": 2,
+    "tests.test_w4_skills_stdio": 2
+  },
+  "passed": 54,
+  "skipped": 0,
+  "linux_host_dependent": {
+    "tool_choice": 13,
+    "role_container": 2,
+    "supervised_role_read": 2
+  },
+  "review_lead_stdio_test": "test_other_lead_cannot_observe_escalate_or_replay_reassigned_work",
+  "provider": "deterministic local fixture; external model calls 0",
+  "archive_sha256": "e15a4a607db7c9902a4e3df7a8bce93bf75df017393c73b9251b9ddaae44500c",
+  "file_sha256": {
+    "checkout-after.txt": "440e41be3e13fb8aebb619054804a86a800f95df9dbae178641eb0580c1e1eae",
+    "checkout.txt": "440e41be3e13fb8aebb619054804a86a800f95df9dbae178641eb0580c1e1eae",
+    "env.txt": "8bc2b2348835c0c2dc2adf0d73c303e6da4c933b29ba7fbc815a87293a17ef39",
+    "owner-and-installation.xml": "b2d20f970eab146700d13e47c7d367d896a4fdfe282530c48c4edbb5cc008ac2",
+    "pg/postgresql.log": "3da2f1b1bf0be16434761f908c7bdfcf03133b5e94b48216a7b3a901800e161c",
+    "role-and-bridge.xml": "d500e64affbd8963a2d11449e94a5ae90b490a35a5524df444a1fa25988398b9",
+    "run.log": "7a8d6526e433b1d795bb766841da71c1d8634bd3924f08adf5b3b9c08f75da2b",
+    "w4-skills-stdio.json": "634e6e1a4d59456dc19cfd0724d2261b0c60fb98b3002facdf9d034765c3a165",
+    "workshop/init.log": "fbe98a42f7ce6d9bc383daefbf02fb5029a1cc1b956e24ed48b3ffb55c4b2ce8",
+    "workshop/migrations.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "workshop/permissions.log": "cd8505284320549bfccb163bdca92b3df42ac1cbf3eefb1a90c266954919c52e",
+    "workshop/provision.log": "15852cd2b5a973299fa22a395afe45e09655e5c4c27c766ec16cfddbf890a149"
+  }
+}
