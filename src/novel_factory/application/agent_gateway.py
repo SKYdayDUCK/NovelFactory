@@ -12,7 +12,10 @@ from datetime import datetime, timezone
 from decimal import Decimal
 import json
 import time
+from urllib.parse import urljoin
 from uuid import UUID, uuid5
+
+from sqlalchemy import select
 
 from novel_factory.application.kernel import require
 from novel_factory.application.queries import WorldQueryService
@@ -66,7 +69,7 @@ def _inline_schema(name, version):
         if "$ref" in value:
             ref = value["$ref"]
             root, definition = ref.split("#/$defs/")
-            target = documents[root] if root else document
+            target = documents[urljoin(document["$id"], root)] if root else document
             identity = target["$id"] + "#/$defs/" + definition
             require(identity not in seen, "INVALID_MODEL_CONFIG", "Recursive model output schemas require a bounded adapter")
             return expand(target["$defs"][definition], target, seen + (identity,))
@@ -172,9 +175,20 @@ class AgentGateway:
     def _messages(self, principal, binding):
         task, spec, context, data = (binding[k] for k in ("task", "spec", "context", "input"))
         material = []
+        continuity = set()
+        if data["material_refs"]:
+            artifacts = tables["artifacts"]
+            with self.kernel.db.uow(write=False) as repo:
+                continuity = set(repo.conn.scalars(select(artifacts.c.artifact_revision_id).where(
+                    artifacts.c.work_id == task["work_id"], artifacts.c.kind == "CONTINUITY_SNAPSHOT",
+                    artifacts.c.artifact_revision_id.in_([r["artifact_revision_id"] for r in data["material_refs"]]))))
         for ref in data["material_refs"]:
             content = None
-            if self.material_reader is not None:
+            if ref["artifact_revision_id"] in continuity:
+                from novel_factory.application.continuity import ContinuityService
+                scoped = ContinuityService(self.kernel).read_for_task(principal, task["task_id"], task["generation"], ref)
+                content = canonical_bytes(scoped)
+            elif self.material_reader is not None:
                 content = self.material_reader(principal, task_id=task["task_id"],
                     generation=task["generation"], context_bundle_id=task["context_bundle_id"],
                     artifact_ref=ref)

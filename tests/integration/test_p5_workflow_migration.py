@@ -1,4 +1,4 @@
-"""Real 0003 -> 0004 -> 0003 rollback preserves pre-P5 Outbox records."""
+"""P5 additive upgrades and empty-extension rollback preserve pre-P5 data."""
 import os
 from pathlib import Path
 import subprocess
@@ -14,7 +14,8 @@ from novel_factory.infrastructure.recovery import database_snapshot
 pytestmark = [pytest.mark.postgres, pytest.mark.integration]
 
 
-def test_workflow_schema_round_trip(rel_env_for_migration):
+@pytest.mark.parametrize("revision", ["0004", "head"])
+def test_workflow_schema_round_trip(rel_env_for_migration, revision):
     target = rel_env_for_migration
     root = Path(__file__).resolve().parents[2]
     env = {**os.environ, "NF_DATABASE_URL": target}
@@ -30,10 +31,15 @@ def test_workflow_schema_round_trip(rel_env_for_migration):
                 aggregate_id,payload,dedupe_key,state) VALUES (:id,'task.changed',
                 'task','legacy','{}','legacy-proof','DELIVERED')"""), {"id": uuid4()})
             original = database_snapshot(conn)
-        migrate("upgrade", "0004")
+        migrate("upgrade", revision)
         with engine.connect() as conn:
             upgraded = database_snapshot(conn)
-            assert set(upgraded) - set(original) == {"nf_workflow_waits", "nf_workflow_edges"}
+            added = set(upgraded) - set(original)
+            assert {"nf_workflow_waits", "nf_workflow_edges"} <= added
+            if revision == "0004":
+                assert added == {"nf_workflow_waits", "nf_workflow_edges"}
+            else:
+                assert {"nf_supervisor_jobs", "nf_host_turns", "nf_resume_grants"} <= added
             assert all(upgraded[k] == v for k, v in original.items() if k != "alembic_version")
         migrate("downgrade", "0003")
         with engine.connect() as conn:

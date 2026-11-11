@@ -40,3 +40,37 @@
 - `nf_task_get({})` 和 `nf_context_get({})` 读取当前租约与上下文。
 - `nf_query_batch({"lookups":[{"subject_id":"<uuid>","predicate":"owner"}]})` 在已编译清单中查询状态，认知平面、角色、时间与世界版本都从当前任务绑定派生。
 - `nf_artifact_put({"content":"我决定不赴宴。","idempotency_key":"scene-2-intent"})` 保存候选文本并返回对象引用。同一任务代际重放同一键和内容会取得同一收据，改动内容会触发幂等冲突。联合裁决、审批和世界接受继续经各自应用服务执行。
+
+## 在作者自己的 VS Code 补验扩展
+
+本仓库的 SDK 与 `probe_codex_mcp.py` 已分别取得真实 stdio、Codex app-server 的恢复回执。隔离环境中的 VS Code 已激活 OpenAI 扩展，并收到了它启动的 app-server 的初始化响应。该环境中的 Codex 侧栏渲染超时，仍缺一份由扩展发起的 `tools/list` 和恢复工具回执。可以在作者日常可用的桌面 VS Code 完成以下步骤。
+
+1. 在服务端选择独立测试作品，按 [P5-03 运行说明](../../reports/P5-03.md) 创建两任务样例与私有配置。首次验证可先只初始化样例。Supervisor 停止时，恢复调用仍能独立验证数据库就绪与等待计数。
+2. 在作者自己的桌面 VS Code 使用隔离测试配置，安装或启用官方 `openai.chatgpt` 扩展。记录「帮助 → 关于」中的 VS Code 版本和扩展详情中的版本号。按本文的 SSH 配置接入服务，打开该项目并只信任自己创建的测试目录。在命令面板执行 `Open Codex Sidebar`，确认侧栏能够加载。运行命令前关闭同一测试服务器上的其他 MCP 客户端，便于将服务侧记录与本次扩展操作对应。
+3. 在扩展新对话中输入 **继续未完成的任务**。展开扩展界面中的工具调用卡片，核对服务器 `novelfactory`、`nf_resume_project`、空参数和返回计数。再次输入相同请求，并记录第二份回执。任务可能在两次扫描之间自然推进；检查已接受世界效果与模型调用账本能够区分重复调用和正常进展。只保存测试作品的信息。
+4. 若需逐帧证明扩展进行了工具发现，可在此次测试的服务端强制命令使用下方薄包装器。对比私有记录与扩展中同一时间段的工具卡片。运行前确认端点已签发专用 `resume_operator` grant。服务端按两个方向过滤，只记录协议名、工具名和恢复计数。每次验收使用新私有目录，结束后还原原有强制命令。
+
+   ```bash
+   #!/usr/bin/env bash
+   set -euo pipefail
+   umask 077
+   audit=$(mktemp -d /var/lib/novelfactory/private/ide-proof.XXXXXX)
+   tee >(jq -c --unbuffered '
+     select(.method == "initialize" or .method == "tools/list"
+            or (.method == "tools/call" and .params.name == "nf_resume_project")) |
+     {method, tool: (.params.name // null)}' > "$audit/requests.jsonl") |
+     /srv/novelfactory/.venv/bin/python -m novel_factory.interfaces.mcp_stdio \
+       --binding /var/lib/novelfactory/private/resume.json |
+     tee >(jq -c --unbuffered '
+       if .result.serverInfo.name? == "NovelFactory" then
+         {server: .result.serverInfo.name, protocol: .result.protocolVersion}
+       elif (.result.tools? | type) == "array" then {tools: [.result.tools[].name]}
+       elif (.result.structuredContent.counts? | type) == "object" then
+         {counts:.result.structuredContent.counts, awakened:.result.structuredContent.awakened,
+          recovered:.result.structuredContent.recovered, isError:.result.isError}
+       else empty end' > "$audit/responses.jsonl")
+   ```
+
+5. 启动独立 Supervisor，检查服务端两任务先后出现不同的 thread/turn ID，并在两次执行间出现持久的等待与唤醒。关闭侧栏只结束作者界面。Supervisor、PostgreSQL 和模型端点是否可用分别决定后续工作能否推进。
+
+角色 Host 的权限还需要独立验证。可以向测试作品植入只在角色 B 认知和作者计划中出现的两段合成文本，用角色 A 的派发记录核对上游实际收到的消息中没有这两段内容。同一 OS 账户的编辑器如果能读取私有绑定、对象目录或 Supervisor 的凭据，MCP 返回拒绝仍不足以证明该编辑器具备角色隔离能力。该部署应让角色继续使用无 shell 的单次文本 Gateway。切换为有 shell 的角色 Host 前，要在真实的角色账户与运行环境中验证上述私有资源的文件系统、数据库和工具访问限制。
