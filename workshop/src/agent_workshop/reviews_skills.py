@@ -323,6 +323,22 @@ def _independent(conn, org, reviewer, artifact):
         raise Denied("INDEPENDENT_REVIEW_REQUIRED")
 
 
+def _require_review_team(conn, session, viewer, review):
+    if viewer["role_id"] != "review_lead":
+        return
+    if review["reviewer_id"] is None:
+        # A deterministic review has no employee assignment. Its requesting lead owns the summary.
+        if review["requested_by"] == session.employee_id:
+            return
+    elif conn.execute(
+        """SELECT 1 FROM aw_employment_versions
+        WHERE (org_id,employee_id,employment_revision,supervisor_id)=(%s,%s,%s,%s)""",
+        (session.org_id, review["reviewer_id"], review["reviewer_revision"], session.employee_id),
+    ).fetchone():
+        return
+    raise Denied("REVIEW_DENIED")
+
+
 def review_request(
     conn,
     session,
@@ -357,12 +373,13 @@ def review_request(
         if old:
             # Legacy operation keys did not include the originating installation.
             review = conn.execute(
-                """SELECT r.execution,r.operation_id FROM aw_reviews r JOIN aw_review_artifacts a
+                """SELECT r.* FROM aw_reviews r JOIN aw_review_artifacts a
                 USING(org_id,artifact_ref,artifact_revision) WHERE r.org_id=%s AND r.review_id=%s
                 AND a.scope_ref=%s""", (org, out["review_id"], viewer["scope_ref"]),
             ).fetchone()
             if not review or not _review_origin_matches(conn, session, review):
                 raise Denied("REVIEW_DENIED")
+            _require_review_team(conn, session, viewer, review)
             return out
         a = conn.execute(
             """SELECT * FROM aw_review_artifacts WHERE (org_id,artifact_ref,artifact_revision,scope_ref)=(%s,%s,%s,%s)
@@ -500,6 +517,7 @@ def get_review(conn, session, review_id):
     )
     if not row or (viewer["role_id"] == "reviewer" and not assigned):
         raise Denied("REVIEW_DENIED")
+    _require_review_team(conn, session, viewer, row)
     if assigned and not _review_origin_matches(conn, session, row):
         raise Denied("REVIEW_DENIED")
     result = {
@@ -545,15 +563,14 @@ def reconcile_review(conn, session, operation_id, review_id, replacement=None):
     ):
         row = conn.execute(
             """SELECT r.*,deadline>clock_timestamp() AS live,a.scope_ref,a.source_receipt,
-            a.producer_ids,a.producer_groups,v.supervisor_id AS assigned_lead
-            FROM aw_reviews r JOIN aw_review_artifacts a USING(org_id,artifact_ref,artifact_revision)
-            LEFT JOIN aw_employment_versions v ON (v.org_id,v.employee_id,v.employment_revision)
-                =(r.org_id,r.reviewer_id,r.reviewer_revision)
+            a.producer_ids,a.producer_groups FROM aw_reviews r JOIN aw_review_artifacts a
+            USING(org_id,artifact_ref,artifact_revision)
             WHERE r.org_id=%s AND r.review_id=%s AND a.scope_ref=%s FOR UPDATE OF r""",
             (org, review_id, viewer["scope_ref"]),
         ).fetchone()
-        if not row or (replacement and lead is not None and row["assigned_lead"] != lead):
+        if not row:
             raise Denied("REVIEW_DENIED")
+        _require_review_team(conn, session, viewer, row)
         same_origin = _review_origin_matches(conn, session, row)
         if old and same_origin:
             return out

@@ -92,7 +92,7 @@ def test_legacy_paid_review_requires_own_nf_installation(isolated_database, tmp_
         contents.extractall(tmp_path, filter="data")
     old = tmp_path / "workshop"
     subprocess.run([sys.executable, "-m", "alembic", "upgrade", "head"], cwd=old, check=True,
-                   env={**os.environ, "PYTHONPATH": str(old/"src"), "AW_DATABASE_URL": dsn})
+                   env={**os.environ, "PYTHONPATH": str(old / "src"), "AW_DATABASE_URL": dsn})
     with connect(dsn) as conn:
         assert conn.execute("SELECT version_num FROM aw_alembic_version").fetchone()["version_num"] == "w004a"
     seeded = subprocess.check_output([sys.executable, str(Path(__file__).resolve())], cwd=old, text=True,
@@ -101,7 +101,7 @@ def test_legacy_paid_review_requires_own_nf_installation(isolated_database, tmp_
     history_sql = """SELECT d.operation_id::text,d.installation_id,d.state,r.receipt_ref::text,r.task_state,
                      r.accounting_state,h.status,h.settled_amount::text FROM aw_delegations d
                      JOIN aw_remote_receipts r USING(org_id,operation_id) JOIN aw_budget_holds h USING(org_id,operation_id)
-                     ORDER BY d.installation_id"""
+                     ORDER BY d.installation_id, d.operation_id"""
     with connect(dsn) as conn:
         before = conn.execute(history_sql).fetchall()
         assert sorted(row["installation_id"] for row in before) == ["east", "east", "west"]
