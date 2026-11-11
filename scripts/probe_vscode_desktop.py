@@ -17,6 +17,7 @@ import sys
 import tempfile
 from threading import Thread
 import time
+from urllib.parse import urlsplit
 
 from probe_vscode_offline_transport import SyntheticResponses, ThreadingHTTPServer
 
@@ -170,6 +171,21 @@ def startup_diagnostics(base, desktop, helper):
             "stderr_markers": [key for key, pattern in patterns.items() if re.search(pattern, raw)]}
 
 
+def target_inventory(session):
+    result = []
+    for target in session.send("Target.getTargets")["targetInfos"]:
+        parsed = urlsplit(target["url"])
+        basename = parsed.path.rsplit("/", 1)[-1]
+        result.append({
+            "type": target["type"] if target["type"] in ("page", "iframe", "worker") else "other",
+            "scheme": parsed.scheme if parsed.scheme in (
+                "vscode-file", "vscode-webview", "file", "about", "devtools") else "other",
+            "entry": basename if basename in ("workbench.html", "sessions.html", "index.html",
+                                               "fake.html", "blank") else "other",
+        })
+    return result
+
+
 def exercise(base, desktop, cdp_port, evidence):
     from playwright.sync_api import Error, sync_playwright
 
@@ -183,18 +199,29 @@ def exercise(base, desktop, cdp_port, evidence):
                 if desktop.poll() is not None or time.monotonic() - start > 40:
                     raise RuntimeError("Desktop failed to create the CDP listener") from None
                 time.sleep(.2)
+        evidence["stage"] = "find_workbench_window"
+        cdp = browser.new_browser_cdp_session()
         page = None
-        for _ in range(90):
-            for context in browser.contexts:
-                page = next((p for p in context.pages if "workbench.html" in p.url), None)
-                if page:
-                    break
+        deadline = time.monotonic() + 40
+        while time.monotonic() < deadline:
+            # Sync Playwright receives new Electron targets while a protocol call pumps its driver.
+            # Chromium may advertise an about:blank target before the workbench navigates.
+            evidence["native_targets"] = target_inventory(cdp)
+            pages = [p for context in browser.contexts for p in context.pages if not p.is_closed()]
+            pages.sort(key=lambda p: "workbench.html" not in p.url)
+            for candidate in pages:
+                try:
+                    if candidate.locator(".monaco-workbench").count():
+                        page = candidate
+                        break
+                except Error:
+                    continue
             if page:
                 break
-            time.sleep(.3)
+            time.sleep(.25)
         if not page:
             raise RuntimeError("Native workbench renderer not found")
-        page.locator(".monaco-workbench").wait_for(timeout=45000)
+        page.locator(".monaco-workbench").wait_for(timeout=15000)
         evidence["stage"] = "open_codex_sidebar"
         page.keyboard.press("Control+Alt+Shift+9")
         editor = None
@@ -216,7 +243,7 @@ def exercise(base, desktop, cdp_port, evidence):
                     continue
             if editor:
                 break
-            time.sleep(.5)
+            page.wait_for_timeout(500)
         if editor is None:
             raise RuntimeError("No editable composer in the Codex webview")
         for i in range(2):
@@ -237,7 +264,7 @@ def exercise(base, desktop, cdp_port, evidence):
                             raise RuntimeError("Unexpected wake count after the submitted turn")
                         evidence.setdefault("awakened_by_ui_turn", []).append(1 - i)
                         break
-                time.sleep(.25)
+                page.wait_for_timeout(250)
             else:
                 raise RuntimeError("No completed renderer turn and matching MCP receipt")
         evidence["rendered_author_turns"] = 2
