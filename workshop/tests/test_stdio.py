@@ -8,6 +8,7 @@ import pytest
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
+from agent_workshop.organization import bootstrap
 from agent_workshop.admin import enroll
 from agent_workshop.auth import Denied, connect, digest, private_binding
 from agent_workshop.server import PROTOCOL
@@ -30,6 +31,7 @@ def test_live_negotiation_scope_and_revocation(tmp_path):
     ident = uuid4().hex
     with connect(dsn) as conn:
         conn.execute("INSERT INTO aw_installations VALUES (%s,%s,true)", (ident, "synthetic-nf"))
+        bootstrap(conn, ident, installation_id=ident)
         token = enroll(conn, ident, ident, "manager", 1, 1)
     path = tmp_path / "server.json"
     path.write_text(json.dumps({"database_url": dsn, "token": token}))

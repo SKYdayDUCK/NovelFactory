@@ -12,3 +12,5 @@
 | Scion | 4f249d5 | PR #4 保持独立 | 未纳入本轮 |
 
 冻结输入：v2.3 设计包 SHA256 `00ed0fa956dfd1298f9f26b2e779aedab404a42e6b601103320427d8f9f2c63e`。独立下载的 00 与上传执行指令逐字节相同。Workshop 对照 `workshop/contracts/nf-catalog.json`。各阶段以 STAGE_STATUS.json 与 evidence/ 为准，合并阻断按原门槛处理。P6 缺本作品的模型端点与消费限额及实际双人审读。
+
+W0 提交 c18e53959807a35816eaa1258a3b7c64b80b4637，PR #7，独立 PostgreSQL 与 stdio 工作流 43030289759 成功。W1 在干净 PG17.11 依序升级，通过 9 项组织与 stdio 检查，原始报告位于 evidence/workshop/w1。

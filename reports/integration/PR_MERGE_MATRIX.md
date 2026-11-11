@@ -3,8 +3,8 @@
 | 阶段 | PR | 接管头 SHA | 接管目标 | 集成状态 |
 |---|---:|---|---|---|
 | P5.5 S0–S9 | [#6](https://github.com/SKYdayDUCK/NovelFactory/pull/6) | `97eeceac266016b0d5da62786b019b704bfcdb70` | `main` | MERGED_AND_VERIFIED，main `df1e0cc904e3` |
-| Workshop W0 | [#7](https://github.com/SKYdayDUCK/NovelFactory/pull/7) | `c18e53959807a35816eaa1258a3b7c64b80b4637` | `main` | 唯一开放的阶段，尚未合并 |
-| Workshop W1 | [#8](https://github.com/SKYdayDUCK/NovelFactory/pull/8) | `f59ac5e442bd5a434ded2e65526d5750c5488e9b` | `dev/aw-w0` | 冻结 |
+| Workshop W0 | [#7](https://github.com/SKYdayDUCK/NovelFactory/pull/7) | `c18e53959807a35816eaa1258a3b7c64b80b4637` | `main` | MERGED_AND_VERIFIED，main `c4939e24b6b5` |
+| Workshop W1 | [#8](https://github.com/SKYdayDUCK/NovelFactory/pull/8) | `f59ac5e442bd5a434ded2e65526d5750c5488e9b` | `dev/aw-w0` | W1 唯一开放，目标 main |
 | Workshop W2 | [#9](https://github.com/SKYdayDUCK/NovelFactory/pull/9) | `0da5b7c8fab5321fa50d2a04a516f3fd95432539` | `dev/aw-w1` | 冻结 |
 | NF 受限委托桥接 | [#11](https://github.com/SKYdayDUCK/NovelFactory/pull/11) | `90cac947c6f1b176f20df6a579027f24e96d7b4c` | `dev/p5-5-redis-eventhub` | 冻结 |
 | Workshop W3 | [#10](https://github.com/SKYdayDUCK/NovelFactory/pull/10) | `15d1cf51c357627866d06bd49fd326798dda56a3` | `dev/aw-w2` | 冻结 |

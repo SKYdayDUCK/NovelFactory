@@ -3,33 +3,18 @@ import argparse
 import asyncio
 import json
 import sys
-from functools import cache
-from pathlib import Path
 
 from jsonschema import Draft202012Validator, FormatChecker
 from mcp import types
 from mcp.server.lowlevel import Server
 from mcp.server.stdio import stdio_server
 
+from . import organization
+from .roster_projection import catalog_binding
 from .auth import Denied, authenticate, connect, private_binding
 
 PROTOCOL = "aw-nf.v1"
 MAX_ARGUMENT_BYTES = 32768
-
-
-@cache
-def catalog_binding():
-    # Wheels contain the frozen manifest beside this module; source checkouts
-    # retain it at the existing contracts path used by operators and CI.
-    path = Path(__file__).with_name("nf-catalog.json")
-    if not path.is_file():
-        path = Path(__file__).resolve().parents[2] / "contracts" / "nf-catalog.json"
-    manifest = json.loads(path.read_text(encoding="utf-8"))
-    return {
-        "nf_commit": manifest["nf_commit"],
-        "role_catalog_hash": manifest["catalogs"]["runtime/roles/catalog.json"],
-        "skill_catalog_hash": manifest["catalogs"]["runtime/skills/catalog.json"],
-    }
 
 
 def negotiate(conn, session, protocol_version):
@@ -45,15 +30,26 @@ def negotiate(conn, session, protocol_version):
 
 TOOLS = {"aw_capabilities": ("Negotiate this connection's organization protocol.",
          {"type": "object", "required": ["protocol_version"], "additionalProperties": False,
-          "properties": {"protocol_version": {"type": "string", "maxLength": 32}}}, negotiate)}
+          "properties": {"protocol_version": {"type": "string", "maxLength": 32}}}, negotiate), **organization.TOOLS}
 
 
 def dispatch(config, name=None, arguments=None):
     with connect(config["database_url"]) as conn:
         session = authenticate(conn, config["token"])
+        # Validate the member even when listing tools on an already open pipe.
+        # Mutating organization commands take the exclusive lock first.
+        changes = {"aw_hire", "aw_suspend", "aw_transfer", "aw_end"}
+        visible = {"aw_capabilities"}
+        if session.org_member:
+            if name in changes:
+                organization.lock_org(conn, session.org_id, write=True)
+            viewer = organization.require_employee(conn, session)
+            visible = set(TOOLS)
+            if viewer["role_id"] != "workshop_manager":
+                visible -= changes
         if name is None:
-            return list(TOOLS)
-        if name not in TOOLS:
+            return sorted(visible)
+        if name not in visible:
             raise Denied("VIEW_DENIED")
         _, schema, handler = TOOLS[name]
         if (len(json.dumps(arguments, ensure_ascii=False).encode()) > MAX_ARGUMENT_BYTES
