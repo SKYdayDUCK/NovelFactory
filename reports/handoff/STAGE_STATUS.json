@@ -83,14 +83,20 @@
     "evidence": "reports/integration/W4_主线签收.md"
   },
   "W5": {
-    "status": "IN_PROGRESS",
-    "result": "AWAITING_MAIN_ACCEPTANCE",
+    "status": "MERGED_AND_VERIFIED",
+    "result": "PASS",
     "pr": 14,
-    "dependency_main_sha": "6c711adf794842bdf4469ab51e89093d37761bcc"
+    "dependency_main_sha": "6c711adf794842bdf4469ab51e89093d37761bcc",
+    "source_sha": "455cf92cc6fe5e1d0e565d627a4d5651a56bc8d4",
+    "main_sha": "b30e76978830bec4c596c04194d749fd01f67402",
+    "merged_at": "2026-11-11T22:31:34Z",
+    "evidence": "reports/integration/W5_主线签收.md"
   },
   "W6": {
-    "status": "NOT_STARTED",
-    "result": "NOT_EXECUTED"
+    "status": "IN_PROGRESS",
+    "result": "AWAITING_MAIN_ACCEPTANCE",
+    "pr": 15,
+    "dependency_main_sha": "b30e76978830bec4c596c04194d749fd01f67402"
   },
   "C": {
     "status": "BLOCKED",

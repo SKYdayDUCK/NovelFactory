@@ -28,3 +28,5 @@ W3 主线验收。原四项 AT-30 继续在 #13 跟踪，未涉及付费模型�
 - W5 候选 `455cf92` 的原生 JUnit 保留本机无 Docker sidecar 的停机用例跳过。相同通知断电场景在真实原生 Redis 停启、两次新 worker 和 PostgreSQL 中通过，正式托管 Docker 原用例也通过。历史资格观测只覆盖管理者停调，本轮验证了 Workshop 数据库实际拒绝连接期间的 NF 完成与原键恢复。[候选实测与原件](evidence/W5/candidate-455cf92/independent/README.md)。
 
 - W5 合并点 `b30e76978830` 已通过候选两项 CI。原生本地 Docker 跳过与托管 PG 的 17 项命名空间跳过均在候选有逐项同源码补验，新的 main 重新验证这些范围。[合并双亲、时间与主线工作流](evidence/W5/main-b30e769/independent/merge-checkpoint.json)。
+
+- W5 主线 `b30e76978830bec4c596c04194d749fd01f67402` 的本地 Docker 项另经原生 Redis 进程停启复验通过。托管 PG 的 17 项宿主限制已同 SHA 逐节点对应。既有 AT-30 性能事实与 Issue #13 继续保留。[W5 主线签收](W5_主线签收.md)。

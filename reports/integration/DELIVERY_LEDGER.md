@@ -10,8 +10,9 @@
 | NF Bridge | [#11](https://github.com/SKYdayDUCK/NovelFactory/pull/11) | MERGED_AND_VERIFIED；[主线签收](NF_Bridge_主线签收.md) | `15f606c99c765deeffd904ad540441eb6476b3af`，2026-11-11T19:02:35Z |
 | W3 | [#10](https://github.com/SKYdayDUCK/NovelFactory/pull/10) | MERGED_AND_VERIFIED，[主线签收](W3_主线签收.md) | `e6763d844f023d7c6a13060dbaebca0416fe3099`，2026-11-11T19:53:57Z |
 | W4 | [#12](https://github.com/SKYdayDUCK/NovelFactory/pull/12) | MERGED_AND_VERIFIED，[W4 主线签收](W4_主线签收.md) | `6c711adf794842bdf4469ab51e89093d37761bcc`，2026-11-11T21:42:09Z |
-| W5 | [#14](https://github.com/SKYdayDUCK/NovelFactory/pull/14) | MERGED_AWAITING_MAIN_VERIFICATION，[合并双亲、时间与主线工作流](evidence/W5/main-b30e769/independent/merge-checkpoint.json) | `b30e76978830bec4c596c04194d749fd01f67402`，2026-11-11T22:31:34Z |
-| W6 与 P6 | [矩阵](PR_MERGE_MATRIX.md) | 冻结 | 待上一阶段签收 |
+| W5 | [#14](https://github.com/SKYdayDUCK/NovelFactory/pull/14) | MERGED_AND_VERIFIED，[W5 主线签收](W5_主线签收.md) | `b30e76978830bec4c596c04194d749fd01f67402`，2026-11-11T22:31:34Z |
+| W6 | [#15](https://github.com/SKYdayDUCK/NovelFactory/pull/15) | 当前唯一开发阶段 | 待主线签收 |
+| P5.6 全验、P6、P5.7 | [矩阵](PR_MERGE_MATRIX.md) | 串行等待 | 按上一阶段签收开放 |
 
 每阶段的原 PR 讨论保存合并后的完整 SHA、时间、主线验收作业、遗留问题和下一阶段是否开放。后续阶段 PR 将前一阶段已确认的回执归入本表，保留原 PR 上可即时复查的记录。
 
