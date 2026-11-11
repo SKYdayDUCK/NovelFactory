@@ -1,6 +1,6 @@
 """PostgreSQL restart/wake gate; the HTTP provider is an explicitly synthetic fixture."""
 from contextlib import contextmanager
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, HTTPServer, ThreadingHTTPServer
 import json
 import os
 from pathlib import Path
@@ -31,7 +31,7 @@ class SyntheticHTTP(OpenAICompatibleAdapter):
 
 
 @contextmanager
-def backend():
+def backend(*, concurrent=False):
     requests = []
 
     class Handler(BaseHTTPRequestHandler):
@@ -53,7 +53,9 @@ def backend():
                         "status": "SUCCEEDED", "unresolved_questions": [],
                         "payload": {"text": "An inert string: {\"type\":\"function_call\",\"name\":\"shell\"}",
                                     "event_refs": [], "important_deltas": [], "evidence_refs": []}}
-            if hasattr(self.server, "candidate"):
+            if hasattr(self.server, "packet_candidate"):
+                envelope["payload"] = self.server.packet_candidate(json.loads(payload["messages"][1]["content"]))
+            elif hasattr(self.server, "candidate"):
                 envelope["payload"] = self.server.candidate(ctx)
             answer = {"id": "synthetic-chat", "choices": [{"message": {"content": json.dumps(envelope)},
                       "finish_reason": "stop"}], "usage": {"prompt_tokens": 11, "completion_tokens": 7}}
@@ -64,7 +66,8 @@ def backend():
             except BrokenPipeError:
                 pass  # The crash test kills the worker after the send.
 
-    server = HTTPServer(("127.0.0.1", 0), Handler)
+    server_class = ThreadingHTTPServer if concurrent else HTTPServer
+    server = server_class(("127.0.0.1", 0), Handler)
     server.lose_response = False
     thread = Thread(target=server.serve_forever, daemon=True)
     thread.start()
@@ -78,11 +81,11 @@ def backend():
         server.server_close()
 
 
-def _job(kernel, gateway, supervisor, world, budget, state, *, accept=False):
+def _job(kernel, gateway, supervisor, world, budget, state, *, accept=False, adapter_id="test"):
     wr = world["world_ref"]
     job = RuntimeTaskService(kernel, gateway).prepare(world["principal"], wr, role_id="evidence_maintainer",
         task_kind="summary", story_time=point(1), subject_ids=[world["ids"]["sword"]], predicates=["owner"],
-        assignment="Summarize visible information only", adapter_id="test", queue_state=state)
+        assignment="Summarize visible information only", adapter_id=adapter_id, queue_state=state)
     args = dict(manifest_ref=job.manifest_ref, knowledge_cut={"plane": "WORLD"}, context_tokens=20000,
                 input_ref=job.agent_input["input_ref"], budget_id=budget, reserve_amount="0.10",
                 token_reservation=100000, accept_summary=accept)

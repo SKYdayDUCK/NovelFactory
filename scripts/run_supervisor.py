@@ -1,9 +1,12 @@
 """Run the deterministic project scheduler. A stopped service resumes on restart."""
+from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 import argparse
 import json
 import os
 from pathlib import Path
 import time
+
+import psycopg
 
 from novel_factory.application.agent_gateway import AgentGateway
 from novel_factory.application.kernel import Kernel
@@ -13,12 +16,51 @@ from novel_factory.infrastructure.codex_host import CodexAppServerAdapter
 from novel_factory.infrastructure.database import Database
 from novel_factory.infrastructure.model_gateway import OpenAICompatibleAdapter
 from novel_factory.infrastructure.objects import ObjectStore
+from novel_factory.infrastructure.supervisor_wake import wait_for_change, wake_listener
+
+
+def log_result(result):
+    print(json.dumps({key: result[key] for key in ("status", "reason", "task_id", "generation", "counts")
+                      if key in result}), flush=True)
+
+
+def serve(supervisor, principal, work, branch, *, workers, interval):
+    pending = set()
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        while True:
+            try:
+                with wake_listener(supervisor.kernel.db.engine) as listener:
+                    _drain(supervisor, principal, work, branch, pool, workers, pending, listener, interval)
+            except psycopg.OperationalError:
+                # A new LISTEN session always begins with a durable scan.
+                # Already admitted futures remain owned by this pool.
+                print(json.dumps({"status": "RECONNECTING", "reason": "LISTENER_UNAVAILABLE"}), flush=True)
+                time.sleep(min(interval, 5))
+
+
+def _drain(supervisor, principal, work, branch, pool, workers, pending, listener, interval):
+    while True:
+        for future in tuple(pending):
+            if future.done():
+                pending.remove(future)
+                log_result(future.result())
+        if len(pending) == workers:
+            wait(pending, return_when=FIRST_COMPLETED)
+            continue
+        result = supervisor.run_once(principal, work, branch, executor=pool)
+        if isinstance(result, Future):
+            pending.add(result)
+        elif result["status"] == "IDLE":
+            wait_for_change(listener, interval)
+        else:
+            log_result(result)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--access-file", required=True, type=Path, help="Private JSON with token, work_id and branch_id")
-    parser.add_argument("--interval", type=float, default=1)
+    parser.add_argument("--interval", type=float, default=60, help="Maximum seconds between durable reconciliations")
+    parser.add_argument("--workers", type=int, default=2, help="Maximum concurrent Host tasks in this process")
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--once", action="store_true")
     mode.add_argument("--enroll", type=Path, help="Private JSON with task_id, fixed input/manifest refs, cut and budget")
@@ -26,8 +68,10 @@ def main():
     args = parser.parse_args()
     if not .1 <= args.interval <= 60:
         parser.error("interval must be between 0.1 and 60 seconds")
+    if not 1 <= args.workers <= 16:
+        parser.error("workers must be between 1 and 16")
     access = json.loads(args.access_file.read_text())
-    db = Database()
+    db = Database(pool_size=max(5, args.workers + 2))
     try:
         kernel = Kernel(db, ObjectStore(os.environ.get("NF_OBJECT_ROOT", "var/objects")))
         principal = kernel.authenticate(access["token"])
@@ -54,15 +98,11 @@ def main():
             enrolled = supervisor.enroll(principal, **enrollment)
             print(json.dumps(enrolled))
             return
-        while True:
-            result = supervisor.run_once(principal, access["work_id"], access["branch_id"])
-            if args.once or result["status"] != "IDLE":
-                print(json.dumps({k: result[k] for k in ("status", "reason", "task_id", "generation", "counts")
-                                  if k in result}), flush=True)
-            if args.once:
-                return
-            if result["status"] == "IDLE":
-                time.sleep(args.interval)
+        if args.once:
+            log_result(supervisor.run_once(principal, access["work_id"], access["branch_id"]))
+            return
+        serve(supervisor, principal, access["work_id"], access["branch_id"],
+              workers=args.workers, interval=args.interval)
     except DomainError as exc:
         raise SystemExit(exc.code) from None
     finally:

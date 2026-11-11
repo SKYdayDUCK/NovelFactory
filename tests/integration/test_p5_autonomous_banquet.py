@@ -182,7 +182,7 @@ def test_one_author_resume_through_autonomous_banquet(kernel_env, tmp_path):
     with os.fdopen(os.open(access, os.O_WRONLY | os.O_EXCL | os.O_CREAT, 0o600), "w") as private:
         json.dump({**binding, "token": world["token"]}, private)
 
-    with backend() as (_, requests, server):
+    with backend(concurrent=True) as (_, requests, server):
         cert = _https(server, tmp_path)
         endpoint = f"https://127.0.0.1:{server.server_port}/v1/chat/completions"
         model = "deterministic-banquet-fixture"
@@ -326,10 +326,13 @@ def test_one_author_resume_through_autonomous_banquet(kernel_env, tmp_path):
         started = time.monotonic()
         proc = None
 
-        def respond(ctx):
+        actor_overlap = Barrier(2)
+
+        def respond(packet):
             try:
-                packet = json.loads(requests[-1]["messages"][1]["content"])
-                task_id = ctx["task_id"]
+                task_id = packet["context"]["task_id"]
+                if task_id in (actor_tasks[0], actor_tasks[2]):
+                    actor_overlap.wait(timeout=20)
                 if "editorial" in packet:
                     labels[task_id] = packet["editorial"]["operation"]
                 with kernel.db.uow(write=False) as repo:
@@ -349,12 +352,14 @@ def test_one_author_resume_through_autonomous_banquet(kernel_env, tmp_path):
                         "live_codex_pids": hosts,
                     }
                 )
+                if task_id in (actor_tasks[0], actor_tasks[2]):
+                    actor_overlap.wait(timeout=20)
                 return _candidate(packet, choices, process["scope_ids"])
             except Exception as exc:
                 callback_errors.append(repr(exc))
                 raise
 
-        server.candidate = respond
+        server.packet_candidate = respond
 
         async def drive():
             nonlocal proc
@@ -377,8 +382,8 @@ def test_one_author_resume_through_autonomous_banquet(kernel_env, tmp_path):
                 with stdout_path.open("w") as stdout, stderr_path.open("w") as stderr:
                     proc = await asyncio.create_subprocess_exec(
                         *command,
-                        "--interval",
-                        "0.1",
+                        "--workers",
+                        "2",
                         cwd=ROOT,
                         env=env,
                         stdout=stdout,
@@ -451,8 +456,13 @@ def test_one_author_resume_through_autonomous_banquet(kernel_env, tmp_path):
             next(o for o in observations if o["turn"] == "B")["states"]["notification"]
             == "ACCEPTED"
         )
-        assert all(len(o["live_codex_pids"]) == 1 for o in observations)
-        host_pids = [o["live_codex_pids"][0] for o in observations]
+        for o in observations:
+            if o["turn"] in ("A", "C"):
+                assert o["states"]["A"] == o["states"]["C"] == "RUNNING"
+                assert len(o["live_codex_pids"]) == 2
+            else:
+                assert 1 <= len(o["live_codex_pids"]) <= 2
+        host_pids = {pid for o in observations for pid in o["live_codex_pids"]}
         assert len(set(host_pids)) == 8 and not any(
             Path(f"/proc/{pid}").exists() for pid in host_pids
         )

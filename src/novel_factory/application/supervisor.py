@@ -14,6 +14,7 @@ from novel_factory.infrastructure.database import tables
 from novel_factory.infrastructure.model_gateway import OpenAICompatibleAdapter
 from novel_factory.infrastructure.repository import KernelRepository
 from novel_factory.orchestration.workflow import WorkflowService
+from novel_factory.orchestration import dispatch
 
 
 class HostJournal:
@@ -139,7 +140,7 @@ class RuntimeSupervisor:
                 repo.add("supervisor_jobs", {"task_id": task_id, "config": config})
             return {"task_id": task_id, "enrolled": True}
 
-    def run_once(self, controller, work_id, branch_id):
+    def run_once(self, controller, work_id, branch_id, *, executor=None):
         def authorize(conn):
             self.kernel.authorize(KernelRepository(conn, tables), controller, work_id, "ADMIN", branch_id)
         from novel_factory.application.editorial_handoff import EditorialDelivery
@@ -166,42 +167,41 @@ class RuntimeSupervisor:
                 self.kernel.tasks._emit(repo.conn, task_id, generation, "PAUSED")
         if stale:
             summary.update(self.workflow.status(work_id, branch_id, authorize_in_tx=authorize))
-        with self.kernel.db.uow(write=False) as repo:
+        with self.kernel.db.uow() as repo:
             authorize(repo.conn)
-            ids = list(repo.conn.scalars(text("""
-                SELECT t.task_id::text FROM nf_tasks t JOIN nf_supervisor_jobs j USING(task_id)
-                JOIN nf_grants g ON g.grant_id=t.grant_id JOIN nf_works w ON w.work_id=t.work_id
-                WHERE t.work_id=:work AND t.branch_id=:branch AND t.state='READY' AND t.deadline>clock_timestamp()
-                  AND g.active AND g.principal_id::text=t.principal_id AND g.work_id=t.work_id AND g.role_id=t.role_id
-                  AND g.epoch=(j.config->>'grant_epoch')::bigint AND w.policy_version=j.config->>'policy_version'
-                  AND (g.branch_ids='["*"]'::jsonb OR g.branch_ids @> jsonb_build_array(t.branch_id))
-                  AND g.capabilities @> '["TASK_CLAIM","READ","COMPILE"]'::jsonb
-                  AND NOT EXISTS(SELECT FROM nf_call_attempts c WHERE c.task_id=t.task_id)
-                ORDER BY t.updated_at,t.task_id LIMIT 32
-            """), {"work": work_id, "branch": branch_id}))
-        for task_id in ids:
-            worker = "supervisor:" + str(uuid4())
-            with self.kernel.db.uow(write=False) as repo:
-                task = repo.one("tasks", {"task_id": task_id})
-                config = repo.one("supervisor_jobs", {"task_id": task_id})["config"]
-                owner = Principal(task["grant_id"], task["principal_id"])
-            def authorized_claim(conn):
-                authorize(conn)
-                repo = KernelRepository(conn, tables)
+            task_id = dispatch.next_job(repo.conn, work_id, branch_id)
+            if task_id is None:
+                return {"status": "IDLE", **summary}
+            task = repo.one("tasks", {"task_id": task_id})
+            config = repo.one("supervisor_jobs", {"task_id": task_id})["config"]
+            owner = Principal(task["grant_id"], task["principal_id"])
+            try:
                 _, grant = self.kernel._task_owner(repo, owner, task_id, "TASK_CLAIM")
                 require(grant["epoch"] == config["grant_epoch"]
                         and repo.one("works", {"work_id": work_id})["policy_version"] == config["policy_version"],
                         "TASK_REBIND_REQUIRED", "Dispatch allowance is no longer current")
-            try:
-                claimed = self.kernel.tasks.claim(worker, work_id=work_id, principal_id=owner.principal_id,
-                    grant_id=owner.grant_id, task_id=task_id, lease_seconds=900, authorize_in_tx=authorized_claim)
             except DomainError as exc:
                 if exc.code not in {"TASK_REBIND_REQUIRED", "VIEW_DENIED"}:
                     raise
-                continue
-            if claimed:
-                return self._execute(owner, claimed, worker, config)
-        return {"status": "IDLE", **summary}
+                return {"status": "IDLE", **summary}
+            worker = "supervisor:" + str(uuid4())
+            claimed = self.kernel.tasks.claim_in_transaction(repo.conn, worker, work_id=work_id,
+                principal_id=owner.principal_id, grant_id=owner.grant_id, task_id=task_id, lease_seconds=900)
+            if not claimed:
+                return {"status": "IDLE", **summary}
+            dispatch.reserve(repo, claimed)
+
+        if executor is not None:
+            return executor.submit(self._run_admitted, owner, claimed, worker, config)
+        return self._run_admitted(owner, claimed, worker, config)
+
+    def _run_admitted(self, owner, claimed, worker, config):
+        try:
+            return self._execute(owner, claimed, worker, config)
+        finally:
+            with self.kernel.db.uow() as repo:
+                repo.conn.execute(text("DELETE FROM nf_dispatch_slots WHERE attempt_id=:attempt"),
+                                  {"attempt": claimed["attempt_id"]})
 
     def _deliver_candidates(self, controller, work_id, branch_id):
         """Recover the completion/outbox boundary even if the prior worker died.
