@@ -4,7 +4,7 @@ import subprocess
 import sys
 
 import pytest
-from historical_release import release_database, run_release
+from tests.fixtures.historical_release import release_database, run_release
 
 from novel_factory.application.kernel import Kernel
 from novel_factory.application.authorization import Principal

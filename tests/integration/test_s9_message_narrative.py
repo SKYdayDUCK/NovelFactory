@@ -81,3 +81,32 @@ def test_finished_unpublished_draft_fenced_when_its_explicit_world_read_changes(
     with k.db.uow(write=False) as repo:
         assert k.head(repo, wr["work_id"]) == change["world_ref"]
         assert s._draft(repo, item["draft_ref"], wr["work_id"])["text_ref"]["sha256"]
+
+
+def test_delivered_draft_selected_as_letter_retains_its_carrier_dependencies(kernel_env):
+    from novel_factory.application.semantic_dependencies import check_task_dependencies
+    from novel_factory.domain.canonical import canonical_bytes
+    from test_release import task_for
+    from test_s9_dependencies import set_fact, world
+
+    kernel = kernel_env["kernel"]
+    f = arrange(kernel, world(kernel))
+    admin, base = f["principal"], f["world_ref"]
+    draft = draft_for(kernel, f, "密信里写的是明早启程。")["draft_ref"]
+    narrative = NarrativeService(kernel)
+    with kernel.db.uow(write=False) as repo:
+        body_ref = narrative._draft(repo, draft, base["work_id"])["text_ref"]
+    named = set_fact(kernel, f, base, f["letter"], "message_content_ref",
+                     {"kind": "STRING", "value": canonical_bytes(body_ref).decode()}, 2)
+    reviewer = runtime_grant(kernel, f, "reviewer")
+    reader = task_for(kernel, f, reviewer, [draft], "extract", wr=named, story_time=point(20))
+    pair = (reader["task_id"], reader["generation"])
+    narrative.bind_reader_task(admin, *pair, [draft], "reader-scope")
+    delivery = narrative.read_text(reviewer, *pair, draft)
+    assert delivery["text"] == "密信里写的是明早启程。" and delivery["text_ref"] == body_ref
+    with kernel.db.uow(write=False) as repo:
+        check_task_dependencies(repo, *pair)
+    set_fact(kernel, f, named, f["letter"], "message_authentic", {"kind": "BOOLEAN", "value": False}, 5)
+    with kernel.db.uow(write=False) as repo, pytest.raises(DomainError) as stale:
+        check_task_dependencies(repo, *pair)
+    assert stale.value.code == "DEPENDENCY_CONFLICT"

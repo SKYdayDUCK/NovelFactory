@@ -82,6 +82,9 @@ def test_unknown_call_paused_and_original_reservation_survives(kernel_env):
     result = svc.reconcile_one(*args)
     assert result["outcome"] == "REVIEW_REQUIRED" and result["reason"] == "ORIGINAL_ATTEMPT_RECONCILED"
     assert svc.reconcile_one(*args) is None
+    from novel_factory.application.audit_log import LogService
+    recent = next(c for c in LogService.recent_conflicts(k, *args) if str(c["case_id"]) == case)
+    assert str(recent["review_task_id"]) == result["review_task_id"] and recent["review_task_state"] == "WAITING_REVIEW"
     with k.db.uow() as repo:
         assert len(repo.many("call_attempts", {"task_id": task["task_id"]})) == 1
         assert repo.one("tasks", {"task_id": result["review_task_id"]})["state"] == "WAITING_REVIEW"
@@ -110,6 +113,14 @@ def test_automatically_prepares_bounded_future_candidate(kernel_env):
         review = repo.one("task_inputs", {"task_id": result["review_task_id"], "generation": 0})["spec"]
         assert review["budget"]["max_amount"] == "0"
         assert repo.one("tasks", {"task_id": result["review_task_id"]})["state"] == "WAITING_REVIEW"
+
+    from novel_factory.application.statistics import StatisticsService
+    stats = StatisticsService(k)
+    assert "conflict.replans_applied" not in stats.rebuild(*args)["metrics"]
+    adopted = plans.adopt_plan(user, change["world_ref"], result["plan_ref"], plan_ref, "adopt-window")
+    assert plans.adopt_plan(user, change["world_ref"], result["plan_ref"], plan_ref, "adopt-window") == adopted
+    metrics = stats.rebuild(*args)["metrics"]
+    assert metrics["conflict.replan_proposals"] == metrics["conflict.replans_applied"] == 1
 
 
 def test_manual_branch_or_repair_requires_independent_immutable_decision(kernel_env):

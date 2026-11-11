@@ -19,8 +19,8 @@ from sqlalchemy import text
 from novel_factory.infrastructure.eventhub import EventHub
 from novel_factory.orchestration.workflow import WorkflowService
 
-from .conftest import start_task
-from .test_workflow import accept, blocked, scope_args
+from tests.fixtures.historical_release import run_release
+from .test_workflow import accept, scope_args
 
 ROOT = Path(__file__).resolve().parents[2]
 pytestmark = [
@@ -47,10 +47,35 @@ def test_upgrade_with_parked_wait_and_protect_live_delivery(rel_env, rel_scope, 
         )
 
     migrate("downgrade", "0007")
-    task = start_task(rel_env, rel_scope)
-    target = blocked(rel_env, rel_scope)
+    # Claims and durable waits are written by P5's actual deployed TaskService.
+    # Its migration head is 0007. Its original test driver builds the bound task.
+    stored = run_release(ROOT, tmp_path, "9dc9c6b806b8ac43f56d0893194a5b402f3f16ca", """
+import json, os
+from novel_factory.infrastructure.database import Database, tables
+from novel_factory.infrastructure.objects import ObjectStore
+from novel_factory.orchestration.tasks import TaskService
+from novel_factory.orchestration.workflow import WorkflowService
+from tests.reliability.conftest import start_task
+from tests.reliability.test_workflow import blocked, scope_args
+db = Database()
+try:
+    store = ObjectStore(os.environ["HISTORICAL_OBJECTS"])
+    service = TaskService(db.engine, tables, store)
+    env = dict(db=db, store=store, service=service)
+    scope = json.loads(os.environ["HISTORICAL_SCOPE"])
+    task = start_task(env, scope)
+    target = blocked(env, scope)
+    WorkflowService(service).wait(target, 0, [task["task_id"]], mode="AND", **scope_args(scope))
+    print(json.dumps({"task": {"task_id": task["task_id"], "generation": task["generation"]},
+                      "target": target}))
+finally:
+    db.close()
+""", {**env, "HISTORICAL_SCOPE": json.dumps(rel_scope),
+      "HISTORICAL_OBJECTS": str(rel_env["store"].root)},
+        fixture_files=("tests/reliability/__init__.py", "tests/reliability/conftest.py",
+                       "tests/reliability/test_workflow.py"))
+    task, target = stored["task"], stored["target"]
     wf = WorkflowService(rel_env["service"])
-    wf.wait(target, 0, [task["task_id"]], mode="AND", **scope_args(rel_scope))
     with rel_env["db"].uow(write=False) as repo:
         before = (
             repo.conn.execute(

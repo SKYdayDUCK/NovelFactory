@@ -126,7 +126,10 @@ def calculate(conn, event, version):
         detail = event["conflict_details"]
         outcome = event["outcome"]
         result["conflict.result." + outcome] = 1
-        result["conflict.strategy." + detail["resolution_strategy"]] = 1
+        # Earlier reconciliation receipts for superseded work may lack a strategy.
+        strategy = detail.get("resolution_strategy")
+        if strategy:
+            result["conflict.strategy." + strategy] = 1
         if outcome in {"REVALIDATED", "CERTIFICATE_REISSUED", "CONTEXT_RECOMPUTED"}:
             result["conflict.auto_resolved"] = 1
         if detail.get("review_task_id") or outcome == "REVIEW_REQUIRED":
@@ -508,6 +511,76 @@ class StatisticsService:
 
     def verify_statistics(self, principal, work_id, branch_id, **selection):
         return self._operate("verify", principal, work_id, branch_id, **selection)
+
+    def labelled_conflicts(self, principal, work_id, branch_id, labels_ref, *, source_cut=None):
+        """Compare an independently signed sample with cases and actual reruns at one audit cut."""
+        from novel_factory.application.authorization import Principal
+        from novel_factory.contracts.registry import validate_contract
+
+        validate_contract("ArtifactRef", labels_ref)
+        with self.kernel.db.uow() as repo:
+            self.kernel.authorize(repo, principal, work_id, "ADMIN", branch_id)
+            evidence = self.kernel.artifact(repo, labels_ref, work_id, kind="EVIDENCE")
+            payload = evidence["payload"]
+            require(isinstance(payload, dict) and payload.get("kind") == "SEMANTIC_LABEL_SET"
+                    and payload.get("work_id") == work_id and payload.get("branch_id") == branch_id,
+                    "INVALID_EVIDENCE", "Expected a labelled sample for this branch")
+            validate_contract("UUID", payload.get("reviewer_grant_id"))
+            reviewer = Principal(payload["reviewer_grant_id"], evidence["created_by"])
+            self.kernel.authorize(repo, reviewer, work_id, "APPROVE", branch_id)
+            labels = payload.get("labels")
+            require(isinstance(labels, list) and 1 <= len(labels) <= 128, "INVALID_EVIDENCE", "Expected 1–128 labels")
+            cut, members = resolve_cut(repo.conn, work_id, branch_id, source_cut)
+            counts = Counter()
+            seen = set()
+            for label in labels:
+                require(isinstance(label, dict) and type(label.get("affected")) is bool
+                        and type(label.get("generation")) is int and label["generation"] >= 0
+                        and isinstance(label.get("reason"), str) and 0 < len(label["reason"].strip()) <= 2000,
+                        "INVALID_EVIDENCE", "Expected a reason and independent yes/no label")
+                for key in ("task_id", "world_revision_id"):
+                    validate_contract("UUID", label.get(key))
+                identity = (label["task_id"], label["generation"], label["world_revision_id"])
+                require(identity not in seen, "INVALID_EVIDENCE", "Duplicate label")
+                seen.add(identity)
+                args = {**label, "work": work_id, "branch": branch_id, "members": members}
+                sample = repo.conn.execute(text("""
+                    SELECT t.principal_id::text, author.principal_id::text AS change_author,
+                        EXISTS(SELECT FROM nf_conflict_cases c
+                          WHERE c.task_id=t.task_id AND c.generation=i.generation AND c.world_revision_id=w.world_revision_id
+                          AND c.case_id=ANY(CAST(:members AS uuid[]))) AS flagged,
+                        EXISTS(SELECT FROM nf_conflict_cases c JOIN nf_conflict_resolutions r USING(case_id)
+                          JOIN nf_audit_events a ON a.task_id=c.task_id AND a.event_type='task.changed'
+                            AND a.outcome='RUNNING' AND a.generation=(r.details->>'new_generation')::int + 1
+                          JOIN nf_task_inputs fresh ON fresh.task_id=a.task_id AND fresh.generation=a.generation
+                          WHERE c.task_id=t.task_id AND c.generation=i.generation AND c.world_revision_id=w.world_revision_id
+                            AND r.outcome='RECOMPUTE_QUEUED' AND fresh.spec->'world_ref'=r.details->'input_world_ref'
+                            AND a.event_id=ANY(CAST(:members AS uuid[]))) AS rerun
+                    FROM nf_tasks t JOIN nf_task_inputs i USING(task_id)
+                    JOIN nf_semantic_changes w ON w.work_id=t.work_id AND w.branch_id=t.branch_id
+                    LEFT JOIN nf_tasks author ON author.task_id=w.source_task_id
+                    JOIN nf_revisions base ON base.world_revision_id=(i.spec->'world_ref'->>'world_revision_id')::uuid
+                    WHERE t.work_id=:work AND t.branch_id=:branch AND t.task_id=:task_id
+                        AND i.generation=:generation AND w.world_revision_id=:world_revision_id
+                        AND base.branch_id=w.branch_id AND base.branch_seq < w.branch_seq
+                        AND EXISTS(SELECT FROM nf_audit_events a WHERE a.event_type='world.accepted'
+                            AND a.world_revision_id=w.world_revision_id AND a.event_id=ANY(CAST(:members AS uuid[])))
+                        AND EXISTS(SELECT FROM nf_audit_events a WHERE a.task_id=t.task_id AND a.generation=i.generation
+                            AND a.event_type='task.changed' AND a.event_id=ANY(CAST(:members AS uuid[])))
+                """), args).mappings().first()
+                require(sample and reviewer.principal_id not in {sample["principal_id"], sample["change_author"]},
+                        "INVALID_EVIDENCE", "An independent label for an eligible task and change is required")
+                actual, flagged = label["affected"], sample["flagged"]
+                counts[(actual, flagged)] += 1
+                counts["reruns"] += int(sample["rerun"])
+                counts["unnecessary"] += int(sample["rerun"] and not actual)
+            return {"status": "INDEPENDENT_LABELLED_SAMPLE", "metric_version": CURRENT_VERSION,
+                    "source_cut": cut, "labels_ref": labels_ref, "labelled_pairs": len(labels),
+                    "actual_conflicts": counts[True, True] + counts[True, False],
+                    "true_positives": counts[True, True], "true_negatives": counts[False, False],
+                    "false_positives": counts[False, True], "false_negatives": counts[True, False],
+                    "observed_reruns": counts["reruns"], "unnecessary_reruns": counts["unnecessary"],
+                    "unnecessary_rework_fraction": counts["unnecessary"] / counts["reruns"] if counts["reruns"] else None}
 
     def current(self, principal, work_id, branch_id):
         """Live authority sample, separately labelled from replayable measurements."""

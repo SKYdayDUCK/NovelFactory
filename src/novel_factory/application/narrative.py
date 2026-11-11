@@ -393,13 +393,16 @@ class NarrativeService:
             "delivery_semantics": "EXACT_BYTES_OFFERED_NOT_UNDERSTANDING"}, "narrative")
         ref = self.kernel._blob(delivery)
         with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
-            from .semantic_dependencies import inherit_material
+            from .semantic_dependencies import inherit_material, record_material_read
             wr = spec["world_ref"]
             self.kernel.authorize(repo, principal, wr["work_id"], "READ", wr["branch_id"])
             branch = repo.one("branches", {"branch_id":wr["branch_id"]}, lock="share")
             self._reader_binding(repo, principal, task_id, generation, draft_ref)
             cut = repo.one("contexts", {"context_bundle_id":task["context_bundle_id"]})["read_cut"]["knowledge_cut"]
-            inherit_material(repo, task_id, generation, self.kernel.revision(repo, wr), [draft_ref], cut, branch["head_revision_id"])
+            revision = self.kernel.revision(repo, wr)
+            inherit_material(repo, task_id, generation, revision, [draft_ref], cut, branch["head_revision_id"])
+            record_material_read(repo, task_id, generation, revision, draft["text_ref"], cut,
+                                 spec["story_time"], branch["head_revision_id"])
             self.kernel._register_artifact(repo, ref, task["work_id"], delivery, "TEXT_DELIVERY", principal.principal_id)
         return {"text": text[span["start"]:span["end"]], "text_ref": draft["text_ref"], "draft_ref": draft_ref,
                 "scene_ref": draft["scene_ref"], "world_ref": spec["world_ref"], "span": span, "delivery_ref": ref}

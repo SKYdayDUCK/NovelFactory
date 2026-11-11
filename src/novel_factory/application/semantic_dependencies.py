@@ -115,15 +115,17 @@ def record_query(repo, packet, request, payload, origin, head_id, *, context_ref
         # Traversal frontier is not fully returned on a partial page. Index a
         # predicate-wide phantom range instead of guessing the unvisited nodes.
         keys.update('range:' + ALIASES.get(p, p) for p in query['predicates'])
-        keys.update('guard:PROCESS_COVERAGE:' + s for s in query['seed_ids'])
     else:
         keys.update('timeline:' + s for s in query['subject_ids'])
-        keys.update('guard:PROCESS_COVERAGE:' + s for s in query['subject_ids'])
     details = {'origin': origin, 'knowledge_cut': cut, 'story_time': request['subject_time'],
                'base_world_ref':packet['spec']['world_ref'], 'query': query, 'dependency_handle': request.get('dependency_handle'), 'interpretation_ref': revision['interpretation_ref'],
                'role_id': packet['grant']['role_id'], 'agent_actor_id': packet['grant']['actor_id'],
                'input_artifacts': packet['spec']['input_artifacts'], 'evidence_refs': _unique(proofs),
                'result_sha256': fingerprint(payload), 'context_ref': context_ref}
+    if cut['plane'] in {'WORLD', 'SIMULATION'} and query['kind'] in {'TIMELINE', 'NEIGHBORHOOD'}:
+        scopes = request.get('coverage_scopes', ())
+        keys.update('guard:PROCESS_COVERAGE:' + scope for scope in scopes)
+        details['coverage_scopes'] = sorted(scopes)
     if uncertain_keys:
         details['uncertain_keys'] = sorted(uncertain_keys - keys)
     message_predicates = {'message_content_ref', 'attributed_reading_ref', 'message_authentic'}
@@ -238,7 +240,11 @@ _MATCH_INDEXED = """
 
 _MATCH = _MATCH_INDEXED.replace('AND r.keys && c.keys', """AND (r.keys && c.keys OR r.created_at IS NULL
            OR EXISTS(SELECT FROM nf_semantic_upgrade_cuts u
-               WHERE u.branch_id=c.branch_id AND c.branch_seq<=u.branch_seq))""")
+               WHERE u.branch_id=c.branch_id AND c.branch_seq<=u.branch_seq)
+           OR EXISTS(SELECT FROM nf_semantic_read_supplements s
+                     WHERE s.observation_id=r.observation_id AND s.keys && c.keys)
+           OR EXISTS(SELECT FROM nf_semantic_change_supplements d
+                     WHERE d.world_revision_id=c.world_revision_id AND d.keys && r.keys))""")
 
 
 def check_task_dependencies(repo, task_id, generation):
@@ -281,7 +287,7 @@ def _classification(rows, scopes):
         return 'SHARED_CONSTRAINT_CONFLICT', 'JOINT_ADJUDICATION'
     if writes.intersection(scopes):
         return 'JOINT_ADJUDICATION_REQUIRED', 'JOINT_ADJUDICATION'
-    if all(scopes_for_row <= set(row['observation'].get('uncertain_keys', []))
+    if all(scopes_for_row <= (set(row['observation'].get('uncertain_keys', [])) | set(row['uncertain_keys']))
            for row in rows if (scopes_for_row := set(row['keys']).intersection(row['read_keys']))):
         return 'SEMANTIC_UNCERTAIN', 'ESCALATE_REVIEW'
     if any(r['observation'].get('uncertain') for r in rows):
@@ -313,10 +319,18 @@ def _emit_case(repo, wr, task, generation, src, case, details):
 
 def _detect(repo, condition, params, *, legacy=True):
     match = _MATCH if legacy else _MATCH_INDEXED
+    projection = ("c.keys AS keys,r.keys AS read_keys,ARRAY[]::text[] AS uncertain_keys" if not legacy else """
+        c.keys || coalesce((SELECT d.keys FROM nf_semantic_change_supplements d
+                            WHERE d.world_revision_id=c.world_revision_id),ARRAY[]::text[]) AS keys,
+        r.keys || coalesce((SELECT s.keys FROM nf_semantic_read_supplements s
+                            WHERE s.observation_id=r.observation_id),ARRAY[]::text[]) AS read_keys,
+        coalesce((SELECT s.uncertain_keys FROM nf_semantic_read_supplements s
+                  WHERE s.observation_id=r.observation_id),ARRAY[]::text[]) AS uncertain_keys""")
     rows = repo.conn.execute(text("""
-        SELECT c.*,r.observation_id,r.details AS observation,r.keys AS read_keys,r.task_id,r.generation,
-               r.world_revision_id AS read_revision,t.state
-        """ + match + " AND " + condition +
+        SELECT /* semantic_detector */ c.work_id,c.branch_id,c.world_revision_id,c.source_task_id,c.details,
+               r.observation_id,r.details AS observation,r.task_id,r.generation,
+               r.world_revision_id AS read_revision,t.state,
+        """ + projection + match + " AND " + condition +
         """ AND NOT EXISTS (SELECT FROM nf_receipts a JOIN nf_proposals p ON a.proposal_id=p.proposal_id
                             WHERE a.command_type='ACCEPT' AND p.task_id=r.task_id AND p.generation=r.generation)
             ORDER BY r.task_id,r.generation,c.world_revision_id,r.observation_id"""), params).mappings()
@@ -358,6 +372,9 @@ def detect_revision(repo, world_ref):
         SELECT EXISTS(SELECT FROM nf_semantic_reads r WHERE r.created_at IS NULL
                       AND r.branch_id=c.branch_id AND r.branch_seq<c.branch_seq)
             OR EXISTS(SELECT FROM nf_semantic_upgrade_cuts u WHERE u.branch_id=c.branch_id AND c.branch_seq<=u.branch_seq)
+            OR EXISTS(SELECT FROM nf_semantic_read_supplements s
+                      WHERE s.branch_id=c.branch_id AND s.branch_seq<c.branch_seq AND s.keys && c.keys)
+            OR EXISTS(SELECT FROM nf_semantic_change_supplements d WHERE d.world_revision_id=c.world_revision_id)
         FROM nf_semantic_changes c WHERE c.world_revision_id=:world_revision_id
           AND c.branch_id=:branch_id AND c.work_id=:work_id
     """), world_ref)
@@ -384,7 +401,9 @@ def add_assumption(kernel, principal, request):
         service = WorldQueryService(kernel)
         service._task(repo, principal, task, gen)
         receipt = repo.conn.execute(text("""
-            SELECT * FROM nf_semantic_reads WHERE task_id=:task AND generation=:gen
+            SELECT r.*,s.keys AS extra_keys FROM nf_semantic_reads r
+            LEFT JOIN nf_semantic_read_supplements s USING(observation_id)
+            WHERE task_id=:task AND generation=:gen
             AND details->>'origin'='QUERY' AND details->>'dependency_handle'=:handle
             ORDER BY observation_id LIMIT 1
         """), {'task': task, 'gen': gen, 'handle': request['dependency_handle']}).mappings().first()
@@ -402,7 +421,7 @@ def add_assumption(kernel, principal, request):
         source = str(receipt['observation_id'])
         statement = request['statement']
         parsed = decode_proposition(statement)
-        keys = set(receipt['keys'])
+        keys = set(receipt['keys']) | set(receipt['extra_keys'] or ())
         if parsed:
             key = slot(parsed['subject_id'], parsed['predicate'])
             if cut['plane'] == 'BELIEF':
@@ -523,13 +542,15 @@ def inherit_material(repo, task_id, generation, revision, refs, cut, head_id):
     wr = _wr(revision)
     rows = list(repo.conn.execute(text("""
         SELECT DISTINCT r.observation_id,r.work_id,r.branch_id,r.world_revision_id,r.branch_seq,
-               r.keys,r.details,a.evidence_id AS product,r.created_at IS NULL AS legacy
+               r.keys || coalesce(s.keys,ARRAY[]::text[]) AS keys,r.details,
+               s.uncertain_keys,a.evidence_id AS product,r.created_at IS NULL AS legacy
         FROM jsonb_to_recordset(CAST(:refs AS jsonb)) AS selected(artifact_id uuid,artifact_revision_id uuid,sha256 text)
         JOIN nf_artifacts art ON (art.artifact_id,art.artifact_revision_id,art.sha256)
                               =(selected.artifact_id,selected.artifact_revision_id,selected.sha256) AND art.work_id=:work
         JOIN nf_audit_events a ON a.evidence_id=art.artifact_revision_id
         JOIN nf_semantic_reads r
           ON (a.task_id,a.generation)=(r.task_id,r.generation)
+        LEFT JOIN nf_semantic_read_supplements s USING(observation_id)
         WHERE a.work_id=:work AND r.work_id=:work
           AND a.task_id IS NOT NULL AND a.task_id<>:task AND a.event_type LIKE 'artifact.%'
           AND (r.created_at IS NULL OR r.created_at<=a.recorded_at) ORDER BY r.observation_id LIMIT 257
@@ -545,6 +566,9 @@ def inherit_material(repo, task_id, generation, revision, refs, cut, head_id):
                    'knowledge_cut':cut, 'source_observation_id':str(row['observation_id']),
                    'source_artifact_version':str(row['product']), 'evidence_refs':[
                        ref for ref in refs if ref['artifact_revision_id'] == str(row['product'])]}
+        uncertainty = set(row['details'].get('uncertain_keys', ())) | set(row['uncertain_keys'] or ())
+        if uncertainty:
+            details['uncertain_keys'] = sorted(uncertainty)
         inherited = set(row['keys'])
         if row['legacy']:
             details['uncertain'] = True
@@ -555,24 +579,25 @@ def inherit_material(repo, task_id, generation, revision, refs, cut, head_id):
 
 
 def record_material_read(repo, task_id, generation, revision, ref, knowledge_cut, story_time, head_id):
-    from novel_factory.domain.canonical import canonical_bytes
+    from novel_factory.domain.canonical import strict_json_loads
     from novel_factory.domain.temporal import contains
 
     keys, uncertain_keys = set(), set()
     if knowledge_cut['plane'] in {'WORLD','SIMULATION'}:
-        # First check the indexed issuance receipt. Ordinary immutable
-        # artifacts have no mutable carrier selection.
-        source = repo.conn.scalar(text("""
-            SELECT EXISTS(SELECT FROM nf_receipts WHERE work_id=:work AND command_type='MESSAGE_SOURCE_VERSION'
-                          AND payload->'source_ref'->>'artifact_revision_id'=:id)
-        """), {'work':revision['work_id'], 'id':ref['artifact_revision_id']})
-        if source:
-            value = {'kind':'STRING', 'value':canonical_bytes(ref).decode()}
-            for rel in revision['snapshot']['relations']:
-                if (rel['predicate']=='message_content_ref' and rel['object_value']==value
-                        and rel['plane']=='WORLD' and contains(rel['valid_time'], story_time)):
-                    keys.add(slot(rel['subject_id'], 'message_content_ref'))
-                    uncertain_keys.update(slot(rel['subject_id'], p) for p in ('message_authentic','attributed_reading_ref'))
+        # The active carrier relation selects the source. An ordinary TEXT or
+        # EVIDENCE artifact is equally valid, regardless of its issuance path
+        # or the JSON formatting used to encode its immutable reference.
+        for rel in revision['snapshot']['relations']:
+            if (rel['predicate'] != 'message_content_ref' or rel['plane'] != 'WORLD'
+                    or not contains(rel['valid_time'], story_time)):
+                continue
+            try:
+                selected = strict_json_loads(rel['object_value']['value'])
+            except DomainError:
+                continue  # An unstructured genesis string binds no artifact.
+            if selected == ref:
+                keys.add(slot(rel['subject_id'], 'message_content_ref'))
+                uncertain_keys.update(slot(rel['subject_id'], p) for p in ('message_authentic','attributed_reading_ref'))
     info = {'origin':'ARTIFACT', 'dependency_kind':'SOURCE_OF', 'knowledge_cut':knowledge_cut,
             'story_time':{'kind':'POINT','at':story_time}, 'uncertain_keys':sorted(uncertain_keys),
             'evidence_refs':[{'kind':'ARTIFACT','artifact_ref':ref}]}

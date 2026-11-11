@@ -195,14 +195,16 @@ class AgentGateway:
                 raise DomainError("INVALID_ARGUMENT", "Agent material must be UTF-8 text") from None
             material.append({"artifact_ref": ref, "content": value})
         if specialized and context["read_cut"]["knowledge_cut"]["plane"] != "BELIEF":
-            from .semantic_dependencies import inherit_material
+            from .semantic_dependencies import record_material_read
             wr = spec["world_ref"]
             with self.kernel.db.uow() as repo:
                 self.kernel.authorize(repo, principal, wr["work_id"], "READ", wr["branch_id"])
                 branch = repo.one("branches", {"branch_id":wr["branch_id"]}, lock="share")
                 self.kernel._task_binding(repo, principal, task["task_id"], task["generation"], task["context_bundle_id"])
-                inherit_material(repo, task["task_id"], task["generation"], self.kernel.revision(repo, wr),
-                                 specialized, context["read_cut"]["knowledge_cut"], branch["head_revision_id"])
+                revision = self.kernel.revision(repo, wr)
+                for ref in specialized:
+                    record_material_read(repo, task["task_id"], task["generation"], revision, ref,
+                                         context["read_cut"]["knowledge_cut"], spec["story_time"], branch["head_revision_id"])
         runtime = binding["runtime"]
         output = data["output_contract"]
         contract_text = prompt_schema(output["name"], output["version"])

@@ -6,7 +6,7 @@ Only an explicitly typed statement can share a proposition identity across sourc
 """
 from .canonical import fingerprint
 from .propositions import decode_proposition
-from .world import ALIASES
+from .world import ALIASES, TERMINAL_LIFECYCLES
 
 
 def slot(subject, predicate):
@@ -35,6 +35,8 @@ def change_keys(events, footprint, repair=False):
             elif kind == 'LIFECYCLE_SET':
                 subject = effect['entity_id']
                 keys.update(slot(subject, p) for p in ('lifecycle', 'possessed_by', 'custody', 'active_use'))
+                if effect['lifecycle'] in TERMINAL_LIFECYCLES:
+                    keys.update(('range:possessed_by', 'range:custody', 'timeline:' + subject))
             elif kind == 'COGNITIVE_RECORD_ADD':
                 actor = effect['actor_id']
                 keys.add('cognition:' + actor)

@@ -107,3 +107,42 @@ def test_character_stdio_hides_an_actual_conflict_and_unknown_case_equally(kerne
         assert case not in str(received) and source["task_id"] not in str(received)
 
     asyncio.run(exercise(config(tmp_path / "actor.json", kernel_env, character.private_token, binding), check))
+
+
+def test_independent_label_set_replays_on_cut_and_excludes_self_labels(kernel_env):
+    from test_s9_resolution import case_for
+    from novel_factory.fixtures import run_command
+
+    k = kernel_env["kernel"]
+    f = load_fixture(k)
+    wr, admin, ids = f["world_ref"], f["principal"], f["ids"]
+    readers = [create_bound_task(k, admin, wr, point(1), [ids[entity]], [predicate])
+               for entity, predicate in (("sword", "lifecycle"), ("guard1", "on_duty"))]
+    changed = run_command(k, admin, wr, "DESTROY_ITEM", {"item_id": ids["sword"], "at": point(40)})["world_ref"]
+    svc, scope, case = case_for(k, f, readers[0])
+    assert svc.resolve(*scope, case)["outcome"] == "RECOMPUTE_QUEUED"
+    k.claim_task(admin, "qualified-runtime", task_id=readers[0]["task_id"])
+    reviewer = k.issue_grant(admin, wr["work_id"], role_id="control_operator",
+        capabilities=["APPROVE", "ARTIFACT_WRITE"], planes=["WORLD"], branch_ids=[wr["branch_id"]])["principal"]
+    with k.db.uow() as repo:
+        rows = repo.conn.execute(text("SELECT * FROM nf_outbox WHERE topic IN ('world.accepted','task.changed')"))
+        for row in rows.mappings():
+            LogService.record_domain(repo.conn, row)
+    labels = [{"task_id": t["task_id"], "generation": t["generation"],
+               "world_revision_id": changed["world_revision_id"], "affected": i == 0,
+               "reason": "Pre-labelled controlled task in the paired fixture"} for i, t in enumerate(readers)]
+    def issue(signer, rows):
+        return k.put_artifact(signer, wr["work_id"], {"kind": "SEMANTIC_LABEL_SET",
+            "reviewer_grant_id": signer.grant_id, "work_id": wr["work_id"], "branch_id": wr["branch_id"],
+            "labels": rows}, "EVIDENCE")
+    stats = StatisticsService(k)
+    ref = issue(reviewer, labels)
+    quality = stats.labelled_conflicts(*scope, ref)
+    assert quality["true_positives"] == quality["true_negatives"] == quality["observed_reruns"] == 1
+    assert quality["false_positives"] == quality["false_negatives"] == quality["unnecessary_rework_fraction"] == 0
+    assert stats.labelled_conflicts(*scope, ref, source_cut=quality["source_cut"]) == quality
+    reversed_labels = issue(reviewer, [{**x, "affected": not x["affected"]} for x in labels])
+    reversed_result = stats.labelled_conflicts(*scope, reversed_labels, source_cut=quality["source_cut"])
+    assert reversed_result["false_positives"] == reversed_result["false_negatives"] == reversed_result["unnecessary_rework_fraction"] == 1
+    with pytest.raises(DomainError, match="independent"):
+        stats.labelled_conflicts(*scope, issue(admin, labels))

@@ -232,6 +232,8 @@ class WorldQueryService:
         if entity is None:
             return False
         scope = entity.get('scope_id', subject_id)
+        if 'coverage_scopes' in packet:
+            packet['coverage_scopes'].add(scope)
         frontier = packet['revision']['frontiers'].get(scope)
         if frontier is None:
             return False
@@ -394,7 +396,13 @@ class WorldQueryService:
         page = entries[offset:offset + request['page_size']]
         next_offset = offset + len(page)
         cursor = self._next_cursor(packet['principal'], request, wr, next_offset) if next_offset < len(entries) else None
-        coverage = 'COMPLETE' if plane == 'PLAN' or (plane != 'BELIEF' and all(self._covered(packet, s, request['subject_time']) for s in subjects)) else 'UNDECLARED' if plane == 'BELIEF' else 'PARTIAL'
+        if plane == 'PLAN':
+            coverage = 'COMPLETE'
+        elif plane == 'BELIEF':
+            coverage = 'UNDECLARED'
+        else:
+            evaluated = [self._covered(packet, subject, request['subject_time']) for subject in subjects]
+            coverage = 'COMPLETE' if all(evaluated) else 'PARTIAL'
         if cursor:
             coverage = 'PARTIAL'
         for entry in page:
@@ -448,6 +456,7 @@ class WorldQueryService:
                 'truncated': truncated or cursor is not None, 'next_cursor': cursor}
 
     def _execute(self, packet, request, offset=0):
+        packet['coverage_scopes'] = set()
         self._time_check(packet, request['subject_time'])
         operation = request['query']['kind']; plane = request['knowledge_cut']['plane']
         check_profile(packet['grant'], plane, operation=operation)
@@ -492,17 +501,17 @@ class WorldQueryService:
                 self.cache_misses += 1
         if cached is None:
             payload, freshness, handle = self._execute(packet, request, cursor['offset'] if cursor else 0)
-            cached = (payload, freshness, handle)
+            cached = (payload, freshness, handle, sorted(packet['coverage_scopes']))
             with self._cache_lock:
                 self._cache[key] = deepcopy(cached)
                 while len(self._cache) > self.cache_size:
                     self._cache.popitem(last=False)
-        payload, freshness, handle = deepcopy(cached)
+        payload, freshness, handle, coverage_scopes = deepcopy(cached)
         result = {'schema_version': '2.1', 'status': 'READY', 'request_id': _id(), 'read_cut': packet['read_cut'],
                   'payload': payload, 'freshness': freshness, 'dependency_handle': handle, 'consistency_status': 'SATISFIED'}
         validate_contract('UnifiedQueryResult', result, '2.1')
         _require(len(canonical_bytes(result)) <= self.max_response_bytes, 'CAPACITY_LIMIT', 'Query response budget exceeded')
-        self._delivery_check(principal, request, packet, [({**request, 'dependency_handle': handle}, payload)])
+        self._delivery_check(principal, request, packet, [({**request, 'dependency_handle': handle, 'coverage_scopes': coverage_scopes}, payload)])
         return result
 
     def batch(self, principal, request):
@@ -520,7 +529,8 @@ class WorldQueryService:
             try:
                 validate_contract('UnifiedQueryRequest', child, '2.1')
                 payload, freshness, handle = self._execute(packet, child)
-                observations.append(({**child, 'dependency_handle': handle}, payload))
+                observations.append(({**child, 'dependency_handle': handle,
+                                      'coverage_scopes': sorted(packet['coverage_scopes'])}, payload))
                 results.append({'item_id': item['item_id'], 'status': 'SUCCESS', 'payload': payload,
                                 'freshness': freshness, 'dependency_handle': handle})
             except DomainError as exc:

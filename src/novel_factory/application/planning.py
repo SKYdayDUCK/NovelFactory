@@ -488,6 +488,9 @@ class PlanningService:
                 result.update(rolling)
                 self._select(repo, world_ref, "WINDOW_PLAN:" + plan["volume_id"], rolling["window_ref"])
             self.kernel._receipt(repo, principal, world_ref, "PLAN_ADOPT", idempotency_key, request, result)
+            if expected_plan_ref:
+                from novel_factory.application.conflict_resolution import record_adopted_window
+                record_adopted_window(repo, world_ref, request["plan_ref"], plan_ref)
             repo.outbox("planning.selected", "volume", plan["volume_id"], result,
                         "plan-selection:" + plan_ref["artifact_revision_id"])
         return result

@@ -231,9 +231,12 @@ class LogService:
             return [dict(row) for row in repo.conn.execute(text("""
                 SELECT c.case_id,c.task_id,c.generation,c.conflict_type,c.strategy,
                     c.world_revision_id,c.created_at,r.outcome,r.receipt_id,
-                    r.details->>'review_task_id' AS review_task_id, t.state AS review_task_state
+                    t.task_id AS review_task_id, t.state AS review_task_state
                 FROM nf_conflict_cases c LEFT JOIN nf_conflict_resolutions r USING(case_id)
-                LEFT JOIN nf_tasks t ON t.task_id=(r.details->>'review_task_id')::uuid
+                LEFT JOIN nf_receipts reconciled ON reconciled.work_id=c.work_id AND reconciled.branch_id=c.branch_id
+                    AND reconciled.command_type='SEMANTIC_RECONCILE' AND reconciled.idempotency_key=c.case_id::text
+                LEFT JOIN nf_tasks t ON t.task_id=coalesce(r.details->>'review_task_id',
+                                                         reconciled.payload->>'review_task_id')::uuid
                 WHERE c.work_id=:work AND c.branch_id=:branch
                 ORDER BY c.created_at DESC,c.case_id DESC LIMIT :limit
             """), {"work":work_id, "branch":branch_id, "limit":limit}).mappings()]

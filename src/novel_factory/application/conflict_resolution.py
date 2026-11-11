@@ -398,7 +398,8 @@ class ConflictResolutionService:
                 result = {"outcome": "SUPERSEDED"}
             else:
                 result = self._review(kernel, repo, controller, head, case, task, "ORIGINAL_ATTEMPT_RECONCILED")
-            result.update(case_id=case["case_id"], additional_model_attempts=0, actual_tokens=0, cost_status="NO_MODEL_CALL")
+            result.update(case_id=case["case_id"], resolution_strategy=result.get("resolution_strategy", case["strategy"]),
+                          additional_model_attempts=0, actual_tokens=0, cost_status="NO_MODEL_CALL")
             kernel._receipt(repo, controller, head, "SEMANTIC_RECONCILE", case["case_id"], {"case_id": case["case_id"]}, result)
             from novel_factory.application.audit_log import LogService
             LogService.conflict(repo.conn, "resolved", case_id=case["case_id"], receipt_id=_id(case["case_id"], "reconciliation"),
@@ -483,3 +484,20 @@ class ConflictResolutionService:
                                 outcome=result["outcome"], details={**result, "resolution_strategy": decision,
                                 "additional_model_attempts": 0, "actual_tokens": 0, "cost_status": "NO_MODEL_CALL"})
             return result
+
+def record_adopted_window(repo, work_ref, original_ref, selected_ref):
+    """Credit a proposed conflict window only when its actual selection transaction commits."""
+    from novel_factory.application.audit_log import LogService
+
+    rows = repo.conn.execute(text("""
+        SELECT c.case_id::text,c.task_id::text,c.generation FROM nf_conflict_resolutions r
+        JOIN nf_conflict_cases c USING(case_id)
+        WHERE r.outcome='REPLAN_PROPOSED' AND r.details->'plan_ref'=CAST(:plan AS jsonb)
+          AND c.work_id=:work AND c.branch_id=:branch
+    """), {"plan": json.dumps(original_ref), "work": work_ref["work_id"], "branch": work_ref["branch_id"]})
+    for case in rows.mappings():
+        LogService.conflict(repo.conn, "resolved", **case, receipt_id=_id(case["case_id"], "plan-adopted"),
+                            outcome="REPLAN_APPLIED", details={"resolution_strategy": "REPLAN_WINDOW",
+                            "replans_applied": 1, "final_world_ref": work_ref, "plan_ref": selected_ref,
+                            "proposed_plan_ref": original_ref, "additional_model_attempts": 0,
+                            "actual_tokens": 0, "cost_status": "NO_MODEL_CALL"})

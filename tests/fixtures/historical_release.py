@@ -30,10 +30,10 @@ def release_database(kernel_env):
             conn.execute(text(f'DROP DATABASE "{name}" WITH (FORCE)'))
 
 
-def run_release(repo, directory, revision, program, env):
+def run_release(repo, directory, revision, program, env, *, fixture_files=()):
     archive = directory / (revision + ".tar")
     subprocess.run(["git", "archive", "--format=tar", "--output", archive, revision,
-                    "src", "runtime", "contracts", "migrations", "alembic.ini"], cwd=repo, check=True)
+                    "src", "runtime", "contracts", "migrations", "alembic.ini", *fixture_files], cwd=repo, check=True)
     source = directory / revision
     with tarfile.open(archive) as files:
         files.extractall(source, filter="data")

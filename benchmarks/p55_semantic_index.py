@@ -40,7 +40,7 @@ def main():
         plans = []
         def capture(conn, clause, multi, params, options):
             sql = str(clause)
-            if sql.lstrip().startswith('SELECT c.*,r.observation_id'):
+            if sql.lstrip().startswith('SELECT /* semantic_detector */'):
                 plan = conn.scalar(text('EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) '+sql),params)
                 plans.append(plan[0])
         event.listen(db.engine,'before_execute',capture)

@@ -27,12 +27,14 @@ def main():
             "literature",
             "index-literature",
             "trace",
+            "conflict-quality",
             "import-legacy",
             "register-experiment",
         ],
     )
     parser.add_argument("--version", choices=range(1, CURRENT_VERSION + 1), type=int)
     parser.add_argument("--source-cut")
+    parser.add_argument("--labels-ref", type=Path)
     parser.add_argument("--chapter-bindings", type=Path)
     parser.add_argument("--trace-id", type=UUID)
     parser.add_argument("--volume-id", type=UUID)
@@ -53,6 +55,16 @@ def main():
             if not args.trace_id:
                 parser.error("--trace-id is required")
             result = LogService.trace(runtime.kernel, *bound, args.trace_id)
+        elif args.operation == "conflict-quality":
+            if not args.labels_ref:
+                parser.error("--labels-ref must identify an immutable labelled EVIDENCE artifact")
+            from novel_factory.domain.canonical import strict_json_loads
+            with args.labels_ref.open("rb") as stream:
+                raw = stream.read(1025)
+                if len(raw) > 1024:
+                    parser.error("label reference exceeds the size limit")
+                ref = strict_json_loads(raw)
+            result = service.labelled_conflicts(*bound, ref, source_cut=args.source_cut)
         elif args.operation in {"literature", "index-literature"}:
             from novel_factory.application.literary_statistics import LiteraryStatisticsService
             from novel_factory.domain.canonical import strict_json_loads
