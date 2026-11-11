@@ -1,0 +1,22 @@
+{
+  "subject_sha": "55d8979b5361a4837701d762feacd83036096b11",
+  "fixture": "One PostgreSQL seed materialized once; A/B/C/D use the same concrete fixed inputs, previous and current WorldRef, change and receipts.",
+  "numeric_workload_seed": "not exposed by the original benchmark",
+  "python_hash_seed": 550897,
+  "labels": {
+    "same_object": true,
+    "causal_read_other_write": true,
+    "independent": false
+  },
+  "repetitions": 12,
+  "hypotheses": [
+    "A invalidates unrelated actions.",
+    "B and C can miss cross-object causal reads.",
+    "D checks actual semantic observations."
+  ],
+  "not_measured": [
+    "narrative end-to-end business throughput",
+    "production false positive/negative rates",
+    "external model token and invoice evidence"
+  ]
+}
