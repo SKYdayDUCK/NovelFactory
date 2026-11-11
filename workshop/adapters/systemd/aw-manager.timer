@@ -1,0 +1,8 @@
+[Unit]
+Description=Wake the deterministic Workshop worker
+[Timer]
+OnBootSec=10s
+OnUnitInactiveSec=5s
+Unit=aw-manager.service
+[Install]
+WantedBy=timers.target

@@ -1,12 +1,14 @@
 {
   "A": {
-    "status": "IN_PROGRESS",
-    "result": "NOT_MET",
+    "status": "MERGED",
+    "result": "PASS",
     "inspected_sha": "f2e6d38534214e79630b807cec9a720d99e975b1",
     "pr": 5,
     "blocker": "three inherited workflows failed",
-    "next": "fix and rerun same-head gates before merge",
-    "local_passed": 722
+    "next": "carry P5 fix to B and integration peer",
+    "local_passed": 722,
+    "capacity": "NOT_MET",
+    "merge_sha": "a8f37b72286163e9117f8874a0e175c61204ff8b"
   },
   "B": {
     "status": "IN_PROGRESS",
@@ -71,15 +73,20 @@
     "nf_pr": 11
   },
   "W4": {
-    "status": "IN_PROGRESS",
-    "result": "PARTIAL",
+    "status": "VERIFIED",
+    "result": "PASS",
     "local_tests": 32,
     "evidence": "evidence/workshop/w4",
-    "next": "same-head CI; dual-service CI now pins NF #11"
+    "next": "same-head CI; dual-service CI now pins NF #11",
+    "source_sha": "71b471416c9407e348d4bdce817588def5f11d5b",
+    "pr": 12,
+    "ci": 43032647213
   },
   "W5": {
-    "status": "NOT_STARTED",
-    "result": "NOT_EXECUTED"
+    "status": "IN_PROGRESS",
+    "result": "PARTIAL",
+    "evidence": "evidence/workshop/w5",
+    "next": "same-head CI and fault runs"
   },
   "W6": {
     "status": "NOT_STARTED",

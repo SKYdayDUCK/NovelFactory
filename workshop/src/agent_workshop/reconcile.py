@@ -7,6 +7,7 @@ import os
 from decimal import Decimal
 from uuid import UUID
 
+from psycopg.types.json import Jsonb
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
@@ -117,6 +118,7 @@ def validate_receipt(data, payload, previous):
         or data["world_ref"]["branch_id"] != payload["branch_id"]
     ):
         raise Denied("REMOTE_SCOPE_MISMATCH")
+    UUID(data["world_ref"]["world_revision_id"])
     if data["accounting_state"] not in {"NO_ATTEMPT", "RESERVED", "UNKNOWN", "SETTLED"}:
         raise Denied("ACCOUNTING_UNAVAILABLE")
     ids = {a["attempt_id"] for a in data["attempts"]}
@@ -163,9 +165,9 @@ def finish(conn, installation, org, operation, fence, data, failure):
             failure, state = "RECEIPT_DISCREPANCY", "WAITING_OPERATOR"
         else:
             conn.execute(
-                """INSERT INTO aw_remote_receipts VALUES (%s,%s,%s,%s,%s,%s,%s)
+                """INSERT INTO aw_remote_receipts (org_id,operation_id,task_id,receipt_ref,generation,task_state,accounting_state,world_ref) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
                 ON CONFLICT (org_id,operation_id) DO UPDATE SET generation=excluded.generation,
-                    task_state=excluded.task_state,accounting_state=excluded.accounting_state""",
+                    task_state=excluded.task_state,accounting_state=excluded.accounting_state,world_ref=excluded.world_ref""",
                 (
                     org,
                     operation,
@@ -174,6 +176,12 @@ def finish(conn, installation, org, operation, fence, data, failure):
                     data["generation"],
                     data["task_state"],
                     data["accounting_state"],
+                    Jsonb(
+                        {
+                            k: data["world_ref"][k]
+                            for k in ("work_id", "branch_id", "world_revision_id")
+                        }
+                    ),
                 ),
             )
             for a in data["attempts"]:

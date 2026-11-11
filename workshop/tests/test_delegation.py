@@ -95,7 +95,11 @@ def test_lost_reply_unknown_then_final_once():
                     "currency",
                 )
             },
-            "world_ref": {"work_id": payload["work_id"], "branch_id": payload["branch_id"]},
+            "world_ref": {
+                "world_revision_id": remote_task,
+                "work_id": payload["work_id"],
+                "branch_id": payload["branch_id"],
+            },
             "task_id": remote_task,
             "receipt_ref": receipt,
             "generation": 0,

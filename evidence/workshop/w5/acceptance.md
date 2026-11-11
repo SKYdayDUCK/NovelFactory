@@ -1,0 +1,3 @@
+# Manager recovery
+
+The exact staged W5 tree was exported with git checkout-index to a fresh work directory. PostgreSQL 17.11 and Redis 8 ran locally. The full Workshop test directory passed 33 cases; the dual-service integration directory passed two cases. JUnit is in all.xml and dual.xml. The NF fixture registers only the branch-specific PROJECT_RESUME grant. An author calls Workshop over stdio, disconnects, and receives the same durable request on reconnect. The worker calls NF's real project resume. The idle project creates no task and the second idle worker pass makes no NF call. Stakeholders can page immutable organization history with a scope-bound cursor. Warm deployment and full PITR are separately tested by W6.
