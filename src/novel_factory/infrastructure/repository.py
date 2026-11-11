@@ -1,8 +1,25 @@
 """Internal PostgreSQL repository. Never exposed through a transport adapter."""
 from __future__ import annotations
 
-from sqlalchemy import select, update, delete, and_, func, text
+from functools import lru_cache
+
+from sqlalchemy import Text, bindparam, select, update, delete, and_, func, text
 from sqlalchemy.dialects.postgresql import insert
+
+@lru_cache(maxsize=4)
+def _revision_text_query(revision):
+    # A live PostgreSQL serialization is an exact content witness. A stored
+    # digest or a revision identifier on its own cannot show storage damage.
+    columns = [
+        col.cast(Text).label("snapshot") if col.key == "snapshot" else col
+        for col in revision.c
+    ]
+    return select(*columns).where(
+        revision.c.work_id == bindparam("work_id"),
+        revision.c.branch_id == bindparam("branch_id"),
+        revision.c.world_revision_id == bindparam("world_revision_id"),
+    )
+
 
 class KernelRepository:
     def __init__(self, conn, tables):
@@ -11,6 +28,11 @@ class KernelRepository:
     def one(self, name, where, *, lock=None):
         rows = self.many(name, where, lock=lock, limit=1)
         return rows[0] if rows else None
+
+    def revision_with_snapshot_text(self, world_ref):
+        query = _revision_text_query(self.tables["revisions"])
+        row = self.conn.execute(query, world_ref).mappings().one_or_none()
+        return dict(row) if row is not None else None
 
     def many(self, name, where=None, *, lock=None, order=None, limit=None):
         t = self.tables[name]
