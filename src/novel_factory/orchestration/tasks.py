@@ -145,6 +145,14 @@ class TaskService:
             row["world_ref"] = self._spec(conn, row)["world_ref"]
             return row
 
+    def plan_binding_exists(self, task_id, work_id):
+        """An immutable plan selection pins its node guards to one task generation."""
+        inputs, selections = self.tables["task_inputs"], self.tables["selections"]
+        key = func.concat_ws(":", "PLAN_TASK", inputs.c.task_id, inputs.c.generation)
+        return (select(1).select_from(inputs.join(selections, selections.c.selection_kind == key))
+                .where(inputs.c.task_id == task_id, selections.c.work_id == work_id)
+                .correlate_except(inputs, selections).exists())
+
     def claim(self, worker_id: str, *, work_id=None, task_kinds=None, principal_id=None, grant_id=None, task_id=None, lease_seconds=30, authorize_in_tx=None):
         if not worker_id or not 0 < lease_seconds <= 3600:
             raise _error("INVALID_ARGUMENT", "Invalid worker lease")
@@ -154,7 +162,8 @@ class TaskService:
             # A short queue-only scheduler lock produces persistent round-robin
             # shares. It never participates in world acceptance or model waits.
             conn.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": MAINTENANCE_GATE + 1})
-            conditions = [t.c.state == "READY", t.c.deadline > now]
+            conditions = [t.c.state == "READY", t.c.deadline > now,
+                          or_(t.c.generation == 0, ~self.plan_binding_exists(t.c.task_id, t.c.work_id))]
             if work_id:
                 conditions.append(t.c.work_id == str(work_id))
             if task_kinds:
@@ -171,6 +180,9 @@ class TaskService:
                 return None
             task = dict(row)
             spec = {**self._spec(conn, task), "context_bundle_id": None, "dependency_fingerprint": None}
+            if (task["role_id"], task["task_kind"]) == ("volume_director", "volume_review"):
+                from novel_factory.orchestration.workflow import review_acceptance
+                spec["world_ref"] = review_acceptance(conn, task, spec)["world_ref"]
             generation = task["generation"] + 1
             attempt_id = str(uuid4())
             updates = {"state": "RUNNING", "generation": generation, "attempt_id": attempt_id,
@@ -358,7 +370,14 @@ class TaskService:
         unresolved = conn.scalar(select(func.count()).select_from(calls).where(calls.c.task_id == task["task_id"], calls.c.state.in_(["UNKNOWN", "PREPARED"])))
         # PREPARED reservations also require explicit reconciliation before a
         # new external attempt; they cannot silently disappear on restart.
-        state = "PAUSED" if unresolved else ("FAILED" if task["deadline"] <= self._now(conn) else "READY")
+        if unresolved:
+            state = "PAUSED"
+        elif task["deadline"] <= self._now(conn):
+            state = "FAILED"
+        elif conn.scalar(select(self.plan_binding_exists(task["task_id"], task["work_id"]))):
+            state = "STALE"
+        else:
+            state = "READY"
         next_generation = task["generation"] + 1
         spec = self._spec(conn, task)
         spec = {**spec, "context_bundle_id": task["context_bundle_id"], "dependency_fingerprint": task["dependency_fingerprint"]}
@@ -386,6 +405,8 @@ class TaskService:
             calls = self.tables["call_attempts"]
             if conn.scalar(select(func.count()).select_from(calls).where(calls.c.task_id == task_id, calls.c.state.in_(["PREPARED", "SENT", "UNKNOWN"]))):
                 raise _error("CALL_RECONCILIATION_REQUIRED", "Unresolved calls still occupy budget")
+            if conn.scalar(select(self.plan_binding_exists(task["task_id"], task["work_id"]))):
+                raise _error("TASK_REBIND_REQUIRED", "Provision fresh plan guards for a new task")
             t = self.tables["tasks"]
             conn.execute(t.update().where(t.c.task_id == task_id).values(state="READY", updated_at=self._now(conn)))
             self._emit(conn, task_id, expected_generation, "READY")

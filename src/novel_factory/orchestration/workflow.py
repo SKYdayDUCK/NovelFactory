@@ -123,6 +123,8 @@ class WorkflowService:
             _guard(task["generation"] == generation, "STALE_GENERATION", "Workflow generation changed")
             epoch = conn.scalar(_TASK_GRANT, {"task": target})
             _guard(epoch is not None, "VIEW_DENIED", "Workflow task grant unavailable")
+            _guard(not conn.scalar(select(self.tasks.plan_binding_exists(target, work_id))),
+                   "TASK_REBIND_REQUIRED", "Provision fresh plan guards for a new task")
             group_key = (w.c.task_id == target, w.c.generation == generation)
             prior = conn.execute(select(w.c.mode, w.c.grant_epoch).where(*group_key)).one_or_none()
             if prior is not None:
@@ -175,9 +177,26 @@ class WorkflowService:
             ).order_by(t.c.task_id).limit(limit).with_for_update(skip_locked=True)).mappings().all()
             for task in expired:
                 self.tasks._recover_task(conn, dict(task))
+            # Retire legacy READY rows before the supervisor's bounded dispatch
+            # scan, so many unrebindable jobs cannot starve eligible work.
+            legacy = conn.execute(select(t.c.task_id, t.c.generation).where(
+                t.c.work_id == work_id, t.c.branch_id == branch_id, t.c.state == "READY",
+                t.c.generation > 0, self.tasks.plan_binding_exists(t.c.task_id, t.c.work_id)
+            ).order_by(t.c.task_id).limit(limit).with_for_update(skip_locked=True)).all()
+            for task_id, generation in legacy:
+                conn.execute(t.update().where(t.c.task_id == task_id).values(
+                    state="STALE", updated_at=func.clock_timestamp()))
+                self.tasks._emit(conn, task_id, generation, "STALE")
             rows = conn.execute(_WAKEABLE, {"work": work_id, "branch": branch_id, "limit": limit}).mappings().all()
+            awakened = 0
             for row in rows:
                 target, generation = str(row["task_id"]), row["generation"]
+                # A wait recorded by an older application may predate this guard.
+                if conn.scalar(select(self.tasks.plan_binding_exists(target, work_id))):
+                    conn.execute(t.update().where(t.c.task_id == target).values(
+                        state="STALE", updated_at=func.clock_timestamp()))
+                    self.tasks._emit(conn, target, generation, "STALE")
+                    continue
                 consumer = f"workflow:{target}:{generation}"
                 conn.execute(insert(inbox).on_conflict_do_nothing(), [
                     {"consumer": consumer, "message_id": str(msg)} for msg in row["message_ids"]])
@@ -186,4 +205,33 @@ class WorkflowService:
                 conn.execute(t.update().where(t.c.task_id == target, t.c.generation == generation)
                              .values(state="READY", updated_at=func.clock_timestamp()))
                 self.tasks._emit(conn, target, generation, "READY")
-            return {**self._counts(conn, work_id, branch_id), "awakened": len(rows), "recovered": len(expired)}
+                awakened += 1
+            return {**self._counts(conn, work_id, branch_id), "awakened": awakened, "recovered": len(expired)}
+
+
+def review_acceptance(conn, task, spec):
+    """Freeze the joint decision that actually woke this review, at claim time.
+
+    A director cannot know the next accepted revision ID when it goes to sleep.
+    Only the new generation gets that ID. The preceding TaskSpec stays intact.
+    """
+    rows = conn.execute(text("""
+        SELECT DISTINCT receipt.payload AS receipt, p.template_args->'at' AS at
+        FROM nf_workflow_waits w
+        JOIN nf_workflow_edges e USING (task_id, generation)
+        JOIN nf_tasks producer ON producer.task_id = e.predecessor_id
+        JOIN nf_outbox o ON o.dedupe_key = concat_ws(':','task',producer.task_id,producer.generation,'ACCEPTED')
+        JOIN nf_inbox ack ON ack.message_id = o.outbox_id
+           AND ack.consumer = concat_ws(':','workflow',w.task_id,w.generation)
+        JOIN nf_proposals p ON p.task_id=producer.task_id AND p.generation=producer.generation
+        JOIN nf_receipts receipt ON receipt.proposal_id=p.proposal_id AND receipt.command_type='ACCEPT'
+        WHERE w.task_id=:task AND w.woken_at IS NOT NULL AND producer.state='ACCEPTED'
+          AND p.template_id='JOINT_INTERACTION' AND receipt.work_id=:work AND receipt.branch_id=:branch
+          AND w.generation=(SELECT max(w2.generation) FROM nf_workflow_waits w2
+                            WHERE w2.task_id=w.task_id AND w2.woken_at IS NOT NULL)
+    """), {"task": task["task_id"], "work": task["work_id"], "branch": task["branch_id"]}).mappings().all()
+    _guard(len(rows) == 1, "REVIEW_INPUT_REQUIRED", "Volume review needs one formally accepted joint decision")
+    from novel_factory.domain.temporal import point_key
+    _guard(point_key(rows[0]["at"]) <= point_key(spec["story_time"]), "VIEW_DENIED",
+           "Joint decision exceeds the review task's time")
+    return rows[0]["receipt"]

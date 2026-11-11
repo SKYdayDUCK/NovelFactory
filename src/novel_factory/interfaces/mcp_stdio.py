@@ -26,7 +26,22 @@ def object_schema(**properties):
 
 _LOOKUP = object_schema(subject_id={"type": "string", "format": "uuid"},
                         predicate={"type": "string", "minLength": 1, "maxLength": 128})
+_UUID = {"type": "string", "format": "uuid"}
+_ARTIFACT = object_schema(artifact_id=_UUID, artifact_revision_id=_UUID,
+                          sha256={"type": "string", "pattern": "^[a-f0-9]{64}$"})
+_EVENT = object_schema(occurrence_id=_UUID, event_version_id=_UUID)
+_REASON = {"type": "string", "minLength": 1, "maxLength": 10000}
+_KEY = {"type": "string", "minLength": 1, "maxLength": 96}
 _TOOLS = {
+    "nf_change_point_request": ("Record evidence for a bounded revision to the volume plan.",
+        object_schema(volume=_UUID, prior_plan_ref=_ARTIFACT,
+                      event_refs={"type":"array","minItems":1,"maxItems":32,"items":_EVENT},
+                      reason=_REASON, idempotency_key=_KEY)),
+    "nf_rolling_window_submit": ("Submit a bounded future window for independent review.",
+        object_schema(change_point_ref=_ARTIFACT, window={"type":"object"}, idempotency_key=_KEY)),
+    "nf_change_point_review": ("Record an independent decision on the exact candidate and window.",
+        object_schema(change_point_ref=_ARTIFACT, plan_ref=_ARTIFACT, window_ref=_ARTIFACT,
+                      decision={"enum":["APPROVED","RETURNED"]}, reason=_REASON, idempotency_key=_KEY)),
     "nf_project_status": ("Read task counts for the configured project branch.", object_schema()),
     "nf_resume_project": ("Recover eligible work and wake satisfied waits in the configured branch.", object_schema()),
     "nf_task_get": ("Read the bound task's current execution identity.", object_schema()),
@@ -93,7 +108,8 @@ def make_server(runtime):
                 return tool_error("INVALID_ARGUMENT")
             if name in {"nf_project_status", "nf_resume_project"}:
                 return await asyncio.to_thread(runtime.project, resume=name == "nf_resume_project")
-            method = {"nf_task_get": runtime.task_get, "nf_context_get": runtime.context_get,
+            method = {"nf_rolling_window_submit": runtime.submit_window, "nf_change_point_request": runtime.request_change, "nf_change_point_review": runtime.review_change,
+                      "nf_task_get": runtime.task_get, "nf_context_get": runtime.context_get,
                       "nf_query_batch": runtime.query_batch, "nf_artifact_put": runtime.artifact_put}[name]
             return await asyncio.to_thread(method, **arguments)
         except DomainError as error:

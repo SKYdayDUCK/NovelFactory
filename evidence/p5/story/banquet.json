@@ -1,0 +1,48 @@
+{
+  "scenario": "deterministic editorial fixture",
+  "work_id": "e9d0e12b-6cf4-42f9-946c-389d181aa371",
+  "sealed_intents": 3,
+  "accepted_events": 1,
+  "reference": {
+    "artifact_id": "92e4d487-bba8-48de-a083-2309242f9bed",
+    "artifact_revision_id": "ba006acd-282c-403e-88dc-51e25dd393ef",
+    "sha256": "e2f5560b23c274cb1ece75d2dc50101ab17147cf8c3e3ac65c6575e61064040b"
+  },
+  "rolling_plan": {
+    "artifact_id": "e7c022be-353f-4ef1-942a-ff0001304081",
+    "artifact_revision_id": "7a6437aa-5bef-432c-9019-0ec0deca39e5",
+    "sha256": "9febaf44dcae7efe8b7dae82f5ba005fe73e2d1a9a5623b19bb0ca908d59d0d3"
+  },
+  "window": {
+    "artifact_id": "ba47b284-d079-4713-ad83-143e70f27112",
+    "artifact_revision_id": "47732955-900d-4ab9-8407-a25661c307b1",
+    "sha256": "745099f24ba5f824f2a20b038997cb12768178a7c11586e55a2be7fd38a6d518"
+  },
+  "change_point": {
+    "artifact_id": "896d6994-e883-478f-9f84-6d7956e0696f",
+    "artifact_revision_id": "dad6026f-1b7e-43f6-97a0-99a495a1ee9f",
+    "sha256": "1bd67d6d1973087fd3954f5494bf09bd494e9ee8cb288f67e744ffc4f7f299cb"
+  },
+  "upper_review": {
+    "artifact_id": "5baf44eb-3c4e-4246-8770-e95dcee16c46",
+    "artifact_revision_id": "459f88ca-ae16-4d3b-a9c5-5662e45bffbc",
+    "sha256": "affb083a4af8bd692dc86449192e8649b11a07ba8e018e17a42033a10e8b2f01"
+  },
+  "accepted_world": {
+    "work_id": "e9d0e12b-6cf4-42f9-946c-389d181aa371",
+    "branch_id": "c960b01a-abab-4776-ac75-35adf38cc8d0",
+    "world_revision_id": "842e1c89-0c63-4caa-9d65-223dcef511ec"
+  },
+  "accept_to_wake_ms": 124.949,
+  "waiting_model_calls": 0,
+  "notification_provider_requests": 1,
+  "real_model_tokens": null,
+  "preauthorized_world_approvals": 2,
+  "human_prompts": 0,
+  "counts": {
+    "READY": 0,
+    "WAITING": 0,
+    "RUNNING": 4,
+    "ACCEPTED": 5
+  }
+}

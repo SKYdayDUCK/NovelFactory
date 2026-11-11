@@ -34,6 +34,7 @@ OUTPUT_CONTRACTS = {
        for kind in ("joint_outcome", "semantic_rule_gap", "refinement_review")},
     ("volume_director", "volume_contract"): ("VolumeContract", "literary"),
     ("volume_director", "window_plan"): ("WindowPlan", "literary"),
+    ("volume_director", "volume_review"): ("AgentTextOutput", "agent"),
     ("volume_director", "replan"): ("WindowPlan", "literary"),
     ("volume_director", "scene_plan"): ("SceneContract", "2.0"),
     **{("reviewer", kind): ("AgentReviewOutput", "agent")

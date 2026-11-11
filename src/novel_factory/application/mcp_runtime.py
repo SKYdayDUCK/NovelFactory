@@ -44,6 +44,7 @@ class McpRuntime:
             inputs = repo.many("artifacts", {"work_id": task["work_id"], "kind": "AGENT_INPUT",
                               "artifact_revision_id": [r["artifact_revision_id"] for r in identity["input_artifacts"]]})
             requested = set()
+            skills = set()
             for record in inputs:
                 data = record["payload"]
                 if (data["role_id"], data["task_kind"], data["runtime_sha256"]) != (
@@ -53,10 +54,22 @@ class McpRuntime:
                 if fingerprint(snapshot) == identity["runtime_contract_version"]:
                     # Pre-P5 text-only snapshots never declared MCP tool ceilings.
                     requested.update(snapshot.get("mcp_requested_tools", []))
+                    skills.add(snapshot["skill_name"])
             ceiling = {"task_get": "READ", "context_get": "READ", "query_batch": "READ",
                        "artifact_put": "ARTIFACT_WRITE"}
-            return ["nf_" + name for name, cap in ceiling.items()
-                    if name in requested and cap in grant["capabilities"]]
+            names = ["nf_" + name for name, cap in ceiling.items()
+                     if name in requested and cap in grant["capabilities"]]
+            if {"PLAN_READ", "ARTIFACT_WRITE"} <= set(grant["capabilities"]):
+                if (grant["role_id"], task["task_kind"]) == ("volume_director", "volume_review"):
+                    if "volume-director-review" in skills and "plan_propose" in requested:
+                        names.append("nf_change_point_request")
+                if (grant["role_id"], task["task_kind"]) == ("volume_director", "replan"):
+                    if "roll-window" in skills and "plan_propose" in requested:
+                        names.append("nf_rolling_window_submit")
+                if (grant["role_id"], task["task_kind"]) == ("chief_editor", "editorial_decision"):
+                    if "review-change-point" in skills and "review_submit" in requested:
+                        names.append("nf_change_point_review")
+            return names
 
     def _project_auth(self, conn):
         repo = KernelRepository(conn, tables)
@@ -151,3 +164,23 @@ class McpRuntime:
             result = {"artifact_ref": ref, "status": "CANDIDATE_STORED"}
             self.kernel._receipt(repo, self.principal, ctx["payload"]["world_ref"], "MCP_ARTIFACT", key, payload, result)
             return result
+
+    def _editorial_call(self, tool_name, operation, arguments):
+        # Direct application calls and MCP transport share the frozen tool ceiling.
+        require(tool_name in self.available_tools(), "VIEW_DENIED", "Unavailable editorial tool")
+        with self.kernel.db.uow(write=False) as repo:
+            task, _, ctx = self._task(repo, "ARTIFACT_WRITE")
+        return operation(self.principal, ctx["payload"]["world_ref"], task_id=task["task_id"],
+                         generation=task["generation"], worker_id=self.binding.worker_id, **arguments)
+
+    def request_change(self, **arguments):
+        from novel_factory.application.rolling_plans import RollingPlanning
+        return self._editorial_call("nf_change_point_request", RollingPlanning(self.kernel).request_change, arguments)
+
+    def review_change(self, **arguments):
+        from novel_factory.application.rolling_plans import RollingPlanning
+        return self._editorial_call("nf_change_point_review", RollingPlanning(self.kernel).review, arguments)
+
+    def submit_window(self, **arguments):
+        from novel_factory.application.rolling_plans import RollingPlanning
+        return self._editorial_call("nf_rolling_window_submit", RollingPlanning(self.kernel).propose_window, arguments)
