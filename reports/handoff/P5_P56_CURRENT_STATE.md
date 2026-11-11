@@ -14,3 +14,5 @@
 W0 提交 c18e53959807a35816eaa1258a3b7c64b80b4637，PR #7，独立 PostgreSQL 与 stdio 工作流 43030289759 成功。W1 在干净 PG17.11 依序升级，通过 9 项组织与 stdio 检查，原始报告位于 evidence/workshop/w1。
 
 W1 PR #8 的 f59ac5e44 通过 Workshop CI 43030513699。W2 从 w001 迁移至 w002，PG17.11 与 Redis 8.0.2 上 13 项通过，包含有限次数路由竞争、重复投递、消费中断和删流后恢复。
+
+W2 PR #9 (0da5b7c8), Workshop CI 43031076636 通过。W3 的双库独立身份、双侧 stdio、NF 成功后丢包、原操作号查回、NF 取消与组织结算专项已在本地通过，见 evidence/workshop/w3。P5 新提交修复了续租时并发槽提前释放，P5.5 分开归档了恢复数据与固定 WorldRef 查询优化。

@@ -2,10 +2,11 @@
   "A": {
     "status": "IN_PROGRESS",
     "result": "NOT_MET",
-    "inspected_sha": "9dc9c6b806b8ac43f56d0893194a5b402f3f16ca",
+    "inspected_sha": "f2e6d38534214e79630b807cec9a720d99e975b1",
     "pr": 5,
     "blocker": "three inherited workflows failed",
-    "next": "fix and rerun same-head gates before merge"
+    "next": "fix and rerun same-head gates before merge",
+    "local_passed": 722
   },
   "B": {
     "status": "IN_PROGRESS",
@@ -13,7 +14,9 @@
     "inspected_sha": "b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5",
     "pr": 6,
     "blocker": "three inherited workflows failed",
-    "next": "fix and rerun same-head gates before merge"
+    "next": "fix and rerun same-head gates before merge",
+    "local_hotspot_passed": 33,
+    "remote_fix_short": "bf0541a4"
   },
   "W0": {
     "status": "VERIFIED",
@@ -41,17 +44,26 @@
     "pr": 8
   },
   "W2": {
-    "status": "IN_PROGRESS",
-    "result": "PARTIAL",
+    "status": "VERIFIED",
+    "result": "PASS",
     "tests": {
       "w1_and_w2": 13
     },
     "evidence": "evidence/workshop/w2",
-    "next": "same-head Redis/PG CI"
+    "next": "integration in dependency order",
+    "source_sha": "0da5b7c8fab5321fa50d2a04a516f3fd95432539",
+    "pr": 9,
+    "ci": 43031076636
   },
   "W3": {
-    "status": "NOT_STARTED",
-    "result": "NOT_EXECUTED"
+    "status": "IN_PROGRESS",
+    "result": "PARTIAL",
+    "evidence": "evidence/workshop/w3",
+    "next": "pin NF branch; rerun dual-service CI; PITR drill",
+    "local_tests": {
+      "local_saga_and_stdio": 4,
+      "dual_mcp": 1
+    }
   },
   "W4": {
     "status": "NOT_STARTED",
