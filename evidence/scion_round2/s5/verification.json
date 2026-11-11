@@ -1,0 +1,276 @@
+{
+  "postgres": "17.11",
+  "oracle": "2c28acba6e1932657162c6e55b3288365ce3ea23",
+  "checks": {
+    "S2_pg": {
+      "total": 76,
+      "passed": 76,
+      "failures_or_errors": 0,
+      "skipped": 0,
+      "failed_cases": [],
+      "junit_uncompressed_sha256": "3d7c68538d1cf6eefdae150498463e79cd0225b3675493423be83e63a54d0f37",
+      "suites_seconds": [
+        "38.606"
+      ]
+    },
+    "S3b_pg_unit": {
+      "total": 41,
+      "passed": 41,
+      "failures_or_errors": 0,
+      "skipped": 0,
+      "failed_cases": [],
+      "junit_uncompressed_sha256": "f1d1a29740cd6df9b38faafe10f3a7d9f140d4b78ed8b8c8c44b2fa492f951da",
+      "suites_seconds": [
+        "11.879"
+      ]
+    },
+    "full_initial_default": {
+      "total": 688,
+      "passed": 687,
+      "failures_or_errors": 1,
+      "skipped": 0,
+      "failed_cases": [
+        "tests.service.test_http_load.test_real_http_logical_agents_fixed_cut_and_bounded_connections[50]"
+      ],
+      "junit_uncompressed_sha256": "c606380cfa9008b02675be26c4c5076a12ae97ce4d743a8ad7680e8c8d826fc2",
+      "suites_seconds": [
+        "833.934"
+      ]
+    },
+    "full_initial_experimental": {
+      "total": 688,
+      "passed": 687,
+      "failures_or_errors": 1,
+      "skipped": 0,
+      "failed_cases": [
+        "tests.service.test_http_load.test_real_http_logical_agents_fixed_cut_and_bounded_connections[50]"
+      ],
+      "junit_uncompressed_sha256": "532a81311cc3084f3c170447735196be2f0a07b3e10152c82d128ef0b36227cc",
+      "suites_seconds": [
+        "840.594"
+      ]
+    },
+    "http_recheck": {
+      "total": 12,
+      "passed": 12,
+      "failures_or_errors": 0,
+      "skipped": 0,
+      "failed_cases": [],
+      "junit_uncompressed_sha256": "84e59da6f6a0042f472ae9db436010ad0ccef96da745f744a76afe0f6b26439b",
+      "suites_seconds": [
+        "51.610"
+      ]
+    },
+    "schema_guarded": {
+      "total": 15,
+      "passed": 15,
+      "failures_or_errors": 0,
+      "skipped": 0,
+      "failed_cases": [],
+      "junit_uncompressed_sha256": "dfef062f509f54e8b1129e695b1e00c868640411dd661ac1d76722e3f4cc456f",
+      "suites_seconds": [
+        "1.697"
+      ]
+    },
+    "full_final_default": {
+      "total": 700,
+      "passed": 700,
+      "failures_or_errors": 0,
+      "skipped": 0,
+      "failed_cases": [],
+      "junit_uncompressed_sha256": "1ace7256cea7207af1b4689062bb078fa8710c02077fe59723f29f6e24df5bf8",
+      "suites_seconds": [
+        "442.112"
+      ]
+    },
+    "differential_corrected_F": {
+      "total": 6,
+      "passed": 6,
+      "failures_or_errors": 0,
+      "skipped": 0,
+      "failed_cases": [],
+      "junit_uncompressed_sha256": "1fd271b6ed715ef04959239fdf0e4305eb1e6458d262d788dcf17c99aa550b40",
+      "suites_seconds": [
+        "574.946"
+      ]
+    },
+    "differential_with_P": {
+      "total": 6,
+      "passed": 6,
+      "failures_or_errors": 0,
+      "skipped": 0,
+      "failed_cases": [],
+      "junit_uncompressed_sha256": "3d2433a65145bbb7675b214d313df3e0bca203d1eed764a5fbaceccf40b31fe8",
+      "suites_seconds": [
+        "384.623"
+      ]
+    }
+  },
+  "trace_comparison": {
+    "finaldiff": {
+      "modes": [
+        "B_metadata",
+        "C_scopes",
+        "D_metadata_scopes",
+        "E_lazy",
+        "F_worker",
+        "all_round2",
+        "candidate",
+        "reference",
+        "schema_service"
+      ],
+      "scenarios": 6,
+      "tables_each": [
+        35
+      ],
+      "per_mode_table_rows": 7238,
+      "public_responses": 210,
+      "domain_errors": 27
+    },
+    "final-prime-diff": {
+      "modes": [
+        "B_metadata",
+        "C_scopes",
+        "D_metadata_scopes",
+        "E_lazy",
+        "F_worker",
+        "P_repeated_parent",
+        "all_round2",
+        "candidate",
+        "reference",
+        "schema_service"
+      ],
+      "scenarios": 6,
+      "tables_each": [
+        35
+      ],
+      "per_mode_table_rows": 7238,
+      "public_responses": 210,
+      "domain_errors": 27
+    }
+  },
+  "package": {
+    "sha256": "f048fb034cb25f98196b2f6c26edad5622c4f1055eabbcf10991dddd2ef17946",
+    "result": "PASS"
+  },
+  "mechanisms": {
+    "sha256": "c5d38f49d627eb11c257de7325a06a76ddfb4f0281810139677c8ef1d8af82cb",
+    "result": "35 passed"
+  },
+  "independent_review": {
+    "source_difference_candidate_then_shared": {
+      "src": {
+        "src/novel_factory/contracts/linked.py": [
+          "f8c078d189314d7424567e03b8456675919ad9b3ae717611f7b5d498b42de14e",
+          "a87526b6a5e6dfabaaf6e9c2dee27d717137c4d10ff162e15b527014e5028a3b"
+        ],
+        "src/novel_factory/contracts/registry.py": [
+          "ae84437855430d88aaa4b2694a0604579057b09dccb78fb7116be960a98e76f7",
+          "bcbb39e8a660279b3d19455bd12511ff54f8f1fae7be7e96e42320540c2b07cd"
+        ]
+      },
+      "tests": {
+        "tests/contracts/test_linked_schema.py": [
+          "b428f464f962282a1dafb00108689f042b59b888128b8800699f618859f4d446",
+          "91a3349a499b615b8884a12228c1a43790fbad40cd4fadf48b92b4990a235731"
+        ],
+        "tests/integration/test_scion_differential.py": [
+          "f6396f64d76ec22b10d045686bfca114a0a314fa23020d065cef88c78e0decae",
+          "36b6a9133992fd3065920b50459f536045a249303ec676caa37d51b925eca8d6"
+        ]
+      },
+      "benchmarks": {
+        "benchmarks/round2_capacity_summary.py": [
+          null,
+          "1aae8c9b8b7557cfaac83e067377926fa4754148b669e956e6e7aa50ef7513d9"
+        ],
+        "benchmarks/round2_queue_attribution.py": [
+          null,
+          "b3fc182527eee77f03fed5d10cc0de1239d539d8478343b65a92ed7d21146988"
+        ],
+        "benchmarks/scion_round2_summary.py": [
+          null,
+          "7897235adabd12a714ef960cc402d758850a13d62177c8185d5cfd49568ebabf"
+        ]
+      }
+    },
+    "bundled_schema_trial": {
+      "defs": 207,
+      "docs": 15,
+      "tested": 5382,
+      "fallbacks": [],
+      "mismatches": [],
+      "format_occurrences": {
+        "date-time": 17,
+        "uuid": 1
+      },
+      "ref_occurrences": 1031,
+      "exceptional_pointer_refs": [],
+      "test_witnesses": [
+        null,
+        true,
+        false,
+        0,
+        1,
+        -1,
+        33,
+        0.5,
+        "",
+        "1",
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "not-a-uuid",
+        "bad+tz",
+        "2025-13-50T28:80:11+00:00",
+        "https://example.org",
+        "2019-10-26T12:34:00Z",
+        "00000000-0000-4000-8000-000000000000",
+        [],
+        [
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        {},
+        {
+          "extra": null
+        },
+        {
+          "type": "object"
+        },
+        {
+          "schema_version": "2.1"
+        },
+        {
+          "tick": 0,
+          "phase": 0
+        },
+        {
+          "tick": "0",
+          "phase": -1
+        }
+      ]
+    },
+    "mutated_example_formats": {
+      "counts": {
+        "uuid_mutations": 557,
+        "uuid_rejected": 557,
+        "date-time_mutations": 14,
+        "date-time_rejected": 0
+      },
+      "mismatches": []
+    },
+    "date_time_format_checker_registered": false,
+    "root_and_nested_pointer_fallback_witnesses": {
+      "nested_ref_a~1b": true,
+      "entrypoint_a~1b": true,
+      "entrypoint_a/b": true,
+      "entrypoint_a%2Fb": true
+    },
+    "focused_linked_test_count": 15,
+    "focused_linked_result": "15 passed",
+    "scope_guard_review": "Sparse lookup only for server-registered template; keys equal server footprint reads union writes, keyed to work+branch. Negative/range/approval/grant/history/rules tokens and full fallback are retained.",
+    "replay_proof_review": "Canonical fingerprint of persisted parent projection checked independently; suffix requires full prefix selection & immutable event body digest & interpreter rules & per-branch epochs & strict time. Negatives return to full replay."
+  }
+}

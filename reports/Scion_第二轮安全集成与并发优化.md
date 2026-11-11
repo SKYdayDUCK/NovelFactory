@@ -46,9 +46,10 @@ PG 17.11，启用 fsync 与 synchronous_commit。50、200 个逻辑身份的世�
 
 [50 人口逐操作记录](../evidence/scion_round2/s2/paired_50.json) · [200 人口逐操作记录](../evidence/scion_round2/s2/paired_200.json) · [PostgreSQL 局部回归 JUnit](../evidence/scion_round2/s2/targeted_pg17.junit.xml.gz) · [端到端计量代码](../benchmarks/round2_safe_reads.py)
 
-两档记录含驱动与源文件 SHA-256、每对各臂五项操作的读行/字节、应用及 PG CPU、耗时、路径命中和一致性哈希。配对实验显式在两臂设置开关；采样完成后只按测量决定未配置时的 worker 默认值。使用隔离的 PostgreSQL 17 可各运行一次以下命令。
+两档记录含驱动与源文件 SHA-256、每对各臂五项操作的读行/字节、应用及 PG CPU、耗时、路径命中和一致性哈希。配对实验显式在两臂设置开关；采样完成后只按测量决定未配置时的 worker 默认值。在仓库根目录激活已安装项目依赖的 Python 环境，确保 PostgreSQL 17 工具在 PATH 中（也可设置 PG_BIN），可各运行一次以下命令。
 
 ```sh
+export PYTHONPATH="$PWD/src:$PWD"
 python scripts/with_postgres.py -- python benchmarks/round2_safe_reads.py --population 50 --pairs 9 --output /tmp/s2-50.json
 python scripts/with_postgres.py -- python benchmarks/round2_safe_reads.py --population 200 --pairs 9 --output /tmp/s2-200.json
 ```

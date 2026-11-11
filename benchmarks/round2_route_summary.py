@@ -1,10 +1,13 @@
 """Reconcile HTTP outcomes, admission stages, and emitted logical steps by route."""
 import argparse
+from bisect import bisect_right
 from collections import Counter, defaultdict
 import gzip
+import hashlib
 import json
 import lzma
 from pathlib import Path
+from statistics import median
 
 from benchmarks.scion_agent_completion import count_agents, mixed_expectations
 
@@ -74,8 +77,51 @@ def summarize(path):
             "capacity_gate": data["capacity_gate"], "first_attempt_gate": data["first_attempt_capacity_gate"]}
 
 
+def wire_overlap(path):
+    """Compare header windows on the client clock; these are not slot-occupancy measurements."""
+    opener = gzip.open if path.suffix == ".gz" else lzma.open
+    with opener(path) as handle:
+        data = json.load(handle)
+    raw = data["raw_requests"]
+    reads = [r for r in raw if r["endpoint"].startswith("queries/")
+             and r.get("wire_started_seconds") is not None and r.get("response_headers_seconds") is not None]
+    assert all(r["wire_started_seconds"] <= r["response_headers_seconds"] for r in reads)
+    start = sorted(r["wire_started_seconds"] for r in reads)
+    end = sorted(r["response_headers_seconds"] for r in reads)
+    pending = defaultdict(list)
+    for row in raw:
+        if row["attempt"] == 1 and row["endpoint"] in ("proposals", "world/acceptance-certificates", "world/accept-guarded"):
+            at = row.get("wire_started_seconds")
+            if at is not None:
+                pending[(row["label"], str(row["status"]))].append(bisect_right(start, at) - bisect_right(end, at))
+    final = {}
+    for row in raw:
+        key = row["operation_id"]
+        if key not in final or row["attempt"] > final[key]["attempt"]:
+            final[key] = row
+    final_counts = defaultdict(Counter)
+    for row in final.values():
+        final_counts[row["label"]][str(row["status"])] += 1
+    queues = {name: {k: data[name].get(k, 0) for k in ("admitted", "completed", "rejected", "timed_out")}
+              for name in ("ingress", "authentication_admission", "admission")}
+    return {"original_raw_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            "fixture_sha256": data["paired_inputs"]["fixture_sha256"], "observed_requests": len(raw),
+            "definition": "At the client request-header start, count queries whose request headers started but response headers have not yet started; no worker identity or per-kind server occupancy is inferred.",
+            "source": data["paired_inputs"]["source_sha"], "settings": data["paired_inputs"]["experiment_env"],
+            "affinity": data["paired_inputs"]["cpu_affinity"], "status": data["metrics"]["status_counts"],
+            "retries": data["metrics"]["infrastructure_retries"], "queues": queues,
+            "missing_logical": data["metrics"]["client_requests_never_emitted"],
+            "unique_world_commits": data["correctness"]["new_world_revisions"],
+            "final_logical_outcomes": final_counts,
+            "first_attempts": {label + "." + status: {"writes": len(q), "with_read_in_flight": sum(n > 0 for n in q),
+                               "minimum": min(q), "median": median(q), "maximum": max(q)}
+                               for (label, status), q in sorted(pending.items())}}
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("inputs", nargs="+", type=Path)
+    parser.add_argument("--wire-overlap", action="store_true")
     args = parser.parse_args()
-    print(json.dumps({p.name: summarize(p) for p in args.inputs}, indent=2, sort_keys=True))
+    operation = wire_overlap if args.wire_overlap else summarize
+    print(json.dumps({p.name: operation(p) for p in args.inputs}, indent=2, sort_keys=True))

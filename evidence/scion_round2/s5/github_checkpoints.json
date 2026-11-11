@@ -1,0 +1,347 @@
+{
+  "repository": "SKYdayDUCK/NovelFactory",
+  "branch": "experiment/scion-incremental-20261111",
+  "observed_at": "2026-11-11 03:35:15 UTC",
+  "method": "GitHub connector create_blob/create_tree/create_commit and expected-SHA non-force update_ref. Verified commits, complete root tree and changed file blobs. The final containing commit and its CI are linked separately from PR 4.",
+  "checkpoints": [
+    {
+      "stage": "S1",
+      "files": {
+        "reports/Scion_B1_B2_B3_独立审核与性能归因.md": "0a66ebda8564490f7b1a14f270d4be4783c31433"
+      },
+      "parent": "e757419aea6f00b9388fee14a92f4ea3b97444c0",
+      "tree": "113f60d18e25096c1c0315d5a95dd4eb7622ea95",
+      "commit": "397fd0166b1d5dc42496515c313f3bf2c7ca3d61",
+      "verified_head": "397fd0166b1d5dc42496515c313f3bf2c7ca3d61",
+      "actions": [
+        {
+          "id": 42949061420,
+          "name": "P2 measured capacity and recovery",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 42949061469,
+          "name": "P3 P4 measured evidence",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 42949061427,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 42949061437,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "completed",
+          "conclusion": "failure"
+        }
+      ]
+    },
+    {
+      "stage": "S2",
+      "files": {
+        "src/novel_factory/application/kernel.py": "90b5751b6eb6ae53b6b9f112f7739858546c09fa",
+        "src/novel_factory/application/scion.py": "0580a88eb4e313dcfd8e72c95eda758d2f6d02ee",
+        "src/novel_factory/application/derived_worker.py": "ea9f5bbb9ae6b0e982da7073ccb9417b0d914d6d",
+        "benchmarks/round2_safe_reads.py": "d2288c701a7b7384cd83f67a5732599ba80b232f",
+        "benchmarks/scion_scope_columns.py": "32d6819160e3949719d8c0355be5cd203c6bd4b2",
+        "tests/queries/test_scion_projections.py": "909ae1b2520b2a04a03654170197010e286e76dc",
+        "tests/unit/test_scion_column_switches.py": "eb06496ed06e60808d0e68420b08732110a3de79",
+        "tests/integration/test_scion_scope_coverage.py": "d8c441888a22c34484d11f434f8f77625a17e2f3",
+        "reports/Scion_第二轮安全集成与并发优化.md": "d5faa9a8b9115f658a0a9d234d2587ec59c92e19",
+        "evidence/scion_round2/s2/paired_200.json": "b24e40d4aee210bfd790b6ea30b6def7d8d1b908",
+        "evidence/scion_round2/s2/paired_50.json": "e72ebbe36647b801787cf9a02399d31cba5e6799",
+        "evidence/scion_round2/s2/targeted_pg17.junit.xml.gz": "3809c3562c31f83b80ea9f41f9f8bd164cb54d33"
+      },
+      "parent": "397fd0166b1d5dc42496515c313f3bf2c7ca3d61",
+      "tree": "8a895a930e686e8e8289c044744cea83796adaf3",
+      "commit": "5df326098b318a098d99ad8692565e2d77b6cde0",
+      "verified_head": "5df326098b318a098d99ad8692565e2d77b6cde0",
+      "actions": [
+        {
+          "id": 42949941136,
+          "name": "P3 P4 measured evidence",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 42949941296,
+          "name": "P2 measured capacity and recovery",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 42949941263,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 42949941212,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "stage": "S3",
+      "files": {
+        "src/novel_factory/application/replay_proofs.py": "ab599d66615588b6e33f47d341678fe64c409dae",
+        "src/novel_factory/application/kernel.py": "438346161d1779f865d1e6bea7eb410d1606bfd5",
+        "src/novel_factory/application/scion.py": "db80bee8a2f91a83fd335334c8745eaed4793fc8",
+        "tests/unit/test_scion_replay_proofs.py": "a33cbec425c1d9593daa0e79347d83bcbbbd652a",
+        "tests/integration/test_scion_replay.py": "9ca00866e826f3e6c6418804b70b326b2cd10b1a",
+        "benchmarks/scion_long_history.py": "6beea48bdedeff22d1f6a15baefd246721146b31",
+        "reports/Scion_B3冷启动与命中率分析.md": "efff271302fadf1623850daf6d4cd12e12731a1a",
+        "evidence/scion_round2/s3/summary.json": "905369d934dafc806ff959ee6d874a79e84b46fd",
+        "evidence/scion_round2/s3/paired_raw.tar.xz": "82eae8f42405cd72b7f8ed6d5d58bd68023b6cd9"
+      },
+      "parent": "5df326098b318a098d99ad8692565e2d77b6cde0",
+      "tree": "39cfdb47aa43df7b16f97daf24570d9fe8ce8b2d",
+      "commit": "6719ec3cd0272bde88c13f280f727b122f0bd35a",
+      "verified_head": "6719ec3cd0272bde88c13f280f727b122f0bd35a",
+      "actions": [
+        {
+          "id": 42950085848,
+          "name": "P3 P4 measured evidence",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 42950085787,
+          "name": "P2 measured capacity and recovery",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 42950085790,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 42950085777,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "stage": "S4",
+      "files": {
+        "src/novel_factory/contracts/linked.py": "b5a1a2f73131dcad3555c0df7fe1c5c978aadfc8",
+        "src/novel_factory/contracts/registry.py": "9af7b24e1d3165f42821e0bd0cfd6a610601a3e8",
+        "tests/contracts/test_linked_schema.py": "77ef3d6fcb7595479eaa24f80fc621f905d2fe5f",
+        "benchmarks/round2_capacity.py": "fa4d273123d30da3fd3a02133115e58c809316c7",
+        "benchmarks/round2_capacity_summary.py": "d0d85fca5c9623dae35ec239e65b3083c2d62ab6",
+        "benchmarks/round2_queue_attribution.py": "0ef05126b448dfce09062643148f3fde5366a314",
+        "reports/多Agent热点容量与背压专项.md": "4efef29e58d942be7819292e8c499c2845470e39",
+        "evidence/scion_round2/s4/pilot.json": "4c93a23dd28574454589c2b88269d396ffb7a708",
+        "evidence/scion_round2/s4/200-hotspot.json": "0d2b6248a5add4095e0b8aa6b278f4e24285953d"
+      },
+      "parent": "6719ec3cd0272bde88c13f280f727b122f0bd35a",
+      "tree": "5fb04cd9a216453bdc5637b14068ffd330cdbf6a",
+      "commit": "0f1a974babbc5642381b046438e1a845850b936a",
+      "verified_head": "0f1a974babbc5642381b046438e1a845850b936a",
+      "actions": [
+        {
+          "id": 42950710564,
+          "name": "P3 P4 measured evidence",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 42950710548,
+          "name": "P2 measured capacity and recovery",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 42950710478,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 42950710662,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "stage": "S5a",
+      "files": {
+        ".github/workflows/p1-integrity.yml": "553ea52db92e2ff69bdf71d40848b99020867b78",
+        "tests/integration/test_scion_differential.py": "4b617875846b1a37466204fd0bebc232a87e3595",
+        "benchmarks/scion_round2_matrix.py": "64d11d927720ee239d11749a0b0b474e19ab8c0a",
+        "benchmarks/scion_round2_summary.py": "ecbfce5df538294e067799de4706d1f0a6be74fd",
+        "evidence/scion_round2/s5/frozen-traces.json.gz": "8b004c412cc581278a6a56a9b7a4ed0ce8f0a728",
+        "evidence/scion_round2/s5/raw/history-20-10-exact.tar.xz": "1539c1c94d6ae9e19aa81ae76b38a3b6b1d0b6aa",
+        "evidence/scion_round2/s5/raw/population-200-exact.tar.xz": "32738bcf5c0dec1c83bb7568186d7c8d6d026552",
+        "evidence/scion_round2/s5/raw/mixed-50-A-1.tar.xz": "a9604209eb02cd1f8723f39d7ec6864cd07c7f35",
+        "evidence/scion_round2/s5/raw/mixed-50-B-1.tar.xz": "f75bda465fcbe39db2cf340b7c9c3e608430f696",
+        "evidence/scion_round2/s5/raw/mixed-50-C-1.tar.xz": "83188b5c1a375650ebb5452c7dcd1a4b9f700b9c",
+        "evidence/scion_round2/s5/raw/mixed-50-D-1.tar.xz": "d6a560f0e5cdbf980d32bf92d9ad1deb108199da",
+        "evidence/scion_round2/s5/raw/mixed-50-E-1.tar.xz": "2ed5fab77b00157b4177868f8f8d3de8efca8242",
+        "evidence/scion_round2/s5/raw/mixed-50-F-1.tar.xz": "408ed1a0de3de1a4cfc567681a7650d7f2ab14d5",
+        "evidence/scion_round2/s4/raw/hotspot-200-A-1.json.xz": "5ffaf48dbedb112caf352f59f3ccb4f271a1d7ec",
+        "evidence/scion_round2/s4/raw/hotspot-200-B-1.json.xz": "eff840dd97342749db8b558fa25a7e4373f76e45"
+      },
+      "parent": "0f1a974babbc5642381b046438e1a845850b936a",
+      "tree": "24ccde69be0a349cffb3cb4b762e98646c3228be",
+      "commit": "b4ad5aafecf05582c26566f7b2a0dcbe14390d8e",
+      "verified_head": "b4ad5aafecf05582c26566f7b2a0dcbe14390d8e",
+      "actions": [
+        {
+          "id": 42951047931,
+          "name": "P3 P4 measured evidence",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 42951048118,
+          "name": "P2 measured capacity and recovery",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 42951048090,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 42951048047,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "stage": "S3b",
+      "files": {
+        "reports/Scion_B3冷启动与命中率分析.md": "1b92b695ecb076c8a30fe1b35f44d5c2c692dc97",
+        "src/novel_factory/application/replay_proofs.py": "ee3efb91eaf5cc811a341115757eff97a0a57eff",
+        "src/novel_factory/application/scion.py": "9878adcc51fdc3e81f8ad2fdfe7f88d8f1d78d5e",
+        "tests/integration/test_scion_prime_pg.py": "a30a2dd4e2cb65f4b5171fa171542a68cf763963",
+        "tests/unit/test_scion_prime_parent.py": "a5c8efd91282c2e86c89fd04081fc3f5297468e5",
+        "tests/integration/test_scion_differential.py": "e0fac07af4333ce520136ac8a2b3b4a1e4bdb649",
+        "benchmarks/scion_round2_matrix.py": "73057fa2f27c2a6f5c7347857056afbce74331d8",
+        "evidence/scion_round2/s3b/http_summary.json": "80e4edd384f6bfa8808dc5c0097ac1647cc447a0",
+        "evidence/scion_round2/s3b/mixed200.tar.xz": "06c9fb606af8712717d177ce1fcf24497732815c",
+        "evidence/scion_round2/s3b/mixed500.tar.xz": "5d7ab3f7026b7735fbf8cb3d4b1e1a49f4282b1a"
+      },
+      "parent": "b4ad5aafecf05582c26566f7b2a0dcbe14390d8e",
+      "tree": "d8a82f8e3a5750d9ddea348c96dcb17ccf696558",
+      "commit": "5dfdd5d2620e1269b8f4e38710f6947a44219b05",
+      "verified_head": "5dfdd5d2620e1269b8f4e38710f6947a44219b05",
+      "actions": [
+        {
+          "id": 42952707083,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 42952706933,
+          "name": "P1 and P2 production integrity",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 42952706855,
+          "name": "P3 P4 measured evidence",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 42952707354,
+          "name": "P2 measured capacity and recovery",
+          "status": "completed",
+          "conclusion": "failure"
+        }
+      ]
+    },
+    {
+      "stage": "S5b",
+      "files": {
+        "benchmarks/round2_auth_projection_probe.py": "c25d4aab0e54dbd82bbd8865685e1bb3376c5490",
+        "benchmarks/round2_route_summary.py": "aafbb3ae72caf8e71c7565110e4d83e9b6228e93",
+        "reports/Scion_B3冷启动与命中率分析.md": "2106c0e7b6697c39f7726d853eecf758687b0ea2",
+        "evidence/scion_round2/s3b/verified.xml.gz": "2f49fd3fbb010ef758e5c2f21a6de7bf5d8dffa9",
+        "evidence/scion_round2/s3b/fixed_parent_pg.py": "af16089df79d4e63009a5aec605d60ca3d990612",
+        "evidence/scion_round2/s3b/fixed_parent_metrics.json": "44810e5d04d19303214820b2b4624715da2feff8",
+        "evidence/scion_round2/s4/auth/paired_metrics.json": "89f38f64a10abd885d0bc92f6f4a2f2023dc0413",
+        "evidence/scion_round2/s4/raw/mixed-500-B-1.json.xz": "b5bab13fa1ad99e0561f8f7ca24f376fef3ad891",
+        "evidence/scion_round2/s4/raw/mixed-500-A-1.json.xz": "390cc910a7a9e2e07f2c7b815eb29b13c4c3ded1",
+        "evidence/scion_round2/s4/raw/open-1000-B-1.json.xz": "7e4dfbcfb276131c431cfbdd5d2ff338896e1def",
+        "evidence/scion_round2/s4/raw/open-1000-A-1.json.xz": "4abac1df3b844611e0f5cb13af1223599add722b",
+        "evidence/scion_round2/s4/raw/steady-500-A-1.json.xz": "08a099d7bfea17dbffa7e625b22ca0ec518cb589",
+        "evidence/scion_round2/s4/route/counters.json": "e370291d12c0f838ae6e6f6bcdacc094fa754b10",
+        "evidence/scion_round2/s4/route/hotspot-200-A-1.json.xz": "2d8991f062d02bc3934caeee22a0858928b2007e",
+        "evidence/scion_round2/s4/raw/steady-500-B-1.json.xz": "7cdb24e357efe55a3272023c59b50465ee938990",
+        "evidence/scion_round2/s5/raw/mixed-200-A-1.tar.xz": "fc5fe66e598a4b0f526516b9ee8237e0b53af8cb",
+        "evidence/scion_round2/s5/raw/mixed-200-B-1.tar.xz": "b5f66c7edeb1fd899e479c768cec62949fe84658",
+        "evidence/scion_round2/s4/route/hotspot-200-B-1.json.xz": "fbd22e759d6af7d4a49312563a0ec8a48257aa0a",
+        "evidence/scion_round2/s5/raw/mixed-200-D-1.tar.xz": "77e4b96d6fd18a1a17d3656f866f48b6457500b6",
+        "evidence/scion_round2/s5/raw/mixed-200-C-1.tar.xz": "b27d6288da2dfeeb43fdeaeb94e2ea4239ae81c1",
+        "evidence/scion_round2/s5/raw/mixed-200-E-1.tar.xz": "1e5ce9d62d3e436a5619c2bb4bc1ca74375d5644",
+        "evidence/scion_round2/s5/raw/mixed-200-F-1.tar.xz": "e31927da11dfef99d6cbe096c3059531ca6e794b",
+        "evidence/scion_round2/s5/raw/mixed-500-A-1.tar.xz": "8d1aed065a4f757a59e19bdc5046c4f3d51e9323",
+        "evidence/scion_round2/s5/raw/mixed-500-B-1.tar.xz": "0888f8cc201c12a9445198f43563d9d4bec39d76",
+        "evidence/scion_round2/s5/raw/mixed-500-F-1.tar.xz.part002": "c5ca5e7c3855d5d0b48aaf3ee71cefb8ba9dc76b",
+        "evidence/scion_round2/s5/raw/mixed-500-E-1.tar.xz": "0e4c6fe86ced5dde1a24bfeff0715617e57c40d9",
+        "evidence/scion_round2/s5/raw/mixed-500-F-1.tar.xz.part001": "db3c79bda422bf1d6d2dda1cf8e91b6e709e9ba5",
+        "evidence/scion_round2/s5/raw/open-1000-C-1.tar.xz": "4e8d08cef1c102520ef0218af9ef131f24bb9def",
+        "evidence/scion_round2/s5/raw/open-1000-A-1.tar.xz": "aba5f64074a5b42e1743910e5a76ff5b31780f46",
+        "evidence/scion_round2/s5/raw/open-1000-B-1.tar.xz": "18c36a59bd1061e2cb18e2b97a3e4a9bac851e10",
+        "evidence/scion_round2/s5/raw/open-1000-D-1.tar.xz": "f6259ead05604013db7b985f462a6fb55a1d461a",
+        "evidence/scion_round2/s5/raw/open-1000-F-1.tar.xz": "1353fa0cc567b6c3eed664f4ab91c7498b5cd39e",
+        "evidence/scion_round2/s5/raw/open-1000-E-1.tar.xz": "681d18f942171699ddf26f5816e3764575e85128",
+        "evidence/scion_round2/s5/raw/overload-200-E-1.tar.xz": "04b3ded862e6def9b070bff7ef830ce3db358649",
+        "evidence/scion_round2/s5/raw/overload-200-A-1.tar.xz": "db2bbd9414c3a20ba8b699df50f149224af76402",
+        "evidence/scion_round2/s5/raw/steady-500-A-1.tar.xz": "a16114be5a5ce8df20f02cdef817a2248cc276fa",
+        "evidence/scion_round2/s5/reproduction/matrix_source_from_S4.patch": "d8e8c75104b56a3e428d1627a35ddd9fa480c3cd",
+        "evidence/scion_round2/s5/reproduction/source_map.json": "ddcfdb0ab370e0fcdf3a50b1880ea1ec2a6d3540"
+      },
+      "parent": "5dfdd5d2620e1269b8f4e38710f6947a44219b05",
+      "tree": "cf3810c6e3c84974d9f85bf7bccca80b08f2ddd1",
+      "commit": "5b6693fd274333bcadb0746f367fda30acf95281",
+      "verified_head": "5b6693fd274333bcadb0746f367fda30acf95281",
+      "actions": [
+        {
+          "id": 42952955246,
+          "name": "P3 P4 measured evidence",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 42952955227,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 42952955079,
+          "name": "P1 and P2 production integrity",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 42952955108,
+          "name": "P2 measured capacity and recovery",
+          "status": "completed",
+          "conclusion": "failure"
+        }
+      ]
+    }
+  ]
+}

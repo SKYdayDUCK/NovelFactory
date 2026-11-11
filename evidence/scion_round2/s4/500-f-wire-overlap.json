@@ -1,0 +1,152 @@
+{
+  "mixed-500-F-1.json.gz": {
+    "affinity": [
+      2,
+      3
+    ],
+    "definition": "At the client request-header start, count queries whose request headers started but response headers have not yet started; no worker identity or per-kind server occupancy is inferred.",
+    "final_logical_outcomes": {
+      "accept_conflict": {
+        "409": 47
+      },
+      "accept_independent": {
+        "200": 36
+      },
+      "accept_retry": {
+        "200": 37
+      },
+      "accept_selected_fixture": {
+        "200": 1
+      },
+      "certificate": {
+        "200": 84,
+        "429": 6
+      },
+      "compile": {
+        "200": 500
+      },
+      "graph": {
+        "200": 37,
+        "429": 13
+      },
+      "history": {
+        "200": 452,
+        "429": 48
+      },
+      "propose": {
+        "200": 90,
+        "429": 10
+      },
+      "state_cold": {
+        "200": 500
+      },
+      "state_mixed": {
+        "200": 356,
+        "429": 94
+      },
+      "state_warm": {
+        "200": 500
+      }
+    },
+    "first_attempts": {
+      "accept_conflict.409": {
+        "maximum": 0,
+        "median": 0,
+        "minimum": 0,
+        "with_read_in_flight": 0,
+        "writes": 47
+      },
+      "accept_independent.200": {
+        "maximum": 0,
+        "median": 0.0,
+        "minimum": 0,
+        "with_read_in_flight": 0,
+        "writes": 36
+      },
+      "accept_retry.200": {
+        "maximum": 0,
+        "median": 0,
+        "minimum": 0,
+        "with_read_in_flight": 0,
+        "writes": 37
+      },
+      "accept_selected_fixture.200": {
+        "maximum": 0,
+        "median": 0,
+        "minimum": 0,
+        "with_read_in_flight": 0,
+        "writes": 1
+      },
+      "certificate.200": {
+        "maximum": 86,
+        "median": 19,
+        "minimum": 0,
+        "with_read_in_flight": 42,
+        "writes": 43
+      },
+      "certificate.429": {
+        "maximum": 125,
+        "median": 42,
+        "minimum": 3,
+        "with_read_in_flight": 47,
+        "writes": 47
+      },
+      "propose.200": {
+        "maximum": 106,
+        "median": 27,
+        "minimum": 1,
+        "with_read_in_flight": 55,
+        "writes": 55
+      },
+      "propose.429": {
+        "maximum": 151,
+        "median": 49,
+        "minimum": 11,
+        "with_read_in_flight": 45,
+        "writes": 45
+      }
+    },
+    "fixture_sha256": "efcab4e10ada73f16904d83223f790dff0cb9db24ea15fc8bc1a9a44acd3843e",
+    "missing_logical": 40,
+    "observed_requests": 4523,
+    "original_raw_sha256": "b03e854b6bb4a3486bc259cb19a4db5e56c13227822e76a9e4dc664dfc8fa7f4",
+    "queues": {
+      "admission": {
+        "admitted": 2659,
+        "completed": 2640,
+        "rejected": 103,
+        "timed_out": 1780
+      },
+      "authentication_admission": {
+        "admitted": 4523,
+        "completed": 4523,
+        "rejected": 0,
+        "timed_out": 0
+      },
+      "ingress": {
+        "admitted": 4523,
+        "completed": 4523,
+        "rejected": 0,
+        "timed_out": 0
+      }
+    },
+    "retries": 1712,
+    "settings": {
+      "NF_SCION_COLUMNS": "0",
+      "NF_SCION_QUERY_COLUMNS": "0",
+      "NF_SCION_REPLAY": "0",
+      "NF_SCION_REPLAY_LAZY": "0",
+      "NF_SCION_REVIEW_COLUMNS": "0",
+      "NF_SCION_SCHEMA_LINKS": "0",
+      "NF_SCION_SCOPES": "0",
+      "NF_SCION_WORKER_COLUMNS": "1"
+    },
+    "source": "01a5ba555cf995353b32edaf5cf200b559386bdb",
+    "status": {
+      "200": 2593,
+      "409": 47,
+      "429": 1883
+    },
+    "unique_world_commits": 37
+  }
+}
