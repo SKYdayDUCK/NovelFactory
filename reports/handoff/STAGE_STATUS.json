@@ -1,41 +1,46 @@
 {
   "A": {
-    "status": "IN_PROGRESS",
-    "result": "NOT_MET",
-    "inspected_sha": "9dc9c6b806b8ac43f56d0893194a5b402f3f16ca",
+    "status": "MERGED_AND_VERIFIED",
     "pr": 5,
-    "blocker": "three inherited workflows failed",
-    "next": "fix and rerun same-head gates before merge"
+    "source_sha": "f2e6d38534214e79630b807cec9a720d99e975b1",
+    "main_sha": "a8f37b72286163e9117f8874a0e175c61204ff8b",
+    "merged_at": "2026-11-11T13:50:16Z",
+    "capacity_issue": 13,
+    "evidence": "https://github.com/SKYdayDUCK/NovelFactory/pull/5"
   },
   "B": {
-    "status": "IN_PROGRESS",
-    "result": "NOT_MET",
-    "inspected_sha": "b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5",
+    "status": "MERGED_AND_VERIFIED",
     "pr": 6,
-    "blocker": "three inherited workflows failed",
-    "next": "fix and rerun same-head gates before merge"
+    "source_sha": "67e8836fd8aceb5d4b8d054594f5f3bdfdddaac9",
+    "main_sha": "df1e0cc904e3b94a360d86e3a3e00bfec3258673",
+    "merged_at": "2026-11-11T16:33:42Z",
+    "capacity_issue": 13,
+    "evidence": "reports/integration/p55-main/README.md"
   },
   "W0": {
-    "status": "VERIFIED",
+    "status": "MERGED_AND_VERIFIED",
     "result": "PASS",
-    "evidence": "evidence/W0",
-    "tests": {
-      "nf": 4,
-      "aw": 2
-    },
-    "next": "merge in dependency order",
-    "source_sha": "c18e53959807a35816eaa1258a3b7c64b80b4637",
     "pr": 7,
-    "ci": 43030289759
+    "source_sha": "e5a47f51f39e3ad618e822e451eb89110395e7dc",
+    "main_sha": "c4939e24b6b5501d82127f528f2054e9c1992856",
+    "evidence": "https://github.com/SKYdayDUCK/NovelFactory/blob/157342ba2fa7d04333d5ef56d450c880ff8ce9b5/evidence/workshop/main-verification/W0/MERGED_AND_VERIFIED.json",
+    "hosted_main_junit": {
+      "workshop": 3,
+      "nf_tools": 5,
+      "dual_services": 2
+    },
+    "issue_13": "4 capacity subjobs NOT_MET"
   },
   "W1": {
     "status": "IN_PROGRESS",
-    "result": "PARTIAL",
+    "result": "AWAITING_MAIN_ACCEPTANCE",
     "tests": {
       "integrated": 9
     },
-    "evidence": "evidence/workshop/w1",
-    "next": "same-head CI"
+    "evidence": "reports/integration/CURRENT_STAGE.md",
+    "next": "same-head CI",
+    "pr": 8,
+    "dependency_main_sha": "c4939e24b6b5501d82127f528f2054e9c1992856"
   },
   "W2": {
     "status": "NOT_STARTED",

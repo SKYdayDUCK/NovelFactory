@@ -82,7 +82,9 @@ def test_hiring_tenure_and_restart_over_stdio(tmp_path):
                                      employee_id="relief"))
                 assert (end["revision"], end["employment_revision"]) == (5, 4)
                 assert (await promoted.call_tool("aw_roster_get", {})).isError
+            expected_directory = await accepted(lead, "aw_roster_get", {})
         async with live_session(manager) as restarted:
+            assert await accepted(restarted, "aw_roster_get", {}) == expected_directory
             state = await accepted(restarted, "aw_state_get", {})
             assert state["revision"] == 5
             ended = next(e for e in state["employees"] if e["employee_id"] == "relief")
