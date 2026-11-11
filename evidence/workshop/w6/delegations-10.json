@@ -1,0 +1,37 @@
+{
+  "registered_members": 10,
+  "delegations": 10,
+  "elapsed_s": 3.0910096610004985,
+  "logical_tasks_per_s": 3.235188853069841,
+  "tasks": 10,
+  "unique_tasks": 10,
+  "accepted": 10,
+  "held": 0,
+  "settled": 10,
+  "provider": "local HTTP synthetic",
+  "provider_requests": 10,
+  "concurrency_policy": 1,
+  "model_calls_while_idle": 0,
+  "observed_peak_model_calls": 1,
+  "synthetic_reported_tokens": 180,
+  "synthetic_tariff": "0.02 USD per fixture call",
+  "extra_budget_authorizations": 0,
+  "latency_ms": {
+    "p50": 2858.6473790001037,
+    "p95": 2887.4207400003797,
+    "p99": 2887.4207400003797
+  },
+  "per_operation_ms": [
+    2839.6939300000668,
+    2842.8414939990034,
+    2843.0033570002706,
+    2850.367891998758,
+    2858.6473790001037,
+    2867.831646999548,
+    2874.2695979999553,
+    2878.1447549990844,
+    2880.9294779985066,
+    2887.4207400003797
+  ],
+  "contract_sha256": "cf0857bc4418379f59f80ba8d1a1029ef2744bc1d43dfc70e9aba84e225a0ea9"
+}

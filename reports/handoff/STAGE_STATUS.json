@@ -4,21 +4,24 @@
     "result": "PASS",
     "inspected_sha": "f2e6d38534214e79630b807cec9a720d99e975b1",
     "pr": 5,
-    "blocker": "three inherited workflows failed",
-    "next": "carry P5 fix to B and integration peer",
+    "blocker": null,
+    "next": "Inherited production capacity remains separately tracked in #13.",
     "local_passed": 722,
     "capacity": "NOT_MET",
     "merge_sha": "a8f37b72286163e9117f8874a0e175c61204ff8b"
   },
   "B": {
-    "status": "IN_PROGRESS",
+    "status": "UNDER_REVIEW",
     "result": "NOT_MET",
-    "inspected_sha": "b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5",
+    "inspected_sha": "e2f0fabadcf673984fddacc9bd7a924d6588b816",
     "pr": 6,
     "blocker": "three inherited workflows failed",
-    "next": "fix and rerun same-head gates before merge",
+    "next": "Check the real 600 s original gates and readiness before merge.",
     "local_hotspot_passed": 33,
-    "remote_fix_short": "bf0541a4"
+    "remote_fix_short": "bf0541a4",
+    "target": "main",
+    "independent_pg_checks": 33,
+    "requested_merge_target": "main"
   },
   "W0": {
     "status": "VERIFIED",
@@ -58,10 +61,10 @@
     "ci": 43031076636
   },
   "W3": {
-    "status": "IN_PROGRESS",
-    "result": "PARTIAL",
+    "status": "VERIFIED_LOCAL",
+    "result": "PASS_LOCAL",
     "evidence": "evidence/workshop/w3",
-    "next": "pin NF branch; rerun dual-service CI; PITR drill",
+    "next": "Confirm final bridge CI and merge after #6. Paired restore verified in W6.",
     "local_tests": {
       "local_saga_and_stdio": 4,
       "dual_mcp": 1
@@ -69,7 +72,7 @@
     "source_sha": "15d1cf51c357627866d06bd49fd326798dda56a3",
     "pr": 10,
     "ci": 43032253677,
-    "nf_sha": "795b17f243613282aaa147668f0f5c384cf32bf8",
+    "nf_sha": "becc8e7a400756c67832e0aca16cac78000df661",
     "nf_pr": 11
   },
   "W4": {
@@ -77,20 +80,43 @@
     "result": "PASS",
     "local_tests": 32,
     "evidence": "evidence/workshop/w4",
-    "next": "same-head CI; dual-service CI now pins NF #11",
+    "next": "Reviewed risk downgrade, reviewer replacement and timeout in #15.",
     "source_sha": "71b471416c9407e348d4bdce817588def5f11d5b",
     "pr": 12,
     "ci": 43032647213
   },
   "W5": {
-    "status": "IN_PROGRESS",
-    "result": "PARTIAL",
+    "status": "VERIFIED",
+    "result": "PASS",
     "evidence": "evidence/workshop/w5",
-    "next": "same-head CI and fault runs"
+    "next": "W6 also covers two installations with the same author request key.",
+    "source_sha": "609e92278476c60a893658ef53b6ff15f659b153",
+    "pr": 14,
+    "local_tests": {
+      "workshop": 33,
+      "dual_mcp": 2
+    },
+    "ci": 43033428508
   },
   "W6": {
-    "status": "NOT_STARTED",
-    "result": "NOT_EXECUTED"
+    "status": "IN_REVIEW",
+    "result": "PASS_LOCAL",
+    "nf_sha": "becc8e7a400756c67832e0aca16cac78000df661",
+    "evidence": "evidence/workshop/w6",
+    "next": "Verify latest release candidate on its exact GitHub head, merge by dependency.",
+    "pr": 15,
+    "initial_sha": "b05ea32aa898d48536467cd2dc82c5ae0f443a32",
+    "review_fix_sha": "c8ae27b6096ddfb38dc75ee9b5588892882336a2",
+    "first_ci": {
+      "run": 43034935188,
+      "result": "FAIL_BEFORE_INTEGRATION",
+      "reason": "Azure Ubuntu mirror DNS unavailable"
+    },
+    "local_tests": {
+      "pg_redis": 44,
+      "dual_services_and_scenes": 4,
+      "physical_pitr": 1
+    }
   },
   "C": {
     "status": "BLOCKED",

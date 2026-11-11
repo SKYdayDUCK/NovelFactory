@@ -1,7 +1,16 @@
 name: Agent Workshop PostgreSQL and stdio
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'workshop/**'
+      - 'src/novel_factory/application/delegation*.py'
+      - 'src/novel_factory/interfaces/delegation_stdio.py'
+      - '.github/workflows/agent-workshop.yml'
   pull_request:
     paths:
+      - 'src/novel_factory/application/delegation*.py'
+      - 'src/novel_factory/interfaces/delegation_stdio.py'
       - 'workshop/**'
       - '.github/workflows/agent-workshop.yml'
   workflow_dispatch:
@@ -10,7 +19,7 @@ permissions:
 jobs:
   workshop:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 25
     services:
       redis:
         image: redis:8
@@ -26,6 +35,7 @@ jobs:
       run:
         working-directory: workshop
     env:
+      PG_BIN: /usr/lib/postgresql/17/bin
       AW_REDIS_TEST_URL: redis://127.0.0.1:6379/0
       AW_DATABASE_URL: postgresql://postgres:local-ci-only@127.0.0.1:5432/workshop_test
     steps:
@@ -37,20 +47,72 @@ jobs:
           python-version: '3.12'
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
       - run: uv sync --locked --extra streams
-      - run: uv run --locked alembic upgrade head
+      - name: Exercise installed wheel and packaged migrations
+        run: |
+          uv build --wheel
+          uv venv "$RUNNER_TEMP/aw-wheel"
+          uv pip install --python "$RUNNER_TEMP/aw-wheel/bin/python" --no-deps dist/*.whl
+          # Use the isolated locked dependencies; prefer wheel modules to the checkout.
+          installed=$("$RUNNER_TEMP/aw-wheel/bin/python" -c 'import site;print(site.getsitepackages()[0])')
+          PYTHONPATH="$installed" .venv/bin/python -m agent_workshop.migrate upgrade
+          PYTHONPATH="$installed" .venv/bin/python -m agent_workshop.migrate current
       - run: uv run --locked --extra streams pytest -q --junitxml=workshop-results.xml
+      - name: Measure message delivery and rebuild each isolated Redis stream
+        env:
+          PGPASSWORD: local-ci-only
+          AW_REDIS_URL: redis://127.0.0.1:6379/0
+        run: |
+          mkdir -p ci-evidence
+          for n in 10 50 200; do
+            database="aw_benchmark_$n"
+            createdb -h 127.0.0.1 -U postgres "$database"
+            export AW_DATABASE_URL="postgresql://postgres:local-ci-only@127.0.0.1:5432/$database"
+            .venv/bin/aw-migrate upgrade
+            .venv/bin/python benchmarks/message_capacity.py --employees "$n" --output "ci-evidence/messages-$n.json"
+          done
       - uses: actions/checkout@v4
         with:
-          ref: 795b17f243613282aaa147668f0f5c384cf32bf8
+          ref: 74350760dfd063f3596e5b6838a56a40d3006ad6
           path: nf-peer
           persist-credentials: false
+      - name: Install pinned NF host and role isolation tools
+        run: |
+          # Hosted images can pin an Azure mirror which has failed DNS before any tests start.
+          if test -f /etc/apt/apt-mirrors.txt; then
+            printf '%s\n' 'https://archive.ubuntu.com/ubuntu/' 'https://mirrors.edge.kernel.org/ubuntu/' | sudo tee /etc/apt/apt-mirrors.txt >/dev/null
+          fi
+          if ! test -x "$PG_BIN/pg_verifybackup" || ! test -x "$PG_BIN/postgres"; then
+            sudo install -d -m 0755 /usr/share/postgresql-common/pgdg
+            curl -fsSL --retry 3 https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo tee /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc > /dev/null
+            echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          fi
+          sudo apt-get -o Acquire::Retries=3 update -qq
+          sudo apt-get -o Acquire::Retries=3 install -y postgresql-17 postgresql-client-17 bubblewrap util-linux gcc libc6-dev
+          "$PG_BIN/pg_verifybackup" --version
+          prefix="$RUNNER_TEMP/aw-codex"
+          npm install --prefix "$prefix" --no-save --no-audit --no-fund @openai/codex@0.167.0-alpha.4
+          native="$prefix/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/bin"
+          test "$("$native/codex" --version)" = "codex-cli 0.167.0-alpha.4"
+          echo "$native" >> "$GITHUB_PATH"
       - name: Test the pinned NF peer over independent PostgreSQL accounts and stdio
         run: |
           export AW_NF_SOURCE="$GITHUB_WORKSPACE/nf-peer"
+          if test -f "$GITHUB_WORKSPACE/src/novel_factory/interfaces/delegation_stdio.py"; then
+            export AW_NF_SOURCE="$GITHUB_WORKSPACE"
+          fi
+          git -C "$AW_NF_SOURCE" rev-parse HEAD
           export AW_DUAL_TEST_ADMIN_URL="$AW_DATABASE_URL"
           export PYTHONPATH="$PWD/src:$AW_NF_SOURCE/src"
           uv sync --project "$AW_NF_SOURCE" --locked
-          "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q integration --junitxml=dual-results.xml
+          export AW_ACCEPTANCE_OUTPUT="$PWD/ci-evidence"
+          export AW_BENCH_RESULTS="$AW_ACCEPTANCE_OUTPUT"
+          export PATH="$AW_NF_SOURCE/.venv/bin:$PATH"
+          mkdir -p "$AW_ACCEPTANCE_OUTPUT"
+          export AW_PAIRED_RESTORE_EVIDENCE="$AW_ACCEPTANCE_OUTPUT/paired.json"
+          "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q integration/test_dual_stdio.py integration/test_manager_resume.py --junitxml=dual-results.xml
+          "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q integration/test_paired_restore.py --junitxml=paired-results.xml
+          "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q benchmarks/cross_service_scene.py --junitxml=scene-results.xml
+          "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q benchmarks/delegation_capacity.py --junitxml=capacity-results.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -58,3 +120,7 @@ jobs:
           path: |
             workshop/workshop-results.xml
             workshop/dual-results.xml
+            workshop/paired-results.xml
+            workshop/scene-results.xml
+            workshop/capacity-results.xml
+            workshop/ci-evidence

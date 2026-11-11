@@ -1,8 +1,8 @@
 """PostgreSQL organization authority. All handlers run within the caller's transaction."""
 
-from hashlib import sha256
 import json
 import re
+from hashlib import sha256
 
 from psycopg.types.json import Jsonb
 
@@ -210,9 +210,12 @@ def bootstrap(conn, org_id, preset="Minimal", manager_id="manager", scope_ref="o
     ).fetchone()
     org = lock_org(conn, org_id, write=True)
     if not new:
-        if (org["preset_sha"], org["scope_ref"]) != (digest, scope_ref):
+        initial = conn.execute(
+            "SELECT preset_sha FROM aw_org_revisions WHERE org_id=%s AND revision=1", (org_id,)
+        ).fetchone()
+        if (initial["preset_sha"], org["scope_ref"]) != (digest, scope_ref):
             raise Denied("BOOTSTRAP_MISMATCH")
-        return {"org_id": org_id, "revision": org["active_revision"], "preset_sha": digest}
+        return {"org_id": org_id, "revision": 1, "preset_sha": digest}
     conn.execute(
         """INSERT INTO aw_org_revisions
         (org_id,revision,preset,preset_sha,changed_by,change_kind)
@@ -223,6 +226,19 @@ def bootstrap(conn, org_id, preset="Minimal", manager_id="manager", scope_ref="o
         _insert_employee(conn, org_id, 1, emp, role, supervisor, team, scope_ref)
     _graph(conn, org_id, 1)
     return {"org_id": org_id, "revision": 1, "preset_sha": digest}
+
+
+def capacity(org, total):
+    if org.get("max_active_employees") is not None and total > org["max_active_employees"]:
+        raise Denied("ROSTER_LIMIT_EXCEEDED")
+
+
+def scope_allowed(org, role, team, scope):
+    if scope != org["scope_ref"]:
+        raise Denied("ROSTER_SCOPE_DENIED")
+    policy = org.get("team_policy")
+    if policy is not None and team not in policy.get(role, []):
+        raise Denied("ROSTER_SCOPE_DENIED")
 
 
 def _change(conn, session, action, expected_revision, operation_id, employee_id, **fields):
@@ -255,6 +271,13 @@ def _change(conn, session, action, expected_revision, operation_id, employee_id,
         raise Denied("INVALID_EMPLOYMENT_TRANSITION")
     if action in ("HIRE", "TRANSFER"):
         role, sup_id, team = fields["role_id"], _id(fields["supervisor_id"]), _id(fields["team_id"])
+        if action == "HIRE" or row["status"] != "ACTIVE":
+            current = conn.execute(
+                "SELECT count(*) AS n FROM aw_employees WHERE org_id=%s AND status='ACTIVE'",
+                (org_id,),
+            ).fetchone()["n"]
+            capacity(org, current + 1)
+        scope_allowed(org, role, team, org["scope_ref"])
         sup = employee(conn, org_id, sup_id)
         if not sup or sup["status"] != "ACTIVE" or sup_id == employee_id:
             raise Denied("INVALID_SUPERVISOR")
