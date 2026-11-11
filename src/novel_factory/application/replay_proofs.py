@@ -38,6 +38,16 @@ def _fallback_reason(events, candidates, template, parent, work):
     return None
 
 
+def _context(genesis, parent, work):
+    # Genesis entity iteration order is visible in lifecycle_history.
+    return fingerprint([parent["work_id"], parent["branch_id"], work["interpretation_ref"],
+                        work["rules_ref"], work["interpretation_epoch"],
+                        parent["provenance"].get("history_epoch", 0),
+                        world.INTERPRETER_VERSION, world.PROJECTION_VERSION,
+                        {k: list(v) for k, v in world.PREDICATES.items()}, sorted(world._TERMINAL),
+                        genesis, list(genesis.get("entities", {}))])
+
+
 class ReplayProofs:
     """Remember only fixed-size content digests; every miss uses full replay.
 
@@ -51,7 +61,16 @@ class ReplayProofs:
         self._capacity = capacity
         self._lock = Lock()
 
-    def evaluate(self, options, genesis, events, candidates, template, parent, work):
+    def _remember(self, context, event_hashes, snapshot):
+        proof = (context, fingerprint(sorted(event_hashes)), fingerprint(snapshot))
+        with self._lock:
+            self._proofs[proof] = None
+            self._proofs.move_to_end(proof)
+            if len(self._proofs) > self._capacity:
+                self._proofs.popitem(last=False)
+
+    def evaluate(self, options, genesis, events, candidates, template, parent, work, *, proposal=False):
+        lazy = getattr(options, "replay_lazy", False)
         try:
             reason = _fallback_reason(events, candidates, template, parent, work)
         except (KeyError, TypeError, AttributeError, DomainError):
@@ -59,19 +78,33 @@ class ReplayProofs:
             reason = "unrecognized_input"
         if reason is not None:
             options.record("replay", reason)
-            return reducer.replay(genesis, events)
+            result = reducer.replay(genesis, events)
+            # Full replay also proves a *new* parent after a valid same-time or
+            # earlier append. That append itself must never take the suffix path.
+            if lazy and not proposal and reason == "not_strictly_later":
+                try:
+                    self._remember(_context(genesis, parent, work), [fingerprint(e) for e in events], result)
+                except (KeyError, TypeError, AttributeError, DomainError):
+                    # Optional admission cannot change a successful full replay.
+                    pass
+                else:
+                    options.record("replay_proof", "full_replay_seed")
+            return result
 
-        # Genesis entity iteration order affects lifecycle_history. The only
-        # event-input-order-dependent projection field is the summary list,
-        # restored explicitly by the suffix reducer. Temporal order (including
-        # ties) is determined by the reducer's deterministic topological sort.
+        if lazy and proposal:
+            with self._lock:
+                possible = any(proof[2] == parent["state_hash"] for proof in self._proofs)
+            if not possible:
+                # A negative prefilter can only send a request to full replay.
+                # A hash match still needs the complete guard and content proof.
+                options.record("replay", "unverified_parent")
+                options.record("replay_proof", "cold_proposal_skipped")
+                return reducer.replay(genesis, events)
+
+        # JSONB selection order can change. The suffix reducer restores the
+        # caller's event-summary order; the proof binds the entire body multiset.
         try:
-            context = fingerprint([parent["work_id"], parent["branch_id"], work["interpretation_ref"],
-                                   work["rules_ref"], work["interpretation_epoch"],
-                                   parent["provenance"].get("history_epoch", 0),
-                                   world.INTERPRETER_VERSION, world.PROJECTION_VERSION,
-                                   {k: list(v) for k, v in world.PREDICATES.items()}, sorted(world._TERMINAL),
-                                   genesis, list(genesis.get("entities", {}))])
+            context = _context(genesis, parent, work)
             prefix = events[:-1]
             hashes = [fingerprint(e) for e in prefix]
             prefix_hash = fingerprint(sorted(hashes))
@@ -87,11 +120,7 @@ class ReplayProofs:
             options.record("replay", "unverified_parent")
             result = reducer.replay(genesis, events)
 
-        hashes.append(fingerprint(events[-1]))
-        proof = (context, fingerprint(sorted(hashes)), fingerprint(result))
-        with self._lock:
-            self._proofs[proof] = None
-            self._proofs.move_to_end(proof)
-            if len(self._proofs) > self._capacity:
-                self._proofs.popitem(last=False)
+        if not (lazy and proposal):
+            hashes.append(fingerprint(events[-1]))
+            self._remember(context, hashes, result)
         return result

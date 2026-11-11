@@ -488,7 +488,7 @@ class Kernel:
             operations=[{"operation":"ADD","occurrence_id":event["occurrence_id"],"prior_event_version_id":None,"selected_event_version_id":event["event_version_id"]}]
             selected.append(event)
         if self.scion.replay:
-            self.replay_proofs.evaluate(self.scion, genesis, selected, event_candidates, template_id, base, work)
+            self.replay_proofs.evaluate(self.scion, genesis, selected, event_candidates, template_id, base, work, proposal=True)
         else:
             replay(genesis,selected)  # Deterministic validation outside DB transaction.
         advances=[]

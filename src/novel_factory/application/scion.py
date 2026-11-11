@@ -14,6 +14,7 @@ class ScionOptions:
         self.query_columns = os.getenv("NF_SCION_QUERY_COLUMNS", group or "0") == "1"
         self.scopes = os.environ.get("NF_SCION_SCOPES") == "1"
         self.replay = os.environ.get("NF_SCION_REPLAY") == "1"
+        self.replay_lazy = os.environ.get("NF_SCION_REPLAY_LAZY") == "1"
         self._counts = Counter()
         self._lock = Lock()
 

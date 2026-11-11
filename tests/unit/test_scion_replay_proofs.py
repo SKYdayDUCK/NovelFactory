@@ -53,10 +53,12 @@ def test_ordered_projection_and_mutable_snapshots_cannot_change_proof():
     ("retcon", "historical_replacement"), ("invalid_event", "unrecognized_input"),
     ("genesis_entity_order", "unverified_parent"),
 ])
-def test_unproved_prefixes_use_original_result_or_exact_error(case, reason):
+@pytest.mark.parametrize("lazy", [False, True], ids=["original", "lazy-admission"])
+def test_unproved_prefixes_use_original_result_or_exact_error(case, reason, lazy):
     raw, history, work = _world()
     first, second = history[:2]
     cache, tokens = ReplayProofs(), Counts()
+    tokens.replay_lazy = lazy
     snapshot = cache.evaluate(tokens, raw, [first], [first], "append", _parent(replay(raw, []), []), work)
     base = _parent(snapshot, [first])
     template = "append"
@@ -93,4 +95,57 @@ def test_unproved_prefixes_use_original_result_or_exact_error(case, reason):
         assert (trial.value.code, trial.value.safe_message) == (original.code, original.safe_message)
     else:
         assert cache.evaluate(tokens, raw, selected, [second], template, base, work) == expected
-    assert tokens == {("replay", reason): 1}
+    assert {k: v for k, v in tokens.items() if k[0] == "replay"} == {("replay", reason): 1}
+
+
+def test_lazy_cold_proposals_skip_digest_and_do_not_evict_accepted_parent(monkeypatch):
+    from novel_factory.application import replay_proofs
+
+    raw, history, work = _world()
+    first, second, third = history[:3]
+    cache, tokens = ReplayProofs(capacity=1), Counts()
+    tokens.replay_lazy = True
+    empty = _parent(replay(raw, []), [])
+    with monkeypatch.context() as guard:
+        guard.setattr(replay_proofs, "fingerprint", lambda _: pytest.fail("cold proposal built a proof"))
+        result = cache.evaluate(tokens, raw, [first], [first], "append", empty, work, proposal=True)
+    assert result == replay(raw, [first])
+    parent = _parent(result, [first])
+    cache.evaluate(tokens, raw, [first], [first], "append", empty, work)
+    # Speculative alternatives must leave the only trusted parent available.
+    for candidate in (second, third, second):
+        assert cache.evaluate(tokens, raw, [first, candidate], [candidate], "append",
+                              parent, work, proposal=True) == replay(raw, [first, candidate])
+    assert tokens["replay", "hit"] == 3
+
+    child = cache.evaluate(tokens, raw, [first, second], [second], "append", parent, work)
+    before = tokens.copy()
+    for lost in (cache, ReplayProofs(capacity=1)):
+        result = lost.evaluate(tokens, raw, [first, second], [second], "append", parent, work, proposal=True)
+        assert result == child
+    assert tokens["replay", "unverified_parent"] - before["replay", "unverified_parent"] == 2
+
+
+@pytest.mark.parametrize("tick", [0, 1])
+def test_lazy_seeds_valid_full_replay_after_out_of_order_and_ties(tick):
+    raw, history, work = _world()
+    first, second, third = history[:3]
+    second["occurrence_time"]["at"] = point(tick)
+    # This event writes an independent slot and therefore remains valid at
+    # the first event's time, or preceding it.
+    second["effects"] = [deepcopy(history[3]["effects"][1])]
+    tokens = Counts()
+    tokens.replay_lazy = True
+    cache = ReplayProofs()
+    parent = _parent(replay(raw, [first]), [first])
+    rows = [first, second]
+    full = cache.evaluate(tokens, raw, rows, [second], "append", parent, work)
+    assert full == replay(raw, rows)
+    assert tokens["replay", "hit"] == 0 and tokens["replay", "not_strictly_later"] == 1
+    assert tokens["replay_proof", "full_replay_seed"] == 1
+    base = _parent(full, rows)
+    # PostgreSQL may change selection order. The original full snapshot must
+    # still be reconstructed exactly, including its event summary sequence.
+    reordered = [second, first, third]
+    assert cache.evaluate(tokens, raw, reordered, [third], "append", base, work) == replay(raw, reordered)
+    assert tokens["replay", "hit"] == 1

@@ -203,6 +203,15 @@ def probe_child(message):
 
     try:
         with ExitStack() as patches, profile.DatabaseObserver(message["url"]) as observer, profile.Attribution(kernel) as meter:
+            if message.get("profile_proofs"):
+                # Optional diagnostic only. Fingerprint timings include Python
+                # timer overhead and must not be mixed with uninstrumented pairs.
+                from novel_factory.application import replay_proofs
+                for name in ("fingerprint", "_fallback_reason"):
+                    function = getattr(replay_proofs, name)
+                    meter._replace(replay_proofs, name, meter._wrap(function, "proof." + name))
+                function = replay_proofs.world._append_verified_suffix
+                meter._replace(replay_proofs.world, "_append_verified_suffix", meter._wrap(function, "proof.suffix"))
             experiment = profile.Experiment(params, kernel, observer)
             for name in ("benchmarks.scion_profile", "novel_factory.orchestration.tasks",
                          "novel_factory.application.kernel", "novel_factory.application.queries", "novel_factory.fixtures"):
@@ -249,7 +258,8 @@ def probe_child(message):
                       seed_seconds=fixture["seed_elapsed"], fixture_request_sha256=fingerprint(fixture["request"]),
                       current_cpu_affinity=sorted(os.sched_getaffinity(0)), flag_env=message["env"],
                       database_observer=observer.result(), status="COMPLETED_WITH_INVARIANTS",
-                      paired_time=message["now"], harness_sha256=sha(Path(__file__)))
+                      paired_time=message["now"], proof_profile=message.get("profile_proofs", False),
+                      harness_sha256=sha(Path(__file__)))
         raw = json.dumps(report, ensure_ascii=False, separators=(",", ":")).encode()
         output.with_suffix(".json.gz").write_bytes(gzip.compress(raw, mtime=0))
         output.unlink()
@@ -287,6 +297,16 @@ def probe(args):
                 base = create_engine(url.set(database=template))
                 with base.connect() as conn:
                     objects = conn.execute(text("SELECT hash FROM nf_objects ORDER BY hash")).scalars().all()
+                    now = datetime.now(UTC)
+                    if args.b3_comparison:
+                        # A restored historical checkpoint contains the original
+                        # task lease. Use its authentic, in-lease business cut
+                        # for both arms without modifying any stored deadline.
+                        start, end = conn.execute(text(
+                            "SELECT updated_at, LEAST(lease_expiry, deadline) FROM nf_tasks WHERE task_id = :task"
+                        ), {"task": fixture["request"]["task_id"]}).one()
+                        assert start < end
+                        now = start + (end - start) / 2
                 base.dispose()
                 with tempfile.TemporaryDirectory() as temp:
                     template_store = Path(temp) / "source"
@@ -297,7 +317,7 @@ def probe(args):
                         dest = template_store / path
                         dest.parent.mkdir(parents=True, exist_ok=True)
                         shutil.copyfile(original, dest)
-                    now = datetime.now(UTC).isoformat()
+                    now = now.isoformat()
                     for repeat in range(1, args.repetitions + 1):
                         pair = []
                         for arm in ("AB" if repeat % 2 else "BA"):
@@ -311,9 +331,13 @@ def probe(args):
                                 scenario = "long-retcon" if args.repair else "long-resource"
                                 out = results / f"{scenario}-{count}-{arm}-{repeat}.json"
                                 controls = {f: "1" if arm == "B" else "0" for f in flags}
+                                if args.b3_comparison:
+                                    controls = {f: "0" for f in flags}
+                                    controls["NF_SCION_REPLAY"] = str(int(arm == "B" or args.b3_comparison == "legacy"))
+                                    controls["NF_SCION_REPLAY_LAZY"] = str(int(arm == "B"))
                                 msg = {"url": url.set(database=name).render_as_string(hide_password=False), "now": now,
                                        "output": str(out), "fixture": fixture, "sha": revision, "env": controls,
-                                       "objects": str(store), "repair": args.repair}
+                                       "objects": str(store), "repair": args.repair, "profile_proofs": args.profile_proofs}
                                 root = checkout.resolve()
                                 print(f"PROBE {count} {arm} {repeat}", flush=True)
                                 subprocess.run([sys.executable, str(Path(__file__).resolve()), "--child"],
@@ -344,6 +368,9 @@ def main():
     parser.add_argument("--candidate-root", type=Path)
     parser.add_argument("--results", type=Path)
     parser.add_argument("--repetitions", type=int, default=3)
+    parser.add_argument("--profile-proofs", action="store_true", help="Time proof digests, guards and suffix separately")
+    parser.add_argument("--b3-comparison", choices=("off", "legacy"),
+                        help="Isolate revised B3 against full replay or original B3, with columns/scopes off")
     args = parser.parse_args()
     if args.probe:
         if not all((args.baseline_root, args.candidate_root, args.baseline_sha, args.results)):
