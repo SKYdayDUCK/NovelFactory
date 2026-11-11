@@ -3,6 +3,8 @@ on:
   push:
     branches: [main]
     paths:
+      - 'scripts/engineering_release_ci.py'
+      - 'tests/unit/test_engineering_release_ci.py'
       - 'scripts/P6_*'
       - 'scripts/p6_budget.py'
       - 'src/novel_factory/application/budget_limits.py'
@@ -10,6 +12,8 @@ on:
       - '.github/workflows/p6-offline.yml'
   pull_request:
     paths:
+      - 'scripts/engineering_release_ci.py'
+      - 'tests/unit/test_engineering_release_ci.py'
       - 'scripts/P6_*'
       - 'reports/handoff/P6*'
       - '.github/workflows/p6-offline.yml'
@@ -25,6 +29,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/checkout@v4
+        if: github.event_name == 'pull_request' || github.ref != 'refs/heads/main'
         with:
           ref: 43dc369ab73e2faacb509b6ca16995848fc92c28
           path: nf-peer
@@ -35,10 +40,7 @@ jobs:
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
       - name: Select the integrated NF source or the pinned peer
         run: |
-          source_dir="$GITHUB_WORKSPACE/nf-peer"
-          if test -f "$GITHUB_WORKSPACE/scripts/p6_budget.py"; then
-            source_dir="$GITHUB_WORKSPACE"
-          fi
+          source_dir=$(python scripts/engineering_release_ci.py scripts/p6_budget.py)
           git -C "$source_dir" rev-parse HEAD
           echo "NF_SOURCE=$source_dir" >> "$GITHUB_ENV"
       - name: Install locked NF and verify preflight with synthetic local input

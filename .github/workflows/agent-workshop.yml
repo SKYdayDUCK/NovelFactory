@@ -3,6 +3,8 @@ on:
   push:
     branches: [main]
     paths:
+      - 'scripts/engineering_release_ci.py'
+      - 'tests/unit/test_engineering_release_ci.py'
       - 'reports/handoff/ENGINEERING_RELEASE.json'
       - 'workshop/**'
       - 'src/novel_factory/application/delegation*.py'
@@ -10,6 +12,8 @@ on:
       - '.github/workflows/agent-workshop.yml'
   pull_request:
     paths:
+      - 'scripts/engineering_release_ci.py'
+      - 'tests/unit/test_engineering_release_ci.py'
       - 'src/novel_factory/application/delegation*.py'
       - 'src/novel_factory/interfaces/delegation_stdio.py'
       - 'workshop/**'
@@ -72,6 +76,7 @@ jobs:
             .venv/bin/python benchmarks/message_capacity.py --employees "$n" --output "ci-evidence/messages-$n.json"
           done
       - uses: actions/checkout@v4
+        if: github.event_name == 'pull_request' || github.ref != 'refs/heads/main'
         with:
           ref: 90cac947c6f1b176f20df6a579027f24e96d7b4c
           path: nf-peer
@@ -97,10 +102,8 @@ jobs:
           echo "$native" >> "$GITHUB_PATH"
       - name: Test the pinned NF peer over independent PostgreSQL accounts and stdio
         run: |
-          export AW_NF_SOURCE="$GITHUB_WORKSPACE/nf-peer"
-          if test -f "$GITHUB_WORKSPACE/src/novel_factory/interfaces/delegation_stdio.py"; then
-            export AW_NF_SOURCE="$GITHUB_WORKSPACE"
-          fi
+          AW_NF_SOURCE=$(python "$GITHUB_WORKSPACE/scripts/engineering_release_ci.py" src/novel_factory/interfaces/delegation_stdio.py)
+          export AW_NF_SOURCE
           git -C "$AW_NF_SOURCE" rev-parse HEAD
           export AW_DUAL_TEST_ADMIN_URL="$AW_DATABASE_URL"
           export PYTHONPATH="$PWD/src:$AW_NF_SOURCE/src"
