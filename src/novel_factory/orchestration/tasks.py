@@ -16,6 +16,7 @@ from uuid import uuid4
 
 from sqlalchemy import and_, func, or_, select, text
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.exc import IntegrityError
 
 from novel_factory.contracts.registry import validate_contract
 from novel_factory.domain.errors import DomainError
@@ -492,7 +493,13 @@ class TaskService:
                 raise _error("BUDGET_EXCEEDED", "Task token budget would be exceeded")
             attempt_id = str(uuid4())
             conn.execute(budgets.update().where(budgets.c.budget_id == budget_id).values(reserved_amount=budgets.c.reserved_amount + reserve))
-            conn.execute(insert(calls).values(attempt_id=attempt_id, task_id=task_id, generation=generation, budget_id=budget_id, call_key=call_key, request_hash=request_hash, state="PREPARED", reserved_amount=reserve, reserved_tokens=token_amount))
+            try:
+                conn.execute(insert(calls).values(attempt_id=attempt_id, task_id=task_id, generation=generation, budget_id=budget_id, call_key=call_key, request_hash=request_hash, state="PREPARED", reserved_amount=reserve, reserved_tokens=token_amount))
+            except IntegrityError as exc:
+                diag = getattr(exc.orig, "diag", None)
+                if getattr(diag, "constraint_name", None) == "ck_nf_shared_token_reservation":
+                    raise _error("BUDGET_EXCEEDED", "Shared Token limit cannot cover this call") from None
+                raise
             return {"attempt_id": attempt_id, "task_id": str(task_id), "generation": generation, "state": "PREPARED", "reserved_amount": reserve, "reserved_tokens": token_amount}
 
     def mark_call_sent(self, attempt_id, *, worker_id, authorize_in_tx=None):
