@@ -21,11 +21,27 @@ def _revision_text_query(revision):
     )
 
 
+@lru_cache(maxsize=256)
+def _scalar_one_query(table, columns, lock):
+    # Cache only SQL construction. PostgreSQL evaluates all scalar values,
+    # takes the requested lock, and returns a fresh row in this transaction.
+    query = select(table).where(*(table.c[key] == bindparam(key) for key in columns))
+    if lock:
+        query = query.with_for_update(read=lock == "share")
+    return query.limit(1)
+
+
 class KernelRepository:
     def __init__(self, conn, tables):
         self.conn, self.tables = conn, tables
 
     def one(self, name, where, *, lock=None):
+        # SQL NULL, collection membership, Boolean SQL literals, and expression
+        # operands retain their original construction and database semantics.
+        if where and all(type(value) in (str, int) for value in where.values()):
+            query = _scalar_one_query(self.tables[name], tuple(where), lock)
+            row = self.conn.execute(query, where).mappings().first()
+            return dict(row) if row is not None else None
         rows = self.many(name, where, lock=lock, limit=1)
         return rows[0] if rows else None
 
