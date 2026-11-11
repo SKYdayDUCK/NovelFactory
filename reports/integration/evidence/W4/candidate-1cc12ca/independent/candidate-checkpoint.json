@@ -1,0 +1,214 @@
+{
+  "observed_at_utc": "2026-11-11T21:26:37.627262+00:00",
+  "sources": {
+    "githubstatus-incident": "https://www.githubstatus.com/api/v2/incidents/dvy0t3mvh1lg.json",
+    "githubstatus-components": "https://www.githubstatus.com/api/v2/components.json",
+    "pr": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/pulls/12",
+    "main": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/git/ref/heads/main",
+    "run-43096270977": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/43096270977",
+    "jobs-43096270977": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/43096270977/jobs?per_page=100",
+    "approvals-43096270977": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/43096270977/pending_deployments",
+    "run-43096271063": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/43096271063",
+    "jobs-43096271063": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/43096271063/jobs?per_page=100",
+    "approvals-43096271063": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/43096271063/pending_deployments",
+    "run-43102959607": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/43102959607",
+    "jobs-43102959607": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/43102959607/jobs?per_page=100",
+    "approvals-43102959607": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/43102959607/pending_deployments",
+    "run-43102959511": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/43102959511",
+    "jobs-43102959511": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/43102959511/jobs?per_page=100",
+    "approvals-43102959511": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/runs/43102959511/pending_deployments"
+  },
+  "githubstatus-incident": {
+    "id": "dvy0t3mvh1lg",
+    "name": "Impact across multiple GitHub products including Actions, Pages, and Copilot products.",
+    "status": "resolved",
+    "impact": "critical",
+    "started_at": "2026-11-11T20:48:12.260Z",
+    "updated_at": "2026-11-11T21:21:39.499Z",
+    "shortlink": "https://stspg.io/jdjlq5zjyl48",
+    "updates": [
+      {
+        "status": "resolved",
+        "body": "This incident has been resolved. Thank you for your patience and understanding as we addressed this issue. A detailed root cause analysis will be shared as soon as it is available.",
+        "display_at": "2026-11-11T21:21:39.473Z",
+        "created_at": "2026-11-11T21:21:39.473Z"
+      },
+      {
+        "status": "monitoring",
+        "body": "The backlog of Actions jobs has been fully processed. We’re observing full recovery across all impacted services.",
+        "display_at": "2026-11-11T21:21:32.087Z",
+        "created_at": "2026-11-11T21:21:32.087Z"
+      },
+      {
+        "status": "monitoring",
+        "body": "We’re seeing recovery across all services and continuing to monitor. The backlog of Actions jobs are being processed. We’ll update when we see full recovery.",
+        "display_at": "2026-11-11T21:07:26.447Z",
+        "created_at": "2026-11-11T21:07:26.447Z"
+      },
+      {
+        "status": "monitoring",
+        "body": "The degradation affecting Actions, Copilot, Pages and Webhooks has been mitigated. We are monitoring to ensure stability.",
+        "display_at": "2026-11-11T21:07:24.649Z",
+        "created_at": "2026-11-11T21:07:24.649Z"
+      },
+      {
+        "status": "investigating",
+        "body": "Copilot is experiencing degraded availability. We are continuing to investigate.",
+        "display_at": "2026-11-11T20:57:40.222Z",
+        "created_at": "2026-11-11T20:57:40.222Z"
+      },
+      {
+        "status": "investigating",
+        "body": "We’re investigating issues impacting multiple GitHub products including Actions, Pages, and Copilot products.",
+        "display_at": "2026-11-11T20:56:49.378Z",
+        "created_at": "2026-11-11T20:56:49.378Z"
+      },
+      {
+        "status": "investigating",
+        "body": "Pages is experiencing degraded availability. We are continuing to investigate.",
+        "display_at": "2026-11-11T20:56:26.453Z",
+        "created_at": "2026-11-11T20:56:26.453Z"
+      },
+      {
+        "status": "investigating",
+        "body": "Webhooks is experiencing degraded performance. We are continuing to investigate.",
+        "display_at": "2026-11-11T20:48:46.733Z",
+        "created_at": "2026-11-11T20:48:46.733Z"
+      },
+      {
+        "status": "investigating",
+        "body": "Actions is experiencing degraded availability. We are continuing to investigate.",
+        "display_at": "2026-11-11T20:48:25.576Z",
+        "created_at": "2026-11-11T20:48:25.576Z"
+      },
+      {
+        "status": "investigating",
+        "body": "We are investigating reports of degraded availability for Pages",
+        "display_at": "2026-11-11T20:48:12.349Z",
+        "created_at": "2026-11-11T20:48:12.349Z"
+      }
+    ]
+  },
+  "githubstatus-components": {
+    "id": "br0l2tvcx85d",
+    "name": "Actions",
+    "status": "operational",
+    "updated_at": "2026-11-11T21:07:24.537Z"
+  },
+  "pr": {
+    "id": 12,
+    "state": "open",
+    "merged": false,
+    "head": "1cc12cab018213e05b70c226dcdf63974ee7dd93",
+    "source_ref": "dev/aw-w4",
+    "base_ref": "main",
+    "base": "e6763d844f023d7c6a13060dbaebca0416fe3099",
+    "mergeable": true,
+    "draft": false,
+    "url": "https://github.com/SKYdayDUCK/NovelFactory/pull/12"
+  },
+  "main": {
+    "ref": "refs/heads/main",
+    "sha": "e6763d844f023d7c6a13060dbaebca0416fe3099"
+  },
+  "run-43096270977": {
+    "id": 43096270977,
+    "head_sha": "3ed83ffe779bf15e7965f2b2fc8236abaf90ff72",
+    "name": "P1 and P2 production integrity",
+    "run_attempt": 1,
+    "status": "queued",
+    "conclusion": null,
+    "created_at": "2026-11-11T20:28:33Z",
+    "updated_at": "2026-11-11T20:28:33Z",
+    "run_started_at": "2026-11-11T20:28:33Z",
+    "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43096270977"
+  },
+  "jobs-43096270977": {
+    "total_count": 0,
+    "jobs": []
+  },
+  "approvals-43096270977": [],
+  "run-43096271063": {
+    "id": 43096271063,
+    "head_sha": "3ed83ffe779bf15e7965f2b2fc8236abaf90ff72",
+    "name": "Agent Workshop PostgreSQL and stdio",
+    "run_attempt": 1,
+    "status": "queued",
+    "conclusion": null,
+    "created_at": "2026-11-11T20:28:33Z",
+    "updated_at": "2026-11-11T20:28:33Z",
+    "run_started_at": "2026-11-11T20:28:33Z",
+    "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43096271063"
+  },
+  "jobs-43096271063": {
+    "total_count": 0,
+    "jobs": []
+  },
+  "approvals-43096271063": [],
+  "run-43102959607": {
+    "id": 43102959607,
+    "head_sha": "1cc12cab018213e05b70c226dcdf63974ee7dd93",
+    "name": "P1 and P2 production integrity",
+    "run_attempt": 1,
+    "status": "in_progress",
+    "conclusion": null,
+    "created_at": "2026-11-11T21:25:45Z",
+    "updated_at": "2026-11-11T21:25:57Z",
+    "run_started_at": "2026-11-11T21:25:45Z",
+    "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43102959607"
+  },
+  "jobs-43102959607": {
+    "total_count": 2,
+    "jobs": [
+      {
+        "id": 130798851058,
+        "name": "Schema, domain, HTTP and production boundaries",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 130798851595,
+        "name": "PostgreSQL 17 integration, concurrency and restore",
+        "status": "in_progress",
+        "conclusion": null
+      }
+    ]
+  },
+  "approvals-43102959607": [],
+  "run-43102959511": {
+    "id": 43102959511,
+    "head_sha": "1cc12cab018213e05b70c226dcdf63974ee7dd93",
+    "name": "Agent Workshop PostgreSQL and stdio",
+    "run_attempt": 1,
+    "status": "queued",
+    "conclusion": null,
+    "created_at": "2026-11-11T21:25:45Z",
+    "updated_at": "2026-11-11T21:25:45Z",
+    "run_started_at": "2026-11-11T21:25:45Z",
+    "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43102959511"
+  },
+  "jobs-43102959511": {
+    "total_count": 1,
+    "jobs": [
+      {
+        "id": 130798850553,
+        "name": "workshop",
+        "status": "queued",
+        "conclusion": null
+      }
+    ]
+  },
+  "approvals-43102959511": [],
+  "commit": {
+    "head": "1cc12cab018213e05b70c226dcdf63974ee7dd93",
+    "parent": "3ed83ffe779bf15e7965f2b2fc8236abaf90ff72",
+    "tree": "cb601579cceafd8cd33d35664a31f8d9dd38c879",
+    "synthetic": [
+      "2d4357cbb5db779af5b5f89416252ab9e4919fce",
+      "cb601579cceafd8cd33d35664a31f8d9dd38c879",
+      "e6763d844f023d7c6a13060dbaebca0416fe3099",
+      "1cc12cab018213e05b70c226dcdf63974ee7dd93"
+    ],
+    "product_diff_files": 0
+  }
+}

@@ -1,5 +1,9 @@
 # 当前唯一阶段
 
+当前 W4 [#12](https://github.com/SKYdayDUCK/NovelFactory/pull/12) 的新候选是 `1cc12cab018213e05b70c226dcdf63974ee7dd93`。GitHub Actions 事故结案后，这次普通快进只重触发 CI，唯一父提交为 `3ed83ffe779bf15e7965f2b2fc8236abaf90ff72`，相同的产品树为 `cb601579cceafd8cd33d35664a31f8d9dd38c879`。21:26:37 UTC 新 P1 已分配两项作业，Workshop 已建作业；旧两运行仍为零作业。新的精确 SHA 已独立跑完 13 套，123 项通过、1 个本地 Docker 检查跳过，另有 17 项原生角色测试及实际阅读覆盖、NF 报告和费用的附加复验。主线仍为 `e6763d844f023d7c6a13060dbaebca0416fe3099`，W4 必须取得正式 CI 和合并后复验才签收。[Workshop](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43102959511) · [P1](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43102959607) · [当前候选原件](evidence/W4/candidate-1cc12ca/independent/README.md) · [正式运行、合并模拟树和父提交](evidence/W4/candidate-1cc12ca/independent/candidate-checkpoint.json)。
+
+## 先前候选的检查记录
+
 Workshop W4 [#12](https://github.com/SKYdayDUCK/NovelFactory/pull/12) → `main`。冻结候选 `3ed83ffe779bf15e7965f2b2fc8236abaf90ff72`，树 `cb601579cceafd8cd33d35664a31f8d9dd38c879`。已签收基线 W3 `e6763d844f023d7c6a13060dbaebca0416fe3099`。此源继承 `6f07f8e` 的所有审核授权、增加真实 NF 的原文读取及类型化审核报告，并扩大旧库目录和权限验证。独立干净检出 [旧库](evidence/W4/candidate-3ed83ff/independent/preserved-original.xml)、[审核授权](evidence/W4/candidate-3ed83ff/independent/upgrade.xml)、[双服务报告与账单](evidence/W4/candidate-3ed83ff/independent/paid.xml) 合计 27 项通过，Linux 角色 [17 项](evidence/W4/candidate-3ed83ff/role-3ed83ff.zip) 通过。[Workshop CI](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43096271063) 与 [P1 CI](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43096270977) 截至 20:32 UTC 待分配执行。当前阶段仍须核对所有正式结果，正常合并，再独立复验主线并签收。W5 继续冻结。
 
 
