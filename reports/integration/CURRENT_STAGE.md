@@ -1,3 +1,6 @@
 # 当前唯一阶段
 
 Workshop W4 [#12](https://github.com/SKYdayDUCK/NovelFactory/pull/12) → `main`。冻结候选 `3ed83ffe779bf15e7965f2b2fc8236abaf90ff72`，树 `cb601579cceafd8cd33d35664a31f8d9dd38c879`。已签收基线 W3 `e6763d844f023d7c6a13060dbaebca0416fe3099`。此源继承 `6f07f8e` 的所有审核授权、增加真实 NF 的原文读取及类型化审核报告，并扩大旧库目录和权限验证。独立干净检出 [旧库](evidence/W4/candidate-3ed83ff/independent/preserved-original.xml)、[审核授权](evidence/W4/candidate-3ed83ff/independent/upgrade.xml)、[双服务报告与账单](evidence/W4/candidate-3ed83ff/independent/paid.xml) 合计 27 项通过，Linux 角色 [17 项](evidence/W4/candidate-3ed83ff/role-3ed83ff.zip) 通过。[Workshop CI](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43096271063) 与 [P1 CI](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43096270977) 截至 20:32 UTC 待分配执行。当前阶段仍须核对所有正式结果，正常合并，再独立复验主线并签收。W5 继续冻结。
+
+
+2026-11-11 20:59:31 UTC。GitHub 的 [平台事故 dvy0t3mvh1lg](https://www.githubstatus.com/incidents/dvy0t3mvh1lg) 公告提及 Actions。此时原候选两项正式运行仍处于排队，尚无可重试的失败作业。独立干净工作树双库回归已经 [67/67 通过](evidence/W4/candidate-3ed83ff/local-w4-verification.zip)。继续跟踪原运行、执行合并及主线复验。W5 仍冻结。
