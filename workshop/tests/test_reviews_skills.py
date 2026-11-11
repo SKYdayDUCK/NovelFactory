@@ -38,6 +38,7 @@ def team():
                 "WORLD": {"opening": 1, "consumed": 1, "remaining": 1},
                 "STABILITY": {"requests": 1, "completed": 1, "duplicate_effects": 0},
             },
+            routine_eligible=True,
         )
 
     def identity(name):
@@ -243,3 +244,78 @@ def test_paid_review_cannot_spend_without_hold_or_ignore_unknown(team):
             ]
             == "APPROVED"
         )
+
+
+def test_review_get_reassignment_and_offline_expiry(team):
+    from agent_workshop.organization import TOOLS
+
+    dsn, idn = team
+    with connect(dsn) as c:
+        lead = idn("review-lead")
+        review = request(c, idn)["review_id"]
+        assert rs.get_review(c, idn("reviewer"), review)["evidence_refs"] == ["source-A"]
+        assert "evidence_refs" not in rs.get_review(c, idn("manager"), review)
+        with pytest.raises(Denied, match="VIEW_DENIED"):
+            rs.get_review(c, idn("actor-1"), review)
+        with pytest.raises(Denied, match="REVIEW_DENIED"):
+            rs.get_review(c, idn("stats"), review)
+        TOOLS["aw_hire"][2](
+            c,
+            idn("manager"),
+            expected_revision=1,
+            operation_id="hire",
+            employee_id="relief",
+            role_id="reviewer",
+            supervisor_id="review-lead",
+            team_id="audit",
+        )
+        subject(c, lead.org_id, "relief", "second-independent")
+        TOOLS["aw_suspend"][2](
+            c, idn("manager"), expected_revision=2, operation_id="s", employee_id="reviewer"
+        )
+        with pytest.raises(Denied, match="INDEPENDENT_REVIEW"):
+            rs.reconcile_review(c, lead, "bad", review, "stats")
+        assert rs.reconcile_review(c, lead, "ok", review, "relief")["reviewer_id"] == "relief"
+        with pytest.raises(Denied, match="STALE_EMPLOYMENT"):
+            rs.get_review(c, idn("reviewer"), review)
+        assert rs.get_review(c, idn("relief"), review)["artifact_ref"] == "text"
+        rs.decide(c, idn("relief"), "decide", review, "APPROVED", "VOICE", "source-A")
+        assert (
+            c.execute(
+                "SELECT count(*) AS n FROM aw_review_evidence WHERE review_id=%s", (review,)
+            ).fetchone()["n"]
+            == 3
+        )
+        waiting = request(c, idn, "DIRECTION", "deadline")["review_id"]
+        c.execute(
+            "UPDATE aw_reviews SET deadline=now()-interval '1 second' WHERE review_id=%s",
+            (waiting,),
+        )
+        assert rs.expire_due_reviews(c, lead.org_id) == 1
+        assert rs.expire_due_reviews(c, lead.org_id) == 0
+        assert rs.reconcile_review(c, lead, "sweep", waiting)["state"] == "ESCALATED"
+
+
+def test_caller_cannot_downgrade_sensitive_source_to_routine_rule_pass(team):
+    dsn, idn = team
+    org = idn("manager").org_id
+    with connect(dsn) as conn:
+        rs.register_artifact(
+            conn,
+            org,
+            "published",
+            "v1",
+            sha256(b"history").hexdigest(),
+            "organization",
+            "independent-source",
+            ["writer"],
+            ["evidence"],
+            {"WORLD": {"opening": 1, "consumed": 0, "remaining": 1}},
+        )
+        result = rs.review_request(
+            conn, idn("review-lead"), "low-risk", "published", "v1", "WORLD", "SAMPLED", 60
+        )
+        assert result["state"] == "PENDING" and result["execution"] == "HUMAN"
+        assert rs.get_review(conn, idn("reviewer"), result["review_id"])["evidence_refs"] == [
+            "evidence"
+        ]

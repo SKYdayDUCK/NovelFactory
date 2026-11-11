@@ -251,17 +251,23 @@ def register_artifact(
     producers,
     evidence_refs,
     rule_results,
+    routine_eligible=False,
 ):
     """Trusted NF-receipt import. The MCP caller cannot choose authors, proxy identities or rules."""
     if (
-        not producers
+        type(routine_eligible) is not bool
+        or not producers
         or not evidence_refs
         or len(digest) != 64
         or any(ch not in "0123456789abcdef" for ch in digest)
         or not set(rule_results).issubset(RULE_MODES)
     ):
         raise Denied("INVALID_PROVENANCE")
-    rules = {"observations": rule_results, "decisions": evaluate_rules(rule_results)}
+    rules = {
+        "observations": rule_results,
+        "decisions": evaluate_rules(rule_results),
+        "routine_eligible": routine_eligible,
+    }
     authors = sorted(set(producers))
     groups = sorted({_group(conn, org, a) for a in authors})
     saved = conn.execute(
@@ -348,7 +354,10 @@ def review_request(
         n = 1 if not last else 2
         result = a["rule_results"]["decisions"].get(mode, "UNCERTAIN")
         state, execution, reviewer, remote = "PENDING", "HUMAN", None, None
-        if result in ("PASS", "FAIL") and (result == "FAIL" or risk_reason == "SAMPLED"):
+        if result in ("PASS", "FAIL") and (
+            result == "FAIL"
+            or (risk_reason == "SAMPLED" and a["rule_results"].get("routine_eligible") is True)
+        ):
             state, execution = ("RULE_PASSED" if result == "PASS" else "RULE_BLOCKED"), "RULE"
             if slot_id or max_amount != "0" or token_limit:
                 raise Denied("RULE_REQUIRES_NO_MODEL")
@@ -437,6 +446,130 @@ def review_request(
         return out
 
 
+def _audit(conn, org, review, event_by, reason, evidence):
+    # The caller owns the review row lock. Each persisted handoff and decision has its own sequence.
+    conn.execute(
+        """INSERT INTO aw_review_evidence(org_id,review_id,seq,authority,reason,evidence_ref)
+        SELECT %s,%s,coalesce(max(seq),0)+1,%s,%s,%s FROM aw_review_evidence WHERE org_id=%s AND review_id=%s""",
+        (org, review, event_by, reason, evidence, org, review),
+    )
+
+
+def get_review(conn, session, review_id):
+    viewer = require_role(conn, session, {"reviewer", "review_lead", "workshop_manager"})
+    row = conn.execute(
+        """SELECT r.*,a.scope_ref,a.evidence_refs FROM aw_reviews r JOIN aw_review_artifacts a
+        USING(org_id,artifact_ref,artifact_revision) WHERE r.org_id=%s AND r.review_id=%s AND a.scope_ref=%s""",
+        (session.org_id, review_id, viewer["scope_ref"]),
+    ).fetchone()
+    assigned = row and (row["reviewer_id"], row["reviewer_revision"]) == (
+        session.employee_id,
+        session.employment_revision,
+    )
+    if not row or (viewer["role_id"] == "reviewer" and not assigned):
+        raise Denied("REVIEW_DENIED")
+    result = {
+        k: row[k]
+        for k in ("mode", "state", "round_no", "reviewer_id", "execution", "policy_revision")
+    }
+    result.update(review_id=review_id, deadline=row["deadline"].isoformat())
+    if assigned:
+        result.update(
+            artifact_ref=row["artifact_ref"],
+            artifact_revision=row["artifact_revision"],
+            content_sha=row["content_sha"],
+            evidence_refs=row["evidence_refs"],
+            risk_reason=row["risk_reason"],
+        )
+    return result
+
+
+def expire_due_reviews(conn, org, limit=32):
+    """Bounded deterministic deadline sweep for the trusted manager worker; leaves NF holds intact."""
+    rows = conn.execute(
+        """SELECT r.review_id,a.source_receipt FROM aw_reviews r JOIN aw_review_artifacts a
+        USING(org_id,artifact_ref,artifact_revision) WHERE r.org_id=%s AND r.state='PENDING'
+        AND r.deadline<=clock_timestamp() ORDER BY r.deadline,r.review_id LIMIT %s FOR UPDATE OF r SKIP LOCKED""",
+        (org, min(max(limit, 1), 100)),
+    ).fetchall()
+    for row in rows:
+        conn.execute(
+            "UPDATE aw_reviews SET state='ESCALATED',decision_reason='DEADLINE' WHERE org_id=%s AND review_id=%s",
+            (org, row["review_id"]),
+        )
+        _audit(conn, org, row["review_id"], "workshop_timer", "DEADLINE", row["source_receipt"])
+    return len(rows)
+
+
+def reconcile_review(conn, session, operation_id, review_id, replacement=None):
+    viewer = require_role(conn, session, {"workshop_manager", "review_lead"})
+    org = session.org_id
+    with operation(conn, session, "REVIEW_RECONCILE", operation_id, [review_id, replacement]) as (
+        old,
+        out,
+    ):
+        if old:
+            return out
+        row = conn.execute(
+            """SELECT r.*,deadline>clock_timestamp() AS live,a.scope_ref,a.source_receipt,
+            a.producer_ids,a.producer_groups FROM aw_reviews r JOIN aw_review_artifacts a USING(org_id,artifact_ref,artifact_revision)
+            WHERE r.org_id=%s AND r.review_id=%s AND a.scope_ref=%s FOR UPDATE OF r""",
+            (org, review_id, viewer["scope_ref"]),
+        ).fetchone()
+        if not row:
+            raise Denied("REVIEW_DENIED")
+        state = row["state"]
+        if state != "PENDING":
+            if replacement:
+                raise Denied("REVIEW_ALREADY_FINAL")
+            out.update(review_id=review_id, state=state)
+            return out
+        old_member = employee(conn, org, row["reviewer_id"])
+        current = (
+            old_member
+            and old_member["status"] == "ACTIVE"
+            and old_member["employment_revision"] == row["reviewer_revision"]
+        )
+        if row["live"] and current:
+            if replacement:
+                raise Denied("REVIEWER_STILL_ACTIVE")
+        elif replacement and row["live"] and row["execution"] == "HUMAN":
+            peer = employee(conn, org, replacement)
+            if (
+                not peer
+                or peer["status"] != "ACTIVE"
+                or peer["role_id"] != "reviewer"
+                or peer["scope_ref"] != viewer["scope_ref"]
+            ):
+                raise Denied("INDEPENDENT_REVIEW_REQUIRED")
+            _independent(conn, org, peer, row)
+            conn.execute(
+                "UPDATE aw_reviews SET reviewer_id=%s,reviewer_revision=%s WHERE org_id=%s AND review_id=%s",
+                (replacement, peer["employment_revision"], org, review_id),
+            )
+            _audit(
+                conn,
+                org,
+                review_id,
+                session.employee_id,
+                "REVIEWER_REASSIGNED",
+                row["source_receipt"],
+            )
+            out["reviewer_id"] = replacement
+        else:
+            if replacement:
+                raise Denied("EXISTING_DELEGATION_OR_DEADLINE")
+            state = "ESCALATED"
+            why = "DEADLINE" if not row["live"] else "REVIEWER_REVOKED"
+            conn.execute(
+                "UPDATE aw_reviews SET state=%s,decision_reason=%s WHERE org_id=%s AND review_id=%s",
+                (state, why, org, review_id),
+            )
+            _audit(conn, org, review_id, session.employee_id, why, row["source_receipt"])
+        out.update(review_id=review_id, state=state)
+        return out
+
+
 def decide(conn, session, operation_id, review_id, outcome, reason, evidence_ref):
     viewer = require_role(conn, session, {"reviewer"})
     if outcome not in ("APPROVED", "CHANGES_REQUESTED") or reason not in REASONS:
@@ -482,15 +615,25 @@ def decide(conn, session, operation_id, review_id, outcome, reason, evidence_ref
             "UPDATE aw_reviews SET state=%s,decision_reason=%s,evidence_ref=%s WHERE org_id=%s AND review_id=%s",
             (state, reason, evidence_ref, session.org_id, review_id),
         )
-        conn.execute(
-            "INSERT INTO aw_review_evidence(org_id,review_id,seq,authority,reason,evidence_ref) VALUES (%s,%s,2,%s,%s,%s)",
-            (session.org_id, review_id, session.employee_id, reason, evidence_ref),
-        )
+        _audit(conn, session.org_id, review_id, session.employee_id, reason, evidence_ref)
         out.update(review_id=review_id, state=state)
         return out
 
 
 TOOLS = {
+    "aw_review_get": (
+        "Read this assignment with evidence references filtered to its current reviewer.",
+        schema({"review_id": ID}),
+        get_review,
+    ),
+    "aw_review_reconcile": (
+        "Escalate a stale review or reassign an outstanding human review after departure.",
+        schema(
+            {"review_id": ID, "operation_id": IDENTIFIER, "replacement": IDENTIFIER},
+            ["review_id", "operation_id"],
+        ),
+        reconcile_review,
+    ),
     "aw_skill_history": (
         "Read a frozen historical hash.",
         schema({"task_ref": ID, "skill_id": IDENTIFIER}),
