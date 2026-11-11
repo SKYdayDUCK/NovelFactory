@@ -25,7 +25,7 @@ def main():
     org, installation = uuid4().hex, uuid4().hex
     with connect(aw_url) as c:
         c.execute("INSERT INTO aw_installations VALUES (%s,%s,true)", (installation, uuid4().hex))
-        bootstrap(c, org)
+        bootstrap(c, org, installation_id=installation)
         token = enroll(c, installation, org, "actor-1", 1, 1)
         with os.fdopen(os.open(aw_binding, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), "w") as f:
             json.dump({"database_url": aw_url, "token": token}, f)
