@@ -29,17 +29,25 @@
     "ci": 43030289759
   },
   "W1": {
-    "status": "IN_PROGRESS",
-    "result": "PARTIAL",
+    "status": "VERIFIED",
+    "result": "PASS",
     "tests": {
       "integrated": 9
     },
     "evidence": "evidence/workshop/w1",
-    "next": "same-head CI"
+    "next": "integration in dependency order",
+    "source_sha": "f59ac5e442bd5a434ded2e65526d5750c5488e9b",
+    "ci": 43030513699,
+    "pr": 8
   },
   "W2": {
-    "status": "NOT_STARTED",
-    "result": "NOT_EXECUTED"
+    "status": "IN_PROGRESS",
+    "result": "PARTIAL",
+    "tests": {
+      "w1_and_w2": 13
+    },
+    "evidence": "evidence/workshop/w2",
+    "next": "same-head Redis/PG CI"
   },
   "W3": {
     "status": "NOT_STARTED",
