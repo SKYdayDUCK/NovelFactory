@@ -318,3 +318,29 @@ def test_revoked_intent_with_unconfirmed_submit_retains_its_hold():
             "status": "HELD",
         }
     assert calls == ["nf_delegation_submit", "nf_delegation_get"]
+
+
+def test_manager_rechecks_author_after_delegation_and_before_resume():
+    from agent_workshop.manager import request_resume
+    from agent_workshop.manager_worker import run_once
+
+    dsn, org, install, token = setup_slot()
+    make(dsn, token)
+    with connect(dsn) as c:
+        manager = enroll(c, install, org, "author", 1, 1)
+        request_resume(c, authenticate(c, manager), "revoke-mid-run")
+    calls = []
+
+    async def revoke_during_lookup(tool, args):
+        calls.append(tool)
+        with connect(dsn) as c:
+            c.execute(
+                "UPDATE aw_bindings SET revoked=true WHERE token_digest=%s", (digest(manager),)
+            )
+        raise ConnectionError()
+
+    async def resume(tool, args):
+        pytest.fail("revoked author reached NF resume")
+
+    assert asyncio.run(run_once(dsn, org, install, resume, revoke_during_lookup)) == "REVOKED"
+    assert calls == ["nf_delegation_submit"]

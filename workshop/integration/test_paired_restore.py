@@ -19,6 +19,7 @@ from sqlalchemy.engine import make_url
 
 from agent_workshop.admin import enroll
 from agent_workshop.auth import Denied, connect
+from agent_workshop.manager_worker import run_once
 from agent_workshop.organization import bootstrap
 from agent_workshop.provision import allow_slot
 from agent_workshop.reconcile import GET_FIELDS, reconcile, remote
@@ -192,6 +193,7 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
             c.execute("INSERT INTO aw_budget_accounts VALUES(%s,1,'USD')", (org,))
             allow_slot(c, org, inst, "scene.summary", "memory", policy)
             chief = enroll(c, inst, org, "chief", 1, 1)
+            author = enroll(c, inst, org, "author", 1, 1)
 
         def transport(where, module, config, src):
             folder = tmp_path / where
@@ -202,6 +204,10 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
         aw = transport(
             "chief", "agent_workshop.server", dict(token=chief, database_url=urls["aw"]), aw_src
         )
+        aw_author = transport(
+            "author", "agent_workshop.server", dict(token=author, database_url=urls["aw"]), aw_src
+        )
+
         def nf_process(tag, dsn, objects):
             return transport(
                 tag,
@@ -249,6 +255,12 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
                 ),
             )
         )["operation_id"]
+        assert (
+            asyncio.run(aw_author("aw_resume_project", {"operation_id": "pending-before-pitr"}))[
+                "state"
+            ]
+            == "PENDING"
+        )
         target = "aw_intent_before_nf"
         lsn = admin.execute("SELECT pg_create_restore_point(%s)", (target,)).fetchone()[0]
         shutil.copytree(tmp_path / "objects", tmp_path / "objects-at-target")
@@ -353,6 +365,11 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
         with connect(restored_aw) as c:
             freeze(c, inst)
 
+        # A normal restarted manager cannot send either an NF resume or a delegation.
+        async def forbidden(tool, args):
+            raise AssertionError(f"unexpected outbound call {tool}")
+
+        assert asyncio.run(run_once(restored_aw, org, inst, forbidden, forbidden)) == "IDLE"
         for _ in range(2):
             assert tick(restored_aw, inst, org, op, traced(nf)) == "BOUND"
         before_invoice = aw_state(restored_aw, op)
@@ -450,6 +467,7 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
                         loopback_synthetic_http_requests=len(requests),
                         supplier_model_calls=0,
                         recovery_mcp_calls=calls,
+                        frozen_manager="IDLE",
                         elapsed_seconds=round(time.monotonic() - started, 2),
                     ),
                     default=str,
