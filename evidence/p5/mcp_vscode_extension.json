@@ -1,0 +1,303 @@
+{
+  "status": "PASS",
+  "harness": "Published VS Code web workbench and unmodified OpenAI Linux x64 extension. Typed into its live renderer with Playwright Chromium.",
+  "vscode": {
+    "version": "1.145.3",
+    "commit": "dcd3ad6e368fbe19d03f37054a40dbaf40d676f4",
+    "server_distribution_sha256": "d4f10bee0f2f9cc667b3e46b00734ef4a34587bb07ee8d1fc066ad9f00a9cc60",
+    "extension": "openai.chatgpt",
+    "extension_version": "26.51106.51428",
+    "vsix_sha256": "4af1f59f7d8a0145943c2ec583e0bf09a495c258304d113052e74cbaeb73d6f6",
+    "codex_cli": "0.167.0-alpha.4"
+  },
+  "authorization": {
+    "principal_role": "resume_operator",
+    "capabilities": [
+      "PROJECT_RESUME"
+    ],
+    "bound_scopes": "one fixture work and branch, with a one-hour grant",
+    "host_tool_setting": "mcp_servers.novelfactory.tools.nf_resume_project.approval_mode=approve",
+    "user_approval_prompts_final_runs": 0,
+    "unconfigured_comparison": "Earlier extension run displayed the nf_resume_project approval dialog without this tool-specific allowance."
+  },
+  "network": {
+    "network_namespace": "net:[4026532245]",
+    "interfaces": [
+      "lo"
+    ],
+    "external_test_net": "ENETUNREACH",
+    "inherited_proxy_or_user_auth": false
+  },
+  "official_static_assets": {
+    "index.html": "454234910089548d9870e14848c2728e2a038c545f837aefd133c875ffd5bc2d",
+    "service-worker.js": "3f4baa02546c5e9f5165748f6b6701a5fa0e54faf455f40bdb3ff0a125769bb2",
+    "fake.html": "dfa91b189b7df71b814d1f3ef98ce5d561309de2c069cd23c49d45c76bd947d5"
+  },
+  "test_model": "Synthetic loopback Responses provider. It selects the advertised resume tool. Real Codex dispatch, MCP server, PostgreSQL and renderer. No external inference or credentials.",
+  "fixtures": {
+    "empty": {
+      "postgres": {
+        "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+        "started_at_utc": "2026-11-11T05:38:47.141931+00:00",
+        "authentication": "loopback_trust_generated_test_data_only",
+        "fsync": true,
+        "synchronous_commit": true,
+        "max_connections": 60,
+        "data_directory_reused": false,
+        "exit_status": 0,
+        "postgres_exit_status": 0,
+        "duration_seconds": 24.314956,
+        "finished_at_utc": "2026-11-11T05:39:11.457084+00:00"
+      },
+      "codex": {
+        "thread_id": "01a1c91e-027a-7d63-8cf1-16725660f194",
+        "turns": [
+          {
+            "turn_id": "01a1c91e-05c4-7ef0-bb05-3a6f5ecb30be",
+            "started_at": "2026-11-11T05:39:10.412Z",
+            "user_message": "继续未完成的任务",
+            "model_tool_request": {
+              "namespace": "mcp__novelfactory",
+              "name": "nf_resume_project",
+              "arguments": "{}"
+            },
+            "tool_result": {
+              "counts": {
+                "READY": 0,
+                "WAITING": 0,
+                "RUNNING": 0
+              },
+              "ready_count": 0,
+              "awakened": 0,
+              "recovered": 0
+            },
+            "completed_at": "2026-11-11T05:39:10.540Z"
+          }
+        ]
+      },
+      "stdio": [
+        {
+          "direction": "extension_to_server",
+          "method": "initialize"
+        },
+        {
+          "direction": "extension_to_server",
+          "method": "notifications/initialized"
+        },
+        {
+          "direction": "extension_to_server",
+          "method": "tools/list"
+        },
+        {
+          "direction": "server_to_extension",
+          "tools": [
+            "nf_project_status",
+            "nf_resume_project"
+          ]
+        },
+        {
+          "direction": "extension_to_server",
+          "method": "tools/call",
+          "tool": "nf_resume_project"
+        },
+        {
+          "direction": "server_to_extension",
+          "isError": false,
+          "counts": {
+            "READY": 0,
+            "WAITING": 0,
+            "RUNNING": 0
+          }
+        }
+      ]
+    },
+    "nonempty": {
+      "postgres": {
+        "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+        "started_at_utc": "2026-11-11T05:43:42.457145+00:00",
+        "authentication": "loopback_trust_generated_test_data_only",
+        "fsync": true,
+        "synchronous_commit": true,
+        "max_connections": 60,
+        "data_directory_reused": false,
+        "exit_status": 0,
+        "postgres_exit_status": 0,
+        "duration_seconds": 25.528167,
+        "finished_at_utc": "2026-11-11T05:44:07.985356+00:00"
+      },
+      "before": {
+        "state": {
+          "counts": {
+            "READY": 0,
+            "WAITING": 1,
+            "RUNNING": 0,
+            "ACCEPTED": 1
+          },
+          "ready_count": 0
+        },
+        "producer": "1695f23b-af6b-46ba-be69-f25e632a19d1",
+        "waiting": "a8b1fbea-d9be-47ab-947f-85514351ab21"
+      },
+      "after": {
+        "counts": {
+          "READY": 1,
+          "WAITING": 0,
+          "RUNNING": 0,
+          "ACCEPTED": 1
+        },
+        "ready_count": 1
+      },
+      "producer": "Kernel formally accepted a SET_RELATION. Workflow WAIT was installed against the producer before acceptance. No scheduler ran during the IDE turns.",
+      "codex": {
+        "thread_id": "01a1c922-846e-7321-ad34-dad90ccebc5c",
+        "turns": [
+          {
+            "turn_id": "01a1c922-8771-7b61-9783-1d73c1f059b9",
+            "started_at": "2026-11-11T05:44:05.749Z",
+            "user_message": "继续未完成的任务",
+            "model_tool_request": {
+              "namespace": "mcp__novelfactory",
+              "name": "nf_resume_project",
+              "arguments": "{}"
+            },
+            "tool_result": {
+              "counts": {
+                "READY": 1,
+                "WAITING": 0,
+                "RUNNING": 0,
+                "ACCEPTED": 1
+              },
+              "ready_count": 1,
+              "awakened": 1,
+              "recovered": 0
+            },
+            "completed_at": "2026-11-11T05:44:05.876Z"
+          },
+          {
+            "turn_id": "01a1c922-8af3-7240-bc41-8879c931c2e6",
+            "started_at": "2026-11-11T05:44:06.653Z",
+            "user_message": "继续未完成的任务",
+            "model_tool_request": {
+              "namespace": "mcp__novelfactory",
+              "name": "nf_resume_project",
+              "arguments": "{}"
+            },
+            "tool_result": {
+              "counts": {
+                "READY": 1,
+                "WAITING": 0,
+                "RUNNING": 0,
+                "ACCEPTED": 1
+              },
+              "ready_count": 1,
+              "awakened": 0,
+              "recovered": 0
+            },
+            "completed_at": "2026-11-11T05:44:06.781Z"
+          }
+        ]
+      },
+      "stdio_by_connection": [
+        [
+          {
+            "direction": "extension_to_server",
+            "method": "initialize"
+          },
+          {
+            "direction": "extension_to_server",
+            "method": "notifications/initialized"
+          },
+          {
+            "direction": "extension_to_server",
+            "method": "tools/list"
+          },
+          {
+            "direction": "server_to_extension",
+            "tools": [
+              "nf_project_status",
+              "nf_resume_project"
+            ]
+          },
+          {
+            "direction": "extension_to_server",
+            "method": "resources/templates/list"
+          },
+          {
+            "direction": "extension_to_server",
+            "method": "resources/list"
+          }
+        ],
+        [
+          {
+            "direction": "extension_to_server",
+            "method": "initialize"
+          },
+          {
+            "direction": "extension_to_server",
+            "method": "notifications/initialized"
+          },
+          {
+            "direction": "extension_to_server",
+            "method": "tools/list"
+          },
+          {
+            "direction": "server_to_extension",
+            "tools": [
+              "nf_project_status",
+              "nf_resume_project"
+            ]
+          },
+          {
+            "direction": "extension_to_server",
+            "method": "tools/call",
+            "tool": "nf_resume_project",
+            "empty_arguments": true
+          },
+          {
+            "direction": "server_to_extension",
+            "isError": false,
+            "receipt": {
+              "counts": {
+                "READY": 1,
+                "WAITING": 0,
+                "RUNNING": 0,
+                "ACCEPTED": 1
+              },
+              "ready_count": 1,
+              "awakened": 1,
+              "recovered": 0
+            }
+          },
+          {
+            "direction": "extension_to_server",
+            "method": "tools/call",
+            "tool": "nf_resume_project",
+            "empty_arguments": true
+          },
+          {
+            "direction": "server_to_extension",
+            "isError": false,
+            "receipt": {
+              "counts": {
+                "READY": 1,
+                "WAITING": 0,
+                "RUNNING": 0,
+                "ACCEPTED": 1
+              },
+              "ready_count": 1,
+              "awakened": 0,
+              "recovered": 0
+            }
+          }
+        ]
+      ],
+      "sidebar_text": "继续未完成的任务\nNo chats in progress\nYou said:\n\n继续未完成的任务\n\n2:44 PM\nNf resume project\nWorked for 0s\nChatGPT said:\nResponse complete: 已收到。\n\n已收到。\n\n2:44 PM\nYou said:\n\n继续未完成的任务\n\n2:44 PM\nNf resume project\nWorked for 0s\nChatGPT said:\nResponse complete: 已收到。\n\n已收到。\n\n2:44 PM\nLatest response\n\n\n"
+    }
+  },
+  "harness_source": "scripts/probe_vscode_offline_transport.py",
+  "scope_limits": [
+    "Tool selection was generated by the fixture provider.",
+    "The operator UI exposes standard Codex tools and does not qualify as a restricted character environment.",
+    "The same-account testing binding did not exercise the documented SSH cross-account deployment."
+  ]
+}

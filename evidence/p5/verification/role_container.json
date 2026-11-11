@@ -1,0 +1,47 @@
+{
+  "date": "2026-11-11",
+  "suite": {
+    "tests": "20",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "14.102"
+  },
+  "cases": [
+    "tests.integration.test_p5_mcp.test_project_stdio_resume_is_scoped_and_live",
+    "tests.integration.test_p5_mcp.test_operator_database_fences_apply_outside_mcp[expiry]",
+    "tests.integration.test_p5_mcp.test_operator_database_fences_apply_outside_mcp[policy]",
+    "tests.integration.test_p5_mcp.test_actor_stdio_own_cut_only_and_candidate_replay",
+    "tests.integration.test_p5_role_container.test_role_container_calls_actual_task_mcp",
+    "tests.integration.test_p5_role_container.test_namespace_hides_service_resources",
+    "tests.integration.test_agent_gateway.test_validated_candidate_replays_without_model_or_world_effects",
+    "tests.integration.test_agent_gateway.test_unknown_actual_cost_preserves_money_and_measured_usage",
+    "tests.integration.test_agent_gateway.test_timeout_retains_unknown_and_cannot_retry_using_another_key",
+    "tests.integration.test_agent_gateway.test_nested_wrong_actor_is_not_an_accepted_result",
+    "tests.integration.test_agent_gateway.test_cancel_or_revoke_during_model_wait_retains_evidence_but_blocks_delivery[cancel]",
+    "tests.integration.test_agent_gateway.test_cancel_or_revoke_during_model_wait_retains_evidence_but_blocks_delivery[revoke]",
+    "tests.integration.test_agent_gateway.test_missing_credential_is_blocked_before_any_call_or_reservation",
+    "tests.integration.test_agent_gateway.test_character_host_without_verified_isolation_cannot_dispatch",
+    "tests.integration.test_agent_gateway.test_same_call_concurrently_dispatches_only_once",
+    "tests.integration.test_agent_gateway.test_distinct_call_keys_race_is_fenced_inside_reservation_transaction",
+    "tests.integration.test_agent_gateway.test_unbound_input_wrong_generation_or_worker_never_calls_model",
+    "tests.integration.test_agent_gateway.test_input_manifest_does_not_grant_access_to_private_material",
+    "tests.integration.test_agent_gateway.test_actor_receives_only_own_compiled_belief_and_frozen_runtime",
+    "tests.integration.test_agent_gateway.test_protocol_failure_keeps_raw_output_and_never_creates_a_candidate"
+  ],
+  "python": "3.12.14",
+  "mcp": "1.29.0",
+  "codex": "codex-cli 0.167.0-alpha.4",
+  "bubblewrap": "bubblewrap 0.12.0",
+  "postgres": "17.11",
+  "namespace_role_model_turns": 0,
+  "provider_billing_verification": "NOT_RUN",
+  "ordinary_desktop_extension": "NOT_RUN",
+  "source_sha256": {
+    "adapters/codex/role_relay.c": "8d42b280342e2c66e771be00fce596256979581a96719f7184deb7352f3452b6",
+    "scripts/run_role_host.py": "c61f2f813164ff137d74085e287abdea9b1e727bb6e4370ac24d95e72dba4dc2",
+    "src/novel_factory/infrastructure/role_container.py": "4f79a31bf5ffad51942582d9cb3e170e1a2258858de6094ba7c6114d79d9440d",
+    "src/novel_factory/interfaces/mcp_stdio.py": "14ca0828a4170c8b5eae08b41927359d8db5dcff6241c0a6e32d74316fb84d8b",
+    "tests/integration/test_p5_role_container.py": "cb5eb02287543bd8808b26fc71183a7a16c8dd64444cdbf9b6671b4e210b7a52"
+  }
+}

@@ -6,6 +6,8 @@
 
 **生产容量仍为 `NOT_MET`。** 50/200 Agent 热点、1000 Agent 开放到达和 500 Agent 持续读的跨次稳定性仍有缺口。多小时混合负载尚未执行。短卷使用确定性夹具，真实模型调用为 0，作者全文评价待完成，文学质量尚未评价。[容量实测](reports/性能与容量修复对照.md) · [合并前容量缺口记录](reports/未通过目标与后续工作.md)
 
+本分支接入完成后，作者在 VS Code 的 Codex 侧栏输入 **“继续未完成的任务”**。项目绑定的 `nf_resume_project({})` 返回工作状态、唤醒、恢复、终止等待和待审计数。独立 Supervisor 按数据库额度领取工作，收到提交通知或到了对账时间才重新检查。需要先运行 PostgreSQL 17、应用迁移并由管理员签发恢复凭据、安装后台服务。作者工作区使用 `python scripts/install_p5_project.py --project .` 安装项目 MCP 配置。[首次接入](adapters/codex/P5-stdio.md) · [服务与槽位](reports/P5_调度与事件唤醒收尾.md) · [连续场景与卷交接](reports/P5_自动剧情连续推进验收.md) · [角色运行边界](reports/P5_MCP与Codex角色隔离验收.md) · [P5 最终验收与未达项](reports/P5_最终集成与PR交接.md) 官方扩展已在普通 Linux 测试账户中完成两次原生桌面恢复，实际唤醒数为 1、0。[桌面运行记录](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42982135338)
+
 Scion 增量版本实验保留在 [Draft PR #4](https://github.com/SKYdayDUCK/NovelFactory/pull/4)。B1/B2 待独立审核，B3 增量重放在实验分支默认关闭。
 
 - **运行/复现：** [复现与运行指南](reports/复现与运行指南.md)，`uv sync --locked --group dev`；默认 Python 3.12，PostgreSQL 17。
@@ -69,7 +71,7 @@ uv run python -m pytest tests -q
 
 根规范和 8 份局部 `AGENTS.md` 面向开发 Agent；小说角色和运行时技能独立管理。开发技能以 Codex 的 `.agents/skills` 为主；Claude 适配见 [adapters/claude](adapters/claude/README.md)。本包提供项目文件，没有安装个人技能。
 
-## 3. 复现与证据等级
+## 3. 原始设计包的复现与证据等级
 
 从包根目录执行：
 
@@ -82,7 +84,7 @@ python benchmarks/calculate_load.py
 
 依赖清单仅用于设计验证，不是生产依赖。实验和负载计算只依赖 Python 标准库。完整结果见 [验证报告](validation/REPORT.md)、[R1 并发审查](validation/R1_CONCURRENCY_REVIEW.md)及[R1 需求审查](validation/R1_REQUIREMENTS.md)。
 
-本轮实际执行了静态包检查、原 18＋新增 17＝35 项有限机制实验，以及 15 行负载算术和 4 项模型一致性检查。它们分别证明格式/引用一致、选定局部反例得到处理和假设计算可复现。没有启动真实 PostgreSQL、运行多进程服务压测、调用生产模型或完成真实短卷验收；没有任何档位的已实现吞吐、P95/P99 或成本结论。
+原始设计包执行过静态包检查、35 项有限机制实验（含原有 18 项）、15 行负载算术和 4 项模型一致性检查。其结果覆盖格式和引用一致性、局部反例与负载估算。此后工程阶段的真实 PostgreSQL、服务压测、确定性短卷和恢复演练见本页顶部的分阶段记录。商业模型与作者文学质量仍待实际验收。
 
 ## 4. 基线、兼容与实施顺序
 

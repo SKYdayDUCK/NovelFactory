@@ -1,0 +1,44 @@
+{
+  "postgres": "17.11 (Debian 17.11-0+deb13u1)",
+  "codex": "codex-cli 0.167.0-alpha.4",
+  "provider": "synthetic loopback HTTP fixture; no external inference or bill",
+  "ready_waiting_running_before": {
+    "READY": 1,
+    "WAITING": 1,
+    "RUNNING": 0
+  },
+  "counts_at_idle": {
+    "READY": 0,
+    "WAITING": 0,
+    "RUNNING": 0,
+    "ACCEPTED": 1,
+    "RESULT_STORED": 1
+  },
+  "host_processes_started": 2,
+  "host_processes_alive_after_returns": 0,
+  "model_requests_while_waiting_for_follower": 0,
+  "total_provider_requests": 2,
+  "synthetic_reported_tokens_per_task": {
+    "input": 11,
+    "output": 7
+  },
+  "completed_candidate_tasks_per_second": 1.379,
+  "accept_outbox_to_first_wake_ms": 8.894,
+  "author_approvals": 0,
+  "preauthorized_summary_completions": 1,
+  "accepted_world_events": 0,
+  "host_turns": [
+    {
+      "attempt_id": "94110c33-10fb-408a-bae9-21f3c9f27e55",
+      "thread_id": "01a1c902-529e-7e82-87db-a4aa10a6e67a",
+      "turn_id": "01a1c902-52b4-7771-8173-cd30aaa350cf",
+      "phase": "COMPLETED"
+    },
+    {
+      "attempt_id": "52997bf9-c073-4ff1-bb13-51ab8e997af4",
+      "thread_id": "01a1c902-56a1-7c11-a3c3-cfa3e991fd86",
+      "turn_id": "01a1c902-56ba-75e1-ad90-17c37b6e6a34",
+      "phase": "COMPLETED"
+    }
+  ]
+}

@@ -5,10 +5,12 @@ only supply intentions; a sealed, reviewed joint result is accepted here once.
 """
 from __future__ import annotations
 
+from contextlib import nullcontext
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 import secrets
+from types import SimpleNamespace
 from uuid import uuid4, uuid5, UUID
 
 from novel_factory.application.authorization import Principal, ADMIN_CAPABILITIES
@@ -31,12 +33,33 @@ class Kernel:
         self.db, self.objects = db, objects
         self.tasks = TaskService(db.engine, tables, object_store=objects)
 
+    def in_transaction(self, repo):
+        """Join an existing write unit of work; nested service calls share its commit."""
+        def connection():
+            return nullcontext(repo.conn)
+
+        bound = SimpleNamespace(
+            engine=SimpleNamespace(begin=connection, connect=connection),
+            uow=lambda **kwargs: nullcontext(repo),
+        )
+        return Kernel(bound, self.objects)
+
     def authenticate(self, token: str) -> Principal:
         require(isinstance(token,str) and 16 <= len(token) <= 256, "VIEW_DENIED", "Credentials unavailable")
         with self.db.uow(write=False) as r:
             grant = r.one("grants", {"token_hash":sha256(token.encode()).hexdigest()})
-            require(grant and grant["active"], "VIEW_DENIED", "Credentials unavailable")
+            require(grant and grant["active"],
+                    "VIEW_DENIED", "Credentials unavailable")
+            self._check_resume_grant(r, grant)
             return Principal(grant["grant_id"], grant["principal_id"])
+
+    @staticmethod
+    def _check_resume_grant(r, grant):
+        if grant["role_id"] == "resume_operator":
+            fence = r.one("resume_grants", {"grant_id": grant["grant_id"]}, lock="share")
+            work = r.one("works", {"work_id": grant["work_id"]})
+            require(fence and fence["expires_at"] > r.now() and fence["policy_version"] == work["policy_version"],
+                    "VIEW_DENIED", "Grant expired or policy changed")
 
     def authorize(self, r, principal, work_id, capability="READ", branch_id=None):
         require(isinstance(principal, Principal), "VIEW_DENIED", "Authenticated identity required")
@@ -44,6 +67,7 @@ class Kernel:
         grant = r.one("grants", {"grant_id":principal.grant_id}, lock="share")
         require(work and grant and grant["active"] and grant["principal_id"] == principal.principal_id
                 and grant["work_id"] == work_id, "VIEW_DENIED", "Resource unavailable for this identity")
+        self._check_resume_grant(r, grant)
         require(capability in grant["capabilities"], "VIEW_DENIED", "Operation is outside this grant")
         require(branch_id is None or grant["branch_ids"] == ["*"] or branch_id in grant["branch_ids"],
                 "VIEW_DENIED", "Resource unavailable for this identity")
@@ -317,18 +341,31 @@ class Kernel:
             r.outbox("world.initialized","work",wid,{"world_ref":world_ref(initial)},"initial:"+wid)
         return {"world_ref":world_ref(initial),"token":token,"principal":Principal(gid,pid)}
 
-    def issue_grant(self, principal, work_id, *, role_id, actor_id=None, branch_ids=None, capabilities=None, planes=None, max_story_time=None):
+    def issue_grant(self, principal, work_id, *, role_id, actor_id=None, branch_ids=None, capabilities=None, planes=None, max_story_time=None, expires_at=None):
         gid,pid,token=new_id(),new_id(),secrets.token_urlsafe(32)
         with self.db.uow() as r:
             self.authorize(r,principal,work_id,"ADMIN")
             caps=capabilities or ["READ","COMPILE","TASK_CREATE","TASK_CLAIM"]
             pls=planes or ["BELIEF"]
-            require(set(caps)<=set(ADMIN_CAPABILITIES),"INVALID_ARGUMENT","Unknown capability")
+            if role_id == "resume_operator":
+                require(isinstance(expires_at, datetime) and expires_at.tzinfo is not None and expires_at > r.now(),
+                        "INVALID_ARGUMENT", "Resume grant requires a future expiration")
+                require(caps == ["PROJECT_RESUME"] and not actor_id
+                        and branch_ids and len(branch_ids) == 1
+                        and r.one("branches", {"work_id": work_id, "branch_id": branch_ids[0]}),
+                        "INVALID_ARGUMENT", "Resume grants require an expiry and one project branch")
+                policy = r.one("works", {"work_id": work_id})["policy_version"]
+                pls = []
+            else:
+                require(expires_at is None and set(caps)<=set(ADMIN_CAPABILITIES),
+                        "INVALID_ARGUMENT","Unknown capability or expiry policy")
             if role_id=="character_actor":
                 require(actor_id and pls==["BELIEF"] and set(caps)<={"READ","COMPILE","TASK_CREATE","TASK_CLAIM","ARTIFACT_WRITE"},"VIEW_DENIED","Actor grant cannot carry control-plane capabilities")
             r.add("grants",{"grant_id":gid,"principal_id":pid,"work_id":work_id,"token_hash":sha256(token.encode()).hexdigest(),"role_id":role_id,"actor_id":actor_id,
                             "branch_ids":branch_ids or [r.one("works",{"work_id":work_id})["canon_branch_id"]],"capabilities":caps,"planes":pls,
                             "max_story_time":max_story_time or {"tick":0,"phase":0}})
+            if role_id == "resume_operator":
+                r.add("resume_grants", {"grant_id":gid, "policy_version":policy, "expires_at":expires_at})
         return {"principal":Principal(gid,pid),"token":token}
 
     def revoke_grant(self, principal, grant_id):
