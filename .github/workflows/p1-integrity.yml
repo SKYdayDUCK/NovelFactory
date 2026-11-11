@@ -101,12 +101,23 @@ jobs:
           enable-cache: true
       - name: Install PostgreSQL 17 client for real pg_dump and pg_restore
         run: |
-          sudo install -d -m 0755 /usr/share/postgresql-common/pgdg
-          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo tee /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc > /dev/null
-          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
-          sudo apt-get update -qq
-          sudo apt-get install -y postgresql-client-17
-          test -x "$PG_BIN/pg_dump" && test -x "$PG_BIN/pg_restore"
+          if [[ ! -x "$PG_BIN/pg_dump" || ! -x "$PG_BIN/pg_restore" || ! -x "$PG_BIN/psql" ]]; then
+            key=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+            if ! apt-cache show postgresql-client-17 >/dev/null 2>&1; then
+              if [[ ! -s "$key" ]]; then
+                curl --fail --silent --show-error --location --retry 4 --retry-all-errors \
+                  --connect-timeout 10 --max-time 60 --retry-max-time 180 \
+                  --output "$RUNNER_TEMP/nf-pgdg.asc" https://www.postgresql.org/media/keys/ACCC4CF8.asc
+                sudo install -D -m 0644 "$RUNNER_TEMP/nf-pgdg.asc" "$key"
+              fi
+              echo "deb [signed-by=$key] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+            fi
+            sudo apt-get -o Acquire::Retries=4 update -qq
+            sudo apt-get -o Acquire::Retries=4 install -y postgresql-client-17
+          fi
+          for tool in pg_dump pg_restore psql; do
+            "$PG_BIN/$tool" --version | grep -E '\(PostgreSQL\) 17\.'
+          done
       - name: Install locked dependencies
         run: uv sync --locked --group dev --python 3.12
       - name: Record runtime and initialize fresh PostgreSQL database
