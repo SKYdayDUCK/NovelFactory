@@ -148,6 +148,23 @@ def test_two_live_mcp_servers_recover_accepted_task_after_lost_reply(dual_databa
 
             wake()
             assert await reconcile(dsn, installation, org, op, nf) == "BOUND"
+            get = {
+                name: policy[name] for name in ("nf_instance_id", "work_id", "branch_id", "grant_epoch")
+            }
+            get.update(protocol_version="aw-nf.v1", operation_id=op)
+            bound = await nf("nf_delegation_get", get)
+            handoff = {"operation_id": op, "handoff_id": "transfer-follow-up", "recipient": "actor-2"}
+            handed = await aw("aw_handoff", handoff)
+            assert handed == handoff and await aw("aw_handoff", handoff) == handed
+            assert await nf("nf_delegation_get", get) == bound
+            with connect(dsn) as c:
+                moved = c.execute(
+                    """SELECT d.owner_id,d.owner_revision,d.payload,h.status AS hold
+                       FROM aw_delegations d JOIN aw_budget_holds h USING (org_id,operation_id)
+                       WHERE d.org_id=%s AND d.operation_id=%s""", (org, op),
+                ).fetchone()
+                assert (moved["owner_id"], moved["owner_revision"], moved["hold"]) == ("actor-2", 1, "HELD")
+                assert moved["payload"]["actor_binding_ref"] == actor
             with kernel.db.uow(write=False) as repo:
                 rows = repo.many("delegation_receipts", {"installation_id": installation})
                 assert len(rows) == 1 and rows[0]["operation_id"] == op

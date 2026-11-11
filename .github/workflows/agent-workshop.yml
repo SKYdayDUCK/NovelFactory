@@ -102,6 +102,8 @@ jobs:
           REVOKE CONNECT ON DATABASE aw_upgrade_test FROM PUBLIC;
           CREATE DATABASE w3_from_w3 OWNER aw_service;
           REVOKE CONNECT ON DATABASE w3_from_w3 FROM PUBLIC;
+          CREATE DATABASE w3_from_w2c OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w3_from_w2c FROM PUBLIC;
           CREATE DATABASE w3_from_w3a OWNER aw_service;
           REVOKE CONNECT ON DATABASE w3_from_w3a FROM PUBLIC;
           CREATE DATABASE w2_from_w1 OWNER aw_service;
@@ -147,6 +149,7 @@ jobs:
         run: |
           export AW_W2_FROM_W1_DATABASE_URL="${AW_DATABASE_URL%/*}/w2_from_w1"
           export AW_W2_FROM_W2_DATABASE_URL="${AW_DATABASE_URL%/*}/w2_from_w2"
+          export AW_W3_FROM_W2C_DATABASE_URL="${AW_DATABASE_URL%/*}/w3_from_w2c"
           .venv/bin/python -m pytest -c pyproject.toml acceptance/test_w2_historical_upgrades.py -q -o junit_family=xunit1 --junitxml=w2-legacy-upgrades.xml
       - name: Upgrade existing W3 queues, preserve all historical rows and reconcile accepted NF work
         working-directory: workshop
@@ -172,7 +175,8 @@ jobs:
       - name: Verify dual-ledger recovery on the integrated NF source and native PG17
         env:
           AW_NF_SOURCE: ${{ github.workspace }}
-          AW_DUAL_TEST_ADMIN_URL: postgresql://postgres:nf-ci-admin@127.0.0.1:5433/postgres
+          AW_DUAL_TEST_ADMIN_URL: postgresql://postgres:workshop-ci-admin@127.0.0.1:5432/postgres
+          AW_DUAL_TEST_NF_ADMIN_URL: postgresql://postgres:nf-ci-admin@127.0.0.1:5433/postgres
           AW_PAIRED_RESTORE_EVIDENCE: ${{ github.workspace }}/workshop/paired-restore.json
           PG_BIN: /usr/lib/postgresql/17/bin
         run: |

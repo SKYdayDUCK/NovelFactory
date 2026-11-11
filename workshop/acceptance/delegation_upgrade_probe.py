@@ -37,8 +37,8 @@ def seed(path):
         for item in (sent, pending):
             assert authenticate(c, item["token"]).employee_id == "volume"
             assert c.execute("SELECT status FROM aw_budget_holds WHERE operation_id=%s", (item["operation"],)).fetchone()["status"] == "HELD"
-    path.write_text(json.dumps(target, default=str))
-    path.chmod(0o600)
+    with os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), "w") as stream:
+        json.dump(target, stream, default=str)
 
 
 def check(path):

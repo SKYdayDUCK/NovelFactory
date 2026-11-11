@@ -31,8 +31,12 @@ def test_old_queue_upgrade(old_revision, source, database, tmp_path, record_prop
     old = tmp_path / "workshop"
     state = tmp_path / "private-bindings.json"
     receipt = tmp_path / "receipt.json"
-    head = ScriptDirectory.from_config(Config(str(WORKSHOP / "alembic.ini"))).get_current_head()
-    assert head
+    scripts = ScriptDirectory.from_config(Config(str(WORKSHOP / "alembic.ini")))
+    head = scripts.get_current_head()
+    assert head and "w003b" in {revision.revision for revision in scripts.walk_revisions(head=head)}
+    assert scripts.get_revision("w003").down_revision == "w002"
+    assert set(scripts.get_revision("w003a").down_revision) == {"w003", "w002a"}
+    assert set(scripts.get_revision("w003b").down_revision) == {"w003a", "w002c"}
     probe = WORKSHOP / "acceptance" / "delegation_upgrade_probe.py"
 
     def exercise(package, action):

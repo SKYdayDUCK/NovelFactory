@@ -76,6 +76,15 @@ def claim(conn, installation, org, operation, lookup_only=False):
             and row["deadline"] > conn.execute("SELECT clock_timestamp() as t").fetchone()["t"]
         )
         if not ok:
+            if row["fence"] > 0:
+                # A missing receipt observed before a delayed submit commits
+                # cannot prove the original intent will never incur a charge.
+                conn.execute(
+                    """UPDATE aw_delegations SET state='WAITING_OPERATOR',last_error='SUBMISSION_UNCONFIRMED'
+                       WHERE installation_id=%s AND org_id=%s AND operation_id=%s""",
+                    (installation, org, operation),
+                )
+                return None
             conn.execute(
                 """UPDATE aw_budget_holds SET status='RELEASED',settled_amount=0
                    WHERE org_id=%s AND operation_id=%s AND status='HELD'""",
@@ -135,6 +144,11 @@ def validate_receipt(data, payload, previous):
     ):
         raise Denied("REMOTE_SCOPE_MISMATCH")
     UUID(data["world_ref"]["world_revision_id"])
+    if previous and previous["world_ref"] and any(
+        previous["world_ref"][key] != data["world_ref"][key]
+        for key in ("work_id", "branch_id", "world_revision_id")
+    ):
+        raise Denied("REMOTE_HISTORY_MISMATCH")
     if data["accounting_state"] not in {"NO_ATTEMPT", "RESERVED", "UNKNOWN", "SETTLED"}:
         raise Denied("ACCOUNTING_UNAVAILABLE")
     ids = {a["attempt_id"] for a in data["attempts"]}
@@ -204,6 +218,10 @@ def finish(conn, installation, org, operation, fence, data, failure, mode, looku
                 (org, operation),
             ).fetchall()
             current = {a["attempt_id"]: a for a in data["attempts"]}
+            if (prev and prev["task_state"] in TERMINAL
+                    and prev["accounting_state"] in {"NO_ATTEMPT", "SETTLED"}
+                    and set(current) != {old["id"] for old in previously_seen}):
+                raise Denied("REMOTE_HISTORY_MISMATCH")
             ranks = {"PREPARED": 0, "SENT": 1, "UNKNOWN": 2, "SUCCEEDED": 3, "FAILED": 3}
             for old in previously_seen:
                 item = current.get(old["id"])
@@ -216,7 +234,8 @@ def finish(conn, installation, org, operation, fence, data, failure, mode, looku
                 ):
                     raise Denied("REMOTE_HISTORY_MISMATCH")
             settled = Decimal(data["actual_amount"])
-            if settled > Decimal(row["payload"]["max_amount"]):
+            if (settled > Decimal(row["payload"]["max_amount"])
+                    or data["actual_tokens"] > row["payload"]["token_limit"]):
                 raise Denied("BUDGET_DISCREPANCY")
         except Denied as exc:
             state, failure = "WAITING_OPERATOR", str(exc)

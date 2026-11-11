@@ -215,3 +215,106 @@ def test_contradictory_peer_ledger_freezes_and_preserves_reservation():
         assert not c.execute(
             "SELECT * FROM aw_cost_observations WHERE operation_id=%s", (op,)
         ).fetchall()
+
+
+@pytest.mark.parametrize("change", ["tokens", "world_revision", "extra_settled_attempt"])
+def test_contradictory_receipt_cannot_replace_the_verified_hold(change):
+    from copy import deepcopy
+    from decimal import Decimal
+
+    from agent_workshop.recovery import freeze, frozen
+
+    dsn, org, install, token = setup_slot()
+    op = make(dsn, token)
+    with connect(dsn) as conn:
+        payload = conn.execute(
+            "SELECT payload FROM aw_delegations WHERE operation_id=%s", (op,)
+        ).fetchone()["payload"]
+    attempt = {
+        "attempt_id": str(uuid4()),
+        "state": "SUCCEEDED",
+        "actual_amount": "0.20",
+        "actual_tokens": 12,
+    }
+    receipt = dict(
+        payload,
+        task_id=str(uuid4()),
+        receipt_ref=str(uuid4()),
+        task_state="ACCEPTED",
+        accounting_state="SETTLED",
+        actual_amount="0.20",
+        actual_tokens=12,
+        attempts=[attempt],
+        attempt_ids=[attempt["attempt_id"]],
+        world_ref={
+            "work_id": payload["work_id"],
+            "branch_id": payload["branch_id"],
+            "world_revision_id": str(uuid4()),
+        },
+    )
+
+    async def peer(tool, request):
+        return receipt
+
+    if change == "tokens":
+        receipt["attempts"][0]["actual_tokens"] = receipt["actual_tokens"] = (
+            payload["token_limit"] + 1
+        )
+    else:
+        assert asyncio.run(reconcile(dsn, install, org, op, peer)) == "SETTLED"
+        with connect(dsn) as conn:
+            freeze(conn, install)
+        receipt = deepcopy(receipt)
+        if change == "world_revision":
+            receipt["world_ref"]["world_revision_id"] = str(uuid4())
+        else:
+            added = dict(attempt, attempt_id=str(uuid4()))
+            receipt["attempts"].append(added)
+            receipt["attempt_ids"].append(added["attempt_id"])
+            receipt.update(actual_amount="0.40", actual_tokens=24)
+    ready(dsn, org, op)
+    assert asyncio.run(reconcile(dsn, install, org, op, peer)) == "WAITING_OPERATOR"
+    with connect(dsn) as conn:
+        assert frozen(conn, install)
+        hold = conn.execute(
+            "SELECT status,settled_amount FROM aw_budget_holds WHERE operation_id=%s", (op,)
+        ).fetchone()
+        assert (hold["status"], hold["settled_amount"]) == (
+            ("HELD", None) if change == "tokens" else ("SETTLED", Decimal("0.20"))
+        )
+        assert conn.execute(
+            "SELECT count(*) AS n FROM aw_cost_observations WHERE operation_id=%s", (op,)
+        ).fetchone()["n"] == (0 if change == "tokens" else 1)
+
+
+def test_revoked_intent_with_unconfirmed_submit_retains_its_hold():
+    dsn, org, install, token = setup_slot()
+    op = make(dsn, token)
+    calls = []
+
+    async def peer(tool, request):
+        calls.append(tool)
+        if tool == "nf_delegation_submit":
+            raise ConnectionError()
+        raise Denied("DELEGATION_NOT_FOUND")
+
+    assert asyncio.run(reconcile(dsn, install, org, op, peer)) == "RECONCILING"
+    ready(dsn, org, op)
+    assert asyncio.run(reconcile(dsn, install, org, op, peer)) == "REQUESTED"
+    with connect(dsn) as conn:
+        conn.execute("UPDATE aw_bindings SET revoked=true WHERE token_digest=%s", (digest(token),))
+    ready(dsn, org, op)
+    asyncio.run(reconcile(dsn, install, org, op, peer))
+    with connect(dsn) as conn:
+        row = conn.execute(
+            """SELECT d.state,d.last_error,h.status FROM aw_delegations d
+                              JOIN aw_budget_holds h USING(org_id,operation_id)
+                              WHERE d.operation_id=%s""",
+            (op,),
+        ).fetchone()
+        assert row == {
+            "state": "WAITING_OPERATOR",
+            "last_error": "SUBMISSION_UNCONFIRMED",
+            "status": "HELD",
+        }
+    assert calls == ["nf_delegation_submit", "nf_delegation_get"]

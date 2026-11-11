@@ -46,7 +46,11 @@ def dispatch(config, name=None, arguments=None):
             viewer = organization.require_employee(conn, session)
             visible = set(TOOLS)
             if viewer["role_id"] != "workshop_manager":
-                visible -= changes | {"aw_handoff"}
+                visible -= changes
+            if (name is None or name in delegation.TOOLS) and not delegation.route(
+                conn, session.org_id, session.employee_id
+            ):
+                visible -= delegation.TOOLS.keys()
         if name is None:
             return sorted(visible)
         if name not in visible:
