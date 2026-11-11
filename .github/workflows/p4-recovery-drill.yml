@@ -7,14 +7,20 @@ on:
       - 'src/novel_factory/infrastructure/recovery.py'
       - 'src/novel_factory/infrastructure/online_backup.py'
       - 'src/novel_factory/application/upgrades.py'
+      - 'scripts/ci_install_pg17.sh'
       - 'scripts/pitr_drill.py'
+      - 'scripts/pitr_streams.py'
+      - 'src/novel_factory/infrastructure/eventhub.py'
       - '.github/workflows/p4-recovery-drill.yml'
   pull_request:
     paths:
       - 'src/novel_factory/infrastructure/recovery.py'
       - 'src/novel_factory/infrastructure/online_backup.py'
       - 'src/novel_factory/application/upgrades.py'
+      - 'scripts/ci_install_pg17.sh'
       - 'scripts/pitr_drill.py'
+      - 'scripts/pitr_streams.py'
+      - 'src/novel_factory/infrastructure/eventhub.py'
       - '.github/workflows/p4-recovery-drill.yml'
   workflow_dispatch:
 
@@ -40,11 +46,7 @@ jobs:
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
       - name: Install PostgreSQL17 server and physical-backup tools
         run: |
-          sudo install -d -m 0755 /usr/share/postgresql-common/pgdg
-          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo tee /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc > /dev/null
-          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
-          sudo apt-get update -qq
-          sudo apt-get install -y postgresql-17 postgresql-client-17
+          bash scripts/ci_install_pg17.sh postgresql-17 postgresql-client-17 redis-server
           "$PG_BIN/postgres" --version
           test -x "$PG_BIN/pg_basebackup" && test -x "$PG_BIN/pg_verifybackup"
       - name: Install locked application
@@ -52,7 +54,7 @@ jobs:
       - name: Restore actual isolated clusters to an explicit target
         run: |
           mkdir -p ci-evidence
-          uv run --no-sync python scripts/pitr_drill.py --output ci-evidence/pitr \
+          uv run --no-sync python scripts/pitr_drill.py --with-redis --output ci-evidence/pitr \
             2>&1 | tee ci-evidence/pitr.log
       - name: Hash retained evidence files
         if: always()

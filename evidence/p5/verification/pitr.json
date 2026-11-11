@@ -1,0 +1,32 @@
+{
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "status": "PASS",
+  "execution_kind": "REAL_ISOLATED_POSTGRESQL",
+  "durability": {
+    "fsync": true,
+    "synchronous_commit": true,
+    "data_checksums": true
+  },
+  "production_data_accessed": false,
+  "model_calls": 0,
+  "snapshot_equal_before_fencing": true,
+  "table_count": 42,
+  "object_count": 19,
+  "target_lsn": "0/3080668",
+  "restored_state_sha256": "07de0fdf68aebc243078dbe9d5a4ff171667c48b53341ef3d60b35398abe49a5",
+  "target_commits_lost": 0,
+  "deliberately_excluded_later_world_commits": 1,
+  "restored_world_event_count": 2,
+  "fenced_task_count": 1,
+  "old_worker_rejected": true,
+  "unknown_calls_retained": 1,
+  "reserved_amount_retained": "0.5",
+  "original_commit_receipt_equal": true,
+  "recovery_seconds_to_verified_service": 1.2309798960013723,
+  "selected_recovery_point_age_seconds": 0.304427,
+  "total_seconds": 4.2908170920018165,
+  "pg_basebackup_exit_code": 0,
+  "pg_verifybackup_exit_code": 0,
+  "measurement": "One isolated, generated world and an explicit recovery target; local physical WAL recovery.",
+  "reproduce": "uv run --no-sync python scripts/pitr_drill.py --output /tmp/nf-p5-pitr-new-dir"
+}

@@ -1,0 +1,49 @@
+{
+  "previous_github_job": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43003779059/job/130466078810",
+  "postgres": "17.11",
+  "redis": "8.0.2",
+  "codex": "0.167.0-alpha.4",
+  "authoritative_probe_and_rolling_repetitions": 4,
+  "final_focused_runs": [
+    {
+      "scope": "Host, MCP, real Redis banquet, restart and process lifetime regression",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 39.13
+    },
+    {
+      "scope": "Host process cleanup, original editorial rolling scene and MCP",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 20.59
+    }
+  ],
+  "overlapping_runs": true,
+  "sent_model_requests_in_surviving_helper_test": 1,
+  "known_accounting_when_fixture_has_no_amount": "UNKNOWN",
+  "local_full_suites": [
+    {
+      "stage": "441db1a",
+      "total": 762,
+      "passed": 762,
+      "skipped": 0
+    },
+    {
+      "stage": "intermediate Host lifecycle snapshot before final accounting test",
+      "total": 763,
+      "passed": 763,
+      "skipped": 0,
+      "seconds": 489.62
+    },
+    {
+      "stage": "frozen Host repair",
+      "collected": 764,
+      "conclusion": "UNVERIFIED_LOCAL_RUNNER_DISCONNECT"
+    }
+  ],
+  "further_evidence": "See the final SHA's GitHub Actions run and its uploaded JUnit."
+}

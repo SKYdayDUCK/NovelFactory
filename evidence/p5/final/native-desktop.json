@@ -1,0 +1,138 @@
+{
+  "status": "PASS",
+  "stage": "complete",
+  "desktop": "1.145.3",
+  "commit": "dcd3ad6e368fbe19d03f37054a40dbaf40d676f4",
+  "extension": "openai.chatgpt@26.51106.51428",
+  "vsix_sha256": "4af1f59f7d8a0145943c2ec583e0bf09a495c258304d113052e74cbaeb73d6f6",
+  "ordinary_uid": 1001,
+  "network": [
+    "lo"
+  ],
+  "model": "synthetic loopback Responses",
+  "display": "Xvfb",
+  "bundled_codex": "codex-cli 0.167.0-alpha.4.1",
+  "native_targets": [
+    {
+      "type": "page",
+      "scheme": "vscode-file",
+      "entry": "workbench.html"
+    }
+  ],
+  "webview_observed": true,
+  "sign_in_screen": false,
+  "awakened_by_ui_turn": [
+    1,
+    0
+  ],
+  "rendered_author_turns": 2,
+  "stdio_by_connection": [
+    [
+      {
+        "direction": "extension_to_server",
+        "method": "initialize"
+      },
+      {
+        "direction": "extension_to_server",
+        "method": "notifications/initialized"
+      },
+      {
+        "direction": "extension_to_server",
+        "method": "tools/list"
+      },
+      {
+        "direction": "server_to_extension",
+        "tools": [
+          "nf_project_status",
+          "nf_resume_project"
+        ]
+      },
+      {
+        "direction": "extension_to_server",
+        "method": "resources/list"
+      },
+      {
+        "direction": "extension_to_server",
+        "method": "resources/templates/list"
+      }
+    ],
+    [
+      {
+        "direction": "extension_to_server",
+        "method": "initialize"
+      },
+      {
+        "direction": "extension_to_server",
+        "method": "notifications/initialized"
+      },
+      {
+        "direction": "extension_to_server",
+        "method": "tools/list"
+      },
+      {
+        "direction": "server_to_extension",
+        "tools": [
+          "nf_project_status",
+          "nf_resume_project"
+        ]
+      },
+      {
+        "direction": "extension_to_server",
+        "method": "tools/call",
+        "tool": "nf_resume_project",
+        "empty_arguments": true
+      },
+      {
+        "direction": "server_to_extension",
+        "isError": false,
+        "receipt": {
+          "counts": {
+            "READY": 1,
+            "WAITING": 0,
+            "RUNNING": 0,
+            "ACCEPTED": 1
+          },
+          "ready_count": 1,
+          "awakened": 1,
+          "recovered": 0
+        }
+      },
+      {
+        "direction": "extension_to_server",
+        "method": "tools/call",
+        "tool": "nf_resume_project",
+        "empty_arguments": true
+      },
+      {
+        "direction": "server_to_extension",
+        "isError": false,
+        "receipt": {
+          "counts": {
+            "READY": 1,
+            "WAITING": 0,
+            "RUNNING": 0,
+            "ACCEPTED": 1
+          },
+          "ready_count": 1,
+          "awakened": 0,
+          "recovered": 0
+        }
+      }
+    ]
+  ],
+  "postgres": "17.11 (Ubuntu 17.11-1.pgdg24.04+2)",
+  "database_after": {
+    "accepted": 1,
+    "ready": 1,
+    "acknowledged_events": 1,
+    "novelfactory_provider_attempts": 0
+  },
+  "desktop_startup": {
+    "exit_code": null,
+    "adjacent_sandbox_mode": "0o4755",
+    "adjacent_sandbox_uid": 0,
+    "stderr_markers": [
+      "debug_listener_started"
+    ]
+  }
+}

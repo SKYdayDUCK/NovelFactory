@@ -1,0 +1,111 @@
+{
+  "source_commit": "50994d9e7559a7c151ed75bd5a285478bbf9343a",
+  "source_isolation": {
+    "kind": "git archive of exact commit",
+    "verified_source_blobs": 109,
+    "verified_imports": {
+      "novel_factory": "src/novel_factory/__init__.py",
+      "novel_factory.application.continuity": "src/novel_factory/application/continuity.py",
+      "novel_factory.infrastructure.recovery": "src/novel_factory/infrastructure/recovery.py"
+    },
+    "python": "3.12.14"
+  },
+  "physical_pitr": {
+    "status": "PASS",
+    "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+    "execution_kind": "REAL_ISOLATED_POSTGRESQL",
+    "durability": {
+      "fsync": true,
+      "synchronous_commit": true,
+      "data_checksums": true
+    },
+    "model_calls": 0,
+    "production_data_accessed": false,
+    "libpq_environment_isolated": true,
+    "pg_basebackup": {
+      "exit_code": 0,
+      "stdout": ""
+    },
+    "pg_verifybackup": {
+      "exit_code": 0,
+      "stdout": "backup successfully verified"
+    },
+    "archiver": {
+      "archived_count": 4,
+      "failed_count": 0
+    },
+    "snapshot_equal_before_fencing": true,
+    "table_count": 45,
+    "object_count": 19,
+    "base_backup_seconds": 0.7120589990008739,
+    "recovery_seconds_to_verified_service": 1.1785983020017738,
+    "selected_recovery_point_age_seconds": 0.294173,
+    "target_commits_lost": 0,
+    "deliberately_excluded_later_world_commits": 1,
+    "restored_world_event_count": 2,
+    "unknown_calls_retained": 1,
+    "reserved_amount_retained": "0.5",
+    "fenced_task_count": 1,
+    "old_worker_rejected": true,
+    "original_commit_receipt_equal": true,
+    "limitation": "Small isolated local fixture; selected-point RPO/RTO, not production SLO or remote storage test",
+    "total_seconds": 3.974266559998796
+  },
+  "design_schema_validation": {
+    "status": "PASS",
+    "counts": {
+      "additional_cases_planned": 16,
+      "agents_files": 9,
+      "baseline_hashes": 14,
+      "canonical_vectors": 2,
+      "case_source_hashes": 60,
+      "development_skills": 7,
+      "invalid_examples_rejected": 31,
+      "json_files_parsed": 2027,
+      "legacy_cases_preserved": 44,
+      "legacy_contracts_preserved": 2,
+      "load_model_calculated_rows": 15,
+      "load_model_checks": 4,
+      "local_markdown_links": 1128,
+      "markdown_fences": 185,
+      "mermaid_source_matches": 10,
+      "mermaid_sources": 10,
+      "planned_cases": 60,
+      "primary_documents_integrated": 12,
+      "r1_planned_acceptance_checks": 37,
+      "r1_planned_case_families": 8,
+      "reading_source_lengths": 2,
+      "real_artifact_hashes": 2,
+      "real_text_spans": 2,
+      "restricted_skill_tool_sets": 4,
+      "role_contracts": 10,
+      "role_skill_bindings": 18,
+      "role_tool_sets": 10,
+      "runtime_query_profiles": 10,
+      "runtime_skill_paths": 12,
+      "runtime_skills": 12,
+      "schema_definitions": 209,
+      "schema_documents": 15,
+      "tool_definitions": 28,
+      "tool_schema_bindings": 84,
+      "valid_examples": 58
+    },
+    "failure_count": 0
+  },
+  "standalone_unittests": {
+    "original": {
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "seconds": 0.001
+    },
+    "all_including_original": {
+      "tests": 35,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "seconds": 0.002
+    }
+  }
+}

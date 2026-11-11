@@ -1,0 +1,4 @@
+user default off
+user relay on #<RELAY_SHA256> ~nf:* -@all +ping +exists +xadd +xrange +xinfo|groups +xpending
+user worker on #<WORKER_SHA256> ~nf:* -@all +ping +exists +xinfo|groups +xgroup|create +xreadgroup +xautoclaim +xack
+user maintenance on #<MAINTENANCE_SHA256> ~nf:* -@all +ping +exists +xrange +xdel +xinfo|groups +xpending

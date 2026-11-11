@@ -15,17 +15,21 @@ import statistics
 import subprocess
 import sys
 import tempfile
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 from hashlib import sha256
 from pathlib import Path
+from uuid import uuid4
+
+from sqlalchemy import create_engine
+from sqlalchemy.engine import make_url
 
 from benchmarks.context_paired_profile import capture_persisted_material, world_identity
 from benchmarks.context_profile import SQLMeter, make_world, measure, prepare
+from benchmarks.p2_behavioral_load import isolated_kernel
 from novel_factory.application.kernel import Kernel
 from novel_factory.application.queries import WorldQueryService
 from novel_factory.domain import temporal
 from novel_factory.infrastructure.database import Database
-from novel_factory.infrastructure.objects import ObjectStore
 from novel_factory.infrastructure.repository import KernelRepository
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -65,25 +69,50 @@ def baseline_methods(point_function, ancestry_method):
         KernelRepository.ancestor = original_ancestry
 
 
+@contextmanager
+def paired_inputs(directory, entities, repeats):
+    # Freeze each request once. Task generation and the resulting observation
+    # handle belong to the input. A PostgreSQL clone lets both arms run normal
+    # service transactions, including authorization, binding and real commits.
+    objects = Path(directory) / 'objects'
+    with isolated_kernel(os.environ['NF_DATABASE_URL'], objects) as (seed, url), ExitStack() as stack:
+        world, items, _ = make_world(seed, entities)
+        requests = {(count, repeat): prepare(seed, world, items[:count])
+                    for count in (1, 20, 100) for repeat in range(repeats + 1)}
+        seed.db.close()  # PostgreSQL requires our private template to be idle.
+        source = make_url(url)
+        clone = 'nf_p3_pair_' + uuid4().hex
+        admin = create_engine(source.set(database='postgres'), isolation_level='AUTOCOMMIT')
+        stack.callback(admin.dispose)
+        connection = stack.enter_context(admin.connect())
+        template = connection.dialect.identifier_preparer.quote_identifier(source.database)
+        connection.exec_driver_sql(f'CREATE DATABASE "{clone}" TEMPLATE {template}')
+        stack.callback(connection.exec_driver_sql, f'DROP DATABASE "{clone}" WITH (FORCE)')
+        arms = {}
+        for arm, name in [('baseline', source.database), ('candidate', clone)]:
+            db = Database(source.set(database=name).render_as_string(hide_password=False), pool_size=4)
+            stack.callback(db.close)
+            arms[arm] = (Kernel(db, seed.objects), SQLMeter(db.engine))
+        yield arms, world, requests
+
+
 def run(output, *, entities=300, repeats=5):
     records, pairs = [], []
-    db = Database(pool_size=4)
-    meter = SQLMeter(db.engine)
     with tempfile.TemporaryDirectory(prefix='nf-p3-paired-') as directory:
         old_temporal, temporal_hash = baseline_module('src/novel_factory/domain/temporal.py',
             'novel_factory.domain._p3_baseline_temporal', directory)
         old_repo, repo_hash = baseline_module('src/novel_factory/infrastructure/repository.py',
             'novel_factory.infrastructure._p3_baseline_repository', directory)
-        kernel = Kernel(db, ObjectStore(Path(directory) / 'objects'))
-        world, items, _ = make_world(kernel, entities)
-        identity_before = world_identity(kernel, world)
-        try:
+        with paired_inputs(directory, entities, repeats) as (arms, world, requests):
+            identity_before = world_identity(arms['baseline'][0], world)
+            assert world_identity(arms['candidate'][0], world) == identity_before
             for count in (1, 20, 100):
                 for repeat in range(repeats):
+                    request = requests[count, repeat]
                     materials = {}
                     # Alternate arm order to avoid consistently warming one arm.
                     for arm in (('baseline', 'candidate') if repeat % 2 == 0 else ('candidate', 'baseline')):
-                        request = prepare(kernel, world, items[:count])
+                        kernel, meter = arms[arm]
                         service = WorldQueryService(kernel)
                         callback = lambda service=service, request=request: service.context_compile(world['principal'], request)
                         if arm == 'baseline':
@@ -94,6 +123,8 @@ def run(output, *, entities=300, repeats=5):
                         record.update(subjects=count, repeat=repeat)
                         records.append(record)
                         materials[arm] = capture_persisted_material(kernel, world, request, compiled)
+                    assert materials['baseline']['task_id'] == materials['candidate']['task_id'] == request['task_id']
+                    assert materials['baseline']['context_bundle_id'] != materials['candidate']['context_bundle_id']
                     for key in ('full_facts', 'full_fact_sha256', 'guard_material',
                                 'guard_material_sha256', 'scope_row_count'):
                         assert materials['baseline'][key] == materials['candidate'][key], key
@@ -101,7 +132,8 @@ def run(output, *, entities=300, repeats=5):
                                   'baseline': materials['baseline'], 'candidate': materials['candidate']})
                 # Profiling is a separate observation, never a paired latency sample.
                 for arm in ('baseline', 'candidate'):
-                    request = prepare(kernel, world, items[:count])
+                    kernel, meter = arms[arm]
+                    request = requests[count, repeats]
                     callback = lambda request=request: WorldQueryService(kernel).context_compile(world['principal'], request)
                     if arm == 'baseline':
                         with baseline_methods(old_temporal.point_key, old_repo.KernelRepository.ancestor):
@@ -110,8 +142,8 @@ def run(output, *, entities=300, repeats=5):
                         _, record = measure(meter, 'profile-' + arm, callback, profile=True)
                     record['subjects'] = count
                     records.append(record)
-            identity_after = world_identity(kernel, world)
-            assert identity_before == identity_after
+            identity_after = world_identity(arms['baseline'][0], world)
+            assert identity_before == identity_after == world_identity(arms['candidate'][0], world)
             summary = []
             for count in (1, 20, 100):
                 row = {'subjects': count}
@@ -128,14 +160,13 @@ def run(output, *, entities=300, repeats=5):
                     'src/novel_factory/domain/temporal.py', 'src/novel_factory/infrastructure/repository.py')},
                 'environment': {'python': sys.version, 'cpus': os.cpu_count(), 'shared_host': True},
                 'entities': entities, 'repeats': repeats, 'summary': summary, 'records': records,
+                'input_isolation': 'Same frozen task and generation in independently committed PostgreSQL clones',
                 'paired_material': pairs, 'world_before': identity_before, 'world_after': identity_after,
                 'real_model_calls': 0,
                 'limitation': 'Small deterministic world, warm PostgreSQL/OS buffers; not a capacity or literary quality claim'}
             output.parent.mkdir(parents=True, exist_ok=True)
             output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
             print(json.dumps({'paired_equal': len(pairs), 'summary': summary}, indent=2), flush=True)
-        finally:
-            db.close()
 
 
 def main():

@@ -1,6 +1,12 @@
 {
   "catalog_version": "2.1",
-  "status": "v2.0-R1 design; adapters not implemented",
+  "status": "General service design catalog. The P5 stdio adapter exposes only its bound runtime subset.",
+  "mcp_stdio": {
+    "source": "src/novel_factory/interfaces/mcp_stdio.py",
+    "authorization": "tools/list and tools/call both revalidate the current project or task grant. A tool in this catalog alone grants no authority.",
+    "project_tools": ["nf_project_status", "nf_resume_project"],
+    "task_tools": ["nf_task_get", "nf_context_get", "nf_query_batch", "nf_artifact_put", "nf_change_point_request", "nf_rolling_window_submit", "nf_change_point_review"]
+  },
   "tools": [
     {
       "name": "context_get",

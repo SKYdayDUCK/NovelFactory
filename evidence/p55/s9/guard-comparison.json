@@ -1,0 +1,324 @@
+{
+  "unit": "guard decision including PostgreSQL transaction; one eligible independent task",
+  "workload": "three labelled tasks in one world; latency repeats reuse the same receipts",
+  "old_world": {
+    "work_id": "f87de2c6-5ab8-4c6c-9e00-5c0bc52b8ba5",
+    "branch_id": "285fc2ca-e319-471e-893e-79e2e239a995",
+    "world_revision_id": "4dfc8e22-7190-4405-946d-3a93dc7907b9"
+  },
+  "new_world": {
+    "work_id": "f87de2c6-5ab8-4c6c-9e00-5c0bc52b8ba5",
+    "branch_id": "285fc2ca-e319-471e-893e-79e2e239a995",
+    "world_revision_id": "bae590a9-346d-46ad-ae31-d758481065ae"
+  },
+  "rows": [
+    {
+      "arm": "A",
+      "observations": [
+        {
+          "scenario": "same_object",
+          "oracle_affected": true,
+          "invalidated": true,
+          "context_reexecutions": 1,
+          "samples_ms": [
+            0.770118,
+            0.607893,
+            0.462465,
+            0.500151,
+            0.464649,
+            0.48619,
+            0.500282,
+            0.800001,
+            0.52591,
+            0.514814,
+            0.558139,
+            0.571318
+          ]
+        },
+        {
+          "scenario": "causal_read_other_write",
+          "oracle_affected": true,
+          "invalidated": true,
+          "context_reexecutions": 1,
+          "samples_ms": [
+            0.814224,
+            0.560733,
+            0.476505,
+            0.65904,
+            0.45949,
+            0.508995,
+            0.440332,
+            0.492941,
+            0.435594,
+            0.585619,
+            0.54555,
+            0.517567
+          ]
+        },
+        {
+          "scenario": "independent",
+          "oracle_affected": false,
+          "invalidated": true,
+          "context_reexecutions": 1,
+          "samples_ms": [
+            3.39466,
+            0.680763,
+            0.596196,
+            0.485299,
+            0.659701,
+            0.440301,
+            0.453732,
+            0.412139,
+            0.434292,
+            0.402395,
+            0.415294,
+            0.413671
+          ]
+        }
+      ],
+      "false_positives": 1,
+      "false_negatives": 0,
+      "affected_fraction": 1.0,
+      "valid_retention_fraction": 0,
+      "context_reexecutions": 3,
+      "mean_decision_ms": 0.6124156388888888,
+      "p95_decision_ms": 0.814224,
+      "p99_decision_ms": 3.39466,
+      "serial_decisions_per_second": 1632.877961467981,
+      "model_calls": 0,
+      "model_tokens": 0,
+      "invoiced_cost": null
+    },
+    {
+      "arm": "B",
+      "observations": [
+        {
+          "scenario": "same_object",
+          "oracle_affected": true,
+          "invalidated": true,
+          "context_reexecutions": 1,
+          "samples_ms": [
+            1.667075,
+            1.40397,
+            1.391571,
+            1.406413,
+            1.40441,
+            1.307695,
+            1.30444,
+            1.245832,
+            1.299862,
+            1.308356,
+            1.355637,
+            1.357429
+          ]
+        },
+        {
+          "scenario": "causal_read_other_write",
+          "oracle_affected": true,
+          "invalidated": false,
+          "context_reexecutions": 0,
+          "samples_ms": [
+            1.137969,
+            1.113092,
+            1.026432,
+            0.934044,
+            1.048415,
+            0.957989,
+            1.135136,
+            0.919001,
+            1.019922,
+            1.063909,
+            0.995045,
+            0.920814
+          ]
+        },
+        {
+          "scenario": "independent",
+          "oracle_affected": false,
+          "invalidated": false,
+          "context_reexecutions": 0,
+          "samples_ms": [
+            1.036246,
+            0.957598,
+            1.053754,
+            0.917668,
+            0.900203,
+            0.921485,
+            1.122817,
+            1.041284,
+            0.921795,
+            1.042045,
+            1.109838,
+            1.007003
+          ]
+        }
+      ],
+      "false_positives": 0,
+      "false_negatives": 1,
+      "affected_fraction": 0.3333333333333333,
+      "valid_retention_fraction": 1,
+      "context_reexecutions": 1,
+      "mean_decision_ms": 1.1321165,
+      "p95_decision_ms": 1.406413,
+      "p99_decision_ms": 1.667075,
+      "serial_decisions_per_second": 883.3013210212907,
+      "model_calls": 0,
+      "model_tokens": 0,
+      "invoiced_cost": null
+    },
+    {
+      "arm": "C",
+      "observations": [
+        {
+          "scenario": "same_object",
+          "oracle_affected": true,
+          "invalidated": true,
+          "context_reexecutions": 1,
+          "samples_ms": [
+            5.620185,
+            6.558334,
+            6.420677,
+            6.542891,
+            6.266636,
+            6.48278,
+            6.542089,
+            6.306185,
+            6.319564,
+            6.424612,
+            6.375088,
+            6.345153
+          ]
+        },
+        {
+          "scenario": "causal_read_other_write",
+          "oracle_affected": true,
+          "invalidated": false,
+          "context_reexecutions": 0,
+          "samples_ms": [
+            7.280108,
+            6.714819,
+            6.647958,
+            6.597553,
+            6.610813,
+            6.526526,
+            5.549618,
+            6.513366,
+            6.702019,
+            6.407836,
+            5.556599,
+            6.720357
+          ]
+        },
+        {
+          "scenario": "independent",
+          "oracle_affected": false,
+          "invalidated": false,
+          "context_reexecutions": 0,
+          "samples_ms": [
+            6.597773,
+            6.518393,
+            6.545625,
+            6.452595,
+            6.723732,
+            5.801246,
+            6.343431,
+            6.581138,
+            6.526265,
+            6.794158,
+            6.550031,
+            5.869808
+          ]
+        }
+      ],
+      "false_positives": 0,
+      "false_negatives": 1,
+      "affected_fraction": 0.3333333333333333,
+      "valid_retention_fraction": 1,
+      "context_reexecutions": 1,
+      "mean_decision_ms": 6.425998916666667,
+      "p95_decision_ms": 6.794158,
+      "p99_decision_ms": 7.280108,
+      "serial_decisions_per_second": 155.61782891160618,
+      "model_calls": 0,
+      "model_tokens": 0,
+      "invoiced_cost": null
+    },
+    {
+      "arm": "D",
+      "observations": [
+        {
+          "scenario": "same_object",
+          "oracle_affected": true,
+          "invalidated": true,
+          "context_reexecutions": 1,
+          "samples_ms": [
+            6.327346,
+            5.054314,
+            4.786862,
+            4.602335,
+            5.469818,
+            4.683607,
+            5.330629,
+            6.044372,
+            6.713516,
+            6.404572,
+            6.459996,
+            6.19694
+          ]
+        },
+        {
+          "scenario": "causal_read_other_write",
+          "oracle_affected": true,
+          "invalidated": true,
+          "context_reexecutions": 1,
+          "samples_ms": [
+            6.911139,
+            6.302249,
+            5.798682,
+            8.640232,
+            6.512856,
+            6.631293,
+            6.622249,
+            6.924564,
+            7.227168,
+            5.974126,
+            6.019844,
+            6.964554
+          ]
+        },
+        {
+          "scenario": "independent",
+          "oracle_affected": false,
+          "invalidated": false,
+          "context_reexecutions": 0,
+          "samples_ms": [
+            7.643624,
+            6.602279,
+            6.831133,
+            7.279517,
+            6.976222,
+            6.764393,
+            5.589798,
+            9.575978,
+            6.674407,
+            5.670249,
+            6.664483,
+            7.047849
+          ]
+        }
+      ],
+      "false_positives": 0,
+      "false_negatives": 0,
+      "affected_fraction": 0.6666666666666666,
+      "valid_retention_fraction": 1,
+      "context_reexecutions": 2,
+      "mean_decision_ms": 6.442310972222222,
+      "p95_decision_ms": 8.640232,
+      "p99_decision_ms": 9.575978,
+      "serial_decisions_per_second": 155.22380156930834,
+      "model_calls": 0,
+      "model_tokens": 0,
+      "invoiced_cost": null
+    }
+  ]
+}
