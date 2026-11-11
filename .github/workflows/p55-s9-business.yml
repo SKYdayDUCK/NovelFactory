@@ -1,0 +1,76 @@
+name: S9 four-arm controlled writer rework
+on:
+  push:
+    branches: ['evidence/p55-s9-business-compare']
+    paths: ['.github/workflows/p55-s9-business.yml','evidence/p55/business/run.py','evidence/p55/business/registration.json']
+permissions:
+  contents: read
+jobs:
+  measure:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    services:
+      postgres:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_DB: nf_test
+          POSTGRES_USER: nf_dev
+          POSTGRES_PASSWORD: nf_dev_ci_only
+          POSTGRES_INITDB_ARGS: --data-checksums
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U nf_dev -d nf_test"
+          --health-interval 2s --health-timeout 2s --health-retries 30
+    env:
+      NF_DATABASE_URL: postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/nf_test
+      NF_TEST_DATABASE_URL: postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/nf_test
+      PYTHONHASHSEED: '550897'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: control
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 55d8979b5361a4837701d762feacd83036096b11
+          path: subject
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - name: Pin NF, run the unchanged guard and its PostgreSQL recovery tests
+        working-directory: subject
+        run: |
+          set -euo pipefail
+          mkdir -p ../results
+          test "$(git rev-parse HEAD)" = 55d8979b5361a4837701d762feacd83036096b11
+          git rev-parse HEAD > ../results/subject-sha.txt
+          cp ../control/evidence/p55/business/registration.json ../results/
+          uv sync --locked --group dev --python 3.12
+          .venv/bin/python -m alembic upgrade head
+          .venv/bin/python -m pytest -q tests/integration/test_s9_resolution.py --junitxml=../results/regressions.xml
+          .venv/bin/python -m benchmarks.p55_semantic_comparison --repeats 12 --output ../results/original-guard.json
+      - name: Execute the registered production-path tasks and rework on independent clones
+        working-directory: subject
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$PWD:$PWD/src"
+          .venv/bin/python ../control/evidence/p55/business/run.py --registration ../results/registration.json --output ../results/business.json
+          .venv/bin/python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('../results/business.json').read_text())
+          for row in report.pop('rows'):
+              print('S9_CONTROLLED_ROW=' + json.dumps(row, ensure_ascii=False, separators=(',',':')))
+          print('S9_CONTROLLED_META=' + json.dumps(report, ensure_ascii=False, separators=(',',':')))
+          PY
+          cd ../results
+          sha256sum *.json *.xml *.txt > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s9-four-arm-synthetic-writer-and-guard
+          path: results/
+          if-no-files-found: error
