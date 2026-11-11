@@ -129,7 +129,17 @@ def test_legacy_paid_review_requires_own_nf_installation(isolated_database, tmp_
         history = conn.execute("""SELECT seq,reason FROM aw_review_evidence WHERE review_id=%s ORDER BY seq""",
                                (refs["east-paid"],)).fetchall()
         assert [row["reason"] for row in history] == ["UNCERTAIN", "ORIGIN_MISMATCH"]
-        assert conn.execute(history_sql).fetchall() == before
+        after = conn.execute(history_sql).fetchall()
+        assert after == before
+        revision = conn.execute("SELECT version_num FROM aw_alembic_version").fetchone()["version_num"]
+        dispositions = conn.execute("""SELECT artifact_ref,state,decision_reason FROM aw_reviews ORDER BY artifact_ref""").fetchall()
+    if out := os.environ.get("AW_W4_LEGACY_REVIEW_EVIDENCE"):
+        Path(out).write_text(json.dumps({
+            "legacy_application_sha": LEGACY, "upgraded_aw_revision": revision, "claimed_installation": "west",
+            "source_scope": "Historical application requests backed by controlled settled NF receipt fixtures.",
+            "old_receipts": before, "preserved_receipts": after, "dispositions": dispositions,
+            "foreign_assignment_history": history, "paid_provider_requests": 0,
+        }, indent=2) + "\n")
     record_property("legacy_w4a_sha", LEGACY)
     record_property("old_paid_receipts_and_holds_preserved", len(before))
     record_property("review_dispositions", "manual=APPROVED,west-paid=APPROVED,east-paid=ESCALATED")

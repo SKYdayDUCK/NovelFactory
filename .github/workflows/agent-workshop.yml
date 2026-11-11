@@ -92,6 +92,8 @@ jobs:
           .venv/bin/python -m alembic upgrade head
           (cd workshop && .venv/bin/python -m alembic upgrade head)
       - name: Run Workshop contracts and stdio permissions
+        env:
+          AW_W4_LEGACY_REVIEW_EVIDENCE: ${{ github.workspace }}/workshop/w4-legacy-review.json
         working-directory: workshop
         run: .venv/bin/python -m pytest tests -q --junitxml=workshop-results.xml
       - name: Upgrade the released W0 service and verify existing bindings
@@ -135,4 +137,5 @@ jobs:
             workshop/w1-legacy-upgrade.xml
             workshop/dual-results.xml
             workshop/paired-restore.json
+            workshop/w4-legacy-review.json
           if-no-files-found: error
