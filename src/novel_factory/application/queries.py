@@ -57,6 +57,9 @@ class WorldQueryService:
         task = repo.one('tasks', {'task_id': task_id}, lock=lock)
         _require(task, 'VIEW_DENIED', 'Task is unavailable')
         grant = self.kernel.authorize(repo, principal, task['work_id'], capability, task['branch_id'])
+        return self._qualify_task(repo, principal, task, generation, grant)
+
+    def _qualify_task(self, repo, principal, task, generation, grant, *, work=None):
         _require(task['principal_id'] == principal.principal_id and task['grant_id'] == principal.grant_id,
                  'VIEW_DENIED', 'Task is unavailable')
         _require(task['generation'] == generation, 'STALE_GENERATION', 'Task generation is no longer current')
@@ -67,10 +70,11 @@ class WorldQueryService:
         if task['state'] == 'RUNNING':
             _require(task['lease_expiry'] is not None and task['lease_expiry'] > now,
                      'LEASE_EXPIRED', 'Task execution lease has expired')
-        record = repo.one('task_inputs', {'task_id': task_id, 'generation': generation})
+        record = repo.one('task_inputs', {'task_id': task['task_id'], 'generation': generation})
         _require(record, 'TASK_NOT_ACCEPTABLE', 'Task input is unavailable')
         spec = record['spec']
-        work = repo.one('works', {'work_id': task['work_id']})
+        if work is None:
+            work = repo.one('works', {'work_id': task['work_id']})
         _require(spec['policy_version'] == work['policy_version'], 'TASK_REBIND_REQUIRED', 'Task policy is no longer current')
         _require(fingerprint(spec) == record['input_hash'], 'TASK_NOT_ACCEPTABLE', 'Task input integrity failed')
         return task, grant, spec
@@ -205,11 +209,19 @@ class WorldQueryService:
     def _delivery_check(self, principal, request, packet, observations):
         with self.kernel.db.uow() as repo:
             wr = packet['read_cut']['world_ref']
-            self.kernel.authorize(repo, principal, wr['work_id'], 'READ', wr['branch_id'])
+            work, grant = self.kernel._authorize_with_work(repo, principal, wr['work_id'], 'READ', wr['branch_id'])
             head = repo.one('branches', {'work_id': wr['work_id'], 'branch_id': wr['branch_id']}, lock='share')
             # Fence concurrent result acceptance while the delivered query
             # becomes a mandatory dependency of this exact generation.
-            _, grant, _ = self._task(repo, principal, request['task_id'], request['generation'], lock='share')
+            task = repo.one('tasks', {'task_id': request['task_id']}, lock='share')
+            _require(task, 'VIEW_DENIED', 'Task is unavailable')
+            # The read and task can have different branch permissions. Time-limited
+            # resume grants also need their expiration rechecked after locking the task.
+            if ((task['work_id'], task['branch_id']) != (wr['work_id'], wr['branch_id'])
+                    or grant['role_id'] == 'resume_operator'):
+                work, grant = self.kernel._authorize_with_work(
+                    repo, principal, task['work_id'], 'READ', task['branch_id'])
+            self._qualify_task(repo, principal, task, request['generation'], grant, work=work)
             _require(grant['epoch'] == packet['grant']['epoch'], 'VIEW_DENIED', 'Authorization changed before delivery')
             for child, payload in observations:
                 record_query(repo, packet, child, payload, 'QUERY', head['head_revision_id'])

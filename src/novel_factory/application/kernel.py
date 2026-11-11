@@ -64,6 +64,11 @@ class Kernel:
                     "VIEW_DENIED", "Grant expired or policy changed")
 
     def authorize(self, r, principal, work_id, capability="READ", branch_id=None):
+        _, grant = self._authorize_with_work(r, principal, work_id, capability, branch_id)
+        return grant
+
+    def _authorize_with_work(self, r, principal, work_id, capability, branch_id):
+        """Return both SHARE-locked rows to a caller in this transaction."""
         require(isinstance(principal, Principal), "VIEW_DENIED", "Authenticated identity required")
         work = r.one("works", {"work_id":work_id}, lock="share")
         grant = r.one("grants", {"grant_id":principal.grant_id}, lock="share")
@@ -73,7 +78,7 @@ class Kernel:
         require(capability in grant["capabilities"], "VIEW_DENIED", "Operation is outside this grant")
         require(branch_id is None or grant["branch_ids"] == ["*"] or branch_id in grant["branch_ids"],
                 "VIEW_DENIED", "Resource unavailable for this identity")
-        return grant
+        return work, grant
 
     def revision(self, r, wr):
         validate_contract("WorldRef", wr)
