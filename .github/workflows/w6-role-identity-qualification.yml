@@ -1,0 +1,131 @@
+name: Verify W6 installed role isolation and historical upgrades together
+on:
+  push:
+    branches: ['audit/w6-installed-roles-integrated']
+    paths: ['.github/workflows/w6-role-identity-qualification.yml']
+permissions:
+  contents: read
+jobs:
+  identity:
+    name: Workshop identity and upgrade verification
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      workshop-db:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_PASSWORD: workshop-ci-admin
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U postgres" --health-interval 3s --health-timeout 5s --health-retries 20
+      nf-db:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_PASSWORD: nf-ci-admin
+        ports: ['5433:5432']
+        options: --health-cmd "pg_isready -U postgres" --health-interval 3s --health-timeout 5s --health-retries 20
+      redis:
+        image: redis:8.0.2
+        ports: ['6379:6379']
+        options: --health-cmd "redis-cli ping" --health-interval 2s --health-timeout 2s --health-retries 20
+    env:
+      AW_REDIS_TEST_URL: redis://127.0.0.1:6379/0
+      AW_DATABASE_URL: postgresql://aw_service:workshop-ci@127.0.0.1:5432/workshop_test
+      NF_DATABASE_URL: postgresql+psycopg://nf_service:nf-ci@127.0.0.1:5433/nf_test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 9ada7a1b9fb13eed23931b24b28ccb4f272bb560
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - name: Install both locked projects
+        run: |
+          uv sync --locked
+          uv sync --locked --project workshop --extra streams
+      - name: Verify the frozen NF contracts against the checked-out runtime
+        run: |
+          git worktree add --detach "$RUNNER_TEMP/nf-catalog" "$(jq -r .nf_commit workshop/contracts/nf-catalog.json)"
+          python workshop/scripts/freeze_nf_catalog.py "$RUNNER_TEMP/nf-catalog" > "$RUNNER_TEMP/pinned-catalog.json"
+          diff -u workshop/contracts/nf-catalog.json "$RUNNER_TEMP/pinned-catalog.json"
+          python workshop/scripts/freeze_nf_catalog.py . > "$RUNNER_TEMP/current-catalog.json"
+          diff -u <(jq -S 'del(.nf_commit)' "$RUNNER_TEMP/pinned-catalog.json") <(jq -S 'del(.nf_commit)' "$RUNNER_TEMP/current-catalog.json")
+      - name: Provision separate service identities and databases
+        env:
+          AW_POSTGRES: ${{ job.services.workshop-db.id }}
+          NF_POSTGRES: ${{ job.services.nf-db.id }}
+        run: |
+          docker exec -i "$AW_POSTGRES" psql -X -v ON_ERROR_STOP=1 -U postgres <<'SQL'
+          CREATE USER aw_service PASSWORD 'workshop-ci';
+          CREATE DATABASE workshop_test OWNER aw_service;
+          REVOKE CONNECT ON DATABASE workshop_test FROM PUBLIC;
+          CREATE DATABASE aw_upgrade_test OWNER aw_service;
+          REVOKE CONNECT ON DATABASE aw_upgrade_test FROM PUBLIC;
+          SQL
+          docker exec -i "$NF_POSTGRES" psql -X -v ON_ERROR_STOP=1 -U postgres <<'SQL'
+          CREATE USER nf_service PASSWORD 'nf-ci';
+          CREATE DATABASE nf_test OWNER nf_service;
+          REVOKE CONNECT ON DATABASE nf_test FROM PUBLIC;
+          CREATE USER nf_fixture CREATEDB PASSWORD 'nf-fixture-ci';
+          SQL
+      - name: Migrate the two service databases
+        run: |
+          .venv/bin/python -m alembic upgrade head
+          (cd workshop && .venv/bin/python -m alembic upgrade head)
+      - name: Run Workshop contracts and stdio permissions
+        working-directory: workshop
+        run: .venv/bin/python -m pytest tests -q --junitxml=workshop-results.xml
+      - name: Upgrade the released W0 service and verify existing bindings
+        working-directory: workshop
+        run: |
+          export AW_UPGRADE_DATABASE_URL="${AW_DATABASE_URL%/*}/aw_upgrade_test"
+          .venv/bin/python -m pytest -c pyproject.toml acceptance/test_w1_historical_upgrade.py -q -o junit_family=xunit1 --junitxml=w1-legacy-upgrade.xml
+      - name: Check the nine granted NF tools over live stdio
+        env:
+          NF_TEST_DATABASE_URL: postgresql+psycopg://nf_fixture:nf-fixture-ci@127.0.0.1:5433/postgres
+          NF_P5_CODEX_VERSION: 0.167.0-alpha.4
+          NF_W0_TOOL_MATRIX: ${{ github.workspace }}/workshop/nf-tools.json
+        run: |
+          prefix="$RUNNER_TEMP/novelfactory-codex"
+          npm install --prefix "$prefix" --no-save --no-audit --no-fund "@openai/codex@$NF_P5_CODEX_VERSION"
+          native_bin="$prefix/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/bin"
+          test "$("$native_bin/codex" --version)" = "codex-cli $NF_P5_CODEX_VERSION"
+          export PATH="$native_bin:$PATH"
+          PYTHONPATH="$PWD/workshop/qualification:$PWD/src" .venv/bin/python -m pytest -p matrix_probe -q tests/integration/test_p5_mcp.py tests/integration/test_p5_rolling.py --junitxml=workshop/nf-tools.xml
+      - name: Verify both live services and database isolation
+        run: |
+          .venv/bin/python -m pytest -c pyproject.toml workshop/acceptance/test_w0_dual_services.py -q -o junit_family=xunit1 --junitxml=workshop/dual-service-results.xml
+      - name: Verify dual-ledger recovery on the integrated NF source and native PG17
+        env:
+          AW_NF_SOURCE: ${{ github.workspace }}
+          AW_DUAL_TEST_ADMIN_URL: postgresql://postgres:nf-ci-admin@127.0.0.1:5433/postgres
+          AW_OFFLINE_WITNESS: ${{ github.workspace }}/workshop/aw-offline.json
+          AW_PAIRED_RESTORE_EVIDENCE: ${{ github.workspace }}/workshop/paired-restore.json
+          PG_BIN: /usr/lib/postgresql/17/bin
+        run: |
+          bash scripts/ci_install_pg17.sh postgresql-17 postgresql-client-17
+          PYTHONPATH="$PWD/workshop/qualification:$PWD/workshop/src:$PWD/src" .venv/bin/python -m pytest -p offline_witness -q workshop/integration --junitxml=workshop/dual-results.xml
+      - name: Verify both read-only role connections in one native Codex thread
+        env:
+          AW_DUAL_TEST_ADMIN_URL: postgresql://postgres:nf-ci-admin@127.0.0.1:5433/postgres
+        run: |
+          bash scripts/ci_install_pg17.sh openssh-client openssh-server
+          native="$RUNNER_TEMP/novelfactory-codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/bin/codex"
+          bash workshop/acceptance/dual_codex/run.sh "$GITHUB_WORKSPACE" "$GITHUB_WORKSPACE/workshop" "$native" "$GITHUB_WORKSPACE/workshop/codex-dual"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: workshop-results
+          path: |
+            workshop/workshop-results.xml
+            workshop/nf-tools.xml
+            workshop/nf-tools.json
+            workshop/dual-service-results.xml
+            workshop/w1-legacy-upgrade.xml
+            workshop/dual-results.xml
+            workshop/paired-restore.json
+            workshop/aw-offline.json
+            workshop/codex-dual/receipt.json
+          if-no-files-found: error
