@@ -421,6 +421,168 @@
         "cost_status"
       ],
       "additionalProperties": false
+    },
+    "DeviationAssessment": {
+      "type": "object",
+      "properties": {
+        "reference_node_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uniqueItems": true,
+          "maxItems": 32
+        },
+        "affected_node_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uniqueItems": true,
+          "maxItems": 32
+        },
+        "characters": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "type": "object",
+            "properties": {
+              "actor_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "plausibility": {
+                "enum": [
+                  "PLAUSIBLE",
+                  "QUESTIONED",
+                  "INSUFFICIENT_EVIDENCE"
+                ]
+              },
+              "basis": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "arc_impact": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "basis_event_refs": {
+                "type": "array",
+                "items": {
+                  "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EventRef"
+                },
+                "maxItems": 32,
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "actor_id",
+              "plausibility",
+              "basis",
+              "arc_impact",
+              "basis_event_refs"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "trajectory": {
+          "type": "object",
+          "properties": {
+            "disposition": {
+              "enum": [
+                "POSSIBLE_RETURN",
+                "DIVERGENCE",
+                "UNDETERMINED"
+              ]
+            },
+            "return_direction": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "alternative_direction": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "rationale": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            }
+          },
+          "required": [
+            "disposition",
+            "return_direction",
+            "alternative_direction",
+            "rationale"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "reference_node_ids",
+        "affected_node_ids",
+        "characters",
+        "trajectory"
+      ],
+      "additionalProperties": false
+    },
+    "VolumeReviewOutput": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200000
+        },
+        "event_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EventRef"
+          },
+          "maxItems": 128
+        },
+        "important_deltas": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "maxItems": 32
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EvidenceRef"
+          },
+          "maxItems": 128
+        },
+        "assessment": {
+          "$ref": "#/$defs/DeviationAssessment"
+        }
+      },
+      "required": [
+        "text",
+        "event_refs",
+        "important_deltas",
+        "evidence_refs"
+      ],
+      "additionalProperties": false
     }
   }
 }

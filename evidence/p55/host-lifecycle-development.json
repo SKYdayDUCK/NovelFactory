@@ -1,0 +1,17 @@
+{
+  "remote_job": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43003779059/job/130466078810",
+  "remote_sha_prefix": "441db1a",
+  "observations": [
+    "The Redis banquet stopped with MODEL_ADAPTER_FAILURE after at least one stored result. The fixture reported no callback errors. The available banquet log contains no traceback from the adapter.",
+    "A separate Codex MCP probe in that job failed removing a still-changing .tmp/plugins-clone directory with ENOTEMPTY. Both former shutdown paths killed only the immediate app-server child.",
+    "The pinned codex-cli 0.167.0-alpha.4 lists plugins and remote_plugin as enabled by default. The previous production adapter mapped protocol or deadline failures to explicit CODEX error codes."
+  ],
+  "development_run": {
+    "passed": 8,
+    "failed": 1,
+    "skipped": 0,
+    "failure": "The new child-lifecycle test expected SUCCEEDED accounting from a token-only loopback fixture. The real Host stored the validated result and sent exactly one provider request, while the call's accounting correctly remained UNKNOWN.",
+    "correction": "Assert the immutable candidate and COMPLETED Host journal separately from UNKNOWN accounting, then check child shutdown and one send."
+  },
+  "scope": "The old banquet log establishes the generic error only. The orphan-writer race was directly observed in the separate probe and recreated by the process-lifecycle regressions. The fixture makes no paid provider calls."
+}

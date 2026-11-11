@@ -72,16 +72,34 @@ def fence_recovered_tasks(engine, object_store, *, tables=None):
         task_table, calls, outbox = tables["tasks"], tables["call_attempts"], tables["outbox"]
         rows = conn.execute(select(task_table).where(task_table.c.state.not_in(
             ["ACCEPTED", "CANCELLED", "FAILED"])).order_by(task_table.c.task_id).with_for_update()).mappings().all()
+        # An older backup may predate the additive workflow migration.
+        has_waits = inspect(conn).has_table("nf_workflow_waits")
         for row in rows:
             task = dict(row)
             spec = {**service._spec(conn, task), "context_bundle_id": task["context_bundle_id"],
                     "dependency_fingerprint": task["dependency_fingerprint"]}
             generation = task["generation"] + 1
-            service._save_input(conn, task["task_id"], generation, spec, "PAUSED")
+            state = "BLOCKED" if task["state"] == "BLOCKED" else "PAUSED"
+            service._save_input(conn, task["task_id"], generation, spec, state)
+            if state == "BLOCKED" and has_waits:
+                # Preserve the barrier when fencing generations. Converting an
+                # unresolved wait to a manually resumable PAUSED bypasses it.
+                params = {"id": task["task_id"], "old": task["generation"], "new": generation}
+                conn.execute(text("""
+                    INSERT INTO nf_workflow_waits(task_id,generation,mode,grant_epoch,created_at)
+                    SELECT task_id,:new,mode,grant_epoch,created_at FROM nf_workflow_waits
+                    WHERE task_id=:id AND generation=:old AND woken_at IS NULL
+                """), params)
+                conn.execute(text("""
+                    INSERT INTO nf_workflow_edges(task_id,generation,predecessor_id)
+                    SELECT e.task_id,:new,e.predecessor_id FROM nf_workflow_edges e
+                    JOIN nf_workflow_waits w USING (task_id,generation)
+                    WHERE e.task_id=:id AND e.generation=:old AND w.woken_at IS NULL
+                """), params)
             conn.execute(task_table.update().where(task_table.c.task_id == task["task_id"]).values(
-                generation=generation, state="PAUSED", lease_owner=None, lease_expiry=None, attempt_id=None))
+                generation=generation, state=state, lease_owner=None, lease_expiry=None, attempt_id=None))
             fenced.append({"task_id": task["task_id"], "old_generation": task["generation"],
-                           "generation": generation, "state": "PAUSED"})
+                           "generation": generation, "state": state})
         conn.execute(calls.update().where(calls.c.state == "SENT").values(state="UNKNOWN"))
         conn.execute(outbox.update().where(outbox.c.state == "DELIVERING").values(
             state="PENDING", generation=outbox.c.generation + 1, lease_owner=None, lease_expiry=None))

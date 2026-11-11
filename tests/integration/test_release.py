@@ -64,7 +64,7 @@ def runtime_grant(k, f, role):
 def setup_batch(k, *, count=2, dependent=False, fixture=None):
     f = fixture if fixture is not None else load_fixture(k)
     p, wr = f["principal"], f["world_ref"]
-    planning, narrative, release = PlanningService(k), NarrativeService(k), ReleaseService(k)
+    planning = PlanningService(k)
     volume_id, narrative_id = uid(), uid()
     key_prefix = volume_id + ":" if fixture is not None else ""
     volume = {"schema_version": "2.0", "volume_id": volume_id, "contract_revision_id": uid(), "input_world_ref": wr,
@@ -82,6 +82,13 @@ def setup_batch(k, *, count=2, dependent=False, fixture=None):
         "considered_options": [{"option_id": uid(), "summary": "显式前驱交接", "disposition": "SELECTED", "reason": "可验证"}]}}
     plan_ref = planning.save_plan(p, plan, key_prefix + "plan")
     planning.adopt_plan(p, wr, plan_ref, None, key_prefix + "adopt")
+    return batch_for_plan(k, f, plan, plan_ref, narrative_id=narrative_id, key_prefix=key_prefix, dependent=dependent)
+
+
+def batch_for_plan(k, f, plan, plan_ref, *, narrative_id, key_prefix, dependent=False):
+    p, wr = f["principal"], f["world_ref"]
+    narrative, release = NarrativeService(k), ReleaseService(k)
+    volume_id, nodes = plan["volume_id"], plan["nodes"]
     scene_ids = [uid() for _ in nodes]
     interval = {"start": point(1), "end": point(1, 1), "bounds": "[)"}
     slots = [{"scene_id": sid, "story_interval": interval, "reader_cut_ordinal": i,

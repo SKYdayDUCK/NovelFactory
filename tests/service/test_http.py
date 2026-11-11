@@ -251,3 +251,39 @@ def test_two_independent_http_processes_share_task_and_revocation_state(service_
             process.wait(timeout=10)
         for stream in logs:
             stream.close()
+
+
+def test_http_query_checks_its_full_contract_once_and_keeps_direct_call_validation(service_env, service_world, monkeypatch):
+    from novel_factory.application import queries
+    from novel_factory.domain.errors import DomainError
+    from novel_factory.interfaces import http as transport
+
+    client = make_client(service_env, service_world)
+    validations = []
+
+    def audited(name, value, version='2.0'):
+        if name == 'UnifiedQueryRequest':
+            validations.append(name)
+        return validate_contract(name, value, version)
+
+    monkeypatch.setattr(queries, 'validate_contract', audited)
+    monkeypatch.setattr(transport, 'validate_contract', audited)
+    app = create_app(service_env['kernel'])
+    with loopback_server(app) as url, httpx.Client(base_url=url, trust_env=False) as http:
+        response = http.post('/api/v1/queries/timeline', json=client['request'], headers=headers(client))
+        assert response.status_code == 200
+        assert response.json()['payload'] == client['expected_payload']
+        assert len(validations) == 1
+        invalid = {**client['request'], 'extra_field': True}
+        # Preserve request-schema rejection before bearer authentication.
+        assert http.post('/api/v1/queries/timeline', json=invalid).status_code == 422
+
+    with pytest.raises(DomainError) as failure:
+        app.state.query_service.query(None, invalid)
+    assert failure.value.code == 'INVALID_ARGUMENT'
+    source = deepcopy(client['request'])
+    prepared = queries.PreparedWorldQuery(source)
+    source['query'].clear()
+    first = prepared.materialize()
+    first['query'].clear()
+    assert prepared.materialize() == client['request']

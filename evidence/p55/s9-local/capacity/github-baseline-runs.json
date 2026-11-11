@@ -1,0 +1,183 @@
+[
+  {
+    "name": "P3 scale experiments with strict unmet gates",
+    "id": 43008211046,
+    "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43008211046",
+    "status": "completed",
+    "conclusion": "failure",
+    "jobs": [
+      {
+        "name": "Measured 500-read-soak",
+        "id": 130480938943,
+        "conclusion": "success",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43008211046/job/130480938943"
+      },
+      {
+        "name": "Measured 500-mixed",
+        "id": 130480939284,
+        "conclusion": "success",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43008211046/job/130480939284"
+      },
+      {
+        "name": "Measured 1000-read-open",
+        "id": 130480939322,
+        "conclusion": "failure",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43008211046/job/130480939322",
+        "gate_log": [
+          "\"capacity_gate\": \"NOT_MET\",",
+          "\"offered_wire_rate_gate\": \"NOT_MET\","
+        ]
+      }
+    ]
+  },
+  {
+    "name": "P2 measured capacity and recovery",
+    "id": 43008211008,
+    "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43008211008",
+    "status": "completed",
+    "conclusion": "failure",
+    "jobs": [
+      {
+        "name": "200 agents / mixed / full capacity gate",
+        "id": 130480938222,
+        "conclusion": "success",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43008211008/job/130480938222"
+      },
+      {
+        "name": "50 agents / mixed / full capacity gate",
+        "id": 130480938574,
+        "conclusion": "success",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43008211008/job/130480938574"
+      },
+      {
+        "name": "50 agents / overload / full capacity gate",
+        "id": 130480938613,
+        "conclusion": "failure",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43008211008/job/130480938613",
+        "gate_log": [
+          "\"correctness\": \"PASS\",",
+          "\"first_attempt_capacity_gate\": \"NOT_MET\",",
+          "\"bounded_recovery_business_gate\": \"PASS\",",
+          "\"capacity_gate\": \"NOT_MET\",",
+          "\"first_attempt_failure_count\": 123,",
+          "\"correctness\": \"PASS\",",
+          "\"first_attempt_capacity_gate\": \"NOT_MET\",",
+          "\"bounded_recovery_business_gate\": \"PASS\",",
+          "\"capacity_gate\": \"NOT_MET\",",
+          "\"first_attempt_failure_count\": 127,"
+        ]
+      },
+      {
+        "name": "200 agents / overload / full capacity gate",
+        "id": 130480938683,
+        "conclusion": "failure",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43008211008/job/130480938683",
+        "gate_log": [
+          "\"correctness\": \"PASS\",",
+          "\"first_attempt_capacity_gate\": \"NOT_MET\",",
+          "\"bounded_recovery_business_gate\": \"PASS\",",
+          "\"capacity_gate\": \"NOT_MET\",",
+          "\"first_attempt_failure_count\": 560,",
+          "\"correctness\": \"PASS\",",
+          "\"first_attempt_capacity_gate\": \"NOT_MET\",",
+          "\"bounded_recovery_business_gate\": \"PASS\",",
+          "\"capacity_gate\": \"NOT_MET\",",
+          "\"first_attempt_failure_count\": 564,"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "P1 and P2 production integrity",
+    "id": 43008211041,
+    "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43008211041",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "name": "PostgreSQL 17 integration, concurrency and restore",
+        "id": 130480938800,
+        "conclusion": "success",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43008211041/job/130480938800",
+        "gate_log": [
+          "747 passed, 17 skipped, 1 warning in 468.35s (0:07:48)",
+          "\"correctness\": \"PASS\",",
+          "\"first_attempt_capacity_gate\": \"PASS\",",
+          "\"bounded_recovery_business_gate\": \"PASS\",",
+          "\"capacity_gate\": \"PASS\",",
+          "\"first_attempt_failure_count\": 0,"
+        ]
+      },
+      {
+        "name": "Schema, domain, HTTP and production boundaries",
+        "id": 130480939019,
+        "conclusion": "success",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43008211041/job/130480939019"
+      }
+    ]
+  },
+  {
+    "name": "P4 real isolated WAL PITR and verified recovery",
+    "id": 43008211062,
+    "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43008211062",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "name": "Physical base backup, SIGKILL, WAL replay and application verification",
+        "id": 130480938100,
+        "conclusion": "success",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43008211062/job/130480938100"
+      }
+    ]
+  },
+  {
+    "name": "P5 native desktop resume",
+    "id": 43008211197,
+    "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43008211197",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "name": "native-desktop",
+        "id": 130480938419,
+        "conclusion": "success",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43008211197/job/130480938419"
+      }
+    ]
+  },
+  {
+    "name": "P3 P4 measured evidence",
+    "id": 43008211026,
+    "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43008211026",
+    "status": "completed",
+    "conclusion": "failure",
+    "jobs": [
+      {
+        "name": "Same world CPU and SQL paired comparison",
+        "id": 130480938324,
+        "conclusion": "success",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43008211026/job/130480938324"
+      },
+      {
+        "name": "Independent load process / 200 / mixed",
+        "id": 130480938529,
+        "conclusion": "success",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43008211026/job/130480938529"
+      },
+      {
+        "name": "Independent load process / 200 / overload",
+        "id": 130480938587,
+        "conclusion": "failure",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43008211026/job/130480938587",
+        "gate_log": [
+          "\"correctness\": \"PASS\",",
+          "\"first_attempt_capacity_gate\": \"NOT_MET\",",
+          "\"bounded_recovery_business_gate\": \"PASS\",",
+          "\"capacity_gate\": \"NOT_MET\",",
+          "\"first_attempt_failure_count\": 632,"
+        ]
+      }
+    ]
+  }
+]
