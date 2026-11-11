@@ -1,0 +1,226 @@
+{
+  "hotspot-200-A-1.json.gz": {
+    "affinity": [
+      6,
+      7
+    ],
+    "all_attempts_latency_ms": {
+      "count": 3281,
+      "p50_ms": 1652.2993,
+      "p95_ms": 11145.039,
+      "p99_ms": 16888.8337
+    },
+    "authentication": {
+      "active": 0,
+      "admitted": 2300,
+      "completed": 2300,
+      "peak_active": 2,
+      "peak_queued": 64,
+      "queued": 0,
+      "rejected": 978,
+      "timed_out": 0,
+      "wait_seconds_total": 632.765239576991
+    },
+    "business": {
+      "complete_agents": 138,
+      "complete_before_extra_burst": 200,
+      "fixture_sha256": "cf22c6daa9a25530ee6072a7f1a7e6fc6dd9d9856656be71e66ff2f5abb5560a",
+      "fulfilled_calls": 2067,
+      "planned_calls": 2141,
+      "source_sha": "e757419aea6f00b9388fee14a92f4ea3b97444c0",
+      "total_agents": 200
+    },
+    "client_cpu_s": 38.27593,
+    "client_pool_wait_ms": {
+      "count": 3281,
+      "p50_ms": 0.004,
+      "p95_ms": 144.5532,
+      "p99_ms": 360.2406
+    },
+    "client_wire_rps_all_phases": 17.749198201616608,
+    "conflicts": 19,
+    "correctness_errors": [],
+    "db_connections_end": 0,
+    "db_reads": 0,
+    "deadlocks": 0,
+    "dirty": false,
+    "dispatch_rps": 38.45891767597263,
+    "duplicates": 21,
+    "duration_s": 184.882234,
+    "effective_rps": 10.9637,
+    "effective_service_flags": [
+      false
+    ],
+    "environment_sha": "e757419aea6f00b9388fee14a92f4ea3b97444c0",
+    "event_loop_delay_by_process": [
+      {
+        "count": 3388,
+        "p50_ms": 0.9439,
+        "p95_ms": 17.208,
+        "p99_ms": 61.7976
+      }
+    ],
+    "failed_sql": 0,
+    "file": "hotspot-200-A-1.json.gz",
+    "first_attempt_429": 614,
+    "fixture_sha256": "cf22c6daa9a25530ee6072a7f1a7e6fc6dd9d9856656be71e66ff2f5abb5560a",
+    "gate": "NOT_MET",
+    "harness_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda",
+    "ingress": {
+      "active": 0,
+      "admitted": 3278,
+      "completed": 3278,
+      "peak_active": 128,
+      "peak_queued": 0,
+      "queued": 0,
+      "rejected": 3,
+      "timed_out": 0,
+      "wait_seconds_total": 0.04566307804452663
+    },
+    "new_world_commits": 21,
+    "operations": {
+      "active": 0,
+      "admitted": 2079,
+      "completed": 2067,
+      "peak_active": 6,
+      "peak_queued": 64,
+      "queued": 0,
+      "rejected": 75,
+      "timed_out": 158,
+      "wait_seconds_total": 1049.704570922021
+    },
+    "peak_db_connections": 8,
+    "pg_cpu_scope": "May omit live backends when /proc children is unavailable; zero is not proof of absent DB CPU",
+    "pg_proc_cpu_estimate_s": 15.97,
+    "query_cache_hits": null,
+    "query_cache_misses": null,
+    "raw_sha256": "0feb8bd8477d534a689739bf163eccfde89fee089eef49d67478977286efaf61",
+    "retries": 1140,
+    "service_cpu_s": 90.521356,
+    "service_received_rps_all_phases": 17.749181454595895,
+    "source_sha": "e757419aea6f00b9388fee14a92f4ea3b97444c0",
+    "sql": 51955,
+    "statuses": {
+      "200": 2048,
+      "409": 19,
+      "429": 1214
+    },
+    "unique_commit_target": 21,
+    "wal_bytes": 10102696,
+    "wire_rps": 30.192895427344922,
+    "world_tps": 0.1136,
+    "world_unchanged": null
+  },
+  "hotspot-200-B-1.json.gz": {
+    "affinity": [
+      6,
+      7
+    ],
+    "all_attempts_latency_ms": {
+      "count": 3287,
+      "p50_ms": 1873.4017,
+      "p95_ms": 11870.7248,
+      "p99_ms": 17788.2574
+    },
+    "authentication": {
+      "active": 0,
+      "admitted": 2322,
+      "completed": 2320,
+      "peak_active": 2,
+      "peak_queued": 64,
+      "queued": 0,
+      "rejected": 950,
+      "timed_out": 17,
+      "wait_seconds_total": 718.1081150180189
+    },
+    "business": {
+      "complete_agents": 146,
+      "complete_before_extra_burst": 200,
+      "fixture_sha256": "cf22c6daa9a25530ee6072a7f1a7e6fc6dd9d9856656be71e66ff2f5abb5560a",
+      "fulfilled_calls": 2076,
+      "planned_calls": 2141,
+      "source_sha": "06adae39e576c0cb96978b5b8b1c11e727b5fc9b",
+      "total_agents": 200
+    },
+    "client_cpu_s": 39.854121,
+    "client_pool_wait_ms": {
+      "count": 3287,
+      "p50_ms": 0.0042,
+      "p95_ms": 0.2763,
+      "p99_ms": 591.9511
+    },
+    "client_wire_rps_all_phases": 17.579593898434318,
+    "conflicts": 19,
+    "correctness_errors": [],
+    "db_connections_end": 0,
+    "db_reads": 0,
+    "deadlocks": 0,
+    "dirty": false,
+    "dispatch_rps": 34.7634037193084,
+    "duplicates": 21,
+    "duration_s": 186.989822,
+    "effective_rps": 10.8883,
+    "effective_service_flags": [
+      true
+    ],
+    "environment_sha": "06adae39e576c0cb96978b5b8b1c11e727b5fc9b",
+    "event_loop_delay_by_process": [
+      {
+        "count": 3393,
+        "p50_ms": 0.9542,
+        "p95_ms": 22.9848,
+        "p99_ms": 62.6634
+      }
+    ],
+    "failed_sql": 0,
+    "file": "hotspot-200-B-1.json.gz",
+    "first_attempt_429": 624,
+    "fixture_sha256": "cf22c6daa9a25530ee6072a7f1a7e6fc6dd9d9856656be71e66ff2f5abb5560a",
+    "gate": "NOT_MET",
+    "harness_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda",
+    "ingress": {
+      "active": 0,
+      "admitted": 3287,
+      "completed": 3287,
+      "peak_active": 124,
+      "peak_queued": 0,
+      "queued": 0,
+      "rejected": 0,
+      "timed_out": 0,
+      "wait_seconds_total": 0.04634324700873549
+    },
+    "new_world_commits": 21,
+    "operations": {
+      "active": 0,
+      "admitted": 2082,
+      "completed": 2076,
+      "peak_active": 6,
+      "peak_queued": 64,
+      "queued": 0,
+      "rejected": 69,
+      "timed_out": 175,
+      "wait_seconds_total": 1095.924698904002
+    },
+    "peak_db_connections": 8,
+    "pg_cpu_scope": "May omit live backends when /proc children is unavailable; zero is not proof of absent DB CPU",
+    "pg_proc_cpu_estimate_s": 16.02,
+    "query_cache_hits": null,
+    "query_cache_misses": null,
+    "raw_sha256": "5f3eb4a4ae6ab1f3efd90badd19ffa4336ee278bd2dbca2b2643db0445f81bf3",
+    "retries": 1146,
+    "service_cpu_s": 92.82951100000001,
+    "service_received_rps_all_phases": 17.579592314946268,
+    "source_sha": "06adae39e576c0cb96978b5b8b1c11e727b5fc9b",
+    "sql": 52155,
+    "statuses": {
+      "200": 2057,
+      "409": 19,
+      "429": 1211
+    },
+    "unique_commit_target": 21,
+    "wal_bytes": 9990152,
+    "wire_rps": 24.55817894047904,
+    "world_tps": 0.1123,
+    "world_unchanged": null
+  }
+}

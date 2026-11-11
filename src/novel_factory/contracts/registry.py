@@ -6,6 +6,7 @@ through the Draft 2020-12 validator. No schema retrieval uses the network.
 """
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from functools import lru_cache
 from typing import Any, Annotated, ClassVar, Literal, Union
@@ -15,8 +16,11 @@ from jsonschema import Draft202012Validator, FormatChecker
 from referencing import Registry, Resource
 from pydantic import BaseModel, ConfigDict, Field, RootModel, create_model, model_validator
 
-from ._schema_bundle import SCHEMAS
 from novel_factory.domain.errors import DomainError
+from ._schema_bundle import SCHEMAS
+from .linked import linked_validator
+
+_STATIC_SCHEMA_LINKS = os.environ.get("NF_SCION_SCHEMA_LINKS") == "1"
 
 _BY_ID = {schema["$id"]: schema for schema in SCHEMAS.values()}
 _REGISTRY = Registry().with_resources((key, Resource.from_contents(value)) for key, value in _BY_ID.items())
@@ -61,6 +65,12 @@ def plain(value: Any) -> Any:
 
 def validate_contract(name: str, payload: Any, version: str = "2.0") -> Any:
     value = plain(payload)
+    if _STATIC_SCHEMA_LINKS:
+        source = _source(name, version)
+        linked = linked_validator(source["$id"], name)
+        if linked is not None and linked.is_valid(value):
+            return deepcopy(value)
+    # Retain ordinary registry evaluation for every rejection or fallback.
     errors = sorted(_validator(name, version).iter_errors(value), key=lambda e: str(list(e.path)))
     if errors:
         # Do not echo instance values: they can be secret or attacker-controlled.
