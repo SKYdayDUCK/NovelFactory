@@ -1,0 +1,227 @@
+{
+  "run": 43110195167,
+  "jobs": [
+    {
+      "name": "PostgreSQL 17 integration, concurrency and restore",
+      "id": 130823854988,
+      "run_id": 43110195167,
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "number": 1,
+          "conclusion": "success"
+        },
+        {
+          "name": "Initialize containers",
+          "number": 2,
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "number": 3,
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "number": 4,
+          "conclusion": "success"
+        },
+        {
+          "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+          "number": 5,
+          "conclusion": "success"
+        },
+        {
+          "name": "Install PostgreSQL 17 client and Linux role isolation dependencies",
+          "number": 6,
+          "conclusion": "success"
+        },
+        {
+          "name": "Install the pinned native Codex app-server for the restart test",
+          "number": 7,
+          "conclusion": "success"
+        },
+        {
+          "name": "Install locked dependencies",
+          "number": 8,
+          "conclusion": "success"
+        },
+        {
+          "name": "Record runtime and initialize fresh PostgreSQL database",
+          "number": 9,
+          "conclusion": "success"
+        },
+        {
+          "name": "All tests with real PostgreSQL 17, race and recovery evidence",
+          "number": 10,
+          "conclusion": "success"
+        },
+        {
+          "name": "Compare current genesis replay with the pinned baseline",
+          "number": 11,
+          "conclusion": "success"
+        },
+        {
+          "name": "Compare current strict canonical checks on the same world",
+          "number": 12,
+          "conclusion": "success"
+        },
+        {
+          "name": "Reproduce historical Context Compiler experiment at e0b0f2b",
+          "number": 13,
+          "conclusion": "success"
+        },
+        {
+          "name": "Probe actual memory services and authorization boundaries",
+          "number": 14,
+          "conclusion": "success"
+        },
+        {
+          "name": "Persist the complete six-scene TEST_FIXTURE production run",
+          "number": 15,
+          "conclusion": "success"
+        },
+        {
+          "name": "Exercise the real HTTP and PostgreSQL behavioral load harness",
+          "number": 16,
+          "conclusion": "success"
+        },
+        {
+          "name": "Join A-H design checks to executed JUnit evidence",
+          "number": 17,
+          "conclusion": "success"
+        },
+        {
+          "name": "Upload PostgreSQL, concurrency and recovery audit evidence",
+          "number": 18,
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+          "number": 33,
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "number": 34,
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "number": 35,
+          "conclusion": "success"
+        },
+        {
+          "name": "Stop containers",
+          "number": 36,
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "number": 37,
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "name": "Schema, domain, HTTP and production boundaries",
+      "id": 130823855352,
+      "run_id": 43110195167,
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "number": 1,
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "number": 2,
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "number": 3,
+          "conclusion": "success"
+        },
+        {
+          "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+          "number": 4,
+          "conclusion": "success"
+        },
+        {
+          "name": "Install locked dependencies",
+          "number": 5,
+          "conclusion": "success"
+        },
+        {
+          "name": "Schema and original design validation",
+          "number": 6,
+          "conclusion": "success"
+        },
+        {
+          "name": "Original standalone mechanisms",
+          "number": 7,
+          "conclusion": "success"
+        },
+        {
+          "name": "Python unit, contract and ASGI slow-body regression tests",
+          "number": 8,
+          "conclusion": "success"
+        },
+        {
+          "name": "Deterministic Chinese memory retrieval evaluation",
+          "number": 9,
+          "conclusion": "success"
+        },
+        {
+          "name": "Same-source Chinese context and review ablations",
+          "number": 10,
+          "conclusion": "success"
+        },
+        {
+          "name": "Upload immutable unit and schema run evidence",
+          "number": 11,
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+          "number": 20,
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "number": 21,
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "number": 22,
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "number": 23,
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "p1-postgres-concurrency-1",
+      "id": 13897336019,
+      "digest": "sha256:246f443db88736b4c4d38f1bc63d2a80d758b5923080947b1fa8450fe12e5fae",
+      "size_in_bytes": 1780622
+    },
+    {
+      "name": "p1-schema-unit-1",
+      "id": 13895327927,
+      "digest": "sha256:4bcc1eddbcc819d97174e75a277b3e2615e650826305c7ffe7eacfe0dd546a63",
+      "size_in_bytes": 301107
+    }
+  ]
+}
