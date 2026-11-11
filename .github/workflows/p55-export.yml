@@ -37,6 +37,12 @@ jobs:
           run-id: 43035161204
           name: p3-scale-500-read-soak-1
           path: artifact-previous-attempt-1
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 43036514307
+          name: p3-scale-500-read-soak-2
+          path: artifact-candidate-attempt-2
       - name: Check exact manifest, redact infrastructure fields, retain request outcomes
         run: python instructions/evidence/p55/checkpoints/export_fixed_receipts.py
       - name: Publish to the dedicated evidence branch only

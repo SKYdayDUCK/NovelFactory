@@ -37,6 +37,7 @@ fixed_keys = {'index','agent','kind','started_seconds','arrival_delay_ms','valid
 summaries = []
 for arm, run, job, artifact in (
     ('candidate-attempt-1',43036514307,130576649020,'p3-scale-500-read-soak-1'),
+    ('candidate-attempt-2',43036514307,130586087962,'p3-scale-500-read-soak-2'),
     ('previous-attempt-1',43035161204,130571937813,'p3-scale-500-read-soak-1'),
 ):
     binary = (Path('artifact-'+arm)/'result.json').read_bytes()
