@@ -1,0 +1,752 @@
+{
+  "checkout_and_candidate": [
+    {
+      "sha": "dff58688fdb1f931a5906f885ed513ed12134026",
+      "tree": "788dc4b190299894509593a23982452f0362f9ef",
+      "parents": [
+        "f2c584ec8e738e09d31b05ddd5c032bb2b8f96b1",
+        "695668b87f6a76acbe7e27c71fcb259b7b3f0795"
+      ]
+    },
+    {
+      "sha": "695668b87f6a76acbe7e27c71fcb259b7b3f0795",
+      "tree": "788dc4b190299894509593a23982452f0362f9ef",
+      "parents": [
+        "b0fac90f71903b7349ccd57e643ae145148180d0"
+      ]
+    }
+  ],
+  "capacities": {
+    "raw/p2-load-200-overload-1/run-1/load.json": {
+      "source": {
+        "run": 43081588236,
+        "name": "p2-load-200-overload-1",
+        "id": 13885391227,
+        "digest": "sha256:af0d34c03cb6e395f16e8711620b84f3479e6e3b5c4004c2142496aa32542d59",
+        "size": 1395222
+      },
+      "json_sha256": "f1a7df1e5ae03781195d0a650b44526540cbb3566764aac1c0f3fdc670154b69",
+      "json_path": "raw/p2-load-200-overload-1/run-1/load.json",
+      "schema": "p2-load-2",
+      "environment": {
+        "git_sha": "dff58688fdb1f931a5906f885ed513ed12134026",
+        "git_dirty": true,
+        "cpu_models": [
+          "AMD EPYC 7763 64-Core Processor"
+        ],
+        "logical_cpu_count": 4,
+        "python": "3.12.16 (main, Oct 26 2026, 02:50:49) [GCC 13.3.0]",
+        "versions": {
+          "SQLAlchemy": "2.0.57",
+          "psycopg": "3.3.8",
+          "uvicorn": "0.54.0",
+          "httpx": "0.28.1"
+        },
+        "api_processes": 1
+      },
+      "reproduction_argv": [
+        "/home/runner/work/NovelFactory/NovelFactory/benchmarks/p2_behavioral_load.py",
+        "--agents",
+        "200",
+        "--profile",
+        "overload",
+        "--hot-fraction",
+        "0.8",
+        "--arrival-rps",
+        "10",
+        "--open-loop-rps",
+        "1000",
+        "--rounds",
+        "5",
+        "--max-attempts",
+        "5",
+        "--retry-budget-seconds",
+        "30",
+        "--gate-scope",
+        "capacity",
+        "--service-mode",
+        "isolated-process",
+        "--api-processes",
+        "1",
+        "--output",
+        "ci-evidence/run-1/load.json"
+      ],
+      "open_loop_offered_rate": {
+        "gate": "NOT_MET",
+        "transport_header_starts": 1000,
+        "transport_header_start_rps": 30.51072479463672,
+        "target_rps": 1000.0,
+        "first_attempts": 1000,
+        "actual_call_start_rps": 36.190080737208234,
+        "start_window_seconds": 27.60424900000001,
+        "max_schedule_delay_ms": 26605.4279,
+        "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+        "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+      },
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "NOT_MET",
+      "bounded_recovery_business_gate": "PASS",
+      "capacity_gate": "NOT_MET",
+      "correctness": {
+        "new_world_revisions": 21,
+        "expected_new_world_revisions": 21,
+        "new_selected_effect_groups": 21,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99",
+        "independent_resource_final_quantities": [
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99"
+        ]
+      },
+      "metrics": {
+        "duration_seconds": 177.825217,
+        "planned_requests": 2141,
+        "emitted_requests": 3104,
+        "completed_requests": 3104,
+        "first_attempt_failure_count": 562,
+        "first_attempt_status_counts": {
+          "200": 1560,
+          "409": 19,
+          "429": 562
+        },
+        "status_counts": {
+          "200": 2107,
+          "409": 19,
+          "429": 978
+        },
+        "first_attempt_latency": {
+          "count": 2141,
+          "p50_ms": 167.9658,
+          "p95_ms": 5820.8792,
+          "p99_ms": 9137.833
+        },
+        "successful_duplicate_receipts": 21,
+        "new_world_commit_receipts": 21,
+        "recovered_logical_operations": 547
+      },
+      "criterion": "engineering correctness/recovery, no first-attempt failures, overload first call-start >= 0.95 * target (950/s)"
+    },
+    "raw/p2-load-200-overload-1/run-2/load.json": {
+      "source": {
+        "run": 43081588236,
+        "name": "p2-load-200-overload-1",
+        "id": 13885391227,
+        "digest": "sha256:af0d34c03cb6e395f16e8711620b84f3479e6e3b5c4004c2142496aa32542d59",
+        "size": 1395222
+      },
+      "json_sha256": "eda039a3dd0d0e438701be8123071a2c5aacfaba682f65679c3280dffd2230a4",
+      "json_path": "raw/p2-load-200-overload-1/run-2/load.json",
+      "schema": "p2-load-2",
+      "environment": {
+        "git_sha": "dff58688fdb1f931a5906f885ed513ed12134026",
+        "git_dirty": true,
+        "cpu_models": [
+          "AMD EPYC 7763 64-Core Processor"
+        ],
+        "logical_cpu_count": 4,
+        "python": "3.12.16 (main, Oct 26 2026, 02:50:49) [GCC 13.3.0]",
+        "versions": {
+          "SQLAlchemy": "2.0.57",
+          "psycopg": "3.3.8",
+          "uvicorn": "0.54.0",
+          "httpx": "0.28.1"
+        },
+        "api_processes": 1
+      },
+      "reproduction_argv": [
+        "/home/runner/work/NovelFactory/NovelFactory/benchmarks/p2_behavioral_load.py",
+        "--agents",
+        "200",
+        "--profile",
+        "overload",
+        "--hot-fraction",
+        "0.8",
+        "--arrival-rps",
+        "10",
+        "--open-loop-rps",
+        "1000",
+        "--rounds",
+        "5",
+        "--max-attempts",
+        "5",
+        "--retry-budget-seconds",
+        "30",
+        "--gate-scope",
+        "capacity",
+        "--service-mode",
+        "isolated-process",
+        "--api-processes",
+        "1",
+        "--output",
+        "ci-evidence/run-2/load.json"
+      ],
+      "open_loop_offered_rate": {
+        "gate": "NOT_MET",
+        "transport_header_starts": 1000,
+        "transport_header_start_rps": 33.958364393849294,
+        "target_rps": 1000.0,
+        "first_attempts": 1000,
+        "actual_call_start_rps": 34.85296444872029,
+        "start_window_seconds": 28.663272000000006,
+        "max_schedule_delay_ms": 27664.407,
+        "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+        "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+      },
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "NOT_MET",
+      "bounded_recovery_business_gate": "PASS",
+      "capacity_gate": "NOT_MET",
+      "correctness": {
+        "new_world_revisions": 21,
+        "expected_new_world_revisions": 21,
+        "new_selected_effect_groups": 21,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99",
+        "independent_resource_final_quantities": [
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99"
+        ]
+      },
+      "metrics": {
+        "duration_seconds": 178.78278,
+        "planned_requests": 2141,
+        "emitted_requests": 3018,
+        "completed_requests": 3018,
+        "first_attempt_failure_count": 543,
+        "first_attempt_status_counts": {
+          "200": 1579,
+          "409": 19,
+          "429": 543
+        },
+        "status_counts": {
+          "200": 2100,
+          "409": 19,
+          "429": 899
+        },
+        "first_attempt_latency": {
+          "count": 2141,
+          "p50_ms": 195.8889,
+          "p95_ms": 7269.2178,
+          "p99_ms": 11549.703
+        },
+        "successful_duplicate_receipts": 21,
+        "new_world_commit_receipts": 21,
+        "recovered_logical_operations": 521
+      },
+      "criterion": "engineering correctness/recovery, no first-attempt failures, overload first call-start >= 0.95 * target (950/s)"
+    },
+    "raw/p2-load-50-overload-1/run-1/load.json": {
+      "source": {
+        "run": 43081588236,
+        "name": "p2-load-50-overload-1",
+        "id": 13885670202,
+        "digest": "sha256:fbfcb844f527854339331fe63e7fcc1c34ed0039a03d87b57accac4653ff5db1",
+        "size": 329496
+      },
+      "json_sha256": "3454da186bdabc614dc3001ae0ba35e11425fcc7cd48cfb68083a2f5c9958a8c",
+      "json_path": "raw/p2-load-50-overload-1/run-1/load.json",
+      "schema": "p2-load-2",
+      "environment": {
+        "git_sha": "dff58688fdb1f931a5906f885ed513ed12134026",
+        "git_dirty": true,
+        "cpu_models": [
+          "AMD EPYC 9V74 80-Core Processor"
+        ],
+        "logical_cpu_count": 4,
+        "python": "3.12.16 (main, Oct 26 2026, 02:50:49) [GCC 13.3.0]",
+        "versions": {
+          "SQLAlchemy": "2.0.57",
+          "psycopg": "3.3.8",
+          "uvicorn": "0.54.0",
+          "httpx": "0.28.1"
+        },
+        "api_processes": 1
+      },
+      "reproduction_argv": [
+        "/home/runner/work/NovelFactory/NovelFactory/benchmarks/p2_behavioral_load.py",
+        "--agents",
+        "50",
+        "--profile",
+        "overload",
+        "--hot-fraction",
+        "0.8",
+        "--arrival-rps",
+        "10",
+        "--open-loop-rps",
+        "1000",
+        "--rounds",
+        "5",
+        "--max-attempts",
+        "5",
+        "--retry-budget-seconds",
+        "30",
+        "--gate-scope",
+        "capacity",
+        "--service-mode",
+        "isolated-process",
+        "--api-processes",
+        "1",
+        "--output",
+        "ci-evidence/run-1/load.json"
+      ],
+      "open_loop_offered_rate": {
+        "gate": "NOT_MET",
+        "transport_header_starts": 250,
+        "transport_header_start_rps": 66.8030450383983,
+        "target_rps": 1000.0,
+        "first_attempts": 250,
+        "actual_call_start_rps": 165.8621132964796,
+        "start_window_seconds": 1.5012469999999993,
+        "max_schedule_delay_ms": 1252.3258,
+        "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+        "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+      },
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "NOT_MET",
+      "bounded_recovery_business_gate": "PASS",
+      "capacity_gate": "NOT_MET",
+      "correctness": {
+        "new_world_revisions": 6,
+        "expected_new_world_revisions": 6,
+        "new_selected_effect_groups": 6,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99",
+        "independent_resource_final_quantities": [
+          "99",
+          "99",
+          "99",
+          "99",
+          "99"
+        ]
+      },
+      "metrics": {
+        "duration_seconds": 39.771581,
+        "planned_requests": 536,
+        "emitted_requests": 617,
+        "completed_requests": 617,
+        "first_attempt_failure_count": 73,
+        "first_attempt_status_counts": {
+          "200": 459,
+          "409": 4,
+          "429": 73
+        },
+        "status_counts": {
+          "200": 532,
+          "409": 4,
+          "429": 81
+        },
+        "first_attempt_latency": {
+          "count": 536,
+          "p50_ms": 115.2524,
+          "p95_ms": 3215.3196,
+          "p99_ms": 4067.8286
+        },
+        "successful_duplicate_receipts": 6,
+        "new_world_commit_receipts": 6,
+        "recovered_logical_operations": 73
+      },
+      "criterion": "engineering correctness/recovery, no first-attempt failures, overload first call-start >= 0.95 * target (950/s)"
+    },
+    "raw/p2-load-50-overload-1/run-2/load.json": {
+      "source": {
+        "run": 43081588236,
+        "name": "p2-load-50-overload-1",
+        "id": 13885670202,
+        "digest": "sha256:fbfcb844f527854339331fe63e7fcc1c34ed0039a03d87b57accac4653ff5db1",
+        "size": 329496
+      },
+      "json_sha256": "fda407f61908c09130e1584348840a40eff0a84dc508decaf7b4aa699396bb33",
+      "json_path": "raw/p2-load-50-overload-1/run-2/load.json",
+      "schema": "p2-load-2",
+      "environment": {
+        "git_sha": "dff58688fdb1f931a5906f885ed513ed12134026",
+        "git_dirty": true,
+        "cpu_models": [
+          "AMD EPYC 9V74 80-Core Processor"
+        ],
+        "logical_cpu_count": 4,
+        "python": "3.12.16 (main, Oct 26 2026, 02:50:49) [GCC 13.3.0]",
+        "versions": {
+          "SQLAlchemy": "2.0.57",
+          "psycopg": "3.3.8",
+          "uvicorn": "0.54.0",
+          "httpx": "0.28.1"
+        },
+        "api_processes": 1
+      },
+      "reproduction_argv": [
+        "/home/runner/work/NovelFactory/NovelFactory/benchmarks/p2_behavioral_load.py",
+        "--agents",
+        "50",
+        "--profile",
+        "overload",
+        "--hot-fraction",
+        "0.8",
+        "--arrival-rps",
+        "10",
+        "--open-loop-rps",
+        "1000",
+        "--rounds",
+        "5",
+        "--max-attempts",
+        "5",
+        "--retry-budget-seconds",
+        "30",
+        "--gate-scope",
+        "capacity",
+        "--service-mode",
+        "isolated-process",
+        "--api-processes",
+        "1",
+        "--output",
+        "ci-evidence/run-2/load.json"
+      ],
+      "open_loop_offered_rate": {
+        "gate": "NOT_MET",
+        "transport_header_starts": 250,
+        "transport_header_start_rps": 128.53908362474024,
+        "target_rps": 1000.0,
+        "first_attempts": 250,
+        "actual_call_start_rps": 227.50114207400566,
+        "start_window_seconds": 1.0945000000000036,
+        "max_schedule_delay_ms": 845.5778,
+        "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+        "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+      },
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "NOT_MET",
+      "bounded_recovery_business_gate": "PASS",
+      "capacity_gate": "NOT_MET",
+      "correctness": {
+        "new_world_revisions": 6,
+        "expected_new_world_revisions": 6,
+        "new_selected_effect_groups": 6,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99",
+        "independent_resource_final_quantities": [
+          "99",
+          "99",
+          "99",
+          "99",
+          "99"
+        ]
+      },
+      "metrics": {
+        "duration_seconds": 39.386641,
+        "planned_requests": 536,
+        "emitted_requests": 691,
+        "completed_requests": 691,
+        "first_attempt_failure_count": 105,
+        "first_attempt_status_counts": {
+          "200": 427,
+          "409": 4,
+          "429": 105
+        },
+        "status_counts": {
+          "200": 532,
+          "409": 4,
+          "429": 155
+        },
+        "first_attempt_latency": {
+          "count": 536,
+          "p50_ms": 106.2406,
+          "p95_ms": 2389.0148,
+          "p99_ms": 3077.1701
+        },
+        "successful_duplicate_receipts": 6,
+        "new_world_commit_receipts": 6,
+        "recovered_logical_operations": 105
+      },
+      "criterion": "engineering correctness/recovery, no first-attempt failures, overload first call-start >= 0.95 * target (950/s)"
+    },
+    "raw/p3-isolated-200-overload-1/load.json": {
+      "source": {
+        "run": 43081588179,
+        "name": "p3-isolated-200-overload-1",
+        "id": 13883743514,
+        "digest": "sha256:07ac1154989fb657c3fe8fb9a8422f604ff4b83eaceba47a6626b31dc6a22e0e",
+        "size": 701168
+      },
+      "json_sha256": "ae417f814a7ea9dfbf47186d5abb679623ed8a59bc3b9f5f20da7aebdab251df",
+      "json_path": "raw/p3-isolated-200-overload-1/load.json",
+      "schema": "p2-load-2",
+      "environment": {
+        "git_sha": "dff58688fdb1f931a5906f885ed513ed12134026",
+        "git_dirty": true,
+        "cpu_models": [
+          "AMD EPYC 7763 64-Core Processor"
+        ],
+        "logical_cpu_count": 4,
+        "python": "3.12.16 (main, Oct 26 2026, 02:50:49) [GCC 13.3.0]",
+        "versions": {
+          "SQLAlchemy": "2.0.57",
+          "psycopg": "3.3.8",
+          "uvicorn": "0.54.0",
+          "httpx": "0.28.1"
+        },
+        "api_processes": 1
+      },
+      "reproduction_argv": [
+        "/home/runner/work/NovelFactory/NovelFactory/benchmarks/p2_behavioral_load.py",
+        "--agents",
+        "200",
+        "--profile",
+        "overload",
+        "--hot-fraction",
+        "0.8",
+        "--arrival-rps",
+        "10",
+        "--open-loop-rps",
+        "1000",
+        "--rounds",
+        "5",
+        "--max-attempts",
+        "5",
+        "--retry-budget-seconds",
+        "30",
+        "--gate-scope",
+        "capacity",
+        "--service-mode",
+        "isolated-process",
+        "--api-processes",
+        "1",
+        "--output",
+        "ci-evidence/load.json"
+      ],
+      "open_loop_offered_rate": {
+        "gate": "NOT_MET",
+        "transport_header_starts": 1000,
+        "transport_header_start_rps": 28.707175374289545,
+        "target_rps": 1000.0,
+        "first_attempts": 1000,
+        "actual_call_start_rps": 34.99947290583598,
+        "start_window_seconds": 28.543286999999992,
+        "max_schedule_delay_ms": 27544.437,
+        "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+        "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+      },
+      "engineer_correctness": "PASS",
+      "first_attempt_capacity_gate": "NOT_MET",
+      "bounded_recovery_business_gate": "PASS",
+      "capacity_gate": "NOT_MET",
+      "correctness": {
+        "new_world_revisions": 21,
+        "expected_new_world_revisions": 21,
+        "new_selected_effect_groups": 21,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99",
+        "independent_resource_final_quantities": [
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99"
+        ]
+      },
+      "metrics": {
+        "duration_seconds": 179.188732,
+        "planned_requests": 2141,
+        "emitted_requests": 3074,
+        "completed_requests": 3074,
+        "first_attempt_failure_count": 553,
+        "first_attempt_status_counts": {
+          "200": 1569,
+          "409": 19,
+          "429": 553
+        },
+        "status_counts": {
+          "200": 2109,
+          "409": 19,
+          "429": 946
+        },
+        "first_attempt_latency": {
+          "count": 2141,
+          "p50_ms": 182.0181,
+          "p95_ms": 6730.8577,
+          "p99_ms": 10219.9352
+        },
+        "successful_duplicate_receipts": 21,
+        "new_world_commit_receipts": 21,
+        "recovered_logical_operations": 540
+      },
+      "criterion": "engineering correctness/recovery, no first-attempt failures, overload first call-start >= 0.95 * target (950/s)"
+    },
+    "raw/p3-scale-1000-read-open-1/result.json": {
+      "source": {
+        "run": 43081588056,
+        "name": "p3-scale-1000-read-open-1",
+        "id": 13884083234,
+        "digest": "sha256:b115407e68f6258c65b3bc9f7eaee0898dce24847868ec4d03febf93798dec85",
+        "size": 501340
+      },
+      "json_sha256": "fcb9a5bad3f83175029a6b019cb3ce042e4d27225828a20659539941170eafe2",
+      "json_path": "raw/p3-scale-1000-read-open-1/result.json",
+      "schema": "p3-open-arrival-1",
+      "environment": {
+        "git_sha": "dff58688fdb1f931a5906f885ed513ed12134026",
+        "git_dirty": false,
+        "cpu_models": [
+          "AMD EPYC 7763 64-Core Processor"
+        ],
+        "logical_cpu_count": 4,
+        "python": "3.12.16 (main, Oct 26 2026, 02:50:49) [GCC 13.3.0]",
+        "versions": {
+          "SQLAlchemy": "2.0.57",
+          "psycopg": "3.3.8",
+          "uvicorn": "0.54.0",
+          "httpx": "0.28.1"
+        },
+        "api_processes": 2
+      },
+      "configuration": {
+        "agents": 1000,
+        "rounds": 5,
+        "arrival_rps": 1000.0,
+        "hot_fraction": 0.8,
+        "api_processes": 2,
+        "output": "ci-evidence/result.json"
+      },
+      "source_sha256": "515ec1ec61e03317cd6f160a22a309aa38bc6df8bbfd4604e3dacfa43b14e9da",
+      "network_window_seconds": 123.55373735499998,
+      "client_validation_seconds": 5.348662324000031,
+      "scheduled_requests": 5000,
+      "completed_requests": 5000,
+      "dispatch_start_rps": 41.85690586984171,
+      "observed_wire_start_rps": 40.73451675770588,
+      "wire_started_requests": 5000,
+      "status_counts": {
+        "429": 3242,
+        "200": 1745,
+        "transport_error": 13
+      },
+      "correctness_errors": [],
+      "world_unchanged": true,
+      "real_model_calls": 0,
+      "successful_query_rps": 14.123409274024548,
+      "validated_successes": 1745,
+      "latency_all_attempts": {
+        "count": 5000,
+        "p50_ms": 2676.6597,
+        "p95_ms": 6584.0724,
+        "p99_ms": 9736.592
+      },
+      "offered_wire_rate_gate": "NOT_MET",
+      "capacity_gate": "NOT_MET",
+      "criterion": "all scheduled requests complete and wire-start; wire-start >= 95% target (950/s); every request valid and no correctness errors"
+    },
+    "raw/p3-scale-500-read-soak-1/result.json": {
+      "source": {
+        "run": 43081588056,
+        "name": "p3-scale-500-read-soak-1",
+        "id": 13885626628,
+        "digest": "sha256:857ddb15790e57989f23df4a2aa59392326156e46ecc4180c72879be34fcfad7",
+        "size": 465469
+      },
+      "json_sha256": "537dbd816b407fd4e5ee48cac0b84ff5b6c14d622e5435644492ad8d534fa0ec",
+      "json_path": "raw/p3-scale-500-read-soak-1/result.json",
+      "schema": "p3-stability-1",
+      "environment": {
+        "git_sha": "dff58688fdb1f931a5906f885ed513ed12134026",
+        "git_dirty": false,
+        "cpu_models": [
+          "AMD EPYC 9V45 96-Core Processor"
+        ],
+        "logical_cpu_count": 4,
+        "python": "3.12.16 (main, Oct 26 2026, 02:50:49) [GCC 13.3.0]",
+        "versions": {
+          "SQLAlchemy": "2.0.57",
+          "psycopg": "3.3.8",
+          "uvicorn": "0.54.0",
+          "httpx": "0.28.1"
+        },
+        "api_processes": 2
+      },
+      "configuration": {
+        "agents": 500,
+        "seconds": 600.0,
+        "read_rps": 20.0,
+        "api_processes": 2,
+        "output": "ci-evidence/result.json"
+      },
+      "source_sha256": "8ad0e0781fbec0464b6385cab9ac89f4a6e51705e456d6394012a016460ec7ed",
+      "duration_seconds": 600.0395879949999,
+      "scheduled_count": 12000,
+      "actual_call_start_rps": 20.000482622163474,
+      "successful_query_rps": 19.99868048722811,
+      "latency_all_attempts": {
+        "count": 12000,
+        "p50_ms": 86.0853,
+        "p95_ms": 98.7357,
+        "p99_ms": 126.4198
+      },
+      "status_counts": {
+        "200": 12000
+      },
+      "probe_gate": "PASS",
+      "long_duration_gate": "NOT_EXECUTED",
+      "correctness_errors": [],
+      "world_unchanged": true,
+      "new_world_commits": 0,
+      "real_model_calls": 0,
+      "database_checked_out_at_end": 0,
+      "validated_records": 12000,
+      "criterion": "all scheduled requests valid, no correctness errors, first call starts at least 0.95 * target (19/s at 20 RPS), zero checked-out DB connections at end"
+    }
+  }
+}

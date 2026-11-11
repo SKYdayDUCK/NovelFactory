@@ -1,0 +1,336 @@
+{
+  "head_sha": "695668b87f6a76acbe7e27c71fcb259b7b3f0795",
+  "event": "pull_request",
+  "runs": [
+    {
+      "id": 43081588092,
+      "name": "P4 real isolated WAL PITR and verified recovery",
+      "event": "pull_request",
+      "conclusion": "success",
+      "status": "completed",
+      "head_sha": "695668b87f6a76acbe7e27c71fcb259b7b3f0795",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588092",
+      "attempt": 1,
+      "jobs": [
+        {
+          "id": 130735238875,
+          "name": "Physical base backup, SIGKILL, WAL replay and application verification",
+          "started_at": "2026-11-11T18:50:44Z",
+          "completed_at": "2026-11-11T18:51:19Z",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588092/job/130735238875"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13884362235,
+          "name": "p4-real-pitr-1",
+          "size": 12284,
+          "digest": "sha256:04e438e9c2b63c8f5cca118cff39ce052820e90c663db870f9c0b544e308997e",
+          "expires_at": "2027-02-09T18:50:41Z",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588092/artifacts/13884362235"
+        }
+      ]
+    },
+    {
+      "id": 43081588087,
+      "name": "Agent Workshop PostgreSQL and stdio",
+      "event": "pull_request",
+      "conclusion": "success",
+      "status": "completed",
+      "head_sha": "695668b87f6a76acbe7e27c71fcb259b7b3f0795",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588087",
+      "attempt": 1,
+      "jobs": [
+        {
+          "id": 130735238773,
+          "name": "workshop",
+          "started_at": "2026-11-11T18:50:44Z",
+          "completed_at": "2026-11-11T18:53:05Z",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588087/job/130735238773"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13884352448,
+          "name": "workshop-results",
+          "size": 5817,
+          "digest": "sha256:8c7e0d0053884c737c97dc347f42108611db2d0808d839fe25a3c7c7268a05d4",
+          "expires_at": "2027-02-09T18:50:41Z",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588087/artifacts/13884352448"
+        },
+        {
+          "id": 13884287722,
+          "name": "nf-bridge-results",
+          "size": 1973,
+          "digest": "sha256:79ca6f709cdd164a4eac59c718dac275daa80a72f9d7fc059d76d518495b7a9c",
+          "expires_at": "2027-02-09T18:50:41Z",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588087/artifacts/13884287722"
+        }
+      ]
+    },
+    {
+      "id": 43081588179,
+      "name": "P3 P4 measured evidence",
+      "event": "pull_request",
+      "conclusion": "failure",
+      "status": "completed",
+      "head_sha": "695668b87f6a76acbe7e27c71fcb259b7b3f0795",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588179",
+      "attempt": 1,
+      "jobs": [
+        {
+          "id": 130735239666,
+          "name": "Same world CPU and SQL paired comparison",
+          "started_at": "2026-11-11T18:50:44Z",
+          "completed_at": "2026-11-11T18:51:21Z",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588179/job/130735239666"
+        },
+        {
+          "id": 130735239967,
+          "name": "Independent load process / 200 / mixed",
+          "started_at": "2026-11-11T18:50:44Z",
+          "completed_at": "2026-11-11T18:53:47Z",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588179/job/130735239967"
+        },
+        {
+          "id": 130735240148,
+          "name": "Independent load process / 200 / overload",
+          "started_at": "2026-11-11T18:50:51Z",
+          "completed_at": "2026-11-11T18:54:30Z",
+          "status": "completed",
+          "conclusion": "failure",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588179/job/130735240148"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13885670319,
+          "name": "p3-isolated-200-mixed-1",
+          "size": 293498,
+          "digest": "sha256:8a6c06fdea2e3462da513e270499eaa8dca7967d5e42a6c3a3bb56be9123d411",
+          "expires_at": "2027-02-09T18:50:41Z",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588179/artifacts/13885670319"
+        },
+        {
+          "id": 13883743514,
+          "name": "p3-isolated-200-overload-1",
+          "size": 701168,
+          "digest": "sha256:07ac1154989fb657c3fe8fb9a8422f604ff4b83eaceba47a6626b31dc6a22e0e",
+          "expires_at": "2027-02-09T18:50:41Z",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588179/artifacts/13883743514"
+        },
+        {
+          "id": 13883384934,
+          "name": "p3-context-paired-1",
+          "size": 281310,
+          "digest": "sha256:dbfe94b7634e53ea9c2c40dc71d427c36f575ff00cd40c205b70d11899644332",
+          "expires_at": "2027-02-09T18:50:41Z",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588179/artifacts/13883384934"
+        }
+      ]
+    },
+    {
+      "id": 43081588236,
+      "name": "P2 measured capacity and recovery",
+      "event": "pull_request",
+      "conclusion": "failure",
+      "status": "completed",
+      "head_sha": "695668b87f6a76acbe7e27c71fcb259b7b3f0795",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588236",
+      "attempt": 1,
+      "jobs": [
+        {
+          "id": 130735241140,
+          "name": "50 agents / overload / full capacity gate",
+          "started_at": "2026-11-11T18:51:07Z",
+          "completed_at": "2026-11-11T18:53:01Z",
+          "status": "completed",
+          "conclusion": "failure",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588236/job/130735241140"
+        },
+        {
+          "id": 130735241428,
+          "name": "200 agents / mixed / full capacity gate",
+          "started_at": "2026-11-11T18:51:18Z",
+          "completed_at": "2026-11-11T18:56:37Z",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588236/job/130735241428"
+        },
+        {
+          "id": 130735241507,
+          "name": "200 agents / overload / full capacity gate",
+          "started_at": "2026-11-11T18:51:21Z",
+          "completed_at": "2026-11-11T18:58:09Z",
+          "status": "completed",
+          "conclusion": "failure",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588236/job/130735241507"
+        },
+        {
+          "id": 130735241764,
+          "name": "50 agents / mixed / full capacity gate",
+          "started_at": "2026-11-11T18:51:24Z",
+          "completed_at": "2026-11-11T18:53:07Z",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588236/job/130735241764"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13885670202,
+          "name": "p2-load-50-overload-1",
+          "size": 329496,
+          "digest": "sha256:fbfcb844f527854339331fe63e7fcc1c34ed0039a03d87b57accac4653ff5db1",
+          "expires_at": "2027-02-09T18:50:41Z",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588236/artifacts/13885670202"
+        },
+        {
+          "id": 13885391227,
+          "name": "p2-load-200-overload-1",
+          "size": 1395222,
+          "digest": "sha256:af0d34c03cb6e395f16e8711620b84f3479e6e3b5c4004c2142496aa32542d59",
+          "expires_at": "2027-02-09T18:50:41Z",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588236/artifacts/13885391227"
+        },
+        {
+          "id": 13884432395,
+          "name": "p2-load-50-mixed-1",
+          "size": 186541,
+          "digest": "sha256:06bbc9837fb454e6fa04287b909a6ecb3398647636fd1c4fc2b5f7854b78818d",
+          "expires_at": "2027-02-09T18:50:41Z",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588236/artifacts/13884432395"
+        },
+        {
+          "id": 13883854214,
+          "name": "p2-load-200-mixed-1",
+          "size": 583039,
+          "digest": "sha256:a95e663e0f307a3a4196838287a947b1b7b1501ef46df837044bcd5331c272bd",
+          "expires_at": "2027-02-09T18:50:41Z",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588236/artifacts/13883854214"
+        }
+      ]
+    },
+    {
+      "id": 43081588056,
+      "name": "P3 scale experiments with strict unmet gates",
+      "event": "pull_request",
+      "conclusion": "failure",
+      "status": "completed",
+      "head_sha": "695668b87f6a76acbe7e27c71fcb259b7b3f0795",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588056",
+      "attempt": 1,
+      "jobs": [
+        {
+          "id": 130735239238,
+          "name": "Measured 500-mixed",
+          "started_at": "2026-11-11T18:50:44Z",
+          "completed_at": "2026-11-11T18:57:54Z",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588056/job/130735239238"
+        },
+        {
+          "id": 130735239451,
+          "name": "Measured 500-read-soak",
+          "started_at": "2026-11-11T18:50:44Z",
+          "completed_at": "2026-11-11T19:01:35Z",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588056/job/130735239451"
+        },
+        {
+          "id": 130735239498,
+          "name": "Measured 1000-read-open",
+          "started_at": "2026-11-11T18:50:44Z",
+          "completed_at": "2026-11-11T18:55:04Z",
+          "status": "completed",
+          "conclusion": "failure",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588056/job/130735239498"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13885626628,
+          "name": "p3-scale-500-read-soak-1",
+          "size": 465469,
+          "digest": "sha256:857ddb15790e57989f23df4a2aa59392326156e46ecc4180c72879be34fcfad7",
+          "expires_at": "2027-02-09T18:50:41Z",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588056/artifacts/13885626628"
+        },
+        {
+          "id": 13884298236,
+          "name": "p3-scale-500-mixed-1",
+          "size": 637230,
+          "digest": "sha256:3c54cd7cbe9d23758d91330a5a3cd8b84451316cb2d1a6bc332e54f4ada0023e",
+          "expires_at": "2027-02-09T18:50:41Z",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588056/artifacts/13884298236"
+        },
+        {
+          "id": 13884083234,
+          "name": "p3-scale-1000-read-open-1",
+          "size": 501340,
+          "digest": "sha256:b115407e68f6258c65b3bc9f7eaee0898dce24847868ec4d03febf93798dec85",
+          "expires_at": "2027-02-09T18:50:41Z",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588056/artifacts/13884083234"
+        }
+      ]
+    },
+    {
+      "id": 43081588068,
+      "name": "P1 and P2 production integrity",
+      "event": "pull_request",
+      "conclusion": "success",
+      "status": "completed",
+      "head_sha": "695668b87f6a76acbe7e27c71fcb259b7b3f0795",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588068",
+      "attempt": 1,
+      "jobs": [
+        {
+          "id": 130735238949,
+          "name": "Schema, domain, HTTP and production boundaries",
+          "started_at": "2026-11-11T18:50:44Z",
+          "completed_at": "2026-11-11T18:51:27Z",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588068/job/130735238949"
+        },
+        {
+          "id": 130735239361,
+          "name": "PostgreSQL 17 integration, concurrency and restore",
+          "started_at": "2026-11-11T18:50:44Z",
+          "completed_at": "2026-11-11T19:01:51Z",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588068/job/130735239361"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13884652086,
+          "name": "p1-schema-unit-1",
+          "size": 301114,
+          "digest": "sha256:e16a64cad1a1fb6e9de788bf3babecff3b3e6faae769d32cf349a94feab3d5fc",
+          "expires_at": "2027-02-09T18:50:41Z",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588068/artifacts/13884652086"
+        },
+        {
+          "id": 13884458956,
+          "name": "p1-postgres-concurrency-1",
+          "size": 1780443,
+          "digest": "sha256:778e69fc5a45b648abe2b83181ce0b214dc4544c87e17d3a44071d269d08b52b",
+          "expires_at": "2027-02-09T18:50:41Z",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43081588068/artifacts/13884458956"
+        }
+      ]
+    }
+  ]
+}
