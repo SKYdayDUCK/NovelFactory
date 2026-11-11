@@ -31,7 +31,7 @@ def test_live_negotiation_scope_and_revocation(tmp_path):
     ident = uuid4().hex
     with connect(dsn) as conn:
         conn.execute("INSERT INTO aw_installations VALUES (%s,%s,true)", (ident, "synthetic-nf"))
-        bootstrap(conn, ident)
+        bootstrap(conn, ident, installation_id=ident)
         token = enroll(conn, ident, ident, "manager", 1, 1)
     path = tmp_path / "server.json"
     path.write_text(json.dumps({"database_url": dsn, "token": token}))

@@ -55,12 +55,14 @@ def dispatch(config, name=None, arguments=None):
         # Validate the member even when listing tools on an already open pipe.
         # Mutating organization commands take the exclusive lock first.
         changes = {"aw_hire", "aw_suspend", "aw_transfer", "aw_end"}
-        if name in changes:
-            organization.lock_org(conn, session.org_id, write=True)
-        viewer = organization.require_employee(conn, session)
-        visible = set(TOOLS)
-        if viewer["role_id"] != "workshop_manager":
-            visible -= changes
+        visible = {"aw_capabilities"}
+        if session.org_member:
+            if name in changes:
+                organization.lock_org(conn, session.org_id, write=True)
+            viewer = organization.require_employee(conn, session)
+            visible = set(TOOLS)
+            if viewer["role_id"] != "workshop_manager":
+                visible -= changes
         if name is None:
             return sorted(visible)
         if name not in visible:

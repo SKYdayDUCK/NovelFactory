@@ -130,7 +130,9 @@ def employee(conn, org_id, employee_id):
 
 def require_employee(conn, session):
     # Writers hold this lock exclusively through commit, including tenure and route changes.
-    lock_org(conn, session.org_id)
+    org = lock_org(conn, session.org_id)
+    if not session.org_member or org["owner_installation_id"] != session.installation_id:
+        raise Denied("VIEW_DENIED")
     row = employee(conn, session.org_id, session.employee_id)
     if (
         not row
@@ -195,20 +197,48 @@ def _graph(conn, org, revision):
         cur.executemany("INSERT INTO aw_edges VALUES (%s,%s,%s,%s,%s,%s)", sorted(edges))
 
 
-def bootstrap(conn, org_id, preset="Minimal", manager_id="manager", scope_ref="organization"):
+def provisioning_installation(conn, installation_id):
+    if installation_id is None:
+        rows = conn.execute(
+            "SELECT installation_id FROM aw_installations WHERE enabled ORDER BY installation_id LIMIT 2 FOR SHARE"
+        ).fetchall()
+        if len(rows) != 1:
+            raise Denied("INSTALLATION_REQUIRED")
+        return rows[0]["installation_id"]
+    if not conn.execute(
+        "SELECT installation_id FROM aw_installations WHERE installation_id=%s AND enabled FOR SHARE",
+        (installation_id,),
+    ).fetchone():
+        raise Denied("INSTALLATION_UNAVAILABLE")
+    return installation_id
+
+
+def claim_organization(conn, org_id, installation_id):
+    """A trusted operator assigns ownership to a pre-upgrade directory after verifying it."""
+    owner = provisioning_installation(conn, installation_id)
+    org = lock_org(conn, org_id, write=True)
+    if org["owner_installation_id"] not in (None, owner):
+        raise Denied("ORGANIZATION_UNAVAILABLE")
+    conn.execute("UPDATE aw_organizations SET owner_installation_id=%s WHERE org_id=%s", (owner, org_id))
+
+
+def bootstrap(conn, org_id, preset="Minimal", manager_id="manager", scope_ref="organization", *, installation_id=None):
     """Installation-admin CLI operation. Repeated provisioning must match the original preset."""
     for key in (org_id, manager_id, scope_ref):
         _id(key)
+    owner = provisioning_installation(conn, installation_id)
     slots = _preset(preset, manager_id)
     digest = fingerprint(
         [preset, slots, NF_ROLES, sorted((list(k), v) for k, v in DOWN.items()), UP]
     )
     new = conn.execute(
-        """INSERT INTO aw_organizations VALUES (%s,1,%s,%s,%s)
-        ON CONFLICT DO NOTHING RETURNING org_id""",
-        (org_id, preset, digest, scope_ref),
+        """INSERT INTO aw_organizations (org_id,active_revision,preset,preset_sha,scope_ref,owner_installation_id)
+        VALUES (%s,1,%s,%s,%s,%s) ON CONFLICT DO NOTHING RETURNING org_id""",
+        (org_id, preset, digest, scope_ref, owner),
     ).fetchone()
     org = lock_org(conn, org_id, write=True)
+    if org["owner_installation_id"] != owner:
+        raise Denied("ORGANIZATION_UNAVAILABLE")
     if not new:
         if (org["preset_sha"], org["scope_ref"]) != (digest, scope_ref):
             raise Denied("BOOTSTRAP_MISMATCH")
