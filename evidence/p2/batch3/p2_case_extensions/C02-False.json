@@ -1,0 +1,148 @@
+{
+  "execution_kind": "TEST_FIXTURE_REAL_POSTGRESQL",
+  "world_ref": {
+    "work_id": "4c87d48e-fe17-4337-aad1-d20d045431a6",
+    "branch_id": "2e29dbc5-2ac0-483a-9fde-77576112e4a7",
+    "world_revision_id": "a3d56732-f3f6-4080-b48e-92c540c9e0a9"
+  },
+  "channel": {
+    "channel_id": "incomplete-west-east",
+    "from_scope_id": "2716226c-e666-5a77-95bb-a77ba0a9bbd6",
+    "to_scope_id": "5e331883-4bba-572e-9b40-818e710b40bc",
+    "min_delay_ticks": null,
+    "earliest_possible_impact": null,
+    "completeness": "UNDECLARED",
+    "evidence_refs": []
+  },
+  "related_errors": [
+    "ADVANCE_BLOCKED",
+    "ADVANCE_BLOCKED"
+  ],
+  "frontiers": {
+    "2716226c-e666-5a77-95bb-a77ba0a9bbd6": {
+      "tick": 1,
+      "phase": 1
+    },
+    "3ad6d90f-ce30-59e8-9bae-d3b85737a8e1": {
+      "tick": 1,
+      "phase": 1
+    },
+    "43bdeff4-e9f7-540b-82a0-8bd22be7dcab": {
+      "tick": 1,
+      "phase": 1
+    },
+    "49284867-39a4-570d-bb9d-24cce10182e3": {
+      "tick": 40,
+      "phase": 0
+    },
+    "4f430e6d-c279-50e1-80c8-0c37c30ffba4": {
+      "tick": 1,
+      "phase": 1
+    },
+    "558324b1-2f48-598f-943f-d253195cda83": {
+      "tick": 1,
+      "phase": 1
+    },
+    "589b732c-449a-5c6b-ae6c-c476618694e4": {
+      "tick": 1,
+      "phase": 1
+    },
+    "5e331883-4bba-572e-9b40-818e710b40bc": {
+      "tick": 1,
+      "phase": 1
+    },
+    "69baeaaf-6ce5-5802-af72-24258d4cbc27": {
+      "tick": 1,
+      "phase": 1
+    },
+    "6f352e8f-1163-588f-af0a-71d2660e9e4b": {
+      "tick": 1,
+      "phase": 1
+    },
+    "7743abb4-dd13-5149-8358-264531bfc3c7": {
+      "tick": 1,
+      "phase": 1
+    },
+    "7b18343a-9772-5e2b-b10c-b477cf5c88e3": {
+      "tick": 1,
+      "phase": 1
+    },
+    "8a460762-9ed1-5118-8edf-ba53f0210396": {
+      "tick": 1,
+      "phase": 1
+    },
+    "8b4240bf-894e-5f6f-93b3-eac2d1b78fa9": {
+      "tick": 1,
+      "phase": 1
+    },
+    "a6494af2-0df7-5e2e-8447-cd3403425e61": {
+      "tick": 1,
+      "phase": 1
+    },
+    "aa9cfc55-2ede-5039-98e4-0b3fa7d0c965": {
+      "tick": 1,
+      "phase": 1
+    },
+    "afe75f34-871f-5a3c-917d-85d7d721957a": {
+      "tick": 1,
+      "phase": 1
+    },
+    "caf851cf-88a0-5af2-bce9-118244683a32": {
+      "tick": 1,
+      "phase": 1
+    },
+    "cb8ea56f-2086-55b8-b505-1c1aa81e3e95": {
+      "tick": 1,
+      "phase": 1
+    },
+    "ce138b93-4045-5928-b6e6-5306bfd418fd": {
+      "tick": 1,
+      "phase": 1
+    },
+    "d00be953-750a-540a-814a-1226da631ca8": {
+      "tick": 1,
+      "phase": 1
+    },
+    "f69b1fe6-2332-502d-af2f-fc01a3048634": {
+      "tick": 1,
+      "phase": 1
+    }
+  },
+  "receipt": {
+    "command_id": "a8578c1b-83ee-4593-bf46-91cf3839bd3c",
+    "world_ref": {
+      "work_id": "4c87d48e-fe17-4337-aad1-d20d045431a6",
+      "branch_id": "2e29dbc5-2ac0-483a-9fde-77576112e4a7",
+      "world_revision_id": "a3d56732-f3f6-4080-b48e-92c540c9e0a9"
+    },
+    "branch_seq": 2,
+    "accepted_event_refs": [],
+    "manifest_sha256": "9498f97ee242846216ffc0f6688e27115973b5a0cfb747db07f2971bb913e9c1",
+    "recorded_at": "2026-11-10T12:22:22.745829+00:00",
+    "original_base_world_ref": {
+      "work_id": "4c87d48e-fe17-4337-aad1-d20d045431a6",
+      "branch_id": "2e29dbc5-2ac0-483a-9fde-77576112e4a7",
+      "world_revision_id": "64d3daa2-ca27-42e2-8a3b-c248cb0c5cdf"
+    },
+    "validation_world_ref": {
+      "work_id": "4c87d48e-fe17-4337-aad1-d20d045431a6",
+      "branch_id": "2e29dbc5-2ac0-483a-9fde-77576112e4a7",
+      "world_revision_id": "64d3daa2-ca27-42e2-8a3b-c248cb0c5cdf"
+    },
+    "parent_world_ref": {
+      "work_id": "4c87d48e-fe17-4337-aad1-d20d045431a6",
+      "branch_id": "2e29dbc5-2ac0-483a-9fde-77576112e4a7",
+      "world_revision_id": "64d3daa2-ca27-42e2-8a3b-c248cb0c5cdf"
+    },
+    "acceptance_certificate_ref": {
+      "artifact_id": "3c64c927-8c05-4959-b8c4-0c730db87f28",
+      "artifact_revision_id": "7375989d-c284-4320-a587-62c27f34722e",
+      "sha256": "76210b96fdac6c6f77847be8f960b2209ff600c16861b09310e5f29fa7707852"
+    },
+    "proposal_ref": {
+      "sha256": "970c6f63f7cdac0e15a6678683b21ccf0b5f5f15929fbea51b7d96d06771b5a0",
+      "artifact_id": "93f6eaf3-00cf-4608-8bb8-2f51a3d249b9",
+      "artifact_revision_id": "e079987e-e348-4786-b28d-e9128171944b"
+    }
+  }
+}

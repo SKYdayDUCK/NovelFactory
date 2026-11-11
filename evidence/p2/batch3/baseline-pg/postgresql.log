@@ -1,0 +1,93 @@
+2026-11-10 12:11:29.297 UTC [25] LOG:  starting PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+2026-11-10 12:11:29.297 UTC [25] LOG:  listening on IPv4 address "127.0.0.1", port 51665
+2026-11-10 12:11:29.298 UTC [29] LOG:  database system was shut down at 2026-11-10 12:11:29 UTC
+2026-11-10 12:11:29.301 UTC [25] LOG:  database system is ready to accept connections
+2026-11-10 12:11:29.345 UTC [34] FATAL:  database "nf_dev" does not exist
+2026-11-10 12:11:37.295 UTC [50] ERROR:  immutable authoritative record: nf_events
+2026-11-10 12:11:37.295 UTC [50] CONTEXT:  PL/pgSQL function nf_reject_immutable_mutation() line 1 at RAISE
+2026-11-10 12:11:37.295 UTC [50] STATEMENT:  UPDATE nf_events SET payload=payload WHERE event_version_id=$1
+2026-11-10 12:11:37.296 UTC [46] ERROR:  immutable authoritative record: nf_events
+2026-11-10 12:11:37.296 UTC [46] CONTEXT:  PL/pgSQL function nf_reject_immutable_mutation() line 1 at RAISE
+2026-11-10 12:11:37.296 UTC [46] STATEMENT:  DELETE FROM nf_events WHERE event_version_id=$1
+2026-11-10 12:11:37.297 UTC [49] ERROR:  immutable authoritative record: nf_revisions
+2026-11-10 12:11:37.297 UTC [49] CONTEXT:  PL/pgSQL function nf_reject_immutable_mutation() line 1 at RAISE
+2026-11-10 12:11:37.297 UTC [49] STATEMENT:  UPDATE nf_revisions SET snapshot=snapshot WHERE world_revision_id=$1
+2026-11-10 12:11:37.298 UTC [50] ERROR:  scope tombstone required
+2026-11-10 12:11:37.298 UTC [50] CONTEXT:  PL/pgSQL function nf_scope_monotonic() line 1 at RAISE
+2026-11-10 12:11:37.298 UTC [50] STATEMENT:  DELETE FROM nf_scopes WHERE work_id=$1
+2026-11-10 12:11:37.958 UTC [63] LOG:  unexpected EOF on client connection with an open transaction
+2026-11-10 12:11:41.562 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:11:41.567 UTC [27] LOG:  checkpoint complete: wrote 935 buffers (5.7%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.005 s, sync=0.001 s, total=0.006 s; sync files=302, longest=0.001 s, average=0.000 s; distance=13455 kB, estimate=13455 kB; lsn=0/2477A08, redo lsn=0/24779B0
+2026-11-10 12:11:44.605 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:11:44.606 UTC [27] LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.001 s; sync files=6, longest=0.001 s, average=0.001 s; distance=6633 kB, estimate=12773 kB; lsn=0/2AF1F80, redo lsn=0/2AF1F28
+2026-11-10 12:12:11.239 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:12:11.240 UTC [27] LOG:  checkpoint complete: wrote 7 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.001 s, sync=0.001 s, total=0.001 s; sync files=6, longest=0.001 s, average=0.000 s; distance=10965 kB, estimate=12592 kB; lsn=0/35A7420, redo lsn=0/35A73C8
+2026-11-10 12:12:12.911 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:12:12.912 UTC [27] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.001 s; sync files=4, longest=0.001 s, average=0.000 s; distance=5473 kB, estimate=11880 kB; lsn=0/3AFFB70, redo lsn=0/3AFFB18
+2026-11-10 12:12:14.369 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:12:14.369 UTC [27] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.001 s, sync=0.001 s, total=0.001 s; sync files=4, longest=0.001 s, average=0.000 s; distance=5708 kB, estimate=11263 kB; lsn=0/4092DE0, redo lsn=0/4092D88
+2026-11-10 12:12:27.289 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:12:27.290 UTC [27] LOG:  checkpoint complete: wrote 5 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.001 s; sync files=4, longest=0.001 s, average=0.000 s; distance=8908 kB, estimate=11028 kB; lsn=0/49460A8, redo lsn=0/4946050
+2026-11-10 12:12:35.830 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:12:35.830 UTC [27] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.001 s, sync=0.001 s, total=0.001 s; sync files=4, longest=0.001 s, average=0.000 s; distance=7826 kB, estimate=10708 kB; lsn=0/50EAA70, redo lsn=0/50EAA18
+2026-11-10 12:12:37.473 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:12:37.479 UTC [27] LOG:  checkpoint complete: wrote 1012 buffers (6.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.005 s, sync=0.001 s, total=0.006 s; sync files=458, longest=0.001 s, average=0.000 s; distance=10636 kB, estimate=10700 kB; lsn=0/5B4DB90, redo lsn=0/5B4DB38
+2026-11-10 12:12:37.482 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:12:37.483 UTC [27] LOG:  checkpoint complete: wrote 2 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.001 s; sync files=2, longest=0.001 s, average=0.000 s; distance=2 kB, estimate=9630 kB; lsn=0/5B4E528, redo lsn=0/5B4E4D0
+2026-11-10 12:12:39.717 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:12:39.718 UTC [27] LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.001 s, sync=0.001 s, total=0.001 s; sync files=6, longest=0.001 s, average=0.000 s; distance=5968 kB, estimate=9264 kB; lsn=0/6122538, redo lsn=0/61224E0
+2026-11-10 12:13:19.930 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:13:19.933 UTC [27] LOG:  checkpoint complete: wrote 49 buffers (0.3%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.003 s, sync=0.001 s, total=0.003 s; sync files=15, longest=0.001 s, average=0.000 s; distance=12191 kB, estimate=12191 kB; lsn=0/6D0A258, redo lsn=0/6D0A200
+2026-11-10 12:13:20.616 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:13:20.618 UTC [27] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.002 s, sync=0.001 s, total=0.002 s; sync files=4, longest=0.001 s, average=0.001 s; distance=5464 kB, estimate=11518 kB; lsn=0/72603B0, redo lsn=0/7260358
+2026-11-10 12:13:21.137 UTC [133] ERROR:  scope identity is immutable
+2026-11-10 12:13:21.137 UTC [133] CONTEXT:  PL/pgSQL function nf_scope_monotonic() line 1 at RAISE
+2026-11-10 12:13:21.137 UTC [133] STATEMENT:  UPDATE nf_scopes SET scope_key=scope_key||$1,version=version+1 WHERE work_id=$2 AND branch_id=$3 AND scope_key=$4
+2026-11-10 12:13:21.138 UTC [133] ERROR:  scope version must increase
+2026-11-10 12:13:21.138 UTC [133] CONTEXT:  PL/pgSQL function nf_scope_monotonic() line 1 at RAISE
+2026-11-10 12:13:21.138 UTC [133] STATEMENT:  UPDATE nf_scopes SET version=version WHERE work_id=$1 AND branch_id=$2 AND scope_key=$3
+2026-11-10 12:13:21.142 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:13:21.144 UTC [27] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.002 s, sync=0.001 s, total=0.002 s; sync files=4, longest=0.001 s, average=0.000 s; distance=5356 kB, estimate=10902 kB; lsn=0/779B590, redo lsn=0/779B538
+2026-11-10 12:13:35.136 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:13:35.136 UTC [27] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.001 s, sync=0.001 s, total=0.001 s; sync files=4, longest=0.001 s, average=0.000 s; distance=11112 kB, estimate=11112 kB; lsn=0/8275640, redo lsn=0/82755E8
+2026-11-10 12:13:39.931 UTC [142] ERROR:  immutable authoritative record: nf_events
+2026-11-10 12:13:39.931 UTC [142] CONTEXT:  PL/pgSQL function nf_reject_immutable_mutation() line 1 at RAISE
+2026-11-10 12:13:39.931 UTC [142] STATEMENT:  UPDATE nf_events SET payload='{}' WHERE event_version_id=$1
+2026-11-10 12:13:41.456 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:13:41.457 UTC [27] LOG:  checkpoint complete: wrote 5 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.002 s, sync=0.001 s, total=0.002 s; sync files=4, longest=0.001 s, average=0.000 s; distance=7864 kB, estimate=10787 kB; lsn=0/8A236E8, redo lsn=0/8A23690
+2026-11-10 12:13:43.988 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:13:43.995 UTC [27] LOG:  checkpoint complete: wrote 1222 buffers (7.5%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.007 s, sync=0.001 s, total=0.008 s; sync files=476, longest=0.001 s, average=0.000 s; distance=12051 kB, estimate=12051 kB; lsn=0/95E82F0, redo lsn=0/95E8298
+2026-11-10 12:13:43.999 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:13:44.000 UTC [27] LOG:  checkpoint complete: wrote 2 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.001 s; sync files=2, longest=0.001 s, average=0.000 s; distance=3 kB, estimate=10846 kB; lsn=0/95E90D0, redo lsn=0/95E9078
+2026-11-10 12:13:44.937 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:13:44.937 UTC [27] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.001 s; sync files=4, longest=0.001 s, average=0.000 s; distance=5556 kB, estimate=10317 kB; lsn=0/9B56360, redo lsn=0/9B56308
+2026-11-10 12:13:52.083 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:13:52.084 UTC [27] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.001 s, sync=0.001 s, total=0.001 s; sync files=4, longest=0.001 s, average=0.000 s; distance=7703 kB, estimate=10055 kB; lsn=0/A2DBF68, redo lsn=0/A2DBF10
+2026-11-10 12:13:53.604 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:13:53.604 UTC [27] LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.001 s; sync files=6, longest=0.001 s, average=0.001 s; distance=5898 kB, estimate=9640 kB; lsn=0/A89E828, redo lsn=0/A89E7D0
+2026-11-10 12:13:55.065 UTC [188] LOG:  unexpected EOF on client connection with an open transaction
+2026-11-10 12:13:55.784 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:13:55.790 UTC [27] LOG:  checkpoint complete: wrote 1086 buffers (6.6%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.006 s, sync=0.001 s, total=0.007 s; sync files=458, longest=0.001 s, average=0.000 s; distance=10689 kB, estimate=10689 kB; lsn=0/B30ED40, redo lsn=0/B30ECE8
+2026-11-10 12:13:56.140 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:13:56.140 UTC [27] LOG:  checkpoint complete: wrote 2 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.001 s; sync files=2, longest=0.001 s, average=0.001 s; distance=40 kB, estimate=9624 kB; lsn=0/B318DC8, redo lsn=0/B318D70
+2026-11-10 12:13:56.621 UTC [211] ERROR:  immutable authoritative record: nf_task_inputs
+2026-11-10 12:13:56.621 UTC [211] CONTEXT:  PL/pgSQL function nf_reject_immutable_mutation() line 1 at RAISE
+2026-11-10 12:13:56.621 UTC [211] STATEMENT:  UPDATE nf_task_inputs SET input_hash=$1::VARCHAR WHERE nf_task_inputs.task_id = $2::UUID
+2026-11-10 12:13:57.194 UTC [214] ERROR:  insert or update on table "nf_object_refs" violates foreign key constraint "fk_nf_object_refs_object_hash_nf_objects"
+2026-11-10 12:13:57.194 UTC [214] DETAIL:  Key (object_hash)=(ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) is not present in table "nf_objects".
+2026-11-10 12:13:57.194 UTC [214] STATEMENT:  INSERT INTO nf_object_refs (owner_type, owner_id, object_hash) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR)
+2026-11-10 12:13:57.245 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:13:57.246 UTC [27] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.001 s; sync files=4, longest=0.001 s, average=0.000 s; distance=5616 kB, estimate=9223 kB; lsn=0/B895148, redo lsn=0/B8950F0
+2026-11-10 12:14:02.477 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:14:02.477 UTC [27] LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.001 s; sync files=6, longest=0.001 s, average=0.000 s; distance=6135 kB, estimate=8914 kB; lsn=0/BE92E18, redo lsn=0/BE92DC0
+2026-11-10 12:14:20.733 UTC [259] FATAL:  terminating connection due to administrator command
+2026-11-10 12:14:20.833 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:14:20.833 UTC [27] LOG:  checkpoint complete: wrote 8 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.001 s, sync=0.001 s, total=0.001 s; sync files=6, longest=0.001 s, average=0.000 s; distance=7823 kB, estimate=8805 kB; lsn=0/C636A68, redo lsn=0/C636A10
+2026-11-10 12:14:22.329 UTC [27] LOG:  checkpoint starting: immediate force wait
+2026-11-10 12:14:22.329 UTC [27] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.001 s; sync files=4, longest=0.001 s, average=0.000 s; distance=5452 kB, estimate=8470 kB; lsn=0/CB89B58, redo lsn=0/CB89B00
+2026-11-10 12:14:25.197 UTC [25] LOG:  received smart shutdown request
+2026-11-10 12:14:25.200 UTC [25] LOG:  background worker "logical replication launcher" (PID 32) exited with exit code 1
+2026-11-10 12:14:25.200 UTC [27] LOG:  shutting down
+2026-11-10 12:14:25.200 UTC [27] LOG:  checkpoint starting: shutdown immediate
+2026-11-10 12:14:25.200 UTC [27] LOG:  checkpoint complete: wrote 1 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.001 s; sync files=1, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=7623 kB; lsn=0/CB89C60, redo lsn=0/CB89C60
+2026-11-10 12:14:25.205 UTC [25] LOG:  database system is shut down

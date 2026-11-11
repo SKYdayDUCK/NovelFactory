@@ -1,0 +1,47 @@
+{"command": ["uv", "run", "--no-sync", "python", "scripts/with_postgres.py", "--pg-bin", "/workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin", "--log-dir", "evidence/p2/batch3/short-volume/cli-pg", "--migrate", "--", "uv", "run", "--no-sync", "python", "scripts/run_short_volume.py", "--execution-kind", "TEST_FIXTURE", "--output", "evidence/p2/batch3/short-volume/run", "--object-root", "var/short-volume-objects"], "command_display": "uv run --no-sync python scripts/with_postgres.py --pg-bin /workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin --log-dir evidence/p2/batch3/short-volume/cli-pg --migrate -- uv run --no-sync python scripts/run_short_volume.py --execution-kind TEST_FIXTURE --output evidence/p2/batch3/short-volume/run --object-root var/short-volume-objects", "cwd": "/workspace/scratch/cf3ee8d0c6c4/NovelFactory", "started_at_utc": "2026-11-10T12:23:22.045308+00:00", "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]", "platform": "Linux-6.18.57-x86_64-with-glibc2.41"}
+RUN ["/workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin/initdb", "-D", "/tmp/nf-pg17-9zylhxdm/data", "-U", "nf_dev", "--encoding=UTF8", "--locale=C", "--auth-local=reject", "--auth-host=trust", "--data-checksums"]
+The files belonging to this database system will be owned by user "agent".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "C".
+The default text search configuration will be set to "english".
+
+Data page checksums are enabled.
+
+creating directory /tmp/nf-pg17-9zylhxdm/data ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default "max_connections" ... 100
+selecting default "shared_buffers" ... 128MB
+selecting default time zone ... Asia/Tokyo
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+
+Success. You can now start the database server using:
+
+    /workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin/pg_ctl -D /tmp/nf-pg17-9zylhxdm/data -l logfile start
+
+RUN ["/workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin/createdb", "nf_test"]
+RUN ["/workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin/psql", "-Atc", "SELECT version(); SHOW fsync; SHOW synchronous_commit;"]
+PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+on
+on
+RUN ["/workspace/scratch/cf3ee8d0c6c4/NovelFactory/.venv/bin/python", "-m", "alembic", "upgrade", "head"]
+REAL_POSTGRES_READY postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1) port 50137
+{
+  "title": "潮闸余灯",
+  "execution_kind": "TEST_FIXTURE",
+  "engineering_status": "PASS",
+  "real_model_status": "BLOCKED_ENVIRONMENT",
+  "author_status": "PENDING_AUTHOR",
+  "scene_count": 6,
+  "text_codepoints": 2204,
+  "model_fixture_call_count": 15,
+  "real_model_call_count": 0,
+  "world_events_before_writing": 7,
+  "world_events_after_release": 7
+}
+
+RUN_METADATA {"command": ["uv", "run", "--no-sync", "python", "scripts/with_postgres.py", "--pg-bin", "/workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin", "--log-dir", "evidence/p2/batch3/short-volume/cli-pg", "--migrate", "--", "uv", "run", "--no-sync", "python", "scripts/run_short_volume.py", "--execution-kind", "TEST_FIXTURE", "--output", "evidence/p2/batch3/short-volume/run", "--object-root", "var/short-volume-objects"], "command_display": "uv run --no-sync python scripts/with_postgres.py --pg-bin /workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin --log-dir evidence/p2/batch3/short-volume/cli-pg --migrate -- uv run --no-sync python scripts/run_short_volume.py --execution-kind TEST_FIXTURE --output evidence/p2/batch3/short-volume/run --object-root var/short-volume-objects", "cwd": "/workspace/scratch/cf3ee8d0c6c4/NovelFactory", "started_at_utc": "2026-11-10T12:23:22.045308+00:00", "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]", "platform": "Linux-6.18.57-x86_64-with-glibc2.41", "exit_status": 0, "duration_seconds": 43.95903, "finished_at_utc": "2026-11-10T12:24:06.004365+00:00"}

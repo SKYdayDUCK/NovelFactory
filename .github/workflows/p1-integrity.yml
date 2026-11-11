@@ -1,21 +1,25 @@
-name: P1 baseline integrity
+name: P1 and P2 production integrity
 
 on:
   push:
-    branches: [main]
+    branches: [main, "dev/p2-*"]
   pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
 
+defaults:
+  run:
+    shell: bash
+
 concurrency:
-  group: p1-integrity-${{ github.workflow }}-${{ github.ref }}
+  group: p1-integrity-${{ github.workflow }}-${{ github.ref }}-${{ github.sha }}
   cancel-in-progress: false
 
 jobs:
   contract-unit:
-    name: Schema, domain, HTTP boundaries
+    name: Schema, domain, HTTP and production boundaries
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -39,6 +43,11 @@ jobs:
           uv run --no-sync python -m pytest tests/unit tests/contracts tests/service/test_admission.py -q \
             --junitxml=ci-evidence/unit.xml --json-report --json-report-file=ci-evidence/unit.json \
             2>&1 | tee ci-evidence/unit.log
+      - name: Deterministic Chinese memory retrieval evaluation
+        run: |
+          uv run --no-sync python benchmarks/memory/evaluate.py \
+            --output ci-evidence/memory \
+            2>&1 | tee ci-evidence/memory.log
       - name: Upload immutable unit and schema run evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -71,11 +80,14 @@ jobs:
       NF_DATABASE_URL: postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/nf_test
       NF_TEST_DATABASE_URL: postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/nf_test
       NF_EVIDENCE_DIR: ci-evidence/recovery
+      NF_P2_ACCEPTANCE_EVIDENCE_DIR: ci-evidence/acceptance
       PG_BIN: /usr/lib/postgresql/17/bin
       NF_POOL_SIZE: '8'
       NF_POOL_OVERFLOW: '0'
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Paired compiler benchmark verifies the exact baseline Git blob.
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -107,6 +119,92 @@ jobs:
           uv run --no-sync python -m pytest tests -q \
             --junitxml=ci-evidence/postgres-all.xml --json-report --json-report-file=ci-evidence/postgres-all.json \
             2>&1 | tee ci-evidence/postgres-all.log
+      - name: Compare current genesis replay with the pinned baseline
+        run: |
+          uv run --no-sync python -m benchmarks.genesis_paired_profile \
+            --agents 200 --repeats 5 --output ci-evidence/genesis-paired.json \
+            2>&1 | tee ci-evidence/genesis-paired.log
+      - name: Compare current strict canonical checks on the same world
+        run: |
+          uv run --no-sync python -m benchmarks.canonical_paired_profile \
+            --agents 200 --repeats 8 --output ci-evidence/canonical-paired.json \
+            2>&1 | tee ci-evidence/canonical-paired.log
+      - name: Reproduce historical Context Compiler experiment at e0b0f2b
+        # The original experiment requires its shared core to match 0609f680.
+        # Preserve that assertion and the complete facts/guard comparison in its
+        # original source tree; this step does not validate the current kernel.
+        # Current-head regressions and replay comparison execute above, while
+        # p3-p4-evidence.yml compares current-core context facts and guard material.
+        run: |
+          historical_sha=e0b0f2b080f3225d8be8e202e13258bc480f5b84
+          historical_root="$RUNNER_TEMP/nf-context-e0b0f2b"
+          historical_output="$GITHUB_WORKSPACE/ci-evidence/context-historical-e0b0f2b"
+          current_python="$GITHUB_WORKSPACE/.venv/bin/python"
+          mkdir -p "$historical_output"
+          git worktree add --detach "$historical_root" "$historical_sha"
+          test "$(git -C "$historical_root" rev-parse HEAD)" = "$historical_sha"
+          (
+            cd "$historical_root"
+            PYTHONPATH="$historical_root/src:$historical_root" "$current_python" - \
+              "$historical_root" "$GITHUB_WORKSPACE" "$historical_output" <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+          import subprocess
+          import sys
+          import benchmarks.context_paired_profile as paired
+          from novel_factory.application import kernel
+          from novel_factory.domain import world
+
+          historical, current, output = map(Path, sys.argv[1:])
+          historical = historical.resolve()
+          origins = {}
+          for module in (paired, kernel, world):
+              source = Path(module.__file__).resolve()
+              assert source.is_relative_to(historical), "Historical experiment imported current source"
+              origins[module.__name__] = str(source.relative_to(historical))
+          metadata = {
+              "scope": "HISTORICAL_REPRODUCTION_NOT_CURRENT_HEAD_VALIDATION",
+              "historical_candidate_sha": subprocess.check_output(
+                  ["git", "rev-parse", "HEAD"], cwd=historical, text=True).strip(),
+              "workflow_checkout_sha": subprocess.check_output(
+                  ["git", "rev-parse", "HEAD"], cwd=current, text=True).strip(),
+              "original_source_checks": paired.source_checks(),
+              "verified_import_origins": origins,
+              "runtime": "Current workflow virtualenv; historical source via fixed PYTHONPATH",
+              "dependency_lock_sha256": hashlib.sha256((current / "uv.lock").read_bytes()).hexdigest(),
+          }
+          (output / "method.json").write_text(json.dumps(metadata, indent=2) + "\n")
+          PY
+            PYTHONPATH="$historical_root/src:$historical_root" "$current_python" \
+              -m benchmarks.context_paired_profile \
+              --entities 1000 --history 12 --subjects 1 20 100 --repeats 5 \
+              --output "$historical_output/paired-run.json"
+          ) 2>&1 | tee "$historical_output/run.log"
+      - name: Probe actual memory services and authorization boundaries
+        run: |
+          uv run --no-sync python -m benchmarks.memory.service_probe \
+            --repeats 3 --output ci-evidence/memory-service \
+            2>&1 | tee ci-evidence/memory-service.log
+      - name: Persist the complete six-scene TEST_FIXTURE production run
+        run: |
+          uv run --no-sync python scripts/run_short_volume.py \
+            --execution-kind TEST_FIXTURE --output ci-evidence/short-volume \
+            --object-root /tmp/nf-ci-short-volume-objects \
+            2>&1 | tee ci-evidence/short-volume.log
+      - name: Exercise the real HTTP and PostgreSQL behavioral load harness
+        run: |
+          uv run --no-sync python -m benchmarks.p2_behavioral_load \
+            --agents 10 --profile mixed --arrival-rps 10 \
+            --output ci-evidence/load-smoke-10.json \
+            2>&1 | tee ci-evidence/load-smoke-10.log
+      - name: Join A-H design checks to executed JUnit evidence
+        run: |
+          uv run --no-sync python -m benchmarks.p2_acceptance_matrix \
+            --junit ci-evidence/postgres-all.xml --load ci-evidence/load-smoke-10.json \
+            --gate-scope executed-tests \
+            --output ci-evidence/r1-acceptance.json \
+            2>&1 | tee ci-evidence/r1-acceptance.log
       - name: Upload PostgreSQL, concurrency and recovery audit evidence
         if: always()
         uses: actions/upload-artifact@v4

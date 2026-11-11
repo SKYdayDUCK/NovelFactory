@@ -1,0 +1,29 @@
+{
+  "command": [
+    "uv",
+    "run",
+    "--no-sync",
+    "python",
+    "-m",
+    "benchmarks.p2_acceptance_matrix",
+    "--junit",
+    "/workspace/scratch/b26d73243868/verification/d_ci/postgres-all.xml",
+    "--load",
+    "/workspace/scratch/b26d73243868/verification/ci_load/50mixed/load.json",
+    "/workspace/scratch/b26d73243868/verification/ci_load/50overload/load.json",
+    "/workspace/scratch/b26d73243868/verification/ci_load/200mixed/load.json",
+    "/workspace/scratch/b26d73243868/verification/ci_load/200overload/load.json",
+    "--gate-scope",
+    "full",
+    "--output",
+    "/workspace/scratch/b26d73243868/verification/acceptance_matrix.json"
+  ],
+  "command_display": "uv run --no-sync python -m benchmarks.p2_acceptance_matrix --junit /workspace/scratch/b26d73243868/verification/d_ci/postgres-all.xml --load /workspace/scratch/b26d73243868/verification/ci_load/50mixed/load.json /workspace/scratch/b26d73243868/verification/ci_load/50overload/load.json /workspace/scratch/b26d73243868/verification/ci_load/200mixed/load.json /workspace/scratch/b26d73243868/verification/ci_load/200overload/load.json --gate-scope full --output /workspace/scratch/b26d73243868/verification/acceptance_matrix.json",
+  "cwd": "/workspace/scratch/b26d73243868/NovelFactory",
+  "started_at_utc": "2026-11-10T13:59:44.753921+00:00",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "exit_status": 1,
+  "duration_seconds": 0.094968,
+  "finished_at_utc": "2026-11-10T13:59:44.848919+00:00"
+}

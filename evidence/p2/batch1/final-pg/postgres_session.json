@@ -1,0 +1,24 @@
+{
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "port": 59393,
+  "command": [
+    ".venv/bin/python",
+    "-m",
+    "pytest",
+    "tests",
+    "-q",
+    "--junitxml=evidence/p2/batch1/final.xml",
+    "--json-report",
+    "--json-report-file=evidence/p2/batch1/final.json"
+  ],
+  "started_at_utc": "2026-11-10T10:05:49.126534+00:00",
+  "authentication": "loopback_trust_generated_test_data_only",
+  "fsync": true,
+  "synchronous_commit": true,
+  "max_connections": 60,
+  "data_directory_reused": false,
+  "exit_status": 0,
+  "postgres_exit_status": 0,
+  "duration_seconds": 93.963644,
+  "finished_at_utc": "2026-11-10T10:07:23.090230+00:00"
+}

@@ -1,0 +1,39 @@
+{
+  "checked_at_utc": "2026-11-10T12:22:45.943Z",
+  "repository": "SKYdayDUCK/NovelFactory",
+  "branch": "dev/p2-production-loop",
+  "head_sha": "0609f680fad782c827dd3834a073f8f9bcddaf0d",
+  "main_sha": "721f155c9cc912cddfdae559afe4f2516d0967f2",
+  "pr": {
+    "number": 2,
+    "url": "https://github.com/SKYdayDUCK/NovelFactory/pull/2",
+    "state": "open",
+    "draft": true,
+    "merged": false,
+    "comments": 0,
+    "review_comments": 0
+  },
+  "verified_github_ci": {
+    "workflow_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42802149422",
+    "conclusion": "success",
+    "unit_contract": {
+      "job_id": 129782117806,
+      "passed": 188,
+      "seconds": 3.19
+    },
+    "postgresql_full": {
+      "job_id": 129782118283,
+      "passed": 364,
+      "seconds": 263
+    },
+    "verification": "Fetched run/job metadata and actual job logs; not inferred from green badge."
+  },
+  "local_baseline": {
+    "passed": 364,
+    "seconds": 173.76,
+    "postgresql": "17.11",
+    "recorded_run": "baseline.json",
+    "junit": "baseline.xml"
+  },
+  "credential_data_recorded": false
+}

@@ -102,12 +102,15 @@ class BackupService:
         return packaged if packaged.is_dir() else checkout
 
     def _runtime_assets(self):
-        packaged = self.package_root / "data" / "runtime" / "query_profiles.json"
-        checkout = self.package_root.parents[1] / "runtime" / "query_profiles.json"
-        profile = packaged if packaged.is_file() else checkout
-        if not profile.is_file():
-            raise DomainError("INTERPRETATION_UNAVAILABLE", "Runtime query authorization profile is unavailable")
-        return {"runtime/query_profiles.json": profile}
+        packaged = self.package_root / "data" / "runtime"
+        checkout = self.package_root.parents[1] / "runtime"
+        root = packaged if packaged.is_dir() else checkout
+        assets = {"runtime/" + p.relative_to(root).as_posix(): p
+                  for p in sorted(root.rglob("*")) if p.is_file() and p.suffix in {".json", ".md"}}
+        required = {"runtime/query_profiles.json", "runtime/roles/catalog.json", "runtime/skills/catalog.json"}
+        if not required.issubset(assets):
+            raise DomainError("INTERPRETATION_UNAVAILABLE", "Runtime authorization, role or skill catalog is unavailable")
+        return assets
 
     def create(self, destination: str | Path):
         dest = Path(destination).resolve()
@@ -170,6 +173,7 @@ class BackupService:
                         asset_hashes[relative] = _sha(target)
                     manifest.update({"status": "COMPLETE", "dump_sha256": _sha(dest / "database.dump"),
                                      "objects": hashes, "runtime_files": runtime_hashes, "schemas": schema_hashes, "runtime_assets": asset_hashes,
+                                     "runtime_asset_version": 2,
                                      "pg_dump": result, "limitations": ["Logical backup; no WAL/PITR or cluster roles", "All writers must participate in maintenance gate", "External side effects require independent reconciliation"]})
                     for directory in sorted((p for p in dest.rglob("*") if p.is_dir()), key=lambda p: len(p.parts), reverse=True):
                         ObjectStore._fsync_dir(directory)
@@ -205,15 +209,23 @@ class BackupService:
                 if not installed.is_file() or _sha(installed) != digest:
                     raise DomainError("INTERPRETATION_UNAVAILABLE", "Installed interpretation differs from backup; use the saved compatible version")
         assets = manifest.get("runtime_assets")
-        if not isinstance(assets, dict) or set(assets) != {"runtime/query_profiles.json"}:
-            raise DomainError("INTERPRETATION_UNAVAILABLE", "Backup authorization profile manifest is incomplete")
+        asset_version = manifest.get("runtime_asset_version", 1)
+        required = {"runtime/query_profiles.json"}
+        if asset_version == 2:
+            required |= {"runtime/roles/catalog.json", "runtime/skills/catalog.json"}
+        if (not isinstance(assets, dict) or asset_version not in {1, 2}
+                or not required.issubset(assets)
+                or (asset_version == 1 and set(assets) != required)):
+            raise DomainError("INTERPRETATION_UNAVAILABLE", "Backup runtime asset manifest is incomplete")
         installed_assets = self._runtime_assets() if require_runtime else {}
+        if require_runtime and asset_version == 2 and set(assets) != set(installed_assets):
+            raise DomainError("INTERPRETATION_UNAVAILABLE", "Installed runtime asset set differs from backup")
         for relative, digest in assets.items():
             target = (src / "runtime_assets" / relative).resolve()
             if not target.is_relative_to(src / "runtime_assets") or not target.is_file() or _sha(target) != digest:
-                raise DomainError("INTERPRETATION_UNAVAILABLE", "Backup runtime authorization profile is unavailable")
-            if require_runtime and _sha(installed_assets[relative]) != digest:
-                raise DomainError("INTERPRETATION_UNAVAILABLE", "Installed runtime authorization profile differs from backup")
+                raise DomainError("INTERPRETATION_UNAVAILABLE", "Backup runtime role, skill or authorization asset is unavailable")
+            if require_runtime and (relative not in installed_assets or _sha(installed_assets[relative]) != digest):
+                raise DomainError("INTERPRETATION_UNAVAILABLE", "Installed runtime asset differs from backup")
         for name, digest in manifest.get("schemas", {}).items():
             target = (src / "schemas" / name).resolve()
             if not target.is_relative_to(src / "schemas") or not target.is_file() or _sha(target) != digest:

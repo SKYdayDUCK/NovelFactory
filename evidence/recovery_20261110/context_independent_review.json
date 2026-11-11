@@ -1,0 +1,209 @@
+{
+  "status": "PASS_INDEPENDENT_RECOMPUTATION",
+  "input": "/workspace/scratch/b26d73243868/verification/p3_01/paired-run.json",
+  "input_sha256": "88b8d5e580693a55167640c32817a04a11b7ef52097054e452422cb817e663a1",
+  "pair_count": 15,
+  "checks": [
+    {
+      "subjects": 1,
+      "repeat": 0,
+      "full_facts_with_evidence_equal": true,
+      "guard_material_equal": true,
+      "retained_hashes_recomputed": true,
+      "world_and_scopes_verified": true,
+      "facts_with_nonempty_evidence": 1,
+      "baseline_sql": 51,
+      "candidate_sql": 47
+    },
+    {
+      "subjects": 1,
+      "repeat": 1,
+      "full_facts_with_evidence_equal": true,
+      "guard_material_equal": true,
+      "retained_hashes_recomputed": true,
+      "world_and_scopes_verified": true,
+      "facts_with_nonempty_evidence": 1,
+      "baseline_sql": 51,
+      "candidate_sql": 47
+    },
+    {
+      "subjects": 1,
+      "repeat": 2,
+      "full_facts_with_evidence_equal": true,
+      "guard_material_equal": true,
+      "retained_hashes_recomputed": true,
+      "world_and_scopes_verified": true,
+      "facts_with_nonempty_evidence": 1,
+      "baseline_sql": 51,
+      "candidate_sql": 47
+    },
+    {
+      "subjects": 1,
+      "repeat": 3,
+      "full_facts_with_evidence_equal": true,
+      "guard_material_equal": true,
+      "retained_hashes_recomputed": true,
+      "world_and_scopes_verified": true,
+      "facts_with_nonempty_evidence": 1,
+      "baseline_sql": 51,
+      "candidate_sql": 47
+    },
+    {
+      "subjects": 1,
+      "repeat": 4,
+      "full_facts_with_evidence_equal": true,
+      "guard_material_equal": true,
+      "retained_hashes_recomputed": true,
+      "world_and_scopes_verified": true,
+      "facts_with_nonempty_evidence": 1,
+      "baseline_sql": 51,
+      "candidate_sql": 47
+    },
+    {
+      "subjects": 20,
+      "repeat": 0,
+      "full_facts_with_evidence_equal": true,
+      "guard_material_equal": true,
+      "retained_hashes_recomputed": true,
+      "world_and_scopes_verified": true,
+      "facts_with_nonempty_evidence": 12,
+      "baseline_sql": 89,
+      "candidate_sql": 47
+    },
+    {
+      "subjects": 20,
+      "repeat": 1,
+      "full_facts_with_evidence_equal": true,
+      "guard_material_equal": true,
+      "retained_hashes_recomputed": true,
+      "world_and_scopes_verified": true,
+      "facts_with_nonempty_evidence": 12,
+      "baseline_sql": 89,
+      "candidate_sql": 47
+    },
+    {
+      "subjects": 20,
+      "repeat": 2,
+      "full_facts_with_evidence_equal": true,
+      "guard_material_equal": true,
+      "retained_hashes_recomputed": true,
+      "world_and_scopes_verified": true,
+      "facts_with_nonempty_evidence": 12,
+      "baseline_sql": 89,
+      "candidate_sql": 47
+    },
+    {
+      "subjects": 20,
+      "repeat": 3,
+      "full_facts_with_evidence_equal": true,
+      "guard_material_equal": true,
+      "retained_hashes_recomputed": true,
+      "world_and_scopes_verified": true,
+      "facts_with_nonempty_evidence": 12,
+      "baseline_sql": 89,
+      "candidate_sql": 47
+    },
+    {
+      "subjects": 20,
+      "repeat": 4,
+      "full_facts_with_evidence_equal": true,
+      "guard_material_equal": true,
+      "retained_hashes_recomputed": true,
+      "world_and_scopes_verified": true,
+      "facts_with_nonempty_evidence": 12,
+      "baseline_sql": 89,
+      "candidate_sql": 47
+    },
+    {
+      "subjects": 100,
+      "repeat": 0,
+      "full_facts_with_evidence_equal": true,
+      "guard_material_equal": true,
+      "retained_hashes_recomputed": true,
+      "world_and_scopes_verified": true,
+      "facts_with_nonempty_evidence": 12,
+      "baseline_sql": 249,
+      "candidate_sql": 47
+    },
+    {
+      "subjects": 100,
+      "repeat": 1,
+      "full_facts_with_evidence_equal": true,
+      "guard_material_equal": true,
+      "retained_hashes_recomputed": true,
+      "world_and_scopes_verified": true,
+      "facts_with_nonempty_evidence": 12,
+      "baseline_sql": 249,
+      "candidate_sql": 47
+    },
+    {
+      "subjects": 100,
+      "repeat": 2,
+      "full_facts_with_evidence_equal": true,
+      "guard_material_equal": true,
+      "retained_hashes_recomputed": true,
+      "world_and_scopes_verified": true,
+      "facts_with_nonempty_evidence": 12,
+      "baseline_sql": 249,
+      "candidate_sql": 47
+    },
+    {
+      "subjects": 100,
+      "repeat": 3,
+      "full_facts_with_evidence_equal": true,
+      "guard_material_equal": true,
+      "retained_hashes_recomputed": true,
+      "world_and_scopes_verified": true,
+      "facts_with_nonempty_evidence": 12,
+      "baseline_sql": 249,
+      "candidate_sql": 47
+    },
+    {
+      "subjects": 100,
+      "repeat": 4,
+      "full_facts_with_evidence_equal": true,
+      "guard_material_equal": true,
+      "retained_hashes_recomputed": true,
+      "world_and_scopes_verified": true,
+      "facts_with_nonempty_evidence": 12,
+      "baseline_sql": 249,
+      "candidate_sql": 47
+    }
+  ],
+  "world_before_and_after_all_fields_equal": true,
+  "world_fields_compared": [
+    "event_count",
+    "head",
+    "manifest_hash",
+    "scope_versions",
+    "state_hash"
+  ],
+  "summary": [
+    {
+      "subjects": 1,
+      "pairs": 5,
+      "median_ms": {
+        "baseline": 77.37304900001618,
+        "candidate": 73.38668100055656
+      }
+    },
+    {
+      "subjects": 20,
+      "pairs": 5,
+      "median_ms": {
+        "baseline": 146.30034699985117,
+        "candidate": 124.80692499957513
+      }
+    },
+    {
+      "subjects": 100,
+      "pairs": 5,
+      "median_ms": {
+        "baseline": 429.35868299900903,
+        "candidate": 230.25667200090538
+      }
+    }
+  ],
+  "scope": "Reads new retained raw measurement; does not execute extra benchmark",
+  "audit_attempt_note": "Initial reviewer script incorrectly required every fact evidence list to be nonempty. The fixture has 12 accepted updates and initial bootstrap relations beyond those 12; the latter legitimately have empty event evidence in both baseline and candidate. This review compares complete lists including empty lists without deleting any evidence field. No product code, fixture, benchmark or golden answer was changed."
+}

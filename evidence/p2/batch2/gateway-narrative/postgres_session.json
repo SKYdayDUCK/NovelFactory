@@ -1,0 +1,22 @@
+{
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "port": 33363,
+  "command": [
+    ".venv/bin/python",
+    "-m",
+    "pytest",
+    "tests/integration/test_gateway_narrative.py",
+    "-q",
+    "--junitxml=evidence/p2/batch2/gateway-narrative.xml"
+  ],
+  "started_at_utc": "2026-11-10T10:29:06.940838+00:00",
+  "authentication": "loopback_trust_generated_test_data_only",
+  "fsync": true,
+  "synchronous_commit": true,
+  "max_connections": 60,
+  "data_directory_reused": false,
+  "exit_status": 0,
+  "postgres_exit_status": 0,
+  "duration_seconds": 2.811157,
+  "finished_at_utc": "2026-11-10T10:29:09.752037+00:00"
+}

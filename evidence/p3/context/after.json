@@ -1,0 +1,1142 @@
+{
+  "label": "after",
+  "execution_kind": "TEST_FIXTURE_REAL_POSTGRESQL",
+  "recorded_at_utc": "2026-11-10T12:40:26.714388+00:00",
+  "git_head": "0609f680fad782c827dd3834a073f8f9bcddaf0d",
+  "git_dirty_paths": [
+    ".github/workflows/p1-integrity.yml",
+    "src/novel_factory/application/queries.py",
+    "src/novel_factory/infrastructure/repository.py",
+    "validation/package_check_results.json"
+  ],
+  "source_sha256": {
+    "benchmarks/context_profile.py": "86c6f3164cb0463bfa662a5b6fd78a3570b03a1dc485d4080c0c6f20c736bedd",
+    "src/novel_factory/application/queries.py": "4fde3a6742fea5491047dbf3b4599cf3b42fce577b385d96609cf19048e88428",
+    "src/novel_factory/infrastructure/repository.py": "13a227c24ef9edde4f4db7c4a828966a81c4328ce65261669f6b7ca857544cbf"
+  },
+  "configuration": {
+    "output": "evidence/p3/context/after.json",
+    "label": "after",
+    "entities": 1000,
+    "history": 12,
+    "subjects": [
+      1,
+      20,
+      100
+    ],
+    "repeats": 5
+  },
+  "environment": {
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "cpu_count": 9,
+    "cpu_models": [
+      "AMD EPYC 9V74 80-Core Processor"
+    ],
+    "cgroup_cpu_max": null,
+    "postgres": "PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+    "settings": {
+      "max_connections": "60",
+      "shared_buffers": "128MB",
+      "fsync": "on",
+      "synchronous_commit": "on"
+    },
+    "pool_size": 4,
+    "max_overflow": 0
+  },
+  "dataset": {
+    "entities": 1001,
+    "genesis_relations": 1000,
+    "accepted_world_events": 12,
+    "fixture_namespace": "nf-context-profile-v1",
+    "revisions": 13,
+    "snapshot_stored_bytes": 3802474,
+    "snapshot_json_text_bytes": 15332949,
+    "largest_snapshot_json_bytes": 1186471,
+    "selections_stored_bytes": 6330
+  },
+  "model_requests": 0,
+  "model_cost": null,
+  "host_exclusivity": "Shared development host; timings are observations, not a capacity SLA.",
+  "cache_note": "Application result cache only; PostgreSQL/OS buffers are warm, not flushed.",
+  "summary": [
+    {
+      "subjects": 1,
+      "samples": 5,
+      "median_seconds": 0.07122878799964383,
+      "sql_counts": [
+        47
+      ],
+      "dependency_insert_counts": [
+        1
+      ]
+    },
+    {
+      "subjects": 20,
+      "samples": 5,
+      "median_seconds": 0.11635974899945722,
+      "sql_counts": [
+        47
+      ],
+      "dependency_insert_counts": [
+        1
+      ]
+    },
+    {
+      "subjects": 100,
+      "samples": 5,
+      "median_seconds": 0.22639285799959907,
+      "sql_counts": [
+        47
+      ],
+      "dependency_insert_counts": [
+        1
+      ]
+    }
+  ],
+  "raw_samples": [
+    {
+      "operation": "context_compile",
+      "elapsed_seconds": 0.09665273700011312,
+      "sql": {
+        "statements": 47,
+        "cursor_execution_seconds": 0.014729511996847577,
+        "statement_kinds": {
+          "SELECT": 36,
+          "INSERT": 10,
+          "UPDATE": 1
+        },
+        "dependency_insert_statements": 1,
+        "excludes_pool_pre_ping_and_result_decoding": true
+      },
+      "subjects": 1,
+      "repeat": 0,
+      "facts": 1,
+      "fact_content_sha256": "2a6b74e14c21ef43e04e75d894ce119cdc7611d45e24fc1f40be5bcb6d4ff90c",
+      "compiled_bytes": 4749
+    },
+    {
+      "operation": "context_compile",
+      "elapsed_seconds": 0.07122878799964383,
+      "sql": {
+        "statements": 47,
+        "cursor_execution_seconds": 0.013399637002294185,
+        "statement_kinds": {
+          "SELECT": 36,
+          "INSERT": 10,
+          "UPDATE": 1
+        },
+        "dependency_insert_statements": 1,
+        "excludes_pool_pre_ping_and_result_decoding": true
+      },
+      "subjects": 1,
+      "repeat": 1,
+      "facts": 1,
+      "fact_content_sha256": "2a6b74e14c21ef43e04e75d894ce119cdc7611d45e24fc1f40be5bcb6d4ff90c",
+      "compiled_bytes": 4749
+    },
+    {
+      "operation": "context_compile",
+      "elapsed_seconds": 0.06793692500104953,
+      "sql": {
+        "statements": 47,
+        "cursor_execution_seconds": 0.01287575499554805,
+        "statement_kinds": {
+          "SELECT": 36,
+          "INSERT": 10,
+          "UPDATE": 1
+        },
+        "dependency_insert_statements": 1,
+        "excludes_pool_pre_ping_and_result_decoding": true
+      },
+      "subjects": 1,
+      "repeat": 2,
+      "facts": 1,
+      "fact_content_sha256": "2a6b74e14c21ef43e04e75d894ce119cdc7611d45e24fc1f40be5bcb6d4ff90c",
+      "compiled_bytes": 4749
+    },
+    {
+      "operation": "context_compile",
+      "elapsed_seconds": 0.07410130300013407,
+      "sql": {
+        "statements": 47,
+        "cursor_execution_seconds": 0.013669381996805896,
+        "statement_kinds": {
+          "SELECT": 36,
+          "INSERT": 10,
+          "UPDATE": 1
+        },
+        "dependency_insert_statements": 1,
+        "excludes_pool_pre_ping_and_result_decoding": true
+      },
+      "subjects": 1,
+      "repeat": 3,
+      "facts": 1,
+      "fact_content_sha256": "2a6b74e14c21ef43e04e75d894ce119cdc7611d45e24fc1f40be5bcb6d4ff90c",
+      "compiled_bytes": 4749
+    },
+    {
+      "operation": "context_compile",
+      "elapsed_seconds": 0.06655808600044111,
+      "sql": {
+        "statements": 47,
+        "cursor_execution_seconds": 0.014639080996857956,
+        "statement_kinds": {
+          "SELECT": 36,
+          "INSERT": 10,
+          "UPDATE": 1
+        },
+        "dependency_insert_statements": 1,
+        "excludes_pool_pre_ping_and_result_decoding": true
+      },
+      "subjects": 1,
+      "repeat": 4,
+      "facts": 1,
+      "fact_content_sha256": "2a6b74e14c21ef43e04e75d894ce119cdc7611d45e24fc1f40be5bcb6d4ff90c",
+      "compiled_bytes": 4749
+    },
+    {
+      "operation": "context_compile_profile",
+      "elapsed_seconds": 0.12651294300121663,
+      "sql": {
+        "statements": 47,
+        "cursor_execution_seconds": 0.015060428000651882,
+        "statement_kinds": {
+          "SELECT": 36,
+          "INSERT": 10,
+          "UPDATE": 1
+        },
+        "dependency_insert_statements": 1,
+        "excludes_pool_pre_ping_and_result_decoding": true
+      },
+      "profile": [
+        {
+          "file": "context_profile.py",
+          "line": 162,
+          "function": "<lambda>",
+          "calls": 1,
+          "self_seconds": 0.002375588,
+          "cumulative_seconds": 0.126446803
+        },
+        {
+          "file": "queries.py",
+          "line": 526,
+          "function": "context_compile",
+          "calls": 1,
+          "self_seconds": 0.00014840100000000002,
+          "cumulative_seconds": 0.12407121500000001
+        },
+        {
+          "file": "queries.py",
+          "line": 137,
+          "function": "_sample",
+          "calls": 1,
+          "self_seconds": 4.9937e-05,
+          "cumulative_seconds": 0.08343172600000001
+        },
+        {
+          "file": "kernel.py",
+          "line": 52,
+          "function": "revision",
+          "calls": 1,
+          "self_seconds": 2.0402000000000002e-05,
+          "cumulative_seconds": 0.07464269800000001
+        },
+        {
+          "file": "canonical.py",
+          "line": 45,
+          "function": "fingerprint",
+          "calls": 13,
+          "self_seconds": 5.5634e-05,
+          "cumulative_seconds": 0.057010839
+        },
+        {
+          "file": "canonical.py",
+          "line": 39,
+          "function": "canonical_bytes",
+          "calls": 19,
+          "self_seconds": 3.9373000000000004e-05,
+          "cumulative_seconds": 0.056724255
+        },
+        {
+          "file": "canonical.py",
+          "line": 12,
+          "function": "_check",
+          "calls": 81925,
+          "self_seconds": 0.040097929000000004,
+          "cumulative_seconds": 0.047466150000000006
+        },
+        {
+          "file": "repository.py",
+          "line": 15,
+          "function": "many",
+          "calls": 23,
+          "self_seconds": 0.000470611,
+          "cumulative_seconds": 0.030176812
+        },
+        {
+          "file": "repository.py",
+          "line": 11,
+          "function": "one",
+          "calls": 22,
+          "self_seconds": 8.423500000000001e-05,
+          "cumulative_seconds": 0.029838757
+        },
+        {
+          "file": "elements.py",
+          "line": 517,
+          "function": "_execute_on_connection",
+          "calls": 47,
+          "self_seconds": 5.2372000000000006e-05,
+          "cumulative_seconds": 0.024822075000000002
+        },
+        {
+          "file": "base.py",
+          "line": 1636,
+          "function": "_execute_clauseelement",
+          "calls": 47,
+          "self_seconds": 0.000366345,
+          "cumulative_seconds": 0.024769703
+        },
+        {
+          "file": "base.py",
+          "line": 1420,
+          "function": "execute",
+          "calls": 44,
+          "self_seconds": 5.2713e-05,
+          "cumulative_seconds": 0.02420285
+        },
+        {
+          "file": "registry.py",
+          "line": 61,
+          "function": "validate_contract",
+          "calls": 24,
+          "self_seconds": 7.7408e-05,
+          "cumulative_seconds": 0.020200691
+        },
+        {
+          "file": "base.py",
+          "line": 1836,
+          "function": "_execute_context",
+          "calls": 47,
+          "self_seconds": 0.000188786,
+          "cumulative_seconds": 0.019568016
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.sorted>",
+          "calls": 56,
+          "self_seconds": 4.6291e-05,
+          "cumulative_seconds": 0.018511102
+        },
+        {
+          "file": "validators.py",
+          "line": 349,
+          "function": "iter_errors",
+          "calls": 201,
+          "self_seconds": 0.000364375,
+          "cumulative_seconds": 0.018485143000000002
+        },
+        {
+          "file": "_keywords.py",
+          "line": 274,
+          "function": "ref",
+          "calls": 241,
+          "self_seconds": 0.000189619,
+          "cumulative_seconds": 0.018455785000000002
+        },
+        {
+          "file": "base.py",
+          "line": 1895,
+          "function": "_exec_single_context",
+          "calls": 47,
+          "self_seconds": 0.00038680800000000004,
+          "cumulative_seconds": 0.018020826
+        },
+        {
+          "file": "validators.py",
+          "line": 396,
+          "function": "descend",
+          "calls": 876,
+          "self_seconds": 0.0019350980000000001,
+          "cumulative_seconds": 0.017411963000000003
+        },
+        {
+          "file": "_keywords.py",
+          "line": 290,
+          "function": "properties",
+          "calls": 199,
+          "self_seconds": 0.000327119,
+          "cumulative_seconds": 0.016335658
+        },
+        {
+          "file": "connection.py",
+          "line": 479,
+          "function": "wait",
+          "calls": 66,
+          "self_seconds": 0.010631384,
+          "cumulative_seconds": 0.01507601
+        },
+        {
+          "file": "cursor.py",
+          "line": 100,
+          "function": "execute",
+          "calls": 50,
+          "self_seconds": 0.000134751,
+          "cumulative_seconds": 0.014821001
+        },
+        {
+          "file": "default.py",
+          "line": 963,
+          "function": "do_execute",
+          "calls": 47,
+          "self_seconds": 3.3656000000000004e-05,
+          "cumulative_seconds": 0.014429323
+        },
+        {
+          "file": "result.py",
+          "line": 565,
+          "function": "iterrows",
+          "calls": 43,
+          "self_seconds": 0.00010379700000000001,
+          "cumulative_seconds": 0.012490784000000001
+        },
+        {
+          "file": "cursor.py",
+          "line": 1163,
+          "function": "fetchone",
+          "calls": 66,
+          "self_seconds": 4.4626e-05,
+          "cumulative_seconds": 0.012431992000000001
+        }
+      ],
+      "subjects": 1
+    },
+    {
+      "operation": "context_compile",
+      "elapsed_seconds": 0.11148923299879243,
+      "sql": {
+        "statements": 47,
+        "cursor_execution_seconds": 0.018580517995360424,
+        "statement_kinds": {
+          "SELECT": 36,
+          "INSERT": 10,
+          "UPDATE": 1
+        },
+        "dependency_insert_statements": 1,
+        "excludes_pool_pre_ping_and_result_decoding": true
+      },
+      "subjects": 20,
+      "repeat": 0,
+      "facts": 20,
+      "fact_content_sha256": "4a30b56df216951dd62e83955b1a29854807eba6cb05fba0db5a8741177dd04d",
+      "compiled_bytes": 29624
+    },
+    {
+      "operation": "context_compile",
+      "elapsed_seconds": 0.16427232999922126,
+      "sql": {
+        "statements": 47,
+        "cursor_execution_seconds": 0.01746321900282055,
+        "statement_kinds": {
+          "SELECT": 36,
+          "INSERT": 10,
+          "UPDATE": 1
+        },
+        "dependency_insert_statements": 1,
+        "excludes_pool_pre_ping_and_result_decoding": true
+      },
+      "subjects": 20,
+      "repeat": 1,
+      "facts": 20,
+      "fact_content_sha256": "4a30b56df216951dd62e83955b1a29854807eba6cb05fba0db5a8741177dd04d",
+      "compiled_bytes": 29624
+    },
+    {
+      "operation": "context_compile",
+      "elapsed_seconds": 0.10912333099986427,
+      "sql": {
+        "statements": 47,
+        "cursor_execution_seconds": 0.01918254500196781,
+        "statement_kinds": {
+          "SELECT": 36,
+          "INSERT": 10,
+          "UPDATE": 1
+        },
+        "dependency_insert_statements": 1,
+        "excludes_pool_pre_ping_and_result_decoding": true
+      },
+      "subjects": 20,
+      "repeat": 2,
+      "facts": 20,
+      "fact_content_sha256": "4a30b56df216951dd62e83955b1a29854807eba6cb05fba0db5a8741177dd04d",
+      "compiled_bytes": 29624
+    },
+    {
+      "operation": "context_compile",
+      "elapsed_seconds": 0.14864512699932675,
+      "sql": {
+        "statements": 47,
+        "cursor_execution_seconds": 0.018563621000794228,
+        "statement_kinds": {
+          "SELECT": 36,
+          "INSERT": 10,
+          "UPDATE": 1
+        },
+        "dependency_insert_statements": 1,
+        "excludes_pool_pre_ping_and_result_decoding": true
+      },
+      "subjects": 20,
+      "repeat": 3,
+      "facts": 20,
+      "fact_content_sha256": "4a30b56df216951dd62e83955b1a29854807eba6cb05fba0db5a8741177dd04d",
+      "compiled_bytes": 29624
+    },
+    {
+      "operation": "context_compile",
+      "elapsed_seconds": 0.11635974899945722,
+      "sql": {
+        "statements": 47,
+        "cursor_execution_seconds": 0.017269246996875154,
+        "statement_kinds": {
+          "SELECT": 36,
+          "INSERT": 10,
+          "UPDATE": 1
+        },
+        "dependency_insert_statements": 1,
+        "excludes_pool_pre_ping_and_result_decoding": true
+      },
+      "subjects": 20,
+      "repeat": 4,
+      "facts": 20,
+      "fact_content_sha256": "4a30b56df216951dd62e83955b1a29854807eba6cb05fba0db5a8741177dd04d",
+      "compiled_bytes": 29624
+    },
+    {
+      "operation": "context_compile_profile",
+      "elapsed_seconds": 0.2537366930009739,
+      "sql": {
+        "statements": 47,
+        "cursor_execution_seconds": 0.022093291998317,
+        "statement_kinds": {
+          "SELECT": 36,
+          "INSERT": 10,
+          "UPDATE": 1
+        },
+        "dependency_insert_statements": 1,
+        "excludes_pool_pre_ping_and_result_decoding": true
+      },
+      "profile": [
+        {
+          "file": "context_profile.py",
+          "line": 162,
+          "function": "<lambda>",
+          "calls": 1,
+          "self_seconds": 0.002565655,
+          "cumulative_seconds": 0.253682521
+        },
+        {
+          "file": "queries.py",
+          "line": 526,
+          "function": "context_compile",
+          "calls": 1,
+          "self_seconds": 0.00037539,
+          "cumulative_seconds": 0.251116866
+        },
+        {
+          "file": "registry.py",
+          "line": 61,
+          "function": "validate_contract",
+          "calls": 247,
+          "self_seconds": 0.00041338400000000004,
+          "cumulative_seconds": 0.12137732300000001
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.sorted>",
+          "calls": 553,
+          "self_seconds": 0.000375127,
+          "cumulative_seconds": 0.11081338700000001
+        },
+        {
+          "file": "validators.py",
+          "line": 349,
+          "function": "iter_errors",
+          "calls": 1154,
+          "self_seconds": 0.000908557,
+          "cumulative_seconds": 0.11064634500000001
+        },
+        {
+          "file": "_keywords.py",
+          "line": 274,
+          "function": "ref",
+          "calls": 1503,
+          "self_seconds": 0.001120976,
+          "cumulative_seconds": 0.11045621400000001
+        },
+        {
+          "file": "validators.py",
+          "line": 396,
+          "function": "descend",
+          "calls": 5479,
+          "self_seconds": 0.012341725000000001,
+          "cumulative_seconds": 0.10261729200000001
+        },
+        {
+          "file": "_keywords.py",
+          "line": 290,
+          "function": "properties",
+          "calls": 1335,
+          "self_seconds": 0.001991202,
+          "cumulative_seconds": 0.093692643
+        },
+        {
+          "file": "queries.py",
+          "line": 137,
+          "function": "_sample",
+          "calls": 1,
+          "self_seconds": 4.8767e-05,
+          "cumulative_seconds": 0.090181729
+        },
+        {
+          "file": "kernel.py",
+          "line": 52,
+          "function": "revision",
+          "calls": 1,
+          "self_seconds": 2.0601e-05,
+          "cumulative_seconds": 0.07993715600000001
+        },
+        {
+          "file": "canonical.py",
+          "line": 39,
+          "function": "canonical_bytes",
+          "calls": 79,
+          "self_seconds": 0.00010036000000000001,
+          "cumulative_seconds": 0.062543676
+        },
+        {
+          "file": "canonical.py",
+          "line": 45,
+          "function": "fingerprint",
+          "calls": 54,
+          "self_seconds": 8.4542e-05,
+          "cumulative_seconds": 0.061189296000000004
+        },
+        {
+          "file": "_keywords.py",
+          "line": 59,
+          "function": "items",
+          "calls": 130,
+          "self_seconds": 0.000289883,
+          "cumulative_seconds": 0.059585001000000005
+        },
+        {
+          "file": "_keywords.py",
+          "line": 351,
+          "function": "oneOf",
+          "calls": 171,
+          "self_seconds": 0.000681473,
+          "cumulative_seconds": 0.057692160000000006
+        },
+        {
+          "file": "queries.py",
+          "line": 442,
+          "function": "_execute",
+          "calls": 1,
+          "self_seconds": 1.0256000000000001e-05,
+          "cumulative_seconds": 0.055987510000000004
+        },
+        {
+          "file": "queries.py",
+          "line": 250,
+          "function": "_state",
+          "calls": 1,
+          "self_seconds": 0.00015335200000000002,
+          "cumulative_seconds": 0.055641195000000004
+        },
+        {
+          "file": "canonical.py",
+          "line": 12,
+          "function": "_check",
+          "calls": 85828,
+          "self_seconds": 0.043392178,
+          "cumulative_seconds": 0.052199102000000004
+        },
+        {
+          "file": "elements.py",
+          "line": 517,
+          "function": "_execute_on_connection",
+          "calls": 47,
+          "self_seconds": 5.6259000000000005e-05,
+          "cumulative_seconds": 0.038160458
+        },
+        {
+          "file": "base.py",
+          "line": 1636,
+          "function": "_execute_clauseelement",
+          "calls": 47,
+          "self_seconds": 0.00040201500000000003,
+          "cumulative_seconds": 0.038104199000000005
+        },
+        {
+          "file": "base.py",
+          "line": 1420,
+          "function": "execute",
+          "calls": 44,
+          "self_seconds": 5.8478000000000005e-05,
+          "cumulative_seconds": 0.037465365
+        },
+        {
+          "file": "repository.py",
+          "line": 15,
+          "function": "many",
+          "calls": 23,
+          "self_seconds": 0.0006550480000000001,
+          "cumulative_seconds": 0.033652953
+        },
+        {
+          "file": "repository.py",
+          "line": 11,
+          "function": "one",
+          "calls": 22,
+          "self_seconds": 8.962e-05,
+          "cumulative_seconds": 0.03330424
+        },
+        {
+          "file": "validators.py",
+          "line": 459,
+          "function": "_validate_reference",
+          "calls": 1500,
+          "self_seconds": 0.000753676,
+          "cumulative_seconds": 0.032729765
+        },
+        {
+          "file": "_core.py",
+          "line": 653,
+          "function": "lookup",
+          "calls": 1500,
+          "self_seconds": 0.002520407,
+          "cumulative_seconds": 0.031976089
+        },
+        {
+          "file": "_keywords.py",
+          "line": 332,
+          "function": "allOf",
+          "calls": 48,
+          "self_seconds": 0.00011982400000000001,
+          "cumulative_seconds": 0.029422745
+        }
+      ],
+      "subjects": 20
+    },
+    {
+      "operation": "context_compile",
+      "elapsed_seconds": 0.2036573599998519,
+      "sql": {
+        "statements": 47,
+        "cursor_execution_seconds": 0.02653249100148969,
+        "statement_kinds": {
+          "SELECT": 36,
+          "INSERT": 10,
+          "UPDATE": 1
+        },
+        "dependency_insert_statements": 1,
+        "excludes_pool_pre_ping_and_result_decoding": true
+      },
+      "subjects": 100,
+      "repeat": 0,
+      "facts": 100,
+      "fact_content_sha256": "64ba64050139e0dc642dc17f1ca8e4278cebf04aa0286fecdb1ce39c2da3f047",
+      "compiled_bytes": 74425
+    },
+    {
+      "operation": "context_compile",
+      "elapsed_seconds": 0.19932207499914512,
+      "sql": {
+        "statements": 47,
+        "cursor_execution_seconds": 0.026276819997292478,
+        "statement_kinds": {
+          "SELECT": 36,
+          "INSERT": 10,
+          "UPDATE": 1
+        },
+        "dependency_insert_statements": 1,
+        "excludes_pool_pre_ping_and_result_decoding": true
+      },
+      "subjects": 100,
+      "repeat": 1,
+      "facts": 100,
+      "fact_content_sha256": "64ba64050139e0dc642dc17f1ca8e4278cebf04aa0286fecdb1ce39c2da3f047",
+      "compiled_bytes": 74425
+    },
+    {
+      "operation": "context_compile",
+      "elapsed_seconds": 0.2415735449994827,
+      "sql": {
+        "statements": 47,
+        "cursor_execution_seconds": 0.034425167003064416,
+        "statement_kinds": {
+          "SELECT": 36,
+          "INSERT": 10,
+          "UPDATE": 1
+        },
+        "dependency_insert_statements": 1,
+        "excludes_pool_pre_ping_and_result_decoding": true
+      },
+      "subjects": 100,
+      "repeat": 2,
+      "facts": 100,
+      "fact_content_sha256": "64ba64050139e0dc642dc17f1ca8e4278cebf04aa0286fecdb1ce39c2da3f047",
+      "compiled_bytes": 74425
+    },
+    {
+      "operation": "context_compile",
+      "elapsed_seconds": 0.22639285799959907,
+      "sql": {
+        "statements": 47,
+        "cursor_execution_seconds": 0.03516666499308485,
+        "statement_kinds": {
+          "SELECT": 36,
+          "INSERT": 10,
+          "UPDATE": 1
+        },
+        "dependency_insert_statements": 1,
+        "excludes_pool_pre_ping_and_result_decoding": true
+      },
+      "subjects": 100,
+      "repeat": 3,
+      "facts": 100,
+      "fact_content_sha256": "64ba64050139e0dc642dc17f1ca8e4278cebf04aa0286fecdb1ce39c2da3f047",
+      "compiled_bytes": 74425
+    },
+    {
+      "operation": "context_compile",
+      "elapsed_seconds": 0.2276850039997953,
+      "sql": {
+        "statements": 47,
+        "cursor_execution_seconds": 0.026012484999228036,
+        "statement_kinds": {
+          "SELECT": 36,
+          "INSERT": 10,
+          "UPDATE": 1
+        },
+        "dependency_insert_statements": 1,
+        "excludes_pool_pre_ping_and_result_decoding": true
+      },
+      "subjects": 100,
+      "repeat": 4,
+      "facts": 100,
+      "fact_content_sha256": "64ba64050139e0dc642dc17f1ca8e4278cebf04aa0286fecdb1ce39c2da3f047",
+      "compiled_bytes": 74425
+    },
+    {
+      "operation": "context_compile_profile",
+      "elapsed_seconds": 0.5601307979995909,
+      "sql": {
+        "statements": 47,
+        "cursor_execution_seconds": 0.03143271300723427,
+        "statement_kinds": {
+          "SELECT": 36,
+          "INSERT": 10,
+          "UPDATE": 1
+        },
+        "dependency_insert_statements": 1,
+        "excludes_pool_pre_ping_and_result_decoding": true
+      },
+      "profile": [
+        {
+          "file": "context_profile.py",
+          "line": 162,
+          "function": "<lambda>",
+          "calls": 1,
+          "self_seconds": 0.002388597,
+          "cumulative_seconds": 0.5600591500000001
+        },
+        {
+          "file": "queries.py",
+          "line": 526,
+          "function": "context_compile",
+          "calls": 1,
+          "self_seconds": 0.000838244,
+          "cumulative_seconds": 0.557670553
+        },
+        {
+          "file": "registry.py",
+          "line": 61,
+          "function": "validate_contract",
+          "calls": 1047,
+          "self_seconds": 0.0018522950000000001,
+          "cumulative_seconds": 0.356199408
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.sorted>",
+          "calls": 1673,
+          "self_seconds": 0.001491963,
+          "cumulative_seconds": 0.31938729800000004
+        },
+        {
+          "file": "validators.py",
+          "line": 349,
+          "function": "iter_errors",
+          "calls": 4194,
+          "self_seconds": 0.003958447,
+          "cumulative_seconds": 0.318509131
+        },
+        {
+          "file": "_keywords.py",
+          "line": 274,
+          "function": "ref",
+          "calls": 3343,
+          "self_seconds": 0.002977305,
+          "cumulative_seconds": 0.31738863
+        },
+        {
+          "file": "validators.py",
+          "line": 396,
+          "function": "descend",
+          "calls": 14439,
+          "self_seconds": 0.035020979,
+          "cumulative_seconds": 0.282789546
+        },
+        {
+          "file": "queries.py",
+          "line": 442,
+          "function": "_execute",
+          "calls": 1,
+          "self_seconds": 1.2118000000000002e-05,
+          "cumulative_seconds": 0.250370817
+        },
+        {
+          "file": "queries.py",
+          "line": 250,
+          "function": "_state",
+          "calls": 1,
+          "self_seconds": 0.0009000840000000001,
+          "cumulative_seconds": 0.249584095
+        },
+        {
+          "file": "_keywords.py",
+          "line": 290,
+          "function": "properties",
+          "calls": 3895,
+          "self_seconds": 0.006247842,
+          "cumulative_seconds": 0.23939600700000002
+        },
+        {
+          "file": "_keywords.py",
+          "line": 332,
+          "function": "allOf",
+          "calls": 208,
+          "self_seconds": 0.0008282830000000001,
+          "cumulative_seconds": 0.122295128
+        },
+        {
+          "file": "queries.py",
+          "line": 137,
+          "function": "_sample",
+          "calls": 1,
+          "self_seconds": 8.111400000000001e-05,
+          "cumulative_seconds": 0.10899608300000001
+        },
+        {
+          "file": "_keywords.py",
+          "line": 59,
+          "function": "items",
+          "calls": 530,
+          "self_seconds": 0.0008223390000000001,
+          "cumulative_seconds": 0.10598686700000001
+        },
+        {
+          "file": "temporal.py",
+          "line": 11,
+          "function": "point_key",
+          "calls": 938,
+          "self_seconds": 0.00055888,
+          "cumulative_seconds": 0.09963532100000001
+        },
+        {
+          "file": "_keywords.py",
+          "line": 351,
+          "function": "oneOf",
+          "calls": 411,
+          "self_seconds": 0.0018004000000000002,
+          "cumulative_seconds": 0.093635037
+        },
+        {
+          "file": "world.py",
+          "line": 510,
+          "function": "state_at",
+          "calls": 100,
+          "self_seconds": 0.007419007,
+          "cumulative_seconds": 0.09360990300000001
+        },
+        {
+          "file": "kernel.py",
+          "line": 52,
+          "function": "revision",
+          "calls": 1,
+          "self_seconds": 2.3416e-05,
+          "cumulative_seconds": 0.09129777300000001
+        },
+        {
+          "file": "validators.py",
+          "line": 459,
+          "function": "_validate_reference",
+          "calls": 3340,
+          "self_seconds": 0.001904538,
+          "cumulative_seconds": 0.08838839300000001
+        },
+        {
+          "file": "_core.py",
+          "line": 653,
+          "function": "lookup",
+          "calls": 3340,
+          "self_seconds": 0.006131834,
+          "cumulative_seconds": 0.08648385500000001
+        },
+        {
+          "file": "canonical.py",
+          "line": 39,
+          "function": "canonical_bytes",
+          "calls": 239,
+          "self_seconds": 0.000321552,
+          "cumulative_seconds": 0.076679867
+        },
+        {
+          "file": "canonical.py",
+          "line": 45,
+          "function": "fingerprint",
+          "calls": 134,
+          "self_seconds": 0.00015923100000000002,
+          "cumulative_seconds": 0.073267934
+        },
+        {
+          "file": "elements.py",
+          "line": 517,
+          "function": "_execute_on_connection",
+          "calls": 47,
+          "self_seconds": 6.1129e-05,
+          "cumulative_seconds": 0.06935131700000001
+        },
+        {
+          "file": "base.py",
+          "line": 1636,
+          "function": "_execute_clauseelement",
+          "calls": 47,
+          "self_seconds": 0.00046514500000000003,
+          "cumulative_seconds": 0.069290188
+        },
+        {
+          "file": "base.py",
+          "line": 1420,
+          "function": "execute",
+          "calls": 44,
+          "self_seconds": 6.057100000000001e-05,
+          "cumulative_seconds": 0.06852206200000001
+        },
+        {
+          "file": "canonical.py",
+          "line": 12,
+          "function": "_check",
+          "calls": 94388,
+          "self_seconds": 0.053446215000000005,
+          "cumulative_seconds": 0.06325968700000001
+        }
+      ],
+      "subjects": 100
+    },
+    {
+      "operation": "state_query_app_cold",
+      "elapsed_seconds": 0.09204060299998673,
+      "sql": {
+        "statements": 20,
+        "cursor_execution_seconds": 0.008789708001131658,
+        "statement_kinds": {
+          "SELECT": 20
+        },
+        "dependency_insert_statements": 0,
+        "excludes_pool_pre_ping_and_result_decoding": true
+      },
+      "repeat": 0,
+      "returned_items": 20
+    },
+    {
+      "operation": "state_query_app_warm",
+      "elapsed_seconds": 0.06214900000122725,
+      "sql": {
+        "statements": 20,
+        "cursor_execution_seconds": 0.00842658000146912,
+        "statement_kinds": {
+          "SELECT": 20
+        },
+        "dependency_insert_statements": 0,
+        "excludes_pool_pre_ping_and_result_decoding": true
+      },
+      "repeat": 1,
+      "returned_items": 20
+    },
+    {
+      "operation": "state_query_app_warm",
+      "elapsed_seconds": 0.06557040100051381,
+      "sql": {
+        "statements": 20,
+        "cursor_execution_seconds": 0.008314301005157176,
+        "statement_kinds": {
+          "SELECT": 20
+        },
+        "dependency_insert_statements": 0,
+        "excludes_pool_pre_ping_and_result_decoding": true
+      },
+      "repeat": 2,
+      "returned_items": 20
+    },
+    {
+      "operation": "state_query_app_warm",
+      "elapsed_seconds": 0.06586524700105656,
+      "sql": {
+        "statements": 20,
+        "cursor_execution_seconds": 0.008548941996195936,
+        "statement_kinds": {
+          "SELECT": 20
+        },
+        "dependency_insert_statements": 0,
+        "excludes_pool_pre_ping_and_result_decoding": true
+      },
+      "repeat": 3,
+      "returned_items": 20
+    },
+    {
+      "operation": "state_query_app_warm",
+      "elapsed_seconds": 0.06734215399956156,
+      "sql": {
+        "statements": 20,
+        "cursor_execution_seconds": 0.008972858004199225,
+        "statement_kinds": {
+          "SELECT": 20
+        },
+        "dependency_insert_statements": 0,
+        "excludes_pool_pre_ping_and_result_decoding": true
+      },
+      "repeat": 4,
+      "returned_items": 20
+    },
+    {
+      "operation": "state_query_app_warm",
+      "elapsed_seconds": 0.09110433000023477,
+      "sql": {
+        "statements": 20,
+        "cursor_execution_seconds": 0.018510509002226172,
+        "statement_kinds": {
+          "SELECT": 20
+        },
+        "dependency_insert_statements": 0,
+        "excludes_pool_pre_ping_and_result_decoding": true
+      },
+      "repeat": 5,
+      "returned_items": 20
+    }
+  ]
+}

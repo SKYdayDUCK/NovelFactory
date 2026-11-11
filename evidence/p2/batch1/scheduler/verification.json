@@ -1,0 +1,46 @@
+{
+  "scope": "P2-02 scheduler",
+  "database": "PostgreSQL 17.11",
+  "durability": {
+    "fsync": true,
+    "synchronous_commit": true
+  },
+  "runs": [
+    {
+      "label": "initial-7",
+      "pytest_passed": 7,
+      "pytest_failed": 0,
+      "duration_seconds": 5.25
+    },
+    {
+      "label": "expanded-23",
+      "pytest_passed": 23,
+      "pytest_failed": 0,
+      "duration_seconds": 12.06
+    },
+    {
+      "label": "final-25",
+      "pytest_passed": 25,
+      "pytest_failed": 0,
+      "duration_seconds": 13.25,
+      "junit": "final-25/scheduler.xml"
+    }
+  ],
+  "last_composition": {
+    "unit": 7,
+    "postgres_integration": 18
+  },
+  "expected": "No duplicate effects, actor leak, skipped registered influence, or story progress from wall-clock delay. All six actor-return permutations preserve the explicit result.",
+  "observed": "All 25 targeted assertions passed; database fault rollback and rejected authorization/causality cases are expected passing counterexamples.",
+  "lint": {
+    "initial_diagnostics": 20,
+    "fixed": 20,
+    "final": "All checks passed",
+    "note": "Lint command output was interactive; this is a factual summary, not a replacement raw transcript."
+  },
+  "limitations": [
+    "Only finite registered recipes and explicit single-stage outcomes are implemented.",
+    "Arbitrary history repair with registered schedule state is conservatively blocked pending a reviewed rebuild.",
+    "This run did not invoke a real external model."
+  ]
+}

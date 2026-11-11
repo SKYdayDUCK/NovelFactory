@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="7" time="8.912" timestamp="2026-11-10T19:33:40.250331+09:00" hostname="2be49009bab4"><testcase classname="tests.integration.test_narrative" name="test_world_event_can_be_narrated_twice_without_effect_reapplication" time="2.708" /><testcase classname="tests.integration.test_narrative" name="test_text_first_delta_must_use_formal_kernel_acceptance_then_exact_alignment" time="1.156" /><testcase classname="tests.integration.test_narrative" name="test_reader_inputs_do_not_grant_text_or_hidden_material_access" time="0.431" /><testcase classname="tests.integration.test_narrative" name="test_forged_clear_report_and_wrong_span_never_receive_acceptance" time="0.614" /><testcase classname="tests.integration.test_narrative" name="test_unrelated_head_progress_keeps_cut_but_revoked_writer_cannot_be_adopted" time="0.906" /><testcase classname="tests.integration.test_narrative" name="test_valid_belief_cannot_cite_forged_or_other_actor_evidence" time="2.040" /><testcase classname="tests.integration.test_narrative" name="test_cross_branch_text_requires_new_scene_task_and_source_qualification" time="0.905"><failure message="novel_factory.domain.errors.DomainError: Idempotency key is already bound to different content">kernel_env = {'db': &lt;novel_factory.infrastructure.database.Database object at 0x7f76482c6570&gt;, 'store': &lt;novel_factory.infrastructu...Kernel object at 0x7f7646db5a30&gt;, 'url': 'postgresql+psycopg://nf_dev@127.0.0.1:33285/nf_kernel_5e21c6cba0ba4c1f', ...}
+
+    def test_cross_branch_text_requires_new_scene_task_and_source_qualification(kernel_env):
+        k = kernel_env["kernel"]; f = arrange(k); s = NarrativeService(k); p = f["principal"]
+        old = draft_for(k, f, "桥下的雨声还没有停。")
+        source = extract(k, f, old, [assertion(old["text"])])
+        before = s.reconcile(p, old["draft_ref"], source["extraction_ref"], f["world_ref"], "original")
+        s.accept_narrative(p, old["draft_ref"], before["reconciliation_ref"], f["world_ref"], "accept-original")
+        candidate_wr = k.fork(p, f["world_ref"], "CANDIDATE", "candidate")
+        with pytest.raises(DomainError) as rebind:
+            s.build_alignment(p, old["draft_ref"], source["extraction_ref"], candidate_wr, "rename-branch")
+        assert rebind.value.code == "BRANCH_CHANGED"
+&gt;       target = arrange(k, {**f, "world_ref": candidate_wr})
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_narrative.py:240: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_narrative.py:38: in arrange
+    planning.adopt_plan(f["principal"], f["world_ref"], plan_ref, None, "adopt")
+src/novel_factory/application/planning.py:325: in adopt_plan
+    old = self.kernel._prior(repo, principal, world_ref["work_id"], "PLAN_ADOPT", idempotency_key, request)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/novel_factory/application/kernel.py:396: in _prior
+    require(prior["request_hash"]==fingerprint(request),"IDEMPOTENCY_MISMATCH","Idempotency key is already bound to different content")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+condition = False, code = 'IDEMPOTENCY_MISMATCH'
+message = 'Idempotency key is already bound to different content'
+
+    def require(condition, code, message):
+&gt;       if not condition: raise DomainError(code, message)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       novel_factory.domain.errors.DomainError: Idempotency key is already bound to different content
+
+src/novel_factory/application/kernel.py:27: DomainError</failure></testcase></testsuite></testsuites>

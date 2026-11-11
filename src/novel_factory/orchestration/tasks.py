@@ -397,13 +397,13 @@ class TaskService:
             conn.execute(insert(self.tables["budgets"]).values(budget_id=budget_id, work_id=str(work_id), currency=currency, limit_amount=amount))
         return budget_id
 
-    def reserve_call(self, task_id, generation, worker_id, *, budget_id, amount, call_key, request_hash, token_amount=0):
+    def reserve_call(self, task_id, generation, worker_id, *, budget_id, amount, call_key, request_hash, token_amount=0, authorize_in_tx=None):
         reserve = _money(amount)
         if type(token_amount) is not int or token_amount < 0:
             raise _error("INVALID_ARGUMENT", "Token reservation must be a nonnegative integer")
         if len(request_hash) != 64 or not call_key:
             raise _error("INVALID_ARGUMENT", "Call requires request hash and stable identity")
-        with self._tx() as conn:
+        with self._tx(authorize_in_tx) as conn:
             task = self.guard_task(conn, task_id, generation, worker_id)
             if task["state"] != "RUNNING":
                 raise _error("TASK_NOT_ACCEPTABLE", "External calls require a live RUNNING execution")
@@ -432,8 +432,13 @@ class TaskService:
             conn.execute(insert(calls).values(attempt_id=attempt_id, task_id=task_id, generation=generation, budget_id=budget_id, call_key=call_key, request_hash=request_hash, state="PREPARED", reserved_amount=reserve, reserved_tokens=token_amount))
             return {"attempt_id": attempt_id, "task_id": str(task_id), "generation": generation, "state": "PREPARED", "reserved_amount": reserve, "reserved_tokens": token_amount}
 
-    def mark_call_sent(self, attempt_id, *, worker_id):
-        with self._tx() as conn:
+    def mark_call_sent(self, attempt_id, *, worker_id, authorize_in_tx=None):
+        """Claim the single right to dispatch this reservation.
+
+        False means another worker has already taken that right. It never means
+        the remote provider did not execute; unknown calls require reconciliation.
+        """
+        with self._tx(authorize_in_tx) as conn:
             calls = self.tables["call_attempts"]
             call = conn.execute(select(calls).where(calls.c.attempt_id == attempt_id)).mappings().one()
             task = self.guard_task(conn, call["task_id"], call["generation"], worker_id)
@@ -441,11 +446,12 @@ class TaskService:
                 raise _error("TASK_NOT_ACCEPTABLE", "External dispatch requires a live RUNNING execution")
             call = conn.execute(select(calls).where(calls.c.attempt_id == attempt_id).with_for_update()).mappings().one()
             if call["state"] == "SENT":
-                return
+                return False
             if call["state"] != "PREPARED":
                 raise _error("INVALID_CALL_TRANSITION", "Call is not prepared")
             conn.execute(calls.update().where(calls.c.attempt_id == attempt_id).values(state="SENT", updated_at=self._now(conn)))
         # Only now may a worker release the connection and perform network IO.
+        return True
 
     def settle_call(self, attempt_id, *, state, actual_amount=None, actual_tokens=0, provider_receipt=None):
         if state not in {"SUCCEEDED", "FAILED", "UNKNOWN"}:

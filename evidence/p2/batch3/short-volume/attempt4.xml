@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="16.222" timestamp="2026-11-10T21:19:47.843714+09:00" hostname="2be49009bab4"><testcase classname="tests.integration.test_short_volume" name="test_six_scene_volume_uses_real_handoffs_and_retains_every_independent_gate" time="16.102"><failure message="novel_factory.domain.errors.DomainError: Text has unresolved world, cognition, or disclosure changes">tests/integration/test_short_volume.py:17: in test_six_scene_volume_uses_real_handoffs_and_retains_every_independent_gate
+    result = runner.run()
+             ^^^^^^^^^^^^
+src/novel_factory/orchestration/short_volume.py:582: in run
+    accepted.append(self.reconcile(self.writer(index, accepted)))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/novel_factory/orchestration/short_volume.py:443: in reconcile
+    accepted = self.narrative.accept_narrative(self.principal, draft["draft_ref"], reconciled["reconciliation_ref"],
+src/novel_factory/application/narrative.py:749: in accept_narrative
+    checked = self.validate_for_acceptance(repo, principal, draft_ref, reconciliation_ref, world_ref)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/novel_factory/application/narrative.py:739: in validate_for_acceptance
+    return self._validate_for_acceptance(repo, draft_ref, reconciliation_ref, world_ref)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/novel_factory/application/narrative.py:688: in _validate_for_acceptance
+    require(report["status"] == alignment["status"] == "CLEAR" and not report["hard_blockers"] and not report["pending_delta_refs"]
+src/novel_factory/application/kernel.py:27: in require
+    if not condition: raise DomainError(code, message)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   novel_factory.domain.errors.DomainError: Text has unresolved world, cognition, or disclosure changes</failure></testcase></testsuite></testsuites>

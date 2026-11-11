@@ -1,0 +1,454 @@
+{
+  "schema_version": "nf-restored-delivery-evidence-index-1",
+  "verified_at_utc": "2026-11-10T14:01:50.116747+00:00",
+  "repository": "SKYdayDUCK/NovelFactory",
+  "branch": "dev/p2-production-loop",
+  "verification_method": "Authorized GitHub connector GET for commits and Actions metadata; SHA-256 verification of downloaded archives; standard-library independent raw-data and JUnit reconstruction.",
+  "batch_commits_and_ci": {
+    "A": {
+      "commit_sha": "2966667f7cb044812155c69b1a1c6bb0a24d0926",
+      "tree_sha": "5087b33cb7a440b0da3349ac7704b5b027091fa5",
+      "parent_shas": [
+        "0609f680fad782c827dd3834a073f8f9bcddaf0d"
+      ],
+      "commit_url": "https://github.com/SKYdayDUCK/NovelFactory/commit/2966667f7cb044812155c69b1a1c6bb0a24d0926",
+      "message": "feat(p2): run and audit persisted six-scene production loop\n\nLocal-source-commit: 0d8880e725f68a34c197d39eedbf4a130f714244\nTree verified identical after authorized GitHub API upload.",
+      "ci": {
+        "run_id": 42825899216,
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42825899216",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "2966667f7cb044812155c69b1a1c6bb0a24d0926",
+        "event": "pull_request"
+      }
+    },
+    "B": {
+      "commit_sha": "8b100581c6eed2f7a6e5e6c6471697f230376162",
+      "tree_sha": "1ddce05f0141750d03da3b24e4e790893ae04e8e",
+      "parent_shas": [
+        "2966667f7cb044812155c69b1a1c6bb0a24d0926"
+      ],
+      "commit_url": "https://github.com/SKYdayDUCK/NovelFactory/commit/8b100581c6eed2f7a6e5e6c6471697f230376162",
+      "message": "test(p2): recover A-H acceptance and load evidence with verified CI entrypoints\n\nReuses complete uploaded batch B objects (6d44847159886ccf3d66f43877eafae46837e733). Restores final module-entrypoint and shell failure propagation corrections, plus macro presentation frontier invariant. New local PostgreSQL 17 targeted regression: 14 passed; preceding P2-07 full regression: 373 passed. Historical 200-agent failures remain NOT_MET.",
+      "ci": {
+        "run_id": 42826207659,
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42826207659",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "8b100581c6eed2f7a6e5e6c6471697f230376162",
+        "event": "pull_request"
+      }
+    },
+    "C": {
+      "commit_sha": "31f0784f4dac644490957f515dfe6ecfb3dc36bc",
+      "tree_sha": "9ee640b7133f4cd18a0fd7cc6c481dca13921250",
+      "parent_shas": [
+        "8b100581c6eed2f7a6e5e6c6471697f230376162"
+      ],
+      "commit_url": "https://github.com/SKYdayDUCK/NovelFactory/commit/31f0784f4dac644490957f515dfe6ecfb3dc36bc",
+      "message": "perf(p3): recover verified context batching and paired PostgreSQL evaluation\n\nReuses exact uploaded batch C source and evidence from 4c73a206241325ed331bc4d81c26767d9ee8fbea, preserving restored P2 CI fixes. Scope, permission, generation and transaction semantics remain unchanged. Historical paired results are retained as historical; current-source CI and a new paired reproduction are required separately.",
+      "ci": {
+        "run_id": 42826779866,
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42826779866",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "31f0784f4dac644490957f515dfe6ecfb3dc36bc",
+        "event": "pull_request"
+      }
+    },
+    "B2": {
+      "commit_sha": "44b9f7fa22a73207f1370ee7e5169daeb4c2dc76",
+      "tree_sha": "eb1b483f49bea632ed4260a927cbde31d21894a2",
+      "parent_shas": [
+        "31f0784f4dac644490957f515dfe6ecfb3dc36bc"
+      ],
+      "commit_url": "https://github.com/SKYdayDUCK/NovelFactory/commit/44b9f7fa22a73207f1370ee7e5169daeb4c2dc76",
+      "message": "fix(p2): recover transient load failures without weakening capacity gates\n\nReplay identical request bytes and idempotency keys within bounded attempts/deadline; never refresh authority, generation, dependencies or certificates. Separate first-attempt capacity, open-loop offered rate, recovered business completion and raw HTTP attempts. Preserve 50/200 populations and 6/21 formal-commit goals. Add real post-commit TCP loss test and four PostgreSQL Actions load jobs; capacity failure remains a failing check with full artifacts. CI concurrency includes commit SHA so subsequent batch pushes cannot discard pending verification.",
+      "ci": {
+        "run_id": 42827075042,
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42827075042",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "44b9f7fa22a73207f1370ee7e5169daeb4c2dc76",
+        "event": "pull_request"
+      }
+    },
+    "D": {
+      "commit_sha": "a1a1cded8634ee4994ea5fbf9ee79f432db81c78",
+      "tree_sha": "5a8eb25af94b717dad9752a4e36b0a3bcf78dfc8",
+      "parent_shas": [
+        "44b9f7fa22a73207f1370ee7e5169daeb4c2dc76"
+      ],
+      "commit_url": "https://github.com/SKYdayDUCK/NovelFactory/commit/a1a1cded8634ee4994ea5fbf9ee79f432db81c78",
+      "message": "feat(p3): recover deterministic Chinese literary memory evaluation\n\nReuses uploaded batch D corpus, gold cases, budgeted retrieval, source-link isolation and actual application-service probes. Preserves P2 bounded recovery and honest capacity gates. Deterministic fixture evaluation is not evidence of real-model literary quality; author review remains pending.",
+      "ci": {
+        "run_id": 42827183713,
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42827183713",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "a1a1cded8634ee4994ea5fbf9ee79f432db81c78",
+        "event": "pull_request"
+      }
+    }
+  },
+  "batch_parent_chain_verified": true,
+  "capacity_ci": {
+    "run_id": 42827058501,
+    "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42827058501",
+    "status": "completed",
+    "conclusion": "failure",
+    "head_sha": "44b9f7fa22a73207f1370ee7e5169daeb4c2dc76",
+    "event": "push",
+    "jobs": [
+      {
+        "job_id": 129867022860,
+        "name": "200 agents / mixed / full capacity gate",
+        "conclusion": "failure",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42827058501/job/129867022860"
+      },
+      {
+        "job_id": 129867023888,
+        "name": "50 agents / mixed / full capacity gate",
+        "conclusion": "success",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42827058501/job/129867023888"
+      },
+      {
+        "job_id": 129867023967,
+        "name": "200 agents / overload / full capacity gate",
+        "conclusion": "failure",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42827058501/job/129867023967"
+      },
+      {
+        "job_id": 129867024140,
+        "name": "50 agents / overload / full capacity gate",
+        "conclusion": "failure",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42827058501/job/129867024140"
+      }
+    ],
+    "job_success_count": 1,
+    "job_failure_count": 3,
+    "artifacts": [
+      {
+        "artifact_id": 13769268230,
+        "name": "p2-load-50-overload-1",
+        "sha256_digest": "sha256:f8db20142899b7a6c7dc5ffe518be572af1db38364505b9bf6435ef2308f7f6f",
+        "expired": false,
+        "size_bytes": 128155,
+        "run_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42827058501",
+        "archive_digest_verified": true,
+        "artifact_relative_path": "load.json",
+        "load_json_sha256": "46bc8607af2afe4e90452de8ebbbcb24b22d43e19efcd97ca0ed8df167822497",
+        "case": "50overload",
+        "independent_review": "PASS",
+        "metrics": {
+          "http_attempts": 713,
+          "emitted_logical_operations": 536,
+          "planned_logical_operations": 536,
+          "infrastructure_retries": 177,
+          "successful_http_calls": 532,
+          "successful_duplicate_receipts": 6,
+          "effective_successful_calls_excluding_duplicates": 526,
+          "unique_world_commits": 6,
+          "expected_world_commits": 6,
+          "database_event_delta": 6,
+          "database_revision_delta": 6,
+          "database_selected_effect_delta": 6,
+          "status_counts": {
+            "200": 532,
+            "429": 177,
+            "409": 4
+          },
+          "recomputed_gates": {
+            "first_attempt_capacity_gate": "NOT_MET",
+            "capacity_gate": "NOT_MET",
+            "bounded_recovery_business_gate": "PASS"
+          },
+          "latency_all_responses": {
+            "count": 713,
+            "p50_ms": 1503.952,
+            "p95_ms": 4562.5802,
+            "p99_ms": 5468.6597
+          },
+          "latency_logical_scheduled_to_completion": {
+            "count": 536,
+            "p50_ms": 1257.4606,
+            "p95_ms": 12488.1397,
+            "p99_ms": 13888.1649
+          }
+        },
+        "runner": {
+          "logical_cpu_count": 4,
+          "cpu_models": [
+            "AMD EPYC 7763 64-Core Processor"
+          ],
+          "postgres_server_version": "17.11 (Debian 17.11-1.pgdg12+2)"
+        }
+      },
+      {
+        "artifact_id": 13768559210,
+        "name": "p2-load-50-mixed-1",
+        "sha256_digest": "sha256:dc9411e153b2a81590c0128f7b766dd966581cbe980953cac64ea97966a9ce39",
+        "expired": false,
+        "size_bytes": 71674,
+        "run_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42827058501",
+        "archive_digest_verified": true,
+        "artifact_relative_path": "load.json",
+        "load_json_sha256": "a1d184fe3aaf8745654d4a40beb5494bc8b673d7de6559eecc426616ea83c522",
+        "case": "50mixed",
+        "independent_review": "PASS",
+        "metrics": {
+          "http_attempts": 286,
+          "emitted_logical_operations": 286,
+          "planned_logical_operations": 286,
+          "infrastructure_retries": 0,
+          "successful_http_calls": 282,
+          "successful_duplicate_receipts": 6,
+          "effective_successful_calls_excluding_duplicates": 276,
+          "unique_world_commits": 6,
+          "expected_world_commits": 6,
+          "database_event_delta": 6,
+          "database_revision_delta": 6,
+          "database_selected_effect_delta": 6,
+          "status_counts": {
+            "200": 282,
+            "409": 4
+          },
+          "recomputed_gates": {
+            "first_attempt_capacity_gate": "PASS",
+            "capacity_gate": "PASS",
+            "bounded_recovery_business_gate": "PASS"
+          },
+          "latency_all_responses": {
+            "count": 286,
+            "p50_ms": 46.9678,
+            "p95_ms": 379.1278,
+            "p99_ms": 461.295
+          },
+          "latency_logical_scheduled_to_completion": {
+            "count": 286,
+            "p50_ms": 46.9893,
+            "p95_ms": 383.0165,
+            "p99_ms": 461.711
+          }
+        },
+        "runner": {
+          "logical_cpu_count": 4,
+          "cpu_models": [
+            "AMD EPYC 9V45 96-Core Processor"
+          ],
+          "postgres_server_version": "17.11 (Debian 17.11-1.pgdg12+2)"
+        }
+      },
+      {
+        "artifact_id": 13768459512,
+        "name": "p2-load-200-mixed-1",
+        "sha256_digest": "sha256:49f41a47606bcbcfaf54537ac5e978c4eaa740e441f5abc648529da235d5325b",
+        "expired": false,
+        "size_bytes": 267989,
+        "run_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42827058501",
+        "archive_digest_verified": true,
+        "artifact_relative_path": "load.json",
+        "load_json_sha256": "04afe27447d446e1a734e75ce39a43845ea375b75c050d0619f92be227df9eac",
+        "case": "200mixed",
+        "independent_review": "PASS",
+        "metrics": {
+          "http_attempts": 1400,
+          "emitted_logical_operations": 1113,
+          "planned_logical_operations": 1141,
+          "infrastructure_retries": 287,
+          "successful_http_calls": 1086,
+          "successful_duplicate_receipts": 13,
+          "effective_successful_calls_excluding_duplicates": 1073,
+          "unique_world_commits": 13,
+          "expected_world_commits": 21,
+          "database_event_delta": 13,
+          "database_revision_delta": 13,
+          "database_selected_effect_delta": 13,
+          "status_counts": {
+            "200": 1086,
+            "429": 299,
+            "409": 15
+          },
+          "recomputed_gates": {
+            "first_attempt_capacity_gate": "NOT_MET",
+            "capacity_gate": "NOT_MET",
+            "bounded_recovery_business_gate": "NOT_MET"
+          },
+          "latency_all_responses": {
+            "count": 1400,
+            "p50_ms": 1523.0102,
+            "p95_ms": 6974.6255,
+            "p99_ms": 9679.2617
+          },
+          "latency_logical_scheduled_to_completion": {
+            "count": 1113,
+            "p50_ms": 106.1433,
+            "p95_ms": 13796.1755,
+            "p99_ms": 28634.8353
+          }
+        },
+        "runner": {
+          "logical_cpu_count": 4,
+          "cpu_models": [
+            "AMD EPYC 9V74 80-Core Processor"
+          ],
+          "postgres_server_version": "17.11 (Debian 17.11-1.pgdg12+2)"
+        }
+      },
+      {
+        "artifact_id": 13768219861,
+        "name": "p2-load-200-overload-1",
+        "sha256_digest": "sha256:2bb848720124a8133d32f3b8cfd8baaae4acfbf7530c854d368507952828bb02",
+        "expired": false,
+        "size_bytes": 417544,
+        "run_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42827058501",
+        "archive_digest_verified": true,
+        "artifact_relative_path": "load.json",
+        "load_json_sha256": "b4e8592de379ecd5358b3ddd48753a9c713057068f990356a399441a0446356c",
+        "case": "200overload",
+        "independent_review": "PASS",
+        "metrics": {
+          "http_attempts": 2297,
+          "emitted_logical_operations": 2128,
+          "planned_logical_operations": 2141,
+          "infrastructure_retries": 169,
+          "successful_http_calls": 2106,
+          "successful_duplicate_receipts": 18,
+          "effective_successful_calls_excluding_duplicates": 2088,
+          "unique_world_commits": 18,
+          "expected_world_commits": 21,
+          "database_event_delta": 18,
+          "database_revision_delta": 18,
+          "database_selected_effect_delta": 18,
+          "status_counts": {
+            "200": 2106,
+            "429": 175,
+            "409": 16
+          },
+          "recomputed_gates": {
+            "first_attempt_capacity_gate": "NOT_MET",
+            "capacity_gate": "NOT_MET",
+            "bounded_recovery_business_gate": "NOT_MET"
+          },
+          "latency_all_responses": {
+            "count": 2297,
+            "p50_ms": 1733.157,
+            "p95_ms": 6170.2801,
+            "p99_ms": 9597.7892
+          },
+          "latency_logical_scheduled_to_completion": {
+            "count": 2128,
+            "p50_ms": 6331.2834,
+            "p95_ms": 36541.7038,
+            "p99_ms": 39486.9006
+          }
+        },
+        "runner": {
+          "logical_cpu_count": 4,
+          "cpu_models": [
+            "AMD EPYC 9V45 96-Core Processor"
+          ],
+          "postgres_server_version": "17.11 (Debian 17.11-1.pgdg12+2)"
+        }
+      }
+    ],
+    "independent_review_status": "PASS",
+    "review_summary": {
+      "raw_http_attempts": 4696,
+      "logical_operations": 4063,
+      "infrastructure_retries": 633,
+      "retried_operation_groups_checked": 398,
+      "retry_request_identity_mismatches": 0,
+      "reported_metric_mismatches": 0,
+      "expected_409_and_429_counted_as_success": false
+    }
+  },
+  "final_engineering_artifact": {
+    "artifact_id": 13770700669,
+    "name": "p1-postgres-concurrency-1",
+    "sha256_digest": "sha256:a1825003ffcac7b30fa98ae3bfb7f1fc2933c00d0fd8731b53560e1cdeabab7f",
+    "expired": false,
+    "size_bytes": 1143157,
+    "run_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42827183713",
+    "archive_digest_verified": true,
+    "junit": {
+      "tests": 410,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "testcase_elements": 410,
+      "seconds": 410.761,
+      "sha256": "bf448110a07ea795461d1629b1c2b737af35d24a29d0034eca91ef7a80de2547",
+      "artifact_relative_path": "postgres-all.xml"
+    }
+  },
+  "short_volume": {
+    "recovered_original": {
+      "checksum_file_count": 551,
+      "checksum_mismatch_count": 0,
+      "indexed_artifacts": 538,
+      "execution_kind": "TEST_FIXTURE",
+      "scene_count": 6,
+      "text_codepoints": 2204,
+      "release_text_sha256": "12c1d512f5bad133466c9164354207642237c62349f4231fcaeb3049d2135781",
+      "release_manifest_sha256": "95f63f4936c91afa8621a206fa7f8f306e25f90f6721c89c04404204e5309a3e",
+      "world_events_before_writing": 7,
+      "world_events_after_release": 7,
+      "fixture_model_calls": 15,
+      "real_model_calls": 0,
+      "declared_model_gate": "BLOCKED_ENVIRONMENT",
+      "declared_author_gate": "PENDING_AUTHOR",
+      "declared_literary_gate": "NOT_EVALUATED",
+      "commit_sha": "2966667f7cb044812155c69b1a1c6bb0a24d0926",
+      "repo_relative_directory": "evidence/p2/batch3/short-volume/run",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/tree/2966667f7cb044812155c69b1a1c6bb0a24d0926/evidence/p2/batch3/short-volume/run"
+    },
+    "fresh_D_ci": {
+      "checksum_file_count": 551,
+      "checksum_mismatch_count": 0,
+      "indexed_artifacts": 538,
+      "execution_kind": "TEST_FIXTURE",
+      "scene_count": 6,
+      "text_codepoints": 2204,
+      "release_text_sha256": "12c1d512f5bad133466c9164354207642237c62349f4231fcaeb3049d2135781",
+      "release_manifest_sha256": "3816368fee84f9de6947b3378e8bea74ea46886c87d38bbb5be92bd4abb22310",
+      "world_events_before_writing": 7,
+      "world_events_after_release": 7,
+      "fixture_model_calls": 15,
+      "real_model_calls": 0,
+      "declared_model_gate": "BLOCKED_ENVIRONMENT",
+      "declared_author_gate": "PENDING_AUTHOR",
+      "declared_literary_gate": "NOT_EVALUATED",
+      "artifact_id": 13770700669,
+      "artifact_relative_directory": "short-volume",
+      "run_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42827183713"
+    },
+    "release_text_bytes_identical": true,
+    "distinct_runtime_manifest_ids_expected": true
+  },
+  "evidence_limits": [
+    "The evidence-index file is an offline review output; its own existence does not establish an uploaded CI artifact. Artifact IDs above identify the actual downloaded GitHub artifacts.",
+    "Five listed implementation CI runs succeeded. The independent capacity workflow failed with one successful and three failed jobs. Engineering success does not override capacity NOT_MET.",
+    "The D PostgreSQL JUnit contains 410 passed tests, zero failures/errors/skips. The separately successful schema/unit job is not added again to this count.",
+    "Retry request byte SHA-256 equality is verified from raw observations; plaintext request bodies are absent and were not independently rehashed. SQL increments and balances are offline evidence cross-checks, not fresh database queries.",
+    "The four CI jobs each expose four logical CPUs but have different processor models; the listed per-case hardware must not be collapsed to one machine specification.",
+    "CI 200-agent 13/21 and 18/21 are separate measurements from local 17/21. Do not combine runs, choose the maximum as a pass, count 429/409 rejections as throughput, or remove uncompleted planned operations.",
+    "Open-loop target 1000/s was not reached by the generator in overload cases. Client call-start rate is not sustained wire-rate capacity.",
+    "The recovered original story and fresh CI story have identical text bytes but different immutable runtime IDs and release manifest hashes. Both full per-file checksums were independently verified.",
+    "All short-volume model calls are TEST_FIXTURE. Real model production remains a separate gate, author full-text evaluation remains PENDING_AUTHOR, and literary quality remains NOT_EVALUATED.",
+    "This index does not assert a final branch HEAD or PR state beyond the individually verified commits; root must verify those after its final write."
+  ],
+  "d_unit_artifact_independently_downloaded": {
+    "workflow_run_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42827183713",
+    "artifact_id": 13769328037,
+    "artifact_name": "p1-schema-unit-1",
+    "zip_sha256": "62ea33b27e5ee68116176a4768716351e5eee595ee402ee529e5dc2439dc2315",
+    "junit_path_in_artifact": "unit.xml",
+    "junit_sha256": "912a08d1fda4ac2993978b33e4de3d330398c38352adbe87f5de19bc2b52ef31",
+    "tests": 219,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "scope": "Subset overlaps full 410-test PostgreSQL run; do not add the counts."
+  }
+}

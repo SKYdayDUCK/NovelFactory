@@ -1,0 +1,72 @@
+{
+  "execution_kind": "TEST_FIXTURE_REAL_POSTGRESQL",
+  "world_receipt": {
+    "command_id": "afc5079f-3519-4521-89d4-b59a2a868000",
+    "world_ref": {
+      "work_id": "a363ea77-6196-4301-8e61-13e7d682f3e7",
+      "branch_id": "c640e6b2-6ce1-40a8-bf26-548812b9bdd4",
+      "world_revision_id": "4e6160bf-f094-4786-8b4c-c0e916a89a3d"
+    },
+    "branch_seq": 2,
+    "accepted_event_refs": [
+      {
+        "occurrence_id": "83c5934f-c64d-55ba-8137-f262b5dc60cd",
+        "event_version_id": "198b4627-0412-5393-a3f1-50817cabeaa6"
+      }
+    ],
+    "manifest_sha256": "81aaf88f7b755a5560c6b3c3e85eefeecd16b13fa9a7bb2e1aaa725ddef3d6f1",
+    "recorded_at": "2026-11-10T12:22:24.736405+00:00",
+    "original_base_world_ref": {
+      "work_id": "a363ea77-6196-4301-8e61-13e7d682f3e7",
+      "branch_id": "c640e6b2-6ce1-40a8-bf26-548812b9bdd4",
+      "world_revision_id": "8bff364c-f3bd-4ac5-a53c-3a5aabb2439d"
+    },
+    "validation_world_ref": {
+      "work_id": "a363ea77-6196-4301-8e61-13e7d682f3e7",
+      "branch_id": "c640e6b2-6ce1-40a8-bf26-548812b9bdd4",
+      "world_revision_id": "8bff364c-f3bd-4ac5-a53c-3a5aabb2439d"
+    },
+    "parent_world_ref": {
+      "work_id": "a363ea77-6196-4301-8e61-13e7d682f3e7",
+      "branch_id": "c640e6b2-6ce1-40a8-bf26-548812b9bdd4",
+      "world_revision_id": "8bff364c-f3bd-4ac5-a53c-3a5aabb2439d"
+    },
+    "acceptance_certificate_ref": {
+      "artifact_id": "248886a4-4259-40f4-8a4a-66092b00d5c9",
+      "artifact_revision_id": "1a0ab63d-e966-48b9-83ab-62758d9278f8",
+      "sha256": "a25052c95b5d0b2026dcbf52f2f06241205fa2cdba7c8563ddfae40019548f4f"
+    },
+    "proposal_ref": {
+      "sha256": "4933be8e8db6a7ba016667591146014bc04926afe8fd63828e8cfce5c536c732",
+      "artifact_id": "7e8d72b4-8bf3-4235-b709-cedcc0be7dc6",
+      "artifact_revision_id": "f15f30e3-5315-425c-9955-41869ecafc11"
+    }
+  },
+  "state_hash": "30249cabcdcffe32481437ae35523596f4e7a854d8253f86dbe11c2eb219eef1",
+  "selected_occurrences": {
+    "83c5934f-c64d-55ba-8137-f262b5dc60cd": "198b4627-0412-5393-a3f1-50817cabeaa6"
+  },
+  "narrative_acceptances": [
+    {
+      "artifact_id": "cd48df1e-35d5-48da-bc47-4ee3eb7ffb63",
+      "artifact_revision_id": "5e83bf87-737a-465b-a1ef-ba5cf7ab9b21",
+      "sha256": "23e9bbd23b9e76b88fab4aeede6aa70c7ab8e08352f161a5b98921eb73581d37"
+    },
+    {
+      "artifact_id": "3f0fed87-7554-4e26-ace5-7938be016ecb",
+      "artifact_revision_id": "267d1df5-0d56-4a73-8886-b02c632a82dc",
+      "sha256": "92767917f67c21021423548d67385cdd0d816523b8b57027e069207273e24bd6"
+    },
+    {
+      "artifact_id": "234b3108-ce70-45dd-b35e-df6f555a4770",
+      "artifact_revision_id": "f5d99649-db9c-497d-af8c-621f43035d8b",
+      "sha256": "cc3d5c96d6471686f95606a3f04f1fb0f0f890f2e5250c5eb81aa1db9e2a055c"
+    }
+  ],
+  "grain_before": "100",
+  "grain_after": "88",
+  "health_before": "100",
+  "health_after": "97",
+  "health_representation": "DECLARED_RESOURCE_WITH_LOSS_SINK",
+  "new_world_effects_from_presentations": 0
+}

@@ -1,0 +1,747 @@
+{
+  "execution_kind": "TEST_FIXTURE",
+  "case": "quantity_30_to_40",
+  "expected_rejection": "NARRATIVE_BLOCKED",
+  "world_unchanged": true,
+  "draft": {
+    "title": "三　缺口",
+    "task_id": "ed45f829-a932-430b-b014-d3272e976fdb",
+    "draft_id": "d41ee15b-4f8a-4ef3-95fd-025817461a58",
+    "text_ref": {
+      "sha256": "356b5318d01b64b3f94b228e84188d39cd35a7999207db1522882ae3e74c9282",
+      "artifact_id": "92a090be-3c2f-4275-8cc9-81447fc2d1ad",
+      "artifact_revision_id": "71805c48-85e1-43c7-8a2a-eac33c76032a"
+    },
+    "scene_ref": {
+      "sha256": "6ac724c56f4ea1a425fd4228dbcff3aaa31a9431a7d0ccab504d8ec51c10a95e",
+      "artifact_id": "d8118d8e-61a0-4bfa-8e48-e4b026d99631",
+      "artifact_revision_id": "d27e7f58-0566-461c-b0a3-29d151c8e59d"
+    },
+    "generation": 1,
+    "handoff_refs": [
+      {
+        "sha256": "eabcbc8b0950a23c5c347529e5295e29c8d4f2ea21e35f352dc50d6b656f04af",
+        "artifact_id": "3e426c04-80ac-4297-b3e3-95fe9d2c4778",
+        "artifact_revision_id": "e27a0e99-336a-4dfe-a6e5-37ddb3528c3f"
+      },
+      {
+        "sha256": "99b26bd7ff510bff2445a5a1612152a5bdbe25020fd0d2f90d2dae40afb9afab",
+        "artifact_id": "dc2dde84-a2c5-4a86-a006-a7a9062bc0a8",
+        "artifact_revision_id": "fba0054c-feca-421f-b390-f6d80349b253"
+      }
+    ],
+    "schema_version": "2.2",
+    "input_world_ref": {
+      "work_id": "d0cf1ae3-9038-464c-9b90-531f7a21b339",
+      "branch_id": "ef0a4097-d8a0-41bf-a293-e6eeb6deb327",
+      "world_revision_id": "f6add2b0-69e5-4023-9be0-844c6320d394"
+    },
+    "prior_draft_ref": null,
+    "agent_output_ref": {
+      "sha256": "589d9baf6d259805cc84d28e9d05d5efb6439f908a495f06a7caa0f775a9d8d8",
+      "artifact_id": "ecdbe5eb-2017-5d32-abeb-4523558a4c9f",
+      "artifact_revision_id": "ff1789eb-d567-5626-a6ce-ee123098a1d1"
+    },
+    "context_bundle_id": "1eedec35-ef56-459d-87fb-1db91148b0b4",
+    "declared_important_deltas": []
+  },
+  "gateway_result": {
+    "status": "RESULT_STORED",
+    "attempt_id": "b2094678-6b94-402a-914c-cf14cc5e0530",
+    "task_receipt": {
+      "task_id": "ed45f829-a932-430b-b014-d3272e976fdb",
+      "generation": 1,
+      "receipt_id": "5766d7e9-f9b9-54df-af7a-c2c4ce8f9e27",
+      "status": "RESULT_STORED"
+    },
+    "output_ref": {
+      "artifact_id": "ecdbe5eb-2017-5d32-abeb-4523558a4c9f",
+      "artifact_revision_id": "ff1789eb-d567-5626-a6ce-ee123098a1d1",
+      "sha256": "589d9baf6d259805cc84d28e9d05d5efb6439f908a495f06a7caa0f775a9d8d8"
+    },
+    "evidence_ref": {
+      "artifact_id": "774b1c0b-ff7a-5562-af46-6d65d1b416bd",
+      "artifact_revision_id": "29116838-b4c4-54c8-830e-5488a6214219",
+      "sha256": "f8f6b7690bf8c398ef5bcdd117df47b879802592ead8dda4547bd98c4d30a80d"
+    },
+    "validation_status": "VALIDATED_CANDIDATE",
+    "cost_status": "KNOWN",
+    "execution_kind": "TEST_FIXTURE"
+  },
+  "candidate": {
+    "text": "三人在闸口交汇时，水面翻起一道反光。木楔突然吃不住力，空出的缝把所有人的打算都挤到了一处。\n\n汛务旧规容许以铜件临时顶闸，但受力变形的铜汛印必须报废，不能既拿它挡水，又把它当作完好的凭证。林澈把印从袖中取出来。印钮挂住线头，她扯了两次，最后连那根舍不得剪的线一起扯断。\n\n铜汛印被压毁了。她没有来得及看清印面最后的纹路，只听见一声很短的闷响。那声响不壮烈，甚至被水声盖住大半，却把持印入社的旧路实实在在地截断了。\n\n联合裁决只批准从北仓向南埠救济账交付四十袋粮；北仓留下七十袋，南埠得到四十袋，没有一袋因谁先开口而多出来。贺宁坚持保留能核对的余数，苏弦接受这一次有限的交付，林澈承担毁印的损失。三种动机没有变成同一种动机，却终于落在同一件可以完成的事上。\n\n潮面缓缓低下去。林澈的手仍保持着握印的形状，空得有些不合时宜。苏弦站在她对面，没有替那只空手找一个好听的名字。",
+    "event_refs": [
+      {
+        "occurrence_id": "5fb34e59-065f-57ef-a6da-9fcb7144be2e",
+        "event_version_id": "a8bf88bf-ee59-5f57-9969-e87b98a8b543"
+      }
+    ],
+    "evidence_refs": [],
+    "important_deltas": []
+  },
+  "model_call_evidence": {
+    "usage": {
+      "currency": "USD",
+      "cost_status": "KNOWN",
+      "input_tokens": 0,
+      "actual_amount": "0",
+      "output_tokens": 0,
+      "cached_input_tokens": null
+    },
+    "reason": null,
+    "outcome": "VALIDATED_CANDIDATE",
+    "role_id": "writer",
+    "task_id": "ed45f829-a932-430b-b014-d3272e976fdb",
+    "actor_id": null,
+    "input_ref": {
+      "sha256": "50fd5ddec9dbe98199fbe95402ee1e19226d6c9f776bc7edea51d3364188f61f",
+      "artifact_id": "fc7d2e2a-4a0e-43cd-ba81-a5765ef887fe",
+      "artifact_revision_id": "41e0c15a-8144-43ae-85c8-8be21fdf3af0"
+    },
+    "world_ref": {
+      "work_id": "d0cf1ae3-9038-464c-9b90-531f7a21b339",
+      "branch_id": "ef0a4097-d8a0-41bf-a293-e6eeb6deb327",
+      "world_revision_id": "f6add2b0-69e5-4023-9be0-844c6320d394"
+    },
+    "attempt_id": "b2094678-6b94-402a-914c-cf14cc5e0530",
+    "generation": 1,
+    "output_ref": {
+      "sha256": "589d9baf6d259805cc84d28e9d05d5efb6439f908a495f06a7caa0f775a9d8d8",
+      "artifact_id": "ecdbe5eb-2017-5d32-abeb-4523558a4c9f",
+      "artifact_revision_id": "ff1789eb-d567-5626-a6ce-ee123098a1d1"
+    },
+    "prompt_ref": {
+      "sha256": "a5ec40d1fb0c030c906808453a343ac0dbf252033a310dc27d40537beabc0f19",
+      "artifact_id": "6320f32a-1597-5cb8-96ca-05277c68b7ef",
+      "artifact_revision_id": "434c3fb6-662a-5513-bef1-547ddc19c258"
+    },
+    "recorded_at": "2026-11-10T12:36:35.158676+00:00",
+    "response_ref": {
+      "sha256": "3f4d8aceccda149c54307fb68377716cf0bec33ad0b6b9c879342468624e0c52",
+      "artifact_id": "92379d88-59dd-5457-b505-7339cc71b157",
+      "artifact_revision_id": "7234258b-1b45-5252-83f6-818ccf2aea1e"
+    },
+    "result_status": "SUCCEEDED",
+    "execution_kind": "TEST_FIXTURE",
+    "request_sha256": "a5ec40d1fb0c030c906808453a343ac0dbf252033a310dc27d40537beabc0f19",
+    "schema_version": "2.1",
+    "elapsed_seconds": "0.011651",
+    "accounting_state": "SUCCEEDED",
+    "provider_receipt": "TEST_FIXTURE:ed45f829-a932-430b-b014-d3272e976fdb",
+    "context_bundle_id": "1eedec35-ef56-459d-87fb-1db91148b0b4",
+    "model_configuration": {
+      "model": "tide-gate-fixture-v1",
+      "isolation": "STATELESS_TEXT_ONLY",
+      "adapter_kind": "DETERMINISTIC_TEST",
+      "execution_kind": "TEST_FIXTURE",
+      "max_output_tokens": 12000
+    }
+  },
+  "rejected": {
+    "stage": "narrative_rejected",
+    "execution_kind": "TEST_FIXTURE",
+    "scene_index": 2,
+    "draft_ref": {
+      "artifact_id": "ad725846-0249-4412-afcc-34d53bbde005",
+      "artifact_revision_id": "76d0e9b3-83ec-49cb-b74f-e3a9d630ca32",
+      "sha256": "bd596329dca61d7bb487f7c4633210bffc3ff2f6ae084c83e413d13ce7f8b19a"
+    },
+    "text": "三人在闸口交汇时，水面翻起一道反光。木楔突然吃不住力，空出的缝把所有人的打算都挤到了一处。\n\n汛务旧规容许以铜件临时顶闸，但受力变形的铜汛印必须报废，不能既拿它挡水，又把它当作完好的凭证。林澈把印从袖中取出来。印钮挂住线头，她扯了两次，最后连那根舍不得剪的线一起扯断。\n\n铜汛印被压毁了。她没有来得及看清印面最后的纹路，只听见一声很短的闷响。那声响不壮烈，甚至被水声盖住大半，却把持印入社的旧路实实在在地截断了。\n\n联合裁决只批准从北仓向南埠救济账交付四十袋粮；北仓留下七十袋，南埠得到四十袋，没有一袋因谁先开口而多出来。贺宁坚持保留能核对的余数，苏弦接受这一次有限的交付，林澈承担毁印的损失。三种动机没有变成同一种动机，却终于落在同一件可以完成的事上。\n\n潮面缓缓低下去。林澈的手仍保持着握印的形状，空得有些不合时宜。苏弦站在她对面，没有替那只空手找一个好听的名字。",
+    "delivery_ref": {
+      "artifact_id": "b63e29c2-9c35-46c5-bc93-dabff1c6a8fb",
+      "artifact_revision_id": "9e5f8f18-ad38-4c5f-8977-f35cf327bfaf",
+      "sha256": "db332fd7cba2f109c43bbea6ab86dcf7e00089b00a1509deace540b4f2b37cdc"
+    },
+    "extraction_ref": {
+      "artifact_id": "9528fb20-9c9b-4529-b37b-7a7858689755",
+      "artifact_revision_id": "910b39c9-cc49-4eb7-95ff-6dbee341dadf",
+      "sha256": "5822511439819efe07455548ec1af9b07d653c92fdc007dbaaacf22bd4182fb4"
+    },
+    "extraction_audit": {
+      "execution_kind": "TEST_FIXTURE",
+      "extractor_version": "tide-finite-text-extractor-v1",
+      "input_text_sha256": "356b5318d01b64b3f94b228e84188d39cd35a7999207db1522882ae3e74c9282",
+      "scene_index": 2,
+      "observations": [
+        {
+          "rule": "seal_state",
+          "quote": "铜汛印被压毁了",
+          "span": {
+            "start": 136,
+            "end": 143,
+            "unit": "UNICODE_CODEPOINT",
+            "quote_sha256": "3808856aa02cf3092c9ffec0df435743619abe8472decbc2341782b669196baa"
+          },
+          "parsed": {
+            "kind": "LIFECYCLE",
+            "value": "DESTROYED"
+          },
+          "assertion_ids": [
+            "76019902-0ed5-4f2d-9b7a-6bf41d2fa212"
+          ]
+        },
+        {
+          "rule": "transfer",
+          "quote": "联合裁决只批准从北仓向南埠救济账交付四十袋粮",
+          "span": {
+            "start": 208,
+            "end": 230,
+            "unit": "UNICODE_CODEPOINT",
+            "quote_sha256": "482e9bfc7b810b5ba928e7fa079d7b724b210b2b6c04a7049bce045315bd4b6b"
+          },
+          "parsed": {
+            "kind": "RESOURCE_TRANSFER",
+            "quantity": "40",
+            "event_effect_match": false
+          },
+          "assertion_ids": [
+            "4904d0c1-ccf9-473d-9936-d92e0699767b"
+          ]
+        },
+        {
+          "rule": "warehouse_after",
+          "quote": "北仓留下七十袋",
+          "span": {
+            "start": 231,
+            "end": 238,
+            "unit": "UNICODE_CODEPOINT",
+            "quote_sha256": "7125c2498cf4981239252527ea947fc4e1a338618d975c65f41ccf1d3b963aae"
+          },
+          "parsed": {
+            "kind": "RESOURCE_BALANCE",
+            "account": "warehouse",
+            "quantity": "70",
+            "event_role": "TEMPORAL_ANCHOR_OR_PRIOR_EFFECT"
+          },
+          "assertion_ids": [
+            "3ca572b3-3694-4da2-b41a-bd5b50f41a4c"
+          ]
+        },
+        {
+          "rule": "relief_after",
+          "quote": "南埠得到四十袋",
+          "span": {
+            "start": 239,
+            "end": 246,
+            "unit": "UNICODE_CODEPOINT",
+            "quote_sha256": "088b71f3bb9ea73c783c27f9002d72c71bc2c8c1e841c6bab1e0be08e7725067"
+          },
+          "parsed": {
+            "kind": "RESOURCE_BALANCE",
+            "account": "relief",
+            "quantity": "40",
+            "event_role": "TEMPORAL_ANCHOR_OR_PRIOR_EFFECT"
+          },
+          "assertion_ids": [
+            "add97c1d-4cbc-407b-8999-2c2305065cbf"
+          ]
+        },
+        {
+          "rule": "copper_rule",
+          "quote": "但受力变形的铜汛印必须报废",
+          "span": {
+            "start": 61,
+            "end": 74,
+            "unit": "UNICODE_CODEPOINT",
+            "quote_sha256": "ab209c04cd82b8167e39f950840603e2b6b60a6d9707b4c80dcf400a98679f7e"
+          },
+          "parsed": {
+            "modality": "CONDITIONAL_WORLD_RULE",
+            "creates_fact": false
+          },
+          "assertion_ids": [
+            "610f5aff-0901-4403-b5c0-07281abce6ba"
+          ]
+        },
+        {
+          "rule": "no_creation",
+          "quote": "没有一袋因谁先开口而多出来",
+          "span": {
+            "start": 247,
+            "end": 260,
+            "unit": "UNICODE_CODEPOINT",
+            "quote_sha256": "01db699b22fb49a188b2efb3657f9970b5d4d577077d76413a333941db691a64"
+          },
+          "parsed": {
+            "modality": "NO_ADDITIONAL_EFFECT",
+            "creates_fact": false
+          },
+          "assertion_ids": [
+            "3067e51e-2f5f-4714-a8c8-a4afa137d216"
+          ]
+        }
+      ],
+      "scope": "Finite quantity/lifecycle/possession/cognition/location/membership grammar; not general NLP"
+    },
+    "assertions": [
+      {
+        "assertion_id": "76019902-0ed5-4f2d-9b7a-6bf41d2fa212",
+        "classification": "EXISTING_EVENT_PRESENTATION",
+        "span": {
+          "start": 136,
+          "end": 143,
+          "unit": "UNICODE_CODEPOINT",
+          "quote_sha256": "3808856aa02cf3092c9ffec0df435743619abe8472decbc2341782b669196baa"
+        },
+        "summary": "原文物品生命周期：DESTROYED",
+        "event_ref": {
+          "occurrence_id": "5fb34e59-065f-57ef-a6da-9fcb7144be2e",
+          "event_version_id": "a8bf88bf-ee59-5f57-9969-e87b98a8b543"
+        },
+        "world_check": {
+          "check_id": "076f5520-a4c2-40b3-8efe-fd9a8a7b03ca",
+          "plane": "WORLD",
+          "subject_id": "8a460762-9ed1-5118-8edf-ba53f0210396",
+          "predicate": "lifecycle",
+          "at": {
+            "tick": 4,
+            "phase": 2
+          },
+          "expected_status": "VALUE",
+          "expected_value": {
+            "kind": "STRING",
+            "value": "DESTROYED"
+          },
+          "actor_id": null,
+          "known_at": null
+        },
+        "knowledge_use": null,
+        "proposed_command": null,
+        "disclosure_id": null,
+        "declared_delta_index": null
+      },
+      {
+        "assertion_id": "4904d0c1-ccf9-473d-9936-d92e0699767b",
+        "classification": "HISTORICAL_CONFLICT",
+        "span": {
+          "start": 208,
+          "end": 230,
+          "unit": "UNICODE_CODEPOINT",
+          "quote_sha256": "482e9bfc7b810b5ba928e7fa079d7b724b210b2b6c04a7049bce045315bd4b6b"
+        },
+        "summary": "原文交付数量与已接受发生的双边资源效果逐项核对：40",
+        "event_ref": {
+          "occurrence_id": "5fb34e59-065f-57ef-a6da-9fcb7144be2e",
+          "event_version_id": "a8bf88bf-ee59-5f57-9969-e87b98a8b543"
+        },
+        "world_check": null,
+        "knowledge_use": null,
+        "proposed_command": null,
+        "disclosure_id": null,
+        "declared_delta_index": null
+      },
+      {
+        "assertion_id": "3ca572b3-3694-4da2-b41a-bd5b50f41a4c",
+        "classification": "EXISTING_EVENT_PRESENTATION",
+        "span": {
+          "start": 231,
+          "end": 238,
+          "unit": "UNICODE_CODEPOINT",
+          "quote_sha256": "7125c2498cf4981239252527ea947fc4e1a338618d975c65f41ccf1d3b963aae"
+        },
+        "summary": "原文库存数量：70",
+        "event_ref": {
+          "occurrence_id": "5fb34e59-065f-57ef-a6da-9fcb7144be2e",
+          "event_version_id": "a8bf88bf-ee59-5f57-9969-e87b98a8b543"
+        },
+        "world_check": {
+          "check_id": "f5304c5f-5cea-4b34-958a-5692607fa61f",
+          "plane": "WORLD",
+          "subject_id": "afe75f34-871f-5a3c-917d-85d7d721957a",
+          "predicate": "resource:589b732c-449a-5c6b-ae6c-c476618694e4:bag",
+          "at": {
+            "tick": 4,
+            "phase": 2
+          },
+          "expected_status": "VALUE",
+          "expected_value": {
+            "kind": "RESOURCE_BALANCE",
+            "account_id": "afe75f34-871f-5a3c-917d-85d7d721957a",
+            "resource_id": "589b732c-449a-5c6b-ae6c-c476618694e4",
+            "quantity": "70",
+            "unit": "bag"
+          },
+          "actor_id": null,
+          "known_at": null
+        },
+        "knowledge_use": null,
+        "proposed_command": null,
+        "disclosure_id": null,
+        "declared_delta_index": null
+      },
+      {
+        "assertion_id": "add97c1d-4cbc-407b-8999-2c2305065cbf",
+        "classification": "EXISTING_EVENT_PRESENTATION",
+        "span": {
+          "start": 239,
+          "end": 246,
+          "unit": "UNICODE_CODEPOINT",
+          "quote_sha256": "088b71f3bb9ea73c783c27f9002d72c71bc2c8c1e841c6bab1e0be08e7725067"
+        },
+        "summary": "原文库存数量：40",
+        "event_ref": {
+          "occurrence_id": "5fb34e59-065f-57ef-a6da-9fcb7144be2e",
+          "event_version_id": "a8bf88bf-ee59-5f57-9969-e87b98a8b543"
+        },
+        "world_check": {
+          "check_id": "d6523a90-774b-436b-aa53-8ee54c7ccd3f",
+          "plane": "WORLD",
+          "subject_id": "a6494af2-0df7-5e2e-8447-cd3403425e61",
+          "predicate": "resource:589b732c-449a-5c6b-ae6c-c476618694e4:bag",
+          "at": {
+            "tick": 4,
+            "phase": 2
+          },
+          "expected_status": "VALUE",
+          "expected_value": {
+            "kind": "RESOURCE_BALANCE",
+            "account_id": "a6494af2-0df7-5e2e-8447-cd3403425e61",
+            "resource_id": "589b732c-449a-5c6b-ae6c-c476618694e4",
+            "quantity": "40",
+            "unit": "bag"
+          },
+          "actor_id": null,
+          "known_at": null
+        },
+        "knowledge_use": null,
+        "proposed_command": null,
+        "disclosure_id": null,
+        "declared_delta_index": null
+      },
+      {
+        "assertion_id": "610f5aff-0901-4403-b5c0-07281abce6ba",
+        "classification": "SURFACE_DETAIL",
+        "span": {
+          "start": 61,
+          "end": 74,
+          "unit": "UNICODE_CODEPOINT",
+          "quote_sha256": "ab209c04cd82b8167e39f950840603e2b6b60a6d9707b4c80dcf400a98679f7e"
+        },
+        "summary": "TEST_FIXTURE非当前事实引用：CONDITIONAL_WORLD_RULE",
+        "event_ref": null,
+        "world_check": null,
+        "knowledge_use": null,
+        "proposed_command": null,
+        "disclosure_id": null,
+        "declared_delta_index": null
+      },
+      {
+        "assertion_id": "3067e51e-2f5f-4714-a8c8-a4afa137d216",
+        "classification": "SURFACE_DETAIL",
+        "span": {
+          "start": 247,
+          "end": 260,
+          "unit": "UNICODE_CODEPOINT",
+          "quote_sha256": "01db699b22fb49a188b2efb3657f9970b5d4d577077d76413a333941db691a64"
+        },
+        "summary": "TEST_FIXTURE非当前事实引用：NO_ADDITIONAL_EFFECT",
+        "event_ref": null,
+        "world_check": null,
+        "knowledge_use": null,
+        "proposed_command": null,
+        "disclosure_id": null,
+        "declared_delta_index": null
+      }
+    ],
+    "reconciliation": {
+      "reconciliation_ref": {
+        "artifact_id": "41b8b046-6cf1-4df0-be8c-6b98dfbbcc20",
+        "artifact_revision_id": "d2f612a4-d399-43ab-8255-d46044542714",
+        "sha256": "65c3353a28473ad3b2bd91c247a567540f98691da2f004c84d204d0adf7e752f"
+      },
+      "alignment_ref": {
+        "artifact_id": "58746878-486b-4d6c-903b-439e85f3b14a",
+        "artifact_revision_id": "989494e9-26fa-4978-9b57-01281d7c3030",
+        "sha256": "66dec456f53af6ab10bde39772eda8918e322e46557a3cd51eea89f9623f8590"
+      },
+      "status": "BLOCKED",
+      "pending_delta_refs": []
+    },
+    "error_code": "NARRATIVE_BLOCKED"
+  },
+  "reconciliation_report": {
+    "status": "BLOCKED",
+    "text_ref": {
+      "sha256": "356b5318d01b64b3f94b228e84188d39cd35a7999207db1522882ae3e74c9282",
+      "artifact_id": "92a090be-3c2f-4275-8cc9-81447fc2d1ad",
+      "artifact_revision_id": "71805c48-85e1-43c7-8a2a-eac33c76032a"
+    },
+    "draft_ref": {
+      "sha256": "bd596329dca61d7bb487f7c4633210bffc3ff2f6ae084c83e413d13ce7f8b19a",
+      "artifact_id": "ad725846-0249-4412-afcc-34d53bbde005",
+      "artifact_revision_id": "76d0e9b3-83ec-49cb-b74f-e3a9d630ca32"
+    },
+    "report_id": "42cc098c-0c57-449e-b276-9ee1e0ce859d",
+    "scene_ref": {
+      "sha256": "6ac724c56f4ea1a425fd4228dbcff3aaa31a9431a7d0ccab504d8ec51c10a95e",
+      "artifact_id": "d8118d8e-61a0-4bfa-8e48-e4b026d99631",
+      "artifact_revision_id": "d27e7f58-0566-461c-b0a3-29d151c8e59d"
+    },
+    "event_refs": [
+      {
+        "occurrence_id": "5fb34e59-065f-57ef-a6da-9fcb7144be2e",
+        "event_version_id": "a8bf88bf-ee59-5f57-9969-e87b98a8b543"
+      }
+    ],
+    "resolutions": [],
+    "hard_blockers": [
+      {
+        "code": "STATE_CONFLICT",
+        "message": "Historical conflict or uncertain important text requires revision or review",
+        "assertion_id": "4904d0c1-ccf9-473d-9936-d92e0699767b"
+      },
+      {
+        "code": "STATE_CONFLICT",
+        "message": "Text's persistent factual assertion must match world state",
+        "assertion_id": "add97c1d-4cbc-407b-8999-2c2305065cbf"
+      }
+    ],
+    "world_binding": {
+      "world_ref": {
+        "work_id": "d0cf1ae3-9038-464c-9b90-531f7a21b339",
+        "branch_id": "ef0a4097-d8a0-41bf-a293-e6eeb6deb327",
+        "world_revision_id": "f6add2b0-69e5-4023-9be0-844c6320d394"
+      },
+      "ruleset_refs": [
+        {
+          "sha256": "6ee39dff75e99879ea9cae13a91020e8335925444c6472f7c97ba58dbaac9c70",
+          "artifact_id": "40514d17-653c-4ed3-b8f7-fb1da68c1a3e",
+          "artifact_revision_id": "26daa0fa-4186-410a-af6f-bb4de1d39ffe"
+        }
+      ],
+      "policy_version": "nf-policy-1",
+      "scope_coverage": [
+        {
+          "proof_ref": {
+            "sha256": "860453001a8c2033e7f304619392223dba47ff94b13bafa2a3cea32ff7d8cfbf",
+            "artifact_id": "840724c2-12e9-4d5f-a922-5b2941205e13",
+            "artifact_revision_id": "9b20450a-1836-476e-9e7f-96171a0629d9"
+          },
+          "scope_key": "PROCESS_COVERAGE:8a460762-9ed1-5118-8edf-ba53f0210396",
+          "story_interval": {
+            "end": {
+              "tick": 4,
+              "phase": 3
+            },
+            "start": {
+              "tick": 4,
+              "phase": 2
+            },
+            "bounds": "[)"
+          }
+        },
+        {
+          "proof_ref": {
+            "sha256": "860453001a8c2033e7f304619392223dba47ff94b13bafa2a3cea32ff7d8cfbf",
+            "artifact_id": "840724c2-12e9-4d5f-a922-5b2941205e13",
+            "artifact_revision_id": "9b20450a-1836-476e-9e7f-96171a0629d9"
+          },
+          "scope_key": "PROCESS_COVERAGE:a6494af2-0df7-5e2e-8447-cd3403425e61",
+          "story_interval": {
+            "end": {
+              "tick": 4,
+              "phase": 3
+            },
+            "start": {
+              "tick": 4,
+              "phase": 2
+            },
+            "bounds": "[)"
+          }
+        },
+        {
+          "proof_ref": {
+            "sha256": "860453001a8c2033e7f304619392223dba47ff94b13bafa2a3cea32ff7d8cfbf",
+            "artifact_id": "840724c2-12e9-4d5f-a922-5b2941205e13",
+            "artifact_revision_id": "9b20450a-1836-476e-9e7f-96171a0629d9"
+          },
+          "scope_key": "PROCESS_COVERAGE:afe75f34-871f-5a3c-917d-85d7d721957a",
+          "story_interval": {
+            "end": {
+              "tick": 4,
+              "phase": 3
+            },
+            "start": {
+              "tick": 4,
+              "phase": 2
+            },
+            "bounds": "[)"
+          }
+        }
+      ],
+      "registry_version": "b900de3e6923b39d2b08ebc9cd2c9635fe725df974c979b9ef5c6e29e52b5609",
+      "projector_version": "nf-projector-1",
+      "interpretation_ref": {
+        "sha256": "04bb4e1411bc9cf3c5a1760e08d5e8e0eb3e02a6abdf738ba8ea640c6d9478f5",
+        "artifact_id": "875a2cba-ad89-4de6-9414-ed886fb4225f",
+        "artifact_revision_id": "75cd8fe8-45d2-4d08-93f6-61f5cfbf81f3"
+      },
+      "effect_selection_manifest_sha256": "d3e35b02a15e6b5bb5b0a78e673fde1fdc375d02547bcc93ba2a00fd3410e7d6",
+      "record_selection_manifest_sha256": "1ba6186c8773dc9ba74411a4797ecd8d15d500f328868c623b1921f1c8e59c26"
+    },
+    "extraction_ref": {
+      "sha256": "5822511439819efe07455548ec1af9b07d653c92fdc007dbaaacf22bd4182fb4",
+      "artifact_id": "9528fb20-9c9b-4529-b37b-7a7858689755",
+      "artifact_revision_id": "910b39c9-cc49-4eb7-95ff-6dbee341dadf"
+    },
+    "schema_version": "2.2",
+    "input_world_ref": {
+      "work_id": "d0cf1ae3-9038-464c-9b90-531f7a21b339",
+      "branch_id": "ef0a4097-d8a0-41bf-a293-e6eeb6deb327",
+      "world_revision_id": "f6add2b0-69e5-4023-9be0-844c6320d394"
+    },
+    "source_coverage": "FULL_TEXT_DELIVERED",
+    "adopted_world_ref": {
+      "work_id": "d0cf1ae3-9038-464c-9b90-531f7a21b339",
+      "branch_id": "ef0a4097-d8a0-41bf-a293-e6eeb6deb327",
+      "world_revision_id": "f6add2b0-69e5-4023-9be0-844c6320d394"
+    },
+    "pending_delta_refs": [],
+    "semantic_completeness": "REQUIRES_INDEPENDENT_REVIEW",
+    "world_effects_applied": 0,
+    "boundary_checks_sha256": "a094c4e85f8cf089a633e04e02e61f7bffa547a8dbe5f5af19b1730c0d2e72b8",
+    "classified_assertion_ids": [
+      "76019902-0ed5-4f2d-9b7a-6bf41d2fa212",
+      "4904d0c1-ccf9-473d-9936-d92e0699767b",
+      "3ca572b3-3694-4da2-b41a-bd5b50f41a4c",
+      "add97c1d-4cbc-407b-8999-2c2305065cbf",
+      "610f5aff-0901-4403-b5c0-07281abce6ba",
+      "3067e51e-2f5f-4714-a8c8-a4afa137d216"
+    ],
+    "critical_commitment_checks": [
+      {
+        "status": "PASS",
+        "category": "STATE",
+        "check_id": "9fcd7e96-d114-41a8-8910-72404bc0b474",
+        "explanation": "Scene boundary must match the accepted world",
+        "evidence_refs": []
+      },
+      {
+        "status": "PASS",
+        "category": "STATE",
+        "check_id": "1a1eb243-0506-41bf-b3ef-1d76d803d6e4",
+        "explanation": "Scene boundary must match the accepted world",
+        "evidence_refs": []
+      },
+      {
+        "status": "PASS",
+        "category": "STATE",
+        "check_id": "85ee331d-e228-444c-b59c-1725b29bb5a2",
+        "explanation": "Scene boundary must match the accepted world",
+        "evidence_refs": []
+      },
+      {
+        "status": "PASS",
+        "category": "TEXT_SPAN",
+        "check_id": "76019902-0ed5-4f2d-9b7a-6bf41d2fa212:span",
+        "explanation": "Exact text span hash verified",
+        "evidence_refs": []
+      },
+      {
+        "status": "PASS",
+        "category": "EVENT_SELECTION",
+        "check_id": "76019902-0ed5-4f2d-9b7a-6bf41d2fa212:event",
+        "explanation": "Narrated occurrence must be selected at the adopted world cut",
+        "evidence_refs": []
+      },
+      {
+        "status": "PASS",
+        "category": "STATE",
+        "check_id": "76019902-0ed5-4f2d-9b7a-6bf41d2fa212:world",
+        "explanation": "Text's persistent factual assertion must match world state",
+        "evidence_refs": []
+      },
+      {
+        "status": "PASS",
+        "category": "TEXT_SPAN",
+        "check_id": "4904d0c1-ccf9-473d-9936-d92e0699767b:span",
+        "explanation": "Exact text span hash verified",
+        "evidence_refs": []
+      },
+      {
+        "status": "PASS",
+        "category": "EVENT_SELECTION",
+        "check_id": "4904d0c1-ccf9-473d-9936-d92e0699767b:event",
+        "explanation": "Narrated occurrence must be selected at the adopted world cut",
+        "evidence_refs": []
+      },
+      {
+        "status": "FAIL",
+        "category": "STATE",
+        "check_id": "4904d0c1-ccf9-473d-9936-d92e0699767b:classification",
+        "explanation": "Historical conflict or uncertain important text requires revision or review",
+        "evidence_refs": []
+      },
+      {
+        "status": "PASS",
+        "category": "TEXT_SPAN",
+        "check_id": "3ca572b3-3694-4da2-b41a-bd5b50f41a4c:span",
+        "explanation": "Exact text span hash verified",
+        "evidence_refs": []
+      },
+      {
+        "status": "PASS",
+        "category": "EVENT_SELECTION",
+        "check_id": "3ca572b3-3694-4da2-b41a-bd5b50f41a4c:event",
+        "explanation": "Narrated occurrence must be selected at the adopted world cut",
+        "evidence_refs": []
+      },
+      {
+        "status": "PASS",
+        "category": "STATE",
+        "check_id": "3ca572b3-3694-4da2-b41a-bd5b50f41a4c:world",
+        "explanation": "Text's persistent factual assertion must match world state",
+        "evidence_refs": []
+      },
+      {
+        "status": "PASS",
+        "category": "TEXT_SPAN",
+        "check_id": "add97c1d-4cbc-407b-8999-2c2305065cbf:span",
+        "explanation": "Exact text span hash verified",
+        "evidence_refs": []
+      },
+      {
+        "status": "PASS",
+        "category": "EVENT_SELECTION",
+        "check_id": "add97c1d-4cbc-407b-8999-2c2305065cbf:event",
+        "explanation": "Narrated occurrence must be selected at the adopted world cut",
+        "evidence_refs": []
+      },
+      {
+        "status": "FAIL",
+        "category": "STATE",
+        "check_id": "add97c1d-4cbc-407b-8999-2c2305065cbf:world",
+        "explanation": "Text's persistent factual assertion must match world state",
+        "evidence_refs": []
+      },
+      {
+        "status": "PASS",
+        "category": "TEXT_SPAN",
+        "check_id": "610f5aff-0901-4403-b5c0-07281abce6ba:span",
+        "explanation": "Exact text span hash verified",
+        "evidence_refs": []
+      },
+      {
+        "status": "PASS",
+        "category": "TEXT_SPAN",
+        "check_id": "3067e51e-2f5f-4714-a8c8-a4afa137d216:span",
+        "explanation": "Exact text span hash verified",
+        "evidence_refs": []
+      },
+      {
+        "status": "PASS",
+        "category": "DECLARED_DELTA_COVERAGE",
+        "check_id": "declared-delta-coverage",
+        "explanation": "Every writer-declared important change requires a classified span",
+        "evidence_refs": []
+      },
+      {
+        "status": "PASS",
+        "category": "IMPORTANT_EFFECT_COVERAGE",
+        "check_id": "required-event-coverage",
+        "explanation": "Every event required for this scene must have an exact narrated occurrence link",
+        "evidence_refs": []
+      }
+    ]
+  }
+}

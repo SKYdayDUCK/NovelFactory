@@ -1,0 +1,25 @@
+{
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "port": 51211,
+  "command": [
+    ".venv/bin/python",
+    "-m",
+    "pytest",
+    "tests/integration/test_p2_r1_f_population.py",
+    "tests/service/test_p2_response_loss.py",
+    "-q",
+    "--junitxml=evidence/p2/batch3/acceptance-attempt1.xml",
+    "--json-report",
+    "--json-report-file=evidence/p2/batch3/acceptance-attempt1.json"
+  ],
+  "started_at_utc": "2026-11-10T12:36:49.892876+00:00",
+  "authentication": "loopback_trust_generated_test_data_only",
+  "fsync": true,
+  "synchronous_commit": true,
+  "max_connections": 60,
+  "data_directory_reused": false,
+  "exit_status": 0,
+  "postgres_exit_status": 0,
+  "duration_seconds": 25.144839,
+  "finished_at_utc": "2026-11-10T12:37:15.037762+00:00"
+}

@@ -1,0 +1,110 @@
+{
+  "evidence_kind": "real_loopback_http_with_real_postgresql",
+  "started_at_utc": "2026-11-10T10:07:04.163065+00:00",
+  "duration_seconds": 1.316429,
+  "logical_agents": 10,
+  "rounds": 6,
+  "arrival_mode": "closed_loop",
+  "arrival_rps_target": null,
+  "seed": 20261110,
+  "modeled_think_seconds": 0.01,
+  "planned_requests": 60,
+  "emitted_requests": 60,
+  "completed_requests": 60,
+  "not_emitted": 0,
+  "successful_requests": 60,
+  "status_counts": {
+    "200": 60
+  },
+  "failures": [],
+  "tool_requests_per_second": 45.5778,
+  "valid_successes_per_second": 45.5778,
+  "latency_all_responses": {
+    "count": 60,
+    "p50_ms": 181.4979,
+    "p95_ms": 288.2312,
+    "p99_ms": 347.1793
+  },
+  "latency_successes": {
+    "count": 60,
+    "p50_ms": 181.4979,
+    "p95_ms": 288.2312,
+    "p99_ms": 347.1793
+  },
+  "arrival_schedule_delay": {
+    "count": 0,
+    "p50_ms": null,
+    "p95_ms": null,
+    "p99_ms": null
+  },
+  "successful_requests_by_agent": {
+    "0": 6,
+    "2": 6,
+    "1": 6,
+    "3": 6,
+    "7": 6,
+    "5": 6,
+    "4": 6,
+    "6": 6,
+    "9": 6,
+    "8": 6
+  },
+  "input_request_hashes": [
+    "9a4ba5fe9abc22595cef02be839dea5f5c0d9f220f1e373f7fbb6db6e915fb5d",
+    "56a1c0ee826bb60b601c3761f30c2552000da18ed13569204490522c03339df9",
+    "09568b2ddcadf548d0720c89430ff2e5abc1ce561ad1c762297fbf767bb3ea69",
+    "9760f69efce49c811b0832168e2c52822e740c994e7bb7c039e3bd80a75ecae4",
+    "0b8786cc66f2f5df6894f79fe602a34d815dd6053a178ae0c552c9b285905563",
+    "1e3cbadf0f78b8623099f40860f275044a6739b067378d4e719fab1134fa4ac8",
+    "10cadbdcdbb440a7befbe3397f450cf5a92a316c2bfa027909d6e50f74d6b051",
+    "d6c604e292a52e5cfbe4a7cc78e6322732bf08837df6a4e7ea8a974712358650",
+    "a073d6b91adc3d5fb5c82bfe31f3e37b758594be6b47f20e12ff3a9f12736474",
+    "5030222ffe4eb9fa714876a28dfb6e866373b5a0a565b6c3de4b63133e356032"
+  ],
+  "new_world_revisions": 0,
+  "external_model_calls": 0,
+  "scope": "P1 small fixture query load; not novel-generation or large-history capacity",
+  "database": {
+    "sql_statements": 1260,
+    "transactions": 180,
+    "sql_statements_per_second": 957.1348,
+    "peak_checked_out_connections": 8,
+    "checked_out_at_end": 0,
+    "configured_pool_size": 8,
+    "pool_status_at_end": "Pool size: 8  Connections in pool: 8 Current Overflow: 0 Current Checked out connections: 0"
+  },
+  "idle_wait_checked_out_samples": [
+    0
+  ],
+  "admission": {
+    "admitted": 60,
+    "peak_active": 6,
+    "peak_queued": 3,
+    "completed": 60,
+    "active": 0,
+    "queued": 0,
+    "capacity": 6,
+    "per_principal": 2,
+    "max_waiters": 64,
+    "wait_seconds_total": 0.35288355099874025
+  },
+  "authentication_admission": {
+    "admitted": 60,
+    "peak_active": 2,
+    "peak_queued": 8,
+    "completed": 60,
+    "active": 0,
+    "queued": 0,
+    "capacity": 2,
+    "per_principal": 2,
+    "max_waiters": 64,
+    "wait_seconds_total": 0.32937004500013245
+  },
+  "configured_connection_budget": 28,
+  "fixture": "r1_sword.initial.D1",
+  "fixture_entities": 22,
+  "fixture_accepted_events": 0,
+  "api_processes": 1,
+  "cache_hits": 50,
+  "cache_misses": 10
+}

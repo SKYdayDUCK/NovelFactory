@@ -1,0 +1,245 @@
+RUN ["/workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin/initdb", "-D", "/tmp/nf-pg17-_792606y/data", "-U", "nf_dev", "--encoding=UTF8", "--locale=C", "--auth-local=reject", "--auth-host=trust", "--data-checksums"]
+The files belonging to this database system will be owned by user "agent".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "C".
+The default text search configuration will be set to "english".
+
+Data page checksums are enabled.
+
+creating directory /tmp/nf-pg17-_792606y/data ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default "max_connections" ... 100
+selecting default "shared_buffers" ... 128MB
+selecting default time zone ... Asia/Tokyo
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+
+Success. You can now start the database server using:
+
+    /workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin/pg_ctl -D /tmp/nf-pg17-_792606y/data -l logfile start
+
+RUN ["/workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin/createdb", "nf_test"]
+RUN ["/workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin/psql", "-Atc", "SELECT version(); SHOW fsync; SHOW synchronous_commit;"]
+PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+on
+on
+REAL_POSTGRES_READY postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1) port 52089
+{
+  "file": "evidence/p2/batch3/load/agents50-stable.json",
+  "correctness": "PASS",
+  "logical_agents": 50,
+  "metrics": {
+    "duration_seconds": 34.11313,
+    "planned_requests": 286,
+    "emitted_requests": 286,
+    "completed_requests": 286,
+    "client_requests_never_emitted": 0,
+    "api_tool_calls": 286,
+    "mcp_tool_calls": 0,
+    "status_counts": {
+      "200": 282,
+      "409": 4
+    },
+    "valid_successful_calls": 282,
+    "api_success_rps": 8.2666,
+    "successful_duplicate_receipts": 6,
+    "effective_call_rps_excluding_duplicates": 8.0907,
+    "new_world_commit_receipts": 6,
+    "effective_world_commits_per_second": 0.1759,
+    "conflict_count": 4,
+    "conflict_rate_all_requests": 0.013986013986013986,
+    "failure_rate_all_requests": 0.013986013986013986,
+    "idempotent_retry_rate_all_requests": 0.02097902097902098,
+    "infrastructure_retries": 0,
+    "model_retries": 0,
+    "peak_inflight_http": 5,
+    "latency_all_responses": {
+      "count": 286,
+      "p50_ms": 59.8049,
+      "p95_ms": 427.8719,
+      "p99_ms": 548.1238
+    },
+    "latency_successes": {
+      "count": 282,
+      "p50_ms": 62.6495,
+      "p95_ms": 427.8719,
+      "p99_ms": 548.1238
+    },
+    "arrival_schedule_delay": {
+      "count": 286,
+      "p50_ms": 0.9741,
+      "p95_ms": 12.5099,
+      "p99_ms": 60.9794
+    },
+    "per_operation": {
+      "accept_conflict": {
+        "calls": 4,
+        "successes": 0,
+        "latency_all_responses": {
+          "count": 4,
+          "p50_ms": 32.6687,
+          "p95_ms": 38.5553,
+          "p99_ms": 38.5553
+        }
+      },
+      "accept_independent": {
+        "calls": 5,
+        "successes": 5,
+        "latency_all_responses": {
+          "count": 5,
+          "p50_ms": 429.3021,
+          "p95_ms": 444.1659,
+          "p99_ms": 444.1659
+        }
+      },
+      "accept_retry": {
+        "calls": 6,
+        "successes": 6,
+        "latency_all_responses": {
+          "count": 6,
+          "p50_ms": 48.991,
+          "p95_ms": 51.8034,
+          "p99_ms": 51.8034
+        }
+      },
+      "accept_selected_fixture": {
+        "calls": 1,
+        "successes": 1,
+        "latency_all_responses": {
+          "count": 1,
+          "p50_ms": 370.5961,
+          "p95_ms": 370.5961,
+          "p99_ms": 370.5961
+        }
+      },
+      "certificate": {
+        "calls": 10,
+        "successes": 10,
+        "latency_all_responses": {
+          "count": 10,
+          "p50_ms": 135.8353,
+          "p95_ms": 186.7882,
+          "p99_ms": 186.7882
+        }
+      },
+      "compile": {
+        "calls": 50,
+        "successes": 50,
+        "latency_all_responses": {
+          "count": 50,
+          "p50_ms": 48.3295,
+          "p95_ms": 59.1413,
+          "p99_ms": 104.7099
+        }
+      },
+      "graph": {
+        "calls": 50,
+        "successes": 50,
+        "latency_all_responses": {
+          "count": 50,
+          "p50_ms": 106.9593,
+          "p95_ms": 356.6284,
+          "p99_ms": 488.4063
+        }
+      },
+      "history": {
+        "calls": 50,
+        "successes": 50,
+        "latency_all_responses": {
+          "count": 50,
+          "p50_ms": 82.6272,
+          "p95_ms": 352.591,
+          "p99_ms": 414.9094
+        }
+      },
+      "propose": {
+        "calls": 10,
+        "successes": 10,
+        "latency_all_responses": {
+          "count": 10,
+          "p50_ms": 535.7662,
+          "p95_ms": 722.396,
+          "p99_ms": 722.396
+        }
+      },
+      "state_cold": {
+        "calls": 50,
+        "successes": 50,
+        "latency_all_responses": {
+          "count": 50,
+          "p50_ms": 73.1273,
+          "p95_ms": 85.5419,
+          "p99_ms": 108.8343
+        }
+      },
+      "state_warm": {
+        "calls": 50,
+        "successes": 50,
+        "latency_all_responses": {
+          "count": 50,
+          "p50_ms": 30.856,
+          "p95_ms": 43.667,
+          "p99_ms": 122.8992
+        }
+      }
+    },
+    "successful_calls_by_agent": {
+      "0": 9,
+      "1": 9,
+      "2": 9,
+      "3": 9,
+      "4": 9,
+      "5": 9,
+      "6": 7,
+      "7": 7,
+      "8": 7,
+      "9": 7,
+      "10": 5,
+      "11": 5,
+      "12": 5,
+      "13": 5,
+      "14": 5,
+      "15": 5,
+      "16": 5,
+      "17": 5,
+      "18": 5,
+      "19": 5,
+      "20": 5,
+      "21": 5,
+      "22": 5,
+      "23": 5,
+      "24": 5,
+      "25": 5,
+      "26": 5,
+      "27": 5,
+      "28": 5,
+      "29": 5,
+      "30": 5,
+      "31": 5,
+      "32": 5,
+      "33": 5,
+      "34": 5,
+      "35": 5,
+      "36": 5,
+      "37": 5,
+      "38": 5,
+      "39": 5,
+      "40": 5,
+      "41": 5,
+      "42": 5,
+      "43": 5,
+      "44": 5,
+      "45": 5,
+      "46": 5,
+      "47": 5,
+      "48": 5,
+      "49": 5
+    },
+    "latency_warning": "P99 for individual write categories has few samples; descriptive only",
+    "correctness_errors": []
+  }
+}

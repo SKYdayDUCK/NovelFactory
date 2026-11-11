@@ -1,0 +1,42 @@
+{
+  "status": "BLOCKED_ENVIRONMENT",
+  "observed_at": "2026-11-10T09:55:11.982017+00:00",
+  "cli_version": "codex-cli 0.167.0-alpha.4",
+  "authentication_status": "Logged in using ChatGPT",
+  "model_api_key_present": false,
+  "confirmed_model_requests": 0,
+  "confirmed_model_responses": 0,
+  "actual_cost": null,
+  "cost_status": "NO_PROVIDER_RECEIPT",
+  "attempts": [
+    {
+      "attempt": 1,
+      "exit_code": 1,
+      "stage": "BEFORE_MODEL_DISPATCH",
+      "error": "HOST_INITIALIZATION_READ_ONLY_FILESYSTEM",
+      "stdout_bytes": 0
+    },
+    {
+      "attempt": 2,
+      "exit_code": 1,
+      "stage": "BEFORE_MODEL_DISPATCH",
+      "error": "HOST_INITIALIZATION_READ_ONLY_FILESYSTEM",
+      "stdout_bytes": 0
+    },
+    {
+      "attempt": 3,
+      "exit_code": 1,
+      "stage": "BEFORE_MODEL_DISPATCH",
+      "error": "CONFIG_UNKNOWN_FIELD",
+      "stdout_bytes": 0
+    },
+    {
+      "attempt": 4,
+      "exit_code": 1,
+      "stage": "BEFORE_MODEL_DISPATCH",
+      "error": "HOST_INITIALIZATION_READ_ONLY_FILESYSTEM",
+      "stdout_bytes": 0
+    }
+  ],
+  "decision": "Do not use developer subagents or deterministic fixtures as proof of isolated production Agent acceptance."
+}

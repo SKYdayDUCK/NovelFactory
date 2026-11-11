@@ -1,0 +1,385 @@
+[
+  {
+    "effects": [
+      {
+        "kind": "COGNITIVE_RECORD_ADD",
+        "actor_id": "7743abb4-dd13-5149-8358-264531bfc3c7",
+        "statement": "NF-PROP-1:{\"object_value\":{\"entity_id\":\"aa9cfc55-2ede-5039-98e4-0b3fa7d0c965\",\"kind\":\"ENTITY\"},\"predicate\":\"possessed_by\",\"subject_id\":\"8a460762-9ed1-5118-8edf-ba53f0210396\"}",
+        "effect_key": "cognition",
+        "record_kind": "BELIEF",
+        "evidence_refs": [
+          {
+            "kind": "ARTIFACT",
+            "artifact_ref": {
+              "sha256": "80a6f854fb1a7f2067bb14dc0a87b5f00d1581d0738859d58dbd115aa06dc63b",
+              "artifact_id": "bb246e83-7c12-4b2b-9584-32cfefade669",
+              "artifact_revision_id": "af045000-ebf2-471c-90bf-f7bdd9dcd1b7"
+            }
+          }
+        ],
+        "epistemic_mode": "OBSERVED"
+      }
+    ],
+    "ruleset_ref": {
+      "sha256": "6ee39dff75e99879ea9cae13a91020e8335925444c6472f7c97ba58dbaac9c70",
+      "artifact_id": "03d393ee-e50c-481d-a9d6-fa9b41117eaa",
+      "artifact_revision_id": "4a3154ad-5d32-4a0c-986a-1ad68585a11e"
+    },
+    "participants": [
+      "7743abb4-dd13-5149-8358-264531bfc3c7"
+    ],
+    "occurrence_id": "9d205fd7-cdb5-582a-be21-2030cd150f4c",
+    "causal_parents": [],
+    "engine_version": "nf-reducer-1",
+    "schema_version": "2.0",
+    "effect_group_id": "de1f18a6-c046-5bb0-b512-6f456a5ff9e8",
+    "occurrence_time": {
+      "at": {
+        "tick": 1,
+        "phase": 1
+      },
+      "kind": "EXACT"
+    },
+    "adjudication_ref": {
+      "sha256": "85d5baad9122c71888166496143a32f2e8c6bae0d40b49468eb41ac23dcfb864",
+      "artifact_id": "bcca49bb-5ff8-400e-9d1d-e7dc95728785",
+      "artifact_revision_id": "538ade5c-cde4-493c-80ba-688a310e3f10"
+    },
+    "event_version_id": "0a3bbc73-8314-5b56-8f2a-75acfe0d6543",
+    "representation_id": "e7ed4681-c3c5-5f59-b974-ec12ab74f17c"
+  },
+  {
+    "effects": [
+      {
+        "kind": "RESOURCE_DELTA",
+        "unit": "bag",
+        "quantity": "-30",
+        "account_id": "afe75f34-871f-5a3c-917d-85d7d721957a",
+        "effect_key": "joint:0:resource:0",
+        "resource_id": "589b732c-449a-5c6b-ae6c-c476618694e4"
+      },
+      {
+        "kind": "RESOURCE_DELTA",
+        "unit": "bag",
+        "quantity": "30",
+        "account_id": "a6494af2-0df7-5e2e-8447-cd3403425e61",
+        "effect_key": "joint:0:resource:1",
+        "resource_id": "589b732c-449a-5c6b-ae6c-c476618694e4"
+      },
+      {
+        "kind": "LIFECYCLE_SET",
+        "entity_id": "8a460762-9ed1-5118-8edf-ba53f0210396",
+        "lifecycle": "DESTROYED",
+        "effect_key": "joint:1:destroy"
+      }
+    ],
+    "ruleset_ref": {
+      "sha256": "6ee39dff75e99879ea9cae13a91020e8335925444c6472f7c97ba58dbaac9c70",
+      "artifact_id": "03d393ee-e50c-481d-a9d6-fa9b41117eaa",
+      "artifact_revision_id": "4a3154ad-5d32-4a0c-986a-1ad68585a11e"
+    },
+    "participants": [
+      "589b732c-449a-5c6b-ae6c-c476618694e4",
+      "8a460762-9ed1-5118-8edf-ba53f0210396",
+      "a6494af2-0df7-5e2e-8447-cd3403425e61",
+      "afe75f34-871f-5a3c-917d-85d7d721957a"
+    ],
+    "occurrence_id": "0905dccd-31b8-5be3-9da1-c7a8f7f49877",
+    "causal_parents": [],
+    "engine_version": "nf-reducer-1",
+    "schema_version": "2.0",
+    "effect_group_id": "0d259399-f631-546b-b1d9-bba7441aa26d",
+    "occurrence_time": {
+      "at": {
+        "tick": 4,
+        "phase": 0
+      },
+      "kind": "EXACT"
+    },
+    "adjudication_ref": {
+      "sha256": "ee9f39508a1f17b79a0b44ae5b641bbe372dd2050911af695dd4315a363858be",
+      "artifact_id": "d728a718-5755-4a7e-ba0c-9030065f23e2",
+      "artifact_revision_id": "f073c143-6ac2-476a-9366-f4d5fcd563b6"
+    },
+    "event_version_id": "0ed69099-f796-572a-86cb-fe90997c90f7",
+    "representation_id": "b0f58630-c3d9-50e0-8dc3-c6635f342dc1"
+  },
+  {
+    "effects": [
+      {
+        "kind": "RELATION_SET",
+        "object_id": "6f352e8f-1163-588f-af0a-71d2660e9e4b",
+        "predicate": "possessed_by",
+        "effect_key": "set:0",
+        "subject_id": "8a460762-9ed1-5118-8edf-ba53f0210396",
+        "value_status": "VALUE"
+      },
+      {
+        "kind": "RELATION_SET",
+        "object_id": "6f352e8f-1163-588f-af0a-71d2660e9e4b",
+        "predicate": "legal_owner",
+        "effect_key": "set:1",
+        "subject_id": "8a460762-9ed1-5118-8edf-ba53f0210396",
+        "value_status": "VALUE"
+      },
+      {
+        "kind": "RELATION_SET",
+        "object_id": "6f352e8f-1163-588f-af0a-71d2660e9e4b",
+        "predicate": "located_in",
+        "effect_key": "set:2",
+        "subject_id": "8a460762-9ed1-5118-8edf-ba53f0210396",
+        "value_status": "VALUE"
+      }
+    ],
+    "ruleset_ref": {
+      "sha256": "6ee39dff75e99879ea9cae13a91020e8335925444c6472f7c97ba58dbaac9c70",
+      "artifact_id": "03d393ee-e50c-481d-a9d6-fa9b41117eaa",
+      "artifact_revision_id": "4a3154ad-5d32-4a0c-986a-1ad68585a11e"
+    },
+    "participants": [
+      "6f352e8f-1163-588f-af0a-71d2660e9e4b",
+      "8a460762-9ed1-5118-8edf-ba53f0210396"
+    ],
+    "occurrence_id": "930ba9cf-c20c-50bb-82cc-afdf3c1a6b9f",
+    "causal_parents": [],
+    "engine_version": "nf-reducer-1",
+    "schema_version": "2.0",
+    "effect_group_id": "fd2a8f36-d5c7-5f5f-a448-9ce0d8eeeedb",
+    "occurrence_time": {
+      "at": {
+        "tick": 2,
+        "phase": 0
+      },
+      "kind": "EXACT"
+    },
+    "adjudication_ref": {
+      "sha256": "d18e2701e5abeb09c3af67bc4fb4fcf85f8e86d7392ee3bed07617e477db2ca7",
+      "artifact_id": "17df2454-31be-43c9-9a6f-1d90bfd23a75",
+      "artifact_revision_id": "8e96fadc-178c-484c-890a-1d9d66d3c389"
+    },
+    "event_version_id": "23e0113d-8193-5a17-adc4-55b84e59d40a",
+    "representation_id": "8094f426-6738-504b-b442-ec1bcf5a578c"
+  },
+  {
+    "effects": [
+      {
+        "at": {
+          "tick": 6,
+          "phase": 0
+        },
+        "kind": "RELATION_TRANSITION",
+        "operation": "OPEN",
+        "predicate": "member_of",
+        "effect_key": "open:0",
+        "subject_id": "7743abb4-dd13-5149-8358-264531bfc3c7",
+        "relation_id": "25f630cd-f496-579f-ac16-b4dc166996bc",
+        "object_value": {
+          "kind": "ENTITY",
+          "entity_id": "f69b1fe6-2332-502d-af2f-fc01a3048634"
+        },
+        "expected_relation_version_id": null
+      }
+    ],
+    "ruleset_ref": {
+      "sha256": "6ee39dff75e99879ea9cae13a91020e8335925444c6472f7c97ba58dbaac9c70",
+      "artifact_id": "03d393ee-e50c-481d-a9d6-fa9b41117eaa",
+      "artifact_revision_id": "4a3154ad-5d32-4a0c-986a-1ad68585a11e"
+    },
+    "participants": [
+      "7743abb4-dd13-5149-8358-264531bfc3c7",
+      "f69b1fe6-2332-502d-af2f-fc01a3048634"
+    ],
+    "occurrence_id": "183b9533-e72b-512e-9740-76bf12157aa8",
+    "causal_parents": [],
+    "engine_version": "nf-reducer-1",
+    "schema_version": "2.1",
+    "effect_group_id": "0296df65-826b-5539-9e67-629e79510479",
+    "occurrence_time": {
+      "at": {
+        "tick": 6,
+        "phase": 0
+      },
+      "kind": "EXACT"
+    },
+    "adjudication_ref": {
+      "sha256": "d4e5e7cc9e81ec54d1bff388b2dbe5f01681e04d82108d5147717bb530e109e5",
+      "artifact_id": "d97a22a7-ec44-47c7-bc8f-273bbfe74f40",
+      "artifact_revision_id": "04036310-9a04-4b16-8e03-9e18c950cea9"
+    },
+    "event_version_id": "4661abe3-aedd-5d06-9924-d75095c9976a",
+    "representation_id": "e39046db-cf84-52e4-b3d2-05a447e7ff2c"
+  },
+  {
+    "effects": [
+      {
+        "kind": "COGNITIVE_RECORD_ADD",
+        "actor_id": "6f352e8f-1163-588f-af0a-71d2660e9e4b",
+        "statement": "铜汛印已经毁坏；不能作为完好凭证使用。",
+        "effect_key": "cognition",
+        "record_kind": "OBSERVATION",
+        "evidence_refs": [
+          {
+            "kind": "EVENT",
+            "event_ref": {
+              "occurrence_id": "0905dccd-31b8-5be3-9da1-c7a8f7f49877",
+              "event_version_id": "0ed69099-f796-572a-86cb-fe90997c90f7"
+            },
+            "world_ref": {
+              "work_id": "bed6f5cf-d506-4436-a3a4-c25d4004be12",
+              "branch_id": "f116be99-a36d-464f-a856-268d812f4e78",
+              "world_revision_id": "420540bb-ea6b-4cae-a39a-616842ff92e9"
+            }
+          }
+        ],
+        "epistemic_mode": "OBSERVED"
+      }
+    ],
+    "ruleset_ref": {
+      "sha256": "6ee39dff75e99879ea9cae13a91020e8335925444c6472f7c97ba58dbaac9c70",
+      "artifact_id": "03d393ee-e50c-481d-a9d6-fa9b41117eaa",
+      "artifact_revision_id": "4a3154ad-5d32-4a0c-986a-1ad68585a11e"
+    },
+    "participants": [
+      "6f352e8f-1163-588f-af0a-71d2660e9e4b"
+    ],
+    "occurrence_id": "a116618a-734d-542b-b975-7a8c38e74842",
+    "causal_parents": [],
+    "engine_version": "nf-reducer-1",
+    "schema_version": "2.0",
+    "effect_group_id": "17295e5f-e6b6-5df3-abe5-df3f6522bcf9",
+    "occurrence_time": {
+      "at": {
+        "tick": 5,
+        "phase": 0
+      },
+      "kind": "EXACT"
+    },
+    "adjudication_ref": {
+      "sha256": "f6a89d5a512d374f86977d09887bafad52b5f4540e3a402598f1eabc07d8458e",
+      "artifact_id": "7869f9e3-3ff7-4379-8763-5f5a13ec1ca0",
+      "artifact_revision_id": "99bd96c7-70f0-4002-8add-7ca776301827"
+    },
+    "event_version_id": "be98c7f7-227a-51be-bb4c-f76acf716f64",
+    "representation_id": "b9947b72-2fdf-5933-9c73-3ad0bf1200b1"
+  },
+  {
+    "effects": [
+      {
+        "at": {
+          "tick": 3,
+          "phase": 0
+        },
+        "kind": "RELATION_TRANSITION",
+        "operation": "CLOSE",
+        "predicate": "located_in",
+        "effect_key": "close:0",
+        "subject_id": "4f430e6d-c279-50e1-80c8-0c37c30ffba4",
+        "relation_id": "bd8a045a-4e9a-5a77-872b-78b569ddf89c",
+        "object_value": {
+          "kind": "ENTITY",
+          "entity_id": "2716226c-e666-5a77-95bb-a77ba0a9bbd6"
+        },
+        "expected_relation_version_id": "55ff4e77-2a62-50d4-a4c0-4f32a82141c8"
+      },
+      {
+        "at": {
+          "tick": 3,
+          "phase": 0
+        },
+        "kind": "RELATION_TRANSITION",
+        "operation": "OPEN",
+        "predicate": "located_in",
+        "effect_key": "open:1",
+        "subject_id": "4f430e6d-c279-50e1-80c8-0c37c30ffba4",
+        "relation_id": "250a7872-156c-5e93-a721-d8df8161694e",
+        "object_value": {
+          "kind": "ENTITY",
+          "entity_id": "5e331883-4bba-572e-9b40-818e710b40bc"
+        },
+        "expected_relation_version_id": null
+      }
+    ],
+    "ruleset_ref": {
+      "sha256": "6ee39dff75e99879ea9cae13a91020e8335925444c6472f7c97ba58dbaac9c70",
+      "artifact_id": "03d393ee-e50c-481d-a9d6-fa9b41117eaa",
+      "artifact_revision_id": "4a3154ad-5d32-4a0c-986a-1ad68585a11e"
+    },
+    "participants": [
+      "2716226c-e666-5a77-95bb-a77ba0a9bbd6",
+      "4f430e6d-c279-50e1-80c8-0c37c30ffba4",
+      "5e331883-4bba-572e-9b40-818e710b40bc"
+    ],
+    "occurrence_id": "b7ea55a2-0d4b-5e3d-878e-c6f6fa9237e4",
+    "causal_parents": [],
+    "engine_version": "nf-reducer-1",
+    "schema_version": "2.1",
+    "effect_group_id": "41264367-07ff-5d8f-8542-3e1acec9290e",
+    "occurrence_time": {
+      "at": {
+        "tick": 3,
+        "phase": 0
+      },
+      "kind": "EXACT"
+    },
+    "adjudication_ref": {
+      "sha256": "f458f288c5f4e809f0968f6cf87e4ba6da1be5c56704237543736e11718fbdbc",
+      "artifact_id": "df8de66a-c463-4f86-95ef-2e96d58289ac",
+      "artifact_revision_id": "1569845f-9262-4a92-a0a3-787177d9ad86"
+    },
+    "event_version_id": "fe763968-9b7c-56fd-94fa-f2504fe70a31",
+    "representation_id": "85c159f9-032d-55fc-b5b6-6f913d6227e4"
+  },
+  {
+    "effects": [
+      {
+        "kind": "COGNITIVE_RECORD_ADD",
+        "actor_id": "6f352e8f-1163-588f-af0a-71d2660e9e4b",
+        "statement": "NF-PROP-1:{\"object_value\":{\"entity_id\":\"6f352e8f-1163-588f-af0a-71d2660e9e4b\",\"kind\":\"ENTITY\"},\"predicate\":\"possessed_by\",\"subject_id\":\"8a460762-9ed1-5118-8edf-ba53f0210396\"}",
+        "effect_key": "cognition",
+        "record_kind": "BELIEF",
+        "evidence_refs": [
+          {
+            "kind": "EVENT",
+            "event_ref": {
+              "occurrence_id": "930ba9cf-c20c-50bb-82cc-afdf3c1a6b9f",
+              "event_version_id": "23e0113d-8193-5a17-adc4-55b84e59d40a"
+            },
+            "world_ref": {
+              "work_id": "bed6f5cf-d506-4436-a3a4-c25d4004be12",
+              "branch_id": "f116be99-a36d-464f-a856-268d812f4e78",
+              "world_revision_id": "ae1e0b78-7aa3-41c5-8e84-09f1e0bb4663"
+            }
+          }
+        ],
+        "epistemic_mode": "OBSERVED"
+      }
+    ],
+    "ruleset_ref": {
+      "sha256": "6ee39dff75e99879ea9cae13a91020e8335925444c6472f7c97ba58dbaac9c70",
+      "artifact_id": "03d393ee-e50c-481d-a9d6-fa9b41117eaa",
+      "artifact_revision_id": "4a3154ad-5d32-4a0c-986a-1ad68585a11e"
+    },
+    "participants": [
+      "6f352e8f-1163-588f-af0a-71d2660e9e4b"
+    ],
+    "occurrence_id": "cc09392c-3ded-5a56-b862-fe3c4a752ade",
+    "causal_parents": [],
+    "engine_version": "nf-reducer-1",
+    "schema_version": "2.0",
+    "effect_group_id": "60cda874-8ba4-5c9f-8ee4-45c75d07df32",
+    "occurrence_time": {
+      "at": {
+        "tick": 2,
+        "phase": 1
+      },
+      "kind": "EXACT"
+    },
+    "adjudication_ref": {
+      "sha256": "45a30ac2f35e94263ea2f1510a50a78b7d68c4b4f4734dc39e85cf1e3ee298f8",
+      "artifact_id": "655829f3-dcaa-402b-8a67-1d981531903c",
+      "artifact_revision_id": "ed42f211-1c1e-4cc9-97aa-ef4fa0516a48"
+    },
+    "event_version_id": "ffc36f65-9aa2-50e8-baff-3fad2ea29b02",
+    "representation_id": "c7696fa1-ac6d-5ad5-88c5-f81bcb73385e"
+  }
+]

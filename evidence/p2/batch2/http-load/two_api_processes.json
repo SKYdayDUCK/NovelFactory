@@ -1,0 +1,16 @@
+{
+  "api_process_ids": [
+    241,
+    242
+  ],
+  "response_statuses": [
+    200,
+    200,
+    401,
+    401
+  ],
+  "api_pool_size_each": 4,
+  "api_connection_budget_sum": 8,
+  "transport": "real_loopback_tcp",
+  "shared_state": "PostgreSQL task and grant; independent API process caches"
+}

@@ -1,0 +1,110 @@
+{
+  "evidence_kind": "real_loopback_http_with_real_postgresql",
+  "started_at_utc": "2026-11-10T10:42:41.859681+00:00",
+  "duration_seconds": 1.29806,
+  "logical_agents": 10,
+  "rounds": 6,
+  "arrival_mode": "closed_loop",
+  "arrival_rps_target": null,
+  "seed": 20261110,
+  "modeled_think_seconds": 0.01,
+  "planned_requests": 60,
+  "emitted_requests": 60,
+  "completed_requests": 60,
+  "not_emitted": 0,
+  "successful_requests": 60,
+  "status_counts": {
+    "200": 60
+  },
+  "failures": [],
+  "tool_requests_per_second": 46.2228,
+  "valid_successes_per_second": 46.2228,
+  "latency_all_responses": {
+    "count": 60,
+    "p50_ms": 182.4892,
+    "p95_ms": 270.2664,
+    "p99_ms": 297.8254
+  },
+  "latency_successes": {
+    "count": 60,
+    "p50_ms": 182.4892,
+    "p95_ms": 270.2664,
+    "p99_ms": 297.8254
+  },
+  "arrival_schedule_delay": {
+    "count": 0,
+    "p50_ms": null,
+    "p95_ms": null,
+    "p99_ms": null
+  },
+  "successful_requests_by_agent": {
+    "0": 6,
+    "2": 6,
+    "1": 6,
+    "3": 6,
+    "5": 6,
+    "4": 6,
+    "6": 6,
+    "8": 6,
+    "7": 6,
+    "9": 6
+  },
+  "input_request_hashes": [
+    "03398ecf06cb454e4fd28925258eaf9d37f2d7e04b699630f9ba34d01747278c",
+    "3f789f682f91ce96538418ad28ac5e4b19cf2ffb96d67d0ed9ffbb44a90b411e",
+    "67e32152092f5a74dbaac19fd73dc3be2ad067a162c6a76d2c39d1fb3a2a4ce5",
+    "0c5dab93cf0f908d87ffaee4e83dc6c6b0b9445cb59d75613ef70209dec2ac41",
+    "81d8e22f140f3f226930657c800dfd31ba9f39913cb193c1eb03baa32dbe2abb",
+    "28001912c577926426876260ccb5156cfb5b4d6b3802be980eccd9bc001ec490",
+    "d0d1a3c0f388fe65a1e3dcf6bc71099b4f37dfc241537fd0c734828ba5f016a8",
+    "d489b1023c8dc72fa8c127be51756fa1a50b724abb8663c1462fb8c1d2115440",
+    "91243915bd57d2497d42104a87a0d477229324006d3a0bd1fff3d77294553a03",
+    "f9d0409940f7b05a8059364aa44df2bec59a629d67432c9da83157560d58273a"
+  ],
+  "new_world_revisions": 0,
+  "external_model_calls": 0,
+  "scope": "P1 small fixture query load; not novel-generation or large-history capacity",
+  "database": {
+    "sql_statements": 1260,
+    "transactions": 180,
+    "sql_statements_per_second": 970.6793,
+    "peak_checked_out_connections": 8,
+    "checked_out_at_end": 0,
+    "configured_pool_size": 8,
+    "pool_status_at_end": "Pool size: 8  Connections in pool: 8 Current Overflow: 0 Current Checked out connections: 0"
+  },
+  "idle_wait_checked_out_samples": [
+    0
+  ],
+  "admission": {
+    "admitted": 60,
+    "peak_active": 6,
+    "peak_queued": 3,
+    "completed": 60,
+    "active": 0,
+    "queued": 0,
+    "capacity": 6,
+    "per_principal": 2,
+    "max_waiters": 64,
+    "wait_seconds_total": 0.4895779520011274
+  },
+  "authentication_admission": {
+    "admitted": 60,
+    "peak_active": 2,
+    "peak_queued": 8,
+    "completed": 60,
+    "active": 0,
+    "queued": 0,
+    "capacity": 2,
+    "per_principal": 2,
+    "max_waiters": 64,
+    "wait_seconds_total": 0.31221419000121386
+  },
+  "configured_connection_budget": 28,
+  "fixture": "r1_sword.initial.D1",
+  "fixture_entities": 22,
+  "fixture_accepted_events": 0,
+  "api_processes": 1,
+  "cache_hits": 50,
+  "cache_misses": 10
+}

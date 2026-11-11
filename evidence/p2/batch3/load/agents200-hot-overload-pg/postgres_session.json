@@ -1,0 +1,33 @@
+{
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "port": 47985,
+  "command": [
+    ".venv/bin/python",
+    "-m",
+    "benchmarks.p2_behavioral_load",
+    "--agents",
+    "200",
+    "--profile",
+    "overload",
+    "--hot-fraction",
+    "0.8",
+    "--arrival-rps",
+    "10",
+    "--open-loop-rps",
+    "1000",
+    "--rounds",
+    "5",
+    "--output",
+    "evidence/p2/batch3/load/agents200-hot-overload.json"
+  ],
+  "started_at_utc": "2026-11-10T12:32:31.420247+00:00",
+  "authentication": "loopback_trust_generated_test_data_only",
+  "fsync": true,
+  "synchronous_commit": true,
+  "max_connections": 60,
+  "data_directory_reused": false,
+  "exit_status": 1,
+  "postgres_exit_status": 0,
+  "duration_seconds": 212.848029,
+  "finished_at_utc": "2026-11-10T12:36:04.268315+00:00"
+}

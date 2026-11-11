@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="0.095" timestamp="2026-11-10T18:57:27.792893+09:00" hostname="2be49009bab4"><testcase classname="" name="tests.unit.test_planning" time="0.000"><error message="collection failure">import file mismatch:
+imported module 'test_planning' has this __file__ attribute:
+  /workspace/scratch/cac4fdab7f30/NovelFactory/tests/integration/test_planning.py
+which is not the same as the test file we want to collect:
+  /workspace/scratch/cac4fdab7f30/NovelFactory/tests/unit/test_planning.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules</error></testcase></testsuite></testsuites>

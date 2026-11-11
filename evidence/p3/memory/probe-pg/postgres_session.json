@@ -1,0 +1,22 @@
+{
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "port": 48749,
+  "command": [
+    "python",
+    "benchmarks/memory/service_probe.py",
+    "--output",
+    "evidence/p3/memory/probe",
+    "--repeats",
+    "3"
+  ],
+  "started_at_utc": "2026-11-10T12:23:31.654270+00:00",
+  "authentication": "loopback_trust_generated_test_data_only",
+  "fsync": true,
+  "synchronous_commit": true,
+  "max_connections": 60,
+  "data_directory_reused": false,
+  "exit_status": 0,
+  "postgres_exit_status": 0,
+  "duration_seconds": 3.505158,
+  "finished_at_utc": "2026-11-10T12:23:35.159467+00:00"
+}

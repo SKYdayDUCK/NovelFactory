@@ -1,0 +1,24 @@
+{
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "port": 41615,
+  "command": [
+    ".venv/bin/python",
+    "-m",
+    "pytest",
+    "tests",
+    "-q",
+    "--junitxml=/workspace/scratch/cac4fdab7f30/p2-baseline-evidence/tests.xml",
+    "--json-report",
+    "--json-report-file=/workspace/scratch/cac4fdab7f30/p2-baseline-evidence/tests.json"
+  ],
+  "started_at_utc": "2026-11-10T09:48:45.869813+00:00",
+  "authentication": "loopback_trust_generated_test_data_only",
+  "fsync": true,
+  "synchronous_commit": true,
+  "max_connections": 60,
+  "data_directory_reused": false,
+  "exit_status": 0,
+  "postgres_exit_status": 0,
+  "duration_seconds": 73.667207,
+  "finished_at_utc": "2026-11-10T09:49:59.537064+00:00"
+}

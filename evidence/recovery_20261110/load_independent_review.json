@@ -1,0 +1,535 @@
+{
+  "schema_version": "independent-ci-load-review-1",
+  "reviewed_at_utc": "2026-11-10T13:52:31.265644+00:00",
+  "workflow_run": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42827058501",
+  "method": "Standard-library reconstruction from raw_requests, world_commit_receipts and correctness/database observations. No benchmark module imported or executed.",
+  "quantile_convention": "Empirical nearest rank: sorted sample at ceil(p*n)-1; milliseconds rounded to four decimals.",
+  "scope_limits": [
+    "Recorded request SHA-256 equality is checked; plaintext request bodies are not in this evidence and cannot be independently rehashed.",
+    "SQL table increments and resource balances are cross-checked against receipt identity; this offline review does not reconnect to the expired CI database.",
+    "Throughput uses the recorded full-run duration, excluding setup; no new load test was executed.",
+    "CI 200-agent results 13/21 and 18/21 are separate executions on GitHub hosts; local 17/21 must remain a separate environment result.",
+    "Review PASS means internally consistent evidence, not capacity PASS. 429 and expected 409 are always excluded from successful throughput."
+  ],
+  "cases": {
+    "50mixed": {
+      "agents": 50,
+      "profile": "mixed",
+      "source_sha256": "a1d184fe3aaf8745654d4a40beb5494bc8b673d7de6559eecc426616ea83c522",
+      "planned_logical_operations": 286,
+      "emitted_logical_operations": 286,
+      "never_emitted_logical_operations": 0,
+      "http_attempts": 286,
+      "infrastructure_retries": 0,
+      "first_attempt_nonconflict_failures": 0,
+      "first_attempt_status_counts": {
+        "200": 282,
+        "409": 4
+      },
+      "status_counts": {
+        "200": 282,
+        "409": 4
+      },
+      "successful_http_calls": 282,
+      "successful_duplicate_receipts": 6,
+      "effective_successful_calls_excluding_duplicates": 276,
+      "expected_conflicts_excluded_from_success": 4,
+      "recovered_successful_logical_operations": 0,
+      "recovered_expected_conflict_operations": 0,
+      "unresolved_logical_operations": 0,
+      "unique_world_commits": 6,
+      "expected_world_commits": 6,
+      "all_receipts": 12,
+      "unique_command_ids": 6,
+      "unique_selected_events": 6,
+      "database_event_delta": 6,
+      "database_revision_delta": 6,
+      "database_selected_effect_delta": 6,
+      "resource_debit_total": "6",
+      "duration_seconds_recorded": 34.192114,
+      "effective_success_rps_excluding_duplicate_receipts": 8.072,
+      "effective_world_commits_per_second": 0.1755,
+      "latency_all_responses": {
+        "count": 286,
+        "p50_ms": 46.9678,
+        "p95_ms": 379.1278,
+        "p99_ms": 461.295
+      },
+      "latency_successes": {
+        "count": 282,
+        "p50_ms": 47.4427,
+        "p95_ms": 379.1278,
+        "p99_ms": 461.295
+      },
+      "latency_first_attempts": {
+        "count": 286,
+        "p50_ms": 46.9678,
+        "p95_ms": 379.1278,
+        "p99_ms": 461.295
+      },
+      "latency_logical_scheduled_to_completion": {
+        "count": 286,
+        "p50_ms": 46.9893,
+        "p95_ms": 383.0165,
+        "p99_ms": 461.711
+      },
+      "latency_per_scheduled_attempt": {
+        "count": 286,
+        "p50_ms": 46.9893,
+        "p95_ms": 383.0165,
+        "p99_ms": 461.711
+      },
+      "latency_cold": {
+        "count": 50,
+        "p50_ms": 25.1425,
+        "p95_ms": 78.1538,
+        "p99_ms": 172.9722
+      },
+      "latency_warm": {
+        "count": 50,
+        "p50_ms": 22.6704,
+        "p95_ms": 37.8803,
+        "p99_ms": 62.3117
+      },
+      "retry_request_identity_mismatches": {},
+      "retry_attempt_sequence_mismatches": [],
+      "duplicate_receipt_content_mismatches": [],
+      "duplicate_response_hashes_match_originals": true,
+      "duplicate_request_byte_and_response_hashes_match_originals": true,
+      "retry_groups_checked": 0,
+      "environment": {
+        "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+        "python": "3.12.16 (main, Oct 26 2026, 02:50:49) [GCC 13.3.0]",
+        "logical_cpu_count": 4,
+        "cpu_models": [
+          "AMD EPYC 9V45 96-Core Processor"
+        ],
+        "git_sha": "44b9f7fa22a73207f1370ee7e5169daeb4c2dc76",
+        "benchmark_source_sha256": "bc1e2c2cf50737a62e3c64ef17a6e560d4273dbc6fd12a3639b634d9712e62d4"
+      },
+      "postgres": {
+        "server_version": "17.11 (Debian 17.11-1.pgdg12+2)",
+        "max_connections": "100",
+        "shared_buffers": "128MB",
+        "fsync": "on",
+        "synchronous_commit": "on"
+      },
+      "open_loop": {
+        "target_met": null,
+        "status": "NOT_APPLICABLE"
+      },
+      "invariants": {
+        "no_success_credit_for_429_or_409": true,
+        "one_identity_one_receipt": true,
+        "retry_keeps_exact_recorded_request_byte_hash": true,
+        "receipt_database_resource_agreement": true,
+        "all_debits_zero_or_one": true,
+        "receipts_correspond_to_successful_world_http_calls": true,
+        "branch_sequences_have_no_gaps": true,
+        "actual_logical_tasks_present": true,
+        "pooled_connections_within_bound_and_released": true
+      },
+      "recomputed_gates": {
+        "first_attempt_capacity_gate": "PASS",
+        "capacity_gate": "PASS",
+        "bounded_recovery_business_gate": "PASS"
+      },
+      "reported_metric_mismatches": {},
+      "reported_gate_mismatches": {},
+      "review_status": "PASS"
+    },
+    "50overload": {
+      "agents": 50,
+      "profile": "overload",
+      "source_sha256": "46bc8607af2afe4e90452de8ebbbcb24b22d43e19efcd97ca0ed8df167822497",
+      "planned_logical_operations": 536,
+      "emitted_logical_operations": 536,
+      "never_emitted_logical_operations": 0,
+      "http_attempts": 713,
+      "infrastructure_retries": 177,
+      "first_attempt_nonconflict_failures": 123,
+      "first_attempt_status_counts": {
+        "200": 409,
+        "429": 123,
+        "409": 4
+      },
+      "status_counts": {
+        "200": 532,
+        "429": 177,
+        "409": 4
+      },
+      "successful_http_calls": 532,
+      "successful_duplicate_receipts": 6,
+      "effective_successful_calls_excluding_duplicates": 526,
+      "expected_conflicts_excluded_from_success": 4,
+      "recovered_successful_logical_operations": 123,
+      "recovered_expected_conflict_operations": 0,
+      "unresolved_logical_operations": 0,
+      "unique_world_commits": 6,
+      "expected_world_commits": 6,
+      "all_receipts": 12,
+      "unique_command_ids": 6,
+      "unique_selected_events": 6,
+      "database_event_delta": 6,
+      "database_revision_delta": 6,
+      "database_selected_effect_delta": 6,
+      "resource_debit_total": "6",
+      "duration_seconds_recorded": 54.115543,
+      "effective_success_rps_excluding_duplicate_receipts": 9.7199,
+      "effective_world_commits_per_second": 0.1109,
+      "latency_all_responses": {
+        "count": 713,
+        "p50_ms": 1503.952,
+        "p95_ms": 4562.5802,
+        "p99_ms": 5468.6597
+      },
+      "latency_successes": {
+        "count": 532,
+        "p50_ms": 1073.3664,
+        "p95_ms": 4656.3086,
+        "p99_ms": 5546.4912
+      },
+      "latency_first_attempts": {
+        "count": 536,
+        "p50_ms": 753.4115,
+        "p95_ms": 4105.2124,
+        "p99_ms": 4744.867
+      },
+      "latency_logical_scheduled_to_completion": {
+        "count": 536,
+        "p50_ms": 1257.4606,
+        "p95_ms": 12488.1397,
+        "p99_ms": 13888.1649
+      },
+      "latency_per_scheduled_attempt": {
+        "count": 713,
+        "p50_ms": 3285.6985,
+        "p95_ms": 12294.5767,
+        "p99_ms": 13650.4733
+      },
+      "latency_cold": {
+        "count": 50,
+        "p50_ms": 80.8304,
+        "p95_ms": 84.1263,
+        "p99_ms": 87.8418
+      },
+      "latency_warm": {
+        "count": 50,
+        "p50_ms": 77.751,
+        "p95_ms": 83.1825,
+        "p99_ms": 86.7999
+      },
+      "retry_request_identity_mismatches": {},
+      "retry_attempt_sequence_mismatches": [],
+      "duplicate_receipt_content_mismatches": [],
+      "duplicate_response_hashes_match_originals": true,
+      "duplicate_request_byte_and_response_hashes_match_originals": true,
+      "retry_groups_checked": 123,
+      "environment": {
+        "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+        "python": "3.12.16 (main, Oct 26 2026, 02:50:49) [GCC 13.3.0]",
+        "logical_cpu_count": 4,
+        "cpu_models": [
+          "AMD EPYC 7763 64-Core Processor"
+        ],
+        "git_sha": "44b9f7fa22a73207f1370ee7e5169daeb4c2dc76",
+        "benchmark_source_sha256": "bc1e2c2cf50737a62e3c64ef17a6e560d4273dbc6fd12a3639b634d9712e62d4"
+      },
+      "postgres": {
+        "server_version": "17.11 (Debian 17.11-1.pgdg12+2)",
+        "max_connections": "100",
+        "shared_buffers": "128MB",
+        "fsync": "on",
+        "synchronous_commit": "on"
+      },
+      "open_loop": {
+        "first_attempts": 250,
+        "call_start_window_seconds": 4.050056000000005,
+        "actual_first_call_start_rps": 61.480631378924066,
+        "target_rps": 1000.0,
+        "target_met": false,
+        "max_schedule_delay_ms": 3801.1337
+      },
+      "invariants": {
+        "no_success_credit_for_429_or_409": true,
+        "one_identity_one_receipt": true,
+        "retry_keeps_exact_recorded_request_byte_hash": true,
+        "receipt_database_resource_agreement": true,
+        "all_debits_zero_or_one": true,
+        "receipts_correspond_to_successful_world_http_calls": true,
+        "branch_sequences_have_no_gaps": true,
+        "actual_logical_tasks_present": true,
+        "pooled_connections_within_bound_and_released": true
+      },
+      "recomputed_gates": {
+        "first_attempt_capacity_gate": "NOT_MET",
+        "capacity_gate": "NOT_MET",
+        "bounded_recovery_business_gate": "PASS"
+      },
+      "reported_metric_mismatches": {},
+      "reported_gate_mismatches": {},
+      "review_status": "PASS"
+    },
+    "200mixed": {
+      "agents": 200,
+      "profile": "mixed",
+      "source_sha256": "04afe27447d446e1a734e75ce39a43845ea375b75c050d0619f92be227df9eac",
+      "planned_logical_operations": 1141,
+      "emitted_logical_operations": 1113,
+      "never_emitted_logical_operations": 28,
+      "http_attempts": 1400,
+      "infrastructure_retries": 287,
+      "first_attempt_nonconflict_failures": 160,
+      "first_attempt_status_counts": {
+        "200": 939,
+        "429": 160,
+        "409": 14
+      },
+      "status_counts": {
+        "200": 1086,
+        "429": 299,
+        "409": 15
+      },
+      "successful_http_calls": 1086,
+      "successful_duplicate_receipts": 13,
+      "effective_successful_calls_excluding_duplicates": 1073,
+      "expected_conflicts_excluded_from_success": 15,
+      "recovered_successful_logical_operations": 147,
+      "recovered_expected_conflict_operations": 1,
+      "unresolved_logical_operations": 12,
+      "unique_world_commits": 13,
+      "expected_world_commits": 21,
+      "all_receipts": 26,
+      "unique_command_ids": 13,
+      "unique_selected_events": 13,
+      "database_event_delta": 13,
+      "database_revision_delta": 13,
+      "database_selected_effect_delta": 13,
+      "resource_debit_total": "13",
+      "duration_seconds_recorded": 167.631407,
+      "effective_success_rps_excluding_duplicate_receipts": 6.4009,
+      "effective_world_commits_per_second": 0.0776,
+      "latency_all_responses": {
+        "count": 1400,
+        "p50_ms": 1523.0102,
+        "p95_ms": 6974.6255,
+        "p99_ms": 9679.2617
+      },
+      "latency_successes": {
+        "count": 1086,
+        "p50_ms": 104.9662,
+        "p95_ms": 5816.5755,
+        "p99_ms": 9408.0992
+      },
+      "latency_first_attempts": {
+        "count": 1113,
+        "p50_ms": 105.155,
+        "p95_ms": 6008.3967,
+        "p99_ms": 8999.0742
+      },
+      "latency_logical_scheduled_to_completion": {
+        "count": 1113,
+        "p50_ms": 106.1433,
+        "p95_ms": 13796.1755,
+        "p99_ms": 28634.8353
+      },
+      "latency_per_scheduled_attempt": {
+        "count": 1400,
+        "p50_ms": 2221.6453,
+        "p95_ms": 16678.7942,
+        "p99_ms": 27191.8469
+      },
+      "latency_cold": {
+        "count": 200,
+        "p50_ms": 82.7734,
+        "p95_ms": 110.4692,
+        "p99_ms": 170.0339
+      },
+      "latency_warm": {
+        "count": 200,
+        "p50_ms": 48.2249,
+        "p95_ms": 89.6678,
+        "p99_ms": 109.5679
+      },
+      "retry_request_identity_mismatches": {},
+      "retry_attempt_sequence_mismatches": [],
+      "duplicate_receipt_content_mismatches": [],
+      "duplicate_response_hashes_match_originals": true,
+      "duplicate_request_byte_and_response_hashes_match_originals": true,
+      "retry_groups_checked": 160,
+      "environment": {
+        "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+        "python": "3.12.16 (main, Oct 26 2026, 02:50:49) [GCC 13.3.0]",
+        "logical_cpu_count": 4,
+        "cpu_models": [
+          "AMD EPYC 9V74 80-Core Processor"
+        ],
+        "git_sha": "44b9f7fa22a73207f1370ee7e5169daeb4c2dc76",
+        "benchmark_source_sha256": "bc1e2c2cf50737a62e3c64ef17a6e560d4273dbc6fd12a3639b634d9712e62d4"
+      },
+      "postgres": {
+        "server_version": "17.11 (Debian 17.11-1.pgdg12+2)",
+        "max_connections": "100",
+        "shared_buffers": "128MB",
+        "fsync": "on",
+        "synchronous_commit": "on"
+      },
+      "open_loop": {
+        "target_met": null,
+        "status": "NOT_APPLICABLE"
+      },
+      "invariants": {
+        "no_success_credit_for_429_or_409": true,
+        "one_identity_one_receipt": true,
+        "retry_keeps_exact_recorded_request_byte_hash": true,
+        "receipt_database_resource_agreement": true,
+        "all_debits_zero_or_one": true,
+        "receipts_correspond_to_successful_world_http_calls": true,
+        "branch_sequences_have_no_gaps": true,
+        "actual_logical_tasks_present": true,
+        "pooled_connections_within_bound_and_released": true
+      },
+      "recomputed_gates": {
+        "first_attempt_capacity_gate": "NOT_MET",
+        "capacity_gate": "NOT_MET",
+        "bounded_recovery_business_gate": "NOT_MET"
+      },
+      "reported_metric_mismatches": {},
+      "reported_gate_mismatches": {},
+      "review_status": "PASS"
+    },
+    "200overload": {
+      "agents": 200,
+      "profile": "overload",
+      "source_sha256": "b4e8592de379ecd5358b3ddd48753a9c713057068f990356a399441a0446356c",
+      "planned_logical_operations": 2141,
+      "emitted_logical_operations": 2128,
+      "never_emitted_logical_operations": 13,
+      "http_attempts": 2297,
+      "infrastructure_retries": 169,
+      "first_attempt_nonconflict_failures": 115,
+      "first_attempt_status_counts": {
+        "200": 1997,
+        "429": 115,
+        "409": 16
+      },
+      "status_counts": {
+        "200": 2106,
+        "429": 175,
+        "409": 16
+      },
+      "successful_http_calls": 2106,
+      "successful_duplicate_receipts": 18,
+      "effective_successful_calls_excluding_duplicates": 2088,
+      "expected_conflicts_excluded_from_success": 16,
+      "recovered_successful_logical_operations": 109,
+      "recovered_expected_conflict_operations": 0,
+      "unresolved_logical_operations": 6,
+      "unique_world_commits": 18,
+      "expected_world_commits": 21,
+      "all_receipts": 36,
+      "unique_command_ids": 18,
+      "unique_selected_events": 18,
+      "database_event_delta": 18,
+      "database_revision_delta": 18,
+      "database_selected_effect_delta": 18,
+      "resource_debit_total": "18",
+      "duration_seconds_recorded": 202.835146,
+      "effective_success_rps_excluding_duplicate_receipts": 10.2941,
+      "effective_world_commits_per_second": 0.0887,
+      "latency_all_responses": {
+        "count": 2297,
+        "p50_ms": 1733.157,
+        "p95_ms": 6170.2801,
+        "p99_ms": 9597.7892
+      },
+      "latency_successes": {
+        "count": 2106,
+        "p50_ms": 1529.667,
+        "p95_ms": 5899.8431,
+        "p99_ms": 9597.7892
+      },
+      "latency_first_attempts": {
+        "count": 2128,
+        "p50_ms": 1583.6228,
+        "p95_ms": 5667.1985,
+        "p99_ms": 9421.4428
+      },
+      "latency_logical_scheduled_to_completion": {
+        "count": 2128,
+        "p50_ms": 6331.2834,
+        "p95_ms": 36541.7038,
+        "p99_ms": 39486.9006
+      },
+      "latency_per_scheduled_attempt": {
+        "count": 2297,
+        "p50_ms": 6079.6133,
+        "p95_ms": 36163.2673,
+        "p99_ms": 39468.5059
+      },
+      "latency_cold": {
+        "count": 200,
+        "p50_ms": 73.7785,
+        "p95_ms": 81.7836,
+        "p99_ms": 160.3218
+      },
+      "latency_warm": {
+        "count": 200,
+        "p50_ms": 38.0613,
+        "p95_ms": 79.7958,
+        "p99_ms": 90.6491
+      },
+      "retry_request_identity_mismatches": {},
+      "retry_attempt_sequence_mismatches": [],
+      "duplicate_receipt_content_mismatches": [],
+      "duplicate_response_hashes_match_originals": true,
+      "duplicate_request_byte_and_response_hashes_match_originals": true,
+      "retry_groups_checked": 115,
+      "environment": {
+        "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+        "python": "3.12.16 (main, Oct 26 2026, 02:50:49) [GCC 13.3.0]",
+        "logical_cpu_count": 4,
+        "cpu_models": [
+          "AMD EPYC 9V45 96-Core Processor"
+        ],
+        "git_sha": "44b9f7fa22a73207f1370ee7e5169daeb4c2dc76",
+        "benchmark_source_sha256": "bc1e2c2cf50737a62e3c64ef17a6e560d4273dbc6fd12a3639b634d9712e62d4"
+      },
+      "postgres": {
+        "server_version": "17.11 (Debian 17.11-1.pgdg12+2)",
+        "max_connections": "100",
+        "shared_buffers": "128MB",
+        "fsync": "on",
+        "synchronous_commit": "on"
+      },
+      "open_loop": {
+        "first_attempts": 1000,
+        "call_start_window_seconds": 38.868427,
+        "actual_first_call_start_rps": 25.702094916267132,
+        "target_rps": 1000.0,
+        "target_met": false,
+        "max_schedule_delay_ms": 37869.553
+      },
+      "invariants": {
+        "no_success_credit_for_429_or_409": true,
+        "one_identity_one_receipt": true,
+        "retry_keeps_exact_recorded_request_byte_hash": true,
+        "receipt_database_resource_agreement": true,
+        "all_debits_zero_or_one": true,
+        "receipts_correspond_to_successful_world_http_calls": true,
+        "branch_sequences_have_no_gaps": true,
+        "actual_logical_tasks_present": true,
+        "pooled_connections_within_bound_and_released": true
+      },
+      "recomputed_gates": {
+        "first_attempt_capacity_gate": "NOT_MET",
+        "capacity_gate": "NOT_MET",
+        "bounded_recovery_business_gate": "NOT_MET"
+      },
+      "reported_metric_mismatches": {},
+      "reported_gate_mismatches": {},
+      "review_status": "PASS"
+    }
+  },
+  "status": "PASS"
+}

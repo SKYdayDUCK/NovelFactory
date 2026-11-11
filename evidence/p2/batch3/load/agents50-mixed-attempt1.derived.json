@@ -1,0 +1,393 @@
+{
+  "schema_version": "p2-load-derived-1",
+  "original_path": "evidence/p2/batch3/load/agents50-mixed-attempt1.json",
+  "original_sha256": "dd139d5fcf0ca794dd57846f07ac9beb4dfb29f69d9d23e8d2467f16839abfb1",
+  "original_scenario_result_unchanged": "FAIL",
+  "metrics": {
+    "duration_seconds": 14.904553,
+    "planned_requests": 279,
+    "emitted_requests": 279,
+    "completed_requests": 279,
+    "client_requests_never_emitted": 0,
+    "api_tool_calls": 279,
+    "mcp_tool_calls": 0,
+    "status_counts": {
+      "200": 271,
+      "transport_error": 1,
+      "429": 3,
+      "409": 4
+    },
+    "valid_successful_calls": 271,
+    "api_success_rps": 18.1824,
+    "successful_duplicate_receipts": 3,
+    "effective_call_rps_excluding_duplicates": 17.9811,
+    "new_world_commit_receipts": 3,
+    "accepted_original_input_after_unrelated_head_progress": 2,
+    "cross_head_accept_rate_among_unique_commits": 0.6666666666666666,
+    "semantic_replan_requests_in_load": 0,
+    "effective_world_commits_per_second": 0.2013,
+    "conflict_count": 4,
+    "conflict_rate_all_requests": 0.014336917562724014,
+    "failure_rate_all_requests": 0.02867383512544803,
+    "idempotent_retry_rate_all_requests": 0.010752688172043012,
+    "infrastructure_retries": 0,
+    "model_retries": 0,
+    "peak_outstanding_client_requests": 30,
+    "client_connection_limit": 256,
+    "outstanding_definition": "Includes HTTPX connection-pool wait; server ingress is measured separately",
+    "latency_all_responses": {
+      "count": 279,
+      "p50_ms": 400.7435,
+      "p95_ms": 1347.387,
+      "p99_ms": 2451.8259
+    },
+    "latency_successes": {
+      "count": 271,
+      "p50_ms": 377.2937,
+      "p95_ms": 1246.8778,
+      "p99_ms": 2346.372
+    },
+    "latency_rejections_and_failures": {
+      "count": 8,
+      "p50_ms": 813.3371,
+      "p95_ms": 2451.8259,
+      "p99_ms": 2451.8259
+    },
+    "scheduled_to_completion_latency": {
+      "count": 279,
+      "p50_ms": 445.8787,
+      "p95_ms": 1371.0831,
+      "p99_ms": 2629.7005
+    },
+    "arrival_schedule_delay": {
+      "count": 279,
+      "p50_ms": 11.7379,
+      "p95_ms": 127.2657,
+      "p99_ms": 180.9068
+    },
+    "per_operation": {
+      "accept_conflict": {
+        "calls": 4,
+        "successes": 0,
+        "latency_all_responses": {
+          "count": 4,
+          "p50_ms": 732.5589,
+          "p95_ms": 813.3371,
+          "p99_ms": 813.3371
+        },
+        "scheduled_to_completion_latency": {
+          "count": 4,
+          "p50_ms": 810.4233,
+          "p95_ms": 844.4063,
+          "p99_ms": 844.4063
+        }
+      },
+      "accept_independent": {
+        "calls": 2,
+        "successes": 2,
+        "latency_all_responses": {
+          "count": 2,
+          "p50_ms": 468.0455,
+          "p95_ms": 852.7912,
+          "p99_ms": 852.7912
+        },
+        "scheduled_to_completion_latency": {
+          "count": 2,
+          "p50_ms": 468.5777,
+          "p95_ms": 854.3332,
+          "p99_ms": 854.3332
+        }
+      },
+      "accept_retry": {
+        "calls": 3,
+        "successes": 3,
+        "latency_all_responses": {
+          "count": 3,
+          "p50_ms": 410.397,
+          "p95_ms": 544.6272,
+          "p99_ms": 544.6272
+        },
+        "scheduled_to_completion_latency": {
+          "count": 3,
+          "p50_ms": 411.4551,
+          "p95_ms": 544.6272,
+          "p99_ms": 544.6272
+        }
+      },
+      "accept_selected_fixture": {
+        "calls": 1,
+        "successes": 1,
+        "latency_all_responses": {
+          "count": 1,
+          "p50_ms": 390.2626,
+          "p95_ms": 390.2626,
+          "p99_ms": 390.2626
+        },
+        "scheduled_to_completion_latency": {
+          "count": 1,
+          "p50_ms": 390.2626,
+          "p95_ms": 390.2626,
+          "p99_ms": 390.2626
+        }
+      },
+      "certificate": {
+        "calls": 9,
+        "successes": 7,
+        "latency_all_responses": {
+          "count": 9,
+          "p50_ms": 1246.8778,
+          "p95_ms": 2185.2951,
+          "p99_ms": 2185.2951
+        },
+        "scheduled_to_completion_latency": {
+          "count": 9,
+          "p50_ms": 1246.8778,
+          "p95_ms": 2185.2951,
+          "p99_ms": 2185.2951
+        }
+      },
+      "compile": {
+        "calls": 50,
+        "successes": 50,
+        "latency_all_responses": {
+          "count": 50,
+          "p50_ms": 794.5615,
+          "p95_ms": 1113.5028,
+          "p99_ms": 1133.6855
+        },
+        "scheduled_to_completion_latency": {
+          "count": 50,
+          "p50_ms": 795.6041,
+          "p95_ms": 1115.3938,
+          "p99_ms": 1135.3979
+        }
+      },
+      "graph": {
+        "calls": 50,
+        "successes": 49,
+        "latency_all_responses": {
+          "count": 50,
+          "p50_ms": 418.3424,
+          "p95_ms": 1249.1507,
+          "p99_ms": 1349.4195
+        },
+        "scheduled_to_completion_latency": {
+          "count": 50,
+          "p50_ms": 511.0913,
+          "p95_ms": 1371.0831,
+          "p99_ms": 1453.8216
+        }
+      },
+      "history": {
+        "calls": 50,
+        "successes": 50,
+        "latency_all_responses": {
+          "count": 50,
+          "p50_ms": 790.9135,
+          "p95_ms": 1170.5864,
+          "p99_ms": 1258.9552
+        },
+        "scheduled_to_completion_latency": {
+          "count": 50,
+          "p50_ms": 849.7728,
+          "p95_ms": 1272.5287,
+          "p99_ms": 1308.7031
+        }
+      },
+      "propose": {
+        "calls": 10,
+        "successes": 9,
+        "latency_all_responses": {
+          "count": 10,
+          "p50_ms": 1744.1411,
+          "p95_ms": 2760.6671,
+          "p99_ms": 2760.6671
+        },
+        "scheduled_to_completion_latency": {
+          "count": 10,
+          "p50_ms": 1960.3279,
+          "p95_ms": 2923.0662,
+          "p99_ms": 2923.0662
+        }
+      },
+      "state_cold": {
+        "calls": 50,
+        "successes": 50,
+        "latency_all_responses": {
+          "count": 50,
+          "p50_ms": 190.8743,
+          "p95_ms": 408.3453,
+          "p99_ms": 621.7906
+        },
+        "scheduled_to_completion_latency": {
+          "count": 50,
+          "p50_ms": 221.1385,
+          "p95_ms": 452.9648,
+          "p99_ms": 658.1717
+        }
+      },
+      "state_warm": {
+        "calls": 50,
+        "successes": 50,
+        "latency_all_responses": {
+          "count": 50,
+          "p50_ms": 195.2673,
+          "p95_ms": 375.2642,
+          "p99_ms": 586.9264
+        },
+        "scheduled_to_completion_latency": {
+          "count": 50,
+          "p50_ms": 226.5619,
+          "p95_ms": 415.9242,
+          "p99_ms": 621.1615
+        }
+      }
+    },
+    "successful_calls_by_agent": {
+      "0": 6,
+      "1": 6,
+      "2": 9,
+      "3": 9,
+      "4": 5,
+      "5": 9,
+      "6": 7,
+      "7": 7,
+      "8": 7,
+      "9": 7,
+      "10": 5,
+      "11": 5,
+      "13": 5,
+      "12": 5,
+      "16": 5,
+      "15": 5,
+      "17": 5,
+      "14": 5,
+      "18": 5,
+      "19": 5,
+      "21": 5,
+      "20": 5,
+      "22": 5,
+      "23": 5,
+      "24": 5,
+      "25": 5,
+      "27": 5,
+      "26": 5,
+      "29": 5,
+      "28": 5,
+      "31": 5,
+      "30": 5,
+      "32": 5,
+      "33": 5,
+      "34": 5,
+      "35": 4,
+      "37": 5,
+      "36": 5,
+      "39": 5,
+      "38": 5,
+      "41": 5,
+      "40": 5,
+      "43": 5,
+      "42": 5,
+      "44": 5,
+      "45": 5,
+      "46": 5,
+      "47": 5,
+      "48": 5,
+      "49": 5
+    },
+    "latency_warning": "P99 for individual write categories has few samples; descriptive only",
+    "correctness_errors": [
+      {
+        "agent": 35,
+        "task_id": "a35a7edf-d5e0-4150-94a2-a0297561fa18",
+        "label": "graph",
+        "endpoint": "queries/timeline",
+        "started_seconds": 6.362479,
+        "request_sha256": "8ca63545f611b8294e9605abcdb48d787f2f4477caaf415f8ea9bfd260c1de23",
+        "duplicate_retry": false,
+        "arrival_delay_ms": 93.8838,
+        "status": "transport_error",
+        "error_type": "ReadError",
+        "reason": ""
+      },
+      {
+        "agent": 4,
+        "task_id": "b5e945e3-8d73-4f63-91d0-264e105fc559",
+        "label": "propose",
+        "endpoint": "proposals",
+        "started_seconds": 10.232979,
+        "request_sha256": "7048ee641066aa17b2c889ae19de34a5d26daf1a4155c966ee7a296a54b81261",
+        "duplicate_retry": false,
+        "arrival_delay_ms": 177.8746,
+        "status": 429,
+        "code": "BACKPRESSURE",
+        "response_sha256": "6abbb943b2053627459e6044da0fa4bc7b5e755ab649ba84dba9b06fdeff7f04",
+        "response_bytes": 154,
+        "reason": "unexpected response"
+      },
+      {
+        "agent": 0,
+        "task_id": "f910f6fa-75c8-4816-b935-67badbc75de8",
+        "label": "certificate",
+        "endpoint": "world/acceptance-certificates",
+        "started_seconds": 10.688475,
+        "request_sha256": "2e325f159066221675500a53517b41c86c44ef7f0d02eb907aa5354d02afcad4",
+        "duplicate_retry": false,
+        "arrival_delay_ms": 0,
+        "status": 429,
+        "code": "BACKPRESSURE",
+        "response_sha256": "7979251b6f42b9e4234c7320c1ea9b92039934c0a82956e7327dbb32f3fff93e",
+        "response_bytes": 154,
+        "reason": "unexpected response"
+      },
+      {
+        "agent": 1,
+        "task_id": "01f487cc-b176-40fb-8712-ba8f184a74b6",
+        "label": "certificate",
+        "endpoint": "world/acceptance-certificates",
+        "started_seconds": 10.819473,
+        "request_sha256": "a2c379b4c7305afa5bdd23d87cde37a5633de555ba78459cefb89c2f8b9e273c",
+        "duplicate_retry": false,
+        "arrival_delay_ms": 0,
+        "status": 429,
+        "code": "BACKPRESSURE",
+        "response_sha256": "3822958cf99c14610ed9acc1fa9501d47b2d77c63dd530ebc0b0bf3fe6dc7666",
+        "response_bytes": 154,
+        "reason": "unexpected response"
+      }
+    ]
+  },
+  "overload_observation": null,
+  "server_ingress": {
+    "admitted": 278,
+    "peak_active": 29,
+    "peak_queued": 0,
+    "completed": 278,
+    "active": 0,
+    "queued": 0,
+    "capacity": 128,
+    "per_principal": 128,
+    "max_waiters": 0,
+    "wait_seconds_total": 0.004050116025609896
+  },
+  "application_sql_and_pool": {
+    "sql_statements": 8078,
+    "transactions": 891,
+    "sql_statements_per_second": 541.982,
+    "peak_checked_out_connections": 8,
+    "checked_out_at_end": 0,
+    "configured_pool_size": 8,
+    "pool_status_at_end": "Pool size: 8  Connections in pool: 8 Current Overflow: 0 Current Checked out connections: 0"
+  },
+  "hot_fraction": 0.2,
+  "hot_fraction_meaning": "Read-subject concentration only; number of shared writer candidates is always logical_agents/10, not hot_fraction*writers.",
+  "source_snapshot": null,
+  "source_snapshot_status": "NOT_RETAINED_FOR_DEVELOPMENT_ATTEMPT",
+  "derivation_source_sha256": "b3b08ce2c2f40c0ae8486d8b7e213245765c17cffc480ac5b45aac3d158fcf8d",
+  "reproduction_command": "python -m benchmarks.p2_load_derived --input evidence/p2/batch3/load/agents50-mixed-attempt1.json --output <new-path>",
+  "limitations": [
+    "Earlier planned counts are only as precise as originally recorded",
+    "No rejected response is promoted to success by post-processing",
+    "No performance re-run or model dispatch occurred during derivation"
+  ]
+}

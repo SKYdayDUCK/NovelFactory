@@ -1,0 +1,25 @@
+{
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "port": 52283,
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "tests/integration/test_editorial_service.py::test_literary_memory_keeps_counterevidence_without_becoming_world_fact",
+    "tests/integration/test_editorial_service.py::test_distinct_voice_style_can_be_explicitly_adopted_at_a_new_world_cut",
+    "-q",
+    "--junitxml=evidence/p3/memory/archive.xml",
+    "--json-report",
+    "--json-report-file=evidence/p3/memory/archive.json"
+  ],
+  "started_at_utc": "2026-11-10T12:26:04.327598+00:00",
+  "authentication": "loopback_trust_generated_test_data_only",
+  "fsync": true,
+  "synchronous_commit": true,
+  "max_connections": 60,
+  "data_directory_reused": false,
+  "exit_status": 0,
+  "postgres_exit_status": 0,
+  "duration_seconds": 9.062268,
+  "finished_at_utc": "2026-11-10T12:26:13.389905+00:00"
+}

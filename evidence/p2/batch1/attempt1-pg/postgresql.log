@@ -1,0 +1,75 @@
+2026-11-10 09:58:20.374 UTC [19] LOG:  starting PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+2026-11-10 09:58:20.374 UTC [19] LOG:  listening on IPv4 address "127.0.0.1", port 48663
+2026-11-10 09:58:20.375 UTC [23] LOG:  database system was shut down at 2026-11-10 09:58:20 UTC
+2026-11-10 09:58:20.378 UTC [19] LOG:  database system is ready to accept connections
+2026-11-10 09:58:20.423 UTC [28] FATAL:  database "nf_dev" does not exist
+2026-11-10 09:58:27.012 UTC [46] ERROR:  immutable authoritative record: nf_events
+2026-11-10 09:58:27.012 UTC [46] CONTEXT:  PL/pgSQL function nf_reject_immutable_mutation() line 1 at RAISE
+2026-11-10 09:58:27.012 UTC [46] STATEMENT:  UPDATE nf_events SET payload=payload WHERE event_version_id=$1
+2026-11-10 09:58:27.013 UTC [42] ERROR:  immutable authoritative record: nf_events
+2026-11-10 09:58:27.013 UTC [42] CONTEXT:  PL/pgSQL function nf_reject_immutable_mutation() line 1 at RAISE
+2026-11-10 09:58:27.013 UTC [42] STATEMENT:  DELETE FROM nf_events WHERE event_version_id=$1
+2026-11-10 09:58:27.014 UTC [45] ERROR:  immutable authoritative record: nf_revisions
+2026-11-10 09:58:27.014 UTC [45] CONTEXT:  PL/pgSQL function nf_reject_immutable_mutation() line 1 at RAISE
+2026-11-10 09:58:27.014 UTC [45] STATEMENT:  UPDATE nf_revisions SET snapshot=snapshot WHERE world_revision_id=$1
+2026-11-10 09:58:27.015 UTC [46] ERROR:  scope tombstone required
+2026-11-10 09:58:27.015 UTC [46] CONTEXT:  PL/pgSQL function nf_scope_monotonic() line 1 at RAISE
+2026-11-10 09:58:27.015 UTC [46] STATEMENT:  DELETE FROM nf_scopes WHERE work_id=$1
+2026-11-10 09:58:27.626 UTC [59] LOG:  unexpected EOF on client connection with an open transaction
+2026-11-10 09:58:31.172 UTC [21] LOG:  checkpoint starting: immediate force wait
+2026-11-10 09:58:31.319 UTC [21] LOG:  checkpoint complete: wrote 1015 buffers (6.2%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.008 s, sync=0.137 s, total=0.147 s; sync files=460, longest=0.004 s, average=0.001 s; distance=14389 kB, estimate=14389 kB; lsn=0/2560F30, redo lsn=0/2560ED8
+2026-11-10 09:58:32.962 UTC [21] LOG:  checkpoint starting: immediate force wait
+2026-11-10 09:58:32.968 UTC [21] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.007 s; sync files=4, longest=0.001 s, average=0.001 s; distance=5719 kB, estimate=13522 kB; lsn=0/2AF6B70, redo lsn=0/2AF6B18
+2026-11-10 09:58:45.440 UTC [21] LOG:  checkpoint starting: immediate force wait
+2026-11-10 09:58:45.447 UTC [21] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.004 s, sync=0.001 s, total=0.007 s; sync files=4, longest=0.001 s, average=0.001 s; distance=8896 kB, estimate=13059 kB; lsn=0/33A6EF8, redo lsn=0/33A6EA0
+2026-11-10 09:58:47.450 UTC [21] LOG:  checkpoint starting: immediate force wait
+2026-11-10 09:58:47.454 UTC [21] LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.002 s, total=0.005 s; sync files=6, longest=0.001 s, average=0.001 s; distance=5955 kB, estimate=12349 kB; lsn=0/3977DA8, redo lsn=0/3977D50
+2026-11-10 09:58:47.981 UTC [80] ERROR:  scope identity is immutable
+2026-11-10 09:58:47.981 UTC [80] CONTEXT:  PL/pgSQL function nf_scope_monotonic() line 1 at RAISE
+2026-11-10 09:58:47.981 UTC [80] STATEMENT:  UPDATE nf_scopes SET scope_key=scope_key||$1,version=version+1 WHERE work_id=$2 AND branch_id=$3 AND scope_key=$4
+2026-11-10 09:58:47.981 UTC [80] ERROR:  scope version must increase
+2026-11-10 09:58:47.981 UTC [80] CONTEXT:  PL/pgSQL function nf_scope_monotonic() line 1 at RAISE
+2026-11-10 09:58:47.981 UTC [80] STATEMENT:  UPDATE nf_scopes SET version=version WHERE work_id=$1 AND branch_id=$2 AND scope_key=$3
+2026-11-10 09:58:47.985 UTC [21] LOG:  checkpoint starting: immediate force wait
+2026-11-10 09:58:47.989 UTC [21] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.004 s; sync files=4, longest=0.001 s, average=0.001 s; distance=5285 kB, estimate=11642 kB; lsn=0/3EA1400, redo lsn=0/3EA13A8
+2026-11-10 09:58:53.109 UTC [84] ERROR:  immutable authoritative record: nf_events
+2026-11-10 09:58:53.109 UTC [84] CONTEXT:  PL/pgSQL function nf_reject_immutable_mutation() line 1 at RAISE
+2026-11-10 09:58:53.109 UTC [84] STATEMENT:  UPDATE nf_events SET payload='{}' WHERE event_version_id=$1
+2026-11-10 09:58:54.481 UTC [21] LOG:  checkpoint starting: immediate force wait
+2026-11-10 09:58:54.486 UTC [21] LOG:  checkpoint complete: wrote 5 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.001 s, sync=0.002 s, total=0.005 s; sync files=4, longest=0.001 s, average=0.001 s; distance=7797 kB, estimate=11258 kB; lsn=0/463E850, redo lsn=0/463E7F8
+2026-11-10 09:58:57.159 UTC [21] LOG:  checkpoint starting: immediate force wait
+2026-11-10 09:58:57.323 UTC [21] LOG:  checkpoint complete: wrote 1214 buffers (7.4%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.008 s, sync=0.155 s, total=0.164 s; sync files=476, longest=0.001 s, average=0.001 s; distance=11913 kB, estimate=11913 kB; lsn=0/51E0E98, redo lsn=0/51E0E40
+2026-11-10 09:58:57.330 UTC [21] LOG:  checkpoint starting: immediate force wait
+2026-11-10 09:58:57.334 UTC [21] LOG:  checkpoint complete: wrote 2 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.004 s; sync files=2, longest=0.001 s, average=0.001 s; distance=2 kB, estimate=10722 kB; lsn=0/51E1788, redo lsn=0/51E1730
+2026-11-10 09:58:58.236 UTC [21] LOG:  checkpoint starting: immediate force wait
+2026-11-10 09:58:58.239 UTC [21] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.004 s; sync files=4, longest=0.001 s, average=0.001 s; distance=5493 kB, estimate=10199 kB; lsn=0/573EE78, redo lsn=0/573EE20
+2026-11-10 09:59:05.025 UTC [21] LOG:  checkpoint starting: immediate force wait
+2026-11-10 09:59:05.029 UTC [21] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.004 s; sync files=4, longest=0.001 s, average=0.001 s; distance=7618 kB, estimate=9941 kB; lsn=0/5EAF9C0, redo lsn=0/5EAF968
+2026-11-10 09:59:06.652 UTC [21] LOG:  checkpoint starting: immediate force wait
+2026-11-10 09:59:06.656 UTC [21] LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.001 s, sync=0.002 s, total=0.005 s; sync files=6, longest=0.001 s, average=0.001 s; distance=5834 kB, estimate=9530 kB; lsn=0/64624E8, redo lsn=0/6462490
+2026-11-10 09:59:08.056 UTC [129] LOG:  unexpected EOF on client connection with an open transaction
+2026-11-10 09:59:08.758 UTC [21] LOG:  checkpoint starting: immediate force wait
+2026-11-10 09:59:08.883 UTC [21] LOG:  checkpoint complete: wrote 1077 buffers (6.6%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.006 s, sync=0.118 s, total=0.126 s; sync files=458, longest=0.001 s, average=0.001 s; distance=10547 kB, estimate=10547 kB; lsn=0/6EAF498, redo lsn=0/6EAF440
+2026-11-10 09:59:09.162 UTC [21] LOG:  checkpoint starting: immediate force wait
+2026-11-10 09:59:09.166 UTC [21] LOG:  checkpoint complete: wrote 2 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.004 s; sync files=2, longest=0.001 s, average=0.001 s; distance=38 kB, estimate=9497 kB; lsn=0/6EB9030, redo lsn=0/6EB8FD8
+2026-11-10 09:59:09.653 UTC [152] ERROR:  immutable authoritative record: nf_task_inputs
+2026-11-10 09:59:09.653 UTC [152] CONTEXT:  PL/pgSQL function nf_reject_immutable_mutation() line 1 at RAISE
+2026-11-10 09:59:09.653 UTC [152] STATEMENT:  UPDATE nf_task_inputs SET input_hash=$1::VARCHAR WHERE nf_task_inputs.task_id = $2::UUID
+2026-11-10 09:59:10.305 UTC [155] ERROR:  insert or update on table "nf_object_refs" violates foreign key constraint "fk_nf_object_refs_object_hash_nf_objects"
+2026-11-10 09:59:10.305 UTC [155] DETAIL:  Key (object_hash)=(ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) is not present in table "nf_objects".
+2026-11-10 09:59:10.305 UTC [155] STATEMENT:  INSERT INTO nf_object_refs (owner_type, owner_id, object_hash) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR)
+2026-11-10 09:59:10.363 UTC [21] LOG:  checkpoint starting: immediate force wait
+2026-11-10 09:59:10.367 UTC [21] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.001 s, sync=0.001 s, total=0.005 s; sync files=4, longest=0.001 s, average=0.001 s; distance=5545 kB, estimate=9101 kB; lsn=0/7423740, redo lsn=0/74236E8
+2026-11-10 09:59:15.462 UTC [21] LOG:  checkpoint starting: immediate force wait
+2026-11-10 09:59:15.466 UTC [21] LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.002 s, total=0.004 s; sync files=6, longest=0.001 s, average=0.001 s; distance=5977 kB, estimate=8789 kB; lsn=0/79F9BB0, redo lsn=0/79F9B58
+2026-11-10 09:59:32.976 UTC [209] FATAL:  terminating connection due to administrator command
+2026-11-10 09:59:33.076 UTC [21] LOG:  checkpoint starting: immediate force wait
+2026-11-10 09:59:33.082 UTC [21] LOG:  checkpoint complete: wrote 8 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.002 s, sync=0.002 s, total=0.006 s; sync files=6, longest=0.001 s, average=0.001 s; distance=7442 kB, estimate=8654 kB; lsn=0/813E518, redo lsn=0/813E4C0
+2026-11-10 09:59:34.431 UTC [21] LOG:  checkpoint starting: immediate force wait
+2026-11-10 09:59:34.435 UTC [21] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.005 s; sync files=4, longest=0.001 s, average=0.001 s; distance=5381 kB, estimate=8327 kB; lsn=0/867FA18, redo lsn=0/867F9C0
+2026-11-10 09:59:36.250 UTC [19] LOG:  received smart shutdown request
+2026-11-10 09:59:36.253 UTC [19] LOG:  background worker "logical replication launcher" (PID 26) exited with exit code 1
+2026-11-10 09:59:36.253 UTC [21] LOG:  shutting down
+2026-11-10 09:59:36.253 UTC [21] LOG:  checkpoint starting: shutdown immediate
+2026-11-10 09:59:36.255 UTC [21] LOG:  checkpoint complete: wrote 2 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=2, longest=0.001 s, average=0.001 s; distance=3 kB, estimate=7494 kB; lsn=0/8680778, redo lsn=0/8680778
+2026-11-10 09:59:36.260 UTC [19] LOG:  database system is shut down

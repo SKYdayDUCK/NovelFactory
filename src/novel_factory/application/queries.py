@@ -579,12 +579,15 @@ class WorldQueryService:
         if cut['plane'] == 'BELIEF':
             scopes.add('ENTITY:' + cut['actor_id'])
         queries = []
+        # Every subject dependency refers to this same fixed-cut payload. Its
+        # canonical digest is identical, so compute it once for the bundle.
+        payload_hash = fingerprint(payload)
         for subject in sorted(subjects):
             scope = 'ENTITY:' + subject
             queries.append({'query_id': str(uuid5(UUID(request['task_id']), subject)),
                             'kind': 'POSITIVE' if subject in revision['snapshot']['entities'] else 'NEGATIVE',
                             'scope_key': scope, 'predicate_sha256': fingerprint({'subject_id': subject, 'predicates': manifest['predicates']}),
-                            'result_sha256': fingerprint(payload)})
+                            'result_sha256': payload_hash})
         dependency = {'world_ref': wr, 'policy_version': packet['read_cut']['policy_version'], 'rule_version': 'nf-world-rules-1',
                       'scope_versions': [{'scope_key': scope, 'version': revision['scope_versions'].get(scope, 0)} for scope in sorted(scopes)],
                       'artifact_refs': _dedupe(packet['read_cut']['source_manifest_refs'] + [revision['interpretation_ref']]),
@@ -645,10 +648,12 @@ class WorldQueryService:
                                   'read_cut': packet['read_cut'], 'dependency_fingerprint': dependency_hash})
             self.kernel.tasks.bind_context_in_transaction(repo.conn, request['task_id'], request['generation'], None,
                 context_bundle_id=context_id, dependency_fingerprint=dependency_hash, world_ref=wr)
-            for scope in sorted(scopes):
-                repo.add('dependencies', {'dependency_id': _id(), 'work_id': wr['work_id'], 'branch_id': wr['branch_id'],
-                                         'owner_type': 'context', 'owner_id': context_id, 'scope_key': scope,
-                                         'observed_version': revision['scope_versions'].get(scope, 0), 'dependency_kind': 'COMPUTED'})
+            repo.add_many('dependencies', [
+                {'dependency_id': _id(), 'work_id': wr['work_id'], 'branch_id': wr['branch_id'],
+                 'owner_type': 'context', 'owner_id': context_id, 'scope_key': scope,
+                 'observed_version': revision['scope_versions'].get(scope, 0), 'dependency_kind': 'COMPUTED'}
+                for scope in sorted(scopes)
+            ])
             repo.add('receipts', {'work_id': wr['work_id'], 'principal_id': principal.principal_id, 'command_type': 'CONTEXT_COMPILE',
                                  'idempotency_key': request['idempotency_key'], 'request_hash': command_hash,
                                  'branch_id': wr['branch_id'], 'proposal_id': None, 'payload': result})

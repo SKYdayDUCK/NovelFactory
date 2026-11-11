@@ -1,0 +1,454 @@
+﻿2026-11-10T10:09:59.7831133Z Current runner version: '2.338.2'
+2026-11-10T10:09:59.7846984Z ##[group]Runner Image Provisioner
+2026-11-10T10:09:59.7847506Z Hosted Compute Agent
+2026-11-10T10:09:59.7847955Z Version: 20261028.624
+2026-11-10T10:09:59.7848383Z Commit: 54898b74c23fde5556c9b3c3a2290865feef0dfe
+2026-11-10T10:09:59.7848832Z Build Date: 2026-10-28T21:51:42Z
+2026-11-10T10:09:59.7849491Z Worker ID: {d970803e-a72a-47e2-aa38-7feb11dd29b8}
+2026-11-10T10:09:59.7849916Z Region: southcentralus
+2026-11-10T10:09:59.7850304Z Cloud: Azure
+2026-11-10T10:09:59.7850635Z ##[endgroup]
+2026-11-10T10:09:59.7851407Z ##[group]Operating System
+2026-11-10T10:09:59.7851858Z Ubuntu
+2026-11-10T10:09:59.7852178Z 24.04.5
+2026-11-10T10:09:59.7852512Z LTS
+2026-11-10T10:09:59.7852872Z ##[endgroup]
+2026-11-10T10:09:59.7853195Z ##[group]Runner Image
+2026-11-10T10:09:59.7853629Z Image: ubuntu-24.04
+2026-11-10T10:09:59.7853974Z Version: 20261101.360.1
+2026-11-10T10:09:59.7854971Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261101.360/images/ubuntu/Ubuntu2404-Readme.md
+2026-11-10T10:09:59.7855844Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261101.360
+2026-11-10T10:09:59.7856440Z ##[endgroup]
+2026-11-10T10:09:59.7857096Z ##[group]GITHUB_TOKEN Permissions
+2026-11-10T10:09:59.7858525Z Contents: read
+2026-11-10T10:09:59.7859103Z Metadata: read
+2026-11-10T10:09:59.7859803Z ##[endgroup]
+2026-11-10T10:09:59.7861964Z Secret source: Actions
+2026-11-10T10:09:59.7862850Z Cache mode: write
+2026-11-10T10:09:59.7863499Z Prepare workflow directory
+2026-11-10T10:09:59.8060342Z Prepare all required actions
+2026-11-10T10:09:59.8089355Z Getting action download info
+2026-11-10T10:10:00.0771394Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-11-10T10:10:00.1956068Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-11-10T10:10:00.2804105Z Download action repository 'astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e' (SHA:07a047e608db84b3d8c06cd9a7c7dcc9c355c18e)
+2026-11-10T10:10:00.8109573Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-11-10T10:10:01.0002453Z Complete job name: Schema, domain, HTTP and production boundaries
+2026-11-10T10:10:01.0516269Z ##[group]Run actions/checkout@v4
+2026-11-10T10:10:01.0516690Z with:
+2026-11-10T10:10:01.0516946Z   repository: SKYdayDUCK/NovelFactory
+2026-11-10T10:10:01.0519282Z   token: ***
+2026-11-10T10:10:01.0519541Z   ssh-strict: true
+2026-11-10T10:10:01.0519792Z   ssh-user: git
+2026-11-10T10:10:01.0520050Z   persist-credentials: true
+2026-11-10T10:10:01.0520328Z   clean: true
+2026-11-10T10:10:01.0520583Z   sparse-checkout-cone-mode: true
+2026-11-10T10:10:01.0520878Z   fetch-depth: 1
+2026-11-10T10:10:01.0521123Z   fetch-tags: false
+2026-11-10T10:10:01.0521378Z   show-progress: true
+2026-11-10T10:10:01.0521642Z   lfs: false
+2026-11-10T10:10:01.0521885Z   submodules: false
+2026-11-10T10:10:01.0522142Z   set-safe-directory: true
+2026-11-10T10:10:01.0522454Z   allow-unsafe-pr-checkout: false
+2026-11-10T10:10:01.0522834Z ##[endgroup]
+2026-11-10T10:10:01.2605774Z Syncing repository: SKYdayDUCK/NovelFactory
+2026-11-10T10:10:01.2607447Z ##[group]Getting Git version info
+2026-11-10T10:10:01.2608291Z Working directory is '/home/runner/work/NovelFactory/NovelFactory'
+2026-11-10T10:10:01.2609548Z [command]/usr/bin/git version
+2026-11-10T10:10:01.2680644Z git version 2.56.0
+2026-11-10T10:10:01.2691808Z ##[endgroup]
+2026-11-10T10:10:01.2700558Z Temporarily overriding HOME='/home/runner/work/_temp/7b4c95d9-cdb6-499f-8f0b-03e63e2383b3' before making global git config changes
+2026-11-10T10:10:01.2701997Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-10T10:10:01.2703696Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/NovelFactory/NovelFactory
+2026-11-10T10:10:01.2745024Z Deleting the contents of '/home/runner/work/NovelFactory/NovelFactory'
+2026-11-10T10:10:01.2751575Z ##[group]Initializing the repository
+2026-11-10T10:10:01.2759960Z [command]/usr/bin/git init /home/runner/work/NovelFactory/NovelFactory
+2026-11-10T10:10:01.2850970Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-10T10:10:01.2851840Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-10T10:10:01.2852753Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-10T10:10:01.2853420Z hint: call:
+2026-11-10T10:10:01.2853673Z hint:
+2026-11-10T10:10:01.2853995Z hint: 	git config --global init.defaultBranch <name>
+2026-11-10T10:10:01.2854350Z hint:
+2026-11-10T10:10:01.2854681Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-10T10:10:01.2855324Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-10T10:10:01.2855731Z hint:
+2026-11-10T10:10:01.2855968Z hint: 	git branch -m <name>
+2026-11-10T10:10:01.2856241Z hint:
+2026-11-10T10:10:01.2856777Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-10T10:10:01.2859963Z Initialized empty Git repository in /home/runner/work/NovelFactory/NovelFactory/.git/
+2026-11-10T10:10:01.2868262Z [command]/usr/bin/git remote add origin https://github.com/SKYdayDUCK/NovelFactory
+2026-11-10T10:10:01.2908398Z ##[endgroup]
+2026-11-10T10:10:01.2909281Z ##[group]Disabling automatic garbage collection
+2026-11-10T10:10:01.2911039Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-10T10:10:01.2937011Z ##[endgroup]
+2026-11-10T10:10:01.2937693Z ##[group]Setting up auth
+2026-11-10T10:10:01.2941806Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-10T10:10:01.2969779Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-10T10:10:01.3286437Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-10T10:10:01.3321565Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-10T10:10:01.3501815Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-10T10:10:01.3535873Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-10T10:10:01.3713814Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-10T10:10:01.3751863Z ##[endgroup]
+2026-11-10T10:10:01.3752408Z ##[group]Fetching the repository
+2026-11-10T10:10:01.3760623Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +98a95361ff46f6d2e6d4efa75e310a617d05c770:refs/remotes/origin/dev/p2-production-loop
+2026-11-10T10:10:02.0784592Z From https://github.com/SKYdayDUCK/NovelFactory
+2026-11-10T10:10:02.0786133Z  * [new ref]         98a95361ff46f6d2e6d4efa75e310a617d05c770 -> origin/dev/p2-production-loop
+2026-11-10T10:10:02.0789133Z ##[endgroup]
+2026-11-10T10:10:02.0790601Z ##[group]Determining the checkout info
+2026-11-10T10:10:02.0855269Z ##[endgroup]
+2026-11-10T10:10:02.0856413Z [command]/usr/bin/git sparse-checkout disable
+2026-11-10T10:10:02.0858987Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-10T10:10:02.0883164Z ##[group]Checking out the ref
+2026-11-10T10:10:02.0891780Z [command]/usr/bin/git checkout --progress --force -B dev/p2-production-loop refs/remotes/origin/dev/p2-production-loop
+2026-11-10T10:10:02.1160400Z Switched to a new branch 'dev/p2-production-loop'
+2026-11-10T10:10:02.1165131Z branch 'dev/p2-production-loop' set up to track 'origin/dev/p2-production-loop'.
+2026-11-10T10:10:02.1170836Z ##[endgroup]
+2026-11-10T10:10:02.1210130Z [command]/usr/bin/git log -1 --format=%H
+2026-11-10T10:10:02.1237495Z 98a95361ff46f6d2e6d4efa75e310a617d05c770
+2026-11-10T10:10:02.1498399Z ##[group]Run actions/setup-python@v5
+2026-11-10T10:10:02.1499090Z with:
+2026-11-10T10:10:02.1499748Z   python-version: 3.12
+2026-11-10T10:10:02.1500331Z   check-latest: false
+2026-11-10T10:10:02.1506040Z   token: ***
+2026-11-10T10:10:02.1506578Z   update-environment: true
+2026-11-10T10:10:02.1507204Z   allow-prereleases: false
+2026-11-10T10:10:02.1507807Z   freethreaded: false
+2026-11-10T10:10:02.1508354Z ##[endgroup]
+2026-11-10T10:10:02.2351420Z ##[group]Installed versions
+2026-11-10T10:10:02.2421635Z (node:2207) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-10T10:10:02.2423597Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-10T10:10:02.2424992Z Successfully set up CPython (3.12.16)
+2026-11-10T10:10:02.2426582Z ##[endgroup]
+2026-11-10T10:10:02.2723929Z ##[group]Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+2026-11-10T10:10:02.2724827Z with:
+2026-11-10T10:10:02.2725311Z   enable-cache: true
+2026-11-10T10:10:02.2725862Z   activate-environment: false
+2026-11-10T10:10:02.2726451Z   no-project: false
+2026-11-10T10:10:02.2727143Z   working-directory: /home/runner/work/NovelFactory/NovelFactory
+2026-11-10T10:10:02.2732620Z   github-token: ***
+2026-11-10T10:10:02.2733832Z   cache-dependency-glob: **/*requirements*.txt
+**/*requirements*.in
+**/*constraints*.txt
+**/*constraints*.in
+**/pyproject.toml
+**/uv.lock
+**/*.py.lock
+
+2026-11-10T10:10:02.2735151Z   restore-cache: true
+2026-11-10T10:10:02.2735679Z   save-cache: auto
+2026-11-10T10:10:02.2736196Z   prune-cache: false
+2026-11-10T10:10:02.2736732Z   cache-python: false
+2026-11-10T10:10:02.2737293Z   ignore-nothing-to-cache: false
+2026-11-10T10:10:02.2737922Z   ignore-empty-workdir: false
+2026-11-10T10:10:02.2738550Z   download-from-astral-mirror: true
+2026-11-10T10:10:02.2739387Z   add-problem-matchers: true
+2026-11-10T10:10:02.2739958Z   quiet: false
+2026-11-10T10:10:02.2740475Z   resolution-strategy: highest
+2026-11-10T10:10:02.2741046Z env:
+2026-11-10T10:10:02.2741638Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:02.2742606Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+2026-11-10T10:10:02.2743568Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:02.2744441Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:02.2745317Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:02.2746219Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+2026-11-10T10:10:02.2746973Z ##[endgroup]
+2026-11-10T10:10:02.3900759Z Trying to find version for uv in: /home/runner/work/NovelFactory/NovelFactory/uv.toml
+2026-11-10T10:10:02.3902615Z Could not find file: /home/runner/work/NovelFactory/NovelFactory/uv.toml
+2026-11-10T10:10:02.3904518Z Trying to find version for uv in: /home/runner/work/NovelFactory/NovelFactory/pyproject.toml
+2026-11-10T10:10:02.3906458Z Could not determine uv version from uv.toml or pyproject.toml. Falling back to latest.
+2026-11-10T10:10:02.3909036Z Fetching manifest data from https://raw.githubusercontent.com/astral-sh/versions/main/v1/uv.ndjson ...
+2026-11-10T10:10:02.4733028Z Downloading uv from "https://releases.astral.sh/github/uv/releases/download/0.13.7/uv-x86_64-unknown-linux-gnu.tar.gz" ...
+2026-11-10T10:10:02.7047665Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/7bf3c1b1-e9ab-4a5a-aa3a-980c61faea5b -f /home/runner/work/_temp/c33342c4-cdd2-4146-8a4e-03d191ba3c2a
+2026-11-10T10:10:03.0140546Z Added /home/runner/.local/bin to the path
+2026-11-10T10:10:03.0141539Z Added /opt/hostedtoolcache/uv/0.13.7/x86_64 to the path
+2026-11-10T10:10:03.0142450Z Set UV_PYTHON_INSTALL_DIR to /home/runner/work/_temp/uv-python-dir
+2026-11-10T10:10:03.0143426Z Added /home/runner/work/_temp/uv-python-dir to the path
+2026-11-10T10:10:03.0149491Z Set UV_CACHE_DIR to /home/runner/work/_temp/setup-uv-cache
+2026-11-10T10:10:03.0150669Z Successfully installed uv version 0.13.7
+2026-11-10T10:10:03.2623644Z Searching files using cache dependency glob: /home/runner/work/NovelFactory/NovelFactory/**/*requirements*.txt,/home/runner/work/NovelFactory/NovelFactory/**/*requirements*.in,/home/runner/work/NovelFactory/NovelFactory/**/*constraints*.txt,/home/runner/work/NovelFactory/NovelFactory/**/*constraints*.in,/home/runner/work/NovelFactory/NovelFactory/**/pyproject.toml,/home/runner/work/NovelFactory/NovelFactory/**/uv.lock,/home/runner/work/NovelFactory/NovelFactory/**/*.py.lock
+2026-11-10T10:10:03.2994922Z /home/runner/work/NovelFactory/NovelFactory/pyproject.toml
+2026-11-10T10:10:03.3123307Z /home/runner/work/NovelFactory/NovelFactory/uv.lock
+2026-11-10T10:10:03.3135347Z /home/runner/work/NovelFactory/NovelFactory/validation/requirements-validation.txt
+2026-11-10T10:10:03.3139935Z Found 3 files to hash.
+2026-11-10T10:10:03.3212293Z Trying to restore cache from GitHub Actions cache with key: setup-uv-2-x86_64-unknown-linux-gnu-ubuntu-24.04-unknown-a976a1f1f4e195e7b28d0a9f3540df9614e67372b08104755e814ab33ebe6d51
+2026-11-10T10:10:03.4722754Z No GitHub Actions cache found for key: setup-uv-2-x86_64-unknown-linux-gnu-ubuntu-24.04-unknown-a976a1f1f4e195e7b28d0a9f3540df9614e67372b08104755e814ab33ebe6d51
+2026-11-10T10:10:03.5859780Z ##[group]Run uv sync --locked --group dev --python 3.12
+2026-11-10T10:10:03.5860080Z [36;1muv sync --locked --group dev --python 3.12[0m
+2026-11-10T10:10:03.5879772Z shell: /usr/bin/bash -e {0}
+2026-11-10T10:10:03.5879944Z env:
+2026-11-10T10:10:03.5880121Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:03.5880386Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+2026-11-10T10:10:03.5880643Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:03.5880876Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:03.5881113Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:03.5881357Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+2026-11-10T10:10:03.5881605Z   UV_PYTHON_INSTALL_DIR: /home/runner/work/_temp/uv-python-dir
+2026-11-10T10:10:03.5881832Z   UV_CACHE_DIR: /home/runner/work/_temp/setup-uv-cache
+2026-11-10T10:10:03.5882022Z ##[endgroup]
+2026-11-10T10:10:03.5986890Z Using CPython 3.12.16 interpreter at: /opt/hostedtoolcache/Python/3.12.16/x64/bin/python3.12
+2026-11-10T10:10:03.5987411Z Creating virtual environment at: .venv
+2026-11-10T10:10:03.6002594Z Resolved 43 packages in 0.64ms
+2026-11-10T10:10:03.6067509Z    Building novel-factory @ file:///home/runner/work/NovelFactory/NovelFactory
+2026-11-10T10:10:03.7197609Z Downloading ruff (10.1MiB)
+2026-11-10T10:10:03.7198982Z Downloading pydantic-core (2.2MiB)
+2026-11-10T10:10:03.7199695Z Downloading pygments (1.2MiB)
+2026-11-10T10:10:03.7202246Z Downloading sqlalchemy (3.3MiB)
+2026-11-10T10:10:03.7206346Z Downloading psycopg-binary (5.0MiB)
+2026-11-10T10:10:03.7207866Z Downloading hypothesis (1.1MiB)
+2026-11-10T10:10:03.8129252Z  Downloaded hypothesis
+2026-11-10T10:10:03.8138854Z  Downloaded pygments
+2026-11-10T10:10:03.8599050Z  Downloaded pydantic-core
+2026-11-10T10:10:03.9091721Z  Downloaded sqlalchemy
+2026-11-10T10:10:03.9332528Z  Downloaded psycopg-binary
+2026-11-10T10:10:04.1656147Z  Downloaded ruff
+2026-11-10T10:10:04.2895949Z       Built novel-factory @ file:///home/runner/work/NovelFactory/NovelFactory
+2026-11-10T10:10:04.2974302Z Prepared 41 packages in 696ms
+2026-11-10T10:10:04.3149706Z Installed 41 packages in 16ms
+2026-11-10T10:10:04.3150263Z  + alembic==1.20.1
+2026-11-10T10:10:04.3150503Z  + annotated-doc==0.0.5
+2026-11-10T10:10:04.3150920Z  + annotated-types==0.8.0
+2026-11-10T10:10:04.3151128Z  + anyio==4.16.0
+2026-11-10T10:10:04.3151370Z  + attrs==26.1.0
+2026-11-10T10:10:04.3151548Z  + certifi==2026.10.23
+2026-11-10T10:10:04.3151734Z  + click==8.5.1
+2026-11-10T10:10:04.3151913Z  + fastapi==0.162.2
+2026-11-10T10:10:04.3152095Z  + greenlet==3.5.6
+2026-11-10T10:10:04.3152560Z  + h11==0.16.0
+2026-11-10T10:10:04.3152734Z  + httpcore==1.0.9
+2026-11-10T10:10:04.3152922Z  + httpx==0.28.1
+2026-11-10T10:10:04.3153104Z  + hypothesis==6.170.15
+2026-11-10T10:10:04.3153293Z  + idna==3.20
+2026-11-10T10:10:04.3153469Z  + iniconfig==2.3.1
+2026-11-10T10:10:04.3153655Z  + jsonschema==4.26.0
+2026-11-10T10:10:04.3153883Z  + jsonschema-specifications==2025.9.1
+2026-11-10T10:10:04.3154121Z  + mako==1.4.3
+2026-11-10T10:10:04.3154300Z  + markupsafe==3.0.4
+2026-11-10T10:10:04.3154615Z  + novel-factory==2.0.1 (from file:///home/runner/work/NovelFactory/NovelFactory)
+2026-11-10T10:10:04.3154979Z  + opentelemetry-api==1.45.2
+2026-11-10T10:10:04.3155194Z  + packaging==26.3
+2026-11-10T10:10:04.3155376Z  + pluggy==1.7.0
+2026-11-10T10:10:04.3155554Z  + psycopg==3.3.8
+2026-11-10T10:10:04.3155747Z  + psycopg-binary==3.3.8
+2026-11-10T10:10:04.3156001Z  + pydantic==2.14.3
+2026-11-10T10:10:04.3156219Z  + pydantic-core==2.50.4
+2026-11-10T10:10:04.3156416Z  + pygments==2.21.0
+2026-11-10T10:10:04.3156596Z  + pytest==9.2.0
+2026-11-10T10:10:04.3156793Z  + pytest-json-report==1.5.0
+2026-11-10T10:10:04.3157012Z  + pytest-metadata==3.1.1
+2026-11-10T10:10:04.3157214Z  + pyyaml==6.0.3
+2026-11-10T10:10:04.3157396Z  + referencing==0.37.0
+2026-11-10T10:10:04.3157594Z  + rpds-py==2026.9.1
+2026-11-10T10:10:04.3157779Z  + ruff==0.17.4
+2026-11-10T10:10:04.3158202Z  + sortedcontainers==2.4.0
+2026-11-10T10:10:04.3158410Z  + sqlalchemy==2.0.57
+2026-11-10T10:10:04.3158599Z  + starlette==1.10.0
+2026-11-10T10:10:04.3158799Z  + typing-extensions==4.16.0
+2026-11-10T10:10:04.3159018Z  + typing-inspection==0.4.5
+2026-11-10T10:10:04.3159391Z  + uvicorn==0.54.0
+2026-11-10T10:10:04.3331286Z ##[group]Run mkdir -p ci-evidence
+2026-11-10T10:10:04.3331479Z [36;1mmkdir -p ci-evidence[0m
+2026-11-10T10:10:04.3331768Z [36;1muv run --no-sync python validation/validate_package.py 2>&1 | tee ci-evidence/schema-validation.log[0m
+2026-11-10T10:10:04.3349821Z shell: /usr/bin/bash -e {0}
+2026-11-10T10:10:04.3349953Z env:
+2026-11-10T10:10:04.3350098Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:04.3350332Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+2026-11-10T10:10:04.3350556Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:04.3350757Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:04.3350959Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:04.3351172Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+2026-11-10T10:10:04.3351379Z   UV_PYTHON_INSTALL_DIR: /home/runner/work/_temp/uv-python-dir
+2026-11-10T10:10:04.3351599Z   UV_CACHE_DIR: /home/runner/work/_temp/setup-uv-cache
+2026-11-10T10:10:04.3351759Z ##[endgroup]
+2026-11-10T10:10:04.3741117Z warning: Using incompatible environment (`.venv`) due to `--no-sync` (The project environment's Python version does not satisfy the request: `Python 3.12.14`)
+2026-11-10T10:10:05.1101079Z {
+2026-11-10T10:10:05.1101283Z   "status": "PASS",
+2026-11-10T10:10:05.1101558Z   "checked_at_utc": "2026-11-10T10:10:05.107434+00:00",
+2026-11-10T10:10:05.1101952Z   "scope": "Static design-package validation; not runtime/business/DB/Host validation",
+2026-11-10T10:10:05.1102314Z   "python": "3.12.16",
+2026-11-10T10:10:05.1102508Z   "dependencies": {
+2026-11-10T10:10:05.1102700Z     "jsonschema": "4.26.0",
+2026-11-10T10:10:05.1102905Z     "referencing": "0.37.0",
+2026-11-10T10:10:05.1103105Z     "PyYAML": "6.0.3"
+2026-11-10T10:10:05.1103280Z   },
+2026-11-10T10:10:05.1103438Z   "counts": {
+2026-11-10T10:10:05.1103624Z     "additional_cases_planned": 16,
+2026-11-10T10:10:05.1103817Z     "agents_files": 9,
+2026-11-10T10:10:05.1103941Z     "baseline_hashes": 14,
+2026-11-10T10:10:05.1104072Z     "canonical_vectors": 2,
+2026-11-10T10:10:05.1104204Z     "case_source_hashes": 60,
+2026-11-10T10:10:05.1104339Z     "development_skills": 6,
+2026-11-10T10:10:05.1104481Z     "invalid_examples_rejected": 31,
+2026-11-10T10:10:05.1104626Z     "json_files_parsed": 148,
+2026-11-10T10:10:05.1104758Z     "legacy_cases_preserved": 44,
+2026-11-10T10:10:05.1105050Z     "legacy_contracts_preserved": 2,
+2026-11-10T10:10:05.1105197Z     "load_model_calculated_rows": 15,
+2026-11-10T10:10:05.1105342Z     "load_model_checks": 4,
+2026-11-10T10:10:05.1105474Z     "local_markdown_links": 881,
+2026-11-10T10:10:05.1105609Z     "markdown_fences": 103,
+2026-11-10T10:10:05.1105740Z     "mermaid_source_matches": 10,
+2026-11-10T10:10:05.1105877Z     "mermaid_sources": 10,
+2026-11-10T10:10:05.1106010Z     "planned_cases": 60,
+2026-11-10T10:10:05.1106144Z     "primary_documents_integrated": 12,
+2026-11-10T10:10:05.1106299Z     "r1_planned_acceptance_checks": 37,
+2026-11-10T10:10:05.1106449Z     "r1_planned_case_families": 8,
+2026-11-10T10:10:05.1106591Z     "reading_source_lengths": 2,
+2026-11-10T10:10:05.1106730Z     "real_artifact_hashes": 2,
+2026-11-10T10:10:05.1106863Z     "real_text_spans": 2,
+2026-11-10T10:10:05.1106995Z     "restricted_skill_tool_sets": 4,
+2026-11-10T10:10:05.1107133Z     "role_contracts": 10,
+2026-11-10T10:10:05.1107263Z     "role_skill_bindings": 15,
+2026-11-10T10:10:05.1107392Z     "role_tool_sets": 10,
+2026-11-10T10:10:05.1107525Z     "runtime_query_profiles": 10,
+2026-11-10T10:10:05.1107663Z     "runtime_skill_paths": 9,
+2026-11-10T10:10:05.1107793Z     "runtime_skills": 9,
+2026-11-10T10:10:05.1107918Z     "schema_definitions": 145,
+2026-11-10T10:10:05.1108050Z     "schema_documents": 9,
+2026-11-10T10:10:05.1108175Z     "tool_definitions": 28,
+2026-11-10T10:10:05.1108304Z     "tool_schema_bindings": 84,
+2026-11-10T10:10:05.1108438Z     "valid_examples": 58
+2026-11-10T10:10:05.1108555Z   },
+2026-11-10T10:10:05.1108801Z   "failures": [],
+2026-11-10T10:10:05.1108918Z   "limitations": [
+2026-11-10T10:10:05.1109100Z     "Markdown targets are checked, heading anchors and external URLs are not.",
+2026-11-10T10:10:05.1109538Z     "Mermaid fences/files are checked; no renderer has been executed.",
+2026-11-10T10:10:05.1109828Z     "Schema validity does not establish permissions, references, database constraints or semantics.",
+2026-11-10T10:10:05.1110147Z     "Role/skill metadata consistency is checked; server policy is not implemented.",
+2026-11-10T10:10:05.1110448Z     "60 prior business cases plus 8 R1 families/37 acceptance checks are planned, not executed.",
+2026-11-10T10:10:05.1110773Z     "15 load-model rows are arithmetic estimates; no service throughput or latency has been measured."
+2026-11-10T10:10:05.1111007Z   ]
+2026-11-10T10:10:05.1111105Z }
+2026-11-10T10:10:05.1274659Z ##[group]Run uv run --no-sync python -m unittest discover -s experiments -p 'test_*.py' -v 2>&1 | tee ci-evidence/original-mechanisms.log
+2026-11-10T10:10:05.1275137Z [36;1muv run --no-sync python -m unittest discover -s experiments -p 'test_*.py' -v 2>&1 | tee ci-evidence/original-mechanisms.log[0m
+2026-11-10T10:10:05.1291203Z shell: /usr/bin/bash -e {0}
+2026-11-10T10:10:05.1291339Z env:
+2026-11-10T10:10:05.1291486Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:05.1291715Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+2026-11-10T10:10:05.1291949Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:05.1292153Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:05.1292391Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:05.1292611Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+2026-11-10T10:10:05.1292840Z   UV_PYTHON_INSTALL_DIR: /home/runner/work/_temp/uv-python-dir
+2026-11-10T10:10:05.1293040Z   UV_CACHE_DIR: /home/runner/work/_temp/setup-uv-cache
+2026-11-10T10:10:05.1293202Z ##[endgroup]
+2026-11-10T10:10:05.1376256Z warning: Using incompatible environment (`.venv`) due to `--no-sync` (The project environment's Python version does not satisfy the request: `Python 3.12.14`)
+2026-11-10T10:10:05.1731335Z test_arrival_permutations_produce_same_sealed_bundle (test_mechanisms.MechanismProbes.test_arrival_permutations_produce_same_sealed_bundle) ... ok
+2026-11-10T10:10:05.1732181Z test_bounded_occurrence_does_not_invent_exact_time (test_mechanisms.MechanismProbes.test_bounded_occurrence_does_not_invent_exact_time) ... ok
+2026-11-10T10:10:05.1732878Z test_canonicalization_keeps_decimal_strings_and_key_order (test_mechanisms.MechanismProbes.test_canonicalization_keeps_decimal_strings_and_key_order) ... ok
+2026-11-10T10:10:05.1733995Z test_fork_inherits_effect_coverage_without_reapplying (test_mechanisms.MechanismProbes.test_fork_inherits_effect_coverage_without_reapplying) ... ok
+2026-11-10T10:10:05.1734498Z test_hidden_and_absent_have_same_actor_visible_output (test_mechanisms.MechanismProbes.test_hidden_and_absent_have_same_actor_visible_output) ... ok
+2026-11-10T10:10:05.1735234Z test_late_generation_cannot_make_new_commit (test_mechanisms.MechanismProbes.test_late_generation_cannot_make_new_commit) ... ok
+2026-11-10T10:10:05.1735944Z test_negative_query_dependency_is_invalidated (test_mechanisms.MechanismProbes.test_negative_query_dependency_is_invalidated) ... ok
+2026-11-10T10:10:05.1736715Z test_precommit_failure_does_not_advance_any_component (test_mechanisms.MechanismProbes.test_precommit_failure_does_not_advance_any_component) ... ok
+2026-11-10T10:10:05.1737446Z test_prior_success_receipt_survives_later_cancellation (test_mechanisms.MechanismProbes.test_prior_success_receipt_survives_later_cancellation) ... ok
+2026-11-10T10:10:05.1738076Z test_receipt_loss_retries_same_effect_once (test_mechanisms.MechanismProbes.test_receipt_loss_retries_same_effect_once) ... ok
+2026-11-10T10:10:05.1739041Z test_release_and_flashback_do_not_apply_world_effects (test_mechanisms.MechanismProbes.test_release_and_flashback_do_not_apply_world_effects) ... ok
+2026-11-10T10:10:05.1740096Z test_resource_violation_is_not_partial_commit (test_mechanisms.MechanismProbes.test_resource_violation_is_not_partial_commit) ... ok
+2026-11-10T10:10:05.1740958Z test_retcon_selects_new_history_preserving_old_speech (test_mechanisms.MechanismProbes.test_retcon_selects_new_history_preserving_old_speech) ... ok
+2026-11-10T10:10:05.1741838Z test_same_final_balance_does_not_prove_refinement (test_mechanisms.MechanismProbes.test_same_final_balance_does_not_prove_refinement) ... ok
+2026-11-10T10:10:05.1742667Z test_same_key_changed_payload_is_rejected (test_mechanisms.MechanismProbes.test_same_key_changed_payload_is_rejected) ... ok
+2026-11-10T10:10:05.1743529Z test_two_commands_pinned_to_same_head_need_revalidation (test_mechanisms.MechanismProbes.test_two_commands_pinned_to_same_head_need_revalidation) ... ok
+2026-11-10T10:10:05.1749945Z test_unicode_spans_preserve_crlf_and_combining_marks (test_mechanisms.MechanismProbes.test_unicode_spans_preserve_crlf_and_combining_marks) ... ok
+2026-11-10T10:10:05.1750460Z test_unregistered_channel_and_exclusive_frontier_boundary (test_mechanisms.MechanismProbes.test_unregistered_channel_and_exclusive_frontier_boundary) ... ok
+2026-11-10T10:10:05.1751027Z test_01_guarded_independent_commands_share_base_and_certificate_cut (test_r1_mechanisms.R1MechanismProbes.test_01_guarded_independent_commands_share_base_and_certificate_cut) ... ok
+2026-11-10T10:10:05.1751626Z test_02_strict_head_rejects_the_same_independent_second_command (test_r1_mechanisms.R1MechanismProbes.test_02_strict_head_rejects_the_same_independent_second_command) ... ok
+2026-11-10T10:10:05.1752162Z test_03_same_resource_invalidates_old_qualification (test_r1_mechanisms.R1MechanismProbes.test_03_same_resource_invalidates_old_qualification) ... ok
+2026-11-10T10:10:05.1752654Z test_04_cross_entity_constraint_stops_write_skew (test_r1_mechanisms.R1MechanismProbes.test_04_cross_entity_constraint_stops_write_skew) ... ok
+2026-11-10T10:10:05.1753132Z test_05_empty_read_needs_a_predicate_range_guard (test_r1_mechanisms.R1MechanismProbes.test_05_empty_read_needs_a_predicate_range_guard) ... ok
+2026-11-10T10:10:05.1753639Z test_06_registry_tombstone_prevents_delete_recreate_aba (test_r1_mechanisms.R1MechanismProbes.test_06_registry_tombstone_prevents_delete_recreate_aba) ... ok
+2026-11-10T10:10:05.1759921Z test_07_cancelled_generation_cannot_create_a_late_commit (test_r1_mechanisms.R1MechanismProbes.test_07_cancelled_generation_cannot_create_a_late_commit) ... ok
+2026-11-10T10:10:05.1760591Z test_08_lost_receipt_retry_survives_cancel_without_repeating_effect (test_r1_mechanisms.R1MechanismProbes.test_08_lost_receipt_retry_survives_cancel_without_repeating_effect) ... ok
+2026-11-10T10:10:05.1761167Z test_09_certificate_uses_facts_and_tokens_from_the_same_pin (test_r1_mechanisms.R1MechanismProbes.test_09_certificate_uses_facts_and_tokens_from_the_same_pin) ... ok
+2026-11-10T10:10:05.1761750Z test_10_interpretation_change_blocks_certificate_without_world_change (test_r1_mechanisms.R1MechanismProbes.test_10_interpretation_change_blocks_certificate_without_world_change) ... ok
+2026-11-10T10:10:05.1762332Z test_11_active_plan_guard_does_not_delete_the_fixed_old_plan (test_r1_mechanisms.R1MechanismProbes.test_11_active_plan_guard_does_not_delete_the_fixed_old_plan) ... ok
+2026-11-10T10:10:05.1762870Z test_12_one_pin_batch_avoids_a_state_that_never_existed (test_r1_mechanisms.R1MechanismProbes.test_12_one_pin_batch_avoids_a_state_that_never_existed) ... ok
+2026-11-10T10:10:05.1763410Z test_13_fixed_revision_cannot_wait_itself_into_future_coverage (test_r1_mechanisms.R1MechanismProbes.test_13_fixed_revision_cannot_wait_itself_into_future_coverage) ... ok
+2026-11-10T10:10:05.1763950Z test_14_revocation_is_checked_on_an_existing_cache_hit (test_r1_mechanisms.R1MechanismProbes.test_14_revocation_is_checked_on_an_existing_cache_hit) ... ok
+2026-11-10T10:10:05.1764494Z test_15_batch_enforces_profile_and_graph_capability_per_operation (test_r1_mechanisms.R1MechanismProbes.test_15_batch_enforces_profile_and_graph_capability_per_operation) ... ok
+2026-11-10T10:10:05.1765028Z test_16_actor_cannot_turn_a_batch_into_a_world_read (test_r1_mechanisms.R1MechanismProbes.test_16_actor_cannot_turn_a_batch_into_a_world_read) ... ok
+2026-11-10T10:10:05.1765574Z test_17_retcon_preserves_old_day25_and_does_not_invent_day35_knowledge (test_r1_mechanisms.R1MechanismProbes.test_17_retcon_preserves_old_day25_and_does_not_invent_day35_knowledge) ... ok
+2026-11-10T10:10:05.1765907Z 
+2026-11-10T10:10:05.1766000Z ----------------------------------------------------------------------
+2026-11-10T10:10:05.1766209Z Ran 35 tests in 0.003s
+2026-11-10T10:10:05.1766287Z 
+2026-11-10T10:10:05.1766332Z OK
+2026-11-10T10:10:05.1833312Z ##[group]Run uv run --no-sync python -m pytest tests/unit tests/contracts tests/service/test_admission.py -q \
+2026-11-10T10:10:05.1833709Z [36;1muv run --no-sync python -m pytest tests/unit tests/contracts tests/service/test_admission.py -q \[0m
+2026-11-10T10:10:05.1834056Z [36;1m  --junitxml=ci-evidence/unit.xml --json-report --json-report-file=ci-evidence/unit.json \[0m
+2026-11-10T10:10:05.1834308Z [36;1m  2>&1 | tee ci-evidence/unit.log[0m
+2026-11-10T10:10:05.1849352Z shell: /usr/bin/bash -e {0}
+2026-11-10T10:10:05.1849527Z env:
+2026-11-10T10:10:05.1849670Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:05.1849896Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+2026-11-10T10:10:05.1850123Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:05.1850323Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:05.1850544Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:05.1850747Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+2026-11-10T10:10:05.1850953Z   UV_PYTHON_INSTALL_DIR: /home/runner/work/_temp/uv-python-dir
+2026-11-10T10:10:05.1851148Z   UV_CACHE_DIR: /home/runner/work/_temp/setup-uv-cache
+2026-11-10T10:10:05.1851322Z ##[endgroup]
+2026-11-10T10:10:05.1931989Z warning: Using incompatible environment (`.venv`) due to `--no-sync` (The project environment's Python version does not satisfy the request: `Python 3.12.14`)
+2026-11-10T10:10:07.8726116Z ........................................................................ [ 44%]
+2026-11-10T10:10:08.0562420Z ........................................................................ [ 88%]
+2026-11-10T10:10:08.6512995Z ..................                                                       [100%]
+2026-11-10T10:10:08.6513354Z 162 passed in 2.34s
+2026-11-10T10:10:08.7599829Z ##[group]Run actions/upload-artifact@v4
+2026-11-10T10:10:08.7600004Z with:
+2026-11-10T10:10:08.7600122Z   name: p1-schema-unit-1
+2026-11-10T10:10:08.7600248Z   path: ci-evidence/
+2026-11-10T10:10:08.7600371Z   if-no-files-found: warn
+2026-11-10T10:10:08.7600498Z   retention-days: 90
+2026-11-10T10:10:08.7600618Z   compression-level: 6
+2026-11-10T10:10:08.7600736Z   overwrite: false
+2026-11-10T10:10:08.7600859Z   include-hidden-files: false
+2026-11-10T10:10:08.7600986Z env:
+2026-11-10T10:10:08.7601127Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:08.7601358Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+2026-11-10T10:10:08.7601586Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:08.7601792Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:08.7602011Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+2026-11-10T10:10:08.7602241Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+2026-11-10T10:10:08.7602450Z   UV_PYTHON_INSTALL_DIR: /home/runner/work/_temp/uv-python-dir
+2026-11-10T10:10:08.7602646Z   UV_CACHE_DIR: /home/runner/work/_temp/setup-uv-cache
+2026-11-10T10:10:08.7602813Z ##[endgroup]
+2026-11-10T10:10:08.8620385Z (node:2330) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-10T10:10:08.8620771Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-10T10:10:08.8660626Z With the provided path, there will be 5 files uploaded
+2026-11-10T10:10:08.8674586Z Artifact name is valid!
+2026-11-10T10:10:08.8674978Z Root directory input is valid!
+2026-11-10T10:10:09.1684693Z Beginning upload of artifact content to blob storage
+2026-11-10T10:10:09.1848568Z (node:2330) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-10T10:10:09.3533842Z Uploaded bytes 19349
+2026-11-10T10:10:09.3941837Z Finished uploading artifact content to blob storage!
+2026-11-10T10:10:09.3942325Z SHA256 digest of uploaded artifact zip is 5b3b305c68c4ef920a913baeb4071a63e3bafd474a26a966f0b754f5645b2c44
+2026-11-10T10:10:09.3943403Z Finalizing artifact upload
+2026-11-10T10:10:09.7998562Z Artifact p1-schema-unit-1.zip successfully finalized. Artifact ID 13755016036
+2026-11-10T10:10:09.7999046Z Artifact p1-schema-unit-1 has been successfully uploaded! Final size is 19349 bytes. Artifact ID is 13755016036
+2026-11-10T10:10:09.8003350Z Artifact download URL: https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42796798483/artifacts/13755016036
+2026-11-10T10:10:09.8166422Z Post job cleanup.
+2026-11-10T10:10:09.8875773Z UV_CACHE_DIR is already set to /home/runner/work/_temp/setup-uv-cache
+2026-11-10T10:10:09.8878921Z UV_PYTHON_INSTALL_DIR is already set to /home/runner/work/_temp/uv-python-dir
+2026-11-10T10:10:09.8880759Z Including uv cache path: /home/runner/work/_temp/setup-uv-cache
+2026-11-10T10:10:09.9015420Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/NovelFactory/NovelFactory --files-from manifest.txt --use-compress-program zstdmt
+2026-11-10T10:10:11.1947643Z Sent 27982397 of 27982397 (100.0%), 28.6 MBs/sec
+2026-11-10T10:10:11.3897505Z uv cache saved with key: setup-uv-2-x86_64-unknown-linux-gnu-ubuntu-24.04-unknown-a976a1f1f4e195e7b28d0a9f3540df9614e67372b08104755e814ab33ebe6d51
+2026-11-10T10:10:11.5005053Z Post job cleanup.
+2026-11-10T10:10:11.5759952Z (node:2362) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-10T10:10:11.5760373Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-10T10:10:11.5855986Z Post job cleanup.
+2026-11-10T10:10:11.6440880Z [command]/usr/bin/git version
+2026-11-10T10:10:11.6474007Z git version 2.56.0
+2026-11-10T10:10:11.6498136Z Temporarily overriding HOME='/home/runner/work/_temp/0100fba8-a97c-4bd3-9120-e21668a78c79' before making global git config changes
+2026-11-10T10:10:11.6498806Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-10T10:10:11.6500989Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/NovelFactory/NovelFactory
+2026-11-10T10:10:11.6533127Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-10T10:10:11.6561728Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-10T10:10:11.6769421Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-10T10:10:11.6792474Z http.https://github.com/.extraheader
+2026-11-10T10:10:11.6801852Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-11-10T10:10:11.6840079Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-10T10:10:11.7034050Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-10T10:10:11.7068397Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-10T10:10:11.7396381Z Cleaning up orphan processes
+2026-11-10T10:10:11.7630581Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+

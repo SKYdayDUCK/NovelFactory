@@ -1,0 +1,176 @@
+{
+  "schema_version": "2.1",
+  "plan_id": "22d0b100-dacd-45d5-a86b-556c78bf0eb8",
+  "plan_revision_id": "cd1c81a7-4580-45d2-bd40-fd4d2f158b08",
+  "volume_id": "f8c3d1bd-96bd-4d81-8220-67b22a190784",
+  "input_world_ref": {
+    "work_id": "084abab3-561d-44ac-a8b9-28c9a8a006ce",
+    "branch_id": "b57fc6e0-81f1-43cf-9899-00887b9f0e13",
+    "world_revision_id": "82e349cc-f8f8-44e2-a8b4-376cfd117fb7"
+  },
+  "volume_contract_ref": {
+    "artifact_id": "62415943-e50f-467f-955d-26661f313ab5",
+    "artifact_revision_id": "beb7e375-93bf-4584-a397-fd0f71832efa",
+    "sha256": "d192cdd724b117377ac009518ca8243307d9266abc622b42c5c3349482b4c246"
+  },
+  "prior_plan_ref": null,
+  "nodes": [
+    {
+      "node_id": "0a4d1547-3c06-4b5b-bb85-291bc00edef4",
+      "goal": "领取铜汛印",
+      "status": "VIABLE",
+      "target_time": {
+        "kind": "EXACT",
+        "at": {
+          "tick": 2,
+          "phase": 0
+        }
+      },
+      "subject_ids": [
+        "6f352e8f-1163-588f-af0a-71d2660e9e4b"
+      ],
+      "hard_preconditions": [],
+      "risk_notes": [
+        "计划不是已发生事件"
+      ],
+      "failure_exit": "保留后果并核验局部替代路径",
+      "fulfillment_event_refs": []
+    },
+    {
+      "node_id": "49bd6aa8-93d5-4a14-a0f5-c7dfc8dfd325",
+      "goal": "北仓和南埠分别核算独立需要",
+      "status": "VIABLE",
+      "target_time": {
+        "kind": "EXACT",
+        "at": {
+          "tick": 3,
+          "phase": 0
+        }
+      },
+      "subject_ids": [
+        "6f352e8f-1163-588f-af0a-71d2660e9e4b"
+      ],
+      "hard_preconditions": [],
+      "risk_notes": [
+        "计划不是已发生事件"
+      ],
+      "failure_exit": "保留后果并核验局部替代路径",
+      "fulfillment_event_refs": []
+    },
+    {
+      "node_id": "12f658fa-d48c-4c0d-a125-a771d71eddf5",
+      "goal": "在潮闸分配有限粮食",
+      "status": "VIABLE",
+      "target_time": {
+        "kind": "EXACT",
+        "at": {
+          "tick": 4,
+          "phase": 0
+        }
+      },
+      "subject_ids": [
+        "6f352e8f-1163-588f-af0a-71d2660e9e4b"
+      ],
+      "hard_preconditions": [],
+      "risk_notes": [
+        "计划不是已发生事件"
+      ],
+      "failure_exit": "保留后果并核验局部替代路径",
+      "fulfillment_event_refs": []
+    },
+    {
+      "node_id": "9fd26360-6cb8-48f0-8eb9-f0ac2ca7b7ea",
+      "goal": "保持完整铜汛印",
+      "status": "VIABLE",
+      "target_time": {
+        "kind": "EXACT",
+        "at": {
+          "tick": 5,
+          "phase": 0
+        }
+      },
+      "subject_ids": [
+        "8a460762-9ed1-5118-8edf-ba53f0210396"
+      ],
+      "hard_preconditions": [
+        {
+          "kind": "ENTITY_ACTIVE",
+          "subject_id": "8a460762-9ed1-5118-8edf-ba53f0210396"
+        }
+      ],
+      "risk_notes": [
+        "计划不是已发生事件"
+      ],
+      "failure_exit": "保留后果并核验局部替代路径",
+      "fulfillment_event_refs": []
+    },
+    {
+      "node_id": "de96236d-f489-441b-a78d-4cb0e18d3797",
+      "goal": "凭完好铜汛印建立协作",
+      "status": "VIABLE",
+      "target_time": {
+        "kind": "EXACT",
+        "at": {
+          "tick": 6,
+          "phase": 0
+        }
+      },
+      "subject_ids": [
+        "6f352e8f-1163-588f-af0a-71d2660e9e4b"
+      ],
+      "hard_preconditions": [],
+      "risk_notes": [
+        "计划不是已发生事件"
+      ],
+      "failure_exit": "保留后果并核验局部替代路径",
+      "fulfillment_event_refs": []
+    },
+    {
+      "node_id": "c4c43466-8396-4dc8-97ad-7e35eaca5b6c",
+      "goal": "核查交付后的余数",
+      "status": "VIABLE",
+      "target_time": {
+        "kind": "EXACT",
+        "at": {
+          "tick": 7,
+          "phase": 0
+        }
+      },
+      "subject_ids": [
+        "6f352e8f-1163-588f-af0a-71d2660e9e4b"
+      ],
+      "hard_preconditions": [],
+      "risk_notes": [
+        "计划不是已发生事件"
+      ],
+      "failure_exit": "保留后果并核验局部替代路径",
+      "fulfillment_event_refs": []
+    }
+  ],
+  "published_prefix_node_ids": [],
+  "dependencies": [
+    {
+      "source_node_id": "9fd26360-6cb8-48f0-8eb9-f0ac2ca7b7ea",
+      "target_node_id": "de96236d-f489-441b-a78d-4cb0e18d3797",
+      "kind": "HARD_PREREQUISITE",
+      "reason": "原协作路线以完好铜印作凭证"
+    }
+  ],
+  "decision": {
+    "reason": "先按完好铜印路线安排，保留独立清点线",
+    "considered_options": [
+      {
+        "option_id": "e035840d-b11b-4f8c-9930-43ad8fbaa3ce",
+        "summary": "持印申请",
+        "disposition": "SELECTED",
+        "reason": "先按完好铜印路线安排，保留独立清点线"
+      },
+      {
+        "option_id": "bf6284ab-b9ef-48a2-b479-12672614d0e5",
+        "summary": "未经核验直接取得资格",
+        "disposition": "REJECTED",
+        "reason": "无法尊重已有世界记录或独立动机"
+      }
+    ]
+  }
+}

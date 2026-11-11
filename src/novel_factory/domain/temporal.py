@@ -1,6 +1,7 @@
 """Exact story coordinates and conservative bounded-time consistency checks."""
 from __future__ import annotations
 from collections import defaultdict, deque
+from functools import lru_cache
 from typing import Any
 from novel_factory.contracts.registry import plain, validate_contract
 from .errors import DomainError
@@ -8,7 +9,24 @@ from .errors import DomainError
 PHASE_RADIX = 2147483648
 
 
+@lru_cache(maxsize=4096)
+def _validated_point_key(tick: int, phase: int) -> tuple[int, int]:
+    """Reuse schema validation for exact immutable coordinates, never worlds.
+
+    The authoritative validator still checks each distinct pair. The bounded
+    cache contains only two integers; no grant, revision, task or mutable input
+    can be retained or substituted. Invalid pairs raise and are not cached.
+    """
+    validate_contract('StoryPoint', {'tick': tick, 'phase': phase})
+    return tick, phase
+
+
 def point_key(point: Any) -> tuple[int, int]:
+    # Check shape before lookup: {tick, phase, extra}, bools, floats and adapter
+    # objects must take the original validator path, even on a warm cache.
+    if (type(point) is dict and point.keys() == {'tick', 'phase'}
+            and type(point['tick']) is int and type(point['phase']) is int):
+        return _validated_point_key(point['tick'], point['phase'])
     point = validate_contract('StoryPoint', point)
     return point['tick'], point['phase']
 

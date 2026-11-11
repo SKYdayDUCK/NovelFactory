@@ -1,7 +1,7 @@
 """The single application boundary for authoritative world mutations.
 
-P1 implements closed, deterministic command templates. It does not implement
-autonomous characters or infer the winner of simultaneous story actions.
+P2 scheduling hooks extend the closed command protocol. External actors still
+only supply intentions; a sealed, reviewed joint result is accepted here once.
 """
 from __future__ import annotations
 
@@ -54,6 +54,8 @@ class Kernel:
         row = r.one("revisions", wr)
         require(row, "VIEW_DENIED", "Requested version is unavailable")
         require(fingerprint(row["snapshot"]) == row["state_hash"], "PROJECTION_CORRUPT", "Projection integrity failed")
+        from novel_factory.application.simulation import verify_schedule_revision
+        verify_schedule_revision(row)
         return row
 
     def head(self, r, work_id, branch_id=None):
@@ -406,6 +408,8 @@ class Kernel:
         require(context and context["task_id"]==task_id and context["generation"]==generation and context["principal_id"]==principal.principal_id,
                 "STALE_GENERATION","Context binding is unavailable")
         require(context["payload"]["world_ref"]==task["world_ref"],"TASK_REBIND_REQUIRED","Task input WorldRef is immutable")
+        from novel_factory.application.planning import validate_task_plan_binding
+        validate_task_plan_binding(r, self, task)
         return task,context
 
     def propose(self,principal,task_id,generation,template_id,args,idempotency_key):
@@ -424,9 +428,19 @@ class Kernel:
             if template_id=="REPAIR_EVENT":
                 require("REPAIR" in g["capabilities"] and branch["kind"]=="REPAIR","VIEW_DENIED","Historical replacement requires a repair branch")
             genesis=r.one("genesis",{"work_id":wr["work_id"]})["payload"]
-            selected=[r.one("events",{"event_version_id":eid})["payload"] for eid in base["selection"].values()]
+            selected_ids=list(base["selection"].values())
+            selected_rows=r.many("events",{"work_id":wr["work_id"],"event_version_id":selected_ids}) if selected_ids else []
+            selected_by_id={row["event_version_id"]:row["payload"] for row in selected_rows}
+            require(all(eid in selected_by_id for eid in selected_ids),"HARD_RULE_VIOLATION","Selected event unavailable")
+            # PostgreSQL IN results have no implied order. Retain the exact
+            # selected-history order used by the unchanged full reducer.
+            selected=[selected_by_id[eid] for eid in selected_ids]
         proposal_id=str(uuid5(UUID(task_id),"proposal:"+idempotency_key))
         footprint=build(template_id,args,base["snapshot"],proposal_id)
+        from novel_factory.application.simulation import validate_schedule_command, changeset_extras
+        with self.db.uow(write=False, repeatable_read=True) as r:
+            self.authorize(r, principal, wr["work_id"], "PROPOSE", wr["branch_id"])
+            validate_schedule_command(self, r, principal, base, template_id, args, footprint)
         at=args.get("at",args.get("target"))
         if at:
             require(point_key(at)<=point_key(context["payload"]["story_time"]),"VIEW_DENIED","Command extends beyond its task story cut")
@@ -459,7 +473,8 @@ class Kernel:
         if template_id!="REPAIR_EVENT":
             for scope in footprint["process_scopes"]:
                 current=base["frontiers"].get(scope,{"tick":0,"phase":0})
-                target=args["target"] if template_id=="ADVANCE_SCOPE" else after(at)
+                target=footprint.get("advance_targets",{}).get(scope,
+                    args["target"] if template_id in {"ADVANCE_SCOPE","SCHEDULE_ADVANCE"} else after(at))
                 require(point_key(target)>point_key(current),"HISTORY_REPAIR_REQUIRED","Command changes already closed history; use repair")
                 if at and template_id!="ADVANCE_SCOPE":require(point_key(at)>=point_key(current),"HISTORY_REPAIR_REQUIRED","Event is earlier than scope coverage")
                 advances.append({"process_id":scope,"expected_frontier":current,"evaluated_frontier":target,"coverage":"COMPLETE",
@@ -468,6 +483,7 @@ class Kernel:
         payload={"schema_version":schema_version,"proposal_id":proposal_id,"input_world_ref":wr,"event_candidates":event_candidates,"event_operations":operations,
                  "adjudication_refs":[closure_ref],"process_advances":advances,"record_operations":[],"trigger_evaluations":[],
                  "dependency_fingerprint":context["dependency_fingerprint"]}
+        payload.update(changeset_extras(base, template_id, args, event_candidates))
         validate_contract("WorldChangeSetR1" if schema_version=="2.1" else "WorldChangeSet",payload,schema_version)
         proposal_ref=self._blob(payload)
         event_blobs=[(self._blob(e),e) for e in event_candidates]
@@ -478,6 +494,7 @@ class Kernel:
             prior=self._prior(r,principal,wr["work_id"],"PROPOSE",idempotency_key,command)
             if prior:return prior
             self._task_binding(r,principal,task_id,generation,context["context_bundle_id"])
+            validate_schedule_command(self, r, principal, base, template_id, args, footprint)
             self._register_artifact(r,closure_ref,wr["work_id"],closure,"CLOSURE",principal.principal_id)
             for event in event_candidates:self._event_sources(r,principal,base,event)
             if template_id=="REPAIR_EVENT":self._revalidate_repair(r,wr["work_id"],genesis,selected,replacement_ids=[e["event_version_id"] for e in event_candidates])
@@ -563,9 +580,13 @@ class Kernel:
             if mode=="STRICT_HEAD":require(parent==wr,"HEAD_CONFLICT","Strict input HEAD changed")
             else:require(p["template_id"] in GUARDED,"UNPROVEN_FOOTPRINT","Template is not eligible for guarded acceptance")
             actual=build(p["template_id"],p["template_args"],current["snapshot"],p["proposal_id"])
+            from novel_factory.application.simulation import validate_schedule_command
+            validate_schedule_command(self, r, principal, current, p["template_id"], p["template_args"], actual)
             require(actual==p["footprint"],"DEPENDENCY_CONFLICT","Registered command inputs changed; prepare a new proposal")
             work=r.one("works",{"work_id":wr["work_id"]});branch=r.one("branches",{"branch_id":wr["branch_id"]})
-            original=self.revision(r,wr)
+            # Both refer to the same immutable row in this repeatable-read
+            # transaction. Reuse the validated value, never a cached HEAD.
+            original=current if parent==wr else self.revision(r,wr)
             require(original["provenance"].get("history_epoch",0)==branch["history_epoch"],"HISTORY_CHANGED","Historical repair requires a fresh task input and proposal")
             require(current["interpretation_ref"]==work["interpretation_ref"],"STALE_CERTIFICATE","Current interpretation requires a new reviewed world revision")
             reads,writes=self._tokens(r,wr,actual,grant,approvals,branch["history_epoch"],work)
@@ -699,6 +720,8 @@ class Kernel:
             else:require(p["template_id"] in GUARDED and cert["coverage_status"]=="COMPLETE_FOR_TEMPLATE","UNPROVEN_FOOTPRINT","Unregistered guarded template")
             self._verify_tokens(r,wr,cert,p["footprint"],grant,approvals,branch,work)
             current=self.revision(r,parent)
+            from novel_factory.application.simulation import validate_schedule_command, attach_schedule_state
+            validate_schedule_command(self, r, principal, current, p["template_id"], p["template_args"], p["footprint"])
             if p["template_id"]!="REPAIR_EVENT":
                 require(build(p["template_id"],p["template_args"],current["snapshot"],p["proposal_id"])==p["footprint"],"DEPENDENCY_CONFLICT","Current command preconditions differ")
             else:
@@ -717,12 +740,12 @@ class Kernel:
                 require(frontiers.get(scope,{"tick":0,"phase":0})==advance["expected_frontier"],"DEPENDENCY_CONFLICT","Process coverage changed")
                 frontiers[scope]=advance["evaluated_frontier"]
             require(len(selection)<=2000,"CAPACITY_LIMIT","P1 synchronous replay is bounded to 2000 selected events")
-            events=[]
-            for eid in selection.values():
-                event=candidates.get(eid)
-                if event is None:
-                    row=r.one("events",{"work_id":wr["work_id"],"event_version_id":eid});require(row,"HARD_RULE_VIOLATION","Selected event unavailable");event=row["payload"]
-                events.append(event)
+            persisted_ids=[eid for eid in selection.values() if eid not in candidates]
+            persisted=r.many("events",{"work_id":wr["work_id"],"event_version_id":persisted_ids}) if persisted_ids else []
+            selected_by_id={row["event_version_id"]:row["payload"] for row in persisted}
+            selected_by_id.update(candidates)
+            require(all(eid in selected_by_id for eid in selection.values()),"HARD_RULE_VIOLATION","Selected event unavailable")
+            events=[selected_by_id[eid] for eid in selection.values()]
             genesis=r.one("genesis",{"work_id":wr["work_id"]})["payload"]
             if p["template_id"]=="REPAIR_EVENT":self._revalidate_repair(r,wr["work_id"],genesis,events)
             snapshot=replay(genesis,events)
@@ -743,9 +766,12 @@ class Kernel:
             rev={"world_revision_id":rid,"work_id":wr["work_id"],"branch_id":wr["branch_id"],"branch_seq":current["branch_seq"]+1,"parent_revision_id":parent["world_revision_id"],
                  "selection":selection,"frontiers":frontiers,"scope_versions":scopes,"snapshot":snapshot,"interpretation_ref":cert["interpretation_ref"],
                  "manifest_hash":manifest,"state_hash":fingerprint(snapshot),"provenance":{"proposal_ref":p["artifact_ref"],"original_base":wr,"certificate_ref":cert_ref,"history_epoch":history_epoch}}
+            attach_schedule_state(current, rev, p)
+            manifest=rev["manifest_hash"]
             r.add("revisions",rev)
-            for event in events:r.add("revision_events",{"world_revision_id":rid,"work_id":wr["work_id"],"branch_id":wr["branch_id"],
-                "occurrence_id":event["occurrence_id"],"event_version_id":event["event_version_id"],"effect_group_id":event["effect_group_id"]})
+            r.add_many("revision_events",[{"world_revision_id":rid,"work_id":wr["work_id"],"branch_id":wr["branch_id"],
+                "occurrence_id":event["occurrence_id"],"event_version_id":event["event_version_id"],"effect_group_id":event["effect_group_id"]}
+                for event in events])
             r.add("commits",{"world_revision_id":rid,"operations":p["payload"]["event_operations"],"request":request,"request_hash":fingerprint(request)})
             for key in sorted(changed):r.add("invalidations",{"invalidation_id":new_id(),"work_id":wr["work_id"],"branch_id":wr["branch_id"],"world_revision_id":rid,"scope_key":key,"version":scopes[key]})
             changed_count=r.change("branches",{"branch_id":wr["branch_id"],"head_revision_id":parent["world_revision_id"]},{"head_revision_id":rid,"history_epoch":history_epoch,"repair_ready":p["template_id"]=="REPAIR_EVENT" or branch["repair_ready"]})
@@ -774,6 +800,8 @@ class Kernel:
             r.add("branches",{"branch_id":bid,"work_id":base["work_id"],"kind":kind,"fork_ref":base_world_ref,"history_epoch":inherited_epoch})
             fields={k:deepcopy(base[k]) for k in ("work_id","selection","frontiers","scope_versions","snapshot","interpretation_ref","manifest_hash","state_hash")}
             fields.update(branch_id=bid,world_revision_id=rid,branch_seq=0,parent_revision_id=None,provenance={"fork_ref":base_world_ref,"history_epoch":inherited_epoch})
+            from novel_factory.application.simulation import inherit_schedule_state
+            inherit_schedule_state(base, fields)
             r.add("revisions",fields)
             for key,val in base["scope_versions"].items():r.add("scopes",{"work_id":base["work_id"],"branch_id":bid,"scope_key":key,"version":val})
             for event in r.many("revision_events",{"world_revision_id":base["world_revision_id"]}):

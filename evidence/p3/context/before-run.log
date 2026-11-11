@@ -1,0 +1,83 @@
+{"command": ["python", "scripts/with_postgres.py", "--pg-bin", "/workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin", "--migrate", "--log-dir", "evidence/p3/context/before-pg", "--", "python", "benchmarks/context_profile.py", "--output", "evidence/p3/context/before.json", "--label", "before", "--entities", "1000", "--history", "12", "--repeats", "5"], "command_display": "python scripts/with_postgres.py --pg-bin /workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin --migrate --log-dir evidence/p3/context/before-pg -- python benchmarks/context_profile.py --output evidence/p3/context/before.json --label before --entities 1000 --history 12 --repeats 5", "cwd": "/workspace/scratch/cf3ee8d0c6c4/NovelFactory", "started_at_utc": "2026-11-10T12:14:29.298471+00:00", "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]", "platform": "Linux-6.18.57-x86_64-with-glibc2.41"}
+RUN ["/workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin/initdb", "-D", "/tmp/nf-pg17-hyrgjyjf/data", "-U", "nf_dev", "--encoding=UTF8", "--locale=C", "--auth-local=reject", "--auth-host=trust", "--data-checksums"]
+The files belonging to this database system will be owned by user "agent".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "C".
+The default text search configuration will be set to "english".
+
+Data page checksums are enabled.
+
+creating directory /tmp/nf-pg17-hyrgjyjf/data ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default "max_connections" ... 100
+selecting default "shared_buffers" ... 128MB
+selecting default time zone ... Asia/Tokyo
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+
+Success. You can now start the database server using:
+
+    /workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin/pg_ctl -D /tmp/nf-pg17-hyrgjyjf/data -l logfile start
+
+RUN ["/workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin/createdb", "nf_test"]
+RUN ["/workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin/psql", "-Atc", "SELECT version(); SHOW fsync; SHOW synchronous_commit;"]
+PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+on
+on
+RUN ["/workspace/scratch/cf3ee8d0c6c4/NovelFactory/.venv/bin/python", "-m", "alembic", "upgrade", "head"]
+REAL_POSTGRES_READY postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1) port 54135
+{
+  "label": "before",
+  "summary": [
+    {
+      "subjects": 1,
+      "samples": 5,
+      "median_seconds": 0.07071722500040778,
+      "sql_counts": [
+        51
+      ],
+      "dependency_insert_counts": [
+        5
+      ]
+    },
+    {
+      "subjects": 20,
+      "samples": 5,
+      "median_seconds": 0.14006449499902374,
+      "sql_counts": [
+        89
+      ],
+      "dependency_insert_counts": [
+        43
+      ]
+    },
+    {
+      "subjects": 100,
+      "samples": 5,
+      "median_seconds": 0.3661541950004903,
+      "sql_counts": [
+        249
+      ],
+      "dependency_insert_counts": [
+        203
+      ]
+    }
+  ],
+  "dataset": {
+    "entities": 1001,
+    "genesis_relations": 1000,
+    "accepted_world_events": 12,
+    "fixture_namespace": "nf-context-profile-v1",
+    "revisions": 13,
+    "snapshot_stored_bytes": 3800070,
+    "snapshot_json_text_bytes": 15332949,
+    "largest_snapshot_json_bytes": 1186471,
+    "selections_stored_bytes": 6330
+  }
+}
+
+RUN_METADATA {"command": ["python", "scripts/with_postgres.py", "--pg-bin", "/workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin", "--migrate", "--log-dir", "evidence/p3/context/before-pg", "--", "python", "benchmarks/context_profile.py", "--output", "evidence/p3/context/before.json", "--label", "before", "--entities", "1000", "--history", "12", "--repeats", "5"], "command_display": "python scripts/with_postgres.py --pg-bin /workspace/scratch/cf3ee8d0c6c4/pg17/dist/usr/lib/postgresql/17/bin --migrate --log-dir evidence/p3/context/before-pg -- python benchmarks/context_profile.py --output evidence/p3/context/before.json --label before --entities 1000 --history 12 --repeats 5", "cwd": "/workspace/scratch/cf3ee8d0c6c4/NovelFactory", "started_at_utc": "2026-11-10T12:14:29.298471+00:00", "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]", "platform": "Linux-6.18.57-x86_64-with-glibc2.41", "exit_status": 0, "duration_seconds": 75.924334, "finished_at_utc": "2026-11-10T12:15:45.222847+00:00"}

@@ -1,0 +1,1055 @@
+{
+  "status": "TEST_FIXTURE",
+  "source_method": "original authored controlled fixture, no model calls",
+  "sources": [
+    {
+      "source_id": "E01",
+      "chapter": 1,
+      "text": "潮门告示写明：一盏朱灯只能支撑一次开闸；同时到场的船必须共同分配这一轮通行，不能因两个人分别讲述开闸经过就多耗一盏灯。守门人把旧灯壳收进册子旁的篮里，灯壳只证明那次开闸已经发生。",
+      "entities": [
+        "gate",
+        "lamp"
+      ],
+      "category": "WORLD_RULE",
+      "plane": "WORLD",
+      "actor_id": null,
+      "related": [
+        "E19"
+      ],
+      "tick": 1,
+      "valid_from": 0,
+      "valid_to": null,
+      "known_at": 1,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 1,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E02",
+      "chapter": 2,
+      "text": "陆舟在送货单背面记下自己的打算：先让河湾的孩子过潮门，再谈报酬。他知道误期会损失押金，却没有把这个目标告诉沈禾。他写完后折起纸，不让旁人看见这段话。",
+      "entities": [
+        "lu",
+        "gate"
+      ],
+      "category": "MOTIVATION",
+      "plane": "BELIEF",
+      "actor_id": "lu",
+      "related": [],
+      "tick": 2,
+      "valid_from": 2,
+      "valid_to": null,
+      "known_at": 2,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 2,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E03",
+      "chapter": 3,
+      "text": "沈禾把亡姐留下的杯子擦净，仍放在原来的位置。她没有决定扔掉它。偶尔能和邻居说笑，不代表她已经从丧失中恢复；这份解释由杯子和她避开的名字共同支持，也允许日后出现不同解释。",
+      "entities": [
+        "shen"
+      ],
+      "category": "LONG_EMOTION",
+      "plane": "LITERARY",
+      "actor_id": null,
+      "related": [
+        "E13",
+        "E14"
+      ],
+      "tick": 3,
+      "valid_from": 3,
+      "valid_to": null,
+      "known_at": 3,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 3,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E04",
+      "chapter": 4,
+      "text": "桥下的芦绳打着一个反向双结，结尾藏在石缝里。陆舟经过时只当它是系船绳。绳结与此前摆渡人的记号相同，是否有人故意留下它仍未确定。",
+      "entities": [
+        "reed",
+        "lu"
+      ],
+      "category": "FORESHADOW",
+      "plane": "LITERARY",
+      "actor_id": null,
+      "related": [
+        "E23"
+      ],
+      "tick": 4,
+      "valid_from": 4,
+      "valid_to": null,
+      "known_at": 4,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 4,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E05",
+      "chapter": 5,
+      "text": "仓库交接清单确认共有四十袋盐。盐袋封口完整，账本由两人签过字；这项库存是该清单作用域内的确定数量，不能用远处市场的传闻修改。",
+      "entities": [
+        "salt"
+      ],
+      "category": "RESOURCE",
+      "plane": "WORLD",
+      "actor_id": null,
+      "related": [
+        "E31"
+      ],
+      "tick": 5,
+      "valid_from": 5,
+      "valid_to": 31,
+      "known_at": 5,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 5,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E06",
+      "chapter": 6,
+      "text": "祁雁看到封签折角，怀疑严渚改过账。她只有折角这个线索，没有证实改账。她在私页写的是“可能”，不是指控书。这项认知只属于祁雁，此时陆舟和沈禾都没有收到它。",
+      "entities": [
+        "qi",
+        "yan",
+        "seal"
+      ],
+      "category": "ASYMMETRIC_BELIEF",
+      "plane": "BELIEF",
+      "actor_id": "qi",
+      "related": [],
+      "tick": 6,
+      "valid_from": 6,
+      "valid_to": null,
+      "known_at": 6,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 6,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E07",
+      "chapter": 7,
+      "text": "码头有人说严渚偷走了铜钥，但没有人能给出目击来源。陆舟听见这个说法，暂时相信钥匙在严渚手里。他的相信有传闻来源，并不使传闻内容成为世界真相。",
+      "entities": [
+        "lu",
+        "yan",
+        "key"
+      ],
+      "category": "RUMOR",
+      "plane": "BELIEF",
+      "actor_id": "lu",
+      "related": [],
+      "tick": 7,
+      "valid_from": 7,
+      "valid_to": 16,
+      "known_at": 7,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 7,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E08",
+      "chapter": 8,
+      "text": "铜钥的实物仍在孟迟工具箱的夹层里。孟迟在第六日收下了它，登记册尚未公开。严渚没有拿走这把钥匙。这个客观位置与陆舟当时听到的传闻不同。",
+      "entities": [
+        "key",
+        "meng"
+      ],
+      "category": "HIDDEN_WORLD_STATE",
+      "plane": "WORLD",
+      "actor_id": null,
+      "related": [
+        "E07",
+        "E10"
+      ],
+      "tick": 6,
+      "valid_from": 6,
+      "valid_to": 22,
+      "known_at": 6,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 8,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E09",
+      "chapter": 9,
+      "text": "沈禾认为陆舟把报酬看得比救人更重。她只见过他追问押金的那一面，没有看过送货单背面的字。她决定暂时不把守门册交给他；这是沈禾的判断，不代表双方已经互相理解。",
+      "entities": [
+        "shen",
+        "lu"
+      ],
+      "category": "RELATIONSHIP_STATE",
+      "plane": "BELIEF",
+      "actor_id": "shen",
+      "related": [
+        "E02",
+        "E27"
+      ],
+      "tick": 9,
+      "valid_from": 9,
+      "valid_to": 25,
+      "known_at": 9,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 9,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E10",
+      "chapter": 10,
+      "text": "第十六日孟迟当面告诉陆舟，铜钥第六日就存进了工具箱。陆舟在第十六日才获知这件早先发生的事，改正了先前听来的传闻。获知日不能倒写成第六日，早年的陆舟仍然不知道这条消息。",
+      "entities": [
+        "lu",
+        "meng",
+        "key"
+      ],
+      "category": "LATE_KNOWLEDGE",
+      "plane": "BELIEF",
+      "actor_id": "lu",
+      "related": [
+        "E07",
+        "E08"
+      ],
+      "tick": 6,
+      "valid_from": 6,
+      "valid_to": 22,
+      "known_at": 16,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 10,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E11",
+      "chapter": 11,
+      "text": "当潮门需要两人同时按住绞盘时，陆舟与沈禾接受了同一份分工。两人分别负责一边，消耗一盏朱灯，让三名孩子过了门。这是一次共同事件，不是两次各自成功的开闸。",
+      "entities": [
+        "lu",
+        "shen",
+        "gate",
+        "lamp"
+      ],
+      "category": "JOINT_EVENT",
+      "plane": "WORLD",
+      "actor_id": null,
+      "related": [
+        "E01",
+        "E19"
+      ],
+      "tick": 11,
+      "valid_from": 11,
+      "valid_to": null,
+      "known_at": 11,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 11,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E12",
+      "chapter": 12,
+      "text": "陆舟为守住绞盘放弃了当天的押金。沈禾看见他松开钱袋，把两只手都压在柄上。叙述可以据此谈论他的取舍，但不能说沈禾因此读到了那张未公开的送货单。",
+      "entities": [
+        "lu",
+        "shen"
+      ],
+      "category": "CHOICE_COST",
+      "plane": "LITERARY",
+      "actor_id": null,
+      "related": [
+        "E02",
+        "E27"
+      ],
+      "tick": 12,
+      "valid_from": 12,
+      "valid_to": null,
+      "known_at": 12,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 12,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E13",
+      "chapter": 13,
+      "text": "沈禾听见孩子学大人的语气说话，低头笑了一下。那笑短促而具体，发生在她再次擦杯子之前。编辑可把它理解为片刻松弛，却没有足够证据据此宣布悲伤已经结束。",
+      "entities": [
+        "shen"
+      ],
+      "category": "EMOTIONAL_COUNTEREXAMPLE",
+      "plane": "LITERARY",
+      "actor_id": null,
+      "related": [
+        "E03",
+        "E14"
+      ],
+      "tick": 13,
+      "valid_from": 13,
+      "valid_to": null,
+      "known_at": 13,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 13,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E14",
+      "chapter": 14,
+      "text": "当夜沈禾仍把亡姐的杯子留在灯下，杯口朝着空椅子。她对陆舟说“今天谢谢你”，没有说“从前都算了”。这段原文为悲伤尚在、感激与宽恕可分提供反证，不强迫下一场重复哀悼句。",
+      "entities": [
+        "shen",
+        "lu"
+      ],
+      "category": "COUNTEREVIDENCE",
+      "plane": "LITERARY",
+      "actor_id": null,
+      "related": [
+        "E03",
+        "E13",
+        "E27"
+      ],
+      "tick": 14,
+      "valid_from": 14,
+      "valid_to": null,
+      "known_at": 14,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 14,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E15",
+      "chapter": 15,
+      "text": "本卷风格约定：环境描写服从人物当下注意，避免每场都用雾比喻心事；同一事实可换视角重述，但不增加新的世界后果。语句长短可随场景变化，不以统一修辞密度衡量所有人物的声线。",
+      "entities": [
+        "style"
+      ],
+      "category": "STYLE_GUIDE",
+      "plane": "LITERARY",
+      "actor_id": null,
+      "related": [],
+      "tick": 15,
+      "valid_from": 0,
+      "valid_to": null,
+      "known_at": 15,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 15,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E16",
+      "chapter": 16,
+      "text": "陆舟对孩子解释路程时说：“先看脚下，到了那块白石再问远处。”他偏好可做的小步骤，遇到官员则会把句子说得完整。这段声线证据支持说话策略，不等于每次发言必须复用同一句口头禅。",
+      "entities": [
+        "lu"
+      ],
+      "category": "VOICE",
+      "plane": "LITERARY",
+      "actor_id": null,
+      "related": [
+        "E35"
+      ],
+      "tick": 16,
+      "valid_from": 16,
+      "valid_to": null,
+      "known_at": 16,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 16,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E17",
+      "chapter": 17,
+      "text": "沈禾面对熟人只说“把绳收好”，对第一次进门的陌生人却会解释为什么不能松手。她的简短来自关系和场合，不是没有感情；写新场景时应保持这种差别，也允许经历改变她的表达。",
+      "entities": [
+        "shen"
+      ],
+      "category": "VOICE",
+      "plane": "LITERARY",
+      "actor_id": null,
+      "related": [],
+      "tick": 17,
+      "valid_from": 17,
+      "valid_to": null,
+      "known_at": 17,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 17,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E18",
+      "chapter": 18,
+      "text": "卷导演原计划在第三十日让陆舟用铜钥开启旧柜，找到雨封信。这只是计划清单 plan-v1 的条件路线，要求铜钥仍可使用；计划被采用也不表示旧柜已被打开或人物已知道信的内容。",
+      "entities": [
+        "lu",
+        "key",
+        "letter"
+      ],
+      "category": "FUTURE_PLAN",
+      "plane": "PLAN",
+      "actor_id": null,
+      "related": [
+        "E20"
+      ],
+      "tick": 30,
+      "valid_from": 0,
+      "valid_to": null,
+      "known_at": 18,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 18,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E19",
+      "chapter": 19,
+      "text": "沈禾的章节从另一侧回写第十一日开闸：她看见陆舟握紧绞盘，孩子踏过门槛。这一段只有叙事链接，事件身份仍指向第十一日共同开闸；库存不得再次扣除朱灯。",
+      "entities": [
+        "shen",
+        "lu",
+        "gate",
+        "lamp"
+      ],
+      "category": "NARRATIVE_REPLAY",
+      "plane": "LITERARY",
+      "actor_id": null,
+      "related": [
+        "E11",
+        "E01"
+      ],
+      "tick": 11,
+      "valid_from": 11,
+      "valid_to": null,
+      "known_at": 11,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 19,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E20",
+      "chapter": 20,
+      "text": "在保留版本 r1 中，第二十二日的涌潮折断了铜钥。碎片被收进封袋，铜钥的可用状态终止。此后“第三十日持铜钥开柜”的旧计划前提失效，导演必须另寻合法路线，不能让后续正文假定钥匙仍完整。",
+      "entities": [
+        "key",
+        "letter"
+      ],
+      "category": "DESTRUCTION",
+      "plane": "WORLD",
+      "actor_id": null,
+      "related": [
+        "E18",
+        "E21"
+      ],
+      "tick": 22,
+      "valid_from": 22,
+      "valid_to": null,
+      "known_at": 22,
+      "branch_id": "canon",
+      "revisions": [
+        "r1"
+      ],
+      "reader_from": 20,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E21",
+      "chapter": 21,
+      "text": "世界规则规定，已毁的工具不能继续执行只适用于完整工具的操作。对断裂铜钥查询开柜能力应返回不适用并保留历史，不能当作暂时没检索到，更不能因未来计划需要而忽略断裂。",
+      "entities": [
+        "key"
+      ],
+      "category": "WORLD_RULE",
+      "plane": "WORLD",
+      "actor_id": null,
+      "related": [
+        "E20"
+      ],
+      "tick": 21,
+      "valid_from": 0,
+      "valid_to": null,
+      "known_at": 21,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 21,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E22",
+      "chapter": 22,
+      "text": "候选分支 rehearsal-a 曾推演铜钥没有折断，由陆舟直接开柜。这段推演未被选择，也没有进入 canonical 世界。看到候选文本不能让正式角色提前知道雨封信的内容。",
+      "entities": [
+        "key",
+        "lu",
+        "letter"
+      ],
+      "category": "REJECTED_SIMULATION",
+      "plane": "SIMULATION",
+      "actor_id": null,
+      "related": [],
+      "tick": 30,
+      "valid_from": 30,
+      "valid_to": null,
+      "known_at": 30,
+      "branch_id": "rehearsal-a",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 22,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E23",
+      "chapter": 23,
+      "text": "第二十三日，陆舟在芦绳反向双结里找到一截旧渡船票。船票背面的号码指向旧柜的木匠登记，这条发现使早先的绳结获得回响；绳结当初并未向人物直接说明这个用途。",
+      "entities": [
+        "lu",
+        "reed",
+        "letter"
+      ],
+      "category": "FORESHADOW_PAYOFF",
+      "plane": "LITERARY",
+      "actor_id": null,
+      "related": [
+        "E04",
+        "E24"
+      ],
+      "tick": 23,
+      "valid_from": 23,
+      "valid_to": null,
+      "known_at": 23,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 23,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E24",
+      "chapter": 24,
+      "text": "导演改用木匠登记寻找开柜方法，并保留了原计划中“信必须当众拆封”的承诺。改变的是依赖铜钥的路线，不是已经发生的断裂，也不是把整卷所有场景从头抹掉。新计划清单为 plan-v2。",
+      "entities": [
+        "letter",
+        "key",
+        "lu"
+      ],
+      "category": "LOCAL_REPLAN",
+      "plane": "PLAN",
+      "actor_id": null,
+      "related": [
+        "E18",
+        "E20",
+        "E23"
+      ],
+      "tick": 24,
+      "valid_from": 24,
+      "valid_to": null,
+      "known_at": 24,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 24,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E25",
+      "chapter": 25,
+      "text": "沈禾在第廿五日把守门册交给陆舟，并明确说“下一次我愿意把后背交给你”。这是一次有来源的新判断。她愿意依赖他，并不自动抹去她对旧事的保留，关系变化应保留前后的时间边界。",
+      "entities": [
+        "shen",
+        "lu"
+      ],
+      "category": "RELATIONSHIP_STATE",
+      "plane": "BELIEF",
+      "actor_id": "shen",
+      "related": [
+        "E09",
+        "E14",
+        "E27"
+      ],
+      "tick": 25,
+      "valid_from": 25,
+      "valid_to": null,
+      "known_at": 25,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 25,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E26",
+      "chapter": 26,
+      "text": "在 r2 修订分支中，第二十二日被浪折断的是废弃的备用钥片，铜钥本体仍由孟迟保管。这段修订只属于 repair 分支；旧 r1 发布仍保留铜钥折断的历史，不能用当前修订覆盖它。",
+      "entities": [
+        "key",
+        "meng"
+      ],
+      "category": "HISTORY_REPAIR",
+      "plane": "WORLD",
+      "actor_id": null,
+      "related": [
+        "E08"
+      ],
+      "tick": 22,
+      "valid_from": 22,
+      "valid_to": null,
+      "known_at": 22,
+      "branch_id": "repair",
+      "revisions": [
+        "r2"
+      ],
+      "reader_from": 26,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E27",
+      "chapter": 27,
+      "text": "编辑把沈禾和陆舟的关系标为“能够合作，但旧日解释尚未完全相通”。证据既有交付守门册，也有未说出口的宽恕。文学档案保存这种不对称与反证，不能简化成双方已毫无隔阂。",
+      "entities": [
+        "shen",
+        "lu"
+      ],
+      "category": "RELATIONSHIP_ASYMMETRY",
+      "plane": "LITERARY",
+      "actor_id": null,
+      "related": [
+        "E09",
+        "E14",
+        "E25"
+      ],
+      "tick": 27,
+      "valid_from": 27,
+      "valid_to": null,
+      "known_at": 27,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 27,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E28",
+      "chapter": 28,
+      "text": "信封内页写着严渚当年收下的不是赃款，而是替渡户保管的抚恤金。此处为作者受限材料，读者编排到第三十八章才披露；第廿八章之前的读者视图不能看到内页内容，人物认知也要另查来源。",
+      "entities": [
+        "yan",
+        "letter"
+      ],
+      "category": "READER_SECRET",
+      "plane": "LITERARY",
+      "actor_id": null,
+      "related": [],
+      "tick": 28,
+      "valid_from": 28,
+      "valid_to": null,
+      "known_at": 28,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 38,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E29",
+      "chapter": 29,
+      "text": "另一部作品《旱城》也有一个叫陆舟的人，他是铸钟学徒，与雾港的递信人没有身份关系。同名检索不得把他掌握的铸钟技术赋给雾港人物。",
+      "entities": [
+        "lu"
+      ],
+      "category": "OTHER_WORK",
+      "plane": "LITERARY",
+      "actor_id": null,
+      "related": [],
+      "tick": 29,
+      "valid_from": 29,
+      "valid_to": null,
+      "known_at": 29,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 29,
+      "work_id": "dry_city"
+    },
+    {
+      "source_id": "E30",
+      "chapter": 30,
+      "text": "陆舟早先答应在第三十日把雨封信交到收件人手中。到第三十日他只拿到了木匠登记，没有完成交信。承诺依然未兑现，不能用“已经努力过”替代结果；后续叙事可以回应、延迟或放弃，但需明确决定。",
+      "entities": [
+        "lu",
+        "letter"
+      ],
+      "category": "UNFINISHED_PROMISE",
+      "plane": "LITERARY",
+      "actor_id": null,
+      "related": [
+        "E24",
+        "E40"
+      ],
+      "tick": 30,
+      "valid_from": 30,
+      "valid_to": null,
+      "known_at": 30,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 30,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E31",
+      "chapter": 31,
+      "text": "第三十一日清点发现两袋盐在涌潮中破损，剩余三十八袋可交付。此后当前库存为三十八，而第五日的四十仍是合法历史答案。检索需要区分当前数量与当时数量，不能保留最新一条就丢掉旧记录。",
+      "entities": [
+        "salt"
+      ],
+      "category": "RESOURCE",
+      "plane": "WORLD",
+      "actor_id": null,
+      "related": [
+        "E05",
+        "E32"
+      ],
+      "tick": 31,
+      "valid_from": 31,
+      "valid_to": null,
+      "known_at": 31,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 31,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E32",
+      "chapter": 32,
+      "text": "破损记录指出，盐袋先被潮水浸开，随后搬运者才改道，改道并不是破损的原因。两个事件在文本中可以倒叙，因果依据仍必须沿正式记录回查。",
+      "entities": [
+        "salt",
+        "gate"
+      ],
+      "category": "CAUSAL_ORDER",
+      "plane": "WORLD",
+      "actor_id": null,
+      "related": [
+        "E31"
+      ],
+      "tick": 32,
+      "valid_from": 32,
+      "valid_to": null,
+      "known_at": 32,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 32,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E33",
+      "chapter": 33,
+      "text": "陆舟尚未收到严渚关于抚恤金的解释。他只知道信要当众拆封，不知道内页金额。查询他此时是否知道钱款性质应保持未知；世界内页存在与人物已读到内页是两回事。",
+      "entities": [
+        "lu",
+        "yan",
+        "letter"
+      ],
+      "category": "KNOWLEDGE_LIMIT",
+      "plane": "BELIEF",
+      "actor_id": "lu",
+      "related": [],
+      "tick": 33,
+      "valid_from": 33,
+      "valid_to": null,
+      "known_at": 33,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 33,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E34",
+      "chapter": 34,
+      "text": "封签编号十三与旧渡船票的登记号相合。祁雁据此请求回读票据原件；她没有把一个相同号码当成对严渚动机的完整证明。正面线索与仍未解决的反解释一并留在档案。",
+      "entities": [
+        "qi",
+        "seal",
+        "letter"
+      ],
+      "category": "EVIDENCE_LINK",
+      "plane": "LITERARY",
+      "actor_id": null,
+      "related": [
+        "E23",
+        "E06"
+      ],
+      "tick": 34,
+      "valid_from": 34,
+      "valid_to": null,
+      "known_at": 34,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 34,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E35",
+      "chapter": 35,
+      "text": "经历潮门事件以后，陆舟对沈禾不再急着把每个空隙填成解释。他仍会提出具体做法，却能在她没回答时等一等。这是声线的有证据演化，不要求他永久复制第十六章那句对白。",
+      "entities": [
+        "lu",
+        "shen"
+      ],
+      "category": "VOICE_EVOLUTION",
+      "plane": "LITERARY",
+      "actor_id": null,
+      "related": [
+        "E16",
+        "E27"
+      ],
+      "tick": 35,
+      "valid_from": 35,
+      "valid_to": null,
+      "known_at": 35,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 35,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E36",
+      "chapter": 36,
+      "text": "有人建议删去沈禾擦杯子的第二次动作，理由是节奏迟缓；另一位编辑认为它提供了笑后仍有悲伤的反证。这个分歧属于文学选择，应保存原文、备选改法和决定理由，不能用确定性规则宣布唯一正确答案。",
+      "entities": [
+        "shen"
+      ],
+      "category": "SUBJECTIVE_REVIEW",
+      "plane": "LITERARY",
+      "actor_id": null,
+      "related": [
+        "E03",
+        "E13",
+        "E14"
+      ],
+      "tick": 36,
+      "valid_from": 36,
+      "valid_to": null,
+      "known_at": 36,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 36,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E37",
+      "chapter": 37,
+      "text": "若正文在第三十一日写“陆舟再用完整铜钥开柜”，而采用的仍是 r1 世界，就与第二十二日已接受的断裂冲突。编辑偏爱这个画面不能豁免事实冲突，必须改稿或走明确的历史修订流程。",
+      "entities": [
+        "lu",
+        "key"
+      ],
+      "category": "HARD_REVIEW",
+      "plane": "LITERARY",
+      "actor_id": null,
+      "related": [
+        "E20",
+        "E21"
+      ],
+      "tick": 37,
+      "valid_from": 37,
+      "valid_to": null,
+      "known_at": 37,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 37,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E38",
+      "chapter": 38,
+      "text": "第三十八章正式向读者披露雨封信内页，解释抚恤金的去向。这个编排位置不改变故事里信件的写成时间，也不能证明所有人物在同一天获得了相同知识。",
+      "entities": [
+        "letter",
+        "yan"
+      ],
+      "category": "READER_DISCLOSURE",
+      "plane": "LITERARY",
+      "actor_id": null,
+      "related": [
+        "E28"
+      ],
+      "tick": 38,
+      "valid_from": 38,
+      "valid_to": null,
+      "known_at": 38,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 38,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E39",
+      "chapter": 39,
+      "text": "祁雁向沈禾坦言，自己最初怀疑严渚仅凭封签折角；她愿意修正判断。沈禾现在听到了这项解释，但第六日的她仍未获知。当时的角色视图必须保留当时的空缺。",
+      "entities": [
+        "qi",
+        "shen",
+        "yan"
+      ],
+      "category": "KNOWLEDGE_TRANSFER",
+      "plane": "BELIEF",
+      "actor_id": "shen",
+      "related": [
+        "E06"
+      ],
+      "tick": 39,
+      "valid_from": 39,
+      "valid_to": null,
+      "known_at": 39,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 39,
+      "work_id": "fog_port"
+    },
+    {
+      "source_id": "E40",
+      "chapter": 40,
+      "text": "第四十日，陆舟终于把仍未拆开的雨封信交给收件人，收条上注明了迟到十日。承诺被兑现，却保留迟到及其代价。编辑可联系第三十日未交付的原文，不能把旧承诺状态原地改成按时完成。",
+      "entities": [
+        "lu",
+        "letter"
+      ],
+      "category": "PROMISE_PAYOFF",
+      "plane": "LITERARY",
+      "actor_id": null,
+      "related": [
+        "E30"
+      ],
+      "tick": 40,
+      "valid_from": 40,
+      "valid_to": null,
+      "known_at": 40,
+      "branch_id": "canon",
+      "revisions": [
+        "r1",
+        "r2"
+      ],
+      "reader_from": 40,
+      "work_id": "fog_port"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "port": 37243,
+  "command": [
+    ".venv/bin/python",
+    "-m",
+    "benchmarks.p2_behavioral_load",
+    "--agents",
+    "10",
+    "--arrival-rps",
+    "20",
+    "--output",
+    "evidence/p2/batch3/load/smoke-attempt1.json"
+  ],
+  "started_at_utc": "2026-11-10T12:14:17.795171+00:00",
+  "authentication": "loopback_trust_generated_test_data_only",
+  "fsync": true,
+  "synchronous_commit": true,
+  "max_connections": 60,
+  "data_directory_reused": false,
+  "exit_status": 1,
+  "postgres_exit_status": 0,
+  "duration_seconds": 4.163425,
+  "finished_at_utc": "2026-11-10T12:14:21.958635+00:00"
+}

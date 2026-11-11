@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.711" timestamp="2026-11-10T21:18:13.077336+09:00" hostname="2be49009bab4"><testcase classname="tests.integration.test_short_volume" name="test_six_scene_volume_uses_real_handoffs_and_retains_every_independent_gate" time="0.624"><failure message="novel_factory.domain.errors.DomainError: Invalid WorldDossier: contract constraints failed">tests/integration/test_short_volume.py:17: in test_six_scene_volume_uses_real_handoffs_and_retains_every_independent_gate
+    result = runner.run()
+             ^^^^^^^^^^^^
+src/novel_factory/orchestration/short_volume.py:539: in run
+    self.initialize(); self.initial_plan(); self.simulate(); self.scenes()
+    ^^^^^^^^^^^^^^^^^
+src/novel_factory/orchestration/short_volume.py:201: in initialize
+    self.dossier_ref = self.planning.save_world_dossier(designer, dossier, "volume:dossier")
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/novel_factory/application/planning.py:171: in save_world_dossier
+    dossier = validate_contract("WorldDossier", payload, "planning")
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/novel_factory/contracts/registry.py:66: in validate_contract
+    raise DomainError("INVALID_ARGUMENT", f"Invalid {name}: contract constraints failed")
+E   novel_factory.domain.errors.DomainError: Invalid WorldDossier: contract constraints failed</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,39 @@
+2026-11-10 10:27:08.504 UTC [6] LOG:  starting PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+2026-11-10 10:27:08.504 UTC [6] LOG:  listening on IPv4 address "127.0.0.1", port 42685
+2026-11-10 10:27:08.506 UTC [10] LOG:  database system was shut down at 2026-11-10 10:04:35 UTC
+2026-11-10 10:27:08.508 UTC [6] LOG:  database system is ready to accept connections
+2026-11-10 10:27:08.549 UTC [15] FATAL:  database "nf_dev" does not exist
+2026-11-10 10:27:26.704 UTC [8] LOG:  checkpoint starting: immediate force wait
+2026-11-10 10:27:26.709 UTC [8] LOG:  checkpoint complete: wrote 8 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.003 s, sync=0.002 s, total=0.006 s; sync files=6, longest=0.001 s, average=0.001 s; distance=9256 kB, estimate=9256 kB; lsn=0/3D7AA90, redo lsn=0/3D7AA38
+2026-11-10 10:27:26.960 UTC [6] LOG:  received smart shutdown request
+2026-11-10 10:27:26.963 UTC [6] LOG:  background worker "logical replication launcher" (PID 13) exited with exit code 1
+2026-11-10 10:27:26.963 UTC [8] LOG:  shutting down
+2026-11-10 10:27:26.963 UTC [8] LOG:  checkpoint starting: shutdown immediate
+2026-11-10 10:27:26.965 UTC [8] LOG:  checkpoint complete: wrote 1 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=1, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=8330 kB; lsn=0/3D7AB98, redo lsn=0/3D7AB98
+2026-11-10 10:27:26.968 UTC [6] LOG:  database system is shut down
+2026-11-10 10:29:53.056 UTC [7] LOG:  starting PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+2026-11-10 10:29:53.056 UTC [7] LOG:  listening on IPv4 address "127.0.0.1", port 46519
+2026-11-10 10:29:53.060 UTC [11] LOG:  database system was shut down at 2026-11-10 10:27:26 UTC
+2026-11-10 10:29:53.063 UTC [7] LOG:  database system is ready to accept connections
+2026-11-10 10:29:53.105 UTC [16] FATAL:  database "nf_dev" does not exist
+2026-11-10 10:30:17.642 UTC [9] LOG:  checkpoint starting: immediate force wait
+2026-11-10 10:30:17.650 UTC [9] LOG:  checkpoint complete: wrote 50 buffers (0.3%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.003 s, sync=0.004 s, total=0.009 s; sync files=15, longest=0.001 s, average=0.001 s; distance=11284 kB, estimate=11284 kB; lsn=0/487FF98, redo lsn=0/487FF40
+2026-11-10 10:30:17.962 UTC [7] LOG:  received smart shutdown request
+2026-11-10 10:30:17.963 UTC [7] LOG:  background worker "logical replication launcher" (PID 14) exited with exit code 1
+2026-11-10 10:30:17.964 UTC [9] LOG:  shutting down
+2026-11-10 10:30:17.965 UTC [9] LOG:  checkpoint starting: shutdown immediate
+2026-11-10 10:30:17.967 UTC [9] LOG:  checkpoint complete: wrote 1 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=1, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=10156 kB; lsn=0/48800B8, redo lsn=0/48800B8
+2026-11-10 10:30:17.970 UTC [7] LOG:  database system is shut down
+2026-11-10 10:36:46.355 UTC [7] LOG:  starting PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+2026-11-10 10:36:46.355 UTC [7] LOG:  listening on IPv4 address "127.0.0.1", port 33741
+2026-11-10 10:36:46.357 UTC [11] LOG:  database system was shut down at 2026-11-10 10:30:17 UTC
+2026-11-10 10:36:46.360 UTC [7] LOG:  database system is ready to accept connections
+2026-11-10 10:36:46.401 UTC [16] FATAL:  database "nf_dev" does not exist
+2026-11-10 10:37:12.362 UTC [9] LOG:  checkpoint starting: immediate force wait
+2026-11-10 10:37:12.366 UTC [9] LOG:  checkpoint complete: wrote 8 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.001 s, sync=0.002 s, total=0.004 s; sync files=6, longest=0.001 s, average=0.001 s; distance=11490 kB, estimate=11490 kB; lsn=0/53B8C00, redo lsn=0/53B8BA8
+2026-11-10 10:37:12.749 UTC [7] LOG:  received smart shutdown request
+2026-11-10 10:37:12.752 UTC [7] LOG:  background worker "logical replication launcher" (PID 14) exited with exit code 1
+2026-11-10 10:37:12.752 UTC [9] LOG:  shutting down
+2026-11-10 10:37:12.753 UTC [9] LOG:  checkpoint starting: shutdown immediate
+2026-11-10 10:37:12.755 UTC [9] LOG:  checkpoint complete: wrote 1 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=1, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=10341 kB; lsn=0/53B8D08, redo lsn=0/53B8D08
+2026-11-10 10:37:12.759 UTC [7] LOG:  database system is shut down

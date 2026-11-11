@@ -1,0 +1,97 @@
+{
+  "real_transport": "loopback TCP proxy dropped full upstream success before any downstream response",
+  "network_error_type": "RemoteProtocolError",
+  "network_error": "Server disconnected without sending a response.",
+  "request_sha256": "38fd117872a468a5428049e43333f195c547af1b672bfed7cd3c9a8ca57fa29c",
+  "accepted_receipt": {
+    "command_id": "fd208658-f507-40a9-9b75-4250e33ae03f",
+    "world_ref": {
+      "work_id": "58620015-9410-4bcc-abb6-81cacac5fcfd",
+      "branch_id": "1ef84346-e0ff-4c3a-ae08-927991aed6ad",
+      "world_revision_id": "7a9bca2b-68e3-4e00-b45c-85a359b5798b"
+    },
+    "branch_seq": 1,
+    "accepted_event_refs": [
+      {
+        "occurrence_id": "55608a86-a580-5e44-b458-2cb2cf71909e",
+        "event_version_id": "1d6ab81f-1022-54c2-8837-6a11293eecc8"
+      }
+    ],
+    "manifest_sha256": "6781baff4eaa4072b7554c1910d63ecbe92de708bb9c7348a4138f8fcc27937a",
+    "recorded_at": "2026-11-10T12:37:13.763981+00:00",
+    "original_base_world_ref": {
+      "work_id": "58620015-9410-4bcc-abb6-81cacac5fcfd",
+      "branch_id": "1ef84346-e0ff-4c3a-ae08-927991aed6ad",
+      "world_revision_id": "08d0539e-4f97-4522-8df0-1e6b83f93f9f"
+    },
+    "validation_world_ref": {
+      "work_id": "58620015-9410-4bcc-abb6-81cacac5fcfd",
+      "branch_id": "1ef84346-e0ff-4c3a-ae08-927991aed6ad",
+      "world_revision_id": "08d0539e-4f97-4522-8df0-1e6b83f93f9f"
+    },
+    "parent_world_ref": {
+      "work_id": "58620015-9410-4bcc-abb6-81cacac5fcfd",
+      "branch_id": "1ef84346-e0ff-4c3a-ae08-927991aed6ad",
+      "world_revision_id": "08d0539e-4f97-4522-8df0-1e6b83f93f9f"
+    },
+    "acceptance_certificate_ref": {
+      "artifact_id": "7865dcab-0ba6-4160-9d10-789b36d06a36",
+      "artifact_revision_id": "965ed12a-42eb-474e-96ab-3ee03286f968",
+      "sha256": "24770f88c1d9bf3915267413b1f1d7ac517bceb8ab363f7e8b9829d03f680396"
+    },
+    "proposal_ref": {
+      "sha256": "c1b3033e744747c62761d449a966eb27f0c771bb6eb83334ec353ae14d0633b3",
+      "artifact_id": "caff8fe4-5fd7-4a9c-98a9-7f26d11848f1",
+      "artifact_revision_id": "169080f6-296b-432e-a9ea-64b8c8887dc5"
+    }
+  },
+  "retry_receipt": {
+    "world_ref": {
+      "work_id": "58620015-9410-4bcc-abb6-81cacac5fcfd",
+      "branch_id": "1ef84346-e0ff-4c3a-ae08-927991aed6ad",
+      "world_revision_id": "7a9bca2b-68e3-4e00-b45c-85a359b5798b"
+    },
+    "branch_seq": 1,
+    "command_id": "fd208658-f507-40a9-9b75-4250e33ae03f",
+    "recorded_at": "2026-11-10T12:37:13.763981+00:00",
+    "proposal_ref": {
+      "sha256": "c1b3033e744747c62761d449a966eb27f0c771bb6eb83334ec353ae14d0633b3",
+      "artifact_id": "caff8fe4-5fd7-4a9c-98a9-7f26d11848f1",
+      "artifact_revision_id": "169080f6-296b-432e-a9ea-64b8c8887dc5"
+    },
+    "manifest_sha256": "6781baff4eaa4072b7554c1910d63ecbe92de708bb9c7348a4138f8fcc27937a",
+    "parent_world_ref": {
+      "work_id": "58620015-9410-4bcc-abb6-81cacac5fcfd",
+      "branch_id": "1ef84346-e0ff-4c3a-ae08-927991aed6ad",
+      "world_revision_id": "08d0539e-4f97-4522-8df0-1e6b83f93f9f"
+    },
+    "accepted_event_refs": [
+      {
+        "occurrence_id": "55608a86-a580-5e44-b458-2cb2cf71909e",
+        "event_version_id": "1d6ab81f-1022-54c2-8837-6a11293eecc8"
+      }
+    ],
+    "validation_world_ref": {
+      "work_id": "58620015-9410-4bcc-abb6-81cacac5fcfd",
+      "branch_id": "1ef84346-e0ff-4c3a-ae08-927991aed6ad",
+      "world_revision_id": "08d0539e-4f97-4522-8df0-1e6b83f93f9f"
+    },
+    "original_base_world_ref": {
+      "work_id": "58620015-9410-4bcc-abb6-81cacac5fcfd",
+      "branch_id": "1ef84346-e0ff-4c3a-ae08-927991aed6ad",
+      "world_revision_id": "08d0539e-4f97-4522-8df0-1e6b83f93f9f"
+    },
+    "acceptance_certificate_ref": {
+      "sha256": "24770f88c1d9bf3915267413b1f1d7ac517bceb8ab363f7e8b9829d03f680396",
+      "artifact_id": "7865dcab-0ba6-4160-9d10-789b36d06a36",
+      "artifact_revision_id": "965ed12a-42eb-474e-96ab-3ee03286f968"
+    }
+  },
+  "mismatch_code": "IDEMPOTENCY_MISMATCH",
+  "duplicate_code": "ALREADY_ACCEPTED",
+  "revoked_status": 401,
+  "world_effect_groups": 1,
+  "outbox_id": "e24a3946-f04f-4dce-94ef-f0dc0157bba6",
+  "derived_generation": 1,
+  "external_model_calls_during_recovery": 0
+}

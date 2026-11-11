@@ -1,0 +1,25 @@
+{
+  "collected_at": "2026-11-10T16:39:05.062Z",
+  "commits": [
+    {
+      "sha": "6eadcc325a75ccb7d600c56cb4c023d367dc9ede",
+      "tree_sha": "8db652361f4e67819e753767772093206fa553dc",
+      "parents": [
+        "721f155c9cc912cddfdae559afe4f2516d0967f2",
+        "0a0af490c7768fe4b7d2da16dbaa74f0d9585f0d"
+      ],
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/commit/6eadcc325a75ccb7d600c56cb4c023d367dc9ede",
+      "message": "Merge 0a0af490c7768fe4b7d2da16dbaa74f0d9585f0d into 721f155c9cc912cddfdae559afe4f2516d0967f2"
+    },
+    {
+      "sha": "0a0af490c7768fe4b7d2da16dbaa74f0d9585f0d",
+      "tree_sha": "8db652361f4e67819e753767772093206fa553dc",
+      "parents": [
+        "e0b0f2b080f3225d8be8e202e13258bc480f5b84"
+      ],
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/commit/0a0af490c7768fe4b7d2da16dbaa74f0d9585f0d",
+      "message": "perf(p2): reuse validated genesis and measure isolated capacity without relaxing gates\n\nPreserve full event replay, authorization, task generation, certificates, transaction rollback and effect uniqueness. Batch selected event reads and mapping inserts; reuse an identical validated revision inside one repeatable-read transaction. Add bounded process/client/SQL observations and two independent-process CI repeats for every original 50/200 capacity cell.\n\nVerified 146 unit/contract and 41 real PostgreSQL focused tests, 10-agent TCP smoke, failed-SQL timing counterexample and five full-snapshot paired replay comparisons. Capacity remains gated on original targets; no merge or production claim. Preserve historical context experiment under its exact pinned core and add current-core replay evidence."
+    }
+  ],
+  "tree_identical": true
+}

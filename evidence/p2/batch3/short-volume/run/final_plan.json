@@ -1,0 +1,175 @@
+{
+  "nodes": [
+    {
+      "goal": "领取铜汛印",
+      "status": "VIABLE",
+      "node_id": "92f94727-7964-48a5-a818-1614d8fd7327",
+      "risk_notes": [
+        "计划不是已发生事件"
+      ],
+      "subject_ids": [
+        "6f352e8f-1163-588f-af0a-71d2660e9e4b"
+      ],
+      "target_time": {
+        "at": {
+          "tick": 2,
+          "phase": 0
+        },
+        "kind": "EXACT"
+      },
+      "failure_exit": "保留后果并核验局部替代路径",
+      "hard_preconditions": [],
+      "fulfillment_event_refs": []
+    },
+    {
+      "goal": "北仓和南埠分别核算独立需要",
+      "status": "VIABLE",
+      "node_id": "1bb3a0b5-328e-4e63-a4b7-b57737d87266",
+      "risk_notes": [
+        "计划不是已发生事件"
+      ],
+      "subject_ids": [
+        "6f352e8f-1163-588f-af0a-71d2660e9e4b"
+      ],
+      "target_time": {
+        "at": {
+          "tick": 3,
+          "phase": 0
+        },
+        "kind": "EXACT"
+      },
+      "failure_exit": "保留后果并核验局部替代路径",
+      "hard_preconditions": [],
+      "fulfillment_event_refs": []
+    },
+    {
+      "goal": "在潮闸分配有限粮食",
+      "status": "VIABLE",
+      "node_id": "c3e79446-2531-4cd8-b484-cf53d90ae814",
+      "risk_notes": [
+        "计划不是已发生事件"
+      ],
+      "subject_ids": [
+        "6f352e8f-1163-588f-af0a-71d2660e9e4b"
+      ],
+      "target_time": {
+        "at": {
+          "tick": 4,
+          "phase": 0
+        },
+        "kind": "EXACT"
+      },
+      "failure_exit": "保留后果并核验局部替代路径",
+      "hard_preconditions": [],
+      "fulfillment_event_refs": []
+    },
+    {
+      "goal": "承认铜印损毁并保留公账",
+      "status": "VIABLE",
+      "node_id": "9e9174cd-ca4c-4e27-935b-4800fde774c3",
+      "risk_notes": [
+        "计划不是已发生事件"
+      ],
+      "subject_ids": [
+        "8a460762-9ed1-5118-8edf-ba53f0210396"
+      ],
+      "target_time": {
+        "at": {
+          "tick": 5,
+          "phase": 0
+        },
+        "kind": "EXACT"
+      },
+      "failure_exit": "保留后果并核验局部替代路径",
+      "hard_preconditions": [],
+      "fulfillment_event_refs": []
+    },
+    {
+      "goal": "改由共同汛务与有据记录建立协作",
+      "status": "VIABLE",
+      "node_id": "a962140e-8cb2-4c60-85cd-c3415eeecf94",
+      "risk_notes": [
+        "计划不是已发生事件"
+      ],
+      "subject_ids": [
+        "6f352e8f-1163-588f-af0a-71d2660e9e4b"
+      ],
+      "target_time": {
+        "at": {
+          "tick": 6,
+          "phase": 0
+        },
+        "kind": "EXACT"
+      },
+      "failure_exit": "保留后果并核验局部替代路径",
+      "hard_preconditions": [],
+      "fulfillment_event_refs": []
+    },
+    {
+      "goal": "核查交付后的余数",
+      "status": "VIABLE",
+      "node_id": "27ce37b8-4333-46e5-9db2-5e950ab2ace7",
+      "risk_notes": [
+        "计划不是已发生事件"
+      ],
+      "subject_ids": [
+        "6f352e8f-1163-588f-af0a-71d2660e9e4b"
+      ],
+      "target_time": {
+        "at": {
+          "tick": 7,
+          "phase": 0
+        },
+        "kind": "EXACT"
+      },
+      "failure_exit": "保留后果并核验局部替代路径",
+      "hard_preconditions": [],
+      "fulfillment_event_refs": []
+    }
+  ],
+  "plan_id": "e761829d-93d4-4ab5-8282-49fd0c2caa10",
+  "decision": {
+    "reason": "毁印使两项依赖失效；北仓清点及其他场景保持不变",
+    "considered_options": [
+      {
+        "reason": "毁印使两项依赖失效；北仓清点及其他场景保持不变",
+        "summary": "有据的共同责任",
+        "option_id": "a5cead69-5be4-4a94-b97c-4d940dfc97dd",
+        "disposition": "SELECTED"
+      },
+      {
+        "reason": "无法尊重已有世界记录或独立动机",
+        "summary": "恢复完好铜印",
+        "option_id": "1ebb441d-5809-453a-a225-d9e874629c44",
+        "disposition": "REJECTED"
+      }
+    ]
+  },
+  "volume_id": "21d70246-0e8c-44d1-ab68-7b8255097353",
+  "dependencies": [
+    {
+      "kind": "HARD_PREREQUISITE",
+      "reason": "原协作路线以完好铜印作凭证",
+      "source_node_id": "9e9174cd-ca4c-4e27-935b-4800fde774c3",
+      "target_node_id": "a962140e-8cb2-4c60-85cd-c3415eeecf94"
+    }
+  ],
+  "prior_plan_ref": {
+    "sha256": "b29c52310e9740cab900b49ed1554bbbf169db912e50c96c6e5d1ec3dab5c227",
+    "artifact_id": "2c83df9d-7bb1-4562-b344-4b7e7ba187d2",
+    "artifact_revision_id": "1b39a3ef-6427-4c8d-8b14-c322fb8a99bb"
+  },
+  "schema_version": "2.1",
+  "input_world_ref": {
+    "work_id": "97811bef-144d-4504-88e9-0cd6f3a2b34e",
+    "branch_id": "9d378f0d-3b52-4f1b-9c1d-e148b9e9f88f",
+    "world_revision_id": "8b99e25b-e930-47ea-b171-0f1bd7d981f6"
+  },
+  "plan_revision_id": "435a12e9-161c-495d-9878-7f7658addf21",
+  "volume_contract_ref": {
+    "sha256": "73ef409168c91fb79bc08c45252b1e7425a10e9e359274172ad43d24ca6b59c2",
+    "artifact_id": "747f3792-db7b-4653-bbac-5014400b346d",
+    "artifact_revision_id": "1f4478d3-cd79-4d26-b347-ba3c4fd87035"
+  },
+  "published_prefix_node_ids": []
+}
