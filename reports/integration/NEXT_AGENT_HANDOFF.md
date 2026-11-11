@@ -12,3 +12,5 @@ W5 已在 `b30e76978830bec4c596c04194d749fd01f67402` 完成正式主线签收。
 [历次 W4 事故和 W5 合并前检查点的历史交接](https://github.com/SKYdayDUCK/NovelFactory/blob/d831b0a53cffa12551fe785ad45b756136ffb999/reports/integration/NEXT_AGENT_HANDOFF.md)。
 
 W5 主线签收 b30e76978830，当前只有 W6 #15。核实集成候选的八条部署升级、四个预设、两个受限 SSH 代理、双库恢复与十/五十/二百员工；提交、CI、实际合并、同 main 重跑后再签收。随后独立进行 P5.6 主线全系统验收。
+
+W6 #15 的当前正式候选为 `50c8c5ed36cc2cfb83d6624c65ed33336e0f1771`，树 `7053bf12cc789dc6bf4220d0217a93253a2b75f9`。GitHub 预合并 a1f1021a 与该候选同树，目标 W5 main 为 b30e7697。归档 [当前正式工作流](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43118072846) 和另外五个运行、同 SHA 原生完整 PostgreSQL，再按 Issue #13 逐项匹配历史未达门槛。确认精确 head/base 后正式合并并在新 main 重新验证。
