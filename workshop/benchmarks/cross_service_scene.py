@@ -481,10 +481,28 @@ def test_real_delegation_unblocks_banquet_actor(
             ],
             env={"PYTHONPATH": str(NF / "src")},
         )
-        assert (
-            await reconcile(aw_dsn, installation, org, state["operation_id"], remote(args))
-            == "BOUND"
-        )
+        async def scheduled_lookup():
+            operation = state["operation_id"]
+            with connect(aw_dsn) as conn:
+                row = conn.execute(
+                    """SELECT state, next_check - clock_timestamp() AS remaining
+                       FROM aw_delegations
+                       WHERE installation_id=%s AND org_id=%s AND operation_id=%s""",
+                    (installation, org, operation),
+                ).fetchone()
+                assert row and row["state"] == "BOUND"
+            # The broker persists its next eligible claim after each receipt.
+            # Independent review and author reporting can finish before that time.
+            wait_seconds = max(0.0, row["remaining"].total_seconds())
+            async with asyncio.timeout(30):
+                await asyncio.sleep(wait_seconds)
+                result = await reconcile(aw_dsn, installation, org, operation, remote(args))
+            state.setdefault("scheduled_lookups", []).append(
+                {"wait_seconds": wait_seconds, "result": result}
+            )
+            return result
+
+        assert await scheduled_lookup() == "BOUND"
         with connect(aw_dsn) as conn:
             attempt = conn.execute(
                 "SELECT attempt_id FROM aw_cost_observations WHERE org_id=%s AND state='UNKNOWN'",
@@ -569,10 +587,7 @@ def test_real_delegation_unblocks_banquet_actor(
                 ),
             )
             state["author_retrieval"] = mail.history
-        assert (
-            await reconcile(aw_dsn, installation, org, state["operation_id"], remote(args))
-            == "SETTLED"
-        )
+        assert await scheduled_lookup() == "SETTLED"
 
     asyncio.run(finish())
     with connect(aw_dsn) as conn:
