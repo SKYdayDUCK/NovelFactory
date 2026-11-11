@@ -1,11 +1,18 @@
 """PostgreSQL checks for public roster projections and independent staffing slots."""
 import os
+from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 from threading import Barrier
 from uuid import uuid4
 
 import pytest
+from alembic.config import Config
+from alembic.migration import MigrationContext
+from alembic.operations import Operations
+from alembic.script import ScriptDirectory
 from psycopg.errors import UniqueViolation
+from sqlalchemy import create_engine
+from sqlalchemy.engine import make_url
 
 from agent_workshop.auth import Denied, Session, connect
 from agent_workshop.organization import TOOLS, bootstrap, roster, state
@@ -114,3 +121,43 @@ def test_competing_employees_cannot_claim_one_active_slot(organization):
             {"display_name": winner, "slot_id": "speaking", "status": status}
             for status in ("ACTIVE", "SUSPENDED")
         ]
+
+
+
+def test_existing_w001_directory_and_tenure_backfill():
+    root = Path(__file__).resolve().parents[1]
+    scripts = ScriptDirectory.from_config(Config(str(root / "alembic.ini")))
+    engine = create_engine(make_url(os.environ["AW_DATABASE_URL"]).set(drivername="postgresql+psycopg"))
+    try:
+        with engine.connect() as conn:
+            # The running Workshop schema stays available, and connection close rolls this fixture back.
+            schema = "legacy_directory_" + uuid4().hex
+            conn.exec_driver_sql(f'CREATE SCHEMA "{schema}"')
+            conn.exec_driver_sql(f'SET LOCAL search_path TO "{schema}"')
+            with Operations.context(MigrationContext.configure(conn)):
+                scripts.get_revision("w000").module.upgrade()
+                scripts.get_revision("w001").module.upgrade()
+                conn.exec_driver_sql("""
+                    INSERT INTO aw_organizations VALUES ('legacy',2,'Standard','frozen','org');
+                    INSERT INTO aw_org_revisions
+                        (org_id,revision,preset,preset_sha,changed_by,change_kind)
+                        VALUES ('legacy',1,'Standard','frozen','manager','BOOTSTRAP'),
+                               ('legacy',2,'Standard','frozen','manager','SUSPEND');
+                    INSERT INTO aw_employees VALUES
+                        ('legacy','performer',2,'character_actor','actors',NULL,'org','SUSPENDED');
+                    INSERT INTO aw_employment_versions VALUES
+                        ('legacy','performer',1,1,'character_actor','actors',NULL,'org','ACTIVE'),
+                        ('legacy','performer',2,2,'character_actor','actors',NULL,'org','SUSPENDED');
+                """)
+                scripts.get_revision("w001a").module.upgrade()
+                scripts.get_revision("w001b").module.upgrade()
+            assert conn.exec_driver_sql(
+                "SELECT employee_id,display_name,slot_id,status FROM aw_employees"
+            ).all() == [("performer", "performer", "performer", "SUSPENDED")]
+            assert conn.exec_driver_sql(
+                """SELECT employment_revision,display_name,slot_id,status FROM aw_employment_versions
+                   ORDER BY employment_revision"""
+            ).all() == [(1, "performer", "performer", "ACTIVE"),
+                        (2, "performer", "performer", "SUSPENDED")]
+    finally:
+        engine.dispose()
