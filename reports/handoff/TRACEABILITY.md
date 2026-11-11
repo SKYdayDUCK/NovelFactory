@@ -9,3 +9,4 @@
 | FR-AW-05–09 / AT-41–43 | evidence/workshop/w2/junit.xml；越级/任期/临时授权/回执/Redis 故障 | PASS（专项） |
 | FR-XSYS-01–07 / AT-46,47 | evidence/workshop/w3/{dual,saga}.xml；独立数据库角色、双 MCP、原键回收、Hold 与 NF 取消结算；双库 PITR 验收尚未完成 | PARTIAL |
 | FR-AW-10–13,17 / AT-44,45 | evidence/workshop/w4/staged.xml；五类分享、冻结哈希、七类审核、实质代理回避、审核专属额度守卫 | PASS（本地专项） |
+| FR-AW-14–16,18 / AT-48,49 | 初版 W5 工件见 `evidence/workshop/w5/`。安装后的管理者、旧库升级和双服务故障恢复见 [W5 验收契约](../integration/W5_契约验收.md)。 | 以 [阶段台账](../integration/DELIVERY_LEDGER.md) 的候选与主线记录为准 |
