@@ -16,7 +16,7 @@ def team():
     dsn = os.environ["AW_DATABASE_URL"]
     with connect(dsn) as conn:
         conn.execute("INSERT INTO aw_installations VALUES (%s,%s,true)", (install, str(uuid4())))
-        bootstrap(conn, org, "Standard")
+        bootstrap(conn, org, "Standard", installation_id=install)
         tokens = {
             name: enroll(conn, install, org, name, 1, 1)
             for name in ("manager", "volume", "actor-1")
@@ -35,9 +35,9 @@ def test_preview_cas_switch_across_four_presets_and_restore_tenure(team):
         manager = authenticate(c, tokens["manager"])
         p = presets.preview(c, manager, "Minimal")
         assert set(p["suspend"]) == {"review-lead", "reviewer", "writer"}
-        original = bootstrap(c, org, "Standard")
+        original = bootstrap(c, org, "Standard", installation_id=manager.installation_id)
         first = switch(c, manager, "Minimal", "1")
-        assert bootstrap(c, org, "Standard") == original
+        assert bootstrap(c, org, "Standard", installation_id=manager.installation_id) == original
         assert (
             presets.apply_preset(c, manager, "Minimal", "1", p["revision"], p["preview_sha"])
             == first
@@ -159,57 +159,78 @@ def test_trusted_roster_and_unknown_delegation_ceiling(team):
         ).fetchone() == {"state": "RECONCILING", "status": "HELD"}
 
 
-def test_upgrade_from_w002_keeps_mail_without_inventing_an_origin(monkeypatch):
-    from agent_workshop.auth import Session
+@pytest.mark.parametrize(
+    ("target", "slot", "change"),
+    [("Standard", "reviewer", "reactivate"), ("Long-form", "memory", "add")],
+)
+def test_preset_reports_manually_occupied_slot_before_apply(team, target, slot, change):
+    dsn, org, tokens = team
+    with connect(dsn) as conn:
+        manager = authenticate(conn, tokens["manager"])
+        switch(conn, manager, "Minimal", "park-reviews")
+        TOOLS["aw_hire"][2](
+            conn, manager, expected_revision=2, operation_id="manual-staffing",
+            employee_id="cover", role_id="character_actor", supervisor_id="volume",
+            team_id="actors", slot_id=slot, display_name="Temporary cover",
+        )
+        preview = presets.preview(conn, manager, target)
+        assert slot in preview[change]
+        assert slot in preview["blocked"]
+        with pytest.raises(Denied, match="PRESET_CONFLICT"):
+            presets.apply_preset(conn, manager, target, "switch-with-cover", 3, preview["preview_sha"])
+        cover = employee(conn, org, "cover")
+        assert (cover["status"], cover["slot_id"], cover["employment_revision"]) == ("ACTIVE", slot, 1)
+        assert presets.preview(conn, manager, target) == preview
+
+        TOOLS["aw_suspend"][2](
+            conn, manager, expected_revision=3, operation_id="end-cover", employee_id="cover",
+        )
+        available = presets.preview(conn, manager, target)
+        assert slot not in available["blocked"]
+        result = presets.apply_preset(conn, manager, target, "switch-after-cover", 4, available["preview_sha"])
+        assert result["revision"] == 5
+        assert employee(conn, org, slot)["status"] == "ACTIVE"
+        assert employee(conn, org, "cover")["status"] == "SUSPENDED"
+
+
+def test_upgrade_from_w002_keeps_mail_without_inventing_an_origin(monkeypatch, tmp_path):
     from alembic import command
     from alembic.config import Config
+    from legacy_w002 import seed_historical_w002
     from psycopg import sql
     from sqlalchemy.engine import make_url
+
+    from agent_workshop.organization import claim_organization
 
     base = os.environ["AW_DATABASE_URL"]
     name = "aw_upgrade_" + uuid4().hex
     with connect(base) as conn:
         conn.execute(sql.SQL("CREATE SCHEMA {}").format(sql.Identifier(name)))
-    scoped = (
-        make_url(base)
-        .update_query_dict({"options": "-csearch_path=" + name})
-        .render_as_string(hide_password=False)
-    )
+    scoped = make_url(base).update_query_dict(
+        {"options": "-csearch_path=" + name}
+    ).render_as_string(hide_password=False)
     monkeypatch.setenv("AW_DATABASE_URL", scoped)
     try:
-        command.upgrade(Config("alembic.ini"), "w002")
-        org, mid = "legacy", uuid4()
+        org = "legacy"
+        old = seed_historical_w002(scoped, org, tmp_path)
+        command.upgrade(Config("alembic.ini"), "head")
         with connect(scoped) as conn:
-            bootstrap(conn, org)
-            conn.execute(
-                """INSERT INTO aw_messages(org_id,message_id,operation_id,sender,sender_revision,recipient,
-                recipient_revision,graph_revision,kind,scope_ref,root_id,hops,expires_at) VALUES
-                (%s,%s,'old-send','volume',1,'actor-1',1,1,'ASSIGN','organization',%s,0,now()+interval '1 hour')""",
-                (org, mid, mid),
-            )
-            conn.execute("INSERT INTO aw_deliveries VALUES(%s,%s,'actor-1',1,1,NULL)", (org, mid))
-            conn.execute(
-                "INSERT INTO aw_outbox(event_id,org_id,message_id) VALUES(%s,%s,%s)",
-                (uuid4(), org, mid),
-            )
-        command.upgrade(Config("alembic.ini"), "w006")
-        with connect(scoped) as conn:
-            actor = Session(org, "actor-1", 1, 1, "legacy")
-            assert messaging.mailbox(conn, actor)["items"] == [
-                {"sequence": 1, "status": "UNAVAILABLE"}
-            ]
-            assert (
-                conn.execute(
-                    "SELECT count(*) AS n FROM aw_messages WHERE message_id=%s", (mid,)
-                ).fetchone()["n"]
-                == 1
-            )
-            assert (
-                conn.execute(
-                    "SELECT count(*) AS n FROM aw_preset_members WHERE org_id=%s", (org,)
-                ).fetchone()["n"]
-                == 8
-            )
+            assert conn.execute("SELECT owner_installation_id FROM aw_organizations").fetchone()["owner_installation_id"] is None
+            assert not conn.execute("SELECT org_member FROM aw_bindings").fetchone()["org_member"]
+            claim_organization(conn, org, old["installation_id"])
+            actor = authenticate(conn, enroll(conn, old["installation_id"], org, "actor-1", 1, 1))
+            assert messaging.mailbox(conn, actor)["items"] == [{"sequence": 1, "status": "UNAVAILABLE"}]
+            with pytest.raises(Denied, match="SENDER_BINDING_UNVERIFIED"):
+                messaging.body_get(conn, actor, old["message_id"])
+            assert conn.execute("SELECT count(*) AS n FROM aw_messages WHERE message_id=%s", (old["message_id"],)).fetchone()["n"] == 1
+            assert old["member_count"] == 8
+            retained = conn.execute(
+                """SELECT p.employee_id, p.managed_revision, e.employment_revision
+                   FROM aw_preset_members p JOIN aw_employees e USING (org_id,employee_id)
+                   WHERE p.org_id=%s AND NOT p.parked ORDER BY p.employee_id""", (org,)
+            ).fetchall()
+            assert len(retained) == old["member_count"]
+            assert all(row["managed_revision"] == row["employment_revision"] == 1 for row in retained)
     finally:
         with connect(base) as conn:
             conn.execute(sql.SQL("DROP SCHEMA {} CASCADE").format(sql.Identifier(name)))

@@ -113,8 +113,8 @@ def test_logical_delegation_backlog(dual_databases, tmp_path, size, policy):
             return {"database_url": dsn, "token": enroll(c, inst, org, e, 1, 1)}
 
         with connect(dsn) as c:
-            bootstrap(c, org)
             c.execute("INSERT INTO aw_installations VALUES (%s,%s,true)", (inst, instance))
+            bootstrap(c, org, installation_id=inst)
             c.execute(
                 "INSERT INTO aw_budget_accounts VALUES (%s,%s,'USD')", (org, Decimal(".10") * size)
             )

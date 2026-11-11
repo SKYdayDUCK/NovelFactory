@@ -3,6 +3,7 @@
 import argparse
 import json
 import os
+from collections import Counter
 
 from .auth import Denied, connect
 from .messaging import operation
@@ -71,6 +72,15 @@ def _plan(conn, session, target):
             and row["supervisor_id"] in park
         ):
             blocked.append(row["employee_id"])
+    # Suspensions free their slots before this transaction adds or reactivates staff.
+    # A manually appointed employee keeps the slot until their own tenure ends.
+    occupied = Counter(
+        row["slot_id"] for row in data
+        if row["status"] == "ACTIVE" and row["employee_id"] not in park
+    )
+    requested = {key: people[key]["slot_id"] if key in people else key for key in add + resume}
+    occupied.update(requested.values())
+    blocked.extend(key for key, slot in requested.items() if occupied[slot] > 1)
     for key in add + resume:
         _, role, sup, team = new[key]
         if sup not in add + resume and (

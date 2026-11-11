@@ -216,7 +216,7 @@ def test_real_delegation_unblocks_banquet_actor(
                 "INSERT INTO aw_installations(installation_id,nf_instance_id) VALUES (%s,%s)",
                 (installation, instance),
             )
-            bootstrap(conn, org, preset)
+            bootstrap(conn, org, preset, installation_id=installation)
             conn.execute("INSERT INTO aw_budget_accounts VALUES (%s,%s,%s)", (org, "2", "USD"))
         path = private_file(
             tmp_path / "nf-delegate.json",

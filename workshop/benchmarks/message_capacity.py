@@ -43,7 +43,7 @@ def provision(dsn, size):
             raise RuntimeError("Provide a fresh, dedicated aw_benchmark_* database.")
         conn.execute("INSERT INTO aw_installations (installation_id,nf_instance_id) VALUES (%s,%s)",
                      (org, org))
-        bootstrap(conn, org)
+        bootstrap(conn, org, installation_id=org)
         lead = {"database_url": dsn, "token": enroll(conn, org, org, "manager", 1, 1)}
         occupied = conn.execute("SELECT count(*) AS n FROM aw_employees WHERE org_id=%s",
                                 (org,)).fetchone()["n"]
