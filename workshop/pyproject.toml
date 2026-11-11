@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling==1.33.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agent-workshop"
+version = "0.1.0"
+description = "Independent organization control plane for NovelFactory"
+requires-python = ">=3.12,<3.13"
+dependencies = ["alembic>=1.14,<2", "psycopg[binary]>=3.2,<4", "sqlalchemy>=2,<2.1", "mcp==1.29.0", "jsonschema>=4.23,<5"]
+
+[dependency-groups]
+dev = ["pytest>=8.3,<10"]
+
+[project.scripts]
+aw-mcp = "agent_workshop.server:main"
+aw-admin = "agent_workshop.admin:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

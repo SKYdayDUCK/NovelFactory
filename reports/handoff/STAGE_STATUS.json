@@ -1,0 +1,60 @@
+{
+  "A": {
+    "status": "IN_PROGRESS",
+    "result": "NOT_MET",
+    "inspected_sha": "9dc9c6b806b8ac43f56d0893194a5b402f3f16ca",
+    "pr": 5,
+    "blocker": "three inherited workflows failed",
+    "next": "fix and rerun same-head gates before merge"
+  },
+  "B": {
+    "status": "IN_PROGRESS",
+    "result": "NOT_MET",
+    "inspected_sha": "b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5",
+    "pr": 6,
+    "blocker": "three inherited workflows failed",
+    "next": "fix and rerun same-head gates before merge"
+  },
+  "W0": {
+    "status": "IN_PROGRESS",
+    "result": "PARTIAL",
+    "evidence": "evidence/W0",
+    "tests": {
+      "nf": 4,
+      "aw": 2
+    },
+    "next": "remote Workshop CI and scoped discovery"
+  },
+  "W1": {
+    "status": "NOT_STARTED",
+    "result": "NOT_EXECUTED"
+  },
+  "W2": {
+    "status": "NOT_STARTED",
+    "result": "NOT_EXECUTED"
+  },
+  "W3": {
+    "status": "NOT_STARTED",
+    "result": "NOT_EXECUTED"
+  },
+  "W4": {
+    "status": "NOT_STARTED",
+    "result": "NOT_EXECUTED"
+  },
+  "W5": {
+    "status": "NOT_STARTED",
+    "result": "NOT_EXECUTED"
+  },
+  "W6": {
+    "status": "NOT_STARTED",
+    "result": "NOT_EXECUTED"
+  },
+  "C": {
+    "status": "BLOCKED",
+    "result": "BLOCKED_ENVIRONMENT",
+    "missing": [
+      "project-authorized provider binding and spend limits",
+      "two independent literary reviews"
+    ]
+  }
+}
