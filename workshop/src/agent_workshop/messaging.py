@@ -149,38 +149,32 @@ def register_body(conn, session, operation_id, recipient, scope_ref, content):
     sender = require_employee(conn, session)
     if sender["scope_ref"] != scope_ref:
         raise Denied("ROUTE_DENIED")
-    target = _peer(conn, session.org_id, recipient, scope_ref)
-    direct = conn.execute(
-        """SELECT 1 FROM aw_current_message_edges
-           WHERE org_id=%s AND src=%s AND dst=%s AND scope_ref=%s AND kind<>'INCIDENT' LIMIT 1""",
-        (session.org_id, session.employee_id, recipient, scope_ref),
-    ).fetchone()
-    if not direct and not _grant(
-        conn, session.org_id, session.employee_id, recipient, scope_ref,
-        session.employment_revision, target["employment_revision"], remaining=True,
-    ):
-        raise Denied("ROUTE_DENIED")
-    if not 0 < len(content.encode()) <= 16384:
-        raise Denied("INVALID_BODY")
     with operation(
         conn, session, "REGISTER_BODY", operation_id, [recipient, scope_ref, content]
     ) as (old, receipt):
-        if not old:
-            key = uuid4()
-            conn.execute(
-                "INSERT INTO aw_message_bodies VALUES (%s,%s,%s,%s,%s,%s,%s,%s)",
-                (
-                    session.org_id,
-                    key,
-                    session.employee_id,
-                    recipient,
-                    session.employment_revision,
-                    target["employment_revision"],
-                    scope_ref,
-                    content,
-                ),
-            )
-            receipt.update(body_ref=str(key))
+        if old:
+            # Only the same principal, tenure and request hash can replay this opaque receipt.
+            return receipt
+        target = _peer(conn, session.org_id, recipient, scope_ref)
+        direct = conn.execute(
+            """SELECT 1 FROM aw_current_message_edges
+               WHERE org_id=%s AND src=%s AND dst=%s AND scope_ref=%s AND kind<>'INCIDENT' LIMIT 1""",
+            (session.org_id, session.employee_id, recipient, scope_ref),
+        ).fetchone()
+        if not direct and not _grant(
+            conn, session.org_id, session.employee_id, recipient, scope_ref,
+            session.employment_revision, target["employment_revision"], remaining=True,
+        ):
+            raise Denied("ROUTE_DENIED")
+        if not 0 < len(content.encode()) <= 16384:
+            raise Denied("INVALID_BODY")
+        key = uuid4()
+        conn.execute(
+            """INSERT INTO aw_message_bodies VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""",
+            (session.org_id, key, session.employee_id, recipient, session.employment_revision,
+             target["employment_revision"], scope_ref, content),
+        )
+        receipt.update(body_ref=str(key))
         return receipt
 
 
