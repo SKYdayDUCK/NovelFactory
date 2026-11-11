@@ -266,7 +266,8 @@ def main():
     args = parser.parse_args()
     evidence = {"status": "FAILED", "stage": "preflight"}
     try:
-        interfaces = {p.name for p in Path("/sys/class/net").iterdir()}
+        interfaces = {row.split(":", 1)[0].strip()
+                      for row in Path("/proc/net/dev").read_text().splitlines()[2:]}
         if os.getuid() == 0 or interfaces != {"lo"} or not os.environ.get("DISPLAY"):
             raise RuntimeError("Requires an ordinary user, loopback-only namespace, and Xvfb DISPLAY")
         args.desktop = args.desktop.resolve()
