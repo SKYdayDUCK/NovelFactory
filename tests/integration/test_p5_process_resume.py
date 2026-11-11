@@ -68,7 +68,7 @@ def _codex_children(pid):
 def test_one_resume_drives_real_process_restart(kernel_env, tmp_path):
     if not shutil.which("codex") or not Path("/proc/self/task").is_dir():
         requirement = "Process observation requires Linux and the installed Codex CLI"
-        if os.environ.get("NF_P5_REQUIRE_CODEX_HOST") == "1":
+        if os.environ.get("CI", "").lower() in {"true", "1"}:
             pytest.fail(requirement)
         pytest.skip(requirement)
     kernel = kernel_env["kernel"]
