@@ -33,9 +33,26 @@ uv run --no-sync python "$P6_TOOLKIT/scripts/P6_preflight.py" \
 
 退出码 0 表示文件与本机可执行源码、模型环境的离线检查匹配；退出码 2 表示需要补齐或修正。脚本阻止 Python socket 操作，仅读取文件和 Git 元数据，没有启动服务、登记角色任务或调用模型。输出区分源码、路由、配置材料、阅读人安排及消费账实。正式登记时由 Kernel 校验当前 HEAD、主管授权、真实预算和已采用计划。角色工具所需的原生 Host 隔离仍须单独实测。
 
-**跨全卷 Token 预算**。本次核对的 NF `55d8979b` 在同一资金账户上硬限总金额，在各 Task 上分别硬限 Token。单份实验授权里的 `total_tokens` 仅供离线对照，不能强制多个任务共享全卷 Token 配额。准备真实创作时，先落实按整次实验限制 Token 的可验证部署控制（如隔离供应商项目的硬配额），保留该控制的测试证据并核对预算余额。UNKNOWN 继续保留原 attempt 的款项及 Token 预留。
+## NF 全卷共享预算与回执
 
-本机在 #6 的 `55d8979b5361a4837701d762feacd83036096b11` 上用空模板执行的[实际回执](P6_LOCAL_PREFLIGHT.json)为 `BLOCKED_ENVIRONMENT`。另用合成、不可路由的 `.invalid` 端点仅检查本地正负路径。完整合成封套通过，金额、Token、环境模型、单次输出不符，重复演员、错误 WorldRef、不同 Git 或 Skill 树均被拒绝；以上五次运行均未联网。可在已安装依赖且源码干净的工作树重现：
+PR #6 的 `55d8979b` 在同一资金账户上限制总金额，并对各 Task 分别限制 Token。包含迁移 `0018_p6_shared_tokens` 的 NF 版本新增按 budget_id 共享的全卷 Token 硬上限。登记首场及后续场景时须使用同一实验预算。只有获得作品全域 ADMIN 的私有项目绑定可以查看或设置全卷账户。现有未设总额的预算返回 `total_tokens: null`。读命令访问部署的 NF 数据库，独立离线前检只读回执文件。
+
+在隔离服务账户中，`BUDGET_ID` 为已授权首场的预算 ID，`P6_TOTAL_TOKENS` 为已获准的全卷限额，`P6_ADMIN_BINDING` 为模式 0600 的 NF 项目绑定（token、database_url、object_root 和含 work_id、branch_id 的 binding）。以下命令使用已包含共享上限的 NF 工作树。首次对现有实验预算设置上限前先查询；已有上限需要变更时，使用本次查得的旧值作为 `--expected-total-tokens`，并履行此次变更对应的消费授权。
+
+```sh
+cd "$NF_CHECKOUT"
+uv run --no-sync python -m alembic current
+uv run --no-sync python scripts/p6_budget.py --binding "$P6_ADMIN_BINDING" show --budget-id "$BUDGET_ID"
+uv run --no-sync python scripts/p6_budget.py --binding "$P6_ADMIN_BINDING" set --budget-id "$BUDGET_ID" --total-tokens "$P6_TOTAL_TOKENS"
+uv run --no-sync python scripts/p6_budget.py --binding "$P6_ADMIN_BINDING" show --budget-id "$BUDGET_ID" > "$P6_PRIVATE/budget.json"
+uv run --no-sync python "$P6_TOOLKIT/scripts/P6_preflight.py" --nf-checkout "$NF_CHECKOUT" --experiment "$P6_PRIVATE/experiment.json" --scene-file "$P6_PRIVATE/first-scene.json" --budget-receipt "$P6_PRIVATE/budget.json" --output "$P6_PRIVATE/preflight.json"
+```
+
+预检核对回执中作品、账户、币种、总金额、全卷 Token 上限和可用余额。尚无可量化用量的历史 attempt 或不足以预留下一次请求的余额会报告 `shared_budget.receipt`。未传回执时输出 `NOT_SUPPLIED`；文件匹配后输出 `MATCHED_SAVED_NF_RECEIPT`。保存的回执有时间差。真正发送模型请求前，NF 在同一预算行锁下重新核对并预留。PREPARED、SENT 和 UNKNOWN 继续占用 Token，已结算调用计入实际用量。部署旧版时，应先升级到具备该共享配额的受验版本，或提供已实测等效的供应商隔离项目硬配额。
+
+在独立 PG 17.11 上，已对这项迁移执行真实 CLI。新预算首次显示无上限，设置 5,000 个合成实验 Token，重复设置后余额一致。另一作品读取返回 VIEW_DENIED，携带错误旧值的更改返回 IDEMPOTENCY_CONFLICT，交给预检的真实余额回执通过。没有登记场景或发出供应商请求。[现场回执](P6_SHARED_BUDGET_DRILL.json) · [NF 并发、迁移和 UNKNOWN 回归](https://github.com/SKYdayDUCK/NovelFactory/blob/013ebcadf4f7d3a64838096361c6432e4e679b8d/evidence/p6/shared-tokens.xml)
+
+本机在 NF [PR #17](https://github.com/SKYdayDUCK/NovelFactory/pull/17) 的 `013ebcadf4f7d3a64838096361c6432e4e679b8d` 上用空模板执行的[实际回执](P6_LOCAL_PREFLIGHT.json)为 `BLOCKED_ENVIRONMENT`。另用合成、不可路由的 `.invalid` 端点仅检查本地正负路径。完整合成封套通过，金额、Token、环境模型、单次输出不符，重复演员、错误 WorldRef、不同 Git 或 Skill 树均被拒绝；新增保存的共享预算回执匹配、历史用量未定与可用余额不足三项，共八次运行均未联网。可在已安装依赖且源码干净的工作树重现：
 
 ```sh
 cd "$NF_CHECKOUT"

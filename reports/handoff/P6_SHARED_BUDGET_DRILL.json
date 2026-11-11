@@ -1,0 +1,27 @@
+{
+  "empty_budget_total_tokens": null,
+  "foreign_work": "VIEW_DENIED",
+  "input_source_matches": true,
+  "local_pg": "17.11",
+  "nf_cli_sha256": "a7fcb66c4e71e1f18b8dc29b684a0d277d4b1f6b9fe1752b146dd1e0b2fc2517",
+  "nf_sha": "013ebcadf4f7d3a64838096361c6432e4e679b8d",
+  "nf_tree": "842ae8d0a6056f789c37cffca0597b07852f5d30",
+  "real_provider_calls": 0,
+  "repeated_set_unchanged": true,
+  "saved_receipt_check": "MATCHED_SAVED_NF_RECEIPT",
+  "scenes_registered": 0,
+  "set_and_readback": 5000,
+  "stale_limit_edit": "IDEMPOTENCY_CONFLICT",
+  "purpose": "Isolated PostgreSQL and saved-receipt compatibility; synthetic material only",
+  "migration": "0018_p6_shared_tokens",
+  "commands": [
+    "p6_budget.py --binding <work A> show --budget-id <budget A>",
+    "p6_budget.py --binding <work A> set --budget-id <budget A> --total-tokens 5000 (twice)",
+    "p6_budget.py --binding <work A> show --budget-id <budget A> (saved receipt)",
+    "p6_budget.py --binding <work B> show --budget-id <budget A>",
+    "p6_budget.py --binding <work A> set --budget-id <budget A> --total-tokens 3000 --expected-total-tokens 4000",
+    "P6_preflight.py --nf-checkout <013ebcad> --experiment <synthetic experiment> --scene-file <synthetic scene> --budget-receipt <work A receipt>"
+  ],
+  "literary_acceptance": "NOT_EVALUATED",
+  "actual_cost": null
+}

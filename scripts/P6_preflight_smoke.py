@@ -41,13 +41,17 @@ def main():
                  budget_id=uid(), adapter_id="external", reserve_amount="0.010", token_reservation=250,
                  idempotency_key="offline-fixture", following_scenes=[dict(node_id=uid(), process_id=uid())])
     script = Path(__file__).with_name("P6_preflight.py")
-    def run(label, exp, registration, errors=()):
+    def run(label, exp, registration, errors=(), receipt=None):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             for name, value in (("experiment", exp), ("scene", registration)):
                 (root / name).write_text(json.dumps(value), encoding="utf-8")
+            extra = []
+            if receipt is not None:
+                (root / "ledger").write_text(json.dumps(receipt), encoding="utf-8")
+                extra = ["--budget-receipt", str(root / "ledger")]
             result = subprocess.run([sys.executable, str(script), "--nf-checkout", str(checkout),
-                                     "--experiment", str(root / "experiment"), "--scene-file", str(root / "scene")],
+                                     "--experiment", str(root / "experiment"), "--scene-file", str(root / "scene"), *extra],
                                     env=env, text=True, capture_output=True, check=False)
             record = json.loads(result.stdout)
             assert result.returncode == (2 if errors else 0)
@@ -58,6 +62,15 @@ def main():
             assert record["actual_cost"] is None
             print(label, record["local_input_checks"])
     run("synthetic configuration", experiment, scene)
+    ledger = dict(work_id=scene["world_ref"]["work_id"], budget_id=scene["budget_id"], currency="USD",
+                  limit_amount="0.500000", reserved_amount="0.03", spent_amount="0.05",
+                  total_tokens=5000, reserved_tokens=100, spent_tokens=700, available_tokens=4200,
+                  unquantified_attempts=0)
+    run("saved budget receipt", experiment, scene, receipt=ledger)
+    run("unresolved usage", experiment, scene, ("shared_budget.receipt",),
+        receipt={**ledger, "unquantified_attempts": 1})
+    run("spent token allowance", experiment, scene, ("shared_budget.receipt",),
+        receipt={**ledger, "spent_tokens": 4800, "available_tokens": 100})
     bad = deepcopy(experiment)
     bad["authorized_limits"].update(total_amount="0.005", total_tokens=200, model_name="mismatch",
                                     max_output_tokens_per_attempt=8)

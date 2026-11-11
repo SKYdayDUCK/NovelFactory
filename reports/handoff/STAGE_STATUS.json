@@ -132,16 +132,19 @@
       "project-authorized provider binding and spend limits",
       "two independent literary reviews"
     ],
-    "offline_checks": 5,
+    "offline_checks": 8,
     "production_model_calls": 0,
     "scenes_dispatched": 0,
     "assigned_readers": 0,
     "spend": null,
-    "next": "Verify optional shared token ceiling on the NF peer and obtain a project-bound experiment authorization and readers before paid dispatch.",
+    "next": "Merge reviewed quota and module changes in dependency order. Real work, provider authorization and independent readers remain required.",
     "pr": 16,
     "first_source_sha": "5800299aafdc4495ba031c3d139a32d0a98c3d70",
     "offline_workflow": 43036958091,
     "offline_workflow_result": "PASS",
-    "combined_rehearsal": "evidence/p6/integrated-rehearsal"
+    "combined_rehearsal": "evidence/p6/integrated-rehearsal",
+    "nf_budget_pr": 17,
+    "nf_budget_sha": "013ebcadf4f7d3a64838096361c6432e4e679b8d",
+    "quota_receipt_test": "P6_SHARED_BUDGET_DRILL.json"
   }
 }

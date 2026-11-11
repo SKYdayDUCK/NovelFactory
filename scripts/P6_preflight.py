@@ -37,14 +37,36 @@ def money(value):
         return None
     try:
         parsed = Decimal(value)
-        if parsed.is_finite() and parsed >= 0:
+        if parsed.is_finite() and parsed >= 0 and parsed == parsed.quantize(Decimal("0.000001")):
             return parsed
     except InvalidOperation:
         pass
     return None
 
 
-def evaluate(root, experiment, scene):
+def budget_matches(receipt, scene, limits):
+    world = scene.get("world_ref")
+    if not isinstance(world, dict):
+        return False
+    amount = money(receipt.get("limit_amount"))
+    held = money(receipt.get("reserved_amount"))
+    spent = money(receipt.get("spent_amount"))
+    requested = money(scene.get("reserve_amount"))
+    counts = [receipt.get(name) for name in ("total_tokens", "reserved_tokens", "spent_tokens", "available_tokens")]
+    if None in (amount, held, spent, requested) or not all(type(n) is int and n >= 0 for n in counts):
+        return False
+    total, reserved, used, available = counts
+    attempt_tokens = scene.get("token_reservation")
+    return (receipt.get("budget_id") == scene.get("budget_id") and
+            receipt.get("work_id") == world.get("work_id") and
+            receipt.get("currency") == limits.get("currency") and
+            amount == money(limits.get("total_amount")) and amount - held - spent >= requested and
+            total == limits.get("total_tokens") and total - reserved - used == available and
+            positive_integer(attempt_tokens) and available >= attempt_tokens and
+            type(receipt.get("unquantified_attempts")) is int and receipt["unquantified_attempts"] == 0)
+
+
+def evaluate(root, experiment, scene, receipt=None):
     from novel_factory.application import scene_runtime
     from novel_factory.application.joint_handoff import validate_item_gift
     from novel_factory.application.planning import PlanningService
@@ -160,7 +182,16 @@ def evaluate(root, experiment, scene):
         relay = os.environ.get("NF_ROLE_MCP_RELAY")
         check("role_mcp_relay", relay and Path(relay).is_file() and os.access(relay, os.X_OK))
 
+    budget_status = "NOT_SUPPLIED"
+    if receipt is not None:
+        if budget_matches(receipt, scene, auth):
+            budget_status = "MATCHED_SAVED_NF_RECEIPT"
+        else:
+            budget_status = "MISMATCHED_OR_INSUFFICIENT"
+            errors.add("shared_budget.receipt")
+
     return {
+        "saved_shared_budget_receipt": budget_status,
         "nf_source_sha": head, "nf_tree": tree, "http_route": route,
         "backend_config_sha256": config_hash, "local_input_checks":
         "BLOCKED_ENVIRONMENT" if errors else "INPUTS_MATCH_LOCAL_CHECKS",
@@ -178,6 +209,7 @@ def main():
     parser.add_argument("--nf-checkout", type=Path, required=True)
     parser.add_argument("--experiment", type=Path, required=True)
     parser.add_argument("--scene-file", type=Path, required=True)
+    parser.add_argument("--budget-receipt", type=Path, help="Previously saved NF p6_budget.py show JSON")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     root = args.nf_checkout.resolve()
@@ -189,7 +221,8 @@ def main():
     try:
         if not (root / "scripts/run_supervisor.py").is_file():
             raise ValueError("missing NF registration entry")
-        result = evaluate(root, read_object(args.experiment), read_object(args.scene_file))
+        receipt = read_object(args.budget_receipt) if args.budget_receipt else None
+        result = evaluate(root, read_object(args.experiment), read_object(args.scene_file), receipt)
     except (OSError, ValueError, ImportError, subprocess.CalledProcessError):
         parser.exit(2, "Cannot read P6 files, NF source or installed NF dependencies.\n")
     output = json.dumps(result, ensure_ascii=False, indent=2) + "\n"
