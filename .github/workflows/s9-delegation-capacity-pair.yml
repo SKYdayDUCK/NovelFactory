@@ -1,0 +1,86 @@
+name: Compare the accepted S9 base and NF delegation workload on one runner
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/s9-delegation-capacity-pair.yml'
+permissions:
+  contents: read
+jobs:
+  paired:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_DB: nf_test
+          POSTGRES_USER: nf_dev
+          POSTGRES_PASSWORD: nf_dev_ci_only
+          POSTGRES_INITDB_ARGS: --data-checksums
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nf_dev -d nf_test"
+          --health-interval 2s
+          --health-timeout 2s
+          --health-retries 30
+    env:
+      NF_DATABASE_URL: postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/nf_test
+      NF_TEST_DATABASE_URL: postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/nf_test
+      NF_POOL_SIZE: '8'
+      NF_POOL_OVERFLOW: '0'
+      NF_BENCH_DIAGNOSTICS: '1'
+      PYTHONHASHSEED: '37'
+      TZ: UTC
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 55d8979b5361a4837701d762feacd83036096b11
+          path: baseline
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 74350760dfd063f3596e5b6838a56a40d3006ad6
+          path: bridge
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - name: Install each checkout's locked dependencies
+        run: |
+          for arm in baseline bridge; do (cd "$arm" && uv sync --locked --group dev --python 3.12); done
+      - name: Measure four independent databases sequentially on the same runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$GITHUB_WORKSPACE/paired-results"
+          mkdir -p "$out"
+          nproc >"$out/visible-cpus.txt"
+          lscpu >"$out/cpu.txt"
+          for key in 1-baseline 2-bridge 3-bridge 4-baseline; do
+            dir="${key#*-}"
+            dest="$out/$key"
+            mkdir -p "$dest"
+            cd "$GITHUB_WORKSPACE/$dir"
+            git rev-parse HEAD HEAD^{tree} >"$dest/revision.txt"
+            cat /proc/loadavg >"$dest/load-before"
+            rc=0
+            uv run --no-sync python -m benchmarks.p2_behavioral_load \
+              --agents 200 --profile overload --hot-fraction 0.8 --arrival-rps 10 --open-loop-rps 1000 \
+              --rounds 5 --max-attempts 5 --retry-budget-seconds 30 --gate-scope capacity \
+              --service-mode isolated-process --api-processes 1 --output "$dest/load.json" >"$dest/load.log" 2>&1 || rc=$?
+            echo "$rc" >"$dest/exit.txt"
+            test -s "$dest/load.json"
+            cat /proc/loadavg >"$dest/load-after"
+            python -c 'import json,sys;p=json.load(open(sys.argv[1]));print(sys.argv[1],p["seed"],p["capacity_gate"],p["bounded_recovery_business_gate"],p["open_loop_offered_rate"]["actual_call_start_rps"],p["open_loop_offered_rate"]["transport_header_start_rps"])' "$dest/load.json"
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: at30-s9-delegation-abba
+          path: paired-results
+          if-no-files-found: error
+      - name: Enforce all four original exit statuses
+        run: |
+          for log in paired-results/*/exit.txt; do test "$(cat "$log")" = 0 || exit 1; done
