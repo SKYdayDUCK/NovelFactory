@@ -109,7 +109,7 @@ class DerivedWorldWorker:
             require(branch, "INVALID_EVIDENCE", "Source branch is unavailable")
             if fault:
                 fault("after_branch_lock")
-            columns = ("branch_seq", "state_hash", "manifest_hash") if kernel.scion.columns else None
+            columns = ("branch_seq", "state_hash", "manifest_hash") if kernel.scion.worker_columns else None
             source = repo.one("revisions", wr, columns=columns)
             if columns:
                 kernel.scion.record("columns", "index_metadata_hit")

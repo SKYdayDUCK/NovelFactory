@@ -24,7 +24,7 @@ def test_query_projection_checks_complete_state_and_schedule(query_env, monkeypa
     try:
         with kernel.db.uow(write=False) as repo:
             old = kernel.revision(repo, wr)
-            monkeypatch.setattr(kernel.scion, "columns", True)
+            monkeypatch.setattr(kernel.scion, "query_columns", True)
             row = kernel.query_revision(repo, wr)
             assert row == {key: old[key] for key in row}
             assert "scope_versions" not in row
@@ -67,16 +67,16 @@ def test_sparse_registered_tokens_match_full_map_with_absent_range(query_env, mo
         work = repo.one("works", {"work_id": wr["work_id"]})
         parameters = repo, wr, footprint, grant, [], 0, work
         monkeypatch.setattr(kernel.scion, "scopes", False)
-        expected = kernel._tokens(*parameters)
+        expected = kernel._tokens(*parameters, template_id="PASS_CLEAR_ROUTE")
         monkeypatch.setattr(kernel.scion, "scopes", True)
-        assert expected == kernel._tokens(*parameters)
+        assert expected == kernel._tokens(*parameters, template_id="PASS_CLEAR_ROUTE")
         assert repo.scope_versions_for(wr["work_id"], wr["branch_id"], set()) == {}
         assert next(t for t in expected[0] if t["scope_key"] == key)["version"] == 0
     with kernel.db.uow() as repo:
         repo.bump(wr["work_id"], wr["branch_id"], {key, "ENTITY:unrelated"})
         parameters = repo, wr, footprint, grant, [], 0, work
-        updated = kernel._tokens(*parameters)
+        updated = kernel._tokens(*parameters, template_id="PASS_CLEAR_ROUTE")
         monkeypatch.setattr(kernel.scion, "scopes", False)
-        assert updated == kernel._tokens(*parameters)
+        assert updated == kernel._tokens(*parameters, template_id="PASS_CLEAR_ROUTE")
         assert next(t for t in updated[0] if t["scope_key"] == key)["version"] == 1
         assert all(t["scope_key"] != "ENTITY:unrelated" for group in updated for t in group)

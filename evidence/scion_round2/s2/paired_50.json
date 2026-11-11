@@ -1,0 +1,1649 @@
+{
+  "postgres": "17.11 (Debian 17.11-0+deb13u1)",
+  "pairs": 9,
+  "population": 50,
+  "scope_count": 176,
+  "review_rows": 2,
+  "affinity": [
+    2,
+    3
+  ],
+  "pg_cpu_scope": "schedstat runtime of the PostgreSQL backends checked out by the measured operation, excluding background processes.",
+  "source_sha256": {
+    "src/novel_factory/application/scion.py": "9f169dcdb46a3ea339a228f177adc8ff70d7c47d6d87291fc8da9d9f3965649e",
+    "src/novel_factory/application/kernel.py": "bb755d1d12cde830a4274c7f5361c195b255681f4ae4669b70d4f4c7b5b79198",
+    "src/novel_factory/application/derived_worker.py": "5e0a9ff39b380fd74183f7f5e200839783764ce242de55999be7e47889c392f3",
+    "src/novel_factory/infrastructure/repository.py": "1595f300086daf2fac1648945f9fff31ef6d58eb9d992830b44868a0498d93fa",
+    "benchmarks/round2_safe_reads.py": "5cc90f4cd6294cd91cc42b1d24b03854402126aa8a7bbfef0304cefff6a8dcba",
+    "benchmarks/scion_profile.py": "177ec088737fcd8b88a012f7ed8bdb310e854dc914664a3868a1bc838b9d5667"
+  },
+  "world_ref": {
+    "work_id": "3a79e6d7-b0ec-4054-b7d0-89eebc5edb7a",
+    "branch_id": "19cbdc04-8742-4add-97a1-58e569751d97",
+    "world_revision_id": "507f2bcc-0e8f-44dd-880b-b89f8007a84d"
+  },
+  "rows": [
+    {
+      "pair": 0,
+      "enabled": false,
+      "operations": {
+        "fixed_query": {
+          "wall_ms": 19.710322,
+          "app_cpu_ms": 15.038523,
+          "pg_backend_cpu_ms": 4.371623,
+          "pg_connections_measured": 1,
+          "sql_calls": 20,
+          "selected_rows": 19,
+          "json_bytes_decoded": 197356,
+          "json_bytes_encoded": 0,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {}
+        },
+        "worker": {
+          "wall_ms": 47.829814,
+          "app_cpu_ms": 33.185884,
+          "pg_backend_cpu_ms": 14.035399,
+          "pg_connections_measured": 1,
+          "sql_calls": 27,
+          "selected_rows": 21,
+          "json_bytes_decoded": 379234,
+          "json_bytes_encoded": 167466,
+          "source_reads": {
+            "revision_sql": 2,
+            "revision_rows": 2
+          },
+          "fast_path_hits": {}
+        },
+        "promote": {
+          "wall_ms": 40.083101,
+          "app_cpu_ms": 29.367567,
+          "pg_backend_cpu_ms": 10.100805,
+          "pg_connections_measured": 1,
+          "sql_calls": 39,
+          "selected_rows": 34,
+          "json_bytes_decoded": 242306,
+          "json_bytes_encoded": 2555,
+          "source_reads": {
+            "revision_sql": 4,
+            "revision_rows": 5
+          },
+          "fast_path_hits": {}
+        },
+        "prepare": {
+          "wall_ms": 34.825738,
+          "app_cpu_ms": 27.044863,
+          "pg_backend_cpu_ms": 7.346862,
+          "pg_connections_measured": 1,
+          "sql_calls": 35,
+          "selected_rows": 199,
+          "json_bytes_decoded": 220040,
+          "json_bytes_encoded": 29565,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1,
+            "scopes_sql": 1,
+            "scopes_rows": 176
+          },
+          "fast_path_hits": {}
+        },
+        "accept": {
+          "wall_ms": 78.110029,
+          "app_cpu_ms": 60.282403,
+          "pg_backend_cpu_ms": 17.437985,
+          "pg_connections_measured": 1,
+          "sql_calls": 61,
+          "selected_rows": 393,
+          "json_bytes_decoded": 408770,
+          "json_bytes_encoded": 197627,
+          "source_reads": {
+            "scopes_sql": 2,
+            "scopes_rows": 353,
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {}
+        }
+      }
+    },
+    {
+      "pair": 0,
+      "enabled": true,
+      "operations": {
+        "fixed_query": {
+          "wall_ms": 18.344433,
+          "app_cpu_ms": 15.262553,
+          "pg_backend_cpu_ms": 2.935427,
+          "pg_connections_measured": 1,
+          "sql_calls": 20,
+          "selected_rows": 19,
+          "json_bytes_decoded": 187605,
+          "json_bytes_encoded": 0,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {
+            "columns.query_hit": 1
+          }
+        },
+        "worker": {
+          "wall_ms": 37.972611,
+          "app_cpu_ms": 28.563112,
+          "pg_backend_cpu_ms": 9.13527,
+          "pg_connections_measured": 1,
+          "sql_calls": 27,
+          "selected_rows": 21,
+          "json_bytes_decoded": 191390,
+          "json_bytes_encoded": 167466,
+          "source_reads": {
+            "revision_sql": 2,
+            "revision_rows": 2
+          },
+          "fast_path_hits": {
+            "columns.index_metadata_hit": 1
+          }
+        },
+        "promote": {
+          "wall_ms": 43.218106,
+          "app_cpu_ms": 35.676631,
+          "pg_backend_cpu_ms": 7.360777,
+          "pg_connections_measured": 1,
+          "sql_calls": 39,
+          "selected_rows": 34,
+          "json_bytes_decoded": 173388,
+          "json_bytes_encoded": 2555,
+          "source_reads": {
+            "revision_sql": 4,
+            "revision_rows": 5
+          },
+          "fast_path_hits": {
+            "columns.repair_review_hit": 1
+          }
+        },
+        "prepare": {
+          "wall_ms": 36.740258,
+          "app_cpu_ms": 29.06234,
+          "pg_backend_cpu_ms": 7.395879,
+          "pg_connections_measured": 1,
+          "sql_calls": 35,
+          "selected_rows": 32,
+          "json_bytes_decoded": 220040,
+          "json_bytes_encoded": 29565,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1,
+            "scopes_sql": 1,
+            "scopes_rows": 9
+          },
+          "fast_path_hits": {
+            "scopes.hit": 1
+          }
+        },
+        "accept": {
+          "wall_ms": 69.535472,
+          "app_cpu_ms": 52.681236,
+          "pg_backend_cpu_ms": 15.471517,
+          "pg_connections_measured": 1,
+          "sql_calls": 61,
+          "selected_rows": 226,
+          "json_bytes_decoded": 408770,
+          "json_bytes_encoded": 197627,
+          "source_reads": {
+            "scopes_sql": 2,
+            "scopes_rows": 186,
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {
+            "scopes.hit": 1
+          }
+        }
+      }
+    },
+    {
+      "pair": 1,
+      "enabled": true,
+      "operations": {
+        "fixed_query": {
+          "wall_ms": 19.641958,
+          "app_cpu_ms": 15.584342,
+          "pg_backend_cpu_ms": 4.162284,
+          "pg_connections_measured": 1,
+          "sql_calls": 20,
+          "selected_rows": 19,
+          "json_bytes_decoded": 187605,
+          "json_bytes_encoded": 0,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {
+            "columns.query_hit": 1
+          }
+        },
+        "worker": {
+          "wall_ms": 43.798269,
+          "app_cpu_ms": 33.324664,
+          "pg_backend_cpu_ms": 10.114857,
+          "pg_connections_measured": 1,
+          "sql_calls": 27,
+          "selected_rows": 21,
+          "json_bytes_decoded": 191390,
+          "json_bytes_encoded": 167466,
+          "source_reads": {
+            "revision_sql": 2,
+            "revision_rows": 2
+          },
+          "fast_path_hits": {
+            "columns.index_metadata_hit": 1
+          }
+        },
+        "promote": {
+          "wall_ms": 34.882935,
+          "app_cpu_ms": 27.368349,
+          "pg_backend_cpu_ms": 7.208001,
+          "pg_connections_measured": 1,
+          "sql_calls": 39,
+          "selected_rows": 34,
+          "json_bytes_decoded": 173388,
+          "json_bytes_encoded": 2555,
+          "source_reads": {
+            "revision_sql": 4,
+            "revision_rows": 5
+          },
+          "fast_path_hits": {
+            "columns.repair_review_hit": 1
+          }
+        },
+        "prepare": {
+          "wall_ms": 36.235708,
+          "app_cpu_ms": 29.031456,
+          "pg_backend_cpu_ms": 6.695445,
+          "pg_connections_measured": 1,
+          "sql_calls": 35,
+          "selected_rows": 32,
+          "json_bytes_decoded": 220040,
+          "json_bytes_encoded": 29565,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1,
+            "scopes_sql": 1,
+            "scopes_rows": 9
+          },
+          "fast_path_hits": {
+            "scopes.hit": 1
+          }
+        },
+        "accept": {
+          "wall_ms": 72.296324,
+          "app_cpu_ms": 56.168158,
+          "pg_backend_cpu_ms": 15.601434,
+          "pg_connections_measured": 1,
+          "sql_calls": 61,
+          "selected_rows": 226,
+          "json_bytes_decoded": 408770,
+          "json_bytes_encoded": 197627,
+          "source_reads": {
+            "scopes_sql": 2,
+            "scopes_rows": 186,
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {
+            "scopes.hit": 1
+          }
+        }
+      }
+    },
+    {
+      "pair": 1,
+      "enabled": false,
+      "operations": {
+        "fixed_query": {
+          "wall_ms": 19.639345,
+          "app_cpu_ms": 15.801475,
+          "pg_backend_cpu_ms": 3.637814,
+          "pg_connections_measured": 1,
+          "sql_calls": 20,
+          "selected_rows": 19,
+          "json_bytes_decoded": 197356,
+          "json_bytes_encoded": 0,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {}
+        },
+        "worker": {
+          "wall_ms": 53.061383,
+          "app_cpu_ms": 42.008254,
+          "pg_backend_cpu_ms": 10.547224,
+          "pg_connections_measured": 1,
+          "sql_calls": 27,
+          "selected_rows": 21,
+          "json_bytes_decoded": 379234,
+          "json_bytes_encoded": 167466,
+          "source_reads": {
+            "revision_sql": 2,
+            "revision_rows": 2
+          },
+          "fast_path_hits": {}
+        },
+        "promote": {
+          "wall_ms": 39.609262,
+          "app_cpu_ms": 30.593664,
+          "pg_backend_cpu_ms": 8.18796,
+          "pg_connections_measured": 1,
+          "sql_calls": 39,
+          "selected_rows": 34,
+          "json_bytes_decoded": 242306,
+          "json_bytes_encoded": 2555,
+          "source_reads": {
+            "revision_sql": 4,
+            "revision_rows": 5
+          },
+          "fast_path_hits": {}
+        },
+        "prepare": {
+          "wall_ms": 41.263379,
+          "app_cpu_ms": 32.30152,
+          "pg_backend_cpu_ms": 8.249511,
+          "pg_connections_measured": 1,
+          "sql_calls": 35,
+          "selected_rows": 199,
+          "json_bytes_decoded": 220040,
+          "json_bytes_encoded": 29565,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1,
+            "scopes_sql": 1,
+            "scopes_rows": 176
+          },
+          "fast_path_hits": {}
+        },
+        "accept": {
+          "wall_ms": 74.794708,
+          "app_cpu_ms": 57.753284,
+          "pg_backend_cpu_ms": 16.399361,
+          "pg_connections_measured": 1,
+          "sql_calls": 61,
+          "selected_rows": 393,
+          "json_bytes_decoded": 408770,
+          "json_bytes_encoded": 197627,
+          "source_reads": {
+            "scopes_sql": 2,
+            "scopes_rows": 353,
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {}
+        }
+      }
+    },
+    {
+      "pair": 2,
+      "enabled": false,
+      "operations": {
+        "fixed_query": {
+          "wall_ms": 21.94609,
+          "app_cpu_ms": 17.077342,
+          "pg_backend_cpu_ms": 4.557896,
+          "pg_connections_measured": 1,
+          "sql_calls": 20,
+          "selected_rows": 19,
+          "json_bytes_decoded": 197356,
+          "json_bytes_encoded": 0,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {}
+        },
+        "worker": {
+          "wall_ms": 47.573889,
+          "app_cpu_ms": 32.929178,
+          "pg_backend_cpu_ms": 14.086241,
+          "pg_connections_measured": 1,
+          "sql_calls": 27,
+          "selected_rows": 21,
+          "json_bytes_decoded": 379234,
+          "json_bytes_encoded": 167466,
+          "source_reads": {
+            "revision_sql": 2,
+            "revision_rows": 2
+          },
+          "fast_path_hits": {}
+        },
+        "promote": {
+          "wall_ms": 38.895235,
+          "app_cpu_ms": 29.718412,
+          "pg_backend_cpu_ms": 8.707622,
+          "pg_connections_measured": 1,
+          "sql_calls": 39,
+          "selected_rows": 34,
+          "json_bytes_decoded": 242306,
+          "json_bytes_encoded": 2555,
+          "source_reads": {
+            "revision_sql": 4,
+            "revision_rows": 5
+          },
+          "fast_path_hits": {}
+        },
+        "prepare": {
+          "wall_ms": 33.080749,
+          "app_cpu_ms": 26.195852,
+          "pg_backend_cpu_ms": 6.533237,
+          "pg_connections_measured": 1,
+          "sql_calls": 35,
+          "selected_rows": 199,
+          "json_bytes_decoded": 220040,
+          "json_bytes_encoded": 29565,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1,
+            "scopes_sql": 1,
+            "scopes_rows": 176
+          },
+          "fast_path_hits": {}
+        },
+        "accept": {
+          "wall_ms": 165.71156,
+          "app_cpu_ms": 148.959381,
+          "pg_backend_cpu_ms": 16.169745,
+          "pg_connections_measured": 1,
+          "sql_calls": 61,
+          "selected_rows": 393,
+          "json_bytes_decoded": 408770,
+          "json_bytes_encoded": 197627,
+          "source_reads": {
+            "scopes_sql": 2,
+            "scopes_rows": 353,
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {}
+        }
+      }
+    },
+    {
+      "pair": 2,
+      "enabled": true,
+      "operations": {
+        "fixed_query": {
+          "wall_ms": 22.239362,
+          "app_cpu_ms": 16.274592,
+          "pg_backend_cpu_ms": 3.593609,
+          "pg_connections_measured": 1,
+          "sql_calls": 20,
+          "selected_rows": 19,
+          "json_bytes_decoded": 187605,
+          "json_bytes_encoded": 0,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {
+            "columns.query_hit": 1
+          }
+        },
+        "worker": {
+          "wall_ms": 48.879115,
+          "app_cpu_ms": 38.471112,
+          "pg_backend_cpu_ms": 9.874551,
+          "pg_connections_measured": 1,
+          "sql_calls": 27,
+          "selected_rows": 21,
+          "json_bytes_decoded": 191390,
+          "json_bytes_encoded": 167466,
+          "source_reads": {
+            "revision_sql": 2,
+            "revision_rows": 2
+          },
+          "fast_path_hits": {
+            "columns.index_metadata_hit": 1
+          }
+        },
+        "promote": {
+          "wall_ms": 41.416861,
+          "app_cpu_ms": 33.563334,
+          "pg_backend_cpu_ms": 6.729845,
+          "pg_connections_measured": 1,
+          "sql_calls": 39,
+          "selected_rows": 34,
+          "json_bytes_decoded": 173388,
+          "json_bytes_encoded": 2555,
+          "source_reads": {
+            "revision_sql": 4,
+            "revision_rows": 5
+          },
+          "fast_path_hits": {
+            "columns.repair_review_hit": 1
+          }
+        },
+        "prepare": {
+          "wall_ms": 33.91061,
+          "app_cpu_ms": 26.043563,
+          "pg_backend_cpu_ms": 7.254588,
+          "pg_connections_measured": 1,
+          "sql_calls": 35,
+          "selected_rows": 32,
+          "json_bytes_decoded": 220040,
+          "json_bytes_encoded": 29565,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1,
+            "scopes_sql": 1,
+            "scopes_rows": 9
+          },
+          "fast_path_hits": {
+            "scopes.hit": 1
+          }
+        },
+        "accept": {
+          "wall_ms": 88.521357,
+          "app_cpu_ms": 64.054227,
+          "pg_backend_cpu_ms": 16.022421,
+          "pg_connections_measured": 1,
+          "sql_calls": 61,
+          "selected_rows": 226,
+          "json_bytes_decoded": 408770,
+          "json_bytes_encoded": 197627,
+          "source_reads": {
+            "scopes_sql": 2,
+            "scopes_rows": 186,
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {
+            "scopes.hit": 1
+          }
+        }
+      }
+    },
+    {
+      "pair": 3,
+      "enabled": true,
+      "operations": {
+        "fixed_query": {
+          "wall_ms": 29.522797,
+          "app_cpu_ms": 22.421161,
+          "pg_backend_cpu_ms": 6.61384,
+          "pg_connections_measured": 1,
+          "sql_calls": 20,
+          "selected_rows": 19,
+          "json_bytes_decoded": 187605,
+          "json_bytes_encoded": 0,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {
+            "columns.query_hit": 1
+          }
+        },
+        "worker": {
+          "wall_ms": 143.538749,
+          "app_cpu_ms": 114.698321,
+          "pg_backend_cpu_ms": 26.099154,
+          "pg_connections_measured": 1,
+          "sql_calls": 27,
+          "selected_rows": 21,
+          "json_bytes_decoded": 191390,
+          "json_bytes_encoded": 167466,
+          "source_reads": {
+            "revision_sql": 2,
+            "revision_rows": 2
+          },
+          "fast_path_hits": {
+            "columns.index_metadata_hit": 1
+          }
+        },
+        "promote": {
+          "wall_ms": 59.190113,
+          "app_cpu_ms": 48.564245,
+          "pg_backend_cpu_ms": 10.138292,
+          "pg_connections_measured": 1,
+          "sql_calls": 39,
+          "selected_rows": 34,
+          "json_bytes_decoded": 173388,
+          "json_bytes_encoded": 2555,
+          "source_reads": {
+            "revision_sql": 4,
+            "revision_rows": 5
+          },
+          "fast_path_hits": {
+            "columns.repair_review_hit": 1
+          }
+        },
+        "prepare": {
+          "wall_ms": 37.798478,
+          "app_cpu_ms": 29.678001,
+          "pg_backend_cpu_ms": 7.549553,
+          "pg_connections_measured": 1,
+          "sql_calls": 35,
+          "selected_rows": 32,
+          "json_bytes_decoded": 220040,
+          "json_bytes_encoded": 29565,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1,
+            "scopes_sql": 1,
+            "scopes_rows": 9
+          },
+          "fast_path_hits": {
+            "scopes.hit": 1
+          }
+        },
+        "accept": {
+          "wall_ms": 80.545293,
+          "app_cpu_ms": 57.513744,
+          "pg_backend_cpu_ms": 18.923522,
+          "pg_connections_measured": 1,
+          "sql_calls": 61,
+          "selected_rows": 226,
+          "json_bytes_decoded": 408770,
+          "json_bytes_encoded": 197627,
+          "source_reads": {
+            "scopes_sql": 2,
+            "scopes_rows": 186,
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {
+            "scopes.hit": 1
+          }
+        }
+      }
+    },
+    {
+      "pair": 3,
+      "enabled": false,
+      "operations": {
+        "fixed_query": {
+          "wall_ms": 21.978459,
+          "app_cpu_ms": 15.327279,
+          "pg_backend_cpu_ms": 4.144545,
+          "pg_connections_measured": 1,
+          "sql_calls": 20,
+          "selected_rows": 19,
+          "json_bytes_decoded": 197356,
+          "json_bytes_encoded": 0,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {}
+        },
+        "worker": {
+          "wall_ms": 46.87798,
+          "app_cpu_ms": 35.415759,
+          "pg_backend_cpu_ms": 11.129585,
+          "pg_connections_measured": 1,
+          "sql_calls": 27,
+          "selected_rows": 21,
+          "json_bytes_decoded": 379234,
+          "json_bytes_encoded": 167466,
+          "source_reads": {
+            "revision_sql": 2,
+            "revision_rows": 2
+          },
+          "fast_path_hits": {}
+        },
+        "promote": {
+          "wall_ms": 41.211397,
+          "app_cpu_ms": 33.983637,
+          "pg_backend_cpu_ms": 6.747428,
+          "pg_connections_measured": 1,
+          "sql_calls": 39,
+          "selected_rows": 34,
+          "json_bytes_decoded": 242306,
+          "json_bytes_encoded": 2555,
+          "source_reads": {
+            "revision_sql": 4,
+            "revision_rows": 5
+          },
+          "fast_path_hits": {}
+        },
+        "prepare": {
+          "wall_ms": 33.373275,
+          "app_cpu_ms": 26.43896,
+          "pg_backend_cpu_ms": 6.47903,
+          "pg_connections_measured": 1,
+          "sql_calls": 35,
+          "selected_rows": 199,
+          "json_bytes_decoded": 220040,
+          "json_bytes_encoded": 29565,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1,
+            "scopes_sql": 1,
+            "scopes_rows": 176
+          },
+          "fast_path_hits": {}
+        },
+        "accept": {
+          "wall_ms": 73.189018,
+          "app_cpu_ms": 57.898679,
+          "pg_backend_cpu_ms": 14.341929,
+          "pg_connections_measured": 1,
+          "sql_calls": 61,
+          "selected_rows": 393,
+          "json_bytes_decoded": 408770,
+          "json_bytes_encoded": 197627,
+          "source_reads": {
+            "scopes_sql": 2,
+            "scopes_rows": 353,
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {}
+        }
+      }
+    },
+    {
+      "pair": 4,
+      "enabled": false,
+      "operations": {
+        "fixed_query": {
+          "wall_ms": 19.042755,
+          "app_cpu_ms": 14.801995,
+          "pg_backend_cpu_ms": 3.953786,
+          "pg_connections_measured": 1,
+          "sql_calls": 20,
+          "selected_rows": 19,
+          "json_bytes_decoded": 197356,
+          "json_bytes_encoded": 0,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {}
+        },
+        "worker": {
+          "wall_ms": 56.14779,
+          "app_cpu_ms": 37.451745,
+          "pg_backend_cpu_ms": 13.916745,
+          "pg_connections_measured": 1,
+          "sql_calls": 27,
+          "selected_rows": 21,
+          "json_bytes_decoded": 379234,
+          "json_bytes_encoded": 167466,
+          "source_reads": {
+            "revision_sql": 2,
+            "revision_rows": 2
+          },
+          "fast_path_hits": {}
+        },
+        "promote": {
+          "wall_ms": 51.392303,
+          "app_cpu_ms": 37.781772,
+          "pg_backend_cpu_ms": 9.969807,
+          "pg_connections_measured": 1,
+          "sql_calls": 39,
+          "selected_rows": 34,
+          "json_bytes_decoded": 242306,
+          "json_bytes_encoded": 2555,
+          "source_reads": {
+            "revision_sql": 4,
+            "revision_rows": 5
+          },
+          "fast_path_hits": {}
+        },
+        "prepare": {
+          "wall_ms": 41.940169,
+          "app_cpu_ms": 31.883032,
+          "pg_backend_cpu_ms": 8.839552,
+          "pg_connections_measured": 1,
+          "sql_calls": 35,
+          "selected_rows": 199,
+          "json_bytes_decoded": 220040,
+          "json_bytes_encoded": 29565,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1,
+            "scopes_sql": 1,
+            "scopes_rows": 176
+          },
+          "fast_path_hits": {}
+        },
+        "accept": {
+          "wall_ms": 93.092736,
+          "app_cpu_ms": 75.372563,
+          "pg_backend_cpu_ms": 16.855035,
+          "pg_connections_measured": 1,
+          "sql_calls": 61,
+          "selected_rows": 393,
+          "json_bytes_decoded": 408770,
+          "json_bytes_encoded": 197627,
+          "source_reads": {
+            "scopes_sql": 2,
+            "scopes_rows": 353,
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {}
+        }
+      }
+    },
+    {
+      "pair": 4,
+      "enabled": true,
+      "operations": {
+        "fixed_query": {
+          "wall_ms": 19.60333,
+          "app_cpu_ms": 15.430031,
+          "pg_backend_cpu_ms": 3.877181,
+          "pg_connections_measured": 1,
+          "sql_calls": 20,
+          "selected_rows": 19,
+          "json_bytes_decoded": 187605,
+          "json_bytes_encoded": 0,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {
+            "columns.query_hit": 1
+          }
+        },
+        "worker": {
+          "wall_ms": 39.83003,
+          "app_cpu_ms": 29.510357,
+          "pg_backend_cpu_ms": 9.654819,
+          "pg_connections_measured": 1,
+          "sql_calls": 27,
+          "selected_rows": 21,
+          "json_bytes_decoded": 191390,
+          "json_bytes_encoded": 167466,
+          "source_reads": {
+            "revision_sql": 2,
+            "revision_rows": 2
+          },
+          "fast_path_hits": {
+            "columns.index_metadata_hit": 1
+          }
+        },
+        "promote": {
+          "wall_ms": 36.470687,
+          "app_cpu_ms": 27.866687,
+          "pg_backend_cpu_ms": 7.830579,
+          "pg_connections_measured": 1,
+          "sql_calls": 39,
+          "selected_rows": 34,
+          "json_bytes_decoded": 173388,
+          "json_bytes_encoded": 2555,
+          "source_reads": {
+            "revision_sql": 4,
+            "revision_rows": 5
+          },
+          "fast_path_hits": {
+            "columns.repair_review_hit": 1
+          }
+        },
+        "prepare": {
+          "wall_ms": 32.514737,
+          "app_cpu_ms": 24.78555,
+          "pg_backend_cpu_ms": 7.055662,
+          "pg_connections_measured": 1,
+          "sql_calls": 35,
+          "selected_rows": 32,
+          "json_bytes_decoded": 220040,
+          "json_bytes_encoded": 29565,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1,
+            "scopes_sql": 1,
+            "scopes_rows": 9
+          },
+          "fast_path_hits": {
+            "scopes.hit": 1
+          }
+        },
+        "accept": {
+          "wall_ms": 69.305496,
+          "app_cpu_ms": 52.331973,
+          "pg_backend_cpu_ms": 15.820334,
+          "pg_connections_measured": 1,
+          "sql_calls": 61,
+          "selected_rows": 226,
+          "json_bytes_decoded": 408770,
+          "json_bytes_encoded": 197627,
+          "source_reads": {
+            "scopes_sql": 2,
+            "scopes_rows": 186,
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {
+            "scopes.hit": 1
+          }
+        }
+      }
+    },
+    {
+      "pair": 5,
+      "enabled": true,
+      "operations": {
+        "fixed_query": {
+          "wall_ms": 18.446357,
+          "app_cpu_ms": 14.447639,
+          "pg_backend_cpu_ms": 3.735029,
+          "pg_connections_measured": 1,
+          "sql_calls": 20,
+          "selected_rows": 19,
+          "json_bytes_decoded": 187605,
+          "json_bytes_encoded": 0,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {
+            "columns.query_hit": 1
+          }
+        },
+        "worker": {
+          "wall_ms": 38.220564,
+          "app_cpu_ms": 28.123195,
+          "pg_backend_cpu_ms": 9.526087,
+          "pg_connections_measured": 1,
+          "sql_calls": 27,
+          "selected_rows": 21,
+          "json_bytes_decoded": 191390,
+          "json_bytes_encoded": 167466,
+          "source_reads": {
+            "revision_sql": 2,
+            "revision_rows": 2
+          },
+          "fast_path_hits": {
+            "columns.index_metadata_hit": 1
+          }
+        },
+        "promote": {
+          "wall_ms": 112.483356,
+          "app_cpu_ms": 104.744127,
+          "pg_backend_cpu_ms": 7.156556,
+          "pg_connections_measured": 1,
+          "sql_calls": 39,
+          "selected_rows": 34,
+          "json_bytes_decoded": 173388,
+          "json_bytes_encoded": 2555,
+          "source_reads": {
+            "revision_sql": 4,
+            "revision_rows": 5
+          },
+          "fast_path_hits": {
+            "columns.repair_review_hit": 1
+          }
+        },
+        "prepare": {
+          "wall_ms": 38.077819,
+          "app_cpu_ms": 31.476233,
+          "pg_backend_cpu_ms": 6.138239,
+          "pg_connections_measured": 1,
+          "sql_calls": 35,
+          "selected_rows": 32,
+          "json_bytes_decoded": 220040,
+          "json_bytes_encoded": 29565,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1,
+            "scopes_sql": 1,
+            "scopes_rows": 9
+          },
+          "fast_path_hits": {
+            "scopes.hit": 1
+          }
+        },
+        "accept": {
+          "wall_ms": 83.564718,
+          "app_cpu_ms": 64.260882,
+          "pg_backend_cpu_ms": 18.26496,
+          "pg_connections_measured": 1,
+          "sql_calls": 61,
+          "selected_rows": 226,
+          "json_bytes_decoded": 408770,
+          "json_bytes_encoded": 197627,
+          "source_reads": {
+            "scopes_sql": 2,
+            "scopes_rows": 186,
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {
+            "scopes.hit": 1
+          }
+        }
+      }
+    },
+    {
+      "pair": 5,
+      "enabled": false,
+      "operations": {
+        "fixed_query": {
+          "wall_ms": 20.682406,
+          "app_cpu_ms": 16.271034,
+          "pg_backend_cpu_ms": 4.020634,
+          "pg_connections_measured": 1,
+          "sql_calls": 20,
+          "selected_rows": 19,
+          "json_bytes_decoded": 197356,
+          "json_bytes_encoded": 0,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {}
+        },
+        "worker": {
+          "wall_ms": 47.479307,
+          "app_cpu_ms": 34.834528,
+          "pg_backend_cpu_ms": 12.187211,
+          "pg_connections_measured": 1,
+          "sql_calls": 27,
+          "selected_rows": 21,
+          "json_bytes_decoded": 379234,
+          "json_bytes_encoded": 167466,
+          "source_reads": {
+            "revision_sql": 2,
+            "revision_rows": 2
+          },
+          "fast_path_hits": {}
+        },
+        "promote": {
+          "wall_ms": 44.665306,
+          "app_cpu_ms": 34.849315,
+          "pg_backend_cpu_ms": 8.903821,
+          "pg_connections_measured": 1,
+          "sql_calls": 39,
+          "selected_rows": 34,
+          "json_bytes_decoded": 242306,
+          "json_bytes_encoded": 2555,
+          "source_reads": {
+            "revision_sql": 4,
+            "revision_rows": 5
+          },
+          "fast_path_hits": {}
+        },
+        "prepare": {
+          "wall_ms": 35.571132,
+          "app_cpu_ms": 28.40597,
+          "pg_backend_cpu_ms": 6.800632,
+          "pg_connections_measured": 1,
+          "sql_calls": 35,
+          "selected_rows": 199,
+          "json_bytes_decoded": 220040,
+          "json_bytes_encoded": 29565,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1,
+            "scopes_sql": 1,
+            "scopes_rows": 176
+          },
+          "fast_path_hits": {}
+        },
+        "accept": {
+          "wall_ms": 76.330868,
+          "app_cpu_ms": 59.695564,
+          "pg_backend_cpu_ms": 16.016267,
+          "pg_connections_measured": 1,
+          "sql_calls": 61,
+          "selected_rows": 393,
+          "json_bytes_decoded": 408770,
+          "json_bytes_encoded": 197627,
+          "source_reads": {
+            "scopes_sql": 2,
+            "scopes_rows": 353,
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {}
+        }
+      }
+    },
+    {
+      "pair": 6,
+      "enabled": false,
+      "operations": {
+        "fixed_query": {
+          "wall_ms": 25.002591,
+          "app_cpu_ms": 21.12377,
+          "pg_backend_cpu_ms": 3.803534,
+          "pg_connections_measured": 1,
+          "sql_calls": 20,
+          "selected_rows": 19,
+          "json_bytes_decoded": 197356,
+          "json_bytes_encoded": 0,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {}
+        },
+        "worker": {
+          "wall_ms": 56.355977,
+          "app_cpu_ms": 44.809885,
+          "pg_backend_cpu_ms": 11.165581,
+          "pg_connections_measured": 1,
+          "sql_calls": 27,
+          "selected_rows": 21,
+          "json_bytes_decoded": 379234,
+          "json_bytes_encoded": 167466,
+          "source_reads": {
+            "revision_sql": 2,
+            "revision_rows": 2
+          },
+          "fast_path_hits": {}
+        },
+        "promote": {
+          "wall_ms": 38.782336,
+          "app_cpu_ms": 30.659827,
+          "pg_backend_cpu_ms": 7.697097,
+          "pg_connections_measured": 1,
+          "sql_calls": 39,
+          "selected_rows": 34,
+          "json_bytes_decoded": 242306,
+          "json_bytes_encoded": 2555,
+          "source_reads": {
+            "revision_sql": 4,
+            "revision_rows": 5
+          },
+          "fast_path_hits": {}
+        },
+        "prepare": {
+          "wall_ms": 32.495507,
+          "app_cpu_ms": 24.951629,
+          "pg_backend_cpu_ms": 7.121363,
+          "pg_connections_measured": 1,
+          "sql_calls": 35,
+          "selected_rows": 199,
+          "json_bytes_decoded": 220040,
+          "json_bytes_encoded": 29565,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1,
+            "scopes_sql": 1,
+            "scopes_rows": 176
+          },
+          "fast_path_hits": {}
+        },
+        "accept": {
+          "wall_ms": 102.071477,
+          "app_cpu_ms": 81.367366,
+          "pg_backend_cpu_ms": 19.392582,
+          "pg_connections_measured": 1,
+          "sql_calls": 61,
+          "selected_rows": 393,
+          "json_bytes_decoded": 408770,
+          "json_bytes_encoded": 197627,
+          "source_reads": {
+            "scopes_sql": 2,
+            "scopes_rows": 353,
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {}
+        }
+      }
+    },
+    {
+      "pair": 6,
+      "enabled": true,
+      "operations": {
+        "fixed_query": {
+          "wall_ms": 18.852939,
+          "app_cpu_ms": 15.230567,
+          "pg_backend_cpu_ms": 3.527001,
+          "pg_connections_measured": 1,
+          "sql_calls": 20,
+          "selected_rows": 19,
+          "json_bytes_decoded": 187605,
+          "json_bytes_encoded": 0,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {
+            "columns.query_hit": 1
+          }
+        },
+        "worker": {
+          "wall_ms": 45.991139,
+          "app_cpu_ms": 33.830259,
+          "pg_backend_cpu_ms": 11.479924,
+          "pg_connections_measured": 1,
+          "sql_calls": 27,
+          "selected_rows": 21,
+          "json_bytes_decoded": 191390,
+          "json_bytes_encoded": 167466,
+          "source_reads": {
+            "revision_sql": 2,
+            "revision_rows": 2
+          },
+          "fast_path_hits": {
+            "columns.index_metadata_hit": 1
+          }
+        },
+        "promote": {
+          "wall_ms": 45.595653,
+          "app_cpu_ms": 36.057094,
+          "pg_backend_cpu_ms": 8.756386,
+          "pg_connections_measured": 1,
+          "sql_calls": 39,
+          "selected_rows": 34,
+          "json_bytes_decoded": 173388,
+          "json_bytes_encoded": 2555,
+          "source_reads": {
+            "revision_sql": 4,
+            "revision_rows": 5
+          },
+          "fast_path_hits": {
+            "columns.repair_review_hit": 1
+          }
+        },
+        "prepare": {
+          "wall_ms": 41.777474,
+          "app_cpu_ms": 32.779503,
+          "pg_backend_cpu_ms": 8.634522,
+          "pg_connections_measured": 1,
+          "sql_calls": 35,
+          "selected_rows": 32,
+          "json_bytes_decoded": 220040,
+          "json_bytes_encoded": 29565,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1,
+            "scopes_sql": 1,
+            "scopes_rows": 9
+          },
+          "fast_path_hits": {
+            "scopes.hit": 1
+          }
+        },
+        "accept": {
+          "wall_ms": 85.363624,
+          "app_cpu_ms": 67.025231,
+          "pg_backend_cpu_ms": 18.165773,
+          "pg_connections_measured": 1,
+          "sql_calls": 61,
+          "selected_rows": 226,
+          "json_bytes_decoded": 408770,
+          "json_bytes_encoded": 197627,
+          "source_reads": {
+            "scopes_sql": 2,
+            "scopes_rows": 186,
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {
+            "scopes.hit": 1
+          }
+        }
+      }
+    },
+    {
+      "pair": 7,
+      "enabled": true,
+      "operations": {
+        "fixed_query": {
+          "wall_ms": 19.563821,
+          "app_cpu_ms": 15.205106,
+          "pg_backend_cpu_ms": 3.93781,
+          "pg_connections_measured": 1,
+          "sql_calls": 20,
+          "selected_rows": 19,
+          "json_bytes_decoded": 187605,
+          "json_bytes_encoded": 0,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {
+            "columns.query_hit": 1
+          }
+        },
+        "worker": {
+          "wall_ms": 45.930763,
+          "app_cpu_ms": 34.112883,
+          "pg_backend_cpu_ms": 11.322562,
+          "pg_connections_measured": 1,
+          "sql_calls": 27,
+          "selected_rows": 21,
+          "json_bytes_decoded": 191390,
+          "json_bytes_encoded": 167466,
+          "source_reads": {
+            "revision_sql": 2,
+            "revision_rows": 2
+          },
+          "fast_path_hits": {
+            "columns.index_metadata_hit": 1
+          }
+        },
+        "promote": {
+          "wall_ms": 41.362759,
+          "app_cpu_ms": 32.383608,
+          "pg_backend_cpu_ms": 8.147889,
+          "pg_connections_measured": 1,
+          "sql_calls": 39,
+          "selected_rows": 34,
+          "json_bytes_decoded": 173388,
+          "json_bytes_encoded": 2555,
+          "source_reads": {
+            "revision_sql": 4,
+            "revision_rows": 5
+          },
+          "fast_path_hits": {
+            "columns.repair_review_hit": 1
+          }
+        },
+        "prepare": {
+          "wall_ms": 39.562185,
+          "app_cpu_ms": 30.537276,
+          "pg_backend_cpu_ms": 8.364532,
+          "pg_connections_measured": 1,
+          "sql_calls": 35,
+          "selected_rows": 32,
+          "json_bytes_decoded": 220040,
+          "json_bytes_encoded": 29565,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1,
+            "scopes_sql": 1,
+            "scopes_rows": 9
+          },
+          "fast_path_hits": {
+            "scopes.hit": 1
+          }
+        },
+        "accept": {
+          "wall_ms": 94.976038,
+          "app_cpu_ms": 76.756063,
+          "pg_backend_cpu_ms": 17.074234,
+          "pg_connections_measured": 1,
+          "sql_calls": 61,
+          "selected_rows": 226,
+          "json_bytes_decoded": 408770,
+          "json_bytes_encoded": 197627,
+          "source_reads": {
+            "scopes_sql": 2,
+            "scopes_rows": 186,
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {
+            "scopes.hit": 1
+          }
+        }
+      }
+    },
+    {
+      "pair": 7,
+      "enabled": false,
+      "operations": {
+        "fixed_query": {
+          "wall_ms": 24.429563,
+          "app_cpu_ms": 20.536632,
+          "pg_backend_cpu_ms": 3.765953,
+          "pg_connections_measured": 1,
+          "sql_calls": 20,
+          "selected_rows": 19,
+          "json_bytes_decoded": 197356,
+          "json_bytes_encoded": 0,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {}
+        },
+        "worker": {
+          "wall_ms": 60.192473,
+          "app_cpu_ms": 44.892019,
+          "pg_backend_cpu_ms": 14.46204,
+          "pg_connections_measured": 1,
+          "sql_calls": 27,
+          "selected_rows": 21,
+          "json_bytes_decoded": 379234,
+          "json_bytes_encoded": 167466,
+          "source_reads": {
+            "revision_sql": 2,
+            "revision_rows": 2
+          },
+          "fast_path_hits": {}
+        },
+        "promote": {
+          "wall_ms": 51.996423,
+          "app_cpu_ms": 40.477536,
+          "pg_backend_cpu_ms": 10.394234,
+          "pg_connections_measured": 1,
+          "sql_calls": 39,
+          "selected_rows": 34,
+          "json_bytes_decoded": 242306,
+          "json_bytes_encoded": 2555,
+          "source_reads": {
+            "revision_sql": 4,
+            "revision_rows": 5
+          },
+          "fast_path_hits": {}
+        },
+        "prepare": {
+          "wall_ms": 39.832929,
+          "app_cpu_ms": 30.976904,
+          "pg_backend_cpu_ms": 8.54445,
+          "pg_connections_measured": 1,
+          "sql_calls": 35,
+          "selected_rows": 199,
+          "json_bytes_decoded": 220040,
+          "json_bytes_encoded": 29565,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1,
+            "scopes_sql": 1,
+            "scopes_rows": 176
+          },
+          "fast_path_hits": {}
+        },
+        "accept": {
+          "wall_ms": 187.456871,
+          "app_cpu_ms": 169.255533,
+          "pg_backend_cpu_ms": 17.15082,
+          "pg_connections_measured": 1,
+          "sql_calls": 61,
+          "selected_rows": 393,
+          "json_bytes_decoded": 408770,
+          "json_bytes_encoded": 197627,
+          "source_reads": {
+            "scopes_sql": 2,
+            "scopes_rows": 353,
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {}
+        }
+      }
+    },
+    {
+      "pair": 8,
+      "enabled": false,
+      "operations": {
+        "fixed_query": {
+          "wall_ms": 28.38947,
+          "app_cpu_ms": 21.363964,
+          "pg_backend_cpu_ms": 6.46271,
+          "pg_connections_measured": 1,
+          "sql_calls": 20,
+          "selected_rows": 19,
+          "json_bytes_decoded": 197356,
+          "json_bytes_encoded": 0,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {}
+        },
+        "worker": {
+          "wall_ms": 58.395455,
+          "app_cpu_ms": 45.710504,
+          "pg_backend_cpu_ms": 12.189373,
+          "pg_connections_measured": 1,
+          "sql_calls": 27,
+          "selected_rows": 21,
+          "json_bytes_decoded": 379234,
+          "json_bytes_encoded": 167466,
+          "source_reads": {
+            "revision_sql": 2,
+            "revision_rows": 2
+          },
+          "fast_path_hits": {}
+        },
+        "promote": {
+          "wall_ms": 54.605255,
+          "app_cpu_ms": 44.010746,
+          "pg_backend_cpu_ms": 9.747936,
+          "pg_connections_measured": 1,
+          "sql_calls": 39,
+          "selected_rows": 34,
+          "json_bytes_decoded": 242306,
+          "json_bytes_encoded": 2555,
+          "source_reads": {
+            "revision_sql": 4,
+            "revision_rows": 5
+          },
+          "fast_path_hits": {}
+        },
+        "prepare": {
+          "wall_ms": 44.471804,
+          "app_cpu_ms": 36.72379,
+          "pg_backend_cpu_ms": 7.397846,
+          "pg_connections_measured": 1,
+          "sql_calls": 35,
+          "selected_rows": 199,
+          "json_bytes_decoded": 220040,
+          "json_bytes_encoded": 29565,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1,
+            "scopes_sql": 1,
+            "scopes_rows": 176
+          },
+          "fast_path_hits": {}
+        },
+        "accept": {
+          "wall_ms": 67.999036,
+          "app_cpu_ms": 53.0799,
+          "pg_backend_cpu_ms": 14.610094,
+          "pg_connections_measured": 1,
+          "sql_calls": 61,
+          "selected_rows": 393,
+          "json_bytes_decoded": 408770,
+          "json_bytes_encoded": 197627,
+          "source_reads": {
+            "scopes_sql": 2,
+            "scopes_rows": 353,
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {}
+        }
+      }
+    },
+    {
+      "pair": 8,
+      "enabled": true,
+      "operations": {
+        "fixed_query": {
+          "wall_ms": 24.687291,
+          "app_cpu_ms": 20.830808,
+          "pg_backend_cpu_ms": 3.61801,
+          "pg_connections_measured": 1,
+          "sql_calls": 20,
+          "selected_rows": 19,
+          "json_bytes_decoded": 187605,
+          "json_bytes_encoded": 0,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {
+            "columns.query_hit": 1
+          }
+        },
+        "worker": {
+          "wall_ms": 54.133613,
+          "app_cpu_ms": 43.520865,
+          "pg_backend_cpu_ms": 10.270858,
+          "pg_connections_measured": 1,
+          "sql_calls": 27,
+          "selected_rows": 21,
+          "json_bytes_decoded": 191390,
+          "json_bytes_encoded": 167466,
+          "source_reads": {
+            "revision_sql": 2,
+            "revision_rows": 2
+          },
+          "fast_path_hits": {
+            "columns.index_metadata_hit": 1
+          }
+        },
+        "promote": {
+          "wall_ms": 39.87973,
+          "app_cpu_ms": 32.014095,
+          "pg_backend_cpu_ms": 7.653729,
+          "pg_connections_measured": 1,
+          "sql_calls": 39,
+          "selected_rows": 34,
+          "json_bytes_decoded": 173388,
+          "json_bytes_encoded": 2555,
+          "source_reads": {
+            "revision_sql": 4,
+            "revision_rows": 5
+          },
+          "fast_path_hits": {
+            "columns.repair_review_hit": 1
+          }
+        },
+        "prepare": {
+          "wall_ms": 39.214251,
+          "app_cpu_ms": 30.134551,
+          "pg_backend_cpu_ms": 8.427835,
+          "pg_connections_measured": 1,
+          "sql_calls": 35,
+          "selected_rows": 32,
+          "json_bytes_decoded": 220040,
+          "json_bytes_encoded": 29565,
+          "source_reads": {
+            "revision_sql": 1,
+            "revision_rows": 1,
+            "scopes_sql": 1,
+            "scopes_rows": 9
+          },
+          "fast_path_hits": {
+            "scopes.hit": 1
+          }
+        },
+        "accept": {
+          "wall_ms": 97.798121,
+          "app_cpu_ms": 76.647424,
+          "pg_backend_cpu_ms": 20.328158,
+          "pg_connections_measured": 1,
+          "sql_calls": 61,
+          "selected_rows": 226,
+          "json_bytes_decoded": 408770,
+          "json_bytes_encoded": 197627,
+          "source_reads": {
+            "scopes_sql": 2,
+            "scopes_rows": 186,
+            "revision_sql": 1,
+            "revision_rows": 1
+          },
+          "fast_path_hits": {
+            "scopes.hit": 1
+          }
+        }
+      }
+    }
+  ],
+  "measurement": "Single public business operation per dedicated PG17 clone; first pair discarded; alternating order. Warm fixed query, new worker/promotion/prepare/accept. Counts include verification and receipt work inside the operation.",
+  "semantic_result_hash": "db7b1d87ca13925099dcfb5488f6947c3be1f5abb9223cfe180c4afe2ea00ae6"
+}

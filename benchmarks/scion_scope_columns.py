@@ -65,7 +65,8 @@ def run(output, pairs):
                                         value = {key: row[key] for key in keys}
                                     else:
                                         value = kernel._tokens(repo, wr, footprint, grant, [],
-                                                               branch["history_epoch"], work)
+                                                               branch["history_epoch"], work,
+                                                               template_id="RESOURCE_TRANSFER")
                         finally:
                             wall_ns = time.perf_counter_ns() - start
                             cpu_ns = time.process_time_ns() - cpu

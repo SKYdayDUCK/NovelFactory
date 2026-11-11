@@ -59,7 +59,7 @@ class Kernel:
 
     def query_revision(self, r, wr):
         """Fixed-cut state/graph/timeline reads still validate the complete snapshot."""
-        if not self.scion.columns:
+        if not self.scion.query_columns:
             return self.revision(r, wr)
         validate_contract("WorldRef", wr)
         row = r.one("revisions", wr, columns=(
@@ -568,13 +568,19 @@ class Kernel:
         require(rows,"APPROVAL_STALE","A content-bound approval is required")
         return rows
 
-    def _tokens(self,r,wr,footprint,grant,approvals,history_epoch,work):
-        if self.scion.scopes:
+    def _tokens(self,r,wr,footprint,grant,approvals,history_epoch,work, *, template_id=None):
+        from novel_factory.application.templates import GUARDED
+        # Only templates with a closed server-derived read/write footprint
+        # use sparse lookup. Strict-only templates can cover the entire world
+        # (e.g. a repair); retain their original full-branch lookup.
+        if self.scion.scopes and template_id in GUARDED:
             keys = set(footprint["reads"]).union(footprint["writes"])
             versions = r.scope_versions_for(wr["work_id"], wr["branch_id"], keys)
             self.scion.record("scopes", "hit")
         else:
             versions = r.scope_map(wr["work_id"], wr["branch_id"])
+            if self.scion.scopes:
+                self.scion.record("scopes", "full_template")
         def token(key,version,owner="BRANCH"):
             kind=key.split(":",1)[0]
             return {"owner_kind":owner,"work_id":wr["work_id"],"branch_id":wr["branch_id"] if owner=="BRANCH" else None,
@@ -616,7 +622,8 @@ class Kernel:
             original=current if parent==wr else self.revision(r,wr)
             require(original["provenance"].get("history_epoch",0)==branch["history_epoch"],"HISTORY_CHANGED","Historical repair requires a fresh task input and proposal")
             require(current["interpretation_ref"]==work["interpretation_ref"],"STALE_CERTIFICATE","Current interpretation requires a new reviewed world revision")
-            reads,writes=self._tokens(r,wr,actual,grant,approvals,branch["history_epoch"],work)
+            reads,writes=self._tokens(r,wr,actual,grant,approvals,branch["history_epoch"],work,
+                                     template_id=p["template_id"])
             sample={"validated_world_ref":parent,"state_hash":current["state_hash"],"reads":reads,"writes":writes,"command_sha256":fingerprint(p["template_args"]),"validator":"nf-validator-1"}
             dependency=deepcopy(context["dependency_manifest"])
             require(fingerprint(dependency)==context["dependency_fingerprint"],"HARD_RULE_VIOLATION","Stored input dependency integrity failed")
@@ -682,7 +689,8 @@ class Kernel:
     def _verify_tokens(self,r,wr,cert,footprint,grant,approvals,branch,work):
         require(branch["history_epoch"]==cert["history_epoch"] and work["interpretation_ref"]==cert["interpretation_ref"]
                 and work["policy_version"]==cert["policy_version"],"STALE_CERTIFICATE","History or interpretation changed")
-        reads,writes=self._tokens(r,wr,footprint,grant,approvals,branch["history_epoch"],work)
+        reads,writes=self._tokens(r,wr,footprint,grant,approvals,branch["history_epoch"],work,
+                                 template_id=cert["command_template_id"])
         require(reads==cert["read_scope_tokens"] and writes==cert["write_scope_tokens"],"DEPENDENCY_CONFLICT","A guarded dependency changed")
 
     def accept(self,principal,request,*,fault=None):
@@ -864,7 +872,7 @@ class Kernel:
             events=[r.one("events",{"event_version_id":eid,"work_id":wid})["payload"] for eid in candidate["selection"].values()]
             genesis=r.one("genesis",{"work_id":wid})["payload"]
             revalidation=self._revalidate_repair(r,wid,genesis,events)
-            review_columns = ("world_revision_id", "provenance") if self.scion.columns else None
+            review_columns = ("world_revision_id", "provenance") if self.scion.review_columns else None
             candidate_revisions = r.many("revisions", {"work_id": wid, "branch_id": candidate_world_ref["branch_id"]},
                                          columns=review_columns)
             if review_columns:
