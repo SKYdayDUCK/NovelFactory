@@ -1,0 +1,642 @@
+{
+  "preset": "Standard",
+  "organization": "2e9ef532-76ac-406c-9886-66fc29967f34",
+  "nf_instance_id": "1bcb82a1-eb00-44de-be6f-1fcf7c3172f9",
+  "source": {
+    "NovelFactory": {
+      "head": "becc8e7a400756c67832e0aca16cac78000df661",
+      "working_changes": [],
+      "source_sha256": "38e8dd1dd448e1c3ea4840595dbdecec17a3b1aacab937accfee17cdb2d15d05"
+    },
+    "Workshop": {
+      "head": "ed6ace9ec14c204aa9fda88ccaa9dee7d3bf4594",
+      "working_changes": [
+        " M workshop/integration/conftest.py",
+        " M workshop/src/agent_workshop/delegation.py",
+        " M workshop/src/agent_workshop/manager.py",
+        " M workshop/src/agent_workshop/manager_worker.py",
+        " M workshop/src/agent_workshop/reconcile.py",
+        "?? workshop/integration/test_paired_restore.py",
+        "?? workshop/migrations/versions/w007_paired_restore.py",
+        "?? workshop/migrations/versions/w008_installation_keys.py",
+        "?? workshop/src/agent_workshop/recovery.py"
+      ],
+      "source_sha256": "5e504c3b652c7a976b781fad71030efe81bfa341012b9a9f18c3a4450098b7fc"
+    },
+    "harness_sha256": "d43a48eb57a24128361c50f85aafc3fbc49a6d7955ba56c8c13cae7629a1dcd4"
+  },
+  "installation": "11f74958-1a0f-4911-9148-f2350d2d0ac9",
+  "org_revision": 2,
+  "operation_id": "bc97ee99-b4e3-4369-8b33-dfc2dd767656",
+  "production_mail": [
+    {
+      "sender": "author",
+      "recipient": "manager",
+      "kind": "GOAL",
+      "message_id": "969c00cf-27bf-4fc9-8bac-5403f79bd460",
+      "receipt": {
+        "status": "ACKNOWLEDGED",
+        "message_id": "969c00cf-27bf-4fc9-8bac-5403f79bd460",
+        "sequence": 1,
+        "acknowledged_at": "2026-11-11T14:10:27.061332+00:00"
+      },
+      "causation": null
+    },
+    {
+      "sender": "manager",
+      "recipient": "script",
+      "kind": "ASSIGN",
+      "message_id": "de3a5ee4-6eac-4c72-a4f0-dcaec63efc75",
+      "receipt": {
+        "status": "ACKNOWLEDGED",
+        "message_id": "de3a5ee4-6eac-4c72-a4f0-dcaec63efc75",
+        "sequence": 1,
+        "acknowledged_at": "2026-11-11T14:10:27.580135+00:00"
+      },
+      "causation": "969c00cf-27bf-4fc9-8bac-5403f79bd460"
+    },
+    {
+      "sender": "script",
+      "recipient": "chief",
+      "kind": "PROPOSE_SCRIPT",
+      "message_id": "15beaaf5-27e4-4dba-8740-e523d8a5d336",
+      "receipt": {
+        "status": "ACKNOWLEDGED",
+        "message_id": "15beaaf5-27e4-4dba-8740-e523d8a5d336",
+        "sequence": 1,
+        "acknowledged_at": "2026-11-11T14:10:28.139683+00:00"
+      },
+      "causation": "de3a5ee4-6eac-4c72-a4f0-dcaec63efc75"
+    },
+    {
+      "sender": "chief",
+      "recipient": "volume",
+      "kind": "ASSIGN",
+      "message_id": "9000fc75-1422-4f28-b024-64235ba52c40",
+      "receipt": {
+        "status": "ACKNOWLEDGED",
+        "message_id": "9000fc75-1422-4f28-b024-64235ba52c40",
+        "sequence": 1,
+        "acknowledged_at": "2026-11-11T14:10:28.699259+00:00"
+      },
+      "causation": "15beaaf5-27e4-4dba-8740-e523d8a5d336"
+    },
+    {
+      "sender": "volume",
+      "recipient": "actor-1",
+      "kind": "ASSIGN",
+      "message_id": "5e9e3551-810b-474c-be66-f9c4557047e8",
+      "receipt": {
+        "status": "ACKNOWLEDGED",
+        "message_id": "5e9e3551-810b-474c-be66-f9c4557047e8",
+        "sequence": 1,
+        "acknowledged_at": "2026-11-11T14:10:29.287684+00:00"
+      },
+      "causation": "9000fc75-1422-4f28-b024-64235ba52c40"
+    },
+    {
+      "sender": "volume",
+      "recipient": "actor-2",
+      "kind": "ASSIGN",
+      "message_id": "d22f43f7-6e58-4d04-bd73-25a46845a412",
+      "receipt": {
+        "status": "ACKNOWLEDGED",
+        "message_id": "d22f43f7-6e58-4d04-bd73-25a46845a412",
+        "sequence": 1,
+        "acknowledged_at": "2026-11-11T14:10:29.849486+00:00"
+      },
+      "causation": "9000fc75-1422-4f28-b024-64235ba52c40"
+    },
+    {
+      "sender": "volume",
+      "recipient": "actor-3",
+      "kind": "ASSIGN",
+      "message_id": "38293060-5703-4157-9138-7ddcbd644379",
+      "receipt": {
+        "status": "ACKNOWLEDGED",
+        "message_id": "38293060-5703-4157-9138-7ddcbd644379",
+        "sequence": 1,
+        "acknowledged_at": "2026-11-11T14:10:30.412727+00:00"
+      },
+      "causation": "9000fc75-1422-4f28-b024-64235ba52c40"
+    }
+  ],
+  "nf_delegation_receipt": "7f2f66bd-06a7-4b27-a675-2858f7310135",
+  "s9": {
+    "case_id": "75acbf47-d0b4-5e22-aa9d-25e131361aa6",
+    "affected_task": "9bacf98f-502f-42ce-8fa4-364bac8fee66",
+    "independent_task": "fa488066-37b0-4d93-93fe-e194bf93e421",
+    "strategy_receipt": {
+      "outcome": "REVIEW_REQUIRED",
+      "resolution_strategy": "ESCALATE_REVIEW",
+      "suggested_strategy": "REVALIDATE",
+      "reason": "REVIEW_REQUIRED",
+      "review_task_id": "e9ede78e-1986-547e-8704-61249677a41a",
+      "case_id": "75acbf47-d0b4-5e22-aa9d-25e131361aa6",
+      "receipt_id": "2d07e722-c8ce-58f6-b4d5-71da90b05d90",
+      "task_id": "9bacf98f-502f-42ce-8fa4-364bac8fee66",
+      "generation": 1,
+      "conflict_type": "STALE_PRECONDITION",
+      "additional_model_attempts": 0,
+      "actual_tokens": 0,
+      "cost_status": "NO_MODEL_CALL"
+    }
+  },
+  "prose": {
+    "source": "deterministic engineering fixture",
+    "accepted": {
+      "artifact_id": "34a85d67-42c6-4150-9d9c-91a8519c6032",
+      "artifact_revision_id": "fdcbb2a1-4cf3-4a4e-96bd-15086ae4fdc2",
+      "sha256": "8dbc5beb5984884a40a0dcb5c44a1d7893364ea3d1995ebe88a3f0b1f8874531"
+    },
+    "draft_ref": {
+      "artifact_id": "106121cf-45a8-434b-9961-f14ee3e4b02c",
+      "artifact_revision_id": "b17f4f0d-df59-40b9-bead-634b5a27be44",
+      "sha256": "531b491aa064edfe3ba930ffbce4d1c0404c228bbade204d31baf6c3ad11eead"
+    },
+    "text_ref": {
+      "sha256": "41c9ff95dfce31ba8ac471194a283a62258febab76e7839e55e9d03ded0faa3d",
+      "artifact_id": "ded0f6cf-8a92-4bd9-aa5d-08c996ccd493",
+      "artifact_revision_id": "c3b415e4-14bb-4065-a1b5-5f028cf1636e"
+    },
+    "reconciliation": {
+      "artifact_id": "579cc30f-7cbb-49db-8b87-74c7180ad405",
+      "artifact_revision_id": "bcda4569-86af-424c-8c2e-7a3e1f39386c",
+      "sha256": "7b873b67edf85c1dd81d6590e743539db7a679717892938bf2d4d8b9bd0f174c"
+    }
+  },
+  "unknown_held_then_settled_attempt": "aa14749b-d8ff-4485-9cab-8e52db90fc19",
+  "reviewed_frozen_source": {
+    "artifact_revision": "c3b415e4-14bb-4065-a1b5-5f028cf1636e",
+    "content_sha": "41c9ff95dfce31ba8ac471194a283a62258febab76e7839e55e9d03ded0faa3d"
+  },
+  "author_task_progress": {
+    "slot_id": "inventory",
+    "owner_id": "clerk",
+    "state": "BOUND",
+    "last_error": null,
+    "task_state": "ACCEPTED",
+    "task_id": "e38e7265-21ea-4c0c-a2ec-7909e195a177",
+    "generation": 1,
+    "world_ref": {
+      "work_id": "7a3e013e-b43a-4143-b0a7-6c41555d5968",
+      "branch_id": "2c81624f-fdfe-4b24-b24a-a7d7795b1b0e",
+      "world_revision_id": "78c907f1-2b44-43eb-adec-c34a83b8d747"
+    },
+    "accounting_state": "UNKNOWN",
+    "hold": "HELD"
+  },
+  "independent_workshop_review": {
+    "review_id": "471e652b-ae30-40ea-8ac2-e14a653c79c5",
+    "state": "APPROVED",
+    "scope": "Programmed account exercise; no human literary rating."
+  },
+  "author_retrieval": [
+    {
+      "sender": "manager",
+      "recipient": "author",
+      "kind": "REPORT",
+      "message_id": "889e5336-7687-4d14-89b7-28f4eed060e5",
+      "receipt": {
+        "status": "ACKNOWLEDGED",
+        "message_id": "889e5336-7687-4d14-89b7-28f4eed060e5",
+        "sequence": 1,
+        "acknowledged_at": "2026-11-11T14:10:47.361211+00:00"
+      },
+      "causation": null
+    }
+  ],
+  "accepted_scene": {
+    "test": "test_one_author_resume_through_autonomous_banquet",
+    "provider": "deterministic HTTPS loopback fixture; no live inference or paid tokens",
+    "mcp": {
+      "client": "Python MCP SDK via child stdio",
+      "protocol": "2025-11-25",
+      "tools": [
+        "nf_project_status",
+        "nf_resume_project"
+      ],
+      "resume_calls": 1
+    },
+    "codex": "codex-cli 0.167.0-alpha.4",
+    "postgres": "17.11 (Debian 17.11-0+deb13u1)",
+    "initial": {
+      "READY": 3,
+      "WAITING": 4,
+      "RUNNING": 0,
+      "ACCEPTED": 2
+    },
+    "final": {
+      "READY": 0,
+      "WAITING": 0,
+      "RUNNING": 0,
+      "ACCEPTED": 11
+    },
+    "scene_provider_turns": 8,
+    "observations": [
+      {
+        "turn": "A",
+        "elapsed_s": 1.9122,
+        "states": {
+          "B": "BLOCKED",
+          "kernel_accept": "READY",
+          "joint": "BLOCKED",
+          "request_change": "BLOCKED",
+          "notification": "BLOCKED",
+          "A": "RUNNING",
+          "C": "RUNNING"
+        },
+        "counts": {
+          "READY": 1,
+          "WAITING": 4,
+          "RUNNING": 2,
+          "ACCEPTED": 2
+        },
+        "live_codex_pids": [
+          1027,
+          1045
+        ]
+      },
+      {
+        "turn": "C",
+        "elapsed_s": 1.9123,
+        "states": {
+          "B": "BLOCKED",
+          "kernel_accept": "READY",
+          "joint": "BLOCKED",
+          "request_change": "BLOCKED",
+          "notification": "BLOCKED",
+          "A": "RUNNING",
+          "C": "RUNNING"
+        },
+        "counts": {
+          "READY": 1,
+          "WAITING": 4,
+          "RUNNING": 2,
+          "ACCEPTED": 2
+        },
+        "live_codex_pids": [
+          1027,
+          1045
+        ]
+      },
+      {
+        "turn": "notification",
+        "elapsed_s": 2.6427,
+        "states": {
+          "B": "BLOCKED",
+          "kernel_accept": "READY",
+          "joint": "BLOCKED",
+          "request_change": "BLOCKED",
+          "A": "ACCEPTED",
+          "notification": "RUNNING",
+          "C": "ACCEPTED"
+        },
+        "counts": {
+          "READY": 1,
+          "WAITING": 3,
+          "RUNNING": 1,
+          "ACCEPTED": 4
+        },
+        "live_codex_pids": [
+          1158
+        ]
+      },
+      {
+        "turn": "B",
+        "elapsed_s": 3.2714,
+        "states": {
+          "kernel_accept": "READY",
+          "joint": "BLOCKED",
+          "request_change": "BLOCKED",
+          "A": "ACCEPTED",
+          "notification": "ACCEPTED",
+          "B": "RUNNING",
+          "C": "ACCEPTED"
+        },
+        "counts": {
+          "READY": 1,
+          "WAITING": 2,
+          "RUNNING": 1,
+          "ACCEPTED": 5
+        },
+        "live_codex_pids": [
+          1223
+        ]
+      },
+      {
+        "turn": "joint",
+        "elapsed_s": 4.0615,
+        "states": {
+          "kernel_accept": "READY",
+          "request_change": "BLOCKED",
+          "A": "ACCEPTED",
+          "notification": "ACCEPTED",
+          "B": "ACCEPTED",
+          "joint": "RUNNING",
+          "C": "ACCEPTED"
+        },
+        "counts": {
+          "READY": 1,
+          "WAITING": 1,
+          "RUNNING": 1,
+          "ACCEPTED": 6
+        },
+        "live_codex_pids": [
+          1289
+        ]
+      },
+      {
+        "turn": "request_change",
+        "elapsed_s": 5.2654,
+        "states": {
+          "A": "ACCEPTED",
+          "notification": "ACCEPTED",
+          "B": "ACCEPTED",
+          "request_change": "RUNNING",
+          "C": "ACCEPTED",
+          "kernel_accept": "ACCEPTED",
+          "joint": "ACCEPTED"
+        },
+        "counts": {
+          "READY": 0,
+          "WAITING": 0,
+          "RUNNING": 1,
+          "ACCEPTED": 8
+        },
+        "live_codex_pids": [
+          1358
+        ]
+      },
+      {
+        "turn": "propose_window",
+        "elapsed_s": 6.1235,
+        "states": {
+          "A": "ACCEPTED",
+          "notification": "ACCEPTED",
+          "B": "ACCEPTED",
+          "request_change": "ACCEPTED",
+          "C": "ACCEPTED",
+          "kernel_accept": "ACCEPTED",
+          "joint": "ACCEPTED",
+          "propose_window": "RUNNING"
+        },
+        "counts": {
+          "READY": 0,
+          "WAITING": 0,
+          "RUNNING": 1,
+          "ACCEPTED": 9
+        },
+        "live_codex_pids": [
+          1427
+        ]
+      },
+      {
+        "turn": "review_and_adopt",
+        "elapsed_s": 6.9154,
+        "states": {
+          "A": "ACCEPTED",
+          "notification": "ACCEPTED",
+          "B": "ACCEPTED",
+          "request_change": "ACCEPTED",
+          "C": "ACCEPTED",
+          "kernel_accept": "ACCEPTED",
+          "joint": "ACCEPTED",
+          "propose_window": "ACCEPTED",
+          "review_and_adopt": "RUNNING"
+        },
+        "counts": {
+          "READY": 0,
+          "WAITING": 0,
+          "RUNNING": 1,
+          "ACCEPTED": 10
+        },
+        "live_codex_pids": [
+          1493
+        ]
+      }
+    ],
+    "accept_to_ready_ms": {
+      "notification": 31.268,
+      "B": 16.786,
+      "joint": 13.596,
+      "request_change": 43.97
+    },
+    "scene_fixture_input_tokens": 88,
+    "scene_fixture_output_tokens": 56,
+    "tokens_by_turn": {
+      "notification": {
+        "input_tokens": 11,
+        "output_tokens": 7
+      },
+      "A": {
+        "input_tokens": 11,
+        "output_tokens": 7
+      },
+      "B": {
+        "input_tokens": 11,
+        "output_tokens": 7
+      },
+      "C": {
+        "input_tokens": 11,
+        "output_tokens": 7
+      },
+      "joint": {
+        "input_tokens": 11,
+        "output_tokens": 7
+      },
+      "request_change": {
+        "input_tokens": 11,
+        "output_tokens": 7
+      },
+      "propose_window": {
+        "input_tokens": 11,
+        "output_tokens": 7
+      },
+      "review_and_adopt": {
+        "input_tokens": 11,
+        "output_tokens": 7
+      }
+    },
+    "observed_request_sizes": {
+      "A": {
+        "prompt_utf8_bytes": 13343,
+        "inlined_schema_bytes": 5081,
+        "emitted_schema_bytes": 4464,
+        "authorized_materials": 0
+      },
+      "C": {
+        "prompt_utf8_bytes": 13343,
+        "inlined_schema_bytes": 5081,
+        "emitted_schema_bytes": 4464,
+        "authorized_materials": 0
+      },
+      "notification": {
+        "prompt_utf8_bytes": 12101,
+        "inlined_schema_bytes": 2736,
+        "emitted_schema_bytes": 2506,
+        "authorized_materials": 0
+      },
+      "B": {
+        "prompt_utf8_bytes": 13343,
+        "inlined_schema_bytes": 5081,
+        "emitted_schema_bytes": 4464,
+        "authorized_materials": 0
+      },
+      "joint": {
+        "prompt_utf8_bytes": 19640,
+        "inlined_schema_bytes": 7050,
+        "emitted_schema_bytes": 6141,
+        "authorized_materials": 0
+      },
+      "request_change": {
+        "prompt_utf8_bytes": 16029,
+        "inlined_schema_bytes": 4295,
+        "emitted_schema_bytes": 3941,
+        "authorized_materials": 0
+      },
+      "propose_window": {
+        "prompt_utf8_bytes": 17288,
+        "inlined_schema_bytes": 3335,
+        "emitted_schema_bytes": 3166,
+        "authorized_materials": 0
+      },
+      "review_and_adopt": {
+        "prompt_utf8_bytes": 17415,
+        "inlined_schema_bytes": 2536,
+        "emitted_schema_bytes": 2491,
+        "authorized_materials": 0
+      }
+    },
+    "completed_model_tasks_per_second": 0.9703,
+    "elapsed_s_including_restart": 8.2445,
+    "B_wake_source": "Distinct notification task completed after A; no private A text or in-world BELIEF is inferred",
+    "A_location_at_tick_31": {
+      "reference": "north",
+      "accepted": "south"
+    },
+    "active_host_processes_after_completion": 0,
+    "waiting_provider_calls": 0,
+    "human_interventions": 0,
+    "ordinary_approvals": 1,
+    "accepted_world_events": 1,
+    "sealed_actor_intents": [
+      "我不赴北岸晚宴，去南岸守粮。",
+      "我在北岸等来信，收到凭证再走。",
+      "我先核对库单。"
+    ],
+    "accepted_world_ref": {
+      "work_id": "7a3e013e-b43a-4143-b0a7-6c41555d5968",
+      "branch_id": "2c81624f-fdfe-4b24-b24a-a7d7795b1b0e",
+      "world_revision_id": "701650eb-c038-4bcb-a188-fa0bfe00d6e7"
+    },
+    "base_world_ref": {
+      "work_id": "7a3e013e-b43a-4143-b0a7-6c41555d5968",
+      "branch_id": "2c81624f-fdfe-4b24-b24a-a7d7795b1b0e",
+      "world_revision_id": "78c907f1-2b44-43eb-adec-c34a83b8d747"
+    },
+    "reference_timeline_ref": {
+      "sha256": "3402304b468ae4718c88177d5dd23f680d9343cbf3071dfe5993de1343e82781",
+      "artifact_id": "ecc37c0b-f980-409c-98b0-7805d7782178",
+      "artifact_revision_id": "703cb2a6-525a-4b33-8feb-ccb18d01caea"
+    },
+    "initial_plan_ref": {
+      "artifact_id": "07ef79da-fb3d-430c-add8-e5f9007d0df6",
+      "artifact_revision_id": "5b3467c2-b20f-4310-ab5d-8f87a39c9b45",
+      "sha256": "98d646c47ef8e6a30efe1b80df3b876ca9354d02e5ddf89b14e91614bf8fe06d"
+    },
+    "selected_plan_ref": {
+      "sha256": "77d5e2dd6b655d62a53c75b2e8ccb605134ad9b12a92b7e77ff66999a40d8f5c",
+      "artifact_id": "3eb1dfc4-ec33-48b1-8b59-ff4840d7a568",
+      "artifact_revision_id": "f165ba91-4443-4020-87f8-8f02edd233c6"
+    },
+    "revised_future_nodes": [
+      0,
+      1
+    ],
+    "change_point_ref": {
+      "sha256": "7286d97d1af9e9c4a1d14d4b0de1460963ca0b3e6c6c678ba89a3ffa07142d5f",
+      "artifact_id": "c1ade54b-66a7-4891-81b0-d74dbe71781c",
+      "artifact_revision_id": "40ef4e5a-7503-4f7d-9e0d-5a572bd206a0"
+    },
+    "window_ref": {
+      "sha256": "a24803dbb29ace34ed218765dd23a224e2f96d956ea22f734e016a02dff68688",
+      "artifact_id": "10721404-78b5-4cc4-aaf5-0dddce0ca1ea",
+      "artifact_revision_id": "3f85da81-58af-493e-9869-d1252a21a912"
+    },
+    "host_journal": [
+      {
+        "task": "notification",
+        "thread_id": "01a1caf2-41d5-7c20-8af9-3588d325eb89",
+        "turn_id": "01a1caf2-41f3-70b0-b899-9286b23bd826",
+        "phase": "COMPLETED"
+      },
+      {
+        "task": "A",
+        "thread_id": "01a1caf2-3eb2-79b2-8040-c43afb699aa4",
+        "turn_id": "01a1caf2-3edc-7c80-80ad-2d0e6e9716f4",
+        "phase": "COMPLETED"
+      },
+      {
+        "task": "B",
+        "thread_id": "01a1caf2-4443-7563-a643-78106c365738",
+        "turn_id": "01a1caf2-4461-7b53-afdc-72e84aa02edb",
+        "phase": "COMPLETED"
+      },
+      {
+        "task": "C",
+        "thread_id": "01a1caf2-3ee2-7c52-bde5-4c5bbcde59dd",
+        "turn_id": "01a1caf2-3f0b-72f3-bd7e-342a8c7b85f7",
+        "phase": "COMPLETED"
+      },
+      {
+        "task": "joint",
+        "thread_id": "01a1caf2-4723-74a2-b460-aaff938a3a5d",
+        "turn_id": "01a1caf2-4751-7532-93f2-49e7a23f79eb",
+        "phase": "COMPLETED"
+      },
+      {
+        "task": "request_change",
+        "thread_id": "01a1caf2-4ba1-7183-9090-6575abdb22df",
+        "turn_id": "01a1caf2-4bcf-7a20-ab24-b1aa38c114be",
+        "phase": "COMPLETED"
+      },
+      {
+        "task": "propose_window",
+        "thread_id": "01a1caf2-4f66-7563-a5b6-2542b912c33c",
+        "turn_id": "01a1caf2-4f7f-7601-bbc7-5b0e18fe67f9",
+        "phase": "COMPLETED"
+      },
+      {
+        "task": "review_and_adopt",
+        "thread_id": "01a1caf2-5264-7173-a9c2-241ccc0ac160",
+        "turn_id": "01a1caf2-528d-7082-be35-9da4338aa7ba",
+        "phase": "COMPLETED"
+      }
+    ],
+    "idle_restart": "IDLE",
+    "registration_replay": "same receipt, unchanged inventory before and after world advancement",
+    "failed_cyclic_registration": "transaction rolled back; no additional grants or tasks",
+    "errors": [],
+    "external_prerequisites": [
+      "e38e7265-21ea-4c0c-a2ec-7909e195a177"
+    ],
+    "dependent_actor_task": "601ad378-7721-4384-a9a3-69347c9e3a59"
+  },
+  "delegated_task_id": "e38e7265-21ea-4c0c-a2ec-7909e195a177",
+  "cost_observations": [
+    {
+      "state": "SUCCEEDED",
+      "actual_tokens": 18
+    },
+    {
+      "state": "UNKNOWN",
+      "actual_tokens": null
+    }
+  ],
+  "hold": {
+    "status": "SETTLED",
+    "settled_fixture_amount": "0.020000"
+  },
+  "accounting_scope": "Deterministic loopback model usage; no external vendor or paid spend."
+}

@@ -7,7 +7,15 @@ from uuid import uuid4
 from psycopg.types.json import Jsonb
 
 from .auth import Denied
-from .organization import IDENTIFIER, NF_ROLES, employee, fingerprint, require_employee, schema
+from .organization import (
+    IDENTIFIER,
+    NF_ROLES,
+    employee,
+    fingerprint,
+    lock_org,
+    require_employee,
+    schema,
+)
 
 MAX_MONEY = {"type": "string", "pattern": r"^(0|[1-9][0-9]{0,11})(\.[0-9]{1,6})?$"}
 UUID_FIELD = {"type": "string", "format": "uuid"}
@@ -32,7 +40,9 @@ def committed_budget(conn, org):
     ).fetchone()["used"]
 
 
-def delegate(conn, session, operation_id, slot_id, max_amount, token_limit, *, _review_request=False):
+def delegate(
+    conn, session, operation_id, slot_id, max_amount, token_limit, *, _review_request=False
+):
     org, sender = session.org_id, session.employee_id
     require_employee(conn, session)
     amount = Decimal(max_amount)
@@ -84,6 +94,13 @@ def delegate(conn, session, operation_id, slot_id, max_amount, token_limit, *, _
         "SELECT 1 FROM aw_delegations WHERE org_id=%s AND slot_id=%s", (org, slot_id)
     ).fetchone():
         raise Denied("SLOT_ALREADY_ASSIGNED")
+    cap = lock_org(conn, org).get("max_active_delegations")
+    if cap is not None:
+        reserved = conn.execute(
+            "SELECT count(*) AS n FROM aw_budget_holds WHERE org_id=%s AND status='HELD'", (org,)
+        ).fetchone()["n"]
+        if reserved >= cap:
+            raise Denied("ACTIVE_DELEGATION_LIMIT")
     # Binding is recorded by digest only; never store a transferable credential in an intent.
     remote_id = str(uuid4())
     payload = {

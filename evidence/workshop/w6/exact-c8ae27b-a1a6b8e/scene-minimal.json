@@ -1,0 +1,612 @@
+{
+  "preset": "Minimal",
+  "organization": "65e8007f-f63e-43d9-b225-13e54acad12b",
+  "nf_instance_id": "6eda2039-5ca2-43b5-ac1d-d573fbbf3cd8",
+  "source": {
+    "NovelFactory": {
+      "head": "a1a6b8e2ecb6e8331a3afa99326c30d8cf27d915",
+      "working_changes": [],
+      "source_sha256": "62ed3502edd735f5a05c933656b6441d8fcd7923459ea9aa935251fea7027eea"
+    },
+    "Workshop": {
+      "head": "c8ae27b6096ddfb38dc75ee9b5588892882336a2",
+      "working_changes": [],
+      "source_sha256": "34eb5cb6c9c550d9619847d6ec44d065e75db41e7633942a2afd63fdb2bcca78"
+    },
+    "harness_sha256": "4615d8f8c482dcbfe106f5c3747f167bf3deca1c09804632261623758bf0b714"
+  },
+  "installation": "78612ddb-f571-4c53-bd02-b37027405f8f",
+  "org_revision": 4,
+  "operation_id": "2aa7e0e7-66a2-4714-a18f-8fd971e47063",
+  "production_mail": [
+    {
+      "sender": "author",
+      "recipient": "manager",
+      "kind": "GOAL",
+      "message_id": "f8ffdc84-399b-47d6-8038-3184e5352caa",
+      "receipt": {
+        "status": "ACKNOWLEDGED",
+        "message_id": "f8ffdc84-399b-47d6-8038-3184e5352caa",
+        "sequence": 1,
+        "acknowledged_at": "2026-11-11T14:08:36.629025+00:00"
+      },
+      "causation": null
+    },
+    {
+      "sender": "manager",
+      "recipient": "script",
+      "kind": "ASSIGN",
+      "message_id": "85825792-d88a-4546-83c4-e352280ac570",
+      "receipt": {
+        "status": "ACKNOWLEDGED",
+        "message_id": "85825792-d88a-4546-83c4-e352280ac570",
+        "sequence": 1,
+        "acknowledged_at": "2026-11-11T14:08:37.212134+00:00"
+      },
+      "causation": "f8ffdc84-399b-47d6-8038-3184e5352caa"
+    },
+    {
+      "sender": "script",
+      "recipient": "chief",
+      "kind": "PROPOSE_SCRIPT",
+      "message_id": "fc01fa90-3f64-46db-800c-05d839e93c62",
+      "receipt": {
+        "status": "ACKNOWLEDGED",
+        "message_id": "fc01fa90-3f64-46db-800c-05d839e93c62",
+        "sequence": 1,
+        "acknowledged_at": "2026-11-11T14:08:37.885615+00:00"
+      },
+      "causation": "85825792-d88a-4546-83c4-e352280ac570"
+    },
+    {
+      "sender": "chief",
+      "recipient": "volume",
+      "kind": "ASSIGN",
+      "message_id": "b31a6617-57b8-45e6-a049-056f65262629",
+      "receipt": {
+        "status": "ACKNOWLEDGED",
+        "message_id": "b31a6617-57b8-45e6-a049-056f65262629",
+        "sequence": 1,
+        "acknowledged_at": "2026-11-11T14:08:38.531238+00:00"
+      },
+      "causation": "fc01fa90-3f64-46db-800c-05d839e93c62"
+    },
+    {
+      "sender": "volume",
+      "recipient": "actor-1",
+      "kind": "ASSIGN",
+      "message_id": "3364bdbc-f509-4871-be10-9352d76f33de",
+      "receipt": {
+        "status": "ACKNOWLEDGED",
+        "message_id": "3364bdbc-f509-4871-be10-9352d76f33de",
+        "sequence": 1,
+        "acknowledged_at": "2026-11-11T14:08:39.148116+00:00"
+      },
+      "causation": "b31a6617-57b8-45e6-a049-056f65262629"
+    },
+    {
+      "sender": "volume",
+      "recipient": "actor-2",
+      "kind": "ASSIGN",
+      "message_id": "87fb0cf2-dd72-4b29-b722-7d928a0a0aa1",
+      "receipt": {
+        "status": "ACKNOWLEDGED",
+        "message_id": "87fb0cf2-dd72-4b29-b722-7d928a0a0aa1",
+        "sequence": 1,
+        "acknowledged_at": "2026-11-11T14:08:39.661602+00:00"
+      },
+      "causation": "b31a6617-57b8-45e6-a049-056f65262629"
+    },
+    {
+      "sender": "volume",
+      "recipient": "actor-3",
+      "kind": "ASSIGN",
+      "message_id": "ad48c84d-612a-45ed-b64a-a060242bed3f",
+      "receipt": {
+        "status": "ACKNOWLEDGED",
+        "message_id": "ad48c84d-612a-45ed-b64a-a060242bed3f",
+        "sequence": 1,
+        "acknowledged_at": "2026-11-11T14:08:40.246797+00:00"
+      },
+      "causation": "b31a6617-57b8-45e6-a049-056f65262629"
+    }
+  ],
+  "nf_delegation_receipt": "e4ad2f99-1fee-437d-8ca3-57cb0f52baa2",
+  "s9": {
+    "case_id": "041f869f-4877-59bf-bebe-75788c1bf700",
+    "affected_task": "51a19e7c-1a59-45b7-9931-1300939dc8bb",
+    "independent_task": "14431b01-a038-4e7b-891c-e2e70b8c88ef",
+    "strategy_receipt": {
+      "outcome": "REVIEW_REQUIRED",
+      "resolution_strategy": "ESCALATE_REVIEW",
+      "suggested_strategy": "REVALIDATE",
+      "reason": "REVIEW_REQUIRED",
+      "review_task_id": "cf220c7d-b42f-54f3-a259-7a49afcad5f2",
+      "case_id": "041f869f-4877-59bf-bebe-75788c1bf700",
+      "receipt_id": "922c9e14-8b05-5830-959e-69690d7043bc",
+      "task_id": "51a19e7c-1a59-45b7-9931-1300939dc8bb",
+      "generation": 1,
+      "conflict_type": "STALE_PRECONDITION",
+      "additional_model_attempts": 0,
+      "actual_tokens": 0,
+      "cost_status": "NO_MODEL_CALL"
+    }
+  },
+  "prose": {
+    "source": "deterministic engineering fixture",
+    "accepted": {
+      "artifact_id": "c218fd42-d725-459e-8a27-34e9803067ce",
+      "artifact_revision_id": "f7dc49cd-0592-47cd-ba81-3e64431936d3",
+      "sha256": "1c66e642934bf3aa210ebbe1399d7a6c98ec03d42dc1e519b8f44fa1153e7baf"
+    },
+    "draft_ref": {
+      "artifact_id": "9679efa7-38e7-4548-a7c0-d86416be52bc",
+      "artifact_revision_id": "4bffaca8-3179-4b7e-8ab7-92e6df4c1c78",
+      "sha256": "26c7645d67b79b2eca477ef1d61763dfc3b5eb35cfeb50e4a08de246db03df76"
+    },
+    "text_ref": {
+      "sha256": "41c9ff95dfce31ba8ac471194a283a62258febab76e7839e55e9d03ded0faa3d",
+      "artifact_id": "cc1e9308-bb0a-4b27-a2ed-8182d45780a2",
+      "artifact_revision_id": "e2680938-ac7d-41c3-9b43-984514569bef"
+    },
+    "reconciliation": {
+      "artifact_id": "1fa556ba-d30a-4108-a891-2cdf34e3eea4",
+      "artifact_revision_id": "c46d014d-3769-418c-8f92-db4659949ce7",
+      "sha256": "c96822ca3a44396ea519157449c6ca72792f14f860ef209607945cc9cb7dda32"
+    }
+  },
+  "unknown_held_then_settled_attempt": "ee9b74ca-2b3b-4536-93bf-ad322f5bb99e",
+  "independent_workshop_review": {
+    "review_id": "eae43f68-13af-4740-b91f-243e91f1acab",
+    "state": "APPROVED",
+    "scope": "Programmed account exercise; no human literary rating."
+  },
+  "author_retrieval": [
+    {
+      "sender": "manager",
+      "recipient": "author",
+      "kind": "REPORT",
+      "message_id": "254c9e23-afa1-460f-92e2-107efd9a7638",
+      "receipt": {
+        "status": "ACKNOWLEDGED",
+        "message_id": "254c9e23-afa1-460f-92e2-107efd9a7638",
+        "sequence": 1,
+        "acknowledged_at": "2026-11-11T14:08:55.394538+00:00"
+      },
+      "causation": null
+    }
+  ],
+  "accepted_scene": {
+    "test": "test_one_author_resume_through_autonomous_banquet",
+    "provider": "deterministic HTTPS loopback fixture; no live inference or paid tokens",
+    "mcp": {
+      "client": "Python MCP SDK via child stdio",
+      "protocol": "2025-11-25",
+      "tools": [
+        "nf_project_status",
+        "nf_resume_project"
+      ],
+      "resume_calls": 1
+    },
+    "codex": "codex-cli 0.167.0-alpha.4",
+    "postgres": "17.11 (Debian 17.11-0+deb13u1)",
+    "initial": {
+      "READY": 3,
+      "WAITING": 4,
+      "RUNNING": 0,
+      "ACCEPTED": 2
+    },
+    "final": {
+      "READY": 0,
+      "WAITING": 0,
+      "RUNNING": 0,
+      "ACCEPTED": 11
+    },
+    "scene_provider_turns": 8,
+    "observations": [
+      {
+        "turn": "C",
+        "elapsed_s": 1.73,
+        "states": {
+          "B": "BLOCKED",
+          "kernel_accept": "READY",
+          "joint": "BLOCKED",
+          "request_change": "BLOCKED",
+          "notification": "BLOCKED",
+          "A": "RUNNING",
+          "C": "RUNNING"
+        },
+        "counts": {
+          "READY": 1,
+          "WAITING": 4,
+          "RUNNING": 2,
+          "ACCEPTED": 2
+        },
+        "live_codex_pids": [
+          197,
+          224
+        ]
+      },
+      {
+        "turn": "A",
+        "elapsed_s": 1.7349,
+        "states": {
+          "B": "BLOCKED",
+          "kernel_accept": "READY",
+          "joint": "BLOCKED",
+          "request_change": "BLOCKED",
+          "notification": "BLOCKED",
+          "A": "RUNNING",
+          "C": "RUNNING"
+        },
+        "counts": {
+          "READY": 1,
+          "WAITING": 4,
+          "RUNNING": 2,
+          "ACCEPTED": 2
+        },
+        "live_codex_pids": [
+          197,
+          224
+        ]
+      },
+      {
+        "turn": "notification",
+        "elapsed_s": 2.3755,
+        "states": {
+          "A": "ACCEPTED",
+          "C": "ACCEPTED",
+          "B": "BLOCKED",
+          "kernel_accept": "READY",
+          "joint": "BLOCKED",
+          "request_change": "BLOCKED",
+          "notification": "RUNNING"
+        },
+        "counts": {
+          "READY": 1,
+          "WAITING": 3,
+          "RUNNING": 1,
+          "ACCEPTED": 4
+        },
+        "live_codex_pids": [
+          330
+        ]
+      },
+      {
+        "turn": "B",
+        "elapsed_s": 2.9201,
+        "states": {
+          "A": "ACCEPTED",
+          "C": "ACCEPTED",
+          "kernel_accept": "READY",
+          "joint": "BLOCKED",
+          "request_change": "BLOCKED",
+          "notification": "ACCEPTED",
+          "B": "RUNNING"
+        },
+        "counts": {
+          "READY": 1,
+          "WAITING": 2,
+          "RUNNING": 1,
+          "ACCEPTED": 5
+        },
+        "live_codex_pids": [
+          395
+        ]
+      },
+      {
+        "turn": "joint",
+        "elapsed_s": 3.5881,
+        "states": {
+          "A": "ACCEPTED",
+          "C": "ACCEPTED",
+          "joint": "RUNNING",
+          "kernel_accept": "READY",
+          "request_change": "BLOCKED",
+          "notification": "ACCEPTED",
+          "B": "ACCEPTED"
+        },
+        "counts": {
+          "READY": 1,
+          "WAITING": 1,
+          "RUNNING": 1,
+          "ACCEPTED": 6
+        },
+        "live_codex_pids": [
+          459
+        ]
+      },
+      {
+        "turn": "request_change",
+        "elapsed_s": 4.5132,
+        "states": {
+          "A": "ACCEPTED",
+          "C": "ACCEPTED",
+          "kernel_accept": "ACCEPTED",
+          "joint": "ACCEPTED",
+          "notification": "ACCEPTED",
+          "B": "ACCEPTED",
+          "request_change": "RUNNING"
+        },
+        "counts": {
+          "READY": 0,
+          "WAITING": 0,
+          "RUNNING": 1,
+          "ACCEPTED": 8
+        },
+        "live_codex_pids": [
+          529
+        ]
+      },
+      {
+        "turn": "propose_window",
+        "elapsed_s": 5.2468,
+        "states": {
+          "A": "ACCEPTED",
+          "C": "ACCEPTED",
+          "kernel_accept": "ACCEPTED",
+          "joint": "ACCEPTED",
+          "notification": "ACCEPTED",
+          "B": "ACCEPTED",
+          "request_change": "ACCEPTED",
+          "propose_window": "RUNNING"
+        },
+        "counts": {
+          "READY": 0,
+          "WAITING": 0,
+          "RUNNING": 1,
+          "ACCEPTED": 9
+        },
+        "live_codex_pids": [
+          594
+        ]
+      },
+      {
+        "turn": "review_and_adopt",
+        "elapsed_s": 5.9994,
+        "states": {
+          "A": "ACCEPTED",
+          "C": "ACCEPTED",
+          "propose_window": "ACCEPTED",
+          "kernel_accept": "ACCEPTED",
+          "joint": "ACCEPTED",
+          "notification": "ACCEPTED",
+          "B": "ACCEPTED",
+          "review_and_adopt": "RUNNING",
+          "request_change": "ACCEPTED"
+        },
+        "counts": {
+          "READY": 0,
+          "WAITING": 0,
+          "RUNNING": 1,
+          "ACCEPTED": 10
+        },
+        "live_codex_pids": [
+          658
+        ]
+      }
+    ],
+    "accept_to_ready_ms": {
+      "notification": 29.047,
+      "B": 14.955,
+      "joint": 10.943,
+      "request_change": 39.908
+    },
+    "scene_fixture_input_tokens": 88,
+    "scene_fixture_output_tokens": 56,
+    "tokens_by_turn": {
+      "notification": {
+        "input_tokens": 11,
+        "output_tokens": 7
+      },
+      "A": {
+        "input_tokens": 11,
+        "output_tokens": 7
+      },
+      "B": {
+        "input_tokens": 11,
+        "output_tokens": 7
+      },
+      "C": {
+        "input_tokens": 11,
+        "output_tokens": 7
+      },
+      "joint": {
+        "input_tokens": 11,
+        "output_tokens": 7
+      },
+      "request_change": {
+        "input_tokens": 11,
+        "output_tokens": 7
+      },
+      "propose_window": {
+        "input_tokens": 11,
+        "output_tokens": 7
+      },
+      "review_and_adopt": {
+        "input_tokens": 11,
+        "output_tokens": 7
+      }
+    },
+    "observed_request_sizes": {
+      "A": {
+        "prompt_utf8_bytes": 13343,
+        "inlined_schema_bytes": 5081,
+        "emitted_schema_bytes": 4464,
+        "authorized_materials": 0
+      },
+      "C": {
+        "prompt_utf8_bytes": 13343,
+        "inlined_schema_bytes": 5081,
+        "emitted_schema_bytes": 4464,
+        "authorized_materials": 0
+      },
+      "notification": {
+        "prompt_utf8_bytes": 12101,
+        "inlined_schema_bytes": 2736,
+        "emitted_schema_bytes": 2506,
+        "authorized_materials": 0
+      },
+      "B": {
+        "prompt_utf8_bytes": 13343,
+        "inlined_schema_bytes": 5081,
+        "emitted_schema_bytes": 4464,
+        "authorized_materials": 0
+      },
+      "joint": {
+        "prompt_utf8_bytes": 19640,
+        "inlined_schema_bytes": 7050,
+        "emitted_schema_bytes": 6141,
+        "authorized_materials": 0
+      },
+      "request_change": {
+        "prompt_utf8_bytes": 16029,
+        "inlined_schema_bytes": 4295,
+        "emitted_schema_bytes": 3941,
+        "authorized_materials": 0
+      },
+      "propose_window": {
+        "prompt_utf8_bytes": 17288,
+        "inlined_schema_bytes": 3335,
+        "emitted_schema_bytes": 3166,
+        "authorized_materials": 0
+      },
+      "review_and_adopt": {
+        "prompt_utf8_bytes": 17415,
+        "inlined_schema_bytes": 2536,
+        "emitted_schema_bytes": 2491,
+        "authorized_materials": 0
+      }
+    },
+    "completed_model_tasks_per_second": 1.0992,
+    "elapsed_s_including_restart": 7.2779,
+    "B_wake_source": "Distinct notification task completed after A; no private A text or in-world BELIEF is inferred",
+    "A_location_at_tick_31": {
+      "reference": "north",
+      "accepted": "south"
+    },
+    "active_host_processes_after_completion": 0,
+    "waiting_provider_calls": 0,
+    "human_interventions": 0,
+    "ordinary_approvals": 1,
+    "accepted_world_events": 1,
+    "sealed_actor_intents": [
+      "我不赴北岸晚宴，去南岸守粮。",
+      "我在北岸等来信，收到凭证再走。",
+      "我先核对库单。"
+    ],
+    "accepted_world_ref": {
+      "work_id": "76f39d24-f5bf-49bd-b769-b8bd482f83fc",
+      "branch_id": "7a99ec22-4848-4967-81b6-8d8257ad7645",
+      "world_revision_id": "f7f1486c-3418-4a83-ba87-9bc20e3fff36"
+    },
+    "base_world_ref": {
+      "work_id": "76f39d24-f5bf-49bd-b769-b8bd482f83fc",
+      "branch_id": "7a99ec22-4848-4967-81b6-8d8257ad7645",
+      "world_revision_id": "1fc3f6cf-9d88-419c-a9cb-df1c0d07ec22"
+    },
+    "reference_timeline_ref": {
+      "sha256": "e0c350f8a84e1f01e3cf8b1bf93370d25d173b96c2ed756f27db46c9397094dc",
+      "artifact_id": "412dd0a3-fa07-46bd-afe5-f45394e06246",
+      "artifact_revision_id": "642725fe-b3a5-4eb7-8d5c-f5d5cedc1e5e"
+    },
+    "initial_plan_ref": {
+      "artifact_id": "8dcff567-30fb-4b35-9a96-482d82f4c28b",
+      "artifact_revision_id": "ac374e2d-c4b3-4a61-9361-461a0a353a54",
+      "sha256": "a788de0c5ce5d6da22fa31928b4f2c24f8088aefacb62eacffa8f766d7adf384"
+    },
+    "selected_plan_ref": {
+      "sha256": "1ad077bbc5d35c65b9f5aea3a485415107ac64702a516479e889158c96170dc1",
+      "artifact_id": "4d6960e8-d1b2-4e57-a8d2-02d71055aa91",
+      "artifact_revision_id": "2734ad9e-c7ab-40bb-a9a5-b7806865b6cf"
+    },
+    "revised_future_nodes": [
+      0,
+      1
+    ],
+    "change_point_ref": {
+      "sha256": "bf4905a075008b8eac73b632b26364b0d43a5a2da1f1057d5e8db8ff9503f4f0",
+      "artifact_id": "0ffd83d7-0445-4b98-821b-85b5fc1ce1d0",
+      "artifact_revision_id": "94109df0-abf3-4112-b786-370df908ce5f"
+    },
+    "window_ref": {
+      "sha256": "ad026ddfd84ca18b3477ff4403e3af8b7fc7512e7e7706507ef2876ae076600f",
+      "artifact_id": "16a0c7fb-0696-4ea4-9862-251cd7ad1da1",
+      "artifact_revision_id": "8ce946d3-9f63-4b6a-bad9-37423d0542c1"
+    },
+    "host_journal": [
+      {
+        "task": "notification",
+        "thread_id": "01a1caf0-91f2-7d21-883d-367e172149cc",
+        "turn_id": "01a1caf0-920c-7220-8ddb-9304fbabbb39",
+        "phase": "COMPLETED"
+      },
+      {
+        "task": "A",
+        "thread_id": "01a1caf0-8f09-78e2-b157-890244d40e66",
+        "turn_id": "01a1caf0-8f28-7a80-8c8a-ed965d427b10",
+        "phase": "COMPLETED"
+      },
+      {
+        "task": "B",
+        "thread_id": "01a1caf0-941a-7ab2-b06b-1be8bd80a909",
+        "turn_id": "01a1caf0-9431-7bf0-97d1-63a7505bc32f",
+        "phase": "COMPLETED"
+      },
+      {
+        "task": "C",
+        "thread_id": "01a1caf0-8f68-7a81-874a-1cb798e83f90",
+        "turn_id": "01a1caf0-8f83-71f1-8415-7b2cc2bbf5fd",
+        "phase": "COMPLETED"
+      },
+      {
+        "task": "joint",
+        "thread_id": "01a1caf0-9696-7782-86be-faa08fd34135",
+        "turn_id": "01a1caf0-96b0-7053-97d5-ff990ef82401",
+        "phase": "COMPLETED"
+      },
+      {
+        "task": "request_change",
+        "thread_id": "01a1caf0-9a44-7d30-892a-854436eb31a2",
+        "turn_id": "01a1caf0-9a63-7ab0-81db-12d4d61d339e",
+        "phase": "COMPLETED"
+      },
+      {
+        "task": "propose_window",
+        "thread_id": "01a1caf0-9d37-76e3-a00b-ec40179fb4e3",
+        "turn_id": "01a1caf0-9d4a-7be0-88b8-80a956af6f98",
+        "phase": "COMPLETED"
+      },
+      {
+        "task": "review_and_adopt",
+        "thread_id": "01a1caf0-a00a-7320-847a-589a88120129",
+        "turn_id": "01a1caf0-a026-7b10-b565-8e37259eb13b",
+        "phase": "COMPLETED"
+      }
+    ],
+    "idle_restart": "IDLE",
+    "registration_replay": "same receipt, unchanged inventory before and after world advancement",
+    "failed_cyclic_registration": "transaction rolled back; no additional grants or tasks",
+    "errors": [],
+    "external_prerequisites": [
+      "3138a355-9442-442b-9451-245f01618c99"
+    ],
+    "dependent_actor_task": "183b52cf-55ff-46ad-b6a0-bec692398935"
+  },
+  "delegated_task_id": "3138a355-9442-442b-9451-245f01618c99",
+  "cost_observations": [
+    {
+      "state": "SUCCEEDED",
+      "actual_tokens": 18
+    },
+    {
+      "state": "UNKNOWN",
+      "actual_tokens": null
+    }
+  ],
+  "hold": {
+    "status": "SETTLED",
+    "settled_fixture_amount": "0.020000"
+  },
+  "accounting_scope": "Deterministic loopback model usage; no external vendor or paid spend."
+}

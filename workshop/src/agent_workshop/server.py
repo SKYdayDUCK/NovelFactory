@@ -9,7 +9,7 @@ from mcp import types
 from mcp.server.lowlevel import Server
 from mcp.server.stdio import stdio_server
 
-from . import delegation, manager, messaging, organization, reviews_skills
+from . import delegation, manager, messaging, organization, presets, reviews_skills
 from .roster_projection import catalog_binding
 from .auth import Denied, authenticate, connect, private_binding
 
@@ -30,7 +30,7 @@ def negotiate(conn, session, protocol_version):
 
 TOOLS = {"aw_capabilities": ("Negotiate this connection's organization protocol.",
          {"type": "object", "required": ["protocol_version"], "additionalProperties": False,
-          "properties": {"protocol_version": {"type": "string", "maxLength": 32}}}, negotiate), **organization.TOOLS, **messaging.TOOLS, **delegation.TOOLS, **reviews_skills.TOOLS, **manager.TOOLS}
+          "properties": {"protocol_version": {"type": "string", "maxLength": 32}}}, negotiate), **organization.TOOLS, **messaging.TOOLS, **delegation.TOOLS, **reviews_skills.TOOLS, **manager.TOOLS, **presets.TOOLS}
 
 
 def dispatch(config, name=None, arguments=None):
@@ -38,7 +38,7 @@ def dispatch(config, name=None, arguments=None):
         session = authenticate(conn, config["token"])
         # Validate the member even when listing tools on an already open pipe.
         # Mutating organization commands take the exclusive lock first.
-        changes = {"aw_hire", "aw_suspend", "aw_transfer", "aw_end", "aw_route_grant", "aw_route_revoke"}
+        changes = {"aw_hire", "aw_suspend", "aw_transfer", "aw_end", "aw_route_grant", "aw_route_revoke", "aw_preset_apply"}
         visible = {"aw_capabilities"}
         if session.org_member:
             if name in changes:
@@ -46,7 +46,7 @@ def dispatch(config, name=None, arguments=None):
             viewer = organization.require_employee(conn, session)
             visible = set(TOOLS)
             if viewer["role_id"] != "workshop_manager":
-                visible -= changes | {"aw_skill_share", "aw_skill_revoke"}
+                visible -= changes | {"aw_preset_preview", "aw_skill_share", "aw_skill_revoke"}
             if (name is None or name in delegation.TOOLS) and not delegation.route(
                 conn, session.org_id, session.employee_id
             ):
