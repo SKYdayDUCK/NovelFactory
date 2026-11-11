@@ -1,0 +1,85 @@
+{
+  "head_sha": "08954a3c33d799e15c9ee9270fc578e10156379c",
+  "event": "pull_request",
+  "runs": [
+    {
+      "id": 43086830873,
+      "name": "P1 and P2 production integrity",
+      "event": "pull_request",
+      "conclusion": null,
+      "status": "in_progress",
+      "head_sha": "08954a3c33d799e15c9ee9270fc578e10156379c",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43086830873",
+      "attempt": 1,
+      "jobs": [
+        {
+          "id": 130753296094,
+          "name": "PostgreSQL 17 integration, concurrency and restore",
+          "started_at": "2026-11-11T19:24:01Z",
+          "completed_at": null,
+          "status": "in_progress",
+          "conclusion": null,
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43086830873/job/130753296094"
+        },
+        {
+          "id": 130753296381,
+          "name": "Schema, domain, HTTP and production boundaries",
+          "started_at": "2026-11-11T19:24:01Z",
+          "completed_at": "2026-11-11T19:24:49Z",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43086830873/job/130753296381"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13886213313,
+          "name": "p1-schema-unit-1",
+          "size": 301225,
+          "digest": "sha256:36eea1a1618c510eaf6411a267d60a8f01bbda445ccdc2aeda42383b5a04ea7a",
+          "expires_at": "2027-02-09T19:23:58Z",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43086830873/artifacts/13886213313"
+        }
+      ]
+    },
+    {
+      "id": 43086830875,
+      "name": "Agent Workshop PostgreSQL and stdio",
+      "event": "pull_request",
+      "conclusion": "success",
+      "status": "completed",
+      "head_sha": "08954a3c33d799e15c9ee9270fc578e10156379c",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43086830875",
+      "attempt": 1,
+      "jobs": [
+        {
+          "id": 130753295169,
+          "name": "workshop",
+          "started_at": "2026-11-11T19:24:02Z",
+          "completed_at": "2026-11-11T19:26:47Z",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43086830875/job/130753295169"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13886403124,
+          "name": "workshop-results",
+          "size": 8608,
+          "digest": "sha256:ec54aca86744c9e5f898c4dfd7a832831eb7f88ba08f70e6d77f405612d3aef2",
+          "expires_at": "2027-02-09T19:23:58Z",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43086830875/artifacts/13886403124"
+        },
+        {
+          "id": 13886353271,
+          "name": "nf-bridge-results",
+          "size": 1968,
+          "digest": "sha256:5e7580f7501dc7e05a40e28def0ac7063ec73d0479c3b68c19b7557346018d9d",
+          "expires_at": "2027-02-09T19:23:58Z",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43086830875/artifacts/13886353271"
+        }
+      ]
+    }
+  ]
+}
