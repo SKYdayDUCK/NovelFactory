@@ -32,7 +32,9 @@ SLOT = schema(
 
 
 def allow_slot(conn, org, installation, slot, target, policy):
-    lock_org(conn, org, write=True)
+    organization = lock_org(conn, org, write=True)
+    if organization["owner_installation_id"] != installation:
+        raise Denied("INVALID_SLOT")
     e = employee(conn, org, target)
     instance = conn.execute(
         "SELECT * FROM aw_installations WHERE installation_id=%s AND enabled FOR SHARE",

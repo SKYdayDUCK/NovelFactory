@@ -18,7 +18,7 @@ def setup_slot():
     ids = [str(uuid4()) for _ in range(4)]
     with connect(dsn) as c:
         c.execute("INSERT INTO aw_installations VALUES (%s,%s,true)", (install, ids[0]))
-        bootstrap(c, org)
+        bootstrap(c, org, installation_id=install)
         token = enroll(c, install, org, "volume", 1, 1)
         c.execute("INSERT INTO aw_budget_accounts VALUES (%s,1,'USD')", (org,))
         policy = dict(

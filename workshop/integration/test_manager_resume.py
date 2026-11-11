@@ -46,10 +46,10 @@ def test_author_wakeup_recovers_through_real_nf_project_binding(dual_databases, 
         )
         org, installation = str(uuid4()), str(uuid4())
         with connect(dual_databases["aw"]) as c:
-            bootstrap(c, org)
             c.execute(
                 "INSERT INTO aw_installations VALUES(%s,%s,true)", (installation, str(uuid4()))
             )
+            bootstrap(c, org, installation_id=installation)
             token = enroll(c, installation, org, "author", 1, 1)
         aw = remote(
             bound_process(

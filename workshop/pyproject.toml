@@ -25,3 +25,6 @@ aw-admin = "agent_workshop.admin:main"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"contracts/nf-catalog.json" = "agent_workshop/nf-catalog.json"

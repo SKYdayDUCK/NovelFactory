@@ -1,0 +1,63 @@
+{
+  "status": "PASS",
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "execution_kind": "REAL_ISOLATED_POSTGRESQL",
+  "source_port": 49101,
+  "restored_port": 56835,
+  "durability": {
+    "fsync": true,
+    "synchronous_commit": true,
+    "data_checksums": true
+  },
+  "model_calls": 0,
+  "production_data_accessed": false,
+  "libpq_environment_isolated": true,
+  "cleared_pg_environment_names": [
+    "PGDATABASE",
+    "PGHOST",
+    "PGPORT",
+    "PGUSER"
+  ],
+  "pg_basebackup": {
+    "exit_code": 0,
+    "stdout": ""
+  },
+  "base_backup_seconds": 1.0404299350000201,
+  "pg_verifybackup": {
+    "exit_code": 0,
+    "stdout": "backup successfully verified"
+  },
+  "archiver": {
+    "archived_count": 4,
+    "failed_count": 0
+  },
+  "redis_pitr_reconciliation": {
+    "redis_version": "8.0.2",
+    "target_subscriber_receipts": 1,
+    "target_audit_rows": 1,
+    "excluded_redis_entries_quarantined": 1,
+    "excluded_world_revisions": 0
+  },
+  "target_world_ref": {
+    "work_id": "5d7f9696-299a-4d5e-b2a0-5e7e59fe96f4",
+    "branch_id": "ed40a84d-97d1-4774-b076-125fe214b3ed",
+    "world_revision_id": "fc012fc6-0c16-42cd-80e2-4a8897da1840"
+  },
+  "target_lsn": "0/30AE258",
+  "restored_state_sha256": "c7161a00d69058a431597593dd3f0f2f5c1c9c2d7de77a6cc4000f66f3d7fb66",
+  "snapshot_equal_before_fencing": true,
+  "table_count": 58,
+  "object_count": 19,
+  "recovery_seconds_to_verified_service": 1.1621054709999044,
+  "selected_recovery_point_age_seconds": 0.345303,
+  "target_commits_lost": 0,
+  "deliberately_excluded_later_world_commits": 1,
+  "restored_world_event_count": 2,
+  "unknown_calls_retained": 1,
+  "reserved_amount_retained": "0.5",
+  "fenced_task_count": 1,
+  "old_worker_rejected": true,
+  "original_commit_receipt_equal": true,
+  "limitation": "Small isolated local fixture; selected-point RPO/RTO, not production SLO or remote storage test",
+  "total_seconds": 4.459655745999953
+}

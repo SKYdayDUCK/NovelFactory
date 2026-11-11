@@ -1,0 +1,74 @@
+{
+  "source_commit": "ef371a32c6c8df5fea41b96702c9903132b85737",
+  "tree": "24bff0318740200678dccf9f0f3efcc7998dc831",
+  "kind": "complete regression at intermediate published checkpoint",
+  "successful": 786,
+  "failed": 4,
+  "skipped": 0,
+  "shards": [
+    {
+      "n": 1,
+      "tests": 270,
+      "start": {
+        "utc": "2026-11-11T12:14:00.107548+00:00",
+        "commit": "ef371a32c6c8df5fea41b96702c9903132b85737",
+        "tree": "24bff0318740200678dccf9f0f3efcc7998dc831",
+        "status_porcelain": ""
+      },
+      "end": {
+        "utc": "2026-11-11T12:17:15.530066+00:00",
+        "commit": "ef371a32c6c8df5fea41b96702c9903132b85737",
+        "tree": "24bff0318740200678dccf9f0f3efcc7998dc831",
+        "status_porcelain": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "n": 2,
+      "tests": 325,
+      "start": {
+        "utc": "2026-11-11T12:14:00.107598+00:00",
+        "commit": "ef371a32c6c8df5fea41b96702c9903132b85737",
+        "tree": "24bff0318740200678dccf9f0f3efcc7998dc831",
+        "status_porcelain": ""
+      },
+      "end": {
+        "utc": "2026-11-11T12:17:31.094774+00:00",
+        "commit": "ef371a32c6c8df5fea41b96702c9903132b85737",
+        "tree": "24bff0318740200678dccf9f0f3efcc7998dc831",
+        "status_porcelain": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "n": 3,
+      "tests": 195,
+      "start": {
+        "utc": "2026-11-11T12:14:00.100114+00:00",
+        "commit": "ef371a32c6c8df5fea41b96702c9903132b85737",
+        "tree": "24bff0318740200678dccf9f0f3efcc7998dc831",
+        "status_porcelain": ""
+      },
+      "end": {
+        "utc": "2026-11-11T12:17:23.540889+00:00",
+        "commit": "ef371a32c6c8df5fea41b96702c9903132b85737",
+        "tree": "24bff0318740200678dccf9f0f3efcc7998dc831",
+        "status_porcelain": "",
+        "exit_code": 1
+      }
+    }
+  ],
+  "failing_cases": [
+    "tests/reliability/test_p55_active_upgrade.py::test_upgrade_with_parked_wait_and_protect_live_delivery",
+    "tests/reliability/test_p55_active_upgrade.py::test_deployed_acl_and_each_operator_entrypoint",
+    "tests/unit/test_audit_artifact_security.py::test_cut_and_story_time_cannot_be_swapped_within_same_context",
+    "tests/unit/test_audit_artifact_security.py::test_task_fence_revocation_and_grant_epoch_invalidate_evidence"
+  ],
+  "diagnosis": [
+    "The compatibility scenario issued new task-claim SQL on a database parked at 0007. This also left transport absent for the subsequent CLI test. The repair runs the real pinned P5 code and its original wait driver before upgrading.",
+    "The legacy authorization unit double had no branches/revisions or observation sink; it could no longer represent an authorized scoped artifact read. The repaired positive path verifies its revision and one receipt. Denial checks are retained."
+  ],
+  "raw_guard_comparison": "ef371a3-guard-comparison.json",
+  "raw_semantic_index": "ef371a3-semantic-index-plan.json",
+  "raw_pitr": "ef371a3-pitr.json"
+}

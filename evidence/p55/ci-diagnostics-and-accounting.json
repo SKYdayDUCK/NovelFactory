@@ -1,0 +1,142 @@
+[
+  {
+    "sha": "4bab5e42d624d5909617fc7f7a8f360e99ee42bc",
+    "run_id": 43001145754,
+    "name": "P4 real isolated WAL PITR and verified recovery",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 130457289299,
+        "name": "Physical base backup, SIGKILL, WAL replay and application verification",
+        "status": "success",
+        "failed_steps": []
+      }
+    ]
+  },
+  {
+    "sha": "4bab5e42d624d5909617fc7f7a8f360e99ee42bc",
+    "run_id": 43001146034,
+    "name": "P5 native desktop resume",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 130457290225,
+        "name": "native-desktop",
+        "status": "success",
+        "failed_steps": []
+      }
+    ]
+  },
+  {
+    "sha": "4bab5e42d624d5909617fc7f7a8f360e99ee42bc",
+    "run_id": 43001145731,
+    "name": "P3 P4 measured evidence",
+    "conclusion": "failure",
+    "jobs": [
+      {
+        "id": 130457289938,
+        "name": "Same world CPU and SQL paired comparison",
+        "status": "success",
+        "failed_steps": []
+      },
+      {
+        "id": 130457290322,
+        "name": "Independent load process / 200 / overload",
+        "status": "failure",
+        "failed_steps": [
+          "Actual requests and strict capacity gate"
+        ]
+      },
+      {
+        "id": 130457290419,
+        "name": "Independent load process / 200 / mixed",
+        "status": "success",
+        "failed_steps": []
+      }
+    ]
+  },
+  {
+    "sha": "4bab5e42d624d5909617fc7f7a8f360e99ee42bc",
+    "run_id": 43001145893,
+    "name": "P2 measured capacity and recovery",
+    "conclusion": "failure",
+    "jobs": [
+      {
+        "id": 130457291028,
+        "name": "50 agents / overload / full capacity gate",
+        "status": "failure",
+        "failed_steps": [
+          "Measure fixed population, requests and business completion"
+        ]
+      },
+      {
+        "id": 130457291324,
+        "name": "200 agents / overload / full capacity gate",
+        "status": "failure",
+        "failed_steps": [
+          "Measure fixed population, requests and business completion"
+        ]
+      },
+      {
+        "id": 130457291337,
+        "name": "200 agents / mixed / full capacity gate",
+        "status": "success",
+        "failed_steps": []
+      },
+      {
+        "id": 130457291462,
+        "name": "50 agents / mixed / full capacity gate",
+        "status": "success",
+        "failed_steps": []
+      }
+    ]
+  },
+  {
+    "sha": "4bab5e42d624d5909617fc7f7a8f360e99ee42bc",
+    "run_id": 43001146022,
+    "name": "P3 scale experiments with strict unmet gates",
+    "conclusion": "failure",
+    "jobs": [
+      {
+        "id": 130457290927,
+        "name": "Measured 1000-read-open",
+        "status": "failure",
+        "failed_steps": [
+          "Original targets and actual network evidence"
+        ]
+      },
+      {
+        "id": 130457291273,
+        "name": "Measured 500-mixed",
+        "status": "success",
+        "failed_steps": []
+      },
+      {
+        "id": 130457291369,
+        "name": "Measured 500-read-soak",
+        "status": "success",
+        "failed_steps": []
+      }
+    ]
+  },
+  {
+    "sha": "4bab5e42d624d5909617fc7f7a8f360e99ee42bc",
+    "run_id": 43001146315,
+    "name": "P1 and P2 production integrity",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 130457292407,
+        "name": "PostgreSQL 17 integration, concurrency and restore",
+        "status": "success",
+        "failed_steps": []
+      },
+      {
+        "id": 130457292876,
+        "name": "Schema, domain, HTTP and production boundaries",
+        "status": "success",
+        "failed_steps": []
+      }
+    ]
+  }
+]

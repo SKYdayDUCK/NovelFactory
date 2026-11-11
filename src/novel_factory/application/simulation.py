@@ -95,7 +95,7 @@ def _expanded_scopes(snapshot, scope_ids, at):
 
 
 def _validate_intents_current(kernel, r, interaction):
-    rows = r.many("simulation_intents", {"interaction_id": interaction["interaction_id"]})
+    rows = r.many("simulation_intents", {"interaction_id": interaction["interaction_id"]}, order=["actor_id"])
     slots = {slot["actor_id"]: slot["grant_id"] for slot in interaction["participant_slots"]}
     require({row["actor_id"] for row in rows} == set(slots),
             "INPUTS_PENDING", "Required actor inputs are incomplete; story time is unchanged")
@@ -106,9 +106,30 @@ def _validate_intents_current(kernel, r, interaction):
                 and grant["principal_id"] == row["principal_id"],
                 "VIEW_DENIED", "A participant's authorization is no longer available")
         principal = Principal(row["grant_id"], row["principal_id"])
-        task, context = kernel._task_binding(r, principal, row["task_id"], row["generation"],
-                                            row["payload"]["context_bundle_id"])
-        require(task["world_ref"] == interaction["base_world_ref"]
+        current = r.one("tasks", {"task_id": row["task_id"]}, lock="update")
+        if current and current["state"] == "ACCEPTED":
+            # A closed, enrolled slot is immutable evidence only. Never make
+            # completed tasks eligible for new proposals, calls or writes.
+            from novel_factory.application.queries import WorldQueryService
+            task, _, spec = WorldQueryService(kernel)._task(r, principal, row["task_id"], row["generation"])
+            job = r.one("supervisor_jobs", {"task_id": row["task_id"]})
+            context = r.one("contexts", {"context_bundle_id": task["context_bundle_id"], "task_id": row["task_id"],
+                                        "generation": row["generation"], "grant_id": row["grant_id"]})
+            require(job and job["config"].get("seal_interaction_id") == interaction["interaction_id"]
+                    and context and task["context_bundle_id"] == row["payload"]["context_bundle_id"]
+                    and context["read_cut"]["permission_epoch"] == grant["epoch"] == job["config"]["grant_epoch"]
+                    and context["read_cut"]["knowledge_cut"] == job["config"]["knowledge_cut"]
+                    and context["read_cut"]["knowledge_cut"]["plane"] == "BELIEF"
+                    and context["read_cut"]["knowledge_cut"]["actor_id"] == row["actor_id"]
+                    and context["payload"]["actor_id"] == row["actor_id"]
+                    and context["dependency_fingerprint"] == row["payload"]["dependency_fingerprint"],
+                    "VIEW_DENIED", "Closed actor slot is no longer authorized")
+            world_ref = spec["world_ref"]
+        else:
+            task, context = kernel._task_binding(r, principal, row["task_id"], row["generation"],
+                                                row["payload"]["context_bundle_id"])
+            world_ref = task["world_ref"]
+        require(world_ref == interaction["base_world_ref"]
                 and context["payload"]["story_time"] == interaction["story_time"],
                 "TASK_REBIND_REQUIRED", "Participant input no longer matches its sealed slot")
     return sorted(rows, key=lambda row: row["actor_id"])
@@ -433,40 +454,44 @@ class WorldSchedulerService:
         return result
 
     def submit_action(self, principal, interaction_id, proposal):
+        with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
+            return self.seal_in_transaction(repo, principal, interaction_id, proposal)
+
+    def seal_in_transaction(self, r, principal, interaction_id, proposal):
+        """Caller holds the shared object lock and short application transaction."""
         validate_contract("ActionProposal", proposal)
         k = self.kernel
+        interaction = r.one("simulation_interactions", {"interaction_id": interaction_id})
+        require(interaction, "VIEW_DENIED", "Interaction unavailable")
+        wr = interaction["payload"]["base_world_ref"]
+        grant = k.authorize(r, principal, wr["work_id"], "READ", wr["branch_id"])
+        require(grant["role_id"] == "character_actor" and grant["actor_id"] == proposal["actor_id"],
+                "VIEW_DENIED", "Actor identity is bound by the current grant")
+        slots = {slot["actor_id"]: slot["grant_id"] for slot in interaction["payload"]["participant_slots"]}
+        require(slots.get(grant["actor_id"]) == principal.grant_id, "VIEW_DENIED", "No authorized slot")
+        # One interaction row is a short input-collection lock, not a world
+        # resource lock and not held while any Agent is generating text.
+        r.one("simulation_interactions", {"interaction_id": interaction_id}, lock="update")
+        old = r.one("simulation_intents", {"interaction_id": interaction_id, "actor_id": grant["actor_id"]})
+        if old:
+            require(old["payload_hash"] == fingerprint(proposal), "IDEMPOTENCY_MISMATCH", "Slot is sealed to different input")
+            return old["artifact_ref"]
+        require(not r.one("simulation_outcomes", {"interaction_id": interaction_id}), "INTERACTION_ALREADY_CLOSED", "Input collection is closed")
+        task, context = k._task_binding(r, principal, proposal["task_id"], proposal["generation"], proposal["context_bundle_id"])
+        require(proposal["world_ref"] == task["world_ref"] == wr
+                and context["payload"]["story_time"] == interaction["payload"]["story_time"]
+                and proposal["story_interval"]["start"] == interaction["payload"]["story_time"]
+                and point_key(proposal["story_interval"]["end"]) > point_key(proposal["story_interval"]["start"])
+                and proposal["dependency_fingerprint"] == context["dependency_fingerprint"],
+                "TASK_REBIND_REQUIRED", "Intent is not bound to the common story and knowledge input")
+        permitted = {fingerprint(value) for value in context["payload"]["permitted_evidence_refs"]}
+        require(all(fingerprint(value) in permitted for value in proposal["evidence_refs"]),
+                "VIEW_DENIED", "Intent cites evidence outside its authorized context")
         ref = k._blob(proposal)
-        with k.objects.lock(), k.db.uow() as r:
-            interaction = r.one("simulation_interactions", {"interaction_id": interaction_id})
-            require(interaction, "VIEW_DENIED", "Interaction unavailable")
-            wr = interaction["payload"]["base_world_ref"]
-            grant = k.authorize(r, principal, wr["work_id"], "READ", wr["branch_id"])
-            require(grant["role_id"] == "character_actor" and grant["actor_id"] == proposal["actor_id"],
-                    "VIEW_DENIED", "Actor identity is bound by the current grant")
-            slots = {slot["actor_id"]: slot["grant_id"] for slot in interaction["payload"]["participant_slots"]}
-            require(slots.get(grant["actor_id"]) == principal.grant_id, "VIEW_DENIED", "No authorized slot")
-            # One interaction row is a short input-collection lock, not a world
-            # resource lock and not held while any Agent is generating text.
-            r.one("simulation_interactions", {"interaction_id": interaction_id}, lock="update")
-            old = r.one("simulation_intents", {"interaction_id": interaction_id, "actor_id": grant["actor_id"]})
-            if old:
-                require(old["payload_hash"] == fingerprint(proposal), "IDEMPOTENCY_MISMATCH", "Slot is sealed to different input")
-                return old["artifact_ref"]
-            require(not r.one("simulation_outcomes", {"interaction_id": interaction_id}), "INTERACTION_ALREADY_CLOSED", "Input collection is closed")
-            task, context = k._task_binding(r, principal, proposal["task_id"], proposal["generation"], proposal["context_bundle_id"])
-            require(proposal["world_ref"] == task["world_ref"] == wr
-                    and context["payload"]["story_time"] == interaction["payload"]["story_time"]
-                    and proposal["story_interval"]["start"] == interaction["payload"]["story_time"]
-                    and point_key(proposal["story_interval"]["end"]) > point_key(proposal["story_interval"]["start"])
-                    and proposal["dependency_fingerprint"] == context["dependency_fingerprint"],
-                    "TASK_REBIND_REQUIRED", "Intent is not bound to the common story and knowledge input")
-            permitted = {fingerprint(value) for value in context["payload"]["permitted_evidence_refs"]}
-            require(all(fingerprint(value) in permitted for value in proposal["evidence_refs"]),
-                    "VIEW_DENIED", "Intent cites evidence outside its authorized context")
-            k._register_artifact(r, ref, wr["work_id"], proposal, "SIMULATION_INTENT", principal.principal_id)
-            r.add("simulation_intents", {"interaction_id": interaction_id, "actor_id": grant["actor_id"],
-                "task_id": proposal["task_id"], "generation": proposal["generation"], "grant_id": principal.grant_id,
-                "principal_id": principal.principal_id, "artifact_ref": ref, "payload": proposal, "payload_hash": fingerprint(proposal)})
+        k._register_artifact(r, ref, wr["work_id"], proposal, "SIMULATION_INTENT", principal.principal_id)
+        r.add("simulation_intents", {"interaction_id": interaction_id, "actor_id": grant["actor_id"],
+            "task_id": proposal["task_id"], "generation": proposal["generation"], "grant_id": principal.grant_id,
+            "principal_id": principal.principal_id, "artifact_ref": ref, "payload": proposal, "payload_hash": fingerprint(proposal)})
         return ref
 
     def interaction_status(self, principal, interaction_id):

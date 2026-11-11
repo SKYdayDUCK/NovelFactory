@@ -100,8 +100,8 @@ def test_two_live_mcp_servers_recover_accepted_task_after_lost_reply(dual_databa
             token_limit=2000,
         )
         with connect(dsn) as c:
-            bootstrap(c, org)
             c.execute("INSERT INTO aw_installations VALUES (%s,%s,true)", (installation, instance))
+            bootstrap(c, org, installation_id=installation)
             c.execute("INSERT INTO aw_budget_accounts VALUES (%s,1,'USD')", (org,))
             allow_slot(c, org, installation, "scene-A", "actor-1", policy)
             token = enroll(c, installation, org, "volume", 1, 1)

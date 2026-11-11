@@ -1,0 +1,138 @@
+{
+  "postgres": "17.11 (Debian 17.11-0+deb13u1)",
+  "codex": "codex-cli 0.167.0-alpha.4",
+  "provider": "deterministic loopback HTTPS; fixture token reports; no paid inference",
+  "mcp": {
+    "client": "Python SDK over spawned stdio",
+    "protocol": "2025-11-25",
+    "tools": [
+      "nf_project_status",
+      "nf_resume_project"
+    ]
+  },
+  "supervisor_pids_in_order": [
+    784,
+    787,
+    855,
+    929
+  ],
+  "observed_codex_pids": [
+    790,
+    858
+  ],
+  "codex_processes_alive_after_each_turn": 0,
+  "observations": [
+    {
+      "label": "dependencies outstanding",
+      "elapsed_s": 0.5623,
+      "counts": {
+        "READY": 0,
+        "WAITING": 2,
+        "RUNNING": 1
+      },
+      "provider_requests": 0
+    },
+    {
+      "label": "MCP woke producer",
+      "elapsed_s": 1.6021,
+      "counts": {
+        "READY": 1,
+        "WAITING": 1,
+        "RUNNING": 0,
+        "ACCEPTED": 1
+      },
+      "provider_requests": 0
+    },
+    {
+      "label": "provider processing a00ac285-7b0d-4926-a20e-67ebdffc9127",
+      "elapsed_s": 2.5918,
+      "counts": {
+        "READY": 0,
+        "WAITING": 1,
+        "RUNNING": 1,
+        "ACCEPTED": 1
+      },
+      "provider_requests": 1
+    },
+    {
+      "label": "first supervisor and host exited",
+      "elapsed_s": 2.9223,
+      "counts": {
+        "READY": 0,
+        "WAITING": 1,
+        "RUNNING": 0,
+        "ACCEPTED": 1,
+        "RESULT_STORED": 1
+      },
+      "provider_requests": 1
+    },
+    {
+      "label": "provider processing 72016ebb-9739-4c20-b6b5-80d4d8cd2c26",
+      "elapsed_s": 3.7677,
+      "counts": {
+        "READY": 0,
+        "WAITING": 0,
+        "RUNNING": 1,
+        "ACCEPTED": 2
+      },
+      "provider_requests": 2
+    },
+    {
+      "label": "completed",
+      "elapsed_s": 4.7386,
+      "counts": {
+        "READY": 0,
+        "WAITING": 0,
+        "RUNNING": 0,
+        "ACCEPTED": 3
+      },
+      "provider_requests": 2
+    }
+  ],
+  "waiting_provider_requests_before_gate": 0,
+  "candidate_tasks": 2,
+  "end_to_end_seconds": 5.0185,
+  "candidate_tasks_per_second_including_process_restarts": 0.3985,
+  "accept_to_ready_ms": [
+    29.964,
+    17.789
+  ],
+  "provider_reported_tokens_per_task": [
+    {
+      "input": 11,
+      "output": 7
+    },
+    {
+      "input": 11,
+      "output": 7
+    }
+  ],
+  "ordinary_world_approvals": 1,
+  "human_approvals": 0,
+  "accepted_summary_tasks": 2,
+  "accepted_world_events": 1,
+  "source_world_ref": {
+    "work_id": "86b4645a-c7d4-44cf-b40b-667f6775b13b",
+    "branch_id": "384f0b72-ac2b-4dd9-b7f2-9996d1d3872c",
+    "world_revision_id": "832b764d-25d4-4083-a6fe-99aba8319442"
+  },
+  "accepted_world_ref": {
+    "work_id": "86b4645a-c7d4-44cf-b40b-667f6775b13b",
+    "branch_id": "384f0b72-ac2b-4dd9-b7f2-9996d1d3872c",
+    "world_revision_id": "393bf62f-0c0a-4526-8944-2c3cc5d8fb8e"
+  },
+  "host_turns": [
+    {
+      "attempt_id": "30ba5f41-91e4-4c47-9795-74a85f445e61",
+      "thread_id": "01a1cab6-9fcb-72b2-9e4d-ddfbbdcfabcd",
+      "turn_id": "01a1cab6-9fed-7a42-a141-f742ee737ca0",
+      "phase": "COMPLETED"
+    },
+    {
+      "attempt_id": "353905d2-9c9f-4e47-a9b4-e3d147549fe6",
+      "thread_id": "01a1cab6-a480-7240-a45f-de184abffa44",
+      "turn_id": "01a1cab6-a496-7c93-a779-771831c12bfe",
+      "phase": "COMPLETED"
+    }
+  ]
+}

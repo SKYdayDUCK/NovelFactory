@@ -1,0 +1,44 @@
+{
+  "head": "229f21a6e5fa71bb107a901663ea1f71be142e27",
+  "start_tree": "5e32f1d11d664f81a87146bb7d8d594032e847f8",
+  "end_tree": "5e32f1d11d664f81a87146bb7d8d594032e847f8",
+  "end_status_porcelain": "",
+  "start_status_porcelain": "",
+  "start_utc": "2026-11-11T11:45:54Z",
+  "end_utc": "2026-11-11T11:54:39.431836+00:00",
+  "junit_suite": {
+    "name": "pytest",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "tests": "764",
+    "time": "520.818",
+    "timestamp": "2026-11-11T11:45:57.449424+00:00",
+    "hostname": "3048d295de1c"
+  },
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "tests",
+    "-q",
+    "--junitxml=junit.xml",
+    "--json-report",
+    "--json-report-file=pytest.json"
+  ],
+  "runtime": [
+    "Python 3.12.14",
+    "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+    "Redis server v=8.0.2 sha=00000000:0 malloc=jemalloc-5.3.0 bits=64 build=b843bbd074c0e1da",
+    "codex-cli 0.167.0-alpha.4",
+    "bubblewrap 0.12.0",
+    "unshare from util-linux 2.41.5",
+    "cc (Debian 14.2.0-19) 14.2.0"
+  ],
+  "sha256": {
+    "baseline-junit.xml": "004506fc0b4a3673a94d95832130696180be002526848bb31baec5c2fb70f72c",
+    "baseline-pitr.json": "11acf00d1dd66bf3df97a811c874ec89f2ea748fd7c27639e683dee6c8b1452e"
+  },
+  "provider": "isolated deterministic test fixtures; no paid request",
+  "warning": "StarletteDeprecationWarning (FastAPI TestClient, httpx)"
+}

@@ -1,0 +1,37 @@
+{
+  "provider": "synthetic text over actual loopback HTTP",
+  "accepted_base_world": {
+    "work_id": "c2498d64-732e-4821-93cc-01d0d71dbce7",
+    "branch_id": "153ffe92-9423-48cb-9d48-d9ef6552793a",
+    "world_revision_id": "0087d23f-c1ad-4911-8463-5c93ddf9b5fa"
+  },
+  "sealed_intents": 3,
+  "actors": [
+    {
+      "task_id": "afd3dcae-e5f3-4d93-8d99-bf3e05bf4ffe",
+      "actor_id": "6f352e8f-1163-588f-af0a-71d2660e9e4b",
+      "intent": "今晚不赴宴，我留守粮仓。",
+      "plane": "BELIEF",
+      "state": "ACCEPTED"
+    },
+    {
+      "task_id": "22e3eb25-8ee5-49d7-ac6d-078a2b14a3a6",
+      "actor_id": "7743abb4-dd13-5149-8358-264531bfc3c7",
+      "intent": "只在收到消息后出发。",
+      "plane": "BELIEF",
+      "state": "ACCEPTED"
+    },
+    {
+      "task_id": "51132d1f-5f1b-4e74-b86d-24ce8cf8b02a",
+      "actor_id": "4f430e6d-c279-50e1-80c8-0c37c30ffba4",
+      "intent": "核对库单。",
+      "plane": "BELIEF",
+      "state": "ACCEPTED"
+    }
+  ],
+  "provider_requests": 3,
+  "waiting_actor_requests_before_wake": 0,
+  "duplicate_provider_requests_after_loss": 0,
+  "joint_candidate_sha256": "f7046d2fc77c66ee3d29f642e296c71667e6b1b4a114f5efadb860fd05b4302f",
+  "tests_of_formal_world_acceptance_in_this_trace": 0
+}
