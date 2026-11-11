@@ -1,0 +1,3 @@
+# Shared token ceiling after WAL recovery
+
+Use a disposable checkout of NF PR #17 at `013ebcadf4f7d3a64838096361c6432e4e679b8d`. Apply `git apply /path/to/drill.patch` there and run `uv run --no-sync python scripts/pitr_drill.py --output /path/to/new-evidence` with PostgreSQL 17 server and physical backup tools. The fixture adds a 150-token cap and verifies after WAL replay that the original UNKNOWN attempt still reserves 100 tokens, zero have been spent and 50 remain. The existing NF recovery assertions execute in the same process. The P6 workflow archives its actual result as `p6-shared-token-recovery`.
