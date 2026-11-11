@@ -94,15 +94,17 @@ class Kernel:
                     "PROJECTION_CORRUPT", "Projection integrity failed")
         else:
             raw = row["snapshot"]
-            witness = (row["state_hash"], raw)
+            # Every read hashes the actual PostgreSQL serialization. Retaining
+            # only its digest gives small and large valid worlds the same
+            # bounded witness, with no projection bytes or mutable results shared.
+            witness = (row["state_hash"], sha256(raw.encode("utf-8")).digest())
             # Decode a private Python object even on a hit. Only evidence that
             # these exact bytes passed NF-CANON-1 is shared between readers.
             row["snapshot"] = json.loads(raw)
             if witness != self._last_verified_projection:
                 require(fingerprint(row["snapshot"]) == row["state_hash"],
                         "PROJECTION_CORRUPT", "Projection integrity failed")
-                if len(raw) <= 1_000_000:
-                    self._last_verified_projection = witness
+                self._last_verified_projection = witness
         from novel_factory.application.simulation import verify_schedule_revision
         verify_schedule_revision(row)
         return row
