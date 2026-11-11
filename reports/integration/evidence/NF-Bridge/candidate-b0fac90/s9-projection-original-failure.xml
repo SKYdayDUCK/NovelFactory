@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1.730" timestamp="2026-11-12T03:48:13.970612+09:00" hostname="8468d52686a3"><testcase classname="tests.integration.test_nf_delegation_progress" name="test_only_current_delegation_generation_reports_dependency_conflict" time="1.457"><failure message="KeyError: 'wait_reason'">site = (&lt;novel_factory.application.delegation.Delegations object at 0x7f36b3e98aa0&gt;, {'protocol_version': 'aw-nf.v1', 'nf_ins..., Principal(grant_id='7ef79943-b677-440b-a185-f8f4a1a61a71', principal_id='6aa1a6d4-27f4-48db-9eae-9b80abef9959'), ...)
+
+    def test_only_current_delegation_generation_reports_dependency_conflict(site):  # noqa: F811
+        bridge, submit, get, _, supervisor, owner, model_calls, original = site
+        kernel = supervisor.kernel
+        sword = fixture_definition("r1_sword")["ids"]["sword"]
+        base = original.spec["world_ref"]
+        assignment = "Summarize the privately observed lifecycle."
+        observed_at = point(1)
+        frozen = RuntimeTaskService(kernel, supervisor.gateway).define(
+            owner,
+            base,
+            role_id=submit["role_id"],
+            task_kind="summary",
+            story_time=observed_at,
+            subject_ids=[sword],
+            predicates=["lifecycle"],
+            assignment=assignment,
+            adapter_id="fixture",
+            max_amount=submit["max_amount"],
+            token_budget=submit["token_limit"],
+        )
+        scope = "scene.summary.lifecycle"
+        provision_slot(
+            supervisor,
+            owner,
+            bridge.installation_id,
+            scope_ref=scope,
+            task_template_id=submit["task_template_id"],
+            frozen=frozen,
+            budget_id=kernel.tasks.create_budget(base["work_id"], "2"),
+            reserve_amount=submit["max_amount"],
+            token_reservation=submit["token_limit"],
+            accept_summary=True,
+        )
+        other = bridge.call("nf_delegation_submit", submit)
+        scoped_get = dict(get, operation_id=str(uuid4()))
+        receipt = bridge.call(
+            "nf_delegation_submit",
+            dict(
+                submit,
+                operation_id=scoped_get["operation_id"],
+                scope_ref=scope,
+                budget_reservation_ref=str(uuid4()),
+            ),
+        )
+        task_id = receipt["task_id"]
+        assert task_id == frozen.spec["task_id"] and task_id != other["task_id"]
+        claim = kernel.claim_task(
+            frozen.principal, "lifecycle-reader", task_id=task_id, lease_seconds=600
+        )
+        generation = claim["generation"]
+        compiled = WorldQueryService(kernel).context_compile(
+            frozen.principal,
+            {
+                "schema_version": "2.1",
+                "task_id": task_id,
+                "generation": generation,
+                "recipe_id": profiles()[submit["role_id"]]["allowed_recipes"][0],
+                "input_manifest_ref": frozen.manifest_ref,
+                "knowledge_cut": frozen.cut,
+                "read_contract": {
+                    "revision": {"mode": "FIXED", "world_ref": base},
+                    "process_policy": "ALLOW_PARTIAL",
+                    "index_policy": "AUTHORITATIVE",
+                    "max_wait_ms": 0,
+                },
+                "subject_time": {"kind": "POINT", "at": frozen.spec["story_time"]},
+                "token_budget": 20000,
+                "idempotency_key": "compile:" + task_id,
+            },
+        )
+        assert compiled["status"] == "READY"
+        # A summary's fixed historical observation stays true. Explicitly bind the
+        # continuing requirement to this generation's own authorized query receipt.
+        observed = query(kernel, {"principal": frozen.principal}, base, claim, sword, "lifecycle", 1)
+        assumption = add_assumption(
+            kernel,
+            frozen.principal,
+            {
+                "task_id": task_id,
+                "generation": generation,
+                "dependency_handle": observed["dependency_handle"],
+                "dependency_kind": "REQUIRES",
+                "statement": encode_proposition(
+                    sword, "lifecycle", {"kind": "STRING", "value": "ACTIVE"}
+                ),
+            },
+        )
+        assert not assumption["uncertain"]
+        before = bridge.call("nf_delegation_get", scoped_get)
+        assert before["task_state"] == "RUNNING" and before["generation"] == generation
+&gt;       assert before["wait_reason"] is None and before["result_ref"] is None
+               ^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'wait_reason'
+
+tests/integration/test_nf_delegation_progress.py:114: KeyError</failure></testcase></testsuite></testsuites>
