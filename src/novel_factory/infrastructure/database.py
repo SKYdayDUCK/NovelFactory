@@ -83,6 +83,8 @@ define("grants", uid("grant_id", primary_key=True), uid("principal_id", nullable
        js("branch_ids", nullable=False), js("capabilities", nullable=False), js("planes", nullable=False), js("max_story_time", nullable=False),
        Column("active", Boolean, nullable=False, server_default="true"), Column("epoch", BigInteger, nullable=False, server_default="0"),
        ForeignKeyConstraint(["work_id"], ["nf_works.work_id"]), ts())
+define("resume_grants", uid("grant_id", primary_key=True), Column("expires_at", DateTime(timezone=True), nullable=False),
+       Column("policy_version", Text, nullable=False), ForeignKeyConstraint(["grant_id"], ["nf_grants.grant_id"]))
 define("artifacts", uid("artifact_revision_id", primary_key=True), uid("artifact_id", nullable=False), uid("work_id", nullable=False),
        Column("sha256", String(64), nullable=False), Column("kind", Text, nullable=False), js("payload"), uid("created_by", nullable=False), ts(),
        ForeignKeyConstraint(["sha256"], ["nf_objects.hash"]), ForeignKeyConstraint(["work_id"], ["nf_works.work_id"]),

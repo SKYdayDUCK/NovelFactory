@@ -166,16 +166,11 @@ def test_recovery_respects_authorizer_and_policy_version(rel_env, rel_scope):
 
 
 def test_wait_admission_and_wake_recheck_role_grant(rel_env, rel_scope):
-    from datetime import datetime, timedelta, timezone
-
     wf = WorkflowService(rel_env["service"])
     opts = scope_args(rel_scope)
     pred = start_task(rel_env, rel_scope)
     target = blocked(rel_env, rel_scope)
     args = (target, 0, [pred["task_id"]])
-    # 0004 works alone. 0006 and later add optional independent grant fences.
-    from sqlalchemy import inspect
-    grant_cols = {c["name"] for c in inspect(rel_env["db"].engine).get_columns("nf_grants")}
     def change(**values):
         with rel_env["db"].uow() as repo:
             repo.change("grants", {"grant_id": rel_scope["grant_id"]}, values)
@@ -184,22 +179,8 @@ def test_wait_admission_and_wake_recheck_role_grant(rel_env, rel_scope):
         wf.wait(*args, mode="AND", **opts)
     assert revoked.value.code == "VIEW_DENIED"
     change(active=True)
-    if "expires_at" in grant_cols:
-        change(expires_at=datetime.now(timezone.utc) - timedelta(seconds=1))
-        with pytest.raises(DomainError) as expired:
-            wf.wait(*args, mode="AND", **opts)
-        assert expired.value.code == "VIEW_DENIED"
-        change(expires_at=None, bound_policy_version="another-policy")
-        with pytest.raises(DomainError) as wrong_policy:
-            wf.wait(*args, mode="AND", **opts)
-        assert wrong_policy.value.code == "VIEW_DENIED"
-        change(bound_policy_version="policy-test")
     wf.wait(*args, mode="AND", **opts)
     accept(rel_env, pred)
-    if "expires_at" in grant_cols:
-        change(expires_at=datetime.now(timezone.utc) - timedelta(seconds=1))
-        assert wf.resume_project(**opts)["awakened"] == 0
-        change(expires_at=None)
     change(epoch=1)
     assert wf.resume_project(**opts)["awakened"] == 0
     assert rel_env["service"].get(target)["state"] == "BLOCKED"

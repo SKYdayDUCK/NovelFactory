@@ -1,0 +1,8 @@
+# Trusted operator Host. The SSH alias uses a restricted key, a verified host
+# key, BatchMode=yes and no agent forwarding. The server forces the MCP command.
+[mcp_servers.novelfactory]
+command = "ssh"
+args = ["-T", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "ForwardAgent=no", "nf-resume-service"]
+enabled_tools = ["nf_project_status", "nf_resume_project"]
+startup_timeout_sec = 30
+tool_timeout_sec = 30

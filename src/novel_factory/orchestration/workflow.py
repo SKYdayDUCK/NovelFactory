@@ -18,14 +18,13 @@ def _guard(condition, code, message):
         raise DomainError(code, message)
 
 
-# The optional grant expiry/policy columns were added after workflow schema
-# 0004. An absent column on an older database has the legacy NULL meaning.
+# Runtime tasks have a role grant, a deadline and a pinned policy version.
+# The resume operator can authorize a project scan but cannot own a task.
 _CURRENT_GRANT = """
     g.active AND g.work_id = t.work_id AND g.principal_id::text = t.principal_id AND g.role_id = t.role_id
       AND (g.branch_ids = '["*"]'::jsonb OR g.branch_ids @> jsonb_build_array(t.branch_id))
       AND work.policy_version = i.spec->>'policy_version'
-      AND coalesce((to_jsonb(g)->>'expires_at')::timestamptz, 'infinity') > clock_timestamp()
-      AND coalesce(to_jsonb(g)->>'bound_policy_version', work.policy_version) = work.policy_version
+      AND g.role_id <> 'resume_operator'
       AND i.spec->>'capability_grant_id' = t.grant_id::text AND i.spec->>'role_id' = t.role_id
       AND i.spec->'world_ref'->>'work_id' = t.work_id::text
       AND i.spec->'world_ref'->>'branch_id' = t.branch_id::text
