@@ -1,0 +1,61 @@
+{
+  "source_sha": "55d8979b5361a4837701d762feacd83036096b11",
+  "seed": "NovelFactory-S9-controlled-writer-A-B-C-D-20261111-v1",
+  "trial_orders": [
+    "ABCD",
+    "BCDA",
+    "CDAB",
+    "DABC"
+  ],
+  "fixed_resources": {
+    "python": "3.12",
+    "postgres": "17.11",
+    "concurrent_writers": 1,
+    "pool_size": 2,
+    "max_overflow": 0,
+    "max_output_tokens": 1024,
+    "token_reservation_per_call": 100000,
+    "monetary_reservation_usd": "0.10",
+    "shared_budget_each_clone": "USD 5.00",
+    "external_model_requests": 0
+  },
+  "cases": [
+    {
+      "scenario": "same_object",
+      "entity": "guard1",
+      "predicate": "on_duty",
+      "proposal": "GUARD_LEAVE",
+      "oracle_affected": true,
+      "post_change_text": "守卫已经离岗。"
+    },
+    {
+      "scenario": "causal_read_other_write",
+      "entity": "guard1",
+      "predicate": "on_duty",
+      "proposal": "RESOURCE_TRANSFER",
+      "oracle_affected": true,
+      "post_change_text": "守卫已经离岗。"
+    },
+    {
+      "scenario": "independent",
+      "entity": "sword",
+      "predicate": "legal_owner",
+      "proposal": "RESOURCE_TRANSFER",
+      "oracle_affected": false,
+      "post_change_text": "登记的剑主为 {smith}。"
+    }
+  ],
+  "arms": {
+    "A": "strict changed branch head",
+    "B": "object-level write scope overlap",
+    "C": "dependency certificate without S9 semantic reads",
+    "D": "certificate plus S9 recorded read dependencies"
+  },
+  "metrics": {
+    "time": "Clock the common pre-change NF writer tasks, scoped preparation and one accepted change. Add serial post-change guard decisions, real NF rework, and persisted output reads. Exclude cloning, migration and out-of-band ledger auditing. Report post-change and full-workflow denominators separately.",
+    "effective_output": "One registered scenario resulting in a retrieved NF writer candidate whose actual text equals the predeclared independent expected fact. Retained stale text is excluded. No policy publishes authoritative events or narrative.",
+    "token": "In-process deterministic test tokenizer counts ASCII alphanumeric/underscore runs as one token and each other non-whitespace Unicode code point as one. Count actual messages and emitted JSON, cross-check NF attempt ledger. These units do not represent any provider tokenizer.",
+    "repeat": "One common baseline of three physical writer calls is cloned and attributed to each measured arm. Four rotated serial orders reuse the same three cases and frozen IDs. Trials are timing repetitions and cannot enlarge the independent gold set."
+  },
+  "limits": "Only two changed and one genuinely independent factual note. The writer is an instrumented in-process synthetic adapter using its authorized context. Real provider tokens, supplier invoices and literary quality remain unavailable. The original 12-repeat guard decision benchmark and old gates remain unchanged."
+}
