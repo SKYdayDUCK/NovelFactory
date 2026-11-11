@@ -1,0 +1,1474 @@
+{
+  "capacity": [
+    {
+      "artifact": "p3-isolated-200-overload-1",
+      "bounded_recovery_business_gate": "PASS",
+      "capacity_gate": "NOT_MET",
+      "correctness": {
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "expected_new_world_revisions": 21,
+        "independent_resource_final_quantities": [
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99"
+        ],
+        "new_selected_effect_groups": 21,
+        "new_world_revisions": 21,
+        "shared_resource_final_quantity": "99"
+      },
+      "engineer_correctness": "PASS",
+      "entry": "load.json",
+      "external_model": {
+        "actual_calls": 0,
+        "billed_cost_usd": null,
+        "note": "No real or fixture model dispatch; this measures service behavior, not model concurrency",
+        "peak_inflight_calls": 0,
+        "status": "NOT_DISPATCHED",
+        "tokens": 0
+      },
+      "logical_agent_task_count": 200,
+      "open_loop_offered_rate": {
+        "actual_call_start_rps": 66.42576521783363,
+        "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+        "first_attempts": 1000,
+        "gate": "NOT_MET",
+        "max_schedule_delay_ms": 14040.4533,
+        "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity",
+        "start_window_seconds": 15.039344999999997,
+        "target_rps": 1000.0,
+        "transport_header_start_rps": 51.20430841969505,
+        "transport_header_starts": 1000
+      },
+      "profile": "overload",
+      "schema_version": "p2-load-2"
+    },
+    {
+      "artifact": "p3-isolated-200-mixed-1",
+      "bounded_recovery_business_gate": "PASS",
+      "capacity_gate": "PASS",
+      "correctness": {
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "expected_new_world_revisions": 21,
+        "independent_resource_final_quantities": [
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99"
+        ],
+        "new_selected_effect_groups": 21,
+        "new_world_revisions": 21,
+        "shared_resource_final_quantity": "99"
+      },
+      "engineer_correctness": "PASS",
+      "entry": "load.json",
+      "external_model": {
+        "actual_calls": 0,
+        "billed_cost_usd": null,
+        "note": "No real or fixture model dispatch; this measures service behavior, not model concurrency",
+        "peak_inflight_calls": 0,
+        "status": "NOT_DISPATCHED",
+        "tokens": 0
+      },
+      "logical_agent_task_count": 200,
+      "open_loop_offered_rate": {
+        "first_attempts": 0,
+        "gate": "NOT_APPLICABLE",
+        "target_rps": null
+      },
+      "profile": "mixed",
+      "schema_version": "p2-load-2"
+    },
+    {
+      "artifact": "p2-load-50-overload-1",
+      "bounded_recovery_business_gate": "PASS",
+      "capacity_gate": "NOT_MET",
+      "correctness": {
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "expected_new_world_revisions": 6,
+        "independent_resource_final_quantities": [
+          "99",
+          "99",
+          "99",
+          "99",
+          "99"
+        ],
+        "new_selected_effect_groups": 6,
+        "new_world_revisions": 6,
+        "shared_resource_final_quantity": "99"
+      },
+      "engineer_correctness": "PASS",
+      "entry": "run-1/load.json",
+      "external_model": {
+        "actual_calls": 0,
+        "billed_cost_usd": null,
+        "note": "No real or fixture model dispatch; this measures service behavior, not model concurrency",
+        "peak_inflight_calls": 0,
+        "status": "NOT_DISPATCHED",
+        "tokens": 0
+      },
+      "logical_agent_task_count": 50,
+      "open_loop_offered_rate": {
+        "actual_call_start_rps": 71.85914914149966,
+        "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+        "first_attempts": 250,
+        "gate": "NOT_MET",
+        "max_schedule_delay_ms": 3216.2111,
+        "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity",
+        "start_window_seconds": 3.4651119999999977,
+        "target_rps": 1000.0,
+        "transport_header_start_rps": 53.32673138404498,
+        "transport_header_starts": 250
+      },
+      "profile": "overload",
+      "schema_version": "p2-load-2"
+    },
+    {
+      "artifact": "p2-load-50-overload-1",
+      "bounded_recovery_business_gate": "PASS",
+      "capacity_gate": "NOT_MET",
+      "correctness": {
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "expected_new_world_revisions": 6,
+        "independent_resource_final_quantities": [
+          "99",
+          "99",
+          "99",
+          "99",
+          "99"
+        ],
+        "new_selected_effect_groups": 6,
+        "new_world_revisions": 6,
+        "shared_resource_final_quantity": "99"
+      },
+      "engineer_correctness": "PASS",
+      "entry": "run-2/load.json",
+      "external_model": {
+        "actual_calls": 0,
+        "billed_cost_usd": null,
+        "note": "No real or fixture model dispatch; this measures service behavior, not model concurrency",
+        "peak_inflight_calls": 0,
+        "status": "NOT_DISPATCHED",
+        "tokens": 0
+      },
+      "logical_agent_task_count": 50,
+      "open_loop_offered_rate": {
+        "actual_call_start_rps": 103.61560192966353,
+        "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+        "first_attempts": 250,
+        "gate": "NOT_MET",
+        "max_schedule_delay_ms": 2154.204,
+        "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity",
+        "start_window_seconds": 2.4031130000000047,
+        "target_rps": 1000.0,
+        "transport_header_start_rps": 62.52578560887434,
+        "transport_header_starts": 250
+      },
+      "profile": "overload",
+      "schema_version": "p2-load-2"
+    },
+    {
+      "artifact": "p2-load-200-overload-1",
+      "bounded_recovery_business_gate": "PASS",
+      "capacity_gate": "NOT_MET",
+      "correctness": {
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "expected_new_world_revisions": 21,
+        "independent_resource_final_quantities": [
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99"
+        ],
+        "new_selected_effect_groups": 21,
+        "new_world_revisions": 21,
+        "shared_resource_final_quantity": "99"
+      },
+      "engineer_correctness": "PASS",
+      "entry": "run-1/load.json",
+      "external_model": {
+        "actual_calls": 0,
+        "billed_cost_usd": null,
+        "note": "No real or fixture model dispatch; this measures service behavior, not model concurrency",
+        "peak_inflight_calls": 0,
+        "status": "NOT_DISPATCHED",
+        "tokens": 0
+      },
+      "logical_agent_task_count": 200,
+      "open_loop_offered_rate": {
+        "actual_call_start_rps": 36.32545513359038,
+        "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+        "first_attempts": 1000,
+        "gate": "NOT_MET",
+        "max_schedule_delay_ms": 26502.5079,
+        "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity",
+        "start_window_seconds": 27.501376000000022,
+        "target_rps": 1000.0,
+        "transport_header_start_rps": 30.12192414147692,
+        "transport_header_starts": 1000
+      },
+      "profile": "overload",
+      "schema_version": "p2-load-2"
+    },
+    {
+      "artifact": "p2-load-200-overload-1",
+      "bounded_recovery_business_gate": "PASS",
+      "capacity_gate": "NOT_MET",
+      "correctness": {
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "expected_new_world_revisions": 21,
+        "independent_resource_final_quantities": [
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99"
+        ],
+        "new_selected_effect_groups": 21,
+        "new_world_revisions": 21,
+        "shared_resource_final_quantity": "99"
+      },
+      "engineer_correctness": "PASS",
+      "entry": "run-2/load.json",
+      "external_model": {
+        "actual_calls": 0,
+        "billed_cost_usd": null,
+        "note": "No real or fixture model dispatch; this measures service behavior, not model concurrency",
+        "peak_inflight_calls": 0,
+        "status": "NOT_DISPATCHED",
+        "tokens": 0
+      },
+      "logical_agent_task_count": 200,
+      "open_loop_offered_rate": {
+        "actual_call_start_rps": 35.28598086567353,
+        "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+        "first_attempts": 1000,
+        "gate": "NOT_MET",
+        "max_schedule_delay_ms": 27312.6579,
+        "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity",
+        "start_window_seconds": 28.311527000000012,
+        "target_rps": 1000.0,
+        "transport_header_start_rps": 29.845193073154757,
+        "transport_header_starts": 1000
+      },
+      "profile": "overload",
+      "schema_version": "p2-load-2"
+    },
+    {
+      "artifact": "p2-load-200-mixed-1",
+      "bounded_recovery_business_gate": "PASS",
+      "capacity_gate": "PASS",
+      "correctness": {
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "expected_new_world_revisions": 21,
+        "independent_resource_final_quantities": [
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99"
+        ],
+        "new_selected_effect_groups": 21,
+        "new_world_revisions": 21,
+        "shared_resource_final_quantity": "99"
+      },
+      "engineer_correctness": "PASS",
+      "entry": "run-1/load.json",
+      "external_model": {
+        "actual_calls": 0,
+        "billed_cost_usd": null,
+        "note": "No real or fixture model dispatch; this measures service behavior, not model concurrency",
+        "peak_inflight_calls": 0,
+        "status": "NOT_DISPATCHED",
+        "tokens": 0
+      },
+      "logical_agent_task_count": 200,
+      "open_loop_offered_rate": {
+        "first_attempts": 0,
+        "gate": "NOT_APPLICABLE",
+        "target_rps": null
+      },
+      "profile": "mixed",
+      "schema_version": "p2-load-2"
+    },
+    {
+      "artifact": "p2-load-200-mixed-1",
+      "bounded_recovery_business_gate": "PASS",
+      "capacity_gate": "PASS",
+      "correctness": {
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "expected_new_world_revisions": 21,
+        "independent_resource_final_quantities": [
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99"
+        ],
+        "new_selected_effect_groups": 21,
+        "new_world_revisions": 21,
+        "shared_resource_final_quantity": "99"
+      },
+      "engineer_correctness": "PASS",
+      "entry": "run-2/load.json",
+      "external_model": {
+        "actual_calls": 0,
+        "billed_cost_usd": null,
+        "note": "No real or fixture model dispatch; this measures service behavior, not model concurrency",
+        "peak_inflight_calls": 0,
+        "status": "NOT_DISPATCHED",
+        "tokens": 0
+      },
+      "logical_agent_task_count": 200,
+      "open_loop_offered_rate": {
+        "first_attempts": 0,
+        "gate": "NOT_APPLICABLE",
+        "target_rps": null
+      },
+      "profile": "mixed",
+      "schema_version": "p2-load-2"
+    },
+    {
+      "artifact": "p2-load-50-mixed-1",
+      "bounded_recovery_business_gate": "PASS",
+      "capacity_gate": "PASS",
+      "correctness": {
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "expected_new_world_revisions": 6,
+        "independent_resource_final_quantities": [
+          "99",
+          "99",
+          "99",
+          "99",
+          "99"
+        ],
+        "new_selected_effect_groups": 6,
+        "new_world_revisions": 6,
+        "shared_resource_final_quantity": "99"
+      },
+      "engineer_correctness": "PASS",
+      "entry": "run-1/load.json",
+      "external_model": {
+        "actual_calls": 0,
+        "billed_cost_usd": null,
+        "note": "No real or fixture model dispatch; this measures service behavior, not model concurrency",
+        "peak_inflight_calls": 0,
+        "status": "NOT_DISPATCHED",
+        "tokens": 0
+      },
+      "logical_agent_task_count": 50,
+      "open_loop_offered_rate": {
+        "first_attempts": 0,
+        "gate": "NOT_APPLICABLE",
+        "target_rps": null
+      },
+      "profile": "mixed",
+      "schema_version": "p2-load-2"
+    },
+    {
+      "artifact": "p2-load-50-mixed-1",
+      "bounded_recovery_business_gate": "PASS",
+      "capacity_gate": "PASS",
+      "correctness": {
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "expected_new_world_revisions": 6,
+        "independent_resource_final_quantities": [
+          "99",
+          "99",
+          "99",
+          "99",
+          "99"
+        ],
+        "new_selected_effect_groups": 6,
+        "new_world_revisions": 6,
+        "shared_resource_final_quantity": "99"
+      },
+      "engineer_correctness": "PASS",
+      "entry": "run-2/load.json",
+      "external_model": {
+        "actual_calls": 0,
+        "billed_cost_usd": null,
+        "note": "No real or fixture model dispatch; this measures service behavior, not model concurrency",
+        "peak_inflight_calls": 0,
+        "status": "NOT_DISPATCHED",
+        "tokens": 0
+      },
+      "logical_agent_task_count": 50,
+      "open_loop_offered_rate": {
+        "first_attempts": 0,
+        "gate": "NOT_APPLICABLE",
+        "target_rps": null
+      },
+      "profile": "mixed",
+      "schema_version": "p2-load-2"
+    },
+    {
+      "artifact": "p3-scale-500-mixed-1",
+      "bounded_recovery_business_gate": "PASS",
+      "capacity_gate": "PASS",
+      "correctness": {
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "expected_new_world_revisions": 51,
+        "independent_resource_final_quantities": [
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99"
+        ],
+        "new_selected_effect_groups": 51,
+        "new_world_revisions": 51,
+        "shared_resource_final_quantity": "99"
+      },
+      "engineer_correctness": "PASS",
+      "entry": "result.json",
+      "external_model": {
+        "actual_calls": 0,
+        "billed_cost_usd": null,
+        "note": "No real or fixture model dispatch; this measures service behavior, not model concurrency",
+        "peak_inflight_calls": 0,
+        "status": "NOT_DISPATCHED",
+        "tokens": 0
+      },
+      "logical_agent_task_count": 500,
+      "open_loop_offered_rate": {
+        "first_attempts": 0,
+        "gate": "NOT_APPLICABLE",
+        "target_rps": null
+      },
+      "profile": "mixed",
+      "schema_version": "p2-load-2"
+    },
+    {
+      "artifact": "p3-scale-1000-read-open-1",
+      "capacity_gate": "NOT_MET",
+      "completed_requests": 5000,
+      "configuration": {
+        "agents": 1000,
+        "api_processes": 2,
+        "arrival_rps": 1000.0,
+        "hot_fraction": 0.8,
+        "output": "ci-evidence/result.json",
+        "rounds": 5
+      },
+      "correctness_errors": [],
+      "entry": "result.json",
+      "latency_all_attempts": {
+        "count": 5000,
+        "p50_ms": 2554.6468,
+        "p95_ms": 6810.2973,
+        "p99_ms": 9762.174
+      },
+      "new_world_commits": 0,
+      "observed_wire_start_rps": 44.09089861578267,
+      "real_model_calls": 0,
+      "scheduled_requests": 5000,
+      "schema_version": "p3-open-arrival-1",
+      "status_counts": {
+        "200": 1992,
+        "429": 2996,
+        "transport_error": 12
+      },
+      "successful_query_rps": 17.38985290710849,
+      "validated_successes": 1992,
+      "world_unchanged": true
+    },
+    {
+      "actual_call_start_rps": 20.00071147142919,
+      "artifact": "p3-scale-500-read-soak-1",
+      "configuration": {
+        "agents": 500,
+        "api_processes": 2,
+        "output": "ci-evidence/result.json",
+        "read_rps": 20.0,
+        "seconds": 600.0
+      },
+      "correctness_errors": [],
+      "duration_seconds": 600.058193471,
+      "entry": "result.json",
+      "latency_all_attempts": {
+        "count": 12000,
+        "p50_ms": 79.889,
+        "p95_ms": 120.2213,
+        "p99_ms": 135.9242
+      },
+      "long_duration_gate": "NOT_EXECUTED",
+      "new_world_commits": 0,
+      "probe_gate": "PASS",
+      "real_model_calls": 0,
+      "scheduled_count": 12000,
+      "schema_version": "p3-stability-1",
+      "status_counts": {
+        "200": 12000
+      },
+      "successful_query_rps": 19.99806040575287,
+      "world_unchanged": true
+    }
+  ],
+  "head_sha": "23d195d9dcd901506f6571d902e68fd48e5a0ab7",
+  "recovery": {
+    "aw-offline.json": {
+      "aw_author_mcp_during_outage": "VIEW_DENIED",
+      "aw_database_allowed_connections": false,
+      "aw_live_client_backends": 0,
+      "operation_id": "89eec467-5f13-4ea2-86f5-86b72576289d",
+      "pending_wake_preserved": "588c6e38-75de-4160-a827-7101027834c0",
+      "production_provider_calls": 0,
+      "recorded_utc": "2026-11-11T23:09:21.979924+00:00",
+      "scope": "Workshop database refused connections across two real NF supervisor scans.",
+      "status": "PASS"
+    },
+    "paired-restore.json": {
+      "basebackup": "physical pg_basebackup -Fp -Xstream",
+      "elapsed_seconds": 14.1,
+      "frozen_manager": "IDLE",
+      "loopback_synthetic_http_requests": 1,
+      "manifest_sha256": "f2dc1cff348f8db36106fd8f91d397360a9175ec85a6eabe6c0c8a3c49f3d1ee",
+      "pg": "postgres (PostgreSQL) 17.11 (Ubuntu 17.11-1.pgdg24.04+2)",
+      "replayed_lsn": "0/402B9A8",
+      "resulting_nf_tasks": 1,
+      "rolled_back_nf_task_count": 0,
+      "second_replay_lsn": "0/407C500",
+      "second_target_lsn": "0/407C500",
+      "second_wal_target": "nf_bound_before_inference",
+      "status": "PASS",
+      "supplier_model_calls": 0,
+      "target": "aw_intent_before_nf",
+      "target_lsn": "0/402B9A8",
+      "workshop_offline": {
+        "aw_after_reconciliation": {
+          "accounting_state": "UNKNOWN",
+          "attempts_observed": 1,
+          "budget_hold": "HELD",
+          "delegation": "BOUND",
+          "receipt_ref": "8477e60f-b616-45b8-88f5-2f7b9f501933",
+          "task_id": "f69f1510-f04c-4246-b213-0d28e11d460c",
+          "task_state": "ACCEPTED"
+        },
+        "aw_author_mcp_during_outage": "VIEW_DENIED",
+        "aw_database_allowed_connections": false,
+        "aw_live_client_backends": 0,
+        "aw_unchanged_while_offline": {
+          "accounting_state": "NO_ATTEMPT",
+          "attempts_observed": 0,
+          "budget_hold": "HELD",
+          "delegation": "BOUND",
+          "receipt_ref": "8477e60f-b616-45b8-88f5-2f7b9f501933",
+          "task_id": "f69f1510-f04c-4246-b213-0d28e11d460c",
+          "task_state": "READY"
+        },
+        "nf_stdio_during_outage": {
+          "attempt_ids": [
+            "14f8ab9a-5f8d-4460-8d80-abd4dfb9df87"
+          ],
+          "receipt_ref": "8477e60f-b616-45b8-88f5-2f7b9f501933"
+        },
+        "nf_supervisor_scans": [
+          {
+            "after": {
+              "attempts": [
+                "14f8ab9a-5f8d-4460-8d80-abd4dfb9df87"
+              ],
+              "state": "RESULT_STORED"
+            },
+            "before": {
+              "attempts": [],
+              "state": "READY"
+            },
+            "status": "RESULT_STORED"
+          },
+          {
+            "after": {
+              "attempts": [
+                "14f8ab9a-5f8d-4460-8d80-abd4dfb9df87"
+              ],
+              "state": "ACCEPTED"
+            },
+            "before": {
+              "attempts": [
+                "14f8ab9a-5f8d-4460-8d80-abd4dfb9df87"
+              ],
+              "state": "RESULT_STORED"
+            },
+            "status": "IDLE"
+          }
+        ],
+        "operation_id": "89eec467-5f13-4ea2-86f5-86b72576289d",
+        "pending_wake_preserved": "588c6e38-75de-4160-a827-7101027834c0",
+        "production_provider_calls": 0,
+        "recorded_utc": "2026-11-11T23:09:21.979924+00:00",
+        "scope": "Workshop database refused connections across two real NF supervisor scans.",
+        "status": "PASS"
+      }
+    },
+    "physical_pitr": {
+      "execution_kind": "REAL_ISOLATED_POSTGRESQL",
+      "fenced_task_count": 3,
+      "model_calls": 0,
+      "object_count": 31,
+      "old_worker_rejected": true,
+      "original_commit_receipt_equal": true,
+      "postgres": "postgres (PostgreSQL) 17.11 (Ubuntu 17.11-1.pgdg24.04+2)",
+      "recovery_seconds_to_verified_service": 0.7825375500000007,
+      "restored_state_sha256": "70a4426dedfb1f8f6a6eb8f98a4b058c07682fda61079503cc376583ef3c4814",
+      "status": "PASS",
+      "table_count": 70,
+      "target_commits_lost": 0,
+      "target_lsn": "0/3109718",
+      "unknown_calls_retained": 1
+    },
+    "w3-redis-recovery.json": {
+      "generation": 0,
+      "hold_after_loss": "HELD",
+      "nf_after_get_matches_lost_reply": true,
+      "operation_id": "9776b54a-d214-4a30-aeb8-81776e0eade8",
+      "receipt_ref": "719298a7-787f-4cf4-b92d-daeabf15af5f",
+      "reserved_amount": "1.000000",
+      "restarted_aw_state": "RECONCILING",
+      "task_id": "a936dcc0-2180-431f-8e50-e1068fbb41be"
+    }
+  },
+  "suites": [
+    {
+      "artifact": "p1-postgres-concurrency-1",
+      "errors": 0,
+      "failures": 0,
+      "name": "postgres-all.xml",
+      "seconds": "745.062",
+      "skipped": 17,
+      "tests": 834,
+      "workflow": "P1 and P2 production integrity"
+    },
+    {
+      "artifact": "p1-schema-unit-1",
+      "errors": 0,
+      "failures": 0,
+      "name": "unit.xml",
+      "seconds": "20.873",
+      "skipped": 0,
+      "tests": 398,
+      "workflow": "P1 and P2 production integrity"
+    },
+    {
+      "artifact": "workshop-scene-recovery-results",
+      "errors": 0,
+      "failures": 0,
+      "name": "scene-results.xml",
+      "seconds": "44.450",
+      "skipped": 0,
+      "tests": 2,
+      "workflow": "Agent Workshop PostgreSQL and stdio"
+    },
+    {
+      "artifact": "workshop-scene-recovery-results",
+      "errors": 0,
+      "failures": 0,
+      "name": "ci-evidence/at43-at49-junit.xml",
+      "seconds": "13.607",
+      "skipped": 0,
+      "tests": 2,
+      "workflow": "Agent Workshop PostgreSQL and stdio"
+    },
+    {
+      "artifact": "workshop-scene-recovery-results",
+      "errors": 1,
+      "failures": 0,
+      "name": "capacity-results.xml",
+      "seconds": "0.869",
+      "skipped": 0,
+      "tests": 1,
+      "workflow": "Agent Workshop PostgreSQL and stdio"
+    },
+    {
+      "artifact": "workshop-results",
+      "errors": 0,
+      "failures": 0,
+      "name": "workshop-results.xml",
+      "seconds": "30.296",
+      "skipped": 0,
+      "tests": 84,
+      "workflow": "Agent Workshop PostgreSQL and stdio"
+    },
+    {
+      "artifact": "workshop-results",
+      "errors": 0,
+      "failures": 0,
+      "name": "nf-tools.xml",
+      "seconds": "16.202",
+      "skipped": 0,
+      "tests": 5,
+      "workflow": "Agent Workshop PostgreSQL and stdio"
+    },
+    {
+      "artifact": "workshop-results",
+      "errors": 0,
+      "failures": 0,
+      "name": "dual-service-results.xml",
+      "seconds": "3.925",
+      "skipped": 0,
+      "tests": 2,
+      "workflow": "Agent Workshop PostgreSQL and stdio"
+    },
+    {
+      "artifact": "workshop-results",
+      "errors": 0,
+      "failures": 0,
+      "name": "w1-legacy-upgrade.xml",
+      "seconds": "4.105",
+      "skipped": 0,
+      "tests": 1,
+      "workflow": "Agent Workshop PostgreSQL and stdio"
+    },
+    {
+      "artifact": "workshop-results",
+      "errors": 0,
+      "failures": 0,
+      "name": "w2-legacy-upgrades.xml",
+      "seconds": "9.908",
+      "skipped": 0,
+      "tests": 3,
+      "workflow": "Agent Workshop PostgreSQL and stdio"
+    },
+    {
+      "artifact": "workshop-results",
+      "errors": 0,
+      "failures": 0,
+      "name": "w3-legacy-upgrades.xml",
+      "seconds": "6.358",
+      "skipped": 0,
+      "tests": 2,
+      "workflow": "Agent Workshop PostgreSQL and stdio"
+    },
+    {
+      "artifact": "workshop-results",
+      "errors": 0,
+      "failures": 0,
+      "name": "w4-reviews-skills-upgrades.xml",
+      "seconds": "22.267",
+      "skipped": 0,
+      "tests": 27,
+      "workflow": "Agent Workshop PostgreSQL and stdio"
+    },
+    {
+      "artifact": "workshop-results",
+      "errors": 0,
+      "failures": 0,
+      "name": "w4-historical-upgrades.xml",
+      "seconds": "8.149",
+      "skipped": 0,
+      "tests": 3,
+      "workflow": "Agent Workshop PostgreSQL and stdio"
+    },
+    {
+      "artifact": "workshop-results",
+      "errors": 0,
+      "failures": 0,
+      "name": "w5-historical-upgrades.xml",
+      "seconds": "20.708",
+      "skipped": 0,
+      "tests": 4,
+      "workflow": "Agent Workshop PostgreSQL and stdio"
+    },
+    {
+      "artifact": "workshop-results",
+      "errors": 0,
+      "failures": 0,
+      "name": "w6-historical-upgrades.xml",
+      "seconds": "30.210",
+      "skipped": 0,
+      "tests": 8,
+      "workflow": "Agent Workshop PostgreSQL and stdio"
+    },
+    {
+      "artifact": "workshop-results",
+      "errors": 0,
+      "failures": 0,
+      "name": "dual-results.xml",
+      "seconds": "43.892",
+      "skipped": 0,
+      "tests": 4,
+      "workflow": "Agent Workshop PostgreSQL and stdio"
+    },
+    {
+      "artifact": "nf-bridge-results",
+      "errors": 0,
+      "failures": 0,
+      "name": "dual-service.xml",
+      "seconds": "8.789",
+      "skipped": 0,
+      "tests": 1,
+      "workflow": "Agent Workshop PostgreSQL and stdio"
+    },
+    {
+      "artifact": "nf-bridge-results",
+      "errors": 0,
+      "failures": 0,
+      "name": "nf-delegation.xml",
+      "seconds": "23.187",
+      "skipped": 0,
+      "tests": 18,
+      "workflow": "Agent Workshop PostgreSQL and stdio"
+    },
+    {
+      "artifact": "workshop-comparisons",
+      "errors": 0,
+      "failures": 1,
+      "name": "scene-results.xml",
+      "seconds": "43.257",
+      "skipped": 0,
+      "tests": 2,
+      "workflow": "Agent Workshop PostgreSQL and stdio"
+    }
+  ],
+  "workflows": {
+    "Agent Workshop PostgreSQL and stdio": {
+      "event": "pull_request",
+      "id": 43116965757,
+      "jobs": [
+        {
+          "conclusion": "success",
+          "id": 130847330624,
+          "name": "workshop",
+          "status": "completed"
+        },
+        {
+          "conclusion": "failure",
+          "id": 130847331052,
+          "name": "W6 message capacity and end-to-end scenes",
+          "status": "completed"
+        },
+        {
+          "conclusion": "failure",
+          "id": 130847331098,
+          "name": "Matched admission and extended scene presets",
+          "status": "completed"
+        }
+      ],
+      "result": "failure",
+      "status": "completed"
+    },
+    "P1 and P2 production integrity": {
+      "event": "pull_request",
+      "id": 43116965753,
+      "jobs": [
+        {
+          "conclusion": "success",
+          "id": 130847330984,
+          "name": "PostgreSQL 17 integration, concurrency and restore",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "id": 130847331541,
+          "name": "Schema, domain, HTTP and production boundaries",
+          "status": "completed"
+        }
+      ],
+      "result": "success",
+      "status": "completed"
+    },
+    "P2 measured capacity and recovery": {
+      "event": "pull_request",
+      "id": 43116965763,
+      "jobs": [
+        {
+          "conclusion": "failure",
+          "id": 130847331306,
+          "name": "200 agents / overload / full capacity gate",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "id": 130847331357,
+          "name": "50 agents / mixed / full capacity gate",
+          "status": "completed"
+        },
+        {
+          "conclusion": "failure",
+          "id": 130847331472,
+          "name": "50 agents / overload / full capacity gate",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "id": 130847331485,
+          "name": "200 agents / mixed / full capacity gate",
+          "status": "completed"
+        }
+      ],
+      "result": "failure",
+      "status": "completed"
+    },
+    "P3 P4 measured evidence": {
+      "event": "pull_request",
+      "id": 43116965760,
+      "jobs": [
+        {
+          "conclusion": "failure",
+          "id": 130847331283,
+          "name": "Independent load process / 200 / overload",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "id": 130847331514,
+          "name": "Same world CPU and SQL paired comparison",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "id": 130847331550,
+          "name": "Independent load process / 200 / mixed",
+          "status": "completed"
+        }
+      ],
+      "result": "failure",
+      "status": "completed"
+    },
+    "P3 scale experiments with strict unmet gates": {
+      "event": "pull_request",
+      "id": 43116965766,
+      "jobs": [
+        {
+          "conclusion": "success",
+          "id": 130847331235,
+          "name": "Measured 500-read-soak",
+          "status": "completed"
+        },
+        {
+          "conclusion": "failure",
+          "id": 130847331450,
+          "name": "Measured 1000-read-open",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "id": 130847331640,
+          "name": "Measured 500-mixed",
+          "status": "completed"
+        }
+      ],
+      "result": "failure",
+      "status": "completed"
+    },
+    "P4 real isolated WAL PITR and verified recovery": {
+      "event": "pull_request",
+      "id": 43116965788,
+      "jobs": [
+        {
+          "conclusion": "success",
+          "id": 130847330219,
+          "name": "Physical base backup, SIGKILL, WAL replay and application verification",
+          "status": "completed"
+        }
+      ],
+      "result": "success",
+      "status": "completed"
+    }
+  },
+  "workshop": {
+    "ci-evidence/at43.json": {
+      "commercial_calls": 0,
+      "scope": "Authenticated AW directory supplied as frozen task instructions; NF builds and validates the actor input.",
+      "world_ref_before_and_after": {
+        "branch_id": "3be0bc5a-9bea-4ab8-8b0f-af0943b59003",
+        "work_id": "083659ca-c6b5-489d-97f0-c4211424fa7f",
+        "world_revision_id": "84af569c-7a71-4295-97df-f84b46182a7e"
+      }
+    },
+    "ci-evidence/at49.json": {
+      "commercial_calls": 0,
+      "loopback_requests": 1,
+      "workshop_db_rejected_connections_until_nf_accepted": true
+    },
+    "ci-evidence/installed-wheel.json": {
+      "database_revision": "w010",
+      "migration_head": "w010",
+      "wheel_sha256": "05f0b1994a65d132afc865417dbe9236a973562b4bebfa86c6e11683967a7088"
+    },
+    "ci-evidence/messages-10.json": {
+      "duration_seconds": 0.5977569939999938,
+      "employees": 10,
+      "latency": {
+        "ack": {
+          "p50_ms": 61.40673700000576,
+          "p95_ms": 74.39746000000014,
+          "p99_ms": 82.05167500000243
+        },
+        "send": {
+          "p50_ms": 67.22552000000093,
+          "p95_ms": 97.82559299999605,
+          "p99_ms": 98.25473899999793
+        }
+      },
+      "message_gate": "PASS",
+      "notification_loss_and_restart": {
+        "distinct_consumed": 30,
+        "rebuilt_stream": 30,
+        "replayed_outbox": 30,
+        "seconds": 0.7035063599999987
+      },
+      "postgres": "17.11 (Debian 17.11-1.pgdg12+2)",
+      "production_model_calls": 0,
+      "receipt_counts": {
+        "acknowledged": 30,
+        "durable_inbox": 30,
+        "messages": 30,
+        "pending_hints": 30
+      },
+      "redis": "8.0.2",
+      "scheduled_messages": 30,
+      "unique_completed_exchanges": 30,
+      "workers": 8,
+      "workshop_migration": "w010"
+    },
+    "ci-evidence/messages-200.json": {
+      "duration_seconds": 11.680903293,
+      "employees": 200,
+      "latency": {
+        "ack": {
+          "p50_ms": 59.0984419999927,
+          "p95_ms": 76.29485600000407,
+          "p99_ms": 94.06829099999925
+        },
+        "send": {
+          "p50_ms": 73.30027300000097,
+          "p95_ms": 95.53225099999452,
+          "p99_ms": 111.51374599999997
+        }
+      },
+      "message_gate": "PASS",
+      "notification_loss_and_restart": {
+        "distinct_consumed": 600,
+        "rebuilt_stream": 600,
+        "replayed_outbox": 600,
+        "seconds": 13.875558034999997
+      },
+      "postgres": "17.11 (Debian 17.11-1.pgdg12+2)",
+      "production_model_calls": 0,
+      "receipt_counts": {
+        "acknowledged": 600,
+        "durable_inbox": 600,
+        "messages": 600,
+        "pending_hints": 600
+      },
+      "redis": "8.0.2",
+      "scheduled_messages": 600,
+      "unique_completed_exchanges": 600,
+      "workers": 8,
+      "workshop_migration": "w010"
+    },
+    "ci-evidence/messages-50.json": {
+      "duration_seconds": 2.8537604290000047,
+      "employees": 50,
+      "latency": {
+        "ack": {
+          "p50_ms": 56.1163140000005,
+          "p95_ms": 78.04115699999414,
+          "p99_ms": 87.97029299999792
+        },
+        "send": {
+          "p50_ms": 71.224069000003,
+          "p95_ms": 96.1599669999984,
+          "p99_ms": 107.7937250000005
+        }
+      },
+      "message_gate": "PASS",
+      "notification_loss_and_restart": {
+        "distinct_consumed": 150,
+        "rebuilt_stream": 150,
+        "replayed_outbox": 150,
+        "seconds": 3.4884561639999987
+      },
+      "postgres": "17.11 (Debian 17.11-1.pgdg12+2)",
+      "production_model_calls": 0,
+      "receipt_counts": {
+        "acknowledged": 150,
+        "durable_inbox": 150,
+        "messages": 150,
+        "pending_hints": 150
+      },
+      "redis": "8.0.2",
+      "scheduled_messages": 150,
+      "unique_completed_exchanges": 150,
+      "workers": 8,
+      "workshop_migration": "w010"
+    },
+    "ci-evidence/scene-minimal.json": {
+      "accounting_scope": "Deterministic loopback model usage; no external vendor or paid spend.",
+      "cost_observations": [
+        {
+          "actual_tokens": null,
+          "state": "UNKNOWN"
+        },
+        {
+          "actual_tokens": 18,
+          "state": "SUCCEEDED"
+        }
+      ],
+      "hold": {
+        "settled_fixture_amount": "0.020000",
+        "status": "SETTLED"
+      },
+      "operation_id": "3c087f08-069c-412e-a562-0409e8d7fa1b",
+      "preset": "Minimal",
+      "review_mode": "PROSE",
+      "reviewed_frozen_source": {
+        "artifact_revision": "034aa060-e3df-4cfd-ae5c-61d199fc87dd",
+        "content_sha": "41c9ff95dfce31ba8ac471194a283a62258febab76e7839e55e9d03ded0faa3d"
+      },
+      "selected_plan_repair": {
+        "change_point": {
+          "artifact_id": "a76e2ff7-0b90-4151-8c61-40938a8d9817",
+          "artifact_revision_id": "a9fd9014-6361-4178-b83a-919365dd1eb7",
+          "sha256": "d86b73419b84f5e4dd1a2c3ccb15584fa0b6a17b8a45b798ae856318cfee540d"
+        },
+        "initial": {
+          "artifact_id": "efb2737f-2334-45f9-a28f-69278241e796",
+          "artifact_revision_id": "f38d4eef-edfe-4a73-8860-9cb998cf5e25",
+          "sha256": "df5c8f98f3b6967204a9c420da1be126e66e013d70eb3dabaf06a32ed42095a8"
+        },
+        "retained_node_ids": [
+          "6abad633-60e9-4718-adef-05a42204286e"
+        ],
+        "revised_node_ids": [
+          "16ffd85d-1561-40e5-aa25-723ee5ecab14",
+          "2268ee90-73e8-4fc9-bb00-636caf827f66"
+        ],
+        "selected": {
+          "artifact_id": "67e40da7-d907-4aeb-8be4-7d7df7806ec5",
+          "artifact_revision_id": "a472766d-c1ba-48e8-a059-b95512735832",
+          "sha256": "1a44d96fb9640034b02e182feb6295e41253c58e9fc9add67a12c12dfa4bf808"
+        },
+        "window": {
+          "artifact_id": "b2af4a75-cb12-4bf8-97fa-7009f4a98cb7",
+          "artifact_revision_id": "a46b6789-fb1b-4b87-8a18-6446c4fc3398",
+          "sha256": "7346ba28c78c36d41df254efcc88693fa82698176345760a04b5172dced2a189"
+        },
+        "world_ref": {
+          "branch_id": "f53467e0-cc81-4663-a4a5-e140823c704c",
+          "work_id": "eaa7d0af-ccbe-4584-a42a-ad850c449beb",
+          "world_revision_id": "ae55b310-228f-4813-b060-cc1127fcf72d"
+        }
+      },
+      "text_sha": "41c9ff95dfce31ba8ac471194a283a62258febab76e7839e55e9d03ded0faa3d",
+      "unknown_held_then_settled_attempt": "6463abd3-e8ed-44b5-958e-3a7c242ba59a"
+    },
+    "ci-evidence/scene-research-audit.json": {
+      "accounting_scope": "Deterministic loopback model usage; no external vendor or paid spend.",
+      "cost_observations": [
+        {
+          "actual_tokens": 18,
+          "state": "SUCCEEDED"
+        },
+        {
+          "actual_tokens": null,
+          "state": "UNKNOWN"
+        }
+      ],
+      "hold": {
+        "settled_fixture_amount": "0.020000",
+        "status": "SETTLED"
+      },
+      "operation_id": "4b9367de-d3ff-4bf9-a452-e0b9058925e2",
+      "preset": "Research-Audit",
+      "review_mode": "STATISTICS",
+      "reviewed_frozen_source": {
+        "artifact_revision": "7d9b3327-1321-4be6-b219-8d6b71cb7b78",
+        "content_sha": "41c9ff95dfce31ba8ac471194a283a62258febab76e7839e55e9d03ded0faa3d"
+      },
+      "selected_plan_repair": {
+        "change_point": {
+          "artifact_id": "4cdfd2c3-a503-4980-9e5c-d80705952a74",
+          "artifact_revision_id": "d9c6772f-529e-49a7-a832-464b40ff1df6",
+          "sha256": "6206735a492cb16b0c3f693def51830c720908c872e286694bfb2ea349d36b1e"
+        },
+        "initial": {
+          "artifact_id": "a932f674-3628-4142-a86c-18122c3d9094",
+          "artifact_revision_id": "4ac490e4-0a7c-42c1-aec9-34084071c055",
+          "sha256": "1da50e58baa4f063f5da6e55b89dc32e788a08c5612bab25c5721b003016ce69"
+        },
+        "retained_node_ids": [
+          "e15281ff-cddb-47c1-a84c-d99df6c138a0"
+        ],
+        "revised_node_ids": [
+          "84190dac-ec20-4b55-9846-557e77a9c0e9",
+          "a6475046-590d-4898-a2d6-12d8079709f2"
+        ],
+        "selected": {
+          "artifact_id": "19b6cda6-160b-49e8-82a8-65778e4a06b9",
+          "artifact_revision_id": "e388545c-50f9-4e54-b518-5c6eb8b586d1",
+          "sha256": "2048f9db1b0f3599590f5d71efd3236d15b5b642961d889aee2a25fb9390f0f1"
+        },
+        "window": {
+          "artifact_id": "6ea4d1da-a407-4ddf-bce6-1f82ed3fdc1e",
+          "artifact_revision_id": "4677e94c-2826-4c69-9bd1-87d52c146ca3",
+          "sha256": "ed8f456c13c1623a7b0d0c9621f57c63dfc2c827c3c01a9a494bea791ad686e5"
+        },
+        "world_ref": {
+          "branch_id": "09db1024-8e11-404c-8c1a-99790db738fd",
+          "work_id": "9bf15c90-2c55-42d4-9b1d-5978b16b614d",
+          "world_revision_id": "60f1eaeb-4010-4356-81a2-e72d32d06050"
+        }
+      },
+      "text_sha": "41c9ff95dfce31ba8ac471194a283a62258febab76e7839e55e9d03ded0faa3d",
+      "unknown_held_then_settled_attempt": "6783b726-5663-4feb-9a00-44eb52d38fd5"
+    },
+    "ci-evidence/scene-standard.json": {
+      "accounting_scope": "Deterministic loopback model usage; no external vendor or paid spend.",
+      "cost_observations": [
+        {
+          "actual_tokens": null,
+          "state": "UNKNOWN"
+        },
+        {
+          "actual_tokens": 18,
+          "state": "SUCCEEDED"
+        }
+      ],
+      "hold": {
+        "settled_fixture_amount": "0.020000",
+        "status": "SETTLED"
+      },
+      "operation_id": "80f7413a-f42a-4f23-ba94-aab779bc03f5",
+      "preset": "Standard",
+      "review_mode": "PROSE",
+      "reviewed_frozen_source": {
+        "artifact_revision": "4d9682cf-63e2-44a2-b516-9faa5babf985",
+        "content_sha": "41c9ff95dfce31ba8ac471194a283a62258febab76e7839e55e9d03ded0faa3d"
+      },
+      "selected_plan_repair": {
+        "change_point": {
+          "artifact_id": "df1d938f-b648-43fc-a673-dcd9e61dd29d",
+          "artifact_revision_id": "ba744660-b920-4ac4-9b82-12232c7c2838",
+          "sha256": "31ad1618f9c2d7667192979d27ab65cb9c47499fd1c678213e871a7ef7a1b0f3"
+        },
+        "initial": {
+          "artifact_id": "2a53b9e9-13f0-4442-b6c6-ca12b99a94b3",
+          "artifact_revision_id": "afed34d9-9258-4000-88ec-6cc92841327b",
+          "sha256": "eef6f1e2eb096486c64c74c52d3aa540ee949336572a2ebe9e60883665e7d9b3"
+        },
+        "retained_node_ids": [
+          "a0d22904-1644-4b60-b4b8-053a9fc901cf"
+        ],
+        "revised_node_ids": [
+          "9cfae1d8-12f4-42c5-9992-e5168e1a1343",
+          "93da2d63-5ddf-450f-a161-cce93ce2abcd"
+        ],
+        "selected": {
+          "artifact_id": "dfa385ec-a0d7-4695-89d8-fbb8c18c15fc",
+          "artifact_revision_id": "8945a68f-7d62-4a14-a2e1-13f2695349e5",
+          "sha256": "5f958f2b45efc6e0f22a7303c98bd4c9ba61bb05d6db3ee95a20809ab5471985"
+        },
+        "window": {
+          "artifact_id": "ab3289a5-6538-43de-929d-74455d0302a5",
+          "artifact_revision_id": "8a837b70-1829-4062-b2b8-f352e1d30999",
+          "sha256": "bd8b31ae43de9ed5611bb3c52c26e9be4287e944090589156d24ae1450cb0ffc"
+        },
+        "world_ref": {
+          "branch_id": "4558c205-3b85-4ef9-9b4a-993a653298c7",
+          "work_id": "492d615a-3d54-4221-a931-6d5f5befc04c",
+          "world_revision_id": "51d0467e-7a7d-42e9-ad90-1514045d1364"
+        }
+      },
+      "text_sha": "41c9ff95dfce31ba8ac471194a283a62258febab76e7839e55e9d03ded0faa3d",
+      "unknown_held_then_settled_attempt": "bc37f883-7ace-42ac-bfd1-2b7922a6b64d"
+    },
+    "codex-dual/receipt.json": {
+      "authenticated_reads": [
+        "nf_task_get",
+        "aw_roster_get"
+      ],
+      "aw_postgres_system_identifier": "7707053789810139174",
+      "codex": "codex-cli 0.167.0-alpha.4",
+      "cross_service_binding_reads_denied": 2,
+      "employee_roster_matched": true,
+      "model_turns": 0,
+      "nf_postgres_system_identifier": "7707053793616932902",
+      "nf_sha": "4280c00134e0627521a936e7892950ebe2b18748",
+      "role_binding_reads_denied": 2,
+      "role_signing_private_keys_unreadable": true,
+      "separate_service_clusters": true,
+      "separate_service_uids": true,
+      "servers": {
+        "novelfactory": [
+          "nf_artifact_put",
+          "nf_context_get",
+          "nf_query_batch",
+          "nf_task_get"
+        ],
+        "workshop": [
+          "aw_capabilities",
+          "aw_delivery_ack",
+          "aw_mailbox_get",
+          "aw_message_body_get",
+          "aw_message_body_put",
+          "aw_message_send",
+          "aw_roster_get"
+        ]
+      },
+      "task_identity_matched": true,
+      "thread_id": "01a1ccdf-f7d5-7af3-a6a4-e4dacde87bb4",
+      "transport": "OpenSSH forced commands",
+      "wheel_sha256": "05f0b1994a65d132afc865417dbe9236a973562b4bebfa86c6e11683967a7088",
+      "workshop_sha": "4280c00134e0627521a936e7892950ebe2b18748"
+    },
+    "w6-upgrades/rehearsal_early.json": {},
+    "w6-upgrades/rehearsal_late.json": {},
+    "w6-upgrades/w006.json": {},
+    "w6-upgrades/w007.json": {},
+    "w6-upgrades/w008.json": {},
+    "w6-upgrades/w008a.json": {},
+    "w6-upgrades/w009.json": {},
+    "w6-upgrades/w5c.json": {}
+  }
+}
