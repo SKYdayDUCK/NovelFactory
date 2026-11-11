@@ -24,6 +24,7 @@ from novel_factory.contracts.registry import schema_for, validate_contract
 from novel_factory.domain.canonical import canonical_bytes, fingerprint
 from novel_factory.domain.errors import DomainError
 from novel_factory.domain.temporal import point_key
+from novel_factory.infrastructure.codex_host import CodexRoleContextAdapter
 from novel_factory.infrastructure.database import tables
 from novel_factory.infrastructure.model_gateway import ModelCallFailure, ModelRequest
 from novel_factory.infrastructure.repository import KernelRepository
@@ -37,7 +38,7 @@ OUTPUT_CONTRACTS = {
        for kind in ("joint_outcome", "semantic_rule_gap", "refinement_review")},
     ("volume_director", "volume_contract"): ("VolumeContract", "literary"),
     ("volume_director", "window_plan"): ("WindowPlan", "literary"),
-    ("volume_director", "volume_review"): ("AgentTextOutput", "agent"),
+    ("volume_director", "volume_review"): ("VolumeReviewOutput", "agent"),
     ("volume_director", "replan"): ("WindowPlan", "literary"),
     ("volume_director", "scene_plan"): ("SceneContract", "2.0"),
     **{("reviewer", kind): ("AgentReviewOutput", "agent")
@@ -324,8 +325,19 @@ class AgentGateway:
             return self._finish(principal, request, binding, ref, old_audit["payload"])
         if call and call["state"] in {"SENT", "UNKNOWN", "SUCCEEDED", "FAILED"}:
             return {"status": "BLOCKED", "reason": "CALL_OUTCOME_UNKNOWN", "attempt_id": call["attempt_id"], "cost_status": "UNKNOWN_COST"}
+        role_read = None
         try:
             adapter.check_available()
+            if isinstance(adapter, CodexRoleContextAdapter) and binding["task"]["role_id"] == "character_actor":
+                scoped, thread_id = adapter.read_actor_context(principal, binding["task"])
+                user_packet = json.loads(messages[1]["content"])
+                require(scoped == user_packet["context"], "HOST_BINDING_MISMATCH", "Role context differs from the frozen prompt")
+                user_packet["context"] = scoped
+                authorized = (messages[0], {**messages[1], "content": canonical_bytes(user_packet).decode()})
+                require(authorized == messages, "HOST_BINDING_MISMATCH", "Role read changed the frozen request")
+                model_request = replace(model_request, messages=authorized)
+                role_read = {"tool": "nf_context_get", "thread_id": thread_id,
+                             "context_sha256": fingerprint(scoped), "model_turns": 0}
         except DomainError as exc:
             blocked = {"schema_version": "2.1", "task_id": request["task_id"], "generation": request["generation"],
                        "request_sha256": request_hash, "reason": exc.code, "provider_call_sent": False,
@@ -389,7 +401,8 @@ class AgentGateway:
                          cost_status="KNOWN" if response.actual_amount is not None else "UNKNOWN_COST")
             validate_contract("AgentUsage", received_usage, "agent")
             usage = received_usage
-            raw = {"text": response.text, "provider_response_json": json.dumps(response.raw_response, ensure_ascii=False, allow_nan=False),
+            response_metadata = response.raw_response if role_read is None else {**response.raw_response, "role_mcp_read": role_read}
+            raw = {"text": response.text, "provider_response_json": json.dumps(response_metadata, ensure_ascii=False, allow_nan=False),
                    "provider_receipt": provider_receipt, "request_sha256": request_hash, "usage": usage}
             response_ref = self._audit_artifact(binding, attempt, "response", raw, "AGENT_RESPONSE")
             outcome = "REJECTED"

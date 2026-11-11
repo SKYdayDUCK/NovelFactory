@@ -133,3 +133,7 @@ cc -O2 -Wall -Wextra -Werror -static adapters/codex/role_relay.c -o /srv/novelfa
 控制器使用标准 app-server stdio RPC 连接此进程，在 `/work` 创建临时 Thread，用 `mcpServerStatus/list` 和 `mcpServer/tool/call` 访问 `novelfactory`。stdout 包含角色获准的正文，应交给该角色的控制器。一次启动服务一个任务和一个客户端。TaskBinding、DSN 和对象库只在容器外的 MCP 服务中使用。容器内可见两个静态程序和专用的双向 FIFO，工作目录为临时文件系统，网络与服务账户的本机回环隔离。服务端逐次检查当前 grant、代际和租约。角色传输最多接收 128 条消息，每条至多 1 MiB，进程有显式截止时间。命名空间、租约或程序配置不可用时启动失败。
 
 该入口已经用于角色工具发现、读取、候选提交和撤权验证。生产 Supervisor 的模型路由另见 [P5-03](../../reports/P5-03.md)。主动模型工具循环仍需要将每次供应商请求接入预算账本；本入口不配置外部模型路由。详细验收与复验命令见[角色隔离验收](../../reports/P5_MCP与Codex角色隔离验收.md)。
+
+### 在 Supervisor 的角色派发中读取 MCP 上下文
+
+服务启动前设置 `NF_ROLE_MCP_RELAY` 为上面编译的转发程序绝对路径。登记新的任务或场景时，选择 `adapter_id: codex-role-mcp`。该路由在角色仍持有租约时由隔离 Codex Thread 发起一次 `nf_context_get`。只有角色授权的工具回执与冻结的 ContextBundle 完全相符，才预留并发出原先的一次模型请求。工具回执没有单独追加到模型输入。生成候选后原始响应审计保留 MCP Thread 标识、上下文哈希及模型 Thread/Turn 标识。工具阶段的决策由服务固定，模型的单次文本返回仍然只提交候选。

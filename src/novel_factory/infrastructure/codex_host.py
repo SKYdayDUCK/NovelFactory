@@ -212,3 +212,19 @@ class CodexAppServerAdapter:
                 if data["turn"]["status"] != "completed":
                     raise ModelCallFailure("CODEX_TURN_INCOMPLETE")
                 return thread_id, turn_id, final_text
+
+
+class CodexRoleContextAdapter(CodexAppServerAdapter):
+    """For actor tasks, read the exact authorized context via an isolated MCP Host first."""
+
+    def __init__(self, backend, journal, *, relay, context_reader, binary="codex", timeout_seconds=90):
+        super().__init__(backend, journal, binary=binary, timeout_seconds=timeout_seconds)
+        self.relay, self.context_reader = relay, context_reader
+
+    @property
+    def configuration(self):
+        return {**super().configuration, "host_protocol": "codex-app-server:actor-mcp-read-text-v1",
+                "isolation_evidence": "Isolated actor context read; one independently authorized text request"}
+
+    def read_actor_context(self, principal, task):
+        return self.context_reader(self.journal.kernel, principal, task, shutil.which(self.binary), self.relay)

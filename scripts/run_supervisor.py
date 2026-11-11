@@ -12,7 +12,7 @@ from novel_factory.application.agent_gateway import AgentGateway
 from novel_factory.application.kernel import Kernel
 from novel_factory.application.supervisor import HostJournal, RuntimeSupervisor
 from novel_factory.domain.errors import DomainError
-from novel_factory.infrastructure.codex_host import CodexAppServerAdapter
+from novel_factory.infrastructure.codex_host import CodexAppServerAdapter, CodexRoleContextAdapter
 from novel_factory.infrastructure.database import Database
 from novel_factory.infrastructure.model_gateway import OpenAICompatibleAdapter
 from novel_factory.infrastructure.objects import ObjectStore
@@ -77,8 +77,12 @@ def main():
         kernel = Kernel(db, ObjectStore(os.environ.get("NF_OBJECT_ROOT", "var/objects")))
         principal = kernel.authenticate(access["token"])
         backend = OpenAICompatibleAdapter.from_environment()
-        gateway = AgentGateway(kernel, {"external": backend,
-            "codex-text": CodexAppServerAdapter(backend, HostJournal(kernel))})
+        journal = HostJournal(kernel)
+        adapters = {"external": backend, "codex-text": CodexAppServerAdapter(backend, journal)}
+        if relay := os.environ.get("NF_ROLE_MCP_RELAY"):
+            from novel_factory.interfaces.role_context_host import read_context
+            adapters["codex-role-mcp"] = CodexRoleContextAdapter(backend, journal, relay=relay, context_reader=read_context)
+        gateway = AgentGateway(kernel, adapters)
         supervisor = RuntimeSupervisor(kernel, gateway)
         if args.register_scene or args.register_next_volume:
             from novel_factory.application.scene_runtime import register_scene

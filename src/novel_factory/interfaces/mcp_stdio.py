@@ -12,6 +12,7 @@ from mcp import types
 from mcp.server.lowlevel import Server
 from mcp.server.stdio import stdio_server
 
+from novel_factory.application.agent_gateway import _inline_schema
 from novel_factory.application.kernel import Kernel
 from novel_factory.application.mcp_runtime import McpRuntime, ProjectBinding, TaskBinding
 from novel_factory.domain.errors import DomainError
@@ -52,6 +53,7 @@ _TOOLS = {
                         object_schema(content={"type": "string", "minLength": 1, "maxLength": 32_768},
                                       idempotency_key={"type": "string", "minLength": 1, "maxLength": 96})),
 }
+_TOOLS["nf_change_point_request"][1]["properties"]["assessment"] = _inline_schema("DeviationAssessment", "agent")
 _VALIDATORS = {name: Draft202012Validator(schema, format_checker=FormatChecker())
                for name, (_, schema) in _TOOLS.items()}
 
@@ -85,7 +87,7 @@ def tool_error(code):
                                 structuredContent={"error": {"code": code}})
 
 
-def make_server(runtime):
+def make_server(runtime, *, ceiling=None):
     server = Server("NovelFactory", version="2.1.0")
 
     @server.list_tools()
@@ -97,12 +99,12 @@ def make_server(runtime):
         except Exception:
             return []
         return [types.Tool(name=name, description=_TOOLS[name][0], inputSchema=_TOOLS[name][1])
-                for name in names]
+                for name in names if ceiling is None or name in ceiling]
 
     @server.call_tool(validate_input=False)
     async def call_tool(name, arguments):
         try:
-            if name not in await asyncio.to_thread(runtime.available_tools):
+            if (ceiling is not None and name not in ceiling) or name not in await asyncio.to_thread(runtime.available_tools):
                 return tool_error("VIEW_DENIED")
             if not _VALIDATORS[name].is_valid(arguments):
                 return tool_error("INVALID_ARGUMENT")

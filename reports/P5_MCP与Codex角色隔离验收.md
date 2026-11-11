@@ -28,3 +28,9 @@ uv run --no-sync python scripts/with_postgres.py --migrate -- \
 ```
 
 使用 Python 3.12、PG 17.11、mcp 1.29.0、实际 Codex 0.167.0-alpha.4、静态 C 工具链、util-linux 及 bubblewrap。2026-11-11 本轮专项 20 项通过，耗时 14.19 秒，零失败、零跳过；两项新增容器测试均实际执行。[逐用例记录与源码指纹](../evidence/p5/verification/role_container.json)没有命名空间或缺少可执行文件的环境会明确跳过对应容器实验，此类 CI 不能代替 M 的验收。部署步骤和单会话传输限额见[接入说明](../adapters/codex/P5-stdio.md)。
+
+## R3b 普通派发入口的角色读取
+
+新增显式路由 `codex-role-mcp`。登记时选用此路由的角色任务经 `RuntimeSupervisor.run_once` 正常领取，冻结输入后，隔离 Codex Thread 使用仅开放 `nf_context_get` 的服务读取角色上下文。返回值经逐字段比对构成实际供应商请求，仍在发送事务中复核授权。场景中的其他岗位使用相同路由时沿用原单次文本派发。旧登记保持旧路由。
+
+正例使用真实 Codex 工具 Thread、独立的模型 Thread/Turn、PostgreSQL 和定序 HTTP 模型。一个模型账本记录对应一个 HTTP 请求，产物通过 ActionProposal 校验；空闲再恢复时没有新增请求。反例移除角色转发器，任务在模型预留和发送前停止，账本与 HTTP 调用计数均为零。该工具由服务选择；多轮模型根据工具结果继续推理需要额外、独立的预算与发送回执。[派发实测](../evidence/p5/verification/supervised_role_read.json)
