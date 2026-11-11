@@ -1,5 +1,5 @@
 {
-  "observed_at": "2026-11-11 10:25:36 UTC",
+  "observed_at": "2026-11-11 10:57:32 UTC",
   "checkpoints": [
     {
       "stage": "S0",
@@ -358,6 +358,56 @@
           "status": "completed",
           "conclusion": "success",
           "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43001146315"
+        }
+      ]
+    },
+    {
+      "stage": "S8",
+      "subject": "S8: publish the 762-test regression, scoped utilization and historical literary verification",
+      "head": "441db1a9a380bca002b5f6470693a4e887e2acd0",
+      "tree": "691eff6e5acd18147bdb40eb4c32dd3fdad49a12",
+      "runs": [
+        {
+          "id": 43003778835,
+          "name": "P5 native desktop resume",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43003778835"
+        },
+        {
+          "id": 43003778858,
+          "name": "P3 P4 measured evidence",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43003778858"
+        },
+        {
+          "id": 43003779011,
+          "name": "P2 measured capacity and recovery",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43003779011"
+        },
+        {
+          "id": 43003779104,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43003779104"
+        },
+        {
+          "id": 43003779108,
+          "name": "P4 real isolated WAL PITR and verified recovery",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43003779108"
+        },
+        {
+          "id": 43003779059,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43003779059"
         }
       ]
     }

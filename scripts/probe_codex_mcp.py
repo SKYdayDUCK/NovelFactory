@@ -3,11 +3,13 @@ import argparse
 import asyncio
 import json
 import os
-from pathlib import Path
 import shutil
 import subprocess
 import sys
 import tempfile
+from pathlib import Path
+
+from novel_factory.infrastructure.host_process import ISOLATED_PLUGIN_OPTIONS, start_host, stop_host
 
 
 async def probe(codex, binding, *, status_only=False):
@@ -27,11 +29,12 @@ async def probe_bound_tool(codex, binding, expected_tools, tool, arguments):
         home = Path(temp, "codex")
         home.mkdir(mode=0o700)
         server = {"command": sys.executable, "args": ["-m", "novel_factory.interfaces.mcp_stdio", "--binding", str(binding)]}
-        options = ["-c", "project_doc_max_bytes=0"]
+        options = ["-c", "project_doc_max_bytes=0", *ISOLATED_PLUGIN_OPTIONS]
         for key, value in server.items():
             options.extend(["-c", "mcp_servers.novelfactory." + key + "=" + json.dumps(value)])
-        proc = await asyncio.create_subprocess_exec(binary, "app-server", "--listen", "stdio://", *options,
-            cwd=temp, env={"PATH": os.defpath, "CODEX_HOME": str(home), "HOME": temp},
+        proc = await start_host(binary, "app-server", "--listen", "stdio://", *options,
+            cwd=temp, env={"PATH": os.defpath, "CODEX_HOME": str(home), "HOME": temp,
+                           "GIT_ALLOW_PROTOCOL": "file", "GIT_TERMINAL_PROMPT": "0"},
             stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.DEVNULL,
             limit=4_000_000)
 
@@ -66,14 +69,13 @@ async def probe_bound_tool(codex, binding, expected_tools, tool, arguments):
                 response = await rpc("mcpServer/tool/call", request, 4)
                 if response.get("isError") or "structuredContent" not in response:
                     raise RuntimeError("Bound tool was denied or lacked its receipt")
-                return {"host": subprocess.check_output([binary, "--version"], text=True).strip(),
+                version = await asyncio.to_thread(subprocess.check_output, [binary, "--version"], text=True, timeout=5)
+                return {"host": version.strip(),
                         "transport": "Codex app-server to local stdio MCP", "server": "NovelFactory",
                         "tools": sorted(servers[0]["tools"]), "thread_id": thread_id, "model_turns": 0,
                         "call": request["tool"], "result": response["structuredContent"]}
         finally:
-            if proc.returncode is None:
-                proc.kill()
-            await proc.wait()
+            await stop_host(proc)
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@ context never cross the provider boundary. Tool-looking text stays JSON text.
 from __future__ import annotations
 
 import asyncio
+from contextlib import contextmanager
 from dataclasses import replace
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
@@ -19,6 +20,7 @@ from threading import Event, Thread
 from uuid import uuid4
 
 from novel_factory.domain.errors import DomainError
+from novel_factory.infrastructure.host_process import ISOLATED_PLUGIN_OPTIONS, start_host, stop_host
 from novel_factory.infrastructure.model_gateway import ModelCallFailure, OpenAICompatibleAdapter
 
 
@@ -92,6 +94,19 @@ class _TextEndpoint(BaseHTTPRequestHandler):
             self.send_error(502)
 
 
+@contextmanager
+def _host_home():
+    directory = tempfile.TemporaryDirectory(prefix="nf-host-")
+    try:
+        yield directory.name
+    finally:
+        try:
+            directory.cleanup()
+        except OSError:
+            # Never expose a clone URL, private path or model input in a failure receipt.
+            raise ModelCallFailure("CODEX_HOST_CLEANUP_FAILED") from None
+
+
 class CodexAppServerAdapter:
     def __init__(self, backend, journal, *, binary="codex", timeout_seconds=90):
         if not isinstance(backend, OpenAICompatibleAdapter) or not 1 <= timeout_seconds <= 600:
@@ -114,7 +129,7 @@ class CodexAppServerAdapter:
         self.check_available()
         if not request.attempt_id:
             raise ModelCallFailure("CALL_IDENTITY_REQUIRED")
-        with tempfile.TemporaryDirectory(prefix="nf-host-") as tmp, _TextBridge(self.backend, request, self.journal.authorize_send) as bridge:
+        with _host_home() as tmp, _TextBridge(self.backend, request, self.journal.authorize_send) as bridge:
             server = Thread(target=bridge.serve, daemon=True)
             server.start()
             try:
@@ -142,24 +157,29 @@ class CodexAppServerAdapter:
                     "model_providers.nf_text.requires_openai_auth": False,
                     "model_providers.nf_text.supports_websockets": False,
                     "model_providers.nf_text.stream_max_retries": 0, "model_providers.nf_text.request_max_retries": 0}
-        args = [shutil.which(self.binary), "app-server", "--listen", "stdio://"]
+        args = [shutil.which(self.binary), "app-server", "--listen", "stdio://", *ISOLATED_PLUGIN_OPTIONS]
         for key, value in settings.items():
             args.extend(["-c", key + "=" + json.dumps(value)])
         for feature in ("shell_tool", "multi_agent", "apps", "browser_use", "computer_use"):
             args.extend(["--disable", feature])
         env = {"HOME": tmp, "CODEX_HOME": str(home), "PATH": os.defpath, "NO_PROXY": "127.0.0.1"}
-        process = await asyncio.create_subprocess_exec(*args, cwd=cwd, env=env,
-            stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.DEVNULL, limit=8_000_000)
+        try:
+            process = await start_host(*args, cwd=cwd, env=env,
+                stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.DEVNULL, limit=8_000_000)
+        except OSError:
+            raise ModelCallFailure("CODEX_HOST_START_FAILED", sent=False) from None
         try:
             async with asyncio.timeout(self.timeout_seconds):
                 return await self._exchange(process, cwd, request)
         except (TimeoutError, OSError, ValueError, KeyError, asyncio.IncompleteReadError):
             raise ModelCallFailure("CODEX_TRANSPORT_UNKNOWN") from None
         finally:
-            if process.returncode is None:
-                process.kill()
-            await process.wait()
+            # The temporary home may be deleted only after the Host and its helpers stop.
+            try:
+                await stop_host(process)
+            except (OSError, TimeoutError, RuntimeError):
+                raise ModelCallFailure("CODEX_HOST_CLEANUP_FAILED") from None
 
     async def _exchange(self, proc, cwd, request):
         async def send(method, params, rpc_id=None):

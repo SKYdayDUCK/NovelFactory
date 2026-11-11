@@ -134,6 +134,33 @@ def _candidate(packet, choices, scopes):
     }
 
 
+def _task_diagnostics(repo, gateway, tasks):
+    """Only durable IDs, phases and bounded application codes cross the CI log boundary."""
+    report = []
+    for task in tasks:
+        attempts = []
+        for attempt in repo.many("call_attempts", {"task_id": task["task_id"]}):
+            identity = attempt["attempt_id"]
+            host = repo.one("host_turns", {"attempt_id": identity})
+            audit = gateway._read_audit(repo, identity)
+            detail = {"attempt_id": identity, "call_state": attempt["state"],
+                      "host_phase": host["phase"] if host else None,
+                      "thread_started": bool(host and host["thread_id"]),
+                      "turn_started": bool(host and host["turn_id"])}
+            if audit:
+                reason = audit["payload"]["reason"]
+                detail["reason"] = reason if reason in {
+                    None, "MODEL_ADAPTER_FAILURE", "CODEX_HOST_START_FAILED", "CODEX_HOST_CLEANUP_FAILED",
+                    "CODEX_TRANSPORT_UNKNOWN", "CODEX_RPC_ERROR", "CODEX_TURN_INCOMPLETE",
+                    "UNEXPECTED_HOST_TOOL_REQUEST", "HOST_BINDING_MISMATCH", "MODEL_HTTP_ERROR",
+                    "MODEL_RATE_LIMITED", "MODEL_TRANSPORT_UNKNOWN", "INVALID_MODEL_OUTPUT",
+                    "MODEL_IDENTITY_MISMATCH", "CALL_RECONCILIATION_REQUIRED",
+                } else "OTHER_DOMAIN_ERROR"
+            attempts.append(detail)
+        report.append({"task_id": task["task_id"], "state": task["state"], "attempts": attempts})
+    return report
+
+
 def test_one_author_resume_through_autonomous_banquet(kernel_env, tmp_path):
     run_banquet(kernel_env, tmp_path)
 
@@ -360,7 +387,7 @@ def run_banquet(kernel_env, tmp_path, *, redis_workers=None):
                     actor_overlap.wait(timeout=20)
                 return _candidate(packet, choices, process["scope_ids"])
             except Exception as exc:
-                callback_errors.append(repr(exc))
+                callback_errors.append(type(exc).__name__)
                 raise
 
         server.packet_candidate = respond
@@ -404,27 +431,21 @@ def run_banquet(kernel_env, tmp_path, *, redis_workers=None):
                                 changed = (
                                     repo.one("selections", selection)["artifact_ref"] != reference
                                 )
-                                held = [
-                                    r["task_id"]
-                                    for r in repo.many("tasks", {"work_id": work})
-                                    if r["state"]
-                                    in {"WAITING_REVIEW", "STALE", "FAILED", "PAUSED", "UNKNOWN"}
-                                ]
-                            assert proc.returncode is None and not held and not callback_errors, (
-                                held,
-                                callback_errors,
-                                stdout_path.read_text(),
-                                stderr_path.read_text()[-2000:],
-                            )
+                                tasks = repo.many("tasks", {"work_id": work})
+                                held = [task for task in tasks if task["state"] in {
+                                    "WAITING_REVIEW", "STALE", "FAILED", "PAUSED", "UNKNOWN"}]
+                                if proc.returncode is not None or held or callback_errors:
+                                    pytest.fail(json.dumps({
+                                        "supervisor_exit": proc.returncode, "fixture_error_count": len(callback_errors),
+                                        "tasks": _task_diagnostics(repo, gateway, held or tasks),
+                                    }))
                             if changed:
                                 break
                             await asyncio.sleep(0.12)
                         else:
-                            pytest.fail(
-                                "Supervisor stalled: "
-                                + stdout_path.read_text()
-                                + stderr_path.read_text()[-2000:]
-                            )
+                            with kernel.db.uow(write=False) as repo:
+                                tasks = repo.many("tasks", {"work_id": work})
+                                pytest.fail("Supervisor stalled " + json.dumps(_task_diagnostics(repo, gateway, tasks)))
                         result = await session.call_tool("nf_project_status", {})
                         assert not result.isError
                         final = result.structuredContent["counts"]

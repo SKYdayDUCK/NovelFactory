@@ -78,5 +78,21 @@
       "skipped": 0,
       "evidence": "literary-statistics.xml"
     }
+  },
+  "github_441db1a": {
+    "run": 43003779059,
+    "job": 130466078810,
+    "passed": 743,
+    "failed": 2,
+    "skipped": 17,
+    "seconds": 714.87,
+    "failed_tests": [
+      "test_eventhub_multi_process_banquet",
+      "test_banquet_absence_pins_reference_and_limits_replanning"
+    ],
+    "observed": [
+      "A held model task reported MODEL_ADAPTER_FAILURE. Underlying exception absent from log.",
+      "TemporaryDirectory cleanup raised ENOTEMPTY while a private Codex plugin-clone directory was active."
+    ]
   }
 }
