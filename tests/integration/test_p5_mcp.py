@@ -52,6 +52,9 @@ def test_project_stdio_resume_is_scoped_and_live(kernel_env, tmp_path):
         assert {tool.name for tool in (await session.list_tools()).tools} == {"nf_project_status", "nf_resume_project"}
         for _ in range(2):
             resp = await session.call_tool("nf_resume_project", {})
+            assert resp.structuredContent["resume_grant_expires_at"]
+            assert resp.structuredContent["workflow_state"] == "IDLE"
+            assert resp.structuredContent["pending_author_approval_count"] == 0
             assert not resp.isError and resp.structuredContent["counts"] == {"READY": 0, "WAITING": 0, "RUNNING": 0}
             assert resp.structuredContent["awakened"] == 0
         await error(session, "nf_resume_project", {"work_id": str(uuid4())}, "INVALID_ARGUMENT")

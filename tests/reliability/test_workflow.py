@@ -184,3 +184,50 @@ def test_wait_admission_and_wake_recheck_role_grant(rel_env, rel_scope):
     change(epoch=1)
     assert wf.resume_project(**opts)["awakened"] == 0
     assert rel_env["service"].get(target)["state"] == "BLOCKED"
+
+
+@pytest.mark.parametrize(("mode", "cancel_both", "closed"), [
+    ("AND", False, 1), ("OR", False, 0), ("OR", True, 1),
+])
+def test_closed_prerequisites_never_synthesize_an_action(rel_env, rel_scope, mode, cancel_both, closed):
+    service = rel_env["service"]
+    wf = WorkflowService(service)
+    opts = scope_args(rel_scope)
+    preds = [start_task(rel_env, rel_scope) for _ in range(2)]
+    target = blocked(rel_env, rel_scope)
+    wf.wait(target, 0, [p["task_id"] for p in preds], mode=mode, **opts)
+    for p in preds[:2 if cancel_both else 1]:
+        service.cancel(p["task_id"], p["generation"], principal_id=rel_scope["principal_id"],
+                       idempotency_key=p["task_id"] + "-stop")
+    assert wf.resume_project(**opts)["closed_waits"] == closed
+    assert wf.resume_project(**opts)["closed_waits"] == 0
+    assert service.get(target)["state"] == ("FAILED" if closed else "BLOCKED")
+    if not closed:
+        accept(rel_env, preds[1])
+        assert wf.resume_project(**opts)["awakened"] == 1
+    with rel_env["db"].uow(write=False) as repo:
+        events = repo.many("outbox", {"topic": "workflow.wait.closed", "aggregate_id": target})
+        assert [r["payload"]["reason"] for r in events] == ["PREREQUISITE_CLOSED"] * closed
+
+
+def test_wait_deadline_closes_once_and_reports_without_model_call(rel_env, rel_scope):
+    from datetime import timedelta
+
+    wf = WorkflowService(rel_env["service"])
+    opts = scope_args(rel_scope)
+    pred = start_task(rel_env, rel_scope)
+    target = blocked(rel_env, rel_scope)
+    wf.wait(target, 0, [pred["task_id"]], mode="AND", **opts)
+    with rel_env["db"].uow() as repo:
+        repo.change("tasks", {"task_id": target}, {"deadline": repo.now() - timedelta(seconds=1)})
+    accept(rel_env, pred)
+    summary = wf.resume_project(**opts)
+    assert (summary["closed_waits"], summary["awakened"]) == (1, 0)
+    assert summary["workflow_state"] == "NEEDS_ATTENTION"
+    assert summary["blockers"] == {"FAILED": 1}
+    assert summary["pending_author_approval_count"] == 0
+    assert wf.resume_project(**opts)["closed_waits"] == 0
+    with rel_env["db"].uow(write=False) as repo:
+        event = repo.one("outbox", {"dedupe_key": f"workflow:{target}:0:closed"})
+        assert event["payload"]["reason"] == "WAIT_DEADLINE"
+        assert not repo.many("call_attempts", {"task_id": target})

@@ -83,7 +83,15 @@ class McpRuntime:
         require(isinstance(self.binding, ProjectBinding), "VIEW_DENIED", "Project grant required")
         service = WorkflowService(self.kernel.tasks)
         operation = service.resume_project if resume else service.status
-        return operation(self.binding.work_id, self.binding.branch_id, authorize_in_tx=self._project_auth)
+        expiration = {}
+
+        def authorize(conn):
+            self._project_auth(conn)
+            fence = KernelRepository(conn, tables).one("resume_grants", {"grant_id": self.principal.grant_id})
+            expiration["resume_grant_expires_at"] = fence["expires_at"].isoformat()
+
+        return {**operation(self.binding.work_id, self.binding.branch_id, authorize_in_tx=authorize),
+                **expiration}
 
     def _task(self, repo, capability="READ"):
         b = self.binding

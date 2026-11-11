@@ -110,3 +110,11 @@ VS Code 1.145.3 的独立 web 工作台实际加载了 OpenAI Codex 扩展 26.51
    ```
 
 4. 在真实侧栏里连续两次输入“继续未完成的任务”。如需复现唤醒，预先建立等待 ACCEPTED 前置任务的 BLOCKED 工单，正式接受前置结果，在操作侧栏前停止其他恢复扫描。检查服务侧两份 `receipt.awakened` 先为 1、再为 0，且计数与 PostgreSQL 一致。试验用定序模型只选择回环工作台实际公开的项目恢复工具。外部模型推理质量、正式 SSH 跨账户部署和角色 Host 隔离需另行验证。
+
+### 恢复回执与诊断
+
+`nf_project_status({})` 只读，`nf_resume_project({})` 在同一授权分支执行有界对账。两者返回 `counts`、`workflow_state`、`ready_count`、`blockers`、`pending_review_count`、`pending_author_approval_count` 和恢复授权的 `resume_grant_expires_at`。恢复另返回本次 `awakened`、`recovered`、`closed_waits`。READY 是数据库任务数，可能包含未登记给模型的控制任务；RUNNING 是有效工作状态，统计本身不能证明服务进程存活或供应商正在计费。blockers 只含分支内的状态和数量。
+
+人工数只计当前代际有明确 `AUTHOR_DECISION_REQUIRED` 交付回执且仍待审的任务。旧版待审记录有些没有路由标记，会计入待审总数。凭据过期或撤权会使原会话失去工具；由管理端重新签发并替换服务侧绑定。用户端继续使用空参数的恢复命令。
+
+登记了屏障的任务遇到自己的截止时间、AND 中一个永久关闭的前置或 OR 中最后一个关闭的前置时，进入 FAILED。工作流以 `workflow.wait.closed` 记录本代的 WAIT_DEADLINE 或 PREREQUISITE_CLOSED，保留原意图和世界历史。尚有未对账调用的任务保留既有围栏。授权管理员可据此延期、重新规划或采用新任务；连续重试恢复不会替角色行动。

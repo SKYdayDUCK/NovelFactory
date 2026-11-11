@@ -11,6 +11,7 @@ from sqlalchemy import func, select, text
 from sqlalchemy.dialects.postgresql import insert
 
 from novel_factory.domain.errors import DomainError
+from novel_factory.orchestration.tasks import enqueue_outbox
 
 
 def _guard(condition, code, message):
@@ -72,6 +73,28 @@ _WAKEABLE = text("""
 """)
 
 
+# A waiter can fail only on a closed prerequisite (for OR, all alternatives)
+# or its own deadline. Keep unresolved provider reservations for recovery.
+_CLOSED_WAITS = text("""
+    SELECT t.task_id, t.generation,
+           CASE WHEN t.deadline <= statement_timestamp() THEN 'WAIT_DEADLINE'
+                ELSE 'PREREQUISITE_CLOSED' END AS reason
+    FROM nf_tasks t JOIN nf_workflow_waits w USING (task_id, generation)
+    CROSS JOIN LATERAL (
+        SELECT bool_or(p.state IN ('FAILED','CANCELLED','STALE')) AS any_closed,
+               bool_and(p.state IN ('FAILED','CANCELLED','STALE')) AS all_closed
+        FROM nf_workflow_edges e JOIN nf_tasks p ON p.task_id=e.predecessor_id
+        WHERE (e.task_id,e.generation)=(t.task_id,t.generation)
+    ) preds
+    WHERE t.work_id=:work AND t.branch_id=:branch AND t.state='BLOCKED' AND w.woken_at IS NULL
+      AND (t.deadline <= statement_timestamp() OR
+           (w.mode='AND' AND preds.any_closed) OR (w.mode='OR' AND preds.all_closed))
+      AND NOT EXISTS (SELECT FROM nf_call_attempts c WHERE c.task_id=t.task_id
+                      AND c.state IN ('PREPARED','SENT','UNKNOWN'))
+    ORDER BY t.deadline,t.task_id LIMIT :limit FOR UPDATE OF t SKIP LOCKED
+""")
+
+
 class WorkflowService:
     def __init__(self, tasks):
         self.tasks = tasks
@@ -88,7 +111,38 @@ class WorkflowService:
         counts = {"READY": 0, "WAITING": 0, "RUNNING": 0}
         for state, count in conn.execute(select(t.c.state, func.count()).where(*scope).group_by(t.c.state)):
             counts["WAITING" if state == "BLOCKED" else state] = count
-        return {"counts": counts, "ready_count": counts["READY"]}
+        blockers = {state: counts[state] for state in ("WAITING", "WAITING_REVIEW", "PAUSED", "FAILED", "STALE")
+                    if counts.get(state)}
+        if counts["RUNNING"]:
+            state = "RUNNING"
+        elif counts["READY"]:
+            state = "READY"
+        elif counts.get("RESULT_STORED") or counts.get("VALIDATING"):
+            state = "PROCESSING_RESULTS"
+        elif counts.get("WAITING_REVIEW") or counts.get("PAUSED"):
+            state = "NEEDS_ATTENTION"
+        elif counts["WAITING"]:
+            state = "WAITING"
+        elif counts.get("FAILED") or counts.get("STALE"):
+            state = "NEEDS_ATTENTION"
+        else:
+            state = "IDLE"
+        reviews = counts.get("WAITING_REVIEW", 0)
+        authors = 0
+        if reviews:
+            authors = conn.scalar(text("""
+                SELECT count(*) FROM nf_tasks t
+                WHERE t.work_id=:work AND t.branch_id=:branch AND t.state='WAITING_REVIEW'
+                  AND EXISTS (SELECT FROM nf_outbox o
+                    WHERE o.dedupe_key=concat_ws(':','editorial',t.task_id,t.generation)
+                      AND o.aggregate_type='task' AND o.aggregate_id=t.task_id::text
+                      AND o.topic='supervisor.editorial.delivery'
+                      AND o.payload->>'reason'='AUTHOR_DECISION_REQUIRED'
+                      AND o.payload->>'status'='WAITING_REVIEW')
+            """), {"work": work_id, "branch": branch_id})
+        return {"counts": counts, "ready_count": counts["READY"], "workflow_state": state,
+                "blockers": blockers, "pending_review_count": reviews,
+                "pending_author_approval_count": authors}
 
     def status(self, work_id, branch_id, *, authorize_in_tx):
         with self.tasks._tx(self._authorize(authorize_in_tx)) as conn:
@@ -187,6 +241,14 @@ class WorkflowService:
                 conn.execute(t.update().where(t.c.task_id == task_id).values(
                     state="STALE", updated_at=func.clock_timestamp()))
                 self.tasks._emit(conn, task_id, generation, "STALE")
+            closed = conn.execute(_CLOSED_WAITS, {"work": work_id, "branch": branch_id, "limit": limit}).all()
+            for task_id, generation, reason in closed:
+                conn.execute(t.update().where(t.c.task_id == task_id).values(
+                    state="FAILED", updated_at=func.clock_timestamp()))
+                self.tasks._emit(conn, str(task_id), generation, "FAILED")
+                enqueue_outbox(conn, self.tables, "workflow.wait.closed", "task", task_id,
+                               {"generation": generation, "reason": reason},
+                               f"workflow:{task_id}:{generation}:closed")
             rows = conn.execute(_WAKEABLE, {"work": work_id, "branch": branch_id, "limit": limit}).mappings().all()
             awakened = 0
             for row in rows:
@@ -206,7 +268,8 @@ class WorkflowService:
                              .values(state="READY", updated_at=func.clock_timestamp()))
                 self.tasks._emit(conn, target, generation, "READY")
                 awakened += 1
-            return {**self._counts(conn, work_id, branch_id), "awakened": awakened, "recovered": len(expired)}
+            return {**self._counts(conn, work_id, branch_id), "awakened": awakened, "recovered": len(expired),
+                    "closed_waits": len(closed)}
 
 
 def review_acceptance(conn, task, spec):
