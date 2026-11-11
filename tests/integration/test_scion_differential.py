@@ -273,10 +273,26 @@ def test_same_postgres_trace(kernel_env, tmp_path, monkeypatch, scenario):
         assert os.environ.get("NF_SCION_DIFF_EVIDENCE")
     modes = {}
     diagnostics = {}
-    for mode in (("frozen",) if frozen else ("reference", "candidate")):
+    configurations = {"reference": set(), "candidate": set(FLAGS)}
+    worker, review, query = ("NF_SCION_WORKER_COLUMNS", "NF_SCION_REVIEW_COLUMNS", "NF_SCION_QUERY_COLUMNS")
+    lazy, links = "NF_SCION_REPLAY_LAZY", "NF_SCION_SCHEMA_LINKS"
+    scope, replay = FLAGS[1:]
+    if os.environ.get("NF_SCION_DIFF_ROUND2") == "1":
+        configurations.update({
+            "B_metadata": {worker, review}, "C_scopes": {scope},
+            "D_metadata_scopes": {worker, review, scope}, "E_lazy": {replay, lazy},
+            "F_worker": {worker},
+            "schema_service": {links}, "all_round2": {*FLAGS, lazy, links},
+        })
+    for mode, active in ({"frozen": set()} if frozen else configurations).items():
         with monkeypatch.context() as patch:
-            for flag in FLAGS:
-                patch.setenv(flag, "1" if mode == "candidate" else "0")
+            for flag in (*FLAGS, lazy, links):
+                patch.setenv(flag, "1" if flag in active else "0")
+            for flag in (worker, review, query):
+                patch.setenv(flag, "1" if flag in active or FLAGS[0] in active else "0")
+            if not frozen:
+                from novel_factory.contracts import registry
+                patch.setattr(registry, "_STATIC_SCHEMA_LINKS", links in active)
             pin_inputs(patch, now, scenario.__name__)
             returns = observe_public_results(patch)
             errors = []
@@ -290,11 +306,15 @@ def test_same_postgres_trace(kernel_env, tmp_path, monkeypatch, scenario):
             with clone(kernel_env, tmp_path / mode) as env:
                 scenario(env)
                 kernel = env["kernel"]
-                enabled = mode == "candidate"
                 if frozen:
                     assert not hasattr(kernel, "scion")
                 else:
-                    assert (kernel.scion.columns, kernel.scion.scopes, kernel.scion.replay) == (enabled,) * 3
+                    assert kernel.scion.worker_columns == (worker in active or FLAGS[0] in active)
+                    assert kernel.scion.review_columns == (review in active or FLAGS[0] in active)
+                    assert kernel.scion.query_columns == (query in active or FLAGS[0] in active)
+                    assert kernel.scion.scopes == (scope in active)
+                    assert kernel.scion.replay == (replay in active)
+                    assert kernel.scion.replay_lazy == (lazy in active)
                     diagnostics[mode] = kernel.scion.counts()
                 modes[mode] = {"tables": table_fingerprints(kernel), "errors": errors,
                                "responses": dict(returns)}
@@ -317,3 +337,8 @@ def test_same_postgres_trace(kernel_env, tmp_path, monkeypatch, scenario):
     assert modes["reference"]["errors"] == modes["candidate"]["errors"]
     for name, expected in modes["reference"]["tables"].items():
         assert modes["candidate"]["tables"][name] == expected, name
+    for mode in configurations:
+        assert modes[mode] == modes["reference"], mode
+    if "E_lazy" in modes and scenario is history:
+        assert diagnostics["E_lazy"].get("replay.hit", 0) > 0
+        assert diagnostics["E_lazy"].get("replay_proof.cold_proposal_skipped", 0) > 0

@@ -138,6 +138,7 @@ jobs:
       - name: Compare Scion default and enabled traces with the frozen original
         env:
           PYTHONHASHSEED: '2411'
+          NF_SCION_DIFF_ROUND2: '1'
         run: |
           original="$RUNNER_TEMP/nf-scion-original"
           evidence="$GITHUB_WORKSPACE/ci-evidence/scion-differential"
