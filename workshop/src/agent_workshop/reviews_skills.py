@@ -218,7 +218,7 @@ def skill_history(conn, session, task_ref, skill_id):
         UNION ALL SELECT 'BUDGETED_NF',operation_id FROM aw_remote_receipts WHERE org_id=%s AND task_id=%s""",
         (session.org_id, task_ref, session.org_id, task_ref),
     ).fetchall()
-    if any(not _review_origin_matches(conn, session, origin) for origin in origins):
+    if not origins or any(not _review_origin_matches(conn, session, origin) for origin in origins):
         raise Denied("TASK_SCOPE_DENIED")
     return {**result, "historical": True}
 
@@ -355,6 +355,14 @@ def review_request(
         raise Denied("INVALID_REVIEW")
     with operation(conn, session, "REVIEW_REQUEST", operation_id, fields) as (old, out):
         if old:
+            # Legacy operation keys did not include the originating installation.
+            review = conn.execute(
+                """SELECT r.execution,r.operation_id FROM aw_reviews r JOIN aw_review_artifacts a
+                USING(org_id,artifact_ref,artifact_revision) WHERE r.org_id=%s AND r.review_id=%s
+                AND a.scope_ref=%s""", (org, out["review_id"], viewer["scope_ref"]),
+            ).fetchone()
+            if not review or not _review_origin_matches(conn, session, review):
+                raise Denied("REVIEW_DENIED")
             return out
         a = conn.execute(
             """SELECT * FROM aw_review_artifacts WHERE (org_id,artifact_ref,artifact_revision,scope_ref)=(%s,%s,%s,%s)
@@ -535,8 +543,6 @@ def reconcile_review(conn, session, operation_id, review_id, replacement=None):
         old,
         out,
     ):
-        if old:
-            return out
         row = conn.execute(
             """SELECT r.*,deadline>clock_timestamp() AS live,a.scope_ref,a.source_receipt,
             a.producer_ids,a.producer_groups,v.supervisor_id AS assigned_lead
@@ -548,13 +554,16 @@ def reconcile_review(conn, session, operation_id, review_id, replacement=None):
         ).fetchone()
         if not row or (replacement and lead is not None and row["assigned_lead"] != lead):
             raise Denied("REVIEW_DENIED")
+        same_origin = _review_origin_matches(conn, session, row)
+        if old and same_origin:
+            return out
         state = row["state"]
         if state != "PENDING":
             if replacement:
                 raise Denied("REVIEW_ALREADY_FINAL")
             out.update(review_id=review_id, state=state)
             return out
-        if not _review_origin_matches(conn, session, row):
+        if not same_origin:
             if replacement:
                 raise Denied("EXISTING_DELEGATION_OR_DEADLINE")
             conn.execute(
@@ -618,14 +627,13 @@ def decide(conn, session, operation_id, review_id, outcome, reason, evidence_ref
     with operation(
         conn, session, "REVIEW_DECIDE", operation_id, [review_id, outcome, reason, evidence_ref]
     ) as (old, out):
-        if old:
-            return out
         r = conn.execute(
             """SELECT *,deadline>clock_timestamp() AS live FROM aw_reviews
             WHERE org_id=%s AND review_id=%s AND reviewer_id=%s AND reviewer_revision=%s FOR UPDATE""",
             (session.org_id, review_id, session.employee_id, session.employment_revision),
         ).fetchone()
-        if not r or r["state"] != "PENDING" or not _review_origin_matches(conn, session, r):
+        if (not r or not _review_origin_matches(conn, session, r)
+                or (not old and r["state"] != "PENDING")):
             raise Denied("REVIEW_DENIED")
         a = conn.execute(
             """SELECT * FROM aw_review_artifacts WHERE org_id=%s AND artifact_ref=%s AND artifact_revision=%s
@@ -635,6 +643,8 @@ def decide(conn, session, operation_id, review_id, outcome, reason, evidence_ref
         if not a or evidence_ref not in a["evidence_refs"]:
             raise Denied("EVIDENCE_SCOPE_DENIED")
         _independent(conn, session.org_id, viewer, a)
+        if old:
+            return out
         if not r["live"]:
             state = "ESCALATED"
             reason = "DEADLINE"

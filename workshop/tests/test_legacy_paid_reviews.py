@@ -33,7 +33,8 @@ def seed_legacy():
         subject(conn, org, "reviewer", "reviewer-id")
         conn.execute("INSERT INTO aw_budget_accounts VALUES (%s,2,'USD')", (org,))
         requests = {}
-        for ref, inst in (("west-paid", "west"), ("east-paid", "east"), ("manual", None)):
+        for ref, inst in (("west-paid", "west"), ("east-paid", "east"), ("manual", None),
+                          ("east-signed", "east")):
             reviews.register_artifact(conn, org, ref, "v1", sha256(ref.encode()).hexdigest(), "organization",
                                       ref + "-source", ["writer"], [ref + "-evidence"], {})
             lead = authenticate(conn, enroll(conn, inst or "west", org, "review-lead", 1, 1))
@@ -59,6 +60,11 @@ def seed_legacy():
                              (org, op, uuid4(), uuid4()))
                 conn.execute("UPDATE aw_budget_holds SET status='SETTLED',settled_amount=0.02 WHERE operation_id=%s", (op,))
                 conn.execute("UPDATE aw_delegations SET state='SETTLED' WHERE operation_id=%s", (op,))
+        east_reviewer = authenticate(conn, enroll(conn, "east", org, "reviewer", 1, 1))
+        assert reviews.decide(conn, east_reviewer, "sign-east-signed", requests["east-signed"],
+                              "APPROVED", "VOICE", "east-signed-evidence")["state"] == "APPROVED"
+        east_lead = authenticate(conn, enroll(conn, "east", org, "review-lead", 1, 1))
+        assert reviews.reconcile_review(conn, east_lead, "escalate-origin", requests["east-paid"])["state"] == "PENDING"
         manager = authenticate(conn, enroll(conn, "west", org, "manager", 1, 1))
         reviews.register_skill(conn, org, "voice", "v1", "creative", "PROSE", b"frozen-voice")
         requests["skill"] = reviews.share(conn, manager, "voice", "voice", "v1", "PUBLIC_SHARED", 3600)["binding_id"]
@@ -79,13 +85,16 @@ def test_legacy_paid_review_requires_own_nf_installation(isolated_database, tmp_
     from agent_workshop.server import dispatch
 
     dsn, config = isolated_database
-    command.upgrade(config, "w004a")
     archive = tmp_path / "old.tar"
     subprocess.run(["git", "archive", "--format=tar", "--output", archive, LEGACY, "workshop"],
                    cwd=Path(__file__).resolve().parents[2], check=True)
     with tarfile.open(archive) as contents:
         contents.extractall(tmp_path, filter="data")
     old = tmp_path / "workshop"
+    subprocess.run([sys.executable, "-m", "alembic", "upgrade", "head"], cwd=old, check=True,
+                   env={**os.environ, "PYTHONPATH": str(old/"src"), "AW_DATABASE_URL": dsn})
+    with connect(dsn) as conn:
+        assert conn.execute("SELECT version_num FROM aw_alembic_version").fetchone()["version_num"] == "w004a"
     seeded = subprocess.check_output([sys.executable, str(Path(__file__).resolve())], cwd=old, text=True,
                                     env={**os.environ, "PYTHONPATH": str(old / "src"), "AW_DATABASE_URL": dsn})
     refs = json.loads(seeded)
@@ -95,7 +104,7 @@ def test_legacy_paid_review_requires_own_nf_installation(isolated_database, tmp_
                      ORDER BY d.installation_id"""
     with connect(dsn) as conn:
         before = conn.execute(history_sql).fetchall()
-        assert len(before) == 2
+        assert sorted(row["installation_id"] for row in before) == ["east", "east", "west"]
     command.upgrade(config, "head")
     with connect(dsn) as conn:
         assert conn.execute(history_sql).fetchall() == before
@@ -115,7 +124,15 @@ def test_legacy_paid_review_requires_own_nf_installation(isolated_database, tmp_
     def decide(ref):
         return dispatch(reviewer, "aw_review_decide", {"review_id": refs[ref], "operation_id": "sign-" + ref,
                         "outcome": "APPROVED", "reason": "VOICE", "evidence_ref": ref + "-evidence"})
+    def request_again(ref):
+        arguments = {"operation_id": ref, "artifact_ref": ref, "artifact_revision": "v1",
+                     "mode": "PROSE", "risk_reason": "MATERIAL_CHANGE", "ttl_seconds": 3600,
+                     "reviewer_id": "reviewer"}
+        if ref != "manual":
+            arguments.update(slot_id=ref, token_limit=100, max_amount="0.10")
+        return dispatch(lead, "aw_review_request", arguments)
     for ref in ("manual", "west-paid"):
+        assert request_again(ref)["review_id"] == refs[ref]
         assert read(ref)["artifact_ref"] == ref
         assert freeze(ref)["skill_id"] == "voice"
         assert frozen_history(ref)["historical"] is True
@@ -129,6 +146,10 @@ def test_legacy_paid_review_requires_own_nf_installation(isolated_database, tmp_
         frozen_history("east-paid")
     with pytest.raises(Denied, match="REVIEW_DENIED"):
         decide("east-paid")
+    with pytest.raises(Denied, match="REVIEW_DENIED"):
+        request_again("east-paid")
+    with pytest.raises(Denied, match="REVIEW_DENIED"):
+        decide("east-signed")
     summary = dispatch(lead, "aw_review_get", {"review_id": refs["east-paid"]})
     assert summary["state"] == "PENDING" and "evidence_refs" not in summary
     args = {"review_id": refs["east-paid"], "operation_id": "escalate-origin"}
@@ -142,6 +163,9 @@ def test_legacy_paid_review_requires_own_nf_installation(isolated_database, tmp_
         assert after == before
         revision = conn.execute("SELECT version_num FROM aw_alembic_version").fetchone()["version_num"]
         dispositions = conn.execute("""SELECT artifact_ref,state,decision_reason FROM aw_reviews ORDER BY artifact_ref""").fetchall()
+    assert {r["artifact_ref"]: r["state"] for r in dispositions} == {
+        "manual": "APPROVED", "west-paid": "APPROVED", "east-paid": "ESCALATED", "east-signed": "APPROVED",
+    }
     if out := os.environ.get("AW_W4_LEGACY_REVIEW_EVIDENCE"):
         Path(out).write_text(json.dumps({
             "legacy_application_sha": LEGACY, "upgraded_aw_revision": revision, "claimed_installation": "west",
@@ -151,4 +175,4 @@ def test_legacy_paid_review_requires_own_nf_installation(isolated_database, tmp_
         }, indent=2) + "\n")
     record_property("legacy_w4a_sha", LEGACY)
     record_property("old_paid_receipts_and_holds_preserved", len(before))
-    record_property("review_dispositions", "manual=APPROVED,west-paid=APPROVED,east-paid=ESCALATED")
+    record_property("review_dispositions", "manual=APPROVED,west-paid=APPROVED,east-paid=ESCALATED,east-signed=APPROVED")
