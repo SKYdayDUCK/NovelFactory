@@ -8,7 +8,7 @@
 | 角色工具宿主 | DONE（单个角色控制通道） | 实际 Codex CLI 0.167.0-alpha.4 在独立容器中创建临时 Thread。真实服务器只列出四个工具，能读本角色上下文、提交候选，并在撤权后拒绝访问。 |
 | H 认知隔离 | PARTIAL | 已测跨角色/超范围查找与不存在对象返回同一错误、禁止切到 PLAN/WORLD/READER、BELIEF 的未知值无数据、跨任务绑定拒绝、候选重放。Host 工具列表无任意材料、图邻居、缓存查询或计划入口。未对全部标题、关联元数据、缓存状态与时间侧信道做成对统计检验。 |
 | J 标准 MCP 与真实 Codex | DONE（协议、工具） | Python SDK 1.29.0／协议 2025-11-25，当前分支复测。实际 Host 的工具调用由受信测试控制器驱动，全程零模型 Turn。 |
-| J 官方 IDE | PARTIAL | 基线的官方 VS Code Web 1.145.3、扩展 26.51106.51428 录到了工具发现及两次恢复，唤醒数 1、0。该记录使用回环合成模型。普通用户桌面安装、受限 SSH 实例和商业模型本轮为 BLOCKED_ENVIRONMENT。参见[历史 IDE 回执](../evidence/p5/mcp_vscode_extension.json)。 |
+| J 官方 IDE | DONE（合成模型的官方 Web 与原生 Linux 桌面） | 普通用户 UID 1001 在官方 VS Code 1.145.3、官方 Codex 26.51106.51428 侧栏完成两次中文恢复；可查真实 MCP 工具清单、两次服务器回执及数据库确认。商业模型与生产 SSH 账户另需对应部署记录。[桌面原始记录](../evidence/p5/final/native-desktop.json) · [Web 工作台历史回执](../evidence/p5/mcp_vscode_extension.json) |
 | M OS 执行隔离 | DONE（等效 Linux 容器，非双账户 SSH） | user、mount、PID、IPC、UTS、network 命名空间，清空环境、删除 capabilities、禁用嵌套 user namespace。静态探针在相同边界内无法看到服务文件、服务环境或 shell，无法连接本轮真实测试 PostgreSQL。 |
 | 按需模型自主选择工具 | DONE（有界合成供应商）；真实商业运行 BLOCKED_ENVIRONMENT | R3c 的显式新路由允许模型选择一次角色查询或跳过，真实 MCP 工具与两次独立模型账本连接到普通 Supervisor。详见本报告 R3c 与运行记录。 |
 | 真实付费模型及费用 | BLOCKED_ENVIRONMENT | 本轮没有调用商业供应商。模型质量、Token 及账单不能由本次 Host 工具调用推导。 |
@@ -55,3 +55,11 @@ uv run --no-sync python scripts/with_postgres.py --migrate -- \
 同一代和同一 worker 实际并发重入时，第一步发送权仅领取一次；在查询观察已保存后撤销 grant，最终请求被拒绝；作品余额只能负担第一步时，第二次预留被拒绝。非法 UUID、超长谓词和错误工具名均保留已知消费并停止该任务。共享物品只在管理员明确授权的本场进入裁决工具清单；接受同时校验实际持有者和所有者。双赢家、未列明接收人和已授权配置中的错误持有者都未改变正式历史。角色自身没有继承裁决者的物品授权，后续场景也没有继承这笔赠予授权。
 
 复核发现第一步模型声明输出 257 Token、超过该步 256 上限时，即使输入输出总和仍在预留下，旧路径会发送第二个请求。修复后按已知费用结算失败的选择，保留账本并阻断后续发送。真实 PG 和 Codex 的角色选择与联合裁决复核 26 项通过，42.59 秒，零跳过。其中包含先前已执行的用例，计数独立。[逐用例清单](../evidence/p5/verification/actor_tool_choice.json)
+
+## 原生 Linux 桌面验收
+
+2026-11-11，提交 `1823668b7ab2180c21bfc8a71a84e8191735dd05` 在 Ubuntu 24.04 通过。扩展自带 Codex CLI 0.167.0-alpha.4.1，PG 17.11，回环合成 Responses 服务。第一次唤醒一项，第二次重放唤醒零项。下载的 artifact `13838650376` 的 ZIP SHA-256 经本地重新计算为 `63eee32b824e8b9b3b9445985dfd3c60050a86ba8405e0a6b2e21186479dbeee`，与 GitHub 回传值一致。[Actions 原始运行](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42982135338) · [过滤后的原始回执](../evidence/p5/final/native-desktop.json)
+
+PR 中改动 [原生桌面脚本](../scripts/probe_vscode_desktop.py)、[MCP 观测夹具](../scripts/probe_vscode_offline_transport.py) 或 [对应工作流](../.github/workflows/p5-native-desktop.yml) 时，GitHub Actions 的 “P5 native desktop resume” 会运行。需要在另一台 Linux x64 主机复验时，按工作流的三个步骤安装依赖、下载并校验桌面和 VSIX、在独立回环网络中运行 Xvfb 和临时 PG17。桌面及 PostgreSQL 均以普通用户运行。只有建立测试网络、安装系统依赖和 Electron 沙箱助手需要管理员权限。
+
+从该次运行的 Artifacts 下载 `p5-native-codex-desktop-<run_id>-<attempt>`，打开 `native.json`。成功条件包含官方桌面和已安装扩展的版本、正常侧栏中两次输入“继续未完成的任务”、调用连接实际发现两个限定工具，两次 `nf_resume_project({})` 的唤醒数依次为 1 和 0。数据库须只有一个事件确认、一个就绪后继，作品侧供应商调用数为零。桌面用独立临时 HOME 和 CODEX_HOME，模型只连接测试命名空间中的合成 Responses 服务。该同账户夹具测量原生桌面到本机 MCP 的路径。作者使用独立 SSH 服务账户时仍需按[首次接入说明](../adapters/codex/P5-stdio.md)配置强制命令与项目绑定。
