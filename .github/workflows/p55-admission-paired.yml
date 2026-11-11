@@ -1,0 +1,94 @@
+name: P55 original HTTP50 paired qualification
+on:
+  push:
+    branches: ['evidence/p55-55d897-guard']
+    paths: ['.github/workflows/p55-admission-paired.yml']
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    services:
+      postgres:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_DB: nf_lab
+          POSTGRES_USER: nf_dev
+          POSTGRES_PASSWORD: nf_dev_ci_only
+          POSTGRES_INITDB_ARGS: --data-checksums
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U nf_dev -d nf_lab"
+          --health-interval 2s --health-timeout 2s --health-retries 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: f2e6d38534214e79630b807cec9a720d99e975b1
+          path: baseline
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 0f80173ee8f641defd8ce4fc8c4df0ebe31087bf
+          path: candidate
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - name: Verify untouched load contract and prepare both locked environments
+        run: |
+          set -euo pipefail
+          for arm in baseline candidate; do
+            cd "$GITHUB_WORKSPACE/$arm"
+            test "$(git hash-object tests/service/test_http_load.py)" = dab234ea57525ed3c8a8eccbe2f356d326a1b2af
+            test -z "$(git status --porcelain)"
+            uv sync --locked --group dev --python 3.12
+          done
+      - name: Run original gate twice per source on one dedicated runner
+        env:
+          PGPASSWORD: nf_dev_ci_only
+          NF_POOL_SIZE: '8'
+          NF_POOL_OVERFLOW: '0'
+        run: |
+          set -euo pipefail
+          n=0
+          for arm in baseline candidate candidate baseline; do
+            n=$((n + 1))
+            cd "$GITHUB_WORKSPACE/$arm"
+            out="$GITHUB_WORKSPACE/receipts/$n-$arm"
+            mkdir -p "$out"
+            git rev-parse HEAD 'HEAD^{tree}' > "$out/source.txt"
+            date -u +%FT%TZ > "$out/start.txt"
+            cat /proc/loadavg > "$out/load-before.txt"
+            db="nf_qualified_$n"
+            createdb -h 127.0.0.1 -p 5432 -U nf_dev "$db"
+            export NF_TEST_DATABASE_URL="postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/$db"
+            export NF_DATABASE_URL="$NF_TEST_DATABASE_URL"
+            export NF_LOAD_EVIDENCE_DIR="$out"
+            .venv/bin/python -m alembic upgrade head
+            status=0
+            .venv/bin/python -m pytest -q 'tests/service/test_http_load.py::test_real_http_logical_agents_fixed_cut_and_bounded_connections[50]' --junitxml="$out/junit.xml" > "$out/test.log" 2>&1 || status=$?
+            echo "$status" > "$out/exit.txt"
+            cat /proc/loadavg > "$out/load-after.txt"
+            date -u +%FT%TZ > "$out/end.txt"
+            test -s "$out/http_agents_50.json"
+            test -s "$out/junit.xml"
+            .venv/bin/python - "$out/http_agents_50.json" <<'PY'
+          import json, sys
+          d = json.load(open(sys.argv[1]))
+          assert d['planned_requests'] == d['completed_requests'] == 300
+          assert d['logical_agents'] == 50 and d['rounds'] == 6 and d['new_world_revisions'] == 0
+          print(d['status_counts'], d['admission'], d['authentication_admission'])
+          PY
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p55-original-http50-f2e6-0f8017
+          path: receipts/
+          if-no-files-found: error
+      - name: Retain the two original candidate outcomes
+        run: |
+          test "$(cat receipts/2-candidate/exit.txt)" = 0
+          test "$(cat receipts/3-candidate/exit.txt)" = 0
