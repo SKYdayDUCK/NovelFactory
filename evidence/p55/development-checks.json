@@ -54,5 +54,29 @@
     "failures": 0,
     "skipped": 0,
     "seconds": 435.4
+  },
+  "post_s8_combined_regression": {
+    "basis": "e831d8f plus the local diagnostics, pinned chapter costs and reply-loss working snapshot collected before final diagnostics revisions",
+    "tests": 752,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "seconds": 451.246
+  },
+  "literary_test_development": {
+    "failed_cases": [
+      {
+        "name": "test_selected_epoch_and_frozen_chapter_only_in_bound_cut",
+        "reason": "The initial fixture used REVISED_EDITION outside the ContinuityRequest enum.",
+        "resolution": "Use the registered REVISE operation and exercise both historical and current source cuts."
+      }
+    ],
+    "targeted_rerun": {
+      "tests": 10,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "evidence": "literary-statistics.xml"
+    }
   }
 }

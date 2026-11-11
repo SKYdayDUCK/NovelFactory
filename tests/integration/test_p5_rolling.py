@@ -363,6 +363,26 @@ def test_banquet_absence_pins_reference_and_limits_replanning(kernel_env, scene_
         d_mcp.request_change(**{**ordinary, "assessment": {**rejoin, "trajectory":
             {**rejoin["trajectory"], "return_direction": None}}})
     assert missing_path.value.code == "INVALID_EVIDENCE"
+    divergent = {**rejoin, "characters": [{
+        "actor_id": actors[0], "plausibility": "INSUFFICIENT_EVIDENCE",
+        "basis": "无足够证据判断角色合理性", "arc_impact": None, "basis_event_refs": [],
+    }], "trajectory": {"disposition": "DIVERGENCE", "return_direction": None,
+                      "alternative_direction": "以异地口信维持协作", "rationale": "本轮改道"}}
+    divergent_request = {**ordinary, "assessment": divergent, "idempotency_key": "audited-divergence"}
+    divergent_ref = d_mcp.request_change(**divergent_request)
+    assert d_mcp.request_change(**divergent_request) == divergent_ref
+    from novel_factory.application.statistics import StatisticsService
+    stats = StatisticsService(k)
+    measured = stats.rebuild(controller, wid, bid, filters={"volume_id": volume}, version=4)
+    assert measured["metrics"]["world.trajectory.DIVERGENCE"] == 1
+    assert measured["metrics"]["world.actor_plausibility.INSUFFICIENT_EVIDENCE"] == 1
+    assert measured["metrics"]["world.actor_observations_on_divergent_trajectories"] == 1
+    assert measured["metrics"]["world.change_points_without_assessment"] == 1
+    assert stats.verify_statistics(controller, wid, bid, version=4, source_cut=measured["source_cut"],
+                                   filters={"volume_id": volume})["consistent"]
+    assert "world.trajectory.DIVERGENCE" not in stats.rebuild(
+        controller, wid, bid, version=3, source_cut=measured["source_cut"]
+    )["metrics"]
     revised = deepcopy(plan)
     revised.update(input_world_ref=now, prior_plan_ref=base, plan_revision_id=str(uuid4()))
     revised["nodes"][0]["goal"] = "派信使去仓库"

@@ -13,7 +13,7 @@ from sqlalchemy import text
 from novel_factory.application.kernel import require
 from novel_factory.domain.errors import DomainError
 
-CURRENT_VERSION = 3
+CURRENT_VERSION = 4
 _FILTERS = {"volume_id", "trace_id", "actor_id", "role_id", "experiment_id", "model", "task_id"}
 _SNAPSHOT = """a.event_id = ANY(CAST(:members AS uuid[]))"""
 
@@ -21,6 +21,7 @@ _SNAPSHOT = """a.event_id = ANY(CAST(:members AS uuid[]))"""
 def _source(conn, event):
     if event["event_type"] not in {
         "model.completed",
+        "artifact.change_point",
         "artifact.review_report",
         "artifact.agent_role_tool_response",
         "artifact.narrative_draft",
@@ -97,7 +98,7 @@ def _usage(conn, event, data, version):
 
 def calculate(conn, event, version):
     """A pure interpretation of immutable evidence for one version and event."""
-    if version not in {1, 2, 3}:
+    if version not in {1, 2, 3, 4}:
         raise DomainError("INVALID_ARGUMENT", "Unsupported metric version")
     kind = event["event_type"]
     result = {"events": 1, "event." + kind: 1}
@@ -144,8 +145,19 @@ def calculate(conn, event, version):
             )
         else:
             result["model.unclassified_selector_responses"] = 1
+    elif kind == "artifact.change_point" and version >= 4:
+        from novel_factory.application.literary_statistics import deviation_metrics
+        result.update(deviation_metrics(_source(conn, event)))
     elif kind == "artifact.review_report":
         report = _source(conn, event)["submission"]
+        if version >= 4:
+            result["literary.review_dimension." + report["dimension"]] = 1
+            result["literary.review_outcome." + report["outcome"]] = 1
+            consistency = [issue for issue in report["issues"] if issue["category"] in {"HARD_CONSISTENCY", "CONTINUITY"}]
+            result["literary.consistency_issue_observations"] = len(consistency)
+            for issue in consistency:
+                key = "literary.consistency_severity." + issue["severity"]
+                result[key] = result.get(key, 0) + 1
         for issue in report["issues"]:
             key = "literary.issue." + issue["category"]
             result[key] = result.get(key, 0) + 1
@@ -275,7 +287,7 @@ class StatisticsService:
         start=None,
         end=None,
     ):
-        require(version in {1, 2, 3}, "INVALID_ARGUMENT", "Unsupported metric version")
+        require(version in {1, 2, 3, 4}, "INVALID_ARGUMENT", "Unsupported metric version")
         where, args = _scope(work_id, branch_id, filters, start, end)
         with self.kernel.db.uow() as repo:
             grant = self.kernel.authorize(repo, principal, work_id, "ADMIN", branch_id)

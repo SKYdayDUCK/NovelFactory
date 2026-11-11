@@ -12,6 +12,7 @@ from sqlalchemy.exc import TimeoutError as PoolTimeout
 
 from novel_factory.infrastructure.diagnostics import OperationsJournal, db_error_code
 from novel_factory.infrastructure.event_streams import (
+    DEFAULT_HANDLER_FAILURE_LIMIT,
     GROUPS,
     STREAMS,
     SUBSCRIBERS,
@@ -65,7 +66,7 @@ def _source(conn, event_id):
 class EventHub:
     """Internal service; callbacks may only perform database effects on the supplied connection."""
 
-    def __init__(self, db, redis_client, *, max_failures=5):
+    def __init__(self, db, redis_client, *, max_failures=DEFAULT_HANDLER_FAILURE_LIMIT):
         self.db, self.redis = db, redis_client
         self.streams = Streams(redis_client)
         self.diagnostics = OperationsJournal(db)

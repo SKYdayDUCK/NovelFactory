@@ -2,8 +2,8 @@
   "status": "PASS",
   "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
   "execution_kind": "REAL_ISOLATED_POSTGRESQL",
-  "source_port": 33381,
-  "restored_port": 36067,
+  "source_port": 56729,
+  "restored_port": 44313,
   "durability": {
     "fsync": true,
     "synchronous_commit": true,
@@ -22,7 +22,7 @@
     "exit_code": 0,
     "stdout": ""
   },
-  "base_backup_seconds": 0.7740740389999701,
+  "base_backup_seconds": 0.7547124660000009,
   "pg_verifybackup": {
     "exit_code": 0,
     "stdout": "backup successfully verified"
@@ -39,17 +39,17 @@
     "excluded_world_revisions": 0
   },
   "target_world_ref": {
-    "work_id": "058ccf0f-6a4c-4ad7-b770-68a061436a73",
-    "branch_id": "9531d7ea-5667-4518-98d7-2a60daffc26c",
-    "world_revision_id": "7762bc02-ac7d-42d9-866f-eced86522587"
+    "work_id": "eeebfcf5-1496-4661-9ffe-1b7f6e01da9d",
+    "branch_id": "aeddda30-f4df-40f2-aa3c-23b3f497b17d",
+    "world_revision_id": "33a1ff69-29a1-43eb-abf4-3024e19252bf"
   },
-  "target_lsn": "0/30AE180",
-  "restored_state_sha256": "4eb8e1a2b81abe776a3b104f1d2aca52d43f1fdf24fe00e45a561de787f79876",
+  "target_lsn": "0/30AE238",
+  "restored_state_sha256": "796b6a40d602a94339772c806ddc3d4281f5e2272f6606c4d80f5b29784b5ef8",
   "snapshot_equal_before_fencing": true,
   "table_count": 58,
   "object_count": 19,
-  "recovery_seconds_to_verified_service": 0.8810379380001905,
-  "selected_recovery_point_age_seconds": 0.314921,
+  "recovery_seconds_to_verified_service": 0.880982161999782,
+  "selected_recovery_point_age_seconds": 0.290892,
   "target_commits_lost": 0,
   "deliberately_excluded_later_world_commits": 1,
   "restored_world_event_count": 2,
@@ -59,5 +59,5 @@
   "old_worker_rejected": true,
   "original_commit_receipt_equal": true,
   "limitation": "Small isolated local fixture; selected-point RPO/RTO, not production SLO or remote storage test",
-  "total_seconds": 3.6543260309999823
+  "total_seconds": 3.493171923999853
 }

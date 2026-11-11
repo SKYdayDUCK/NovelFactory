@@ -10,9 +10,10 @@ from uuid import uuid4
 
 from redis import Redis
 from redis.exceptions import RedisError
-from sqlalchemy.exc import OperationalError, TimeoutError as PoolTimeout
+from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import TimeoutError as PoolTimeout
 
-from novel_factory.infrastructure.capacity import AdaptiveController
+from novel_factory.infrastructure.capacity import AdaptiveController, PoolWindows
 from novel_factory.infrastructure.database import Database
 from novel_factory.infrastructure.eventhub import EventHub
 from novel_factory.orchestration.processors import PROCESSORS, handler_for
@@ -25,14 +26,25 @@ def main():
     parser.add_argument("--batch", type=int, default=16)
     parser.add_argument("--workers", type=int, default=1)
     parser.add_argument("--adaptive", action="store_true")
+    parser.add_argument("--observation-seconds", type=float, default=60)
     args = parser.parse_args()
     if not 1 <= args.batch <= 128 or not 1 <= args.workers <= PROCESSORS[args.group].max_workers:
         parser.error("Invalid batch or worker count")
+    if not .5 <= args.observation_seconds <= 3600:
+        parser.error("observation-seconds must be between 0.5 and 3600")
     db = Database(pool_size=args.workers + int(args.adaptive))
     client = Redis.from_url(os.environ["NF_REDIS_URL"], decode_responses=True, max_connections=args.workers + 1,
                             socket_connect_timeout=3, socket_timeout=5)
     local_worker = local()
-    handler = handler_for(args.group)
+    raw_handler = handler_for(args.group)
+    controller = AdaptiveController(db, args.group, args.workers, "observability", redis=client) if args.adaptive else None
+    windows = PoolWindows(db, args.group, "subscriber_handler", controller.policy.target if controller else args.workers,
+                          args.observation_seconds, instance=controller.instance if controller else None)
+    if controller:
+        controller.monitor.occupancy = windows.meter
+
+    def handler(conn, envelope):
+        return windows.meter.measure(raw_handler, conn, envelope)
 
     def consume():
         if not hasattr(local_worker, "hub"):
@@ -40,7 +52,6 @@ def main():
             local_worker.name = socket.gethostname()[:60] + "-" + uuid4().hex
         return local_worker.hub.consume_once(args.group, local_worker.name, handler, limit=args.batch)
 
-    controller = AdaptiveController(db, args.group, args.workers, "observability", redis=client) if args.adaptive else None
     try:
         if args.once:
             try:
@@ -52,9 +63,10 @@ def main():
         with ThreadPoolExecutor(max_workers=args.workers) as pool:
             while True:
                 target = controller.limit() if controller else args.workers
+                windows.tick(target)
                 while len(pending) < target:
                     pending[pool.submit(consume)] = time.monotonic()
-                done, _ = wait(pending, return_when=FIRST_COMPLETED)
+                done, _ = wait(pending, timeout=windows.timeout(), return_when=FIRST_COMPLETED)
                 processed = 0
                 for future in done:
                     start = pending.pop(future)

@@ -9,6 +9,8 @@ from uuid import UUID
 
 from redis.exceptions import ResponseError
 
+DEFAULT_HANDLER_FAILURE_LIMIT = 5
+
 STREAMS = {
     "domain": "nf:events:domain:v1",
     "model": "nf:jobs:model:v1",

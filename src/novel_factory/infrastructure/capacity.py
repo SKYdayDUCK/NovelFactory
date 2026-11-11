@@ -4,10 +4,12 @@ from __future__ import annotations
 import json
 import logging
 import math
+import multiprocessing
 import os
 import time
 from collections import deque
 from dataclasses import dataclass
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import uuid4
 
@@ -38,6 +40,97 @@ def percentile(values, fraction):
     return sorted(values)[math.ceil(len(values) * fraction) - 1] if values else None
 
 
+class PoolOccupancy:
+    """Integrate busy and admitted slot-seconds on the same monotonic clock, across spawn workers."""
+    def __init__(self, slots, *, now=None):
+        now = time.monotonic() if now is None else now
+        ctx = multiprocessing.get_context("spawn")
+        # last tick, window start, target, busy, accumulated busy and available slot-seconds
+        self.state = ctx.Array("d", [now, now, slots, 0, 0, 0])
+        self.valid = ctx.RawValue("b", 1)
+
+    def _transition(self, *, now=None, delta=0, target=None, snapshot=False, reset=False):
+        lock = self.state.get_lock()
+        # A terminated worker holding telemetry's lock cannot block a business operation.
+        if not lock.acquire(timeout=.05):
+            self.valid.value = 0
+            return None
+        try:
+            tick = time.monotonic() if now is None else now
+            state = self.state.get_obj()
+            last, start, slots, busy, busy_s, available_s = state[:]
+            elapsed = max(0.0, tick - last)
+            busy_s += elapsed * busy
+            # Shrinking admission never retracts a slot already occupied.
+            available_s += elapsed * max(slots, busy)
+            window = tick - start
+            state[:] = (tick, tick if reset else start, slots if target is None else target,
+                        busy + delta, 0 if reset else busy_s, 0 if reset else available_s)
+            if snapshot and self.valid.value and window > 0 and available_s > 0:
+                return {"window_seconds": window, "busy_slot_seconds": busy_s,
+                        "available_slot_seconds": available_s, "worker_utilization_pct": 100 * busy_s / available_s}
+            return None
+        finally:
+            lock.release()
+
+    def measure(self, function, *args):
+        self._transition(delta=1)
+        try:
+            return function(*args)
+        finally:
+            self._transition(delta=-1)
+
+    def sample(self, *, reset=False, now=None):
+        return self._transition(snapshot=True, reset=reset, now=now)
+
+    def set_target(self, slots, *, now=None):
+        self._transition(target=slots, now=now)
+
+
+class PoolWindows:
+    """One small operator record per completed observation window, irrespective of task count."""
+    def __init__(self, db, group, scope, slots, interval, *, work=None, branch=None, instance=None):
+        self.db, self.group, self.scope = db, group, scope
+        self.work, self.branch, self.instance = work, branch, instance or str(uuid4())
+        self.meter = PoolOccupancy(slots)
+        self.interval, self.next = interval, time.monotonic() + interval
+
+    def timeout(self):
+        return max(.001, self.next - time.monotonic())
+
+    def tick(self, slots):
+        self.meter.set_target(slots)
+        now = time.monotonic()
+        if now < self.next:
+            return
+        self.next = now + self.interval
+        values = self.meter.sample(reset=True)
+        if values is None:
+            return
+        ended = datetime.now(UTC)
+        values.update(scope=self.scope, branch_id=self.branch, window_end=ended.isoformat(),
+                      window_start=(ended - timedelta(seconds=values["window_seconds"])).isoformat())
+        try:
+            with self.db.uow() as repo:
+                repo.conn.execute(text("""INSERT INTO nf_scale_decisions
+                    (processor,instance,work_id,previous,target,reason,sample)
+                    VALUES(:group,:instance,:work,:slots,:slots,'worker_observation',CAST(:sample AS jsonb))"""),
+                    {"group": self.group, "instance": self.instance, "work": self.work,
+                     "slots": slots, "sample": json.dumps(values, allow_nan=False)})
+                repo.conn.execute(text("""DELETE FROM nf_scale_decisions WHERE id IN
+                    (SELECT id FROM nf_scale_decisions WHERE created_at<now()-interval '7 days' ORDER BY id LIMIT 128)"""))
+        except SQLAlchemyError:
+            logging.getLogger(__name__).warning("Pool observation window unavailable")
+
+
+class MeasuredThreadExecutor:
+    def __init__(self, pool, meter):
+        self.pool, self.meter = pool, meter
+
+    def submit(self, function, *args):
+        return self.pool.submit(self.meter.measure, function, *args)
+
+
 class ResourceMonitor:
     def __init__(self):
         relative = next((row[3:].lstrip("/") for row in _read("/proc/self/cgroup").splitlines()
@@ -48,6 +141,7 @@ class ResourceMonitor:
         self.results = deque(maxlen=4096)
         self.sample_time = time.monotonic()
         self.pool_timeouts = 0
+        self.occupancy = None
 
     def completed(self, elapsed, ok=True):
         self.results.append((time.monotonic(), elapsed, ok))
@@ -92,7 +186,9 @@ class ResourceMonitor:
         interval = max(.001, now - self.sample_time)
         self.sample_time = now
         costs = [elapsed for elapsed, ok in samples if ok]
-        return {"cpu_pct": cpu_pct, "cpu_count": os.cpu_count(), "affinity": affinity, "quota_cpus": quota_cpus,
+        occupancy = self.occupancy.sample() if self.occupancy is not None else None
+        return {"worker_utilization_pct": occupancy["worker_utilization_pct"] if occupancy else None,
+                "cpu_pct": cpu_pct, "cpu_count": os.cpu_count(), "affinity": affinity, "quota_cpus": quota_cpus,
                 "effective_cpus": usable, "process_cpu_pct": process_pct, "throttle_pct": throttle_pct, "cpu_psi": psi,
                 "available_bytes": available, "rss_kib": _kv("/proc/self/status").get("VmRSS"),
                 "child_rss_kib": sum(size for size in child_rss if size is not None),

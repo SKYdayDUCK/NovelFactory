@@ -163,7 +163,8 @@ def inspect(db, limit, *, component=None, since=None):
                 text("""
             SELECT created_at,processor,previous,target,reason,
                 sample->'pool_timeouts' AS pool_timeouts,sample->'pool_wait_ms' AS pool_wait_ms
-            FROM nf_scale_decisions WHERE (CAST(:component AS text) IS NULL OR processor=:component)
+            FROM nf_scale_decisions WHERE reason<>'worker_observation'
+            AND (CAST(:component AS text) IS NULL OR processor=:component)
             AND (CAST(:since AS timestamptz) IS NULL OR created_at>=:since)
             ORDER BY id DESC LIMIT :limit
         """),
@@ -172,7 +173,21 @@ def inspect(db, limit, *, component=None, since=None):
             .mappings()
             .all()
         )
+        windows = repo.conn.execute(text("""
+            SELECT (sample->>'window_end')::timestamptz AS window_end,
+                (sample->>'window_start')::timestamptz AS window_start,
+                processor, instance, work_id, sample->>'branch_id' AS branch_id,
+                sample->>'scope' AS scope, (sample->>'window_seconds')::float8 AS window_seconds,
+                (sample->>'busy_slot_seconds')::float8 AS busy_slot_seconds,
+                (sample->>'available_slot_seconds')::float8 AS available_slot_seconds,
+                (sample->>'worker_utilization_pct')::float8 AS worker_utilization_pct
+            FROM nf_scale_decisions WHERE reason='worker_observation'
+              AND (CAST(:component AS text) IS NULL OR processor=:component)
+              AND (CAST(:since AS timestamptz) IS NULL OR created_at>=:since)
+            ORDER BY id DESC LIMIT :limit
+        """), params).mappings().all()
     return {
         "observations": [dict(r) for r in faults],
         "scaling_decisions": [dict(r) for r in decisions],
+        "worker_utilization_windows": [dict(r) for r in windows],
     }

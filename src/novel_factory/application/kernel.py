@@ -439,6 +439,9 @@ class Kernel:
     def _receipt(self,r,principal,wr,kind,key,request,payload,proposal_id=None):
         r.add("receipts",{"work_id":wr["work_id"],"principal_id":principal.principal_id,"command_type":kind,"idempotency_key":key,
             "request_hash":fingerprint(request),"branch_id":wr["branch_id"],"proposal_id":proposal_id,"payload":payload})
+        if kind in {"PLAN_ADOPT", "CONTINUITY_PUBLISH", "RELEASE_FREEZE"}:
+            from novel_factory.application.literary_statistics import record_selection
+            record_selection(r.conn, kind, wr, payload, principal.principal_id)
 
     def _task_binding(self,r,principal,task_id,generation,context_bundle_id=None):
         task=self.tasks.guard_task(r.conn,task_id,generation)

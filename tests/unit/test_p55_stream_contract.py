@@ -65,3 +65,14 @@ def test_wire_schema_matches_runtime_and_rejects_extra_payload():
     validator.validate(data)
     with pytest.raises(jsonschema.ValidationError):
         validator.validate({**data, "prompt": "secret"})
+
+
+def test_processor_contracts_cover_every_registered_consumer_group():
+    from novel_factory.infrastructure.event_streams import DEFAULT_HANDLER_FAILURE_LIMIT, GROUPS
+    from novel_factory.orchestration.processors import PROCESSORS
+
+    assert {entry.consumer_group for entry in PROCESSORS.values()} == GROUPS
+    for entry in PROCESSORS.values():
+        assert entry.input_schema == "EventEnvelope.v1" and entry.output
+        assert entry.business_idempotency and entry.recovery and entry.permission
+        assert entry.handler_failure_limit == DEFAULT_HANDLER_FAILURE_LIMIT

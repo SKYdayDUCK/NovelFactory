@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from sqlalchemy import text
 
+from novel_factory.infrastructure.event_streams import DEFAULT_HANDLER_FAILURE_LIMIT
 from novel_factory.orchestration import dispatch
 from novel_factory.orchestration.tasks import MAINTENANCE_GATE
 
@@ -19,22 +20,34 @@ class Processor:
     max_workers: int
     timeout_seconds: int
     recovery: str
+    business_idempotency: str
     input_schema: str = "EventEnvelope.v1"
+    handler_failure_limit: int = DEFAULT_HANDLER_FAILURE_LIMIT
+
+    @property
+    def consumer_group(self):
+        return self.name
 
 
 PROCESSORS = MappingProxyType({row.name: row for row in (
     Processor("model", "model", "enrolled READY task", "AgentCallEvidence", "ADMIN + current task grant", 16, 900,
-              "P5 lease and call ledger; quarantine UNKNOWN"),
+              "P5 lease and call ledger; quarantine UNKNOWN",
+              "task ID, generation, lease and model call ledger"),
     Processor("world", "database", "world and editorial handoffs", "Kernel or editorial receipt", "ADMIN + enrolled grants", 4, 15,
-              "rescan stored candidates and receipts"),
+              "rescan stored candidates and receipts",
+              "Kernel commit and editorial handoff receipts"),
     Processor("compute", "cpu", "world.accepted", "DerivedWorldIndex", "ADMIN on target branch", 8, 120,
-              "rebuild from immutable WorldRef and keyed inbox"),
+              "rebuild from immutable WorldRef and keyed inbox",
+              "immutable WorldRef, projection watermarks and index Inbox"),
     Processor("log", "observability", "durable domain evidence", "AuditRecord", "trusted audit writer", 4, 15,
-              "atomic subscriber receipt and log"),
+              "atomic subscriber receipt and log",
+              "subscriber/event ID and immutable audit evidence"),
     Processor("statistics", "observability", "persisted audit record", "MetricProjection", "trusted statistics writer", 4, 15,
-              "atomic subscriber receipt and projection"),
+              "atomic subscriber receipt and projection",
+              "event ID, metric version and per-event contribution"),
     Processor("recovery", "database", "workflow and lease reconciliation", "WorkflowStatus", "ADMIN on target branch", 2, 15,
-              "bounded P5 resume; preserve uncertain calls"),
+              "bounded P5 resume; preserve uncertain calls",
+              "task generation, dependency receipts and call ledger"),
 )})
 
 SCOPED = ("model", "world", "compute", "recovery")
@@ -147,16 +160,18 @@ class TaskDispatcher:
 # Spawn workers build their own SQLAlchemy engine. Never pickle a live connection.
 _index_db = None
 _index_kernel = None
+_index_meter = None
 
 
-def initialize_index_worker(database_url, object_root):
+def initialize_index_worker(database_url, object_root, meter=None):
     import atexit
 
     from novel_factory.application.kernel import Kernel
     from novel_factory.infrastructure.database import Database
     from novel_factory.infrastructure.objects import ObjectStore
 
-    global _index_db, _index_kernel
+    global _index_db, _index_kernel, _index_meter
+    _index_meter = meter
     _index_db = Database(database_url, pool_size=1)
     _index_kernel = Kernel(_index_db, ObjectStore(object_root))
     atexit.register(_index_db.close)
@@ -165,5 +180,9 @@ def initialize_index_worker(database_url, object_root):
 def process_reserved_index(principal, work, branch, lease):
     from novel_factory.application.derived_worker import DerivedWorldWorker
 
-    receipt = DerivedWorldWorker(_index_kernel).process_reserved(principal, work, branch, lease)
+    process = DerivedWorldWorker(_index_kernel).process_reserved
+    if _index_meter is None:
+        receipt = process(principal, work, branch, lease)
+    else:
+        receipt = _index_meter.measure(process, principal, work, branch, lease)
     return {"status": "INDEXED", "message_id": receipt["message_id"]}

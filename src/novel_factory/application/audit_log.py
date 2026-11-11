@@ -153,7 +153,7 @@ class LogService:
                attempt_id=identity if kind != "AGENT_BLOCKED" else None, model=model, **scope)
 
     @staticmethod
-    def artifact(conn, kind, evidence_id, work_id, payload, principal_id, *, text_characters=None):
+    def artifact(conn, kind, evidence_id, work_id, payload, principal_id, *, text_characters=None, event_time=None):
         binding = payload.get("submission", payload)
         task_id = binding.get("task_id")
         scope = _task_scope(conn, task_id, binding.get("generation"))
@@ -163,7 +163,7 @@ class LogService:
             scope.update(branch_id=wr["branch_id"], world_revision_id=wr["world_revision_id"])
         if _uuid(payload.get("volume_id")):
             scope["volume_id"] = payload["volume_id"]
-        record(conn, "artifact."+kind.lower(), event_id=evidence_id, evidence_id=evidence_id, text_characters=text_characters, **scope)
+        record(conn, "artifact."+kind.lower(), event_id=evidence_id, evidence_id=evidence_id, text_characters=text_characters, event_time=event_time, **scope)
 
     @staticmethod
     def begin_tool(runtime, safe_tool, request_id):

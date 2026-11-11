@@ -19,7 +19,11 @@ from novel_factory.application.agent_gateway import AgentGateway
 from novel_factory.application.kernel import Kernel
 from novel_factory.application.supervisor import HostJournal, RuntimeSupervisor
 from novel_factory.domain.errors import DomainError
-from novel_factory.infrastructure.capacity import AdaptiveController
+from novel_factory.infrastructure.capacity import (
+    AdaptiveController,
+    MeasuredThreadExecutor,
+    PoolWindows,
+)
 from novel_factory.infrastructure.codex_host import (
     CodexAppServerAdapter,
     CodexRoleContextAdapter,
@@ -42,19 +46,27 @@ def log_result(result):
                       if key in result}), flush=True)
 
 
-def serve(supervisor, principal, work, branch, *, workers, interval, processor=None, controller=None):
+def serve(supervisor, principal, work, branch, *, workers, interval, processor=None, controller=None, observation_seconds=60):
     pending = {}
+    windows = None
+    if processor in (None, "model", "compute"):
+        windows = PoolWindows(supervisor.kernel.db, processor or "model", "project_executor",
+                              controller.policy.target if controller else workers, observation_seconds,
+                              work=work, branch=branch, instance=controller.instance if controller else None)
+        if controller:
+            controller.monitor.occupancy = windows.meter
     if processor == "compute":
         url = supervisor.kernel.db.engine.url.render_as_string(hide_password=False)
         pool = ProcessPoolExecutor(max_workers=workers, mp_context=multiprocessing.get_context("spawn"),
-                                   initializer=initialize_index_worker, initargs=(url, str(supervisor.kernel.objects.root)))
+                                   initializer=initialize_index_worker, initargs=(url, str(supervisor.kernel.objects.root), windows.meter))
     else:
         pool = ThreadPoolExecutor(max_workers=workers)
+    execution = MeasuredThreadExecutor(pool, windows.meter) if windows and processor != "compute" else pool
     with pool:
         while True:
             try:
                 with wake_listener(supervisor.kernel.db.engine) as listener:
-                    _drain(supervisor, principal, work, branch, pool, workers, pending, listener, interval, processor, controller)
+                    _drain(supervisor, principal, work, branch, execution, workers, pending, listener, interval, processor, controller, windows)
             except psycopg.OperationalError:
                 # A new LISTEN session always begins with a durable scan.
                 # Already admitted futures remain owned by this pool.
@@ -62,7 +74,7 @@ def serve(supervisor, principal, work, branch, *, workers, interval, processor=N
                 time.sleep(min(interval, 5))
 
 
-def _drain(supervisor, principal, work, branch, pool, workers, pending, listener, interval, processor=None, controller=None):
+def _drain(supervisor, principal, work, branch, pool, workers, pending, listener, interval, processor=None, controller=None, windows=None):
     dispatcher = TaskDispatcher(supervisor, principal, work, branch) if processor else None
     next_reconciliation = 0.0
     while True:
@@ -77,8 +89,11 @@ def _drain(supervisor, principal, work, branch, pool, workers, pending, listener
                     controller.monitor.completed(time.monotonic() - started, result["status"] not in {"BLOCKED", "FAILED"})
                 log_result(result)
         target = controller.limit() if controller else workers
+        if windows:
+            windows.tick(target)
         if len(pending) >= target:
-            wait(pending, timeout=controller.interval if controller else None, return_when=FIRST_COMPLETED)
+            timeout = min(windows.timeout(), controller.interval if controller else interval) if windows else interval
+            wait(pending, timeout=timeout, return_when=FIRST_COMPLETED)
             continue
         if dispatcher:
             now = time.monotonic()
@@ -95,7 +110,7 @@ def _drain(supervisor, principal, work, branch, pool, workers, pending, listener
             if pending:
                 wait(pending, timeout=min(interval, .25), return_when=FIRST_COMPLETED)
             else:
-                wait_for_change(listener, interval)
+                wait_for_change(listener, min(interval, windows.timeout()) if windows else interval)
         else:
             log_result(result)
 
@@ -108,6 +123,7 @@ def main():
     parser.add_argument("--processor", choices=SCOPED, help="Run this Redis-mode project processor")
     parser.add_argument("--adaptive", action="store_true", help="Adjust new admissions under the fixed worker ceiling")
     parser.add_argument("--sample-seconds", type=float, default=3)
+    parser.add_argument("--observation-seconds", type=float, default=60, help="Worker utilization reporting window")
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--set-transport", choices=("postgres", "redis"), help="Set admission mode for the authorized branch")
     mode.add_argument("--once", action="store_true")
@@ -119,6 +135,8 @@ def main():
         parser.error("interval must be between 0.1 and 60 seconds")
     if not 1 <= args.workers <= 16:
         parser.error("workers must be between 1 and 16")
+    if not .5 <= args.observation_seconds <= 3600:
+        parser.error("observation-seconds must be between 0.5 and 3600")
     if not .1 <= args.sample_seconds <= 60:
         parser.error("sample-seconds must be between 0.1 and 60")
     if args.processor and args.workers > PROCESSORS[args.processor].max_workers:
@@ -177,7 +195,7 @@ def main():
         controller = AdaptiveController(db, processor, args.workers, PROCESSORS[processor].resource,
             work=access["work_id"], branch=access["branch_id"], interval=args.sample_seconds) if args.adaptive else None
         serve(supervisor, principal, access["work_id"], access["branch_id"],
-              workers=args.workers, interval=args.interval, processor=args.processor, controller=controller)
+              workers=args.workers, interval=args.interval, processor=args.processor, controller=controller, observation_seconds=args.observation_seconds)
     except DomainError as exc:
         raise SystemExit(exc.code) from None
     finally:
