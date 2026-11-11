@@ -1,0 +1,82 @@
+{
+  "commit": "e5a47f51f39e3ad618e822e451eb89110395e7dc",
+  "git_tree": "013e2acd2e19a1cfa391dc40c813bc7c76714551",
+  "clean_before_and_after": true,
+  "completion_utc": "2026-11-11T16:57:24.440078+00:00",
+  "python": "3.12.14",
+  "postgres": "PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+  "dependencies": {
+    "mcp": "1.29.0",
+    "psycopg": "3.3.8",
+    "pytest": "9.2.0"
+  },
+  "codex": "codex-cli 0.167.0-alpha.4",
+  "pytest_command": "python -m pytest -p matrix_probe -q tests/integration/test_p5_mcp.py tests/integration/test_p5_rolling.py --junitxml=nf.xml",
+  "transport": "real stdio / PostgreSQL. Three real Codex Host editorial replay assertions required zero model turns. The rolling scenario uses deterministic local fixture HTTP. No paid model calls.",
+  "exit_code": 0,
+  "pytest_summary": "5 passed in 31.75s",
+  "suite": {
+    "name": "pytest",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "tests": "5",
+    "time": "31.062",
+    "timestamp": "2026-11-11T16:56:29.450086+00:00",
+    "hostname": "51c9c427df21"
+  },
+  "role_discovery_and_denials": {
+    "nf_discovery.resume_operator": [
+      "nf_project_status",
+      "nf_resume_project"
+    ],
+    "nf_discovery.character_actor": [
+      "nf_artifact_put",
+      "nf_context_get",
+      "nf_query_batch",
+      "nf_task_get"
+    ],
+    "nf_discovery.volume_review": [
+      "nf_artifact_put",
+      "nf_change_point_request",
+      "nf_context_get",
+      "nf_query_batch"
+    ],
+    "nf_denials.volume_review": {
+      "nf_change_point_review": "VIEW_DENIED",
+      "nf_rolling_window_submit": "VIEW_DENIED"
+    },
+    "nf_discovery.replan": [
+      "nf_artifact_put",
+      "nf_context_get",
+      "nf_query_batch",
+      "nf_rolling_window_submit"
+    ],
+    "nf_denials.replan": {
+      "nf_change_point_request": "VIEW_DENIED",
+      "nf_change_point_review": "VIEW_DENIED"
+    },
+    "nf_discovery.editorial_decision": [
+      "nf_artifact_put",
+      "nf_change_point_review",
+      "nf_context_get",
+      "nf_query_batch",
+      "nf_task_get"
+    ],
+    "nf_denials.editorial_decision": {
+      "nf_change_point_request": "VIEW_DENIED",
+      "nf_rolling_window_submit": "VIEW_DENIED"
+    }
+  },
+  "matrix": {
+    "tools": 9,
+    "missing": []
+  },
+  "sha256": {
+    "matrix.json": "84db29b891df3884a04ec0e1cdf3b56ac7999edb69fdbe2060366b7d1a0313d4",
+    "nf.xml": "95e02d405740126a0f3491d56ca4aa70a1f4251193c6d44c49fe41f0b778cf95",
+    "postgres_session.json": "02f0b7a7bc09347aef83277a1c1ae15803f461668ddbf26bd02ad324586df40d",
+    "postgresql.log": "318aeadca0f78c1b5a6f8a9bb16e14613201e90c084bf454ae51218b12ec0d81",
+    "run.log": "51595ba462a52d6512158671853ea278282b03e0dea161dd57fd155b22aaa88e"
+  }
+}

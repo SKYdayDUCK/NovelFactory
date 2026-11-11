@@ -16,6 +16,7 @@ from uuid import uuid4
 
 from sqlalchemy import and_, func, or_, select, text
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.exc import NoResultFound
 
 from novel_factory.contracts.registry import validate_contract
 from novel_factory.domain.errors import DomainError
@@ -116,28 +117,31 @@ class TaskService:
                               f"task:{task_id}:{generation}:{state}")
 
     def create(self, spec: dict, *, principal_id: str, idempotency_key: str, authorize_in_tx=None):
+        with self._tx(authorize_in_tx) as conn:
+            return self.create_in_transaction(conn, spec, principal_id=principal_id, idempotency_key=idempotency_key)
+
+    def create_in_transaction(self, conn, spec, *, principal_id, idempotency_key):
         validate_contract("TaskSpec", spec, version="2.0")
         if spec["generation"] != 0 or spec["state"] not in {"READY", "BLOCKED"}:
             raise _error("INVALID_ARGUMENT", "New tasks start in generation zero, READY or BLOCKED")
         deadline = datetime.fromisoformat(spec["wall_deadline"].replace("Z", "+00:00"))
         content = {"operation": "create", "spec": spec}
-        with self._tx(authorize_in_tx) as conn:
-            prior = self._command_prior(conn, principal_id, idempotency_key, content)
-            if prior:
-                return prior
-            if deadline <= self._now(conn):
-                raise _error("DEADLINE_EXCEEDED", "Task deadline has passed")
-            t = self.tables["tasks"]
-            if conn.scalar(select(t.c.task_id).where(t.c.task_id == spec["task_id"])):
-                raise _error("ALREADY_EXISTS", "Task identity is already assigned")
-            wr = spec["world_ref"]
-            conn.execute(insert(t).values(task_id=spec["task_id"], work_id=wr["work_id"], branch_id=wr["branch_id"], principal_id=str(principal_id), grant_id=spec["capability_grant_id"], role_id=spec["role_id"], task_kind=spec["task_kind"], state=spec["state"], generation=0, context_bundle_id=spec["context_bundle_id"], dependency_fingerprint=spec["dependency_fingerprint"], deadline=deadline))
-            self._save_input(conn, spec["task_id"], 0, spec, spec["state"])
-            conn.execute(insert(self.tables["task_fairness"]).values(work_id=wr["work_id"], task_kind=spec["task_kind"]).on_conflict_do_nothing())
-            receipt = {"task_id": spec["task_id"], "generation": 0, "state": spec["state"]}
-            self._command_record(conn, principal_id, idempotency_key, content, receipt)
-            self._emit(conn, spec["task_id"], 0, spec["state"])
-            return receipt
+        prior = self._command_prior(conn, principal_id, idempotency_key, content)
+        if prior:
+            return prior
+        if deadline <= self._now(conn):
+            raise _error("DEADLINE_EXCEEDED", "Task deadline has passed")
+        t = self.tables["tasks"]
+        if conn.scalar(select(t.c.task_id).where(t.c.task_id == spec["task_id"])):
+            raise _error("ALREADY_EXISTS", "Task identity is already assigned")
+        wr = spec["world_ref"]
+        conn.execute(insert(t).values(task_id=spec["task_id"], work_id=wr["work_id"], branch_id=wr["branch_id"], principal_id=str(principal_id), grant_id=spec["capability_grant_id"], role_id=spec["role_id"], task_kind=spec["task_kind"], state=spec["state"], generation=0, context_bundle_id=spec["context_bundle_id"], dependency_fingerprint=spec["dependency_fingerprint"], deadline=deadline))
+        self._save_input(conn, spec["task_id"], 0, spec, spec["state"])
+        conn.execute(insert(self.tables["task_fairness"]).values(work_id=wr["work_id"], task_kind=spec["task_kind"]).on_conflict_do_nothing())
+        receipt = {"task_id": spec["task_id"], "generation": 0, "state": spec["state"]}
+        self._command_record(conn, principal_id, idempotency_key, content, receipt)
+        self._emit(conn, spec["task_id"], 0, spec["state"])
+        return receipt
 
     def get(self, task_id):
         with self.engine.connect() as conn:
@@ -445,13 +449,42 @@ class TaskService:
             conn.execute(insert(self.tables["budgets"]).values(budget_id=budget_id, work_id=str(work_id), currency=currency, limit_amount=amount))
         return budget_id
 
+    def _lock_delegation_authority(self, conn, task_id):
+        if "delegation_receipts" not in self.tables:
+            return
+        return conn.execute(text("""
+            SELECT i.expires_at, i.active AND NOT i.outbound_fenced AND i.expires_at > clock_timestamp()
+               AND i.policy_version = w.policy_version AND g.active AND g.epoch = s.grant_epoch AS allowed
+            FROM nf_delegation_receipts r
+            JOIN nf_delegation_installations i USING (installation_id)
+            JOIN nf_delegation_slots s USING (installation_id, scope_ref)
+            JOIN nf_works w ON w.work_id = i.work_id
+            JOIN nf_grants g ON g.grant_id = s.grant_id
+            WHERE r.task_id=:task FOR SHARE OF i, w, g
+        """), {"task": task_id}).mappings().one_or_none()
+
+    def _authorize_model_spend(self, conn, task_id, authorize_in_tx):
+        # Lock in the same order as installation revocation. Disclose business
+        # state only after the caller has passed its own authority check.
+        row = self._lock_delegation_authority(conn, task_id)
+        if authorize_in_tx is not None:
+            authorize_in_tx(conn)
+        if row and not row["allowed"]:
+            raise _error("DELEGATION_RECOVERY_FENCED", "Delegated inference is fenced")
+        return row["expires_at"] if row else None
+
+    def _check_delegation_deadline(self, conn, deadline):
+        if deadline is not None and deadline <= self._now(conn):
+            raise _error("DELEGATION_RECOVERY_FENCED", "Delegated installation expired")
+
     def reserve_call(self, task_id, generation, worker_id, *, budget_id, amount, call_key, request_hash, token_amount=0, authorize_in_tx=None):
         reserve = _money(amount)
         if type(token_amount) is not int or token_amount < 0:
             raise _error("INVALID_ARGUMENT", "Token reservation must be a nonnegative integer")
         if len(request_hash) != 64 or not call_key:
             raise _error("INVALID_ARGUMENT", "Call requires request hash and stable identity")
-        with self._tx(authorize_in_tx) as conn:
+        with self._tx() as conn:
+            deadline = self._authorize_model_spend(conn, task_id, authorize_in_tx)
             task = self.guard_task(conn, task_id, generation, worker_id)
             if task["state"] != "RUNNING":
                 raise _error("TASK_NOT_ACCEPTABLE", "External calls require a live RUNNING execution")
@@ -475,6 +508,7 @@ class TaskService:
             task_spent_tokens = conn.scalar(select(func.coalesce(func.sum(calls.c.actual_tokens), 0)).where(calls.c.task_id == task_id, calls.c.state.in_(["SUCCEEDED", "FAILED"])))
             if task_reserved_tokens + task_spent_tokens + token_amount > spec["budget"]["token_budget"]:
                 raise _error("BUDGET_EXCEEDED", "Task token budget would be exceeded")
+            self._check_delegation_deadline(conn, deadline)
             attempt_id = str(uuid4())
             conn.execute(budgets.update().where(budgets.c.budget_id == budget_id).values(reserved_amount=budgets.c.reserved_amount + reserve))
             conn.execute(insert(calls).values(attempt_id=attempt_id, task_id=task_id, generation=generation, budget_id=budget_id, call_key=call_key, request_hash=request_hash, state="PREPARED", reserved_amount=reserve, reserved_tokens=token_amount))
@@ -486,9 +520,12 @@ class TaskService:
         False means another worker has already taken that right. It never means
         the remote provider did not execute; unknown calls require reconciliation.
         """
-        with self._tx(authorize_in_tx) as conn:
+        with self._tx() as conn:
             calls = self.tables["call_attempts"]
-            call = conn.execute(select(calls).where(calls.c.attempt_id == attempt_id)).mappings().one()
+            call = conn.execute(select(calls).where(calls.c.attempt_id == attempt_id)).mappings().one_or_none()
+            deadline = self._authorize_model_spend(conn, call["task_id"] if call else None, authorize_in_tx)
+            if call is None:
+                raise NoResultFound("No row was found when one was required")
             task = self.guard_task(conn, call["task_id"], call["generation"], worker_id)
             if task["state"] != "RUNNING":
                 raise _error("TASK_NOT_ACCEPTABLE", "External dispatch requires a live RUNNING execution")
@@ -497,6 +534,7 @@ class TaskService:
                 return False
             if call["state"] != "PREPARED":
                 raise _error("INVALID_CALL_TRANSITION", "Call is not prepared")
+            self._check_delegation_deadline(conn, deadline)
             conn.execute(calls.update().where(calls.c.attempt_id == attempt_id).values(state="SENT", updated_at=self._now(conn)))
         # Only now may a worker release the connection and perform network IO.
         return True

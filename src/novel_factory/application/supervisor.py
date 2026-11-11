@@ -78,31 +78,10 @@ class RuntimeSupervisor:
             spec = repo.one("task_inputs", {"task_id": task_id, "generation": task["generation"]})["spec"]
             owner = Principal(task["grant_id"], task["principal_id"])
             _, grant = self.kernel._task_owner(repo, owner, task_id, "COMPILE")
-            require(manifest_ref in spec["input_artifacts"] and input_ref in spec["input_artifacts"],
-                    "VIEW_DENIED", "Dispatch materials must be pinned in the task")
-            self.kernel.artifact(repo, manifest_ref, task["work_id"], kind="INPUT_MANIFEST")
-            payload = self.kernel.artifact(repo, input_ref, task["work_id"], kind="AGENT_INPUT")["payload"]
-            route = self.gateway.adapters.get(payload["adapter_id"])
-            require(isinstance(route, (OpenAICompatibleAdapter, CodexAppServerAdapter)),
-                    "HOST_ISOLATION_UNVERIFIED", "Supervised runtime roles require a stateless text route")
-            validate_contract("KnowledgeCut", knowledge_cut, "2.1")
-            check_profile(grant, knowledge_cut["plane"])
-            if task["role_id"] == "character_actor":
-                require(knowledge_cut["plane"] == "BELIEF" and knowledge_cut["actor_id"] == grant["actor_id"],
-                        "VIEW_DENIED", "Actor cut does not match its grant")
-            require(type(context_tokens) is int and 256 <= context_tokens <= 200000,
-                    "INVALID_ARGUMENT", "Context budget is out of range")
-            budget = repo.one("budgets", {"budget_id": budget_id, "work_id": task["work_id"]})
-            require(budget, "VIEW_DENIED", "Budget unavailable")
-            dispatch = dict(input_ref=input_ref, budget_id=budget_id, reserve_amount=reserve_amount,
-                            token_reservation=token_reservation)
-            validate_contract("AgentDispatchRequest", {"schema_version": "2.1", "task_id": task_id,
-                "generation": 1, "worker_id": "enrollment", "call_key": "candidate", **dispatch}, "agent")
-            require(type(accept_summary) is bool and (not accept_summary or
-                    (task["role_id"], task["task_kind"]) == ("evidence_maintainer", "summary")),
-                    "VIEW_DENIED", "Automatic completion is limited to an explicitly enrolled evidence summary")
-            config = {"accept_summary": accept_summary, "manifest_ref": manifest_ref, "knowledge_cut": knowledge_cut, "context_tokens": context_tokens,
-                      "dispatch": dispatch, "grant_epoch": grant["epoch"], "policy_version": spec["policy_version"]}
+            config, payload = self.dispatch_config(repo, spec, grant, manifest_ref=manifest_ref,
+                knowledge_cut=knowledge_cut, context_tokens=context_tokens, input_ref=input_ref,
+                budget_id=budget_id, reserve_amount=reserve_amount, token_reservation=token_reservation,
+                accept_summary=accept_summary)
             if seal_interaction_id is not None:
                 validate_contract("UUID", seal_interaction_id)
                 interaction = repo.one("simulation_interactions", {"interaction_id": seal_interaction_id,
@@ -134,16 +113,51 @@ class RuntimeSupervisor:
                 config["joint"] = joint
                 config["joint_authorizer"] = {"grant_id": controller.grant_id, "principal_id": controller.principal_id,
                                               "epoch": grant["epoch"]}
-            old = repo.one("supervisor_jobs", {"task_id": task_id})
-            if old:
-                require(old["config"] == config, "IDEMPOTENCY_CONFLICT", "Task dispatch allowance already exists")
-            else:
-                require(task["state"] in {"BLOCKED", "READY", "RUNNING"}, "INVALID_TASK_TRANSITION",
-                        "Cannot enroll a finished task")
-                repo.add("supervisor_jobs", {"task_id": task_id, "config": config})
-                repo.outbox("supervisor.enrolled", "task", task_id, {"generation": task["generation"]},
-                            f"supervisor:enroll:{task_id}")
-            return {"task_id": task_id, "enrolled": True}
+            return self.install_job(repo, task, config)
+
+    def dispatch_config(self, repo, spec, grant, *, manifest_ref, knowledge_cut, context_tokens,
+                        input_ref, budget_id, reserve_amount, token_reservation, accept_summary=False):
+        """Validate the server-selected route and freeze a bounded runtime allowance."""
+        require(manifest_ref in spec["input_artifacts"] and input_ref in spec["input_artifacts"],
+                "VIEW_DENIED", "Dispatch materials must be pinned in the task")
+        self.kernel.artifact(repo, manifest_ref, spec["world_ref"]["work_id"], kind="INPUT_MANIFEST")
+        payload = self.kernel.artifact(repo, input_ref, spec["world_ref"]["work_id"], kind="AGENT_INPUT")["payload"]
+        route = self.gateway.adapters.get(payload["adapter_id"])
+        require(isinstance(route, (OpenAICompatibleAdapter, CodexAppServerAdapter)),
+                "HOST_ISOLATION_UNVERIFIED", "Supervised runtime roles require a stateless text route")
+        validate_contract("KnowledgeCut", knowledge_cut, "2.1")
+        check_profile(grant, knowledge_cut["plane"])
+        if spec["role_id"] == "character_actor":
+            require(knowledge_cut["plane"] == "BELIEF" and knowledge_cut["actor_id"] == grant["actor_id"],
+                    "VIEW_DENIED", "Actor cut does not match its grant")
+        require(type(context_tokens) is int and 256 <= context_tokens <= 200000,
+                "INVALID_ARGUMENT", "Context budget is out of range")
+        budget = repo.one("budgets", {"budget_id": budget_id, "work_id": spec["world_ref"]["work_id"]})
+        require(budget, "VIEW_DENIED", "Budget unavailable")
+        dispatch = dict(input_ref=input_ref, budget_id=budget_id, reserve_amount=reserve_amount,
+                        token_reservation=token_reservation)
+        validate_contract("AgentDispatchRequest", {"schema_version": "2.1", "task_id": spec["task_id"],
+            "generation": 1, "worker_id": "enrollment", "call_key": "candidate", **dispatch}, "agent")
+        require(type(accept_summary) is bool and (not accept_summary or
+                (spec["role_id"], spec["task_kind"]) == ("evidence_maintainer", "summary")),
+                "VIEW_DENIED", "Automatic completion is limited to an explicitly enrolled evidence summary")
+        config = {"accept_summary": accept_summary, "manifest_ref": manifest_ref, "knowledge_cut": knowledge_cut, "context_tokens": context_tokens,
+                  "dispatch": dispatch, "grant_epoch": grant["epoch"], "policy_version": spec["policy_version"]}
+        return config, payload
+
+    @staticmethod
+    def install_job(repo, task, config):
+        task_id = task["task_id"]
+        old = repo.one("supervisor_jobs", {"task_id": task_id})
+        if old:
+            require(old["config"] == config, "IDEMPOTENCY_CONFLICT", "Task dispatch allowance already exists")
+        else:
+            require(task["state"] in {"BLOCKED", "READY", "RUNNING"}, "INVALID_TASK_TRANSITION",
+                    "Cannot enroll a finished task")
+            repo.add("supervisor_jobs", {"task_id": task_id, "config": config})
+            repo.outbox("supervisor.enrolled", "task", task_id, {"generation": task["generation"]},
+                        f"supervisor:enroll:{task_id}")
+        return {"task_id": task_id, "enrolled": True}
 
     def run_once(self, controller, work_id, branch_id, *, executor=None):
         with self.kernel.db.uow(write=False) as repo:

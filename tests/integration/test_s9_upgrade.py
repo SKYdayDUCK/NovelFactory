@@ -184,7 +184,7 @@ finally:
     with db.uow(write=False) as r:
         before = database_snapshot(r.conn)
         assert before["nf_semantic_scans"]["rows"] == 0
-    subprocess.run([sys.executable, "-m", "alembic", "upgrade", "head"], cwd=root,
+    subprocess.run([sys.executable, "-m", "alembic", "upgrade", "0016_p55_observed_scopes"], cwd=root,
                    env=env, check=True, capture_output=True)
     kernel = Kernel(db, ObjectStore(tmp_path / "objects"))
     user, scope = Principal(**old["owner"]), old["scope"]

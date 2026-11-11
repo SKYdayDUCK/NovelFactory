@@ -1,0 +1,28 @@
+{
+  "pr": 8,
+  "candidate": "48c20a10c1e28af608a4c52f207351eaa1c45e06",
+  "tree": "ec211b1d01badd4f07ca631de93ffa229baf187d",
+  "prepared_base": "c4939e24b6b5501d82127f528f2054e9c1992856",
+  "checkout": "9c28a89d9fa07482fd2af4c564a92f9dca41cf39",
+  "job": 130690886572,
+  "run": 43068819896,
+  "artifact": 13876778443,
+  "sha256": "0da8ec911157352d76c468af8c3e82577e21c78d54d3f89624637454feb95040",
+  "outcomes": {
+    "workshop": 16,
+    "published_W0_upgrade": 1,
+    "nf_scoped": 5,
+    "dual_services": 2
+  },
+  "issue_fixed": {
+    "reproduced_on": "b0be8ead12d7c5c67ab4ad904b98d67fb0994bd0",
+    "run": 43068381286,
+    "job": 130689340329,
+    "passed": 15,
+    "failed": 1,
+    "reason": "PostgreSQL ObjectInUse, deferred constraint events pending at ALTER TABLE",
+    "fixed_on": "ac5962e006f31b3ba8f1062a1e179a1f22d6d45a"
+  },
+  "commercial_model_calls": 0,
+  "source_of_records": "GitHub Actions logs and official artifact metadata; local executor was unavailable."
+}

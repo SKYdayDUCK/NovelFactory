@@ -1,0 +1,95 @@
+{
+  "head_sha": "d039839fe68f6403ea6e5590af3ed787318d5b5f",
+  "event": "push",
+  "runs": [
+    {
+      "id": 43071657594,
+      "name": "Agent Workshop PostgreSQL and stdio",
+      "event": "push",
+      "conclusion": "success",
+      "status": "completed",
+      "head_sha": "d039839fe68f6403ea6e5590af3ed787318d5b5f",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43071657594",
+      "attempt": 1,
+      "jobs": [
+        {
+          "id": 130700878499,
+          "name": "workshop",
+          "started_at": "2026-11-11T17:48:17Z",
+          "completed_at": "2026-11-11T17:49:39Z",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43071657594/job/130700878499"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13877069435,
+          "name": "workshop-results",
+          "size": 3461,
+          "digest": "sha256:bb9a06d0b4120080dd08255a3dc41a7d08d3e76183632c9890c60eb533762fa8",
+          "expires_at": "2027-02-09T17:48:14Z",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43071657594/artifacts/13877069435"
+        }
+      ]
+    },
+    {
+      "id": 43071657819,
+      "name": "P1 and P2 production integrity",
+      "event": "push",
+      "conclusion": "success",
+      "status": "completed",
+      "head_sha": "d039839fe68f6403ea6e5590af3ed787318d5b5f",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43071657819",
+      "attempt": 1,
+      "jobs": [
+        {
+          "id": 130700879799,
+          "name": "Schema, domain, HTTP and production boundaries",
+          "started_at": "2026-11-11T17:48:17Z",
+          "completed_at": "2026-11-11T17:49:05Z",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43071657819/job/130700879799"
+        },
+        {
+          "id": 130700880342,
+          "name": "PostgreSQL 17 integration, concurrency and restore",
+          "started_at": "2026-11-11T17:48:16Z",
+          "completed_at": "2026-11-11T17:59:46Z",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43071657819/job/130700880342"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13880525573,
+          "name": "p1-postgres-concurrency-1",
+          "size": 1776534,
+          "digest": "sha256:28d304ebb61b45c247ab918f1a069c864fd3a25c015fa1a4c64ad1bf591d4ab1",
+          "expires_at": "2027-02-09T17:48:14Z",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43071657819/artifacts/13880525573"
+        },
+        {
+          "id": 13878871749,
+          "name": "p1-schema-unit-1",
+          "size": 301205,
+          "digest": "sha256:300abc2ca983b397ab9d8cf18c175b3ea52c753c05330e99189e0e3aabb28ea1",
+          "expires_at": "2027-02-09T17:48:14Z",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43071657819/artifacts/13878871749"
+        }
+      ]
+    }
+  ],
+  "nf_postgres": {
+    "passed": 799,
+    "skipped_namespace_unavailable": 17,
+    "warnings": 1,
+    "seconds": 532.09
+  },
+  "w0_w1_stage": {
+    "passed": 24,
+    "skipped": 0
+  }
+}

@@ -46,15 +46,18 @@
     }
   },
   "W2": {
-    "status": "IN_PROGRESS",
+    "status": "MERGED_AND_VERIFIED",
     "pr": 9,
     "base": "d039839fe68f6403ea6e5590af3ed787318d5b5f",
     "historical_source": "0da5b7c8fab5321fa50d2a04a516f3fd95432539",
     "origin_guard_source": "ec713a437b28a18c965ec58da0fb4cb8503470bb",
     "previous_evidence": "evidence/workshop/w2",
-    "next": "Qualify on the integrated main base",
-    "result": "AWAITING_MAIN_ACCEPTANCE",
-    "dependency_main_sha": "d039839fe68f6403ea6e5590af3ed787318d5b5f"
+    "next": "NF Bridge #11",
+    "result": "PASS",
+    "dependency_main_sha": "d039839fe68f6403ea6e5590af3ed787318d5b5f",
+    "source_sha": "162af2695b76b20c0257b28217a3eb5b4096d7f6",
+    "main_sha": "f2c584ec8e738e09d31b05ddd5c032bb2b8f96b1",
+    "evidence": "reports/integration/W2_主线签收.md"
   },
   "W3": {
     "status": "NOT_STARTED",
