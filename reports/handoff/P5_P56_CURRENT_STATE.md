@@ -20,3 +20,5 @@ W1 PR #8 的 f59ac5e44 通过 Workshop CI 43030513699。W2 从 w001 迁移至 w0
 W2 PR #9 (0da5b7c8), Workshop CI 43031076636 通过。W3 的双库独立身份、双侧 stdio、NF 成功后丢包、原操作号查回、NF 取消与组织结算专项已在本地通过，见 evidence/workshop/w3。P5 新提交修复了续租时并发槽提前释放，P5.5 分开归档了恢复数据与固定 WorldRef 查询优化。
 
 W3 两端已建立 PR #10 和 #11。NF 接受侧 795b17f2 有 45 项本地专项通过。Workshop 独立工作流 43032253677 成功。W4 加入按 NF 原始 SHA 签出的双服务 CI。W4 实际迁移至 w004，在 PG17/Redis8 全部 32 项测试通过。
+
+Workshop W5 的原版作者唤醒、隔离历史与固定读点沿用 PR #14 的 `609e92278476c60a893658ef53b6ff15f659b153`；重新集成于签收的 W4 主线 `6c711adf794842bdf4469ab51e89093d37761bcc`。[当前串行验收](../integration/CURRENT_STAGE.md)

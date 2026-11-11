@@ -9,7 +9,7 @@ from mcp import types
 from mcp.server.lowlevel import Server
 from mcp.server.stdio import stdio_server
 
-from . import delegation, messaging, organization, reviews_skills
+from . import delegation, manager, messaging, organization, reviews_skills
 from .roster_projection import catalog_binding
 from .auth import Denied, authenticate, connect, private_binding
 
@@ -30,7 +30,7 @@ def negotiate(conn, session, protocol_version):
 
 TOOLS = {"aw_capabilities": ("Negotiate this connection's organization protocol.",
          {"type": "object", "required": ["protocol_version"], "additionalProperties": False,
-          "properties": {"protocol_version": {"type": "string", "maxLength": 32}}}, negotiate), **organization.TOOLS, **messaging.TOOLS, **delegation.TOOLS, **reviews_skills.TOOLS}
+          "properties": {"protocol_version": {"type": "string", "maxLength": 32}}}, negotiate), **organization.TOOLS, **messaging.TOOLS, **delegation.TOOLS, **reviews_skills.TOOLS, **manager.TOOLS}
 
 
 def dispatch(config, name=None, arguments=None):
@@ -57,6 +57,8 @@ def dispatch(config, name=None, arguments=None):
                 visible.discard("aw_review_get")
             if viewer["role_id"] != "reviewer":
                 visible.discard("aw_review_decide")
+            if viewer["role_id"] not in {"workshop_manager", "author"}:
+                visible.discard("aw_resume_project")
         if name is None:
             return sorted(visible)
         if name not in visible:

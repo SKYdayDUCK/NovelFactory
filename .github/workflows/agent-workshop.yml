@@ -100,6 +100,14 @@ jobs:
           REVOKE CONNECT ON DATABASE workshop_test FROM PUBLIC;
           CREATE DATABASE aw_upgrade_test OWNER aw_service;
           REVOKE CONNECT ON DATABASE aw_upgrade_test FROM PUBLIC;
+          CREATE DATABASE w5_from_w4c OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w5_from_w4c FROM PUBLIC;
+          CREATE DATABASE w5_from_w5 OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w5_from_w5 FROM PUBLIC;
+          CREATE DATABASE w5_from_w5a OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w5_from_w5a FROM PUBLIC;
+          CREATE DATABASE w5_from_w5b OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w5_from_w5b FROM PUBLIC;
           CREATE DATABASE w4_from_w3 OWNER aw_service;
           REVOKE CONNECT ON DATABASE w4_from_w3 FROM PUBLIC;
           CREATE DATABASE w4_from_w3_route OWNER aw_service;
@@ -172,6 +180,21 @@ jobs:
           for origin in w004 w004a w004b signed-view; do
             test -s "$AW_W4_ROUTING_UPGRADE_EVIDENCE_DIR/$origin.json"
           done
+      - name: Upgrade populated W4c and each deployed W5 database
+        working-directory: workshop
+        env:
+          AW_W5_UPGRADE_EVIDENCE_DIR: ${{ github.workspace }}/workshop/w5-upgrades
+        run: |
+          mkdir -p "$AW_W5_UPGRADE_EVIDENCE_DIR"
+          export AW_W5_FROM_W4C_DATABASE_URL="${AW_DATABASE_URL%/*}/w5_from_w4c"
+          export AW_W5_FROM_W5_DATABASE_URL="${AW_DATABASE_URL%/*}/w5_from_w5"
+          export AW_W5_FROM_W5A_DATABASE_URL="${AW_DATABASE_URL%/*}/w5_from_w5a"
+          export AW_W5_FROM_W5B_DATABASE_URL="${AW_DATABASE_URL%/*}/w5_from_w5b"
+          .venv/bin/python -m pytest -c pyproject.toml -q -o junit_family=xunit1 \
+            acceptance/test_w5_historical_upgrades.py --junitxml=w5-historical-upgrades.xml
+          for origin in w004c w005 w005a w005b; do
+            test -s "$AW_W5_UPGRADE_EVIDENCE_DIR/$origin.json"
+          done
       - name: Upgrade the released W0 service and verify existing bindings
         working-directory: workshop
         run: |
@@ -212,12 +235,14 @@ jobs:
           AW_DUAL_TEST_NF_ADMIN_URL: postgresql://postgres:nf-ci-admin@127.0.0.1:5433/postgres
           AW_W3_REDIS_IMAGE: redis:8.0.2
           AW_W3_REDIS_EVIDENCE: ${{ github.workspace }}/workshop/w3-redis-recovery.json
+          AW_OFFLINE_WITNESS: ${{ github.workspace }}/workshop/aw-offline.json
           AW_PAIRED_RESTORE_EVIDENCE: ${{ github.workspace }}/workshop/paired-restore.json
           PG_BIN: /usr/lib/postgresql/17/bin
         run: |
           bash scripts/ci_install_pg17.sh postgresql-17 postgresql-client-17
           PYTHONPATH="$PWD/workshop/src:$PWD/src" .venv/bin/python -m pytest \
             -c pyproject.toml -o junit_family=xunit1 -q workshop/integration --junitxml=workshop/dual-results.xml
+          test -s workshop/aw-offline.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -237,6 +262,9 @@ jobs:
             workshop/w4-historical-upgrades.xml
             workshop/w4-legacy-review.json
             workshop/w4-route-upgrades/*.json
+            workshop/w5-historical-upgrades.xml
+            workshop/w5-upgrades/*.json
+            workshop/aw-offline.json
             workshop/dual-results.xml
             workshop/paired-restore.json
             workshop/w3-redis-recovery.json

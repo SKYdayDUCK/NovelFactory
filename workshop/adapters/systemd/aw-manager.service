@@ -1,0 +1,10 @@
+[Unit]
+Description=Reconcile one durable author request
+After=network-online.target
+[Service]
+Type=oneshot
+User=aw-broker
+EnvironmentFile=/etc/agent-workshop/worker.env
+ExecStart=/opt/agent-workshop/bin/aw-manager-run --route /etc/agent-workshop/manager-route.json
+NoNewPrivileges=true
+PrivateTmp=true

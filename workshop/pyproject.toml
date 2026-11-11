@@ -16,6 +16,7 @@ streams = ["redis>=6.4,<7"]
 dev = ["pytest>=8.3,<10"]
 
 [project.scripts]
+aw-manager-run = "agent_workshop.manager_worker:main"
 aw-reconcile = "agent_workshop.reconcile:main"
 aw-provision = "agent_workshop.provision:main"
 aw-mcp = "agent_workshop.server:main"

@@ -1,4 +1,5 @@
 """Upgrade populated original W4 revisions before signing an existing review."""
+from decimal import Decimal
 from hashlib import sha256
 import json
 import os
@@ -152,6 +153,22 @@ def test_legacy_paid_review_requires_own_nf_installation(isolated_database, tmp_
         lead = {"database_url": dsn, "token": enroll(conn, "west", "legacy-film", "review-lead", 1, 1)}
         with pytest.raises(Denied, match="ORGANIZATION_UNAVAILABLE"):
             enroll(conn, "east", "legacy-film", "reviewer", 1, 1)
+    # W5's employee history must preserve the same installation boundary as the
+    # W4 assignment. The organization still owes every recorded settled charge.
+    history_rows_for_reviewer = dispatch(reviewer, "aw_history_get", {"limit": 200})["events"]
+    assert {row["ref_id"] for row in history_rows_for_reviewer if row["source"] == "aw_reviews"} == {
+        refs["manual"], refs["west-paid"],
+    }
+    with connect(dsn) as conn:
+        manager = {"database_url": dsn, "token": enroll(conn, "west", "legacy-film", "manager", 1, 1)}
+    account = dispatch(manager, "aw_state_get", {})["budget"]
+    assert Decimal(account["settled"]) == sum(Decimal(row["settled_amount"]) for row in before)
+    manager_events = dispatch(manager, "aw_history_get", {"limit": 200})["events"]
+    for source_name in ("aw_delegations", "aw_remote_receipts", "aw_budget_holds"):
+        assert {row["ref_id"] for row in manager_events if row["source"] == source_name} == {
+            row["operation_id"] for row in before if row["installation_id"] == "west"
+        }
+
     def read(ref):
         return dispatch(reviewer, "aw_review_get", {"review_id": refs[ref]})
     def freeze(ref):
