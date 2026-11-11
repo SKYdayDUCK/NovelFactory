@@ -1,0 +1,54 @@
+name: Profile exact 500-agent projection
+on:
+  push:
+    branches: ['evidence/p55-55d897-guard']
+    paths: ['.github/workflows/p55-profile.yml','evidence/p55/checkpoints/profile_fixed_cut.py']
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_DB: nf_test
+          POSTGRES_USER: nf_dev
+          POSTGRES_PASSWORD: nf_dev_ci_only
+          POSTGRES_INITDB_ARGS: --data-checksums
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U nf_dev -d nf_test"
+          --health-interval 2s --health-timeout 2s --health-retries 30
+    env:
+      NF_DATABASE_URL: postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/nf_test
+      NF_TEST_DATABASE_URL: postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/nf_test
+      PYTHONHASHSEED: '550897'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: registration
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 55d8979b5361a4837701d762feacd83036096b11
+          path: subject
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - name: Profile the pinned seed and compare hot storage reads
+        working-directory: subject
+        run: |
+          set -euo pipefail
+          uv sync --locked --group dev --python 3.12
+          export BENCH_RESULT="$GITHUB_WORKSPACE/profile.json"
+          export PYTHONPATH="$PWD:$PWD/src"
+          .venv/bin/python "$GITHUB_WORKSPACE/registration/evidence/p55/checkpoints/profile_fixed_cut.py"
+          cat "$BENCH_RESULT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p55-exact-500-fixed-cut-profile
+          path: profile.json

@@ -2,6 +2,7 @@ name: P55 exact-source guard acceptance
 on:
   push:
     branches: ['evidence/p55-55d897-guard']
+    paths: ['.github/workflows/p55-guard-acceptance.yml','evidence/p55/checkpoints/guard-registration.json']
 permissions:
   contents: read
 jobs:
