@@ -13,7 +13,8 @@ from novel_factory.domain.temporal import point_key
 
 
 def validate_volume_end(value):
-    require(isinstance(value, dict) and set(value) == {"series_id"}, "INVALID_ARGUMENT",
+    require(isinstance(value, dict) and set(value) - {"publish_after_review"} == {"series_id"}
+            and type(value.get("publish_after_review", False)) is bool, "INVALID_ARGUMENT",
             "An explicit end marker requires one authorized continuity series")
     validate_contract("UUID", value["series_id"])
 

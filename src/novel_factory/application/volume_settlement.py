@@ -114,6 +114,7 @@ def finish(kernel, repo, owner, task, spec, allowance, scenes):
     plan = kernel.artifact(repo, selected, work, kind="PLAN_REVISION")["payload"]
     series = allowance["volume_end"]["series_id"]
     body = {
+        "publish_after_review": allowance["volume_end"].get("publish_after_review", False),
         "series_id": series,
         "volume_id": volume,
         "world_ref": wr,
@@ -252,6 +253,16 @@ def prepare_after_release(kernel, repo, wr, volume, release_ref):
                 "idempotency_key": key,
             }
             candidate = ContinuityService(kernel.in_transaction(repo)).prepare(owner, request)
+            if body.get("publish_after_review"):
+                repo.add(
+                    "selections",
+                    {
+                        "work_id": work,
+                        "selection_kind": "SETTLEMENT_PUBLISH:" + candidate["artifact_revision_id"],
+                        "artifact_ref": settlement,
+                        "epoch": 1,
+                    },
+                )
             result = {"status": "AWAITING_INDEPENDENT_REVIEW", "candidate_ref": candidate}
     except DomainError as error:
         result = {"status": "SETTLEMENT_REVIEW_DEFERRED", "reason": error.code}
@@ -261,4 +272,53 @@ def prepare_after_release(kernel, repo, wr, volume, release_ref):
         volume,
         {**result, "settlement_ref": settlement, "release_ref": release_ref},
         key,
+    )
+
+
+def publish_after_review(kernel, repo, work, candidate_ref, review_ref):
+    """Consume a real, independent approval only for this exact preauthorized candidate."""
+    mandate = _ref(repo, work, "SETTLEMENT_PUBLISH:" + candidate_ref["artifact_revision_id"])
+    if mandate is None:
+        return
+    body = kernel.artifact(repo, mandate, work, kind="VOLUME_SETTLEMENT_CANDIDATE")["payload"]
+    volume, wr = body["volume_id"], body["world_ref"]
+    key = "settlement-publish:" + candidate_ref["artifact_revision_id"]
+    try:
+        with repo.conn.begin_nested():
+            authorization = body["authorizer"]
+            owner = Principal(authorization["grant_id"], authorization["principal_id"])
+            grant = kernel.authorize(repo, owner, work, "ADMIN", wr["branch_id"])
+            require(
+                body.get("publish_after_review") is True
+                and grant["epoch"] == authorization["epoch"]
+                and repo.one("works", {"work_id": work})["policy_version"]
+                == authorization["policy_version"]
+                and _ref(repo, work, f"VOLUME_SETTLEMENT:{wr['branch_id']}:{volume}") == mandate,
+                "VIEW_DENIED",
+                "Settlement publication authorization changed",
+            )
+            result = ContinuityService(kernel.in_transaction(repo)).publish(
+                owner,
+                work,
+                {
+                    "schema_version": "2.3",
+                    "candidate_ref": candidate_ref,
+                    "review_ref": review_ref,
+                    "idempotency_key": key,
+                },
+            )
+            outcome = {"status": "CONTINUITY_PUBLISHED", "snapshot_ref": result["snapshot_ref"]}
+    except DomainError as error:
+        outcome = {"status": "SETTLEMENT_PUBLICATION_DEFERRED", "reason": error.code}
+    repo.outbox(
+        "volume.settlement.publication",
+        "volume",
+        volume,
+        {
+            **outcome,
+            "candidate_ref": candidate_ref,
+            "review_ref": review_ref,
+            "settlement_ref": mandate,
+        },
+        key + ":" + review_ref["artifact_revision_id"],
     )

@@ -293,6 +293,9 @@ class ContinuityService:
             ref = self.kernel._blob(review)
             self.kernel._register_artifact(repo, ref, work_id, review, "CONTINUITY_REVIEW", principal.principal_id)
             self.kernel._receipt(repo, principal, wr, "CONTINUITY_REVIEW", request["idempotency_key"], request, ref)
+            if request["decision"] == "APPROVED":
+                from novel_factory.application.volume_settlement import publish_after_review
+                publish_after_review(self.kernel, repo, work_id, request["candidate_ref"], ref)
         return ref
 
     def publish(self, principal, work_id, payload, *, fault=None):
