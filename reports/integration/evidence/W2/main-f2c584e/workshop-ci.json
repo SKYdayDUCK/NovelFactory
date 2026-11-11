@@ -1,0 +1,137 @@
+{
+  "stage": "W2",
+  "source": "f2c584ec8e738e09d31b05ddd5c032bb2b8f96b1",
+  "tree": "bb41e0bb3d2deaaccbbb26bd18a18676718cd7c8",
+  "parents": [
+    "d039839fe68f6403ea6e5590af3ed787318d5b5f",
+    "162af2695b76b20c0257b28217a3eb5b4096d7f6"
+  ],
+  "observed": "2026-11-11 18:21:37 UTC",
+  "jobs": [
+    {
+      "run": 43076279221,
+      "job": 130716814017,
+      "name": "workshop",
+      "status": "completed",
+      "conclusion": "success",
+      "raw_log_sha256": "2ca681ea931c53687a87f175402975ccb1d93768907ecd9f3d2519c714e37060",
+      "pytest": [
+        "35 passed in 18.16s",
+        "1 passed in 3.12s",
+        "2 passed in 5.22s",
+        "5 passed in 15.89s",
+        "2 passed in 3.34s"
+      ]
+    },
+    {
+      "run": 43076279023,
+      "job": 130716812798,
+      "name": "PostgreSQL 17 integration, concurrency and restore",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "run": 43076279023,
+      "job": 130716813142,
+      "name": "Schema, domain, HTTP and production boundaries",
+      "status": "completed",
+      "conclusion": "success",
+      "raw_log_sha256": "13fb24cd9c665e205126e08ecd30e5cd46c93be5137686c6b7f90e33f66f8881",
+      "pytest": [
+        "398 passed in 15.70s"
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "run": 43076279221,
+      "name": "workshop-results",
+      "id": 13882612205,
+      "sha256": "5cb8f0f9117657001e0eb47342f9ba12e5f4baa09671a7f58703d2c1329ec06c",
+      "entries": {
+        "workshop-results.xml": {
+          "sha256": "7c8d6115d43742c20895bc9eff0ee6174c5295f9260399eacf13f145a14e92f3",
+          "bytes": 4614,
+          "counts": {
+            "tests": 35,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        },
+        "nf-tools.json": {
+          "sha256": "84db29b891df3884a04ec0e1cdf3b56ac7999edb69fdbe2060366b7d1a0313d4",
+          "bytes": 4240,
+          "missing": [],
+          "distinct_NF_tools": 9
+        },
+        "nf-tools.xml": {
+          "sha256": "cdb6bfc9f2d29dfd7b3faffa06ff6b9180982ef030b531e8e6e7b4613e0d04c3",
+          "bytes": 2284,
+          "counts": {
+            "tests": 5,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        },
+        "dual-service-results.xml": {
+          "sha256": "a0f1d08867edb806a5c783e2aecd2b143e7ba23964a2ffcbbb8459ce20cf1a60",
+          "bytes": 2686,
+          "counts": {
+            "tests": 2,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        },
+        "w1-legacy-upgrade.xml": {
+          "sha256": "78dbff20e87ceaa7417fb7ff6a80dd0adf9aac1f70bb8738e0293803d5e8e9e5",
+          "bytes": 620,
+          "counts": {
+            "tests": 1,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        },
+        "w2-legacy-upgrades.xml": {
+          "sha256": "59fbc71a2af09fbd51c4d34e2d106e31f27350ccca6b547daa765f238c581570",
+          "bytes": 1916,
+          "counts": {
+            "tests": 2,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        },
+        "routing-matrix.json": {
+          "sha256": "107c7e3ca832c5cad8acaa6f9f5f1a3a38faf71dae514e09404e1b3673475a20",
+          "bytes": 16391
+        },
+        "w2-transport.json": {
+          "sha256": "601bbd93526649ec724794596f8887a1bc6be3c0b0c3ff03c14c4cefa65b5c0d",
+          "bytes": 178
+        }
+      }
+    },
+    {
+      "run": 43076279023,
+      "name": "p1-schema-unit-1",
+      "id": 13882906962,
+      "sha256": "f629101877ebf7ed79291cfc023731a8e7bb06d2ad113745e1e1d633beb5265e",
+      "entries": {
+        "unit.xml": {
+          "sha256": "2817cddfc99776b29cb0d8c543c22ed91113f635b2dcf9f0eeaff26b45677a91",
+          "bytes": 60848,
+          "counts": {
+            "tests": 398,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        }
+      }
+    }
+  ]
+}
