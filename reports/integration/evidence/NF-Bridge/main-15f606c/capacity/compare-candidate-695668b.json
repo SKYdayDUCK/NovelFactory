@@ -1,0 +1,702 @@
+{
+  "previous_head": "695668b87f6a76acbe7e27c71fcb259b7b3f0795",
+  "current_head": "15f606c99c765deeffd904ad540441eb6476b3af",
+  "comparison_scope": "Independent hosted runs of the same workloads; no matched hardware or new code causality claimed.",
+  "previous_evidence_commit": "fec68fa14bef993d6737eb7e401a790a3af29da9",
+  "results": [
+    {
+      "artifact_name": "p3-isolated-200-overload-1",
+      "member": "load.json",
+      "previous_artifact": 13883743514,
+      "current_artifact": 13885447574,
+      "previous": {
+        "engineer_correctness": "PASS",
+        "bounded_recovery": "PASS",
+        "capacity": "NOT_MET",
+        "logical_completed": 2141,
+        "logical_emitted": 2141,
+        "actual_new_revisions": 21,
+        "expected_new_revisions": 21,
+        "expected_resources_retained": true,
+        "pooled_connections_released": true,
+        "unresolved_errors": 0,
+        "correctness_errors": 0,
+        "first_attempt_failures": 553,
+        "start_rps": 34.99947290583598,
+        "header_start_rps": 28.707175374289545,
+        "p95_ms": 7335.437,
+        "model_calls": 0,
+        "model_token_count": 0,
+        "billing_record": {
+          "actual_calls": 0,
+          "tokens": 0,
+          "billed_cost_usd": null,
+          "status": "NOT_DISPATCHED"
+        }
+      },
+      "current": {
+        "engineer_correctness": "PASS",
+        "bounded_recovery": "PASS",
+        "capacity": "NOT_MET",
+        "logical_completed": 2141,
+        "logical_emitted": 2141,
+        "actual_new_revisions": 21,
+        "expected_new_revisions": 21,
+        "expected_resources_retained": true,
+        "pooled_connections_released": true,
+        "unresolved_errors": 0,
+        "correctness_errors": 0,
+        "first_attempt_failures": 520,
+        "start_rps": 52.12690014682677,
+        "header_start_rps": 39.54817535843056,
+        "p95_ms": 8383.9697,
+        "model_calls": 0,
+        "model_token_count": 0,
+        "billing_record": {
+          "actual_calls": 0,
+          "tokens": 0,
+          "billed_cost_usd": null,
+          "status": "NOT_DISPATCHED"
+        }
+      },
+      "differences_requiring_investigation": []
+    },
+    {
+      "artifact_name": "p3-isolated-200-mixed-1",
+      "member": "load.json",
+      "previous_artifact": 13885670319,
+      "current_artifact": 13884124567,
+      "previous": {
+        "engineer_correctness": "PASS",
+        "bounded_recovery": "PASS",
+        "capacity": "PASS",
+        "logical_completed": 1141,
+        "logical_emitted": 1141,
+        "actual_new_revisions": 21,
+        "expected_new_revisions": 21,
+        "expected_resources_retained": true,
+        "pooled_connections_released": true,
+        "unresolved_errors": 0,
+        "correctness_errors": 0,
+        "first_attempt_failures": 0,
+        "p95_ms": 171.2099,
+        "model_calls": 0,
+        "model_token_count": 0,
+        "billing_record": {
+          "actual_calls": 0,
+          "tokens": 0,
+          "billed_cost_usd": null,
+          "status": "NOT_DISPATCHED"
+        }
+      },
+      "current": {
+        "engineer_correctness": "PASS",
+        "bounded_recovery": "PASS",
+        "capacity": "PASS",
+        "logical_completed": 1141,
+        "logical_emitted": 1141,
+        "actual_new_revisions": 21,
+        "expected_new_revisions": 21,
+        "expected_resources_retained": true,
+        "pooled_connections_released": true,
+        "unresolved_errors": 0,
+        "correctness_errors": 0,
+        "first_attempt_failures": 0,
+        "p95_ms": 150.2672,
+        "model_calls": 0,
+        "model_token_count": 0,
+        "billing_record": {
+          "actual_calls": 0,
+          "tokens": 0,
+          "billed_cost_usd": null,
+          "status": "NOT_DISPATCHED"
+        }
+      },
+      "differences_requiring_investigation": []
+    },
+    {
+      "artifact_name": "p3-context-paired-1",
+      "member": "context-p3.json",
+      "previous_artifact": 13883384934,
+      "current_artifact": 13883829935,
+      "previous": {
+        "world_unchanged": true,
+        "model_calls": 0
+      },
+      "current": {
+        "world_unchanged": true,
+        "model_calls": 0
+      },
+      "differences_requiring_investigation": []
+    },
+    {
+      "artifact_name": "p2-load-200-mixed-1",
+      "member": "run-1/load.json",
+      "previous_artifact": 13883854214,
+      "current_artifact": 13886180654,
+      "previous": {
+        "engineer_correctness": "PASS",
+        "bounded_recovery": "PASS",
+        "capacity": "PASS",
+        "logical_completed": 1141,
+        "logical_emitted": 1141,
+        "actual_new_revisions": 21,
+        "expected_new_revisions": 21,
+        "expected_resources_retained": true,
+        "pooled_connections_released": true,
+        "unresolved_errors": 0,
+        "correctness_errors": 0,
+        "first_attempt_failures": 0,
+        "p95_ms": 96.966,
+        "model_calls": 0,
+        "model_token_count": 0,
+        "billing_record": {
+          "actual_calls": 0,
+          "tokens": 0,
+          "billed_cost_usd": null,
+          "status": "NOT_DISPATCHED"
+        }
+      },
+      "current": {
+        "engineer_correctness": "PASS",
+        "bounded_recovery": "PASS",
+        "capacity": "PASS",
+        "logical_completed": 1141,
+        "logical_emitted": 1141,
+        "actual_new_revisions": 21,
+        "expected_new_revisions": 21,
+        "expected_resources_retained": true,
+        "pooled_connections_released": true,
+        "unresolved_errors": 0,
+        "correctness_errors": 0,
+        "first_attempt_failures": 0,
+        "p95_ms": 181.9592,
+        "model_calls": 0,
+        "model_token_count": 0,
+        "billing_record": {
+          "actual_calls": 0,
+          "tokens": 0,
+          "billed_cost_usd": null,
+          "status": "NOT_DISPATCHED"
+        }
+      },
+      "differences_requiring_investigation": []
+    },
+    {
+      "artifact_name": "p2-load-200-mixed-1",
+      "member": "run-2/load.json",
+      "previous_artifact": 13883854214,
+      "current_artifact": 13886180654,
+      "previous": {
+        "engineer_correctness": "PASS",
+        "bounded_recovery": "PASS",
+        "capacity": "PASS",
+        "logical_completed": 1141,
+        "logical_emitted": 1141,
+        "actual_new_revisions": 21,
+        "expected_new_revisions": 21,
+        "expected_resources_retained": true,
+        "pooled_connections_released": true,
+        "unresolved_errors": 0,
+        "correctness_errors": 0,
+        "first_attempt_failures": 0,
+        "p95_ms": 89.9431,
+        "model_calls": 0,
+        "model_token_count": 0,
+        "billing_record": {
+          "actual_calls": 0,
+          "tokens": 0,
+          "billed_cost_usd": null,
+          "status": "NOT_DISPATCHED"
+        }
+      },
+      "current": {
+        "engineer_correctness": "PASS",
+        "bounded_recovery": "PASS",
+        "capacity": "PASS",
+        "logical_completed": 1141,
+        "logical_emitted": 1141,
+        "actual_new_revisions": 21,
+        "expected_new_revisions": 21,
+        "expected_resources_retained": true,
+        "pooled_connections_released": true,
+        "unresolved_errors": 0,
+        "correctness_errors": 0,
+        "first_attempt_failures": 0,
+        "p95_ms": 180.4536,
+        "model_calls": 0,
+        "model_token_count": 0,
+        "billing_record": {
+          "actual_calls": 0,
+          "tokens": 0,
+          "billed_cost_usd": null,
+          "status": "NOT_DISPATCHED"
+        }
+      },
+      "differences_requiring_investigation": []
+    },
+    {
+      "artifact_name": "p2-load-200-overload-1",
+      "member": "run-1/load.json",
+      "previous_artifact": 13885391227,
+      "current_artifact": 13885358235,
+      "previous": {
+        "engineer_correctness": "PASS",
+        "bounded_recovery": "PASS",
+        "capacity": "NOT_MET",
+        "logical_completed": 2141,
+        "logical_emitted": 2141,
+        "actual_new_revisions": 21,
+        "expected_new_revisions": 21,
+        "expected_resources_retained": true,
+        "pooled_connections_released": true,
+        "unresolved_errors": 0,
+        "correctness_errors": 0,
+        "first_attempt_failures": 562,
+        "start_rps": 36.190080737208234,
+        "header_start_rps": 30.51072479463672,
+        "p95_ms": 7110.3757,
+        "model_calls": 0,
+        "model_token_count": 0,
+        "billing_record": {
+          "actual_calls": 0,
+          "tokens": 0,
+          "billed_cost_usd": null,
+          "status": "NOT_DISPATCHED"
+        }
+      },
+      "current": {
+        "engineer_correctness": "PASS",
+        "bounded_recovery": "PASS",
+        "capacity": "NOT_MET",
+        "logical_completed": 2141,
+        "logical_emitted": 2141,
+        "actual_new_revisions": 21,
+        "expected_new_revisions": 21,
+        "expected_resources_retained": true,
+        "pooled_connections_released": true,
+        "unresolved_errors": 0,
+        "correctness_errors": 0,
+        "first_attempt_failures": 559,
+        "start_rps": 32.72536977784258,
+        "header_start_rps": 30.675935487064475,
+        "p95_ms": 7009.0442,
+        "model_calls": 0,
+        "model_token_count": 0,
+        "billing_record": {
+          "actual_calls": 0,
+          "tokens": 0,
+          "billed_cost_usd": null,
+          "status": "NOT_DISPATCHED"
+        }
+      },
+      "differences_requiring_investigation": []
+    },
+    {
+      "artifact_name": "p2-load-200-overload-1",
+      "member": "run-2/load.json",
+      "previous_artifact": 13885391227,
+      "current_artifact": 13885358235,
+      "previous": {
+        "engineer_correctness": "PASS",
+        "bounded_recovery": "PASS",
+        "capacity": "NOT_MET",
+        "logical_completed": 2141,
+        "logical_emitted": 2141,
+        "actual_new_revisions": 21,
+        "expected_new_revisions": 21,
+        "expected_resources_retained": true,
+        "pooled_connections_released": true,
+        "unresolved_errors": 0,
+        "correctness_errors": 0,
+        "first_attempt_failures": 543,
+        "start_rps": 34.85296444872029,
+        "header_start_rps": 33.958364393849294,
+        "p95_ms": 7550.3086,
+        "model_calls": 0,
+        "model_token_count": 0,
+        "billing_record": {
+          "actual_calls": 0,
+          "tokens": 0,
+          "billed_cost_usd": null,
+          "status": "NOT_DISPATCHED"
+        }
+      },
+      "current": {
+        "engineer_correctness": "PASS",
+        "bounded_recovery": "PASS",
+        "capacity": "NOT_MET",
+        "logical_completed": 2141,
+        "logical_emitted": 2141,
+        "actual_new_revisions": 21,
+        "expected_new_revisions": 21,
+        "expected_resources_retained": true,
+        "pooled_connections_released": true,
+        "unresolved_errors": 0,
+        "correctness_errors": 0,
+        "first_attempt_failures": 565,
+        "start_rps": 34.5821684785092,
+        "header_start_rps": 28.529441784203303,
+        "p95_ms": 7426.0342,
+        "model_calls": 0,
+        "model_token_count": 0,
+        "billing_record": {
+          "actual_calls": 0,
+          "tokens": 0,
+          "billed_cost_usd": null,
+          "status": "NOT_DISPATCHED"
+        }
+      },
+      "differences_requiring_investigation": []
+    },
+    {
+      "artifact_name": "p2-load-50-overload-1",
+      "member": "run-1/load.json",
+      "previous_artifact": 13885670202,
+      "current_artifact": 13885237960,
+      "previous": {
+        "engineer_correctness": "PASS",
+        "bounded_recovery": "PASS",
+        "capacity": "NOT_MET",
+        "logical_completed": 536,
+        "logical_emitted": 536,
+        "actual_new_revisions": 6,
+        "expected_new_revisions": 6,
+        "expected_resources_retained": true,
+        "pooled_connections_released": true,
+        "unresolved_errors": 0,
+        "correctness_errors": 0,
+        "first_attempt_failures": 73,
+        "start_rps": 165.8621132964796,
+        "header_start_rps": 66.8030450383983,
+        "p95_ms": 3542.9336,
+        "model_calls": 0,
+        "model_token_count": 0,
+        "billing_record": {
+          "actual_calls": 0,
+          "tokens": 0,
+          "billed_cost_usd": null,
+          "status": "NOT_DISPATCHED"
+        }
+      },
+      "current": {
+        "engineer_correctness": "PASS",
+        "bounded_recovery": "PASS",
+        "capacity": "NOT_MET",
+        "logical_completed": 536,
+        "logical_emitted": 536,
+        "actual_new_revisions": 6,
+        "expected_new_revisions": 6,
+        "expected_resources_retained": true,
+        "pooled_connections_released": true,
+        "unresolved_errors": 0,
+        "correctness_errors": 0,
+        "first_attempt_failures": 90,
+        "start_rps": 281.4373423272728,
+        "header_start_rps": 214.97968053501356,
+        "p95_ms": 1859.4099,
+        "model_calls": 0,
+        "model_token_count": 0,
+        "billing_record": {
+          "actual_calls": 0,
+          "tokens": 0,
+          "billed_cost_usd": null,
+          "status": "NOT_DISPATCHED"
+        }
+      },
+      "differences_requiring_investigation": []
+    },
+    {
+      "artifact_name": "p2-load-50-overload-1",
+      "member": "run-2/load.json",
+      "previous_artifact": 13885670202,
+      "current_artifact": 13885237960,
+      "previous": {
+        "engineer_correctness": "PASS",
+        "bounded_recovery": "PASS",
+        "capacity": "NOT_MET",
+        "logical_completed": 536,
+        "logical_emitted": 536,
+        "actual_new_revisions": 6,
+        "expected_new_revisions": 6,
+        "expected_resources_retained": true,
+        "pooled_connections_released": true,
+        "unresolved_errors": 0,
+        "correctness_errors": 0,
+        "first_attempt_failures": 105,
+        "start_rps": 227.50114207400566,
+        "header_start_rps": 128.53908362474024,
+        "p95_ms": 2435.4958,
+        "model_calls": 0,
+        "model_token_count": 0,
+        "billing_record": {
+          "actual_calls": 0,
+          "tokens": 0,
+          "billed_cost_usd": null,
+          "status": "NOT_DISPATCHED"
+        }
+      },
+      "current": {
+        "engineer_correctness": "PASS",
+        "bounded_recovery": "PASS",
+        "capacity": "NOT_MET",
+        "logical_completed": 536,
+        "logical_emitted": 536,
+        "actual_new_revisions": 6,
+        "expected_new_revisions": 6,
+        "expected_resources_retained": true,
+        "pooled_connections_released": true,
+        "unresolved_errors": 0,
+        "correctness_errors": 0,
+        "first_attempt_failures": 84,
+        "start_rps": 216.23931178582396,
+        "header_start_rps": 71.5959984450154,
+        "p95_ms": 2808.6078,
+        "model_calls": 0,
+        "model_token_count": 0,
+        "billing_record": {
+          "actual_calls": 0,
+          "tokens": 0,
+          "billed_cost_usd": null,
+          "status": "NOT_DISPATCHED"
+        }
+      },
+      "differences_requiring_investigation": []
+    },
+    {
+      "artifact_name": "p2-load-50-mixed-1",
+      "member": "run-1/load.json",
+      "previous_artifact": 13884432395,
+      "current_artifact": 13884998210,
+      "previous": {
+        "engineer_correctness": "PASS",
+        "bounded_recovery": "PASS",
+        "capacity": "PASS",
+        "logical_completed": 286,
+        "logical_emitted": 286,
+        "actual_new_revisions": 6,
+        "expected_new_revisions": 6,
+        "expected_resources_retained": true,
+        "pooled_connections_released": true,
+        "unresolved_errors": 0,
+        "correctness_errors": 0,
+        "first_attempt_failures": 0,
+        "p95_ms": 133.3407,
+        "model_calls": 0,
+        "model_token_count": 0,
+        "billing_record": {
+          "actual_calls": 0,
+          "tokens": 0,
+          "billed_cost_usd": null,
+          "status": "NOT_DISPATCHED"
+        }
+      },
+      "current": {
+        "engineer_correctness": "PASS",
+        "bounded_recovery": "PASS",
+        "capacity": "PASS",
+        "logical_completed": 286,
+        "logical_emitted": 286,
+        "actual_new_revisions": 6,
+        "expected_new_revisions": 6,
+        "expected_resources_retained": true,
+        "pooled_connections_released": true,
+        "unresolved_errors": 0,
+        "correctness_errors": 0,
+        "first_attempt_failures": 0,
+        "p95_ms": 97.9091,
+        "model_calls": 0,
+        "model_token_count": 0,
+        "billing_record": {
+          "actual_calls": 0,
+          "tokens": 0,
+          "billed_cost_usd": null,
+          "status": "NOT_DISPATCHED"
+        }
+      },
+      "differences_requiring_investigation": []
+    },
+    {
+      "artifact_name": "p2-load-50-mixed-1",
+      "member": "run-2/load.json",
+      "previous_artifact": 13884432395,
+      "current_artifact": 13884998210,
+      "previous": {
+        "engineer_correctness": "PASS",
+        "bounded_recovery": "PASS",
+        "capacity": "PASS",
+        "logical_completed": 286,
+        "logical_emitted": 286,
+        "actual_new_revisions": 6,
+        "expected_new_revisions": 6,
+        "expected_resources_retained": true,
+        "pooled_connections_released": true,
+        "unresolved_errors": 0,
+        "correctness_errors": 0,
+        "first_attempt_failures": 0,
+        "p95_ms": 121.8991,
+        "model_calls": 0,
+        "model_token_count": 0,
+        "billing_record": {
+          "actual_calls": 0,
+          "tokens": 0,
+          "billed_cost_usd": null,
+          "status": "NOT_DISPATCHED"
+        }
+      },
+      "current": {
+        "engineer_correctness": "PASS",
+        "bounded_recovery": "PASS",
+        "capacity": "PASS",
+        "logical_completed": 286,
+        "logical_emitted": 286,
+        "actual_new_revisions": 6,
+        "expected_new_revisions": 6,
+        "expected_resources_retained": true,
+        "pooled_connections_released": true,
+        "unresolved_errors": 0,
+        "correctness_errors": 0,
+        "first_attempt_failures": 0,
+        "p95_ms": 103.1056,
+        "model_calls": 0,
+        "model_token_count": 0,
+        "billing_record": {
+          "actual_calls": 0,
+          "tokens": 0,
+          "billed_cost_usd": null,
+          "status": "NOT_DISPATCHED"
+        }
+      },
+      "differences_requiring_investigation": []
+    },
+    {
+      "artifact_name": "p3-scale-500-mixed-1",
+      "member": "result.json",
+      "previous_artifact": 13884298236,
+      "current_artifact": 13886580190,
+      "previous": {
+        "engineer_correctness": "PASS",
+        "bounded_recovery": "PASS",
+        "capacity": "PASS",
+        "logical_completed": 2851,
+        "logical_emitted": 2851,
+        "actual_new_revisions": 51,
+        "expected_new_revisions": 51,
+        "expected_resources_retained": true,
+        "pooled_connections_released": true,
+        "unresolved_errors": 0,
+        "correctness_errors": 0,
+        "first_attempt_failures": 0,
+        "p95_ms": 147.7578,
+        "model_calls": 0,
+        "model_token_count": 0,
+        "billing_record": {
+          "actual_calls": 0,
+          "tokens": 0,
+          "billed_cost_usd": null,
+          "status": "NOT_DISPATCHED"
+        }
+      },
+      "current": {
+        "engineer_correctness": "PASS",
+        "bounded_recovery": "PASS",
+        "capacity": "PASS",
+        "logical_completed": 2851,
+        "logical_emitted": 2851,
+        "actual_new_revisions": 51,
+        "expected_new_revisions": 51,
+        "expected_resources_retained": true,
+        "pooled_connections_released": true,
+        "unresolved_errors": 0,
+        "correctness_errors": 0,
+        "first_attempt_failures": 0,
+        "p95_ms": 158.1756,
+        "model_calls": 0,
+        "model_token_count": 0,
+        "billing_record": {
+          "actual_calls": 0,
+          "tokens": 0,
+          "billed_cost_usd": null,
+          "status": "NOT_DISPATCHED"
+        }
+      },
+      "differences_requiring_investigation": []
+    },
+    {
+      "artifact_name": "p3-scale-500-read-soak-1",
+      "member": "result.json",
+      "previous_artifact": 13885626628,
+      "current_artifact": 13885089092,
+      "previous": {
+        "capacity": "PASS",
+        "world_unchanged": true,
+        "new_world_commits": 0,
+        "correctness_errors": 0,
+        "status_counts": {
+          "200": 12000
+        },
+        "start_rps": 20.000482622163474,
+        "p95_ms": 98.7357,
+        "successful_query_rps": 19.99868048722811,
+        "model_calls": 0,
+        "long_duration_gate": "NOT_EXECUTED"
+      },
+      "current": {
+        "capacity": "PASS",
+        "world_unchanged": true,
+        "new_world_commits": 0,
+        "correctness_errors": 0,
+        "status_counts": {
+          "200": 12000
+        },
+        "start_rps": 20.000828756233915,
+        "p95_ms": 126.2724,
+        "successful_query_rps": 19.995514471923777,
+        "model_calls": 0,
+        "long_duration_gate": "NOT_EXECUTED"
+      },
+      "differences_requiring_investigation": []
+    },
+    {
+      "artifact_name": "p3-scale-1000-read-open-1",
+      "member": "result.json",
+      "previous_artifact": 13884083234,
+      "current_artifact": 13884539464,
+      "previous": {
+        "capacity": "NOT_MET",
+        "world_unchanged": true,
+        "new_world_commits": 0,
+        "correctness_errors": 0,
+        "status_counts": {
+          "429": 3242,
+          "200": 1745,
+          "transport_error": 13
+        },
+        "start_rps": 41.85690586984171,
+        "header_start_rps": 40.73451675770588,
+        "p95_ms": 6584.0724,
+        "successful_query_rps": 14.123409274024548,
+        "validated_responses": 1745,
+        "model_calls": 0
+      },
+      "current": {
+        "capacity": "NOT_MET",
+        "world_unchanged": true,
+        "new_world_commits": 0,
+        "correctness_errors": 0,
+        "status_counts": {
+          "429": 2600,
+          "200": 2397,
+          "transport_error": 3
+        },
+        "start_rps": 53.08766897014426,
+        "header_start_rps": 53.03695359420735,
+        "p95_ms": 6686.3982,
+        "successful_query_rps": 24.7847745455645,
+        "validated_responses": 2397,
+        "model_calls": 0
+      },
+      "differences_requiring_investigation": []
+    }
+  ]
+}
