@@ -35,6 +35,10 @@ def test_roster_routing_stays_outside_belief_and_other_actors_prompt(kernel_env,
     })
     world = kernel.bootstrap_work("AT-43 isolated synthetic project", genesis, frontiers=fixture["frontiers"])
     wr, owner = world["world_ref"], world["principal"]
+    with kernel.db.uow(write=False) as repo:
+        original_cognitions = kernel.revision(repo, wr)["snapshot"]["cognitions"]
+        assert len(original_cognitions) == 1 and original_cognitions[0]["actor_id"] == other
+        assert original_cognitions[0]["object_value"]["entity_id"] == private_value
     org, inst, nf_instance = (str(uuid4()) for _ in range(3))
     with connect(dual_databases["aw"]) as conn:
         conn.execute("INSERT INTO aw_installations(installation_id,nf_instance_id) VALUES (%s,%s)", (inst, nf_instance))
@@ -115,7 +119,7 @@ def test_roster_routing_stays_outside_belief_and_other_actors_prompt(kernel_env,
         with kernel.db.uow(write=False) as repo:
             assert kernel.head(repo, wr["work_id"], wr["branch_id"]) == wr
             persisted = kernel.revision(repo, wr)["snapshot"]["cognitions"]
-            assert persisted == genesis["cognitions"] and route_mark not in json.dumps(persisted)
+            assert persisted == original_cognitions and route_mark not in json.dumps(persisted)
             assert private_value in json.dumps(persisted) and len(repo.many("call_attempts", {"task_id": local.task["task_id"]})) == 1
         out = Path(os.environ["AW_ACCEPTANCE_OUTPUT"])
         out.mkdir(exist_ok=True, parents=True)
