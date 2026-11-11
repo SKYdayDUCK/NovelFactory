@@ -1,0 +1,109 @@
+{
+  "tools": {
+    "nf_artifact_put": {
+      "discovered": [
+        "tests/integration/test_p5_mcp.py::test_actor_stdio_own_cut_only_and_candidate_replay",
+        "tests/integration/test_p5_rolling.py::test_banquet_absence_pins_reference_and_limits_replanning"
+      ],
+      "success": [
+        "tests/integration/test_p5_mcp.py::test_actor_stdio_own_cut_only_and_candidate_replay"
+      ],
+      "denied": [
+        "tests/integration/test_p5_mcp.py::test_project_stdio_resume_is_scoped_and_live"
+      ]
+    },
+    "nf_change_point_request": {
+      "discovered": [
+        "tests/integration/test_p5_rolling.py::test_banquet_absence_pins_reference_and_limits_replanning"
+      ],
+      "success": [
+        "tests/integration/test_p5_rolling.py::test_banquet_absence_pins_reference_and_limits_replanning"
+      ],
+      "denied": [
+        "tests/integration/test_p5_rolling.py::test_banquet_absence_pins_reference_and_limits_replanning"
+      ]
+    },
+    "nf_change_point_review": {
+      "discovered": [
+        "tests/integration/test_p5_rolling.py::test_banquet_absence_pins_reference_and_limits_replanning"
+      ],
+      "success": [
+        "tests/integration/test_p5_rolling.py::test_banquet_absence_pins_reference_and_limits_replanning"
+      ],
+      "denied": [
+        "tests/integration/test_p5_rolling.py::test_banquet_absence_pins_reference_and_limits_replanning"
+      ]
+    },
+    "nf_context_get": {
+      "discovered": [
+        "tests/integration/test_p5_mcp.py::test_actor_stdio_own_cut_only_and_candidate_replay",
+        "tests/integration/test_p5_rolling.py::test_banquet_absence_pins_reference_and_limits_replanning"
+      ],
+      "success": [
+        "tests/integration/test_p5_mcp.py::test_actor_stdio_own_cut_only_and_candidate_replay"
+      ],
+      "denied": [
+        "tests/integration/test_p5_mcp.py::test_project_stdio_resume_is_scoped_and_live"
+      ]
+    },
+    "nf_project_status": {
+      "discovered": [
+        "tests/integration/test_p5_mcp.py::test_project_stdio_resume_is_scoped_and_live"
+      ],
+      "success": [
+        "tests/integration/test_p5_mcp.py::test_project_stdio_resume_is_scoped_and_live"
+      ],
+      "denied": [
+        "tests/integration/test_p5_mcp.py::test_project_stdio_resume_is_scoped_and_live"
+      ]
+    },
+    "nf_query_batch": {
+      "discovered": [
+        "tests/integration/test_p5_mcp.py::test_actor_stdio_own_cut_only_and_candidate_replay",
+        "tests/integration/test_p5_rolling.py::test_banquet_absence_pins_reference_and_limits_replanning"
+      ],
+      "success": [
+        "tests/integration/test_p5_mcp.py::test_actor_stdio_own_cut_only_and_candidate_replay"
+      ],
+      "denied": [
+        "tests/integration/test_p5_mcp.py::test_project_stdio_resume_is_scoped_and_live"
+      ]
+    },
+    "nf_resume_project": {
+      "discovered": [
+        "tests/integration/test_p5_mcp.py::test_project_stdio_resume_is_scoped_and_live"
+      ],
+      "success": [
+        "tests/integration/test_p5_mcp.py::test_project_stdio_resume_is_scoped_and_live"
+      ],
+      "denied": [
+        "tests/integration/test_p5_mcp.py::test_project_stdio_resume_is_scoped_and_live",
+        "tests/integration/test_p5_mcp.py::test_actor_stdio_own_cut_only_and_candidate_replay"
+      ]
+    },
+    "nf_rolling_window_submit": {
+      "discovered": [
+        "tests/integration/test_p5_rolling.py::test_banquet_absence_pins_reference_and_limits_replanning"
+      ],
+      "success": [
+        "tests/integration/test_p5_rolling.py::test_banquet_absence_pins_reference_and_limits_replanning"
+      ],
+      "denied": [
+        "tests/integration/test_p5_rolling.py::test_banquet_absence_pins_reference_and_limits_replanning"
+      ]
+    },
+    "nf_task_get": {
+      "discovered": [
+        "tests/integration/test_p5_mcp.py::test_actor_stdio_own_cut_only_and_candidate_replay",
+        "tests/integration/test_p5_rolling.py::test_banquet_absence_pins_reference_and_limits_replanning"
+      ],
+      "success": [
+        "tests/integration/test_p5_mcp.py::test_actor_stdio_own_cut_only_and_candidate_replay"
+      ],
+      "denied": [
+        "tests/integration/test_p5_mcp.py::test_project_stdio_resume_is_scoped_and_live"
+      ]
+    }
+  },
+  "missing": []
+}
