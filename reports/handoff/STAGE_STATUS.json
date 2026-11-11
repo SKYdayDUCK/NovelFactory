@@ -63,11 +63,19 @@
     "local_tests": {
       "local_saga_and_stdio": 4,
       "dual_mcp": 1
-    }
+    },
+    "source_sha": "15d1cf51c357627866d06bd49fd326798dda56a3",
+    "pr": 10,
+    "ci": 43032253677,
+    "nf_sha": "795b17f243613282aaa147668f0f5c384cf32bf8",
+    "nf_pr": 11
   },
   "W4": {
-    "status": "NOT_STARTED",
-    "result": "NOT_EXECUTED"
+    "status": "IN_PROGRESS",
+    "result": "PARTIAL",
+    "local_tests": 32,
+    "evidence": "evidence/workshop/w4",
+    "next": "same-head CI; dual-service CI now pins NF #11"
   },
   "W5": {
     "status": "NOT_STARTED",

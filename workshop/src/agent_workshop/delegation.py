@@ -24,7 +24,7 @@ def route(conn, org, sender, recipient, scope):
     )
 
 
-def delegate(conn, session, operation_id, slot_id, max_amount, token_limit):
+def delegate(conn, session, operation_id, slot_id, max_amount, token_limit, *, _review_request=False):
     org, sender = session.org_id, session.employee_id
     require_employee(conn, session)
     amount = Decimal(max_amount)
@@ -51,6 +51,8 @@ def delegate(conn, session, operation_id, slot_id, max_amount, token_limit):
     ).fetchone()
     if not slot:
         raise Denied("VIEW_DENIED")
+    if slot.get("review_required", False) and not _review_request:
+        raise Denied("REVIEW_REQUEST_REQUIRED")
     target = employee(conn, org, slot["employee_id"])
     policy = slot["config"]
     if (
