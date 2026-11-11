@@ -22,3 +22,5 @@ W3 主线验收。原四项 AT-30 继续在 #13 跟踪，未涉及付费模型�
 - 2026-11-11 21:02:59 UTC，GitHub Actions 组件为 `major_outage`。W4 两条正式 CI 从 20:28:33 UTC 起排队，尚无被分配的作业，两条运行也没有待部署审批。发布流程保留原未合并状态。历史 AT-30 仍沿用 Issue #13。[GitHub 平台事件](https://www.githubstatus.com/incidents/dvy0t3mvh1lg) · [该时点的 GitHub 状态、PR、main、作业与部署审批回执](evidence/W4/candidate-3ed83ff/platform-outage-20261111T210259Z/checkpoint.json)。
 
 - Actions 官方事件结案后，W4 旧 `3ed83ff` 两项运行在 21:26:37 UTC 仍各有零个作业。无产品变化的普通快进 `1cc12ca` 已获得新的独立运行编号；同树旧 NF 834/834、本机 Docker 跳过以及原平台事故均各自保留原证据。[正式运行、合并模拟树和父提交](evidence/W4/candidate-1cc12ca/independent/candidate-checkpoint.json) · [前一候选 834/834 原件](https://github.com/SKYdayDUCK/NovelFactory/blob/5f07125458a0249c3203c9c0d5b03ff92abdcd50/reports/integration/evidence/W4/candidate-3ed83ff/independent/local-nf-full.md)。
+
+- W4 已在真实主线 `6c711adf794842bdf4469ab51e89093d37761bcc` 签收。平台事故、旧 w004b 缺失视图以及测试 fixture 参数权限的原试次均保留。两项主线 CI 成功，原 17 项托管宿主限制由同 SHA 原生复验覆盖。#13 容量门槛与 P6 本地实验条件继续单列。[W4 主线签收](W4_主线签收.md)。
