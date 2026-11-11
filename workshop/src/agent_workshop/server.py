@@ -9,7 +9,7 @@ from mcp import types
 from mcp.server.lowlevel import Server
 from mcp.server.stdio import stdio_server
 
-from . import delegation, messaging, organization
+from . import delegation, messaging, organization, reviews_skills
 from .auth import Denied, authenticate, connect, private_binding
 
 PROTOCOL = "aw-nf.v1"
@@ -28,7 +28,7 @@ def negotiate(conn, session, protocol_version):
 
 TOOLS = {"aw_capabilities": ("Negotiate this connection's organization protocol.",
          {"type": "object", "required": ["protocol_version"], "additionalProperties": False,
-          "properties": {"protocol_version": {"type": "string", "maxLength": 32}}}, negotiate), **organization.TOOLS, **messaging.TOOLS, **delegation.TOOLS}
+          "properties": {"protocol_version": {"type": "string", "maxLength": 32}}}, negotiate), **organization.TOOLS, **messaging.TOOLS, **delegation.TOOLS, **reviews_skills.TOOLS}
 
 
 def dispatch(config, name=None, arguments=None):
@@ -42,7 +42,11 @@ def dispatch(config, name=None, arguments=None):
         viewer = organization.require_employee(conn, session)
         visible = set(TOOLS)
         if viewer["role_id"] != "workshop_manager":
-            visible -= changes | {'aw_handoff'}
+            visible -= changes | {"aw_handoff", "aw_skill_share", "aw_skill_revoke"}
+        if viewer["role_id"] not in {"workshop_manager", "review_lead"}:
+            visible.discard("aw_review_request")
+        if viewer["role_id"] != "reviewer":
+            visible.discard("aw_review_decide")
         if name is None:
             return sorted(visible)
         if name not in visible:

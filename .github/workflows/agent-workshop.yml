@@ -39,8 +39,22 @@ jobs:
       - run: uv sync --locked --extra streams
       - run: uv run --locked alembic upgrade head
       - run: uv run --locked --extra streams pytest -q --junitxml=workshop-results.xml
+      - uses: actions/checkout@v4
+        with:
+          ref: 795b17f243613282aaa147668f0f5c384cf32bf8
+          path: nf-peer
+          persist-credentials: false
+      - name: Test the pinned NF peer over independent PostgreSQL accounts and stdio
+        run: |
+          export AW_NF_SOURCE="$GITHUB_WORKSPACE/nf-peer"
+          export AW_DUAL_TEST_ADMIN_URL="$AW_DATABASE_URL"
+          export PYTHONPATH="$PWD/src:$AW_NF_SOURCE/src"
+          uv sync --project "$AW_NF_SOURCE" --locked
+          "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q integration --junitxml=dual-results.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: workshop-results
-          path: workshop/workshop-results.xml
+          path: |
+            workshop/workshop-results.xml
+            workshop/dual-results.xml
