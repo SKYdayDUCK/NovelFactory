@@ -84,18 +84,25 @@ class Kernel:
 
     def revision(self, r, wr):
         validate_contract("WorldRef", wr)
-        row = r.revision_with_snapshot_text(wr)
+        read_text = getattr(r, "revision_with_snapshot_text", None)
+        row = read_text(wr) if read_text is not None else r.one("revisions", wr)
         require(row, "VIEW_DENIED", "Requested version is unavailable")
-        raw = row["snapshot"]
-        witness = (row["state_hash"], raw)
-        # Return a private Python object even on a hit. Only evidence that these
-        # exact bytes passed the NF-CANON-1 digest is reused between callers.
-        row["snapshot"] = json.loads(raw)
-        if witness != self._last_verified_projection:
+        if read_text is None:
+            # Repositories exposing the original decoded-JSON port still prove
+            # their snapshot hash independently on each access.
             require(fingerprint(row["snapshot"]) == row["state_hash"],
                     "PROJECTION_CORRUPT", "Projection integrity failed")
-            if len(raw) <= 1_000_000:
-                self._last_verified_projection = witness
+        else:
+            raw = row["snapshot"]
+            witness = (row["state_hash"], raw)
+            # Decode a private Python object even on a hit. Only evidence that
+            # these exact bytes passed NF-CANON-1 is shared between readers.
+            row["snapshot"] = json.loads(raw)
+            if witness != self._last_verified_projection:
+                require(fingerprint(row["snapshot"]) == row["state_hash"],
+                        "PROJECTION_CORRUPT", "Projection integrity failed")
+                if len(raw) <= 1_000_000:
+                    self._last_verified_projection = witness
         from novel_factory.application.simulation import verify_schedule_revision
         verify_schedule_revision(row)
         return row
