@@ -1,0 +1,51 @@
+{
+  "source": "450e4415240eb1ea2dfbba4a4ca708b9fa6aa8e0",
+  "workflow": "4ae3ff359d471481528ff42dc15058a16eb3b834",
+  "run": 43075242671,
+  "job": 130713227812,
+  "command": "bash workshop/acceptance/dual_codex/run.sh NF_CHECKOUT WORKSHOP_SUBDIRECTORY CODEX_BINARY ARTIFACT_DIRECTORY",
+  "original_authorization_proof_run": 43074135139,
+  "native_version": "codex-cli 0.167.0-alpha.4",
+  "artifact": [
+    {
+      "id": 13882246237,
+      "sha256": "831ae75476185785bae1f5b7ccd4ef1e5e0f6231951c8b469dbe6829f5079129",
+      "bytes": 573
+    }
+  ],
+  "receipt": {
+    "authenticated_reads": [
+      "nf_task_get",
+      "aw_roster_get"
+    ],
+    "codex": "codex-cli 0.167.0-alpha.4",
+    "cross_service_binding_reads_denied": 2,
+    "employee_roster_matched": true,
+    "model_turns": 0,
+    "nf_sha": "90cac947c6f1b176f20df6a579027f24e96d7b4c",
+    "role_binding_reads_denied": 2,
+    "role_signing_private_keys_unreadable": true,
+    "separate_service_uids": true,
+    "servers": {
+      "novelfactory": [
+        "nf_artifact_put",
+        "nf_context_get",
+        "nf_query_batch",
+        "nf_task_get"
+      ],
+      "workshop": [
+        "aw_capabilities",
+        "aw_delivery_ack",
+        "aw_mailbox_get",
+        "aw_message_body_get",
+        "aw_message_body_put",
+        "aw_message_send",
+        "aw_roster_get"
+      ]
+    },
+    "task_identity_matched": true,
+    "thread_id": "01a1cbce-9984-72f1-ad67-ee54632a76de",
+    "transport": "OpenSSH forced commands",
+    "workshop_sha": "450e4415240eb1ea2dfbba4a4ca708b9fa6aa8e0"
+  }
+}

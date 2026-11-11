@@ -1,0 +1,19 @@
+{
+  "scope": "Extracted actual run.sh preparation up to broker subprocess invocation. Source SQL, migrations and connections ran. No privileged SSH account setup on this host.",
+  "service_users": [
+    {
+      "user": "aw_test_25ac06eb7e834385",
+      "database": "aw_test_25ac06eb7e834385",
+      "superuser": false
+    },
+    {
+      "user": "nf_test_25ac06eb7e834385",
+      "database": "nf_test_25ac06eb7e834385",
+      "superuser": false
+    }
+  ],
+  "nf_cluster": "7707052030832234540",
+  "aw_cluster": "7707052025892266002",
+  "admin_vars_in_broker": [],
+  "source_sha256": "f20913c7bb39f16e3818a71033ae3960c29be9833729cb6cd1d65364d23d1c44"
+}
