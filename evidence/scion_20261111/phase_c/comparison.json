@@ -1,0 +1,187 @@
+{
+  "status": "PASS",
+  "comparison": "frozen original vs B(default off) vs B(all three on)",
+  "frozen_sha": "2c28acba6e1932657162c6e55b3288365ce3ea23",
+  "candidate_sha": "1db99217497c74f0e6ebb6fdf8c4ed977022963f",
+  "test_sha256": "5d23c7e409a3e1c5a7b423dc1dc69aef2e27c1f44c5c7bfb091cf4bdbcac0c5a",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "versions": {
+    "sqlalchemy": "2.0.57",
+    "psycopg": "3.3.8",
+    "pytest": "9.2.0",
+    "alembic": "1.20.1",
+    "pydantic": "2.14.3",
+    "jsonschema": "4.26.0"
+  },
+  "pythonhashseed": 2411,
+  "test_wall_clock": "2024-06-01T00:00:00+00:00",
+  "database_clock_for_outbox": "real",
+  "tests": {
+    "authorization": {
+      "tables": 35,
+      "rows_per_arm": 282,
+      "success_responses": 11,
+      "domain_errors": 7,
+      "digests": {
+        "frozen": "cbcdc4eea8eb7c7ccba54cbd61f4c5186c7826ca1d2ef5863c8ec7dc758b0db8",
+        "reference": "cbcdc4eea8eb7c7ccba54cbd61f4c5186c7826ca1d2ef5863c8ec7dc758b0db8",
+        "candidate": "cbcdc4eea8eb7c7ccba54cbd61f4c5186c7826ca1d2ef5863c8ec7dc758b0db8"
+      },
+      "path_counts": {
+        "replay.unverified_parent": 2,
+        "scopes.hit": 2,
+        "columns.query_hit": 4
+      }
+    },
+    "contention": {
+      "tables": 35,
+      "rows_per_arm": 1112,
+      "success_responses": 35,
+      "domain_errors": 6,
+      "digests": {
+        "frozen": "833f62ac03ae5f9a3c3e8ac1efc1f9e1670ddc722a9388aff0dada028a1b242c",
+        "reference": "833f62ac03ae5f9a3c3e8ac1efc1f9e1670ddc722a9388aff0dada028a1b242c",
+        "candidate": "833f62ac03ae5f9a3c3e8ac1efc1f9e1670ddc722a9388aff0dada028a1b242c"
+      },
+      "path_counts": {
+        "replay.unverified_parent": 14,
+        "scopes.hit": 19,
+        "replay.not_strictly_later": 1
+      }
+    },
+    "derived": {
+      "tables": 35,
+      "rows_per_arm": 585,
+      "success_responses": 22,
+      "domain_errors": 4,
+      "digests": {
+        "frozen": "79e86cd284aaf3985b9bc71085605e40ac3cb771fe683ea024606a2051484e5e",
+        "reference": "79e86cd284aaf3985b9bc71085605e40ac3cb771fe683ea024606a2051484e5e",
+        "candidate": "79e86cd284aaf3985b9bc71085605e40ac3cb771fe683ea024606a2051484e5e"
+      },
+      "path_counts": {
+        "replay.unverified_parent": 5,
+        "scopes.hit": 10,
+        "replay.hit": 4,
+        "columns.index_metadata_hit": 4,
+        "columns.query_hit": 2
+      }
+    },
+    "faults": {
+      "tables": 35,
+      "rows_per_arm": 444,
+      "success_responses": 12,
+      "domain_errors": 2,
+      "digests": {
+        "frozen": "079332b44f983c2d291fd98bd5d40ccde64c24b8ca43b243f6cde259d8661b50",
+        "reference": "079332b44f983c2d291fd98bd5d40ccde64c24b8ca43b243f6cde259d8661b50",
+        "candidate": "079332b44f983c2d291fd98bd5d40ccde64c24b8ca43b243f6cde259d8661b50"
+      },
+      "path_counts": {
+        "replay.unverified_parent": 6,
+        "scopes.hit": 6
+      }
+    },
+    "history": {
+      "tables": 35,
+      "rows_per_arm": 1912,
+      "success_responses": 68,
+      "domain_errors": 6,
+      "digests": {
+        "frozen": "37cc0ca69e5c4c4f35e29f8ccceb691e2447619dd3d2931a6d2059c0a371d672",
+        "reference": "37cc0ca69e5c4c4f35e29f8ccceb691e2447619dd3d2931a6d2059c0a371d672",
+        "candidate": "37cc0ca69e5c4c4f35e29f8ccceb691e2447619dd3d2931a6d2059c0a371d672"
+      },
+      "path_counts": {
+        "replay.unverified_parent": 9,
+        "scopes.hit": 27,
+        "replay.hit": 11,
+        "replay.not_one_append": 2,
+        "replay.historical_replacement": 4,
+        "columns.query_hit": 3,
+        "columns.repair_review_hit": 2,
+        "replay.interpretation_or_rules": 2,
+        "replay.not_strictly_later": 2
+      }
+    },
+    "published": {
+      "tables": 35,
+      "rows_per_arm": 2903,
+      "success_responses": 62,
+      "domain_errors": 2,
+      "digests": {
+        "frozen": "913f7079ecfd37704ec396c94d5221d1637c20f3d36c353ea4e4eefd6e42e764",
+        "reference": "913f7079ecfd37704ec396c94d5221d1637c20f3d36c353ea4e4eefd6e42e764",
+        "candidate": "913f7079ecfd37704ec396c94d5221d1637c20f3d36c353ea4e4eefd6e42e764"
+      },
+      "path_counts": {
+        "replay.unverified_parent": 2,
+        "scopes.hit": 14,
+        "replay.hit": 8,
+        "replay.not_one_append": 2,
+        "replay.historical_replacement": 2,
+        "columns.repair_review_hit": 1
+      }
+    }
+  },
+  "sessions": {
+    "oracle": {
+      "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+      "port": 54867,
+      "command": [
+        "python",
+        "-m",
+        "pytest",
+        "tests/integration/test_scion_differential.py",
+        "-q",
+        "--tb=short"
+      ],
+      "started_at_utc": "2026-11-11T01:26:14.925525+00:00",
+      "authentication": "loopback_trust_generated_test_data_only",
+      "fsync": true,
+      "synchronous_commit": true,
+      "max_connections": 60,
+      "data_directory_reused": false,
+      "exit_status": 0,
+      "postgres_exit_status": 0,
+      "duration_seconds": 24.678219,
+      "finished_at_utc": "2026-11-11T01:26:39.603799+00:00"
+    },
+    "strict": {
+      "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+      "port": 42077,
+      "command": [
+        "python",
+        "-m",
+        "pytest",
+        "tests/integration/test_scion_differential.py",
+        "-q",
+        "--tb=short",
+        "--junitxml=../runtime/results/strict-junit.xml"
+      ],
+      "started_at_utc": "2026-11-11T01:26:37.083079+00:00",
+      "authentication": "loopback_trust_generated_test_data_only",
+      "fsync": true,
+      "synchronous_commit": true,
+      "max_connections": 60,
+      "data_directory_reused": false,
+      "exit_status": 0,
+      "postgres_exit_status": 0,
+      "duration_seconds": 45.537447,
+      "finished_at_utc": "2026-11-11T01:27:22.620624+00:00"
+    }
+  },
+  "replay_and_read_counters": {
+    "replay.unverified_parent": 38,
+    "scopes.hit": 78,
+    "columns.query_hit": 9,
+    "replay.not_strictly_later": 3,
+    "replay.hit": 23,
+    "columns.index_metadata_hit": 4,
+    "replay.not_one_append": 4,
+    "replay.historical_replacement": 6,
+    "columns.repair_review_hit": 3,
+    "replay.interpretation_or_rules": 2
+  },
+  "raw_traces_sha256": "9174482ab8ebc84edf56b516eb10544747fdef5c6427283b0e504c1a88d9dc02"
+}

@@ -1,0 +1,318 @@
+{
+  "scope": "Read-only takeover of historical workspace and source/evidence inspection; no new performance result",
+  "source_head": "23a61398278c9a13e6450d444d4a6d25a88ef5e0",
+  "workspaces": [
+    {
+      "path": "/workspace/scratch/f6d7dc8c770b/NovelFactory",
+      "head": "a9547bd651e177d48c9d0e810362e411f510d62d",
+      "branch": "repair/pr2",
+      "tracked_changes": [],
+      "untracked_count": 0
+    },
+    {
+      "path": "/workspace/scratch/f6d7dc8c770b/NovelFactory-pr3",
+      "head": "23a61398278c9a13e6450d444d4a6d25a88ef5e0",
+      "branch": "repair/pr3",
+      "tracked_changes": [],
+      "untracked_count": 0
+    },
+    {
+      "path": "/workspace/scratch/f6d7dc8c770b/NovelFactory-audit",
+      "head": "23a61398278c9a13e6450d444d4a6d25a88ef5e0",
+      "branch": "",
+      "tracked_changes": [
+        "AGENTS.md",
+        "README.md",
+        "\"reports/PR2_PR3_\\345\\220\\210\\345\\271\\266\\345\\211\\215\\344\\277\\256\\345\\244\\215\\346\\212\\245\\345\\221\\212.md\"",
+        "\"reports/PR\\345\\220\\210\\345\\271\\266\\344\\270\\216main\\351\\252\\214\\346\\224\\266\\350\\256\\260\\345\\275\\225.md\"",
+        "\"reports/\\346\\200\\247\\350\\203\\275\\344\\270\\216\\345\\256\\271\\351\\207\\217\\344\\277\\256\\345\\244\\215\\345\\257\\271\\347\\205\\247.md\"",
+        "\"reports/\\346\\234\\252\\351\\200\\232\\350\\277\\207\\347\\233\\256\\346\\240\\207\\344\\270\\216\\345\\220\\216\\347\\273\\255\\345\\267\\245\\344\\275\\234.md\""
+      ],
+      "untracked_count": 334
+    },
+    {
+      "path": "/workspace/scratch/f6d7dc8c770b/baseline-pr2",
+      "head": "e0b0f2b080f3225d8be8e202e13258bc480f5b84",
+      "branch": "",
+      "tracked_changes": [],
+      "untracked_count": 0
+    },
+    {
+      "path": "/workspace/scratch/f6d7dc8c770b/candidate1-pr2",
+      "head": "0a0af490c7768fe4b7d2da16dbaa74f0d9585f0d",
+      "branch": "",
+      "tracked_changes": [],
+      "untracked_count": 0
+    },
+    {
+      "path": "/workspace/scratch/f6d7dc8c770b/context-history-audit",
+      "head": "e0b0f2b080f3225d8be8e202e13258bc480f5b84",
+      "branch": "",
+      "tracked_changes": [],
+      "untracked_count": 0
+    },
+    {
+      "path": "/workspace/scratch/f6d7dc8c770b/NovelFactory-p1-baseline",
+      "head": "721f155c9cc912cddfdae559afe4f2516d0967f2",
+      "branch": "",
+      "tracked_changes": [],
+      "untracked_count": 0
+    }
+  ],
+  "stage_commits": [
+    {
+      "parent": "e0b0f2b080f3225d8be8e202e13258bc480f5b84",
+      "tree": "8db652361f4e67819e753767772093206fa553dc",
+      "commit": "0a0af490c7768fe4b7d2da16dbaa74f0d9585f0d",
+      "status": "REF_UPDATED_AND_FULL_REMOTE_TREE_VERIFIED"
+    },
+    {
+      "parent": "24b203f6fcda5f36105dfd9a37cd833671d7215c",
+      "additional_parent": "0a0af490c7768fe4b7d2da16dbaa74f0d9585f0d",
+      "tree": "350a3bd277ed1405e6e2ff4333315c4707c25eff",
+      "commit": "008fccf23291c6f74693e450a88c224a436be7f6",
+      "status": "REF_UPDATED_AND_FULL_REMOTE_TREE_VERIFIED"
+    },
+    {
+      "parent": "0a0af490c7768fe4b7d2da16dbaa74f0d9585f0d",
+      "tree": "e87b88d343e47361d16161f2721a596083a71085",
+      "commit": "971fbef29eceb422d77271d11841bae1abdfd73f",
+      "status": "REF_UPDATED_AND_FULL_REMOTE_TREE_VERIFIED"
+    },
+    {
+      "parent": "008fccf23291c6f74693e450a88c224a436be7f6",
+      "additional_parent": "971fbef29eceb422d77271d11841bae1abdfd73f",
+      "tree": "72328df65eafff795a5df1a10117c68c2d899bb6",
+      "commit": "e3c7b79b0058656f11257ea55edc75371382b73e",
+      "status": "REF_UPDATED_AND_FULL_REMOTE_TREE_VERIFIED",
+      "verified_blobs": 2584
+    },
+    {
+      "parent": "971fbef29eceb422d77271d11841bae1abdfd73f",
+      "tree": "62b274b6436540df8aaf7e0527f6485af836499f",
+      "commit": "a9547bd651e177d48c9d0e810362e411f510d62d",
+      "status": "REF_UPDATED_AND_FULL_REMOTE_TREE_VERIFIED",
+      "verified_blobs": 2690
+    },
+    {
+      "parent": "e3c7b79b0058656f11257ea55edc75371382b73e",
+      "additional_parent": "a9547bd651e177d48c9d0e810362e411f510d62d",
+      "tree": "e5dd8cc2c2867ce6cb8d45771303b4e943d78269",
+      "commit": "23a61398278c9a13e6450d444d4a6d25a88ef5e0",
+      "status": "REF_UPDATED_AND_FULL_REMOTE_TREE_VERIFIED",
+      "verified_blobs": 3187
+    }
+  ],
+  "unreferenced_final_audit": {
+    "remote_branch_head_confirmed_by_root": "23a61398278c9a13e6450d444d4a6d25a88ef5e0",
+    "blob_upload_record": {
+      "status": "FINAL_PR3_AUDIT_ARCHIVE_BLOBS_READY",
+      "repo_dir": "NovelFactory-audit",
+      "target_branch": "audit/pr2-pr3-20261111",
+      "observed_branch_head": "23a61398278c9a13e6450d444d4a6d25a88ef5e0",
+      "observed_tree": "e5dd8cc2c2867ce6cb8d45771303b4e943d78269",
+      "archive_checkpoint": "23a61398278c9a13e6450d444d4a6d25a88ef5e0",
+      "current_paths": 141,
+      "unique_git_blobs": 141,
+      "total_bytes": 7064730,
+      "create_blob_calls_succeeded": 133,
+      "reused_prior_verified_blobs": 8,
+      "all_local_git_hashes_bytes_sha256_match_map": true,
+      "archive_manifest_sha256": "52d85714a3cd477c90a8a0dbfcf1475df55da8ef7358516e1e2ff46f443ef58d",
+      "map_path": "/workspace/scratch/f6d7dc8c770b/control/audit_pr3_blobs.json",
+      "map_sha256": "0e419525242e9be1290871741a370a78aca2152139d7df4e2e6a0c4ad7c93226",
+      "source_records": 149,
+      "unique_gzip_objects": 133,
+      "actual_extraction_and_original_bytes_verified": true,
+      "capacity_gate_remains": "NOT_MET",
+      "tree_commit_ref_mutations_performed": false,
+      "pr_worktrees_modified": false
+    },
+    "preservation_manifest": "unsynced_final_audit_manifest.json"
+  },
+  "legacy_preservation_reverified": {
+    "members": 96,
+    "archive_sha256": "cc7357b7b193fd4791dc566fe21bd95ffd5ee1f492605bae349a530c255849d6",
+    "archive_bytes": 958612,
+    "all_member_hashes_and_sizes_match": true
+  },
+  "final_ci": [
+    {
+      "pr": 2,
+      "kind": "engineering PR",
+      "run_id": 42863611743,
+      "status": "SUCCESS",
+      "postgres_tests": 472,
+      "unit_subset_tests": 276
+    },
+    {
+      "pr": 2,
+      "kind": "engineering push",
+      "run_id": 42863601042,
+      "status": "SUCCESS",
+      "postgres_tests": 472,
+      "unit_subset_tests": 276
+    },
+    {
+      "pr": 2,
+      "kind": "4-cell capacity",
+      "run_id": 42863611898,
+      "status": "FAILURE"
+    },
+    {
+      "pr": 2,
+      "kind": "200/context",
+      "run_id": 42863611810,
+      "status": "FAILURE"
+    },
+    {
+      "pr": 3,
+      "kind": "engineering PR",
+      "run_id": 42864582299,
+      "status": "SUCCESS",
+      "postgres_tests": 631,
+      "unit_subset_tests": 380
+    },
+    {
+      "pr": 3,
+      "kind": "engineering push",
+      "run_id": 42864569773,
+      "status": "SUCCESS",
+      "postgres_tests": 631,
+      "unit_subset_tests": 380
+    },
+    {
+      "pr": 3,
+      "kind": "4-cell capacity",
+      "run_id": 42864580621,
+      "status": "FAILURE"
+    },
+    {
+      "pr": 3,
+      "kind": "200/context",
+      "run_id": 42864580618,
+      "status": "FAILURE"
+    },
+    {
+      "pr": 3,
+      "kind": "scale",
+      "run_id": 42864579931,
+      "status": "FAILURE"
+    },
+    {
+      "pr": 3,
+      "kind": "PITR",
+      "run_id": 42864580346,
+      "status": "SUCCESS_ATTEMPT2_NETWORK_FAILURE_PRESERVED"
+    }
+  ],
+  "final_scale_scenarios": [
+    {
+      "run_id": 42864579931,
+      "scenario": "1000-read-open",
+      "validated_successes": 1528,
+      "scheduled_requests": 5000,
+      "status_counts": {
+        "429": 3419,
+        "200": 1528,
+        "transport_error": 53
+      },
+      "latency": {
+        "count": 5000,
+        "p50_ms": 2815.0751,
+        "p95_ms": 8368.8184,
+        "p99_ms": 10523.0359
+      },
+      "latency_scope": "All emitted attempts, including 429/transport errors.",
+      "call_start_rps": 48.346216199580134,
+      "header_start_rps": 48.067960041081086,
+      "rate_scope": "HTTPcore header-start observed separately.",
+      "goodput_rps": 14.314385002917268,
+      "goodput_scope": "Fully validated successful read-only responses.",
+      "gate": "NOT_MET",
+      "long_duration_gate": null
+    },
+    {
+      "run_id": 42864579931,
+      "scenario": "500-mixed",
+      "new_world_commits": 51,
+      "expected_new_world_commits": 51,
+      "attempts": 2851,
+      "status_counts": {
+        "200": 2802,
+        "409": 49
+      },
+      "latency": {
+        "count": 2851,
+        "p50_ms": 99.9802,
+        "p95_ms": 276.2094,
+        "p99_ms": 488.4872
+      },
+      "latency_scope": "All first attempts, including expected 409 conflicts.",
+      "call_start_rps": 8.160114269086467,
+      "header_start_rps": 8.161121850145223,
+      "rate_scope": "Across mixed phases, including phase spacing and write throttling; not a constant 1000 RPS gate.",
+      "goodput_rps": 7.8756,
+      "goodput_scope": "Validated HTTP calls excluding duplicate receipts.",
+      "gate": "PASS",
+      "business_gate": "PASS"
+    },
+    {
+      "run_id": 42864579931,
+      "scenario": "500-read-soak-600s",
+      "validated_successes": 12000,
+      "scheduled_requests": 12000,
+      "status_counts": {
+        "200": 12000
+      },
+      "latency": {
+        "count": 12000,
+        "p50_ms": 127.9258,
+        "p95_ms": 426.3717,
+        "p99_ms": 585.2642
+      },
+      "latency_scope": "All emitted attempts, including 429/transport errors.",
+      "call_start_rps": 20.000576160442883,
+      "header_start_rps": null,
+      "rate_scope": "Original probe records call-start only; header-start unmeasured.",
+      "goodput_rps": 19.997377317534937,
+      "goodput_scope": "Fully validated successful read-only responses.",
+      "gate": "PASS",
+      "long_duration_gate": "NOT_EXECUTED"
+    }
+  ],
+  "final_scale_validation": {
+    "all_advertised_artifacts_downloaded": true,
+    "all_zip_digests_match": true,
+    "all_observed_attempt_jobs_have_checkout_logs": true,
+    "all_available_checkout_and_recorded_trees_match": true,
+    "pitr_successful_artifact_count": 1,
+    "pitr_evidence_available": true,
+    "all_available_pitr_members_and_hashes_match": true,
+    "all_probe_records_complete": true,
+    "all_probe_backpressure_counts_reconcile": true,
+    "retained_raw_attempts": 19851
+  },
+  "final_open_backpressure": {
+    "http_429": 3419,
+    "service_rejection_locations": {
+      "admission": {
+        "rejected": 717,
+        "timed_out": 1363
+      },
+      "authentication_admission": {
+        "rejected": 1339,
+        "timed_out": 0
+      },
+      "ingress": {
+        "rejected": 0,
+        "timed_out": 0
+      }
+    },
+    "service_rejection_sum": 3419,
+    "sum_matches_http_429": true,
+    "pool_checked_out_at_end": 0,
+    "configured_aggregate_pool": 8
+  },
+  "historical_readme_caveat": "Final audit working-copy report claims audit-branch preservation but branch remains base SHA; treat those last files as unreferenced until new stage commit preserves them."
+}

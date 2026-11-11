@@ -1,0 +1,28 @@
+{
+  "records": [
+    {
+      "file": "smoke.json",
+      "sha256": "066a34586fa56559f19a05e642afe7b8d94ba5c168f3b78a03e34584b4db630e",
+      "bytes": 67034,
+      "status": "HARNESS_SMOKE_ONLY",
+      "reason": "Initial per-checkout closure adapter warnings; semantics verified, timings not used."
+    },
+    {
+      "file": "profile.json",
+      "sha256": "f2a6c1387c10850116b1590cd8fbd476033ef98885a1632d90dc9edf461d80a4",
+      "bytes": 431176,
+      "status": "INVALID_FOR_LATENCY_INSTRUMENTATION",
+      "reason": "Repeated set_json_dumps at checkout constructed progressively nested adapter subclasses; cProfile attributes 60-103ms of warm reads to _make_dumper/type creation."
+    },
+    {
+      "file": "profile_v2.json",
+      "sha256": "52a0d2b5b29f4e6bd4287b7f2379ba53b742895805751a316e5592a3fb1e7c65",
+      "bytes": 378009,
+      "status": "VALID_SEQUENTIAL_ATTRIBUTION",
+      "reason": "Same requested workload rerun with connection-local codecs installed once per physical connection; source and module hashes recorded."
+    }
+  ],
+  "original_results_modified": false,
+  "gate_changes": false,
+  "invalid_latency_not_used_as_baseline": true
+}

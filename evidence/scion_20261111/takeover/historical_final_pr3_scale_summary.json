@@ -1,0 +1,1664 @@
+{
+  "checkpoint": "23a61398278c9a13e6450d444d4a6d25a88ef5e0",
+  "generated_at": "2026-11-10T17:37:43.256712+00:00",
+  "collection_status": "COMPLETE",
+  "runs": [
+    {
+      "run_id": 42864579931,
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "failure",
+      "head_sha": "23a61398278c9a13e6450d444d4a6d25a88ef5e0",
+      "run_attempt": 1,
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42864579931",
+      "jobs": [
+        {
+          "id": 129999375005,
+          "name": "Measured 500-read-soak",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 42864579931,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Locked runtime",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Original targets and actual network evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Preserve complete evidence when capacity fails",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15
+            },
+            {
+              "name": "Stop containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 16
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 17
+            }
+          ]
+        },
+        {
+          "id": 129999376014,
+          "name": "Measured 1000-read-open",
+          "status": "completed",
+          "conclusion": "failure",
+          "run_id": 42864579931,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Locked runtime",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Original targets and actual network evidence",
+              "status": "completed",
+              "conclusion": "failure",
+              "number": 7
+            },
+            {
+              "name": "Preserve complete evidence when capacity fails",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 13
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15
+            },
+            {
+              "name": "Stop containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 16
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 17
+            }
+          ]
+        },
+        {
+          "id": 129999377174,
+          "name": "Measured 500-mixed",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 42864579931,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Locked runtime",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Original targets and actual network evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Preserve complete evidence when capacity fails",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15
+            },
+            {
+              "name": "Stop containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 16
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 17
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "run_id": 42864580346,
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "23a61398278c9a13e6450d444d4a6d25a88ef5e0",
+      "run_attempt": 2,
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42864580346",
+      "jobs": [
+        {
+          "id": 130001277693,
+          "name": "Physical base backup, SIGKILL, WAL replay and application verification",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 42864580346,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Install PostgreSQL17 server and physical-backup tools",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Install locked application",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Restore actual isolated clusters to an explicit target",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Hash retained evidence files",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Verify manifest covers the retained artifact",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Preserve recovery measurements and logs",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 18
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 19
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 20
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 21
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "run_attempts": [
+    {
+      "run_id": 42864579931,
+      "attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "metadata_snapshot": "metadata_snapshot8.json",
+      "jobs": [
+        {
+          "id": 129999375005,
+          "name": "Measured 500-read-soak",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 42864579931,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Locked runtime",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Original targets and actual network evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Preserve complete evidence when capacity fails",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15
+            },
+            {
+              "name": "Stop containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 16
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 17
+            }
+          ]
+        },
+        {
+          "id": 129999376014,
+          "name": "Measured 1000-read-open",
+          "status": "completed",
+          "conclusion": "failure",
+          "run_id": 42864579931,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Locked runtime",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Original targets and actual network evidence",
+              "status": "completed",
+              "conclusion": "failure",
+              "number": 7
+            },
+            {
+              "name": "Preserve complete evidence when capacity fails",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 13
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15
+            },
+            {
+              "name": "Stop containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 16
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 17
+            }
+          ]
+        },
+        {
+          "id": 129999377174,
+          "name": "Measured 500-mixed",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 42864579931,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Locked runtime",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Original targets and actual network evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Preserve complete evidence when capacity fails",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15
+            },
+            {
+              "name": "Stop containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 16
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 17
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "run_id": 42864580346,
+      "attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "metadata_snapshot": "metadata_snapshot1.json",
+      "jobs": [
+        {
+          "id": 129999375049,
+          "name": "Physical base backup, SIGKILL, WAL replay and application verification",
+          "status": "completed",
+          "conclusion": "failure",
+          "run_id": 42864580346,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Install PostgreSQL17 server and physical-backup tools",
+              "status": "completed",
+              "conclusion": "failure",
+              "number": 5
+            },
+            {
+              "name": "Install locked application",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 6
+            },
+            {
+              "name": "Restore actual isolated clusters to an explicit target",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 7
+            },
+            {
+              "name": "Hash retained evidence files",
+              "status": "completed",
+              "conclusion": "failure",
+              "number": 8
+            },
+            {
+              "name": "Verify manifest covers the retained artifact",
+              "status": "completed",
+              "conclusion": "failure",
+              "number": 9
+            },
+            {
+              "name": "Preserve recovery measurements and logs",
+              "status": "completed",
+              "conclusion": "failure",
+              "number": 10
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 18
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 19
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 20
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 21
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "run_id": 42864580346,
+      "attempt": 2,
+      "status": "completed",
+      "conclusion": "success",
+      "metadata_snapshot": "metadata_snapshot8.json",
+      "jobs": [
+        {
+          "id": 130001277693,
+          "name": "Physical base backup, SIGKILL, WAL replay and application verification",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 42864580346,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Install PostgreSQL17 server and physical-backup tools",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Install locked application",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Restore actual isolated clusters to an explicit target",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Hash retained evidence files",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Verify manifest covers the retained artifact",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Preserve recovery measurements and logs",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 18
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 19
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 20
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 21
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "installation_failures": [
+    {
+      "job_id": 129999375049,
+      "log_path": "42864580346/jobs/129999375049.log",
+      "first_failure": "2026-11-10T17:25:45.8016152Z curl: (56) Failure when receiving data from the peer",
+      "recovery_executed": false,
+      "secondary_errors": [
+        "2026-11-10T17:25:45.9127326Z FileNotFoundError: [Errno 2] No such file or directory: 'ci-evidence/SHA256.json'",
+        "2026-11-10T17:25:45.9558623Z FileNotFoundError: [Errno 2] No such file or directory: 'ci-evidence/SHA256.json'",
+        "2026-11-10T17:25:46.1789325Z ##[error]No files were found with the provided path: ci-evidence/**/*.json"
+      ]
+    }
+  ],
+  "checkout_tree_proof": {
+    "final_head": "23a61398278c9a13e6450d444d4a6d25a88ef5e0",
+    "final_tree": "e5dd8cc2c2867ce6cb8d45771303b4e943d78269",
+    "job_checkouts": [
+      {
+        "run_id": 42864579931,
+        "job_id": 129999375005,
+        "log_path": "42864579931/jobs/129999375005.log",
+        "log_sha256": "75812109a4af344df1597f4004783f01193a422b0ee5e38f8a96ac17620d46cd",
+        "actual_checkout_sha": "264b800bd5d019ae283b5cd7d65c08cdf742f87a",
+        "tree_sha": "e5dd8cc2c2867ce6cb8d45771303b4e943d78269",
+        "matches_final_tree": true
+      },
+      {
+        "run_id": 42864579931,
+        "job_id": 129999376014,
+        "log_path": "42864579931/jobs/129999376014.log",
+        "log_sha256": "6e9e8dbb1cdf086d972bbcaf17ff21d8c04b2cbfc3fb6698f49ec0d2300e45ec",
+        "actual_checkout_sha": "264b800bd5d019ae283b5cd7d65c08cdf742f87a",
+        "tree_sha": "e5dd8cc2c2867ce6cb8d45771303b4e943d78269",
+        "matches_final_tree": true
+      },
+      {
+        "run_id": 42864579931,
+        "job_id": 129999377174,
+        "log_path": "42864579931/jobs/129999377174.log",
+        "log_sha256": "3f1c008b913fc79e7367d5ce9e4068de318785d4830a176372e7c1d35763dd3b",
+        "actual_checkout_sha": "264b800bd5d019ae283b5cd7d65c08cdf742f87a",
+        "tree_sha": "e5dd8cc2c2867ce6cb8d45771303b4e943d78269",
+        "matches_final_tree": true
+      },
+      {
+        "run_id": 42864580346,
+        "job_id": 129999375049,
+        "log_path": "42864580346/jobs/129999375049.log",
+        "log_sha256": "592b2424966fcd7c17f0ce83ed42c53c1d7affb2cecc2f8615af07258afad465",
+        "actual_checkout_sha": "264b800bd5d019ae283b5cd7d65c08cdf742f87a",
+        "tree_sha": "e5dd8cc2c2867ce6cb8d45771303b4e943d78269",
+        "matches_final_tree": true
+      },
+      {
+        "run_id": 42864580346,
+        "job_id": 130001277693,
+        "log_path": "42864580346/jobs/130001277693.log",
+        "log_sha256": "de2e8cb5bdbb54948ddf71b848408ca5eade0b4f20545cb58e9a66ee57bb6eec",
+        "actual_checkout_sha": "264b800bd5d019ae283b5cd7d65c08cdf742f87a",
+        "tree_sha": "e5dd8cc2c2867ce6cb8d45771303b4e943d78269",
+        "matches_final_tree": true
+      }
+    ],
+    "all_available_checkouts_match": true,
+    "observed_attempt_job_count": 5,
+    "logged_job_count": 5,
+    "artifact_git_contexts": [
+      {
+        "run_id": 42864579931,
+        "event": "pull_request",
+        "artifact_id": 13786638701,
+        "path": "42864579931/13786638701/extracted/result.json",
+        "sha256": "819e8876923527123569e18ab969b2160448ce6646bf0c60d66e87a7c3705443",
+        "recorded_git_sha": "264b800bd5d019ae283b5cd7d65c08cdf742f87a",
+        "git_dirty": false,
+        "tree_sha": "e5dd8cc2c2867ce6cb8d45771303b4e943d78269",
+        "matches_final_tree": true
+      },
+      {
+        "run_id": 42864579931,
+        "event": "pull_request",
+        "artifact_id": 13786683165,
+        "path": "42864579931/13786683165/extracted/result.json",
+        "sha256": "069f248ea21056eda07a61c7b23f43ed8336984f2a7b754d247f4f21068f3e7a",
+        "recorded_git_sha": "264b800bd5d019ae283b5cd7d65c08cdf742f87a",
+        "git_dirty": true,
+        "tree_sha": "e5dd8cc2c2867ce6cb8d45771303b4e943d78269",
+        "matches_final_tree": true,
+        "retained_benchmark_snapshot_sha256": "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f",
+        "snapshot_hash_matches_environment": true
+      },
+      {
+        "run_id": 42864579931,
+        "event": "pull_request",
+        "artifact_id": 13787871128,
+        "path": "42864579931/13787871128/extracted/result.json",
+        "sha256": "992f2db9686fb4816a69744733360389b3afcea3d878049fc9c48e0c7a92eb27",
+        "recorded_git_sha": "264b800bd5d019ae283b5cd7d65c08cdf742f87a",
+        "git_dirty": false,
+        "tree_sha": "e5dd8cc2c2867ce6cb8d45771303b4e943d78269",
+        "matches_final_tree": true
+      }
+    ]
+  },
+  "pitr": [
+    {
+      "run_id": 42864580346,
+      "event": "pull_request",
+      "artifact_id": 13785449393,
+      "path": "42864580346/13785449393/extracted/pitr/result.json",
+      "sha256": "07daeb793c2422f3a8a7e3d5539b242896f3d046e589986831d4d601e9b3e192",
+      "result": {
+        "status": "PASS",
+        "postgres": "postgres (PostgreSQL) 17.11 (Ubuntu 17.11-1.pgdg24.04+2)",
+        "execution_kind": "REAL_ISOLATED_POSTGRESQL",
+        "source_port": 51055,
+        "restored_port": 57801,
+        "durability": {
+          "fsync": true,
+          "synchronous_commit": true,
+          "data_checksums": true
+        },
+        "model_calls": 0,
+        "production_data_accessed": false,
+        "libpq_environment_isolated": true,
+        "cleared_pg_environment_names": [],
+        "pg_basebackup": {
+          "exit_code": 0,
+          "stdout": ""
+        },
+        "base_backup_seconds": 1.1970621669999986,
+        "pg_verifybackup": {
+          "exit_code": 0,
+          "stdout": "backup successfully verified"
+        },
+        "archiver": {
+          "archived_count": 4,
+          "failed_count": 0
+        },
+        "target_world_ref": {
+          "work_id": "0c8a74fa-7432-49d8-84f3-39fbb2a4cbb4",
+          "branch_id": "fbd0cae6-a23b-4f22-9ddb-8c4c72c5d7f9",
+          "world_revision_id": "80f54a07-afd8-4983-b603-776188b54911"
+        },
+        "target_lsn": "0/30741D8",
+        "restored_state_sha256": "e9d9bb85ca1a0d559ba737089fb8f9d1dddb73cf280347ccef6a5577649ec11a",
+        "snapshot_equal_before_fencing": true,
+        "table_count": 37,
+        "object_count": 19,
+        "recovery_seconds_to_verified_service": 1.0810197479999957,
+        "selected_recovery_point_age_seconds": 0.382233,
+        "target_commits_lost": 0,
+        "deliberately_excluded_later_world_commits": 1,
+        "restored_world_event_count": 2,
+        "unknown_calls_retained": 1,
+        "reserved_amount_retained": "0.5",
+        "fenced_task_count": 1,
+        "old_worker_rejected": true,
+        "original_commit_receipt_equal": true,
+        "limitation": "Small isolated local fixture; selected-point RPO/RTO, not production SLO or remote storage test",
+        "total_seconds": 4.574364275000001
+      },
+      "manifest_members": 11,
+      "actual_manifest_members": 11,
+      "all_hashes_match": true,
+      "exact_retained_members_including_manifest": true,
+      "file_hash_checks": [
+        {
+          "path": "pitr.log",
+          "expected": "50858651b156797280b9effc41bb417706dc723d0e38f846690f6cff3f3e6235",
+          "actual": "50858651b156797280b9effc41bb417706dc723d0e38f846690f6cff3f3e6235"
+        },
+        {
+          "path": "pitr/NF_ISOLATED_RECOVERY_DRILL.json",
+          "expected": "60797787fd519b8ba1539cf0382fe7194c03cf5e78824bf8ae481648e64ac8ec",
+          "actual": "60797787fd519b8ba1539cf0382fe7194c03cf5e78824bf8ae481648e64ac8ec"
+        },
+        {
+          "path": "pitr/archive_segment.py",
+          "expected": "672395d38fb8cfe2d7c36ab9133c3136e03c9bc4e5051010a697b7f3dd545dc5",
+          "actual": "672395d38fb8cfe2d7c36ab9133c3136e03c9bc4e5051010a697b7f3dd545dc5"
+        },
+        {
+          "path": "pitr/fenced_tasks.json",
+          "expected": "6944b596b669d4560ce33e75391fc2a2ebe28f9319b664158ca5ef5e566253f6",
+          "actual": "6944b596b669d4560ce33e75391fc2a2ebe28f9319b664158ca5ef5e566253f6"
+        },
+        {
+          "path": "pitr/file_checksums.json",
+          "expected": "fa26bb7fea91e3f90f995af0a1069b236584f08612fb2147b9a1cf348242b458",
+          "actual": "fa26bb7fea91e3f90f995af0a1069b236584f08612fb2147b9a1cf348242b458"
+        },
+        {
+          "path": "pitr/restore.conf",
+          "expected": "55a6dec016f249226c56fe6bf00598e7068c749fd7f4e7240c0f2d25479703ae",
+          "actual": "55a6dec016f249226c56fe6bf00598e7068c749fd7f4e7240c0f2d25479703ae"
+        },
+        {
+          "path": "pitr/restored.log",
+          "expected": "542d63480bb0e98bed0ab2232e3adb23fb3833dd369c81f31e237e75abcb4481",
+          "actual": "542d63480bb0e98bed0ab2232e3adb23fb3833dd369c81f31e237e75abcb4481"
+        },
+        {
+          "path": "pitr/result.json",
+          "expected": "07daeb793c2422f3a8a7e3d5539b242896f3d046e589986831d4d601e9b3e192",
+          "actual": "07daeb793c2422f3a8a7e3d5539b242896f3d046e589986831d4d601e9b3e192"
+        },
+        {
+          "path": "pitr/source.conf",
+          "expected": "f5d9e6e4f2fbd1860a845ed17cd1a4762274c304959a24e5827d43e49006a388",
+          "actual": "f5d9e6e4f2fbd1860a845ed17cd1a4762274c304959a24e5827d43e49006a388"
+        },
+        {
+          "path": "pitr/source.log",
+          "expected": "6e262d9aeba58a275335c4a091b8891b33083e9ee8fe7f19050d90dde098791c",
+          "actual": "6e262d9aeba58a275335c4a091b8891b33083e9ee8fe7f19050d90dde098791c"
+        },
+        {
+          "path": "pitr/target_database_digests.json",
+          "expected": "3bd7fec4d9395602fda48014f13045bbc6f0bf8f78b95c7ca61ffbe739a6cba3",
+          "actual": "3bd7fec4d9395602fda48014f13045bbc6f0bf8f78b95c7ca61ffbe739a6cba3"
+        }
+      ]
+    }
+  ],
+  "scenario_table": [
+    {
+      "run_id": 42864579931,
+      "scenario": "1000-read-open",
+      "validated_successes": 1528,
+      "scheduled_requests": 5000,
+      "status_counts": {
+        "429": 3419,
+        "200": 1528,
+        "transport_error": 53
+      },
+      "latency": {
+        "count": 5000,
+        "p50_ms": 2815.0751,
+        "p95_ms": 8368.8184,
+        "p99_ms": 10523.0359
+      },
+      "latency_scope": "All emitted attempts, including 429/transport errors.",
+      "call_start_rps": 48.346216199580134,
+      "header_start_rps": 48.067960041081086,
+      "rate_scope": "HTTPcore header-start observed separately.",
+      "goodput_rps": 14.314385002917268,
+      "goodput_scope": "Fully validated successful read-only responses.",
+      "gate": "NOT_MET",
+      "long_duration_gate": null
+    },
+    {
+      "run_id": 42864579931,
+      "scenario": "500-mixed",
+      "new_world_commits": 51,
+      "expected_new_world_commits": 51,
+      "attempts": 2851,
+      "status_counts": {
+        "200": 2802,
+        "409": 49
+      },
+      "latency": {
+        "count": 2851,
+        "p50_ms": 99.9802,
+        "p95_ms": 276.2094,
+        "p99_ms": 488.4872
+      },
+      "latency_scope": "All first attempts, including expected 409 conflicts.",
+      "call_start_rps": 8.160114269086467,
+      "header_start_rps": 8.161121850145223,
+      "rate_scope": "Across mixed phases, including phase spacing and write throttling; not a constant 1000 RPS gate.",
+      "goodput_rps": 7.8756,
+      "goodput_scope": "Validated HTTP calls excluding duplicate receipts.",
+      "gate": "PASS",
+      "business_gate": "PASS"
+    },
+    {
+      "run_id": 42864579931,
+      "scenario": "500-read-soak-600s",
+      "validated_successes": 12000,
+      "scheduled_requests": 12000,
+      "status_counts": {
+        "200": 12000
+      },
+      "latency": {
+        "count": 12000,
+        "p50_ms": 127.9258,
+        "p95_ms": 426.3717,
+        "p99_ms": 585.2642
+      },
+      "latency_scope": "All emitted attempts, including 429/transport errors.",
+      "call_start_rps": 20.000576160442883,
+      "header_start_rps": null,
+      "rate_scope": "Original probe records call-start only; header-start unmeasured.",
+      "goodput_rps": 19.997377317534937,
+      "goodput_scope": "Fully validated successful read-only responses.",
+      "gate": "PASS",
+      "long_duration_gate": "NOT_EXECUTED"
+    }
+  ],
+  "validation": {
+    "all_advertised_artifacts_downloaded": true,
+    "all_zip_digests_match": true,
+    "all_observed_attempt_jobs_have_checkout_logs": true,
+    "all_available_checkout_and_recorded_trees_match": true,
+    "pitr_successful_artifact_count": 1,
+    "pitr_evidence_available": true,
+    "all_available_pitr_members_and_hashes_match": true,
+    "all_probe_records_complete": true,
+    "all_probe_backpressure_counts_reconcile": true,
+    "retained_raw_attempts": 19851
+  },
+  "notes": [
+    "Final HEAD is measured independently; e3 byte equivalence does not substitute for actual CI.",
+    "CI collection is read-only: this collector did not rerun jobs or change application branches/workflows. The parent-authorized PITR retry is retained as a separate attempt; later audit-only archival does not promote any gate.",
+    "Every raw failure and any earlier failed attempt are retained; completed requests are not synonymous with valid successes.",
+    "The 600-second probe does not execute a multi-hour production target; preserve NOT_EXECUTED.",
+    "HTTPcore header-start is not packet capture or proof of server acceptance; the stability probe does not measure header starts.",
+    "Generated fixed-world workload with no actual model calls; no combined API/derived-worker scale experiment.",
+    "Signing-key download failures occur before recovery and cannot be called successful PITR.",
+    "Mixed benchmark git_dirty includes its prewritten source snapshot; snapshot bytes and recorded checkout tree are checked separately."
+  ],
+  "runtime_byte_equivalence": {
+    "before": "e3c7b79b0058656f11257ea55edc75371382b73e",
+    "after": "23a61398278c9a13e6450d444d4a6d25a88ef5e0",
+    "path_roots": [
+      "src",
+      "tests",
+      ".github/workflows",
+      "benchmarks",
+      "scripts",
+      "contracts",
+      "migrations",
+      "runtime",
+      "pyproject.toml",
+      "uv.lock",
+      "alembic.ini"
+    ],
+    "git_diff_exit_code": 0,
+    "diff_empty": true,
+    "compared_file_count": 349,
+    "all_modes_types_blob_sha_equal": true,
+    "file_inventory_sha256": "f1914ee5e79520aa0cc43f63669625efe1904171cbc613bd82a1f79269c0f991",
+    "limitation": "Byte-equivalent application/workflow/benchmark inputs do not predeclare final HEAD CI or capacity as passing."
+  },
+  "artifacts": [
+    {
+      "run_id": 42864579931,
+      "artifact_id": 13786638701,
+      "artifact_name": "p3-scale-1000-read-open-1",
+      "github_digest": "sha256:c1406247a895c06af5c1e51a0f7ae204d4a0142a3a9ee833eb84547002877a68",
+      "actual_sha256": "c1406247a895c06af5c1e51a0f7ae204d4a0142a3a9ee833eb84547002877a68",
+      "digest_matches": true,
+      "bytes": 500976
+    },
+    {
+      "run_id": 42864579931,
+      "artifact_id": 13786683165,
+      "artifact_name": "p3-scale-500-mixed-1",
+      "github_digest": "sha256:8078ed2877e24407e78217625de7bdbb5dc08ca194d8fd4cffec252a048ff5bf",
+      "actual_sha256": "8078ed2877e24407e78217625de7bdbb5dc08ca194d8fd4cffec252a048ff5bf",
+      "digest_matches": true,
+      "bytes": 641743
+    },
+    {
+      "run_id": 42864579931,
+      "artifact_id": 13787871128,
+      "artifact_name": "p3-scale-500-read-soak-1",
+      "github_digest": "sha256:da0dff2cb9fe423bd87903fc8e51a6c0e22b750faed97b0f2ecd53d62bba1061",
+      "actual_sha256": "da0dff2cb9fe423bd87903fc8e51a6c0e22b750faed97b0f2ecd53d62bba1061",
+      "digest_matches": true,
+      "bytes": 482787
+    },
+    {
+      "run_id": 42864580346,
+      "artifact_id": 13785449393,
+      "artifact_name": "p4-real-pitr-2",
+      "github_digest": "sha256:8a543c232b05fd6d0d4a108618c2ef970f1ee3267b2bc77b7ec2e154321d58b6",
+      "actual_sha256": "8a543c232b05fd6d0d4a108618c2ef970f1ee3267b2bc77b7ec2e154321d58b6",
+      "digest_matches": true,
+      "bytes": 9835
+    }
+  ],
+  "mixed_loads": [
+    {
+      "run_id": 42864579931,
+      "path": "42864579931/13786683165/extracted/result.json",
+      "gates": {
+        "engineer_correctness": "PASS",
+        "capacity_gate": "PASS",
+        "bounded_recovery_business_gate": "PASS",
+        "first_attempt_capacity_gate": "PASS"
+      },
+      "correctness": {
+        "new_world_revisions": 51,
+        "expected_new_world_revisions": 51,
+        "new_selected_effect_groups": 51,
+        "all_grants_have_real_persisted_tasks": true,
+        "connections_released_between_phases": true,
+        "shared_resource_final_quantity": "99",
+        "independent_resource_final_quantities": [
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99",
+          "99"
+        ]
+      },
+      "metrics": {
+        "duration_seconds": 349.307474,
+        "planned_requests": 2851,
+        "emitted_requests": 2851,
+        "completed_requests": 2851,
+        "client_requests_never_emitted": 0,
+        "emitted_logical_operations": 2851,
+        "completed_logical_operations": 2851,
+        "first_attempt_failure_count": 0,
+        "first_attempt_status_counts": {
+          "200": 2802,
+          "409": 49
+        },
+        "first_attempt_latency": {
+          "count": 2851,
+          "p50_ms": 99.9802,
+          "p95_ms": 276.2094,
+          "p99_ms": 488.4872
+        },
+        "recovered_logical_operations": 0,
+        "logical_operation_completion_latency": {
+          "count": 2851,
+          "p50_ms": 100.9055,
+          "p95_ms": 277.669,
+          "p99_ms": 491.1762
+        },
+        "status_counts": {
+          "200": 2802,
+          "409": 49
+        },
+        "valid_successful_calls": 2802,
+        "api_success_rps": 8.0216,
+        "successful_duplicate_receipts": 51,
+        "effective_call_rps_excluding_duplicates": 7.8756,
+        "new_world_commit_receipts": 51,
+        "effective_world_commits_per_second": 0.146,
+        "infrastructure_retries": 0,
+        "peak_outstanding_client_requests": 7,
+        "client_connection_limit": 256,
+        "latency_all_responses": {
+          "count": 2851,
+          "p50_ms": 99.9802,
+          "p95_ms": 276.2094,
+          "p99_ms": 488.4872
+        },
+        "latency_successes": {
+          "count": 2802,
+          "p50_ms": 102.3447,
+          "p95_ms": 277.2623,
+          "p99_ms": 488.4872
+        },
+        "latency_rejections_and_failures": {
+          "count": 49,
+          "p50_ms": 33.2117,
+          "p95_ms": 64.6084,
+          "p99_ms": 165.5534
+        },
+        "scheduled_to_completion_latency": {
+          "count": 2851,
+          "p50_ms": 100.9055,
+          "p95_ms": 277.669,
+          "p99_ms": 491.1762
+        },
+        "client_pool_wait": {
+          "count": 2851,
+          "p50_ms": 0.0015,
+          "p95_ms": 0.002,
+          "p99_ms": 0.0024
+        },
+        "client_response_validation_cpu_seconds": 7.8612173090002315,
+        "transport_headers_started": 2851,
+        "arrival_schedule_delay": {
+          "count": 2851,
+          "p50_ms": 0.7629,
+          "p95_ms": 1.8628,
+          "p99_ms": 2.5338
+        },
+        "correctness_errors": [],
+        "unresolved_operational_errors": []
+      },
+      "retry_exhaustion": {
+        "recorded_exhausted_operations": 0,
+        "last_retryable_operations": 0,
+        "exhausted_below_max_attempts_due_to_time_budget": 0,
+        "exhausted_at_max_attempts_time_budget_may_also_apply": 0,
+        "final_code_counts": {},
+        "final_label_counts": {},
+        "max_attempts": 5,
+        "retry_budget_seconds": 30.0
+      },
+      "receipt_checks": {
+        "receipt_rows": 102,
+        "unique_commands": 51,
+        "unique_world_revisions": 51,
+        "duplicate_receipts_equal_original": true
+      },
+      "raw_cross_checks": {
+        "raw_request_count_matches": true,
+        "first_status_counts_match": true,
+        "first_logical_count": 2851,
+        "overload_first_count": 0,
+        "response_validation_cpu_seconds_from_raw": 7.8612173090002315,
+        "response_validation_cpu_sum_matches": true,
+        "response_bytes_total": 7700968,
+        "unique_operation_count": 2851,
+        "last_attempt_still_retryable_operation_ids": []
+      },
+      "all_error_rows": {
+        "path": "42864579931/13786683165/all_error_or_nonvalid_rows.json",
+        "sha256": "63d2920dbe6c31740036f76b65052f6bb7a01bd0151b038209369b2dab9f9ffd",
+        "records": 49,
+        "statuses": {
+          "409": 49
+        },
+        "codes": {
+          "DEPENDENCY_CONFLICT": 49
+        },
+        "error_types": {},
+        "labels_or_kinds": {
+          "accept_conflict": 49
+        }
+      },
+      "open_loop_offered_rate": {
+        "gate": "NOT_APPLICABLE",
+        "target_rps": null,
+        "first_attempts": 0
+      }
+    }
+  ],
+  "open_arrival": [
+    {
+      "run_id": 42864579931,
+      "event": "pull_request",
+      "artifact_id": 13786638701,
+      "path": "42864579931/13786638701/extracted/result.json",
+      "sha256": "819e8876923527123569e18ab969b2160448ce6646bf0c60d66e87a7c3705443",
+      "schema_version": "p3-open-arrival-1",
+      "evidence_kind": "REAL_HTTP_POSTGRESQL_OPEN_ARRIVAL",
+      "configuration": {
+        "agents": 1000,
+        "rounds": 5,
+        "arrival_rps": 1000.0,
+        "hot_fraction": 0.8,
+        "api_processes": 2,
+        "output": "ci-evidence/result.json"
+      },
+      "source_sha256": "515ec1ec61e03317cd6f160a22a309aa38bc6df8bbfd4604e3dacfa43b14e9da",
+      "network_window_seconds": 106.74576656199997,
+      "client_validation_seconds": 2.301695260000031,
+      "scheduled_requests": 5000,
+      "completed_requests": 5000,
+      "dispatch_start_rps": 48.346216199580134,
+      "observed_wire_start_rps": 48.067960041081086,
+      "wire_started_requests": 5000,
+      "client_connections_limit": 256,
+      "first_attempts_only": true,
+      "validated_successes": 1528,
+      "successful_query_rps": 14.314385002917268,
+      "latency_all_attempts": {
+        "count": 5000,
+        "p50_ms": 2815.0751,
+        "p95_ms": 8368.8184,
+        "p99_ms": 10523.0359
+      },
+      "scheduled_to_network_completion": {
+        "count": 5000,
+        "p50_ms": 48793.488,
+        "p95_ms": 94669.5769,
+        "p99_ms": 101198.3977
+      },
+      "status_counts": {
+        "429": 3419,
+        "200": 1528,
+        "transport_error": 53
+      },
+      "offered_wire_rate_gate": "NOT_MET",
+      "capacity_gate": "NOT_MET",
+      "correctness_errors": [],
+      "world_unchanged": true,
+      "new_world_commits": 0,
+      "real_model_calls": 0,
+      "limitations": [
+        "Read-only overload; mixed business commits are measured by p2_behavioral_load",
+        "Wire-start trace observes HTTP header send start, not packet capture or server acceptance",
+        "Schema validation runs after network timing but every success requires it",
+        "Shared host; short window does not establish sustained production SLO"
+      ],
+      "raw_checks": {
+        "records": 5000,
+        "expected": 5000,
+        "unique_index_count": 5000,
+        "index_set_exact": true,
+        "validated_successes": 1528,
+        "statuses": {
+          "200": 1528,
+          "429": 3419,
+          "transport_error": 53
+        },
+        "statuses_match": true,
+        "correctness_errors": 0,
+        "transport_errors": 53,
+        "client_drops": 0,
+        "max_arrival_delay_ms": 98412.05111500002,
+        "wire_starts": 5000,
+        "observed_header_start_rps_from_raw": 48.067960041081086,
+        "header_rate_matches": true,
+        "count_fields_match": true
+      },
+      "all_failure_rows": {
+        "path": "42864579931/13786638701/all_error_or_nonvalid_rows.json",
+        "sha256": "f4178d44354642081c4aaddd2aa7538a75ae55768a58d93d8d1a04fac2a21744",
+        "records": 3472,
+        "statuses": {
+          "429": 3419,
+          "transport_error": 53
+        },
+        "codes": {
+          "BACKPRESSURE": 3419,
+          "None": 53
+        },
+        "error_types": {
+          "ReadError": 53
+        },
+        "labels_or_kinds": {
+          "None": 3472
+        }
+      },
+      "backpressure_reconciliation": {
+        "http_429": 3419,
+        "service_rejection_locations": {
+          "admission": {
+            "rejected": 717,
+            "timed_out": 1363
+          },
+          "authentication_admission": {
+            "rejected": 1339,
+            "timed_out": 0
+          },
+          "ingress": {
+            "rejected": 0,
+            "timed_out": 0
+          }
+        },
+        "service_rejection_sum": 3419,
+        "sum_matches_http_429": true,
+        "pool_checked_out_at_end": 0,
+        "configured_aggregate_pool": 8
+      }
+    }
+  ],
+  "stability": [
+    {
+      "run_id": 42864579931,
+      "event": "pull_request",
+      "artifact_id": 13787871128,
+      "path": "42864579931/13787871128/extracted/result.json",
+      "sha256": "992f2db9686fb4816a69744733360389b3afcea3d878049fc9c48e0c7a92eb27",
+      "duration_seconds": 600.0786907930001,
+      "scheduled_count": 12000,
+      "evidence_kind": "REAL_HTTP_POSTGRESQL_READ_ONLY_STABILITY_PROBE",
+      "configuration": {
+        "agents": 500,
+        "seconds": 600.0,
+        "read_rps": 20.0,
+        "api_processes": 2,
+        "output": "ci-evidence/result.json"
+      },
+      "schema_version": "p3-stability-1",
+      "source_sha256": "8ad0e0781fbec0464b6385cab9ac89f4a6e51705e456d6394012a016460ec7ed",
+      "actual_call_start_rps": 20.000576160442883,
+      "successful_query_rps": 19.997377317534937,
+      "latency_all_attempts": {
+        "count": 12000,
+        "p50_ms": 127.9258,
+        "p95_ms": 426.3717,
+        "p99_ms": 585.2642
+      },
+      "status_counts": {
+        "200": 12000
+      },
+      "correctness_errors": [],
+      "world_unchanged": true,
+      "new_world_commits": 0,
+      "real_model_calls": 0,
+      "probe_gate": "PASS",
+      "long_duration_gate": "NOT_EXECUTED",
+      "limitations": [
+        "Synthetic small world; fixed historical reads, no model requests",
+        "Process crash/receipt recovery is a separate integration test",
+        "No claim of hosted Agent products being integrated",
+        "One-hour minimum long-duration label is an explicit probe convention, not a production SLO"
+      ],
+      "sample_count": 60,
+      "raw_checks": {
+        "records": 12000,
+        "expected": 12000,
+        "unique_index_count": 12000,
+        "index_set_exact": true,
+        "validated_successes": 12000,
+        "statuses": {
+          "200": 12000
+        },
+        "statuses_match": true,
+        "correctness_errors": 0,
+        "transport_errors": 0,
+        "client_drops": 0,
+        "max_arrival_delay_ms": 45.05976100000453,
+        "actual_call_start_rps_from_raw": 20.000576160442883,
+        "call_rate_matches": true,
+        "count_fields_match": true
+      },
+      "all_failure_rows": {
+        "path": "42864579931/13787871128/all_error_or_nonvalid_rows.json",
+        "sha256": "316ba8710f0eb194dcf4715675a21ccc77103b668a07cadd042ede9a33e0300d",
+        "records": 0,
+        "statuses": {},
+        "codes": {},
+        "error_types": {},
+        "labels_or_kinds": {}
+      },
+      "backpressure_reconciliation": {
+        "http_429": 0,
+        "service_rejection_locations": {
+          "admission": {
+            "rejected": 0,
+            "timed_out": 0
+          },
+          "authentication_admission": {
+            "rejected": 0,
+            "timed_out": 0
+          },
+          "ingress": {
+            "rejected": 0,
+            "timed_out": 0
+          }
+        },
+        "service_rejection_sum": 0,
+        "sum_matches_http_429": true,
+        "pool_checked_out_at_end": 0,
+        "configured_aggregate_pool": 8
+      }
+    }
+  ]
+}

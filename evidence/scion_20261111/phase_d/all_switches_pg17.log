@@ -1,0 +1,47 @@
+RUN ["/workspace/scratch/f1e87f09c4ea/runtime/pg/usr/lib/postgresql/17/bin/initdb", "-D", "/tmp/nf-pg17-y0wk18fb/data", "-U", "nf_dev", "--encoding=UTF8", "--locale=C", "--auth-local=reject", "--auth-host=trust", "--data-checksums"]
+The files belonging to this database system will be owned by user "agent".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "C".
+The default text search configuration will be set to "english".
+
+Data page checksums are enabled.
+
+creating directory /tmp/nf-pg17-y0wk18fb/data ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default "max_connections" ... 100
+selecting default "shared_buffers" ... 128MB
+selecting default time zone ... Asia/Tokyo
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+
+Success. You can now start the database server using:
+
+    /workspace/scratch/f1e87f09c4ea/runtime/pg/usr/lib/postgresql/17/bin/pg_ctl -D /tmp/nf-pg17-y0wk18fb/data -l logfile start
+
+RUN ["/workspace/scratch/f1e87f09c4ea/runtime/pg/usr/lib/postgresql/17/bin/createdb", "nf_test"]
+RUN ["/workspace/scratch/f1e87f09c4ea/runtime/pg/usr/lib/postgresql/17/bin/psql", "-Atc", "SELECT version(); SHOW fsync; SHOW synchronous_commit;"]
+PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+on
+on
+REAL_POSTGRES_READY postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1) port 53443
+........................................................................ [ 11%]
+........................................................................ [ 22%]
+........................................................................ [ 33%]
+........................................................................ [ 44%]
+........................................................................ [ 55%]
+........................................................................ [ 66%]
+........................................................................ [ 78%]
+........................................................................ [ 89%]
+......................................................................   [100%]
+=============================== warnings summary ===============================
+../../runtime/venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /workspace/scratch/f1e87f09c4ea/runtime/venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+646 passed, 1 warning in 303.94s (0:05:03)
+Temporary PostgreSQL logs: /tmp/nf-pg17-y0wk18fb/logs (use --log-dir to retain)

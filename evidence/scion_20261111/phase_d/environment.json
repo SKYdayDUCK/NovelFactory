@@ -1,0 +1,210 @@
+{
+  "python": "3.12.14",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "cpu_affinity_visible": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "pg_binaries": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "uv_lock_sha256": "e262a34d691894a8a644ac9e561cee6a16c40d2eebd2755d87e13dcb99cdf0bd",
+  "dependencies": {
+    "alembic": {
+      "locked": "1.20.1",
+      "installed": "1.20.1"
+    },
+    "annotated-doc": {
+      "locked": "0.0.5",
+      "installed": "0.0.5"
+    },
+    "annotated-types": {
+      "locked": "0.8.0",
+      "installed": "0.8.0"
+    },
+    "anyio": {
+      "locked": "4.16.0",
+      "installed": "4.16.0"
+    },
+    "attrs": {
+      "locked": "26.1.0",
+      "installed": "26.1.0"
+    },
+    "certifi": {
+      "locked": "2026.10.23",
+      "installed": "2026.10.23"
+    },
+    "click": {
+      "locked": "8.5.1",
+      "installed": "8.5.1"
+    },
+    "colorama": {
+      "locked": "0.4.6",
+      "installed": null
+    },
+    "fastapi": {
+      "locked": "0.162.2",
+      "installed": "0.162.2"
+    },
+    "greenlet": {
+      "locked": "3.5.6",
+      "installed": "3.5.6"
+    },
+    "h11": {
+      "locked": "0.16.0",
+      "installed": "0.16.0"
+    },
+    "httpcore": {
+      "locked": "1.0.9",
+      "installed": "1.0.9"
+    },
+    "httpx": {
+      "locked": "0.28.1",
+      "installed": "0.28.1"
+    },
+    "hypothesis": {
+      "locked": "6.170.15",
+      "installed": "6.170.15"
+    },
+    "idna": {
+      "locked": "3.20",
+      "installed": "3.20"
+    },
+    "iniconfig": {
+      "locked": "2.3.1",
+      "installed": "2.3.1"
+    },
+    "jsonschema": {
+      "locked": "4.26.0",
+      "installed": "4.26.0"
+    },
+    "jsonschema-specifications": {
+      "locked": "2025.9.1",
+      "installed": "2025.9.1"
+    },
+    "mako": {
+      "locked": "1.4.3",
+      "installed": "1.4.3"
+    },
+    "markupsafe": {
+      "locked": "3.0.4",
+      "installed": "3.0.4"
+    },
+    "novel-factory": {
+      "locked": "2.0.1",
+      "installed": "2.0.1"
+    },
+    "opentelemetry-api": {
+      "locked": "1.45.2",
+      "installed": "1.45.2"
+    },
+    "packaging": {
+      "locked": "26.3",
+      "installed": "26.3"
+    },
+    "pluggy": {
+      "locked": "1.7.0",
+      "installed": "1.7.0"
+    },
+    "psycopg": {
+      "locked": "3.3.8",
+      "installed": "3.3.8"
+    },
+    "psycopg-binary": {
+      "locked": "3.3.8",
+      "installed": "3.3.8"
+    },
+    "pydantic": {
+      "locked": "2.14.3",
+      "installed": "2.14.3"
+    },
+    "pydantic-core": {
+      "locked": "2.50.4",
+      "installed": "2.50.4"
+    },
+    "pygments": {
+      "locked": "2.21.0",
+      "installed": "2.21.0"
+    },
+    "pytest": {
+      "locked": "9.2.0",
+      "installed": "9.2.0"
+    },
+    "pytest-json-report": {
+      "locked": "1.5.0",
+      "installed": "1.5.0"
+    },
+    "pytest-metadata": {
+      "locked": "3.1.1",
+      "installed": "3.1.1"
+    },
+    "pyyaml": {
+      "locked": "6.0.3",
+      "installed": "6.0.3"
+    },
+    "referencing": {
+      "locked": "0.37.0",
+      "installed": "0.37.0"
+    },
+    "rpds-py": {
+      "locked": "2026.9.1",
+      "installed": "2026.9.1"
+    },
+    "ruff": {
+      "locked": "0.17.4",
+      "installed": "0.17.4"
+    },
+    "sortedcontainers": {
+      "locked": "2.4.0",
+      "installed": "2.4.0"
+    },
+    "sqlalchemy": {
+      "locked": "2.0.57",
+      "installed": "2.0.57"
+    },
+    "starlette": {
+      "locked": "1.10.0",
+      "installed": "1.10.0"
+    },
+    "typing-extensions": {
+      "locked": "4.16.0",
+      "installed": "4.16.0"
+    },
+    "typing-inspection": {
+      "locked": "0.4.5",
+      "installed": "0.4.5"
+    },
+    "tzdata": {
+      "locked": "2026.6",
+      "installed": null
+    },
+    "uvicorn": {
+      "locked": "0.54.0",
+      "installed": "0.54.0"
+    }
+  },
+  "baseline": "2c28acba6e1932657162c6e55b3288365ce3ea23",
+  "candidate": "1db99217497c74f0e6ebb6fdf8c4ed977022963f",
+  "settings": {
+    "shared_buffers": "128MB",
+    "max_connections": 60,
+    "full_page_writes": "on",
+    "fsync": "on",
+    "synchronous_commit": "on",
+    "aggregate_application_pool": 8,
+    "database_observer_pool": 1,
+    "service_models": 0
+  },
+  "notes": [
+    "All applicable Linux runtime requirements use the same installed binaries in both arms; colorama/tzdata are conditional Windows dependencies.",
+    "Each campaign started a separate PG17 cluster with scripts/with_postgres.py and its own loopback namespace.",
+    "CPU affinity is per campaign. Pinned processes still share the physical host and storage. The one-core overload overlapped other campaigns.",
+    "The two-core 600-second A overlapped the large-history CPU7 campaign. Compare with the main 4-core repetition.",
+    "PG cluster CPU uses Linux clock ticks for the private postmaster and its live and reaped child processes; pg_stat_activity samples can miss short locks."
+  ]
+}

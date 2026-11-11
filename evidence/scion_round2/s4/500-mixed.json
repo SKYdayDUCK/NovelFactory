@@ -1,0 +1,239 @@
+{
+  "mixed-500-A-1.json.gz": {
+    "affinity": [
+      6,
+      7
+    ],
+    "all_attempts_latency_ms": {
+      "count": 3180,
+      "p50_ms": 165.1935,
+      "p95_ms": 2445.6348,
+      "p99_ms": 2901.0432
+    },
+    "authentication": {
+      "active": 0,
+      "admitted": 3180,
+      "completed": 3180,
+      "peak_active": 4,
+      "peak_queued": 18,
+      "queued": 0,
+      "rejected": 0,
+      "timed_out": 0,
+      "wait_seconds_total": 16.14819712701592
+    },
+    "business": {
+      "complete_agents": 494,
+      "complete_before_extra_burst": 494,
+      "fixture_sha256": "08ff0e2af50da610f5d1a22c460c8cedaf78fe99e31be0d6a37589848809993d",
+      "fulfilled_calls": 2843,
+      "planned_calls": 2851,
+      "source_sha": "e757419aea6f00b9388fee14a92f4ea3b97444c0",
+      "total_agents": 500
+    },
+    "client_cpu_s": 23.716108,
+    "client_pool_wait_ms": {
+      "count": 3180,
+      "p50_ms": 0.002,
+      "p95_ms": 0.0038,
+      "p99_ms": 0.0209
+    },
+    "client_wire_rps_all_phases": 8.700052686906046,
+    "conflicts": 49,
+    "correctness_errors": [],
+    "db_connections_end": 0,
+    "db_reads": 0,
+    "deadlocks": 0,
+    "dirty": false,
+    "dispatch_rps": null,
+    "duplicates": 50,
+    "duration_s": 365.44813,
+    "effective_rps": 7.5086,
+    "effective_service_flags": [
+      false,
+      false
+    ],
+    "environment_sha": "e757419aea6f00b9388fee14a92f4ea3b97444c0",
+    "event_loop_delay_by_process": [
+      {
+        "count": 6395,
+        "p50_ms": 1.2604,
+        "p95_ms": 28.8351,
+        "p99_ms": 80.0294
+      },
+      {
+        "count": 6548,
+        "p50_ms": 0.7763,
+        "p95_ms": 25.8119,
+        "p99_ms": 66.215
+      }
+    ],
+    "failed_sql": 0,
+    "file": "mixed-500-A-1.json.gz",
+    "first_attempt_429": 156,
+    "fixture_sha256": "08ff0e2af50da610f5d1a22c460c8cedaf78fe99e31be0d6a37589848809993d",
+    "gate": "NOT_MET",
+    "harness_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda",
+    "ingress": {
+      "active": 0,
+      "admitted": 3180,
+      "completed": 3180,
+      "peak_active": 76,
+      "peak_queued": 0,
+      "queued": 0,
+      "rejected": 0,
+      "timed_out": 0,
+      "wait_seconds_total": 0.08128299700547359
+    },
+    "new_world_commits": 50,
+    "operations": {
+      "active": 0,
+      "admitted": 2847,
+      "completed": 2843,
+      "peak_active": 4,
+      "peak_queued": 71,
+      "queued": 0,
+      "rejected": 0,
+      "timed_out": 337,
+      "wait_seconds_total": 580.8967464860489
+    },
+    "peak_db_connections": 8,
+    "pg_cpu_scope": "May omit live backends when /proc children is unavailable; zero is not proof of absent DB CPU",
+    "pg_proc_cpu_estimate_s": 45.269999999999996,
+    "query_cache_hits": null,
+    "query_cache_misses": null,
+    "raw_sha256": "bee1663cf429d36d405114a3736e8d995ceda4ce58a4bc71f93ac0ea399191a7",
+    "retries": 331,
+    "service_cpu_s": 280.913166,
+    "service_received_rps_all_phases": 8.700063245575555,
+    "source_sha": "e757419aea6f00b9388fee14a92f4ea3b97444c0",
+    "sql": 80766,
+    "statuses": {
+      "200": 2794,
+      "409": 49,
+      "429": 337
+    },
+    "unique_commit_target": 51,
+    "wal_bytes": 48984936,
+    "wire_rps": null,
+    "world_tps": 0.1368,
+    "world_unchanged": null
+  },
+  "mixed-500-B-1.json.gz": {
+    "affinity": [
+      6,
+      7
+    ],
+    "all_attempts_latency_ms": {
+      "count": 2851,
+      "p50_ms": 118.879,
+      "p95_ms": 417.446,
+      "p99_ms": 634.4405
+    },
+    "authentication": {
+      "active": 0,
+      "admitted": 2851,
+      "completed": 2851,
+      "peak_active": 4,
+      "peak_queued": 4,
+      "queued": 0,
+      "rejected": 0,
+      "timed_out": 0,
+      "wait_seconds_total": 0.08041851799043798
+    },
+    "business": {
+      "complete_agents": 500,
+      "complete_before_extra_burst": 500,
+      "fixture_sha256": "08ff0e2af50da610f5d1a22c460c8cedaf78fe99e31be0d6a37589848809993d",
+      "fulfilled_calls": 2851,
+      "planned_calls": 2851,
+      "source_sha": "06adae39e576c0cb96978b5b8b1c11e727b5fc9b",
+      "total_agents": 500
+    },
+    "client_cpu_s": 21.702949999999998,
+    "client_pool_wait_ms": {
+      "count": 2851,
+      "p50_ms": 0.0018,
+      "p95_ms": 0.0028,
+      "p99_ms": 0.0048
+    },
+    "client_wire_rps_all_phases": 8.14883871642855,
+    "conflicts": 49,
+    "correctness_errors": [],
+    "db_connections_end": 0,
+    "db_reads": 0,
+    "deadlocks": 0,
+    "dirty": false,
+    "dispatch_rps": null,
+    "duplicates": 51,
+    "duration_s": 349.788389,
+    "effective_rps": 7.8648,
+    "effective_service_flags": [
+      true,
+      true
+    ],
+    "environment_sha": "06adae39e576c0cb96978b5b8b1c11e727b5fc9b",
+    "event_loop_delay_by_process": [
+      {
+        "count": 6357,
+        "p50_ms": 0.967,
+        "p95_ms": 19.4058,
+        "p99_ms": 53.1191
+      },
+      {
+        "count": 6538,
+        "p50_ms": 0.4333,
+        "p95_ms": 16.8752,
+        "p99_ms": 41.1666
+      }
+    ],
+    "failed_sql": 0,
+    "file": "mixed-500-B-1.json.gz",
+    "first_attempt_429": 0,
+    "fixture_sha256": "08ff0e2af50da610f5d1a22c460c8cedaf78fe99e31be0d6a37589848809993d",
+    "gate": "PASS",
+    "harness_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda",
+    "ingress": {
+      "active": 0,
+      "admitted": 2851,
+      "completed": 2851,
+      "peak_active": 10,
+      "peak_queued": 0,
+      "queued": 0,
+      "rejected": 0,
+      "timed_out": 0,
+      "wait_seconds_total": 0.06719148597494495
+    },
+    "new_world_commits": 51,
+    "operations": {
+      "active": 0,
+      "admitted": 2851,
+      "completed": 2851,
+      "peak_active": 4,
+      "peak_queued": 6,
+      "queued": 0,
+      "rejected": 0,
+      "timed_out": 0,
+      "wait_seconds_total": 12.786391954959981
+    },
+    "peak_db_connections": 8,
+    "pg_cpu_scope": "May omit live backends when /proc children is unavailable; zero is not proof of absent DB CPU",
+    "pg_proc_cpu_estimate_s": 43.80000000000001,
+    "query_cache_hits": null,
+    "query_cache_misses": null,
+    "raw_sha256": "a63ff95683fee3816a572dfae0b60ac908104da7f0b72fae3038eb650b7ef87d",
+    "retries": 0,
+    "service_cpu_s": 246.03150800000003,
+    "service_received_rps_all_phases": 8.148844078835095,
+    "source_sha": "06adae39e576c0cb96978b5b8b1c11e727b5fc9b",
+    "sql": 80636,
+    "statuses": {
+      "200": 2802,
+      "409": 49
+    },
+    "unique_commit_target": 51,
+    "wal_bytes": 55567784,
+    "wire_rps": null,
+    "world_tps": 0.1458,
+    "world_unchanged": null
+  }
+}

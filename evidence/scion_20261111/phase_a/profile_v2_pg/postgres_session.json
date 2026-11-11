@@ -1,0 +1,30 @@
+{
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "port": 39493,
+  "command": [
+    "/workspace/scratch/3dd241864a32/NovelFactory/.venv/bin/python",
+    "-m",
+    "benchmarks.scion_profile",
+    "--agents",
+    "200",
+    "--entities",
+    "200",
+    "--histories",
+    "1",
+    "20",
+    "--repeats",
+    "3",
+    "--output",
+    "/workspace/scratch/3dd241864a32/NovelFactory/evidence/scion_20261111/phase_a/profile_v2.json"
+  ],
+  "started_at_utc": "2026-11-10T17:57:25.815999+00:00",
+  "authentication": "loopback_trust_generated_test_data_only",
+  "fsync": true,
+  "synchronous_commit": true,
+  "max_connections": 60,
+  "data_directory_reused": false,
+  "exit_status": 0,
+  "postgres_exit_status": 0,
+  "duration_seconds": 21.412117,
+  "finished_at_utc": "2026-11-10T17:57:47.228158+00:00"
+}

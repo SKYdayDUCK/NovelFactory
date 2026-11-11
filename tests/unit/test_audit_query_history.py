@@ -56,6 +56,7 @@ def fixture(query_kind="STATE", *, batch=False, size=9000):
         db = DB()
         def authorize(self, *_args, **_kw): return grant
         def revision(self, *_args): return revision
+        query_revision = revision
     service = WorldQueryService(Kernel())
     service._task = lambda *_a, **_k: (task, grant, spec)
     service._selector = lambda *_a, **_k: wr

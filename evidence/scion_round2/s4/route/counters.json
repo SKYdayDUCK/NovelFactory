@@ -1,0 +1,782 @@
+{
+  "A": {
+    "actual_status_by_route": {
+      "accept": {
+        "200": 42,
+        "409": 19
+      },
+      "certificate": {
+        "200": 40,
+        "429": 1
+      },
+      "context": {
+        "200": 200
+      },
+      "proposal": {
+        "200": 40
+      },
+      "query": {
+        "200": 1703,
+        "429": 1194
+      }
+    },
+    "business": {
+      "complete_agents": 113,
+      "complete_before_extra_burst": 200,
+      "fixture_sha256": "be2948a43bbe4de444f50216f981143511d628b8b51ceef700bdfd469535afc6",
+      "fulfilled_calls": 2044,
+      "planned_calls": 2141,
+      "source_sha": "e757419aea6f00b9388fee14a92f4ea3b97444c0",
+      "total_agents": 200
+    },
+    "capacity_gate": "NOT_MET",
+    "correctness_errors": [],
+    "duplicates": 21,
+    "first_attempt_gate": "NOT_MET",
+    "inputs": {
+      "cpu_affinity": [
+        5
+      ],
+      "fixture_sha256": "be2948a43bbe4de444f50216f981143511d628b8b51ceef700bdfd469535afc6",
+      "harness_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda",
+      "source_sha": "e757419aea6f00b9388fee14a92f4ea3b97444c0"
+    },
+    "new_world_commits": 21,
+    "per_stage": {
+      "accept.auth": {
+        "admitted": 61,
+        "attempts": 61,
+        "max_waiters_seen_on_entry": 0,
+        "mean_admitted_wait_ms": 0.04421385245901639,
+        "mean_slot_held_ms": 4.108618327868852,
+        "queue_full": 0,
+        "wait_expired": 0
+      },
+      "accept.ingress": {
+        "admitted": 61,
+        "attempts": 61,
+        "max_waiters_seen_on_entry": 0,
+        "mean_admitted_wait_ms": 0.06712516393442623,
+        "mean_slot_held_ms": 211.1176635409836,
+        "queue_full": 0,
+        "wait_expired": 0
+      },
+      "accept.operation": {
+        "admitted": 61,
+        "attempts": 61,
+        "max_waiters_seen_on_entry": 0,
+        "mean_admitted_wait_ms": 0.03282022950819673,
+        "mean_slot_held_ms": 203.51355183606557,
+        "queue_full": 0,
+        "wait_expired": 0
+      },
+      "certificate.auth": {
+        "admitted": 41,
+        "attempts": 41,
+        "max_waiters_seen_on_entry": 0,
+        "mean_admitted_wait_ms": 0.965116,
+        "mean_slot_held_ms": 24.953098731707318,
+        "queue_full": 0,
+        "wait_expired": 0
+      },
+      "certificate.ingress": {
+        "admitted": 41,
+        "attempts": 41,
+        "max_waiters_seen_on_entry": 0,
+        "mean_admitted_wait_ms": 0.05310856097560975,
+        "mean_slot_held_ms": 694.094621902439,
+        "queue_full": 0,
+        "wait_expired": 0
+      },
+      "certificate.operation": {
+        "admitted": 40,
+        "attempts": 41,
+        "max_waiters_seen_on_entry": 7,
+        "mean_admitted_wait_ms": 123.3581544,
+        "mean_slot_held_ms": 508.299174425,
+        "queue_full": 0,
+        "wait_expired": 1
+      },
+      "context.auth": {
+        "admitted": 200,
+        "attempts": 200,
+        "max_waiters_seen_on_entry": 0,
+        "mean_admitted_wait_ms": 0.043548015,
+        "mean_slot_held_ms": 9.2172108,
+        "queue_full": 0,
+        "wait_expired": 0
+      },
+      "context.ingress": {
+        "admitted": 200,
+        "attempts": 200,
+        "max_waiters_seen_on_entry": 0,
+        "mean_admitted_wait_ms": 0.068295155,
+        "mean_slot_held_ms": 341.271630255,
+        "queue_full": 0,
+        "wait_expired": 0
+      },
+      "context.operation": {
+        "admitted": 200,
+        "attempts": 200,
+        "max_waiters_seen_on_entry": 9,
+        "mean_admitted_wait_ms": 157.09559360499998,
+        "mean_slot_held_ms": 171.9312514,
+        "queue_full": 0,
+        "wait_expired": 0
+      },
+      "proposal.auth": {
+        "admitted": 40,
+        "attempts": 40,
+        "max_waiters_seen_on_entry": 1,
+        "mean_admitted_wait_ms": 0.755580375,
+        "mean_slot_held_ms": 32.18347405,
+        "queue_full": 0,
+        "wait_expired": 0
+      },
+      "proposal.ingress": {
+        "admitted": 40,
+        "attempts": 40,
+        "max_waiters_seen_on_entry": 0,
+        "mean_admitted_wait_ms": 0.053104225,
+        "mean_slot_held_ms": 1260.7165918,
+        "queue_full": 0,
+        "wait_expired": 0
+      },
+      "proposal.operation": {
+        "admitted": 40,
+        "attempts": 40,
+        "max_waiters_seen_on_entry": 8,
+        "mean_admitted_wait_ms": 214.1634088,
+        "mean_slot_held_ms": 1008.95576835,
+        "queue_full": 0,
+        "wait_expired": 0
+      },
+      "query.auth": {
+        "admitted": 2112,
+        "attempts": 2897,
+        "max_waiters_seen_on_entry": 64,
+        "mean_admitted_wait_ms": 397.20464910132574,
+        "mean_slot_held_ms": 45.476310220170454,
+        "queue_full": 735,
+        "wait_expired": 50
+      },
+      "query.ingress": {
+        "admitted": 2897,
+        "attempts": 2897,
+        "max_waiters_seen_on_entry": 0,
+        "mean_admitted_wait_ms": 0.07354634829133586,
+        "mean_slot_held_ms": 1131.056634536417,
+        "queue_full": 0,
+        "wait_expired": 0
+      },
+      "query.operation": {
+        "admitted": 1703,
+        "attempts": 2112,
+        "max_waiters_seen_on_entry": 64,
+        "mean_admitted_wait_ms": 505.5074993035819,
+        "mean_slot_held_ms": 368.7970094762185,
+        "queue_full": 88,
+        "wait_expired": 321
+      }
+    },
+    "raw": {
+      "file": "hotspot-200-A-1.json.xz",
+      "gzip_sha256": "dc79debc3d6663a29e87f8c6ff16d85cc47107a6bde5125327cf5903da6ede64",
+      "json_sha256": "9b36051a6c87ddece16c4be0e1ef0e74331530bd1faee265ff0db2bc5ff6f0af",
+      "xz_sha256": "3bf7dc27e6ee17ed9e9d7a1b6070cb933f6b77cccd9eb812b44f5cc96376d491"
+    },
+    "service_schema_links_active": [
+      false
+    ],
+    "steps": {
+      "accept_conflict": {
+        "emitted": 19,
+        "fulfilled": 19,
+        "not_emitted": 0,
+        "planned": 19
+      },
+      "accept_independent": {
+        "emitted": 20,
+        "fulfilled": 20,
+        "not_emitted": 0,
+        "planned": 20
+      },
+      "accept_retry": {
+        "emitted": 21,
+        "fulfilled": 21,
+        "not_emitted": 0,
+        "planned": 21
+      },
+      "accept_selected_fixture": {
+        "emitted": 1,
+        "fulfilled": 1,
+        "not_emitted": 0,
+        "planned": 1
+      },
+      "certificate": {
+        "emitted": 40,
+        "fulfilled": 40,
+        "not_emitted": 0,
+        "planned": 40
+      },
+      "compile": {
+        "emitted": 200,
+        "fulfilled": 200,
+        "not_emitted": 0,
+        "planned": 200
+      },
+      "graph": {
+        "emitted": 20,
+        "fulfilled": 20,
+        "not_emitted": 0,
+        "planned": 20
+      },
+      "history": {
+        "emitted": 200,
+        "fulfilled": 200,
+        "not_emitted": 0,
+        "planned": 200
+      },
+      "overload": {
+        "emitted": 1000,
+        "fulfilled": 903,
+        "not_emitted": 0,
+        "planned": 1000
+      },
+      "propose": {
+        "emitted": 40,
+        "fulfilled": 40,
+        "not_emitted": 0,
+        "planned": 40
+      },
+      "state_cold": {
+        "emitted": 200,
+        "fulfilled": 200,
+        "not_emitted": 0,
+        "planned": 200
+      },
+      "state_mixed": {
+        "emitted": 180,
+        "fulfilled": 180,
+        "not_emitted": 0,
+        "planned": 180
+      },
+      "state_warm": {
+        "emitted": 200,
+        "fulfilled": 200,
+        "not_emitted": 0,
+        "planned": 200
+      }
+    },
+    "workers_raw_counters": [
+      {
+        "accept.auth": {
+          "admitted": 61,
+          "admitted_wait_ns": 2697045,
+          "attempts": 61,
+          "max_waiters_seen_on_entry": 0,
+          "slot_held_ns": 250625718
+        },
+        "accept.ingress": {
+          "admitted": 61,
+          "admitted_wait_ns": 4094635,
+          "attempts": 61,
+          "max_waiters_seen_on_entry": 0,
+          "slot_held_ns": 12878177476
+        },
+        "accept.operation": {
+          "admitted": 61,
+          "admitted_wait_ns": 2002034,
+          "attempts": 61,
+          "max_waiters_seen_on_entry": 0,
+          "slot_held_ns": 12414326662
+        },
+        "certificate.auth": {
+          "admitted": 41,
+          "admitted_wait_ns": 39569756,
+          "attempts": 41,
+          "max_waiters_seen_on_entry": 0,
+          "slot_held_ns": 1023077048
+        },
+        "certificate.ingress": {
+          "admitted": 41,
+          "admitted_wait_ns": 2177451,
+          "attempts": 41,
+          "max_waiters_seen_on_entry": 0,
+          "slot_held_ns": 28457879498
+        },
+        "certificate.operation": {
+          "admitted": 40,
+          "admitted_wait_ns": 4934326176,
+          "attempts": 41,
+          "max_waiters_seen_on_entry": 7,
+          "rejected_wait_ns": 2026982030,
+          "slot_held_ns": 20331966977,
+          "wait_expired": 1
+        },
+        "context.auth": {
+          "admitted": 200,
+          "admitted_wait_ns": 8709603,
+          "attempts": 200,
+          "max_waiters_seen_on_entry": 0,
+          "slot_held_ns": 1843442160
+        },
+        "context.ingress": {
+          "admitted": 200,
+          "admitted_wait_ns": 13659031,
+          "attempts": 200,
+          "max_waiters_seen_on_entry": 0,
+          "slot_held_ns": 68254326051
+        },
+        "context.operation": {
+          "admitted": 200,
+          "admitted_wait_ns": 31419118721,
+          "attempts": 200,
+          "max_waiters_seen_on_entry": 9,
+          "slot_held_ns": 34386250280
+        },
+        "proposal.auth": {
+          "admitted": 40,
+          "admitted_wait_ns": 30223215,
+          "attempts": 40,
+          "max_waiters_seen_on_entry": 1,
+          "slot_held_ns": 1287338962
+        },
+        "proposal.ingress": {
+          "admitted": 40,
+          "admitted_wait_ns": 2124169,
+          "attempts": 40,
+          "max_waiters_seen_on_entry": 0,
+          "slot_held_ns": 50428663672
+        },
+        "proposal.operation": {
+          "admitted": 40,
+          "admitted_wait_ns": 8566536352,
+          "attempts": 40,
+          "max_waiters_seen_on_entry": 8,
+          "slot_held_ns": 40358230734
+        },
+        "query.auth": {
+          "admitted": 2112,
+          "admitted_wait_ns": 838896218902,
+          "attempts": 2897,
+          "max_waiters_seen_on_entry": 64,
+          "queue_full": 735,
+          "rejected_wait_ns": 100867466890,
+          "slot_held_ns": 96045967185,
+          "wait_expired": 50
+        },
+        "query.ingress": {
+          "admitted": 2897,
+          "admitted_wait_ns": 213063771,
+          "attempts": 2897,
+          "max_waiters_seen_on_entry": 0,
+          "slot_held_ns": 3276671070252
+        },
+        "query.operation": {
+          "admitted": 1703,
+          "admitted_wait_ns": 860879271314,
+          "attempts": 2112,
+          "max_waiters_seen_on_entry": 64,
+          "queue_full": 88,
+          "rejected_wait_ns": 653025611155,
+          "slot_held_ns": 628061307138,
+          "wait_expired": 321
+        }
+      }
+    ]
+  },
+  "B": {
+    "actual_status_by_route": {
+      "accept": {
+        "200": 42,
+        "409": 19
+      },
+      "certificate": {
+        "200": 40,
+        "429": 1
+      },
+      "context": {
+        "200": 200,
+        "429": 101
+      },
+      "proposal": {
+        "200": 40,
+        "429": 1
+      },
+      "query": {
+        "200": 1650,
+        "429": 1264
+      }
+    },
+    "business": {
+      "complete_agents": 86,
+      "complete_before_extra_burst": 200,
+      "fixture_sha256": "be2948a43bbe4de444f50216f981143511d628b8b51ceef700bdfd469535afc6",
+      "fulfilled_calls": 1991,
+      "planned_calls": 2141,
+      "source_sha": "06adae39e576c0cb96978b5b8b1c11e727b5fc9b",
+      "total_agents": 200
+    },
+    "capacity_gate": "NOT_MET",
+    "correctness_errors": [],
+    "duplicates": 21,
+    "first_attempt_gate": "NOT_MET",
+    "inputs": {
+      "cpu_affinity": [
+        5
+      ],
+      "fixture_sha256": "be2948a43bbe4de444f50216f981143511d628b8b51ceef700bdfd469535afc6",
+      "harness_sha256": "8f29fb28ae0145395df4bdd5cbf0dd311ea3835d61716d35177736a928ed3dda",
+      "source_sha": "06adae39e576c0cb96978b5b8b1c11e727b5fc9b"
+    },
+    "new_world_commits": 21,
+    "per_stage": {
+      "accept.auth": {
+        "admitted": 61,
+        "attempts": 61,
+        "max_waiters_seen_on_entry": 0,
+        "mean_admitted_wait_ms": 0.04228288524590164,
+        "mean_slot_held_ms": 6.217884081967213,
+        "queue_full": 0,
+        "wait_expired": 0
+      },
+      "accept.ingress": {
+        "admitted": 61,
+        "attempts": 61,
+        "max_waiters_seen_on_entry": 0,
+        "mean_admitted_wait_ms": 0.07339768852459017,
+        "mean_slot_held_ms": 247.00442203278686,
+        "queue_full": 0,
+        "wait_expired": 0
+      },
+      "accept.operation": {
+        "admitted": 61,
+        "attempts": 61,
+        "max_waiters_seen_on_entry": 0,
+        "mean_admitted_wait_ms": 0.12988267213114754,
+        "mean_slot_held_ms": 237.78656121311477,
+        "queue_full": 0,
+        "wait_expired": 0
+      },
+      "certificate.auth": {
+        "admitted": 41,
+        "attempts": 41,
+        "max_waiters_seen_on_entry": 0,
+        "mean_admitted_wait_ms": 0.03324365853658537,
+        "mean_slot_held_ms": 16.140129365853657,
+        "queue_full": 0,
+        "wait_expired": 0
+      },
+      "certificate.ingress": {
+        "admitted": 41,
+        "attempts": 41,
+        "max_waiters_seen_on_entry": 0,
+        "mean_admitted_wait_ms": 0.04937107317073171,
+        "mean_slot_held_ms": 543.2099574146341,
+        "queue_full": 0,
+        "wait_expired": 0
+      },
+      "certificate.operation": {
+        "admitted": 40,
+        "attempts": 41,
+        "max_waiters_seen_on_entry": 13,
+        "mean_admitted_wait_ms": 132.44323425,
+        "mean_slot_held_ms": 353.209834875,
+        "queue_full": 0,
+        "wait_expired": 1
+      },
+      "context.auth": {
+        "admitted": 301,
+        "attempts": 301,
+        "max_waiters_seen_on_entry": 3,
+        "mean_admitted_wait_ms": 2.4774641627906977,
+        "mean_slot_held_ms": 21.341917936877074,
+        "queue_full": 0,
+        "wait_expired": 0
+      },
+      "context.ingress": {
+        "admitted": 301,
+        "attempts": 301,
+        "max_waiters_seen_on_entry": 0,
+        "mean_admitted_wait_ms": 0.09610323255813955,
+        "mean_slot_held_ms": 1727.8568628239202,
+        "queue_full": 0,
+        "wait_expired": 0
+      },
+      "context.operation": {
+        "admitted": 200,
+        "attempts": 301,
+        "max_waiters_seen_on_entry": 44,
+        "mean_admitted_wait_ms": 1288.19305041,
+        "mean_slot_held_ms": 254.33187295,
+        "queue_full": 0,
+        "wait_expired": 101
+      },
+      "proposal.auth": {
+        "admitted": 41,
+        "attempts": 41,
+        "max_waiters_seen_on_entry": 0,
+        "mean_admitted_wait_ms": 0.03596539024390244,
+        "mean_slot_held_ms": 21.76612185365854,
+        "queue_full": 0,
+        "wait_expired": 0
+      },
+      "proposal.ingress": {
+        "admitted": 41,
+        "attempts": 41,
+        "max_waiters_seen_on_entry": 0,
+        "mean_admitted_wait_ms": 0.04322068292682927,
+        "mean_slot_held_ms": 980.1870779268293,
+        "queue_full": 0,
+        "wait_expired": 0
+      },
+      "proposal.operation": {
+        "admitted": 40,
+        "attempts": 41,
+        "max_waiters_seen_on_entry": 12,
+        "mean_admitted_wait_ms": 174.77038155000002,
+        "mean_slot_held_ms": 755.074829,
+        "queue_full": 0,
+        "wait_expired": 1
+      },
+      "query.auth": {
+        "admitted": 1980,
+        "attempts": 2914,
+        "max_waiters_seen_on_entry": 64,
+        "mean_admitted_wait_ms": 451.0367343025253,
+        "mean_slot_held_ms": 52.135597753030304,
+        "queue_full": 792,
+        "wait_expired": 142
+      },
+      "query.ingress": {
+        "admitted": 2914,
+        "attempts": 2914,
+        "max_waiters_seen_on_entry": 0,
+        "mean_admitted_wait_ms": 0.2221442288949897,
+        "mean_slot_held_ms": 1214.0433411180509,
+        "queue_full": 0,
+        "wait_expired": 0
+      },
+      "query.operation": {
+        "admitted": 1650,
+        "attempts": 1980,
+        "max_waiters_seen_on_entry": 64,
+        "mean_admitted_wait_ms": 522.7104672351516,
+        "mean_slot_held_ms": 376.73614970484846,
+        "queue_full": 9,
+        "wait_expired": 321
+      }
+    },
+    "raw": {
+      "file": "hotspot-200-B-1.json.xz",
+      "gzip_sha256": "0ddfca9dfcbe4e9d1c97d1f56e59e253a7cc718a426d0c96cd37e5442d559c65",
+      "json_sha256": "297b5f627a95cdf960341eb3012a9f18312f3d8da702e853193a290d392b2953",
+      "xz_sha256": "8291906d3f8de0c289fdb615b92401965430ab81d7ed7290344b58201cd16892"
+    },
+    "service_schema_links_active": [
+      true
+    ],
+    "steps": {
+      "accept_conflict": {
+        "emitted": 19,
+        "fulfilled": 19,
+        "not_emitted": 0,
+        "planned": 19
+      },
+      "accept_independent": {
+        "emitted": 20,
+        "fulfilled": 20,
+        "not_emitted": 0,
+        "planned": 20
+      },
+      "accept_retry": {
+        "emitted": 21,
+        "fulfilled": 21,
+        "not_emitted": 0,
+        "planned": 21
+      },
+      "accept_selected_fixture": {
+        "emitted": 1,
+        "fulfilled": 1,
+        "not_emitted": 0,
+        "planned": 1
+      },
+      "certificate": {
+        "emitted": 40,
+        "fulfilled": 40,
+        "not_emitted": 0,
+        "planned": 40
+      },
+      "compile": {
+        "emitted": 200,
+        "fulfilled": 200,
+        "not_emitted": 0,
+        "planned": 200
+      },
+      "graph": {
+        "emitted": 20,
+        "fulfilled": 20,
+        "not_emitted": 0,
+        "planned": 20
+      },
+      "history": {
+        "emitted": 200,
+        "fulfilled": 200,
+        "not_emitted": 0,
+        "planned": 200
+      },
+      "overload": {
+        "emitted": 1000,
+        "fulfilled": 850,
+        "not_emitted": 0,
+        "planned": 1000
+      },
+      "propose": {
+        "emitted": 40,
+        "fulfilled": 40,
+        "not_emitted": 0,
+        "planned": 40
+      },
+      "state_cold": {
+        "emitted": 200,
+        "fulfilled": 200,
+        "not_emitted": 0,
+        "planned": 200
+      },
+      "state_mixed": {
+        "emitted": 180,
+        "fulfilled": 180,
+        "not_emitted": 0,
+        "planned": 180
+      },
+      "state_warm": {
+        "emitted": 200,
+        "fulfilled": 200,
+        "not_emitted": 0,
+        "planned": 200
+      }
+    },
+    "workers_raw_counters": [
+      {
+        "accept.auth": {
+          "admitted": 61,
+          "admitted_wait_ns": 2579256,
+          "attempts": 61,
+          "max_waiters_seen_on_entry": 0,
+          "slot_held_ns": 379290929
+        },
+        "accept.ingress": {
+          "admitted": 61,
+          "admitted_wait_ns": 4477259,
+          "attempts": 61,
+          "max_waiters_seen_on_entry": 0,
+          "slot_held_ns": 15067269744
+        },
+        "accept.operation": {
+          "admitted": 61,
+          "admitted_wait_ns": 7922843,
+          "attempts": 61,
+          "max_waiters_seen_on_entry": 0,
+          "slot_held_ns": 14504980234
+        },
+        "certificate.auth": {
+          "admitted": 41,
+          "admitted_wait_ns": 1362990,
+          "attempts": 41,
+          "max_waiters_seen_on_entry": 0,
+          "slot_held_ns": 661745304
+        },
+        "certificate.ingress": {
+          "admitted": 41,
+          "admitted_wait_ns": 2024214,
+          "attempts": 41,
+          "max_waiters_seen_on_entry": 0,
+          "slot_held_ns": 22271608254
+        },
+        "certificate.operation": {
+          "admitted": 40,
+          "admitted_wait_ns": 5297729370,
+          "attempts": 41,
+          "max_waiters_seen_on_entry": 13,
+          "rejected_wait_ns": 2084325083,
+          "slot_held_ns": 14128393395,
+          "wait_expired": 1
+        },
+        "context.auth": {
+          "admitted": 301,
+          "admitted_wait_ns": 745716713,
+          "attempts": 301,
+          "max_waiters_seen_on_entry": 3,
+          "slot_held_ns": 6423917299
+        },
+        "context.ingress": {
+          "admitted": 301,
+          "admitted_wait_ns": 28927073,
+          "attempts": 301,
+          "max_waiters_seen_on_entry": 0,
+          "slot_held_ns": 520084915710
+        },
+        "context.operation": {
+          "admitted": 200,
+          "admitted_wait_ns": 257638610082,
+          "attempts": 301,
+          "max_waiters_seen_on_entry": 44,
+          "rejected_wait_ns": 203158852791,
+          "slot_held_ns": 50866374590,
+          "wait_expired": 101
+        },
+        "proposal.auth": {
+          "admitted": 41,
+          "admitted_wait_ns": 1474581,
+          "attempts": 41,
+          "max_waiters_seen_on_entry": 0,
+          "slot_held_ns": 892410996
+        },
+        "proposal.ingress": {
+          "admitted": 41,
+          "admitted_wait_ns": 1772048,
+          "attempts": 41,
+          "max_waiters_seen_on_entry": 0,
+          "slot_held_ns": 40187670195
+        },
+        "proposal.operation": {
+          "admitted": 40,
+          "admitted_wait_ns": 6990815262,
+          "attempts": 41,
+          "max_waiters_seen_on_entry": 12,
+          "rejected_wait_ns": 2009103405,
+          "slot_held_ns": 30202993160,
+          "wait_expired": 1
+        },
+        "query.auth": {
+          "admitted": 1980,
+          "admitted_wait_ns": 893052733919,
+          "attempts": 2914,
+          "max_waiters_seen_on_entry": 64,
+          "queue_full": 792,
+          "rejected_wait_ns": 291680474364,
+          "slot_held_ns": 103228483551,
+          "wait_expired": 142
+        },
+        "query.ingress": {
+          "admitted": 2914,
+          "admitted_wait_ns": 647328283,
+          "attempts": 2914,
+          "max_waiters_seen_on_entry": 0,
+          "slot_held_ns": 3537722296018
+        },
+        "query.operation": {
+          "admitted": 1650,
+          "admitted_wait_ns": 862472270938,
+          "attempts": 1980,
+          "max_waiters_seen_on_entry": 64,
+          "queue_full": 9,
+          "rejected_wait_ns": 650466757796,
+          "slot_held_ns": 621614647013,
+          "wait_expired": 321
+        }
+      }
+    ]
+  }
+}

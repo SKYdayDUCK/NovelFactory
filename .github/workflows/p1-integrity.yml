@@ -101,12 +101,23 @@ jobs:
           enable-cache: true
       - name: Install PostgreSQL 17 client for real pg_dump and pg_restore
         run: |
-          sudo install -d -m 0755 /usr/share/postgresql-common/pgdg
-          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo tee /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc > /dev/null
-          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
-          sudo apt-get update -qq
-          sudo apt-get install -y postgresql-client-17
-          test -x "$PG_BIN/pg_dump" && test -x "$PG_BIN/pg_restore"
+          if [[ ! -x "$PG_BIN/pg_dump" || ! -x "$PG_BIN/pg_restore" || ! -x "$PG_BIN/psql" ]]; then
+            key=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+            if ! apt-cache show postgresql-client-17 >/dev/null 2>&1; then
+              if [[ ! -s "$key" ]]; then
+                curl --fail --silent --show-error --location --retry 4 --retry-all-errors \
+                  --connect-timeout 10 --max-time 60 --retry-max-time 180 \
+                  --output "$RUNNER_TEMP/nf-pgdg.asc" https://www.postgresql.org/media/keys/ACCC4CF8.asc
+                sudo install -D -m 0644 "$RUNNER_TEMP/nf-pgdg.asc" "$key"
+              fi
+              echo "deb [signed-by=$key] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+            fi
+            sudo apt-get -o Acquire::Retries=4 update -qq
+            sudo apt-get -o Acquire::Retries=4 install -y postgresql-client-17
+          fi
+          for tool in pg_dump pg_restore psql; do
+            "$PG_BIN/$tool" --version | grep -E '\(PostgreSQL\) 17\.'
+          done
       - name: Install locked dependencies
         run: uv sync --locked --group dev --python 3.12
       - name: Record runtime and initialize fresh PostgreSQL database
@@ -124,6 +135,26 @@ jobs:
           uv run --no-sync python -m pytest tests -q \
             --junitxml=ci-evidence/postgres-all.xml --json-report --json-report-file=ci-evidence/postgres-all.json \
             2>&1 | tee ci-evidence/postgres-all.log
+      - name: Compare Scion default and enabled traces with the frozen original
+        env:
+          PYTHONHASHSEED: '2411'
+          NF_SCION_DIFF_ROUND2: '1'
+        run: |
+          original="$RUNNER_TEMP/nf-scion-original"
+          evidence="$GITHUB_WORKSPACE/ci-evidence/scion-differential"
+          interpreter="$GITHUB_WORKSPACE/.venv/bin/python"
+          test_file=tests/integration/test_scion_differential.py
+          git worktree add --detach "$original" 2c28acba6e1932657162c6e55b3288365ce3ea23
+          cp "$test_file" "$original/$test_file"
+          mkdir -p "$evidence"
+          (
+            cd "$original"
+            PYTHONPATH="$original/src:$original" NF_SCION_DIFF_FROZEN=1 NF_SCION_DIFF_EVIDENCE="$evidence/frozen" \
+              "$interpreter" -m pytest "$test_file" -q
+          ) 2>&1 | tee "$evidence/frozen.log"
+          PYTHONPATH="$GITHUB_WORKSPACE/src:$GITHUB_WORKSPACE" NF_SCION_DIFF_ORACLE="$evidence/frozen" \
+            NF_SCION_DIFF_EVIDENCE="$evidence/current" "$interpreter" -m pytest "$test_file" -q \
+            2>&1 | tee "$evidence/current.log"
       - name: Compare current genesis replay with the pinned baseline
         run: |
           uv run --no-sync python -m benchmarks.genesis_paired_profile \

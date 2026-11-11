@@ -1,0 +1,36 @@
+# 最终PR3资料提交实际 CI 证据索引
+
+提交：`23a61398278c9a13e6450d444d4a6d25a88ef5e0`。ZIP digest 逐项核对；原始 ZIP、解包文件及 job logs 均保留。
+
+## 实际负载（包括所有已下载重复）
+
+| Run / repeat | Agent / profile | 正式提交 | 首试失败 | 容量 | 业务恢复 | 有效调用/s（扣重复） | 首试 P95 / P99 ms | 实际 call/header start/s |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 42864580618 / single | 200 / mixed | 21/21 | 0 | PASS | PASS | 7.9099 | 247.62/520.30 | N/A |
+| 42864580618 / single | 200 / overload | 21/21 | 574 | NOT_MET | PASS | 11.0787 | 10806.57/17297.46 | 44.19/30.05 |
+| 42864580621 / run-1 | 50 / mixed | 6/6 | 0 | PASS | PASS | 8.0969 | 140.63/272.05 | N/A |
+| 42864580621 / run-2 | 50 / mixed | 6/6 | 0 | PASS | PASS | 8.0935 | 491.45/958.01 | N/A |
+| 42864580621 / run-1 | 50 / overload | 6/6 | 133 | NOT_MET | PASS | 12.2417 | 3396.83/4135.57 | 225.85/112.70 |
+| 42864580621 / run-2 | 50 / overload | 6/6 | 116 | NOT_MET | PASS | 11.6609 | 3424.50/4111.59 | 156.12/89.47 |
+| 42864580621 / run-1 | 200 / mixed | 21/21 | 0 | PASS | PASS | 7.9050 | 211.78/362.88 | N/A |
+| 42864580621 / run-2 | 200 / mixed | 21/21 | 0 | PASS | PASS | 7.9156 | 185.11/306.42 | N/A |
+| 42864580621 / run-1 | 200 / overload | 21/21 | 633 | NOT_MET | PASS | 10.3340 | 12918.82/21761.31 | 32.16/22.45 |
+| 42864580621 / run-2 | 200 / overload | 21/21 | 653 | NOT_MET | PASS | 10.3539 | 12739.08/21083.74 | 32.76/22.98 |
+
+## JUnit 实际计数
+
+- `42864569773/13785964137/extracted/postgres-all.xml`: tests=631, failures=0, errors=0, skipped=0, time=377.553s
+- `42864569773/13787276035/extracted/unit.xml`: tests=380, failures=0, errors=0, skipped=0, time=17.372s
+- `42864582299/13787430788/extracted/unit.xml`: tests=380, failures=0, errors=0, skipped=0, time=17.772s
+- `42864582299/13787760403/extracted/postgres-all.xml`: tests=631, failures=0, errors=0, skipped=0, time=267.310s
+
+## 证据边界
+
+- All listed load repetitions are included; no best-run selection.
+- This index describes the final PR3 document checkpoint only. Current local source may have moved.
+- Service diagnostic timing is inclusive and overlapping, and instrumentation may affect latency/throughput.
+- Local no-NF_BENCH_DIAGNOSTICS experiments are separate and are not synthesized into GitHub results.
+- Connection-sample wait totals are sample-weighted observations, not elapsed time.
+- Declared 1000 RPS remains NOT_MET whenever actual call starts or first attempts fail the frozen gate.
+- Business recovery PASS and completed_logical_operations do not mean every overload read succeeded: retain retry_exhaustion counts.
+- GitHub runners expose 4 CPUs; the actual model is recorded for every result and varies between jobs. Only same-job repetitions share the same runner allocation.

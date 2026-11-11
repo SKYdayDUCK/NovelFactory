@@ -139,7 +139,8 @@ class WorldQueryService:
             task, grant, spec = self._task(repo, principal, request['task_id'], request['generation'],
                                           'COMPILE' if compile_context else 'READ')
             wr = self._selector(repo, principal, request['read_contract'], task, cursor)
-            revision = self.kernel.revision(repo, wr)
+            revision = (self.kernel.revision(repo, wr) if compile_context
+                        else self.kernel.query_revision(repo, wr))
             plane = request['knowledge_cut']['plane']
             if plane not in {'WORLD', 'BELIEF', 'PLAN', 'SIMULATION'}:
                 raise DomainError('UNSUPPORTED_SCHEMA', 'This knowledge plane is not implemented in P1')
