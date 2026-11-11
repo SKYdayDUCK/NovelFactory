@@ -177,7 +177,12 @@ def test_workshop_loss_after_nf_provider_send_preserves_single_execution(kernel_
             with connect(aw_url) as conn:
                 counts = {table: conn.execute("SELECT count(*) AS n FROM " + table + " WHERE operation_id=%s", (op,)).fetchone()["n"]
                           for table in ("aw_delegations", "aw_budget_holds", "aw_remote_receipts", "aw_cost_observations")}
-            assert set(counts.values()) == {1} and len(requests) == 1
+                observations = conn.execute("""SELECT attempt_id::text,state FROM aw_cost_observations
+                    WHERE operation_id=%s ORDER BY state""", (op,)).fetchall()
+            assert counts == {"aw_delegations": 1, "aw_budget_holds": 1, "aw_remote_receipts": 1,
+                              "aw_cost_observations": 2}, counts
+            assert observations == [{"attempt_id": attempt, "state": "SUCCEEDED"}, {"attempt_id": attempt, "state": "UNKNOWN"}]
+            assert len(requests) == 1
             assert nf_state()["attempts"] == [{"id": attempt, "state": "SUCCEEDED"}]
         out = Path(os.environ["AW_ACCEPTANCE_OUTPUT"])
         out.mkdir(exist_ok=True, parents=True)
@@ -187,5 +192,5 @@ def test_workshop_loss_after_nf_provider_send_preserves_single_execution(kernel_
             "nf_db": make_url(dual_databases["nf"]).database, "workshop_db_rejected_connections_until_nf_accepted": True,
             "initial_aw": before, "nf_at_signal": active, "nf_while_aw_offline": offline,
             "aw_before_reconcile": unchanged, "aw_after_reconcile": caught_up, "settled_aw": final,
-            "nf_final": nf_state(), "aw_rows": counts, "loopback_requests": len(requests)
+            "nf_final": nf_state(), "aw_rows": counts, "immutable_cost_history": observations, "loopback_requests": len(requests)
         }, indent=2) + "\n")
