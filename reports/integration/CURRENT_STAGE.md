@@ -1,5 +1,5 @@
 # 当前唯一阶段
 
-Workshop W5 [#14](https://github.com/SKYdayDUCK/NovelFactory/pull/14)。W4 已在 `main` `6c711adf794842bdf4469ab51e89093d37761bcc` 完成两条 push CI、独立双服务、历史数据库、真实原文覆盖和故障恢复验收，状态 **MERGED_AND_VERIFIED**。[W4 主线签收](W4_主线签收.md)。
+Workshop W6 [#15](https://github.com/SKYdayDUCK/NovelFactory/pull/15)。W5 已在实际 main `b30e76978830bec4c596c04194d749fd01f67402` 完成两条 push CI、双服务、四个历史部署、管理者与故障恢复测试，状态为 **MERGED_AND_VERIFIED**。[W5 主线签收](W5_主线签收.md)。
 
-从该主线重新整理 #14 的历史堆叠差异，保留原提交与证据，按独立阶段验收。W6、P6 及 P5.7 继续按串行制度等候。
+从该主线整理原 W6 提交和证据，核对真实双服务协作、10/50/200 员工和恢复情况。W6 签收后完成 P5.6 主线综合验收，再进入 P6。

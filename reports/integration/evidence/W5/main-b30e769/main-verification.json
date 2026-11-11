@@ -1,0 +1,291 @@
+{
+  "stage": "Workshop W5",
+  "pr": 14,
+  "status": "MERGED_AND_VERIFIED",
+  "merged_at_utc": "2026-11-11T22:31:34Z",
+  "first_parent": "6c711adf794842bdf4469ab51e89093d37761bcc",
+  "source_sha": "455cf92cc6fe5e1d0e565d627a4d5651a56bc8d4",
+  "main_sha": "b30e76978830bec4c596c04194d749fd01f67402",
+  "tree": "d6cf8513c8df97902eb08fe1666492097d3d025a",
+  "candidate_hosted": {
+    "workshop": 43110195132,
+    "passed": 145
+  },
+  "main_hosted": {
+    "workshop": 43112498236,
+    "passed": 145,
+    "p1": 43112498026,
+    "unit_passed": 398,
+    "postgres_passed": 817,
+    "postgres_skipped_due_to_host": 17,
+    "all_17_independently_matched": true
+  },
+  "main_linux_nf": {
+    "tests": "834",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "time": "667.092"
+  },
+  "main_local_workshop": {
+    "suites": 15,
+    "pass": 144,
+    "docker_skip": 1,
+    "native_notification_outage": {
+      "tests": 1,
+      "passed": 1,
+      "skipped": 0
+    },
+    "restricted_role": {
+      "tests": 17,
+      "skipped": 0,
+      "errors": 0,
+      "failures": 0
+    }
+  },
+  "physical_restore_lsns": [
+    "0/4026790",
+    "0/407A3C0"
+  ],
+  "separate_postgres_service_cluster_ids_verified": true,
+  "physical_drill_topology": "two service databases with independent owners on an isolated PG17.11 cluster for comparable WAL positions",
+  "w5_historical_upgrades": {
+    "w004c": {
+      "old_source": "6c711adf794842bdf4469ab51e89093d37761bcc",
+      "old_tables": 34,
+      "catalog_sha256": "8c15c79de44a96050f514908b104e84296331fc2a03b2015d06d6d7333820ca4",
+      "old_wakes_after_restart": [],
+      "history_trigger_modes": []
+    },
+    "w005": {
+      "old_source": "609e92278476c60a893658ef53b6ff15f659b153",
+      "old_tables": 34,
+      "catalog_sha256": "8c15c79de44a96050f514908b104e84296331fc2a03b2015d06d6d7333820ca4",
+      "old_wakes_after_restart": [
+        [
+          "REVOKED",
+          0
+        ]
+      ],
+      "history_trigger_modes": [
+        [
+          "aw_budget_holds",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_delegations",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_deliveries",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_employment_versions",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_remote_receipts",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_resume_requests",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_reviews",
+          "aw_history",
+          "O"
+        ]
+      ]
+    },
+    "w005a": {
+      "old_source": "d308e1ce1986a33e4781be97fba8a862b89dd76f",
+      "old_tables": 37,
+      "catalog_sha256": "8c15c79de44a96050f514908b104e84296331fc2a03b2015d06d6d7333820ca4",
+      "old_wakes_after_restart": [
+        [
+          "REVOKED",
+          0
+        ]
+      ],
+      "history_trigger_modes": [
+        [
+          "aw_budget_holds",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_delegations",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_deliveries",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_employment_versions",
+          "aw_history",
+          "A"
+        ],
+        [
+          "aw_remote_receipts",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_resume_requests",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_reviews",
+          "aw_history",
+          "O"
+        ]
+      ]
+    },
+    "w005b": {
+      "old_source": "bfb74f681435b12a385eb54e596c658e64629276",
+      "old_tables": 37,
+      "catalog_sha256": "8c15c79de44a96050f514908b104e84296331fc2a03b2015d06d6d7333820ca4",
+      "old_wakes_after_restart": [
+        [
+          "DONE",
+          1
+        ]
+      ],
+      "history_trigger_modes": [
+        [
+          "aw_budget_holds",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_delegations",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_deliveries",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_employment_versions",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_remote_receipts",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_resume_requests",
+          "aw_history",
+          "O"
+        ],
+        [
+          "aw_reviews",
+          "aw_history",
+          "O"
+        ]
+      ]
+    }
+  },
+  "manager": {
+    "nf_workflow": "IDLE",
+    "peer_launched_while_idle": false,
+    "request_id": "4f40199d-7047-4080-8e01-1ed6b4af4ac1",
+    "states": [
+      "PENDING",
+      "DONE",
+      "IDLE"
+    ]
+  },
+  "wall_clock_idle": {
+    "seconds": 67.811,
+    "timer_ticks": 12,
+    "peer_launches": 0,
+    "initial_nf_tasks": 0,
+    "final_nf_tasks": 0
+  },
+  "outage": {
+    "status": "PASS",
+    "operation_id": "2d43401b-14f9-427b-a7a9-8457888a45d3",
+    "recorded_utc": "2026-11-11T22:35:24.143835+00:00",
+    "scope": "Workshop database refused connections across two real NF supervisor scans.",
+    "aw_database_allowed_connections": false,
+    "aw_live_client_backends": 0,
+    "aw_author_mcp_during_outage": "VIEW_DENIED",
+    "pending_wake_preserved": "a2b0c8e7-7f94-4208-b191-0684b7eb04cf",
+    "aw_unchanged_while_offline": {
+      "delegation": "BOUND",
+      "task_id": "1626f0c5-6841-4c64-a7e9-99aebceafed1",
+      "receipt_ref": "d77f5216-35dd-4990-9888-beae6baf23fc",
+      "task_state": "READY",
+      "accounting_state": "NO_ATTEMPT",
+      "budget_hold": "HELD",
+      "attempts_observed": 0
+    },
+    "nf_supervisor_scans": [
+      {
+        "before": {
+          "state": "READY",
+          "attempts": []
+        },
+        "after": {
+          "state": "RESULT_STORED",
+          "attempts": [
+            "ee06c5d5-190d-43dc-b46b-8eade48f3211"
+          ]
+        },
+        "status": "RESULT_STORED"
+      },
+      {
+        "before": {
+          "state": "RESULT_STORED",
+          "attempts": [
+            "ee06c5d5-190d-43dc-b46b-8eade48f3211"
+          ]
+        },
+        "after": {
+          "state": "ACCEPTED",
+          "attempts": [
+            "ee06c5d5-190d-43dc-b46b-8eade48f3211"
+          ]
+        },
+        "status": "IDLE"
+      }
+    ],
+    "nf_stdio_during_outage": {
+      "receipt_ref": "d77f5216-35dd-4990-9888-beae6baf23fc",
+      "attempt_ids": [
+        "ee06c5d5-190d-43dc-b46b-8eade48f3211"
+      ]
+    },
+    "aw_after_reconciliation": {
+      "delegation": "BOUND",
+      "task_id": "1626f0c5-6841-4c64-a7e9-99aebceafed1",
+      "receipt_ref": "d77f5216-35dd-4990-9888-beae6baf23fc",
+      "task_state": "ACCEPTED",
+      "accounting_state": "UNKNOWN",
+      "budget_hold": "HELD",
+      "attempts_observed": 1
+    },
+    "production_provider_calls": 0
+  },
+  "production_supplier_calls": 0,
+  "capacity_issue": 13,
+  "p6_real_creation": "BLOCKED_LOCAL_AUTHORIZATION",
+  "next_eligible_stage": "Workshop W6 #15"
+}
