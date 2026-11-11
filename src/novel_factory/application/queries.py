@@ -56,10 +56,10 @@ class WorldQueryService:
     def _task(self, repo, principal, task_id, generation, capability='READ', *, lock=None):
         task = repo.one('tasks', {'task_id': task_id}, lock=lock)
         _require(task, 'VIEW_DENIED', 'Task is unavailable')
-        grant = self.kernel.authorize(repo, principal, task['work_id'], capability, task['branch_id'])
-        return self._qualify_task(repo, principal, task, generation, grant)
+        work, grant = self.kernel._authorize_with_work(repo, principal, task['work_id'], capability, task['branch_id'])
+        return self._qualify_task(repo, principal, task, generation, grant, work=work)
 
-    def _qualify_task(self, repo, principal, task, generation, grant, *, work=None):
+    def _qualify_task(self, repo, principal, task, generation, grant, *, work):
         _require(task['principal_id'] == principal.principal_id and task['grant_id'] == principal.grant_id,
                  'VIEW_DENIED', 'Task is unavailable')
         _require(task['generation'] == generation, 'STALE_GENERATION', 'Task generation is no longer current')
@@ -73,13 +73,11 @@ class WorldQueryService:
         record = repo.one('task_inputs', {'task_id': task['task_id'], 'generation': generation})
         _require(record, 'TASK_NOT_ACCEPTABLE', 'Task input is unavailable')
         spec = record['spec']
-        if work is None:
-            work = repo.one('works', {'work_id': task['work_id']})
         _require(spec['policy_version'] == work['policy_version'], 'TASK_REBIND_REQUIRED', 'Task policy is no longer current')
         _require(fingerprint(spec) == record['input_hash'], 'TASK_NOT_ACCEPTABLE', 'Task input integrity failed')
         return task, grant, spec
 
-    def _selector(self, repo, principal, read_contract, task, cursor=None):
+    def _selector(self, repo, principal, read_contract, task, task_grant, cursor=None):
         selector = read_contract['revision']
         if cursor:
             wr = cursor['world_ref']
@@ -100,7 +98,11 @@ class WorldQueryService:
             _require(target['work_id'] == task['work_id'], 'VIEW_DENIED', 'World is outside the task grant')
             wr = self.kernel.head(repo, target['work_id'], target.get('branch_id'))
         _require(wr['work_id'] == task['work_id'], 'VIEW_DENIED', 'World is outside the task grant')
-        self.kernel.authorize(repo, principal, wr['work_id'], 'READ', wr['branch_id'])
+        # Only reuse the grant SHARE-locked by _task in this sampling transaction.
+        # A compile grant may lack READ, and a resume grant has a live expiry.
+        if (wr['branch_id'] != task['branch_id'] or 'READ' not in task_grant['capabilities']
+                or task_grant['role_id'] == 'resume_operator'):
+            self.kernel.authorize(repo, principal, wr['work_id'], 'READ', wr['branch_id'])
         if selector['mode'] == 'READ_YOUR_WRITES':
             receipt = self.kernel.artifact(repo, selector['min_receipt_ref'], wr['work_id'])
             proof = repo.one('receipts', {'work_id': wr['work_id'], 'principal_id': principal.principal_id,
@@ -143,7 +145,7 @@ class WorldQueryService:
         with self.kernel.db.uow(write=False, repeatable_read=True) as repo:
             task, grant, spec = self._task(repo, principal, request['task_id'], request['generation'],
                                           'COMPILE' if compile_context else 'READ')
-            wr = self._selector(repo, principal, request['read_contract'], task, cursor)
+            wr = self._selector(repo, principal, request['read_contract'], task, grant, cursor)
             revision = self.kernel.revision(repo, wr)
             plane = request['knowledge_cut']['plane']
             if plane not in {'WORLD', 'BELIEF', 'PLAN', 'SIMULATION'}:
@@ -196,7 +198,10 @@ class WorldQueryService:
                 _require(ref in spec['input_artifacts'], 'VIEW_DENIED', 'Input manifest is not bound to this task generation')
                 manifest = validate_contract('InputManifest', a['payload'], 'kernel')
                 refs.append(ref)
-            indexes = repo.many('index_watermarks', {'branch_id': wr['branch_id']})
+            # STATE and BELIEF are resolved from the fixed authoritative projection.
+            # Only graph/timeline payloads use watermarks for freshness and caching.
+            needs_indexes = plane != 'BELIEF' and any(q['kind'] != 'STATE' for q in queries)
+            indexes = repo.many('index_watermarks', {'branch_id': wr['branch_id']}) if needs_indexes else []
             read_cut = {'world_ref': wr, 'knowledge_cut': deepcopy(request['knowledge_cut']),
                         'policy_version': spec['policy_version'], 'permission_epoch': grant['epoch'],
                         'resolved_at': repo.now().isoformat(), 'source_manifest_refs': refs,

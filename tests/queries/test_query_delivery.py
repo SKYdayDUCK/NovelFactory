@@ -8,7 +8,7 @@ from sqlalchemy import event, text
 from novel_factory.application.semantic_dependencies import check_task_dependencies
 from novel_factory.domain.errors import DomainError
 
-from .conftest import p, request, seed, start
+from .conftest import compile_request, p, request, seed, start
 
 pytestmark = [pytest.mark.postgres, pytest.mark.integration]
 
@@ -49,6 +49,13 @@ def test_repeated_delivery_verifies_both_scopes_and_persists_one_read(query_env,
     # The fixed-cut sample is read-only. Its separate delivery transaction begins
     # with the maintenance fence and ends after recording the immutable observation.
     (gate,) = [i for i, sql in enumerate(statements) if "pg_advisory_xact_lock_shared" in sql]
+    sample = statements[:gate]
+    # Same-scope sampling uses the work and grant already locked for this task.
+    # A distinct target branch requires an independent permission decision.
+    for table in ("nf_works", "nf_grants"):
+        rows = [sql for sql in sample if f"from {table} " in sql]
+        assert len(rows) == (2 if alternate_branch else 1)
+    assert not any("nf_index_watermarks " in sql for sql in sample)
     delivery = statements[gate:]
     for table in ("nf_works", "nf_grants"):
         scope_locks = [sql for sql in delivery if f"from {table} " in sql and "for share" in sql]
@@ -125,3 +132,21 @@ def test_cache_hit_rechecks_changes_committed_after_sampling(query_env, monkeypa
         service.query(principal, query)
     assert blocked.value.code == code
     assert service.cache_hits == hits + 1
+
+def test_compile_grant_without_read_cannot_sample_projection(query_env):
+    kernel, service = query_env["kernel"], query_env["query"]
+    world = seed(query_env)
+    wr = world["world_ref"]
+    grant = kernel.issue_grant(
+        world["principal"], wr["work_id"], role_id="evidence_maintainer",
+        capabilities=["READ", "COMPILE", "TASK_CREATE", "TASK_CLAIM"],
+        branch_ids=[wr["branch_id"]], max_story_time=p(42), planes=["WORLD"],
+    )
+    principal = grant["principal"]
+    task = start(query_env, world, principal=principal, role="evidence_maintainer", at=p(42))
+    with kernel.db.uow() as repo:
+        repo.change("grants", {"grant_id": principal.grant_id},
+                    {"capabilities": ["COMPILE", "TASK_CREATE", "TASK_CLAIM"]})
+    with pytest.raises(DomainError) as denied:
+        service.context_compile(principal, compile_request(task))
+    assert denied.value.code == "VIEW_DENIED"

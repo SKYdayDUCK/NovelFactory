@@ -17,5 +17,20 @@
     130535530409,
     130535530542
   ],
-  "next": "Profile the failed read-only soak and overload jobs. Rerun unchanged gates. Retarget only after PR #5 merges."
+  "next": "Profile the failed read-only soak and overload jobs. Rerun unchanged gates. Retarget only after PR #5 merges.",
+  "latest_fix": {
+    "parent": "d423007bd55d78952ad846729e735845f7f24284",
+    "paths": [
+      "src/novel_factory/application/queries.py",
+      "tests/queries/test_query_delivery.py"
+    ],
+    "before": "two new SQL-count assertions failed on predecessor code; two existing fence cases passed",
+    "after": {
+      "command": "python -m pytest tests/queries tests/integration/test_s9_query_coverage.py -q",
+      "passed": 33,
+      "junit": "evidence/p55/s9-local/query-sampling-junit.xml"
+    },
+    "new_sha_ci": "see PR #6 Actions for the tested head; pending at commit",
+    "capacity_status": "NOT_MET at previous source, not yet measured for fix"
+  }
 }
