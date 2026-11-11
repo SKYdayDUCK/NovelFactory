@@ -9,3 +9,5 @@ Workshop W4 [#12](https://github.com/SKYdayDUCK/NovelFactory/pull/12) → `main`
 
 
 **2026-11-11 21:15 UTC 续办点**。GitHub 再次确认 `main` 为 `e6763d844f023d7c6a13060dbaebca0416fe3099`，#12 未合并，候选 `3ed83ffe779bf15e7965f2b2fc8236abaf90ff72`。正式 [P1](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43096270977) 和 [Workshop](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43096271063) 均为 queued，作业数均为 0。已核已有“NovelFactory 串行交付续办”处于启用，按小时检查，上一轮于 21:10 UTC 结束，下次计划 22:04 UTC。恢复时先查询这两个运行和最新头；失败则诊断原日志，成功则核验原件、同树和审查，走正常 PR 合并、重验实际 main 并签收。只在 W4 签收后开启 W5。随后 W6 与双服务最终验收须针对真实 main 产出 `reports/integration/P5_P5.5_P5.6_主分支最终验收.md`，再恢复 P6。
+
+2026-11-11 21:23:01 UTC。GitHub 于 21:07:26 UTC 公告正在处理积压，并于 21:21:39 UTC 将事故标为 resolved。此时 #12 的原 P1/Workshop 两项仍为 queued、0 jobs、0 待部署审批，head 和 main 均与上述检查点一致。继续以仓库原作业为合并门禁。[恢复监控](evidence/W4/candidate-3ed83ff/platform-recovery/211315-monitoring-checkpoint.json) · [官方结案后的实际排队状态](evidence/W4/candidate-3ed83ff/platform-recovery/212301-resolved-checkpoint.json)。
