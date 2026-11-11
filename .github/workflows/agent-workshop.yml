@@ -73,7 +73,7 @@ jobs:
           done
       - uses: actions/checkout@v4
         with:
-          ref: 74350760dfd063f3596e5b6838a56a40d3006ad6
+          ref: 90cac947c6f1b176f20df6a579027f24e96d7b4c
           path: nf-peer
           persist-credentials: false
       - name: Install pinned NF host and role isolation tools

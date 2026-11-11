@@ -15,3 +15,5 @@
 | FR-ENTRY, FR-XSYS / AT-46–49 | evidence/workshop/w6/w008；相同作者键以安装分别幂等、隔离历史和进度、两套 stdio、审读冻结材料与取件 | PASS（PG17.11） |
 | FR-EXP / AT-50 | reports/handoff/P6_ROUTE_PROBE.json、P6_LOCAL_PREFLIGHT.json；金额、模型、演员、作品 revision 和 Skill 固定检查 | 离线前检已实跑；商业运行与独立审读 BLOCKED_ENVIRONMENT |
 | FR-SEM / AT-31–39 | evidence/p55/s9-local/remote-55d897；冻结的三样本四臂实际判决中 A、B、C、D 的 FP/FN 分别为 1/0、0/1、0/1、0/0 | 仅限已标注样本；实际小说总体误漏和供应商用量未测 |
+| FR-SEM / AT-31–39 | evidence/p55/business/receipts；实际 writer、合成 provider、冻结金标和每臂有效吞吐/返工 Token | PASS（受控实验，零商业调用） |
+| NF 历史 500 人读 / #13 | evidence/p55/http-validation 及原始运行 43040949167、43041082878；相同负载下完整 HTTP 记录 | #21 两次通过；组合源码仍按自己的 CI 验收 |

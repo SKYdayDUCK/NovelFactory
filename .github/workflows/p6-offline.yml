@@ -26,7 +26,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/checkout@v4
         with:
-          ref: 013ebcadf4f7d3a64838096361c6432e4e679b8d
+          ref: 43dc369ab73e2faacb509b6ca16995848fc92c28
           path: nf-peer
           persist-credentials: false
       - uses: actions/setup-python@v5
