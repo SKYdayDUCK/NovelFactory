@@ -10,7 +10,14 @@ from agent_workshop.organization import PRESETS, TOOLS, bootstrap, require_emplo
 
 
 def identity(org, employee="manager", rev=1):
-    return Session(org, employee, rev, 1, "test-install")
+    return Session(org, employee, rev, 1, org, org_member=True)
+
+
+def install(conn, installation):
+    conn.execute(
+        "INSERT INTO aw_installations (installation_id, nf_instance_id) VALUES (%s,%s)",
+        (installation, "fixture-nf"),
+    )
 
 
 @pytest.fixture
@@ -18,7 +25,8 @@ def team():
     url = os.environ["AW_DATABASE_URL"]
     org = uuid4().hex
     with connect(url) as conn:
-        bootstrap(conn, org, "Standard")
+        install(conn, org)
+        bootstrap(conn, org, "Standard", installation_id=org)
     return url, org
 
 
@@ -31,14 +39,15 @@ def test_frozen_presets_repeated_bootstrap(preset):
     url = os.environ["AW_DATABASE_URL"]
     org = uuid4().hex
     with connect(url) as conn:
-        first = bootstrap(conn, org, preset)
-        assert bootstrap(conn, org, preset) == first
+        install(conn, org)
+        first = bootstrap(conn, org, preset, installation_id=org)
+        assert bootstrap(conn, org, preset, installation_id=org) == first
         view = roster(conn, identity(org))
         assert len({e["employee_id"] for e in view["employees"]}) == len(view["employees"])
         assert sum(e["role_id"] == "character_actor" for e in view["employees"]) == 3
         assert len(first["preset_sha"]) == 64
         with pytest.raises(Denied, match="BOOTSTRAP_MISMATCH"):
-            bootstrap(conn, org, "Minimal" if preset != "Minimal" else "Standard")
+            bootstrap(conn, org, "Minimal" if preset != "Minimal" else "Standard", installation_id=org)
 
 
 def test_tenure_acl_history_and_reactivation(team):

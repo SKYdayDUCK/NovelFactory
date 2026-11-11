@@ -5,7 +5,7 @@ from uuid import uuid4
 import pytest
 from agent_workshop import reviews_skills as rs
 from agent_workshop.admin import enroll
-from agent_workshop.auth import Denied, Session, authenticate, connect
+from agent_workshop.auth import Denied, authenticate, connect
 from agent_workshop.organization import bootstrap
 from agent_workshop.provision import allow_slot
 from agent_workshop.review_admin import review_slot, subject
@@ -17,7 +17,7 @@ def team():
     dsn = os.environ["AW_DATABASE_URL"]
     with connect(dsn) as conn:
         conn.execute("INSERT INTO aw_installations VALUES (%s,%s,true)", (install, str(uuid4())))
-        bootstrap(conn, org, "Research-Audit")
+        bootstrap(conn, org, "Research-Audit", installation_id=install)
         for person, group in (
             ("writer", "producer"),
             ("stats", "producer"),
@@ -41,8 +41,11 @@ def team():
             routine_eligible=True,
         )
 
+        members = conn.execute("SELECT employee_id FROM aw_employees WHERE org_id=%s", (org,)).fetchall()
+        sessions = {m["employee_id"]: authenticate(conn, enroll(conn, install, org, m["employee_id"], 1, 1)) for m in members}
+
     def identity(name):
-        return Session(org, name, 1, 1, install)
+        return sessions[name]
 
     return dsn, identity
 
@@ -269,6 +272,7 @@ def test_review_get_reassignment_and_offline_expiry(team):
             supervisor_id="review-lead",
             team_id="audit",
         )
+        relief = authenticate(c, enroll(c, lead.installation_id, lead.org_id, "relief", 1, 1))
         subject(c, lead.org_id, "relief", "second-independent")
         TOOLS["aw_suspend"][2](
             c, idn("manager"), expected_revision=2, operation_id="s", employee_id="reviewer"
@@ -278,8 +282,8 @@ def test_review_get_reassignment_and_offline_expiry(team):
         assert rs.reconcile_review(c, lead, "ok", review, "relief")["reviewer_id"] == "relief"
         with pytest.raises(Denied, match="STALE_EMPLOYMENT"):
             rs.get_review(c, idn("reviewer"), review)
-        assert rs.get_review(c, idn("relief"), review)["artifact_ref"] == "text"
-        rs.decide(c, idn("relief"), "decide", review, "APPROVED", "VOICE", "source-A")
+        assert rs.get_review(c, relief, review)["artifact_ref"] == "text"
+        rs.decide(c, relief, "decide", review, "APPROVED", "VOICE", "source-A")
         assert (
             c.execute(
                 "SELECT count(*) AS n FROM aw_review_evidence WHERE review_id=%s", (review,)

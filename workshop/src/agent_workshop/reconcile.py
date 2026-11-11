@@ -31,7 +31,7 @@ SELECT_ITEM = """SELECT * FROM aw_delegations WHERE installation_id=%s AND org_i
 
 
 def claim(conn, installation, org, operation, lookup_only=False):
-    lock_org(conn, org)
+    organization = lock_org(conn, org)
     lookup_only = frozen(conn, installation) or lookup_only
     epoch = active_epoch(conn, installation) if lookup_only else None
     row = conn.execute(SELECT_ITEM, (installation, org, operation)).fetchone()
@@ -52,13 +52,17 @@ def claim(conn, installation, org, operation, lookup_only=False):
                 s.employee_id,s.employment_revision
             FROM aw_delegation_slots s JOIN aw_installations i USING(installation_id)
             JOIN aw_bindings b ON b.token_digest=%s AND b.installation_id=i.installation_id
-            JOIN aw_employees sender ON sender.org_id=s.org_id AND sender.employee_id=%s
+                AND b.org_id=s.org_id AND b.org_member
+            JOIN aw_employees sender ON (sender.org_id,sender.employee_id,sender.employment_revision)
+                = (b.org_id,b.employee_id,b.employment_revision)
             JOIN aw_employees t ON t.org_id=s.org_id AND t.employee_id=s.employee_id
-            WHERE s.org_id=%s AND s.slot_id=%s FOR SHARE""",
-            (row["binding_digest"], row["sender_id"], org, row["slot_id"]),
+            WHERE s.org_id=%s AND s.slot_id=%s AND s.installation_id=%s
+                AND b.employee_id=%s AND b.employment_revision=%s FOR SHARE""",
+            (row["binding_digest"], org, row["slot_id"], installation, row["sender_id"], row["sender_revision"]),
         ).fetchone()
         ok = (
             identities
+            and organization["owner_installation_id"] == installation
             and identities["enabled"]
             and identities["installed"]
             and identities["live"]
@@ -73,7 +77,8 @@ def claim(conn, installation, org, operation, lookup_only=False):
         )
         if not ok:
             conn.execute(
-                "UPDATE aw_budget_holds SET status='RELEASED',settled_amount=0 WHERE org_id=%s AND operation_id=%s",
+                """UPDATE aw_budget_holds SET status='RELEASED',settled_amount=0
+                   WHERE org_id=%s AND operation_id=%s AND status='HELD'""",
                 (org, operation),
             )
             conn.execute(

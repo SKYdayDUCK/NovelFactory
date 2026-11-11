@@ -1,0 +1,12 @@
+{
+  "postgres": "17.11",
+  "stage": "S3/S4",
+  "command": "python -m pytest tests/unit/test_p55_capacity.py tests/integration/test_p55_capacity_sampling.py tests/integration/test_p55_processors.py tests/integration/test_p5_scheduler_admission.py tests/integration/test_derived_worker.py -q",
+  "passed": 22,
+  "elapsed_s": 17.93,
+  "prior_failure": {
+    "case": "scope bind reused with text and uuid",
+    "result": "1 failed, 1 passed",
+    "fix": "dedicated text parameters for quota subject and JSON scope; full test above passed"
+  }
+}

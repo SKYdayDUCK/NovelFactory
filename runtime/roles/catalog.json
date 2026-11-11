@@ -7,7 +7,7 @@
       "role_id": "chief_editor",
       "display_name": "总编与协调者",
       "contract_path": "chief_editor.md",
-      "contract_version": "2.1.0",
+      "contract_version": "2.1.1",
       "task_modes": [
         "book_direction",
         "editorial_decision",
@@ -30,7 +30,8 @@
       ],
       "skill_names": [
         "plan-volume",
-        "edit-volume"
+        "edit-volume",
+        "review-change-point"
       ],
       "restricted_skill_modes": {
         "plan-volume": "editorial_decision_only"
@@ -71,12 +72,13 @@
       "role_id": "volume_director",
       "display_name": "卷导演与剧情规划",
       "contract_path": "volume_director.md",
-      "contract_version": "2.1.0",
+      "contract_version": "2.1.1",
       "task_modes": [
         "volume_contract",
         "window_plan",
         "scene_plan",
-        "replan"
+        "replan",
+        "volume_review"
       ],
       "requested_tools": [
         "context_get",
@@ -98,7 +100,9 @@
         "context_compile"
       ],
       "skill_names": [
-        "plan-volume"
+        "plan-volume",
+        "volume-director-review",
+        "roll-window"
       ],
       "query_profile_id": "volume_director"
     },

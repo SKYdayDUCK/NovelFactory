@@ -1,0 +1,80 @@
+{
+  "stage": "A",
+  "status": "IN_PROGRESS",
+  "repo": "SKYdayDUCK/NovelFactory",
+  "pr": 5,
+  "parent_nf": "9dc9c6b806b8ac43f56d0893194a5b402f3f16ca",
+  "source_commit_aw": null,
+  "local_candidate": "See source_blobs and the containing Git commit.",
+  "source_blobs": {
+    "src/novel_factory/orchestration/dispatch.py": "524bce2ec609c891c218a1bcc7dafa83a3d2665d",
+    "src/novel_factory/orchestration/tasks.py": "1987603c4ac58ff6d4e741d2a7513c43ba105ba3",
+    "tests/integration/test_p5_process_resume.py": "e59f3278589ef2e781a8440e219d282a0e6e78d6",
+    "tests/integration/test_p5_scheduler_admission.py": "d7675ae0b27d26e57ffd27f31f5dbb6e54d19e02"
+  },
+  "database": "PostgreSQL 17.11, fsync=on, synchronous_commit=on",
+  "host": "Python 3.12.14, Codex CLI 0.167.0-alpha.4, local generated fixtures",
+  "baseline_targeted": {
+    "result": "PASS",
+    "passed": 15,
+    "skipped": 0,
+    "junit": "evidence/p5/handoff-a/baseline.xml"
+  },
+  "regression_before": {
+    "result": "FAIL",
+    "failed": 1,
+    "junit": "evidence/p5/handoff-a/old-slot-expiry.xml"
+  },
+  "candidate_targeted": {
+    "result": "PASS",
+    "passed": 40,
+    "skipped": 0,
+    "junit": "evidence/p5/handoff-a/lease-and-resume.xml",
+    "scope": "scheduler_admission, p5_mcp, p5_process_resume, reliability/test_workflow, reliability/test_tasks"
+  },
+  "resume": {
+    "calls_after_satisfied_prerequisite": 100,
+    "awakened_total": 1,
+    "replays_awakening": 0,
+    "provider_calls_during_replays": 0,
+    "provider": "synthetic loopback",
+    "final_accepted_world_events": 1,
+    "final_provider_requests": 2
+  },
+  "parent_ci": [
+    {
+      "name": "P4 real isolated WAL PITR and verified recovery",
+      "result": "success",
+      "run": 42983010483
+    },
+    {
+      "name": "P3 P4 measured evidence",
+      "result": "failure",
+      "run": 42983010553
+    },
+    {
+      "name": "P1 and P2 production integrity",
+      "result": "success",
+      "run": 42983010581
+    },
+    {
+      "name": "P5 native desktop resume",
+      "result": "success",
+      "run": 42983010463
+    },
+    {
+      "name": "P2 measured capacity and recovery",
+      "result": "failure",
+      "run": 42983010479
+    },
+    {
+      "name": "P3 scale experiments with strict unmet gates",
+      "result": "failure",
+      "run": 42983010480
+    }
+  ],
+  "candidate_ci": "NOT_EXECUTED at local qualification; resolve current PR head and query by exact SHA.",
+  "inherited_capacity": "NOT_MET",
+  "integration_status": "NOT_EXECUTED",
+  "next": "Check current head's six GitHub workflows; compare inherited capacity; complete same-SHA full PG, physical recovery and desktop evidence before merge."
+}

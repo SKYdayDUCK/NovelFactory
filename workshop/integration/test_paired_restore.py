@@ -187,8 +187,8 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
             token_limit=100000,
         )
         with connect(urls["aw"]) as c:
-            bootstrap(c, org, "Long-form")
             c.execute("INSERT INTO aw_installations VALUES (%s,%s,true)", (inst, instance))
+            bootstrap(c, org, "Long-form", installation_id=inst)
             c.execute("INSERT INTO aw_budget_accounts VALUES(%s,1,'USD')", (org,))
             allow_slot(c, org, inst, "scene.summary", "memory", policy)
             chief = enroll(c, inst, org, "chief", 1, 1)

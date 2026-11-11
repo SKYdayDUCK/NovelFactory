@@ -1,0 +1,64 @@
+{
+  "tested_date": "2026-11-11",
+  "sdk": {
+    "package": "mcp==1.29.0",
+    "negotiated_protocol": "2025-11-25",
+    "transport": "stdio",
+    "status": "PASS"
+  },
+  "codex_app_server": {
+    "evidence": "mcp_codex_host.json",
+    "status": "PASS",
+    "provider_calls": 0
+  },
+  "postgres": {
+    "version": "17.11",
+    "fsync": true,
+    "synchronous_commit": true
+  },
+  "regressions": {
+    "passed": 13,
+    "elapsed_seconds": 6.76,
+    "command": "python -m pytest tests/integration/test_p5_mcp.py tests/integration/test_p2_upgrade.py tests/unit/test_agent_adapter_protocol.py -q"
+  },
+  "vscode": {
+    "version": "1.145.3",
+    "extension": "OpenAI ChatGPT/Codex 26.51106.51428 for Linux x64",
+    "observed": [
+      "Installed published extension in isolated profile",
+      "VS Code web workbench loaded",
+      "VS Code launched the remote Node extension host process",
+      "Isolated offline extension host activated openai.chatgpt",
+      "Extension spawned its own Codex app-server and received initialize id=1",
+      "Typed 继续未完成的任务 in the live extension. Obtained the two-tool operator inventory and a PostgreSQL receipt.",
+      "Repeated the extension prompt with one satisfied wait: awakened=1 then awakened=0."
+    ],
+    "extension_originated_tools_list": "PASS",
+    "extension_originated_resume": "PASS",
+    "status": "PASS",
+    "offline_harness": {
+      "kernel_network_namespace": "new network namespace with only loopback",
+      "external_routing_probe": "TEST-NET returned ENETUNREACH",
+      "personal_credentials_inherited": false,
+      "synthetic_pg": "PostgreSQL 17.11",
+      "telemetry": "off; external egress additionally denied by network namespace"
+    },
+    "extension_log_excerpt": [
+      "Activating Codex extension",
+      "[CodexMcpConnection] Spawning codex app-server",
+      "[CodexMcpConnection] Initialize received id=1"
+    ],
+    "history": [
+      "Initial online probe stopped after automatic approval review identified telemetry egress.",
+      "First offline extension initialized its app-server then encountered renderer_ready_timeout with remote webview assets unreachable.",
+      "Serving the three matching official webview assets over isolated loopback TLS allowed the unmodified renderer and extension-originated MCP calls to complete."
+    ],
+    "evidence": "mcp_vscode_extension.json",
+    "model_route": "synthetic loopback Responses test model"
+  },
+  "isolation": {
+    "database_grant_and_fixed_task_cut": "TESTED",
+    "operator_ssh_forced_command_cross_uid_deployment": "DOCUMENTED_NOT_EXECUTED",
+    "shell_capable_character_host": "UNVERIFIED"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "base": "9630d95fa5c11b9327f223b8316d7c277e9d20f2",
+  "source_sha256": {
+    "src/novel_factory/application/kernel.py": "646b3ba56de0e096f7d1c8374c09c216b0d48fb5213e874ef82fb3830e997b4f",
+    "src/novel_factory/infrastructure/repository.py": "594fab543243f8116beff1c68d0e9143e433ed4c538abfea6e04f0332e53d947"
+  },
+  "database": "PostgreSQL 17.11, fsync and synchronous_commit on",
+  "method": "Same unchanged fixture and WorldRef. Each fresh process reads it 121 times through Kernel.revision in one read-only unit of work. Discard first read and report median and nearest-rank P95 of 120 independent Python results. Local simultaneous suites shared this machine. This measures one read path only. It is not the full HTTP or long-read acceptance gate.",
+  "baseline_regression": "Unmodified base failed repeated-validation counter and passed both corrupt-storage checks.",
+  "rounds": [
+    {
+      "checkout": "base",
+      "ms_median": 1.4861525005471776,
+      "ms_p95": 2.326044001165428,
+      "state_hash": "89f5ef69a711bb411892cab29c0695ddb15b9c80a50a53b02a191912e57ea560"
+    },
+    {
+      "checkout": "candidate",
+      "ms_median": 0.7539924990851432,
+      "ms_p95": 1.2382450004224665,
+      "state_hash": "89f5ef69a711bb411892cab29c0695ddb15b9c80a50a53b02a191912e57ea560"
+    },
+    {
+      "checkout": "candidate",
+      "ms_median": 0.6849940000392962,
+      "ms_p95": 0.8124200012389338,
+      "state_hash": "89f5ef69a711bb411892cab29c0695ddb15b9c80a50a53b02a191912e57ea560"
+    },
+    {
+      "checkout": "base",
+      "ms_median": 1.1934274989471305,
+      "ms_p95": 1.7021069998008898,
+      "state_hash": "89f5ef69a711bb411892cab29c0695ddb15b9c80a50a53b02a191912e57ea560"
+    },
+    {
+      "checkout": "candidate",
+      "ms_median": 0.690466999913042,
+      "ms_p95": 0.9174679998977808,
+      "state_hash": "89f5ef69a711bb411892cab29c0695ddb15b9c80a50a53b02a191912e57ea560"
+    },
+    {
+      "checkout": "base",
+      "ms_median": 1.4666430006400333,
+      "ms_p95": 1.8374899991613347,
+      "state_hash": "89f5ef69a711bb411892cab29c0695ddb15b9c80a50a53b02a191912e57ea560"
+    }
+  ]
+}

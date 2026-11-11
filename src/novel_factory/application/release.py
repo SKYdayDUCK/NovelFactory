@@ -431,6 +431,8 @@ class ReleaseService:
                 validate_contract("ReleaseReceipt", result, "release")
                 self.kernel._receipt(repo, principal, wr, "RELEASE_FREEZE", idempotency_key, request, result)
                 repo.outbox("release.frozen", "release", release_id, result, "release:" + release_id)
+                from novel_factory.application.volume_settlement import prepare_after_release
+                prepare_after_release(self.kernel, repo, wr, request["volume_id"], release_ref)
                 if fault:
                     fault("before_commit")
             if fault:

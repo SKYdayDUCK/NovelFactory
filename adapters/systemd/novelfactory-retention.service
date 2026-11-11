@@ -1,0 +1,21 @@
+[Unit]
+Description=NovelFactory acknowledged stream retention
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=novelfactory
+Group=novelfactory
+WorkingDirectory=/srv/novelfactory
+EnvironmentFile=/etc/novelfactory/retention.env
+ExecStart=/srv/novelfactory/.venv/bin/python /srv/novelfactory/scripts/run_eventhub.py trim --limit 1000 --retention-seconds ${NF_RETENTION_SECONDS}
+TimeoutStopSec=30
+KillMode=control-group
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/novelfactory
+
