@@ -4,7 +4,7 @@ import argparse
 import asyncio
 import json
 import os
-import stat
+from .private_files import read_private_bytes
 
 from mcp import StdioServerParameters
 from psycopg.types.json import Jsonb
@@ -162,16 +162,10 @@ def main():
         help="Private operator manifest binding one organization to two trusted stdio launchers",
     )
     args = p.parse_args()
-    with os.fdopen(os.open(args.route, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)) as f:
-        st = os.fstat(f.fileno())
-        if (
-            not stat.S_ISREG(st.st_mode)
-            or st.st_uid != os.getuid()
-            or st.st_mode & 0o077
-            or st.st_size > 16384
-        ):
-            p.error("invalid route file")
-        cfg = json.load(f)
+    try:
+        cfg = json.loads(read_private_bytes(args.route, 16384))
+    except (ValueError, OSError):
+        p.error("invalid route file")
 
     def launcher(name):
         argv = cfg[name]

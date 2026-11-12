@@ -15,7 +15,7 @@ from uuid import UUID, uuid5
 
 from novel_factory.domain.canonical import canonical_bytes, fingerprint, strict_json_loads
 from novel_factory.domain.errors import DomainError
-from novel_factory.infrastructure.native_files import file_lock, publish_file, open_append
+from novel_factory.infrastructure.native_files import file_lock, open_append, publish_file, sync_directory
 from .contracts import validate
 from .protocol import condition_accounting, controls_signature, require, state_for, validate_plan
 
@@ -56,6 +56,7 @@ def _immutable_file(path, data):
         except FileExistsError:
             require(not path.is_symlink() and path.read_bytes() == data,
                     "EVALUATION_OBJECT_CONFLICT", "Existing immutable evidence differs")
+            sync_directory(path.parent)
     finally:
         Path(temporary).unlink(missing_ok=True)
 

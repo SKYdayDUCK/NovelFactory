@@ -9,7 +9,6 @@ from __future__ import annotations
 import asyncio
 import json
 import secrets
-import shutil
 import socket
 import tempfile
 import time
@@ -19,7 +18,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from threading import Event, Lock, Thread
 
-from .host_process import ISOLATED_PLUGIN_OPTIONS, isolated_host_environment, start_host, stop_host
+from .host_process import ISOLATED_PLUGIN_OPTIONS, isolated_host_environment, resolve_host_binary, start_host, stop_host
 from .protocol import ModelCallFailure, ModelResponse
 from .providers import ProfileError, _authorized_credential, post, usage_value
 
@@ -225,7 +224,7 @@ async def _turn(tmp, relay, record):
                 "model_providers.nf_openai.base_url": origin, "model_providers.nf_openai.wire_api": "responses",
                 "model_providers.nf_openai.requires_openai_auth": False, "model_providers.nf_openai.supports_websockets": False,
                 "model_providers.nf_openai.request_max_retries": 0, "model_providers.nf_openai.stream_max_retries": 0}
-    args = [shutil.which("codex"), "app-server", "--listen", "stdio://", *ISOLATED_PLUGIN_OPTIONS]
+    args = [resolve_host_binary(), "app-server", "--listen", "stdio://", *ISOLATED_PLUGIN_OPTIONS]
     for key, value in settings.items():
         args.extend(["-c", key + "=" + json.dumps(value)])
     for feature in ("shell_tool", "multi_agent", "apps", "browser_use", "computer_use", "view_image", "hooks", "image_generation"):

@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import os
 import signal
+import shutil
 import subprocess
 import sys
 from contextlib import suppress
@@ -39,6 +40,18 @@ async def start_host(*argv, **kwargs):
     proc._nf_host_job = job
     proc._nf_host_group = proc.pid
     return proc
+
+
+def resolve_host_binary(name="codex"):
+    if os.name == "nt" and name == "codex":
+        # npm also installs command-script shims. A stdio host is launched
+        # without a shell and only receives the isolated process environment.
+        explicit = os.environ.get("NF_CODEX_EXECUTABLE")
+        if explicit:
+            path = Path(explicit)
+            return str(path) if path.is_absolute() and path.suffix.lower() == ".exe" and path.is_file() else None
+        name = "codex.exe"
+    return shutil.which(name)
 
 
 def isolated_host_environment(home):

@@ -9,6 +9,7 @@ from threading import Barrier, Thread
 import pytest
 
 from agent_runtime import codex, providers
+from agent_runtime.host_process import resolve_host_binary
 from agent_runtime.protocol import ModelCallFailure, ModelRequest
 from agent_runtime.providers import Profile, ProfileError, invoke, read_profiles
 
@@ -155,7 +156,7 @@ def test_http_rate_limit_and_redirect_never_retry_or_leak_body():
             worker.join()
 
 
-@pytest.mark.skipif(not shutil.which("codex"), reason="Real app-server binary unavailable")
+@pytest.mark.skipif(not resolve_host_binary(), reason="Real app-server binary unavailable")
 def test_real_cli_and_deepseek_wire_overlap_with_no_provider_egress(monkeypatch):
     enable_synthetic_credentials(monkeypatch)
     barrier, sends, identities = Barrier(2), [], []
@@ -257,7 +258,7 @@ def test_subscription_source_requires_signed_access_scope_and_client(monkeypatch
     profile = plan(auth_mode="chatgpt-plan", model_output_ceiling=300, oauth_client_id="oaiapp_fixture")
     enable_synthetic_credentials(monkeypatch)
     # This test exercises signed credentials only. The native host has its own integration test.
-    monkeypatch.setattr(providers.shutil, "which", lambda name: "/fixture/codex" if name == "codex" else None)
+    monkeypatch.setattr(providers, "resolve_host_binary", lambda: "/fixture/codex")
     with pytest.raises(ProfileError, match="MODEL_PLAN_AUTH_UNVERIFIED"):
         profile.preflight()  # Arbitrary secret under a subscription profile.
     private = rsa.generate_private_key(public_exponent=65537, key_size=2048)

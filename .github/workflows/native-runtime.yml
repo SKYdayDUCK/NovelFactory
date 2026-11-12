@@ -1,0 +1,63 @@
+name: Native runtime
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    name: Native runtime / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2025, ubuntu-24.04]
+    env:
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - run: uv sync --locked --group dev --python 3.12
+      - run: uv run --no-sync python scripts/nf.py doctor
+      - run: uv run --no-sync python scripts/nf.py mcp --help
+      - run: uv run --no-sync python scripts/nf.py supervisor --help
+      - name: Filesystem, child lifetime, capacity and offline provider contracts
+        run: >-
+          uv run --no-sync python -m pytest -q tests/unit/test_native_platform.py
+          tests/reliability/test_objects.py tests/unit/test_host_process.py tests/unit/test_p55_capacity.py
+          tests/unit/test_p58_providers.py --junitxml=native-core.xml
+      - name: Standalone Workshop install and private binding
+        run: uv run --project workshop --locked --group dev python -m pytest -q workshop/tests/test_private_binding.py --junitxml=native-workshop.xml
+      - name: Start runner's disposable Windows PostgreSQL 17
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Set-Service -Name postgresql-x64-17 -StartupType Manual
+          Start-Service -Name postgresql-x64-17
+          $env:PGPASSWORD = 'root'
+          $version = & "$env:PGBIN/psql.exe" -XAt -h 127.0.0.1 -U postgres -c 'show server_version_num'
+          if ($LASTEXITCODE -ne 0 -or [int]$version -lt 170000 -or [int]$version -ge 180000) { throw 'PostgreSQL 17 required' }
+          & "$env:PGBIN/createdb.exe" -h 127.0.0.1 -U postgres nf_native
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          'NF_TEST_DATABASE_URL=postgresql+psycopg://postgres:root@127.0.0.1:5432/nf_native' | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Migrate, bootstrap, claim, cancel, recover and reconcile on Windows
+        if: runner.os == 'Windows'
+        run: >-
+          uv run --no-sync python -m pytest -q tests/integration/test_m0_bootstrap.py
+          tests/reliability/test_tasks.py --junitxml=native-postgres.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-runtime-${{ matrix.os }}-${{ github.run_attempt }}
+          path: native-*.xml
+          if-no-files-found: warn

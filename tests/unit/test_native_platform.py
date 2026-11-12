@@ -93,3 +93,13 @@ def test_windows_write_through_publication_keeps_first_writer(tmp_path, monkeypa
         publish_file(source, dest)
     assert moves == [win32file.MOVEFILE_WRITE_THROUGH] * 2
     assert dest.read_bytes() == b"first"
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Tests selection of an explicit Windows native image")
+def test_windows_host_selects_native_executable(monkeypatch):
+    from agent_runtime.host_process import resolve_host_binary
+
+    monkeypatch.setenv("NF_CODEX_EXECUTABLE", sys.executable)
+    assert resolve_host_binary() == sys.executable
+    monkeypatch.setenv("NF_CODEX_EXECUTABLE", "codex.cmd")
+    assert resolve_host_binary() is None

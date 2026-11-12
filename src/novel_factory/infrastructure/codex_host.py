@@ -13,13 +13,12 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 from pathlib import Path
 import secrets
-import shutil
 import tempfile
 from threading import Event, Thread
 from uuid import uuid4
 
 from novel_factory.domain.errors import DomainError
-from novel_factory.infrastructure.host_process import ISOLATED_PLUGIN_OPTIONS, isolated_host_environment, start_host, stop_host
+from novel_factory.infrastructure.host_process import ISOLATED_PLUGIN_OPTIONS, isolated_host_environment, resolve_host_binary, start_host, stop_host
 from novel_factory.infrastructure.model_gateway import ModelCallFailure, OpenAICompatibleAdapter
 
 
@@ -121,7 +120,7 @@ class CodexAppServerAdapter:
 
     def check_available(self):
         self.backend.check_available()
-        if not shutil.which(self.binary):
+        if not resolve_host_binary(self.binary):
             raise DomainError("MODEL_UNAVAILABLE", "Codex app-server executable is unavailable")
 
     def generate(self, request):
@@ -156,7 +155,7 @@ class CodexAppServerAdapter:
                     "model_providers.nf_text.requires_openai_auth": False,
                     "model_providers.nf_text.supports_websockets": False,
                     "model_providers.nf_text.stream_max_retries": 0, "model_providers.nf_text.request_max_retries": 0}
-        args = [shutil.which(self.binary), "app-server", "--listen", "stdio://", *ISOLATED_PLUGIN_OPTIONS]
+        args = [resolve_host_binary(self.binary), "app-server", "--listen", "stdio://", *ISOLATED_PLUGIN_OPTIONS]
         for key, value in settings.items():
             args.extend(["-c", key + "=" + json.dumps(value)])
         for feature in ("shell_tool", "multi_agent", "apps", "browser_use", "computer_use"):
@@ -246,7 +245,7 @@ class CodexRoleContextAdapter(CodexAppServerAdapter):
                 "isolation_evidence": "Isolated actor context read; one independently authorized text request"}
 
     def read_actor_context(self, principal, task):
-        return self.context_reader(self.journal.kernel, principal, task, shutil.which(self.binary), self.relay)
+        return self.context_reader(self.journal.kernel, principal, task, resolve_host_binary(self.binary), self.relay)
 
 
 
@@ -269,5 +268,5 @@ class CodexRoleLookupAdapter(CodexRoleContextAdapter):
         return response
 
     def actor_lookup(self, principal, task, arguments):
-        return self.context_reader(self.journal.kernel, principal, task, shutil.which(self.binary), self.relay,
+        return self.context_reader(self.journal.kernel, principal, task, resolve_host_binary(self.binary), self.relay,
                                    tool="nf_query_batch", arguments=arguments)
