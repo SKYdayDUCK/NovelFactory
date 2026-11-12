@@ -1,0 +1,50 @@
+name: novel-p6-local
+services:
+  nf-db:
+    image: postgres:17.11-bookworm
+    environment:
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+      POSTGRES_PASSWORD_FILE: /run/secrets/nf_admin
+      P6_SERVICE: nf_service
+    secrets: [nf_admin, nf_service_password]
+    volumes:
+      - nf_data:/var/lib/postgresql/data
+      - ./init-service.sh:/docker-entrypoint-initdb.d/10-service.sh:ro
+    ports: ["127.0.0.1:56431:5432"]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  aw-db:
+    image: postgres:17.11-bookworm
+    environment:
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+      POSTGRES_PASSWORD_FILE: /run/secrets/aw_admin
+      P6_SERVICE: aw_service
+    secrets: [aw_admin, aw_service_password]
+    volumes:
+      - aw_data:/var/lib/postgresql/data
+      - ./init-service.sh:/docker-entrypoint-initdb.d/10-service.sh:ro
+    ports: ["127.0.0.1:56432:5432"]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  redis:
+    image: redis:8.0.2-bookworm
+    command: ["redis-server", "--aclfile", "/run/secrets/redis_acl", "--appendonly", "yes"]
+    ports: ["127.0.0.1:56379:6379"]
+    secrets: [redis_acl]
+    volumes: [redis_data:/data]
+volumes:
+  nf_data:
+  aw_data:
+  redis_data:
+secrets:
+  nf_admin: {file: "${P6_SECRETS:?}/nf_admin"}
+  aw_admin: {file: "${P6_SECRETS:?}/aw_admin"}
+  nf_service_password: {file: "${P6_SECRETS:?}/nf_password"}
+  aw_service_password: {file: "${P6_SECRETS:?}/aw_password"}
+  redis_acl: {file: "${P6_SECRETS:?}/redis.acl"}

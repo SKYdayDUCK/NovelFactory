@@ -273,6 +273,7 @@ jobs:
           AW_W3_REDIS_EVIDENCE: ${{ github.workspace }}/workshop/w3-redis-recovery.json
           AW_OFFLINE_WITNESS: ${{ github.workspace }}/workshop/aw-offline.json
           AW_PAIRED_RESTORE_EVIDENCE: ${{ github.workspace }}/workshop/paired-restore.json
+          AW_INDEPENDENT_PITR_EVIDENCE: ${{ github.workspace }}/workshop/independent-pitr.json
           PG_BIN: /usr/lib/postgresql/17/bin
         run: |
           bash scripts/ci_install_pg17.sh postgresql-17 postgresql-client-17
@@ -281,6 +282,7 @@ jobs:
           PYTHONPATH="$PWD/workshop/src:$PWD/src" .venv/bin/python -m pytest \
             -c pyproject.toml -o junit_family=xunit1 -q workshop/integration --junitxml=workshop/dual-results.xml
           test -s workshop/aw-offline.json
+          test -s workshop/independent-pitr.json
       - name: Verify two independent SSH brokers in a single native Codex role thread
         env:
           AW_DUAL_TEST_ADMIN_URL: postgresql://postgres:workshop-ci-admin@127.0.0.1:5432/postgres
@@ -326,6 +328,7 @@ jobs:
             workshop/aw-offline.json
             workshop/dual-results.xml
             workshop/paired-restore.json
+            workshop/independent-pitr.json
             workshop/w3-redis-recovery.json
           if-no-files-found: error
       - uses: actions/upload-artifact@v4

@@ -1,0 +1,21 @@
+{
+  "profiles": {
+    "codex-v1": {
+      "kind": "codex-cli",
+      "auth_mode": "chatgpt-plan",
+      "model": "REPLACE_WITH_AUTHORIZED_PLAN_MODEL",
+      "oauth_client_id": "oaiapp_REPLACE_WITH_REGISTERED_CLIENT_ID",
+      "secret_ref": "NF_CODEX_PLAN_TOKEN",
+      "max_output_tokens": null,
+      "model_output_ceiling": null,
+      "timeout_seconds": 90
+    },
+    "deepseek-v1": {
+      "kind": "deepseek",
+      "model": "REPLACE_WITH_AUTHORIZED_DEEPSEEK_MODEL",
+      "secret_ref": "NF_DEEPSEEK_API_KEY",
+      "max_output_tokens": 2048,
+      "timeout_seconds": 90
+    }
+  }
+}
