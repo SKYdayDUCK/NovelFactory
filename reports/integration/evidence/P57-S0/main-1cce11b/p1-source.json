@@ -1,0 +1,59 @@
+{
+  "stage": "P5.7-S0 MAIN",
+  "repository": "SKYdayDUCK/NovelFactory",
+  "subject": {
+    "event": "push",
+    "head": "1cce11b5f0ead0d6ba4d57658a5ff5533b2ef37b",
+    "checkout": "1cce11b5f0ead0d6ba4d57658a5ff5533b2ef37b",
+    "tree": "fa1a10cc5f237d5a06bbac283c1c5e492fdf5ed6",
+    "base": "276820316129d546b0a13118bcbe283b06507795"
+  },
+  "run": {
+    "id": 43166232959,
+    "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43166232959",
+    "conclusion": "success",
+    "attempt": 1,
+    "started_at": "2026-11-12T06:10:08Z",
+    "updated_at": "2026-11-12T06:28:43Z"
+  },
+  "jobs": [
+    {
+      "id": 131008642305,
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43166232959/job/131008642305",
+      "name": "PostgreSQL 17 integration, concurrency and restore",
+      "started_at": "2026-11-12T06:10:11Z",
+      "completed_at": "2026-11-12T06:28:42Z",
+      "conclusion": "success"
+    },
+    {
+      "id": 131008643133,
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43166232959/job/131008643133",
+      "name": "Schema, domain, HTTP and production boundaries",
+      "started_at": "2026-11-12T06:10:11Z",
+      "completed_at": "2026-11-12T06:10:53Z",
+      "conclusion": "success"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 13920254649,
+      "name": "p1-postgres-concurrency-1",
+      "digest": "sha256:d75742842c70b7e56ba0fa916223f1eb23cfe77e1290b43412a95b0555e40cc1",
+      "bytes": 1791888,
+      "expires_at": "2027-02-10T06:10:09Z",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43166232959/artifacts/13920254649"
+    },
+    {
+      "id": 13920186784,
+      "name": "p1-schema-unit-1",
+      "digest": "sha256:47297bc9f1e6820a46820dec301e2f08f82473ed2205d910aa8baa66270faf8b",
+      "bytes": 302428,
+      "expires_at": "2027-02-10T06:10:09Z",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43166232959/artifacts/13920186784"
+    }
+  ],
+  "native_stdout": {
+    "postgres": "835 passed, 17 skipped, 1 warning, 17 subtests passed in 896.55s (0:14:56)",
+    "schema": "403 passed, 17 subtests passed in 20.71s"
+  }
+}

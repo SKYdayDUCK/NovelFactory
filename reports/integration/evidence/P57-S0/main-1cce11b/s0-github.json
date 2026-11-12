@@ -1,0 +1,81 @@
+{
+  "repository": "SKYdayDUCK/NovelFactory",
+  "scope": "P5.7 S0 hosted checkout, contract, static runtime and instruction audit",
+  "event": "push",
+  "workflow": ".github/workflows/creative-harness.yml",
+  "run_id": 43166233158,
+  "run_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43166233158",
+  "run_head_sha": "1cce11b5f0ead0d6ba4d57658a5ff5533b2ef37b",
+  "attempt": 1,
+  "created_at": "2026-11-12T06:10:09Z",
+  "updated_at": "2026-11-12T06:10:25Z",
+  "outcome": "success",
+  "job_id": 131008642545,
+  "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43166233158/job/131008642545",
+  "job_started_at": "2026-11-12T06:10:11Z",
+  "job_completed_at": "2026-11-12T06:10:24Z",
+  "receipt_checkout": "1cce11b5f0ead0d6ba4d57658a5ff5533b2ef37b",
+  "receipt_tree": "fa1a10cc5f237d5a06bbac283c1c5e492fdf5ed6",
+  "artifact_id": 13919693300,
+  "artifact_name": "creative-harness-s0-1",
+  "artifact_sha256": "sha256:020439a85b64e36af0637f01a1dec8019b6c421da151b40896761f3c3f32e025",
+  "zip_bytes": 1637,
+  "artifact_member": "s0.json",
+  "member_source": "Original verifier stdout, written and printed from the same rendered JSON in validation/validate_creative_harness.py. The ZIP digest identifies the Actions artifact.",
+  "raw_receipt_git_blob": "ef91f4b27aa14f55ac8c7a4748a4c25f23e0978e",
+  "positive_accepted": 16,
+  "negative_rejected": 33,
+  "world_refs": {
+    "deployed_contract": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef",
+    "valid_and_invalid_checked": [
+      "scope.world_ref",
+      "context.world_ref"
+    ]
+  },
+  "actor_snapshot": {
+    "role_version": "2.1.0",
+    "skill_version": "2.1.0",
+    "runtime_sha256": "f1bf28443b2c37c6881fd83f1332e3101e37e2f898b381054d32378ecd5c38a4",
+    "role_blob": "89f0910970c8daf55fe764784ebfeb5f0bd9f029",
+    "skill_blob": "23d291058a5a44e71bbf68a964238f64beb9386e",
+    "role_id": "character_actor",
+    "task_kind": "character_action",
+    "skill_name": "simulate-character"
+  },
+  "runtime": {
+    "roles": 10,
+    "skills": 12,
+    "snapshots_checked": 66,
+    "rejected_combinations": [
+      [
+        "character_actor",
+        "S0_UNREGISTERED_MODE",
+        "simulate-character"
+      ],
+      [
+        "character_actor",
+        "character_action",
+        "prepare-world"
+      ]
+    ]
+  },
+  "source_audit": {
+    "source_commit": "276820316129d546b0a13118bcbe283b06507795",
+    "entries": 77,
+    "required_instruction_paths": 34
+  },
+  "default_configuration": {
+    "schema_version": "1.0",
+    "kind": "CONFIGURATION",
+    "creative_harness": {
+      "enabled": false,
+      "dynamic_agents": {
+        "enabled": false
+      },
+      "adaptive_instructions": {
+        "enabled": false,
+        "auto_promote": false
+      }
+    }
+  }
+}

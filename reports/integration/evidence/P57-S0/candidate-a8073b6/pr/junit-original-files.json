@@ -1,0 +1,121 @@
+{
+  "collector_run_id": 43166306593,
+  "collector_job_id": 131008872011,
+  "members": {
+    "p1-postgres-concurrency-1/postgres-all.xml.gz": {
+      "path": "p1-postgres-concurrency-1/postgres-all.xml.gz",
+      "raw_bytes": 137212,
+      "raw_sha256": "47f1d8661110bf78366c5c6d2b999d7525f56d3c66d9f18ef891fb051156428c",
+      "wire_sha256": "a7fd77e731bd3ae2c6b2e0025e254e7a691d74b27afbfa244c054ceee0ec542d",
+      "preserved_blob": "aa4093e720596c647fa0d4b1abd50859e5942dfc"
+    },
+    "p1-postgres-concurrency-1/postgres-all.xml-summary.json": {
+      "path": "p1-postgres-concurrency-1/postgres-all.xml-summary.json",
+      "raw_bytes": 1294,
+      "raw_sha256": "153a77065275fe512898a92f719614152da242d176843adb3ce6d41e7fc356de",
+      "wire_sha256": "153a77065275fe512898a92f719614152da242d176843adb3ce6d41e7fc356de",
+      "preserved_blob": "7c6577d6b31b9dd8ec09f3eaa1e261eaa1b8e0dc",
+      "summary": {
+        "raw_sha256": "47f1d8661110bf78366c5c6d2b999d7525f56d3c66d9f18ef891fb051156428c",
+        "totals": {
+          "tests": 869,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 17
+        },
+        "p6_nodes": [
+          {
+            "module": "tests.integration.test_p6_export_release",
+            "test": "test_export_frozen_prose_scoped_log_and_blank_reader_forms",
+            "result": "PASS"
+          },
+          {
+            "module": "tests.integration.test_p6_export_release",
+            "test": "test_export_rejects_another_work_bound_branch_actor_and_revocation",
+            "result": "PASS"
+          },
+          {
+            "module": "tests.integration.test_p6_preflight_registration",
+            "test": "test_operator_registers_once_and_leaves_dispatch_idle",
+            "result": "PASS"
+          },
+          {
+            "module": "tests.unit.test_engineering_release_ci.SourceTests",
+            "test": "test_verify_integrated_event_tree_for_main_and_pr",
+            "result": "PASS"
+          },
+          {
+            "module": "tests.unit.test_engineering_release_ci.GateTests",
+            "test": "test_both_latest_main_pushes_succeeded",
+            "result": "PASS"
+          },
+          {
+            "module": "tests.unit.test_engineering_release_ci.GateTests",
+            "test": "test_newer_run_preempts_earlier_success_even_when_listing_order_changes",
+            "result": "PASS"
+          },
+          {
+            "module": "tests.unit.test_engineering_release_ci.GateTests",
+            "test": "test_other_path_branch_event_sha_and_missing_check_cannot_qualify",
+            "result": "PASS"
+          },
+          {
+            "module": "tests.unit.test_engineering_release_ci.GateTests",
+            "test": "test_run_attempt_changed_between_listing_and_check",
+            "result": "PASS"
+          }
+        ]
+      }
+    },
+    "p1-schema-unit-1/unit.xml.gz": {
+      "path": "p1-schema-unit-1/unit.xml.gz",
+      "raw_bytes": 61593,
+      "raw_sha256": "3c6c290825a4d48a4e42874604de360f387fe4d7da8fda53e2e80ef8cc990d8a",
+      "wire_sha256": "e4798c0de636b7f8323c2e54e7c820069e363a918ae2dff28225874996f4fe05",
+      "preserved_blob": "bda5415e93062414280d6afa2f85853122d09d9f"
+    },
+    "p1-schema-unit-1/unit.xml-summary.json": {
+      "path": "p1-schema-unit-1/unit.xml-summary.json",
+      "raw_bytes": 868,
+      "raw_sha256": "4ec386a013f867f9c1b565be30ae575f4c2697c4a66a9cba2af1f1954913e578",
+      "wire_sha256": "4ec386a013f867f9c1b565be30ae575f4c2697c4a66a9cba2af1f1954913e578",
+      "preserved_blob": "6dd20977f8082aaca73b623cb28b4f718a3472ea",
+      "summary": {
+        "raw_sha256": "3c6c290825a4d48a4e42874604de360f387fe4d7da8fda53e2e80ef8cc990d8a",
+        "totals": {
+          "tests": 420,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "p6_nodes": [
+          {
+            "module": "tests.unit.test_engineering_release_ci.SourceTests",
+            "test": "test_verify_integrated_event_tree_for_main_and_pr",
+            "result": "PASS"
+          },
+          {
+            "module": "tests.unit.test_engineering_release_ci.GateTests",
+            "test": "test_both_latest_main_pushes_succeeded",
+            "result": "PASS"
+          },
+          {
+            "module": "tests.unit.test_engineering_release_ci.GateTests",
+            "test": "test_newer_run_preempts_earlier_success_even_when_listing_order_changes",
+            "result": "PASS"
+          },
+          {
+            "module": "tests.unit.test_engineering_release_ci.GateTests",
+            "test": "test_other_path_branch_event_sha_and_missing_check_cannot_qualify",
+            "result": "PASS"
+          },
+          {
+            "module": "tests.unit.test_engineering_release_ci.GateTests",
+            "test": "test_run_attempt_changed_between_listing_and_check",
+            "result": "PASS"
+          }
+        ]
+      }
+    }
+  }
+}

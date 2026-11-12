@@ -1,26 +1,58 @@
 {
   "schema": 1,
   "repository": "SKYdayDUCK/NovelFactory",
-  "event": "pull_request",
-  "head": "a8073b6664df8953330dd3bc0240038fcb64f09a",
-  "checkout": "e2f9becfc4e5dbf5182349132ab422ac99ae0fbe",
+  "event": "push",
+  "head": "1cce11b5f0ead0d6ba4d57658a5ff5533b2ef37b",
+  "checkout": "1cce11b5f0ead0d6ba4d57658a5ff5533b2ef37b",
   "tree": "fa1a10cc5f237d5a06bbac283c1c5e492fdf5ed6",
   "base": "276820316129d546b0a13118bcbe283b06507795",
   "runs": {
     "p1-integrity.yml": {
-      "id": 43164314485,
+      "id": 43166232959,
       "artifacts": [
         {
-          "id": 13919498979,
+          "id": 13920254649,
           "name": "p1-postgres-concurrency-1",
-          "digest": "sha256:d78bc1cbf49e1e98986d9294110ca9a32aacd68ef364547446cef390560c7291"
+          "digest": "sha256:d75742842c70b7e56ba0fa916223f1eb23cfe77e1290b43412a95b0555e40cc1"
         },
         {
-          "id": 13918848835,
+          "id": 13920186784,
           "name": "p1-schema-unit-1",
-          "digest": "sha256:f6d65db55ce69f8d2e832a6e3a2595bc0e24730769f2c79913a9196cfc06bb15"
+          "digest": "sha256:47297bc9f1e6820a46820dec301e2f08f82473ed2205d910aa8baa66270faf8b"
         }
       ]
     }
-  }
+  },
+  "s0_originals": [
+    {
+      "stage": "pre",
+      "head": "a8073b6664df8953330dd3bc0240038fcb64f09a",
+      "checkout": "a8073b6664df8953330dd3bc0240038fcb64f09a",
+      "tree": "fa1a10cc5f237d5a06bbac283c1c5e492fdf5ed6",
+      "stdout_blob": "303a9dad90ca5870842826b06edc152e92685df3",
+      "run_id": 43164309298,
+      "artifact_id": 13918843554,
+      "digest": "sha256:647d5e8ad7f1bc3418b69d97e030cdd279603e98a83d81634c43986b34e0bd15"
+    },
+    {
+      "stage": "pr",
+      "head": "a8073b6664df8953330dd3bc0240038fcb64f09a",
+      "checkout": "e2f9becfc4e5dbf5182349132ab422ac99ae0fbe",
+      "tree": "fa1a10cc5f237d5a06bbac283c1c5e492fdf5ed6",
+      "stdout_blob": "207f1dfb5da64046efb38c267a1e0a3d0280adcf",
+      "run_id": 43164314487,
+      "artifact_id": 13918469951,
+      "digest": "sha256:07004383fb880856fac0e595c14d9da0a7c4aba220a0296634bfd79592903bbf"
+    },
+    {
+      "stage": "main",
+      "head": "1cce11b5f0ead0d6ba4d57658a5ff5533b2ef37b",
+      "checkout": "1cce11b5f0ead0d6ba4d57658a5ff5533b2ef37b",
+      "tree": "fa1a10cc5f237d5a06bbac283c1c5e492fdf5ed6",
+      "stdout_blob": "ef91f4b27aa14f55ac8c7a4748a4c25f23e0978e",
+      "run_id": 43166233158,
+      "artifact_id": 13919693300,
+      "digest": "sha256:020439a85b64e36af0637f01a1dec8019b6c421da151b40896761f3c3f32e025"
+    }
+  ]
 }
