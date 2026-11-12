@@ -7,8 +7,10 @@ Only the outbound transport receives the operator's credential.
 from __future__ import annotations
 
 import asyncio
+import io
 import json
 import secrets
+import select
 import socket
 import tempfile
 import time
@@ -88,7 +90,13 @@ def _message(item):
 
 class _OneTurnServer(HTTPServer):
     def __init__(self, timeout):
-        super().__init__(("127.0.0.1", 0), _Transport)
+        self.stop_reader, self.stop_writer = socket.socketpair()
+        try:
+            super().__init__(("127.0.0.1", 0), _Transport)
+        except BaseException:
+            self.stop_reader.close()
+            self.stop_writer.close()
+            raise
         self.closed = Event()
         self.gate = Lock()
         self.active_socket = None
@@ -118,9 +126,18 @@ class _OneTurnServer(HTTPServer):
     def stop(self):
         with self.gate:
             self.closed.set()
+            # Make the cancellation socket readable even when WinSock does not
+            # wake a select() on the accepted socket after cross-thread shutdown.
+            with suppress(OSError):
+                self.stop_writer.shutdown(socket.SHUT_WR)
             if self.active_socket:
                 with suppress(OSError):
                     self.active_socket.shutdown(socket.SHUT_RDWR)
+
+    def server_close(self):
+        super().server_close()
+        self.stop_reader.close()
+        self.stop_writer.close()
 
     def begin_forward(self):
         with self.gate:
@@ -131,7 +148,31 @@ class _OneTurnServer(HTTPServer):
             return remaining
 
 
+class _RelayInput(io.RawIOBase):
+    """Keep the original socket idle limit while allowing an immediate stop."""
+    def __init__(self, connection, server):
+        self.connection = connection
+        self.server = server
+
+    def readable(self):
+        return True
+
+    def readinto(self, target):
+        ready, _, _ = select.select((self.connection, self.server.stop_reader), (), (),
+                                    self.connection.gettimeout())
+        if self.server.stop_reader in ready:
+            return 0
+        if not ready:
+            raise TimeoutError("Loopback client read timed out")
+        return self.connection.recv_into(target)
+
+
 class _Transport(BaseHTTPRequestHandler):
+    def setup(self):
+        super().setup()
+        self.rfile.close()
+        self.rfile = io.BufferedReader(_RelayInput(self.connection, self.server))
+
     def log_message(self, *args):
         pass
 
