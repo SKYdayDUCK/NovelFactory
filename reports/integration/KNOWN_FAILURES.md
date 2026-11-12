@@ -43,3 +43,5 @@ W6 已复现主管调任后的两项不相容岗位扩编，修复及红绿原�
 P5.6 #26 的候选与主线各有 4 个高压容量作业未达标；对照、两档 mixed、500 mixed 及 500 read-soak 通过。合并主线有 27 次 1000 开环传输错误。逐档原件和真实回放限制见[综合签收](https://github.com/SKYdayDUCK/NovelFactory/blob/3ef5a72d7a65edb76a988132a72c4e82ee0805ee/reports/integration/evidence/P56/main-4e8fc5a/SIGNOFF.md)。
 
 #17 的原版取消曾遗留可确认未发送的预留，修复后原失败测试通过。主线四个历史容量作业继续未达标，1000 开环读记录 12 个传输错误。[#17 主线签收](https://github.com/SKYdayDUCK/NovelFactory/blob/fee462dfb6923059512b9797b4707e61eec8e8a3/reports/integration/evidence/P6-C1/main-533c1f5/SIGNOFF.md)。
+
+#18 已归档关闭，原输入、测试版本和采用决策见 [S9 归档](evidence/S9-PR18/README.md)。[PRE_HARNESS_BASELINE](PRE_HARNESS_BASELINE.md)保留 #16 实际主线、开放列表和原始容量边界。

@@ -1,0 +1,19 @@
+{
+  "baseline": "55d8979b5361a4837701d762feacd83036096b11",
+  "candidate": "598f4ee65fbb6f0ed9872656de965f070965b1da",
+  "order": [
+    "baseline",
+    "candidate"
+  ],
+  "cases": [
+    {
+      "agents": 500,
+      "seconds": 600,
+      "read_rps": 20,
+      "api_processes": 2
+    }
+  ],
+  "resources": "Same Ubuntu runner with same PostgreSQL 17.11 container; each arm uses original make_population() default seed and isolated disposable database. Business population and logical requests match. Generated principal/task/world IDs are fresh per arm.",
+  "verification": "Record both raw reports and original process exit codes, including every 429. The comparison does not change the public CI capacity gates.",
+  "limits": "One ordered pair on one GitHub runner; cached package state, background load and hardware placement limit causal claims. Original independent CI remains a separate source."
+}

@@ -1,0 +1,694 @@
+{
+  "schema_version": 1,
+  "pr": 18,
+  "subject": "3985ebd4f90ff9f7d2e9626df9c0fbf5e8cdb1be",
+  "base": "55d8979b5361a4837701d762feacd83036096b11",
+  "compared_main": "0420356b0bd0bfd675494e581799946c4b967f6e",
+  "c2_signoff": "a9d77b8",
+  "original_pr_url": "https://github.com/SKYdayDUCK/NovelFactory/pull/18",
+  "decision": "CLOSE_AS_ARCHIVED_EVIDENCE_WITHOUT_MERGING",
+  "business_implementation_to_merge": [],
+  "summary_zh": "12项全部为历史测量、预登记、导出或固定 SHA 工作流。采用原证据；#6 已交付生产语义守卫，#21 和 #24 已先完整合入 #6 并进入当前主线；#20 SQL 缓存保留为失败对照。",
+  "tree_comparison": {
+    "changed_files": 12,
+    "additions": 696,
+    "deletions": 0,
+    "only_additions": true,
+    "original_paths_on_main": 0,
+    "identical_blobs_elsewhere_on_main": 1,
+    "merge_base": "55d8979b5361a4837701d762feacd83036096b11",
+    "main_ahead_of_merge_base": 153,
+    "pr18_ahead_of_merge_base": 9,
+    "commits": [
+      {
+        "sha": "c775013e16fd71717d5c6a309df92df90842ea05",
+        "message": "evidence(p55): preregister paired S9 guards and rerun pinned PostgreSQL source"
+      },
+      {
+        "sha": "51e5ac1cda8770e244b8f9fd95803bdd80d0e08d",
+        "message": "evidence(p55): preregister unchanged 600-second probes on one runner"
+      },
+      {
+        "sha": "9526c7734835453a0ef7c9cbf22ac145da90d830",
+        "message": "evidence(p55): persist allowlisted guard receipts and complete long-read outcomes"
+      },
+      {
+        "sha": "b54db47093ead1d3396f23bcf6caa4ed5d06fff5",
+        "message": "evidence(p55): preserve second nonpassing 600-second run on 55d897"
+      },
+      {
+        "sha": "6673629617bb67e02860dcee2a41ff959b0ac2b0",
+        "message": "measure(p55): profile live snapshot transfer, decode and validation at 500 agents"
+      },
+      {
+        "sha": "07c4f6d38ad3237ff34482741845031f1d0dedcc",
+        "message": "measure(p55): attribute matched P5 and S9 delivery SQL and CPU on one runner"
+      },
+      {
+        "sha": "a08294964b29c63cbc74902f2552cb0a19851a5c",
+        "message": "evidence(p55): qualify large projection witness, schedule integrity and original 600s probe"
+      },
+      {
+        "sha": "e8b0fa61a8ceb86b92ff4bae82296273d16adf06",
+        "message": "test(p55): compare the unchanged 50-agent admission test on one runner"
+      },
+      {
+        "sha": "3985ebd4f90ff9f7d2e9626df9c0fbf5e8cdb1be",
+        "message": "test(p55): dispatch the original native desktop verification for the known main merge"
+      }
+    ]
+  },
+  "files": [
+    {
+      "path": ".github/workflows/p55-admission-paired.yml",
+      "original_blob": "492b514e38195fc85acf7d5099203fd3a1613add",
+      "original_url": "https://github.com/SKYdayDUCK/NovelFactory/blob/3985ebd4f90ff9f7d2e9626df9c0fbf5e8cdb1be/.github/workflows/p55-admission-paired.yml",
+      "status": "added",
+      "added_lines": 94,
+      "deleted_lines": 0,
+      "main_path_present": false,
+      "same_bytes_on_main": [],
+      "disposition": "archive_historical_harness",
+      "reason": "Runs the existing PostgreSQL HTTP50 fixed-cut test on f2e6d385 and 0f80173e with fresh databases in four rounds/arms (300/300 HTTP 200 each). The current parameterized test still runs; fixed snapshots and the evidence-only branch trigger should remain historical.",
+      "original_run": 43054332525,
+      "current_evidence": [
+        {
+          "path": "tests/service/test_http_load.py",
+          "blob": "dab234ea57525ed3c8a8eccbe2f356d326a1b2af"
+        }
+      ]
+    },
+    {
+      "path": ".github/workflows/p55-export.yml",
+      "original_blob": "28b8f514282444ef75e8bc7663770a5621610347",
+      "original_url": "https://github.com/SKYdayDUCK/NovelFactory/blob/3985ebd4f90ff9f7d2e9626df9c0fbf5e8cdb1be/.github/workflows/p55-export.yml",
+      "status": "added",
+      "added_lines": 58,
+      "deleted_lines": 0,
+      "main_path_present": false,
+      "same_bytes_on_main": [],
+      "disposition": "archive_one_shot_export",
+      "reason": "Explicitly downloads the historical guard and long-read artifacts and may push only to evidence/p55-receipts-55d897. Its exported guard, JUnit, SHA list and three 12,000-row streams already exist on main. Retain original workflow for provenance.",
+      "original_run": 43041235226,
+      "current_evidence": [
+        {
+          "path": "evidence/p55/s9-local/remote-55d897/guard-SHA256SUMS",
+          "blob": "460c5d3bf17bb79face1b9076bf3eb3515bd115b"
+        },
+        {
+          "path": "evidence/p55/s9-local/remote-55d897/long-read-summaries.json",
+          "blob": "ac4537ec96339f740a4de68e29dc536330706393"
+        }
+      ]
+    },
+    {
+      "path": ".github/workflows/p55-guard-acceptance.yml",
+      "original_blob": "2de4a533b9497ee58fb87d9c18a384c1a83ef8a5",
+      "original_url": "https://github.com/SKYdayDUCK/NovelFactory/blob/3985ebd4f90ff9f7d2e9626df9c0fbf5e8cdb1be/.github/workflows/p55-guard-acceptance.yml",
+      "status": "added",
+      "added_lines": 74,
+      "deleted_lines": 0,
+      "main_path_present": false,
+      "same_bytes_on_main": [],
+      "disposition": "adopt_results_archive_pinned_harness",
+      "reason": "Four guard policies share one PG dataset fixed to 55d8979b, with three preregistered affected labels and twelve decision repetitions per label and arm. #6 already integrated the benchmark, query fences and raw comparison. 36/36 real query tests passed.",
+      "original_run": 43039818150,
+      "current_evidence": [
+        {
+          "path": "benchmarks/p55_semantic_comparison.py",
+          "blob": "f96e38dd9c04096e64308b7465aa6d60abf0ba9a"
+        },
+        {
+          "path": "tests/integration/test_s9_query_coverage.py",
+          "blob": "dbc84083f7670e2f6177a2cf1af4bf621da689e2"
+        },
+        {
+          "path": "evidence/p55/s9-local/remote-55d897/guard-comparison.json",
+          "blob": "075e810a5798eaf7b2d007098473fe5dfeaafcad"
+        },
+        {
+          "path": "evidence/p55/s9-local/remote-55d897/queries.xml",
+          "blob": "d8710aa571ea42d44c21d84480dfb536a8c0bbf9"
+        }
+      ]
+    },
+    {
+      "path": ".github/workflows/p55-large-qualification.yml",
+      "original_blob": "c858706d4960fb534f57f15e21fef8e8f560a47b",
+      "original_url": "https://github.com/SKYdayDUCK/NovelFactory/blob/3985ebd4f90ff9f7d2e9626df9c0fbf5e8cdb1be/.github/workflows/p55-large-qualification.yml",
+      "status": "added",
+      "added_lines": 81,
+      "deleted_lines": 0,
+      "main_path_present": false,
+      "same_bytes_on_main": [],
+      "disposition": "adopt_via_pr24_archive_pinned_harness",
+      "reason": "Qualifies #24 8f245a51 against 55d8979b plus independently registered tests at b3e63bb9. Query/corruption suite 35 passed; 500-agent 600 s pair baseline 11,862 successes/138 429, candidate 12,000/12,000. The independent candidate also passes. Implementation and corruption/concurrent-work tests are already in #6/main.",
+      "original_run": 43044231150,
+      "current_evidence": [
+        {
+          "path": "src/novel_factory/application/kernel.py",
+          "blob": "66c3b034acf9495ca050585a692335ee6da4ed03"
+        },
+        {
+          "path": "tests/queries/test_large_postgres_projection.py",
+          "blob": "eb8f457e60238b31546934b304dc334f12ee6c74"
+        },
+        {
+          "path": "tests/unit/test_large_projection_witness.py",
+          "blob": "033d681e1b7da3419af9d1ce3070098c0b67e2b5"
+        }
+      ]
+    },
+    {
+      "path": ".github/workflows/p55-main-desktop-receipt.yml",
+      "original_blob": "b7291c6b31a3d634bacee67f7cbb4f3ef963bc5a",
+      "original_url": "https://github.com/SKYdayDUCK/NovelFactory/blob/3985ebd4f90ff9f7d2e9626df9c0fbf5e8cdb1be/.github/workflows/p55-main-desktop-receipt.yml",
+      "status": "added",
+      "added_lines": 26,
+      "deleted_lines": 0,
+      "main_path_present": false,
+      "same_bytes_on_main": [],
+      "disposition": "archive_fixed_dispatch",
+      "reason": "A one-time actions:write workflow checks main == df1e0cc9 and tree == 6355c181, avoids duplicate runs, then requests the existing native desktop workflow. Original desktop run 43059877408 passed on that exact merge. Current main retains the native desktop entry point.",
+      "original_run": 43059856343,
+      "current_evidence": [
+        {
+          "path": ".github/workflows/p5-native-desktop.yml",
+          "blob": "64b1b1ab0805e85ba878cf01aa4ec5898b7664b5"
+        }
+      ]
+    },
+    {
+      "path": ".github/workflows/p55-profile.yml",
+      "original_blob": "ad3012512d8dfb188ffd5017ba5231d48059cbf0",
+      "original_url": "https://github.com/SKYdayDUCK/NovelFactory/blob/3985ebd4f90ff9f7d2e9626df9c0fbf5e8cdb1be/.github/workflows/p55-profile.yml",
+      "status": "added",
+      "added_lines": 70,
+      "deleted_lines": 0,
+      "main_path_present": false,
+      "same_bytes_on_main": [],
+      "disposition": "archive_profile_retain_result",
+      "reason": "Measures the archived P5 and S9 500-agent fixture on one runner, fresh DBs, with a hot-read profile and no external model. The matched profile survives on main and informed #24.",
+      "original_run": 43042702151,
+      "current_evidence": [
+        {
+          "path": "evidence/p55/s9-local/remote-55d897/same-runner-p5-s9-profile.json",
+          "blob": "292799c57a5526df2f7dfd1e8ccec2815fb54111"
+        }
+      ]
+    },
+    {
+      "path": ".github/workflows/p55-query-comparison.yml",
+      "original_blob": "dbbe339ca80b6345c08d2dadafd2aac5eef13507",
+      "original_url": "https://github.com/SKYdayDUCK/NovelFactory/blob/3985ebd4f90ff9f7d2e9626df9c0fbf5e8cdb1be/.github/workflows/p55-query-comparison.yml",
+      "status": "added",
+      "added_lines": 72,
+      "deleted_lines": 0,
+      "main_path_present": false,
+      "same_bytes_on_main": [],
+      "disposition": "reject_sql_candidate_archive_comparison",
+      "reason": "Side-by-side 55d8979 vs #20/598f4ee6 scheduling original 500-agent 600 s/20 read-rps gate; 32 query tests passed. Baseline 11,760/12,000 (239 429 + one transport failure); paired SQL candidate 12,000 but independent SQL run only 11,898/12,000 (102 429). #20 closed unmerged; #6 adopted #21 and #24.",
+      "original_run": 43040245181,
+      "current_evidence": [
+        {
+          "path": "src/novel_factory/application/queries.py",
+          "blob": "8c066ab33ce3f8d618a02095c2c434eb85e2c790"
+        },
+        {
+          "path": "src/novel_factory/application/kernel.py",
+          "blob": "66c3b034acf9495ca050585a692335ee6da4ed03"
+        },
+        {
+          "path": "evidence/p55/http-validation/comparison.json",
+          "blob": "80b3269966646ed2775bae202ef29f2855a53adc"
+        }
+      ]
+    },
+    {
+      "path": "evidence/p55/checkpoints/export_fixed_receipts.py",
+      "original_blob": "1a2c5a7f02ccf2253ccdd4a1b1eec39117983504",
+      "original_url": "https://github.com/SKYdayDUCK/NovelFactory/blob/3985ebd4f90ff9f7d2e9626df9c0fbf5e8cdb1be/evidence/p55/checkpoints/export_fixed_receipts.py",
+      "status": "added",
+      "added_lines": 58,
+      "deleted_lines": 0,
+      "main_path_present": false,
+      "same_bytes_on_main": [],
+      "disposition": "adopt_exported_bytes_archive_one_shot_code",
+      "reason": "Validates fixed artifact names, SHA256, source SHA, A/B/C/D observation counts and 0 model usage, uses an allowlist of fields and deterministic gzip, and saves original candidate attempts plus prior control. Archive the provenance-bound helper; the actual receipts and raw streams are retained.",
+      "original_run": 43041235226,
+      "current_evidence": [
+        {
+          "path": "evidence/p55/s9-local/remote-55d897/candidate-attempt-1-records.json.gz",
+          "blob": "3817094d88835d39d13f33b7421ff5c760aae6c9"
+        },
+        {
+          "path": "evidence/p55/s9-local/remote-55d897/candidate-attempt-2-records.json.gz",
+          "blob": "54d0f29d024db9c6aa6bdbfc4f7a51919e9b750b"
+        },
+        {
+          "path": "evidence/p55/s9-local/remote-55d897/previous-attempt-1-records.json.gz",
+          "blob": "7aa88229ac9081d2cb382f707a9e2a0a074b2c87"
+        }
+      ]
+    },
+    {
+      "path": "evidence/p55/checkpoints/guard-registration.json",
+      "original_blob": "bfa29a5dd60658fdd5f4e0a484546061b22a8f6b",
+      "original_url": "https://github.com/SKYdayDUCK/NovelFactory/blob/3985ebd4f90ff9f7d2e9626df9c0fbf5e8cdb1be/evidence/p55/checkpoints/guard-registration.json",
+      "status": "added",
+      "added_lines": 22,
+      "deleted_lines": 0,
+      "main_path_present": false,
+      "same_bytes_on_main": [
+        "evidence/p55/s9-local/remote-55d897/guard-registration.json"
+      ],
+      "disposition": "adopt_identical_blob_under_evidence_path",
+      "reason": "The exact registered labels, evidence boundaries, subject and repeat count survive on main with identical blob bfa29a5d. A FP/FN=1/0; B=0/1; C=0/1; D=0/0. These three synthetic labels do not establish production error rates.",
+      "original_run": 43039818150,
+      "current_evidence": [
+        {
+          "path": "evidence/p55/s9-local/remote-55d897/guard-registration.json",
+          "blob": "bfa29a5dd60658fdd5f4e0a484546061b22a8f6b"
+        }
+      ]
+    },
+    {
+      "path": "evidence/p55/checkpoints/large-world-registration.json",
+      "original_blob": "df6bb21df4621904105564ab9156cd1c13019988",
+      "original_url": "https://github.com/SKYdayDUCK/NovelFactory/blob/3985ebd4f90ff9f7d2e9626df9c0fbf5e8cdb1be/evidence/p55/checkpoints/large-world-registration.json",
+      "status": "added",
+      "added_lines": 19,
+      "deleted_lines": 0,
+      "main_path_present": false,
+      "same_bytes_on_main": [],
+      "disposition": "archive_preregistered_test_contract",
+      "reason": "#24's predeclared fixed-baseline/fixed-candidate workloads are retained in this immutable source and paired/independent original ZIPs. The adopted product tests address same-size corruption plus schedule and identity across concurrent works.",
+      "original_run": 43044231150,
+      "current_evidence": [
+        {
+          "path": "tests/queries/test_large_postgres_projection.py",
+          "blob": "eb8f457e60238b31546934b304dc334f12ee6c74"
+        },
+        {
+          "path": "tests/unit/test_large_projection_witness.py",
+          "blob": "033d681e1b7da3419af9d1ce3070098c0b67e2b5"
+        }
+      ]
+    },
+    {
+      "path": "evidence/p55/checkpoints/profile_fixed_cut.py",
+      "original_blob": "27777ce8e5f47b5713d3d4e5c0bf2d0b78d57dd4",
+      "original_url": "https://github.com/SKYdayDUCK/NovelFactory/blob/3985ebd4f90ff9f7d2e9626df9c0fbf5e8cdb1be/evidence/p55/checkpoints/profile_fixed_cut.py",
+      "status": "added",
+      "added_lines": 103,
+      "deleted_lines": 0,
+      "main_path_present": false,
+      "same_bytes_on_main": [],
+      "disposition": "archive_profiler_retain_results",
+      "reason": "Standalone cProfile/SQL phase counter instruments serial fixed-cut reads with a scoped ExitStack and restores temporary instrumentation. Checks SQL digest against bytes; includes timings of transfer, decoding, canonicalization and full revision access. The old private witness representation ties its witness_retained observation to those historical snapshots.",
+      "original_run": 43042702151,
+      "current_evidence": [
+        {
+          "path": "evidence/p55/s9-local/remote-55d897/same-runner-p5-s9-profile.json",
+          "blob": "292799c57a5526df2f7dfd1e8ccec2815fb54111"
+        }
+      ]
+    },
+    {
+      "path": "evidence/p55/checkpoints/query-comparison.json",
+      "original_blob": "70248d647ff158b0e271ee59d113db569571974b",
+      "original_url": "https://github.com/SKYdayDUCK/NovelFactory/blob/3985ebd4f90ff9f7d2e9626df9c0fbf5e8cdb1be/evidence/p55/checkpoints/query-comparison.json",
+      "status": "added",
+      "added_lines": 19,
+      "deleted_lines": 0,
+      "main_path_present": false,
+      "same_bytes_on_main": [],
+      "disposition": "archive_preregistered_test_contract",
+      "reason": "Order, seed/isolated DBs, fixed 500 x 600-second 20-rps two-process workload and limits of causal interpretation preregister #20 only. Preserve it with paired SQL evidence and independent adverse result.",
+      "original_run": 43040245181,
+      "current_evidence": [
+        {
+          "path": "reports/handoff/P5_P56_CURRENT_STATE.md",
+          "blob": "8a17cc4b22356f153498871bde8ae69ff1799765"
+        }
+      ]
+    }
+  ],
+  "integrated": [
+    {
+      "pr": 6,
+      "head": "67e8836fd8aceb5d4b8d054594f5f3bdfdddaac9",
+      "merge": "df1e0cc904e3b94a360d86e3a3e00bfec3258673",
+      "main_descends": true,
+      "product": [
+        "benchmarks/p55_semantic_comparison.py",
+        "tests/integration/test_s9_query_coverage.py",
+        "evidence/p55/business/README.md"
+      ],
+      "decision": "Adopted in main. Keep earlier 492 and 46 HTTP 429 outcomes on 55d8979 separately from later results."
+    },
+    {
+      "pr": 21,
+      "head": "df30c306057d26b7b32e3cec0df1ad9926a6824a",
+      "merge": "84e9f80f9d69f1cd337c2ec7e897e0ef0add9fd7",
+      "main_descends": true,
+      "files": [
+        {
+          "path": "src/novel_factory/application/queries.py",
+          "pr_blob": "8c066ab33ce3f8d618a02095c2c434eb85e2c790",
+          "current_blob": "8c066ab33ce3f8d618a02095c2c434eb85e2c790"
+        },
+        {
+          "path": "src/novel_factory/interfaces/http.py",
+          "pr_blob": "75a526ef44c32d4891c6533f41e9e50a7facb3c8",
+          "current_blob": "75a526ef44c32d4891c6533f41e9e50a7facb3c8"
+        },
+        {
+          "path": "tests/service/test_http.py",
+          "pr_blob": "a9dc3c1c01c566ca611a654c45c63efcea0b63eb",
+          "current_blob": "a9dc3c1c01c566ca611a654c45c63efcea0b63eb"
+        }
+      ],
+      "decision": "Immutable validated HTTP query bytes with fresh per-reader materialization; direct calls still enforce schema. All three touched blobs remain identical."
+    },
+    {
+      "pr": 24,
+      "head": "8f245a51729308fc892396d3a10d70a7ef1d7853",
+      "merge": "97eeceac266016b0d5da62786b019b704bfcdb70",
+      "main_descends": true,
+      "files": [
+        {
+          "path": "src/novel_factory/application/kernel.py",
+          "pr_blob": "f62f2789ad2c0d3ec7535bbb7551d8c40782a44a",
+          "current_blob": "66c3b034acf9495ca050585a692335ee6da4ed03"
+        },
+        {
+          "path": "tests/queries/test_large_postgres_projection.py",
+          "pr_blob": "eb8f457e60238b31546934b304dc334f12ee6c74",
+          "current_blob": "eb8f457e60238b31546934b304dc334f12ee6c74"
+        },
+        {
+          "path": "tests/unit/test_large_projection_witness.py",
+          "pr_blob": "033d681e1b7da3419af9d1ce3070098c0b67e2b5",
+          "current_blob": "033d681e1b7da3419af9d1ce3070098c0b67e2b5"
+        }
+      ],
+      "decision": "Fresh byte SHA-256 and canonical integrity check, while decoding independently and checking schedule. Current kernel has subsequent edits but retains the witness and both original test blobs."
+    }
+  ],
+  "historical_rejected_option": {
+    "pr": 20,
+    "subject": "598f4ee65fbb6f0ed9872656de965f070965b1da",
+    "merged": false,
+    "reason": "Independent unchanged gate 11,898/12,000 HTTP 200 and 102 HTTP 429; final P5.5 uses #21/#24. Its independent and paired receipts, including all failures, survive.",
+    "immutable_archive_url": "https://github.com/SKYdayDUCK/NovelFactory/tree/abf499e68eace738233ab8a3c40b982aff304ed9/evidence/p55/s9-local/combined-97eeceac/raw-experiments",
+    "archives": [
+      {
+        "file": "size-independent.zip",
+        "run_id": 43043791829,
+        "artifact_id": 13868070141,
+        "sha256": "28e1faad86c9562ea4e27b2ee8568a1974666ce0e33773eb6c95b413f64a2207",
+        "bytes": 472526,
+        "observations": {
+          "result.json": {
+            "checkout": "22f1bee3d9d8c63d9868a82b0ffb38d2686830d7",
+            "gate": "PASS",
+            "status_counts": {
+              "200": 12000
+            }
+          }
+        }
+      },
+      {
+        "file": "size-paired.zip",
+        "run_id": 43044231150,
+        "artifact_id": 13867723125,
+        "sha256": "acd627ca328954a5d1b328e22ab7d0371241bf436adee6c16480d31b2d5c0ab5",
+        "bytes": 979390,
+        "observations": {
+          "baseline.json": {
+            "checkout": "55d8979b5361a4837701d762feacd83036096b11",
+            "gate": "NOT_MET",
+            "status_counts": {
+              "200": 11862,
+              "429": 138
+            }
+          },
+          "candidate.json": {
+            "checkout": "8f245a51729308fc892396d3a10d70a7ef1d7853",
+            "gate": "PASS",
+            "status_counts": {
+              "200": 12000
+            }
+          }
+        }
+      },
+      {
+        "file": "sql-independent.zip",
+        "run_id": 43040241786,
+        "artifact_id": 13864214845,
+        "sha256": "b5b24304f3fc0da0ab5bd35295326c995bef7090b6b3e1ccb07a0b7b1b150f27",
+        "bytes": 488673,
+        "observations": {
+          "result.json": {
+            "checkout": "a227597de069890b266c5dd9a8e5b88aaa4e2596",
+            "gate": "NOT_MET",
+            "status_counts": {
+              "200": 11898,
+              "429": 102
+            }
+          }
+        }
+      },
+      {
+        "file": "sql-paired.zip",
+        "run_id": 43040245181,
+        "artifact_id": 13867065861,
+        "sha256": "919813deea15f5e179764f86092e4306c2ea7737c16d9e9ca64543c608284762",
+        "bytes": 981296,
+        "observations": {
+          "baseline.json": {
+            "checkout": "55d8979b5361a4837701d762feacd83036096b11",
+            "gate": "NOT_MET",
+            "status_counts": {
+              "200": 11760,
+              "429": 239,
+              "transport_error": 1
+            }
+          },
+          "candidate.json": {
+            "checkout": "598f4ee65fbb6f0ed9872656de965f070965b1da",
+            "gate": "PASS",
+            "status_counts": {
+              "200": 12000
+            }
+          }
+        }
+      }
+    ]
+  },
+  "archived_runs": [
+    {
+      "run_id": 43039818150,
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43039818150",
+      "jobs": [
+        [
+          130588291437,
+          "compare",
+          "success"
+        ]
+      ],
+      "artifacts": [
+        [
+          13864487840,
+          "exact-55d897-s9-guard-and-junit",
+          "sha256:87665a0d85221d504fc8b5fad5bb595951c197302b67e2a2aea3beeaa7b44cc1",
+          false
+        ]
+      ]
+    },
+    {
+      "run_id": 43040245181,
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43040245181",
+      "jobs": [
+        [
+          130589778137,
+          "compare",
+          "success"
+        ]
+      ],
+      "artifacts": [
+        [
+          13867065861,
+          "same-runner-600s-55d897-and-598f4ee",
+          "sha256:919813deea15f5e179764f86092e4306c2ea7737c16d9e9ca64543c608284762",
+          false
+        ]
+      ]
+    },
+    {
+      "run_id": 43041235226,
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43041235226",
+      "jobs": [
+        [
+          130593267474,
+          "export",
+          "success"
+        ]
+      ],
+      "artifacts": []
+    },
+    {
+      "run_id": 43042702151,
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43042702151",
+      "jobs": [
+        [
+          130598408066,
+          "compare",
+          "success"
+        ]
+      ],
+      "artifacts": [
+        [
+          13866072369,
+          "p55-exact-500-fixed-cut-profile",
+          "sha256:eee6b05063eaf9ecc90fef32225f1e3b1e15e0a10a6c286ee89a41bece636569",
+          false
+        ]
+      ]
+    },
+    {
+      "run_id": 43044231150,
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43044231150",
+      "jobs": [
+        [
+          130603799986,
+          "compare",
+          "success"
+        ]
+      ],
+      "artifacts": [
+        [
+          13867723125,
+          "same-runner-600s-55d897-and-8f245a5",
+          "sha256:acd627ca328954a5d1b328e22ab7d0371241bf436adee6c16480d31b2d5c0ab5",
+          false
+        ]
+      ]
+    },
+    {
+      "run_id": 43054332525,
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43054332525",
+      "jobs": [
+        [
+          130639625356,
+          "compare",
+          "success"
+        ]
+      ],
+      "artifacts": [
+        [
+          13871700305,
+          "p55-original-http50-f2e6-0f8017",
+          "sha256:37cbfed3c4eb77522a52296dda465c716719b2837150c4cad3d4cff594a21b2a",
+          false
+        ]
+      ]
+    },
+    {
+      "run_id": 43059856343,
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43059856343",
+      "jobs": [
+        [
+          130659123967,
+          "original-workflow",
+          "success"
+        ]
+      ],
+      "artifacts": []
+    }
+  ],
+  "dispatched_native_desktop": [
+    [
+      43059877408,
+      "P5 native desktop resume",
+      "success",
+      "df1e0cc904e3b94a360d86e3a3e00bfec3258673"
+    ]
+  ],
+  "current_regression": {
+    "source": "0420356b0bd0bfd675494e581799946c4b967f6e",
+    "run_id": 43152869266,
+    "job_id": 130965941851,
+    "artifact_id": 13915776485,
+    "junit_blob": "edf5c126be5ae902171b54eaf03dcbfc7d693605",
+    "junit_sha256": "bdce8fa41d24d92f804854ec6202acb8343860d3918c2354a441f54668971b03",
+    "named_tests": [
+      {
+        "name": "test_query_projection_change_blocks_disjoint_candidate[implicit_edge_closure]",
+        "module": "tests.integration.test_s9_query_coverage",
+        "seconds": "1.411",
+        "status": "PASS"
+      },
+      {
+        "name": "test_query_projection_change_blocks_disjoint_candidate[scoped_timeline]",
+        "module": "tests.integration.test_s9_query_coverage",
+        "seconds": "0.729",
+        "status": "PASS"
+      },
+      {
+        "name": "test_query_projection_change_blocks_disjoint_candidate[visited_graph_frontier]",
+        "module": "tests.integration.test_s9_query_coverage",
+        "seconds": "0.645",
+        "status": "PASS"
+      },
+      {
+        "name": "test_authorized_message_read_fences_all_supported_source_bindings[existing_text]",
+        "module": "tests.integration.test_s9_query_coverage",
+        "seconds": "0.848",
+        "status": "PASS"
+      },
+      {
+        "name": "test_authorized_message_read_fences_all_supported_source_bindings[spaced_version_reference]",
+        "module": "tests.integration.test_s9_query_coverage",
+        "seconds": "0.854",
+        "status": "PASS"
+      },
+      {
+        "name": "test_large_live_projection_fences_same_size_corruption_across_concurrent_works",
+        "module": "tests.queries.test_large_postgres_projection",
+        "seconds": "39.752",
+        "status": "PASS"
+      },
+      {
+        "name": "test_http_query_checks_its_full_contract_once_and_keeps_direct_call_validation",
+        "module": "tests.service.test_http",
+        "seconds": "0.416",
+        "status": "PASS"
+      },
+      {
+        "name": "test_real_http_logical_agents_fixed_cut_and_bounded_connections[10]",
+        "module": "tests.service.test_http_load",
+        "seconds": "3.740",
+        "status": "PASS"
+      },
+      {
+        "name": "test_real_http_logical_agents_fixed_cut_and_bounded_connections[50]",
+        "module": "tests.service.test_http_load",
+        "seconds": "16.318",
+        "status": "PASS"
+      },
+      {
+        "name": "test_large_snapshot_reuses_validation_and_still_examines_every_read",
+        "module": "tests.unit.test_large_projection_witness",
+        "seconds": "0.061",
+        "status": "PASS"
+      }
+    ]
+  },
+  "retained_capacity_limits": {
+    "issue": 13,
+    "state": "open",
+    "note": "No inference from a single paired engineering probe to remaining published capacity gates, external token economics or literary acceptance."
+  }
+}

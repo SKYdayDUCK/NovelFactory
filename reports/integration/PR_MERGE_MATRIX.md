@@ -37,3 +37,5 @@ W6 主线签收见 [W6_主线签收.md](W6_主线签收.md)，下一唯一阶段
 [#25](https://github.com/SKYdayDUCK/NovelFactory/pull/25) 的合并提交为 `ba892d3a424be39efccb697232a5614b26609cc4`，2026-11-12 01:57:08 UTC 合并。已在[精确主线](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43137991893)复验并[签收](https://github.com/SKYdayDUCK/NovelFactory/tree/9eb7bb52e422f1a8e33a91fe01a1e67fef6375d3/reports/integration/evidence/W6/signoff-ba892d3)。 [P5.6 独立综合验收](P56_SYSTEM_ACCEPTANCE.md)。
 
 #17 已于 2026-11-12 03:19:32 UTC 合并并在 `533c1f526ef8841610d5c414e77ecbea8bbd5e35` 验证。[#17 主线签收](https://github.com/SKYdayDUCK/NovelFactory/blob/fee462dfb6923059512b9797b4707e61eec8e8a3/reports/integration/evidence/P6-C1/main-533c1f5/SIGNOFF.md)。#16 在该基线上接收原堆叠分支 `bc7824078a7613c5e1a0d26031c3c64fa2db8490`。
+
+#18 已归档关闭，原输入、测试版本和采用决策见 [S9 归档](evidence/S9-PR18/README.md)。[PRE_HARNESS_BASELINE](PRE_HARNESS_BASELINE.md)保留 #16 实际主线、开放列表和原始容量边界。

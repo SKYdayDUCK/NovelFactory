@@ -1,0 +1,117 @@
+{
+  "pr": 18,
+  "state_on_inspection": "open",
+  "draft": true,
+  "original_url": "https://github.com/SKYdayDUCK/NovelFactory/pull/18",
+  "title": "Evidence: rerun preregistered S9 guard policies on exact 55d8979",
+  "head": "3985ebd4f90ff9f7d2e9626df9c0fbf5e8cdb1be",
+  "head_branch": "evidence/p55-55d897-guard",
+  "base": "55d8979b5361a4837701d762feacd83036096b11",
+  "base_branch": "dev/p5-5-redis-eventhub",
+  "review_main": "0420356b0bd0bfd675494e581799946c4b967f6e",
+  "trees": {
+    "base": "51b5a83050708ebbdfc43cbee74c14c05fae85d2",
+    "head": "3f3464caef1a7143fc7565a6ffc597bdd352ce92",
+    "main": "c15a497115b404e05a1abc194363888c3ca66725"
+  },
+  "paths": [
+    {
+      "path": ".github/workflows/p55-admission-paired.yml",
+      "sha": "492b514e38195fc85acf7d5099203fd3a1613add",
+      "mode": "100644",
+      "size": 3832,
+      "mainSamePath": null,
+      "mainIdenticalObjects": []
+    },
+    {
+      "path": ".github/workflows/p55-export.yml",
+      "sha": "28b8f514282444ef75e8bc7663770a5621610347",
+      "mode": "100644",
+      "size": 2158,
+      "mainSamePath": null,
+      "mainIdenticalObjects": []
+    },
+    {
+      "path": ".github/workflows/p55-guard-acceptance.yml",
+      "sha": "2de4a533b9497ee58fb87d9c18a384c1a83ef8a5",
+      "mode": "100644",
+      "size": 3173,
+      "mainSamePath": null,
+      "mainIdenticalObjects": []
+    },
+    {
+      "path": ".github/workflows/p55-large-qualification.yml",
+      "sha": "c858706d4960fb534f57f15e21fef8e8f560a47b",
+      "mode": "100644",
+      "size": 3497,
+      "mainSamePath": null,
+      "mainIdenticalObjects": []
+    },
+    {
+      "path": ".github/workflows/p55-main-desktop-receipt.yml",
+      "sha": "b7291c6b31a3d634bacee67f7cbb4f3ef963bc5a",
+      "mode": "100644",
+      "size": 1194,
+      "mainSamePath": null,
+      "mainIdenticalObjects": []
+    },
+    {
+      "path": ".github/workflows/p55-profile.yml",
+      "sha": "ad3012512d8dfb188ffd5017ba5231d48059cbf0",
+      "mode": "100644",
+      "size": 2735,
+      "mainSamePath": null,
+      "mainIdenticalObjects": []
+    },
+    {
+      "path": ".github/workflows/p55-query-comparison.yml",
+      "sha": "dbbe339ca80b6345c08d2dadafd2aac5eef13507",
+      "mode": "100644",
+      "size": 2938,
+      "mainSamePath": null,
+      "mainIdenticalObjects": []
+    },
+    {
+      "path": "evidence/p55/checkpoints/export_fixed_receipts.py",
+      "sha": "1a2c5a7f02ccf2253ccdd4a1b1eec39117983504",
+      "mode": "100644",
+      "size": 3635,
+      "mainSamePath": null,
+      "mainIdenticalObjects": []
+    },
+    {
+      "path": "evidence/p55/checkpoints/guard-registration.json",
+      "sha": "bfa29a5dd60658fdd5f4e0a484546061b22a8f6b",
+      "mode": "100644",
+      "size": 768,
+      "mainSamePath": null,
+      "mainIdenticalObjects": [
+        "evidence/p55/s9-local/remote-55d897/guard-registration.json"
+      ]
+    },
+    {
+      "path": "evidence/p55/checkpoints/large-world-registration.json",
+      "sha": "df6bb21df4621904105564ab9156cd1c13019988",
+      "mode": "100644",
+      "size": 893,
+      "mainSamePath": null,
+      "mainIdenticalObjects": []
+    },
+    {
+      "path": "evidence/p55/checkpoints/profile_fixed_cut.py",
+      "sha": "27777ce8e5f47b5713d3d4e5c0bf2d0b78d57dd4",
+      "mode": "100644",
+      "size": 6109,
+      "mainSamePath": null,
+      "mainIdenticalObjects": []
+    },
+    {
+      "path": "evidence/p55/checkpoints/query-comparison.json",
+      "sha": "70248d647ff158b0e271ee59d113db569571974b",
+      "mode": "100644",
+      "size": 902,
+      "mainSamePath": null,
+      "mainIdenticalObjects": []
+    }
+  ]
+}
