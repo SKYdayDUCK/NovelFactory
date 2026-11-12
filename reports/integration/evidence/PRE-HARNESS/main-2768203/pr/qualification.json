@@ -1,0 +1,225 @@
+{
+  "version": 1,
+  "PR": 27,
+  "scope": "Archival baseline and documentation PR through the real P1 workflow. Registration, author fixtures and engineering release unit tests reran in P1. The isolated empty-template CLI and capacity experiments are available in C2's separate exact-source proofs.",
+  "subject": {
+    "event": "pull_request",
+    "head": "5aa9b71b66c7800f58214fa368e22ebeb9c3d56b",
+    "checkout": "3ada28b0c35e59dfbcc903f981403fb0e0467dfe",
+    "tree": "f8b5f9ff2f53d726cf5c666aea7cacf176f1fac9",
+    "base": "0420356b0bd0bfd675494e581799946c4b967f6e"
+  },
+  "source_run": {
+    "id": 43157805358,
+    "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43157805358",
+    "conclusion": "success",
+    "attempt": 1,
+    "workflow_path": ".github/workflows/p1-integrity.yml"
+  },
+  "collector": {
+    "id": 43160006117,
+    "head": "bb504588491486487fff9fd5d6250062062439f9",
+    "job": 130988662662
+  },
+  "github_provenance": "3370736d6dd018d5d0714fc5306de447a06fa153",
+  "changed_files": 51,
+  "all_changes_under_reports_integration": true,
+  "superseded_pr_run_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43156847157",
+  "source_zip_metadata": [
+    {
+      "id": 13917332767,
+      "name": "p1-postgres-concurrency-1",
+      "digest": "sha256:9c6be1d3b57521477558bcc68420a33af336eef7dfd1abd86d4fb56e87b2b2d5",
+      "size_in_bytes": 1792121,
+      "created_at": "2026-11-12T05:13:17Z",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43157805358/artifacts/13917332767"
+    },
+    {
+      "id": 13915884774,
+      "name": "p1-schema-unit-1",
+      "digest": "sha256:ddeea0069b5136e4aded0c1fc8da11bc972348e3a40da1c8117c2367f0401173",
+      "size_in_bytes": 301938,
+      "created_at": "2026-11-12T04:55:00Z",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43157805358/artifacts/13915884774"
+    }
+  ],
+  "jobs": [
+    {
+      "id": 130981705725,
+      "name": "PostgreSQL 17 integration, concurrency and restore",
+      "conclusion": "success",
+      "checkout": "2026-11-12T04:54:41.1095529Z 3ada28b0c35e59dfbcc903f981403fb0e0467dfe",
+      "pytest_summary": [
+        "2026-11-12T05:10:43.7423472Z   /home/runner/work/NovelFactory/NovelFactory/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.",
+        "2026-11-12T05:10:43.7427134Z SKIPPED [17] tests/integration/test_p5_role_container.py:34: Linux container setup denied by this runner",
+        "2026-11-12T05:10:43.7428339Z 835 passed, 17 skipped, 1 warning, 17 subtests passed in 929.80s (0:15:29)"
+      ]
+    },
+    {
+      "id": 130981706133,
+      "name": "Schema, domain, HTTP and production boundaries",
+      "conclusion": "success",
+      "checkout": "2026-11-12T04:54:28.8696327Z 3ada28b0c35e59dfbcc903f981403fb0e0467dfe",
+      "pytest_summary": [
+        "2026-11-12T04:54:53.9285528Z 403 passed, 17 subtests passed in 18.62s"
+      ]
+    }
+  ],
+  "raw_junit_and_selected_receipt_blobs": [
+    {
+      "path": "p1-postgres-concurrency-1/postgres-all.xml",
+      "bytes": 137218,
+      "sha256": "c2b865e73078329edf2128331ef531cc7c4a3c061a02b31195ef33b43ab9e1d9",
+      "git_blob": "90af531eb777ec3289c288f90896fba05ecd47b6"
+    },
+    {
+      "path": "p1-postgres-concurrency-1/postgres-all.xml-summary.json",
+      "bytes": 1294,
+      "sha256": "e2573cd8d4912a22e7ffe077497a4102d35414744b9cc771b7cfcdbebc6e36b7",
+      "git_blob": "b66cf65d55b204ef32dc9bad23bd838aa7be36b4"
+    },
+    {
+      "path": "p6-register-only.json",
+      "bytes": 1535,
+      "sha256": "c2495e114c2ccb14fab631cc59f030b1ca5a8ee210cbc6de11d2d1706b9ef8f4",
+      "git_blob": "4973f85c1beb7002a72736054265d6eae7dfd120"
+    },
+    {
+      "path": "p6-author/author-receipt.json",
+      "bytes": 1299,
+      "sha256": "7d94327d6377c64425ce66610a635c3f406431cd21051cc7a96327ed0a902aff",
+      "git_blob": "e10174b0043d7ac1dfe96ea615f77f36b7cf0e21"
+    },
+    {
+      "path": "p1-schema-unit-1/unit.xml",
+      "bytes": 61593,
+      "sha256": "14250ae7542e32a3dfd919fe7e172ff485688f0adad33464cf3b8361b56fd295",
+      "git_blob": "cf9829c0718b987ffaf9edece8ebd722ba8b5896"
+    },
+    {
+      "path": "p1-schema-unit-1/unit.xml-summary.json",
+      "bytes": 868,
+      "sha256": "8003f60be3b002ed41f0769d306e5c69e0e8dd6d01fc124d7041c28f278df83d",
+      "git_blob": "edbfd1bedaedf157bdfeb8fa040ac1e6f194d3e0"
+    }
+  ],
+  "raw_junit_suite_counts": {
+    "postgres": {
+      "tests": 869,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 17
+    },
+    "schema": {
+      "tests": 420,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "tested_p6_and_engineering_nodes": {
+    "integration_suite": [
+      {
+        "module": "tests.integration.test_p6_export_release",
+        "test": "test_export_frozen_prose_scoped_log_and_blank_reader_forms",
+        "result": "PASS"
+      },
+      {
+        "module": "tests.integration.test_p6_export_release",
+        "test": "test_export_rejects_another_work_bound_branch_actor_and_revocation",
+        "result": "PASS"
+      },
+      {
+        "module": "tests.integration.test_p6_preflight_registration",
+        "test": "test_operator_registers_once_and_leaves_dispatch_idle",
+        "result": "PASS"
+      },
+      {
+        "module": "tests.unit.test_engineering_release_ci.SourceTests",
+        "test": "test_verify_integrated_event_tree_for_main_and_pr",
+        "result": "PASS"
+      },
+      {
+        "module": "tests.unit.test_engineering_release_ci.GateTests",
+        "test": "test_both_latest_main_pushes_succeeded",
+        "result": "PASS"
+      },
+      {
+        "module": "tests.unit.test_engineering_release_ci.GateTests",
+        "test": "test_newer_run_preempts_earlier_success_even_when_listing_order_changes",
+        "result": "PASS"
+      },
+      {
+        "module": "tests.unit.test_engineering_release_ci.GateTests",
+        "test": "test_other_path_branch_event_sha_and_missing_check_cannot_qualify",
+        "result": "PASS"
+      },
+      {
+        "module": "tests.unit.test_engineering_release_ci.GateTests",
+        "test": "test_run_attempt_changed_between_listing_and_check",
+        "result": "PASS"
+      }
+    ],
+    "schema_suite": [
+      {
+        "module": "tests.unit.test_engineering_release_ci.SourceTests",
+        "test": "test_verify_integrated_event_tree_for_main_and_pr",
+        "result": "PASS"
+      },
+      {
+        "module": "tests.unit.test_engineering_release_ci.GateTests",
+        "test": "test_both_latest_main_pushes_succeeded",
+        "result": "PASS"
+      },
+      {
+        "module": "tests.unit.test_engineering_release_ci.GateTests",
+        "test": "test_newer_run_preempts_earlier_success_even_when_listing_order_changes",
+        "result": "PASS"
+      },
+      {
+        "module": "tests.unit.test_engineering_release_ci.GateTests",
+        "test": "test_other_path_branch_event_sha_and_missing_check_cannot_qualify",
+        "result": "PASS"
+      },
+      {
+        "module": "tests.unit.test_engineering_release_ci.GateTests",
+        "test": "test_run_attempt_changed_between_listing_and_check",
+        "result": "PASS"
+      }
+    ]
+  },
+  "register_only": {
+    "trace_id": "21c521b1-ea8f-5f3d-97d0-abb5023255d6",
+    "tasks": 6,
+    "attempts": 0,
+    "provider_calls": 0,
+    "replays": 1,
+    "skills": {
+      "4f430e6d-c279-50e1-80c8-0c37c30ffba4": {
+        "sha256": "f1bf28443b2c37c6881fd83f1332e3101e37e2f898b381054d32378ecd5c38a4",
+        "skill": "simulate-character",
+        "version": "2.1.0"
+      },
+      "6f352e8f-1163-588f-af0a-71d2660e9e4b": {
+        "sha256": "f1bf28443b2c37c6881fd83f1332e3101e37e2f898b381054d32378ecd5c38a4",
+        "skill": "simulate-character",
+        "version": "2.1.0"
+      },
+      "7743abb4-dd13-5149-8358-264531bfc3c7": {
+        "sha256": "f1bf28443b2c37c6881fd83f1332e3101e37e2f898b381054d32378ecd5c38a4",
+        "skill": "simulate-character",
+        "version": "2.1.0"
+      }
+    }
+  },
+  "author": {
+    "execution_kind": "TEST_FIXTURE",
+    "fixture_calls": 15,
+    "real_model_calls": 0,
+    "external_delivery": "NOT_REQUESTED",
+    "literary": "NOT_EVALUATED",
+    "human_reviews_received": 0
+  },
+  "previous_separate_exact_main_empty_template_and_capacity_blob": "7d1c2a55ffca7fad935e5c6ac53a3dbfde835401",
+  "archival_engineering_qualification": "PASS"
+}

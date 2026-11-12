@@ -1,0 +1,78 @@
+{
+  "observed_at": "2026-11-12 05:14:40 UTC",
+  "repository": "SKYdayDUCK/NovelFactory",
+  "base": "0420356b0bd0bfd675494e581799946c4b967f6e",
+  "pr": {
+    "number": 27,
+    "head": "5aa9b71b66c7800f58214fa368e22ebeb9c3d56b",
+    "synthetic": "3ada28b0c35e59dfbcc903f981403fb0e0467dfe",
+    "merge_sha": "276820316129d546b0a13118bcbe283b06507795",
+    "merged_at": "2026-11-12T05:13:37Z",
+    "merged": true,
+    "url": "https://github.com/SKYdayDUCK/NovelFactory/pull/27"
+  },
+  "main": {
+    "sha": "276820316129d546b0a13118bcbe283b06507795",
+    "tree": "f8b5f9ff2f53d726cf5c666aea7cacf176f1fac9",
+    "parents": [
+      "0420356b0bd0bfd675494e581799946c4b967f6e",
+      "5aa9b71b66c7800f58214fa368e22ebeb9c3d56b"
+    ]
+  },
+  "query": "GET /repos/SKYdayDUCK/NovelFactory/pulls?state=open&per_page=100",
+  "open": [
+    {
+      "number": 4,
+      "head": "4f249d520c921c8d6effee9978f7338b912f1dd0",
+      "base": "dev/p3-p4-continuity",
+      "updated_at": "2026-11-11T03:38:09Z",
+      "draft": true,
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/pull/4"
+    }
+  ],
+  "issue13": {
+    "number": 13,
+    "state": "open",
+    "url": "https://github.com/SKYdayDUCK/NovelFactory/issues/13"
+  },
+  "candidate": [
+    {
+      "workflow": ".github/workflows/p1-integrity.yml",
+      "run": 43157805358,
+      "attempt": 1,
+      "event": "pull_request",
+      "head": "5aa9b71b66c7800f58214fa368e22ebeb9c3d56b",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43157805358",
+      "jobs": [
+        {
+          "name": "PostgreSQL 17 integration, concurrency and restore",
+          "id": 130981705725,
+          "result": "success",
+          "failed_steps": []
+        },
+        {
+          "name": "Schema, domain, HTTP and production boundaries",
+          "id": 130981706133,
+          "result": "success",
+          "failed_steps": []
+        }
+      ],
+      "artifacts": [
+        {
+          "name": "p1-postgres-concurrency-1",
+          "id": 13917332767,
+          "sha256": "sha256:9c6be1d3b57521477558bcc68420a33af336eef7dfd1abd86d4fb56e87b2b2d5",
+          "size": 1792121
+        },
+        {
+          "name": "p1-schema-unit-1",
+          "id": 13915884774,
+          "sha256": "sha256:ddeea0069b5136e4aded0c1fc8da11bc972348e3a40da1c8117c2367f0401173",
+          "size": 301938
+        }
+      ]
+    }
+  ]
+}
