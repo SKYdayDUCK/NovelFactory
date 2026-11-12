@@ -1,0 +1,44 @@
+{
+  "source_run": 43166232959,
+  "source": "0b4763f9e5b8f71bbf8eea37a810854181ad0513",
+  "collector": {
+    "run": 43174438632,
+    "job": 131035157365,
+    "head": "650142088cd23bf76397de6a29d944cfdb6cfa20"
+  },
+  "representation": "Original archive JUnit member, stored using lossless gzip; raw and gzip SHA256 independently verified.",
+  "files": {
+    "p1-postgres-concurrency-1/postgres-all.xml.gz": {
+      "raw_bytes": 137216,
+      "raw_sha256": "a8ca887c4b01d6679b55d755cc789a433b0165042956734b7433fee10e5e949c",
+      "wire_sha256": "43a18c89d0b680be0c40296fbccf33cf7d3652f79a875688b9ad3ae54b23887b",
+      "wire_bytes": 23233,
+      "junit": {
+        "tests": 869,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 17
+      },
+      "skips": [
+        "Linux container setup denied by this runner"
+      ],
+      "git_blob": "872e317b14a991744ecb3b0bde897857777b059f",
+      "original_archive": 13920254649
+    },
+    "p1-schema-unit-1/unit.xml.gz": {
+      "raw_bytes": 61593,
+      "raw_sha256": "e9adad90e620ece48f3d69618b59bf8e12a15c9ceb1a0dc9ebcc5dd35b543424",
+      "wire_sha256": "bd0729f14a851f87a34d00e5fd1928233c0cd799ec98292c6b92a8713ffe3f3b",
+      "wire_bytes": 9742,
+      "junit": {
+        "tests": 420,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "skips": [],
+      "git_blob": "b55d72dbf0936a4a6c7d10a30837c410781619c1",
+      "original_archive": 13920186784
+    }
+  }
+}
