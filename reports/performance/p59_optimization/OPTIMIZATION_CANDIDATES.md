@@ -1,0 +1,8 @@
+# Decisions before the experiment
+
+| ID | Evidence and decision | Acceptance and rollback |
+| --- | --- | --- |
+| C01 sorted scope upserts | Controlled candidate. Seven real writes established four keys, five scope SQL commands and 4.45 ms median under the commit transaction. The candidate changes only the emission of those statements. | Compare 0/1/4/large/deduplicated scopes, reversals, independent concurrent connections, rollback after later failure, final map, full acceptance and recoverable business completion. Reject if the common small case slows materially without a compensating repeatable benefit. Revert one repository method. |
+| C02 validation normalization and copies | Profile confirms meaningful time in exact schema evaluation, but does not attribute it to materializing errors or a second copy. | Delay until a paired comparison covers valid payloads, rejected payloads, nested DTOs and ownership. Preserve generic safe error responses. |
+| C03–C05 index, keyset pagination, snapshot reuse | The source already uses scoped primary keys, response caching and storage witnesses. Current measurements do not establish an additional net benefit. | Gather deep-page and cold/warm history workloads; recheck isolation, storage integrity and SQL/heap/WAL deltas before a migration. |
+| C06–C09 fair scheduling, provider connections, Redis batching and materialized observations | The relevant mechanisms and validation costs are listed in RESEARCH_SURVEY.md. No evidence here warrants changing tenant/ledger semantics or destructive backpressure settings. | Use faulted providers, unequal work sizes, lease expiry, duplicate receipts, backlog age and outbox recovery when evaluating a replacement. |
