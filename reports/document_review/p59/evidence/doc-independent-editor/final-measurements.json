@@ -1,0 +1,88 @@
+[
+  {
+    "arm": "at30",
+    "scenario": "200-overload-1",
+    "raw_sha256": "222bf427eb7f9f7e45c44bf8184d12f6cae16f47e3bac6a9c3c17d1b24745767",
+    "gate": "NOT_MET",
+    "actual_call_start_rps": 41.012178933960854,
+    "transport_header_start_rps": 40.08035650092952,
+    "minimum_call_starts": 950.0,
+    "valid_math": true
+  },
+  {
+    "arm": "at30-candidate",
+    "scenario": "200-overload-1",
+    "raw_sha256": "817d0484995be1d7a155cea25983ef795cc2cd5b70e2542ec69809af8779b5e5",
+    "gate": "NOT_MET",
+    "actual_call_start_rps": 35.38979198985536,
+    "transport_header_start_rps": 27.799719025262277,
+    "minimum_call_starts": 950.0,
+    "valid_math": true
+  },
+  {
+    "arm": "at30",
+    "scenario": "500-soak",
+    "raw_sha256": "d0b5a70f4365e55a6e89fff10a18c791c36c4bea4685e3d03abcc05ab66d7e7f",
+    "result": {
+      "probe_gate": "PASS",
+      "long_duration_gate": "NOT_EXECUTED",
+      "scheduled_count": 12000,
+      "status_counts": {
+        "200": 12000
+      },
+      "latency_all_attempts": {
+        "count": 12000,
+        "p50_ms": 130.0784,
+        "p95_ms": 649.2326,
+        "p99_ms": 996.1528
+      }
+    }
+  },
+  {
+    "arm": "at30-independent",
+    "scenario": "500-soak",
+    "raw_sha256": "994d545ca7a15c0b0992dad0f2ee606f5d91c70706d1d266117009024db1feb3",
+    "result": {
+      "probe_gate": "PASS",
+      "long_duration_gate": "NOT_EXECUTED",
+      "scheduled_count": 12000,
+      "status_counts": {
+        "200": 12000
+      },
+      "latency_all_attempts": {
+        "count": 12000,
+        "p50_ms": 199.6546,
+        "p95_ms": 1071.3847,
+        "p99_ms": 1519.0966
+      }
+    }
+  },
+  {
+    "arm": "at30",
+    "scenario": "1000-open",
+    "raw_sha256": "c6ae9e2cbd049c762ac5e2d05f0f00c1c13361eee6e6835f1213707db0881d31",
+    "wire_starts": 41.95011893740728,
+    "wire_gate": "NOT_MET",
+    "capacity": "NOT_MET",
+    "valid": 1319,
+    "status": {
+      "429": 3627,
+      "200": 1319,
+      "transport_error": 54
+    }
+  },
+  {
+    "arm": "at30-candidate",
+    "scenario": "1000-open",
+    "raw_sha256": "0bf1077565579cc7498a9a51c283324b121e87f06083b0ac84728db944ff2fab",
+    "wire_starts": 38.25644640147347,
+    "wire_gate": "NOT_MET",
+    "capacity": "NOT_MET",
+    "valid": 1434,
+    "status": {
+      "200": 1434,
+      "429": 3534,
+      "transport_error": 32
+    }
+  }
+]

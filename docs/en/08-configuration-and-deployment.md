@@ -49,8 +49,8 @@ Each service account owns its database. Migrate empty databases for a new instal
 ## Bind an organization, a work and a host
 
 1. An operator installs Workshop, creates an organization and issues the manager's private binding. The manager can publish an authorized routing policy for a work.
-2. An NF administrator creates a work, branch, budget and Supervisor binding for each book. Activate its routing policy, then register the pipeline. Inspect role routing with `runtime_policy.py preview` and registered nodes with `run_supervisor.py --pipeline-status`.
-3. Set `NF_RUNTIME_PROFILES` on the NF execution service to its private provider configuration. Each `secret_ref` names a host environment variable. Replace the template's `model` placeholders with model names available to the account. A zero-budget registration supports status checks and route previews before authorizing inference.
+2. Set `NF_RUNTIME_PROFILES` on the NF execution service to its private provider configuration. Each `secret_ref` names a host environment variable. Replace the template's `model` placeholders with model names available to the account. A zero-budget registration supports status checks and route previews before authorizing inference.
+3. An NF administrator creates a work, branch, budget and Supervisor binding for each book. Activate its routing policy, then register the pipeline. Inspect role routing with `runtime_policy.py preview` and registered nodes with `run_supervisor.py --pipeline-status`.
 
 The two-book procedure includes the installation, registration and route activation commands. [Two-book operator walkthrough](../../reports/p6_readiness/README.md) · [Provider template](../../reports/p6_readiness/templates/providers.json) · [API reference](07-api-reference.md)
 

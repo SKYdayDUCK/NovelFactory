@@ -36,6 +36,8 @@ jobs:
         run: |
           mkdir -p ci-evidence
           uv run --no-sync python validation/validate_package.py --output ci-evidence/schema-validation.json 2>&1 | tee ci-evidence/schema-validation.log
+      - name: Check public interface registrations and example inputs
+        run: uv run --no-sync python scripts/export_public_api.py --check docs/reference/catalog.json --examples docs/reference/examples.json
       - name: Original standalone mechanisms
         run: uv run --no-sync python -m unittest discover -s experiments -p 'test_*.py' -v 2>&1 | tee ci-evidence/original-mechanisms.log
       - name: Python unit, contract and ASGI slow-body regression tests

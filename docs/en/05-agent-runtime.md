@@ -78,6 +78,6 @@ stateDiagram-v2
     UNKNOWN --> FAILED : Reconciled failure
 ```
 
-Token usage, provider receipts and the actual charge are recorded separately. A response with tokens but no price, a currency or amount outside the reservation, or a lost response after send can leave an Attempt `UNKNOWN`. Its reservation remains held and subsequent dispatch must reconcile the original Attempt first. Operators can inspect `.venv/bin/python scripts/p6_reconcile_invoice.py --help` to post a reviewed invoice line against that request. Synthetic adapter results, actual network calls and supplier charges have distinct evidence in tests, call audits and the spending ledger.
+Token usage, provider receipts and the actual charge are recorded separately. A response with tokens but no price, a currency or amount outside the reservation, or a lost response after send can leave an Attempt `UNKNOWN`. Its reservation stays on the ledger. The task cannot automatically resend that call. Other tasks can run under their own authorization and available quota. Operators can inspect `.venv/bin/python scripts/p6_reconcile_invoice.py --help` to post a reviewed invoice line against that request. Synthetic adapter results, actual network calls and supplier charges have distinct evidence in tests, call audits and the spending ledger.
 
 [Profiles and host protocol](../../agent_runtime/providers.py) · [Selector precedence](../../agent_runtime/routing.py) · [Rebinding](../../src/novel_factory/application/model_routing.py) · [Call accounting](../../src/novel_factory/application/agent_gateway.py)

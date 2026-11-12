@@ -52,7 +52,7 @@ sequenceDiagram
     W-->>E: Authorized progress fields
 ```
 
-`aw-reconcile` compares the two services’ records. Within an installation the same operation ID binds once. Reusing it with changed arguments conflicts. Managers and authors see the spending hold and remote task identity. A current sender or owner receives a narrower progress view.
+`aw-reconcile` compares the two services’ records. To retry `aw_delegate`, reuse the original caller-supplied operation key under the same installation, organization, sender and employment revision. A changed command conflicts. Use the returned server-generated operation UUID for `aw_progress_get` and NF receipt lookup. Managers and authors see the spending hold and remote task identity. A current sender or owner receives a narrower progress view.
 
 ## Skills and independent review
 

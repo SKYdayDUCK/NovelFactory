@@ -19,14 +19,14 @@ On a 250-item world with four revisions, median context compilation took **47.34
 | Resolve checked-in operator routing rules | 20.501 µs | 14.883 µs | P50, pure Python ABBA comparison |
 | Resolve 256 routing rules | 942.809 µs | 616.548 µs | P50; one-rule P99 rose from 70.706 to 79.319 µs |
 
-A sorted, deduplicated scope update runs in the existing transaction. The timer stops immediately before commit; each pair rolls back to the same proposal. A separate durable commit and replay checked the resulting receipt. Routing selects the highest-ranked match in one traversal. A separate validator experiment stopped at the first invalid field. This helped rejected payloads but slowed the single-subject successful compile. Copy avoidance also slowed complete compiles. Both experiments stayed out of the product.
+A sorted, deduplicated scope update runs in the existing transaction. The timer stops immediately before commit; each pair rolls back to the same proposal. A separate durable commit and replay checked the resulting receipt. Routing selects the best matching rule without sorting all the matches. A separate validator experiment stopped at the first invalid field. This helped rejected payloads but slowed the single-subject successful compile. Copy avoidance also slowed complete compiles. Both experiments stayed out of the product.
 
 ## Capacity and fairness
 
 | Original load | Observed outcome |
 | --- | --- |
 | 10, 50, 200 and 500 mixed | The recorded mixed business/capacity runs passed. One-task behavior is covered separately by task and recovery tests. |
-| 50 and 200 overload | Capacity unmet. At 200 the baseline reached 40.08 wire starts/s and the candidate 27.80/s against the original minimum of 950/s. Business recovery passed. The runs had different CPU contention. |
+| 50 and 200 overload | Capacity unmet. At 200, client call starts reached 41.01/s on the baseline and 35.39/s on the candidate against the original 950/s minimum. Separately, the transport started sending headers at 40.08/s and 27.80/s. Business recovery passed. The runs had different CPU contention. |
 | 500 steady reads | Two 600-second runs at 20 requests/s each completed 12,000/12,000. P50/P95/P99 were 199.65/1071.38/1519.10 ms and 130.08/649.23/996.15 ms. |
 | 1000 open arrival | Out of 5,000 attempts, the baseline had 1,319 valid replies, 3,627 HTTP 429s and 54 transport errors. The candidate had 1,434 valid replies, 3,534 HTTP 429s and 32 transport errors. Both missed the gate. |
 | Four books, one model slot | With three equal-sized tasks per book, all four finished three. Fixture endpoints exercised fixed, mixed and failed providers for one, two and four books. |

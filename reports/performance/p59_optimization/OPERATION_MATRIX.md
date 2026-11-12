@@ -37,3 +37,5 @@ Each authorized supervisor has a different work, budget and task. Endpoints list
 | 4 | failure | [2, 2] | 2 | 4 | 2.70 | 739.63 |
 
 See raw/multi-project.json for per-project results, waiting and peaks. The first one-poll-only attempt is under raw/attempted; it exposed legitimate quota deferral when more projects competed.
+
+The initial two delegation receipt lookups deliberately exercised refusals. A subsequent PG17/stdio run also measured successful handling: three lookups at 16.18, 13.22 and 10.91 ms observed NO_ATTEMPT, UNKNOWN and SETTLED. Two submissions completed in 45.48 and 24.14 ms. These measurements exclude MCP initialization and tool discovery. [Raw five calls](raw/subsystems/delegation-success.json)

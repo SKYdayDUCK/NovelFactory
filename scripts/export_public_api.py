@@ -5,6 +5,7 @@ Run from a source checkout with both services' development dependencies installe
 import argparse
 import ast
 import json
+import re
 from pathlib import Path
 import sys
 
@@ -36,6 +37,9 @@ def http_routes():
             path = route.args[0].value
             entry = {'transport': 'http', 'method': method, 'path': path,
                      'source': str(source), 'handler': handler.name}
+            parameters = re.findall(r'\{([^{}]+)\}', path)
+            if parameters:
+                entry['pathParameters'] = {param: {'type': 'string', 'format': 'uuid'} for param in parameters}
             if method == 'POST':
                 # Each handler validates its actual body or explicitly constructs a prepared request.
                 calls = [call for call in ast.walk(handler) if isinstance(call, ast.Call)
@@ -77,6 +81,11 @@ def validate_examples(path, entries):
         errors = list(validator.iter_errors(example['request']))
         if errors:
             raise ValueError(f"{name}: {errors[0].message}")
+        path_fields = entries[name].get('pathParameters', {})
+        bindings = example.get('pathBindings', {})
+        path_schema = {'type': 'object', 'properties': path_fields,
+                       'required': list(path_fields), 'additionalProperties': False}
+        Draft202012Validator(path_schema, format_checker=FormatChecker()).validate(bindings)
         test_path, test_name = example['test'].split('::', 1)
         source = (ROOT / test_path).read_text(encoding='utf-8')
         functions = {node.name for node in ast.walk(ast.parse(source))

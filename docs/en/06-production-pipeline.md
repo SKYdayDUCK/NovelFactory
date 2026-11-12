@@ -2,11 +2,11 @@
 
 [简体中文](../zh-CN/06-小说生产流水线.md) · [Agent Runtime](05-agent-runtime.md)
 
-A novel can draft the current volume, send completed chapters to a reader, and commission plans for later volumes at the same time. Each assignment has a task identity, input materials, budget and delivery requirements. Scene drafts, reading advice, future plans and authoritative world events are stored separately.
+While writers draft the current volume, reviewers can read completed chapters and planners can prepare later volumes. Each assignment has a task identity, input materials, budget and delivery requirements. Scene drafts, reading advice, future plans and authoritative world events are stored separately.
 
 ## Register a book
 
-Complete the database migrations in the [quick start](02-quick-start.md) and configure the NF database and object directory. Save the following as `book.json` in the repository root. It supplies the intent for two volumes, two scene goals for the current volume, and book-wide and per-call limits. Monetary amounts are strings. The sample amounts illustrate budget configuration. Actual prices come from the provider.
+Follow the [deployment guide](08-configuration-and-deployment.md) to migrate a persistent NF database and set `NF_DATABASE_URL` and `NF_OBJECT_ROOT`. Save the following as `book.json` in the repository root. It supplies the intent for two volumes, two scene goals for the current volume, and book-wide and per-call limits. Monetary amounts are strings. The sample amounts illustrate budget configuration. Actual prices come from the provider.
 
 ```json
 {
@@ -52,8 +52,8 @@ Ready chapter reviews take priority. When pending ready reviews plus active revi
 flowchart TD
     A["Future-volume candidate"] --> B["Predecessor continuity published"]
     B --> C{"Revalidate dependencies"}
-    C -->|Hold| D["READY_FOR_ADOPTION"]
-    C -->|Fail| E["REPLAN_REQUIRED"]
+    C -->|Satisfied| D["READY_FOR_ADOPTION"]
+    C -->|Invalidated| E["REPLAN_REQUIRED"]
     D --> F["Transfer a native DRAFT window"]
     E --> G["Authorize a local revision"]
     G --> A

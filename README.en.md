@@ -57,7 +57,7 @@ The verified run produced six scenes and 2,204 Unicode code points in 15 fixture
 | Capacity | Two ten-minute read runs with 500 logical agents completed 12,000 requests each. The 200-agent overload and 1000-agent open-arrival gates remain unmet. |
 | Editorial and billing evidence | The volume and provider fault scenarios used synthetic inputs. Human manuscript ratings and commercial invoices require separate evidence. |
 
-The services use Python, SQLAlchemy, PostgreSQL 17, optional Redis Streams, MCP over stdio and HTTP. The contributing guide covers repository conventions. Historical designs and acceptance records remain available at their original paths. [Contributing](AGENTS.md) · [Engineering history](reports/p6_readiness/README.md) · [Capacity issue #13](https://github.com/SKYdayDUCK/NovelFactory/issues/13) · [GitHub Actions](https://github.com/SKYdayDUCK/NovelFactory/actions)
+The services use Python, SQLAlchemy, PostgreSQL 17, optional Redis Streams, MCP over stdio, and a separate HTTP API. The contributing guide covers repository conventions. Historical designs and acceptance records remain available at their original paths. [Contributing](AGENTS.md) · [Engineering history](reports/p6_readiness/README.md) · [Capacity issue #13](https://github.com/SKYdayDUCK/NovelFactory/issues/13) · [GitHub Actions](https://github.com/SKYdayDUCK/NovelFactory/actions)
 
 ## License
 

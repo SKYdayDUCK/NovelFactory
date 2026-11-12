@@ -2,19 +2,19 @@
 
 [中文](../zh-CN/07-接口参考.md) · [Runtime](05-agent-runtime.md) · [Configuration](08-configuration-and-deployment.md)
 
-The checkout registers 34 NovelFactory tools, 34 Workshop tools, two installation delegation tools and 28 HTTP routes. A host advertises the subset available to its bound identity. A method appearing in this catalog grants no authority. Each entry links to the request schema, a test-backed request and result, and the implementation.
+The checkout registers 34 NovelFactory tools, 34 Workshop tools, two installation delegation tools and 28 HTTP routes. Use the tools advertised to the identity bound to your host session. Each entry links to the request schema, a test-backed request and result, and the implementation.
 
 ## Reading the entries
 
 Input fields with a trailing `?` are optional. Named types such as `WorldRef` refer to a schema definition. The linked definition supplies nested fields, limits, enumerations, defaults and conditional branches. A missing optional field follows the handler's behavior. Result fields show the JSON types observed in the linked example. A sample `null` describes that execution. Methods with multiple result forms list the conditions that select them. The example records identify their originating test. Fixture identifiers refer to the objects created by that test.
 
-The examples cover 20 direct HTTP routes and eight HTTP input mappings paired with results from the corresponding application service. The MCP examples include 62 service fixtures, four direct Workshop handlers and four NovelFactory application results. To construct a JSON-RPC call, put the example request in `params.arguments`. For HTTP, use it as the JSON body of a POST or substitute path parameters on GET.
+The examples cover 20 direct HTTP routes and eight HTTP input mappings paired with results from the corresponding application service. The MCP examples include 62 service fixtures, four direct Workshop handlers and four NovelFactory application results. To construct a JSON-RPC call, put the example request in `params.arguments`. For HTTP, use it as the JSON body of a POST and replace each UUID in the path on both GET and POST. The six examples with path parameters include the matching `pathBindings`.
 
 ```json
 {"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"nf_resume_project","arguments":{}}}
 ```
 
-Call after the host has initialized a bound MCP session. On success, inspect `structuredContent`. On a tool error, inspect `isError` and `structuredContent.error.code`. Common codes include `VIEW_DENIED`, `INVALID_ARGUMENT` and `SERVICE_UNAVAILABLE`. Workshop checks current employment and limits argument JSON to 32,768 UTF-8 bytes. A stale employee binding can yield `STALE_EMPLOYMENT`. The installation port checks enabled status, expiry, policy revision and live authority on each call.
+Call after the host has initialized a bound MCP session. On success, inspect `structuredContent`. An HTTP error object supplies `code`, `safe_message`, `retryable`, `request_id` and `recovery`. On a tool error, inspect `isError` and `structuredContent.error.code`. Common codes include `VIEW_DENIED`, `INVALID_ARGUMENT` and `SERVICE_UNAVAILABLE`. Workshop checks current employment and limits argument JSON to 32,768 UTF-8 bytes. A stale employee binding can yield `STALE_EMPLOYMENT`. The installation port checks enabled status, expiry, policy revision and live authority on each call.
 
 Use a bearer credential for authenticated HTTP endpoints. The default request limit is 262,144 bytes with a five-second body deadline. Error responses include a request ID. Authentication and scope failures map to 401 and 403, missing resources to 404, body size and media type to 413 and 415, schema errors to 422, and most state conflicts to 409. A request deadline can return 408. Admission and availability errors at 429 or 503 may supply `Retry-After`. Check the call's replay rules before trying again. [HTTP adapter](../../src/novel_factory/interfaces/http.py)
 
@@ -34,8 +34,8 @@ The Python application classes back these transports. The benchmark modules crea
 From a checkout with both services' development dependencies, inspect a registration or verify the catalog and its examples.
 
 ```bash
-python scripts/export_public_api.py --name nf_resume_project
-python scripts/export_public_api.py --check docs/reference/catalog.json --examples docs/reference/examples.json
+.venv/bin/python scripts/export_public_api.py --name nf_resume_project
+.venv/bin/python scripts/export_public_api.py --check docs/reference/catalog.json --examples docs/reference/examples.json
 ```
 
 ## NovelFactory MCP
@@ -50,7 +50,7 @@ Store a task candidate with a stable idempotency key.
 - **Retry** Retry with the original idempotency_key and payload. A matching receipt can be replayed under current authority; changing the payload conflicts.
 - **Errors** `IDEMPOTENCY_MISMATCH`
 
-[Registration](../reference/catalog.json#L1865) · [Request and result](../reference/examples.json#L2386) · [Handler](../../src/novel_factory/application/mcp_runtime.py#L367)
+[Registration](../reference/catalog.json#L1901) · [Request and result](../reference/examples.json#L2404) · [Handler](../../src/novel_factory/application/mcp_runtime.py#L367)
 
 ### `nf_change_point_request`
 
@@ -62,7 +62,7 @@ Record evidence for a bounded revision to the volume plan.
 - **Retry** Retry with the original idempotency_key and payload. A matching receipt can be replayed under current authority; changing the payload conflicts.
 - **Errors** `BRANCH_CHANGED`, `IDEMPOTENCY_MISMATCH`, `INVALID_EVIDENCE`, `NO_REPLAN_IMPACT`, `PLAN_SELECTION_CONFLICT`
 
-[Registration](../reference/catalog.json#L1890) · [Request and result](../reference/examples.json#L2402) · [Handler](../../src/novel_factory/application/rolling_plans.py#L148)
+[Registration](../reference/catalog.json#L1926) · [Request and result](../reference/examples.json#L2420) · [Handler](../../src/novel_factory/application/rolling_plans.py#L148)
 
 ### `nf_change_point_review`
 
@@ -74,7 +74,7 @@ Record an independent decision on the exact candidate and window.
 - **Retry** Retry with the original idempotency_key and payload. A matching receipt can be replayed under current authority; changing the payload conflicts.
 - **Errors** `HEAD_CONFLICT`, `IDEMPOTENCY_MISMATCH`
 
-[Registration](../reference/catalog.json#L2102) · [Request and result](../reference/examples.json#L2442) · [Handler](../../src/novel_factory/application/rolling_plans.py#L407)
+[Registration](../reference/catalog.json#L2138) · [Request and result](../reference/examples.json#L2460) · [Handler](../../src/novel_factory/application/rolling_plans.py#L407)
 
 ### `nf_context_get`
 
@@ -86,7 +86,7 @@ Read the bound task's authorized context.
 - **Retry** Repeat the read with the same arguments; authorization is checked on every call.
 - **Errors** common errors
 
-[Registration](../reference/catalog.json#L2206) · [Request and result](../reference/examples.json#L2471) · [Handler](../../src/novel_factory/application/mcp_runtime.py#L337)
+[Registration](../reference/catalog.json#L2242) · [Request and result](../reference/examples.json#L2489) · [Handler](../../src/novel_factory/application/mcp_runtime.py#L337)
 
 ### `nf_harness_agent_history`
 
@@ -94,11 +94,11 @@ Read the dynamic agent's authorized selection and lifecycle history.
 
 - **Access** Branch-bound control_operator with ADMIN; Creative Harness and dynamic_agents must be enabled.
 - **Input** `world_ref: object`, `instance_ref: object`
-- **Result** Returns the current state and epoch together with the instance’s events and revisions. `instance_ref: object`, `epoch: integer`, `state: string`, `revision_ref: null`, `events: array`, `revisions: array`
+- **Result** Returns the current state and epoch together with the instance’s events and revisions. `instance_ref: object`, `epoch: integer`, `state: string`, `revision_ref: object|null`, `events: array`, `revisions: array`
 - **Retry** Repeat the read with the same arguments; authorization is checked on every call.
 - **Errors** `DYNAMIC_VERSION_CONFLICT`
 
-[Registration](../reference/catalog.json#L2359) · [Request and result](../reference/examples.json#L2582) · [Handler](../../src/novel_factory/application/dynamic_agents.py#L628)
+[Registration](../reference/catalog.json#L2395) · [Request and result](../reference/examples.json#L2600) · [Handler](../../src/novel_factory/application/dynamic_agents.py#L628)
 
 ### `nf_harness_agent_register`
 
@@ -110,7 +110,7 @@ Register scoped profile and Skill text from a delegated source assignment.
 - **Retry** Retry with the original idempotency_key and payload. A matching receipt can be replayed under current authority; changing the payload conflicts.
 - **Errors** `DYNAMIC_INSTANCE_INACTIVE`, `DYNAMIC_VERSION_CONFLICT`, `FROZEN_SOURCE_MISMATCH`, `IDEMPOTENCY_MISMATCH`
 
-[Registration](../reference/catalog.json#L2421) · [Request and result](../reference/examples.json#L2634) · [Handler](../../src/novel_factory/application/dynamic_agents.py#L196)
+[Registration](../reference/catalog.json#L2457) · [Request and result](../reference/examples.json#L2652) · [Handler](../../src/novel_factory/application/dynamic_agents.py#L196)
 
 ### `nf_harness_agent_retire`
 
@@ -118,11 +118,11 @@ Exit or archive the scoped dynamic agent at its expected version.
 
 - **Access** Branch-bound control_operator with ADMIN; Creative Harness and dynamic_agents must be enabled.
 - **Input** `world_ref: object`, `instance_ref: object`, `action: EXIT|ARCHIVE`, `expected_epoch: integer`, `idempotency_key: string`
-- **Result** EXIT or ARCHIVE returns the resulting state and event after checking expected_epoch. `instance_ref: object`, `revision_ref: null`, `epoch: integer`, `state: string`, `event_ref: object`
+- **Result** EXIT or ARCHIVE returns the resulting state and event after checking expected_epoch. `instance_ref: object`, `revision_ref: null (both retirement actions)`, `epoch: integer`, `state: string`, `event_ref: object`
 - **Retry** Retry with the original idempotency_key and payload. A matching receipt can be replayed under current authority; changing the payload conflicts.
 - **Errors** `DYNAMIC_INSTANCE_INACTIVE`, `DYNAMIC_SELECTION_CONFLICT`, `IDEMPOTENCY_MISMATCH`
 
-[Registration](../reference/catalog.json#L2636) · [Request and result](../reference/examples.json#L2691) · [Handler](../../src/novel_factory/application/dynamic_agents.py#L583)
+[Registration](../reference/catalog.json#L2672) · [Request and result](../reference/examples.json#L2709) · [Handler](../../src/novel_factory/application/dynamic_agents.py#L583)
 
 ### `nf_harness_agent_select`
 
@@ -134,7 +134,7 @@ Select a registered revision for new assignments, including a historical revisio
 - **Retry** Retry with the original idempotency_key and payload. A matching receipt can be replayed under current authority; changing the payload conflicts.
 - **Errors** `DYNAMIC_INSTANCE_INACTIVE`, `DYNAMIC_SELECTION_CONFLICT`, `IDEMPOTENCY_MISMATCH`
 
-[Registration](../reference/catalog.json#L2716) · [Request and result](../reference/examples.json#L2725) · [Handler](../../src/novel_factory/application/dynamic_agents.py#L478)
+[Registration](../reference/catalog.json#L2752) · [Request and result](../reference/examples.json#L2743) · [Handler](../../src/novel_factory/application/dynamic_agents.py#L478)
 
 ### `nf_harness_instruction_case`
 
@@ -146,7 +146,7 @@ Describe the exact participants and artifacts for an independent registrar.
 - **Retry** Repeat the read with the same arguments; authorization is checked on every call.
 - **Errors** `INDEPENDENT_REVIEW_REQUIRED`
 
-[Registration](../reference/catalog.json#L2813) · [Request and result](../reference/examples.json#L2767) · [Handler](../../src/novel_factory/application/adaptive_promotion.py#L220)
+[Registration](../reference/catalog.json#L2849) · [Request and result](../reference/examples.json#L2785) · [Handler](../../src/novel_factory/application/adaptive_promotion.py#L220)
 
 ### `nf_harness_instruction_decide`
 
@@ -154,11 +154,11 @@ Decide whether to release independently reviewed instructions.
 
 - **Access** Branch-bound control_operator with ADMIN; Creative Harness and adaptive_instructions must be enabled. The publisher must match the evaluation and current independent opinion. Automatic release also requires a live policy and auto_promote.
 - **Input** `candidate_ref: object`, `engineering_report_ref: object`, `run_manifest_ref: object`, `world_ref: object`, `review_ref: object`, `action: APPROVE|REJECT`, `expected_epoch: integer`, `reason: string`, `valid_until: string`, `idempotency_key: string`, `route?: MANUAL|POLICY_AUTOMATIC`, `policy_ref?: object`
-- **Result** APPROVE can advance the selection. REJECT records the decision and returns the current selection, which can be null. `epoch: integer`, `action: string`, `decision_ref: object`, `selection_ref: object`
+- **Result** APPROVE can advance the selection. REJECT records the decision and returns the current selection, which can be null. `epoch: integer`, `action: string`, `decision_ref: object`, `selection_ref: object|null`
 - **Retry** Retry with the original idempotency_key and payload. A matching receipt can be replayed under current authority; changing the payload conflicts.
 - **Errors** `CAPACITY_LIMIT`, `IDEMPOTENCY_MISMATCH`, `INVALID_EVIDENCE`, `PROMOTION_NOT_AUTHORIZED`, `PROMOTION_REVOKED`, `SELECTION_CONFLICT`
 
-[Registration](../reference/catalog.json#L2938) · [Request and result](../reference/examples.json#L2854) · [Handler](../../src/novel_factory/application/adaptive_promotion.py#L707)
+[Registration](../reference/catalog.json#L2974) · [Request and result](../reference/examples.json#L2872) · [Handler](../../src/novel_factory/application/adaptive_promotion.py#L707)
 
 ### `nf_harness_instruction_evaluate`
 
@@ -170,7 +170,7 @@ Run every preregistered arm and retain outcomes for independent review.
 - **Retry** Retry with the original idempotency_key and payload. A matching receipt can be replayed under current authority; changing the payload conflicts.
 - **Errors** `ADAPTIVE_INSTRUCTIONS_DISABLED`, `EVALUATION_FREEZE_MISMATCH`, `IDEMPOTENCY_MISMATCH`, `INVALID_EVIDENCE`
 
-[Registration](../reference/catalog.json#L3130) · [Request and result](../reference/examples.json#L2904) · [Handler](../../src/novel_factory/application/adaptive_evaluation.py#L645)
+[Registration](../reference/catalog.json#L3166) · [Request and result](../reference/examples.json#L2922) · [Handler](../../src/novel_factory/application/adaptive_evaluation.py#L645)
 
 ### `nf_harness_instruction_evidence`
 
@@ -182,7 +182,7 @@ Read the assigned evaluation outcomes and scope.
 - **Retry** Repeat the read with the same arguments; authorization is checked on every call.
 - **Errors** `INDEPENDENT_REVIEW_REQUIRED`
 
-[Registration](../reference/catalog.json#L3198) · [Request and result](../reference/examples.json#L2945) · [Handler](../../src/novel_factory/application/adaptive_promotion.py#L297)
+[Registration](../reference/catalog.json#L3234) · [Request and result](../reference/examples.json#L2963) · [Handler](../../src/novel_factory/application/adaptive_promotion.py#L297)
 
 ### `nf_harness_instruction_monitor`
 
@@ -190,11 +190,11 @@ Read NF attempts and settlement for a task that froze a specific release.
 
 - **Access** Branch-bound control_operator with ADMIN; Creative Harness and adaptive_instructions must be enabled.
 - **Input** `world_ref: object`, `decision_ref: object`, `task_id: string`, `generation: integer`, `idempotency_key: string`
-- **Result** Persists one observation and returns attempts, known cost, unsettled count, observed time and monitor_ref. `monitor_ref: object`, `decision_ref: object`, `selection_ref: object`, `task_id: string`, `generation: integer`, `task_state: string`, `result_id: string`, `observed_at: string`, `attempts: array`, `known_cost: string`, `unsettled_attempts: integer`, `literary_status: string`
+- **Result** Persists one observation and returns attempts, known cost, unsettled count, observed time and monitor_ref. `monitor_ref: object`, `decision_ref: object`, `selection_ref: object`, `task_id: string`, `generation: integer`, `task_state: string`, `result_id: string|null`, `observed_at: string`, `attempts: array`, `known_cost: string`, `unsettled_attempts: integer`, `literary_status: string`
 - **Retry** Retry with the original idempotency_key and payload. A matching receipt can be replayed under current authority; changing the payload conflicts.
 - **Errors** `IDEMPOTENCY_MISMATCH`, `INVALID_EVIDENCE`, `STALE_GENERATION`
 
-[Registration](../reference/catalog.json#L3283) · [Request and result](../reference/examples.json#L3107) · [Handler](../../src/novel_factory/application/adaptive_promotion.py#L1064)
+[Registration](../reference/catalog.json#L3319) · [Request and result](../reference/examples.json#L3125) · [Handler](../../src/novel_factory/application/adaptive_promotion.py#L1064)
 
 ### `nf_harness_instruction_policy`
 
@@ -206,7 +206,7 @@ Authorize a scoped publisher under an expiring automatic promotion policy.
 - **Retry** Retry with the original idempotency_key and payload. A matching receipt can be replayed under current authority; changing the payload conflicts.
 - **Errors** `IDEMPOTENCY_MISMATCH`
 
-[Registration](../reference/catalog.json#L3361) · [Request and result](../reference/examples.json#L3159) · [Handler](../../src/novel_factory/application/adaptive_promotion.py#L496)
+[Registration](../reference/catalog.json#L3397) · [Request and result](../reference/examples.json#L3177) · [Handler](../../src/novel_factory/application/adaptive_promotion.py#L496)
 
 ### `nf_harness_instruction_propose`
 
@@ -218,7 +218,7 @@ Freeze a scoped instruction and comparison using signed manuscript reviews.
 - **Retry** Retry with the original idempotency_key and payload. A matching receipt can be replayed under current authority; changing the payload conflicts.
 - **Errors** `CAPACITY_LIMIT`, `IDEMPOTENCY_MISMATCH`, `INVALID_EVIDENCE`
 
-[Registration](../reference/catalog.json#L3456) · [Request and result](../reference/examples.json#L3183) · [Handler](../../src/novel_factory/application/adaptive_instructions.py#L870)
+[Registration](../reference/catalog.json#L3492) · [Request and result](../reference/examples.json#L3201) · [Handler](../../src/novel_factory/application/adaptive_instructions.py#L870)
 
 ### `nf_harness_instruction_review`
 
@@ -230,7 +230,7 @@ Record an independent opinion on the assigned experiment.
 - **Retry** Retry with the original idempotency_key and payload. A matching receipt can be replayed under current authority; changing the payload conflicts.
 - **Errors** `IDEMPOTENCY_MISMATCH`, `INDEPENDENT_REVIEW_REQUIRED`, `PROMOTION_REVOKED`
 
-[Registration](../reference/catalog.json#L3688) · [Request and result](../reference/examples.json#L3261) · [Handler](../../src/novel_factory/application/adaptive_promotion.py#L359)
+[Registration](../reference/catalog.json#L3724) · [Request and result](../reference/examples.json#L3279) · [Handler](../../src/novel_factory/application/adaptive_promotion.py#L359)
 
 ### `nf_harness_instruction_revoke_policy`
 
@@ -242,7 +242,7 @@ Withdraw the scoped authority for subsequent automatic releases.
 - **Retry** Retry with the original idempotency_key and payload. A matching receipt can be replayed under current authority; changing the payload conflicts.
 - **Errors** `IDEMPOTENCY_MISMATCH`
 
-[Registration](../reference/catalog.json#L3802) · [Request and result](../reference/examples.json#L3295) · [Handler](../../src/novel_factory/application/adaptive_promotion.py#L608)
+[Registration](../reference/catalog.json#L3838) · [Request and result](../reference/examples.json#L3313) · [Handler](../../src/novel_factory/application/adaptive_promotion.py#L608)
 
 ### `nf_harness_instruction_rollback`
 
@@ -250,11 +250,11 @@ Restore the previous scoped selection at the expected release epoch.
 
 - **Access** Branch-bound control_operator with ADMIN; Creative Harness and adaptive_instructions must be enabled. The publisher must satisfy the original decision’s rollback authority.
 - **Input** `world_ref: object`, `decision_ref: object`, `expected_epoch: integer`, `reason: string`, `review_ref?: object`, `idempotency_key: string`
-- **Result** Restores the preceding selection and advances its epoch. restored_selection_ref can be null if there was no previous selection. `decision_ref: object`, `restored_selection_ref: null`, `selection_ref: null`, `epoch: integer`, `action: string`
+- **Result** Restores the preceding selection and advances its epoch. restored_selection_ref can be null if there was no previous selection. `decision_ref: object`, `restored_selection_ref: object|null`, `selection_ref: object|null`, `epoch: integer`, `action: string`
 - **Retry** Retry with the original idempotency_key and payload. A matching receipt can be replayed under current authority; changing the payload conflicts.
 - **Errors** `IDEMPOTENCY_MISMATCH`, `PROMOTION_NOT_AUTHORIZED`, `SELECTION_CONFLICT`
 
-[Registration](../reference/catalog.json#L3876) · [Request and result](../reference/examples.json#L3325) · [Handler](../../src/novel_factory/application/adaptive_promotion.py#L932)
+[Registration](../reference/catalog.json#L3912) · [Request and result](../reference/examples.json#L3343) · [Handler](../../src/novel_factory/application/adaptive_promotion.py#L932)
 
 ### `nf_harness_metrics`
 
@@ -266,7 +266,7 @@ Read measured creative workflow activity in the bound work, branch and time wind
 - **Retry** Repeat the read with the same arguments; authorization is checked on every call.
 - **Errors** common errors
 
-[Registration](../reference/catalog.json#L3978) · [Request and result](../reference/examples.json#L3355) · [Handler](../../src/novel_factory/application/creative_metrics.py#L317)
+[Registration](../reference/catalog.json#L4014) · [Request and result](../reference/examples.json#L3373) · [Handler](../../src/novel_factory/application/creative_metrics.py#L317)
 
 ### `nf_harness_plan_decide`
 
@@ -274,11 +274,11 @@ Submit a plan decision to the existing adoption service, or decline every altern
 
 - **Access** A control_operator with ADMIN on the bound work and branch; Creative Harness must be enabled. Selecting an option also requires APPROVE and a principal independent of the planner.
 - **Input** `task_id: string`, `generation: integer`, `candidate_ref: object`, `option_id: string|null`, `rolling_review_ref?: object|null`, `idempotency_key: string`
-- **Result** A selected option requires independent approval authority. Adoption returns ADOPTED. A decline returns DECLINED with null plan_ref and adoption. `status: string`, `plan_ref: null`, `candidate_ref: object`, `option_id: null`, `adoption: null`
+- **Result** A selected option requires independent approval authority. Adoption returns ADOPTED. A decline returns DECLINED with null plan_ref and adoption. `status: string`, `plan_ref: object|null`, `candidate_ref: object`, `option_id: string|null`, `adoption: object|null`
 - **Retry** Retry with the original idempotency_key and payload. A matching receipt can be replayed under current authority; changing the payload conflicts.
 - **Errors** `IDEMPOTENCY_MISMATCH`, `INVALID_EVIDENCE`, `PLAN_SELECTION_CONFLICT`
 
-[Registration](../reference/catalog.json#L4029) · [Request and result](../reference/examples.json#L3584) · [Handler](../../src/novel_factory/application/creative_planning.py#L265)
+[Registration](../reference/catalog.json#L4065) · [Request and result](../reference/examples.json#L3602) · [Handler](../../src/novel_factory/application/creative_planning.py#L265)
 
 ### `nf_harness_plan_propose`
 
@@ -290,7 +290,7 @@ Derive bounded conditional alternatives from the assigned plan.
 - **Retry** Retry with the original idempotency_key and payload. A matching receipt can be replayed under current authority; changing the payload conflicts.
 - **Errors** `CAPACITY_LIMIT`, `IDEMPOTENCY_MISMATCH`
 
-[Registration](../reference/catalog.json#L4124) · [Request and result](../reference/examples.json#L3611) · [Handler](../../src/novel_factory/application/creative_planning.py#L208)
+[Registration](../reference/catalog.json#L4160) · [Request and result](../reference/examples.json#L3629) · [Handler](../../src/novel_factory/application/creative_planning.py#L208)
 
 ### `nf_harness_review_decide`
 
@@ -298,11 +298,11 @@ Record an authorized editorial response to the cited draft and review.
 
 - **Access** A control_operator with ADMIN on the bound work and branch; Creative Harness must be enabled. The editor also needs APPROVE and must be independent of the reviewer and producers.
 - **Input** `task_id: string`, `generation: integer`, `report_ref: object`, `action: RETURN|RETAIN|ACCEPT_REVISION|DEFER|WITHDRAW`, `reason: string`, `native_decision?: object`, `idempotency_key: string`
-- **Result** Final editorial actions require independence from authors and reviewers, a native decision and current proof. Non-final actions can have null native_decision_ref. `action: string`, `decision_ref: object`, `native_decision_ref: null`
+- **Result** Final editorial actions require independence from authors and reviewers, a native decision and current proof. Non-final actions can have null native_decision_ref. `action: string`, `decision_ref: object`, `native_decision_ref: object|null`
 - **Retry** Retry with the original idempotency_key and payload. A matching receipt can be replayed under current authority; changing the payload conflicts.
 - **Errors** `EDITORIAL_BINDING_MISMATCH`, `EDITORIAL_DECISION_REQUIRED`, `EDIT_CONFLICT`, `IDEMPOTENCY_MISMATCH`, `INDEPENDENT_REVIEW_REQUIRED`, `REVIEW_REQUIRED`, `REWORK_LIMIT`
 
-[Registration](../reference/catalog.json#L4244) · [Request and result](../reference/examples.json#L3760) · [Handler](../../src/novel_factory/application/creative_review.py#L429)
+[Registration](../reference/catalog.json#L4280) · [Request and result](../reference/examples.json#L3778) · [Handler](../../src/novel_factory/application/creative_review.py#L429)
 
 ### `nf_harness_review_independence`
 
@@ -314,7 +314,7 @@ Verify the named review assignment and manuscript against trusted subject record
 - **Retry** Rechecks live independence. The same binding, evidence digest and issuer epoch reuse the existing NF proof artifact.
 - **Errors** `INDEPENDENT_REVIEW_REQUIRED`
 
-[Registration](../reference/catalog.json#L5176) · [Request and result](../reference/examples.json#L3785) · [Handler](../../src/novel_factory/application/review_independence.py#L249)
+[Registration](../reference/catalog.json#L5212) · [Request and result](../reference/examples.json#L3803) · [Handler](../../src/novel_factory/application/review_independence.py#L249)
 
 ### `nf_harness_review_read`
 
@@ -326,7 +326,7 @@ Read the exact assigned manuscript and obtain a coverage receipt.
 - **Retry** The same key and request redeliver the authorized text and reuse the original coverage_ref. Each text delivery has its own delivery record.
 - **Errors** `IDEMPOTENCY_MISMATCH`, `INVALID_READING_COVERAGE`
 
-[Registration](../reference/catalog.json#L5223) · [Request and result](../reference/examples.json#L3805) · [Handler](../../src/novel_factory/application/creative_review.py#L176)
+[Registration](../reference/catalog.json#L5259) · [Request and result](../reference/examples.json#L3823) · [Handler](../../src/novel_factory/application/creative_review.py#L176)
 
 ### `nf_harness_review_submit`
 
@@ -338,7 +338,7 @@ Report precisely located literary findings for the assigned manuscript.
 - **Retry** Retry with the original idempotency_key and payload. A matching receipt can be replayed under current authority; changing the payload conflicts.
 - **Errors** `BUDGET_EXCEEDED`, `CAPACITY_LIMIT`, `IDEMPOTENCY_MISMATCH`, `INDEPENDENT_REVIEW_REQUIRED`, `INVALID_EVIDENCE`, `READING_COVERAGE_INCOMPLETE`, `REVIEW_REVOKED`
 
-[Registration](../reference/catalog.json#L5266) · [Request and result](../reference/examples.json#L3856) · [Handler](../../src/novel_factory/application/creative_review.py#L187)
+[Registration](../reference/catalog.json#L5302) · [Request and result](../reference/examples.json#L3874) · [Handler](../../src/novel_factory/application/creative_review.py#L187)
 
 ### `nf_harness_review_withdraw`
 
@@ -350,7 +350,7 @@ Withdraw a review written by this assigned reviewer.
 - **Retry** Retry with the original idempotency_key and payload. A matching receipt can be replayed under current authority; changing the payload conflicts.
 - **Errors** `IDEMPOTENCY_MISMATCH`, `REVIEW_REVOKED`
 
-[Registration](../reference/catalog.json#L5900) · [Request and result](../reference/examples.json#L4011) · [Handler](../../src/novel_factory/application/creative_review.py#L429)
+[Registration](../reference/catalog.json#L5936) · [Request and result](../reference/examples.json#L4029) · [Handler](../../src/novel_factory/application/creative_review.py#L429)
 
 ### `nf_harness_revise`
 
@@ -362,7 +362,7 @@ Revise only the assigned finding spans and retain the source draft.
 - **Retry** Retry with the original idempotency_key and payload. A matching receipt can be replayed under current authority; changing the payload conflicts.
 - **Errors** `EDITORIAL_NO_PROGRESS`, `IDEMPOTENCY_MISMATCH`, `INVALID_EVIDENCE`
 
-[Registration](../reference/catalog.json#L5949) · [Request and result](../reference/examples.json#L4033) · [Handler](../../src/novel_factory/application/creative_review.py#L518)
+[Registration](../reference/catalog.json#L5985) · [Request and result](../reference/examples.json#L4051) · [Handler](../../src/novel_factory/application/creative_review.py#L518)
 
 ### `nf_harness_revision_brief`
 
@@ -374,7 +374,7 @@ Read the returned author-facing findings for the assigned manuscript.
 - **Retry** Repeat the read with the same arguments; authorization is checked on every call.
 - **Errors** common errors
 
-[Registration](../reference/catalog.json#L6040) · [Request and result](../reference/examples.json#L4069) · [Handler](../../src/novel_factory/application/creative_revision_brief.py#L88)
+[Registration](../reference/catalog.json#L6076) · [Request and result](../reference/examples.json#L4087) · [Handler](../../src/novel_factory/application/creative_revision_brief.py#L88)
 
 ### `nf_harness_simulate`
 
@@ -386,7 +386,7 @@ Evaluate a frozen candidate using enrolled actors' fixed knowledge cuts.
 - **Retry** Retry with the original idempotency_key and payload. A matching receipt can be replayed under current authority; changing the payload conflicts.
 - **Errors** `IDEMPOTENCY_MISMATCH`, `TASK_REBIND_REQUIRED`
 
-[Registration](../reference/catalog.json#L6077) · [Request and result](../reference/examples.json#L4117) · [Handler](../../src/novel_factory/application/creative_simulation.py#L314)
+[Registration](../reference/catalog.json#L6113) · [Request and result](../reference/examples.json#L4135) · [Handler](../../src/novel_factory/application/creative_simulation.py#L314)
 
 ### `nf_project_status`
 
@@ -398,7 +398,7 @@ Read task counts for the configured project branch.
 - **Retry** Repeat the read with the same arguments; authorization is checked on every call.
 - **Errors** common errors
 
-[Registration](../reference/catalog.json#L6173) · [Request and result](../reference/examples.json#L4276) · [Handler](../../src/novel_factory/orchestration/workflow.py#L147)
+[Registration](../reference/catalog.json#L6209) · [Request and result](../reference/examples.json#L4294) · [Handler](../../src/novel_factory/orchestration/workflow.py#L147)
 
 ### `nf_query_batch`
 
@@ -410,7 +410,7 @@ Read selected state values at this task's bound time and knowledge cut.
 - **Retry** Repeatable. Each delivered successful lookup records a semantic dependency for the task generation.
 - **Errors** `CAPACITY_LIMIT`
 
-[Registration](../reference/catalog.json#L6184) · [Request and result](../reference/examples.json#L4294) · [Handler](../../src/novel_factory/application/mcp_runtime.py#L343)
+[Registration](../reference/catalog.json#L6220) · [Request and result](../reference/examples.json#L4312) · [Handler](../../src/novel_factory/application/mcp_runtime.py#L343)
 
 ### `nf_resume_project`
 
@@ -422,7 +422,7 @@ Recover eligible work and wake satisfied waits in the configured branch.
 - **Retry** Repeat to process currently eligible or newly expired work. Counts describe that pass; there is no caller-supplied idempotency key.
 - **Errors** common errors
 
-[Registration](../reference/catalog.json#L6222) · [Request and result](../reference/examples.json#L4347) · [Handler](../../src/novel_factory/orchestration/workflow.py#L223)
+[Registration](../reference/catalog.json#L6258) · [Request and result](../reference/examples.json#L4365) · [Handler](../../src/novel_factory/orchestration/workflow.py#L223)
 
 ### `nf_rolling_window_submit`
 
@@ -434,7 +434,7 @@ Submit a bounded future window for independent review.
 - **Retry** Retry with the original idempotency_key and payload. A matching receipt can be replayed under current authority; changing the payload conflicts.
 - **Errors** `HEAD_CONFLICT`, `IDEMPOTENCY_MISMATCH`, `WINDOW_CONFLICT`
 
-[Registration](../reference/catalog.json#L6233) · [Request and result](../reference/examples.json#L4369) · [Handler](../../src/novel_factory/application/rolling_plans.py#L280)
+[Registration](../reference/catalog.json#L6269) · [Request and result](../reference/examples.json#L4387) · [Handler](../../src/novel_factory/application/rolling_plans.py#L280)
 
 ### `nf_task_get`
 
@@ -446,7 +446,7 @@ Read the bound task's current execution identity.
 - **Retry** Repeat the read with the same arguments; authorization is checked on every call.
 - **Errors** common errors
 
-[Registration](../reference/catalog.json#L6280) · [Request and result](../reference/examples.json#L4446) · [Handler](../../src/novel_factory/application/mcp_runtime.py#L330)
+[Registration](../reference/catalog.json#L6316) · [Request and result](../reference/examples.json#L4464) · [Handler](../../src/novel_factory/application/mcp_runtime.py#L330)
 
 ## Workshop MCP
 
@@ -460,7 +460,7 @@ Negotiate this connection's organization protocol.
 - **Retry** Repeat the read with the same arguments; authorization is checked on every call.
 - **Errors** `PROTOCOL_UNSUPPORTED`
 
-[Registration](../reference/catalog.json#L276) · [Request and result](../reference/examples.json#L1556) · [Handler](../../workshop/src/agent_workshop/server.py#L21)
+[Registration](../reference/catalog.json#L312) · [Request and result](../reference/examples.json#L1574) · [Handler](../../workshop/src/agent_workshop/server.py#L21)
 
 ### `aw_delegate`
 
@@ -469,10 +469,10 @@ Reserve organization budget and request a provisioned NF task slot.
 - **Access** Current employee with a delegation route matching slot, recipient, installation and scope.
 - **Input** `operation_id: string`, `slot_id: string`, `max_amount: string`, `token_limit: integer`
 - **Result** A new delegation returns REQUESTED. A replay can report a later state. `operation_id: string`, `state: string`
-- **Retry** Replay the same operation_id, slot and arguments to read the current delegation state without a second budget hold.
+- **Retry** Reuse the caller’s operation_id and arguments under the same installation, organization, sender and employment revision. Use the returned server-generated operation_id to query progress.
 - **Errors** `ACTIVE_DELEGATION_LIMIT`, `BUDGET_EXCEEDED`, `BUDGET_UNCONFIGURED`, `IDEMPOTENCY_MISMATCH`, `REVIEW_REQUEST_REQUIRED`, `SLOT_ALREADY_ASSIGNED`
 
-[Registration](../reference/catalog.json#L295) · [Request and result](../reference/examples.json#L1574) · [Handler](../../workshop/src/agent_workshop/delegation.py#L43)
+[Registration](../reference/catalog.json#L331) · [Request and result](../reference/examples.json#L1592) · [Handler](../../workshop/src/agent_workshop/delegation.py#L43)
 
 ### `aw_delivery_ack`
 
@@ -484,7 +484,7 @@ Acknowledge an addressed message.
 - **Retry** Acknowledge by message_id. An authorized replay preserves the first acknowledgement timestamp.
 - **Errors** `DELIVERY_EXPIRED`, `DELIVERY_UNAVAILABLE`, `ROUTE_REVOKED`
 
-[Registration](../reference/catalog.json#L330) · [Request and result](../reference/examples.json#L1588) · [Handler](../../workshop/src/agent_workshop/messaging.py#L456)
+[Registration](../reference/catalog.json#L366) · [Request and result](../reference/examples.json#L1606) · [Handler](../../workshop/src/agent_workshop/messaging.py#L456)
 
 ### `aw_dynamic_skill_attest`
 
@@ -492,11 +492,11 @@ Verify the current employee and creative Skill and optionally freeze it to the e
 
 - **Access** Current employee meeting the skill binding’s live owner, mode, scope and sharing policy checks. The NF role must match the Workshop employee. Task attestation additionally verifies the installation, delegation, slot and receipt.
 - **Input** `binding_id: string`, `nf: object`, `task?: object`, `freeze_task: boolean`
-- **Result** Without a task the result has task=null. With a task it verifies the delegation receipt; successful optional freezing sets frozen=true. `binding: object`, `nf: object`, `task: null`, `frozen: boolean`, `skill_epoch: integer`, `expires_at: string`, `skill_mode: string`
+- **Result** Without a task the result has task=null. With a task it verifies the delegation receipt; successful optional freezing sets frozen=true. `binding: object`, `nf: object`, `task: object|null`, `frozen: boolean`, `skill_epoch: integer`, `expires_at: string`, `skill_mode: string`
 - **Retry** Re-attests on every call. With freeze_task=true a task is required and its skill binding is frozen.
 - **Errors** `DYNAMIC_SKILL_DENIED`, `SKILL_DENIED`, `TASK_SKILL_ALREADY_FROZEN`
 
-[Registration](../reference/catalog.json#L349) · [Request and result](../reference/examples.json#L1601) · [Handler](../../workshop/src/agent_workshop/dynamic_skills.py#L40)
+[Registration](../reference/catalog.json#L385) · [Request and result](../reference/examples.json#L1619) · [Handler](../../workshop/src/agent_workshop/dynamic_skills.py#L40)
 
 ### `aw_end`
 
@@ -508,7 +508,7 @@ End an employee using organization revision CAS.
 - **Retry** Retry with the original operation_id and arguments under a still-authorized session. Reusing the ID with different arguments conflicts.
 - **Errors** `IDEMPOTENCY_MISMATCH`, `INVALID_EMPLOYMENT_TRANSITION`, `STALE_ORG_REVISION`
 
-[Registration](../reference/catalog.json#L461) · [Request and result](../reference/examples.json#L1647) · [Handler](../../workshop/src/agent_workshop/organization.py#L280)
+[Registration](../reference/catalog.json#L497) · [Request and result](../reference/examples.json#L1665) · [Handler](../../workshop/src/agent_workshop/organization.py#L280)
 
 ### `aw_handoff`
 
@@ -520,7 +520,7 @@ Transfer organization follow-up responsibility. The NF attempt keeps its identit
 - **Retry** Use the same operation_id, handoff_id and recipient. A different recipient conflicts; retries recheck the route.
 - **Errors** `IDEMPOTENCY_MISMATCH`
 
-[Registration](../reference/catalog.json#L490) · [Request and result](../reference/examples.json#L1662) · [Handler](../../workshop/src/agent_workshop/delegation.py#L141)
+[Registration](../reference/catalog.json#L526) · [Request and result](../reference/examples.json#L1680) · [Handler](../../workshop/src/agent_workshop/delegation.py#L141)
 
 ### `aw_hire`
 
@@ -532,7 +532,7 @@ Hire an employee using organization revision CAS.
 - **Retry** Retry with the original operation_id and arguments under a still-authorized session. Reusing the ID with different arguments conflicts.
 - **Errors** `EMPLOYEE_ALREADY_REGISTERED`, `IDEMPOTENCY_MISMATCH`, `INCOMPATIBLE_ROLE`, `INVALID_DISPLAY_NAME`, `INVALID_SUPERVISOR`, `ROSTER_LIMIT_EXCEEDED`, `ROSTER_SCOPE_DENIED`, `SLOT_OCCUPIED`, `STALE_ORG_REVISION`
 
-[Registration](../reference/catalog.json#L519) · [Request and result](../reference/examples.json#L1676) · [Handler](../../workshop/src/agent_workshop/organization.py#L280)
+[Registration](../reference/catalog.json#L555) · [Request and result](../reference/examples.json#L1694) · [Handler](../../workshop/src/agent_workshop/organization.py#L280)
 
 ### `aw_history_get`
 
@@ -540,11 +540,11 @@ Read a fixed cut of organization history within the live audience grant.
 
 - **Access** Current organization member and employment revision; reads are scoped to the caller’s audience.
 - **Input** `cursor?: string`, `limit?: integer`
-- **Result** The first page pins source_cut. Without a watermark, returns zero, an empty event list and null cursor. Subsequent pages use this audience’s cursor. `source_cut: integer`, `events: array`, `next_cursor: null`
+- **Result** The first page pins source_cut. Without a watermark, returns zero, an empty event list and null cursor. Subsequent pages use this audience’s cursor. `source_cut: integer`, `events: array`, `next_cursor: string|null`
 - **Retry** Repeat the read with the same arguments; authorization is checked on every call.
 - **Errors** `INVALID_CURSOR`
 
-[Registration](../reference/catalog.json#L586) · [Request and result](../reference/examples.json#L1694) · [Handler](../../workshop/src/agent_workshop/manager.py#L23)
+[Registration](../reference/catalog.json#L622) · [Request and result](../reference/examples.json#L1712) · [Handler](../../workshop/src/agent_workshop/manager.py#L23)
 
 ### `aw_mailbox_get`
 
@@ -556,7 +556,7 @@ Resume the authenticated employee's mailbox after a sequence.
 - **Retry** Repeat the read with the same arguments; authorization is checked on every call.
 - **Errors** common errors
 
-[Registration](../reference/catalog.json#L608) · [Request and result](../reference/examples.json#L1754) · [Handler](../../workshop/src/agent_workshop/messaging.py#L471)
+[Registration](../reference/catalog.json#L644) · [Request and result](../reference/examples.json#L1772) · [Handler](../../workshop/src/agent_workshop/messaging.py#L471)
 
 ### `aw_message_body_get`
 
@@ -568,7 +568,7 @@ Read an addressed body under current route authorization.
 - **Retry** Repeat the read with the same arguments; authorization is checked on every call.
 - **Errors** `BODY_DENIED`, `DELIVERY_EXPIRED`, `DELIVERY_UNAVAILABLE`, `ROUTE_REVOKED`
 
-[Registration](../reference/catalog.json#L630) · [Request and result](../reference/examples.json#L1763) · [Handler](../../workshop/src/agent_workshop/messaging.py#L438)
+[Registration](../reference/catalog.json#L666) · [Request and result](../reference/examples.json#L1781) · [Handler](../../workshop/src/agent_workshop/messaging.py#L438)
 
 ### `aw_message_body_put`
 
@@ -580,7 +580,7 @@ Register a private body addressed to a recipient and current tenure.
 - **Retry** Retry with the original operation_id and arguments under a still-authorized session. Reusing the ID with different arguments conflicts.
 - **Errors** `IDEMPOTENCY_MISMATCH`, `INVALID_BODY`, `ROUTE_DENIED`
 
-[Registration](../reference/catalog.json#L649) · [Request and result](../reference/examples.json#L1773) · [Handler](../../workshop/src/agent_workshop/messaging.py#L148)
+[Registration](../reference/catalog.json#L685) · [Request and result](../reference/examples.json#L1791) · [Handler](../../workshop/src/agent_workshop/messaging.py#L148)
 
 ### `aw_message_send`
 
@@ -592,7 +592,7 @@ Send one addressed message over a permitted direction and message kind.
 - **Retry** Retry with the original operation_id and arguments under a still-authorized session. Reusing the ID with different arguments conflicts.
 - **Errors** `BODY_DENIED`, `CAUSATION_DENIED`, `IDEMPOTENCY_MISMATCH`, `INCIDENT_RATE_LIMIT`, `INVALID_INCIDENT`, `ROUTE_DENIED`, `ROUTE_HOP_LIMIT`, `SENDER_BINDING_UNVERIFIED`, `STALE_ORG_REVISION`
 
-[Registration](../reference/catalog.json#L684) · [Request and result](../reference/examples.json#L1786) · [Handler](../../workshop/src/agent_workshop/messaging.py#L268)
+[Registration](../reference/catalog.json#L720) · [Request and result](../reference/examples.json#L1804) · [Handler](../../workshop/src/agent_workshop/messaging.py#L268)
 
 ### `aw_model_policy_get`
 
@@ -604,7 +604,7 @@ Export the current manager-approved model policy for this branch.
 - **Retry** Repeat the read with the same arguments; authorization is checked on every call.
 - **Errors** `POLICY_UNAVAILABLE`
 
-[Registration](../reference/catalog.json#L764) · [Request and result](../reference/examples.json#L1803) · [Handler](../../workshop/src/agent_workshop/model_policies.py#L48)
+[Registration](../reference/catalog.json#L800) · [Request and result](../reference/examples.json#L1821) · [Handler](../../workshop/src/agent_workshop/model_policies.py#L48)
 
 ### `aw_model_policy_publish`
 
@@ -616,7 +616,7 @@ Publish a scoped policy revision for authorized NF adoption.
 - **Retry** Identical rules with the immediately preceding expected_revision replay. Read the current policy before publishing after intervening revisions.
 - **Errors** `INVALID_ROUTING_RULES`, `STALE_REVISION`
 
-[Registration](../reference/catalog.json#L788) · [Request and result](../reference/examples.json#L1825) · [Handler](../../workshop/src/agent_workshop/model_policies.py#L29)
+[Registration](../reference/catalog.json#L824) · [Request and result](../reference/examples.json#L1843) · [Handler](../../workshop/src/agent_workshop/model_policies.py#L29)
 
 ### `aw_preset_apply`
 
@@ -624,11 +624,11 @@ Apply a matching preview at the current organization revision.
 
 - **Access** Current workshop_manager with a live employee session in the organization.
 - **Input** `preset: string`, `operation_id: string`, `expected_revision: integer`, `preview_sha: string`
-- **Result** An already active preset returns only revision and preset. A switch also reports added, suspended and reactivated entries. `revision: integer`, `preset: string`, `added: array`, `suspended: array`, `reactivated: array`
+- **Result** An already active preset returns only revision and preset. A switch also reports added, suspended and reactivated entries. `revision: integer`, `preset: string`, `added: array (switch)`, `suspended: array (switch)`, `reactivated: array (switch)`
 - **Retry** Retry with the original operation_id and arguments under a still-authorized session. Reusing the ID with different arguments conflicts.
 - **Errors** `IDEMPOTENCY_MISMATCH`, `MANAGER_REQUIRED`, `PRESET_CONFLICT`, `STALE_PREVIEW`
 
-[Registration](../reference/catalog.json#L992) · [Request and result](../reference/examples.json#L1855) · [Handler](../../workshop/src/agent_workshop/presets.py#L115)
+[Registration](../reference/catalog.json#L1028) · [Request and result](../reference/examples.json#L1873) · [Handler](../../workshop/src/agent_workshop/presets.py#L115)
 
 ### `aw_preset_preview`
 
@@ -640,7 +640,7 @@ Preview roster, tenure and supervision changes.
 - **Retry** Repeat the read with the same arguments; authorization is checked on every call.
 - **Errors** common errors
 
-[Registration](../reference/catalog.json#L1031) · [Request and result](../reference/examples.json#L1876) · [Handler](../../workshop/src/agent_workshop/presets.py#L110)
+[Registration](../reference/catalog.json#L1067) · [Request and result](../reference/examples.json#L1894) · [Handler](../../workshop/src/agent_workshop/presets.py#L110)
 
 ### `aw_progress_get`
 
@@ -648,11 +648,11 @@ Read an authorized scene or role delegation and its latest NF receipt.
 
 - **Access** A workshop_manager or author on this installation, or the delegation’s sender or owner at the matching employment revision.
 - **Input** `operation_id: string`
-- **Result** Management also sees task_id, generation, world_ref, accounting and hold state. Task fields can be null before the first remote receipt. `slot_id: string`, `owner_id: string`, `state: string`, `last_error: null`, `task_state: null`
+- **Result** Management also sees task_id, generation, world_ref, accounting and hold state. Task fields can be null before the first remote receipt. `slot_id: string`, `owner_id: string`, `state: string`, `last_error: string|null`, `task_state: string|null`, `task_id: string|null (management)`, `generation: integer|null (management)`, `world_ref: object|null (management)`, `accounting_state: string|null (management)`, `hold: string (management)`
 - **Retry** Repeat the read with the same arguments; authorization is checked on every call.
 - **Errors** common errors
 
-[Registration](../reference/catalog.json#L1055) · [Request and result](../reference/examples.json#L1898) · [Handler](../../workshop/src/agent_workshop/manager.py#L132)
+[Registration](../reference/catalog.json#L1091) · [Request and result](../reference/examples.json#L1916) · [Handler](../../workshop/src/agent_workshop/manager.py#L132)
 
 ### `aw_resume_project`
 
@@ -660,11 +660,11 @@ Persist one authorized wake request for the bound NF project and end this turn.
 
 - **Access** Current workshop_manager or author using this installation’s employee session.
 - **Input** `operation_id: string`
-- **Result** New requests start PENDING. Replays can return an already processed request and its result. `request_id: string`, `state: string`, `result: null`
+- **Result** New requests start PENDING. Replays can return an already processed request and its result. `request_id: string`, `state: string`, `result: object|null`
 - **Retry** Deduplicated by installation, employee tenure and operation_id. A retry returns the request’s current state and result.
 - **Errors** common errors
 
-[Registration](../reference/catalog.json#L1074) · [Request and result](../reference/examples.json#L1912) · [Handler](../../workshop/src/agent_workshop/manager.py#L167)
+[Registration](../reference/catalog.json#L1110) · [Request and result](../reference/examples.json#L1930) · [Handler](../../workshop/src/agent_workshop/manager.py#L167)
 
 ### `aw_review_decide`
 
@@ -676,7 +676,7 @@ Record a bounded decision on a frozen artifact and authorized evidence.
 - **Retry** Retry with the original operation_id and arguments under a still-authorized session. Reusing the ID with different arguments conflicts.
 - **Errors** `EVIDENCE_SCOPE_DENIED`, `IDEMPOTENCY_MISMATCH`, `INDEPENDENT_REVIEW_REQUIRED`, `INVALID_REVIEW`, `REVIEW_DENIED`, `WAITING_NF_RECONCILIATION`
 
-[Registration](../reference/catalog.json#L1093) · [Request and result](../reference/examples.json#L1924) · [Handler](../../workshop/src/agent_workshop/reviews_skills.py#L650)
+[Registration](../reference/catalog.json#L1129) · [Request and result](../reference/examples.json#L1942) · [Handler](../../workshop/src/agent_workshop/reviews_skills.py#L650)
 
 ### `aw_review_get`
 
@@ -684,11 +684,11 @@ Read this assignment with evidence references filtered to its current reviewer.
 
 - **Access** A current workshop_manager, review_lead or the assigned reviewer, within the applicable scope and team.
 - **Input** `review_id: string`
-- **Result** The assigned reviewer additionally receives artifact identity, revision, content digest, evidence and risk reason. `mode: string`, `state: string`, `round_no: integer`, `reviewer_id: string`, `execution: string`, `policy_revision: string`, `review_id: string`, `deadline: string`
+- **Result** The assigned reviewer additionally receives artifact identity, revision, content digest, evidence and risk reason. `mode: string`, `state: string`, `round_no: integer`, `reviewer_id: string`, `execution: string`, `policy_revision: string`, `review_id: string`, `deadline: string`, `artifact_ref: string (assigned)`, `artifact_revision: string (assigned)`, `content_sha: string (assigned)`, `evidence_refs: array (assigned)`, `risk_reason: string (assigned)`
 - **Retry** Repeat the read with the same arguments; authorization is checked on every call.
 - **Errors** `REVIEW_DENIED`
 
-[Registration](../reference/catalog.json#L1142) · [Request and result](../reference/examples.json#L1939) · [Handler](../../workshop/src/agent_workshop/reviews_skills.py#L517)
+[Registration](../reference/catalog.json#L1178) · [Request and result](../reference/examples.json#L1957) · [Handler](../../workshop/src/agent_workshop/reviews_skills.py#L517)
 
 ### `aw_review_independence`
 
@@ -700,7 +700,7 @@ Verify a frozen NF draft and reviewer assignment against current Workshop author
 - **Retry** Repeat the read with the same arguments; authorization is checked on every call.
 - **Errors** `INDEPENDENT_REVIEW_REQUIRED`, `REVIEW_DENIED`
 
-[Registration](../reference/catalog.json#L1161) · [Request and result](../reference/examples.json#L1956) · [Handler](../../workshop/src/agent_workshop/review_independence.py#L62)
+[Registration](../reference/catalog.json#L1197) · [Request and result](../reference/examples.json#L1974) · [Handler](../../workshop/src/agent_workshop/review_independence.py#L62)
 
 ### `aw_review_reconcile`
 
@@ -708,11 +708,11 @@ Escalate a stale review or reassign an outstanding human review after departure.
 
 - **Access** Current workshop_manager or review_lead in the review scope. A review_lead is restricted to the team they supervise.
 - **Input** `review_id: string`, `operation_id: string`, `replacement?: string`
-- **Result** Can keep the state, reassign a human review, or escalate it. Reassignment includes reviewer_id. `review_id: string`, `state: string`
+- **Result** Can keep the state, reassign a human review, or escalate it. Reassignment includes reviewer_id. `review_id: string`, `state: string`, `reviewer_id: string (reassigned)`
 - **Retry** Retry with the original operation_id and arguments under a still-authorized session. Reusing the ID with different arguments conflicts.
 - **Errors** `EXISTING_DELEGATION_OR_DEADLINE`, `IDEMPOTENCY_MISMATCH`, `INDEPENDENT_REVIEW_REQUIRED`, `REVIEWER_STILL_ACTIVE`, `REVIEW_ALREADY_FINAL`, `REVIEW_DENIED`
 
-[Registration](../reference/catalog.json#L1397) · [Request and result](../reference/examples.json#L2016) · [Handler](../../workshop/src/agent_workshop/reviews_skills.py#L566)
+[Registration](../reference/catalog.json#L1433) · [Request and result](../reference/examples.json#L2034) · [Handler](../../workshop/src/agent_workshop/reviews_skills.py#L566)
 
 ### `aw_review_request`
 
@@ -720,11 +720,11 @@ Create an independent scoped review, evaluating trusted deterministic rules firs
 
 - **Access** Current workshop_manager or review_lead in the review scope. A review_lead is restricted to the team they supervise.
 - **Input** `operation_id: string`, `artifact_ref: string`, `artifact_revision: string`, `mode: SCRIPT|DIRECTION|CHARACTER|PROSE|WORLD|STABILITY|STATISTICS`, `risk_reason: SAMPLED|MATERIAL_CHANGE|DISCLOSURE|RETCON|INCIDENT|COST_DISPUTE`, `ttl_seconds: integer`, `reviewer_id?: string`, `slot_id?: string`, `max_amount?: string`, `token_limit?: integer`
-- **Result** RULE execution returns RULE_PASSED or RULE_BLOCKED. HUMAN and BUDGETED_NF start PENDING; the budgeted path includes operation_id. `review_id: string`, `state: string`, `round_no: integer`, `execution: string`
+- **Result** RULE execution returns RULE_PASSED or RULE_BLOCKED. HUMAN and BUDGETED_NF start PENDING; the budgeted path includes operation_id. `review_id: string`, `state: string`, `round_no: integer`, `execution: string`, `operation_id: string (BUDGETED_NF)`
 - **Retry** Retry with the original operation_id and arguments under a still-authorized session. Reusing the ID with different arguments conflicts.
 - **Errors** `EVIDENCE_SCOPE_DENIED`, `IDEMPOTENCY_MISMATCH`, `INDEPENDENT_REVIEW_REQUIRED`, `INVALID_REVIEW`, `REVIEW_ALREADY_ASSIGNED_OR_FINAL`, `REVIEW_DENIED`, `REVIEW_SLOT_DENIED`, `RULE_REQUIRES_NO_MODEL`
 
-[Registration](../reference/catalog.json#L1425) · [Request and result](../reference/examples.json#L2028) · [Handler](../../workshop/src/agent_workshop/reviews_skills.py#L352)
+[Registration](../reference/catalog.json#L1461) · [Request and result](../reference/examples.json#L2046) · [Handler](../../workshop/src/agent_workshop/reviews_skills.py#L352)
 
 ### `aw_roster_get`
 
@@ -736,7 +736,7 @@ Read the current directory and permitted routes.
 - **Retry** Repeat the read with the same arguments; authorization is checked on every call.
 - **Errors** common errors
 
-[Registration](../reference/catalog.json#L1500) · [Request and result](../reference/examples.json#L2046) · [Handler](../../workshop/src/agent_workshop/organization.py#L396)
+[Registration](../reference/catalog.json#L1536) · [Request and result](../reference/examples.json#L2064) · [Handler](../../workshop/src/agent_workshop/organization.py#L396)
 
 ### `aw_route_grant`
 
@@ -748,7 +748,7 @@ Issue a limited non-transferrable message route.
 - **Retry** Retry with the original operation_id and arguments under a still-authorized session. Reusing the ID with different arguments conflicts.
 - **Errors** `IDEMPOTENCY_MISMATCH`, `INVALID_ROUTE_GRANT`, `ROUTE_DENIED`
 
-[Registration](../reference/catalog.json#L1512) · [Request and result](../reference/examples.json#L2102) · [Handler](../../workshop/src/agent_workshop/messaging.py#L76)
+[Registration](../reference/catalog.json#L1548) · [Request and result](../reference/examples.json#L2120) · [Handler](../../workshop/src/agent_workshop/messaging.py#L76)
 
 ### `aw_route_revoke`
 
@@ -760,7 +760,7 @@ Revoke a temporary route for subsequent delivery and body reads.
 - **Retry** Retry with the original operation_id and arguments under a still-authorized session. Reusing the ID with different arguments conflicts.
 - **Errors** `IDEMPOTENCY_MISMATCH`, `ROUTE_DENIED`
 
-[Registration](../reference/catalog.json#L1583) · [Request and result](../reference/examples.json#L2120) · [Handler](../../workshop/src/agent_workshop/messaging.py#L130)
+[Registration](../reference/catalog.json#L1619) · [Request and result](../reference/examples.json#L2138) · [Handler](../../workshop/src/agent_workshop/messaging.py#L130)
 
 ### `aw_skill_freeze`
 
@@ -772,7 +772,7 @@ Freeze skill provenance for this employee's task.
 - **Retry** Frozen by employment revision, task and skill. Repeating the same binding reuses the snapshot; a different binding conflicts.
 - **Errors** `SKILL_DENIED`, `TASK_SCOPE_DENIED`, `TASK_SKILL_ALREADY_FROZEN`
 
-[Registration](../reference/catalog.json#L1607) · [Request and result](../reference/examples.json#L2132) · [Handler](../../workshop/src/agent_workshop/reviews_skills.py#L169)
+[Registration](../reference/catalog.json#L1643) · [Request and result](../reference/examples.json#L2150) · [Handler](../../workshop/src/agent_workshop/reviews_skills.py#L169)
 
 ### `aw_skill_history`
 
@@ -784,7 +784,7 @@ Read a frozen historical hash.
 - **Retry** Repeat the read with the same arguments; authorization is checked on every call.
 - **Errors** `TASK_SCOPE_DENIED`
 
-[Registration](../reference/catalog.json#L1636) · [Request and result](../reference/examples.json#L2147) · [Handler](../../workshop/src/agent_workshop/reviews_skills.py#L215)
+[Registration](../reference/catalog.json#L1672) · [Request and result](../reference/examples.json#L2165) · [Handler](../../workshop/src/agent_workshop/reviews_skills.py#L215)
 
 ### `aw_skill_resolve`
 
@@ -796,7 +796,7 @@ Resolve live skill metadata without expanding NF grants.
 - **Retry** Repeat the read with the same arguments; authorization is checked on every call.
 - **Errors** `SKILL_DENIED`
 
-[Registration](../reference/catalog.json#L1660) · [Request and result](../reference/examples.json#L2160) · [Handler](../../workshop/src/agent_workshop/reviews_skills.py#L127)
+[Registration](../reference/catalog.json#L1696) · [Request and result](../reference/examples.json#L2178) · [Handler](../../workshop/src/agent_workshop/reviews_skills.py#L127)
 
 ### `aw_skill_revoke`
 
@@ -808,7 +808,7 @@ Revoke live skill use.
 - **Retry** Retry with the original operation_id and arguments under a still-authorized session. Reusing the ID with different arguments conflicts.
 - **Errors** `IDEMPOTENCY_MISMATCH`, `SKILL_DENIED`
 
-[Registration](../reference/catalog.json#L1684) · [Request and result](../reference/examples.json#L2175) · [Handler](../../workshop/src/agent_workshop/reviews_skills.py#L132)
+[Registration](../reference/catalog.json#L1720) · [Request and result](../reference/examples.json#L2193) · [Handler](../../workshop/src/agent_workshop/reviews_skills.py#L132)
 
 ### `aw_skill_share`
 
@@ -820,7 +820,7 @@ Share registered skill metadata under an explicit scope.
 - **Retry** Retry with the original operation_id and arguments under a still-authorized session. Reusing the ID with different arguments conflicts.
 - **Errors** `IDEMPOTENCY_MISMATCH`, `SKILL_POLICY_DENIED`
 
-[Registration](../reference/catalog.json#L1708) · [Request and result](../reference/examples.json#L2187) · [Handler](../../workshop/src/agent_workshop/reviews_skills.py#L52)
+[Registration](../reference/catalog.json#L1744) · [Request and result](../reference/examples.json#L2205) · [Handler](../../workshop/src/agent_workshop/reviews_skills.py#L52)
 
 ### `aw_state_get`
 
@@ -828,11 +828,11 @@ Read authorized organization state, review backlog and budget.
 
 - **Access** Current organization member and employment revision; reads are scoped to the caller’s audience.
 - **Input** `{}`
-- **Result** Members see a directory. Managers and authors additionally see delegation counts, reviews and a nullable budget. `org_id: string`, `revision: integer`, `preset: string`, `employees: array`, `delegations: object`, `reviews: object`, `budget: null`
+- **Result** Members see a directory. Managers and authors additionally see delegation counts, reviews and a nullable budget. `org_id: string`, `revision: integer`, `preset: string`, `employees: array`, `delegations: object (management)`, `reviews: object (management)`, `budget: object|null (management)`
 - **Retry** Repeat the read with the same arguments; authorization is checked on every call.
 - **Errors** common errors
 
-[Registration](../reference/catalog.json#L1757) · [Request and result](../reference/examples.json#L2203) · [Handler](../../workshop/src/agent_workshop/manager.py#L99)
+[Registration](../reference/catalog.json#L1793) · [Request and result](../reference/examples.json#L2221) · [Handler](../../workshop/src/agent_workshop/manager.py#L99)
 
 ### `aw_suspend`
 
@@ -844,7 +844,7 @@ Suspend an employee using organization revision CAS.
 - **Retry** Retry with the original operation_id and arguments under a still-authorized session. Reusing the ID with different arguments conflicts.
 - **Errors** `IDEMPOTENCY_MISMATCH`, `INVALID_EMPLOYMENT_TRANSITION`, `STALE_ORG_REVISION`
 
-[Registration](../reference/catalog.json#L1769) · [Request and result](../reference/examples.json#L2353) · [Handler](../../workshop/src/agent_workshop/organization.py#L280)
+[Registration](../reference/catalog.json#L1805) · [Request and result](../reference/examples.json#L2371) · [Handler](../../workshop/src/agent_workshop/organization.py#L280)
 
 ### `aw_transfer`
 
@@ -856,7 +856,7 @@ Transfer an employee using organization revision CAS.
 - **Retry** Retry with the original operation_id and arguments under a still-authorized session. Reusing the ID with different arguments conflicts.
 - **Errors** `IDEMPOTENCY_MISMATCH`, `INCOMPATIBLE_ROLE`, `INVALID_DISPLAY_NAME`, `INVALID_EMPLOYMENT_TRANSITION`, `INVALID_SUPERVISOR`, `REASSIGN_REPORTS_FIRST`, `ROSTER_LIMIT_EXCEEDED`, `ROSTER_SCOPE_DENIED`, `SLOT_OCCUPIED`, `STALE_ORG_REVISION`, `SUPERVISOR_CYCLE`
 
-[Registration](../reference/catalog.json#L1798) · [Request and result](../reference/examples.json#L2368) · [Handler](../../workshop/src/agent_workshop/organization.py#L280)
+[Registration](../reference/catalog.json#L1834) · [Request and result](../reference/examples.json#L2386) · [Handler](../../workshop/src/agent_workshop/organization.py#L280)
 
 ## Installation delegation MCP
 
@@ -866,11 +866,11 @@ Read the original task binding and authoritative accounting for this installatio
 
 - **Access** The installation token, NF instance, work, branch and grant_epoch must match. The server verifies the provisioned slot and its TASK_CREATE grant.
 - **Input** `protocol_version: "aw-nf.v1"`, `nf_instance_id: string`, `work_id: string`, `branch_id: string`, `operation_id: string`, `grant_epoch: integer`
-- **Result** Returns the current receipt, progress and wait reason. An operation without a receipt returns DELEGATION_NOT_FOUND. `protocol_version: string`, `nf_instance_id: string`, `work_id: string`, `branch_id: string`, `operation_id: string`, `task_id: string`, `receipt_ref: string`, `world_ref: object`, `generation: integer`, `task_state: string`, `accounting_state: string`, `currency: string`, `actual_amount: string`, `actual_tokens: integer`, `attempt_ids: array`, `attempts: array`, `result_ref: null`, `wait_reason: string`
+- **Result** Returns the current receipt, progress and wait reason. An operation without a receipt returns DELEGATION_NOT_FOUND. Only an accepted task supplies a result UUID. Totals sum known charges and tokens. An UNKNOWN Attempt can have a null amount or token count. `protocol_version: string`, `nf_instance_id: string`, `work_id: string`, `branch_id: string`, `operation_id: string`, `task_id: string`, `receipt_ref: string`, `world_ref: object`, `generation: integer`, `task_state: string`, `accounting_state: string`, `currency: string`, `actual_amount: string`, `actual_tokens: integer`, `attempt_ids: array`, `attempts: array`, `result_ref: UUID|null`, `wait_reason: string|null`
 - **Retry** Repeat the read with the same arguments; authorization is checked on every call.
 - **Errors** `DELEGATION_NOT_FOUND`
 
-[Registration](../reference/catalog.json#L2217) · [Request and result](../reference/examples.json#L2501) · [Handler](../../src/novel_factory/application/delegation.py#L286)
+[Registration](../reference/catalog.json#L2253) · [Request and result](../reference/examples.json#L2519) · [Handler](../../src/novel_factory/application/delegation.py#L286)
 
 ### `nf_delegation_submit`
 
@@ -878,11 +878,11 @@ Consume an NF-authorized task slot with a stable operation ID.
 
 - **Access** The installation token, NF instance, work, branch and grant_epoch must match. The server verifies the provisioned slot and its TASK_CREATE grant.
 - **Input** `protocol_version: "aw-nf.v1"`, `nf_instance_id: string`, `work_id: string`, `branch_id: string`, `operation_id: string`, `grant_epoch: integer`, `task_template_id: string`, `scope_ref: string`, `actor_binding_ref: string|null`, `role_id: string`, `generation: integer`, `budget_reservation_ref: string`, `max_amount: string`, `currency: USD|CNY`, `token_limit: integer`
-- **Result** Returns current task and accounting state. accounting_state is UNKNOWN, RESERVED, SETTLED or NO_ATTEMPT. Only ACCEPTED supplies a result_ref. `protocol_version: string`, `nf_instance_id: string`, `work_id: string`, `branch_id: string`, `operation_id: string`, `task_id: string`, `receipt_ref: string`, `world_ref: object`, `generation: integer`, `task_state: string`, `accounting_state: string`, `currency: string`, `actual_amount: string`, `actual_tokens: integer`, `attempt_ids: array`, `attempts: array`, `result_ref: null`, `wait_reason: null`
+- **Result** Returns current task and accounting state. accounting_state is UNKNOWN, RESERVED, SETTLED or NO_ATTEMPT. Only ACCEPTED supplies a result_ref. Only an accepted task supplies a result UUID. Totals sum known charges and tokens. An UNKNOWN Attempt can have a null amount or token count. `protocol_version: string`, `nf_instance_id: string`, `work_id: string`, `branch_id: string`, `operation_id: string`, `task_id: string`, `receipt_ref: string`, `world_ref: object`, `generation: integer`, `task_state: string`, `accounting_state: string`, `currency: string`, `actual_amount: string`, `actual_tokens: integer`, `attempt_ids: array`, `attempts: array`, `result_ref: UUID|null`, `wait_reason: string|null`
 - **Retry** Serialized by installation and operation_id. The same request returns current task/accounting state, while changed input conflicts. A recovery fence blocks new bindings.
 - **Errors** `BUDGET_EXCEEDED`, `BUDGET_MISMATCH`, `DELEGATION_RECOVERY_FENCED`, `IDEMPOTENCY_MISMATCH`, `SLOT_CONSUMED`
 
-[Registration](../reference/catalog.json#L2259) · [Request and result](../reference/examples.json#L2537) · [Handler](../../src/novel_factory/application/delegation.py#L286)
+[Registration](../reference/catalog.json#L2295) · [Request and result](../reference/examples.json#L2555) · [Handler](../../src/novel_factory/application/delegation.py#L286)
 
 ## HTTP routes
 
@@ -891,8 +891,8 @@ Consume an NF-authorized task slot with a stable operation ID.
 Read current task state and generation.
 
 - **Access** Task owner, READ
-- **Input** `{task_id}: UUID`
-- **Result** `task_id: string`, `work_id: string`, `branch_id: string`, `task_kind: string`, `role_id: string`, `state: string`, `generation: integer`, `context_bundle_id: string`, `dependency_fingerprint: string`, `lease_expiry: null`, `deadline: string`, `current_result_id: null`, `attempt_id: string`, `created_at: string`, `updated_at: string`, `world_ref: object`
+- **Input** `{task_id}: UUID` (path)
+- **Result** Lease, context, result and Attempt references are nullable across task states. `attempt_id: string`, `branch_id: string`, `context_bundle_id: string`, `created_at: string`, `current_result_id: null`, `deadline: string`, `dependency_fingerprint: string`, `generation: integer`, `lease_expiry: string`, `role_id: string`, `state: string`, `task_id: string`, `task_kind: string`, `updated_at: string`, `work_id: string`, `world_ref: object`
 - **Retry** Read again to obtain the current state.
 - **Errors** common errors
 
@@ -908,7 +908,7 @@ Check process liveness.
 - **Retry** Read again to obtain the current state.
 - **Errors** common errors
 
-[Registration](../reference/catalog.json#L9) · [Request and result](../reference/examples.json#L29) · [Handler](../../src/novel_factory/interfaces/http.py#L288)
+[Registration](../reference/catalog.json#L15) · [Request and result](../reference/examples.json#L32) · [Handler](../../src/novel_factory/interfaces/http.py#L288)
 
 ### `POST /api/v1/branches`
 
@@ -920,7 +920,7 @@ Fork a fixed revision.
 - **Retry** Retry a lost reply with the same key and command. Read current state after a version or qualification conflict.
 - **Errors** `INVALID_ARGUMENT`
 
-[Registration](../reference/catalog.json#L16) · [JSON Schema](../../contracts/http.schema.json) · [Request and result](../reference/examples.json#L38) · [Handler](../../src/novel_factory/application/kernel.py#L936)
+[Registration](../reference/catalog.json#L22) · [JSON Schema](../../contracts/http.schema.json) · [Request and result](../reference/examples.json#L41) · [Handler](../../src/novel_factory/application/kernel.py#L936)
 
 ### `POST /api/v1/contexts/compile`
 
@@ -932,7 +932,7 @@ Compile and bind a context to a task.
 - **Retry** Retry a lost reply with the same key and command. Read current state after a version or qualification conflict.
 - **Errors** `CAPACITY_LIMIT`, `CONTEXT_INCOMPLETE`, `IDEMPOTENCY_CONFLICT`, `INVALID_ARGUMENT`, `TASK_NOT_ACCEPTABLE`, `TASK_REBIND_REQUIRED`, `VIEW_DENIED`
 
-[Registration](../reference/catalog.json#L26) · [JSON Schema](../../contracts/temporal_concurrency.schema.json) · [Request and result](../reference/examples.json#L56) · [Handler](../../src/novel_factory/application/queries.py#L580)
+[Registration](../reference/catalog.json#L32) · [JSON Schema](../../contracts/temporal_concurrency.schema.json) · [Request and result](../reference/examples.json#L59) · [Handler](../../src/novel_factory/application/queries.py#L580)
 
 ### `POST /api/v1/continuity/prepare`
 
@@ -944,7 +944,7 @@ Prepare a continuity candidate.
 - **Retry** Retry a lost reply with the same key and command. Read current state after a version or qualification conflict.
 - **Errors** `CAPACITY_LIMIT`
 
-[Registration](../reference/catalog.json#L36) · [JSON Schema](../../contracts/continuity.schema.json) · [Request and result](../reference/examples.json#L201) · [Handler](../../src/novel_factory/application/continuity.py#L199)
+[Registration](../reference/catalog.json#L42) · [JSON Schema](../../contracts/continuity.schema.json) · [Request and result](../reference/examples.json#L204) · [Handler](../../src/novel_factory/application/continuity.py#L199)
 
 ### `POST /api/v1/model-routes/select`
 
@@ -956,7 +956,7 @@ Select a server-configured adapter.
 - **Retry** Retry a lost reply with the same key and command. Read current state after a version or qualification conflict.
 - **Errors** `HEAD_CONFLICT`, `MODEL_CONFIG_CHANGED`, `MODEL_UNAVAILABLE`
 
-[Registration](../reference/catalog.json#L46) · [JSON Schema](../../contracts/upgrades.schema.json) · [Request and result](../reference/examples.json#L231) · [Handler](../../src/novel_factory/application/upgrades.py#L214)
+[Registration](../reference/catalog.json#L52) · [JSON Schema](../../contracts/upgrades.schema.json) · [Request and result](../reference/examples.json#L234) · [Handler](../../src/novel_factory/application/upgrades.py#L214)
 
 ### `POST /api/v1/proposals`
 
@@ -968,7 +968,7 @@ Build a proposal from a registered template.
 - **Retry** Retry a lost reply with the same key and command. Read current state after a version or qualification conflict.
 - **Errors** `HARD_RULE_VIOLATION`, `HISTORY_REPAIR_REQUIRED`, `INVALID_ARGUMENT`, `VIEW_DENIED`
 
-[Registration](../reference/catalog.json#L56) · [JSON Schema](../../contracts/http.schema.json) · [Request and result](../reference/examples.json#L251) · [Handler](../../src/novel_factory/application/kernel.py#L556)
+[Registration](../reference/catalog.json#L62) · [JSON Schema](../../contracts/http.schema.json) · [Request and result](../reference/examples.json#L254) · [Handler](../../src/novel_factory/application/kernel.py#L556)
 
 ### `POST /api/v1/queries/batch`
 
@@ -980,7 +980,7 @@ Run queries at one shared cut.
 - **Retry** Repeat with the same parameters. Retain the resolved cut and cursor across pages. Successful reads can record dependencies.
 - **Errors** `CAPACITY_LIMIT`, `INVALID_ARGUMENT`
 
-[Registration](../reference/catalog.json#L66) · [JSON Schema](../../contracts/temporal_concurrency.schema.json) · [Request and result](../reference/examples.json#L289) · [Handler](../../src/novel_factory/application/queries.py#L552)
+[Registration](../reference/catalog.json#L72) · [JSON Schema](../../contracts/temporal_concurrency.schema.json) · [Request and result](../reference/examples.json#L292) · [Handler](../../src/novel_factory/application/queries.py#L552)
 
 ### `POST /api/v1/queries/semantic-assumptions`
 
@@ -992,7 +992,7 @@ Attach an assumption to an existing read receipt.
 - **Retry** Reuse the original read handle and assumption. The read receipt scopes supplemental evidence.
 - **Errors** `TASK_NOT_ACCEPTABLE`, `VIEW_DENIED`
 
-[Registration](../reference/catalog.json#L76) · [JSON Schema](../../contracts/kernel.schema.json) · [Request and result](../reference/examples.json#L466) · [Handler](../../src/novel_factory/application/semantic_dependencies.py#L387)
+[Registration](../reference/catalog.json#L82) · [JSON Schema](../../contracts/kernel.schema.json) · [Request and result](../reference/examples.json#L469) · [Handler](../../src/novel_factory/application/semantic_dependencies.py#L387)
 
 ### `POST /api/v1/queries/timeline`
 
@@ -1004,7 +1004,7 @@ Query a timeline, state, plans or graph at a resolved cut.
 - **Retry** Repeat with the same parameters. Retain the resolved cut and cursor across pages. Successful reads can record dependencies.
 - **Errors** `CAPACITY_LIMIT`
 
-[Registration](../reference/catalog.json#L86) · [JSON Schema](../../contracts/temporal_concurrency.schema.json) · [Request and result](../reference/examples.json#L482) · [Handler](../../src/novel_factory/application/queries.py#L519)
+[Registration](../reference/catalog.json#L92) · [JSON Schema](../../contracts/temporal_concurrency.schema.json) · [Request and result](../reference/examples.json#L485) · [Handler](../../src/novel_factory/application/queries.py#L519)
 
 ### `POST /api/v1/refinements/prepare`
 
@@ -1016,7 +1016,7 @@ Prepare evidence of equivalent refinement.
 - **Retry** Retry a lost reply with the same key and command. Read current state after a version or qualification conflict.
 - **Errors** `INVALID_EVIDENCE`
 
-[Registration](../reference/catalog.json#L96) · [JSON Schema](../../contracts/refinement.schema.json) · [Request and result](../reference/examples.json#L615) · [Handler](../../src/novel_factory/application/refinement.py#L79)
+[Registration](../reference/catalog.json#L102) · [JSON Schema](../../contracts/refinement.schema.json) · [Request and result](../reference/examples.json#L618) · [Handler](../../src/novel_factory/application/refinement.py#L79)
 
 ### `POST /api/v1/refinements/proposals`
 
@@ -1028,7 +1028,7 @@ Propose a previously proved refinement.
 - **Retry** Retry a lost reply with the same key and command. Read current state after a version or qualification conflict.
 - **Errors** common errors
 
-[Registration](../reference/catalog.json#L106) · [JSON Schema](../../contracts/refinement.schema.json) · [Request and result](../reference/examples.json#L784) · [Handler](../../src/novel_factory/application/refinement.py#L161)
+[Registration](../reference/catalog.json#L112) · [JSON Schema](../../contracts/refinement.schema.json) · [Request and result](../reference/examples.json#L787) · [Handler](../../src/novel_factory/application/refinement.py#L161)
 
 ### `POST /api/v1/runtime-upgrades/activate`
 
@@ -1040,7 +1040,7 @@ Activate a reviewed interpretation version.
 - **Retry** Retry a lost reply with the same key and command. Read current state after a version or qualification conflict.
 - **Errors** `APPROVAL_STALE`, `HEAD_CONFLICT`, `PROJECTION_CORRUPT`
 
-[Registration](../reference/catalog.json#L116) · [JSON Schema](../../contracts/upgrades.schema.json) · [Request and result](../reference/examples.json#L814) · [Handler](../../src/novel_factory/application/upgrades.py#L140)
+[Registration](../reference/catalog.json#L122) · [JSON Schema](../../contracts/upgrades.schema.json) · [Request and result](../reference/examples.json#L817) · [Handler](../../src/novel_factory/application/upgrades.py#L140)
 
 ### `POST /api/v1/runtime-upgrades/prepare`
 
@@ -1052,7 +1052,7 @@ Prepare an immutable runtime upgrade package.
 - **Retry** Retry a lost reply with the same key and command. Read current state after a version or qualification conflict.
 - **Errors** `HEAD_CONFLICT`, `INVALID_ARGUMENT`, `PROJECTION_CORRUPT`, `UPGRADE_REQUIRES_REPAIR`
 
-[Registration](../reference/catalog.json#L126) · [JSON Schema](../../contracts/upgrades.schema.json) · [Request and result](../reference/examples.json#L861) · [Handler](../../src/novel_factory/application/upgrades.py#L56)
+[Registration](../reference/catalog.json#L132) · [JSON Schema](../../contracts/upgrades.schema.json) · [Request and result](../reference/examples.json#L864) · [Handler](../../src/novel_factory/application/upgrades.py#L56)
 
 ### `POST /api/v1/runtime-upgrades/reviews`
 
@@ -1064,7 +1064,7 @@ Review an upgrade package.
 - **Retry** Retry a lost reply with the same key and command. Read current state after a version or qualification conflict.
 - **Errors** `INDEPENDENT_REVIEW_REQUIRED`
 
-[Registration](../reference/catalog.json#L136) · [JSON Schema](../../contracts/upgrades.schema.json) · [Request and result](../reference/examples.json#L912) · [Handler](../../src/novel_factory/application/upgrades.py#L120)
+[Registration](../reference/catalog.json#L142) · [JSON Schema](../../contracts/upgrades.schema.json) · [Request and result](../reference/examples.json#L915) · [Handler](../../src/novel_factory/application/upgrades.py#L120)
 
 ### `POST /api/v1/tasks`
 
@@ -1076,7 +1076,7 @@ Freeze the input specification and create a task.
 - **Retry** Retry a lost reply with the same key and command. Read current state after a version or qualification conflict.
 - **Errors** common errors
 
-[Registration](../reference/catalog.json#L146) · [JSON Schema](../../contracts/http.schema.json) · [Request and result](../reference/examples.json#L937) · [Handler](../../src/novel_factory/application/kernel.py#L466)
+[Registration](../reference/catalog.json#L152) · [JSON Schema](../../contracts/http.schema.json) · [Request and result](../reference/examples.json#L940) · [Handler](../../src/novel_factory/application/kernel.py#L466)
 
 ### `POST /api/v1/tasks/cancel`
 
@@ -1088,19 +1088,19 @@ Cancel a task generation.
 - **Retry** Retry a lost reply with the same key and command. Read current state after a version or qualification conflict.
 - **Errors** common errors
 
-[Registration](../reference/catalog.json#L156) · [JSON Schema](../../contracts/http.schema.json) · [Request and result](../reference/examples.json#L984) · [Handler](../../src/novel_factory/application/kernel.py#L519)
+[Registration](../reference/catalog.json#L162) · [JSON Schema](../../contracts/http.schema.json) · [Request and result](../reference/examples.json#L987) · [Handler](../../src/novel_factory/application/kernel.py#L519)
 
 ### `POST /api/v1/tasks/claim`
 
 Claim a lease on ready work.
 
 - **Access** TASK_CLAIM for the authorized work
-- **Input** `worker_id: string`, `lease_seconds?: integer`, `task_id?: UUID`
-- **Result** `task_id: string`, `work_id: string`, `branch_id: string`, `principal_id: string`, `grant_id: string`, `task_kind: string`, `role_id: string`, `state: string`, `generation: integer`, `context_bundle_id: null`, `dependency_fingerprint: null`, `lease_owner: string`, `lease_expiry: string`, `deadline: string`, `current_result_id: null`, `attempt_id: string`, `created_at: string`, `updated_at: string`, `world_ref: object`
+- **Input** `worker_id: string`, `lease_seconds?: integer = 30`, `task_id?: UUID`
+- **Result** An empty queue returns HTTP 200 with JSON `null`. A successful claim returns `task_id: string`, `work_id: string`, `branch_id: string`, `principal_id: string`, `grant_id: string`, `task_kind: string`, `role_id: string`, `state: string`, `generation: integer`, `context_bundle_id: null`, `dependency_fingerprint: null`, `lease_owner: string`, `lease_expiry: string`, `deadline: string`, `current_result_id: null`, `attempt_id: string`, `created_at: string`, `updated_at: string`, `world_ref: object`
 - **Retry** A claim changes the lease. Inspect the task and worker after an uncertain reply before claiming more work.
 - **Errors** `VIEW_DENIED`
 
-[Registration](../reference/catalog.json#L166) · [JSON Schema](../../contracts/http.schema.json) · [Request and result](../reference/examples.json#L999) · [Handler](../../src/novel_factory/application/kernel.py#L496)
+[Registration](../reference/catalog.json#L172) · [JSON Schema](../../contracts/http.schema.json) · [Request and result](../reference/examples.json#L1002) · [Handler](../../src/novel_factory/application/kernel.py#L496)
 
 ### `POST /api/v1/tasks/results`
 
@@ -1112,91 +1112,91 @@ Store a worker result for the specified generation.
 - **Retry** Resubmit the same result identity, generation and contents. Inspect the task after a content or lease conflict.
 - **Errors** `ATTEMPT_MISMATCH`, `CONTEXT_MISMATCH`, `IDEMPOTENCY_CONFLICT`, `OBJECT_STORE_REQUIRED`, `TASK_NOT_ACCEPTABLE`
 
-[Registration](../reference/catalog.json#L176) · [JSON Schema](../../contracts/http.schema.json) · [Request and result](../reference/examples.json#L1033) · [Handler](../../src/novel_factory/orchestration/tasks.py#L285)
+[Registration](../reference/catalog.json#L182) · [JSON Schema](../../contracts/http.schema.json) · [Request and result](../reference/examples.json#L1036) · [Handler](../../src/novel_factory/orchestration/tasks.py#L285)
 
 ### `POST /api/v1/tasks/{task_id}/continuity`
 
-Deliver authorized continuity to a particular task generation.
+Deliver authorized continuity to a task generation, with a default budget of 100,000 bytes.
 
 - **Access** Current task identity with the snapshot in its authorized inputs
-- **Input** `{task_id}: UUID`, `schema_version: "2.3"`, `generation: integer`, `snapshot_ref: ArtifactRef`, `budget_bytes?: integer`
-- **Result** `snapshot_ref: object`, `world_ref: object`, `entries: array`, `authority: string`, `world_effects_applied: integer`
+- **Input** `{task_id}: UUID` (path), `schema_version: "2.3"`, `generation: integer`, `snapshot_ref: ArtifactRef`, `budget_bytes?: integer`
+- **Result** `authority: string`, `entries: array`, `snapshot_ref: object`, `world_effects_applied: integer`, `world_ref: object`
 - **Retry** Read again to obtain the current state.
 - **Errors** `CONTEXT_BUDGET_EXCEEDED`, `CONTINUITY_REVALIDATION_REQUIRED`, `INVALID_ARGUMENT`, `TASK_REBIND_REQUIRED`, `VIEW_DENIED`
 
-[Registration](../reference/catalog.json#L186) · [JSON Schema](../../contracts/continuity.schema.json) · [Request and result](../reference/examples.json#L1058) · [Handler](../../src/novel_factory/application/continuity.py#L441)
+[Registration](../reference/catalog.json#L192) · [JSON Schema](../../contracts/continuity.schema.json) · [Request and result](../reference/examples.json#L1061) · [Handler](../../src/novel_factory/application/continuity.py#L441)
 
 ### `POST /api/v1/works/{work_id}/continuity/inspect`
 
 Inspect a snapshot against its target world.
 
 - **Access** Non-actor READ with WORLD and PLAN
-- **Input** `schema_version: "2.3"`, `snapshot_ref: ArtifactRef`, `target_world_ref?: WorldRef|null`
-- **Result** `snapshot_ref: object`, `snapshot: object`, `current_impact: object`, `qualification: string`, `world_effects_applied: integer`
+- **Input** `{work_id}: UUID` (path), `schema_version: "2.3"`, `snapshot_ref: ArtifactRef`, `target_world_ref?: WorldRef|null`
+- **Result** `current_impact: object`, `qualification: string`, `snapshot: object`, `snapshot_ref: object`, `world_effects_applied: integer`
 - **Retry** Read again to obtain the current state.
 - **Errors** `VIEW_DENIED`
 
-[Registration](../reference/catalog.json#L196) · [JSON Schema](../../contracts/continuity.schema.json) · [Request and result](../reference/examples.json#L1133) · [Handler](../../src/novel_factory/application/continuity.py#L396)
+[Registration](../reference/catalog.json#L208) · [JSON Schema](../../contracts/continuity.schema.json) · [Request and result](../reference/examples.json#L1139) · [Handler](../../src/novel_factory/application/continuity.py#L396)
 
 ### `POST /api/v1/works/{work_id}/continuity/publish`
 
 Select a reviewed continuity snapshot.
 
 - **Access** Controller with APPROVE and a currently qualified reviewer
-- **Input** `schema_version: "2.3"`, `candidate_ref: ArtifactRef`, `review_ref: ArtifactRef`, `idempotency_key: string`
-- **Result** `snapshot_ref: object`, `selection_epoch: integer`, `world_ref: object`, `world_effects_applied: integer`, `external_delivery: string`
+- **Input** `{work_id}: UUID` (path), `schema_version: "2.3"`, `candidate_ref: ArtifactRef`, `review_ref: ArtifactRef`, `idempotency_key: string`
+- **Result** `external_delivery: string`, `selection_epoch: integer`, `snapshot_ref: object`, `world_effects_applied: integer`, `world_ref: object`
 - **Retry** Retry a lost reply with the same key and command. Read current state after a version or qualification conflict.
 - **Errors** `APPROVAL_REQUIRED`, `APPROVAL_REVOKED`, `CONTINUITY_REVALIDATION_REQUIRED`
 
-[Registration](../reference/catalog.json#L206) · [JSON Schema](../../contracts/continuity.schema.json) · [Request and result](../reference/examples.json#L1234) · [Handler](../../src/novel_factory/application/continuity.py#L316)
+[Registration](../reference/catalog.json#L224) · [JSON Schema](../../contracts/continuity.schema.json) · [Request and result](../reference/examples.json#L1243) · [Handler](../../src/novel_factory/application/continuity.py#L316)
 
 ### `POST /api/v1/works/{work_id}/continuity/readings`
 
 Read a candidate and record its reading receipt.
 
 - **Access** Independent reader with WORLD, PLAN and APPROVE on current revision
-- **Input** `schema_version: "2.3"`, `candidate_ref: ArtifactRef`, `idempotency_key: string`
-- **Result** `candidate: object`, `original_texts: array`, `reading_ref: object`, `comprehension: string`, `world_effects_applied: integer`
+- **Input** `{work_id}: UUID` (path), `schema_version: "2.3"`, `candidate_ref: ArtifactRef`, `idempotency_key: string`
+- **Result** `candidate: object`, `comprehension: string`, `original_texts: array`, `reading_ref: object`, `world_effects_applied: integer`
 - **Retry** Retry a lost reply with the same key and command. Read current state after a version or qualification conflict.
 - **Errors** `CAPACITY_LIMIT`, `CONTINUITY_REVALIDATION_REQUIRED`
 
-[Registration](../reference/catalog.json#L216) · [JSON Schema](../../contracts/continuity.schema.json) · [Request and result](../reference/examples.json#L1267) · [Handler](../../src/novel_factory/application/continuity.py#L220)
+[Registration](../reference/catalog.json#L240) · [JSON Schema](../../contracts/continuity.schema.json) · [Request and result](../reference/examples.json#L1279) · [Handler](../../src/novel_factory/application/continuity.py#L220)
 
 ### `POST /api/v1/works/{work_id}/continuity/reviews`
 
 Record a continuity review.
 
 - **Access** WORLD, PLAN, APPROVE and the matching reading receipt
-- **Input** `schema_version: "2.3"`, `candidate_ref: ArtifactRef`, `reading_ref: ArtifactRef`, `decision: APPROVED|CHANGES_REQUIRED`, `reason: string`, `acknowledged_affected_ordinals: array`, `idempotency_key: string`
+- **Input** `{work_id}: UUID` (path), `schema_version: "2.3"`, `candidate_ref: ArtifactRef`, `reading_ref: ArtifactRef`, `decision: APPROVED|CHANGES_REQUIRED`, `reason: string`, `acknowledged_affected_ordinals: array`, `idempotency_key: string`
 - **Result** `artifact_id: string`, `artifact_revision_id: string`, `sha256: string`
 - **Retry** Retry a lost reply with the same key and command. Read current state after a version or qualification conflict.
 - **Errors** `CONTINUITY_IMPACT_UNREVIEWED`, `CONTINUITY_REVALIDATION_REQUIRED`, `INVALID_READING_COVERAGE`, `SELF_APPROVAL_DENIED`, `STALE_CONTINUITY_WORLD`, `VIEW_DENIED`
 
-[Registration](../reference/catalog.json#L226) · [JSON Schema](../../contracts/continuity.schema.json) · [Request and result](../reference/examples.json#L1362) · [Handler](../../src/novel_factory/application/continuity.py#L265)
+[Registration](../reference/catalog.json#L256) · [JSON Schema](../../contracts/continuity.schema.json) · [Request and result](../reference/examples.json#L1377) · [Handler](../../src/novel_factory/application/continuity.py#L265)
 
 ### `POST /api/v1/world/accept`
 
 Accept a proposal against its expected head.
 
-- **Access** ACCEPT, valid approval and current task generation
+- **Access** READ and ACCEPT for a new write, with valid approvals and a current generation. A committed receipt may be replayed with READ.
 - **Input** `schema_version: string`, `task_id: UUID`, `generation: integer`, `context_bundle_id: UUID`, `expected_world_ref: WorldRef`, `proposal_ref: ArtifactRef`, `approval_refs: array`, `dependency_fingerprint: Sha256`, `idempotency_key: string`
 - **Result** `command_id: string`, `world_ref: object`, `branch_seq: integer`, `accepted_event_refs: array`, `manifest_sha256: string`, `recorded_at: string`
-- **Retry** Retry a lost reply with the same key and command. Read current state after a version or qualification conflict.
-- **Errors** `INVALID_ARGUMENT`, `SCHEMA_UNSUPPORTED`
+- **Retry** Replay the same key and command with READ to retrieve the committed receipt. A first execution requires ACCEPT. Inspect the current revision after a conflict.
+- **Errors** `ALREADY_ACCEPTED`, `APPROVAL_STALE`, `BRANCH_CHANGED`, `CANON_MOVED`, `DEPENDENCY_CONFLICT`, `HEAD_CONFLICT`, `HISTORY_CHANGED`, `INVALID_ARGUMENT`, `SCHEMA_UNSUPPORTED`, `STALE_CERTIFICATE`, `TASK_REBIND_REQUIRED`, `VIEW_DENIED`
 
-[Registration](../reference/catalog.json#L236) · [JSON Schema](../../contracts/core.schema.json) · [Request and result](../reference/examples.json#L1388) · [Handler](../../src/novel_factory/application/kernel.py#L805)
+[Registration](../reference/catalog.json#L272) · [JSON Schema](../../contracts/core.schema.json) · [Request and result](../reference/examples.json#L1406) · [Handler](../../src/novel_factory/application/kernel.py#L805)
 
 ### `POST /api/v1/world/accept-guarded`
 
 Accept a proposal using its guarded certificate.
 
-- **Access** ACCEPT, qualified certificate and approvals
+- **Access** READ and ACCEPT for a new write, with valid approvals and a current generation. A committed receipt may be replayed with READ.
 - **Input** `schema_version: string`, `task_id: UUID`, `generation: integer`, `context_bundle_id: UUID`, `concurrency_mode: string`, `base_world_ref: WorldRef`, `proposal_ref: ArtifactRef`, `acceptance_certificate_ref: ArtifactRef`, `approval_refs: array`, `dependency_fingerprint: Sha256`, `idempotency_key: string`
 - **Result** `command_id: string`, `world_ref: object`, `branch_seq: integer`, `accepted_event_refs: array`, `manifest_sha256: string`, `recorded_at: string`, `original_base_world_ref: object`, `validation_world_ref: object`, `parent_world_ref: object`, `acceptance_certificate_ref: object`, `proposal_ref: object`
-- **Retry** Retry a lost reply with the same key and command. Read current state after a version or qualification conflict.
-- **Errors** `INVALID_ARGUMENT`, `SCHEMA_UNSUPPORTED`
+- **Retry** Replay the same key and command with READ to retrieve the committed receipt. A first execution requires ACCEPT. Inspect the current revision after a conflict.
+- **Errors** `ALREADY_ACCEPTED`, `APPROVAL_STALE`, `BRANCH_CHANGED`, `CANON_MOVED`, `DEPENDENCY_CONFLICT`, `HEAD_CONFLICT`, `HISTORY_CHANGED`, `INVALID_ARGUMENT`, `STALE_CERTIFICATE`, `TASK_REBIND_REQUIRED`, `UNPROVEN_FOOTPRINT`, `VIEW_DENIED`
 
-[Registration](../reference/catalog.json#L246) · [JSON Schema](../../contracts/temporal_concurrency.schema.json) · [Request and result](../reference/examples.json#L1430) · [Handler](../../src/novel_factory/application/kernel.py#L805)
+[Registration](../reference/catalog.json#L282) · [JSON Schema](../../contracts/temporal_concurrency.schema.json) · [Request and result](../reference/examples.json#L1448) · [Handler](../../src/novel_factory/application/kernel.py#L805)
 
 ### `POST /api/v1/world/acceptance-certificates`
 
@@ -1208,16 +1208,16 @@ Prepare an acceptance certificate.
 - **Retry** Retry a lost reply with the same key and command. Read current state after a version or qualification conflict.
 - **Errors** `BRANCH_CHANGED`, `DEPENDENCY_CONFLICT`, `HARD_RULE_VIOLATION`, `HEAD_CONFLICT`, `HISTORY_CHANGED`, `INVALID_ARGUMENT`, `STALE_CERTIFICATE`, `UNPROVEN_FOOTPRINT`
 
-[Registration](../reference/catalog.json#L256) · [JSON Schema](../../contracts/temporal_concurrency.schema.json) · [Request and result](../reference/examples.json#L1503) · [Handler](../../src/novel_factory/application/kernel.py#L705)
+[Registration](../reference/catalog.json#L292) · [JSON Schema](../../contracts/temporal_concurrency.schema.json) · [Request and result](../reference/examples.json#L1521) · [Handler](../../src/novel_factory/application/kernel.py#L705)
 
 ### `POST /api/v1/world/promotions`
 
-Promote a candidate to the canonical branch.
+Promote a reviewed REPAIR head to canonical.
 
-- **Access** PROMOTE on candidate; expected canonical revision
+- **Access** BRANCH on both branches and PROMOTE on the repair. Requires a prepared head, independently approved repair and the matching canonical base.
 - **Input** `old_world_ref: WorldRef`, `candidate_world_ref: WorldRef`, `idempotency_key: string`
 - **Result** `work_id: string`, `branch_id: string`, `world_revision_id: string`
 - **Retry** Retry a lost reply with the same key and command. Read current state after a version or qualification conflict.
 - **Errors** `HEAD_CONFLICT`, `REPAIR_INCOMPLETE`, `VIEW_DENIED`
 
-[Registration](../reference/catalog.json#L266) · [JSON Schema](../../contracts/http.schema.json) · [Request and result](../reference/examples.json#L1534) · [Handler](../../src/novel_factory/application/kernel.py#L970)
+[Registration](../reference/catalog.json#L302) · [JSON Schema](../../contracts/http.schema.json) · [Request and result](../reference/examples.json#L1552) · [Handler](../../src/novel_factory/application/kernel.py#L970)

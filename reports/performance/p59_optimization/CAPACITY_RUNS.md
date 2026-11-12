@@ -1,6 +1,6 @@
 # Original capacity gate executions
 
-The 200 overload offered-call target remains 1000/s and its original minimum 950/s. 1000 open uses the actual header-start and requires all responses validated. P2 status counts include retries and other workflow phases. Each raw asset retains the original configuration, offered traffic, latency distributions, correctness, resource metrics and exit status. Read soak groups are separate repetitions.
+The 200 overload offered-call target remains 1000/s and its original minimum 950/s. The baseline and candidate 200-overload runs recorded actual_call_start_rps of 41.0122 and 35.3898 respectively. The table below reports the distinct transport-header metric. 1000 open uses the actual header-start and requires all responses validated. P2 status counts include retries and other workflow phases. Each raw asset retains the original configuration, offered traffic, latency distributions, correctness, resource metrics and exit status. Read soak groups are separate repetitions.
 
 | Arm | Scenario | Capacity | Business recovery | Wire starts/s | HTTP/transport outcomes |
 | --- | --- | --- | --- | --- | --- |

@@ -4,7 +4,13 @@
     "method": "GET",
     "path": "/api/v1/tasks/{task_id}",
     "source": "src/novel_factory/interfaces/http.py",
-    "handler": "get_task"
+    "handler": "get_task",
+    "pathParameters": {
+      "task_id": {
+        "type": "string",
+        "format": "uuid"
+      }
+    }
   },
   "GET /health": {
     "transport": "http",
@@ -189,6 +195,12 @@
     "path": "/api/v1/tasks/{task_id}/continuity",
     "source": "src/novel_factory/interfaces/http.py",
     "handler": "read_task_continuity",
+    "pathParameters": {
+      "task_id": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
     "inputSchema": {
       "$ref": "https://novel-factory.example/contracts/2.3/continuity.schema.json#/$defs/ContinuityTaskReadRequest"
     }
@@ -199,6 +211,12 @@
     "path": "/api/v1/works/{work_id}/continuity/inspect",
     "source": "src/novel_factory/interfaces/http.py",
     "handler": "inspect_continuity",
+    "pathParameters": {
+      "work_id": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
     "inputSchema": {
       "$ref": "https://novel-factory.example/contracts/2.3/continuity.schema.json#/$defs/ContinuityInspectRequest"
     }
@@ -209,6 +227,12 @@
     "path": "/api/v1/works/{work_id}/continuity/publish",
     "source": "src/novel_factory/interfaces/http.py",
     "handler": "publish_continuity",
+    "pathParameters": {
+      "work_id": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
     "inputSchema": {
       "$ref": "https://novel-factory.example/contracts/2.3/continuity.schema.json#/$defs/ContinuityPublishRequest"
     }
@@ -219,6 +243,12 @@
     "path": "/api/v1/works/{work_id}/continuity/readings",
     "source": "src/novel_factory/interfaces/http.py",
     "handler": "read_continuity_candidate",
+    "pathParameters": {
+      "work_id": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
     "inputSchema": {
       "$ref": "https://novel-factory.example/contracts/2.3/continuity.schema.json#/$defs/ContinuityReadRequest"
     }
@@ -229,6 +259,12 @@
     "path": "/api/v1/works/{work_id}/continuity/reviews",
     "source": "src/novel_factory/interfaces/http.py",
     "handler": "review_continuity",
+    "pathParameters": {
+      "work_id": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
     "inputSchema": {
       "$ref": "https://novel-factory.example/contracts/2.3/continuity.schema.json#/$defs/ContinuityReviewRequest"
     }
