@@ -1,0 +1,28 @@
+name: Archive original S9 experiment results
+on:
+  push:
+    branches: [evidence/serial-delivery]
+    paths: [reports/integration/evidence/S9-PR18/archive-request.json]
+permissions:
+  actions: read
+  contents: read
+jobs:
+  archive:
+    if: github.repository == 'SKYdayDUCK/NovelFactory' && github.ref == 'refs/heads/evidence/serial-delivery'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        include: [{"id":13871700305,"part":0},{"id":13867723125,"part":0},{"id":13867723125,"part":1},{"id":13867723125,"part":2},{"id":13867723125,"part":3},{"id":13866072369,"part":0},{"id":13866426181,"part":0},{"id":13865697546,"part":0},{"id":13866055835,"part":0},{"id":13864898356,"part":0},{"id":13867065861,"part":0},{"id":13867065861,"part":1},{"id":13867065861,"part":2},{"id":13867065861,"part":3},{"id":13865002753,"part":0},{"id":13864487840,"part":0}]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify original experiment archive before transfer
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARCHIVE_ID: ${{ matrix.id }}
+          PART: ${{ matrix.part }}
+        run: python reports/integration/evidence/S9-PR18/collect_originals.py
