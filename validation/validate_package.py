@@ -1,10 +1,11 @@
-"""Validate the preserved design and schema package, not runtime behavior.
+"""Validate the preserved design, schemas, examples and source references.
 
 Run from any directory: python /path/to/package/validation/validate_package.py
 Dependencies are pinned in requirements-validation.txt. No network calls are made.
 """
 from __future__ import annotations
 
+import argparse
 import hashlib
 import fnmatch
 import importlib.metadata
@@ -348,8 +349,14 @@ def r1_checks():
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--output", type=Path, default=ROOT / "validation/package_check_results.json",
+        help="Path for the JSON report (default: validation/package_check_results.json)",
+    )
+    output = parser.parse_args().output.resolve()
     for path in package_files("*.json"):
-        if path.name == "package_check_results.json":
+        if path.name == "package_check_results.json" or path == output:
             continue
         try:
             read_json(path)
@@ -367,22 +374,22 @@ def main():
     result = {
         "status": "PASS" if not FAILURES else "FAIL",
         "checked_at_utc": datetime.now(timezone.utc).isoformat(),
-        "scope": "Static design-package validation; not runtime/business/DB/Host validation",
+        "scope": "Static checks of the design package, schemas, examples and source references",
         "python": platform.python_version(),
         "dependencies": {n: importlib.metadata.version(n) for n in
                          ("jsonschema", "referencing", "PyYAML")},
         "counts": dict(sorted(COUNTS.items())),
         "failures": FAILURES,
         "limitations": [
-            "Markdown targets are checked, heading anchors and external URLs are not.",
-            "Mermaid fences/files are checked; no renderer has been executed.",
-            "Schema validity does not establish permissions, references, database constraints or semantics.",
-            "Role/skill metadata consistency is checked; server policy is not implemented.",
-            "60 prior business cases plus 8 R1 families/37 acceptance checks are planned, not executed.",
-            "15 load-model rows are arithmetic estimates; no service throughput or latency has been measured.",
+            "Markdown checks cover local file targets and Mermaid blocks. Heading anchors, external URLs and diagram rendering require separate checks.",
+            "Schema examples exercise JSON structure. Database constraints, authorization and business semantics use runtime integration tests.",
+            "Role and Skill checks compare the catalogs, source files and declared tool names. The runtime enforces policy when handling a request.",
+            "The legacy matrices contain 60 planned business cases and 8 R1 families with 37 planned acceptance checks.",
+            "The 15 historical load-model rows contain arithmetic estimates. Runtime benchmarks record measured throughput and latency.",
         ],
     }
-    (ROOT / "validation/package_check_results.json").write_text(
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(
         json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0 if not FAILURES else 1

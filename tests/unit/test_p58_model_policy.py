@@ -19,3 +19,14 @@ def test_resolution_precedence_and_ambiguous_rejection():
     policy["rules"].append({**policy["rules"][-1], "id": "other"})
     with pytest.raises(RoutingError, match="AMBIGUOUS"):
         validate_policy(policy)
+
+
+def test_resolve_validates_each_policy_revision_before_matching():
+    policy = {"installation_id": "site", "org_id": "org", "work_id": "work", "branch_id": "branch",
+              "revision": 1, "rules": [{"id": "default", "when": {}, "profile": "text"},
+                                      {"id": "writer", "when": {"role_id": "writer"}, "profile": "draft"}]}
+    actor = {"role_id": "writer"}
+    assert resolve(policy, actor)["matched_rule"] == "writer"
+    policy["rules"][1]["when"]["work_id"] = "work"
+    with pytest.raises(RoutingError, match="^INVALID_ROUTING_SELECTOR$"):
+        resolve(policy, actor)

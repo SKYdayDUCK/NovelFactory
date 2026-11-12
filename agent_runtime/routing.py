@@ -2,12 +2,14 @@
 import hashlib
 import json
 import re
+from types import MappingProxyType
 
 ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$")
 # A branch is more specific than a work and an organization than its installation.
 LEVELS = (("task_id",), ("instance_id", "task_kind"), ("instance_id",),
           ("role_id", "task_kind"), ("role_id",), ("task_kind",),
           ("branch_id",), ("work_id",), ("org_id",), ("installation_id",), ())
+_SELECTOR_PRIORITY = MappingProxyType({frozenset(keys): rank for rank, keys in enumerate(LEVELS)})
 SCOPE = ("installation_id", "org_id", "work_id", "branch_id")
 
 
@@ -34,7 +36,7 @@ def validate_rules(rules):
                 or not identifier(rule["id"]) or not identifier(rule["profile"])):
             raise RoutingError("INVALID_ROUTING_RULE")
         match = rule["when"]
-        if (not isinstance(match, dict) or set(match) not in [set(level) for level in LEVELS]
+        if (not isinstance(match, dict) or frozenset(match) not in _SELECTOR_PRIORITY
                 or not all(identifier(value) for value in match.values())):
             raise RoutingError("INVALID_ROUTING_SELECTOR")
         selector = tuple(sorted(match.items()))
@@ -64,8 +66,7 @@ def resolve(policy, actor, *, override=None):
     else:
         matches = [r for r in policy["rules"]
                    if all(subject.get(k) == v for k, v in r["when"].items())]
-        rule = min(matches, key=lambda r: next(i for i, keys in enumerate(LEVELS)
-                                               if set(keys) == set(r["when"])))
+        rule = min(matches, key=lambda r: _SELECTOR_PRIORITY[frozenset(r["when"])])
         profile, rule_id = rule["profile"], rule["id"]
     return {"profile_id": profile, "matched_rule": rule_id, "revision": policy["revision"],
             "policy_sha256": digest(policy)}

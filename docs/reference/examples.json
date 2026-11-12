@@ -1,0 +1,4480 @@
+{
+  "GET /api/v1/tasks/{task_id}": {
+    "kind": "HTTP_FIXTURE",
+    "pathBindings": {
+      "task_id": "1cba582a-e191-434b-8e39-25c65bf69011"
+    },
+    "request": {},
+    "response": {
+      "attempt_id": "c106c644-29f9-4878-802d-14cb27fe41a6",
+      "branch_id": "b43c8d56-5040-48e6-af80-2bd4f7bd7363",
+      "context_bundle_id": "ddaba142-15b6-42d4-a442-404bcf922a0b",
+      "created_at": "2026-11-12T15:46:50.259896+00:00",
+      "current_result_id": null,
+      "deadline": "2026-11-12T17:46:50.249919+00:00",
+      "dependency_fingerprint": "a0d3de988d3a04edf1cd48682713023f08c1e35914961fe9b22ea05c76369096",
+      "generation": 1,
+      "lease_expiry": "2026-11-12T16:46:50.266205+00:00",
+      "role_id": "adjudication_advisor",
+      "state": "RUNNING",
+      "task_id": "1cba582a-e191-434b-8e39-25c65bf69011",
+      "task_kind": "kernel_acceptance",
+      "updated_at": "2026-11-12T15:46:50.305982+00:00",
+      "work_id": "a86c8e6e-422f-4453-9544-191188977802",
+      "world_ref": {
+        "branch_id": "b43c8d56-5040-48e6-af80-2bd4f7bd7363",
+        "work_id": "a86c8e6e-422f-4453-9544-191188977802",
+        "world_revision_id": "1a26ad9b-af68-4589-9e4b-cd0893351ae6"
+      }
+    },
+    "test": "tests/service/test_http.py::test_http_real_task_cancellation_blocks_late_result"
+  },
+  "GET /health": {
+    "kind": "HTTP_FIXTURE",
+    "test": "tests/service/test_http.py::test_two_independent_http_processes_share_task_and_revocation_state",
+    "request": {},
+    "response": {
+      "status": "alive",
+      "release": "P0/P1"
+    }
+  },
+  "POST /api/v1/branches": {
+    "kind": "APPLICATION_FIXTURE",
+    "test": "tests/queries/test_queries.py::test_fixed_cut_stale_search_is_not_unknown_world",
+    "request": {
+      "base_world_ref": {
+        "work_id": "8eda0fbb-8dde-4c17-8776-8945d63497f3",
+        "branch_id": "39967fbf-8da7-4d5f-b2c8-4bab3526627f",
+        "world_revision_id": "fda03e53-0ca8-4fe1-a723-d6a8a724010a"
+      },
+      "idempotency_key": "watermark-fork",
+      "kind": "CANDIDATE"
+    },
+    "response": {
+      "work_id": "8eda0fbb-8dde-4c17-8776-8945d63497f3",
+      "branch_id": "40e9c221-6e31-4f07-b0df-6bc730ff24aa",
+      "world_revision_id": "aed69595-75bd-4f1a-a1ff-5b1df3f3fef7"
+    }
+  },
+  "POST /api/v1/contexts/compile": {
+    "kind": "HTTP_FIXTURE",
+    "test": "tests/service/test_http_write.py::test_http_task_to_guarded_accept_and_retry_uses_one_authoritative_commit",
+    "request": {
+      "schema_version": "2.1",
+      "task_id": "54b049a7-581a-449b-9a05-d843bf956350",
+      "generation": 1,
+      "recipe_id": "ADJUDICATOR",
+      "input_manifest_ref": {
+        "artifact_id": "6123ace3-cde3-4bc4-be63-65e28a075a80",
+        "artifact_revision_id": "8b4cd397-e478-4be9-890f-1f3106943b5b",
+        "sha256": "73e7e6fe85fc06520540868535a9f9f85167ed1270b1738ec2aa5238b1208ccf"
+      },
+      "read_contract": {
+        "revision": {
+          "mode": "FIXED",
+          "world_ref": {
+            "work_id": "c2b3b3be-9819-4313-b94f-c7421d70be47",
+            "branch_id": "2c1571e9-b687-464a-8cbc-b60c9cd9bb66",
+            "world_revision_id": "adda54d9-ede8-4ef9-91cb-1c660ca66a24"
+          }
+        },
+        "process_policy": "ALLOW_PARTIAL",
+        "index_policy": "AUTHORITATIVE",
+        "max_wait_ms": 0
+      },
+      "knowledge_cut": {
+        "plane": "WORLD"
+      },
+      "subject_time": {
+        "kind": "POINT",
+        "at": {
+          "tick": 10,
+          "phase": 0
+        }
+      },
+      "token_budget": 50000,
+      "idempotency_key": "tcp-compile"
+    },
+    "response": {
+      "schema_version": "2.1",
+      "status": "READY",
+      "compiled": {
+        "schema_version": "2.1",
+        "bundle": {
+          "schema_version": "2.0",
+          "context_bundle_id": "fcb67d34-7d4c-4b97-9308-6175c0c55773",
+          "task_id": "54b049a7-581a-449b-9a05-d843bf956350",
+          "generation": 1,
+          "world_ref": {
+            "work_id": "c2b3b3be-9819-4313-b94f-c7421d70be47",
+            "branch_id": "2c1571e9-b687-464a-8cbc-b60c9cd9bb66",
+            "world_revision_id": "adda54d9-ede8-4ef9-91cb-1c660ca66a24"
+          },
+          "story_time": {
+            "tick": 10,
+            "phase": 0
+          },
+          "role_id": "control_operator",
+          "actor_id": null,
+          "policy_version": "nf-policy-1",
+          "dependency_fingerprint": "38da0845ee9fbc392f6aee00b1928d386a68e854d68c439164b0b7305d37c651",
+          "dependency_handle": "68295104-500a-406a-ad56-c1f20616a248",
+          "permitted_evidence_refs": [],
+          "facts": [],
+          "limitations": [
+            "Requested material is not available as a determined value at this knowledge cut."
+          ]
+        },
+        "read_cut": {
+          "world_ref": {
+            "work_id": "c2b3b3be-9819-4313-b94f-c7421d70be47",
+            "branch_id": "2c1571e9-b687-464a-8cbc-b60c9cd9bb66",
+            "world_revision_id": "adda54d9-ede8-4ef9-91cb-1c660ca66a24"
+          },
+          "knowledge_cut": {
+            "plane": "WORLD"
+          },
+          "policy_version": "nf-policy-1",
+          "permission_epoch": 0,
+          "resolved_at": "2026-11-13T00:12:37.610178+09:00",
+          "source_manifest_refs": [
+            {
+              "artifact_id": "6123ace3-cde3-4bc4-be63-65e28a075a80",
+              "artifact_revision_id": "8b4cd397-e478-4be9-890f-1f3106943b5b",
+              "sha256": "73e7e6fe85fc06520540868535a9f9f85167ed1270b1738ec2aa5238b1208ccf"
+            }
+          ],
+          "read_cut_id": "55b4becb-3c85-41da-a3d6-c636d319d03c",
+          "interpretation_ref": {
+            "sha256": "04bb4e1411bc9cf3c5a1760e08d5e8e0eb3e02a6abdf738ba8ea640c6d9478f5",
+            "artifact_id": "7538614c-6de0-47c1-8374-e2e44fabbfc3",
+            "artifact_revision_id": "f31d8762-0248-4fe6-8b8c-4ff20f1c707b"
+          }
+        },
+        "compiler_version": "nf-context-1",
+        "recipe_revision_ref": {
+          "artifact_id": "32f4bd78-f840-4f9f-a4f2-278789d9b056",
+          "artifact_revision_id": "5b0eb7c4-d2ac-485a-a0a2-ad8af385bdd8",
+          "sha256": "5a3e24e3b0429bb390cd1507ab3eaba206f2b75b808f6f630d229f680e48a5c7"
+        },
+        "input_manifest_ref": {
+          "artifact_id": "6123ace3-cde3-4bc4-be63-65e28a075a80",
+          "artifact_revision_id": "8b4cd397-e478-4be9-890f-1f3106943b5b",
+          "sha256": "73e7e6fe85fc06520540868535a9f9f85167ed1270b1738ec2aa5238b1208ccf"
+        },
+        "auxiliary_knowledge_cuts": [],
+        "sections": [
+          {
+            "section_kind": "TASK",
+            "content": "Task 54b049a7-581a-449b-9a05-d843bf956350 generation 1; fixed story point {\"phase\":0,\"tick\":10}.",
+            "source_refs": [],
+            "required": true
+          },
+          {
+            "section_kind": "HARD_CONSTRAINTS",
+            "content": "Use only the supplied fixed-cut material. Unknown values remain unknown. Beliefs and plans are not objective world facts. State changes require the formal acceptance service.",
+            "source_refs": [],
+            "required": true
+          },
+          {
+            "section_kind": "WORLD",
+            "content": "[]",
+            "source_refs": [],
+            "required": true
+          },
+          {
+            "section_kind": "UNRESOLVED",
+            "content": "Requested material is not available as a determined value at this knowledge cut.",
+            "source_refs": [],
+            "required": true
+          }
+        ],
+        "hard_requirements_status": "COMPLETE_FOR_RECIPE",
+        "tokenizer_version": "utf8-byte-upper-bound-1",
+        "estimated_tokens": 352,
+        "omitted_optional_scopes": []
+      },
+      "compiled_artifact_ref": {
+        "artifact_id": "f12b9a29-97fe-4662-bb7c-2cbfba7d22cb",
+        "artifact_revision_id": "7887268a-ed11-4455-82ba-5e2d20704185",
+        "sha256": "a299aa7e8785cae89a2c651dc66751eb3139cd499cca4d1a138e4f583d99bb6f"
+      }
+    }
+  },
+  "POST /api/v1/continuity/prepare": {
+    "kind": "HTTP_FIXTURE",
+    "test": "tests/integration/test_continuity_http.py::test_http_continuity_review_publish_inspect_and_character_denial",
+    "request": {
+      "schema_version": "2.3",
+      "series_id": "15688392-ad0d-4c02-95a2-ae7af6a94a23",
+      "operation": "APPEND",
+      "world_ref": {
+        "work_id": "d17f2824-fd39-406d-87a9-c89714c8522d",
+        "branch_id": "eff44702-9ed9-4381-80ff-38a73a7f8171",
+        "world_revision_id": "06f27a93-10d7-4f63-aef1-5deeef4540dc"
+      },
+      "expected_prior_ref": null,
+      "ordered_release_refs": [
+        {
+          "artifact_id": "f390cc0f-797d-4857-b3ff-a5ac208bba10",
+          "artifact_revision_id": "0feb7139-e71e-48cf-9488-92c4ba82452d",
+          "sha256": "2c4a759ab3cc444e73b8ce152453837b5181c5588a793b6656c7318f56081046"
+        }
+      ],
+      "entries": [],
+      "revision_reason": null,
+      "idempotency_key": "prepare:2ca442c2-f5b7-432f-b170-ca12cb5edc9e"
+    },
+    "response": {
+      "artifact_id": "598e4f3a-4cd6-4371-b0c8-236628ab7ebe",
+      "artifact_revision_id": "afb2c33a-eb35-484a-a5fe-fc626a510bdc",
+      "sha256": "f2267018a0fbc4b7a7101644bea41362d51e08e0778a82fb41a00aac51237dbb"
+    }
+  },
+  "POST /api/v1/model-routes/select": {
+    "kind": "HTTP_FIXTURE",
+    "test": "tests/integration/test_runtime_upgrade_http.py::test_http_runtime_review_activation_receipt_and_server_only_model_route",
+    "request": {
+      "schema_version": "2.1",
+      "world_ref": {
+        "work_id": "7a93e5ba-49cc-4529-b7c8-2211d60605cc",
+        "branch_id": "8a3382d4-1214-4da0-bfcc-67cfe49b839e",
+        "world_revision_id": "bd478807-e65a-43f5-a826-78a5972b54e3"
+      },
+      "adapter_id": "fixture-v1",
+      "expected_ref": null,
+      "idempotency_key": "http-model"
+    },
+    "response": {
+      "artifact_id": "eacd2ab5-4af0-43a2-a88d-1471d2f9b914",
+      "artifact_revision_id": "c1456a6e-b89c-4542-b437-e1834d9dc11a",
+      "sha256": "617690faf98af5cf95210e9d3c34b22fc7e30cc3b13c0ee7ba94958a045810bf"
+    }
+  },
+  "POST /api/v1/proposals": {
+    "kind": "HTTP_FIXTURE",
+    "test": "tests/service/test_http_write.py::test_http_task_to_guarded_accept_and_retry_uses_one_authoritative_commit",
+    "request": {
+      "task_id": "54b049a7-581a-449b-9a05-d843bf956350",
+      "generation": 1,
+      "command": {
+        "template_id": "TRANSFER_ITEM",
+        "args": {
+          "item_id": "4ef873a8-4f45-56f0-ad45-67928097cea9",
+          "from_id": "3e774eb4-a3c5-5f70-a324-4dd61d43b870",
+          "to_id": "3ab18f96-5526-56ce-96bc-9bf3d66de8d4",
+          "transfer_kind": "GIFT",
+          "at": {
+            "tick": 10,
+            "phase": 0
+          }
+        }
+      },
+      "idempotency_key": "tcp-propose"
+    },
+    "response": {
+      "proposal_ref": {
+        "artifact_id": "7838c951-18d1-4627-99c6-cb89db1dd12d",
+        "artifact_revision_id": "2bd30ea9-0121-46a3-9348-a105cb1cd5f4",
+        "sha256": "ab38744f6df405be1ae41398fcac2d398409c3b1a4807b0473b432accb8feec6"
+      },
+      "approval_id": "1a99e071-f29c-4345-bd68-c5edf6fc0d2e",
+      "base_world_ref": {
+        "work_id": "c2b3b3be-9819-4313-b94f-c7421d70be47",
+        "branch_id": "2c1571e9-b687-464a-8cbc-b60c9cd9bb66",
+        "world_revision_id": "adda54d9-ede8-4ef9-91cb-1c660ca66a24"
+      },
+      "context_bundle_id": "fcb67d34-7d4c-4b97-9308-6175c0c55773",
+      "dependency_fingerprint": "38da0845ee9fbc392f6aee00b1928d386a68e854d68c439164b0b7305d37c651",
+      "dependency_handle": "68295104-500a-406a-ad56-c1f20616a248"
+    }
+  },
+  "POST /api/v1/queries/batch": {
+    "kind": "APPLICATION_FIXTURE",
+    "test": "tests/queries/test_queries.py::test_batch_one_worldref_and_inner_capabilities",
+    "request": {
+      "schema_version": "2.1",
+      "task_id": "08eeaf66-faaf-4874-95eb-5d597934af44",
+      "generation": 1,
+      "read_contract": {
+        "revision": {
+          "mode": "FIXED",
+          "world_ref": {
+            "work_id": "48e8eb89-5bd5-4410-99b2-4e832712612a",
+            "branch_id": "83c3c45c-6e8c-4040-8560-1b67a5d6d93e",
+            "world_revision_id": "b581dad6-3484-4e6c-835c-ca118738de27"
+          }
+        },
+        "process_policy": "ALLOW_PARTIAL",
+        "index_policy": "AUTHORITATIVE",
+        "max_wait_ms": 0
+      },
+      "knowledge_cut": {
+        "plane": "WORLD"
+      },
+      "items": [
+        {
+          "item_id": "state",
+          "subject_time": {
+            "kind": "POINT",
+            "at": {
+              "tick": 35,
+              "phase": 0
+            }
+          },
+          "query": {
+            "kind": "STATE",
+            "subject_ids": [
+              "487754da-5322-4b53-a334-31e1d6400c8c"
+            ],
+            "predicates": [
+              "legal_owner",
+              "possessed_by"
+            ]
+          },
+          "page_size": 100
+        },
+        {
+          "item_id": "graph",
+          "subject_time": {
+            "kind": "POINT",
+            "at": {
+              "tick": 35,
+              "phase": 0
+            }
+          },
+          "query": {
+            "kind": "NEIGHBORHOOD",
+            "seed_ids": [
+              "487754da-5322-4b53-a334-31e1d6400c8c"
+            ],
+            "predicates": [
+              "possessed_by",
+              "located_in"
+            ],
+            "max_hops": 3,
+            "max_edges": 50
+          },
+          "page_size": 100
+        }
+      ]
+    },
+    "response": {
+      "schema_version": "2.1",
+      "status": "READY",
+      "request_id": "d8791aaa-405e-4b8a-925b-4eea6436e7eb",
+      "read_cut": {
+        "world_ref": {
+          "work_id": "48e8eb89-5bd5-4410-99b2-4e832712612a",
+          "branch_id": "83c3c45c-6e8c-4040-8560-1b67a5d6d93e",
+          "world_revision_id": "b581dad6-3484-4e6c-835c-ca118738de27"
+        },
+        "knowledge_cut": {
+          "plane": "WORLD"
+        },
+        "policy_version": "nf-policy-1",
+        "permission_epoch": 0,
+        "resolved_at": "2026-11-13T00:16:21.590902+09:00",
+        "source_manifest_refs": [],
+        "read_cut_id": "04f84421-33d4-432e-ba2d-01690e956161",
+        "interpretation_ref": {
+          "sha256": "04bb4e1411bc9cf3c5a1760e08d5e8e0eb3e02a6abdf738ba8ea640c6d9478f5",
+          "artifact_id": "149bf327-a514-406d-8dce-3e1b3b96bfbc",
+          "artifact_revision_id": "319e305c-93d2-4dbc-8529-ee197af11309"
+        }
+      },
+      "items": [
+        {
+          "item_id": "state",
+          "status": "SUCCESS",
+          "payload": {
+            "kind": "STATE",
+            "state_items": [
+              {
+                "subject_id": "487754da-5322-4b53-a334-31e1d6400c8c",
+                "predicate": "legal_owner",
+                "answer": {
+                  "world_ref": {
+                    "work_id": "48e8eb89-5bd5-4410-99b2-4e832712612a",
+                    "branch_id": "83c3c45c-6e8c-4040-8560-1b67a5d6d93e",
+                    "world_revision_id": "b581dad6-3484-4e6c-835c-ca118738de27"
+                  },
+                  "story_time": {
+                    "tick": 35,
+                    "phase": 0
+                  },
+                  "plane": "WORLD",
+                  "truth_status": "DETERMINED",
+                  "evaluation_status": "EVALUATED",
+                  "knowledge_status": "KNOWN",
+                  "freshness": "CURRENT",
+                  "coverage": "COMPLETE",
+                  "value_status": "VALUE",
+                  "data": {
+                    "kind": "ENTITY",
+                    "entity_id": "fa4c8618-c0cd-4369-bbc4-7a45816b338a"
+                  },
+                  "evidence_refs": [],
+                  "dependency_handle": "71261075-b9ba-5281-9bb1-7123305510d9"
+                }
+              },
+              {
+                "subject_id": "487754da-5322-4b53-a334-31e1d6400c8c",
+                "predicate": "possessed_by",
+                "answer": {
+                  "world_ref": {
+                    "work_id": "48e8eb89-5bd5-4410-99b2-4e832712612a",
+                    "branch_id": "83c3c45c-6e8c-4040-8560-1b67a5d6d93e",
+                    "world_revision_id": "b581dad6-3484-4e6c-835c-ca118738de27"
+                  },
+                  "story_time": {
+                    "tick": 35,
+                    "phase": 0
+                  },
+                  "plane": "WORLD",
+                  "truth_status": "DETERMINED",
+                  "evaluation_status": "EVALUATED",
+                  "knowledge_status": "KNOWN",
+                  "freshness": "CURRENT",
+                  "coverage": "COMPLETE",
+                  "value_status": "VALUE",
+                  "data": {
+                    "kind": "ENTITY",
+                    "entity_id": "369ef5a5-185c-4bbe-b0a2-e214d920fa06"
+                  },
+                  "evidence_refs": [],
+                  "dependency_handle": "71261075-b9ba-5281-9bb1-7123305510d9"
+                }
+              }
+            ]
+          },
+          "freshness": "CURRENT",
+          "dependency_handle": "71261075-b9ba-5281-9bb1-7123305510d9"
+        },
+        {
+          "item_id": "graph",
+          "status": "ERROR",
+          "error": {
+            "code": "VIEW_DENIED",
+            "safe_message": "Operation is outside this role",
+            "retryable": false,
+            "request_id": "e984e118-dd83-4733-a08d-f6a81162842b",
+            "recovery": "NONE"
+          }
+        }
+      ],
+      "all_items_succeeded": false
+    }
+  },
+  "POST /api/v1/queries/semantic-assumptions": {
+    "kind": "APPLICATION_FIXTURE",
+    "test": "tests/integration/test_s9_dependencies.py::test_assumption_is_additive_source_bound_and_never_confers_another_tasks_reads",
+    "request": {
+      "task_id": "5c1d05fd-d7ca-4d9e-a525-f790d3e82466",
+      "generation": 1,
+      "dependency_handle": "6ff4d15e-1fc6-556e-92a1-bda5f04861c1",
+      "dependency_kind": "ASSUMES_TRUE",
+      "statement": "城门如常"
+    },
+    "response": {
+      "observation_id": "2a14ce6b-da2c-5713-b884-b47d12112732",
+      "proposition_key": "uncertain:dc98e11b5e42488e99566ded5a7bf8bc9c36a09534593276cc20c68ed222e8b1",
+      "uncertain": true
+    }
+  },
+  "POST /api/v1/queries/timeline": {
+    "kind": "HTTP_FIXTURE",
+    "test": "tests/service/test_http.py::test_http_rate_limit_is_explicit",
+    "request": {
+      "schema_version": "2.1",
+      "task_id": "5e7c7d02-e3e4-48a5-9d70-e6d9c01c888f",
+      "generation": 1,
+      "read_contract": {
+        "revision": {
+          "mode": "FIXED",
+          "world_ref": {
+            "work_id": "2834a756-2fba-4283-acab-702a5399edcc",
+            "branch_id": "4b07fa3a-d090-4bc8-ad57-fd40fe1774ef",
+            "world_revision_id": "1c63c809-c7ab-49b3-8a9f-45cf493e5cfc"
+          }
+        },
+        "process_policy": "REQUIRE_EVALUATED",
+        "index_policy": "AUTHORITATIVE",
+        "max_wait_ms": 0
+      },
+      "knowledge_cut": {
+        "plane": "WORLD"
+      },
+      "subject_time": {
+        "kind": "POINT",
+        "at": {
+          "tick": 1,
+          "phase": 0
+        }
+      },
+      "query": {
+        "kind": "STATE",
+        "subject_ids": [
+          "4ef873a8-4f45-56f0-ad45-67928097cea9"
+        ],
+        "predicates": [
+          "owner",
+          "active_holder"
+        ]
+      },
+      "page_size": 50,
+      "cursor": null
+    },
+    "response": {
+      "schema_version": "2.1",
+      "status": "READY",
+      "request_id": "e604b6ce-1d76-4730-8064-16158a326cd5",
+      "read_cut": {
+        "world_ref": {
+          "work_id": "2834a756-2fba-4283-acab-702a5399edcc",
+          "branch_id": "4b07fa3a-d090-4bc8-ad57-fd40fe1774ef",
+          "world_revision_id": "1c63c809-c7ab-49b3-8a9f-45cf493e5cfc"
+        },
+        "knowledge_cut": {
+          "plane": "WORLD"
+        },
+        "policy_version": "nf-policy-1",
+        "permission_epoch": 0,
+        "resolved_at": "2026-11-13T00:12:09.742094+09:00",
+        "source_manifest_refs": [],
+        "read_cut_id": "665db792-bea0-4cb1-b7a0-9db1c460f824",
+        "interpretation_ref": {
+          "sha256": "04bb4e1411bc9cf3c5a1760e08d5e8e0eb3e02a6abdf738ba8ea640c6d9478f5",
+          "artifact_id": "b9335b7b-2df0-4157-8672-81d99aa70fc3",
+          "artifact_revision_id": "ce274d49-86e2-491d-94b3-39f7cb1973cf"
+        }
+      },
+      "payload": {
+        "kind": "STATE",
+        "state_items": [
+          {
+            "subject_id": "4ef873a8-4f45-56f0-ad45-67928097cea9",
+            "predicate": "owner",
+            "answer": {
+              "world_ref": {
+                "work_id": "2834a756-2fba-4283-acab-702a5399edcc",
+                "branch_id": "4b07fa3a-d090-4bc8-ad57-fd40fe1774ef",
+                "world_revision_id": "1c63c809-c7ab-49b3-8a9f-45cf493e5cfc"
+              },
+              "story_time": {
+                "tick": 1,
+                "phase": 0
+              },
+              "plane": "WORLD",
+              "truth_status": "DETERMINED",
+              "evaluation_status": "EVALUATED",
+              "knowledge_status": "KNOWN",
+              "freshness": "CURRENT",
+              "coverage": "COMPLETE",
+              "value_status": "VALUE",
+              "data": {
+                "kind": "ENTITY",
+                "entity_id": "3e774eb4-a3c5-5f70-a324-4dd61d43b870"
+              },
+              "evidence_refs": [],
+              "dependency_handle": "fb777c6e-c852-5631-9eb7-0d0ab810368e"
+            }
+          },
+          {
+            "subject_id": "4ef873a8-4f45-56f0-ad45-67928097cea9",
+            "predicate": "active_holder",
+            "answer": {
+              "world_ref": {
+                "work_id": "2834a756-2fba-4283-acab-702a5399edcc",
+                "branch_id": "4b07fa3a-d090-4bc8-ad57-fd40fe1774ef",
+                "world_revision_id": "1c63c809-c7ab-49b3-8a9f-45cf493e5cfc"
+              },
+              "story_time": {
+                "tick": 1,
+                "phase": 0
+              },
+              "plane": "WORLD",
+              "truth_status": "DETERMINED",
+              "evaluation_status": "EVALUATED",
+              "knowledge_status": "KNOWN",
+              "freshness": "CURRENT",
+              "coverage": "COMPLETE",
+              "value_status": "VALUE",
+              "data": {
+                "kind": "ENTITY",
+                "entity_id": "3e774eb4-a3c5-5f70-a324-4dd61d43b870"
+              },
+              "evidence_refs": [],
+              "dependency_handle": "fb777c6e-c852-5631-9eb7-0d0ab810368e"
+            }
+          }
+        ]
+      },
+      "freshness": "CURRENT",
+      "dependency_handle": "fb777c6e-c852-5631-9eb7-0d0ab810368e",
+      "consistency_status": "SATISFIED"
+    }
+  },
+  "POST /api/v1/refinements/prepare": {
+    "kind": "HTTP_FIXTURE",
+    "test": "tests/service/test_refinement_http.py::test_http_refinement_is_idempotent_and_does_not_accept_world_effects",
+    "request": {
+      "schema_version": "2.3",
+      "source_world_ref": {
+        "work_id": "cc22f00b-8707-4bce-8d21-59714b49f4b8",
+        "branch_id": "c8c4d627-317e-48de-b2b3-41b89ba4e812",
+        "world_revision_id": "2843dae6-56bf-4441-a403-5db8109caae6"
+      },
+      "macro_event_ref": {
+        "occurrence_id": "0e79fe80-2eff-58e9-81e3-d7ab96251ff0",
+        "event_version_id": "fc5afbc5-d7e2-5f3a-be58-0da9a9f43a64"
+      },
+      "steps": [
+        {
+          "step_id": "f07ceed5-5e23-4c13-818d-e0357bda5351",
+          "at": {
+            "tick": 30,
+            "phase": 0
+          },
+          "participant_ids": [
+            "589b732c-449a-5c6b-ae6c-c476618694e4",
+            "a6494af2-0df7-5e2e-8447-cd3403425e61",
+            "afe75f34-871f-5a3c-917d-85d7d721957a"
+          ],
+          "depends_on": [],
+          "effects": [
+            {
+              "kind": "RESOURCE_DELTA",
+              "unit": "bag",
+              "quantity": "-10",
+              "account_id": "afe75f34-871f-5a3c-917d-85d7d721957a",
+              "effect_key": "portion:0:resource:0",
+              "resource_id": "589b732c-449a-5c6b-ae6c-c476618694e4"
+            },
+            {
+              "kind": "RESOURCE_DELTA",
+              "unit": "bag",
+              "quantity": "10",
+              "account_id": "a6494af2-0df7-5e2e-8447-cd3403425e61",
+              "effect_key": "portion:0:resource:1",
+              "resource_id": "589b732c-449a-5c6b-ae6c-c476618694e4"
+            }
+          ]
+        },
+        {
+          "step_id": "6b6d4f08-74f5-4eb6-9694-5917694830e9",
+          "at": {
+            "tick": 30,
+            "phase": 0
+          },
+          "participant_ids": [
+            "589b732c-449a-5c6b-ae6c-c476618694e4",
+            "a6494af2-0df7-5e2e-8447-cd3403425e61",
+            "afe75f34-871f-5a3c-917d-85d7d721957a"
+          ],
+          "depends_on": [],
+          "effects": [
+            {
+              "kind": "RESOURCE_DELTA",
+              "unit": "bag",
+              "quantity": "-20",
+              "account_id": "afe75f34-871f-5a3c-917d-85d7d721957a",
+              "effect_key": "portion:1:resource:0",
+              "resource_id": "589b732c-449a-5c6b-ae6c-c476618694e4"
+            },
+            {
+              "kind": "RESOURCE_DELTA",
+              "unit": "bag",
+              "quantity": "20",
+              "account_id": "a6494af2-0df7-5e2e-8447-cd3403425e61",
+              "effect_key": "portion:1:resource:1",
+              "resource_id": "589b732c-449a-5c6b-ae6c-c476618694e4"
+            }
+          ]
+        }
+      ],
+      "idempotency_key": "finite-refinement"
+    },
+    "response": {
+      "proof_ref": {
+        "artifact_id": "747598f3-4846-4ce6-9844-2fd48186a64e",
+        "artifact_revision_id": "ebc2ac8a-2866-44e4-8857-dcd55a9c3225",
+        "sha256": "144fb1c9ef3e58fea19ae10602c1ab77f5670723334c3361573241c00635042a"
+      },
+      "replacement_event_ref": {
+        "occurrence_id": "0e79fe80-2eff-58e9-81e3-d7ab96251ff0",
+        "event_version_id": "d6df2aff-be61-58fe-8c59-9e7352456f5e"
+      },
+      "repair_command": {
+        "template_id": "REPAIR_EVENT",
+        "args": {
+          "occurrence_id": "0e79fe80-2eff-58e9-81e3-d7ab96251ff0",
+          "replacement_event": {
+            "effects": [
+              {
+                "kind": "RESOURCE_DELTA",
+                "unit": "bag",
+                "quantity": "-20",
+                "account_id": "afe75f34-871f-5a3c-917d-85d7d721957a",
+                "effect_key": "portion:1:resource:0",
+                "resource_id": "589b732c-449a-5c6b-ae6c-c476618694e4"
+              },
+              {
+                "kind": "RESOURCE_DELTA",
+                "unit": "bag",
+                "quantity": "20",
+                "account_id": "a6494af2-0df7-5e2e-8447-cd3403425e61",
+                "effect_key": "portion:1:resource:1",
+                "resource_id": "589b732c-449a-5c6b-ae6c-c476618694e4"
+              },
+              {
+                "kind": "RESOURCE_DELTA",
+                "unit": "bag",
+                "quantity": "-10",
+                "account_id": "afe75f34-871f-5a3c-917d-85d7d721957a",
+                "effect_key": "portion:0:resource:0",
+                "resource_id": "589b732c-449a-5c6b-ae6c-c476618694e4"
+              },
+              {
+                "kind": "RESOURCE_DELTA",
+                "unit": "bag",
+                "quantity": "10",
+                "account_id": "a6494af2-0df7-5e2e-8447-cd3403425e61",
+                "effect_key": "portion:0:resource:1",
+                "resource_id": "589b732c-449a-5c6b-ae6c-c476618694e4"
+              }
+            ],
+            "ruleset_ref": {
+              "sha256": "6ee39dff75e99879ea9cae13a91020e8335925444c6472f7c97ba58dbaac9c70",
+              "artifact_id": "25d1174b-88b4-4a66-bab4-a97a0b60873d",
+              "artifact_revision_id": "e97d6c79-0b0e-41d8-a35c-f0d078196887"
+            },
+            "participants": [
+              "589b732c-449a-5c6b-ae6c-c476618694e4",
+              "a6494af2-0df7-5e2e-8447-cd3403425e61",
+              "afe75f34-871f-5a3c-917d-85d7d721957a"
+            ],
+            "occurrence_id": "0e79fe80-2eff-58e9-81e3-d7ab96251ff0",
+            "causal_parents": [],
+            "engine_version": "nf-reducer-1",
+            "schema_version": "2.0",
+            "effect_group_id": "6c7b48a8-215f-5a91-b462-bbc11aefb7c6",
+            "occurrence_time": {
+              "at": {
+                "tick": 30,
+                "phase": 0
+              },
+              "kind": "EXACT"
+            },
+            "adjudication_ref": {
+              "sha256": "bcd3544fe3262a2044d449be68114488a57d7c83284de5e32a533e503f8ab606",
+              "artifact_id": "395babee-7285-4b45-b41c-1f1219889970",
+              "artifact_revision_id": "a260dc10-13d7-4f44-a926-b821a51eed74"
+            },
+            "event_version_id": "d6df2aff-be61-58fe-8c59-9e7352456f5e",
+            "representation_id": "575989c7-3409-5ee2-a4c7-648977f0e7d2"
+          },
+          "reason": "Finite registered-effect equivalence; independent review required",
+          "equivalence_proof_ref": {
+            "artifact_id": "747598f3-4846-4ce6-9844-2fd48186a64e",
+            "artifact_revision_id": "ebc2ac8a-2866-44e4-8857-dcd55a9c3225",
+            "sha256": "144fb1c9ef3e58fea19ae10602c1ab77f5670723334c3361573241c00635042a"
+          }
+        }
+      }
+    }
+  },
+  "POST /api/v1/refinements/proposals": {
+    "kind": "APPLICATION_FIXTURE",
+    "test": "tests/integration/test_refinement.py::test_registered_message_schedule_and_three_actor_decision_are_preserved",
+    "request": {
+      "generation": 1,
+      "idempotency_key": "proposal:joint",
+      "proof_ref": {
+        "artifact_id": "7a3273b1-996c-434c-912e-47c9bc495dc6",
+        "artifact_revision_id": "b57b8911-1bc5-4f10-a67f-8c6b11d0d554",
+        "sha256": "3ac2498f64ef35f19acb2f7483c7d24efa8301fe27ed63cf108662aed04c1d39"
+      },
+      "task_id": "f6beb9a7-3f93-436b-a478-226d165b02ab"
+    },
+    "response": {
+      "proposal_ref": {
+        "artifact_id": "febd0c2e-e864-46b8-96c0-cb7fa0b1d9e5",
+        "artifact_revision_id": "9b0cdd7a-3051-4d3d-9c7d-607f5cfa90be",
+        "sha256": "dcd57c62cfee3c406510629fab0b1538258564a33a9a35cfad89e42d90e2257e"
+      },
+      "approval_id": null,
+      "base_world_ref": {
+        "work_id": "39e13581-5288-4b7b-8a73-c1616081ecf8",
+        "branch_id": "024a1328-5bf1-4614-ac63-78f4d452da69",
+        "world_revision_id": "1d299bf5-c6d7-4f08-98a9-c3f8bc0fe4ab"
+      },
+      "context_bundle_id": "3dcfbfca-2419-4ecb-9b10-7fd294df4414",
+      "dependency_fingerprint": "752330f76e562c2b22351b8f6f7fe906efdd71a3488b38139e9fd5f38a7fc8a3",
+      "dependency_handle": "2d04d6d8-3e6a-4658-9d53-e0e16b6c1a57"
+    }
+  },
+  "POST /api/v1/runtime-upgrades/activate": {
+    "kind": "HTTP_FIXTURE",
+    "test": "tests/integration/test_runtime_upgrade_http.py::test_http_runtime_review_activation_receipt_and_server_only_model_route",
+    "request": {
+      "schema_version": "2.1",
+      "world_ref": {
+        "work_id": "7a93e5ba-49cc-4529-b7c8-2211d60605cc",
+        "branch_id": "8a3382d4-1214-4da0-bfcc-67cfe49b839e",
+        "world_revision_id": "e951808b-669f-4fa8-baf1-163899ede984"
+      },
+      "package_ref": {
+        "artifact_id": "569bf8f9-c2e4-4635-9552-899cfab7c401",
+        "artifact_revision_id": "40aae92d-3a5b-4e5b-9192-d40cf386129d",
+        "sha256": "89b6e05f87c442bfdd98eef1fcb8ac335cc786d2f0af058854d21f00d77e020d"
+      },
+      "approval_ref": {
+        "artifact_id": "c463efae-9e76-4dca-88dc-d2eff65f68a4",
+        "artifact_revision_id": "0c324400-4678-429e-ba48-0359a42274d9",
+        "sha256": "b7e31e279ca39c0cb3b577b9efe0d13ad575461f3f3f14a64f57f0b49edda401"
+      },
+      "idempotency_key": "http-activate"
+    },
+    "response": {
+      "old_world_ref": {
+        "work_id": "7a93e5ba-49cc-4529-b7c8-2211d60605cc",
+        "branch_id": "8a3382d4-1214-4da0-bfcc-67cfe49b839e",
+        "world_revision_id": "e951808b-669f-4fa8-baf1-163899ede984"
+      },
+      "world_ref": {
+        "work_id": "7a93e5ba-49cc-4529-b7c8-2211d60605cc",
+        "branch_id": "8a3382d4-1214-4da0-bfcc-67cfe49b839e",
+        "world_revision_id": "bd478807-e65a-43f5-a826-78a5972b54e3"
+      },
+      "package_ref": {
+        "artifact_id": "569bf8f9-c2e4-4635-9552-899cfab7c401",
+        "artifact_revision_id": "40aae92d-3a5b-4e5b-9192-d40cf386129d",
+        "sha256": "89b6e05f87c442bfdd98eef1fcb8ac335cc786d2f0af058854d21f00d77e020d"
+      },
+      "approval_ref": {
+        "artifact_id": "c463efae-9e76-4dca-88dc-d2eff65f68a4",
+        "artifact_revision_id": "0c324400-4678-429e-ba48-0359a42274d9",
+        "sha256": "b7e31e279ca39c0cb3b577b9efe0d13ad575461f3f3f14a64f57f0b49edda401"
+      },
+      "new_world_effects": 0,
+      "interpretation_epoch": 1
+    }
+  },
+  "POST /api/v1/runtime-upgrades/prepare": {
+    "kind": "HTTP_FIXTURE",
+    "test": "tests/integration/test_runtime_upgrade_http.py::test_http_runtime_review_activation_receipt_and_server_only_model_route",
+    "request": {
+      "schema_version": "2.1",
+      "world_ref": {
+        "work_id": "7a93e5ba-49cc-4529-b7c8-2211d60605cc",
+        "branch_id": "8a3382d4-1214-4da0-bfcc-67cfe49b839e",
+        "world_revision_id": "e951808b-669f-4fa8-baf1-163899ede984"
+      },
+      "rules": {
+        "version": "nf-world-rules-compatible-package-2",
+        "templates": [
+          "TRANSFER_ITEM",
+          "DESTROY_ITEM",
+          "RESOURCE_TRANSFER",
+          "SET_RELATION",
+          "GUARD_LEAVE",
+          "PASS_CLEAR_ROUTE"
+        ],
+        "closed_world": true,
+        "resource_floor": "0",
+        "item_destroy_irreversible": true
+      },
+      "interpretation": {
+        "reducer": "nf-reducer-1",
+        "calendar": "integer-tick-phase-1",
+        "projector": "nf-projector-1",
+        "predicates": "nf-predicates-1",
+        "package_release": "reviewed-compatible-package-2"
+      },
+      "idempotency_key": "upgrade-prepare"
+    },
+    "response": {
+      "package_ref": {
+        "artifact_id": "569bf8f9-c2e4-4635-9552-899cfab7c401",
+        "artifact_revision_id": "40aae92d-3a5b-4e5b-9192-d40cf386129d",
+        "sha256": "89b6e05f87c442bfdd98eef1fcb8ac335cc786d2f0af058854d21f00d77e020d"
+      },
+      "rules_ref": {
+        "artifact_id": "c457de71-397e-4d9e-81cd-26fc70143daf",
+        "artifact_revision_id": "3142ee17-10cc-46ed-91d8-5b8db779e689",
+        "sha256": "bd3844fb545513255b9fb8d0095e620c64c97c0f492fec4a50e367b0bb96f326"
+      },
+      "interpretation_ref": {
+        "artifact_id": "ea88f935-2008-40b0-ac03-b0a4bec16252",
+        "artifact_revision_id": "275f575b-07e3-4d16-a5a9-3ec8ed8d707d",
+        "sha256": "be948c0fa6347899b08f87974f4c3afcbdc0694805b534d037c5c56ef55b193c"
+      }
+    }
+  },
+  "POST /api/v1/runtime-upgrades/reviews": {
+    "kind": "HTTP_FIXTURE",
+    "test": "tests/integration/test_runtime_upgrade_http.py::test_http_runtime_review_activation_receipt_and_server_only_model_route",
+    "request": {
+      "schema_version": "2.1",
+      "world_ref": {
+        "work_id": "7a93e5ba-49cc-4529-b7c8-2211d60605cc",
+        "branch_id": "8a3382d4-1214-4da0-bfcc-67cfe49b839e",
+        "world_revision_id": "e951808b-669f-4fa8-baf1-163899ede984"
+      },
+      "package_ref": {
+        "artifact_id": "569bf8f9-c2e4-4635-9552-899cfab7c401",
+        "artifact_revision_id": "40aae92d-3a5b-4e5b-9192-d40cf386129d",
+        "sha256": "89b6e05f87c442bfdd98eef1fcb8ac335cc786d2f0af058854d21f00d77e020d"
+      },
+      "decision": "APPROVE",
+      "notes": "HTTP fixture, separately authenticated reviewer",
+      "idempotency_key": "http-review"
+    },
+    "response": {
+      "artifact_id": "c463efae-9e76-4dca-88dc-d2eff65f68a4",
+      "artifact_revision_id": "0c324400-4678-429e-ba48-0359a42274d9",
+      "sha256": "b7e31e279ca39c0cb3b577b9efe0d13ad575461f3f3f14a64f57f0b49edda401"
+    }
+  },
+  "POST /api/v1/tasks": {
+    "kind": "HTTP_FIXTURE",
+    "test": "tests/service/test_http_write.py::test_http_task_to_guarded_accept_and_retry_uses_one_authoritative_commit",
+    "request": {
+      "spec": {
+        "schema_version": "2.0",
+        "task_id": "54b049a7-581a-449b-9a05-d843bf956350",
+        "generation": 0,
+        "role_id": "control_operator",
+        "task_kind": "http_acceptance",
+        "state": "READY",
+        "world_ref": {
+          "work_id": "c2b3b3be-9819-4313-b94f-c7421d70be47",
+          "branch_id": "2c1571e9-b687-464a-8cbc-b60c9cd9bb66",
+          "world_revision_id": "adda54d9-ede8-4ef9-91cb-1c660ca66a24"
+        },
+        "story_time": {
+          "tick": 10,
+          "phase": 0
+        },
+        "context_bundle_id": null,
+        "policy_version": "nf-policy-1",
+        "dependency_fingerprint": null,
+        "runtime_contract_version": "b8d0ef990c87c2bf6ae56918120654e14ca13a1f8dc12a315984148171f8d9f8",
+        "capability_grant_id": "5fd197d5-2483-427f-a3a4-7d9d20501e52",
+        "input_artifacts": [
+          {
+            "artifact_id": "6123ace3-cde3-4bc4-be63-65e28a075a80",
+            "artifact_revision_id": "8b4cd397-e478-4be9-890f-1f3106943b5b",
+            "sha256": "73e7e6fe85fc06520540868535a9f9f85167ed1270b1738ec2aa5238b1208ccf"
+          }
+        ],
+        "budget": {
+          "currency": "USD",
+          "max_amount": "1",
+          "token_budget": 50000
+        },
+        "wall_deadline": "2026-11-12T16:12:37.486528+00:00"
+      },
+      "idempotency_key": "tcp-create"
+    },
+    "response": {
+      "task_id": "54b049a7-581a-449b-9a05-d843bf956350",
+      "generation": 0,
+      "state": "READY"
+    }
+  },
+  "POST /api/v1/tasks/cancel": {
+    "kind": "HTTP_FIXTURE",
+    "test": "tests/service/test_http.py::test_http_real_task_cancellation_blocks_late_result",
+    "request": {
+      "task_id": "aa65b886-b94b-43ca-ab42-0ece2045a92b",
+      "generation": 1,
+      "idempotency_key": "http-cancel-1"
+    },
+    "response": {
+      "task_id": "aa65b886-b94b-43ca-ab42-0ece2045a92b",
+      "generation": 1,
+      "receipt_id": "a4c83512-1b66-43ae-8dbd-d618f3f17876",
+      "status": "CANCELLED"
+    }
+  },
+  "POST /api/v1/tasks/claim": {
+    "kind": "HTTP_FIXTURE",
+    "test": "tests/service/test_http_write.py::test_http_task_to_guarded_accept_and_retry_uses_one_authoritative_commit",
+    "request": {
+      "worker_id": "tcp-worker",
+      "task_id": "54b049a7-581a-449b-9a05-d843bf956350",
+      "lease_seconds": 60
+    },
+    "response": {
+      "task_id": "54b049a7-581a-449b-9a05-d843bf956350",
+      "work_id": "c2b3b3be-9819-4313-b94f-c7421d70be47",
+      "branch_id": "2c1571e9-b687-464a-8cbc-b60c9cd9bb66",
+      "principal_id": "e3ad6028-04c5-4f2f-bdf3-6867f6c08926",
+      "grant_id": "5fd197d5-2483-427f-a3a4-7d9d20501e52",
+      "task_kind": "http_acceptance",
+      "role_id": "control_operator",
+      "state": "RUNNING",
+      "generation": 1,
+      "context_bundle_id": null,
+      "dependency_fingerprint": null,
+      "lease_owner": "tcp-worker",
+      "lease_expiry": "2026-11-13T00:13:37.535036+09:00",
+      "deadline": "2026-11-13T01:12:37.486528+09:00",
+      "current_result_id": null,
+      "attempt_id": "b8a3be83-f15e-4cd5-ac07-9311e50d62f0",
+      "created_at": "2026-11-13T00:12:37.522688+09:00",
+      "updated_at": "2026-11-13T00:12:37.535036+09:00",
+      "world_ref": {
+        "work_id": "c2b3b3be-9819-4313-b94f-c7421d70be47",
+        "branch_id": "2c1571e9-b687-464a-8cbc-b60c9cd9bb66",
+        "world_revision_id": "adda54d9-ede8-4ef9-91cb-1c660ca66a24"
+      }
+    }
+  },
+  "POST /api/v1/tasks/results": {
+    "kind": "APPLICATION_FIXTURE",
+    "test": "tests/reliability/test_tasks.py::test_result_lifecycle_and_response_loss_retry",
+    "request": {
+      "result": {
+        "schema_version": "2.0",
+        "task_id": "4aa629df-7ce3-4e32-934c-89778d6f511e",
+        "generation": 1,
+        "attempt_id": "594a27b6-7b5b-4ca2-998e-406c942ffd5c",
+        "result_id": "43dd5881-285a-46ff-9751-79ea54d43fc2",
+        "context_bundle_id": "a31109f6-0cc1-49d6-89d2-d2334bd3dec4",
+        "dependency_fingerprint": "b220d352c167413937ecafc2420945acc7ada74644f5a8bafefba4e7b4e95770",
+        "status": "SUCCEEDED",
+        "artifacts": [],
+        "safe_summary": "Isolated output stored; no world effects accepted."
+      },
+      "worker_id": "worker"
+    },
+    "response": {
+      "task_id": "4aa629df-7ce3-4e32-934c-89778d6f511e",
+      "generation": 1,
+      "receipt_id": "43dd5881-285a-46ff-9751-79ea54d43fc2",
+      "status": "RESULT_STORED"
+    }
+  },
+  "POST /api/v1/tasks/{task_id}/continuity": {
+    "kind": "APPLICATION_FIXTURE",
+    "pathBindings": {
+      "task_id": "9bc1355a-864b-44f1-891e-d055766ec21e"
+    },
+    "request": {
+      "generation": 1,
+      "schema_version": "2.3",
+      "snapshot_ref": {
+        "artifact_id": "389ce9d0-c562-4177-a4ab-68f090b724bc",
+        "artifact_revision_id": "6cdbf4f5-681f-4b90-b417-4ec3672ff327",
+        "sha256": "d2a4baa1984e1679e165c365fa3b45418ab05fd542d6dce7afe7124c0f8f209b"
+      }
+    },
+    "response": {
+      "authority": "DERIVED_EDITORIAL_MEMORY_NOT_WORLD_FACT_OR_ACTOR_BELIEF",
+      "entries": [
+        {
+          "entity_ids": [
+            "3ab18f96-5526-56ce-96bc-9bf3d66de8d4"
+          ],
+          "entry_id": "6de61ae5-5ae7-45f8-a95c-8bfa66358133",
+          "epistemic_status": "LITERARY_INTERPRETATION",
+          "interpretation": "工程夹具：人物观察的距离可能变化；这不是心理事实或文学质量判断。",
+          "kind": "FORESHADOW",
+          "plane": "LITERARY",
+          "source_events": [],
+          "source_texts": [
+            {
+              "release_ref": {
+                "artifact_id": "12a70e41-226e-4a0a-a074-8dba3f9ffb8f",
+                "artifact_revision_id": "7fd00e63-a6bc-47c4-8bf4-ae6823790ded",
+                "sha256": "06c790d343b9a105b71271d6bf8c14c2087c585f8dc531c8bba1b81186bdbddc"
+              },
+              "span": {
+                "end": 8,
+                "quote_sha256": "4b7fe20117cbf253ce574179c5e2c00f959d44fb3ebc09b4ea6dcb2c9f354902",
+                "start": 0,
+                "unit": "UNICODE_CODEPOINT"
+              },
+              "text_ref": {
+                "artifact_id": "b93845b8-ca8f-4392-8fce-4a9657132f3e",
+                "artifact_revision_id": "4eb84281-8c3a-4be8-b10f-b99a7bb72042",
+                "sha256": "4b7fe20117cbf253ce574179c5e2c00f959d44fb3ebc09b4ea6dcb2c9f354902"
+              }
+            }
+          ],
+          "status": "OPEN",
+          "story_interval": {
+            "bounds": "[)",
+            "end": {
+              "phase": 1,
+              "tick": 1
+            },
+            "start": {
+              "phase": 0,
+              "tick": 1
+            }
+          },
+          "supersedes_entry_ids": [],
+          "thread_id": "ab264911-0e12-4699-90fc-8ac027847277",
+          "volume_ordinal": 1
+        }
+      ],
+      "snapshot_ref": {
+        "artifact_id": "389ce9d0-c562-4177-a4ab-68f090b724bc",
+        "artifact_revision_id": "6cdbf4f5-681f-4b90-b417-4ec3672ff327",
+        "sha256": "d2a4baa1984e1679e165c365fa3b45418ab05fd542d6dce7afe7124c0f8f209b"
+      },
+      "world_effects_applied": 0,
+      "world_ref": {
+        "branch_id": "5db33e61-d7f3-4bbe-9526-6e5aff308485",
+        "work_id": "c4d04136-297f-4c29-aba6-048cc6638164",
+        "world_revision_id": "2326a04f-f2c2-4952-92c9-68dc77959091"
+      }
+    },
+    "test": "tests/integration/test_continuity.py::test_task_delivery_is_generation_bound_and_never_exposes_future_plan_fields"
+  },
+  "POST /api/v1/works/{work_id}/continuity/inspect": {
+    "kind": "HTTP_FIXTURE",
+    "pathBindings": {
+      "work_id": "2e2104c3-35c4-4b97-b5cf-e858b7799363"
+    },
+    "request": {
+      "schema_version": "2.3",
+      "snapshot_ref": {
+        "artifact_id": "a5b6ac0a-8161-4095-9ebc-5a3ae3d8c598",
+        "artifact_revision_id": "ad7b18fc-95ab-43a1-a0e7-b7fb7220cdcc",
+        "sha256": "8b76f649212ea09e6f22479a43a54f16ebe8b036da09ba4497afeef52d36696e"
+      }
+    },
+    "response": {
+      "current_impact": {
+        "affected_volumes": [],
+        "changed_occurrence_ids": [],
+        "status": "UNCHANGED",
+        "target_world_ref": {
+          "branch_id": "4f7d7ee5-6bd8-418d-92c4-2d052d55f46d",
+          "work_id": "2e2104c3-35c4-4b97-b5cf-e858b7799363",
+          "world_revision_id": "62d244af-5295-4551-8c36-183322bc3eea"
+        },
+        "world_effects_applied": 0
+      },
+      "qualification": "NO_NEW_IMPACT_SINCE_REVIEW",
+      "snapshot": {
+        "active_thread_entries": {},
+        "authority": "DERIVED_CONTINUITY_NOT_WORLD_HISTORY",
+        "candidate_ref": {
+          "artifact_id": "cf92c1b7-c57f-499f-87b8-7a41b626db23",
+          "artifact_revision_id": "c83e751f-0132-4703-96d3-64c462409f1e",
+          "sha256": "a34ed0e4a22313393f438e294704e243c35c5e97aae967b25c378393dd807a6d"
+        },
+        "entry_evidence_status": {},
+        "historical_release_ordinals": [],
+        "impact": {
+          "affected_volumes": [],
+          "changed_occurrence_ids": [],
+          "status": "UNCHANGED",
+          "target_world_ref": {
+            "branch_id": "4f7d7ee5-6bd8-418d-92c4-2d052d55f46d",
+            "work_id": "2e2104c3-35c4-4b97-b5cf-e858b7799363",
+            "world_revision_id": "62d244af-5295-4551-8c36-183322bc3eea"
+          },
+          "world_effects_applied": 0
+        },
+        "recorded_at": "2026-11-12T15:46:42.536141+00:00",
+        "request": {
+          "entries": [],
+          "expected_prior_ref": null,
+          "idempotency_key": "prepare:d0b83824-d04c-422a-90ae-f02622585900",
+          "operation": "APPEND",
+          "ordered_release_refs": [
+            {
+              "artifact_id": "50d2f093-9dcc-4174-aa96-9a30adfa498a",
+              "artifact_revision_id": "98e53ba1-02ae-4841-8830-67f8f44617d3",
+              "sha256": "9788e47b2226d131ec8d2378c1ddf668a79b8f9712bde92e1994847c58d88b21"
+            }
+          ],
+          "revision_reason": null,
+          "schema_version": "2.3",
+          "series_id": "78c0a4f3-ff9c-4cdf-b31b-cd1f8d2e72c1",
+          "world_ref": {
+            "branch_id": "4f7d7ee5-6bd8-418d-92c4-2d052d55f46d",
+            "work_id": "2e2104c3-35c4-4b97-b5cf-e858b7799363",
+            "world_revision_id": "62d244af-5295-4551-8c36-183322bc3eea"
+          }
+        },
+        "review_ref": {
+          "artifact_id": "0f81753e-4517-4628-b5d6-16897800fa24",
+          "artifact_revision_id": "6e3f3b6a-de88-425b-82a9-240203f6f3cb",
+          "sha256": "9deb1c869a8077cc1563b64380fb02e42ead71c9029e358c70d47ba083a7a5cf"
+        },
+        "schema_version": "2.3",
+        "selection_epoch": 1,
+        "volumes": [
+          {
+            "manifest_sha256": "a1046e17569dfc147229c9b72cfcc03df9e0d344be7def2e383d7dfdaa684889",
+            "ordinal": 1,
+            "release_ref": {
+              "artifact_id": "50d2f093-9dcc-4174-aa96-9a30adfa498a",
+              "artifact_revision_id": "98e53ba1-02ae-4841-8830-67f8f44617d3",
+              "sha256": "9788e47b2226d131ec8d2378c1ddf668a79b8f9712bde92e1994847c58d88b21"
+            },
+            "volume_id": "c7ea1fe1-f9c6-4a08-85ad-02c355798161",
+            "world_ref": {
+              "branch_id": "4f7d7ee5-6bd8-418d-92c4-2d052d55f46d",
+              "work_id": "2e2104c3-35c4-4b97-b5cf-e858b7799363",
+              "world_revision_id": "62d244af-5295-4551-8c36-183322bc3eea"
+            }
+          }
+        ],
+        "world_effects_applied": 0
+      },
+      "snapshot_ref": {
+        "artifact_id": "a5b6ac0a-8161-4095-9ebc-5a3ae3d8c598",
+        "artifact_revision_id": "ad7b18fc-95ab-43a1-a0e7-b7fb7220cdcc",
+        "sha256": "8b76f649212ea09e6f22479a43a54f16ebe8b036da09ba4497afeef52d36696e"
+      },
+      "world_effects_applied": 0
+    },
+    "test": "tests/integration/test_continuity_http.py::test_http_continuity_review_publish_inspect_and_character_denial"
+  },
+  "POST /api/v1/works/{work_id}/continuity/publish": {
+    "kind": "HTTP_FIXTURE",
+    "pathBindings": {
+      "work_id": "2e2104c3-35c4-4b97-b5cf-e858b7799363"
+    },
+    "request": {
+      "candidate_ref": {
+        "artifact_id": "cf92c1b7-c57f-499f-87b8-7a41b626db23",
+        "artifact_revision_id": "c83e751f-0132-4703-96d3-64c462409f1e",
+        "sha256": "a34ed0e4a22313393f438e294704e243c35c5e97aae967b25c378393dd807a6d"
+      },
+      "idempotency_key": "3ddb68b8-039e-49fa-8852-cf431a18b0bd",
+      "review_ref": {
+        "artifact_id": "0f81753e-4517-4628-b5d6-16897800fa24",
+        "artifact_revision_id": "6e3f3b6a-de88-425b-82a9-240203f6f3cb",
+        "sha256": "9deb1c869a8077cc1563b64380fb02e42ead71c9029e358c70d47ba083a7a5cf"
+      },
+      "schema_version": "2.3"
+    },
+    "response": {
+      "external_delivery": "NOT_REQUESTED",
+      "selection_epoch": 1,
+      "snapshot_ref": {
+        "artifact_id": "a5b6ac0a-8161-4095-9ebc-5a3ae3d8c598",
+        "artifact_revision_id": "ad7b18fc-95ab-43a1-a0e7-b7fb7220cdcc",
+        "sha256": "8b76f649212ea09e6f22479a43a54f16ebe8b036da09ba4497afeef52d36696e"
+      },
+      "world_effects_applied": 0,
+      "world_ref": {
+        "branch_id": "4f7d7ee5-6bd8-418d-92c4-2d052d55f46d",
+        "work_id": "2e2104c3-35c4-4b97-b5cf-e858b7799363",
+        "world_revision_id": "62d244af-5295-4551-8c36-183322bc3eea"
+      }
+    },
+    "test": "tests/integration/test_continuity_http.py::test_http_continuity_review_publish_inspect_and_character_denial"
+  },
+  "POST /api/v1/works/{work_id}/continuity/readings": {
+    "kind": "HTTP_FIXTURE",
+    "pathBindings": {
+      "work_id": "2e2104c3-35c4-4b97-b5cf-e858b7799363"
+    },
+    "request": {
+      "candidate_ref": {
+        "artifact_id": "cf92c1b7-c57f-499f-87b8-7a41b626db23",
+        "artifact_revision_id": "c83e751f-0132-4703-96d3-64c462409f1e",
+        "sha256": "a34ed0e4a22313393f438e294704e243c35c5e97aae967b25c378393dd807a6d"
+      },
+      "idempotency_key": "07e03c59-94ef-463a-9295-6a49b3215adf",
+      "schema_version": "2.3"
+    },
+    "response": {
+      "candidate": {
+        "authority": "DERIVED_CONTINUITY_NOT_WORLD_HISTORY",
+        "candidate_id": "1b3461c3-4c32-4933-8f03-bcdce282f07c",
+        "created_by": "b7040245-28d2-4b2d-a21e-125bb10745a2",
+        "impact": {
+          "affected_volumes": [],
+          "changed_occurrence_ids": [],
+          "status": "UNCHANGED",
+          "target_world_ref": {
+            "branch_id": "4f7d7ee5-6bd8-418d-92c4-2d052d55f46d",
+            "work_id": "2e2104c3-35c4-4b97-b5cf-e858b7799363",
+            "world_revision_id": "62d244af-5295-4551-8c36-183322bc3eea"
+          },
+          "world_effects_applied": 0
+        },
+        "input_sha256": "4392c4a8eddd988cc4633fda3b9b45c97ca028bcb3290403f1a1d2b09586c46a",
+        "recorded_at": "2026-11-12T15:46:42.458918+00:00",
+        "request": {
+          "entries": [],
+          "expected_prior_ref": null,
+          "idempotency_key": "prepare:d0b83824-d04c-422a-90ae-f02622585900",
+          "operation": "APPEND",
+          "ordered_release_refs": [
+            {
+              "artifact_id": "50d2f093-9dcc-4174-aa96-9a30adfa498a",
+              "artifact_revision_id": "98e53ba1-02ae-4841-8830-67f8f44617d3",
+              "sha256": "9788e47b2226d131ec8d2378c1ddf668a79b8f9712bde92e1994847c58d88b21"
+            }
+          ],
+          "revision_reason": null,
+          "schema_version": "2.3",
+          "series_id": "78c0a4f3-ff9c-4cdf-b31b-cd1f8d2e72c1",
+          "world_ref": {
+            "branch_id": "4f7d7ee5-6bd8-418d-92c4-2d052d55f46d",
+            "work_id": "2e2104c3-35c4-4b97-b5cf-e858b7799363",
+            "world_revision_id": "62d244af-5295-4551-8c36-183322bc3eea"
+          }
+        },
+        "schema_version": "2.3",
+        "world_effects_applied": 0
+      },
+      "comprehension": "NOT_VERIFIED",
+      "original_texts": [
+        {
+          "edition_role": "PROPOSED_EDITION",
+          "release_ref": {
+            "artifact_id": "50d2f093-9dcc-4174-aa96-9a30adfa498a",
+            "artifact_revision_id": "98e53ba1-02ae-4841-8830-67f8f44617d3",
+            "sha256": "9788e47b2226d131ec8d2378c1ddf668a79b8f9712bde92e1994847c58d88b21"
+          },
+          "text": "北窗的雨声很轻。",
+          "text_ref": {
+            "artifact_id": "ca2add7f-e9dc-4f0c-9d45-8a5d93c8e5a7",
+            "artifact_revision_id": "ca87c368-1774-4391-bd80-aa26e7c2d176",
+            "sha256": "4b7fe20117cbf253ce574179c5e2c00f959d44fb3ebc09b4ea6dcb2c9f354902"
+          },
+          "volume_ordinal": 1
+        },
+        {
+          "edition_role": "PROPOSED_EDITION",
+          "release_ref": {
+            "artifact_id": "50d2f093-9dcc-4174-aa96-9a30adfa498a",
+            "artifact_revision_id": "98e53ba1-02ae-4841-8830-67f8f44617d3",
+            "sha256": "9788e47b2226d131ec8d2378c1ddf668a79b8f9712bde92e1994847c58d88b21"
+          },
+          "text": "南岸的水声很远。",
+          "text_ref": {
+            "artifact_id": "5b2e15e1-1e8e-477c-9a86-fb453aac0a73",
+            "artifact_revision_id": "f528c4f0-5d0d-41d0-a1f0-35822975937f",
+            "sha256": "866bc5c95c290ef8047aa1d75dea266c4f1423daa61c317fb3729ba2def55747"
+          },
+          "volume_ordinal": 1
+        }
+      ],
+      "reading_ref": {
+        "artifact_id": "097ef13c-99ed-4265-b652-31e54d50de96",
+        "artifact_revision_id": "81a4a301-ec99-41fe-ac5b-bed7b68160a0",
+        "sha256": "bfd7d45128d00b7bd0bcadf5f12c19294a021d3f4ea399794c420318c401fab8"
+      },
+      "world_effects_applied": 0
+    },
+    "test": "tests/integration/test_continuity_http.py::test_http_continuity_review_publish_inspect_and_character_denial"
+  },
+  "POST /api/v1/works/{work_id}/continuity/reviews": {
+    "kind": "HTTP_FIXTURE",
+    "pathBindings": {
+      "work_id": "2e2104c3-35c4-4b97-b5cf-e858b7799363"
+    },
+    "request": {
+      "acknowledged_affected_ordinals": [],
+      "candidate_ref": {
+        "artifact_id": "cf92c1b7-c57f-499f-87b8-7a41b626db23",
+        "artifact_revision_id": "c83e751f-0132-4703-96d3-64c462409f1e",
+        "sha256": "a34ed0e4a22313393f438e294704e243c35c5e97aae967b25c378393dd807a6d"
+      },
+      "decision": "APPROVED",
+      "idempotency_key": "20ce91c4-a6a0-4065-9e27-a52914b26041",
+      "reading_ref": {
+        "artifact_id": "097ef13c-99ed-4265-b652-31e54d50de96",
+        "artifact_revision_id": "81a4a301-ec99-41fe-ac5b-bed7b68160a0",
+        "sha256": "bfd7d45128d00b7bd0bcadf5f12c19294a021d3f4ea399794c420318c401fab8"
+      },
+      "reason": "Independent identity, deterministic transport fixture",
+      "schema_version": "2.3"
+    },
+    "response": {
+      "artifact_id": "0f81753e-4517-4628-b5d6-16897800fa24",
+      "artifact_revision_id": "6e3f3b6a-de88-425b-82a9-240203f6f3cb",
+      "sha256": "9deb1c869a8077cc1563b64380fb02e42ead71c9029e358c70d47ba083a7a5cf"
+    },
+    "test": "tests/integration/test_continuity_http.py::test_http_continuity_review_publish_inspect_and_character_denial"
+  },
+  "POST /api/v1/world/accept": {
+    "kind": "APPLICATION_FIXTURE",
+    "test": "tests/integration/test_world_kernel.py::test_legacy_strict_entry_uses_same_writer",
+    "request": {
+      "schema_version": "2.0",
+      "task_id": "b6983138-e533-4030-aead-8a552f117c6d",
+      "generation": 1,
+      "context_bundle_id": "03bacdbd-3489-4e53-b85c-62ba6d78c4e0",
+      "proposal_ref": {
+        "artifact_id": "8195ba0f-00b2-4eb9-8a53-7a27373b4683",
+        "artifact_revision_id": "809e6f35-dbbe-4752-8a7d-faaa9fefa0de",
+        "sha256": "016615d4ce3fbc2249e9ceea7a4e0153055439c37fe04c2b37187f785305a1dc"
+      },
+      "approval_refs": [
+        "5e05e090-4dbb-493d-a00f-d3a32c2dc8ea"
+      ],
+      "idempotency_key": "accept:ee558786-c191-4d5e-9cd0-487e122e0795",
+      "dependency_fingerprint": "da4a1b63631865672cb442952441d9b6c065d0031135739988abf8932cd43011",
+      "expected_world_ref": {
+        "work_id": "08a67b38-90dc-4818-902b-e4c0d5bd0ceb",
+        "branch_id": "2c9997e4-2b3e-4cbf-aa22-4cc54d60ec9c",
+        "world_revision_id": "f3d192cd-c36f-4bd8-9eb5-ddad97f1fed9"
+      }
+    },
+    "response": {
+      "command_id": "d1360057-e467-47e9-8ba6-718b5c9a5ea3",
+      "world_ref": {
+        "work_id": "08a67b38-90dc-4818-902b-e4c0d5bd0ceb",
+        "branch_id": "2c9997e4-2b3e-4cbf-aa22-4cc54d60ec9c",
+        "world_revision_id": "5d1eb6e5-f3a8-4ec8-a312-0aeac2002431"
+      },
+      "branch_seq": 1,
+      "accepted_event_refs": [
+        {
+          "occurrence_id": "282bfba5-865c-574d-80fa-72a40fdb4a0c",
+          "event_version_id": "f849f6de-63e6-54b4-9fed-d48ab80c41a7"
+        }
+      ],
+      "manifest_sha256": "cbc9dacf96f5ba7e3d47c9c49d6d7fb152cd9bf0a5d525ced5d11f7dae0533d1",
+      "recorded_at": "2026-11-13T00:18:10.711066+09:00"
+    }
+  },
+  "POST /api/v1/world/accept-guarded": {
+    "kind": "HTTP_FIXTURE",
+    "test": "tests/service/test_http_write.py::test_http_task_to_guarded_accept_and_retry_uses_one_authoritative_commit",
+    "request": {
+      "schema_version": "2.1",
+      "task_id": "54b049a7-581a-449b-9a05-d843bf956350",
+      "generation": 1,
+      "context_bundle_id": "fcb67d34-7d4c-4b97-9308-6175c0c55773",
+      "concurrency_mode": "DEPENDENCY_GUARDED",
+      "base_world_ref": {
+        "work_id": "c2b3b3be-9819-4313-b94f-c7421d70be47",
+        "branch_id": "2c1571e9-b687-464a-8cbc-b60c9cd9bb66",
+        "world_revision_id": "adda54d9-ede8-4ef9-91cb-1c660ca66a24"
+      },
+      "proposal_ref": {
+        "artifact_id": "7838c951-18d1-4627-99c6-cb89db1dd12d",
+        "artifact_revision_id": "2bd30ea9-0121-46a3-9348-a105cb1cd5f4",
+        "sha256": "ab38744f6df405be1ae41398fcac2d398409c3b1a4807b0473b432accb8feec6"
+      },
+      "approval_refs": [
+        "1a99e071-f29c-4345-bd68-c5edf6fc0d2e"
+      ],
+      "idempotency_key": "tcp-accept",
+      "acceptance_certificate_ref": {
+        "artifact_id": "022484ab-14f0-42df-a388-f3289dccde4c",
+        "artifact_revision_id": "ce373b00-9074-4b34-9158-97c26bc6fda2",
+        "sha256": "2dd781c602b2965b8b33de36be90bb1bfb87b1b925702e85521a4c858cee82d0"
+      },
+      "dependency_fingerprint": "38da0845ee9fbc392f6aee00b1928d386a68e854d68c439164b0b7305d37c651"
+    },
+    "response": {
+      "command_id": "894ee3f1-a4f5-4cbf-8a1e-210931703b2e",
+      "world_ref": {
+        "work_id": "c2b3b3be-9819-4313-b94f-c7421d70be47",
+        "branch_id": "2c1571e9-b687-464a-8cbc-b60c9cd9bb66",
+        "world_revision_id": "af3f7b15-8dbc-4f44-8d10-d374c43c3e33"
+      },
+      "branch_seq": 1,
+      "accepted_event_refs": [
+        {
+          "occurrence_id": "5f7de733-7248-5eee-a525-a400a9afd30e",
+          "event_version_id": "c1882634-1d17-5ec7-9de2-8f13b708b739"
+        }
+      ],
+      "manifest_sha256": "9cdd292cad9bd1dec704ecb8c022c3dad45ed0bde3f029fb5e43617a84f052ad",
+      "recorded_at": "2026-11-13T00:12:37.924569+09:00",
+      "original_base_world_ref": {
+        "work_id": "c2b3b3be-9819-4313-b94f-c7421d70be47",
+        "branch_id": "2c1571e9-b687-464a-8cbc-b60c9cd9bb66",
+        "world_revision_id": "adda54d9-ede8-4ef9-91cb-1c660ca66a24"
+      },
+      "validation_world_ref": {
+        "work_id": "c2b3b3be-9819-4313-b94f-c7421d70be47",
+        "branch_id": "2c1571e9-b687-464a-8cbc-b60c9cd9bb66",
+        "world_revision_id": "adda54d9-ede8-4ef9-91cb-1c660ca66a24"
+      },
+      "parent_world_ref": {
+        "work_id": "c2b3b3be-9819-4313-b94f-c7421d70be47",
+        "branch_id": "2c1571e9-b687-464a-8cbc-b60c9cd9bb66",
+        "world_revision_id": "adda54d9-ede8-4ef9-91cb-1c660ca66a24"
+      },
+      "acceptance_certificate_ref": {
+        "artifact_id": "022484ab-14f0-42df-a388-f3289dccde4c",
+        "artifact_revision_id": "ce373b00-9074-4b34-9158-97c26bc6fda2",
+        "sha256": "2dd781c602b2965b8b33de36be90bb1bfb87b1b925702e85521a4c858cee82d0"
+      },
+      "proposal_ref": {
+        "sha256": "ab38744f6df405be1ae41398fcac2d398409c3b1a4807b0473b432accb8feec6",
+        "artifact_id": "7838c951-18d1-4627-99c6-cb89db1dd12d",
+        "artifact_revision_id": "2bd30ea9-0121-46a3-9348-a105cb1cd5f4"
+      }
+    }
+  },
+  "POST /api/v1/world/acceptance-certificates": {
+    "kind": "HTTP_FIXTURE",
+    "test": "tests/service/test_http_write.py::test_http_task_to_guarded_accept_and_retry_uses_one_authoritative_commit",
+    "request": {
+      "schema_version": "2.1",
+      "task_id": "54b049a7-581a-449b-9a05-d843bf956350",
+      "generation": 1,
+      "context_bundle_id": "fcb67d34-7d4c-4b97-9308-6175c0c55773",
+      "concurrency_mode": "DEPENDENCY_GUARDED",
+      "base_world_ref": {
+        "work_id": "c2b3b3be-9819-4313-b94f-c7421d70be47",
+        "branch_id": "2c1571e9-b687-464a-8cbc-b60c9cd9bb66",
+        "world_revision_id": "adda54d9-ede8-4ef9-91cb-1c660ca66a24"
+      },
+      "proposal_ref": {
+        "artifact_id": "7838c951-18d1-4627-99c6-cb89db1dd12d",
+        "artifact_revision_id": "2bd30ea9-0121-46a3-9348-a105cb1cd5f4",
+        "sha256": "ab38744f6df405be1ae41398fcac2d398409c3b1a4807b0473b432accb8feec6"
+      },
+      "approval_refs": [
+        "1a99e071-f29c-4345-bd68-c5edf6fc0d2e"
+      ],
+      "dependency_handle": "68295104-500a-406a-ad56-c1f20616a248",
+      "idempotency_key": "tcp-prepare"
+    },
+    "response": {
+      "artifact_id": "022484ab-14f0-42df-a388-f3289dccde4c",
+      "artifact_revision_id": "ce373b00-9074-4b34-9158-97c26bc6fda2",
+      "sha256": "2dd781c602b2965b8b33de36be90bb1bfb87b1b925702e85521a4c858cee82d0"
+    }
+  },
+  "POST /api/v1/world/promotions": {
+    "kind": "APPLICATION_FIXTURE",
+    "test": "tests/integration/test_history_repair.py::test_r1_b_reviewed_loan_to_gift_preserves_history_and_promotes",
+    "request": {
+      "candidate_world_ref": {
+        "work_id": "aacc7d01-b43b-44df-aedb-504052016fc5",
+        "branch_id": "4c9396de-9ce3-4597-9a4e-e0b55693a588",
+        "world_revision_id": "d929c4a1-b01b-4a85-a002-8dd0507eae88"
+      },
+      "idempotency_key": "r1-b:promote",
+      "old_world_ref": {
+        "work_id": "aacc7d01-b43b-44df-aedb-504052016fc5",
+        "branch_id": "70be9eb9-f861-4ff8-be7d-99f826ac6f5c",
+        "world_revision_id": "5637b315-626f-407e-96a5-2d5edf760ce6"
+      }
+    },
+    "response": {
+      "work_id": "aacc7d01-b43b-44df-aedb-504052016fc5",
+      "branch_id": "4c9396de-9ce3-4597-9a4e-e0b55693a588",
+      "world_revision_id": "d929c4a1-b01b-4a85-a002-8dd0507eae88"
+    }
+  },
+  "aw_capabilities": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/tests/test_installation_ownership.py::test_new_org_has_one_provisioning_installation",
+    "request": {
+      "protocol_version": "aw-nf.v1"
+    },
+    "response": {
+      "protocol_version": "aw-nf.v1",
+      "installation_id": "one",
+      "nf_instance_id": "nf-one",
+      "grant_epoch": 1,
+      "max_argument_bytes": 32768,
+      "max_ttl_seconds": 86400,
+      "nf_commit": "df1e0cc904e3b94a360d86e3a3e00bfec3258673",
+      "role_catalog_hash": "5477dd96125081665d0ff545d26b0487f949b12b34e3d81cc0f4e811be276bef",
+      "skill_catalog_hash": "c9036422791a0319312367db4fc1e554d0e2bf5b27387d41a6efbedc428e70db"
+    }
+  },
+  "aw_delegate": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/integration/test_paired_restore.py::test_physical_pitr_both_directions",
+    "request": {
+      "operation_id": "persist-before-nf",
+      "slot_id": "scene.summary",
+      "max_amount": "0.10",
+      "token_limit": 100000
+    },
+    "response": {
+      "operation_id": "35ff6d03-7821-47b4-a129-db52a96aa453",
+      "state": "REQUESTED"
+    }
+  },
+  "aw_delivery_ack": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/tests/test_w2_stdio.py::test_temporary_route_and_private_mail_are_scoped_over_stdio",
+    "request": {
+      "message_id": "0c623c22-e595-4743-b1cf-f21e36940605"
+    },
+    "response": {
+      "status": "ACKNOWLEDGED",
+      "message_id": "0c623c22-e595-4743-b1cf-f21e36940605",
+      "sequence": 1,
+      "acknowledged_at": "2026-11-13T00:09:09.736866+09:00"
+    }
+  },
+  "aw_dynamic_skill_attest": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/integration/test_creative_review_independence.py::test_editor_rechecks_dynamic_reviewer_skill_after_signed_report",
+    "request": {
+      "binding_id": "8a8957ad-1c22-47d8-9db6-3334cd91937e",
+      "nf": {
+        "role_id": "reviewer",
+        "task_kind": "literary",
+        "installation_epoch": 1,
+        "installation_id": "3654949c-604b-405b-a425-07b5d58fa251",
+        "org_id": "3d261afc-eb09-424b-8d51-40db9c51d2c3",
+        "nf_instance_id": "ac2af196-f8c6-4436-aece-382cf9667baa",
+        "work_id": "97f2ce08-2f60-43c2-9d4d-ba10daa0b1b2",
+        "branch_id": "8a3e8447-2116-459d-a62d-663b1a64b219"
+      },
+      "freeze_task": false
+    },
+    "response": {
+      "binding": {
+        "org_id": "3d261afc-eb09-424b-8d51-40db9c51d2c3",
+        "installation_id": "3654949c-604b-405b-a425-07b5d58fa251",
+        "employee_id": "reviewer",
+        "employment_revision": 1,
+        "grant_epoch": 1,
+        "binding_id": "8a8957ad-1c22-47d8-9db6-3334cd91937e",
+        "skill_id": "review-reading",
+        "source_revision": "r1",
+        "content_sha": "f7e94368ba43c23788df0bdc061b012f5cbed76bfe50822092921c8fd122f377"
+      },
+      "nf": {
+        "role_id": "reviewer",
+        "task_kind": "literary",
+        "installation_epoch": 1,
+        "installation_id": "3654949c-604b-405b-a425-07b5d58fa251",
+        "org_id": "3d261afc-eb09-424b-8d51-40db9c51d2c3",
+        "nf_instance_id": "ac2af196-f8c6-4436-aece-382cf9667baa",
+        "work_id": "97f2ce08-2f60-43c2-9d4d-ba10daa0b1b2",
+        "branch_id": "8a3e8447-2116-459d-a62d-663b1a64b219"
+      },
+      "task": null,
+      "frozen": false,
+      "skill_epoch": 1,
+      "expires_at": "2026-11-13T00:21:58.738739+09:00",
+      "skill_mode": "literary"
+    }
+  },
+  "aw_end": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/tests/test_w1_stdio.py::test_hiring_tenure_and_restart_over_stdio",
+    "request": {
+      "operation_id": "end",
+      "expected_revision": 4,
+      "employee_id": "relief"
+    },
+    "response": {
+      "org_id": "c599ec6b5aef4f699b64713bc0af84b9",
+      "revision": 5,
+      "employee_id": "relief",
+      "employment_revision": 4
+    }
+  },
+  "aw_handoff": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/tests/test_delegation_permissions.py::test_live_roles_handoff_budget_race_and_revoked_slot_replay",
+    "request": {
+      "operation_id": "e3937223-eb38-4683-bc5e-094e886c16e0",
+      "handoff_id": "handoff-1",
+      "recipient": "actor-2"
+    },
+    "response": {
+      "operation_id": "e3937223-eb38-4683-bc5e-094e886c16e0",
+      "handoff_id": "handoff-1",
+      "recipient": "actor-2"
+    }
+  },
+  "aw_hire": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/tests/test_w1_stdio.py::test_hiring_tenure_and_restart_over_stdio",
+    "request": {
+      "operation_id": "hire",
+      "expected_revision": 1,
+      "employee_id": "relief",
+      "role_id": "character_actor",
+      "supervisor_id": "volume",
+      "team_id": "actors"
+    },
+    "response": {
+      "org_id": "c599ec6b5aef4f699b64713bc0af84b9",
+      "revision": 2,
+      "employee_id": "relief",
+      "employment_revision": 1
+    }
+  },
+  "aw_history_get": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/tests/test_legacy_paid_reviews.py::test_legacy_paid_review_requires_own_nf_installation[w004]",
+    "request": {
+      "limit": 200
+    },
+    "response": {
+      "source_cut": 24,
+      "events": [
+        {
+          "seq": 8,
+          "source": "aw_employment_versions",
+          "ref_id": "reviewer",
+          "data": {
+            "status": "ACTIVE",
+            "role_id": "reviewer",
+            "employee_id": "reviewer",
+            "org_revision": 1,
+            "employment_revision": 1
+          }
+        },
+        {
+          "seq": 12,
+          "source": "aw_delegations",
+          "ref_id": "28e48b5d-cbc6-4117-a4e9-af40e6ba941b",
+          "data": {
+            "state": "SETTLED",
+            "owner_id": "reviewer",
+            "last_error": null,
+            "operation_id": "28e48b5d-cbc6-4117-a4e9-af40e6ba941b"
+          }
+        },
+        {
+          "seq": 21,
+          "source": "aw_reviews",
+          "ref_id": "7c02b7ee-681b-415c-b642-e4f0deb16083",
+          "data": {
+            "mode": "PROSE",
+            "state": "PENDING",
+            "deadline": "2026-11-13T01:13:05.325324+09:00",
+            "round_no": 1,
+            "review_id": "7c02b7ee-681b-415c-b642-e4f0deb16083"
+          }
+        },
+        {
+          "seq": 22,
+          "source": "aw_reviews",
+          "ref_id": "88562fe7-1f9d-406f-9d6a-c46725e8fa54",
+          "data": {
+            "mode": "PROSE",
+            "state": "PENDING",
+            "deadline": "2026-11-13T01:13:05.29795+09:00",
+            "round_no": 1,
+            "review_id": "88562fe7-1f9d-406f-9d6a-c46725e8fa54"
+          }
+        }
+      ],
+      "next_cursor": null
+    }
+  },
+  "aw_mailbox_get": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/tests/test_w2_stdio.py::test_temporary_route_and_private_mail_are_scoped_over_stdio",
+    "request": {},
+    "response": {
+      "items": [],
+      "next_cursor": 0
+    }
+  },
+  "aw_message_body_get": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/tests/test_live_mailbox.py::test_persistent_mailbox_after_stream_loss_and_sender_revocation",
+    "request": {
+      "message_id": "c6d6c1ca-1352-4565-ad23-b24ed046995b"
+    },
+    "response": {
+      "content": "bounded fixture"
+    }
+  },
+  "aw_message_body_put": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/tests/test_live_mailbox.py::test_persistent_mailbox_after_stream_loss_and_sender_revocation",
+    "request": {
+      "recipient": "actor-1",
+      "scope_ref": "organization",
+      "operation_id": "body",
+      "content": "bounded fixture"
+    },
+    "response": {
+      "body_ref": "392b3c8d-a894-41c8-bd8b-80c025d16f28"
+    }
+  },
+  "aw_message_send": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/integration/test_dual_stdio.py::test_two_live_mcp_servers_recover_accepted_task_after_lost_reply",
+    "request": {
+      "operation_id": "40962350-8d80-4f7f-96db-c2fa44f1f9c1",
+      "recipient": "actor-1",
+      "kind": "ASSIGN",
+      "scope_ref": "organization",
+      "graph_revision": 1,
+      "ttl_seconds": 600
+    },
+    "response": {
+      "message_id": "eeb2d996-2abe-4193-9fac-7b64505d0736",
+      "status": "QUEUED",
+      "sequence": 1
+    }
+  },
+  "aw_model_policy_get": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/tests/test_p58_model_policies.py::test_manager_only_versioned_publish_and_export",
+    "request": {
+      "work_id": "9121f75a-2bec-4fed-bf15-60f9a54836d6",
+      "branch_id": "31dff7ec-cd19-4919-a611-753dc8752adc"
+    },
+    "response": {
+      "org_id": "63c37f19-519e-4f74-ace5-3de0eb144c94",
+      "installation_id": "d7030868-c72b-4f94-8301-9369648e6a3e",
+      "work_id": "9121f75a-2bec-4fed-bf15-60f9a54836d6",
+      "branch_id": "31dff7ec-cd19-4919-a611-753dc8752adc",
+      "revision": 1,
+      "rules": [
+        {
+          "id": "system",
+          "when": {},
+          "profile": "codex-v1"
+        }
+      ]
+    }
+  },
+  "aw_model_policy_publish": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/tests/test_p58_model_policies.py::test_manager_only_versioned_publish_and_export",
+    "request": {
+      "work_id": "9121f75a-2bec-4fed-bf15-60f9a54836d6",
+      "branch_id": "31dff7ec-cd19-4919-a611-753dc8752adc",
+      "expected_revision": 0,
+      "rules": [
+        {
+          "id": "system",
+          "when": {},
+          "profile": "codex-v1"
+        }
+      ]
+    },
+    "response": {
+      "org_id": "63c37f19-519e-4f74-ace5-3de0eb144c94",
+      "installation_id": "d7030868-c72b-4f94-8301-9369648e6a3e",
+      "work_id": "9121f75a-2bec-4fed-bf15-60f9a54836d6",
+      "branch_id": "31dff7ec-cd19-4919-a611-753dc8752adc",
+      "revision": 1,
+      "rules": [
+        {
+          "id": "system",
+          "when": {},
+          "profile": "codex-v1"
+        }
+      ]
+    }
+  },
+  "aw_preset_apply": {
+    "kind": "EXECUTED_REGISTERED_HANDLER",
+    "test": "workshop/tests/test_preset_fences.py::test_preview_cas_switch_across_four_presets_and_restore_tenure",
+    "request": {
+      "preset": "Standard",
+      "operation_id": "4",
+      "expected_revision": 4,
+      "preview_sha": "749e05049effe57eacc992f06411deb9afda94626c509d1ce0e7146085ee64a5"
+    },
+    "response": {
+      "revision": 5,
+      "preset": "Standard",
+      "added": [],
+      "suspended": [
+        "ops",
+        "stats",
+        "world"
+      ],
+      "reactivated": []
+    }
+  },
+  "aw_preset_preview": {
+    "kind": "EXECUTED_REGISTERED_HANDLER",
+    "test": "workshop/tests/test_preset_fences.py::test_preview_cas_switch_across_four_presets_and_restore_tenure",
+    "request": {
+      "preset": "Standard"
+    },
+    "response": {
+      "org_id": "2e6bae23148744a39906a389a3e0029b",
+      "revision": 4,
+      "from": "Research-Audit",
+      "to": "Standard",
+      "add": [],
+      "suspend": [
+        "ops",
+        "stats",
+        "world"
+      ],
+      "reactivate": [],
+      "blocked": [],
+      "preview_sha": "749e05049effe57eacc992f06411deb9afda94626c509d1ce0e7146085ee64a5"
+    }
+  },
+  "aw_progress_get": {
+    "kind": "EXECUTED_REGISTERED_HANDLER",
+    "test": "workshop/tests/test_manager.py::test_installation_isolates_progress_history_and_idempotency",
+    "request": {
+      "operation_id": "09a330ff-8769-484a-9cb4-0c9a0830f07f"
+    },
+    "response": {
+      "slot_id": "scene-A",
+      "owner_id": "actor-1",
+      "state": "REQUESTED",
+      "last_error": null,
+      "task_state": null
+    }
+  },
+  "aw_resume_project": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/integration/test_paired_restore.py::test_physical_pitr_both_directions",
+    "request": {
+      "operation_id": "pending-before-pitr"
+    },
+    "response": {
+      "request_id": "8adafe7a-fc9c-4c07-81a0-5d49362870fd",
+      "state": "PENDING",
+      "result": null
+    }
+  },
+  "aw_review_decide": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/tests/test_review_stdio.py::test_independent_reviewer_signs_all_seven_modes_over_stdio",
+    "request": {
+      "review_id": "98de76ea-3bb1-4503-8db3-1cbba4c10598",
+      "operation_id": "sign-PROSE",
+      "outcome": "APPROVED",
+      "reason": "VOICE",
+      "evidence_ref": "proxied-evidence"
+    },
+    "response": {
+      "review_id": "98de76ea-3bb1-4503-8db3-1cbba4c10598",
+      "state": "APPROVED"
+    }
+  },
+  "aw_review_get": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/tests/test_review_stdio.py::test_independent_reviewer_signs_all_seven_modes_over_stdio",
+    "request": {
+      "review_id": "98de76ea-3bb1-4503-8db3-1cbba4c10598"
+    },
+    "response": {
+      "mode": "PROSE",
+      "state": "PENDING",
+      "round_no": 1,
+      "reviewer_id": "reviewer",
+      "execution": "HUMAN",
+      "policy_revision": "aw-review.v1",
+      "review_id": "98de76ea-3bb1-4503-8db3-1cbba4c10598",
+      "deadline": "2026-11-13T01:08:56.197919+09:00"
+    }
+  },
+  "aw_review_independence": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/integration/test_creative_review_independence.py::test_editor_rechecks_dynamic_reviewer_skill_after_signed_report",
+    "request": {
+      "binding": {
+        "authority": "WORKSHOP",
+        "world_ref": {
+          "work_id": "97f2ce08-2f60-43c2-9d4d-ba10daa0b1b2",
+          "branch_id": "8a3e8447-2116-459d-a62d-663b1a64b219",
+          "world_revision_id": "e6200a39-f60e-4340-bf8e-dce226fd67f8"
+        },
+        "manuscript_ref": {
+          "artifact_id": "51c176f9-0e5a-49be-b974-a0d1aa4b815d",
+          "artifact_revision_id": "f7d6f13a-2a4f-46fe-91c3-99b3bc124384",
+          "sha256": "d8408055bff5010a283b0b779e0330aff5943b7c010b0c850de160a7c9e33d45"
+        },
+        "producers": [
+          {
+            "principal_id": "9a030560-1ab9-45cf-8f13-d79e1a43a6f0",
+            "grant_id": "20f6a501-94dc-480a-b1fa-5149262af925",
+            "permission_epoch": 0,
+            "task_id": "acae5f88-1c29-43ef-b769-1fced3de7062",
+            "generation": 1,
+            "delegation": {
+              "installation_id": "3654949c-604b-405b-a425-07b5d58fa251",
+              "org_id": "3d261afc-eb09-424b-8d51-40db9c51d2c3",
+              "nf_instance_id": "ac2af196-f8c6-4436-aece-382cf9667baa",
+              "epoch": 1,
+              "operation_id": "96cb6c12-f408-47e8-b0d0-b57420068d04",
+              "receipt_ref": "3cd39441-b860-423b-9d75-be3fce9856f9",
+              "scope_ref": "writer"
+            }
+          }
+        ],
+        "reviewer": {
+          "principal_id": "3ca24dcc-3831-4004-9bee-85646f30d6a0",
+          "grant_id": "492a8fb9-c2c2-476f-8fa1-789eaee99c0d",
+          "permission_epoch": 0,
+          "task_id": "5b5e46cb-b99a-415b-8964-ed66743a1002",
+          "generation": 1,
+          "delegation": {
+            "installation_id": "3654949c-604b-405b-a425-07b5d58fa251",
+            "org_id": "3d261afc-eb09-424b-8d51-40db9c51d2c3",
+            "nf_instance_id": "ac2af196-f8c6-4436-aece-382cf9667baa",
+            "epoch": 1,
+            "operation_id": "a9733aab-1ffc-4bf5-a8f8-271be53c8717",
+            "receipt_ref": "a00f8a2a-7e7f-4304-9933-688b68212ebd",
+            "scope_ref": "dynamic-review"
+          }
+        }
+      }
+    },
+    "response": {
+      "binding_sha256": "c15ad460adb6a2e1f9b6d19a6cac245f24e6ff3d23cb5f648b995383391aa88b",
+      "review_id": "c99e5ec8-ff04-4259-bb8b-cc463dd531a8",
+      "policy_revision": "aw-review.v1",
+      "subject_commitment": "f7946587935bf8a2a9e3b12c059c47a0747e2e9603a84a5248173b4b38b4b824",
+      "expires_at": "2026-11-13T00:22:01.296849+09:00"
+    }
+  },
+  "aw_review_reconcile": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/tests/test_review_team_assignment.py::test_other_lead_cannot_observe_escalate_or_replay_reassigned_work",
+    "request": {
+      "review_id": "d7992f30-9b1a-47e0-bdc1-fe77c08e3624",
+      "operation_id": "check"
+    },
+    "response": {
+      "review_id": "d7992f30-9b1a-47e0-bdc1-fe77c08e3624",
+      "state": "PENDING"
+    }
+  },
+  "aw_review_request": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/tests/test_review_stdio.py::test_independent_reviewer_signs_all_seven_modes_over_stdio",
+    "request": {
+      "operation_id": "text-WORLD",
+      "artifact_ref": "text",
+      "artifact_revision": "v1",
+      "mode": "WORLD",
+      "risk_reason": "SAMPLED",
+      "ttl_seconds": 3600
+    },
+    "response": {
+      "review_id": "1ab5aeee-725a-4704-bf60-5c18ede9922b",
+      "state": "RULE_BLOCKED",
+      "round_no": 1,
+      "execution": "RULE"
+    }
+  },
+  "aw_roster_get": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/tests/test_installation_ownership.py::test_w000_and_populated_w001_upgrade_keeps_old_tokens_scoped",
+    "request": {},
+    "response": {
+      "org_id": "legacy",
+      "revision": 1,
+      "preset": "Minimal",
+      "employees": [
+        {
+          "employee_id": "author",
+          "role_id": "author",
+          "team_id": "author",
+          "supervisor_id": null,
+          "employment_revision": 1,
+          "status": "ACTIVE",
+          "display_name": "author"
+        },
+        {
+          "employee_id": "manager",
+          "role_id": "workshop_manager",
+          "team_id": "control",
+          "supervisor_id": null,
+          "employment_revision": 1,
+          "status": "ACTIVE",
+          "display_name": "manager",
+          "capability_profile": {
+            "organization_role": "workshop_manager",
+            "nf_role_modes": []
+          },
+          "skill_manifest_ref": null,
+          "authorized_scope": {
+            "organization": "legacy",
+            "scope_ref": "scope"
+          },
+          "slot_id": "manager",
+          "allowed_routes": [
+            {
+              "src": "manager",
+              "dst": "author",
+              "kind": "REPORT",
+              "scope_ref": "scope"
+            }
+          ]
+        }
+      ],
+      "routes": [
+        {
+          "src": "manager",
+          "dst": "author",
+          "kind": "REPORT",
+          "scope_ref": "scope"
+        }
+      ]
+    }
+  },
+  "aw_route_grant": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/tests/test_w2_stdio.py::test_temporary_route_and_private_mail_are_scoped_over_stdio",
+    "request": {
+      "operation_id": "permit",
+      "sender": "script",
+      "recipient": "actor-1",
+      "kind": "ASSIGN",
+      "scope_ref": "organization",
+      "ttl_seconds": 120,
+      "max_uses": 1,
+      "expected_revision": 1
+    },
+    "response": {
+      "grant_id": "c6cdd1f4-2ae2-4d77-b41c-3c25ffe92505",
+      "revocation_epoch": 1
+    }
+  },
+  "aw_route_revoke": {
+    "kind": "EXECUTED_REGISTERED_HANDLER",
+    "test": "workshop/tests/test_messaging.py::test_grant_revocation_fences_inflight_body_and_ack",
+    "request": {
+      "operation_id": "revoke",
+      "grant_id": "f053c0c0-16db-4493-8773-3a62f8a8dc7d"
+    },
+    "response": {
+      "grant_id": "f053c0c0-16db-4493-8773-3a62f8a8dc7d",
+      "revocation_epoch": 2
+    }
+  },
+  "aw_skill_freeze": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/tests/test_w4_skills_stdio.py::test_live_skill_scopes_and_immutable_task_history",
+    "request": {
+      "binding_id": "b6264112-8099-473d-8efd-9a9267320992",
+      "mode": "PROSE",
+      "task_ref": "b4389c08-c14f-45b2-99c1-33678d50a8b1"
+    },
+    "response": {
+      "content_sha": "3307f7114c90d2dc31a24e412599217ac3eccef6b0be6e4bff0a795f2b32f909",
+      "epoch": 1,
+      "task_ref": "b4389c08-c14f-45b2-99c1-33678d50a8b1",
+      "skill_id": "method"
+    }
+  },
+  "aw_skill_history": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/tests/test_w4_skills_stdio.py::test_live_skill_scopes_and_immutable_task_history",
+    "request": {
+      "task_ref": "b4389c08-c14f-45b2-99c1-33678d50a8b1",
+      "skill_id": "method"
+    },
+    "response": {
+      "content_sha": "3307f7114c90d2dc31a24e412599217ac3eccef6b0be6e4bff0a795f2b32f909",
+      "epoch": 1,
+      "historical": true
+    }
+  },
+  "aw_skill_resolve": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/tests/test_w4_skills_stdio.py::test_live_skill_scopes_and_immutable_task_history",
+    "request": {
+      "binding_id": "b6264112-8099-473d-8efd-9a9267320992",
+      "mode": "PROSE"
+    },
+    "response": {
+      "skill_id": "method",
+      "source_revision": "v1",
+      "content_sha": "3307f7114c90d2dc31a24e412599217ac3eccef6b0be6e4bff0a795f2b32f909",
+      "mode": "PROSE",
+      "epoch": 1
+    }
+  },
+  "aw_skill_revoke": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/tests/test_w4_skills_stdio.py::test_live_skill_scopes_and_immutable_task_history",
+    "request": {
+      "operation_id": "stop-method",
+      "binding_id": "b6264112-8099-473d-8efd-9a9267320992"
+    },
+    "response": {
+      "binding_id": "b6264112-8099-473d-8efd-9a9267320992",
+      "epoch": 2
+    }
+  },
+  "aw_skill_share": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/tests/test_w4_skills_stdio.py::test_live_skill_scopes_and_immutable_task_history",
+    "request": {
+      "operation_id": "PUBLIC_SHARED",
+      "skill_id": "method",
+      "source_revision": "v1",
+      "policy": "PUBLIC_SHARED",
+      "ttl_seconds": 3600
+    },
+    "response": {
+      "binding_id": "b6264112-8099-473d-8efd-9a9267320992",
+      "content_sha": "3307f7114c90d2dc31a24e412599217ac3eccef6b0be6e4bff0a795f2b32f909",
+      "epoch": 1
+    }
+  },
+  "aw_state_get": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/tests/test_w1_stdio.py::test_hiring_tenure_and_restart_over_stdio",
+    "request": {},
+    "response": {
+      "org_id": "c599ec6b5aef4f699b64713bc0af84b9",
+      "revision": 5,
+      "preset": "Minimal",
+      "employees": [
+        {
+          "employee_id": "actor-1",
+          "role_id": "character_actor",
+          "team_id": "actors",
+          "supervisor_id": "volume",
+          "employment_revision": 1,
+          "status": "ACTIVE",
+          "display_name": "actor-1"
+        },
+        {
+          "employee_id": "actor-2",
+          "role_id": "character_actor",
+          "team_id": "actors",
+          "supervisor_id": "volume",
+          "employment_revision": 1,
+          "status": "ACTIVE",
+          "display_name": "actor-2"
+        },
+        {
+          "employee_id": "actor-3",
+          "role_id": "character_actor",
+          "team_id": "actors",
+          "supervisor_id": "volume",
+          "employment_revision": 1,
+          "status": "ACTIVE",
+          "display_name": "actor-3"
+        },
+        {
+          "employee_id": "author",
+          "role_id": "author",
+          "team_id": "author",
+          "supervisor_id": "manager",
+          "employment_revision": 1,
+          "status": "ACTIVE",
+          "display_name": "author"
+        },
+        {
+          "employee_id": "chief",
+          "role_id": "chief_editor",
+          "team_id": "production",
+          "supervisor_id": "manager",
+          "employment_revision": 1,
+          "status": "ACTIVE",
+          "display_name": "chief"
+        },
+        {
+          "employee_id": "manager",
+          "role_id": "workshop_manager",
+          "team_id": "control",
+          "supervisor_id": null,
+          "employment_revision": 1,
+          "status": "ACTIVE",
+          "display_name": "manager",
+          "capability_profile": {
+            "organization_role": "workshop_manager",
+            "nf_role_modes": []
+          },
+          "skill_manifest_ref": null,
+          "authorized_scope": {
+            "organization": "c599ec6b5aef4f699b64713bc0af84b9",
+            "scope_ref": "organization"
+          },
+          "slot_id": "manager",
+          "allowed_routes": [
+            {
+              "src": "manager",
+              "dst": "author",
+              "kind": "REPORT",
+              "scope_ref": "organization"
+            },
+            {
+              "src": "manager",
+              "dst": "author",
+              "kind": "REQUEST_DECISION",
+              "scope_ref": "organization"
+            },
+            {
+              "src": "manager",
+              "dst": "chief",
+              "kind": "ASSIGN",
+              "scope_ref": "organization"
+            },
+            {
+              "src": "manager",
+              "dst": "chief",
+              "kind": "PAUSE",
+              "scope_ref": "organization"
+            },
+            {
+              "src": "manager",
+              "dst": "chief",
+              "kind": "REQUEST_REVISION",
+              "scope_ref": "organization"
+            },
+            {
+              "src": "manager",
+              "dst": "script",
+              "kind": "ASSIGN",
+              "scope_ref": "organization"
+            },
+            {
+              "src": "manager",
+              "dst": "script",
+              "kind": "REQUEST_REVISION",
+              "scope_ref": "organization"
+            }
+          ]
+        },
+        {
+          "employee_id": "relief",
+          "role_id": "character_actor",
+          "team_id": "new-team",
+          "supervisor_id": "volume",
+          "employment_revision": 4,
+          "status": "ENDED",
+          "display_name": "relief"
+        },
+        {
+          "employee_id": "script",
+          "role_id": "screenwriter",
+          "team_id": "production",
+          "supervisor_id": "manager",
+          "employment_revision": 1,
+          "status": "ACTIVE",
+          "display_name": "script"
+        },
+        {
+          "employee_id": "volume",
+          "role_id": "volume_director",
+          "team_id": "production",
+          "supervisor_id": "chief",
+          "employment_revision": 1,
+          "status": "ACTIVE",
+          "display_name": "volume"
+        }
+      ],
+      "delegations": {},
+      "reviews": {},
+      "budget": null
+    }
+  },
+  "aw_suspend": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/tests/test_w1_stdio.py::test_hiring_tenure_and_restart_over_stdio",
+    "request": {
+      "operation_id": "pause",
+      "expected_revision": 2,
+      "employee_id": "relief"
+    },
+    "response": {
+      "org_id": "c599ec6b5aef4f699b64713bc0af84b9",
+      "revision": 3,
+      "employee_id": "relief",
+      "employment_revision": 2
+    }
+  },
+  "aw_transfer": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/tests/test_w1_stdio.py::test_hiring_tenure_and_restart_over_stdio",
+    "request": {
+      "operation_id": "transfer",
+      "expected_revision": 3,
+      "employee_id": "relief",
+      "role_id": "character_actor",
+      "supervisor_id": "volume",
+      "team_id": "new-team"
+    },
+    "response": {
+      "org_id": "c599ec6b5aef4f699b64713bc0af84b9",
+      "revision": 4,
+      "employee_id": "relief",
+      "employment_revision": 3
+    }
+  },
+  "nf_artifact_put": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_p5_mcp.py::test_actor_stdio_own_cut_only_and_candidate_replay",
+    "request": {
+      "content": "I decline the invitation.",
+      "idempotency_key": "first-intention"
+    },
+    "response": {
+      "artifact_ref": {
+        "artifact_id": "a201ab0d-c89a-4071-a4a0-dad06f8d8869",
+        "artifact_revision_id": "10d63875-448d-45b3-8a24-d5583d616475",
+        "sha256": "514c54c9bc25d5ea771128eb741fc8c248f5f164b3f6457e57ca59d804b573cd"
+      },
+      "status": "CANDIDATE_STORED"
+    }
+  },
+  "nf_change_point_request": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_p5_rolling.py::test_banquet_absence_pins_reference_and_limits_replanning",
+    "request": {
+      "volume": "9ba2f55f-b48a-41f9-90a3-9af5abf555d3",
+      "prior_plan_ref": {
+        "artifact_id": "34699484-fdb6-49fc-a51b-ee3c8fb1eeed",
+        "artifact_revision_id": "ed47395b-5de5-4d5f-99d5-61a0fd6c4778",
+        "sha256": "26fcf06ef20df9616c7a1bc026ced8d89f3c2c70ccf0ec008526e7142060ad63"
+      },
+      "event_refs": [
+        {
+          "occurrence_id": "fc129ddc-f0fd-56d1-937c-90fc050e5d82",
+          "event_version_id": "bdaa3c66-1ec1-5bb3-802d-8fddf5892ec2"
+        }
+      ],
+      "reason": "原拟当面结盟，A 选择守仓，改用书信联络。",
+      "idempotency_key": "change-rejoin",
+      "assessment": {
+        "reference_node_ids": [
+          "42535bac-3fa8-44a4-9c3b-50a237ca07a2"
+        ],
+        "affected_node_ids": [
+          "42535bac-3fa8-44a4-9c3b-50a237ca07a2"
+        ],
+        "characters": [],
+        "trajectory": {
+          "disposition": "POSSIBLE_RETURN",
+          "return_direction": "回信送达后重议结盟",
+          "alternative_direction": null,
+          "rationale": "保留角色缺席的已接受后果"
+        }
+      }
+    },
+    "response": {
+      "artifact_id": "2d4af12b-6580-4773-891b-615595061ecb",
+      "artifact_revision_id": "a426260f-91ab-470a-b540-de5397f78ec4",
+      "sha256": "3f86500218b52821cfa4344e93d79800241bf3aa12f7b6aa5cb25aad74127b38"
+    }
+  },
+  "nf_change_point_review": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_p5_rolling.py::test_banquet_absence_pins_reference_and_limits_replanning",
+    "request": {
+      "change_point_ref": {
+        "artifact_id": "3bf8dae8-6ab8-419d-8ced-f77bf13f0315",
+        "artifact_revision_id": "b90b6074-cc58-4220-a6dc-81fea637ff46",
+        "sha256": "a95c6e65e39e8dc11abae86d10cd4f0eb21c79ec30550866c563a8a678665db0"
+      },
+      "plan_ref": {
+        "artifact_id": "c12a1e0f-00d8-480c-9424-762f5e88400a",
+        "artifact_revision_id": "c09f3706-b0bf-479a-b556-3221a5a30778",
+        "sha256": "18daf0fabf121fd34b04bb5ef811be2fb5e6c3b1ab0047aca021b18f4c656e83"
+      },
+      "window_ref": {
+        "artifact_id": "b0f7e5d8-2a1c-4bf8-8eae-fe507da82a02",
+        "artifact_revision_id": "e41726f5-f3bd-4f5b-b9cc-7259863e4c9d",
+        "sha256": "ae65fa57976b8e95b027558093eed1f05aac8bc1d28ecccaa7c3c52792834ecc"
+      },
+      "decision": "APPROVED",
+      "reason": "符合角色动机，信使可以恢复联络。",
+      "idempotency_key": "review"
+    },
+    "response": {
+      "artifact_id": "57a975b6-a820-4178-b1c8-46009e213c22",
+      "artifact_revision_id": "336cf4dc-15cd-474d-a742-a2ad3b0f2556",
+      "sha256": "b4a0f9162b908fc80e2e0b9a6dbe44adfb036cca4839c128e2223661c1a9004a"
+    }
+  },
+  "nf_context_get": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_p5_mcp.py::test_actor_stdio_own_cut_only_and_candidate_replay",
+    "request": {},
+    "response": {
+      "facts": [],
+      "role_id": "character_actor",
+      "task_id": "12e71480-2e62-4d37-a204-0427c96c6d16",
+      "actor_id": "3ab18f96-5526-56ce-96bc-9bf3d66de8d4",
+      "world_ref": {
+        "work_id": "bf176ec8-9c25-480e-b36f-b81dd15c60c8",
+        "branch_id": "d5fd739a-8362-447f-9977-046fa300251e",
+        "world_revision_id": "638de02f-89bf-4580-9b16-83d72c61f53f"
+      },
+      "generation": 1,
+      "story_time": {
+        "tick": 1,
+        "phase": 0
+      },
+      "limitations": [
+        "Requested material is not available as a determined value at this knowledge cut."
+      ],
+      "policy_version": "nf-policy-1",
+      "schema_version": "2.0",
+      "context_bundle_id": "a8aba6a9-19af-4400-800c-2e0b154bddd6",
+      "dependency_handle": "3e2cb293-d698-4314-9cc6-b5dff5e396e7",
+      "dependency_fingerprint": "a1cba08795f43b8315a688996e4d15afd53fd6fec76f9ac7dd34e7088bbfd648",
+      "permitted_evidence_refs": []
+    }
+  },
+  "nf_delegation_get": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/integration/test_paired_restore.py::test_physical_pitr_both_directions",
+    "request": {
+      "protocol_version": "aw-nf.v1",
+      "nf_instance_id": "fbbc309e-a3fc-4976-95dc-c6b475f4243c",
+      "work_id": "79b406fa-2aa6-4b98-9b33-0333856008af",
+      "branch_id": "8d4aea98-52d8-4f0e-b333-581cc005c29d",
+      "operation_id": "35ff6d03-7821-47b4-a129-db52a96aa453",
+      "grant_epoch": 1
+    },
+    "response": {
+      "protocol_version": "aw-nf.v1",
+      "nf_instance_id": "fbbc309e-a3fc-4976-95dc-c6b475f4243c",
+      "work_id": "79b406fa-2aa6-4b98-9b33-0333856008af",
+      "branch_id": "8d4aea98-52d8-4f0e-b333-581cc005c29d",
+      "operation_id": "35ff6d03-7821-47b4-a129-db52a96aa453",
+      "task_id": "8d95371a-6e34-4bbf-8353-402ceb1b24e4",
+      "receipt_ref": "df8e1cd4-b1e1-4e5c-bef0-1e510e8a531a",
+      "world_ref": {
+        "work_id": "79b406fa-2aa6-4b98-9b33-0333856008af",
+        "branch_id": "8d4aea98-52d8-4f0e-b333-581cc005c29d",
+        "world_revision_id": "e1db1249-7c6d-47d6-bc03-718a934bf353"
+      },
+      "generation": 1,
+      "task_state": "PAUSED",
+      "accounting_state": "NO_ATTEMPT",
+      "currency": "USD",
+      "actual_amount": "0",
+      "actual_tokens": 0,
+      "attempt_ids": [],
+      "attempts": [],
+      "result_ref": null,
+      "wait_reason": "DELEGATION_RECOVERY_FENCED"
+    }
+  },
+  "nf_delegation_submit": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/integration/test_paired_restore.py::test_physical_pitr_both_directions",
+    "request": {
+      "role_id": "evidence_maintainer",
+      "work_id": "79b406fa-2aa6-4b98-9b33-0333856008af",
+      "currency": "USD",
+      "branch_id": "8d4aea98-52d8-4f0e-b333-581cc005c29d",
+      "scope_ref": "scene.summary",
+      "generation": 0,
+      "max_amount": "0.10",
+      "grant_epoch": 1,
+      "token_limit": 100000,
+      "operation_id": "35ff6d03-7821-47b4-a129-db52a96aa453",
+      "nf_instance_id": "fbbc309e-a3fc-4976-95dc-c6b475f4243c",
+      "protocol_version": "aw-nf.v1",
+      "task_template_id": "summary.v1",
+      "actor_binding_ref": null,
+      "budget_reservation_ref": "558708f0-7b95-4888-b44c-aeba187fdd62"
+    },
+    "response": {
+      "protocol_version": "aw-nf.v1",
+      "nf_instance_id": "fbbc309e-a3fc-4976-95dc-c6b475f4243c",
+      "work_id": "79b406fa-2aa6-4b98-9b33-0333856008af",
+      "branch_id": "8d4aea98-52d8-4f0e-b333-581cc005c29d",
+      "operation_id": "35ff6d03-7821-47b4-a129-db52a96aa453",
+      "task_id": "8d95371a-6e34-4bbf-8353-402ceb1b24e4",
+      "receipt_ref": "df8e1cd4-b1e1-4e5c-bef0-1e510e8a531a",
+      "world_ref": {
+        "work_id": "79b406fa-2aa6-4b98-9b33-0333856008af",
+        "branch_id": "8d4aea98-52d8-4f0e-b333-581cc005c29d",
+        "world_revision_id": "e1db1249-7c6d-47d6-bc03-718a934bf353"
+      },
+      "generation": 0,
+      "task_state": "READY",
+      "accounting_state": "NO_ATTEMPT",
+      "currency": "USD",
+      "actual_amount": "0",
+      "actual_tokens": 0,
+      "attempt_ids": [],
+      "attempts": [],
+      "result_ref": null,
+      "wait_reason": null
+    }
+  },
+  "nf_harness_agent_history": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/integration/test_workshop_harness_observations.py::test_correlated_delegation_freeze_withdrawal_and_denial",
+    "request": {
+      "world_ref": {
+        "work_id": "d6a09f83-a4bd-496b-870c-64f2dbadf655",
+        "branch_id": "996521be-82bf-49ef-a92c-5f8ddf946206",
+        "world_revision_id": "5a62cdfc-d557-4ca9-928a-b48b074d97e9"
+      },
+      "instance_ref": {
+        "artifact_id": "9d11787b-0983-404f-aa3d-8216e29f2ce8",
+        "artifact_revision_id": "7fb59a68-a51c-5caa-823f-e43f83f2cd0c",
+        "sha256": "993e34a3cbfc77c76903beae78259006183764e1eb27ec424914bf997bdc0200"
+      }
+    },
+    "response": {
+      "instance_ref": {
+        "artifact_id": "9d11787b-0983-404f-aa3d-8216e29f2ce8",
+        "artifact_revision_id": "7fb59a68-a51c-5caa-823f-e43f83f2cd0c",
+        "sha256": "993e34a3cbfc77c76903beae78259006183764e1eb27ec424914bf997bdc0200"
+      },
+      "epoch": 0,
+      "state": "REGISTERED",
+      "revision_ref": null,
+      "events": [],
+      "revisions": [
+        {
+          "revision_ref": {
+            "sha256": "bb005f4fa6d3c60f9d47f50a194f7e1572b5dc6aa04df23e7f452eda54b2469a",
+            "artifact_id": "3290dd71-638f-42a3-ac3c-06b53f6a84c8",
+            "artifact_revision_id": "38cfd753-dea9-5df4-89c2-3b9d57885081"
+          },
+          "proposal_ref": {
+            "sha256": "c5187ff64139ede9aa879af9c33da290c3546486fc309606df0568fbf78f1bf8",
+            "artifact_id": "ea64b8b7-8fd7-436b-8c16-914aac24c020",
+            "artifact_revision_id": "530d3fd1-76f7-4967-a8c0-192b7247cc4e"
+          },
+          "profile_ref": {
+            "sha256": "5f664eff1f74a9248b977e096d94d4713c1a5ac06a14c35feae61ce5ee26b559",
+            "artifact_id": "e572ce21-71c8-400b-a43e-fd162e9855e6",
+            "artifact_revision_id": "7ca15b42-cb15-5ce5-9df9-38e53fc37d10"
+          },
+          "skill_ref": {
+            "sha256": "8915e24314b84ea03375e5aea4f3a66be8c689d4cbf3535964f34ebded31e068",
+            "artifact_id": "af388c6c-89d5-4c5f-a64c-42839186146f",
+            "artifact_revision_id": "2fbbe28c-687e-5b15-a672-f0059ac7a983"
+          },
+          "sequence": 1
+        }
+      ]
+    }
+  },
+  "nf_harness_agent_register": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/integration/test_dynamic_version_switch.py::test_running_draft_keeps_prior_version_and_rollback_changes_only_future_tasks",
+    "request": {
+      "task_id": "57920991-e8f4-4f68-804b-9d8f37921f64",
+      "generation": 1,
+      "workshop_binding": {
+        "org_id": "6f6b15c2-9c20-4a97-b41e-01d542cb17a3",
+        "installation_id": "5661de10-26e0-4a71-9087-0404678e240d",
+        "employee_id": "memory",
+        "employment_revision": 1,
+        "grant_epoch": 1,
+        "binding_id": "20201a15-6568-48f5-9b35-83aa488972a6",
+        "skill_id": "close-reading",
+        "source_revision": "p2",
+        "content_sha": "1157d23a8831aa849d9cd34409306674452062bb0c1465a8b4a33c8856d7d4fd"
+      },
+      "profile_version": "p2",
+      "role_instructions": "Prefer the watchman's visible action.",
+      "skill_instructions": "Find the hand that shields the flame before describing why the watchman waits.",
+      "requested_tools": [],
+      "trigger": "TASK_DEMAND",
+      "evidence_refs": [
+        {
+          "artifact_id": "6e9fb115-9f78-48c1-8890-7a33b0d32880",
+          "artifact_revision_id": "f433532c-61a0-4d54-911b-353603cf20a7",
+          "sha256": "0a05bfcb718846039a4a2823deddfe87467804df0e70a6b2ca5d5bacb40885c6"
+        }
+      ],
+      "quota": {
+        "currency": "USD",
+        "max_amount": "1",
+        "max_tokens": 60000,
+        "max_attempts": 1,
+        "budget_id": "96fbcc46-b529-40e6-baab-5d6877ec11c8",
+        "deadline": "2026-11-12T15:30:23.201826+00:00"
+      },
+      "idempotency_key": "register-p2"
+    },
+    "response": {
+      "instance_ref": {
+        "artifact_id": "2fb174f8-4509-4cd8-9d9c-a11c68548111",
+        "artifact_revision_id": "71361e81-1154-5468-816d-429c94261b9c",
+        "sha256": "aae9b7c59719d3a7330b9f05aebed38b120b38527b164464badb1d8f7efec99f"
+      },
+      "revision_ref": {
+        "artifact_id": "f861d5ff-073a-4885-9992-6b3a99b6c504",
+        "artifact_revision_id": "3c9786ba-1ceb-5c96-8ac1-2263926079ea",
+        "sha256": "08c3f5eb1307c38bba5558ef36ce43e00fc0f2b3f9b73b9c094c120e7991fb5b"
+      },
+      "proposal_ref": {
+        "artifact_id": "46768bf6-6d63-44b5-9baa-964f32e4ad34",
+        "artifact_revision_id": "7fed63f4-df9e-4ada-a4e3-82af37b6b09e",
+        "sha256": "3be27de57a62df198d1c18e4f6741cebede01d4898489ec55b541d829d57cbb6"
+      }
+    }
+  },
+  "nf_harness_agent_retire": {
+    "kind": "EXECUTED_SERVICE_FIXTURE",
+    "test": "tests/integration/test_harness_dynamic_registry.py::test_scoped_versions_rollback_frozen_bytes_and_archival",
+    "request": {
+      "world_ref": {
+        "work_id": "c3ffd403-20d9-431c-a908-0d8d359e40fb",
+        "branch_id": "82058eea-3c6b-4823-9656-ff9388b54217",
+        "world_revision_id": "7d48b0fe-d99b-47af-b513-a264329850a5"
+      },
+      "instance_ref": {
+        "artifact_id": "9a1c477c-6a6e-421b-a233-d144ec0c03a7",
+        "artifact_revision_id": "c985f922-562f-56ce-bb75-0d1f63720c6a",
+        "sha256": "5c803b0cbb831a625758fcc0026a45a7737761cb077ad5c002b39432e3361572"
+      },
+      "action": "EXIT",
+      "expected_epoch": 3,
+      "idempotency_key": "exit"
+    },
+    "response": {
+      "instance_ref": {
+        "artifact_id": "9a1c477c-6a6e-421b-a233-d144ec0c03a7",
+        "artifact_revision_id": "c985f922-562f-56ce-bb75-0d1f63720c6a",
+        "sha256": "5c803b0cbb831a625758fcc0026a45a7737761cb077ad5c002b39432e3361572"
+      },
+      "revision_ref": null,
+      "epoch": 4,
+      "state": "EXITED",
+      "event_ref": {
+        "artifact_id": "19538ca6-a4be-49ed-a161-0fd285b9bfa0",
+        "artifact_revision_id": "9f60b788-b2b2-489a-9c15-13ba8eca7001",
+        "sha256": "f1d7e2a4c5bdf95375b1894e1993d7c23407db13abd8cc9569125f99a6614312"
+      }
+    }
+  },
+  "nf_harness_agent_select": {
+    "kind": "MCP_FIXTURE",
+    "test": "workshop/integration/test_dynamic_version_switch.py::test_running_draft_keeps_prior_version_and_rollback_changes_only_future_tasks",
+    "request": {
+      "world_ref": {
+        "work_id": "071233ab-aef4-4748-8b0d-84018d0ab254",
+        "branch_id": "51ff8eec-41f2-46a8-b956-0897401efe86",
+        "world_revision_id": "bf4c56df-c3a7-45a3-86cb-df5691c314ac"
+      },
+      "instance_ref": {
+        "artifact_id": "2fb174f8-4509-4cd8-9d9c-a11c68548111",
+        "artifact_revision_id": "71361e81-1154-5468-816d-429c94261b9c",
+        "sha256": "aae9b7c59719d3a7330b9f05aebed38b120b38527b164464badb1d8f7efec99f"
+      },
+      "revision_ref": {
+        "artifact_id": "d976573f-cb10-4d2a-b4ef-f2e38cfb1440",
+        "artifact_revision_id": "276b14a6-4a2e-5ca2-bbe3-4c6b7c7116f1",
+        "sha256": "575283f31c6cbab2d9e82c126ed0f2a7ab50197bb536da2674a717ece58506fd"
+      },
+      "expected_epoch": 0,
+      "idempotency_key": "select-p1"
+    },
+    "response": {
+      "instance_ref": {
+        "artifact_id": "2fb174f8-4509-4cd8-9d9c-a11c68548111",
+        "artifact_revision_id": "71361e81-1154-5468-816d-429c94261b9c",
+        "sha256": "aae9b7c59719d3a7330b9f05aebed38b120b38527b164464badb1d8f7efec99f"
+      },
+      "revision_ref": {
+        "artifact_id": "d976573f-cb10-4d2a-b4ef-f2e38cfb1440",
+        "artifact_revision_id": "276b14a6-4a2e-5ca2-bbe3-4c6b7c7116f1",
+        "sha256": "575283f31c6cbab2d9e82c126ed0f2a7ab50197bb536da2674a717ece58506fd"
+      },
+      "epoch": 1,
+      "state": "ACTIVE",
+      "event_ref": {
+        "artifact_id": "dfeebfa5-504f-42d5-b397-a9a44bbd53f6",
+        "artifact_revision_id": "35d3c990-1d34-4abc-834c-9e8781a6dd54",
+        "sha256": "cd5aae77fb8570215357cf84e3998cbb3e83343ec86208fabe04e7fbd57fd8a2"
+      }
+    }
+  },
+  "nf_harness_instruction_case": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_harness_adaptive_mcp.py::test_independent_release_freezes_prompt_for_new_tasks_and_restores_exact_prior_selection",
+    "request": {
+      "candidate_ref": {
+        "artifact_id": "9f844480-e1cf-4f61-a9c5-313f854419b4",
+        "artifact_revision_id": "381b7cbd-e5d4-416c-9aa3-5591d0898712",
+        "sha256": "ca0747172c3e714b2d77462c1b7151adab27ae086aa7220cd620fb7a60cee800"
+      },
+      "engineering_report_ref": {
+        "artifact_id": "aa07fb2e-8096-4df1-b9fa-6e2cb312a0c5",
+        "artifact_revision_id": "2aee7a24-6f99-5ade-b769-6c68b334c79e",
+        "sha256": "4872eb784b487163a66cde1efc47c92e7ea57b8c8029c834e8ddef5b658d257a"
+      },
+      "run_manifest_ref": {
+        "artifact_id": "75b67a19-ef6b-48ef-850c-992130fc256b",
+        "artifact_revision_id": "64762d4f-73f9-5562-b3b6-21ed6325010f",
+        "sha256": "249608c9e43561fbdcc4cfe5d9d4a78637818a9adc056824c281d96efe1a4698"
+      },
+      "publisher_grant_id": "1ef215d8-bd87-468e-8c0f-da75b5b6ab06",
+      "world_ref": {
+        "work_id": "fa86c09a-f928-4ba0-9e53-476678660ae8",
+        "branch_id": "8382dee2-e9af-47ad-9af9-6f7e7dffb642",
+        "world_revision_id": "57dd1b87-ed62-4ef2-a673-a75880df0e44"
+      },
+      "reviewer_task_id": "849df449-65fe-4c61-92dc-a5e1da296321",
+      "reviewer_generation": 1
+    },
+    "response": {
+      "kind": "INSTRUCTION_PROMOTION_CASE",
+      "authority": "NATIVE",
+      "world_ref": {
+        "work_id": "fa86c09a-f928-4ba0-9e53-476678660ae8",
+        "branch_id": "8382dee2-e9af-47ad-9af9-6f7e7dffb642",
+        "world_revision_id": "57dd1b87-ed62-4ef2-a673-a75880df0e44"
+      },
+      "candidate_ref": {
+        "artifact_id": "9f844480-e1cf-4f61-a9c5-313f854419b4",
+        "artifact_revision_id": "381b7cbd-e5d4-416c-9aa3-5591d0898712",
+        "sha256": "ca0747172c3e714b2d77462c1b7151adab27ae086aa7220cd620fb7a60cee800"
+      },
+      "engineering_report_ref": {
+        "artifact_id": "aa07fb2e-8096-4df1-b9fa-6e2cb312a0c5",
+        "artifact_revision_id": "2aee7a24-6f99-5ade-b769-6c68b334c79e",
+        "sha256": "4872eb784b487163a66cde1efc47c92e7ea57b8c8029c834e8ddef5b658d257a"
+      },
+      "run_manifest_ref": {
+        "artifact_id": "75b67a19-ef6b-48ef-850c-992130fc256b",
+        "artifact_revision_id": "64762d4f-73f9-5562-b3b6-21ed6325010f",
+        "sha256": "249608c9e43561fbdcc4cfe5d9d4a78637818a9adc056824c281d96efe1a4698"
+      },
+      "freeze_ref": {
+        "sha256": "baa09b644f95c5ce66526952779087235d44ffbb87c689f941eff52245f569a9",
+        "artifact_id": "83af5626-dd81-4fbf-b620-cc60b31a4d25",
+        "artifact_revision_id": "c16bf276-3840-5664-b115-db60396d841f"
+      },
+      "producers": [
+        {
+          "grant_id": "63caa22e-9167-4af0-957d-c460068c8d48",
+          "principal_id": "fb15418d-3aa2-4926-bcd6-198dead10209",
+          "permission_epoch": 0
+        },
+        {
+          "grant_id": "53f54c8d-453c-4c61-ac17-c383cba6d7f9",
+          "principal_id": "e1bf4554-f214-4de9-99e6-4addab5230a6",
+          "permission_epoch": 0
+        },
+        {
+          "grant_id": "ffc8792c-f534-41db-8bdc-74a6acd03faa",
+          "principal_id": "ce8f60a2-5a55-46ef-8303-f440cc5cd056",
+          "permission_epoch": 0
+        }
+      ],
+      "reviewer": {
+        "grant_id": "149112d9-32ed-449b-b030-c7c3406946f2",
+        "principal_id": "dee36ed8-91f9-4b53-82c9-9e44f11be796",
+        "permission_epoch": 0
+      },
+      "publisher": {
+        "grant_id": "1ef215d8-bd87-468e-8c0f-da75b5b6ab06",
+        "principal_id": "b767538e-f480-4d23-85a2-9aa2a377348c",
+        "permission_epoch": 0
+      },
+      "reviewer_task_id": "849df449-65fe-4c61-92dc-a5e1da296321",
+      "reviewer_generation": 1
+    }
+  },
+  "nf_harness_instruction_decide": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_harness_adaptive_mcp.py::test_independent_release_freezes_prompt_for_new_tasks_and_restores_exact_prior_selection",
+    "request": {
+      "candidate_ref": {
+        "artifact_id": "9f844480-e1cf-4f61-a9c5-313f854419b4",
+        "artifact_revision_id": "381b7cbd-e5d4-416c-9aa3-5591d0898712",
+        "sha256": "ca0747172c3e714b2d77462c1b7151adab27ae086aa7220cd620fb7a60cee800"
+      },
+      "engineering_report_ref": {
+        "artifact_id": "aa07fb2e-8096-4df1-b9fa-6e2cb312a0c5",
+        "artifact_revision_id": "2aee7a24-6f99-5ade-b769-6c68b334c79e",
+        "sha256": "4872eb784b487163a66cde1efc47c92e7ea57b8c8029c834e8ddef5b658d257a"
+      },
+      "run_manifest_ref": {
+        "artifact_id": "75b67a19-ef6b-48ef-850c-992130fc256b",
+        "artifact_revision_id": "64762d4f-73f9-5562-b3b6-21ed6325010f",
+        "sha256": "249608c9e43561fbdcc4cfe5d9d4a78637818a9adc056824c281d96efe1a4698"
+      },
+      "world_ref": {
+        "work_id": "fa86c09a-f928-4ba0-9e53-476678660ae8",
+        "branch_id": "8382dee2-e9af-47ad-9af9-6f7e7dffb642",
+        "world_revision_id": "57dd1b87-ed62-4ef2-a673-a75880df0e44"
+      },
+      "review_ref": {
+        "artifact_id": "2c172622-696e-4c72-b050-acc014bb55e8",
+        "artifact_revision_id": "700d8901-becc-4c8b-b2ef-b1eff89aaf20",
+        "sha256": "6b5c4f165f520fc28ebd0c55c802cfe026af94dfd16407dfcf9906118f5fc5a1"
+      },
+      "action": "APPROVE",
+      "reason": "只在同一角色与技能范围内发布该检查。",
+      "expected_epoch": 0,
+      "valid_until": "2026-11-12T15:24:45.895191+00:00",
+      "idempotency_key": "authorize-release"
+    },
+    "response": {
+      "epoch": 1,
+      "action": "APPROVE",
+      "decision_ref": {
+        "sha256": "0edc6d1d6742f3e191d6f845317239263eda1a9b9f23733a231d7c2a112bc8f2",
+        "artifact_id": "477a34f1-c542-4a85-ae47-5de10f3222a5",
+        "artifact_revision_id": "5ec6a68b-5fdb-456c-9190-e24da88cd1b4"
+      },
+      "selection_ref": {
+        "sha256": "81db5ff929d04e84bb7c7f77b1fd0a490b108b24f77e0b21dbaec32729588dd2",
+        "artifact_id": "86465686-6067-49fa-8b28-590b878c2d92",
+        "artifact_revision_id": "696d9b82-53e4-4f46-8cf7-5a168f0d4f85"
+      }
+    }
+  },
+  "nf_harness_instruction_evaluate": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_harness_adaptive_mcp.py::test_independent_release_freezes_prompt_for_new_tasks_and_restores_exact_prior_selection",
+    "request": {
+      "world_ref": {
+        "work_id": "fa86c09a-f928-4ba0-9e53-476678660ae8",
+        "branch_id": "8382dee2-e9af-47ad-9af9-6f7e7dffb642",
+        "world_revision_id": "57dd1b87-ed62-4ef2-a673-a75880df0e44"
+      },
+      "candidate_ref": {
+        "artifact_id": "9f844480-e1cf-4f61-a9c5-313f854419b4",
+        "artifact_revision_id": "381b7cbd-e5d4-416c-9aa3-5591d0898712",
+        "sha256": "ca0747172c3e714b2d77462c1b7151adab27ae086aa7220cd620fb7a60cee800"
+      },
+      "idempotency_key": "engineering-a-b"
+    },
+    "response": {
+      "candidate_ref": {
+        "artifact_id": "9f844480-e1cf-4f61-a9c5-313f854419b4",
+        "artifact_revision_id": "381b7cbd-e5d4-416c-9aa3-5591d0898712",
+        "sha256": "ca0747172c3e714b2d77462c1b7151adab27ae086aa7220cd620fb7a60cee800"
+      },
+      "freeze_ref": {
+        "artifact_id": "83af5626-dd81-4fbf-b620-cc60b31a4d25",
+        "artifact_revision_id": "c16bf276-3840-5664-b115-db60396d841f",
+        "sha256": "baa09b644f95c5ce66526952779087235d44ffbb87c689f941eff52245f569a9"
+      },
+      "engineering_report_ref": {
+        "artifact_id": "aa07fb2e-8096-4df1-b9fa-6e2cb312a0c5",
+        "artifact_revision_id": "2aee7a24-6f99-5ade-b769-6c68b334c79e",
+        "sha256": "4872eb784b487163a66cde1efc47c92e7ea57b8c8029c834e8ddef5b658d257a"
+      },
+      "run_manifest_ref": {
+        "artifact_id": "75b67a19-ef6b-48ef-850c-992130fc256b",
+        "artifact_revision_id": "64762d4f-73f9-5562-b3b6-21ed6325010f",
+        "sha256": "249608c9e43561fbdcc4cfe5d9d4a78637818a9adc056824c281d96efe1a4698"
+      },
+      "status": "COMPLETE",
+      "eligible": true
+    }
+  },
+  "nf_harness_instruction_evidence": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_harness_adaptive_mcp.py::test_independent_release_freezes_prompt_for_new_tasks_and_restores_exact_prior_selection",
+    "request": {
+      "candidate_ref": {
+        "artifact_id": "9f844480-e1cf-4f61-a9c5-313f854419b4",
+        "artifact_revision_id": "381b7cbd-e5d4-416c-9aa3-5591d0898712",
+        "sha256": "ca0747172c3e714b2d77462c1b7151adab27ae086aa7220cd620fb7a60cee800"
+      },
+      "engineering_report_ref": {
+        "artifact_id": "aa07fb2e-8096-4df1-b9fa-6e2cb312a0c5",
+        "artifact_revision_id": "2aee7a24-6f99-5ade-b769-6c68b334c79e",
+        "sha256": "4872eb784b487163a66cde1efc47c92e7ea57b8c8029c834e8ddef5b658d257a"
+      },
+      "run_manifest_ref": {
+        "artifact_id": "75b67a19-ef6b-48ef-850c-992130fc256b",
+        "artifact_revision_id": "64762d4f-73f9-5562-b3b6-21ed6325010f",
+        "sha256": "249608c9e43561fbdcc4cfe5d9d4a78637818a9adc056824c281d96efe1a4698"
+      }
+    },
+    "response": {
+      "freeze_ref": {
+        "sha256": "baa09b644f95c5ce66526952779087235d44ffbb87c689f941eff52245f569a9",
+        "artifact_id": "83af5626-dd81-4fbf-b620-cc60b31a4d25",
+        "artifact_revision_id": "c16bf276-3840-5664-b115-db60396d841f"
+      },
+      "engineering_report_ref": {
+        "artifact_id": "aa07fb2e-8096-4df1-b9fa-6e2cb312a0c5",
+        "artifact_revision_id": "2aee7a24-6f99-5ade-b769-6c68b334c79e",
+        "sha256": "4872eb784b487163a66cde1efc47c92e7ea57b8c8029c834e8ddef5b658d257a"
+      },
+      "run_manifest_ref": {
+        "sha256": "249608c9e43561fbdcc4cfe5d9d4a78637818a9adc056824c281d96efe1a4698",
+        "artifact_id": "75b67a19-ef6b-48ef-850c-992130fc256b",
+        "artifact_revision_id": "64762d4f-73f9-5562-b3b6-21ed6325010f"
+      },
+      "eligible": true,
+      "status": "COMPLETE",
+      "quality": {
+        "eligible": true,
+        "reasons": [],
+        "held_out_positives": [
+          "fb1a6ba6-5865-4060-991e-bfaa921db1b8"
+        ],
+        "held_out_negatives": [
+          "c129eee7-24b1-4624-9ae2-90ece2b451f2"
+        ],
+        "improved": [
+          "fb1a6ba6-5865-4060-991e-bfaa921db1b8"
+        ],
+        "regressed": []
+      },
+      "arm_totals": {
+        "CONTROL": {
+          "amount": "0",
+          "failures": 0,
+          "executions": 2,
+          "latency_ns": 827218,
+          "true_positives": 1,
+          "false_negatives": 1,
+          "false_positives": 0,
+          "provider_tokens": 0,
+          "evidence_position": 0,
+          "native_rework_count": 0
+        },
+        "TREATMENT": {
+          "amount": "0",
+          "failures": 0,
+          "executions": 2,
+          "latency_ns": 1339540,
+          "true_positives": 2,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "provider_tokens": 0,
+          "evidence_position": 0,
+          "native_rework_count": 0
+        }
+      },
+      "candidate_ref": {
+        "artifact_id": "9f844480-e1cf-4f61-a9c5-313f854419b4",
+        "artifact_revision_id": "381b7cbd-e5d4-416c-9aa3-5591d0898712",
+        "sha256": "ca0747172c3e714b2d77462c1b7151adab27ae086aa7220cd620fb7a60cee800"
+      },
+      "change_kind": "REVIEW_RUBRIC",
+      "target": {
+        "role_id": "reviewer",
+        "task_kind": "literary",
+        "skill_name": "review-consistency",
+        "instance_ref": null
+      },
+      "cases": [
+        {
+          "arm_id": "CONTROL",
+          "case_id": "fb1a6ba6-5865-4060-991e-bfaa921db1b8",
+          "repetition": 1,
+          "status": "SUCCEEDED",
+          "held_out": true,
+          "score": {
+            "detected": 1,
+            "positives": 2,
+            "false_negatives": 1,
+            "false_positives": 0,
+            "content_conserved": true,
+            "evidence_position": 0
+          },
+          "latency_ns": 546314,
+          "amount": "0"
+        },
+        {
+          "arm_id": "TREATMENT",
+          "case_id": "fb1a6ba6-5865-4060-991e-bfaa921db1b8",
+          "repetition": 1,
+          "status": "SUCCEEDED",
+          "held_out": true,
+          "score": {
+            "detected": 2,
+            "positives": 2,
+            "false_negatives": 0,
+            "false_positives": 0,
+            "content_conserved": true,
+            "evidence_position": 0
+          },
+          "latency_ns": 1054019,
+          "amount": "0"
+        },
+        {
+          "arm_id": "CONTROL",
+          "case_id": "c129eee7-24b1-4624-9ae2-90ece2b451f2",
+          "repetition": 1,
+          "status": "SUCCEEDED",
+          "held_out": true,
+          "score": {
+            "detected": 0,
+            "positives": 0,
+            "false_negatives": 0,
+            "false_positives": 0,
+            "content_conserved": true,
+            "evidence_position": 0
+          },
+          "latency_ns": 280904,
+          "amount": "0"
+        },
+        {
+          "arm_id": "TREATMENT",
+          "case_id": "c129eee7-24b1-4624-9ae2-90ece2b451f2",
+          "repetition": 1,
+          "status": "SUCCEEDED",
+          "held_out": true,
+          "score": {
+            "detected": 0,
+            "positives": 0,
+            "false_negatives": 0,
+            "false_positives": 0,
+            "content_conserved": true,
+            "evidence_position": 0
+          },
+          "latency_ns": 285521,
+          "amount": "0"
+        }
+      ]
+    }
+  },
+  "nf_harness_instruction_monitor": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_harness_adaptive_mcp.py::test_independent_release_freezes_prompt_for_new_tasks_and_restores_exact_prior_selection",
+    "request": {
+      "world_ref": {
+        "work_id": "fa86c09a-f928-4ba0-9e53-476678660ae8",
+        "branch_id": "8382dee2-e9af-47ad-9af9-6f7e7dffb642",
+        "world_revision_id": "57dd1b87-ed62-4ef2-a673-a75880df0e44"
+      },
+      "decision_ref": {
+        "artifact_id": "477a34f1-c542-4a85-ae47-5de10f3222a5",
+        "artifact_revision_id": "5ec6a68b-5fdb-456c-9190-e24da88cd1b4",
+        "sha256": "0edc6d1d6742f3e191d6f845317239263eda1a9b9f23733a231d7c2a112bc8f2"
+      },
+      "task_id": "4a479bc1-fc4f-4323-b35d-c324411e7d24",
+      "generation": 1,
+      "idempotency_key": "observe-rollout"
+    },
+    "response": {
+      "monitor_ref": {
+        "artifact_id": "f7b4a4c9-ec71-4e36-baec-e869f9cdfb5a",
+        "artifact_revision_id": "0e4b4482-d64a-4b02-a3b6-7a4e0e185ae2",
+        "sha256": "3425bd02496b276e68d2a0674db10216cb1187bdfc225af4dce79554ba631feb"
+      },
+      "decision_ref": {
+        "artifact_id": "477a34f1-c542-4a85-ae47-5de10f3222a5",
+        "artifact_revision_id": "5ec6a68b-5fdb-456c-9190-e24da88cd1b4",
+        "sha256": "0edc6d1d6742f3e191d6f845317239263eda1a9b9f23733a231d7c2a112bc8f2"
+      },
+      "selection_ref": {
+        "sha256": "81db5ff929d04e84bb7c7f77b1fd0a490b108b24f77e0b21dbaec32729588dd2",
+        "artifact_id": "86465686-6067-49fa-8b28-590b878c2d92",
+        "artifact_revision_id": "696d9b82-53e4-4f46-8cf7-5a168f0d4f85"
+      },
+      "task_id": "4a479bc1-fc4f-4323-b35d-c324411e7d24",
+      "generation": 1,
+      "task_state": "RESULT_STORED",
+      "result_id": "dc3fde18-2128-5996-a0ac-cfff9d354630",
+      "observed_at": "2026-11-13T00:09:48.156564+09:00",
+      "attempts": [
+        {
+          "attempt_id": "c1604341-c990-4955-859d-442a1c1ecb01",
+          "state": "SUCCEEDED",
+          "actual_tokens": 65,
+          "actual_amount": "0.010000"
+        }
+      ],
+      "known_cost": "0.010000",
+      "unsettled_attempts": 0,
+      "literary_status": "UNPROVEN"
+    }
+  },
+  "nf_harness_instruction_policy": {
+    "kind": "EXECUTED_SERVICE_FIXTURE",
+    "test": "tests/integration/test_adaptive_promotion.py::test_automatic_release_requires_live_scoped_policy_and_current_independent_opinion",
+    "request": {
+      "world_ref": {
+        "work_id": "cd38f9ec-79a8-493d-83e0-8bf95908721c",
+        "branch_id": "4bbc5ee8-7926-4344-a424-91aec2389396",
+        "world_revision_id": "59137b68-0372-498a-82bb-e5cbfbe2111c"
+      },
+      "role_id": "writer",
+      "task_kind": "literary",
+      "skill_name": "review-consistency",
+      "publisher_grant_id": "a72b5266-8c6a-4cc5-86c4-ce0ae1affe80",
+      "valid_until": "2026-11-12T15:19:36.931306+00:00",
+      "idempotency_key": "wrong-policy"
+    },
+    "response": {
+      "policy_ref": {
+        "artifact_id": "2ab44cc6-6cf4-4b3a-a489-337d1298aaa8",
+        "artifact_revision_id": "8de1c198-0c6b-4fb1-b7cf-ce3fa92acfc1",
+        "sha256": "b5b8abdcccddf1f8994b6c21db7dc976c685ffcd97dadc6572b57dbc708d67d9"
+      }
+    }
+  },
+  "nf_harness_instruction_propose": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_harness_adaptive_mcp.py::test_independent_release_freezes_prompt_for_new_tasks_and_restores_exact_prior_selection",
+    "request": {
+      "world_ref": {
+        "work_id": "fa86c09a-f928-4ba0-9e53-476678660ae8",
+        "branch_id": "8382dee2-e9af-47ad-9af9-6f7e7dffb642",
+        "world_revision_id": "57dd1b87-ed62-4ef2-a673-a75880df0e44"
+      },
+      "task_id": "246af282-b199-405f-b6c0-a46aa3a62a36",
+      "generation": 1,
+      "failure_report_refs": [
+        {
+          "artifact_id": "9c9f83bc-b99e-4308-a476-36b54cf1ed50",
+          "artifact_revision_id": "0749e51e-6a1e-4935-b471-390fb834ac85",
+          "sha256": "b2e2da9c85e20ad284b7e47187a92bfafbe5bd17646ec289967c550ac615b5cb"
+        }
+      ],
+      "success_report_refs": [
+        {
+          "artifact_id": "44502680-683e-40ef-9d84-ae7b8c53742d",
+          "artifact_revision_id": "975fcd38-6720-4942-af89-8e47200091cb",
+          "sha256": "d17aa4c8521fe1abe28223b350168fe21d475b58e222a91947198f594e8caff9"
+        }
+      ],
+      "evaluation_report_refs": [
+        {
+          "artifact_id": "5f4beba5-cc6f-460a-91c6-1f51eb3afdc0",
+          "artifact_revision_id": "fb1a6ba6-5865-4060-991e-bfaa921db1b8",
+          "sha256": "de0468e08bfd468ead3f3e1ab170f8eac0882f48d020291bfe43d642e4ee5beb"
+        },
+        {
+          "artifact_id": "42495e96-eed9-481b-b1a6-f65b21b949b4",
+          "artifact_revision_id": "c129eee7-24b1-4624-9ae2-90ece2b451f2",
+          "sha256": "8497b3b8d893acb5cc7ea19514e277ca8b38ffcf39c9e6abef0178ef07bb0e11"
+        }
+      ],
+      "change_kind": "REVIEW_RUBRIC",
+      "quota": {
+        "currency": "USD",
+        "max_amount": "0.1",
+        "max_tokens": 180000,
+        "max_attempts": 24,
+        "budget_id": "429a97af-a966-4753-a5fe-931091e4897e",
+        "deadline": "2026-11-12T15:17:41.736448+00:00"
+      },
+      "order_seed": 2048,
+      "repetitions": 1,
+      "idempotency_key": "registered-reading-method"
+    },
+    "response": {
+      "candidate_ref": {
+        "artifact_id": "9f844480-e1cf-4f61-a9c5-313f854419b4",
+        "artifact_revision_id": "381b7cbd-e5d4-416c-9aa3-5591d0898712",
+        "sha256": "ca0747172c3e714b2d77462c1b7151adab27ae086aa7220cd620fb7a60cee800"
+      },
+      "experiment_ref": {
+        "artifact_id": "83af5626-dd81-4fbf-b620-cc60b31a4d25",
+        "artifact_revision_id": "c16bf276-3840-5664-b115-db60396d841f",
+        "sha256": "baa09b644f95c5ce66526952779087235d44ffbb87c689f941eff52245f569a9"
+      },
+      "design_ref": {
+        "artifact_id": "6f4e6349-c48c-47e5-a0d5-dbf9ca8edff1",
+        "artifact_revision_id": "7c90a522-68e8-4048-b8fc-7f9e9baf4197",
+        "sha256": "7ecb42f658a150463df49cebd0b36a1ae0383e92e530cdb42a94d5f2915d23b4"
+      },
+      "baseline_ref": {
+        "artifact_id": "67a8e3fa-b253-42fc-9653-f066a70f3cdb",
+        "artifact_revision_id": "4438b9c0-1f18-4ad5-815c-1253554db9f5",
+        "sha256": "2aca7e206e6b6a9af283f4122b01af979101262a11017073be65dba7e6417e45"
+      },
+      "instruction_ref": {
+        "artifact_id": "fdbb7eae-2256-4f1e-acb3-1fdad332b6dd",
+        "artifact_revision_id": "dc29959d-a03c-4f12-acb0-d9aeede44018",
+        "sha256": "cdb29fec117648e9cc06d03ff907dc3eb3f6ca6fd5876a5a29b4a4fb99764f91"
+      }
+    }
+  },
+  "nf_harness_instruction_review": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_harness_adaptive_mcp.py::test_independent_release_freezes_prompt_for_new_tasks_and_restores_exact_prior_selection",
+    "request": {
+      "candidate_ref": {
+        "artifact_id": "9f844480-e1cf-4f61-a9c5-313f854419b4",
+        "artifact_revision_id": "381b7cbd-e5d4-416c-9aa3-5591d0898712",
+        "sha256": "ca0747172c3e714b2d77462c1b7151adab27ae086aa7220cd620fb7a60cee800"
+      },
+      "engineering_report_ref": {
+        "artifact_id": "aa07fb2e-8096-4df1-b9fa-6e2cb312a0c5",
+        "artifact_revision_id": "2aee7a24-6f99-5ade-b769-6c68b334c79e",
+        "sha256": "4872eb784b487163a66cde1efc47c92e7ea57b8c8029c834e8ddef5b658d257a"
+      },
+      "run_manifest_ref": {
+        "artifact_id": "75b67a19-ef6b-48ef-850c-992130fc256b",
+        "artifact_revision_id": "64762d4f-73f9-5562-b3b6-21ed6325010f",
+        "sha256": "249608c9e43561fbdcc4cfe5d9d4a78637818a9adc056824c281d96efe1a4698"
+      },
+      "publisher_grant_id": "1ef215d8-bd87-468e-8c0f-da75b5b6ab06",
+      "verdict": "APPROVE",
+      "valid_until": "2026-11-12T15:24:45.895191+00:00",
+      "idempotency_key": "review-outcomes",
+      "reason": "独立核对四条轨迹。补充检查在保留样本上发现第二处重复，负例原样保留。"
+    },
+    "response": {
+      "review_ref": {
+        "artifact_id": "2c172622-696e-4c72-b050-acc014bb55e8",
+        "artifact_revision_id": "700d8901-becc-4c8b-b2ef-b1eff89aaf20",
+        "sha256": "6b5c4f165f520fc28ebd0c55c802cfe026af94dfd16407dfcf9906118f5fc5a1"
+      },
+      "verdict": "APPROVE"
+    }
+  },
+  "nf_harness_instruction_revoke_policy": {
+    "kind": "EXECUTED_SERVICE_FIXTURE",
+    "test": "tests/integration/test_adaptive_promotion.py::test_automatic_release_requires_live_scoped_policy_and_current_independent_opinion",
+    "request": {
+      "world_ref": {
+        "work_id": "cd38f9ec-79a8-493d-83e0-8bf95908721c",
+        "branch_id": "4bbc5ee8-7926-4344-a424-91aec2389396",
+        "world_revision_id": "59137b68-0372-498a-82bb-e5cbfbe2111c"
+      },
+      "policy_ref": {
+        "artifact_id": "b1556fb2-18dd-4ece-81e9-cd8038af61a2",
+        "artifact_revision_id": "b7dc779d-ca65-4ba8-929a-20565293b179",
+        "sha256": "c709769ee72c3110d4e9182ca3638f8e9eea72e0cc207d577b8d88383624e1d3"
+      },
+      "reason": "End this release policy.",
+      "idempotency_key": "retire-policy"
+    },
+    "response": {
+      "revocation_ref": {
+        "artifact_id": "f3ac00c2-c34f-4fab-a9e1-d895db62fec7",
+        "artifact_revision_id": "91caf225-e41f-4215-b51a-0c27ed39a588",
+        "sha256": "c9d8c181230d96dc0d42f99b03ee7f2030c649d245159f3fb137496e6fc4e7e0"
+      },
+      "policy_ref": {
+        "artifact_id": "b1556fb2-18dd-4ece-81e9-cd8038af61a2",
+        "artifact_revision_id": "b7dc779d-ca65-4ba8-929a-20565293b179",
+        "sha256": "c709769ee72c3110d4e9182ca3638f8e9eea72e0cc207d577b8d88383624e1d3"
+      }
+    }
+  },
+  "nf_harness_instruction_rollback": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_harness_adaptive_mcp.py::test_independent_release_freezes_prompt_for_new_tasks_and_restores_exact_prior_selection",
+    "request": {
+      "world_ref": {
+        "work_id": "fa86c09a-f928-4ba0-9e53-476678660ae8",
+        "branch_id": "8382dee2-e9af-47ad-9af9-6f7e7dffb642",
+        "world_revision_id": "57dd1b87-ed62-4ef2-a673-a75880df0e44"
+      },
+      "decision_ref": {
+        "artifact_id": "477a34f1-c542-4a85-ae47-5de10f3222a5",
+        "artifact_revision_id": "5ec6a68b-5fdb-456c-9190-e24da88cd1b4",
+        "sha256": "0edc6d1d6742f3e191d6f845317239263eda1a9b9f23733a231d7c2a112bc8f2"
+      },
+      "expected_epoch": 1,
+      "reason": "结束分批试用，恢复先前版本。",
+      "idempotency_key": "rollback-release"
+    },
+    "response": {
+      "decision_ref": {
+        "artifact_id": "023939c0-b37c-4cc0-ba2f-713f7bc81fc0",
+        "artifact_revision_id": "2142333b-d693-48dc-970e-5907837f7d2a",
+        "sha256": "9029f1a0949a84e292a76977183bcaf7793d3a4adfc4d7285227fd10b181a30b"
+      },
+      "restored_selection_ref": null,
+      "selection_ref": null,
+      "epoch": 2,
+      "action": "ROLLBACK"
+    }
+  },
+  "nf_harness_metrics": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_harness_metrics_mcp.py::test_scoped_metrics_are_measured_through_stdio_and_hidden_from_roles",
+    "request": {
+      "world_ref": {
+        "work_id": "edb1fb11-8afb-4fdf-b0ed-c4a87e170e9e",
+        "branch_id": "aa485788-b4e3-4847-9b26-180029b6b42a",
+        "world_revision_id": "d4af1475-def4-4127-baea-d53d5b0716db"
+      },
+      "since": "2026-11-12T14:09:58.071808+00:00",
+      "until": "2026-11-12T15:09:58.071808+00:00",
+      "limit": 256
+    },
+    "response": {
+      "schema_version": "1.0",
+      "world_ref": {
+        "work_id": "edb1fb11-8afb-4fdf-b0ed-c4a87e170e9e",
+        "branch_id": "aa485788-b4e3-4847-9b26-180029b6b42a",
+        "world_revision_id": "d4af1475-def4-4127-baea-d53d5b0716db"
+      },
+      "coverage": {
+        "since": "2026-11-12T14:09:58.071808+00:00",
+        "until": "2026-11-12T15:09:58.071808+00:00",
+        "scope": "WORK_BRANCH_EVENT_WINDOW",
+        "per_source_limit": 256,
+        "complete": true,
+        "source_rows": {
+          "artifacts": 2,
+          "call_attempts": 1,
+          "task_events": 1,
+          "generation_fences": 0,
+          "context_compile_events": 1
+        }
+      },
+      "context": {
+        "packets": 1,
+        "compile_ms": {
+          "n": 1,
+          "sum": 49.386,
+          "mean": 49.386,
+          "p95": 49.386
+        },
+        "compiled_bytes": {
+          "n": 1,
+          "sum": 3165.0,
+          "mean": 3165.0,
+          "p95": 3165.0
+        },
+        "packet_build_ms": {
+          "n": 1,
+          "sum": 19.211,
+          "mean": 19.211,
+          "p95": 19.211
+        },
+        "model_input_bytes": {
+          "n": 1,
+          "sum": 233.0,
+          "mean": 233.0,
+          "p95": 233.0
+        },
+        "stored_snapshot_bytes": {
+          "n": 1,
+          "sum": 2337.0,
+          "mean": 2337.0,
+          "p95": 2337.0
+        },
+        "loaded_sources": {
+          "n": 1,
+          "sum": 0.0,
+          "mean": 0.0,
+          "p95": 0.0
+        }
+      },
+      "planning": {
+        "candidates": 0,
+        "alternatives": 0,
+        "decision_counts": {},
+        "simulations": 0,
+        "simulated_paths": 0,
+        "pending_paths": 0,
+        "adoption": {
+          "numerator": 0,
+          "denominator": 0,
+          "rate": null
+        },
+        "abandonment": {
+          "numerator": 0,
+          "denominator": 0,
+          "rate": null
+        }
+      },
+      "review": {
+        "reports": 0,
+        "reports_by_layer": {},
+        "covered_drafts": 0,
+        "coverage": {
+          "numerator": 0,
+          "denominator": 0,
+          "rate": null
+        },
+        "findings_observed": 0,
+        "actionable_findings": 0,
+        "reports_with_actionable_findings": {
+          "numerator": 0,
+          "denominator": 0,
+          "rate": null
+        },
+        "independently_fixed": {
+          "numerator": 0,
+          "denominator": 0,
+          "rate": null
+        },
+        "targeted_revisions": 0,
+        "heldout_review_errors": {
+          "CONTROL": {
+            "labeled_heldout_runs": 0,
+            "false_positives": null,
+            "false_negatives": null,
+            "false_discovery_rate": {
+              "numerator": 0,
+              "denominator": 0,
+              "rate": null
+            },
+            "miss_rate": {
+              "numerator": 0,
+              "denominator": 0,
+              "rate": null
+            },
+            "negative_case_false_alarm_rate": {
+              "numerator": 0,
+              "denominator": 0,
+              "rate": null
+            }
+          },
+          "TREATMENT": {
+            "labeled_heldout_runs": 0,
+            "false_positives": null,
+            "false_negatives": null,
+            "false_discovery_rate": {
+              "numerator": 0,
+              "denominator": 0,
+              "rate": null
+            },
+            "miss_rate": {
+              "numerator": 0,
+              "denominator": 0,
+              "rate": null
+            },
+            "negative_case_false_alarm_rate": {
+              "numerator": 0,
+              "denominator": 0,
+              "rate": null
+            }
+          }
+        }
+      },
+      "dynamic": {
+        "instances_created": 0,
+        "instances_registered_as_of_end": 0,
+        "inventory_lower_bound": 0,
+        "actions": {},
+        "dispatched_skill_versions": [
+          {
+            "skill": "write-scene",
+            "static_version": "2.1.0",
+            "dynamic_revision_id": null,
+            "dynamic_source_revision": null,
+            "dynamic_content_sha256": null,
+            "calls": 1
+          }
+        ]
+      },
+      "instructions": {
+        "proposed": 0,
+        "evaluated": 0,
+        "complete": 0,
+        "eligible": 0,
+        "promoted": 0,
+        "rejected": 0,
+        "rolled_back": 0
+      },
+      "scenes": [
+        {
+          "scene_id": null,
+          "currency": "USD",
+          "execution_origin": "TEST_FIXTURE",
+          "attempts": 1,
+          "known_tokens": 65,
+          "tokens_from_unsettled_provider_receipts": 0,
+          "unknown_token_attempts": 0,
+          "actual_tokens": 65,
+          "known_amount": "0.010000",
+          "unknown_amount_attempts": 0,
+          "actual_amount": "0.010000"
+        }
+      ],
+      "latency": {
+        "terminal_ms": {
+          "n": 0,
+          "sum": null,
+          "mean": null,
+          "p95": null
+        },
+        "result_stored_ms": {
+          "n": 1,
+          "sum": 231.85500000000002,
+          "mean": 231.85500000000002,
+          "p95": 231.85500000000002
+        },
+        "by_terminal_state_ms": {},
+        "model_call_ms_by_execution_kind": {
+          "TEST_FIXTURE": {
+            "n": 1,
+            "sum": 28.604,
+            "mean": 28.604,
+            "p95": 28.604
+          }
+        }
+      },
+      "recovery": {
+        "failed_or_fenced_generations": 0,
+        "success_after_failure": {
+          "numerator": 0,
+          "denominator": 0,
+          "rate": null
+        }
+      }
+    }
+  },
+  "nf_harness_plan_decide": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_harness_planning_mcp.py::test_separate_planner_and_controller_stdio_ports",
+    "request": {
+      "task_id": "d3c7d6e3-44d8-45b0-b69e-d2777f33b395",
+      "generation": 1,
+      "candidate_ref": {
+        "artifact_id": "42b6f2c9-129d-4639-bbec-01e95799ba59",
+        "artifact_revision_id": "0a487a16-e487-48bb-bede-c775c792767f",
+        "sha256": "c96a3a76f8ab4a3443bb612ba5e49c7dd3cad3a09ee88f243a0d8295dca921fd"
+      },
+      "option_id": null,
+      "rolling_review_ref": null,
+      "idempotency_key": "stdio-decline"
+    },
+    "response": {
+      "status": "DECLINED",
+      "plan_ref": null,
+      "candidate_ref": {
+        "artifact_id": "42b6f2c9-129d-4639-bbec-01e95799ba59",
+        "artifact_revision_id": "0a487a16-e487-48bb-bede-c775c792767f",
+        "sha256": "c96a3a76f8ab4a3443bb612ba5e49c7dd3cad3a09ee88f243a0d8295dca921fd"
+      },
+      "option_id": null,
+      "adoption": null
+    }
+  },
+  "nf_harness_plan_propose": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_harness_planning_mcp.py::test_separate_planner_and_controller_stdio_ports",
+    "request": {
+      "plan_ref": {
+        "artifact_id": "161ed470-ba87-41d7-a303-335514243cba",
+        "artifact_revision_id": "359a58dc-6a93-4cbd-a59f-32225e8ca3c1",
+        "sha256": "eddc53b77069bc6816f5d17e4710c8539301e684bf0e7b7da7ba985454197c06"
+      },
+      "node_ids": [
+        "43e80e5e-17a3-43cd-bdd6-835d3728361e",
+        "2208ccd2-eca7-4221-8bd8-7c3aac45d8ab"
+      ],
+      "trigger": "MOTIVE_CONFLICT",
+      "quota": {
+        "currency": "USD",
+        "max_amount": "0.10",
+        "max_tokens": 50000,
+        "max_attempts": 4,
+        "budget_id": "925e558a-c5ac-43a7-ba78-a7d3ddf48801",
+        "deadline": "2026-11-12T15:12:53.164541+00:00"
+      },
+      "horizon_scenes": 3,
+      "idempotency_key": "stdio-propose"
+    },
+    "response": {
+      "candidate_ref": {
+        "artifact_id": "42b6f2c9-129d-4639-bbec-01e95799ba59",
+        "artifact_revision_id": "0a487a16-e487-48bb-bede-c775c792767f",
+        "sha256": "c96a3a76f8ab4a3443bb612ba5e49c7dd3cad3a09ee88f243a0d8295dca921fd"
+      },
+      "candidate": {
+        "schema_version": "1.0",
+        "kind": "PLAN_CANDIDATE",
+        "scope": {
+          "world_ref": {
+            "work_id": "6535091f-7cbe-4eb1-a4e0-cbb986644b67",
+            "branch_id": "1b271bc8-abef-4d59-94f4-21086a84c5b9",
+            "world_revision_id": "57b0d227-4fad-454b-a393-3aece0b06524"
+          },
+          "task_id": "d3c7d6e3-44d8-45b0-b69e-d2777f33b395",
+          "generation": 1
+        },
+        "plan_anchor": {
+          "artifact_id": "161ed470-ba87-41d7-a303-335514243cba",
+          "artifact_revision_id": "359a58dc-6a93-4cbd-a59f-32225e8ca3c1",
+          "sha256": "eddc53b77069bc6816f5d17e4710c8539301e684bf0e7b7da7ba985454197c06"
+        },
+        "alternatives": [
+          {
+            "option_id": "21422f4c-1f51-53b1-9773-33c7e8638638",
+            "goal": "Ask the smith to identify the sword.",
+            "premises": [
+              {
+                "artifact_id": "161ed470-ba87-41d7-a303-335514243cba",
+                "artifact_revision_id": "359a58dc-6a93-4cbd-a59f-32225e8ca3c1",
+                "sha256": "eddc53b77069bc6816f5d17e4710c8539301e684bf0e7b7da7ba985454197c06"
+              },
+              {
+                "sha256": "71db47c5c074cb59347fb534658953e9187b96bc5357b3b6aa8940f42084586f",
+                "artifact_id": "8fa0e632-4563-4895-a61b-fb5e301f7a57",
+                "artifact_revision_id": "41910d83-53b5-42c6-adfc-89b39e5f12bf"
+              }
+            ],
+            "expected_consequences": [
+              "On success: Ask a passing witness what she saw.",
+              "If the goal fails: 承担失去旧路的代价"
+            ],
+            "risks": [
+              "未来结果仍需世界裁决",
+              "Competing goal may be deferred: Hide the sword until both witnesses can meet."
+            ],
+            "disconfirming_evidence": [],
+            "selection_reason": "Continue this assigned goal under its existing prerequisites. Its recorded hard preconditions require native validation at adoption."
+          },
+          {
+            "option_id": "f6f5f4ae-e92d-5696-8464-916fa28ea206",
+            "goal": "Hide the sword until both witnesses can meet.",
+            "premises": [
+              {
+                "artifact_id": "161ed470-ba87-41d7-a303-335514243cba",
+                "artifact_revision_id": "359a58dc-6a93-4cbd-a59f-32225e8ca3c1",
+                "sha256": "eddc53b77069bc6816f5d17e4710c8539301e684bf0e7b7da7ba985454197c06"
+              },
+              {
+                "sha256": "71db47c5c074cb59347fb534658953e9187b96bc5357b3b6aa8940f42084586f",
+                "artifact_id": "8fa0e632-4563-4895-a61b-fb5e301f7a57",
+                "artifact_revision_id": "41910d83-53b5-42c6-adfc-89b39e5f12bf"
+              }
+            ],
+            "expected_consequences": [
+              "On success: Hide the sword until both witnesses can meet.",
+              "If the goal fails: 承担失去旧路的代价"
+            ],
+            "risks": [
+              "未来结果仍需世界裁决",
+              "Competing goal may be deferred: Ask the smith to identify the sword."
+            ],
+            "disconfirming_evidence": [],
+            "selection_reason": "Continue this assigned goal under its existing prerequisites."
+          }
+        ],
+        "assumptions": [
+          "These alternatives are conditional on the frozen planning cut.",
+          "Assigned goals express planning intentions. Actors may choose differently."
+        ],
+        "protected_commitments": [
+          {
+            "artifact_id": "161ed470-ba87-41d7-a303-335514243cba",
+            "artifact_revision_id": "359a58dc-6a93-4cbd-a59f-32225e8ca3c1",
+            "sha256": "eddc53b77069bc6816f5d17e4710c8539301e684bf0e7b7da7ba985454197c06"
+          }
+        ],
+        "horizon_scenes": 3,
+        "quota": {
+          "currency": "USD",
+          "max_amount": "0.10",
+          "max_tokens": 50000,
+          "max_attempts": 4,
+          "budget_id": "925e558a-c5ac-43a7-ba78-a7d3ddf48801",
+          "deadline": "2026-11-12T15:12:53.164541+00:00"
+        },
+        "status": "HYPOTHESIS_ONLY",
+        "candidate": {
+          "candidate_id": "43274bd5-08d2-4917-b759-44c5fb873b52",
+          "revision": 1,
+          "parent_ref": null,
+          "content_sha256": "f51721cf852bdaeaa8a6710348842b0f1b2432deb4991df9b667132a43f51276",
+          "created_by": {
+            "grant_id": "7868a46c-28cb-490a-866f-cc44a841b87a",
+            "principal_id": "0671a095-b27c-4e78-9e31-4d5131372892",
+            "permission_epoch": 0
+          }
+        }
+      },
+      "option_plan_refs": {
+        "21422f4c-1f51-53b1-9773-33c7e8638638": {
+          "artifact_id": "6943b243-ed98-4ac8-ae30-2d96c0a339c5",
+          "artifact_revision_id": "6b514269-0944-4969-9153-e1f1e5043b88",
+          "sha256": "cef02c7d02522f58adb4401a3b1b7baebe01a48633eaa290bdb4d89ded883890"
+        },
+        "f6f5f4ae-e92d-5696-8464-916fa28ea206": {
+          "artifact_id": "0f37fe8d-991d-4416-acdc-9601e3e04630",
+          "artifact_revision_id": "c8b311b1-8afe-42c6-bd4a-52254eb5ae1b",
+          "sha256": "6143ecbdb527a7ec45d9cf43d37e700764f444d0b55bf23128a2a07c900ef0d3"
+        }
+      }
+    }
+  },
+  "nf_harness_review_decide": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_harness_literary_mcp.py::test_separate_ports_recheck_independence_on_report_and_editorial_action",
+    "request": {
+      "task_id": "4e6acb04-f2c9-4694-9acf-feb743d03cc3",
+      "generation": 1,
+      "report_ref": {
+        "artifact_id": "50d61aea-ddd0-4e25-8a68-ebc38b89c1fc",
+        "artifact_revision_id": "2d08ed16-d533-4a0a-bec7-749d8aa2fa4c",
+        "sha256": "88a1ade569b5488386183e2f2aba3f0b48def5e47fc68370004ac1f0146e61e3"
+      },
+      "reason": "等待独立读者对章节调度的意见。",
+      "action": "DEFER",
+      "idempotency_key": "pause"
+    },
+    "response": {
+      "action": "DEFER",
+      "decision_ref": {
+        "artifact_id": "397cdaff-1a06-4e79-8068-1dfa2f6b6ede",
+        "artifact_revision_id": "50074385-00de-4b0f-960c-5006a887a8d9",
+        "sha256": "bbb1d8e75e5955fa1328d2f41c64fa7bc5625fef8a00d36bd8da37c3d5532c7c"
+      },
+      "native_decision_ref": null
+    }
+  },
+  "nf_harness_review_independence": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_harness_literary_mcp.py::test_separate_ports_recheck_independence_on_report_and_editorial_action",
+    "request": {
+      "task_id": "4e6acb04-f2c9-4694-9acf-feb743d03cc3",
+      "generation": 1,
+      "manuscript_ref": {
+        "artifact_id": "5ff4404a-638c-4399-b1b8-2ed020b43d8b",
+        "artifact_revision_id": "88581509-f886-4448-8a5d-f9d633e4298a",
+        "sha256": "858537b7d963cefe413741b45978a215f6956d128fd1768ff16beacd5fff73c6"
+      }
+    },
+    "response": {
+      "independence_ref": {
+        "artifact_id": "abed55df-f0c6-4bf6-b15b-bad866bd632a",
+        "artifact_revision_id": "90700a9a-f255-574d-91fb-39af839bef40",
+        "sha256": "a95c4ad3f0accdb0b955ccafb4f0a05751168ad1f2200e9f8f91d1e6a72f3c49"
+      }
+    }
+  },
+  "nf_harness_review_read": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_harness_literary_mcp.py::test_separate_ports_recheck_independence_on_report_and_editorial_action",
+    "request": {
+      "draft_ref": {
+        "artifact_id": "5ff4404a-638c-4399-b1b8-2ed020b43d8b",
+        "artifact_revision_id": "88581509-f886-4448-8a5d-f9d633e4298a",
+        "sha256": "858537b7d963cefe413741b45978a215f6956d128fd1768ff16beacd5fff73c6"
+      },
+      "idempotency_key": "s3-read"
+    },
+    "response": {
+      "text": "她把铜印按在封泥上，等最后一条船靠岸。",
+      "text_ref": {
+        "sha256": "9d19977b607d7102f4ed59fb5e66d393092b59e989cdeec4a5ab48dc8e925a3e",
+        "artifact_id": "d7fafdc4-7e25-4ac5-800b-4041e2867044",
+        "artifact_revision_id": "e2d0690f-3204-4501-b37c-7a660e55e821"
+      },
+      "draft_ref": {
+        "artifact_id": "5ff4404a-638c-4399-b1b8-2ed020b43d8b",
+        "artifact_revision_id": "88581509-f886-4448-8a5d-f9d633e4298a",
+        "sha256": "858537b7d963cefe413741b45978a215f6956d128fd1768ff16beacd5fff73c6"
+      },
+      "scene_ref": {
+        "sha256": "5b8a18d7dac7b0017fca6bf2fec24a9cf5a5829cc45a4b9c8535ce2ed452a272",
+        "artifact_id": "0d763c0f-a924-4718-959e-073553ae0c4c",
+        "artifact_revision_id": "2d85cb40-54eb-44ff-9d27-4c0a93406cba"
+      },
+      "world_ref": {
+        "work_id": "0210e551-e5f2-4458-9348-7eb7d657d0f1",
+        "branch_id": "b4ff555e-67ad-4923-9bf4-fdd1a58709de",
+        "world_revision_id": "02c6f2b7-b702-4096-85f6-147e7b82e253"
+      },
+      "span": {
+        "start": 0,
+        "end": 19,
+        "unit": "UNICODE_CODEPOINT",
+        "quote_sha256": "9d19977b607d7102f4ed59fb5e66d393092b59e989cdeec4a5ab48dc8e925a3e"
+      },
+      "delivery_ref": {
+        "artifact_id": "a38c7833-46df-44dd-85ed-054c3a82f101",
+        "artifact_revision_id": "7ad09d72-8397-42ae-8531-a9f6a300e4c8",
+        "sha256": "8da9ad68b197b2cc8a905af313d3a2f7cfbb8a0ba3e596d6bbc9c434e8137bca"
+      },
+      "coverage_ref": {
+        "artifact_id": "68a647bc-d68e-453d-b3a4-a89d19e8ef29",
+        "artifact_revision_id": "3afd1211-b453-40c0-95df-7bb6bb6b70e9",
+        "sha256": "dc6a4a9b731296de2bb82062319f390315956da77ff664d37848ef875ecb123d"
+      }
+    }
+  },
+  "nf_harness_review_submit": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_harness_literary_mcp.py::test_separate_ports_recheck_independence_on_report_and_editorial_action",
+    "request": {
+      "binding": {
+        "world_ref": {
+          "work_id": "0210e551-e5f2-4458-9348-7eb7d657d0f1",
+          "branch_id": "b4ff555e-67ad-4923-9bf4-fdd1a58709de",
+          "world_revision_id": "02c6f2b7-b702-4096-85f6-147e7b82e253"
+        },
+        "plan_ref": {
+          "artifact_id": "ef8ce533-8c7c-4628-9e25-1f24f156870a",
+          "artifact_revision_id": "55b5c040-f84c-4506-8df5-440c91293586",
+          "sha256": "d1d9fc633eaf16cd73241ec71874c0a2cefed2d46840b32ffe5aa312dfaaa4b5"
+        },
+        "ordered_draft_refs": [
+          {
+            "artifact_id": "5ff4404a-638c-4399-b1b8-2ed020b43d8b",
+            "artifact_revision_id": "88581509-f886-4448-8a5d-f9d633e4298a",
+            "sha256": "858537b7d963cefe413741b45978a215f6956d128fd1768ff16beacd5fff73c6"
+          }
+        ],
+        "reconciliation_refs": [
+          {
+            "artifact_id": "c4af57fb-8a39-4526-b093-bd43ebfe0693",
+            "artifact_revision_id": "0e0b2d30-f9e0-4ed4-8370-4b6a72ecd90e",
+            "sha256": "9b4ec21a434c66e293e8d71818fc381a3df314217dbb4b77605c31927451e82b"
+          }
+        ],
+        "ordered_acceptance_refs": [
+          {
+            "artifact_id": "2278b3f7-b1c3-4082-a4e1-a1e3577e6216",
+            "artifact_revision_id": "313422f3-d58c-45b5-8a66-f7674a4b9673",
+            "sha256": "217f8f82401d9be78709ccb412d594ff6b0a53e71ce9ed7d4a864f94f1c5e7cf"
+          }
+        ],
+        "narrative_revision_id": "ddfe44fb-0c68-4c02-9398-da29d91c3c72",
+        "arrangement_version": "arrangement-1",
+        "disclosure_revision_id": "e3b05d14-2983-4298-ae33-6a1aefaccca7",
+        "style_refs": [],
+        "literary_refs": []
+      },
+      "scope_draft_refs": [
+        {
+          "artifact_id": "5ff4404a-638c-4399-b1b8-2ed020b43d8b",
+          "artifact_revision_id": "88581509-f886-4448-8a5d-f9d633e4298a",
+          "sha256": "858537b7d963cefe413741b45978a215f6956d128fd1768ff16beacd5fff73c6"
+        }
+      ],
+      "target_ref": {
+        "artifact_id": "5ff4404a-638c-4399-b1b8-2ed020b43d8b",
+        "artifact_revision_id": "88581509-f886-4448-8a5d-f9d633e4298a",
+        "sha256": "858537b7d963cefe413741b45978a215f6956d128fd1768ff16beacd5fff73c6"
+      },
+      "coverage_refs": [
+        {
+          "artifact_id": "68a647bc-d68e-453d-b3a4-a89d19e8ef29",
+          "artifact_revision_id": "3afd1211-b453-40c0-95df-7bb6bb6b70e9",
+          "sha256": "dc6a4a9b731296de2bb82062319f390315956da77ff664d37848ef875ecb123d"
+        }
+      ],
+      "independence_ref": {
+        "artifact_id": "abed55df-f0c6-4bf6-b15b-bad866bd632a",
+        "artifact_revision_id": "90700a9a-f255-574d-91fb-39af839bef40",
+        "sha256": "a95c4ad3f0accdb0b955ccafb4f0a05751168ad1f2200e9f8f91d1e6a72f3c49"
+      },
+      "quota": {
+        "currency": "USD",
+        "max_amount": "0.10",
+        "max_tokens": 10000,
+        "max_attempts": 1,
+        "budget_id": "2cf697dc-972d-40af-8255-643a6bc3804c",
+        "deadline": "2026-11-12T15:14:09.947146+00:00"
+      },
+      "rework_limit": 1,
+      "layer": "PROSE",
+      "observations": [],
+      "idempotency_key": "report"
+    },
+    "response": {
+      "report_ref": {
+        "artifact_id": "50d61aea-ddd0-4e25-8a68-ebc38b89c1fc",
+        "artifact_revision_id": "2d08ed16-d533-4a0a-bec7-749d8aa2fa4c",
+        "sha256": "88a1ade569b5488386183e2f2aba3f0b48def5e47fc68370004ac1f0146e61e3"
+      },
+      "native_review_ref": {
+        "artifact_id": "efa80238-6df6-41e6-a0d1-d8efeaf994ff",
+        "artifact_revision_id": "9f48f592-d275-4fb9-92c2-2a0bbdd237f9",
+        "sha256": "7768985da4e9f76f17b075c1ee117e782ebb508a6ab7b17371c479b334f6788f"
+      },
+      "details_ref": {
+        "artifact_id": "1b3d6eae-48d2-4212-91cf-f190489bab3b",
+        "artifact_revision_id": "26aed95c-c35f-5e40-a6d3-059526002e47",
+        "sha256": "c9d91c77410d9e181ac849f87a74e4b68945ea559fd1b0cab8f532339f0140ac"
+      },
+      "report": {
+        "schema_version": "1.0",
+        "kind": "REVIEW_REPORT",
+        "scope": {
+          "world_ref": {
+            "work_id": "0210e551-e5f2-4458-9348-7eb7d657d0f1",
+            "branch_id": "b4ff555e-67ad-4923-9bf4-fdd1a58709de",
+            "world_revision_id": "02c6f2b7-b702-4096-85f6-147e7b82e253"
+          },
+          "task_id": "4e6acb04-f2c9-4694-9acf-feb743d03cc3",
+          "generation": 1
+        },
+        "target_ref": {
+          "artifact_id": "5ff4404a-638c-4399-b1b8-2ed020b43d8b",
+          "artifact_revision_id": "88581509-f886-4448-8a5d-f9d633e4298a",
+          "sha256": "858537b7d963cefe413741b45978a215f6956d128fd1768ff16beacd5fff73c6"
+        },
+        "review_binding": {
+          "producer": {
+            "principal_id": "fa42c53e-2316-4446-8e79-7a9720929aad",
+            "grant_id": "2b5b5b2e-8292-48f8-a222-4619e513d797",
+            "permission_epoch": 0
+          },
+          "reviewer": {
+            "principal_id": "04dc235d-69f4-426d-97f8-6cff2f994c74",
+            "grant_id": "b75aa2f1-1c41-42bc-a5d4-36e4e4adc699",
+            "permission_epoch": 0
+          },
+          "independence_receipt": {
+            "artifact_id": "abed55df-f0c6-4bf6-b15b-bad866bd632a",
+            "artifact_revision_id": "90700a9a-f255-574d-91fb-39af839bef40",
+            "sha256": "a95c4ad3f0accdb0b955ccafb4f0a05751168ad1f2200e9f8f91d1e6a72f3c49"
+          }
+        },
+        "mode": "ENGINEERING",
+        "rubric_ref": {
+          "artifact_id": "c1087f8f-c274-4e90-b421-2b625688c211",
+          "artifact_revision_id": "3b1030bc-d43a-452e-af97-13e7108b6825",
+          "sha256": "883ecfe4503b0e659738aa1b6d7b2ac3c04deeac4a44b2f043ad646ea60b7c0f"
+        },
+        "findings": [],
+        "recommendation": "ACCEPT_CANDIDATE",
+        "rework_limit": 1,
+        "evaluation": {
+          "kind": "ENGINEERING",
+          "check_receipts": [
+            {
+              "artifact_id": "efa80238-6df6-41e6-a0d1-d8efeaf994ff",
+              "artifact_revision_id": "9f48f592-d275-4fb9-92c2-2a0bbdd237f9",
+              "sha256": "7768985da4e9f76f17b075c1ee117e782ebb508a6ab7b17371c479b334f6788f"
+            }
+          ],
+          "literary_conclusion": "NOT_EVALUATED"
+        },
+        "status": "ADVISORY",
+        "independence_policy": "DISTINCT_PRINCIPALS_AND_NO_SUBSTANTIVE_PROXY"
+      },
+      "findings": []
+    }
+  },
+  "nf_harness_review_withdraw": {
+    "kind": "EXECUTED_SERVICE_FIXTURE",
+    "test": "tests/integration/test_harness_review_workflow.py::test_withdraw_retain_and_rework_limit",
+    "request": {
+      "report_ref": {
+        "artifact_id": "81dff538-411e-4b46-bca8-c05b53720f7d",
+        "artifact_revision_id": "d1bdc833-5692-420f-bb56-8630f5b4bf3a",
+        "sha256": "fc66b0d61e4cb8d14bccdd0aad2df745c783c203015436a25e101845818d66d6"
+      },
+      "reason": "保留判断与理由。",
+      "idempotency_key": "WITHDRAWd1bdc833-5692-420f-bb56-8630f5b4bf3a"
+    },
+    "response": {
+      "action": "WITHDRAW",
+      "decision_ref": {
+        "artifact_id": "9f7ab93d-c075-401c-888a-e5451bb250ca",
+        "artifact_revision_id": "800653a0-2c96-4df4-929c-28717c458f21",
+        "sha256": "f2b0f8c7562a91c32aebb18d0e37231a07a70ab1c0a62cbbbffad96af7ed54a4"
+      },
+      "native_decision_ref": null
+    }
+  },
+  "nf_harness_revise": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_harness_revision_brief.py::test_brief_waits_for_an_editor_and_releases_only_writer_scoped_edits",
+    "request": {
+      "report_ref": {
+        "artifact_id": "b983f28e-b491-4d6d-ac63-fe3c279a08df",
+        "artifact_revision_id": "c9ab08ad-b6dc-4830-b06d-29ad9c320948",
+        "sha256": "77ac88d3244b199bc6611c0c03b93dcae4d934276a28fe510fa478e520ad7c31"
+      },
+      "scene_ref": {
+        "artifact_id": "bac01a9c-246c-4931-94bc-e3621c5174d3",
+        "artifact_revision_id": "32a12499-de6a-4153-b24d-1b3d017b62c7",
+        "sha256": "5b2ae3f36e9dd67fd87dbe71796482ec49fc5c053e63cddb132c811f157975b9"
+      },
+      "replacements": [
+        {
+          "finding_id": "506074ba-b1b6-5b18-932a-690cecd6522c",
+          "replacement": "这一次，她没有抬头。"
+        }
+      ],
+      "idempotency_key": "brief-to-revision"
+    },
+    "response": {
+      "draft_ref": {
+        "artifact_id": "cf36ddc4-607a-4467-ab79-f275a37abb65",
+        "artifact_revision_id": "4e2d2d7f-8153-40a3-95a7-64eec4e88ed5",
+        "sha256": "888e4eabcd3c80a525d765c6b538aac41723bdeae03bd6593022df441ad8a9cf"
+      },
+      "revision_ref": {
+        "artifact_id": "e34a98f3-fbde-43e2-bbbc-8e5e2e857e19",
+        "artifact_revision_id": "f256fd1a-ef54-5ff1-a7da-4eaac97b88d2",
+        "sha256": "35974222ecc4fc178f178d819179ea833bc02b6470f856dc9b95f302ab167d46"
+      },
+      "round": 1
+    }
+  },
+  "nf_harness_revision_brief": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_harness_revision_brief.py::test_brief_waits_for_an_editor_and_releases_only_writer_scoped_edits",
+    "request": {
+      "report_ref": {
+        "artifact_id": "b983f28e-b491-4d6d-ac63-fe3c279a08df",
+        "artifact_revision_id": "c9ab08ad-b6dc-4830-b06d-29ad9c320948",
+        "sha256": "77ac88d3244b199bc6611c0c03b93dcae4d934276a28fe510fa478e520ad7c31"
+      }
+    },
+    "response": {
+      "report_ref": {
+        "artifact_id": "b983f28e-b491-4d6d-ac63-fe3c279a08df",
+        "artifact_revision_id": "c9ab08ad-b6dc-4830-b06d-29ad9c320948",
+        "sha256": "77ac88d3244b199bc6611c0c03b93dcae4d934276a28fe510fa478e520ad7c31"
+      },
+      "draft_ref": {
+        "sha256": "d3973770c3f6a24edbef5dde59172dacf56807e88f4501ecf4a0145815014505",
+        "artifact_id": "86df69eb-8656-4fc3-b8d3-34cf181e3a2c",
+        "artifact_revision_id": "63e568e4-6c80-447d-9d82-9b32b4c19be2"
+      },
+      "text_ref": {
+        "sha256": "8c819256c332901f580c7a43e9b1f7254df7b4adc33092bcb9bd51956d7ea614",
+        "artifact_id": "9bb81eea-619d-45e6-8377-333bf988288f",
+        "artifact_revision_id": "0e82a6dd-bb5b-4b30-8560-e97a73ee1ec2"
+      },
+      "round": 1,
+      "findings": [
+        {
+          "finding_id": "506074ba-b1b6-5b18-932a-690cecd6522c",
+          "text_span": {
+            "end": 57,
+            "unit": "UNICODE_CODEPOINT",
+            "start": 38,
+            "quote_sha256": "9d19977b607d7102f4ed59fb5e66d393092b59e989cdeec4a5ab48dc8e925a3e"
+          },
+          "quote_span": {
+            "start": 38,
+            "end": 57,
+            "unit": "UNICODE_CODEPOINT",
+            "quote_sha256": "9d19977b607d7102f4ed59fb5e66d393092b59e989cdeec4a5ab48dc8e925a3e"
+          },
+          "quote": "她把铜印按在封泥上，等最后一条船靠岸。",
+          "requested_change": "只调整选中的重复句，保留其余段落。"
+        }
+      ]
+    }
+  },
+  "nf_harness_simulate": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_harness_planning_mcp.py::test_separate_planner_and_controller_stdio_ports",
+    "request": {
+      "task_id": "d3c7d6e3-44d8-45b0-b69e-d2777f33b395",
+      "generation": 1,
+      "candidate_ref": {
+        "artifact_id": "42b6f2c9-129d-4639-bbec-01e95799ba59",
+        "artifact_revision_id": "0a487a16-e487-48bb-bede-c775c792767f",
+        "sha256": "c96a3a76f8ab4a3443bb612ba5e49c7dd3cad3a09ee88f243a0d8295dca921fd"
+      },
+      "actor_tasks": [
+        {
+          "task_id": "bc9fc0b4-27d8-43a0-a699-17a7c5f544fe",
+          "generation": 1
+        },
+        {
+          "task_id": "78aba49d-4815-4301-b860-c273eecaaf3e",
+          "generation": 1
+        }
+      ],
+      "seed": 7,
+      "max_branches": 2,
+      "max_steps_per_branch": 3,
+      "idempotency_key": "stdio-sim"
+    },
+    "response": {
+      "report_ref": {
+        "artifact_id": "ae3b5671-24a9-45ee-9a41-68ff0d533024",
+        "artifact_revision_id": "ffcb027d-a4b5-4777-9ca4-4b5a8910991a",
+        "sha256": "0046788fcab977265e21dd84e09a2cdea82e2aec495846038c1165a948046976"
+      },
+      "report": {
+        "schema_version": "1.0",
+        "kind": "SIMULATION_REPORT",
+        "scope": {
+          "task_id": "d3c7d6e3-44d8-45b0-b69e-d2777f33b395",
+          "world_ref": {
+            "work_id": "6535091f-7cbe-4eb1-a4e0-cbb986644b67",
+            "branch_id": "1b271bc8-abef-4d59-94f4-21086a84c5b9",
+            "world_revision_id": "57b0d227-4fad-454b-a393-3aece0b06524"
+          },
+          "generation": 1
+        },
+        "plan_candidate_ref": {
+          "artifact_id": "42b6f2c9-129d-4639-bbec-01e95799ba59",
+          "artifact_revision_id": "0a487a16-e487-48bb-bede-c775c792767f",
+          "sha256": "c96a3a76f8ab4a3443bb612ba5e49c7dd3cad3a09ee88f243a0d8295dca921fd"
+        },
+        "input_cut": {
+          "sha256": "3748cf90d629a1c1d67212d4be95e69e8639c0240a723725eec9aa44862b4b4c",
+          "artifact_id": "228262da-b83d-4c56-ab07-d084e77e0724",
+          "artifact_revision_id": "1b2713db-52cb-4be0-af61-bf7e4ef6c102"
+        },
+        "assumptions": [
+          "These alternatives are conditional on the frozen planning cut.",
+          "Assigned goals express planning intentions. Actors may choose differently."
+        ],
+        "method": "RULE_REPLAY",
+        "max_branches": 2,
+        "max_steps_per_branch": 3,
+        "seed": 7,
+        "quota": {
+          "currency": "USD",
+          "deadline": "2026-11-12T15:12:53.164541+00:00",
+          "budget_id": "925e558a-c5ac-43a7-ba78-a7d3ddf48801",
+          "max_amount": "0.10",
+          "max_tokens": 50000,
+          "max_attempts": 4
+        },
+        "outcomes": [
+          {
+            "option_id": "21422f4c-1f51-53b1-9773-33c7e8638638",
+            "conditional_result": "Incompatible accounts would lead participants to contest the premise before acting. Conditional endpoint: 承担失去旧路的代价",
+            "supporting_refs": [
+              {
+                "kind": "ARTIFACT",
+                "artifact_ref": {
+                  "sha256": "eddc53b77069bc6816f5d17e4710c8539301e684bf0e7b7da7ba985454197c06",
+                  "artifact_id": "161ed470-ba87-41d7-a303-335514243cba",
+                  "artifact_revision_id": "359a58dc-6a93-4cbd-a59f-32225e8ca3c1"
+                }
+              }
+            ],
+            "uncertainties": [
+              "The rule compares beliefs only; it does not predict an actor's final choice."
+            ],
+            "stop_reason": "RULE_STOP"
+          },
+          {
+            "option_id": "f6f5f4ae-e92d-5696-8464-916fa28ea206",
+            "conditional_result": "Incompatible accounts would lead participants to contest the premise before acting. Conditional endpoint: 承担失去旧路的代价",
+            "supporting_refs": [
+              {
+                "kind": "ARTIFACT",
+                "artifact_ref": {
+                  "sha256": "eddc53b77069bc6816f5d17e4710c8539301e684bf0e7b7da7ba985454197c06",
+                  "artifact_id": "161ed470-ba87-41d7-a303-335514243cba",
+                  "artifact_revision_id": "359a58dc-6a93-4cbd-a59f-32225e8ca3c1"
+                }
+              }
+            ],
+            "uncertainties": [
+              "The rule compares beliefs only; it does not predict an actor's final choice."
+            ],
+            "stop_reason": "RULE_STOP"
+          }
+        ],
+        "accepted_world_events": 0,
+        "status": "HYPOTHESIS_ONLY"
+      },
+      "usage": {
+        "local_input_units": 1460,
+        "rollout_attempts": 2,
+        "model_tokens": 0,
+        "model_attempts": 0,
+        "amount": "0",
+        "currency": "USD"
+      },
+      "stops": [
+        {
+          "option_id": "21422f4c-1f51-53b1-9773-33c7e8638638",
+          "reason": "COMPLETED",
+          "steps": 2,
+          "reaction": "DISAGREEMENT",
+          "path": [
+            {
+              "node_id": "43e80e5e-17a3-43cd-bdd6-835d3728361e",
+              "action": "PURSUE",
+              "reaction": "DISAGREEMENT"
+            },
+            {
+              "node_id": "43e80e5e-17a3-43cd-bdd6-835d3728361e",
+              "action": "FAILURE_EXIT",
+              "consequence": "承担失去旧路的代价"
+            }
+          ]
+        },
+        {
+          "option_id": "f6f5f4ae-e92d-5696-8464-916fa28ea206",
+          "reason": "COMPLETED",
+          "steps": 2,
+          "reaction": "DISAGREEMENT",
+          "path": [
+            {
+              "node_id": "2208ccd2-eca7-4221-8bd8-7c3aac45d8ab",
+              "action": "PURSUE",
+              "reaction": "DISAGREEMENT"
+            },
+            {
+              "node_id": "2208ccd2-eca7-4221-8bd8-7c3aac45d8ab",
+              "action": "FAILURE_EXIT",
+              "consequence": "承担失去旧路的代价"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "nf_project_status": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_p5_mcp.py::test_project_stdio_resume_is_scoped_and_live",
+    "request": {},
+    "response": {
+      "counts": {
+        "READY": 0,
+        "WAITING": 0,
+        "RUNNING": 0
+      },
+      "ready_count": 0,
+      "workflow_state": "IDLE",
+      "blockers": {},
+      "pending_review_count": 0,
+      "pending_author_approval_count": 0,
+      "resume_grant_expires_at": "2026-11-13T01:10:14.549330+09:00"
+    }
+  },
+  "nf_query_batch": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_p5_mcp.py::test_actor_stdio_own_cut_only_and_candidate_replay",
+    "request": {
+      "lookups": [
+        {
+          "subject_id": "4ef873a8-4f45-56f0-ad45-67928097cea9",
+          "predicate": "owner"
+        }
+      ]
+    },
+    "response": {
+      "items": [
+        {
+          "item_id": "0",
+          "status": "SUCCESS",
+          "payload": {
+            "kind": "STATE",
+            "state_items": [
+              {
+                "subject_id": "4ef873a8-4f45-56f0-ad45-67928097cea9",
+                "predicate": "owner",
+                "answer": {
+                  "world_ref": {
+                    "work_id": "bf176ec8-9c25-480e-b36f-b81dd15c60c8",
+                    "branch_id": "d5fd739a-8362-447f-9977-046fa300251e",
+                    "world_revision_id": "638de02f-89bf-4580-9b16-83d72c61f53f"
+                  },
+                  "story_time": {
+                    "tick": 1,
+                    "phase": 0
+                  },
+                  "plane": "BELIEF",
+                  "truth_status": "UNDETERMINED",
+                  "evaluation_status": "EVALUATED",
+                  "knowledge_status": "UNKNOWN",
+                  "freshness": "CURRENT",
+                  "coverage": "UNDECLARED",
+                  "value_status": "UNRESOLVED",
+                  "data": null,
+                  "evidence_refs": [],
+                  "dependency_handle": "0662b4f2-68e4-527b-b180-0133e18449a9"
+                }
+              }
+            ]
+          },
+          "freshness": "CURRENT",
+          "dependency_handle": "0662b4f2-68e4-527b-b180-0133e18449a9"
+        }
+      ],
+      "all_items_succeeded": true
+    }
+  },
+  "nf_resume_project": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_p5_mcp.py::test_project_stdio_resume_is_scoped_and_live",
+    "request": {},
+    "response": {
+      "counts": {
+        "READY": 0,
+        "WAITING": 0,
+        "RUNNING": 0
+      },
+      "ready_count": 0,
+      "workflow_state": "IDLE",
+      "blockers": {},
+      "pending_review_count": 0,
+      "pending_author_approval_count": 0,
+      "awakened": 0,
+      "recovered": 0,
+      "closed_waits": 0,
+      "expired_ready": 0,
+      "resume_grant_expires_at": "2026-11-13T01:10:14.549330+09:00"
+    }
+  },
+  "nf_rolling_window_submit": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_p5_rolling.py::test_banquet_absence_pins_reference_and_limits_replanning",
+    "request": {
+      "change_point_ref": {
+        "artifact_id": "3bf8dae8-6ab8-419d-8ced-f77bf13f0315",
+        "artifact_revision_id": "b90b6074-cc58-4220-a6dc-81fea637ff46",
+        "sha256": "a95c6e65e39e8dc11abae86d10cd4f0eb21c79ec30550866c563a8a678665db0"
+      },
+      "window": {
+        "schema_version": "2.0",
+        "window_plan_id": "ab144645-6406-481f-9baf-cab5d701e6ea",
+        "volume_contract_revision_id": "8db20619-8824-43d9-ab98-ad1e4ef9b3c1",
+        "input_world_ref": {
+          "work_id": "a836e2e1-725f-4b93-b7a9-59c2346a2d02",
+          "branch_id": "02a5e9d2-7d6a-4ba4-ae8d-9d392f0d23b8",
+          "world_revision_id": "f0206858-f438-4400-98e5-3aa2512d46a7"
+        },
+        "story_interval": {
+          "start": {
+            "tick": 50,
+            "phase": 0
+          },
+          "end": {
+            "tick": 51,
+            "phase": 1
+          },
+          "bounds": "[)"
+        },
+        "scope_ids": [
+          "afe75f34-871f-5a3c-917d-85d7d721957a"
+        ],
+        "process_ids": [],
+        "focus_actor_ids": [
+          "6f352e8f-1163-588f-af0a-71d2660e9e4b",
+          "7743abb4-dd13-5149-8358-264531bfc3c7",
+          "4f430e6d-c279-50e1-80c8-0c37c30ffba4"
+        ],
+        "resolution_strategy": "MICRO_INTERACTION",
+        "candidate_goals": [
+          "派信使去仓库",
+          "收到回信后再决定是否结盟"
+        ],
+        "next_decision_reason": "信使带回实际回应再重新判断。",
+        "assumptions": [],
+        "adopted_event_refs": [
+          {
+            "occurrence_id": "fc129ddc-f0fd-56d1-937c-90fc050e5d82",
+            "event_version_id": "bdaa3c66-1ec1-5bb3-802d-8fddf5892ec2"
+          }
+        ],
+        "expected_outputs": [
+          "SCENE_CONTRACT"
+        ],
+        "dependency_fingerprint": "735f23b15c43f301e438b58f5f00a2f7ff8796b7349e1767fb6066ba99cde5c4",
+        "status": "DRAFT"
+      },
+      "idempotency_key": "window"
+    },
+    "response": {
+      "plan_ref": {
+        "artifact_id": "c12a1e0f-00d8-480c-9424-762f5e88400a",
+        "artifact_revision_id": "c09f3706-b0bf-479a-b556-3221a5a30778",
+        "sha256": "18daf0fabf121fd34b04bb5ef811be2fb5e6c3b1ab0047aca021b18f4c656e83"
+      },
+      "window_ref": {
+        "artifact_id": "b0f7e5d8-2a1c-4bf8-8eae-fe507da82a02",
+        "artifact_revision_id": "e41726f5-f3bd-4f5b-b9cc-7259863e4c9d",
+        "sha256": "ae65fa57976b8e95b027558093eed1f05aac8bc1d28ecccaa7c3c52792834ecc"
+      },
+      "change_point_ref": {
+        "artifact_id": "3bf8dae8-6ab8-419d-8ced-f77bf13f0315",
+        "artifact_revision_id": "b90b6074-cc58-4220-a6dc-81fea637ff46",
+        "sha256": "a95c6e65e39e8dc11abae86d10cd4f0eb21c79ec30550866c563a8a678665db0"
+      }
+    }
+  },
+  "nf_task_get": {
+    "kind": "MCP_FIXTURE",
+    "test": "tests/integration/test_p5_mcp.py::test_actor_stdio_own_cut_only_and_candidate_replay",
+    "request": {},
+    "response": {
+      "task_id": "12e71480-2e62-4d37-a204-0427c96c6d16",
+      "generation": 1,
+      "state": "RUNNING",
+      "context_bundle_id": "a8aba6a9-19af-4400-800c-2e0b154bddd6",
+      "world_ref": {
+        "work_id": "bf176ec8-9c25-480e-b36f-b81dd15c60c8",
+        "branch_id": "d5fd739a-8362-447f-9977-046fa300251e",
+        "world_revision_id": "638de02f-89bf-4580-9b16-83d72c61f53f"
+      }
+    }
+  }
+}

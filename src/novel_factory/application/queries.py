@@ -188,7 +188,8 @@ class WorldQueryService:
                      'Selected history exceeds the P1 query scan budget')
             queries = [request['query']] if 'query' in request else [item['query'] for item in request.get('items', [])]
             needs_events = (not compile_context and plane in {'WORLD', 'SIMULATION'} and
-                            any(q['kind'] == 'TIMELINE' and 'FACT' in q['entry_kinds'] for q in queries))
+                            any(q['kind'] == 'TIMELINE' and 'FACT' in q['entry_kinds']
+                                and q['time_axis'] in {'SOURCE', 'RELEVANT'} for q in queries))
             events = []
             if needs_events:
                 selected = revision['selection'].values()
@@ -345,7 +346,8 @@ class WorldQueryService:
         cut = request['knowledge_cut']; plane = cut['plane']; query = request['query']
         subjects = set(query['subject_ids']); snapshot = packet['revision']['snapshot']; wr = packet['read_cut']['world_ref']
         entries = []
-        if plane == 'PLAN':
+        axis = query.get('time_axis', 'RELEVANT')  # PLAN_DEPENDENTS uses the target time.
+        if plane == 'PLAN' and axis in {'TARGET', 'RELEVANT'}:
             for plan in packet['plans']['plans']:
                 if not subjects.intersection(plan['subject_ids'] + plan['requires_active']):
                     continue
@@ -365,7 +367,7 @@ class WorldQueryService:
                                 'source_story_time': None, 'target_time': plan['target_time'], 'valid_time': None,
                                 'subject_ids': plan['subject_ids'], 'safe_summary': summary,
                                 'evidence_refs': [{'kind': 'ARTIFACT', 'artifact_ref': plan['plan_ref']}]})
-        elif plane == 'BELIEF':
+        elif plane == 'BELIEF' and axis in {'SOURCE', 'RELEVANT'}:
             for cognition in snapshot['cognitions']:
                 if cognition['actor_id'] != cut['actor_id'] or point_key(cognition['acquired_at']) > point_key(cut['known_at']):
                     continue
@@ -391,12 +393,10 @@ class WorldQueryService:
                                 'source': source, 'source_story_time': source_time, 'target_time': None, 'valid_time': None,
                                 'subject_ids': [cognition.get('subject_id', cut['actor_id'])],
                                 'safe_summary': cognition['statement'], 'evidence_refs': deepcopy(allowed)})
-        else:
-            if 'FACT' in query['entry_kinds']:
+        elif plane in {'WORLD', 'SIMULATION'}:
+            if 'FACT' in query['entry_kinds'] and axis in {'SOURCE', 'RELEVANT'}:
                 for event in packet['events']:
                     if not subjects.intersection(event['participants']):
-                        continue
-                    if query.get('time_axis') == 'TARGET':
                         continue
                     if not self._time_matches(event['occurrence_time'], None, request['subject_time']):
                         continue
@@ -407,7 +407,7 @@ class WorldQueryService:
                                     'subject_ids': event['participants'] or sorted(subjects),
                                     'safe_summary': '已接受事件；效果类型：' + ','.join(sorted({e['kind'] for e in event['effects']})) if event['effects'] else '已接受无状态效果的事件',
                                     'evidence_refs': [{'kind': 'EVENT', 'world_ref': wr, 'event_ref': reference}]})
-            if 'STATE_ASSERTION' in query['entry_kinds']:
+            if 'STATE_ASSERTION' in query['entry_kinds'] and axis in {'VALID', 'RELEVANT'}:
                 for relation in snapshot['relations']:
                     if relation['subject_id'] not in subjects or relation['plane'] != 'WORLD' or relation['origin']['kind'] != 'RECORD':
                         continue

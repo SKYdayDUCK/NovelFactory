@@ -1,0 +1,6327 @@
+{
+  "GET /api/v1/tasks/{task_id}": {
+    "transport": "http",
+    "method": "GET",
+    "path": "/api/v1/tasks/{task_id}",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "get_task",
+    "pathParameters": {
+      "task_id": {
+        "type": "string",
+        "format": "uuid"
+      }
+    }
+  },
+  "GET /health": {
+    "transport": "http",
+    "method": "GET",
+    "path": "/health",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "health"
+  },
+  "POST /api/v1/branches": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/branches",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "fork",
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/p1/http.schema.json#/$defs/ForkRequest"
+    }
+  },
+  "POST /api/v1/contexts/compile": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/contexts/compile",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "compile_context",
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/2.1/temporal_concurrency.schema.json#/$defs/ContextCompileRequest"
+    }
+  },
+  "POST /api/v1/continuity/prepare": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/continuity/prepare",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "prepare_continuity",
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/2.3/continuity.schema.json#/$defs/ContinuityRequest"
+    }
+  },
+  "POST /api/v1/model-routes/select": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/model-routes/select",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "select_model_route",
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/2.1/upgrades.schema.json#/$defs/ModelRouteSelect"
+    }
+  },
+  "POST /api/v1/proposals": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/proposals",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "propose",
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/p1/http.schema.json#/$defs/ProposalRequest"
+    }
+  },
+  "POST /api/v1/queries/batch": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/queries/batch",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "batch",
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/2.1/temporal_concurrency.schema.json#/$defs/QueryBatchRequest"
+    }
+  },
+  "POST /api/v1/queries/semantic-assumptions": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/queries/semantic-assumptions",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "semantic_assumption",
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/2.1/kernel.schema.json#/$defs/SemanticAssumption"
+    }
+  },
+  "POST /api/v1/queries/timeline": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/queries/timeline",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "query",
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/2.1/temporal_concurrency.schema.json#/$defs/UnifiedQueryRequest"
+    }
+  },
+  "POST /api/v1/refinements/prepare": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/refinements/prepare",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "prepare_refinement",
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/2.3/refinement.schema.json#/$defs/RefinementRequest"
+    }
+  },
+  "POST /api/v1/refinements/proposals": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/refinements/proposals",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "propose_refinement",
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/2.3/refinement.schema.json#/$defs/RefinementProposeRequest"
+    }
+  },
+  "POST /api/v1/runtime-upgrades/activate": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/runtime-upgrades/activate",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "activate_runtime_upgrade",
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/2.1/upgrades.schema.json#/$defs/RuntimeUpgradeActivate"
+    }
+  },
+  "POST /api/v1/runtime-upgrades/prepare": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/runtime-upgrades/prepare",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "prepare_runtime_upgrade",
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/2.1/upgrades.schema.json#/$defs/RuntimeUpgradePrepare"
+    }
+  },
+  "POST /api/v1/runtime-upgrades/reviews": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/runtime-upgrades/reviews",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "review_runtime_upgrade",
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/2.1/upgrades.schema.json#/$defs/RuntimeUpgradeReview"
+    }
+  },
+  "POST /api/v1/tasks": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/tasks",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "create_task",
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/p1/http.schema.json#/$defs/TaskCreateRequest"
+    }
+  },
+  "POST /api/v1/tasks/cancel": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/tasks/cancel",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "cancel_task",
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/p1/http.schema.json#/$defs/TaskCancelHttpRequest"
+    }
+  },
+  "POST /api/v1/tasks/claim": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/tasks/claim",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "claim_task",
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/p1/http.schema.json#/$defs/TaskClaimRequest"
+    }
+  },
+  "POST /api/v1/tasks/results": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/tasks/results",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "submit_result",
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/p1/http.schema.json#/$defs/TaskResultHttpRequest"
+    }
+  },
+  "POST /api/v1/tasks/{task_id}/continuity": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/tasks/{task_id}/continuity",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "read_task_continuity",
+    "pathParameters": {
+      "task_id": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/2.3/continuity.schema.json#/$defs/ContinuityTaskReadRequest"
+    }
+  },
+  "POST /api/v1/works/{work_id}/continuity/inspect": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/works/{work_id}/continuity/inspect",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "inspect_continuity",
+    "pathParameters": {
+      "work_id": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/2.3/continuity.schema.json#/$defs/ContinuityInspectRequest"
+    }
+  },
+  "POST /api/v1/works/{work_id}/continuity/publish": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/works/{work_id}/continuity/publish",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "publish_continuity",
+    "pathParameters": {
+      "work_id": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/2.3/continuity.schema.json#/$defs/ContinuityPublishRequest"
+    }
+  },
+  "POST /api/v1/works/{work_id}/continuity/readings": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/works/{work_id}/continuity/readings",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "read_continuity_candidate",
+    "pathParameters": {
+      "work_id": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/2.3/continuity.schema.json#/$defs/ContinuityReadRequest"
+    }
+  },
+  "POST /api/v1/works/{work_id}/continuity/reviews": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/works/{work_id}/continuity/reviews",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "review_continuity",
+    "pathParameters": {
+      "work_id": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/2.3/continuity.schema.json#/$defs/ContinuityReviewRequest"
+    }
+  },
+  "POST /api/v1/world/accept": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/world/accept",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "accept",
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/AcceptWorldRequest"
+    }
+  },
+  "POST /api/v1/world/accept-guarded": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/world/accept-guarded",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "accept_guarded",
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/2.1/temporal_concurrency.schema.json#/$defs/GuardedAcceptRequest"
+    }
+  },
+  "POST /api/v1/world/acceptance-certificates": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/world/acceptance-certificates",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "prepare",
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/2.1/temporal_concurrency.schema.json#/$defs/AcceptancePrepareRequest"
+    }
+  },
+  "POST /api/v1/world/promotions": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/world/promotions",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "promote",
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/p1/http.schema.json#/$defs/PromotionHttpRequest"
+    }
+  },
+  "aw_capabilities": {
+    "transport": "workshop-mcp",
+    "description": "Negotiate this connection's organization protocol.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "protocol_version"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "protocol_version": {
+          "type": "string",
+          "maxLength": 32
+        }
+      }
+    },
+    "source": "workshop/src/agent_workshop/server.py",
+    "handler": "negotiate"
+  },
+  "aw_delegate": {
+    "transport": "workshop-mcp",
+    "description": "Reserve organization budget and request a provisioned NF task slot.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "operation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "slot_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "max_amount": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,6})?$"
+        },
+        "token_limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000000
+        }
+      },
+      "required": [
+        "operation_id",
+        "slot_id",
+        "max_amount",
+        "token_limit"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/delegation.py",
+    "handler": "delegate"
+  },
+  "aw_delivery_ack": {
+    "transport": "workshop-mcp",
+    "description": "Acknowledge an addressed message.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "message_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "message_id"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/messaging.py",
+    "handler": "ack"
+  },
+  "aw_dynamic_skill_attest": {
+    "transport": "workshop-mcp",
+    "description": "Verify the current employee and creative Skill and optionally freeze it to the exact delegated NF task.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "binding_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "nf": {
+          "type": "object",
+          "properties": {
+            "installation_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "org_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nf_instance_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "work_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "branch_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "role_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+            },
+            "task_kind": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+            },
+            "installation_epoch": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "installation_id",
+            "org_id",
+            "nf_instance_id",
+            "work_id",
+            "branch_id",
+            "role_id",
+            "task_kind",
+            "installation_epoch"
+          ],
+          "additionalProperties": false
+        },
+        "task": {
+          "type": "object",
+          "properties": {
+            "task_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "generation": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "operation_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "receipt_ref": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "scope_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "task_template_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          "required": [
+            "task_id",
+            "generation",
+            "operation_id",
+            "receipt_ref",
+            "scope_ref",
+            "task_template_id"
+          ],
+          "additionalProperties": false
+        },
+        "freeze_task": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "binding_id",
+        "nf",
+        "freeze_task"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/dynamic_skills.py",
+    "handler": "attest"
+  },
+  "aw_end": {
+    "transport": "workshop-mcp",
+    "description": "End an employee using organization revision CAS.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "operation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "expected_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "employee_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        }
+      },
+      "required": [
+        "operation_id",
+        "expected_revision",
+        "employee_id"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/organization.py",
+    "handler": "handle"
+  },
+  "aw_handoff": {
+    "transport": "workshop-mcp",
+    "description": "Transfer organization follow-up responsibility. The NF attempt keeps its identity.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "operation_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "handoff_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "recipient": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        }
+      },
+      "required": [
+        "operation_id",
+        "handoff_id",
+        "recipient"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/delegation.py",
+    "handler": "handoff"
+  },
+  "aw_hire": {
+    "transport": "workshop-mcp",
+    "description": "Hire an employee using organization revision CAS.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "operation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "expected_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "employee_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "role_id": {
+          "type": "string",
+          "enum": [
+            "adjudication_advisor",
+            "character_actor",
+            "chief_editor",
+            "environment_director",
+            "evidence_maintainer",
+            "literary_editor",
+            "maintenance",
+            "review_lead",
+            "reviewer",
+            "screenwriter",
+            "volume_director",
+            "world_designer",
+            "writer"
+          ]
+        },
+        "supervisor_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "team_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "slot_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "operation_id",
+        "expected_revision",
+        "employee_id",
+        "role_id",
+        "supervisor_id",
+        "team_id"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/organization.py",
+    "handler": "handle"
+  },
+  "aw_history_get": {
+    "transport": "workshop-mcp",
+    "description": "Read a fixed cut of organization history within the live audience grant.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "cursor": {
+          "type": "string",
+          "maxLength": 2048
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/manager.py",
+    "handler": "history"
+  },
+  "aw_mailbox_get": {
+    "transport": "workshop-mcp",
+    "description": "Resume the authenticated employee's mailbox after a sequence.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "after": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/messaging.py",
+    "handler": "mailbox"
+  },
+  "aw_message_body_get": {
+    "transport": "workshop-mcp",
+    "description": "Read an addressed body under current route authorization.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "message_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "message_id"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/messaging.py",
+    "handler": "body_get"
+  },
+  "aw_message_body_put": {
+    "transport": "workshop-mcp",
+    "description": "Register a private body addressed to a recipient and current tenure.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "operation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "recipient": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "scope_ref": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "content": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16384
+        }
+      },
+      "required": [
+        "operation_id",
+        "recipient",
+        "scope_ref",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/messaging.py",
+    "handler": "register_body"
+  },
+  "aw_message_send": {
+    "transport": "workshop-mcp",
+    "description": "Send one addressed message over a permitted direction and message kind.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "operation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "recipient": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "scope_ref": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "ASK",
+            "ASSIGN",
+            "ASSIGN_REVIEW",
+            "EXCEPTION",
+            "GOAL",
+            "INCIDENT",
+            "PAUSE",
+            "PLAN_NOTICE",
+            "PROPOSE_SCRIPT",
+            "REPORT",
+            "REQUEST_DECISION",
+            "REQUEST_RESOURCE",
+            "REQUEST_REVIEW",
+            "REQUEST_REVISION"
+          ]
+        },
+        "graph_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "ttl_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 86400
+        },
+        "body_ref": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "route_grant_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "causation_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "incident_code": {
+          "enum": [
+            "SERVICE_OFFLINE",
+            "STALE_LEASE",
+            "RECEIPT_MISSING",
+            "QUEUE_PRESSURE"
+          ]
+        }
+      },
+      "required": [
+        "operation_id",
+        "recipient",
+        "scope_ref",
+        "kind",
+        "graph_revision",
+        "ttl_seconds"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/messaging.py",
+    "handler": "send"
+  },
+  "aw_model_policy_get": {
+    "transport": "workshop-mcp",
+    "description": "Export the current manager-approved model policy for this branch.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "work_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "branch_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "work_id",
+        "branch_id"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/model_policies.py",
+    "handler": "get"
+  },
+  "aw_model_policy_publish": {
+    "transport": "workshop-mcp",
+    "description": "Publish a scoped policy revision for authorized NF adoption.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "work_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "branch_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "expected_revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rules": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+              },
+              "when": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "task_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                      }
+                    },
+                    "required": [
+                      "task_id"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "instance_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                      },
+                      "task_kind": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                      }
+                    },
+                    "required": [
+                      "instance_id",
+                      "task_kind"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "instance_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                      }
+                    },
+                    "required": [
+                      "instance_id"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "role_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                      },
+                      "task_kind": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                      }
+                    },
+                    "required": [
+                      "role_id",
+                      "task_kind"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "role_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                      }
+                    },
+                    "required": [
+                      "role_id"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "task_kind": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                      }
+                    },
+                    "required": [
+                      "task_kind"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "branch_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                      }
+                    },
+                    "required": [
+                      "branch_id"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "work_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                      }
+                    },
+                    "required": [
+                      "work_id"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "org_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                      }
+                    },
+                    "required": [
+                      "org_id"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "installation_id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+                      }
+                    },
+                    "required": [
+                      "installation_id"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {},
+                    "required": [],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "profile": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,79}$"
+              }
+            },
+            "required": [
+              "id",
+              "when",
+              "profile"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "work_id",
+        "branch_id",
+        "expected_revision",
+        "rules"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/model_policies.py",
+    "handler": "publish"
+  },
+  "aw_preset_apply": {
+    "transport": "workshop-mcp",
+    "description": "Apply a matching preview at the current organization revision.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "preset": {
+          "type": "string",
+          "enum": [
+            "Minimal",
+            "Standard",
+            "Long-form",
+            "Research-Audit"
+          ]
+        },
+        "operation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "expected_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "preview_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "preset",
+        "operation_id",
+        "expected_revision",
+        "preview_sha"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/presets.py",
+    "handler": "apply_preset"
+  },
+  "aw_preset_preview": {
+    "transport": "workshop-mcp",
+    "description": "Preview roster, tenure and supervision changes.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "preset": {
+          "type": "string",
+          "enum": [
+            "Minimal",
+            "Standard",
+            "Long-form",
+            "Research-Audit"
+          ]
+        }
+      },
+      "required": [
+        "preset"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/presets.py",
+    "handler": "preview"
+  },
+  "aw_progress_get": {
+    "transport": "workshop-mcp",
+    "description": "Read an authorized scene or role delegation and its latest NF receipt.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "operation_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "operation_id"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/manager.py",
+    "handler": "progress"
+  },
+  "aw_resume_project": {
+    "transport": "workshop-mcp",
+    "description": "Persist one authorized wake request for the bound NF project and end this turn.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "operation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        }
+      },
+      "required": [
+        "operation_id"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/manager.py",
+    "handler": "request_resume"
+  },
+  "aw_review_decide": {
+    "transport": "workshop-mcp",
+    "description": "Record a bounded decision on a frozen artifact and authorized evidence.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "operation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "review_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "outcome": {
+          "enum": [
+            "APPROVED",
+            "CHANGES_REQUESTED"
+          ]
+        },
+        "reason": {
+          "enum": [
+            "CAUSALITY",
+            "VOICE",
+            "MOTIVATION",
+            "SCENE_ORDER",
+            "RESOURCE",
+            "RELIABILITY",
+            "ACCOUNTING",
+            "EVIDENCE"
+          ]
+        },
+        "evidence_ref": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        }
+      },
+      "required": [
+        "operation_id",
+        "review_id",
+        "outcome",
+        "reason",
+        "evidence_ref"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/reviews_skills.py",
+    "handler": "decide"
+  },
+  "aw_review_get": {
+    "transport": "workshop-mcp",
+    "description": "Read this assignment with evidence references filtered to its current reviewer.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "review_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "review_id"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/reviews_skills.py",
+    "handler": "get_review"
+  },
+  "aw_review_independence": {
+    "transport": "workshop-mcp",
+    "description": "Verify a frozen NF draft and reviewer assignment against current Workshop authority.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "binding": {
+          "type": "object",
+          "properties": {
+            "authority": {
+              "const": "WORKSHOP"
+            },
+            "world_ref": {
+              "type": "object",
+              "properties": {
+                "work_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "branch_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "world_revision_id": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "required": [
+                "work_id",
+                "branch_id",
+                "world_revision_id"
+              ],
+              "additionalProperties": false
+            },
+            "manuscript_ref": {
+              "type": "object",
+              "properties": {
+                "artifact_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "artifact_revision_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "artifact_id",
+                "artifact_revision_id",
+                "sha256"
+              ],
+              "additionalProperties": false
+            },
+            "producers": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 32,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "principal_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "grant_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "task_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "generation": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "permission_epoch": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "delegation": {
+                    "type": "object",
+                    "properties": {
+                      "installation_id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "org_id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "nf_instance_id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "epoch": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "operation_id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "receipt_ref": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "scope_ref": {
+                        "type": "string",
+                        "maxLength": 128
+                      }
+                    },
+                    "required": [
+                      "installation_id",
+                      "org_id",
+                      "nf_instance_id",
+                      "epoch",
+                      "operation_id",
+                      "receipt_ref",
+                      "scope_ref"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "principal_id",
+                  "grant_id",
+                  "task_id",
+                  "generation",
+                  "permission_epoch",
+                  "delegation"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "reviewer": {
+              "type": "object",
+              "properties": {
+                "principal_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "grant_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "task_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "generation": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "permission_epoch": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "delegation": {
+                  "type": "object",
+                  "properties": {
+                    "installation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "org_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "nf_instance_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "epoch": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "operation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "receipt_ref": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "scope_ref": {
+                      "type": "string",
+                      "maxLength": 128
+                    }
+                  },
+                  "required": [
+                    "installation_id",
+                    "org_id",
+                    "nf_instance_id",
+                    "epoch",
+                    "operation_id",
+                    "receipt_ref",
+                    "scope_ref"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "principal_id",
+                "grant_id",
+                "task_id",
+                "generation",
+                "permission_epoch",
+                "delegation"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "authority",
+            "world_ref",
+            "manuscript_ref",
+            "producers",
+            "reviewer"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "binding"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/review_independence.py",
+    "handler": "attest"
+  },
+  "aw_review_reconcile": {
+    "transport": "workshop-mcp",
+    "description": "Escalate a stale review or reassign an outstanding human review after departure.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "review_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "operation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "replacement": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        }
+      },
+      "required": [
+        "review_id",
+        "operation_id"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/reviews_skills.py",
+    "handler": "reconcile_review"
+  },
+  "aw_review_request": {
+    "transport": "workshop-mcp",
+    "description": "Create an independent scoped review, evaluating trusted deterministic rules first.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "operation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "artifact_ref": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "artifact_revision": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "mode": {
+          "enum": [
+            "SCRIPT",
+            "DIRECTION",
+            "CHARACTER",
+            "PROSE",
+            "WORLD",
+            "STABILITY",
+            "STATISTICS"
+          ]
+        },
+        "risk_reason": {
+          "enum": [
+            "SAMPLED",
+            "MATERIAL_CHANGE",
+            "DISCLOSURE",
+            "RETCON",
+            "INCIDENT",
+            "COST_DISPUTE"
+          ]
+        },
+        "ttl_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 86400
+        },
+        "reviewer_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "slot_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "max_amount": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,6})?$"
+        },
+        "token_limit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000000
+        }
+      },
+      "required": [
+        "operation_id",
+        "artifact_ref",
+        "artifact_revision",
+        "mode",
+        "risk_reason",
+        "ttl_seconds"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/reviews_skills.py",
+    "handler": "review_request"
+  },
+  "aw_roster_get": {
+    "transport": "workshop-mcp",
+    "description": "Read the current directory and permitted routes.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/organization.py",
+    "handler": "roster"
+  },
+  "aw_route_grant": {
+    "transport": "workshop-mcp",
+    "description": "Issue a limited non-transferrable message route.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "operation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "recipient": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "scope_ref": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "sender": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "ASK",
+            "ASSIGN",
+            "ASSIGN_REVIEW",
+            "EXCEPTION",
+            "GOAL",
+            "INCIDENT",
+            "PAUSE",
+            "PLAN_NOTICE",
+            "PROPOSE_SCRIPT",
+            "REPORT",
+            "REQUEST_DECISION",
+            "REQUEST_RESOURCE",
+            "REQUEST_REVIEW",
+            "REQUEST_REVISION"
+          ]
+        },
+        "ttl_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 86400
+        },
+        "max_uses": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "expected_revision": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "operation_id",
+        "recipient",
+        "scope_ref",
+        "sender",
+        "kind",
+        "ttl_seconds",
+        "max_uses",
+        "expected_revision"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/messaging.py",
+    "handler": "issue_route"
+  },
+  "aw_route_revoke": {
+    "transport": "workshop-mcp",
+    "description": "Revoke a temporary route for subsequent delivery and body reads.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "operation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "grant_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "operation_id",
+        "grant_id"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/messaging.py",
+    "handler": "revoke_route"
+  },
+  "aw_skill_freeze": {
+    "transport": "workshop-mcp",
+    "description": "Freeze skill provenance for this employee's task.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "binding_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "mode": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "task_ref": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "binding_id",
+        "mode",
+        "task_ref"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/reviews_skills.py",
+    "handler": "freeze"
+  },
+  "aw_skill_history": {
+    "transport": "workshop-mcp",
+    "description": "Read a frozen historical hash.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "task_ref": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "skill_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        }
+      },
+      "required": [
+        "task_ref",
+        "skill_id"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/reviews_skills.py",
+    "handler": "skill_history"
+  },
+  "aw_skill_resolve": {
+    "transport": "workshop-mcp",
+    "description": "Resolve live skill metadata without expanding NF grants.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "binding_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "mode": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        }
+      },
+      "required": [
+        "binding_id",
+        "mode"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/reviews_skills.py",
+    "handler": "resolve"
+  },
+  "aw_skill_revoke": {
+    "transport": "workshop-mcp",
+    "description": "Revoke live skill use.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "operation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "binding_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "operation_id",
+        "binding_id"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/reviews_skills.py",
+    "handler": "revoke"
+  },
+  "aw_skill_share": {
+    "transport": "workshop-mcp",
+    "description": "Share registered skill metadata under an explicit scope.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "operation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "skill_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "source_revision": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "policy": {
+          "enum": [
+            "PUBLIC_SHARED",
+            "ROLE_SCOPED",
+            "TEAM_SCOPED",
+            "PRIVATE",
+            "CONTROL_ONLY"
+          ]
+        },
+        "ttl_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 86400
+        },
+        "target": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        }
+      },
+      "required": [
+        "operation_id",
+        "skill_id",
+        "source_revision",
+        "policy",
+        "ttl_seconds"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/reviews_skills.py",
+    "handler": "share"
+  },
+  "aw_state_get": {
+    "transport": "workshop-mcp",
+    "description": "Read authorized organization state, review backlog and budget.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/manager.py",
+    "handler": "state"
+  },
+  "aw_suspend": {
+    "transport": "workshop-mcp",
+    "description": "Suspend an employee using organization revision CAS.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "operation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "expected_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "employee_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        }
+      },
+      "required": [
+        "operation_id",
+        "expected_revision",
+        "employee_id"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/organization.py",
+    "handler": "handle"
+  },
+  "aw_transfer": {
+    "transport": "workshop-mcp",
+    "description": "Transfer an employee using organization revision CAS.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "operation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "expected_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "employee_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "role_id": {
+          "type": "string",
+          "enum": [
+            "adjudication_advisor",
+            "character_actor",
+            "chief_editor",
+            "environment_director",
+            "evidence_maintainer",
+            "literary_editor",
+            "maintenance",
+            "review_lead",
+            "reviewer",
+            "screenwriter",
+            "volume_director",
+            "world_designer",
+            "writer"
+          ]
+        },
+        "supervisor_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "team_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "slot_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "operation_id",
+        "expected_revision",
+        "employee_id",
+        "role_id",
+        "supervisor_id",
+        "team_id"
+      ],
+      "additionalProperties": false
+    },
+    "source": "workshop/src/agent_workshop/organization.py",
+    "handler": "handle"
+  },
+  "nf_artifact_put": {
+    "transport": "nf-mcp",
+    "description": "Store a task candidate with a stable idempotency key.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32768
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        }
+      },
+      "required": [
+        "content",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_change_point_request": {
+    "transport": "nf-mcp",
+    "description": "Record evidence for a bounded revision to the volume plan.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "volume": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "prior_plan_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "event_refs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "type": "object",
+            "properties": {
+              "occurrence_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "event_version_id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            "required": [
+              "occurrence_id",
+              "event_version_id"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 10000
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        },
+        "assessment": {
+          "additionalProperties": false,
+          "properties": {
+            "affected_node_ids": {
+              "items": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "maxItems": 32,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "characters": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "actor_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "arc_impact": {
+                    "maxLength": 2000,
+                    "minLength": 1,
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "basis": {
+                    "maxLength": 2000,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "basis_event_refs": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "event_version_id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "occurrence_id": {
+                          "format": "uuid",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "occurrence_id",
+                        "event_version_id"
+                      ],
+                      "type": "object"
+                    },
+                    "maxItems": 32,
+                    "type": "array",
+                    "uniqueItems": true
+                  },
+                  "plausibility": {
+                    "enum": [
+                      "PLAUSIBLE",
+                      "QUESTIONED",
+                      "INSUFFICIENT_EVIDENCE"
+                    ]
+                  }
+                },
+                "required": [
+                  "actor_id",
+                  "plausibility",
+                  "basis",
+                  "arc_impact",
+                  "basis_event_refs"
+                ],
+                "type": "object"
+              },
+              "maxItems": 32,
+              "type": "array"
+            },
+            "reference_node_ids": {
+              "items": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "maxItems": 32,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "trajectory": {
+              "additionalProperties": false,
+              "properties": {
+                "alternative_direction": {
+                  "maxLength": 2000,
+                  "minLength": 1,
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "disposition": {
+                  "enum": [
+                    "POSSIBLE_RETURN",
+                    "DIVERGENCE",
+                    "UNDETERMINED"
+                  ]
+                },
+                "rationale": {
+                  "maxLength": 2000,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "return_direction": {
+                  "maxLength": 2000,
+                  "minLength": 1,
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "disposition",
+                "return_direction",
+                "alternative_direction",
+                "rationale"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "reference_node_ids",
+            "affected_node_ids",
+            "characters",
+            "trajectory"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "volume",
+        "prior_plan_ref",
+        "event_refs",
+        "reason",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_change_point_review": {
+    "transport": "nf-mcp",
+    "description": "Record an independent decision on the exact candidate and window.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "change_point_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "plan_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "window_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "decision": {
+          "enum": [
+            "APPROVED",
+            "RETURNED"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 10000
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        }
+      },
+      "required": [
+        "change_point_ref",
+        "plan_ref",
+        "window_ref",
+        "decision",
+        "reason",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_context_get": {
+    "transport": "nf-mcp",
+    "description": "Read the bound task's authorized context.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_delegation_get": {
+    "transport": "installation-mcp",
+    "description": "Read the original task binding and authoritative accounting for this installation.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "protocol_version": {
+          "const": "aw-nf.v1"
+        },
+        "nf_instance_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "work_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "branch_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "operation_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "grant_epoch": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "protocol_version",
+        "nf_instance_id",
+        "work_id",
+        "branch_id",
+        "operation_id",
+        "grant_epoch"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/application/delegation.py"
+  },
+  "nf_delegation_submit": {
+    "transport": "installation-mcp",
+    "description": "Consume an NF-authorized task slot with a stable operation ID.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "protocol_version": {
+          "const": "aw-nf.v1"
+        },
+        "nf_instance_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "work_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "branch_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "operation_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "grant_epoch": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "task_template_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "scope_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "actor_binding_ref": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "role_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "generation": {
+          "type": "integer",
+          "const": 0
+        },
+        "budget_reservation_ref": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "max_amount": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,6})?$"
+        },
+        "currency": {
+          "enum": [
+            "USD",
+            "CNY"
+          ]
+        },
+        "token_limit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "protocol_version",
+        "nf_instance_id",
+        "work_id",
+        "branch_id",
+        "operation_id",
+        "grant_epoch",
+        "task_template_id",
+        "scope_ref",
+        "actor_binding_ref",
+        "role_id",
+        "generation",
+        "budget_reservation_ref",
+        "max_amount",
+        "currency",
+        "token_limit"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/application/delegation.py"
+  },
+  "nf_harness_agent_history": {
+    "transport": "nf-mcp",
+    "description": "Read the dynamic agent's authorized selection and lifecycle history.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "world_ref": {
+          "additionalProperties": false,
+          "description": "All three identifiers are checked together against an immutable branch/revision membership; main is resolved before issue.",
+          "properties": {
+            "branch_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "work_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "world_revision_id": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "required": [
+            "work_id",
+            "branch_id",
+            "world_revision_id"
+          ],
+          "type": "object"
+        },
+        "instance_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "world_ref",
+        "instance_ref"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_harness_agent_register": {
+    "transport": "nf-mcp",
+    "description": "Register scoped profile and Skill text from a delegated source assignment.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "workshop_binding": {
+          "additionalProperties": false,
+          "properties": {
+            "binding_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "content_sha": {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            "employee_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            "employment_revision": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "grant_epoch": {
+              "maximum": 2147483647,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "installation_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            "org_id": {
+              "maxLength": 200,
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            "skill_id": {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            "source_revision": {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            }
+          },
+          "required": [
+            "org_id",
+            "installation_id",
+            "employee_id",
+            "employment_revision",
+            "grant_epoch",
+            "binding_id",
+            "skill_id",
+            "source_revision",
+            "content_sha"
+          ],
+          "type": "object"
+        },
+        "profile_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "role_instructions": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200000
+        },
+        "skill_instructions": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200000
+        },
+        "requested_tools": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        },
+        "trigger": {
+          "enum": [
+            "SKILL_GAP",
+            "REVIEW_FINDING",
+            "TASK_DEMAND"
+          ]
+        },
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "properties": {
+              "artifact_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "artifact_revision_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "artifact_id",
+              "artifact_revision_id",
+              "sha256"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "quota": {
+          "additionalProperties": false,
+          "properties": {
+            "budget_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "currency": {
+              "enum": [
+                "USD",
+                "CNY"
+              ],
+              "type": "string"
+            },
+            "deadline": {
+              "format": "date-time",
+              "type": "string"
+            },
+            "max_amount": {
+              "allOf": [
+                {
+                  "description": "Nonnegative exact decimal; domain enforces unit and finite precision.",
+                  "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+                  "type": "string"
+                },
+                {
+                  "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$",
+                  "type": "string"
+                }
+              ]
+            },
+            "max_attempts": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "max_tokens": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "budget_id",
+            "currency",
+            "max_amount",
+            "max_tokens",
+            "max_attempts",
+            "deadline"
+          ],
+          "type": "object"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "workshop_binding",
+        "profile_version",
+        "role_instructions",
+        "skill_instructions",
+        "requested_tools",
+        "trigger",
+        "evidence_refs",
+        "quota",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_harness_agent_retire": {
+    "transport": "nf-mcp",
+    "description": "Exit or archive the scoped dynamic agent at its expected version.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "world_ref": {
+          "additionalProperties": false,
+          "description": "All three identifiers are checked together against an immutable branch/revision membership; main is resolved before issue.",
+          "properties": {
+            "branch_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "work_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "world_revision_id": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "required": [
+            "work_id",
+            "branch_id",
+            "world_revision_id"
+          ],
+          "type": "object"
+        },
+        "instance_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "action": {
+          "enum": [
+            "EXIT",
+            "ARCHIVE"
+          ]
+        },
+        "expected_epoch": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        }
+      },
+      "required": [
+        "world_ref",
+        "instance_ref",
+        "action",
+        "expected_epoch",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_harness_agent_select": {
+    "transport": "nf-mcp",
+    "description": "Select a registered revision for new assignments, including a historical revision.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "world_ref": {
+          "additionalProperties": false,
+          "description": "All three identifiers are checked together against an immutable branch/revision membership; main is resolved before issue.",
+          "properties": {
+            "branch_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "work_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "world_revision_id": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "required": [
+            "work_id",
+            "branch_id",
+            "world_revision_id"
+          ],
+          "type": "object"
+        },
+        "instance_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "revision_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "expected_epoch": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        }
+      },
+      "required": [
+        "world_ref",
+        "instance_ref",
+        "revision_ref",
+        "expected_epoch",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_harness_instruction_case": {
+    "transport": "nf-mcp",
+    "description": "Describe the exact participants and artifacts for an independent registrar.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "world_ref": {
+          "additionalProperties": false,
+          "description": "All three identifiers are checked together against an immutable branch/revision membership; main is resolved before issue.",
+          "properties": {
+            "branch_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "work_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "world_revision_id": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "required": [
+            "work_id",
+            "branch_id",
+            "world_revision_id"
+          ],
+          "type": "object"
+        },
+        "candidate_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "engineering_report_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "run_manifest_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "reviewer_task_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "reviewer_generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "publisher_grant_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "world_ref",
+        "candidate_ref",
+        "engineering_report_ref",
+        "run_manifest_ref",
+        "reviewer_task_id",
+        "reviewer_generation",
+        "publisher_grant_id"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_harness_instruction_decide": {
+    "transport": "nf-mcp",
+    "description": "Decide whether to release independently reviewed instructions.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "candidate_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "engineering_report_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "run_manifest_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "world_ref": {
+          "additionalProperties": false,
+          "description": "All three identifiers are checked together against an immutable branch/revision membership; main is resolved before issue.",
+          "properties": {
+            "branch_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "work_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "world_revision_id": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "required": [
+            "work_id",
+            "branch_id",
+            "world_revision_id"
+          ],
+          "type": "object"
+        },
+        "review_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "action": {
+          "enum": [
+            "APPROVE",
+            "REJECT"
+          ]
+        },
+        "expected_epoch": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 10000
+        },
+        "valid_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        },
+        "route": {
+          "enum": [
+            "MANUAL",
+            "POLICY_AUTOMATIC"
+          ]
+        },
+        "policy_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "candidate_ref",
+        "engineering_report_ref",
+        "run_manifest_ref",
+        "world_ref",
+        "review_ref",
+        "action",
+        "expected_epoch",
+        "reason",
+        "valid_until",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_harness_instruction_evaluate": {
+    "transport": "nf-mcp",
+    "description": "Run every preregistered arm and retain outcomes for independent review.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "world_ref": {
+          "additionalProperties": false,
+          "description": "All three identifiers are checked together against an immutable branch/revision membership; main is resolved before issue.",
+          "properties": {
+            "branch_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "work_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "world_revision_id": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "required": [
+            "work_id",
+            "branch_id",
+            "world_revision_id"
+          ],
+          "type": "object"
+        },
+        "candidate_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        }
+      },
+      "required": [
+        "world_ref",
+        "candidate_ref",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_harness_instruction_evidence": {
+    "transport": "nf-mcp",
+    "description": "Read the assigned evaluation outcomes and scope.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "candidate_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "engineering_report_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "run_manifest_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "candidate_ref",
+        "engineering_report_ref",
+        "run_manifest_ref"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_harness_instruction_monitor": {
+    "transport": "nf-mcp",
+    "description": "Read NF attempts and settlement for a task that froze a specific release.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "world_ref": {
+          "additionalProperties": false,
+          "description": "All three identifiers are checked together against an immutable branch/revision membership; main is resolved before issue.",
+          "properties": {
+            "branch_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "work_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "world_revision_id": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "required": [
+            "work_id",
+            "branch_id",
+            "world_revision_id"
+          ],
+          "type": "object"
+        },
+        "decision_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "task_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        }
+      },
+      "required": [
+        "world_ref",
+        "decision_ref",
+        "task_id",
+        "generation",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_harness_instruction_policy": {
+    "transport": "nf-mcp",
+    "description": "Authorize a scoped publisher under an expiring automatic promotion policy.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "world_ref": {
+          "additionalProperties": false,
+          "description": "All three identifiers are checked together against an immutable branch/revision membership; main is resolved before issue.",
+          "properties": {
+            "branch_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "work_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "world_revision_id": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "required": [
+            "work_id",
+            "branch_id",
+            "world_revision_id"
+          ],
+          "type": "object"
+        },
+        "role_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "task_kind": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "skill_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "dynamic_instance_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "publisher_grant_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "valid_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        }
+      },
+      "required": [
+        "world_ref",
+        "role_id",
+        "task_kind",
+        "skill_name",
+        "publisher_grant_id",
+        "valid_until",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_harness_instruction_propose": {
+    "transport": "nf-mcp",
+    "description": "Freeze a scoped instruction and comparison using signed manuscript reviews.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "world_ref": {
+          "additionalProperties": false,
+          "description": "All three identifiers are checked together against an immutable branch/revision membership; main is resolved before issue.",
+          "properties": {
+            "branch_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "work_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "world_revision_id": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "required": [
+            "work_id",
+            "branch_id",
+            "world_revision_id"
+          ],
+          "type": "object"
+        },
+        "task_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "failure_report_refs": {
+          "type": "array",
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "properties": {
+              "artifact_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "artifact_revision_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "artifact_id",
+              "artifact_revision_id",
+              "sha256"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "success_report_refs": {
+          "type": "array",
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "properties": {
+              "artifact_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "artifact_revision_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "artifact_id",
+              "artifact_revision_id",
+              "sha256"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "evaluation_report_refs": {
+          "type": "array",
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "properties": {
+              "artifact_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "artifact_revision_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "artifact_id",
+              "artifact_revision_id",
+              "sha256"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "change_kind": {
+          "enum": [
+            "ROLE_INSTRUCTIONS",
+            "SKILL_INSTRUCTIONS",
+            "CONTEXT_RECIPE",
+            "REVIEW_RUBRIC"
+          ]
+        },
+        "quota": {
+          "additionalProperties": false,
+          "properties": {
+            "budget_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "currency": {
+              "enum": [
+                "USD",
+                "CNY"
+              ],
+              "type": "string"
+            },
+            "deadline": {
+              "format": "date-time",
+              "type": "string"
+            },
+            "max_amount": {
+              "allOf": [
+                {
+                  "description": "Nonnegative exact decimal; domain enforces unit and finite precision.",
+                  "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+                  "type": "string"
+                },
+                {
+                  "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$",
+                  "type": "string"
+                }
+              ]
+            },
+            "max_attempts": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "max_tokens": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "budget_id",
+            "currency",
+            "max_amount",
+            "max_tokens",
+            "max_attempts",
+            "deadline"
+          ],
+          "type": "object"
+        },
+        "order_seed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "repetitions": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        },
+        "instructions": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16000
+        },
+        "material_order": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 11,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          }
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        }
+      },
+      "required": [
+        "world_ref",
+        "task_id",
+        "generation",
+        "failure_report_refs",
+        "success_report_refs",
+        "change_kind",
+        "quota",
+        "order_seed",
+        "repetitions",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_harness_instruction_review": {
+    "transport": "nf-mcp",
+    "description": "Record an independent opinion on the assigned experiment.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "candidate_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "engineering_report_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "run_manifest_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "publisher_grant_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "verdict": {
+          "enum": [
+            "APPROVE",
+            "REJECT"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 10000
+        },
+        "valid_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        }
+      },
+      "required": [
+        "candidate_ref",
+        "engineering_report_ref",
+        "run_manifest_ref",
+        "publisher_grant_id",
+        "verdict",
+        "reason",
+        "valid_until",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_harness_instruction_revoke_policy": {
+    "transport": "nf-mcp",
+    "description": "Withdraw the scoped authority for subsequent automatic releases.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "world_ref": {
+          "additionalProperties": false,
+          "description": "All three identifiers are checked together against an immutable branch/revision membership; main is resolved before issue.",
+          "properties": {
+            "branch_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "work_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "world_revision_id": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "required": [
+            "work_id",
+            "branch_id",
+            "world_revision_id"
+          ],
+          "type": "object"
+        },
+        "policy_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 10000
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        }
+      },
+      "required": [
+        "world_ref",
+        "policy_ref",
+        "reason",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_harness_instruction_rollback": {
+    "transport": "nf-mcp",
+    "description": "Restore the previous scoped selection at the expected release epoch.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "world_ref": {
+          "additionalProperties": false,
+          "description": "All three identifiers are checked together against an immutable branch/revision membership; main is resolved before issue.",
+          "properties": {
+            "branch_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "work_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "world_revision_id": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "required": [
+            "work_id",
+            "branch_id",
+            "world_revision_id"
+          ],
+          "type": "object"
+        },
+        "decision_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "expected_epoch": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 10000
+        },
+        "review_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        }
+      },
+      "required": [
+        "world_ref",
+        "decision_ref",
+        "expected_epoch",
+        "reason",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_harness_metrics": {
+    "transport": "nf-mcp",
+    "description": "Read measured creative workflow activity in the bound work, branch and time window.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "world_ref": {
+          "additionalProperties": false,
+          "description": "All three identifiers are checked together against an immutable branch/revision membership; main is resolved before issue.",
+          "properties": {
+            "branch_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "work_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "world_revision_id": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "required": [
+            "work_id",
+            "branch_id",
+            "world_revision_id"
+          ],
+          "type": "object"
+        },
+        "since": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5000
+        }
+      },
+      "required": [
+        "world_ref"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_harness_plan_decide": {
+    "transport": "nf-mcp",
+    "description": "Submit a plan decision to the existing adoption service, or decline every alternative.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "candidate_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "option_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rolling_review_ref": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "artifact_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "artifact_revision_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "artifact_id",
+                "artifact_revision_id",
+                "sha256"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "candidate_ref",
+        "option_id",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_harness_plan_propose": {
+    "transport": "nf-mcp",
+    "description": "Derive bounded conditional alternatives from the assigned plan.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "plan_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "node_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "minItems": 1,
+          "maxItems": 8,
+          "uniqueItems": true
+        },
+        "trigger": {
+          "enum": [
+            "ORDINARY",
+            "MOTIVE_CONFLICT",
+            "IRREVERSIBLE"
+          ]
+        },
+        "quota": {
+          "additionalProperties": false,
+          "properties": {
+            "budget_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "currency": {
+              "enum": [
+                "USD",
+                "CNY"
+              ],
+              "type": "string"
+            },
+            "deadline": {
+              "format": "date-time",
+              "type": "string"
+            },
+            "max_amount": {
+              "allOf": [
+                {
+                  "description": "Nonnegative exact decimal; domain enforces unit and finite precision.",
+                  "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+                  "type": "string"
+                },
+                {
+                  "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$",
+                  "type": "string"
+                }
+              ]
+            },
+            "max_attempts": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "max_tokens": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "budget_id",
+            "currency",
+            "max_amount",
+            "max_tokens",
+            "max_attempts",
+            "deadline"
+          ],
+          "type": "object"
+        },
+        "horizon_scenes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        }
+      },
+      "required": [
+        "plan_ref",
+        "node_ids",
+        "trigger",
+        "quota",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_harness_review_decide": {
+    "transport": "nf-mcp",
+    "description": "Record an authorized editorial response to the cited draft and review.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "report_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "action": {
+          "enum": [
+            "RETURN",
+            "RETAIN",
+            "ACCEPT_REVISION",
+            "DEFER",
+            "WITHDRAW"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 10000
+        },
+        "native_decision": {
+          "additionalProperties": false,
+          "properties": {
+            "after_binding": {
+              "additionalProperties": false,
+              "properties": {
+                "arrangement_version": {
+                  "maxLength": 200,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "disclosure_revision_id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "literary_refs": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "artifact_id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "artifact_revision_id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "sha256": {
+                        "pattern": "^[a-f0-9]{64}$",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "artifact_id",
+                      "artifact_revision_id",
+                      "sha256"
+                    ],
+                    "type": "object"
+                  },
+                  "maxItems": 128,
+                  "minItems": 0,
+                  "type": "array"
+                },
+                "narrative_revision_id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "ordered_acceptance_refs": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "artifact_id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "artifact_revision_id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "sha256": {
+                        "pattern": "^[a-f0-9]{64}$",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "artifact_id",
+                      "artifact_revision_id",
+                      "sha256"
+                    ],
+                    "type": "object"
+                  },
+                  "maxItems": 128,
+                  "minItems": 0,
+                  "type": "array"
+                },
+                "ordered_draft_refs": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "artifact_id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "artifact_revision_id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "sha256": {
+                        "pattern": "^[a-f0-9]{64}$",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "artifact_id",
+                      "artifact_revision_id",
+                      "sha256"
+                    ],
+                    "type": "object"
+                  },
+                  "maxItems": 128,
+                  "minItems": 1,
+                  "type": "array"
+                },
+                "plan_ref": {
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "artifact_id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "artifact_revision_id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "sha256": {
+                          "pattern": "^[a-f0-9]{64}$",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "artifact_id",
+                        "artifact_revision_id",
+                        "sha256"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "reconciliation_refs": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "artifact_id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "artifact_revision_id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "sha256": {
+                        "pattern": "^[a-f0-9]{64}$",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "artifact_id",
+                      "artifact_revision_id",
+                      "sha256"
+                    ],
+                    "type": "object"
+                  },
+                  "maxItems": 128,
+                  "minItems": 1,
+                  "type": "array"
+                },
+                "style_refs": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "artifact_id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "artifact_revision_id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "sha256": {
+                        "pattern": "^[a-f0-9]{64}$",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "artifact_id",
+                      "artifact_revision_id",
+                      "sha256"
+                    ],
+                    "type": "object"
+                  },
+                  "maxItems": 128,
+                  "minItems": 0,
+                  "type": "array"
+                },
+                "world_ref": {
+                  "additionalProperties": false,
+                  "description": "All three identifiers are checked together against an immutable branch/revision membership; main is resolved before issue.",
+                  "properties": {
+                    "branch_id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "work_id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "world_revision_id": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "work_id",
+                    "branch_id",
+                    "world_revision_id"
+                  ],
+                  "type": "object"
+                }
+              },
+              "required": [
+                "world_ref",
+                "plan_ref",
+                "ordered_draft_refs",
+                "reconciliation_refs",
+                "ordered_acceptance_refs",
+                "narrative_revision_id",
+                "arrangement_version",
+                "style_refs",
+                "literary_refs",
+                "disclosure_revision_id"
+              ],
+              "type": "object"
+            },
+            "considered_options": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "benefits": {
+                    "items": {
+                      "maxLength": 8000,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "maxItems": 16,
+                    "type": "array"
+                  },
+                  "costs": {
+                    "items": {
+                      "maxLength": 8000,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "maxItems": 16,
+                    "type": "array"
+                  },
+                  "disposition": {
+                    "enum": [
+                      "SELECTED",
+                      "REJECTED",
+                      "DEFERRED"
+                    ]
+                  },
+                  "option_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "reason": {
+                    "maxLength": 8000,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "summary": {
+                    "maxLength": 8000,
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "option_id",
+                  "summary",
+                  "disposition",
+                  "reason",
+                  "benefits",
+                  "costs"
+                ],
+                "type": "object"
+              },
+              "maxItems": 8,
+              "type": "array"
+            },
+            "expected_prior_decision_ref": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "artifact_id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "artifact_revision_id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "sha256": {
+                      "pattern": "^[a-f0-9]{64}$",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "artifact_id",
+                    "artifact_revision_id",
+                    "sha256"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "idempotency_key": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "issue_decisions": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "action": {
+                    "enum": [
+                      "REVISE",
+                      "RETAIN_WITH_REASON",
+                      "DEFER",
+                      "RESOLVED"
+                    ]
+                  },
+                  "evidence_refs": {
+                    "items": {
+                      "oneOf": [
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "artifact_ref": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "artifact_id": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "artifact_revision_id": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "sha256": {
+                                  "pattern": "^[a-f0-9]{64}$",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "artifact_id",
+                                "artifact_revision_id",
+                                "sha256"
+                              ],
+                              "type": "object"
+                            },
+                            "kind": {
+                              "enum": [
+                                "ARTIFACT"
+                              ],
+                              "type": "string"
+                            },
+                            "span": {
+                              "additionalProperties": false,
+                              "description": "Offsets address the exact UTF-8 decoded artifact without normalization. Domain enforces end > start and verifies quoted content.",
+                              "properties": {
+                                "end": {
+                                  "minimum": 0,
+                                  "type": "integer"
+                                },
+                                "quote_sha256": {
+                                  "pattern": "^[a-f0-9]{64}$",
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "minimum": 0,
+                                  "type": "integer"
+                                },
+                                "unit": {
+                                  "enum": [
+                                    "UNICODE_CODEPOINT"
+                                  ],
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "start",
+                                "end",
+                                "unit",
+                                "quote_sha256"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "artifact_ref"
+                          ],
+                          "type": "object"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "event_ref": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "event_version_id": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "occurrence_id": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "occurrence_id",
+                                "event_version_id"
+                              ],
+                              "type": "object"
+                            },
+                            "kind": {
+                              "enum": [
+                                "EVENT"
+                              ],
+                              "type": "string"
+                            },
+                            "world_ref": {
+                              "additionalProperties": false,
+                              "description": "All three identifiers are checked together against an immutable branch/revision membership; main is resolved before issue.",
+                              "properties": {
+                                "branch_id": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "work_id": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "world_revision_id": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "work_id",
+                                "branch_id",
+                                "world_revision_id"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "world_ref",
+                            "event_ref"
+                          ],
+                          "type": "object"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "artifact_ref": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "artifact_id": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "artifact_revision_id": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "sha256": {
+                                  "pattern": "^[a-f0-9]{64}$",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "artifact_id",
+                                "artifact_revision_id",
+                                "sha256"
+                              ],
+                              "type": "object"
+                            },
+                            "kind": {
+                              "enum": [
+                                "RULE"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "artifact_ref"
+                          ],
+                          "type": "object"
+                        }
+                      ]
+                    },
+                    "maxItems": 32,
+                    "minItems": 0,
+                    "type": "array"
+                  },
+                  "issue_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "reason": {
+                    "maxLength": 8000,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "replacement_draft_refs": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "artifact_id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "artifact_revision_id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "sha256": {
+                          "pattern": "^[a-f0-9]{64}$",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "artifact_id",
+                        "artifact_revision_id",
+                        "sha256"
+                      ],
+                      "type": "object"
+                    },
+                    "maxItems": 32,
+                    "minItems": 0,
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "issue_id",
+                  "action",
+                  "reason",
+                  "evidence_refs",
+                  "replacement_draft_refs"
+                ],
+                "type": "object"
+              },
+              "maxItems": 64,
+              "minItems": 0,
+              "type": "array"
+            },
+            "phase": {
+              "enum": [
+                "STRUCTURE",
+                "SEAM",
+                "LANGUAGE"
+              ]
+            },
+            "review_refs": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "artifact_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "artifact_revision_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "sha256": {
+                    "pattern": "^[a-f0-9]{64}$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "artifact_id",
+                  "artifact_revision_id",
+                  "sha256"
+                ],
+                "type": "object"
+              },
+              "maxItems": 128,
+              "minItems": 1,
+              "type": "array"
+            },
+            "scene_functions": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "choice_evidence_refs": {
+                    "items": {
+                      "oneOf": [
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "artifact_ref": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "artifact_id": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "artifact_revision_id": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "sha256": {
+                                  "pattern": "^[a-f0-9]{64}$",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "artifact_id",
+                                "artifact_revision_id",
+                                "sha256"
+                              ],
+                              "type": "object"
+                            },
+                            "kind": {
+                              "enum": [
+                                "ARTIFACT"
+                              ],
+                              "type": "string"
+                            },
+                            "span": {
+                              "additionalProperties": false,
+                              "description": "Offsets address the exact UTF-8 decoded artifact without normalization. Domain enforces end > start and verifies quoted content.",
+                              "properties": {
+                                "end": {
+                                  "minimum": 0,
+                                  "type": "integer"
+                                },
+                                "quote_sha256": {
+                                  "pattern": "^[a-f0-9]{64}$",
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "minimum": 0,
+                                  "type": "integer"
+                                },
+                                "unit": {
+                                  "enum": [
+                                    "UNICODE_CODEPOINT"
+                                  ],
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "start",
+                                "end",
+                                "unit",
+                                "quote_sha256"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "artifact_ref"
+                          ],
+                          "type": "object"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "event_ref": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "event_version_id": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "occurrence_id": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "occurrence_id",
+                                "event_version_id"
+                              ],
+                              "type": "object"
+                            },
+                            "kind": {
+                              "enum": [
+                                "EVENT"
+                              ],
+                              "type": "string"
+                            },
+                            "world_ref": {
+                              "additionalProperties": false,
+                              "description": "All three identifiers are checked together against an immutable branch/revision membership; main is resolved before issue.",
+                              "properties": {
+                                "branch_id": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "work_id": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "world_revision_id": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "work_id",
+                                "branch_id",
+                                "world_revision_id"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "world_ref",
+                            "event_ref"
+                          ],
+                          "type": "object"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "artifact_ref": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "artifact_id": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "artifact_revision_id": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "sha256": {
+                                  "pattern": "^[a-f0-9]{64}$",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "artifact_id",
+                                "artifact_revision_id",
+                                "sha256"
+                              ],
+                              "type": "object"
+                            },
+                            "kind": {
+                              "enum": [
+                                "RULE"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "artifact_ref"
+                          ],
+                          "type": "object"
+                        }
+                      ]
+                    },
+                    "maxItems": 32,
+                    "minItems": 0,
+                    "type": "array"
+                  },
+                  "draft_ref": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "artifact_id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "artifact_revision_id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "sha256": {
+                        "pattern": "^[a-f0-9]{64}$",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "artifact_id",
+                      "artifact_revision_id",
+                      "sha256"
+                    ],
+                    "type": "object"
+                  },
+                  "function": {
+                    "maxLength": 8000,
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "draft_ref",
+                  "function",
+                  "choice_evidence_refs"
+                ],
+                "type": "object"
+              },
+              "maxItems": 128,
+              "minItems": 0,
+              "type": "array"
+            },
+            "schema_version": {
+              "const": "2.1"
+            },
+            "session_ref": {
+              "additionalProperties": false,
+              "properties": {
+                "artifact_id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "artifact_revision_id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "sha256": {
+                  "pattern": "^[a-f0-9]{64}$",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "artifact_id",
+                "artifact_revision_id",
+                "sha256"
+              ],
+              "type": "object"
+            },
+            "summary": {
+              "maxLength": 16000,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "schema_version",
+            "session_ref",
+            "expected_prior_decision_ref",
+            "phase",
+            "after_binding",
+            "review_refs",
+            "issue_decisions",
+            "scene_functions",
+            "summary",
+            "idempotency_key",
+            "considered_options"
+          ],
+          "type": "object"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "report_ref",
+        "action",
+        "reason",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_harness_review_independence": {
+    "transport": "nf-mcp",
+    "description": "Verify the named review assignment and manuscript against trusted subject records.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "manuscript_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "manuscript_ref"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_harness_review_read": {
+    "transport": "nf-mcp",
+    "description": "Read the exact assigned manuscript and obtain a coverage receipt.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "draft_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        }
+      },
+      "required": [
+        "draft_ref",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_harness_review_submit": {
+    "transport": "nf-mcp",
+    "description": "Report precisely located literary findings for the assigned manuscript.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "binding": {
+          "additionalProperties": false,
+          "properties": {
+            "arrangement_version": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "disclosure_revision_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "literary_refs": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "artifact_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "artifact_revision_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "sha256": {
+                    "pattern": "^[a-f0-9]{64}$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "artifact_id",
+                  "artifact_revision_id",
+                  "sha256"
+                ],
+                "type": "object"
+              },
+              "maxItems": 128,
+              "minItems": 0,
+              "type": "array"
+            },
+            "narrative_revision_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "ordered_acceptance_refs": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "artifact_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "artifact_revision_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "sha256": {
+                    "pattern": "^[a-f0-9]{64}$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "artifact_id",
+                  "artifact_revision_id",
+                  "sha256"
+                ],
+                "type": "object"
+              },
+              "maxItems": 128,
+              "minItems": 0,
+              "type": "array"
+            },
+            "ordered_draft_refs": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "artifact_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "artifact_revision_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "sha256": {
+                    "pattern": "^[a-f0-9]{64}$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "artifact_id",
+                  "artifact_revision_id",
+                  "sha256"
+                ],
+                "type": "object"
+              },
+              "maxItems": 128,
+              "minItems": 1,
+              "type": "array"
+            },
+            "plan_ref": {
+              "anyOf": [
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "artifact_id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "artifact_revision_id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "sha256": {
+                      "pattern": "^[a-f0-9]{64}$",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "artifact_id",
+                    "artifact_revision_id",
+                    "sha256"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "reconciliation_refs": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "artifact_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "artifact_revision_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "sha256": {
+                    "pattern": "^[a-f0-9]{64}$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "artifact_id",
+                  "artifact_revision_id",
+                  "sha256"
+                ],
+                "type": "object"
+              },
+              "maxItems": 128,
+              "minItems": 1,
+              "type": "array"
+            },
+            "style_refs": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "artifact_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "artifact_revision_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "sha256": {
+                    "pattern": "^[a-f0-9]{64}$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "artifact_id",
+                  "artifact_revision_id",
+                  "sha256"
+                ],
+                "type": "object"
+              },
+              "maxItems": 128,
+              "minItems": 0,
+              "type": "array"
+            },
+            "world_ref": {
+              "additionalProperties": false,
+              "description": "All three identifiers are checked together against an immutable branch/revision membership; main is resolved before issue.",
+              "properties": {
+                "branch_id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "work_id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "world_revision_id": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "work_id",
+                "branch_id",
+                "world_revision_id"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "world_ref",
+            "plan_ref",
+            "ordered_draft_refs",
+            "reconciliation_refs",
+            "ordered_acceptance_refs",
+            "narrative_revision_id",
+            "arrangement_version",
+            "style_refs",
+            "literary_refs",
+            "disclosure_revision_id"
+          ],
+          "type": "object"
+        },
+        "target_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "independence_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "related_independence_refs": {
+          "type": "array",
+          "maxItems": 127,
+          "items": {
+            "type": "object",
+            "properties": {
+              "artifact_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "artifact_revision_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "artifact_id",
+              "artifact_revision_id",
+              "sha256"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "scope_draft_refs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "items": {
+            "type": "object",
+            "properties": {
+              "artifact_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "artifact_revision_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "artifact_id",
+              "artifact_revision_id",
+              "sha256"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "coverage_refs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 512,
+          "items": {
+            "type": "object",
+            "properties": {
+              "artifact_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "artifact_revision_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "artifact_id",
+              "artifact_revision_id",
+              "sha256"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "layer": {
+          "enum": [
+            "WORLD_SETTING",
+            "NAMING",
+            "PLOT",
+            "STAGING",
+            "CHARACTER",
+            "PROSE",
+            "CHAPTER_SEAM",
+            "VOLUME",
+            "FACT_KNOWLEDGE"
+          ]
+        },
+        "reader_position": {
+          "enum": [
+            "NO_OPINION",
+            "NO_ISSUES"
+          ]
+        },
+        "observations": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "properties": {
+              "pattern": {
+                "enum": [
+                  "DROPPED_PROMISE",
+                  "EMOTION_AS_RULE",
+                  "ENGINEERING_SERIALIZATION",
+                  "EXCESS_SUMMARY",
+                  "MECHANICAL_CADENCE",
+                  "MISSING_CONSEQUENCE",
+                  "MOTIVATION_GAP",
+                  "POV_LEAK",
+                  "REPEATED_BEAT",
+                  "REPEATED_IMAGE",
+                  "REPEATED_NAME_FORM",
+                  "REPEATED_SEAM",
+                  "SHARED_VOICE",
+                  "UNBRIDGED_MOVEMENT",
+                  "UNBRIDGED_SEAM",
+                  "UNUSED_EXPOSITION",
+                  "WORLD_CONTRADICTION"
+                ]
+              },
+              "start": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "end": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "counterinterpretation": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "narrative_function": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              },
+              "requested_change": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "related_spans": {
+                "type": "array",
+                "maxItems": 32,
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "text_ref": {
+                      "type": "object",
+                      "properties": {
+                        "artifact_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "artifact_revision_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "sha256": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        }
+                      },
+                      "required": [
+                        "artifact_id",
+                        "artifact_revision_id",
+                        "sha256"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "start": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "end": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "text_ref",
+                    "start",
+                    "end"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "speakers": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "severity": {
+                "enum": [
+                  "NOTE",
+                  "MINOR",
+                  "MAJOR",
+                  "BLOCKER"
+                ]
+              },
+              "disposition": {
+                "enum": [
+                  "QUESTION",
+                  "PREFERENCE",
+                  "PRESERVE"
+                ]
+              }
+            },
+            "required": [
+              "pattern",
+              "start",
+              "end",
+              "reason",
+              "counterinterpretation",
+              "narrative_function",
+              "requested_change",
+              "related_spans"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "quota": {
+          "additionalProperties": false,
+          "properties": {
+            "budget_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "currency": {
+              "enum": [
+                "USD",
+                "CNY"
+              ],
+              "type": "string"
+            },
+            "deadline": {
+              "format": "date-time",
+              "type": "string"
+            },
+            "max_amount": {
+              "allOf": [
+                {
+                  "description": "Nonnegative exact decimal; domain enforces unit and finite precision.",
+                  "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+                  "type": "string"
+                },
+                {
+                  "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$",
+                  "type": "string"
+                }
+              ]
+            },
+            "max_attempts": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "max_tokens": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "budget_id",
+            "currency",
+            "max_amount",
+            "max_tokens",
+            "max_attempts",
+            "deadline"
+          ],
+          "type": "object"
+        },
+        "rework_limit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 32
+        },
+        "prior_report_ref": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "artifact_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "artifact_revision_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "artifact_id",
+                "artifact_revision_id",
+                "sha256"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        }
+      },
+      "required": [
+        "binding",
+        "target_ref",
+        "independence_ref",
+        "scope_draft_refs",
+        "coverage_refs",
+        "layer",
+        "observations",
+        "quota",
+        "rework_limit",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_harness_review_withdraw": {
+    "transport": "nf-mcp",
+    "description": "Withdraw a review written by this assigned reviewer.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "report_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 10000
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        }
+      },
+      "required": [
+        "report_ref",
+        "reason",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_harness_revise": {
+    "transport": "nf-mcp",
+    "description": "Revise only the assigned finding spans and retain the source draft.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "report_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "scene_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "replacements": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "properties": {
+              "finding_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "replacement": {
+                "type": "string",
+                "maxLength": 32000
+              }
+            },
+            "required": [
+              "finding_id",
+              "replacement"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        }
+      },
+      "required": [
+        "report_ref",
+        "scene_ref",
+        "replacements",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_harness_revision_brief": {
+    "transport": "nf-mcp",
+    "description": "Read the returned author-facing findings for the assigned manuscript.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "report_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "report_ref"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_harness_simulate": {
+    "transport": "nf-mcp",
+    "description": "Evaluate a frozen candidate using enrolled actors' fixed knowledge cuts.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "candidate_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "actor_tasks": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "properties": {
+              "task_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "generation": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "required": [
+              "task_id",
+              "generation"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "max_branches": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        },
+        "max_steps_per_branch": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 128
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "candidate_ref",
+        "actor_tasks",
+        "max_branches",
+        "max_steps_per_branch",
+        "seed",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_project_status": {
+    "transport": "nf-mcp",
+    "description": "Read task counts for the configured project branch.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_query_batch": {
+    "transport": "nf-mcp",
+    "description": "Read selected state values at this task's bound time and knowledge cut.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "lookups": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "type": "object",
+            "properties": {
+              "subject_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "predicate": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              }
+            },
+            "required": [
+              "subject_id",
+              "predicate"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "lookups"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_resume_project": {
+    "transport": "nf-mcp",
+    "description": "Recover eligible work and wake satisfied waits in the configured branch.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_rolling_window_submit": {
+    "transport": "nf-mcp",
+    "description": "Submit a bounded future window for independent review.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "change_point_ref": {
+          "type": "object",
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "artifact_revision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "artifact_revision_id",
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "window": {
+          "type": "object"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        }
+      },
+      "required": [
+        "change_point_ref",
+        "window",
+        "idempotency_key"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_task_get": {
+    "transport": "nf-mcp",
+    "description": "Read the bound task's current execution identity.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  }
+}

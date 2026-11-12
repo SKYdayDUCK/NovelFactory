@@ -4,7 +4,7 @@ The board is an immutable projection of handoffs. NF tasks, attempts, drafts,
 published continuity and selected plans keep their existing authorities.
 """
 import json
-from collections import Counter
+from collections import Counter, defaultdict
 from datetime import datetime, timedelta
 
 from sqlalchemy import text
@@ -222,11 +222,16 @@ def pipeline_status(kernel, owner, work, branch, *, include_outputs=False):
         board = _load(kernel, repo, work, branch)
         require(board is not None, "INVALID_ARGUMENT", "No production allowance")
         nodes = board["nodes"]
-        task_ids = [n["task_id"] for n in nodes.values() if n.get("task_id")]
-        calls = repo.many("call_attempts", {"task_id": task_ids}) if task_ids else []
+        records = [record for node in nodes.values() for record in (node, *node.get("history", []))]
+        task_ids = {record["task_id"] for record in records if record.get("task_id")}
+        attempts = defaultdict(list)
+        if task_ids:
+            for call in repo.many("call_attempts", {"task_id": task_ids}):
+                attempts[call["task_id"]].append(call["attempt_id"])
+        for record in records:
+            record["attempt_ids"] = attempts.get(record.get("task_id"), [])
         outputs = {}
         for key, node in nodes.items():
-            node["attempt_ids"] = [c["attempt_id"] for c in calls if c["task_id"] == node.get("task_id")]
             if not include_outputs or "output_ref" not in node:
                 continue
             stage, ref = node["stage"], node["output_ref"]

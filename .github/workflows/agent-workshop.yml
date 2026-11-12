@@ -227,6 +227,8 @@ jobs:
           AW_W6_UPGRADE_EVIDENCE_DIR: ${{ github.workspace }}/workshop/w6-upgrades
         run: |
           mkdir -p "$AW_W6_UPGRADE_EVIDENCE_DIR"
+          # A full branch checkout omits the two archived W6 rehearsal commits.
+          git fetch --no-tags origin d3322de37f8975481b0f200ba97e27d545b85c59 538a6750f8e17df8e4b408ce6589d741dfe671d4
           .venv/bin/python -m pytest -q -o junit_family=xunit1 acceptance/test_w6_historical_upgrades.py --junitxml=w6-historical-upgrades.xml
           for origin in w5c w006 w007 w008 w008a rehearsal_early rehearsal_late w009; do
             test -s "$AW_W6_UPGRADE_EVIDENCE_DIR/$origin.json"

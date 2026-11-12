@@ -69,11 +69,18 @@ class KernelRepository:
         return self.conn.execute(q).rowcount
 
     def bump(self, work_id, branch_id, keys):
-        t = self.tables["scopes"]
-        for key in sorted(set(keys)):
-            q = insert(t).values(work_id=work_id, branch_id=branch_id, scope_key=key, version=1)
-            self.conn.execute(q.on_conflict_do_update(index_elements=[t.c.work_id,t.c.branch_id,t.c.scope_key],
-                set_={"version": t.c.version + 1}))
+        unique_keys = list(set(keys))
+        if unique_keys:
+            # Order conflicting rows as the former sorted loop did. COLLATE "C"
+            # compares UTF-8 bytes, which preserves Unicode code point order.
+            self.conn.execute(text("""
+                INSERT INTO nf_scopes (work_id, branch_id, scope_key, version)
+                SELECT :work_id, :branch_id, key, 1
+                FROM unnest(CAST(:keys AS text[])) AS requested(key)
+                ORDER BY key COLLATE "C"
+                ON CONFLICT (work_id, branch_id, scope_key)
+                DO UPDATE SET version = nf_scopes.version + 1
+            """), {"work_id": work_id, "branch_id": branch_id, "keys": unique_keys})
         return self.scope_map(work_id, branch_id)
 
     def scope_map(self, work_id, branch_id):
