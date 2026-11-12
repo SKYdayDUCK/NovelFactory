@@ -170,3 +170,38 @@ def test_expired_preregistration_records_every_unexecuted_arm(experiment, monkey
             and r["amount"] == "0"
             for r in report["results"]
         )
+
+
+def test_two_signed_readings_of_one_manuscript_do_not_qualify(experiment):
+    e = experiment
+    kernel = e["kernel"]
+    job, positive, review_args, _ = e["records"][2]
+    from novel_factory.application.creative_review import _review_history
+
+    with kernel.db.uow(write=False) as repo:
+        _, details = _review_history(kernel, repo, e["wr"]["work_id"], positive)
+        first = details["reader_observations"][0]
+    interpretation = {
+        **first,
+        "pattern": "REPEATED_NAME_FORM",
+        "disposition": "PRESERVE",
+        "requested_change": None,
+        "related_spans": [],
+    }
+    negative = CreativeReviewService(kernel).review(
+        *_args(job),
+        **{**review_args, "layer": "NAMING", "observations": [interpretation],
+           "idempotency_key": "independent-second-reading"},
+    )["report_ref"]
+    assert positive != negative
+    candidate = _propose(e, evaluation_report_refs=[positive, negative])
+    result = _run(e, candidate)
+    with kernel.db.uow(write=False) as repo:
+        report = e["engine"].inspect(repo, e["wr"], **_refs(result))
+        assert report["status"] == "COMPLETE"
+        assert len({r["text_ref"]["sha256"] for r in report["results"]}) == 1
+        assert report["quality"]["held_out_positives"] and report["quality"]["held_out_negatives"]
+        assert not result["eligible"], "Two readings of one manuscript cannot provide independent controls"
+        assert "OVERLAPPING_HELD_OUT_MANUSCRIPTS" in report["quality"]["reasons"]
+        with pytest.raises(DomainError, match="held-out"):
+            e["engine"].require_release(repo, e["wr"], **_refs(result))

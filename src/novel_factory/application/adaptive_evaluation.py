@@ -322,6 +322,31 @@ def _score(sample, output, kind):
     }
 
 
+def _overlap_quality(quality, case_texts):
+    """A signed reading may share its text with another layer or chapter window."""
+    seen = set()
+    for case_id in set(quality["held_out_positives"] + quality["held_out_negatives"]):
+        current = set(case_texts[case_id])
+        if seen.intersection(current):
+            return {
+                **quality,
+                "eligible": False,
+                "reasons": [*quality["reasons"], "OVERLAPPING_HELD_OUT_MANUSCRIPTS"],
+            }
+        seen.update(current)
+    return quality
+
+
+def _historical_case_texts(kernel, repo, work, report_ref):
+    from .creative_review import _review_history
+
+    _, details = _review_history(kernel, repo, work, report_ref)
+    return [
+        kernel.artifact(repo, ref, work, kind="NARRATIVE_DRAFT")["payload"]["text_ref"]["sha256"]
+        for ref in details["scope_draft_refs"]
+    ]
+
+
 def _quality(rows):
     complete = all(row["status"] == "SUCCEEDED" for row in rows)
     pairs = {}
@@ -557,6 +582,7 @@ class AdaptiveEvaluationService:
                 "candidate_ref": candidate_ref,
                 "start_ref": start_ref,
                 "sample_ref": sample["sample_ref"],
+                "manuscript_sha256": sorted({s["text_ref"]["sha256"] for s in sample["ordered_texts"]}),
                 "text_ref": sample["text_ref"],
                 "case_id": plan["case_id"],
                 "repetition": plan["repetition"],
@@ -640,14 +666,14 @@ class AdaptiveEvaluationService:
                 repo, controller, world_ref["work_id"], "ADAPTIVE_REPLAY", idempotency_key, request
             )
             if old:
-                self.inspect(
+                inspected = self.inspect(
                     repo,
                     world_ref,
                     candidate_ref=candidate_ref,
                     engineering_report_ref=old["engineering_report_ref"],
                     run_manifest_ref=old["run_manifest_ref"],
                 )
-                return old
+                return {**old, "eligible": inspected["eligible"]}
             freeze, samples, schedule = self._freeze(snapshot)
         start_ref, start = self._start(controller, world_ref, candidate_ref, snapshot)
         rows = []
@@ -672,6 +698,7 @@ class AdaptiveEvaluationService:
                 rows.append(row)
                 refs.append(row_ref)
         quality, totals = _quality(rows)
+        quality = _overlap_quality(quality, {r["case_id"]: r["manuscript_sha256"] for r in rows})
         status = "COMPLETE" if all(r["status"] == "SUCCEEDED" for r in rows) else "INCOMPLETE"
         manifest = {
             "scope": start["scope"],
@@ -722,6 +749,7 @@ class AdaptiveEvaluationService:
                 "arm_totals": totals,
                 "literary_status": "UNPROVEN",
                 "measurement": "ENGINEERING_ONLY",
+                "manuscript_independence_version": 1,
                 "status": status,
             }
             report_ref, old_report = self._saved(repo, world_ref, report_id, report_kind)
@@ -814,9 +842,19 @@ class AdaptiveEvaluationService:
             "INVALID_EVIDENCE",
             "Missing or substituted preregistered measurements",
         )
-        quality, totals = _quality(rows)
+        original_quality, totals = _quality(rows)
+        cases = set(original_quality["held_out_positives"] + original_quality["held_out_negatives"])
+        case_texts = {}
+        for row in rows:
+            case_id = row["case_id"]
+            if case_id in cases and case_id not in case_texts:
+                case_texts[case_id] = row.get("manuscript_sha256") or _historical_case_texts(
+                    self.kernel, repo, world_ref["work_id"], row["sample_ref"]
+                )
+        quality = _overlap_quality(original_quality, case_texts)
+        recorded_quality = quality if report.get("manuscript_independence_version") == 1 else original_quality
         require(
-            quality == report["quality"] and totals == report["arm_totals"],
+            recorded_quality == report["quality"] and totals == report["arm_totals"],
             "INVALID_EVIDENCE",
             "Objective measurements differ",
         )
@@ -824,6 +862,7 @@ class AdaptiveEvaluationService:
             **report,
             "engineering_report_ref": engineering_report_ref,
             "results": rows,
+            "quality": quality,
             "eligible": quality["eligible"],
         }
 
