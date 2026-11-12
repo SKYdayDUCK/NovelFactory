@@ -282,6 +282,9 @@ class Kernel:
         """
         grant = self.authorize(r, principal, work_id, "READ")
         artifact = self.artifact(r, ref, work_id)
+        if artifact["kind"] == "RUNTIME_ROUTING_POLICY":
+            self.authorize(r, principal, work_id, "ADMIN", artifact["payload"]["branch_id"])
+            return
         if artifact["kind"].startswith("AGENT_"):
             from .dynamic_runtime import audit_branches
 

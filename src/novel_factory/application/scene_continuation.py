@@ -57,7 +57,7 @@ def authorize_slots(kernel, repo, owner, director_id, request, plan_ref):
         "INVALID_ARGUMENT",
         "Future slots must name adopted plan nodes",
     )
-    # The selected model route is immutable across the entire allowance.
+    # Fixed allowances retain their original profile. Policy allowances resolve each new task.
     director_job = repo.one("supervisor_jobs", {"task_id": director_id})["config"]
     agent_input = kernel.artifact(
         repo, director_job["dispatch"]["input_ref"], work, kind="AGENT_INPUT"
@@ -88,7 +88,7 @@ def _start_next(kernel, repo, gateway, owner, task, spec, allowance):
     require(remaining > 0, "TASK_EXPIRED", "The scene allowance expired")
     adapter = gateway.adapters.get(allowance["adapter_id"])
     require(
-        adapter and fingerprint(adapter.configuration) == allowance["model_config_sha256"],
+        allowance["adapter_id"] == "@policy" or (adapter and fingerprint(adapter.configuration) == allowance["model_config_sha256"]),
         "MODEL_CONFIG_CHANGED",
         "The authorized model route changed",
     )

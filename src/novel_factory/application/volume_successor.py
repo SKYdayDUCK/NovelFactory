@@ -91,7 +91,7 @@ def register_next_volume(
         require(
             anchor
             and repo.one("budgets", {"budget_id": budget_id, "work_id": work})
-            and adapter_id in gateway.adapters,
+            and (adapter_id == "@policy" or adapter_id in gateway.adapters),
             "VIEW_DENIED",
             "Frozen target reference, model route and work budget are required",
         )
@@ -123,7 +123,7 @@ def register_next_volume(
             "epoch": owner_grant["epoch"],
             "policy_version": current_work["policy_version"],
             "anchor_ref": anchor["artifact_ref"],
-            "model_sha256": fingerprint(gateway.adapters[adapter_id].configuration),
+            "model_sha256": fingerprint(gateway.adapters[adapter_id].configuration) if adapter_id != "@policy" else None,
             "deadline": (repo.now() + timedelta(seconds=deadline_seconds)).isoformat(),
         }
         ref = _save(kernel, repo, owner, work, body, "VOLUME_SUCCESSOR")
@@ -185,7 +185,7 @@ def _start(kernel, repo, gateway, owner, body, allowance_ref, snapshot_ref):
     )
     adapter = gateway.adapters.get(body["adapter_id"])
     require(
-        adapter and fingerprint(adapter.configuration) == body["model_sha256"],
+        body["adapter_id"] == "@policy" or (adapter and fingerprint(adapter.configuration) == body["model_sha256"]),
         "MODEL_CONFIG_CHANGED",
         "Model route changed",
     )

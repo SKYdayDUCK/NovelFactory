@@ -45,7 +45,7 @@ def test_populated_w010_preserves_historical_cut_and_guarded_downgrade(dual_data
         assert before == snapshot()
         with connect(dsn) as conn:
             assert (
-                conn.execute("SELECT version_num FROM aw_alembic_version").fetchone()["version_num"] == "w011"
+                conn.execute("SELECT version_num FROM aw_alembic_version").fetchone()["version_num"] == "w012"
             )
             assert (
                 conn.execute("SELECT cut FROM aw_source_cuts WHERE org_id=%s", (org,)).fetchone()["cut"]

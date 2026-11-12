@@ -24,7 +24,8 @@ _NEXT = text("""
           AND g.capabilities @> '["TASK_CLAIM","READ","COMPILE"]'::jsonb
           AND NOT EXISTS(SELECT FROM nf_dispatch_slots s WHERE s.task_id=t.task_id
                          AND s.expires_at > statement_timestamp())
-          AND NOT EXISTS(SELECT FROM nf_call_attempts c WHERE c.task_id=t.task_id)
+          AND NOT EXISTS(SELECT FROM nf_call_attempts c WHERE c.task_id=t.task_id
+              AND NOT EXISTS(SELECT FROM nf_runtime_unsent u WHERE u.attempt_id=c.attempt_id))
           AND NOT EXISTS(SELECT FROM nf_conflict_cases sc WHERE sc.task_id=t.task_id
                          AND sc.generation=t.generation AND NOT EXISTS
                          (SELECT FROM nf_conflict_resolutions sr WHERE sr.case_id=sc.case_id

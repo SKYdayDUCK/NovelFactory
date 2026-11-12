@@ -59,9 +59,9 @@ def provision_successor(kernel, gateway, controller, task, spec, cfg, outcome):
                 "独立复核此次偏离、候选计划和有限窗口，记录同意、退回或需要作者决定的问题。"
             )
 
-    adapter_id = parent_input["adapter_id"]
+    adapter_id = "@policy" if "routing_decision" in parent_input else parent_input["adapter_id"]
     require(
-        adapter_id in gateway.adapters
+        adapter_id == "@policy" or adapter_id in gateway.adapters
         and fingerprint(gateway.adapters[adapter_id].configuration)
         == parent_input["model_config_sha256"],
         "MODEL_CONFIG_CHANGED",
