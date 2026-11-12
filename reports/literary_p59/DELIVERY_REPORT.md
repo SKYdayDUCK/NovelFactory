@@ -12,3 +12,14 @@
 - [来源兼容修正](https://github.com/SKYdayDUCK/NovelFactory/commit/c8781c28e34483a6c6cfb5619fab1f8cf3b45b3d)
 
 正文成稿、原生正式接受与 GitHub 合并分别验收。用于核查的私有 PG、凭据、原生日志、临时脚本和来源探针均在独立工作目录。提交只含 Markdown；现有 CI 和受保护的目录 JSON 没有编辑。
+
+## 工程验收
+
+| 实际检查 | 观察 |
+|---|---|
+| 原生来源与授权、Workshop 固定摘要、研究来源和链接 | [逐项独立工程复核](ENGINEERING_ACCEPTANCE.md)。最终 66/66 内建组合与原基线行为相同，三个禁止组合在两边均被拒。 |
+| 架构包与文档 | `python validation/validate_package.py --output <隔离目录>/package.json`，零失败。首轮知识索引尚未落盘时，设计验证单测曾失败；补齐目标后重跑。 |
+| 单元、契约与准入 | `python -m pytest -q tests/unit tests/contracts tests/service/test_admission.py`，最终 433 项和 17 个子测试通过。 |
+| PostgreSQL 17.11 写作、对账、冻结与 Harness 专项 | 在独立 PG 执行 gateway_narrative、narrative、release、p58_production_pipeline、harness_literary_mcp、harness_context、harness_review_workflow、harness_editor_independence、harness_planning_simulation 和 harness_revision_brief 十个现有集成测试文件。直接覆盖受保护指令时 49 通过、3 失败，恢复内置来源字节后以完全相同的文件复跑，52 通过。 |
+| 真实任务卡的投递 | 使用既有风格绑定和写作网关冻结 139 码点的 write-scene 段落，在隔离记录适配器收到的 `creative_materials` 复核字节。任务 `1454eb26-9850-41cc-8cc9-f0f297dedb7d`。适配器无外网调用，未参与小说写作或评分。 |
+| 文学材料 | 13 次定稿原文送达均与原文散列一致，覆盖和盲评原件分别见两个作品目录与[第一轮报告](ROUND1_EVALUATION.md)。抽样对账保留 BLOCKED；已完成作品不冒充 NF 的 RELEASE。 |
