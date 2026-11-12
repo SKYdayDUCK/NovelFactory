@@ -1,0 +1,1004 @@
+{
+  "schema": "pr18-independent-provenance-v1",
+  "repository": "SKYdayDUCK/NovelFactory",
+  "review_main": "0420356b0bd0bfd675494e581799946c4b967f6e",
+  "review_main_tree": "c15a497115b404e05a1abc194363888c3ca66725",
+  "pr": {
+    "number": 18,
+    "head": "3985ebd4f90ff9f7d2e9626df9c0fbf5e8cdb1be",
+    "base": "55d8979b5361a4837701d762feacd83036096b11",
+    "head_branch": "evidence/p55-55d897-guard",
+    "base_branch": "dev/p5-5-redis-eventhub",
+    "commits": 9,
+    "added_files": 12,
+    "product_or_schema_changes_in_diff": 0
+  },
+  "retained_evidence_root": {
+    "ref": "a2fc30d264e80e74e6fbe9ad152d12f1c50c8735",
+    "directory": "reports/integration/evidence/S9-PR18/",
+    "source_inventory": "f3800f73b04ead24cba1cf5f0704f6d77e6b38c2",
+    "original_archive_manifest": "6d5b5f93dab9c28d8d55c5887d514e85a2ba59aa",
+    "collector_run": 43155669120,
+    "pre_expiry_retention": "Git objects referenced from a repository tree survive the Actions artifact dates while that Git history is retained."
+  },
+  "method": "Compared recursive, untruncated main and PR trees, including object identity at any path. Decoded all 10 original ZIPs from the pinned retained Git tree, verified their exact GitHub archive SHA256 and each of the 80 decompressed member SHA256/size values. Computed each member canonical Git blob hash and searched the reviewed main tree for that exact object. Loose-file absence is not a claim about different representations or compressions.",
+  "source_diff": [
+    {
+      "path": ".github/workflows/p55-admission-paired.yml",
+      "sha": "492b514e38195fc85acf7d5099203fd3a1613add",
+      "mode": "100644",
+      "size": 3832,
+      "mainSamePath": null,
+      "mainIdenticalObjects": []
+    },
+    {
+      "path": ".github/workflows/p55-export.yml",
+      "sha": "28b8f514282444ef75e8bc7663770a5621610347",
+      "mode": "100644",
+      "size": 2158,
+      "mainSamePath": null,
+      "mainIdenticalObjects": []
+    },
+    {
+      "path": ".github/workflows/p55-guard-acceptance.yml",
+      "sha": "2de4a533b9497ee58fb87d9c18a384c1a83ef8a5",
+      "mode": "100644",
+      "size": 3173,
+      "mainSamePath": null,
+      "mainIdenticalObjects": []
+    },
+    {
+      "path": ".github/workflows/p55-large-qualification.yml",
+      "sha": "c858706d4960fb534f57f15e21fef8e8f560a47b",
+      "mode": "100644",
+      "size": 3497,
+      "mainSamePath": null,
+      "mainIdenticalObjects": []
+    },
+    {
+      "path": ".github/workflows/p55-main-desktop-receipt.yml",
+      "sha": "b7291c6b31a3d634bacee67f7cbb4f3ef963bc5a",
+      "mode": "100644",
+      "size": 1194,
+      "mainSamePath": null,
+      "mainIdenticalObjects": []
+    },
+    {
+      "path": ".github/workflows/p55-profile.yml",
+      "sha": "ad3012512d8dfb188ffd5017ba5231d48059cbf0",
+      "mode": "100644",
+      "size": 2735,
+      "mainSamePath": null,
+      "mainIdenticalObjects": []
+    },
+    {
+      "path": ".github/workflows/p55-query-comparison.yml",
+      "sha": "dbbe339ca80b6345c08d2dadafd2aac5eef13507",
+      "mode": "100644",
+      "size": 2938,
+      "mainSamePath": null,
+      "mainIdenticalObjects": []
+    },
+    {
+      "path": "evidence/p55/checkpoints/export_fixed_receipts.py",
+      "sha": "1a2c5a7f02ccf2253ccdd4a1b1eec39117983504",
+      "mode": "100644",
+      "size": 3635,
+      "mainSamePath": null,
+      "mainIdenticalObjects": []
+    },
+    {
+      "path": "evidence/p55/checkpoints/guard-registration.json",
+      "sha": "bfa29a5dd60658fdd5f4e0a484546061b22a8f6b",
+      "mode": "100644",
+      "size": 768,
+      "mainSamePath": null,
+      "mainIdenticalObjects": [
+        "evidence/p55/s9-local/remote-55d897/guard-registration.json"
+      ]
+    },
+    {
+      "path": "evidence/p55/checkpoints/large-world-registration.json",
+      "sha": "df6bb21df4621904105564ab9156cd1c13019988",
+      "mode": "100644",
+      "size": 893,
+      "mainSamePath": null,
+      "mainIdenticalObjects": []
+    },
+    {
+      "path": "evidence/p55/checkpoints/profile_fixed_cut.py",
+      "sha": "27777ce8e5f47b5713d3d4e5c0bf2d0b78d57dd4",
+      "mode": "100644",
+      "size": 6109,
+      "mainSamePath": null,
+      "mainIdenticalObjects": []
+    },
+    {
+      "path": "evidence/p55/checkpoints/query-comparison.json",
+      "sha": "70248d647ff158b0e271ee59d113db569571974b",
+      "mode": "100644",
+      "size": 902,
+      "mainSamePath": null,
+      "mainIdenticalObjects": []
+    }
+  ],
+  "original_commit_file_deltas": [
+    {
+      "commit": "c775013e16fd71717d5c6a309df92df90842ea05",
+      "changes": [
+        {
+          "path": ".github/workflows/p55-guard-acceptance.yml",
+          "blob": "8a9077b11e50be1e5223e103932a68fefe973bcc",
+          "status": "added"
+        },
+        {
+          "path": "evidence/p55/checkpoints/guard-registration.json",
+          "blob": "bfa29a5dd60658fdd5f4e0a484546061b22a8f6b",
+          "status": "added"
+        }
+      ]
+    },
+    {
+      "commit": "51e5ac1cda8770e244b8f9fd95803bdd80d0e08d",
+      "changes": [
+        {
+          "path": ".github/workflows/p55-query-comparison.yml",
+          "blob": "dbbe339ca80b6345c08d2dadafd2aac5eef13507",
+          "status": "added"
+        },
+        {
+          "path": "evidence/p55/checkpoints/query-comparison.json",
+          "blob": "70248d647ff158b0e271ee59d113db569571974b",
+          "status": "added"
+        }
+      ]
+    },
+    {
+      "commit": "9526c7734835453a0ef7c9cbf22ac145da90d830",
+      "changes": [
+        {
+          "path": ".github/workflows/p55-export.yml",
+          "blob": "962623b04f729be90890feda0c4bc850cc231c7b",
+          "status": "added"
+        },
+        {
+          "path": "evidence/p55/checkpoints/export_fixed_receipts.py",
+          "blob": "a78ec18b6c7c454d96e82389808121bc98d520a4",
+          "status": "added"
+        }
+      ]
+    },
+    {
+      "commit": "b54db47093ead1d3396f23bcf6caa4ed5d06fff5",
+      "changes": [
+        {
+          "path": ".github/workflows/p55-export.yml",
+          "blob": "28b8f514282444ef75e8bc7663770a5621610347",
+          "status": "modified"
+        },
+        {
+          "path": "evidence/p55/checkpoints/export_fixed_receipts.py",
+          "blob": "1a2c5a7f02ccf2253ccdd4a1b1eec39117983504",
+          "status": "modified"
+        }
+      ]
+    },
+    {
+      "commit": "6673629617bb67e02860dcee2a41ff959b0ac2b0",
+      "changes": [
+        {
+          "path": ".github/workflows/p55-guard-acceptance.yml",
+          "blob": "2de4a533b9497ee58fb87d9c18a384c1a83ef8a5",
+          "status": "modified"
+        },
+        {
+          "path": ".github/workflows/p55-profile.yml",
+          "blob": "f1f39fdbb4d77a287e0fce0d0f7473e0d6d6577b",
+          "status": "added"
+        },
+        {
+          "path": "evidence/p55/checkpoints/profile_fixed_cut.py",
+          "blob": "d9a33f329501a7d8dc17c2841707a32905e57c13",
+          "status": "added"
+        }
+      ]
+    },
+    {
+      "commit": "07c4f6d38ad3237ff34482741845031f1d0dedcc",
+      "changes": [
+        {
+          "path": ".github/workflows/p55-profile.yml",
+          "blob": "ad3012512d8dfb188ffd5017ba5231d48059cbf0",
+          "status": "modified"
+        },
+        {
+          "path": "evidence/p55/checkpoints/profile_fixed_cut.py",
+          "blob": "27777ce8e5f47b5713d3d4e5c0bf2d0b78d57dd4",
+          "status": "modified"
+        }
+      ]
+    },
+    {
+      "commit": "a08294964b29c63cbc74902f2552cb0a19851a5c",
+      "changes": [
+        {
+          "path": ".github/workflows/p55-large-qualification.yml",
+          "blob": "c858706d4960fb534f57f15e21fef8e8f560a47b",
+          "status": "added"
+        },
+        {
+          "path": "evidence/p55/checkpoints/large-world-registration.json",
+          "blob": "df6bb21df4621904105564ab9156cd1c13019988",
+          "status": "added"
+        }
+      ]
+    },
+    {
+      "commit": "e8b0fa61a8ceb86b92ff4bae82296273d16adf06",
+      "changes": [
+        {
+          "path": ".github/workflows/p55-admission-paired.yml",
+          "blob": "492b514e38195fc85acf7d5099203fd3a1613add",
+          "status": "added"
+        }
+      ]
+    },
+    {
+      "commit": "3985ebd4f90ff9f7d2e9626df9c0fbf5e8cdb1be",
+      "changes": [
+        {
+          "path": ".github/workflows/p55-main-desktop-receipt.yml",
+          "blob": "b7291c6b31a3d634bacee67f7cbb4f3ef963bc5a",
+          "status": "added"
+        }
+      ]
+    }
+  ],
+  "main_standalone_byte_comparison": {
+    "zip_count": 10,
+    "zip_bytes": 2025233,
+    "total_member_occurrences": 80,
+    "byte_identical_standalone_occurrences_in_main": 15,
+    "absent_as_standalone": 65,
+    "direct": [
+      {
+        "run": 43054332525,
+        "control_sha": "e8b0fa61a8ceb86b92ff4bae82296273d16adf06",
+        "workflow": "p55-admission-paired.yml",
+        "artifact_id": 13871700305,
+        "zip_bytes": 19737,
+        "zip_sha256": "37cbfed3c4eb77522a52296dda465c716719b2837150c4cad3d4cff594a21b2a",
+        "original_expires_at": "2027-02-09T16:02:35Z",
+        "archived_git_blob": "bfff68774356497e64b606ee68dac817cd3f64dc",
+        "relative_path": "original-zips/43054332525-13871700305.zip",
+        "total_members": 36,
+        "members_with_exact_bytes_in_main": [],
+        "members_without_standalone_copy_in_main": 36
+      },
+      {
+        "run": 43044231150,
+        "control_sha": "a08294964b29c63cbc74902f2552cb0a19851a5c",
+        "workflow": "p55-large-qualification.yml",
+        "artifact_id": 13867723125,
+        "zip_bytes": 979390,
+        "zip_sha256": "acd627ca328954a5d1b328e22ab7d0371241bf436adee6c16480d31b2d5c0ab5",
+        "original_expires_at": "2027-02-09T15:01:52Z",
+        "archived_git_blob": "a8a938aaf2b82a0dcfb82a37b1b8ffa8ab8f541d",
+        "relative_path": "original-zips/43044231150-13867723125.zip",
+        "total_members": 8,
+        "members_with_exact_bytes_in_main": [
+          {
+            "member": "baseline-sha.txt",
+            "git_blob": "b8a6950d37ff7f10d44b236312282a6e39963788",
+            "main_paths": [
+              "evidence/p55/business/receipts/subject-sha.txt",
+              "evidence/p55/s9-local/remote-55d897/source-sha.txt"
+            ]
+          }
+        ],
+        "members_without_standalone_copy_in_main": 7
+      },
+      {
+        "run": 43042702151,
+        "control_sha": "07c4f6d38ad3237ff34482741845031f1d0dedcc",
+        "workflow": "p55-profile.yml",
+        "artifact_id": 13866072369,
+        "zip_bytes": 19691,
+        "zip_sha256": "eee6b05063eaf9ecc90fef32225f1e3b1e15e0a10a6c286ee89a41bece636569",
+        "original_expires_at": "2027-02-09T14:52:30Z",
+        "archived_git_blob": "673f391b43d1a8021250e72e7b077c3602193520",
+        "relative_path": "original-zips/43042702151-13866072369.zip",
+        "total_members": 2,
+        "members_with_exact_bytes_in_main": [],
+        "members_without_standalone_copy_in_main": 2
+      },
+      {
+        "run": 43042439465,
+        "control_sha": "6673629617bb67e02860dcee2a41ff959b0ac2b0",
+        "workflow": "p55-guard-acceptance.yml",
+        "artifact_id": 13866426181,
+        "zip_bytes": 4311,
+        "zip_sha256": "14ba32ffbee12ad3719f1ce859d5f15643e183e0826bfc0411dca1429a1f0aac",
+        "original_expires_at": "2027-02-09T14:50:52Z",
+        "archived_git_blob": "d8d4e0cc05586f627700d8917cb7d120304562f1",
+        "relative_path": "original-zips/43042439465-13866426181.zip",
+        "total_members": 5,
+        "members_with_exact_bytes_in_main": [
+          {
+            "member": "guard-registration.json",
+            "git_blob": "bfa29a5dd60658fdd5f4e0a484546061b22a8f6b",
+            "main_paths": [
+              "evidence/p55/s9-local/remote-55d897/guard-registration.json"
+            ]
+          },
+          {
+            "member": "source-sha.txt",
+            "git_blob": "b8a6950d37ff7f10d44b236312282a6e39963788",
+            "main_paths": [
+              "evidence/p55/business/receipts/subject-sha.txt",
+              "evidence/p55/s9-local/remote-55d897/source-sha.txt"
+            ]
+          }
+        ],
+        "members_without_standalone_copy_in_main": 3
+      },
+      {
+        "run": 43042439565,
+        "control_sha": "6673629617bb67e02860dcee2a41ff959b0ac2b0",
+        "workflow": "p55-profile.yml",
+        "artifact_id": 13865697546,
+        "zip_bytes": 3550,
+        "zip_sha256": "5f0bda4441a1cee124a9f9d9a0d723d6aac923217bd80eb85925aec718cc6ffa",
+        "original_expires_at": "2027-02-09T14:50:52Z",
+        "archived_git_blob": "1c39e9ba5be07730f0338e667e7a74a76b8ac3cc",
+        "relative_path": "original-zips/43042439565-13865697546.zip",
+        "total_members": 1,
+        "members_with_exact_bytes_in_main": [],
+        "members_without_standalone_copy_in_main": 1
+      },
+      {
+        "run": 43041235141,
+        "control_sha": "b54db47093ead1d3396f23bcf6caa4ed5d06fff5",
+        "workflow": "p55-guard-acceptance.yml",
+        "artifact_id": 13866055835,
+        "zip_bytes": 4319,
+        "zip_sha256": "1156fab3fbbb5cd5a1309bde9107a4e36768a59299c8141ac3afc5fd2fe68a1e",
+        "original_expires_at": "2027-02-09T14:43:30Z",
+        "archived_git_blob": "e9cf51342aca1721cfffd4c22431d38e0a17ba5b",
+        "relative_path": "original-zips/43041235141-13866055835.zip",
+        "total_members": 5,
+        "members_with_exact_bytes_in_main": [
+          {
+            "member": "guard-registration.json",
+            "git_blob": "bfa29a5dd60658fdd5f4e0a484546061b22a8f6b",
+            "main_paths": [
+              "evidence/p55/s9-local/remote-55d897/guard-registration.json"
+            ]
+          },
+          {
+            "member": "source-sha.txt",
+            "git_blob": "b8a6950d37ff7f10d44b236312282a6e39963788",
+            "main_paths": [
+              "evidence/p55/business/receipts/subject-sha.txt",
+              "evidence/p55/s9-local/remote-55d897/source-sha.txt"
+            ]
+          }
+        ],
+        "members_without_standalone_copy_in_main": 3
+      },
+      {
+        "run": 43040555093,
+        "control_sha": "9526c7734835453a0ef7c9cbf22ac145da90d830",
+        "workflow": "p55-guard-acceptance.yml",
+        "artifact_id": 13864898356,
+        "zip_bytes": 4327,
+        "zip_sha256": "e688c8af64ebca896438b3b0890456ba8f57b739131f6a30bd38a6f656b499fd",
+        "original_expires_at": "2027-02-09T14:39:21Z",
+        "archived_git_blob": "8b1caafb7b035a2d262606bec0f9c1dd479378fd",
+        "relative_path": "original-zips/43040555093-13864898356.zip",
+        "total_members": 5,
+        "members_with_exact_bytes_in_main": [
+          {
+            "member": "guard-registration.json",
+            "git_blob": "bfa29a5dd60658fdd5f4e0a484546061b22a8f6b",
+            "main_paths": [
+              "evidence/p55/s9-local/remote-55d897/guard-registration.json"
+            ]
+          },
+          {
+            "member": "source-sha.txt",
+            "git_blob": "b8a6950d37ff7f10d44b236312282a6e39963788",
+            "main_paths": [
+              "evidence/p55/business/receipts/subject-sha.txt",
+              "evidence/p55/s9-local/remote-55d897/source-sha.txt"
+            ]
+          }
+        ],
+        "members_without_standalone_copy_in_main": 3
+      },
+      {
+        "run": 43040245181,
+        "control_sha": "51e5ac1cda8770e244b8f9fd95803bdd80d0e08d",
+        "workflow": "p55-query-comparison.yml",
+        "artifact_id": 13867065861,
+        "zip_bytes": 981296,
+        "zip_sha256": "919813deea15f5e179764f86092e4306c2ea7737c16d9e9ca64543c608284762",
+        "original_expires_at": "2027-02-09T14:37:22Z",
+        "archived_git_blob": "0d38b94c959a671936021e05bd879965711ffa91",
+        "relative_path": "original-zips/43040245181-13867065861.zip",
+        "total_members": 8,
+        "members_with_exact_bytes_in_main": [
+          {
+            "member": "baseline-sha.txt",
+            "git_blob": "b8a6950d37ff7f10d44b236312282a6e39963788",
+            "main_paths": [
+              "evidence/p55/business/receipts/subject-sha.txt",
+              "evidence/p55/s9-local/remote-55d897/source-sha.txt"
+            ]
+          }
+        ],
+        "members_without_standalone_copy_in_main": 7
+      },
+      {
+        "run": 43040245115,
+        "control_sha": "51e5ac1cda8770e244b8f9fd95803bdd80d0e08d",
+        "workflow": "p55-guard-acceptance.yml",
+        "artifact_id": 13865002753,
+        "zip_bytes": 4284,
+        "zip_sha256": "56cb46c686f74ebd2e2ea36a81880437cf4bad10d83c4afd5a4d62eebdd41c25",
+        "original_expires_at": "2027-02-09T14:37:22Z",
+        "archived_git_blob": "6283183e0a65aaf6d755fb4c78ee8aa81054de4f",
+        "relative_path": "original-zips/43040245115-13865002753.zip",
+        "total_members": 5,
+        "members_with_exact_bytes_in_main": [
+          {
+            "member": "guard-registration.json",
+            "git_blob": "bfa29a5dd60658fdd5f4e0a484546061b22a8f6b",
+            "main_paths": [
+              "evidence/p55/s9-local/remote-55d897/guard-registration.json"
+            ]
+          },
+          {
+            "member": "source-sha.txt",
+            "git_blob": "b8a6950d37ff7f10d44b236312282a6e39963788",
+            "main_paths": [
+              "evidence/p55/business/receipts/subject-sha.txt",
+              "evidence/p55/s9-local/remote-55d897/source-sha.txt"
+            ]
+          }
+        ],
+        "members_without_standalone_copy_in_main": 3
+      },
+      {
+        "run": 43039818150,
+        "control_sha": "c775013e16fd71717d5c6a309df92df90842ea05",
+        "workflow": "p55-guard-acceptance.yml",
+        "artifact_id": 13864487840,
+        "zip_bytes": 4328,
+        "zip_sha256": "87665a0d85221d504fc8b5fad5bb595951c197302b67e2a2aea3beeaa7b44cc1",
+        "original_expires_at": "2027-02-09T14:34:44Z",
+        "archived_git_blob": "a1cdd5e08add0bbe9544e6101a807f065961729b",
+        "relative_path": "original-zips/43039818150-13864487840.zip",
+        "total_members": 5,
+        "members_with_exact_bytes_in_main": [
+          {
+            "member": "guard-comparison.json",
+            "git_blob": "075e810a5798eaf7b2d007098473fe5dfeaafcad",
+            "main_paths": [
+              "evidence/p55/s9-local/remote-55d897/guard-comparison.json"
+            ]
+          },
+          {
+            "member": "guard-registration.json",
+            "git_blob": "bfa29a5dd60658fdd5f4e0a484546061b22a8f6b",
+            "main_paths": [
+              "evidence/p55/s9-local/remote-55d897/guard-registration.json"
+            ]
+          },
+          {
+            "member": "SHA256SUMS",
+            "git_blob": "460c5d3bf17bb79face1b9076bf3eb3515bd115b",
+            "main_paths": [
+              "evidence/p55/s9-local/remote-55d897/guard-SHA256SUMS"
+            ]
+          },
+          {
+            "member": "queries.xml",
+            "git_blob": "d8710aa571ea42d44c21d84480dfb536a8c0bbf9",
+            "main_paths": [
+              "evidence/p55/s9-local/remote-55d897/queries.xml"
+            ]
+          },
+          {
+            "member": "source-sha.txt",
+            "git_blob": "b8a6950d37ff7f10d44b236312282a6e39963788",
+            "main_paths": [
+              "evidence/p55/business/receipts/subject-sha.txt",
+              "evidence/p55/s9-local/remote-55d897/source-sha.txt"
+            ]
+          }
+        ],
+        "members_without_standalone_copy_in_main": 0
+      }
+    ]
+  },
+  "preregistrations": [
+    {
+      "path": "evidence/p55/checkpoints/guard-registration.json",
+      "git_blob": "bfa29a5dd60658fdd5f4e0a484546061b22a8f6b",
+      "sha256": "d66cb747461518fc56bc508772dae0c54ec1c86d82251622d23391c0f3672944",
+      "spec": {
+        "subject_sha": "55d8979b5361a4837701d762feacd83036096b11",
+        "fixture": "One PostgreSQL seed materialized once; A/B/C/D use the same concrete fixed inputs, previous and current WorldRef, change and receipts.",
+        "numeric_workload_seed": "not exposed by the original benchmark",
+        "python_hash_seed": 550897,
+        "labels": {
+          "same_object": true,
+          "causal_read_other_write": true,
+          "independent": false
+        },
+        "repetitions": 12,
+        "hypotheses": [
+          "A invalidates unrelated actions.",
+          "B and C can miss cross-object causal reads.",
+          "D checks actual semantic observations."
+        ],
+        "not_measured": [
+          "narrative end-to-end business throughput",
+          "production false positive/negative rates",
+          "external model token and invoice evidence"
+        ]
+      }
+    },
+    {
+      "path": "evidence/p55/checkpoints/large-world-registration.json",
+      "git_blob": "df6bb21df4621904105564ab9156cd1c13019988",
+      "sha256": "d7caf4b12c9ffc2c3379439d8abab3575fc024a70b51d2e0fc29a2e77a9f9473",
+      "spec": {
+        "baseline": "55d8979b5361a4837701d762feacd83036096b11",
+        "candidate": "8f245a51729308fc892396d3a10d70a7ef1d7853",
+        "independent_source": "b3e63bb9cf3e4819951245aedebe677979f2f3d5",
+        "order": [
+          "baseline",
+          "candidate"
+        ],
+        "cases": [
+          {
+            "agents": 500,
+            "seconds": 600,
+            "read_rps": 20,
+            "api_processes": 2
+          }
+        ],
+        "acceptance": "Candidate must pass the original unchanged 600-second production probe. Independently registered real PostgreSQL cases change only schedule metadata on a warm projection and concurrently alternate work-qualified snapshots. The candidate adds exact-size corruption after warm reads. Raw result and JUnit are retained regardless of the decision.",
+        "limits": "Same runner and deterministic workload seed with isolated role/task IDs and fresh databases. One ordered pair cannot establish performance on every machine."
+      }
+    },
+    {
+      "path": "evidence/p55/checkpoints/query-comparison.json",
+      "git_blob": "70248d647ff158b0e271ee59d113db569571974b",
+      "sha256": "bd0dc88ab4f3b9283a1f57f4d42a93d8516f1a714fe722107ef97c6f668c9b1c",
+      "spec": {
+        "baseline": "55d8979b5361a4837701d762feacd83036096b11",
+        "candidate": "598f4ee65fbb6f0ed9872656de965f070965b1da",
+        "order": [
+          "baseline",
+          "candidate"
+        ],
+        "cases": [
+          {
+            "agents": 500,
+            "seconds": 600,
+            "read_rps": 20,
+            "api_processes": 2
+          }
+        ],
+        "resources": "Same Ubuntu runner with same PostgreSQL 17.11 container; each arm uses original make_population() default seed and isolated disposable database. Business population and logical requests match. Generated principal/task/world IDs are fresh per arm.",
+        "verification": "Record both raw reports and original process exit codes, including every 429. The comparison does not change the public CI capacity gates.",
+        "limits": "One ordered pair on one GitHub runner; cached package state, background load and hardware placement limit causal claims. Original independent CI remains a separate source."
+      }
+    }
+  ],
+  "comparison_base_to_review_main": {
+    "55d8979b5361a4837701d762feacd83036096b11": {
+      "status": "ahead",
+      "merge_base": "55d8979b5361a4837701d762feacd83036096b11",
+      "ahead": 153,
+      "behind": 0
+    },
+    "f2e6d38534214e79630b807cec9a720d99e975b1": {
+      "status": "ahead",
+      "merge_base": "f2e6d38534214e79630b807cec9a720d99e975b1",
+      "ahead": 178,
+      "behind": 0
+    },
+    "598f4ee65fbb6f0ed9872656de965f070965b1da": {
+      "status": "diverged",
+      "merge_base": "55d8979b5361a4837701d762feacd83036096b11",
+      "ahead": 153,
+      "behind": 1
+    },
+    "8f245a51729308fc892396d3a10d70a7ef1d7853": {
+      "status": "ahead",
+      "merge_base": "8f245a51729308fc892396d3a10d70a7ef1d7853",
+      "ahead": 151,
+      "behind": 0
+    },
+    "b3e63bb9cf3e4819951245aedebe677979f2f3d5": {
+      "status": "ahead",
+      "merge_base": "b3e63bb9cf3e4819951245aedebe677979f2f3d5",
+      "ahead": 202,
+      "behind": 0
+    },
+    "0f80173ee8f641defd8ce4fc8c4df0ebe31087bf": {
+      "status": "ahead",
+      "merge_base": "0f80173ee8f641defd8ce4fc8c4df0ebe31087bf",
+      "ahead": 146,
+      "behind": 0
+    },
+    "df1e0cc904e3b94a360d86e3a3e00bfec3258673": {
+      "status": "ahead",
+      "merge_base": "df1e0cc904e3b94a360d86e3a3e00bfec3258673",
+      "ahead": 144,
+      "behind": 0
+    },
+    "3985ebd4f90ff9f7d2e9626df9c0fbf5e8cdb1be": {
+      "status": "diverged",
+      "merge_base": "55d8979b5361a4837701d762feacd83036096b11",
+      "ahead": 153,
+      "behind": 9
+    }
+  },
+  "original_experiments": {
+    "guard": {
+      "runs": [
+        43039818150,
+        43040245115,
+        43040555093,
+        43041235141,
+        43042439465
+      ],
+      "subject": "55d8979b5361a4837701d762feacd83036096b11",
+      "scope": "Three preregistered policy labels. A false positives/false negatives = 1/0, B 0/1, C 0/1, D 0/0. Twelve repetitions per case and arm, shared PostgreSQL dataset. Real model calls and model tokens zero, invoiced cost null. The separate main business receipt is a different experiment."
+    },
+    "paired_600_second_reads": [
+      {
+        "run": 43040245181,
+        "candidate_query_junit_header": "<testsuite name=\"pytest\" errors=\"0\" failures=\"0\" skipped=\"0\" tests=\"32\" time=\"16.121\" timestamp=\"2026-11-11T14:40:33.210119+00:00\" hostname=\"runnervm7aw5e\">",
+        "arms": [
+          {
+            "arm": "baseline",
+            "subject": "55d8979b5361a4837701d762feacd83036096b11",
+            "exit": 1,
+            "clients": 500,
+            "seconds": 600,
+            "rps": 20,
+            "api_processes": 2,
+            "rows": 12000,
+            "status": {
+              "200": 11760,
+              "429": 239,
+              "transport_error": 1
+            },
+            "p99_ms": 2322.1339,
+            "correctness_errors": [],
+            "real_model_calls": 0,
+            "world_unchanged": true,
+            "probe_gate": "NOT_MET",
+            "long_duration_gate": "NOT_EXECUTED"
+          },
+          {
+            "arm": "candidate",
+            "subject": "598f4ee65fbb6f0ed9872656de965f070965b1da",
+            "exit": 0,
+            "clients": 500,
+            "seconds": 600,
+            "rps": 20,
+            "api_processes": 2,
+            "rows": 12000,
+            "status": {
+              "200": 12000
+            },
+            "p99_ms": 1179.1256,
+            "correctness_errors": [],
+            "real_model_calls": 0,
+            "world_unchanged": true,
+            "probe_gate": "PASS",
+            "long_duration_gate": "NOT_EXECUTED"
+          }
+        ]
+      },
+      {
+        "run": 43044231150,
+        "candidate_query_junit_header": "<testsuite name=\"pytest\" errors=\"0\" failures=\"0\" skipped=\"0\" tests=\"35\" time=\"55.548\" timestamp=\"2026-11-11T15:08:25.377888+00:00\" hostname=\"runnervm7aw5e\">",
+        "arms": [
+          {
+            "arm": "baseline",
+            "subject": "55d8979b5361a4837701d762feacd83036096b11",
+            "exit": 1,
+            "clients": 500,
+            "seconds": 600,
+            "rps": 20,
+            "api_processes": 2,
+            "rows": 12000,
+            "status": {
+              "200": 11862,
+              "429": 138
+            },
+            "p99_ms": 2291.8719,
+            "correctness_errors": [],
+            "real_model_calls": 0,
+            "world_unchanged": true,
+            "probe_gate": "NOT_MET",
+            "long_duration_gate": "NOT_EXECUTED"
+          },
+          {
+            "arm": "candidate",
+            "subject": "8f245a51729308fc892396d3a10d70a7ef1d7853",
+            "exit": 0,
+            "clients": 500,
+            "seconds": 600,
+            "rps": 20,
+            "api_processes": 2,
+            "rows": 12000,
+            "status": {
+              "200": 12000
+            },
+            "p99_ms": 271.4827,
+            "correctness_errors": [],
+            "real_model_calls": 0,
+            "world_unchanged": true,
+            "probe_gate": "PASS",
+            "long_duration_gate": "NOT_EXECUTED"
+          }
+        ]
+      }
+    ],
+    "profiles": {
+      "single": 43042439565,
+      "same_runner_paired": 43042702151,
+      "scope": "Serial direct service timing. Main contains a derivative analysis, with the three raw profile files inside the retained archives."
+    },
+    "http50": {
+      "run": 43054332525,
+      "subjects": [
+        "f2e6d38534214e79630b807cec9a720d99e975b1",
+        "0f80173ee8f641defd8ce4fc8c4df0ebe31087bf"
+      ],
+      "order": [
+        "baseline",
+        "candidate",
+        "candidate",
+        "baseline"
+      ],
+      "http200": [
+        300,
+        300,
+        300,
+        300
+      ],
+      "p95_ms": [
+        3423.5883,
+        2804.4416,
+        3416.2794,
+        4066.2966
+      ],
+      "successful_requests_per_second": [
+        28.2852,
+        32.1419,
+        32.0136,
+        28.7859
+      ],
+      "junit_tests_passed": 4,
+      "scope": "Original HTTP50 check only; retains all four blocks. Wider capacity gates remain independently measured."
+    }
+  },
+  "historical_versions_and_external_subjects": [
+    {
+      "path": ".github/workflows/p55-guard-acceptance.yml",
+      "blob": "8a9077b11e50be1e5223e103932a68fefe973bcc",
+      "status": "added",
+      "commit": "c775013e16fd71717d5c6a309df92df90842ea05",
+      "category": "earlier control input executed on the PR branch",
+      "bytes": 3064,
+      "sha256": "15c908db0ab68280c2e58dbca83dcf3c8f008abeaae04f97c658ff1a01a75ec4",
+      "recommended_archive_slot": "history/c775013e/.github/workflows/p55-guard-acceptance.yml"
+    },
+    {
+      "path": ".github/workflows/p55-export.yml",
+      "blob": "962623b04f729be90890feda0c4bc850cc231c7b",
+      "status": "added",
+      "commit": "9526c7734835453a0ef7c9cbf22ac145da90d830",
+      "category": "earlier control input executed on the PR branch",
+      "bytes": 1941,
+      "sha256": "2375afefc9933945fd39835af51ef27483b6f724c19b4914ca89188a6a063689",
+      "recommended_archive_slot": "history/9526c773/.github/workflows/p55-export.yml"
+    },
+    {
+      "path": "evidence/p55/checkpoints/export_fixed_receipts.py",
+      "blob": "a78ec18b6c7c454d96e82389808121bc98d520a4",
+      "status": "added",
+      "commit": "9526c7734835453a0ef7c9cbf22ac145da90d830",
+      "category": "earlier control input executed on the PR branch",
+      "bytes": 3554,
+      "sha256": "33834ead81d84ba21fe9186c40872161003d4f54b0292bf691756e0c8c15507f",
+      "recommended_archive_slot": "history/9526c773/evidence/p55/checkpoints/export_fixed_receipts.py"
+    },
+    {
+      "path": ".github/workflows/p55-profile.yml",
+      "blob": "f1f39fdbb4d77a287e0fce0d0f7473e0d6d6577b",
+      "status": "added",
+      "commit": "6673629617bb67e02860dcee2a41ff959b0ac2b0",
+      "category": "earlier control input executed on the PR branch",
+      "bytes": 1952,
+      "sha256": "9c5a7e54e8101bbc2e46ea54594bebb5d4a9e4bf579b2350a73e08cefb08f022",
+      "recommended_archive_slot": "history/66736296/.github/workflows/p55-profile.yml"
+    },
+    {
+      "path": "evidence/p55/checkpoints/profile_fixed_cut.py",
+      "blob": "d9a33f329501a7d8dc17c2841707a32905e57c13",
+      "status": "added",
+      "commit": "6673629617bb67e02860dcee2a41ff959b0ac2b0",
+      "category": "earlier control input executed on the PR branch",
+      "bytes": 3556,
+      "sha256": "07723e0ec8ab9c9793944859aff651c3f1390fa040e71f1cab1c48cfeb497a36",
+      "recommended_archive_slot": "history/66736296/evidence/p55/checkpoints/profile_fixed_cut.py"
+    },
+    {
+      "category": "upstream comparison subject, diverged from main",
+      "commit": "598f4ee65fbb6f0ed9872656de965f070965b1da",
+      "path": "src/novel_factory/infrastructure/repository.py",
+      "blob": "7fb7ab69c92d5928c48219acc47e635d8bf17f33",
+      "bytes": 5909,
+      "sha256": "617e807ca97ab90d509e9a389adf71b0476804f0094f6e2aef4d27dab4a3b2cd",
+      "recommended_archive_slot": "subjects/598f4ee65fbb6f0ed9872656de965f070965b1da/src/novel_factory/infrastructure/repository.py"
+    },
+    {
+      "category": "upstream comparison subject, diverged from main",
+      "commit": "598f4ee65fbb6f0ed9872656de965f070965b1da",
+      "path": "tests/queries/test_scalar_select.py",
+      "blob": "cb25f0ef0179ab0815be82c9f681c5d8de3e4d3f",
+      "bytes": 1035,
+      "sha256": "86300a13905a89915ef23cfaa1038fd912f5b9afed2d7e2021bc2ba4a44c752a",
+      "recommended_archive_slot": "subjects/598f4ee65fbb6f0ed9872656de965f070965b1da/tests/queries/test_scalar_select.py"
+    }
+  ],
+  "external_dependencies": {
+    "export_workflow_runs": [
+      43040555259,
+      43041235226
+    ],
+    "export_jobs": [
+      130590879458,
+      130593267474
+    ],
+    "published_ref": "evidence/p55-receipts-55d897",
+    "published_head": "4be08f03512bc20040f517306532a26a32348dc5",
+    "upstream_soaks": [
+      {
+        "role": "candidate-attempt-1",
+        "upstream_run": 43036514307,
+        "upstream_job": 130576649020,
+        "artifact_id": 13864227631,
+        "zip_bytes": 489080,
+        "zip_digest": "sha256:7153d6668be5a6244559fdf399e0e8a7396821d2bd1d96d8e724ffb16980a216",
+        "original_expires_at": "2027-02-09T14:14:09Z",
+        "result_sha256_recorded_on_main": "2f8c9410042397963ce85d760e7663df90a89eb3700b610c1bdd4d6bcb9e2421",
+        "scheduled_rows": 12000,
+        "status": {
+          "200": 11508,
+          "429": 492
+        },
+        "real_model_calls": 0,
+        "original_probe_gate": "NOT_MET",
+        "original_long_duration_gate": "NOT_EXECUTED"
+      },
+      {
+        "role": "candidate-attempt-2",
+        "upstream_run": 43036514307,
+        "upstream_job": 130586087962,
+        "artifact_id": 13863984683,
+        "zip_bytes": 489381,
+        "zip_digest": "sha256:218e08b98a5a2fa3c5a3f67b392f81e7018d4bba04ab18f6d271cc02ff9c4ed2",
+        "original_expires_at": "2027-02-09T14:30:52Z",
+        "result_sha256_recorded_on_main": "1d206777041c3c64a047d39c49560d4c405b39706e642bc646a120fc083ce667",
+        "scheduled_rows": 12000,
+        "status": {
+          "200": 11954,
+          "429": 46
+        },
+        "real_model_calls": 0,
+        "original_probe_gate": "NOT_MET",
+        "original_long_duration_gate": "NOT_EXECUTED"
+      },
+      {
+        "role": "previous-attempt-1",
+        "upstream_run": 43035161204,
+        "upstream_job": 130571937813,
+        "artifact_id": 13864160530,
+        "zip_bytes": 489593,
+        "zip_digest": "sha256:4666915db6085c9bf09f41346209e3fcd59346e449a33380380da957a692d4d0",
+        "original_expires_at": "2027-02-09T14:05:41Z",
+        "result_sha256_recorded_on_main": "b9d3b025cbd08323054a2621aef2dd9f5e4cda9c64adbff36f445105fd22896f",
+        "scheduled_rows": 12000,
+        "status": {
+          "200": 12000
+        },
+        "real_model_calls": 0,
+        "original_probe_gate": "PASS",
+        "original_long_duration_gate": "NOT_EXECUTED"
+      }
+    ],
+    "export_content": "The export publishes fixed guard data and allowlisted compressed request projections with summaries from three earlier scale jobs. The complete source result and native archive require separate ZIP conservation. Other sibling scale-job outputs were not inputs.",
+    "desktop": {
+      "parent_dispatch_run": 43059856343,
+      "downstream_workflow_dispatch_run": 43059877408,
+      "subject": "df1e0cc904e3b94a360d86e3a3e00bfec3258673",
+      "artifact_id": 13873727201,
+      "zip_bytes": 1034,
+      "zip_sha256": "ba6c07ae9f2914b882089bd1863ddf385aeae13d8a38b4a9adb57e6dba602829",
+      "original_expires_at": "2026-12-11T16:41:09Z",
+      "previously_archived_desktop_json_blob": "7816edb952cbbf62d70a429b9b33aec59f8b6d07"
+    }
+  },
+  "review_main_paths": [
+    {
+      "path": "benchmarks/p55_semantic_comparison.py",
+      "blob": "f96e38dd9c04096e64308b7465aa6d60abf0ba9a"
+    },
+    {
+      "path": "benchmarks/p3_stability.py",
+      "blob": "7be225ec3ad25dfd4e6199d9180041db35edde1c"
+    },
+    {
+      "path": "tests/integration/test_s9_query_coverage.py",
+      "blob": "dbc84083f7670e2f6177a2cf1af4bf621da689e2"
+    },
+    {
+      "path": "tests/service/test_http_load.py",
+      "blob": "dab234ea57525ed3c8a8eccbe2f356d326a1b2af"
+    },
+    {
+      "path": ".github/workflows/p5-native-desktop.yml",
+      "blob": "64b1b1ab0805e85ba878cf01aa4ec5898b7664b5"
+    },
+    {
+      "path": "tests/unit/test_large_projection_witness.py",
+      "blob": "033d681e1b7da3419af9d1ce3070098c0b67e2b5"
+    },
+    {
+      "path": "tests/queries/test_large_postgres_projection.py",
+      "blob": "eb8f457e60238b31546934b304dc334f12ee6c74"
+    },
+    {
+      "path": "evidence/p55/independent-review/query-checks.py",
+      "blob": "61400aef2d1c31c7aec39a93ffdfd8c699752bff"
+    },
+    {
+      "path": "evidence/p55/business/README.md",
+      "blob": "24591af25f76e799fccdef505e226fd13dabc687"
+    },
+    {
+      "path": "evidence/p55/s9-local/remote-55d897/long-read-summaries.json",
+      "blob": "ac4537ec96339f740a4de68e29dc536330706393"
+    },
+    {
+      "path": "evidence/p55/s9-local/remote-55d897/same-runner-p5-s9-profile.json",
+      "blob": "292799c57a5526df2f7dfd1e8ccec2815fb54111"
+    },
+    {
+      "path": "reports/integration/p55-main/README.md",
+      "blob": "a168ab963dcf9db4c46e0aadb75f102dbbd44be4"
+    },
+    {
+      "path": "src/novel_factory/infrastructure/repository.py",
+      "blob": "7b8e4d9dce4e111fa2d55a5cb4c2e059c7bc3960"
+    }
+  ],
+  "disposition": [
+    "The PR adds seven archival experiment workflows, two helper scripts and three preregistrations. None of these twelve paths exists at the same path on the frozen main. One guard preregistration blob is already present at an alternate main path. Preserve duplicate and missing inputs under an inactive evidence path, including five earlier executed controller versions.",
+    "The 598f4ee scalar-select candidate is a separate non-ancestor branch off 55d897. Its cached statement helper, specialized KernelRepository.one path and candidate-specific regression do not occur on the frozen main. Preserve both external source blobs and the actual 600s probe; adoption as production behavior is a separate design decision. This code was never added by PR18.",
+    "The later large-world witness subject and independent regression, HTTP50 subjects and native desktop subject are ancestors of the reviewed main. The main includes active benchmark and production-facing test entry points listed above. No missing production source was found in the twelve-file PR diff.",
+    "A main evidence summary or a probe pass is not a new qualification of the current main. The 600-second pairs recorded NOT_EXECUTED for the original one-hour gate. The first guard files are also represented loosely on main; other raw artifacts are retained in their exact original ZIPs."
+  ]
+}
