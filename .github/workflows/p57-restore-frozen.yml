@@ -1,0 +1,53 @@
+name: Reassemble P5.7 frozen engineering sources
+on:
+  push:
+    branches: [dev/p57-creative-harness-s1-s6]
+    paths:
+      - '.github/workflows/p57-restore-frozen.yml'
+      - 'reports/harness/evidence/s6/recovery/replay/**'
+permissions:
+  contents: read
+jobs:
+  reassemble:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - name: Restore recorded generator inputs on the verified S5 parent
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$GITHUB_WORKSPACE/reports/harness/evidence/s6/recovery"
+          product="$RUNNER_TEMP/p57-frozen"
+          git worktree add --detach "$product" 976e3212fcb42b9251fc2858a3b9d9ce3c3a646c
+          cd "$product"
+          uv sync --locked --group dev --python 3.12
+          export PATH="$PWD/.venv/bin:$PATH"
+          ruff --version
+          python "$archive/replay/metrics.py.blob"
+          python "$archive/replay/observations.py.blob" "$product"
+          python "$archive/replay/observation_tests.py.blob" "$product"
+          python - "$archive" <<'PY'
+          from pathlib import Path
+          import json, shutil, subprocess, sys
+          archive = Path(sys.argv[1])
+          manifest = json.loads((archive / "manifest.json").read_text())
+          for path, expected in manifest["recovered_verified_product_blobs"].items():
+              source = archive / "objects" / (path + ".blob")
+              actual = subprocess.check_output(["git", "hash-object", source], text=True).strip()
+              assert actual == expected, path
+              dest = Path(path)
+              dest.parent.mkdir(parents=True, exist_ok=True)
+              shutil.copyfile(source, dest)
+          PY
+          git add -- .github/workflows/creative-harness.yml src tests workshop migrations scripts validation/run_p57_acceptance.py
+          git diff --cached --raw --no-abbrev
+          echo "P57_RESTORED_TREE=$(git write-tree)"
+          test "$(git write-tree)" = 9a7b09f11e98a1eec87316869eca54240db2c15f
