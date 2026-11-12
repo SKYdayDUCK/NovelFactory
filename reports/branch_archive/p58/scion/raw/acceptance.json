@@ -1,0 +1,141 @@
+{
+  "accepted_main": "630c4bcf1f1a7d71f1632d6eb2d273923ac08014",
+  "accepted_main_tree": "08d3e307fb843475dcef624897eff56bf3270bac",
+  "scion_original_head": "4f249d520c921c8d6effee9978f7338b912f1dd0",
+  "scion_ahead": 13,
+  "scion_behind": 269,
+  "review_branch": "experiment/scion-p58-compat",
+  "local_tested_candidate_sha": "2e20b5a60a3666338692ebc94f7edc8ea4359544",
+  "source_commit_count": 13,
+  "source_diff_files": 277,
+  "retained_old_query_shortcut": false,
+  "patch_sha256": "7de101a79cfdee94dbb1f8d94a183a8e07fcf34aa17921035d49b39f97c5f5f7",
+  "historical_head_restored": {
+    "file": "historical-restore.xml",
+    "tests": 6,
+    "skipped": 0,
+    "failures": 0,
+    "errors": 0,
+    "seconds": 47.999
+  },
+  "merged_main_regression": {
+    "file": "main-compatibility.xml",
+    "tests": 120,
+    "skipped": 0,
+    "failures": 0,
+    "errors": 0,
+    "seconds": 56.079
+  },
+  "merged_main_frozen": {
+    "file": "main-oracle.xml",
+    "tests": 6,
+    "skipped": 0,
+    "failures": 0,
+    "errors": 0,
+    "seconds": 26.636
+  },
+  "merged_main_candidate": {
+    "file": "main-trace.xml",
+    "tests": 6,
+    "skipped": 0,
+    "failures": 0,
+    "errors": 0,
+    "seconds": 52.548
+  },
+  "matched_three_arms_per_scenario": {
+    "authorization": {
+      "tables": 76,
+      "table_rows": 329,
+      "public_responses": 11,
+      "domain_errors": 7
+    },
+    "contention": {
+      "tables": 76,
+      "table_rows": 1224,
+      "public_responses": 35,
+      "domain_errors": 6
+    },
+    "derived": {
+      "tables": 76,
+      "table_rows": 659,
+      "public_responses": 22,
+      "domain_errors": 4
+    },
+    "faults": {
+      "tables": 76,
+      "table_rows": 487,
+      "public_responses": 12,
+      "domain_errors": 2
+    },
+    "history": {
+      "tables": 76,
+      "table_rows": 2130,
+      "public_responses": 68,
+      "domain_errors": 6
+    },
+    "published": {
+      "tables": 76,
+      "table_rows": 3429,
+      "public_responses": 62,
+      "domain_errors": 2
+    }
+  },
+  "microbenchmark_median_us": {
+    "metadata_projection": {
+      "baseline_median_us": 731.608,
+      "candidate_median_us": 276.07849999999996,
+      "returned_values_identical": true
+    },
+    "sparse_guard_read": {
+      "baseline_median_us": 10522.646499999999,
+      "candidate_median_us": 421.0735,
+      "returned_values_identical": true
+    },
+    "schema_positive_validation": {
+      "baseline_median_us": 598.0325,
+      "candidate_median_us": 418.092,
+      "returned_values_identical": true
+    },
+    "proved_suffix_replay": {
+      "baseline_median_us": 7389.6385,
+      "candidate_median_us": 2586.3265,
+      "returned_values_identical": true
+    }
+  },
+  "formula": "Mean elapsed time per operation within each arm, median over 12 alternating-order pairs; raw timings in main-benchmark.json.",
+  "verified_suffix_hits_including_warmup": 123,
+  "fresh_large_agent_capacity_result": "NOT_EXECUTED",
+  "paid_requests": 0,
+  "literary_quality": "NOT_EVALUATED",
+  "premerge_rehearsal": {
+    "local_sha": "5f8ff1c756c927f883a3b8beb964ead88e136708",
+    "delivered_sha": "74302455de9dd6365f722af25007ff1da14e0dad",
+    "matching_git_tree": "0fe6b85e7cdd5497b8377b3b948d223f913129c3",
+    "regression": {
+      "file": "a4-rehearsal.xml",
+      "tests": 120,
+      "skipped": 0,
+      "failures": 0,
+      "errors": 0,
+      "seconds": 49.632
+    }
+  },
+  "raw_sha256": {
+    "main-compatibility.xml": "9897dabad8876e12a85c91999ff523f5a341841936c984020e8de24ca185c408",
+    "main-oracle.xml": "1744ff1e5779c7548ff165d50da3d716ab9133a1aba8cd59dc324370ab84dabf",
+    "main-trace.xml": "607677c99cd59457576ab6d2aec46af5c2b624195590a841efa5d9d6e902fbb8",
+    "main-benchmark.json": "50e95bbcf1ef20b53c090e4de1a46814329bb9e5724c4bd31212c1c4320374a3",
+    "main-frozen-traces.json.gz": "82a243cb9053ae45cabdf2a5d84245dd60294ef11526fadf920d96101f389c1e",
+    "a4-frozen-traces.json.gz": "82a243cb9053ae45cabdf2a5d84245dd60294ef11526fadf920d96101f389c1e",
+    "a4-rehearsal.xml": "e22a5d4ad1ac4bbd3cf0553e7316ff3b2081d13c3954f85116c31c1669cbfb2b",
+    "a4-benchmark.json": "728c8d32e96191dda428c4bf7997243c8e707fccc957fdeff00b81faee33bb0b",
+    "historical-restore.xml": "2ec147c3f28f59fbd08570e54c3c533fc7c74300404f3be56a7f097a018abda2",
+    "restoration.json": "69cc48a4546af055aca29a7b1ff15b86047c0d0a38c7b8e28d6e0a2132a89334",
+    "original-objects.json": "75a5107fed7a5ba32be9c14e46160918bd9bd7424021dce8af01b4aff55552b3",
+    "pr4-before.json": "e0310cc9a4e557feb0443587d5b4cd924d8924ab8d23b15191f30887c2487200",
+    "pr4-at-main-retest.json": "3547a7486db607f670da071e26ce9d096ace3359bbc684379e2cb72c706dde9a",
+    "port-1.junit.xml.gz": "2fd19cfa86d47572e8106b7fdd8a1d59a505e3a929441600c6dfa6e3312e3e3a",
+    "port-2.junit.xml.gz": "e053b94770486e933bfb71eca78a4b7b46a8fb09198d6d26846df87c852d1c13",
+    "port-3.junit.xml.gz": "7eae3fb283ca74e09a61d95f0d165ca38c86c1293e5490b5e11db3222adcad3d"
+  }
+}

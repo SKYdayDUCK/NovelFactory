@@ -1,0 +1,238 @@
+{
+  "measurement": "isolated_operations",
+  "runtime": "17.11 (Debian 17.11-0+deb13u1)",
+  "base_git_sha": "630c4bcf1f1a7d71f1632d6eb2d273923ac08014",
+  "scope_row_count": 2098,
+  "selected_scopes": 4,
+  "metadata_projection": {
+    "returned_values_identical": true,
+    "unit": "microseconds_per_operation",
+    "operations_per_arm_per_pair": 10,
+    "raw_pairs": [
+      {
+        "baseline": 668.143,
+        "candidate": 292.226
+      },
+      {
+        "candidate": 269.493,
+        "baseline": 720.23
+      },
+      {
+        "baseline": 605.41,
+        "candidate": 257.471
+      },
+      {
+        "candidate": 252.19,
+        "baseline": 742.986
+      },
+      {
+        "baseline": 625.166,
+        "candidate": 216.052
+      },
+      {
+        "candidate": 194.099,
+        "baseline": 750.46
+      },
+      {
+        "baseline": 652.806,
+        "candidate": 282.664
+      },
+      {
+        "candidate": 205.025,
+        "baseline": 688.081
+      },
+      {
+        "baseline": 769.553,
+        "candidate": 347.86
+      },
+      {
+        "candidate": 319.044,
+        "baseline": 944.039
+      },
+      {
+        "baseline": 788.663,
+        "candidate": 365.957
+      },
+      {
+        "candidate": 379.602,
+        "baseline": 832.993
+      }
+    ],
+    "baseline_median_us": 731.608,
+    "candidate_median_us": 276.07849999999996
+  },
+  "sparse_guard_read": {
+    "returned_values_identical": true,
+    "unit": "microseconds_per_operation",
+    "operations_per_arm_per_pair": 5,
+    "raw_pairs": [
+      {
+        "baseline": 9796.808,
+        "candidate": 612.541
+      },
+      {
+        "candidate": 462.597,
+        "baseline": 10282.596
+      },
+      {
+        "baseline": 10800.768,
+        "candidate": 594.922
+      },
+      {
+        "candidate": 636.507,
+        "baseline": 10580.001
+      },
+      {
+        "baseline": 9711.971,
+        "candidate": 416.524
+      },
+      {
+        "candidate": 278.157,
+        "baseline": 14648.355
+      },
+      {
+        "baseline": 9446.172,
+        "candidate": 350.116
+      },
+      {
+        "candidate": 366.258,
+        "baseline": 9632.131
+      },
+      {
+        "baseline": 10527.552,
+        "candidate": 424.095
+      },
+      {
+        "candidate": 291.71,
+        "baseline": 11446.717
+      },
+      {
+        "baseline": 10517.741,
+        "candidate": 563.225
+      },
+      {
+        "candidate": 418.052,
+        "baseline": 11365.223
+      }
+    ],
+    "baseline_median_us": 10522.646499999999,
+    "candidate_median_us": 421.0735
+  },
+  "schema_positive_validation": {
+    "returned_values_identical": true,
+    "unit": "microseconds_per_operation",
+    "operations_per_arm_per_pair": 15,
+    "raw_pairs": [
+      {
+        "baseline": 574.806,
+        "candidate": 401.937
+      },
+      {
+        "candidate": 439.262,
+        "baseline": 607.315
+      },
+      {
+        "baseline": 592.884,
+        "candidate": 492.667
+      },
+      {
+        "candidate": 419.839,
+        "baseline": 623.895
+      },
+      {
+        "baseline": 563.027,
+        "candidate": 396.067
+      },
+      {
+        "candidate": 390.66,
+        "baseline": 624.273
+      },
+      {
+        "baseline": 600.068,
+        "candidate": 423.619
+      },
+      {
+        "candidate": 386.51,
+        "baseline": 595.997
+      },
+      {
+        "baseline": 606.05,
+        "candidate": 463.606
+      },
+      {
+        "candidate": 451.595,
+        "baseline": 614.936
+      },
+      {
+        "baseline": 587.967,
+        "candidate": 402.551
+      },
+      {
+        "candidate": 416.345,
+        "baseline": 553.735
+      }
+    ],
+    "baseline_median_us": 598.0325,
+    "candidate_median_us": 418.092
+  },
+  "proved_suffix_replay": {
+    "returned_values_identical": true,
+    "unit": "microseconds_per_operation",
+    "operations_per_arm_per_pair": 10,
+    "raw_pairs": [
+      {
+        "baseline": 7505.837,
+        "candidate": 2608.2
+      },
+      {
+        "candidate": 2509.552,
+        "baseline": 7384.9
+      },
+      {
+        "baseline": 7447.608,
+        "candidate": 2663.256
+      },
+      {
+        "candidate": 2901.016,
+        "baseline": 7296.805
+      },
+      {
+        "baseline": 7325.463,
+        "candidate": 2520.915
+      },
+      {
+        "candidate": 2564.453,
+        "baseline": 7394.377
+      },
+      {
+        "baseline": 30576.152,
+        "candidate": 3078.889
+      },
+      {
+        "candidate": 2370.815,
+        "baseline": 7514.56
+      },
+      {
+        "baseline": 7088.706,
+        "candidate": 2507.213
+      },
+      {
+        "candidate": 2399.02,
+        "baseline": 7272.657
+      },
+      {
+        "baseline": 6726.048,
+        "candidate": 3048.034
+      },
+      {
+        "candidate": 2783.455,
+        "baseline": 8007.617
+      }
+    ],
+    "baseline_median_us": 7389.6385,
+    "candidate_median_us": 2586.3265,
+    "verified_suffix_hits": 123,
+    "event_count": 8
+  },
+  "provider_requests": 0
+}
