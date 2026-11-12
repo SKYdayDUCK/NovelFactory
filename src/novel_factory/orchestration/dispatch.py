@@ -13,7 +13,11 @@ _NEXT = text("""
         FROM nf_dispatch_waiters q
         JOIN nf_tasks t ON q.branch_id=t.branch_id
         JOIN nf_task_fairness f USING(work_id, task_kind)
-        JOIN nf_supervisor_jobs j USING(task_id)
+        -- Keep the enrollment attached to its primary-key task. Joining the
+        -- repeated policy/epoch values first can multiply every grant by every job.
+        JOIN LATERAL (
+            SELECT job.config FROM nf_supervisor_jobs job WHERE job.task_id=t.task_id OFFSET 0
+        ) j ON true
         LEFT JOIN nf_runtime_work_share rw ON rw.work_id=t.work_id
         CROSS JOIN LATERAL (SELECT nf_runtime_scope(j.config->'runtime_scope',t.work_id,t.branch_id) AS scope) route
         LEFT JOIN nf_runtime_org_share ro ON ro.organization=route.scope->>'organization'
