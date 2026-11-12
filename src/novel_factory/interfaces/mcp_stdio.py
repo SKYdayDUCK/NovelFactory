@@ -16,14 +16,14 @@ from mcp.server.stdio import stdio_server
 from novel_factory.application.audit_log import LogService
 from novel_factory.application.agent_gateway import _inline_schema
 from novel_factory.application.kernel import Kernel
-from novel_factory.application.mcp_runtime import McpRuntime, ProjectBinding, TaskBinding
+from novel_factory.application.mcp_runtime import CreativeControllerBinding, McpRuntime, ProjectBinding, TaskBinding
 from novel_factory.domain.errors import DomainError
 from novel_factory.infrastructure.database import Database
 from novel_factory.infrastructure.objects import ObjectStore
 
 
-def object_schema(**properties):
-    return {"type": "object", "properties": properties, "required": list(properties),
+def object_schema(*, optional=(), **properties):
+    return {"type": "object", "properties": properties, "required": [key for key in properties if key not in optional],
             "additionalProperties": False}
 
 
@@ -36,6 +36,23 @@ _EVENT = object_schema(occurrence_id=_UUID, event_version_id=_UUID)
 _REASON = {"type": "string", "minLength": 1, "maxLength": 10000}
 _KEY = {"type": "string", "minLength": 1, "maxLength": 96}
 _TOOLS = {
+    "nf_harness_plan_propose": ("Derive bounded conditional alternatives from the assigned plan.",
+        object_schema(optional=("horizon_scenes",), plan_ref=_ARTIFACT,
+                      node_ids={"type": "array", "items": _UUID, "minItems": 1, "maxItems": 8, "uniqueItems": True},
+                      trigger={"enum": ["ORDINARY", "MOTIVE_CONFLICT", "IRREVERSIBLE"]},
+                      quota=_inline_schema("Quota", "harness"), horizon_scenes={"type": "integer", "minimum": 1, "maximum": 32},
+                      idempotency_key=_KEY)),
+    "nf_harness_simulate": ("Evaluate a frozen candidate using enrolled actors' fixed knowledge cuts.",
+        object_schema(task_id=_UUID, generation={"type": "integer", "minimum": 1}, candidate_ref=_ARTIFACT,
+                      actor_tasks={"type": "array", "minItems": 1, "maxItems": 16, "uniqueItems": True,
+                                   "items": object_schema(task_id=_UUID, generation={"type": "integer", "minimum": 1})},
+                      max_branches={"type": "integer", "minimum": 1, "maximum": 32},
+                      max_steps_per_branch={"type": "integer", "minimum": 1, "maximum": 128},
+                      seed={"type": "integer", "minimum": 0, "maximum": 2147483647}, idempotency_key=_KEY)),
+    "nf_harness_plan_decide": ("Submit a plan decision to the existing adoption service, or decline every alternative.",
+        object_schema(optional=("rolling_review_ref",), task_id=_UUID, generation={"type": "integer", "minimum": 1}, candidate_ref=_ARTIFACT,
+                      option_id={"anyOf": [_UUID, {"type": "null"}]},
+                      rolling_review_ref={"anyOf": [_ARTIFACT, {"type": "null"}]}, idempotency_key=_KEY)),
     "nf_change_point_request": ("Record evidence for a bounded revision to the volume plan.",
         object_schema(volume=_UUID, prior_plan_ref=_ARTIFACT,
                       event_refs={"type":"array","minItems":1,"maxItems":32,"items":_EVENT},
@@ -76,6 +93,8 @@ def runtime_from_config(config):
     binding = config["binding"]
     if set(binding) == {"work_id", "branch_id"}:
         bound = ProjectBinding(**binding)
+    elif set(binding) == {"mode", "work_id", "branch_id"} and binding["mode"] == "creative_controller":
+        bound = CreativeControllerBinding(binding["work_id"], binding["branch_id"])
     elif set(binding) == {"task_id", "generation", "worker_id"} and type(binding["generation"]) is int:
         bound = TaskBinding(**binding)
     else:
@@ -111,9 +130,14 @@ def make_server(runtime, *, ceiling=None):
                 return tool_error("INVALID_ARGUMENT")
             if name in {"nf_project_status", "nf_resume_project"}:
                 return await asyncio.to_thread(runtime.project, resume=name == "nf_resume_project")
-            method = {"nf_rolling_window_submit": runtime.submit_window, "nf_change_point_request": runtime.request_change, "nf_change_point_review": runtime.review_change,
-                      "nf_task_get": runtime.task_get, "nf_context_get": runtime.context_get,
-                      "nf_query_batch": runtime.query_batch, "nf_artifact_put": runtime.artifact_put}[name]
+            methods = {
+                "nf_harness_plan_propose": "propose_creative_plan", "nf_harness_simulate": "simulate_creative_plan",
+                "nf_harness_plan_decide": "decide_creative_plan", "nf_rolling_window_submit": "submit_window",
+                "nf_change_point_request": "request_change", "nf_change_point_review": "review_change",
+                "nf_task_get": "task_get", "nf_context_get": "context_get",
+                "nf_query_batch": "query_batch", "nf_artifact_put": "artifact_put",
+            }
+            method = getattr(runtime, methods[name])
             return await asyncio.to_thread(method, **arguments)
         except DomainError as error:
             return tool_error(error.code)
@@ -137,7 +161,7 @@ def make_server(runtime, *, ceiling=None):
         if isinstance(result,dict):
             # Only a recognized successful response can bind an audit object. Never
             # copy a rejected lookup, candidate content, or caller-supplied ID.
-            for key in ("artifact_ref","change_point_ref","window_ref","review_ref"):
+            for key in ("artifact_ref","change_point_ref","window_ref","review_ref","candidate_ref","report_ref","plan_ref"):
                 ref = result.get(key)
                 if isinstance(ref,dict) and ref.get("artifact_revision_id"):
                     evidence_id = ref["artifact_revision_id"]

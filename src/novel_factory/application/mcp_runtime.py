@@ -19,6 +19,12 @@ class ProjectBinding:
 
 
 @dataclass(frozen=True)
+class CreativeControllerBinding:
+    work_id: str
+    branch_id: str
+
+
+@dataclass(frozen=True)
 class TaskBinding:
     task_id: str
     generation: int
@@ -34,15 +40,23 @@ class McpRuntime:
 
     def available_tools(self):
         with self.kernel.db.uow(write=False) as repo:
+            if isinstance(self.binding, CreativeControllerBinding):
+                from novel_factory.infrastructure.creative_config import CreativeHarnessConfig
+
+                self._creative_authority(repo)
+                if CreativeHarnessConfig.from_env().enabled:
+                    return ["nf_harness_simulate", "nf_harness_plan_decide"]
+                return []
             if isinstance(self.binding, ProjectBinding):
                 self._project_auth(repo.conn)
                 return ["nf_project_status", "nf_resume_project"]
-            task, grant, _ = self._task(repo)
+            task, grant, context = self._task(repo)
             identity = repo.one("task_inputs", {"task_id": task["task_id"], "generation": task["generation"]})["spec"]
             # Only the role/skill ceilings selected at provisioning time apply. A later
             # catalog revision cannot silently add tools to an existing execution.
             inputs = repo.many("artifacts", {"work_id": task["work_id"], "kind": "AGENT_INPUT",
                               "artifact_revision_id": [r["artifact_revision_id"] for r in identity["input_artifacts"]]})
+            creative_enabled = False
             requested = set()
             skills = set()
             for record in inputs:
@@ -55,11 +69,17 @@ class McpRuntime:
                     # Pre-P5 text-only snapshots never declared MCP tool ceilings.
                     requested.update(snapshot.get("mcp_requested_tools", []))
                     skills.add(snapshot["skill_name"])
+                    if "creative_harness" in data:
+                        from novel_factory.infrastructure.creative_config import CreativeHarnessConfig
+                        creative_enabled = CreativeHarnessConfig.parse(data["creative_harness"]).enabled
             ceiling = {"task_get": "READ", "context_get": "READ", "query_batch": "READ",
                        "artifact_put": "ARTIFACT_WRITE"}
             names = ["nf_" + name for name, cap in ceiling.items()
                      if name in requested and cap in grant["capabilities"]]
             if {"PLAN_READ", "ARTIFACT_WRITE"} <= set(grant["capabilities"]):
+                if (creative_enabled and grant["role_id"] == "volume_director"
+                        and "plan_propose" in requested and context["read_cut"]["knowledge_cut"]["plane"] == "PLAN"):
+                    names.append("nf_harness_plan_propose")
                 if (grant["role_id"], task["task_kind"]) == ("volume_director", "volume_review"):
                     if "volume-director-review" in skills and "plan_propose" in requested:
                         names.append("nf_change_point_request")
@@ -70,6 +90,41 @@ class McpRuntime:
                     if "review-change-point" in skills and "review_submit" in requested:
                         names.append("nf_change_point_review")
             return names
+
+    def _creative_authority(self, repo, task_id=None):
+        binding = self.binding
+        require(isinstance(binding, CreativeControllerBinding), "VIEW_DENIED", "Creative controller binding required")
+        grant = self.kernel.authorize(repo, self.principal, binding.work_id, "ADMIN", binding.branch_id)
+        require(grant["role_id"] == "control_operator", "VIEW_DENIED", "Creative controller role required")
+        if task_id is not None:
+            task = repo.one("tasks", {"task_id": task_id, "work_id": binding.work_id, "branch_id": binding.branch_id})
+            require(task is not None, "VIEW_DENIED", "Task unavailable in the bound branch")
+
+    def propose_creative_plan(self, **arguments):
+        from .creative_planning import CreativePlanningService
+
+        require("nf_harness_plan_propose" in self.available_tools(), "VIEW_DENIED", "Creative planner unavailable")
+        binding = self.binding
+        return CreativePlanningService(self.kernel).propose(
+            self.principal, binding.task_id, binding.generation, worker_id=binding.worker_id, **arguments)
+
+    def _creative_controller_call(self, tool, operation, arguments):
+        require(tool in self.available_tools(), "VIEW_DENIED", "Creative controller operation unavailable")
+        with self.kernel.db.uow(write=False) as repo:
+            self._creative_authority(repo, arguments["task_id"])
+        return operation(self.principal, **arguments)
+
+    def simulate_creative_plan(self, **arguments):
+        from .creative_simulation import CreativeSimulationService
+
+        return self._creative_controller_call(
+            "nf_harness_simulate", CreativeSimulationService(self.kernel).run, arguments)
+
+    def decide_creative_plan(self, **arguments):
+        from .creative_planning import CreativePlanningService
+
+        return self._creative_controller_call(
+            "nf_harness_plan_decide", CreativePlanningService(self.kernel).decide, arguments)
 
     def _project_auth(self, conn):
         repo = KernelRepository(conn, tables)

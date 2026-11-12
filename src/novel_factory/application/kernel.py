@@ -279,11 +279,15 @@ class Kernel:
         """
         grant = self.authorize(r, principal, work_id, "READ")
         artifact = self.artifact(r, ref, work_id)
-        if artifact["kind"] == "CREATIVE_CONTEXT_SNAPSHOT":
-            # The snapshot joins control metadata and private prose. Its UUID is
-            # an audit reference, never a transferable literary read capability.
-            branch = artifact["payload"]["packet"]["scope"]["world_ref"]["branch_id"]
-            self.authorize(r, principal, work_id, "ADMIN", branch)
+        if artifact["kind"].startswith("CREATIVE_"):
+            # Raw records combine internal prompts, plan choices or evaluation
+            # evidence. Task-scoped read ports return their permitted sections.
+            payload = artifact["payload"]
+            scoped = payload["packet"] if artifact["kind"] == "CREATIVE_CONTEXT_SNAPSHOT" else payload
+            world_ref = scoped.get("scope", {}).get("world_ref", {})
+            require(world_ref.get("work_id") == work_id and world_ref.get("branch_id"),
+                    "VIEW_DENIED", "Creative artifact has no readable branch scope")
+            self.authorize(r, principal, work_id, "ADMIN", world_ref["branch_id"])
             return
         if "ADMIN" in grant["capabilities"]:
             return

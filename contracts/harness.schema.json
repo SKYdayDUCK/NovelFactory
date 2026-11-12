@@ -393,6 +393,365 @@
         "permission_epoch"
       ],
       "additionalProperties": false
+    },
+    "PlanCandidate": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "kind": {
+          "const": "PLAN_CANDIDATE"
+        },
+        "scope": {
+          "$ref": "#/$defs/TaskScope"
+        },
+        "candidate": {
+          "$ref": "#/$defs/CandidateIdentity"
+        },
+        "plan_anchor": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "alternatives": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "option_id": {
+                "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+              },
+              "goal": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "pattern": "\\S"
+              },
+              "premises": {
+                "type": "array",
+                "items": {
+                  "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+                },
+                "minItems": 1,
+                "maxItems": 32,
+                "uniqueItems": true
+              },
+              "expected_consequences": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 512,
+                  "pattern": "\\S"
+                },
+                "minItems": 1,
+                "maxItems": 64
+              },
+              "risks": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 512,
+                  "pattern": "\\S"
+                },
+                "minItems": 0,
+                "maxItems": 64
+              },
+              "disconfirming_evidence": {
+                "type": "array",
+                "items": {
+                  "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EvidenceRef"
+                },
+                "minItems": 0,
+                "maxItems": 64
+              },
+              "selection_reason": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "pattern": "\\S"
+              }
+            },
+            "required": [
+              "option_id",
+              "goal",
+              "premises",
+              "expected_consequences",
+              "risks",
+              "disconfirming_evidence",
+              "selection_reason"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 8
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "\\S"
+          },
+          "minItems": 1,
+          "maxItems": 64
+        },
+        "protected_commitments": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+          },
+          "minItems": 0,
+          "maxItems": 64
+        },
+        "horizon_scenes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        },
+        "quota": {
+          "$ref": "#/$defs/Quota"
+        },
+        "status": {
+          "const": "HYPOTHESIS_ONLY"
+        }
+      },
+      "required": [
+        "schema_version",
+        "kind",
+        "scope",
+        "candidate",
+        "plan_anchor",
+        "alternatives",
+        "assumptions",
+        "protected_commitments",
+        "horizon_scenes",
+        "quota",
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "CandidateIdentity": {
+      "type": "object",
+      "properties": {
+        "candidate_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "parent_ref": {
+          "anyOf": [
+            {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "content_sha256": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/Sha256"
+        },
+        "created_by": {
+          "$ref": "#/$defs/NFPrincipal"
+        }
+      },
+      "required": [
+        "candidate_id",
+        "revision",
+        "parent_ref",
+        "content_sha256",
+        "created_by"
+      ],
+      "additionalProperties": false
+    },
+    "Quota": {
+      "type": "object",
+      "properties": {
+        "budget_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "currency": {
+          "type": "string",
+          "enum": [
+            "USD",
+            "CNY"
+          ]
+        },
+        "max_amount": {
+          "allOf": [
+            {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/NonnegativeDecimal"
+            },
+            {
+              "type": "string",
+              "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+            }
+          ]
+        },
+        "max_tokens": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "max_attempts": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "deadline": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "budget_id",
+        "currency",
+        "max_amount",
+        "max_tokens",
+        "max_attempts",
+        "deadline"
+      ],
+      "additionalProperties": false
+    },
+    "SimulationReport": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "kind": {
+          "const": "SIMULATION_REPORT"
+        },
+        "scope": {
+          "$ref": "#/$defs/TaskScope"
+        },
+        "plan_candidate_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "input_cut": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "\\S"
+          },
+          "minItems": 1,
+          "maxItems": 64
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "RULE_REPLAY",
+            "BOUNDED_ROLLOUT",
+            "COMPARE_BRANCHES"
+          ]
+        },
+        "max_branches": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        },
+        "max_steps_per_branch": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 128
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "quota": {
+          "$ref": "#/$defs/Quota"
+        },
+        "outcomes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "option_id": {
+                "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+              },
+              "conditional_result": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "pattern": "\\S"
+              },
+              "supporting_refs": {
+                "type": "array",
+                "items": {
+                  "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EvidenceRef"
+                },
+                "minItems": 0,
+                "maxItems": 64
+              },
+              "uncertainties": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 512,
+                  "pattern": "\\S"
+                },
+                "minItems": 1,
+                "maxItems": 64
+              },
+              "stop_reason": {
+                "type": "string",
+                "enum": [
+                  "HORIZON",
+                  "RULE_STOP",
+                  "QUOTA",
+                  "INSUFFICIENT_EVIDENCE"
+                ]
+              }
+            },
+            "required": [
+              "option_id",
+              "conditional_result",
+              "supporting_refs",
+              "uncertainties",
+              "stop_reason"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 32
+        },
+        "accepted_world_events": {
+          "const": 0
+        },
+        "status": {
+          "const": "HYPOTHESIS_ONLY"
+        }
+      },
+      "required": [
+        "schema_version",
+        "kind",
+        "scope",
+        "plan_candidate_ref",
+        "input_cut",
+        "assumptions",
+        "method",
+        "max_branches",
+        "max_steps_per_branch",
+        "seed",
+        "quota",
+        "outcomes",
+        "accepted_world_events",
+        "status"
+      ],
+      "additionalProperties": false
     }
   }
 }

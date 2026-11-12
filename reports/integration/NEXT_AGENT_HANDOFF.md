@@ -1,7 +1,7 @@
 # 串行交付交接
 
-从 `dev/p57-creative-harness-s1-s6` 的实际远端 tip 恢复。先查本地工作树和并行执行者，保留已有实现。S1 已接入真实 AgentGateway，NF 迁移 head 为 `0019_p57_context_sources`。下一阶段 S2 须确认 PlanningService、RollingPlanning、演员 BELIEF 及 NF 原预算记录，并按冻结的 PlanCandidate/SimulationReport 定义实现可放弃、可恢复的有界候选；在数据库核对正式历史和预算。
+恢复 `dev/p57-creative-harness-s1-s6` 的实际远端 tip 及本地工作树。S2 剧情规划与隔离推演 阶段已验证。下一项为 S3 细粒度文学审核及定向修订。[S2 工程回执](../harness/evidence/s2/receipt.json)
 
-[本轮委托](P57_SINGLE_BRANCH_MANDATE.md) · [现场记录](../harness/S1_RECOVERY.md) · [S1 证据](../harness/evidence/s1/receipt.json) · [工程验收矩阵](../harness/S0_ACCEPTANCE_MATRIX.md)
+S2 通过真实 stdio 客户端和两类已授权身份执行。候选采用后 NF 原生 PLAN manifest 区分 READY 与 DRAFT，同一候选的重复推演复用冻结结果。S3 应沿用正式阅读凭证、精确稿件版本、已有审核服务和 Workshop 审核独立性。
 
-S2–S6 按顺序验收后在此分支提交和推送。最终仅一次非快进合入 main，独立审核结果单独提交保留的开发分支。Scion #4 与容量 #13 单独保留；真实模型授权和独立文学评估仍待作者完成。
+本轮依据[单分支委托](P57_SINGLE_BRANCH_MANDATE.md)交付。目前仅开发分支接收修改，S1–S6 全部验收后一次性合并 main。Scion #4 与容量 #13 单独保留。真实模型创作 BLOCKED_LOCAL_AUTHORIZATION；文学评估 NOT_EVALUATED。
