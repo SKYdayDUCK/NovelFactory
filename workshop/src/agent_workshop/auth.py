@@ -43,9 +43,10 @@ def authenticate(conn, token, lock=True):
 
 def private_binding(path):
     try:
-        data = json.loads(read_private_bytes(path, 16384))
-    except (ValueError, OSError):
+        content = read_private_bytes(path, 16384)
+    except ValueError:
         raise Denied("INVALID_BINDING") from None
+    data = json.loads(content)
     if set(data) != {"database_url", "token"} or not all(
         isinstance(v, str) and v for v in data.values()
     ):
