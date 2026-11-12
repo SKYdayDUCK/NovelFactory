@@ -25,7 +25,15 @@ uv run --no-sync python scripts/nf.py serve --host 127.0.0.1 --port 8000
 
 The bootstrap creates a new private directory with an owner-only inheritable ACL. An existing shared directory or an unverifiable binding fails closed. Put object storage under a service-owned local path. On Linux create the private directory with mode 0700; binding files use mode 0600. Both wheels carry the same private-file checks. Windows host cleanup uses a Job Object to contain child processes across cancellation and parent exit. Native Codex execution uses `codex.exe` on PATH or an absolute executable path in `NF_CODEX_EXECUTABLE`.
 
-Use `scripts/nf.py supervisor` to start the foreground scheduler and Ctrl+C for a graceful stop. A bound project uses `'{}' | uv run --no-sync python scripts/nf.py call --binding "$private/resume.json" nf_resume_project` with an authorized project binding. Supply the existing route profile and budget before dispatching modeled work. The bootstrap and status commands above make zero model calls. Linux uses the same Python commands after setting its environment as below. The ordinary two-service template and the Bubblewrap role-tool sandbox require Linux. The Windows CI job covers the native kernel, bound files, supervisor bootstrap, simulated providers, object publication, lease recovery and cancellation on real PostgreSQL 17. Release evidence is the job result for the exact tested commit.
+The administrator binding in `control.json` authorizes issuance. The branch-limited binding in `resume.json` performs status and resume operations. `grant-resume` creates its output exclusively. Reuse the existing unexpired binding or choose a fresh output filename for renewal. The example's 24-hour grant expires even if its file stays on disk. The `doctor` command checks native dependencies and reports configuration presence. The migration and authenticated status commands exercise the real database. Creating the book and checking its status make zero model calls.
+
+The HTTP command runs in the foreground. To run a world processor in another terminal, set the same database URL, object root and private directory there. Ctrl+C starts graceful shutdown. A model processor additionally requires authorized runtime profiles and budget.
+
+```powershell
+uv run --no-sync python scripts/nf.py supervisor --access-file "$private/supervisor.json" --processor world --adaptive
+```
+
+The operator can restore eligible work through the branch binding using `'{}' | uv run --no-sync python scripts/nf.py call --binding "$private/resume.json" nf_resume_project`. Linux runs the same Python commands after setting the environment below. The original two-service bootstrap scripts and the Bubblewrap role-tool sandbox require Linux. The Windows job covers native bootstrap, real MCP stdio, simulated providers, object publication, lease recovery, cancellation and idle session retirement on real PostgreSQL 17. The job result identifies the exact tested commit.
 
 ## Provision the services
 
