@@ -78,6 +78,32 @@
     "raw": "raw/at30/200-mixed-1/load.json.gz"
   },
   {
+    "retry_attempts": 0,
+    "validated_rps": 7.9055,
+    "new_world_commits": 21,
+    "database_pool_peak": 5,
+    "database_sql": 29658,
+    "service_cpu_seconds": 46.878175,
+    "service_sum_peak_rss_kib": 114868,
+    "arm": "at30",
+    "scenario": "200-mixed-2",
+    "gate": "PASS",
+    "business": "PASS",
+    "wire_rps": null,
+    "status": {
+      "200": 1122,
+      "409": 19
+    },
+    "validated": 1122,
+    "latency": {
+      "count": 1141,
+      "p50_ms": 72.0475,
+      "p95_ms": 209.7176,
+      "p99_ms": 361.5626
+    },
+    "raw": "raw/at30/200-mixed-2/load.json.gz"
+  },
+  {
     "retry_attempts": 841,
     "validated_rps": 12.0422,
     "new_world_commits": 21,
@@ -158,6 +184,32 @@
     "raw": "raw/at30/50-mixed-1/load.json.gz"
   },
   {
+    "retry_attempts": 0,
+    "validated_rps": 8.1383,
+    "new_world_commits": 6,
+    "database_pool_peak": 2,
+    "database_sql": 7443,
+    "service_cpu_seconds": 7.337344,
+    "service_sum_peak_rss_kib": 89384,
+    "arm": "at30",
+    "scenario": "50-mixed-2",
+    "gate": "PASS",
+    "business": "PASS",
+    "wire_rps": null,
+    "status": {
+      "200": 282,
+      "409": 4
+    },
+    "validated": 282,
+    "latency": {
+      "count": 286,
+      "p50_ms": 41.1978,
+      "p95_ms": 111.9251,
+      "p99_ms": 168.3066
+    },
+    "raw": "raw/at30/50-mixed-2/load.json.gz"
+  },
+  {
     "retry_attempts": 48,
     "validated_rps": 13.1452,
     "new_world_commits": 6,
@@ -183,6 +235,33 @@
       "p99_ms": 5432.4797
     },
     "raw": "raw/at30/50-overload-1/load.json.gz"
+  },
+  {
+    "retry_attempts": 45,
+    "validated_rps": 13.6192,
+    "new_world_commits": 6,
+    "database_pool_peak": 8,
+    "database_sql": 11693,
+    "service_cpu_seconds": 11.692807,
+    "service_sum_peak_rss_kib": 108592,
+    "arm": "at30",
+    "scenario": "50-overload-2",
+    "gate": "NOT_MET",
+    "business": "PASS",
+    "wire_rps": 74.44188764297557,
+    "status": {
+      "200": 532,
+      "409": 4,
+      "429": 45
+    },
+    "validated": 532,
+    "latency": {
+      "count": 581,
+      "p50_ms": 95.9852,
+      "p95_ms": 3125.2775,
+      "p99_ms": 3798.3538
+    },
+    "raw": "raw/at30/50-overload-2/load.json.gz"
   },
   {
     "retry_attempts": 0,

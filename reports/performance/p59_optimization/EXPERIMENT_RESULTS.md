@@ -7,3 +7,9 @@
 5. AT-30 kept its old workload, time measurement, success checks, retry budget and capacities. The 200-agent overload's speculative throughput target remains unmet for the original implementation and isolated candidate. [Capacity runs](CAPACITY_RUNS.md)
 
 6. [Full validation experiment](VALIDATION_EXPERIMENT.md). All 89 frozen source fixtures agreed. Early invalid input improved from 3.261 to 0.323 ms with first-error validation, but common valid end-to-end results varied by input size. The guarded native-copy alternative slowed both sizes. No product changes were selected.
+
+| Stage | Source and evidence |
+| --- | --- |
+| BASELINE | Main `5e322e8af8ddb4465f68f8cab84c9685832461a9`, repository.py SHA-256 `594fab543243f8116beff1c68d0e9143e433ed4c538abfea6e04f0332e53d947`, raw/context-baseline.json and raw/write-baseline.json. |
+| CANDIDATE | Isolated worktree on the same main plus the scope-method patch. repository.py SHA-256 `5735197b6587dd6f05fd115b7dd1136bba3833eddabc706fc61f3105cb63fc60`, matched 74-pair results in raw/scope-pair.json. |
+| VALIDATED | The candidate file exactly matches product commit `5cfcfa4001042fd1611df31c82618eb2690832c2`; every scope/manifest witness matched, with 45 focused PG17 and 2 concurrency/rollback passes. See raw/scope-regression.xml and raw/concurrent.xml. |

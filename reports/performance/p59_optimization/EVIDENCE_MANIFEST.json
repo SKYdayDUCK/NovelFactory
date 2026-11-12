@@ -23,6 +23,11 @@
       "process_exit": 0
     },
     {
+      "path": "raw/at30/200-mixed-2/load.json.gz",
+      "gate": "PASS",
+      "process_exit": 0
+    },
+    {
       "path": "raw/at30/200-overload-1/load.json.gz",
       "gate": "NOT_MET",
       "process_exit": 1
@@ -38,7 +43,17 @@
       "process_exit": 0
     },
     {
+      "path": "raw/at30/50-mixed-2/load.json.gz",
+      "gate": "PASS",
+      "process_exit": 0
+    },
+    {
       "path": "raw/at30/50-overload-1/load.json.gz",
+      "gate": "NOT_MET",
+      "process_exit": 1
+    },
+    {
+      "path": "raw/at30/50-overload-2/load.json.gz",
       "gate": "NOT_MET",
       "process_exit": 1
     },
@@ -98,7 +113,7 @@
       "process_exit": 1
     }
   ],
-  "file_count": 173,
+  "file_count": 188,
   "files": [
     {
       "path": "BASELINE.md",
@@ -117,8 +132,8 @@
     },
     {
       "path": "CAPACITY_RUNS.md",
-      "size": 4349,
-      "sha256": "16b79c4ef218eea7ca2b909cd3a85ce03b18cd29419296e95ef9424e276e6ad6"
+      "size": 4824,
+      "sha256": "5907765febd40a3251301154e6de757cbd117e51d297176f880b29169ec89a99"
     },
     {
       "path": "EXPERIMENT_DESIGN.md",
@@ -127,8 +142,8 @@
     },
     {
       "path": "EXPERIMENT_RESULTS.md",
-      "size": 1972,
-      "sha256": "a3d247a0f171c243d9c3cc75c61e16a27ef92a685f1bf162376231d159b2f1f0"
+      "size": 2703,
+      "sha256": "baf3d8642401d812a0aa0b0696cfd87655c57d5e80007fda3032bedf9351bced"
     },
     {
       "path": "FINAL_PERFORMANCE_REPORT.md",
@@ -172,8 +187,8 @@
     },
     {
       "path": "SNAPSHOT.md",
-      "size": 871,
-      "sha256": "3dbb5ad9cb0d8a0cc7284d411c59b5c6fbdbd0b582e453e31e330feaa24b81f8"
+      "size": 1542,
+      "sha256": "f8665f065d1db906f7fd5f2d06692512af4240108db951725ef18dd8e14aef92"
     },
     {
       "path": "VALIDATION_EXPERIMENT.md",
@@ -182,8 +197,8 @@
     },
     {
       "path": "capacity-summary.json",
-      "size": 11227,
-      "sha256": "0dbd01c23743a8c7225c8c846c4c806b4ba8ed3e3aefd7cbdb1d98284ae5c2c9"
+      "size": 13026,
+      "sha256": "d5ad758f8b82d5104f64580974888916337fd77637d0ab9b540f5a1b33c04836"
     },
     {
       "path": "environment.json",
@@ -252,6 +267,28 @@
       "sha256": "e4107855de9e482c2ac415d5c4212b5faf1017c49e6e406c0da8d94ae3e13ca4"
     },
     {
+      "path": "raw/at30/200-mixed-2/console.log",
+      "size": 11311,
+      "sha256": "e8cbb6cf9e3d1946489df8c1361fc5587875dbf0a0bc2099de1daec9ee40b022"
+    },
+    {
+      "path": "raw/at30/200-mixed-2/load.json.gz",
+      "size": 289964,
+      "sha256": "0b9495916d3e56f322be36330d53eb130fd8ffae15d66b442b81584b00389525",
+      "original_bytes": 1889605,
+      "original_sha256": "4d602de2e8e25d08120c8c83fdcf82b64629c1f97aff67306e8b194ab323fa2c"
+    },
+    {
+      "path": "raw/at30/200-mixed-2/source_snapshots/07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f.py",
+      "size": 49610,
+      "sha256": "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f"
+    },
+    {
+      "path": "raw/at30/200-mixed-2/status.json",
+      "size": 770,
+      "sha256": "0eba33d316654c15823a42801d331cbe6f0797d3b957745782adfebf6fef9e0b"
+    },
+    {
       "path": "raw/at30/200-overload-1/console.log",
       "size": 12423,
       "sha256": "bffba484f98f4b7392cb399c03656a507cabaeb77900816ad01bc70250bb553c"
@@ -318,6 +355,28 @@
       "sha256": "a416e280928633fca612f4ff9f1fe30235b093f3fcbfc78ebd940493db3b41af"
     },
     {
+      "path": "raw/at30/50-mixed-2/console.log",
+      "size": 8879,
+      "sha256": "56274228089e05c9d861cd01784726d138e5fa74c9b28c75df4ba617845f2320"
+    },
+    {
+      "path": "raw/at30/50-mixed-2/load.json.gz",
+      "size": 78552,
+      "sha256": "715d58dd7636fcc402bdfbe2430ba663ba0f46fb470b3db6f13c7852bfd17fde",
+      "original_bytes": 484080,
+      "original_sha256": "bbd779600c43fcc974ddf170c74f9ed164e96c75819d1734d146d5342e399608"
+    },
+    {
+      "path": "raw/at30/50-mixed-2/source_snapshots/07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f.py",
+      "size": 49610,
+      "sha256": "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f"
+    },
+    {
+      "path": "raw/at30/50-mixed-2/status.json",
+      "size": 768,
+      "sha256": "e559e791feb7036e7bff00899785ce4436b801cc77e4b83ef1b77659d83db638"
+    },
+    {
       "path": "raw/at30/50-overload-1/console.log",
       "size": 9841,
       "sha256": "52ac4d0eec8eeccad294c822ca3be982b16d5251c21fd63c054cbca28bcdb89c"
@@ -338,6 +397,28 @@
       "path": "raw/at30/50-overload-1/status.json",
       "size": 773,
       "sha256": "ce4381d85d2825a4f17aaf464c1676fc87421909c97290b20bceeb5515441561"
+    },
+    {
+      "path": "raw/at30/50-overload-2/console.log",
+      "size": 9826,
+      "sha256": "5c5380fc20d10eec0fd9d34a5453da137e50ef9beaf684d0f94a593f6af264ef"
+    },
+    {
+      "path": "raw/at30/50-overload-2/load.json.gz",
+      "size": 137151,
+      "sha256": "6554cea842e2645f085c3999b6c5c91729f0a82d561272d0455631d74a033461",
+      "original_bytes": 826530,
+      "original_sha256": "0a5fb1b34b7b9738d2e23ae188d2c2f972fd3cad5cf2c078acacb124f51234bf"
+    },
+    {
+      "path": "raw/at30/50-overload-2/source_snapshots/07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f.py",
+      "size": 49610,
+      "sha256": "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f"
+    },
+    {
+      "path": "raw/at30/50-overload-2/status.json",
+      "size": 773,
+      "sha256": "e09dac847810c6da851278b34d9f134be5a207ff7fcc553c2b3554065f8a0d53"
     },
     {
       "path": "raw/at30/500-mixed-1/console.log",
@@ -610,6 +691,21 @@
       "path": "raw/at30-replica-session.log",
       "size": 1590,
       "sha256": "e0d60e7377f1d62e685290e8cf865535172df49729dd21b7c0ed754f10832127"
+    },
+    {
+      "path": "raw/at30-session/postgres_session.json",
+      "size": 858,
+      "sha256": "3015a6d2cb2cd5eca315054ae15af28811a47baf09ec794e330b40f93e48c851"
+    },
+    {
+      "path": "raw/at30-session/postgresql.log",
+      "size": 6861,
+      "sha256": "c92f5f124cb379c2b52481563ffd8fedc2c1e5e9f2bf0462892c0b7f58c576cb"
+    },
+    {
+      "path": "raw/at30-session.log",
+      "size": 1590,
+      "sha256": "ad1a9509f0600e31a9b319879cb5cc8c2959933c214471c8cab8c9fb99a4b019"
     },
     {
       "path": "raw/attempted/multi-project-incomplete.json",
