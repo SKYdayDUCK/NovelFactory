@@ -135,6 +135,8 @@ jobs:
           python-version: '3.12'
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
       - run: uv sync --locked --group dev
+      - name: Install the checked-out Workshop package for isolated child services
+        run: uv pip install --python .venv/bin/python --no-deps ./workshop
       - name: Install physical restore and local Redis tools
         if: matrix.suite == 'pitr'
         run: bash scripts/ci_install_pg17.sh postgresql-17 postgresql-client-17 redis-server
