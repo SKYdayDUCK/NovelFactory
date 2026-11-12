@@ -51,6 +51,91 @@
           "digest": "sha256:b5dc8c5005b6e0078aa31d57ff651b96441e26ef00bf5779e0a1b4f557cdf234"
         }
       ]
+    },
+    "agent-workshop.yml": {
+      "id": 43150709977,
+      "artifacts": [
+        {
+          "id": 13914406080,
+          "name": "workshop-scene-recovery-results",
+          "digest": "sha256:07385ab8bd26329454ac0ebc83f725b0c0993ac4975d23c2aa153615aaaa21cb"
+        },
+        {
+          "id": 13914331089,
+          "name": "nf-bridge-results",
+          "digest": "sha256:204c60bbfdb78cb7c2128c34135567eed65578ca5073f57b1e007eb4b2e7cfcf"
+        },
+        {
+          "id": 13914216300,
+          "name": "workshop-comparisons",
+          "digest": "sha256:42e48d8969f6fa19743ef8ba725e1d92769edcb5a52941dcc2a6a22b2d1aa8d2"
+        },
+        {
+          "id": 13913582382,
+          "name": "workshop-results",
+          "digest": "sha256:c351158770017258ce441da2f8a7281dc7f7d86c317c2845482f7c12d6b9f9b1"
+        }
+      ]
+    },
+    "p2-load.yml": {
+      "id": 43150709897,
+      "artifacts": [
+        {
+          "id": 13914366021,
+          "name": "p2-load-50-mixed-1",
+          "digest": "sha256:c8d32b8e59f5dbdb1d4b238324ea606eeb607ed02a8adb5b9245d2e342355fc1"
+        },
+        {
+          "id": 13914040958,
+          "name": "p2-load-50-overload-1",
+          "digest": "sha256:f0db37a510985156f5a9507d9a1562948b9b204809d693d0d45c0ae724978332"
+        },
+        {
+          "id": 13913094691,
+          "name": "p2-load-200-overload-1",
+          "digest": "sha256:22a2e494dae1c5ec3d7bf5b8aa92cba1151525b45e32cc191ed69ad2dc868cd8"
+        },
+        {
+          "id": 13913074408,
+          "name": "p2-load-200-mixed-1",
+          "digest": "sha256:3ebe2c6012b04a81a8d7448a5bf3de89048be8b4bb5e2869dc5b28954617ffa9"
+        }
+      ]
+    },
+    "p3-scale-experiments.yml": {
+      "id": 43150709905,
+      "artifacts": [
+        {
+          "id": 13914536235,
+          "name": "p3-scale-500-read-soak-1",
+          "digest": "sha256:148fd8cd594d209aced7f8163a5047f9320aac622bbbb6e81a555fd5b108fe71"
+        },
+        {
+          "id": 13914296152,
+          "name": "p3-scale-1000-read-open-1",
+          "digest": "sha256:e2a48882aa977143b53299863485705fa58284a3609c58fb076452cd78faeabd"
+        },
+        {
+          "id": 13913767464,
+          "name": "p3-scale-500-mixed-1",
+          "digest": "sha256:87bd5515d63d84fe3fdb1e78e3d2173a8536e84943c7625e887a6d2c56d3fa5b"
+        }
+      ]
+    },
+    "p1-integrity.yml": {
+      "id": 43150709986,
+      "artifacts": [
+        {
+          "id": 13913541797,
+          "name": "p1-schema-unit-1",
+          "digest": "sha256:4fd2c6955e93a0cc31be73efc03ca952551d3f9b9695d8fc649d244e52720f43"
+        },
+        {
+          "id": 13913404458,
+          "name": "p1-postgres-concurrency-1",
+          "digest": "sha256:4f3d271eb24315ee3cfaf9cfad531767101c43331eb4331faf53faace474cf6d"
+        }
+      ]
     }
   }
 }
