@@ -71,7 +71,7 @@ class FixtureAdapter(OpenAICompatibleAdapter):
                 self.active -= 1
 
 
-def trial(kernel, population):
+def trial(kernel, population, *, dispatch_profile=None):
     adapter = FixtureAdapter()
     gateway = AgentGateway(kernel, {"fixture": adapter})
     supervisor = RuntimeSupervisor(kernel, gateway)
@@ -124,6 +124,9 @@ def trial(kernel, population):
     # Reconstruct the service from PG. No in-flight provider request crosses this restart.
     supervisor = RuntimeSupervisor(kernel, gateway)
     args = [(b["principal"], b["world_ref"]["work_id"], b["world_ref"]["branch_id"]) for b in books]
+    if dispatch_profile:
+        from benchmarks.p59_dispatch_plan import compare
+        return compare(kernel, args[0][2], dispatch_profile)
     pending = {}
     initial = []
     for scope in args:
@@ -240,16 +243,18 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--agents", required=True, type=int, choices=[10, 100, 500, 1000, 2000])
     p.add_argument("--output", required=True, type=Path)
+    p.add_argument("--dispatch-profile", type=Path,
+                   help="Run the frozen and current PG selector on the prepared queue instead of draining it")
     args = p.parse_args()
     with tempfile.TemporaryDirectory() as directory:
         with isolated_kernel(os.environ["NF_TEST_DATABASE_URL"], Path(directory)) as (kernel, _):
-            result = trial(kernel, args.agents)
+            result = trial(kernel, args.agents, dispatch_profile=args.dispatch_profile)
     result.update(source_commit=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
                   python=platform.python_version(), platform=platform.platform())
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({k: v for k, v in result.items() if k != "records"}), flush=True)
-    return int(result["gate"] != "PASS")
+    return int(result["gate"] not in {"PASS", "PROFILED"})
 
 
 if __name__ == "__main__":
