@@ -7,7 +7,8 @@
       "src/novel_factory/application/queries.py:378",
       "src/novel_factory/application/queries.py:398",
       "src/novel_factory/application/queries.py:408",
-      "contracts/R1_README.md:30"
+      "contracts/R1_README.md:30",
+      "src/novel_factory/application/queries.py:191"
     ],
     "mechanism": "Timeline branches apply their native time dimension even when the request explicitly selected a different dimension. A plan with no source time is returned on SOURCE; an assertion with only validity is returned on TARGET.",
     "trigger": "Authorized temporal query at a point inside the record's native time dimension.",
@@ -16,7 +17,7 @@
     "impact": "Incorrect historical and future query results consumed by planning and dependency collection. No unauthorized role read or world write observed.",
     "repair": "Select entry families using their emitted time fields; preserve the RELEVANT axis and the unlocated-time convention for matching families. Verify single and batch queries.",
     "regression": "tests/queries/test_time_axis.py",
-    "state": "REPRODUCED",
+    "state": "VALIDATED_FOCUSED",
     "sha": "5e322e8af8ddb4465f68f8cab84c9685832461a9"
   },
   {
@@ -34,7 +35,7 @@
     "impact": "Bad configuration can abort construction of the entire adapter registry outside the stable ProfileError/DomainError contract. No remote call.",
     "repair": "Validate the HTTP port at profile construction for every HTTP provider; convert urllib parsing errors to INVALID_MODEL_CONFIG; retain generic hosts/paths and valid nondefault ports.",
     "regression": "Test through read_profiles and load_runtime_profiles, including positive nondefault port and malformed port; no network.",
-    "state": "REPRODUCED",
+    "state": "VALIDATED_FOCUSED",
     "sha": "5e322e8af8ddb4465f68f8cab84c9685832461a9"
   },
   {
@@ -52,7 +53,7 @@
     "impact": "Incomplete operator-facing accounting trace; authoritative reservations and billing rows retained.",
     "repair": "Index one scoped query by task_id and populate IDs on each current/historical node.",
     "regression": "On real PostgreSQL compare the old and new per-task IDs with their ledger rows and preserve board immutability, current generation and unrelated nodes.",
-    "state": "REPRODUCED",
+    "state": "VALIDATED_FOCUSED",
     "sha": "5e322e8af8ddb4465f68f8cab84c9685832461a9"
   },
   {
@@ -69,7 +70,49 @@
     "impact": "CPU cost isolated to pure policy resolution; end-to-end throughput attribution remains unestablished.",
     "repair": "Measure a static immutable table of allowed selector shapes/ranks. Keep full validation on every policy; no credential, authority or policy result cache.",
     "regression": "Compare baseline/candidate over matching/nonmatching rules at all 11 precedence levels, invalid selectors, overrides, and policy hash. Retain per-call samples and alternate implementations.",
-    "state": "PROFILED",
+    "state": "VALIDATED_FOCUSED",
     "sha": "5e322e8af8ddb4465f68f8cab84c9685832461a9"
+  },
+  {
+    "id": "P59-DB-01",
+    "severity": "P2",
+    "sha": "5e322e8af8ddb4465f68f8cab84c9685832461a9",
+    "location": "src/novel_factory/infrastructure/repository.py:73",
+    "mechanism": "One conflict upsert per distinct semantic scope in the authoritative accept transaction.",
+    "trigger": "A guarded command updates several scopes.",
+    "reproduction": "Run scripts/write_baseline.py and scripts/scope_pair.py in the performance evidence directory against a disposable PG17 cluster.",
+    "raw": "Seven committed baseline writes each used four distinct scope increments; with 12 controlled pairs the complete precommit path used 60 versus 57 statements.",
+    "impact": "Database round trips in the serialized portion of a world commit.",
+    "repair": "Single ordered UNNEST...ON CONFLICT; keep work and branch binding, version increments, return map and caller transaction.",
+    "regression": "tests/integration/test_scope_identity.py; raw/scope-pair.json in performance directory",
+    "state": "VALIDATED_FOCUSED"
+  },
+  {
+    "id": "P59-VALID-01",
+    "severity": "P3",
+    "sha": "5e322e8af8ddb4465f68f8cab84c9685832461a9",
+    "location": "validation/validate_package.py:380",
+    "mechanism": "The design validator wrote the tracked historical output and its wording characterized live server policy based on static package checks.",
+    "trigger": "Running a fresh design validation in a Git checkout.",
+    "reproduction": "Run original validator with --output pointing outside checkout and compare the requested output path and git status.",
+    "raw": "raw/validator-before.log and raw/validator-after.log. The baseline ignored the flag.",
+    "impact": "A developer can accidentally commit a regenerated historical report and misread the scope of validation.",
+    "repair": "Support explicit output in the validator, route CI to its evidence directory, state the checked scope, preserve the no-argument interface.",
+    "regression": "tests/unit/test_design_validator_output.py",
+    "state": "VALIDATED_FOCUSED"
+  },
+  {
+    "id": "P59-CI-01",
+    "severity": "P2",
+    "sha": "5e322e8af8ddb4465f68f8cab84c9685832461a9",
+    "location": ".github/workflows/agent-workshop.yml:232",
+    "mechanism": "Two historical W6 fixture commits had been archived away from standard branch refs. The historical upgrade harness uses git archive on both SHAs.",
+    "trigger": "Fresh clone without the extra rehearsal objects.",
+    "reproduction": "Run workshop/acceptance/test_w6_historical_upgrades.py against isolated databases from a clean clone.",
+    "raw": "raw/historical-initial.txt: missing tree errors in both rehearsal cases; explicit SHA fetch recovered both.",
+    "impact": "The clean historical upgrade job cannot reconstruct two real old releases.",
+    "repair": "Fetch the two immutable SHAs before the historical W6 job.",
+    "regression": "W1–W6 historic suite and separate W4; retain initial failure and fetch retry.",
+    "state": "VALIDATED_FOCUSED"
   }
 ]
