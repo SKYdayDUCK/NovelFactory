@@ -14,12 +14,13 @@
 | [nf-research-evidence](.agents/skills/nf-research-evidence/SKILL.md) | 论文/文档核查、技术选型和平台适配 | 可追溯来源、实现映射与验证等级 |
 | [nf-concurrency-review](.agents/skills/nf-concurrency-review/SKILL.md) | 统一时间、批量读取、scope守卫、缓存、池与压测变更 | 一致性/负载分层、并发反例、实测与未测边界 |
 | [nf-pipeline-change](.agents/skills/nf-pipeline-change/SKILL.md) | 规划、写作、审核与整卷编辑流程变更 | 阶段契约、失败路径、工程/文学验收 |
+| [nf-resume](.agents/skills/nf-resume/SKILL.md) | 作者要求通过已绑定的项目 MCP 恢复小说生产 | 获取当前作品状态与实际唤醒数，后台调度器接续 |
 
 同一个开发任务可以顺序调用多个相关技能，例如先核查新机制，再修改契约和内核。没有相关技能时依据根/局部规范正常工作，不必为了每次文字修改创建技能。
 
 ## 2. 小说运行时技能
 
-运行时技能由工厂自己的 [catalog](runtime/skills/catalog.json) 和 [角色目录](runtime/roles/README.md) 选择；这些文件不属于 Codex 自动发现路径。运行时加载器先读索引、角色允许范围与输入类型，再按任务加载一个主技能及必要辅助技能。加载记录包含技能版本/内容哈希，并进入任务证据。
+运行时技能由工厂的[角色目录](runtime/roles/README.md)与 [Skill 目录](runtime/skills/catalog.json)选择。现有 RuntimeCatalog 每次快照冻结一个角色契约和一个已获准的主 Skill，记录两份文本、版本及整个快照摘要。网关按任务单独装载已授权的素材。开发 Agent 使用的仓库技能不进入这个提示词路径。[逐文件装载审计](reports/harness/S0_INSTRUCTION_AUDIT.md)。
 
 | 技能 | 主要任务 | 操作边界 |
 |---|---|---|
@@ -32,6 +33,9 @@
 | [maintain-memory](runtime/skills/maintain-memory/SKILL.md) | 历史查询、摘要及记忆维护 | 摘要是可追溯派生物，受版本与认知范围约束 |
 | [research-literature](runtime/skills/research-literature/SKILL.md) | 文学资料研究与作品风格参考 | 通用方法与作品决策隔离，不套用普遍质量公式 |
 | [edit-volume](runtime/skills/edit-volume/SKILL.md) | 整卷结构、衔接与语言编辑 | 事实变化走变更提案；表达编辑不撤销世界 |
+| [volume-director-review](runtime/skills/volume-director-review/SKILL.md) | 审核人物行动和剧情偏离 | 引用已接受事件并交代动机、代价及待决项 |
+| [review-change-point](runtime/skills/review-change-point/SKILL.md) | 审议变更点及候选未来窗口 | 总编独立批准或退回，需要作者决定时列为待办 |
+| [roll-window](runtime/skills/roll-window/SKILL.md) | 起草获准窗口内的重规划 | 保留原参考线及窗口外场次，提交独立审议 |
 
 开发 Agent 修改某项运行时技能时，先阅读其角色契约和 `nf-pipeline-change`。运行时 Agent 不因看见开发技能而获得 shell、迁移或管理提交权限。
 
