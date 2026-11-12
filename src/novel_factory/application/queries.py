@@ -188,7 +188,8 @@ class WorldQueryService:
                      'Selected history exceeds the P1 query scan budget')
             queries = [request['query']] if 'query' in request else [item['query'] for item in request.get('items', [])]
             needs_events = (not compile_context and plane in {'WORLD', 'SIMULATION'} and
-                            any(q['kind'] == 'TIMELINE' and 'FACT' in q['entry_kinds'] for q in queries))
+                            any(q['kind'] == 'TIMELINE' and 'FACT' in q['entry_kinds']
+                                and q['time_axis'] in {'SOURCE', 'RELEVANT'} for q in queries))
             events = []
             if needs_events:
                 selected = revision['selection'].values()
