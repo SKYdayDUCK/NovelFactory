@@ -51,3 +51,84 @@ def test_singleton_status_holds_work_lock_and_rechecks_grant(kernel_env):
         with pytest.raises(DomainError) as denied:
             pending.result(timeout=5)
         assert denied.value.code == 'VIEW_DENIED'
+
+
+def test_complete_locked_work_and_generation_are_separate_from_task(kernel_env):
+    kernel = kernel_env['kernel']
+    book = load_fixture(kernel)
+    grant = kernel.issue_grant(book['principal'], book['world_ref']['work_id'], role_id='writer')['principal']
+    op = task_fixture(kernel, book, grant, 'writer', 0)
+    claim = kernel.claim_task(grant, 'trusted-worker', task_id=op.task_id)
+    with kernel.db.uow(write=False) as repo:
+        task, work, world_ref = repo.task_with_locked_work(op.task_id)
+        assert task == repo.one('tasks', {'task_id': op.task_id})
+        assert work == repo.one('works', {'work_id': task['work_id']})
+        assert work['policy_version'] and work['interpretation_ref'] and work['policy_ref']
+        assert task['generation'] == claim['generation']
+        assert world_ref == repo.one('task_inputs', {'task_id': op.task_id, 'generation': task['generation']})['spec']['world_ref']
+
+
+@pytest.mark.parametrize('setting,expected_sql', [(None, 5), ('0', 5), ('1', 3)])
+def test_environment_setting_selects_only_authenticated_http_status(kernel_env, monkeypatch, tmp_path,
+                                                                    setting, expected_sql):
+    import httpx
+    from fastapi.encoders import jsonable_encoder
+    from sqlalchemy import event
+    from benchmarks.http_load import loopback_server
+    from novel_factory.interfaces.http import from_environment
+    from novel_factory.contracts.registry import validate_contract
+
+    kernel = kernel_env['kernel']
+    book = load_fixture(kernel)
+    own = kernel.issue_grant(book['principal'], book['world_ref']['work_id'], role_id='writer')
+    peer = kernel.issue_grant(book['principal'], book['world_ref']['work_id'], role_id='writer')
+    op = task_fixture(kernel, book, own['principal'], 'writer', 1)
+    expected = kernel.get_task(own['principal'], op.task_id)
+    monkeypatch.setenv('NF_DATABASE_URL', kernel_env['url'])
+    monkeypatch.setenv('NF_OBJECT_ROOT', str(tmp_path / 'http-settings'))
+    monkeypatch.setenv('NF_POOL_SIZE', '4')
+    if setting is None:
+        monkeypatch.delenv('NF_HTTP_FENCED_TASK_STATUS', raising=False)
+    else:
+        monkeypatch.setenv('NF_HTTP_FENCED_TASK_STATUS', setting)
+    app = from_environment()
+    engine = app.state.kernel.db.engine
+    statements = []
+
+    def record(conn, cursor, sql, *_):
+        statements.append(sql)
+
+    def headers(actor):
+        return {'Authorization': 'Bearer ' + actor['token']}
+
+    try:
+        with loopback_server(app) as base, httpx.Client(base_url=base, timeout=5, trust_env=False) as client:
+            path = '/api/v1/tasks/' + op.task_id.upper()
+            event.listen(engine, 'before_cursor_execute', record)
+            try:
+                response = client.get(path, headers=headers(own))
+                assert response.status_code == 200 and response.json() == jsonable_encoder(expected)
+                assert len(statements) == expected_sql
+                assert any('LATERAL' in sql for sql in statements) == (setting == '1')
+                statements.clear()
+                # A bound agent in the HTTP process still gets the old path.
+                assert app.state.kernel.get_task(own['principal'], op.task_id) == expected
+                assert len(statements) == 4 and all('LATERAL' not in sql for sql in statements)
+            finally:
+                event.remove(engine, 'before_cursor_execute', record)
+
+            for url, kwargs, status, code in (
+                (path, {}, 401, 'UNAUTHENTICATED'),
+                (path, {'headers': headers(peer)}, 403, 'VIEW_DENIED'),
+                ('/api/v1/tasks/' + str(uuid4()), {'headers': headers(own)}, 403, 'VIEW_DENIED'),
+                ('/api/v1/tasks/invalid', {'headers': headers(own)}, 422, 'INVALID_ARGUMENT'),
+            ):
+                error = client.get(url, **kwargs)
+                assert error.status_code == status and error.json()['code'] == code
+                validate_contract('ErrorEnvelope', error.json())
+                assert error.headers['cache-control'] == 'no-store'
+            kernel.revoke_grant(book['principal'], own['principal'].grant_id)
+            revoked = client.get(path, headers=headers(own))
+            assert revoked.status_code == 401 and revoked.json()['code'] == 'UNAUTHENTICATED'
+    finally:
+        app.state.kernel.db.close()

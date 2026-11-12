@@ -1,0 +1,165 @@
+name: Qualified HTTP option and full application regression
+on:
+  push:
+    branches: [experiment/p59-database-throughput]
+    paths: ['.github/workflows/p59-db-qualified.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [mixed, http]
+    services:
+      pg:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_DB: nf_test
+          POSTGRES_PASSWORD: disposable
+          POSTGRES_INITDB_ARGS: --data-checksums
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 2s --health-timeout 2s --health-retries 30
+    env:
+      NF_TEST_DATABASE_URL: postgresql+psycopg://postgres:disposable@127.0.0.1:5432/nf_test
+      PROFILE: ${{ matrix.profile }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - run: uv sync --locked --group dev --python 3.12
+      - name: Enable statement statistics on this private experiment cluster
+        env:
+          INSTANCE: ${{ job.services.pg.id }}
+        shell: bash
+        run: |
+          docker exec "$INSTANCE" psql -U postgres -d postgres -v ON_ERROR_STOP=1 -c "ALTER SYSTEM SET shared_preload_libraries='pg_stat_statements'"
+          docker restart "$INSTANCE"
+          for i in {1..30}; do
+            if docker exec "$INSTANCE" pg_isready -U postgres; then break; fi
+            sleep 1
+          done
+          docker exec "$INSTANCE" psql -U postgres -d postgres -v ON_ERROR_STOP=1 -c 'CREATE EXTENSION pg_stat_statements'
+      - name: Validate role equivalence and database metrics
+        shell: bash
+        run: |
+          mkdir out
+          git rev-parse HEAD > out/source
+          lscpu > out/cpu
+          uv run --no-sync python -m pytest -q tests/integration/test_p59_fenced_status.py --junitxml=out/locks.xml
+          case "$PROFILE" in
+            http) uv run --no-sync python -m benchmarks.p59_task_http --fenced --output out/task-http.json ;;
+            mixed) uv run --no-sync python -m benchmarks.p59_task_http --fenced --mixed-status --output out/mixed-status.json ;;
+          esac
+      - if: always()
+        shell: bash
+        run: |
+          if test -s out/comparison/summary.json; then
+            jq -c '.[] | {mode,goodput,latency,requested_batch,window_ms,outcomes,exit}' out/comparison/summary.json
+          fi
+          find out -name '*.json' -type f -exec gzip -n {} +
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qualified-status-${{ matrix.profile }}-${{ github.sha }}
+          path: out/
+  postgres-integration:
+    name: PostgreSQL 17 integration, concurrency and restore
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    services:
+      redis:
+        image: redis:8.0.2
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 2s --health-timeout 2s --health-retries 30
+      postgres:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_DB: nf_test
+          POSTGRES_USER: nf_dev
+          POSTGRES_PASSWORD: nf_dev_ci_only
+          POSTGRES_INITDB_ARGS: --data-checksums
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nf_dev -d nf_test"
+          --health-interval 2s
+          --health-timeout 2s
+          --health-retries 30
+    env:
+      NF_DATABASE_URL: postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/nf_test
+      NF_TEST_REDIS_URL: redis://127.0.0.1:6379/0
+      NF_TEST_DATABASE_URL: postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/nf_test
+      NF_EVIDENCE_DIR: ci-evidence/recovery
+      NF_P2_ACCEPTANCE_EVIDENCE_DIR: ci-evidence/acceptance
+      NF_P5_CODEX_VERSION: '0.167.0-alpha.4'
+      NF_P5_PROCESS_EVIDENCE: ci-evidence/p5-process-resume.json
+      NF_P55_BANQUET_EVIDENCE: ci-evidence/p55-redis-banquet.json
+      NF_P5_BANQUET_EVIDENCE: ci-evidence/p5-autonomous-banquet.json
+      PG_BIN: /usr/lib/postgresql/17/bin
+      NF_POOL_SIZE: '8'
+      NF_POOL_OVERFLOW: '0'
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Paired compiler benchmark verifies the exact baseline Git blob.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          enable-cache: true
+      - name: Install PostgreSQL 17 client and Linux role isolation dependencies
+        run: |
+          bash scripts/ci_install_pg17.sh redis-server postgresql-client-17 bubblewrap util-linux gcc libc6-dev
+          bwrap --version
+          unshare --version
+          cc --version
+          test -x "$PG_BIN/pg_dump" && test -x "$PG_BIN/pg_restore"
+      - name: Install the pinned native Codex app-server for the restart test
+        run: |
+          prefix="$RUNNER_TEMP/novelfactory-codex"
+          npm install --prefix "$prefix" --no-save --no-audit --no-fund "@openai/codex@$NF_P5_CODEX_VERSION"
+          native_bin="$prefix/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/bin"
+          test "$("$native_bin/codex" --version)" = "codex-cli $NF_P5_CODEX_VERSION"
+          echo "$native_bin" >> "$GITHUB_PATH"
+      - name: Install locked dependencies
+        run: uv sync --locked --group dev --python 3.12
+      - name: Record runtime and initialize fresh PostgreSQL database
+        run: |
+          mkdir -p ci-evidence
+          { uv run --no-sync python --version; codex --version; "$PG_BIN/pg_dump" --version; \
+            "$PG_BIN/psql" -h 127.0.0.1 -U nf_dev -d nf_test -Atc 'SHOW server_version; SHOW fsync; SHOW synchronous_commit;'; } \
+            2>&1 | tee ci-evidence/environment.log
+          uv run --no-sync python -m alembic upgrade head 2>&1 | tee ci-evidence/migration.log
+          uv run --no-sync python -m alembic current 2>&1 | tee -a ci-evidence/migration.log
+        env:
+          PGPASSWORD: nf_dev_ci_only
+      - name: All tests with real PostgreSQL 17, race and recovery evidence
+        env:
+          NF_P6_AUTHOR_EVIDENCE: ${{ github.workspace }}/ci-evidence/p6-author
+        run: |
+          uv run --no-sync python -m pytest tests -q \
+            --junitxml=ci-evidence/postgres-all.xml --json-report --json-report-file=ci-evidence/postgres-all.json \
+            2>&1 | tee ci-evidence/postgres-all.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qualified-application-tests-${{ github.sha }}
+          path: |
+            ci-evidence/postgres-all.xml
+            ci-evidence/postgres-all.log
+            ci-evidence/environment.log
+            ci-evidence/migration.log

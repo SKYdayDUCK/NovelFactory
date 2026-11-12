@@ -541,6 +541,20 @@ class Kernel:
             world_ref = r.one("task_inputs", {"task_id": task_id, "generation": task["generation"]})["spec"]["world_ref"]
         return self._public_task(task, world_ref)
 
+    def get_task_with_locked_work(self, principal, task_id):
+        """Read the exact generation and SHARE-lock its owning work before the grant."""
+        if not isinstance(principal, Principal):
+            # Preserve the regular path's error precedence and locking behavior.
+            return Kernel.get_task(self, principal, task_id)
+        with self.db.uow(write=False) as repo:
+            task, work, world_ref = repo.task_with_locked_work(task_id)
+            require(task is not None, "VIEW_DENIED", "Task unavailable")
+            grant = repo.one("grants", {"grant_id": principal.grant_id}, lock="share")
+            self._validate_locked_grant(repo, principal, task["work_id"], "READ", task["branch_id"], work, grant)
+            self._require_task_owner(task, principal)
+            require(world_ref is not None, "INTERNAL_ERROR", "Task input unavailable")
+            return self._public_task(task, world_ref)
+
     def cancel_task(self,principal,task_id,generation,idempotency_key):
         def authorize_cancel(conn):
             from novel_factory.infrastructure.repository import KernelRepository

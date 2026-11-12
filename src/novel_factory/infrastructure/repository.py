@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
-from sqlalchemy import Text, bindparam, select, update, delete, and_, func, text
+from sqlalchemy import Text, bindparam, select, update, delete, and_, func, text, true
 from sqlalchemy.dialects.postgresql import insert
 
 @lru_cache(maxsize=4)
@@ -29,6 +29,19 @@ def _tasks_with_world_ref_query(tasks, inputs):
             .where(tasks.c.task_id.in_(bindparam("task_ids", expanding=True))))
 
 
+@lru_cache(maxsize=4)
+def _task_with_locked_work_query(tasks, inputs, works):
+    generation = and_(inputs.c.task_id == tasks.c.task_id, inputs.c.generation == tasks.c.generation)
+    locked_work = (select(works).where(works.c.work_id == tasks.c.work_id).correlate(tasks)
+                   .with_for_update(read=True, of=works).lateral("locked_work"))
+    # Keep the owning work's complete typed row separate from the public task.
+    # A policy update or a grant revocation still must synchronize on live rows.
+    work_columns = [column.label("locked_work_" + column.key) for column in locked_work.c]
+    return (select(tasks, inputs.c.spec["world_ref"].label("world_ref"), *work_columns)
+            .select_from(tasks.outerjoin(inputs, generation).outerjoin(locked_work, true()))
+            .where(tasks.c.task_id == bindparam("requested_task")))
+
+
 class KernelRepository:
     def __init__(self, conn, tables):
         self.conn, self.tables = conn, tables
@@ -41,6 +54,17 @@ class KernelRepository:
         """Pin each current row to its immutable input for that exact generation."""
         query = _tasks_with_world_ref_query(self.tables["tasks"], self.tables["task_inputs"])
         return [dict(row) for row in self.conn.execute(query, {"task_ids": task_ids}).mappings()]
+
+    def task_with_locked_work(self, task_id):
+        tasks, inputs, works = (self.tables[name] for name in ("tasks", "task_inputs", "works"))
+        query = _task_with_locked_work_query(tasks, inputs, works)
+        row = self.conn.execute(query, {"requested_task": task_id}).mappings().one_or_none()
+        if row is None:
+            return None, None, None
+        task = {column.key: row[column] for column in tasks.c}
+        work = ({column.key: row["locked_work_" + column.key] for column in works.c}
+                if row["locked_work_work_id"] is not None else None)
+        return task, work, row["world_ref"]
 
     def revision_with_snapshot_text(self, world_ref):
         query = _revision_text_query(self.tables["revisions"])

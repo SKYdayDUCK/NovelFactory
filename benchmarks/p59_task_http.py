@@ -3,6 +3,7 @@ import argparse
 import asyncio
 from collections import Counter
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from decimal import Decimal
 import json
 from pathlib import Path
@@ -19,16 +20,12 @@ from novel_factory.application.kernel import Kernel
 from novel_factory.contracts.registry import plain
 from novel_factory.fixtures import load_fixture
 from novel_factory.interfaces.admission import ConnectionBudget
-from novel_factory.interfaces.http import create_app
+from novel_factory.interfaces.http import create_app, HttpSettings
 
 
 @asynccontextmanager
 async def select_kernel(kernel, mode):
-    if mode == 'fenced':
-        from experiments.db_execution.fenced_status import FencedStatusKernel
-        yield FencedStatusKernel(kernel.db, kernel.objects)
-        return
-    if mode in ('baseline', 'sql'):
+    if mode in ('baseline', 'sql', 'fenced'):
         yield Kernel(kernel.db, kernel.objects, joined_task_status=mode == 'sql')
         return
     # Preserve the stock synchronous HTTP business callback. Dispatched work
@@ -46,7 +43,7 @@ async def select_kernel(kernel, mode):
         yield StatusKernel(kernel.db, kernel.objects)
 
 
-async def trial(mode, count, concurrency):
+async def trial(mode, count, concurrency, *, mixed_status=False):
     with private_kernel(4) as (kernel, _):
         books = [load_fixture(kernel), load_fixture(kernel)]
         calls = []
@@ -57,26 +54,53 @@ async def trial(mode, count, concurrency):
             oracle = kernel.get_task(grant['principal'], op.task_id)
             calls.append((f'/api/v1/tasks/{op.task_id}', {'Authorization': 'Bearer '+grant['token']},
                           jsonable_encoder(plain(oracle), custom_encoder={Decimal: str})))
+        leases = []
+        lease_bounds = []
+        renewed_expiries = [[], []]
+        if mixed_status:
+            for i, book in enumerate(books):
+                owner = book['principal']
+                op = task_fixture(kernel, book, owner, 'control_operator', i)
+                worker = f"fixture-lease-owner-{i}"
+                claim = kernel.claim_task(owner, worker, lease_seconds=300, task_id=op.task_id)
+                leases.append((op.task_id, claim['generation'], worker))
+                lease_bounds.append((claim['lease_expiry'], claim['deadline']))
         async with select_kernel(kernel, mode) as target:
             budget = ConnectionBudget(api_processes=1, api_pool_size=4, worker_processes=0)
-            app = create_app(target, connection_budget=budget)
+            settings = HttpSettings(fenced_task_status=mode == 'fenced')
+            app = create_app(target, settings=settings, connection_budget=budget)
             with loopback_server(app) as base:
                 async with httpx.AsyncClient(base_url=base, timeout=15, trust_env=False) as client:
-                    async def one(i):
-                        path, headers, expected = calls[i % len(calls)]
+                    async def one(i, *, measured=False):
+                        if measured and mixed_status and i % 10 == 0:
+                            book = (i // 10) % 2
+                            begin = perf_counter()
+                            try:
+                                # The supervisor owns this durable lease. It shares the
+                                # real HTTP database pool, never an HTTP transaction.
+                                expiry = await asyncio.to_thread(kernel.tasks.renew, *leases[book], lease_seconds=3600)
+                                initial_expiry, deadline = lease_bounds[book]
+                                ok = max(initial_expiry, datetime.now(timezone.utc)) < expiry <= deadline
+                                renewed_expiries[book].append(expiry)
+                                status = 'RENEWED' if ok else 'INVALID_EXPIRY'
+                            except Exception as exc:
+                                ok, status = False, getattr(exc, 'code', type(exc).__name__)
+                            return (i, status, ok, perf_counter() - begin)
+                        read_seq = i - (i + 9) // 10 if measured and mixed_status else i
+                        path, headers, expected = calls[read_seq % len(calls)]
                         begin = perf_counter()
                         try:
                             resp = await client.get(path, headers=headers)
                             status = str(resp.status_code)
                             ok = resp.status_code == 200 and resp.json() == expected
-                        except httpx.HTTPError as exc:
+                        except (httpx.HTTPError, ValueError) as exc:
                             status, ok = type(exc).__name__, False
                         return (i, status, ok, perf_counter() - begin)
                     warmup = [await one(i) for i in range(len(calls))]
                     if not all(row[2] for row in warmup):
                         raise ValueError('Warm-up returned a mismatched task')
                     async def worker(start):
-                        return [await one(i) for i in range(start, count, concurrency)]
+                        return [await one(i, measured=True) for i in range(start, count, concurrency)]
                     with SqlMeasurements(kernel.db.engine) as meters:
                         begin, cpu = perf_counter(), process_time()
                         chunks = await asyncio.gather(*(worker(i) for i in range(concurrency)))
@@ -85,10 +109,28 @@ async def trial(mode, count, concurrency):
                     sql = meters.result(elapsed)
         rows = sorted(r for chunk in chunks for r in chunk)
         verified = sum(r[2] for r in rows)
-        return {'mode': mode, 'verified': verified, 'count': count, 'concurrency': concurrency,
+        result = {'mode': mode, 'verified': verified, 'count': count, 'concurrency': concurrency,
                 'goodput': verified / elapsed, 'seconds': elapsed, 'cpu_s_client_and_service': cpu_seconds,
                 'latency': percentiles([r[3] for r in rows]), 'sql': sql,
                 'outcomes': dict(Counter(r[1] for r in rows)), 'raw': rows}
+        if mixed_status:
+            durable = []
+            with kernel.db.uow(write=False) as repo:
+                for book, (task_id, generation, worker) in enumerate(leases):
+                    task = repo.one('tasks', {'task_id': task_id})
+                    expected_count = sum(i % 10 == 0 and (i // 10) % 2 == book for i in range(count))
+                    if (task['state'] != 'RUNNING' or task['generation'] != generation
+                            or task['lease_owner'] != worker or len(renewed_expiries[book]) != expected_count):
+                        durable.append(False)
+                    else:
+                        durable.append(task['lease_expiry'] == max(renewed_expiries[book])
+                                       if expected_count else True)
+            kinds = {'http_get': [r for r in rows if r[0] % 10], 'lease_renew': [r for r in rows if r[0] % 10 == 0]}
+            result.update(mixed_status=True, durable_lease_receipts_match=durable,
+                          counts_by_kind={k: len(rs) for k, rs in kinds.items()},
+                          verified_by_kind={k: sum(r[2] for r in rs) for k, rs in kinds.items()},
+                          latency_by_kind={k: percentiles([r[3] for r in rs]) for k, rs in kinds.items()})
+        return result
 
 
 def main():
@@ -97,19 +139,23 @@ def main():
     parser.add_argument('--count', type=int, default=320)
     parser.add_argument('--concurrency', type=int, default=16)
     parser.add_argument('--fenced', action='store_true', help='Run the registered singleton A/B/B/A')
+    parser.add_argument('--mixed-status', action='store_true',
+                        help='Replace every tenth GET with a trusted supervisor renewal on the same pool')
     args = parser.parse_args()
+    if args.mixed_status and (not args.fenced or args.count < 20):
+        parser.error('--mixed-status requires --fenced and at least 20 operations to exercise both leases')
     if not 1 <= args.concurrency <= args.count <= 5000:
         parser.error('Choose positive bounded concurrency and operation count')
     results = []
     modes = ('baseline', 'fenced') if args.fenced else ('baseline', 'sql', 'micro', 'hybrid')
     for index, mode in enumerate((*modes, *reversed(modes))):
-        result = asyncio.run(trial(mode, args.count, args.concurrency))
+        result = asyncio.run(trial(mode, args.count, args.concurrency, mixed_status=args.mixed_status))
         result.update(execution_index=index, order='forward' if index < len(modes) else 'reverse')
         results.append(result)
         print(mode, results[-1]['verified'], round(results[-1]['goodput'], 2), flush=True)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(results, indent=2) + '\n', encoding='utf-8')
-    return int(any(r['verified'] != args.count for r in results))
+    return int(any(r['verified'] != args.count or not all(r.get('durable_lease_receipts_match', ())) for r in results))
 
 
 if __name__ == '__main__':
