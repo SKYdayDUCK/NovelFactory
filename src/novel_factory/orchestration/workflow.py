@@ -110,10 +110,13 @@ class WorkflowService:
         return check
 
     def _counts(self, conn, work_id, branch_id):
-        t = self.tables["tasks"]
-        scope = (t.c.work_id == work_id, t.c.branch_id == branch_id)
         counts = {"READY": 0, "WAITING": 0, "RUNNING": 0}
-        for state, count in conn.execute(select(t.c.state, func.count()).where(*scope).group_by(t.c.state)):
+        for state, count in conn.execute(text("""
+            SELECT CASE WHEN t.state='READY' AND d.retry_not_before > statement_timestamp()
+                        THEN 'BLOCKED' ELSE t.state END, count(*)
+            FROM nf_tasks t LEFT JOIN nf_quota_retry_deadlines d USING(task_id,generation)
+            WHERE t.work_id=:work AND t.branch_id=:branch GROUP BY 1
+        """), {"work": work_id, "branch": branch_id}):
             counts["WAITING" if state == "BLOCKED" else state] = count
         blockers = {state: counts[state] for state in ("WAITING", "WAITING_REVIEW", "PAUSED", "FAILED", "STALE")
                     if counts.get(state)}

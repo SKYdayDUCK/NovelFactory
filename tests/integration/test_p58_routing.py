@@ -238,3 +238,77 @@ def test_direct_profile_cannot_bypass_org_or_quota_change_after_reserve(kernel_e
         finally:
             with kernel.db.uow() as repo:
                 repo.conn.execute(text("DELETE FROM nf_runtime_limits WHERE subject='local/direct'"))
+
+
+def test_repeated_unsent_quota_wait_resumes_on_timer_after_restart(kernel_env, monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Event
+
+    from novel_factory.infrastructure.database import tables
+    from novel_factory.infrastructure.repository import KernelRepository
+    from scripts.run_supervisor import serve
+
+    kernel = kernel_env["kernel"]
+    world = load_fixture(kernel)
+    wr, owner = world["world_ref"], world["principal"]
+    work, branch = wr["work_id"], wr["branch_id"]
+    args = (owner, work, branch)
+
+    def authorize(conn):
+        kernel.authorize(KernelRepository(conn, tables), owner, work, "ADMIN", branch)
+
+    with backend() as (route, requests, server):
+        route.provider_key, route.account_key = "fixture", "quota-timer-account"
+        gw = AgentGateway(kernel, {"timer": route})
+        supervisor = RuntimeSupervisor(kernel, gw)
+        budget = kernel.tasks.create_budget(work, "1")
+        job = _job(kernel, gw, supervisor, world, budget, "READY", adapter_id="timer").task["task_id"]
+        mark = gw._mark_sent
+
+        def close_quota(*arguments):
+            with kernel.db.uow() as repo:
+                repo.conn.execute(text("""
+                    INSERT INTO nf_runtime_limits(scope,subject,slots) VALUES ('account','quota-timer-account',0)
+                """))
+            return mark(*arguments)
+
+        try:
+            for _ in range(2):
+                with monkeypatch.context() as patch:
+                    patch.setattr(gw, "_mark_sent", close_quota)
+                    assert supervisor.run_once(*args)["reason"] == "RUNTIME_CAPACITY_LIMIT"
+                with kernel.db.uow() as repo:
+                    repo.conn.execute(text("DELETE FROM nf_runtime_limits WHERE subject='quota-timer-account'"))
+            with kernel.db.uow(write=False) as repo:
+                assert not repo.many("dispatch_slots", {"task_id": job})
+                assert [r["state"] for r in repo.many("call_attempts", {"task_id": job})] == ["FAILED"] * 2
+                assert repo.one("budgets", {"budget_id": budget})["reserved_amount"] == 0
+            assert not requests
+            status = supervisor.workflow.status(work, branch, authorize_in_tx=authorize)
+            assert status["counts"]["WAITING"] == 1 and status["ready_count"] == 0
+            assert kernel.tasks.claim("early", task_id=job) is None
+            idle = supervisor.run_once(*args)
+            assert idle["status"] == "IDLE" and 0 < idle["retry_after_seconds"] <= 2.25
+            # No caller sends a wake after this point. A fresh listener/daemon
+            # must discover the deadline before its default 60 second scan.
+            server.lose_response = True
+            server.started, server.release = Event(), Event()
+            stop = Event()
+            restarted = RuntimeSupervisor(kernel, AgentGateway(kernel, {"timer": route}))
+            with ThreadPoolExecutor(1) as driver:
+                daemon = driver.submit(serve, restarted, *args, workers=1, interval=60, stop_event=stop)
+                try:
+                    assert server.started.wait(15)
+                finally:
+                    stop.set()
+                    server.release.set()
+                daemon.result(timeout=10)
+            for _ in range(2):
+                assert restarted.run_once(*args)["status"] == "IDLE"
+            with kernel.db.uow(write=False) as repo:
+                states = [r["state"] for r in repo.many("call_attempts", {"task_id": job}, order=["generation"])]
+                assert states == ["FAILED", "FAILED", "UNKNOWN"]
+            assert len(requests) == 1
+        finally:
+            with kernel.db.uow() as repo:
+                repo.conn.execute(text("DELETE FROM nf_runtime_limits WHERE subject='quota-timer-account'"))

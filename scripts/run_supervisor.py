@@ -123,16 +123,17 @@ def _drain(supervisor, principal, work, branch, pool, workers, pending, listener
             pending[result] = time.monotonic()
             used_pool = True
         elif result["status"] == "IDLE":
-            # Completion of CPU work, and changes in the target, can predate the periodic rescan.
-            if pending:
-                wait(pending, timeout=min(interval, .25), return_when=FIRST_COMPLETED)
-            else:
-                timeout = min(interval, windows.timeout()) if windows else interval
-                until = time.monotonic() + timeout
-                # Wake promptly on service stop without scanning PostgreSQL every second.
-                while not stop_event.is_set() and (remaining := until - time.monotonic()) > 0:
-                    if wait_for_change(listener, min(remaining, 1)):
-                        break
+            timeout = min(interval, windows.timeout()) if windows else interval
+            if "retry_after_seconds" in result:
+                timeout = min(timeout, result["retry_after_seconds"])
+                next_reconciliation = min(next_reconciliation, time.monotonic() + timeout)
+            # Slot releases and new work both publish commit-time wake hints.
+            # Check local futures between socket waits, keeping a quiet provider
+            # call from triggering repeated durable scans while slots are free.
+            until = time.monotonic() + timeout
+            while not stop_event.is_set() and (remaining := until - time.monotonic()) > 0:
+                if any(future.done() for future in pending) or wait_for_change(listener, min(remaining, 1)):
+                    break
         else:
             log_result(result)
 

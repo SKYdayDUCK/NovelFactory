@@ -1,5 +1,6 @@
 """Transient executor capacity. NF call attempts remain the sole spending ledger."""
 import json
+from uuid import UUID
 
 from sqlalchemy import text
 
@@ -50,3 +51,27 @@ def release(db, attempt):
         repo.conn.execute(text("UPDATE nf_runtime_permits SET released=true WHERE attempt_id=:attempt"),
                           {"attempt": attempt})
         repo.conn.execute(text("SELECT pg_notify('nf_supervisor_wake','')"))
+
+
+def delay_repeated_denial(conn, task, attempt):
+    """Called with the task locked, only after the current PREPARED call was refunded."""
+    recent = conn.scalar(text("""
+        SELECT count(*) FROM (
+            SELECT 1 FROM nf_call_attempts c JOIN nf_runtime_unsent u USING(attempt_id)
+            WHERE c.task_id=:task AND c.state='FAILED' AND c.actual_amount=0 AND c.actual_tokens=0
+              AND u.recorded_at >= statement_timestamp() - interval '2 minutes'
+            LIMIT 6
+        ) refunded
+    """), {"task": task})
+    if recent < 2:
+        return
+    # Stable per-attempt jitter spreads competing projects across a reopening quota.
+    jitter = (UUID(str(attempt)).int % 250) / 1000
+    seconds = min(30, 2 ** (recent - 1) + jitter)
+    conn.execute(text("""
+        INSERT INTO nf_quota_retry_deadlines (task_id,generation,attempt_id,retry_not_before)
+        SELECT task_id,generation,:attempt,least(deadline, clock_timestamp() + :seconds * interval '1 second')
+        FROM nf_tasks WHERE task_id=:task AND state='READY'
+        ON CONFLICT (task_id) DO UPDATE SET generation=excluded.generation, attempt_id=excluded.attempt_id,
+                                          retry_not_before=excluded.retry_not_before
+    """), {"task": task, "attempt": attempt, "seconds": seconds})

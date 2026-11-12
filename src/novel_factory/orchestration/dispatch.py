@@ -24,6 +24,9 @@ _NEXT = text("""
         JOIN nf_grants g ON g.grant_id=t.grant_id
         JOIN nf_works w ON w.work_id=t.work_id
         WHERE q.valid_until > statement_timestamp() AND t.state='READY'
+          AND NOT EXISTS (SELECT FROM nf_quota_retry_deadlines d
+                          WHERE (d.task_id,d.generation)=(t.task_id,t.generation)
+                            AND d.retry_not_before > statement_timestamp())
           AND t.deadline > statement_timestamp() AND g.active AND g.work_id=t.work_id
           AND g.principal_id::text=t.principal_id AND g.role_id=t.role_id
           AND g.epoch=(j.config->>'grant_epoch')::bigint AND w.policy_version=j.config->>'policy_version'

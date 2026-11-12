@@ -439,3 +439,49 @@ def test_idle_pool_retires_and_listener_recovers_sql_outage(kernel_env, monkeypa
         future.result(timeout=10)
         assert kernel.tasks.get(second)["state"] == "RESULT_STORED"
         assert len(requests) == 2
+
+
+def test_waiting_provider_with_free_slot_does_not_poll_database(kernel_env, monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+
+    from scripts import run_supervisor
+
+    kernel = kernel_env["kernel"]
+    book = load_fixture(kernel)
+    wr = book["world_ref"]
+    work, branch = wr["work_id"], wr["branch_id"]
+    quiet = []
+    scans = []
+    observed, stop = Event(), Event()
+    with backend() as (route, requests, server), ThreadPoolExecutor(1) as driver:
+        server.started, server.release = Event(), Event()
+        gw = AgentGateway(kernel, {"test": route})
+        supervisor = RuntimeSupervisor(kernel, gw)
+        _job(kernel, gw, supervisor, book, kernel.tasks.create_budget(work, "1"), "READY")
+        scan = supervisor.run_once
+        wait_change = run_supervisor.wait_for_change
+
+        def record_scan(*args, **kwargs):
+            scans.append(None)
+            return scan(*args, **kwargs)
+
+        def observe_wait(listener, timeout):
+            changed = wait_change(listener, min(timeout, .3))
+            if server.started.is_set() and not changed:
+                quiet.append(len(scans))
+                if len(quiet) >= 3:
+                    observed.set()
+            return changed
+
+        monkeypatch.setattr(supervisor, "run_once", record_scan)
+        monkeypatch.setattr(run_supervisor, "wait_for_change", observe_wait)
+        future = driver.submit(run_supervisor.serve, supervisor, book["principal"], work, branch, workers=2,
+                               interval=60, stop_event=stop)
+        try:
+            assert observed.wait(12)
+            assert len(set(quiet[-3:])) == 1
+        finally:
+            stop.set()
+            server.release.set()
+        future.result(timeout=10)
+        assert len(requests) == 1

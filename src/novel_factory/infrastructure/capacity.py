@@ -244,9 +244,10 @@ class ResourceMonitor:
                 scope = {"work": work, "branch": branch, "group": group}
                 if work is not None:
                     stats.update(repo.conn.execute(text("""
-                        SELECT count(*) FILTER(WHERE state='READY') AS ready,
-                          COALESCE(max(EXTRACT(epoch FROM now()-updated_at)) FILTER(WHERE state='READY'),0)::float8 AS oldest_ready_s
-                        FROM nf_tasks WHERE branch_id=:branch AND work_id=:work
+                        SELECT count(*) FILTER(WHERE state='READY' AND (retry_not_before IS NULL OR retry_not_before<=now())) AS ready,
+                          COALESCE(max(EXTRACT(epoch FROM now()-updated_at)) FILTER(WHERE state='READY' AND (retry_not_before IS NULL OR retry_not_before<=now())),0)::float8 AS oldest_ready_s
+                        FROM nf_tasks t LEFT JOIN nf_quota_retry_deadlines d USING(task_id,generation)
+                        WHERE t.branch_id=:branch AND t.work_id=:work
                     """), scope).mappings().one())
                 if work is None:
                     stats["queue_backlog"] = repo.conn.scalar(text("""SELECT count(*) FROM nf_bus_subscriptions
@@ -255,6 +256,9 @@ class ResourceMonitor:
                     stats["enrolled_ready"] = repo.conn.scalar(text("""SELECT count(*) FROM (
                         SELECT t.task_id FROM nf_tasks t JOIN nf_supervisor_jobs j USING(task_id)
                         WHERE t.branch_id=:branch AND t.work_id=:work AND t.state='READY'
+                          AND NOT EXISTS (SELECT FROM nf_quota_retry_deadlines d
+                              WHERE (d.task_id,d.generation)=(t.task_id,t.generation)
+                                AND d.retry_not_before > statement_timestamp())
                           AND t.deadline > statement_timestamp()
                           AND NOT EXISTS (SELECT FROM nf_call_attempts c WHERE c.task_id=t.task_id
                               AND NOT EXISTS (SELECT FROM nf_runtime_unsent u WHERE u.attempt_id=c.attempt_id))

@@ -254,6 +254,14 @@ class RuntimeSupervisor:
             self.kernel.authorize(repo, controller, work_id, "ADMIN", branch_id)
             task_id = dispatch.next_job(repo.conn, work_id, branch_id, transport=transport)
             if task_id is None:
+                retry_in = repo.conn.scalar(text("""
+                    SELECT extract(epoch FROM min(retry_not_before) - statement_timestamp())::float8
+                    FROM nf_quota_retry_deadlines d JOIN nf_tasks t USING(task_id,generation)
+                    WHERE t.work_id=:work AND t.branch_id=:branch AND t.state='READY'
+                      AND d.retry_not_before >= transaction_timestamp()
+                """), {"work": work_id, "branch": branch_id})
+                if retry_in is not None:
+                    return {"status": "IDLE", "retry_after_seconds": max(0.0, retry_in), **summary}
                 return {"status": "IDLE", **summary}
             task = repo.one("tasks", {"task_id": task_id})
             config = repo.one("supervisor_jobs", {"task_id": task_id})["config"]

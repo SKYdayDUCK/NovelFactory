@@ -172,6 +172,9 @@ class TaskService:
         conn.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": MAINTENANCE_GATE + 1})
         now = self._now(conn)
         conditions = [t.c.state == "READY", t.c.deadline > now,
+                      text("""NOT EXISTS (SELECT FROM nf_quota_retry_deadlines d
+                           WHERE (d.task_id,d.generation)=(nf_tasks.task_id,nf_tasks.generation)
+                             AND d.retry_not_before > statement_timestamp())"""),
                       text("""NOT EXISTS(SELECT FROM nf_conflict_cases sc
                             WHERE sc.task_id=nf_tasks.task_id AND sc.generation=nf_tasks.generation
                             AND NOT EXISTS(SELECT FROM nf_conflict_resolutions sr WHERE sr.case_id=sc.case_id
