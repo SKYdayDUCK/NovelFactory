@@ -8,13 +8,20 @@ from sqlalchemy import select, text
 from novel_factory.application.kernel import require
 
 
-def assignment_for(repo, task, spec, *, selected_input=None):
-    """One runtime generation cannot mix a static input and a dynamic assignment."""
+def matching_inputs(repo, task, spec):
     inputs = repo.many("artifacts", {"work_id": task["work_id"], "kind": "AGENT_INPUT",
                        "artifact_revision_id": [r["artifact_revision_id"] for r in spec["input_artifacts"]]})
-    compatible = [row["payload"] for row in inputs if
-                  (row["payload"]["role_id"], row["payload"]["task_kind"], row["payload"]["runtime_sha256"])
-                  == (task["role_id"], task["task_kind"], spec["runtime_contract_version"])]
+    return [row["payload"] for row in inputs if
+            (row["payload"]["role_id"], row["payload"]["task_kind"], row["payload"]["runtime_sha256"])
+            == (task["role_id"], task["task_kind"], spec["runtime_contract_version"])]
+
+
+def assignment_for(repo, task, spec, *, selected_input=None):
+    return assignment_from_inputs(matching_inputs(repo, task, spec), selected_input=selected_input)
+
+
+def assignment_from_inputs(compatible, *, selected_input=None):
+    """One runtime generation cannot mix a static input and a dynamic assignment."""
     refs = [data["dynamic_assignment_ref"] for data in compatible if "dynamic_assignment_ref" in data]
     if not refs:
         return None
