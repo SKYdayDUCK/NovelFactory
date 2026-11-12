@@ -1,0 +1,706 @@
+{
+  "stage": "S0",
+  "subject": "a8073b6664df8953330dd3bc0240038fcb64f09a",
+  "event": "pull_request",
+  "checkout": "e2f9becfc4e5dbf5182349132ab422ac99ae0fbe",
+  "scope": "Historical unmodified capacity and equivalence probes, separate from the Creative Harness engineering contract gate.",
+  "baseline": "276820316129d546b0a13118bcbe283b06507795",
+  "issue": "https://github.com/SKYdayDUCK/NovelFactory/issues/13",
+  "criteria": {
+    "p2_and_independent": "Capacity requires base business correctness, zero first-attempt failures, and >=950 measured first call starts/s of a frozen 1000/s target for overload; original mixed profile reports rate NOT_APPLICABLE. Bounded business recovery has a separate outcome. Expected domain rejections such as 409 are evaluated by the source benchmark and are not all failures.",
+    "p3_open": "1000 agents x five rounds = 5000; >=950 wire-header starts/s, all scheduled complete and all valid on first attempt, zero correctness errors.",
+    "p3_soak": "500, fixed 600 seconds at 20/s: all 12000 valid, >=19 call starts/s, zero correctness errors, pool drained. An hour-plus duration is separately NOT_EXECUTED.",
+    "paired": "15 frozen input pairs with facts/evidence/guards equal; CPU and SQL timings published separately."
+  },
+  "unchanged_threshold_source_blobs": [
+    {
+      "path": "benchmarks/p2_behavioral_load.py",
+      "base": "c182f3d96ecd914a6434ea5bae688e1992eafdfe",
+      "candidate": "c182f3d96ecd914a6434ea5bae688e1992eafdfe"
+    },
+    {
+      "path": "benchmarks/p3_open_arrival.py",
+      "base": "58d7c72d11d30d15adc81272a4101385d5a70d7c",
+      "candidate": "58d7c72d11d30d15adc81272a4101385d5a70d7c"
+    },
+    {
+      "path": "benchmarks/p3_stability.py",
+      "base": "7be225ec3ad25dfd4e6199d9180041db35edde1c",
+      "candidate": "7be225ec3ad25dfd4e6199d9180041db35edde1c"
+    },
+    {
+      "path": "benchmarks/p3_context_comparison.py",
+      "base": "8e7c07ed5503a7def75fd92bcdacf451bce96c69",
+      "candidate": "8e7c07ed5503a7def75fd92bcdacf451bce96c69"
+    },
+    {
+      "path": ".github/workflows/p2-load.yml",
+      "base": "1db56c57c8a497063d023f328d8658c58867fcf3",
+      "candidate": "1db56c57c8a497063d023f328d8658c58867fcf3"
+    },
+    {
+      "path": ".github/workflows/p3-scale-experiments.yml",
+      "base": "8941bc00e2d0223518737910ce2616c8545bc916",
+      "candidate": "8941bc00e2d0223518737910ce2616c8545bc916"
+    },
+    {
+      "path": ".github/workflows/p3-p4-evidence.yml",
+      "base": "1734860398d1592e9f55d88115dcbd1b086e00c9",
+      "candidate": "1734860398d1592e9f55d88115dcbd1b086e00c9"
+    }
+  ],
+  "source_note": "Measurements are parsed from original job logs; archive receipt IDs/bytes/GitHub SHA-256 refer to the complete raw ZIP artifacts. Original complete P2 JSON and request rows are inside those archives. Failure exit codes remain original.",
+  "runs": [
+    {
+      "id": 43164315859,
+      "head_sha": "a8073b6664df8953330dd3bc0240038fcb64f09a",
+      "event": "pull_request",
+      "conclusion": "failure",
+      "name": "P2 measured capacity and recovery",
+      "run_attempt": 1,
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43164315859",
+      "run_id": 43164315859,
+      "artifacts": [
+        {
+          "id": 13920120096,
+          "name": "p2-load-200-mixed-1",
+          "digest": "sha256:69df3bafb1b5401a4a53f2901bd1d37fe0d6db7917cd33c111f0797f9e1068eb",
+          "bytes": 586480
+        },
+        {
+          "id": 13919756206,
+          "name": "p2-load-200-overload-1",
+          "digest": "sha256:38cdee52d33fa7703badb591711ef8c1514bf23a1f7d5fd5f6829a0999c47431",
+          "bytes": 1347592
+        },
+        {
+          "id": 13919700732,
+          "name": "p2-load-50-overload-1",
+          "digest": "sha256:d3d7e00aee3f5c4efa3630a6041463ea2a20e0581489d5abedd3ba76a5043657",
+          "bytes": 308097
+        },
+        {
+          "id": 13919481507,
+          "name": "p2-load-50-mixed-1",
+          "digest": "sha256:29aae8c97e7c4d84d42f695047c2462c6a6519d3bcaab3a81e709a9c4ad86f7a",
+          "bytes": 186542
+        }
+      ],
+      "jobs": [
+        {
+          "id": 131002500765,
+          "name": "50 agents / overload / full capacity gate",
+          "status": "completed",
+          "conclusion": "failure",
+          "failed_steps": [
+            "Measure fixed population, requests and business completion"
+          ],
+          "read_from_original_job_log": true,
+          "measurements": [
+            {
+              "report": "ci-evidence/run-1/load.json",
+              "agents": 50,
+              "correctness": "PASS",
+              "first_attempt_gate": "NOT_MET",
+              "capacity": "NOT_MET",
+              "bounded_recovery": "PASS",
+              "first_failures": 63,
+              "first_status": {
+                "200": 469,
+                "409": 4,
+                "429": 63
+              },
+              "planned": 536,
+              "first_emission_gate": "NOT_MET",
+              "target_call_start_rps": 1000,
+              "observed_call_start_rps": 153.67970310809503,
+              "observed_header_start_rps": 63.277693012211266,
+              "open_first_attempts": 250,
+              "completed_operations": 536
+            },
+            {
+              "report": "ci-evidence/run-2/load.json",
+              "agents": 50,
+              "correctness": "PASS",
+              "first_attempt_gate": "NOT_MET",
+              "capacity": "NOT_MET",
+              "bounded_recovery": "PASS",
+              "first_failures": 79,
+              "first_status": {
+                "200": 453,
+                "409": 4,
+                "429": 79
+              },
+              "planned": 536,
+              "first_emission_gate": "NOT_MET",
+              "target_call_start_rps": 1000,
+              "observed_call_start_rps": 102.5193407471149,
+              "observed_header_start_rps": 64.72996685513745,
+              "open_first_attempts": 250,
+              "completed_operations": 536
+            }
+          ]
+        },
+        {
+          "id": 131002501076,
+          "name": "200 agents / overload / full capacity gate",
+          "status": "completed",
+          "conclusion": "failure",
+          "failed_steps": [
+            "Measure fixed population, requests and business completion"
+          ],
+          "read_from_original_job_log": true,
+          "measurements": [
+            {
+              "report": "ci-evidence/run-1/load.json",
+              "agents": 200,
+              "correctness": "PASS",
+              "first_attempt_gate": "NOT_MET",
+              "capacity": "NOT_MET",
+              "bounded_recovery": "PASS",
+              "first_failures": 525,
+              "first_status": {
+                "200": 1597,
+                "409": 19,
+                "429": 525
+              },
+              "planned": 2141,
+              "first_emission_gate": "NOT_MET",
+              "target_call_start_rps": 1000,
+              "observed_call_start_rps": 46.05135662041493,
+              "observed_header_start_rps": 43.03361761223387,
+              "open_first_attempts": 1000,
+              "completed_operations": 2141
+            },
+            {
+              "report": "ci-evidence/run-2/load.json",
+              "agents": 200,
+              "correctness": "PASS",
+              "first_attempt_gate": "NOT_MET",
+              "capacity": "NOT_MET",
+              "bounded_recovery": "PASS",
+              "first_failures": 533,
+              "first_status": {
+                "200": 1589,
+                "409": 19,
+                "429": 533
+              },
+              "planned": 2141,
+              "first_emission_gate": "NOT_MET",
+              "target_call_start_rps": 1000,
+              "observed_call_start_rps": 44.6358139809825,
+              "observed_header_start_rps": 40.73744978670945,
+              "open_first_attempts": 1000,
+              "completed_operations": 2141
+            }
+          ]
+        },
+        {
+          "id": 131002501090,
+          "name": "200 agents / mixed / full capacity gate",
+          "status": "completed",
+          "conclusion": "success",
+          "failed_steps": [],
+          "read_from_original_job_log": true,
+          "measurements": [
+            {
+              "report": "ci-evidence/run-1/load.json",
+              "agents": 200,
+              "correctness": "PASS",
+              "first_attempt_gate": "PASS",
+              "capacity": "PASS",
+              "bounded_recovery": "PASS",
+              "first_failures": 0,
+              "first_status": {
+                "200": 1122,
+                "409": 19
+              },
+              "planned": 1141,
+              "first_emission_gate": "NOT_APPLICABLE",
+              "target_call_start_rps": null,
+              "observed_call_start_rps": null,
+              "observed_header_start_rps": null,
+              "open_first_attempts": 0,
+              "completed_operations": 1141
+            },
+            {
+              "report": "ci-evidence/run-2/load.json",
+              "agents": 200,
+              "correctness": "PASS",
+              "first_attempt_gate": "PASS",
+              "capacity": "PASS",
+              "bounded_recovery": "PASS",
+              "first_failures": 0,
+              "first_status": {
+                "200": 1122,
+                "409": 19
+              },
+              "planned": 1141,
+              "first_emission_gate": "NOT_APPLICABLE",
+              "target_call_start_rps": null,
+              "observed_call_start_rps": null,
+              "observed_header_start_rps": null,
+              "open_first_attempts": 0,
+              "completed_operations": 1141
+            }
+          ]
+        },
+        {
+          "id": 131002501136,
+          "name": "50 agents / mixed / full capacity gate",
+          "status": "completed",
+          "conclusion": "success",
+          "failed_steps": [],
+          "read_from_original_job_log": true,
+          "measurements": [
+            {
+              "report": "ci-evidence/run-1/load.json",
+              "agents": 50,
+              "correctness": "PASS",
+              "first_attempt_gate": "PASS",
+              "capacity": "PASS",
+              "bounded_recovery": "PASS",
+              "first_failures": 0,
+              "first_status": {
+                "200": 282,
+                "409": 4
+              },
+              "planned": 286,
+              "first_emission_gate": "NOT_APPLICABLE",
+              "target_call_start_rps": null,
+              "observed_call_start_rps": null,
+              "observed_header_start_rps": null,
+              "open_first_attempts": 0,
+              "completed_operations": 286
+            },
+            {
+              "report": "ci-evidence/run-2/load.json",
+              "agents": 50,
+              "correctness": "PASS",
+              "first_attempt_gate": "PASS",
+              "capacity": "PASS",
+              "bounded_recovery": "PASS",
+              "first_failures": 0,
+              "first_status": {
+                "200": 282,
+                "409": 4
+              },
+              "planned": 286,
+              "first_emission_gate": "NOT_APPLICABLE",
+              "target_call_start_rps": null,
+              "observed_call_start_rps": null,
+              "observed_header_start_rps": null,
+              "open_first_attempts": 0,
+              "completed_operations": 286
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 43164314483,
+      "head_sha": "a8073b6664df8953330dd3bc0240038fcb64f09a",
+      "event": "pull_request",
+      "conclusion": "failure",
+      "name": "P3 P4 measured evidence",
+      "run_attempt": 1,
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43164314483",
+      "run_id": 43164314483,
+      "artifacts": [
+        {
+          "id": 13919417180,
+          "name": "p3-isolated-200-overload-1",
+          "digest": "sha256:7be8418d3e3f7cac4df372a3506ed8b339a91f4236f4d2b7eb81fd7c44a974da",
+          "bytes": 651548
+        },
+        {
+          "id": 13919367329,
+          "name": "p3-isolated-200-mixed-1",
+          "digest": "sha256:37766de9374f2b9dfa30c01e1e021544593affde9539bc05b7686318f864f01f",
+          "bytes": 292132
+        },
+        {
+          "id": 13919252883,
+          "name": "p3-context-paired-1",
+          "digest": "sha256:6d3b8a920282ea92a73805b7875a4544ae5ffcedcdd5d32be06ae65df0c5c4e4",
+          "bytes": 281430
+        }
+      ],
+      "jobs": [
+        {
+          "id": 131002496752,
+          "name": "Same world CPU and SQL paired comparison",
+          "status": "completed",
+          "conclusion": "success",
+          "failed_steps": [],
+          "read_from_original_job_log": true,
+          "measurements": [
+            {
+              "paired_equal": 15,
+              "summary": [
+                {
+                  "subjects": 1,
+                  "baseline": {
+                    "median_seconds": 0.060210671999996634,
+                    "sql_counts": [
+                      43
+                    ],
+                    "median_cursor_execution_seconds": 0.01402704599999538
+                  },
+                  "candidate": {
+                    "median_seconds": 0.04227379599998926,
+                    "sql_counts": [
+                      43
+                    ],
+                    "median_cursor_execution_seconds": 0.014028804999981048
+                  }
+                },
+                {
+                  "subjects": 20,
+                  "baseline": {
+                    "median_seconds": 0.06281220500000018,
+                    "sql_counts": [
+                      43
+                    ],
+                    "median_cursor_execution_seconds": 0.013607689000011192
+                  },
+                  "candidate": {
+                    "median_seconds": 0.05586574400000188,
+                    "sql_counts": [
+                      43
+                    ],
+                    "median_cursor_execution_seconds": 0.013745197999980974
+                  }
+                },
+                {
+                  "subjects": 100,
+                  "baseline": {
+                    "median_seconds": 0.1968511890000002,
+                    "sql_counts": [
+                      43
+                    ],
+                    "median_cursor_execution_seconds": 0.022687219999980357
+                  },
+                  "candidate": {
+                    "median_seconds": 0.1665560020000072,
+                    "sql_counts": [
+                      43
+                    ],
+                    "median_cursor_execution_seconds": 0.02382074899998088
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": 131002496949,
+          "name": "Independent load process / 200 / mixed",
+          "status": "completed",
+          "conclusion": "success",
+          "failed_steps": [],
+          "read_from_original_job_log": true,
+          "measurements": [
+            {
+              "report": "ci-evidence/load.json",
+              "agents": 200,
+              "correctness": "PASS",
+              "first_attempt_gate": "PASS",
+              "capacity": "PASS",
+              "bounded_recovery": "PASS",
+              "first_failures": 0,
+              "first_status": {
+                "200": 1122,
+                "409": 19
+              },
+              "planned": 1141,
+              "first_emission_gate": "NOT_APPLICABLE",
+              "target_call_start_rps": null,
+              "observed_call_start_rps": null,
+              "observed_header_start_rps": null,
+              "open_first_attempts": 0,
+              "completed_operations": 1141
+            }
+          ]
+        },
+        {
+          "id": 131002497009,
+          "name": "Independent load process / 200 / overload",
+          "status": "completed",
+          "conclusion": "failure",
+          "failed_steps": [
+            "Actual requests and strict capacity gate"
+          ],
+          "read_from_original_job_log": true,
+          "measurements": [
+            {
+              "report": "ci-evidence/load.json",
+              "agents": 200,
+              "correctness": "PASS",
+              "first_attempt_gate": "NOT_MET",
+              "capacity": "NOT_MET",
+              "bounded_recovery": "PASS",
+              "first_failures": 466,
+              "first_status": {
+                "200": 1656,
+                "409": 19,
+                "429": 466
+              },
+              "planned": 2141,
+              "first_emission_gate": "NOT_MET",
+              "target_call_start_rps": 1000,
+              "observed_call_start_rps": 55.112911404919096,
+              "observed_header_start_rps": 41.69115691750192,
+              "open_first_attempts": 1000,
+              "completed_operations": 2141
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 43164314475,
+      "head_sha": "a8073b6664df8953330dd3bc0240038fcb64f09a",
+      "event": "pull_request",
+      "conclusion": "failure",
+      "name": "P3 scale experiments with strict unmet gates",
+      "run_attempt": 1,
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43164314475",
+      "run_id": 43164314475,
+      "artifacts": [
+        {
+          "id": 13919885892,
+          "name": "p3-scale-500-mixed-1",
+          "digest": "sha256:cc2bf4c47ff43653bd5570352da66342293241c99c66c804663f9f9c6bb756a0",
+          "bytes": 633210
+        },
+        {
+          "id": 13919612520,
+          "name": "p3-scale-500-read-soak-1",
+          "digest": "sha256:ad72c90a38c26c8bb40fec10b0926cf5d71cadd05f9ab6c388baccfd2ea74cc0",
+          "bytes": 476749
+        },
+        {
+          "id": 13918744870,
+          "name": "p3-scale-1000-read-open-1",
+          "digest": "sha256:be5d347064b07f6aafd7fccd69e3927fee07d945baea2e01471f8dd07d5389fe",
+          "bytes": 499338
+        }
+      ],
+      "jobs": [
+        {
+          "id": 131002496801,
+          "name": "Measured 1000-read-open",
+          "status": "completed",
+          "conclusion": "failure",
+          "failed_steps": [
+            "Original targets and actual network evidence"
+          ],
+          "read_from_original_job_log": true,
+          "measurements": [
+            {
+              "capacity_gate": "NOT_MET",
+              "offered_wire_rate_gate": "NOT_MET",
+              "dispatch_start_rps": 47.43381925926037,
+              "observed_wire_start_rps": 47.02613751967921,
+              "successful_query_rps": 19.143702270794652,
+              "status_counts": {
+                "200": 2077,
+                "429": 2911,
+                "transport_error": 12
+              }
+            }
+          ]
+        },
+        {
+          "id": 131002497091,
+          "name": "Measured 500-read-soak",
+          "status": "completed",
+          "conclusion": "success",
+          "failed_steps": [],
+          "read_from_original_job_log": true,
+          "measurements": [
+            {
+              "probe_gate": "PASS",
+              "long_duration_gate": "NOT_EXECUTED",
+              "duration_seconds": 600.0841641149999,
+              "actual_call_start_rps": 20.000680501159806,
+              "successful_query_rps": 19.997194922978046,
+              "status_counts": {
+                "200": 12000
+              }
+            }
+          ]
+        },
+        {
+          "id": 131002497343,
+          "name": "Measured 500-mixed",
+          "status": "completed",
+          "conclusion": "success",
+          "failed_steps": [],
+          "read_from_original_job_log": true,
+          "measurements": [
+            {
+              "report": "ci-evidence/result.json",
+              "agents": 500,
+              "correctness": "PASS",
+              "first_attempt_gate": "PASS",
+              "capacity": "PASS",
+              "bounded_recovery": "PASS",
+              "first_failures": 0,
+              "first_status": {
+                "200": 2802,
+                "409": 49
+              },
+              "planned": 2851,
+              "first_emission_gate": "NOT_APPLICABLE",
+              "target_call_start_rps": null,
+              "observed_call_start_rps": null,
+              "observed_header_start_rps": null,
+              "open_first_attempts": 0,
+              "completed_operations": 2851
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "superseded_history": {
+    "source": "f7ac35b98b638e587f1a79344018c1a6859443fd",
+    "checkout": "50ebfd9763d0669c88ad5059a5adc3e10905ea12",
+    "index": [
+      {
+        "run_id": 43163646157,
+        "jobs": [
+          {
+            "name": "200 agents / overload / full capacity gate",
+            "id": 131000358347,
+            "result": "failure"
+          },
+          {
+            "name": "50 agents / mixed / full capacity gate",
+            "id": 131000358422,
+            "result": "success"
+          },
+          {
+            "name": "200 agents / mixed / full capacity gate",
+            "id": 131000358447,
+            "result": "success"
+          },
+          {
+            "name": "50 agents / overload / full capacity gate",
+            "id": 131000358449,
+            "result": "failure"
+          }
+        ],
+        "artifacts": [
+          {
+            "id": 13919322404,
+            "name": "p2-load-200-overload-1",
+            "digest": "sha256:aace1b457215fac17b3689250d5f6f23f5e8bce6b1f2f9a6431b39ed7fe383c8",
+            "bytes": 1364526
+          },
+          {
+            "id": 13919312132,
+            "name": "p2-load-200-mixed-1",
+            "digest": "sha256:871a53fdf0e8187a77715872e00f52dbbfb71805410744f346ccde60585eac1b",
+            "bytes": 593425
+          },
+          {
+            "id": 13918629005,
+            "name": "p2-load-50-mixed-1",
+            "digest": "sha256:443c86b269327ad9e3336ed1fdf3a204176a7e54065b5d671a0e7fd29391a6be",
+            "bytes": 186672
+          },
+          {
+            "id": 13918274148,
+            "name": "p2-load-50-overload-1",
+            "digest": "sha256:446a3fa587f66e5a1611223b8e1f79039fd2bef6b34982bc8c97bebd492f4977",
+            "bytes": 308915
+          }
+        ]
+      },
+      {
+        "run_id": 43163646153,
+        "jobs": [
+          {
+            "name": "Same world CPU and SQL paired comparison",
+            "id": 131000358498,
+            "result": "success"
+          },
+          {
+            "name": "Independent load process / 200 / mixed",
+            "id": 131000358687,
+            "result": "success"
+          },
+          {
+            "name": "Independent load process / 200 / overload",
+            "id": 131000358845,
+            "result": "failure"
+          }
+        ],
+        "artifacts": [
+          {
+            "id": 13919351631,
+            "name": "p3-isolated-200-overload-1",
+            "digest": "sha256:f5931dbda7cc51d70b2f72e1d30d2903571322536f79ac57c3506c42cf6753ea",
+            "bytes": 659905
+          },
+          {
+            "id": 13919037286,
+            "name": "p3-context-paired-1",
+            "digest": "sha256:307819286e1cd65ba1f606213d8b3bd1f48c906989e7aa9cabf27c5a0553f9cc",
+            "bytes": 281373
+          },
+          {
+            "id": 13918354788,
+            "name": "p3-isolated-200-mixed-1",
+            "digest": "sha256:309fd65ebe233e511dbca8e4f282b52d51963baab05030c520abc740ca55ee6c",
+            "bytes": 294411
+          }
+        ]
+      },
+      {
+        "run_id": 43163646140,
+        "jobs": [
+          {
+            "name": "Measured 500-read-soak",
+            "id": 131000358619,
+            "result": "success"
+          },
+          {
+            "name": "Measured 1000-read-open",
+            "id": 131000358942,
+            "result": "failure"
+          },
+          {
+            "name": "Measured 500-mixed",
+            "id": 131000359135,
+            "result": "success"
+          }
+        ],
+        "artifacts": [
+          {
+            "id": 13919511118,
+            "name": "p3-scale-500-mixed-1",
+            "digest": "sha256:9fe81da5f1feb03727c56aadfaeb96ee8a8ba0e6276db9673057345f480ac178",
+            "bytes": 642505
+          },
+          {
+            "id": 13919093741,
+            "name": "p3-scale-500-read-soak-1",
+            "digest": "sha256:11b2761c1591da39d7fb0d5a74ea8850a195e98bb74ebcfd985a25bc2bd95811",
+            "bytes": 465276
+          },
+          {
+            "id": 13918798348,
+            "name": "p3-scale-1000-read-open-1",
+            "digest": "sha256:c055c57de7a5435ebee21491a1b72d000b6b3725981a28ae289e821f5b098d9d",
+            "bytes": 504536
+          }
+        ]
+      }
+    ]
+  },
+  "comparison_tree": "fa1a10cc5f237d5a06bbac283c1c5e492fdf5ed6"
+}
