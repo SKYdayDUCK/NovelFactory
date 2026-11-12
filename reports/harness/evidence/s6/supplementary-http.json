@@ -1,0 +1,55 @@
+{
+  "configured_repetitions": 1,
+  "gate": "MET",
+  "observed": {
+    "api_processes": 1,
+    "backpressure_429": 0,
+    "client_barrier_peak_checked_out": 0,
+    "completed_requests": 300,
+    "database": {
+      "checked_out_at_end": 0,
+      "configured_pool_size": 8,
+      "failed_statements": 0,
+      "peak_checked_out_connections": 8
+    },
+    "duration_seconds": 8.289593,
+    "emitted_requests": 300,
+    "external_model_calls": 0,
+    "latency_all_responses": {
+      "count": 300,
+      "p50_ms": 774.6603,
+      "p95_ms": 2560.2404,
+      "p99_ms": 4305.4876
+    },
+    "logical_agents": 50,
+    "new_world_revisions": 0,
+    "not_emitted": 0,
+    "planned_requests": 300,
+    "rounds": 6,
+    "status_counts": {
+      "200": 300
+    },
+    "successful_requests": 300,
+    "unsuccessful_requests": 0
+  },
+  "original_local_suite": {
+    "failed": 1,
+    "passed": 58,
+    "required_requests": 300,
+    "retained_failure_sample": "HTTP_429_BACKPRESSURE",
+    "successful_requests": 293,
+    "unsuccessful_requests": 7
+  },
+  "original_test": "test_real_http_logical_agents_fixed_cut_and_bounded_connections[50]",
+  "pytest_step": "success",
+  "required_successes": 300,
+  "run_attempt": "1",
+  "run_id": "43193124083",
+  "scope": "Small fixed-cut STATE query fixture, one loopback HTTP process, 50 logical agents and six closed-loop rounds. No AT-30 or literary capacity claim.",
+  "services": {
+    "postgres_server_version_num": 170011,
+    "redis_version": "8.0.2"
+  },
+  "source_sha": "4e1e3639384d7992586ef0d58af01280e94d0a73",
+  "trigger_sha": "a28635169039907157af8e2c0472f69b5f7e431e"
+}

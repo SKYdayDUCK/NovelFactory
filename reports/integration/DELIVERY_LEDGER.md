@@ -1,6 +1,8 @@
 # 串行交付台账
 
-S6 冻结产品树已跨运行环境重建，逐文件及整树核验一致。[Git 对象和托管恢复回执](../harness/evidence/s6/restored-product.json)
+S6 观测、三组工程对照、真实服务及恢复验收已通过。[逐项回执](../harness/evidence/s6/receipt.json)
+
+S5 已推送为 `976e3212fcb42b9251fc2858a3b9d9ce3c3a646c`，远端检出及 Actions 成功。[远端回执](../harness/evidence/s5/remote-receipt.json)
 
 S5 指令根因、受控对照、独立发布和回滚 已在开发分支验证并进入阶段提交。[S5 工程回执](../harness/evidence/s5/receipt.json)
 
