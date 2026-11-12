@@ -20,6 +20,16 @@ These shared-host runs used Linux, CPython 3.12.14, PostgreSQL 17.11 and an in-p
 
 The verifier and product were pinned to local `e23b8e0`, tree-identical to [GitHub ce74f265](https://github.com/SKYdayDUCK/NovelFactory/tree/ce74f265b9072df52e9a485c6dfd48d5612d1907). Each JSON contains the benchmark source hash, per-task generation, execution/Attempt count, result witness, wake receipt, timing and final state. [500 agents](raw/final-500.json.gz) · [1,000 agents](raw/final-1000.json.gz) · [2,000 agents](raw/final-2000.json.gz) · [Methods and commands](METHOD.md)
 
+### Independent hosted runners
+
+A second matrix on GitHub commit `3e6b59268f1e89520230c8b70e9a26b9950a2f79` gave every population its own Ubuntu runner and PostgreSQL 17.11 service. The role grants, model fixture, two-slot limit and outcome checks were identical. All three runs produced the same per-task dispositions, zero remaining dispatch slots and unchanged world heads. Each reached two active model calls and four of eight checked-out PostgreSQL connections. The publication records include the checked-out Git tree, driver and lockfile checksums, GitHub artifact digests and the original compressed results. The verifier checked every task again after download. [Actions run](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43284920794) · [Publication manifest](raw/hosted-candidate/manifest.json)
+
+| Agents | Validated results | Drain / total s | Valid results/s, drain / total | P95 creation-to-claim s | Admission-to-completion P50 / P95 / P99 ms |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 500 | 490 | 80.34 / 104.35 | 6.10 / 4.70 | 77.47 | 311 / 414 / 443 |
+| 1,000 | 980 | 171.31 / 222.21 | 5.72 / 4.41 | 165.82 | 323 / 439 / 514 |
+| 2,000 | 1,960 | 375.56 / 462.15 | 5.22 / 4.24 | 365.98 | 283 / 828 / 853 |
+
 ## Before and after the first-claim failure
 
 The first 500- and 1,000-participant runs completed with 490 and 980 successful results. The first 2,000-participant run on the same selector failed on its first real claim. In an A/B on one 2,000-task populated queue, the original selector exceeded the 15-second statement timeout in both trials. So did a scope-guard-only alternative. Keeping the job lookup bound to its indexed task completed in 296.994 and 391.768 ms. On 100 tasks the four selectors chose exactly the same task, with overlapping runtimes. No numeric speedup is assigned to the censored old 2,000-task results. [Pre-fix 500](raw/workflow-500.json.gz) · [Pre-fix 1,000](raw/workflow-1000.json.gz) · [Original timeout](raw/workflow-2000.log.gz) · [Plans and timings](raw/dispatch/)
