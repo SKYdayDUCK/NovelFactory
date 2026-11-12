@@ -200,6 +200,10 @@ class RuntimeSupervisor:
         settled = resolution.reconcile_one(controller, work_id, branch_id)
         if settled:
             return {"status": "CONFLICT_COORDINATED", **settled}
+        from novel_factory.application.production_pipeline import advance_pipeline
+        handoff = advance_pipeline(self.kernel, self.gateway, controller, work_id, branch_id)
+        if handoff:
+            return handoff
         from novel_factory.application.volume_successor import advance_volume
         volume = advance_volume(self.kernel, self.gateway, controller, work_id, branch_id)
         if volume:
@@ -395,6 +399,9 @@ class RuntimeSupervisor:
                 "subject_time": {"kind": "POINT", "at": spec["story_time"]}, "token_budget": config["context_tokens"],
                 "idempotency_key": f"supervisor-compile:{task_id}:{generation}"})
             require(context["status"] == "READY", "CONTEXT_REQUIRED", "Task requires an available fixed context")
+            if "production_node" in config:
+                from novel_factory.application.production_pipeline import prepare_materials
+                prepare_materials(self.kernel, task, config)
             result = self.gateway.execute(owner, {"schema_version": "2.1", "task_id": task_id, "generation": generation,
                 "worker_id": worker, "call_key": "supervised-candidate", **config["dispatch"]})
         except DomainError as exc:

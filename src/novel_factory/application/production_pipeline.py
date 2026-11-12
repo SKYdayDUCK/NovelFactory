@@ -1,0 +1,576 @@
+"""Bounded production across one accepted volume and up to two future volumes.
+
+The board is an immutable projection of handoffs. NF tasks, attempts, drafts,
+published continuity and selected plans keep their existing authorities.
+"""
+import json
+from collections import Counter
+from datetime import datetime, timedelta
+
+from sqlalchemy import text
+
+from novel_factory.application.authorization import Principal
+from novel_factory.application.candidate_delivery import CandidateDelivery
+from novel_factory.application.kernel import require
+from novel_factory.application.narrative import NarrativeService
+from novel_factory.application.planning import PlanningService
+from novel_factory.application.release import ReleaseService
+from novel_factory.application.runtime_tasks import RuntimeTaskService
+from novel_factory.application.volume_successor import _selected
+from novel_factory.contracts.registry import validate_contract
+from novel_factory.domain.canonical import fingerprint
+from novel_factory.domain.errors import DomainError
+from novel_factory.domain.planning import condition_result
+from novel_factory.domain.temporal import point_key
+
+ROLES = {"draft": ("writer", "scene_draft"), "review": ("reviewer", "literary"),
+         "plan": ("volume_director", "window_plan")}
+PLAN_EDGES = {"HARD_CAUSAL", "CHARACTER_BELIEF", "STYLE_OR_VOICE", "LITERARY_COMMITMENT",
+              "SOFT_PREFERENCE", "READER_DISCLOSURE"}
+
+
+def _key(branch):
+    return "P58_PIPELINE:" + branch
+
+
+def _bounded(value, maximum, name, minimum=1):
+    require(type(value) is int and minimum <= value <= maximum, "INVALID_ARGUMENT", name)
+    return value
+
+
+def _list(value, maximum, label, minimum=0):
+    require(isinstance(value, list) and minimum <= len(value) <= maximum, "INVALID_ARGUMENT", label)
+    return value
+
+
+def _fields(obj, keys):
+    require(isinstance(obj, dict) and set(obj) == set(keys.split()), "INVALID_ARGUMENT",
+            "Missing or unsupported production fields")
+
+
+def _artifact(kernel, repo, work, owner, kind, payload):
+    ref = kernel._blob(payload)
+    kernel._register_artifact(repo, ref, work, payload, kind, owner.principal_id)
+    return ref
+
+
+def _load(kernel, repo, work, branch):
+    selected = _selected(repo, work, _key(branch))
+    return selected and kernel.artifact(repo, selected, work, kind="PRODUCTION_BOARD")["payload"]
+
+
+def _save(kernel, repo, owner, board):
+    wr = board["world_ref"]
+    ref = _artifact(kernel, repo, wr["work_id"], owner, "PRODUCTION_BOARD", board)
+    PlanningService(kernel)._select(repo, wr, _key(wr["branch_id"]), ref)
+    repo.outbox("production.board.changed", "volume", board["volume_id"], {"board_ref": ref},
+                "production:" + ref["artifact_revision_id"])
+    return ref
+
+
+def _current_owner(kernel, repo, board):
+    wr = board["world_ref"]
+    fence = board["authorization"]
+    owner = Principal(fence["grant_id"], fence["principal_id"])
+    grant = kernel.authorize(repo, owner, wr["work_id"], "ADMIN", wr["branch_id"])
+    require(grant["epoch"] == fence["epoch"] and
+            repo.one("works", {"work_id": wr["work_id"]})["policy_version"] == fence["policy_version"],
+            "VIEW_DENIED", "Production authorization changed")
+    require(repo.now() < datetime.fromisoformat(fence["deadline"]), "TASK_EXPIRED", "Production allowance expired")
+    return owner
+
+
+def _dependencies(assumptions, plan_nodes, subjects, predicates):
+    deps = []
+    for dep in _list(assumptions, 32, "Each candidate needs 1..32 typed assumptions", 1):
+        require(isinstance(dep, dict), "INVALID_ARGUMENT", "Invalid dependency")
+        if dep.get("kind") == "WORLD_FACT":
+            _fields(dep, "kind condition")
+            condition = validate_contract("PlanPrecondition", dep["condition"], "planning")
+            require(all(condition[k] in subjects for k in ("subject_id", "account_id", "resource_id") if k in condition)
+                    and ("predicate" not in condition or condition["predicate"] in predicates),
+                    "VIEW_DENIED", "The assumption exceeds the declared planning scope")
+            if condition.get("expected_value", {}).get("kind") == "ENTITY":
+                require(condition["expected_value"]["entity_id"] in subjects,
+                        "VIEW_DENIED", "The expected identity is outside the declared scope")
+            deps.append(dep)
+        else:
+            _fields(dep, "kind node_id")
+            require(isinstance(dep["kind"], str) and dep["kind"] in PLAN_EDGES and
+                    validate_contract("UUID", dep["node_id"]) in plan_nodes,
+                    "INVALID_ARGUMENT", "Expected a typed dependency on an exact source plan node")
+            deps.append({**dep, "node_hash": fingerprint(plan_nodes[dep["node_id"]])})
+    return deps
+
+
+def _nodes(kernel, repo, wr, current_volume, current_plan, chapters, future, lookahead, subjects, predicates):
+    work, nodes, used_scenes = wr["work_id"], {}, set()
+    plan_nodes = {n["node_id"]: n for n in current_plan["nodes"]}
+    current_ref = _selected(repo, work, PlanningService.selection_key(current_volume))
+    for chapter in _list(chapters, 32, "A run contains 1..32 chapters", 1):
+        _fields(chapter, "chapter_id scenes")
+        chapter_id = validate_contract("UUID", chapter["chapter_id"])
+        review_id = "review:" + chapter_id
+        require(review_id not in nodes, "INVALID_ARGUMENT", "Chapter repeated")
+        parents = []
+        for item in _list(chapter["scenes"], 32, "A chapter contains 1..32 scenes", 1):
+            _fields(item, "scene_ref handoff_refs")
+            scene = kernel.artifact(repo, item["scene_ref"], work, kind="SCENE_PLAN")["payload"]
+            scene_id = scene["scene_contract"]["scene_id"]
+            require(scene["plan_ref"] == current_ref and scene.get("batch_ref") and
+                    scene["scene_contract"]["input_world_ref"] == wr and scene_id not in used_scenes,
+                    "STALE_PLAN", "Each distinct writing card needs the selected volume plan and fixed world")
+            used_scenes.add(scene_id)
+            for ref in _list(item["handoff_refs"], 32, "Bounded predecessor acceptances"):
+                kernel.artifact(repo, ref, work, kind="NARRATIVE_ACCEPTANCE")
+            require(len(item["handoff_refs"]) == len(scene["required_predecessor_scene_ids"]),
+                    "TASK_REBIND_REQUIRED", "A dependent scene requires exact accepted handoffs")
+            node_id = "draft:" + scene_id
+            parents.append(node_id)
+            nodes[node_id] = {"stage": "draft", "chapter_id": chapter_id, **item, "state": "PENDING"}
+        nodes[review_id] = {"stage": "review", "chapter_id": chapter_id, "parents": parents, "state": "PENDING"}
+    future_volumes = set()
+    for item in _list(future, 8, "At most eight provisional candidates per run"):
+        _fields(item, "candidate_id volume_contract_ref distance assumptions")
+        identity = "plan:" + validate_contract("UUID", item["candidate_id"])
+        distance = _bounded(item["distance"], lookahead, "Candidate exceeds lookahead")
+        contract = kernel.artifact(repo, item["volume_contract_ref"], work, kind="VOLUME_CONTRACT")["payload"]
+        volume = contract["volume_id"]
+        require(volume != current_volume and repo.ancestor(contract["input_world_ref"], wr)
+                and contract["input_world_ref"]["branch_id"] == wr["branch_id"] and identity not in nodes,
+                "INVALID_ARGUMENT", "Invalid future contract or duplicate candidate")
+        future_volumes.add((distance, volume))
+        deps = _dependencies(item["assumptions"], plan_nodes, subjects, predicates)
+        nodes[identity] = {"stage": "plan", "state": "PENDING", "volume_id": volume,
+                           "distance": distance, "contract_ref": item["volume_contract_ref"], "dependencies": deps}
+    require(len({d for d, _ in future_volumes}) == len({v for _, v in future_volumes}) == len(future_volumes)
+            and sorted(d for d, _ in future_volumes) == list(range(1, len(future_volumes) + 1)),
+            "INVALID_ARGUMENT", "Future volumes require consecutive, distinct ordinals")
+    require(len(nodes) <= 128, "CAPACITY_LIMIT", "At most 128 nodes per branch run")
+    return nodes
+
+
+def register_pipeline(kernel, gateway, owner, *, world_ref, series_id, volume_id, chapters, future,
+                      story_time, subject_ids, predicates, routes, budget_id, reserve_amount,
+                      token_reservation, limits, deadline_seconds, idempotency_key):
+    """Persist a finite controller allowance. Registration sends no model requests."""
+    validate_contract("WorldRef", world_ref)
+    validate_contract("StoryPoint", story_time)
+    for uid in (series_id, volume_id, budget_id):
+        validate_contract("UUID", uid)
+    validate_contract("InputManifest", {"subject_ids": subject_ids, "predicates": predicates}, "kernel")
+    _fields(routes, "draft review plan")
+    _fields(limits, "draft review plan review_backlog lookahead window_goals")
+    for stage in ROLES:
+        _bounded(limits[stage], 16, "Per-stage WIP must be 1..16")
+        require(isinstance(routes[stage], str) and (routes[stage] in gateway.adapters or routes[stage] == "@policy"),
+                "MODEL_UNAVAILABLE", "Unknown stage route")
+    _bounded(limits["review_backlog"], 32, "Review backlog must be 1..32")
+    _bounded(limits["lookahead"], 2, "Lookahead must be 1..2")
+    _bounded(limits["window_goals"], 32, "Future window must be 1..32")
+    _bounded(deadline_seconds, 86400, "Deadline must be 1..86400 seconds")
+    PlanningService._key(idempotency_key)
+    wr, work, branch = world_ref, world_ref["work_id"], world_ref["branch_id"]
+    request = {"world_ref": wr, "series_id": series_id, "volume_id": volume_id, "chapters": chapters,
+                   "future": future, "story_time": story_time, "subject_ids": subject_ids, "predicates": predicates,
+                   "routes": routes, "budget_id": budget_id, "reserve_amount": reserve_amount,
+                   "token_reservation": token_reservation, "limits": limits, "deadline_seconds": deadline_seconds}
+    with kernel.objects.lock(), kernel.db.uow() as repo:
+        current_work = repo.one("works", {"work_id": work}, lock="update")
+        grant, _ = PlanningService(kernel)._authorize(repo, owner, wr, capability="ADMIN")
+        previous = kernel._prior(repo, owner, work, "PRODUCTION_REGISTER", idempotency_key, request)
+        if previous:
+            return previous
+        active = _load(kernel, repo, work, branch)
+        require(not active or all(n["state"] in {"DRAFT_STORED", "ADVISORY_REVIEW", "WINDOW_TRANSFERRED",
+                "REPLAN_REQUIRED", "STOPPED"} for n in active["nodes"].values()), "CAPACITY_LIMIT",
+                "The branch has an unfinished production allowance")
+        if active:
+            previous_tasks = [record["task_id"] for n in active["nodes"].values() for record in [n, *n.get("history", [])]
+                              if "task_id" in record]
+            require(not previous_tasks or not repo.one("call_attempts", {"task_id": previous_tasks,
+                    "state": ["PREPARED", "SENT", "UNKNOWN"]}), "CALL_RECONCILIATION_REQUIRED",
+                    "Reconcile outstanding attempts before replacing this production allowance")
+        require(kernel.head(repo, work, branch) == wr and repo.one("budgets", {"work_id": work, "budget_id": budget_id}),
+                "VIEW_DENIED", "Current work head and a work-owned budget are required")
+        plan_ref = _selected(repo, work, PlanningService.selection_key(volume_id))
+        manifest = _selected(repo, work, "PLAN_MANIFEST:" + volume_id)
+        require(plan_ref and manifest, "STALE_PLAN", "The source volume requires an adopted fine outline")
+        plan = kernel.artifact(repo, plan_ref, work, kind="PLAN_REVISION")["payload"]
+        require(plan["input_world_ref"] == wr, "STALE_PLAN", "The source outline must match the fixed world")
+        validate_contract("AgentDispatchRequest", {"schema_version": "2.1", "task_id": volume_id, "generation": 1,
+                          "worker_id": "registration", "call_key": "pipeline", "input_ref": plan_ref,
+                          "budget_id": budget_id, "reserve_amount": reserve_amount,
+                          "token_reservation": token_reservation}, "agent")
+        nodes = _nodes(kernel, repo, wr, volume_id, plan, chapters, future, limits["lookahead"], subject_ids, predicates)
+        board = {k: v for k, v in request.items() if k not in {"chapters", "future", "deadline_seconds"}}
+        board.update(nodes=nodes, plan_ref=plan_ref, manifest_ref=manifest, authorization={
+            "grant_id": owner.grant_id, "principal_id": owner.principal_id, "epoch": grant["epoch"],
+            "policy_version": current_work["policy_version"],
+            "deadline": (repo.now() + timedelta(seconds=deadline_seconds)).isoformat()})
+        if active:
+            board["previous_board_ref"] = _selected(repo, work, _key(branch))
+        result = {"board_ref": _save(kernel, repo, owner, board), "status": "REGISTERED", "nodes": len(nodes)}
+        kernel._receipt(repo, owner, wr, "PRODUCTION_REGISTER", idempotency_key, request, result)
+        repo.conn.execute(text("SELECT pg_notify('nf_supervisor_wake', '')"))
+        return result
+
+
+def pipeline_status(kernel, owner, work, branch, *, include_outputs=False):
+    with kernel.db.uow(write=False, repeatable_read=True) as repo:
+        kernel.authorize(repo, owner, work, "ADMIN", branch)
+        board = _load(kernel, repo, work, branch)
+        require(board is not None, "INVALID_ARGUMENT", "No production allowance")
+        nodes = board["nodes"]
+        task_ids = [n["task_id"] for n in nodes.values() if n.get("task_id")]
+        calls = repo.many("call_attempts", {"task_id": task_ids}) if task_ids else []
+        outputs = {}
+        for key, node in nodes.items():
+            node["attempt_ids"] = [c["attempt_id"] for c in calls if c["task_id"] == node.get("task_id")]
+            if not include_outputs or "output_ref" not in node:
+                continue
+            stage, ref = node["stage"], node["output_ref"]
+            if stage == "draft":
+                draft = kernel.artifact(repo, ref, work, kind="NARRATIVE_DRAFT")["payload"]
+                kernel.artifact(repo, draft["text_ref"], work, kind="TEXT")
+                outputs[key] = {"draft_ref": ref, "text_ref": draft["text_ref"],
+                                "text": kernel.objects.read(draft["text_ref"]["sha256"]).decode("utf-8")}
+            elif stage == "review":
+                advice = kernel.artifact(repo, ref, work, kind="CHAPTER_READING_ADVICE")["payload"]
+                outputs[key] = {**advice, "advice": kernel.artifact(repo, advice["candidate_ref"], work,
+                                                                      kind="AGENT_CANDIDATE")["payload"]}
+            else:
+                outputs[key] = kernel.artifact(repo, ref, work, kind="AGENT_CANDIDATE")["payload"]
+        return {"world_ref": board["world_ref"], "volume_id": board["volume_id"], "nodes": nodes,
+                **({"outputs": outputs, "literary_quality": "NOT_EVALUATED"} if include_outputs else {})}
+
+
+def _ready(board):
+    nodes, limits = board["nodes"], board["limits"]
+    busy = Counter(n["stage"] for n in nodes.values() if n["state"] == "ENROLLED")
+    reviews = [k for k, n in nodes.items() if n["stage"] == "review" and n["state"] == "PENDING"
+               and all(nodes[p]["state"] == "DRAFT_STORED" for p in n["parents"])]
+    if reviews and busy["review"] < limits["review"]:
+        return min(reviews)
+    if len(reviews) + busy["review"] >= limits["review_backlog"]:
+        return None
+    for stage in ("plan", "draft"):
+        if busy[stage] < limits[stage]:
+            pending = sorted(k for k, n in nodes.items() if n["stage"] == stage and n["state"] == "PENDING")
+            if pending:
+                return pending[0]
+    return None
+
+
+def _enroll(kernel, repo, gateway, owner, board, identity):
+    from novel_factory.application.supervisor import RuntimeSupervisor
+
+    node = board["nodes"][identity]
+    wr, stage = node.get("world_ref", board["world_ref"]), node["stage"]
+    work = wr["work_id"]
+    cut, refs, materials = {"plane": "WORLD"}, [], []
+    if stage == "plan":
+        manifest_ref = node.get("manifest_ref", board["manifest_ref"])
+        cut = {"plane": "PLAN", "plan_manifest_ref": manifest_ref}
+        require(_selected(repo, work, "PLAN_MANIFEST:" + board["volume_id"]) == manifest_ref,
+                "STALE_PLAN", "Source plan changed before enrollment")
+        contract = kernel.artifact(repo, node["contract_ref"], work, kind="VOLUME_CONTRACT")["payload"]
+        refs = [manifest_ref, node["contract_ref"]]
+        assignment = ("在下列前卷假设条件下为未来卷提供候选细纲，使用获准时点之后的窗口，不宣称结局已经发生。"
+                      + json.dumps({"contract_revision_id": contract["contract_revision_id"],
+                                    "brief": contract["creative_brief"], "intentions": contract["narrative_intents"],
+                                    "assumptions": node["dependencies"], "goal_limit": board["limits"]["window_goals"]},
+                                   ensure_ascii=False))
+    elif stage == "draft":
+        scene = kernel.artifact(repo, node["scene_ref"], work, kind="SCENE_PLAN")["payload"]
+        materials = [node["scene_ref"]]
+        refs = [board["plan_ref"], scene["batch_ref"], *node["handoff_refs"]]
+        assignment = "依据获准场景卡写出正文，保留人物视角、披露边界和已接受前序交接。"
+    else:
+        materials = [board["nodes"][p]["output_ref"] for p in node["parents"]]
+        assignment = "独立阅读本章给定顺序的全部场景，报告文学观察、证据和仍未判断的问题。"
+    role, kind = ROLES[stage]
+    seconds = int((datetime.fromisoformat(board["authorization"]["deadline"]) - repo.now()).total_seconds())
+    require(seconds > 0, "TASK_EXPIRED", "No time remains")
+    task = RuntimeTaskService(kernel, gateway).prepare(owner, wr, role_id=role, task_kind=kind,
+        assignment=assignment, knowledge_cut=cut, subject_ids=board["subject_ids"], predicates=board["predicates"],
+        story_time=board["story_time"], material_refs=materials, input_artifacts=refs,
+        adapter_id=board["routes"][stage], max_amount=board["reserve_amount"], token_budget=board["token_reservation"],
+        currency=repo.one("budgets", {"work_id": work, "budget_id": board["budget_id"]})["currency"],
+        queue_state="READY", lease_seconds=min(600, seconds), deadline_seconds=seconds)
+    supervisor = RuntimeSupervisor(kernel, gateway)
+    role_grant = repo.one("grants", {"grant_id": task.principal.grant_id})
+    config, _ = supervisor.dispatch_config(repo, task.spec, role_grant, manifest_ref=task.manifest_ref,
+        knowledge_cut=cut, context_tokens=20000, input_ref=task.agent_input["input_ref"],
+        budget_id=board["budget_id"], reserve_amount=board["reserve_amount"], token_reservation=board["token_reservation"])
+    supervisor.install_job(repo, task.task, {**config, "production_node": identity})
+    node.update(state="ENROLLED", task_id=task.task["task_id"], enrolled_at=repo.now().isoformat())
+    repo.conn.execute(text("INSERT INTO nf_trace_tasks(task_id,trace_id,volume_id) VALUES (:task,:trace,:volume)"),
+                      {"task": task.task["task_id"], "trace": node.get("chapter_id", board["series_id"]),
+                       "volume": node.get("volume_id", board["volume_id"])})
+
+
+def guard_send(kernel, repo, task, job, request=None):
+    board = _load(kernel, repo, task["work_id"], task["branch_id"])
+    node = board and board["nodes"].get(job["production_node"])
+    require(node and node["state"] == "ENROLLED" and node["task_id"] == task["task_id"],
+            "VIEW_DENIED", "Production handoff no longer authorizes this task")
+    owner = _current_owner(kernel, repo, board)
+    if request is not None:
+        require(request["call_key"] == "supervised-candidate"
+                and all(request[k] == v for k, v in job["dispatch"].items()),
+                "VIEW_DENIED", "The production task requires its enrolled call")
+    return board, node, owner
+
+
+def production_material_reader(kernel):
+    """Install only the exact chapter/scene reading port for enrolled production jobs."""
+    def read(owner, *, task_id, generation, context_bundle_id, artifact_ref):
+        with kernel.db.uow(write=False) as repo:
+            job = repo.one("supervisor_jobs", {"task_id": task_id})
+            if not job or "production_node" not in job["config"]:
+                return None
+        return NarrativeService(kernel).read_agent_material(owner, task_id=task_id, generation=generation,
+            context_bundle_id=context_bundle_id, artifact_ref=artifact_ref)
+    return read
+
+
+def prepare_materials(kernel, task, config):
+    """Bind compiled reader/writer generations before the existing paid-call fence."""
+    with kernel.objects.lock(), kernel.db.uow() as repo:
+        repo.one("works", {"work_id": task["work_id"]}, lock="update")
+        bound = kernel.in_transaction(repo)
+        board, node, owner = guard_send(bound, repo, task, config)
+        tid, gen = task["task_id"], task["generation"]
+        key = f"production:{tid}:{gen}"
+        if node["stage"] == "draft":
+            scene = bound.artifact(repo, node["scene_ref"], task["work_id"], kind="SCENE_PLAN")["payload"]
+            PlanningService(bound).bind_task_for_controller(owner, tid, gen, board["plan_ref"], scene["plan_node_ids"], key)
+            actor = Principal(task["grant_id"], task["principal_id"])
+            ReleaseService(bound).bind_writer_task(actor, tid, gen, node["scene_ref"], node["handoff_refs"], key)
+        elif node["stage"] == "review":
+            drafts = [board["nodes"][p]["output_ref"] for p in node["parents"]]
+            for parent in node["parents"]:
+                source = repo.one("tasks", {"task_id": board["nodes"][parent]["task_id"]})
+                require(source["principal_id"] != task["principal_id"] and source["grant_id"] != task["grant_id"],
+                        "INDEPENDENT_REVIEW_REQUIRED", "Chapter reader must differ from every writer")
+            NarrativeService(bound).bind_reader_task(owner, tid, gen, drafts, key)
+
+
+def _deliver(kernel, repo, gateway, board, node, task):
+    from novel_factory.application.semantic_dependencies import check_task_dependencies
+
+    owner = _current_owner(kernel, repo, board)
+    check_task_dependencies(repo, task["task_id"], task["generation"])
+    evidence, candidate = CandidateDelivery(kernel, gateway).audited_candidate(repo, task)
+    key = "production-result:" + task["task_id"]
+    if node["stage"] == "draft":
+        actor = Principal(task["grant_id"], task["principal_id"])
+        ref = NarrativeService(kernel).store_draft(actor, task["task_id"], task["generation"],
+            node["scene_ref"], candidate["text"], key, declared_important_deltas=candidate["important_deltas"],
+            handoff_refs=node["handoff_refs"], agent_output_ref=evidence["output_ref"])
+        state = "DRAFT_STORED"
+    elif node["stage"] == "review":
+        drafts = [board["nodes"][p]["output_ref"] for p in node["parents"]]
+        ref = _artifact(kernel, repo, task["work_id"], owner, "CHAPTER_READING_ADVICE",
+                        {"draft_refs": drafts, "generation": task["generation"], "task_id": task["task_id"],
+                         "candidate_ref": evidence["output_ref"], "literary_quality": "NOT_EVALUATED"})
+        state = "ADVISORY_REVIEW"
+    else:
+        wr = node.get("world_ref", board["world_ref"])
+        require(candidate["input_world_ref"] == wr and candidate["dependency_fingerprint"] == task["dependency_fingerprint"]
+                and point_key(candidate["story_interval"]["start"]) > point_key(board["story_time"])
+                and 0 < len(candidate["candidate_goals"]) <= board["limits"]["window_goals"]
+                and set(candidate["scope_ids"] + candidate["focus_actor_ids"]) <= set(board["subject_ids"]),
+                "WINDOW_CONFLICT", "Candidate is outside its authorized future window")
+        context = repo.one("contexts", {"context_bundle_id": task["context_bundle_id"]})["payload"]
+        allowed = [r["event_ref"] for r in context["permitted_evidence_refs"] if r.get("kind") == "EVENT"]
+        require(all(r in allowed for r in candidate["adopted_event_refs"]) and not candidate["process_ids"],
+                "VIEW_DENIED", "Lookahead may cite only its delivered evidence")
+        PlanningService(kernel)._validate_window(repo, kernel.revision(repo, wr), candidate, node["contract_ref"])
+        ref = evidence["output_ref"]
+        state = "PROVISIONAL_WITH_ASSUMPTIONS"
+    kernel.tasks.accept_in_transaction(repo.conn, task["task_id"], task["generation"])
+    node.update(state=state, output_ref=ref, generation=task["generation"], completed_at=repo.now().isoformat())
+
+
+def _settlement(kernel, repo, board):
+    work = board["world_ref"]["work_id"]
+    ref = _selected(repo, work, "CONTINUITY:" + board["series_id"])
+    if not ref:
+        return None
+    snapshot = kernel.artifact(repo, ref, work, kind="CONTINUITY_SNAPSHOT")["payload"]
+    wr = snapshot["request"]["world_ref"]
+    volumes = [v["volume_id"] for v in snapshot["volumes"]]
+    if (board["volume_id"] not in volumes or wr["branch_id"] != board["world_ref"]["branch_id"]
+            or kernel.head(repo, work, wr["branch_id"]) != wr or not repo.ancestor(board["world_ref"], wr)):
+        return None
+    return ref, snapshot, volumes
+
+
+def _revalidate(kernel, repo, board, node, settlement):
+    ref, snapshot, volumes = settlement
+    previous = board["volume_id"] if node["distance"] == 1 else next(
+        n["volume_id"] for n in board["nodes"].values() if n.get("distance") == node["distance"] - 1)
+    if volumes[-1] != previous or node["volume_id"] in volumes:
+        return None
+    wr = snapshot["request"]["world_ref"]
+    revision = kernel.revision(repo, wr)
+    plan_ref = _selected(repo, wr["work_id"], PlanningService.selection_key(board["volume_id"]))
+    plan = kernel.artifact(repo, plan_ref, wr["work_id"], kind="PLAN_REVISION")["payload"]
+    require(plan["input_world_ref"]["branch_id"] == wr["branch_id"], "STALE_PLAN", "Source plan branch changed")
+    hashes = {n["node_id"]: fingerprint(n) for n in plan["nodes"]}
+    verdicts = []
+    for dep in node["dependencies"]:
+        if dep["kind"] == "WORLD_FACT":
+            verdicts.append(condition_result(dep["condition"], revision["snapshot"], revision["selection"]))
+        else:
+            verdicts.append("SATISFIED" if hashes.get(dep["node_id"]) == dep["node_hash"] else "BROKEN")
+    return {"state": "READY_FOR_ADOPTION" if all(v == "SATISFIED" for v in verdicts) else "REPLAN_REQUIRED",
+            "settlement_ref": ref, "checked_world_ref": wr, "dependency_verdicts": verdicts, "source_plan_ref": plan_ref}
+
+
+def transfer_window(kernel, owner, *, world_ref, candidate_id, idempotency_key):
+    """After checked continuity, copy only a revalidated draft window to native planning."""
+    validate_contract("UUID", candidate_id)
+    validate_contract("WorldRef", world_ref)
+    PlanningService._key(idempotency_key)
+    work, branch = world_ref["work_id"], world_ref["branch_id"]
+    with kernel.objects.lock(), kernel.db.uow() as repo:
+        repo.one("works", {"work_id": work}, lock="update")
+        PlanningService(kernel)._authorize(repo, owner, world_ref, capability="ADMIN")
+        request = {"candidate_id": candidate_id, "world_ref": world_ref}
+        prior = kernel._prior(repo, owner, work, "PRODUCTION_TRANSFER", idempotency_key, request)
+        if prior:
+            return prior
+        board = _load(kernel, repo, work, branch)
+        node = board and board["nodes"].get("plan:" + candidate_id)
+        require(node and node["state"] in {"READY_FOR_ADOPTION", "PROVISIONAL_WITH_ASSUMPTIONS"},
+                "CONTINUITY_REVALIDATION_REQUIRED", "No eligible provisional window")
+        _current_owner(kernel, repo, board)
+        settlement = _settlement(kernel, repo, board)
+        verdict = settlement and _revalidate(kernel, repo, board, node, settlement)
+        require(verdict and verdict["state"] == "READY_FOR_ADOPTION" and verdict["checked_world_ref"] == world_ref,
+                "CONTINUITY_REVALIDATION_REQUIRED", "The current published continuity must satisfy every assumption")
+        source = kernel.artifact(repo, node["output_ref"], work, kind="AGENT_CANDIDATE")["payload"]
+        # The original attempt and candidate stay frozen at their provisional cut.
+        from uuid import uuid4
+        current = {**source, "window_plan_id": str(uuid4()), "input_world_ref": world_ref,
+                   "dependency_fingerprint": fingerprint({"candidate": node["output_ref"], "review": verdict})}
+        ref = PlanningService(kernel.in_transaction(repo)).save_window_plan(owner, current, node["contract_ref"], idempotency_key)
+        node.update(verdict, state="WINDOW_TRANSFERRED", window_ref=ref)
+        result = {"window_ref": ref, "source_ref": node["output_ref"], "board_ref": _save(kernel, repo, owner, board)}
+        kernel._receipt(repo, owner, world_ref, "PRODUCTION_TRANSFER", idempotency_key, request, result)
+        return result
+
+
+def revise_window(kernel, owner, *, world_ref, candidate_id, expected_candidate_ref, assumptions, idempotency_key):
+    """Authorize one new attempt only for a rejected provisional window; preserve every prior artifact."""
+    validate_contract("UUID", candidate_id)
+    validate_contract("WorldRef", world_ref)
+    validate_contract("ArtifactRef", expected_candidate_ref)
+    PlanningService._key(idempotency_key)
+    work, branch = world_ref["work_id"], world_ref["branch_id"]
+    request = {"candidate_id": candidate_id, "world_ref": world_ref,
+               "expected_candidate_ref": expected_candidate_ref, "assumptions": assumptions}
+    with kernel.objects.lock(), kernel.db.uow() as repo:
+        repo.one("works", {"work_id": work}, lock="update")
+        PlanningService(kernel)._authorize(repo, owner, world_ref, capability="ADMIN")
+        prior = kernel._prior(repo, owner, work, "PRODUCTION_REVISE", idempotency_key, request)
+        if prior:
+            return prior
+        board = _load(kernel, repo, work, branch)
+        key = "plan:" + candidate_id
+        node = board and board["nodes"].get(key)
+        require(node and node["state"] == "REPLAN_REQUIRED" and node["output_ref"] == expected_candidate_ref,
+                "STALE_PLAN", "A revision must select the exact invalidated candidate")
+        _current_owner(kernel, repo, board)
+        settlement = _settlement(kernel, repo, board)
+        require(settlement and settlement[1]["request"]["world_ref"] == world_ref,
+                "CONTINUITY_REVALIDATION_REQUIRED", "Revision requires the current published predecessor")
+        history = node.get("history", [])
+        require(len(history) < 2, "CAPACITY_LIMIT", "The run allows two explicit local revisions per candidate")
+        plan_ref = _selected(repo, work, PlanningService.selection_key(board["volume_id"]))
+        plan = kernel.artifact(repo, plan_ref, work, kind="PLAN_REVISION")["payload"]
+        replacement = {k: node[k] for k in ("stage", "volume_id", "distance", "contract_ref")}
+        replacement.update(state="PENDING", dependencies=_dependencies(assumptions, {n["node_id"]: n for n in plan["nodes"]},
+                                  board["subject_ids"], board["predicates"]),
+                           world_ref=world_ref, manifest_ref=_selected(repo, work, "PLAN_MANIFEST:" + board["volume_id"]),
+                           history=[*history, {k: v for k, v in node.items() if k != "history"}])
+        verdict = _revalidate(kernel, repo, board, replacement, settlement)
+        require(verdict and verdict["state"] == "READY_FOR_ADOPTION", "STALE_PLAN",
+                "Revised assumptions already conflict with the published predecessor")
+        board["nodes"][key] = replacement
+        result = {"status": "REVISION_PENDING", "node_id": key, "prior_candidate_ref": expected_candidate_ref,
+                  "board_ref": _save(kernel, repo, owner, board)}
+        kernel._receipt(repo, owner, world_ref, "PRODUCTION_REVISE", idempotency_key, request, result)
+        repo.conn.execute(text("SELECT pg_notify('nf_supervisor_wake', '')"))
+        return result
+
+
+def advance_pipeline(kernel, gateway, controller, work, branch):
+    """Project one recoverable handoff for the existing supervisor."""
+    with kernel.db.uow(write=False) as repo:
+        kernel.authorize(repo, controller, work, "ADMIN", branch)
+        if not _selected(repo, work, _key(branch)):
+            return None
+    with kernel.objects.lock(), kernel.db.uow() as repo:
+        repo.one("works", {"work_id": work}, lock="update")
+        kernel.authorize(repo, controller, work, "ADMIN", branch)
+        repo.one("branches", {"work_id": work, "branch_id": branch}, lock="share")
+        bound = kernel.in_transaction(repo)
+        board = _load(bound, repo, work, branch)
+        nodes = board["nodes"]
+        expired = repo.now() >= datetime.fromisoformat(board["authorization"]["deadline"])
+        settlement = _settlement(bound, repo, board) if any(n["state"] in {
+            "PROVISIONAL_WITH_ASSUMPTIONS", "READY_FOR_ADOPTION"} for n in nodes.values()) else None
+        for identity, node in nodes.items():
+            if node["state"] in {"PROVISIONAL_WITH_ASSUMPTIONS", "READY_FOR_ADOPTION"}:
+                if expired:
+                    node.update(state="STOPPED", reason="TASK_EXPIRED")
+                    break
+                verdict = _revalidate(bound, repo, board, node, settlement) if settlement else None
+                if verdict:
+                    if all(node.get(k) == v for k, v in verdict.items()):
+                        continue
+                    node.update(verdict)
+                elif node["state"] == "READY_FOR_ADOPTION":
+                    node["state"] = "PROVISIONAL_WITH_ASSUMPTIONS"
+                    for field in ("settlement_ref", "checked_world_ref", "dependency_verdicts", "source_plan_ref"):
+                        node.pop(field, None)
+                else:
+                    continue
+            elif node["state"] == "ENROLLED":
+                task = repo.one("tasks", {"task_id": node["task_id"]}, lock="update")
+                if task["state"] in {"PAUSED", "STALE", "FAILED", "CANCELLED", "WAITING_REVIEW"}:
+                    node.update(state="STOPPED", reason="TASK_" + task["state"])
+                elif task["state"] == "RESULT_STORED":
+                    try:
+                        with repo.conn.begin_nested():
+                            _deliver(bound, repo, gateway, board, node, task)
+                    except DomainError as error:
+                        node.update(state="STOPPED", reason=error.code)
+                elif expired and task["state"] in {"READY", "BLOCKED", "RUNNING"}:
+                    node.update(state="STOPPED", reason="TASK_EXPIRED")
+                else:
+                    continue
+            elif node["stage"] == "review" and node["state"] == "PENDING" and any(
+                    nodes[p]["state"] == "STOPPED" for p in node["parents"]):
+                node.update(state="STOPPED", reason="PREDECESSOR_STOPPED")
+            else:
+                continue
+            break
+        else:
+            identity = _ready(board)
+            if identity is None:
+                return None
+            node = nodes[identity]
+            try:
+                with repo.conn.begin_nested():
+                    owner = _current_owner(bound, repo, board)
+                    _enroll(bound, repo, gateway.with_kernel(bound), owner, board, identity)
+            except DomainError as error:
+                node.update(state="STOPPED", reason=error.code)
+        ref = _save(bound, repo, controller, board)
+        return {"status": "PRODUCTION_HANDOFF", "node_id": identity, "state": node["state"],
+                "board_ref": ref, **{k: node[k] for k in ("reason", "task_id", "output_ref") if k in node}}
