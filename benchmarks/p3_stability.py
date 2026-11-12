@@ -92,6 +92,37 @@ async def steady(services, fixture, *, seconds, rate, max_inflight=256):
             'scheduled_count': scheduled_count}
 
 
+async def steady_with_renewal(services, kernel, fixture, *, seconds, rate, renew_every=1200):
+    """Model active owners renewing their own leases during a long read run."""
+    stop = asyncio.Event()
+    renewals = []
+    def renew_all():
+        begin = time.monotonic()
+        count = 0
+        for actor in fixture["population"]:
+            kernel.tasks.renew(actor["task_id"], actor["generation"], "load:" + actor["task_id"],
+                               lease_seconds=3600)
+            count += 1
+        renewals.append({"leases": count, "duration_seconds": time.monotonic() - begin})
+
+    async def maintain():
+        while True:
+            try:
+                await asyncio.wait_for(stop.wait(), timeout=renew_every)
+                return
+            except TimeoutError:
+                await asyncio.to_thread(renew_all)
+
+    async with asyncio.TaskGroup() as group:
+        group.create_task(maintain())
+        try:
+            result = await steady(services, fixture, seconds=seconds, rate=rate)
+        finally:
+            stop.set()
+    result["worker_lease_renewals"] = renewals
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--agents', type=int, choices=[10, 50, 200, 500, 1000], required=True)
@@ -99,6 +130,8 @@ def main():
     parser.add_argument('--read-rps', type=float, default=20)
     parser.add_argument('--api-processes', type=int, choices=[1, 2, 4], default=2)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--renew-worker-leases', action='store_true',
+                        help='Long-duration variant: active owners renew leases every 20 minutes')
     args = parser.parse_args()
     if not 10 <= args.seconds <= 86400 or not 0 < args.read_rps <= 2000:
         parser.error('bounded stability duration/rate invalid')
@@ -111,7 +144,10 @@ def main():
         kernel.db.engine.dispose()
         with ServiceProcesses(target, objects, processes=args.api_processes) as services:
             with DatabaseObserver(target) as observer:
-                result = asyncio.run(steady(services, fixture, seconds=args.seconds, rate=args.read_rps))
+                run = (steady_with_renewal(services, kernel, fixture, seconds=args.seconds, rate=args.read_rps)
+                       if args.renew_worker_leases else
+                       steady(services, fixture, seconds=args.seconds, rate=args.read_rps))
+                result = asyncio.run(run)
             final = services.snapshot(result['duration_seconds'])
         with kernel.db.uow(write=False) as repo:
             head = kernel.head(repo, fixture['world']['world_ref']['work_id'])
