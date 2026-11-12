@@ -92,6 +92,20 @@ Future-volume planning freezes its assumptions, budget and versions. A scene can
 
 A runtime route selects a provider profile using task, role, branch, work and installation policy. The generation adapter sends a text request derived from frozen input. The role MCP host enforces tool permissions separately. The scheduler considers work-level fairness, capacity and provider quotas before dispatch. A stored result can coexist with an unknown amount in the ledger. Inspect the work, task, generation, Attempt, provider and usage fields together when attributing a cost. [Routing](../../agent_runtime/routing.py) · [Budget and admission](../../src/novel_factory/orchestration/runtime_admission.py) · [Statistics](../../src/novel_factory/application/statistics.py)
 
+## Dispatch, suspension and resumption
+
+HTTP parses and authenticates timeline requests before calling the world query service. A bound MCP tool, an in-process agent and the one-shot bound CLI use the same tool dispatcher for discovery, input validation, business invocation and audit. Workshop retains its own identity, database and signed NF delegation.
+
+| Situation | Durable record and next action |
+| --- | --- |
+| Eligible to run | A READY task joins its work queue. A short PostgreSQL transaction selects an eligible task, checks its live grant, advances its generation and reserves an execution lease. |
+| Waiting for another task or an editorial decision | An AND/OR barrier records the prerequisite identities and grant epoch. A suspended worker relinquishes its lease and its own dispatch slot. A committed acceptance can satisfy a prerequisite. The editorial service owns the decision on returned work. |
+| A worker or notification disappears | PostgreSQL records the input, task state and outbox event. A new supervisor reconciles the project, consumes each source event idempotently and checks live dependencies. A stale worker cannot submit into a replacement generation. |
+| Model response is outstanding | The synchronous adapter occupies a bounded worker while the call runs. The database transaction ends before the external call. The durable Attempt retains its reservation if the response or charge is uncertain. |
+| Repeated quota denial before send | A confirmed unsent, refunded Attempt can defer the same task in PostgreSQL. The scheduler checks its eligibility time, authorization and available quota before another admission. A sent or uncertain Attempt requires reconciliation. |
+
+Each active project needs a supervisor binding. The executor ceiling, parent database pool, listener connections and provider limits are separate capacity budgets. When adaptive mode is enabled the supervisor can grow admissions as work accumulates and retire an idle executor. A task on disk consumes storage while it waits. A model request consumes provider capacity only while admitted. The [runtime audit](../../reports/code_review/p59_runtime/SCHEDULER.md) describes recovery boundaries and worker limits.
+
 ## Operating and extending the system
 
 Run the services with distinct database identities. Use one project binding per book and keep installation secrets on the operator side. Extend adapters at the runtime protocol and register model capabilities in the operator profile. Extend role tools through their registered schemas, live grants and frozen task-tool ceiling. New world effects belong in the kernel's template, approval and acceptance flow. For physical recovery, restore both service databases and matching objects to isolated targets, check their receipts, then rebuild delivery state. [ModelAdapter protocol](../../src/novel_factory/infrastructure/model_gateway.py) · [Portable request and response types](../../agent_runtime/protocol.py) · [Interface reference](07-api-reference.md) · [Deployment](08-configuration-and-deployment.md) · [Recovery](09-operations-and-recovery.md)
