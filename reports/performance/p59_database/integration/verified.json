@@ -1,0 +1,33 @@
+{
+  "verified_at_utc": "2026-11-12T20:10:01.543193+00:00",
+  "repository": "SKYdayDUCK/NovelFactory",
+  "unmodified_development_base": "877be80d7c1dfa8b6fb9c9c5a2a570c7b14d3ca0",
+  "reference_product_commit": "4c4a36cb845f63b3ceb8cdde7775a47213264feb",
+  "patch_author_commit": "db6622800d90e6c93c6c02616c9c56ddddba12d7",
+  "applied_commit": "db6622800d90e6c93c6c02616c9c56ddddba12d7",
+  "expected_and_applied_tree": "364523f6e3c35735d519a1821d09d3914574d102",
+  "clean_second_detached_checkout_before_apply": true,
+  "git_am_exit_code": 0,
+  "patch_path": "0001-opt-in-fenced-task-get.patch",
+  "patch_sha256": "9f1a6eb19184a3b3b6859d8313f9b39c01d837199e6b8a124bc54d0fb109f9f7",
+  "scope": [
+    "src/novel_factory/application/kernel.py",
+    "src/novel_factory/infrastructure/repository.py",
+    "src/novel_factory/interfaces/http.py",
+    "tests/integration/test_http_fenced_task_status.py"
+  ],
+  "standalone_test_imports_experiment_or_benchmark": false,
+  "tests_command": "python -m pytest -q tests/integration/test_http_fenced_task_status.py tests/integration/test_bound_tool_entrypoints.py tests/service/test_http.py tests/service/test_http_write.py tests/integration/test_native_operator_cli.py -o junit_family=xunit1 --junitxml=applied-postgres.xml",
+  "tests": {
+    "tests": "18",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "time": "20.112"
+  },
+  "junit_sha256": "bd0ed9becb9f500d45c1930d1c56e86bfba7865223238b73a7f551e8f89fcabf",
+  "platform": "Linux; Python 3.12.14; PostgreSQL 17.11; independent disposable cluster",
+  "deployment_default": "off",
+  "database_migration": false,
+  "new_dependencies": false
+}

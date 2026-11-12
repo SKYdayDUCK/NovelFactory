@@ -1,0 +1,42 @@
+{
+  "64": {
+    "exit_code": 0,
+    "modes": {
+      "baseline": {
+        "verified": 1024,
+        "included_requests": 1024,
+        "arithmetic_mean_round_goodput_per_s": 133.88616703339568,
+        "pooled_goodput_per_s": 133.72000667103373
+      },
+      "fenced": {
+        "verified": 1024,
+        "included_requests": 1024,
+        "arithmetic_mean_round_goodput_per_s": 142.54501334501876,
+        "pooled_goodput_per_s": 141.93195507161522
+      }
+    },
+    "raw_sha256": "2243439225d5905b6c704f02d491dc89bc05eecad62c54bdd30bc97cc27eb0de",
+    "gzip_sha256": "29b95ca38117358516aa29c3cfbea7f490e1693f654739cd8943da34ba455470",
+    "all_outcomes_verified": true
+  },
+  "128": {
+    "exit_code": 1,
+    "modes": {
+      "baseline": {
+        "verified": 997,
+        "included_requests": 1024,
+        "arithmetic_mean_round_goodput_per_s": 122.80930091401677,
+        "pooled_goodput_per_s": 122.38804546174306
+      },
+      "fenced": {
+        "verified": 1024,
+        "included_requests": 1024,
+        "arithmetic_mean_round_goodput_per_s": 147.09055928105875,
+        "pooled_goodput_per_s": 147.0890882626963
+      }
+    },
+    "raw_sha256": "f1e6d41ad9f80b8bb6d50e0da6d7e4f8eeb9ca7130f24ef6f6b12e63d6aaa609",
+    "gzip_sha256": "57adc5c621d05679959072ab6de36f1c107ae035c512d0d78772be685de70456",
+    "all_outcomes_verified": false
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "host": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "python": "3.12.14",
+  "code": "0f48432a0d342de20ff0d996b9121384eaeb2da8",
+  "preregistered_commit": "0f48432a0d342de20ff0d996b9121384eaeb2da8",
+  "git_dirty": false,
+  "package_versions": {
+    "httpx": "0.28.1",
+    "httpcore": "1.0.9",
+    "fastapi": "0.162.2",
+    "uvicorn": "0.54.0",
+    "sqlalchemy": "2.0.57",
+    "psycopg": "3.3.8",
+    "psycopg-binary": "3.3.8",
+    "redis": "6.4.0"
+  },
+  "cpu_affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+  "cgroup_cpu_quota": null,
+  "postgres": {
+    "server_version": "17.11 (Debian 17.11-0+deb13u1)",
+    "max_connections": "60",
+    "shared_buffers": "128MB",
+    "fsync": "on",
+    "full_page_writes": "on",
+    "synchronous_commit": "on",
+    "track_io_timing": "on",
+    "data_checksums": "on",
+    "preload": "pg_stat_statements"
+  },
+  "agreed_no_overlapping_qualification_or_benchmarks": true,
+  "isolation": "One new loopback-only cluster per concurrency block, a fresh DB and object directory per mode. No overlapping team load tests. Other tenants outside process visibility cannot be ruled out.",
+  "resource_scope": "Process CPU includes load generator and HTTP server in one process; PostgreSQL runs separately.",
+  "command": "python -m benchmarks.p59_task_http --fenced --count 512 --concurrency 128 --output saturation-128.json",
+  "before": {
+    "utc": "2026-11-12T20:04:36.254284+00:00",
+    "loadavg": [
+      0.8154296875,
+      1.13037109375,
+      1.44921875
+    ],
+    "meminfo": {
+      "MemTotal": 10206472,
+      "MemAvailable": 8591108,
+      "SwapTotal": 0,
+      "SwapFree": 0
+    },
+    "cpu_total_ticks": "cpu  2066509 86737 340882 6297436 33048 0 87455 105343 0 0"
+  },
+  "exit_code": 1,
+  "after": {
+    "utc": "2026-11-12T20:05:00.469072+00:00",
+    "loadavg": [
+      1.0439453125,
+      1.1533203125,
+      1.44873046875
+    ],
+    "meminfo": {
+      "MemTotal": 10206472,
+      "MemAvailable": 8584208,
+      "SwapTotal": 0,
+      "SwapFree": 0
+    },
+    "cpu_total_ticks": "cpu  2068165 86737 341573 6316430 33182 0 87611 105582 0 0"
+  },
+  "elapsed_including_fixture_seconds": 24.214512190001187
+}
