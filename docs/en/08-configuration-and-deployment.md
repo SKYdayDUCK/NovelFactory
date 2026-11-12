@@ -17,14 +17,15 @@ $env:NF_OBJECT_ROOT = Join-Path $env:LOCALAPPDATA 'NovelFactory/objects'
 $private = Join-Path $env:LOCALAPPDATA 'NovelFactory/book-one'
 uv run --no-sync python scripts/nf.py doctor
 uv run --no-sync python scripts/nf.py migrate upgrade head
-uv run --no-sync python scripts/nf.py init-book --book reports/p6_readiness/templates/book.json --private-dir $private
-uv run --no-sync python scripts/nf.py supervisor --access-file "$private/supervisor.json" --pipeline-status
+$book = uv run --no-sync python scripts/nf.py init-book --book reports/p6_readiness/templates/book.json --private-dir $private | ConvertFrom-Json
+uv run --no-sync python scripts/nf.py grant-resume --admin-binding "$private/control.json" --work-id $book.world_ref.work_id --branch-id $book.world_ref.branch_id --object-root $env:NF_OBJECT_ROOT --hours 24 --output "$private/resume.json"
+'{}' | uv run --no-sync python scripts/nf.py call --binding "$private/resume.json" nf_project_status
 uv run --no-sync python scripts/nf.py serve --host 127.0.0.1 --port 8000
 ```
 
 The bootstrap creates a new private directory with an owner-only inheritable ACL. An existing shared directory or an unverifiable binding fails closed. Put object storage under a service-owned local path. On Linux create the private directory with mode 0700; binding files use mode 0600. Both wheels carry the same private-file checks. Windows host cleanup uses a Job Object to contain child processes across cancellation and parent exit. Native Codex execution uses `codex.exe` on PATH or an absolute executable path in `NF_CODEX_EXECUTABLE`.
 
-Use `scripts/nf.py supervisor` to start the foreground scheduler and Ctrl+C for a graceful stop. A bound project uses `'{}' | uv run --no-sync python scripts/nf.py call --binding "$private/control.json" nf_resume_project` with an authorized project binding. Supply the existing route profile and budget before dispatching modeled work. The bootstrap and status commands above make zero model calls. Linux uses the same Python commands after setting its environment as below. The ordinary two-service template and the Bubblewrap role-tool sandbox require Linux. The Windows CI job covers the native kernel, bound files, supervisor bootstrap, simulated providers, object publication, lease recovery and cancellation on real PostgreSQL 17. Release evidence is the job result for the exact tested commit.
+Use `scripts/nf.py supervisor` to start the foreground scheduler and Ctrl+C for a graceful stop. A bound project uses `'{}' | uv run --no-sync python scripts/nf.py call --binding "$private/resume.json" nf_resume_project` with an authorized project binding. Supply the existing route profile and budget before dispatching modeled work. The bootstrap and status commands above make zero model calls. Linux uses the same Python commands after setting its environment as below. The ordinary two-service template and the Bubblewrap role-tool sandbox require Linux. The Windows CI job covers the native kernel, bound files, supervisor bootstrap, simulated providers, object publication, lease recovery and cancellation on real PostgreSQL 17. Release evidence is the job result for the exact tested commit.
 
 ## Provision the services
 

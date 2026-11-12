@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = {
     "init-sample": "bootstrap_p5_m0.py",
     "init-book": "p58_bootstrap_book.py",
+    "grant-resume": "provision_resume.py",
     "supervisor": "run_supervisor.py",
     "processor": "run_processor.py",
 }

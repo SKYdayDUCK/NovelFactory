@@ -27,7 +27,8 @@ jobs:
         with:
           python-version: "3.12"
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
-      - run: uv sync --locked --group dev --python 3.12
+      - id: install
+        run: uv sync --locked --group dev --python 3.12
       - run: uv run --no-sync python scripts/nf.py doctor
       - run: uv run --no-sync python scripts/nf.py mcp --help
       - run: uv run --no-sync python scripts/nf.py supervisor --help
@@ -37,9 +38,11 @@ jobs:
           tests/reliability/test_objects.py tests/unit/test_host_process.py tests/unit/test_p55_capacity.py
           tests/unit/test_p58_providers.py --junitxml=native-core.xml
       - name: Standalone Workshop install and private binding
+        if: "!cancelled() && steps.install.outcome == 'success'"
         run: uv run --project workshop --locked --group dev python -m pytest -q workshop/tests/test_private_binding.py --junitxml=native-workshop.xml
       - name: Start runner's disposable Windows PostgreSQL 17
-        if: runner.os == 'Windows'
+        id: postgres
+        if: "!cancelled() && runner.os == 'Windows' && steps.install.outcome == 'success'"
         shell: pwsh
         run: |
           Set-Service -Name postgresql-x64-17 -StartupType Manual
@@ -51,10 +54,13 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           'NF_TEST_DATABASE_URL=postgresql+psycopg://postgres:root@127.0.0.1:5432/nf_native' | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
       - name: Migrate, bootstrap, claim, cancel, recover and reconcile on Windows
-        if: runner.os == 'Windows'
+        if: "!cancelled() && runner.os == 'Windows' && steps.postgres.outcome == 'success'"
         run: >-
-          uv run --no-sync python -m pytest -q tests/integration/test_m0_bootstrap.py
-          tests/reliability/test_tasks.py --junitxml=native-postgres.xml
+          uv run --no-sync python -m pytest -q tests/integration/test_m0_bootstrap.py tests/integration/test_native_operator_cli.py
+          tests/reliability/test_tasks.py
+          tests/integration/test_p5_scheduler_admission.py::test_supervisor_drains_sent_attempt_and_leaves_next_job_ready
+          tests/integration/test_p58_routing.py
+          --junitxml=native-postgres.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:

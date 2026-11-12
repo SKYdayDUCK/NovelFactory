@@ -44,6 +44,9 @@ exclude = ["agent_runtime/pyproject.toml"]
 "contracts" = "novel_factory/data/contracts"
 "runtime" = "novel_factory/data/runtime"
 
+[tool.uv]
+cache-keys = [{ file = "pyproject.toml" }, { file = "workshop/src/agent_workshop/private_files.py" }]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra --strict-markers"

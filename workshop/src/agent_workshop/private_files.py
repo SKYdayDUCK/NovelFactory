@@ -44,14 +44,15 @@ def _private_security_attributes(*, directory):
     return attrs
 
 
-def private_temporary_file(directory):
+def create_private_file(name):
+    """Exclusively create a new owner-private file and return its open descriptor."""
+    name = Path(name)
     if os.name != "nt":
-        return tempfile.mkstemp(dir=directory)
+        return os.open(name, os.O_CREAT | os.O_EXCL | os.O_RDWR, 0o600)
     import msvcrt
     import win32con as con
     import win32file
 
-    name = Path(directory) / (".pending-" + uuid4().hex)
     handle = win32file.CreateFile(str(name), con.GENERIC_READ | con.GENERIC_WRITE, 0,
                                   _private_security_attributes(directory=False), con.CREATE_NEW,
                                   con.FILE_ATTRIBUTE_NORMAL, None)
@@ -63,7 +64,14 @@ def private_temporary_file(directory):
         name.unlink(missing_ok=True)
         raise
     handle.Detach()
-    return fd, name
+    return fd
+
+
+def private_temporary_file(directory):
+    if os.name != "nt":
+        return tempfile.mkstemp(dir=directory)
+    name = Path(directory) / (".pending-" + uuid4().hex)
+    return create_private_file(name), name
 
 
 def _checked_handle(path, *, directory=False):
