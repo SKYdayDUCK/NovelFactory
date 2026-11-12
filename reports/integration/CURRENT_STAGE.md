@@ -7,3 +7,5 @@ PR [#25](https://github.com/SKYdayDUCK/NovelFactory/pull/25) 已于 2026-11-12 0
 当前唯一阶段为 P5.6 全系统综合验收。顺序及终点以作者的[十六节交付委托](CREATIVE_HARNESS_DELIVERY_SCOPE.md)为准。P6_REAL_CREATION = BLOCKED_LOCAL_AUTHORIZATION。
 
 B 的开发与精确基线复验在 `integration/p56-full-acceptance` 进行。已完成的[独立测试原始回执](evidence/P56/README.md)可用于接续当前阶段。
+
+当前 B 的唯一 PR 为 [#26](https://github.com/SKYdayDUCK/NovelFactory/pull/26)。[本地完整验收原件](evidence/P56/baseline-ba892d3/local-evidence.zip)已归档，候选的 Workshop 已通过，继续核对其他回执、正式合并并复验。

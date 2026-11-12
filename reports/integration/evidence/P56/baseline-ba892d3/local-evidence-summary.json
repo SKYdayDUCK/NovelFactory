@@ -1,0 +1,242 @@
+{
+  "archive": "local-evidence.zip",
+  "archive_sha256": "3b1980a6e8a3b9d08d31f811b5cc88e61135d6314bbdea74d6c754dbb3a10898",
+  "archive_size_bytes": 204666,
+  "raw_members": 94,
+  "manifest_sha256": "61cfec63a1283ed05cda748aba048f12059054c6f889e3069e8ef3544276a36a",
+  "snapshot_scopes": {
+    "local_clean_baseline_worktree": "Four scenes, AT-43/49 and the deployed W6 migration tests were run from an independent clean baseline worktree; recorded scene source head and working_changes checked.",
+    "local_services_on_base": "Two PostgreSQL clusters, distinct service accounts and a real Redis service. Supplier code provenance is in tested-inputs.json. Workshop suite starts before the new checker tests; hosted Docker stop/start is locally skipped. Native Redis loss and rebuild is separately exercised.",
+    "local_closed_loop_capacity_on_base": "Workshop benchmark loopback HTTP, synthetic tariff and reported fixture tokens. All original workload sizes and judgments retained. These results do not measure open arrivals for the independent NF AT-30 contract.",
+    "local_physical_recovery_on_base": "Isolated NF PostgreSQL plus Redis physical PITR drill on the baseline. Retained result.json is a raw recovery summary; no database pages, private binding files or cluster keys are packaged.",
+    "local_world_acceptance_candidate_with_added_test": "World tests used the recorded corrected test blob on the baseline runtime; initial failing JUnit, second failure log and corrected full/targeted JUnit retained.",
+    "coverage_crosswalk_with_source_refs": "The map joins individually identified historical GitHub W6 and NF receipts with the new local PG17 regression; the listed sources retain their distinct SHAs and scope.",
+    "historical_checks_verified_by_new_local_checker": "Two earlier genuine GitHub runs (W6 main 43122517485 and pre-merge PR 43118072846) exercise the candidate offline checker. See the official immutable artifact IDs/digests. They were not new executions of B.",
+    "local_offline_checker_new_tests": "New negative controls and partial rerun coverage on the candidate checker. Retains the pytest JUnit; synthetic metadata for tests is distinct from the genuine historical inputs used in cross-run-controls.json.",
+    "local_candidate_static_validation": "Static package validation recorded from the in-progress B worktree before its final commit."
+  },
+  "base_sha": "ba892d3a424be39efccb697232a5614b26609cc4",
+  "source": {
+    "tests/integration/test_narrative.py": {
+      "git_blob": "35b0dfae8cde99622988daae5b4792cc6e84e6db",
+      "sha256": "cb92ff883d9b4c2e1c9c1117ae585e375823a8014929a861e74e059e57dd675b"
+    },
+    "workshop/qualification/verify_run.py": {
+      "git_blob": "33a64afa1f63092301f4975fd97e0a233ba00d29",
+      "sha256": "d7c04e2508843acd5e92bf1fab23a4ef3b3c9b74ca33b72b8d9c57dde89f33d7"
+    },
+    "workshop/tests/test_qualification_run.py": {
+      "git_blob": "9e0fe42f35c09b6d17c3e6ec747625cf5bd81435",
+      "sha256": "effe5a452bcd739ab992b6bb934c1bbe800305161d03069898677bb7c26aefbb"
+    }
+  },
+  "results": {
+    "commercial_model_calls": 0,
+    "literary_quality": "NOT_EVALUATED",
+    "P6_REAL_CREATION": "BLOCKED_LOCAL_AUTHORIZATION",
+    "historical_nf_at30": "NOT_MET (Issue #13)",
+    "junit_files": {
+      "cross-run/negative-tests.xml": {
+        "tests": 9,
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0,
+        "passed": 9
+      },
+      "migrations/w6-upgrades.xml": {
+        "tests": 8,
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0,
+        "passed": 8
+      },
+      "scenes/scenes.xml": {
+        "tests": 6,
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0,
+        "passed": 6
+      },
+      "services/capacity/delegation.xml": {
+        "tests": 9,
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0,
+        "passed": 9
+      },
+      "services/integration.xml": {
+        "tests": 4,
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0,
+        "passed": 4
+      },
+      "services/workshop.xml": {
+        "tests": 110,
+        "errors": 0,
+        "failures": 0,
+        "skipped": 1,
+        "passed": 109
+      },
+      "world/pg17-world-final.xml": {
+        "tests": 89,
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0,
+        "passed": 89
+      },
+      "world/pg17-world.xml": {
+        "tests": 89,
+        "errors": 0,
+        "failures": 1,
+        "skipped": 0,
+        "passed": 88
+      },
+      "world/plan-prose-current.xml": {
+        "tests": 1,
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0,
+        "passed": 1
+      },
+      "world/plan-prose-first.xml": {
+        "tests": 1,
+        "errors": 0,
+        "failures": 1,
+        "skipped": 0,
+        "passed": 0
+      }
+    },
+    "closed_loop_messages": {
+      "10": {
+        "scheduled": 30,
+        "completed": 30,
+        "gate": "PASS"
+      },
+      "50": {
+        "scheduled": 150,
+        "completed": 150,
+        "gate": "PASS"
+      },
+      "200": {
+        "scheduled": 600,
+        "completed": 600,
+        "gate": "PASS"
+      }
+    },
+    "local_synthetic_delegations": [
+      {
+        "registered_members": 10,
+        "policy": "fixed-1",
+        "accepted": 10,
+        "unique_tasks": 10,
+        "settled": 10,
+        "held": 0,
+        "provider": "local HTTP synthetic",
+        "provider_requests": 10,
+        "model_calls_while_idle": 0
+      },
+      {
+        "registered_members": 10,
+        "policy": "fixed-2",
+        "accepted": 10,
+        "unique_tasks": 10,
+        "settled": 10,
+        "held": 0,
+        "provider": "local HTTP synthetic",
+        "provider_requests": 10,
+        "model_calls_while_idle": 0
+      },
+      {
+        "registered_members": 10,
+        "policy": "adaptive-2",
+        "accepted": 10,
+        "unique_tasks": 10,
+        "settled": 10,
+        "held": 0,
+        "provider": "local HTTP synthetic",
+        "provider_requests": 10,
+        "model_calls_while_idle": 0
+      },
+      {
+        "registered_members": 50,
+        "policy": "fixed-1",
+        "accepted": 50,
+        "unique_tasks": 50,
+        "settled": 50,
+        "held": 0,
+        "provider": "local HTTP synthetic",
+        "provider_requests": 50,
+        "model_calls_while_idle": 0
+      },
+      {
+        "registered_members": 50,
+        "policy": "fixed-2",
+        "accepted": 50,
+        "unique_tasks": 50,
+        "settled": 50,
+        "held": 0,
+        "provider": "local HTTP synthetic",
+        "provider_requests": 50,
+        "model_calls_while_idle": 0
+      },
+      {
+        "registered_members": 50,
+        "policy": "adaptive-2",
+        "accepted": 50,
+        "unique_tasks": 50,
+        "settled": 50,
+        "held": 0,
+        "provider": "local HTTP synthetic",
+        "provider_requests": 50,
+        "model_calls_while_idle": 0
+      },
+      {
+        "registered_members": 200,
+        "policy": "fixed-1",
+        "accepted": 200,
+        "unique_tasks": 200,
+        "settled": 200,
+        "held": 0,
+        "provider": "local HTTP synthetic",
+        "provider_requests": 200,
+        "model_calls_while_idle": 0
+      },
+      {
+        "registered_members": 200,
+        "policy": "fixed-2",
+        "accepted": 200,
+        "unique_tasks": 200,
+        "settled": 200,
+        "held": 0,
+        "provider": "local HTTP synthetic",
+        "provider_requests": 200,
+        "model_calls_while_idle": 0
+      },
+      {
+        "registered_members": 200,
+        "policy": "adaptive-2",
+        "accepted": 200,
+        "unique_tasks": 200,
+        "settled": 200,
+        "held": 0,
+        "provider": "local HTTP synthetic",
+        "provider_requests": 200,
+        "model_calls_while_idle": 0
+      }
+    ]
+  },
+  "credential_review": {
+    "allowlisted_utf8_receipts": 94,
+    "detected_credential_patterns": 0,
+    "scan_classes": [
+      "URI user with password",
+      "private key header",
+      "provider or GitHub token",
+      "assigned credential",
+      "signed temporary URL",
+      "bearer credential"
+    ],
+    "private_binding_files_and_database_files": 0
+  }
+}
