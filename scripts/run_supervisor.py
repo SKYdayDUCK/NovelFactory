@@ -149,14 +149,21 @@ def main():
         adapters = {}
         model_needed = not args.set_transport and args.processor not in {"world", "compute", "recovery"}
         configured = os.environ.get("NF_MODEL_ENDPOINT") and os.environ.get("NF_MODEL_NAME")
-        if model_needed or configured:
+        profiles_file = os.environ.get("NF_RUNTIME_PROFILES")
+        if profiles_file:
+            from novel_factory.infrastructure.runtime_providers import load_runtime_profiles
+            adapters = load_runtime_profiles(profiles_file, HostJournal(kernel))
+        if configured or (model_needed and not profiles_file):
             backend = OpenAICompatibleAdapter.from_environment()
             journal = HostJournal(kernel)
-            adapters = {"external": backend, "codex-text": CodexAppServerAdapter(backend, journal)}
-        if adapters and (relay := os.environ.get("NF_ROLE_MCP_RELAY")):
-            from novel_factory.interfaces.role_context_host import read_context
-            adapters["codex-role-mcp"] = CodexRoleContextAdapter(backend, journal, relay=relay, context_reader=read_context)
-            adapters["codex-role-tools"] = CodexRoleLookupAdapter(backend, journal, relay=relay, context_reader=read_context)
+            legacy = {"external": backend, "codex-text": CodexAppServerAdapter(backend, journal)}
+            if relay := os.environ.get("NF_ROLE_MCP_RELAY"):
+                from novel_factory.interfaces.role_context_host import read_context
+                legacy["codex-role-mcp"] = CodexRoleContextAdapter(backend, journal, relay=relay, context_reader=read_context)
+                legacy["codex-role-tools"] = CodexRoleLookupAdapter(backend, journal, relay=relay, context_reader=read_context)
+            if adapters.keys() & legacy.keys():
+                raise DomainError("INVALID_MODEL_CONFIG", "Runtime profile collides with a configured legacy route")
+            adapters.update(legacy)
         gateway = AgentGateway(kernel, adapters)
         supervisor = RuntimeSupervisor(kernel, gateway)
         if args.set_transport:

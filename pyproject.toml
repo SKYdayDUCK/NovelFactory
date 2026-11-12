@@ -32,7 +32,8 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/novel_factory"]
+packages = ["src/novel_factory", "agent_runtime"]
+exclude = ["agent_runtime/pyproject.toml"]
 
 [tool.hatch.build.targets.wheel.force-include]
 "contracts" = "novel_factory/data/contracts"

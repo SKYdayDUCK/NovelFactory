@@ -1,0 +1,15 @@
+[build-system]
+requires = ["hatchling==1.33.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "nf-agent-runtime"
+version = "0.1.0"
+description = "Stateless model transports and route selection for authorized callers"
+requires-python = ">=3.12"
+
+[tool.hatch.build.targets.wheel]
+only-include = ["__init__.py", "providers.py", "codex.py", "host_process.py", "routing.py", "protocol.py"]
+
+[tool.hatch.build.targets.wheel.sources]
+"" = "agent_runtime"

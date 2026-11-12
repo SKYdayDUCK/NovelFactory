@@ -13,6 +13,7 @@ from novel_factory.infrastructure.codex_host import CodexAppServerAdapter
 from novel_factory.infrastructure.database import tables
 from novel_factory.infrastructure.model_gateway import OpenAICompatibleAdapter
 from novel_factory.infrastructure.repository import KernelRepository
+from novel_factory.infrastructure.runtime_providers import RuntimeModelAdapter
 from novel_factory.orchestration.workflow import WorkflowService
 from novel_factory.orchestration import dispatch
 
@@ -132,7 +133,7 @@ class RuntimeSupervisor:
         self.kernel.artifact(repo, manifest_ref, spec["world_ref"]["work_id"], kind="INPUT_MANIFEST")
         payload = self.kernel.artifact(repo, input_ref, spec["world_ref"]["work_id"], kind="AGENT_INPUT")["payload"]
         route = self.gateway.adapters.get(payload["adapter_id"])
-        require(isinstance(route, (OpenAICompatibleAdapter, CodexAppServerAdapter)),
+        require(isinstance(route, (OpenAICompatibleAdapter, CodexAppServerAdapter, RuntimeModelAdapter)),
                 "HOST_ISOLATION_UNVERIFIED", "Supervised runtime roles require a stateless text route")
         validate_contract("KnowledgeCut", knowledge_cut, "2.1")
         check_profile(grant, knowledge_cut["plane"])
