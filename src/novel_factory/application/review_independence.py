@@ -254,7 +254,8 @@ class ReviewIndependenceService:
                     runtimes[key] = refresh_task(self.kernel, owner, *key)
         live = _refresh_bindings(list(unique.values()))
         result = {}
-        for revision, binding in bindings.items():
+        for revision in requested:
+            binding = bindings[revision]
             reviewer = binding["reviewer"]
             key = reviewer["task_id"], reviewer["generation"]
             result[revision] = replace(live[fingerprint(binding)], reviewer_runtime=runtimes.get(key))
