@@ -140,6 +140,9 @@ jobs:
       - name: Install physical restore and local Redis tools
         if: matrix.suite == 'pitr'
         run: bash scripts/ci_install_pg17.sh postgresql-17 postgresql-client-17 redis-server
+      - name: Install local Redis tools for the dual-service loss-and-restart test
+        if: matrix.suite == 'dual'
+        run: bash scripts/ci_install_pg17.sh redis-server
       - name: Run the configured engineering suite
         run: uv run --no-sync python validation/run_p57_acceptance.py "${{ matrix.suite }}" --output "ci-evidence/p57-${{ matrix.suite }}"
       - name: Retain the exact checkout and measured outcomes
