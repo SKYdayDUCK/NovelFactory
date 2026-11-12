@@ -62,4 +62,4 @@ role_id/actor_id/plane字段只是对象声明，权限来自服务端Principal�
 
 P0选定Pydantic模型作为实现后的生成源，并建立Schema与当前设计文件的差异门禁；当前以Schema文件为边界设计源。不要永久手工维护两份不一致的类型。新增题材effect、关系和record subtype先扩展注册表、Schema、领域规则与反例，不允许执行模型生成的任意程序。
 
-从项目根目录执行 `python validation/validate_package.py` 可检查Schema、全部示例、引用、技能/角色工具目录和原文锚点；它不验证真实PostgreSQL、Host互操作、模型质量或所有领域前置条件。正式开发测试见[11](../docs/11_研发路线与测试计划.md)。
+从项目根目录执行 `python validation/validate_package.py --output /tmp/nf-schema-report.json`，可检查 Schema、示例、引用、角色和 Skill 目录及原文锚点。该命令将本次检查结果写入指定文件。正式开发测试见[11](../docs/11_研发路线与测试计划.md)。
