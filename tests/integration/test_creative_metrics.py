@@ -358,7 +358,7 @@ def test_rework_is_not_fixed_until_independent_reread_and_native_editor_acceptan
             "text": LINE * 2 + CHANGE,
         },
     )
-    newjob, newargs, newread = _reviewer(k, f, edited, tmp_path, monkeypatch)
+    newjob, newargs, newread = _reviewer(k, f, edited, tmp_path, monkeypatch, editor_group="volume-editors")
     reread = svc.review(
         *_args(newjob),
         **{**newargs, "quota": args["quota"], "prior_report_ref": report["report_ref"]},

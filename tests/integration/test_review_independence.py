@@ -15,10 +15,11 @@ pytestmark = [pytest.mark.postgres, pytest.mark.integration]
 
 
 def enroll_native_case(kernel, tmp_path, monkeypatch, manuscript_ref, reviewer_task_id, reviewer_generation, *,
-                       controller, producer_group="workshop-authors", reviewer_group="external-editors"):
+                       controller, producer_group="workshop-authors", reviewer_group="external-editors", editor_group=None,
+                       workshop_producer_groups=()):
     service = ReviewIndependenceService(kernel)
     request = {"manuscript_ref": manuscript_ref, "reviewer_task_id": reviewer_task_id, "reviewer_generation": reviewer_generation}
-    binding = service.describe(controller, **request)
+    binding = service.describe(controller, for_editor=editor_group is not None, **request)
     directory = tmp_path / "independence"
     directory.mkdir(mode=0o700, exist_ok=True)
     key = directory / "private-key"
@@ -30,10 +31,20 @@ def enroll_native_case(kernel, tmp_path, monkeypatch, manuscript_ref, reviewer_t
     paths = []
     groups = {p["principal_id"]: producer_group for p in binding["producers"]}
     groups[binding["reviewer"]["principal_id"]] = reviewer_group
+    if editor_group is not None:
+        groups[binding["publisher"]["principal_id"]] = editor_group
     for principal, group in groups.items():
         path = directory / ("record-" + principal)
         path.write_text(json.dumps({"kind": "VERIFIED_SUBJECT_GROUP", "principal_id": principal, "subject_group": group,
                                     "source_record_id": "identity-case-" + principal, "verified_by": "test registrar",
+                                    **{k: binding["world_ref"][k] for k in ("work_id", "branch_id")}}))
+        path.chmod(0o600)
+        paths.append(path)
+    for index, group in enumerate(workshop_producer_groups):
+        path = directory / f"workshop-producer-{index}"
+        path.write_text(json.dumps({"kind": "VERIFIED_WORKSHOP_PRODUCER_GROUP", "subject_group": group,
+                                    "source_record_id": f"producer-{index}", "verified_by": "test registrar",
+                                    "org_id": binding["reviewer"]["delegation"]["org_id"], "manuscript_ref": manuscript_ref,
                                     **{k: binding["world_ref"][k] for k in ("work_id", "branch_id")}}))
         path.chmod(0o600)
         paths.append(path)
@@ -106,6 +117,16 @@ def test_offline_registrar_enrolls_and_withdraws_exact_case(kernel_env, tmp_path
     assert run("enroll", [*sources, "--expires-at", (datetime.now(UTC) + timedelta(minutes=5)).isoformat()]) == case.name
     ref = json.loads(run("issue"))["independence_ref"]
     assert ReviewIndependenceService(kernel).refresh(ref)
+    editor_case = enroll_native_case(kernel, tmp_path, monkeypatch, draft["draft_ref"], scope["task_id"], scope["generation"],
+                                     controller=world["principal"], editor_group="volume-editors")
+    editor_case.unlink()
+    described = json.loads(run("describe", ["--editor"]))
+    assert described["publisher"]["principal_id"] == world["principal"].principal_id
+    editor_sources = [arg for file in sorted(case.parent.glob("record-*")) for arg in ["--subject-evidence", str(file)]]
+    assert run("enroll", ["--editor", *editor_sources, "--expires-at",
+                          (datetime.now(UTC) + timedelta(minutes=5)).isoformat()]) == editor_case.name
+    run("withdraw", ["--editor"])
+    assert not editor_case.exists() and ReviewIndependenceService(kernel).refresh(ref)
     run("withdraw")
     with pytest.raises(DomainError):
         ReviewIndependenceService(kernel).refresh(ref)
