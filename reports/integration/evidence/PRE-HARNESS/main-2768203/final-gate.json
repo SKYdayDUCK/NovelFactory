@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "repository": "SKYdayDUCK/NovelFactory",
+  "observed_at": "2026-11-12 05:26:44 UTC",
+  "main": {
+    "sha": "276820316129d546b0a13118bcbe283b06507795",
+    "tree": "f8b5f9ff2f53d726cf5c666aea7cacf176f1fac9",
+    "parents": [
+      "0420356b0bd0bfd675494e581799946c4b967f6e",
+      "5aa9b71b66c7800f58214fa368e22ebeb9c3d56b"
+    ],
+    "merged_at": "2026-11-12T05:13:37Z"
+  },
+  "pr_27": {
+    "url": "https://github.com/SKYdayDUCK/NovelFactory/pull/27",
+    "number": 27,
+    "state": "closed",
+    "merged": true,
+    "head": "5aa9b71b66c7800f58214fa368e22ebeb9c3d56b",
+    "at": "2026-11-12T05:13:37Z"
+  },
+  "original_audited_experiment": {
+    "pr": 18,
+    "merged": false,
+    "state": "closed",
+    "closed_at": "2026-11-12T04:42:53Z",
+    "source": "3985ebd4f90ff9f7d2e9626df9c0fbf5e8cdb1be"
+  },
+  "open_query": "GET /repos/SKYdayDUCK/NovelFactory/pulls?state=open&per_page=100",
+  "open_prs": [
+    {
+      "number": 4,
+      "head": "4f249d520c921c8d6effee9978f7338b912f1dd0",
+      "base": "dev/p3-p4-continuity",
+      "draft": true,
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/pull/4",
+      "updated": "2026-11-11T03:38:09Z"
+    }
+  ],
+  "historical_capacity": {
+    "issue": "https://github.com/SKYdayDUCK/NovelFactory/issues/13",
+    "state": "open",
+    "verdict": "NOT_MET"
+  },
+  "real_creation": "BLOCKED_LOCAL_AUTHORIZATION",
+  "literary_quality": "NOT_EVALUATED",
+  "final_push": [
+    {
+      "workflow": ".github/workflows/p1-integrity.yml",
+      "run": 43159952745,
+      "attempt": 1,
+      "event": "push",
+      "head": "276820316129d546b0a13118bcbe283b06507795",
+      "status": "completed",
+      "result": "success",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43159952745",
+      "jobs": [
+        {
+          "name": "PostgreSQL 17 integration, concurrency and restore",
+          "id": 130988496757,
+          "result": "success",
+          "failed_steps": []
+        },
+        {
+          "name": "Schema, domain, HTTP and production boundaries",
+          "id": 130988497111,
+          "result": "success",
+          "failed_steps": []
+        }
+      ],
+      "artifacts": [
+        {
+          "name": "p1-postgres-concurrency-1",
+          "id": 13918490591,
+          "sha256": "sha256:742e8c2b19e9773d5e3dc9b10c91276c981b872b851ce36387cc69cf3ef799c3",
+          "size": 1792406
+        },
+        {
+          "name": "p1-schema-unit-1",
+          "id": 13917188530,
+          "sha256": "sha256:3edeedb615e9e526dc64f877259282cdf2648169ae540e43087ef53db6d79278",
+          "size": 301914
+        }
+      ]
+    }
+  ]
+}

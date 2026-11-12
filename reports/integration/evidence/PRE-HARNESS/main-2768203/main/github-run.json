@@ -1,0 +1,393 @@
+{
+  "stage": "main",
+  "observed_utc": "2026-11-12 05:26:22 UTC",
+  "subject": {
+    "event": "push",
+    "head": "276820316129d546b0a13118bcbe283b06507795",
+    "checkout": "276820316129d546b0a13118bcbe283b06507795",
+    "tree": "f8b5f9ff2f53d726cf5c666aea7cacf176f1fac9",
+    "base": "0420356b0bd0bfd675494e581799946c4b967f6e"
+  },
+  "actual_run": {
+    "id": 43159952745,
+    "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43159952745",
+    "conclusion": "success",
+    "attempt": 1,
+    "workflow_path": ".github/workflows/p1-integrity.yml"
+  },
+  "workflows_observed_for_event": [
+    {
+      "name": "P1 and P2 production integrity",
+      "id": 43159952745,
+      "event": "push",
+      "head": "276820316129d546b0a13118bcbe283b06507795",
+      "conclusion": "success"
+    }
+  ],
+  "git_commit": {
+    "checkout": "276820316129d546b0a13118bcbe283b06507795",
+    "tree": "f8b5f9ff2f53d726cf5c666aea7cacf176f1fac9",
+    "parents": [
+      "0420356b0bd0bfd675494e581799946c4b967f6e",
+      "5aa9b71b66c7800f58214fa368e22ebeb9c3d56b"
+    ]
+  },
+  "jobs": [
+    {
+      "id": 130988496757,
+      "name": "PostgreSQL 17 integration, concurrency and restore",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43159952745/job/130988496757",
+      "attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "started": "2026-11-12T05:13:42Z",
+      "ended": "2026-11-12T05:26:10Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-12T05:13:43Z",
+          "completed_at": "2026-11-12T05:13:44Z"
+        },
+        {
+          "name": "Initialize containers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-12T05:13:44Z",
+          "completed_at": "2026-11-12T05:13:58Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-12T05:13:58Z",
+          "completed_at": "2026-11-12T05:14:02Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-12T05:14:02Z",
+          "completed_at": "2026-11-12T05:14:02Z"
+        },
+        {
+          "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-12T05:14:02Z",
+          "completed_at": "2026-11-12T05:14:05Z"
+        },
+        {
+          "name": "Install PostgreSQL 17 client and Linux role isolation dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-12T05:14:05Z",
+          "completed_at": "2026-11-12T05:14:21Z"
+        },
+        {
+          "name": "Install the pinned native Codex app-server for the restart test",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-12T05:14:21Z",
+          "completed_at": "2026-11-12T05:14:25Z"
+        },
+        {
+          "name": "Install locked dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-12T05:14:25Z",
+          "completed_at": "2026-11-12T05:14:25Z"
+        },
+        {
+          "name": "Record runtime and initialize fresh PostgreSQL database",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-12T05:14:25Z",
+          "completed_at": "2026-11-12T05:14:27Z"
+        },
+        {
+          "name": "All tests with real PostgreSQL 17, race and recovery evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-12T05:14:27Z",
+          "completed_at": "2026-11-12T05:24:35Z"
+        },
+        {
+          "name": "Compare current genesis replay with the pinned baseline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-12T05:24:35Z",
+          "completed_at": "2026-11-12T05:24:47Z"
+        },
+        {
+          "name": "Compare current strict canonical checks on the same world",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-12T05:24:47Z",
+          "completed_at": "2026-11-12T05:24:58Z"
+        },
+        {
+          "name": "Reproduce historical Context Compiler experiment at e0b0f2b",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-12T05:24:58Z",
+          "completed_at": "2026-11-12T05:25:26Z"
+        },
+        {
+          "name": "Probe actual memory services and authorization boundaries",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-11-12T05:25:26Z",
+          "completed_at": "2026-11-12T05:25:28Z"
+        },
+        {
+          "name": "Persist the complete six-scene TEST_FIXTURE production run",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-11-12T05:25:28Z",
+          "completed_at": "2026-11-12T05:25:57Z"
+        },
+        {
+          "name": "Exercise the real HTTP and PostgreSQL behavioral load harness",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-11-12T05:25:57Z",
+          "completed_at": "2026-11-12T05:26:05Z"
+        },
+        {
+          "name": "Join A-H design checks to executed JUnit evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-11-12T05:26:05Z",
+          "completed_at": "2026-11-12T05:26:05Z"
+        },
+        {
+          "name": "Upload PostgreSQL, concurrency and recovery audit evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-11-12T05:26:05Z",
+          "completed_at": "2026-11-12T05:26:07Z"
+        },
+        {
+          "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 33,
+          "started_at": "2026-11-12T05:26:07Z",
+          "completed_at": "2026-11-12T05:26:07Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 34,
+          "started_at": "2026-11-12T05:26:07Z",
+          "completed_at": "2026-11-12T05:26:07Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 35,
+          "started_at": "2026-11-12T05:26:07Z",
+          "completed_at": "2026-11-12T05:26:07Z"
+        },
+        {
+          "name": "Stop containers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 36,
+          "started_at": "2026-11-12T05:26:07Z",
+          "completed_at": "2026-11-12T05:26:08Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 37,
+          "started_at": "2026-11-12T05:26:08Z",
+          "completed_at": "2026-11-12T05:26:08Z"
+        }
+      ],
+      "checkout_log": "2026-11-12T05:14:02.0947850Z 276820316129d546b0a13118bcbe283b06507795",
+      "pytest_lines": [
+        "2026-11-12T05:24:34.3342762Z   /home/runner/work/NovelFactory/NovelFactory/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.",
+        "2026-11-12T05:24:34.3346300Z SKIPPED [17] tests/integration/test_p5_role_container.py:34: Linux container setup denied by this runner",
+        "2026-11-12T05:24:34.3349288Z 835 passed, 17 skipped, 1 warning, 17 subtests passed in 605.53s (0:10:05)"
+      ]
+    },
+    {
+      "id": 130988497111,
+      "name": "Schema, domain, HTTP and production boundaries",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43159952745/job/130988497111",
+      "attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "started": "2026-11-12T05:13:42Z",
+      "ended": "2026-11-12T05:14:21Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-12T05:13:43Z",
+          "completed_at": "2026-11-12T05:13:44Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-12T05:13:44Z",
+          "completed_at": "2026-11-12T05:13:46Z"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-12T05:13:46Z",
+          "completed_at": "2026-11-12T05:13:46Z"
+        },
+        {
+          "name": "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-12T05:13:46Z",
+          "completed_at": "2026-11-12T05:13:48Z"
+        },
+        {
+          "name": "Install locked dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-12T05:13:48Z",
+          "completed_at": "2026-11-12T05:13:49Z"
+        },
+        {
+          "name": "Schema and original design validation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-12T05:13:49Z",
+          "completed_at": "2026-11-12T05:13:51Z"
+        },
+        {
+          "name": "Original standalone mechanisms",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-12T05:13:51Z",
+          "completed_at": "2026-11-12T05:13:51Z"
+        },
+        {
+          "name": "Python unit, contract and ASGI slow-body regression tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-12T05:13:51Z",
+          "completed_at": "2026-11-12T05:14:10Z"
+        },
+        {
+          "name": "Deterministic Chinese memory retrieval evaluation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-12T05:14:10Z",
+          "completed_at": "2026-11-12T05:14:13Z"
+        },
+        {
+          "name": "Same-source Chinese context and review ablations",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-12T05:14:13Z",
+          "completed_at": "2026-11-12T05:14:17Z"
+        },
+        {
+          "name": "Upload immutable unit and schema run evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-12T05:14:17Z",
+          "completed_at": "2026-11-12T05:14:18Z"
+        },
+        {
+          "name": "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-11-12T05:14:18Z",
+          "completed_at": "2026-11-12T05:14:18Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-11-12T05:14:18Z",
+          "completed_at": "2026-11-12T05:14:19Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22,
+          "started_at": "2026-11-12T05:14:19Z",
+          "completed_at": "2026-11-12T05:14:19Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23,
+          "started_at": "2026-11-12T05:14:19Z",
+          "completed_at": "2026-11-12T05:14:19Z"
+        }
+      ],
+      "checkout_log": "2026-11-12T05:13:46.2578587Z 276820316129d546b0a13118bcbe283b06507795",
+      "pytest_lines": [
+        "2026-11-12T05:14:10.6435960Z 403 passed, 17 subtests passed in 17.48s"
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 13918490591,
+      "name": "p1-postgres-concurrency-1",
+      "digest": "sha256:742e8c2b19e9773d5e3dc9b10c91276c981b872b851ce36387cc69cf3ef799c3",
+      "size_in_bytes": 1792406,
+      "created_at": "2026-11-12T05:26:07Z",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43159952745/artifacts/13918490591"
+    },
+    {
+      "id": 13917188530,
+      "name": "p1-schema-unit-1",
+      "digest": "sha256:3edeedb615e9e526dc64f877259282cdf2648169ae540e43087ef53db6d79278",
+      "size_in_bytes": 301914,
+      "created_at": "2026-11-12T05:14:18Z",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43159952745/artifacts/13917188530"
+    }
+  ]
+}
