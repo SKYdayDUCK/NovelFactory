@@ -57,3 +57,7 @@ P0 必须在目标 Host 验证：根/局部指导实际加载、技能触发和�
 ## 5. R1查询与并发使用
 
 运行时统一查询能力仍受[角色查询profile](runtime/query_profiles.json)和当前服务端grant共同限制。timeline_query/query_batch只是原有获准能力的组合，不能让无图查询权的维护者执行NEIGHBORHOOD，不能让角色切换到WORLD或读取PLAN。context_compile只可使用获准recipe；生产任务同代WorldRef不可改。正式guarded接受始终由控制面执行，运行时技能不自造证书或扩大scope。
+
+## 文学方法的按需取用
+
+仓库工作者可按当前阅读问题从[文学知识索引](docs/literary_knowledge/README.md)选取资料。运行时一项任务仍取得一个 Role 与一个主 Skill。链接不触发读取；补充方法须由已有授权素材路径提供，否则使用主 Skill 内可直接执行的步骤。独立成稿评阅使用[评阅任务书](docs/literary_evaluation/INDEPENDENT_LITERARY_JUDGE.md)。
