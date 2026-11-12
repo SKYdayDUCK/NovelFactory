@@ -1,0 +1,1117 @@
+{
+  "workload": "sequential loopback HTTP, one live BELIEF actor, PG17, no model",
+  "source_sha256": {
+    "novel_factory.application.queries": "860086de0a0e6042b5717ccb3e39810469588ab98a4f02d59da7b60033ed30e7",
+    "novel_factory.interfaces.http": "b53a9bd8b14c7f1d185ca8d4a7a81b316c502696dec48130cb0984493b0ef4c0"
+  },
+  "samples": [
+    {
+      "items": 1,
+      "pair": 1,
+      "arm": "prepared",
+      "latency_ms": 66.8692,
+      "cpu_ms": 17.8635,
+      "validation_ms": 1.4751,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 1,
+      "arm": "dictionary",
+      "latency_ms": 40.5074,
+      "cpu_ms": 19.1797,
+      "validation_ms": 2.0921,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 2,
+      "arm": "dictionary",
+      "latency_ms": 71.3021,
+      "cpu_ms": 18.787,
+      "validation_ms": 2.4282,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 2,
+      "arm": "prepared",
+      "latency_ms": 28.8028,
+      "cpu_ms": 19.0104,
+      "validation_ms": 1.1406,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 3,
+      "arm": "prepared",
+      "latency_ms": 71.0146,
+      "cpu_ms": 17.1164,
+      "validation_ms": 1.1214,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 3,
+      "arm": "dictionary",
+      "latency_ms": 30.6487,
+      "cpu_ms": 17.119,
+      "validation_ms": 1.9043,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 4,
+      "arm": "dictionary",
+      "latency_ms": 69.9757,
+      "cpu_ms": 18.0229,
+      "validation_ms": 2.7765,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 4,
+      "arm": "prepared",
+      "latency_ms": 45.9801,
+      "cpu_ms": 18.2459,
+      "validation_ms": 0.8745,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 5,
+      "arm": "prepared",
+      "latency_ms": 85.173,
+      "cpu_ms": 19.2874,
+      "validation_ms": 1.0758,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 5,
+      "arm": "dictionary",
+      "latency_ms": 47.5358,
+      "cpu_ms": 21.6541,
+      "validation_ms": 4.104,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 6,
+      "arm": "dictionary",
+      "latency_ms": 76.2133,
+      "cpu_ms": 17.6394,
+      "validation_ms": 4.3445,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 6,
+      "arm": "prepared",
+      "latency_ms": 35.4129,
+      "cpu_ms": 20.6826,
+      "validation_ms": 1.315,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 7,
+      "arm": "prepared",
+      "latency_ms": 72.2387,
+      "cpu_ms": 16.5478,
+      "validation_ms": 0.9844,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 7,
+      "arm": "dictionary",
+      "latency_ms": 37.0897,
+      "cpu_ms": 20.893,
+      "validation_ms": 2.285,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 8,
+      "arm": "dictionary",
+      "latency_ms": 66.7095,
+      "cpu_ms": 15.2234,
+      "validation_ms": 1.8472,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 8,
+      "arm": "prepared",
+      "latency_ms": 48.1165,
+      "cpu_ms": 20.815,
+      "validation_ms": 1.2091,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 9,
+      "arm": "prepared",
+      "latency_ms": 71.8947,
+      "cpu_ms": 17.7012,
+      "validation_ms": 2.0697,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 9,
+      "arm": "dictionary",
+      "latency_ms": 35.6253,
+      "cpu_ms": 20.0027,
+      "validation_ms": 3.3326,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 10,
+      "arm": "dictionary",
+      "latency_ms": 67.986,
+      "cpu_ms": 16.3262,
+      "validation_ms": 2.7558,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 10,
+      "arm": "prepared",
+      "latency_ms": 21.4234,
+      "cpu_ms": 15.7128,
+      "validation_ms": 1.1839,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 11,
+      "arm": "prepared",
+      "latency_ms": 84.9092,
+      "cpu_ms": 24.166,
+      "validation_ms": 1.0993,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 11,
+      "arm": "dictionary",
+      "latency_ms": 82.3288,
+      "cpu_ms": 54.6721,
+      "validation_ms": 8.4482,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 12,
+      "arm": "dictionary",
+      "latency_ms": 140.9961,
+      "cpu_ms": 66.8225,
+      "validation_ms": 8.624,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 12,
+      "arm": "prepared",
+      "latency_ms": 502.4538,
+      "cpu_ms": 348.2984,
+      "validation_ms": 2.103,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 13,
+      "arm": "prepared",
+      "latency_ms": 83.6773,
+      "cpu_ms": 20.9978,
+      "validation_ms": 1.4868,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 13,
+      "arm": "dictionary",
+      "latency_ms": 68.1202,
+      "cpu_ms": 23.362,
+      "validation_ms": 2.287,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 14,
+      "arm": "dictionary",
+      "latency_ms": 79.1623,
+      "cpu_ms": 18.6087,
+      "validation_ms": 2.5348,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 14,
+      "arm": "prepared",
+      "latency_ms": 55.7381,
+      "cpu_ms": 23.6879,
+      "validation_ms": 6.5927,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 15,
+      "arm": "prepared",
+      "latency_ms": 75.9865,
+      "cpu_ms": 21.2579,
+      "validation_ms": 0.9019,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 15,
+      "arm": "dictionary",
+      "latency_ms": 36.6304,
+      "cpu_ms": 20.3618,
+      "validation_ms": 2.2674,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 16,
+      "arm": "dictionary",
+      "latency_ms": 89.0044,
+      "cpu_ms": 20.87,
+      "validation_ms": 2.0889,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 16,
+      "arm": "prepared",
+      "latency_ms": 30.4731,
+      "cpu_ms": 16.6493,
+      "validation_ms": 0.9461,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 17,
+      "arm": "prepared",
+      "latency_ms": 67.0685,
+      "cpu_ms": 15.2123,
+      "validation_ms": 1.007,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 17,
+      "arm": "dictionary",
+      "latency_ms": 28.1993,
+      "cpu_ms": 16.4494,
+      "validation_ms": 2.196,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 18,
+      "arm": "dictionary",
+      "latency_ms": 78.5453,
+      "cpu_ms": 15.7939,
+      "validation_ms": 2.1622,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 18,
+      "arm": "prepared",
+      "latency_ms": 43.5961,
+      "cpu_ms": 21.6934,
+      "validation_ms": 0.8868,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 19,
+      "arm": "prepared",
+      "latency_ms": 69.4454,
+      "cpu_ms": 15.8127,
+      "validation_ms": 1.0743,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 19,
+      "arm": "dictionary",
+      "latency_ms": 38.2786,
+      "cpu_ms": 18.6431,
+      "validation_ms": 1.6987,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 20,
+      "arm": "dictionary",
+      "latency_ms": 73.3091,
+      "cpu_ms": 19.9725,
+      "validation_ms": 2.0831,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 20,
+      "arm": "prepared",
+      "latency_ms": 40.1075,
+      "cpu_ms": 16.2765,
+      "validation_ms": 0.8996,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 21,
+      "arm": "prepared",
+      "latency_ms": 69.2097,
+      "cpu_ms": 13.9934,
+      "validation_ms": 0.8483,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 21,
+      "arm": "dictionary",
+      "latency_ms": 27.5167,
+      "cpu_ms": 20.8771,
+      "validation_ms": 1.86,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 22,
+      "arm": "dictionary",
+      "latency_ms": 79.0184,
+      "cpu_ms": 20.6953,
+      "validation_ms": 2.5615,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 22,
+      "arm": "prepared",
+      "latency_ms": 37.472,
+      "cpu_ms": 18.0793,
+      "validation_ms": 0.8792,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 23,
+      "arm": "prepared",
+      "latency_ms": 78.2367,
+      "cpu_ms": 17.1585,
+      "validation_ms": 0.8577,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 23,
+      "arm": "dictionary",
+      "latency_ms": 43.1366,
+      "cpu_ms": 18.4213,
+      "validation_ms": 2.0755,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 24,
+      "arm": "dictionary",
+      "latency_ms": 71.704,
+      "cpu_ms": 15.5094,
+      "validation_ms": 2.9117,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 24,
+      "arm": "prepared",
+      "latency_ms": 29.7233,
+      "cpu_ms": 16.418,
+      "validation_ms": 1.0966,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 25,
+      "arm": "prepared",
+      "latency_ms": 67.0221,
+      "cpu_ms": 15.5335,
+      "validation_ms": 0.9486,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 25,
+      "arm": "dictionary",
+      "latency_ms": 24.9643,
+      "cpu_ms": 16.4099,
+      "validation_ms": 1.7827,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 26,
+      "arm": "dictionary",
+      "latency_ms": 69.9981,
+      "cpu_ms": 18.3699,
+      "validation_ms": 1.932,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 26,
+      "arm": "prepared",
+      "latency_ms": 23.5984,
+      "cpu_ms": 15.8172,
+      "validation_ms": 0.9829,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 27,
+      "arm": "prepared",
+      "latency_ms": 81.3245,
+      "cpu_ms": 18.8692,
+      "validation_ms": 4.6351,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 27,
+      "arm": "dictionary",
+      "latency_ms": 29.6053,
+      "cpu_ms": 16.1384,
+      "validation_ms": 1.8425,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 28,
+      "arm": "dictionary",
+      "latency_ms": 70.8127,
+      "cpu_ms": 16.8796,
+      "validation_ms": 2.178,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 28,
+      "arm": "prepared",
+      "latency_ms": 36.8678,
+      "cpu_ms": 20.43,
+      "validation_ms": 1.0518,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 29,
+      "arm": "prepared",
+      "latency_ms": 81.7282,
+      "cpu_ms": 18.4202,
+      "validation_ms": 1.2158,
+      "validations": 1
+    },
+    {
+      "items": 1,
+      "pair": 29,
+      "arm": "dictionary",
+      "latency_ms": 47.0279,
+      "cpu_ms": 21.6875,
+      "validation_ms": 1.9554,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 30,
+      "arm": "dictionary",
+      "latency_ms": 82.0383,
+      "cpu_ms": 18.4346,
+      "validation_ms": 2.044,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "pair": 30,
+      "arm": "prepared",
+      "latency_ms": 126.6008,
+      "cpu_ms": 92.7582,
+      "validation_ms": 2.3105,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 1,
+      "arm": "prepared",
+      "latency_ms": 143.4931,
+      "cpu_ms": 76.9303,
+      "validation_ms": 15.1397,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 1,
+      "arm": "dictionary",
+      "latency_ms": 99.6266,
+      "cpu_ms": 70.7244,
+      "validation_ms": 12.3774,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 2,
+      "arm": "dictionary",
+      "latency_ms": 191.6674,
+      "cpu_ms": 89.4621,
+      "validation_ms": 13.9021,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 2,
+      "arm": "prepared",
+      "latency_ms": 127.9011,
+      "cpu_ms": 92.298,
+      "validation_ms": 5.5841,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 3,
+      "arm": "prepared",
+      "latency_ms": 164.1501,
+      "cpu_ms": 87.8932,
+      "validation_ms": 3.2804,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 3,
+      "arm": "dictionary",
+      "latency_ms": 106.1534,
+      "cpu_ms": 73.0632,
+      "validation_ms": 14.1416,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 4,
+      "arm": "dictionary",
+      "latency_ms": 116.5781,
+      "cpu_ms": 64.063,
+      "validation_ms": 7.8164,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 4,
+      "arm": "prepared",
+      "latency_ms": 91.6947,
+      "cpu_ms": 71.4173,
+      "validation_ms": 3.2755,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 5,
+      "arm": "prepared",
+      "latency_ms": 155.6141,
+      "cpu_ms": 86.6241,
+      "validation_ms": 3.5376,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 5,
+      "arm": "dictionary",
+      "latency_ms": 95.5212,
+      "cpu_ms": 71.6174,
+      "validation_ms": 7.4855,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 6,
+      "arm": "dictionary",
+      "latency_ms": 148.113,
+      "cpu_ms": 90.235,
+      "validation_ms": 7.6692,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 6,
+      "arm": "prepared",
+      "latency_ms": 103.5632,
+      "cpu_ms": 75.4755,
+      "validation_ms": 6.2906,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 7,
+      "arm": "prepared",
+      "latency_ms": 143.3753,
+      "cpu_ms": 71.0066,
+      "validation_ms": 6.2222,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 7,
+      "arm": "dictionary",
+      "latency_ms": 107.6151,
+      "cpu_ms": 84.0175,
+      "validation_ms": 14.7605,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 8,
+      "arm": "dictionary",
+      "latency_ms": 136.2711,
+      "cpu_ms": 79.5794,
+      "validation_ms": 8.8671,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 8,
+      "arm": "prepared",
+      "latency_ms": 369.7404,
+      "cpu_ms": 256.7208,
+      "validation_ms": 5.9111,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 9,
+      "arm": "prepared",
+      "latency_ms": 328.2849,
+      "cpu_ms": 174.7576,
+      "validation_ms": 9.4677,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 9,
+      "arm": "dictionary",
+      "latency_ms": 181.46,
+      "cpu_ms": 98.7563,
+      "validation_ms": 11.2271,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 10,
+      "arm": "dictionary",
+      "latency_ms": 154.0466,
+      "cpu_ms": 99.4076,
+      "validation_ms": 9.4578,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 10,
+      "arm": "prepared",
+      "latency_ms": 150.6135,
+      "cpu_ms": 98.9053,
+      "validation_ms": 4.2246,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 11,
+      "arm": "prepared",
+      "latency_ms": 156.4925,
+      "cpu_ms": 77.3135,
+      "validation_ms": 5.5893,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 11,
+      "arm": "dictionary",
+      "latency_ms": 123.4499,
+      "cpu_ms": 87.6962,
+      "validation_ms": 18.1109,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 12,
+      "arm": "dictionary",
+      "latency_ms": 155.9964,
+      "cpu_ms": 91.2023,
+      "validation_ms": 13.0049,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 12,
+      "arm": "prepared",
+      "latency_ms": 86.3865,
+      "cpu_ms": 73.3049,
+      "validation_ms": 6.247,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 13,
+      "arm": "prepared",
+      "latency_ms": 140.8039,
+      "cpu_ms": 68.3651,
+      "validation_ms": 3.6633,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 13,
+      "arm": "dictionary",
+      "latency_ms": 111.084,
+      "cpu_ms": 85.7163,
+      "validation_ms": 18.3413,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 14,
+      "arm": "dictionary",
+      "latency_ms": 156.5733,
+      "cpu_ms": 86.4293,
+      "validation_ms": 10.8642,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 14,
+      "arm": "prepared",
+      "latency_ms": 99.694,
+      "cpu_ms": 74.1438,
+      "validation_ms": 4.3078,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 15,
+      "arm": "prepared",
+      "latency_ms": 131.3239,
+      "cpu_ms": 74.2675,
+      "validation_ms": 5.4682,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 15,
+      "arm": "dictionary",
+      "latency_ms": 113.6556,
+      "cpu_ms": 81.6433,
+      "validation_ms": 14.4268,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 16,
+      "arm": "dictionary",
+      "latency_ms": 147.3187,
+      "cpu_ms": 71.6278,
+      "validation_ms": 9.4682,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 16,
+      "arm": "prepared",
+      "latency_ms": 248.796,
+      "cpu_ms": 199.2578,
+      "validation_ms": 10.3165,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 17,
+      "arm": "prepared",
+      "latency_ms": 396.5979,
+      "cpu_ms": 244.7258,
+      "validation_ms": 25.595,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 17,
+      "arm": "dictionary",
+      "latency_ms": 179.4128,
+      "cpu_ms": 99.5605,
+      "validation_ms": 25.6539,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 18,
+      "arm": "dictionary",
+      "latency_ms": 223.4336,
+      "cpu_ms": 101.7832,
+      "validation_ms": 15.3453,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 18,
+      "arm": "prepared",
+      "latency_ms": 132.0097,
+      "cpu_ms": 83.1374,
+      "validation_ms": 4.0213,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 19,
+      "arm": "prepared",
+      "latency_ms": 139.0813,
+      "cpu_ms": 85.155,
+      "validation_ms": 5.9669,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 19,
+      "arm": "dictionary",
+      "latency_ms": 101.9363,
+      "cpu_ms": 76.4402,
+      "validation_ms": 12.0354,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 20,
+      "arm": "dictionary",
+      "latency_ms": 145.3713,
+      "cpu_ms": 82.5415,
+      "validation_ms": 7.4913,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 20,
+      "arm": "prepared",
+      "latency_ms": 90.525,
+      "cpu_ms": 80.8161,
+      "validation_ms": 7.3783,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 21,
+      "arm": "prepared",
+      "latency_ms": 137.5973,
+      "cpu_ms": 76.9223,
+      "validation_ms": 8.4777,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 21,
+      "arm": "dictionary",
+      "latency_ms": 126.273,
+      "cpu_ms": 92.7405,
+      "validation_ms": 8.0617,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 22,
+      "arm": "dictionary",
+      "latency_ms": 156.1054,
+      "cpu_ms": 88.9702,
+      "validation_ms": 18.8797,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 22,
+      "arm": "prepared",
+      "latency_ms": 143.4479,
+      "cpu_ms": 91.6878,
+      "validation_ms": 8.3529,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 23,
+      "arm": "prepared",
+      "latency_ms": 135.8296,
+      "cpu_ms": 72.2637,
+      "validation_ms": 11.5635,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 23,
+      "arm": "dictionary",
+      "latency_ms": 136.0009,
+      "cpu_ms": 92.0336,
+      "validation_ms": 12.2475,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 24,
+      "arm": "dictionary",
+      "latency_ms": 123.737,
+      "cpu_ms": 73.57,
+      "validation_ms": 10.3867,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 24,
+      "arm": "prepared",
+      "latency_ms": 156.204,
+      "cpu_ms": 112.6825,
+      "validation_ms": 4.5091,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 25,
+      "arm": "prepared",
+      "latency_ms": 356.1424,
+      "cpu_ms": 235.2082,
+      "validation_ms": 7.7187,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 25,
+      "arm": "dictionary",
+      "latency_ms": 195.6947,
+      "cpu_ms": 137.9817,
+      "validation_ms": 15.4411,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 26,
+      "arm": "dictionary",
+      "latency_ms": 185.8874,
+      "cpu_ms": 96.9491,
+      "validation_ms": 16.6618,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 26,
+      "arm": "prepared",
+      "latency_ms": 140.6001,
+      "cpu_ms": 93.6372,
+      "validation_ms": 5.8225,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 27,
+      "arm": "prepared",
+      "latency_ms": 166.4694,
+      "cpu_ms": 88.0756,
+      "validation_ms": 4.7937,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 27,
+      "arm": "dictionary",
+      "latency_ms": 88.1258,
+      "cpu_ms": 73.9111,
+      "validation_ms": 7.2569,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 28,
+      "arm": "dictionary",
+      "latency_ms": 155.2641,
+      "cpu_ms": 94.6767,
+      "validation_ms": 9.6716,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 28,
+      "arm": "prepared",
+      "latency_ms": 102.1785,
+      "cpu_ms": 83.0675,
+      "validation_ms": 4.1321,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 29,
+      "arm": "prepared",
+      "latency_ms": 144.8871,
+      "cpu_ms": 87.0333,
+      "validation_ms": 4.5634,
+      "validations": 1
+    },
+    {
+      "items": 16,
+      "pair": 29,
+      "arm": "dictionary",
+      "latency_ms": 94.3994,
+      "cpu_ms": 86.2444,
+      "validation_ms": 9.4028,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 30,
+      "arm": "dictionary",
+      "latency_ms": 117.1423,
+      "cpu_ms": 66.4289,
+      "validation_ms": 8.6531,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "pair": 30,
+      "arm": "prepared",
+      "latency_ms": 100.7399,
+      "cpu_ms": 74.6192,
+      "validation_ms": 4.4884,
+      "validations": 1
+    }
+  ],
+  "prepared": {
+    "1": {
+      "latency_ms": 67.0453,
+      "cpu_ms": 18.1626,
+      "validation_ms": 1.0862,
+      "validations": 1.0
+    },
+    "16": {
+      "latency_ms": 142.0896,
+      "cpu_ms": 84.1462,
+      "validation_ms": 5.7059,
+      "validations": 1.0
+    }
+  },
+  "dictionary": {
+    "1": {
+      "latency_ms": 68.0531,
+      "cpu_ms": 18.6259,
+      "validation_ms": 2.187,
+      "validations": 2.0
+    },
+    "16": {
+      "latency_ms": 136.136,
+      "cpu_ms": 86.3368,
+      "validation_ms": 11.6312,
+      "validations": 2.0
+    }
+  }
+}

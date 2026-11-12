@@ -1,0 +1,187 @@
+{
+  "workload": "sequential loopback HTTP, one live BELIEF actor, PG17, no model",
+  "source_sha256": {
+    "novel_factory.application.queries": "eb518f274a62a1de2e3e6d2e885cd7841486e8ff2f161740d1112a014387f487",
+    "novel_factory.interfaces.http": "d9ca7af6886e37da59efc2a908a7c90848d402ee935048e7e7b0e45837aad008"
+  },
+  "samples": [
+    {
+      "items": 1,
+      "latency_ms": 103.283,
+      "validation_ms": 2.0319,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "latency_ms": 108.1741,
+      "validation_ms": 2.3953,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "latency_ms": 104.9211,
+      "validation_ms": 2.0291,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "latency_ms": 86.4237,
+      "validation_ms": 6.0621,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "latency_ms": 76.9468,
+      "validation_ms": 2.2291,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "latency_ms": 82.8023,
+      "validation_ms": 1.9502,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "latency_ms": 91.8344,
+      "validation_ms": 2.0815,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "latency_ms": 103.7908,
+      "validation_ms": 2.1709,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "latency_ms": 80.3831,
+      "validation_ms": 1.7675,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "latency_ms": 85.6644,
+      "validation_ms": 5.6477,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "latency_ms": 84.2487,
+      "validation_ms": 1.9349,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "latency_ms": 127.4505,
+      "validation_ms": 3.0036,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "latency_ms": 80.7426,
+      "validation_ms": 2.2799,
+      "validations": 2
+    },
+    {
+      "items": 1,
+      "latency_ms": 103.078,
+      "validation_ms": 2.2201,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "latency_ms": 176.4525,
+      "validation_ms": 9.7656,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "latency_ms": 321.9895,
+      "validation_ms": 17.7832,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "latency_ms": 168.5436,
+      "validation_ms": 30.7085,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "latency_ms": 157.6138,
+      "validation_ms": 7.4737,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "latency_ms": 212.7607,
+      "validation_ms": 13.4771,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "latency_ms": 179.2363,
+      "validation_ms": 19.4017,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "latency_ms": 180.2914,
+      "validation_ms": 13.9783,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "latency_ms": 230.9219,
+      "validation_ms": 16.7625,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "latency_ms": 159.2665,
+      "validation_ms": 6.6024,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "latency_ms": 187.4311,
+      "validation_ms": 9.0133,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "latency_ms": 169.634,
+      "validation_ms": 13.8183,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "latency_ms": 185.9464,
+      "validation_ms": 14.2882,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "latency_ms": 239.4246,
+      "validation_ms": 7.1068,
+      "validations": 2
+    },
+    {
+      "items": 16,
+      "latency_ms": 202.8008,
+      "validation_ms": 17.5641,
+      "validations": 2
+    }
+  ],
+  "1": {
+    "latency_ms": 89.1291,
+    "validation_ms": 2.1955,
+    "validations": 2.0
+  },
+  "16": {
+    "latency_ms": 183.1189,
+    "validation_ms": 13.8983,
+    "validations": 2.0
+  }
+}

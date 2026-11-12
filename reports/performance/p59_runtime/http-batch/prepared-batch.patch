@@ -1,0 +1,151 @@
+diff --git a/src/novel_factory/application/queries.py b/src/novel_factory/application/queries.py
+index 386fd55..147c4ed 100644
+--- a/src/novel_factory/application/queries.py
++++ b/src/novel_factory/application/queries.py
+@@ -45,19 +45,29 @@ def _wr(revision):
+     return {key: revision[key] for key in ('work_id', 'branch_id', 'world_revision_id')}
+ 
+ 
+-class PreparedWorldQuery(bytes):
++class _PreparedRequest(bytes):
+     """Immutable JSON produced only after applying the public request contract."""
+ 
+     __slots__ = ()
+ 
+     def __new__(cls, request):
+-        value = validate_contract('UnifiedQueryRequest', request, '2.1')
++        value = validate_contract(cls.contract, request, '2.1')
+         return super().__new__(cls, json.dumps(value, separators=(',', ':'), allow_nan=False).encode('ascii'))
+ 
+     def materialize(self):
+         return json.loads(self)
+ 
+ 
++class PreparedWorldQuery(_PreparedRequest):
++    __slots__ = ()
++    contract = 'UnifiedQueryRequest'
++
++
++class PreparedQueryBatch(_PreparedRequest):
++    __slots__ = ()
++    contract = 'QueryBatchRequest'
++
++
+ class WorldQueryService:
+     def __init__(self, kernel, *, cache_size=256, max_scan=10000, max_response_bytes=2_000_000):
+         self.kernel = kernel
+@@ -550,7 +560,10 @@ class WorldQueryService:
+         return result
+ 
+     def batch(self, principal, request):
+-        request = validate_contract('QueryBatchRequest', request, '2.1')
++        if type(request) is PreparedQueryBatch:
++            request = request.materialize()
++        else:
++            request = validate_contract('QueryBatchRequest', request, '2.1')
+         _require(len({item['item_id'] for item in request['items']}) == len(request['items']),
+                  'INVALID_ARGUMENT', 'Batch item identities must be unique')
+         cost = sum(len(item['query'].get('subject_ids', item['query'].get('seed_ids', []))) *
+diff --git a/src/novel_factory/interfaces/http.py b/src/novel_factory/interfaces/http.py
+index 75a526e..0e118ba 100644
+--- a/src/novel_factory/interfaces/http.py
++++ b/src/novel_factory/interfaces/http.py
+@@ -212,7 +212,7 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
+         raise ValueError("declared API pool budget differs from actual SQLAlchemy pool")
+     if pool_size < 2:
+         raise ValueError("HTTP needs at least two pool slots for auth and operations")
+-    from novel_factory.application.queries import PreparedWorldQuery, WorldQueryService
++    from novel_factory.application.queries import PreparedQueryBatch, PreparedWorldQuery, WorldQueryService
+     if query_service is None:
+         query_service = WorldQueryService(kernel)
+     auth_capacity = min(2, pool_size - 1)
+@@ -288,19 +288,21 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
+     async def health():
+         return {"status": "alive", "release": "P0/P1"}
+ 
+-    @app.post("/api/v1/queries/timeline")
+-    async def query(request: Request):
++    async def query_body(request, prepared_type):
+         value = await _json_body(request)
+         if type(query_service) is WorldQueryService:
+-            payload = PreparedWorldQuery(value)
+-        else:
+-            # Existing custom query services receive their validated, mutable dictionary.
+-            payload = validate_contract("UnifiedQueryRequest", value, "2.1")
++            return prepared_type(value)
++        # Injected services retain their validated, caller-owned dictionary.
++        return validate_contract(prepared_type.contract, value, "2.1")
++
++    @app.post("/api/v1/queries/timeline")
++    async def query(request: Request):
++        payload = await query_body(request, PreparedWorldQuery)
+         return await execute(request, "query", lambda principal: query_service.query(principal, payload))
+ 
+     @app.post("/api/v1/queries/batch")
+     async def batch(request: Request):
+-        payload = await _body(request, "QueryBatchRequest", "2.1")
++        payload = await query_body(request, PreparedQueryBatch)
+         return await execute(request, "query", lambda principal: query_service.batch(principal, payload))
+ 
+     @app.post("/api/v1/queries/semantic-assumptions")
+diff --git a/tests/service/test_http.py b/tests/service/test_http.py
+index a9dc3c1..46ea6d5 100644
+--- a/tests/service/test_http.py
++++ b/tests/service/test_http.py
+@@ -287,3 +287,56 @@ def test_http_query_checks_its_full_contract_once_and_keeps_direct_call_validati
+     first = prepared.materialize()
+     first['query'].clear()
+     assert prepared.materialize() == client['request']
++
++
++def test_batch_contract_validation_and_ownership_across_entry_points(service_env, service_world, monkeypatch):
++    from novel_factory.application import queries
++    from novel_factory.domain.errors import DomainError
++    from novel_factory.interfaces import http as transport
++
++    client = make_client(service_env, service_world, actor=True)
++    single = client["request"]
++    batch = {key: single[key] for key in ("schema_version", "task_id", "generation", "read_contract", "knowledge_cut")}
++    batch["items"] = [{"item_id": "a", **{key: single[key] for key in ("subject_time", "query", "page_size")}}]
++    validations = []
++
++    def counted(name, value, version="2.0"):
++        if name == "QueryBatchRequest":
++            validations.append(name)
++        return validate_contract(name, value, version)
++
++    monkeypatch.setattr(queries, "validate_contract", counted)
++    monkeypatch.setattr(transport, "validate_contract", counted)
++    app = create_app(service_env["kernel"])
++    invalid = {**batch, "unknown": True}
++    with loopback_server(app) as url, httpx.Client(base_url=url, trust_env=False) as http:
++        result = http.post("/api/v1/queries/batch", json=batch, headers=headers(client))
++        assert result.status_code == 200 and len(validations) == 1
++        assert result.json()["items"][0]["payload"] == client["expected_payload"]
++        assert http.post("/api/v1/queries/batch", json=invalid).status_code == 422
++        assert http.post("/api/v1/queries/batch", json=batch).status_code == 401
++        service_env["kernel"].revoke_grant(service_world["principal"], client["principal"].grant_id)
++        assert http.post("/api/v1/queries/batch", json=batch, headers=headers(client)).status_code == 401
++
++    with pytest.raises(DomainError) as failure:
++        app.state.query_service.batch(None, invalid)
++    assert failure.value.code == "INVALID_ARGUMENT"
++    source = deepcopy(batch)
++    prepared = queries.PreparedQueryBatch(source)
++    source["items"].clear()
++    first = prepared.materialize()
++    first["items"][0]["query"].clear()
++    assert prepared.materialize() == batch
++
++    class CustomQueries:
++        def batch(self, principal, request):
++            assert type(request) is dict
++            request["items"].clear()
++            return {"status": "fixture received mutable dict"}
++
++    other = make_client(service_env, service_world, actor=True)
++    custom_app = create_app(service_env["kernel"], query_service=CustomQueries())
++    with loopback_server(custom_app) as url, httpx.Client(base_url=url, trust_env=False) as http:
++        received = http.post("/api/v1/queries/batch", json=batch, headers=headers(other))
++        assert received.json() == {"status": "fixture received mutable dict"}
++        assert http.post("/api/v1/queries/batch", json=invalid).status_code == 422
