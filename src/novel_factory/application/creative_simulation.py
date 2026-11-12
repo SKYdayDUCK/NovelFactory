@@ -26,7 +26,7 @@ from novel_factory.domain.canonical import canonical_bytes, fingerprint
 from novel_factory.domain.temporal import point_key
 from novel_factory.domain.world import ALIASES
 from novel_factory.infrastructure.creative_config import CreativeHarnessConfig
-from novel_factory.infrastructure.database import tables
+from novel_factory.infrastructure.database import mutation_gate, tables
 
 
 def _actor_scope(kernel, repo, wr, story_time, selector, proof):
@@ -346,7 +346,7 @@ class CreativeSimulationService:
         frozen_id = str(uuid5(UUID(candidate_ref["artifact_revision_id"]), "creative-simulation-run"))
         # Only the candidate-specific advisory lock spans computation and external
         # re-attestation. Hold the object/GC lock through the later NF commit.
-        with ExitStack() as locks, self.kernel.db.uow() as repo:
+        with ExitStack() as locks, self.kernel.db.uow(write=False) as repo:
             repo.conn.execute(text("SELECT pg_advisory_xact_lock(hashtextextended(:key,0))"), {"key": frozen_id})
             frozen = repo.one("artifacts", {"work_id": wr["work_id"], "artifact_revision_id": frozen_id,
                                             "kind": "CREATIVE_SIMULATION_RUN"})
@@ -364,6 +364,7 @@ class CreativeSimulationService:
             if any(proofs.values()):
                 proofs = self._runtime_proofs(controller, request)
             locks.enter_context(self.kernel.objects.lock())
+            mutation_gate(repo.conn)
             current, _, _, live_cut, live_actors, live_nodes = self._read(repo, controller, request, proofs, writing=True)
             require(current == candidate and live_cut == cut_ref and live_actors == actor_refs and live_nodes == permitted,
                     "TASK_REBIND_REQUIRED", "Simulation sources have changed")
