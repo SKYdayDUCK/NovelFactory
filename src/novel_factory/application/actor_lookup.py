@@ -1,5 +1,6 @@
 """One model-selected, read-only MCP lookup inside an explicitly enrolled actor budget."""
 import json
+import time
 from dataclasses import dataclass
 from decimal import ROUND_DOWN, Decimal
 from uuid import UUID, uuid5
@@ -111,6 +112,7 @@ def read_stage(gateway, adapter, principal, binding, request, messages):
         known = False
         used = amount_used = receipt = None
         try:
+            started = time.monotonic()
             response = adapter.generate(ModelRequest(selector_messages, digest, maximum, attempt))
             require(response.request_sha256 == digest, "HOST_BINDING_MISMATCH", "Unbound selection")
             receipt = response.provider_receipt
@@ -122,7 +124,8 @@ def read_stage(gateway, adapter, principal, binding, request, messages):
                      and amount_used == amount_used.quantize(Decimal("0.000001"))
                      and response.currency == binding["spec"]["budget"]["currency"] and used is not None and used <= choice_tokens)
             gateway._audit_artifact(binding, attempt, "lookup-response", {"text": response.text,
-                "request_sha256": digest, "provider_receipt": receipt, "input_tokens": response.input_tokens,
+                "request_sha256": digest, "elapsed_seconds": format(time.monotonic() - started, ".6f"),
+                "provider_receipt": receipt, "input_tokens": response.input_tokens,
                 "output_tokens": response.output_tokens, "actual_amount": str(amount_used) if amount_used is not None else None,
                 "currency": response.currency, "cached_input_tokens": response.cached_input_tokens,
                 "cost_receipt_checked": known, "model_configuration": {key:binding["config"][key]
