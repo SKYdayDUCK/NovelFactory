@@ -1,0 +1,25 @@
+name: Collect exact hosted acceptance receipts
+on:
+  push:
+    branches: [evidence/serial-delivery]
+    paths: [reports/integration/evidence/collector-request.json]
+permissions:
+  actions: read
+  contents: read
+jobs:
+  collect:
+    if: github.repository == 'SKYdayDUCK/NovelFactory' && github.ref == 'refs/heads/evidence/serial-delivery'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        workflow: [agent-workshop.yml, p1-integrity.yml, p4-recovery-drill.yml, p6-offline.yml, p2-load.yml, p3-p4-evidence.yml, p3-scale-experiments.yml]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate run, checkout and immutable artifact digests
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python reports/integration/evidence/collect_hosted.py "${{ matrix.workflow }}"
