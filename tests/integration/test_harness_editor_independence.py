@@ -6,6 +6,7 @@ import pytest
 from novel_factory.application.creative_review import CreativeReviewService
 from novel_factory.domain.canonical import fingerprint
 from novel_factory.domain.errors import DomainError
+from novel_factory.fixtures import point
 from test_harness_review_workflow import _args, _formal, _repeat, _reviewer, manuscript
 from test_review_independence import enroll_native_case
 
@@ -51,7 +52,8 @@ def test_editor_groups_and_receipts_follow_the_actual_reading(manuscript, tmp_pa
         retain(editor)
     case = register(editor_group="volume-editors")
     actual = kernel.issue_grant(editor, world["world_ref"]["work_id"], role_id="literary_editor",
-                                branch_ids=[world["world_ref"]["branch_id"]], capabilities=["READ", "APPROVE"])["principal"]
+                                branch_ids=[world["world_ref"]["branch_id"]], capabilities=["READ", "APPROVE"],
+                                max_story_time=point(1000))["principal"]
     with pytest.raises(DomainError, match="qualified"):
         retain(actual)
     result = retain(editor)
