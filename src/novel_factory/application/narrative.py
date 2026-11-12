@@ -247,6 +247,10 @@ class NarrativeService:
                    "title": title, "declared_important_deltas": declared_important_deltas or [], "prior_draft_ref": prior_draft_ref,
                    "handoff_refs": handoff_refs or [], "agent_output_ref": agent_output_ref}
 
+        from .dynamic_runtime import refresh_task, verify_task
+
+        proof = refresh_task(self.kernel, principal, task_id, generation) if agent_output_ref is not None else None
+
         def check(repo):
             task, grant, spec, context, scene = self._writer_binding(repo, principal, task_id, generation, scene_ref)
             if agent_output_ref is not None:
@@ -280,6 +284,8 @@ class NarrativeService:
 
         with self.kernel.db.uow(write=False) as repo:
             task, _ = self.kernel._task_owner(repo, principal, task_id, "ARTIFACT_WRITE")
+            if agent_output_ref is not None:
+                verify_task(self.kernel, repo, principal, task, proof)
             old = self.kernel._prior(repo, principal, task["work_id"], "NARRATIVE_DRAFT", idempotency_key, request)
             if old:
                 return old
@@ -293,7 +299,9 @@ class NarrativeService:
         ref = self.kernel._blob(payload)
         with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
             repo.one("works", {"work_id": task["work_id"]}, lock="update")
-            self.kernel._task_owner(repo, principal, task_id, "ARTIFACT_WRITE")
+            task, _ = self.kernel._task_owner(repo, principal, task_id, "ARTIFACT_WRITE")
+            if agent_output_ref is not None:
+                verify_task(self.kernel, repo, principal, task, proof)
             old = self.kernel._prior(repo, principal, task["work_id"], "NARRATIVE_DRAFT", idempotency_key, request)
             if old:
                 return old

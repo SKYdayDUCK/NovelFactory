@@ -52,7 +52,29 @@ _REVIEW_OBSERVATION = object_schema(
     disposition={"enum": ["QUESTION", "PREFERENCE", "PRESERVE"]},
 )
 
+_WORLD = _inline_schema("WorldRef", "2.0")
+_EPOCH = {"type": "integer", "minimum": 0}
+_INSTRUCTION = {"type": "string", "minLength": 1, "maxLength": 200000}
 _TOOLS = {
+    "nf_harness_agent_register": ("Register scoped profile and Skill text from a delegated source assignment.",
+        object_schema(task_id=_UUID, generation={"type": "integer", "minimum": 1},
+                      workshop_binding=_inline_schema("WorkshopBinding", "harness"),
+                      profile_version={"type": "string", "minLength": 1, "maxLength": 80},
+                      role_instructions=_INSTRUCTION, skill_instructions=_INSTRUCTION,
+                      requested_tools={"type": "array", "maxItems": 64, "uniqueItems": True,
+                                       "items": {"type": "string", "minLength": 1, "maxLength": 100}},
+                      trigger={"enum": ["SKILL_GAP", "REVIEW_FINDING", "TASK_DEMAND"]},
+                      evidence_refs={"type": "array", "minItems": 1, "maxItems": 32, "uniqueItems": True,
+                                     "items": _ARTIFACT}, quota=_inline_schema("Quota", "harness"),
+                      idempotency_key=_KEY)),
+    "nf_harness_agent_select": ("Select a registered revision for new assignments, including a historical revision.",
+        object_schema(world_ref=_WORLD, instance_ref=_ARTIFACT, revision_ref=_ARTIFACT,
+                      expected_epoch=_EPOCH, idempotency_key=_KEY)),
+    "nf_harness_agent_retire": ("Exit or archive the scoped dynamic agent at its expected version.",
+        object_schema(world_ref=_WORLD, instance_ref=_ARTIFACT, action={"enum": ["EXIT", "ARCHIVE"]},
+                      expected_epoch=_EPOCH, idempotency_key=_KEY)),
+    "nf_harness_agent_history": ("Read the dynamic agent's authorized selection and lifecycle history.",
+        object_schema(world_ref=_WORLD, instance_ref=_ARTIFACT)),
     "nf_harness_review_independence": ("Verify the named review assignment and manuscript against trusted subject records.",
         object_schema(task_id=_UUID, generation={"type": "integer", "minimum": 1}, manuscript_ref=_ARTIFACT)),
     "nf_harness_review_read": ("Read the exact assigned manuscript and obtain a coverage receipt.",
@@ -174,6 +196,9 @@ def make_server(runtime, *, ceiling=None):
                 return tool_error("INVALID_ARGUMENT")
             if name in {"nf_project_status", "nf_resume_project"}:
                 return await asyncio.to_thread(runtime.project, resume=name == "nf_resume_project")
+            if name in {"nf_harness_agent_register", "nf_harness_agent_select", "nf_harness_agent_retire",
+                        "nf_harness_agent_history"}:
+                return await asyncio.to_thread(runtime.dynamic_agent_call, name, **arguments)
             if name in {"nf_harness_review_read", "nf_harness_review_submit", "nf_harness_review_withdraw",
                         "nf_harness_revision_brief", "nf_harness_revise"}:
                 return await asyncio.to_thread(runtime.creative_review_call, name, **arguments)

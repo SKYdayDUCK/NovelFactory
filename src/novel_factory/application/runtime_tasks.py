@@ -49,7 +49,7 @@ class RuntimeTaskService:
                 knowledge_cut=None, actor_id=None, input_artifacts=(), material_refs=(),
                 max_amount="1", token_budget=200_000,
                 currency="USD", lease_seconds=600, deadline_seconds=3600,
-                skill_name=None, queue_state=None):
+                skill_name=None, queue_state=None, dynamic_instance_ref=None):
         """Freeze authorized inputs and issue a fresh role grant, without enqueueing work.
 
         The controller must possess ADMIN already. Runtime grants receive only
@@ -77,9 +77,10 @@ class RuntimeTaskService:
             self.kernel.authorize(repo, controller, world_ref["work_id"], "ADMIN", world_ref["branch_id"])
             self.kernel.revision(repo, world_ref)
             policy_version = repo.one("works", {"work_id": world_ref["work_id"]})["policy_version"]
+        task_id = str(uuid4())
         prepared = self.gateway.prepare_input(controller, world_ref, role_id=role_id,
             task_kind=task_kind, assignment=assignment, adapter_id=adapter_id,
-            skill_name=skill_name, material_refs=material_refs)
+            skill_name=skill_name, material_refs=material_refs, task_id=task_id, dynamic_instance_ref=dynamic_instance_ref)
         manifest = self.kernel.put_artifact(controller, world_ref["work_id"],
             {"subject_ids": list(subject_ids), "predicates": list(predicates)}, "INPUT_MANIFEST")
         caps = ["READ", "COMPILE", "TASK_CREATE", "TASK_CLAIM", "ARTIFACT_WRITE"]
@@ -93,7 +94,6 @@ class RuntimeTaskService:
         for ref in [manifest, prepared["input_ref"], *input_artifacts, *material_refs]:
             if ref not in inputs:
                 inputs.append(ref)
-        task_id = str(uuid4())
         spec = {"schema_version": "2.0", "task_id": task_id, "generation": 0,
             "role_id": role_id, "task_kind": task_kind, "state": queue_state or "READY", "world_ref": world_ref,
             "story_time": story_time, "context_bundle_id": None, "policy_version": policy_version,

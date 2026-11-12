@@ -86,6 +86,9 @@
         },
         "creative_harness": {
           "$ref": "https://novel-factory.example/contracts/1.0/harness.schema.json#/$defs/HarnessConfiguration"
+        },
+        "dynamic_assignment_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
         }
       },
       "required": [
@@ -100,7 +103,31 @@
         "material_refs",
         "output_contract"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "dependentSchemas": {
+        "dynamic_assignment_ref": {
+          "required": [
+            "creative_harness"
+          ],
+          "properties": {
+            "creative_harness": {
+              "properties": {
+                "creative_harness": {
+                  "properties": {
+                    "dynamic_agents": {
+                      "properties": {
+                        "enabled": {
+                          "const": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "AgentDispatchRequest": {
       "type": "object",

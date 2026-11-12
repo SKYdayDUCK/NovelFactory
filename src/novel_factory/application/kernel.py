@@ -279,6 +279,17 @@ class Kernel:
         """
         grant = self.authorize(r, principal, work_id, "READ")
         artifact = self.artifact(r, ref, work_id)
+        if artifact["kind"].startswith("AGENT_"):
+            from .dynamic_runtime import audit_assignment
+
+            assignment = audit_assignment(r, work_id, artifact, ref)
+            if assignment:
+                frozen = self.artifact(r, assignment, work_id, kind="CREATIVE_DYNAMIC_FREEZE")["payload"]
+                branch = frozen["scope"]["world_ref"]["branch_id"]
+                if artifact["kind"] != "AGENT_CANDIDATE" or "ADMIN" in grant["capabilities"]:
+                    self.authorize(r, principal, work_id, "ADMIN", branch)
+                    return
+                self.authorize(r, principal, work_id, "READ", branch)
         if artifact["kind"].startswith("CREATIVE_"):
             # Raw records combine internal prompts, plan choices or evaluation
             # evidence. Task-scoped read ports return their permitted sections.

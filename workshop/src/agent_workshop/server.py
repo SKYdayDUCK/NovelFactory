@@ -9,7 +9,7 @@ from mcp import types
 from mcp.server.lowlevel import Server
 from mcp.server.stdio import stdio_server
 
-from . import delegation, manager, messaging, organization, presets, review_independence, reviews_skills
+from . import delegation, dynamic_skills, manager, messaging, organization, presets, review_independence, reviews_skills
 from .roster_projection import catalog_binding
 from .auth import Denied, authenticate, connect, private_binding
 
@@ -30,7 +30,7 @@ def negotiate(conn, session, protocol_version):
 
 TOOLS = {"aw_capabilities": ("Negotiate this connection's organization protocol.",
          {"type": "object", "required": ["protocol_version"], "additionalProperties": False,
-          "properties": {"protocol_version": {"type": "string", "maxLength": 32}}}, negotiate), **organization.TOOLS, **messaging.TOOLS, **delegation.TOOLS, **reviews_skills.TOOLS, **review_independence.TOOLS, **manager.TOOLS, **presets.TOOLS}
+          "properties": {"protocol_version": {"type": "string", "maxLength": 32}}}, negotiate), **organization.TOOLS, **messaging.TOOLS, **delegation.TOOLS, **reviews_skills.TOOLS, **dynamic_skills.TOOLS, **review_independence.TOOLS, **manager.TOOLS, **presets.TOOLS}
 
 
 def dispatch(config, name=None, arguments=None):

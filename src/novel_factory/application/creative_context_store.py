@@ -182,6 +182,8 @@ def freeze_snapshot(kernel, repo, binding, input_ref, packet, user, material_sou
     repo.one("tasks", {"task_id": task["task_id"]}, lock="update")
     versions = source_fences(kernel, repo, binding, material_sources, input_ref)
     payload = {"input_ref": input_ref, "packet": packet, "model_input": user, "source_versions": versions}
+    if "dynamic_assignment_ref" in binding:
+        payload["dynamic_assignment_ref"] = binding["dynamic_assignment_ref"]
     prior = load_snapshot(kernel, repo, task, input_ref)
     if prior:
         require(prior[1] == payload, "TASK_REBIND_REQUIRED", "Concurrent context compilation differs")
@@ -197,5 +199,6 @@ def freeze_snapshot(kernel, repo, binding, input_ref, packet, user, material_sou
 def check_candidate_snapshot(kernel, repo, task, audit):
     ref = audit.get("creative_context_ref")
     if ref is not None:
-        saved, _ = load_snapshot(kernel, repo, task, audit["input_ref"], required=True)
-        require(ref == saved, "TASK_REBIND_REQUIRED", "Candidate used a different creative snapshot")
+        saved, snapshot = load_snapshot(kernel, repo, task, audit["input_ref"], required=True)
+        require(ref == saved and snapshot.get("dynamic_assignment_ref") == audit.get("dynamic_assignment_ref"),
+                "TASK_REBIND_REQUIRED", "Candidate used a different creative snapshot")

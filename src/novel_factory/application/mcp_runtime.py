@@ -44,62 +44,104 @@ class McpRuntime:
                 from novel_factory.infrastructure.creative_config import CreativeHarnessConfig
 
                 self._creative_authority(repo)
-                if CreativeHarnessConfig.from_env().enabled:
-                    return ["nf_harness_simulate", "nf_harness_plan_decide", "nf_harness_review_independence",
-                            "nf_harness_review_decide"]
-                return []
+                configuration = CreativeHarnessConfig.from_env()
+                if not configuration.enabled:
+                    return []
+                names = ["nf_harness_simulate", "nf_harness_plan_decide", "nf_harness_review_independence",
+                         "nf_harness_review_decide"]
+                if configuration.dynamic_agents:
+                    names.extend(("nf_harness_agent_register", "nf_harness_agent_select",
+                                  "nf_harness_agent_retire", "nf_harness_agent_history"))
+                return names
             if isinstance(self.binding, ProjectBinding):
                 self._project_auth(repo.conn)
                 return ["nf_project_status", "nf_resume_project"]
-            task, grant, context = self._task(repo)
-            identity = repo.one("task_inputs", {"task_id": task["task_id"], "generation": task["generation"]})["spec"]
-            # Only the role/skill ceilings selected at provisioning time apply. A later
-            # catalog revision cannot silently add tools to an existing execution.
-            inputs = repo.many("artifacts", {"work_id": task["work_id"], "kind": "AGENT_INPUT",
-                              "artifact_revision_id": [r["artifact_revision_id"] for r in identity["input_artifacts"]]})
-            creative_enabled = False
-            requested = set()
-            skills = set()
-            for record in inputs:
-                data = record["payload"]
-                if (data["role_id"], data["task_kind"], data["runtime_sha256"]) != (
-                        task["role_id"], task["task_kind"], identity["runtime_contract_version"]):
-                    continue
-                snapshot = self.kernel.artifact(repo, data["runtime_ref"], task["work_id"], kind="AGENT_RUNTIME")["payload"]
-                if fingerprint(snapshot) == identity["runtime_contract_version"]:
-                    # Pre-P5 text-only snapshots never declared MCP tool ceilings.
-                    requested.update(snapshot.get("mcp_requested_tools", []))
-                    skills.add(snapshot["skill_name"])
-                    if "creative_harness" in data:
-                        from novel_factory.infrastructure.creative_config import CreativeHarnessConfig
-                        creative_enabled = CreativeHarnessConfig.parse(data["creative_harness"]).enabled
-            ceiling = {"task_get": "READ", "context_get": "READ", "query_batch": "READ",
-                       "artifact_put": "ARTIFACT_WRITE"}
-            names = ["nf_" + name for name, cap in ceiling.items()
-                     if name in requested and cap in grant["capabilities"]]
-            if creative_enabled and "ARTIFACT_WRITE" in grant["capabilities"]:
-                role = grant["role_id"]
-                if role in {"reviewer", "literary_editor", "chief_editor", "writer"} and "evidence_read" in requested:
-                    names.append("nf_harness_review_read")
-                if role in {"reviewer", "literary_editor", "chief_editor"} and "review_submit" in requested:
-                    names.extend(("nf_harness_review_submit", "nf_harness_review_withdraw"))
-                if (role == "writer" and task["task_kind"] == "targeted_revision"
-                        and {"artifact_put", "draft_submit"} <= requested):
-                    names.extend(("nf_harness_revision_brief", "nf_harness_revise"))
-            if {"PLAN_READ", "ARTIFACT_WRITE"} <= set(grant["capabilities"]):
-                if (creative_enabled and grant["role_id"] == "volume_director"
-                        and "plan_propose" in requested and context["read_cut"]["knowledge_cut"]["plane"] == "PLAN"):
-                    names.append("nf_harness_plan_propose")
-                if (grant["role_id"], task["task_kind"]) == ("volume_director", "volume_review"):
-                    if "volume-director-review" in skills and "plan_propose" in requested:
-                        names.append("nf_change_point_request")
-                if (grant["role_id"], task["task_kind"]) == ("volume_director", "replan"):
-                    if "roll-window" in skills and "plan_propose" in requested:
-                        names.append("nf_rolling_window_submit")
-                if (grant["role_id"], task["task_kind"]) == ("chief_editor", "editorial_decision"):
-                    if "review-change-point" in skills and "review_submit" in requested:
-                        names.append("nf_change_point_review")
-            return names
+            task, _, _ = self._task(repo)
+            spec = repo.one("task_inputs", {"task_id": task["task_id"], "generation": task["generation"]})["spec"]
+            from .dynamic_runtime import assignment_for, refresh
+
+            ref = assignment_for(repo, task, spec)
+            if ref is None:
+                return self._task_tools(repo)
+        live = refresh(self.kernel, self.principal, task["task_id"], task["generation"], ref)
+        with self.kernel.db.uow(write=False) as repo:
+            return self._task_tools(repo, dynamic_ref=ref, dynamic_live=live)
+
+    def _task_tools(self, repo, *, dynamic_ref=None, dynamic_live=None):
+        task, grant, context = self._task(repo)
+        identity = repo.one("task_inputs", {"task_id": task["task_id"], "generation": task["generation"]})["spec"]
+        # Only the role/skill ceilings selected at provisioning time apply. A later
+        # catalog revision cannot silently add tools to an existing execution.
+        inputs = repo.many("artifacts", {"work_id": task["work_id"], "kind": "AGENT_INPUT",
+                          "artifact_revision_id": [r["artifact_revision_id"] for r in identity["input_artifacts"]]})
+        creative_enabled = False
+        requested = set()
+        skills = set()
+        for record in inputs:
+            data = record["payload"]
+            if (data["role_id"], data["task_kind"], data["runtime_sha256"]) != (
+                    task["role_id"], task["task_kind"], identity["runtime_contract_version"]):
+                continue
+            snapshot = self.kernel.artifact(repo, data["runtime_ref"], task["work_id"], kind="AGENT_RUNTIME")["payload"]
+            if fingerprint(snapshot) == identity["runtime_contract_version"]:
+                # Pre-P5 text-only snapshots never declared MCP tool ceilings.
+                requested.update(snapshot.get("mcp_requested_tools", []))
+                skills.add(snapshot["skill_name"])
+                if "creative_harness" in data:
+                    from novel_factory.infrastructure.creative_config import CreativeHarnessConfig
+                    creative_enabled = CreativeHarnessConfig.parse(data["creative_harness"]).enabled
+        caps = set(grant["capabilities"])
+        if dynamic_ref is not None:
+            from .dynamic_runtime import verified
+
+            record, caps = verified(self.kernel, repo, self.principal, task, grant, dynamic_ref, dynamic_live,
+                                    plane=context["read_cut"]["knowledge_cut"]["plane"])
+            requested.intersection_update(record["requested_tools"])
+        ceiling = {"task_get": "READ", "context_get": "READ", "query_batch": "READ",
+                   "artifact_put": "ARTIFACT_WRITE"}
+        names = ["nf_" + name for name, cap in ceiling.items()
+                 if name in requested and cap in caps]
+        if creative_enabled and "ARTIFACT_WRITE" in caps:
+            role = grant["role_id"]
+            if role in {"reviewer", "literary_editor", "chief_editor", "writer"} and "evidence_read" in requested:
+                names.append("nf_harness_review_read")
+            if role in {"reviewer", "literary_editor", "chief_editor"} and "review_submit" in requested:
+                names.extend(("nf_harness_review_submit", "nf_harness_review_withdraw"))
+            if (role == "writer" and task["task_kind"] == "targeted_revision"
+                    and {"artifact_put", "draft_submit"} <= requested):
+                names.extend(("nf_harness_revision_brief", "nf_harness_revise"))
+        if {"PLAN_READ", "ARTIFACT_WRITE"} <= caps:
+            if (creative_enabled and grant["role_id"] == "volume_director"
+                    and "plan_propose" in requested and context["read_cut"]["knowledge_cut"]["plane"] == "PLAN"):
+                names.append("nf_harness_plan_propose")
+            if (grant["role_id"], task["task_kind"]) == ("volume_director", "volume_review"):
+                if "volume-director-review" in skills and "plan_propose" in requested:
+                    names.append("nf_change_point_request")
+            if (grant["role_id"], task["task_kind"]) == ("volume_director", "replan"):
+                if "roll-window" in skills and "plan_propose" in requested:
+                    names.append("nf_rolling_window_submit")
+            if (grant["role_id"], task["task_kind"]) == ("chief_editor", "editorial_decision"):
+                if "review-change-point" in skills and "review_submit" in requested:
+                    names.append("nf_change_point_review")
+        return names
+
+    def _role_proof(self):
+        from .dynamic_runtime import assignment_for, refresh
+
+        with self.kernel.db.uow(write=False) as repo:
+            task, _, _ = self._task(repo)
+            spec = repo.one("task_inputs", {"task_id": task["task_id"], "generation": task["generation"]})["spec"]
+            ref = assignment_for(repo, task, spec)
+        if ref is None:
+            return None
+        live = refresh(self.kernel, self.principal, task["task_id"], task["generation"], ref)
+        return ref, live
+
+    def _role_task(self, repo, tool, proof, capability="READ"):
+        if proof is not None:
+            require(tool in self._task_tools(repo, dynamic_ref=proof[0], dynamic_live=proof[1]),
+                    "VIEW_DENIED", "Tool outside task authority")
+        return self._task(repo, capability)
 
     def creative_review_call(self, tool, **arguments):
         from .creative_review import CreativeReviewService
@@ -141,6 +183,24 @@ class McpRuntime:
         with self.kernel.db.uow(write=False) as repo:
             self._creative_authority(repo, arguments["task_id"])
         return operation(self.principal, **arguments)
+
+    def dynamic_agent_call(self, tool, **arguments):
+        require(tool in self.available_tools(), "VIEW_DENIED", "Dynamic agent operation unavailable")
+        binding = self.binding
+        if tool == "nf_harness_agent_register":
+            with self.kernel.db.uow(write=False) as repo:
+                self._creative_authority(repo, arguments["task_id"])
+        else:
+            world = arguments["world_ref"]
+            require((world["work_id"], world["branch_id"]) == (binding.work_id, binding.branch_id),
+                    "VIEW_DENIED", "Dynamic operation exceeds the bound work or branch")
+
+        from .dynamic_agents import DynamicAgentService
+
+        service = DynamicAgentService(self.kernel)
+        methods = {"nf_harness_agent_register": service.register_revision, "nf_harness_agent_select": service.select,
+                   "nf_harness_agent_retire": service.retire, "nf_harness_agent_history": service.history}
+        return methods[tool](self.principal, **arguments)
 
     def issue_review_independence(self, *, task_id, generation, manuscript_ref):
         from .review_independence import ReviewIndependenceService
@@ -221,19 +281,22 @@ class McpRuntime:
         return task, grant, ctx
 
     def task_get(self):
+        proof = self._role_proof()
         with self.kernel.db.uow(write=False) as repo:
-            task, _, ctx = self._task(repo)
+            task, _, ctx = self._role_task(repo, "nf_task_get", proof)
             return {**{k: task[k] for k in ("task_id", "generation", "state", "context_bundle_id")},
                     "world_ref": ctx["payload"]["world_ref"]}
 
     def context_get(self):
+        proof = self._role_proof()
         with self.kernel.db.uow(write=False) as repo:
-            _, _, ctx = self._task(repo)
+            _, _, ctx = self._role_task(repo, "nf_context_get", proof)
             return ctx["payload"]
 
     def query_batch(self, lookups):
+        proof = self._role_proof()
         with self.kernel.db.uow(write=False) as repo:
-            task, grant, ctx = self._task(repo)
+            task, grant, ctx = self._role_task(repo, "nf_query_batch", proof)
             cut = ctx["read_cut"]
             check_profile(grant, cut["knowledge_cut"]["plane"], operation="STATE")
             compiled = self.kernel.artifact(repo, ctx["artifact_ref"], task["work_id"], kind="COMPILED_CONTEXT")
@@ -251,17 +314,18 @@ class McpRuntime:
                                  for index, item in enumerate(lookups)]}
         response = self.queries.batch(self.principal, request)
         with self.kernel.db.uow(write=False) as repo:
-            self._task(repo)
+            self._role_task(repo, "nf_query_batch", proof)
         return {"items": response["items"], "all_items_succeeded": response["all_items_succeeded"]}
 
     def artifact_put(self, content, idempotency_key):
+        proof = self._role_proof()
         with self.kernel.db.uow(write=False) as repo:
-            self._task(repo, "ARTIFACT_WRITE")
+            self._role_task(repo, "nf_artifact_put", proof, "ARTIFACT_WRITE")
         payload = {"task_id": self.binding.task_id, "generation": self.binding.generation, "content": content}
         ref = self.kernel._blob(payload)
         with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
             repo.one("tasks", {"task_id": self.binding.task_id}, lock="update")
-            task, _, ctx = self._task(repo, "ARTIFACT_WRITE")
+            task, _, ctx = self._role_task(repo, "nf_artifact_put", proof, "ARTIFACT_WRITE")
             key = f"{task['task_id']}:{task['generation']}:{idempotency_key}"
             old = self.kernel._prior(repo, self.principal, task["work_id"], "MCP_ARTIFACT", key, payload)
             if old:

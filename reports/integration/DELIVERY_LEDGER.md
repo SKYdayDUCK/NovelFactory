@@ -1,6 +1,8 @@
 # 串行交付台账
 
-S3 细粒度文学审核及定向修订 已在开发分支验证并进入阶段提交。[S3 工程回执](../harness/evidence/s3/receipt.json)
+S4 动态角色、Skill 版本与代际恢复 已在开发分支验证并进入阶段提交。[S4 工程回执](../harness/evidence/s4/receipt.json)
+
+S3 细粒度文学审核及定向修订已推送至开发分支，提交为 `7a480d0371622966520f354c19e80257465398b9`。[远端 Actions 回执](../harness/evidence/s3/remote-receipt.json)。[S3 工程回执](../harness/evidence/s3/receipt.json)
 
 S2 剧情规划与隔离推演已推送至开发分支，提交为 `32ef8b3ced7fb5ea06cb25ecd4ccfa436fe9150b`。[远端 Actions 回执](../harness/evidence/s2/remote-receipt.json)。[S2 工程回执](../harness/evidence/s2/receipt.json)
 

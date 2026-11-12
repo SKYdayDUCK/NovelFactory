@@ -54,3 +54,21 @@ def test_deployed_defs_are_identical_to_the_frozen_s0_shapes():
     assert "ContextPacket" in deployed
     for name, contract in deployed.items():
         assert contract == candidates[name]
+
+
+def test_frozen_dynamic_assignment_requires_both_flags_and_remains_optional_for_old_inputs():
+    from novel_factory.contracts.registry import validate_contract
+
+    ref = {"artifact_id": "36ebae0c-7ecb-4e35-ba62-c5951cb426fb",
+           "artifact_revision_id": "c1f7d985-8e7f-4487-908a-e879c0d2895f", "sha256": "d" * 64}
+    baseline = {"schema_version": "2.1", "role_id": "writer", "task_kind": "scene_prose",
+                "runtime_ref": ref, "runtime_sha256": ref["sha256"], "adapter_id": "fixture",
+                "model_config_sha256": "a" * 64, "assignment": "Write the scene.", "material_refs": [],
+                "output_contract": {"name": "AgentTextOutput", "version": "agent"}}
+    assert validate_contract("AgentInput", baseline, "agent") == baseline
+    for disabled in ({}, {"creative_harness": CreativeHarnessConfig(enabled=True).as_dict()}):
+        with pytest.raises(DomainError):
+            validate_contract("AgentInput", {**baseline, **disabled, "dynamic_assignment_ref": ref}, "agent")
+    enabled = {**baseline, "dynamic_assignment_ref": ref,
+               "creative_harness": CreativeHarnessConfig(enabled=True, dynamic_agents=True).as_dict()}
+    assert validate_contract("AgentInput", enabled, "agent") == enabled

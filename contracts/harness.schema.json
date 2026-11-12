@@ -1126,6 +1126,216 @@
         "rubric_scores"
       ],
       "additionalProperties": false
+    },
+    "RoleSkillProposal": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "kind": {
+          "const": "ROLE_SKILL_PROPOSAL"
+        },
+        "scope": {
+          "$ref": "#/$defs/TaskScope"
+        },
+        "candidate": {
+          "$ref": "#/$defs/CandidateIdentity"
+        },
+        "trigger": {
+          "type": "string",
+          "enum": [
+            "SKILL_GAP",
+            "REVIEW_FINDING",
+            "TASK_DEMAND"
+          ]
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+          },
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true
+        },
+        "parent_runtime": {
+          "$ref": "#/$defs/RuntimeSnapshot"
+        },
+        "proposed_role_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "\\S"
+        },
+        "proposed_skill_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "\\S"
+        },
+        "proposed_revision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "\\S"
+        },
+        "instruction_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "requested_workshop_binding": {
+          "$ref": "#/$defs/WorkshopBinding"
+        },
+        "scope_limit": {
+          "type": "object",
+          "properties": {
+            "work_id": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            },
+            "branch_id": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            },
+            "task_modes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "\\S"
+              },
+              "minItems": 1,
+              "maxItems": 32,
+              "uniqueItems": true
+            },
+            "requested_capabilities": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "READ",
+                  "COMPILE",
+                  "TASK_CREATE",
+                  "TASK_CLAIM",
+                  "ARTIFACT_WRITE",
+                  "PLAN_READ"
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 32,
+              "uniqueItems": true
+            },
+            "max_agents": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 128
+            },
+            "expires_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "work_id",
+            "branch_id",
+            "task_modes",
+            "requested_capabilities",
+            "max_agents",
+            "expires_at"
+          ],
+          "additionalProperties": false
+        },
+        "quota": {
+          "$ref": "#/$defs/Quota"
+        },
+        "fallback_runtime": {
+          "$ref": "#/$defs/RuntimeSnapshot"
+        },
+        "status": {
+          "const": "PROPOSED_NOT_INSTALLED"
+        }
+      },
+      "required": [
+        "schema_version",
+        "kind",
+        "scope",
+        "candidate",
+        "trigger",
+        "evidence_refs",
+        "parent_runtime",
+        "proposed_role_id",
+        "proposed_skill_name",
+        "proposed_revision",
+        "instruction_ref",
+        "requested_workshop_binding",
+        "scope_limit",
+        "quota",
+        "fallback_runtime",
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "WorkshopBinding": {
+      "type": "object",
+      "properties": {
+        "org_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "pattern": "\\S"
+        },
+        "installation_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "pattern": "\\S"
+        },
+        "employee_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "pattern": "\\S"
+        },
+        "employment_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "grant_epoch": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "binding_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "skill_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "\\S"
+        },
+        "source_revision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "\\S"
+        },
+        "content_sha": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/Sha256"
+        }
+      },
+      "required": [
+        "org_id",
+        "installation_id",
+        "employee_id",
+        "employment_revision",
+        "grant_epoch",
+        "binding_id",
+        "skill_id",
+        "source_revision",
+        "content_sha"
+      ],
+      "additionalProperties": false
     }
   }
 }
