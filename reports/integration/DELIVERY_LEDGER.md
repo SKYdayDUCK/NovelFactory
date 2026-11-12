@@ -1,5 +1,8 @@
 # 串行交付台账
 
+2026-11-12 接管核实 S0 主线 `1cce11b5f0ead0d6ba4d57658a5ff5533b2ef37b`。唯一开发分支已创建；S1 尚未签收。 [本轮二十节委托](P57_SINGLE_BRANCH_MANDATE.md) · [现场记录](../harness/S1_RECOVERY.md)
+
+
 | 阶段 | PR | 存证状态 | 实际 main SHA 与时间 |
 |---|---|---|---|
 | P5 | [#5](https://github.com/SKYdayDUCK/NovelFactory/pull/5) | 历史合并已核实；工程/原生桌面/恢复的合并依据见 #5。既有 AT-30 保留 | `a8f37b72286163e9117f8874a0e175c61204ff8b`，2026-11-11 13:50:15 UTC |
