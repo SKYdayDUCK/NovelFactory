@@ -1,0 +1,323 @@
+name: S6 native historical compatibility
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, dev/p57-creative-harness-s1-s6]
+    paths:
+      - .github/workflows/p57-history-recheck.yml
+permissions:
+  contents: read
+jobs:
+  qualify:
+    name: qualify / ${{ matrix.suite }}
+    runs-on: ${{ matrix.suite == 'history' && 'ubuntu-22.04' || 'ubuntu-24.04' }}
+    timeout-minutes: 39
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [history]
+    services:
+      nf-db:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_PASSWORD: nf-ci-admin
+        ports: ['5433:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 2s --health-timeout 2s --health-retries 30
+      workshop-db:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_PASSWORD: workshop-ci-admin
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 2s --health-timeout 2s --health-retries 30
+      redis:
+        image: redis:8.0.2
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 2s --health-timeout 2s --health-retries 30
+    env:
+      QUAL_SUITE: ${{ matrix.suite }}
+      PG_BIN: /usr/lib/postgresql/17/bin
+      NF_DATABASE_URL: postgresql+psycopg://nf_service:nf-ci@127.0.0.1:5433/nf_test
+      NF_TEST_DATABASE_URL: postgresql+psycopg://nf_fixture:nf-fixture-ci@127.0.0.1:5433/postgres
+      AW_DATABASE_URL: postgresql://aw_service:workshop-ci@127.0.0.1:5432/workshop_test
+      AW_DUAL_TEST_NF_ADMIN_URL: postgresql://postgres:nf-ci-admin@127.0.0.1:5433/postgres
+      AW_DUAL_TEST_ADMIN_URL: postgresql://postgres:workshop-ci-admin@127.0.0.1:5432/postgres
+      AW_REDIS_TEST_URL: redis://127.0.0.1:6379/0
+      AW_REDIS_URL: redis://127.0.0.1:6379/0
+      NF_TEST_REDIS_URL: redis://127.0.0.1:6379/1
+      NF_P5_CODEX_VERSION: '0.167.0-alpha.4'
+      NF_POOL_SIZE: '8'
+      NF_POOL_OVERFLOW: '0'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Select and verify the exact target commit
+        id: target
+        shell: bash
+        run: |
+          set -euo pipefail
+          target=$(python3 - <<'PY'
+          import os, re
+          from pathlib import Path
+          path = Path("reports/harness/evidence/s6/remote-qualification-target.txt")
+          raw = path.read_bytes() if path.is_file() else os.environ["GITHUB_SHA"].encode("ascii")
+          if not re.fullmatch(rb"[0-9a-f]{40}\n?", raw):
+              raise SystemExit("Qualification target must contain exactly one full commit SHA")
+          print(raw.decode("ascii").strip())
+          PY
+          )
+          cp validation/p57_export_gate_receipt.py "$RUNNER_TEMP/p57-export.py"
+          if ! git cat-file -e "$target^{commit}" 2>/dev/null; then
+            git fetch --no-tags origin "$target"
+          fi
+          test "$(git cat-file -t "$target")" = commit
+          git checkout --detach "$target"
+          test "$(git rev-parse HEAD)" = "$target"
+          tree=$(git rev-parse 'HEAD^{tree}')
+          echo "target=$target" >> "$GITHUB_OUTPUT"
+          echo "tree=$tree" >> "$GITHUB_OUTPUT"
+          mkdir -p "$RUNNER_TEMP/p57-qualification/witness"
+          if [[ "$QUAL_SUITE" = projection ]]; then
+            git diff --exit-code 976e3212fcb42b9251fc2858a3b9d9ce3c3a646c "$target" -- tests/queries tests/service benchmarks/http_load.py
+          fi
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+        with:
+          enable-cache: true
+      - name: Install native PostgreSQL recovery tools and Redis executable
+        shell: bash
+        run: |
+          set -euo pipefail
+          packages=(postgresql-17 postgresql-client-17 redis-server)
+          if [[ "$QUAL_SUITE" = history ]]; then
+            packages+=(util-linux gcc libc6-dev meson ninja-build libcap-dev pkg-config)
+            sed 's/noble/jammy/g' scripts/ci_install_pg17.sh > "$RUNNER_TEMP/install-pg17-jammy.sh"
+            bash "$RUNNER_TEMP/install-pg17-jammy.sh" "${packages[@]}"
+          else
+            bash scripts/ci_install_pg17.sh "${packages[@]}"
+          fi
+          for tool in postgres initdb pg_ctl pg_dump pg_restore pg_basebackup pg_verifybackup; do
+            test -x "$PG_BIN/$tool"
+          done
+          redis-server --version
+      - name: Install the historical offline Codex app-server and native isolation prerequisites
+        if: matrix.suite == 'history'
+        shell: bash
+        run: |
+          set -euo pipefail
+          prefix="$RUNNER_TEMP/novelfactory-codex"
+          npm install --prefix "$prefix" --no-save --no-audit --no-fund "@openai/codex@$NF_P5_CODEX_VERSION"
+          native_bin="$prefix/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/bin"
+          test "$("$native_bin/codex" --version)" = "codex-cli $NF_P5_CODEX_VERSION"
+          echo "$native_bin" >> "$GITHUB_PATH"
+          build="$RUNNER_TEMP/bubblewrap-source"
+          git clone --quiet --depth 1 --branch v0.12.0 https://github.com/containers/bubblewrap.git "$build"
+          test "$(git -C "$build" rev-parse HEAD)" = 2a76602a8c71f36c1527cf9fc3417d9149822e0c
+          meson setup "$build/out" "$build" -Dtests=false -Dman=disabled
+          meson compile -C "$build/out" bwrap
+          mkdir -p "$RUNNER_TEMP/p57-namespace-tools"
+          install -m 0755 "$build/out/bwrap" "$RUNNER_TEMP/p57-namespace-tools/bwrap"
+          echo "$RUNNER_TEMP/p57-namespace-tools" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/p57-namespace-tools/bwrap" --version
+          unshare --user --map-current-user --net -- true
+          unshare --version
+          cc --version
+      - name: Install locked NF dependencies and the Workshop distribution for child processes
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv sync --locked --group dev --python 3.12
+          uv pip install --python .venv/bin/python --no-deps ./workshop
+          test -x .venv/bin/aw-mcp
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
+      - name: Create isolated service owners and historical schema fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          .venv/bin/python - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          import psycopg
+          import redis
+          from psycopg import sql
+
+          archive = Path(os.environ["RUNNER_TEMP"]) / "p57-qualification/witness"
+          history = (
+              "w3_from_w3 w3_from_w3a w4_from_w3_route w4_from_w4 w4_from_w4b "
+              "w5_from_w4c w5_from_w5 w5_from_w5a w5_from_w5b w6_from_w5c w6_from_w006 "
+              "w6_from_w007 w6_from_w008 w6_from_w008a w6_from_rehearsal_early "
+              "w6_from_rehearsal_late w6_from_w009"
+          ).split()
+          roles = {}
+          for name, admin, url, owner, password, database in (
+              ("nf", "AW_DUAL_TEST_NF_ADMIN_URL", "NF_DATABASE_URL", "nf_service", "nf-ci", "nf_test"),
+              ("workshop", "AW_DUAL_TEST_ADMIN_URL", "AW_DATABASE_URL", "aw_service", "workshop-ci", "workshop_test"),
+          ):
+              with psycopg.connect(os.environ[admin], autocommit=True) as root:
+                  system_id, = root.execute("SELECT system_identifier::text FROM pg_control_system()").fetchone()
+                  root.execute(sql.SQL("CREATE ROLE {} LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE PASSWORD {}")
+                               .format(sql.Identifier(owner), sql.Literal(password)))
+                  if name == "nf":
+                      root.execute("CREATE ROLE nf_fixture LOGIN NOSUPERUSER CREATEDB NOCREATEROLE PASSWORD 'nf-fixture-ci'")
+                      if os.environ["QUAL_SUITE"] == "history":
+                          # This disposable fixture owner tears down databases after native processes exit.
+                          root.execute("GRANT pg_signal_backend TO nf_fixture")
+                  names = [database]
+                  if name == "workshop" and os.environ["QUAL_SUITE"] == "workshops-upgrades":
+                      names.extend(history)
+                  for db in names:
+                      root.execute(sql.SQL("CREATE DATABASE {} OWNER {}").format(sql.Identifier(db), sql.Identifier(owner)))
+                      root.execute(sql.SQL("REVOKE CONNECT ON DATABASE {} FROM PUBLIC").format(sql.Identifier(db)))
+              dsn = os.environ[url].replace("postgresql+psycopg://", "postgresql://")
+              with psycopg.connect(dsn) as svc:
+                  flags = svc.execute("SELECT rolsuper, rolcreatedb, rolcreaterole FROM pg_roles WHERE rolname=current_user").fetchone()
+                  assert flags == (False, False, False) and svc.info.server_version == 170011
+                  settings = svc.execute("SELECT current_setting('fsync'), current_setting('synchronous_commit')").fetchone()
+                  assert settings == ("on", "on")
+                  roles[name] = dict(postgres=svc.info.server_version, system_id=system_id, fsync=settings[0],
+                                     synchronous_commit=settings[1], service_role=owner, rolsuper=flags[0],
+                                     rolcreatedb=flags[1], rolcreaterole=flags[2])
+          assert roles["nf"]["system_id"] != roles["workshop"]["system_id"]
+          redis_version = redis.Redis.from_url(os.environ["AW_REDIS_TEST_URL"]).info("server")["redis_version"]
+          assert redis_version == "8.0.2"
+          bin_dir = Path(os.environ["PG_BIN"])
+          versions = {name: subprocess.check_output([bin_dir / name, "--version"], text=True).strip()
+                      for name in ("postgres", "pg_basebackup", "pg_verifybackup", "pg_restore")}
+          record = dict(postgres=roles, redis=redis_version, host_tools=versions)
+          (archive / "services.json").write_text(json.dumps(record, indent=2) + "\n")
+          if os.environ["QUAL_SUITE"] == "workshops-upgrades":
+              base = os.environ["AW_DATABASE_URL"].rsplit("/", 1)[0]
+              envvars = {"AW_W3_FROM_W3": "w3_from_w3", "AW_W3_FROM_W3A": "w3_from_w3a",
+                         "AW_W4_FROM_W3": "w4_from_w3_route", "AW_W4_FROM_W4": "w4_from_w4",
+                         "AW_W4_FROM_W4B": "w4_from_w4b", "AW_W5_FROM_W4C": "w5_from_w4c",
+                         "AW_W5_FROM_W5": "w5_from_w5", "AW_W5_FROM_W5A": "w5_from_w5a",
+                         "AW_W5_FROM_W5B": "w5_from_w5b"}
+              with open(os.environ["GITHUB_ENV"], "a") as export:
+                  for key, db in envvars.items():
+                      print(f"{key}_DATABASE_URL={base}/{db}", file=export)
+                  print("AW_W6_UPGRADE_DATABASE_PREFIX=w6_from_", file=export)
+          PY
+          .venv/bin/python -m alembic upgrade head
+          (cd workshop && "$GITHUB_WORKSPACE/.venv/bin/python" -m alembic upgrade head)
+      - name: Run the checked-in acceptance suite on the selected tree
+        id: suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          receipt="$RUNNER_TEMP/p57-qualification"
+          case "$QUAL_SUITE" in
+            workshops-upgrades)
+              export AW_W4_ROUTING_UPGRADE_EVIDENCE_DIR="$receipt/witness/w4"
+              export AW_W5_UPGRADE_EVIDENCE_DIR="$receipt/witness/w5"
+              export AW_W6_UPGRADE_EVIDENCE_DIR="$receipt/witness/w6"
+              mkdir -p "$receipt/witness/"{w4,w5,w6}
+              ;;
+            projection)
+              export NF_TEST_DATABASE_URL="postgresql+psycopg://postgres:nf-ci-admin@127.0.0.1:5433/postgres"
+              export NF_LOAD_EVIDENCE_DIR="$receipt/witness/http"
+              mkdir -p "$NF_LOAD_EVIDENCE_DIR"
+              ;;
+            history)
+              export NF_P5_PROCESS_EVIDENCE="$receipt/witness/p5-process-resume.json"
+              ;;
+            p6)
+              export NF_P6_AUTHOR_EVIDENCE="$receipt/witness/p6"
+              mkdir -p "$NF_P6_AUTHOR_EVIDENCE"
+              ;;
+          esac
+          .venv/bin/python validation/run_p57_acceptance.py "$QUAL_SUITE" --output "$receipt/suite"
+      - name: Attest the source, denominator and outcome
+        if: always()
+        shell: bash
+        env:
+          TARGET: ${{ steps.target.outputs.target }}
+          TREE: ${{ steps.target.outputs.tree }}
+          SUITE_OUTCOME: ${{ steps.suite.outcome }}
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, subprocess
+          from pathlib import Path
+
+          base = Path(os.environ["RUNNER_TEMP"]) / "p57-qualification"
+          base.mkdir(exist_ok=True)
+          def read_json(name):
+              path = base / "suite" / name
+              return json.loads(path.read_text()) if path.exists() else {}
+          run, cases = read_json("run.json"), read_json("cases.json")
+          counts = cases.get("summary", {})
+          tests = cases.get("tests", [])
+          suite, target, tree = (os.environ[name] for name in ("QUAL_SUITE", "TARGET", "TREE"))
+          success = (os.environ["SUITE_OUTCOME"] == "success" and run.get("suite") == suite
+                     and bool(target and tree) and run.get("source_commit") == target and run.get("exit_code") == 0
+                     and run.get("working_tree_changes") == [] and (base / "suite/cases.xml").is_file()
+                     and counts.get("total") == len(tests) == counts.get("passed", 0) + counts.get("subtests passed", 0) and len(tests) > 0
+                     and all(test.get("outcome") in {"passed", "subtests passed"} for test in tests)
+                     and all(not counts.get(key) for key in ("skipped","xfailed","xpassed","errors","failed")))
+          if target and tree:
+              current = subprocess.run(["git","rev-parse","HEAD","HEAD^{tree}"], text=True, capture_output=True)
+              success = success and current.returncode == 0 and current.stdout.splitlines() == [target,tree]
+          if suite == "workshops-upgrades":
+              by_stage = {f"w{i}": sum(f"test_w{i}_historical_upgrades.py::" in t.get("nodeid","") for t in tests)
+                          for i in range(3,7)}
+              success = success and list(by_stage.values()) == [2,3,4,8]
+          else:
+              by_stage = None
+          if suite == "paired-restore":
+              success = success and (base / "suite/paired-restore.json").is_file()
+          if suite == "history":
+              success = success and (base / "witness/p5-process-resume.json").is_file()
+          files = {str(p.relative_to(base)): hashlib.sha256(p.read_bytes()).hexdigest()
+                   for p in sorted(base.rglob("*")) if p.is_file()}
+          manifest = dict(suite=suite,status="PASS" if success else "FAIL",trigger_sha=os.environ["GITHUB_SHA"],
+                          source_commit=target or None,source_tree=tree or None,counts=counts,
+                          elapsed_seconds=run.get("elapsed_seconds"),historical_origins=by_stage,
+                          native_exit=run.get("exit_code"),suite_step=os.environ["SUITE_OUTCOME"],receipt_sha256=files)
+          (base / "qualification.json").write_text(json.dumps(manifest, indent=2) + "\n")
+          summary = {key:value for key,value in manifest.items() if key != "receipt_sha256"}
+          line = json.dumps(summary, sort_keys=True)
+          print("P57_QUALIFICATION " + line)
+          with open(os.environ["GITHUB_STEP_SUMMARY"],"a") as dst:
+              print("~~~json",line,"~~~",sep="\n",file=dst)
+          raise SystemExit(0 if success else 1)
+          PY
+      - name: Copy the selected public evidence inputs
+        if: success()
+        run: |
+          mkdir -p "ci-evidence/p57-$QUAL_SUITE"
+          cp "$RUNNER_TEMP/p57-qualification/suite/run.json" "$RUNNER_TEMP/p57-qualification/suite/cases.json" "ci-evidence/p57-$QUAL_SUITE/"
+          if [[ "$QUAL_SUITE" = paired-restore ]]; then
+            cp "$RUNNER_TEMP/p57-qualification/suite/paired-restore.json" "ci-evidence/p57-$QUAL_SUITE/"
+          fi
+      - name: Retain public per-case outcomes
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python "$RUNNER_TEMP/p57-export.py" "${{ matrix.suite }}" "ci-evidence/p57-${{ matrix.suite }}"
+          python - "${{ matrix.suite }}" "ci-evidence/p57-${{ matrix.suite }}" <<'PY'
+          import json, os, runpy, sys
+          from pathlib import Path
+          suite, path = sys.argv[1:]
+          ex = runpy.run_path(str(Path(os.environ["RUNNER_TEMP"])/"p57-export.py"))
+          doc = ex["export"](suite, path)
+          for entry in doc["entries"]:
+              result = entry["projection"]
+              if entry["file"] == "cases.json":
+                  result = {"counts": result.get("summary", result.get("counts", {}))}
+              elif entry["file"] not in {"run.json","packaging-evidence.json","paired-restore.json"}:
+                  result = {}
+              print("P57_SAFE_DETAIL", json.dumps({"suite":suite, "file":entry["file"], "sha256":entry["source_sha256"], "bytes":entry["source_bytes"], "data":result}, separators=(",",":")))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p57-supplementary-${{ matrix.suite }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/p57-qualification/
+          if-no-files-found: error
+          retention-days: 14
