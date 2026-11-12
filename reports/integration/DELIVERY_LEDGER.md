@@ -1,6 +1,8 @@
 # 串行交付台账
 
-S2 剧情规划与隔离推演 已在开发分支验证并进入阶段提交。[S2 工程回执](../harness/evidence/s2/receipt.json)
+S3 细粒度文学审核及定向修订 已在开发分支验证并进入阶段提交。[S3 工程回执](../harness/evidence/s3/receipt.json)
+
+S2 剧情规划与隔离推演已推送至开发分支，提交为 `32ef8b3ced7fb5ea06cb25ecd4ccfa436fe9150b`。[远端 Actions 回执](../harness/evidence/s2/remote-receipt.json)。[S2 工程回执](../harness/evidence/s2/receipt.json)
 
 2026-11-12 接管核实 S0 主线 `1cce11b5f0ead0d6ba4d57658a5ff5533b2ef37b`。接管记录已推送（1ef78e6b6a4a22339508de52a854e11a4be65bec）。S1 已推送至开发分支，提交为 `2d47a66f297dd017c6bac3f207abb6f6752cc742`（[远端和物理恢复回执](../harness/evidence/s1/remote-receipt.json)），见 [S1 测试及产品文件摘要](../harness/evidence/s1/receipt.json)。 [本轮二十节委托](P57_SINGLE_BRANCH_MANDATE.md) · [现场记录](../harness/S1_RECOVERY.md)
 

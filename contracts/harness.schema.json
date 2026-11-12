@@ -752,6 +752,380 @@
         "status"
       ],
       "additionalProperties": false
+    },
+    "ReviewReport": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "kind": {
+          "const": "REVIEW_REPORT"
+        },
+        "scope": {
+          "$ref": "#/$defs/TaskScope"
+        },
+        "target_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "review_binding": {
+          "$ref": "#/$defs/IndependentReview"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "ENGINEERING",
+            "LITERARY"
+          ]
+        },
+        "rubric_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Finding"
+          },
+          "minItems": 0,
+          "maxItems": 64
+        },
+        "recommendation": {
+          "type": "string",
+          "enum": [
+            "ACCEPT_CANDIDATE",
+            "REVISE",
+            "REJECT",
+            "INSUFFICIENT_EVIDENCE"
+          ]
+        },
+        "rework_limit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 32
+        },
+        "evaluation": {
+          "$ref": "#/$defs/ReviewEvaluation"
+        },
+        "status": {
+          "const": "ADVISORY"
+        },
+        "independence_policy": {
+          "const": "DISTINCT_PRINCIPALS_AND_NO_SUBSTANTIVE_PROXY"
+        }
+      },
+      "required": [
+        "schema_version",
+        "kind",
+        "scope",
+        "target_ref",
+        "review_binding",
+        "mode",
+        "rubric_ref",
+        "findings",
+        "recommendation",
+        "rework_limit",
+        "evaluation",
+        "status",
+        "independence_policy"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "ENGINEERING"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          },
+          "then": {
+            "properties": {
+              "evaluation": {
+                "$ref": "#/$defs/EngineeringReview"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "LITERARY"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          },
+          "then": {
+            "properties": {
+              "evaluation": {
+                "$ref": "#/$defs/LiteraryReview"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "recommendation": {
+                "enum": [
+                  "REVISE",
+                  "REJECT"
+                ]
+              }
+            },
+            "required": [
+              "recommendation"
+            ]
+          },
+          "then": {
+            "properties": {
+              "findings": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "IndependentReview": {
+      "type": "object",
+      "properties": {
+        "producer": {
+          "$ref": "#/$defs/NFPrincipal"
+        },
+        "reviewer": {
+          "$ref": "#/$defs/NFPrincipal"
+        },
+        "independence_receipt": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        }
+      },
+      "required": [
+        "producer",
+        "reviewer",
+        "independence_receipt"
+      ],
+      "additionalProperties": false
+    },
+    "Finding": {
+      "type": "object",
+      "properties": {
+        "dimension": {
+          "type": "string",
+          "enum": [
+            "FACT",
+            "KNOWLEDGE",
+            "MOTIVATION",
+            "VOICE",
+            "CONTINUITY",
+            "CAUSALITY",
+            "PACING",
+            "STYLE",
+            "EVIDENCE",
+            "OTHER"
+          ]
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "NOTE",
+            "MINOR",
+            "MAJOR",
+            "BLOCKER"
+          ]
+        },
+        "target_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "text_span": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/TextSpan"
+        },
+        "judgment": {
+          "type": "string",
+          "enum": [
+            "SUPPORTED",
+            "CONTRADICTION",
+            "UNCERTAIN",
+            "PREFERENCE"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000,
+          "pattern": "\\S"
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EvidenceRef"
+          },
+          "minItems": 0,
+          "maxItems": 64
+        },
+        "requested_change": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000,
+              "pattern": "\\S"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "dimension",
+        "severity",
+        "target_ref",
+        "text_span",
+        "judgment",
+        "reason",
+        "evidence_refs",
+        "requested_change"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "judgment": {
+                "type": "string",
+                "enum": [
+                  "SUPPORTED",
+                  "CONTRADICTION"
+                ]
+              }
+            },
+            "required": [
+              "judgment"
+            ]
+          },
+          "then": {
+            "properties": {
+              "evidence_refs": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ReviewEvaluation": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/EngineeringReview"
+        },
+        {
+          "$ref": "#/$defs/LiteraryReview"
+        }
+      ]
+    },
+    "EngineeringReview": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "ENGINEERING"
+        },
+        "check_receipts": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+          },
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true
+        },
+        "literary_conclusion": {
+          "const": "NOT_EVALUATED"
+        }
+      },
+      "required": [
+        "kind",
+        "check_receipts",
+        "literary_conclusion"
+      ],
+      "additionalProperties": false
+    },
+    "LiteraryReview": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "LITERARY"
+        },
+        "reader_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "blind_sample_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "blind_assignment_receipt": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "reading_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "rubric_scores": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "dimension": {
+                "type": "string",
+                "enum": [
+                  "CAUSALITY",
+                  "KNOWLEDGE",
+                  "MOTIVATION",
+                  "VOICE",
+                  "PACING",
+                  "PROSE",
+                  "OTHER"
+                ]
+              },
+              "score": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5
+              },
+              "passage": {
+                "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/TextSpan"
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000,
+                "pattern": "\\S"
+              }
+            },
+            "required": [
+              "dimension",
+              "score",
+              "passage",
+              "reason"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 16
+        }
+      },
+      "required": [
+        "kind",
+        "reader_id",
+        "blind_sample_id",
+        "blind_assignment_receipt",
+        "reading_ref",
+        "rubric_scores"
+      ],
+      "additionalProperties": false
     }
   }
 }

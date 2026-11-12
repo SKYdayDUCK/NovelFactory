@@ -358,8 +358,8 @@ class NarrativeService:
             self.kernel._receipt(repo, principal, spec["world_ref"], "NARRATIVE_READ_BIND", idempotency_key, request, ref)
         return ref
 
-    def _reader_binding(self, repo, principal, task_id, generation, draft_ref):
-        task, grant, spec, context = self._task(repo, principal, task_id, generation)
+    def _reader_binding(self, repo, principal, task_id, generation, draft_ref, *, allow_accepted=False):
+        task, grant, spec, context = self._task(repo, principal, task_id, generation, allow_accepted=allow_accepted)
         require(grant["role_id"] in {"writer", "reviewer", "evidence_maintainer", "literary_editor", "chief_editor", "volume_director", "control_operator"},
                 "VIEW_DENIED", "Role cannot read literary source text")
         plane = context["read_cut"]["knowledge_cut"]["plane"]
@@ -450,7 +450,7 @@ class NarrativeService:
             self.kernel._receipt(repo, principal, spec["world_ref"], "NARRATIVE_EXTRACTION", idempotency_key, request, ref)
         return ref
 
-    def _extraction(self, repo, extraction_ref, draft_ref, draft):
+    def _extraction(self, repo, extraction_ref, draft_ref, draft, *, allow_accepted=False):
         wid = draft["input_world_ref"]["work_id"]
         extraction = self._artifact(repo, extraction_ref, wid, "ASSERTION_EXTRACTION")
         require(extraction["draft_ref"] == draft_ref and extraction["text_ref"] == draft["text_ref"] and extraction["scene_ref"] == draft["scene_ref"],
@@ -458,7 +458,8 @@ class NarrativeService:
         task = repo.one("tasks", {"task_id": extraction["task_id"]})
         require(task and task["generation"] == extraction["generation"], "STALE_GENERATION", "Extraction generation is no longer current")
         principal = Principal(task["grant_id"], task["principal_id"])
-        _, grant, _, _ = self._reader_binding(repo, principal, task["task_id"], task["generation"], draft_ref)
+        _, grant, _, _ = self._reader_binding(repo, principal, task["task_id"], task["generation"], draft_ref,
+                                                    allow_accepted=allow_accepted)
         require(grant["role_id"] in {"evidence_maintainer", "reviewer", "control_operator"}, "VIEW_DENIED", "Extraction source is not eligible")
         delivery = self._artifact(repo, extraction["delivery_ref"], wid, "TEXT_DELIVERY")
         require(delivery["task_id"] == task["task_id"] and delivery["generation"] == task["generation"]

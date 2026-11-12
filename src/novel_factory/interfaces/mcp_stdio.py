@@ -17,6 +17,7 @@ from novel_factory.application.audit_log import LogService
 from novel_factory.application.agent_gateway import _inline_schema
 from novel_factory.application.kernel import Kernel
 from novel_factory.application.mcp_runtime import CreativeControllerBinding, McpRuntime, ProjectBinding, TaskBinding
+from novel_factory.domain.creative_review import RUBRICS
 from novel_factory.domain.errors import DomainError
 from novel_factory.infrastructure.database import Database
 from novel_factory.infrastructure.objects import ObjectStore
@@ -35,7 +36,50 @@ _ARTIFACT = object_schema(artifact_id=_UUID, artifact_revision_id=_UUID,
 _EVENT = object_schema(occurrence_id=_UUID, event_version_id=_UUID)
 _REASON = {"type": "string", "minLength": 1, "maxLength": 10000}
 _KEY = {"type": "string", "minLength": 1, "maxLength": 96}
+_SPAN_OFFSET = {"type": "integer", "minimum": 0}
+_REVIEW_OBSERVATION = object_schema(
+    optional=("severity", "disposition", "speakers"),
+    pattern={"enum": sorted({pattern for layer in RUBRICS.values() for pattern in layer})},
+    start=_SPAN_OFFSET, end=_SPAN_OFFSET,
+    reason={"type": "string", "minLength": 1, "maxLength": 2000},
+    counterinterpretation={"type": "string", "minLength": 1, "maxLength": 2000},
+    narrative_function={"type": "string", "minLength": 1, "maxLength": 1000},
+    requested_change={"anyOf": [{"type": "string", "minLength": 1, "maxLength": 1000}, {"type": "null"}]},
+    related_spans={"type": "array", "maxItems": 32,
+                   "items": object_schema(text_ref=_ARTIFACT, start=_SPAN_OFFSET, end=_SPAN_OFFSET)},
+    speakers={"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "string", "minLength": 1}},
+    severity={"enum": ["NOTE", "MINOR", "MAJOR", "BLOCKER"]},
+    disposition={"enum": ["QUESTION", "PREFERENCE", "PRESERVE"]},
+)
+
 _TOOLS = {
+    "nf_harness_review_independence": ("Verify the named review assignment and manuscript against trusted subject records.",
+        object_schema(task_id=_UUID, generation={"type": "integer", "minimum": 1}, manuscript_ref=_ARTIFACT)),
+    "nf_harness_review_read": ("Read the exact assigned manuscript and obtain a coverage receipt.",
+        object_schema(draft_ref=_ARTIFACT, idempotency_key=_KEY)),
+    "nf_harness_review_submit": ("Report precisely located literary findings for the assigned manuscript.",
+        object_schema(optional=("prior_report_ref", "related_independence_refs"), binding=_inline_schema("EditorialBinding", "editorial"),
+                      target_ref=_ARTIFACT, independence_ref=_ARTIFACT,
+                      related_independence_refs={"type": "array", "maxItems": 127, "items": _ARTIFACT},
+                      scope_draft_refs={"type": "array", "minItems": 1, "maxItems": 128, "items": _ARTIFACT},
+                      coverage_refs={"type": "array", "minItems": 1, "maxItems": 512, "items": _ARTIFACT},
+                      layer={"enum": list(RUBRICS)},
+                      observations={"type": "array", "maxItems": 64, "items": _REVIEW_OBSERVATION},
+                      quota=_inline_schema("Quota", "harness"), rework_limit={"type": "integer", "minimum": 0, "maximum": 32},
+                      prior_report_ref={"anyOf": [_ARTIFACT, {"type": "null"}]}, idempotency_key=_KEY)),
+    "nf_harness_review_withdraw": ("Withdraw a review written by this assigned reviewer.",
+        object_schema(report_ref=_ARTIFACT, reason=_REASON, idempotency_key=_KEY)),
+    "nf_harness_review_decide": ("Record an authorized editorial response to the cited draft and review.",
+        object_schema(optional=("native_decision",), task_id=_UUID, generation={"type": "integer", "minimum": 1}, report_ref=_ARTIFACT,
+                      action={"enum": ["RETURN", "RETAIN", "ACCEPT_REVISION", "DEFER", "WITHDRAW"]},
+                      reason=_REASON, native_decision=_inline_schema("EditDecisionRequest", "editorial"), idempotency_key=_KEY)),
+    "nf_harness_revision_brief": ("Read the returned author-facing findings for the assigned manuscript.",
+        object_schema(report_ref=_ARTIFACT)),
+    "nf_harness_revise": ("Revise only the assigned finding spans and retain the source draft.",
+        object_schema(report_ref=_ARTIFACT, scene_ref=_ARTIFACT,
+                      replacements={"type": "array", "minItems": 1, "maxItems": 64,
+                                    "items": object_schema(finding_id=_UUID, replacement={"type": "string", "maxLength": 32000})},
+                      idempotency_key=_KEY)),
     "nf_harness_plan_propose": ("Derive bounded conditional alternatives from the assigned plan.",
         object_schema(optional=("horizon_scenes",), plan_ref=_ARTIFACT,
                       node_ids={"type": "array", "items": _UUID, "minItems": 1, "maxItems": 8, "uniqueItems": True},
@@ -130,7 +174,12 @@ def make_server(runtime, *, ceiling=None):
                 return tool_error("INVALID_ARGUMENT")
             if name in {"nf_project_status", "nf_resume_project"}:
                 return await asyncio.to_thread(runtime.project, resume=name == "nf_resume_project")
+            if name in {"nf_harness_review_read", "nf_harness_review_submit", "nf_harness_review_withdraw",
+                        "nf_harness_revision_brief", "nf_harness_revise"}:
+                return await asyncio.to_thread(runtime.creative_review_call, name, **arguments)
             methods = {
+                "nf_harness_review_decide": "decide_creative_review",
+                "nf_harness_review_independence": "issue_review_independence",
                 "nf_harness_plan_propose": "propose_creative_plan", "nf_harness_simulate": "simulate_creative_plan",
                 "nf_harness_plan_decide": "decide_creative_plan", "nf_rolling_window_submit": "submit_window",
                 "nf_change_point_request": "request_change", "nf_change_point_review": "review_change",

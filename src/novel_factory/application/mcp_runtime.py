@@ -45,7 +45,8 @@ class McpRuntime:
 
                 self._creative_authority(repo)
                 if CreativeHarnessConfig.from_env().enabled:
-                    return ["nf_harness_simulate", "nf_harness_plan_decide"]
+                    return ["nf_harness_simulate", "nf_harness_plan_decide", "nf_harness_review_independence",
+                            "nf_harness_review_decide"]
                 return []
             if isinstance(self.binding, ProjectBinding):
                 self._project_auth(repo.conn)
@@ -76,6 +77,15 @@ class McpRuntime:
                        "artifact_put": "ARTIFACT_WRITE"}
             names = ["nf_" + name for name, cap in ceiling.items()
                      if name in requested and cap in grant["capabilities"]]
+            if creative_enabled and "ARTIFACT_WRITE" in grant["capabilities"]:
+                role = grant["role_id"]
+                if role in {"reviewer", "literary_editor", "chief_editor", "writer"} and "evidence_read" in requested:
+                    names.append("nf_harness_review_read")
+                if role in {"reviewer", "literary_editor", "chief_editor"} and "review_submit" in requested:
+                    names.extend(("nf_harness_review_submit", "nf_harness_review_withdraw"))
+                if (role == "writer" and task["task_kind"] == "targeted_revision"
+                        and {"artifact_put", "draft_submit"} <= requested):
+                    names.extend(("nf_harness_revision_brief", "nf_harness_revise"))
             if {"PLAN_READ", "ARTIFACT_WRITE"} <= set(grant["capabilities"]):
                 if (creative_enabled and grant["role_id"] == "volume_director"
                         and "plan_propose" in requested and context["read_cut"]["knowledge_cut"]["plane"] == "PLAN"):
@@ -90,6 +100,24 @@ class McpRuntime:
                     if "review-change-point" in skills and "review_submit" in requested:
                         names.append("nf_change_point_review")
             return names
+
+    def creative_review_call(self, tool, **arguments):
+        from .creative_review import CreativeReviewService
+
+        require(tool in self.available_tools(), "VIEW_DENIED", "Creative review operation unavailable")
+        service = CreativeReviewService(self.kernel)
+        if tool == "nf_harness_revision_brief":
+            from .creative_revision_brief import CreativeRevisionBriefService
+
+            method = CreativeRevisionBriefService(self.kernel).read
+        elif tool == "nf_harness_review_withdraw":
+            arguments["action"] = "WITHDRAW"
+            method = service.decide
+        else:
+            method = {"nf_harness_review_read": service.read, "nf_harness_review_submit": service.review,
+                      "nf_harness_revise": service.revise}[tool]
+        return method(self.principal, self.binding.task_id, self.binding.generation,
+                      worker_id=self.binding.worker_id, **arguments)
 
     def _creative_authority(self, repo, task_id=None):
         binding = self.binding
@@ -113,6 +141,22 @@ class McpRuntime:
         with self.kernel.db.uow(write=False) as repo:
             self._creative_authority(repo, arguments["task_id"])
         return operation(self.principal, **arguments)
+
+    def issue_review_independence(self, *, task_id, generation, manuscript_ref):
+        from .review_independence import ReviewIndependenceService
+
+        require("nf_harness_review_independence" in self.available_tools(), "VIEW_DENIED",
+                "Review independence operation unavailable")
+        with self.kernel.db.uow(write=False) as repo:
+            self._creative_authority(repo, task_id)
+        return ReviewIndependenceService(self.kernel).issue(self.principal, manuscript_ref=manuscript_ref,
+                                                             reviewer_task_id=task_id, reviewer_generation=generation)
+
+    def decide_creative_review(self, **arguments):
+        from .creative_review import CreativeReviewService
+
+        return self._creative_controller_call(
+            "nf_harness_review_decide", CreativeReviewService(self.kernel).decide, arguments)
 
     def simulate_creative_plan(self, **arguments):
         from .creative_simulation import CreativeSimulationService

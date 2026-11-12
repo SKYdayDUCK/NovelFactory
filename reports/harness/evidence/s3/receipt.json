@@ -1,0 +1,94 @@
+{
+  "stage": "S3",
+  "name": "细粒度文学审核及定向修订",
+  "branch": "dev/p57-creative-harness-s1-s6",
+  "base_commit": "32ef8b3ced7fb5ea06cb25ecd4ccfa436fe9150b",
+  "product_tree_before_evidence": "5bfc94bb6f3ea914e9f830c835a9225d55324fc9",
+  "tested_blobs": {
+    "contracts/harness.schema.json": "2a0492a510c3725146adc2b3ab86decb22cb311e",
+    "src/novel_factory/application/creative_review.py": "e64bc8d6067fb1b3ea077251a6f227d688a3f682",
+    "src/novel_factory/application/creative_revision_brief.py": "cd0adea58a56b5581a4c0b59af83061051885d1f",
+    "src/novel_factory/application/mcp_runtime.py": "5bbd47f790391311928573cb162bb50ffffb8e5d",
+    "src/novel_factory/application/narrative.py": "fe5c18e064892241d33630e6b9c8049557a586bb",
+    "src/novel_factory/application/review_independence.py": "4034493d5c384b9fc8eb900023415196112b8263",
+    "src/novel_factory/contracts/_schema_bundle.py": "76aadeda8854ef600be12d2cc59dab1363710798",
+    "src/novel_factory/domain/creative_review.py": "bb36f6de0f3742af6eda1ae245cb40df71240d88",
+    "src/novel_factory/interfaces/mcp_stdio.py": "c3ae0d201b0e7010d7e8075e4fb3870499ff690a",
+    "src/novel_factory/interfaces/review_independence.py": "a21ced5a9b2ebf473e7469b0bbae0d29fb09b56f",
+    "tests/integration/harness_review_helpers.py": "40cb572f51b5c38e19d3fd9b27b45f65f2856934",
+    "tests/integration/test_harness_literary_mcp.py": "d9ef8c2ba420f25c9d26aee685d0c5b5fda9ba76",
+    "tests/integration/test_harness_review_workflow.py": "c0d716a5bd9a75593ebba1030b240298b2a0d4d1",
+    "tests/integration/test_harness_revision_brief.py": "e20016db858f33e40c3de06ca6c6022bcb26f783",
+    "tests/integration/test_review_independence.py": "0aaf2cc0c89c6e4be704da8afc3e7c02256e282b",
+    "tests/unit/test_creative_review_rubrics.py": "157da885359b2cc9ba669aa1989e3b7a8b6d1666",
+    "workshop/integration/test_creative_review_independence.py": "2fbe9cc428225cdbcb0552be83f04c387c8c9bb3",
+    "workshop/src/agent_workshop/review_independence.py": "a394e0e3ef37d0b97d4269277701ec0ee2d579a6",
+    "workshop/src/agent_workshop/server.py": "6975112eabd6088159b048900e67e1693008f75b"
+  },
+  "postgres": "17.11",
+  "model": "deterministic engine or fixture",
+  "paid_calls": 0,
+  "literary_quality": "NOT_EVALUATED",
+  "verification": "测试从真实 stdio、双 PostgreSQL 17.11、NF 原生编辑以及 Workshop W4 委托进入。九类规则验证引文、合理反解释、原样保留与认知切面。两个不同稿件或审稿凭证的组合覆盖撤权、乱序和重放。工作流核对定向修改前后版本、独立复核、最终编辑决定和累计额度。单批支持的 128 个引用是输入上限，测试覆盖两项不同的 Workshop 凭证。下一阶段需把动态版本在现有 NF Grant、Workshop 授权及任务代际交集中实际冻结，关闭时保持现有静态路径。",
+  "runs": {
+    "final": {
+      "file": "final.json.gz",
+      "summary": {
+        "passed": 27,
+        "total": 27,
+        "collected": 27
+      },
+      "seconds": 93.98435521125793
+    },
+    "editorial_and_stdio": {
+      "file": "editorial_and_stdio.json.gz",
+      "summary": {
+        "passed": 41,
+        "total": 41,
+        "collected": 41
+      },
+      "seconds": 134.58185052871704
+    },
+    "prior_harness_contracts": {
+      "file": "prior_harness_contracts.json.gz",
+      "summary": {
+        "passed": 123,
+        "total": 123,
+        "collected": 123
+      },
+      "seconds": 42.91888999938965
+    },
+    "historical_w3_w4": {
+      "file": "historical_w3_w4.json.gz",
+      "summary": {
+        "passed": 1,
+        "total": 1,
+        "collected": 1
+      },
+      "seconds": 9.33599066734314
+    },
+    "historical_route_upgrades": {
+      "file": "historical_route_upgrades.json.gz",
+      "summary": {
+        "passed": 3,
+        "total": 3,
+        "collected": 3
+      },
+      "seconds": 19.377559900283813
+    }
+  },
+  "earlier_failures": [
+    "first_stdio.txt.gz",
+    "kind_mismatch.txt.gz",
+    "early_combined.txt.gz",
+    "missing_workshop_fixture_root.txt.gz",
+    "historical_database_fixture.txt.gz"
+  ],
+  "final_services": {
+    "postgres_nf_id": 7707192854344413218,
+    "postgres_workshop_id": 7707192854412767267,
+    "distinct_clusters": true,
+    "redis": "8.0.2"
+  },
+  "earlier_failure_resolution": "原生审稿凭证种类统一后单案签发、消费和重放通过。作者写接口和简报共用授权时的过渡版本已在冻结树复测。历史库分配和双服务源目录按原生 CI 配置注入后全部重跑通过。"
+}
