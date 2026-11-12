@@ -1,5 +1,10 @@
 # PRE_HARNESS_BASELINE
 
+**正式门禁已于 2026-11-12 通过。** [#27](https://github.com/SKYdayDUCK/NovelFactory/pull/27) 的 main SHA 为 [`276820316129d546b0a13118bcbe283b06507795`](https://github.com/SKYdayDUCK/NovelFactory/commit/276820316129d546b0a13118bcbe283b06507795)。PR 测试、合并与主线复验的文件树相同。主线 JUnit 为 PostgreSQL 835 项通过、17 项跳过，另有 17 个子测试通过；Schema 403 项通过，另有 17 个子测试通过。复验后开放列表中唯一条目为 Scion #4。原 XML、运行、开放清单及签收时间见[不可变门禁签收](https://github.com/SKYdayDUCK/NovelFactory/blob/1b0302a6867c56f5871c0b570477d88dc1ffe0a7/reports/integration/PRE_HARNESS_BASELINE.md)。
+
+## 归档提交前的现场
+
+
 2026-11-12 04:42:54 UTC，最后一项存量实验 #18 已按证据归档关闭。GitHub Open PR 查询仅返回 [Scion #4](https://github.com/SKYdayDUCK/NovelFactory/pull/4)，保留其原分支和头 `4f249d520c921c8d6effee9978f7338b912f1dd0`。这一查询发生在提交本归档 PR 之前。经过生产代码及双服务验收的主线是 `0420356b0bd0bfd675494e581799946c4b967f6e`。[原始列表快照](evidence/S9-PR18/open-after-closure.json)。
 
 | 验收范围 | 交付与边界 |

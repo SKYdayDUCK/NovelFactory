@@ -1,0 +1,785 @@
+{
+  "schema_version": 1,
+  "source_commit": "276820316129d546b0a13118bcbe283b06507795",
+  "entry_count": 77,
+  "scope": "冻结 2768203 的原始文件，记录静态消费路径/历史执行凭据，不代表新轮次的模型输入或人评。根 SKILLS.md 的 S0 导航更正另留在变更集。",
+  "visibility_legend": {
+    "developer_only": "项目作者或开发 Host 的导航/指令，角色运行时不读取",
+    "runtime_selected": "只在对应角色＋所选唯一技能的快照中，源码可证明消费方式",
+    "runtime_metadata": "目录或导航。选择器/策略读取索引，链接的 README 不自动进入 system",
+    "service_only": "供控制器、服务或运维使用，不作为角色 Markdown 自动加载",
+    "historical_observation": "现有源文、审读状态、夹具或原始回执，按注明范围理解"
+  },
+  "entries": [
+    {
+      "path": "AGENTS.md",
+      "category": "root_instruction",
+      "visibility": "developer_only",
+      "line_start": 3,
+      "line_end": 82,
+      "finding": "开发 Agent 读局部规范、区分作者恢复和开发；世界、正文、内部发布、外部交付分开。第 4 行是历史接管说明，第 82 行才指向当前台账。",
+      "next_stage": "保留服务不变量；阶段现状由 CURRENT_STAGE 读取，勿复制到人物说明。",
+      "git_blob": "ede2e8d8afc8259a34b1ffd2c1ed1268c83738d5"
+    },
+    {
+      "path": "SKILLS.md",
+      "category": "root_instruction",
+      "visibility": "developer_only",
+      "line_start": 3,
+      "line_end": 55,
+      "finding": "开发表仅列六项，作者恢复另在根入口。运行表仅列九项，实际目录十二项；第 22 行称可加载必要辅助技能，snapshot 实际只冻结一项。",
+      "next_stage": "S0 校正导航，运行时仍以固定提交代码为准；任意后续组合加载须另行验证。",
+      "git_blob": "9b6bdb5c6b444edd473b28a1f840e99fa2b72696"
+    },
+    {
+      "path": ".agents/skills/nf-concurrency-review/SKILL.md",
+      "category": "development_skill",
+      "visibility": "developer_only",
+      "line_start": 14,
+      "line_end": 27,
+      "finding": "固定读取切面，检查空查询、ABA 与并发；容量与模型在途量分别取证。",
+      "next_stage": "以后改编译或缓存时运行其并发反例；演员无须看到锁竞争术语。",
+      "git_blob": "fcbc1ec729fa9885f4a672c2fa8820cbffb3c427"
+    },
+    {
+      "path": ".agents/skills/nf-contract-change/SKILL.md",
+      "category": "development_skill",
+      "visibility": "developer_only",
+      "line_start": 14,
+      "line_end": 30,
+      "finding": "明确契约归属、版本、可信身份与非法输入；区分 Schema 符合和授权。",
+      "next_stage": "转换给角色的用户可读材料时保留原 DTO、授权和错误码对照。",
+      "git_blob": "2c9eee532cc0e081c2954487a79771685011c39a"
+    },
+    {
+      "path": ".agents/skills/nf-kernel-change/SKILL.md",
+      "category": "development_skill",
+      "visibility": "developer_only",
+      "line_start": 16,
+      "line_end": 32,
+      "finding": "区分世界、正文与派生结果；用真实数据库验证幂等与跨分支反例。",
+      "next_stage": "将不变条件保在接受服务，给编剧角色的材料展示已批准后果。",
+      "git_blob": "54e6adcda5c093e5679e5fd73fce1f97fe295d17"
+    },
+    {
+      "path": ".agents/skills/nf-pipeline-change/SKILL.md",
+      "category": "development_skill",
+      "visibility": "developer_only",
+      "line_start": 14,
+      "line_end": 31,
+      "finding": "覆盖交接、固定快照、披露、有限返工和创作建议，明定工程与文学独立验收。",
+      "next_stage": "后续改稿同时回归无权限变化、分段证据与独立审读。",
+      "git_blob": "a66e552031c03fec4c6fc3deb58cb7f06197a745"
+    },
+    {
+      "path": ".agents/skills/nf-recovery-check/SKILL.md",
+      "category": "development_skill",
+      "visibility": "developer_only",
+      "line_start": 14,
+      "line_end": 30,
+      "finding": "恢复重放不调用模型；旧代排除，UNKNOWN 对账后处理。",
+      "next_stage": "每次指令发布须能按原输入重放，失败与 UNKNOWN 计入比较。",
+      "git_blob": "060b1224af62d0e850472aeade44f34fc1316394"
+    },
+    {
+      "path": ".agents/skills/nf-research-evidence/SKILL.md",
+      "category": "development_skill",
+      "visibility": "developer_only",
+      "line_start": 14,
+      "line_end": 28,
+      "finding": "核对原始来源，区分研究报告、项目推论与实测，不可自动提升为业务规则。",
+      "next_stage": "作品风格建议附适用情境和反例，保留作者取舍。",
+      "git_blob": "cf338a6143f6b24e6e0c877d8d7c5ec2afa979c6"
+    },
+    {
+      "path": ".agents/skills/nf-resume/SKILL.md",
+      "category": "development_skill",
+      "visibility": "developer_only",
+      "line_start": 3,
+      "line_end": 6,
+      "finding": "作者从项目 MCP 单次唤醒，报告实际状态；管理待办去重，不认领人物、不找管理员令牌。",
+      "next_stage": "保留作者入口与人物连续对白的身份隔离，并把该项补入导航。",
+      "git_blob": "e14515ec7093edc2b76cc764f06d3c544945b25e"
+    },
+    {
+      "path": "runtime/roles/adjudication_advisor.md",
+      "category": "runtime_role",
+      "visibility": "runtime_selected",
+      "line_start": 3,
+      "line_end": 46,
+      "finding": "联合裁决使用同组意图与成本，产出候选，定序不能取决于先交稿者。 第3行标2.0.0，目录供快照使用的版本为2.1.0。",
+      "next_stage": "以竞争同一物件、双方均合理为例，裁决说明与演员所见分开。",
+      "git_blob": "de72b4730453a542d63e07c06a4e9d7eb7841799"
+    },
+    {
+      "path": "runtime/roles/character_actor.md",
+      "category": "runtime_role",
+      "visibility": "runtime_selected",
+      "line_start": 3,
+      "line_end": 46,
+      "finding": "角色仅凭自身 BELIEF，允许拒绝、等待和离场；材料夹杂全知时报告污染。 第3行标2.0.0，目录供快照使用的版本为2.1.0。",
+      "next_stage": "按当时可见消息核对角色动机；保留不知道、误信与故意隐瞒三种差别。",
+      "git_blob": "89f0910970c8daf55fe764784ebfeb5f0bd9f029"
+    },
+    {
+      "path": "runtime/roles/chief_editor.md",
+      "category": "runtime_role",
+      "visibility": "runtime_selected",
+      "line_start": 23,
+      "line_end": 52,
+      "finding": "可就创作分歧作决定，重大偏离绑定版本；总编无世界写权，返工有上限。",
+      "next_stage": "盲审检查批准/退回的具体代价及真分歧，留存普通稿原样通过。",
+      "git_blob": "b269adc138563a2210c6b3132ad3d074aedfee2e"
+    },
+    {
+      "path": "runtime/roles/environment_director.md",
+      "category": "runtime_role",
+      "visibility": "runtime_selected",
+      "line_start": 3,
+      "line_end": 48,
+      "finding": "允许过程变化或无变化；对环境的授权不包括读取密封意图和决定胜负。 第3行标2.0.0，目录供快照使用的版本为2.1.0。",
+      "next_stage": "用潮闸木楔受力与环境无变化成对检查，防止每场都用灾祸逼选。",
+      "git_blob": "bf2970ad056e7840354aa51a67dd5e60a0984a13"
+    },
+    {
+      "path": "runtime/roles/evidence_maintainer.md",
+      "category": "runtime_role",
+      "visibility": "runtime_selected",
+      "line_start": 3,
+      "line_end": 48,
+      "finding": "抽取、对账和摘要绑定精确原文；证据候选不能替人审稿。 第3行标2.0.0，目录供快照使用的版本为2.1.0。",
+      "next_stage": "保存原句、人物所知时点、反证和不确定范围；正文不写断言分类。",
+      "git_blob": "cf85549346d983b2654cd9b1e0233780ecb88a92"
+    },
+    {
+      "path": "runtime/roles/literary_editor.md",
+      "category": "runtime_role",
+      "visibility": "runtime_selected",
+      "line_start": 3,
+      "line_end": 48,
+      "finding": "分研究、结构、接缝与跨卷；可保留原稿，全文覆盖不足不能宣布整卷通过。 第3行标2.0.0，目录供快照使用的版本为2.1.0。",
+      "next_stage": "后续抽查是否为个别声音举出好例，保留有意停顿、直接抒情与多视角差异。",
+      "git_blob": "827c770fec845193f33bd35b9c2b154d196ce8d1"
+    },
+    {
+      "path": "runtime/roles/reviewer.md",
+      "category": "runtime_role",
+      "visibility": "runtime_selected",
+      "line_start": 3,
+      "line_end": 46,
+      "finding": "先看证据；区分合理误信、倒叙、谎言、硬问题和审美分歧。 第3行标2.0.0，目录供快照使用的版本为2.1.0。",
+      "next_stage": "用误报与漏报相配的盲审，记录原句、权限、反解释与建议影响。",
+      "git_blob": "e381e4077a412d445574bf0e06fbc3a1a33b3471"
+    },
+    {
+      "path": "runtime/roles/volume_director.md",
+      "category": "runtime_role",
+      "visibility": "runtime_selected",
+      "line_start": 13,
+      "line_end": 50,
+      "finding": "先看局部影响与可行路径；正文末尾另列 volume_review、replan 的不同技能与任务，前部名单未完整反映它们。",
+      "next_stage": "导览与 catalog 对齐；看改走书信是否保留缺席代价及未受影响节点。",
+      "git_blob": "653e2c3d39e340cf62b0a674e374be33a8295bc7"
+    },
+    {
+      "path": "runtime/roles/world_designer.md",
+      "category": "runtime_role",
+      "visibility": "runtime_selected",
+      "line_start": 3,
+      "line_end": 46,
+      "finding": "设定、历史与未知分开；新规则提交候选，不能靠补设定抹去代价。 第3行标2.0.0，目录供快照使用的版本为2.1.0。",
+      "next_stage": "提供各类型世界的制度和物理依据；允许世界中的技术职业说专业话。",
+      "git_blob": "8e943fda3ffd041eea0c7b2c80af1b93e9864405"
+    },
+    {
+      "path": "runtime/roles/writer.md",
+      "category": "runtime_role",
+      "visibility": "runtime_selected",
+      "line_start": 3,
+      "line_end": 46,
+      "finding": "强调自主对白、意象、留白和普通细节，同时要求提交版本、工具、事件关联及重要增量。 第3行标2.0.0，目录供快照使用的版本为2.1.0。",
+      "next_stage": "对照同一场景的正文、提交外壳与变更说明，检查系统词进入叙述的具体位置。",
+      "git_blob": "82ac1d95540599fd607eed21c6c74e5b4ee75dc1"
+    },
+    {
+      "path": "runtime/skills/adjudicate-actions/SKILL.md",
+      "category": "runtime_skill",
+      "visibility": "runtime_selected",
+      "line_start": 17,
+      "line_end": 27,
+      "finding": "明确拆分环境过程任务与独立联合裁决；环境模式无法取得整组人物意图。",
+      "next_stage": "候选返给人物前按视角裁剪；保留竞争失败与合法未知。",
+      "git_blob": "56a19bfd88d0d612aeec5590c2f91da3fa01ddd0"
+    },
+    {
+      "path": "runtime/skills/edit-volume/SKILL.md",
+      "category": "runtime_skill",
+      "visibility": "runtime_selected",
+      "line_start": 18,
+      "line_end": 39,
+      "finding": "按结构、接缝、语言顺序通读并比较小范围方案；不按章平均分判整卷。",
+      "next_stage": "保留无需修订组和不同声音，衡量改动是否确实有益。",
+      "git_blob": "1d5b721d8629b3513e9eb00b4981a51ea3721e6c"
+    },
+    {
+      "path": "runtime/skills/maintain-memory/SKILL.md",
+      "category": "runtime_skill",
+      "visibility": "runtime_selected",
+      "line_start": 17,
+      "line_end": 27,
+      "finding": "维护者可核事实，文学编辑只能用已交付材料；解释、读者反应假设与事实分列。",
+      "next_stage": "用同一段对白分别存事实、解释与反例，不把推断升为人物心理事实。",
+      "git_blob": "a2d19c5a220da6765d501a6fad51ffdeff03cb3d"
+    },
+    {
+      "path": "runtime/skills/plan-volume/SKILL.md",
+      "category": "runtime_skill",
+      "visibility": "runtime_selected",
+      "line_start": 17,
+      "line_end": 43,
+      "finding": "总编的共享模式仅取舍，卷导演提出结构与窗口；失败路线不得靠倒改历史修好。",
+      "next_stage": "用一条偏离线和一条无关线测定向重规划，控制信息留在规划输出。",
+      "git_blob": "ca263a43c204b0502017879052e51791645c0069"
+    },
+    {
+      "path": "runtime/skills/prepare-world/SKILL.md",
+      "category": "runtime_skill",
+      "visibility": "runtime_selected",
+      "line_start": 18,
+      "line_end": 38,
+      "finding": "供给、距离、交通、通信和制度要支撑情境；查不到不自动等于不存在。",
+      "next_stage": "让不同类型沿用不同术语；以水利身份和行动目的区分行话与平台词。",
+      "git_blob": "9ecaee5334e6ab8dd4788ee54bfbc919856c124e"
+    },
+    {
+      "path": "runtime/skills/research-literature/SKILL.md",
+      "category": "runtime_skill",
+      "visibility": "runtime_selected",
+      "line_start": 8,
+      "line_end": 38,
+      "finding": "从原始出处提取有条件的写作方法，明确反例；不全书禁用某种表达。头部提及总编方法选择，当前总编 catalog 未列该技能。",
+      "next_stage": "按实际可冻结角色修正说明；研究建议只对授权作品范围生效。",
+      "git_blob": "8abe4f2d113ef87ba1046574a52064de32c9a1e8"
+    },
+    {
+      "path": "runtime/skills/review-change-point/SKILL.md",
+      "category": "runtime_skill",
+      "visibility": "runtime_selected",
+      "line_start": 6,
+      "line_end": 12,
+      "finding": "在总编 editorial_decision 绑定候选与参考线，只判该偏离，采纳由受权服务执行。",
+      "next_stage": "保留批准、理由充分的退回和必要的作者决定；不强行回归原计划。",
+      "git_blob": "01eb1aa7bc24922ed6b68151755f9d7ac36227a0"
+    },
+    {
+      "path": "runtime/skills/review-consistency/SKILL.md",
+      "category": "runtime_skill",
+      "visibility": "runtime_selected",
+      "line_start": 17,
+      "line_end": 43,
+      "finding": "区分硬冲突、语义疑点、文学选择和变更请求；引文、事实锚点与反解释均有位置。",
+      "next_stage": "把有意误信和精确数错配成负/正例，禁止凭词频直接扣分或拒收。",
+      "git_blob": "b1e20dc7941f6c82dafa873880a9ee54ddc4935d"
+    },
+    {
+      "path": "runtime/skills/roll-window/SKILL.md",
+      "category": "runtime_skill",
+      "visibility": "runtime_selected",
+      "line_start": 6,
+      "line_end": 12,
+      "finding": "只改下一有限窗口，保留原参考线和真实后果；尚未送达不能提前写成回信。",
+      "next_stage": "成对比较可回归与合理分化，检查成本是否仍在。",
+      "git_blob": "01d17d72adbc581aded903aeea637b7caefd1e9b"
+    },
+    {
+      "path": "runtime/skills/simulate-character/SKILL.md",
+      "category": "runtime_skill",
+      "visibility": "runtime_selected",
+      "line_start": 18,
+      "line_end": 38,
+      "finding": "亲见、传闻、猜测和无知分开；人物可拒绝导演倾向，不能自判行动成功。",
+      "next_stage": "测试有权限与未送达消息两种条件，相同角色可有不同选择理由。",
+      "git_blob": "23d291058a5a44e71bbf68a964238f64beb9386e"
+    },
+    {
+      "path": "runtime/skills/volume-director-review/SKILL.md",
+      "category": "runtime_skill",
+      "visibility": "runtime_selected",
+      "line_start": 6,
+      "line_end": 12,
+      "finding": "先等行动与正式裁决屏障，以受权证据评估重大偏离；不足可保留未知。",
+      "next_stage": "单列未接受提案、真实意外、普通表达，防止把每一变化升级。",
+      "git_blob": "a868c3436b8d4934c6d7abcb74de0c4479dccfbd"
+    },
+    {
+      "path": "runtime/skills/write-scene/SKILL.md",
+      "category": "runtime_skill",
+      "visibility": "runtime_selected",
+      "line_start": 12,
+      "line_end": 49,
+      "finding": "既要求声音、相邻原文、节奏与留白，也重复身份核对、工具和绑定说明；无词汇禁表。",
+      "next_stage": "用准确引文比较控制语外溢与人物正当行话，候选提升由盲读证实。",
+      "git_blob": "9ee37f717a3107b01796f167f99088583cce3d9c"
+    },
+    {
+      "path": "runtime/roles/README.md",
+      "category": "runtime_catalog",
+      "visibility": "runtime_metadata",
+      "line_start": 3,
+      "line_end": 32,
+      "finding": "公共协议、角色目录和查询边界；目录中的卷导演模式略去 volume_review。被 Markdown 链接，加载器没有展开该文件。 这是供人及宿主参考的说明页，所选角色引用它也不会自动读入。",
+      "next_stage": "修订人读索引时以 catalog 复核模式，必要约束同时由服务验证。",
+      "git_blob": "7959d5aaa918f8055c2de97f4944c264eb9dd51d"
+    },
+    {
+      "path": "runtime/roles/catalog.json",
+      "category": "runtime_catalog",
+      "visibility": "runtime_metadata",
+      "line_start": 3,
+      "line_end": 325,
+      "finding": "列十个角色、各自 task_modes、skill_names 和工具请求上限；默认技能取列表第一项。",
+      "next_stage": "保持顺序与显式选择分别可追溯；验证每个角色/模式的实际派发入口。",
+      "git_blob": "783e8de88fd3e60854bd5f2838da2feef5257390"
+    },
+    {
+      "path": "runtime/skills/catalog.json",
+      "category": "runtime_catalog",
+      "visibility": "runtime_metadata",
+      "line_start": 5,
+      "line_end": 162,
+      "finding": "十二个技能和四种受限角色用法；目录元数据供选择和收窄工具说明。",
+      "next_stage": "对照角色目录、手册、共享模式真实来源，避免把全部技能正文塞入一次模型任务。",
+      "git_blob": "e2ce7574c29b4c43d3c1809ff1a831e0bd2d050a"
+    },
+    {
+      "path": "runtime/query_profiles.json",
+      "category": "runtime_catalog",
+      "visibility": "runtime_metadata",
+      "line_start": 3,
+      "line_end": 239,
+      "finding": "十类角色查询平面、操作和 recipe 上限；ACTOR 仅 BELIEF。",
+      "next_stage": "测试角色、时间、scope 交集；资料是否有趣不能改变可见范围。",
+      "git_blob": "3cc6cd14eb4c4334ec19d8c36e42e7e509122320"
+    },
+    {
+      "path": "workshop/contracts/nf-catalog.json",
+      "category": "workshop",
+      "visibility": "service_only",
+      "line_start": 2,
+      "line_end": 98,
+      "finding": "清单标源 df1e0cc。对冻结主线实算两目录、十份角色与十二份技能的 SHA-256，24/24 一致。",
+      "next_stage": "后续若更新技能，保持旧清单可复验并重新登记选择的角色版本。",
+      "git_blob": "f3df6cdf33cab314eb4e6061651182d33bdf10c8"
+    },
+    {
+      "path": "workshop/scripts/freeze_nf_catalog.py",
+      "category": "workshop",
+      "visibility": "service_only",
+      "line_start": 9,
+      "line_end": 22,
+      "finding": "从指定 checkout 的 HEAD 以 git show 读取完整原字节并写 SHA-256；不加载模型。",
+      "next_stage": "记录 NF 版本与目录指纹，勿用“同名”代替字节一致。",
+      "git_blob": "be55650a5e63ae92857204de8be9c5dbacc995d2"
+    },
+    {
+      "path": "workshop/tests/test_catalog.py",
+      "category": "workshop",
+      "visibility": "service_only",
+      "line_start": 7,
+      "line_end": 16,
+      "finding": "协商测试比对两个目录指纹、NF 提交及 10/12 计数，未逐个运行角色任务。",
+      "next_stage": "同时保留内容级比对和实际执行证据。",
+      "git_blob": "957430560ea5ec384b9d8d32929bd69798c998b7"
+    },
+    {
+      "path": "workshop/src/agent_workshop/organization.py",
+      "category": "workshop",
+      "visibility": "service_only",
+      "line_start": 14,
+      "line_end": 113,
+      "finding": "十五种组织岗位映射十种 NF 角色，编剧映射卷导演与写手；管理者、作者、审查主管、运维映射空。四个 preset 建立不同员工席位。",
+      "next_stage": "每次委托记录实际员工、独立身份组与 NF 角色；一人双映射不能自审。",
+      "git_blob": "3871e286560390b9376d2ac6415f680129be4be2"
+    },
+    {
+      "path": "workshop/src/agent_workshop/delegation.py",
+      "category": "workshop",
+      "visibility": "service_only",
+      "line_start": 43,
+      "line_end": 93,
+      "finding": "通过安装、员工任期、NF_ROLES、指派路由及金额/Token 检查后才能占用预置槽。",
+      "next_stage": "用错任期、错角色和超额槽验证拒绝，不靠文字要求分权。",
+      "git_blob": "647bd6e59f0345a333c51de0c77c532eacf92727"
+    },
+    {
+      "path": "workshop/src/agent_workshop/presets.py",
+      "category": "workshop",
+      "visibility": "service_only",
+      "line_start": 110,
+      "line_end": 138,
+      "finding": "预览摘要、组织版本、管理岗位及冲突共同约束切换；预设是组织结构。",
+      "next_stage": "记录各批次预设或明确沿用同一预设，避免团队不同导致假提升。",
+      "git_blob": "52ce3edbeb545cc7a89bcf8daa0cc455e74a5bee"
+    },
+    {
+      "path": "workshop/src/agent_workshop/reviews_skills.py",
+      "category": "workshop",
+      "visibility": "service_only",
+      "line_start": 236,
+      "line_end": 428,
+      "finding": "确定性审核计算库存、请求完成/重复效果、Token 核账；审稿排除原生产者及身份组，分开 RULE、HUMAN 和后续委托。",
+      "next_stage": "盲读另存实际人评；工程规则 PASS、主管任命皆不能代为填写。",
+      "git_blob": "2f15e066be67b0780c36b3d39486b43838ba4a5c"
+    },
+    {
+      "path": "workshop/docs/permissions.md",
+      "category": "workshop",
+      "visibility": "service_only",
+      "line_start": 3,
+      "line_end": 12,
+      "finding": "将组织名册和消息与 NF 的人物信念分开，披露受任期、作品/分支与任务代际约束。",
+      "next_stage": "保留跨服务负例；独立读者只收正文及个人空表。",
+      "git_blob": "df4adfd7b8abaf1b39f429979901e19b53a48348"
+    },
+    {
+      "path": "workshop/README.md",
+      "category": "workshop",
+      "visibility": "service_only",
+      "line_start": 15,
+      "line_end": 23,
+      "finding": "协商版本与指纹用于验证来源，工具与数据访问仍由各服务签发的活会话决定。",
+      "next_stage": "比对指纹后还需核对给定任期与任务，禁止把清单当通行证。",
+      "git_blob": "aa95c4c2daae006a589c84602ace8249e58d46f0"
+    },
+    {
+      "path": "workshop/adapters/codex/AGENTS.md",
+      "category": "workshop",
+      "visibility": "developer_only",
+      "line_start": 1,
+      "line_end": 3,
+      "finding": "作者项目另有单次 aw_resume_project 入口；不得把组织私信转给虚构人物。",
+      "next_stage": "区分作者恢复、组织安排与演员台词，重试保留原 operation_id。",
+      "git_blob": "9a6289befb51e7d6f83aee3ae6bd52911f3cad5b"
+    },
+    {
+      "path": "workshop/adapters/codex/dual-services.md",
+      "category": "workshop",
+      "visibility": "service_only",
+      "line_start": 3,
+      "line_end": 20,
+      "finding": "双服务 Codex 的员工和角色绑定独立；真实双服务只读回执能见两种工具边界。",
+      "next_stage": "比较实验复用同样隔离配置并登记，变权另走正式审批。",
+      "git_blob": "cdb1a53225d7e91d281cd5a2c62fe29205bb0c5a"
+    },
+    {
+      "path": "src/novel_factory/infrastructure/runtime_catalog.py",
+      "category": "implementation",
+      "visibility": "service_only",
+      "line_start": 17,
+      "line_end": 66,
+      "finding": "优先选安装包资源，选单角色与单技能；显式技能须在角色允许列表。没有 mode→skill 唯一映射，调用方负责选择；正文内链接不展开。",
+      "next_stage": "以后改编译必须比原始两个文本、版本、最终 snapshot 摘要和实际派发。",
+      "git_blob": "af0ab3d9b7b640227a653efb7bf6194e5a91c82c"
+    },
+    {
+      "path": "src/novel_factory/application/runtime_tasks.py",
+      "category": "implementation",
+      "visibility": "service_only",
+      "line_start": 47,
+      "line_end": 104,
+      "finding": "仅控制者可建任务；演员自身 BELIEF、角色和故事时点绑定，能力按切面签发，再钉住预算与 runtime_contract_version。",
+      "next_stage": "使用现有任务和预算，不向生成者授予正式接受或任意检索。",
+      "git_blob": "fad5b4386f663938a3f7334f59f38a3d85ceaf9d"
+    },
+    {
+      "path": "src/novel_factory/application/queries.py",
+      "category": "implementation",
+      "visibility": "service_only",
+      "line_start": 580,
+      "line_end": 697,
+      "finding": "编译时校验授权、代际和固定时点；构建区分 BELIEF/FACT/PLAN 的片段、依赖、许可来源。",
+      "next_stage": "层次拆分保留固定 WorldRef、知识边界、来源和未知状态。",
+      "git_blob": "8c066ab33ce3f8d618a02095c2c434eb85e2c790"
+    },
+    {
+      "path": "src/novel_factory/application/query_policy.py",
+      "category": "implementation",
+      "visibility": "service_only",
+      "line_start": 14,
+      "line_end": 42,
+      "finding": "从打包或源码文件读 profile。查询逐次核 grant、角色上限、操作、recipe，PLAN 和图读另有限权。",
+      "next_stage": "误配材料应由服务拒绝；文本无权豁免。",
+      "git_blob": "ecfee1c9c730827c43b636995e49a5b87f46f213"
+    },
+    {
+      "path": "src/novel_factory/application/agent_gateway.py",
+      "category": "implementation",
+      "visibility": "service_only",
+      "line_start": 81,
+      "line_end": 234,
+      "finding": "冻结 AGENT_RUNTIME/AGENT_INPUT，派发重核租约、cut、内容及模型配置指纹。system 拼入完整角色+技能、受限模式、身份及 Schema；user 限任务、context、read_cut、授权材料及专用材料。",
+      "next_stage": "比较发给适配器的分层原件及哈希，保留未返回与超限样本；不得从说明文字推断真实模型已依从。",
+      "git_blob": "db11c16088d1c5c46c8cbcfcf7ed98b610567fed"
+    },
+    {
+      "path": "src/novel_factory/application/prompt_schema.py",
+      "category": "implementation",
+      "visibility": "service_only",
+      "line_start": 32,
+      "line_end": 66,
+      "finding": "仅保留选定契约可达定义并选较短表达；结构化输出身份仍在信封。",
+      "next_stage": "报告 Schema 占用与角色/技能占用两项，不用缩短字节冒充文学改善。",
+      "git_blob": "b60af8e62bda672cb889ac0eac6ebc39b48b8734"
+    },
+    {
+      "path": "src/novel_factory/application/scene_runtime.py",
+      "category": "implementation",
+      "visibility": "service_only",
+      "line_start": 202,
+      "line_end": 341,
+      "finding": "登记时将技能显式传给任务；联合裁决、卷导演复核及各自屏障分别建立。",
+      "next_stage": "同一批冻结登记参数，不用先返回的角色结果决定联合胜负。",
+      "git_blob": "db3a02539f3809b679b63a0832a702b7da18e665"
+    },
+    {
+      "path": "src/novel_factory/application/editorial_successors.py",
+      "category": "implementation",
+      "visibility": "service_only",
+      "line_start": 43,
+      "line_end": 78,
+      "finding": "后继为 replan 明选 roll-window，总编的 editorial_decision 明选 review-change-point。",
+      "next_stage": "验证所选技能与角色/模式组合；文档中链接的技能不自动并入。",
+      "git_blob": "7cd0b3e47a6c8d4b701391f4ce773c143fadb377"
+    },
+    {
+      "path": "src/novel_factory/application/editorial_handoff.py",
+      "category": "implementation",
+      "visibility": "service_only",
+      "line_start": 84,
+      "line_end": 115,
+      "finding": "从本次已登记的合法 route/材料构造编辑专属输入；偏离、计划和参考线按目标处理。",
+      "next_stage": "将编辑可见的诊断与作者读者包分开，防止诊断渗入叙述。",
+      "git_blob": "df86bc0cbe90e69540f42d091611840df6366332"
+    },
+    {
+      "path": "src/novel_factory/infrastructure/codex_host.py",
+      "category": "implementation",
+      "visibility": "service_only",
+      "line_start": 148,
+      "line_end": 219,
+      "finding": "临时 HOME 与 CWD，项目指导字节上限 0，关 shell/apps 等，临时只读线程只收到请求摘要；桥向后端交付已冻结请求。",
+      "next_stage": "工程证据分别记录宿主线程、后端实际输入和供应商收据。",
+      "git_blob": "6753441ea134b7ba0bd566c59c3f947d8b1f471e"
+    },
+    {
+      "path": "src/novel_factory/infrastructure/role_container.py",
+      "category": "implementation",
+      "visibility": "service_only",
+      "line_start": 7,
+      "line_end": 24,
+      "finding": "角色读取由 bubblewrap 限制宿主挂载与命名空间，运行目录与 IPC 单独暴露。",
+      "next_stage": "验证角色不能从工作树补读开发技能或其他人员资料。",
+      "git_blob": "f608f44dedc5c7f38b5db97b1cca46cbabfb9f86"
+    },
+    {
+      "path": "src/novel_factory/interfaces/role_context_host.py",
+      "category": "implementation",
+      "visibility": "service_only",
+      "line_start": 78,
+      "line_end": 145,
+      "finding": "角色只读 Host 每次只启用一个工具；核验库存后调用，限定 nf_context_get 或 nf_query_batch。",
+      "next_stage": "把授权查询的输入输出与模型普通文本请求分开记账。",
+      "git_blob": "867de3321d6f4fd69e2751f92acea8289adfdbcf"
+    },
+    {
+      "path": "src/novel_factory/application/actor_lookup.py",
+      "category": "implementation",
+      "visibility": "service_only",
+      "line_start": 34,
+      "line_end": 154,
+      "finding": "可选演员查询先由登记的独立选择轮返回受限问法，服务执行一次查询后加入合法结果。",
+      "next_stage": "区分控制器固定读取、模型选择读取和通用工具能力；统计跳过、拒绝和两阶段成本。",
+      "git_blob": "3f950bde5e0112a1b38e2f2bf6c931d5905c42a9"
+    },
+    {
+      "path": "src/novel_factory/application/narrative.py",
+      "category": "implementation",
+      "visibility": "service_only",
+      "line_start": 581,
+      "line_end": 759,
+      "finding": "从精确正文与世界绑定形成对账；正式接受需要相应对账证据。",
+      "next_stage": "库存/认知硬冲突与语气意见分开，保存候选与拒绝原因。",
+      "git_blob": "68ce062d78bafe0c8ede547d6dfc8c6bf0dcbf3e"
+    },
+    {
+      "path": "src/novel_factory/application/editorial.py",
+      "category": "implementation",
+      "visibility": "service_only",
+      "line_start": 591,
+      "line_end": 661,
+      "finding": "整卷批准复核正文接受、审稿矩阵、结构→接缝→语言的精确稿件链、硬问题解决与职责分离；同一服务另限轮次/问题数。",
+      "next_stage": "保存每轮变化、未改稿和未决项；人类文学取舍另登记。",
+      "git_blob": "0bfb5cc0804d6dfcf05f1493a2ec4abaf0b4b304"
+    },
+    {
+      "path": "src/novel_factory/domain/editorial.py",
+      "category": "implementation",
+      "visibility": "service_only",
+      "line_start": 78,
+      "line_end": 113,
+      "finding": "相同问题按证据指纹去重，结构先于语言，逐场/章/卷/相邻接缝覆盖。",
+      "next_stage": "负例包含摘要冒充通读、重复问题、新版正文沿用旧批准。",
+      "git_blob": "04adbe65819ecfe61a4bd51961abc12fecfa0c93"
+    },
+    {
+      "path": "src/novel_factory/application/release.py",
+      "category": "implementation",
+      "visibility": "service_only",
+      "line_start": 442,
+      "line_end": 467,
+      "finding": "按作品授权读冻结版本，导出按有序引用构造正文，权限核查独立于角色话术。",
+      "next_stage": "盲评只发冻结 UTF-8 正文；每份记录摘要，不携带审计信息。",
+      "git_blob": "ccb7f7857fa198ec88ed3f24060381c389b7e342"
+    },
+    {
+      "path": "scripts/p6_export_release.py",
+      "category": "implementation",
+      "visibility": "service_only",
+      "line_start": 20,
+      "line_end": 54,
+      "finding": "公开作者入口验证绑定分支，使用 ReleaseService 导出原文与 SHA-256。",
+      "next_stage": "两位读者只拿相同字节与各自空表，审计日志留协调端。",
+      "git_blob": "4cb037e64be7c2c0b37e52dfaaed356716577450"
+    },
+    {
+      "path": "evidence/p5/verification/supervised_role_read.json",
+      "category": "evidence",
+      "visibility": "historical_observation",
+      "line_start": 3,
+      "line_end": 16,
+      "finding": "一次固定 nf_context_get、工具轮 0、一次合成供应商请求、一条账；付费模型 NOT_RUN。",
+      "next_stage": "用于校准“工具读取已观察”的口径，不能外推所有人所有任务。",
+      "git_blob": "a2915a7292329c04fc9d5bb401d4816e3fff40cc"
+    },
+    {
+      "path": "evidence/p5/verification/actor_tool_choice.json",
+      "category": "evidence",
+      "visibility": "historical_observation",
+      "line_start": 2,
+      "line_end": 25,
+      "finding": "合成演员选择查询与最终候选共两次供应商请求，两条成功记录；无外部账。",
+      "next_stage": "把选择与生成分帐，外部费用没有账单时填 null。",
+      "git_blob": "eef5a5970fbce03453aa3509d44b9bc74371536f"
+    },
+    {
+      "path": "evidence/p5/final/prompt-sizes.json",
+      "category": "evidence",
+      "visibility": "historical_observation",
+      "line_start": 253,
+      "line_end": 301,
+      "finding": "历史宴会8个合成请求分别记 UTF-8 大小与 Schema 大小，最小 12101、最大 19640 字节。",
+      "next_stage": "新批次逐项记字节及可核对 Token；历史字节不能换算供应商实际 Token。",
+      "git_blob": "efe790bcac9898f8fd24119167edcb5d120fceb0"
+    },
+    {
+      "path": "evidence/p2/batch3/short-volume/run/release.txt",
+      "category": "evidence",
+      "visibility": "historical_observation",
+      "line_start": 7,
+      "line_end": 53,
+      "finding": "“联合裁决只批准”等工程口吻与木楔顶闸、汛务凭证的情境用语出现在同一原文。",
+      "next_stage": "按人物、场景、引文和后果给出可反驳判断；保留反例。",
+      "git_blob": "7331370c61bc8927634f4b4b2aa7e6e8e9a455be"
+    },
+    {
+      "path": "evidence/p2/batch3/short-volume/run/author_feedback.md",
+      "category": "evidence",
+      "visibility": "historical_observation",
+      "line_start": 3,
+      "line_end": 13,
+      "finding": "作者阅读全文、阅读日期、具体问题及最终结论都为空。",
+      "next_stage": "读者自行填写，待返还不计为0分。",
+      "git_blob": "afc34253ab2f32fdc20db5889c8b47c322165e3e"
+    },
+    {
+      "path": "evidence/p2/batch3/short-volume/run/run_manifest.json",
+      "category": "evidence",
+      "visibility": "historical_observation",
+      "line_start": 2,
+      "line_end": 15,
+      "finding": "六场夹具、文学 NOT_EVALUATED、作者 PENDING_AUTHOR；同文件预算段记录十五次夹具和零真实调用。",
+      "next_stage": "冻结输入和正文原件分开，报告工程与文学两项状态。",
+      "git_blob": "c880b1478c671a62e229dd7e1fc8e7418af8ded5"
+    },
+    {
+      "path": "src/novel_factory/orchestration/short_volume_fixture.py",
+      "category": "evidence",
+      "visibility": "historical_observation",
+      "line_start": 1,
+      "line_end": 25,
+      "finding": "正文是固定编写的 TEST_FIXTURE，有角色目标、六场标题和固定全文；没有现场创作因果识别能力。",
+      "next_stage": "仅作样例和工程负控，不能作为新旧生成质量对比。",
+      "git_blob": "8e2cc0cbcad812c082e2bb8827eb9fca3d64dc57"
+    },
+    {
+      "path": "src/novel_factory/orchestration/short_volume.py",
+      "category": "evidence",
+      "visibility": "historical_observation",
+      "line_start": 116,
+      "line_end": 130,
+      "finding": "首轮“重复未增加信息”来自固定审稿夹具，保留有意重复的反解释。",
+      "next_stage": "引用来源而不冒认人工审读，零新证据的返工记为负担。",
+      "git_blob": "f7d5d9b3e9a3bbd7025b80f265863ed40847fde6"
+    },
+    {
+      "path": "reports/handoff/P6_RUNTIME.md",
+      "category": "evidence",
+      "visibility": "historical_observation",
+      "line_start": 3,
+      "line_end": 11,
+      "finding": "生产模型请求为0，未取得生产正文/账单/独立文学评分；既有研究计划给出3–5角色、10–20场、两名读者。",
+      "next_stage": "日后若开展，需要独立的真实预算与人员登记；继承历史计划要注明。",
+      "git_blob": "f02b8eba776413c1995d72d58062b142e068c3f1"
+    },
+    {
+      "path": "reports/handoff/P6_READER_FORM.md",
+      "category": "evidence",
+      "visibility": "historical_observation",
+      "line_start": 3,
+      "line_end": 16,
+      "finding": "两份独立空表格式按五维记录1–5、对应场次及理由，分差至少2分保留原意见复核。",
+      "next_stage": "按正文摘要绑定独立填写，不公开另一位意见或工程判断。",
+      "git_blob": "fbfdaba1ce4285860b02c551b1a26b8b4795bcb8"
+    },
+    {
+      "path": "docs/P6_本地真实模型创作交接.md",
+      "category": "evidence",
+      "visibility": "historical_observation",
+      "line_start": 87,
+      "line_end": 117,
+      "finding": "作品/分支受权作者导出，私有日志和绑定单独保存，两人拿同一文本及各自空表。",
+      "next_stage": "日后执行用独立化名、读者回收及凭据隔离；S0只核对设计。",
+      "git_blob": "6e61e58d904ae88724e0d104fbd53595aa1f1a5e"
+    },
+    {
+      "path": "contracts/examples/literary_source.txt",
+      "category": "evidence",
+      "visibility": "historical_observation",
+      "line_start": 1,
+      "line_end": 2,
+      "finding": "白桥尚未通，粮在南岸；沈砚提出有条件合作，只有这两行构成原文证据。",
+      "next_stage": "与摘要对读，避免把同意合作解释成已宽恕。",
+      "git_blob": "9e685459d6b5d030443880a704eb0f9c73f78f85"
+    },
+    {
+      "path": "contracts/examples/literary_summary.txt",
+      "category": "evidence",
+      "visibility": "historical_observation",
+      "line_start": 1,
+      "line_end": 1,
+      "finding": "摘录明确限制“原谅守军”的推论，不能充当原文全文送达记录。",
+      "next_stage": "审阅允许“证据不足”结论，评分须有冻结原句。",
+      "git_blob": "0ea37eea16d031ee4bf21fe44025f0839ac5d520"
+    }
+  ]
+}

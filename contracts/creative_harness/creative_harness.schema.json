@@ -1,0 +1,1402 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novel-factory.example/contracts/1.0/creative_harness.schema.json",
+  "title": "Creative Harness S0 candidate and evidence contracts",
+  "description": "Design-time contracts. Authority, data access, settlement, acceptance and publication remain with the referenced services. Version 1.0.",
+  "oneOf": [
+    {"$ref":"#/$defs/HarnessConfiguration"},
+    {"$ref":"#/$defs/ContextPacket"},
+    {"$ref":"#/$defs/PlanCandidate"},
+    {"$ref":"#/$defs/SimulationReport"},
+    {"$ref":"#/$defs/ReviewReport"},
+    {"$ref":"#/$defs/RoleSkillProposal"},
+    {"$ref":"#/$defs/InstructionCandidate"},
+    {"$ref":"#/$defs/ExperimentFreeze"},
+    {"$ref":"#/$defs/PromotionDecision"},
+    {"$ref":"#/$defs/ExecutionLog"}
+  ],
+  "$defs": {
+    "HarnessFlags": {
+      "type": "object",
+      "properties": {
+        "enabled": {"type":"boolean","default":false},
+        "dynamic_agents": {
+          "type": "object",
+          "properties": {"enabled":{"type":"boolean","default":false}},
+          "required": ["enabled"],
+          "additionalProperties": false
+        },
+        "adaptive_instructions": {
+          "type": "object",
+          "properties": {
+            "enabled": {"type":"boolean","default":false},
+            "auto_promote": {"type":"boolean","default":false}
+          },
+          "required": ["enabled","auto_promote"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["enabled","dynamic_agents","adaptive_instructions"],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {"properties":{"enabled":{"const":false}},"required":["enabled"]},
+          "then": {
+            "properties": {
+              "dynamic_agents": {"properties":{"enabled":{"const":false}}},
+              "adaptive_instructions": {"properties":{"enabled":{"const":false},"auto_promote":{"const":false}}}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"adaptive_instructions":{"properties":{"enabled":{"const":false}}}},
+            "required": ["adaptive_instructions"]
+          },
+          "then": {
+            "properties": {"adaptive_instructions":{"properties":{"auto_promote":{"const":false}}}}
+          }
+        }
+      ]
+    },
+    "HarnessConfiguration": {
+      "type": "object",
+      "properties": {
+        "schema_version": {"const":"1.0"},
+        "kind": {"const":"CONFIGURATION"},
+        "creative_harness": {"$ref":"#/$defs/HarnessFlags"}
+      },
+      "required": ["schema_version","kind","creative_harness"],
+      "additionalProperties": false
+    },
+    "TaskScope": {
+      "type": "object",
+      "properties": {
+        "world_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"
+        },
+        "task_id": {"$ref":"https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"},
+        "generation": {"type":"integer","minimum":0,"maximum":2147483647}
+      },
+      "required": ["world_ref","task_id","generation"],
+      "additionalProperties": false
+    },
+    "NFPrincipal": {
+      "type": "object",
+      "properties": {
+        "principal_id": {"type":"string","minLength":1,"maxLength":200,"pattern":"\\S"},
+        "grant_id": {"$ref":"https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"},
+        "permission_epoch": {"type":"integer","minimum":0,"maximum":2147483647}
+      },
+      "required": ["principal_id","grant_id","permission_epoch"],
+      "additionalProperties": false
+    },
+    "WorkshopBinding": {
+      "type": "object",
+      "properties": {
+        "org_id": {"type":"string","minLength":1,"maxLength":200,"pattern":"\\S"},
+        "installation_id": {"type":"string","minLength":1,"maxLength":200,"pattern":"\\S"},
+        "employee_id": {"type":"string","minLength":1,"maxLength":200,"pattern":"\\S"},
+        "employment_revision": {"type":"integer","minimum":1,"maximum":2147483647},
+        "grant_epoch": {"type":"integer","minimum":0,"maximum":2147483647},
+        "binding_id": {"$ref":"https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"},
+        "skill_id": {"type":"string","minLength":1,"maxLength":128,"pattern":"\\S"},
+        "source_revision": {"type":"string","minLength":1,"maxLength":128,"pattern":"\\S"},
+        "content_sha": {"$ref":"https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/Sha256"}
+      },
+      "required": [
+        "org_id",
+        "installation_id",
+        "employee_id",
+        "employment_revision",
+        "grant_epoch",
+        "binding_id",
+        "skill_id",
+        "source_revision",
+        "content_sha"
+      ],
+      "additionalProperties": false
+    },
+    "RuntimeSnapshot": {
+      "type": "object",
+      "properties": {
+        "role_id": {"type":"string","minLength":1,"maxLength":100,"pattern":"\\S"},
+        "task_kind": {"type":"string","minLength":1,"maxLength":100,"pattern":"\\S"},
+        "role_version": {"type":"string","minLength":1,"maxLength":80,"pattern":"\\S"},
+        "role_blob": {"type":"string","pattern":"^[0-9a-f]{40}$"},
+        "skill_name": {"type":"string","minLength":1,"maxLength":120,"pattern":"\\S"},
+        "skill_version": {"type":"string","minLength":1,"maxLength":80,"pattern":"\\S"},
+        "skill_blob": {"type":"string","pattern":"^[0-9a-f]{40}$"},
+        "runtime_sha256": {"$ref":"https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/Sha256"},
+        "source_commit": {"type":"string","pattern":"^[0-9a-f]{40}$"}
+      },
+      "required": [
+        "role_id",
+        "task_kind",
+        "role_version",
+        "role_blob",
+        "skill_name",
+        "skill_version",
+        "skill_blob",
+        "runtime_sha256",
+        "source_commit"
+      ],
+      "additionalProperties": false
+    },
+    "AuthorizedSource": {
+      "type": "object",
+      "properties": {
+        "evidence": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EvidenceRef"
+        },
+        "authority": {"$ref":"#/$defs/NFPrincipal"},
+        "world_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"
+        },
+        "visibility": {"type":"string","enum":["WORLD","BELIEF","READER","PLAN","SIMULATION","LITERARY"]},
+        "selection_reason": {"type":"string","minLength":1,"maxLength":512,"pattern":"\\S"},
+        "content_sha256": {"$ref":"https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/Sha256"}
+      },
+      "required": ["evidence","authority","world_ref","visibility","selection_reason","content_sha256"],
+      "additionalProperties": false
+    },
+    "Quota": {
+      "type": "object",
+      "properties": {
+        "budget_id": {"$ref":"https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"},
+        "currency": {"type":"string","enum":["USD","CNY"]},
+        "max_amount": {
+          "allOf": [
+            {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/NonnegativeDecimal"
+            },
+            {"type":"string","pattern":"^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"}
+          ]
+        },
+        "max_tokens": {"type":"integer","minimum":1,"maximum":2147483647},
+        "max_attempts": {"type":"integer","minimum":1,"maximum":2147483647},
+        "deadline": {"type":"string","format":"date-time"}
+      },
+      "required": ["budget_id","currency","max_amount","max_tokens","max_attempts","deadline"],
+      "additionalProperties": false
+    },
+    "CandidateIdentity": {
+      "type": "object",
+      "properties": {
+        "candidate_id": {"$ref":"https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"},
+        "revision": {"type":"integer","minimum":1,"maximum":2147483647},
+        "parent_ref": {
+          "anyOf": [
+            {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+            },
+            {"type":"null"}
+          ]
+        },
+        "content_sha256": {"$ref":"https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/Sha256"},
+        "created_by": {"$ref":"#/$defs/NFPrincipal"}
+      },
+      "required": ["candidate_id","revision","parent_ref","content_sha256","created_by"],
+      "additionalProperties": false
+    },
+    "ContextPacket": {
+      "type": "object",
+      "properties": {
+        "schema_version": {"const":"1.0"},
+        "kind": {"const":"CONTEXT_PACKET"},
+        "scope": {"$ref":"#/$defs/TaskScope"},
+        "runtime": {"$ref":"#/$defs/RuntimeSnapshot"},
+        "context": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ContextBundle"
+        },
+        "knowledge_cut": {
+          "$ref": "https://novel-factory.example/contracts/2.1/temporal_concurrency.schema.json#/$defs/KnowledgeCut"
+        },
+        "sources": {
+          "type": "array",
+          "items": {"$ref":"#/$defs/AuthorizedSource"},
+          "minItems": 0,
+          "maxItems": 64
+        },
+        "omissions": {
+          "type": "array",
+          "items": {"type":"string","minLength":1,"maxLength":512,"pattern":"\\S"},
+          "minItems": 0,
+          "maxItems": 64
+        },
+        "token_budget": {"type":"integer","minimum":1,"maximum":2147483647},
+        "output_status": {"const":"NON_AUTHORITATIVE"}
+      },
+      "required": [
+        "schema_version",
+        "kind",
+        "scope",
+        "runtime",
+        "context",
+        "knowledge_cut",
+        "sources",
+        "omissions",
+        "token_budget",
+        "output_status"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {"runtime":{"properties":{"role_id":{"const":"character_actor"}}}},
+            "required": ["runtime"]
+          },
+          "then": {
+            "properties": {
+              "context": {
+                "properties": {
+                  "role_id": {"const":"character_actor"},
+                  "actor_id": {
+                    "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+                  }
+                }
+              },
+              "knowledge_cut": {"properties":{"plane":{"const":"BELIEF"}}},
+              "sources": {"items":{"properties":{"visibility":{"const":"BELIEF"}}}}
+            }
+          }
+        }
+      ]
+    },
+    "PlanCandidate": {
+      "type": "object",
+      "properties": {
+        "schema_version": {"const":"1.0"},
+        "kind": {"const":"PLAN_CANDIDATE"},
+        "scope": {"$ref":"#/$defs/TaskScope"},
+        "candidate": {"$ref":"#/$defs/CandidateIdentity"},
+        "plan_anchor": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "alternatives": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "option_id": {
+                "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+              },
+              "goal": {"type":"string","minLength":1,"maxLength":512,"pattern":"\\S"},
+              "premises": {
+                "type": "array",
+                "items": {
+                  "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+                },
+                "minItems": 1,
+                "maxItems": 32,
+                "uniqueItems": true
+              },
+              "expected_consequences": {
+                "type": "array",
+                "items": {"type":"string","minLength":1,"maxLength":512,"pattern":"\\S"},
+                "minItems": 1,
+                "maxItems": 64
+              },
+              "risks": {
+                "type": "array",
+                "items": {"type":"string","minLength":1,"maxLength":512,"pattern":"\\S"},
+                "minItems": 0,
+                "maxItems": 64
+              },
+              "disconfirming_evidence": {
+                "type": "array",
+                "items": {
+                  "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EvidenceRef"
+                },
+                "minItems": 0,
+                "maxItems": 64
+              },
+              "selection_reason": {"type":"string","minLength":1,"maxLength":512,"pattern":"\\S"}
+            },
+            "required": [
+              "option_id",
+              "goal",
+              "premises",
+              "expected_consequences",
+              "risks",
+              "disconfirming_evidence",
+              "selection_reason"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 8
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {"type":"string","minLength":1,"maxLength":512,"pattern":"\\S"},
+          "minItems": 1,
+          "maxItems": 64
+        },
+        "protected_commitments": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+          },
+          "minItems": 0,
+          "maxItems": 64
+        },
+        "horizon_scenes": {"type":"integer","minimum":1,"maximum":32},
+        "quota": {"$ref":"#/$defs/Quota"},
+        "status": {"const":"HYPOTHESIS_ONLY"}
+      },
+      "required": [
+        "schema_version",
+        "kind",
+        "scope",
+        "candidate",
+        "plan_anchor",
+        "alternatives",
+        "assumptions",
+        "protected_commitments",
+        "horizon_scenes",
+        "quota",
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "SimulationReport": {
+      "type": "object",
+      "properties": {
+        "schema_version": {"const":"1.0"},
+        "kind": {"const":"SIMULATION_REPORT"},
+        "scope": {"$ref":"#/$defs/TaskScope"},
+        "plan_candidate_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "input_cut": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {"type":"string","minLength":1,"maxLength":512,"pattern":"\\S"},
+          "minItems": 1,
+          "maxItems": 64
+        },
+        "method": {"type":"string","enum":["RULE_REPLAY","BOUNDED_ROLLOUT","COMPARE_BRANCHES"]},
+        "max_branches": {"type":"integer","minimum":1,"maximum":32},
+        "max_steps_per_branch": {"type":"integer","minimum":1,"maximum":128},
+        "seed": {"type":"integer","minimum":0,"maximum":2147483647},
+        "quota": {"$ref":"#/$defs/Quota"},
+        "outcomes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "option_id": {
+                "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+              },
+              "conditional_result": {"type":"string","minLength":1,"maxLength":512,"pattern":"\\S"},
+              "supporting_refs": {
+                "type": "array",
+                "items": {
+                  "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EvidenceRef"
+                },
+                "minItems": 0,
+                "maxItems": 64
+              },
+              "uncertainties": {
+                "type": "array",
+                "items": {"type":"string","minLength":1,"maxLength":512,"pattern":"\\S"},
+                "minItems": 1,
+                "maxItems": 64
+              },
+              "stop_reason": {"type":"string","enum":["HORIZON","RULE_STOP","QUOTA","INSUFFICIENT_EVIDENCE"]}
+            },
+            "required": ["option_id","conditional_result","supporting_refs","uncertainties","stop_reason"],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 32
+        },
+        "accepted_world_events": {"const":0},
+        "status": {"const":"HYPOTHESIS_ONLY"}
+      },
+      "required": [
+        "schema_version",
+        "kind",
+        "scope",
+        "plan_candidate_ref",
+        "input_cut",
+        "assumptions",
+        "method",
+        "max_branches",
+        "max_steps_per_branch",
+        "seed",
+        "quota",
+        "outcomes",
+        "accepted_world_events",
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "Finding": {
+      "type": "object",
+      "properties": {
+        "dimension": {
+          "type": "string",
+          "enum": [
+            "FACT",
+            "KNOWLEDGE",
+            "MOTIVATION",
+            "VOICE",
+            "CONTINUITY",
+            "CAUSALITY",
+            "PACING",
+            "STYLE",
+            "EVIDENCE",
+            "OTHER"
+          ]
+        },
+        "severity": {"type":"string","enum":["NOTE","MINOR","MAJOR","BLOCKER"]},
+        "target_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "text_span": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/TextSpan"
+        },
+        "judgment": {"type":"string","enum":["SUPPORTED","CONTRADICTION","UNCERTAIN","PREFERENCE"]},
+        "reason": {"type":"string","minLength":1,"maxLength":2000,"pattern":"\\S"},
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EvidenceRef"
+          },
+          "minItems": 0,
+          "maxItems": 64
+        },
+        "requested_change": {
+          "anyOf": [{"type":"string","minLength":1,"maxLength":1000,"pattern":"\\S"},{"type":"null"}]
+        }
+      },
+      "required": [
+        "dimension",
+        "severity",
+        "target_ref",
+        "text_span",
+        "judgment",
+        "reason",
+        "evidence_refs",
+        "requested_change"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {"judgment":{"type":"string","enum":["SUPPORTED","CONTRADICTION"]}},
+            "required": ["judgment"]
+          },
+          "then": {"properties":{"evidence_refs":{"minItems":1}}}
+        }
+      ]
+    },
+    "IndependentReview": {
+      "type": "object",
+      "properties": {
+        "producer": {"$ref":"#/$defs/NFPrincipal"},
+        "reviewer": {"$ref":"#/$defs/NFPrincipal"},
+        "independence_receipt": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        }
+      },
+      "required": ["producer","reviewer","independence_receipt"],
+      "additionalProperties": false
+    },
+    "ReviewReport": {
+      "type": "object",
+      "properties": {
+        "schema_version": {"const":"1.0"},
+        "kind": {"const":"REVIEW_REPORT"},
+        "scope": {"$ref":"#/$defs/TaskScope"},
+        "target_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "review_binding": {"$ref":"#/$defs/IndependentReview"},
+        "mode": {"type":"string","enum":["ENGINEERING","LITERARY"]},
+        "rubric_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "findings": {"type":"array","items":{"$ref":"#/$defs/Finding"},"minItems":0,"maxItems":64},
+        "recommendation": {
+          "type": "string",
+          "enum": ["ACCEPT_CANDIDATE","REVISE","REJECT","INSUFFICIENT_EVIDENCE"]
+        },
+        "rework_limit": {"type":"integer","minimum":0,"maximum":32},
+        "evaluation": {"$ref":"#/$defs/ReviewEvaluation"},
+        "status": {"const":"ADVISORY"},
+        "independence_policy": {"const":"DISTINCT_PRINCIPALS_AND_NO_SUBSTANTIVE_PROXY"}
+      },
+      "required": [
+        "schema_version",
+        "kind",
+        "scope",
+        "target_ref",
+        "review_binding",
+        "mode",
+        "rubric_ref",
+        "findings",
+        "recommendation",
+        "rework_limit",
+        "evaluation",
+        "status",
+        "independence_policy"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {"properties":{"mode":{"const":"ENGINEERING"}},"required":["mode"]},
+          "then": {"properties":{"evaluation":{"$ref":"#/$defs/EngineeringReview"}}}
+        },
+        {
+          "if": {"properties":{"mode":{"const":"LITERARY"}},"required":["mode"]},
+          "then": {"properties":{"evaluation":{"$ref":"#/$defs/LiteraryReview"}}}
+        },
+        {
+          "if": {
+            "properties": {"recommendation":{"enum":["REVISE","REJECT"]}},
+            "required": ["recommendation"]
+          },
+          "then": {"properties":{"findings":{"minItems":1}}}
+        }
+      ]
+    },
+    "EngineeringReview": {
+      "type": "object",
+      "properties": {
+        "kind": {"const":"ENGINEERING"},
+        "check_receipts": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+          },
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true
+        },
+        "literary_conclusion": {"const":"NOT_EVALUATED"}
+      },
+      "required": ["kind","check_receipts","literary_conclusion"],
+      "additionalProperties": false
+    },
+    "LiteraryReview": {
+      "type": "object",
+      "properties": {
+        "kind": {"const":"LITERARY"},
+        "reader_id": {"$ref":"https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"},
+        "blind_sample_id": {"$ref":"https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"},
+        "blind_assignment_receipt": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "reading_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "rubric_scores": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "dimension": {
+                "type": "string",
+                "enum": ["CAUSALITY","KNOWLEDGE","MOTIVATION","VOICE","PACING","PROSE","OTHER"]
+              },
+              "score": {"type":"integer","minimum":1,"maximum":5},
+              "passage": {
+                "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/TextSpan"
+              },
+              "reason": {"type":"string","minLength":1,"maxLength":1000,"pattern":"\\S"}
+            },
+            "required": ["dimension","score","passage","reason"],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 16
+        }
+      },
+      "required": [
+        "kind",
+        "reader_id",
+        "blind_sample_id",
+        "blind_assignment_receipt",
+        "reading_ref",
+        "rubric_scores"
+      ],
+      "additionalProperties": false
+    },
+    "ReviewEvaluation": {"oneOf":[{"$ref":"#/$defs/EngineeringReview"},{"$ref":"#/$defs/LiteraryReview"}]},
+    "RoleSkillProposal": {
+      "type": "object",
+      "properties": {
+        "schema_version": {"const":"1.0"},
+        "kind": {"const":"ROLE_SKILL_PROPOSAL"},
+        "scope": {"$ref":"#/$defs/TaskScope"},
+        "candidate": {"$ref":"#/$defs/CandidateIdentity"},
+        "trigger": {"type":"string","enum":["SKILL_GAP","REVIEW_FINDING","TASK_DEMAND"]},
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+          },
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true
+        },
+        "parent_runtime": {"$ref":"#/$defs/RuntimeSnapshot"},
+        "proposed_role_id": {"type":"string","minLength":1,"maxLength":100,"pattern":"\\S"},
+        "proposed_skill_name": {"type":"string","minLength":1,"maxLength":120,"pattern":"\\S"},
+        "proposed_revision": {"type":"string","minLength":1,"maxLength":80,"pattern":"\\S"},
+        "instruction_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "requested_workshop_binding": {"$ref":"#/$defs/WorkshopBinding"},
+        "scope_limit": {
+          "type": "object",
+          "properties": {
+            "work_id": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            },
+            "branch_id": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            },
+            "task_modes": {
+              "type": "array",
+              "items": {"type":"string","minLength":1,"maxLength":100,"pattern":"\\S"},
+              "minItems": 1,
+              "maxItems": 32,
+              "uniqueItems": true
+            },
+            "requested_capabilities": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["READ","COMPILE","TASK_CREATE","TASK_CLAIM","ARTIFACT_WRITE","PLAN_READ"]
+              },
+              "minItems": 1,
+              "maxItems": 32,
+              "uniqueItems": true
+            },
+            "max_agents": {"type":"integer","minimum":1,"maximum":128},
+            "expires_at": {"type":"string","format":"date-time"}
+          },
+          "required": [
+            "work_id",
+            "branch_id",
+            "task_modes",
+            "requested_capabilities",
+            "max_agents",
+            "expires_at"
+          ],
+          "additionalProperties": false
+        },
+        "quota": {"$ref":"#/$defs/Quota"},
+        "fallback_runtime": {"$ref":"#/$defs/RuntimeSnapshot"},
+        "status": {"const":"PROPOSED_NOT_INSTALLED"}
+      },
+      "required": [
+        "schema_version",
+        "kind",
+        "scope",
+        "candidate",
+        "trigger",
+        "evidence_refs",
+        "parent_runtime",
+        "proposed_role_id",
+        "proposed_skill_name",
+        "proposed_revision",
+        "instruction_ref",
+        "requested_workshop_binding",
+        "scope_limit",
+        "quota",
+        "fallback_runtime",
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "InstructionCandidate": {
+      "type": "object",
+      "properties": {
+        "schema_version": {"const":"1.0"},
+        "kind": {"const":"INSTRUCTION_CANDIDATE"},
+        "scope": {"$ref":"#/$defs/TaskScope"},
+        "candidate": {"$ref":"#/$defs/CandidateIdentity"},
+        "baseline_runtime": {"$ref":"#/$defs/RuntimeSnapshot"},
+        "change_kind": {
+          "type": "string",
+          "enum": ["ROLE_INSTRUCTIONS","SKILL_INSTRUCTIONS","CONTEXT_RECIPE","REVIEW_RUBRIC"]
+        },
+        "instruction_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "change_summary": {"type":"string","minLength":1,"maxLength":1800,"pattern":"\\S"},
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+          },
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true
+        },
+        "failure_examples": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+          },
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true
+        },
+        "success_examples": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+          },
+          "minItems": 0,
+          "maxItems": 64
+        },
+        "expected_effect": {"type":"string","minLength":1,"maxLength":1200,"pattern":"\\S"},
+        "risk": {"type":"string","minLength":1,"maxLength":1200,"pattern":"\\S"},
+        "freeze_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "rollback_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "status": {"const":"PROPOSED_NOT_ACTIVE"}
+      },
+      "required": [
+        "schema_version",
+        "kind",
+        "scope",
+        "candidate",
+        "baseline_runtime",
+        "change_kind",
+        "instruction_ref",
+        "change_summary",
+        "evidence_refs",
+        "failure_examples",
+        "success_examples",
+        "expected_effect",
+        "risk",
+        "freeze_ref",
+        "rollback_ref",
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "FrozenArm": {
+      "type": "object",
+      "properties": {
+        "arm_id": {
+          "type": "string",
+          "enum": ["BASELINE","HARNESS","HARNESS_ADAPTIVE","CONTROL","TREATMENT"]
+        },
+        "candidate_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "creative_harness": {"$ref":"#/$defs/HarnessFlags"}
+      },
+      "required": ["arm_id","candidate_ref","creative_harness"],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {"properties":{"arm_id":{"const":"BASELINE"}},"required":["arm_id"]},
+          "then": {
+            "properties": {
+              "creative_harness": {
+                "type": "object",
+                "properties": {
+                  "enabled": {"const":false},
+                  "dynamic_agents": {"properties":{"enabled":{"const":false}}},
+                  "adaptive_instructions": {"properties":{"enabled":{"const":false},"auto_promote":{"const":false}}}
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {"properties":{"arm_id":{"const":"HARNESS"}},"required":["arm_id"]},
+          "then": {
+            "properties": {
+              "creative_harness": {
+                "type": "object",
+                "properties": {
+                  "enabled": {"const":true},
+                  "dynamic_agents": {"properties":{"enabled":{"const":false}}},
+                  "adaptive_instructions": {"properties":{"enabled":{"const":false},"auto_promote":{"const":false}}}
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {"properties":{"arm_id":{"const":"HARNESS_ADAPTIVE"}},"required":["arm_id"]},
+          "then": {
+            "properties": {
+              "creative_harness": {
+                "type": "object",
+                "properties": {
+                  "enabled": {"const":true},
+                  "dynamic_agents": {"properties":{"enabled":{"const":true}}},
+                  "adaptive_instructions": {"properties":{"enabled":{"const":true},"auto_promote":{"const":false}}}
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {"properties":{"arm_id":{"enum":["CONTROL","TREATMENT"]}},"required":["arm_id"]},
+          "then": {
+            "properties": {
+              "creative_harness": {
+                "properties": {"adaptive_instructions":{"properties":{"auto_promote":{"const":false}}}}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "OrderedArms": {
+      "type": "array",
+      "items": {"$ref":"#/$defs/FrozenArm"},
+      "oneOf": [
+        {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "prefixItems": [
+            {"properties":{"arm_id":{"const":"CONTROL"}}},
+            {"properties":{"arm_id":{"const":"TREATMENT"}}}
+          ]
+        },
+        {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "prefixItems": [
+            {"properties":{"arm_id":{"const":"BASELINE"}}},
+            {"properties":{"arm_id":{"const":"HARNESS"}}},
+            {"properties":{"arm_id":{"const":"HARNESS_ADAPTIVE"}}}
+          ]
+        }
+      ]
+    },
+    "ExperimentFreeze": {
+      "type": "object",
+      "properties": {
+        "schema_version": {"const":"1.0"},
+        "kind": {"const":"EXPERIMENT_FREEZE"},
+        "experiment_id": {"$ref":"https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"},
+        "frozen_at": {"type":"string","format":"date-time"},
+        "source_commit": {"type":"string","pattern":"^[0-9a-f]{40}$"},
+        "works": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"
+          },
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true
+        },
+        "shared_input_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "case_manifest_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "model_config_sha256": {"$ref":"https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/Sha256"},
+        "budget_policy_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "quota": {"$ref":"#/$defs/Quota"},
+        "rubric_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "blind_allocation_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "order_seed": {"type":"integer","minimum":0,"maximum":2147483647},
+        "repetitions": {"type":"integer","minimum":1,"maximum":10000},
+        "arms": {"$ref":"#/$defs/OrderedArms"},
+        "sampling": {"const":"ALL_PREREGISTERED_CASES_INCLUDING_FAILURES"},
+        "metrics": {
+          "type": "object",
+          "properties": {
+            "engineering": {"const":"REQUIRED"},
+            "review_effectiveness": {"const":"REQUIRED"},
+            "tokens": {"const":"REQUIRED"},
+            "cost": {"const":"REQUIRED"},
+            "latency": {"const":"REQUIRED"},
+            "rework": {"const":"REQUIRED"},
+            "literary": {"const":"INDEPENDENT_READING_OR_UNPROVEN"}
+          },
+          "required": ["engineering","review_effectiveness","tokens","cost","latency","rework","literary"],
+          "additionalProperties": false
+        },
+        "design": {"enum":["A_B","THREE_ARM"]}
+      },
+      "required": [
+        "schema_version",
+        "kind",
+        "experiment_id",
+        "frozen_at",
+        "source_commit",
+        "works",
+        "shared_input_ref",
+        "case_manifest_ref",
+        "model_config_sha256",
+        "budget_policy_ref",
+        "quota",
+        "rubric_ref",
+        "blind_allocation_ref",
+        "order_seed",
+        "repetitions",
+        "arms",
+        "sampling",
+        "metrics",
+        "design"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {"properties":{"design":{"const":"A_B"}},"required":["design"]},
+          "then": {"properties":{"arms":{"minItems":2,"maxItems":2}}}
+        },
+        {
+          "if": {"properties":{"design":{"const":"THREE_ARM"}},"required":["design"]},
+          "then": {"properties":{"arms":{"minItems":3,"maxItems":3}}}
+        }
+      ]
+    },
+    "PromotionEvidence": {
+      "type": "object",
+      "properties": {
+        "freeze_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "engineering_report_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "run_manifest_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "literary_status": {"type":"string","enum":["INDEPENDENTLY_REVIEWED","UNPROVEN"]},
+        "blind_review_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+          },
+          "minItems": 0,
+          "maxItems": 32,
+          "uniqueItems": true
+        },
+        "reviewer_ids": {
+          "type": "array",
+          "items": {"$ref":"https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"},
+          "minItems": 0,
+          "maxItems": 32,
+          "uniqueItems": true
+        },
+        "decision_reason": {"type":"string","minLength":1,"maxLength":2000,"pattern":"\\S"}
+      },
+      "required": [
+        "freeze_ref",
+        "engineering_report_ref",
+        "run_manifest_ref",
+        "literary_status",
+        "blind_review_refs",
+        "reviewer_ids",
+        "decision_reason"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {"literary_status":{"const":"UNPROVEN"}},
+            "required": ["literary_status"]
+          },
+          "then": {"properties":{"blind_review_refs":{"maxItems":0},"reviewer_ids":{"maxItems":0}}}
+        },
+        {
+          "if": {
+            "properties": {"literary_status":{"const":"INDEPENDENTLY_REVIEWED"}},
+            "required": ["literary_status"]
+          },
+          "then": {"properties":{"blind_review_refs":{"minItems":2},"reviewer_ids":{"minItems":2}}}
+        }
+      ]
+    },
+    "PromotionAuthority": {
+      "type": "object",
+      "properties": {
+        "approver": {"$ref":"#/$defs/NFPrincipal"},
+        "authority_receipt": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "policy_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "valid_until": {"type":"string","format":"date-time"}
+      },
+      "required": ["approver","authority_receipt","policy_ref","valid_until"],
+      "additionalProperties": false
+    },
+    "PromotionDecision": {
+      "type": "object",
+      "properties": {
+        "schema_version": {"const":"1.0"},
+        "kind": {"const":"PROMOTION_DECISION"},
+        "scope": {"$ref":"#/$defs/TaskScope"},
+        "candidate_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "previous_version_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "decision": {"type":"string","enum":["RECOMMEND","REJECT","APPROVE","ROLLBACK"]},
+        "route": {"type":"string","enum":["MANUAL","POLICY_AUTOMATIC"]},
+        "creative_harness": {"$ref":"#/$defs/HarnessFlags"},
+        "independence": {"$ref":"#/$defs/IndependentReview"},
+        "evidence": {"$ref":"#/$defs/PromotionEvidence"},
+        "authority": {"anyOf":[{"$ref":"#/$defs/PromotionAuthority"},{"type":"null"}]},
+        "rollback_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "status": {"const":"DECISION_RECORD"}
+      },
+      "required": [
+        "schema_version",
+        "kind",
+        "scope",
+        "candidate_ref",
+        "previous_version_ref",
+        "decision",
+        "route",
+        "creative_harness",
+        "independence",
+        "evidence",
+        "authority",
+        "rollback_ref",
+        "status"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {"decision":{"type":"string","enum":["APPROVE","ROLLBACK"]}},
+            "required": ["decision"]
+          },
+          "then": {"properties":{"authority":{"$ref":"#/$defs/PromotionAuthority"}}}
+        },
+        {
+          "if": {"properties":{"route":{"const":"POLICY_AUTOMATIC"}},"required":["route"]},
+          "then": {
+            "properties": {
+              "creative_harness": {
+                "properties": {
+                  "enabled": {"const":true},
+                  "adaptive_instructions": {"properties":{"enabled":{"const":true},"auto_promote":{"const":true}}}
+                }
+              },
+              "authority": {"$ref":"#/$defs/PromotionAuthority"}
+            }
+          }
+        }
+      ]
+    },
+    "AttemptRef": {
+      "type": "object",
+      "properties": {
+        "attempt_id": {"$ref":"https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"},
+        "task_id": {"$ref":"https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"},
+        "generation": {"type":"integer","minimum":0,"maximum":2147483647},
+        "budget_id": {"$ref":"https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"},
+        "state": {"type":"string","enum":["PREPARED","SENT","SUCCEEDED","FAILED","UNKNOWN"]},
+        "provider_receipt_ref": {
+          "anyOf": [
+            {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+            },
+            {"type":"null"}
+          ]
+        }
+      },
+      "required": ["attempt_id","task_id","generation","budget_id","state","provider_receipt_ref"],
+      "additionalProperties": false
+    },
+    "Accounting": {
+      "type": "object",
+      "properties": {
+        "source": {"const":"NF_ATTEMPT_LEDGER"},
+        "state": {"type":"string","enum":["NO_ATTEMPT","RECORDED","RECONCILIATION_REQUIRED"]},
+        "attempts": {"type":"array","items":{"$ref":"#/$defs/AttemptRef"},"minItems":0,"maxItems":64},
+        "reserved_amount": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/NonnegativeDecimal"
+        },
+        "spent_amount": {
+          "anyOf": [
+            {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/NonnegativeDecimal"
+            },
+            {"type":"null"}
+          ]
+        },
+        "reported_tokens": {"anyOf":[{"type":"integer","minimum":0,"maximum":2147483647},{"type":"null"}]},
+        "invoice_ref": {
+          "anyOf": [
+            {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+            },
+            {"type":"null"}
+          ]
+        }
+      },
+      "required": [
+        "source",
+        "state",
+        "attempts",
+        "reserved_amount",
+        "spent_amount",
+        "reported_tokens",
+        "invoice_ref"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {"properties":{"state":{"const":"NO_ATTEMPT"}},"required":["state"]},
+          "then": {
+            "properties": {
+              "attempts": {"maxItems":0},
+              "reserved_amount": {"pattern":"^0(\\.0+)?$"},
+              "spent_amount": {"type":"null"},
+              "reported_tokens": {"const":0},
+              "invoice_ref": {"type":"null"}
+            }
+          }
+        },
+        {
+          "if": {"properties":{"state":{"const":"RECORDED"}},"required":["state"]},
+          "then": {
+            "properties": {
+              "attempts": {"minItems":1,"not":{"contains":{"properties":{"state":{"const":"UNKNOWN"}}}}}
+            }
+          }
+        },
+        {
+          "if": {"properties":{"state":{"const":"RECONCILIATION_REQUIRED"}},"required":["state"]},
+          "then": {
+            "properties": {
+              "attempts": {"contains":{"properties":{"state":{"const":"UNKNOWN"}}}},
+              "spent_amount": {"type":"null"}
+            }
+          }
+        }
+      ]
+    },
+    "ExecutionLog": {
+      "type": "object",
+      "properties": {
+        "schema_version": {"const":"1.0"},
+        "kind": {"const":"EXECUTION_LOG"},
+        "trace_id": {"$ref":"https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"},
+        "recorded_at": {"type":"string","format":"date-time"},
+        "module": {"type":"string","enum":["H1","H2","H3","H4","H5","H6"]},
+        "scope": {"$ref":"#/$defs/TaskScope"},
+        "actor": {"$ref":"#/$defs/NFPrincipal"},
+        "flags": {"$ref":"#/$defs/HarnessFlags"},
+        "runtime": {"$ref":"#/$defs/RuntimeSnapshot"},
+        "input_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+          },
+          "minItems": 0,
+          "maxItems": 64
+        },
+        "output_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+          },
+          "minItems": 0,
+          "maxItems": 64
+        },
+        "decision": {
+          "type": "string",
+          "enum": [
+            "SKIPPED_DISABLED",
+            "CANDIDATE_RECORDED",
+            "REVIEWED",
+            "DENIED",
+            "FAILED",
+            "AWAITING_RECONCILIATION",
+            "OBSERVED_NF_ACCEPTANCE"
+          ]
+        },
+        "reason_code": {"type":"string","minLength":1,"maxLength":100,"pattern":"\\S"},
+        "nf_trace_id": {"$ref":"https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"},
+        "workshop_operation_id": {
+          "anyOf": [
+            {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+            },
+            {"type":"null"}
+          ]
+        },
+        "latency_ms": {"type":"integer","minimum":0,"maximum":2147483647},
+        "rework_count": {"type":"integer","minimum":0,"maximum":2147483647},
+        "accounting": {"$ref":"#/$defs/Accounting"},
+        "literary_status": {"type":"string","enum":["NOT_EVALUATED","UNPROVEN","INDEPENDENT_EVIDENCE_LINKED"]},
+        "literary_evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+          },
+          "minItems": 0,
+          "maxItems": 64
+        },
+        "official_change_receipt": {
+          "anyOf": [
+            {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/CommitReceipt"
+            },
+            {"type":"null"}
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "kind",
+        "trace_id",
+        "recorded_at",
+        "module",
+        "scope",
+        "actor",
+        "flags",
+        "runtime",
+        "input_refs",
+        "output_refs",
+        "decision",
+        "reason_code",
+        "nf_trace_id",
+        "workshop_operation_id",
+        "latency_ms",
+        "rework_count",
+        "accounting",
+        "literary_status",
+        "literary_evidence_refs",
+        "official_change_receipt"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {"literary_status":{"type":"string","enum":["NOT_EVALUATED","UNPROVEN"]}},
+            "required": ["literary_status"]
+          },
+          "then": {"properties":{"literary_evidence_refs":{"maxItems":0}}}
+        },
+        {
+          "if": {
+            "properties": {"literary_status":{"const":"INDEPENDENT_EVIDENCE_LINKED"}},
+            "required": ["literary_status"]
+          },
+          "then": {"properties":{"literary_evidence_refs":{"minItems":2}}}
+        },
+        {
+          "if": {"properties":{"decision":{"const":"SKIPPED_DISABLED"}},"required":["decision"]},
+          "then": {
+            "properties": {
+              "output_refs": {"maxItems":0},
+              "accounting": {"properties":{"state":{"const":"NO_ATTEMPT"}}},
+              "official_change_receipt": {"type":"null"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"flags":{"properties":{"enabled":{"const":false}}}},
+            "required": ["flags"]
+          },
+          "then": {
+            "properties": {
+              "decision": {"type":"string","enum":["SKIPPED_DISABLED","DENIED"]},
+              "accounting": {"properties":{"state":{"const":"NO_ATTEMPT"}}},
+              "output_refs": {"maxItems":0},
+              "official_change_receipt": {"type":"null"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"decision":{"const":"OBSERVED_NF_ACCEPTANCE"}},
+            "required": ["decision"]
+          },
+          "then": {
+            "properties": {
+              "official_change_receipt": {
+                "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/CommitReceipt"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"decision":{"not":{"const":"OBSERVED_NF_ACCEPTANCE"}}},
+            "required": ["decision"]
+          },
+          "then": {"properties":{"official_change_receipt":{"type":"null"}}}
+        },
+        {
+          "if": {
+            "properties": {
+              "module": {"const":"H5"},
+              "flags": {"properties":{"dynamic_agents":{"properties":{"enabled":{"const":false}}}}}
+            },
+            "required": ["module","flags"]
+          },
+          "then": {
+            "properties": {
+              "decision": {"enum":["SKIPPED_DISABLED","DENIED"]},
+              "output_refs": {"maxItems":0},
+              "accounting": {"properties":{"state":{"const":"NO_ATTEMPT"}}},
+              "official_change_receipt": {"type":"null"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "module": {"const":"H6"},
+              "flags": {
+                "properties": {"adaptive_instructions":{"properties":{"enabled":{"const":false}}}}
+              }
+            },
+            "required": ["module","flags"]
+          },
+          "then": {
+            "properties": {
+              "decision": {"enum":["SKIPPED_DISABLED","DENIED"]},
+              "output_refs": {"maxItems":0},
+              "accounting": {"properties":{"state":{"const":"NO_ATTEMPT"}}},
+              "official_change_receipt": {"type":"null"}
+            }
+          }
+        }
+      ]
+    }
+  },
+  "x-default-configuration": {
+    "schema_version": "1.0",
+    "kind": "CONFIGURATION",
+    "creative_harness": {
+      "enabled": false,
+      "dynamic_agents": {"enabled":false},
+      "adaptive_instructions": {"enabled":false,"auto_promote":false}
+    }
+  }
+}
