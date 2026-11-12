@@ -136,6 +136,11 @@ class AgentGateway:
                 self.kernel.artifact(repo, ref, world_ref["work_id"])
             self.kernel._register_artifact(repo, runtime_ref, world_ref["work_id"], runtime["snapshot"], "AGENT_RUNTIME", principal.principal_id)
             self.kernel._register_artifact(repo, input_ref, world_ref["work_id"], data, "AGENT_INPUT", principal.principal_id)
+            if self.creative_harness.enabled:
+                from .audit_log import LogService
+
+                LogService.artifact(repo.conn, "AGENT_INPUT", input_ref["artifact_revision_id"],
+                                    world_ref["work_id"], {"input_world_ref": world_ref}, principal.principal_id)
         return {"input_ref": input_ref, "runtime_ref": runtime_ref,
                 "runtime_contract_version": runtime["sha256"], "output_contract": data["output_contract"]}
 
@@ -193,7 +198,9 @@ class AgentGateway:
             binding["adaptive_blocks"] = resolve_for_input(self.kernel, repo, spec, data, runtime)
         if "creative_harness" in data and data["creative_harness"]["creative_harness"]["enabled"]:
             from .creative_context_store import load_snapshot
+            from .dynamic_runtime import check_input_branch
 
+            check_input_branch(self.kernel, repo, spec["world_ref"], row, request["input_ref"])
             compiled_ref = context["artifact_ref"]
             compiled = self.kernel.artifact(repo, compiled_ref, task["work_id"], kind="COMPILED_CONTEXT")["payload"]
             require(fingerprint(compiled) == compiled_ref["sha256"] and compiled["bundle"] == bundle
@@ -376,6 +383,11 @@ class AgentGateway:
         if kind != "AGENT_CANDIDATE" and (assignment_ref or adaptive_ref):
             payload = {**payload, **{k: binding[k] for k in ("dynamic_assignment_ref", "adaptive_instruction_ref")
                                      if k in binding}}
+        snapshot = binding.get("creative_snapshot")
+        context_ref = snapshot[0] if snapshot else None
+        previous_payload = payload
+        if kind != "AGENT_CANDIDATE" and context_ref:
+            payload = {**payload, "creative_context_ref": context_ref}
         artifact_id = str(uuid5(UUID(identity), label))
         artifact_revision_id = str(uuid5(UUID(identity), label + ":revision"))
         ref = {"artifact_id": artifact_id, "artifact_revision_id": artifact_revision_id,
@@ -384,13 +396,18 @@ class AgentGateway:
             repo.one("tasks", {"task_id": binding["task"]["task_id"]}, lock="update")
             old = repo.one("artifacts", {"artifact_revision_id": artifact_revision_id})
             if old:
-                require(old["sha256"] == ref["sha256"] and old["work_id"] == binding["task"]["work_id"],
+                # A retry can encounter immutable stage bytes written before S1 audit tagging.
+                if context_ref and old["sha256"] == fingerprint(previous_payload):
+                    ref["sha256"] = old["sha256"]
+                require(old["sha256"] == ref["sha256"] and old["work_id"] == binding["task"]["work_id"]
+                        and old["kind"] == kind and old["artifact_id"] == artifact_id,
                         "IDEMPOTENCY_CONFLICT", "Recorded model artifact differs")
             else:
                 self.kernel._register_artifact(repo, ref, binding["task"]["work_id"], payload, kind, binding["task"]["principal_id"])
-                if (assignment_ref or adaptive_ref) and kind == "AGENT_CANDIDATE":
+                if (assignment_ref or adaptive_ref or context_ref) and kind == "AGENT_CANDIDATE":
                     from .dynamic_runtime import protect_candidate
-                    protect_candidate(self.kernel, repo, binding["task"], binding["spec"]["world_ref"], ref, assignment_ref, adaptive_ref=adaptive_ref)
+                    protect_candidate(self.kernel, repo, binding["task"], binding["spec"]["world_ref"], ref, assignment_ref,
+                                      adaptive_ref=adaptive_ref, context_ref=context_ref)
                 from novel_factory.application.audit_log import LogService
                 if kind == "AGENT_CALL_EVIDENCE":
                     LogService.model(repo.conn, artifact_revision_id, payload)
