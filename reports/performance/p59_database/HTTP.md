@@ -49,8 +49,19 @@ NF_BENCH_DIAGNOSTICS=1 python scripts/with_postgres.py --log-dir /tmp/nf-http-db
 仓库的每份 GitHub artifact 元数据包含文件 ID、源码、外层 SHA256 及 URL。下载 ZIP 至 `<archives>/<run_id>/<artifact_id>.zip` 后，以下命令逐一校验 GitHub 记录的 ZIP SHA256 及解压后的每份 JSON SHA256，重建汇总。
 
 ```bash
-python -m benchmarks.p59_http_evidence --archives /path/to/archives --metadata reports/performance/p59_database/raw/http
+python -m benchmarks.p59_http_evidence --archives reports/performance/p59_database/raw/actions --metadata reports/performance/p59_database/raw/http
 ```
+
+## 一小时实际结果
+
+同一冻结 P5.9 提交、每轮 500 个真实持久化身份、每秒计划 20 次，只读一小时。两个独立 runner 各安排 72,000 次，两个严格门槛均为 `NOT_MET`。
+
+| 方案 | 有效读取 / 计划 | 429 | 409 租约到期 | 传输错误 | P50 / P95 / P99 毫秒 |
+| --- | ---: | ---: | ---: | ---: | --- |
+| 原始单租约 | 71,500 / 72,000 | 0 | 500 | 0 | 69.76 / 123.28 / 136.08 |
+| 当前 owner 定期续租 | 71,999 / 72,000 | 0 | 0 | 1 | 89.73 / 106.12 / 214.28 |
+
+原始夹具从第一次到最后一次 `LEASE_EXPIRED` 的时间为第 3,575.00 至 3,599.95 秒，500 次 409 全出现在最后约 25 秒。原始方案实际耗时 3,599.96 秒，续租方案耗时 3,600.04 秒。续租在两个轮次分别成功续租全部 500 个身份，两个轮次分别用了 2.17 和 2.25 秒。第 3,355.00 秒发生一次 `httpx.ReadError`，记录的是传输读取失败；现有证据不足以判断其底层原因。两个世界 HEAD 均保持原值，数据库连接峰值之和为 6/8，收尾时均为零。与此前共享主机的一小时测量相比，本轮两次独立 runner 都没有观察到 429。[原始小时完整记录](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43288667752/artifacts/13980816715) · [续租小时完整记录](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43288667752/artifacts/13981535743)
 
 ## 固定版本条件传输的完整入口复验
 

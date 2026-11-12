@@ -2538,5 +2538,219 @@
         "source_sha256": "67036036d25079b30f41827164e2b1ade61d3de1099f0250e5564f9ebab0163a"
       }
     }
+  },
+  {
+    "run_id": 43288667752,
+    "artifact_id": 13980816715,
+    "name": "db-http-read-hour-3e6b59268f1e89520230c8b70e9a26b9950a2f79-1",
+    "bytes": 3518772,
+    "sha256": "1f709b2d32e9dae4cb4c197532269cc007b962ce6d6fd8cbde3c20071400b45d",
+    "head_sha": "82542395adcc7a1ced87132500326bdab2234847",
+    "artifact_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43288667752/artifacts/13980816715",
+    "source": "3e6b59268f1e89520230c8b70e9a26b9950a2f79",
+    "verified_inner_sha256": {
+      "result.json": "ef710c1a3795dd232505098fd43ec2868bd9b25c15e45aa28e28a4d56df306b9",
+      "transport.json": "ee39c82bb3aa715b47e7ea33eb560756232d935b4d853377f9b8bd6ab3c283f7"
+    },
+    "exit": 1,
+    "frozen_transport_header_rps": [
+      236.21660170603255,
+      242.11115088885234
+    ],
+    "outcome": {
+      "probe_gate": "NOT_MET",
+      "long_duration_gate": "NOT_MET",
+      "duration_seconds": 3599.961212021,
+      "scheduled_count": 72000,
+      "actual_call_start_rps": 20.000115619801992,
+      "successful_query_rps": 19.861325105739198,
+      "status_counts": {
+        "200": 71500,
+        "409": 500
+      },
+      "latency_all_attempts": {
+        "count": 72000,
+        "p50_ms": 69.7625,
+        "p95_ms": 123.2806,
+        "p99_ms": 136.0788
+      },
+      "world_unchanged": true,
+      "validated": 71500,
+      "unsuccessful_groups": {
+        "LEASE_EXPIRED": {
+          "requests": 500,
+          "first_seconds": 3575.000857195,
+          "last_seconds": 3599.951003414
+        }
+      },
+      "service": {
+        "ingress": {
+          "queued": 0,
+          "peak_active": 6,
+          "admitted": 72000,
+          "capacity": 256,
+          "peak_queued": 0,
+          "per_principal": 256,
+          "max_waiters": 0,
+          "completed": 72000,
+          "active": 0,
+          "wait_seconds_total": 1.14034231802151,
+          "peak_note": "Sum of process peaks; see process snapshots for exact values"
+        },
+        "authentication_admission": {
+          "queued": 0,
+          "peak_active": 3,
+          "admitted": 72000,
+          "capacity": 4,
+          "peak_queued": 0,
+          "per_principal": 4,
+          "max_waiters": 128,
+          "completed": 72000,
+          "active": 0,
+          "wait_seconds_total": 1.0834008840314198,
+          "peak_note": "Sum of process peaks; see process snapshots for exact values"
+        },
+        "admission": {
+          "queued": 0,
+          "peak_active": 4,
+          "admitted": 72000,
+          "capacity": 4,
+          "peak_queued": 2,
+          "per_principal": 4,
+          "max_waiters": 128,
+          "completed": 72000,
+          "active": 0,
+          "wait_seconds_total": 0.8641805149819959,
+          "peak_note": "Sum of process peaks; see process snapshots for exact values"
+        },
+        "resources": {
+          "service_user_cpu_seconds": 2629.465901,
+          "service_system_cpu_seconds": 229.06256399999998,
+          "service_sum_peak_rss_kib": 253024
+        },
+        "database": {
+          "sql_statements": 1228725,
+          "transactions": 215500,
+          "failed_statements": 0,
+          "checked_out_at_end": 0,
+          "peak_checked_out_connections": 6,
+          "configured_pool_size": 8,
+          "sql_cursor_execution_seconds": 1501.2283284427747,
+          "transaction_seconds_before_commit": 3276.9959050530033
+        }
+      }
+    }
+  },
+  {
+    "run_id": 43288667752,
+    "artifact_id": 13981535743,
+    "name": "db-http-renewed-hour-3e6b59268f1e89520230c8b70e9a26b9950a2f79-1",
+    "bytes": 3478092,
+    "sha256": "898badab3581c3b6fe02601468c4b4e42c2f595acab8f262bcab86ed137586e2",
+    "head_sha": "82542395adcc7a1ced87132500326bdab2234847",
+    "artifact_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43288667752/artifacts/13981535743",
+    "source": "3e6b59268f1e89520230c8b70e9a26b9950a2f79",
+    "verified_inner_sha256": {
+      "result.json": "bf036c462cee6e2588f3d6029a18b3d7f470700b4a4ab5401cd3ef1fb0cf5992",
+      "transport.json": "e4d9c37b67ccede4ce9e5ae28e4341113284983efe5c9347d0e2dd0304b7b95d"
+    },
+    "exit": 1,
+    "frozen_transport_header_rps": [
+      238.26946750534768,
+      221.20459360493012
+    ],
+    "outcome": {
+      "probe_gate": "NOT_MET",
+      "long_duration_gate": "NOT_MET",
+      "duration_seconds": 3600.04221804,
+      "scheduled_count": 72000,
+      "actual_call_start_rps": 20.000111593561442,
+      "successful_query_rps": 19.999487683563608,
+      "status_counts": {
+        "200": 71999,
+        "transport_error": 1
+      },
+      "worker_lease_renewals": [
+        {
+          "leases": 500,
+          "duration_seconds": 2.171156805999999
+        },
+        {
+          "leases": 500,
+          "duration_seconds": 2.252060111999981
+        }
+      ],
+      "latency_all_attempts": {
+        "count": 72000,
+        "p50_ms": 89.7328,
+        "p95_ms": 106.1155,
+        "p99_ms": 214.2778
+      },
+      "world_unchanged": true,
+      "validated": 71999,
+      "unsuccessful_groups": {
+        "transport_error": {
+          "requests": 1,
+          "first_seconds": 3355.001134662,
+          "last_seconds": 3355.001134662
+        }
+      },
+      "service": {
+        "ingress": {
+          "per_principal": 256,
+          "admitted": 71999,
+          "queued": 0,
+          "peak_active": 22,
+          "peak_queued": 0,
+          "completed": 71999,
+          "wait_seconds_total": 1.2137301269694376,
+          "active": 0,
+          "capacity": 256,
+          "max_waiters": 0,
+          "peak_note": "Sum of process peaks; see process snapshots for exact values"
+        },
+        "authentication_admission": {
+          "per_principal": 4,
+          "admitted": 71999,
+          "queued": 0,
+          "peak_active": 3,
+          "peak_queued": 0,
+          "completed": 71999,
+          "wait_seconds_total": 0.8437946279902917,
+          "active": 0,
+          "capacity": 4,
+          "max_waiters": 128,
+          "peak_note": "Sum of process peaks; see process snapshots for exact values"
+        },
+        "admission": {
+          "per_principal": 4,
+          "admitted": 71999,
+          "queued": 0,
+          "peak_active": 4,
+          "peak_queued": 18,
+          "completed": 71999,
+          "wait_seconds_total": 130.06032998295012,
+          "active": 0,
+          "capacity": 4,
+          "max_waiters": 128,
+          "peak_note": "Sum of process peaks; see process snapshots for exact values"
+        },
+        "resources": {
+          "service_user_cpu_seconds": 2298.194381,
+          "service_system_cpu_seconds": 209.792622,
+          "service_sum_peak_rss_kib": 253748
+        },
+        "database": {
+          "sql_statements": 1234781,
+          "transactions": 215997,
+          "failed_statements": 0,
+          "checked_out_at_end": 0,
+          "peak_checked_out_connections": 6,
+          "configured_pool_size": 8,
+          "sql_cursor_execution_seconds": 1072.9381289949342,
+          "transaction_seconds_before_commit": 2699.2811205849907
+        }
+      }
+    }
   }
 ]

@@ -189,6 +189,17 @@ python scripts/with_postgres.py --log-dir "$out/pg-hour" -- \
 
 冻结过载工具允许的有界恢复与开环单次物理尝试使用不同分母；全程状态、结果时延及原始退出码可分别查看。额外探针和真实任务 GET 的更改均未调整上述容量门槛。[50/500 原始三种负载](../../reports/performance/p59_database/raw/actions/43294345517/) · [200 过载、1,000 开环](../../reports/performance/p59_database/raw/actions/43292819006/) · [两个历史源对照](../../reports/performance/p59_database/HTTP.md)
 
+### 两组完整一小时稳定性复验
+
+冻结源 `3e6b5926`，每组单独 runner、500 个授权身份、20 次定速读取/秒，计划 72,000 次、每身份 144 次。原始失败标准和程序的非零退出码均保留。[同一工作流的两份原始 ZIP 与独立 SHA-256](../../reports/performance/p59_database/raw/actions/43288667752/) · [HTTP 报告与命令](../../reports/performance/p59_database/HTTP.md)
+
+| 一小时模式 | 有效 / 计划 | 409 / 429 / 传输错误 | P50 / P95 / P99（毫秒） | 原一小时门槛 |
+|---|---:|---:|---:|---|
+| 原始单租约 | 71,500 / 72,000 | 500 / 0 / 0 | 69.76 / 123.28 / 136.08 | 未通过 |
+| 活跃 owner 按代际续租 | 71,999 / 72,000 | 0 / 0 / 1 | 89.73 / 106.12 / 214.28 | 未通过 |
+
+原始组从计划时刻第 3,575 秒起，每个身份的最后一项请求各出现一次 409，领域码均为 `LEASE_EXPIRED`。两个小时组都未产生新世界提交，也没有商业模型调用。续租组分别在两轮更新中成功更新 500 份租约，耗时 2.17 和 2.25 秒。第 67,100 号请求在第 3,355 秒由客户端报 `ReadError`，没有 HTTP 状态。前后请求正常；该组接入、认证、业务均累计进入并完成 71,999 次，应用 SQL 错误为 0，收尾连接归零。现有记录把该错误定位到一次未被接入仪表计入的传输尝试，缺少确认断连由哪端发起的网络证据。续租消除了这一轮观测到的过期错误，严格的无错长稳仍然未通过。
+
 ### 回归与恢复记录
 
 在最终产品树 `6b8fd74d` 上，GitHub Linux runner 的完整应用测试为 1,033 项通过、另有 17 个子测试通过、21 项跳过，失败和错误均为零。跳过由 17 个要求 Linux 容器隔离的用例、一个双库 S6 收集项和三个 Windows 专属用例组成。该次原始日志还列出 4 个警告。对同一整仓树，按其 JUnit 提取这 17 个 Linux node ID，加上 S6，在具备容器能力的两套真实 PG 集群上运行，18/18 通过、零跳过。3 个 Windows 用例在同源原生 Windows 的 35 项回归中通过。所有跳过项均有对应平台或夹具上的执行记录。[逐项补跑与 SHA](../../reports/performance/p59_database/raw/validation/hosted-skip-supplement.json)[定稿 Linux 全量日志与 JUnit](../../reports/performance/p59_database/raw/actions/43294749933/)
@@ -201,7 +212,7 @@ Linux 的独立双 PostgreSQL 集群和 Redis 运行，在协调器定稿源 `d9
 
 PR #33 在实验途中前进。以最新核验的 `877be80d7c1dfa8b6fb9c9c5a2a570c7b14d3ca0` 与候选定稿生成未发布的组合树 `cfaadaf9007fa129985f2d5c722c7ba40915e69e`，无冲突。相对上次 `293e6f4c`，上游新增的 9 个文件差异仅为文档与数据。组合树的产品源、迁移、实验与基准均与定稿一致。该树用真实 PG17.11 运行 62 项检查，59 通过，3 个 Windows 专有用例按平台跳过。覆盖上游已变动的 Provider 用例。候选、运行日志、否决记录和环境说明统一保存在一条实验分支，没有建立待合并的候选分支。[兼容性收据](../../reports/performance/p59_database/raw/compatibility.json) · [兼容性 JUnit](../../reports/performance/p59_database/raw/compatibility.xml)
 
-完整检出分支后，在仓库根目录可离线校验所有登记的原始 ZIP。该命令检查运行来源、清单与目录的一致性、每份 ZIP 的字节数与 SHA-256，并解压读取各成员验证 CRC。
+已核对 14 个运行的全部 44 份原始 ZIP，合计 30,886,062 字节。完整检出分支后，在仓库根目录可离线校验所有登记的原始 ZIP。该命令检查运行来源、清单与目录的一致性、每份 ZIP 的字节数与 SHA-256，并解压读取各成员验证 CRC。
 
 ```bash
 python scripts/archive_database_experiment.py --verify-local
