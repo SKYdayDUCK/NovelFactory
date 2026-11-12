@@ -1,132 +1,61 @@
 [
   {
-    "run": 43054332525,
-    "workflow": "p55-admission-paired.yml",
-    "event": "push",
-    "head": "e8b0fa61a8ceb86b92ff4bae82296273d16adf06",
+    "run": 43059877408,
+    "workflow": "p5-native-desktop.yml",
+    "event": "workflow_dispatch",
+    "head": "df1e0cc904e3b94a360d86e3a3e00bfec3258673",
+    "branch": "main",
     "conclusion": "success",
     "artifact": {
-      "id": 13871700305,
-      "name": "p55-original-http50-f2e6-0f8017",
-      "size": 19737,
-      "digest": "sha256:37cbfed3c4eb77522a52296dda465c716719b2837150c4cad3d4cff594a21b2a"
+      "id": 13873727201,
+      "name": "p5-native-codex-desktop-43059877408-1",
+      "size": 1034,
+      "digest": "sha256:ba6c07ae9f2914b882089bd1863ddf385aeae13d8a38b4a9adb57e6dba602829"
     }
   },
   {
-    "run": 43044231150,
-    "workflow": "p55-large-qualification.yml",
-    "event": "push",
-    "head": "a08294964b29c63cbc74902f2552cb0a19851a5c",
-    "conclusion": "success",
+    "run": 43036514307,
+    "workflow": "p3-scale-experiments.yml",
+    "event": "pull_request",
+    "head": "55d8979b5361a4837701d762feacd83036096b11",
+    "branch": "dev/p5-5-redis-eventhub",
+    "conclusion": "failure",
     "artifact": {
-      "id": 13867723125,
-      "name": "same-runner-600s-55d897-and-8f245a5",
-      "size": 979390,
-      "digest": "sha256:acd627ca328954a5d1b328e22ab7d0371241bf436adee6c16480d31b2d5c0ab5"
-    }
+      "id": 13864227631,
+      "name": "p3-scale-500-read-soak-1",
+      "size": 489080,
+      "digest": "sha256:7153d6668be5a6244559fdf399e0e8a7396821d2bd1d96d8e724ffb16980a216"
+    },
+    "expected_result_sha256": "2f8c9410042397963ce85d760e7663df90a89eb3700b610c1bdd4d6bcb9e2421"
   },
   {
-    "run": 43042702151,
-    "workflow": "p55-profile.yml",
-    "event": "push",
-    "head": "07c4f6d38ad3237ff34482741845031f1d0dedcc",
-    "conclusion": "success",
+    "run": 43036514307,
+    "workflow": "p3-scale-experiments.yml",
+    "event": "pull_request",
+    "head": "55d8979b5361a4837701d762feacd83036096b11",
+    "branch": "dev/p5-5-redis-eventhub",
+    "conclusion": "failure",
     "artifact": {
-      "id": 13866072369,
-      "name": "p55-exact-500-fixed-cut-profile",
-      "size": 19691,
-      "digest": "sha256:eee6b05063eaf9ecc90fef32225f1e3b1e15e0a10a6c286ee89a41bece636569"
-    }
+      "id": 13863984683,
+      "name": "p3-scale-500-read-soak-2",
+      "size": 489381,
+      "digest": "sha256:218e08b98a5a2fa3c5a3f67b392f81e7018d4bba04ab18f6d271cc02ff9c4ed2"
+    },
+    "expected_result_sha256": "1d206777041c3c64a047d39c49560d4c405b39706e642bc646a120fc083ce667"
   },
   {
-    "run": 43042439465,
-    "workflow": "p55-guard-acceptance.yml",
-    "event": "push",
-    "head": "6673629617bb67e02860dcee2a41ff959b0ac2b0",
-    "conclusion": "success",
+    "run": 43035161204,
+    "workflow": "p3-scale-experiments.yml",
+    "event": "pull_request",
+    "head": "e2f0fabadcf673984fddacc9bd7a924d6588b816",
+    "branch": "dev/p5-5-redis-eventhub",
+    "conclusion": "failure",
     "artifact": {
-      "id": 13866426181,
-      "name": "exact-55d897-s9-guard-and-junit",
-      "size": 4311,
-      "digest": "sha256:14ba32ffbee12ad3719f1ce859d5f15643e183e0826bfc0411dca1429a1f0aac"
-    }
-  },
-  {
-    "run": 43042439565,
-    "workflow": "p55-profile.yml",
-    "event": "push",
-    "head": "6673629617bb67e02860dcee2a41ff959b0ac2b0",
-    "conclusion": "success",
-    "artifact": {
-      "id": 13865697546,
-      "name": "p55-exact-500-fixed-cut-profile",
-      "size": 3550,
-      "digest": "sha256:5f0bda4441a1cee124a9f9d9a0d723d6aac923217bd80eb85925aec718cc6ffa"
-    }
-  },
-  {
-    "run": 43041235141,
-    "workflow": "p55-guard-acceptance.yml",
-    "event": "push",
-    "head": "b54db47093ead1d3396f23bcf6caa4ed5d06fff5",
-    "conclusion": "success",
-    "artifact": {
-      "id": 13866055835,
-      "name": "exact-55d897-s9-guard-and-junit",
-      "size": 4319,
-      "digest": "sha256:1156fab3fbbb5cd5a1309bde9107a4e36768a59299c8141ac3afc5fd2fe68a1e"
-    }
-  },
-  {
-    "run": 43040555093,
-    "workflow": "p55-guard-acceptance.yml",
-    "event": "push",
-    "head": "9526c7734835453a0ef7c9cbf22ac145da90d830",
-    "conclusion": "success",
-    "artifact": {
-      "id": 13864898356,
-      "name": "exact-55d897-s9-guard-and-junit",
-      "size": 4327,
-      "digest": "sha256:e688c8af64ebca896438b3b0890456ba8f57b739131f6a30bd38a6f656b499fd"
-    }
-  },
-  {
-    "run": 43040245181,
-    "workflow": "p55-query-comparison.yml",
-    "event": "push",
-    "head": "51e5ac1cda8770e244b8f9fd95803bdd80d0e08d",
-    "conclusion": "success",
-    "artifact": {
-      "id": 13867065861,
-      "name": "same-runner-600s-55d897-and-598f4ee",
-      "size": 981296,
-      "digest": "sha256:919813deea15f5e179764f86092e4306c2ea7737c16d9e9ca64543c608284762"
-    }
-  },
-  {
-    "run": 43040245115,
-    "workflow": "p55-guard-acceptance.yml",
-    "event": "push",
-    "head": "51e5ac1cda8770e244b8f9fd95803bdd80d0e08d",
-    "conclusion": "success",
-    "artifact": {
-      "id": 13865002753,
-      "name": "exact-55d897-s9-guard-and-junit",
-      "size": 4284,
-      "digest": "sha256:56cb46c686f74ebd2e2ea36a81880437cf4bad10d83c4afd5a4d62eebdd41c25"
-    }
-  },
-  {
-    "run": 43039818150,
-    "workflow": "p55-guard-acceptance.yml",
-    "event": "push",
-    "head": "c775013e16fd71717d5c6a309df92df90842ea05",
-    "conclusion": "success",
-    "artifact": {
-      "id": 13864487840,
-      "name": "exact-55d897-s9-guard-and-junit",
-      "size": 4328,
-      "digest": "sha256:87665a0d85221d504fc8b5fad5bb595951c197302b67e2a2aea3beeaa7b44cc1"
-    }
+      "id": 13864160530,
+      "name": "p3-scale-500-read-soak-1",
+      "size": 489593,
+      "digest": "sha256:4666915db6085c9bf09f41346209e3fcd59346e449a33380380da957a692d4d0"
+    },
+    "expected_result_sha256": "b9d3b025cbd08323054a2621aef2dd9f5e4cda9c64adbff36f445105fd22896f"
   }
 ]

@@ -53,7 +53,7 @@ def main():
     check(len(entries) == 1, "artifact not fixed by request")
     entry = entries[0]
     run = api(f"actions/runs/{entry['run']}")
-    check(run["repository"]["full_name"] == "SKYdayDUCK/NovelFactory" and run["head_branch"] == "evidence/p55-55d897-guard"
+    check(run["repository"]["full_name"] == "SKYdayDUCK/NovelFactory" and run["head_branch"] == entry.get("branch", "evidence/p55-55d897-guard")
           and run["head_sha"] == entry["head"] and run["event"] == entry["event"] and run["status"] == "completed"
           and run["conclusion"] == entry["conclusion"] and Path(run["path"]).name == entry["workflow"], "run provenance mismatch")
     info = api(f"actions/artifacts/{idx}")
@@ -65,6 +65,10 @@ def main():
     check(len(archive) == required["size"] and "sha256:"+digest(archive) == required["digest"], "download differs from GitHub digest")
     with zipfile.ZipFile(io.BytesIO(archive)) as z:
         members = screen(z)
+        if "expected_result_sha256" in entry:
+            check(members["result.json"]["sha256"] == entry["expected_result_sha256"], "published historical source digest mismatch")
+            results = json.loads(z.read("result.json"))
+            check(len(results["records"]) == results["scheduled_count"] == 12000 and results["real_model_calls"] == results["new_world_commits"] == 0, "historical work is not the registered deterministic probe")
     count = (len(archive)+SIZE-1)//SIZE
     check(0 <= part < count, "invalid part")
     if part == 0:
