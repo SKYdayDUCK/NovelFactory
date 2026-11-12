@@ -1,5 +1,5 @@
 # 串行交付交接
 
-[P5.6 主线签收](https://github.com/SKYdayDUCK/NovelFactory/blob/3ef5a72d7a65edb76a988132a72c4e82ee0805ee/reports/integration/evidence/P56/main-4e8fc5a/SIGNOFF.md)。从[当前阶段](CURRENT_STAGE.md)、[台账](DELIVERY_LEDGER.md)、[PR 矩阵](PR_MERGE_MATRIX.md)及实际 GitHub 状态恢复。#17 在 P5.6 已签收主线上集成原有预算提交；操作入口和账户语义见[共享 Token 预算](../../docs/operations/shared-token-budget.md)。分开跟踪原 PR 头、整合候选、实际主线及各自 CI 工件。
+[当前阶段](CURRENT_STAGE.md)记录 #16 的基线。[#17 主线签收](https://github.com/SKYdayDUCK/NovelFactory/blob/fee462dfb6923059512b9797b4707e61eec8e8a3/reports/integration/evidence/P6-C1/main-533c1f5/SIGNOFF.md)保留了真实 CLI、取消竞态、WAL 与原始 CI 回执。#16 使用集成的 NF 和 Workshop，验收模板、登记授权、预算、错误恢复、日志、正文导出和两位独立读者的操作入口。工程样卷使用 TEST_FIXTURE。真实模型、费用和文学评价仍需作者本地授权。
 
-P6 #16 在 #17 完成主线验证后继续。作者本地真实创作另行授权，工程样卷仅是 TEST_FIXTURE。存量交付结束时须从 GitHub 复核只剩 Scion #4，归档 PRE_HARNESS_BASELINE。后续 [Creative Harness S0–S6](https://github.com/SKYdayDUCK/NovelFactory/blob/05b5b0e38ffa86ed483568388aa2c2a2674f66e5/reports/integration/CREATIVE_HARNESS_DELIVERY_SCOPE.md) 分别提交、合并及验证，Issue #13 按原容量条件跟踪。
+#16 经 main 验证后处理历史 #18，按[十六节委托](https://github.com/SKYdayDUCK/NovelFactory/blob/05b5b0e38ffa86ed483568388aa2c2a2674f66e5/reports/integration/CREATIVE_HARNESS_DELIVERY_SCOPE.md)完成 PRE_HARNESS_BASELINE 后开发 S0–S6。

@@ -1,0 +1,165 @@
+[
+  {
+    "scheduled_count": 12000,
+    "duration_seconds": 601.924329983,
+    "actual_call_start_rps": 20.000608229580855,
+    "successful_query_rps": 19.118682244203384,
+    "latency_all_attempts": {
+      "count": 12000,
+      "p50_ms": 1888.4602,
+      "p95_ms": 2301.9095,
+      "p99_ms": 2364.7984
+    },
+    "status_counts": {
+      "200": 11508,
+      "429": 492
+    },
+    "correctness_errors": [],
+    "world_unchanged": true,
+    "new_world_commits": 0,
+    "real_model_calls": 0,
+    "probe_gate": "NOT_MET",
+    "long_duration_gate": "NOT_EXECUTED",
+    "run": 43036514307,
+    "job": 130576649020,
+    "artifact": "p3-scale-500-read-soak-1",
+    "source_result_sha256": "2f8c9410042397963ce85d760e7663df90a89eb3700b610c1bdd4d6bcb9e2421",
+    "arm": "candidate-attempt-1",
+    "cpu_models": [
+      "AMD EPYC 7763 64-Core Processor"
+    ],
+    "initial_load_average": [
+      3.046875,
+      2.826171875,
+      1.6376953125
+    ],
+    "admission": {
+      "peak_queued": 42,
+      "wait_seconds_total": 16686.955358402993,
+      "max_waiters": 128,
+      "completed": 11508,
+      "capacity": 4,
+      "peak_active": 4,
+      "admitted": 11527,
+      "per_principal": 4,
+      "active": 0,
+      "timed_out": 492,
+      "queued": 0,
+      "peak_note": "Sum of process peaks; see process snapshots for exact values"
+    },
+    "service_resources": {
+      "service_user_cpu_seconds": 1064.618551,
+      "service_system_cpu_seconds": 62.400238,
+      "service_sum_peak_rss_kib": 273160
+    },
+    "sql_execution_seconds": 956.3623442419753
+  },
+  {
+    "scheduled_count": 12000,
+    "duration_seconds": 601.7988231910001,
+    "actual_call_start_rps": 20.00071214780036,
+    "successful_query_rps": 19.863780950276162,
+    "latency_all_attempts": {
+      "count": 12000,
+      "p50_ms": 431.6299,
+      "p95_ms": 2180.718,
+      "p99_ms": 2261.9615
+    },
+    "status_counts": {
+      "200": 11954,
+      "429": 46
+    },
+    "correctness_errors": [],
+    "world_unchanged": true,
+    "new_world_commits": 0,
+    "real_model_calls": 0,
+    "probe_gate": "NOT_MET",
+    "long_duration_gate": "NOT_EXECUTED",
+    "run": 43036514307,
+    "job": 130586087962,
+    "artifact": "p3-scale-500-read-soak-2",
+    "source_result_sha256": "1d206777041c3c64a047d39c49560d4c405b39706e642bc646a120fc083ce667",
+    "arm": "candidate-attempt-2",
+    "cpu_models": [
+      "AMD EPYC 7763 64-Core Processor"
+    ],
+    "initial_load_average": [
+      3.49560546875,
+      2.955078125,
+      1.69775390625
+    ],
+    "admission": {
+      "capacity": 4,
+      "queued": 0,
+      "active": 0,
+      "peak_queued": 29,
+      "per_principal": 4,
+      "peak_active": 4,
+      "admitted": 11955,
+      "wait_seconds_total": 5679.192862055996,
+      "completed": 11954,
+      "timed_out": 46,
+      "max_waiters": 128,
+      "peak_note": "Sum of process peaks; see process snapshots for exact values"
+    },
+    "service_resources": {
+      "service_user_cpu_seconds": 1042.267946,
+      "service_system_cpu_seconds": 59.919416000000005,
+      "service_sum_peak_rss_kib": 275732
+    },
+    "sql_execution_seconds": 800.7189602770111
+  },
+  {
+    "scheduled_count": 12000,
+    "duration_seconds": 600.867890897,
+    "actual_call_start_rps": 20.002629013929322,
+    "successful_query_rps": 19.9711120893578,
+    "latency_all_attempts": {
+      "count": 12000,
+      "p50_ms": 180.8443,
+      "p95_ms": 933.0234,
+      "p99_ms": 1349.9489
+    },
+    "status_counts": {
+      "200": 12000
+    },
+    "correctness_errors": [],
+    "world_unchanged": true,
+    "new_world_commits": 0,
+    "real_model_calls": 0,
+    "probe_gate": "PASS",
+    "long_duration_gate": "NOT_EXECUTED",
+    "run": 43035161204,
+    "job": 130571937813,
+    "artifact": "p3-scale-500-read-soak-1",
+    "source_result_sha256": "b9d3b025cbd08323054a2621aef2dd9f5e4cda9c64adbff36f445105fd22896f",
+    "arm": "previous-attempt-1",
+    "cpu_models": [
+      "AMD EPYC 9V74 80-Core Processor"
+    ],
+    "initial_load_average": [
+      2.62890625,
+      2.05517578125,
+      1.1494140625
+    ],
+    "admission": {
+      "wait_seconds_total": 1476.9359733299991,
+      "max_waiters": 128,
+      "per_principal": 4,
+      "completed": 12000,
+      "queued": 0,
+      "active": 0,
+      "capacity": 4,
+      "peak_active": 4,
+      "peak_queued": 26,
+      "admitted": 12000,
+      "peak_note": "Sum of process peaks; see process snapshots for exact values"
+    },
+    "service_resources": {
+      "service_user_cpu_seconds": 766.899739,
+      "service_system_cpu_seconds": 44.026123,
+      "service_sum_peak_rss_kib": 272428
+    },
+    "sql_execution_seconds": 468.21520241099745
+  }
+]

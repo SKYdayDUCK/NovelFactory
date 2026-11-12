@@ -1,0 +1,151 @@
+{
+  "scope": "Matched 500-agent seed, same runner/PG17.11, isolated databases, serial fixed reads. Stage SQL counts include children. No model requests.",
+  "src_sha": [
+    "f2e6d38534214e79630b807cec9a720d99e975b1",
+    "55d8979b5361a4837701d762feacd83036096b11"
+  ],
+  "experiment_sha": "07c4f6d38ad3237ff34482741845031f1d0dedcc",
+  "run": 43042702151,
+  "job": 130598408066,
+  "raw_artifacts": [
+    {
+      "id": 13866072369,
+      "sha": "sha256:eee6b05063eaf9ecc90fef32225f1e3b1e15e0a10a6c286ee89a41bece636569",
+      "name": "p55-exact-500-fixed-cut-profile"
+    }
+  ],
+  "arms": [
+    {
+      "source": "accepted P5",
+      "projection": {
+        "raw_bytes": 1495659,
+        "postgres_toast_bytes": 276873,
+        "witness_retained": false
+      },
+      "hot_calls": {
+        "canonical_fingerprint": {
+          "wall_median_ms": 29.421937999998704,
+          "cpu_median_ms": 29.41674099999858
+        },
+        "json_loads": {
+          "wall_median_ms": 11.022533999991424,
+          "cpu_median_ms": 11.024787000003755
+        },
+        "pydantic_core_from_json": {
+          "wall_median_ms": 6.376712999994538,
+          "cpu_median_ms": 6.37754899999976
+        },
+        "full_sql_text_roundtrip": {
+          "wall_median_ms": 9.894278999993844,
+          "cpu_median_ms": 3.0251989999996454
+        },
+        "live_raw_digest_sql_roundtrip": {
+          "wall_median_ms": 7.707295999992425,
+          "cpu_median_ms": 0.30163299999941273
+        },
+        "kernel_hot_revision": {
+          "wall_median_ms": 52.81461100000229,
+          "cpu_median_ms": 45.41797099999911
+        }
+      },
+      "stages": {
+        "initial_delivery._sample": {
+          "wall_ms": 60.39265900000146,
+          "cpu_ms": 50.962950999998924,
+          "sql_statements": 12,
+          "sql_cursor_ms": 11.04716050001997
+        },
+        "initial_delivery._delivery_check": {
+          "wall_ms": 5.374230999997565,
+          "cpu_ms": 3.768429500002668,
+          "sql_statements": 8,
+          "sql_cursor_ms": 2.1598109999985127
+        },
+        "exact_replay._sample": {
+          "wall_ms": 61.38968549999646,
+          "cpu_ms": 52.03568799999658,
+          "sql_statements": 12,
+          "sql_cursor_ms": 11.070206500015445
+        },
+        "exact_replay._delivery_check": {
+          "wall_ms": 5.313513500006195,
+          "cpu_ms": 3.766457999997641,
+          "sql_statements": 8,
+          "sql_cursor_ms": 2.146241000012594
+        }
+      }
+    },
+    {
+      "source": "P5.5",
+      "projection": {
+        "raw_bytes": 1495659,
+        "postgres_toast_bytes": 276877,
+        "witness_retained": false
+      },
+      "hot_calls": {
+        "canonical_fingerprint": {
+          "wall_median_ms": 30.928838999983554,
+          "cpu_median_ms": 30.918073999998796
+        },
+        "json_loads": {
+          "wall_median_ms": 11.111335999999028,
+          "cpu_median_ms": 11.106971000003796
+        },
+        "pydantic_core_from_json": {
+          "wall_median_ms": 6.4852029999826755,
+          "cpu_median_ms": 6.478326999996398
+        },
+        "full_sql_text_roundtrip": {
+          "wall_median_ms": 8.64261899999974,
+          "cpu_median_ms": 1.6936310000019716
+        },
+        "live_raw_digest_sql_roundtrip": {
+          "wall_median_ms": 7.975270000002865,
+          "cpu_median_ms": 0.42651700000106985
+        },
+        "kernel_hot_revision": {
+          "wall_median_ms": 54.90280999998731,
+          "cpu_median_ms": 46.7617099999984
+        }
+      },
+      "stages": {
+        "initial_delivery._sample": {
+          "wall_ms": 60.73819450000428,
+          "cpu_ms": 51.44266150000121,
+          "sql_statements": 8,
+          "sql_cursor_ms": 11.0146710000123
+        },
+        "initial_delivery.record_query": {
+          "wall_ms": 0.812526999993679,
+          "cpu_ms": 0.5254165000003752,
+          "sql_statements": 1,
+          "sql_cursor_ms": 0.43258249999666987
+        },
+        "initial_delivery._delivery_check": {
+          "wall_ms": 5.791533000007121,
+          "cpu_ms": 3.908913500001887,
+          "sql_statements": 8,
+          "sql_cursor_ms": 2.441395499985788
+        },
+        "exact_replay._sample": {
+          "wall_ms": 62.782393999995634,
+          "cpu_ms": 53.12750150000056,
+          "sql_statements": 8,
+          "sql_cursor_ms": 11.21934700002214
+        },
+        "exact_replay.record_query": {
+          "wall_ms": 0.7105459999934283,
+          "cpu_ms": 0.5196749999996086,
+          "sql_statements": 1,
+          "sql_cursor_ms": 0.3443130000135852
+        },
+        "exact_replay._delivery_check": {
+          "wall_ms": 5.337345000000937,
+          "cpu_ms": 3.767551000002811,
+          "sql_statements": 8,
+          "sql_cursor_ms": 2.1986279999595126
+        }
+      }
+    }
+  ]
+}

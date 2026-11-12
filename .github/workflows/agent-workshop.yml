@@ -2,6 +2,10 @@ name: Agent Workshop PostgreSQL and stdio
 on:
   pull_request:
     paths:
+      - 'scripts/engineering_release_ci.py'
+      - 'tests/unit/test_engineering_release_ci.py'
+      - 'scripts/P6_*'
+      - '.github/workflows/p6-offline.yml'
       - 'workshop/**'
       - '.github/workflows/agent-workshop.yml'
       - 'runtime/roles/**'
@@ -22,6 +26,11 @@ on:
   push:
     branches: [main]
     paths:
+      - 'scripts/engineering_release_ci.py'
+      - 'tests/unit/test_engineering_release_ci.py'
+      - 'scripts/P6_*'
+      - '.github/workflows/p6-offline.yml'
+      - 'reports/handoff/ENGINEERING_RELEASE.json'
       - 'workshop/**'
       - '.github/workflows/agent-workshop.yml'
       - 'runtime/roles/**'

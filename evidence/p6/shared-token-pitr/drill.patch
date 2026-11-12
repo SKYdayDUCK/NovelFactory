@@ -1,0 +1,25 @@
+diff --git a/scripts/pitr_drill.py b/scripts/pitr_drill.py
+--- a/scripts/pitr_drill.py
++++ b/scripts/pitr_drill.py
+@@ -180,6 +180,9 @@
+         first = transfer(initial, "10", 10)
+         task = create_bound_task(kernel, principal, first["world_ref"], point(10))
+         budget = kernel.tasks.create_budget(initial["work_id"], "5")
++        from novel_factory.application.budget_limits import SharedBudgetService
++        scope = (principal, initial["work_id"], initial["branch_id"], budget)
++        SharedBudgetService(kernel).set_limit(*scope, 150)
+         call = kernel.tasks.reserve_call(task["task_id"], task["generation"], task["worker_id"],
+                                         budget_id=budget, amount="0.5", call_key="pitr-unknown",
+                                         request_hash="a" * 64, token_amount=100)
+@@ -264,6 +267,11 @@
+             _check(repo.one("revisions", {"world_revision_id": later["world_ref"]["world_revision_id"]}) is None, "Later revision was not excluded")
+             expected_state_hash = recovered.revision(repo, target["world_ref"])["state_hash"]
+         fenced = fence_recovered_tasks(recovered_database.engine, recovered_objects, tables=tables)
++        shared = SharedBudgetService(recovered).status(*scope)
++        _check((shared["total_tokens"], shared["reserved_tokens"], shared["spent_tokens"],
++                shared["available_tokens"]) == (150, 100, 0, 50),
++               "Physical recovery lost the shared token ceiling or its original reservation")
++        result["shared_token_budget_after_physical_restore"] = shared
+         with recovered.db.uow(write=False) as repo:
+             _check(repo.one("call_attempts", {"attempt_id": call["attempt_id"]})["state"] == "UNKNOWN", "External call was not retained as unknown")
+             _check(repo.one("budgets", {"budget_id": budget})["reserved_amount"] == Decimal("0.5"), "Reserved budget was lost")

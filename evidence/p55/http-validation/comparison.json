@@ -1,0 +1,89 @@
+{
+  "run": 43041082878,
+  "order": [
+    "baseline",
+    "candidate"
+  ],
+  "arms": {
+    "baseline": {
+      "scheduled_count": 12000,
+      "duration_seconds": 601.43453583,
+      "actual_call_start_rps": 20.00055838748705,
+      "successful_query_rps": 19.945645428301045,
+      "latency_all_attempts": {
+        "count": 12000,
+        "p50_ms": 130.9548,
+        "p95_ms": 637.3464,
+        "p99_ms": 1724.7396
+      },
+      "status_counts": {
+        "200": 11996,
+        "429": 4
+      },
+      "world_unchanged": true,
+      "new_world_commits": 0,
+      "real_model_calls": 0,
+      "probe_gate": "NOT_MET",
+      "long_duration_gate": "NOT_EXECUTED",
+      "sha": "55d8979b5361a4837701d762feacd83036096b11",
+      "original_exit": 1,
+      "correctness_error_count": 0,
+      "source_result_sha256": "c1ded2addb33494f9958d5fbd0c3606a29e0c1b405176b2e7d3a577bce7d5f54",
+      "retained_records_sha256": "b4e4e97d5ee01d9b7b41cc91dfa6d4826d716c24e43613e7819298d4b551f5ee",
+      "cpu_models": [
+        "AMD EPYC 9V74 80-Core Processor"
+      ],
+      "initial_load_average": [
+        1.7568359375,
+        1.85595703125,
+        1.134765625
+      ],
+      "service_resources": {
+        "service_user_cpu_seconds": 747.500309,
+        "service_system_cpu_seconds": 40.075668,
+        "service_sum_peak_rss_kib": 279800
+      },
+      "sql_execution_seconds": 294.53458854401435
+    },
+    "candidate": {
+      "scheduled_count": 12000,
+      "duration_seconds": 600.35894195,
+      "actual_call_start_rps": 20.000460133629492,
+      "successful_query_rps": 19.988042421794063,
+      "latency_all_attempts": {
+        "count": 12000,
+        "p50_ms": 123.9075,
+        "p95_ms": 428.202,
+        "p99_ms": 650.1398
+      },
+      "status_counts": {
+        "200": 12000
+      },
+      "world_unchanged": true,
+      "new_world_commits": 0,
+      "real_model_calls": 0,
+      "probe_gate": "PASS",
+      "long_duration_gate": "NOT_EXECUTED",
+      "sha": "df30c306057d26b7b32e3cec0df1ad9926a6824a",
+      "original_exit": 0,
+      "correctness_error_count": 0,
+      "source_result_sha256": "8a46cef3e3b47aeab68a5abd1892fcc9174d5a18252ede36ec3b4d0e4840a6c2",
+      "retained_records_sha256": "43b4a3b044c777d981bfabc79b179d84d4ca013984403f9de63f78d12d937fac",
+      "cpu_models": [
+        "AMD EPYC 9V74 80-Core Processor"
+      ],
+      "initial_load_average": [
+        1.85498046875,
+        1.85302734375,
+        1.51708984375
+      ],
+      "service_resources": {
+        "service_user_cpu_seconds": 689.614777,
+        "service_system_cpu_seconds": 39.488687999999996,
+        "service_sum_peak_rss_kib": 265040
+      },
+      "sql_execution_seconds": 291.1809179420728
+    }
+  },
+  "acceptance": "original exit codes; one ordered pair"
+}

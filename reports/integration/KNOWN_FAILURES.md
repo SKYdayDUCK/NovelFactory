@@ -41,3 +41,5 @@ W6 已复现主管调任后的两项不相容岗位扩编，修复及红绿原�
 #25 合并主线 NF PostgreSQL 作业 817 项通过，17 项因宿主 Linux namespace 限制跳过；可逐项核对同运行时代码的原生回执。R1 原工件仍记录 `overall_engineering_gate=NOT_MET` 和 `load_coverage_gate=NOT_EXECUTED`。[计数、工件摘要与原生对应](https://github.com/SKYdayDUCK/NovelFactory/blob/9eb7bb52e422f1a8e33a91fe01a1e67fef6375d3/reports/integration/evidence/W6/signoff-ba892d3/verified-main-summary.json)。
 
 P5.6 #26 的候选与主线各有 4 个高压容量作业未达标；对照、两档 mixed、500 mixed 及 500 read-soak 通过。合并主线有 27 次 1000 开环传输错误。逐档原件和真实回放限制见[综合签收](https://github.com/SKYdayDUCK/NovelFactory/blob/3ef5a72d7a65edb76a988132a72c4e82ee0805ee/reports/integration/evidence/P56/main-4e8fc5a/SIGNOFF.md)。
+
+#17 的原版取消曾遗留可确认未发送的预留，修复后原失败测试通过。主线四个历史容量作业继续未达标，1000 开环读记录 12 个传输错误。[#17 主线签收](https://github.com/SKYdayDUCK/NovelFactory/blob/fee462dfb6923059512b9797b4707e61eec8e8a3/reports/integration/evidence/P6-C1/main-533c1f5/SIGNOFF.md)。

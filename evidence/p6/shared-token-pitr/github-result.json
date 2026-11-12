@@ -1,0 +1,64 @@
+{
+  "status": "PASS",
+  "postgres": "postgres (PostgreSQL) 17.11 (Ubuntu 17.11-1.pgdg24.04+2)",
+  "execution_kind": "REAL_ISOLATED_POSTGRESQL",
+  "source_port": 36763,
+  "restored_port": 43095,
+  "durability": {
+    "fsync": true,
+    "synchronous_commit": true,
+    "data_checksums": true
+  },
+  "model_calls": 0,
+  "production_data_accessed": false,
+  "libpq_environment_isolated": true,
+  "cleared_pg_environment_names": [],
+  "pg_basebackup": {
+    "exit_code": 0,
+    "stdout": ""
+  },
+  "base_backup_seconds": 1.5501994250000735,
+  "pg_verifybackup": {
+    "exit_code": 0,
+    "stdout": "backup successfully verified"
+  },
+  "archiver": {
+    "archived_count": 4,
+    "failed_count": 0
+  },
+  "shared_token_budget_after_physical_restore": {
+    "work_id": "57d0496e-eba2-4b8b-bdc4-6d2ef4423789",
+    "budget_id": "d7faccb0-ea51-448d-95ca-1e9eec2f8200",
+    "currency": "USD",
+    "limit_amount": "5.000000",
+    "reserved_amount": "0.500000",
+    "spent_amount": "0.000000",
+    "total_tokens": 150,
+    "reserved_tokens": 100,
+    "spent_tokens": 0,
+    "available_tokens": 50,
+    "unquantified_attempts": 0
+  },
+  "target_world_ref": {
+    "work_id": "57d0496e-eba2-4b8b-bdc4-6d2ef4423789",
+    "branch_id": "e442700a-5387-4030-ae21-4696283520b1",
+    "world_revision_id": "e72ae817-b86f-4353-bed2-e4c72ec44c1c"
+  },
+  "target_lsn": "0/30B8078",
+  "restored_state_sha256": "49ad7aa5674f3c1a2175cc29544e431dfbf88ac4fa604a74c22b765b2b31d862",
+  "snapshot_equal_before_fencing": true,
+  "table_count": 71,
+  "object_count": 19,
+  "recovery_seconds_to_verified_service": 1.3823086669999611,
+  "selected_recovery_point_age_seconds": 0.371181,
+  "target_commits_lost": 0,
+  "deliberately_excluded_later_world_commits": 1,
+  "restored_world_event_count": 2,
+  "unknown_calls_retained": 1,
+  "reserved_amount_retained": "0.5",
+  "fenced_task_count": 1,
+  "old_worker_rejected": true,
+  "original_commit_receipt_equal": true,
+  "limitation": "Small isolated local fixture; selected-point RPO/RTO, not production SLO or remote storage test",
+  "total_seconds": 5.701885677000064
+}

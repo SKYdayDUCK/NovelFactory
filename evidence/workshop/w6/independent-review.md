@@ -24,15 +24,17 @@ A separate clean checkout at `d5bcb7cb0a1e9030b122561e32c90c0b182088ec` was migr
 | 50 | 150 / 150 | 87.45 ms | 72.66 ms | 1.27 s |
 | 200 | 600 / 600 | 106.58 ms | 55.70 ms | 5.23 s |
 
-## Recovery review requiring a separate correction
+## Recovery defects found and rechecked
 
-Four defects were reported to the dedicated recovery implementer during this pass. Review the subsequent recovery patch and its JUnit before signing these paths off.
+Four concrete failure modes were reported to the dedicated recovery implementer. The original findings below describe pre-fix behavior. The subsequent PostgreSQL and physical-WAL receipts document which checks actually ran.
 
 1. After committing a SENDING fence, a worker can die before NF receives the request. An authenticated original-key lookup returning explicit absence, with no local remote receipt or attempt observation, was left in perpetual lookup until escalation. Frozen lookup also advanced pristine REQUESTED rows to SENDING. Safe recovery requires preserving the original key, respecting the freeze, checking both sides' restore evidence and fencing the caller again before sending.
 2. An author binding can become stale while the manager performs several original-key reconciliations. Revalidate the original authority and recovery fence before requesting NF resume. A stale/unknown outcome cannot release an already-sent hold.
 3. A malformed partner aggregate could claim SETTLED while its attempt still says UNKNOWN or has missing actual cost. Refuse contradictory accounting and keep the hold. Restoration or receipt disagreement requires reconciliation before outbound dispatch.
 
 4. Restoring NF to a point after creation of the same receipt but before model dispatch can retain the complete operation-to-receipt map while losing an already settled attempt. A comparison limited to receipt IDs is insufficient to permit a restart. Terminal operations need epoch-bound reads and agreement on generation, task, attempt identities, states, amounts and tokens. A mismatched or missing observation must keep dispatch fenced, including when a restored older NF task could otherwise be resumed. NF restoration separately fences previously pending tasks into PAUSED/BLOCKED and increments their generations; operators must keep provider/manager dispatch disabled until reconciled.
+
+The post-fix [six authorization and recovery regressions](../recovery/authorization.xml) passed with real PostgreSQL. They exercised the crash before the first send, a frozen unsent intent, contradictory per-attempt accounting, and manager authorization immediately before NF resume. The [physical WAL/PITR regression](../recovery/paired.xml) also passed. The [two named recovery targets and observations](../recovery/paired.json) show that a restored NF retaining the same task and receipt but missing its attempt stayed fenced with `REMOTE_HISTORY_MISMATCH`, while the AW ledger retained its prior synthetic USD 0.020000 settlement. An earlier target retained UNKNOWN and its hold until an explicit synthetic invoice. NF ended with one task; there was one loopback synthetic HTTP request and zero supplier model requests. These findings exercise the implementation and restore controls with controlled accounting; actual provider invoices and the author's paid run remain unobserved.
 
 ## Reproduction and limits
 

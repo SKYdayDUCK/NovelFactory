@@ -13,7 +13,8 @@
 | W5 | [#14](https://github.com/SKYdayDUCK/NovelFactory/pull/14) | MERGED_AND_VERIFIED，[W5 主线签收](W5_主线签收.md) | `b30e76978830bec4c596c04194d749fd01f67402`，2026-11-11T22:31:34Z |
 | W6 | [#15](https://github.com/SKYdayDUCK/NovelFactory/pull/15) | **MERGED_AND_VERIFIED** scoped W6, AT-30 NOT_MET; [主线签收](W6_主线签收.md) | `98a8bbed289a29d0326454c86dd3db54ac85ae5c`, 2026-11-11T23:47:40Z |
 | P5.6 双服务综合验收 | [#26](https://github.com/SKYdayDUCK/NovelFactory/pull/26) | **MERGED_AND_VERIFIED**，[主线签收](https://github.com/SKYdayDUCK/NovelFactory/blob/3ef5a72d7a65edb76a988132a72c4e82ee0805ee/reports/integration/evidence/P56/main-4e8fc5a/SIGNOFF.md) | `4e8fc5a3c2331a0de669ad8851d82c5b08a1e5dc`，2026-11-12 02:36:05 UTC |
-| P6 全局 Token 预算 | [#17](https://github.com/SKYdayDUCK/NovelFactory/pull/17) | 当前交付 | 基于已签收的 P5.6 主线 |
+| P6 全局 Token 预算 | [#17](https://github.com/SKYdayDUCK/NovelFactory/pull/17) | **MERGED_AND_VERIFIED**，[#17 主线签收](https://github.com/SKYdayDUCK/NovelFactory/blob/fee462dfb6923059512b9797b4707e61eec8e8a3/reports/integration/evidence/P6-C1/main-533c1f5/SIGNOFF.md) | `533c1f526ef8841610d5c414e77ecbea8bbd5e35`，2026-11-12 03:19:32 UTC |
+| P6 本地预检和部署 | [#16](https://github.com/SKYdayDUCK/NovelFactory/pull/16) | 当前交付 | 基于已签收的 #17 主线 |
 
 每阶段的原 PR 讨论保存合并后的完整 SHA、时间、主线验收作业、遗留问题和下一阶段是否开放。后续阶段 PR 将前一阶段已确认的回执归入本表，保留原 PR 上可即时复查的记录。
 

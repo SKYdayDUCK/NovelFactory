@@ -24,6 +24,7 @@ import time
 
 from sqlalchemy import text
 
+from novel_factory.application.budget_limits import SharedBudgetService
 from novel_factory.application.kernel import Kernel
 from novel_factory.domain.errors import DomainError
 from novel_factory.fixtures import create_bound_task, load_fixture, point, run_command
@@ -101,6 +102,8 @@ def main():
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--pg-bin", default=os.environ.get("PG_BIN", "/usr/lib/postgresql/17/bin"), type=Path)
     parser.add_argument("--keep-clusters", action="store_true")
+    parser.add_argument("--shared-token-budget", action="store_true",
+                        help="Verify the shared token ceiling and original reservation after WAL replay")
     parser.add_argument("--with-redis", action="store_true",
                         help="Exercise a separate, disposable Redis left ahead of the recovered PG cluster")
     args = parser.parse_args()
@@ -180,6 +183,9 @@ def main():
         first = transfer(initial, "10", 10)
         task = create_bound_task(kernel, principal, first["world_ref"], point(10))
         budget = kernel.tasks.create_budget(initial["work_id"], "5")
+        if args.shared_token_budget:
+            budget_scope = (principal, initial["work_id"], initial["branch_id"], budget)
+            SharedBudgetService(kernel).set_limit(*budget_scope, 150)
         call = kernel.tasks.reserve_call(task["task_id"], task["generation"], task["worker_id"],
                                         budget_id=budget, amount="0.5", call_key="pitr-unknown",
                                         request_hash="a" * 64, token_amount=100)
@@ -264,6 +270,12 @@ def main():
             _check(repo.one("revisions", {"world_revision_id": later["world_ref"]["world_revision_id"]}) is None, "Later revision was not excluded")
             expected_state_hash = recovered.revision(repo, target["world_ref"])["state_hash"]
         fenced = fence_recovered_tasks(recovered_database.engine, recovered_objects, tables=tables)
+        if args.shared_token_budget:
+            shared = SharedBudgetService(recovered).status(*budget_scope)
+            _check((shared["total_tokens"], shared["reserved_tokens"], shared["spent_tokens"],
+                    shared["available_tokens"]) == (150, 100, 0, 50),
+                   "Physical recovery lost the shared token ceiling or its original reservation")
+            result["shared_token_budget_after_physical_restore"] = shared
         with recovered.db.uow(write=False) as repo:
             _check(repo.one("call_attempts", {"attempt_id": call["attempt_id"]})["state"] == "UNKNOWN", "External call was not retained as unknown")
             _check(repo.one("budgets", {"budget_id": budget})["reserved_amount"] == Decimal("0.5"), "Reserved budget was lost")

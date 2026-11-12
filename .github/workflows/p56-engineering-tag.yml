@@ -1,0 +1,76 @@
+name: Publish the reviewed P5.6 engineering tag
+on:
+  workflow_run:
+    workflows: [Agent Workshop PostgreSQL and stdio, P6 offline experiment and authorization checks]
+    types: [completed]
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: p56-engineering-release-${{ github.event.workflow_run.head_sha }}
+  cancel-in-progress: false
+jobs:
+  tag:
+    if: github.event.workflow_run.event == 'push' && github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: write
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+      - name: Verify integrated CI and merged pull requests
+        id: verify
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet HEAD^ HEAD -- reports/handoff/ENGINEERING_RELEASE.json; then exit 0; fi
+          python - <<'PY'
+          import json
+          import os
+          import re
+          import subprocess
+          from pathlib import Path
+
+          sha = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+          repo = os.environ["GITHUB_REPOSITORY"]
+          from scripts.engineering_release_ci import both_workflows_passed
+          if not both_workflows_passed(repo, sha):
+              # The matching workflow_run event will run this job again when the second check ends.
+              Path(os.environ["GITHUB_OUTPUT"]).write_text("ready=false\n")
+              raise SystemExit(0)
+          record = json.loads(Path("reports/handoff/ENGINEERING_RELEASE.json").read_text())
+          if record["tag"] != "novelfactory-p5.6-rc.1":
+              raise SystemExit("Unexpected release tag")
+          if record["production_p6"] not in {"BLOCKED_ENVIRONMENT", "VERIFIED_REAL_RUN"}:
+              raise SystemExit("Unrecognized P6 acceptance state")
+          merged = record["merged_pull_requests"]
+          if not {5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17}.issubset(map(int, merged)):
+              raise SystemExit("Incomplete stage ancestry")
+          for number, sha in merged.items():
+              if not number.isdecimal() or not re.fullmatch(r"[0-9a-f]{40}", sha):
+                  raise SystemExit("Invalid PR ancestry record")
+              path = f"repos/{os.environ['GITHUB_REPOSITORY']}/pulls/{number}"
+              pr = json.loads(subprocess.check_output(["gh", "api", path]))
+              if not pr["merged"] or pr["base"]["ref"] != "main" or pr["merge_commit_sha"] != sha:
+                  raise SystemExit(f"Merge record disagrees with GitHub on PR {number}")
+              subprocess.run(["git", "merge-base", "--is-ancestor", sha, "HEAD"], check=True)
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              print("ready=true", file=output)
+          PY
+      - name: Create the immutable engineering tag
+        if: steps.verify.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          tag=novelfactory-p5.6-rc.1
+          if git show-ref --tags --verify --quiet "refs/tags/$tag"; then
+            test "$(git rev-list -n 1 "$tag")" = "$(git rev-parse HEAD)"
+            exit 0
+          fi
+          git -c user.name=github-actions -c 'user.email=41898282+github-actions[bot]@users.noreply.github.com' tag -a "$tag" -m "P5/P5.5 and Agent Workshop engineering candidate. See ENGINEERING_RELEASE.json for the production P6 acceptance state."
+          git push origin "refs/tags/$tag"

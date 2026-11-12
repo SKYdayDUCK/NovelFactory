@@ -137,6 +137,8 @@ jobs:
         env:
           PGPASSWORD: nf_dev_ci_only
       - name: All tests with real PostgreSQL 17, race and recovery evidence
+        env:
+          NF_P6_AUTHOR_EVIDENCE: ${{ github.workspace }}/ci-evidence/p6-author
         run: |
           uv run --no-sync python -m pytest tests -q \
             --junitxml=ci-evidence/postgres-all.xml --json-report --json-report-file=ci-evidence/postgres-all.json \

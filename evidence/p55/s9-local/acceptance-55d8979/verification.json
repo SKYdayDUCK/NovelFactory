@@ -1,0 +1,57 @@
+{
+  "candidate": "55d8979b5361a4837701d762feacd83036096b11",
+  "tree": "51b5a83050708ebbdfc43cbee74c14c05fae85d2",
+  "dependencies": {
+    "PostgreSQL": "17.11",
+    "Redis": "8.0.2",
+    "Codex CLI": "0.167.0-alpha.4",
+    "Python": "3.12.14"
+  },
+  "collected": 807,
+  "executed": 807,
+  "failed": 0,
+  "errors": 0,
+  "skipped": 0,
+  "missing": [],
+  "duplicates": {},
+  "pitr": "PASS",
+  "independent_pg_tests": 38,
+  "independent_source": "../../independent-review/55d8979b-junit.xml",
+  "prior_e2f0": {
+    "passed": 805,
+    "failed": [
+      "test_cut_and_story_time_cannot_be_swapped_within_same_context",
+      "test_task_fence_revocation_and_grant_epoch_invalidate_evidence"
+    ]
+  },
+  "integrated_9630": {
+    "passed": 804,
+    "failed": 0,
+    "skipped": 0
+  },
+  "local_probe": {
+    "source": "e2f0fabadcf673984fddacc9bd7a924d6588b816",
+    "agents": 500,
+    "seconds": 30,
+    "scheduled": 600,
+    "http_200": 600,
+    "status": "PASS",
+    "original_600_second_remote_gate": "See corresponding GitHub Actions job"
+  },
+  "sha256": {
+    "collection.txt": "04e70d56ddf19458cb225354a951747b3aa197ee481f6aaed28a17867c4e4052",
+    "e2f0-30s-probe.json.gz": "586d93357fec49d10280510451302d34194f6b3d889c9484be5329b84d43bf88",
+    "exact-pitr-fences.json": "672d33036afc083c11956257cf63b7dee2b3967bc9e10cb50e0f23b2dc5dab8c",
+    "exact-pitr-target-digests.json": "7de048c1e5a07bde3672f766bb0a9e80ea4fff10aef55764b59855c75ed8ee21",
+    "exact-pitr.json": "4d1723306a77b463b731371ae6f300e29a312d39249ac785da9f56734a8f9585",
+    "exact-shard-1-modules.txt": "f8ef5f1bad4aefe5404190640284356c6a8585be2326703885b10f8b0970dd10",
+    "exact-shard-1.xml": "ba13303ffc5cd2e528e63e23541b6ebd5005c250986cdd980654e960dfa27910",
+    "exact-shard-2-modules.txt": "df15682e440d13c0674c739423fd9a6eda5c6b9beb1b1f90d2a0741251cb8f0b",
+    "exact-shard-2.xml": "aeec8d12c763f87a46f5a9966c7a52e77f707e0fbae2d4fc4c6e2b44c2ed8998",
+    "exact-shard-3-modules.txt": "811cc380113e4dc176a422b6810c2630e76e0210b884d0deb235367434fbcb69",
+    "exact-shard-3.xml": "bdf4dc0305b70fbb52b39585bcecb85b8e3a922a757ca772629b80e7dca4acdd",
+    "independent-e2f0faba-junit.xml": "6c46d14a8f15cd880b401d92aff28ff65fb271fde8c4898daafe9a9bcf57ec14",
+    "integrated-9630d95-junit.xml": "ef6c42455380e6181af11190ff2f7ba5f13f20725b0596375f2eb9f11247ad08",
+    "previous-e2f0-junit.xml": "29c1e99f882cb68505fd4d72f05e4e742195230a9325055cec4bb632bfd720d1"
+  }
+}
