@@ -42,6 +42,21 @@ The frozen 200-agent overload still requires 950 first call starts per second. I
 
 Both variants were `NOT_MET` on first-attempt capacity. Both 200-agent business/recovery gates passed with 21 expected new revisions and no unresolved operational errors. All 1,000-agent HTTP 200 responses in this table passed validation, with no change in world head. At 200 agents, CPU load averages and competition were higher for the candidate. Lower rates in these observations are retained. These two nonisolated snapshots do not quantify the contribution of any individual refactor. Separately, the same client, fixed 2,104-byte response and 5,000 scheduled requests achieved 199.57 and 194.29 header starts/s in two transport-only calibration runs. That path has no NovelFactory business work. [Baseline 200](raw/baseline-at30-200.json.gz) · [Candidate 200](raw/final-at30-200.json.gz) · [Baseline 1,000](raw/baseline-at30-open.json.gz) · [Candidate 1,000](raw/final-at30-open.json.gz) · [Transport calibration](raw/calibration.json.gz) · [Open capacity issue](https://github.com/SKYdayDUCK/NovelFactory/issues/13)
 
+### Serial repeat on the same host
+
+Each version used a separate locked checkout and a new PG17 cluster. The 200-agent pair ran baseline then candidate. The 1,000-agent pair reversed that order. The four HTTP probes ran sequentially. The ongoing qualification loads on the shared machine could still vary. Both versions again failed the original capacity gates. Both 200-agent runs passed business/recovery with zero correctness failures.
+
+| Measurement | Frozen main | Candidate |
+| --- | ---: | ---: |
+| 200 agents, first call starts/s (minimum 950) | 44.95 | 45.20 |
+| 200 agents, header starts/s | 34.28 | 35.79 |
+| 200 agents, effective calls/s excluding duplicate receipts | 11.80 | 11.62 |
+| 1,000 agents, header starts/s | 47.50 | 48.12 |
+| 1,000 agents, validated reads/s | 16.99 | 18.24 |
+| 1,000 agents, validated reads / HTTP 429 / transport errors, out of 5,000 | 1,835 / 3,132 / 33 | 1,941 / 3,036 / 23 |
+
+In the serial repeat, the 1,000-agent candidate delivered more validated reads than the baseline. In the concurrently loaded run above and the hosted runs in the independent audit, it delivered fewer. This evidence does not establish a general HTTP performance gain. [Serial 200 baseline](raw/controlled-base-200.json.gz) · [Serial 200 candidate](raw/controlled-candidate-200.json.gz) · [Serial 1,000 baseline](raw/controlled-base-open.json.gz) · [Serial 1,000 candidate](raw/controlled-candidate-open.json.gz) · [Hosted comparison](../../code_review/p59_runtime/INTEGRITY_CI.md)
+
 ## MCP protocol throughput
 
 A separate ABBA run used two independent native stdio processes, two differently authorized roles, and the real MCP SDK. Each closed-loop phase checked 240 full task/context results against the corresponding role. Frozen main delivered 56.32 and 56.57 validated reads/s. The candidate delivered 82.98 and 71.53 validated reads/s. In the independent 12 requests/s open-arrival phases, frozen main validated 240/240 twice. The candidate validated 240/240 and 236/240, with four explicit `BACKPRESSURE` responses. All returned business payloads matched their own bindings. These short protocol runs contain no model sends. [Complete samples, P50/P95/P99 and reproduction](STDIO.md)
