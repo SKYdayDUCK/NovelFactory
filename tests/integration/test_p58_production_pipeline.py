@@ -142,7 +142,15 @@ def test_native_parallel_drafts_conditional_plans_and_early_review(kernel_env):
                 break
         updated = status()
         assert updated["plan:" + candidate_ids[0]]["state"] == "READY_FOR_ADOPTION", updated["plan:" + candidate_ids[0]]
-        assert updated["plan:" + candidate_ids[0]]["history"][0]["task_id"] == affected["task_id"]
+        current = updated["plan:" + candidate_ids[0]]
+        prior = current["history"][0]
+        assert prior["task_id"] == affected["task_id"]
+        assert prior["attempt_ids"] == affected["attempt_ids"]
+        assert current["attempt_ids"] and set(current["attempt_ids"]).isdisjoint(prior["attempt_ids"])
+        with kernel.db.uow(write=False) as repo:
+            for record in (prior, current):
+                attempts = repo.many("call_attempts", {"task_id": record["task_id"]})
+                assert set(record["attempt_ids"]) == {row["attempt_id"] for row in attempts}
         assert len(calls) == 7 and all(updated[k] == n for k, n in now.items() if n["stage"] != "plan")
         # An expired READY candidate must relinquish the branch slot, even with a published predecessor.
         from datetime import timedelta
