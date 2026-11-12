@@ -251,7 +251,7 @@ def trial(kernel, population, *, dispatch_profile=None):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--agents", required=True, type=int, choices=[10, 100, 500, 1000, 2000])
+    p.add_argument("--agents", required=True, type=int, choices=[10, 50, 100, 200, 500, 1000, 2000])
     p.add_argument("--output", required=True, type=Path)
     p.add_argument("--dispatch-profile", type=Path,
                    help="Run the frozen and current PG selector on the prepared queue instead of draining it")

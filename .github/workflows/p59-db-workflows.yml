@@ -1,0 +1,56 @@
+name: Isolated P5.9 database workflow populations
+on:
+  push:
+    branches: [experiment/p59-database-throughput]
+    paths: ['.github/workflows/p59-db-workflows.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  workflow:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    strategy:
+      fail-fast: false
+      matrix:
+        agents: [50, 200, 500, 1000, 2000]
+    services:
+      pg:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_DB: nf_test
+          POSTGRES_PASSWORD: disposable
+          POSTGRES_INITDB_ARGS: --data-checksums
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 2s --health-timeout 2s --health-retries 30
+    env:
+      NF_TEST_DATABASE_URL: postgresql+psycopg://postgres:disposable@localhost:5432/nf_test
+      NF_POOL_SIZE: 8
+      NF_POOL_OVERFLOW: 0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - run: uv sync --locked --group dev --python 3.12
+      - name: Verify results and durable ledgers across two works
+        shell: bash
+        run: |
+          mkdir out
+          uv run --no-sync python -m benchmarks.p59_workflow_load --agents "${{ matrix.agents }}" --output out/result.json
+      - if: always()
+        shell: bash
+        run: |
+          if test -s out/result.json; then
+            jq 'del(.records)' out/result.json > out/summary.json
+            gzip -n out/result.json
+            cat out/summary.json >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: workflow-${{ matrix.agents }}-${{ github.sha }}
+          path: out/
