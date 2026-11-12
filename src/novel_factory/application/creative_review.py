@@ -4,6 +4,7 @@ from decimal import Decimal
 from uuid import UUID, uuid5
 
 from novel_factory.application.authorization import Principal
+from novel_factory.application.dynamic_runtime import refresh_task, verify_task
 from novel_factory.application.editorial import ReviewService
 from novel_factory.application.kernel import require
 from novel_factory.application.narrative import NarrativeService
@@ -173,9 +174,12 @@ class CreativeReviewService:
         self.kernel = kernel
 
     def read(self, principal, task_id, generation, *, draft_ref, idempotency_key, worker_id=None):
+        proof = refresh_task(self.kernel, principal, task_id, generation)
         with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
             _lock_work(repo, task_id)
             task, _, spec, _, _ = _task(self.kernel, repo, principal, task_id, generation, "evidence_read", worker_id)
+            verify_task(self.kernel, repo, principal, task, proof, required_tools=("evidence_read",),
+                        required_capabilities=("ARTIFACT_WRITE",))
             _bound_draft(self.kernel, repo, principal, task, spec, draft_ref)
             service = ReviewService(self.kernel.in_transaction(repo))
             return service.read_text(principal, task_id, generation, draft_ref, idempotency_key=idempotency_key)
@@ -221,6 +225,8 @@ class CreativeReviewService:
             _lock_work(repo, task_id)
             task, grant, spec, agent_input, runtime = _task(self.kernel, repo, principal, task_id, generation,
                                                            "review_submit", worker_id)
+            verify_task(self.kernel, repo, principal, task, live[independence_ref["artifact_revision_id"]].reviewer_runtime,
+                        required_tools=("review_submit",), required_capabilities=("ARTIFACT_WRITE",))
             work, scope = task["work_id"], _scope(task, spec)
             native = ReviewService(self.kernel.in_transaction(repo))
             require(binding["world_ref"] == spec["world_ref"] and target_ref in scope_draft_refs
@@ -353,7 +359,7 @@ class CreativeReviewService:
             return result
 
     def _refresh_many(self, refs):
-        return ReviewIndependenceService(self.kernel).refresh_many(refs)
+        return ReviewIndependenceService(self.kernel).refresh_many(refs, include_reviewer_runtime=True)
 
     def _refresh_report(self, principal, task_id, generation, report_ref, *, writing=False):
         with self.kernel.db.uow(write=False) as repo:
@@ -386,6 +392,9 @@ class CreativeReviewService:
         owner = Principal(owner_identity["grant_id"], owner_identity["principal_id"])
         task, grant, spec, _, _ = _task(self.kernel, repo, owner, scope["task_id"], scope["generation"],
                                          "review_submit", live=False)
+        primary = report["review_binding"]["independence_receipt"]
+        verify_task(self.kernel, repo, owner, task, live_proof[primary["artifact_revision_id"]].reviewer_runtime,
+                    required_tools=("review_submit",), required_capabilities=("ARTIFACT_WRITE",))
         require(_scope(task, spec) == scope and grant["epoch"] == owner_identity["permission_epoch"],
                 "REVIEW_REVOKED", "The literary review is outside its original grant")
         service = ReviewService(self.kernel)
@@ -502,11 +511,12 @@ class CreativeReviewService:
         request = {"task_id": task_id, "generation": generation, "scene_ref": scene_ref, "report_ref": report_ref,
                    "replacements": replacements}
         live_proof = self._refresh_report(principal, task_id, generation, report_ref, writing=True)
+        writer_proof = refresh_task(self.kernel, principal, task_id, generation)
         with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
             _lock_work(repo, task_id)
             from .creative_revision_brief import authorize_returned_revision, pending_revision
             task, spec, report, details, decision = authorize_returned_revision(
-                self, repo, principal, task_id, generation, report_ref, worker_id, live_proof)
+                self, repo, principal, task_id, generation, report_ref, worker_id, live_proof, writer_proof)
             work, wr, old_ref = task["work_id"], spec["world_ref"], report["target_ref"]
             old = self.kernel._prior(repo, principal, work, "CREATIVE_REVISE", idempotency_key, request)
             if old:

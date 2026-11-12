@@ -65,7 +65,8 @@ class DynamicSite(SimpleNamespace):
 
 
 @pytest.fixture
-def dynamic_site(dual_databases, tmp_path, monkeypatch):
+def dynamic_site(dual_databases, tmp_path, monkeypatch, request):
+    role_id, task_kind = getattr(request, "param", ("evidence_maintainer", "summary"))
     root = Path(os.environ["AW_NF_SOURCE"]).resolve()
     dsn, db = dual_databases["aw"], Database(dual_databases["nf"])
     kernel = Kernel(db, ObjectStore(tmp_path / "objects"))
@@ -98,8 +99,8 @@ def dynamic_site(dual_databases, tmp_path, monkeypatch):
         bootstrap(conn, org, "Long-form", installation_id=installation)
         conn.execute("INSERT INTO aw_budget_accounts VALUES (%s,20,'USD')", (org,))
         employee = conn.execute(
-            "SELECT employee_id FROM aw_employees WHERE org_id=%s AND role_id='evidence_maintainer' LIMIT 1",
-            (org,),
+            "SELECT employee_id FROM aw_employees WHERE org_id=%s AND role_id=%s LIMIT 1",
+            (org, role_id),
         ).fetchone()["employee_id"]
         sender = conn.execute(
             "SELECT src FROM aw_current_message_edges WHERE org_id=%s AND dst=%s AND kind='ASSIGN' LIMIT 1",
@@ -202,7 +203,7 @@ def dynamic_site(dual_databases, tmp_path, monkeypatch):
 
     def share(version, content):
         with connect(dsn) as conn:
-            register_skill(conn, org, "close-reading", version, "creative", "summary", content.encode())
+            register_skill(conn, org, "close-reading", version, "creative", task_kind, content.encode())
         row = call(
             ports["manager"],
             "aw_skill_share",
@@ -225,12 +226,14 @@ def dynamic_site(dual_databases, tmp_path, monkeypatch):
             "content_sha": row["content_sha"],
         }
 
-    def delegate(slot_id, instance_ref=None, *, accept_summary=False):
+    def delegate(slot_id, instance_ref=None, *, accept_summary=False, knowledge_cut=None, input_artifacts=()):
         frozen = tasks.define(
             owner,
             wr,
-            role_id="evidence_maintainer",
-            task_kind="summary",
+            role_id=role_id,
+            task_kind=task_kind,
+            knowledge_cut=knowledge_cut,
+            input_artifacts=input_artifacts,
             story_time=point(1),
             subject_ids=[world["ids"]["sword"]],
             predicates=["owner"],
@@ -245,7 +248,7 @@ def dynamic_site(dual_databases, tmp_path, monkeypatch):
             owner,
             installation,
             scope_ref=slot_id,
-            task_template_id="summary",
+            task_template_id=task_kind,
             frozen=frozen,
             budget_id=budget_id,
             reserve_amount="1",
@@ -266,9 +269,9 @@ def dynamic_site(dual_databases, tmp_path, monkeypatch):
                     "generation": 0,
                     "grant_epoch": tickets["grant_epoch"],
                     "scope_ref": slot_id,
-                    "task_template_id": "summary",
+                    "task_template_id": task_kind,
                     "actor_binding_ref": None,
-                    "role_id": "evidence_maintainer",
+                    "role_id": role_id,
                     "max_amount": "1",
                     "currency": "USD",
                     "token_limit": 60000,
@@ -295,7 +298,7 @@ def dynamic_site(dual_databases, tmp_path, monkeypatch):
                 "schema_version": "2.1",
                 "task_id": tid,
                 "generation": gen,
-                "recipe_id": profiles()["evidence_maintainer"]["allowed_recipes"][0],
+                "recipe_id": profiles()[role_id]["allowed_recipes"][0],
                 "input_manifest_ref": frozen.manifest_ref,
                 "read_contract": {
                     "revision": {"mode": "FIXED", "world_ref": wr},
@@ -531,3 +534,48 @@ def test_employee_exit_or_skill_revocation_during_real_model_wait_blocks_result(
         )
         assert len(repo.many("call_attempts", {"task_id": dispatched.task_id})) == 1
     assert len(s.requests) == 1
+
+
+@pytest.mark.parametrize("dynamic_site", [("volume_director", "window_plan")], indirect=True)
+def test_planning_controller_rejects_source_skill_revoked_after_proposal(dynamic_site, monkeypatch):
+    from novel_factory.application.creative_planning import CreativePlanningService
+    from novel_factory.application.mcp_runtime import CreativeControllerBinding, McpRuntime
+    from novel_factory.application.planning import PlanningService
+
+    root = Path(os.environ["AW_NF_SOURCE"]).resolve()
+    monkeypatch.syspath_prepend(str(root / "tests" / "integration"))
+    from test_planning import make_plan
+
+    site = dynamic_site
+    planner = PlanningService(site.kernel)
+    plan, anchor = make_plan(planner, site.world)
+    selected = planner.adopt_plan(site.owner, site.wr, anchor, None, "initial-plan")
+    inputs = {"knowledge_cut": selected["knowledge_cut"],
+              "input_artifacts": [anchor, plan["volume_contract_ref"], selected["plan_manifest_ref"]]}
+    source = site.delegate("source-plan", **inputs)
+    instruction = "Compare the consequences of each available route."
+    binding = site.share("for-planning", instruction)
+    revision = site.activate(source, binding, instruction, requested_tools=["plan_propose"])
+    task = site.delegate("target-plan", revision["instance_ref"], **inputs)
+    node = plan["nodes"][0]["node_id"]
+    planner.bind_task_for_controller(site.owner, task.task_id, task.generation, anchor, [node], "assign-nodes")
+    quota = {"budget_id": site.budget_id, "max_amount": "0.1", "max_tokens": 10000, "max_attempts": 1,
+             "currency": "USD", "deadline": (datetime.now(UTC) + timedelta(minutes=3)).isoformat()}
+    candidate = CreativePlanningService(site.kernel).propose(
+        task.principal, task.task_id, task.generation, worker_id=task.request["worker_id"], plan_ref=anchor,
+        node_ids=[node], trigger="ORDINARY", quota=quota, idempotency_key="propose")
+    call(site.ports["manager"], "aw_skill_revoke", operation_id="retire-planning-skill",
+         binding_id=binding["binding_id"])
+    controller = McpRuntime(site.kernel, site.owner,
+                            CreativeControllerBinding(site.wr["work_id"], site.wr["branch_id"]))
+    with pytest.raises(DomainError) as rejected:
+        controller.decide_creative_plan(
+            task_id=task.task_id, generation=task.generation, candidate_ref=candidate["candidate_ref"],
+            option_id=candidate["candidate"]["alternatives"][0]["option_id"], idempotency_key="adopt")
+    assert rejected.value.code == "DYNAMIC_SKILL_DENIED"
+    with site.kernel.db.uow(write=False) as repo:
+        pointer = repo.one("selections", {"work_id": site.wr["work_id"],
+                           "selection_kind": planner.selection_key(plan["volume_id"])})
+        assert pointer["artifact_ref"] == anchor
+        assert repo.one("grants", {"grant_id": task.principal.grant_id})["active"]
+        assert not repo.many("artifacts", {"work_id": site.wr["work_id"], "kind": "CREATIVE_PLAN_DECISION"})

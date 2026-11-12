@@ -33,11 +33,14 @@ from novel_factory.infrastructure.objects import ObjectStore
 from test_dual_stdio import bound_process
 
 
-def test_dual_review_uses_exact_delegations_and_denies_after_workshop_revocation(dual_databases, tmp_path, monkeypatch):
+@pytest.fixture
+def delegated_review(dual_databases, tmp_path, monkeypatch):
     root = Path(os.environ["AW_NF_SOURCE"]).resolve()
     monkeypatch.syspath_prepend(str(root / "tests" / "integration"))
     from novel_factory.infrastructure.model_gateway import OpenAICompatibleAdapter
     from test_release import setup_batch
+    from novel_factory.infrastructure.creative_config import CreativeHarnessConfig
+    monkeypatch.setenv("NF_CREATIVE_HARNESS_CONFIG", json.dumps(CreativeHarnessConfig(enabled=True, dynamic_agents=True).as_dict()))
 
     dsn = dual_databases["aw"]
     db = Database(dual_databases["nf"])
@@ -67,12 +70,12 @@ def test_dual_review_uses_exact_delegations_and_denies_after_workshop_revocation
         private.chmod(0o600)
         monkeypatch.setenv("NF_REVIEW_WORKSHOP_BINDING", str(private))
 
-        def dispatch(role_id, inputs, manuscript=None, producer_receipt=None, *, slot=None, mode="PROSE"):
+        def dispatch(role_id, inputs, manuscript=None, producer_receipt=None, *, slot=None, mode="PROSE", instance_ref=None):
             slot = slot or role_id
             kind = "scene_draft" if role_id == "writer" else "literary"
             frozen = tasks.define(admin, wr, role_id=role_id, task_kind=kind, story_time=point(1, 1),
                                   subject_ids=[world["ids"]["sword"]], predicates=["owner"], assignment="审阅灯船抵岸。",
-                                  adapter_id="fixture", input_artifacts=inputs, max_amount="1", token_budget=60000)
+                                  adapter_id="fixture", input_artifacts=inputs, dynamic_instance_ref=instance_ref, max_amount="1", token_budget=60000)
             provision_slot(supervisor, admin, installation, scope_ref=slot, task_template_id=kind, frozen=frozen,
                            budget_id=budget, reserve_amount="1", token_reservation=60000)
             policy = {"nf_instance_id": instance, "work_id": wr["work_id"], "branch_id": wr["branch_id"],
@@ -125,25 +128,95 @@ def test_dual_review_uses_exact_delegations_and_denies_after_workshop_revocation
         reviewer, reading, _ = dispatch("reviewer", [draft], draft, receipt)
         narrative.bind_reader_task(admin, reading["task_id"], reading["generation"], [draft], "bind-review")
         service = ReviewIndependenceService(kernel)
-        args = {"manuscript_ref": draft, "reviewer_task_id": reading["task_id"], "reviewer_generation": reading["generation"]}
-        proof = service.issue(admin, **args)["independence_ref"]
-        _, second, _ = dispatch("reviewer", [draft], draft, receipt, slot="review-story", mode="SCRIPT")
-        narrative.bind_reader_task(admin, second["task_id"], second["generation"], [draft], "bind-story-review")
-        other = service.issue(admin, manuscript_ref=draft, reviewer_task_id=second["task_id"],
-                              reviewer_generation=second["generation"])["independence_ref"]
-        batch = service.refresh_many([other, proof, other])
-        assert list(batch) == [other["artifact_revision_id"], proof["artifact_revision_id"]]
-        live = batch[proof["artifact_revision_id"]]
-        with kernel.db.uow() as repo:
-            out = service.verify(repo, proof_ref=proof, **args, creator_task_id=tid, creator_generation=gen, live_proof=live)
-            assert out["producer"]["principal_id"] == author.principal_id
-            assert out["reviewer"]["principal_id"] == reviewer.principal_id
-        with connect(dsn) as conn:
-            conn.execute("UPDATE aw_delegation_slots SET enabled=false WHERE org_id=%s AND slot_id='reviewer'", (org,))
-        with pytest.raises(DomainError, match="qualified"):
-            service.refresh_many([other, proof])
-        assert service.refresh(other)
-        with pytest.raises(DomainError, match="qualified"):
-            service.issue(admin, **args)
+        yield kernel, world, admin, dsn, org, installation, manager_token, budget, author, writing, draft, receipt, reviewer, reading, service, dispatch
     finally:
         db.close()
+
+
+def test_dual_review_uses_exact_delegations_and_denies_after_workshop_revocation(delegated_review):
+    (kernel, world, admin, dsn, org, installation, manager_token, budget, author, writing, draft,
+     receipt, reviewer, reading, service, dispatch) = delegated_review
+    tid, gen = writing["task_id"], writing["generation"]
+    narrative = NarrativeService(kernel)
+    args = {"manuscript_ref": draft, "reviewer_task_id": reading["task_id"], "reviewer_generation": reading["generation"]}
+    proof = service.issue(admin, **args)["independence_ref"]
+    _, second, _ = dispatch("reviewer", [draft], draft, receipt, slot="review-story", mode="SCRIPT")
+    narrative.bind_reader_task(admin, second["task_id"], second["generation"], [draft], "bind-story-review")
+    other = service.issue(admin, manuscript_ref=draft, reviewer_task_id=second["task_id"],
+                          reviewer_generation=second["generation"])["independence_ref"]
+    batch = service.refresh_many([other, proof, other])
+    assert list(batch) == [other["artifact_revision_id"], proof["artifact_revision_id"]]
+    live = batch[proof["artifact_revision_id"]]
+    with kernel.db.uow() as repo:
+        out = service.verify(repo, proof_ref=proof, **args, creator_task_id=tid, creator_generation=gen, live_proof=live)
+        assert out["producer"]["principal_id"] == author.principal_id
+        assert out["reviewer"]["principal_id"] == reviewer.principal_id
+    with connect(dsn) as conn:
+        conn.execute("UPDATE aw_delegation_slots SET enabled=false WHERE org_id=%s AND slot_id='reviewer'", (org,))
+    with pytest.raises(DomainError, match="qualified"):
+        service.refresh_many([other, proof])
+    assert service.refresh(other)
+    with pytest.raises(DomainError, match="qualified"):
+        service.issue(admin, **args)
+
+
+def test_editor_rechecks_dynamic_reviewer_skill_after_signed_report(delegated_review, tmp_path, monkeypatch):
+    from agent_workshop.reviews_skills import register_skill, revoke, share
+    from novel_factory.application.creative_review import CreativeReviewService
+    from novel_factory.application.dynamic_agents import DynamicAgentService
+    from novel_factory.application.mcp_runtime import CreativeControllerBinding, McpRuntime
+    from editorial_helpers import binding_for
+    from test_release import accept_draft
+
+    (kernel, world, admin, dsn, org, installation, manager_token, budget, author, writing, draft,
+     receipt, reviewer, source_task, independence, dispatch) = delegated_review
+    text = "雨落在船头。她把灯挪向岸边。"
+    accepted = accept_draft(kernel, world, {"draft_ref": draft, "text": text, "writer": author, "task": writing})
+    editorial = binding_for(world, [accepted])
+    wr = world["world_ref"]
+    instructions = "Distinguish a deliberate pause from accidental repetition."
+    with connect(dsn) as conn:
+        reviewer_token = enroll(conn, installation, org, "reviewer", 1, 1)
+        register_skill(conn, org, "review-reading", "r1", "creative", "literary", instructions.encode())
+        shared = share(conn, authenticate(conn, manager_token), "share-review", "review-reading", "r1",
+                       "PRIVATE", 600, target="reviewer")
+    private = tmp_path / "dynamic-reader.json"
+    private.write_text(json.dumps({"database_url": dsn, "token": reviewer_token}))
+    private.chmod(0o600)
+    monkeypatch.setenv("NF_DYNAMIC_WORKSHOP_BINDING", str(private))
+    binding = {"org_id": org, "installation_id": installation, "employee_id": "reviewer",
+               "employment_revision": 1, "grant_epoch": 1, "binding_id": shared["binding_id"],
+               "skill_id": "review-reading", "source_revision": "r1", "content_sha": shared["content_sha"]}
+    quota = {"budget_id": budget, "currency": "USD", "max_amount": "0.1", "max_tokens": 20000,
+             "max_attempts": 1, "deadline": (datetime.now(UTC) + timedelta(minutes=4)).isoformat()}
+    registry = DynamicAgentService(kernel)
+    revision = registry.register_revision(
+        admin, source_task["task_id"], source_task["generation"], workshop_binding=binding, profile_version="r1",
+        role_instructions="Review the assigned passage.", skill_instructions=instructions,
+        requested_tools=["evidence_read", "review_submit"], trigger="TASK_DEMAND", evidence_refs=[draft],
+        quota=quota, idempotency_key="register-review")
+    registry.select(admin, wr, instance_ref=revision["instance_ref"], revision_ref=revision["revision_ref"],
+                    expected_epoch=0, idempotency_key="select-review")
+    reader, target, _ = dispatch("reviewer", [draft, *editorial["reconciliation_refs"]], draft, receipt,
+                                 slot="dynamic-review", mode="SCRIPT", instance_ref=revision["instance_ref"])
+    tid, gen = target["task_id"], target["generation"]
+    NarrativeService(kernel).bind_reader_task(admin, tid, gen, [draft], "bind-dynamic-review")
+    proof = independence.issue(admin, manuscript_ref=draft, reviewer_task_id=tid, reviewer_generation=gen)
+    service = CreativeReviewService(kernel)
+    reading = service.read(reader, tid, gen, draft_ref=draft, idempotency_key="read")
+    result = service.review(reader, tid, gen, binding=editorial, target_ref=draft, scope_draft_refs=[draft],
+                            coverage_refs=[reading["coverage_ref"]], layer="PROSE", observations=[],
+                            quota=quota, rework_limit=1, independence_ref=proof["independence_ref"],
+                            idempotency_key="review-current")
+    with connect(dsn) as conn:
+        revoke(conn, authenticate(conn, manager_token), "revoke-review", shared["binding_id"])
+    assert independence.refresh(proof["independence_ref"])
+    control = McpRuntime(kernel, admin, CreativeControllerBinding(wr["work_id"], wr["branch_id"]))
+    with pytest.raises(DomainError) as rejected:
+        control.decide_creative_review(task_id=tid, generation=gen, report_ref=result["report_ref"],
+                                       action="DEFER", reason="Record the editorial decision.",
+                                       idempotency_key="decide-revoked")
+    assert rejected.value.code == "DYNAMIC_SKILL_DENIED"
+    with kernel.db.uow(write=False) as repo:
+        assert repo.one("grants", {"grant_id": reader.grant_id})["active"]
+        assert not repo.many("artifacts", {"work_id": wr["work_id"], "kind": "CREATIVE_REVIEW_DECISION"})

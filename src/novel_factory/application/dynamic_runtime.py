@@ -77,7 +77,7 @@ def refresh_task(kernel, principal, task_id, generation):
     return None
 
 
-def verify_task(kernel, repo, principal, task, proof):
+def verify_task(kernel, repo, principal, task, proof, *, required_tools=(), required_capabilities=()):
     from .queries import WorldQueryService
 
     inputs = repo.one("task_inputs", {"task_id": task["task_id"], "generation": task["generation"]})
@@ -90,7 +90,11 @@ def verify_task(kernel, repo, principal, task, proof):
     context = repo.one("contexts", {"task_id": task["task_id"], "generation": task["generation"],
                                     "context_bundle_id": task["context_bundle_id"]})
     require(context, "CONTEXT_REQUIRED", "Task context required for delegated delivery")
-    verified(kernel, repo, principal, task, grant, ref, proof[1], plane=context["read_cut"]["knowledge_cut"]["plane"])
+    assignment, capabilities = verified(kernel, repo, principal, task, grant, ref, proof[1],
+                                        plane=context["read_cut"]["knowledge_cut"]["plane"])
+    require(set(required_tools).issubset(assignment["requested_tools"])
+            and set(required_capabilities).issubset(capabilities), "VIEW_DENIED",
+            "Dynamic task does not authorize this operation")
 
 
 def _candidate_scope_id(ref):

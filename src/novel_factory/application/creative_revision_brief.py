@@ -6,6 +6,7 @@ import re
 from novel_factory.application.creative_review import (
     CreativeReviewService, _bound_draft, _current_manuscript, _latest_decision, _part, _review_history, _task,
 )
+from novel_factory.application.dynamic_runtime import refresh_task, verify_task
 from novel_factory.application.editorial import ReviewService
 from novel_factory.application.kernel import require
 from novel_factory.application.narrative import NarrativeService
@@ -37,9 +38,12 @@ _DIRECTIONS = {
 }
 
 
-def authorize_returned_revision(service, repo, principal, task_id, generation, report_ref, worker_id, live_proof):
+def authorize_returned_revision(service, repo, principal, task_id, generation, report_ref, worker_id,
+                                live_proof, writer_proof):
     kernel = service.kernel
     task, _, spec, _, runtime = _task(kernel, repo, principal, task_id, generation, "artifact_put", worker_id)
+    verify_task(kernel, repo, principal, task, writer_proof, required_tools=("artifact_put", "draft_submit"),
+                required_capabilities=("ARTIFACT_WRITE",))
     require(task["task_kind"] == "targeted_revision" and report_ref in spec["input_artifacts"]
             and "draft_submit" in runtime.get("mcp_requested_tools", []), "VIEW_DENIED",
             "Writer needs an assigned, frozen revision instruction")
@@ -91,12 +95,13 @@ class CreativeRevisionBriefService:
                     "VIEW_DENIED", "Revision brief unavailable to this assignment")
         service = CreativeReviewService(self.kernel)
         live = service._refresh_report(principal, task_id, generation, report_ref, writing=True)
+        writer_proof = refresh_task(self.kernel, principal, task_id, generation)
         with self.kernel.objects.lock(), self.kernel.db.uow(write=False) as repo:
             self.kernel.authorize(repo, principal, task["work_id"], "READ", task["branch_id"])
             repo.one("branches", {"branch_id": task["branch_id"]}, lock="share")
             repo.one("tasks", {"task_id": task_id}, lock="share")
             task, spec, report, details, _ = authorize_returned_revision(
-                service, repo, principal, task_id, generation, report_ref, worker_id, live)
+                service, repo, principal, task_id, generation, report_ref, worker_id, live, writer_proof)
             draft, text, eligible = pending_revision(service, repo, principal, task, spec, report_ref, report, details)
             findings = []
             for identifier, (note, finding) in eligible.items():

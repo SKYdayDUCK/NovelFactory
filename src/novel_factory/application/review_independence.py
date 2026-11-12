@@ -4,7 +4,7 @@ import hmac
 import json
 import os
 import stat
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
 from time import monotonic
@@ -101,6 +101,7 @@ class _LiveProof:
     binding_digest: str
     valid_until: datetime
     checked_at: float
+    reviewer_runtime: tuple | None = None
 
 
 def _refresh_bindings(bindings):
@@ -223,7 +224,7 @@ class ReviewIndependenceService:
     def refresh(self, proof_ref):
         return self.refresh_many([proof_ref])[proof_ref["artifact_revision_id"]]
 
-    def refresh_many(self, refs):
+    def refresh_many(self, refs, *, include_reviewer_runtime=False):
         _check(isinstance(refs, list) and 1 <= len(refs) <= 128)
         requested = {}
         for ref in refs:
@@ -241,8 +242,23 @@ class ReviewIndependenceService:
                 _check(all(row[k] == v for k, v in ref.items()) and fingerprint(row["payload"]) == ref["sha256"])
                 bindings[revision] = row["payload"]["binding"]
         unique = {fingerprint(value): value for value in bindings.values()}
+        runtimes = {}
+        if include_reviewer_runtime:
+            from .dynamic_runtime import refresh_task
+
+            for binding in unique.values():
+                reviewer = binding["reviewer"]
+                key = reviewer["task_id"], reviewer["generation"]
+                if reviewer["delegation"] and key not in runtimes:
+                    owner = Principal(reviewer["grant_id"], reviewer["principal_id"])
+                    runtimes[key] = refresh_task(self.kernel, owner, *key)
         live = _refresh_bindings(list(unique.values()))
-        return {revision: live[fingerprint(bindings[revision])] for revision in requested}
+        result = {}
+        for revision, binding in bindings.items():
+            reviewer = binding["reviewer"]
+            key = reviewer["task_id"], reviewer["generation"]
+            result[revision] = replace(live[fingerprint(binding)], reviewer_runtime=runtimes.get(key))
+        return result
 
     def verify(self, repo, *, proof_ref, manuscript_ref, creator_task_id, creator_generation,
                reviewer_task_id, reviewer_generation, live_proof):
