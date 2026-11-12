@@ -62,7 +62,7 @@ TIME=re.compile(r"20[0-9-]{8}T[0-9:.]{8,24}(?:Z|\+00:00)\Z")
 VERSION=re.compile(r"v?[0-9]{1,5}(?:\.[0-9]{1,5}){1,3}\Z")
 DSN=re.compile(rb"(?:postgres(?:ql)?(?:\+[a-z]+)?|rediss?)://|(?:Authorization:|Bearer\s+)[A-Za-z0-9._=-]{12,}|-----BEGIN (?:[A-Z]+ )?PRIVATE KEY-----|\b(?:sk-(?:proj-|or-v1-|svcacct-)?|ghp_|github_pat_)[A-Za-z0-9_-]{20,}",re.I)
 NODE=re.compile(r"(?:workshop/)?tests?/[A-Za-z0-9_./-]+\.py(?:::[A-Za-z_][A-Za-z0-9_]*)+|workshop/(?:acceptance|integration)/[A-Za-z0-9_./-]+\.py(?:::[A-Za-z_][A-Za-z0-9_]*)+")
-RESULTS=set("passed failed skipped xfailed xpassed error rerun".split())
+RESULTS=set("passed failed skipped xfailed xpassed error rerun".split()) | {"subtests passed", "subtests failed"}
 MODULE_KEYS=set(["application/"+p+".py" for p in ("adaptive_runtime","adaptive_instructions","adaptive_evaluation","agent_gateway","creative_review","creative_context","creative_context_store")]+["domain/creative_review.py"])
 def sha(b):return hashlib.sha256(b).hexdigest()
 def pack(v):return json.dumps(v,sort_keys=True,ensure_ascii=True,allow_nan=False,separators=(",",":")).encode()
