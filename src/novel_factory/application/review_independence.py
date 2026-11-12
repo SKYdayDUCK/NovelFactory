@@ -14,6 +14,7 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
 from novel_factory.application.authorization import Principal
+from novel_factory.application.editorial import ReviewService
 from novel_factory.application.kernel import require
 from novel_factory.application.narrative import NarrativeService
 from novel_factory.contracts.registry import validate_contract
@@ -50,6 +51,13 @@ def native_signature(body):
     return hmac.digest(key, b"nf.native-review-case.v1\0" + canonical_bytes(body), "sha256").hex()
 
 
+def _subject_groups(binding, case):
+    subjects = case["subjects"]
+    writers = {subjects[p["principal_id"]]["group"] for p in binding["producers"]}
+    writers.update(record["group"] for record in case.get("workshop_producers", []))
+    return sorted(writers), subjects[binding["reviewer"]["principal_id"]]["group"]
+
+
 def validate_native_case(binding, case):
     _check(case["binding"] == binding and case["version"] == "nf.native-review-case.v1")
     expires = datetime.fromisoformat(case["expires_at"].replace("Z", "+00:00"))
@@ -59,16 +67,18 @@ def validate_native_case(binding, case):
     reviewer = binding["reviewer"]["principal_id"]
     publisher = binding.get("publisher", {}).get("principal_id")
     _check(set(subjects) == owners | {reviewer} | ({publisher} if publisher else set()))
-    for record in subjects.values():
+    extra = case.get("workshop_producers", [])
+    _check(isinstance(extra, list) and (not extra or (publisher and binding["authority"] == "WORKSHOP")))
+    for record in [*subjects.values(), *extra]:
         # The offline registrar supplies the digest of the evidence actually inspected.
         _check(set(record) == {"group", "evidence_sha256"} and isinstance(record["group"], str)
                and record["group"].strip() == record["group"] and 0 < len(record["group"]) <= 200
                and len(record["evidence_sha256"]) == 64
                and all(ch in "0123456789abcdef" for ch in record["evidence_sha256"]))
-    producer_groups = {subjects[p]["group"] for p in owners}
-    _check(subjects[reviewer]["group"] not in producer_groups)
+    producer_groups, reviewer_group = _subject_groups(binding, case)
+    _check(reviewer_group not in producer_groups)
     if publisher:
-        _check(subjects[publisher]["group"] not in producer_groups | {subjects[reviewer]["group"]})
+        _check(subjects[publisher]["group"] not in [*producer_groups, reviewer_group])
     return expires
 
 
@@ -90,7 +100,7 @@ async def _workshop_reads(bindings):
                     evidence = result.structuredContent
                     _check(evidence and evidence["binding_sha256"] == fingerprint(binding))
                     return _LiveProof(fingerprint(evidence), fingerprint(binding),
-                                      datetime.fromisoformat(evidence["expires_at"]), started)
+                                      datetime.fromisoformat(evidence["expires_at"]), started, evidence["subject_commitment"])
 
             return await asyncio.gather(*(read_one(b) for b in bindings))
 
@@ -101,7 +111,38 @@ class _LiveProof:
     binding_digest: str
     valid_until: datetime
     checked_at: float
+    subject_commitment: str
     reviewer_runtime: tuple | None = None
+
+
+def _signed_case(binding):
+    try:
+        checked = monotonic()
+        envelope = json.loads(_private_bytes(native_case_path(binding)))
+        case = envelope["case"]
+        _check(hmac.compare_digest(native_signature(case), envelope["signature"]))
+        expires = validate_native_case(binding, case)
+        groups, reviewer = _subject_groups(binding, case)
+        return _LiveProof(fingerprint(case), fingerprint(binding), expires, checked, fingerprint([groups, reviewer]))
+    except DomainError:
+        raise
+    except (OSError, KeyError, TypeError, ValueError, AttributeError):
+        _check(False)
+
+
+def _editor_binding(binding, principal, grant):
+    _check(principal.principal_id not in {p["principal_id"] for p in [*binding["producers"], binding["reviewer"]]})
+    return {**binding, "publisher": {"principal_id": principal.principal_id, "grant_id": principal.grant_id,
+                                     "permission_epoch": grant["epoch"]}}
+
+
+def verify_editor_case(binding, principal, grant, reading, now):
+    decision_binding = _editor_binding(binding, principal, grant)
+    proof = _signed_case(decision_binding)
+    _check(reading.binding_digest == fingerprint(binding) and proof.subject_commitment == reading.subject_commitment
+           and min(proof.valid_until, reading.valid_until) > now and 0 <= monotonic() - reading.checked_at <= 10)
+    return {"manuscript_ref": binding["manuscript_ref"], "binding_sha256": proof.binding_digest,
+            "editor_evidence_sha256": proof.evidence_digest, "reading_evidence_sha256": reading.evidence_digest}
 
 
 def _refresh_bindings(bindings):
@@ -114,13 +155,8 @@ def _refresh_bindings(bindings):
         for binding in bindings:
             if binding["authority"] != "NATIVE":
                 continue
-            checked = monotonic()
-            envelope = json.loads(_private_bytes(native_case_path(binding)))
-            evidence = envelope["case"]
-            _check(hmac.compare_digest(native_signature(evidence), envelope["signature"]))
-            expires = validate_native_case(binding, evidence)
-            digest = fingerprint(binding)
-            result[digest] = _LiveProof(fingerprint(evidence), digest, expires, checked)
+            proof = _signed_case(binding)
+            result[proof.binding_digest] = proof
         _check(all(fingerprint(b) in result for b in bindings))
         return result
     except DomainError:
@@ -158,12 +194,12 @@ class ReviewIndependenceService:
             delegation.update({k: receipt[k] for k in ("operation_id", "receipt_ref", "scope_ref")})
         return {**identity, "task_id": task["task_id"], "generation": generation, "delegation": delegation}
 
-    def _binding(self, repo, manuscript_ref, reviewer_task_id, reviewer_generation, controller=None, *, allow_accepted=False):
+    def _binding(self, repo, manuscript_ref, reviewer_task_id, reviewer_generation, controller=None, *, allow_accepted=False, for_editor=False):
         task = repo.one("tasks", {"task_id": reviewer_task_id}, lock="share")
         _check(task and task["role_id"] in {"reviewer", "chief_editor", "literary_editor"})
         work, branch = task["work_id"], task["branch_id"]
         if controller is not None:
-            self.kernel.authorize(repo, controller, work, "ADMIN", branch)
+            self.kernel.authorize(repo, controller, work, "APPROVE" if for_editor else "ADMIN", branch)
         reviewer = self._assignment(repo, task, reviewer_generation)
         owner = Principal(task["grant_id"], task["principal_id"])
         narrative = NarrativeService(self.kernel)
@@ -188,12 +224,17 @@ class ReviewIndependenceService:
         delegations = [p["delegation"] for p in [*producers, reviewer]]
         _check(all(d is None for d in delegations) or all(d and d["installation_id"] == delegations[0]["installation_id"]
                                                          for d in delegations))
-        return {"authority": "WORKSHOP" if reviewer["delegation"] else "NATIVE", "world_ref": draft["input_world_ref"],
-                "manuscript_ref": manuscript_ref, "producers": producers, "reviewer": reviewer}
+        binding = {"authority": "WORKSHOP" if reviewer["delegation"] else "NATIVE", "world_ref": draft["input_world_ref"],
+                   "manuscript_ref": manuscript_ref, "producers": producers, "reviewer": reviewer}
+        if for_editor:
+            grant = ReviewService(self.kernel)._controller(repo, controller, binding["world_ref"])
+            return _editor_binding(binding, controller, grant)
+        return binding
 
-    def describe(self, controller, *, manuscript_ref, reviewer_task_id, reviewer_generation):
+    def describe(self, controller, *, manuscript_ref, reviewer_task_id, reviewer_generation, for_editor=False):
         with self.kernel.db.uow(write=False) as repo:
-            return self._binding(repo, manuscript_ref, reviewer_task_id, reviewer_generation, controller, allow_accepted=True)
+            return self._binding(repo, manuscript_ref, reviewer_task_id, reviewer_generation, controller,
+                                 allow_accepted=True, for_editor=for_editor)
 
     def issue(self, controller, *, manuscript_ref, reviewer_task_id, reviewer_generation):
         args = (manuscript_ref, reviewer_task_id, reviewer_generation)

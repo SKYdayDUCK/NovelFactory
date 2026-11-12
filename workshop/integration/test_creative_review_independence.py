@@ -18,12 +18,13 @@ from agent_workshop.review_admin import review_slot, subject
 from agent_workshop.reviews_skills import register_artifact, review_request
 from novel_factory.application.agent_gateway import AgentGateway
 from novel_factory.application.delegation import install, provision_slot
+from novel_factory.application.editorial import ReviewService
 from novel_factory.application.kernel import Kernel
 from novel_factory.application.narrative import NarrativeService
 from novel_factory.application.planning import PlanningService
 from novel_factory.application.queries import WorldQueryService
 from novel_factory.application.release import ReleaseService
-from novel_factory.application.review_independence import ReviewIndependenceService
+from novel_factory.application.review_independence import ReviewIndependenceService, verify_editor_case
 from novel_factory.application.runtime_tasks import RuntimeTaskService
 from novel_factory.application.supervisor import RuntimeSupervisor
 from novel_factory.domain.errors import DomainError
@@ -34,7 +35,7 @@ from test_dual_stdio import bound_process
 
 
 @pytest.fixture
-def delegated_review(dual_databases, tmp_path, monkeypatch):
+def delegated_review(dual_databases, tmp_path, monkeypatch, request):
     root = Path(os.environ["AW_NF_SOURCE"]).resolve()
     monkeypatch.syspath_prepend(str(root / "tests" / "integration"))
     from novel_factory.infrastructure.model_gateway import OpenAICompatibleAdapter
@@ -62,7 +63,7 @@ def delegated_review(dual_databases, tmp_path, monkeypatch):
             conn.execute("INSERT INTO aw_installations VALUES (%s,%s,true)", (installation, instance))
             bootstrap(conn, org, "Research-Audit", installation_id=installation)
             conn.execute("INSERT INTO aw_budget_accounts VALUES (%s,3,'USD')", (org,))
-            for name, group in (("writer", "story-team"), ("reviewer", "independent-team")):
+            for name, group in (("writer", "story-team"), ("manager", "extra-producers"), ("reviewer", "independent-team")):
                 subject(conn, org, name, group)
             manager_token = enroll(conn, installation, org, "manager", 1, 1)
         private = tmp_path / "workshop.json"
@@ -89,7 +90,7 @@ def delegated_review(dual_databases, tmp_path, monkeypatch):
                 session = authenticate(conn, enroll(conn, installation, org, sender, 1, 1))
                 if manuscript:
                     register_artifact(conn, org, manuscript["artifact_id"], manuscript["artifact_revision_id"], manuscript["sha256"],
-                                      "organization", producer_receipt, ["writer"], [manuscript["sha256"]], {})
+                                      "organization", producer_receipt, getattr(request, "param", ["writer"]), [manuscript["sha256"]], {})
                     review_slot(conn, org, slot, manuscript["artifact_id"], manuscript["artifact_revision_id"], mode)
                     req = review_request(conn, session, "ask-" + slot, manuscript["artifact_id"], manuscript["artifact_revision_id"],
                                          mode, "MATERIAL_CHANGE", 600, role_id, slot, "1", 60000)
@@ -220,3 +221,36 @@ def test_editor_rechecks_dynamic_reviewer_skill_after_signed_report(delegated_re
     with kernel.db.uow(write=False) as repo:
         assert repo.one("grants", {"grant_id": reader.grant_id})["active"]
         assert not repo.many("artifacts", {"work_id": wr["work_id"], "kind": "CREATIVE_REVIEW_DECISION"})
+
+
+@pytest.mark.parametrize("delegated_review", [["writer", "manager"]], indirect=True)
+def test_final_editor_covers_all_workshop_producer_groups(delegated_review, tmp_path, monkeypatch):
+    from test_review_independence import enroll_native_case
+
+    (kernel, world, admin, dsn, org, installation, manager_token, budget, author, writing, draft,
+     receipt, reviewer, reading, service, dispatch) = delegated_review
+    args = {"manuscript_ref": draft, "reviewer_task_id": reading["task_id"], "reviewer_generation": reading["generation"]}
+    proof = service.issue(admin, **args)["independence_ref"]
+    binding = service.describe(admin, **args)
+
+    def register_editor(group, extra=()):
+        return enroll_native_case(kernel, tmp_path, monkeypatch, **args, controller=admin, producer_group="story-team",
+                                  reviewer_group="independent-team", editor_group=group, workshop_producer_groups=extra)
+
+    def verify_editor():
+        fresh = service.refresh(proof)
+        with kernel.db.uow(write=False) as repo:
+            grant = ReviewService(kernel)._controller(repo, admin, world["world_ref"])
+            return verify_editor_case(binding, admin, grant, fresh, repo.now())
+
+    register_editor("publication-team")
+    with pytest.raises(DomainError, match="qualified"):
+        verify_editor()  # W4 includes a substantive producer without an NF task.
+    with pytest.raises(DomainError, match="qualified"):
+        register_editor("extra-producers", ["extra-producers"])
+    register_editor("publication-team", ["extra-producers"])
+    assert verify_editor()["reading_evidence_sha256"] == service.refresh(proof).evidence_digest
+    with connect(dsn) as conn:
+        conn.execute("UPDATE aw_delegation_slots SET enabled=false WHERE org_id=%s AND slot_id='reviewer'", (org,))
+    with pytest.raises(DomainError, match="qualified"):
+        verify_editor()

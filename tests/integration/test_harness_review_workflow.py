@@ -36,13 +36,15 @@ def _args(job):
     return job.principal, job.task["task_id"], job.task["generation"]
 
 
-def _reviewer(k, f, manuscript, tmp_path, monkeypatch, mode="literary", binding=None):
+def _reviewer(k, f, manuscript, tmp_path, monkeypatch, mode="literary", binding=None, *, editor_group=None):
     b = binding or binding_for(f, [manuscript])
     job = _runtime(k, f, "reviewer", mode, b["ordered_draft_refs"] + b["reconciliation_refs"])
     _, tid, generation = _args(job)
     NarrativeService(k).bind_reader_task(f["principal"], tid, generation, b["ordered_draft_refs"], "bind:" + tid)
     auth = dict(manuscript_ref=manuscript["draft_ref"], reviewer_task_id=tid, reviewer_generation=generation)
     enroll_native_case(k, tmp_path, monkeypatch, **auth, controller=f["principal"])
+    if editor_group is not None:
+        enroll_native_case(k, tmp_path, monkeypatch, **auth, controller=f["principal"], editor_group=editor_group)
     proof = ReviewIndependenceService(k).issue(f["principal"], **auth)["independence_ref"]
     svc = CreativeReviewService(k)
     read = svc.read(*_args(job), draft_ref=manuscript["draft_ref"], idempotency_key="read", worker_id=job.worker_id)
@@ -128,7 +130,7 @@ def test_directed_revision_and_independent_clean_reread(manuscript, tmp_path, mo
         decide(f["principal"], "WITHDRAW")
     assert stale.value.code == "TASK_REBIND_REQUIRED"
     accepted = accept_draft(k,f,{"writer":writer.principal,"task":writer.task,"draft_ref":child["draft_ref"],"text":LINE*2+CHANGE})
-    newjob, newargs, newread = _reviewer(k, f, accepted, tmp_path, monkeypatch)
+    newjob, newargs, newread = _reviewer(k, f, accepted, tmp_path, monkeypatch, editor_group="volume-editors")
     with pytest.raises(DomainError) as wrong:
         svc.review(*_args(newjob), **newargs)
     assert wrong.value.code == "INVALID_EVIDENCE"
@@ -153,7 +155,7 @@ def test_directed_revision_and_independent_clean_reread(manuscript, tmp_path, mo
 def test_withdraw_retain_and_rework_limit(manuscript, tmp_path, monkeypatch):
     k, f, source = manuscript
     svc = CreativeReviewService(k)
-    job,args,read = _reviewer(k,f,source,tmp_path,monkeypatch)
+    job,args,read = _reviewer(k,f,source,tmp_path,monkeypatch,editor_group="volume-editors")
     args.update(observations=[_repeat(read)], rework_limit=0)
     limited = svc.review(*_args(job), **args)
     def decide(owner, action, result, **kwargs):

@@ -1,4 +1,4 @@
-"""Case enrollment for NF tasks without a Workshop delegation.
+"""Offline enrollment for NF review and final editorial independence.
 
 The registrar verifies each source subject-group record against its identity
 provider before enrollment. Its private JSON files contain kind
@@ -13,7 +13,17 @@ Run describe with a private creative-controller binding and the NF manuscript
 and reader assignment. Run enroll with one --subject-evidence path per frozen
 principal and --expires-at. Issue returns the review's ArtifactRef. Withdraw
 removes the case immediately for subsequent verification. Workshop assignments
-instead use their existing W4 evidence through NF_REVIEW_WORKSHOP_BINDING.
+use their existing W4 reading evidence through NF_REVIEW_WORKSHOP_BINDING.
+
+For a final decision, run describe/enroll/withdraw with --editor and the
+actual editor's private controller binding, once per manuscript in the review.
+Independently verify the exact NF grants and their subjects, including the
+editor, against the identity provider. For Workshop reviews use W4's group
+namespace and verify the delegated authors and reviewer against the W4 roster.
+Supply any additional W4 producer groups as private subject-evidence records
+of kind VERIFIED_WORKSHOP_PRODUCER_GROUP with work_id, branch_id, org_id,
+manuscript_ref, subject_group, verified_by and source_record_id. The live
+reading's group commitment must match the complete roster at decision time.
 """
 import argparse
 import json
@@ -31,16 +41,25 @@ from novel_factory.interfaces.mcp_stdio import read_private_config, runtime_from
 
 def enroll(binding, evidence_paths, expires_at):
     """Read isolated identity-provider records; callers of the NF controller cannot supply identity assertions."""
-    _check(binding["authority"] == "NATIVE")
-    subjects = {}
+    workshop_editor = binding["authority"] == "WORKSHOP" and "publisher" in binding
+    _check(binding["authority"] == "NATIVE" or workshop_editor)
+    subjects, workshop_producers = {}, []
     for path in evidence_paths:
         raw = _private_bytes(path)
         evidence = json.loads(raw)
-        _check(evidence["kind"] == "VERIFIED_SUBJECT_GROUP" and evidence["work_id"] == binding["world_ref"]["work_id"]
-               and evidence["branch_id"] == binding["world_ref"]["branch_id"] and evidence["verified_by"].strip()
-               and evidence["source_record_id"].strip() and evidence["principal_id"] not in subjects)
-        subjects[evidence["principal_id"]] = {"group": evidence["subject_group"], "evidence_sha256": sha256(raw).hexdigest()}
+        _check(evidence["work_id"] == binding["world_ref"]["work_id"] and evidence["branch_id"] == binding["world_ref"]["branch_id"]
+               and evidence["verified_by"].strip() and evidence["source_record_id"].strip())
+        record = {"group": evidence["subject_group"], "evidence_sha256": sha256(raw).hexdigest()}
+        if evidence["kind"] == "VERIFIED_WORKSHOP_PRODUCER_GROUP":
+            _check(workshop_editor and evidence["org_id"] == binding["reviewer"]["delegation"]["org_id"]
+                   and evidence["manuscript_ref"] == binding["manuscript_ref"])
+            workshop_producers.append(record)
+        else:
+            _check(evidence["kind"] == "VERIFIED_SUBJECT_GROUP" and evidence["principal_id"] not in subjects)
+            subjects[evidence["principal_id"]] = record
     case = {"version": "nf.native-review-case.v1", "binding": binding, "subjects": subjects, "expires_at": expires_at}
+    if workshop_producers:
+        case["workshop_producers"] = workshop_producers
     validate_native_case(binding, case)
     envelope = {"case": case, "signature": native_signature(case)}
     path = native_case_path(binding)
@@ -59,6 +78,7 @@ def enroll(binding, evidence_paths, expires_at):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("describe", "enroll", "withdraw", "issue"))
+    parser.add_argument("--editor", action="store_true", help="Bind the actual final editor for this manuscript")
     parser.add_argument("--controller-binding", required=True)
     parser.add_argument("--manuscript-ref", required=True, type=json.loads)
     parser.add_argument("--reviewer-task", required=True)
@@ -71,14 +91,15 @@ def main():
     service = ReviewIndependenceService(runtime.kernel)
     request = {"manuscript_ref": args.manuscript_ref, "reviewer_task_id": args.reviewer_task,
                "reviewer_generation": args.generation}
-    binding = service.describe(runtime.principal, **request)
+    _check(not (args.editor and args.action == "issue"))
+    binding = service.describe(runtime.principal, for_editor=args.editor, **request)
     _check((runtime.binding.work_id, runtime.binding.branch_id) ==
            (binding["world_ref"]["work_id"], binding["world_ref"]["branch_id"]))
     if args.action == "enroll":
         _check(args.expires_at and args.subject_evidence)
         print(enroll(binding, args.subject_evidence, args.expires_at).name)
     elif args.action == "withdraw":
-        _check(binding["authority"] == "NATIVE")
+        _check(binding["authority"] == "NATIVE" or args.editor)
         native_case_path(binding).unlink(missing_ok=True)
     elif args.action == "issue":
         print(json.dumps(service.issue(runtime.principal, **request)))

@@ -8,7 +8,7 @@ from novel_factory.application.dynamic_runtime import refresh_task, verify_task
 from novel_factory.application.editorial import ReviewService
 from novel_factory.application.kernel import require
 from novel_factory.application.narrative import NarrativeService
-from novel_factory.application.review_independence import PROOF_KIND, ReviewIndependenceService
+from novel_factory.application.review_independence import PROOF_KIND, ReviewIndependenceService, verify_editor_case
 from novel_factory.application.semantic_dependencies import check_task_dependencies
 from novel_factory.contracts.registry import validate_contract
 from novel_factory.domain.canonical import canonical_bytes, fingerprint
@@ -439,18 +439,25 @@ class CreativeReviewService:
                     and task["generation"] == generation and wr["branch_id"] == task["branch_id"],
                     "VIEW_DENIED", "Report belongs to another review assignment")
             reviewer = report["review_binding"]["reviewer"]["principal_id"]
-            producer_ids = {p["principal_id"] for review in [report["review_binding"],
-                                      *(b["independence"] for b in details["related_bindings"])]
-                            for p in self.kernel.artifact(repo, review["independence_receipt"], work,
-                                                          kind=PROOF_KIND)["payload"]["binding"]["producers"]}
+            final = action in {"RETAIN", "ACCEPT_REVISION"}
+            participants = [report["review_binding"], *(b["independence"] for b in details["related_bindings"])]
+            readings = []
+            for participant in participants:
+                ref = participant["independence_receipt"]
+                binding = self.kernel.artifact(repo, ref, work, kind=PROOF_KIND)["payload"]["binding"]
+                readings.append((ref, binding))
+            producer_ids = {p["principal_id"] for _, binding in readings for p in binding["producers"]}
             native = ReviewService(self.kernel.in_transaction(repo))
             if action == "WITHDRAW" and principal.principal_id == reviewer:
                 _task(self.kernel, repo, principal, task_id, generation, "review_submit", worker_id)
             else:
-                native._controller(repo, principal, wr)
+                grant = native._controller(repo, principal, wr)
                 require(principal.principal_id not in producer_ids | {reviewer},
                         "VIEW_DENIED", "The producer and reviewer cannot approve their own work")
             submission = self._current_review(repo, report, details, live_proof)["submission"]
+            if final:
+                editor_cases = [verify_editor_case(binding, principal, grant, live_proof[ref["artifact_revision_id"]], repo.now())
+                                for ref, binding in readings]
             old = self.kernel._prior(repo, principal, work, "CREATIVE_REVIEW_DECIDE", idempotency_key, request)
             if old:
                 return old
@@ -465,7 +472,6 @@ class CreativeReviewService:
                 _quota(repo, task, task_spec, details["quota"], 0, details["usage"])
                 require(details["round"] < report["rework_limit"] and report["recommendation"] == "REVISE",
                         "REWORK_LIMIT", "No further revision is authorized for this review")
-            final = action in {"RETAIN", "ACCEPT_REVISION"}
             require((native_decision is not None) == final, "EDITORIAL_DECISION_REQUIRED",
                     "A final decision needs a native editorial session and exact decision input")
             native_ref = None
@@ -488,6 +494,8 @@ class CreativeReviewService:
                         "action": action, "reason": reason, "editor_id": principal.principal_id,
                         "native_decision_ref": native_ref, "previous_ref": previous["decision_ref"] if previous else None,
                         "recorded_at": repo.now().isoformat()}
+            if final:
+                decision["editor_independence"] = editor_cases
             ref = _artifact(self.kernel, repo, work, principal, "CREATIVE_REVIEW_DECISION", decision)
             key = {"work_id": work, "selection_kind": "CREATIVE_REVIEW_ACTION:" + report_ref["artifact_revision_id"]}
             current = repo.one("selections", key)
