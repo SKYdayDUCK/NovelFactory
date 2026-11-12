@@ -9,3 +9,5 @@ PR [#25](https://github.com/SKYdayDUCK/NovelFactory/pull/25) 已于 2026-11-12 0
 B 的开发与精确基线复验在 `integration/p56-full-acceptance` 进行。已完成的[独立测试原始回执](evidence/P56/README.md)可用于接续当前阶段。
 
 当前 B 的唯一 PR 为 [#26](https://github.com/SKYdayDUCK/NovelFactory/pull/26)。[本地完整验收原件](evidence/P56/baseline-ba892d3/local-evidence.zip)已归档，候选的 Workshop 已通过，继续核对其他回执、正式合并并复验。
+
+#26 已在 `4e8fc5a3c2331a0de669ad8851d82c5b08a1e5dc` 合并；B 当前为 MERGED_AWAITING_MAIN_VERIFICATION。[合并回执](evidence/P56/main-4e8fc5a/merge.json)。

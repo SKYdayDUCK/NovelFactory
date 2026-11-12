@@ -1,0 +1,277 @@
+{
+  "pull_number": 26,
+  "pull_head": "e5f5348ca07dc50c9fe52ab271a733ac31fa063c",
+  "pull_base": "ba892d3a424be39efccb697232a5614b26609cc4",
+  "test_merge_ref": "fea6519f7d5d24b8f391648f26fee2ce794035ac",
+  "tree_sha": "515ade557fc82c4ab1a5b67218539a030d0e18cc",
+  "candidate_tree_matches_test_merge": true,
+  "workflows": [
+    {
+      "run_id": 43141153217,
+      "name": "P2 measured capacity and recovery",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43141153217",
+      "jobs": [
+        {
+          "id": 130928184373,
+          "conclusion": "success",
+          "name": "50 agents / mixed / full capacity gate"
+        },
+        {
+          "id": 130928184632,
+          "conclusion": "failure",
+          "name": "200 agents / overload / full capacity gate"
+        },
+        {
+          "id": 130928184742,
+          "conclusion": "failure",
+          "name": "50 agents / overload / full capacity gate"
+        },
+        {
+          "id": 130928184761,
+          "conclusion": "success",
+          "name": "200 agents / mixed / full capacity gate"
+        }
+      ]
+    },
+    {
+      "run_id": 43141153222,
+      "name": "P3 scale experiments with strict unmet gates",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43141153222",
+      "jobs": [
+        {
+          "id": 130928187000,
+          "conclusion": "success",
+          "name": "Measured 500-read-soak"
+        },
+        {
+          "id": 130928187159,
+          "conclusion": "success",
+          "name": "Measured 500-mixed"
+        },
+        {
+          "id": 130928187844,
+          "conclusion": "failure",
+          "name": "Measured 1000-read-open"
+        }
+      ]
+    },
+    {
+      "run_id": 43141153238,
+      "name": "P3 P4 measured evidence",
+      "status": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43141153238",
+      "jobs": [
+        {
+          "id": 130928185178,
+          "conclusion": "success",
+          "name": "Same world CPU and SQL paired comparison"
+        },
+        {
+          "id": 130928185322,
+          "conclusion": "success",
+          "name": "Independent load process / 200 / mixed"
+        },
+        {
+          "id": 130928185420,
+          "conclusion": "failure",
+          "name": "Independent load process / 200 / overload"
+        }
+      ]
+    },
+    {
+      "run_id": 43141153219,
+      "name": "P1 and P2 production integrity",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43141153219",
+      "jobs": [
+        {
+          "id": 130928183866,
+          "conclusion": "success",
+          "name": "Schema, domain, HTTP and production boundaries"
+        },
+        {
+          "id": 130928184182,
+          "conclusion": "success",
+          "name": "PostgreSQL 17 integration, concurrency and restore"
+        }
+      ]
+    },
+    {
+      "run_id": 43141153391,
+      "name": "Agent Workshop PostgreSQL and stdio",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43141153391",
+      "jobs": [
+        {
+          "id": 130928183955,
+          "conclusion": "success",
+          "name": "Matched admission and extended scene presets"
+        },
+        {
+          "id": 130928184253,
+          "conclusion": "success",
+          "name": "workshop"
+        },
+        {
+          "id": 130928184288,
+          "conclusion": "success",
+          "name": "W6 message capacity and end-to-end scenes"
+        }
+      ]
+    }
+  ],
+  "workshop": {
+    "status": "PASS",
+    "run_id": 43141153391,
+    "run_attempt": 1,
+    "event": "pull_request",
+    "head_sha": "e5f5348ca07dc50c9fe52ab271a733ac31fa063c",
+    "checkout_sha": "fea6519f7d5d24b8f391648f26fee2ce794035ac",
+    "archives": {
+      "workshop-results": {
+        "artifact_id": 13910095773,
+        "job_id": 130928184253,
+        "job_attempt": 1,
+        "sha256": "091b6f1ffba8d7db4e9e302d8d79b363a8300a53237295c1a330c016126c5e0b"
+      },
+      "workshop-scene-recovery-results": {
+        "artifact_id": 13909553328,
+        "job_id": 130928184288,
+        "job_attempt": 1,
+        "sha256": "85b3c4dd3ffbbe47bc7e25d7df8d55be84840ab494b2513a7b30719748418ab6"
+      },
+      "workshop-comparisons": {
+        "artifact_id": 13910390628,
+        "job_id": 130928183955,
+        "job_attempt": 1,
+        "sha256": "d661c38143b46f066d15bffe7e8f679874ebddb34ed9563cc55cccf34279339d"
+      }
+    },
+    "messages": {
+      "10": 30,
+      "50": 150,
+      "200": 600
+    },
+    "delegations": {
+      "fixed-1": {
+        "10": 10,
+        "50": 50,
+        "200": 200
+      },
+      "fixed-2": {
+        "10": 10,
+        "50": 50,
+        "200": 200
+      },
+      "adaptive-2": {
+        "10": 10,
+        "50": 50,
+        "200": 200
+      }
+    },
+    "scenes": {
+      "Minimal": {
+        "operation_id": "f6441290-ae0a-4fe8-9d82-651f42c3bc78",
+        "review_id": "c81bc34a-5b6b-4f4c-814d-eacc7e8ee302"
+      },
+      "Standard": {
+        "operation_id": "333ac0ca-22f3-4237-aa23-2d1d318d294f",
+        "review_id": "436c8f92-0048-42ee-b54d-11eddb77930c"
+      },
+      "Long-form": {
+        "operation_id": "cf2b976c-52e1-4038-ba6a-d338ea58f9c8",
+        "review_id": "53478c59-1d45-4b41-8f0c-9d96ccdce7d4"
+      },
+      "Research-Audit": {
+        "operation_id": "1ae8e6fc-39d3-45f0-95d1-286cf9aab29d",
+        "review_id": "19eb80d8-8579-4e15-b3ae-314da7b84d7a"
+      }
+    },
+    "literary_quality": "NOT_EVALUATED",
+    "historical_nf_capacity": "NOT_EVALUATED_BY_THIS_RUN",
+    "services_and_recovery": {
+      "postgres_system_ids": [
+        "7707105234268557350",
+        "7707105239572566053"
+      ],
+      "wal_targets": [
+        "0/402B9A8",
+        "0/407C500"
+      ],
+      "redis_replayed_operation": "02aedd5d-f9ea-4fc6-b527-3222661b5d10"
+    }
+  },
+  "nf_junit": [
+    {
+      "archive": "p1-postgres-concurrency-1",
+      "source_id": 13909897158,
+      "archive_sha256": "6e5acd9e63fe2a1a07687ad3fb4ce454cdd1f9efa4420475619b0926be9955fa",
+      "junit_member": "postgres-all.xml",
+      "junit_sha256": "239575a3a3a07675eab653f7c33088257c11e971e52d70ad49113e3850e0a2a4",
+      "counts": {
+        "tests": 835,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 17,
+        "passed": 818
+      },
+      "new_test_node_present": true
+    },
+    {
+      "archive": "p1-schema-unit-1",
+      "source_id": 13909761740,
+      "archive_sha256": "a19b1cdac5a9e856a822ebbf26717e54afdff7b4d7d9e5760df99c311feecf20",
+      "junit_member": "unit.xml",
+      "junit_sha256": "05eff85b562b21dc78f284c12b3cb59d80965478488024060f893c504b885ce9",
+      "counts": {
+        "tests": 398,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 398
+      },
+      "new_test_node_present": false
+    }
+  ],
+  "unmet_capacity": [
+    {
+      "job_id": 130928184632,
+      "name": "200 agents / overload / full capacity gate",
+      "reason": "MATCHES_EXISTING_UNMET_LOAD_GATE"
+    },
+    {
+      "job_id": 130928184742,
+      "name": "50 agents / overload / full capacity gate",
+      "reason": "MATCHES_EXISTING_UNMET_LOAD_GATE"
+    },
+    {
+      "job_id": 130928187844,
+      "name": "Measured 1000-read-open",
+      "reason": "MATCHES_EXISTING_UNMET_LOAD_GATE"
+    },
+    {
+      "job_id": 130928185420,
+      "name": "Independent load process / 200 / overload",
+      "reason": "MATCHES_EXISTING_UNMET_LOAD_GATE"
+    }
+  ],
+  "evidence_paths": {
+    "run_job_metadata": "{nf,workshop,capacity/<run_id>}/{run,jobs,artifacts}.json",
+    "checkouts": "refs/*.json",
+    "workshop_raw": "workshop/archives/*.zip",
+    "original_capacity_artifacts": "capacity/<run_id>/archives/*.zip",
+    "load_excerpts": "capacity/<run_id>/job-*-log-excerpts.json",
+    "measurement_rows": "capacity-measurements.json"
+  },
+  "engineering_status": "PASS_WITH_RECORDED_HOSTED_NAMESPACE_SKIPS",
+  "historical_capacity": "NOT_MET",
+  "literary_quality": "NOT_EVALUATED",
+  "merge_status": "SEPARATE_MAIN_VERIFICATION_REQUIRED"
+}
