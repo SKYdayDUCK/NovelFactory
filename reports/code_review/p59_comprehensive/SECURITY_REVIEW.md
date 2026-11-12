@@ -1,5 +1,0 @@
-# Defensive review
-
-Examined Kernel._authorize_with_work, _delivery_check, MCP binding parsing and live discovery, Workshop dispatch and runtime profile separation. NF's stdio adapter checks private file ownership/mode, validates the bound session's live tool list and applies the registered schema before dispatch. Workshop performs a new member check per request, including discovery. Model-facing roles receive authorized task material; provider secrets are resolved by the host. Config preflight and role exposure have separate tests.
-
-The review used fixture data and normal authorized interface behavior. The directly observed configuration error affected stable rejection of a malformed operator URL. The temporal finding affected query semantics between dimensions of the same permitted record. Neither probe establishes disclosure to another principal. No new P0 was confirmed. Native sandbox availability, independent operators' real-world identities and third-party provider retention are outside these observations.
