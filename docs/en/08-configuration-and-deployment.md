@@ -2,7 +2,7 @@
 
 [简体中文](../zh-CN/08-配置与部署.md) · [Quick start](02-quick-start.md)
 
-For core development, the [root Compose file](../../docker-compose.yml) starts a PostgreSQL test database on loopback port `55432`. For Workshop, per-work model routing, or paired restore, use the [two-service template](../../reports/p6_readiness/templates/wsl/compose.yaml). The steps below set up the two-service installation.
+For core development, the [root Compose file](../../docker-compose.yml) starts a PostgreSQL test database on loopback port `55432`. For Workshop, per-work model routing, or paired restore, use the [two-service template](../../reports/p6_readiness/templates/wsl/compose.yaml).
 
 ## Native Windows and Linux runtime
 
@@ -35,7 +35,7 @@ uv run --no-sync python scripts/nf.py supervisor --access-file "$private/supervi
 
 The operator can restore eligible work through the branch binding using `'{}' | uv run --no-sync python scripts/nf.py call --binding "$private/resume.json" nf_resume_project`. Linux runs the same Python commands after setting the environment below. The original two-service bootstrap scripts and the Bubblewrap role-tool sandbox require Linux. The Windows job covers native bootstrap, real MCP stdio, simulated providers, object publication, lease recovery, cancellation and idle session retirement on real PostgreSQL 17. The job result identifies the exact tested commit.
 
-## Provision the services
+## Provision the two-service installation on Linux
 
 Start in the repository root on Linux or WSL2 with uv, Python 3.12, a running Docker Engine and Compose v2. Install each project's locked dependencies. Workshop's `streams` extra provides the Redis client for notifications.
 
