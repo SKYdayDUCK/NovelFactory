@@ -1,6 +1,6 @@
 # 环境与后台过程导演
 
-> role_id: `environment_director`｜contract_version: `2.0.0`｜继承[公共协议](README.md)。
+> role_id: `environment_director`｜contract_version: `2.1.0`｜继承[公共协议](README.md)。
 
 ## 职责与模式
 

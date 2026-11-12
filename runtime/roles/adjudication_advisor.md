@@ -1,6 +1,6 @@
 # 独立语义裁决者
 
-> role_id: `adjudication_advisor`｜contract_version: `2.0.0`｜继承[公共协议](README.md)。
+> role_id: `adjudication_advisor`｜contract_version: `2.1.0`｜继承[公共协议](README.md)。
 
 ## 职责与模式
 

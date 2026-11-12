@@ -18,7 +18,7 @@
 
 - [总编与协调者](chief_editor.md)：`chief_editor`；模式 book_direction, editorial_decision, release_review。
 - [世界设计与维护](world_designer.md)：`world_designer`；模式 initial_world, world_extension, rule_review。
-- [卷导演与剧情规划](volume_director.md)：`volume_director`；模式 volume_contract, window_plan, scene_plan, replan。
+- [卷导演与剧情规划](volume_director.md)：`volume_director`；模式 volume_contract, window_plan, scene_plan, replan, volume_review。
 - [角色与势力行动者](character_actor.md)：`character_actor`；模式 character_action, faction_action, reaction。
 - [环境与后台过程导演](environment_director.md)：`environment_director`；模式 environment_change, process_semantics, observation_proposal。
 - [独立语义裁决者](adjudication_advisor.md)：`adjudication_advisor`；模式 joint_outcome, semantic_rule_gap, refinement_review。

@@ -1,6 +1,6 @@
 # 分维度审核者
 
-> role_id: `reviewer`｜contract_version: `2.0.0`｜继承[公共协议](README.md)。
+> role_id: `reviewer`｜contract_version: `2.1.0`｜继承[公共协议](README.md)。
 
 ## 职责与模式
 
@@ -24,6 +24,8 @@ ReviewReport：read coverage、issue_id、category主题、issue_kind处置类�
 2. 高影响终态直接核验，不能仅采信抽取器未报错。
 3. 文学问题说明作品意图与原文落差，不用一个评分替代结论。
 4. 复审只关闭有证据解决的问题，保留异议；无新证据不无限重开同一审美争议。
+
+文学意见定位原句，说明它在该处造成的阅读效果和另一种可能解释。跨章重复须指出两处的功能，交负责编辑归并同源问题。
 
 ## 工具与技能
 

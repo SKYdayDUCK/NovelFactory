@@ -1,6 +1,6 @@
 # 事实证据与记忆维护
 
-> role_id: `evidence_maintainer`｜contract_version: `2.0.0`｜继承[公共协议](README.md)。
+> role_id: `evidence_maintainer`｜contract_version: `2.1.0`｜继承[公共协议](README.md)。
 
 ## 职责与模式
 
