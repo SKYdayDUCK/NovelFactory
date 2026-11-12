@@ -236,6 +236,8 @@ def test_subscription_source_requires_signed_access_scope_and_client(monkeypatch
 
     profile = plan(auth_mode="chatgpt-plan", model_output_ceiling=300, oauth_client_id="oaiapp_fixture")
     enable_synthetic_credentials(monkeypatch)
+    # This test exercises signed credentials only. The native host has its own integration test.
+    monkeypatch.setattr(providers.shutil, "which", lambda name: "/fixture/codex" if name == "codex" else None)
     with pytest.raises(ProfileError, match="MODEL_PLAN_AUTH_UNVERIFIED"):
         profile.preflight()  # Arbitrary secret under a subscription profile.
     private = rsa.generate_private_key(public_exponent=65537, key_size=2048)
