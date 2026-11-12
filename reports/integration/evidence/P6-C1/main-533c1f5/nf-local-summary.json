@@ -1,0 +1,100 @@
+{
+  "main_sha": "533c1f526ef8841610d5c414e77ecbea8bbd5e35",
+  "candidate_sha": "f96d26bcf449d8e7905099402ddb4ddcf8679a60",
+  "main_tree": "86c524a7ba91e38fa3832a515e890a87ce7599cc",
+  "candidate_tree": "86c524a7ba91e38fa3832a515e890a87ce7599cc",
+  "parents": [
+    "4e8fc5a3c2331a0de669ad8851d82c5b08a1e5dc",
+    "f96d26bcf449d8e7905099402ddb4ddcf8679a60"
+  ],
+  "source_module": "/workspace/scratch/8a86cf12eb4c/c1-main-533c1f5/src/novel_factory/__init__.py",
+  "git_status_initial": "",
+  "production_file_blob": "3a9ef6f0dbf2b3df98f5bfce63a6763cbb563287",
+  "status": "PASS",
+  "git_status_final": "",
+  "junit": {
+    "tests": "35",
+    "skipped": "0",
+    "failures": "0",
+    "errors": "0",
+    "time": "18.550"
+  },
+  "by_module": {
+    "tests.integration.test_shared_token_budget": 8,
+    "tests.integration.test_shared_token_upgrade": 1,
+    "tests.reliability.test_tasks": 18,
+    "tests.reliability.test_recovery": 7,
+    "tests.reliability.test_s9_recovery": 1
+  },
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "redis_version": "Redis server v=8.0.2 sha=00000000:1 malloc=libc bits=64 build=5b75b6dfc819e14e",
+  "database_sessions": {
+    "suite": {
+      "port": 51761,
+      "duration_seconds": 21.383994,
+      "command": [
+        ".venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-o",
+        "junit_family=xunit1",
+        "tests/integration/test_shared_token_budget.py",
+        "tests/integration/test_shared_token_upgrade.py",
+        "tests/reliability/test_tasks.py",
+        "tests/reliability/test_recovery.py",
+        "tests/reliability/test_s9_recovery.py",
+        "--junitxml=/workspace/scratch/8a86cf12eb4c/c1-main-533c1f5/../acceptance_receipts/phase_c1/main-533c1f5/local/budget.xml"
+      ]
+    },
+    "cli": {
+      "port": 40763,
+      "duration_seconds": 17.692011,
+      "command": [
+        ".venv/bin/python",
+        "../runtime/c1-budget-cli.py",
+        "/workspace/scratch/8a86cf12eb4c/c1-main-533c1f5/../acceptance_receipts/phase_c1/main-533c1f5/local/cli.json"
+      ]
+    },
+    "legacy": {
+      "port": 59733,
+      "duration_seconds": 4.898426,
+      "command": [
+        ".venv/bin/python",
+        "../runtime/c1-old-cancel.py",
+        "/workspace/scratch/8a86cf12eb4c/c1-main-533c1f5/../acceptance_receipts/phase_c1/main-533c1f5/local/legacy-cancel.json"
+      ]
+    }
+  },
+  "real_redis_case": "test_consumer_death_rolls_back_case_and_reclaims_the_original_event",
+  "historical_binary": "4e8fc5a3c2331a0de669ad8851d82c5b08a1e5dc",
+  "old_sqlstate": "23514",
+  "cancel_after_reserved": {
+    "tokens": 10,
+    "amount": "0.100000"
+  },
+  "old_replay": {
+    "retries": 2,
+    "commands": 1,
+    "attempts": [
+      "FAILED",
+      "FAILED",
+      "SENT"
+    ]
+  },
+  "provider_calls": 0,
+  "files_sha256": {
+    "budget.xml": "43db61a0f06b16dfee894841cc10f2b34c9245e7246f102244394d6135474666",
+    "cli.json": "be532f3e97d7ad5910af67518fdddc431348ca49d417cf3f14c50f69b10f2bc9",
+    "legacy-cancel.json": "7781c92966395a70adf34ace16c40cc6f549fe6ff3e02197372b7172c950b326",
+    "checkout.json": "2c6741df5a139438945ca04c78f8fffedd7101c5c568ca98ea5b3b0790b084eb",
+    "suite.log": "e2c52cc12158924730b72371e97c4a8eed7eccc4b5f16c4ffed581c75b2b5626",
+    "cli.log": "9f4e74084dc6d5dfa8f859853394146633be001dbf6bc725e0b89d42fd163819",
+    "legacy.log": "88862ceac04ba14f18f33a413b9d6833886485f6f3b47478c5a540e9e8f40240",
+    "suite-pg/postgres_session.json": "11746c44a31fef4f2ccac1b64f5aa7c229ee89b41f21137535f879c749a89802",
+    "cli-pg/postgres_session.json": "2a2997f4725980ff6bfc97de8c9318c7fb81606756ef9f6c125eca780f999c2f",
+    "legacy-pg/postgres_session.json": "478855437dd28ab5c1200b365c5054c4da55f956c399d7ca9fe6253d9d8fa6f7",
+    "c1-budget-cli.py": "9adc0751c7a80439d431a92e1c9773d8e9251645324f3505b9b1b0f321211f8f",
+    "c1-old-cancel.py": "66de16795ea6437f56ae07133d914667f6476c6f52852b5b30c1e04aaef608bd"
+  }
+}

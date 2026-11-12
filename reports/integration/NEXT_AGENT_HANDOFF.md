@@ -1,7 +1,5 @@
 # 串行交付交接
 
-[P5.6 综合验收签收](evidence/P56/main-4e8fc5a/SIGNOFF.md)。读取[当前阶段](CURRENT_STAGE.md)及[完整委托](CREATIVE_HARNESS_DELIVERY_SCOPE.md)。接续 #17 时保留旧堆叠分支及测试工件，使用最新 main 和原 PR。金额/Token 原子预留、UNKNOWN 保留、取消/恢复、跨作品访问、旧库升级及双服务恢复对账均需有真实回执。P6_REAL_CREATION = BLOCKED_LOCAL_AUTHORIZATION。
+[P6 全局预算主线签收](evidence/P6-C1/main-533c1f5/SIGNOFF.md)，合并时间为 2026-11-12 03:19:32 UTC。六项主线工作流和独立原始结果均已保存。从现有 [#16](https://github.com/SKYdayDUCK/NovelFactory/pull/16) 接管本地预检和部署，保留原有实验与工具，使用包含 #17 的真实主线。核对权限、工作范围、模型配置、预算、Skills、场景、双服务部署、日志、导出和作者入口。
 
-#17 已完成旧库升级、实际 CLI、取消/发送双向抢锁及按 WAL 恢复保留 UNKNOWN 的本地测试，冻结在 [f96d26b](https://github.com/SKYdayDUCK/NovelFactory/commit/f96d26bcf449d8e7905099402ddb4ddcf8679a60)。现有负责人正在核验 [NF](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43145386368)、[Workshop](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43145386324)、[物理恢复](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43145386314) 和三个容量工作流，同一头继续，不需另开候选。
-
-#17 的 PR 检查已归档，主线精确 SHA 为 `533c1f526ef8841610d5c414e77ecbea8bbd5e35`。[主线 NF 检查](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43147438010)。主线验收结束后再接管已有 #16。
+真实创作、支出和独立审读须作者本地单独授权。工程验收可独立完成；未获得授权期间保持 `P6_REAL_CREATION = BLOCKED_LOCAL_AUTHORIZATION`。#18 待 #16 主线签收后处理。[完整委托](CREATIVE_HARNESS_DELIVERY_SCOPE.md)。

@@ -44,3 +44,5 @@ W6 已复现主管调任后的两项不相容岗位扩编，修复及红绿原�
 P5.6 [#26](https://github.com/SKYdayDUCK/NovelFactory/pull/26) 在 `4e8fc5a3c2331a0de669ad8851d82c5b08a1e5dc` 完成主线复验。**MERGED_AND_VERIFIED**，保留历史 AT-30 NOT_MET、托管宿主跳过及真实创作授权边界。[P5.6 综合验收签收](evidence/P56/main-4e8fc5a/SIGNOFF.md)。
 
 - P6 #17 初次集成时，公开取消遗留未发送的当代预留，旧实现有两项回归失败。冻结候选对同样测试通过，旧代、SENT 和 UNKNOWN 继续占用。[原始修前修后回执](evidence/P6-C1/local-evidence.zip)
+
+#17 的主线执行 3 个工程工作流通过，三个容量工作流共 4 个历史失败。50/200 热点以及 1000 开环读继续 **NOT_MET**。主线开环读 12 个传输错误。[逐档回执](evidence/P6-C1/main-533c1f5/qualification.json)。

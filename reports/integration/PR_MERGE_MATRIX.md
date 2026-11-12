@@ -36,3 +36,5 @@ W6 #15 的当前正式候选为 `50c8c5ed36cc2cfb83d6624c65ed33336e0f1771`，树
 [#25](https://github.com/SKYdayDUCK/NovelFactory/pull/25) 合并至 `ba892d3a424be39efccb697232a5614b26609cc4`，候选 `e6f79f1063fd52acbaefd20dedd5a1f186b3168b`，合并时间 01:57:08 UTC。原始合并记录、候选工件摘要与主线静态验证归入 [#25 证据](evidence/W6/signoff-ba892d3/pr-25.json)。主线 push 两作业于 02:10:07 UTC 完成，均成功。**MERGED_AND_VERIFIED**。[主线回执](evidence/W6/signoff-ba892d3/main-push.json)。署名范围和后续阶段以[本次十六节委托](CREATIVE_HARNESS_DELIVERY_SCOPE.md)为准。
 
 P5.6 [#26](https://github.com/SKYdayDUCK/NovelFactory/pull/26) 在 `4e8fc5a3c2331a0de669ad8851d82c5b08a1e5dc` 完成主线复验。**MERGED_AND_VERIFIED**，保留历史 AT-30 NOT_MET、托管宿主跳过及真实创作授权边界。[P5.6 综合验收签收](evidence/P56/main-4e8fc5a/SIGNOFF.md)。
+
+[#17](https://github.com/SKYdayDUCK/NovelFactory/pull/17) 原 PR 的最终基线为 main，候选 `f96d26bcf449d8e7905099402ddb4ddcf8679a60`，正式合并 `533c1f526ef8841610d5c414e77ecbea8bbd5e35`。[P6 全局预算主线签收](evidence/P6-C1/main-533c1f5/SIGNOFF.md)。当前交付 #16。

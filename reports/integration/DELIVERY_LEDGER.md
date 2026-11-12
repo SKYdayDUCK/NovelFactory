@@ -37,3 +37,5 @@ W6 #15 的当前正式候选为 `50c8c5ed36cc2cfb83d6624c65ed33336e0f1771`，树
 P5.6 [#26](https://github.com/SKYdayDUCK/NovelFactory/pull/26) 在 `4e8fc5a3c2331a0de669ad8851d82c5b08a1e5dc` 完成主线复验。**MERGED_AND_VERIFIED**，保留历史 AT-30 NOT_MET、托管宿主跳过及真实创作授权边界。[P5.6 综合验收签收](evidence/P56/main-4e8fc5a/SIGNOFF.md)。
 
 [#17 候选本地证据](evidence/P6-C1/README.md)记录了旧发行真实升级、预算取消修前失败和修后回归，以及两端账本随物理 WAL 回放同一 attempt 的结果。PR 和 main 的 GitHub 工作流分轮验收。
+
+P6 C1 [#17](https://github.com/SKYdayDUCK/NovelFactory/pull/17) **MERGED_AND_VERIFIED**，2026-11-12 03:19:32 UTC，主线 `533c1f526ef8841610d5c414e77ecbea8bbd5e35`。[P6 全局预算主线签收](evidence/P6-C1/main-533c1f5/SIGNOFF.md)。

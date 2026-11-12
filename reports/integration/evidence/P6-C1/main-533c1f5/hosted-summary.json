@@ -1,0 +1,214 @@
+{
+  "pr": 17,
+  "checks": {
+    "pr17": {
+      "head": "f96d26bcf449d8e7905099402ddb4ddcf8679a60",
+      "checkout": "9529840b7b7138fc129bc795355a7f91bda6c781",
+      "tree": "86c524a7ba91e38fa3832a515e890a87ce7599cc",
+      "engineering_status": "PASS",
+      "nf_junit": {
+        "postgres-all.xml": {
+          "counts": {
+            "tests": 844,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 17,
+            "passed": 827,
+            "skip_reasons": [
+              "Linux container setup denied by this runner"
+            ]
+          },
+          "sha256": "2a22de6f43b410ab586dfe2be1d25a1b91bf6ba46f66349b869c5a0a7f451208",
+          "archive_id": 13912062037,
+          "archive_sha256": "sha256:eae402af201202188b286f4eb0624c66b134e7d30ae3602c4f829abe0ca57cdc"
+        },
+        "unit.xml": {
+          "counts": {
+            "tests": 398,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0,
+            "passed": 398,
+            "skip_reasons": []
+          },
+          "sha256": "aac13cf8155de2d41c4b9af2d0beab003af8002dae87f2e4ee15c74d46ac7753",
+          "archive_id": 13911595950,
+          "archive_sha256": "sha256:9c35d00359caaba052a4e6c17cafa25ae20eb6b0f2f33a91c8625139f3a33f5d"
+        }
+      },
+      "workflows": [
+        {
+          "id": 43145386324,
+          "name": "Agent Workshop PostgreSQL and stdio",
+          "event": "pull_request",
+          "head_sha": "f96d26bcf449d8e7905099402ddb4ddcf8679a60",
+          "run_attempt": 1,
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43145386324"
+        },
+        {
+          "id": 43145386314,
+          "name": "P4 real isolated WAL PITR and verified recovery",
+          "event": "pull_request",
+          "head_sha": "f96d26bcf449d8e7905099402ddb4ddcf8679a60",
+          "run_attempt": 1,
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43145386314"
+        },
+        {
+          "id": 43145386368,
+          "name": "P1 and P2 production integrity",
+          "event": "pull_request",
+          "head_sha": "f96d26bcf449d8e7905099402ddb4ddcf8679a60",
+          "run_attempt": 1,
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43145386368"
+        },
+        {
+          "id": 43145386318,
+          "name": "P3 P4 measured evidence",
+          "event": "pull_request",
+          "head_sha": "f96d26bcf449d8e7905099402ddb4ddcf8679a60",
+          "run_attempt": 1,
+          "conclusion": "failure",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43145386318"
+        },
+        {
+          "id": 43145386387,
+          "name": "P3 scale experiments with strict unmet gates",
+          "event": "pull_request",
+          "head_sha": "f96d26bcf449d8e7905099402ddb4ddcf8679a60",
+          "run_attempt": 1,
+          "conclusion": "failure",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43145386387"
+        },
+        {
+          "id": 43145386304,
+          "name": "P2 measured capacity and recovery",
+          "event": "pull_request",
+          "head_sha": "f96d26bcf449d8e7905099402ddb4ddcf8679a60",
+          "run_attempt": 1,
+          "conclusion": "failure",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43145386304"
+        }
+      ],
+      "historical_capacity": "NOT_MET",
+      "failed_capacity_cases": [
+        "200 agents / overload / full capacity gate",
+        "50 agents / overload / full capacity gate",
+        "Independent load process / 200 / overload",
+        "Measured 1000-read-open"
+      ]
+    },
+    "main-533c1f5": {
+      "head": "533c1f526ef8841610d5c414e77ecbea8bbd5e35",
+      "checkout": "533c1f526ef8841610d5c414e77ecbea8bbd5e35",
+      "tree": "86c524a7ba91e38fa3832a515e890a87ce7599cc",
+      "engineering_status": "PASS",
+      "nf_junit": {
+        "postgres-all.xml": {
+          "counts": {
+            "tests": 844,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 17,
+            "passed": 827,
+            "skip_reasons": [
+              "Linux container setup denied by this runner"
+            ]
+          },
+          "sha256": "7824ef03d5fb38bb079cf743130c6a6dfb74a578c68798c829736dbd1eb0effa",
+          "archive_id": 13912308966,
+          "archive_sha256": "sha256:c7ec621540db1f49c15156dde1f407adf743c09de17304215acf9f5c8aa6b1ca"
+        },
+        "unit.xml": {
+          "counts": {
+            "tests": 398,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0,
+            "passed": 398,
+            "skip_reasons": []
+          },
+          "sha256": "2bb7eea098fecb2519eea5c511e2dabef3fcb19c1b80777299ccf97999ffaaa8",
+          "archive_id": 13912226812,
+          "archive_sha256": "sha256:913f3d7aafa6229612c9e73d59a31dec6fd2b5fd12b7bf5929f20f09fce2071b"
+        }
+      },
+      "workflows": [
+        {
+          "id": 43147437875,
+          "name": "Agent Workshop PostgreSQL and stdio",
+          "event": "push",
+          "head_sha": "533c1f526ef8841610d5c414e77ecbea8bbd5e35",
+          "run_attempt": 1,
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43147437875"
+        },
+        {
+          "id": 43147437883,
+          "name": "P4 real isolated WAL PITR and verified recovery",
+          "event": "push",
+          "head_sha": "533c1f526ef8841610d5c414e77ecbea8bbd5e35",
+          "run_attempt": 1,
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43147437883"
+        },
+        {
+          "id": 43147438010,
+          "name": "P1 and P2 production integrity",
+          "event": "push",
+          "head_sha": "533c1f526ef8841610d5c414e77ecbea8bbd5e35",
+          "run_attempt": 1,
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43147438010"
+        },
+        {
+          "id": 43147437927,
+          "name": "P3 scale experiments with strict unmet gates",
+          "event": "push",
+          "head_sha": "533c1f526ef8841610d5c414e77ecbea8bbd5e35",
+          "run_attempt": 1,
+          "conclusion": "failure",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43147437927"
+        },
+        {
+          "id": 43147437908,
+          "name": "P2 measured capacity and recovery",
+          "event": "push",
+          "head_sha": "533c1f526ef8841610d5c414e77ecbea8bbd5e35",
+          "run_attempt": 1,
+          "conclusion": "failure",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43147437908"
+        },
+        {
+          "id": 43147437939,
+          "name": "P3 P4 measured evidence",
+          "event": "push",
+          "head_sha": "533c1f526ef8841610d5c414e77ecbea8bbd5e35",
+          "run_attempt": 1,
+          "conclusion": "failure",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43147437939"
+        }
+      ],
+      "historical_capacity": "NOT_MET",
+      "failed_capacity_cases": [
+        "50 agents / overload / full capacity gate",
+        "200 agents / overload / full capacity gate",
+        "Measured 1000-read-open",
+        "Independent load process / 200 / overload"
+      ]
+    }
+  },
+  "workshop_verifier_source_git_blob": {
+    "pr17": "33a64afa1f63092301f4975fd97e0a233ba00d29",
+    "main-533c1f5": "33a64afa1f63092301f4975fd97e0a233ba00d29"
+  },
+  "literary": "NOT_EVALUATED",
+  "commercial_provider_calls": 0,
+  "file": "hosted-c1-evidence.zip",
+  "archive_sha256": "59b5acb67ecc2a28f9e59dc6c03c0c9372bab2af1ae5219253069742ff3edc4e",
+  "archive_bytes": 511653,
+  "file_count": 113,
+  "credential_scan": "PASS"
+}

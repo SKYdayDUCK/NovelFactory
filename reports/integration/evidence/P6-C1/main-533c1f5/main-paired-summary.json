@@ -1,0 +1,187 @@
+{
+  "candidate_with_same_tree": "f96d26bcf449d8e7905099402ddb4ddcf8679a60",
+  "commands": {
+    "nf": "From the exact checkout, with PYTHONPATH=$PWD/src:$PWD and PG_BIN set: .venv/bin/python scripts/with_postgres.py --pg-bin \"$PG_BIN\" -- .venv/bin/python -m pytest -q --tb=line -o junit_family=xunit1 tests/integration/test_shared_token_budget.py -k cancel --junitxml=../acceptance_receipts/phase_c1/main-533c1f5/local-paired/nf-cancel.xml",
+    "workshop": "With the clone named c1-main-533c1f5, run from its parent after creating acceptance_receipts/phase_c1/main-533c1f5/local-paired, exporting PG_BIN to PostgreSQL 17 binaries and adding PG_BIN and redis-server to PATH: c1-main-533c1f5/.venv/bin/python replay/c1-main-paired.py"
+  },
+  "commit": "533c1f526ef8841610d5c414e77ecbea8bbd5e35",
+  "coverage_boundary": "The two formal Workshop tests prove zero-attempt cancellation and recovery of already SENT/UNKNOWN usage. The additional four NF PostgreSQL nodes exercise an actual current-generation PREPARED attempt, a prior generation after fencing, and both dispatch/cancel lock orders. Generated accounting and invoices use only local fixtures.",
+  "environment": {
+    "dual_stdio": "two separately initialized SCRAM PG17 clusters; different system identifiers; two MCP services",
+    "external_provider_calls": 0,
+    "loopback_synthetic_HTTP_requests": 1,
+    "physical_pitr": "pg_basebackup -Fp -Xstream, pg_verifybackup and physical WAL replay endpoints created for this run",
+    "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+    "redis": "8.0.2"
+  },
+  "formal_workshop_rerun": {
+    "counts": {
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "tests": 2
+    },
+    "nodes": [
+      "workshop.integration.test_dual_stdio.test_two_live_mcp_servers_recover_accepted_task_after_lost_reply",
+      "workshop.integration.test_paired_restore.test_physical_pitr_both_directions"
+    ],
+    "seconds": 40.362
+  },
+  "kind": "Local replay on merged main; frozen source and fresh services",
+  "observations": {
+    "actual_wal_positions": {
+      "aw_intent_before_nf": {
+        "replayed": "0/402B9A8",
+        "requested": "0/402B9A8"
+      },
+      "nf_bound_before_inference": {
+        "replayed": "0/4077960",
+        "requested": "0/4077960"
+      },
+      "unknown_usage_before_invoice": {
+        "replayed": "0/40B0C28",
+        "requested": "0/40B0C28"
+      }
+    },
+    "first_operation": {
+      "after_cancel_before_any_attempt": {
+        "attempt_count": 0,
+        "budget_id": "0f952bb7-e4da-4a73-a0de-16daa5449e0e",
+        "nf_after_cancel": {
+          "available_tokens": 2000,
+          "budget_id": "0f952bb7-e4da-4a73-a0de-16daa5449e0e",
+          "currency": "USD",
+          "limit_amount": "2.000000",
+          "reserved_amount": "0.000000",
+          "reserved_tokens": 0,
+          "spent_amount": "0.000000",
+          "spent_tokens": 0,
+          "total_tokens": 2000,
+          "unquantified_attempts": 0,
+          "work_id": "d9261bb1-ff80-4a2f-b467-76eeb174896e"
+        },
+        "nf_reported_tokens": 0,
+        "operation_id": "26820e01-6528-4a14-a6a2-afefc6cb1ac9",
+        "receipt_ref": "738f2411-e8a5-472e-bb5d-157a6fd4eae0",
+        "workshop_hold": "SETTLED",
+        "workshop_remote_task": "CANCELLED",
+        "workshop_settled_amount": "0.000000"
+      },
+      "operation_id": "26820e01-6528-4a14-a6a2-afefc6cb1ac9",
+      "outbox_event_ids_retained_across_replacement": true,
+      "redis_replaced": true
+    },
+    "physically_verified_base_backup": {
+      "exit_code": 0,
+      "stdout": "backup successfully verified"
+    },
+    "second_operation": {
+      "after_duplicate_invoice": {
+        "available_tokens": 99982,
+        "reserved_tokens": 0,
+        "spent_tokens": 18
+      },
+      "final_workshop_observations": [
+        [
+          "24cf147f-07ca-465f-9740-11638603fb60",
+          "UNKNOWN",
+          null
+        ],
+        [
+          "24cf147f-07ca-465f-9740-11638603fb60",
+          "SUCCEEDED",
+          18
+        ]
+      ],
+      "live_unknown": {
+        "available_tokens": 0,
+        "reserved_tokens": 100000,
+        "spent_tokens": 0
+      },
+      "nf_task_count": 1,
+      "operation_id": "87f7f5c3-35b7-48fb-a7ac-d16194d357c8",
+      "original_attempt_id": "24cf147f-07ca-465f-9740-11638603fb60",
+      "restored_unknown": {
+        "available_tokens": 0,
+        "reserved_tokens": 100000,
+        "spent_tokens": 0
+      },
+      "same_attempt_before_and_after_restore": true,
+      "same_invoice_charged_amount": "0.020000",
+      "workshop_disconnected_client_count": 0
+    }
+  },
+  "original_members": {
+    "nf-cancel.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "source": "acceptance_receipts/phase_c1/main-533c1f5/local-paired/nf-cancel.exit"
+    },
+    "nf-cancel.xml": {
+      "bytes": 1080,
+      "sha256": "33512f822e54dbffaeac6da63feef19f92a285679572c331936bcc3fc4ccd1e3",
+      "source": "acceptance_receipts/phase_c1/main-533c1f5/local-paired/nf-cancel.xml"
+    },
+    "offline-final.json": {
+      "bytes": 1818,
+      "sha256": "2a917165deff6ef5596b2707b12d4d59a799d8d30306c5e64aa1167ce045f762",
+      "source": "acceptance_receipts/phase_c1/main-533c1f5/local-paired/offline-final.json"
+    },
+    "paired-and-cancel.xml": {
+      "bytes": 635,
+      "sha256": "038c83ba4f56592898ad8ad65e088f0f04c7663333dfced340da97703504b6b9",
+      "source": "acceptance_receipts/phase_c1/main-533c1f5/local-paired/paired-and-cancel.xml"
+    },
+    "paired-final.json": {
+      "bytes": 8253,
+      "sha256": "7ec9f36245d59e3eec035c8d3eb73a2f096d708fa62d9ab964213cb17431bcc2",
+      "source": "acceptance_receipts/phase_c1/main-533c1f5/local-paired/paired-final.json"
+    },
+    "redis-cancel.json": {
+      "bytes": 2168,
+      "sha256": "a95826b641772d23ad0e0c2244036d6408e29137af6ddc3e2dbce42c21f50337",
+      "source": "acceptance_receipts/phase_c1/main-533c1f5/local-paired/redis-cancel.json"
+    },
+    "replay/c1-main-paired.py": {
+      "bytes": 2636,
+      "sha256": "a3eb2aceb54f0f6ec8c87ac4c42cb82f56a9b00a8fbe8882a7b7b6d166fe519a",
+      "source": "runtime/c1-main-paired.py"
+    },
+    "run.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "source": "acceptance_receipts/phase_c1/main-533c1f5/local-paired/run.exit"
+    },
+    "run.log": {
+      "bytes": 410,
+      "sha256": "306fda032e12b697a8cfdf6e175fbea4c5c1ed87c8d308e15d5ffa069d38c9cc",
+      "source": "acceptance_receipts/phase_c1/main-533c1f5/local-paired/run.log"
+    }
+  },
+  "publication_review": "Checked captured JSON, XML, log and exit files for connection locators, credential-bearing fields and secret-value patterns. Included runner creates its own credentials inside its private temporary directory. Database dumps, generated credentials, bindings and service logs were not included.",
+  "source_blobs": {
+    "migrations/versions/0018_p6_shared_tokens.py": "7df62ba202fb26e37d3df4a2e2889dc7dd6cbbc7",
+    "src/novel_factory/application/budget_limits.py": "b4bac583a8279e412f4ae1edd04f22b1cf8681ec",
+    "src/novel_factory/orchestration/tasks.py": "3a9ef6f0dbf2b3df98f5bfce63a6763cbb563287",
+    "tests/integration/test_shared_token_budget.py": "1a495b2d82658089d8db25a6ba08d66381406322",
+    "workshop/integration/test_dual_stdio.py": "9cf2e8b96ecb963eb580d785569625ae3ccad43c",
+    "workshop/integration/test_paired_restore.py": "a66f0b7853677645aa96f1d66bb6bdb1facf470b",
+    "workshop/src/agent_workshop/reconcile.py": "daba22623def50c028b2e0463aee2bc9aabb9881"
+  },
+  "supplementary_NF_public_cancel_rerun": {
+    "counts": {
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "tests": 4
+    },
+    "nodes": [
+      "tests.integration.test_shared_token_budget.test_cancel_refunds_only_provably_unsent_calls",
+      "tests.integration.test_shared_token_budget.test_cancel_after_recovery_preserves_previous_generation_holds",
+      "tests.integration.test_shared_token_budget.test_cancel_and_dispatch_serialize_at_the_task_lock[cancel]",
+      "tests.integration.test_shared_token_budget.test_cancel_and_dispatch_serialize_at_the_task_lock[send]"
+    ],
+    "seconds": 2.238
+  },
+  "tree": "86c524a7ba91e38fa3832a515e890a87ce7599cc"
+}
