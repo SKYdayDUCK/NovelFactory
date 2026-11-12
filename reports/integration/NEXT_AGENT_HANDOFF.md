@@ -1,5 +1,5 @@
-# 独立审核后的交接
+# P5.7 完成交接
 
-主线仍以首次合并 `1de471076b8fb4240f95ff8033c60db34c187404` 为基础。候选 `d6ff88223d6ae655a45d713687e5e8119e157737` 是 12 个单父代码/测试/CI 修复的最后一项；GitHub [逐项重放回执](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43203324524) 留有完整映射及 patch SHA-256。复核 [原树/修复树的 S1](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43202876684)、[S2/S3 撤权](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43201932268)、[终审编辑](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43203324597)、[留出资格](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43199663974)、[Workshop 完整集合](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43201789218)。
+已验证主线 `d6ff88223d6ae655a45d713687e5e8119e157737` 和开发分支审查定稿 `59f2e89da94ff39190143b55147fa1d53a291dd2`。审查代码范围从原 S0 到正式合并 `1de471076b8fb4240f95ff8033c60db34c187404`，严重修复另行选择性进入 main。全部产品、迁移和测试已送达。完整复核记录在 [审查目录](../code_review/p57_creative_harness/README.md)，阶段历史及产品证据在 [S6 验收](../harness/S6_ACCEPTANCE.md)。
 
-待候选完整资格通过，以首次合并 SHA 作为 expected head，快进推送这串修复并验证 main。然后在开发分支补齐最终台账、删除开发专用重放载体、归档正式回执。保持 #13 为 NOT_MET，P6 为 BLOCKED_LOCAL_AUTHORIZATION，文学评估为 NOT_EVALUATED。七份原始审查载于开发提交 `5dadfc4ff36088f6bd31b324acb7fb673891b7bb`。
+若继续维护，按 [四项延期问题](../code_review/p57_creative_harness/FINDINGS.md) 的触发条件复核。分别涉及首阶段角色调用的 S6 报表、长历史查询、独立集群灾备演练、空文学意见的语义。生产财务依 NF 权威账本，文学质量需另获读者验收。保留开发分支及原始反例，新工作不得把审查目录随整分支合入主线。Issue #13 和 P6 原有资格边界列于 [最终结论](../code_review/p57_creative_harness/FINAL_VERDICT.md)。

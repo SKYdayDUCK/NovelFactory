@@ -1,5 +1,7 @@
 # 串行交付台账
 
+2026-11-12，P5.7 独立代码审查及修复签收。原合并 `1de471076b8fb4240f95ff8033c60db34c187404`，正式修复主线 `d6ff88223d6ae655a45d713687e5e8119e157737`，完成 15 份审查文件的定稿 `59f2e89da94ff39190143b55147fa1d53a291dd2`。记录 5 项修复 P1 和 4 项延期 P2。正式复验和既有容量红灯逐项见 [主线回执](../code_review/p57_creative_harness/MAIN_MERGE_RECEIPT.md)。本轮未建立 PR。
+
 S6 里程碑 `602ba7fe8ece18503ac3b994adee4f00634cd761` 已于单次非快进合并 `1de471076b8fb4240f95ff8033c60db34c187404` 纳入 main。[正式推送与回读](../harness/evidence/s6/remote-receipt.json)
 
 S6 观测、三组工程对照、真实服务及恢复验收已通过。[逐项回执](../harness/evidence/s6/receipt.json)
@@ -19,12 +21,12 @@ S2 剧情规划与隔离推演已推送至开发分支，提交为 `32ef8b3ced7f
 
 | 阶段 | PR | 存证状态 | 实际 main SHA 与时间 |
 |---|---|---|---|
-| P5 | [#5](https://github.com/SKYdayDUCK/NovelFactory/pull/5) | 历史合并已核实；工程/原生桌面/恢复的合并依据见 #5。既有 AT-30 保留 | `a8f37b72286163e9117f8874a0e175c61204ff8b`，2026-11-11 13:50:15 UTC |
-| P5.5 | [#6](https://github.com/SKYdayDUCK/NovelFactory/pull/6) | MERGED_AND_VERIFIED；[主线用例、PITR、托管作业及容量限制](p55-main/README.md) | `df1e0cc904e3b94a360d86e3a3e00bfec3258673`，2026-11-11 16:33:42 UTC |
-| W0 | [#7](https://github.com/SKYdayDUCK/NovelFactory/pull/7) | MERGED_AND_VERIFIED；[W0 主线签收](W0_主线签收.md) | `c4939e24b6b5501d82127f528f2054e9c1992856`，2026-11-11 17:11:10 UTC |
-| W1 | [#8](https://github.com/SKYdayDUCK/NovelFactory/pull/8) | MERGED_AND_VERIFIED；[主线签收](W1_主线签收.md) | `d039839fe68f6403ea6e5590af3ed787318d5b5f`，2026-11-11T17:48:11Z |
-| W2 | [#9](https://github.com/SKYdayDUCK/NovelFactory/pull/9) | MERGED_AND_VERIFIED；[主线签收](W2_主线签收.md) | `f2c584ec8e738e09d31b05ddd5c032bb2b8f96b1`，2026-11-11T18:16:58Z |
-| NF Bridge | [#11](https://github.com/SKYdayDUCK/NovelFactory/pull/11) | MERGED_AND_VERIFIED；[主线签收](NF_Bridge_主线签收.md) | `15f606c99c765deeffd904ad540441eb6476b3af`，2026-11-11T19:02:35Z |
+| P5 | [#5](https://github.com/SKYdayDUCK/NovelFactory/pull/5) | 历史合并已核实，工程/原生桌面/恢复的合并依据见 #5。既有 AT-30 保留 | `a8f37b72286163e9117f8874a0e175c61204ff8b`，2026-11-11 13:50:15 UTC |
+| P5.5 | [#6](https://github.com/SKYdayDUCK/NovelFactory/pull/6) | MERGED_AND_VERIFIED，[主线用例、PITR、托管作业及容量限制](p55-main/README.md) | `df1e0cc904e3b94a360d86e3a3e00bfec3258673`，2026-11-11 16:33:42 UTC |
+| W0 | [#7](https://github.com/SKYdayDUCK/NovelFactory/pull/7) | MERGED_AND_VERIFIED，[W0 主线签收](W0_主线签收.md) | `c4939e24b6b5501d82127f528f2054e9c1992856`，2026-11-11 17:11:10 UTC |
+| W1 | [#8](https://github.com/SKYdayDUCK/NovelFactory/pull/8) | MERGED_AND_VERIFIED，[主线签收](W1_主线签收.md) | `d039839fe68f6403ea6e5590af3ed787318d5b5f`，2026-11-11T17:48:11Z |
+| W2 | [#9](https://github.com/SKYdayDUCK/NovelFactory/pull/9) | MERGED_AND_VERIFIED，[主线签收](W2_主线签收.md) | `f2c584ec8e738e09d31b05ddd5c032bb2b8f96b1`，2026-11-11T18:16:58Z |
+| NF Bridge | [#11](https://github.com/SKYdayDUCK/NovelFactory/pull/11) | MERGED_AND_VERIFIED，[主线签收](NF_Bridge_主线签收.md) | `15f606c99c765deeffd904ad540441eb6476b3af`，2026-11-11T19:02:35Z |
 | W3 | [#10](https://github.com/SKYdayDUCK/NovelFactory/pull/10) | MERGED_AND_VERIFIED，[主线签收](W3_主线签收.md) | `e6763d844f023d7c6a13060dbaebca0416fe3099`，2026-11-11T19:53:57Z |
 | W4 | [#12](https://github.com/SKYdayDUCK/NovelFactory/pull/12) | MERGED_AND_VERIFIED，[W4 主线签收](W4_主线签收.md) | `6c711adf794842bdf4469ab51e89093d37761bcc`，2026-11-11T21:42:09Z |
 | W5 | [#14](https://github.com/SKYdayDUCK/NovelFactory/pull/14) | MERGED_AND_VERIFIED，[W5 主线签收](W5_主线签收.md) | `b30e76978830bec4c596c04194d749fd01f67402`，2026-11-11T22:31:34Z |
@@ -50,7 +52,7 @@ W6 在两个主管已合法调任的 PostgreSQL 用例中，一例新岗位、�
 W6 #15 的当前正式候选为 `50c8c5ed36cc2cfb83d6624c65ed33336e0f1771`，树 `7053bf12cc789dc6bf4220d0217a93253a2b75f9`。GitHub 预合并 a1f1021a 与该候选同树，目标 W5 main 为 b30e7697。八库升级、真实重启、NF 原生 10 项、四预设场景、AT43/49、17 项原生角色和 wheel 安装均已在精确候选取得独立回执。[八库与 NF](https://github.com/SKYdayDUCK/NovelFactory/tree/df8bea90fe19ea492220448e07323f63c4e496ea/reports/integration/evidence/W6/candidate-50c8c5e/database-upgrade-and-fixtures) · [首轮回归负控](https://github.com/SKYdayDUCK/NovelFactory/blob/df8bea90fe19ea492220448e07323f63c4e496ea/reports/integration/evidence/W6/candidate-23d195d/creative-and-roles/broker-poll-timing.zip)。
 
 
-W6 main 六条正式 push 工作流三绿三红：Workshop、NF integrity、PITR 成功；P2/P3 历史 AT-30 原容量门槛失败保留。[原始主线回执](W6_主线签收.md)。
+W6 main 六条正式 push 工作流三绿三红：Workshop、NF integrity、PITR 成功，P2/P3 历史 AT-30 原容量门槛失败保留。[原始主线回执](W6_主线签收.md)。
 
 [#25](https://github.com/SKYdayDUCK/NovelFactory/pull/25) 的合并提交为 `ba892d3a424be39efccb697232a5614b26609cc4`，2026-11-12 01:57:08 UTC 合并。已在[精确主线](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43137991893)复验并[签收](https://github.com/SKYdayDUCK/NovelFactory/tree/9eb7bb52e422f1a8e33a91fe01a1e67fef6375d3/reports/integration/evidence/W6/signoff-ba892d3)。 [P5.6 独立综合验收](P56_SYSTEM_ACCEPTANCE.md)。
 
