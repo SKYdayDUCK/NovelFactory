@@ -1,0 +1,38 @@
+{
+  "workflows": 100,
+  "tickets": 1,
+  "order": "ABBA",
+  "frozen_sha": "434840593179e6c1faa6b7aeca3d7d747644506d",
+  "sql_change": "f9f66341c5f341102dbe363e5a33523d20695d17",
+  "workload": "100 provisioned tasks across two books, 1 live branch ticket; no state transitions between selections",
+  "results": [
+    {
+      "arm": "baseline",
+      "status": "COMPLETED",
+      "task_id": "aaf6c522-62a8-434e-bd9d-838e7fdd4ba5",
+      "execution_ms": 26.414,
+      "elapsed_s_including_repeated_selection": 0.09719234499971208
+    },
+    {
+      "arm": "candidate",
+      "status": "COMPLETED",
+      "task_id": "aaf6c522-62a8-434e-bd9d-838e7fdd4ba5",
+      "execution_ms": 35.846,
+      "elapsed_s_including_repeated_selection": 0.09398276799993255
+    },
+    {
+      "arm": "candidate",
+      "status": "COMPLETED",
+      "task_id": "aaf6c522-62a8-434e-bd9d-838e7fdd4ba5",
+      "execution_ms": 36.989,
+      "elapsed_s_including_repeated_selection": 0.11413024700004826
+    },
+    {
+      "arm": "baseline",
+      "status": "COMPLETED",
+      "task_id": "aaf6c522-62a8-434e-bd9d-838e7fdd4ba5",
+      "execution_ms": 49.354,
+      "elapsed_s_including_repeated_selection": 0.10860862799972892
+    }
+  ]
+}
