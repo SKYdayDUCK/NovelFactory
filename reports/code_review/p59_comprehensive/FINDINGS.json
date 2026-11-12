@@ -1,0 +1,75 @@
+[
+  {
+    "id": "P59-CORE-01",
+    "severity": "P1",
+    "location": "src/novel_factory/application/queries.py:348",
+    "related": [
+      "src/novel_factory/application/queries.py:378",
+      "src/novel_factory/application/queries.py:398",
+      "src/novel_factory/application/queries.py:408",
+      "contracts/R1_README.md:30"
+    ],
+    "mechanism": "Timeline branches apply their native time dimension even when the request explicitly selected a different dimension. A plan with no source time is returned on SOURCE; an assertion with only validity is returned on TARGET.",
+    "trigger": "Authorized temporal query at a point inside the record's native time dimension.",
+    "reproduction": "Copy raw/test_time_axis.py into tests/queries in a clean baseline checkout, run python scripts/with_postgres.py -- python -m pytest tests/queries/test_time_axis.py -q.",
+    "raw": "raw/timeline-baseline.log: four of eight parameterized checks failed; returned entry identifiers in absent dimensions.",
+    "impact": "Incorrect historical and future query results consumed by planning and dependency collection. No unauthorized role read or world write observed.",
+    "repair": "Select entry families using their emitted time fields; preserve the RELEVANT axis and the unlocated-time convention for matching families. Verify single and batch queries.",
+    "regression": "tests/queries/test_time_axis.py",
+    "state": "REPRODUCED",
+    "sha": "5e322e8af8ddb4465f68f8cab84c9685832461a9"
+  },
+  {
+    "id": "P59-RT-01",
+    "severity": "P2",
+    "location": "agent_runtime/providers.py:72",
+    "related": [
+      "agent_runtime/providers.py:86",
+      "src/novel_factory/infrastructure/runtime_providers.py:28"
+    ],
+    "mechanism": "An openai-compatible profile validates the URL hostname and path but first reads the port in provider_key after read_profiles returns.",
+    "trigger": "An operator enters a non-numeric or out-of-range port in a generic OpenAI-compatible profile.",
+    "reproduction": "PYTHONPATH=. python catalog_check.py (run from checkout, script in evidence directory)",
+    "raw": "catalog-before.jsonl: both invalid ports accepted by read_profiles; public NF loader raised raw ValueError; port 443 succeeded.",
+    "impact": "Bad configuration can abort construction of the entire adapter registry outside the stable ProfileError/DomainError contract. No remote call.",
+    "repair": "Validate the HTTP port at profile construction for every HTTP provider; convert urllib parsing errors to INVALID_MODEL_CONFIG; retain generic hosts/paths and valid nondefault ports.",
+    "regression": "Test through read_profiles and load_runtime_profiles, including positive nondefault port and malformed port; no network.",
+    "state": "REPRODUCED",
+    "sha": "5e322e8af8ddb4465f68f8cab84c9685832461a9"
+  },
+  {
+    "id": "P59-PIPE-01",
+    "severity": "P2",
+    "location": "src/novel_factory/application/production_pipeline.py:225",
+    "related": [
+      "src/novel_factory/application/production_pipeline.py:229",
+      "src/novel_factory/application/production_pipeline.py:499"
+    ],
+    "mechanism": "The board stores the previous node in history but pipeline_status looks up only current task ids.",
+    "trigger": "A provisional plan is locally revised and the operator exports its status.",
+    "reproduction": "Set NF_P58_PIPELINE_TEST_EVIDENCE and run tests/integration/test_p58_production_pipeline.py::test_native_parallel_drafts_conditional_plans_and_early_review via scripts/with_postgres.py.",
+    "raw": "pipeline-ledger.json: seven fixture calls and seven ledger rows; six attempts visible on board status, historical task record has no attempt_ids.",
+    "impact": "Incomplete operator-facing accounting trace; authoritative reservations and billing rows retained.",
+    "repair": "Index one scoped query by task_id and populate IDs on each current/historical node.",
+    "regression": "On real PostgreSQL compare the old and new per-task IDs with their ledger rows and preserve board immutability, current generation and unrelated nodes.",
+    "state": "REPRODUCED",
+    "sha": "5e322e8af8ddb4465f68f8cab84c9685832461a9"
+  },
+  {
+    "id": "P59-RT-02",
+    "severity": "P2",
+    "location": "agent_runtime/routing.py:37",
+    "related": [
+      "agent_runtime/routing.py:68"
+    ],
+    "mechanism": "The validator reconstructs the permitted selector shapes for every rule and the resolver repeatedly builds sets to rank matching rules.",
+    "trigger": "Repeated route resolution for valid operator policies up to the supported 256 rules.",
+    "reproduction": "PYTHONPATH=. python profile_route.py --output result.json --profile profile.txt (from checkout)",
+    "raw": "routing-baseline.json; routing-baseline.prof.txt: 0.758/0.994 cumulative seconds in validate_rules across 256 profiled resolutions.",
+    "impact": "CPU cost isolated to pure policy resolution; end-to-end throughput attribution remains unestablished.",
+    "repair": "Measure a static immutable table of allowed selector shapes/ranks. Keep full validation on every policy; no credential, authority or policy result cache.",
+    "regression": "Compare baseline/candidate over matching/nonmatching rules at all 11 precedence levels, invalid selectors, overrides, and policy hash. Retain per-call samples and alternate implementations.",
+    "state": "PROFILED",
+    "sha": "5e322e8af8ddb4465f68f8cab84c9685832461a9"
+  }
+]

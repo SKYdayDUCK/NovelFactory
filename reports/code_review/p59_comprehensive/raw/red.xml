@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="8.541" timestamp="2026-11-13T00:05:10.592716+09:00" hostname="93b612710152"><testcase classname="tests.unit.test_p58_providers" name="test_generic_endpoint_port_is_checked_when_loading_a_catalog[bad]" time="0.003"><failure message="Failed: DID NOT RAISE ProfileError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-8/test_generic_endpoint_port_is_0')
+port = 'bad'
+
+    @pytest.mark.parametrize("port", ["bad", "70000"])
+    def test_generic_endpoint_port_is_checked_when_loading_a_catalog(tmp_path, port):
+        from novel_factory.domain.errors import DomainError
+        from novel_factory.infrastructure.runtime_providers import load_runtime_profiles
+    
+        path = tmp_path / "profiles.json"
+        fields = {"kind": "openai-compatible", "model": "fixture", "secret_ref": "NF_TEST_HTTP",
+                  "max_output_tokens": 32, "endpoint": "https://example.org:8443/v1/chat/completions"}
+        path.write_text(json.dumps({"profiles": {"working": fields}}))
+        assert load_runtime_profiles(path, None)["working"].provider_key == "https://example.org:8443"
+    
+        invalid = {**fields, "endpoint": f"https://example.org:{port}/v1/chat/completions"}
+        path.write_text(json.dumps({"profiles": {"working": fields, "mistyped": invalid}}))
+&gt;       with pytest.raises(ProfileError, match="^INVALID_MODEL_CONFIG$"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ProfileError
+
+tests/unit/test_p58_providers.py:85: Failed</failure></testcase><testcase classname="tests.unit.test_p58_providers" name="test_generic_endpoint_port_is_checked_when_loading_a_catalog[70000]" time="0.001"><failure message="Failed: DID NOT RAISE ProfileError">tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-8/test_generic_endpoint_port_is_1')
+port = '70000'
+
+    @pytest.mark.parametrize("port", ["bad", "70000"])
+    def test_generic_endpoint_port_is_checked_when_loading_a_catalog(tmp_path, port):
+        from novel_factory.domain.errors import DomainError
+        from novel_factory.infrastructure.runtime_providers import load_runtime_profiles
+    
+        path = tmp_path / "profiles.json"
+        fields = {"kind": "openai-compatible", "model": "fixture", "secret_ref": "NF_TEST_HTTP",
+                  "max_output_tokens": 32, "endpoint": "https://example.org:8443/v1/chat/completions"}
+        path.write_text(json.dumps({"profiles": {"working": fields}}))
+        assert load_runtime_profiles(path, None)["working"].provider_key == "https://example.org:8443"
+    
+        invalid = {**fields, "endpoint": f"https://example.org:{port}/v1/chat/completions"}
+        path.write_text(json.dumps({"profiles": {"working": fields, "mistyped": invalid}}))
+&gt;       with pytest.raises(ProfileError, match="^INVALID_MODEL_CONFIG$"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ProfileError
+
+tests/unit/test_p58_providers.py:85: Failed</failure></testcase><testcase classname="tests.integration.test_p58_production_pipeline" name="test_native_parallel_drafts_conditional_plans_and_early_review" time="8.087"><failure message="KeyError: 'attempt_ids'">kernel_env = {'db': &lt;novel_factory.infrastructure.database.Database object at 0x7f2c8fbc6ae0&gt;, 'store': &lt;novel_factory.infrastructu...Kernel object at 0x7f2c8fbf9f40&gt;, 'url': 'postgresql+psycopg://nf_dev@127.0.0.1:42713/nf_kernel_94e510e478464ae4', ...}
+
+    def test_native_parallel_drafts_conditional_plans_and_early_review(kernel_env):
+        kernel = kernel_env["kernel"]
+        f, release, _ = volume(kernel)
+        original, owner = f["world_ref"], f["principal"]
+        work, branch = original["work_id"], original["branch_id"]
+        target, _ = make_plan(PlanningService(kernel), f)
+        ids = f["ids"]
+        with kernel.db.uow(write=False) as repo:
+            contract = kernel.artifact(repo, target["volume_contract_ref"], work)["payload"]
+        series = uid()
+        chapters = [{"chapter_id": uid(), "scenes": [{"scene_ref": scene, "handoff_refs": []}]} for scene in f["scene_refs"]]
+        candidate_ids = [uid(), uid()]
+        futures = [{"candidate_id": ident, "distance": 1, "volume_contract_ref": target["volume_contract_ref"],
+                    "assumptions": [dep]} for ident, dep in zip(candidate_ids, [
+                        {"kind": "WORLD_FACT", "condition": {"kind": "STATE_EQUALS", "subject_id": ids["protagonist"],
+                         "predicate": "located_in", "expected_value": entity_value(ids["north"])}},
+                        {"kind": "LITERARY_COMMITMENT", "node_id": f["plan"]["nodes"][0]["node_id"]}], strict=True)]
+        options = {"world_ref": original, "series_id": series, "volume_id": f["volume_id"], "chapters": chapters, "future": futures,
+                       "story_time": point(12), "subject_ids": [ids["protagonist"], ids["sword"], ids["north"], ids["south"]],
+                       "predicates": ["possessed_by", "located_in"], "routes": {"draft": "fixture", "review": "fixture", "plan": "fixture"},
+                       "budget_id": kernel.tasks.create_budget(work, "2"), "reserve_amount": "0.1", "token_reservation": 100000,
+                       "limits": {"draft": 1, "review": 1, "plan": 2, "lookahead": 1, "review_backlog": 1, "window_goals": 2},
+                       "deadline_seconds": 3600, "idempotency_key": "p58-production-test"}
+        with backend(concurrent=True) as (http, calls, server):
+            gateway = AgentGateway(kernel, {"fixture": http}, material_reader=production_material_reader(kernel))
+            def model(packet):
+                ctx = packet["context"]
+                if ctx["role_id"] == "writer":
+                    scene = json.loads(packet["authorized_materials"][0]["content"])
+                    assert "scene_contract" in scene and "assumptions" not in packet["assignment"]
+                    return {"text": "北窗的雨声很轻。", "event_refs": [], "important_deltas": [], "evidence_refs": []}
+                if ctx["role_id"] == "reviewer":
+                    assert "北窗的雨声很轻。" in packet["authorized_materials"][0]["content"]
+                    return {"summary": "合成测试中的章节阅读意见。", "issues": [], "counterinterpretations": [], "evidence_refs": []}
+                assert ctx["role_id"] == "volume_director" and packet["read_cut"]["knowledge_cut"]["plane"] == "PLAN"
+                return {"schema_version": "2.0", "window_plan_id": uid(), "volume_contract_revision_id": contract["contract_revision_id"],
+                        "input_world_ref": ctx["world_ref"], "dependency_fingerprint": ctx["dependency_fingerprint"],
+                        "story_interval": {"start": point(13), "end": point(14), "bounds": "[)"},
+                        "scope_ids": [ids["south"]], "focus_actor_ids": [ids["protagonist"]], "process_ids": [],
+                        "resolution_strategy": "MIXED", "candidate_goals": ["前提成立时检查渡口"],
+                        "next_decision_reason": "复核前卷结局", "assumptions": [], "adopted_event_refs": [],
+                        "expected_outputs": ["REPLAN_REPORT"], "status": "DRAFT"}
+            server.packet_candidate = model
+            invalid = deepcopy(options)
+            invalid["future"][0]["distance"] = 2
+            with pytest.raises(DomainError):
+                register_pipeline(kernel, gateway, owner, **invalid)
+            registered = register_pipeline(kernel, gateway, owner, **options)
+            assert register_pipeline(kernel, gateway, owner, **options) == registered and not calls
+            def tick():
+                return RuntimeSupervisor(kernel, gateway).run_once(owner, work, branch)
+            with ThreadPoolExecutor(3) as pool:
+                initial = list(pool.map(lambda _: tick(), range(3)))
+            assert sorted(x["node_id"].split(":")[0] for x in initial) == ["draft", "plan", "plan"], initial
+            assert all(x["state"] == "ENROLLED" for x in initial), initial
+            status = lambda: pipeline_status(kernel, owner, work, branch)["nodes"]
+            with pytest.raises(DomainError):
+                pipeline_status(kernel, reviewer(kernel, f), work, branch)
+            saw_early_review = False
+            outcomes = []
+            for _ in range(26):
+                step = tick()
+                outcomes.append(step)
+                if step["status"] == "IDLE":
+                    break
+                if step.get("state") == "ENROLLED" and step["node_id"].startswith("review:"):
+                    saw_early_review |= any(n["stage"] == "draft" and n["state"] == "PENDING" for n in status().values())
+            assert saw_early_review, outcomes
+            nodes = status()
+            assert len(calls) == 6 and all(n["state"] == {"draft": "DRAFT_STORED", "review": "ADVISORY_REVIEW",
+                    "plan": "PROVISIONAL_WITH_ASSUMPTIONS"}[n["stage"]] for n in nodes.values()), outcomes
+            with kernel.db.uow(write=False) as repo:
+                assert kernel.head(repo, work, branch) == original
+                assert not repo.many("events", {"work_id": work})
+                assert not repo.one("selections", {"work_id": work, "selection_kind": "PLAN:" + target["volume_id"]})
+            with pytest.raises(DomainError, match="continuity"):
+                transfer_window(kernel, owner, world_ref=original, candidate_id=candidate_ids[1], idempotency_key="unsafe")
+            live = {**f, "world_ref": run_command(kernel, owner, original, "SET_RELATION", {
+                "subject_id": ids["protagonist"], "predicate": "located_in", "object_value": entity_value(ids["south"]),
+                "at": point(9)})["world_ref"]}
+            cont = ContinuityService(kernel)
+            approval, _, _ = qualify(cont, owner, reviewer(kernel, live), work, request(live, [release], series_id=series))
+            cont.publish(owner, work, approval)
+            for _ in range(4):
+                if tick()["status"] == "IDLE":
+                    break
+            now = status()
+            assert now["plan:" + candidate_ids[0]]["state"] == "REPLAN_REQUIRED"
+            assert now["plan:" + candidate_ids[1]]["state"] == "READY_FOR_ADOPTION"
+            assert all(now[k] == n for k, n in nodes.items() if n["stage"] != "plan")
+            sent = transfer_window(kernel, owner, world_ref=live["world_ref"], candidate_id=candidate_ids[1], idempotency_key="transfer")
+            assert transfer_window(kernel, owner, world_ref=live["world_ref"], candidate_id=candidate_ids[1], idempotency_key="transfer") == sent
+            with kernel.db.uow(write=False) as repo:
+                assert kernel.artifact(repo, sent["window_ref"], work, kind="WINDOW_PLAN")["payload"]["status"] == "DRAFT"
+                assert kernel.head(repo, work, branch) == live["world_ref"]
+            assert len(calls) == 6
+            exported = pipeline_status(kernel, owner, work, branch, include_outputs=True)
+            assert all(n["attempt_ids"] for n in exported["nodes"].values())
+            assert exported["literary_quality"] == "NOT_EVALUATED"
+            assert all(v["text"] == "北窗的雨声很轻。" for k, v in exported["outputs"].items() if k.startswith("draft:"))
+            affected = now["plan:" + candidate_ids[0]]
+            revised = revise_window(kernel, owner, world_ref=live["world_ref"], candidate_id=candidate_ids[0],
+                expected_candidate_ref=affected["output_ref"], assumptions=[{"kind": "WORLD_FACT", "condition": {
+                    "kind": "ENTITY_ACTIVE", "subject_id": ids["protagonist"]}}], idempotency_key="one-local-revision")
+            assert revised["prior_candidate_ref"] == affected["output_ref"]
+            for _ in range(8):
+                if tick()["status"] == "IDLE":
+                    break
+            updated = status()
+            assert updated["plan:" + candidate_ids[0]]["state"] == "READY_FOR_ADOPTION", updated["plan:" + candidate_ids[0]]
+            current = updated["plan:" + candidate_ids[0]]
+            prior = current["history"][0]
+            assert prior["task_id"] == affected["task_id"]
+&gt;           assert prior["attempt_ids"] == affected["attempt_ids"]
+                   ^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'attempt_ids'
+
+tests/integration/test_p58_production_pipeline.py:148: KeyError</failure></testcase></testsuite></testsuites>
