@@ -35,7 +35,8 @@ jobs:
       - name: Native role, cancellation, renewal and authority tests
         run: >-
           uv run --no-sync python -m pytest -q tests/integration/test_p59_db_candidates.py
-          tests/integration/test_p59_read_soak_renewal.py tests/unit/test_p59_http_shards.py
+          tests/integration/test_p59_read_soak_renewal.py tests/integration/test_p59_revision_witness.py
+          tests/unit/test_p59_http_shards.py tests/unit/test_p55_capacity.py
           tests/unit/test_native_platform.py tests/integration/test_bound_tool_entrypoints.py
           tests/integration/test_mcp_idle_pool.py tests/integration/test_p58_routing.py
           --junitxml=windows.xml

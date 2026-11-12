@@ -36,3 +36,13 @@ Each compressed file is original program output compressed with gzip. Use `gzip 
 ```sh
 uv run --no-sync python -m benchmarks.p59_db_restart --pg-bin /usr/lib/postgresql/17/bin --output restart.json
 ```
+
+## Development-tree smoke and fixed snapshots
+
+`working-tree-regression.log.gz` and `working-tree-regression.xml.gz` retain the initial unfiltered NF run started during development. Pytest collected classes before all new tests existed, and subsequent subprocesses could load later edits in that writable tree. The run completed with 1,031 passing tests, 17 passing subtests, 4 skips and one failure. `working-tree-validator.json` identifies the failed assertion as a local link to then-unarchived raw Actions output in an in-progress candidate review. The application and database test cases in that run passed. The three Windows-specific checks and the dual-cluster S6 check were skipped by their existing platform or fixture markers.
+
+The fixed `568f949` S6 test was run separately with two fresh PostgreSQL 17 clusters using independent system identifiers. Each fixture creates a distinct least-privilege role and database, and tests cross-service login denial before comparing the three offline scene conditions. The original test passed. `dual-cluster-s6.xml.gz` and `dual-cluster-comparison.json.gz` are its raw outputs. Set `AW_DUAL_TEST_ADMIN_URL` and `AW_DUAL_TEST_NF_ADMIN_URL` to the two independent disposable administrative DSNs, set `AW_NF_SOURCE` to the checkout, and run the following using the locked NF environment with the matching Workshop package installed.
+
+```sh
+NF_S6_COMPARISON_OUTPUT=comparison.json python -m pytest -q tests/integration/test_s6_engineering_comparison.py --junitxml=s6.xml
+```

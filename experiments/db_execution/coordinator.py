@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from functools import partial
 import math
 
-from sqlalchemy.exc import DBAPIError
+from sqlalchemy.exc import SQLAlchemyError, TimeoutError as PoolTimeout
 
 from novel_factory.domain.errors import DomainError
 from .operations import LeaseRenewal, TaskStatus, execute
@@ -64,19 +64,16 @@ class Coordinator:
         if not math.isfinite(timeout) or timeout <= 0:
             raise ValueError("Timeout must be positive and finite")
         if self.closed or not self.running:
-            raise DomainError("UNAVAILABLE", "Coordinator is closed")
+            raise DomainError("SERVICE_UNAVAILABLE", "Coordinator is closed", True, "WAIT")
         depth = sum(map(len, self.queues))
         if depth >= self.capacity:
             self.counts["rejected"] += 1
-            raise DomainError("BACKPRESSURE", "Database queue is full", retryable=True)
+            raise DomainError("BACKPRESSURE", "Database queue is full", True, "WAIT")
         loop = asyncio.get_running_loop()
         now = loop.time()
         ticket = Ticket(operation, loop.create_future(), now, now + timeout)
-        lane = int(self.split_queues and type(operation) is LeaseRenewal)
-        self.queues[lane].append(ticket)
         self.counts["submitted"] += 1
-        self.counts["peak_queued"] = max(self.counts["peak_queued"], depth + 1)
-        self.event.set()
+        self._enqueue(ticket, depth)
         try:
             async with asyncio.timeout_at(ticket.deadline):
                 return await ticket.future
@@ -84,12 +81,20 @@ class Coordinator:
             self.counts["timed_out"] += 1
             if ticket.started and type(operation) is LeaseRenewal:
                 raise DomainError("OUTCOME_UNKNOWN", "Check the current lease before resubmission") from None
-            raise
+            if ticket.started:
+                raise DomainError("REQUEST_TIMEOUT", "Database read deadline exceeded", True, "WAIT") from None
+            raise DomainError("BACKPRESSURE", "Database queue wait expired", True, "WAIT") from None
         except asyncio.CancelledError:
             self.counts["cancelled"] += 1
             # Queued tickets are discarded. An already dispatched transaction
             # commits or rolls back normally; disconnect never retries a write.
             raise
+
+    def _enqueue(self, ticket, depth):
+        lane = int(self.split_queues and type(ticket.operation) is LeaseRenewal)
+        self.queues[lane].append(ticket)
+        self.counts["peak_queued"] = max(self.counts["peak_queued"], depth + 1)
+        self.event.set()
 
     def _next_queue(self):
         for offset in range(len(self.queues)):
@@ -113,61 +118,75 @@ class Coordinator:
                 self.event.clear()
                 await self.event.wait()
                 continue
-            tickets = [queue.popleft()]
-            if type(tickets[0].operation) is TaskStatus:
+            tickets = await self._collect(queue, loop)
+            await self._dispatch(tickets, loop, grouped=self.batch > 1 or self.join_input)
+
+    async def _collect(self, queue, loop):
+        tickets = [queue.popleft()]
+        if type(tickets[0].operation) is TaskStatus:
+            self._take_reads(queue, tickets)
+            # Sparse arrivals pass immediately. A partially filled batch
+            # under pressure may collect more for the remaining latency budget.
+            if 1 < len(tickets) < self.batch and not queue and not self.closed:
+                until = min(t.deadline for t in tickets)
+                until = min(until, tickets[0].queued + self.window)
+                delay = until - loop.time()
+                if delay > 0:
+                    await asyncio.sleep(delay)
                 self._take_reads(queue, tickets)
-                # Sparse arrivals pass immediately. A partially filled batch
-                # under pressure may collect more for the remaining latency budget.
-                if 1 < len(tickets) < self.batch and not queue and not self.closed:
-                    until = min(t.deadline for t in tickets)
-                    until = min(until, tickets[0].queued + self.window)
-                    delay = until - loop.time()
-                    if delay > 0:
-                        await asyncio.sleep(delay)
-                    self._take_reads(queue, tickets)
-            active = []
-            for ticket in tickets:
-                if ticket.future.done():
-                    continue
-                now = loop.time()
-                if now >= ticket.deadline:
-                    ticket.future.set_exception(TimeoutError())
-                    continue
-                self.max_queue_wait_s = max(self.max_queue_wait_s, now - ticket.queued)
-                ticket.started = True
-                active.append(ticket)
-            if not active:
+        return tickets
+
+    async def _dispatch(self, tickets, loop, *, grouped):
+        active = []
+        for ticket in tickets:
+            if ticket.future.done():
                 continue
-            operations = [ticket.operation for ticket in active]
-            self.batches[len(active)] += 1
-            self.counts["executing"] += 1
-            self.counts["peak_executing"] = max(self.counts["peak_executing"], self.counts["executing"])
-            try:
-                # With size one the joined hybrid still uses its set-wise SQL
-                # on one row; changing a queue limit must not change the query.
-                call = partial(execute, self.kernel, operations, join_input=self.join_input,
-                               grouped=self.batch > 1 or self.join_input)
-                results = await loop.run_in_executor(self.pool, call)
-                if len(results) != len(active):
-                    raise RuntimeError("Incomplete batch response")
-            except DBAPIError:
-                self.counts["db_errors"] += 1
-                if type(operations[0]) is LeaseRenewal:
-                    results = [DomainError("OUTCOME_UNKNOWN", "Check the current lease before resubmission")]
-                else:
-                    results = [DomainError("UNAVAILABLE", "Database read unavailable") for _ in active]
-            except Exception as error:
-                # An infrastructure failure rolls back the read batch and no
-                # item receives data. Never re-run a write with unknown outcome.
-                results = [error] * len(active)
-            finally:
-                self.counts["executing"] -= 1
-            for ticket, result in zip(active, results, strict=True):
-                if ticket.future.done():
-                    continue
-                if loop.time() >= ticket.deadline:
-                    ticket.future.set_exception(TimeoutError())
-                elif isinstance(result, Exception):
-                    ticket.future.set_exception(result)
-                else:
-                    ticket.future.set_result(result)
+            now = loop.time()
+            if now >= ticket.deadline:
+                ticket.future.set_exception(TimeoutError())
+                continue
+            self.max_queue_wait_s = max(self.max_queue_wait_s, now - ticket.queued)
+            ticket.started = True
+            active.append(ticket)
+        if not active:
+            return
+        operations = [ticket.operation for ticket in active]
+        self.batches[len(active)] += 1
+        self.counts["executing"] += 1
+        self.counts["peak_executing"] = max(self.counts["peak_executing"], self.counts["executing"])
+        try:
+            # With size one the joined hybrid still uses its set-wise SQL
+            # on one row; changing a queue limit must not change the query.
+            call = partial(execute, self.kernel, operations, join_input=self.join_input,
+                           grouped=grouped)
+            results = await loop.run_in_executor(self.pool, call)
+            if len(results) != len(active):
+                raise RuntimeError("Incomplete batch response")
+        except PoolTimeout:
+            # Each supported operation uses a single UoW. Pool checkout
+            # failed before that UoW could open a transaction.
+            self.counts["pool_timeouts"] += 1
+            results = [DomainError("POOL_TIMEOUT", "Database capacity is temporarily unavailable",
+                                   True, "WAIT") for _ in active]
+        except SQLAlchemyError:
+            self.counts["db_errors"] += 1
+            if type(operations[0]) is LeaseRenewal:
+                results = [DomainError("OUTCOME_UNKNOWN", "Check the current lease before resubmission")]
+            else:
+                results = [DomainError("SERVICE_UNAVAILABLE", "Database read unavailable",
+                                       True, "WAIT") for _ in active]
+        except Exception as error:
+            # An infrastructure failure rolls back the read batch and no
+            # item receives data. Never re-run a write with unknown outcome.
+            results = [error] * len(active)
+        finally:
+            self.counts["executing"] -= 1
+        for ticket, result in zip(active, results, strict=True):
+            if ticket.future.done():
+                continue
+            if loop.time() >= ticket.deadline:
+                ticket.future.set_exception(TimeoutError())
+            elif isinstance(result, Exception):
+                ticket.future.set_exception(result)
+            else:
+                ticket.future.set_result(result)

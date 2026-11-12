@@ -18,6 +18,10 @@ def settings(profile):
     elif profile in ('mixed', 'reads'):
         for mode in (*MODES, *reversed(MODES)):
             yield mode, 50, 1000, 64, 32, 2, 10 if profile == 'mixed' else 0
+    elif profile == 'adaptive':
+        for concurrency in (1, 8, 64, 128):
+            for mode in ('micro', 'adaptive', 'adaptive', 'micro'):
+                yield mode, 50, 1000, concurrency, 32, 2, 10
     elif profile == 'pressure':
         for concurrency in (1, 8, 32, 128):
             for mode in ('baseline', 'hybrid', 'hybrid', 'baseline'):
@@ -26,7 +30,7 @@ def settings(profile):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--profile', choices=['mixed', 'reads', 'grid', 'pressure'], required=True)
+    parser.add_argument('--profile', choices=['mixed', 'reads', 'grid', 'pressure', 'adaptive'], required=True)
     parser.add_argument('--directory', required=True, type=Path)
     args = parser.parse_args()
     args.directory.mkdir(parents=True, exist_ok=False)

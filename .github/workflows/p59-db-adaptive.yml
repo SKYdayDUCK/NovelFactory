@@ -1,0 +1,48 @@
+name: Adaptive versus fixed FIFO database reads
+on:
+  push:
+    branches: [experiment/p59-database-throughput]
+    paths: ['.github/workflows/p59-db-adaptive.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  abba:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    services:
+      pg:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_DB: nf_test
+          POSTGRES_PASSWORD: disposable
+          POSTGRES_INITDB_ARGS: --data-checksums
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 2s --health-timeout 2s --health-retries 30
+    env:
+      NF_TEST_DATABASE_URL: postgresql+psycopg://postgres:disposable@127.0.0.1:5432/nf_test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - run: uv sync --locked --group dev --python 3.12
+      - name: Exercise isolated correctness checks
+        run: |
+          mkdir out
+          git rev-parse HEAD > out/source
+          lscpu > out/cpu
+          uv run --no-sync python -m pytest -q tests/integration/test_p59_db_candidates.py --junitxml=out/tests.xml
+      - name: Compare FIFO versus adaptive serially at 1, 8, 64 and 128 clients
+        run: uv run --no-sync python -m benchmarks.p59_db_matrix --profile adaptive --directory out/comparison
+      - if: always()
+        run: |
+          find out -name '*.json' -exec gzip -n {} +
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: db-adaptive-${{ github.sha }}
+          path: out/

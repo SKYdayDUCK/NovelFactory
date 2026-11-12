@@ -9,6 +9,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import resource
 from time import perf_counter, process_time
 
 import psycopg
@@ -77,7 +78,10 @@ def main():
             raise AssertionError('Failed pipeline left partial state')
     result = {'scope': 'one local connection, TEMP fixture, no inter-client locks or business authorization',
               'python': platform.python_version(), 'postgres': version, 'psycopg': psycopg.__version__,
-              'pipeline_failure_rolled_back': True, 'records': rows}
+              'pipeline_failure_rolled_back': True, 'application_connections': 1, 'driver_queue': 0,
+              'peak_process_rss_kib_linux': resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+              'measurement': 'One private session; no cross-session table contention. SQL executions exclude setup and transaction control. Protocol packets are not counted.',
+              'records': rows}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8')
 

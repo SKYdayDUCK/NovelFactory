@@ -11,12 +11,15 @@ from sqlalchemy import event, text
 
 from benchmarks.p59_db_candidates import task_fixture
 from experiments.db_execution import coordinator as module
+from experiments.db_execution.adaptive import AdaptiveCoordinator
 from experiments.db_execution.coordinator import Coordinator
 from experiments.db_execution.operations import LeaseRenewal, TaskStatus, execute
 from novel_factory.application.authorization import Principal
 from novel_factory.application.kernel import Kernel
 from novel_factory.domain.errors import DomainError
 from novel_factory.fixtures import load_fixture
+from novel_factory.infrastructure.database import Database
+from novel_factory.interfaces.http import _status
 
 
 def setup_pair(kernel):
@@ -103,8 +106,9 @@ def test_revoke_while_pending_backpressure_cancel_and_recovery(kernel_env, monke
                 abandoned.cancel()
                 with pytest.raises(asyncio.CancelledError):
                     await abandoned
-                with pytest.raises(TimeoutError):
+                with pytest.raises(DomainError, match="queue wait expired") as full:
                     await expired
+                assert _status(full.value.code) == 429 and full.value.recovery == "WAIT"
                 kernel.revoke_grant(books[0]["principal"], first.principal.grant_id)
             finally:
                 release.set()
@@ -114,8 +118,9 @@ def test_revoke_while_pending_backpressure_cancel_and_recovery(kernel_env, monke
             assert await good == await blocker == kernel.get_task(second.principal, second.task_id)
             assert dispatched.count(first) == 1 and dispatched.count(second) == 2
             assert channel.counts["peak_queued"] <= 4 and channel.counts["peak_executing"] == 1
-        with pytest.raises(DomainError, match="closed"):
+        with pytest.raises(DomainError, match="closed") as closed:
             await channel.submit(second)
+        assert _status(closed.value.code) == 503 and closed.value.retryable and closed.value.recovery == "WAIT"
         async with Coordinator(kernel, workers=2) as restarted:
             assert await restarted.submit(second) == kernel.get_task(second.principal, second.task_id)
 
@@ -147,7 +152,7 @@ def test_lease_write_unknown_is_never_retried(kernel_env, monkeypatch):
                 assert await asyncio.to_thread(started.wait, 2)
                 with pytest.raises(DomainError) as failure:
                     await renewal
-                assert failure.value.code == "OUTCOME_UNKNOWN"
+                assert failure.value.code == "OUTCOME_UNKNOWN" and not failure.value.retryable
             finally:
                 release.set()
             status_after = await channel.submit(status)
@@ -178,7 +183,9 @@ def test_database_error_rolls_back_all_and_later_request_succeeds(kernel_env):
             event.listen(kernel.db.engine, "before_cursor_execute", fail_once, retval=True)
             try:
                 result = await asyncio.gather(*(channel.submit(op) for op in operations), return_exceptions=True)
-                assert seen and all(isinstance(e, DomainError) and e.code == "UNAVAILABLE" for e in result)
+                assert seen and all(isinstance(e, DomainError) and e.code == "SERVICE_UNAVAILABLE"
+                                    and e.retryable and e.recovery == "WAIT" and _status(e.code) == 503
+                                    for e in result)
             finally:
                 event.remove(kernel.db.engine, "before_cursor_execute", fail_once)
             assert await channel.submit(operations[0]) == kernel.get_task(operations[0].principal, operations[0].task_id)
@@ -249,3 +256,55 @@ def test_hybrid_size_one_keeps_singleton_join(kernel_env):
     assert len(statements) == 3
     assert "JOIN nf_task_inputs" in statements[0]
     assert all("FOR SHARE" in sql for sql in statements[1:])
+
+def test_adaptive_dispatch_bypasses_idle_reads_and_batches_compatible_bursts(kernel_env):
+    kernel = kernel_env["kernel"]
+    _, (first, second) = setup_pair(kernel)
+    oracle = {op: kernel.get_task(op.principal, op.task_id) for op in (first, second)}
+
+    async def run():
+        async with AdaptiveCoordinator(kernel, workers=2, batch=8, capacity=32) as channel:
+            reads = []
+
+            def count(conn, cursor, sql, *_):
+                reads.append(sql)
+
+            event.listen(kernel.db.engine, "before_cursor_execute", count)
+            try:
+                for op in (first, second, first):
+                    assert await channel.submit(op) == oracle[op]
+            finally:
+                event.remove(kernel.db.engine, "before_cursor_execute", count)
+            assert len(reads) == 12 and channel.counts["direct_status"] == 3
+            assert all("JOIN nf_task_inputs" not in sql for sql in reads)
+            assert channel.counts["peak_queued"] == 0
+            calls = [first, second] * 16
+            assert await asyncio.gather(*(channel.submit(op) for op in calls)) == [oracle[op] for op in calls]
+            assert channel.counts["direct_status"] == 4
+            assert 1 < max(channel.batches) <= 8
+            assert channel.counts["peak_executing"] <= 2 and channel.counts["read_ewma_us"] > 0
+            assert channel.counts["fifo_immediate"] > 0
+
+    asyncio.run(run())
+
+def test_real_pool_timeout_is_retryable_503_before_transaction(kernel_env):
+    kernel = kernel_env["kernel"]
+    _, (operation, _) = setup_pair(kernel)
+    db = Database(kernel_env["url"], pool_size=1, max_overflow=0, pool_timeout=.1)
+    narrow = Kernel(db, kernel.objects)
+
+    async def run():
+        async with Coordinator(narrow, workers=1) as channel:
+            with db.engine.connect():
+                with pytest.raises(DomainError) as failure:
+                    await channel.submit(operation)
+            error = failure.value
+            assert error.code == "POOL_TIMEOUT" and error.retryable and error.recovery == "WAIT"
+            assert _status(error.code) == 503
+            assert channel.counts["pool_timeouts"] == 1
+            assert await channel.submit(operation) == kernel.get_task(operation.principal, operation.task_id)
+
+    try:
+        asyncio.run(run())
+    finally:
+        db.close()

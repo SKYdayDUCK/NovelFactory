@@ -23,6 +23,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.engine import make_url
 
 from benchmarks.http_load import percentiles, SqlMeasurements
+from experiments.db_execution.adaptive import AdaptiveCoordinator
 from experiments.db_execution.coordinator import Coordinator
 from experiments.db_execution.operations import LeaseRenewal, TaskStatus, execute
 from novel_factory.application.kernel import Kernel
@@ -30,7 +31,7 @@ from novel_factory.fixtures import load_fixture
 from novel_factory.infrastructure.database import Database
 from novel_factory.infrastructure.objects import ObjectStore
 
-MODES = ("baseline", "queues", "sql", "micro", "micro_queues", "hybrid")
+MODES = ("baseline", "queues", "sql", "micro", "micro_queues", "hybrid", "adaptive")
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -164,8 +165,9 @@ async def measure(kernel, url, fixture, args):
     pool = ThreadPoolExecutor(max_workers=args.workers)
     loop = asyncio.get_running_loop()
     queue_mode = args.mode not in ("baseline", "sql")
-    coordinator = Coordinator(kernel, workers=args.workers, capacity=args.capacity,
-                              batch=args.batch if args.mode in ("micro", "micro_queues", "hybrid") else 1,
+    coordinator_type = AdaptiveCoordinator if args.mode == "adaptive" else Coordinator
+    coordinator = coordinator_type(kernel, workers=args.workers, capacity=args.capacity,
+                              batch=args.batch if args.mode in ("micro", "micro_queues", "hybrid", "adaptive") else 1,
                               window_ms=args.window_ms, split_queues=args.mode in ("queues", "micro_queues", "hybrid"),
                               join_input=args.mode == "hybrid")
     semaphore = asyncio.Semaphore(args.workers)
