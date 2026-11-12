@@ -1,0 +1,224 @@
+{
+  "scope": "Additional hosted observations around the paired CI comparisons",
+  "jobs": [
+    {
+      "source_head": "9bc6b79df1e22f988602cd8245bc42145aaccf58",
+      "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43273075314/job/131374254276",
+      "measurements": [
+        {
+          "file": "ci-evidence/run-1/load.json",
+          "logical_agents": 50,
+          "correctness": "PASS",
+          "first_attempt_capacity_gate": "NOT_MET",
+          "capacity_gate": "NOT_MET",
+          "bounded_recovery_business_gate": "PASS",
+          "offered": {
+            "gate": "NOT_MET",
+            "transport_header_starts": 250,
+            "transport_header_start_rps": 136.73970800306182,
+            "target_rps": 1000,
+            "first_attempts": 250,
+            "actual_call_start_rps": 237.95371274686508,
+            "start_window_seconds": 1.0464219999999997,
+            "max_schedule_delay_ms": 797.5113,
+            "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+            "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+          },
+          "results": {
+            "duration_seconds": 38.744129,
+            "planned_requests": 536,
+            "completed_logical_operations": 536,
+            "first_attempt_failure_count": 101,
+            "first_attempt_status_counts": {
+              "200": 431,
+              "409": 4,
+              "429": 101
+            },
+            "correctness_errors": [],
+            "unresolved_operational_errors": []
+          }
+        },
+        {
+          "file": "ci-evidence/run-2/load.json",
+          "logical_agents": 50,
+          "correctness": "PASS",
+          "first_attempt_capacity_gate": "NOT_MET",
+          "capacity_gate": "NOT_MET",
+          "bounded_recovery_business_gate": "PASS",
+          "offered": {
+            "gate": "NOT_MET",
+            "transport_header_starts": 250,
+            "transport_header_start_rps": 95.89404055124064,
+            "target_rps": 1000,
+            "first_attempts": 250,
+            "actual_call_start_rps": 242.87777980446833,
+            "start_window_seconds": 1.0252070000000018,
+            "max_schedule_delay_ms": 776.2845,
+            "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+            "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+          },
+          "results": {
+            "duration_seconds": 39.011832,
+            "planned_requests": 536,
+            "completed_logical_operations": 536,
+            "first_attempt_failure_count": 90,
+            "first_attempt_status_counts": {
+              "200": 442,
+              "409": 4,
+              "429": 90
+            },
+            "correctness_errors": [],
+            "unresolved_operational_errors": []
+          }
+        }
+      ]
+    },
+    {
+      "source_head": "9bc6b79df1e22f988602cd8245bc42145aaccf58",
+      "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43273075686/job/131374257145",
+      "measurements": [
+        {
+          "capacity_gate": "NOT_MET",
+          "offered_wire_rate_gate": "NOT_MET",
+          "dispatch_start_rps": 42.211303243420886,
+          "observed_wire_start_rps": 41.29556558684549,
+          "successful_query_rps": 14.951370502777587,
+          "status_counts": {
+            "200": 1821,
+            "429": 3166,
+            "transport_error": 13
+          }
+        }
+      ]
+    },
+    {
+      "source_head": "23c62ab14a50481cd35023195eedd743b5006237",
+      "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43275627109/job/131383125897",
+      "measurements": [
+        {
+          "file": "ci-evidence/run-1/load.json",
+          "logical_agents": 50,
+          "correctness": "PASS",
+          "first_attempt_capacity_gate": "NOT_MET",
+          "capacity_gate": "NOT_MET",
+          "bounded_recovery_business_gate": "PASS",
+          "offered": {
+            "gate": "NOT_MET",
+            "transport_header_starts": 250,
+            "transport_header_start_rps": 92.78667449204893,
+            "target_rps": 1000,
+            "first_attempts": 250,
+            "actual_call_start_rps": 228.00381288303967,
+            "start_window_seconds": 1.0920869999999994,
+            "max_schedule_delay_ms": 843.1741,
+            "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+            "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+          },
+          "results": {
+            "duration_seconds": 40.173837,
+            "planned_requests": 536,
+            "completed_logical_operations": 536,
+            "first_attempt_failure_count": 91,
+            "first_attempt_status_counts": {
+              "200": 441,
+              "409": 4,
+              "429": 91
+            },
+            "correctness_errors": [],
+            "unresolved_operational_errors": []
+          }
+        },
+        {
+          "file": "ci-evidence/run-2/load.json",
+          "logical_agents": 50,
+          "correctness": "PASS",
+          "first_attempt_capacity_gate": "NOT_MET",
+          "capacity_gate": "NOT_MET",
+          "bounded_recovery_business_gate": "PASS",
+          "offered": {
+            "gate": "NOT_MET",
+            "transport_header_starts": 250,
+            "transport_header_start_rps": 200.7815158439994,
+            "target_rps": 1000,
+            "first_attempts": 250,
+            "actual_call_start_rps": 278.2306319634492,
+            "start_window_seconds": 0.8949409999999958,
+            "max_schedule_delay_ms": 646.0418,
+            "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+            "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+          },
+          "results": {
+            "duration_seconds": 38.768246,
+            "planned_requests": 536,
+            "completed_logical_operations": 536,
+            "first_attempt_failure_count": 115,
+            "first_attempt_status_counts": {
+              "200": 417,
+              "409": 4,
+              "429": 115
+            },
+            "correctness_errors": [],
+            "unresolved_operational_errors": []
+          }
+        }
+      ]
+    },
+    {
+      "source_head": "23c62ab14a50481cd35023195eedd743b5006237",
+      "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43275626921/job/131383117458",
+      "measurements": [
+        {
+          "file": "ci-evidence/load.json",
+          "logical_agents": 200,
+          "correctness": "PASS",
+          "first_attempt_capacity_gate": "NOT_MET",
+          "capacity_gate": "NOT_MET",
+          "bounded_recovery_business_gate": "PASS",
+          "offered": {
+            "gate": "NOT_MET",
+            "transport_header_starts": 1000,
+            "transport_header_start_rps": 48.10037233251176,
+            "target_rps": 1000,
+            "first_attempts": 1000,
+            "actual_call_start_rps": 60.82384343370388,
+            "start_window_seconds": 16.42447999999999,
+            "max_schedule_delay_ms": 15425.6001,
+            "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+            "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+          },
+          "results": {
+            "duration_seconds": 164.868734,
+            "planned_requests": 2141,
+            "completed_logical_operations": 2141,
+            "first_attempt_failure_count": 521,
+            "first_attempt_status_counts": {
+              "200": 1601,
+              "409": 19,
+              "429": 521
+            },
+            "correctness_errors": [],
+            "unresolved_operational_errors": []
+          }
+        }
+      ]
+    },
+    {
+      "source_head": "23c62ab14a50481cd35023195eedd743b5006237",
+      "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43275627154/job/131383120280",
+      "measurements": [
+        {
+          "capacity_gate": "NOT_MET",
+          "offered_wire_rate_gate": "NOT_MET",
+          "dispatch_start_rps": 40.6853181544987,
+          "observed_wire_start_rps": 40.34394741640901,
+          "successful_query_rps": 14.634286014577256,
+          "status_counts": {
+            "200": 1837,
+            "429": 3139,
+            "transport_error": 24
+          }
+        }
+      ]
+    }
+  ]
+}

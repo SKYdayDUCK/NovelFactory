@@ -1,0 +1,54 @@
+{
+  "final-full/cases.xml": {
+    "sha256": "49b97a8921e44d2b89f679b711fac4317e3a415ad512878fb64494274ca9b392",
+    "tests": 1050,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 3,
+    "junit_including_subtests": true,
+    "seconds": 1355.149,
+    "failed_cases": [
+      {
+        "classname": "tests.integration.test_shared_token_upgrade",
+        "name": "test_install_limit_on_populated_0017",
+        "error": "sqlalchemy.exc.ProgrammingError: (psycopg.errors.UndefinedTable) relation \"nf_quota_retry_deadlines\" does not exist"
+      }
+    ]
+  },
+  "integrity-0017-red.xml": {
+    "sha256": "2b9eeb83dc70d1a1fbe781bf63bb092611e7f4b3e720ec174b58f8f92f4a20bf",
+    "tests": 1,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "junit_including_subtests": true,
+    "seconds": 1.816,
+    "failed_cases": [
+      {
+        "classname": "tests.integration.test_shared_token_upgrade",
+        "name": "test_install_limit_on_populated_0017",
+        "error": "sqlalchemy.exc.ProgrammingError: (psycopg.errors.UndefinedTable) relation \"nf_quota_retry_deadlines\" does not exist"
+      }
+    ]
+  },
+  "integrity-0017-green.xml": {
+    "sha256": "fd0816b7b6c55d253d66de1ad09d45720f18f88b83d0d79870eca3576e91083a",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "junit_including_subtests": true,
+    "seconds": 4.018,
+    "failed_cases": []
+  },
+  "full_pre_fix": {
+    "commit": "e23b8e0ffa4efaba314e82fcb1a5af326e80dfee",
+    "python_pytest_passed": 1029,
+    "python_pytest_failed": 1,
+    "python_skipped": 3,
+    "subtests_passed": 17
+  },
+  "current_audit_mcp_and_relay_source": "010529c5a73456302af9f6b802aa0a88ac4ba55b",
+  "fix": "bb419d7c24104c005c25c66937f9b20691d7be31",
+  "historical_writer": "74350760dfd063f3596e5b6838a56a40d3006ad6"
+}
