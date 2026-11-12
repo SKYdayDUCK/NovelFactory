@@ -1,0 +1,73 @@
+{
+  "archive_tag": "p58-history-4157e475a9b33ba2",
+  "assets": {
+    "branch-inventory.json.gz": {
+      "asset_id": 739603934,
+      "bytes": 226047,
+      "sha256": "cf84369950ca7522d86ab324d8bf3c1fb880b5ac7a5215cc167e9f46858e98d3"
+    },
+    "cleanup-plan.json": {
+      "asset_id": 739603939,
+      "bytes": 7658,
+      "sha256": "c25decb194015da9ca3d6a28abcb59f7cf8f34d34e94990c0d61b49b9ca24773"
+    },
+    "p58-archive-receipt.json": {
+      "asset_id": 739603933,
+      "bytes": 265,
+      "sha256": "ef03ab51d04e091ca397cdf589ff94a1b593ae1e64320788776db9bef329b4ca"
+    },
+    "p58-history.bundle": {
+      "asset_id": 739603936,
+      "bytes": 139621401,
+      "sha256": "0766cccec031f9117eaaa3af57f70da01fd8aae1e52c94744c2fe88b2a84859b"
+    },
+    "p58-refs-43227888297-1.json": {
+      "asset_id": 739607822,
+      "bytes": 22773,
+      "sha256": "e0a3072430ee09591ea3af77716e1bda548484c18d6897028d6bdef55fb63812"
+    }
+  },
+  "baseline": "630c4bcf1f1a7d71f1632d6eb2d273923ac08014",
+  "branches_after": 10,
+  "branches_before": 91,
+  "branches_deleted": 81,
+  "deleted_names_still_absent": true,
+  "git_alternates_used": false,
+  "git_fsck_full": "PASS",
+  "inventory_sha256": "4157e475a9b33ba212b89483cfbb147fc546b566bde01b2043047924f1bc7288",
+  "live_remote_branch_count": 10,
+  "new_scion_compat": "75276a791294d4b17035aead4e33352e865e01aa",
+  "open_scion_pr_4_after": {
+    "base": {
+      "branch": "dev/p3-p4-continuity",
+      "oid": "23a61398278c9a13e6450d444d4a6d25a88ef5e0",
+      "repo": "SKYdayDUCK/NovelFactory"
+    },
+    "head": {
+      "branch": "experiment/scion-incremental-20261111",
+      "oid": "4f249d520c921c8d6effee9978f7338b912f1dd0",
+      "repo": "SKYdayDUCK/NovelFactory"
+    },
+    "number": 4
+  },
+  "refs_restored_and_compared_exactly": 91,
+  "release_id": 442989520,
+  "release_url": "https://github.com/SKYdayDUCK/NovelFactory/releases/tag/p58-history-4157e475a9b33ba2",
+  "repository": "SKYdayDUCK/NovelFactory",
+  "retained_names": [
+    "dev/aw-w4",
+    "dev/p2-production-loop",
+    "dev/p3-p4-continuity",
+    "dev/p57-creative-harness-s1-s6",
+    "dev/p57-s0-architecture",
+    "dev/p58-agent-runtime",
+    "evidence/serial-delivery",
+    "experiment/scion-incremental-20261111",
+    "experiment/scion-p58-compat",
+    "main"
+  ],
+  "source": "anonymous HTTPS release asset downloads and a blank bare Git repository fetched solely from refs/tags/p58-history-4157e475a9b33ba2",
+  "state": "VERIFIED",
+  "verified_at_utc": "2026-11-12T13:34:06.404707+00:00",
+  "workflow_run": 43227888297
+}

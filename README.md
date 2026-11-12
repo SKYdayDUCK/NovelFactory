@@ -4,7 +4,9 @@
 
 [![main 工程 CI](https://github.com/SKYdayDUCK/NovelFactory/actions/workflows/p1-integrity.yml/badge.svg?branch=main)](https://github.com/SKYdayDUCK/NovelFactory/actions/workflows/p1-integrity.yml)
 
-**当前 `main` 为 P2/P3/P4 研发工程集成基线。** P2 包含从卷级规划、六场短卷写作到内部发布的工程闭环。P3/P4 包含有限范围的宏微事件等效、跨卷继承与权限控制、派生工作者、在线备份及隔离 PostgreSQL 17 的 WAL 时间点恢复。合并提交、回归结果与回退步骤见[工程基线合并记录](reports/main_工程基线合并记录.md)。
+**当前主线已合入 P5.8-A 和 P5.8-B。** 双作品实验的[主线签收](reports/p6_readiness/MERGED_MAIN.md)与[历史分支归档结果](reports/branch_archive/p58/FINAL.md)已发布。
+
+**P2/P3/P4 是早期研发工程集成基线。** P2 包含从卷级规划、六场短卷写作到内部发布的工程闭环。P3/P4 包含有限范围的宏微事件等效、跨卷继承与权限控制、派生工作者、在线备份及隔离 PostgreSQL 17 的 WAL 时间点恢复。合并提交、回归结果与回退步骤见[工程基线合并记录](reports/main_工程基线合并记录.md)。
 
 **生产容量仍为 `NOT_MET`。** 50/200 Agent 热点、1000 Agent 开放到达和 500 Agent 持续读的跨次稳定性仍有缺口。多小时混合负载尚未执行。短卷使用确定性夹具，真实模型调用为 0，作者全文评价待完成，文学质量尚未评价。[容量实测](reports/性能与容量修复对照.md) · [合并前容量缺口记录](reports/未通过目标与后续工作.md)
 

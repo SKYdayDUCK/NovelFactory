@@ -11,3 +11,5 @@
 | P6 真实创作 | 无付费授权。新功能验收的线上推理请求为 0，双供应商实调为 NOT_EXECUTED，真实已结算金额为 null，独立读者评分 0 份，文学质量 NOT_EVALUATED。Windows Docker Desktop 的实际启动待现场验证。 |
 
 阶段状态为 **MERGED_AND_VERIFIED**。本次 P6 低并发工程范围、逐项验收和复现命令分别见[验收矩阵](ACCEPTANCE.md)与[操作者手册](README.md)。
+
+合入后的 GitHub push 有独立运行号，可以分别查询[生产完整性](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668528)、[双服务](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668984)、[物理恢复](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668533)、[Creative Harness](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668897)和[P6 离线授权](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668645)的最终明细。
