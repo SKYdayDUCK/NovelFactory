@@ -12,3 +12,5 @@ PR [#17](https://github.com/SKYdayDUCK/NovelFactory/pull/17) 将跨任务共享�
 真实创作仍为 `BLOCKED_LOCAL_AUTHORIZATION`，文学质量为 `NOT_EVALUATED`。原 AT-30 未达标的容量档位继续由 [#13](https://github.com/SKYdayDUCK/NovelFactory/issues/13) 跟踪。
 
 [本地验收清单](local-summary.json)和[本地原始回执](local-evidence.zip)包括修前失败、修后同测、旧版本二进制及真实 CLI、Redis 补跑、最终双服务 stdio 和物理恢复。ZIP 共 33 项，SHA-256 为 `9483a575b55f62e4f3944e0afc7d69fad1d9cfd34df158c83d58b396e8b9e6c0`。35 个不同的预算、任务和恢复测试均有通过回执。双服务测试单独运行，两项通过。
+
+[PR 工程与容量逐项结果](pr17-qualification.json)和[GitHub 工件回执](pr17-evidence.zip)对应冻结候选与测试合成提交。六个工作流中，NF 完整性、Workshop、P4 物理恢复通过。NF 单元 398/398，PostgreSQL 全量 827 通过、17 跳过。其余三个工作流保留 10 个作业中 4 个历史容量失败。
