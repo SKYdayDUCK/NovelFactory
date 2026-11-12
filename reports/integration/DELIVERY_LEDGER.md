@@ -16,6 +16,7 @@
 | P6 全局 Token 预算 | [#17](https://github.com/SKYdayDUCK/NovelFactory/pull/17) | **MERGED_AND_VERIFIED**，[#17 主线签收](https://github.com/SKYdayDUCK/NovelFactory/blob/fee462dfb6923059512b9797b4707e61eec8e8a3/reports/integration/evidence/P6-C1/main-533c1f5/SIGNOFF.md) | `533c1f526ef8841610d5c414e77ecbea8bbd5e35`，2026-11-12 03:19:32 UTC |
 | P6 本地预检和部署 | [#16](https://github.com/SKYdayDUCK/NovelFactory/pull/16) | **MERGED_AND_VERIFIED**，[#16 签收](https://github.com/SKYdayDUCK/NovelFactory/blob/a9d77b86c425de3cfe67c1b82996377003ac4200/reports/integration/evidence/P6-C2/main-0420356/SIGNOFF.md) | `0420356b0bd0bfd675494e581799946c4b967f6e`，2026-11-12 04:08:54 UTC |
 | 存量归档与第一阶段门禁 | [#27](https://github.com/SKYdayDUCK/NovelFactory/pull/27) | **MERGED_AND_VERIFIED**，[PRE_HARNESS_BASELINE](PRE_HARNESS_BASELINE.md) | `276820316129d546b0a13118bcbe283b06507795`，2026-11-12T05:13:37Z |
+| P5.7-S0 架构与审计 | [#28](https://github.com/SKYdayDUCK/NovelFactory/pull/28) | **MERGED_AND_VERIFIED**，[S0 主线签收](https://github.com/SKYdayDUCK/NovelFactory/blob/63712b4d9bc53d9d0025b1fadf28e8c464084196/reports/integration/evidence/P57-S0/main-1cce11b/SIGNOFF.md) | `1cce11b5f0ead0d6ba4d57658a5ff5533b2ef37b`，2026-11-12T06:10:06Z |
 
 每阶段的原 PR 讨论保存合并后的完整 SHA、时间、主线验收作业、遗留问题和下一阶段是否开放。后续阶段 PR 将前一阶段已确认的回执归入本表，保留原 PR 上可即时复查的记录。
 

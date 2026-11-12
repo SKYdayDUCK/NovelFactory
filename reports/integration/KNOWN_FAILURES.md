@@ -47,3 +47,5 @@ P5.6 #26 的候选与主线各有 4 个高压容量作业未达标；对照、�
 #18 已归档关闭，原输入、测试版本和采用决策见 [S9 归档](evidence/S9-PR18/README.md)。[PRE_HARNESS_BASELINE](PRE_HARNESS_BASELINE.md)保留 #16 实际主线、开放列表和原始容量边界。
 
 第一大阶段在 276820316129d546b0a13118bcbe283b06507795 签收。#27 的 PostgreSQL 主测试有 17 项因宿主机隔离条件跳过；主线原始测试逐项列出跳过的理由。#13 原 AT-30 的容量失败项继续保留。[PRE_HARNESS_BASELINE](PRE_HARNESS_BASELINE.md) 链接完整 XML、各阶段规格及独立阅读状态。
+
+S0 主线有 17 个宿主机隔离项目跳过，主线 10 个历史容量作业有 4 个未达原门槛；1000 开环读记录 1,832 个 HTTP 200、3,149 个 HTTP 429 和 19 次传输错误。#13 持续开放。[S0 主线签收](https://github.com/SKYdayDUCK/NovelFactory/blob/63712b4d9bc53d9d0025b1fadf28e8c464084196/reports/integration/evidence/P57-S0/main-1cce11b/SIGNOFF.md)。

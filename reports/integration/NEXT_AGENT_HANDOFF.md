@@ -1,5 +1,5 @@
 # 串行交付交接
 
-[PRE_HARNESS_BASELINE](PRE_HARNESS_BASELINE.md) 已签收。当前主线为 `276820316129d546b0a13118bcbe283b06507795`。只开放 Scion #4。原始范围与已完成的四项正式 PR 见[委托](https://github.com/SKYdayDUCK/NovelFactory/blob/05b5b0e38ffa86ed483568388aa2c2a2674f66e5/reports/integration/CREATIVE_HARNESS_DELIVERY_SCOPE.md)以及[交付台账](DELIVERY_LEDGER.md)。
+[S0 主线签收](https://github.com/SKYdayDUCK/NovelFactory/blob/63712b4d9bc53d9d0025b1fadf28e8c464084196/reports/integration/evidence/P57-S0/main-1cce11b/SIGNOFF.md) 对应 [#28](https://github.com/SKYdayDUCK/NovelFactory/pull/28) 和主线 `1cce11b5f0ead0d6ba4d57658a5ff5533b2ef37b`。S0 检查器的三份 ZIP 均与各次真实输出逐字相符。
 
-下一阶段 P5.7-S0 交付 Core、Workshop、Harness 三层架构映射，逐文件运行时及开发指令审计，接口、数据模型、权限及开关设计，创作评价协议和可执行回归矩阵。S0 至 S6 分开集成，在每个精确主线上保存工程结果、原始失败及数据边界。真实创作和独立文学评级等待作者本地授权。
+自 07:09 的[二十节委托](https://github.com/SKYdayDUCK/NovelFactory/blob/1ef78e6b6a4a22339508de52a854e11a4be65bec/reports/integration/P57_SINGLE_BRANCH_MANDATE.md)起，S1–S6 由[指定分支](https://github.com/SKYdayDUCK/NovelFactory/tree/dev/p57-creative-harness-s1-s6)接续。先读取该分支的 CURRENT_STAGE、NEXT_AGENT_HANDOFF、S1_RECOVERY 与实际代码，保留在途工作。每阶段在同一分支测试、里程碑提交并推送。全部通过后一次合入 main，随后独立代码审阅，审阅报告只交开发分支。主线合并后再次核对 Scion #4、AT-30 与真实创作/文学边界。

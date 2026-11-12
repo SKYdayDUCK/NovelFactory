@@ -17,6 +17,7 @@
 | Scion 实验 | [#4](https://github.com/SKYdayDUCK/NovelFactory/pull/4) | `4f249d520c921c8d6effee9978f7338b912f1dd0` | `dev/p3-p4-continuity` | Open、Draft，原头与目标未变 |
 | S9 历史实验 | [#18](https://github.com/SKYdayDUCK/NovelFactory/pull/18) | `3985ebd4f90ff9f7d2e9626df9c0fbf5e8cdb1be` | 历史分支 | ARCHIVED_AND_CLOSED，2026-11-12T04:42:53Z |
 | 第一阶段门禁 | [#27](https://github.com/SKYdayDUCK/NovelFactory/pull/27) | `5aa9b71b66c7800f58214fa368e22ebeb9c3d56b` | `main` | **MERGED_AND_VERIFIED**，`276820316129d546b0a13118bcbe283b06507795` |
+| P5.7-S0 架构与审计 | [#28](https://github.com/SKYdayDUCK/NovelFactory/pull/28) | `a8073b6664df8953330dd3bc0240038fcb64f09a` | `main` | **MERGED_AND_VERIFIED**，`1cce11b5f0ead0d6ba4d57658a5ff5533b2ef37b`。[S0 主线签收](https://github.com/SKYdayDUCK/NovelFactory/blob/63712b4d9bc53d9d0025b1fadf28e8c464084196/reports/integration/evidence/P57-S0/main-1cce11b/SIGNOFF.md) |
 
 阶段状态详见 [交付台账](DELIVERY_LEDGER.md)，接管字段为历史快照。
 
