@@ -48,7 +48,7 @@ jobs:
         run: |
           set -euo pipefail
           original=1de471076b8fb4240f95ff8033c60db34c187404
-          corrected=a6f08bf65b4c66a913964d7e88b250500f05c985
+          corrected=aadaf43050f068a15bd9d753ccba1a48b9e8f225
           git fetch --no-tags origin "$corrected"
           if [ "${{ matrix.version }}" = original ]; then target="$original"; else target="$corrected"; fi
           git checkout --detach "$target"
