@@ -12,7 +12,7 @@ permissions:
 jobs:
   qualify:
     name: qualify / ${{ matrix.suite }}
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.suite == 'history' && 'ubuntu-22.04' || 'ubuntu-24.04' }}
     timeout-minutes: 39
     strategy:
       fail-fast: false
@@ -98,9 +98,12 @@ jobs:
           set -euo pipefail
           packages=(postgresql-17 postgresql-client-17 redis-server)
           if [[ "$QUAL_SUITE" = history ]]; then
-            packages+=(bubblewrap util-linux gcc libc6-dev)
+            packages+=(util-linux gcc libc6-dev meson ninja-build libcap-dev pkg-config)
+            sed 's/noble/jammy/g' scripts/ci_install_pg17.sh > "$RUNNER_TEMP/install-pg17-jammy.sh"
+            bash "$RUNNER_TEMP/install-pg17-jammy.sh" "${packages[@]}"
+          else
+            bash scripts/ci_install_pg17.sh "${packages[@]}"
           fi
-          bash scripts/ci_install_pg17.sh "${packages[@]}"
           for tool in postgres initdb pg_ctl pg_dump pg_restore pg_basebackup pg_verifybackup; do
             test -x "$PG_BIN/$tool"
           done
@@ -115,7 +118,16 @@ jobs:
           native_bin="$prefix/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/bin"
           test "$("$native_bin/codex" --version)" = "codex-cli $NF_P5_CODEX_VERSION"
           echo "$native_bin" >> "$GITHUB_PATH"
-          bwrap --version
+          build="$RUNNER_TEMP/bubblewrap-source"
+          git clone --quiet --depth 1 --branch v0.12.0 https://github.com/containers/bubblewrap.git "$build"
+          test "$(git -C "$build" rev-parse HEAD)" = 2a76602a8c71f36c1527cf9fc3417d9149822e0c
+          meson setup "$build/out" "$build" -Dtests=false -Dman=disabled
+          meson compile -C "$build/out" bwrap
+          mkdir -p "$RUNNER_TEMP/p57-namespace-tools"
+          install -m 0755 "$build/out/bwrap" "$RUNNER_TEMP/p57-namespace-tools/bwrap"
+          echo "$RUNNER_TEMP/p57-namespace-tools" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/p57-namespace-tools/bwrap" --version
+          unshare --user --map-current-user --net -- true
           unshare --version
           cc --version
       - name: Install locked NF dependencies and the Workshop distribution for child processes
