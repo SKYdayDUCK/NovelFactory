@@ -1,0 +1,295 @@
+{
+  "status": "PASS",
+  "pg": "postgres (PostgreSQL) 17.11 (Ubuntu 17.11-1.pgdg24.04+2)",
+  "basebackup": "physical pg_basebackup -Fp -Xstream",
+  "verification": {
+    "exit_code": 0,
+    "stdout": "backup successfully verified"
+  },
+  "manifest_sha256": "90f44fb93d91dfb21b8968410fb467bb8d21108481dc33ef37aeb601d6de84a7",
+  "target": "aw_intent_before_nf",
+  "target_lsn": "0/402B9A8",
+  "replayed_lsn": "0/402B9A8",
+  "second_wal_target": "nf_bound_before_inference",
+  "second_target_lsn": "0/4077960",
+  "second_replay_lsn": "0/4077960",
+  "shared_token_budget": {
+    "budget_id": "b78e7ea0-1547-4454-993c-b1b15b3b1bcd",
+    "total_tokens": 100000,
+    "original_attempt_id": "f9ce6888-47d5-4d7f-8bd5-2dbd15e483a7",
+    "before_first_call": {
+      "reserved_tokens": 0,
+      "spent_tokens": 0,
+      "available_tokens": 100000
+    },
+    "live_unknown": {
+      "reserved_tokens": 100000,
+      "spent_tokens": 0,
+      "available_tokens": 0
+    },
+    "unknown_wal_target": "unknown_usage_before_invoice",
+    "unknown_target_lsn": "0/40B0C10",
+    "unknown_replayed_lsn": "0/40B0C10",
+    "recovered_unknown": {
+      "reserved_tokens": 100000,
+      "spent_tokens": 0,
+      "available_tokens": 0
+    },
+    "recovered_workshop_observations": [
+      [
+        "f9ce6888-47d5-4d7f-8bd5-2dbd15e483a7",
+        "UNKNOWN",
+        null
+      ]
+    ],
+    "after_repeated_invoice": {
+      "reserved_tokens": 0,
+      "spent_tokens": 18,
+      "available_tokens": 99982
+    },
+    "final_workshop_observations": [
+      [
+        "f9ce6888-47d5-4d7f-8bd5-2dbd15e483a7",
+        "UNKNOWN",
+        null
+      ],
+      [
+        "f9ce6888-47d5-4d7f-8bd5-2dbd15e483a7",
+        "SUCCEEDED",
+        18
+      ]
+    ]
+  },
+  "same_receipt_missing_attempt_peer": {
+    "task_id": "f48326c5-2bd8-4115-8df9-a77c8f98208d",
+    "receipt_ref": "fbba072f-2318-4bf1-b2fc-6cedbaa51623",
+    "generation": 1,
+    "task_state": "PAUSED",
+    "accounting_state": "NO_ATTEMPT",
+    "attempts": []
+  },
+  "after_settled_history_mismatch": {
+    "state": "WAITING_OPERATOR",
+    "last_error": "REMOTE_HISTORY_MISMATCH",
+    "hold": "SETTLED",
+    "receipt_ref": "fbba072f-2318-4bf1-b2fc-6cedbaa51623",
+    "task_id": "f48326c5-2bd8-4115-8df9-a77c8f98208d",
+    "accounting_state": "SETTLED",
+    "settled_amount": "0.020000",
+    "task_token_limit": 100000,
+    "token_observations": [
+      [
+        "f9ce6888-47d5-4d7f-8bd5-2dbd15e483a7",
+        "UNKNOWN",
+        null
+      ],
+      [
+        "f9ce6888-47d5-4d7f-8bd5-2dbd15e483a7",
+        "SUCCEEDED",
+        18
+      ]
+    ],
+    "observations": 2
+  },
+  "rolled_back_nf_task_count": 0,
+  "rolled_back_aw_intent": {
+    "state": "REQUESTED",
+    "last_error": null,
+    "hold": "HELD",
+    "receipt_ref": null,
+    "task_id": null,
+    "accounting_state": null,
+    "settled_amount": null,
+    "task_token_limit": 100000,
+    "token_observations": null,
+    "observations": 0
+  },
+  "live_nf": {
+    "protocol_version": "aw-nf.v1",
+    "nf_instance_id": "e0a4bedb-81ae-463d-8955-64bf9906f6e7",
+    "work_id": "2a0646d5-6cfe-4e61-ae80-2694c4a9d100",
+    "branch_id": "5a23aed7-15b6-4cc2-bc12-09d2b8c811ae",
+    "operation_id": "680a480b-2a58-4f79-969b-3295b8bc3f70",
+    "task_id": "f48326c5-2bd8-4115-8df9-a77c8f98208d",
+    "receipt_ref": "fbba072f-2318-4bf1-b2fc-6cedbaa51623",
+    "world_ref": {
+      "work_id": "2a0646d5-6cfe-4e61-ae80-2694c4a9d100",
+      "branch_id": "5a23aed7-15b6-4cc2-bc12-09d2b8c811ae",
+      "world_revision_id": "12409f8a-d2d0-459f-a4c3-3d71f438e70b"
+    },
+    "generation": 1,
+    "task_state": "ACCEPTED",
+    "accounting_state": "UNKNOWN",
+    "currency": "USD",
+    "actual_amount": "0",
+    "actual_tokens": 0,
+    "attempt_ids": [
+      "f9ce6888-47d5-4d7f-8bd5-2dbd15e483a7"
+    ],
+    "attempts": [
+      {
+        "attempt_id": "f9ce6888-47d5-4d7f-8bd5-2dbd15e483a7",
+        "state": "UNKNOWN",
+        "actual_amount": null,
+        "actual_tokens": null
+      }
+    ],
+    "result_ref": "719a870e-15ce-57cc-a36d-b37d1a83b1d4",
+    "wait_reason": null
+  },
+  "nf_restored_aw_live": {
+    "state": "WAITING_OPERATOR",
+    "last_error": "REMOTE_HISTORY_MISMATCH",
+    "hold": "HELD",
+    "receipt_ref": "fbba072f-2318-4bf1-b2fc-6cedbaa51623",
+    "task_id": "f48326c5-2bd8-4115-8df9-a77c8f98208d",
+    "accounting_state": "UNKNOWN",
+    "settled_amount": null,
+    "task_token_limit": 100000,
+    "token_observations": [
+      [
+        "f9ce6888-47d5-4d7f-8bd5-2dbd15e483a7",
+        "UNKNOWN",
+        null
+      ]
+    ],
+    "observations": 1
+  },
+  "aw_restored_nf_live_before_invoice": {
+    "state": "BOUND",
+    "last_error": null,
+    "hold": "HELD",
+    "receipt_ref": "fbba072f-2318-4bf1-b2fc-6cedbaa51623",
+    "task_id": "f48326c5-2bd8-4115-8df9-a77c8f98208d",
+    "accounting_state": "UNKNOWN",
+    "settled_amount": null,
+    "task_token_limit": 100000,
+    "token_observations": [
+      [
+        "f9ce6888-47d5-4d7f-8bd5-2dbd15e483a7",
+        "UNKNOWN",
+        null
+      ]
+    ],
+    "observations": 1
+  },
+  "after_explicit_synthetic_invoice": {
+    "state": "SETTLED",
+    "last_error": null,
+    "hold": "SETTLED",
+    "receipt_ref": "fbba072f-2318-4bf1-b2fc-6cedbaa51623",
+    "task_id": "f48326c5-2bd8-4115-8df9-a77c8f98208d",
+    "accounting_state": "SETTLED",
+    "settled_amount": "0.020000",
+    "task_token_limit": 100000,
+    "token_observations": [
+      [
+        "f9ce6888-47d5-4d7f-8bd5-2dbd15e483a7",
+        "UNKNOWN",
+        null
+      ],
+      [
+        "f9ce6888-47d5-4d7f-8bd5-2dbd15e483a7",
+        "SUCCEEDED",
+        18
+      ]
+    ],
+    "observations": 2
+  },
+  "resulting_nf_tasks": 1,
+  "loopback_synthetic_http_requests": 1,
+  "supplier_model_calls": 0,
+  "recovery_mcp_calls": [
+    [
+      "nf_delegation_get",
+      "680a480b-2a58-4f79-969b-3295b8bc3f70"
+    ],
+    [
+      "nf_delegation_get",
+      "680a480b-2a58-4f79-969b-3295b8bc3f70"
+    ],
+    [
+      "nf_delegation_get",
+      "680a480b-2a58-4f79-969b-3295b8bc3f70"
+    ],
+    [
+      "nf_delegation_get",
+      "680a480b-2a58-4f79-969b-3295b8bc3f70"
+    ],
+    [
+      "nf_delegation_get",
+      "680a480b-2a58-4f79-969b-3295b8bc3f70"
+    ],
+    [
+      "nf_delegation_get",
+      "680a480b-2a58-4f79-969b-3295b8bc3f70"
+    ]
+  ],
+  "frozen_manager": "IDLE",
+  "workshop_offline": {
+    "status": "PASS",
+    "operation_id": "680a480b-2a58-4f79-969b-3295b8bc3f70",
+    "recorded_utc": "2026-11-12T03:53:33.848232+00:00",
+    "scope": "Workshop database refused connections across two real NF supervisor scans.",
+    "aw_database_allowed_connections": false,
+    "aw_live_client_backends": 0,
+    "aw_author_mcp_during_outage": "VIEW_DENIED",
+    "pending_wake_preserved": "d68259ed-cf28-4f41-b536-bd5344cd4505",
+    "aw_unchanged_while_offline": {
+      "delegation": "BOUND",
+      "task_id": "f48326c5-2bd8-4115-8df9-a77c8f98208d",
+      "receipt_ref": "fbba072f-2318-4bf1-b2fc-6cedbaa51623",
+      "task_state": "READY",
+      "accounting_state": "NO_ATTEMPT",
+      "budget_hold": "HELD",
+      "attempts_observed": 0
+    },
+    "nf_supervisor_scans": [
+      {
+        "before": {
+          "state": "READY",
+          "attempts": []
+        },
+        "after": {
+          "state": "RESULT_STORED",
+          "attempts": [
+            "f9ce6888-47d5-4d7f-8bd5-2dbd15e483a7"
+          ]
+        },
+        "status": "RESULT_STORED"
+      },
+      {
+        "before": {
+          "state": "RESULT_STORED",
+          "attempts": [
+            "f9ce6888-47d5-4d7f-8bd5-2dbd15e483a7"
+          ]
+        },
+        "after": {
+          "state": "ACCEPTED",
+          "attempts": [
+            "f9ce6888-47d5-4d7f-8bd5-2dbd15e483a7"
+          ]
+        },
+        "status": "IDLE"
+      }
+    ],
+    "nf_stdio_during_outage": {
+      "receipt_ref": "fbba072f-2318-4bf1-b2fc-6cedbaa51623",
+      "attempt_ids": [
+        "f9ce6888-47d5-4d7f-8bd5-2dbd15e483a7"
+      ]
+    },
+    "aw_after_reconciliation": {
+      "delegation": "BOUND",
+      "task_id": "f48326c5-2bd8-4115-8df9-a77c8f98208d",
+      "receipt_ref": "fbba072f-2318-4bf1-b2fc-6cedbaa51623",
+      "task_state": "ACCEPTED",
+      "accounting_state": "UNKNOWN",
+      "budget_hold": "HELD",
+      "attempts_observed": 1
+    },
+    "production_provider_calls": 0
+  },
+  "elapsed_seconds": 17.97
+}

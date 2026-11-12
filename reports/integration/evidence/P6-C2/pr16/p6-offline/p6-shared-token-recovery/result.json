@@ -1,0 +1,102 @@
+{
+  "status": "PASS",
+  "postgres": "postgres (PostgreSQL) 17.11 (Ubuntu 17.11-1.pgdg24.04+2)",
+  "execution_kind": "REAL_ISOLATED_POSTGRESQL",
+  "source_port": 49965,
+  "restored_port": 53273,
+  "durability": {
+    "fsync": true,
+    "synchronous_commit": true,
+    "data_checksums": true
+  },
+  "model_calls": 0,
+  "production_data_accessed": false,
+  "libpq_environment_isolated": true,
+  "cleared_pg_environment_names": [],
+  "pg_basebackup": {
+    "exit_code": 0,
+    "stdout": ""
+  },
+  "base_backup_seconds": 1.1240586039999982,
+  "pg_verifybackup": {
+    "exit_code": 0,
+    "stdout": "backup successfully verified"
+  },
+  "archiver": {
+    "archived_count": 4,
+    "failed_count": 0
+  },
+  "shared_token_budget_after_physical_restore": {
+    "work_id": "9df4681b-a804-4127-bca3-edda7b0272e9",
+    "budget_id": "cea83b69-b830-4ad5-b4cc-084806435440",
+    "currency": "USD",
+    "limit_amount": "5.000000",
+    "reserved_amount": "0.500000",
+    "spent_amount": "0.000000",
+    "total_tokens": 150,
+    "reserved_tokens": 100,
+    "spent_tokens": 0,
+    "available_tokens": 50,
+    "unquantified_attempts": 0
+  },
+  "restored_semantic_conflict": {
+    "case_id": "c48c72bd-45a2-51a1-aee7-b5dad32a4bf1",
+    "receipt_id": "fb8d1f5c-a7e9-5562-af34-0dc9e5a1626e",
+    "conflict_type": "STALE_PRECONDITION",
+    "outcome": "REVIEW_REQUIRED",
+    "observation_ids": [
+      "b1d1faa5-167b-5e1e-90c9-0166bf0cde07",
+      "c08dc2d4-2d9b-5d97-8468-bdaf35aed5e0"
+    ],
+    "change_revision": "2ab32933-1405-4aca-a56a-c596bb13061e",
+    "contributions": {
+      "semantic.conflict.detected": {
+        "events": 1,
+        "conflict.candidates": 1,
+        "conflict.confirmed_by_guard": 1,
+        "conflict.type.STALE_PRECONDITION": 1,
+        "event.semantic.conflict.detected": 1
+      },
+      "semantic.conflict.resolved": {
+        "events": 1,
+        "conflict.actual_tokens": 0,
+        "conflict.review_escalations": 1,
+        "conflict.result.REVIEW_REQUIRED": 1,
+        "event.semantic.conflict.resolved": 1,
+        "conflict.strategy.ESCALATE_REVIEW": 1,
+        "conflict.additional_model_attempts": 0,
+        "conflict.cost_status.NO_MODEL_CALL": 1,
+        "duration_ms.semantic.conflict.resolved": "54.935"
+      }
+    }
+  },
+  "redis_pitr_reconciliation": {
+    "redis_version": "8.0.2",
+    "target_subscriber_receipts": 1,
+    "target_audit_rows": 1,
+    "excluded_redis_entries_quarantined": 1,
+    "excluded_world_revisions": 0
+  },
+  "target_world_ref": {
+    "work_id": "9df4681b-a804-4127-bca3-edda7b0272e9",
+    "branch_id": "1d57af83-ac39-4438-82ff-475cc423cc12",
+    "world_revision_id": "4771ff97-173c-4a68-90ca-196421e0a19a"
+  },
+  "target_lsn": "0/310D7B0",
+  "restored_state_sha256": "9a77ec03c4b14f89ff149338c0eb6689cf669b70b862b7af28d7168a2cfd012e",
+  "snapshot_equal_before_fencing": true,
+  "table_count": 71,
+  "object_count": 31,
+  "recovery_seconds_to_verified_service": 1.3641924439999968,
+  "selected_recovery_point_age_seconds": 0.456958,
+  "target_commits_lost": 0,
+  "deliberately_excluded_later_world_commits": 1,
+  "restored_world_event_count": 2,
+  "unknown_calls_retained": 1,
+  "reserved_amount_retained": "0.5",
+  "fenced_task_count": 3,
+  "old_worker_rejected": true,
+  "original_commit_receipt_equal": true,
+  "limitation": "Small isolated local fixture; selected-point RPO/RTO, not production SLO or remote storage test",
+  "total_seconds": 5.1189519509999855
+}
