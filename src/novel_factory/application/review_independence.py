@@ -57,14 +57,18 @@ def validate_native_case(binding, case):
     subjects = case["subjects"]
     owners = {p["principal_id"] for p in binding["producers"]}
     reviewer = binding["reviewer"]["principal_id"]
-    _check(set(subjects) == owners | {reviewer})
+    publisher = binding.get("publisher", {}).get("principal_id")
+    _check(set(subjects) == owners | {reviewer} | ({publisher} if publisher else set()))
     for record in subjects.values():
         # The offline registrar supplies the digest of the evidence actually inspected.
         _check(set(record) == {"group", "evidence_sha256"} and isinstance(record["group"], str)
                and record["group"].strip() == record["group"] and 0 < len(record["group"]) <= 200
                and len(record["evidence_sha256"]) == 64
                and all(ch in "0123456789abcdef" for ch in record["evidence_sha256"]))
-    _check(subjects[reviewer]["group"] not in {subjects[p]["group"] for p in owners})
+    producer_groups = {subjects[p]["group"] for p in owners}
+    _check(subjects[reviewer]["group"] not in producer_groups)
+    if publisher:
+        _check(subjects[publisher]["group"] not in producer_groups | {subjects[reviewer]["group"]})
     return expires
 
 

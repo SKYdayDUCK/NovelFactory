@@ -1,0 +1,261 @@
+{
+  "stage": "S5",
+  "name": "指令根因、受控对照、独立发布和回滚",
+  "branch": "dev/p57-creative-harness-s1-s6",
+  "base_commit": "7e8659f286407b0428a37f3fae8e9c6905e7c203",
+  "product_tree_before_evidence": "ab216903d93fe3c05dc5bc6e1c2d978c2ba3805c",
+  "tested_blobs": {
+    "contracts/agent.schema.json": "ed29c3a55bf260d2fa94e0f94f88bcff7b5abb32",
+    "contracts/harness.schema.json": "cb37f7e44341936aa0393cb2c09e255b91ce383b",
+    "src/novel_factory/application/adaptive_evaluation.py": "4bf44613b6ba4484aa725e4f5e5f04a00d74caec",
+    "src/novel_factory/application/adaptive_instructions.py": "321fe54bb206bff8f67893b912e662210e192071",
+    "src/novel_factory/application/adaptive_promotion.py": "f02458e6e90c4b1bf169e04b8fa440df2da5c7b0",
+    "src/novel_factory/application/adaptive_runtime.py": "8025498e3b8cb03c7301d89a4655a562ff682354",
+    "src/novel_factory/application/agent_gateway.py": "4805fe6fd292e2bd7debc32fc2caeb017f3db050",
+    "src/novel_factory/application/creative_context.py": "39950fcd845630c68cb791094e46274e1f4e4a52",
+    "src/novel_factory/application/creative_context_store.py": "4619a5b9b8b18fb4d54138a1db215a0bdbbb3e1a",
+    "src/novel_factory/application/creative_review.py": "c40143881ced6e362d9a4608eac8950beb67f364",
+    "src/novel_factory/application/dynamic_runtime.py": "13152c441f0725fc62d3c1cc67c7847e7c5aea4b",
+    "src/novel_factory/application/kernel.py": "8c8bb90aa120ffe984bda2f830591ada6ede0520",
+    "src/novel_factory/application/mcp_runtime.py": "1889ce20475fbad5f35b57ca663d8b9c80e6f41f",
+    "src/novel_factory/application/review_independence.py": "8fbefdf2bce2467e99f5aa48b3f2ac01bf69d08a",
+    "src/novel_factory/contracts/_schema_bundle.py": "ba5b38dde48d29fc0f9da86d8ac983ba4f202362",
+    "src/novel_factory/interfaces/adaptive_authority.py": "ed42bf189b7ebb1136a03ace03a065385e5a5231",
+    "src/novel_factory/interfaces/mcp_stdio.py": "8fa7c2bb1b79ae8f66dbc522f32c62cda08b9d6d",
+    "tests/integration/adaptive_helpers.py": "2a087c26c06cabbdfc526db3a0dd09bf42b258fc",
+    "tests/integration/test_adaptive_context_replay.py": "0ac54e6b50df0f6a1813cc85d619d7c963816e4b",
+    "tests/integration/test_adaptive_evaluation.py": "7ee264cce49359e9e0895dbd3302d72193b4ba41",
+    "tests/integration/test_adaptive_instruction_proposals.py": "826a77b1ad8cbb33b5eabb6d8ddc487ec5530224",
+    "tests/integration/test_adaptive_promotion.py": "74ef08d462454d11aca8e1649ba419f6807f76cf",
+    "tests/integration/test_harness_adaptive_mcp.py": "402dc15a950c450575527cd47e957e4b906d0307",
+    "tests/unit/test_harness_configuration.py": "c438b888f31b27029dbea82a88955c15c056e953"
+  },
+  "postgres": "17.11",
+  "model": "Offline engineering reader and local deterministic transport only",
+  "paid_calls": 0,
+  "literary_quality": "NOT_EVALUATED",
+  "verification": "从带签名的 S3 审核和原生稿件生成候选；保留完整冻结清单、独立身份组、实际部署摘要、全部配对和失败。真实 stdio 控制端与审核端分别验证观察、批准、任务冻结和回滚。阶段回执含本地模型传输测试和正式历史不变性的反例。后续执行静态 A、固定 Harness B、有真实动态行为的 C，核对原有 NF/Workshop 日志和 NF Attempt，并独立运行真实服务故障与恢复。",
+  "runs": {
+    "final_historical_fences": {
+      "file": "final_historical_fences.json.gz",
+      "summary": {
+        "passed": 2,
+        "total": 2,
+        "collected": 2
+      },
+      "seconds": 31.31468105316162
+    },
+    "frozen_proposals": {
+      "file": "frozen_proposals.json.gz",
+      "summary": {
+        "passed": 2,
+        "total": 2,
+        "collected": 2
+      },
+      "seconds": 30.41527271270752
+    },
+    "frozen_ab": {
+      "file": "frozen_ab.json.gz",
+      "summary": {
+        "passed": 4,
+        "total": 4,
+        "collected": 4
+      },
+      "seconds": 79.71892738342285
+    },
+    "signed_context": {
+      "file": "signed_context.json.gz",
+      "summary": {
+        "passed": 1,
+        "total": 1,
+        "collected": 1
+      },
+      "seconds": 43.284525871276855
+    },
+    "frozen_authority": {
+      "file": "frozen_authority.json.gz",
+      "summary": {
+        "passed": 2,
+        "total": 2,
+        "collected": 2
+      },
+      "seconds": 51.4917676448822
+    },
+    "frozen_stdio": {
+      "file": "frozen_stdio.json.gz",
+      "summary": {
+        "passed": 3,
+        "total": 3,
+        "collected": 3
+      },
+      "seconds": 50.4658899307251
+    },
+    "nf_legacy": {
+      "file": "nf_legacy.json.gz",
+      "summary": {
+        "passed": 96,
+        "total": 96,
+        "collected": 96
+      },
+      "seconds": 447.55359649658203
+    },
+    "w4_handoff": {
+      "file": "w4_handoff.json.gz",
+      "summary": {
+        "passed": 4,
+        "total": 4,
+        "collected": 4
+      },
+      "seconds": 116.7305223941803
+    },
+    "preceding_harness": {
+      "file": "preceding_harness.json.gz",
+      "summary": {
+        "passed": 45,
+        "total": 45,
+        "collected": 45
+      },
+      "seconds": 192.1754014492035
+    },
+    "unit_and_contract": {
+      "file": "unit_and_contract.json.gz",
+      "summary": {
+        "passed": 422,
+        "subtests passed": 3,
+        "total": 425,
+        "collected": 425
+      },
+      "seconds": 38.12147116661072
+    }
+  },
+  "earlier_failures": [
+    "historical_writer.txt.gz",
+    "writer_output_missing.txt.gz",
+    "previous_attempt_fixture.txt.gz",
+    "mixed_source.txt.gz",
+    "original_event_column.txt.gz"
+  ],
+  "installed_wheel": {
+    "source_commit": "7e8659f286407b0428a37f3fae8e9c6905e7c203",
+    "origin": "DEPLOYMENT_RELEASE",
+    "module_sha256": {
+      "application/adaptive_instructions.py": "57bba0b7e99541d9130146acb245e49c1726102314da0dbf310af1bb2e9ce8a3",
+      "application/adaptive_evaluation.py": "52362a67f5186fe53375fd2d53860cad7884ff6857ced6e68f8c9d38ccbf8303",
+      "application/adaptive_runtime.py": "dde828b714e0070af779ecbab5666ebdafe8bca38882083aca686a302122a6da",
+      "application/adaptive_promotion.py": "0fd88a10be50fab9a83fcd76aa50ab059cdd404e4fd13196846d67329c94fc72",
+      "application/agent_gateway.py": "3023f188f50345409df0d2effbfc3558dff4d7a3594355695cef46cfebaa4310",
+      "application/dynamic_runtime.py": "9ed4a2d9094e2b37a5d7bea72027f909f905e8a07352c41d7de89f1fcca9bc98",
+      "application/dynamic_agents.py": "9b09f2f1f40c35d64aac143d6999f826e8e412992120b878a8a4e833b4b94c62",
+      "application/creative_context_store.py": "53313c675ed8628f303d8a444ec9ee0221fcb302427bf9602cfadad9e204f635",
+      "application/runtime_tasks.py": "7ed0f9290526178d7e7bd6b851ac33d30da4c4b5b55deae1adf5208d880c5c40",
+      "application/candidate_delivery.py": "00c366ebac215714d82b501eb52d84552f74bc0c4c70fa9325cd2dab3f28b5d2",
+      "application/creative_review.py": "a536268b9420fc23730d6625fc6bc54119ed2d8d246f0dc35106c5630a89ca67",
+      "application/creative_context.py": "0c40c3e095ff8e8938b56355d31dab1e23703bbdae70ba370a0e882798fdbdd8",
+      "domain/creative_review.py": "47143b9fea0ef3f71b23b35b708fa9d0f41d69ed97215bc4ba901e2caa3207e4"
+    },
+    "wheel": "novel_factory-2.0.1-py3-none-any.whl",
+    "sha256": "2d3d22c64d4fe3c15a61e27e2e22a96f975d72ef59d2cd0516af93a5ee7dc50e",
+    "verified_schemas": [
+      "InstructionCandidate",
+      "ExperimentFreeze",
+      "PromotionDecision"
+    ],
+    "commercial_calls": 0
+  },
+  "first_frozen_tree": "c33d56dda46c378749d88125f9d335f8ca6142eb",
+  "final_tree_diff": "Three test files refined the nonempty existing attempt ledger assertion, exact accepted output in writer evidence, and explicit denials for fresh dispatch/superseded draft. All affected suites were rerun; production sources were identical.",
+  "service_runs": {
+    "s5-frozen-proposals": {
+      "postgres_nf_id": 7707205612944699503,
+      "postgres_workshop_id": 7707205612467843173,
+      "distinct_clusters": true,
+      "redis": "8.0.2"
+    },
+    "s5-final-ab": {
+      "postgres_nf_id": 7707205965428318233,
+      "postgres_workshop_id": 7707205965197389847,
+      "distinct_clusters": true,
+      "redis": "8.0.2"
+    },
+    "s5-final-context": {
+      "postgres_nf_id": 7707205803988283425,
+      "postgres_workshop_id": 7707205803996827683,
+      "distinct_clusters": true,
+      "redis": "8.0.2"
+    },
+    "s5-frozen-promotion": {
+      "postgres_nf_id": 7707205612659331181,
+      "postgres_workshop_id": 7707205612370165868,
+      "distinct_clusters": true,
+      "redis": "8.0.2"
+    },
+    "s5-final-mcp": {
+      "postgres_nf_id": 7707205916245200933,
+      "postgres_workshop_id": 7707205916277588003,
+      "distinct_clusters": true,
+      "redis": "8.0.2"
+    },
+    "s5-final-proposal-fences": {
+      "postgres_nf_id": 7707205741977878563,
+      "postgres_workshop_id": 7707205741474545697,
+      "distinct_clusters": true,
+      "redis": "8.0.2"
+    }
+  },
+  "rollout_example": {
+    "candidate_ref": {
+      "artifact_id": "a7e365f0-ef09-47c2-8ad4-b1b98be79d03",
+      "artifact_revision_id": "fd2834c6-89b7-4e9e-98d1-d0d459219319",
+      "sha256": "61e0491f1980859cc118fc84df0c4d04db6420d69a1d83daeb0c17651ae8589a"
+    },
+    "quality": {
+      "reasons": [],
+      "eligible": true,
+      "improved": [
+        "34b0a2f2-eac5-4314-ad80-844184ed387f"
+      ],
+      "regressed": [],
+      "held_out_negatives": [
+        "1c6fff4c-40df-4948-937e-cfe285806670"
+      ],
+      "held_out_positives": [
+        "34b0a2f2-eac5-4314-ad80-844184ed387f"
+      ]
+    },
+    "arms": {
+      "CONTROL": {
+        "amount": "0",
+        "failures": 0,
+        "executions": 2,
+        "latency_ns": 18384875,
+        "true_positives": 1,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "provider_tokens": 0,
+        "evidence_position": 0,
+        "native_rework_count": 0
+      },
+      "TREATMENT": {
+        "amount": "0",
+        "failures": 0,
+        "executions": 2,
+        "latency_ns": 3988229,
+        "true_positives": 2,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "provider_tokens": 0,
+        "evidence_position": 0,
+        "native_rework_count": 0
+      }
+    },
+    "attempt": "b94ff131-836a-4d5f-a299-1afccf477ed3",
+    "epochs": [
+      0,
+      1,
+      2
+    ],
+    "distinct_identities": 5,
+    "commercial_calls": 0
+  },
+  "initial_failures": "Changing the deployed evaluation module between MCP startup and the frozen run correctly produced EVALUATION_FREEZE_MISMATCH. One early test used event_id, corrected to the real primary key event_version_id. The disabled optimization check now compares the attempt ledger before and after discovery, including earlier test attempts. Historical evidence permits only the signed writer output selected by native acceptance; new dispatch retains the original S1 restriction."
+}

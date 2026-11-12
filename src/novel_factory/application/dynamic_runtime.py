@@ -97,10 +97,12 @@ def _candidate_scope_id(ref):
     return str(uuid5(UUID(ref["artifact_revision_id"]), "dynamic-candidate-scope"))
 
 
-def protect_candidate(kernel, repo, task, world_ref, ref, assignment_ref):
+def protect_candidate(kernel, repo, task, world_ref, ref, assignment_ref, *, adaptive_ref=None):
     """Preserve the validated output schema, registering its access scope in the same transaction."""
     scope = {"world_ref": world_ref, "task_id": task["task_id"], "generation": task["generation"]}
     payload = {"scope": scope, "candidate_ref": ref, "dynamic_assignment_ref": assignment_ref}
+    if adaptive_ref is not None:
+        payload["adaptive_instruction_ref"] = adaptive_ref
     marker = kernel._blob(payload)
     marker["artifact_revision_id"] = _candidate_scope_id(ref)
     kernel._register_artifact(repo, marker, task["work_id"], payload, "CREATIVE_DYNAMIC_CANDIDATE_SCOPE",
@@ -108,14 +110,21 @@ def protect_candidate(kernel, repo, task, world_ref, ref, assignment_ref):
 
 
 def audit_assignment(repo, work, artifact, ref):
-    if artifact["kind"] == "AGENT_CANDIDATE":
+    kind = artifact["kind"]
+    if kind == "AGENT_CANDIDATE":
         marker = repo.one("artifacts", {"work_id": work, "kind": "CREATIVE_DYNAMIC_CANDIDATE_SCOPE",
                                         "artifact_revision_id": _candidate_scope_id(ref)})
-        if marker:
-            require(marker["payload"]["candidate_ref"] == ref, "VIEW_DENIED", "Candidate scope mismatch")
-            return marker["payload"]["dynamic_assignment_ref"]
-        return None
-    if artifact["kind"].startswith("AGENT_ROLE_TOOL_") or artifact["kind"] in {
+        if not marker:
+            return None
+        require(marker["payload"]["candidate_ref"] == ref, "VIEW_DENIED", "Candidate scope mismatch")
+        payload = marker["payload"]
+    elif kind.startswith("AGENT_ROLE_TOOL_") or kind in {
             "AGENT_INPUT", "AGENT_PROMPT", "AGENT_RESPONSE", "AGENT_BLOCKED", "AGENT_CALL_EVIDENCE"}:
-        return artifact["payload"].get("dynamic_assignment_ref")
+        payload = artifact["payload"]
+    else:
+        return None
+    for name, expected_kind in (("dynamic_assignment_ref", "CREATIVE_DYNAMIC_FREEZE"),
+                                ("adaptive_instruction_ref", "CREATIVE_INSTRUCTION_SELECTION")):
+        if payload.get(name):
+            return expected_kind, payload[name]
     return None

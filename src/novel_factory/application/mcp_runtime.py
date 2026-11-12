@@ -52,6 +52,13 @@ class McpRuntime:
                 if configuration.dynamic_agents:
                     names.extend(("nf_harness_agent_register", "nf_harness_agent_select",
                                   "nf_harness_agent_retire", "nf_harness_agent_history"))
+                if configuration.adaptive_instructions:
+                    names.extend(("nf_harness_instruction_propose", "nf_harness_instruction_evaluate",
+                                  "nf_harness_instruction_case", "nf_harness_instruction_decide",
+                                  "nf_harness_instruction_monitor", "nf_harness_instruction_rollback"))
+                    if configuration.auto_promote:
+                        names.append("nf_harness_instruction_policy")
+                    names.append("nf_harness_instruction_revoke_policy")
                 return names
             if isinstance(self.binding, ProjectBinding):
                 self._project_auth(repo.conn)
@@ -74,6 +81,7 @@ class McpRuntime:
         # catalog revision cannot silently add tools to an existing execution.
         inputs = repo.many("artifacts", {"work_id": task["work_id"], "kind": "AGENT_INPUT",
                           "artifact_revision_id": [r["artifact_revision_id"] for r in identity["input_artifacts"]]})
+        adaptive_enabled = False
         creative_enabled = False
         requested = set()
         skills = set()
@@ -89,7 +97,9 @@ class McpRuntime:
                 skills.add(snapshot["skill_name"])
                 if "creative_harness" in data:
                     from novel_factory.infrastructure.creative_config import CreativeHarnessConfig
-                    creative_enabled = CreativeHarnessConfig.parse(data["creative_harness"]).enabled
+                    config = CreativeHarnessConfig.parse(data["creative_harness"])
+                    creative_enabled = config.enabled
+                    adaptive_enabled = config.adaptive_instructions
         caps = set(grant["capabilities"])
         if dynamic_ref is not None:
             from .dynamic_runtime import verified
@@ -107,6 +117,8 @@ class McpRuntime:
                 names.append("nf_harness_review_read")
             if role in {"reviewer", "literary_editor", "chief_editor"} and "review_submit" in requested:
                 names.extend(("nf_harness_review_submit", "nf_harness_review_withdraw"))
+                if adaptive_enabled:
+                    names.extend(("nf_harness_instruction_evidence", "nf_harness_instruction_review"))
             if (role == "writer" and task["task_kind"] == "targeted_revision"
                     and {"artifact_put", "draft_submit"} <= requested):
                 names.extend(("nf_harness_revision_brief", "nf_harness_revise"))
@@ -183,6 +195,33 @@ class McpRuntime:
         with self.kernel.db.uow(write=False) as repo:
             self._creative_authority(repo, arguments["task_id"])
         return operation(self.principal, **arguments)
+
+    def adaptive_instruction_call(self, tool, **arguments):
+        from .adaptive_evaluation import AdaptiveEvaluationService
+        from .adaptive_instructions import AdaptiveInstructionService
+        from .adaptive_promotion import AdaptivePromotionService
+
+        require(tool in self.available_tools(), "VIEW_DENIED", "Instruction operation unavailable")
+        promotion = AdaptivePromotionService(self.kernel)
+        if tool in {"nf_harness_instruction_evidence", "nf_harness_instruction_review"}:
+            proof = self._role_proof()
+            with self.kernel.db.uow(write=False) as repo:
+                task, _, context = self._role_task(repo, tool, proof, "ARTIFACT_WRITE")
+            method = promotion.evidence if tool == "nf_harness_instruction_evidence" else promotion.review
+            return method(self.principal, context["read_cut"]["world_ref"], reviewer_task_id=task["task_id"],
+                          reviewer_generation=task["generation"], **arguments)
+        world = arguments["world_ref"]
+        require((world["work_id"], world["branch_id"]) == (self.binding.work_id, self.binding.branch_id),
+                "VIEW_DENIED", "Instruction operation exceeds the bound work or branch")
+        with self.kernel.db.uow(write=False) as repo:
+            self._creative_authority(repo, arguments.get("task_id", arguments.get("reviewer_task_id")))
+        methods = {"nf_harness_instruction_propose": AdaptiveInstructionService(self.kernel).propose,
+                   "nf_harness_instruction_evaluate": AdaptiveEvaluationService(self.kernel).run,
+                   "nf_harness_instruction_case": promotion.describe_case,
+                   "nf_harness_instruction_decide": promotion.decide, "nf_harness_instruction_policy": promotion.policy,
+                   "nf_harness_instruction_revoke_policy": promotion.revoke_policy,
+                   "nf_harness_instruction_monitor": promotion.monitor, "nf_harness_instruction_rollback": promotion.rollback}
+        return methods[tool](self.principal, **arguments)
 
     def dynamic_agent_call(self, tool, **arguments):
         require(tool in self.available_tools(), "VIEW_DENIED", "Dynamic agent operation unavailable")

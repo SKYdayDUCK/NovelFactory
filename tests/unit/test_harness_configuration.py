@@ -56,7 +56,10 @@ def test_deployed_defs_are_identical_to_the_frozen_s0_shapes():
         assert contract == candidates[name]
 
 
-def test_frozen_dynamic_assignment_requires_both_flags_and_remains_optional_for_old_inputs():
+@pytest.mark.parametrize(("field", "flag"), [
+    ("dynamic_assignment_ref", "dynamic_agents"), ("adaptive_instruction_ref", "adaptive_instructions"),
+])
+def test_frozen_runtime_selection_requires_its_flag_and_remains_optional_for_old_inputs(field, flag):
     from novel_factory.contracts.registry import validate_contract
 
     ref = {"artifact_id": "36ebae0c-7ecb-4e35-ba62-c5951cb426fb",
@@ -68,7 +71,7 @@ def test_frozen_dynamic_assignment_requires_both_flags_and_remains_optional_for_
     assert validate_contract("AgentInput", baseline, "agent") == baseline
     for disabled in ({}, {"creative_harness": CreativeHarnessConfig(enabled=True).as_dict()}):
         with pytest.raises(DomainError):
-            validate_contract("AgentInput", {**baseline, **disabled, "dynamic_assignment_ref": ref}, "agent")
-    enabled = {**baseline, "dynamic_assignment_ref": ref,
-               "creative_harness": CreativeHarnessConfig(enabled=True, dynamic_agents=True).as_dict()}
+            validate_contract("AgentInput", {**baseline, **disabled, field: ref}, "agent")
+    enabled = {**baseline, field: ref,
+               "creative_harness": CreativeHarnessConfig(enabled=True, **{flag: True}).as_dict()}
     assert validate_contract("AgentInput", enabled, "agent") == enabled

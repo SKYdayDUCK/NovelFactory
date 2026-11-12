@@ -89,6 +89,9 @@
         },
         "dynamic_assignment_ref": {
           "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "adaptive_instruction_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
         }
       },
       "required": [
@@ -115,6 +118,28 @@
                 "creative_harness": {
                   "properties": {
                     "dynamic_agents": {
+                      "properties": {
+                        "enabled": {
+                          "const": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "adaptive_instruction_ref": {
+          "required": [
+            "creative_harness"
+          ],
+          "properties": {
+            "creative_harness": {
+              "properties": {
+                "creative_harness": {
+                  "properties": {
+                    "adaptive_instructions": {
                       "properties": {
                         "enabled": {
                           "const": true

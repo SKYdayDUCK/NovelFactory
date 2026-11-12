@@ -55,7 +55,47 @@ _REVIEW_OBSERVATION = object_schema(
 _WORLD = _inline_schema("WorldRef", "2.0")
 _EPOCH = {"type": "integer", "minimum": 0}
 _INSTRUCTION = {"type": "string", "minLength": 1, "maxLength": 200000}
+_GENERATION = {"type": "integer", "minimum": 1}
+_UNTIL = {"type": "string", "format": "date-time"}
+_REVIEW_REFS = {"type": "array", "maxItems": 32, "uniqueItems": True, "items": _ARTIFACT}
+_EVALUATION_REFS = {"candidate_ref": _ARTIFACT, "engineering_report_ref": _ARTIFACT, "run_manifest_ref": _ARTIFACT}
+_VERDICT = {"enum": ["APPROVE", "REJECT"]}
+_NAME = {"type": "string", "minLength": 1, "maxLength": 128}
 _TOOLS = {
+    "nf_harness_instruction_propose": ("Freeze a scoped instruction and comparison using signed manuscript reviews.",
+        object_schema(optional=("instructions", "material_order", "evaluation_report_refs"), world_ref=_WORLD,
+                      task_id=_UUID, generation=_GENERATION, failure_report_refs={**_REVIEW_REFS, "minItems": 1},
+                      success_report_refs=_REVIEW_REFS, evaluation_report_refs={**_REVIEW_REFS, "minItems": 1},
+                      change_kind={"enum": ["ROLE_INSTRUCTIONS", "SKILL_INSTRUCTIONS", "CONTEXT_RECIPE", "REVIEW_RUBRIC"]},
+                      quota=_inline_schema("Quota", "harness"), order_seed={"type": "integer", "minimum": 0,
+                      "maximum": 2147483647}, repetitions={"type": "integer", "minimum": 1, "maximum": 32},
+                      instructions={"type": "string", "minLength": 1, "maxLength": 16000},
+                      material_order={"type": "array", "minItems": 1, "maxItems": 11, "uniqueItems": True, "items": _NAME},
+                      idempotency_key=_KEY)),
+    "nf_harness_instruction_evaluate": ("Run every preregistered arm and retain outcomes for independent review.",
+        object_schema(world_ref=_WORLD, candidate_ref=_ARTIFACT, idempotency_key=_KEY)),
+    "nf_harness_instruction_case": ("Describe the exact participants and artifacts for an independent registrar.",
+        object_schema(world_ref=_WORLD, **_EVALUATION_REFS, reviewer_task_id=_UUID, reviewer_generation=_GENERATION,
+                      publisher_grant_id=_UUID)),
+    "nf_harness_instruction_evidence": ("Read the assigned evaluation outcomes and scope.",
+        object_schema(**_EVALUATION_REFS)),
+    "nf_harness_instruction_review": ("Record an independent opinion on the assigned experiment.",
+        object_schema(**_EVALUATION_REFS, publisher_grant_id=_UUID, verdict=_VERDICT, reason=_REASON,
+                      valid_until=_UNTIL, idempotency_key=_KEY)),
+    "nf_harness_instruction_decide": ("Decide whether to release independently reviewed instructions.",
+        object_schema(optional=("route", "policy_ref"), **_EVALUATION_REFS, world_ref=_WORLD, review_ref=_ARTIFACT,
+                      action=_VERDICT, expected_epoch=_EPOCH, reason=_REASON, valid_until=_UNTIL, idempotency_key=_KEY,
+                      route={"enum": ["MANUAL", "POLICY_AUTOMATIC"]}, policy_ref=_ARTIFACT)),
+    "nf_harness_instruction_policy": ("Authorize a scoped publisher under an expiring automatic promotion policy.",
+        object_schema(optional=("dynamic_instance_ref",), world_ref=_WORLD, role_id=_NAME, task_kind=_NAME, skill_name=_NAME,
+                      dynamic_instance_ref=_ARTIFACT, publisher_grant_id=_UUID, valid_until=_UNTIL, idempotency_key=_KEY)),
+    "nf_harness_instruction_revoke_policy": ("Withdraw the scoped authority for subsequent automatic releases.",
+        object_schema(world_ref=_WORLD, policy_ref=_ARTIFACT, reason=_REASON, idempotency_key=_KEY)),
+    "nf_harness_instruction_monitor": ("Read NF attempts and settlement for a task that froze a specific release.",
+        object_schema(world_ref=_WORLD, decision_ref=_ARTIFACT, task_id=_UUID, generation=_GENERATION, idempotency_key=_KEY)),
+    "nf_harness_instruction_rollback": ("Restore the previous scoped selection at the expected release epoch.",
+        object_schema(optional=("review_ref",), world_ref=_WORLD, decision_ref=_ARTIFACT, expected_epoch=_EPOCH,
+                      reason=_REASON, review_ref=_ARTIFACT, idempotency_key=_KEY)),
     "nf_harness_agent_register": ("Register scoped profile and Skill text from a delegated source assignment.",
         object_schema(task_id=_UUID, generation={"type": "integer", "minimum": 1},
                       workshop_binding=_inline_schema("WorkshopBinding", "harness"),
@@ -196,6 +236,8 @@ def make_server(runtime, *, ceiling=None):
                 return tool_error("INVALID_ARGUMENT")
             if name in {"nf_project_status", "nf_resume_project"}:
                 return await asyncio.to_thread(runtime.project, resume=name == "nf_resume_project")
+            if name.startswith("nf_harness_instruction_"):
+                return await asyncio.to_thread(runtime.adaptive_instruction_call, name, **arguments)
             if name in {"nf_harness_agent_register", "nf_harness_agent_select", "nf_harness_agent_retire",
                         "nf_harness_agent_history"}:
                 return await asyncio.to_thread(runtime.dynamic_agent_call, name, **arguments)

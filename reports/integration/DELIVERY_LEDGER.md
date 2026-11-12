@@ -1,6 +1,8 @@
 # 串行交付台账
 
-S4 动态角色、Skill 版本与代际恢复 已在开发分支验证并进入阶段提交。[S4 工程回执](../harness/evidence/s4/receipt.json)
+S5 指令根因、受控对照、独立发布和回滚 已在开发分支验证并进入阶段提交。[S5 工程回执](../harness/evidence/s5/receipt.json)
+
+S4 动态角色、Skill 版本与代际恢复已推送至开发分支，提交为 `7e8659f286407b0428a37f3fae8e9c6905e7c203`。[远端 Actions 回执](../harness/evidence/s4/remote-receipt.json)。[S4 工程回执](../harness/evidence/s4/receipt.json)
 
 S3 细粒度文学审核及定向修订已推送至开发分支，提交为 `7a480d0371622966520f354c19e80257465398b9`。[远端 Actions 回执](../harness/evidence/s3/remote-receipt.json)。[S3 工程回执](../harness/evidence/s3/receipt.json)
 

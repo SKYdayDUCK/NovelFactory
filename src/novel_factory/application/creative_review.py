@@ -182,7 +182,8 @@ class CreativeReviewService:
 
     def review(self, principal, task_id, generation, *, binding, target_ref, scope_draft_refs, coverage_refs, layer,
                observations, quota, rework_limit, independence_ref, idempotency_key, prior_report_ref=None, related_independence_refs=None, worker_id=None):
-        from novel_factory.domain.creative_review import evaluate, native_dimensions
+        from novel_factory.domain.creative_review import native_dimensions
+        from .adaptive_runtime import resolve_for_input, review_with_guidance
 
         ReviewService._key(idempotency_key)
         validate_contract("EditorialBinding", binding, "editorial")
@@ -283,8 +284,10 @@ class CreativeReviewService:
             old = self.kernel._prior(repo, principal, work, "CREATIVE_REVIEW", idempotency_key, request)
             if old:
                 return old
-            evaluated = evaluate(layer, primary["text_ref"], primary["text"], observations,
-                                 related_texts=ordered_texts, verified_evidence=verified)
+            blocks = (resolve_for_input(self.kernel, repo, spec, agent_input, runtime)
+                      if "adaptive_instruction_ref" in agent_input else [])
+            evaluated = review_with_guidance(layer, primary["text_ref"], primary["text"], observations,
+                                             related_texts=ordered_texts, verified_evidence=verified, blocks=blocks)
             findings, notes, issues = [], [], []
             for item in evaluated:
                 finding = item["finding"]
@@ -314,6 +317,8 @@ class CreativeReviewService:
                 "outcome": outcome, "idempotency_key": "h3:" + fingerprint(request)})
             rubric = {"schema_version": "1.0", "layer": layer, "dimension": dimension,
                       "implementation": "novel_factory.domain.creative_review.v1", "scope": scope}
+            if "adaptive_instruction_ref" in agent_input:
+                rubric["adaptive_instruction_ref"] = agent_input["adaptive_instruction_ref"]
             rubric_ref = _artifact(self.kernel, repo, work, principal, "CREATIVE_REVIEW_RUBRIC", rubric)
             report = {"schema_version": "1.0", "kind": "REVIEW_REPORT", "scope": scope, "target_ref": target_ref,
                       "review_binding": {"producer": _identity(producer, producer_grant), "reviewer": _identity(principal, grant),
@@ -337,6 +342,8 @@ class CreativeReviewService:
                          "runtime_sha256": agent_input["runtime_sha256"], "skill": runtime["skill_name"],
                          "skill_version": runtime["skill_version"]}, "scene_ref": draft["scene_ref"], "plan_ref": binding["plan_ref"],
                          "style_refs": binding["style_refs"], "literary_refs": binding["literary_refs"]}}
+            if "adaptive_instruction_ref" in agent_input:
+                evidence["source_versions"]["reviewer"]["adaptive_instruction_ref"] = agent_input["adaptive_instruction_ref"]
             details_ref = _artifact(self.kernel, repo, work, principal, "CREATIVE_REVIEW_DETAILS", evidence,
                                     revision=_derived(report_ref, "details"))
             result = {"report_ref": report_ref, "native_review_ref": native_report, "details_ref": details_ref,

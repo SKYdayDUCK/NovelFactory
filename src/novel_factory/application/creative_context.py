@@ -249,6 +249,9 @@ def build_context_packet(binding, materials, editorial=None, joint=None):
     else:
         omissions.append("Only this character's fixed knowledge cut was selected.")
 
+    if binding.get("adaptive_blocks"):
+        from .adaptive_runtime import organize_materials
+        creative = organize_materials(creative, binding["adaptive_blocks"])
     user = {"assignment": binding["input"]["assignment"], "creative_materials": creative}
     # Typed outputs can require exact citations and operation handles. Keep
     # them outside the literary view. Neither section has system authority.

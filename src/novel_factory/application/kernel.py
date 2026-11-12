@@ -284,7 +284,8 @@ class Kernel:
 
             assignment = audit_assignment(r, work_id, artifact, ref)
             if assignment:
-                frozen = self.artifact(r, assignment, work_id, kind="CREATIVE_DYNAMIC_FREEZE")["payload"]
+                kind, assignment_ref = assignment
+                frozen = self.artifact(r, assignment_ref, work_id, kind=kind)["payload"]
                 branch = frozen["scope"]["world_ref"]["branch_id"]
                 if artifact["kind"] != "AGENT_CANDIDATE" or "ADMIN" in grant["capabilities"]:
                     self.authorize(r, principal, work_id, "ADMIN", branch)
