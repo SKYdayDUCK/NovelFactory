@@ -1,0 +1,20 @@
+{
+  "stage": "P6 shared budget prerequisite",
+  "base": "74350760dfd063f3596e5b6838a56a40d3006ad6",
+  "migration": "0017_nf_workshop_delegation -> 0018_p6_shared_tokens",
+  "runtime": "PostgreSQL 17.11",
+  "local_evidence": "evidence/p6/shared-tokens.xml",
+  "operator_entry": "scripts/p6_budget.py",
+  "usage_source": "nf_call_attempts across every task and generation of one budget_id",
+  "scope": "NF work-wide administrative project binding, revalidated inside the transaction",
+  "cases": [
+    "two concurrent tasks request 60 Tokens each from a 100 Token budget",
+    "same-key replay and mismatched reservation",
+    "exact remaining amount, partial settlement, PREPARED cancellation, UNKNOWN after recovery",
+    "replayed and stale CAS, cross-branch restrictions and real role-bound CLI",
+    "upgrade populated 0017 ledger holding six spent and ten unknown Tokens",
+    "unquantified legacy usage and guarded rollback"
+  ],
+  "real_provider_calls": 0,
+  "external_spend": 0
+}

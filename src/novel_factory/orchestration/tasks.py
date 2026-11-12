@@ -16,7 +16,7 @@ from uuid import uuid4
 
 from sqlalchemy import and_, func, or_, select, text
 from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import IntegrityError, NoResultFound
 
 from novel_factory.contracts.registry import validate_contract
 from novel_factory.domain.errors import DomainError
@@ -326,9 +326,12 @@ class TaskService:
         content = {"operation": "cancel", "task_id": str(task_id), "expected_generation": expected_generation, "reason": reason}
         with self._tx(authorize_in_tx) as conn:
             prior = self._command_prior(conn, principal_id, idempotency_key, content)
-            if prior:
-                return prior
             task = self._task(conn, task_id)
+            if prior:
+                # Earlier releases recorded the cancellation without settling unsent attempts.
+                if task["state"] == "CANCELLED" and task["generation"] == expected_generation:
+                    self._release_prepared_calls(conn, task_id, expected_generation)
+                return prior
             if task["generation"] != expected_generation:
                 raise _error("STALE_GENERATION", "Cancellation expected another generation")
             if task["state"] == "ACCEPTED":
@@ -337,9 +340,24 @@ class TaskService:
                 t = self.tables["tasks"]
                 conn.execute(t.update().where(t.c.task_id == task_id).values(state="CANCELLED", lease_expiry=None, updated_at=self._now(conn)))
                 self._emit(conn, task_id, expected_generation, "CANCELLED")
+            self._release_prepared_calls(conn, task_id, expected_generation)
             receipt = {"task_id": str(task_id), "generation": expected_generation, "receipt_id": str(uuid4()), "status": "CANCELLED"}
             self._command_record(conn, principal_id, idempotency_key, content, receipt)
             return receipt
+
+    def _release_prepared_calls(self, conn, task_id, generation):
+        # The caller holds the task row used by both reservation and mark_call_sent.
+        # Restore fences advance nonterminal tasks to a new generation. A PREPARED
+        # row from an earlier generation can therefore require external reconciliation.
+        calls = self.tables["call_attempts"]
+        pending = select(calls).where(
+            calls.c.task_id == task_id,
+            calls.c.generation == generation,
+            calls.c.state == "PREPARED",
+        ).order_by(calls.c.budget_id, calls.c.attempt_id)
+        # Two cancellations can release reservations in several shared budgets.
+        for call in conn.execute(pending).mappings().all():
+            self._settle_locked_task_call(conn, call, "FAILED", Decimal(0), 0, None)
 
     def fail(self, task_id, generation, worker_id, *, retryable=False):
         with self._tx() as conn:
@@ -511,7 +529,13 @@ class TaskService:
             self._check_delegation_deadline(conn, deadline)
             attempt_id = str(uuid4())
             conn.execute(budgets.update().where(budgets.c.budget_id == budget_id).values(reserved_amount=budgets.c.reserved_amount + reserve))
-            conn.execute(insert(calls).values(attempt_id=attempt_id, task_id=task_id, generation=generation, budget_id=budget_id, call_key=call_key, request_hash=request_hash, state="PREPARED", reserved_amount=reserve, reserved_tokens=token_amount))
+            try:
+                conn.execute(insert(calls).values(attempt_id=attempt_id, task_id=task_id, generation=generation, budget_id=budget_id, call_key=call_key, request_hash=request_hash, state="PREPARED", reserved_amount=reserve, reserved_tokens=token_amount))
+            except IntegrityError as exc:
+                diag = getattr(exc.orig, "diag", None)
+                if getattr(diag, "constraint_name", None) == "ck_nf_shared_token_reservation":
+                    raise _error("BUDGET_EXCEEDED", "Shared Token limit cannot cover this call") from None
+                raise
             return {"attempt_id": attempt_id, "task_id": str(task_id), "generation": generation, "state": "PREPARED", "reserved_amount": reserve, "reserved_tokens": token_amount}
 
     def mark_call_sent(self, attempt_id, *, worker_id, authorize_in_tx=None):
@@ -545,39 +569,44 @@ class TaskService:
         if type(actual_tokens) is not int or actual_tokens < 0:
             raise _error("INVALID_ARGUMENT", "Actual token use must be a nonnegative integer")
         actual = None if state == "UNKNOWN" else _money(actual_amount if actual_amount is not None else 0)
-        settled_tokens = None if state == "UNKNOWN" else actual_tokens
         with self._tx() as conn:
-            calls, budgets = self.tables["call_attempts"], self.tables["budgets"]
+            calls = self.tables["call_attempts"]
             call = conn.execute(select(calls).where(calls.c.attempt_id == attempt_id)).mappings().one()
-            # Same lock order as reservation: task -> budget -> call.
             self._task(conn, call["task_id"])
-            conn.execute(select(budgets).where(budgets.c.budget_id == call["budget_id"]).with_for_update()).mappings().one()
-            call = conn.execute(select(calls).where(calls.c.attempt_id == attempt_id).with_for_update()).mappings().one()
-            if call["state"] in {"SUCCEEDED", "FAILED"}:
-                if call["state"] != state or call["actual_amount"] != actual or call["provider_receipt"] != provider_receipt or call["actual_tokens"] != settled_tokens:
-                    raise _error("IDEMPOTENCY_CONFLICT", "Settled call has different accounting")
-                return dict(call)
-            if call["state"] == "PREPARED" and (state != "FAILED" or actual != 0 or settled_tokens != 0):
-                raise _error("INVALID_CALL_TRANSITION", "Unsent reservations may only be cancelled with zero usage")
-            if state == "UNKNOWN":
-                if call["state"] not in {"SENT", "UNKNOWN"}:
-                    raise _error("INVALID_CALL_TRANSITION", "Only a sent call can have unknown outcome")
-            elif actual > call["reserved_amount"] or actual_tokens > call["reserved_tokens"]:
-                raise _error("BUDGET_SETTLEMENT_EXCEEDS_RESERVATION", "Cost exceeds the reserved maximum; reconcile explicitly")
-            if state != "UNKNOWN":
-                conn.execute(budgets.update().where(budgets.c.budget_id == call["budget_id"]).values(reserved_amount=budgets.c.reserved_amount - call["reserved_amount"], spent_amount=budgets.c.spent_amount + actual))
-            conn.execute(calls.update().where(calls.c.attempt_id == attempt_id).values(state=state, actual_amount=actual, actual_tokens=settled_tokens, provider_receipt=provider_receipt, updated_at=self._now(conn)))
-            if state != "UNKNOWN" and call["state"] in {"UNKNOWN","PREPARED","SENT"}:
-                conflict = conn.execute(text("""
-                    SELECT c.work_id::text,c.branch_id::text FROM nf_conflict_resolutions r
-                    JOIN nf_conflict_cases c USING(case_id) WHERE r.task_id=:task
-                    AND r.outcome='CALL_RECONCILIATION_REQUIRED' LIMIT 1
-                """), {"task": call["task_id"]}).mappings().one_or_none()
-                if conflict:
-                    enqueue_outbox(conn, self.tables, "world.requested", "task", str(call["task_id"]),
-                        {**conflict, "generation": call["generation"]}, "semantic:settled:" + str(attempt_id))
-                    conn.exec_driver_sql("NOTIFY nf_supervisor_wake")
-            return {"attempt_id": str(attempt_id), "state": state, "actual_amount": actual, "actual_tokens": settled_tokens}
+            return self._settle_locked_task_call(conn, call, state, actual, actual_tokens, provider_receipt)
+
+    def _settle_locked_task_call(self, conn, call, state, actual, actual_tokens, provider_receipt):
+        # The task is locked. Finish in the same budget -> attempt order as reservation.
+        calls, budgets = self.tables["call_attempts"], self.tables["budgets"]
+        attempt_id = call["attempt_id"]
+        settled_tokens = None if state == "UNKNOWN" else actual_tokens
+        conn.execute(select(budgets).where(budgets.c.budget_id == call["budget_id"]).with_for_update()).mappings().one()
+        call = conn.execute(select(calls).where(calls.c.attempt_id == attempt_id).with_for_update()).mappings().one()
+        if call["state"] in {"SUCCEEDED", "FAILED"}:
+            if call["state"] != state or call["actual_amount"] != actual or call["provider_receipt"] != provider_receipt or call["actual_tokens"] != settled_tokens:
+                raise _error("IDEMPOTENCY_CONFLICT", "Settled call has different accounting")
+            return dict(call)
+        if call["state"] == "PREPARED" and (state != "FAILED" or actual != 0 or settled_tokens != 0):
+            raise _error("INVALID_CALL_TRANSITION", "Unsent reservations may only be cancelled with zero usage")
+        if state == "UNKNOWN":
+            if call["state"] not in {"SENT", "UNKNOWN"}:
+                raise _error("INVALID_CALL_TRANSITION", "Only a sent call can have unknown outcome")
+        elif actual > call["reserved_amount"] or actual_tokens > call["reserved_tokens"]:
+            raise _error("BUDGET_SETTLEMENT_EXCEEDS_RESERVATION", "Cost exceeds the reserved maximum; reconcile explicitly")
+        if state != "UNKNOWN":
+            conn.execute(budgets.update().where(budgets.c.budget_id == call["budget_id"]).values(reserved_amount=budgets.c.reserved_amount - call["reserved_amount"], spent_amount=budgets.c.spent_amount + actual))
+        conn.execute(calls.update().where(calls.c.attempt_id == attempt_id).values(state=state, actual_amount=actual, actual_tokens=settled_tokens, provider_receipt=provider_receipt, updated_at=self._now(conn)))
+        if state != "UNKNOWN" and call["state"] in {"UNKNOWN","PREPARED","SENT"}:
+            conflict = conn.execute(text("""
+                SELECT c.work_id::text,c.branch_id::text FROM nf_conflict_resolutions r
+                JOIN nf_conflict_cases c USING(case_id) WHERE r.task_id=:task
+                AND r.outcome='CALL_RECONCILIATION_REQUIRED' LIMIT 1
+            """), {"task": call["task_id"]}).mappings().one_or_none()
+            if conflict:
+                enqueue_outbox(conn, self.tables, "world.requested", "task", str(call["task_id"]),
+                    {**conflict, "generation": call["generation"]}, "semantic:settled:" + str(attempt_id))
+                conn.exec_driver_sql("NOTIFY nf_supervisor_wake")
+        return {"attempt_id": str(attempt_id), "state": state, "actual_amount": actual, "actual_tokens": settled_tokens}
 
 
 class OutboxService:

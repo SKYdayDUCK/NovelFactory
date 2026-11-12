@@ -16,6 +16,7 @@ from agent_workshop.organization import bootstrap
 from agent_workshop.provision import allow_slot
 from agent_workshop.reconcile import reconcile, remote
 from novel_factory.application.agent_gateway import AgentGateway
+from novel_factory.application.budget_limits import SharedBudgetService
 from novel_factory.application.delegation import install, provision_slot
 from novel_factory.application.kernel import Kernel
 from novel_factory.application.runtime_tasks import RuntimeTaskService
@@ -75,6 +76,10 @@ def test_two_live_mcp_servers_recover_accepted_task_after_lost_reply(dual_databa
             token_budget=2000,
         )
         budget = kernel.tasks.create_budget(wr["work_id"], "2")
+        budget_view = SharedBudgetService(kernel)
+        budget_scope = (controller, wr["work_id"], wr["branch_id"], budget)
+        before_call = budget_view.set_limit(*budget_scope, 2000)
+        assert before_call["available_tokens"] == 2000
         provision_slot(
             RuntimeSupervisor(kernel, gateway),
             controller,
@@ -175,15 +180,13 @@ def test_two_live_mcp_servers_recover_accepted_task_after_lost_reply(dual_databa
             get.update(protocol_version="aw-nf.v1", operation_id=op)
             bound = await nf("nf_delegation_get", get)
             assert bound == committed
-            receipt_path = os.environ.get("AW_W3_REDIS_EVIDENCE")
-            if receipt_path:
-                Path(receipt_path).write_text(json.dumps({
-                    **streams, "operation_id": op, "task_id": bound["task_id"],
-                    "generation": bound["generation"], "receipt_ref": bound["receipt_ref"],
-                    "hold_after_loss": hold["status"], "reserved_amount": str(hold["amount"]),
-                    "world_ref": bound["world_ref"], "restarted_aw_state": "RECONCILING",
-                    "restarted_worker": restarted_worker, "nf_after_get_matches_lost_reply": True,
-                }, indent=2) + "\n")
+            redis_receipt = {
+                **streams, "operation_id": op, "task_id": bound["task_id"],
+                "generation": bound["generation"], "receipt_ref": bound["receipt_ref"],
+                "hold_after_loss": hold["status"], "reserved_amount": str(hold["amount"]),
+                "world_ref": bound["world_ref"], "restarted_aw_state": "RECONCILING",
+                "restarted_worker": restarted_worker, "nf_after_get_matches_lost_reply": True,
+            }
             handoff = {"operation_id": op, "handoff_id": "transfer-follow-up", "recipient": "actor-2"}
             handed = await aw("aw_handoff", handoff)
             assert handed == handoff and await aw("aw_handoff", handoff) == handed
@@ -214,6 +217,19 @@ def test_two_live_mcp_servers_recover_accepted_task_after_lost_reply(dual_databa
                 ).fetchone()
                 assert hold["status"] == "SETTLED" and hold["settled_amount"] == 0
                 assert str(receipt["task_id"]) == task and receipt["task_state"] == "CANCELLED"
+            cancelled = await nf("nf_delegation_get", get)
+            assert cancelled["receipt_ref"] == committed["receipt_ref"]
+            assert cancelled["attempts"] == [] and cancelled["actual_tokens"] == 0
+            after_cancel = budget_view.status(*budget_scope)
+            assert after_cancel == before_call
+            if receipt_path := os.environ.get("AW_W3_REDIS_EVIDENCE"):
+                redis_receipt["cancel_before_attempt"] = {
+                    "budget_id": budget, "operation_id": op, "receipt_ref": cancelled["receipt_ref"],
+                    "nf_after_cancel": after_cancel, "nf_reported_tokens": cancelled["actual_tokens"],
+                    "workshop_hold": hold["status"], "workshop_settled_amount": str(hold["settled_amount"]),
+                    "workshop_remote_task": receipt["task_state"], "attempt_count": len(cancelled["attempts"]),
+                }
+                Path(receipt_path).write_text(json.dumps(redis_receipt, indent=2, default=str) + "\n")
 
         asyncio.run(run())
     finally:

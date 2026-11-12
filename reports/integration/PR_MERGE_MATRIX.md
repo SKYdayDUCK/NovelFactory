@@ -11,8 +11,9 @@
 | Workshop W4 | [#12](https://github.com/SKYdayDUCK/NovelFactory/pull/12) | `71b471416c9407e348d4bdce817588def5f11d5b` | `dev/aw-w3` | MERGED_AND_VERIFIED，main `6c711adf7948` |
 | Workshop W5 | [#14](https://github.com/SKYdayDUCK/NovelFactory/pull/14) | `609e92278476c60a893658ef53b6ff15f659b153` | `dev/aw-w4` | MERGED_AND_VERIFIED，main `b30e76978830` |
 | Workshop W6 | [#15](https://github.com/SKYdayDUCK/NovelFactory/pull/15) | `50c8c5ed36cc2cfb83d6624c65ed33336e0f1771` | `main` | **MERGED_AND_VERIFIED**, main `98a8bbed289a29d0326454c86dd3db54ac85ae5c`, AT-30 NOT_MET |
+| P5.6 综合验收 | [#26](https://github.com/SKYdayDUCK/NovelFactory/pull/26) | `e5f5348ca07dc50c9fe52ab271a733ac31fa063c` | `main` | **MERGED_AND_VERIFIED**，[主线 `4e8fc5a`](https://github.com/SKYdayDUCK/NovelFactory/blob/3ef5a72d7a65edb76a988132a72c4e82ee0805ee/reports/integration/evidence/P56/main-4e8fc5a/SIGNOFF.md) |
 | P6 本地验收 | [#16](https://github.com/SKYdayDUCK/NovelFactory/pull/16) | `1d950705ccdebaca02171bd24293682f6efeab54` | `dev/aw-w6` | 冻结 |
-| P6 预算 | [#17](https://github.com/SKYdayDUCK/NovelFactory/pull/17) | `43dc369ab73e2faacb509b6ca16995848fc92c28` | `dev/nf-workshop-delegation` | 冻结 |
+| P6 预算 | [#17](https://github.com/SKYdayDUCK/NovelFactory/pull/17) | `43dc369ab73e2faacb509b6ca16995848fc92c28` | `main` | 在 `4e8fc5a` 集成 |
 | Scion 实验 | [#4](https://github.com/SKYdayDUCK/NovelFactory/pull/4) | `4f249d520c921c8d6effee9978f7338b912f1dd0` | `dev/p3-p4-continuity` | 冻结 |
 
 阶段状态详见 [交付台账](DELIVERY_LEDGER.md)，接管字段为历史快照。

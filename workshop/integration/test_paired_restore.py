@@ -25,6 +25,7 @@ from agent_workshop.provision import allow_slot
 from agent_workshop.reconcile import GET_FIELDS, reconcile, remote
 from agent_workshop.recovery import freeze, frozen, permit
 from novel_factory.application.agent_gateway import AgentGateway
+from novel_factory.application.budget_limits import SharedBudgetService
 from novel_factory.application.delegation import (
     install,
     installation_ledger,
@@ -52,6 +53,11 @@ def aw_state(dsn, op):
         return c.execute(
             """SELECT d.state, d.last_error, h.status AS hold,
             r.receipt_ref::text,r.task_id::text,r.accounting_state,h.settled_amount,
+            (d.payload->>'token_limit')::int AS task_token_limit,
+            (SELECT jsonb_agg(jsonb_build_array(o.attempt_id,o.state,o.actual_tokens)
+                              ORDER BY o.observed_at, o.state)
+             FROM aw_cost_observations o WHERE o.org_id=d.org_id AND o.operation_id=d.operation_id)
+               AS token_observations,
             (SELECT count(*) FROM aw_cost_observations o WHERE o.operation_id=d.operation_id) AS observations
             FROM aw_delegations d JOIN aw_budget_holds h USING(org_id,operation_id)
             LEFT JOIN aw_remote_receipts r USING(org_id,operation_id) WHERE d.operation_id=%s""",
@@ -150,6 +156,7 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
         adapter, requests, _ = stack.enter_context(backend())
         gateway = AgentGateway(kernel, {"fixture": adapter})
         supervisor = RuntimeSupervisor(kernel, gateway)
+        token_limit = 100000
         spec = RuntimeTaskService(kernel, gateway).define(
             owner,
             wr,
@@ -161,8 +168,17 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
             assignment="Summarize observed state.",
             adapter_id="fixture",
             max_amount="0.10",
-            token_budget=100000,
+            token_budget=token_limit,
         )
+        budget_id = kernel.tasks.create_budget(wr["work_id"], "1")
+        budget_scope = (owner, wr["work_id"], wr["branch_id"], budget_id)
+        assert SharedBudgetService(kernel).set_limit(*budget_scope, token_limit)["available_tokens"] == token_limit
+
+        def budget_at(peer):
+            status = SharedBudgetService(peer).status(*budget_scope)
+            assert str(status["budget_id"]) == budget_id and status["total_tokens"] == token_limit
+            return {k: status[k] for k in ("reserved_tokens", "spent_tokens", "available_tokens")}
+
         provision_slot(
             supervisor,
             owner,
@@ -170,9 +186,9 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
             scope_ref="scene.summary",
             task_template_id="summary.v1",
             frozen=spec,
-            budget_id=kernel.tasks.create_budget(wr["work_id"], "1"),
+            budget_id=budget_id,
             reserve_amount="0.10",
-            token_reservation=100000,
+            token_reservation=token_limit,
             accept_summary=True,
         )
         policy = dict(
@@ -187,7 +203,7 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
             role_id="evidence_maintainer",
             max_amount="0.10",
             currency="USD",
-            token_limit=100000,
+            token_limit=token_limit,
         )
         with connect(urls["aw"]) as c:
             c.execute("INSERT INTO aw_installations VALUES (%s,%s,true)", (inst, instance))
@@ -253,7 +269,7 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
                     operation_id="persist-before-nf",
                     slot_id="scene.summary",
                     max_amount="0.10",
-                    token_limit=100000,
+                    token_limit=token_limit,
                 ),
             )
         )["operation_id"]
@@ -305,6 +321,13 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
         assert reconnected["task_id"] == task and reconnected["attempts_observed"] == 1
         later = aw_state(urls["aw"], op)
         assert later["hold"] == "HELD" and later["accounting_state"] == "UNKNOWN"
+        attempt_id = accepted["attempt_ids"][0]
+        unknown_usage = budget_at(kernel)
+        assert unknown_usage == {"reserved_tokens": token_limit, "spent_tokens": 0, "available_tokens": 0}
+        assert later["task_token_limit"] == token_limit
+        assert later["token_observations"] == [[attempt_id, "UNKNOWN", None]]
+        unknown_target = "unknown_usage_before_invoice"
+        unknown_lsn = admin.execute("SELECT pg_create_restore_point(%s)", (unknown_target,)).fetchone()[0]
         offline = {
             "status": "PASS",
             "operation_id": op,
@@ -372,6 +395,8 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
         with db2.uow(write=False) as repo:
             assert not repo.many("delegation_receipts", {"installation_id": inst})
             assert not repo.many("tasks", {"work_id": wr["work_id"]})
+        unused_usage = budget_at(kernel2)
+        assert unused_usage == {"reserved_tokens": 0, "spent_tokens": 0, "available_tokens": token_limit}
         early = aw_state(restored_aw, op)
         assert (
             early["state"] == "REQUESTED"
@@ -419,13 +444,15 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
         assert (
             before_invoice["observations"] == 1 and before_invoice["accounting_state"] == "UNKNOWN"
         )
-        kernel.tasks.settle_call(
-            accepted["attempt_ids"][0],
-            state="SUCCEEDED",
-            actual_amount="0.02",
-            actual_tokens=18,
-            provider_receipt="synthetic-drill-invoice",
-        )
+        assert before_invoice["token_observations"] == later["token_observations"]
+        assert budget_at(kernel) == unknown_usage
+        invoice = dict(state="SUCCEEDED", actual_amount="0.02", actual_tokens=18,
+                       provider_receipt="synthetic-drill-invoice")
+        kernel.tasks.settle_call(attempt_id, **invoice)
+        after_invoice_usage = budget_at(kernel)
+        assert after_invoice_usage == {"reserved_tokens": 0, "spent_tokens": 18, "available_tokens": token_limit - 18}
+        kernel.tasks.settle_call(attempt_id, **invoice)
+        assert budget_at(kernel) == after_invoice_usage
         assert tick(restored_aw, inst, org, op, traced(nf)) == "SETTLED"
         final = aw_state(restored_aw, op)
         assert (
@@ -433,6 +460,7 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
             and final["observations"] == 2
             and final["hold"] == "SETTLED"
         )
+        assert final["token_observations"] == [[attempt_id, "UNKNOWN", None], [attempt_id, "SUCCEEDED", 18]]
         with connect(restored_aw) as c:
             permit(c, inst, installation_ledger(kernel, owner, inst))
             assert not frozen(c, inst)
@@ -478,6 +506,17 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
         with db.uow(write=False) as repo:
             assert len(repo.many("tasks", {"work_id": wr["work_id"]})) == 1
             assert kernel.head(repo, wr["work_id"], wr["branch_id"]) == wr
+        # Restore both service databases to the recorded post-UNKNOWN point after the live
+        # bill has settled. The old WAL image must independently retain its unresolved hold.
+        unknown_port, replayed_unknown = restore_at(unknown_target)
+        unknown_db = Database(port_at(urls["nf"], unknown_port))
+        stack.callback(unknown_db.close)
+        recovered_unknown_usage = budget_at(Kernel(unknown_db, kernel.objects))
+        recovered_unknown_aw = aw_state(port_at(urls["aw"], unknown_port), op)
+        assert replayed_unknown == unknown_lsn
+        assert recovered_unknown_usage == unknown_usage
+        assert recovered_unknown_aw == later
+        assert budget_at(kernel) == after_invoice_usage
         if witness := os.environ.get("AW_OFFLINE_WITNESS"):
             Path(witness).write_text(json.dumps(offline, indent=2) + "\n")
         out = os.environ.get("AW_PAIRED_RESTORE_EVIDENCE")
@@ -496,6 +535,15 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
                         second_wal_target=bound_target,
                         second_target_lsn=bound_lsn,
                         second_replay_lsn=middle_replay,
+                        shared_token_budget=dict(
+                            budget_id=budget_id, total_tokens=token_limit, original_attempt_id=attempt_id,
+                            before_first_call=unused_usage, live_unknown=unknown_usage,
+                            unknown_wal_target=unknown_target, unknown_target_lsn=unknown_lsn,
+                            unknown_replayed_lsn=replayed_unknown, recovered_unknown=recovered_unknown_usage,
+                            recovered_workshop_observations=recovered_unknown_aw["token_observations"],
+                            after_repeated_invoice=after_invoice_usage,
+                            final_workshop_observations=final["token_observations"],
+                        ),
                         same_receipt_missing_attempt_peer=middle_view[op],
                         after_settled_history_mismatch=after_mismatch,
                         rolled_back_nf_task_count=0,
