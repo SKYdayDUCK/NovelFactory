@@ -1,0 +1,86 @@
+name: Additional original 50 and 500 capacity profiles
+
+on:
+  push:
+    branches: [experiment/p59-database-throughput]
+    paths: ['.github/workflows/p59-db-original-mixed.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  measure:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [mixed-50, overload-50, mixed-500, read-500]
+    services:
+      postgres:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_DB: nf_test
+          POSTGRES_USER: nf_test
+          POSTGRES_PASSWORD: isolated_ci_only
+          POSTGRES_INITDB_ARGS: --data-checksums
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 2s --health-timeout 2s --health-retries 30
+    env:
+      PROFILE: ${{ matrix.profile }}
+      NF_TEST_DATABASE_URL: postgresql+psycopg://nf_test:isolated_ci_only@127.0.0.1:5432/nf_test
+      NF_POOL_SIZE: 8
+      NF_POOL_OVERFLOW: 0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - run: uv sync --locked --group dev --python 3.12
+      - name: Record runner, source and transport control
+        shell: bash
+        run: |
+          mkdir evidence-out
+          git rev-parse HEAD > evidence-out/source
+          lscpu > evidence-out/lscpu
+          uv run --no-sync python -m benchmarks.client_calibration --response-bytes 2104 --repeats 2 --output evidence-out/transport.json
+      - name: Execute frozen workload and preserve exit status
+        shell: bash
+        run: |
+          case "$PROFILE" in
+            mixed-50|overload-50|mixed-500)
+              export NF_BENCH_DIAGNOSTICS=1
+              n=${PROFILE##*-}
+              scenario=${PROFILE%-*}
+              fraction=.2
+              processes=1
+              if [[ "$scenario" == overload ]]; then fraction=.8; fi
+              if [[ "$n" == 500 ]]; then processes=2; fi
+              args=(benchmarks.p2_behavioral_load --agents "$n" --profile "$scenario" --hot-fraction "$fraction" --arrival-rps 10 --open-loop-rps 1000 --rounds 5 --max-attempts 5 --retry-budget-seconds 30 --gate-scope capacity --service-mode isolated-process --api-processes "$processes")
+              ;;
+            read-500)
+              args=(benchmarks.p3_stability --agents 500 --seconds 600 --read-rps 20 --api-processes 2)
+              ;;
+          esac
+          set +e
+          uv run --no-sync python -m "${args[@]}" --output evidence-out/result.json >evidence-out/probe.log 2>&1
+          code=$?
+          echo "$code" > evidence-out/exit-code
+          tail -40 evidence-out/probe.log
+          exit "$code"
+      - if: always()
+        shell: bash
+        run: |
+          for path in evidence-out/*.json; do
+            if [[ -f "$path" ]]; then sha256sum "$path" >> evidence-out/manifest.sha256; gzip -n "$path"; fi
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-mixed-${{ matrix.profile }}-${{ github.sha }}-${{ github.run_attempt }}
+          path: evidence-out/
+          if-no-files-found: error
