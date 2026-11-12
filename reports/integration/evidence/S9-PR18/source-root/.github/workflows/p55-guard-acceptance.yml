@@ -1,0 +1,74 @@
+name: P55 exact-source guard acceptance
+on:
+  push:
+    branches: ['evidence/p55-55d897-guard']
+    paths: ['.github/workflows/p55-guard-acceptance.yml','evidence/p55/checkpoints/guard-registration.json']
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_DB: nf_test
+          POSTGRES_USER: nf_dev
+          POSTGRES_PASSWORD: nf_dev_ci_only
+          POSTGRES_INITDB_ARGS: --data-checksums
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U nf_dev -d nf_test"
+          --health-interval 2s --health-timeout 2s --health-retries 30
+    env:
+      NF_DATABASE_URL: postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/nf_test
+      NF_TEST_DATABASE_URL: postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/nf_test
+      PYTHONHASHSEED: '550897'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: registration
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 55d8979b5361a4837701d762feacd83036096b11
+          path: subject
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - name: Run unchanged benchmark and guard tests on the pinned source
+        working-directory: subject
+        shell: bash
+        run: |
+          set -euo pipefail
+          output="$GITHUB_WORKSPACE/ci-evidence"
+          mkdir -p "$output"
+          cp "$GITHUB_WORKSPACE/registration/evidence/p55/checkpoints/guard-registration.json" "$output/"
+          git rev-parse HEAD > "$output/source-sha.txt"
+          test "$(cat "$output/source-sha.txt")" = '55d8979b5361a4837701d762feacd83036096b11'
+          uv sync --locked --group dev --python 3.12
+          .venv/bin/python -m alembic upgrade head
+          .venv/bin/python -m benchmarks.p55_semantic_comparison --repeats 12 --output "$output/guard-comparison.json"
+          .venv/bin/python - "$output" <<'PY'
+          import json, sys
+          from pathlib import Path
+          dst = Path(sys.argv[1])
+          reg = json.loads((dst / 'guard-registration.json').read_text())
+          data = json.loads((dst / 'guard-comparison.json').read_text())
+          assert [r['arm'] for r in data['rows']] == list('ABCD')
+          for row in data['rows']:
+              assert {o['scenario']: o['oracle_affected'] for o in row['observations']} == reg['labels']
+              assert all(len(o['samples_ms']) == reg['repetitions'] for o in row['observations'])
+          PY
+          .venv/bin/python -m pytest -q tests/queries tests/integration/test_s9_query_coverage.py --junitxml="$output/queries.xml"
+          cd "$output"
+          sha256sum source-sha.txt guard-registration.json guard-comparison.json queries.xml > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: exact-55d897-s9-guard-and-junit
+          path: ci-evidence/
+          if-no-files-found: error

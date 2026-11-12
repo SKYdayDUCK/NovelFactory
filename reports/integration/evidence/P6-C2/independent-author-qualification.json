@@ -1,0 +1,153 @@
+{
+  "scope": "C2 author export, permission boundaries, scoped audit export, two unfilled independent reader forms on the existing six-scene TEST_FIXTURE only",
+  "source_blobs": {
+    "scripts/p6_export_release.py": "4cb037e64be7c2c0b37e52dfaaed356716577450",
+    "tests/integration/test_p6_export_release.py": "29e9775673b03490928d3678d9151bca5821c238",
+    "reports/handoff/P6_READER_FORM.md": "fbfdaba1ce4285860b02c551b1a26b8b4795bcb8"
+  },
+  "pull_request": {
+    "workflow_run": 43150709986,
+    "workflow_attempt": 1,
+    "event": "pull_request",
+    "head": "6c01eee41f0366dd9a136038161b2d030d07ab67",
+    "checkout": "f363ad137d034617b9a11d3b47e0ce0fb0d4885d",
+    "tree": "c15a497115b404e05a1abc194363888c3ca66725",
+    "postgres_job": 130958929841,
+    "postgres_artifact": {
+      "id": 13913404458,
+      "name": "p1-postgres-concurrency-1",
+      "sha256": "4f3d271eb24315ee3cfaf9cfad531767101c43331eb4331faf53faace474cf6d"
+    },
+    "collector_run": 43152914757,
+    "collector_job": 130966089232,
+    "junit_sha256": "f71981e47cf77eaebfa5f20b6815f2cf2f03fcced7f9fc7ae1d58cd60e25adf1",
+    "full_junit_counts_including_reported_subtests": {
+      "tests": 869,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 17
+    },
+    "full_pytest_stdout": {
+      "passed": 835,
+      "skipped": 17,
+      "subtests_passed": 17,
+      "warnings": 1
+    },
+    "author_nodes_passed": [
+      "test_export_frozen_prose_scoped_log_and_blank_reader_forms",
+      "test_export_rejects_another_work_bound_branch_actor_and_revocation"
+    ],
+    "author_nodes_skipped": 0,
+    "files": {
+      "author-receipt.json": {
+        "sha256": "8cb5bea814ce27d04630fc07bc51b26058ee3d1bc1caad55dae8735269a7176a",
+        "bytes": 1299
+      },
+      "reader-A.md": {
+        "sha256": "620fffee4e19a0a513d7ab20f5a47915be0bf71cc90885f7dd19a37272d09f24",
+        "bytes": 1029
+      },
+      "reader-B.md": {
+        "sha256": "061c6f3da3e8daca87fa69664ed258a1e8f5cbe07e637e0350c953096b25c290",
+        "bytes": 1029
+      },
+      "release.txt": {
+        "sha256": "12c1d512f5bad133466c9164354207642237c62349f4231fcaeb3049d2135781",
+        "bytes": 6500
+      },
+      "trace.json": {
+        "sha256": "430c5575ce49de16f87beaa2e740ad408e3dc1168143e680ec80c5cd87a37c78",
+        "bytes": 920
+      }
+    },
+    "release_ref": {
+      "artifact_id": "21769ae6-8fca-4b51-b1c5-ed4310166114",
+      "artifact_revision_id": "2505ba23-5723-4c27-b9f9-d88394ac3473",
+      "sha256": "afbc91c85fa0f67226bd8c6d03f82476721e84f326c521688ea55d6664aef118"
+    },
+    "manifest_sha256": "1ce714050ea743cfe931b6a457fb1f0ba289b9a81bfd1ffafc88589a2fdc2eec",
+    "actual_trace_id": "2505ba23-5723-4c27-b9f9-d88394ac3473"
+  },
+  "merged_main": {
+    "workflow_run": 43152869266,
+    "workflow_attempt": 1,
+    "event": "push",
+    "head": "0420356b0bd0bfd675494e581799946c4b967f6e",
+    "checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+    "tree": "c15a497115b404e05a1abc194363888c3ca66725",
+    "postgres_job": 130965941851,
+    "postgres_artifact": {
+      "id": 13915776485,
+      "name": "p1-postgres-concurrency-1",
+      "sha256": "f72ad1615cf66385f1d84923a913d110c722abb26800acb7df1b856c1b396d19"
+    },
+    "collector_run": 43155006768,
+    "collector_job": 130972786572,
+    "junit_sha256": "bdce8fa41d24d92f804854ec6202acb8343860d3918c2354a441f54668971b03",
+    "full_junit_counts_including_reported_subtests": {
+      "tests": 869,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 17
+    },
+    "full_pytest_stdout": {
+      "passed": 835,
+      "skipped": 17,
+      "subtests_passed": 17,
+      "warnings": 1
+    },
+    "author_nodes_passed": [
+      "test_export_frozen_prose_scoped_log_and_blank_reader_forms",
+      "test_export_rejects_another_work_bound_branch_actor_and_revocation"
+    ],
+    "author_nodes_skipped": 0,
+    "files": {
+      "author-receipt.json": {
+        "sha256": "dd9f03d8eb152df7de96af96d2f171d71d86821e548a9d764ee294554b1e177e",
+        "bytes": 1299
+      },
+      "reader-A.md": {
+        "sha256": "620fffee4e19a0a513d7ab20f5a47915be0bf71cc90885f7dd19a37272d09f24",
+        "bytes": 1029
+      },
+      "reader-B.md": {
+        "sha256": "061c6f3da3e8daca87fa69664ed258a1e8f5cbe07e637e0350c953096b25c290",
+        "bytes": 1029
+      },
+      "release.txt": {
+        "sha256": "12c1d512f5bad133466c9164354207642237c62349f4231fcaeb3049d2135781",
+        "bytes": 6500
+      },
+      "trace.json": {
+        "sha256": "ce71422c9fe3a3f8fbcae74755e8afcc88309dec0783282a85eb4346f015f2b1",
+        "bytes": 920
+      }
+    },
+    "release_ref": {
+      "artifact_id": "118109d2-ba4a-4a7b-8354-752e83faa2ae",
+      "artifact_revision_id": "badbeb21-08e6-4f9c-8754-941b14da9354",
+      "sha256": "2c7a70697eb18839b9e6ca84f39da712653a32dcb2107297157c7af69407a0f5"
+    },
+    "manifest_sha256": "e7d47918171b8d1bc02ff038985ff4961c396801d4434208a8f7240c03cb3e84",
+    "actual_trace_id": "badbeb21-08e6-4f9c-8754-941b14da9354"
+  },
+  "checks": {
+    "same_frozen_code_tree": true,
+    "independent_release_and_trace_identifiers": true,
+    "correct_scoped_export_and_trace": "non-actor project grant with READ+PLAN_READ exports the frozen release, an independent branch ADMIN reads its freeze trace; cross-work, cross-branch, actor, revoked and non-admin trace checks ran via the actual CLI; creation preserves prior output files",
+    "prose": "Exactly the six canonical UTF-8 TEXTS joined by two LF bytes. 6500 bytes / 2204 Unicode code points for each run.",
+    "forms": "Each reviewer form exactly equals the pinned empty template with its own form letter and the verified prose digest inserted. Five score/evidence rows are blank in each; no reviewer is assigned or represented.",
+    "trace": "One selection.release_freeze event. Identifiers are typed generated UUIDs; event_time and recorded_at are timestamps. All other optional audit payload columns are null. Both output traces bind the actual frozen release-ref revision for their own run.",
+    "privacy": "Verified exact five-member allowlist; parsed closed JSON field sets and expected types/status values; matched four raw SHA-256 digests per receipt; checked all decoded original bytes against expected source text/forms and credential/DSN signatures. No served credentials, binding, model response or secret-bearing field found.",
+    "accounting": {
+      "fixture_adapter_calls_per_run": 15,
+      "real_model_calls": 0,
+      "currency": "USD",
+      "fixture_amount": "0",
+      "human_reviews_received": 0,
+      "literary_acceptance": "NOT_EVALUATED",
+      "external_delivery": "NOT_REQUESTED"
+    },
+    "verification": "Decoded the chunked original collector outputs independently, verified SHA-256 of wire and raw bytes, inflated and inspected exact JUnit nodes. The frozen candidate and merged main ran independently on hosted PostgreSQL. Local execution became unavailable before author tests could run."
+  }
+}
