@@ -59,3 +59,5 @@ git -C "$recovery/recovered.git" log -1 refs/p58-restore/experiment/scion-increm
 ```
 
 使用清单内的原始 commit 和路径，例如 `git -C "$recovery/recovered.git" show "$oid:$path"`，可直接核查历史实验数据。回执中的 `bundle_sha256` 是该次已上传二进制资产的 SHA-256。重新打包可能产生另一份有效的 bundle；恢复核验使用已发布的原件和同一回执。
+
+本轮[逐分支审查](BRANCHES.md)登记 91 个远端引用。31 个已在正式 main 中，50 个有独有历史，另 10 个有保留依据。91 个冻结 tip 的[发布前恢复回执](raw/prepublication-restore.json)与[Scion 独立验收](scion/README.md)在本目录。真实远端事务的回执将随[归档 Release](https://github.com/SKYdayDUCK/NovelFactory/releases/tag/p58-history-4157e475a9b33ba2)发布。
