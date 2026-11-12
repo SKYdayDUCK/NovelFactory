@@ -24,7 +24,7 @@ from novel_factory.application.narrative import NarrativeService
 from novel_factory.application.planning import PlanningService
 from novel_factory.application.queries import WorldQueryService
 from novel_factory.application.release import ReleaseService
-from novel_factory.application.review_independence import ReviewIndependenceService, verify_editor_case
+from novel_factory.application.review_independence import ReviewIndependenceService, verify_editor_cases
 from novel_factory.application.runtime_tasks import RuntimeTaskService
 from novel_factory.application.supervisor import RuntimeSupervisor
 from novel_factory.domain.errors import DomainError
@@ -241,7 +241,7 @@ def test_final_editor_covers_all_workshop_producer_groups(delegated_review, tmp_
         fresh = service.refresh(proof)
         with kernel.db.uow(write=False) as repo:
             grant = ReviewService(kernel)._controller(repo, admin, world["world_ref"])
-            return verify_editor_case(binding, admin, grant, fresh, repo.now())
+            return verify_editor_cases([(proof, binding)], admin, grant, {proof["artifact_revision_id"]: fresh}, repo.now())[0]
 
     register_editor("publication-team")
     with pytest.raises(DomainError, match="qualified"):

@@ -113,6 +113,7 @@ class _LiveProof:
     checked_at: float
     subject_commitment: str
     reviewer_runtime: tuple | None = None
+    editor_group: str | None = None
 
 
 def _signed_case(binding):
@@ -123,7 +124,10 @@ def _signed_case(binding):
         _check(hmac.compare_digest(native_signature(case), envelope["signature"]))
         expires = validate_native_case(binding, case)
         groups, reviewer = _subject_groups(binding, case)
-        return _LiveProof(fingerprint(case), fingerprint(binding), expires, checked, fingerprint([groups, reviewer]))
+        publisher = binding.get("publisher")
+        editor_group = case["subjects"][publisher["principal_id"]]["group"] if publisher else None
+        return _LiveProof(fingerprint(case), fingerprint(binding), expires, checked, fingerprint([groups, reviewer]),
+                          editor_group=editor_group)
     except DomainError:
         raise
     except (OSError, KeyError, TypeError, ValueError, AttributeError):
@@ -136,13 +140,19 @@ def _editor_binding(binding, principal, grant):
                                      "permission_epoch": grant["epoch"]}}
 
 
-def verify_editor_case(binding, principal, grant, reading, now):
-    decision_binding = _editor_binding(binding, principal, grant)
-    proof = _signed_case(decision_binding)
-    _check(reading.binding_digest == fingerprint(binding) and proof.subject_commitment == reading.subject_commitment
-           and min(proof.valid_until, reading.valid_until) > now and 0 <= monotonic() - reading.checked_at <= 10)
-    return {"manuscript_ref": binding["manuscript_ref"], "binding_sha256": proof.binding_digest,
-            "editor_evidence_sha256": proof.evidence_digest, "reading_evidence_sha256": reading.evidence_digest}
+def verify_editor_cases(readings, principal, grant, live_readings, now):
+    cases = []
+    editor_group = None
+    for ref, binding in readings:
+        reading = live_readings[ref["artifact_revision_id"]]
+        proof = _signed_case(_editor_binding(binding, principal, grant))
+        _check(reading.binding_digest == fingerprint(binding) and proof.subject_commitment == reading.subject_commitment
+               and min(proof.valid_until, reading.valid_until) > now and 0 <= monotonic() - reading.checked_at <= 10)
+        _check(editor_group is None or editor_group == proof.editor_group)
+        editor_group = proof.editor_group
+        cases.append({"manuscript_ref": binding["manuscript_ref"], "binding_sha256": proof.binding_digest,
+                      "editor_evidence_sha256": proof.evidence_digest, "reading_evidence_sha256": reading.evidence_digest})
+    return cases
 
 
 def _refresh_bindings(bindings):

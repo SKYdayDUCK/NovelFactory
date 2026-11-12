@@ -1,9 +1,11 @@
 """Final creative-review decisions require a currently enrolled, independent editor."""
+from datetime import UTC, datetime, timedelta
 import json
 
 import pytest
 
 from novel_factory.application.creative_review import CreativeReviewService
+from novel_factory.application.review_independence import native_signature
 from novel_factory.domain.canonical import fingerprint
 from novel_factory.domain.errors import DomainError
 from novel_factory.fixtures import point
@@ -65,6 +67,10 @@ def test_editor_groups_and_receipts_follow_the_actual_reading(manuscript, tmp_pa
     assert record["editor_independence"] == [{"manuscript_ref": draft["draft_ref"],
         "binding_sha256": fingerprint(signed["binding"]), "editor_evidence_sha256": fingerprint(signed),
         "reading_evidence_sha256": reading["evidence_digest"]}]
+    signed["expires_at"] = (datetime.now(UTC) - timedelta(seconds=1)).isoformat()
+    case.write_text(json.dumps({"case": signed, "signature": native_signature(signed)}))
+    with pytest.raises(DomainError, match="qualified"):
+        retain(editor)
     case.unlink()
     with pytest.raises(DomainError, match="qualified"):
         retain(editor)

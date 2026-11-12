@@ -8,7 +8,7 @@ from novel_factory.application.dynamic_runtime import refresh_task, verify_task
 from novel_factory.application.editorial import ReviewService
 from novel_factory.application.kernel import require
 from novel_factory.application.narrative import NarrativeService
-from novel_factory.application.review_independence import PROOF_KIND, ReviewIndependenceService, verify_editor_case
+from novel_factory.application.review_independence import PROOF_KIND, ReviewIndependenceService, verify_editor_cases
 from novel_factory.application.semantic_dependencies import check_task_dependencies
 from novel_factory.contracts.registry import validate_contract
 from novel_factory.domain.canonical import canonical_bytes, fingerprint
@@ -456,8 +456,7 @@ class CreativeReviewService:
                         "VIEW_DENIED", "The producer and reviewer cannot approve their own work")
             submission = self._current_review(repo, report, details, live_proof)["submission"]
             if final:
-                editor_cases = [verify_editor_case(binding, principal, grant, live_proof[ref["artifact_revision_id"]], repo.now())
-                                for ref, binding in readings]
+                editor_cases = verify_editor_cases(readings, principal, grant, live_proof, repo.now())
             old = self.kernel._prior(repo, principal, work, "CREATIVE_REVIEW_DECIDE", idempotency_key, request)
             if old:
                 return old

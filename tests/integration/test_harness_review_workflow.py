@@ -12,7 +12,6 @@ from novel_factory.application.release import ReleaseService
 from novel_factory.application.review_independence import ReviewIndependenceService
 from novel_factory.application.runtime_tasks import RuntimeTaskService
 from novel_factory.domain.errors import DomainError
-from novel_factory.domain.reconciliation import span_for
 from novel_factory.fixtures import point
 from novel_factory.infrastructure.creative_config import CreativeHarnessConfig
 from editorial_helpers import binding_for, decision_request, uid
@@ -72,13 +71,15 @@ def _formal(k, f, svc, job, args, read, report, *, retain=False):
     from editorial_helpers import make_review_task, review_request
     native = ReviewService(k)
     reader, task = make_review_task(k, f, binding, "literary")
-    delivered = native.read_text(reader, task["task_id"], task["generation"], args["target_ref"], idempotency_key="full")
-    volume = native.submit_review(reader, review_request(binding, task, [delivered["coverage_ref"]], "VOLUME",
-                                                      "LITERARY", binding["ordered_draft_refs"]))
+    delivered = [native.read_text(reader, task["task_id"], task["generation"], ref,
+                                  idempotency_key="full:" + ref["artifact_revision_id"]) for ref in binding["ordered_draft_refs"]]
+    volume = native.submit_review(reader, review_request(binding, task, [item["coverage_ref"] for item in delivered],
+                                                         "VOLUME", "LITERARY", binding["ordered_draft_refs"]))
     session = native.start_editing(f["principal"], {"schema_version":"2.1","binding":binding,"max_rounds":3,
                                 "max_issue_decisions":16,"idempotency_key":"edit:"+uid()})
-    fn = [{"draft_ref":args["target_ref"],"function":"人物留下一个未解决的决定。",
-           "choice_evidence_refs":[{"kind":"ARTIFACT","artifact_ref":read["text_ref"],"span":span_for(read["text"])}]}]
+    fn = [{"draft_ref": item["draft_ref"], "function": "人物留下一个未解决的决定。",
+           "choice_evidence_refs": [{"kind": "ARTIFACT", "artifact_ref": item["text_ref"], "span": item["span"]}]}
+          for item in delivered]
     retained = [{"issue_id": i["finding_id"], "action":"RETAIN_WITH_REASON","reason": "保留等待的重复句。",
                  "evidence_refs":[],"replacement_draft_refs":[]} for i in report["findings"]] if retain else []
     return decision_request(session, None, "STRUCTURE", binding, [report["native_review_ref"],volume], fn,
@@ -256,6 +257,20 @@ def test_seam_requires_both_live_producer_groups_and_manifest_order(kernel_env, 
     result = svc.review(*_args(job),**args)
     assert result["findings"][0]["pattern"] == "REPEATED_SEAM"
     assert result["findings"][0]["quote"] == LINE
+    final = dict(report_ref=result["report_ref"], action="RETAIN", reason="有意保留衔接重复。",
+                 idempotency_key="retain-seam", native_decision=_formal(k, f, svc, job, args, read, result, retain=True))
+    enroll_native_case(k, tmp_path, monkeypatch, **{**source_args, "manuscript_ref": second},
+                       controller=f["principal"], editor_group="volume-editors")
+    with pytest.raises(DomainError, match="qualified"):
+        svc.decide(f["principal"], *_args(job)[1:], **final)
+    enroll_native_case(k, tmp_path, monkeypatch, **source_args, controller=f["principal"], editor_group="other-editors")
+    with pytest.raises(DomainError, match="qualified"):
+        svc.decide(f["principal"], *_args(job)[1:], **final)
+    enroll_native_case(k, tmp_path, monkeypatch, **source_args, controller=f["principal"], editor_group="volume-editors")
+    retained = svc.decide(f["principal"], *_args(job)[1:], **final)
+    with k.db.uow(write=False) as repo:
+        decision = k.artifact(repo, retained["decision_ref"], f["world_ref"]["work_id"])["payload"]
+        assert [entry["manuscript_ref"] for entry in decision["editor_independence"]] == [second, first]
     case.unlink()
     with pytest.raises(DomainError) as lost:
         svc.review(*_args(job),**args)
