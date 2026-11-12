@@ -1,0 +1,112 @@
+{
+  "frozen": "3e6b59268f1e89520230c8b70e9a26b9950a2f79",
+  "local_experiment": "4c4a36cb845f63b3ceb8cdde7775a47213264feb",
+  "upstream": "877be80d7c1dfa8b6fb9c9c5a2a570c7b14d3ca0",
+  "tested_ref": "refs/heads/dev/p59-runtime-architecture-refactor",
+  "merge_base": "3e6b59268f1e89520230c8b70e9a26b9950a2f79",
+  "combined_tree": "cfaadaf9007fa129985f2d5c722c7ba40915e69e",
+  "detached_head_for_test": "4c4a36cb845f63b3ceb8cdde7775a47213264feb",
+  "method": "git merge-tree --write-tree <experiment> <upstream>; git worktree add --detach <new-worktree> <experiment>; git -C <new-worktree> read-tree --reset -u <combined-tree>; verify git write-tree equals combined-tree; run isolated PostgreSQL suite",
+  "merge_tree_conflicts": 0,
+  "branch_updates": 0,
+  "upstream_changed_paths": [
+    ".github/workflows/native-runtime.yml",
+    "docs/en/08-configuration-and-deployment.md",
+    "docs/en/10-performance-and-evaluation.md",
+    "docs/zh-CN/08-配置与部署.md",
+    "docs/zh-CN/10-性能与实验.md",
+    "reports/code_review/p59_runtime/PLATFORM.md",
+    "reports/code_review/p59_runtime/QUALIFICATION.md",
+    "reports/code_review/p59_runtime/raw/native-codex/initial-win-native-core.xml.gz",
+    "reports/code_review/p59_runtime/raw/native-codex/initial-win-native-postgres.xml.gz",
+    "reports/code_review/p59_runtime/raw/native-codex/initial-win-native-workshop.xml.gz",
+    "reports/code_review/p59_runtime/raw/native-codex/receipts.json",
+    "reports/code_review/p59_runtime/raw/native-codex/verified-linux-native-core.xml.gz",
+    "reports/code_review/p59_runtime/raw/native-codex/verified-linux-native-workshop.xml.gz",
+    "reports/code_review/p59_runtime/raw/native-codex/verified-win-native-core.xml.gz",
+    "reports/code_review/p59_runtime/raw/native-codex/verified-win-native-postgres.xml.gz",
+    "reports/code_review/p59_runtime/raw/native-codex/verified-win-native-workshop.xml.gz",
+    "reports/performance/p59_runtime/RESULTS.md",
+    "reports/performance/p59_runtime/raw/hosted-candidate/manifest.json",
+    "reports/performance/p59_runtime/raw/hosted-candidate/read-hour-500.json.gz.001",
+    "reports/performance/p59_runtime/raw/hosted-candidate/read-hour-500.json.gz.002",
+    "reports/performance/p59_runtime/raw/hosted-candidate/read-hour-500.json.gz.003",
+    "reports/performance/p59_runtime/raw/hosted-candidate/read-hour-500.json.gz.004",
+    "reports/performance/p59_runtime/raw/hosted-candidate/workflow-1000.json.gz",
+    "reports/performance/p59_runtime/raw/hosted-candidate/workflow-2000.json.gz",
+    "reports/performance/p59_runtime/raw/hosted-candidate/workflow-500.json.gz",
+    "tests/unit/test_p58_providers.py"
+  ],
+  "paths_overlapping_experiment_since_freeze": [],
+  "previous_qualified_upstream": "293e6f4c6a6a8090ab234ae51188255484627628",
+  "upstream_since_prior_qualification": [
+    "docs/en/10-performance-and-evaluation.md",
+    "docs/zh-CN/10-性能与实验.md",
+    "reports/code_review/p59_runtime/QUALIFICATION.md",
+    "reports/performance/p59_runtime/RESULTS.md",
+    "reports/performance/p59_runtime/raw/hosted-candidate/manifest.json",
+    "reports/performance/p59_runtime/raw/hosted-candidate/read-hour-500.json.gz.001",
+    "reports/performance/p59_runtime/raw/hosted-candidate/read-hour-500.json.gz.002",
+    "reports/performance/p59_runtime/raw/hosted-candidate/read-hour-500.json.gz.003",
+    "reports/performance/p59_runtime/raw/hosted-candidate/read-hour-500.json.gz.004"
+  ],
+  "product_and_benchmark_paths_unchanged_in_combined_tree": [
+    "src",
+    "agent_runtime",
+    "workshop/src",
+    "benchmarks",
+    "experiments",
+    "migrations"
+  ],
+  "host": {
+    "platform": "Linux x86_64",
+    "postgresql": "17.11",
+    "new_private_pg_cluster": true,
+    "new_private_redis_instance": true,
+    "python": "3.12.14"
+  },
+  "qualification": {
+    "tests": 62,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 3,
+    "passed": 59,
+    "linux_skipped_windows_only": [
+      "test_windows_write_through_publication_keeps_first_writer",
+      "test_windows_host_selects_native_executable",
+      "test_native_windows_monitor_reports_physical_headroom"
+    ],
+    "seconds": 25.742,
+    "file": "compatibility.xml",
+    "pytest_modules": [
+      "tests/integration/test_bound_tool_entrypoints.py",
+      "tests/integration/test_p59_db_candidates.py",
+      "tests/integration/test_p59_fenced_status.py",
+      "tests/integration/test_p59_read_soak_renewal.py",
+      "tests/integration/test_p59_revision_witness.py",
+      "tests/reliability/test_objects.py",
+      "tests/service/test_http.py",
+      "tests/unit/test_host_process.py",
+      "tests/unit/test_native_platform.py",
+      "tests/unit/test_p55_capacity.py",
+      "tests/unit/test_p58_providers.py"
+    ],
+    "passing_upstream_native_cli_synthetic_provider": true
+  },
+  "upstream_archived_read_hour_checked": {
+    "source": "3e6b59268f1e89520230c8b70e9a26b9950a2f79",
+    "result_gzip_sha256": "db3e58d00219019fed929469a01905f98d54e0ad98b80445d1b6be5aa38b5588",
+    "raw_json_sha256": "23622acc383573fd267f6d4476009f232d342ccf4f9edd130db97139e7084cd9",
+    "records": 72000,
+    "valid_http_200": 72000,
+    "identities": 500,
+    "per_identity_count": 144,
+    "gate": "PASS",
+    "scope": "PARTIAL_READ_ONLY",
+    "independently_rerun_here": false
+  },
+  "prior_receipts": [
+    "compatibility-293e6f4c.json",
+    "compatibility-293e6f4c.xml"
+  ]
+}

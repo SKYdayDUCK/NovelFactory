@@ -62,3 +62,7 @@ uv run --no-sync python -m benchmarks.p59_db_restart --pg-bin /usr/lib/postgresq
 ```
 
 `post-archive-validator.xml` records a passing rerun of the original link-validation test after the Actions archives referenced from the review documents became available.
+
+## Unfiltered two-cluster suite
+
+`353106c-dual-regression.log.gz`, `353106c-dual-regression.xml.gz` and `353106c-dual-comparison.json.gz` record one unfiltered `python -m pytest -q tests -o junit_family=xunit1` run from an immutable `353106cf94b529450b6966a4b5d81b2b9f9c3be0` checkout. The NF and Workshop clusters used independent system identifiers, separate disposable service roles, private application directories and Redis endpoints. The run completed in 1,156.28 seconds with 1,046 passed, 17 passing subtests, three Windows-only skips, zero failures and zero errors. The S6 comparison completed all three windows in that same run. JUnit's 1,066 test-case count includes the 17 subtest nodes and three platform skips.

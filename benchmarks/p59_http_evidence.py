@@ -154,6 +154,22 @@ def summarize(metadata, archives):
                 ],
                 "outcome": summarize_old(load("result.json")),
             }
+        if "A1.json" in verified:
+            runs = {name: load(name + ".json") for name in ("A1", "B1", "B2", "A2")}
+            return {
+                **base,
+                "outcome": load("summary.json"),
+                "calibration": [load(name + ".json")["summary"] for name in ("cal1", "cal2")],
+                "paired": {
+                    name: {
+                        "summary": run["summary"],
+                        "service": service(run["server_metrics"]),
+                        "database_observer_errors": run["database_observer"]["observer_errors"],
+                        "source_sha256": run["harness_sha256"],
+                    }
+                    for name, run in runs.items()
+                },
+            }
         profiles = {
             profile: load(profile + ".json")
             for profile in ("single", "calibration-1", "calibration-2", "business")

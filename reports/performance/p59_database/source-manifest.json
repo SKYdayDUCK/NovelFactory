@@ -1,0 +1,99 @@
+{
+  "baselines": {
+    "main_PR32": "434840593179e6c1faa6b7aeca3d7d747644506d",
+    "frozen_PR33": "3e6b59268f1e89520230c8b70e9a26b9950a2f79"
+  },
+  "qualified_source": "6b8fd74d3ed8830a65b4f183bd58f9023cb4923c",
+  "qualified_tree": "0e1be0dc2e1b79be22577c51931cee44dfcaf423",
+  "source_snapshots": [
+    {
+      "github_commit": "82542395adcc7a1ced87132500326bdab2234847",
+      "tree": "1540352554ff9357c97c1ca4115cadc326451b2a",
+      "local_commit_same_tree": "79ae488ba642cfb042fee3718ca49331dc2e0c6d",
+      "runs": [
+        43288667752
+      ]
+    },
+    {
+      "github_commit": "49d06f7180c0057c00cddc38f9b3cab4eea1b375",
+      "tree": "98f7e291e7cbc2b990584d89f8272f53319af253",
+      "local_commit_same_tree": "a22a640d523b55351603c0f8fde3d7b3a7b91546",
+      "runs": [
+        43288881002
+      ]
+    },
+    {
+      "github_commit": "be14de6a34775b1fce9de44e9cb0385dcb5d566c",
+      "tree": "cc64a3e76d1b3337f743ea781323c0251d080b27",
+      "local_commit_same_tree": "a7b4e9529e598a40d839fab7ff8e24e7da15742a",
+      "runs": [
+        43289598993
+      ]
+    },
+    {
+      "github_commit": "94c5a28175b1fc4281de13ad36deaa6ad78cf70d",
+      "tree": "8566e1eef689723ac3c8e2757780143593b6f03a",
+      "local_commit_same_tree": "a59f5a6b52995c6e1ca7213c64745855ef6e51cc",
+      "runs": [
+        43290275128
+      ]
+    },
+    {
+      "github_commit": "8d9a62c2a444a5f04ff6273211cc7ea1a1ec07ae",
+      "tree": "6dae95a72c793e8f5fc5a8a4feaafc16a6d38375",
+      "local_commit_same_tree": "568f949d8068faa4b987a9dfcae0e2b8468a246e",
+      "runs": [
+        43290800835
+      ]
+    },
+    {
+      "github_commit": "05751855cd9e7e2283648d8acef352f192da7298",
+      "tree": "abfd28a7c8b9a265fb23d29ad5dbe706f025b156",
+      "local_commit_same_tree": "b56d0fa8cf10b3f6c40a0363d86480868fb7c5c8",
+      "runs": [
+        43291814145,
+        43291814205
+      ]
+    },
+    {
+      "github_commit": "d9a0df493918b351542e0a0d978bf3474b099e85",
+      "tree": "ba5809da27841b991d3d575a02806ccb5c279b56",
+      "local_commit_same_tree": "353106cf94b529450b6966a4b5d81b2b9f9c3be0",
+      "runs": [
+        43292819006,
+        43292818072,
+        43292819221
+      ]
+    },
+    {
+      "github_commit": "55d605f83a24017843ec6865cf6d5d85f7bf8397",
+      "tree": "b12ac8e79a4788d4e4eaa57a6a7ec15bb20b350f",
+      "local_commit_same_tree": "9a69d2c02cd6dedcfa8c90ac10ffecc2e2c25979",
+      "runs": [
+        43293435711
+      ]
+    },
+    {
+      "github_commit": "45be53951d5b6a4daab9e3ea538116b695e978e7",
+      "tree": "ee8d7df5220ce238ee16e39bf5cfe2fc30d38faa",
+      "local_commit_same_tree": "3830eae8ba3f9ec9b4784d2a188d6c77d5be5df3",
+      "runs": [
+        43294345517
+      ]
+    },
+    {
+      "github_commit": "6b8fd74d3ed8830a65b4f183bd58f9023cb4923c",
+      "tree": "0e1be0dc2e1b79be22577c51931cee44dfcaf423",
+      "local_commit_same_tree": "4c4a36cb845f63b3ceb8cdde7775a47213264feb",
+      "runs": [
+        43294749796,
+        43294749933
+      ]
+    }
+  ],
+  "ci_environments": "GitHub-hosted runner unique per matrix job. Each artifact retains the SHA and its own workflow/configuration; the original mixed/open/hour job explicitly checks out the registered historical target. Inspect the measured source inside each archive as well as the outer workflow commit.",
+  "native_validation": "Local Python 3.12, isolated PostgreSQL 17.11 and Redis 8.0.2. Per-run checksummed databases with fsync and synchronous_commit, private object storage and loopback ports. Native Windows 2025 and Linux Redis-stop cases also run on their corresponding hosted runners.",
+  "hosted_registry": "archive-runs.json",
+  "local_qualification_evidence": "raw/validation/README.md",
+  "upstream_check": "raw/compatibility.json"
+}

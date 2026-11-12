@@ -1,0 +1,2542 @@
+[
+  {
+    "run_id": 43288667752,
+    "artifact_id": 13975584016,
+    "name": "db-http-overload-200-434840593179e6c1faa6b7aeca3d7d747644506d-1",
+    "bytes": 1270363,
+    "sha256": "23b87a8dfd1220bbc836159a2fd2a6f308bc1290a29d376ed5d076d8fa0c0d6f",
+    "head_sha": "82542395adcc7a1ced87132500326bdab2234847",
+    "artifact_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43288667752/artifacts/13975584016",
+    "source": "434840593179e6c1faa6b7aeca3d7d747644506d",
+    "verified_inner_sha256": {
+      "result.json": "e7a419aa61ded309f04b6eed3cc87d90d425eff6ac2bf2a1702969ab227746b8",
+      "transport.json": "481d2668834cedb717fb4612f0dd82d2ea83faef705a1f417e3a8b3b2cec9f7a"
+    },
+    "exit": 1,
+    "frozen_transport_header_rps": [
+      295.1046699141446,
+      262.15593672566
+    ],
+    "outcome": {
+      "capacity_gate": "NOT_MET",
+      "first_attempt_capacity_gate": "NOT_MET",
+      "engineer_correctness": "PASS",
+      "bounded_recovery_business_gate": "PASS",
+      "open_loop_offered_rate": {
+        "gate": "NOT_MET",
+        "transport_header_starts": 1000,
+        "transport_header_start_rps": 54.90373023857295,
+        "target_rps": 1000.0,
+        "first_attempts": 1000,
+        "actual_call_start_rps": 60.75541051561211,
+        "start_window_seconds": 16.442980000000006,
+        "max_schedule_delay_ms": 15444.0793,
+        "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+        "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+      },
+      "metrics": {
+        "planned_requests": 2141,
+        "completed_requests": 2811,
+        "first_attempt_status_counts": {
+          "200": 1659,
+          "409": 19,
+          "429": 463
+        },
+        "valid_successful_calls": 2122,
+        "effective_call_rps_excluding_duplicates": 12.9757,
+        "status_counts": {
+          "200": 2122,
+          "409": 19,
+          "429": 670
+        },
+        "infrastructure_retries": 670,
+        "latency_all_responses": {
+          "count": 2811,
+          "p50_ms": 658.7183,
+          "p95_ms": 5814.6771,
+          "p99_ms": 9134.6955
+        },
+        "new_world_commit_receipts": 21
+      },
+      "world": {
+        "new_world_revisions": 21,
+        "expected_new_world_revisions": 21
+      },
+      "service": {
+        "ingress": {
+          "peak_active": 128,
+          "wait_seconds_total": 0.021598733000743664,
+          "queued": 0,
+          "per_principal": 128,
+          "active": 0,
+          "admitted": 2689,
+          "peak_queued": 0,
+          "rejected": 122,
+          "max_waiters": 0,
+          "completed": 2689,
+          "capacity": 128,
+          "peak_note": "Sum of process peaks; see process snapshots for exact values"
+        },
+        "authentication_admission": {
+          "peak_active": 2,
+          "wait_seconds_total": 301.29524566000026,
+          "queued": 0,
+          "per_principal": 2,
+          "active": 0,
+          "admitted": 2165,
+          "peak_queued": 64,
+          "rejected": 524,
+          "max_waiters": 64,
+          "completed": 2165,
+          "capacity": 2,
+          "peak_note": "Sum of process peaks; see process snapshots for exact values"
+        },
+        "admission": {
+          "timed_out": 1,
+          "peak_active": 6,
+          "wait_seconds_total": 529.4383192500002,
+          "queued": 0,
+          "per_principal": 2,
+          "active": 0,
+          "admitted": 2142,
+          "peak_queued": 64,
+          "rejected": 23,
+          "max_waiters": 64,
+          "completed": 2141,
+          "capacity": 6,
+          "peak_note": "Sum of process peaks; see process snapshots for exact values"
+        },
+        "resources": {
+          "process_user_cpu_seconds": 22.480294,
+          "process_system_cpu_seconds": 1.4664450000000002,
+          "process_peak_rss_kib": 115600,
+          "minor_page_faults": 3918,
+          "major_page_faults": 0
+        },
+        "database": {
+          "sql_statements": 46598,
+          "transactions": 6706,
+          "failed_statements": 0,
+          "checked_out_at_end": 0,
+          "peak_checked_out_connections": 8,
+          "configured_pool_size": 8,
+          "sql_cursor_execution_seconds": 97.3385424939987,
+          "transaction_seconds_before_commit": 123.25958438799859
+        }
+      }
+    }
+  },
+  {
+    "run_id": 43289598993,
+    "artifact_id": 13975969617,
+    "name": "p59-shards-auth-be14de6a34775b1fce9de44e9cb0385dcb5d566c-1",
+    "bytes": 1777365,
+    "sha256": "dbc227ab487ff2e7ab9293d80d7083f43377a59060922b7252117e62e792f78b",
+    "head_sha": "be14de6a34775b1fce9de44e9cb0385dcb5d566c",
+    "artifact_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43289598993/artifacts/13975969617",
+    "source": "be14de6a34775b1fce9de44e9cb0385dcb5d566c",
+    "verified_inner_sha256": {
+      "business.json": "03326d647f25cd35dee59e3b643e25d0aa792635cebfcd9ff0700fabcec29b3c",
+      "calibration-1.json": "5547e7abcf1f60032797869dfb89e0447783893cc7d4ede7f1877993d42085c9",
+      "calibration-2.json": "1284d693099a3314fc894b26e97eb0bce02152ffd8780f4bbbab19c43b864e1b",
+      "frozen-client.json": "0a227202a5b958cc17ab2d999c046e1ab3a7f01635ca1c20bd5f18a1350c342a",
+      "single.json": "1b1bfdc0032d283cb7ced73e02c0761a0dbfa2e027d465d7f1291d346d39d076",
+      "summary.json": "528b81927be50ac0ae440f7fb6fd9abd46fb1705975ff39c0443c2842ef4a54d"
+    },
+    "frozen_transport_header_rps": [
+      246.10003582187622,
+      244.1928107485918
+    ],
+    "outcome": {
+      "calibrated": true,
+      "layer": "auth",
+      "workload": {
+        "planned": 5000,
+        "scheduled": 5000,
+        "attempted": 5000,
+        "headers_started": 5000,
+        "received_by_server": 5000,
+        "admitted_by_server": 2472,
+        "http_responses": 5000,
+        "validated": 2472,
+        "counts_by_status": {
+          "200": 2472,
+          "429": 2528
+        },
+        "errors_by_code": {
+          "BACKPRESSURE": 2528
+        },
+        "timeouts": 0,
+        "transport_errors": 0,
+        "http_429": 2528,
+        "http_409": 0,
+        "http_5xx": 0,
+        "retry_attempts": 0,
+        "business_validated": null,
+        "network_seconds": 5.133711781000017,
+        "validated_per_s": 481.5229419674334,
+        "requested_per_s": 1000.0,
+        "header_start_per_s": 999.8733253103627,
+        "started_inside_offer_window": 4999,
+        "client_schedule_lag": {
+          "count": 5000,
+          "p50_ms": 0.3569,
+          "p95_ms": 1.0224,
+          "p99_ms": 1.1589
+        },
+        "client_lane_wait": {
+          "count": 5000,
+          "p50_ms": 0.0077,
+          "p95_ms": 0.0101,
+          "p99_ms": 0.0203
+        },
+        "scheduled_to_completion": {
+          "count": 5000,
+          "p50_ms": 83.1873,
+          "p95_ms": 656.2186,
+          "p99_ms": 756.2078
+        },
+        "server_to_response_headers": {
+          "count": 5000,
+          "p50_ms": 1.708,
+          "p95_ms": 617.118,
+          "p99_ms": 713.692
+        },
+        "wire_rate_gate": "PASS",
+        "layer_gate": "NOT_MET"
+      },
+      "attribution": "NOT_MET"
+    },
+    "profiles": {
+      "single": {
+        "planned": 5000,
+        "scheduled": 5000,
+        "attempted": 5000,
+        "headers_started": 5000,
+        "received_by_server": 5000,
+        "admitted_by_server": 5000,
+        "http_responses": 5000,
+        "validated": 5000,
+        "counts_by_status": {
+          "200": 5000
+        },
+        "errors_by_code": {},
+        "timeouts": 0,
+        "transport_errors": 0,
+        "http_429": 0,
+        "http_409": 0,
+        "http_5xx": 0,
+        "retry_attempts": 0,
+        "business_validated": null,
+        "network_seconds": 5.041580723999999,
+        "validated_per_s": 991.752443077613,
+        "requested_per_s": 1000.0,
+        "header_start_per_s": 999.7646473223069,
+        "started_inside_offer_window": 4999,
+        "client_schedule_lag": {
+          "count": 5000,
+          "p50_ms": 0.6087,
+          "p95_ms": 0.8757,
+          "p99_ms": 0.942
+        },
+        "client_lane_wait": {
+          "count": 5000,
+          "p50_ms": 0.0033,
+          "p95_ms": 0.0039,
+          "p99_ms": 0.0061
+        },
+        "scheduled_to_completion": {
+          "count": 5000,
+          "p50_ms": 41.5987,
+          "p95_ms": 42.6067,
+          "p99_ms": 42.6331
+        },
+        "server_to_response_headers": {
+          "count": 0,
+          "p50_ms": null,
+          "p95_ms": null,
+          "p99_ms": null
+        },
+        "wire_rate_gate": "PASS",
+        "layer_gate": "PASS"
+      },
+      "calibration-1": {
+        "planned": 5000,
+        "scheduled": 5000,
+        "attempted": 5000,
+        "headers_started": 5000,
+        "received_by_server": 5000,
+        "admitted_by_server": 5000,
+        "http_responses": 5000,
+        "validated": 5000,
+        "counts_by_status": {
+          "200": 5000
+        },
+        "errors_by_code": {},
+        "timeouts": 0,
+        "transport_errors": 0,
+        "http_429": 0,
+        "http_409": 0,
+        "http_5xx": 0,
+        "retry_attempts": 0,
+        "business_validated": null,
+        "network_seconds": 5.041011024000014,
+        "validated_per_s": 991.8645240399669,
+        "requested_per_s": 1000.0,
+        "header_start_per_s": 1000.0626052394358,
+        "started_inside_offer_window": 5000,
+        "client_schedule_lag": {
+          "count": 5000,
+          "p50_ms": 1.0344,
+          "p95_ms": 1.0724,
+          "p99_ms": 1.092
+        },
+        "client_lane_wait": {
+          "count": 5000,
+          "p50_ms": 0.0054,
+          "p95_ms": 0.0065,
+          "p99_ms": 0.0086
+        },
+        "scheduled_to_completion": {
+          "count": 5000,
+          "p50_ms": 41.9512,
+          "p95_ms": 42.965,
+          "p99_ms": 42.9869
+        },
+        "server_to_response_headers": {
+          "count": 0,
+          "p50_ms": null,
+          "p95_ms": null,
+          "p99_ms": null
+        },
+        "wire_rate_gate": "PASS",
+        "layer_gate": "PASS"
+      },
+      "calibration-2": {
+        "planned": 5000,
+        "scheduled": 5000,
+        "attempted": 5000,
+        "headers_started": 5000,
+        "received_by_server": 5000,
+        "admitted_by_server": 5000,
+        "http_responses": 5000,
+        "validated": 5000,
+        "counts_by_status": {
+          "200": 5000
+        },
+        "errors_by_code": {},
+        "timeouts": 0,
+        "transport_errors": 0,
+        "http_429": 0,
+        "http_409": 0,
+        "http_5xx": 0,
+        "retry_attempts": 0,
+        "business_validated": null,
+        "network_seconds": 5.036746423000011,
+        "validated_per_s": 992.7043333306973,
+        "requested_per_s": 1000.0,
+        "header_start_per_s": 999.9632145958653,
+        "started_inside_offer_window": 4999,
+        "client_schedule_lag": {
+          "count": 5000,
+          "p50_ms": 0.487,
+          "p95_ms": 0.8063,
+          "p99_ms": 0.8805
+        },
+        "client_lane_wait": {
+          "count": 5000,
+          "p50_ms": 0.0054,
+          "p95_ms": 0.0061,
+          "p99_ms": 0.0077
+        },
+        "scheduled_to_completion": {
+          "count": 5000,
+          "p50_ms": 41.3913,
+          "p95_ms": 41.4121,
+          "p99_ms": 42.4114
+        },
+        "server_to_response_headers": {
+          "count": 0,
+          "p50_ms": null,
+          "p95_ms": null,
+          "p99_ms": null
+        },
+        "wire_rate_gate": "PASS",
+        "layer_gate": "PASS"
+      },
+      "business": {
+        "planned": 5000,
+        "scheduled": 5000,
+        "attempted": 5000,
+        "headers_started": 5000,
+        "received_by_server": 5000,
+        "admitted_by_server": 2472,
+        "http_responses": 5000,
+        "validated": 2472,
+        "counts_by_status": {
+          "200": 2472,
+          "429": 2528
+        },
+        "errors_by_code": {
+          "BACKPRESSURE": 2528
+        },
+        "timeouts": 0,
+        "transport_errors": 0,
+        "http_429": 2528,
+        "http_409": 0,
+        "http_5xx": 0,
+        "retry_attempts": 0,
+        "business_validated": null,
+        "network_seconds": 5.133711781000017,
+        "validated_per_s": 481.5229419674334,
+        "requested_per_s": 1000.0,
+        "header_start_per_s": 999.8733253103627,
+        "started_inside_offer_window": 4999,
+        "client_schedule_lag": {
+          "count": 5000,
+          "p50_ms": 0.3569,
+          "p95_ms": 1.0224,
+          "p99_ms": 1.1589
+        },
+        "client_lane_wait": {
+          "count": 5000,
+          "p50_ms": 0.0077,
+          "p95_ms": 0.0101,
+          "p99_ms": 0.0203
+        },
+        "scheduled_to_completion": {
+          "count": 5000,
+          "p50_ms": 83.1873,
+          "p95_ms": 656.2186,
+          "p99_ms": 756.2078
+        },
+        "server_to_response_headers": {
+          "count": 5000,
+          "p50_ms": 1.708,
+          "p95_ms": 617.118,
+          "p99_ms": 713.692
+        },
+        "wire_rate_gate": "PASS",
+        "layer_gate": "NOT_MET"
+      }
+    },
+    "service": {
+      "ingress": {
+        "peak_queued": 0,
+        "queued": 0,
+        "completed": 5000,
+        "admitted": 5000,
+        "wait_seconds_total": 0.03898718599933204,
+        "per_principal": 256,
+        "peak_active": 138,
+        "max_waiters": 0,
+        "active": 0,
+        "capacity": 256,
+        "peak_note": "Sum of process peaks; see process snapshots for exact values"
+      },
+      "authentication_admission": {
+        "peak_queued": 128,
+        "queued": 0,
+        "rejected": 2528,
+        "completed": 2472,
+        "admitted": 2472,
+        "wait_seconds_total": 541.8340748439991,
+        "per_principal": 4,
+        "peak_active": 4,
+        "max_waiters": 128,
+        "active": 0,
+        "capacity": 4,
+        "peak_note": "Sum of process peaks; see process snapshots for exact values"
+      },
+      "admission": {
+        "peak_queued": 0,
+        "queued": 0,
+        "completed": 2472,
+        "admitted": 2472,
+        "wait_seconds_total": 0.014324863000638288,
+        "per_principal": 4,
+        "peak_active": 4,
+        "max_waiters": 128,
+        "active": 0,
+        "capacity": 4,
+        "peak_note": "Sum of process peaks; see process snapshots for exact values"
+      },
+      "resources": {
+        "service_user_cpu_seconds": 9.294856,
+        "service_system_cpu_seconds": 0.9954259999999999,
+        "service_sum_peak_rss_kib": 316552
+      },
+      "database": {
+        "sql_statements": 2472,
+        "transactions": 2472,
+        "failed_statements": 0,
+        "checked_out_at_end": 0,
+        "peak_checked_out_connections": 4,
+        "configured_pool_size": 8,
+        "sql_cursor_execution_seconds": 6.090337818000819,
+        "transaction_seconds_before_commit": 6.853838702999752
+      }
+    },
+    "validation_errors": {}
+  },
+  {
+    "run_id": 43289598993,
+    "artifact_id": 13976104080,
+    "name": "p59-shards-auth-read-be14de6a34775b1fce9de44e9cb0385dcb5d566c-1",
+    "bytes": 1804227,
+    "sha256": "d5a60ede70ec2b7f4b6c40ebcd7ba6b3caa6a05bff320b0504c8ef32cb963706",
+    "head_sha": "be14de6a34775b1fce9de44e9cb0385dcb5d566c",
+    "artifact_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43289598993/artifacts/13976104080",
+    "source": "be14de6a34775b1fce9de44e9cb0385dcb5d566c",
+    "verified_inner_sha256": {
+      "business.json": "aba87e48c1d6aedc0daa0fe8a2e27823f20e6e2df2fec681a7842cfd57c2e8e9",
+      "calibration-1.json": "e30f72730b422bdc6354ff16db3acd9333a1811b98ec053e0920e9c6741f7d99",
+      "calibration-2.json": "1b7d5377cf48a654019755f2b30ef6aa091df08453acd2a2fb34ad7624ecc2dd",
+      "frozen-client.json": "e8ac9b5417d32d3a6df6e688e68dbb53075b01ede3edb21aae902e15e9c155d5",
+      "single.json": "dcbfb996bda49be77207e935a35ed085864976eb1ff145350d7260e6dc6cd932",
+      "summary.json": "1e6fe3fb38fe9b9225d9d81bbf67ab30aefc653344e0d60010dcb9030437d8b3"
+    },
+    "frozen_transport_header_rps": [
+      207.5630978800745,
+      230.86307998784974
+    ],
+    "outcome": {
+      "calibrated": true,
+      "layer": "auth-read",
+      "workload": {
+        "planned": 5000,
+        "scheduled": 5000,
+        "attempted": 5000,
+        "headers_started": 5000,
+        "received_by_server": 5000,
+        "admitted_by_server": 2447,
+        "http_responses": 5000,
+        "validated": 2447,
+        "counts_by_status": {
+          "200": 2447,
+          "429": 2553
+        },
+        "errors_by_code": {
+          "BACKPRESSURE": 2553
+        },
+        "timeouts": 0,
+        "transport_errors": 0,
+        "http_429": 2553,
+        "http_409": 0,
+        "http_5xx": 0,
+        "retry_attempts": 0,
+        "business_validated": 2447,
+        "network_seconds": 8.28536401400001,
+        "validated_per_s": 295.34007146399796,
+        "requested_per_s": 1000.0,
+        "header_start_per_s": 623.211522479871,
+        "started_inside_offer_window": 3313,
+        "client_schedule_lag": {
+          "count": 5000,
+          "p50_ms": 0.7095,
+          "p95_ms": 1.1298,
+          "p99_ms": 1.4826
+        },
+        "client_lane_wait": {
+          "count": 5000,
+          "p50_ms": 1322.9699,
+          "p95_ms": 2735.4581,
+          "p99_ms": 2925.3612
+        },
+        "scheduled_to_completion": {
+          "count": 5000,
+          "p50_ms": 1681.4757,
+          "p95_ms": 3167.4188,
+          "p99_ms": 3359.4479
+        },
+        "server_to_response_headers": {
+          "count": 5000,
+          "p50_ms": 226.59,
+          "p95_ms": 691.678,
+          "p99_ms": 861.442
+        },
+        "wire_rate_gate": "NOT_MET",
+        "layer_gate": "NOT_MET"
+      },
+      "attribution": "NOT_MET"
+    },
+    "profiles": {
+      "single": {
+        "planned": 5000,
+        "scheduled": 5000,
+        "attempted": 5000,
+        "headers_started": 5000,
+        "received_by_server": 5000,
+        "admitted_by_server": 5000,
+        "http_responses": 5000,
+        "validated": 5000,
+        "counts_by_status": {
+          "200": 5000
+        },
+        "errors_by_code": {},
+        "timeouts": 0,
+        "transport_errors": 0,
+        "http_429": 0,
+        "http_409": 0,
+        "http_5xx": 0,
+        "retry_attempts": 0,
+        "business_validated": null,
+        "network_seconds": 5.043337979,
+        "validated_per_s": 991.4068858402003,
+        "requested_per_s": 1000.0,
+        "header_start_per_s": 999.5030562377178,
+        "started_inside_offer_window": 4999,
+        "client_schedule_lag": {
+          "count": 5000,
+          "p50_ms": 0.3624,
+          "p95_ms": 0.693,
+          "p99_ms": 0.8669
+        },
+        "client_lane_wait": {
+          "count": 5000,
+          "p50_ms": 0.0048,
+          "p95_ms": 0.006,
+          "p99_ms": 0.0079
+        },
+        "scheduled_to_completion": {
+          "count": 5000,
+          "p50_ms": 41.3476,
+          "p95_ms": 42.3523,
+          "p99_ms": 42.3955
+        },
+        "server_to_response_headers": {
+          "count": 0,
+          "p50_ms": null,
+          "p95_ms": null,
+          "p99_ms": null
+        },
+        "wire_rate_gate": "PASS",
+        "layer_gate": "PASS"
+      },
+      "calibration-1": {
+        "planned": 5000,
+        "scheduled": 5000,
+        "attempted": 5000,
+        "headers_started": 5000,
+        "received_by_server": 5000,
+        "admitted_by_server": 5000,
+        "http_responses": 5000,
+        "validated": 5000,
+        "counts_by_status": {
+          "200": 5000
+        },
+        "errors_by_code": {},
+        "timeouts": 0,
+        "transport_errors": 0,
+        "http_429": 0,
+        "http_409": 0,
+        "http_5xx": 0,
+        "retry_attempts": 0,
+        "business_validated": null,
+        "network_seconds": 5.036429087000002,
+        "validated_per_s": 992.7668817785934,
+        "requested_per_s": 1000.0,
+        "header_start_per_s": 999.8564738933607,
+        "started_inside_offer_window": 4999,
+        "client_schedule_lag": {
+          "count": 5000,
+          "p50_ms": 0.4941,
+          "p95_ms": 0.9155,
+          "p99_ms": 0.9766
+        },
+        "client_lane_wait": {
+          "count": 5000,
+          "p50_ms": 0.0067,
+          "p95_ms": 0.0079,
+          "p99_ms": 0.01
+        },
+        "scheduled_to_completion": {
+          "count": 5000,
+          "p50_ms": 41.3842,
+          "p95_ms": 41.4287,
+          "p99_ms": 42.4098
+        },
+        "server_to_response_headers": {
+          "count": 0,
+          "p50_ms": null,
+          "p95_ms": null,
+          "p99_ms": null
+        },
+        "wire_rate_gate": "PASS",
+        "layer_gate": "PASS"
+      },
+      "calibration-2": {
+        "planned": 5000,
+        "scheduled": 5000,
+        "attempted": 5000,
+        "headers_started": 5000,
+        "received_by_server": 5000,
+        "admitted_by_server": 5000,
+        "http_responses": 5000,
+        "validated": 5000,
+        "counts_by_status": {
+          "200": 5000
+        },
+        "errors_by_code": {},
+        "timeouts": 0,
+        "transport_errors": 0,
+        "http_429": 0,
+        "http_409": 0,
+        "http_5xx": 0,
+        "retry_attempts": 0,
+        "business_validated": null,
+        "network_seconds": 5.036649357000002,
+        "validated_per_s": 992.7234646682192,
+        "requested_per_s": 1000.0,
+        "header_start_per_s": 999.853217387466,
+        "started_inside_offer_window": 4999,
+        "client_schedule_lag": {
+          "count": 5000,
+          "p50_ms": 0.7023,
+          "p95_ms": 0.7505,
+          "p99_ms": 1.0962
+        },
+        "client_lane_wait": {
+          "count": 5000,
+          "p50_ms": 0.0067,
+          "p95_ms": 0.0079,
+          "p99_ms": 0.0098
+        },
+        "scheduled_to_completion": {
+          "count": 5000,
+          "p50_ms": 41.5964,
+          "p95_ms": 41.6248,
+          "p99_ms": 42.6247
+        },
+        "server_to_response_headers": {
+          "count": 0,
+          "p50_ms": null,
+          "p95_ms": null,
+          "p99_ms": null
+        },
+        "wire_rate_gate": "PASS",
+        "layer_gate": "PASS"
+      },
+      "business": {
+        "planned": 5000,
+        "scheduled": 5000,
+        "attempted": 5000,
+        "headers_started": 5000,
+        "received_by_server": 5000,
+        "admitted_by_server": 2447,
+        "http_responses": 5000,
+        "validated": 2447,
+        "counts_by_status": {
+          "200": 2447,
+          "429": 2553
+        },
+        "errors_by_code": {
+          "BACKPRESSURE": 2553
+        },
+        "timeouts": 0,
+        "transport_errors": 0,
+        "http_429": 2553,
+        "http_409": 0,
+        "http_5xx": 0,
+        "retry_attempts": 0,
+        "business_validated": 2447,
+        "network_seconds": 8.28536401400001,
+        "validated_per_s": 295.34007146399796,
+        "requested_per_s": 1000.0,
+        "header_start_per_s": 623.211522479871,
+        "started_inside_offer_window": 3313,
+        "client_schedule_lag": {
+          "count": 5000,
+          "p50_ms": 0.7095,
+          "p95_ms": 1.1298,
+          "p99_ms": 1.4826
+        },
+        "client_lane_wait": {
+          "count": 5000,
+          "p50_ms": 1322.9699,
+          "p95_ms": 2735.4581,
+          "p99_ms": 2925.3612
+        },
+        "scheduled_to_completion": {
+          "count": 5000,
+          "p50_ms": 1681.4757,
+          "p95_ms": 3167.4188,
+          "p99_ms": 3359.4479
+        },
+        "server_to_response_headers": {
+          "count": 5000,
+          "p50_ms": 226.59,
+          "p95_ms": 691.678,
+          "p99_ms": 861.442
+        },
+        "wire_rate_gate": "NOT_MET",
+        "layer_gate": "NOT_MET"
+      }
+    },
+    "service": {
+      "ingress": {
+        "completed": 4960,
+        "admitted": 4960,
+        "capacity": 256,
+        "rejected": 40,
+        "active": 0,
+        "peak_active": 242,
+        "per_principal": 256,
+        "peak_queued": 0,
+        "max_waiters": 0,
+        "wait_seconds_total": 0.05361136399992006,
+        "queued": 0,
+        "peak_note": "Sum of process peaks; see process snapshots for exact values"
+      },
+      "authentication_admission": {
+        "completed": 4527,
+        "admitted": 4527,
+        "capacity": 4,
+        "rejected": 433,
+        "active": 0,
+        "peak_active": 4,
+        "per_principal": 4,
+        "peak_queued": 128,
+        "max_waiters": 128,
+        "wait_seconds_total": 759.1855316100023,
+        "queued": 0,
+        "peak_note": "Sum of process peaks; see process snapshots for exact values"
+      },
+      "admission": {
+        "completed": 2447,
+        "admitted": 2447,
+        "capacity": 4,
+        "rejected": 2080,
+        "active": 0,
+        "peak_active": 4,
+        "per_principal": 4,
+        "peak_queued": 128,
+        "max_waiters": 128,
+        "wait_seconds_total": 965.3081880230013,
+        "queued": 0,
+        "peak_note": "Sum of process peaks; see process snapshots for exact values"
+      },
+      "resources": {
+        "service_user_cpu_seconds": 13.018979,
+        "service_system_cpu_seconds": 3.668057,
+        "service_sum_peak_rss_kib": 317144
+      },
+      "database": {
+        "sql_statements": 14315,
+        "transactions": 6974,
+        "failed_statements": 0,
+        "checked_out_at_end": 0,
+        "peak_checked_out_connections": 8,
+        "configured_pool_size": 8,
+        "sql_cursor_execution_seconds": 24.83234822500191,
+        "transaction_seconds_before_commit": 29.86780545799985
+      }
+    },
+    "validation_errors": {}
+  },
+  {
+    "run_id": 43289598993,
+    "artifact_id": 13976638692,
+    "name": "p59-shards-query-be14de6a34775b1fce9de44e9cb0385dcb5d566c-1",
+    "bytes": 1840044,
+    "sha256": "d767a5041634a48ddd4449d20bf5c6073377608a8ef75617083ec97c32be7877",
+    "head_sha": "be14de6a34775b1fce9de44e9cb0385dcb5d566c",
+    "artifact_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43289598993/artifacts/13976638692",
+    "source": "be14de6a34775b1fce9de44e9cb0385dcb5d566c",
+    "verified_inner_sha256": {
+      "business.json": "6ec502a4755ad61a85d5924666108c1a79fcf6bf3dbda75e0a162f037c6e6227",
+      "calibration-1.json": "9153acd21cbe62a045ff1d884f305ba417a51acc45209fb4c65a31f141ab5198",
+      "calibration-2.json": "53ce46c6601df7202f0fb4114dfaea87813fbd7ee05f4e549e34af89167aecab",
+      "frozen-client.json": "bffa489072705911e1c2c2aa3853982a23ff05d2ce6c0c7c4a2d45bce0f8084d",
+      "single.json": "0e988977e3720d5fa5ac746511a0a3de7bc2ac94a079ff7fbab87b6628f8c283",
+      "summary.json": "dbba189f464c101edfe11f7db28707e6ff72699ca9237e7d36629c57c7128081"
+    },
+    "frozen_transport_header_rps": [
+      209.6707359639858,
+      212.77373762136037
+    ],
+    "outcome": {
+      "calibrated": true,
+      "layer": "query",
+      "workload": {
+        "planned": 5000,
+        "scheduled": 5000,
+        "attempted": 5000,
+        "headers_started": 5000,
+        "received_by_server": 5000,
+        "admitted_by_server": 94,
+        "http_responses": 5000,
+        "validated": 93,
+        "counts_by_status": {
+          "200": 93,
+          "429": 4907
+        },
+        "errors_by_code": {
+          "BACKPRESSURE": 4907
+        },
+        "timeouts": 0,
+        "transport_errors": 0,
+        "http_429": 4907,
+        "http_409": 0,
+        "http_5xx": 0,
+        "retry_attempts": 0,
+        "business_validated": 93,
+        "network_seconds": 10.472659227999998,
+        "validated_per_s": 8.880266031320161,
+        "requested_per_s": 1000.0,
+        "header_start_per_s": 630.1201751584733,
+        "started_inside_offer_window": 3162,
+        "client_schedule_lag": {
+          "count": 5000,
+          "p50_ms": 0.8392,
+          "p95_ms": 1.5657,
+          "p99_ms": 2.7773
+        },
+        "client_lane_wait": {
+          "count": 5000,
+          "p50_ms": 1440.4725,
+          "p95_ms": 2693.4609,
+          "p99_ms": 2846.2006
+        },
+        "scheduled_to_completion": {
+          "count": 5000,
+          "p50_ms": 1809.6213,
+          "p95_ms": 3857.2479,
+          "p99_ms": 5926.6071
+        },
+        "server_to_response_headers": {
+          "count": 5000,
+          "p50_ms": 2.033,
+          "p95_ms": 2207.222,
+          "p99_ms": 3371.96
+        },
+        "wire_rate_gate": "NOT_MET",
+        "layer_gate": "NOT_MET"
+      },
+      "attribution": "NOT_MET"
+    },
+    "profiles": {
+      "single": {
+        "planned": 5000,
+        "scheduled": 5000,
+        "attempted": 5000,
+        "headers_started": 5000,
+        "received_by_server": 5000,
+        "admitted_by_server": 5000,
+        "http_responses": 5000,
+        "validated": 5000,
+        "counts_by_status": {
+          "200": 5000
+        },
+        "errors_by_code": {},
+        "timeouts": 0,
+        "transport_errors": 0,
+        "http_429": 0,
+        "http_409": 0,
+        "http_5xx": 0,
+        "retry_attempts": 0,
+        "business_validated": null,
+        "network_seconds": 5.043732074000019,
+        "validated_per_s": 991.3294216745862,
+        "requested_per_s": 1000.0,
+        "header_start_per_s": 999.6250154411227,
+        "started_inside_offer_window": 4999,
+        "client_schedule_lag": {
+          "count": 5000,
+          "p50_ms": 0.381,
+          "p95_ms": 0.966,
+          "p99_ms": 1.0733
+        },
+        "client_lane_wait": {
+          "count": 5000,
+          "p50_ms": 0.0075,
+          "p95_ms": 0.0102,
+          "p99_ms": 0.0131
+        },
+        "scheduled_to_completion": {
+          "count": 5000,
+          "p50_ms": 41.7383,
+          "p95_ms": 42.7708,
+          "p99_ms": 42.9338
+        },
+        "server_to_response_headers": {
+          "count": 0,
+          "p50_ms": null,
+          "p95_ms": null,
+          "p99_ms": null
+        },
+        "wire_rate_gate": "PASS",
+        "layer_gate": "PASS"
+      },
+      "calibration-1": {
+        "planned": 5000,
+        "scheduled": 5000,
+        "attempted": 5000,
+        "headers_started": 5000,
+        "received_by_server": 5000,
+        "admitted_by_server": 5000,
+        "http_responses": 5000,
+        "validated": 5000,
+        "counts_by_status": {
+          "200": 5000
+        },
+        "errors_by_code": {},
+        "timeouts": 0,
+        "transport_errors": 0,
+        "http_429": 0,
+        "http_409": 0,
+        "http_5xx": 0,
+        "retry_attempts": 0,
+        "business_validated": null,
+        "network_seconds": 5.045689803000016,
+        "validated_per_s": 990.9447855924773,
+        "requested_per_s": 1000.0,
+        "header_start_per_s": 999.9005965993621,
+        "started_inside_offer_window": 4998,
+        "client_schedule_lag": {
+          "count": 5000,
+          "p50_ms": 0.7426,
+          "p95_ms": 0.7959,
+          "p99_ms": 0.9101
+        },
+        "client_lane_wait": {
+          "count": 5000,
+          "p50_ms": 0.008,
+          "p95_ms": 0.0111,
+          "p99_ms": 0.0146
+        },
+        "scheduled_to_completion": {
+          "count": 5000,
+          "p50_ms": 41.6152,
+          "p95_ms": 41.6808,
+          "p99_ms": 42.661
+        },
+        "server_to_response_headers": {
+          "count": 0,
+          "p50_ms": null,
+          "p95_ms": null,
+          "p99_ms": null
+        },
+        "wire_rate_gate": "PASS",
+        "layer_gate": "PASS"
+      },
+      "calibration-2": {
+        "planned": 5000,
+        "scheduled": 5000,
+        "attempted": 5000,
+        "headers_started": 5000,
+        "received_by_server": 5000,
+        "admitted_by_server": 5000,
+        "http_responses": 5000,
+        "validated": 5000,
+        "counts_by_status": {
+          "200": 5000
+        },
+        "errors_by_code": {},
+        "timeouts": 0,
+        "transport_errors": 0,
+        "http_429": 0,
+        "http_409": 0,
+        "http_5xx": 0,
+        "retry_attempts": 0,
+        "business_validated": null,
+        "network_seconds": 5.036150085999992,
+        "validated_per_s": 992.8218807258176,
+        "requested_per_s": 1000.0,
+        "header_start_per_s": 999.879985999406,
+        "started_inside_offer_window": 4998,
+        "client_schedule_lag": {
+          "count": 5000,
+          "p50_ms": 0.2164,
+          "p95_ms": 0.7438,
+          "p99_ms": 0.8283
+        },
+        "client_lane_wait": {
+          "count": 5000,
+          "p50_ms": 0.0077,
+          "p95_ms": 0.0086,
+          "p99_ms": 0.0125
+        },
+        "scheduled_to_completion": {
+          "count": 5000,
+          "p50_ms": 41.0861,
+          "p95_ms": 41.1814,
+          "p99_ms": 42.1272
+        },
+        "server_to_response_headers": {
+          "count": 0,
+          "p50_ms": null,
+          "p95_ms": null,
+          "p99_ms": null
+        },
+        "wire_rate_gate": "PASS",
+        "layer_gate": "PASS"
+      },
+      "business": {
+        "planned": 5000,
+        "scheduled": 5000,
+        "attempted": 5000,
+        "headers_started": 5000,
+        "received_by_server": 5000,
+        "admitted_by_server": 94,
+        "http_responses": 5000,
+        "validated": 93,
+        "counts_by_status": {
+          "200": 93,
+          "429": 4907
+        },
+        "errors_by_code": {
+          "BACKPRESSURE": 4907
+        },
+        "timeouts": 0,
+        "transport_errors": 0,
+        "http_429": 4907,
+        "http_409": 0,
+        "http_5xx": 0,
+        "retry_attempts": 0,
+        "business_validated": 93,
+        "network_seconds": 10.472659227999998,
+        "validated_per_s": 8.880266031320161,
+        "requested_per_s": 1000.0,
+        "header_start_per_s": 630.1201751584733,
+        "started_inside_offer_window": 3162,
+        "client_schedule_lag": {
+          "count": 5000,
+          "p50_ms": 0.8392,
+          "p95_ms": 1.5657,
+          "p99_ms": 2.7773
+        },
+        "client_lane_wait": {
+          "count": 5000,
+          "p50_ms": 1440.4725,
+          "p95_ms": 2693.4609,
+          "p99_ms": 2846.2006
+        },
+        "scheduled_to_completion": {
+          "count": 5000,
+          "p50_ms": 1809.6213,
+          "p95_ms": 3857.2479,
+          "p99_ms": 5926.6071
+        },
+        "server_to_response_headers": {
+          "count": 5000,
+          "p50_ms": 2.033,
+          "p95_ms": 2207.222,
+          "p99_ms": 3371.96
+        },
+        "wire_rate_gate": "NOT_MET",
+        "layer_gate": "NOT_MET"
+      }
+    },
+    "service": {
+      "ingress": {
+        "max_waiters": 0,
+        "peak_queued": 0,
+        "per_principal": 256,
+        "queued": 0,
+        "capacity": 256,
+        "active": 0,
+        "wait_seconds_total": 0.06473497700295638,
+        "completed": 5000,
+        "peak_active": 151,
+        "admitted": 5000,
+        "peak_note": "Sum of process peaks; see process snapshots for exact values"
+      },
+      "authentication_admission": {
+        "max_waiters": 128,
+        "peak_queued": 128,
+        "per_principal": 4,
+        "queued": 0,
+        "capacity": 4,
+        "active": 0,
+        "timed_out": 356,
+        "wait_seconds_total": 669.7134072180004,
+        "completed": 185,
+        "peak_active": 4,
+        "admitted": 388,
+        "rejected": 4459,
+        "peak_note": "Sum of process peaks; see process snapshots for exact values"
+      },
+      "admission": {
+        "max_waiters": 128,
+        "peak_queued": 128,
+        "per_principal": 4,
+        "queued": 0,
+        "capacity": 4,
+        "active": 0,
+        "timed_out": 84,
+        "wait_seconds_total": 94.61360491099975,
+        "completed": 93,
+        "peak_active": 4,
+        "admitted": 94,
+        "rejected": 8,
+        "peak_note": "Sum of process peaks; see process snapshots for exact values"
+      },
+      "resources": {
+        "service_user_cpu_seconds": 18.979407000000002,
+        "service_system_cpu_seconds": 1.189039,
+        "service_sum_peak_rss_kib": 317424
+      },
+      "database": {
+        "sql_statements": 1673,
+        "transactions": 371,
+        "failed_statements": 0,
+        "checked_out_at_end": 0,
+        "peak_checked_out_connections": 8,
+        "configured_pool_size": 8,
+        "sql_cursor_execution_seconds": 13.753392434999,
+        "transaction_seconds_before_commit": 20.995987358999685
+      }
+    },
+    "validation_errors": {}
+  },
+  {
+    "run_id": 43288667752,
+    "artifact_id": 13976687772,
+    "name": "db-http-open-1000-3e6b59268f1e89520230c8b70e9a26b9950a2f79-1",
+    "bytes": 1114677,
+    "sha256": "f396da9ab63b83d8a1840ed91eaad666ab8bcdc45aa390f38285d0ff8d7b0397",
+    "head_sha": "82542395adcc7a1ced87132500326bdab2234847",
+    "artifact_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43288667752/artifacts/13976687772",
+    "source": "3e6b59268f1e89520230c8b70e9a26b9950a2f79",
+    "verified_inner_sha256": {
+      "result.json": "d1002194ea6a3e2f5fb971d67e5e643707517017d247a6ae7e541e88747fd2ac",
+      "transport.json": "b9e5ee011409375a95de6e4001b78de0bbbc171bf7732a8d891f0bc38ff25bae"
+    },
+    "exit": 1,
+    "frozen_transport_header_rps": [
+      219.8475689268868,
+      216.83833072470006
+    ],
+    "outcome": {
+      "capacity_gate": "NOT_MET",
+      "offered_wire_rate_gate": "NOT_MET",
+      "scheduled_requests": 5000,
+      "wire_started_requests": 5000,
+      "validated_successes": 1912,
+      "successful_query_rps": 15.15022558664861,
+      "observed_wire_start_rps": 40.317201690350714,
+      "dispatch_start_rps": 40.6165299330043,
+      "status_counts": {
+        "429": 3074,
+        "200": 1912,
+        "transport_error": 14
+      },
+      "latency_all_attempts": {
+        "count": 5000,
+        "p50_ms": 2672.3941,
+        "p95_ms": 6565.4827,
+        "p99_ms": 10044.4211
+      },
+      "world_unchanged": true,
+      "service": {
+        "ingress": {
+          "peak_queued": 0,
+          "peak_active": 185,
+          "active": 0,
+          "completed": 4986,
+          "per_principal": 256,
+          "capacity": 256,
+          "queued": 0,
+          "max_waiters": 0,
+          "wait_seconds_total": 0.0773675150012707,
+          "admitted": 4986,
+          "peak_note": "Sum of process peaks; see process snapshots for exact values"
+        },
+        "authentication_admission": {
+          "peak_queued": 128,
+          "peak_active": 4,
+          "active": 0,
+          "rejected": 1118,
+          "completed": 3868,
+          "per_principal": 4,
+          "capacity": 4,
+          "queued": 0,
+          "max_waiters": 128,
+          "wait_seconds_total": 1064.255580746998,
+          "admitted": 3868,
+          "peak_note": "Sum of process peaks; see process snapshots for exact values"
+        },
+        "admission": {
+          "peak_queued": 128,
+          "peak_active": 4,
+          "active": 0,
+          "rejected": 543,
+          "completed": 1912,
+          "per_principal": 4,
+          "capacity": 4,
+          "timed_out": 1413,
+          "queued": 0,
+          "max_waiters": 128,
+          "wait_seconds_total": 1651.970939481997,
+          "admitted": 1934,
+          "peak_note": "Sum of process peaks; see process snapshots for exact values"
+        },
+        "resources": {
+          "service_user_cpu_seconds": 167.779931,
+          "service_system_cpu_seconds": 16.564274,
+          "service_sum_peak_rss_kib": 327824
+        },
+        "database": {
+          "sql_statements": 34460,
+          "transactions": 7692,
+          "failed_statements": 0,
+          "checked_out_at_end": 0,
+          "peak_checked_out_connections": 8,
+          "configured_pool_size": 8,
+          "sql_cursor_execution_seconds": 187.95340333499882,
+          "transaction_seconds_before_commit": 364.3726117969992
+        }
+      }
+    }
+  },
+  {
+    "run_id": 43288667752,
+    "artifact_id": 13976822092,
+    "name": "db-http-overload-200-3e6b59268f1e89520230c8b70e9a26b9950a2f79-1",
+    "bytes": 1308616,
+    "sha256": "d0d3f88b7ef99a393c616f7a296d42fae25db6f7ede27041f6fed569325826bb",
+    "head_sha": "82542395adcc7a1ced87132500326bdab2234847",
+    "artifact_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43288667752/artifacts/13976822092",
+    "source": "3e6b59268f1e89520230c8b70e9a26b9950a2f79",
+    "verified_inner_sha256": {
+      "result.json": "6f40c2b089dd92640b3db1a3086e67953da39326c54e4cfcbddaf836499a640a",
+      "transport.json": "9cfc528ebfe60d68db669b9b7be968b184b47944b63fe8b71a59df84d147e3c4"
+    },
+    "exit": 1,
+    "frozen_transport_header_rps": [
+      227.744431386603,
+      257.2471989650834
+    ],
+    "outcome": {
+      "capacity_gate": "NOT_MET",
+      "first_attempt_capacity_gate": "NOT_MET",
+      "engineer_correctness": "PASS",
+      "bounded_recovery_business_gate": "PASS",
+      "open_loop_offered_rate": {
+        "gate": "NOT_MET",
+        "transport_header_starts": 1000,
+        "transport_header_start_rps": 44.323434713909954,
+        "target_rps": 1000.0,
+        "first_attempts": 1000,
+        "actual_call_start_rps": 56.51541241485768,
+        "start_window_seconds": 17.676594000000023,
+        "max_schedule_delay_ms": 16677.7141,
+        "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+        "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+      },
+      "metrics": {
+        "planned_requests": 2141,
+        "completed_requests": 2971,
+        "first_attempt_status_counts": {
+          "200": 1617,
+          "409": 19,
+          "429": 505
+        },
+        "valid_successful_calls": 2121,
+        "effective_call_rps_excluding_duplicates": 12.5542,
+        "status_counts": {
+          "200": 2121,
+          "409": 19,
+          "429": 831
+        },
+        "infrastructure_retries": 830,
+        "latency_all_responses": {
+          "count": 2971,
+          "p50_ms": 843.282,
+          "p95_ms": 7359.3973,
+          "p99_ms": 11320.4966
+        },
+        "new_world_commit_receipts": 21
+      },
+      "world": {
+        "new_world_revisions": 21,
+        "expected_new_world_revisions": 21
+      },
+      "service": {
+        "ingress": {
+          "capacity": 128,
+          "max_waiters": 0,
+          "peak_active": 128,
+          "admitted": 2966,
+          "rejected": 5,
+          "completed": 2966,
+          "queued": 0,
+          "active": 0,
+          "peak_queued": 0,
+          "per_principal": 128,
+          "wait_seconds_total": 0.03359923900089257,
+          "peak_note": "Sum of process peaks; see process snapshots for exact values"
+        },
+        "authentication_admission": {
+          "capacity": 2,
+          "max_waiters": 64,
+          "peak_active": 2,
+          "admitted": 2156,
+          "rejected": 810,
+          "completed": 2156,
+          "queued": 0,
+          "active": 0,
+          "peak_queued": 64,
+          "per_principal": 2,
+          "wait_seconds_total": 464.2085040319996,
+          "peak_note": "Sum of process peaks; see process snapshots for exact values"
+        },
+        "admission": {
+          "capacity": 6,
+          "max_waiters": 64,
+          "peak_active": 6,
+          "admitted": 2140,
+          "rejected": 13,
+          "completed": 2140,
+          "timed_out": 3,
+          "active": 0,
+          "peak_queued": 64,
+          "queued": 0,
+          "per_principal": 2,
+          "wait_seconds_total": 649.9802088779984,
+          "peak_note": "Sum of process peaks; see process snapshots for exact values"
+        },
+        "resources": {
+          "process_user_cpu_seconds": 28.008235999999997,
+          "process_system_cpu_seconds": 1.8360450000000001,
+          "process_peak_rss_kib": 118692,
+          "minor_page_faults": 3804,
+          "major_page_faults": 0
+        },
+        "database": {
+          "sql_statements": 46573,
+          "transactions": 6695,
+          "failed_statements": 0,
+          "checked_out_at_end": 0,
+          "peak_checked_out_connections": 8,
+          "configured_pool_size": 8,
+          "sql_cursor_execution_seconds": 122.86277828100526,
+          "transaction_seconds_before_commit": 159.50952908700015
+        }
+      }
+    }
+  },
+  {
+    "run_id": 43288667752,
+    "artifact_id": 13977031882,
+    "name": "db-http-open-1000-434840593179e6c1faa6b7aeca3d7d747644506d-1",
+    "bytes": 1141143,
+    "sha256": "50558f4e42e0a9567d5b3988ef83a74b91c1397c3f63a17ab687281b6f83496c",
+    "head_sha": "82542395adcc7a1ced87132500326bdab2234847",
+    "artifact_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43288667752/artifacts/13977031882",
+    "source": "434840593179e6c1faa6b7aeca3d7d747644506d",
+    "verified_inner_sha256": {
+      "result.json": "e38096aedca97182e4df924ff04ed04dac654bbfdd40501834241a16d197ac12",
+      "transport.json": "cc3859785f60ca2182f848496fed8546bc501501ec62e64ed940dfa3200c14f1"
+    },
+    "exit": 1,
+    "frozen_transport_header_rps": [
+      202.60699934831894,
+      223.5688928547134
+    ],
+    "outcome": {
+      "capacity_gate": "NOT_MET",
+      "offered_wire_rate_gate": "NOT_MET",
+      "scheduled_requests": 5000,
+      "wire_started_requests": 5000,
+      "validated_successes": 1856,
+      "successful_query_rps": 14.8578662388926,
+      "observed_wire_start_rps": 40.372867541755916,
+      "dispatch_start_rps": 40.78960310285174,
+      "status_counts": {
+        "429": 3130,
+        "200": 1856,
+        "transport_error": 14
+      },
+      "latency_all_attempts": {
+        "count": 5000,
+        "p50_ms": 2656.1961,
+        "p95_ms": 5924.35,
+        "p99_ms": 9417.0333
+      },
+      "world_unchanged": true,
+      "service": {
+        "ingress": {
+          "peak_queued": 0,
+          "queued": 0,
+          "max_waiters": 0,
+          "capacity": 256,
+          "per_principal": 256,
+          "wait_seconds_total": 0.07943513199847985,
+          "admitted": 4986,
+          "active": 0,
+          "peak_active": 183,
+          "completed": 4986,
+          "peak_note": "Sum of process peaks; see process snapshots for exact values"
+        },
+        "authentication_admission": {
+          "peak_queued": 128,
+          "queued": 0,
+          "max_waiters": 128,
+          "capacity": 4,
+          "per_principal": 4,
+          "wait_seconds_total": 1124.6495491920007,
+          "admitted": 3784,
+          "rejected": 1202,
+          "active": 0,
+          "peak_active": 4,
+          "completed": 3784,
+          "peak_note": "Sum of process peaks; see process snapshots for exact values"
+        },
+        "admission": {
+          "peak_queued": 128,
+          "queued": 0,
+          "max_waiters": 128,
+          "capacity": 4,
+          "per_principal": 4,
+          "wait_seconds_total": 1636.3276407559983,
+          "admitted": 1910,
+          "rejected": 498,
+          "timed_out": 1430,
+          "active": 0,
+          "peak_active": 4,
+          "completed": 1856,
+          "peak_note": "Sum of process peaks; see process snapshots for exact values"
+        },
+        "resources": {
+          "service_user_cpu_seconds": 166.93863900000002,
+          "service_system_cpu_seconds": 16.650921,
+          "service_sum_peak_rss_kib": 327188
+        },
+        "database": {
+          "sql_statements": 33480,
+          "transactions": 7496,
+          "failed_statements": 0,
+          "checked_out_at_end": 0,
+          "peak_checked_out_connections": 8,
+          "configured_pool_size": 8,
+          "sql_cursor_execution_seconds": 188.99651808000067,
+          "transaction_seconds_before_commit": 366.22222483100177
+        }
+      }
+    }
+  },
+  {
+    "run_id": 43289598993,
+    "artifact_id": 13977690034,
+    "name": "p59-shards-minimal-be14de6a34775b1fce9de44e9cb0385dcb5d566c-1",
+    "bytes": 1577875,
+    "sha256": "4f5851400a1101460da1e680813abcf78d99f350949a905c9cc2c79dcbe89205",
+    "head_sha": "be14de6a34775b1fce9de44e9cb0385dcb5d566c",
+    "artifact_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43289598993/artifacts/13977690034",
+    "source": "be14de6a34775b1fce9de44e9cb0385dcb5d566c",
+    "verified_inner_sha256": {
+      "business.json": "25db9384f23ab81f8fdad7d6b77d82086df80f00ae5fc1ee09e9a94e2c9ea2ce",
+      "calibration-1.json": "bf271eb41cb2ab8d8e75fa1a9ae425bd8f92dc49c106eaf18887139909bd8251",
+      "calibration-2.json": "c72a450d981989853a782828a449c6d7fff72f1f0d5a85569c36d1c2256ffb77",
+      "frozen-client.json": "055722e49881a88acd2aff5c75acec411666d80b914bc882f67a40d97b7f8df3",
+      "single.json": "eac16f8e78db116122d124324aeb3a90b189cb0dd300450c3b5b1c724ab267e6",
+      "summary.json": "5bcd6b5b7307514b668e31b02e15a3d8cf87ca0541c9f49ed326bbb42960124a"
+    },
+    "frozen_transport_header_rps": [
+      253.7739545910199,
+      251.46943608276808
+    ],
+    "outcome": {
+      "calibrated": true,
+      "layer": "minimal",
+      "workload": {
+        "planned": 5000,
+        "scheduled": 5000,
+        "attempted": 5000,
+        "headers_started": 5000,
+        "received_by_server": 5000,
+        "admitted_by_server": 5000,
+        "http_responses": 5000,
+        "validated": 5000,
+        "counts_by_status": {
+          "200": 5000
+        },
+        "errors_by_code": {},
+        "timeouts": 0,
+        "transport_errors": 0,
+        "http_429": 0,
+        "http_409": 0,
+        "http_5xx": 0,
+        "retry_attempts": 0,
+        "business_validated": null,
+        "network_seconds": 5.0388124800000185,
+        "validated_per_s": 992.2972962073758,
+        "requested_per_s": 1000.0,
+        "header_start_per_s": 999.9023018043252,
+        "started_inside_offer_window": 4999,
+        "client_schedule_lag": {
+          "count": 5000,
+          "p50_ms": 0.8694,
+          "p95_ms": 0.9172,
+          "p99_ms": 0.9994
+        },
+        "client_lane_wait": {
+          "count": 5000,
+          "p50_ms": 0.0085,
+          "p95_ms": 0.0098,
+          "p99_ms": 0.013
+        },
+        "scheduled_to_completion": {
+          "count": 5000,
+          "p50_ms": 41.7572,
+          "p95_ms": 41.8405,
+          "p99_ms": 42.7987
+        },
+        "server_to_response_headers": {
+          "count": 5000,
+          "p50_ms": 0.148,
+          "p95_ms": 0.177,
+          "p99_ms": 0.217
+        },
+        "wire_rate_gate": "PASS",
+        "layer_gate": "PASS"
+      },
+      "attribution": "PASS"
+    },
+    "profiles": {
+      "single": {
+        "planned": 5000,
+        "scheduled": 5000,
+        "attempted": 5000,
+        "headers_started": 5000,
+        "received_by_server": 5000,
+        "admitted_by_server": 5000,
+        "http_responses": 5000,
+        "validated": 5000,
+        "counts_by_status": {
+          "200": 5000
+        },
+        "errors_by_code": {},
+        "timeouts": 0,
+        "transport_errors": 0,
+        "http_429": 0,
+        "http_409": 0,
+        "http_5xx": 0,
+        "retry_attempts": 0,
+        "business_validated": null,
+        "network_seconds": 5.042548267000001,
+        "validated_per_s": 991.5621497808063,
+        "requested_per_s": 1000.0,
+        "header_start_per_s": 999.5731482734029,
+        "started_inside_offer_window": 4999,
+        "client_schedule_lag": {
+          "count": 5000,
+          "p50_ms": 0.601,
+          "p95_ms": 0.9889,
+          "p99_ms": 1.0791
+        },
+        "client_lane_wait": {
+          "count": 5000,
+          "p50_ms": 0.0054,
+          "p95_ms": 0.0081,
+          "p99_ms": 0.0116
+        },
+        "scheduled_to_completion": {
+          "count": 5000,
+          "p50_ms": 41.5851,
+          "p95_ms": 42.5986,
+          "p99_ms": 42.6637
+        },
+        "server_to_response_headers": {
+          "count": 0,
+          "p50_ms": null,
+          "p95_ms": null,
+          "p99_ms": null
+        },
+        "wire_rate_gate": "PASS",
+        "layer_gate": "PASS"
+      },
+      "calibration-1": {
+        "planned": 5000,
+        "scheduled": 5000,
+        "attempted": 5000,
+        "headers_started": 5000,
+        "received_by_server": 5000,
+        "admitted_by_server": 5000,
+        "http_responses": 5000,
+        "validated": 5000,
+        "counts_by_status": {
+          "200": 5000
+        },
+        "errors_by_code": {},
+        "timeouts": 0,
+        "transport_errors": 0,
+        "http_429": 0,
+        "http_409": 0,
+        "http_5xx": 0,
+        "retry_attempts": 0,
+        "business_validated": null,
+        "network_seconds": 5.041610508000005,
+        "validated_per_s": 991.7465841651239,
+        "requested_per_s": 1000.0,
+        "header_start_per_s": 1000.0012988614601,
+        "started_inside_offer_window": 4999,
+        "client_schedule_lag": {
+          "count": 5000,
+          "p50_ms": 0.6563,
+          "p95_ms": 1.0209,
+          "p99_ms": 1.0861
+        },
+        "client_lane_wait": {
+          "count": 5000,
+          "p50_ms": 0.0078,
+          "p95_ms": 0.0099,
+          "p99_ms": 0.0133
+        },
+        "scheduled_to_completion": {
+          "count": 5000,
+          "p50_ms": 41.5456,
+          "p95_ms": 41.5984,
+          "p99_ms": 42.5702
+        },
+        "server_to_response_headers": {
+          "count": 0,
+          "p50_ms": null,
+          "p95_ms": null,
+          "p99_ms": null
+        },
+        "wire_rate_gate": "PASS",
+        "layer_gate": "PASS"
+      },
+      "calibration-2": {
+        "planned": 5000,
+        "scheduled": 5000,
+        "attempted": 5000,
+        "headers_started": 5000,
+        "received_by_server": 5000,
+        "admitted_by_server": 5000,
+        "http_responses": 5000,
+        "validated": 5000,
+        "counts_by_status": {
+          "200": 5000
+        },
+        "errors_by_code": {},
+        "timeouts": 0,
+        "transport_errors": 0,
+        "http_429": 0,
+        "http_409": 0,
+        "http_5xx": 0,
+        "retry_attempts": 0,
+        "business_validated": null,
+        "network_seconds": 5.037777259000009,
+        "validated_per_s": 992.5012049842974,
+        "requested_per_s": 1000.0,
+        "header_start_per_s": 999.9783611403869,
+        "started_inside_offer_window": 4999,
+        "client_schedule_lag": {
+          "count": 5000,
+          "p50_ms": 0.8102,
+          "p95_ms": 0.859,
+          "p99_ms": 0.9397
+        },
+        "client_lane_wait": {
+          "count": 5000,
+          "p50_ms": 0.0078,
+          "p95_ms": 0.0093,
+          "p99_ms": 0.0155
+        },
+        "scheduled_to_completion": {
+          "count": 5000,
+          "p50_ms": 41.7021,
+          "p95_ms": 41.7523,
+          "p99_ms": 42.7388
+        },
+        "server_to_response_headers": {
+          "count": 0,
+          "p50_ms": null,
+          "p95_ms": null,
+          "p99_ms": null
+        },
+        "wire_rate_gate": "PASS",
+        "layer_gate": "PASS"
+      },
+      "business": {
+        "planned": 5000,
+        "scheduled": 5000,
+        "attempted": 5000,
+        "headers_started": 5000,
+        "received_by_server": 5000,
+        "admitted_by_server": 5000,
+        "http_responses": 5000,
+        "validated": 5000,
+        "counts_by_status": {
+          "200": 5000
+        },
+        "errors_by_code": {},
+        "timeouts": 0,
+        "transport_errors": 0,
+        "http_429": 0,
+        "http_409": 0,
+        "http_5xx": 0,
+        "retry_attempts": 0,
+        "business_validated": null,
+        "network_seconds": 5.0388124800000185,
+        "validated_per_s": 992.2972962073758,
+        "requested_per_s": 1000.0,
+        "header_start_per_s": 999.9023018043252,
+        "started_inside_offer_window": 4999,
+        "client_schedule_lag": {
+          "count": 5000,
+          "p50_ms": 0.8694,
+          "p95_ms": 0.9172,
+          "p99_ms": 0.9994
+        },
+        "client_lane_wait": {
+          "count": 5000,
+          "p50_ms": 0.0085,
+          "p95_ms": 0.0098,
+          "p99_ms": 0.013
+        },
+        "scheduled_to_completion": {
+          "count": 5000,
+          "p50_ms": 41.7572,
+          "p95_ms": 41.8405,
+          "p99_ms": 42.7987
+        },
+        "server_to_response_headers": {
+          "count": 5000,
+          "p50_ms": 0.148,
+          "p95_ms": 0.177,
+          "p99_ms": 0.217
+        },
+        "wire_rate_gate": "PASS",
+        "layer_gate": "PASS"
+      }
+    },
+    "service": {
+      "ingress": {
+        "peak_active": 2,
+        "wait_seconds_total": 0.0475125450000462,
+        "admitted": 5000,
+        "max_waiters": 0,
+        "completed": 5000,
+        "per_principal": 256,
+        "capacity": 256,
+        "queued": 0,
+        "active": 0,
+        "peak_queued": 0,
+        "peak_note": "Sum of process peaks; see process snapshots for exact values"
+      },
+      "authentication_admission": {
+        "queued": 0,
+        "max_waiters": 128,
+        "per_principal": 4,
+        "capacity": 4,
+        "active": 0,
+        "wait_seconds_total": 0.0,
+        "peak_note": "Sum of process peaks; see process snapshots for exact values"
+      },
+      "admission": {
+        "queued": 0,
+        "max_waiters": 128,
+        "per_principal": 4,
+        "capacity": 4,
+        "active": 0,
+        "wait_seconds_total": 0.0,
+        "peak_note": "Sum of process peaks; see process snapshots for exact values"
+      },
+      "resources": {
+        "service_user_cpu_seconds": 2.1128739999999997,
+        "service_system_cpu_seconds": 0.14771099999999998,
+        "service_sum_peak_rss_kib": 317424
+      },
+      "database": {
+        "sql_statements": 0,
+        "transactions": 0,
+        "failed_statements": 0,
+        "checked_out_at_end": 0,
+        "peak_checked_out_connections": 0,
+        "configured_pool_size": 8,
+        "sql_cursor_execution_seconds": 0.0,
+        "transaction_seconds_before_commit": 0.0
+      }
+    },
+    "validation_errors": {}
+  },
+  {
+    "run_id": 43291814145,
+    "artifact_id": 13977741822,
+    "name": "p59-revision-http-05751855cd9e7e2283648d8acef352f192da7298-1",
+    "bytes": 2509178,
+    "sha256": "93bd6f61af2cbcbfe375018fe353212d3e032ec184a709ae3ba0598de4fac45c",
+    "head_sha": "05751855cd9e7e2283648d8acef352f192da7298",
+    "artifact_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43291814145/artifacts/13977741822",
+    "source": "05751855cd9e7e2283648d8acef352f192da7298",
+    "verified_inner_sha256": {
+      "A1.json": "e14afb667bb491f3b5b73ecb8ed0b91a570a1b28b9cce640e6f20d7ec1c935f4",
+      "A2.json": "b37ef06b27cad03746ea6b0ce6b7963c7e565135a3606b738a7ba99728573fcf",
+      "B1.json": "9fe097a39281aa613061bc8f12c50e591078fd8fe1f2d8585ed86eeb75a333c5",
+      "B2.json": "830ba43a1363337e5fae839f00fa40d16d68349bec3245a8a510c357bf4559e0",
+      "cal1.json": "c9c096ecb445ddd09268c59683a644b450e71604124d6fb1a634e7a46336baef",
+      "cal2.json": "d6ddba0050298569ceef836a2faa5ac1d7eda986e1691fef8d3ab274ebf63e84",
+      "summary.json": "dbe20c8610daeacf6f6c0d646514eb1c9952ab1dba430be5d8de439d98ea0abb"
+    },
+    "outcome": {
+      "calibrated": true,
+      "runs": [
+        {
+          "witness": false,
+          "layer_gate": "NOT_MET",
+          "status": {
+            "200": 121,
+            "429": 4879
+          },
+          "goodput": 13.603375624731784,
+          "sql": 2180,
+          "latency": {
+            "count": 5000,
+            "p50_ms": 623.985,
+            "p95_ms": 2659.9335,
+            "p99_ms": 4443.0067
+          },
+          "correctness_errors": 0
+        },
+        {
+          "witness": true,
+          "layer_gate": "NOT_MET",
+          "status": {
+            "200": 170,
+            "429": 4830
+          },
+          "goodput": 15.552113250198841,
+          "sql": 3667,
+          "latency": {
+            "count": 5000,
+            "p50_ms": 2077.0423,
+            "p95_ms": 4111.6059,
+            "p99_ms": 6064.1498
+          },
+          "correctness_errors": 0
+        },
+        {
+          "witness": true,
+          "layer_gate": "NOT_MET",
+          "status": {
+            "200": 157,
+            "429": 4843
+          },
+          "goodput": 15.101696966135844,
+          "sql": 3215,
+          "latency": {
+            "count": 5000,
+            "p50_ms": 1446.0929,
+            "p95_ms": 3825.3507,
+            "p99_ms": 5248.2504
+          },
+          "correctness_errors": 0
+        },
+        {
+          "witness": false,
+          "layer_gate": "NOT_MET",
+          "status": {
+            "200": 117,
+            "429": 4883
+          },
+          "goodput": 13.248084920338592,
+          "sql": 2183,
+          "latency": {
+            "count": 5000,
+            "p50_ms": 672.5077,
+            "p95_ms": 2624.4669,
+            "p99_ms": 4191.4686
+          },
+          "correctness_errors": 0
+        }
+      ]
+    },
+    "calibration": [
+      {
+        "planned": 5000,
+        "scheduled": 5000,
+        "attempted": 5000,
+        "headers_started": 5000,
+        "received_by_server": 5000,
+        "admitted_by_server": 5000,
+        "http_responses": 5000,
+        "validated": 5000,
+        "counts_by_status": {
+          "200": 5000
+        },
+        "errors_by_code": {},
+        "timeouts": 0,
+        "transport_errors": 0,
+        "http_429": 0,
+        "http_409": 0,
+        "http_5xx": 0,
+        "retry_attempts": 0,
+        "business_validated": null,
+        "network_seconds": 5.040662440999995,
+        "validated_per_s": 991.9331156418544,
+        "requested_per_s": 1000.0,
+        "header_start_per_s": 1000.0293083204458,
+        "started_inside_offer_window": 5000,
+        "client_schedule_lag": {
+          "count": 5000,
+          "p50_ms": 0.7122,
+          "p95_ms": 0.751,
+          "p99_ms": 1.0913
+        },
+        "client_lane_wait": {
+          "count": 5000,
+          "p50_ms": 0.0066,
+          "p95_ms": 0.0079,
+          "p99_ms": 0.0099
+        },
+        "scheduled_to_completion": {
+          "count": 5000,
+          "p50_ms": 41.6062,
+          "p95_ms": 41.6579,
+          "p99_ms": 42.6367
+        },
+        "server_to_response_headers": {
+          "count": 0,
+          "p50_ms": null,
+          "p95_ms": null,
+          "p99_ms": null
+        },
+        "wire_rate_gate": "PASS",
+        "layer_gate": "PASS"
+      },
+      {
+        "planned": 5000,
+        "scheduled": 5000,
+        "attempted": 5000,
+        "headers_started": 5000,
+        "received_by_server": 5000,
+        "admitted_by_server": 5000,
+        "http_responses": 5000,
+        "validated": 5000,
+        "counts_by_status": {
+          "200": 5000
+        },
+        "errors_by_code": {},
+        "timeouts": 0,
+        "transport_errors": 0,
+        "http_429": 0,
+        "http_409": 0,
+        "http_5xx": 0,
+        "retry_attempts": 0,
+        "business_validated": null,
+        "network_seconds": 5.036199661999994,
+        "validated_per_s": 992.8121074561174,
+        "requested_per_s": 1000.0,
+        "header_start_per_s": 999.9350204258599,
+        "started_inside_offer_window": 4999,
+        "client_schedule_lag": {
+          "count": 5000,
+          "p50_ms": 0.258,
+          "p95_ms": 0.7023,
+          "p99_ms": 0.7643
+        },
+        "client_lane_wait": {
+          "count": 5000,
+          "p50_ms": 0.0066,
+          "p95_ms": 0.0076,
+          "p99_ms": 0.0098
+        },
+        "scheduled_to_completion": {
+          "count": 5000,
+          "p50_ms": 41.1468,
+          "p95_ms": 41.1882,
+          "p99_ms": 42.1693
+        },
+        "server_to_response_headers": {
+          "count": 0,
+          "p50_ms": null,
+          "p95_ms": null,
+          "p99_ms": null
+        },
+        "wire_rate_gate": "PASS",
+        "layer_gate": "PASS"
+      }
+    ],
+    "paired": {
+      "A1": {
+        "summary": {
+          "planned": 5000,
+          "scheduled": 5000,
+          "attempted": 5000,
+          "headers_started": 5000,
+          "received_by_server": 5000,
+          "admitted_by_server": 121,
+          "http_responses": 5000,
+          "validated": 121,
+          "counts_by_status": {
+            "200": 121,
+            "429": 4879
+          },
+          "errors_by_code": {
+            "BACKPRESSURE": 4879
+          },
+          "timeouts": 0,
+          "transport_errors": 0,
+          "http_429": 4879,
+          "http_409": 0,
+          "http_5xx": 0,
+          "retry_attempts": 0,
+          "business_validated": 121,
+          "network_seconds": 8.894851052999996,
+          "validated_per_s": 13.603375624731784,
+          "requested_per_s": 1000.0,
+          "header_start_per_s": 737.1188652295966,
+          "started_inside_offer_window": 4133,
+          "client_schedule_lag": {
+            "count": 5000,
+            "p50_ms": 0.4232,
+            "p95_ms": 1.225,
+            "p99_ms": 2.2088
+          },
+          "client_lane_wait": {
+            "count": 5000,
+            "p50_ms": 410.9745,
+            "p95_ms": 1456.9813,
+            "p99_ms": 1584.7151
+          },
+          "scheduled_to_completion": {
+            "count": 5000,
+            "p50_ms": 623.985,
+            "p95_ms": 2659.9335,
+            "p99_ms": 4443.0067
+          },
+          "server_to_response_headers": {
+            "count": 5000,
+            "p50_ms": 1.496,
+            "p95_ms": 2139.93,
+            "p99_ms": 3740.443
+          },
+          "wire_rate_gate": "NOT_MET",
+          "layer_gate": "NOT_MET"
+        },
+        "service": {
+          "ingress": {
+            "per_principal": 256,
+            "wait_seconds_total": 0.04992447799878619,
+            "capacity": 256,
+            "peak_active": 183,
+            "max_waiters": 0,
+            "active": 0,
+            "observed_operation_entries": 121,
+            "queued": 0,
+            "admitted": 5000,
+            "peak_queued": 0,
+            "observed_received": 5000,
+            "completed": 5000,
+            "peak_note": "Sum of process peaks; see process snapshots for exact values"
+          },
+          "authentication_admission": {
+            "per_principal": 4,
+            "timed_out": 252,
+            "wait_seconds_total": 607.1420567790003,
+            "capacity": 4,
+            "peak_active": 4,
+            "max_waiters": 128,
+            "rejected": 4504,
+            "active": 0,
+            "queued": 0,
+            "admitted": 402,
+            "peak_queued": 128,
+            "completed": 244,
+            "peak_note": "Sum of process peaks; see process snapshots for exact values"
+          },
+          "admission": {
+            "per_principal": 4,
+            "timed_out": 65,
+            "wait_seconds_total": 149.90131985500005,
+            "capacity": 4,
+            "peak_active": 4,
+            "max_waiters": 128,
+            "rejected": 58,
+            "active": 0,
+            "queued": 0,
+            "admitted": 124,
+            "peak_queued": 122,
+            "completed": 121,
+            "peak_note": "Sum of process peaks; see process snapshots for exact values"
+          },
+          "resources": {
+            "service_user_cpu_seconds": 15.593091000000001,
+            "service_system_cpu_seconds": 1.3464209999999999,
+            "service_sum_peak_rss_kib": 321704
+          },
+          "database": {
+            "sql_statements": 2180,
+            "transactions": 486,
+            "failed_statements": 0,
+            "checked_out_at_end": 0,
+            "peak_checked_out_connections": 8,
+            "configured_pool_size": 8,
+            "sql_cursor_execution_seconds": 13.776574992000178,
+            "transaction_seconds_before_commit": 21.3392772819995
+          }
+        },
+        "database_observer_errors": [],
+        "source_sha256": "67036036d25079b30f41827164e2b1ade61d3de1099f0250e5564f9ebab0163a"
+      },
+      "B1": {
+        "summary": {
+          "planned": 5000,
+          "scheduled": 5000,
+          "attempted": 5000,
+          "headers_started": 5000,
+          "received_by_server": 5000,
+          "admitted_by_server": 170,
+          "http_responses": 5000,
+          "validated": 170,
+          "counts_by_status": {
+            "200": 170,
+            "429": 4830
+          },
+          "errors_by_code": {
+            "BACKPRESSURE": 4830
+          },
+          "timeouts": 0,
+          "transport_errors": 0,
+          "http_429": 4830,
+          "http_409": 0,
+          "http_5xx": 0,
+          "retry_attempts": 0,
+          "business_validated": 170,
+          "network_seconds": 10.93099035900002,
+          "validated_per_s": 15.552113250198841,
+          "requested_per_s": 1000.0,
+          "header_start_per_s": 582.7077160247242,
+          "started_inside_offer_window": 3018,
+          "client_schedule_lag": {
+            "count": 5000,
+            "p50_ms": 0.4446,
+            "p95_ms": 1.2838,
+            "p99_ms": 2.4182
+          },
+          "client_lane_wait": {
+            "count": 5000,
+            "p50_ms": 1588.8533,
+            "p95_ms": 3217.777,
+            "p99_ms": 3482.4659
+          },
+          "scheduled_to_completion": {
+            "count": 5000,
+            "p50_ms": 2077.0423,
+            "p95_ms": 4111.6059,
+            "p99_ms": 6064.1498
+          },
+          "server_to_response_headers": {
+            "count": 5000,
+            "p50_ms": 1.589,
+            "p95_ms": 2275.102,
+            "p99_ms": 3722.811
+          },
+          "wire_rate_gate": "NOT_MET",
+          "layer_gate": "NOT_MET"
+        },
+        "service": {
+          "ingress": {
+            "wait_seconds_total": 0.0516218050013606,
+            "max_waiters": 0,
+            "queued": 0,
+            "peak_active": 167,
+            "observed_received": 5000,
+            "observed_operation_entries": 170,
+            "active": 0,
+            "admitted": 5000,
+            "capacity": 256,
+            "completed": 5000,
+            "per_principal": 256,
+            "peak_queued": 0,
+            "peak_note": "Sum of process peaks; see process snapshots for exact values"
+          },
+          "authentication_admission": {
+            "wait_seconds_total": 483.6600411050002,
+            "max_waiters": 128,
+            "timed_out": 181,
+            "queued": 0,
+            "peak_active": 4,
+            "admitted": 1000,
+            "active": 0,
+            "rejected": 3872,
+            "capacity": 4,
+            "completed": 947,
+            "per_principal": 4,
+            "peak_queued": 128,
+            "peak_note": "Sum of process peaks; see process snapshots for exact values"
+          },
+          "admission": {
+            "wait_seconds_total": 234.50875803399998,
+            "max_waiters": 128,
+            "timed_out": 214,
+            "queued": 0,
+            "peak_active": 4,
+            "admitted": 174,
+            "active": 0,
+            "rejected": 563,
+            "capacity": 4,
+            "completed": 170,
+            "per_principal": 4,
+            "peak_queued": 128,
+            "peak_note": "Sum of process peaks; see process snapshots for exact values"
+          },
+          "resources": {
+            "service_user_cpu_seconds": 18.65911,
+            "service_system_cpu_seconds": 1.890689,
+            "service_sum_peak_rss_kib": 315260
+          },
+          "database": {
+            "sql_statements": 3667,
+            "transactions": 1287,
+            "failed_statements": 0,
+            "checked_out_at_end": 0,
+            "peak_checked_out_connections": 8,
+            "configured_pool_size": 8,
+            "sql_cursor_execution_seconds": 20.953995574999624,
+            "transaction_seconds_before_commit": 32.14546958899999
+          }
+        },
+        "database_observer_errors": [],
+        "source_sha256": "67036036d25079b30f41827164e2b1ade61d3de1099f0250e5564f9ebab0163a"
+      },
+      "B2": {
+        "summary": {
+          "planned": 5000,
+          "scheduled": 5000,
+          "attempted": 5000,
+          "headers_started": 5000,
+          "received_by_server": 5000,
+          "admitted_by_server": 157,
+          "http_responses": 5000,
+          "validated": 157,
+          "counts_by_status": {
+            "200": 157,
+            "429": 4843
+          },
+          "errors_by_code": {
+            "BACKPRESSURE": 4843
+          },
+          "timeouts": 0,
+          "transport_errors": 0,
+          "http_429": 4843,
+          "http_409": 0,
+          "http_5xx": 0,
+          "retry_attempts": 0,
+          "business_validated": 157,
+          "network_seconds": 10.396182650999947,
+          "validated_per_s": 15.101696966135844,
+          "requested_per_s": 1000.0,
+          "header_start_per_s": 617.9116155153204,
+          "started_inside_offer_window": 3331,
+          "client_schedule_lag": {
+            "count": 5000,
+            "p50_ms": 0.4749,
+            "p95_ms": 1.2832,
+            "p99_ms": 2.3671
+          },
+          "client_lane_wait": {
+            "count": 5000,
+            "p50_ms": 1008.6901,
+            "p95_ms": 2709.7751,
+            "p99_ms": 3051.7668
+          },
+          "scheduled_to_completion": {
+            "count": 5000,
+            "p50_ms": 1446.0929,
+            "p95_ms": 3825.3507,
+            "p99_ms": 5248.2504
+          },
+          "server_to_response_headers": {
+            "count": 5000,
+            "p50_ms": 1.55,
+            "p95_ms": 2284.935,
+            "p99_ms": 3260.245
+          },
+          "wire_rate_gate": "NOT_MET",
+          "layer_gate": "NOT_MET"
+        },
+        "service": {
+          "ingress": {
+            "observed_received": 5000,
+            "admitted": 5000,
+            "peak_queued": 0,
+            "queued": 0,
+            "peak_active": 173,
+            "per_principal": 256,
+            "wait_seconds_total": 0.05137841599952253,
+            "capacity": 256,
+            "observed_operation_entries": 157,
+            "completed": 5000,
+            "max_waiters": 0,
+            "active": 0,
+            "peak_note": "Sum of process peaks; see process snapshots for exact values"
+          },
+          "authentication_admission": {
+            "rejected": 4072,
+            "admitted": 850,
+            "peak_queued": 128,
+            "queued": 0,
+            "peak_active": 4,
+            "per_principal": 4,
+            "wait_seconds_total": 658.913248167999,
+            "capacity": 4,
+            "completed": 703,
+            "timed_out": 225,
+            "max_waiters": 128,
+            "active": 0,
+            "peak_note": "Sum of process peaks; see process snapshots for exact values"
+          },
+          "admission": {
+            "rejected": 384,
+            "admitted": 164,
+            "peak_queued": 128,
+            "queued": 0,
+            "peak_active": 4,
+            "per_principal": 4,
+            "wait_seconds_total": 218.20337446800016,
+            "capacity": 4,
+            "completed": 157,
+            "timed_out": 162,
+            "max_waiters": 128,
+            "active": 0,
+            "peak_note": "Sum of process peaks; see process snapshots for exact values"
+          },
+          "resources": {
+            "service_user_cpu_seconds": 17.788908,
+            "service_system_cpu_seconds": 1.738632,
+            "service_sum_peak_rss_kib": 318748
+          },
+          "database": {
+            "sql_statements": 3215,
+            "transactions": 1017,
+            "failed_statements": 0,
+            "checked_out_at_end": 0,
+            "peak_checked_out_connections": 8,
+            "configured_pool_size": 8,
+            "sql_cursor_execution_seconds": 18.485877317999552,
+            "transaction_seconds_before_commit": 28.610609350998516
+          }
+        },
+        "database_observer_errors": [],
+        "source_sha256": "67036036d25079b30f41827164e2b1ade61d3de1099f0250e5564f9ebab0163a"
+      },
+      "A2": {
+        "summary": {
+          "planned": 5000,
+          "scheduled": 5000,
+          "attempted": 5000,
+          "headers_started": 5000,
+          "received_by_server": 5000,
+          "admitted_by_server": 117,
+          "http_responses": 5000,
+          "validated": 117,
+          "counts_by_status": {
+            "200": 117,
+            "429": 4883
+          },
+          "errors_by_code": {
+            "BACKPRESSURE": 4883
+          },
+          "timeouts": 0,
+          "transport_errors": 0,
+          "http_429": 4883,
+          "http_409": 0,
+          "http_5xx": 0,
+          "retry_attempts": 0,
+          "business_validated": 117,
+          "network_seconds": 8.831465128999923,
+          "validated_per_s": 13.248084920338592,
+          "requested_per_s": 1000.0,
+          "header_start_per_s": 768.5682582358177,
+          "started_inside_offer_window": 4111,
+          "client_schedule_lag": {
+            "count": 5000,
+            "p50_ms": 0.6779,
+            "p95_ms": 1.3959,
+            "p99_ms": 2.5702
+          },
+          "client_lane_wait": {
+            "count": 5000,
+            "p50_ms": 498.9366,
+            "p95_ms": 1202.3404,
+            "p99_ms": 1430.5136
+          },
+          "scheduled_to_completion": {
+            "count": 5000,
+            "p50_ms": 672.5077,
+            "p95_ms": 2624.4669,
+            "p99_ms": 4191.4686
+          },
+          "server_to_response_headers": {
+            "count": 5000,
+            "p50_ms": 1.435,
+            "p95_ms": 2124.246,
+            "p99_ms": 3407.87
+          },
+          "wire_rate_gate": "NOT_MET",
+          "layer_gate": "NOT_MET"
+        },
+        "service": {
+          "ingress": {
+            "admitted": 5000,
+            "per_principal": 256,
+            "peak_active": 184,
+            "capacity": 256,
+            "max_waiters": 0,
+            "wait_seconds_total": 0.04965652100332818,
+            "active": 0,
+            "peak_queued": 0,
+            "completed": 5000,
+            "observed_received": 5000,
+            "queued": 0,
+            "observed_operation_entries": 117,
+            "peak_note": "Sum of process peaks; see process snapshots for exact values"
+          },
+          "authentication_admission": {
+            "admitted": 509,
+            "per_principal": 4,
+            "peak_active": 4,
+            "capacity": 4,
+            "max_waiters": 128,
+            "wait_seconds_total": 666.235023315,
+            "active": 0,
+            "rejected": 4436,
+            "peak_queued": 128,
+            "completed": 311,
+            "timed_out": 253,
+            "queued": 0,
+            "peak_note": "Sum of process peaks; see process snapshots for exact values"
+          },
+          "admission": {
+            "admitted": 117,
+            "per_principal": 4,
+            "peak_active": 4,
+            "capacity": 4,
+            "max_waiters": 128,
+            "wait_seconds_total": 137.06913190599988,
+            "active": 0,
+            "peak_queued": 98,
+            "rejected": 148,
+            "completed": 117,
+            "timed_out": 46,
+            "queued": 0,
+            "peak_note": "Sum of process peaks; see process snapshots for exact values"
+          },
+          "resources": {
+            "service_user_cpu_seconds": 14.898498,
+            "service_system_cpu_seconds": 1.3461109999999998,
+            "service_sum_peak_rss_kib": 318004
+          },
+          "database": {
+            "sql_statements": 2183,
+            "transactions": 545,
+            "failed_statements": 0,
+            "checked_out_at_end": 0,
+            "peak_checked_out_connections": 8,
+            "configured_pool_size": 8,
+            "sql_cursor_execution_seconds": 13.100352082999962,
+            "transaction_seconds_before_commit": 20.479222614998946
+          }
+        },
+        "database_observer_errors": [],
+        "source_sha256": "67036036d25079b30f41827164e2b1ade61d3de1099f0250e5564f9ebab0163a"
+      }
+    }
+  }
+]
