@@ -191,6 +191,8 @@ python scripts/with_postgres.py --log-dir "$out/pg-hour" -- \
 
 ### 回归与恢复记录
 
+在最终产品树 `6b8fd74d` 上，GitHub Linux runner 的完整应用测试为 1,033 项通过、另有 17 个子测试通过、21 项跳过，失败和错误均为零。跳过由 17 个要求 Linux 容器隔离的用例、一个双库 S6 收集项和三个 Windows 专属用例组成。该次原始日志还列出 4 个警告。对同一整仓树，按其 JUnit 提取这 17 个 Linux node ID，加上 S6，在具备容器能力的两套真实 PG 集群上运行，18/18 通过、零跳过。3 个 Windows 用例在同源原生 Windows 的 35 项回归中通过。所有跳过项均有对应平台或夹具上的执行记录。[逐项补跑与 SHA](../../reports/performance/p59_database/raw/validation/hosted-skip-supplement.json)[定稿 Linux 全量日志与 JUnit](../../reports/performance/p59_database/raw/actions/43294749933/)
+
 Linux 的独立双 PostgreSQL 集群和 Redis 运行，在协调器定稿源 `d9a0df49`（本地相同树 `353106c`）取得 1,046 项通过、17 个子测试通过、3 个 Windows 专属用例按平台跳过。双集群跑完 S6 全部三个窗口。Workshop 本地 120 项通过，要求真实停止 Docker sidecar 的 1 项在独立 runner 跑通。另一套物理备份从目标恢复点到验证可用为 1.799 秒，小数据集的目标提交丢失数为零。这个恢复时间属于试验夹具。首轮 Workshop 由于监测扩展进入模板库，四个迁移用例报错，转用干净模板库后通过；早期开发快照亦保留了一次未归档文档链接引起的失败，原用例在归档后通过。[完整 JUnit、失败与修复记录](../../reports/performance/p59_database/raw/validation/README.md) · [真实 Redis 停机验证](../../reports/performance/p59_database/raw/actions/43294749796/)
 
 ### 源码、环境与分支兼容

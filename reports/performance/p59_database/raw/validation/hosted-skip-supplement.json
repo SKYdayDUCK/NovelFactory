@@ -1,0 +1,43 @@
+{
+  "upstream_workflow_run": "43294749933",
+  "artifact_id": "13979473568",
+  "hosted_source": "6b8fd74d3ed8830a65b4f183bd58f9023cb4923c",
+  "artifact_sha256": "2b6d0cc0118369763697c117ddb9d244998c30907f3510240274084012b8908a",
+  "upstream_junit_sha256": "1061560961e1f12a750a630c06b0ebfb241c0d0d6063717bd30a49ee23f9e655",
+  "source_sha": "4c4a36cb845f63b3ceb8cdde7775a47213264feb",
+  "source_clean_before_run": true,
+  "exact_linux_nodes": [
+    "tests/integration/test_p5_actor_tool_choice.py::test_model_selects_scoped_lookup_before_final_candidate[read-states0]",
+    "tests/integration/test_p5_actor_tool_choice.py::test_model_selects_scoped_lookup_before_final_candidate[resume-after-choice-states1]",
+    "tests/integration/test_p5_actor_tool_choice.py::test_model_selects_scoped_lookup_before_final_candidate[out-of-scope-states2]",
+    "tests/integration/test_p5_actor_tool_choice.py::test_model_selects_scoped_lookup_before_final_candidate[concurrent-reentry-states3]",
+    "tests/integration/test_p5_actor_tool_choice.py::test_model_selects_scoped_lookup_before_final_candidate[revoke-observation-states4]",
+    "tests/integration/test_p5_actor_tool_choice.py::test_model_selects_scoped_lookup_before_final_candidate[budget-prevents-final-states5]",
+    "tests/integration/test_p5_actor_tool_choice.py::test_model_selects_scoped_lookup_before_final_candidate[invalid-uuid-states6]",
+    "tests/integration/test_p5_actor_tool_choice.py::test_model_selects_scoped_lookup_before_final_candidate[oversized-choice-states7]",
+    "tests/integration/test_p5_actor_tool_choice.py::test_model_selects_scoped_lookup_before_final_candidate[over-token-cap-states8]",
+    "tests/integration/test_p5_actor_tool_choice.py::test_model_selects_scoped_lookup_before_final_candidate[skip-states9]",
+    "tests/integration/test_p5_actor_tool_choice.py::test_model_selects_scoped_lookup_before_final_candidate[unknown-first-states10]",
+    "tests/integration/test_p5_actor_tool_choice.py::test_model_selects_scoped_lookup_before_final_candidate[unknown-final-states11]",
+    "tests/integration/test_p5_actor_tool_choice.py::test_model_selects_scoped_lookup_before_final_candidate[wrong-tool-states12]",
+    "tests/integration/test_p5_role_container.py::test_role_container_calls_actual_task_mcp",
+    "tests/integration/test_p5_role_container.py::test_namespace_hides_service_resources",
+    "tests/integration/test_p5_supervised_role_read.py::test_supervisor_uses_bounded_role_read[single-send]",
+    "tests/integration/test_p5_supervised_role_read.py::test_supervisor_uses_bounded_role_read[fail-before-reserving]"
+  ],
+  "additional_dual_cluster_node": "tests/integration/test_s6_engineering_comparison.py::test_frozen_three_arm_complete_scene",
+  "started_utc": "2026-11-12T20:17:25.330771+00:00",
+  "exit_code": 0,
+  "completed_utc": "2026-11-12T20:18:20.220423+00:00",
+  "junit_stats": {
+    "tests": "18",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "53.211"
+  },
+  "junit_sha256": "27ac6ffe00ebe393c0a533d68cce7740210483dfffb872dee1b6b1262e876da0",
+  "whole_repository_tree": "0e1be0dc2e1b79be22577c51931cee44dfcaf423",
+  "same_source_tree_as_hosted": true,
+  "s6_complete_windows": 3
+}
