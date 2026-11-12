@@ -42,3 +42,16 @@ The warm discovery benchmark ran baseline, candidate, candidate, baseline on one
 Historical PERF-01 remains open. `DynamicAgentService.history` reads the linked event and revision chains, checks each object, and returns the complete history. SQL, object verification, response size and read-transaction duration still grow with chain length. A bounded paging contract needs a pinned head and tests across concurrent version changes. The discovery benchmark contains no measurements of this operator history endpoint. [Original issue and scope](https://github.com/SKYdayDUCK/NovelFactory/blob/1de471076b8fb4240f95ff8033c60db34c187404/src/novel_factory/application/dynamic_agents.py#L628)
 
 No claim of commercial inference, formal native Windows qualification, production capacity, or human literary quality follows from these Linux runs. The service-specific deployment and capacity reports carry their own evidence.
+
+## Repeating the frozen Linux full suite
+
+The audit runner starts two independent PostgreSQL 17 instances and a private Redis server in the same process namespace as pytest. It sets the NF and Workshop admin URLs to distinct PG clusters, exposes the checkout's own environment to subprocesses, and writes JUnit, S6 results and service logs beneath the selected output directory. Supply the runner from this revision when measuring an older checkout. Its `--redis-server` option accepts the installed server executable. For the extracted Redis 8.0.2 Debian packages used here, `--redis-root` accepts the directory containing `usr/bin/redis-server` and `usr/lib/x86_64-linux-gnu`. A focused run against frozen main exercised the S6 engineering comparison successfully through this runner in 33.75 seconds. [Linux audit runner](raw/native_full.py)
+
+Run these commands from each target checkout. The locked environment is per checkout because the real SDK launches child Python processes that import the installed runtime. The root suite is under `tests`. The independent Workshop suite has its own qualification receipts.
+
+```sh
+uv sync --locked --group dev
+uv pip install --python .venv/bin/python --no-deps ./workshop
+.venv/bin/python "$AUDIT_RUNNER" --pg-bin "$PG_BIN" \
+  --redis-server "$REDIS_SERVER" --output "$RESULT_DIRECTORY"
+```
