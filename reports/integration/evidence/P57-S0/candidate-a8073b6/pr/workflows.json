@@ -1,0 +1,236 @@
+[
+  {
+    "workflow": ".github/workflows/p2-load.yml",
+    "run": 43164315859,
+    "attempt": 1,
+    "event": "pull_request",
+    "head": "a8073b6664df8953330dd3bc0240038fcb64f09a",
+    "status": "completed",
+    "result": "failure",
+    "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43164315859",
+    "jobs": [
+      {
+        "name": "50 agents / overload / full capacity gate",
+        "id": 131002500765,
+        "result": "failure",
+        "failed_steps": [
+          "Measure fixed population, requests and business completion"
+        ]
+      },
+      {
+        "name": "200 agents / overload / full capacity gate",
+        "id": 131002501076,
+        "result": "failure",
+        "failed_steps": [
+          "Measure fixed population, requests and business completion"
+        ]
+      },
+      {
+        "name": "200 agents / mixed / full capacity gate",
+        "id": 131002501090,
+        "result": "success",
+        "failed_steps": []
+      },
+      {
+        "name": "50 agents / mixed / full capacity gate",
+        "id": 131002501136,
+        "result": "success",
+        "failed_steps": []
+      }
+    ],
+    "artifacts": [
+      {
+        "name": "p2-load-200-mixed-1",
+        "id": 13920120096,
+        "sha256": "sha256:69df3bafb1b5401a4a53f2901bd1d37fe0d6db7917cd33c111f0797f9e1068eb",
+        "size": 586480
+      },
+      {
+        "name": "p2-load-200-overload-1",
+        "id": 13919756206,
+        "sha256": "sha256:38cdee52d33fa7703badb591711ef8c1514bf23a1f7d5fd5f6829a0999c47431",
+        "size": 1347592
+      },
+      {
+        "name": "p2-load-50-overload-1",
+        "id": 13919700732,
+        "sha256": "sha256:d3d7e00aee3f5c4efa3630a6041463ea2a20e0581489d5abedd3ba76a5043657",
+        "size": 308097
+      },
+      {
+        "name": "p2-load-50-mixed-1",
+        "id": 13919481507,
+        "sha256": "sha256:29aae8c97e7c4d84d42f695047c2462c6a6519d3bcaab3a81e709a9c4ad86f7a",
+        "size": 186542
+      }
+    ]
+  },
+  {
+    "workflow": ".github/workflows/p3-p4-evidence.yml",
+    "run": 43164314483,
+    "attempt": 1,
+    "event": "pull_request",
+    "head": "a8073b6664df8953330dd3bc0240038fcb64f09a",
+    "status": "completed",
+    "result": "failure",
+    "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43164314483",
+    "jobs": [
+      {
+        "name": "Same world CPU and SQL paired comparison",
+        "id": 131002496752,
+        "result": "success",
+        "failed_steps": []
+      },
+      {
+        "name": "Independent load process / 200 / mixed",
+        "id": 131002496949,
+        "result": "success",
+        "failed_steps": []
+      },
+      {
+        "name": "Independent load process / 200 / overload",
+        "id": 131002497009,
+        "result": "failure",
+        "failed_steps": [
+          "Actual requests and strict capacity gate"
+        ]
+      }
+    ],
+    "artifacts": [
+      {
+        "name": "p3-isolated-200-overload-1",
+        "id": 13919417180,
+        "sha256": "sha256:7be8418d3e3f7cac4df372a3506ed8b339a91f4236f4d2b7eb81fd7c44a974da",
+        "size": 651548
+      },
+      {
+        "name": "p3-isolated-200-mixed-1",
+        "id": 13919367329,
+        "sha256": "sha256:37766de9374f2b9dfa30c01e1e021544593affde9539bc05b7686318f864f01f",
+        "size": 292132
+      },
+      {
+        "name": "p3-context-paired-1",
+        "id": 13919252883,
+        "sha256": "sha256:6d3b8a920282ea92a73805b7875a4544ae5ffcedcdd5d32be06ae65df0c5c4e4",
+        "size": 281430
+      }
+    ]
+  },
+  {
+    "workflow": ".github/workflows/p3-scale-experiments.yml",
+    "run": 43164314475,
+    "attempt": 1,
+    "event": "pull_request",
+    "head": "a8073b6664df8953330dd3bc0240038fcb64f09a",
+    "status": "completed",
+    "result": "failure",
+    "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43164314475",
+    "jobs": [
+      {
+        "name": "Measured 1000-read-open",
+        "id": 131002496801,
+        "result": "failure",
+        "failed_steps": [
+          "Original targets and actual network evidence"
+        ]
+      },
+      {
+        "name": "Measured 500-read-soak",
+        "id": 131002497091,
+        "result": "success",
+        "failed_steps": []
+      },
+      {
+        "name": "Measured 500-mixed",
+        "id": 131002497343,
+        "result": "success",
+        "failed_steps": []
+      }
+    ],
+    "artifacts": [
+      {
+        "name": "p3-scale-500-mixed-1",
+        "id": 13919885892,
+        "sha256": "sha256:cc2bf4c47ff43653bd5570352da66342293241c99c66c804663f9f9c6bb756a0",
+        "size": 633210
+      },
+      {
+        "name": "p3-scale-500-read-soak-1",
+        "id": 13919612520,
+        "sha256": "sha256:ad72c90a38c26c8bb40fec10b0926cf5d71cadd05f9ab6c388baccfd2ea74cc0",
+        "size": 476749
+      },
+      {
+        "name": "p3-scale-1000-read-open-1",
+        "id": 13918744870,
+        "sha256": "sha256:be5d347064b07f6aafd7fccd69e3927fee07d945baea2e01471f8dd07d5389fe",
+        "size": 499338
+      }
+    ]
+  },
+  {
+    "workflow": ".github/workflows/creative-harness.yml",
+    "run": 43164314487,
+    "attempt": 1,
+    "event": "pull_request",
+    "head": "a8073b6664df8953330dd3bc0240038fcb64f09a",
+    "status": "completed",
+    "result": "success",
+    "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43164314487",
+    "jobs": [
+      {
+        "name": "contracts-and-static-runtime",
+        "id": 131002496016,
+        "result": "success",
+        "failed_steps": []
+      }
+    ],
+    "artifacts": [
+      {
+        "name": "creative-harness-s0-1",
+        "id": 13918469951,
+        "sha256": "sha256:07004383fb880856fac0e595c14d9da0a7c4aba220a0296634bfd79592903bbf",
+        "size": 1639
+      }
+    ]
+  },
+  {
+    "workflow": ".github/workflows/p1-integrity.yml",
+    "run": 43164314485,
+    "attempt": 1,
+    "event": "pull_request",
+    "head": "a8073b6664df8953330dd3bc0240038fcb64f09a",
+    "status": "completed",
+    "result": "success",
+    "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43164314485",
+    "jobs": [
+      {
+        "name": "PostgreSQL 17 integration, concurrency and restore",
+        "id": 131002496322,
+        "result": "success",
+        "failed_steps": []
+      },
+      {
+        "name": "Schema, domain, HTTP and production boundaries",
+        "id": 131002496481,
+        "result": "success",
+        "failed_steps": []
+      }
+    ],
+    "artifacts": [
+      {
+        "name": "p1-postgres-concurrency-1",
+        "id": 13919498979,
+        "sha256": "sha256:d78bc1cbf49e1e98986d9294110ca9a32aacd68ef364547446cef390560c7291",
+        "size": 1791406
+      },
+      {
+        "name": "p1-schema-unit-1",
+        "id": 13918848835,
+        "sha256": "sha256:f6d65db55ce69f8d2e832a6e3a2595bc0e24730769f2c79913a9196cfc06bb15",
+        "size": 301965
+      }
+    ]
+  }
+]
