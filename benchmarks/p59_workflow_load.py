@@ -9,6 +9,7 @@ import argparse
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from decimal import Decimal
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -185,7 +186,13 @@ def trial(kernel, population, *, dispatch_profile=None):
     duration = time.monotonic() - drain
     with kernel.db.uow(write=False) as repo:
         rows = repo.conn.execute(text("""
-            SELECT t.task_id::text, t.state, t.principal_id,
+            SELECT t.task_id::text, t.state, t.principal_id, t.generation,
+                   (SELECT count(*) FROM nf_task_executions e WHERE e.task_id=t.task_id) claims,
+                   EXISTS(SELECT FROM nf_task_results r WHERE r.result_id=t.current_result_id
+                          AND r.task_id=t.task_id AND r.generation=t.generation AND r.disposition='CURRENT'
+                          AND r.payload->>'status'='SUCCEEDED'
+                          AND r.payload->>'context_bundle_id'=t.context_bundle_id::text) valid_result,
+                   (SELECT count(*) FROM nf_inbox i WHERE i.consumer=concat_ws(':','workflow',t.task_id,0)) wake_receipts,
                    (SELECT count(*) FROM nf_call_attempts c WHERE c.task_id=t.task_id) attempts,
                    (SELECT min(c.state) FROM nf_call_attempts c WHERE c.task_id=t.task_id) call_state,
                    (SELECT extract(epoch FROM min(x.created_at)-t.created_at)
@@ -209,10 +216,13 @@ def trial(kernel, population, *, dispatch_profile=None):
         state = "CANCELLED" if cancel else "PAUSED" if lost else "ACCEPTED" if index < 2 else "RESULT_STORED"
         owners.add(r["principal_id"])
         states[r["state"]] += 1
-        job.update(state=r["state"], model_attempts=r["attempts"], ledger=r["call_state"],
+        job.update(task_id=key, generation=r["generation"], claims=r["claims"], valid_result=r["valid_result"],
+                   wake_receipts=r["wake_receipts"], state=r["state"], model_attempts=r["attempts"], ledger=r["call_state"],
                    queue_s=float(r["queue_s"]) if r["queue_s"] is not None else None)
         expected_call = None if cancel else "UNKNOWN" if lost else "SUCCEEDED"
         if (r["state"] != state or r["attempts"] != int(not cancel)
+                or r["claims"] != int(not cancel) or r["generation"] != int(not cancel)
+                or r["wake_receipts"] != int(job["wait"]) or r["valid_result"] != (not cancel and not lost)
                 or adapter.calls[key] != int(not cancel) or r["call_state"] != expected_call):
             errors.append(index)
     successes = states["ACCEPTED"] + states["RESULT_STORED"]
@@ -246,10 +256,12 @@ def main():
     p.add_argument("--dispatch-profile", type=Path,
                    help="Run the frozen and current PG selector on the prepared queue instead of draining it")
     args = p.parse_args()
+    root = Path(__file__).resolve().parents[1]
+    commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
     with tempfile.TemporaryDirectory() as directory:
         with isolated_kernel(os.environ["NF_TEST_DATABASE_URL"], Path(directory)) as (kernel, _):
             result = trial(kernel, args.agents, dispatch_profile=args.dispatch_profile)
-    result.update(source_commit=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+    result.update(source_commit=commit, benchmark_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                   python=platform.python_version(), platform=platform.platform())
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
