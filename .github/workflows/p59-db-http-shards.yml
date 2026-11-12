@@ -1,0 +1,80 @@
+name: Calibrated HTTP layer experiment
+
+on:
+  push:
+    branches: [experiment/p59-database-throughput]
+    paths: ['.github/workflows/p59-db-http-shards.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  layer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    strategy:
+      fail-fast: false
+      matrix:
+        layer: [minimal, auth, auth-read, query]
+    services:
+      postgres:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_DB: nf_test
+          POSTGRES_USER: nf_test
+          POSTGRES_PASSWORD: isolated_ci_only
+          POSTGRES_INITDB_ARGS: --data-checksums
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 2s --health-timeout 2s --health-retries 30
+    env:
+      NF_TEST_DATABASE_URL: postgresql+psycopg://nf_test:isolated_ci_only@127.0.0.1:5432/nf_test
+      NF_POOL_SIZE: 8
+      NF_POOL_OVERFLOW: 0
+      LAYER: ${{ matrix.layer }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - run: uv sync --locked --group dev --python 3.12
+      - name: Reproduce control and candidate transport first, then measure one layer
+        shell: bash
+        run: |
+          mkdir out
+          git rev-parse HEAD >out/source
+          sha256sum benchmarks/{client_calibration,p59_http_shards,p3_open_arrival,process_server}.py uv.lock >out/inputs.sha256
+          uv run --no-sync python -m benchmarks.client_calibration --response-bytes 2104 --repeats 2 --output out/frozen-client.json
+          set +e
+          for specification in transport:1:single transport:4:calibration-1 transport:4:calibration-2 "$LAYER:4:business"; do
+            IFS=: read -r layer workers name <<< "$specification"
+            uv run --no-sync python -m benchmarks.p59_http_shards --layer "$layer" --workers "$workers" \
+              --rate 1000 --agents 1000 --rounds 5 --connections 256 --servers 2 --output "out/$name.json" >"out/$name.log" 2>&1
+            code=$?
+            echo "$code" >"out/$name.exit"
+            if [[ ! -s "out/$name.json" ]]; then tail -25 "out/$name.log"; exit 2; fi
+            jq -c '.summary' "out/$name.json"
+          done
+          set -e
+          jq -n --slurpfile a out/calibration-1.json --slurpfile b out/calibration-2.json --slurpfile c out/business.json \
+            '{calibrated: ([$a[0], $b[0]] | all(.summary.layer_gate=="PASS")), layer: $c[0].layer,
+              workload: $c[0].summary} | .attribution = (if .calibrated then .workload.layer_gate else "UNCALIBRATED_DIAGNOSTIC_ONLY" end)' \
+            | tee out/summary.json >> "$GITHUB_STEP_SUMMARY"
+          cat out/summary.json
+          if [[ "$(jq -r .attribution out/summary.json)" != PASS ]]; then exit 1; fi
+      - name: Archive measurements even when a gate failed
+        if: always()
+        shell: bash
+        run: |
+          for path in out/*.json; do
+            if [[ -f "$path" ]]; then sha256sum "$path" >>out/raw.sha256; gzip -n "$path"; fi
+          done
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p59-shards-${{ matrix.layer }}-${{ github.sha }}-${{ github.run_attempt }}
+          path: out/
+          if-no-files-found: error
