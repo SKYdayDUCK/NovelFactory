@@ -18,12 +18,12 @@ The local Linux native selection covered 32 tests plus three Windows-specific sk
 
 ## Hosted verification on PR 33
 
-The native matrix passed on commit `23c62ab14a50481cd35023195eedd743b5006237`. The Windows PostgreSQL step ran real migrations, project bootstrap, authorized status and resume, competing claims, cancellation, lease recovery, the UNKNOWN fence, multi-work routing, graceful drain and quota-timer recovery.
+The native matrix passed on commit `234dcfc161e85a24bb56b0a83f7ca1ceb715e1cb`. The Windows PostgreSQL step ran real migrations, project bootstrap, authorized status and resume, competing claims, cancellation, lease recovery, the UNKNOWN fence, multi-work routing, graceful drain quota-timer recovery, actual MCP stdio/ASGI query equivalence and the idle MCP session release/reconnect cycle.
 
 | Host / job | Core cases | Separately installed Workshop binding | PostgreSQL cases in this job |
 |---|---|---|---|
-| [Windows Server 2025 job 131383116189](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43275626989/job/131383116189) | 31 passed, 4 skipped | 1 passed | 27 passed |
-| [Ubuntu 24.04 job 131383116068](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43275626989/job/131383116068) | 31 passed, 4 skipped | 1 passed | Linux PG17 covered separately in the local JUnit and the repository integrity workflow |
+| [Windows Server 2025 job 131386528013](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43276599485/job/131386528013) | 31 passed, 4 skipped | 1 passed | 29 passed |
+| [Ubuntu 24.04 job 131386526950](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43276599485/job/131386526950) | 31 passed, 4 skipped | 1 passed | Linux PG17 covered separately in the local JUnit and the repository integrity workflow |
 
 Windows skipped two POSIX directory-fsync syscall assertions, one Linux session-group assertion and the real Codex executable test. Linux skipped the Windows write-through, explicit executable selection and native resource-counter cases, plus the real Codex executable test. Each host executed its process-lifetime and filesystem assertions. Real commercial endpoints, Windows Docker Desktop startup, and macOS were outside this run.
 

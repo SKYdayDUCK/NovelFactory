@@ -676,6 +676,141 @@
           ]
         }
       ]
+    },
+    {
+      "id": 43276599485,
+      "head_sha": "234dcfc161e85a24bb56b0a83f7ca1ceb715e1cb",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43276599485",
+      "status": "completed",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 131386526950,
+          "name": "Native runtime / ubuntu-24.04",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43276599485/job/131386526950",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "number": 5,
+              "name": "Run uv sync --locked --group dev --python 3.12",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 6,
+              "name": "Run uv run --no-sync python scripts/nf.py doctor",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 7,
+              "name": "Run uv run --no-sync python scripts/nf.py mcp --help",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 8,
+              "name": "Run uv run --no-sync python scripts/nf.py supervisor --help",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 9,
+              "name": "Filesystem, child lifetime, capacity and offline provider contracts",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 10,
+              "name": "Standalone Workshop install and private binding",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 11,
+              "name": "Start runner's disposable Windows PostgreSQL 17",
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "number": 12,
+              "name": "Migrate, bootstrap, claim, cancel, recover and reconcile on Windows",
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "number": 13,
+              "name": "Run actions/upload-artifact@v4",
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 131386528013,
+          "name": "Native runtime / windows-2025",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43276599485/job/131386528013",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "number": 5,
+              "name": "Run uv sync --locked --group dev --python 3.12",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 6,
+              "name": "Run uv run --no-sync python scripts/nf.py doctor",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 7,
+              "name": "Run uv run --no-sync python scripts/nf.py mcp --help",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 8,
+              "name": "Run uv run --no-sync python scripts/nf.py supervisor --help",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 9,
+              "name": "Filesystem, child lifetime, capacity and offline provider contracts",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 10,
+              "name": "Standalone Workshop install and private binding",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 11,
+              "name": "Start runner's disposable Windows PostgreSQL 17",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 12,
+              "name": "Migrate, bootstrap, claim, cancel, recover and reconcile on Windows",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 13,
+              "name": "Run actions/upload-artifact@v4",
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
     }
   ],
   "last_green_counts": {
@@ -683,7 +818,7 @@
       "core_passed": 31,
       "core_skipped": 4,
       "workshop_binding_passed": 1,
-      "postgres_passed": 27
+      "postgres_passed": 29
     },
     "ubuntu-24.04": {
       "core_passed": 31,
