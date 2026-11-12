@@ -5,6 +5,7 @@ on:
     branches: [main, dev/p57-creative-harness-s1-s6]
     paths:
       - .github/workflows/p57-supplementary-engineering.yml
+      - validation/p57_export_gate_receipt.py
       - reports/harness/evidence/s6/remote-qualification-target.txt
 permissions:
   contents: read
