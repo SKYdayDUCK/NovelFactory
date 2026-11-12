@@ -16,6 +16,8 @@ from uuid import uuid4, uuid5, UUID
 
 from novel_factory.application.authorization import Principal, ADMIN_CAPABILITIES
 from novel_factory.application.semantic_dependencies import check_task_dependencies, record_change, record_proposal
+from novel_factory.application.scion import ScionOptions
+from novel_factory.application.replay_proofs import ReplayProofs
 from novel_factory.contracts.registry import validate_contract
 from novel_factory.domain.canonical import canonical_bytes, fingerprint
 from novel_factory.domain.errors import DomainError
@@ -34,6 +36,8 @@ def require(condition, code, message):
 class Kernel:
     def __init__(self, db, objects):
         self.db, self.objects = db, objects
+        self.scion = ScionOptions()
+        self.replay_proofs = ReplayProofs()
         self._last_verified_projection = None
         self.tasks = TaskService(db.engine, tables, object_store=objects)
 
@@ -609,7 +613,10 @@ class Kernel:
             event_candidates=[event]
             operations=[{"operation":"ADD","occurrence_id":event["occurrence_id"],"prior_event_version_id":None,"selected_event_version_id":event["event_version_id"]}]
             selected.append(event)
-        replay(genesis,selected)  # Deterministic validation outside DB transaction.
+        if self.scion.replay:
+            self.replay_proofs.evaluate(self.scion, genesis, selected, event_candidates, template_id, base, work, proposal=True)
+        else:
+            replay(genesis,selected)  # Deterministic validation outside DB transaction.
         advances=[]
         if template_id!="REPAIR_EVENT":
             for scope in footprint["process_scopes"]:
@@ -689,8 +696,19 @@ class Kernel:
         require(rows,"APPROVAL_STALE","A content-bound approval is required")
         return rows
 
-    def _tokens(self,r,wr,footprint,grant,approvals,history_epoch,work):
-        versions=r.scope_map(wr["work_id"],wr["branch_id"])
+    def _tokens(self,r,wr,footprint,grant,approvals,history_epoch,work, *, template_id=None):
+        from novel_factory.application.templates import GUARDED
+        # Only templates with a closed server-derived read/write footprint
+        # use sparse lookup. Strict-only templates can cover the entire world
+        # (e.g. a repair); retain their original full-branch lookup.
+        if self.scion.scopes and template_id in GUARDED:
+            keys = set(footprint["reads"]).union(footprint["writes"])
+            versions = r.scope_versions_for(wr["work_id"], wr["branch_id"], keys)
+            self.scion.record("scopes", "hit")
+        else:
+            versions = r.scope_map(wr["work_id"], wr["branch_id"])
+            if self.scion.scopes:
+                self.scion.record("scopes", "full_template")
         def token(key,version,owner="BRANCH"):
             kind=key.split(":",1)[0]
             return {"owner_kind":owner,"work_id":wr["work_id"],"branch_id":wr["branch_id"] if owner=="BRANCH" else None,
@@ -733,7 +751,7 @@ class Kernel:
             require(original["provenance"].get("history_epoch",0)==branch["history_epoch"],"HISTORY_CHANGED","Historical repair requires a fresh task input and proposal")
             require(current["interpretation_ref"]==work["interpretation_ref"],"STALE_CERTIFICATE","Current interpretation requires a new reviewed world revision")
             check_task_dependencies(r, task["task_id"], task["generation"])
-            reads,writes=self._tokens(r,wr,actual,grant,approvals,branch["history_epoch"],work)
+            reads,writes=self._tokens(r,wr,actual,grant,approvals,branch["history_epoch"],work, template_id=p["template_id"])
             sample={"validated_world_ref":parent,"state_hash":current["state_hash"],"reads":reads,"writes":writes,"command_sha256":fingerprint(p["template_args"]),"validator":"nf-validator-1"}
             dependency=deepcopy(context["dependency_manifest"])
             require(fingerprint(dependency)==context["dependency_fingerprint"],"HARD_RULE_VIOLATION","Stored input dependency integrity failed")
@@ -799,7 +817,7 @@ class Kernel:
     def _verify_tokens(self,r,wr,cert,footprint,grant,approvals,branch,work):
         require(branch["history_epoch"]==cert["history_epoch"] and work["interpretation_ref"]==cert["interpretation_ref"]
                 and work["policy_version"]==cert["policy_version"],"STALE_CERTIFICATE","History or interpretation changed")
-        reads,writes=self._tokens(r,wr,footprint,grant,approvals,branch["history_epoch"],work)
+        reads,writes=self._tokens(r,wr,footprint,grant,approvals,branch["history_epoch"],work, template_id=cert["command_template_id"])
         require(reads==cert["read_scope_tokens"] and writes==cert["write_scope_tokens"],"DEPENDENCY_CONFLICT","A guarded dependency changed")
 
     def accept(self,principal,request,*,fault=None):
@@ -893,7 +911,11 @@ class Kernel:
             events=[selected_by_id[eid] for eid in selection.values()]
             genesis=r.one("genesis",{"work_id":wr["work_id"]})["payload"]
             if p["template_id"]=="REPAIR_EVENT":self._revalidate_repair(r,wr["work_id"],genesis,events)
-            snapshot=replay(genesis,events)
+            if self.scion.replay:
+                snapshot = self.replay_proofs.evaluate(self.scion, genesis, events, list(candidates.values()),
+                                                       p["template_id"], current, work)
+            else:
+                snapshot=replay(genesis,events)
             # All effect/causal/resource constraints have passed before writing.
             for eid,event in candidates.items():
                 previous=r.one("events",{"event_version_id":eid})
@@ -979,7 +1001,11 @@ class Kernel:
             events=[r.one("events",{"event_version_id":eid,"work_id":wid})["payload"] for eid in candidate["selection"].values()]
             genesis=r.one("genesis",{"work_id":wid})["payload"]
             revalidation=self._revalidate_repair(r,wid,genesis,events)
-            candidate_revisions=r.many("revisions",{"work_id":wid,"branch_id":candidate_world_ref["branch_id"]})
+            review_columns = ("world_revision_id", "provenance") if self.scion.review_columns else None
+            candidate_revisions = r.many("revisions", {"work_id": wid, "branch_id": candidate_world_ref["branch_id"]},
+                                         columns=review_columns)
+            if review_columns:
+                self.scion.record("columns", "repair_review_hit")
             repair_reviews=[]
             for rev in candidate_revisions:
                 commit=r.one("commits",{"world_revision_id":rev["world_revision_id"]})

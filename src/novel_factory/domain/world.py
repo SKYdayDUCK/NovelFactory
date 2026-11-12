@@ -367,6 +367,20 @@ supported; effects without resolved boundaries are conservatively rejected.
 """
     data = plain(genesis)
     canonical_bytes(data)
+    return _replay_events(data, events, at)
+
+
+def _append_verified_suffix(parent_snapshot, prefix, event):
+    """Internal reducer entry for a caller with a content-bound prefix proof."""
+    snapshot = deepcopy(parent_snapshot)
+    # JSONB reorders selection keys on storage. Full replay emits the event
+    # summary list in the caller's selection order, not chronological order.
+    summaries = {row['event_ref']['event_version_id']: row for row in snapshot['events']}
+    snapshot['events'] = [summaries[old['event_version_id']] for old in prefix]
+    return _replay_events(None, [event], None, snapshot)
+
+
+def _replay_events(genesis, events, at, snapshot=None):
     selected = []
     seen_effects, seen_groups = set(), set()
     for raw in events:
@@ -396,7 +410,8 @@ supported; effects without resolved boundaries are conservatively rejected.
         selected.append(event)
     order = validate_temporal_constraints(selected)
     topo = {key: index for index, key in enumerate(order)}
-    snapshot = _initial_snapshot(data)
+    if snapshot is None:
+        snapshot = _initial_snapshot(genesis)
     limit = point_key(at) if at is not None else None
     operations = []
     for event in selected:
