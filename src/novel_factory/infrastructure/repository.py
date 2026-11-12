@@ -21,6 +21,14 @@ def _revision_text_query(revision):
     )
 
 
+@lru_cache(maxsize=4)
+def _tasks_with_world_ref_query(tasks, inputs):
+    key = and_(inputs.c.task_id == tasks.c.task_id, inputs.c.generation == tasks.c.generation)
+    return (select(tasks, inputs.c.spec["world_ref"].label("world_ref"))
+            .select_from(tasks.outerjoin(inputs, key))
+            .where(tasks.c.task_id.in_(bindparam("task_ids", expanding=True))))
+
+
 class KernelRepository:
     def __init__(self, conn, tables):
         self.conn, self.tables = conn, tables
@@ -28,6 +36,11 @@ class KernelRepository:
     def one(self, name, where, *, lock=None):
         rows = self.many(name, where, lock=lock, limit=1)
         return rows[0] if rows else None
+
+    def tasks_with_world_ref(self, task_ids):
+        """Pin each current row to its immutable input for that exact generation."""
+        query = _tasks_with_world_ref_query(self.tables["tasks"], self.tables["task_inputs"])
+        return [dict(row) for row in self.conn.execute(query, {"task_ids": task_ids}).mappings()]
 
     def revision_with_snapshot_text(self, world_ref):
         query = _revision_text_query(self.tables["revisions"])

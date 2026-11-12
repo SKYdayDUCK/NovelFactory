@@ -32,8 +32,9 @@ def require(condition, code, message):
 
 
 class Kernel:
-    def __init__(self, db, objects):
+    def __init__(self, db, objects, *, joined_task_status=False):
         self.db, self.objects = db, objects
+        self.joined_task_status = joined_task_status
         self._last_verified_projection = None
         self.tasks = TaskService(db.engine, tables, object_store=objects)
 
@@ -46,7 +47,7 @@ class Kernel:
             engine=SimpleNamespace(begin=connection, connect=connection),
             uow=lambda **kwargs: nullcontext(repo),
         )
-        return Kernel(bound, self.objects)
+        return Kernel(bound, self.objects, joined_task_status=self.joined_task_status)
 
     def authenticate(self, token: str) -> Principal:
         require(isinstance(token,str) and 16 <= len(token) <= 256, "VIEW_DENIED", "Credentials unavailable")
@@ -74,6 +75,10 @@ class Kernel:
         require(isinstance(principal, Principal), "VIEW_DENIED", "Authenticated identity required")
         work = r.one("works", {"work_id":work_id}, lock="share")
         grant = r.one("grants", {"grant_id":principal.grant_id}, lock="share")
+        return self._validate_locked_grant(r, principal, work_id, capability, branch_id, work, grant)
+
+    def _validate_locked_grant(self, r, principal, work_id, capability, branch_id, work, grant):
+        """Apply the same live policy to singleton and set-wise SHARE-locked rows."""
         require(work and grant and grant["active"] and grant["principal_id"] == principal.principal_id
                 and grant["work_id"] == work_id, "VIEW_DENIED", "Resource unavailable for this identity")
         self._check_resume_grant(r, grant)
@@ -507,16 +512,34 @@ class Kernel:
 
     def _task_owner(self,r,principal,task_id,capability="READ"):
         task=r.one("tasks",{"task_id":task_id})
+        return self._authorize_task_row(r, principal, task, capability)
+
+    def _authorize_task_row(self, r, principal, task, capability):
         require(task,"VIEW_DENIED","Task unavailable")
         g=self.authorize(r,principal,task["work_id"],capability,task["branch_id"])
-        require(task["principal_id"]==principal.principal_id and task["grant_id"]==principal.grant_id,"VIEW_DENIED","Task unavailable")
+        self._require_task_owner(task, principal)
         return task,g
+
+    @staticmethod
+    def _require_task_owner(task, principal):
+        require(task["principal_id"] == principal.principal_id and task["grant_id"] == principal.grant_id,
+                "VIEW_DENIED", "Task unavailable")
+
+    @staticmethod
+    def _public_task(task, world_ref):
+        return {**{k: v for k, v in task.items() if k not in {"principal_id", "grant_id", "lease_owner"}},
+                "world_ref": world_ref}
 
     def get_task(self,principal,task_id):
         with self.db.uow(write=False) as r:
+            if self.joined_task_status:
+                rows = r.tasks_with_world_ref([task_id])
+                task, _ = self._authorize_task_row(r, principal, rows[0] if rows else None, "READ")
+                require(task["world_ref"] is not None, "INTERNAL_ERROR", "Task input unavailable")
+                return self._public_task(task, task["world_ref"])
             task,_=self._task_owner(r,principal,task_id)
-            task["world_ref"]=r.one("task_inputs",{"task_id":task_id,"generation":task["generation"]})["spec"]["world_ref"]
-        return {k:v for k,v in task.items() if k not in {"principal_id","grant_id","lease_owner"}}
+            world_ref = r.one("task_inputs", {"task_id": task_id, "generation": task["generation"]})["spec"]["world_ref"]
+        return self._public_task(task, world_ref)
 
     def cancel_task(self,principal,task_id,generation,idempotency_key):
         def authorize_cancel(conn):

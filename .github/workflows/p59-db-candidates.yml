@@ -1,0 +1,62 @@
+name: PostgreSQL candidate comparisons
+on:
+  push:
+    branches: [experiment/p59-database-throughput]
+    paths: ['.github/workflows/p59-db-candidates.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [mixed, reads, grid, pressure, entrypoints]
+    services:
+      pg:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_DB: nf_test
+          POSTGRES_PASSWORD: disposable
+          POSTGRES_INITDB_ARGS: --data-checksums
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 2s --health-timeout 2s --health-retries 30
+    env:
+      NF_TEST_DATABASE_URL: postgresql+psycopg://postgres:disposable@127.0.0.1:5432/nf_test
+      PROFILE: ${{ matrix.profile }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - run: uv sync --locked --group dev --python 3.12
+      - name: Execute in sequence on a dedicated runner
+        shell: bash
+        run: |
+          mkdir out
+          git rev-parse HEAD > out/source
+          lscpu > out/cpu
+          if [[ "$PROFILE" == entrypoints ]]; then
+            uv run --no-sync python -m benchmarks.p59_sql_protocols --output out/protocols.json
+            uv run --no-sync python -m benchmarks.p59_db_entrypoints --output out/bindings.json
+            uv run --no-sync python -m benchmarks.p59_task_http --output out/task-http.json
+          else
+            uv run --no-sync python -m benchmarks.p59_db_matrix --profile "$PROFILE" --directory out/comparison
+          fi
+      - if: always()
+        shell: bash
+        run: |
+          if test -s out/comparison/summary.json; then
+            jq -c '.[] | {mode,goodput,latency,requested_batch,window_ms,outcomes,exit}' out/comparison/summary.json
+          fi
+          find out -name '*.json' -type f -exec gzip -n {} +
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-candidates-${{ matrix.profile }}-${{ github.sha }}
+          path: out/
