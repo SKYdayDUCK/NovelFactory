@@ -1,6 +1,6 @@
 # 角色与势力行动者
 
-> role_id: `character_actor`｜contract_version: `2.1.0`｜继承[公共协议](README.md)。
+> role_id: `character_actor`｜contract_version: `2.0.0`｜继承[公共协议](README.md)。
 
 ## 职责与模式
 

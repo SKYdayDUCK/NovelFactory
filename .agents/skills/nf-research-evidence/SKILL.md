@@ -28,3 +28,5 @@ description: 为小说工厂补充论文、官方技术文档、平台兼容性�
 - 研究不自动触发依赖升级、个人技能安装或生产配置修改。
 
 参考：[论文卡](../../../research/paper_cards.md)、[官方平台核查](../../../research/official_platform_notes.md)。
+
+文学问题按[来源研究](../../../research/literary_agents/COMMUNITY_AI_STYLE_RESEARCH.md)区分受控比较、作者经验、社区观察与本次编辑假说。记录模型版本、语言、样本、题材和原文损失；同一个词出现在多个模型不能支持归因。文学知识用于任务方法，作品世界事实另按既有证据接受。

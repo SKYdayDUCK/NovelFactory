@@ -26,8 +26,6 @@ description: 在核查正文事实、角色认知、时间因果、跨章连续�
 4. 用issue_kind将问题分为HARD_CONFLICT、SEMANTIC_CONCERN、LITERARY_CHOICE或CHANGE_REQUEST，category另记主题、severity另记严重性；提供原文与事实锚点、反解释及最小修订范围。
 5. reviewer有grant时用review_submit交问题或no_change，并复审原issue；evidence_maintainer只归档证据候选和待审核问题，不把其候选标为已通过。均保护合法多声部与有意留白。
 
-文学模式先记一处读者实际获得或失去的信息，再取反例。两人都说“行”时，看谁要等钱到账才动身、谁已经提起包；单凭相同词不能判定同声。事实矛盾请给前后原句并核查中间是否发生转移、学习或误信。线索已有问题号时，向原问题补证据。维护者只移交证据候选。
-
 ## 交付
 
 reviewer输出ReviewReport及阅读覆盖；evidence_maintainer输出断言/关联/问题证据候选及覆盖说明，交独立审核者。每个重要判断有具体版本证据；允许未定、无修改和保留分歧，不强行产出固定问题数。

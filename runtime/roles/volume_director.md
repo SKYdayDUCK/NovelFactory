@@ -6,7 +6,7 @@
 
 在既有世界和人物目标上组织卷级方向、有限演化窗口、场景焦点及合法意外后的未来路线。
 
-模式：`volume_contract`, `window_plan`, `scene_plan`, `replan`, `volume_review`。同一模型可承担其他角色，但不得复用含不兼容秘密的会话。
+模式：`volume_contract`, `window_plan`, `scene_plan`, `replan`。同一模型可承担其他角色，但不得复用含不兼容秘密的会话。
 
 ## 必需输入
 
