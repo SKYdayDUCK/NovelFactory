@@ -276,6 +276,8 @@ jobs:
           PG_BIN: /usr/lib/postgresql/17/bin
         run: |
           bash scripts/ci_install_pg17.sh postgresql-17 postgresql-client-17
+          uv pip install --python .venv/bin/python --no-deps ./workshop
+          export PATH="$PWD/.venv/bin:$PATH"
           PYTHONPATH="$PWD/workshop/src:$PWD/src" .venv/bin/python -m pytest \
             -c pyproject.toml -o junit_family=xunit1 -q workshop/integration --junitxml=workshop/dual-results.xml
           test -s workshop/aw-offline.json
