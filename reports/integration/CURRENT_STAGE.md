@@ -1,5 +1,5 @@
-# 工程资格签收
+# 当前交付状态
 
-S1–S6 的产品功能均已完成开发分支验收。本文件记录随 S6 归档的工程资格。逐案回执、三臂冻结、恢复演练和适用环境见 [S6 工程验收](../harness/S6_ACCEPTANCE.md)。
+S1–S6 已通过工程资格验收，并于 2026-11-12 正式合入 main。合并提交为 `1de471076b8fb4240f95ff8033c60db34c187404`，主线文件树与阶段代码 tip 完全一致。主线已从远端核对，合并后的 Actions 正在复验。[原始合并回执](../harness/evidence/s6/remote-receipt.json)
 
-正式主线合并 SHA、合并后复验和独立审核结论由保留开发分支的[主线签收记录](https://github.com/SKYdayDUCK/NovelFactory/blob/dev/p57-creative-harness-s1-s6/reports/code_review/p57_creative_harness/MAIN_MERGE_RECEIPT.md)记录。Scion #4 保持独立，AT-30 为 `NOT_MET`，P6 真实本地商业模型为 `BLOCKED_LOCAL_AUTHORIZATION`，文学质量为 `NOT_EVALUATED`。
+下一项为主线回执归档和独立代码审查。审查结果仅保存在开发分支。

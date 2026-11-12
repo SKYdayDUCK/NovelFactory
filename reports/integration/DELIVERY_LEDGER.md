@@ -1,5 +1,7 @@
 # 串行交付台账
 
+S6 里程碑 `602ba7fe8ece18503ac3b994adee4f00634cd761` 已于单次非快进合并 `1de471076b8fb4240f95ff8033c60db34c187404` 纳入 main。[正式推送与回读](../harness/evidence/s6/remote-receipt.json)
+
 S6 观测、三组工程对照、真实服务及恢复验收已通过。[逐项回执](../harness/evidence/s6/receipt.json)
 
 S5 已推送为 `976e3212fcb42b9251fc2858a3b9d9ce3c3a646c`，远端检出及 Actions 成功。[远端回执](../harness/evidence/s5/remote-receipt.json)
