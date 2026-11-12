@@ -1,0 +1,57 @@
+name: Preserve verified database experiment artifacts
+on:
+  push:
+    branches: [experiment/p59-database-throughput]
+    paths: ['reports/performance/p59_database/archive-runs.json', '.github/workflows/p59-db-archive.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  preserve:
+    if: github.repository == 'SKYdayDUCK/NovelFactory' && github.ref == 'refs/heads/experiment/p59-database-throughput'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Wait for every registered run and preserve its unmodified artifact ZIP
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import json, subprocess, sys, time
+          from pathlib import Path
+          from scripts.archive_database_experiment import request, BRANCH
+
+          entries = json.loads(Path('reports/performance/p59_database/archive-runs.json').read_text())
+          remaining = {row['id']: row['git_head'] for row in entries}
+          while remaining:
+              for rid, sha in tuple(remaining.items()):
+                  run = request(f'actions/runs/{rid}')
+                  if run['head_branch'] != BRANCH or run['head_sha'] != sha:
+                      raise ValueError(f'Unexpected source for run {rid}')
+                  if run['status'] == 'completed':
+                      subprocess.run([sys.executable, 'scripts/archive_database_experiment.py', str(rid)], check=True)
+                      del remaining[rid]
+              if remaining:
+                  print('Waiting for', sorted(remaining), flush=True)
+                  time.sleep(45)
+          PY
+      - name: Append evidence only to the experiment branch
+        run: |
+          test "$GITHUB_REF_NAME" = experiment/p59-database-throughput
+          git config user.name "NovelFactory experiment evidence"
+          git config user.email "experiment@users.noreply.github.com"
+          git add -- reports/performance/p59_database/raw/actions
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'evidence: retain verified original Actions archives and manifests'
+          git fetch origin "refs/heads/$GITHUB_REF_NAME"
+          git rebase FETCH_HEAD
+          git push origin "HEAD:refs/heads/$GITHUB_REF_NAME"

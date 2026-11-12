@@ -52,3 +52,13 @@ The final runtime revision `353106cf94b529450b6966a4b5d81b2b9f9c3be0` changed th
 The first fixed-snapshot complete run, `568f949-regression.log.gz` and `568f949-regression.xml.gz`, collected the unfiltered NF root suite and finished with 1,041 passed, 4 skipped and 17 passing subtests in 1,130.92 seconds. The dual-cluster S6 follow-up is recorded above. Three checks require native Windows.
 
 The later `9a69d2c02cd6dedcfa8c90ac10ffecc2e2c25979` experiment adds the fenced singleton implementation and its integration test relative to `353106c`. A fresh detached checkout and private PostgreSQL ran `python -m pytest -q tests/integration/test_p59_fenced_status.py`: one passed. The original JUnit is `fenced-delta-9a69d2c.xml.gz`.
+
+## Opt-in task GET qualification
+
+`4c4a36c` includes the opt-in HTTP route setting in the application. Its independent targeted run covered `test_p59_fenced_status.py`, `test_bound_tool_entrypoints.py` and `test_p59_db_candidates.py`. All 15 tests passed in a fresh checkout with PostgreSQL 17.11. See `fenced-http-4c4a36c.xml.gz`. The real TCP outcome in `restart-4c4a36c.json` comes from the production FastAPI and Uvicorn route configured with the optimization on. The same credential and request received 200 before the outage, 503 with Retry-After during it and 200 with the full original body after recovery. The direct coordinator was checked separately in the same drill.
+
+```sh
+uv run --no-sync python -m benchmarks.p59_db_restart --pg-bin /usr/lib/postgresql/17/bin --fenced-http --output restart-http.json
+```
+
+`post-archive-validator.xml` records a passing rerun of the original link-validation test after the Actions archives referenced from the review documents became available.
