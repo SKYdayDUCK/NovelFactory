@@ -48,7 +48,8 @@ def test_private_binding_is_verified_and_size_bounded(tmp_path):
 def test_native_host_reaps_child_after_host_exits(tmp_path):
     async def run():
         script = """import subprocess, sys
-subprocess.Popen([sys.executable, "-c", sys.argv[1]])
+print("host-ready", flush=True)
+subprocess.Popen([sys.executable, "-c", sys.argv[1]], stdout=sys.stdout)
 sys.stdin.buffer.read()
 """
         child = """import socket, time
@@ -62,6 +63,7 @@ time.sleep(60)
                                 stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.DEVNULL,
                                 env=isolated_host_environment(tmp_path))
         try:
+            assert (await asyncio.wait_for(proc.stdout.readline(), 10)).strip() == b"host-ready"
             port = int(await asyncio.wait_for(proc.stdout.readline(), 10))
         finally:
             await asyncio.wait_for(stop_host(proc), timeout=8)

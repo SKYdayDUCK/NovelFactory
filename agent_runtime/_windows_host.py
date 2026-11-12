@@ -30,7 +30,9 @@ def main():
         win32job.AssignProcessToJobObject(job, win32api.GetCurrentProcess())
     finally:
         job.Close()
-    return subprocess.call(sys.argv[2:])
+    # With close_fds=True Windows does not automatically propagate inherited
+    # pipe handles across another CreateProcess. Pass only this stdio triplet.
+    return subprocess.call(sys.argv[2:], stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr)
 
 
 if __name__ == "__main__":
