@@ -29,6 +29,24 @@ jobs:
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
       - id: install
         run: uv sync --locked --group dev --python 3.12
+      - name: Install the pinned native Windows app-server for the synthetic provider test
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          NF_P5_CODEX_VERSION: '0.167.0-alpha.4'
+        run: |
+          $prefix = Join-Path $env:RUNNER_TEMP 'nf-test-codex'
+          npm install --prefix $prefix --include=optional --no-save --no-audit --no-fund "@openai/codex@$env:NF_P5_CODEX_VERSION"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $package = Join-Path $prefix 'node_modules/@openai/codex-win32-x64'
+          $images = @(Get-ChildItem -LiteralPath $package -Recurse -File -Filter 'codex.exe')
+          if ($images.Count -ne 1) { throw 'Expected exactly one native codex.exe in the pinned win32-x64 package' }
+          $image = $images[0]
+          $version = & $image.FullName --version
+          if ($LASTEXITCODE -ne 0 -or $version -ne "codex-cli $env:NF_P5_CODEX_VERSION") { throw "Unexpected native Codex version: $version" }
+          Write-Output $version
+          "NF_CODEX_EXECUTABLE=$($image.FullName)" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          $image.DirectoryName | Out-File $env:GITHUB_PATH -Append -Encoding utf8
       - run: uv run --no-sync python scripts/nf.py doctor
       - run: uv run --no-sync python scripts/nf.py mcp --help
       - run: uv run --no-sync python scripts/nf.py supervisor --help
@@ -37,6 +55,13 @@ jobs:
           uv run --no-sync python -m pytest -q tests/unit/test_native_platform.py
           tests/reliability/test_objects.py tests/unit/test_host_process.py tests/unit/test_p55_capacity.py
           tests/unit/test_p58_providers.py --junitxml=native-core.xml
+      - name: Verify Windows ran the real app-server protocol case
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          [xml]$junit = Get-Content -LiteralPath native-core.xml -Raw
+          $cases = $junit.SelectNodes("//testcase[@name='test_real_cli_and_deepseek_wire_overlap_with_no_provider_egress']")
+          if ($cases.Count -ne 1 -or $cases[0].SelectSingleNode('skipped|failure|error')) { throw 'Expected a passing native app-server protocol test' }
       - name: Standalone Workshop install and private binding
         if: "!cancelled() && steps.install.outcome == 'success'"
         run: uv run --project workshop --locked --group dev python -m pytest -q workshop/tests/test_private_binding.py --junitxml=native-workshop.xml
