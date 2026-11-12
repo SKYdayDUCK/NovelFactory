@@ -6,6 +6,7 @@ from contextlib import AsyncExitStack
 from dataclasses import dataclass
 from datetime import UTC, datetime
 import hashlib
+import inspect
 import json
 import math
 import os
@@ -27,7 +28,6 @@ from novel_factory.fixtures import load_fixture, point
 from novel_factory.infrastructure.database import Database
 from novel_factory.infrastructure.model_gateway import OpenAICompatibleAdapter
 from novel_factory.infrastructure.objects import ObjectStore
-from novel_factory.infrastructure.private_files import create_private_file
 
 TOOLS = ("nf_task_get", "nf_context_get")
 
@@ -57,7 +57,12 @@ def provision(kernel, directory, index):
     url = kernel.db.engine.url.update_query_dict({"application_name": app_name})
     binding = {key: task[key] for key in ("task_id", "generation")}
     path = directory / f"binding-{index}.json"
-    with os.fdopen(create_private_file(path), "w", encoding="utf-8") as out:
+    if os.name == "nt":
+        from novel_factory.infrastructure.private_files import create_private_file
+        fd = create_private_file(path)
+    else:
+        fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+    with os.fdopen(fd, "w", encoding="utf-8") as out:
         json.dump({"database_url": url.render_as_string(hide_password=False), "token": role.private_token,
                    "object_root": str(kernel.objects.root), "binding": {**binding, "worker_id": role.worker_id}}, out)
     return Role(path, {"nf_task_get": expected_task, "nf_context_get": context}, app_name, role.principal.principal_id)
@@ -155,8 +160,9 @@ def main():
     args = parser.parse_args()
     if args.samples_per_role < 2 or not math.isfinite(args.offered_rps) or args.offered_rps <= 0:
         parser.error("Set at least two samples per role and a positive finite offered rate")
-    repo_root = Path(__file__).resolve().parents[1]
-    source = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo_root, text=True).strip()
+    # The fixed driver can be called by a different revision's editable installation.
+    runtime_source = Path(inspect.getfile(Kernel)).resolve().parent
+    source = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=runtime_source, text=True).strip()
     db = Database(pool_size=1)
     try:
         with tempfile.TemporaryDirectory() as space:
