@@ -6,7 +6,7 @@ the model. Credentials are kept only in this adapter and never in provenance.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from agent_runtime.protocol import ModelCallFailure, ModelRequest, ModelResponse
 from decimal import Decimal
 import json
 import os
@@ -17,28 +17,6 @@ from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 from novel_factory.domain.canonical import canonical_bytes
 from novel_factory.domain.errors import DomainError
-
-
-@dataclass(frozen=True)
-class ModelRequest:
-    messages: tuple[dict, ...]
-    request_sha256: str
-    max_output_tokens: int
-    attempt_id: str | None = None
-
-
-@dataclass(frozen=True)
-class ModelResponse:
-    text: str
-    provider_receipt: str | None = None
-    input_tokens: int | None = None
-    output_tokens: int | None = None
-    cached_input_tokens: int | None = None
-    actual_amount: Decimal | None = None
-    currency: str | None = None
-    raw_response: dict = field(default_factory=dict)
-    request_sha256: str | None = None
-    provider_reported_usd: Decimal | None = None
 
 
 def _openrouter_charge(endpoint, content, generation_id):
@@ -56,13 +34,6 @@ def _openrouter_charge(endpoint, content, generation_id):
             and amount == amount.quantize(Decimal("0.000001"))):
         return amount
     return None
-
-
-class ModelCallFailure(Exception):
-    """Only stable diagnostics are exposed; provider error text can be secret."""
-    def __init__(self, code: str, *, sent: bool = True, http_status: int | None = None):
-        super().__init__(code)
-        self.code, self.sent, self.http_status = code, sent, http_status
 
 
 class ModelAdapter(Protocol):

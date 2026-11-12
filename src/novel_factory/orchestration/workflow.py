@@ -246,7 +246,8 @@ class WorkflowService:
                 FROM nf_tasks t JOIN nf_supervisor_jobs j USING (task_id)
                 WHERE t.work_id=:work AND t.branch_id=:branch AND t.state='READY'
                   AND t.deadline <= statement_timestamp()
-                  AND NOT EXISTS (SELECT FROM nf_call_attempts c WHERE c.task_id=t.task_id)
+                  AND NOT EXISTS (SELECT FROM nf_call_attempts c WHERE c.task_id=t.task_id
+                      AND NOT EXISTS (SELECT FROM nf_runtime_unsent u WHERE u.attempt_id=c.attempt_id))
                 ORDER BY t.deadline,t.task_id LIMIT :limit FOR UPDATE OF t SKIP LOCKED
             """), {"work": work_id, "branch": branch_id, "limit": limit}).all()
             for task_id, generation in overdue:

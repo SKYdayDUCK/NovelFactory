@@ -14,6 +14,9 @@ _NEXT = text("""
         JOIN nf_tasks t ON q.branch_id=t.branch_id
         JOIN nf_task_fairness f USING(work_id, task_kind)
         JOIN nf_supervisor_jobs j USING(task_id)
+        LEFT JOIN nf_runtime_work_share rw ON rw.work_id=t.work_id
+        CROSS JOIN LATERAL (SELECT nf_runtime_scope(j.config->'runtime_scope',t.work_id,t.branch_id) AS scope) route
+        LEFT JOIN nf_runtime_org_share ro ON ro.organization=route.scope->>'organization'
         JOIN nf_grants g ON g.grant_id=t.grant_id
         JOIN nf_works w ON w.work_id=t.work_id
         WHERE q.valid_until > statement_timestamp() AND t.state='READY'
@@ -24,7 +27,8 @@ _NEXT = text("""
           AND g.capabilities @> '["TASK_CLAIM","READ","COMPILE"]'::jsonb
           AND NOT EXISTS(SELECT FROM nf_dispatch_slots s WHERE s.task_id=t.task_id
                          AND s.expires_at > statement_timestamp())
-          AND NOT EXISTS(SELECT FROM nf_call_attempts c WHERE c.task_id=t.task_id)
+          AND NOT EXISTS(SELECT FROM nf_call_attempts c WHERE c.task_id=t.task_id
+              AND NOT EXISTS(SELECT FROM nf_runtime_unsent u WHERE u.attempt_id=c.attempt_id))
           AND NOT EXISTS(SELECT FROM nf_conflict_cases sc WHERE sc.task_id=t.task_id
                          AND sc.generation=t.generation AND NOT EXISTS
                          (SELECT FROM nf_conflict_resolutions sr WHERE sr.case_id=sc.case_id
@@ -37,7 +41,14 @@ _NEXT = text("""
           AND (SELECT count(*) FROM active a WHERE a.role_id=t.role_id) <
               (SELECT slots FROM nf_dispatch_limits WHERE scope='ROLE' AND subject IN ('*',t.role_id)
                ORDER BY subject='*' LIMIT 1)
-        ORDER BY q.requested_at, q.branch_id, f.last_served_at, t.created_at, t.task_id LIMIT 1
+          AND (j.config->'runtime_scope' IS NULL OR
+               nf_runtime_available(route.scope,
+                  (j.config->'dispatch'->>'token_reservation')::bigint,true))
+        ORDER BY (q.requested_at < statement_timestamp()-interval '30 seconds') DESC,
+            CASE WHEN q.requested_at < statement_timestamp()-interval '30 seconds' THEN q.requested_at END,
+            CASE WHEN route.scope IS NOT NULL THEN coalesce(ro.virtual_finish,0) END NULLS FIRST,
+            CASE WHEN route.scope IS NOT NULL THEN coalesce(rw.virtual_finish,0) END NULLS FIRST,
+            q.requested_at, q.branch_id, f.last_served_at, t.created_at, t.task_id LIMIT 1
         FOR UPDATE OF t SKIP LOCKED FOR SHARE OF g,w SKIP LOCKED
     )
     SELECT task_id::text FROM next_job WHERE branch_id=:branch
@@ -88,5 +99,19 @@ def next_job(conn, work, branch, *, transport="postgres"):
 def reserve(repo, claimed):
     repo.add("dispatch_slots", {"attempt_id": claimed["attempt_id"], "task_id": claimed["task_id"],
                                 "expires_at": claimed["lease_expiry"]})
+    repo.conn.execute(text("""
+        INSERT INTO nf_runtime_work_share(work_id,virtual_finish)
+        SELECT :work,1 WHERE EXISTS (SELECT FROM nf_supervisor_jobs WHERE task_id=:task
+                                      AND config ? 'runtime_scope')
+        ON CONFLICT(work_id) DO UPDATE SET virtual_finish=nf_runtime_work_share.virtual_finish
+                                                         + 1.0/nf_runtime_work_share.weight
+    """), {"work": claimed["work_id"], "task": claimed["task_id"]})
+    repo.conn.execute(text("""
+        INSERT INTO nf_runtime_org_share(organization,virtual_finish)
+        SELECT scope->>'organization', 1 FROM (SELECT nf_runtime_scope(config->'runtime_scope',:work,:branch)
+          AS scope FROM nf_supervisor_jobs WHERE task_id=:task) x WHERE scope ? 'organization'
+        ON CONFLICT(organization) DO UPDATE SET virtual_finish=nf_runtime_org_share.virtual_finish
+                                                                + 1.0/nf_runtime_org_share.weight
+    """), {"work": claimed["work_id"], "branch": claimed["branch_id"], "task": claimed["task_id"]})
     repo.conn.execute(text("DELETE FROM nf_dispatch_waiters WHERE branch_id=:branch"),
                       {"branch": claimed["branch_id"]})

@@ -27,18 +27,6 @@ gpg --batch --show-keys --with-colons "$key" | awk -F: '$1 == "fpr" {print $10}'
 ubuntu=/usr/share/keyrings/ubuntu-archive-keyring.gpg
 test -r "$ubuntu"
 sources="$archive/sources.list"
-for suite in noble noble-updates noble-security; do
-  found=0
-  for mirror in https://mirrors.edge.kernel.org/ubuntu https://archive.ubuntu.com/ubuntu https://security.ubuntu.com/ubuntu; do
-    if curl -fsSL --connect-timeout 4 --max-time 8 --range 0-1023 "$mirror/dists/$suite/InRelease" -o /dev/null; then
-      printf 'deb [signed-by=%s] %s %s main universe\n' "$ubuntu" "$mirror" "$suite" >> "$sources"
-      found=1
-      break
-    fi
-  done
-  (( found )) || { echo "No reachable signed Ubuntu index for $suite" >&2; exit 1; }
-done
-printf 'deb [signed-by=%s] https://apt.postgresql.org/pub/repos/apt noble-pgdg main\n' "$key" >> "$sources"
 options=(
   -o "Dir::Etc::sourcelist=$sources" -o Dir::Etc::sourceparts=-
   -o "Dir::State::lists=$archive/lists"
@@ -47,5 +35,18 @@ options=(
   -o Acquire::IndexTargets::deb::DEP-11::DefaultEnabled=false
   -o APT::Update::Error-Mode=any
 )
-sudo apt-get "${options[@]}" update -qq
-sudo apt-get "${options[@]}" install -y "$@"
+# A byte-range curl probe can succeed even when APT cannot fetch the complete
+# signed index. Retry the actual index and package operations on another mirror.
+for mirror in https://azure.archive.ubuntu.com/ubuntu https://archive.ubuntu.com/ubuntu https://mirrors.edge.kernel.org/ubuntu; do
+  : > "$sources"
+  for suite in noble noble-updates noble-security; do
+    printf 'deb [signed-by=%s] %s %s main universe\n' "$ubuntu" "$mirror" "$suite" >> "$sources"
+  done
+  printf 'deb [signed-by=%s] https://apt.postgresql.org/pub/repos/apt noble-pgdg main\n' "$key" >> "$sources"
+  if sudo apt-get "${options[@]}" -o Acquire::https::Timeout=12 update -qq &&
+     sudo apt-get "${options[@]}" -o Acquire::https::Timeout=12 install -y "$@"; then
+    exit 0
+  fi
+  echo "Signed package installation failed via $mirror; trying next archive" >&2
+done
+exit 1

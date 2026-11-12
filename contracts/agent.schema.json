@@ -61,6 +61,20 @@
         "runtime_sha256": {
           "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/Sha256"
         },
+        "routing_decision": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["profile_id", "matched_rule", "revision", "policy_sha256", "policy_ref", "configuration_sha256", "organization"],
+          "properties": {
+            "profile_id": {"type": "string", "minLength": 1, "maxLength": 80},
+            "matched_rule": {"type": "string", "minLength": 1, "maxLength": 80},
+            "revision": {"type": "integer", "minimum": 1},
+            "policy_sha256": {"$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/Sha256"},
+            "policy_ref": {"$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"},
+            "configuration_sha256": {"$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/Sha256"},
+            "organization": {"type": "string", "minLength": 1, "maxLength": 161}
+          }
+        },
         "adapter_id": {
           "type": "string",
           "minLength": 1,

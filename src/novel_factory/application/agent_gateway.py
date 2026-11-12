@@ -84,7 +84,7 @@ class AgentGateway:
                             creative_harness=self.creative_harness)
 
     def prepare_input(self, principal, world_ref, *, role_id, task_kind, assignment,
-                      adapter_id=None, skill_name=None, material_refs=(), task_id=None, dynamic_instance_ref=None):
+                      adapter_id=None, skill_name=None, material_refs=(), task_id=None, dynamic_instance_ref=None, routing_instance_id=None, routing_override=None):
         """Freeze safe instructions/configuration before creating a task.
 
         This is a controller-only operation. material_refs are not granted by
@@ -94,6 +94,16 @@ class AgentGateway:
         with self.kernel.db.uow(write=False) as repo:
             self.kernel.authorize(repo, principal, world_ref["work_id"], "ADMIN", world_ref["branch_id"])
             self.kernel.revision(repo, world_ref)
+            require(routing_override is None or adapter_id == "@policy", "INVALID_ARGUMENT",
+                    "A per-task override requires a policy dispatch")
+            decision = None
+            if adapter_id == "@policy":
+                from .model_routing import select
+
+                instance = (dynamic_instance_ref or {}).get("artifact_revision_id") or routing_instance_id
+                decision = select(self.kernel, repo, world_ref, {"role_id": role_id, "task_kind": task_kind,
+                                  "task_id": task_id, "instance_id": instance}, self.adapters, override=routing_override)
+                adapter_id = decision["profile_id"]
         if adapter_id is None:
             from novel_factory.application.upgrades import RuntimeUpgradeService
             adapter_id = RuntimeUpgradeService(self.kernel, adapters=self.adapters).selected_model(principal, world_ref)
@@ -108,6 +118,8 @@ class AgentGateway:
                 "adapter_id": adapter_id, "model_config_sha256": fingerprint(self.adapters[adapter_id].configuration),
                 "assignment": assignment, "material_refs": list(material_refs),
                 "output_contract": {"name": contract[0], "version": contract[1]}}
+        if decision is not None:
+            data["routing_decision"] = decision
         if self.creative_harness.enabled:
             data["creative_harness"] = self.creative_harness.as_dict()
         if dynamic_instance_ref is not None:
@@ -191,6 +203,13 @@ class AgentGateway:
             require(config["isolation"] == "STATELESS_TEXT_ONLY", "HOST_ISOLATION_UNVERIFIED", "Character execution requires a verified text-only route")
         binding = {"task": task, "grant": grant, "spec": spec, "context": context,
                    "input": data, "runtime": runtime, "config": config}
+        if "routing_decision" in data:
+            decision = data["routing_decision"]
+            policy = self.kernel.artifact(repo, decision["policy_ref"], task["work_id"],
+                                         kind="RUNTIME_ROUTING_POLICY")["payload"]
+            require(policy["branch_id"] == task["branch_id"] and data["adapter_id"] == decision["profile_id"]
+                    and decision["configuration_sha256"] == data["model_config_sha256"],
+                    "TASK_REBIND_REQUIRED", "Frozen routing scope differs from the task")
         if "adaptive_instruction_ref" in data:
             from .adaptive_runtime import resolve_for_input
 
@@ -233,16 +252,37 @@ class AgentGateway:
     def _mark_sent(self, principal, binding, attempt, worker, authorize):
         try:
             self._refresh_dynamic(principal, binding)
-            return self.kernel.tasks.mark_call_sent(attempt, worker_id=worker, authorize_in_tx=authorize)
-        except DomainError:
-            if "dynamic_assignment_ref" in binding:
+            from novel_factory.orchestration import runtime_admission
+            adapter = self.adapters[binding["input"]["adapter_id"]]
+            scope = runtime_admission.scope_for(adapter, binding["input"], binding["task"]["work_id"])
+
+            def authorize_send(conn):
+                authorize(conn)
+                if scope:
+                    call = KernelRepository(conn, tables).one("call_attempts", {"attempt_id": attempt})
+                    timeout = float(binding["config"].get("timeout_seconds", 60))
+                    if binding["config"].get("adapter_kind") == "codex-cli":
+                        timeout *= 2  # native startup/turn and the guarded upstream transfer
+                    runtime_admission.take(conn, scope, call["task_id"], attempt, call["reserved_tokens"], timeout)
+
+            return self.kernel.tasks.mark_call_sent(attempt, worker_id=worker, authorize_in_tx=authorize_send)
+        except DomainError as exc:
+            if ("dynamic_assignment_ref" in binding or binding["input"].get("routing_decision")
+                    or getattr(self.adapters[binding["input"]["adapter_id"]], "provider_key", None)):
                 # Revocation between reserve and send cannot consume money. The
                 # task lock serializes this release with any concurrent sender.
                 with self.kernel.db.uow() as repo:
-                    repo.one("tasks", {"task_id": binding["task"]["task_id"]}, lock="update")
+                    task = repo.one("tasks", {"task_id": binding["task"]["task_id"]}, lock="update")
                     call = repo.one("call_attempts", {"attempt_id": attempt})
                     if call and call["state"] == "PREPARED":
                         self.kernel.tasks._settle_locked_task_call(repo.conn, call, "FAILED", Decimal(0), 0, None)
+                        if exc.code == "RUNTIME_CAPACITY_LIMIT":
+                            from sqlalchemy import text
+                            repo.conn.execute(text("""
+                                INSERT INTO nf_runtime_unsent(attempt_id,generation) VALUES (:id,:generation)
+                            """), {"id": attempt, "generation": call["generation"]})
+                            if task["state"] == "RUNNING" and task["generation"] == call["generation"]:
+                                self.kernel.tasks._recover_task(repo.conn, task, reason="RUNTIME_CAPACITY_LIMIT")
             raise
 
     def _authorized_materials(self, principal, binding):
@@ -555,6 +595,14 @@ class AgentGateway:
                 # terminal billing receipt does not prove task delivery.
                 other = [c for c in pending if (c["generation"], c["call_key"]) !=
                          (request["generation"], request["call_key"])]
+                if other and ("routing_decision" in binding["input"] or
+                              getattr(self.adapters[binding["input"]["adapter_id"]], "provider_key", None)):
+                    from sqlalchemy import text
+                    released = set(repo.conn.scalars(text("""
+                        SELECT u.attempt_id::text FROM nf_runtime_unsent u JOIN nf_call_attempts c USING(attempt_id)
+                        WHERE c.task_id=:task AND c.state='FAILED' AND c.actual_amount=0
+                    """), {"task": request["task_id"]}))
+                    other = [c for c in other if str(c["attempt_id"]) not in released]
                 require(not other or (lookup and len(other) == 1 and str(other[0]["attempt_id"]) == lookup.attempt_id
                             and other[0]["generation"] == request["generation"] and other[0]["state"] == "SUCCEEDED"),
                         "CALL_RECONCILIATION_REQUIRED", "Prior dispatch needs delivery reconciliation")
@@ -576,7 +624,12 @@ class AgentGateway:
                  "actual_amount": None, "currency": None, "cost_status": "UNKNOWN_COST"}
         outcome, result_status, reason, provider_receipt = "UNKNOWN", "FAILED", None, None
         try:
-            response = adapter.generate(replace(model_request, attempt_id=attempt))
+            try:
+                response = adapter.generate(replace(model_request, attempt_id=attempt))
+            finally:
+                if binding["input"].get("routing_decision") or getattr(adapter, "provider_key", None):
+                    from novel_factory.orchestration.runtime_admission import release
+                    release(self.kernel.db, attempt)
             provider_receipt = response.provider_receipt
             require(response.request_sha256 == request_hash, "HOST_BINDING_MISMATCH", "Response is not bound to the dispatched request")
             require(isinstance(response.text, str) and len(response.text.encode("utf-8")) <= 2_000_000,

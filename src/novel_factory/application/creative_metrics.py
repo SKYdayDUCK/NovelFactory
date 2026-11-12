@@ -81,11 +81,29 @@ _KINDS = (
 _ARTIFACTS = (
     """
 WITH population AS MATERIALIZED (
- SELECT a.* FROM nf_artifacts a WHERE a.work_id=:work AND a.kind=ANY(CAST(:kinds AS text[]))
+ SELECT a.kind,a.artifact_revision_id,a.work_id,a.sha256,a.payload,a.created_at FROM nf_artifacts a WHERE a.work_id=:work AND a.kind=ANY(CAST(:kinds AS text[]))
  AND a.created_at >= :since AND a.created_at < :until AND """
     + _BRANCH
     + """=:branch
- ORDER BY a.created_at,a.artifact_revision_id LIMIT :fetch
+ UNION ALL
+ SELECT 'AGENT_CALL_EVIDENCE',r.artifact_revision_id,r.work_id,r.sha256,
+   jsonb_build_object('attempt_id',c.attempt_id,'elapsed_seconds',r.payload->'elapsed_seconds',
+     'model_configuration',r.payload->'model_configuration','execution_kind',r.payload#>'{model_configuration,execution_kind}',
+     'usage',jsonb_build_object('input_tokens',r.payload->'input_tokens','output_tokens',r.payload->'output_tokens'),
+     'input_ref',p.payload->'input_ref','dynamic_assignment_ref',r.payload->'dynamic_assignment_ref'),r.created_at
+ FROM nf_audit_events e
+ JOIN nf_call_attempts c ON c.attempt_id=e.attempt_id AND c.task_id=e.task_id AND c.generation=e.generation
+   AND c.call_key='actor-lookup-choice-v1'
+ JOIN nf_tasks t ON t.task_id=c.task_id AND t.work_id=e.work_id AND t.branch_id=e.branch_id
+ JOIN nf_artifacts r ON r.artifact_revision_id=e.evidence_id AND r.work_id=e.work_id AND r.kind='AGENT_ROLE_TOOL_RESPONSE'
+   AND r.payload->>'request_sha256'=c.request_hash
+ JOIN nf_audit_events pe ON pe.attempt_id=c.attempt_id AND pe.task_id=c.task_id AND pe.generation=c.generation
+   AND pe.work_id=e.work_id AND pe.branch_id=e.branch_id AND pe.event_type='artifact.agent_role_tool_prompt'
+ JOIN nf_artifacts p ON p.artifact_revision_id=pe.evidence_id AND p.work_id=e.work_id
+   AND p.kind='AGENT_ROLE_TOOL_PROMPT' AND p.payload->>'request_sha256'=c.request_hash
+ WHERE e.event_type='artifact.agent_role_tool_response' AND e.work_id=:work AND e.branch_id=CAST(:branch AS uuid)
+   AND r.created_at>=:since AND r.created_at<:until
+ ORDER BY created_at,artifact_revision_id LIMIT :fetch
 )
 SELECT a.kind, a.artifact_revision_id::text AS id, CASE a.kind
  WHEN 'CREATIVE_CONTEXT_SNAPSHOT' THEN jsonb_build_object(
@@ -195,7 +213,7 @@ def _spend(rows, end, audits):
         settled = row["updated_at"] < end and row["state"] in {"SUCCEEDED", "FAILED"}
         if settled and row["actual_tokens"] is not None:
             known_tokens.append(row["actual_tokens"])
-        elif audit.get("input_tokens") is not None and audit.get("output_tokens") is not None:
+        elif all(type(audit.get(k)) is int and audit[k] >= 0 for k in ("input_tokens", "output_tokens")):
             known_tokens.append(audit["input_tokens"] + audit["output_tokens"])
             provider_measured += 1
         if settled and row["actual_amount"] is not None:

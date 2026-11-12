@@ -20,6 +20,7 @@ dependencies = [
   "uvicorn>=0.34,<1",
   "mcp==1.29.0",
   "redis>=6.4,<7",
+  "PyJWT[crypto]>=2.10,<3",
 ]
 
 [dependency-groups]
@@ -32,7 +33,8 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/novel_factory"]
+packages = ["src/novel_factory", "agent_runtime"]
+exclude = ["agent_runtime/pyproject.toml"]
 
 [tool.hatch.build.targets.wheel.force-include]
 "contracts" = "novel_factory/data/contracts"

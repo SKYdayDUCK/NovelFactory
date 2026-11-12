@@ -1,0 +1,6 @@
+[
+  {"id": "review", "when": {"role_id": "reviewer"}, "profile": "codex-v1"},
+  {"id": "planner", "when": {"role_id": "volume_director", "task_kind": "window_plan"}, "profile": "codex-v1"},
+  {"id": "draft", "when": {"role_id": "writer"}, "profile": "deepseek-v1"},
+  {"id": "default", "when": {}, "profile": "deepseek-v1"}
+]

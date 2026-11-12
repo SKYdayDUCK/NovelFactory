@@ -1,5 +1,7 @@
 # NovelFactory — Agent 驱动的小说世界知识与状态内核
 
+[P5.8 / P6 小规模实验运行手册](reports/p6_readiness/README.md) · [工程验收与真实模型状态](reports/p6_readiness/ACCEPTANCE.md)
+
 [![main 工程 CI](https://github.com/SKYdayDUCK/NovelFactory/actions/workflows/p1-integrity.yml/badge.svg?branch=main)](https://github.com/SKYdayDUCK/NovelFactory/actions/workflows/p1-integrity.yml)
 
 **当前 `main` 为 P2/P3/P4 研发工程集成基线。** P2 包含从卷级规划、六场短卷写作到内部发布的工程闭环。P3/P4 包含有限范围的宏微事件等效、跨卷继承与权限控制、派生工作者、在线备份及隔离 PostgreSQL 17 的 WAL 时间点恢复。合并提交、回归结果与回退步骤见[工程基线合并记录](reports/main_工程基线合并记录.md)。

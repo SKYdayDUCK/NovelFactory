@@ -1,0 +1,35 @@
+{
+  "local_checks": "BLOCKED_ENVIRONMENT",
+  "profiles": [
+    {
+      "profile": "codex-v1",
+      "kind": "codex-cli",
+      "auth_mode": "api-key",
+      "model": "REPLACE_WITH_AUTHORIZED_OPENAI_MODEL",
+      "max_output_tokens": 2048,
+      "local_checks": "BLOCKED",
+      "conditions": [
+        "MODEL_NOT_SELECTED",
+        "CREDENTIAL_NOT_CONFIGURED"
+      ]
+    },
+    {
+      "profile": "deepseek-v1",
+      "kind": "deepseek",
+      "auth_mode": null,
+      "model": "REPLACE_WITH_AUTHORIZED_DEEPSEEK_MODEL",
+      "max_output_tokens": 2048,
+      "local_checks": "BLOCKED",
+      "conditions": [
+        "MODEL_NOT_SELECTED",
+        "CREDENTIAL_NOT_CONFIGURED"
+      ]
+    }
+  ],
+  "live_opt_in_present": false,
+  "provider_authentication": "NOT_TESTED",
+  "real_model_calls": 0,
+  "live_parallelism": "NOT_EXECUTED",
+  "settled_provider_amount": null,
+  "independent_reader_quality": "NOT_EVALUATED"
+}

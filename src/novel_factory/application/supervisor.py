@@ -13,6 +13,7 @@ from novel_factory.infrastructure.codex_host import CodexAppServerAdapter
 from novel_factory.infrastructure.database import tables
 from novel_factory.infrastructure.model_gateway import OpenAICompatibleAdapter
 from novel_factory.infrastructure.repository import KernelRepository
+from novel_factory.infrastructure.runtime_providers import RuntimeModelAdapter
 from novel_factory.orchestration.workflow import WorkflowService
 from novel_factory.orchestration import dispatch
 
@@ -132,7 +133,7 @@ class RuntimeSupervisor:
         self.kernel.artifact(repo, manifest_ref, spec["world_ref"]["work_id"], kind="INPUT_MANIFEST")
         payload = self.kernel.artifact(repo, input_ref, spec["world_ref"]["work_id"], kind="AGENT_INPUT")["payload"]
         route = self.gateway.adapters.get(payload["adapter_id"])
-        require(isinstance(route, (OpenAICompatibleAdapter, CodexAppServerAdapter)),
+        require(isinstance(route, (OpenAICompatibleAdapter, CodexAppServerAdapter, RuntimeModelAdapter)),
                 "HOST_ISOLATION_UNVERIFIED", "Supervised runtime roles require a stateless text route")
         validate_contract("KnowledgeCut", knowledge_cut, "2.1")
         check_profile(grant, knowledge_cut["plane"])
@@ -152,6 +153,10 @@ class RuntimeSupervisor:
                 "VIEW_DENIED", "Automatic completion is limited to an explicitly enrolled evidence summary")
         config = {"accept_summary": accept_summary, "manifest_ref": manifest_ref, "knowledge_cut": knowledge_cut, "context_tokens": context_tokens,
                   "dispatch": dispatch, "grant_epoch": grant["epoch"], "policy_version": spec["policy_version"]}
+        from novel_factory.orchestration.runtime_admission import scope_for
+        scope = scope_for(route, payload, spec["world_ref"]["work_id"])
+        if scope:
+            config["runtime_scope"] = scope
         return config, payload
 
     @staticmethod
@@ -195,6 +200,10 @@ class RuntimeSupervisor:
         settled = resolution.reconcile_one(controller, work_id, branch_id)
         if settled:
             return {"status": "CONFLICT_COORDINATED", **settled}
+        from novel_factory.application.production_pipeline import advance_pipeline
+        handoff = advance_pipeline(self.kernel, self.gateway, controller, work_id, branch_id)
+        if handoff:
+            return handoff
         from novel_factory.application.volume_successor import advance_volume
         volume = advance_volume(self.kernel, self.gateway, controller, work_id, branch_id)
         if volume:
@@ -227,7 +236,8 @@ class RuntimeSupervisor:
             stale = repo.conn.execute(text("""
                 SELECT t.task_id::text,t.generation FROM nf_tasks t JOIN nf_supervisor_jobs j USING(task_id)
                 WHERE t.work_id=:work AND t.branch_id=:branch AND t.state='READY'
-                  AND EXISTS(SELECT FROM nf_call_attempts c WHERE c.task_id=t.task_id)
+                  AND EXISTS(SELECT FROM nf_call_attempts c WHERE c.task_id=t.task_id
+                      AND NOT EXISTS(SELECT FROM nf_runtime_unsent u WHERE u.attempt_id=c.attempt_id))
                 ORDER BY t.updated_at LIMIT 32 FOR UPDATE OF t SKIP LOCKED
             """), {"work": work_id, "branch": branch_id}).all()
             for task_id, generation in stale:
@@ -389,6 +399,9 @@ class RuntimeSupervisor:
                 "subject_time": {"kind": "POINT", "at": spec["story_time"]}, "token_budget": config["context_tokens"],
                 "idempotency_key": f"supervisor-compile:{task_id}:{generation}"})
             require(context["status"] == "READY", "CONTEXT_REQUIRED", "Task requires an available fixed context")
+            if "production_node" in config:
+                from novel_factory.application.production_pipeline import prepare_materials
+                prepare_materials(self.kernel, task, config)
             result = self.gateway.execute(owner, {"schema_version": "2.1", "task_id": task_id, "generation": generation,
                 "worker_id": worker, "call_key": "supervised-candidate", **config["dispatch"]})
         except DomainError as exc:

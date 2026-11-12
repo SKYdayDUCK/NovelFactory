@@ -1,0 +1,458 @@
+{
+  "status": "PASS",
+  "pg": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "topology": "two_independent_clusters",
+  "physical_domains": {
+    "nf": {
+      "system_identifier": "7707265977145020433",
+      "source_timeline": 1,
+      "data_checksums": "on",
+      "restore_points": {
+        "aw_intent_before_nf": {
+          "lsn": "0/3000090",
+          "wal_segment": "000000010000000000000003",
+          "wal_sha256": "93468945a9f4c40b12822aa5f9d8ac1158e5ac5451176885c203230089a83a2a"
+        },
+        "nf_bound_before_inference": {
+          "lsn": "0/3052700",
+          "wal_segment": "000000010000000000000003",
+          "wal_sha256": "93468945a9f4c40b12822aa5f9d8ac1158e5ac5451176885c203230089a83a2a"
+        },
+        "unknown_usage_before_invoice": {
+          "lsn": "0/3085C10",
+          "wal_segment": "000000010000000000000003",
+          "wal_sha256": "93468945a9f4c40b12822aa5f9d8ac1158e5ac5451176885c203230089a83a2a"
+        }
+      },
+      "recoveries": {
+        "aw_intent_before_nf": {
+          "target": "aw_intent_before_nf",
+          "system_identifier": "7707265977145020433",
+          "promoted_timeline": 2,
+          "replay_lsn": "0/3000090"
+        },
+        "nf_bound_before_inference": {
+          "target": "nf_bound_before_inference",
+          "system_identifier": "7707265977145020433",
+          "promoted_timeline": 2,
+          "replay_lsn": "0/3052700"
+        },
+        "unknown_usage_before_invoice": {
+          "target": "unknown_usage_before_invoice",
+          "system_identifier": "7707265977145020433",
+          "promoted_timeline": 2,
+          "replay_lsn": "0/3085C10"
+        }
+      },
+      "manifest_sha256": "a29f088214b0824590f960bf61c8a8905faf03815efa2d794b886f6f3643d405",
+      "verification": {
+        "exit_code": 0,
+        "stdout": "backup successfully verified"
+      }
+    },
+    "workshop": {
+      "system_identifier": "7707265980683800618",
+      "source_timeline": 1,
+      "data_checksums": "on",
+      "restore_points": {
+        "aw_intent_before_nf": {
+          "lsn": "0/30270D8",
+          "wal_segment": "000000010000000000000003",
+          "wal_sha256": "27887b67ea707375cfcc003547e06abeabde79ee8d693daf94dc0a3fd136bfa3"
+        },
+        "nf_bound_before_inference": {
+          "lsn": "0/3032F38",
+          "wal_segment": "000000010000000000000003",
+          "wal_sha256": "27887b67ea707375cfcc003547e06abeabde79ee8d693daf94dc0a3fd136bfa3"
+        },
+        "unknown_usage_before_invoice": {
+          "lsn": "0/30364C0",
+          "wal_segment": "000000010000000000000003",
+          "wal_sha256": "27887b67ea707375cfcc003547e06abeabde79ee8d693daf94dc0a3fd136bfa3"
+        }
+      },
+      "recoveries": {
+        "aw_intent_before_nf": {
+          "target": "aw_intent_before_nf",
+          "system_identifier": "7707265980683800618",
+          "promoted_timeline": 2,
+          "replay_lsn": "0/30270D8"
+        },
+        "unknown_usage_before_invoice": {
+          "target": "unknown_usage_before_invoice",
+          "system_identifier": "7707265980683800618",
+          "promoted_timeline": 2,
+          "replay_lsn": "0/30364C0"
+        },
+        "independent-aw-before-receipt": {
+          "target": "aw_intent_before_nf",
+          "system_identifier": "7707265980683800618",
+          "promoted_timeline": 2,
+          "replay_lsn": "0/30270D8"
+        }
+      },
+      "manifest_sha256": "1a8872824ce6483574126d47bea03789fe110f9d2c1d0da87c5d275fe3de5080",
+      "verification": {
+        "exit_code": 0,
+        "stdout": "backup successfully verified"
+      }
+    }
+  },
+  "independently_restored_mismatched_pairs": {
+    "aw_ahead": {
+      "aw_target": "unknown_usage_before_invoice",
+      "nf_target": "aw_intent_before_nf",
+      "result": {
+        "state": "WAITING_OPERATOR",
+        "last_error": "REMOTE_HISTORY_MISMATCH",
+        "hold": "HELD",
+        "receipt_ref": "23a775fa-d493-4f54-a237-e0dafa0f62a2",
+        "task_id": "43582167-f926-408b-aafd-3780b8514bc9",
+        "accounting_state": "UNKNOWN",
+        "settled_amount": null,
+        "task_token_limit": 100000,
+        "token_observations": [
+          [
+            "16ebcd4e-6293-42f3-8191-de8c33cc64e1",
+            "UNKNOWN",
+            null
+          ]
+        ],
+        "observations": 1
+      },
+      "installation_frozen": true
+    },
+    "nf_ahead": {
+      "aw_target": "aw_intent_before_nf",
+      "nf_target": "unknown_usage_before_invoice",
+      "result": {
+        "state": "BOUND",
+        "last_error": null,
+        "hold": "HELD",
+        "receipt_ref": "23a775fa-d493-4f54-a237-e0dafa0f62a2",
+        "task_id": "43582167-f926-408b-aafd-3780b8514bc9",
+        "accounting_state": "UNKNOWN",
+        "settled_amount": null,
+        "task_token_limit": 100000,
+        "token_observations": [
+          [
+            "16ebcd4e-6293-42f3-8191-de8c33cc64e1",
+            "UNKNOWN",
+            null
+          ]
+        ],
+        "observations": 1
+      },
+      "nf_token_budget": {
+        "reserved_tokens": 100000,
+        "spent_tokens": 0,
+        "available_tokens": 0
+      }
+    },
+    "reconciliation_mcp_tools": [
+      "nf_delegation_get",
+      "nf_delegation_get"
+    ]
+  },
+  "nf_object_snapshots": {
+    "aw_intent_before_nf": {
+      "verified_objects": 7,
+      "inventory_sha256": "2efbb5f2b18d2ad60abf8a0a134d9adec5f4b2f681b5956bd9501716387b0bf2"
+    },
+    "unknown_usage_before_invoice": {
+      "verified_objects": 14,
+      "inventory_sha256": "1f3943e127ee1bd5ebff3cb8852769fd7b136e896648d907e9c891563f411732"
+    }
+  },
+  "basebackup": "physical pg_basebackup -Fp -Xstream",
+  "verification": {
+    "exit_code": 0,
+    "stdout": "backup successfully verified"
+  },
+  "manifest_sha256": "a29f088214b0824590f960bf61c8a8905faf03815efa2d794b886f6f3643d405",
+  "target": "aw_intent_before_nf",
+  "target_lsn": "0/3000090",
+  "replayed_lsn": "0/3000090",
+  "second_wal_target": "nf_bound_before_inference",
+  "second_target_lsn": "0/3052700",
+  "second_replay_lsn": "0/3052700",
+  "shared_token_budget": {
+    "budget_id": "8b41d933-3156-4b90-adee-1b588e41660d",
+    "total_tokens": 100000,
+    "original_attempt_id": "16ebcd4e-6293-42f3-8191-de8c33cc64e1",
+    "before_first_call": {
+      "reserved_tokens": 0,
+      "spent_tokens": 0,
+      "available_tokens": 100000
+    },
+    "live_unknown": {
+      "reserved_tokens": 100000,
+      "spent_tokens": 0,
+      "available_tokens": 0
+    },
+    "unknown_wal_target": "unknown_usage_before_invoice",
+    "unknown_target_lsn": "0/3085C10",
+    "unknown_replayed_lsn": "0/3085C10",
+    "recovered_unknown": {
+      "reserved_tokens": 100000,
+      "spent_tokens": 0,
+      "available_tokens": 0
+    },
+    "recovered_workshop_observations": [
+      [
+        "16ebcd4e-6293-42f3-8191-de8c33cc64e1",
+        "UNKNOWN",
+        null
+      ]
+    ],
+    "after_repeated_invoice": {
+      "reserved_tokens": 0,
+      "spent_tokens": 18,
+      "available_tokens": 99982
+    },
+    "final_workshop_observations": [
+      [
+        "16ebcd4e-6293-42f3-8191-de8c33cc64e1",
+        "UNKNOWN",
+        null
+      ],
+      [
+        "16ebcd4e-6293-42f3-8191-de8c33cc64e1",
+        "SUCCEEDED",
+        18
+      ]
+    ]
+  },
+  "same_receipt_missing_attempt_peer": {
+    "task_id": "43582167-f926-408b-aafd-3780b8514bc9",
+    "receipt_ref": "23a775fa-d493-4f54-a237-e0dafa0f62a2",
+    "generation": 1,
+    "task_state": "PAUSED",
+    "accounting_state": "NO_ATTEMPT",
+    "attempts": []
+  },
+  "after_settled_history_mismatch": {
+    "state": "WAITING_OPERATOR",
+    "last_error": "REMOTE_HISTORY_MISMATCH",
+    "hold": "SETTLED",
+    "receipt_ref": "23a775fa-d493-4f54-a237-e0dafa0f62a2",
+    "task_id": "43582167-f926-408b-aafd-3780b8514bc9",
+    "accounting_state": "SETTLED",
+    "settled_amount": "0.020000",
+    "task_token_limit": 100000,
+    "token_observations": [
+      [
+        "16ebcd4e-6293-42f3-8191-de8c33cc64e1",
+        "UNKNOWN",
+        null
+      ],
+      [
+        "16ebcd4e-6293-42f3-8191-de8c33cc64e1",
+        "SUCCEEDED",
+        18
+      ]
+    ],
+    "observations": 2
+  },
+  "rolled_back_nf_task_count": 0,
+  "rolled_back_aw_intent": {
+    "state": "REQUESTED",
+    "last_error": null,
+    "hold": "HELD",
+    "receipt_ref": null,
+    "task_id": null,
+    "accounting_state": null,
+    "settled_amount": null,
+    "task_token_limit": 100000,
+    "token_observations": null,
+    "observations": 0
+  },
+  "live_nf": {
+    "protocol_version": "aw-nf.v1",
+    "nf_instance_id": "0fd834e2-6326-4d43-8525-458be2b8d8e3",
+    "work_id": "5e7b2868-70e2-4711-bf6f-4da36d3992c4",
+    "branch_id": "0014f6e3-33d0-4b16-be77-e17ba33f50ac",
+    "operation_id": "a3ddf47d-1932-4506-be43-94ece977d8d2",
+    "task_id": "43582167-f926-408b-aafd-3780b8514bc9",
+    "receipt_ref": "23a775fa-d493-4f54-a237-e0dafa0f62a2",
+    "world_ref": {
+      "work_id": "5e7b2868-70e2-4711-bf6f-4da36d3992c4",
+      "branch_id": "0014f6e3-33d0-4b16-be77-e17ba33f50ac",
+      "world_revision_id": "51f563ca-2889-47be-9b96-a01e0805a965"
+    },
+    "generation": 1,
+    "task_state": "ACCEPTED",
+    "accounting_state": "UNKNOWN",
+    "currency": "USD",
+    "actual_amount": "0",
+    "actual_tokens": 0,
+    "attempt_ids": [
+      "16ebcd4e-6293-42f3-8191-de8c33cc64e1"
+    ],
+    "attempts": [
+      {
+        "attempt_id": "16ebcd4e-6293-42f3-8191-de8c33cc64e1",
+        "state": "UNKNOWN",
+        "actual_amount": null,
+        "actual_tokens": null
+      }
+    ],
+    "result_ref": "bf39078a-b8c4-55e8-9f30-eecb05e75f1b",
+    "wait_reason": null
+  },
+  "nf_restored_aw_live": {
+    "state": "WAITING_OPERATOR",
+    "last_error": "REMOTE_HISTORY_MISMATCH",
+    "hold": "HELD",
+    "receipt_ref": "23a775fa-d493-4f54-a237-e0dafa0f62a2",
+    "task_id": "43582167-f926-408b-aafd-3780b8514bc9",
+    "accounting_state": "UNKNOWN",
+    "settled_amount": null,
+    "task_token_limit": 100000,
+    "token_observations": [
+      [
+        "16ebcd4e-6293-42f3-8191-de8c33cc64e1",
+        "UNKNOWN",
+        null
+      ]
+    ],
+    "observations": 1
+  },
+  "aw_restored_nf_live_before_invoice": {
+    "state": "BOUND",
+    "last_error": null,
+    "hold": "HELD",
+    "receipt_ref": "23a775fa-d493-4f54-a237-e0dafa0f62a2",
+    "task_id": "43582167-f926-408b-aafd-3780b8514bc9",
+    "accounting_state": "UNKNOWN",
+    "settled_amount": null,
+    "task_token_limit": 100000,
+    "token_observations": [
+      [
+        "16ebcd4e-6293-42f3-8191-de8c33cc64e1",
+        "UNKNOWN",
+        null
+      ]
+    ],
+    "observations": 1
+  },
+  "after_explicit_synthetic_invoice": {
+    "state": "SETTLED",
+    "last_error": null,
+    "hold": "SETTLED",
+    "receipt_ref": "23a775fa-d493-4f54-a237-e0dafa0f62a2",
+    "task_id": "43582167-f926-408b-aafd-3780b8514bc9",
+    "accounting_state": "SETTLED",
+    "settled_amount": "0.020000",
+    "task_token_limit": 100000,
+    "token_observations": [
+      [
+        "16ebcd4e-6293-42f3-8191-de8c33cc64e1",
+        "UNKNOWN",
+        null
+      ],
+      [
+        "16ebcd4e-6293-42f3-8191-de8c33cc64e1",
+        "SUCCEEDED",
+        18
+      ]
+    ],
+    "observations": 2
+  },
+  "resulting_nf_tasks": 1,
+  "loopback_synthetic_http_requests": 1,
+  "supplier_model_calls": 0,
+  "recovery_mcp_calls": [
+    [
+      "nf_delegation_get",
+      "a3ddf47d-1932-4506-be43-94ece977d8d2"
+    ],
+    [
+      "nf_delegation_get",
+      "a3ddf47d-1932-4506-be43-94ece977d8d2"
+    ],
+    [
+      "nf_delegation_get",
+      "a3ddf47d-1932-4506-be43-94ece977d8d2"
+    ],
+    [
+      "nf_delegation_get",
+      "a3ddf47d-1932-4506-be43-94ece977d8d2"
+    ],
+    [
+      "nf_delegation_get",
+      "a3ddf47d-1932-4506-be43-94ece977d8d2"
+    ],
+    [
+      "nf_delegation_get",
+      "a3ddf47d-1932-4506-be43-94ece977d8d2"
+    ]
+  ],
+  "frozen_manager": "IDLE",
+  "workshop_offline": {
+    "status": "PASS",
+    "operation_id": "a3ddf47d-1932-4506-be43-94ece977d8d2",
+    "recorded_utc": "2026-11-12T12:48:28.825837+00:00",
+    "scope": "Workshop database refused connections across two real NF supervisor scans.",
+    "aw_database_allowed_connections": false,
+    "aw_live_client_backends": 0,
+    "aw_author_mcp_during_outage": "VIEW_DENIED",
+    "pending_wake_preserved": "fb19106c-79fe-49d9-ac53-cba51e96df5e",
+    "aw_unchanged_while_offline": {
+      "delegation": "BOUND",
+      "task_id": "43582167-f926-408b-aafd-3780b8514bc9",
+      "receipt_ref": "23a775fa-d493-4f54-a237-e0dafa0f62a2",
+      "task_state": "READY",
+      "accounting_state": "NO_ATTEMPT",
+      "budget_hold": "HELD",
+      "attempts_observed": 0
+    },
+    "nf_supervisor_scans": [
+      {
+        "before": {
+          "state": "READY",
+          "attempts": []
+        },
+        "after": {
+          "state": "RESULT_STORED",
+          "attempts": [
+            "16ebcd4e-6293-42f3-8191-de8c33cc64e1"
+          ]
+        },
+        "status": "RESULT_STORED"
+      },
+      {
+        "before": {
+          "state": "RESULT_STORED",
+          "attempts": [
+            "16ebcd4e-6293-42f3-8191-de8c33cc64e1"
+          ]
+        },
+        "after": {
+          "state": "ACCEPTED",
+          "attempts": [
+            "16ebcd4e-6293-42f3-8191-de8c33cc64e1"
+          ]
+        },
+        "status": "IDLE"
+      }
+    ],
+    "nf_stdio_during_outage": {
+      "receipt_ref": "23a775fa-d493-4f54-a237-e0dafa0f62a2",
+      "attempt_ids": [
+        "16ebcd4e-6293-42f3-8191-de8c33cc64e1"
+      ]
+    },
+    "aw_after_reconciliation": {
+      "delegation": "BOUND",
+      "task_id": "43582167-f926-408b-aafd-3780b8514bc9",
+      "receipt_ref": "23a775fa-d493-4f54-a237-e0dafa0f62a2",
+      "task_state": "ACCEPTED",
+      "accounting_state": "UNKNOWN",
+      "budget_hold": "HELD",
+      "attempts_observed": 1
+    },
+    "production_provider_calls": 0
+  },
+  "elapsed_seconds": 26.26
+}

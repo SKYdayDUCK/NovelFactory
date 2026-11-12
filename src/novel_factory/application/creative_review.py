@@ -185,7 +185,7 @@ class CreativeReviewService:
             return service.read_text(principal, task_id, generation, draft_ref, idempotency_key=idempotency_key)
 
     def review(self, principal, task_id, generation, *, binding, target_ref, scope_draft_refs, coverage_refs, layer,
-               observations, quota, rework_limit, independence_ref, idempotency_key, prior_report_ref=None, related_independence_refs=None, worker_id=None):
+               observations, quota, rework_limit, independence_ref, idempotency_key, prior_report_ref=None, related_independence_refs=None, worker_id=None, reader_position=None):
         from novel_factory.domain.creative_review import native_dimensions
         from .adaptive_runtime import resolve_for_input, review_with_guidance
 
@@ -201,6 +201,10 @@ class CreativeReviewService:
                 and isinstance(coverage_refs, list) and 1 <= len(coverage_refs) <= 512
                 and len(canonical_bytes(observations)) <= 200000,
                 "INVALID_ARGUMENT", "Invalid review inputs or rework limit")
+        require(reader_position in (None, "NO_ISSUES", "NO_OPINION") and not (reader_position and observations),
+                "INVALID_ARGUMENT", "A clean reading or abstention must have empty observations")
+        position = reader_position or ("OBSERVATIONS" if observations else "UNSTATED")
+        abstained = position == "NO_OPINION" or (position == "UNSTATED" and layer in {"PLOT", "STAGING"})
         ordered = binding["ordered_draft_refs"]
         require(scope_draft_refs == [r for r in ordered if r in scope_draft_refs] and target_ref in scope_draft_refs,
                 "INVALID_ARGUMENT", "Reading scope must follow the manuscript manifest exactly")
@@ -215,6 +219,8 @@ class CreativeReviewService:
                    "scope_draft_refs": scope_draft_refs, "coverage_refs": coverage_refs, "layer": layer,
                    "observations": observations, "quota": quota, "rework_limit": rework_limit,
                    "prior_report_ref": prior_report_ref, "independence_ref": independence_ref, "related_independence_refs": related_refs}
+        if reader_position is not None:
+            request["reader_position"] = reader_position
         with self.kernel.db.uow(write=False) as repo:
             task, _, spec, _, _ = _task(self.kernel, repo, principal, task_id, generation, "review_submit", worker_id)
             require(all(r in spec["input_artifacts"] for r in scope_draft_refs), "VIEW_DENIED", "Draft is outside the assigned scope")
@@ -314,7 +320,7 @@ class CreativeReviewService:
             scale = "SEAM" if layer == "CHAPTER_SEAM" else "VOLUME" if layer == "VOLUME" else (
                 "SCENE" if len(scope_draft_refs) == 1 else "CHAPTER")
             changes = any(f["requested_change"] and f["judgment"] not in {"SUPPORTED", "UNCERTAIN"} for f in findings)
-            outcome = "CHANGES_REQUESTED" if changes else "UNDETERMINED" if findings else "PASS"
+            outcome = "CHANGES_REQUESTED" if changes else "UNDETERMINED" if findings or abstained else "PASS"
             native_report = native.submit_review(principal, {"schema_version": "2.1", "task_id": task_id,
                 "generation": generation, "context_bundle_id": task["context_bundle_id"], "binding": binding,
                 "scope_draft_refs": scope_draft_refs, "scale": scale, "dimension": dimension,
@@ -330,7 +336,7 @@ class CreativeReviewService:
                       "review_binding": {"producer": _identity(producer, producer_grant), "reviewer": _identity(principal, grant),
                                          "independence_receipt": independence_ref},
                       "mode": "ENGINEERING", "rubric_ref": rubric_ref, "findings": findings,
-                      "recommendation": "REVISE" if changes else "INSUFFICIENT_EVIDENCE" if findings else "ACCEPT_CANDIDATE",
+                      "recommendation": "REVISE" if changes else "INSUFFICIENT_EVIDENCE" if findings or abstained else "ACCEPT_CANDIDATE",
                       "rework_limit": rework_limit, "evaluation": {"kind": "ENGINEERING", "check_receipts": [native_report],
                       "literary_conclusion": "NOT_EVALUATED"}, "status": "ADVISORY",
                       "independence_policy": "DISTINCT_PRINCIPALS_AND_NO_SUBSTANTIVE_PROXY"}
@@ -340,7 +346,7 @@ class CreativeReviewService:
                         "layer": layer, "round": round_number, "previous_report_ref": prior_report_ref, "findings": notes,
                         "text_ref": draft["text_ref"], "before_draft_ref": draft["prior_draft_ref"], "after_draft_ref": target_ref,
                         "coverage_refs": coverage_refs, "quota": quota, "usage": usage,
-                        "reader_observations": observations, "related_bindings": related_bindings, "prior_findings": prior_findings,
+                        "reader_position": position, "reader_observations": observations, "related_bindings": related_bindings, "prior_findings": prior_findings,
                         "scope_draft_refs": scope_draft_refs, "verified_evidence": verified,
                         "upstream_instruction_versions": _upstream_versions(repo, work, draft, binding, notes),
                         "source_versions": {"writer": {"task_id": draft["task_id"], "generation": draft["generation"],
@@ -475,6 +481,9 @@ class CreativeReviewService:
                     "A final decision needs a native editorial session and exact decision input")
             native_ref = None
             if final:
+                if details["layer"] in {"PLOT", "STAGING"} and not details["reader_observations"]:
+                    require(details.get("reader_position") == "NO_ISSUES", "REVIEW_REQUIRED",
+                            "A final decision requires an explicit verdict on this reading")
                 validate_contract("EditDecisionRequest", native_decision, "editorial")
                 require(details["native_review_ref"] in native_decision["review_refs"]
                         and native_decision["after_binding"] == submission["binding"],

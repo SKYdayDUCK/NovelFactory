@@ -146,6 +146,10 @@ def audit_branches(kernel, repo, work, artifact, ref):
         "AGENT_INPUT", "AGENT_PROMPT", "AGENT_RESPONSE", "AGENT_BLOCKED", "AGENT_CALL_EVIDENCE",
     }:
         return None
+    if kind == "AGENT_INPUT" and "routing_decision" in artifact["payload"]:
+        policy = kernel.artifact(repo, artifact["payload"]["routing_decision"]["policy_ref"], work,
+                                 kind="RUNTIME_ROUTING_POLICY")["payload"]
+        return (policy["branch_id"],)
     assignment = audit_assignment(repo, work, artifact, ref)
     if assignment:
         scope_kind, scope_ref = assignment

@@ -7,13 +7,10 @@ import hashlib
 import json
 import os
 from pathlib import Path
-import shlex
 import shutil
-import sys
 import time
 from uuid import uuid4
 
-import psycopg
 import pytest
 from sqlalchemy.engine import make_url
 
@@ -42,6 +39,7 @@ from novel_factory.infrastructure.objects import ObjectStore
 from novel_factory.infrastructure.recovery import fence_recovered_tasks
 from conftest import database_pair
 from test_dual_stdio import bound_process
+from physical_peer import PhysicalPeer
 
 
 def port_at(dsn, port):
@@ -74,6 +72,14 @@ def tick(dsn, inst, org, op, transport):
 
 
 def test_physical_pitr_both_directions(tmp_path, monkeypatch):
+    _physical_drill(tmp_path, monkeypatch, split_clusters=False)
+
+
+def test_db01_independent_cluster_archives_and_skewed_targets(tmp_path, monkeypatch):
+    _physical_drill(tmp_path, monkeypatch, split_clusters=True)
+
+
+def _physical_drill(tmp_path, monkeypatch, *, split_clusters):
     nf_source = Path(os.environ["AW_NF_SOURCE"]).resolve()
     monkeypatch.syspath_prepend(str(nf_source / "scripts"))
     monkeypatch.syspath_prepend(str(nf_source / "tests/integration"))
@@ -89,54 +95,28 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
     started = time.monotonic()
     version = pg._run([pg_bin / "postgres", "--version"])["stdout"]
     assert "PostgreSQL) 17." in version
-    archive, original, image, recovered = [
-        tmp_path / p for p in ("archive", "source", "base", "recovered")
-    ]
-    archive.mkdir()
-    pg._run(
-        [
-            pg_bin / "initdb",
-            "-D",
-            original,
-            "-U",
-            "nf_dev",
-            "--encoding=UTF8",
-            "--locale=C",
-            "--auth-local=reject",
-            "--auth-host=trust",
-            "--data-checksums",
-        ]
-    )
-    (original / "pg_hba.conf").write_text(
-        "host all all 127.0.0.1/32 scram-sha-256\nhost replication nf_dev 127.0.0.1/32 trust\n"
-    )
-    # Only this disposable cluster trusts its isolated local bootstrap user.
-    hba = original / "pg_hba.conf"
-    hba.write_text("host all nf_dev 127.0.0.1/32 trust\n" + hba.read_text())
-    port = pg._port()
-    admin_dsn = f"postgresql://nf_dev@127.0.0.1:{port}/postgres"
-    archived_segment = f"{shlex.quote(str(archive))}/%f"
-    archive_command = f"test -f {archived_segment} || (cp %p {archived_segment}.part && mv {archived_segment}.part {archived_segment})"
-    settings = dict(
-        listen_addresses="127.0.0.1",
-        unix_socket_directories="",
-        port=port,
-        max_connections=35,
-        shared_buffers="48MB",
-        fsync="on",
-        synchronous_commit="on",
-        full_page_writes="on",
-        wal_level="replica",
-        archive_mode="on",
-        max_wal_senders=4,
-        archive_command=archive_command,
-    )
-    source_conf = tmp_path / "source.conf"
-    pg._config(source_conf, settings)
     with ExitStack() as stack:
-        source = pg._start(pg_bin, original, source_conf, port, tmp_path / "source.log")
-        stack.callback(pg._stop, source)
-        urls = stack.enter_context(database_pair(admin_dsn))
+        source_nf = PhysicalPeer(stack, pg, pg_bin, tmp_path / "nf-server")
+        source_aw = PhysicalPeer(stack, pg, pg_bin, tmp_path / "aw-server") if split_clusters else source_nf
+        peers = [source_nf, source_aw] if split_clusters else [source_nf]
+        if split_clusters:
+            assert source_nf.evidence["system_identifier"] != source_aw.evidence["system_identifier"]
+        urls = stack.enter_context(database_pair(source_aw.dsn, source_nf.dsn if split_clusters else None))
+
+        object_snapshots = {}
+
+        def mark_both(name, objects=None):
+            with kernel.objects.lock(exclusive=True):
+                points = [peer.mark(name) for peer in peers]
+                if objects is not None:
+                    current = kernel.objects.inventory()
+                    shutil.copytree(kernel.objects.root, objects)
+                    assert ObjectStore(objects).inventory() == current
+                    inventory = json.dumps(current, sort_keys=True, separators=(",", ":")).encode()
+                    object_snapshots[name] = {"verified_objects": len(current),
+                                              "inventory_sha256": hashlib.sha256(inventory).hexdigest()}
+            return points[0]
+
         db = Database(urls["nf"])
         stack.callback(db.close)
         kernel = Kernel(db, ObjectStore(tmp_path / "objects"))
@@ -240,28 +220,9 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
             )
 
         nf = nf_process("live", urls["nf"], tmp_path / "objects")
-        admin = stack.enter_context(psycopg.connect(admin_dsn, autocommit=True))
-        pg_env = {
-            **os.environ,
-            "PGHOST": "127.0.0.1",
-            "PGPORT": str(port),
-            "PGUSER": "nf_dev",
-            "PGDATABASE": "postgres",
-        }
-        pg._run(
-            [
-                pg_bin / "pg_basebackup",
-                "-D",
-                image,
-                "-Fp",
-                "-Xstream",
-                "--checkpoint=fast",
-                "--manifest-checksums=SHA256",
-            ],
-            env=pg_env,
-        )
-        verified = pg._run([pg_bin / "pg_verifybackup", image])
-        manifest_sha = hashlib.sha256((image / "backup_manifest").read_bytes()).hexdigest()
+        verified, manifest_sha = source_nf.backup()
+        if split_clusters:
+            source_aw.backup()
         op = asyncio.run(
             aw(
                 "aw_delegate",
@@ -277,13 +238,10 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
         wake = asyncio.run(aw_author("aw_resume_project", wake_key))
         assert wake["state"] == "PENDING"
         target = "aw_intent_before_nf"
-        lsn = admin.execute("SELECT pg_create_restore_point(%s)", (target,)).fetchone()[0]
-        shutil.copytree(tmp_path / "objects", tmp_path / "objects-at-target")
+        lsn = mark_both(target, tmp_path / "objects-at-target")
         assert tick(urls["aw"], inst, org, op, nf) == "BOUND"
         bound_target = "nf_bound_before_inference"
-        bound_lsn = admin.execute("SELECT pg_create_restore_point(%s)", (bound_target,)).fetchone()[
-            0
-        ]
+        bound_lsn = mark_both(bound_target)
         initial = workshop_snapshot(urls["aw"], op)
         task = initial["task_id"]
         with connect(urls["aw"]) as c:
@@ -292,7 +250,7 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
             ).fetchone()["payload"]
         get = {k: payload[k] for k in GET_FIELDS}
         scans = []
-        with workshop_disconnected(admin, urls["aw"]):
+        with workshop_disconnected(source_aw.admin, urls["aw"]):
             # The bound stdio service fails closed while its database is unavailable.
             with pytest.raises(Denied, match="^VIEW_DENIED$"):
                 asyncio.run(aw_author("aw_resume_project", wake_key))
@@ -327,7 +285,8 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
         assert later["task_token_limit"] == token_limit
         assert later["token_observations"] == [[attempt_id, "UNKNOWN", None]]
         unknown_target = "unknown_usage_before_invoice"
-        unknown_lsn = admin.execute("SELECT pg_create_restore_point(%s)", (unknown_target,)).fetchone()[0]
+        unknown_objects = tmp_path / "objects-at-unknown"
+        unknown_lsn = mark_both(unknown_target, unknown_objects)
         offline = {
             "status": "PASS",
             "operation_id": op,
@@ -346,48 +305,12 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
             "aw_after_reconciliation": reconnected,
             "production_provider_calls": 0,
         }
-        wal = admin.execute("SELECT pg_walfile_name(pg_current_wal_lsn())").fetchone()[0]
-        admin.execute("SELECT pg_switch_wal()")
-        until = time.monotonic() + 60
-        while not (archive / wal).exists():
-            assert time.monotonic() < until, "WAL archive deadline exceeded"
-            time.sleep(0.1)
+        for peer in peers:
+            peer.archive_targets()
 
-        def restore_at(target):
-            recovered_port = pg._port()
-            recovered = tmp_path / ("data-" + target)
-            shutil.copytree(image, recovered)
-            (recovered / "recovery.signal").touch()
-            restore_conf = tmp_path / (target + ".conf")
-            pg._config(
-                restore_conf,
-                {
-                    **settings,
-                    "port": recovered_port,
-                    "archive_mode": "off",
-                    "restore_command": f"cp {shlex.quote(str(archive))}/%f %p",
-                    "recovery_target_name": target,
-                    "recovery_target_action": "promote",
-                },
-            )
-            restored = pg._start(
-                pg_bin, recovered, restore_conf, recovered_port, tmp_path / (target + ".log")
-            )
-            stack.callback(pg._stop, restored)
-            with psycopg.connect(port_at(admin_dsn, recovered_port), autocommit=True) as ctl:
-                until = time.monotonic() + 60
-                while ctl.execute("SELECT pg_is_in_recovery()").fetchone()[0]:
-                    assert time.monotonic() < until
-                    time.sleep(0.1)
-                replay = ctl.execute("SELECT pg_last_wal_replay_lsn()").fetchone()[0]
-            assert (
-                f'recovery stopping at restore point "{target}"'
-                in (tmp_path / (target + ".log")).read_text()
-            )
-            return recovered_port, replay
-
-        recovered_port, replay = restore_at(target)
-        restored_nf, restored_aw = (port_at(urls[k], recovered_port) for k in ("nf", "aw"))
+        recovered_port, replay = source_nf.restore(target)
+        aw_port = source_aw.restore(target)[0] if split_clusters else recovered_port
+        restored_nf, restored_aw = port_at(urls["nf"], recovered_port), port_at(urls["aw"], aw_port)
         db2 = Database(restored_nf)
         stack.callback(db2.close)
         kernel2 = Kernel(db2, ObjectStore(tmp_path / "objects-at-target"))
@@ -473,7 +396,7 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
         assert tick(restored_aw, inst, org, op, traced(nf)) == "SETTLED"
         with connect(restored_aw) as c:
             permit(c, inst, installation_ledger(kernel, owner, inst))
-        middle_port, middle_replay = restore_at(bound_target)
+        middle_port, middle_replay = source_nf.restore(bound_target)
         middle_dsn = port_at(urls["nf"], middle_port)
         middle_db = Database(middle_dsn)
         stack.callback(middle_db.close)
@@ -508,24 +431,64 @@ def test_physical_pitr_both_directions(tmp_path, monkeypatch):
             assert kernel.head(repo, wr["work_id"], wr["branch_id"]) == wr
         # Restore both service databases to the recorded post-UNKNOWN point after the live
         # bill has settled. The old WAL image must independently retain its unresolved hold.
-        unknown_port, replayed_unknown = restore_at(unknown_target)
+        unknown_port, replayed_unknown = source_nf.restore(unknown_target)
+        aw_unknown = source_aw.restore(unknown_target)[0] if split_clusters else unknown_port
         unknown_db = Database(port_at(urls["nf"], unknown_port))
         stack.callback(unknown_db.close)
-        recovered_unknown_usage = budget_at(Kernel(unknown_db, kernel.objects))
-        recovered_unknown_aw = aw_state(port_at(urls["aw"], unknown_port), op)
+        recovered_unknown_usage = budget_at(Kernel(unknown_db, ObjectStore(unknown_objects)))
+        recovered_unknown_aw = aw_state(port_at(urls["aw"], aw_unknown), op)
         assert replayed_unknown == unknown_lsn
         assert recovered_unknown_usage == unknown_usage
         assert recovered_unknown_aw == later
         assert budget_at(kernel) == after_invoice_usage
-        if witness := os.environ.get("AW_OFFLINE_WITNESS"):
+        skew = {}
+        if split_clusters:
+            # Both endpoints here are promoted archive restores, not a source instance.
+            # AW has already observed the remote attempt but NF has no delegation.
+            aw_late = port_at(urls["aw"], aw_unknown)
+            skew_calls = []
+            def lookup_only(peer):
+                async def call(tool, args):
+                    assert tool == "nf_delegation_get" and args["operation_id"] == op
+                    skew_calls.append(tool)
+                    return await peer(tool, args)
+                return call
+            assert tick(aw_late, inst, org, op, lookup_only(restored_peer)) == "WAITING_OPERATOR"
+            with connect(aw_late) as c:
+                assert frozen(c, inst)
+            skew["aw_ahead"] = {"aw_target": unknown_target, "nf_target": target,
+                                "result": aw_state(aw_late, op), "installation_frozen": True}
+            # Reverse the skew. Freeze the earlier AW intent and look up the original
+            # operation against recovered NF; its UNKNOWN reservation must survive.
+            early_port, _ = source_aw.restore(target, "independent-aw-before-receipt")
+            aw_early = port_at(urls["aw"], early_port)
+            nf_late = port_at(urls["nf"], unknown_port)
+            late_kernel = Kernel(unknown_db, ObjectStore(unknown_objects))
+            fence_recovered_tasks(unknown_db.engine, late_kernel.objects)
+            late_peer = nf_process("replayed-nf-unknown", nf_late, unknown_objects)
+            with connect(aw_early) as c:
+                freeze(c, inst)
+            assert tick(aw_early, inst, org, op, lookup_only(late_peer)) == "BOUND"
+            caught_up = aw_state(aw_early, op)
+            assert caught_up["receipt_ref"] == accepted["receipt_ref"] and caught_up["hold"] == "HELD"
+            assert caught_up["token_observations"] == [[attempt_id, "UNKNOWN", None]]
+            assert budget_at(late_kernel) == unknown_usage and len(requests) == 1
+            skew["nf_ahead"] = {"aw_target": target, "nf_target": unknown_target,
+                                "result": caught_up, "nf_token_budget": unknown_usage}
+            skew["reconciliation_mcp_tools"] = skew_calls
+        if not split_clusters and (witness := os.environ.get("AW_OFFLINE_WITNESS")):
             Path(witness).write_text(json.dumps(offline, indent=2) + "\n")
-        out = os.environ.get("AW_PAIRED_RESTORE_EVIDENCE")
+        out = os.environ.get("AW_INDEPENDENT_PITR_EVIDENCE" if split_clusters else "AW_PAIRED_RESTORE_EVIDENCE")
         if out:
             Path(out).write_text(
                 json.dumps(
                     dict(
                         status="PASS",
                         pg=version,
+                        topology="two_independent_clusters" if split_clusters else "one_cluster_two_databases",
+                        physical_domains={"nf": source_nf.evidence, "workshop": source_aw.evidence},
+                        independently_restored_mismatched_pairs=skew,
+                        nf_object_snapshots=object_snapshots,
                         basebackup="physical pg_basebackup -Fp -Xstream",
                         verification=verified,
                         manifest_sha256=manifest_sha,

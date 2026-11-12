@@ -17,6 +17,7 @@ import psycopg
 
 from novel_factory.application.agent_gateway import AgentGateway
 from novel_factory.application.kernel import Kernel
+from novel_factory.application.production_pipeline import production_material_reader
 from novel_factory.application.supervisor import HostJournal, RuntimeSupervisor
 from novel_factory.domain.errors import DomainError
 from novel_factory.infrastructure.capacity import (
@@ -130,6 +131,11 @@ def main():
     mode.add_argument("--enroll", type=Path, help="Private JSON with task_id, fixed input/manifest refs, cut and budget")
     mode.add_argument("--register-next-volume", type=Path, help="Preauthorize one next-volume planner on continuity publication")
     mode.add_argument("--register-scene", type=Path, help="Register a bounded scene from an authorized private JSON file")
+    mode.add_argument("--register-pipeline", type=Path, help="Register chapter drafts, reviews and bounded future windows")
+    mode.add_argument("--pipeline-status", action="store_true", help="Inspect production handoffs for this work and branch")
+    mode.add_argument("--pipeline-results", action="store_true", help="Export this branch's exact draft text, advisory opinions and plan candidates")
+    mode.add_argument("--revise-window", type=Path, help="Authorize a bounded new revision for one invalidated candidate")
+    mode.add_argument("--transfer-window", type=Path, help="Submit a revalidated candidate window to native planning")
     args = parser.parse_args()
     if not .1 <= args.interval <= 60:
         parser.error("interval must be between 0.1 and 60 seconds")
@@ -147,20 +153,45 @@ def main():
         kernel = Kernel(db, ObjectStore(os.environ.get("NF_OBJECT_ROOT", "var/objects")))
         principal = kernel.authenticate(access["token"])
         adapters = {}
-        model_needed = not args.set_transport and args.processor not in {"world", "compute", "recovery"}
+        model_needed = not (args.set_transport or args.pipeline_status or args.pipeline_results or args.transfer_window or args.revise_window) and args.processor not in {"world", "compute", "recovery"}
         configured = os.environ.get("NF_MODEL_ENDPOINT") and os.environ.get("NF_MODEL_NAME")
-        if model_needed or configured:
+        profiles_file = os.environ.get("NF_RUNTIME_PROFILES")
+        if profiles_file:
+            from novel_factory.infrastructure.runtime_providers import load_runtime_profiles
+            adapters = load_runtime_profiles(profiles_file, HostJournal(kernel))
+        if configured or (model_needed and not profiles_file):
             backend = OpenAICompatibleAdapter.from_environment()
             journal = HostJournal(kernel)
-            adapters = {"external": backend, "codex-text": CodexAppServerAdapter(backend, journal)}
-        if adapters and (relay := os.environ.get("NF_ROLE_MCP_RELAY")):
-            from novel_factory.interfaces.role_context_host import read_context
-            adapters["codex-role-mcp"] = CodexRoleContextAdapter(backend, journal, relay=relay, context_reader=read_context)
-            adapters["codex-role-tools"] = CodexRoleLookupAdapter(backend, journal, relay=relay, context_reader=read_context)
-        gateway = AgentGateway(kernel, adapters)
+            legacy = {"external": backend, "codex-text": CodexAppServerAdapter(backend, journal)}
+            if relay := os.environ.get("NF_ROLE_MCP_RELAY"):
+                from novel_factory.interfaces.role_context_host import read_context
+                legacy["codex-role-mcp"] = CodexRoleContextAdapter(backend, journal, relay=relay, context_reader=read_context)
+                legacy["codex-role-tools"] = CodexRoleLookupAdapter(backend, journal, relay=relay, context_reader=read_context)
+            if adapters.keys() & legacy.keys():
+                raise DomainError("INVALID_MODEL_CONFIG", "Runtime profile collides with a configured legacy route")
+            adapters.update(legacy)
+        gateway = AgentGateway(kernel, adapters, material_reader=production_material_reader(kernel))
         supervisor = RuntimeSupervisor(kernel, gateway)
         if args.set_transport:
             print(json.dumps(TaskDispatcher(supervisor, principal, access["work_id"], access["branch_id"]).switch(args.set_transport)))
+            return
+        if args.pipeline_status or args.pipeline_results:
+            from novel_factory.application.production_pipeline import pipeline_status
+            print(json.dumps(pipeline_status(kernel, principal, access["work_id"], access["branch_id"],
+                                             include_outputs=args.pipeline_results), ensure_ascii=False))
+            return
+        if args.register_pipeline or args.transfer_window or args.revise_window:
+            from novel_factory.application.production_pipeline import register_pipeline, revise_window, transfer_window
+            payload = json.loads((args.register_pipeline or args.transfer_window or args.revise_window).read_text(encoding="utf-8"))
+            if not isinstance(payload, dict) or not isinstance(payload.get("world_ref"), dict) or any(
+                    payload["world_ref"].get(k) != access[k] for k in ("work_id", "branch_id")):
+                parser.error("Pipeline must belong to the configured work and branch")
+            if args.register_pipeline:
+                result = register_pipeline(kernel, gateway, principal, **payload)
+            else:
+                operation = transfer_window if args.transfer_window else revise_window
+                result = operation(kernel, principal, **payload)
+            print(json.dumps(result, ensure_ascii=False))
             return
         if args.register_scene or args.register_next_volume:
             from novel_factory.application.scene_runtime import register_scene

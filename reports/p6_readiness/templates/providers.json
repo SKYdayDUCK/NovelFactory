@@ -1,0 +1,19 @@
+{
+  "profiles": {
+    "codex-v1": {
+      "kind": "codex-cli",
+      "auth_mode": "api-key",
+      "model": "REPLACE_WITH_AUTHORIZED_OPENAI_MODEL",
+      "secret_ref": "NF_OPENAI_API_KEY",
+      "max_output_tokens": 2048,
+      "timeout_seconds": 90
+    },
+    "deepseek-v1": {
+      "kind": "deepseek",
+      "model": "REPLACE_WITH_AUTHORIZED_DEEPSEEK_MODEL",
+      "secret_ref": "NF_DEEPSEEK_API_KEY",
+      "max_output_tokens": 2048,
+      "timeout_seconds": 90
+    }
+  }
+}
