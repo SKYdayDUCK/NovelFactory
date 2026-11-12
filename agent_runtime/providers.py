@@ -69,11 +69,15 @@ class Profile:
                 object.__setattr__(self, "endpoint", "https://api.deepseek.com/chat/completions")
             if not isinstance(self.endpoint, str):
                 raise ProfileError("INVALID_MODEL_CONFIG")
-            url = urlsplit(self.endpoint)
+            try:
+                url = urlsplit(self.endpoint)
+                port = url.port
+            except ValueError:
+                raise ProfileError("INVALID_MODEL_CONFIG") from None
             if (url.scheme != "https" or not url.hostname or url.username is not None or url.password is not None
                     or url.query or url.fragment or not url.path.strip("/") or any(c.isspace() for c in self.endpoint)):
                 raise ProfileError("INVALID_MODEL_CONFIG")
-            if self.kind == "deepseek" and (url.hostname != "api.deepseek.com" or url.port not in (None, 443)
+            if self.kind == "deepseek" and (url.hostname != "api.deepseek.com" or port not in (None, 443)
                     or url.path not in ("/chat/completions", "/v1/chat/completions")):
                 raise ProfileError("INVALID_MODEL_CONFIG")
 

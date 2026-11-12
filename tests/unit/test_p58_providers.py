@@ -69,6 +69,26 @@ def test_catalog_preview_no_credentials_and_alias_quota_binding(tmp_path, monkey
         read_profiles(p)
 
 
+@pytest.mark.parametrize("port", ["bad", "70000"])
+def test_generic_endpoint_port_is_checked_when_loading_a_catalog(tmp_path, port):
+    from novel_factory.domain.errors import DomainError
+    from novel_factory.infrastructure.runtime_providers import load_runtime_profiles
+
+    path = tmp_path / "profiles.json"
+    fields = {"kind": "openai-compatible", "model": "fixture", "secret_ref": "NF_TEST_HTTP",
+              "max_output_tokens": 32, "endpoint": "https://example.org:8443/v1/chat/completions"}
+    path.write_text(json.dumps({"profiles": {"working": fields}}))
+    assert load_runtime_profiles(path, None)["working"].provider_key == "https://example.org:8443"
+
+    invalid = {**fields, "endpoint": f"https://example.org:{port}/v1/chat/completions"}
+    path.write_text(json.dumps({"profiles": {"working": fields, "mistyped": invalid}}))
+    with pytest.raises(ProfileError, match="^INVALID_MODEL_CONFIG$"):
+        read_profiles(path)
+    with pytest.raises(DomainError) as error:
+        load_runtime_profiles(path, None)
+    assert error.value.code == "INVALID_MODEL_CONFIG"
+
+
 def test_plan_requires_hard_model_bound_and_trusted_origin():
     with pytest.raises(ProfileError, match="MODEL_OUTPUT_CEILING_REQUIRED"):
         plan(auth_mode="chatgpt-plan")
