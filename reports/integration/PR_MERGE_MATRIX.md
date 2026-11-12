@@ -17,11 +17,11 @@
 
 阶段状态详见 [交付台账](DELIVERY_LEDGER.md)，接管字段为历史快照。
 
-#11 现以 `main` 为目标，候选 `26bf0337`，双库专项通过，托管验收进行中。[原始回执](evidence/NF-Bridge/candidate-26bf033/README.md)
+#11 现以 `main` 为目标，候选 `26bf0337`，双库专项通过，托管验收进行中。[原始回执](https://github.com/SKYdayDUCK/NovelFactory/blob/df8bea90fe19ea492220448e07323f63c4e496ea/reports/integration/evidence/NF-Bridge/candidate-26bf033/README.md)
 
-NF Bridge #11 的公开候选现为 `695668b87f6a76acbe7e27c71fcb259b7b3f0795`。实际 PostgreSQL 双服务专项 23 项全部通过。等待此候选的完整工程和原条件容量回执。[候选专项、WAL、权限和工作流](evidence/NF-Bridge/candidate-695668b/README.md)
+NF Bridge #11 的公开候选现为 `695668b87f6a76acbe7e27c71fcb259b7b3f0795`。实际 PostgreSQL 双服务专项 23 项全部通过。等待此候选的完整工程和原条件容量回执。[候选专项、WAL、权限和工作流](https://github.com/SKYdayDUCK/NovelFactory/blob/df8bea90fe19ea492220448e07323f63c4e496ea/reports/integration/evidence/NF-Bridge/candidate-695668b/README.md)
 
-NF Bridge [#11](https://github.com/SKYdayDUCK/NovelFactory/pull/11) 已于北京时间 2026-11-12 03:02:35 合入 `main`。合并提交为 `15f606c99c765deeffd904ad540441eb6476b3af`，与合格候选 `695668b8` 同树。当前阶段为 `MERGED_AWAITING_MAIN_VERIFICATION`。[合并双亲、树及两轮工作流](evidence/NF-Bridge/main-15f606c/merge.json)
+NF Bridge [#11](https://github.com/SKYdayDUCK/NovelFactory/pull/11) 已于北京时间 2026-11-12 03:02:35 合入 `main`。合并提交为 `15f606c99c765deeffd904ad540441eb6476b3af`，与合格候选 `695668b8` 同树。当前阶段为 `MERGED_AWAITING_MAIN_VERIFICATION`。[合并双亲、树及两轮工作流](https://github.com/SKYdayDUCK/NovelFactory/blob/df8bea90fe19ea492220448e07323f63c4e496ea/reports/integration/evidence/NF-Bridge/main-15f606c/merge.json)
 
 
 W3 已签收于 `e6763d844f023d7c6a13060dbaebca0416fe3099`，下一阶段为 W4。[记录](W3_主线签收.md)。
