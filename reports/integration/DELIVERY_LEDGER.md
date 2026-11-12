@@ -1,6 +1,6 @@
 # 串行交付台账
 
-2026-11-12 接管核实 S0 主线 `1cce11b5f0ead0d6ba4d57658a5ff5533b2ef37b`。接管记录已推送（1ef78e6b6a4a22339508de52a854e11a4be65bec）。S1 在唯一开发分支完成，见 [S1 测试及产品文件摘要](../harness/evidence/s1/receipt.json)。 [本轮二十节委托](P57_SINGLE_BRANCH_MANDATE.md) · [现场记录](../harness/S1_RECOVERY.md)
+2026-11-12 接管核实 S0 主线 `1cce11b5f0ead0d6ba4d57658a5ff5533b2ef37b`。接管记录已推送（1ef78e6b6a4a22339508de52a854e11a4be65bec）。S1 已推送至开发分支，提交为 `2d47a66f297dd017c6bac3f207abb6f6752cc742`（[远端和物理恢复回执](../harness/evidence/s1/remote-receipt.json)），见 [S1 测试及产品文件摘要](../harness/evidence/s1/receipt.json)。 [本轮二十节委托](P57_SINGLE_BRANCH_MANDATE.md) · [现场记录](../harness/S1_RECOVERY.md)
 
 
 | 阶段 | PR | 存证状态 | 实际 main SHA 与时间 |
