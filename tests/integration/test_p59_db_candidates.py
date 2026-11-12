@@ -227,3 +227,25 @@ def test_concurrent_grant_lock_rechecks_after_wait_in_both_orders(kernel_env):
                         assert value == kernel.get_task(second.principal, second.task_id)
     finally:
         event.remove(kernel.db.engine, "after_cursor_execute", hold_update)
+
+def test_hybrid_size_one_keeps_singleton_join(kernel_env):
+    kernel = kernel_env["kernel"]
+    _, (op, _) = setup_pair(kernel)
+    reference = kernel.get_task(op.principal, op.task_id)
+    statements = []
+
+    def record(conn, cursor, statement, *_):
+        statements.append(statement)
+
+    async def run():
+        async with Coordinator(kernel, workers=1, batch=1, join_input=True) as channel:
+            event.listen(kernel.db.engine, "before_cursor_execute", record)
+            try:
+                assert await channel.submit(op) == reference
+            finally:
+                event.remove(kernel.db.engine, "before_cursor_execute", record)
+
+    asyncio.run(run())
+    assert len(statements) == 3
+    assert "JOIN nf_task_inputs" in statements[0]
+    assert all("FOR SHARE" in sql for sql in statements[1:])

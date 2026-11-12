@@ -24,14 +24,17 @@ from novel_factory.interfaces.http import create_app
 
 @asynccontextmanager
 async def select_kernel(kernel, mode):
-    if mode != 'hybrid':
+    if mode in ('baseline', 'sql'):
         yield Kernel(kernel.db, kernel.objects, joined_task_status=mode == 'sql')
         return
     # Preserve the stock synchronous HTTP business callback. Dispatched work
     # holds its existing admission slot while waiting; the database budget
     # remains shared with authentication and cannot grow with the queue.
     loop = asyncio.get_running_loop()
-    async with Coordinator(kernel, workers=4, join_input=True, split_queues=True) as coordinator:
+    if mode not in ('micro', 'hybrid'):
+        raise ValueError("Unknown task status candidate")
+    async with Coordinator(kernel, workers=4, batch=32, window_ms=2, join_input=mode == 'hybrid',
+                           split_queues=mode == 'hybrid') as coordinator:
         class StatusKernel(Kernel):
             def get_task(self, principal, task_id):
                 request = coordinator.submit(TaskStatus(principal, task_id))
@@ -93,8 +96,11 @@ def main():
     if not 1 <= args.concurrency <= args.count <= 5000:
         parser.error('Choose positive bounded concurrency and operation count')
     results = []
-    for mode in ('baseline', 'sql', 'hybrid', 'hybrid', 'sql', 'baseline'):
-        results.append(asyncio.run(trial(mode, args.count, args.concurrency)))
+    modes = ('baseline', 'sql', 'micro', 'hybrid')
+    for index, mode in enumerate((*modes, *reversed(modes))):
+        result = asyncio.run(trial(mode, args.count, args.concurrency))
+        result.update(execution_index=index, order='forward' if index < len(modes) else 'reverse')
+        results.append(result)
         print(mode, results[-1]['verified'], round(results[-1]['goodput'], 2), flush=True)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(results, indent=2) + '\n', encoding='utf-8')

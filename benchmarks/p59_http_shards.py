@@ -19,7 +19,7 @@ import sys
 import tempfile
 import time
 from collections import Counter
-from contextlib import ExitStack, contextmanager, nullcontext
+from contextlib import ExitStack, asynccontextmanager, contextmanager, nullcontext
 from pathlib import Path
 
 import h11
@@ -214,10 +214,12 @@ def offer(port, requests, count, target, workers, connections, timeout):
 
 
 class ServerTiming:
-    def __init__(self, app):
+    def __init__(self, app, counts):
         self.app = app
+        self.counts = counts
 
     async def __call__(self, scope, receive, send):
+        self.counts["observed_received"] += 1
         started = time.monotonic()
 
         async def timed(event):
@@ -236,6 +238,10 @@ def observed_worker(channel, listener, url, objects, processes, pool_size, layer
     # app closure still performs the actual authentication, limiter and admission.
     from benchmarks import process_server
 
+    if os.environ.get("NF_BENCH_PG_REVISION_WITNESS") == "1":
+        from experiments.db_execution.revision_witness import WitnessKernel
+
+        process_server.Kernel = WitnessKernel
     create_app = process_server.create_app
 
     def measured(*args, **kwargs):
@@ -244,7 +250,20 @@ def observed_worker(channel, listener, url, objects, processes, pool_size, layer
                 "principal_id": str(principal.principal_id)
             }
         app = create_app(*args, **kwargs)
-        app.add_middleware(ServerTiming)
+        counts = {"observed_received": 0, "observed_operation_entries": 0}
+        controller = app.state.ingress if layer == "minimal" else app.state.admission
+        slot = controller.slot
+        ingress_snapshot = app.state.ingress.snapshot
+
+        @asynccontextmanager
+        async def observed_slot(*args, **kwargs):
+            async with slot(*args, **kwargs):
+                counts["observed_operation_entries"] += 1
+                yield
+
+        controller.slot = observed_slot
+        app.state.ingress.snapshot = lambda: {**ingress_snapshot(), **counts}
+        app.add_middleware(ServerTiming, counts=counts)
         return app
 
     process_server.create_app = measured
@@ -303,7 +322,26 @@ def validate(rows, fixture, layer):
     if layer == "query":
         from benchmarks.p3_open_arrival import validate_responses
 
+        # The frozen predicate checks the immutable world reference and both
+        # expected owners. Different subjects share that owner, so also bind
+        # each successful response to the particular subjects/predicates sent.
+        bodies = [row.get("_content") for row in rows]
         validate_responses(rows, fixture)
+        for row, raw in zip(rows, bodies, strict=True):
+            if not row["valid"]:
+                continue
+            request = fixture["population"][row["index"] % len(fixture["population"])]["state"]
+            body = json.loads(raw)
+            query = request["query"]
+            expected = {(s, p) for s in query["subject_ids"] for p in query["predicates"]}
+            observed = {
+                (item["subject_id"], item["predicate"]) for item in body["payload"]["state_items"]
+            }
+            if (
+                observed != expected
+                or body["read_cut"]["knowledge_cut"] != request["knowledge_cut"]
+            ):
+                row.update(valid=False, correctness_error="cross_request_result")
         return
     population = fixture["population"]
     if layer == "transport":
@@ -360,13 +398,8 @@ def summarize(rows, count, target, metrics, layer):
     if layer == "transport":
         received, accepted = metrics["requests_received"], metrics["responses_sent"]
     else:
-        ingress = metrics["ingress"]
-        received = sum(ingress.get(k, 0) for k in ("admitted", "rejected", "timed_out"))
-        accepted = (
-            metrics["admission"].get("admitted", 0)
-            if layer != "minimal"
-            else ingress.get("admitted", 0)
-        )
+        received = metrics["ingress"]["observed_received"]
+        accepted = metrics["ingress"]["observed_operation_entries"]
     result = {
         "planned": count,
         "scheduled": len(rows),
@@ -479,8 +512,10 @@ def main():
             )
             metrics = snapshot(max(r["completed_seconds"] for r in rows))
         validation_start = time.monotonic()
+        validation_cpu_start = time.process_time()
         validate(rows, fixture, args.layer)
         validation_duration = time.monotonic() - validation_start
+        validation_cpu = time.process_time() - validation_cpu_start
         if target:
             with kernel.db.uow(write=False) as repo:
                 if (
@@ -490,17 +525,32 @@ def main():
                     raise RuntimeError("Read benchmark changed the authoritative head")
         pg = observer.result() if observer else None
     summary = summarize(rows, len(requests) * args.rounds, args.rate, metrics, args.layer)
+    topology = hardware()
+    topology.update(
+        load_client_location="separate spawned event loops with a shared parent validation process",
+        api_processes=0 if args.layer == "transport" else args.servers,
+        api_server_threads=0 if args.layer == "transport" else args.servers,
+        transport_server_processes=int(args.layer == "transport"),
+        generator_processes=args.workers,
+    )
+    topology["hardware_helper_sha256"] = topology.pop("benchmark_source_sha256")
     result = {
         "layer": args.layer,
-        "schema": "p59-http-shards-1",
+        "schema": "p59-http-shards-2",
         "summary": summary,
         "raw_requests": rows,
         "server_metrics": metrics,
         "database_observer": pg,
         "client_workers": cpu,
         "client_validation_seconds": validation_duration,
-        "configuration": {**vars(args), "output": str(args.output)},
-        "environment": hardware(),
+        "client_validation_process_cpu_seconds": validation_cpu,
+        "configuration": {
+            **vars(args),
+            "output": str(args.output),
+            "pg_revision_witness": bool(target)
+            and os.environ.get("NF_BENCH_PG_REVISION_WITNESS") == "1",
+        },
+        "environment": topology,
         "harness_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "world_unchanged": bool(target) if target else None,
         "effective_service_processes": 1 if args.layer == "transport" else args.servers,

@@ -1,0 +1,72 @@
+name: Final PostgreSQL comparisons with statement statistics
+on:
+  push:
+    branches: [experiment/p59-database-throughput]
+    paths: ['.github/workflows/p59-db-confirm.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [mixed, grid, entrypoints, busy]
+    services:
+      pg:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_DB: nf_test
+          POSTGRES_PASSWORD: disposable
+          POSTGRES_INITDB_ARGS: --data-checksums
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 2s --health-timeout 2s --health-retries 30
+    env:
+      NF_TEST_DATABASE_URL: postgresql+psycopg://postgres:disposable@127.0.0.1:5432/nf_test
+      PROFILE: ${{ matrix.profile }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - run: uv sync --locked --group dev --python 3.12
+      - name: Enable statement statistics on this private experiment cluster
+        env:
+          INSTANCE: ${{ job.services.pg.id }}
+        shell: bash
+        run: |
+          docker exec "$INSTANCE" psql -U postgres -d postgres -v ON_ERROR_STOP=1 -c "ALTER SYSTEM SET shared_preload_libraries='pg_stat_statements'"
+          docker restart "$INSTANCE"
+          for i in {1..30}; do
+            if docker exec "$INSTANCE" pg_isready -U postgres; then break; fi
+            sleep 1
+          done
+          docker exec "$INSTANCE" psql -U postgres -d postgres -v ON_ERROR_STOP=1 -c 'CREATE EXTENSION pg_stat_statements'
+      - name: Validate role equivalence and database metrics
+        shell: bash
+        run: |
+          mkdir out
+          git rev-parse HEAD > out/source
+          lscpu > out/cpu
+          case "$PROFILE" in
+            entrypoints) uv run --no-sync python -m benchmarks.p59_task_http --output out/task-http.json ;;
+            busy) uv run --no-sync python -m benchmarks.p59_contended_workflow --agents 50 --output out/busy.json ;;
+            *) uv run --no-sync python -m benchmarks.p59_db_matrix --profile "$PROFILE" --directory out/comparison ;;
+          esac
+      - if: always()
+        shell: bash
+        run: |
+          if test -s out/comparison/summary.json; then
+            jq -c '.[] | {mode,goodput,latency,requested_batch,window_ms,outcomes,exit}' out/comparison/summary.json
+          fi
+          find out -name '*.json' -type f -exec gzip -n {} +
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-confirm-${{ matrix.profile }}-${{ github.sha }}
+          path: out/

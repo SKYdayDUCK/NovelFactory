@@ -38,7 +38,14 @@ def test_counter_boundaries_keep_unsent_timeouts_and_admission_failure():
         },
     ]
     result = driver.summarize(
-        rows, 2, 1, {"ingress": {"admitted": 1}, "admission": {"rejected": 1}}, "query"
+        rows,
+        2,
+        1,
+        {
+            "ingress": {"observed_received": 1, "observed_operation_entries": 0},
+            "admission": {"admitted": 1, "timed_out": 1},
+        },
+        "query",
     )
     assert [
         result[key]

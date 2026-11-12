@@ -143,7 +143,10 @@ class Coordinator:
             self.counts["executing"] += 1
             self.counts["peak_executing"] = max(self.counts["peak_executing"], self.counts["executing"])
             try:
-                call = partial(execute, self.kernel, operations, join_input=self.join_input, grouped=self.batch > 1)
+                # With size one the joined hybrid still uses its set-wise SQL
+                # on one row; changing a queue limit must not change the query.
+                call = partial(execute, self.kernel, operations, join_input=self.join_input,
+                               grouped=self.batch > 1 or self.join_input)
                 results = await loop.run_in_executor(self.pool, call)
                 if len(results) != len(active):
                     raise RuntimeError("Incomplete batch response")

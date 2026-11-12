@@ -28,3 +28,11 @@ uv run --no-sync python scripts/pitr_drill.py --with-redis --shared-token-budget
 The first Workshop run inherited the instrumentation extension in the public schema of template1. Four migration tests correctly found the extra catalog objects when comparing public to a fresh scoped schema. Compressed original JUnit and stdout have the `template-extension.gz` suffix. For the second complete run the template was pristine. PostgreSQL still preloaded the collector, and its views were installed only in the separate measurement and maintenance databases. All 120 runnable tests passed. The original Docker-sidecar stop/restart test requires `AW_REDIS_TEST_CONTAINER` and was skipped in both local runs. Preserve that distinction when interpreting `workshop.xml.gz`.
 
 Each compressed file is original program output compressed with gzip. Use `gzip -dc FILE.gz` to inspect it. Traces use generated fixture paths and identities.
+
+## Physical restart with a surviving coordinator
+
+`pitr-568f949.json` repeats the PITR drill on an immutable detached checkout of `568f949d8068faa4b987a9dfcae0e2b8468a246e`. The separate `restart-568f949.json` covers an actual immediate PostgreSQL shutdown on the same product snapshot with the coordinator and connection pool kept alive. It tests warm reads, fail-closed read outcomes while the listener is down, WAL recovery of the same cluster, new reads and the original UNKNOWN reservation. The probe creates and stops only its own temporary cluster. It does not accept an existing database URL or data directory.
+
+```sh
+uv run --no-sync python -m benchmarks.p59_db_restart --pg-bin /usr/lib/postgresql/17/bin --output restart.json
+```

@@ -1,0 +1,78 @@
+name: Revision witness full-query comparison
+
+on:
+  push:
+    branches: [experiment/p59-database-throughput]
+    paths: ['.github/workflows/p59-db-revision-http.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    services:
+      postgres:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_DB: nf_test
+          POSTGRES_USER: nf_test
+          POSTGRES_PASSWORD: isolated_ci_only
+          POSTGRES_INITDB_ARGS: --data-checksums
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 2s --health-timeout 2s --health-retries 30
+    env:
+      NF_TEST_DATABASE_URL: postgresql+psycopg://nf_test:isolated_ci_only@127.0.0.1:5432/nf_test
+      NF_POOL_SIZE: 8
+      NF_POOL_OVERFLOW: 0
+      NF_BENCH_DIAGNOSTICS: 1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - run: uv sync --locked --group dev --python 3.12
+      - name: Calibrate twice and run serial ABBA at fixed 1,000 reads per second
+        shell: bash
+        run: |
+          mkdir out
+          git rev-parse HEAD >out/source
+          sha256sum benchmarks/{p59_http_shards,p3_open_arrival,process_server}.py experiments/db_execution/revision_witness.py uv.lock >out/inputs.sha256
+          for spec in cal1:transport:0 cal2:transport:0 A1:query:0 B1:query:1 B2:query:1 A2:query:0; do
+            IFS=: read -r label layer enabled <<< "$spec"
+            export NF_BENCH_PG_REVISION_WITNESS="$enabled"
+            code=0
+            uv run --no-sync python -m benchmarks.p59_http_shards --layer "$layer" --workers 4 --rate 1000 \
+              --agents 1000 --rounds 5 --connections 256 --servers 2 --output "out/$label.json" >"out/$label.log" 2>&1 || code=$?
+            echo "$code" >"out/$label.exit"
+            if [[ ! -s "out/$label.json" ]]; then tail -50 "out/$label.log"; exit 2; fi
+            jq -c '{layer,configuration,summary}' "out/$label.json"
+          done
+          jq -n --slurpfile cal1 out/cal1.json --slurpfile cal2 out/cal2.json --slurpfile a1 out/A1.json --slurpfile b1 out/B1.json \
+            --slurpfile b2 out/B2.json --slurpfile a2 out/A2.json \
+            '{calibrated: ([$cal1[0],$cal2[0]] | all(.summary.layer_gate=="PASS")),
+              runs: ([$a1[0],$b1[0],$b2[0],$a2[0]] | map({witness:.configuration.pg_revision_witness,
+                    layer_gate:.summary.layer_gate, status:.summary.counts_by_status, goodput:.summary.validated_per_s,
+                    sql:.server_metrics.database.sql_statements, latency:.summary.scheduled_to_completion,
+                    correctness_errors:(.raw_requests|map(select(.correctness_error != null))|length)}))}' \
+            | tee out/summary.json >>"$GITHUB_STEP_SUMMARY"
+          cat out/summary.json
+          jq -e '.calibrated and (.runs | all(.layer_gate == "PASS" and .correctness_errors == 0))' out/summary.json >/dev/null
+      - name: Retain all observed failures, samples and acceptance records
+        if: always()
+        shell: bash
+        run: |
+          for path in out/*.json; do
+            if [[ -f "$path" ]]; then sha256sum "$path" >>out/raw.sha256; gzip -n "$path"; fi
+          done
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p59-revision-http-${{ github.sha }}-${{ github.run_attempt }}
+          path: out/
+          if-no-files-found: error
