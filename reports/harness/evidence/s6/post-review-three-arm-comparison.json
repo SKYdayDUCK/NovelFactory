@@ -1,0 +1,1591 @@
+{
+  "adaptive_proposal_registration_and_selection_latency_ns": 5758707307,
+  "allocation": [
+    [
+      "HARNESS_ADAPTIVE",
+      "d6ce6f46-9188-4b5f-9a7c-4dcc356eeb06"
+    ],
+    [
+      "BASELINE",
+      "5956e778-63eb-4b5a-8da0-5e6a4f809ea5"
+    ],
+    [
+      "HARNESS",
+      "1c389c2d-0a5e-4d53-8580-22817a81b5fc"
+    ]
+  ],
+  "arm_durations_include": "All measured runtime cases include preparation, delegation and review. The adaptive window also includes its evaluation and approval; preregistration authoring latency is listed separately.",
+  "arm_sources": {
+    "BASELINE": {
+      "adjacent_draft_ref": {
+        "artifact_id": "c333250c-e442-4a13-b1be-f607c81a9d6d",
+        "artifact_revision_id": "eaa21787-5746-4bd6-93cf-3f98a71c6dad",
+        "sha256": "1f7d55cdca869fabe4afe5ffc2a399ab3d0d7d00f22febac65050828ad9f0372"
+      },
+      "adjacent_sha256": "b1d2e0ebc215cc440944ae49aeb0bef4a85b84db9a8d0ffd9e2bb46597711ad6",
+      "batch_ref": {
+        "artifact_id": "d6ac7b38-c273-4658-a524-4a8cf196ae78",
+        "artifact_revision_id": "7a0cb519-36a8-4e5f-a467-f3aa76222fe9",
+        "sha256": "c2ff31bdee3b2d39b1873b3d5293c0deb13093f6748b4c1fce9fcf9d860bdcd4"
+      },
+      "fixture_sha256": "33359bfe4719aea1705e4a11cb71a7958f13700ec2da4c5a3ac1cbe03adb0434",
+      "flags": {
+        "creative_harness": {
+          "adaptive_instructions": {
+            "auto_promote": false,
+            "enabled": false
+          },
+          "dynamic_agents": {
+            "enabled": false
+          },
+          "enabled": false
+        },
+        "kind": "CONFIGURATION",
+        "schema_version": "1.0"
+      },
+      "goal": "写完渡口关门前这一场。保留已给的背景与未知处，让最后一个动作结束这场。",
+      "original_source_sha256": "12c1d512f5bad133466c9164354207642237c62349f4231fcaeb3049d2135781",
+      "outcome": "validated draft and checked review; official edition unchanged",
+      "plan_ref": {
+        "artifact_id": "42df7f7d-beb2-49d6-8716-8fcd3bf21033",
+        "artifact_revision_id": "9a77fd7b-9997-47c7-84aa-394f1270b2ce",
+        "sha256": "2b3b59a457a4e5b0b71fe7c45ec3fe7c28a0d3d4a53983bdcd531c723f3a63af"
+      },
+      "reader_cut_ordinal": 5,
+      "scene_ref": {
+        "artifact_id": "2560ef21-80cc-4315-a596-132c7a1474d1",
+        "artifact_revision_id": "ca73092a-df38-4199-b4f2-15476d60b907",
+        "sha256": "669fb23e373573f9cd0e8e43833ef6eb3c29a59fac128cdc45a57ddf4c4382a8"
+      },
+      "stages": [
+        "evidence_maintainer/summary",
+        "writer/scene_draft",
+        "reviewer/literary"
+      ],
+      "subject_id": "4ef873a8-4f45-56f0-ad45-67928097cea9",
+      "target_story_time": {
+        "phase": 1,
+        "tick": 1
+      },
+      "world_effects_permitted": false,
+      "world_ref": {
+        "branch_id": "b5b58625-1705-43c7-8dce-1ad82a66714e",
+        "work_id": "b95cfb30-bdbf-491c-9d0f-e233c6344688",
+        "world_revision_id": "80c74b44-521c-461e-8338-c1099d832fa2"
+      }
+    },
+    "HARNESS": {
+      "adjacent_draft_ref": {
+        "artifact_id": "c333250c-e442-4a13-b1be-f607c81a9d6d",
+        "artifact_revision_id": "eaa21787-5746-4bd6-93cf-3f98a71c6dad",
+        "sha256": "1f7d55cdca869fabe4afe5ffc2a399ab3d0d7d00f22febac65050828ad9f0372"
+      },
+      "adjacent_sha256": "b1d2e0ebc215cc440944ae49aeb0bef4a85b84db9a8d0ffd9e2bb46597711ad6",
+      "batch_ref": {
+        "artifact_id": "d6ac7b38-c273-4658-a524-4a8cf196ae78",
+        "artifact_revision_id": "7a0cb519-36a8-4e5f-a467-f3aa76222fe9",
+        "sha256": "c2ff31bdee3b2d39b1873b3d5293c0deb13093f6748b4c1fce9fcf9d860bdcd4"
+      },
+      "fixture_sha256": "33359bfe4719aea1705e4a11cb71a7958f13700ec2da4c5a3ac1cbe03adb0434",
+      "flags": {
+        "creative_harness": {
+          "adaptive_instructions": {
+            "auto_promote": false,
+            "enabled": false
+          },
+          "dynamic_agents": {
+            "enabled": false
+          },
+          "enabled": true
+        },
+        "kind": "CONFIGURATION",
+        "schema_version": "1.0"
+      },
+      "goal": "写完渡口关门前这一场。保留已给的背景与未知处，让最后一个动作结束这场。",
+      "original_source_sha256": "12c1d512f5bad133466c9164354207642237c62349f4231fcaeb3049d2135781",
+      "outcome": "validated draft and checked review; official edition unchanged",
+      "plan_ref": {
+        "artifact_id": "42df7f7d-beb2-49d6-8716-8fcd3bf21033",
+        "artifact_revision_id": "9a77fd7b-9997-47c7-84aa-394f1270b2ce",
+        "sha256": "2b3b59a457a4e5b0b71fe7c45ec3fe7c28a0d3d4a53983bdcd531c723f3a63af"
+      },
+      "reader_cut_ordinal": 5,
+      "scene_ref": {
+        "artifact_id": "2560ef21-80cc-4315-a596-132c7a1474d1",
+        "artifact_revision_id": "ca73092a-df38-4199-b4f2-15476d60b907",
+        "sha256": "669fb23e373573f9cd0e8e43833ef6eb3c29a59fac128cdc45a57ddf4c4382a8"
+      },
+      "stages": [
+        "evidence_maintainer/summary",
+        "writer/scene_draft",
+        "reviewer/literary"
+      ],
+      "subject_id": "4ef873a8-4f45-56f0-ad45-67928097cea9",
+      "target_story_time": {
+        "phase": 1,
+        "tick": 1
+      },
+      "world_effects_permitted": false,
+      "world_ref": {
+        "branch_id": "b5b58625-1705-43c7-8dce-1ad82a66714e",
+        "work_id": "b95cfb30-bdbf-491c-9d0f-e233c6344688",
+        "world_revision_id": "80c74b44-521c-461e-8338-c1099d832fa2"
+      }
+    },
+    "HARNESS_ADAPTIVE": {
+      "adjacent_draft_ref": {
+        "artifact_id": "c333250c-e442-4a13-b1be-f607c81a9d6d",
+        "artifact_revision_id": "eaa21787-5746-4bd6-93cf-3f98a71c6dad",
+        "sha256": "1f7d55cdca869fabe4afe5ffc2a399ab3d0d7d00f22febac65050828ad9f0372"
+      },
+      "adjacent_sha256": "b1d2e0ebc215cc440944ae49aeb0bef4a85b84db9a8d0ffd9e2bb46597711ad6",
+      "batch_ref": {
+        "artifact_id": "d6ac7b38-c273-4658-a524-4a8cf196ae78",
+        "artifact_revision_id": "7a0cb519-36a8-4e5f-a467-f3aa76222fe9",
+        "sha256": "c2ff31bdee3b2d39b1873b3d5293c0deb13093f6748b4c1fce9fcf9d860bdcd4"
+      },
+      "employee_revision": {
+        "instance_ref": {
+          "artifact_id": "329da314-8a8b-4b8a-811a-b30221943cc8",
+          "artifact_revision_id": "803174d7-5335-566b-9bc9-7cb5bb784a74",
+          "sha256": "45d5b2476a26ca53448d2f056c1099b487506abcc632b41a6a28bc2069bc8602"
+        },
+        "proposal_ref": {
+          "artifact_id": "04da2f98-e140-44ab-9d1d-66269cd641fc",
+          "artifact_revision_id": "57da3c73-565a-4f6a-911f-965a8439b82f",
+          "sha256": "8384a190e9a908bafcc4f61a242a7df335fb34cdd4f0d8659eb8c3b41f0992db"
+        },
+        "revision_ref": {
+          "artifact_id": "2df17c68-a18e-4dfc-bd65-ef7504db2784",
+          "artifact_revision_id": "1546a725-1c66-5d84-b922-5f3f39d0d671",
+          "sha256": "34970732d9ad39976579adc8a42e94d00fadc59ea130b15bd0c5e02a38977b8f"
+        }
+      },
+      "fixture_sha256": "33359bfe4719aea1705e4a11cb71a7958f13700ec2da4c5a3ac1cbe03adb0434",
+      "flags": {
+        "creative_harness": {
+          "adaptive_instructions": {
+            "auto_promote": false,
+            "enabled": true
+          },
+          "dynamic_agents": {
+            "enabled": true
+          },
+          "enabled": true
+        },
+        "kind": "CONFIGURATION",
+        "schema_version": "1.0"
+      },
+      "goal": "写完渡口关门前这一场。保留已给的背景与未知处，让最后一个动作结束这场。",
+      "instruction_proposal": {
+        "baseline_ref": {
+          "artifact_id": "5e5b80ea-0591-4973-bec7-92725b6ba270",
+          "artifact_revision_id": "80e924c8-8abf-4634-b9fe-ff0626a5dd98",
+          "sha256": "9afcdc94572550e72bb5df75f8b96749c18a460a14bc44e09e233bdbea6691ab"
+        },
+        "candidate_ref": {
+          "artifact_id": "044724f9-efdd-4f6f-b315-c51e2d631c06",
+          "artifact_revision_id": "e8425ea5-fbbd-44f5-847f-c7642deb5231",
+          "sha256": "9bdc5d551500538cbae07f0162c77bb491de616d14ccf937b7848daedf112b82"
+        },
+        "design_ref": {
+          "artifact_id": "02f5a453-b532-41fd-bbc8-88e92ff03ed4",
+          "artifact_revision_id": "1f541ebc-6082-4d73-88c7-5b7b619ad8a5",
+          "sha256": "243b19d0c1cc91e73beb1d68434dc4413a7714308acf8107e8623814ec7f0436"
+        },
+        "experiment_ref": {
+          "artifact_id": "2eba3958-e2ff-4dca-bceb-b855118168c0",
+          "artifact_revision_id": "af078ebc-cc65-5984-8d3a-48d6b0a76329",
+          "sha256": "882faba69529d4249d87fe48a89a78e353ef251c74e41c25ad6bb8ccd905c0f4"
+        },
+        "instruction_ref": {
+          "artifact_id": "d24f8db5-4aea-4fb0-9907-e3b3d2bdffe5",
+          "artifact_revision_id": "802de3c4-f42e-4094-8f73-5baf9ef7197e",
+          "sha256": "c108bbd4e9ae747407f42b7d93b1d1f7e6ac1d6a06fb8db988bb20dc41fc8cf3"
+        }
+      },
+      "original_source_sha256": "12c1d512f5bad133466c9164354207642237c62349f4231fcaeb3049d2135781",
+      "outcome": "validated draft and checked review; official edition unchanged",
+      "plan_ref": {
+        "artifact_id": "42df7f7d-beb2-49d6-8716-8fcd3bf21033",
+        "artifact_revision_id": "9a77fd7b-9997-47c7-84aa-394f1270b2ce",
+        "sha256": "2b3b59a457a4e5b0b71fe7c45ec3fe7c28a0d3d4a53983bdcd531c723f3a63af"
+      },
+      "reader_cut_ordinal": 5,
+      "scene_ref": {
+        "artifact_id": "2560ef21-80cc-4315-a596-132c7a1474d1",
+        "artifact_revision_id": "ca73092a-df38-4199-b4f2-15476d60b907",
+        "sha256": "669fb23e373573f9cd0e8e43833ef6eb3c29a59fac128cdc45a57ddf4c4382a8"
+      },
+      "skill_source": {
+        "content_sha": "bbc1cb4a38be974d763d75f9c24287ae03ecb2ac6c38cea4005bcbc8c92e9539",
+        "skill_id": "close-reading",
+        "source_revision": "s6-w4"
+      },
+      "stages": [
+        "evidence_maintainer/summary",
+        "writer/scene_draft",
+        "reviewer/literary"
+      ],
+      "subject_id": "4ef873a8-4f45-56f0-ad45-67928097cea9",
+      "target_story_time": {
+        "phase": 1,
+        "tick": 1
+      },
+      "world_effects_permitted": false,
+      "world_ref": {
+        "branch_id": "b5b58625-1705-43c7-8dce-1ad82a66714e",
+        "work_id": "b95cfb30-bdbf-491c-9d0f-e233c6344688",
+        "world_revision_id": "80c74b44-521c-461e-8338-c1099d832fa2"
+      }
+    }
+  },
+  "budget_policy": {
+    "fixture_token_unit": "UTF-8 bytes (synthetic NF metering); billed provider tokens zero",
+    "optimization_quota": {
+      "budget_id": "4563f8db-4d57-48e5-854c-a9c499436038",
+      "currency": "USD",
+      "deadline": "2026-11-12T10:58:07.705499+00:00",
+      "max_amount": "0.1",
+      "max_attempts": 24,
+      "max_tokens": 180000
+    },
+    "paid_provider_spend": "0",
+    "parallel_arms": 1,
+    "per_call_allowance": 60000,
+    "per_role_attempts": 1,
+    "reserve_amount": "1",
+    "retries": 0,
+    "rework_limit": 0
+  },
+  "calibration_batches": 1,
+  "common_training_preparation_latency_ns": 5122925587,
+  "complete_windows": 3,
+  "completed_at": "2026-11-12T10:50:29.457704+00:00",
+  "config": {
+    "adapter_kind": "OPENAI_COMPATIBLE_HTTP",
+    "endpoint": "http://127.0.0.1:46055/v1/chat/completions",
+    "execution_kind": "TEST_FIXTURE",
+    "isolation": "STATELESS_TEXT_ONLY",
+    "isolation_evidence": "No tools or conversation state are sent by this adapter",
+    "max_output_tokens": 5000,
+    "max_response_bytes": 2000000,
+    "model": "s6-scene-calibration-v1",
+    "provider": "127.0.0.1",
+    "timeout_seconds": "60"
+  },
+  "confirmatory_batches": 0,
+  "freeze": {
+    "arms": [
+      {
+        "arm_id": "BASELINE",
+        "candidate_ref": {
+          "artifact_id": "f1b0a575-629c-47db-b804-2a6cb97a51d9",
+          "artifact_revision_id": "f855a2e1-1ed3-465b-b10a-21cecf49f19f",
+          "sha256": "6782d877b152750e579b5c3d8d20ca0b68b7adcfe294474f74ad4ebf757ee68a"
+        },
+        "creative_harness": {
+          "adaptive_instructions": {
+            "auto_promote": false,
+            "enabled": false
+          },
+          "dynamic_agents": {
+            "enabled": false
+          },
+          "enabled": false
+        }
+      },
+      {
+        "arm_id": "HARNESS",
+        "candidate_ref": {
+          "artifact_id": "a882dce5-b95b-43fe-bf68-66ecf44670ff",
+          "artifact_revision_id": "0058202e-7127-4e5f-ab8a-7ed893366d80",
+          "sha256": "c0bd9524d96f559eca8538a0cf6d2a64b43cb131d3c830d8c00abac7f2158474"
+        },
+        "creative_harness": {
+          "adaptive_instructions": {
+            "auto_promote": false,
+            "enabled": false
+          },
+          "dynamic_agents": {
+            "enabled": false
+          },
+          "enabled": true
+        }
+      },
+      {
+        "arm_id": "HARNESS_ADAPTIVE",
+        "candidate_ref": {
+          "artifact_id": "03145f30-123b-4dcb-99c3-9199260cef9d",
+          "artifact_revision_id": "258a9192-bd75-4033-bc51-b6bf59f0904f",
+          "sha256": "d21243370f1f614c44a2137b593d6ce747450b08b40436b21d8095189b77ac43"
+        },
+        "creative_harness": {
+          "adaptive_instructions": {
+            "auto_promote": false,
+            "enabled": true
+          },
+          "dynamic_agents": {
+            "enabled": true
+          },
+          "enabled": true
+        }
+      }
+    ],
+    "blind_allocation_ref": {
+      "artifact_id": "efde5102-c7ef-425f-9157-79e819b016be",
+      "artifact_revision_id": "e56b0c10-e736-428e-9b56-c30ce0e76e5d",
+      "sha256": "dbed8842e534bac067a524643b58e8926ba9ae19124c1eaedae12ce1f45ffc14"
+    },
+    "budget_policy_ref": {
+      "artifact_id": "e2ef7426-a0f6-414e-ac71-069ff84ed7e8",
+      "artifact_revision_id": "f5bdb2b7-befb-4f73-ae46-166476cc7094",
+      "sha256": "89ece7db2a3354f0cf4d5a413e1ff28eb8c0c5d65e25b7b63434725c0bdc4509"
+    },
+    "case_manifest_ref": {
+      "artifact_id": "934ef28f-42d1-4f08-ad7c-79ccb3dfc648",
+      "artifact_revision_id": "ce51f47b-34be-4bca-a8b2-2b63d2ee7333",
+      "sha256": "3e1fc53565f4189b9c421d4aef9b3218f7b474969e89c72851dcf7cc72cfaa01"
+    },
+    "design": "THREE_ARM",
+    "experiment_id": "145f774c-bc4b-493d-b92b-8825bf5507b1",
+    "frozen_at": "2026-11-12T10:50:15.066417+00:00",
+    "kind": "EXPERIMENT_FREEZE",
+    "metrics": {
+      "cost": "REQUIRED",
+      "engineering": "REQUIRED",
+      "latency": "REQUIRED",
+      "literary": "INDEPENDENT_READING_OR_UNPROVEN",
+      "review_effectiveness": "REQUIRED",
+      "rework": "REQUIRED",
+      "tokens": "REQUIRED"
+    },
+    "model_config_sha256": "d9a543292d1ad5a4b31992b46750b6568ebc62243cee3e84de83ed37d7b986df",
+    "order_seed": 20261111,
+    "quota": {
+      "budget_id": "519e39f0-ae0d-440f-83cc-7ea4540840d4",
+      "currency": "USD",
+      "deadline": "2026-11-12T11:14:14.324983+00:00",
+      "max_amount": "9",
+      "max_attempts": 9,
+      "max_tokens": 540000
+    },
+    "repetitions": 1,
+    "rubric_ref": {
+      "artifact_id": "4b289dd0-941c-45d5-b073-54f1c31cd3fa",
+      "artifact_revision_id": "cdaa708d-6bf5-4fce-98ad-86239846e310",
+      "sha256": "c64244b357d7e532f29c743420ec951bb4fd24102a601aed2a1b5e9e4212123b"
+    },
+    "sampling": "ALL_PREREGISTERED_CASES_INCLUDING_FAILURES",
+    "schema_version": "1.0",
+    "shared_input_ref": {
+      "artifact_id": "e01cd7ec-ad7e-4e22-892b-f1d43a7757de",
+      "artifact_revision_id": "bd229f76-5a00-4ed9-a622-c27c7c7040f0",
+      "sha256": "d03a10c169508cb9bc208cb1a6941765939626efe9b0240db467b8aae03c974d"
+    },
+    "source_commit": "d6ff88223d6ae655a45d713687e5e8119e157737",
+    "works": [
+      {
+        "branch_id": "b5b58625-1705-43c7-8dce-1ad82a66714e",
+        "work_id": "b95cfb30-bdbf-491c-9d0f-e233c6344688",
+        "world_revision_id": "80c74b44-521c-461e-8338-c1099d832fa2"
+      }
+    ]
+  },
+  "freeze_ref": {
+    "artifact_id": "ba35f7c1-e47d-4717-a242-b39476b37520",
+    "artifact_revision_id": "273ea7c1-e887-49cb-b0d1-08ce349418aa",
+    "sha256": "fc3a38e8a5f76dd1cd8385d40b205f32a7fc4c6a728534c03c8ded9f4e9a794d"
+  },
+  "literary": "NOT_EVALUATED",
+  "official_state_before": {
+    "event_count": 0,
+    "interpretation_epoch": 0,
+    "official_artifacts_sha256": "2bc19930cdc6f48e3844d27946877e5c5761ae85db1b3187045eb550b1bac0a0",
+    "selected_event_versions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  },
+  "optimization": {
+    "arm_totals": {
+      "CONTROL": {
+        "amount": "0",
+        "evidence_position": 0,
+        "executions": 2,
+        "failures": 0,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "latency_ns": 934857,
+        "native_rework_count": 0,
+        "provider_tokens": 0,
+        "true_positives": 1
+      },
+      "TREATMENT": {
+        "amount": "0",
+        "evidence_position": 0,
+        "executions": 2,
+        "failures": 0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "latency_ns": 1427428,
+        "native_rework_count": 0,
+        "provider_tokens": 0,
+        "true_positives": 2
+      }
+    },
+    "candidate_ref": {
+      "artifact_id": "044724f9-efdd-4f6f-b315-c51e2d631c06",
+      "artifact_revision_id": "e8425ea5-fbbd-44f5-847f-c7642deb5231",
+      "sha256": "9bdc5d551500538cbae07f0162c77bb491de616d14ccf937b7848daedf112b82"
+    },
+    "engineering_report_ref": {
+      "artifact_id": "8e8b7e68-4af3-4027-a50e-0b1fd0f5e774",
+      "artifact_revision_id": "4a1d013d-478b-5167-8c64-07fd387fdb6d",
+      "sha256": "8b3a50b6025f531e847dcd4865143049fb5f4abdc8b52d0f2b157f878a38aa2d"
+    },
+    "evaluation_and_promotion_latency_ns": 1433379189,
+    "local_engineering_executions": 4,
+    "model_attempts": 0,
+    "proposal_ref": {
+      "artifact_id": "044724f9-efdd-4f6f-b315-c51e2d631c06",
+      "artifact_revision_id": "e8425ea5-fbbd-44f5-847f-c7642deb5231",
+      "sha256": "9bdc5d551500538cbae07f0162c77bb491de616d14ccf937b7848daedf112b82"
+    },
+    "quality": {
+      "eligible": true,
+      "held_out_negatives": [
+        "36806e20-9000-4716-8270-2ad59ef79681"
+      ],
+      "held_out_positives": [
+        "b0669269-c90a-453d-9534-d4822c1e5831"
+      ],
+      "improved": [
+        "b0669269-c90a-453d-9534-d4822c1e5831"
+      ],
+      "reasons": [],
+      "regressed": []
+    },
+    "review_ref": {
+      "artifact_id": "1153a4d2-c715-4056-b338-d6717fa51ded",
+      "artifact_revision_id": "784dc867-9019-40be-b606-a94175f1b7d0",
+      "sha256": "73f27d3e47053d1ce718df724cb6e1a60945ff58e53d3f56e52984702d6369d9"
+    },
+    "run_manifest_ref": {
+      "artifact_id": "834e86f5-0154-4a9a-9c35-6a30407b2f74",
+      "artifact_revision_id": "577bdffe-83be-5e66-9bd9-e0b70d1eb940",
+      "sha256": "805794433619a3716d80286a48f15d95ea7630db6b27438ee5a9a92fb0614112"
+    },
+    "selection_ref": {
+      "artifact_id": "0ce6b90e-902b-41ae-898f-e55b2c74d533",
+      "artifact_revision_id": "7fc31cc7-b3a0-4115-9d3d-2255dae1e6d7",
+      "sha256": "6f7b02171df5d57b2f4286b236ecde8981b4a76840b6b3f32368ad019b314dac"
+    }
+  },
+  "paid_cost_usd": "0",
+  "planned_windows": 3,
+  "public_data": "Synthetic arm outputs, immutable refs, source digests and objective results. No original source corpus or bearer credentials.",
+  "real_model_calls": 0,
+  "rows": [
+    {
+      "actual_amount_usd": "0.000000",
+      "advisory_input_ref": {
+        "artifact_id": "8ab380df-c3d4-4d6f-bf22-b087eeda5164",
+        "artifact_revision_id": "1423c6d1-ce2e-4114-943a-0d33de0065ba",
+        "sha256": "4e5e2e640d16729fd5c0822f3b1a0ff1a0c2767609e2a8b10e6a15b3487a6adb"
+      },
+      "advisory_ref": {
+        "artifact_id": "92b1e19d-7360-4f42-91a7-b28ce0e94c01",
+        "artifact_revision_id": "97748ea9-aeea-442e-8a78-efb619392ad6",
+        "sha256": "17811939d3ab9869acb397e0c7ddb65b9b595fceec9e707871e7b837f3fadab3"
+      },
+      "advisory_task_id": "7ff372df-8516-4c8e-bfa5-70a3a5093ac4",
+      "arm": "HARNESS_ADAPTIVE",
+      "attempts": [
+        {
+          "actual_amount": "0.000000",
+          "actual_tokens": "12336",
+          "attempt_id": "45410921-82ed-4d91-8004-8128c74538c3",
+          "generation": "1",
+          "state": "SUCCEEDED",
+          "task_id": "e58a1639-21ca-40a9-887d-8ceea9ebcf31"
+        },
+        {
+          "actual_amount": "0.000000",
+          "actual_tokens": "14019",
+          "attempt_id": "6a7f273c-2734-40ba-bb23-049900cfc84b",
+          "generation": "1",
+          "state": "SUCCEEDED",
+          "task_id": "00b2262a-65a5-4d7d-88dd-952bf9b284aa"
+        },
+        {
+          "actual_amount": "0.000000",
+          "actual_tokens": "14992",
+          "attempt_id": "f0f0194e-a988-4229-bd44-2d941bbc5f20",
+          "generation": "1",
+          "state": "SUCCEEDED",
+          "task_id": "106c3cb4-b032-43f4-a787-49f6646decd1"
+        }
+      ],
+      "blind_id": "d6ce6f46-9188-4b5f-9a7c-4dcc356eeb06",
+      "draft_ref": {
+        "artifact_id": "b5535a18-d75c-4988-ad5e-368a99f7bbf1",
+        "artifact_revision_id": "3350f148-e3d8-4b21-9d15-60823154e3b5",
+        "sha256": "b4fba0cc6d6916005a74737fc85e31c3593eb24aede34c92134c989963c26fd0"
+      },
+      "elapsed_ns": 8265780958,
+      "local_meter_units": 41347,
+      "manuscript": "小渡隔着芦苇望向旧渡口。前夜有人提过那枚铜印：那根线是上回缝衣留下的，她总觉得收拾得过分齐整，像是事情已经办完。\n\n小渡把那盏手提灯举起来，朝江心等了片刻。小渡把那盏手提灯举起来，朝江心等了片刻。小渡把那盏手提灯举起来，朝江心等了片刻。\n\n他摸到门柱上的绳结，湿麻贴住了拇指。守灯人抬灯后才放下门闩。\n\n潮水一直没过第一层台阶，岸上没有应声。潮水一直没过第一层台阶，岸上没有应声。潮水一直没过第一层台阶，岸上没有应声。\n\n小渡把钥匙留在灯座下面，合上木门，踩着退潮时露出来的石阶往家里走。",
+      "manuscript_sha256": "fce57f33babd2ed975a2b1d51834a6cb17e3c35d5504341eba3d865a29078eb2",
+      "official_state_after": {
+        "event_count": 0,
+        "interpretation_epoch": 0,
+        "official_artifacts_sha256": "2bc19930cdc6f48e3844d27946877e5c5761ae85db1b3187045eb550b1bac0a0",
+        "selected_event_versions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "quality": {
+        "control_fields_in_prose": 0,
+        "expected": 2,
+        "false_negative": 0,
+        "false_positive": 0,
+        "literary": "NOT_EVALUATED",
+        "native_narrative_accepted": false,
+        "rework": 0,
+        "true_positive": 2
+      },
+      "reconciliation": {
+        "alignment_ref": {
+          "artifact_id": "4c632800-f80e-4ae8-a293-ad027a0edbd3",
+          "artifact_revision_id": "fd776e6f-2f72-4686-88a9-c210d2ef599d",
+          "sha256": "0559e49a0f20321bacc3998c2f6fd852146573bd1c98934c760e1de25796bb6b"
+        },
+        "pending_delta_refs": [],
+        "reconciliation_ref": {
+          "artifact_id": "ab289242-1d3e-4cac-9147-f9ecf729b427",
+          "artifact_revision_id": "6c820416-d2ea-44f7-8cdc-55d998fb16e4",
+          "sha256": "0c07d76bd6a0e4aa953db473b73ab25c758ec8ad0bfdc69ca42c2cd6addaff8c"
+        },
+        "status": "CLEAR"
+      },
+      "review_spans": [
+        {
+          "end": 118,
+          "pattern": "MECHANICAL_CADENCE",
+          "start": 98
+        },
+        {
+          "end": 209,
+          "pattern": "MECHANICAL_CADENCE",
+          "start": 190
+        }
+      ],
+      "stages": [
+        {
+          "adaptive_instruction_ref": null,
+          "attempt_id": "45410921-82ed-4d91-8004-8128c74538c3",
+          "creative_context_ref": {
+            "artifact_id": "b7e4cf05-9844-577d-b131-0de5f70abebe",
+            "artifact_revision_id": "6f7f88ab-f3ed-53a7-a476-5fd66e8c95ab",
+            "sha256": "6d68599b4f5dfe19c03ecf7a4be1821ccf0a86489be1d10fed8faefdae9c8aad"
+          },
+          "dynamic_assignment_ref": {
+            "artifact_id": "2b3abae2-3a13-49d4-b86a-76c200f0c581",
+            "artifact_revision_id": "0737ea58-fc31-51fa-aff5-98065bec6442",
+            "sha256": "0aa4652fe1b56a82a73811f84701b05c49f764f1d94a195adb368ed8f4f9c352"
+          },
+          "elapsed_seconds": "0.024797",
+          "evidence_ref": {
+            "artifact_id": "17214aef-dd98-53e4-9839-2a96626efc10",
+            "artifact_revision_id": "b887131c-51fb-5090-b47c-5eb5b73045c5",
+            "sha256": "93f15b11739aa4563860767cb4f36be734b987f0f16514089bf70b40ad0e8bee"
+          },
+          "generation": 1,
+          "input": {
+            "creative_harness": {
+              "creative_harness": {
+                "adaptive_instructions": {
+                  "auto_promote": false,
+                  "enabled": true
+                },
+                "dynamic_agents": {
+                  "enabled": true
+                },
+                "enabled": true
+              },
+              "kind": "CONFIGURATION",
+              "schema_version": "1.0"
+            },
+            "dynamic_assignment_ref": {
+              "artifact_id": "2b3abae2-3a13-49d4-b86a-76c200f0c581",
+              "artifact_revision_id": "0737ea58-fc31-51fa-aff5-98065bec6442",
+              "sha256": "0aa4652fe1b56a82a73811f84701b05c49f764f1d94a195adb368ed8f4f9c352"
+            },
+            "model_config_sha256": "d9a543292d1ad5a4b31992b46750b6568ebc62243cee3e84de83ed37d7b986df",
+            "output_contract": {
+              "name": "AgentTextOutput",
+              "version": "agent"
+            },
+            "role_id": "evidence_maintainer",
+            "runtime_ref": {
+              "artifact_id": "7567cc2e-7483-4d3d-a8da-3e03888e86a0",
+              "artifact_revision_id": "56a53fb1-01dd-41f6-93b5-35553ebbd316",
+              "sha256": "92acef6f7a2d5583ebd26560d87c852ebf5446171a73c98cbcd49e892fffdedc"
+            },
+            "runtime_sha256": "92acef6f7a2d5583ebd26560d87c852ebf5446171a73c98cbcd49e892fffdedc",
+            "task_kind": "summary"
+          },
+          "input_ref": {
+            "artifact_id": "8f3ce9d5-c2e0-41e0-a2a7-93b806325f4f",
+            "artifact_revision_id": "732786a7-c02c-4b70-bc2e-1b86999a6a10",
+            "sha256": "b7a639d5df630b5ecfa80faf07e87f67dff01bc4cb0e3b87af0fa592d8bee6c1"
+          },
+          "output_ref": {
+            "artifact_id": "72f43b76-df4f-5ddf-9205-0bdc68d40c7d",
+            "artifact_revision_id": "7d263e52-d55b-5864-afb6-2e7f8e911f55",
+            "sha256": "31a9a93aeb638d203d1328e810de6ee2440c01662b9227948ef27795c61c14ac"
+          },
+          "prompt_ref": {
+            "artifact_id": "bea9c1a3-728f-5ff3-bfa1-53236e7b2d1b",
+            "artifact_revision_id": "2d349209-cc82-5c80-b0b7-2b77af9f3597",
+            "sha256": "ee2e42e07133ffbd6c24995af6cad636e9b693ac42ba8745bbf0cd5dc051f117"
+          },
+          "request_sha256": "ee2e42e07133ffbd6c24995af6cad636e9b693ac42ba8745bbf0cd5dc051f117",
+          "response_ref": {
+            "artifact_id": "343fa793-2812-50e5-8736-a965c90afaee",
+            "artifact_revision_id": "2b755e9a-7c13-53df-87fa-803c17b6bcb7",
+            "sha256": "c9a0360d0cafdd07d44ccaded9339e1449bb7627dadb2e18c95e6c1cf59406b5"
+          },
+          "role": "evidence_maintainer",
+          "status": "VALIDATED_CANDIDATE",
+          "task_id": "e58a1639-21ca-40a9-887d-8ceea9ebcf31",
+          "usage": {
+            "actual_amount": "0",
+            "cached_input_tokens": null,
+            "cost_status": "KNOWN",
+            "currency": "USD",
+            "input_tokens": 11775,
+            "output_tokens": 561
+          },
+          "visible_system_sha256": "673dcace0d242f83d20803f6f43781ea63212ce423533fdea8a9a2c712ac70d6",
+          "visible_user_sha256": "39b936e9a6411993448fb935351b7fb848821753226e5a73aa35a80d9c9a2de1"
+        },
+        {
+          "adaptive_instruction_ref": null,
+          "attempt_id": "6a7f273c-2734-40ba-bb23-049900cfc84b",
+          "creative_context_ref": {
+            "artifact_id": "28a3f69b-5fb9-5cbb-af29-2897ad8b9529",
+            "artifact_revision_id": "de8c3e0e-6cbe-5188-bae9-32e2e66722b7",
+            "sha256": "0d8d3f0ef212cfaed8d1c39104d5fb4fda0e4583812f87ffbbbc69c77a226602"
+          },
+          "dynamic_assignment_ref": null,
+          "elapsed_seconds": "0.027083",
+          "evidence_ref": {
+            "artifact_id": "c373806b-2860-55c0-b069-b9e98e97c58b",
+            "artifact_revision_id": "b2228b96-e5d5-5272-a045-83bda9e1e8c6",
+            "sha256": "c5fe08c4c9dd90b4ba7f0452fc3474ffa6483633d3282aaa779019aa4559262f"
+          },
+          "generation": 1,
+          "input": {
+            "creative_harness": {
+              "creative_harness": {
+                "adaptive_instructions": {
+                  "auto_promote": false,
+                  "enabled": true
+                },
+                "dynamic_agents": {
+                  "enabled": true
+                },
+                "enabled": true
+              },
+              "kind": "CONFIGURATION",
+              "schema_version": "1.0"
+            },
+            "model_config_sha256": "d9a543292d1ad5a4b31992b46750b6568ebc62243cee3e84de83ed37d7b986df",
+            "output_contract": {
+              "name": "AgentTextOutput",
+              "version": "agent"
+            },
+            "role_id": "writer",
+            "runtime_ref": {
+              "artifact_id": "4a937a28-d98c-4c53-82ec-4b597f5bde3d",
+              "artifact_revision_id": "351f1127-21a6-4727-b342-8b0d377a4b74",
+              "sha256": "b0d0d2e40f29fa9d882021be2c8fee4de6dfe19e72b4232dd78ca1a7ec7f64ae"
+            },
+            "runtime_sha256": "b0d0d2e40f29fa9d882021be2c8fee4de6dfe19e72b4232dd78ca1a7ec7f64ae",
+            "task_kind": "scene_draft"
+          },
+          "input_ref": {
+            "artifact_id": "ea9aebca-e191-4f1f-8f40-7605e6abe554",
+            "artifact_revision_id": "b255f234-8126-42b8-8cd4-9693b2c0eec5",
+            "sha256": "28437b2b0a0702892f7d8b7906efe5310ca0173a2d820df9441fefa22da2a712"
+          },
+          "output_ref": {
+            "artifact_id": "d6bf274e-937e-5b1e-8087-8087d41bf909",
+            "artifact_revision_id": "c46434df-364c-595e-b5fb-e4a57446e7c2",
+            "sha256": "236e0215be5de233ea767613f5b585380187d8eab2e25c589ffe7dabc5a46b67"
+          },
+          "prompt_ref": {
+            "artifact_id": "cbbb9304-cffd-5944-847e-1392b661cefc",
+            "artifact_revision_id": "b8e70fa2-2f9e-55d9-bb11-c68ef160aedf",
+            "sha256": "366a47b8250d51584356a65fe3b9684d5b210cc90e354dd27c042305a04582c8"
+          },
+          "request_sha256": "366a47b8250d51584356a65fe3b9684d5b210cc90e354dd27c042305a04582c8",
+          "response_ref": {
+            "artifact_id": "ef47857e-44f3-56a4-b204-7ac281bd677f",
+            "artifact_revision_id": "ec2afef8-f074-5251-b1a1-3ddf878ef261",
+            "sha256": "92b06db93981dda4d755fe3ed967628fe90810562fc48158b36a7bb97f1799e6"
+          },
+          "role": "writer",
+          "status": "VALIDATED_CANDIDATE",
+          "task_id": "00b2262a-65a5-4d7d-88dd-952bf9b284aa",
+          "usage": {
+            "actual_amount": "0",
+            "cached_input_tokens": null,
+            "cost_status": "KNOWN",
+            "currency": "USD",
+            "input_tokens": 12783,
+            "output_tokens": 1236
+          },
+          "visible_system_sha256": "9e35b41295bf09f4c013c83b525ea21caf480149d069d85888f5c7408905fe10",
+          "visible_user_sha256": "38fd059dce8147700f8ceea00c00fa3d4e115a6bb7806b9f94a3f315e2a97131"
+        },
+        {
+          "adaptive_instruction_ref": {
+            "artifact_id": "0ce6b90e-902b-41ae-898f-e55b2c74d533",
+            "artifact_revision_id": "7fc31cc7-b3a0-4115-9d3d-2255dae1e6d7",
+            "sha256": "6f7b02171df5d57b2f4286b236ecde8981b4a76840b6b3f32368ad019b314dac"
+          },
+          "attempt_id": "f0f0194e-a988-4229-bd44-2d941bbc5f20",
+          "creative_context_ref": {
+            "artifact_id": "a233ab72-c62f-5541-b4d5-d09fe4cac7a3",
+            "artifact_revision_id": "c689d53b-8f86-5226-a4ba-e03884fee9cb",
+            "sha256": "f42fd8ae0f1d5e4667d2ba701ad43bb88bd7d7b4486b18d8ff045199a5edd123"
+          },
+          "dynamic_assignment_ref": null,
+          "elapsed_seconds": "0.022054",
+          "evidence_ref": {
+            "artifact_id": "530350d5-d0dd-5e5d-86b7-8a9df49c7505",
+            "artifact_revision_id": "666a7f45-9f9d-5385-9351-c845c948ab7b",
+            "sha256": "b3480320041bd4c9bc979a2eec439275fca50f22f8b4a6a2997ff6307755798d"
+          },
+          "generation": 1,
+          "input": {
+            "adaptive_instruction_ref": {
+              "artifact_id": "0ce6b90e-902b-41ae-898f-e55b2c74d533",
+              "artifact_revision_id": "7fc31cc7-b3a0-4115-9d3d-2255dae1e6d7",
+              "sha256": "6f7b02171df5d57b2f4286b236ecde8981b4a76840b6b3f32368ad019b314dac"
+            },
+            "creative_harness": {
+              "creative_harness": {
+                "adaptive_instructions": {
+                  "auto_promote": false,
+                  "enabled": true
+                },
+                "dynamic_agents": {
+                  "enabled": true
+                },
+                "enabled": true
+              },
+              "kind": "CONFIGURATION",
+              "schema_version": "1.0"
+            },
+            "model_config_sha256": "d9a543292d1ad5a4b31992b46750b6568ebc62243cee3e84de83ed37d7b986df",
+            "output_contract": {
+              "name": "AgentReviewOutput",
+              "version": "agent"
+            },
+            "role_id": "reviewer",
+            "runtime_ref": {
+              "artifact_id": "72d627a3-ef1f-49f8-8e14-2c70d39f532c",
+              "artifact_revision_id": "3feeaae2-b76b-47b9-a4dd-23a687de5760",
+              "sha256": "f052487a12e5940b7de72fe5a304bc4eba1bdfa717ee8d70257a726cc647b516"
+            },
+            "runtime_sha256": "f052487a12e5940b7de72fe5a304bc4eba1bdfa717ee8d70257a726cc647b516",
+            "task_kind": "literary"
+          },
+          "input_ref": {
+            "artifact_id": "cbe1009c-39ae-4bde-9090-b190b6a6f9d6",
+            "artifact_revision_id": "2119a94c-35bc-402e-a61c-f6ee3e2317f7",
+            "sha256": "baa91357736eb610d75dceb326a3c6f19dfa4473cd063cacfd2a1da6d4a1c111"
+          },
+          "output_ref": {
+            "artifact_id": "d32626b4-4983-5b14-8d9f-d02302ff7223",
+            "artifact_revision_id": "ef43ea15-1b58-5bf8-912e-8706ddc575fa",
+            "sha256": "c456429ba05bb06efa59a001139640fe225dd274158cfef21057647011c88ca2"
+          },
+          "prompt_ref": {
+            "artifact_id": "e8412ba9-36ba-5fa3-a716-f85e299f4a59",
+            "artifact_revision_id": "9368d763-0274-507e-b52f-aea3e00a2c62",
+            "sha256": "62164bb4e1931f5c3d3164503874ce310fbf26d38ba5a353faee3e44bde3982c"
+          },
+          "request_sha256": "62164bb4e1931f5c3d3164503874ce310fbf26d38ba5a353faee3e44bde3982c",
+          "response_ref": {
+            "artifact_id": "7b08df84-94ba-5701-89ed-1e238606a580",
+            "artifact_revision_id": "065637af-2706-52d8-aebd-0d808a8d506e",
+            "sha256": "0bd81454593111d80d7a18ad96c60a794e9eed06a318dd59cce822a335766d04"
+          },
+          "role": "reviewer",
+          "status": "VALIDATED_CANDIDATE",
+          "task_id": "106c3cb4-b032-43f4-a787-49f6646decd1",
+          "usage": {
+            "actual_amount": "0",
+            "cached_input_tokens": null,
+            "cost_status": "KNOWN",
+            "currency": "USD",
+            "input_tokens": 14369,
+            "output_tokens": 623
+          },
+          "visible_system_sha256": "f6e0efd63f915efac97b3bb64f3a666438f1ddc050fa9a8795dd799e7307f442",
+          "visible_user_sha256": "e3fcf00c4959e382def96b615ce031cf087c9d0dd01ebe14e72fe83b1aed5a27"
+        }
+      ],
+      "status": "COMPLETE",
+      "summary": "守灯人抬灯后才放下门闩。",
+      "unsettled_attempts": 0,
+      "world_ref_after": {
+        "branch_id": "b5b58625-1705-43c7-8dce-1ad82a66714e",
+        "work_id": "b95cfb30-bdbf-491c-9d0f-e233c6344688",
+        "world_revision_id": "80c74b44-521c-461e-8338-c1099d832fa2"
+      }
+    },
+    {
+      "actual_amount_usd": "0.000000",
+      "arm": "BASELINE",
+      "attempts": [
+        {
+          "actual_amount": "0.000000",
+          "actual_tokens": "13473",
+          "attempt_id": "ee9ee4e9-0f94-4f61-83f2-c3624a4ad918",
+          "generation": "1",
+          "state": "SUCCEEDED",
+          "task_id": "3346526a-27ef-4021-9075-76d08c456192"
+        },
+        {
+          "actual_amount": "0.000000",
+          "actual_tokens": "17593",
+          "attempt_id": "c012453a-44c9-4521-8bfb-88d37300e362",
+          "generation": "1",
+          "state": "SUCCEEDED",
+          "task_id": "5a123c30-3bfd-457d-8bc9-197b08d2cd97"
+        },
+        {
+          "actual_amount": "0.000000",
+          "actual_tokens": "16722",
+          "attempt_id": "8a43029f-53bb-49c1-ace9-dfd976835d11",
+          "generation": "1",
+          "state": "SUCCEEDED",
+          "task_id": "fe2b6845-e89a-4c71-9b31-a48b4a7b61d6"
+        }
+      ],
+      "blind_id": "5956e778-63eb-4b5a-8da0-5e6a4f809ea5",
+      "draft_ref": {
+        "artifact_id": "c3d43467-5dd8-4be0-9711-71d0ca6b1367",
+        "artifact_revision_id": "8fe30f54-972a-44f6-b08f-5f4a2155ccf4",
+        "sha256": "0e1f4bb33c68ec9ba069ea1bac5dc38b1ca0a9eb7b889ec6e6585c9ac4b3aa9a"
+      },
+      "elapsed_ns": 2670005057,
+      "local_meter_units": 47788,
+      "manuscript": "小渡隔着芦苇望向旧渡口。前夜有人提过那枚铜印：那根线是上回缝衣留下的，她总觉得收拾得过分齐整，像是事情已经办完。\n\n小渡把那盏手提灯举起来，朝江心等了片刻。小渡把那盏手提灯举起来，朝江心等了片刻。小渡把那盏手提灯举起来，朝江心等了片刻。\n\n他摸到门柱上的绳结，湿麻贴住了拇指。桥边的灯还亮着。\n\n潮水一直没过第一层台阶，岸上没有应声。潮水一直没过第一层台阶，岸上没有应声。潮水一直没过第一层台阶，岸上没有应声。\n\n小渡把钥匙留在灯座下面，合上木门，踩着退潮时露出来的石阶往家里走。",
+      "manuscript_sha256": "518ae2ddee13912c3a4c1d65b90a9b4f49c039880085299c32fe2b0af40fedd5",
+      "official_state_after": {
+        "event_count": 0,
+        "interpretation_epoch": 0,
+        "official_artifacts_sha256": "2bc19930cdc6f48e3844d27946877e5c5761ae85db1b3187045eb550b1bac0a0",
+        "selected_event_versions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "quality": {
+        "control_fields_in_prose": 0,
+        "expected": 2,
+        "false_negative": 1,
+        "false_positive": 0,
+        "literary": "NOT_EVALUATED",
+        "native_narrative_accepted": false,
+        "rework": 0,
+        "true_positive": 1
+      },
+      "reconciliation": {
+        "alignment_ref": {
+          "artifact_id": "c6338652-7c4c-4b06-af19-3924d4e666b6",
+          "artifact_revision_id": "54e96645-3fce-4e4c-8ddf-71794e9a2009",
+          "sha256": "67f3118d38ed145d2248eed0646a9776bfc2bcca35af0f83ae671949197df83c"
+        },
+        "pending_delta_refs": [],
+        "reconciliation_ref": {
+          "artifact_id": "876a6434-333b-4a25-a060-5b3962658a6d",
+          "artifact_revision_id": "19932ed3-24e4-403f-9b86-f2ad93f1d160",
+          "sha256": "df4f73239e1fd4560bad805696b2a7c5c72cf45bbe60754481899d93fdaebb2e"
+        },
+        "status": "CLEAR"
+      },
+      "review_spans": [
+        {
+          "end": 118,
+          "pattern": "MECHANICAL_CADENCE",
+          "start": 98
+        }
+      ],
+      "stages": [
+        {
+          "adaptive_instruction_ref": null,
+          "attempt_id": "ee9ee4e9-0f94-4f61-83f2-c3624a4ad918",
+          "creative_context_ref": null,
+          "dynamic_assignment_ref": null,
+          "elapsed_seconds": "0.019279",
+          "evidence_ref": {
+            "artifact_id": "8ab5c29d-12ec-5bef-99e5-2af90f10baf6",
+            "artifact_revision_id": "ce9d6ef2-db55-5856-8c25-38ce50cb44b5",
+            "sha256": "2a68c705bec55b7f2f21826e28d43ec6f19551f0c0df2a2d8a485301ce558ba8"
+          },
+          "generation": 1,
+          "input": {
+            "model_config_sha256": "d9a543292d1ad5a4b31992b46750b6568ebc62243cee3e84de83ed37d7b986df",
+            "output_contract": {
+              "name": "AgentTextOutput",
+              "version": "agent"
+            },
+            "role_id": "evidence_maintainer",
+            "runtime_ref": {
+              "artifact_id": "d011378f-17ca-4b4f-88e6-ed81d3d56ed0",
+              "artifact_revision_id": "49c9bd7b-a865-4dd1-b3e2-1b7c10d715bf",
+              "sha256": "92acef6f7a2d5583ebd26560d87c852ebf5446171a73c98cbcd49e892fffdedc"
+            },
+            "runtime_sha256": "92acef6f7a2d5583ebd26560d87c852ebf5446171a73c98cbcd49e892fffdedc",
+            "task_kind": "summary"
+          },
+          "input_ref": {
+            "artifact_id": "6b80deca-535f-4db0-a854-722c16b6e61c",
+            "artifact_revision_id": "37fdf78a-3aa0-4344-b05b-9b5f79fdf556",
+            "sha256": "8df03e8aa5a5bd14b2356bb04f0288a5e2fff08046e05bd52955b111cd25dc57"
+          },
+          "output_ref": {
+            "artifact_id": "8f8e576f-50e1-50fa-a1a4-ea5312564f86",
+            "artifact_revision_id": "33615aec-1d32-5f09-8a59-c554e6da24a3",
+            "sha256": "3ba8ba00e34b1385f505770dceca5215374719cb609db628f3e3588a59784d6c"
+          },
+          "prompt_ref": {
+            "artifact_id": "3c47a33f-19a7-5436-bc87-01e84c11dbcf",
+            "artifact_revision_id": "fd4e475b-35cb-55a5-9250-f4e4e19eb637",
+            "sha256": "44b9cd4be131adeacf78149fc2c9cc019da375b4cb8e4831544868507420997c"
+          },
+          "request_sha256": "44b9cd4be131adeacf78149fc2c9cc019da375b4cb8e4831544868507420997c",
+          "response_ref": {
+            "artifact_id": "cf6c1979-ce74-5dca-90f0-f35edd6bce61",
+            "artifact_revision_id": "fe90c68f-16d7-5246-ac7d-36beed5886c7",
+            "sha256": "3a3a9e8ff9a5976419a6a5424c17a451a9de37970d5201b7f995eef800d435ee"
+          },
+          "role": "evidence_maintainer",
+          "status": "VALIDATED_CANDIDATE",
+          "task_id": "3346526a-27ef-4021-9075-76d08c456192",
+          "usage": {
+            "actual_amount": "0",
+            "cached_input_tokens": null,
+            "cost_status": "KNOWN",
+            "currency": "USD",
+            "input_tokens": 12924,
+            "output_tokens": 549
+          },
+          "visible_system_sha256": "586a72b18cca7d572168e4790d87906b824d634ba00ddf3fa6273882ee2b4a2b",
+          "visible_user_sha256": "e78335c81f085e321b51e951cbb8faed75e0abb680bd09af5cec20be8a7cbeab"
+        },
+        {
+          "adaptive_instruction_ref": null,
+          "attempt_id": "c012453a-44c9-4521-8bfb-88d37300e362",
+          "creative_context_ref": null,
+          "dynamic_assignment_ref": null,
+          "elapsed_seconds": "0.019840",
+          "evidence_ref": {
+            "artifact_id": "9ad1005f-1b62-5741-a679-e31a9f532e04",
+            "artifact_revision_id": "54c60ad1-e2cb-55ef-8cc8-6393a9a96263",
+            "sha256": "e7f59d83b4ba256eabef55d589b52f875f8452e9c3e54517856ec6a5156acaba"
+          },
+          "generation": 1,
+          "input": {
+            "model_config_sha256": "d9a543292d1ad5a4b31992b46750b6568ebc62243cee3e84de83ed37d7b986df",
+            "output_contract": {
+              "name": "AgentTextOutput",
+              "version": "agent"
+            },
+            "role_id": "writer",
+            "runtime_ref": {
+              "artifact_id": "8de7da22-39f3-4ae0-b9eb-f70c0594e559",
+              "artifact_revision_id": "645a9551-0ad6-4d4b-9808-e1bc30df22c2",
+              "sha256": "b0d0d2e40f29fa9d882021be2c8fee4de6dfe19e72b4232dd78ca1a7ec7f64ae"
+            },
+            "runtime_sha256": "b0d0d2e40f29fa9d882021be2c8fee4de6dfe19e72b4232dd78ca1a7ec7f64ae",
+            "task_kind": "scene_draft"
+          },
+          "input_ref": {
+            "artifact_id": "262ad522-11f0-4594-8802-a10d8923914b",
+            "artifact_revision_id": "390eea0e-21d7-4628-821d-aef4270a9e77",
+            "sha256": "4bb9bc25f44f6b3e64576a399f596ca9403532461245bed0825a3efc84888728"
+          },
+          "output_ref": {
+            "artifact_id": "1c6b0f46-90c6-5432-a2bd-5377a419cf29",
+            "artifact_revision_id": "7fb2500c-f2ef-5a68-bf7f-461bb9ed03b3",
+            "sha256": "d94f3d70307f5dc86a341c61ef208553dc143195abab9db912ed37c7feb14f06"
+          },
+          "prompt_ref": {
+            "artifact_id": "838a8830-edae-5d03-8c77-cebfa9f19f47",
+            "artifact_revision_id": "4534b84d-21ac-57a2-a1bc-a9492e9edd4c",
+            "sha256": "a4017b4e0f39ffe054ef8c6e5b05a3c3bdfb1bb232484c800217443d99db937a"
+          },
+          "request_sha256": "a4017b4e0f39ffe054ef8c6e5b05a3c3bdfb1bb232484c800217443d99db937a",
+          "response_ref": {
+            "artifact_id": "edf28e89-191a-5bf4-826b-fb83a845e748",
+            "artifact_revision_id": "6a3130a7-ab12-5478-8584-f5d576dffc7d",
+            "sha256": "c8c37fd519c9b98a3de40dfd6db6fe67be6ec0f76d1f420e3e7845376c852fac"
+          },
+          "role": "writer",
+          "status": "VALIDATED_CANDIDATE",
+          "task_id": "5a123c30-3bfd-457d-8bc9-197b08d2cd97",
+          "usage": {
+            "actual_amount": "0",
+            "cached_input_tokens": null,
+            "cost_status": "KNOWN",
+            "currency": "USD",
+            "input_tokens": 16369,
+            "output_tokens": 1224
+          },
+          "visible_system_sha256": "2dd001b6fb52f411780fdf988c7f39bd924b02e2a082aee207f55302444d19ee",
+          "visible_user_sha256": "57dcf0c84fca97576bb2f566b4eb9496084814b75f2731f99819c401a06604ec"
+        },
+        {
+          "adaptive_instruction_ref": null,
+          "attempt_id": "8a43029f-53bb-49c1-ace9-dfd976835d11",
+          "creative_context_ref": null,
+          "dynamic_assignment_ref": null,
+          "elapsed_seconds": "0.018591",
+          "evidence_ref": {
+            "artifact_id": "62659dc0-d2f2-5bf0-a238-102d2e338068",
+            "artifact_revision_id": "fdfb085a-d5ea-518d-85d6-1b4f357970a7",
+            "sha256": "d49223dab844b1d99f9aabd7c19abe68d93144c69df1872d8cf3e2790c0b8495"
+          },
+          "generation": 1,
+          "input": {
+            "model_config_sha256": "d9a543292d1ad5a4b31992b46750b6568ebc62243cee3e84de83ed37d7b986df",
+            "output_contract": {
+              "name": "AgentReviewOutput",
+              "version": "agent"
+            },
+            "role_id": "reviewer",
+            "runtime_ref": {
+              "artifact_id": "24b6ba75-8d99-4926-af74-e6eb2f11e2d7",
+              "artifact_revision_id": "685b0330-2fa6-4398-96fe-673fabb8a9f1",
+              "sha256": "f052487a12e5940b7de72fe5a304bc4eba1bdfa717ee8d70257a726cc647b516"
+            },
+            "runtime_sha256": "f052487a12e5940b7de72fe5a304bc4eba1bdfa717ee8d70257a726cc647b516",
+            "task_kind": "literary"
+          },
+          "input_ref": {
+            "artifact_id": "4f4bfd35-1182-4e4a-bbe2-487d4c102096",
+            "artifact_revision_id": "bc70cf35-e3fb-4d47-9fce-36b4a5ad9be5",
+            "sha256": "a239d513c170c93397f8269b36fa7d9d02e314d217b12829a2b8bebb33cb3ef9"
+          },
+          "output_ref": {
+            "artifact_id": "56796db2-46c0-57ac-9829-474490ec8b3e",
+            "artifact_revision_id": "1e747436-5a2b-50d9-910b-ff89d3cb0971",
+            "sha256": "c456429ba05bb06efa59a001139640fe225dd274158cfef21057647011c88ca2"
+          },
+          "prompt_ref": {
+            "artifact_id": "9919d961-be7d-5675-9a90-afc39ad2fed3",
+            "artifact_revision_id": "4b8677c2-afe4-5426-b0d8-0572438b9117",
+            "sha256": "d84b12f50fff9a10fe92a4e696d4d2a6a27f3e09fab4c1639f2d84f441f6655b"
+          },
+          "request_sha256": "d84b12f50fff9a10fe92a4e696d4d2a6a27f3e09fab4c1639f2d84f441f6655b",
+          "response_ref": {
+            "artifact_id": "38003bb6-1f0a-5068-8a10-580a1ee00917",
+            "artifact_revision_id": "22922cd6-c396-5a17-9fc7-28d2ada4d582",
+            "sha256": "4819e0feec4797c05cb89b1b6e2826cf67e6dc6a696664ad83622537f5ce9ef7"
+          },
+          "role": "reviewer",
+          "status": "VALIDATED_CANDIDATE",
+          "task_id": "fe2b6845-e89a-4c71-9b31-a48b4a7b61d6",
+          "usage": {
+            "actual_amount": "0",
+            "cached_input_tokens": null,
+            "cost_status": "KNOWN",
+            "currency": "USD",
+            "input_tokens": 16099,
+            "output_tokens": 623
+          },
+          "visible_system_sha256": "5c35d8c1ff9adfc3bd9dace7da9dcf2f4c9173315b12d455810d23eef485c1df",
+          "visible_user_sha256": "9b0d49e89b0cab505b14474086b16e0157033014dc205eda142e2e31785be242"
+        }
+      ],
+      "status": "COMPLETE",
+      "summary": "桥边的灯还亮着。",
+      "unsettled_attempts": 0,
+      "world_ref_after": {
+        "branch_id": "b5b58625-1705-43c7-8dce-1ad82a66714e",
+        "work_id": "b95cfb30-bdbf-491c-9d0f-e233c6344688",
+        "world_revision_id": "80c74b44-521c-461e-8338-c1099d832fa2"
+      }
+    },
+    {
+      "actual_amount_usd": "0.000000",
+      "advisory_input_ref": {
+        "artifact_id": "5c5822ea-d92c-41d8-b588-bdcbf67ae1da",
+        "artifact_revision_id": "47a33dbc-3905-4391-811f-fd2561e86f1d",
+        "sha256": "9951cf82fa659d270f211e95abac52e4f8c81b9a9db8d72023633b18c09c3f23"
+      },
+      "advisory_ref": {
+        "artifact_id": "f509e7a4-138e-4687-b822-5735d272d1f8",
+        "artifact_revision_id": "fa788ca7-3d85-4c0c-b498-086096c7a8a9",
+        "sha256": "be9620f5a6154da63377a76c632429163f6024efee8be54a0543b572f42c693c"
+      },
+      "advisory_task_id": "a0a3376b-c58a-4113-9e84-397792b94603",
+      "arm": "HARNESS",
+      "attempts": [
+        {
+          "actual_amount": "0.000000",
+          "actual_tokens": "12140",
+          "attempt_id": "8b63e900-b836-495e-82d6-6e6dfe0b7ce5",
+          "generation": "1",
+          "state": "SUCCEEDED",
+          "task_id": "66a16f54-4466-4c05-9186-2bb46d2d23ea"
+        },
+        {
+          "actual_amount": "0.000000",
+          "actual_tokens": "13995",
+          "attempt_id": "85d027f5-2d2a-42d5-a2e4-7bc4bf20a71f",
+          "generation": "1",
+          "state": "SUCCEEDED",
+          "task_id": "107b4ab3-2abf-40fb-8a3a-c6fe33eace5c"
+        },
+        {
+          "actual_amount": "0.000000",
+          "actual_tokens": "14550",
+          "attempt_id": "8d84e7f4-0625-4d5b-8d85-e97ff1e5e0e0",
+          "generation": "1",
+          "state": "SUCCEEDED",
+          "task_id": "0453044d-4048-408d-ad81-0f4d3508a941"
+        }
+      ],
+      "blind_id": "1c389c2d-0a5e-4d53-8580-22817a81b5fc",
+      "draft_ref": {
+        "artifact_id": "7a18865a-90f7-4d8f-afc0-f8c259b7c7ea",
+        "artifact_revision_id": "4836c54e-699d-4a49-b25e-6b8a634fecc1",
+        "sha256": "343a52a87fed7dd40aaee34f324b78797b54215b45fda7c6903eb7759bd7572d"
+      },
+      "elapsed_ns": 3164129754,
+      "local_meter_units": 40685,
+      "manuscript": "小渡隔着芦苇望向旧渡口。前夜有人提过那枚铜印：那根线是上回缝衣留下的，她总觉得收拾得过分齐整，像是事情已经办完。\n\n小渡把那盏手提灯举起来，朝江心等了片刻。小渡把那盏手提灯举起来，朝江心等了片刻。小渡把那盏手提灯举起来，朝江心等了片刻。\n\n他摸到门柱上的绳结，湿麻贴住了拇指。桥边的灯还亮着。\n\n潮水一直没过第一层台阶，岸上没有应声。潮水一直没过第一层台阶，岸上没有应声。潮水一直没过第一层台阶，岸上没有应声。\n\n小渡把钥匙留在灯座下面，合上木门，踩着退潮时露出来的石阶往家里走。",
+      "manuscript_sha256": "518ae2ddee13912c3a4c1d65b90a9b4f49c039880085299c32fe2b0af40fedd5",
+      "official_state_after": {
+        "event_count": 0,
+        "interpretation_epoch": 0,
+        "official_artifacts_sha256": "2bc19930cdc6f48e3844d27946877e5c5761ae85db1b3187045eb550b1bac0a0",
+        "selected_event_versions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "quality": {
+        "control_fields_in_prose": 0,
+        "expected": 2,
+        "false_negative": 1,
+        "false_positive": 0,
+        "literary": "NOT_EVALUATED",
+        "native_narrative_accepted": false,
+        "rework": 0,
+        "true_positive": 1
+      },
+      "reconciliation": {
+        "alignment_ref": {
+          "artifact_id": "a5dc3d8a-3b1e-4be0-b9f5-400d054d7d83",
+          "artifact_revision_id": "5b2db01d-d708-4865-aaff-ff42eb7359c3",
+          "sha256": "b24c5656adfa0b53ce93567c7b57186068faf1b582b151eac7f2d8f043d57bdb"
+        },
+        "pending_delta_refs": [],
+        "reconciliation_ref": {
+          "artifact_id": "82834680-806e-4561-8e76-ea84144fc704",
+          "artifact_revision_id": "b9a66e60-4cd6-4784-aeb9-d2a70179fbf8",
+          "sha256": "bf2625b5f472f4d6f25d74d71897e7eb5f1a3884a9aae3cfdf9ae3aaafac4ed6"
+        },
+        "status": "CLEAR"
+      },
+      "review_spans": [
+        {
+          "end": 118,
+          "pattern": "MECHANICAL_CADENCE",
+          "start": 98
+        }
+      ],
+      "stages": [
+        {
+          "adaptive_instruction_ref": null,
+          "attempt_id": "8b63e900-b836-495e-82d6-6e6dfe0b7ce5",
+          "creative_context_ref": {
+            "artifact_id": "29a79014-5317-52ad-a67a-3ea7803c4116",
+            "artifact_revision_id": "d29a3e6d-07aa-5274-a81f-d15b2b2f9753",
+            "sha256": "9f72d459cbfa6be2068e38557a667a7e8433e67daae9ccf7fccb74bd76871658"
+          },
+          "dynamic_assignment_ref": null,
+          "elapsed_seconds": "0.020101",
+          "evidence_ref": {
+            "artifact_id": "403b5767-f8ac-57a8-988f-15f6206785c4",
+            "artifact_revision_id": "c6e9ebef-3b68-59c7-9c44-a1baa192dfad",
+            "sha256": "b433dae3268e090e9bbc81176e8a5839fd739970e472ef7aab8e228c09dc7059"
+          },
+          "generation": 1,
+          "input": {
+            "creative_harness": {
+              "creative_harness": {
+                "adaptive_instructions": {
+                  "auto_promote": false,
+                  "enabled": false
+                },
+                "dynamic_agents": {
+                  "enabled": false
+                },
+                "enabled": true
+              },
+              "kind": "CONFIGURATION",
+              "schema_version": "1.0"
+            },
+            "model_config_sha256": "d9a543292d1ad5a4b31992b46750b6568ebc62243cee3e84de83ed37d7b986df",
+            "output_contract": {
+              "name": "AgentTextOutput",
+              "version": "agent"
+            },
+            "role_id": "evidence_maintainer",
+            "runtime_ref": {
+              "artifact_id": "1aa23cbf-3189-446d-8172-0875daabd971",
+              "artifact_revision_id": "7b2b628c-7f32-44cd-b5ee-0325ce4fc928",
+              "sha256": "92acef6f7a2d5583ebd26560d87c852ebf5446171a73c98cbcd49e892fffdedc"
+            },
+            "runtime_sha256": "92acef6f7a2d5583ebd26560d87c852ebf5446171a73c98cbcd49e892fffdedc",
+            "task_kind": "summary"
+          },
+          "input_ref": {
+            "artifact_id": "a327150c-d3ff-4ab2-bd86-d69ee3b2f3ee",
+            "artifact_revision_id": "43d8890f-c82a-457d-a7ea-a87060c60015",
+            "sha256": "68ba8da012a633978db28e772649d099f856aa7061c1304754f79408bd65a50b"
+          },
+          "output_ref": {
+            "artifact_id": "37d2df8e-a9b1-5a8f-87ca-6c6cf5ec9746",
+            "artifact_revision_id": "f5b06b2d-7a40-51e8-ac2f-adb2ac4d7feb",
+            "sha256": "3ba8ba00e34b1385f505770dceca5215374719cb609db628f3e3588a59784d6c"
+          },
+          "prompt_ref": {
+            "artifact_id": "e8821177-359f-5d5f-9120-739844359c72",
+            "artifact_revision_id": "641b8a3b-4e14-5931-aa5a-021ede91be2b",
+            "sha256": "4f4e80cc29bc0d070c39f03760acee9d8fe6ef1e0690dc6357aa5c15c2f2eb31"
+          },
+          "request_sha256": "4f4e80cc29bc0d070c39f03760acee9d8fe6ef1e0690dc6357aa5c15c2f2eb31",
+          "response_ref": {
+            "artifact_id": "92a50f29-7bc9-5a95-a7c8-a5750771644f",
+            "artifact_revision_id": "01c54b12-680e-571d-9b2b-4173d6313889",
+            "sha256": "accd14b2dc9f2b4c76a075596e9519a999c6b0d3700dc70481233aec35850bd9"
+          },
+          "role": "evidence_maintainer",
+          "status": "VALIDATED_CANDIDATE",
+          "task_id": "66a16f54-4466-4c05-9186-2bb46d2d23ea",
+          "usage": {
+            "actual_amount": "0",
+            "cached_input_tokens": null,
+            "cost_status": "KNOWN",
+            "currency": "USD",
+            "input_tokens": 11591,
+            "output_tokens": 549
+          },
+          "visible_system_sha256": "af93511064b8c05b25c51f25f86d0ccde0674a45a225bd997c6098a51656ef57",
+          "visible_user_sha256": "39b936e9a6411993448fb935351b7fb848821753226e5a73aa35a80d9c9a2de1"
+        },
+        {
+          "adaptive_instruction_ref": null,
+          "attempt_id": "85d027f5-2d2a-42d5-a2e4-7bc4bf20a71f",
+          "creative_context_ref": {
+            "artifact_id": "040c786d-ce84-5f90-a3a6-9a78458ac09b",
+            "artifact_revision_id": "73579d69-7cca-5527-a3af-5f8c26972718",
+            "sha256": "d7abc803842c5970f18d87d3914a408ec1fa2210d1c3cc1093be79e3ef20a8ab"
+          },
+          "dynamic_assignment_ref": null,
+          "elapsed_seconds": "0.023555",
+          "evidence_ref": {
+            "artifact_id": "20002966-16c6-5728-9380-48db58cbf6f6",
+            "artifact_revision_id": "1aa2a597-56ff-522d-b30d-1d3ddd99e4a4",
+            "sha256": "bad50ec94cba5ba2f7096eb9bc41f52ddebe7693a3162e981b141c6ce36ef59a"
+          },
+          "generation": 1,
+          "input": {
+            "creative_harness": {
+              "creative_harness": {
+                "adaptive_instructions": {
+                  "auto_promote": false,
+                  "enabled": false
+                },
+                "dynamic_agents": {
+                  "enabled": false
+                },
+                "enabled": true
+              },
+              "kind": "CONFIGURATION",
+              "schema_version": "1.0"
+            },
+            "model_config_sha256": "d9a543292d1ad5a4b31992b46750b6568ebc62243cee3e84de83ed37d7b986df",
+            "output_contract": {
+              "name": "AgentTextOutput",
+              "version": "agent"
+            },
+            "role_id": "writer",
+            "runtime_ref": {
+              "artifact_id": "00d72849-df4d-47aa-a0a2-373bfcc49583",
+              "artifact_revision_id": "9f2078a0-acdc-4b64-a6cc-07f50c885e65",
+              "sha256": "b0d0d2e40f29fa9d882021be2c8fee4de6dfe19e72b4232dd78ca1a7ec7f64ae"
+            },
+            "runtime_sha256": "b0d0d2e40f29fa9d882021be2c8fee4de6dfe19e72b4232dd78ca1a7ec7f64ae",
+            "task_kind": "scene_draft"
+          },
+          "input_ref": {
+            "artifact_id": "d0540241-c63e-4c29-b50b-13fbef3b7ef4",
+            "artifact_revision_id": "eb35450b-555a-41db-a924-4369abc8bf0a",
+            "sha256": "55940c35ae3bc4f12ab35a95e94a46f790df4bf8794bde087db74e9b7bde2b0a"
+          },
+          "output_ref": {
+            "artifact_id": "19858b42-41ab-51c7-9b77-1eb1d33e0ce5",
+            "artifact_revision_id": "7a71d678-57bf-5404-91c2-e21e786f2191",
+            "sha256": "d94f3d70307f5dc86a341c61ef208553dc143195abab9db912ed37c7feb14f06"
+          },
+          "prompt_ref": {
+            "artifact_id": "ab5dbdf2-2740-5eb0-9ecd-0acbb9cdec60",
+            "artifact_revision_id": "72ab420a-365a-5dd1-b0d9-b751f81cfb13",
+            "sha256": "ecd5fc9875f33fc6ccab6c9443d6b913ee43a2d3832c410297a1931ea8e3f537"
+          },
+          "request_sha256": "ecd5fc9875f33fc6ccab6c9443d6b913ee43a2d3832c410297a1931ea8e3f537",
+          "response_ref": {
+            "artifact_id": "594317dd-08e7-5f85-981a-fa6601a856e2",
+            "artifact_revision_id": "c3a18e68-4de8-5e20-a872-4fcc0b8657cb",
+            "sha256": "6584b6289c70354e14ff3adc7c2fe9bcf30f73f4298daba6102fef1da65a1e65"
+          },
+          "role": "writer",
+          "status": "VALIDATED_CANDIDATE",
+          "task_id": "107b4ab3-2abf-40fb-8a3a-c6fe33eace5c",
+          "usage": {
+            "actual_amount": "0",
+            "cached_input_tokens": null,
+            "cost_status": "KNOWN",
+            "currency": "USD",
+            "input_tokens": 12771,
+            "output_tokens": 1224
+          },
+          "visible_system_sha256": "b646da8794de5e6dec6c9b741d3ff681d813f96eac23f13ebf21419d1ab434b2",
+          "visible_user_sha256": "aa8a3881c7e94c60de2ebab2e9e2c9181c3b74463b9310e15477c6453611dec2"
+        },
+        {
+          "adaptive_instruction_ref": null,
+          "attempt_id": "8d84e7f4-0625-4d5b-8d85-e97ff1e5e0e0",
+          "creative_context_ref": {
+            "artifact_id": "4a3f252b-5b49-5755-972a-ff00e8d8337b",
+            "artifact_revision_id": "6fbbd1bc-1cb7-5bd1-9d0c-2faed365beb9",
+            "sha256": "1f6af436119362f12832da206943a325d57d3bf01c488e7bf2afabe9171707a4"
+          },
+          "dynamic_assignment_ref": null,
+          "elapsed_seconds": "0.027827",
+          "evidence_ref": {
+            "artifact_id": "6143e0b7-61de-5917-8cf8-a2917ffab265",
+            "artifact_revision_id": "0332a0b0-2cdd-5a4b-bac9-5d3e3704fae6",
+            "sha256": "fba1049f1e43b3569d27f50fa6b24364d5088cd7d13412e3e1a00fffcab20e69"
+          },
+          "generation": 1,
+          "input": {
+            "creative_harness": {
+              "creative_harness": {
+                "adaptive_instructions": {
+                  "auto_promote": false,
+                  "enabled": false
+                },
+                "dynamic_agents": {
+                  "enabled": false
+                },
+                "enabled": true
+              },
+              "kind": "CONFIGURATION",
+              "schema_version": "1.0"
+            },
+            "model_config_sha256": "d9a543292d1ad5a4b31992b46750b6568ebc62243cee3e84de83ed37d7b986df",
+            "output_contract": {
+              "name": "AgentReviewOutput",
+              "version": "agent"
+            },
+            "role_id": "reviewer",
+            "runtime_ref": {
+              "artifact_id": "2d626eba-60bf-46c6-92d3-d408ce4f94fc",
+              "artifact_revision_id": "9b56a86b-f59d-4ffe-96dd-04a688d82f99",
+              "sha256": "f052487a12e5940b7de72fe5a304bc4eba1bdfa717ee8d70257a726cc647b516"
+            },
+            "runtime_sha256": "f052487a12e5940b7de72fe5a304bc4eba1bdfa717ee8d70257a726cc647b516",
+            "task_kind": "literary"
+          },
+          "input_ref": {
+            "artifact_id": "8063041a-6735-4e28-99e6-a83a384ce3c9",
+            "artifact_revision_id": "2645ee9f-4458-4a71-acbd-433bc4754889",
+            "sha256": "eed658af3357d5576dc053e98869e70211d39f9b432e015631fd0108a0068736"
+          },
+          "output_ref": {
+            "artifact_id": "2f718afa-ff7a-560b-b4a2-697518a8511b",
+            "artifact_revision_id": "e4c4d54a-8822-587e-b816-b4f65b33dc49",
+            "sha256": "c456429ba05bb06efa59a001139640fe225dd274158cfef21057647011c88ca2"
+          },
+          "prompt_ref": {
+            "artifact_id": "df5667e0-ff0b-51e6-8967-61649fe07c21",
+            "artifact_revision_id": "e526746f-0ac6-5835-a46d-881a8888d220",
+            "sha256": "ae5081b87cf65a9f2c9904c42779364f7e486a1f5e974626d497008331b5b30e"
+          },
+          "request_sha256": "ae5081b87cf65a9f2c9904c42779364f7e486a1f5e974626d497008331b5b30e",
+          "response_ref": {
+            "artifact_id": "77d00955-7db8-5363-8af6-0824fcaf094b",
+            "artifact_revision_id": "5f373489-fc7a-562d-84dc-01454345bf9c",
+            "sha256": "85fc032ccd0cd22744e45eb37dfa724447871c97412419c95793f85a05b86a08"
+          },
+          "role": "reviewer",
+          "status": "VALIDATED_CANDIDATE",
+          "task_id": "0453044d-4048-408d-ad81-0f4d3508a941",
+          "usage": {
+            "actual_amount": "0",
+            "cached_input_tokens": null,
+            "cost_status": "KNOWN",
+            "currency": "USD",
+            "input_tokens": 13927,
+            "output_tokens": 623
+          },
+          "visible_system_sha256": "2216cd013cc926d0d110b9c064b7f50063d705a072d3e44a1228d83310bf23f0",
+          "visible_user_sha256": "ea63685c43b941e3f2dfa0c734b9e430ae7a54c38723ced61ac3e012051cb74f"
+        }
+      ],
+      "status": "COMPLETE",
+      "summary": "桥边的灯还亮着。",
+      "unsettled_attempts": 0,
+      "world_ref_after": {
+        "branch_id": "b5b58625-1705-43c7-8dce-1ad82a66714e",
+        "work_id": "b95cfb30-bdbf-491c-9d0f-e233c6344688",
+        "world_revision_id": "80c74b44-521c-461e-8338-c1099d832fa2"
+      }
+    }
+  ],
+  "rubric": {
+    "independent_batch": false,
+    "interpretation": "calibration only; the fixture intentionally generates the preregistered motifs",
+    "judgment": "one true positive for exact third copy, count all extra or missing findings, preserve equality",
+    "sha256_of_sealed_labels": "a1d7aa0e9e9889bfb0874643a216dc8143afed6c96646c4799b9edd2c2d0c3d0"
+  },
+  "runtime": {
+    "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+    "python": "3.12.14"
+  },
+  "runtime_sha256": {
+    "evidence_maintainer": "388e4accd44267369cee425e9cd7442f755dfb32a8f589e811438fed794ba5d2",
+    "reviewer": "f95c7c1f6ba342fe504e9fd6a25ab95cf1225769777f62f1478c79a4d730a76a",
+    "writer": "c82cae8743e31ec91597341fe7e9952966adc3ab983c8539d6d4c031cb607317"
+  },
+  "shared_input": {
+    "adjacent_draft_ref": {
+      "artifact_id": "c333250c-e442-4a13-b1be-f607c81a9d6d",
+      "artifact_revision_id": "eaa21787-5746-4bd6-93cf-3f98a71c6dad",
+      "sha256": "1f7d55cdca869fabe4afe5ffc2a399ab3d0d7d00f22febac65050828ad9f0372"
+    },
+    "adjacent_sha256": "b1d2e0ebc215cc440944ae49aeb0bef4a85b84db9a8d0ffd9e2bb46597711ad6",
+    "batch_ref": {
+      "artifact_id": "d6ac7b38-c273-4658-a524-4a8cf196ae78",
+      "artifact_revision_id": "7a0cb519-36a8-4e5f-a467-f3aa76222fe9",
+      "sha256": "c2ff31bdee3b2d39b1873b3d5293c0deb13093f6748b4c1fce9fcf9d860bdcd4"
+    },
+    "goal": "写完渡口关门前这一场。保留已给的背景与未知处，让最后一个动作结束这场。",
+    "original_source_sha256": "12c1d512f5bad133466c9164354207642237c62349f4231fcaeb3049d2135781",
+    "outcome": "validated draft and checked review; official edition unchanged",
+    "plan_ref": {
+      "artifact_id": "42df7f7d-beb2-49d6-8716-8fcd3bf21033",
+      "artifact_revision_id": "9a77fd7b-9997-47c7-84aa-394f1270b2ce",
+      "sha256": "2b3b59a457a4e5b0b71fe7c45ec3fe7c28a0d3d4a53983bdcd531c723f3a63af"
+    },
+    "reader_cut_ordinal": 5,
+    "scene_ref": {
+      "artifact_id": "2560ef21-80cc-4315-a596-132c7a1474d1",
+      "artifact_revision_id": "ca73092a-df38-4199-b4f2-15476d60b907",
+      "sha256": "669fb23e373573f9cd0e8e43833ef6eb3c29a59fac128cdc45a57ddf4c4382a8"
+    },
+    "stages": [
+      "evidence_maintainer/summary",
+      "writer/scene_draft",
+      "reviewer/literary"
+    ],
+    "subject_id": "4ef873a8-4f45-56f0-ad45-67928097cea9",
+    "target_story_time": {
+      "phase": 1,
+      "tick": 1
+    },
+    "world_effects_permitted": false,
+    "world_ref": {
+      "branch_id": "b5b58625-1705-43c7-8dce-1ad82a66714e",
+      "work_id": "b95cfb30-bdbf-491c-9d0f-e233c6344688",
+      "world_revision_id": "80c74b44-521c-461e-8338-c1099d832fa2"
+    }
+  },
+  "source_locator": {
+    "paragraphs": [
+      1,
+      2,
+      3
+    ],
+    "path": "evidence/p2/batch3/short-volume/run/release.txt",
+    "sha256": "b1d2e0ebc215cc440944ae49aeb0bef4a85b84db9a8d0ffd9e2bb46597711ad6"
+  },
+  "source_module_sha256": {
+    "application/adaptive_evaluation.py": "de3e62e2106c05b3896c4222ac49b3313e236d6e7740012b9456d86237bda7bb",
+    "application/adaptive_instructions.py": "57bba0b7e99541d9130146acb245e49c1726102314da0dbf310af1bb2e9ce8a3",
+    "application/adaptive_promotion.py": "0fd88a10be50fab9a83fcd76aa50ab059cdd404e4fd13196846d67329c94fc72",
+    "application/adaptive_runtime.py": "dde828b714e0070af779ecbab5666ebdafe8bca38882083aca686a302122a6da",
+    "application/agent_gateway.py": "328855ff3ebcdf60db60fbb2cf6057fd7835de1ec751e18757ca23b731c4c476",
+    "application/candidate_delivery.py": "00c366ebac215714d82b501eb52d84552f74bc0c4c70fa9325cd2dab3f28b5d2",
+    "application/creative_context.py": "0c40c3e095ff8e8938b56355d31dab1e23703bbdae70ba370a0e882798fdbdd8",
+    "application/creative_context_store.py": "c1226b1acc45b5f8db88e27416d79bc190efeb49fea6d45cace65cff5a5623eb",
+    "application/creative_review.py": "35445815c24006003113a0be4873bb810ffa44ff9ecfc4067ee0ade412d3d517",
+    "application/dynamic_agents.py": "9b09f2f1f40c35d64aac143d6999f826e8e412992120b878a8a4e833b4b94c62",
+    "application/dynamic_runtime.py": "36adb108e8a5dcbf4e8fc5d7a8b41711343e9225df8a7c7db32e791e1fcaca42",
+    "application/runtime_tasks.py": "7ed0f9290526178d7e7bd6b851ac33d30da4c4b5b55deae1adf5208d880c5c40",
+    "domain/creative_review.py": "47143b9fea0ef3f71b23b35b708fa9d0f41d69ed97215bc4ba901e2caa3207e4"
+  },
+  "total_nf_attempts": 9,
+  "unsealed_labels": {
+    "expected_count": 2,
+    "expected_occurrence": 3,
+    "reader_judgments": 0,
+    "sha256": "a1d7aa0e9e9889bfb0874643a216dc8143afed6c96646c4799b9edd2c2d0c3d0"
+  },
+  "workshop_attestations": [
+    {
+      "binding_id_sha256": "f3d4faef02ef8286e15c892cd057ab62e163a45ef802204d0042558464e2e942",
+      "freeze_task": false,
+      "task_id": "c13a0ace-28d2-4857-94ee-e526fca2a266"
+    },
+    {
+      "binding_id_sha256": "f3d4faef02ef8286e15c892cd057ab62e163a45ef802204d0042558464e2e942",
+      "freeze_task": false,
+      "task_id": null
+    },
+    {
+      "binding_id_sha256": "f3d4faef02ef8286e15c892cd057ab62e163a45ef802204d0042558464e2e942",
+      "freeze_task": false,
+      "task_id": null
+    },
+    {
+      "binding_id_sha256": "f3d4faef02ef8286e15c892cd057ab62e163a45ef802204d0042558464e2e942",
+      "freeze_task": true,
+      "task_id": "e58a1639-21ca-40a9-887d-8ceea9ebcf31"
+    },
+    {
+      "binding_id_sha256": "f3d4faef02ef8286e15c892cd057ab62e163a45ef802204d0042558464e2e942",
+      "freeze_task": true,
+      "task_id": "e58a1639-21ca-40a9-887d-8ceea9ebcf31"
+    },
+    {
+      "binding_id_sha256": "f3d4faef02ef8286e15c892cd057ab62e163a45ef802204d0042558464e2e942",
+      "freeze_task": true,
+      "task_id": "e58a1639-21ca-40a9-887d-8ceea9ebcf31"
+    },
+    {
+      "binding_id_sha256": "f3d4faef02ef8286e15c892cd057ab62e163a45ef802204d0042558464e2e942",
+      "freeze_task": true,
+      "task_id": "e58a1639-21ca-40a9-887d-8ceea9ebcf31"
+    },
+    {
+      "binding_id_sha256": "f3d4faef02ef8286e15c892cd057ab62e163a45ef802204d0042558464e2e942",
+      "freeze_task": true,
+      "task_id": "e58a1639-21ca-40a9-887d-8ceea9ebcf31"
+    }
+  ]
+}

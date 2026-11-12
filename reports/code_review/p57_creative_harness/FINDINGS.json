@@ -1,0 +1,456 @@
+{
+  "schema_version": 1,
+  "scope": {
+    "project": "SKYdayDUCK/NovelFactory",
+    "baseline": "1cce11b5f0ead0d6ba4d57658a5ff5533b2ef37b",
+    "stage_code_tip": "602ba7fe8ece18503ac3b994adee4f00634cd761",
+    "reviewed_main_merge": "1de471076b8fb4240f95ff8033c60db34c187404",
+    "final_main": "d6ff88223d6ae655a45d713687e5e8119e157737",
+    "final_main_tree": "eeba8d062d6d8aeb9628f60b564fe9653443a05c",
+    "review_started_utc": "2026-11-12T10:13:24Z",
+    "stage_commits": {
+      "S1": "2d47a66f297dd017c6bac3f207abb6f6752cc742",
+      "S2": "32ef8b3ced7fb5ea06cb25ecd4ccfa436fe9150b",
+      "S3": "7a480d0371622966520f354c19e80257465398b9",
+      "S4": "7e8659f286407b0428a37f3fae8e9c6905e7c203",
+      "S5": "976e3212fcb42b9251fc2858a3b9d9ce3c3a646c",
+      "S6": "602ba7fe8ece18503ac3b994adee4f00634cd761"
+    }
+  },
+  "counts": {
+    "findings": 9,
+    "P0": {
+      "confirmed": 0
+    },
+    "P1": {
+      "confirmed": 5,
+      "fixed_verified": 5,
+      "open": 0
+    },
+    "P2": {
+      "confirmed": 4,
+      "open_deferred": 4
+    },
+    "P3": {
+      "confirmed": 0
+    }
+  },
+  "final_main_verification": [
+    {
+      "run_id": 43204722942,
+      "name": "Creative Harness engineering",
+      "result": "success",
+      "summary": "5/5 作业成功，真实 PG Harness 76 passed，双服务 14 passed，三臂 1 passed，S0 静态与 WAL/PITR 通过。",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43204722942"
+    },
+    {
+      "run_id": 43204723031,
+      "name": "P1 and P2 production integrity",
+      "result": "success",
+      "summary": "940 passed, 18 skipped, 2 warnings, 17 subtests passed in 993.82s (0:16:33)。Schema/domain/HTTP 与真实 PostgreSQL 的全量集成、并发和恢复作业均成功。",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43204723031"
+    },
+    {
+      "run_id": 43204722952,
+      "name": "P2 measured capacity and recovery",
+      "result": "failure",
+      "summary": "50 与 200 agents overload 两个原门槛未过，其他作业通过。200 热点两个测量约 48.04/50.56 次每秒，门槛 950；正确性与有界恢复通过。",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43204722952"
+    },
+    {
+      "run_id": 43204723111,
+      "name": "P3 scale experiments with strict unmet gates",
+      "result": "failure",
+      "summary": "Measured 1000-read-open 未过，5000 次中 2481 次 HTTP 200、2514 次 429、5 次传输错误，52.37 次请求头启动每秒，门槛 950。500 持续读 600.004 秒、12000/12000 个 HTTP 200，一小时长测未执行。",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43204723111"
+    },
+    {
+      "run_id": 43204723135,
+      "name": "Agent Workshop PostgreSQL and stdio",
+      "result": "success",
+      "summary": "3/3 作业成功。常规 workshop/integration 17 passed；W6 message capacity 与 matched admission 两个场景作业均成功。独立 PostgreSQL 系统标识与强制命令 SSH 双代理回执有效，模型轮次 0。",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43204723135"
+    },
+    {
+      "run_id": 43204723460,
+      "name": "P3 P4 measured evidence",
+      "result": "failure",
+      "summary": "Independent load process / 200 / overload 原门槛未过，其他作业通过。与 S0 同名同类型。",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43204723460"
+    }
+  ],
+  "selection_verification": {
+    "run_id": 43203324524,
+    "job_id": 131132080228,
+    "rebuilt_single_parent_patches": 12,
+    "selected_files": [
+      ".github/workflows/agent-workshop.yml",
+      "src/novel_factory/application/adaptive_evaluation.py",
+      "src/novel_factory/application/agent_gateway.py",
+      "src/novel_factory/application/creative_planning.py",
+      "src/novel_factory/application/creative_review.py",
+      "src/novel_factory/application/creative_revision_brief.py",
+      "src/novel_factory/application/creative_simulation.py",
+      "src/novel_factory/application/dynamic_runtime.py",
+      "src/novel_factory/application/kernel.py",
+      "src/novel_factory/application/review_independence.py",
+      "src/novel_factory/interfaces/review_independence.py",
+      "tests/integration/test_adaptive_evaluation.py",
+      "tests/integration/test_creative_metrics.py",
+      "tests/integration/test_harness_audit_scope.py",
+      "tests/integration/test_harness_editor_independence.py",
+      "tests/integration/test_harness_review_workflow.py",
+      "tests/integration/test_review_independence.py",
+      "workshop/integration/test_creative_review_independence.py",
+      "workshop/integration/test_dynamic_skill_dispatch.py"
+    ],
+    "patch_sha256": "45f3fe62c3de88107c59597a3074dea3342846b31a679e7fc6e8df5d43675478",
+    "name_status_sha256": "7077bbcb58836913b0d715c17d2769fff74a9493f2cf1270ea12f553b993b1ea"
+  },
+  "findings": [
+    {
+      "id": "P57-SEC-01",
+      "severity": "P1",
+      "module": "S1 / Gateway 制品访问",
+      "path": "src/novel_factory/application/kernel.py",
+      "lines": "273–307，349–360",
+      "function": "Kernel._check_artifact_read / Kernel.get_artifact",
+      "related": [
+        "src/novel_factory/application/agent_gateway.py:374–393",
+        "src/novel_factory/application/dynamic_runtime.py:112–130"
+      ],
+      "description": "单独启用 S1 的模型提示、响应及候选等网关材料缺少可供通用读入口复核的创作分支归属。",
+      "trigger": "同作品的管理员限于另一个分支，测试持有对应合成制品的已知引用。静态对照和动态快照分别检查。",
+      "reproduction": "对合成稿件通过普通 Gateway 准备及完成一次工作，再核对授权策略返回值；旧格式回执使用原生审计关联。比对 ALLOW/DENY，不向报告输出稿件。",
+      "impact": "受影响的是已知引用且有同作品管理员授权的原始创作数据。未观察到匿名读取、跨作品或角色模型 MCP 的裸读。",
+      "recommendation": "在新网关阶段保留位置和代际，旧制品从受信任的冻结任务及审计回执恢复来源，读前、读后都核验该分支授权；保留静态兼容性。",
+      "code_sha": "1de471076b8fb4240f95ff8033c60db34c187404",
+      "state": "FIXED_VERIFIED",
+      "proof_level": "真实正常业务反例、修复后专项、最终主线复验",
+      "fix_commits": [
+        {
+          "development": "425b80002aff73b78f30b6a27503001775b22907",
+          "main": "52dea422b5e931d5e2c16eeaeaf4170f01a470a2"
+        },
+        {
+          "development": "3a979cb0fd74170e256fb26703ad9e59396b428f",
+          "main": "95fd21afec125276a4794351526a5f959153389a"
+        }
+      ],
+      "retest": {
+        "original_run": 43202876684,
+        "original_job": 131130521377,
+        "original_result": "4 failed, 1 passed in 3.48s",
+        "corrected_run": 43202876684,
+        "corrected_job": 131130521753,
+        "corrected_result": "5 passed in 3.06s"
+      }
+    },
+    {
+      "id": "P57-SEC-02",
+      "severity": "P1",
+      "module": "S2 / S3 / S4 来源授权",
+      "path": "src/novel_factory/application/creative_planning.py",
+      "lines": "17–48，275–311",
+      "function": "CreativePlanningService.decide / CreativeReviewService._current_review",
+      "related": [
+        "src/novel_factory/application/creative_review.py:383–448",
+        "src/novel_factory/application/mcp_runtime.py:158–197，262–278"
+      ],
+      "description": "候选与审稿完成后，最终控制器路径复核 NF grant、代际或审稿独立性，却漏查产生结果的动态员工当前是否仍获 Workshop 的对应 Skill。",
+      "trigger": "正常授权产生候选或签名审核后，仅撤销源 Skill，保留 NF grant、在职关系和控制器授权。",
+      "reproduction": "在两个独立 PostgreSQL 集群上经 W4 正常授权、委托和撤权，再调用 NF 正规计划与编辑决定端口。核对原生计划指针及编辑记录。",
+      "impact": "原实现可以采信没有当前来源权限的工作结果，改变计划指针或登记编辑决定。此两次复现都没有正式世界事件或商业调用。",
+      "recommendation": "在 NF 写事务外取当前 W4 见证，在最终业务事务中同时验证任务代际、冻结绑定、工具与能力；决定前后对照原指针和历史。",
+      "code_sha": "1de471076b8fb4240f95ff8033c60db34c187404",
+      "state": "FIXED_VERIFIED",
+      "proof_level": "真实正常业务反例、修复后专项、最终主线复验",
+      "fix_commits": [
+        {
+          "development": "0fba1c9e852ac10ef4f4edb801a9b890a5718490",
+          "main": "b4970e8622f72e1965dc5d878d0cd13bd3961f46"
+        },
+        {
+          "development": "e1f74c72ea7ddd08ca349c3203dfb96a3ae89a47",
+          "main": "fb1160cbe610c50c2b4e1532c5e42ebf1f7da761"
+        },
+        {
+          "development": "9a205cdd897d66f981eaf346673908fb15c64edc",
+          "main": "bcc691aa671a0f402b1c005ea513e7a691f90376"
+        },
+        {
+          "development": "2e5c3a34d7173199387913c6a3b3da7bd2cded21",
+          "main": "a1047b0038917c4de58ae4a4831d7a08abd8044b"
+        }
+      ],
+      "retest": {
+        "original_run": 43201932268,
+        "original_job": 131127269538,
+        "original_result": "2 failed in 17.26s (DID NOT RAISE in both final decision checks)",
+        "corrected_run": 43201932268,
+        "corrected_job": 131127269303,
+        "corrected_result": "2 passed in 26.80s"
+      }
+    },
+    {
+      "id": "P57-SEC-03",
+      "severity": "P1",
+      "module": "S3 / 终审身份独立性",
+      "path": "src/novel_factory/application/creative_review.py",
+      "lines": "432–443，463–477",
+      "function": "CreativeReviewService.decide",
+      "related": [
+        "src/novel_factory/application/review_independence.py:53–71，160–191",
+        "src/novel_factory/application/editorial.py:501–523"
+      ],
+      "description": "正式终审仅比较实际控制器与原作者、审稿人的 principal_id；独立性收据验证作者与读者，未将终审者的实质主体组纳入原签名。",
+      "trigger": "一份合格的阅读和合法完整的原生终审申请有多个 NF 身份，而当前控制器没有独立的编辑主体组凭据。",
+      "reproduction": "让已取得授权的控制器对自有合成稿使用正规 RETAIN 决定，并用独立登记过和未登记的编辑身份做对照，保存原生决定状态。",
+      "impact": "在多身份环境中，原终审可被接受而无法证明终审者与作者、审稿人实质分离。未观察到对既有世界事实的改变。",
+      "recommendation": "把当前控制器 grant 和 epoch 绑定到登记的实质主体，逐一比对同卷相关稿件的作者谱系与独立审稿人，并保留正式审批证据。",
+      "code_sha": "1de471076b8fb4240f95ff8033c60db34c187404",
+      "state": "FIXED_VERIFIED",
+      "proof_level": "真实正常业务反例、修复后专项、最终主线复验",
+      "fix_commits": [
+        {
+          "development": "7e63ef5e8c60f5988a05e06a75fa2176c450d0ad",
+          "main": "2b26f54b4ec9a196c33edd23e6ff12f853821d6a"
+        },
+        {
+          "development": "a6f08bf65b4c66a913964d7e88b250500f05c985",
+          "main": "92fbf9bcdfaa1dde80516c211aad04605b1af801"
+        },
+        {
+          "development": "aadaf43050f068a15bd9d753ccba1a48b9e8f225",
+          "main": "8e880af06508acb19e5c6074da3e8de8cd24d007"
+        },
+        {
+          "development": "644b69bc0e397abcb894a395707a76d6d10dc861",
+          "main": "d6ff88223d6ae655a45d713687e5e8119e157737"
+        }
+      ],
+      "retest": {
+        "original_run": 43202380763,
+        "original_job": 131128823797,
+        "original_result": "1 failed in 4.13s (original completed the valid native RETAIN)",
+        "corrected_run": 43203324597,
+        "corrected_job": 131132081080,
+        "corrected_result": "11 passed in 39.94s"
+      }
+    },
+    {
+      "id": "P57-CR-01",
+      "severity": "P1",
+      "module": "S5 / A/B 留出资格",
+      "path": "src/novel_factory/application/adaptive_evaluation.py",
+      "lines": "325–396，799–842",
+      "function": "_quality / AdaptiveEvaluationService.inspect / require_release",
+      "related": [
+        "src/novel_factory/application/adaptive_instructions.py:498，1008–1029"
+      ],
+      "description": "工程晋级门槛按报告 revision 计算正负留出样本。底稿和有重叠的多稿阅读窗口没有独立计数。",
+      "trigger": "两个已签名的读者结果同源，一份为 PROSE 正例、一份为 NAMING 保留负例。两份报告都与训练集分离。",
+      "reproduction": "通过 S3 对同一留出稿提交不同层的解读，再从 S5 正常提案、冻结、运行和尝试取晋级资格；保留全部配对测量。",
+      "impact": "原实现以一篇稿件提供两个独立控制并满足工程晋级资格。正式指令发布仍需另行审批。",
+      "recommendation": "用全部冻结来源正文的内容 SHA 检查实质重叠，重复稿不具备送审资格。旧报告保留原始有签名的数据，并在使用时按当前规则核验。",
+      "code_sha": "1de471076b8fb4240f95ff8033c60db34c187404",
+      "state": "FIXED_VERIFIED",
+      "proof_level": "真实正常业务反例、修复后专项、最终主线复验",
+      "fix_commits": [
+        {
+          "development": "3cfb4884120ddeb9a08e8c1396766a78f17dbc8a",
+          "main": "bc165661cf2960979df9f15d5789e2c441ac14b6"
+        }
+      ],
+      "retest": {
+        "original_run": 43199663974,
+        "original_job": 131119434366,
+        "original_result": "1 failed, 4 passed in 27.44s",
+        "corrected_run": 43199663974,
+        "corrected_job": 131119434962,
+        "corrected_result": "5 passed in 31.60s",
+        "historical": {
+          "run": 43203462448,
+          "job": 131132551642,
+          "summary": [
+            "P57_S5_LEGACY archived_eligible=true current_overlapping_eligible=false current_disjoint_eligible=true",
+            "1 passed in 8.78s"
+          ]
+        }
+      }
+    },
+    {
+      "id": "P57-TC-01",
+      "severity": "P1",
+      "module": "主线 Workshop 集成验收",
+      "path": ".github/workflows/agent-workshop.yml",
+      "lines": "90–93，267–280",
+      "function": "Verify dual-ledger recovery on the integrated NF source and native PG17",
+      "related": [
+        ".github/workflows/creative-harness.yml:137–139",
+        "workshop/integration/"
+      ],
+      "description": "常规 Workshop 工作流用根解释器运行整个集成套件，Workshop 安装于另一虚拟环境，隔离子进程找不到包或 aw-mcp 命令。",
+      "trigger": "主线推送后，用干净的官方运行器走原 Workshop 集成工作流。",
+      "reproduction": "保留原主线作业的九项失败；在完全相同的工作流里安装检出的 Workshop 分发到根解释器并把该解释器的脚本目录加入本步骤 PATH，复跑整个集合。",
+      "impact": "正常主线载体无法给出九项真实双库测试的结论。当时另一个专用载体 11 项通过。",
+      "recommendation": "在实际启动子服务的解释器安装当前 checkout 的 Workshop，保留独立环境、服务 UID 与实数据库验收。",
+      "code_sha": "1de471076b8fb4240f95ff8033c60db34c187404",
+      "state": "FIXED_VERIFIED",
+      "proof_level": "真实正常业务反例、修复后专项、最终主线复验",
+      "fix_commits": [
+        {
+          "development": "0a24898c6a6719b6e61d454ce05ef13eb4f72d4a",
+          "main": "1c01dabe7f2de2308a814be14c79e02ab17cc3aa"
+        }
+      ],
+      "retest": {
+        "original_run": 43197896850,
+        "original_job": 131113456793,
+        "original_result": "9 failed, 5 passed in 154.96s",
+        "corrected_run": 43201789218,
+        "corrected_job": 131126778921,
+        "corrected_result": "14 passed in 134.55s (0:02:14)"
+      }
+    },
+    {
+      "id": "P57-CR-02",
+      "severity": "P2",
+      "module": "S3 / 文学读者意见",
+      "path": "src/novel_factory/application/creative_review.py",
+      "lines": "310–329",
+      "function": "CreativeReviewService.review",
+      "related": [
+        "src/novel_factory/domain/creative_review.py:127–207，325",
+        "tests/unit/test_creative_review_rubrics.py:36–61"
+      ],
+      "description": "PLOT 和 STAGING 没有自动判断路径，空 observations 既可代表读者审清，也可代表读者未表态。两者入库后均可得到 PASS/ACCEPT_CANDIDATE。",
+      "trigger": "合格读者取得完整阅读回执，并在这两个层之一不填写意见。",
+      "reproduction": "在原合并及最终修复产品代码上，合格独立读者在真实 PostgreSQL 绑定稿件和阅读覆盖，分别运行 PLOT / STAGING，刻意留空 observations。两层均写入 native PASS 和 advisory ACCEPT_CANDIDATE，各树两项通过。记录本身没有明示已审清的字段。",
+      "impact": "下游可能过度解读空读者意见；正式世界接受仍有独立流程，读者审清也确属合法业务。",
+      "recommendation": "给人工或受托读者增加明示已审清/未给判断的区别，补两种业务结果的成对用例。",
+      "defer": "需要约定读者与编辑端口的语义并兼容历史报告。当前部署保留逐稿人工阅读。",
+      "proof_level": "真实生产服务入口复现，读者为何给空意见仍需人类确认",
+      "code_sha": "1de471076b8fb4240f95ff8033c60db34c187404",
+      "state": "OPEN_DEFERRED",
+      "retest": {
+        "run": 43205583624,
+        "jobs": [
+          {
+            "job": 131139849724,
+            "version": "empty-reader-observation original",
+            "outcome": "success",
+            "observed": [
+              "P57_EMPTY_READING PLOT PASS ACCEPT_CANDIDATE",
+              ".P57_EMPTY_READING STAGING PASS ACCEPT_CANDIDATE",
+              "2 passed in 4.96s"
+            ]
+          },
+          {
+            "job": 131139850067,
+            "version": "empty-reader-observation corrected",
+            "outcome": "success",
+            "observed": [
+              "P57_EMPTY_READING PLOT PASS ACCEPT_CANDIDATE",
+              ".P57_EMPTY_READING STAGING PASS ACCEPT_CANDIDATE",
+              "2 passed in 5.22s"
+            ]
+          }
+        ],
+        "open": true
+      }
+    },
+    {
+      "id": "DB-01",
+      "severity": "P2",
+      "module": "双系统物理恢复资格",
+      "path": "workshop/integration/test_paired_restore.py",
+      "lines": "95–139，250–285，389–399，476–519",
+      "function": "test_physical_pitr_both_directions",
+      "related": [
+        "reports/harness/S6_ACCEPTANCE.md:12",
+        "workshop/integration/conftest.py:18–79"
+      ],
+      "description": "paired-restore 在一个 PostgreSQL 物理集群创建两个服务库，基于一份基备与一条 WAL 时间线恢复后交叉搭配 live peer。S6 验收文档对独立物理备份的表述过宽。",
+      "trigger": "两个真实独立集群分别归档，恢复点与时间线出现偏差。",
+      "reproduction": "核对 initdb、pg_basebackup、服务 DSN 和恢复点；主线实际 PITR 日志及双向错配测试验证已有范围。两个独立归档的异步恢复没有执行。",
+      "impact": "尚无对两条独立 WAL 时间线恢复点偏移的实测保证，现有测试未观察到数据丢失。",
+      "recommendation": "按两独立集群生成两份基备及归档，故意错开命名时间点并保留两个 system_identifier、LSN 和对账结果；更新正式验收用语。",
+      "defer": "需单独组织双集群灾备资格演练，不能以已通过的单时间线试验承诺现场灾备。",
+      "proof_level": "代码与实际恢复收据交叉确认；独立双归档未测",
+      "code_sha": "1de471076b8fb4240f95ff8033c60db34c187404",
+      "state": "OPEN_DEFERRED",
+      "retest": {
+        "method": "代码与实际恢复收据交叉确认；独立双归档未测",
+        "open": true
+      }
+    },
+    {
+      "id": "PERF-01",
+      "severity": "P2",
+      "module": "S4 / 动态实例历史",
+      "path": "src/novel_factory/application/dynamic_agents.py",
+      "lines": "57–66，164–174，628–668",
+      "function": "DynamicAgentService.history",
+      "related": [
+        "src/novel_factory/infrastructure/objects.py"
+      ],
+      "description": "历史接口按实例遍历全部事件和修订，逐项做 SQL、对象校验及内容指纹校验，且在该期间持有作品共享锁。",
+      "trigger": "控制员读取长期活动、已有大量版本与事件的员工实例。",
+      "reproduction": "按实际源码和现有 5 个事件、2 个修订的场景计算，单逐项循环已有 7 次 SQL 与 21 次 fsync 调用；不对该计数作壁钟延迟换算。",
+      "impact": "查询、响应大小与长历史持锁随历史线性增长。未给出生产 P95、死锁和用户受影响次数的实测值。",
+      "recommendation": "设计带冻结 epoch 的分页游标及批量检索，保留逐项完整性语义，另做长历史基准测试。",
+      "defer": "分页需要兼容返回契约和历史完整性验证。影响已授权的管理查询，未发现对核心世界或费用账本的破坏。",
+      "proof_level": "源码计数与现有示例，未运行长历史性能样本",
+      "code_sha": "1de471076b8fb4240f95ff8033c60db34c187404",
+      "state": "OPEN_DEFERRED",
+      "retest": {
+        "method": "源码计数与现有示例，未运行长历史性能样本",
+        "open": true
+      }
+    },
+    {
+      "id": "PERF-02",
+      "severity": "P2",
+      "module": "S6 / 角色两阶段调用计量",
+      "path": "src/novel_factory/application/creative_metrics.py",
+      "lines": "61–77，190–212，382–409",
+      "function": "_spend / CreativeMetricsService.report",
+      "related": [
+        "src/novel_factory/application/actor_lookup.py:105–146"
+      ],
+      "description": "S6 投影只从 AGENT_CALL_EVIDENCE 归集调用，漏归第一阶段 AGENT_ROLE_TOOL_RESPONSE。",
+      "trigger": "角色以正常工具选择完成模型第一阶段，特别是有 provider token 而金额 UNKNOWN 的响应。",
+      "reproduction": "在原始合并、真实 PG 和本地隔离的角色回放上跑 read 与 unknown-first，再用同一 controller 查询真实分支 S6 report。",
+      "impact": "成功两调用共 58 Token 和 0.10 夹具金额，其中一笔 29 Token 被列为 UNCLASSIFIED_LEDGER；第一调用 UNKNOWN 时 provider 返回 29，而报表 known_tokens=0、实际金额 null。权威 Attempt、预留及防重发未受影响。",
+      "recommendation": "以授权工作、分支、任务代际与 attempt 连接首阶段不可变回执；金额未知保持 null，已知 Token 单独记录，核对 Skill、调用数量及延迟分组。",
+      "defer": "属于观测分类，金额与预算的权威来源独立。投产计量前须修正并回填相容范围；本次只选取严重修复进入主线。",
+      "proof_level": "已经通过真实报表入口完成独立复现",
+      "retest": {
+        "run": 43202106191,
+        "job": 131127864815,
+        "tests": "2 passed, 11 deselected in 5.03s"
+      },
+      "code_sha": "1de471076b8fb4240f95ff8033c60db34c187404",
+      "state": "OPEN_DEFERRED"
+    }
+  ],
+  "qualification_limits": {
+    "AT_30": "NOT_MET",
+    "P6": "BLOCKED_LOCAL_AUTHORIZATION",
+    "literary": "NOT_EVALUATED",
+    "commercial_calls": 0,
+    "paid_usd": "0",
+    "independent_human_confirmation_batches": 0,
+    "scoped_dual_archive_disaster_recovery": "NOT_EXECUTED",
+    "long_history_latency": "NOT_MEASURED"
+  },
+  "comparison": {
+    "stage_git_blob": "edbdaf836db72bc22200fa237c08d5f6923b0266",
+    "final_main_git_blob": "f6750235dce37f1ef5559ef46fa7d283554b9e64",
+    "final_main_raw_sha256": "6c039e6d34cc1190b95bde25b073be7d4fd99adb6f4f8f72859224cb04c227d2",
+    "paired_scene_count": 1,
+    "complete_windows": 3,
+    "measured_nf_fixture_attempts": 9
+  }
+}
