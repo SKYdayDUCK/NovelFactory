@@ -4,23 +4,23 @@ index 386fd55..147c4ed 100644
 +++ b/src/novel_factory/application/queries.py
 @@ -45,19 +45,29 @@ def _wr(revision):
      return {key: revision[key] for key in ('work_id', 'branch_id', 'world_revision_id')}
- 
- 
+
+
 -class PreparedWorldQuery(bytes):
 +class _PreparedRequest(bytes):
      """Immutable JSON produced only after applying the public request contract."""
- 
+
      __slots__ = ()
- 
+
      def __new__(cls, request):
 -        value = validate_contract('UnifiedQueryRequest', request, '2.1')
 +        value = validate_contract(cls.contract, request, '2.1')
          return super().__new__(cls, json.dumps(value, separators=(',', ':'), allow_nan=False).encode('ascii'))
- 
+
      def materialize(self):
          return json.loads(self)
- 
- 
+
+
 +class PreparedWorldQuery(_PreparedRequest):
 +    __slots__ = ()
 +    contract = 'UnifiedQueryRequest'
@@ -36,7 +36,7 @@ index 386fd55..147c4ed 100644
          self.kernel = kernel
 @@ -550,7 +560,10 @@ class WorldQueryService:
          return result
- 
+
      def batch(self, principal, request):
 -        request = validate_contract('QueryBatchRequest', request, '2.1')
 +        if type(request) is PreparedQueryBatch:
@@ -62,7 +62,7 @@ index 75a526e..0e118ba 100644
 @@ -288,19 +288,21 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
      async def health():
          return {"status": "alive", "release": "P0/P1"}
- 
+
 -    @app.post("/api/v1/queries/timeline")
 -    async def query(request: Request):
 +    async def query_body(request, prepared_type):
@@ -80,13 +80,13 @@ index 75a526e..0e118ba 100644
 +    async def query(request: Request):
 +        payload = await query_body(request, PreparedWorldQuery)
          return await execute(request, "query", lambda principal: query_service.query(principal, payload))
- 
+
      @app.post("/api/v1/queries/batch")
      async def batch(request: Request):
 -        payload = await _body(request, "QueryBatchRequest", "2.1")
 +        payload = await query_body(request, PreparedQueryBatch)
          return await execute(request, "query", lambda principal: query_service.batch(principal, payload))
- 
+
      @app.post("/api/v1/queries/semantic-assumptions")
 diff --git a/tests/service/test_http.py b/tests/service/test_http.py
 index a9dc3c1..46ea6d5 100644
