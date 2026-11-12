@@ -3,7 +3,6 @@ import asyncio
 import json
 import os
 from pathlib import Path
-import socket
 import sys
 
 import pytest
@@ -48,28 +47,40 @@ def test_private_binding_is_verified_and_size_bounded(tmp_path):
 def test_native_host_reaps_child_after_host_exits(tmp_path):
     async def run():
         script = """import subprocess, sys
-print("host-ready", flush=True)
-subprocess.Popen([sys.executable, "-c", sys.argv[1]], stdout=sys.stdout)
+child = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"],
+                         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=sys.stderr)
+print(child.pid, flush=True)
 sys.stdin.buffer.read()
 """
-        child = """import socket, time
-s = socket.socket()
-s.bind(("127.0.0.1", 0))
-s.listen()
-print(s.getsockname()[1], flush=True)
-time.sleep(60)
-"""
-        proc = await start_host(sys.executable, "-c", script, child, stdin=asyncio.subprocess.PIPE,
-                                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.DEVNULL,
-                                env=isolated_host_environment(tmp_path))
-        try:
-            assert (await asyncio.wait_for(proc.stdout.readline(), 10)).strip() == b"host-ready"
-            port = int(await asyncio.wait_for(proc.stdout.readline(), 10))
-        finally:
-            await asyncio.wait_for(stop_host(proc), timeout=8)
-        assert proc.returncode == 0
-        with pytest.raises(ConnectionRefusedError):
-            socket.create_connection(("127.0.0.1", port), timeout=2)
+        diagnostics = tmp_path / "host-stderr.txt"
+        with diagnostics.open("wb") as err:
+            proc = await start_host(sys.executable, "-c", script, stdin=asyncio.subprocess.PIPE,
+                                    stdout=asyncio.subprocess.PIPE, stderr=err,
+                                    env=isolated_host_environment(tmp_path))
+            handle = None
+            try:
+                raw = await asyncio.wait_for(proc.stdout.readline(), 10)
+                assert raw.strip().isdigit(), diagnostics.read_text(errors="replace")
+                pid = int(raw)
+                if os.name == "nt":
+                    import win32api
+                    import win32con
+                    import win32event
+
+                    handle = win32api.OpenProcess(win32con.SYNCHRONIZE, False, pid)
+                    assert win32event.WaitForSingleObject(handle, 0) == win32con.WAIT_TIMEOUT
+            finally:
+                await asyncio.wait_for(stop_host(proc), timeout=8)
+        assert proc.returncode == 0, diagnostics.read_text(errors="replace")
+        if handle is not None:
+            try:
+                assert win32event.WaitForSingleObject(handle, 2000) == win32con.WAIT_OBJECT_0
+            finally:
+                handle.Close()
+        elif sys.platform.startswith("linux"):
+            stat = Path(f"/proc/{pid}/stat")
+            if stat.exists():
+                assert stat.read_bytes().rpartition(b") ")[2].split()[0] in {b"Z", b"X"}
 
     asyncio.run(run())
 
