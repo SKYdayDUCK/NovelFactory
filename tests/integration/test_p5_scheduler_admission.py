@@ -313,3 +313,36 @@ def test_overdue_ready_job_closes_its_dependent_without_an_external_call(kernel_
         with kernel.db.uow(write=False) as repo:
             assert repo.one("outbox", {"dedupe_key": f"supervisor:{first}:0:expired"})["payload"]["reason"] == "DEADLINE_EXCEEDED"
             assert repo.one("outbox", {"dedupe_key": f"workflow:{dependent}:0:closed"})["payload"]["reason"] == "PREREQUISITE_CLOSED"
+
+
+def test_suspension_releases_only_its_own_dispatch_slot(kernel_env):
+    from novel_factory.infrastructure.database import tables
+    from novel_factory.infrastructure.repository import KernelRepository
+    from novel_factory.orchestration import dispatch
+
+    kernel = kernel_env["kernel"]
+    world = load_fixture(kernel)
+    owner, wr = world["principal"], world["world_ref"]
+    work, branch = wr["work_id"], wr["branch_id"]
+
+    def authorize(conn):
+        kernel.authorize(KernelRepository(conn, tables), owner, work, "ADMIN", branch)
+
+    with backend() as (route, requests, _):
+        gateway = AgentGateway(kernel, {"test": route})
+        supervisor = RuntimeSupervisor(kernel, gateway)
+        budget = kernel.tasks.create_budget(work, "2")
+        waiting, sibling = [_job(kernel, gateway, supervisor, world, budget, "READY").task["task_id"]
+                            for _ in range(2)]
+        with kernel.db.uow() as repo:
+            repo.add("dispatch_limits", {"scope": "WORK", "subject": work, "slots": 1})
+            assert dispatch.next_job(repo.conn, work, branch) == waiting
+            claim = kernel.tasks.claim_in_transaction(repo.conn, "sleeper", task_id=waiting, lease_seconds=900)
+            dispatch.reserve(repo, claim)
+        supervisor.workflow.wait(waiting, claim["generation"], [sibling], mode="AND",
+                                 worker_id="sleeper", work_id=work, branch_id=branch, authorize_in_tx=authorize)
+        with kernel.db.uow() as repo:
+            assert repo.one("dispatch_slots", {"attempt_id": claim["attempt_id"]}) is None
+            assert dispatch.next_job(repo.conn, work, branch) == sibling
+        assert supervisor.run_once(owner, work, branch)["task_id"] == sibling
+        assert len(requests) == 1

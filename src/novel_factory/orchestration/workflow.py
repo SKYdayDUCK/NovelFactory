@@ -41,6 +41,10 @@ _TASK_GRANT = text("""
 """)
 
 
+def current_task_epoch(conn, task_id):
+    return conn.scalar(_TASK_GRANT, {"task": task_id})
+
+
 # Match the exact producer event, including its current generation. Reading
 # delivered rows is intentional: another consumer can ACK before we register.
 _WAKEABLE = text("""
@@ -175,7 +179,7 @@ class WorkflowService:
             _guard((task["work_id"], task["branch_id"]) == (str(work_id), str(branch_id)),
                    "VIEW_DENIED", "Workflow task unavailable")
             _guard(task["generation"] == generation, "STALE_GENERATION", "Workflow generation changed")
-            epoch = conn.scalar(_TASK_GRANT, {"task": target})
+            epoch = current_task_epoch(conn, target)
             _guard(epoch is not None, "VIEW_DENIED", "Workflow task grant unavailable")
             _guard(not conn.scalar(select(self.tasks.plan_binding_exists(target, work_id))),
                    "TASK_REBIND_REQUIRED", "Provision fresh plan guards for a new task")
@@ -214,6 +218,9 @@ class WorkflowService:
             _guard(not cycle, "WORKFLOW_CYCLE", "Workflow prerequisites must form a DAG")
             conn.execute(w.insert().values(task_id=target, generation=generation, mode=mode, grant_epoch=epoch))
             conn.execute(e.insert(), [dict(task_id=target, generation=generation, predecessor_id=p) for p in preds])
+            if task["attempt_id"] is not None:
+                slots = self.tables["dispatch_slots"]
+                conn.execute(slots.delete().where(slots.c.attempt_id == task["attempt_id"], slots.c.task_id == target))
             conn.execute(t.update().where(t.c.task_id == target).values(
                 state="BLOCKED", lease_owner=None, lease_expiry=None, attempt_id=None,
                 updated_at=self.tasks._now(conn)))
@@ -270,7 +277,8 @@ class WorkflowService:
             for row in rows:
                 target, generation = str(row["task_id"]), row["generation"]
                 # A wait recorded by an older application may predate this guard.
-                if conn.scalar(select(self.tasks.plan_binding_exists(target, work_id))):
+                if (conn.scalar(select(self.tasks.plan_binding_exists(target, work_id)))
+                        or self.tasks.has_stale_dependencies(conn, target, generation)):
                     conn.execute(t.update().where(t.c.task_id == target).values(
                         state="STALE", updated_at=func.clock_timestamp()))
                     self.tasks._emit(conn, target, generation, "STALE")
