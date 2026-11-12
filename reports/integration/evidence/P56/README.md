@@ -9,3 +9,5 @@
 本地复验已封存 [94 个原始文件](baseline-ba892d3/local-evidence.zip)及[摘要](baseline-ba892d3/local-evidence-summary.json)，包括开发期失败、修正结果与既有容量失败边界。三档消息共 780 条，九个委托组合共 780 个唯一任务全部接受并结算。200 员工在 fixed-1、fixed-2、adaptive-2 下分别耗时 248.67、157.91、303.09 秒。数据来自本地闭环合成提供者。8 项真实旧库迁移全部通过。
 
 [#26](https://github.com/SKYdayDUCK/NovelFactory/pull/26) 已于 02:36:05 UTC 合入 `4e8fc5a3c2331a0de669ad8851d82c5b08a1e5dc`，合并树与合格候选树一致。[候选逐项结果](candidate-e5f5348/candidate-qualification.json) · [各档容量原件摘录](candidate-e5f5348/capacity-measurements.json) · [合并及五个 push 运行](main-4e8fc5a/merge.json)。本时点等待实际主线复验。
+
+本阶段已完成候选、正式合并及精确主线验收。最终状态与六项维度见 [P5.6 综合验收签收](main-4e8fc5a/SIGNOFF.md)。

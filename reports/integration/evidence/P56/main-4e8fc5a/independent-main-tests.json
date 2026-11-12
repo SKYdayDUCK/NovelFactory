@@ -1,0 +1,160 @@
+{
+  "checkout": {
+    "sha": "4e8fc5a3c2331a0de669ad8851d82c5b08a1e5dc",
+    "tree": "515ade557fc82c4ab1a5b67218539a030d0e18cc",
+    "parents": [
+      "ba892d3a424be39efccb697232a5614b26609cc4",
+      "e5f5348ca07dc50c9fe52ab271a733ac31fa063c"
+    ],
+    "git_status_initial": "",
+    "nf_runtime": "/workspace/scratch/8a86cf12eb4c/p56-main-4e8fc5a/src/novel_factory/__init__.py",
+    "aw_runtime": "/workspace/scratch/8a86cf12eb4c/p56-main-4e8fc5a/workshop/src/agent_workshop/__init__.py"
+  },
+  "suites": {
+    "verifier": {
+      "tests": "9",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "time": "0.680"
+    },
+    "narrative": {
+      "tests": "10",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "time": "44.023"
+    },
+    "dual-mcp": {
+      "tests": "3",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "time": "55.610"
+    }
+  },
+  "commands": [
+    "workshop/.venv/bin/python -m pytest -c workshop/pyproject.toml -q -o junit_family=xunit1 workshop/tests/test_qualification_run.py --junitxml=<out>/verifier.xml",
+    ".venv/bin/python -m pytest -c pyproject.toml -q -o junit_family=xunit1 tests/integration/test_narrative.py --junitxml=<out>/narrative.xml",
+    ".venv/bin/python -m pytest -c pyproject.toml -q -o junit_family=xunit1 workshop/acceptance/test_w0_dual_services.py workshop/acceptance/test_nf_bridge_stdio.py --junitxml=<out>/dual-mcp.xml",
+    ".venv/bin/python scripts/pitr_drill.py --with-redis --output <out>/pitr"
+  ],
+  "final_status": "",
+  "pitr": {
+    "status": "PASS",
+    "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+    "execution_kind": "REAL_ISOLATED_POSTGRESQL",
+    "source_port": 46561,
+    "restored_port": 44833,
+    "durability": {
+      "fsync": true,
+      "synchronous_commit": true,
+      "data_checksums": true
+    },
+    "model_calls": 0,
+    "production_data_accessed": false,
+    "libpq_environment_isolated": true,
+    "cleared_pg_environment_names": [],
+    "pg_basebackup": {
+      "exit_code": 0,
+      "stdout": ""
+    },
+    "base_backup_seconds": 1.809292164999988,
+    "pg_verifybackup": {
+      "exit_code": 0,
+      "stdout": "backup successfully verified"
+    },
+    "archiver": {
+      "archived_count": 4,
+      "failed_count": 0
+    },
+    "restored_semantic_conflict": {
+      "case_id": "939d127f-401a-5734-98f1-047c7572151e",
+      "receipt_id": "003bad05-825f-5e2d-8613-7f02fa767a07",
+      "conflict_type": "STALE_PRECONDITION",
+      "outcome": "REVIEW_REQUIRED",
+      "observation_ids": [
+        "3c52d18d-0256-512d-90e0-03b7316392be",
+        "ed5ad65a-b937-56fb-8ff5-ed8471c633f5"
+      ],
+      "change_revision": "97e78acd-2d73-4052-a637-9feff265feea",
+      "contributions": {
+        "semantic.conflict.detected": {
+          "events": 1,
+          "conflict.candidates": 1,
+          "conflict.confirmed_by_guard": 1,
+          "conflict.type.STALE_PRECONDITION": 1,
+          "event.semantic.conflict.detected": 1
+        },
+        "semantic.conflict.resolved": {
+          "events": 1,
+          "conflict.actual_tokens": 0,
+          "conflict.review_escalations": 1,
+          "conflict.result.REVIEW_REQUIRED": 1,
+          "event.semantic.conflict.resolved": 1,
+          "conflict.strategy.ESCALATE_REVIEW": 1,
+          "conflict.additional_model_attempts": 0,
+          "conflict.cost_status.NO_MODEL_CALL": 1,
+          "duration_ms.semantic.conflict.resolved": "328.222"
+        }
+      }
+    },
+    "redis_pitr_reconciliation": {
+      "redis_version": "8.0.2",
+      "target_subscriber_receipts": 1,
+      "target_audit_rows": 1,
+      "excluded_redis_entries_quarantined": 1,
+      "excluded_world_revisions": 0
+    },
+    "target_world_ref": {
+      "work_id": "e67f49e8-a1f7-434b-b67e-a9d87310f817",
+      "branch_id": "9761d32a-d77a-4b8a-8eb9-3512db61196d",
+      "world_revision_id": "14c7a5ba-54ef-404f-ac7e-75f466e2da29"
+    },
+    "target_lsn": "0/310B7B0",
+    "restored_state_sha256": "f5811819f846357e413f2b302def7da8ed75dee049761b4b50fca386a4c9576b",
+    "snapshot_equal_before_fencing": true,
+    "table_count": 70,
+    "object_count": 31,
+    "recovery_seconds_to_verified_service": 2.8207588279997253,
+    "selected_recovery_point_age_seconds": 0.856057,
+    "target_commits_lost": 0,
+    "deliberately_excluded_later_world_commits": 1,
+    "restored_world_event_count": 2,
+    "unknown_calls_retained": 1,
+    "reserved_amount_retained": "0.5",
+    "fenced_task_count": 3,
+    "old_worker_rejected": true,
+    "original_commit_receipt_equal": true,
+    "limitation": "Small isolated local fixture; selected-point RPO/RTO, not production SLO or remote storage test",
+    "total_seconds": 10.353051305999998
+  },
+  "sha256": {
+    "checkout.json": "31e1b2dd5f60187445fd834dc111176da5443051293d6dc22d6e4f16b8cb7a6d",
+    "dual-mcp.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "dual-mcp.log": "04bd6e6cd2d7f6a1dfbaa4c81a7b81992f7457abe6ce014043a20d1d4e1196d7",
+    "dual-mcp.xml": "c7d091276230a231ba25be4723af3a9f106f0ae218e52d95510c8553031b6eab",
+    "dual-run.log": "bacd71dd3ede5024744eb23bb8a2000cdd0b6ee1f8bba7231f48e082f9b5502b",
+    "narrative.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "narrative.log": "7faaff760ba3920dd6b951fd070954daa56f6875ea932ce56cf18148be85e25b",
+    "narrative.xml": "af70180d209ca2c893108d3e811bc90710fcfbd76064122500eb06fb26271d47",
+    "pitr/NF_ISOLATED_RECOVERY_DRILL.json": "d8ef4d14e3970b9f60b6ca9ac4f43ba72c1c7e3d50984a5230a5affeaefcda5a",
+    "pitr/archive_segment.py": "672395d38fb8cfe2d7c36ab9133c3136e03c9bc4e5051010a697b7f3dd545dc5",
+    "pitr/fenced_tasks.json": "582122b9eedde17e9e95c636c1afd51bd17e91fdf3d7bdaab7222e58c6580f62",
+    "pitr/file_checksums.json": "a409462fe5a22e5701f248856e6aca4cbb3ad489e52a8f0938eee570f3f59ebb",
+    "pitr/redis.log": "0aa9a509fdbf69eb9d75fb1a58b97932662adc6271955653f8b43f0413c0b667",
+    "pitr/restore.conf": "1978180fe95d1c2d72f270793eeaaede2d05554fd70452a25afef24eca2bc8cc",
+    "pitr/restored.log": "f457b64a03c2e1b3cb5adf68e21b0df5beee1575c84cb83e6e893aa5e30a93c7",
+    "pitr/result.json": "aef1f4c02c566952adba020f682939dea588d7937d7bdf934c38930a356ac7e8",
+    "pitr/source.conf": "6d025703b18c6db0b051c3a6ae10f7c8a9b5f720639fad38e19b411a57a00cf1",
+    "pitr/source.log": "396d4d5f6dff9cdb8025324619c069d69cce46bbdd2a74bfbdf4bd8ef500bf68",
+    "pitr/target_database_digests.json": "e5add1da29538ee96e7e11be6bae51036c971c8708ede05b82bf321c33a1abe5",
+    "pitr.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "pitr.log": "aef1f4c02c566952adba020f682939dea588d7937d7bdf934c38930a356ac7e8",
+    "setup-aw.log": "3ad78b4b5812d44172dfe9edcca01ae7a6f5541402390e6273b8c3aefaf63b9d",
+    "setup-nf.log": "99a342c83d30f9d0dc89dc76a561dbc47dd6453efc843a83807f59d35c1df4a7",
+    "verifier.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "verifier.log": "b9afdd65d96bd58a0795b8c7dd771b962e7b4159a58fffdccebefc15308fe5ea",
+    "verifier.xml": "14968c7009eecd1bc5cb12dec40f6bcbb41e4121330bfd43cd25c397dc7887ed"
+  }
+}
