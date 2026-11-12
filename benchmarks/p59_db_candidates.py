@@ -161,10 +161,14 @@ class Observer:
 
 async def measure(kernel, url, fixture, args):
     reads, writes, expected = fixture
-    kernel = Kernel(kernel.db, kernel.objects, joined_task_status=args.mode == "sql")
+    if args.mode == "fenced":
+        from experiments.db_execution.fenced_status import FencedStatusKernel
+        kernel = FencedStatusKernel(kernel.db, kernel.objects)
+    else:
+        kernel = Kernel(kernel.db, kernel.objects, joined_task_status=args.mode == "sql")
     pool = ThreadPoolExecutor(max_workers=args.workers)
     loop = asyncio.get_running_loop()
-    queue_mode = args.mode not in ("baseline", "sql")
+    queue_mode = args.mode not in ("baseline", "sql", "fenced")
     coordinator_type = AdaptiveCoordinator if args.mode == "adaptive" else Coordinator
     coordinator = coordinator_type(kernel, workers=args.workers, capacity=args.capacity,
                               batch=args.batch if args.mode in ("micro", "micro_queues", "hybrid", "adaptive") else 1,
@@ -258,7 +262,7 @@ async def measure(kernel, url, fixture, args):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--mode", choices=MODES, required=True)
+    parser.add_argument("--mode", choices=(*MODES, "fenced"), required=True)
     parser.add_argument("--agents", type=int, default=50)
     parser.add_argument("--requests", type=int, default=600)
     parser.add_argument("--workers", type=int, default=4)

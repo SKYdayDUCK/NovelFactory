@@ -17,6 +17,7 @@ from novel_factory.domain.errors import DomainError
 from novel_factory.fixtures import create_bound_task, load_fixture, point
 from novel_factory.infrastructure.database import Database
 from novel_factory.infrastructure.objects import ObjectStore
+from novel_factory.interfaces.http import _error_response
 from scripts.pitr_drill import _check, _config, _port, _run, _start, _stop
 
 
@@ -61,15 +62,21 @@ async def exercise(root, pg, result):
                 check=False, capture_output=True, timeout=3)
             _check(probe.returncode == 2, "Stopped PostgreSQL still answers")
             failures = await asyncio.gather(*(coordinator.submit(op) for _ in range(3)), return_exceptions=True)
-            _check(all(isinstance(error, DomainError) and error.code == "UNAVAILABLE" for error in failures),
+            _check(all(isinstance(error, DomainError) and error.code == "SERVICE_UNAVAILABLE"
+                       and error.retryable and error.recovery == "WAIT" for error in failures),
                    "Outage did not fail every item closed")
+            responses = [_error_response(error, "outage-probe") for error in failures]
+            _check(all(r.status_code == 503 and r.headers.get("Retry-After") for r in responses),
+                   "Temporary database outage produced the wrong HTTP response mapping")
             server = await asyncio.to_thread(_start, pg, data, config, port, log)
             _check(server.pid != initial_pid, "Expected a new postmaster")
             recovered = await asyncio.gather(*(coordinator.submit(op) for _ in range(3)))
             elapsed = time.monotonic() - outage
             _check(all(row == expected for row in recovered), "Restarted coordinator returned different task data")
             result.update(stopped_pg_isready_exit=probe.returncode, distinct_postmaster=server.pid != initial_pid,
-                          outage_rejections=[error.code for error in failures], recovered_verified_reads=len(recovered),
+                          outage_rejections=[error.code for error in failures],
+                          http_error_serializer_statuses=[response.status_code for response in responses],
+                          recovered_verified_reads=len(recovered),
                           outage_to_verified_read_seconds=elapsed, coordinator_counts=dict(coordinator.counts))
         repeated = kernel.tasks.reserve_call(*args, **spend)
         _check(repeated["attempt_id"] == attempt["attempt_id"] and repeated["state"] == "UNKNOWN",

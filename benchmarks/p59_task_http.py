@@ -24,6 +24,10 @@ from novel_factory.interfaces.http import create_app
 
 @asynccontextmanager
 async def select_kernel(kernel, mode):
+    if mode == 'fenced':
+        from experiments.db_execution.fenced_status import FencedStatusKernel
+        yield FencedStatusKernel(kernel.db, kernel.objects)
+        return
     if mode in ('baseline', 'sql'):
         yield Kernel(kernel.db, kernel.objects, joined_task_status=mode == 'sql')
         return
@@ -92,11 +96,12 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--count', type=int, default=320)
     parser.add_argument('--concurrency', type=int, default=16)
+    parser.add_argument('--fenced', action='store_true', help='Run the registered singleton A/B/B/A')
     args = parser.parse_args()
     if not 1 <= args.concurrency <= args.count <= 5000:
         parser.error('Choose positive bounded concurrency and operation count')
     results = []
-    modes = ('baseline', 'sql', 'micro', 'hybrid')
+    modes = ('baseline', 'fenced') if args.fenced else ('baseline', 'sql', 'micro', 'hybrid')
     for index, mode in enumerate((*modes, *reversed(modes))):
         result = asyncio.run(trial(mode, args.count, args.concurrency))
         result.update(execution_index=index, order='forward' if index < len(modes) else 'reverse')

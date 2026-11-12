@@ -10,7 +10,10 @@ MODES = ('baseline', 'queues', 'sql', 'micro', 'micro_queues', 'hybrid')
 
 
 def settings(profile):
-    if profile == 'grid':
+    if profile == 'fenced':
+        for mode in ('baseline', 'fenced', 'fenced', 'baseline'):
+            yield mode, 50, 1000, 64, 32, 2, 10
+    elif profile == 'grid':
         for window in (0, 1, 2, 5, 10):
             sizes = (1, 8, 16, 32, 64, 128)
             for batch in sizes if window % 2 == 0 else reversed(sizes):
@@ -30,7 +33,7 @@ def settings(profile):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--profile', choices=['mixed', 'reads', 'grid', 'pressure', 'adaptive'], required=True)
+    parser.add_argument('--profile', choices=['mixed', 'reads', 'grid', 'pressure', 'adaptive', 'fenced'], required=True)
     parser.add_argument('--directory', required=True, type=Path)
     args = parser.parse_args()
     args.directory.mkdir(parents=True, exist_ok=False)

@@ -46,3 +46,5 @@ The fixed `568f949` S6 test was run separately with two fresh PostgreSQL 17 clus
 ```sh
 NF_S6_COMPARISON_OUTPUT=comparison.json python -m pytest -q tests/integration/test_s6_engineering_comparison.py --junitxml=s6.xml
 ```
+
+The final runtime revision `353106cf94b529450b6966a4b5d81b2b9f9c3be0` changed the coordinator's database-connection error to `SERVICE_UNAVAILABLE`, retryable with a `WAIT` recovery instruction. `restart-353106c.json` verifies three rejected reads during a real immediate shutdown and their production error serializer's 503 status and Retry-After header. The same live coordinator classified each read and resumed all three after WAL recovery. The idempotent reservation remained unique and the provider dispatch fence rejected a repeat send. `pitr-353106c.json` independently exercises physical base-backup recovery and Redis reconciliation on that revision.

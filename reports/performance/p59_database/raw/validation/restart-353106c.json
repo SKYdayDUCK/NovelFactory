@@ -1,0 +1,46 @@
+{
+  "status": "PASS",
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "shutdown_mode": "immediate",
+  "source_sha": "353106cf94b529450b6966a4b5d81b2b9f9c3be0",
+  "stopped_pg_isready_exit": 2,
+  "distinct_postmaster": true,
+  "outage_rejections": [
+    "SERVICE_UNAVAILABLE",
+    "SERVICE_UNAVAILABLE",
+    "SERVICE_UNAVAILABLE"
+  ],
+  "http_error_serializer_statuses": [
+    503,
+    503,
+    503
+  ],
+  "recovered_verified_reads": 3,
+  "outage_to_verified_read_seconds": 0.7644590769996285,
+  "coordinator_counts": {
+    "submitted": 7,
+    "peak_queued": 3,
+    "executing": 0,
+    "peak_executing": 1,
+    "db_errors": 1
+  },
+  "resend_denied": "INVALID_CALL_TRANSITION",
+  "unique_attempts": 1,
+  "reserved": "0.500000",
+  "spent": "0.000000",
+  "external_provider_calls": 0,
+  "recovery_log": [
+    "2026-11-12 19:42:49.727 GMT [44] LOG:  database system was interrupted; last known up at 2026-11-12 19:42:47 GMT",
+    "2026-11-12 19:42:50.110 GMT [44] LOG:  database system was not properly shut down; automatic recovery in progress",
+    "2026-11-12 19:42:50.111 GMT [44] LOG:  redo starts at 0/1753A70",
+    "2026-11-12 19:42:50.136 GMT [44] LOG:  redo done at 0/1D92A80 system usage: CPU: user: 0.00 s, system: 0.01 s, elapsed: 0.02 s",
+    "2026-11-12 19:42:50.165 GMT [60] DETAIL:  Consistent recovery state has not been yet reached.",
+    "2026-11-12 19:42:50.201 GMT [42] LOG:  checkpoint starting: end-of-recovery immediate wait",
+    "2026-11-12 19:42:50.221 GMT [62] DETAIL:  Consistent recovery state has not been yet reached.",
+    "2026-11-12 19:42:50.278 GMT [64] DETAIL:  Consistent recovery state has not been yet reached.",
+    "2026-11-12 19:42:50.335 GMT [66] DETAIL:  Consistent recovery state has not been yet reached.",
+    "2026-11-12 19:42:50.392 GMT [68] DETAIL:  Consistent recovery state has not been yet reached.",
+    "2026-11-12 19:42:50.398 GMT [42] LOG:  checkpoint complete: wrote 1364 buffers (33.3%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.027 s, sync=0.168 s, total=0.198 s; sync files=633, longest=0.003 s, average=0.001 s; distance=6396 kB, estimate=6396 kB; lsn=0/1D92AA8, redo lsn=0/1D92AA8",
+    "2026-11-12 19:42:50.491 GMT [42] LOG:  checkpoint complete: wrote 63 buffers (1.5%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.002 s, sync=0.006 s, total=0.010 s; sync files=18, longest=0.001 s, average=0.001 s; distance=403 kB, estimate=5796 kB; lsn=0/1DF7888, redo lsn=0/1DF7888"
+  ]
+}
