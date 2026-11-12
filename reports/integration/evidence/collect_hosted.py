@@ -138,10 +138,71 @@ def capacity(z, idx):
     emit(f"capacity/{idx}.json", encoded(result))
 
 
+def collect_s0(request):
+    rows = request.get("s0_originals", [])
+    if not rows:
+        return
+    check({row["stage"] for row in rows} == {"pre", "pr", "main"} and len(rows) == 3, "S0 stage set")
+    check(len({row["tree"] for row in rows}) == 1, "S0 candidate tree differs")
+    check(len({row["run_id"] for row in rows}) == len({row["artifact_id"] for row in rows}) == 3,
+          "S0 executions must be distinct")
+    for row in rows:
+        stage = row["stage"]
+        event = "pull_request" if stage == "pr" else "push"
+        head, checkout, tree, stdout_oid = (row[key] for key in ("head", "checkout", "tree", "stdout_blob"))
+        check(all(re.fullmatch(r"[0-9a-f]{40}", x) for x in (head, checkout, tree, stdout_oid)), "S0 Git IDs")
+        commit = api("git/commits/" + checkout)
+        check(commit["tree"]["sha"] == tree, "S0 checkout tree")
+        if stage == "pr":
+            check(len(commit["parents"]) == 2 and commit["parents"][1]["sha"] == head
+                  and api("git/commits/" + head)["tree"]["sha"] == tree, "S0 PR synthetic identity")
+        else:
+            check(head == checkout, "S0 exact push checkout")
+        run_id, artifact_id = row["run_id"], row["artifact_id"]
+        check(type(run_id) is int and type(artifact_id) is int, "S0 API identifiers")
+        run = api(f"actions/runs/{run_id}")
+        check(run["id"] == run_id and run["repository"]["full_name"] == REPO and run["head_sha"] == head
+              and run["event"] == event and run["path"] == ".github/workflows/creative-harness.yml"
+              and run["status"] == "completed" and run["conclusion"] == "success", "S0 run identity")
+        check(run["head_branch"] == "main" if stage == "main" else run["head_branch"].startswith("dev/p57-"),
+              "S0 branch")
+        arts = api(f"actions/runs/{run_id}/artifacts")
+        check(arts["total_count"] == len(arts["artifacts"]) == 1, "S0 single artifact")
+        art = arts["artifacts"][0]
+        check(art["id"] == artifact_id and art["digest"] == row["digest"] and not art["expired"]
+              and art["name"] == f"creative-harness-s0-{run['run_attempt']}"
+              and art["workflow_run"]["id"] == run_id and art["workflow_run"]["head_sha"] == head
+              and 0 < art["size_in_bytes"] <= 32_768, "S0 artifact identity")
+        archive = subprocess.check_output(["gh", "api", BASE + f"/actions/artifacts/{artifact_id}/zip"])
+        check(len(archive) == art["size_in_bytes"] and "sha256:" + sha(archive) == art["digest"],
+              "S0 original ZIP digest")
+        with zipfile.ZipFile(io.BytesIO(archive)) as z:
+            check(z.namelist() == ["s0.json"] and not z.comment
+                  and not z.getinfo("s0.json").comment and z.getinfo("s0.json").file_size <= 65_536,
+                  "S0 archive contains additional material")
+            raw = z.read("s0.json")
+        expected = api("git/blobs/" + stdout_oid)
+        check(expected["sha"] == stdout_oid and raw == base64.b64decode(expected["content"]),
+              "S0 uploaded member differs from exact verifier stdout")
+        data = json.loads(raw)
+        check(data["status"] == "PASS" and data["event"] == event and data["checkout_sha"] == checkout
+              and data["checkout_tree"] == tree and data["stage"] == "P5.7-S0", "S0 member scope")
+        check(not SENSITIVE.search(raw.decode()) and not SENSITIVE.search(archive.decode("latin1"))
+              and os.environ["GH_TOKEN"].encode() not in raw + archive, "S0 private content")
+        emit("s0/" + stage + "-original.json", encoded({
+            "stage": stage, "run_id": run_id, "artifact_id": artifact_id, "zip_sha256": sha(archive),
+            "s0_json_sha256": sha(raw), "stdout_git_blob": stdout_oid, "stdout_equals_file": True,
+            "zip_base64": base64.b64encode(archive).decode("ascii"),
+        }))
+
+
 def main():
     check(os.environ["GITHUB_REPOSITORY"] == REPO and os.environ["GITHUB_REF"] == "refs/heads/evidence/serial-delivery", "wrong collector scope")
     req = json.loads(REQUEST.read_bytes())
     check(req["schema"] == 1 and req["repository"] == REPO and req["event"] in {"pull_request","push"}, "request scope")
+    if WORKFLOW == "creative-harness.yml":
+        collect_s0(req)
+        return
     if WORKFLOW not in req["runs"]:
         print("Workflow absent from this request")
         return

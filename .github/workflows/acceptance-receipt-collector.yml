@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        workflow: [agent-workshop.yml, p1-integrity.yml, p4-recovery-drill.yml, p6-offline.yml, p2-load.yml, p3-p4-evidence.yml, p3-scale-experiments.yml]
+        workflow: [agent-workshop.yml, p1-integrity.yml, p4-recovery-drill.yml, p6-offline.yml, p2-load.yml, p3-p4-evidence.yml, p3-scale-experiments.yml, creative-harness.yml]
     steps:
       - uses: actions/checkout@v4
         with:
