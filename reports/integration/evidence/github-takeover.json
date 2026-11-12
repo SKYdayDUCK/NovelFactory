@@ -1,0 +1,896 @@
+{
+  "observed": "2026-11-11T15:24:45Z",
+  "repository": "SKYdayDUCK/NovelFactory",
+  "main": "a8f37b72286163e9117f8874a0e175c61204ff8b",
+  "branch_protection": {
+    "enabled": false,
+    "required_status_checks": {
+      "enforcement_level": "off",
+      "contexts": [],
+      "checks": []
+    }
+  },
+  "rulesets": [],
+  "pull_requests": [
+    {
+      "number": 1,
+      "title": "P1 audit closeout: exercise integrity CI and publish evidence index",
+      "head": "audit/p1-ci-verification",
+      "head_sha": "cf7454ff3699d1d33b7d2af40822c45ac18d6a79",
+      "base": "main",
+      "base_sha": "aa5871b7f0219f2713f6c144889f24afd8ef4e9e",
+      "was_draft": false,
+      "draft_after_freeze": false,
+      "state": "closed",
+      "merged": true,
+      "mergeable": false,
+      "merge_commit_sha": "721f155c9cc912cddfdae559afe4f2516d0967f2",
+      "merged_at": "2026-11-10T09:34:40Z",
+      "reviews": [],
+      "threads": [],
+      "comments": [
+        {
+          "id": 6763930556,
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/pull/1#issuecomment-6763930556",
+          "body": "### Verified P1 CI audit closeout\n\n- **Actions run #2**: https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42791301632 — `completed / success`.\n- **Schema, domain, HTTP boundaries**: 142 pytest cases passed (0 failed), original 35 mechanism tests passed, schema/compatibility validation passed.\n- **Real PostgreSQL 17 integration, concurrency and restore**: PostgreSQL server 17.11; 248 pytest cases passed (0 failed) in 98.80 seconds. Alembic upgrade and pg_dump/pg_restore paths executed. The database logs include deliberate negative-case constraint violations, not pytest failures.\n- Uploaded CI artifacts: `p1-schema-unit-1` (artifact ID 13750644819), `p1-postgres-concurrency-1` (artifact ID 13750304765), including JUnit/JSON/raw logs. Retention configured at 90 days.\n- Remediation commit: aa5871b7f0219f2713f6c144889f24afd8ef4e9e.\n\nThe only additional PR change is a CI evidence review index document. This verification allows a named P1 audit-closeout checkpoint; no P2 features were added."
+        }
+      ],
+      "ci": [
+        {
+          "id": 42791301632,
+          "name": "P1 baseline integrity",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "P2 production loop: six-scene E2E, real load evidence and bounded P3 candidates",
+      "head": "dev/p2-production-loop",
+      "head_sha": "a9547bd651e177d48c9d0e810362e411f510d62d",
+      "base": "main",
+      "base_sha": "721f155c9cc912cddfdae559afe4f2516d0967f2",
+      "was_draft": false,
+      "draft_after_freeze": false,
+      "state": "closed",
+      "merged": true,
+      "mergeable": false,
+      "merge_commit_sha": "499289e8e6bd333e17f40c3d36534fa2c8df2894",
+      "merged_at": "2026-11-11T03:54:33Z",
+      "reviews": [],
+      "threads": [],
+      "comments": [],
+      "ci": [
+        {
+          "id": 42863611743,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 42863611898,
+          "name": "P2 measured capacity and recovery",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 42863611810,
+          "name": "P3 P4 measured evidence",
+          "status": "completed",
+          "conclusion": "failure"
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "P3/P4: 宏微等效、跨卷连续性与恢复升级（容量未达标）",
+      "head": "dev/p3-p4-continuity",
+      "head_sha": "23a61398278c9a13e6450d444d4a6d25a88ef5e0",
+      "base": "main",
+      "base_sha": "499289e8e6bd333e17f40c3d36534fa2c8df2894",
+      "was_draft": false,
+      "draft_after_freeze": false,
+      "state": "closed",
+      "merged": true,
+      "mergeable": false,
+      "merge_commit_sha": "3e59c2860fed96f058566d1c2d38bcb3140ebd9b",
+      "merged_at": "2026-11-11T04:02:41Z",
+      "reviews": [],
+      "threads": [],
+      "comments": [],
+      "ci": [
+        {
+          "id": 42864582299,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 42864580621,
+          "name": "P2 measured capacity and recovery",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 42864580346,
+          "name": "P4 real isolated WAL PITR and verified recovery",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 42864580618,
+          "name": "P3 P4 measured evidence",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 42864579931,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "completed",
+          "conclusion": "failure"
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Scion-inspired incremental world versions: measured prototypes and strict equivalence",
+      "head": "experiment/scion-incremental-20261111",
+      "head_sha": "4f249d520c921c8d6effee9978f7338b912f1dd0",
+      "base": "dev/p3-p4-continuity",
+      "base_sha": "23a61398278c9a13e6450d444d4a6d25a88ef5e0",
+      "was_draft": true,
+      "draft_after_freeze": true,
+      "state": "open",
+      "merged": false,
+      "mergeable": true,
+      "merge_commit_sha": null,
+      "merged_at": null,
+      "reviews": [],
+      "threads": [],
+      "comments": [],
+      "ci": [
+        {
+          "id": 42954063529,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 42954063450,
+          "name": "P2 measured capacity and recovery",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 42954063627,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 42954063523,
+          "name": "P3 P4 measured evidence",
+          "status": "completed",
+          "conclusion": "failure"
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "title": "P5 · MCP 恢复入口、持久等待与受限 Agent 执行",
+      "head": "dev/p5-agent-runtime",
+      "head_sha": "f2e6d38534214e79630b807cec9a720d99e975b1",
+      "base": "main",
+      "base_sha": "c8d35c74c342b58fd72fa379f18ac1b480eed468",
+      "was_draft": false,
+      "draft_after_freeze": false,
+      "state": "closed",
+      "merged": true,
+      "mergeable": false,
+      "merge_commit_sha": "a8f37b72286163e9117f8874a0e175c61204ff8b",
+      "merged_at": "2026-11-11T13:50:16Z",
+      "reviews": [],
+      "threads": [],
+      "comments": [],
+      "ci": [
+        {
+          "id": 43030461014,
+          "name": "P2 measured capacity and recovery",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 43030460960,
+          "name": "P5 native desktop resume",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 43030460915,
+          "name": "P3 P4 measured evidence",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 43030460905,
+          "name": "P4 real isolated WAL PITR and verified recovery",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 43030460895,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 43030460863,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "title": "P5.5 S0–S9 · Redis 运行时、语义依赖与有界冲突处置",
+      "head": "dev/p5-5-redis-eventhub",
+      "head_sha": "97eeceac266016b0d5da62786b019b704bfcdb70",
+      "base": "main",
+      "base_sha": "a8f37b72286163e9117f8874a0e175c61204ff8b",
+      "was_draft": true,
+      "draft_after_freeze": true,
+      "state": "open",
+      "merged": false,
+      "mergeable": true,
+      "merge_commit_sha": null,
+      "merged_at": null,
+      "reviews": [],
+      "threads": [],
+      "comments": [],
+      "ci": [
+        {
+          "id": 43047071068,
+          "name": "P4 real isolated WAL PITR and verified recovery",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 43047071080,
+          "name": "P2 measured capacity and recovery",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 43047071010,
+          "name": "P1 and P2 production integrity",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 43047070805,
+          "name": "P3 P4 measured evidence",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 43047070914,
+          "name": "P5 native desktop resume",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 43047070882,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "queued",
+          "conclusion": null
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "title": "W0: independent Workshop MCP service and exact NF catalog",
+      "head": "dev/aw-w0",
+      "head_sha": "c18e53959807a35816eaa1258a3b7c64b80b4637",
+      "base": "main",
+      "base_sha": "c8d35c74c342b58fd72fa379f18ac1b480eed468",
+      "was_draft": false,
+      "draft_after_freeze": true,
+      "state": "open",
+      "merged": false,
+      "mergeable": true,
+      "merge_commit_sha": null,
+      "merged_at": null,
+      "reviews": [],
+      "threads": [],
+      "comments": [],
+      "ci": [
+        {
+          "id": 43030289759,
+          "name": "Agent Workshop PostgreSQL and stdio",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 43030289465,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "title": "W1: roster revisions, four team presets and tenure fences",
+      "head": "dev/aw-w1",
+      "head_sha": "f59ac5e442bd5a434ded2e65526d5750c5488e9b",
+      "base": "dev/aw-w0",
+      "base_sha": "c18e53959807a35816eaa1258a3b7c64b80b4637",
+      "was_draft": false,
+      "draft_after_freeze": true,
+      "state": "open",
+      "merged": false,
+      "mergeable": true,
+      "merge_commit_sha": null,
+      "merged_at": null,
+      "reviews": [],
+      "threads": [],
+      "comments": [],
+      "ci": [
+        {
+          "id": 43030513699,
+          "name": "Agent Workshop PostgreSQL and stdio",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 43030513581,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "number": 9,
+      "title": "W2: typed communication routes, revocation and recoverable mail",
+      "head": "dev/aw-w2",
+      "head_sha": "0da5b7c8fab5321fa50d2a04a516f3fd95432539",
+      "base": "dev/aw-w1",
+      "base_sha": "f59ac5e442bd5a434ded2e65526d5750c5488e9b",
+      "was_draft": false,
+      "draft_after_freeze": true,
+      "state": "open",
+      "merged": false,
+      "mergeable": true,
+      "merge_commit_sha": null,
+      "merged_at": null,
+      "reviews": [],
+      "threads": [],
+      "comments": [],
+      "ci": [
+        {
+          "id": 43031076718,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 43031076636,
+          "name": "Agent Workshop PostgreSQL and stdio",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "number": 10,
+      "title": "W3: reserve organizational budget and reconcile remote NF tasks",
+      "head": "dev/aw-w3",
+      "head_sha": "15d1cf51c357627866d06bd49fd326798dda56a3",
+      "base": "dev/aw-w2",
+      "base_sha": "0da5b7c8fab5321fa50d2a04a516f3fd95432539",
+      "was_draft": false,
+      "draft_after_freeze": true,
+      "state": "open",
+      "merged": false,
+      "mergeable": true,
+      "merge_commit_sha": null,
+      "merged_at": null,
+      "reviews": [],
+      "threads": [],
+      "comments": [],
+      "ci": [
+        {
+          "id": 43032253868,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 43032253677,
+          "name": "Agent Workshop PostgreSQL and stdio",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "number": 11,
+      "title": "W3 · Workshop 受限委托、NF 原子收据和账务对账",
+      "head": "dev/nf-workshop-delegation",
+      "head_sha": "90cac947c6f1b176f20df6a579027f24e96d7b4c",
+      "base": "dev/p5-5-redis-eventhub",
+      "base_sha": "97eeceac266016b0d5da62786b019b704bfcdb70",
+      "was_draft": true,
+      "draft_after_freeze": true,
+      "state": "open",
+      "merged": false,
+      "mergeable": true,
+      "merge_commit_sha": null,
+      "merged_at": null,
+      "reviews": [],
+      "threads": [],
+      "comments": [],
+      "ci": [
+        {
+          "id": 43047259218,
+          "name": "P3 P4 measured evidence",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 43047258552,
+          "name": "P1 and P2 production integrity",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 43047258923,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 43047258813,
+          "name": "P2 measured capacity and recovery",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 43047258879,
+          "name": "P4 real isolated WAL PITR and verified recovery",
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ]
+    },
+    {
+      "number": 12,
+      "title": "W4: versioned skill sharing and independent, bounded specialist reviews",
+      "head": "dev/aw-w4",
+      "head_sha": "71b471416c9407e348d4bdce817588def5f11d5b",
+      "base": "dev/aw-w3",
+      "base_sha": "15d1cf51c357627866d06bd49fd326798dda56a3",
+      "was_draft": false,
+      "draft_after_freeze": true,
+      "state": "open",
+      "merged": false,
+      "mergeable": true,
+      "merge_commit_sha": null,
+      "merged_at": null,
+      "reviews": [],
+      "threads": [],
+      "comments": [],
+      "ci": [
+        {
+          "id": 43032647213,
+          "name": "Agent Workshop PostgreSQL and stdio",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 43032647271,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "number": 14,
+      "title": "W5: durable author resume, scoped organization history and manager operation",
+      "head": "dev/aw-w5",
+      "head_sha": "609e92278476c60a893658ef53b6ff15f659b153",
+      "base": "dev/aw-w4",
+      "base_sha": "71b471416c9407e348d4bdce817588def5f11d5b",
+      "was_draft": false,
+      "draft_after_freeze": true,
+      "state": "open",
+      "merged": false,
+      "mergeable": true,
+      "merge_commit_sha": null,
+      "merged_at": null,
+      "reviews": [],
+      "threads": [],
+      "comments": [],
+      "ci": [
+        {
+          "id": 43033428508,
+          "name": "Agent Workshop PostgreSQL and stdio",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 43033428612,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "number": 15,
+      "title": "W6: validate two-service creative workflow and 10/50/200 employee workloads",
+      "head": "dev/aw-w6",
+      "head_sha": "a0d8c7e0ac4e775fdb3190af6f254aecac0ca256",
+      "base": "dev/aw-w5",
+      "base_sha": "609e92278476c60a893658ef53b6ff15f659b153",
+      "was_draft": false,
+      "draft_after_freeze": true,
+      "state": "open",
+      "merged": false,
+      "mergeable": true,
+      "merge_commit_sha": null,
+      "merged_at": null,
+      "reviews": [],
+      "threads": [],
+      "comments": [],
+      "ci": [
+        {
+          "id": 43038309410,
+          "name": "Agent Workshop PostgreSQL and stdio",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 43038309562,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "number": 16,
+      "title": "P6: offline experiment preflight, deployment entry points and real-run blocker",
+      "head": "dev/p6-local-validation",
+      "head_sha": "1d950705ccdebaca02171bd24293682f6efeab54",
+      "base": "dev/aw-w6",
+      "base_sha": "a0d8c7e0ac4e775fdb3190af6f254aecac0ca256",
+      "was_draft": true,
+      "draft_after_freeze": true,
+      "state": "open",
+      "merged": false,
+      "mergeable": true,
+      "merge_commit_sha": null,
+      "merged_at": null,
+      "reviews": [],
+      "threads": [],
+      "comments": [],
+      "ci": [
+        {
+          "id": 43047548451,
+          "name": "P3 P4 measured evidence",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 43047548408,
+          "name": "Agent Workshop PostgreSQL and stdio",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 43047548350,
+          "name": "P1 and P2 production integrity",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 43047548474,
+          "name": "P6 offline experiment and authorization checks",
+          "status": "queued",
+          "conclusion": null
+        }
+      ]
+    },
+    {
+      "number": 17,
+      "title": "P6: enforce one authorized Token ceiling across tasks and recovered attempts",
+      "head": "dev/p6-token-ceiling",
+      "head_sha": "43dc369ab73e2faacb509b6ca16995848fc92c28",
+      "base": "dev/nf-workshop-delegation",
+      "base_sha": "90cac947c6f1b176f20df6a579027f24e96d7b4c",
+      "was_draft": false,
+      "draft_after_freeze": true,
+      "state": "open",
+      "merged": false,
+      "mergeable": true,
+      "merge_commit_sha": null,
+      "merged_at": null,
+      "reviews": [],
+      "threads": [],
+      "comments": [],
+      "ci": [
+        {
+          "id": 43047319104,
+          "name": "P1 and P2 production integrity",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 43047319647,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 43047319435,
+          "name": "P3 P4 measured evidence",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 43047319013,
+          "name": "P2 measured capacity and recovery",
+          "status": "queued",
+          "conclusion": null
+        }
+      ]
+    },
+    {
+      "number": 18,
+      "title": "Evidence: rerun preregistered S9 guard policies on exact 55d8979",
+      "head": "evidence/p55-55d897-guard",
+      "head_sha": "a08294964b29c63cbc74902f2552cb0a19851a5c",
+      "base": "dev/p5-5-redis-eventhub",
+      "base_sha": "55d8979b5361a4837701d762feacd83036096b11",
+      "was_draft": true,
+      "draft_after_freeze": true,
+      "state": "open",
+      "merged": false,
+      "mergeable": true,
+      "merge_commit_sha": null,
+      "merged_at": null,
+      "reviews": [],
+      "threads": [],
+      "comments": [],
+      "ci": [
+        {
+          "id": 43044242189,
+          "name": "P1 and P2 production integrity",
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ]
+    },
+    {
+      "number": 19,
+      "title": "Verify AT-30 with a same-host 200-agent S9/delegation comparison",
+      "head": "ci/at30-delegation-pair",
+      "head_sha": "143c33c5c6a9d87624a0ada36228956322d7db75",
+      "base": "dev/nf-workshop-delegation",
+      "base_sha": "74350760dfd063f3596e5b6838a56a40d3006ad6",
+      "was_draft": true,
+      "draft_after_freeze": true,
+      "state": "closed",
+      "merged": false,
+      "mergeable": true,
+      "merge_commit_sha": null,
+      "merged_at": null,
+      "reviews": [],
+      "threads": [],
+      "comments": [],
+      "ci": [
+        {
+          "id": 43039855189,
+          "name": "Compare the accepted S9 base and NF delegation workload on one runner",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 43039855261,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "number": 20,
+      "title": "Experiment: cache SQL statement construction for scalar repository lookups",
+      "head": "experiment/p55-query-shapes",
+      "head_sha": "598f4ee65fbb6f0ed9872656de965f070965b1da",
+      "base": "dev/p5-5-redis-eventhub",
+      "base_sha": "55d8979b5361a4837701d762feacd83036096b11",
+      "was_draft": true,
+      "draft_after_freeze": true,
+      "state": "open",
+      "merged": false,
+      "mergeable": true,
+      "merge_commit_sha": null,
+      "merged_at": null,
+      "reviews": [],
+      "threads": [],
+      "comments": [],
+      "ci": [
+        {
+          "id": 43040241786,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 43040241824,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 43040241957,
+          "name": "P3 P4 measured evidence",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 43040241799,
+          "name": "P2 measured capacity and recovery",
+          "status": "completed",
+          "conclusion": "failure"
+        }
+      ]
+    },
+    {
+      "number": 21,
+      "title": "P5.5 candidate: validate a wire query once before authenticated execution",
+      "head": "perf/p55-http-query-validation",
+      "head_sha": "df30c306057d26b7b32e3cec0df1ad9926a6824a",
+      "base": "dev/p5-5-redis-eventhub",
+      "base_sha": "55d8979b5361a4837701d762feacd83036096b11",
+      "was_draft": false,
+      "draft_after_freeze": false,
+      "state": "closed",
+      "merged": true,
+      "mergeable": false,
+      "merge_commit_sha": "84e9f80f9d69f1cd337c2ec7e897e0ef0add9fd7",
+      "merged_at": "2026-11-11T15:17:01Z",
+      "reviews": [],
+      "threads": [],
+      "comments": [],
+      "ci": [
+        {
+          "id": 43040949090,
+          "name": "P3 P4 measured evidence",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 43040949167,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 43040949212,
+          "name": "P2 measured capacity and recovery",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 43040949065,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "number": 22,
+      "title": "Evidence: compare #21 and #6 on the same runner with original 500-agent / 600s probe",
+      "head": "evidence/p55-http-query-comparison",
+      "head_sha": "fb5622d0a0b7c6baef7721457399a1a63cd3a0b3",
+      "base": "perf/p55-http-query-validation",
+      "base_sha": "df30c306057d26b7b32e3cec0df1ad9926a6824a",
+      "was_draft": true,
+      "draft_after_freeze": true,
+      "state": "open",
+      "merged": false,
+      "mergeable": true,
+      "merge_commit_sha": null,
+      "merged_at": null,
+      "reviews": [],
+      "threads": [],
+      "comments": [],
+      "ci": [
+        {
+          "id": 43046848292,
+          "name": "P1 and P2 production integrity",
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ]
+    },
+    {
+      "number": 23,
+      "title": "S9 evidence: four-arm controlled NF writer rework, effective output and synthetic tokens",
+      "head": "evidence/p55-s9-business-compare",
+      "head_sha": "695e048ea936f6eebf5c223747797aaece5bb757",
+      "base": "dev/p5-5-redis-eventhub",
+      "base_sha": "55d8979b5361a4837701d762feacd83036096b11",
+      "was_draft": true,
+      "draft_after_freeze": true,
+      "state": "open",
+      "merged": false,
+      "mergeable": true,
+      "merge_commit_sha": null,
+      "merged_at": null,
+      "reviews": [],
+      "threads": [],
+      "comments": [],
+      "ci": [
+        {
+          "id": 43045505344,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "failure"
+        }
+      ]
+    },
+    {
+      "number": 24,
+      "title": "P5.5: retain bounded integrity witnesses for measured large worlds",
+      "head": "experiment/p55-large-projection-witness",
+      "head_sha": "8f245a51729308fc892396d3a10d70a7ef1d7853",
+      "base": "dev/p5-5-redis-eventhub",
+      "base_sha": "55d8979b5361a4837701d762feacd83036096b11",
+      "was_draft": false,
+      "draft_after_freeze": false,
+      "state": "closed",
+      "merged": true,
+      "mergeable": false,
+      "merge_commit_sha": "97eeceac266016b0d5da62786b019b704bfcdb70",
+      "merged_at": "2026-11-11T15:18:33Z",
+      "reviews": [],
+      "threads": [],
+      "comments": [],
+      "ci": [
+        {
+          "id": 43043791623,
+          "name": "P1 and P2 production integrity",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 43043791693,
+          "name": "P3 P4 measured evidence",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 43043791354,
+          "name": "P2 measured capacity and recovery",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 43043791829,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "completed",
+          "conclusion": "failure"
+        }
+      ]
+    }
+  ]
+}

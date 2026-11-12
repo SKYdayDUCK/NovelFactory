@@ -1,0 +1,8 @@
+{
+  "tiers": [10, 50, 200],
+  "active_members_and_logical_delegations_per_tier": "N active members, N distinct authorized summary tasks. Minimal base roles plus N-8 evidence maintainers under chief; distribute the N jobs round-robin over those maintainers.",
+  "load": "Close the backlog under fixed single-model concurrency, deterministic local HTTP provider. Create all N organization holds, deny a further correctly provisioned request for insufficient budget, then bind and execute every accepted job. Read accounting over a persistent real NF MCP connection.",
+  "thresholds": {"completed_fraction":1.0,"extra_budget_authorizations":0,"duplicate_tasks":0,"unsettled_holds":0,"provider_requests_per_completed_task":1,"max_concurrent_model_calls":1,"deadline_seconds_per_tier":600},
+  "clock": "End-to-end latency from AW request to settled organization receipt including backlog wait. Report nearest-rank P50/P95/P99 and completed tasks/wall second. Preparation and environment initialization excluded.",
+  "cost": "Synthetic provider reported tokens; no commercial inference, invoice or monetary price conclusion."
+}

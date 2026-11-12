@@ -4,6 +4,8 @@ import asyncio
 import json
 import os
 import sys
+import time
+from threading import Event, current_thread, main_thread
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
@@ -11,6 +13,7 @@ from uuid import uuid4
 import pytest
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
+from sqlalchemy import event, text
 from test_p5_supervisor import backend
 
 from novel_factory.application.agent_gateway import AgentGateway
@@ -132,6 +135,7 @@ def test_stdio_receipt_survives_lost_reply_and_supervisor_execution(site):
         and receipt["accounting_state"] == "NO_ATTEMPT"
         and not requests
     )
+    assert receipt["result_ref"] is None and receipt["wait_reason"] is None
     assert asyncio.run(call_once("nf_delegation_submit", submit)) == receipt
     for _ in range(2):
         supervisor.run_once(owner, get["work_id"], get["branch_id"])
@@ -158,6 +162,10 @@ def test_stdio_receipt_survives_lost_reply_and_supervisor_execution(site):
     assert settled["actual_tokens"] == 18 and settled["accounting_state"] == "SETTLED"
     assert settled["actual_amount"] == "0.020000"
     with runtime.kernel.db.uow(write=False) as repo:
+        result = repo.one("task_results", {"result_id": settled["result_ref"]})
+        assert result["task_id"] == final["task_id"] and result["generation"] == final["generation"]
+        assert result["disposition"] == "CURRENT" and final["result_ref"] == settled["result_ref"]
+        assert final["wait_reason"] is None and result["payload_hash"] not in json.dumps(final)
         assert len(repo.many("tasks", {"work_id": get["work_id"]})) == 1
         assert (
             len(repo.many("delegation_receipts", {"installation_id": runtime.installation_id})) == 1
@@ -231,6 +239,7 @@ def test_restored_installation_requires_partner_reconciliation(site):
     assert (
         current["receipt_ref"] == bound["receipt_ref"]
         and current["task_state"] == "PAUSED"
+        and current["wait_reason"] == "DELEGATION_RECOVERY_FENCED"
         and not requests
     )
 
@@ -275,3 +284,225 @@ def test_receipt_match_cannot_unlock_missing_attempt_or_resume_model(site):
         )
     assert blocked.value.code == "DELEGATION_RECOVERY_FENCED" and not requests
     reconcile_restored_installation(runtime.kernel, owner, runtime.installation_id, snapshot)
+
+
+def expire_installation(runtime):
+    with runtime.kernel.db.uow() as repo:
+        repo.change(
+            "delegation_installations",
+            {"installation_id": runtime.installation_id},
+            {"expires_at": repo.now() - timedelta(seconds=1)},
+        )
+
+
+@pytest.mark.parametrize("boundary", ["reserve_call", "mark_call_sent"])
+@pytest.mark.parametrize("authority_change", ["expiry", "policy", "slot_revocation"])
+def test_current_delegation_authority_fences_new_model_spend(site, monkeypatch, boundary, authority_change):
+    runtime, submit, get, _, supervisor, owner, requests, frozen = site
+    bound = runtime.call("nf_delegation_submit", submit)
+    ledger = runtime.kernel.tasks
+    original = getattr(ledger, boundary)
+
+    def change_before_authorization(*args, **kwargs):
+        if authority_change == "expiry":
+            expire_installation(runtime)
+        elif authority_change == "slot_revocation":
+            runtime.kernel.revoke_grant(owner, frozen.principal.grant_id)
+        else:
+            with runtime.kernel.db.uow() as repo:
+                repo.change("works", {"work_id": get["work_id"]}, {"policy_version": "nf-policy-next"})
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(ledger, boundary, change_before_authorization)
+    result = supervisor.admit_model(owner, get["work_id"], get["branch_id"])
+    expected = {"expiry": "DELEGATION_RECOVERY_FENCED", "policy": "TASK_REBIND_REQUIRED", "slot_revocation": "VIEW_DENIED"}
+    assert (result["status"], result["reason"]) == ("BLOCKED", expected[authority_change])
+    assert not requests
+    with runtime.kernel.db.uow(write=False) as repo:
+        attempts = repo.many("call_attempts", {"task_id": bound["task_id"]})
+        assert [attempt["state"] for attempt in attempts] == (
+            ["PREPARED"] if boundary == "mark_call_sent" else []
+        )
+        budget = repo.one("budgets", {"work_id": get["work_id"]})
+        assert budget["spent_amount"] == 0
+        assert budget["reserved_amount"] == sum(attempt["reserved_amount"] for attempt in attempts)
+
+
+def test_expiry_allows_settling_an_existing_unknown_invoice(site):
+    runtime, submit, get, _, supervisor, owner, requests, _ = site
+    bound = runtime.call("nf_delegation_submit", submit)
+    supervisor.admit_model(owner, get["work_id"], get["branch_id"])
+    before = runtime.call("nf_delegation_get", get)
+    assert before["accounting_state"] == "UNKNOWN" and len(before["attempt_ids"]) == 1
+    expire_installation(runtime)
+    with pytest.raises(DomainError) as denied:
+        runtime.call("nf_delegation_get", get)
+    assert denied.value.code == "VIEW_DENIED"
+    attempt_id = before["attempt_ids"][0]
+    runtime.kernel.tasks.settle_call(
+        attempt_id, state="SUCCEEDED", actual_amount="0.02", actual_tokens=18,
+        provider_receipt="synthetic-late-invoice",
+    )
+    with runtime.kernel.db.uow(write=False) as repo:
+        [attempt] = repo.many("call_attempts", {"task_id": bound["task_id"]})
+        assert str(attempt["attempt_id"]) == attempt_id and attempt["actual_tokens"] == 18
+        budget = repo.one("budgets", {"budget_id": attempt["budget_id"]})
+        assert budget["spent_amount"] == attempt["actual_amount"] and budget["reserved_amount"] == 0
+    assert len(requests) == 1
+
+
+def test_two_installations_can_use_the_same_operation_and_hold(site):
+    runtime, submit, get, _, supervisor, owner, requests, frozen = site
+    kernel = runtime.kernel
+    ticket = install(
+        kernel,
+        owner,
+        nf_instance_id=get["nf_instance_id"],
+        org_id=str(uuid4()),
+        work_id=get["work_id"],
+        branch_id=get["branch_id"],
+        expires_at=datetime.now(UTC) + timedelta(hours=1),
+    )
+    peer = Delegations(kernel, ticket["installation_id"], ticket["token"])
+    with kernel.db.uow(write=False) as repo:
+        manifest = kernel.artifact(repo, frozen.manifest_ref, get["work_id"])["payload"]
+    other = RuntimeTaskService(kernel, supervisor.gateway).define(
+        owner,
+        frozen.spec["world_ref"],
+        role_id=submit["role_id"],
+        task_kind="summary",
+        story_time=point(1),
+        subject_ids=manifest["subject_ids"],
+        predicates=manifest["predicates"],
+        assignment="Summarize observed state.",
+        adapter_id="fixture",
+        max_amount=submit["max_amount"],
+        token_budget=submit["token_limit"],
+    )
+    provision_slot(
+        supervisor,
+        owner,
+        peer.installation_id,
+        scope_ref=submit["scope_ref"],
+        task_template_id=submit["task_template_id"],
+        frozen=other,
+        budget_id=kernel.tasks.create_budget(get["work_id"], "2"),
+        reserve_amount=submit["max_amount"],
+        token_reservation=submit["token_limit"],
+    )
+    with ThreadPoolExecutor(2) as pool:
+        left, right = pool.map(
+            lambda service: service.call("nf_delegation_submit", submit), (runtime, peer)
+        )
+    assert left["task_id"] == frozen.spec["task_id"] and right["task_id"] == other.spec["task_id"]
+    assert left["receipt_ref"] != right["receipt_ref"]
+    assert (
+        runtime.call("nf_delegation_get", get) == left
+        and peer.call("nf_delegation_get", get) == right
+    )
+    assert not requests
+
+
+def test_expiry_while_dispatch_authorization_waits_keeps_attempt_unsent(site, monkeypatch):
+    from sqlalchemy import text
+
+    runtime, submit, get, _, supervisor, owner, requests, _ = site
+    bound = runtime.call("nf_delegation_submit", submit)
+    tasks = runtime.kernel.tasks
+    mark_sent = tasks.mark_call_sent
+
+    def expire_during_authorization(attempt_id, *, worker_id, authorize_in_tx):
+        with runtime.kernel.db.uow() as repo:
+            deadline = repo.now() + timedelta(seconds=2)
+            repo.change(
+                "delegation_installations",
+                {"installation_id": runtime.installation_id},
+                {"expires_at": deadline},
+            )
+
+        def slow_authorization(conn):
+            authorize_in_tx(conn)
+            conn.execute(text("SELECT pg_sleep_until(:deadline)"), {"deadline": deadline})
+
+        return mark_sent(attempt_id, worker_id=worker_id, authorize_in_tx=slow_authorization)
+
+    monkeypatch.setattr(tasks, "mark_call_sent", expire_during_authorization)
+    result = supervisor.admit_model(owner, get["work_id"], get["branch_id"])
+    assert result["status"] == "BLOCKED" and result["reason"] == "DELEGATION_RECOVERY_FENCED"
+    with runtime.kernel.db.uow(write=False) as repo:
+        [attempt] = repo.many("call_attempts", {"task_id": bound["task_id"]})
+        assert attempt["state"] == "PREPARED" and not requests
+
+@pytest.mark.parametrize("boundary", ["reserve_call", "mark_call_sent"])
+def test_installation_revoke_racing_model_spend_has_one_lock_order(site, monkeypatch, boundary):
+    runtime, submit, get, _, supervisor, owner, requests, _ = site
+    kernel = runtime.kernel
+    runtime.call("nf_delegation_submit", submit)
+    installation_locked, spending_at_installation = Event(), Event()
+    spender_pid = None
+    authorize = kernel.authorize
+    spend = getattr(kernel.tasks, boundary)
+
+    def pause_revoker(*args, **kwargs):
+        if current_thread() is not main_thread() and args[3] == "ADMIN":
+            # revoke() has already acquired FOR UPDATE on the installation.
+            installation_locked.set()
+            assert spending_at_installation.wait(10)
+            conn = args[0].conn
+            deadline = time.monotonic() + 10
+            while not conn.scalar(
+                text("SELECT pg_backend_pid() = ANY(pg_blocking_pids(:spender))"),
+                {"spender": spender_pid},
+            ):
+                assert time.monotonic() < deadline, "spending transaction never waited on revocation"
+                time.sleep(0.01)
+        return authorize(*args, **kwargs)
+
+    def before_sql(conn, cursor, statement, parameters, context, many):
+        nonlocal spender_pid
+        if installation_locked.is_set() and current_thread() is main_thread():
+            if "FOR SHARE OF i" in statement:
+                spender_pid = conn.connection.driver_connection.info.backend_pid
+                spending_at_installation.set()
+
+    def contend(*args, **kwargs):
+        with ThreadPoolExecutor(1) as worker:
+            revoked = worker.submit(revoke, kernel, owner, runtime.installation_id)
+            assert installation_locked.wait(10)
+            try:
+                return spend(*args, **kwargs)
+            finally:
+                revoked.result(timeout=10)
+
+    monkeypatch.setattr(kernel, "authorize", pause_revoker)
+    monkeypatch.setattr(kernel.tasks, boundary, contend)
+    event.listen(kernel.db.engine, "before_cursor_execute", before_sql)
+    try:
+        result = supervisor.admit_model(owner, get["work_id"], get["branch_id"])
+    finally:
+        event.remove(kernel.db.engine, "before_cursor_execute", before_sql)
+    assert installation_locked.is_set() and spending_at_installation.is_set()
+    assert result["status"] == "BLOCKED" and not requests
+
+
+def test_denied_accounting_caller_cannot_distinguish_missing_from_expired(site):
+    runtime, submit, get, _, supervisor, owner, requests, _ = site
+    bound = runtime.call("nf_delegation_submit", submit)
+    ledger = runtime.kernel.tasks
+    supervisor.admit_model(owner, get["work_id"], get["branch_id"])
+    [attempt_id] = runtime.call("nf_delegation_get", get)["attempt_ids"]
+    expire_installation(runtime)
+
+    def deny(_conn):
+        raise DomainError("VIEW_DENIED", "Caller unavailable")
+
+    for task in [bound["task_id"], str(uuid4())]:
+        with pytest.raises(DomainError) as blocked:
+            ledger.reserve_call(task, 1, "denied", budget_id=str(uuid4()), amount="0.01",
+                                call_key="denied", request_hash="a" * 64, authorize_in_tx=deny)
+        assert blocked.value.as_dict("same") == DomainError("VIEW_DENIED", "Caller unavailable").as_dict("same")
+    for attempt in [attempt_id, str(uuid4())]:
+        with pytest.raises(DomainError) as blocked:
+            ledger.mark_call_sent(attempt, worker_id="denied", authorize_in_tx=deny)
+        assert blocked.value.as_dict("same") == DomainError("VIEW_DENIED", "Caller unavailable").as_dict("same")
+    assert len(requests) == 1

@@ -1,0 +1,37 @@
+{
+  "sha": "e5a47f51f39e3ad618e822e451eb89110395e7dc",
+  "tree": "013e2acd2e19a1cfa391dc40c813bc7c76714551",
+  "git_status": "",
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "cluster_count": 2,
+  "database_roles": [
+    "nf_service",
+    "aw_service"
+  ],
+  "cluster_authentication": "scram-sha-256",
+  "counts": {
+    "aw": {
+      "tests": 2,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0
+    },
+    "nf": {
+      "tests": 4,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0
+    },
+    "dual": {
+      "tests": 2,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0
+    }
+  },
+  "artifacts": {
+    "aw.xml": "81144454661d36f164ee14d6e0749df1ed755449a9bf81030632e38b27fb017f",
+    "dual.xml": "85b993ac610416368617a5ce5edd10087106f9babea96d307edc3e16e2cc837f",
+    "nf.xml": "107f979ca0cbfc1ff14371756f1e6e840d8badadf7547a6181b58c312d45dd2a"
+  }
+}

@@ -11,8 +11,10 @@ from sqlalchemy import text
 
 from novel_factory.application.authorization import Principal
 from novel_factory.application.kernel import require
+from novel_factory.application.semantic_dependencies import check_task_dependencies
 from novel_factory.application.supervisor import RuntimeSupervisor
 from novel_factory.domain.canonical import fingerprint
+from novel_factory.domain.errors import DomainError
 
 PROTOCOL = "aw-nf.v1"
 _UUID = {"type": "string", "format": "uuid"}
@@ -347,7 +349,7 @@ class Delegations:
                         "Reconcile restored installations",
                     )
                     receipt = self._bind(repo, data, key, slot, owner)
-            return self._read(repo, identity, receipt, slot)
+            return self._read(repo, identity, receipt, slot, public_progress=True)
 
     def _bind(self, repo, data, key, slot, owner):
         spec, config = slot["spec"], slot["job_config"]
@@ -429,7 +431,43 @@ class Delegations:
         return receipt
 
     @staticmethod
-    def _read(repo, identity, receipt, slot):
+    def _wait_reason(repo, task, call_states, installation):
+        if task["state"] in {"ACCEPTED", "CANCELLED", "FAILED"}:
+            return None
+        if task["state"] == "PAUSED" and call_states & {"PREPARED", "SENT", "UNKNOWN"}:
+            return "CALL_RECONCILIATION_REQUIRED"
+        if installation["outbound_fenced"]:
+            return "DELEGATION_RECOVERY_FENCED"
+        task_id, generation = task["task_id"], task["generation"]
+        # Use the acceptance guard even when the asynchronous S9 scan has yet to run.
+        try:
+            check_task_dependencies(repo, task_id, generation)
+        except DomainError as error:
+            if error.code != "DEPENDENCY_CONFLICT":
+                raise
+            return error.code
+        held = repo.conn.scalar(text("""
+            SELECT EXISTS (
+                SELECT FROM nf_conflict_cases c
+                WHERE c.task_id=:task AND c.generation=:generation
+                AND NOT EXISTS (
+                    SELECT FROM nf_conflict_resolutions r WHERE r.case_id=c.case_id
+                    AND r.outcome IN ('REVALIDATED','CERTIFICATE_REISSUED')
+                )
+            )
+        """), {"task": task_id, "generation": generation})
+        if held:
+            return "DEPENDENCY_CONFLICT"
+        if task["state"] == "WAITING_REVIEW":
+            return "REVIEW_REQUIRED"
+        if task["state"] == "BLOCKED":
+            wait = repo.one("workflow_waits", {"task_id": task_id, "generation": generation})
+            if wait and wait["woken_at"] is None:
+                return "WAITING_FOR_DEPENDENCY"
+        return None
+
+    @staticmethod
+    def _read(repo, identity, receipt, slot, *, public_progress=False):
         task = repo.one("tasks", {"task_id": receipt["task_id"]}, lock="share")
         calls = repo.many("call_attempts", {"task_id": task["task_id"]}, order=["attempt_id"])
         states = {r["state"] for r in calls}
@@ -451,7 +489,7 @@ class Delegations:
             }
             for r in calls
         ]
-        return {
+        view = {
             "protocol_version": PROTOCOL,
             "nf_instance_id": identity["nf_instance_id"],
             "work_id": identity["work_id"],
@@ -471,3 +509,8 @@ class Delegations:
             "attempt_ids": [a["attempt_id"] for a in attempts],
             "attempts": attempts,
         }
+        if public_progress:
+            # The accepted result UUID refers only to this task. Never expose payload hashes or artifacts.
+            view["result_ref"] = task["current_result_id"] if task["state"] == "ACCEPTED" else None
+            view["wait_reason"] = Delegations._wait_reason(repo, task, states, identity)
+        return view

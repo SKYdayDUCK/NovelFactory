@@ -1,0 +1,341 @@
+{
+  "repository": "SKYdayDUCK/NovelFactory",
+  "pr": 11,
+  "signed_w2_main": "f2c584ec8e738e09d31b05ddd5c032bb2b8f96b1",
+  "original_pr_head": "90cac947c6f1b176f20df6a579027f24e96d7b4c",
+  "main_branch_protected": false,
+  "visible_rulesets": [],
+  "at30": {
+    "issue": 13,
+    "url": "https://github.com/SKYdayDUCK/NovelFactory/issues/13",
+    "title": "AT-30 · 50/200 热点及 1000 开环读容量仍未达标",
+    "state": "open"
+  },
+  "candidate_and_main_expected": [
+    ".github/workflows/agent-workshop.yml",
+    ".github/workflows/p1-integrity.yml",
+    ".github/workflows/p2-load.yml",
+    ".github/workflows/p3-p4-evidence.yml",
+    ".github/workflows/p3-scale-experiments.yml",
+    ".github/workflows/p4-recovery-drill.yml"
+  ],
+  "native_desktop": "p5-native-desktop.yml uses pull_request path filters or workflow_dispatch. Original bridge file set does not intersect. There is no push trigger.",
+  "prospective_bridge_workflow_blob": "7b2ed0b3c72f4e517aef41afd110b1ee9ab4ed0e",
+  "archive_note": "Historical runs reflect old code or hard-coded checkouts on a separate rehearsal branch. No result below qualifies the final W2-based #11 candidate or its merge commit.",
+  "runs": [
+    {
+      "run": 43047258552,
+      "workflow": ".github/workflows/p1-integrity.yml",
+      "head_sha": "90cac947c6f1b176f20df6a579027f24e96d7b4c",
+      "event": "pull_request",
+      "attempt": 2,
+      "conclusion": "cancelled",
+      "checkout_pin": null,
+      "jobs": [
+        {
+          "id": 130646757167,
+          "name": "PostgreSQL 17 integration, concurrency and restore",
+          "conclusion": "cancelled",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43047258552/job/130646757167"
+        },
+        {
+          "id": 130646850750,
+          "name": "Schema, domain, HTTP and production boundaries",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43047258552/job/130646850750"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13873553743,
+          "name": "p1-postgres-concurrency-2",
+          "digest": "sha256:d442262d53484229751df98bc1f821c70d38c94444ef53843f93cfedf392c744",
+          "expired": false
+        },
+        {
+          "id": 13872030069,
+          "name": "p1-postgres-concurrency-1",
+          "digest": "sha256:52c32d198636340c7042c2aabb0f65c5b2297533b15cdc2646fd9c4a62dd9106",
+          "expired": false
+        },
+        {
+          "id": 13867922484,
+          "name": "p1-schema-unit-1",
+          "digest": "sha256:15167dd51792744d419246522923b0c036d9ce73bfb3f013f4bdadf988e797ba",
+          "expired": false
+        }
+      ]
+    },
+    {
+      "run": 43047258879,
+      "workflow": ".github/workflows/p4-recovery-drill.yml",
+      "head_sha": "90cac947c6f1b176f20df6a579027f24e96d7b4c",
+      "event": "pull_request",
+      "attempt": 1,
+      "conclusion": "success",
+      "checkout_pin": null,
+      "jobs": [
+        {
+          "id": 130614412465,
+          "name": "Physical base backup, SIGKILL, WAL replay and application verification",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43047258879/job/130614412465"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13867584540,
+          "name": "p4-real-pitr-1",
+          "digest": "sha256:c941a4d61719f7795120fa3e843b5361d90da32e5f56fd305254e202e988ab6c",
+          "expired": false
+        }
+      ]
+    },
+    {
+      "run": 43047258923,
+      "workflow": ".github/workflows/p3-scale-experiments.yml",
+      "head_sha": "90cac947c6f1b176f20df6a579027f24e96d7b4c",
+      "event": "pull_request",
+      "attempt": 1,
+      "conclusion": "failure",
+      "checkout_pin": null,
+      "jobs": [
+        {
+          "id": 130614413286,
+          "name": "Measured 500-read-soak",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43047258923/job/130614413286"
+        },
+        {
+          "id": 130614413492,
+          "name": "Measured 1000-read-open",
+          "conclusion": "failure",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43047258923/job/130614413492"
+        },
+        {
+          "id": 130614413927,
+          "name": "Measured 500-mixed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43047258923/job/130614413927"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13870315420,
+          "name": "p3-scale-500-mixed-1",
+          "digest": "sha256:103c4e09f3a71cccd37161b24bf38acf73912099e08f2681f596e081e75039c1",
+          "expired": false
+        },
+        {
+          "id": 13868298153,
+          "name": "p3-scale-1000-read-open-1",
+          "digest": "sha256:06c24ed4eddbf6ee98aba6fae449ec14a539e524abdff833b9b319ab962ffe13",
+          "expired": false
+        },
+        {
+          "id": 13868133457,
+          "name": "p3-scale-500-read-soak-1",
+          "digest": "sha256:a689132058b857999d49f69d66254e782931d7201da09002019ef45ee1ce7631",
+          "expired": false
+        }
+      ]
+    },
+    {
+      "run": 43047258813,
+      "workflow": ".github/workflows/p2-load.yml",
+      "head_sha": "90cac947c6f1b176f20df6a579027f24e96d7b4c",
+      "event": "pull_request",
+      "attempt": 1,
+      "conclusion": "failure",
+      "checkout_pin": null,
+      "jobs": [
+        {
+          "id": 130614416295,
+          "name": "50 agents / mixed / full capacity gate",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43047258813/job/130614416295"
+        },
+        {
+          "id": 130614416738,
+          "name": "200 agents / overload / full capacity gate",
+          "conclusion": "failure",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43047258813/job/130614416738"
+        },
+        {
+          "id": 130614416762,
+          "name": "200 agents / mixed / full capacity gate",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43047258813/job/130614416762"
+        },
+        {
+          "id": 130614416902,
+          "name": "50 agents / overload / full capacity gate",
+          "conclusion": "failure",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43047258813/job/130614416902"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13869377044,
+          "name": "p2-load-200-overload-1",
+          "digest": "sha256:f45aac1bbbdbec23ccb71bba26e4545f35949e7a5e85f6a84cae20cc7cc76390",
+          "expired": false
+        },
+        {
+          "id": 13869180529,
+          "name": "p2-load-50-mixed-1",
+          "digest": "sha256:7e3e8cb2e5ed2d6a564529e6462a17bc8d1bb03e020d8826c41a5b6a002cfd7f",
+          "expired": false
+        },
+        {
+          "id": 13868979803,
+          "name": "p2-load-200-mixed-1",
+          "digest": "sha256:f1e87c861ccc2c2f0b5378e6c23115b39d833a3b729ad94791c69480eb8171e6",
+          "expired": false
+        },
+        {
+          "id": 13867429897,
+          "name": "p2-load-50-overload-1",
+          "digest": "sha256:83d9fd5761f6b08e9e23363b5f96faa23e1d7e740d93321162728ad1a7c08a97",
+          "expired": false
+        }
+      ]
+    },
+    {
+      "run": 43047259218,
+      "workflow": ".github/workflows/p3-p4-evidence.yml",
+      "head_sha": "90cac947c6f1b176f20df6a579027f24e96d7b4c",
+      "event": "pull_request",
+      "attempt": 1,
+      "conclusion": "failure",
+      "checkout_pin": null,
+      "jobs": [
+        {
+          "id": 130614415400,
+          "name": "Same world CPU and SQL paired comparison",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43047259218/job/130614415400"
+        },
+        {
+          "id": 130614416007,
+          "name": "Independent load process / 200 / overload",
+          "conclusion": "failure",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43047259218/job/130614416007"
+        },
+        {
+          "id": 130614416073,
+          "name": "Independent load process / 200 / mixed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43047259218/job/130614416073"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13869182850,
+          "name": "p3-isolated-200-overload-1",
+          "digest": "sha256:a6896ec553d6a07ed92b49fe69964f7eb464fcb21ded93a0bd4b744a4c68217e",
+          "expired": false
+        },
+        {
+          "id": 13868744365,
+          "name": "p3-isolated-200-mixed-1",
+          "digest": "sha256:2e51d991fa72edaa2fc54e62f78a2177de706c28cf71b6e8366603a19139e497",
+          "expired": false
+        },
+        {
+          "id": 13867933947,
+          "name": "p3-context-paired-1",
+          "digest": "sha256:98a6b4ff61d4f824007057af9d92501b1f3cecda35f811eb200946f0b25b3956",
+          "expired": false
+        }
+      ]
+    },
+    {
+      "run": 43074030837,
+      "workflow": ".github/workflows/nfbridge-p1.yml",
+      "head_sha": "bbc983231d15960783cde5d6f89dff7935855ed5",
+      "event": "push",
+      "attempt": 1,
+      "conclusion": "failure",
+      "checkout_pin": "4badb53a6804ea391ede0438689d977f9a4ed23b",
+      "jobs": [
+        {
+          "id": 130709064486,
+          "name": "Schema, domain, HTTP and production boundaries",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43074030837/job/130709064486"
+        },
+        {
+          "id": 130709065242,
+          "name": "PostgreSQL 17 integration, concurrency and restore",
+          "conclusion": "failure",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43074030837/job/130709065242"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13880229408,
+          "name": "p1-postgres-concurrency-1",
+          "digest": "sha256:27ff608cf3a8672f01a00ab246d4c865d6ce5683c72c64281c18d88cda70a6c2",
+          "expired": false
+        },
+        {
+          "id": 13880216813,
+          "name": "p1-schema-unit-1",
+          "digest": "sha256:5a689d7d8e67f78fc35bf052f30182212a14f28e12ddc6d0ad69509a496e5fd8",
+          "expired": false
+        }
+      ]
+    },
+    {
+      "run": 43074030784,
+      "workflow": ".github/workflows/nfbridge-physical.yml",
+      "head_sha": "bbc983231d15960783cde5d6f89dff7935855ed5",
+      "event": "push",
+      "attempt": 1,
+      "conclusion": "success",
+      "checkout_pin": "4badb53a6804ea391ede0438689d977f9a4ed23b",
+      "jobs": [
+        {
+          "id": 130709062892,
+          "name": "Physical base backup, SIGKILL, WAL replay and application verification",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43074030784/job/130709062892"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13880531276,
+          "name": "p4-real-pitr-1",
+          "digest": "sha256:bf93b2cda8982518aa10823d4ad5b18446581969f33877e65c638cd57958feb3",
+          "expired": false
+        }
+      ]
+    },
+    {
+      "run": 43075180037,
+      "workflow": ".github/workflows/nfbridge-native.yml",
+      "head_sha": "0da226d1aef0e2500d798ce81a8ae62c494efe3f",
+      "event": "push",
+      "attempt": 1,
+      "conclusion": "success",
+      "checkout_pin": "e62e2b6c8de6da4e61d87eb2a8680861f0a6b30f",
+      "jobs": [
+        {
+          "id": 130713017666,
+          "name": "native-desktop",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43075180037/job/130713017666"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13882056402,
+          "name": "p5-native-codex-desktop-43075180037-1",
+          "digest": "sha256:1be712e98c366c7102285a9b167693ae8c719938e4ffacbe2c675892f0642e62",
+          "expired": false
+        }
+      ]
+    }
+  ]
+}

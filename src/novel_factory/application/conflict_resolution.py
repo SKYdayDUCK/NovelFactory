@@ -1,6 +1,8 @@
 """Bounded, replayable coordination of immutable cross-workflow conflict cases."""
+from dataclasses import asdict, dataclass
 from datetime import timedelta
 import json
+import os
 from time import monotonic
 from uuid import UUID, uuid5
 
@@ -11,9 +13,30 @@ from novel_factory.application.kernel import require
 from novel_factory.domain.canonical import fingerprint
 from novel_factory.domain.errors import DomainError
 
-MAX_REFRESHES = 2
-MAX_WINDOW = 8
-MAX_IMPACT = 32
+def _repair_limit(name, default):
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    if value.isascii() and value.isdecimal() and len(value) <= 10:
+        limit = int(value)
+        if limit <= 2**31 - 1:
+            return limit
+    raise ValueError(f"{name} must be a nonnegative 32-bit integer")
+
+
+@dataclass(frozen=True)
+class RepairLimits:
+    max_refreshes: int
+    max_window: int
+    max_impact: int
+
+    @classmethod
+    def from_environment(cls):
+        return cls(
+            max_refreshes=_repair_limit("NF_S9_MAX_REFRESHES", 2),
+            max_window=_repair_limit("NF_S9_MAX_WINDOW", 8),
+            max_impact=_repair_limit("NF_S9_MAX_IMPACT", 32),
+        )
 
 
 def _id(case_id, name):
@@ -43,6 +66,7 @@ def _set_state(kernel, repo, task, state):
 class ConflictResolutionService:
     def __init__(self, kernel):
         self.kernel = kernel
+        self.limits = RepairLimits.from_environment()
 
     def scan_one(self, controller, work_id, branch_id):
         with self.kernel.db.uow() as repo:
@@ -110,6 +134,7 @@ class ConflictResolutionService:
             receipt_id = _id(found, "resolution:v1")
             result.update(case_id=found, receipt_id=receipt_id, task_id=case["task_id"],
                           generation=case["generation"], conflict_type=case["conflict_type"],
+                          repair_limits=asdict(self.limits),
                           resolution_strategy=result.get("resolution_strategy", case["strategy"]),
                           additional_model_attempts=0, actual_tokens=0, cost_status="NO_MODEL_CALL")
             repo.conn.execute(text("""
@@ -151,6 +176,9 @@ class ConflictResolutionService:
                     [str(c["attempt_id"]) for c in calls if c["state"] in {"PREPARED", "SENT", "UNKNOWN"}]}
         spec = repo.one("task_inputs", {"task_id": task["task_id"], "generation": task["generation"]})["spec"]
         strategy = case["strategy"]
+        affected_tasks = case["details"].get("affected_task_ids", [task["task_id"]])
+        if len(affected_tasks) > self.limits.max_impact:
+            return self._review(kernel, repo, controller, head, case, task, "IMPACT_LIMIT")
         if strategy == "CANDIDATE_BRANCH" and case["conflict_type"] == "BRANCH_DIVERGENCE":
             refs = case["details"]["source_world_refs"]
             require(len(refs) == 2, "INVALID_EVIDENCE", "Expected two immutable branch selections")
@@ -222,8 +250,7 @@ class ConflictResolutionService:
                 "certificate_ref": ref, "validated_world_ref": head, "retained_artifacts": 1,
                 "retained_artifact_refs": [proposal["artifact_ref"]]}
 
-    @staticmethod
-    def _refresh(kernel, repo, head, case, task, spec):
+    def _refresh(self, kernel, repo, head, case, task, spec):
         # Keep the task identity (and waiting successors) but never rewrite a frozen
         # input. Only refetchable context is eligible for unattended recomputation.
         tid, gen = task["task_id"], task["generation"]
@@ -256,7 +283,7 @@ class ConflictResolutionService:
             agent = kernel.artifact(repo, cfg["dispatch"]["input_ref"], head["work_id"], kind="AGENT_INPUT")
             require(not agent["payload"]["material_refs"], "REVIEW_REQUIRED", "Pinned material needs revalidation")
         require(not repo.conn.scalar(text("""SELECT count(*) >= :limit FROM nf_conflict_resolutions
-            WHERE task_id=:task AND outcome='RECOMPUTE_QUEUED'"""), {"task": tid, "limit": MAX_REFRESHES}),
+            WHERE task_id=:task AND outcome='RECOMPUTE_QUEUED'"""), {"task": tid, "limit": self.limits.max_refreshes}),
             "REPAIR_BUDGET_EXHAUSTED", "Task exhausted its automatic refresh budget")
         fresh = {**spec, "world_ref": head, "context_bundle_id": None, "dependency_fingerprint": None}
         kernel.tasks._save_input(repo.conn, tid, gen + 1, fresh, "READY")
@@ -282,7 +309,7 @@ class ConflictResolutionService:
         revision = kernel.revision(repo, head)
         impact = affected_nodes(prior, revision["snapshot"], revision["selection"])
         affected = set(impact["affected"])
-        require(affected.intersection(pinned["node_ids"]) and len(affected) <= MAX_WINDOW,
+        require(affected.intersection(pinned["node_ids"]) and len(affected) <= self.limits.max_window,
                 "WINDOW_CONFLICT", "Impact exceeds or misses this finite window")
         cuts = [spec["story_time"]]
         cuts.extend(e for e in case["details"].get("story_time_constraints", [])
@@ -300,8 +327,6 @@ class ConflictResolutionService:
             policy = kernel.artifact(repo, anchor, head["work_id"], kind="REFERENCE_TIMELINE")["payload"]
             window = _future_window(prior, {"tick": boundary[0], "phase": boundary[1]}, policy["scene_limit"])
             require(affected <= set(window), "WINDOW_CONFLICT", "Existing rolling policy bounds this change")
-        if len(case["details"].get("affected_task_ids", [task["task_id"]])) > MAX_IMPACT:
-            return self._review(kernel, repo, controller, head, case, task, "IMPACT_LIMIT")
         candidate = plans.replan(controller, {"schema_version": "2.1", "prior_plan_ref": pinned["plan_ref"],
             "input_world_ref": head, "replacements": [], "additional_nodes": [], "additional_dependencies": [],
             "decision": {"reason": "已登记的未来场景前提发生变化，保留其他场景供独立审核。",
@@ -315,8 +340,7 @@ class ConflictResolutionService:
                       affected_node_ids=sorted(affected), preserved_node_ids=candidate["report"]["preserved_node_ids"])
         return result
 
-    @staticmethod
-    def _review(kernel, repo, controller, head, case, task, reason):
+    def _review(self, kernel, repo, controller, head, case, task, reason):
         # A controller-owned inbox job with a frozen scope, finite deadline and no
         # provider allowance. Interactive review uses an independently issued grant.
         case_id = case["case_id"]
@@ -325,7 +349,7 @@ class ConflictResolutionService:
         grant = kernel.authorize(repo, controller, head["work_id"], "ADMIN", head["branch_id"])
         scope = {"case_id": case_id, "affected_task_id": task["task_id"], "generation": case["generation"],
              "input_world_ref": head, "strategy": case["strategy"], "reason": reason,
-             "maximum_model_calls": 0, "maximum_future_nodes": MAX_WINDOW}
+             "maximum_model_calls": 0, "maximum_future_nodes": self.limits.max_window}
         if grant["role_id"] != "control_operator" or not {
                 "TASK_CREATE", "TASK_CLAIM", "COMPILE", "ARTIFACT_WRITE", "READ"} <= set(grant["capabilities"]):
             return {"outcome": "DEFERRED", "reason": "REVIEW_PROVISIONING_GRANT_REQUIRED",
@@ -458,7 +482,8 @@ class ConflictResolutionService:
             kernel = self.kernel.in_transaction(repo)
             result = {"outcome": "REVIEW_DECIDED", "decision": decision, "case_id": case_id,
                       "review_task_id": ticket["task_id"], "evidence_ref": evidence_ref,
-                      "validated_world_ref": expected_head, "reviewer_id": reviewer.principal_id}
+                      "validated_world_ref": expected_head, "reviewer_id": reviewer.principal_id,
+                      "repair_limits": asdict(self.limits)}
             if decision in {"REPAIR_HISTORY", "CANDIDATE_BRANCH"}:
                 kind = "REPAIR" if decision == "REPAIR_HISTORY" else "CANDIDATE"
                 result["candidate_world_ref"] = kernel.fork(reviewer, expected_head, kind, "semantic:review:" + case_id)
@@ -466,9 +491,9 @@ class ConflictResolutionService:
                 from novel_factory.application.simulation import WorldSchedulerService
                 require(case["conflict_type"] in {"JOINT_ADJUDICATION_REQUIRED", "SHARED_CONSTRAINT_CONFLICT"}
                         and isinstance(interaction, dict) and set(interaction) == {"at", "scope_ids", "participant_grants"}
-                        and isinstance(interaction["scope_ids"], list) and 1 <= len(interaction["scope_ids"]) <= MAX_IMPACT
+                        and isinstance(interaction["scope_ids"], list) and 1 <= len(interaction["scope_ids"]) <= self.limits.max_impact
                         and isinstance(interaction["participant_grants"], dict)
-                        and len(interaction["participant_grants"]) <= MAX_IMPACT,
+                        and len(interaction["participant_grants"]) <= self.limits.max_impact,
                         "INVALID_ARGUMENT", "Expected a bounded common interaction")
                 affected_scopes = {part for key in case["detection"]["scopes"] for part in key.split(":")}
                 require(affected_scopes.intersection(interaction["scope_ids"]) and

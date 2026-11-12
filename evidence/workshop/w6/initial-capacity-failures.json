@@ -1,0 +1,36 @@
+[
+  {
+    "source_file": "delegations.xml",
+    "cases": [
+      {
+        "name": "test_logical_delegation_backlog[10]",
+        "result": "FAIL"
+      },
+      {
+        "name": "test_logical_delegation_backlog[50]",
+        "result": "FAIL"
+      },
+      {
+        "name": "test_logical_delegation_backlog[200]",
+        "result": "FAIL"
+      }
+    ]
+  },
+  {
+    "source_file": "delegation-priced.xml",
+    "cases": [
+      {
+        "name": "test_logical_delegation_backlog[10]",
+        "result": "FAIL"
+      },
+      {
+        "name": "test_logical_delegation_backlog[50]",
+        "result": "FAIL"
+      },
+      {
+        "name": "test_logical_delegation_backlog[200]",
+        "result": "FAIL"
+      }
+    ]
+  }
+]

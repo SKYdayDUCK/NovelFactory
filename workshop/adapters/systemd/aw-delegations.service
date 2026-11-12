@@ -1,0 +1,11 @@
+[Unit]
+Description=Reconcile due Workshop delegation receipts
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=aw-broker
+EnvironmentFile=/etc/agent-workshop/worker.env
+ExecStart=/opt/agent-workshop/bin/aw-reconcile --org ${AW_ORG_ID} --installation ${AW_INSTALLATION_ID} -- /etc/agent-workshop/nf-delegation
+NoNewPrivileges=true
+PrivateTmp=true

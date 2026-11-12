@@ -1,0 +1,457 @@
+name: Agent Workshop PostgreSQL and stdio
+on:
+  pull_request:
+    paths:
+      - 'workshop/**'
+      - '.github/workflows/agent-workshop.yml'
+      - 'runtime/roles/**'
+      - 'runtime/skills/**'
+      - 'src/novel_factory/application/mcp_runtime.py'
+      - 'src/novel_factory/interfaces/mcp_stdio.py'
+      - 'tests/integration/test_p5_mcp.py'
+      - 'tests/integration/test_p5_rolling.py'
+      - 'migrations/versions/0017_nf_workshop_delegation.py'
+      - 'scripts/manage_workshop_binding.py'
+      - 'src/novel_factory/application/delegation.py'
+      - 'src/novel_factory/application/runtime_tasks.py'
+      - 'src/novel_factory/application/supervisor.py'
+      - 'src/novel_factory/infrastructure/delegation_tables.py'
+      - 'src/novel_factory/infrastructure/recovery.py'
+      - 'src/novel_factory/interfaces/delegation_stdio.py'
+      - 'tests/integration/test_workshop_delegation*.py'
+  push:
+    branches: [main]
+    paths:
+      - 'workshop/**'
+      - '.github/workflows/agent-workshop.yml'
+      - 'runtime/roles/**'
+      - 'runtime/skills/**'
+      - 'src/novel_factory/application/mcp_runtime.py'
+      - 'src/novel_factory/interfaces/mcp_stdio.py'
+      - 'tests/integration/test_p5_mcp.py'
+      - 'tests/integration/test_p5_rolling.py'
+      - 'migrations/versions/0017_nf_workshop_delegation.py'
+      - 'scripts/manage_workshop_binding.py'
+      - 'src/novel_factory/application/delegation.py'
+      - 'src/novel_factory/application/runtime_tasks.py'
+      - 'src/novel_factory/application/supervisor.py'
+      - 'src/novel_factory/infrastructure/delegation_tables.py'
+      - 'src/novel_factory/infrastructure/recovery.py'
+      - 'src/novel_factory/interfaces/delegation_stdio.py'
+      - 'tests/integration/test_workshop_delegation*.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  workshop:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      redis:
+        image: redis:8.0.2
+        ports: ['6379:6379']
+        options: --health-cmd "redis-cli ping" --health-interval 2s --health-timeout 2s --health-retries 30
+      workshop-db:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_PASSWORD: workshop-ci-admin
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U postgres" --health-interval 3s --health-timeout 5s --health-retries 20
+      nf-db:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_PASSWORD: nf-ci-admin
+        ports: ['5433:5432']
+        options: --health-cmd "pg_isready -U postgres" --health-interval 3s --health-timeout 5s --health-retries 20
+    env:
+      AW_ROUTE_MATRIX_EVIDENCE: ${{ github.workspace }}/workshop/routing-matrix.json
+      AW_W2_TRANSPORT_EVIDENCE: ${{ github.workspace }}/workshop/w2-transport.json
+      AW_REDIS_TEST_URL: redis://127.0.0.1:6379/0
+      AW_DATABASE_URL: postgresql://aw_service:workshop-ci@127.0.0.1:5432/workshop_test
+      NF_DATABASE_URL: postgresql+psycopg://nf_service:nf-ci@127.0.0.1:5433/nf_test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - name: Install both locked projects
+        run: |
+          uv sync --locked
+          uv sync --locked --project workshop --extra streams
+      - name: Verify the frozen NF contracts against the checked-out runtime
+        run: |
+          git worktree add --detach "$RUNNER_TEMP/nf-catalog" "$(jq -r .nf_commit workshop/contracts/nf-catalog.json)"
+          python workshop/scripts/freeze_nf_catalog.py "$RUNNER_TEMP/nf-catalog" > "$RUNNER_TEMP/pinned-catalog.json"
+          diff -u workshop/contracts/nf-catalog.json "$RUNNER_TEMP/pinned-catalog.json"
+          python workshop/scripts/freeze_nf_catalog.py . > "$RUNNER_TEMP/current-catalog.json"
+          diff -u <(jq -S 'del(.nf_commit)' "$RUNNER_TEMP/pinned-catalog.json") <(jq -S 'del(.nf_commit)' "$RUNNER_TEMP/current-catalog.json")
+      - name: Provision separate service identities and databases
+        env:
+          AW_POSTGRES: ${{ job.services.workshop-db.id }}
+          NF_POSTGRES: ${{ job.services.nf-db.id }}
+        run: |
+          docker exec -i "$AW_POSTGRES" psql -X -v ON_ERROR_STOP=1 -U postgres <<'SQL'
+          CREATE USER aw_service PASSWORD 'workshop-ci';
+          CREATE DATABASE workshop_test OWNER aw_service;
+          REVOKE CONNECT ON DATABASE workshop_test FROM PUBLIC;
+          CREATE DATABASE aw_upgrade_test OWNER aw_service;
+          REVOKE CONNECT ON DATABASE aw_upgrade_test FROM PUBLIC;
+          CREATE DATABASE w6_from_w5c OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w6_from_w5c FROM PUBLIC;
+          CREATE DATABASE w6_from_w006 OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w6_from_w006 FROM PUBLIC;
+          CREATE DATABASE w6_from_w007 OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w6_from_w007 FROM PUBLIC;
+          CREATE DATABASE w6_from_w008 OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w6_from_w008 FROM PUBLIC;
+          CREATE DATABASE w6_from_w008a OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w6_from_w008a FROM PUBLIC;
+          CREATE DATABASE w6_from_rehearsal_early OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w6_from_rehearsal_early FROM PUBLIC;
+          CREATE DATABASE w6_from_rehearsal_late OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w6_from_rehearsal_late FROM PUBLIC;
+          CREATE DATABASE w6_from_w009 OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w6_from_w009 FROM PUBLIC;
+          CREATE DATABASE w5_from_w4c OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w5_from_w4c FROM PUBLIC;
+          CREATE DATABASE w5_from_w5 OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w5_from_w5 FROM PUBLIC;
+          CREATE DATABASE w5_from_w5a OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w5_from_w5a FROM PUBLIC;
+          CREATE DATABASE w5_from_w5b OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w5_from_w5b FROM PUBLIC;
+          CREATE DATABASE w4_from_w3 OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w4_from_w3 FROM PUBLIC;
+          CREATE DATABASE w4_from_w3_route OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w4_from_w3_route FROM PUBLIC;
+          CREATE DATABASE w4_from_w4 OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w4_from_w4 FROM PUBLIC;
+          CREATE DATABASE w4_from_w4b OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w4_from_w4b FROM PUBLIC;
+          CREATE DATABASE w3_from_w3 OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w3_from_w3 FROM PUBLIC;
+          CREATE DATABASE w3_from_w2c OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w3_from_w2c FROM PUBLIC;
+          CREATE DATABASE w3_from_w3a OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w3_from_w3a FROM PUBLIC;
+          CREATE DATABASE w2_from_w1 OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w2_from_w1 FROM PUBLIC;
+          CREATE DATABASE w2_from_w2 OWNER aw_service;
+          REVOKE CONNECT ON DATABASE w2_from_w2 FROM PUBLIC;
+          SQL
+          docker exec -i "$NF_POSTGRES" psql -X -v ON_ERROR_STOP=1 -U postgres <<'SQL'
+          CREATE USER nf_service PASSWORD 'nf-ci';
+          CREATE DATABASE nf_test OWNER nf_service;
+          REVOKE CONNECT ON DATABASE nf_test FROM PUBLIC;
+          CREATE USER nf_fixture CREATEDB PASSWORD 'nf-fixture-ci';
+          SQL
+      - name: Migrate the two service databases
+        run: |
+          .venv/bin/python -m alembic upgrade head
+          (cd workshop && .venv/bin/python -m alembic upgrade head)
+      - name: Check delegated calls, recovery and the released NF database upgrade
+        env:
+          NF_TEST_DATABASE_URL: postgresql+psycopg://nf_fixture:nf-fixture-ci@127.0.0.1:5433/postgres
+        run: |
+          mkdir -p bridge-results
+          git show -s --format='commit=%H%ntree=%T%nparents=%P' HEAD > bridge-results/checkout.txt
+          .venv/bin/python -m pytest -q -o junit_family=xunit1 \
+            tests/integration/test_workshop_delegation*.py \
+            --junitxml=bridge-results/nf-delegation.xml
+      - name: Check the limited NF interface beside the live Workshop service
+        run: |
+          .venv/bin/python -m pytest -c pyproject.toml -q -o junit_family=xunit1 \
+            workshop/acceptance/test_nf_bridge_stdio.py --junitxml=bridge-results/dual-service.xml
+      - name: Run Workshop contracts and stdio permissions
+        env:
+          AW_REDIS_TEST_CONTAINER: ${{ job.services.redis.id }}
+        working-directory: workshop
+        run: |
+          .venv/bin/python -m pytest tests -q --junitxml=workshop-results.xml \
+            --ignore-glob='tests/test_review*.py' --ignore=tests/test_w4_skills_stdio.py --ignore=tests/test_legacy_paid_reviews.py \
+            --ignore=tests/test_w4_routing_upgrade.py
+      - name: Verify W4 review modes, Skill scopes and populated W3 and W4 upgrades
+        working-directory: workshop
+        env:
+          AW_W4_SKILLS_EVIDENCE: ${{ github.workspace }}/workshop/w4-skills-stdio.json
+          AW_W4_LEGACY_REVIEW_EVIDENCE: ${{ github.workspace }}/workshop/w4-legacy-review.json
+          AW_W4_ROUTING_UPGRADE_EVIDENCE_DIR: ${{ github.workspace }}/workshop/w4-route-upgrades
+        run: |
+          mkdir -p "$AW_W4_ROUTING_UPGRADE_EVIDENCE_DIR"
+          export AW_W4_FROM_W3_DATABASE_URL="${AW_DATABASE_URL%/*}/w4_from_w3"
+          .venv/bin/python -m pytest -c pyproject.toml -q -o junit_family=xunit1 \
+            tests/test_review*.py tests/test_w4_skills_stdio.py tests/test_legacy_paid_reviews.py tests/test_w4_routing_upgrade.py \
+            acceptance/test_w4_historical_upgrade.py \
+            --junitxml=w4-reviews-skills-upgrades.xml
+          test -s w4-legacy-review.json
+          test -s w4-skills-stdio.json
+          export AW_W4_FROM_W3_DATABASE_URL="${AW_DATABASE_URL%/*}/w4_from_w3_route"
+          export AW_W4_FROM_W4_DATABASE_URL="${AW_DATABASE_URL%/*}/w4_from_w4"
+          export AW_W4_FROM_W4B_DATABASE_URL="${AW_DATABASE_URL%/*}/w4_from_w4b"
+          .venv/bin/python -m pytest -c pyproject.toml acceptance/test_w4_historical_upgrades.py -q -o junit_family=xunit1 --junitxml=w4-historical-upgrades.xml
+          for origin in w004 w004a w004b signed-view; do
+            test -s "$AW_W4_ROUTING_UPGRADE_EVIDENCE_DIR/$origin.json"
+          done
+      - name: Upgrade populated W4c and each deployed W5 database
+        working-directory: workshop
+        env:
+          AW_W5_UPGRADE_EVIDENCE_DIR: ${{ github.workspace }}/workshop/w5-upgrades
+        run: |
+          mkdir -p "$AW_W5_UPGRADE_EVIDENCE_DIR"
+          export AW_W5_FROM_W4C_DATABASE_URL="${AW_DATABASE_URL%/*}/w5_from_w4c"
+          export AW_W5_FROM_W5_DATABASE_URL="${AW_DATABASE_URL%/*}/w5_from_w5"
+          export AW_W5_FROM_W5A_DATABASE_URL="${AW_DATABASE_URL%/*}/w5_from_w5a"
+          export AW_W5_FROM_W5B_DATABASE_URL="${AW_DATABASE_URL%/*}/w5_from_w5b"
+          .venv/bin/python -m pytest -c pyproject.toml -q -o junit_family=xunit1 \
+            acceptance/test_w5_historical_upgrades.py --junitxml=w5-historical-upgrades.xml
+          for origin in w004c w005 w005a w005b; do
+            test -s "$AW_W5_UPGRADE_EVIDENCE_DIR/$origin.json"
+          done
+      - name: Verify the signed W5 and deployed W6 upgrade histories
+        working-directory: workshop
+        env:
+          AW_W6_UPGRADE_DATABASE_PREFIX: w6_from_
+          AW_W6_UPGRADE_EVIDENCE_DIR: ${{ github.workspace }}/workshop/w6-upgrades
+        run: |
+          mkdir -p "$AW_W6_UPGRADE_EVIDENCE_DIR"
+          .venv/bin/python -m pytest -q -o junit_family=xunit1 acceptance/test_w6_historical_upgrades.py --junitxml=w6-historical-upgrades.xml
+          for origin in w5c w006 w007 w008 w008a rehearsal_early rehearsal_late w009; do
+            test -s "$AW_W6_UPGRADE_EVIDENCE_DIR/$origin.json"
+          done
+      - name: Upgrade the released W0 service and verify existing bindings
+        working-directory: workshop
+        run: |
+          export AW_UPGRADE_DATABASE_URL="${AW_DATABASE_URL%/*}/aw_upgrade_test"
+          .venv/bin/python -m pytest -c pyproject.toml acceptance/test_w1_historical_upgrade.py -q -o junit_family=xunit1 --junitxml=w1-legacy-upgrade.xml
+      - name: Upgrade previously deployed W1 and W2 databases
+        working-directory: workshop
+        run: |
+          export AW_W2_FROM_W1_DATABASE_URL="${AW_DATABASE_URL%/*}/w2_from_w1"
+          export AW_W2_FROM_W2_DATABASE_URL="${AW_DATABASE_URL%/*}/w2_from_w2"
+          export AW_W3_FROM_W2C_DATABASE_URL="${AW_DATABASE_URL%/*}/w3_from_w2c"
+          .venv/bin/python -m pytest -c pyproject.toml acceptance/test_w2_historical_upgrades.py -q -o junit_family=xunit1 --junitxml=w2-legacy-upgrades.xml
+      - name: Upgrade existing W3 queues, preserve all historical rows and reconcile accepted NF work
+        working-directory: workshop
+        run: |
+          export AW_W3_FROM_W3_DATABASE_URL="${AW_DATABASE_URL%/*}/w3_from_w3"
+          export AW_W3_FROM_W3A_DATABASE_URL="${AW_DATABASE_URL%/*}/w3_from_w3a"
+          .venv/bin/python -m pytest -c pyproject.toml acceptance/test_w3_historical_upgrades.py -q -o junit_family=xunit1 --junitxml=w3-legacy-upgrades.xml
+      - name: Check the nine granted NF tools over live stdio
+        env:
+          NF_TEST_DATABASE_URL: postgresql+psycopg://nf_fixture:nf-fixture-ci@127.0.0.1:5433/postgres
+          NF_P5_CODEX_VERSION: 0.167.0-alpha.4
+          NF_W0_TOOL_MATRIX: ${{ github.workspace }}/workshop/nf-tools.json
+        run: |
+          prefix="$RUNNER_TEMP/novelfactory-codex"
+          npm install --prefix "$prefix" --no-save --no-audit --no-fund "@openai/codex@$NF_P5_CODEX_VERSION"
+          native_bin="$prefix/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/bin"
+          test "$("$native_bin/codex" --version)" = "codex-cli $NF_P5_CODEX_VERSION"
+          export PATH="$native_bin:$PATH"
+          PYTHONPATH="$PWD/workshop/qualification:$PWD/src" .venv/bin/python -m pytest -p matrix_probe -q tests/integration/test_p5_mcp.py tests/integration/test_p5_rolling.py --junitxml=workshop/nf-tools.xml
+      - name: Verify both live services and database isolation
+        run: |
+          .venv/bin/python -m pytest -c pyproject.toml workshop/acceptance/test_w0_dual_services.py -q -o junit_family=xunit1 --junitxml=workshop/dual-service-results.xml
+      - name: Verify dual-ledger recovery on the integrated NF source and native PG17
+        env:
+          AW_NF_SOURCE: ${{ github.workspace }}
+          AW_DUAL_TEST_ADMIN_URL: postgresql://postgres:workshop-ci-admin@127.0.0.1:5432/postgres
+          AW_DUAL_TEST_NF_ADMIN_URL: postgresql://postgres:nf-ci-admin@127.0.0.1:5433/postgres
+          AW_W3_REDIS_IMAGE: redis:8.0.2
+          AW_W3_REDIS_EVIDENCE: ${{ github.workspace }}/workshop/w3-redis-recovery.json
+          AW_OFFLINE_WITNESS: ${{ github.workspace }}/workshop/aw-offline.json
+          AW_PAIRED_RESTORE_EVIDENCE: ${{ github.workspace }}/workshop/paired-restore.json
+          PG_BIN: /usr/lib/postgresql/17/bin
+        run: |
+          bash scripts/ci_install_pg17.sh postgresql-17 postgresql-client-17
+          PYTHONPATH="$PWD/workshop/src:$PWD/src" .venv/bin/python -m pytest \
+            -c pyproject.toml -o junit_family=xunit1 -q workshop/integration --junitxml=workshop/dual-results.xml
+          test -s workshop/aw-offline.json
+      - name: Verify two independent SSH brokers in a single native Codex role thread
+        env:
+          AW_DUAL_TEST_ADMIN_URL: postgresql://postgres:workshop-ci-admin@127.0.0.1:5432/postgres
+          AW_DUAL_TEST_NF_ADMIN_URL: postgresql://postgres:nf-ci-admin@127.0.0.1:5433/postgres
+        run: |
+          bash scripts/ci_install_pg17.sh openssh-client openssh-server
+          native="$RUNNER_TEMP/novelfactory-codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/bin/codex"
+          bash workshop/acceptance/dual_codex/run.sh "$GITHUB_WORKSPACE" "$GITHUB_WORKSPACE/workshop" "$native" "$GITHUB_WORKSPACE/workshop/codex-dual"
+          python - <<'PYCODE'
+          import json, os, re
+          from pathlib import Path
+          proof = json.loads(Path("workshop/codex-dual/receipt.json").read_text())
+          assert proof["workshop_sha"] == proof["nf_sha"] == os.environ["GITHUB_SHA"]
+          assert proof["separate_service_clusters"] and proof["separate_service_uids"]
+          assert proof["aw_postgres_system_identifier"] != proof["nf_postgres_system_identifier"]
+          assert re.fullmatch("[0-9a-f]{64}", proof["wheel_sha256"])
+          assert proof["model_turns"] == 0 and proof["cross_service_binding_reads_denied"] == 2
+          PYCODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: workshop-results
+          path: |
+            workshop/workshop-results.xml
+            workshop/nf-tools.xml
+            workshop/nf-tools.json
+            workshop/dual-service-results.xml
+            workshop/w1-legacy-upgrade.xml
+            workshop/w2-legacy-upgrades.xml
+            workshop/routing-matrix.json
+            workshop/w2-transport.json
+            workshop/w3-legacy-upgrades.xml
+            workshop/w4-reviews-skills-upgrades.xml
+            workshop/w4-skills-stdio.json
+            workshop/w4-historical-upgrades.xml
+            workshop/w4-legacy-review.json
+            workshop/w4-route-upgrades/*.json
+            workshop/w5-historical-upgrades.xml
+            workshop/w5-upgrades/*.json
+            workshop/w6-historical-upgrades.xml
+            workshop/w6-upgrades/*.json
+            workshop/codex-dual/receipt.json
+            workshop/aw-offline.json
+            workshop/dual-results.xml
+            workshop/paired-restore.json
+            workshop/w3-redis-recovery.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nf-bridge-results
+          path: bridge-results/
+          if-no-files-found: error
+  w6-capacity-and-scenes:
+    name: ${{ matrix.job_name }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - suite: original
+            job_name: W6 message capacity and end-to-end scenes
+            minutes: 25
+          - suite: comparison
+            job_name: Matched admission and extended scene presets
+            minutes: 40
+    timeout-minutes: ${{ matrix.minutes }}
+    services:
+      redis:
+        image: redis:8.0.2
+        ports: ['6379:6379']
+        options: --health-cmd "redis-cli ping" --health-interval 2s --health-timeout 2s --health-retries 30
+      workshop-db:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_PASSWORD: workshop-ci-admin
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U postgres" --health-interval 3s --health-timeout 5s --health-retries 20
+      nf-db:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_PASSWORD: nf-ci-admin
+        ports: ['5433:5432']
+        options: --health-cmd "pg_isready -U postgres" --health-interval 3s --health-timeout 5s --health-retries 20
+    defaults:
+      run:
+        working-directory: workshop
+    env:
+      AW_CI_SUITE: ${{ matrix.suite }}
+      PG_BIN: /usr/lib/postgresql/17/bin
+      AW_REDIS_TEST_URL: redis://127.0.0.1:6379/0
+      AW_DATABASE_URL: postgresql://aw_service:workshop-ci@127.0.0.1:5432/workshop_test
+      AW_DUAL_TEST_ADMIN_URL: postgresql://postgres:workshop-ci-admin@127.0.0.1:5432/postgres
+      AW_DUAL_TEST_NF_ADMIN_URL: postgresql://postgres:nf-ci-admin@127.0.0.1:5433/postgres
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - name: Provision a non-superuser Workshop identity for the wheel and message workloads
+        env:
+          AW_POSTGRES: ${{ job.services.workshop-db.id }}
+        run: |
+          docker exec -i "$AW_POSTGRES" psql -X -v ON_ERROR_STOP=1 -U postgres <<'SQL'
+          CREATE USER aw_service PASSWORD 'workshop-ci';
+          CREATE DATABASE workshop_test OWNER aw_service;
+          REVOKE CONNECT ON DATABASE workshop_test FROM PUBLIC;
+          SQL
+      - run: uv sync --locked --extra streams
+      - name: Exercise installed wheel and packaged migrations
+        if: matrix.suite == 'original'
+        run: |
+          wheel_root=$(mktemp -d "$RUNNER_TEMP/aw-installed.XXXXXX")
+          uv build --wheel --out-dir "$wheel_root/dist"
+          uv export --locked --no-dev --extra streams --no-emit-project --format requirements-txt --output-file "$wheel_root/requirements.txt" >/dev/null
+          uv venv "$wheel_root/venv"
+          py="$wheel_root/venv/bin/python"
+          uv pip sync --python "$py" --require-hashes "$wheel_root/requirements.txt"
+          wheels=("$wheel_root"/dist/*.whl)
+          test "${#wheels[@]}" = 1
+          uv pip install --python "$py" --no-deps "${wheels[0]}"
+          mkdir -p "$GITHUB_WORKSPACE/workshop/ci-evidence"
+          cd "$wheel_root"
+          "$py" -I "$GITHUB_WORKSPACE/workshop/scripts/verify_installed_wheel.py" \
+            --manifest "$GITHUB_WORKSPACE/workshop/contracts/nf-catalog.json" \
+            --wheel "${wheels[0]}" | tee "$GITHUB_WORKSPACE/workshop/ci-evidence/installed-wheel.json"
+      - name: Measure message delivery and rebuild each isolated Redis stream
+        if: matrix.suite == 'original'
+        env:
+          PGPASSWORD: workshop-ci-admin
+          AW_REDIS_URL: redis://127.0.0.1:6379/0
+        run: |
+          mkdir -p ci-evidence
+          for n in 10 50 200; do
+            database="aw_benchmark_$n"
+            createdb -h 127.0.0.1 -U postgres -O aw_service "$database"
+            psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -U postgres -d postgres -c "REVOKE CONNECT ON DATABASE $database FROM PUBLIC"
+            export AW_DATABASE_URL="postgresql://aw_service:workshop-ci@127.0.0.1:5432/$database"
+            .venv/bin/aw-migrate upgrade
+            .venv/bin/python benchmarks/message_capacity.py --employees "$n" --output "ci-evidence/messages-$n.json"
+          done
+      - name: Install pinned NF host and role isolation tools
+        run: |
+          bash "$GITHUB_WORKSPACE/scripts/ci_install_pg17.sh" postgresql-17 postgresql-client-17 bubblewrap util-linux gcc libc6-dev
+          "$PG_BIN/pg_verifybackup" --version
+          prefix="$RUNNER_TEMP/aw-codex"
+          npm install --prefix "$prefix" --no-save --no-audit --no-fund @openai/codex@0.167.0-alpha.4
+          native="$prefix/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/bin"
+          test "$("$native/codex" --version)" = "codex-cli 0.167.0-alpha.4"
+          echo "$native" >> "$GITHUB_PATH"
+      - name: Test this integrated NF revision over independent PostgreSQL accounts and stdio
+        env:
+          EXPECTED_SOURCE: ${{ github.sha }}
+        run: |
+          export AW_NF_SOURCE="$GITHUB_WORKSPACE"
+          test -f "$AW_NF_SOURCE/src/novel_factory/interfaces/delegation_stdio.py"
+          test "$(git -C "$AW_NF_SOURCE" rev-parse HEAD)" = "${EXPECTED_SOURCE}"
+          git -C "$AW_NF_SOURCE" rev-parse HEAD
+          export PYTHONPATH="$PWD/src:$AW_NF_SOURCE/src:$AW_NF_SOURCE"
+          uv sync --project "$AW_NF_SOURCE" --locked
+          export AW_ACCEPTANCE_OUTPUT="$PWD/ci-evidence"
+          export AW_BENCH_RESULTS="$AW_ACCEPTANCE_OUTPUT"
+          export PATH="$AW_NF_SOURCE/.venv/bin:$PATH"
+          mkdir -p "$AW_ACCEPTANCE_OUTPUT"
+          if test "$AW_CI_SUITE" = comparison; then
+            "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q benchmarks/cross_service_scene.py -k 'Long-form or Research-Audit' --junitxml=scene-results.xml
+            "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q benchmarks/delegation_capacity.py -k 'fixed-2 or adaptive-2' --junitxml=capacity-results.xml
+            exit 0
+          fi
+          "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q benchmarks/actor_directory_isolation.py benchmarks/running_workshop_outage.py --junitxml="$AW_ACCEPTANCE_OUTPUT/at43-at49-junit.xml"
+          "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q benchmarks/cross_service_scene.py -k 'Minimal or Standard' --junitxml=scene-results.xml
+          "$AW_NF_SOURCE/.venv/bin/python" -m pytest -q benchmarks/delegation_capacity.py -k 'fixed-1' --junitxml=capacity-results.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ${{ matrix.suite == 'original' && 'workshop-scene-recovery-results' || 'workshop-comparisons' }}
+          path: |
+            workshop/scene-results.xml
+            workshop/capacity-results.xml
+            workshop/ci-evidence

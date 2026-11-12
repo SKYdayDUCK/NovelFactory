@@ -1,0 +1,26 @@
+{
+  "tiers": [
+    10,
+    50,
+    200
+  ],
+  "comparison": [
+    "fixed-2",
+    "adaptive-2"
+  ],
+  "seed": 0,
+  "topology": "Minimal base roles, N-8 maintainers, i-th slot assigned to maintainer i modulo (N-8); deterministic fixture with no random task, verdict or payload selection. UUIDs isolate storage.",
+  "provider": "Same threaded, local synthetic HTTP provider and fixed 50 ms service delay in each paired arm.",
+  "admission": "Two slots for both arms. Fixed uses both. Adaptive uses the production NF AdaptiveController with actual PG and system observations, polling interval 0.5 s; record every observed target change. Both use actual NF task claims and the same funded slots.",
+  "clock": "AW request to settled receipt, nearest-rank P50/P95/P99 including backlog. Compare descriptive measurements on the same executor. The pre-existing fixed-single contract remains separately enforced.",
+  "thresholds": {
+    "completion_fraction": 1,
+    "duplicate_tasks": 0,
+    "unsettled_holds": 0,
+    "extra_budget_authorizations": 0,
+    "provider_calls_per_task": 1,
+    "max_concurrent_model_calls": 2,
+    "max_seconds_per_case": 600
+  },
+  "human_reviews": false
+}
