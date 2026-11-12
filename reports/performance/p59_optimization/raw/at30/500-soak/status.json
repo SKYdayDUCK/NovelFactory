@@ -1,0 +1,25 @@
+{
+  "exit_code": 0,
+  "argv": [
+    "/workspace/scratch/2f68328c379c/local-evidence/venv-core/bin/python",
+    "-m",
+    "benchmarks.p3_stability",
+    "--agents",
+    "500",
+    "--seconds",
+    "600",
+    "--read-rps",
+    "20",
+    "--api-processes",
+    "2",
+    "--output",
+    "/workspace/scratch/2f68328c379c/perf-work/raw/at30/500-soak/load.json"
+  ],
+  "elapsed_seconds": 649.7770924568176,
+  "started_epoch_seconds": 1794496700.1246111,
+  "cpu_affinity": [
+    7,
+    8
+  ],
+  "has_evidence": true
+}

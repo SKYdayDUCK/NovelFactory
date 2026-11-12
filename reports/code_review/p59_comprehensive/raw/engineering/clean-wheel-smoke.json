@@ -1,0 +1,15 @@
+{
+  "baseline": "5e322e8af8ddb4465f68f8cab84c9685832461a9",
+  "installer": "uv",
+  "postgres": "17.11",
+  "sha256_log": "63209a1bc02341a0826d513caecba29841e41eb0afadf025d130b02d6f6f53e5",
+  "observations": {
+    "backup_cli": "PASS",
+    "restore_cli": "PASS",
+    "restored_table_count": 76,
+    "restored_object_count": 44,
+    "snapshot_equal_before_fencing": true,
+    "credentials_printed": false,
+    "task_fencing_count": 1
+  }
+}

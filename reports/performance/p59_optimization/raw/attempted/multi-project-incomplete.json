@@ -1,0 +1,192 @@
+{
+  "pg": "17",
+  "application_source": "frozen main",
+  "mode": "per-project authorized competing supervisors; local synthetic HTTP; failure endpoint returns 503 after send",
+  "provider_inference_calls": 0,
+  "actual_charge": null,
+  "trials": [
+    {
+      "works": 1,
+      "mode": "fixed",
+      "workers": 1,
+      "jobs": [
+        {
+          "route": "one",
+          "status": "RESULT_STORED",
+          "latency_ms": 332.373743,
+          "task_id": "893093c4-96a2-4e44-aa13-6615d21f3978",
+          "work_id": "990b58b6-3ce2-4d08-a55f-6ddaae391c23",
+          "attempt_states": [
+            "UNKNOWN"
+          ],
+          "attempt_count": 1
+        }
+      ],
+      "elapsed_seconds": 0.3330940760000658,
+      "completed_tasks_per_second": 3.002154862699517,
+      "sent_by_endpoint": [
+        1,
+        0
+      ],
+      "max_rss_kib": 74580
+    },
+    {
+      "works": 1,
+      "mode": "mixed",
+      "workers": 1,
+      "jobs": [
+        {
+          "route": "one",
+          "status": "RESULT_STORED",
+          "latency_ms": 218.477361,
+          "task_id": "cc73d160-a7a5-4691-9901-8f26fc22055e",
+          "work_id": "b68b20e7-c637-41d9-ab07-b57920b0b6ad",
+          "attempt_states": [
+            "UNKNOWN"
+          ],
+          "attempt_count": 1
+        }
+      ],
+      "elapsed_seconds": 0.2187864800000625,
+      "completed_tasks_per_second": 4.570666340990148,
+      "sent_by_endpoint": [
+        1,
+        0
+      ],
+      "max_rss_kib": 74836
+    },
+    {
+      "works": 1,
+      "mode": "failure",
+      "workers": 1,
+      "jobs": [
+        {
+          "route": "one",
+          "status": "BLOCKED",
+          "latency_ms": 228.366987,
+          "task_id": "bb7a98bf-4b73-416c-9f2c-560f23e4704a",
+          "work_id": "ea705ad5-1cb5-4be9-a955-36cdf15a2a90",
+          "attempt_states": [
+            "UNKNOWN"
+          ],
+          "attempt_count": 1
+        }
+      ],
+      "elapsed_seconds": 0.22870333700006995,
+      "completed_tasks_per_second": 0.0,
+      "sent_by_endpoint": [
+        1,
+        0
+      ],
+      "max_rss_kib": 74836
+    },
+    {
+      "works": 2,
+      "mode": "fixed",
+      "workers": 2,
+      "jobs": [
+        {
+          "route": "one",
+          "status": "RESULT_STORED",
+          "latency_ms": 318.951075,
+          "task_id": "e1876a51-e919-4256-98a4-52bfc3bed73b",
+          "work_id": "539c48a9-c282-4a8a-9795-662aa89087b1",
+          "attempt_states": [
+            "UNKNOWN"
+          ],
+          "attempt_count": 1
+        },
+        {
+          "route": "one",
+          "status": "RESULT_STORED",
+          "latency_ms": 346.779338,
+          "task_id": "335ffc47-2a0d-4162-a6e3-51cada6035eb",
+          "work_id": "dd0a6f25-81e8-47c6-8331-7faf03937d01",
+          "attempt_states": [
+            "UNKNOWN"
+          ],
+          "attempt_count": 1
+        }
+      ],
+      "elapsed_seconds": 0.3475075439999955,
+      "completed_tasks_per_second": 5.755270740251976,
+      "sent_by_endpoint": [
+        2,
+        0
+      ],
+      "max_rss_kib": 75604
+    },
+    {
+      "works": 2,
+      "mode": "mixed",
+      "workers": 2,
+      "jobs": [
+        {
+          "route": "one",
+          "status": "RESULT_STORED",
+          "latency_ms": 367.251438,
+          "task_id": "bf7328ce-80ab-47c6-9c3d-f962a3448fe1",
+          "work_id": "6c620b00-3675-4e83-8aca-38e5ad3e09c6",
+          "attempt_states": [
+            "UNKNOWN"
+          ],
+          "attempt_count": 1
+        },
+        {
+          "route": "two",
+          "status": "RESULT_STORED",
+          "latency_ms": 349.76818,
+          "task_id": "27f1c6f0-69a1-46c4-9488-175c9c064c0d",
+          "work_id": "9e2ec173-28a2-4a99-a489-642e9741558c",
+          "attempt_states": [
+            "UNKNOWN"
+          ],
+          "attempt_count": 1
+        }
+      ],
+      "elapsed_seconds": 0.36935646500000985,
+      "completed_tasks_per_second": 5.414823319797439,
+      "sent_by_endpoint": [
+        1,
+        1
+      ],
+      "max_rss_kib": 75732
+    },
+    {
+      "works": 2,
+      "mode": "failure",
+      "workers": 2,
+      "jobs": [
+        {
+          "route": "one",
+          "status": "BLOCKED",
+          "latency_ms": 287.819238,
+          "task_id": "177b4f80-c0f3-41e2-bd2a-b2acf528be4c",
+          "work_id": "d5279bb9-a218-4ddd-9f5b-91059bd200d0",
+          "attempt_states": [
+            "UNKNOWN"
+          ],
+          "attempt_count": 1
+        },
+        {
+          "route": "two",
+          "status": "RESULT_STORED",
+          "latency_ms": 361.144934,
+          "task_id": "d3f4071c-d9d8-4e5e-ba65-6ae7cac1783f",
+          "work_id": "fc59b5ff-1576-4805-835c-33f75af74fc5",
+          "attempt_states": [
+            "UNKNOWN"
+          ],
+          "attempt_count": 1
+        }
+      ],
+      "elapsed_seconds": 0.3619554539999399,
+      "completed_tasks_per_second": 2.7627709126885156,
+      "sent_by_endpoint": [
+        1,
+        1
+      ],
+      "max_rss_kib": 75732
+    }
+  ]
+}

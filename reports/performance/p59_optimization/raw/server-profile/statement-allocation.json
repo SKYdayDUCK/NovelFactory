@@ -1,0 +1,564 @@
+{
+  "dataset": "same 250-item world / 100 subject compile / no external model",
+  "facts": 100,
+  "elapsed_seconds_with_tracemalloc": 3.06397124099999,
+  "traced_current_bytes": 1041796,
+  "traced_peak_bytes": 4886725,
+  "live_allocations_after_return": [
+    {
+      "file": "<frozen importlib._bootstrap>",
+      "line": 488,
+      "count": 1067,
+      "bytes": 132187
+    },
+    {
+      "file": "<frozen importlib._bootstrap_external>",
+      "line": 757,
+      "count": 992,
+      "bytes": 123486
+    },
+    {
+      "file": "crud.py",
+      "line": 1540,
+      "count": 1558,
+      "bytes": 112176
+    },
+    {
+      "file": "_queries.py",
+      "line": 231,
+      "count": 1033,
+      "bytes": 57848
+    },
+    {
+      "file": "langhelpers.py",
+      "line": 1250,
+      "count": 83,
+      "bytes": 40256
+    },
+    {
+      "file": "_queries.py",
+      "line": 245,
+      "count": 26,
+      "bytes": 30730
+    },
+    {
+      "file": "langhelpers.py",
+      "line": 1251,
+      "count": 118,
+      "bytes": 26952
+    },
+    {
+      "file": "queries.py",
+      "line": 663,
+      "count": 2,
+      "bytes": 25406
+    },
+    {
+      "file": "<string>",
+      "line": 1,
+      "count": 311,
+      "bytes": 24640
+    },
+    {
+      "file": "elements.py",
+      "line": 2322,
+      "count": 267,
+      "bytes": 22616
+    },
+    {
+      "file": "queries.py",
+      "line": 613,
+      "count": 100,
+      "bytes": 22000
+    },
+    {
+      "file": "<frozen importlib._bootstrap_external>",
+      "line": 774,
+      "count": 108,
+      "bytes": 19688
+    },
+    {
+      "file": "_queries.py",
+      "line": 103,
+      "count": 19,
+      "bytes": 14434
+    },
+    {
+      "file": "elements.py",
+      "line": 486,
+      "count": 66,
+      "bytes": 14256
+    },
+    {
+      "file": "compiler.py",
+      "line": 5185,
+      "count": 15,
+      "bytes": 12608
+    },
+    {
+      "file": "decoder.py",
+      "line": 354,
+      "count": 132,
+      "bytes": 11591
+    },
+    {
+      "file": "result.py",
+      "line": 198,
+      "count": 8,
+      "bytes": 10488
+    },
+    {
+      "file": "cursor.py",
+      "line": 476,
+      "count": 8,
+      "bytes": 10488
+    },
+    {
+      "file": "cursor.py",
+      "line": 594,
+      "count": 85,
+      "bytes": 8160
+    },
+    {
+      "file": "_queries.py",
+      "line": 167,
+      "count": 16,
+      "bytes": 7762
+    }
+  ],
+  "query_stats": [
+    {
+      "query_id": -7064456840713062963,
+      "verb": "INSERT",
+      "calls": 1,
+      "rows": 203,
+      "total_exec_time": 4.597025,
+      "mean_exec_time": 4.597025,
+      "shared_blks_hit": 1579,
+      "shared_blks_read": 2,
+      "shared_blks_dirtied": 14,
+      "temp_blks_written": 0,
+      "wal_bytes": 101212
+    },
+    {
+      "query_id": -7049886099275612241,
+      "verb": "INSERT",
+      "calls": 1,
+      "rows": 1,
+      "total_exec_time": 2.65204,
+      "mean_exec_time": 2.65204,
+      "shared_blks_hit": 103,
+      "shared_blks_read": 1,
+      "shared_blks_dirtied": 11,
+      "temp_blks_written": 0,
+      "wal_bytes": 33206
+    },
+    {
+      "query_id": -5349829903140647718,
+      "verb": "SELECT",
+      "calls": 1,
+      "rows": 1,
+      "total_exec_time": 1.5601269999999998,
+      "mean_exec_time": 1.5601269999999998,
+      "shared_blks_hit": 20,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 0
+    },
+    {
+      "query_id": 1852087220203776907,
+      "verb": "SELECT",
+      "calls": 1,
+      "rows": 1,
+      "total_exec_time": 0.9906999999999999,
+      "mean_exec_time": 0.9906999999999999,
+      "shared_blks_hit": 0,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 0
+    },
+    {
+      "query_id": 8950347284041790583,
+      "verb": "INSERT",
+      "calls": 1,
+      "rows": 1,
+      "total_exec_time": 0.919022,
+      "mean_exec_time": 0.919022,
+      "shared_blks_hit": 63,
+      "shared_blks_read": 1,
+      "shared_blks_dirtied": 13,
+      "temp_blks_written": 0,
+      "wal_bytes": 25978
+    },
+    {
+      "query_id": 7976520613701222108,
+      "verb": "INSERT",
+      "calls": 2,
+      "rows": 2,
+      "total_exec_time": 0.905603,
+      "mean_exec_time": 0.45280149999999997,
+      "shared_blks_hit": 39,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 1,
+      "temp_blks_written": 0,
+      "wal_bytes": 12945
+    },
+    {
+      "query_id": -1925241184592009666,
+      "verb": "INSERT",
+      "calls": 1,
+      "rows": 1,
+      "total_exec_time": 0.805152,
+      "mean_exec_time": 0.805152,
+      "shared_blks_hit": 45,
+      "shared_blks_read": 1,
+      "shared_blks_dirtied": 9,
+      "temp_blks_written": 0,
+      "wal_bytes": 12680
+    },
+    {
+      "query_id": -7503291048594910169,
+      "verb": "INSERT",
+      "calls": 1,
+      "rows": 1,
+      "total_exec_time": 0.521192,
+      "mean_exec_time": 0.521192,
+      "shared_blks_hit": 26,
+      "shared_blks_read": 5,
+      "shared_blks_dirtied": 11,
+      "temp_blks_written": 0,
+      "wal_bytes": 1365
+    },
+    {
+      "query_id": -5776610372691079420,
+      "verb": "SELECT",
+      "calls": 1,
+      "rows": 1,
+      "total_exec_time": 0.470217,
+      "mean_exec_time": 0.470217,
+      "shared_blks_hit": 9,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 0
+    },
+    {
+      "query_id": 96285044459934792,
+      "verb": "INSERT",
+      "calls": 2,
+      "rows": 2,
+      "total_exec_time": 0.43102699999999994,
+      "mean_exec_time": 0.21551349999999997,
+      "shared_blks_hit": 28,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 2040
+    },
+    {
+      "query_id": -8559254327050337524,
+      "verb": "INSERT",
+      "calls": 2,
+      "rows": 2,
+      "total_exec_time": 0.201793,
+      "mean_exec_time": 0.1008965,
+      "shared_blks_hit": 12,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 668
+    },
+    {
+      "query_id": -1418024989206408131,
+      "verb": "SELECT",
+      "calls": 3,
+      "rows": 3,
+      "total_exec_time": 0.128224,
+      "mean_exec_time": 0.04274133333333333,
+      "shared_blks_hit": 6,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 0
+    },
+    {
+      "query_id": -6226434569685124066,
+      "verb": "SELECT",
+      "calls": 3,
+      "rows": 3,
+      "total_exec_time": 0.09648699999999999,
+      "mean_exec_time": 0.032162333333333334,
+      "shared_blks_hit": 9,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 162
+    },
+    {
+      "query_id": -7776395706724596873,
+      "verb": "UPDATE",
+      "calls": 1,
+      "rows": 1,
+      "total_exec_time": 0.09096599999999999,
+      "mean_exec_time": 0.09096599999999999,
+      "shared_blks_hit": 5,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 221
+    },
+    {
+      "query_id": -2186136451689673349,
+      "verb": "SELECT",
+      "calls": 2,
+      "rows": 2,
+      "total_exec_time": 0.087621,
+      "mean_exec_time": 0.0438105,
+      "shared_blks_hit": 6,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 54
+    },
+    {
+      "query_id": -5968923599653607371,
+      "verb": "SELECT",
+      "calls": 3,
+      "rows": 3,
+      "total_exec_time": 0.073571,
+      "mean_exec_time": 0.02452366666666667,
+      "shared_blks_hit": 9,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 162
+    },
+    {
+      "query_id": -2627704976594469988,
+      "verb": "SELECT",
+      "calls": 3,
+      "rows": 3,
+      "total_exec_time": 0.07206800000000001,
+      "mean_exec_time": 0.024022666666666668,
+      "shared_blks_hit": 6,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 0
+    },
+    {
+      "query_id": 8067188053597308269,
+      "verb": "SELECT",
+      "calls": 1,
+      "rows": 1,
+      "total_exec_time": 0.054503,
+      "mean_exec_time": 0.054503,
+      "shared_blks_hit": 5,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 0
+    },
+    {
+      "query_id": -6800206622165417448,
+      "verb": "SELECT",
+      "calls": 2,
+      "rows": 2,
+      "total_exec_time": 0.047653,
+      "mean_exec_time": 0.0238265,
+      "shared_blks_hit": 4,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 0
+    },
+    {
+      "query_id": -1305801747635824294,
+      "verb": "SELECT",
+      "calls": 7,
+      "rows": 7,
+      "total_exec_time": 0.038856,
+      "mean_exec_time": 0.005550857142857142,
+      "shared_blks_hit": 0,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 0
+    },
+    {
+      "query_id": -1722933444334418480,
+      "verb": "SELECT",
+      "calls": 1,
+      "rows": 0,
+      "total_exec_time": 0.035163,
+      "mean_exec_time": 0.035163,
+      "shared_blks_hit": 6,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 0
+    },
+    {
+      "query_id": 8249157533396653463,
+      "verb": "INSERT",
+      "calls": 1,
+      "rows": 1,
+      "total_exec_time": 0.033141,
+      "mean_exec_time": 0.033141,
+      "shared_blks_hit": 4,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 319
+    },
+    {
+      "query_id": -6367090592421062960,
+      "verb": "INSERT",
+      "calls": 1,
+      "rows": 1,
+      "total_exec_time": 0.031678,
+      "mean_exec_time": 0.031678,
+      "shared_blks_hit": 4,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 319
+    },
+    {
+      "query_id": 7877680286247477981,
+      "verb": "SELECT",
+      "calls": 1,
+      "rows": 1,
+      "total_exec_time": 0.02643,
+      "mean_exec_time": 0.02643,
+      "shared_blks_hit": 2,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 0
+    },
+    {
+      "query_id": -582213882519692874,
+      "verb": "SELECT",
+      "calls": 1,
+      "rows": 1,
+      "total_exec_time": 0.026019,
+      "mean_exec_time": 0.026019,
+      "shared_blks_hit": 3,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 54
+    },
+    {
+      "query_id": -3295584335674310234,
+      "verb": "SELECT",
+      "calls": 1,
+      "rows": 1,
+      "total_exec_time": 0.02563,
+      "mean_exec_time": 0.02563,
+      "shared_blks_hit": 8,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 0
+    },
+    {
+      "query_id": -2969766663128965394,
+      "verb": "BEGIN",
+      "calls": 2,
+      "rows": 0,
+      "total_exec_time": 0.019479,
+      "mean_exec_time": 0.0097395,
+      "shared_blks_hit": 0,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 0
+    },
+    {
+      "query_id": -7931385484281051913,
+      "verb": "SELECT",
+      "calls": 1,
+      "rows": 1,
+      "total_exec_time": 0.017596,
+      "mean_exec_time": 0.017596,
+      "shared_blks_hit": 3,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 0
+    },
+    {
+      "query_id": -729669955787509283,
+      "verb": "SELECT",
+      "calls": 2,
+      "rows": 0,
+      "total_exec_time": 0.008603,
+      "mean_exec_time": 0.0043015,
+      "shared_blks_hit": 4,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 0
+    },
+    {
+      "query_id": -5350442984989486705,
+      "verb": "SELECT",
+      "calls": 1,
+      "rows": 1,
+      "total_exec_time": 0.005868000000000001,
+      "mean_exec_time": 0.005868000000000001,
+      "shared_blks_hit": 0,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 0
+    },
+    {
+      "query_id": -7925039055630395329,
+      "verb": "BEGIN",
+      "calls": 1,
+      "rows": 0,
+      "total_exec_time": 0.004857,
+      "mean_exec_time": 0.004857,
+      "shared_blks_hit": 0,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 0
+    },
+    {
+      "query_id": -2835399305386018931,
+      "verb": "COMMIT",
+      "calls": 4,
+      "rows": 0,
+      "total_exec_time": 0.0036049999999999997,
+      "mean_exec_time": 0.0009012499999999999,
+      "shared_blks_hit": 0,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 0
+    },
+    {
+      "query_id": 11701968915743190,
+      "verb": "BEGIN",
+      "calls": 1,
+      "rows": 0,
+      "total_exec_time": 0.000912,
+      "mean_exec_time": 0.000912,
+      "shared_blks_hit": 0,
+      "shared_blks_read": 0,
+      "shared_blks_dirtied": 0,
+      "temp_blks_written": 0,
+      "wal_bytes": 0
+    }
+  ],
+  "extension": {
+    "extversion": "1.11",
+    "postgres_version": "17.11 (Debian 17.11-0+deb13u1)"
+  }
+}

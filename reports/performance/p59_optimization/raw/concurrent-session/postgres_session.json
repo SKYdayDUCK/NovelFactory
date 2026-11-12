@@ -1,0 +1,22 @@
+{
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "port": 55113,
+  "command": [
+    "/workspace/scratch/2f68328c379c/perf-candidate/../local-evidence/venv-core/bin/python",
+    "-m",
+    "pytest",
+    "tests/integration/test_scope_identity.py",
+    "-q",
+    "--junitxml=../perf-work/raw/concurrent.xml"
+  ],
+  "started_at_utc": "2026-11-12T15:11:56.214843+00:00",
+  "authentication": "loopback_trust_generated_test_data_only",
+  "fsync": true,
+  "synchronous_commit": true,
+  "max_connections": 60,
+  "data_directory_reused": false,
+  "exit_status": 0,
+  "postgres_exit_status": 0,
+  "duration_seconds": 3.066181,
+  "finished_at_utc": "2026-11-12T15:11:59.281072+00:00"
+}

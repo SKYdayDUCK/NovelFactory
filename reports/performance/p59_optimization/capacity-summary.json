@@ -1,0 +1,555 @@
+[
+  {
+    "retry_attempts": 0,
+    "validated_rps": 9.402,
+    "new_world_commits": 2,
+    "database_pool_peak": 2,
+    "database_sql": 1519,
+    "service_cpu_seconds": 1.620566,
+    "service_sum_peak_rss_kib": 83048,
+    "arm": "at30",
+    "scenario": "10-mixed-1",
+    "gate": "PASS",
+    "business": "PASS",
+    "wire_rps": null,
+    "status": {
+      "200": 58
+    },
+    "validated": 58,
+    "latency": {
+      "count": 58,
+      "p50_ms": 73.3604,
+      "p95_ms": 138.562,
+      "p99_ms": 165.1331
+    },
+    "raw": "raw/at30/10-mixed-1/load.json.gz"
+  },
+  {
+    "retry_attempts": 0,
+    "validated_rps": 10.882020921320207,
+    "new_world_commits": 0,
+    "database_pool_peak": 8,
+    "database_sql": 24704,
+    "service_cpu_seconds": 110.325364,
+    "service_sum_peak_rss_kib": 297236,
+    "arm": "at30",
+    "scenario": "1000-open",
+    "gate": "NOT_MET",
+    "business": null,
+    "wire_rps": 41.95011893740728,
+    "status": {
+      "429": 3627,
+      "200": 1319,
+      "transport_error": 54
+    },
+    "validated": 1319,
+    "latency": {
+      "count": 5000,
+      "p50_ms": 2885.4526,
+      "p95_ms": 8812.4084,
+      "p99_ms": 11335.9863
+    },
+    "raw": "raw/at30/1000-open/load.json.gz"
+  },
+  {
+    "retry_attempts": 0,
+    "validated_rps": 7.9081,
+    "new_world_commits": 21,
+    "database_pool_peak": 7,
+    "database_sql": 29658,
+    "service_cpu_seconds": 46.973969,
+    "service_sum_peak_rss_kib": 118640,
+    "arm": "at30",
+    "scenario": "200-mixed-1",
+    "gate": "PASS",
+    "business": "PASS",
+    "wire_rps": null,
+    "status": {
+      "200": 1122,
+      "409": 19
+    },
+    "validated": 1122,
+    "latency": {
+      "count": 1141,
+      "p50_ms": 76.5157,
+      "p95_ms": 221.3694,
+      "p99_ms": 416.8944
+    },
+    "raw": "raw/at30/200-mixed-1/load.json.gz"
+  },
+  {
+    "retry_attempts": 0,
+    "validated_rps": 7.9055,
+    "new_world_commits": 21,
+    "database_pool_peak": 5,
+    "database_sql": 29658,
+    "service_cpu_seconds": 46.878175,
+    "service_sum_peak_rss_kib": 114868,
+    "arm": "at30",
+    "scenario": "200-mixed-2",
+    "gate": "PASS",
+    "business": "PASS",
+    "wire_rps": null,
+    "status": {
+      "200": 1122,
+      "409": 19
+    },
+    "validated": 1122,
+    "latency": {
+      "count": 1141,
+      "p50_ms": 72.0475,
+      "p95_ms": 209.7176,
+      "p99_ms": 361.5626
+    },
+    "raw": "raw/at30/200-mixed-2/load.json.gz"
+  },
+  {
+    "retry_attempts": 841,
+    "validated_rps": 12.0422,
+    "new_world_commits": 21,
+    "database_pool_peak": 8,
+    "database_sql": 46575,
+    "service_cpu_seconds": 72.13845099999999,
+    "service_sum_peak_rss_kib": 136784,
+    "arm": "at30",
+    "scenario": "200-overload-1",
+    "gate": "NOT_MET",
+    "business": "PASS",
+    "wire_rps": 40.08035650092952,
+    "status": {
+      "200": 2114,
+      "409": 19,
+      "429": 849
+    },
+    "validated": 2114,
+    "latency": {
+      "count": 2982,
+      "p50_ms": 1121.7856,
+      "p95_ms": 6690.1241,
+      "p99_ms": 10680.8237
+    },
+    "raw": "raw/at30/200-overload-1/load.json.gz"
+  },
+  {
+    "retry_attempts": 842,
+    "validated_rps": 12.2933,
+    "new_world_commits": 21,
+    "database_pool_peak": 8,
+    "database_sql": 46706,
+    "service_cpu_seconds": 70.13323,
+    "service_sum_peak_rss_kib": 136108,
+    "arm": "at30",
+    "scenario": "200-overload-2",
+    "gate": "NOT_MET",
+    "business": "PASS",
+    "wire_rps": 38.25457581591665,
+    "status": {
+      "200": 2119,
+      "409": 19,
+      "429": 845
+    },
+    "validated": 2119,
+    "latency": {
+      "count": 2983,
+      "p50_ms": 1152.9361,
+      "p95_ms": 12624.4038,
+      "p99_ms": 18126.498
+    },
+    "raw": "raw/at30/200-overload-2/load.json.gz"
+  },
+  {
+    "retry_attempts": 0,
+    "validated_rps": 8.1204,
+    "new_world_commits": 6,
+    "database_pool_peak": 3,
+    "database_sql": 7443,
+    "service_cpu_seconds": 8.365743,
+    "service_sum_peak_rss_kib": 90096,
+    "arm": "at30",
+    "scenario": "50-mixed-1",
+    "gate": "PASS",
+    "business": "PASS",
+    "wire_rps": null,
+    "status": {
+      "200": 282,
+      "409": 4
+    },
+    "validated": 282,
+    "latency": {
+      "count": 286,
+      "p50_ms": 59.8225,
+      "p95_ms": 133.8795,
+      "p99_ms": 202.683
+    },
+    "raw": "raw/at30/50-mixed-1/load.json.gz"
+  },
+  {
+    "retry_attempts": 0,
+    "validated_rps": 8.1383,
+    "new_world_commits": 6,
+    "database_pool_peak": 2,
+    "database_sql": 7443,
+    "service_cpu_seconds": 7.337344,
+    "service_sum_peak_rss_kib": 89384,
+    "arm": "at30",
+    "scenario": "50-mixed-2",
+    "gate": "PASS",
+    "business": "PASS",
+    "wire_rps": null,
+    "status": {
+      "200": 282,
+      "409": 4
+    },
+    "validated": 282,
+    "latency": {
+      "count": 286,
+      "p50_ms": 41.1978,
+      "p95_ms": 111.9251,
+      "p99_ms": 168.3066
+    },
+    "raw": "raw/at30/50-mixed-2/load.json.gz"
+  },
+  {
+    "retry_attempts": 48,
+    "validated_rps": 13.1452,
+    "new_world_commits": 6,
+    "database_pool_peak": 8,
+    "database_sql": 11693,
+    "service_cpu_seconds": 16.15955,
+    "service_sum_peak_rss_kib": 110060,
+    "arm": "at30",
+    "scenario": "50-overload-1",
+    "gate": "NOT_MET",
+    "business": "PASS",
+    "wire_rps": 58.36971282335704,
+    "status": {
+      "200": 532,
+      "409": 4,
+      "429": 48
+    },
+    "validated": 532,
+    "latency": {
+      "count": 584,
+      "p50_ms": 182.4214,
+      "p95_ms": 4433.8455,
+      "p99_ms": 5432.4797
+    },
+    "raw": "raw/at30/50-overload-1/load.json.gz"
+  },
+  {
+    "retry_attempts": 45,
+    "validated_rps": 13.6192,
+    "new_world_commits": 6,
+    "database_pool_peak": 8,
+    "database_sql": 11693,
+    "service_cpu_seconds": 11.692807,
+    "service_sum_peak_rss_kib": 108592,
+    "arm": "at30",
+    "scenario": "50-overload-2",
+    "gate": "NOT_MET",
+    "business": "PASS",
+    "wire_rps": 74.44188764297557,
+    "status": {
+      "200": 532,
+      "409": 4,
+      "429": 45
+    },
+    "validated": 532,
+    "latency": {
+      "count": 581,
+      "p50_ms": 95.9852,
+      "p95_ms": 3125.2775,
+      "p99_ms": 3798.3538
+    },
+    "raw": "raw/at30/50-overload-2/load.json.gz"
+  },
+  {
+    "retry_attempts": 0,
+    "validated_rps": 7.8529,
+    "new_world_commits": 51,
+    "database_pool_peak": 8,
+    "database_sql": 74088,
+    "service_cpu_seconds": 213.24065900000002,
+    "service_sum_peak_rss_kib": 291648,
+    "arm": "at30",
+    "scenario": "500-mixed-1",
+    "gate": "PASS",
+    "business": "PASS",
+    "wire_rps": null,
+    "status": {
+      "200": 2802,
+      "409": 49
+    },
+    "validated": 2802,
+    "latency": {
+      "count": 2851,
+      "p50_ms": 179.7781,
+      "p95_ms": 846.3769,
+      "p99_ms": 1164.4145
+    },
+    "raw": "raw/at30/500-mixed-1/load.json.gz"
+  },
+  {
+    "retry_attempts": 0,
+    "validated_rps": 19.99778954489926,
+    "new_world_commits": 0,
+    "database_pool_peak": 8,
+    "database_sql": 205800,
+    "service_cpu_seconds": 605.971975,
+    "service_sum_peak_rss_kib": 228732,
+    "arm": "at30",
+    "scenario": "500-soak",
+    "gate": "PASS",
+    "business": null,
+    "wire_rps": null,
+    "status": {
+      "200": 12000
+    },
+    "validated": 12000,
+    "latency": {
+      "count": 12000,
+      "p50_ms": 130.0784,
+      "p95_ms": 649.2326,
+      "p99_ms": 996.1528
+    },
+    "raw": "raw/at30/500-soak/load.json.gz"
+  },
+  {
+    "retry_attempts": 0,
+    "validated_rps": 10.66156766941713,
+    "new_world_commits": 0,
+    "database_pool_peak": 8,
+    "database_sql": 26896,
+    "service_cpu_seconds": 128.326405,
+    "service_sum_peak_rss_kib": 299368,
+    "arm": "at30-candidate",
+    "scenario": "1000-open",
+    "gate": "NOT_MET",
+    "business": null,
+    "wire_rps": 38.25644640147347,
+    "status": {
+      "200": 1434,
+      "429": 3534,
+      "transport_error": 32
+    },
+    "validated": 1434,
+    "latency": {
+      "count": 5000,
+      "p50_ms": 2920.187,
+      "p95_ms": 8224.5946,
+      "p99_ms": 11531.4994
+    },
+    "raw": "raw/at30-candidate/1000-open/load.json.gz"
+  },
+  {
+    "retry_attempts": 810,
+    "validated_rps": 11.3471,
+    "new_world_commits": 21,
+    "database_pool_peak": 8,
+    "database_sql": 46164,
+    "service_cpu_seconds": 83.87603100000001,
+    "service_sum_peak_rss_kib": 139220,
+    "arm": "at30-candidate",
+    "scenario": "200-overload-1",
+    "gate": "NOT_MET",
+    "business": "PASS",
+    "wire_rps": 27.799719025262277,
+    "status": {
+      "200": 2092,
+      "409": 19,
+      "429": 840
+    },
+    "validated": 2092,
+    "latency": {
+      "count": 2951,
+      "p50_ms": 1629.5121,
+      "p95_ms": 12047.6402,
+      "p99_ms": 18888.852
+    },
+    "raw": "raw/at30-candidate/200-overload-1/load.json.gz"
+  },
+  {
+    "retry_attempts": 137,
+    "validated_rps": 13.3464,
+    "new_world_commits": 6,
+    "database_pool_peak": 8,
+    "database_sql": 11690,
+    "service_cpu_seconds": 15.750142999999998,
+    "service_sum_peak_rss_kib": 112580,
+    "arm": "at30-candidate",
+    "scenario": "50-overload-1",
+    "gate": "NOT_MET",
+    "business": "PASS",
+    "wire_rps": 77.51983838514663,
+    "status": {
+      "200": 532,
+      "409": 4,
+      "429": 137
+    },
+    "validated": 532,
+    "latency": {
+      "count": 673,
+      "p50_ms": 210.8999,
+      "p95_ms": 2475.4898,
+      "p99_ms": 3128.7064
+    },
+    "raw": "raw/at30-candidate/50-overload-1/load.json.gz"
+  },
+  {
+    "retry_attempts": 0,
+    "validated_rps": 19.998461592210692,
+    "new_world_commits": 0,
+    "database_pool_peak": 8,
+    "database_sql": 205800,
+    "service_cpu_seconds": 628.5882049999999,
+    "service_sum_peak_rss_kib": 230292,
+    "arm": "at30-independent",
+    "scenario": "500-soak",
+    "gate": "PASS",
+    "business": null,
+    "wire_rps": null,
+    "status": {
+      "200": 12000
+    },
+    "validated": 12000,
+    "latency": {
+      "count": 12000,
+      "p50_ms": 199.6546,
+      "p95_ms": 1071.3847,
+      "p99_ms": 1519.0966
+    },
+    "raw": "raw/at30-independent/500-soak/load.json.gz"
+  },
+  {
+    "retry_attempts": 0,
+    "validated_rps": 7.9134,
+    "new_world_commits": 21,
+    "database_pool_peak": 8,
+    "database_sql": 29658,
+    "service_cpu_seconds": 54.05956200000001,
+    "service_sum_peak_rss_kib": 129460,
+    "arm": "at30-replica",
+    "scenario": "200-mixed-1",
+    "gate": "PASS",
+    "business": "PASS",
+    "wire_rps": null,
+    "status": {
+      "200": 1122,
+      "409": 19
+    },
+    "validated": 1122,
+    "latency": {
+      "count": 1141,
+      "p50_ms": 81.5394,
+      "p95_ms": 385.6899,
+      "p99_ms": 671.8794
+    },
+    "raw": "raw/at30-replica/200-mixed-1/load.json.gz"
+  },
+  {
+    "retry_attempts": 0,
+    "validated_rps": 7.8936,
+    "new_world_commits": 21,
+    "database_pool_peak": 5,
+    "database_sql": 29658,
+    "service_cpu_seconds": 49.781583000000005,
+    "service_sum_peak_rss_kib": 115260,
+    "arm": "at30-replica",
+    "scenario": "200-mixed-2",
+    "gate": "PASS",
+    "business": "PASS",
+    "wire_rps": null,
+    "status": {
+      "200": 1122,
+      "409": 19
+    },
+    "validated": 1122,
+    "latency": {
+      "count": 1141,
+      "p50_ms": 64.7417,
+      "p95_ms": 291.7896,
+      "p99_ms": 777.553
+    },
+    "raw": "raw/at30-replica/200-mixed-2/load.json.gz"
+  },
+  {
+    "retry_attempts": 852,
+    "validated_rps": 12.0309,
+    "new_world_commits": 21,
+    "database_pool_peak": 8,
+    "database_sql": 46544,
+    "service_cpu_seconds": 76.23643200000001,
+    "service_sum_peak_rss_kib": 138740,
+    "arm": "at30-replica",
+    "scenario": "200-overload-2",
+    "gate": "NOT_MET",
+    "business": "PASS",
+    "wire_rps": 34.31387197525281,
+    "status": {
+      "200": 2113,
+      "409": 19,
+      "429": 861
+    },
+    "validated": 2113,
+    "latency": {
+      "count": 2993,
+      "p50_ms": 1136.4175,
+      "p95_ms": 6848.9625,
+      "p99_ms": 11632.3072
+    },
+    "raw": "raw/at30-replica/200-overload-2/load.json.gz"
+  },
+  {
+    "retry_attempts": 0,
+    "validated_rps": 8.0622,
+    "new_world_commits": 6,
+    "database_pool_peak": 8,
+    "database_sql": 7443,
+    "service_cpu_seconds": 14.548943,
+    "service_sum_peak_rss_kib": 106208,
+    "arm": "at30-replica",
+    "scenario": "50-mixed-2",
+    "gate": "PASS",
+    "business": "PASS",
+    "wire_rps": null,
+    "status": {
+      "200": 282,
+      "409": 4
+    },
+    "validated": 282,
+    "latency": {
+      "count": 286,
+      "p50_ms": 83.7372,
+      "p95_ms": 695.2788,
+      "p99_ms": 861.7847
+    },
+    "raw": "raw/at30-replica/50-mixed-2/load.json.gz"
+  },
+  {
+    "retry_attempts": 103,
+    "validated_rps": 13.1316,
+    "new_world_commits": 6,
+    "database_pool_peak": 8,
+    "database_sql": 11693,
+    "service_cpu_seconds": 14.322501,
+    "service_sum_peak_rss_kib": 110720,
+    "arm": "at30-replica",
+    "scenario": "50-overload-2",
+    "gate": "NOT_MET",
+    "business": "PASS",
+    "wire_rps": 49.443679181609845,
+    "status": {
+      "200": 532,
+      "409": 4,
+      "429": 103
+    },
+    "validated": 532,
+    "latency": {
+      "count": 639,
+      "p50_ms": 172.2792,
+      "p95_ms": 3305.032,
+      "p99_ms": 4257.4394
+    },
+    "raw": "raw/at30-replica/50-overload-2/load.json.gz"
+  }
+]

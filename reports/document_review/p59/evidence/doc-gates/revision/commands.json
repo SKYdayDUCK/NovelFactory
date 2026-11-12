@@ -1,0 +1,85 @@
+[
+  {
+    "log": "markdownlint.log",
+    "exit_code": 0,
+    "command": [
+      "/workspace/scratch/2f68328c379c/local-evidence/docs-tools/node_modules/.bin/markdownlint-cli2",
+      "--config",
+      "/workspace/scratch/2f68328c379c/doc-gates/quality.markdownlint-cli2.jsonc",
+      "README.md",
+      "README.en.md",
+      "docs/en/01-project-overview.md",
+      "docs/en/02-quick-start.md",
+      "docs/en/03-system-architecture.md",
+      "docs/en/04-agent-platform.md",
+      "docs/en/05-agent-runtime.md",
+      "docs/en/06-production-pipeline.md",
+      "docs/en/07-api-reference.md",
+      "docs/en/08-configuration-and-deployment.md",
+      "docs/en/09-operations-and-recovery.md",
+      "docs/en/10-performance-and-evaluation.md",
+      "docs/zh-CN/01-项目介绍.md",
+      "docs/zh-CN/02-快速开始.md",
+      "docs/zh-CN/03-系统架构.md",
+      "docs/zh-CN/04-Agent系统.md",
+      "docs/zh-CN/05-Agent-Runtime.md",
+      "docs/zh-CN/06-小说生产流水线.md",
+      "docs/zh-CN/07-接口参考.md",
+      "docs/zh-CN/08-配置与部署.md",
+      "docs/zh-CN/09-运维与恢复.md",
+      "docs/zh-CN/10-性能与实验.md"
+    ]
+  },
+  {
+    "log": "mermaid.jsonl",
+    "exit_code": 0,
+    "command": [
+      "node",
+      "/workspace/scratch/2f68328c379c/local-evidence/docs-tools/parse.mjs",
+      "README.md",
+      "README.en.md",
+      "docs/en/01-project-overview.md",
+      "docs/en/02-quick-start.md",
+      "docs/en/03-system-architecture.md",
+      "docs/en/04-agent-platform.md",
+      "docs/en/05-agent-runtime.md",
+      "docs/en/06-production-pipeline.md",
+      "docs/en/07-api-reference.md",
+      "docs/en/08-configuration-and-deployment.md",
+      "docs/en/09-operations-and-recovery.md",
+      "docs/en/10-performance-and-evaluation.md",
+      "docs/zh-CN/01-项目介绍.md",
+      "docs/zh-CN/02-快速开始.md",
+      "docs/zh-CN/03-系统架构.md",
+      "docs/zh-CN/04-Agent系统.md",
+      "docs/zh-CN/05-Agent-Runtime.md",
+      "docs/zh-CN/06-小说生产流水线.md",
+      "docs/zh-CN/07-接口参考.md",
+      "docs/zh-CN/08-配置与部署.md",
+      "docs/zh-CN/09-运维与恢复.md",
+      "docs/zh-CN/10-性能与实验.md"
+    ]
+  },
+  {
+    "log": "api.log",
+    "exit_code": 0,
+    "command": [
+      "/workspace/scratch/2f68328c379c/local-evidence/docs-checkout/.venv/bin/python",
+      "scripts/export_public_api.py",
+      "--check",
+      "docs/reference/catalog.json",
+      "--examples",
+      "docs/reference/examples.json"
+    ]
+  },
+  {
+    "log": "check.log",
+    "exit_code": 0,
+    "command": [
+      "/workspace/scratch/2f68328c379c/local-evidence/docs-checkout/.venv/bin/python",
+      "/workspace/scratch/2f68328c379c/doc-gates/check.py",
+      "/workspace/scratch/2f68328c379c/doc-gates/revision",
+      "/workspace/scratch/2f68328c379c/NovelFactory"
+    ]
+  }
+]

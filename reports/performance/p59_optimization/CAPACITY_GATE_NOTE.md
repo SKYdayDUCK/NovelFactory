@@ -1,0 +1,3 @@
+# Gate counters in the fixed historical workloads
+
+The 200-agent P2 overload offered-rate gate measures first-call start times. The baseline and candidate achieved 41.01217893 and 35.38979199 calls/s against 950/s. The independent wire diagnostic measured 40.0803565 and 27.799719 starts/s. The original P2 method in benchmarks/p2_behavioral_load.py computes actual_call_start_rps from first-attempt rows using started_seconds and checks that statistic against the target. In the separate 1000-agent P3 open-arrival test, benchmarks/p3_open_arrival.py judges the rate from wire start times and requires a wire-start timestamp for every request. The two gate failures remain NOT_MET. The capacity JSON and workload hashes are unchanged.

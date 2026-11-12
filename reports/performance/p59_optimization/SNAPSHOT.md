@@ -1,0 +1,7 @@
+# Complete P5.9 performance snapshot
+
+The four original-load collectors completed 21 observations and closed their temporary PostgreSQL clusters cleanly. Every scenario has its own unchanged capacity verdict, original exit status, console output and compressed raw JSON. The primary group ran 12 scenarios (including two 50/200 mixed and overload repetitions, 500 mixed, 500 read soak, 1000 open and an additional 10-agent mixed run). The other groups ran five independent repetitions on the original source, one 500-agent read soak and three capacity reruns on the isolated scope candidate. The capacity-gate failures are present in the original files.
+
+Both 500-agent 600-second, 20-rps read soaks completed all 12,000 requests. The same-source 200-overload trials and both 1000-open arms missed the original thresholds. The full shape-preserving validator candidates are isolated in scripts/validation_pair.py; failed naive copy ownership, early and late rejected samples, small-size regressions and all raw timings are retained under raw/validation-pair.json. Initial failed Redis setup, successful co-located service rerun and the original four-work single-poll measurement are identified in REGRESSION.md.
+
+EVIDENCE_MANIFEST.json contains relative paths, sizes, SHA-256 hashes and per-scenario exit statuses. Each compressed raw file also has its original-byte digest and size. Run scripts/evidence_manifest.py from a copied evidence tree to verify formats and regenerate the manifest. The final snapshot contains no live output files.

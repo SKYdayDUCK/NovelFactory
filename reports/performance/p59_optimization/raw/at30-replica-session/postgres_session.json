@@ -1,0 +1,24 @@
+{
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "port": 40845,
+  "command": [
+    "/workspace/scratch/2f68328c379c/perf-base/../local-evidence/venv-core/bin/python",
+    "../perf-work/scripts/at30.py",
+    "../perf-work/raw/at30-replica",
+    "200-mixed-1",
+    "50-overload-2",
+    "50-mixed-2",
+    "200-mixed-2",
+    "200-overload-2"
+  ],
+  "started_at_utc": "2026-11-12T15:20:09.420594+00:00",
+  "authentication": "loopback_trust_generated_test_data_only",
+  "fsync": true,
+  "synchronous_commit": true,
+  "max_connections": 60,
+  "data_directory_reused": false,
+  "exit_status": 0,
+  "postgres_exit_status": 0,
+  "duration_seconds": 584.015122,
+  "finished_at_utc": "2026-11-12T15:29:53.435760+00:00"
+}

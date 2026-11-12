@@ -1,0 +1,39 @@
+{
+  "exit_code": 0,
+  "argv": [
+    "/workspace/scratch/2f68328c379c/local-evidence/venv-core/bin/python",
+    "-m",
+    "benchmarks.p2_behavioral_load",
+    "--agents",
+    "50",
+    "--profile",
+    "mixed",
+    "--hot-fraction",
+    ".2",
+    "--arrival-rps",
+    "10",
+    "--open-loop-rps",
+    "1000",
+    "--rounds",
+    "5",
+    "--max-attempts",
+    "5",
+    "--retry-budget-seconds",
+    "30",
+    "--gate-scope",
+    "capacity",
+    "--service-mode",
+    "isolated-process",
+    "--api-processes",
+    "1",
+    "--output",
+    "/workspace/scratch/2f68328c379c/perf-work/raw/at30/50-mixed-2/load.json"
+  ],
+  "elapsed_seconds": 39.099377155303955,
+  "started_epoch_seconds": 1794497733.8044267,
+  "cpu_affinity": [
+    7,
+    8
+  ],
+  "has_evidence": true
+}

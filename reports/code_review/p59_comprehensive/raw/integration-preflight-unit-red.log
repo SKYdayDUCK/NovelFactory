@@ -1,0 +1,24 @@
+................F....................................................... [ 15%]
+............................................................................................................................... [ 43%]
+........................................................................ [ 59%]
+........................................................................ [ 75%]
+........................................................................ [ 91%]
+........................................                                 [100%]
+=================================== FAILURES ===================================
+_______ test_fact_timeline_still_fetches_selected_versions_exactly_once ________
+
+    def test_fact_timeline_still_fetches_selected_versions_exactly_once():
+        for batch in (False, True):
+            service, principal, request, repo, expected_ids = fixture("TIMELINE", batch=batch, size=150)
+            fact_query = request["items"][0]["query"] if batch else request["query"]
+            fact_query["entry_kinds"].append("FACT")
+            packet = service._sample(principal, request)
+            assert packet["events"] == []  # mocked DB returns no payload; selection itself remains immutable
+>           assert repo.event_calls == 1 and repo.requested == len(expected_ids)
+E           assert (0 == 1)
+E            +  where 0 = <test_audit_query_history.fixture.<locals>.Repo object at 0x7f0e0d8618e0>.event_calls
+
+tests/unit/test_audit_query_history.py:81: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_audit_query_history.py::test_fact_timeline_still_fetches_selected_versions_exactly_once
+1 failed, 454 passed, 17 subtests passed in 19.47s

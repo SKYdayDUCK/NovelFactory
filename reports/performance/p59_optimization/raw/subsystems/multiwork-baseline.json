@@ -1,0 +1,1144 @@
+{
+  "sha": "5e322e8af8ddb4465f68f8cab84c9685832461a9",
+  "kind": "postgresql_17_supervisor_synthetic_loopback_http",
+  "real_provider_calls": 0,
+  "protocol": "Each scenario clones the empty, migrated disposable template. Two tasks per book. One slot/account. No Redis. All roles summarize fixed fixture inputs.",
+  "runs": [
+    {
+      "projects": 1,
+      "scenario": "fixed",
+      "jobs_per_project": 2,
+      "enroll_fixture_ms": [
+        74.303832,
+        60.787313
+      ],
+      "rounds": [
+        [
+          {
+            "work_index": 0,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 410.857512
+          }
+        ],
+        [
+          {
+            "work_index": 0,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 248.662906
+          }
+        ]
+      ],
+      "by_work": [
+        {
+          "work_index": 0,
+          "profiles_by_task": [
+            "one",
+            "one"
+          ],
+          "states": {
+            "UNKNOWN": 2
+          },
+          "task_states": [
+            "RESULT_STORED",
+            "RESULT_STORED"
+          ]
+        }
+      ],
+      "provider_sends": [
+        2,
+        0
+      ],
+      "elapsed_seconds": 0.6602911919999315,
+      "worker_process_cpu_seconds": 0.4103897120000001,
+      "process_peak_rss_kib": 84364,
+      "connections_end": 1,
+      "successful_business_tasks": 2,
+      "successful_business_tasks_per_second": 3.028966650217269,
+      "duplicate_sends": 0
+    },
+    {
+      "projects": 1,
+      "scenario": "mixed",
+      "jobs_per_project": 2,
+      "enroll_fixture_ms": [
+        67.376758,
+        56.709228
+      ],
+      "rounds": [
+        [
+          {
+            "work_index": 0,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 284.276621
+          }
+        ],
+        [
+          {
+            "work_index": 0,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 215.601134
+          }
+        ]
+      ],
+      "by_work": [
+        {
+          "work_index": 0,
+          "profiles_by_task": [
+            "one",
+            "two"
+          ],
+          "states": {
+            "UNKNOWN": 2
+          },
+          "task_states": [
+            "RESULT_STORED",
+            "RESULT_STORED"
+          ]
+        }
+      ],
+      "provider_sends": [
+        1,
+        1
+      ],
+      "elapsed_seconds": 0.5004641670000183,
+      "worker_process_cpu_seconds": 0.2892139360000001,
+      "process_peak_rss_kib": 85260,
+      "connections_end": 1,
+      "successful_business_tasks": 2,
+      "successful_business_tasks_per_second": 3.9962901080187163,
+      "duplicate_sends": 0
+    },
+    {
+      "projects": 1,
+      "scenario": "outage",
+      "jobs_per_project": 2,
+      "enroll_fixture_ms": [
+        66.599989,
+        70.018113
+      ],
+      "rounds": [
+        [
+          {
+            "work_index": 0,
+            "status": "BLOCKED",
+            "reason": "MODEL_HTTP_ERROR",
+            "ms": 214.321153
+          }
+        ],
+        [
+          {
+            "work_index": 0,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 216.307738
+          }
+        ]
+      ],
+      "by_work": [
+        {
+          "work_index": 0,
+          "profiles_by_task": [
+            "one",
+            "two"
+          ],
+          "states": {
+            "UNKNOWN": 2
+          },
+          "task_states": [
+            "PAUSED",
+            "RESULT_STORED"
+          ]
+        }
+      ],
+      "provider_sends": [
+        1,
+        1
+      ],
+      "elapsed_seconds": 0.43121290800002043,
+      "worker_process_cpu_seconds": 0.24296632499999982,
+      "process_peak_rss_kib": 86284,
+      "connections_end": 1,
+      "successful_business_tasks": 1,
+      "successful_business_tasks_per_second": 2.31904004135227,
+      "duplicate_sends": 0
+    },
+    {
+      "projects": 2,
+      "scenario": "fixed",
+      "jobs_per_project": 2,
+      "enroll_fixture_ms": [
+        63.080748,
+        52.920444,
+        52.476937,
+        52.37321
+      ],
+      "rounds": [
+        [
+          {
+            "work_index": 0,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 124.38626
+          },
+          {
+            "work_index": 1,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 256.75419
+          }
+        ],
+        [
+          {
+            "work_index": 0,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 283.893297
+          },
+          {
+            "work_index": 1,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 68.283192
+          }
+        ],
+        [
+          {
+            "work_index": 0,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 141.226775
+          },
+          {
+            "work_index": 1,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 284.348361
+          }
+        ],
+        [
+          {
+            "work_index": 0,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 270.33369
+          },
+          {
+            "work_index": 1,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 60.259263
+          }
+        ]
+      ],
+      "by_work": [
+        {
+          "work_index": 0,
+          "profiles_by_task": [
+            "one",
+            "one"
+          ],
+          "states": {
+            "UNKNOWN": 2
+          },
+          "task_states": [
+            "RESULT_STORED",
+            "RESULT_STORED"
+          ]
+        },
+        {
+          "work_index": 1,
+          "profiles_by_task": [
+            "one",
+            "one"
+          ],
+          "states": {
+            "UNKNOWN": 2
+          },
+          "task_states": [
+            "RESULT_STORED",
+            "RESULT_STORED"
+          ]
+        }
+      ],
+      "provider_sends": [
+        4,
+        0
+      ],
+      "elapsed_seconds": 1.1016869759999963,
+      "worker_process_cpu_seconds": 0.633877579,
+      "process_peak_rss_kib": 87948,
+      "connections_end": 2,
+      "successful_business_tasks": 4,
+      "successful_business_tasks_per_second": 3.6307953957331827,
+      "duplicate_sends": 0
+    },
+    {
+      "projects": 2,
+      "scenario": "mixed",
+      "jobs_per_project": 2,
+      "enroll_fixture_ms": [
+        70.299855,
+        81.239057,
+        80.22406,
+        70.92622
+      ],
+      "rounds": [
+        [
+          {
+            "work_index": 0,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 344.494649
+          },
+          {
+            "work_index": 1,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 399.841558
+          }
+        ],
+        [
+          {
+            "work_index": 0,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 324.226456
+          },
+          {
+            "work_index": 1,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 405.889607
+          }
+        ]
+      ],
+      "by_work": [
+        {
+          "work_index": 0,
+          "profiles_by_task": [
+            "one",
+            "two"
+          ],
+          "states": {
+            "UNKNOWN": 2
+          },
+          "task_states": [
+            "RESULT_STORED",
+            "RESULT_STORED"
+          ]
+        },
+        {
+          "work_index": 1,
+          "profiles_by_task": [
+            "two",
+            "one"
+          ],
+          "states": {
+            "UNKNOWN": 2
+          },
+          "task_states": [
+            "RESULT_STORED",
+            "RESULT_STORED"
+          ]
+        }
+      ],
+      "provider_sends": [
+        2,
+        2
+      ],
+      "elapsed_seconds": 0.8065581379999003,
+      "worker_process_cpu_seconds": 0.59627944,
+      "process_peak_rss_kib": 88076,
+      "connections_end": 2,
+      "successful_business_tasks": 4,
+      "successful_business_tasks_per_second": 4.959344914576381,
+      "duplicate_sends": 0
+    },
+    {
+      "projects": 2,
+      "scenario": "outage",
+      "jobs_per_project": 2,
+      "enroll_fixture_ms": [
+        74.925575,
+        50.82002,
+        62.826374,
+        56.233086
+      ],
+      "rounds": [
+        [
+          {
+            "work_index": 0,
+            "status": "BLOCKED",
+            "reason": "MODEL_HTTP_ERROR",
+            "ms": 301.948161
+          },
+          {
+            "work_index": 1,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 371.611449
+          }
+        ],
+        [
+          {
+            "work_index": 0,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 413.536829
+          },
+          {
+            "work_index": 1,
+            "status": "BLOCKED",
+            "reason": "MODEL_HTTP_ERROR",
+            "ms": 334.754363
+          }
+        ]
+      ],
+      "by_work": [
+        {
+          "work_index": 0,
+          "profiles_by_task": [
+            "one",
+            "two"
+          ],
+          "states": {
+            "UNKNOWN": 2
+          },
+          "task_states": [
+            "PAUSED",
+            "RESULT_STORED"
+          ]
+        },
+        {
+          "work_index": 1,
+          "profiles_by_task": [
+            "two",
+            "one"
+          ],
+          "states": {
+            "UNKNOWN": 2
+          },
+          "task_states": [
+            "RESULT_STORED",
+            "PAUSED"
+          ]
+        }
+      ],
+      "provider_sends": [
+        2,
+        2
+      ],
+      "elapsed_seconds": 0.7903537079999978,
+      "worker_process_cpu_seconds": 0.5671141030000006,
+      "process_peak_rss_kib": 88076,
+      "connections_end": 2,
+      "successful_business_tasks": 2,
+      "successful_business_tasks_per_second": 2.530512579059103,
+      "duplicate_sends": 0
+    },
+    {
+      "projects": 4,
+      "scenario": "fixed",
+      "jobs_per_project": 2,
+      "enroll_fixture_ms": [
+        65.686577,
+        66.896587,
+        61.827262,
+        52.795461,
+        77.986809,
+        58.686407,
+        66.155697,
+        66.495684
+      ],
+      "rounds": [
+        [
+          {
+            "work_index": 0,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 393.145621
+          },
+          {
+            "work_index": 1,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 268.455796
+          },
+          {
+            "work_index": 2,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 194.834108
+          },
+          {
+            "work_index": 3,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 229.636199
+          }
+        ],
+        [
+          {
+            "work_index": 0,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 88.239592
+          },
+          {
+            "work_index": 1,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 142.804689
+          },
+          {
+            "work_index": 2,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 365.923305
+          },
+          {
+            "work_index": 3,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 119.724176
+          }
+        ],
+        [
+          {
+            "work_index": 0,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 256.914588
+          },
+          {
+            "work_index": 1,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 165.583043
+          },
+          {
+            "work_index": 2,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 126.767961
+          },
+          {
+            "work_index": 3,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 431.21157
+          }
+        ],
+        [
+          {
+            "work_index": 0,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 162.668562
+          },
+          {
+            "work_index": 1,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 472.575309
+          },
+          {
+            "work_index": 2,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 135.508352
+          },
+          {
+            "work_index": 3,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 109.498816
+          }
+        ],
+        [
+          {
+            "work_index": 0,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 300.28196
+          },
+          {
+            "work_index": 1,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 167.994408
+          },
+          {
+            "work_index": 2,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 124.394556
+          },
+          {
+            "work_index": 3,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 203.601341
+          }
+        ],
+        [
+          {
+            "work_index": 0,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 120.954721
+          },
+          {
+            "work_index": 1,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 190.122205
+          },
+          {
+            "work_index": 2,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 350.744086
+          },
+          {
+            "work_index": 3,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 84.972044
+          }
+        ],
+        [
+          {
+            "work_index": 0,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 98.822134
+          },
+          {
+            "work_index": 1,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 213.501671
+          },
+          {
+            "work_index": 2,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 181.122553
+          },
+          {
+            "work_index": 3,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 334.545437
+          }
+        ],
+        [
+          {
+            "work_index": 0,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 165.160753
+          },
+          {
+            "work_index": 1,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 550.504352
+          },
+          {
+            "work_index": 2,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 114.979438
+          },
+          {
+            "work_index": 3,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 139.488229
+          }
+        ]
+      ],
+      "by_work": [
+        {
+          "work_index": 0,
+          "profiles_by_task": [
+            "one",
+            "one"
+          ],
+          "states": {
+            "UNKNOWN": 2
+          },
+          "task_states": [
+            "RESULT_STORED",
+            "RESULT_STORED"
+          ]
+        },
+        {
+          "work_index": 1,
+          "profiles_by_task": [
+            "one",
+            "one"
+          ],
+          "states": {
+            "UNKNOWN": 2
+          },
+          "task_states": [
+            "RESULT_STORED",
+            "RESULT_STORED"
+          ]
+        },
+        {
+          "work_index": 2,
+          "profiles_by_task": [
+            "one",
+            "one"
+          ],
+          "states": {
+            "UNKNOWN": 2
+          },
+          "task_states": [
+            "RESULT_STORED",
+            "RESULT_STORED"
+          ]
+        },
+        {
+          "work_index": 3,
+          "profiles_by_task": [
+            "one",
+            "one"
+          ],
+          "states": {
+            "UNKNOWN": 2
+          },
+          "task_states": [
+            "RESULT_STORED",
+            "RESULT_STORED"
+          ]
+        }
+      ],
+      "provider_sends": [
+        8,
+        0
+      ],
+      "elapsed_seconds": 3.2068112240000346,
+      "worker_process_cpu_seconds": 1.7451682519999991,
+      "process_peak_rss_kib": 89356,
+      "connections_end": 4,
+      "successful_business_tasks": 8,
+      "successful_business_tasks_per_second": 2.4946900335533795,
+      "duplicate_sends": 0
+    },
+    {
+      "projects": 4,
+      "scenario": "mixed",
+      "jobs_per_project": 2,
+      "enroll_fixture_ms": [
+        63.181911,
+        57.849331,
+        57.264687,
+        55.347265,
+        128.481069,
+        65.891409,
+        48.59122,
+        54.255213
+      ],
+      "rounds": [
+        [
+          {
+            "work_index": 0,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 424.179493
+          },
+          {
+            "work_index": 1,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 463.543638
+          },
+          {
+            "work_index": 2,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 178.80662
+          },
+          {
+            "work_index": 3,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 214.834526
+          }
+        ],
+        [
+          {
+            "work_index": 0,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 201.779752
+          },
+          {
+            "work_index": 1,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 280.169117
+          },
+          {
+            "work_index": 2,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 542.372879
+          },
+          {
+            "work_index": 3,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 688.804976
+          }
+        ],
+        [
+          {
+            "work_index": 0,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 435.657597
+          },
+          {
+            "work_index": 1,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 506.003882
+          },
+          {
+            "work_index": 2,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 203.373468
+          },
+          {
+            "work_index": 3,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 277.198497
+          }
+        ],
+        [
+          {
+            "work_index": 0,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 193.176926
+          },
+          {
+            "work_index": 1,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 133.637179
+          },
+          {
+            "work_index": 2,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 378.776022
+          },
+          {
+            "work_index": 3,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 407.566777
+          }
+        ]
+      ],
+      "by_work": [
+        {
+          "work_index": 0,
+          "profiles_by_task": [
+            "one",
+            "two"
+          ],
+          "states": {
+            "UNKNOWN": 2
+          },
+          "task_states": [
+            "RESULT_STORED",
+            "RESULT_STORED"
+          ]
+        },
+        {
+          "work_index": 1,
+          "profiles_by_task": [
+            "two",
+            "one"
+          ],
+          "states": {
+            "UNKNOWN": 2
+          },
+          "task_states": [
+            "RESULT_STORED",
+            "RESULT_STORED"
+          ]
+        },
+        {
+          "work_index": 2,
+          "profiles_by_task": [
+            "one",
+            "two"
+          ],
+          "states": {
+            "UNKNOWN": 2
+          },
+          "task_states": [
+            "RESULT_STORED",
+            "RESULT_STORED"
+          ]
+        },
+        {
+          "work_index": 3,
+          "profiles_by_task": [
+            "two",
+            "one"
+          ],
+          "states": {
+            "UNKNOWN": 2
+          },
+          "task_states": [
+            "RESULT_STORED",
+            "RESULT_STORED"
+          ]
+        }
+      ],
+      "provider_sends": [
+        4,
+        4
+      ],
+      "elapsed_seconds": 2.0734704510000483,
+      "worker_process_cpu_seconds": 1.4271462320000001,
+      "process_peak_rss_kib": 89996,
+      "connections_end": 4,
+      "successful_business_tasks": 8,
+      "successful_business_tasks_per_second": 3.8582657380728755,
+      "duplicate_sends": 0
+    },
+    {
+      "projects": 4,
+      "scenario": "outage",
+      "jobs_per_project": 2,
+      "enroll_fixture_ms": [
+        56.031763,
+        51.414242,
+        80.939879,
+        73.145587,
+        52.096948,
+        56.606012,
+        60.58094,
+        74.944442
+      ],
+      "rounds": [
+        [
+          {
+            "work_index": 0,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 286.896144
+          },
+          {
+            "work_index": 1,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 493.730669
+          },
+          {
+            "work_index": 2,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 240.964622
+          },
+          {
+            "work_index": 3,
+            "status": "BLOCKED",
+            "reason": "MODEL_HTTP_ERROR",
+            "ms": 461.927475
+          }
+        ],
+        [
+          {
+            "work_index": 0,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 440.435802
+          },
+          {
+            "work_index": 1,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 249.605102
+          },
+          {
+            "work_index": 2,
+            "status": "BLOCKED",
+            "reason": "MODEL_HTTP_ERROR",
+            "ms": 356.983632
+          },
+          {
+            "work_index": 3,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 227.424099
+          }
+        ],
+        [
+          {
+            "work_index": 0,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 106.28062
+          },
+          {
+            "work_index": 1,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 127.278539
+          },
+          {
+            "work_index": 2,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 192.85397
+          },
+          {
+            "work_index": 3,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 360.780113
+          }
+        ],
+        [
+          {
+            "work_index": 0,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 294.974168
+          },
+          {
+            "work_index": 1,
+            "status": "BLOCKED",
+            "reason": "MODEL_HTTP_ERROR",
+            "ms": 470.206497
+          },
+          {
+            "work_index": 2,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 120.758359
+          },
+          {
+            "work_index": 3,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 317.468633
+          }
+        ],
+        [
+          {
+            "work_index": 0,
+            "status": "BLOCKED",
+            "reason": "MODEL_HTTP_ERROR",
+            "ms": 496.886425
+          },
+          {
+            "work_index": 1,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 117.337466
+          },
+          {
+            "work_index": 2,
+            "status": "RESULT_STORED",
+            "reason": null,
+            "ms": 640.042892
+          },
+          {
+            "work_index": 3,
+            "status": "IDLE",
+            "reason": null,
+            "ms": 96.623408
+          }
+        ]
+      ],
+      "by_work": [
+        {
+          "work_index": 0,
+          "profiles_by_task": [
+            "one",
+            "two"
+          ],
+          "states": {
+            "UNKNOWN": 2
+          },
+          "task_states": [
+            "PAUSED",
+            "RESULT_STORED"
+          ]
+        },
+        {
+          "work_index": 1,
+          "profiles_by_task": [
+            "two",
+            "one"
+          ],
+          "states": {
+            "UNKNOWN": 2
+          },
+          "task_states": [
+            "RESULT_STORED",
+            "PAUSED"
+          ]
+        },
+        {
+          "work_index": 2,
+          "profiles_by_task": [
+            "one",
+            "two"
+          ],
+          "states": {
+            "UNKNOWN": 2
+          },
+          "task_states": [
+            "PAUSED",
+            "RESULT_STORED"
+          ]
+        },
+        {
+          "work_index": 3,
+          "profiles_by_task": [
+            "two",
+            "one"
+          ],
+          "states": {
+            "UNKNOWN": 2
+          },
+          "task_states": [
+            "RESULT_STORED",
+            "PAUSED"
+          ]
+        }
+      ],
+      "provider_sends": [
+        4,
+        4
+      ],
+      "elapsed_seconds": 2.417398399999911,
+      "worker_process_cpu_seconds": 1.428820847999999,
+      "process_peak_rss_kib": 91532,
+      "connections_end": 4,
+      "successful_business_tasks": 4,
+      "successful_business_tasks_per_second": 1.6546714021156577,
+      "duplicate_sends": 0
+    }
+  ]
+}

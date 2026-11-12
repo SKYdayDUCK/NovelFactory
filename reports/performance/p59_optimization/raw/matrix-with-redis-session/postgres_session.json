@@ -1,0 +1,18 @@
+{
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "port": 51435,
+  "command": [
+    "bash",
+    "../perf-work/scripts/matrix.sh"
+  ],
+  "started_at_utc": "2026-11-12T15:06:42.820451+00:00",
+  "authentication": "loopback_trust_generated_test_data_only",
+  "fsync": true,
+  "synchronous_commit": true,
+  "max_connections": 60,
+  "data_directory_reused": false,
+  "exit_status": 1,
+  "postgres_exit_status": 0,
+  "duration_seconds": 45.713385,
+  "finished_at_utc": "2026-11-12T15:07:28.533879+00:00"
+}

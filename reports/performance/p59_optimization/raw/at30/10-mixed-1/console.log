@@ -1,0 +1,295 @@
+{
+  "file": "/workspace/scratch/2f68328c379c/perf-work/raw/at30/10-mixed-1/load.json",
+  "correctness": "PASS",
+  "logical_agents": 10,
+  "first_attempt_capacity_gate": "PASS",
+  "bounded_recovery_business_gate": "PASS",
+  "capacity_gate": "PASS",
+  "open_loop_offered_rate": {
+    "gate": "NOT_APPLICABLE",
+    "target_rps": null,
+    "first_attempts": 0
+  },
+  "gate_scope": "capacity",
+  "metrics": {
+    "duration_seconds": 5.95615,
+    "planned_requests": 58,
+    "emitted_requests": 58,
+    "completed_requests": 58,
+    "client_requests_never_emitted": 0,
+    "emitted_logical_operations": 58,
+    "completed_logical_operations": 58,
+    "first_attempt_failure_count": 0,
+    "first_attempt_status_counts": {
+      "200": 58
+    },
+    "first_attempt_latency": {
+      "count": 58,
+      "p50_ms": 73.3604,
+      "p95_ms": 138.562,
+      "p99_ms": 165.1331
+    },
+    "recovered_logical_operations": 0,
+    "logical_operation_completion_latency": {
+      "count": 58,
+      "p50_ms": 74.5683,
+      "p95_ms": 139.173,
+      "p99_ms": 165.1683
+    },
+    "api_tool_calls": 58,
+    "mcp_tool_calls": 0,
+    "status_counts": {
+      "200": 58
+    },
+    "valid_successful_calls": 58,
+    "api_success_rps": 9.7378,
+    "successful_duplicate_receipts": 2,
+    "effective_call_rps_excluding_duplicates": 9.402,
+    "new_world_commit_receipts": 2,
+    "accepted_original_input_after_unrelated_head_progress": 1,
+    "cross_head_accept_rate_among_unique_commits": 0.5,
+    "semantic_replan_requests_in_load": 0,
+    "effective_world_commits_per_second": 0.3358,
+    "conflict_count": 0,
+    "conflict_rate_all_requests": 0.0,
+    "failure_rate_all_requests": 0.0,
+    "idempotent_retry_rate_all_requests": 0.034482758620689655,
+    "infrastructure_retries": 0,
+    "model_retries": 0,
+    "peak_outstanding_client_requests": 3,
+    "client_connection_limit": 256,
+    "outstanding_definition": "Includes HTTPX connection-pool wait; server ingress is measured separately",
+    "latency_all_responses": {
+      "count": 58,
+      "p50_ms": 73.3604,
+      "p95_ms": 138.562,
+      "p99_ms": 165.1331
+    },
+    "latency_successes": {
+      "count": 58,
+      "p50_ms": 73.3604,
+      "p95_ms": 138.562,
+      "p99_ms": 165.1331
+    },
+    "latency_rejections_and_failures": {
+      "count": 0,
+      "p50_ms": null,
+      "p95_ms": null,
+      "p99_ms": null
+    },
+    "scheduled_to_completion_latency": {
+      "count": 58,
+      "p50_ms": 74.5683,
+      "p95_ms": 139.173,
+      "p99_ms": 165.1683
+    },
+    "client_pool_wait_timing_note": "HTTPcore wait_for_connection await wall time includes event-loop scheduling; not pure server or pool queue time.",
+    "client_pool_wait": {
+      "count": 58,
+      "p50_ms": 0.0019,
+      "p95_ms": 0.0028,
+      "p99_ms": 0.0069
+    },
+    "client_response_validation_cpu_seconds": 0.15695091100000091,
+    "transport_headers_started": 58,
+    "arrival_schedule_delay": {
+      "count": 58,
+      "p50_ms": 1.0594,
+      "p95_ms": 4.4505,
+      "p99_ms": 9.3819
+    },
+    "per_operation": {
+      "accept_independent": {
+        "calls": 1,
+        "successes": 1,
+        "latency_all_responses": {
+          "count": 1,
+          "p50_ms": 132.8129,
+          "p95_ms": 132.8129,
+          "p99_ms": 132.8129
+        },
+        "scheduled_to_completion_latency": {
+          "count": 1,
+          "p50_ms": 132.8812,
+          "p95_ms": 132.8812,
+          "p99_ms": 132.8812
+        }
+      },
+      "accept_retry": {
+        "calls": 2,
+        "successes": 2,
+        "latency_all_responses": {
+          "count": 2,
+          "p50_ms": 24.2164,
+          "p95_ms": 58.9591,
+          "p99_ms": 58.9591
+        },
+        "scheduled_to_completion_latency": {
+          "count": 2,
+          "p50_ms": 26.1384,
+          "p95_ms": 58.9845,
+          "p99_ms": 58.9845
+        }
+      },
+      "accept_selected_fixture": {
+        "calls": 1,
+        "successes": 1,
+        "latency_all_responses": {
+          "count": 1,
+          "p50_ms": 165.1331,
+          "p95_ms": 165.1331,
+          "p99_ms": 165.1331
+        },
+        "scheduled_to_completion_latency": {
+          "count": 1,
+          "p50_ms": 165.1683,
+          "p95_ms": 165.1683,
+          "p99_ms": 165.1683
+        }
+      },
+      "certificate": {
+        "calls": 2,
+        "successes": 2,
+        "latency_all_responses": {
+          "count": 2,
+          "p50_ms": 96.302,
+          "p95_ms": 122.9505,
+          "p99_ms": 122.9505
+        },
+        "scheduled_to_completion_latency": {
+          "count": 2,
+          "p50_ms": 96.324,
+          "p95_ms": 122.9709,
+          "p99_ms": 122.9709
+        }
+      },
+      "compile": {
+        "calls": 10,
+        "successes": 10,
+        "latency_all_responses": {
+          "count": 10,
+          "p50_ms": 95.6431,
+          "p95_ms": 145.0375,
+          "p99_ms": 145.0375
+        },
+        "scheduled_to_completion_latency": {
+          "count": 10,
+          "p50_ms": 99.0935,
+          "p95_ms": 145.2526,
+          "p99_ms": 145.2526
+        }
+      },
+      "graph": {
+        "calls": 1,
+        "successes": 1,
+        "latency_all_responses": {
+          "count": 1,
+          "p50_ms": 100.9943,
+          "p95_ms": 100.9943,
+          "p99_ms": 100.9943
+        },
+        "scheduled_to_completion_latency": {
+          "count": 1,
+          "p50_ms": 101.132,
+          "p95_ms": 101.132,
+          "p99_ms": 101.132
+        }
+      },
+      "history": {
+        "calls": 10,
+        "successes": 10,
+        "latency_all_responses": {
+          "count": 10,
+          "p50_ms": 53.6714,
+          "p95_ms": 108.9237,
+          "p99_ms": 108.9237
+        },
+        "scheduled_to_completion_latency": {
+          "count": 10,
+          "p50_ms": 55.7976,
+          "p95_ms": 115.8041,
+          "p99_ms": 115.8041
+        }
+      },
+      "propose": {
+        "calls": 2,
+        "successes": 2,
+        "latency_all_responses": {
+          "count": 2,
+          "p50_ms": 108.5726,
+          "p95_ms": 138.562,
+          "p99_ms": 138.562
+        },
+        "scheduled_to_completion_latency": {
+          "count": 2,
+          "p50_ms": 109.211,
+          "p95_ms": 139.173,
+          "p99_ms": 139.173
+        }
+      },
+      "state_cold": {
+        "calls": 10,
+        "successes": 10,
+        "latency_all_responses": {
+          "count": 10,
+          "p50_ms": 63.2316,
+          "p95_ms": 106.8828,
+          "p99_ms": 106.8828
+        },
+        "scheduled_to_completion_latency": {
+          "count": 10,
+          "p50_ms": 64.4093,
+          "p95_ms": 108.9057,
+          "p99_ms": 108.9057
+        }
+      },
+      "state_mixed": {
+        "calls": 9,
+        "successes": 9,
+        "latency_all_responses": {
+          "count": 9,
+          "p50_ms": 80.8382,
+          "p95_ms": 94.4629,
+          "p99_ms": 94.4629
+        },
+        "scheduled_to_completion_latency": {
+          "count": 9,
+          "p50_ms": 81.1344,
+          "p95_ms": 95.2575,
+          "p99_ms": 95.2575
+        }
+      },
+      "state_warm": {
+        "calls": 10,
+        "successes": 10,
+        "latency_all_responses": {
+          "count": 10,
+          "p50_ms": 29.955,
+          "p95_ms": 59.6922,
+          "p99_ms": 59.6922
+        },
+        "scheduled_to_completion_latency": {
+          "count": 10,
+          "p50_ms": 32.5592,
+          "p95_ms": 59.8859,
+          "p99_ms": 59.8859
+        }
+      }
+    },
+    "successful_calls_by_agent": {
+      "0": 9,
+      "1": 9,
+      "2": 5,
+      "3": 5,
+      "4": 5,
+      "5": 5,
+      "6": 5,
+      "7": 5,
+      "8": 5,
+      "9": 5
+    },
+    "latency_warning": "P99 for individual write categories has few samples; descriptive only",
+    "correctness_errors": [],
+    "unresolved_operational_errors": []
+  }
+}
