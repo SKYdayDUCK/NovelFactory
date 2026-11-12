@@ -42,3 +42,5 @@ W6 已复现主管调任后的两项不相容岗位扩编，修复及红绿原�
 #25 的合并主线两个作业均成功。W6 原始高压失败数字、宿主跳过项、双库演练拓扑及九档准入的实测并发边界见[原始证据核对](evidence/W6/signoff-ba892d3/w6-main-receipts.md)。
 
 P5.6 [#26](https://github.com/SKYdayDUCK/NovelFactory/pull/26) 在 `4e8fc5a3c2331a0de669ad8851d82c5b08a1e5dc` 完成主线复验。**MERGED_AND_VERIFIED**，保留历史 AT-30 NOT_MET、托管宿主跳过及真实创作授权边界。[P5.6 综合验收签收](evidence/P56/main-4e8fc5a/SIGNOFF.md)。
+
+- P6 #17 初次集成时，公开取消遗留未发送的当代预留，旧实现有两项回归失败。冻结候选对同样测试通过，旧代、SENT 和 UNKNOWN 继续占用。[原始修前修后回执](evidence/P6-C1/local-evidence.zip)

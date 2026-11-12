@@ -1,0 +1,203 @@
+{
+  "archive": {
+    "all_member_hashes_verified_after_extraction": true,
+    "byte_identical_second_build": true,
+    "bytes": 41476,
+    "manifest_sha256": "1aa86efb608b0e9bb9ab2f90ad80a51897e5183de1a74b266e4242524c014b2a",
+    "members": 33,
+    "name": "local-evidence.zip",
+    "sha256": "9483a575b55f62e4f3944e0afc7d69fad1d9cfd34df158c83d58b396e8b9e6c0"
+  },
+  "commits": {
+    "final_candidate": "f96d26bcf449d8e7905099402ddb4ddcf8679a60",
+    "old_pr_head": "43dc369ab73e2faacb509b6ca16995848fc92c28",
+    "pr_synthetic_merge": "9529840b7b7138fc129bc795355a7f91bda6c781",
+    "pre_fix_integration": "e15bb3d91d16da02d3e9b795dd985f0005b36941",
+    "pre_fix_tree": "4bfedb7a3e08b4dd510e9bbd020f553eb2a9c5ec",
+    "previous_release": "4e8fc5a3c2331a0de669ad8851d82c5b08a1e5dc",
+    "shared_final_tree": "86c524a7ba91e38fa3832a515e890a87ce7599cc"
+  },
+  "final_source_blobs": {
+    "migrations/versions/0018_p6_shared_tokens.py": "7df62ba202fb26e37d3df4a2e2889dc7dd6cbbc7",
+    "scripts/p6_budget.py": "a36897ef88677efd40ac07195e3f6cccb50dd748",
+    "src/novel_factory/application/budget_limits.py": "b4bac583a8279e412f4ae1edd04f22b1cf8681ec",
+    "src/novel_factory/orchestration/tasks.py": "3a9ef6f0dbf2b3df98f5bfce63a6763cbb563287",
+    "tests/integration/test_shared_token_budget.py": "1a495b2d82658089d8db25a6ba08d66381406322",
+    "tests/integration/test_shared_token_upgrade.py": "968cababccb6ea5fa6883c13615384fe8f8c6edd",
+    "tests/reliability/test_recovery.py": "b9757b080a815478177b5cf443f188183dfba11a",
+    "tests/reliability/test_s9_recovery.py": "cc2a30ca1522558e1a4d879dce31673bfd45817a",
+    "tests/reliability/test_tasks.py": "757aa56bdf5b693035fe96fa851dffc1550f2033",
+    "workshop/integration/test_dual_stdio.py": "9cf2e8b96ecb963eb580d785569625ae3ccad43c",
+    "workshop/integration/test_paired_restore.py": "a66f0b7853677645aa96f1d66bb6bdb1facf470b",
+    "workshop/src/agent_workshop/reconcile.py": "daba22623def50c028b2e0463aee2bc9aabb9881"
+  },
+  "identified_error_and_correction": {
+    "earlier_six_pass_assumption": "budget/ledger-first.xml and its historical object audit had accepted continued current-generation PREPARED hold until manual settlement. The corrected regression is the paired before/after evidence.",
+    "initial_cli": {
+      "after_task_cancel": [
+        "0.110000",
+        13
+      ],
+      "before_prepared": [
+        "0.100000",
+        10
+      ]
+    },
+    "meaning": "USD hold and Token count in that order. Initial cancellation stranded USD 0.01 / 3 known-unsent tokens. Post-fix both fields return to baseline, leaving USD 0.10 / 10 genuinely unresolved tokens held.",
+    "post_fix_cli": {
+      "after_task_cancel": [
+        "0.100000",
+        10
+      ],
+      "before_prepared": [
+        "0.100000",
+        10
+      ]
+    },
+    "public_safe_reproduction": {
+      "difference": "Same pre-fix product and final test bytes. Replayed with --tb=line to omit an ephemeral database locator from original fixture representations.",
+      "first_original_sha256": "1f3e43cd6c4aa2c94c2fdd541c900f2bb90a6fab099165a71d864f8f09cb3d2e",
+      "public_raw_junit": "budget/cancel-before-public.xml"
+    }
+  },
+  "legacy": {
+    "cross_work_set": {
+      "error": "VIEW_DENIED",
+      "exit": 1
+    },
+    "cross_work_show": {
+      "error": "VIEW_DENIED",
+      "exit": 1
+    },
+    "historical_after_states": [
+      "FAILED",
+      "FAILED",
+      "SENT"
+    ],
+    "historical_cancel_repeats": 2,
+    "historical_recorded_commands": 1,
+    "old_binary_trigger": {
+      "constraint": "ck_nf_shared_token_reservation",
+      "sqlstate": "23514"
+    },
+    "old_release": "4e8fc5a3c2331a0de669ad8851d82c5b08a1e5dc",
+    "source_revision": "0017_nf_workshop_delegation",
+    "stale_cas": {
+      "error": "IDEMPOTENCY_CONFLICT",
+      "exit": 1
+    },
+    "target_revision": "0018_p6_shared_tokens"
+  },
+  "paired": {
+    "after_repeated_invoice": {
+      "available_tokens": 99982,
+      "reserved_tokens": 0,
+      "spent_tokens": 18
+    },
+    "cancel_before_attempt": 0,
+    "commercial_provider_calls": 0,
+    "exact_wal_targets": {
+      "aw_intent_before_nf": "0/402B9A8",
+      "nf_bound_before_inference": "0/4077960",
+      "unknown_usage_before_invoice": "0/40B0C20"
+    },
+    "outage_live_workshop_postgres_clients": 0,
+    "physical_backup_verification": {
+      "exit_code": 0,
+      "stdout": "backup successfully verified"
+    },
+    "pytest_wall_seconds": 43.36,
+    "redis_run_id_changed": true,
+    "restored_unknown": {
+      "available_tokens": 0,
+      "reserved_tokens": 100000,
+      "spent_tokens": 0
+    },
+    "runtime": "PostgreSQL 17.11, Redis 8.0.2, two real stdio MCP services",
+    "source_tree": "86c524a7ba91e38fa3832a515e890a87ce7599cc",
+    "synthetic_http_requests": 1
+  },
+  "provenance_notes": [
+    "The old PR bundled 39 historical test cases before integration. Baseline and stage-specific binding details are in manifest.json.",
+    "The 34 passing rows plus one conditional skip in cancel-fixed/budget.xml were observed against the post-fix production and test bytes; the exact same skipped node passed in the independent real-Redis rerun.",
+    "The intermediate paired/exact summary kept the pre-fix product blob. Only paired/final-candidate is attributed to the frozen candidate tree.",
+    "The post-fix local budget and CLI runs are attributed by matched source content. The final paired run used the fully staged tree verified against the frozen candidate and PR merge tree. No hosted check, merge or P6 experiment result is asserted by this package."
+  ],
+  "publication_review": {
+    "checked": "Every included input was UTF-8, parsed where structured, checked for credential fields and high-confidence secret values or credential-bearing URLs. No connection locator in captured JSON, XML or log output. Executable sources use only generated throwaway credentials and static fixture labels.",
+    "excluded": "Project binding files, generated credentials, service environment, raw server logs, original verbose failure XML, object snapshots, and database backups.",
+    "selected_inputs": "allowlisted raw accounting, test and recovery fixture receipts, three probe/runner programs, a reproducible source diff, and reproduction instructions"
+  },
+  "results_by_receipt": {
+    "budget/cancel-after.xml": {
+      "errors": 0,
+      "failed_nodes": [],
+      "failures": 0,
+      "skipped": 0,
+      "skipped_nodes": [],
+      "tests": 9
+    },
+    "budget/cancel-before-public.xml": {
+      "errors": 0,
+      "failed_nodes": [
+        "tests.integration.test_shared_token_budget.test_cancel_refunds_only_provably_unsent_calls",
+        "tests.integration.test_shared_token_budget.test_cancel_and_dispatch_serialize_at_the_task_lock[cancel]"
+      ],
+      "failures": 2,
+      "skipped": 0,
+      "skipped_nodes": [],
+      "tests": 4
+    },
+    "budget/ledger-first.xml": {
+      "errors": 0,
+      "failed_nodes": [],
+      "failures": 0,
+      "skipped": 0,
+      "skipped_nodes": [],
+      "tests": 6
+    },
+    "cancel-fixed/budget.xml": {
+      "errors": 0,
+      "failed_nodes": [],
+      "failures": 0,
+      "skipped": 1,
+      "skipped_nodes": [
+        "tests.reliability.test_s9_recovery.test_consumer_death_rolls_back_case_and_reclaims_the_original_event"
+      ],
+      "tests": 35
+    },
+    "cancel-fixed/redis-recovery.xml": {
+      "errors": 0,
+      "failed_nodes": [],
+      "failures": 0,
+      "skipped": 0,
+      "skipped_nodes": [],
+      "tests": 1
+    },
+    "historical/shared-tokens.xml": {
+      "errors": 0,
+      "failed_nodes": [],
+      "failures": 0,
+      "skipped": 0,
+      "skipped_nodes": [],
+      "tests": 39
+    },
+    "initial/budget.xml": {
+      "errors": 0,
+      "failed_nodes": [],
+      "failures": 0,
+      "skipped": 0,
+      "skipped_nodes": [],
+      "tests": 21
+    },
+    "paired/final-candidate/paired-and-cancel.xml": {
+      "errors": 0,
+      "failed_nodes": [],
+      "failures": 0,
+      "skipped": 0,
+      "skipped_nodes": [],
+      "tests": 2
+    }
+  },
+  "scope": "PR 17 C1 local evidence only, with a mix of historical runs, regression replays, and a frozen final-candidate dual-service run. Independent or overlapping suites are not added into a single test total."
+}
