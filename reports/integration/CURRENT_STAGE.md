@@ -1,9 +1,7 @@
 # 当前唯一阶段
 
-Workshop W6 [#15](https://github.com/SKYdayDUCK/NovelFactory/pull/15)。W5 已在实际 main `b30e76978830bec4c596c04194d749fd01f67402` 完成两条 push CI、双服务、四个历史部署、管理者与故障恢复测试，状态为 **MERGED_AND_VERIFIED**。[W5 主线签收](W5_主线签收.md)。
+PR [#25](https://github.com/SKYdayDUCK/NovelFactory/pull/25) 已于 2026-11-12 01:57:08 UTC 合并，精确主线为 `ba892d3a424be39efccb697232a5614b26609cc4`。[合并回执与候选 CI](evidence/W6/signoff-ba892d3/pr-25.json) · [主线静态校验](evidence/W6/signoff-ba892d3/main-package-validation.json) · [同 SHA 的 push CI](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43137991893)。
 
-从该主线整理原 W6 提交和证据，核对真实双服务协作、10/50/200 员工和恢复情况。W6 签收后完成 P5.6 主线综合验收，再进入 P6。
+当前等待该 push CI 的 PostgreSQL 17 作业完成并签收。合并的六个文件均为签收记录。W6 功能合并点、六项工作流及三项历史容量失败详见 [W6 主线签收](W6_主线签收.md)。Issue [#13](https://github.com/SKYdayDUCK/NovelFactory/issues/13) 继续跟踪原门槛。
 
-当前仅开发 W6 #15。已切换目标为 main，保留旧 W6 历史、安装 wheel、四种场景、容量矩阵和双 SSH 原生验证。签收前需归档统一候选和新 main 的原始回执。
-
-W6 #15 的当前正式候选为 `50c8c5ed36cc2cfb83d6624c65ed33336e0f1771`，树 `7053bf12cc789dc6bf4220d0217a93253a2b75f9`。GitHub 预合并 a1f1021a 与该候选同树，目标 W5 main 为 b30e7697。新候选的托管双库与原生双 SSH 已通过，完整 CI、九档委托和正式主线复验仍在进行。
+后继唯一阶段为 P5.6 全系统综合验收。顺序及终点以作者的[十六节交付委托](CREATIVE_HARNESS_DELIVERY_SCOPE.md)为准。P6_REAL_CREATION = BLOCKED_LOCAL_AUTHORIZATION。

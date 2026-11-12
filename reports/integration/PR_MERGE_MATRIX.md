@@ -29,3 +29,8 @@ W3 已签收于 `e6763d844f023d7c6a13060dbaebca0416fe3099`，下一阶段为 W4�
 W6 #15 当前指向 main，接管时 Draft 头为 ac579e0b89b55e613d32750ce1c07210e0b07022。此次整理继承 34e4e7658b8a、73050eab6c5b 的已交付历史。正式合并和 main 验收仍待执行。
 
 W6 #15 的当前正式候选为 `50c8c5ed36cc2cfb83d6624c65ed33336e0f1771`，树 `7053bf12cc789dc6bf4220d0217a93253a2b75f9`。GitHub 预合并 a1f1021a 与该候选同树，目标 W5 main 为 b30e7697。 PR 已准备审查。P6 #17、#16 和 P5.7 仍排在 W6 与 P5.6 主线综合签收之后。
+
+
+## 2026-11-12 W6 签收 PR
+
+[#25](https://github.com/SKYdayDUCK/NovelFactory/pull/25) 合并至 `ba892d3a424be39efccb697232a5614b26609cc4`，候选 `e6f79f1063fd52acbaefd20dedd5a1f186b3168b`，合并时间 01:57:08 UTC。原始合并记录、候选工件摘要与主线静态验证归入 [#25 证据](evidence/W6/signoff-ba892d3/pr-25.json)。主线 push 验证进行中。署名范围和后续阶段以[本次十六节委托](CREATIVE_HARNESS_DELIVERY_SCOPE.md)为准。

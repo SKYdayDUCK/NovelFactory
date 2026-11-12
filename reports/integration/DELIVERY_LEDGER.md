@@ -28,3 +28,8 @@ W3 已签收。真实双服务委托与交接、预算与恢复均通过，两�
 W6 在两个主管已合法调任的 PostgreSQL 用例中，一例新岗位、一例已停岗位，旧版扩编预览都未拒绝。接入现有岗位矩阵后，18 项预设、路由、通信与租期用例通过。[红绿 JUnit、复演脚本与 633cf1a 补丁](evidence/W6/preset-supervisor/W6-preset-supervisor-633cf1a.zip)。
 
 W6 #15 的当前正式候选为 `50c8c5ed36cc2cfb83d6624c65ed33336e0f1771`，树 `7053bf12cc789dc6bf4220d0217a93253a2b75f9`。GitHub 预合并 a1f1021a 与该候选同树，目标 W5 main 为 b30e7697。八库升级、真实重启、NF 原生 10 项、四预设场景、AT43/49、17 项原生角色和 wheel 安装均已在精确候选取得独立回执。[八库与 NF](evidence/W6/candidate-50c8c5e/database-upgrade-and-fixtures/) · [首轮回归负控](evidence/W6/candidate-23d195d/creative-and-roles/broker-poll-timing.zip)。
+
+
+## 2026-11-12 W6 签收 PR
+
+[#25](https://github.com/SKYdayDUCK/NovelFactory/pull/25) 合并至 `ba892d3a424be39efccb697232a5614b26609cc4`，候选 `e6f79f1063fd52acbaefd20dedd5a1f186b3168b`，合并时间 01:57:08 UTC。原始合并记录、候选工件摘要与主线静态验证归入 [#25 证据](evidence/W6/signoff-ba892d3/pr-25.json)。主线 push 验证进行中。署名范围和后续阶段以[本次十六节委托](CREATIVE_HARNESS_DELIVERY_SCOPE.md)为准。

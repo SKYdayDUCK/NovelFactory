@@ -34,3 +34,7 @@ W3 主线验收。原四项 AT-30 继续在 #13 跟踪，未涉及付费模型�
 W6 已复现主管调任后的两项不相容岗位扩编，修复及红绿原件可追溯。[红绿 JUnit、复演脚本与 633cf1a 补丁](evidence/W6/preset-supervisor/W6-preset-supervisor-633cf1a.zip)。八条旧库升级路径还发现两套同名 w009_rehearsal 中早期部署缺少岗位列和唯一索引，按真实旧库修复复验。AT-30 保持 Issue #13 原始口径。
 
 首轮候选 23d195d 暴露两个验收入口故障。容量脚本从 Workshop 目录导入共享物理恢复模块时缺仓库根模块路径，长篇场景在持久化的下次可查询时间之前取回 IDLE。同条件修正后原始结算断言通过，产品的退避、授权和容量阈值均保持原值。 [当时的正式工作流与两项失败](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43116965757)。
+
+## W6 签收与已知遗留
+
+[#25 的第一次文档检查](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43134466602)发现 16 处相对证据链接失效。修复链接后[候选检查](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43136015001)通过。W6 六条主线工作流中三条历史容量工作流失败，原结果、条件和 Issue #13 均见 [W6 主线签收](W6_主线签收.md)。P6_REAL_CREATION = BLOCKED_LOCAL_AUTHORIZATION，文学质量为 NOT_EVALUATED。
