@@ -43,7 +43,15 @@ def _task_scope(conn, task_id, generation=None):
     return scope
 
 
-def record(conn, event_type, *, event_id=None, conflict_details=None, **fields):
+def supports_harness_details(conn):
+    """Read the active database catalog, including on historical upgrade rehearsals."""
+    return conn.scalar(text("""
+        SELECT EXISTS (SELECT FROM pg_attribute
+           WHERE attrelid=to_regclass('nf_audit_events') AND attname='harness_details' AND NOT attisdropped)
+    """))
+
+
+def record(conn, event_type, *, event_id=None, conflict_details=None, harness_details=None, **fields):
     """Internal transaction boundary. Only typed identifiers, counters and bounded labels persist."""
     event_id = str(event_id or uuid4())
     values = dict.fromkeys(_FIELDS)
@@ -52,13 +60,14 @@ def record(conn, event_type, *, event_id=None, conflict_details=None, **fields):
     values["span_id"] = values["span_id"] or event_id
     values["event_time"] = values["event_time"] or datetime.now(UTC)
     statement = _INSERT
-    if conflict_details is not None:
-        columns = ','.join(_FIELDS)
-        parameters = ','.join(':' + key for key in _FIELDS)
-        statement = text(f"""INSERT INTO nf_audit_events ({columns},conflict_details)
-            VALUES ({parameters},CAST(:conflict_details AS jsonb))
+    extras = {key: value for key, value in (("conflict_details", conflict_details), ("harness_details", harness_details))
+              if value is not None}
+    if extras:
+        columns = ','.join([*_FIELDS, *extras])
+        parameters = ','.join([':' + key for key in _FIELDS] + [f'CAST(:{key} AS jsonb)' for key in extras])
+        statement = text(f"""INSERT INTO nf_audit_events ({columns}) VALUES ({parameters})
             ON CONFLICT(event_id) DO NOTHING RETURNING event_id""")
-        values["conflict_details"] = json.dumps(conflict_details)
+        values.update({key: json.dumps(value) for key, value in extras.items()})
     inserted = conn.execute(statement, values).scalar_one_or_none()
     if inserted:
         envelope = {k:str(values[k]) for k in ("work_id","branch_id","task_id","trace_id") if values[k]}
@@ -168,9 +177,12 @@ class LogService:
     @staticmethod
     def model(conn, evidence_id, data):
         scope = _task_scope(conn, data["task_id"], data["generation"])
+        from .harness_observations import model_error, model_metadata
         return record(conn, "model.completed", event_id=evidence_id, **scope, evidence_id=evidence_id,
+                      harness_details=model_metadata(conn, data) if supports_harness_details(conn) else None,
                       attempt_id=data["attempt_id"], model=data["model_configuration"]["model"],
-                      outcome=data["outcome"], event_time=datetime.fromisoformat(data["recorded_at"]),
+                      outcome=data["outcome"], error_code=model_error(data.get("reason")),
+                      event_time=datetime.fromisoformat(data["recorded_at"]),
                       duration_ms=int(float(data["elapsed_seconds"])*1000))
 
     @staticmethod

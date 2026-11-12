@@ -206,15 +206,30 @@ class DynamicSkillAuthority:
             nf["org_id"] == workshop_binding["org_id"]
             and nf["installation_id"] == workshop_binding["installation_id"]
         )
-        live = _attest(
-            workshop_binding["binding_id"],
-            nf,
-            task,
-            grant,
-            freeze=True,
-            employee=workshop_binding["employee_id"],
-        )
-        _check(live.result["binding"] == workshop_binding)
+        from .harness_observations import delegation
+
+        receipt = {**task, "installation_id": nf["installation_id"]}
+        try:
+            live = _attest(
+                workshop_binding["binding_id"], nf, task, grant, freeze=True,
+                employee=workshop_binding["employee_id"],
+            )
+            _check(live.result["binding"] == workshop_binding)
+        except DomainError:
+            # Only correlate a binding already enrolled in NF. A rejected input
+            # cannot supply its own employee identity or create a false Skill link.
+            with self.kernel.db.uow() as repo:
+                from .dynamic_runtime import assignment_for
+                current = repo.one("tasks", {"task_id": task_id})
+                spec = repo.one("task_inputs", {"task_id": task_id, "generation": generation})
+                frozen = assignment_for(repo, current, spec["spec"]) if current and spec else None
+                if frozen:
+                    item = self.kernel.artifact(repo, frozen, nf["work_id"], kind="CREATIVE_DYNAMIC_FREEZE")
+                    if item["payload"]["workshop_binding"] == workshop_binding:
+                        delegation(repo.conn, task_id, generation, receipt, binding=workshop_binding, denied=True)
+            raise
+        with self.kernel.db.uow() as repo:
+            delegation(repo.conn, task_id, generation, receipt, binding=live.result["binding"])
         return live
 
     def verify(self, repo, principal, task_id, generation, *, workshop_binding, live):

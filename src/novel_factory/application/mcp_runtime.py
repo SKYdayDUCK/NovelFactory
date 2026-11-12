@@ -47,7 +47,7 @@ class McpRuntime:
                 configuration = CreativeHarnessConfig.from_env()
                 if not configuration.enabled:
                     return []
-                names = ["nf_harness_simulate", "nf_harness_plan_decide", "nf_harness_review_independence",
+                names = ["nf_harness_metrics", "nf_harness_simulate", "nf_harness_plan_decide", "nf_harness_review_independence",
                          "nf_harness_review_decide"]
                 if configuration.dynamic_agents:
                     names.extend(("nf_harness_agent_register", "nf_harness_agent_select",
@@ -195,6 +195,14 @@ class McpRuntime:
         with self.kernel.db.uow(write=False) as repo:
             self._creative_authority(repo, arguments["task_id"])
         return operation(self.principal, **arguments)
+
+    def creative_metrics(self, *, world_ref, **window):
+        from .creative_metrics import CreativeMetricsService
+
+        require("nf_harness_metrics" in self.available_tools(), "VIEW_DENIED", "Harness metrics unavailable")
+        require((world_ref["work_id"], world_ref["branch_id"]) == (self.binding.work_id, self.binding.branch_id),
+                "VIEW_DENIED", "Metrics exceed the bound work or branch")
+        return CreativeMetricsService(self.kernel).report(self.principal, world_ref, **window)
 
     def adaptive_instruction_call(self, tool, **arguments):
         from .adaptive_evaluation import AdaptiveEvaluationService

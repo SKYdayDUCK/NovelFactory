@@ -1,6 +1,6 @@
 # 串行交付台账
 
-S6 已保存冻结源码恢复检查点和当前验收数据。最终阶段签收仍待完整回归。[S6 恢复清单](../harness/evidence/s6/recovery/manifest.json)
+S6 冻结产品树已跨运行环境重建，逐文件及整树核验一致。[Git 对象和托管恢复回执](../harness/evidence/s6/restored-product.json)
 
 S5 指令根因、受控对照、独立发布和回滚 已在开发分支验证并进入阶段提交。[S5 工程回执](../harness/evidence/s5/receipt.json)
 

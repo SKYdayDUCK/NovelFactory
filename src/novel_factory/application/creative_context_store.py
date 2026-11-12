@@ -177,7 +177,7 @@ def load_snapshot(kernel, repo, task, input_ref, *, required=False):
     return {key: row[key] for key in ("artifact_id", "artifact_revision_id", "sha256")}, snap
 
 
-def freeze_snapshot(kernel, repo, binding, input_ref, packet, user, material_sources):
+def freeze_snapshot(kernel, repo, binding, input_ref, packet, user, material_sources, *, started):
     task = binding["task"]
     repo.one("tasks", {"task_id": task["task_id"]}, lock="update")
     versions = source_fences(kernel, repo, binding, material_sources, input_ref)
@@ -194,6 +194,8 @@ def freeze_snapshot(kernel, repo, binding, input_ref, packet, user, material_sou
            "sha256": kernel.objects.put(canonical_bytes(payload)).sha256}
     kernel._register_artifact(repo, ref, task["work_id"], payload, "CREATIVE_CONTEXT_SNAPSHOT",
                               task["principal_id"])
+    from .harness_observations import creative_packet
+    creative_packet(repo.conn, ref, packet, user, started)
     return ref, payload
 
 

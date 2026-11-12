@@ -62,6 +62,9 @@ _EVALUATION_REFS = {"candidate_ref": _ARTIFACT, "engineering_report_ref": _ARTIF
 _VERDICT = {"enum": ["APPROVE", "REJECT"]}
 _NAME = {"type": "string", "minLength": 1, "maxLength": 128}
 _TOOLS = {
+    "nf_harness_metrics": ("Read measured creative workflow activity in the bound work, branch and time window.",
+        object_schema(optional=("since", "until", "limit"), world_ref=_WORLD, since=_UNTIL, until=_UNTIL,
+                      limit={"type": "integer", "minimum": 1, "maximum": 5000})),
     "nf_harness_instruction_propose": ("Freeze a scoped instruction and comparison using signed manuscript reviews.",
         object_schema(optional=("instructions", "material_order", "evaluation_report_refs"), world_ref=_WORLD,
                       task_id=_UUID, generation=_GENERATION, failure_report_refs={**_REVIEW_REFS, "minItems": 1},
@@ -245,6 +248,7 @@ def make_server(runtime, *, ceiling=None):
                         "nf_harness_revision_brief", "nf_harness_revise"}:
                 return await asyncio.to_thread(runtime.creative_review_call, name, **arguments)
             methods = {
+                "nf_harness_metrics": "creative_metrics",
                 "nf_harness_review_decide": "decide_creative_review",
                 "nf_harness_review_independence": "issue_review_independence",
                 "nf_harness_plan_propose": "propose_creative_plan", "nf_harness_simulate": "simulate_creative_plan",

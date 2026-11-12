@@ -338,6 +338,7 @@ class AgentGateway:
             if cached:
                 return ({"role": "system", "content": system},
                         {"role": "user", "content": canonical_bytes(cached[1]["model_input"]).decode()})
+        packet_started = time.monotonic()
         material, source_fences = self._authorized_materials(principal, binding)
         user = {"assignment": data["assignment"], "context": context["payload"], "read_cut": context["read_cut"],
                 "authorized_materials": material}
@@ -358,7 +359,7 @@ class AgentGateway:
             with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
                 live = self._binding(repo, principal, binding["dispatch_request"], dynamic_live=binding.get("dynamic_live"))
                 ref, snapshot = freeze_snapshot(self.kernel, repo, live, binding["dispatch_request"]["input_ref"],
-                                                packet, user, source_fences)
+                                                packet, user, source_fences, started=packet_started)
             binding["creative_snapshot"] = ref, snapshot
             user = snapshot["model_input"]
         return ({"role": "system", "content": system},

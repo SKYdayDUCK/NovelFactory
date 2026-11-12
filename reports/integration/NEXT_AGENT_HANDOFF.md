@@ -1,3 +1,3 @@
-# 恢复中的 S6 交接
+# S6 验收交接
 
-从指定开发分支的 [S6 恢复清单](../harness/evidence/s6/recovery/manifest.json) 接续。先核对 S5 父提交、本地冻结产品树和逐项结果，再完成清单中的未结束用例。正式主线合并和独立审核均在 S6 签收之后。
+开发分支已恢复全部 S6 产品代码。核对[已验证的冻结树](../harness/evidence/s6/restored-product.json)，保留早期综合测试中观察到的 293/300 HTTP 请求成功。先完成开发分支综合套件、三组实验与原阈值独立复验，再签收 S6、正式合并和独立审核。[单分支委托](P57_SINGLE_BRANCH_MANDATE.md)

@@ -432,6 +432,8 @@ class TaskService:
         t = self.tables["tasks"]
         conn.execute(t.update().where(t.c.task_id == task["task_id"]).values(state=state, generation=next_generation, lease_owner=None, lease_expiry=None, attempt_id=None, updated_at=self._now(conn)))
         self._emit(conn, task["task_id"], next_generation, state)
+        from novel_factory.application.harness_observations import recovery
+        recovery(conn, task, next_generation, state, "LEASE_RECOVERY", unresolved=unresolved)
         return {"task_id": task["task_id"], "generation": next_generation, "state": state}
 
     def recover_expired(self, *, limit=100):

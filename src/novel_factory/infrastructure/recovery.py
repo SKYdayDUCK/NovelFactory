@@ -65,6 +65,7 @@ def fence_recovered_tasks(engine, object_store, *, tables=None):
     """
     if tables is None:
         from novel_factory.infrastructure.database import tables
+    from novel_factory.application.harness_observations import recovery
     service = TaskService(engine, tables, object_store)
     fenced = []
     with engine.begin() as conn:
@@ -102,6 +103,7 @@ def fence_recovered_tasks(engine, object_store, *, tables=None):
                 """), params)
             conn.execute(task_table.update().where(task_table.c.task_id == task["task_id"]).values(
                 generation=generation, state=state, lease_owner=None, lease_expiry=None, attempt_id=None))
+            recovery(conn, task, generation, state, "RESTORE_FENCE")
             fenced.append({"task_id": task["task_id"], "old_generation": task["generation"],
                            "generation": generation, "state": state})
         conn.execute(calls.update().where(calls.c.state == "SENT").values(state="UNKNOWN"))

@@ -104,6 +104,7 @@ def main():
     parser.add_argument("--keep-clusters", action="store_true")
     parser.add_argument("--shared-token-budget", action="store_true",
                         help="Verify the shared token ceiling and original reservation after WAL replay")
+    parser.add_argument("--creative-harness", action="store_true", help="Restore a post-basebackup frozen creative packet and its preflight receipt")
     parser.add_argument("--with-redis", action="store_true",
                         help="Exercise a separate, disposable Redis left ahead of the recovered PG cluster")
     args = parser.parse_args()
@@ -197,6 +198,9 @@ def main():
         result["base_backup_seconds"] = time.monotonic() - base_started
         result["pg_verifybackup"] = _run([str(pg_bin / "pg_verifybackup"), str(base)])
         target = transfer(first["world_ref"], "5", 20)
+        if args.creative_harness:
+            from p57_pitr import stage_packet, verify_packet
+            packet, packet_owner, packet_worker = stage_packet(kernel)
         if args.with_redis:
             from pitr_streams import StreamsDrill
             streams_drill = StreamsDrill(root, _port())
@@ -213,6 +217,9 @@ def main():
         if streams_drill:
             streams_drill.acknowledge_target(database)
         later = transfer(target["world_ref"], "7", 30)
+        if args.creative_harness:
+            excluded_packet = kernel.put_artifact(packet_owner, packet["world_ref"]["work_id"],
+                {"after_named_target": packet["packet_ref"]}, "EVIDENCE")
         if streams_drill:
             streams_drill.publish(database)
         with database.engine.connect() as conn:
@@ -269,6 +276,8 @@ def main():
             _check(recovered.revision(repo, initial)["branch_seq"] == 0, "Initial immutable history changed")
             _check(repo.one("revisions", {"world_revision_id": later["world_ref"]["world_revision_id"]}) is None, "Later revision was not excluded")
             expected_state_hash = recovered.revision(repo, target["world_ref"])["state_hash"]
+        if args.creative_harness:
+            result["creative_harness_recovery"] = verify_packet(recovered, packet, packet_owner, packet_worker, excluded_packet)
         fenced = fence_recovered_tasks(recovered_database.engine, recovered_objects, tables=tables)
         if args.shared_token_budget:
             shared = SharedBudgetService(recovered).status(*budget_scope)

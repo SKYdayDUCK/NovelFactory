@@ -10,10 +10,11 @@ from novel_factory.application.creative_review import CreativeReviewService
 from novel_factory.infrastructure.creative_config import CreativeHarnessConfig
 
 
-def setup_adaptive_case(kernel, tmp_path, monkeypatch):
+def setup_adaptive_case(kernel, tmp_path, monkeypatch, *, world=None):
     config = CreativeHarnessConfig(enabled=True, adaptive_instructions=True)
     monkeypatch.setenv("NF_CREATIVE_HARNESS_CONFIG", json.dumps(config.as_dict()))
-    world = setup_batch(kernel, count=4)
+    if world is None:
+        world = setup_batch(kernel, count=4)
     wr, admin = world["world_ref"], world["principal"]
     records = []
     lines = [
