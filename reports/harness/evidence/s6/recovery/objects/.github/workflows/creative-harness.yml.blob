@@ -1,0 +1,153 @@
+name: Creative Harness engineering
+on:
+  push:
+    branches: [main, 'dev/p57-*']
+    paths:
+      - '.github/workflows/creative-harness.yml'
+      - 'validation/validate_creative_harness.py'
+      - 'validation/run_p57_acceptance.py'
+      - 'scripts/p57_pitr.py'
+      - 'scripts/pitr_drill.py'
+      - 'src/novel_factory/application/**'
+      - 'src/novel_factory/interfaces/**'
+      - 'src/novel_factory/infrastructure/**'
+      - 'src/novel_factory/domain/creative_review.py'
+      - 'migrations/**'
+      - 'workshop/src/**'
+      - 'workshop/migrations/**'
+      - 'workshop/integration/**'
+      - 'tests/integration/test_harness_*.py'
+      - 'tests/integration/test_adaptive_*.py'
+      - 'tests/integration/adaptive_helpers.py'
+      - 'tests/integration/test_s6_*.py'
+      - 'tests/integration/test_creative_metrics.py'
+      - 'contracts/**'
+      - 'reports/harness/**'
+      - 'AGENTS.md'
+      - 'SKILLS.md'
+      - '.agents/skills/**'
+      - 'runtime/**'
+      - 'src/novel_factory/infrastructure/runtime_catalog.py'
+      - 'src/novel_factory/contracts/**'
+      - 'src/novel_factory/domain/canonical.py'
+      - 'pyproject.toml'
+      - 'uv.lock'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/creative-harness.yml'
+      - 'validation/validate_creative_harness.py'
+      - 'validation/run_p57_acceptance.py'
+      - 'scripts/p57_pitr.py'
+      - 'scripts/pitr_drill.py'
+      - 'src/novel_factory/application/**'
+      - 'src/novel_factory/interfaces/**'
+      - 'src/novel_factory/infrastructure/**'
+      - 'src/novel_factory/domain/creative_review.py'
+      - 'migrations/**'
+      - 'workshop/src/**'
+      - 'workshop/migrations/**'
+      - 'workshop/integration/**'
+      - 'tests/integration/test_harness_*.py'
+      - 'tests/integration/test_adaptive_*.py'
+      - 'tests/integration/adaptive_helpers.py'
+      - 'tests/integration/test_s6_*.py'
+      - 'tests/integration/test_creative_metrics.py'
+      - 'contracts/**'
+      - 'reports/harness/**'
+      - 'AGENTS.md'
+      - 'SKILLS.md'
+      - '.agents/skills/**'
+      - 'runtime/**'
+      - 'src/novel_factory/infrastructure/runtime_catalog.py'
+      - 'src/novel_factory/contracts/**'
+      - 'src/novel_factory/domain/canonical.py'
+      - 'pyproject.toml'
+      - 'uv.lock'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contracts-and-static-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - run: uv sync --locked --no-dev --python 3.12
+      - name: Verify S0 examples, static snapshots and the frozen instruction audit
+        run: uv run --no-sync python validation/validate_creative_harness.py --output ci-evidence/creative-harness/s0.json
+      - name: Preserve the exact checkout receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: creative-harness-s0-${{ github.run_attempt }}
+          path: ci-evidence/creative-harness/s0.json
+          if-no-files-found: error
+
+  engineering:
+    name: P5.7 ${{ matrix.suite }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [harness, dual, comparison, pitr]
+    services:
+      nf:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_PASSWORD: ephemeral-nf-test
+        ports: ['5433:5432']
+        options: --health-cmd "pg_isready -U postgres" --health-interval 3s --health-timeout 4s --health-retries 30
+      workshop:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_PASSWORD: ephemeral-workshop-test
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U postgres" --health-interval 3s --health-timeout 4s --health-retries 30
+      redis:
+        image: redis:8.0.2
+        ports: ['6379:6379']
+        options: --health-cmd "redis-cli ping" --health-interval 3s --health-timeout 4s --health-retries 30
+    env:
+      NF_TEST_DATABASE_URL: postgresql+psycopg://postgres:ephemeral-nf-test@127.0.0.1:5433/postgres
+      AW_DUAL_TEST_NF_ADMIN_URL: postgresql://postgres:ephemeral-nf-test@127.0.0.1:5433/postgres
+      AW_DUAL_TEST_ADMIN_URL: postgresql://postgres:ephemeral-workshop-test@127.0.0.1:5432/postgres
+      AW_REDIS_TEST_URL: redis://127.0.0.1:6379/0
+      NF_TEST_REDIS_URL: redis://127.0.0.1:6379/1
+      PG_BIN: /usr/lib/postgresql/17/bin
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - run: uv sync --locked --group dev
+      - name: Install physical restore and local Redis tools
+        if: matrix.suite == 'pitr'
+        run: bash scripts/ci_install_pg17.sh postgresql-17 postgresql-client-17 redis-server
+      - name: Run the configured engineering suite
+        run: uv run --no-sync python validation/run_p57_acceptance.py "${{ matrix.suite }}" --output "ci-evidence/p57-${{ matrix.suite }}"
+      - name: Retain the exact checkout and measured outcomes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p57-${{ matrix.suite }}-${{ github.run_attempt }}
+          path: |
+            ci-evidence/p57-*/run.json
+            ci-evidence/p57-*/cases.json
+            ci-evidence/p57-*/comparison.json
+            ci-evidence/p57-*/pitr/result.json
+          if-no-files-found: warn

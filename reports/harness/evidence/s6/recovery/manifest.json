@@ -1,0 +1,122 @@
+{
+  "checkpoint_utc": "2026-11-12T09:30:00Z",
+  "status": "S6_IN_PROGRESS_WORKSPACE_UNAVAILABLE",
+  "source_parent": "976e3212fcb42b9251fc2858a3b9d9ce3c3a646c",
+  "verified_local_product_tree": "9a7b09f11e98a1eec87316869eca54240db2c15f",
+  "changed_product_blob_total": 30,
+  "recovered_verified_product_blobs": {
+    "tests/integration/test_s6_engineering_comparison.py": "207513ef16e22e0e09c2a06d74883dc84f8942c0",
+    "migrations/versions/0020_p57_harness_observations.py": "1efaf449b50b471ebba982c394578e929d6918f2",
+    "workshop/migrations/versions/w011_harness_observations.py": "47d53dfe6ba2ab35a62b065897c14a4c7ec4e86e",
+    "tests/integration/adaptive_helpers.py": "2b1390b3e34366e75fc8f3e4c352613be4affde2",
+    "scripts/pitr_drill.py": "534e2ba7a5a615742fa4d3a75aa0f3aae76a118f",
+    "src/novel_factory/interfaces/mcp_stdio.py": "278923e913f4a8075706e854d4dda70cd13e4173",
+    "scripts/p57_pitr.py": "1483f68983edc63318ae6a5c062b562266a43cb3",
+    "src/novel_factory/application/agent_gateway.py": "899f9ab70846bf6127acfd938b3838c2157ef3bb",
+    "src/novel_factory/application/audit_log.py": "aec20cf8a63e00ad14dd00372f229074482751c6",
+    "src/novel_factory/application/creative_context_store.py": "322fc5931c01954c112466c8078fe3a43526e272",
+    "src/novel_factory/application/delegation.py": "8e2bfcd5efa06fedc389668609d1414371a5f2e0",
+    "src/novel_factory/application/kernel.py": "9d4b99762e0a71b0ed24042f6f884929de502775",
+    "src/novel_factory/application/queries.py": "ec331bab138b322e7d4ddff00d97462194b3c698",
+    "src/novel_factory/application/workshop_skills.py": "a22efc39e329c689a640ae617f8a933b07e26427",
+    "src/novel_factory/infrastructure/recovery.py": "31cdef8be530897424a51cfe917fd4910d1b9066",
+    "src/novel_factory/orchestration/tasks.py": "48ace92580d64214040c0354f55c096ff3149d62",
+    "tests/integration/test_s9_upgrade.py": "89dfef45eac44220e019db1123452ce6777bafa3",
+    "workshop/src/agent_workshop/manager.py": "f2c99b17028d4636f729ed67001631c0b7f023b4",
+    "workshop/src/agent_workshop/reviews_skills.py": "361c7272cdc8e8885cc1a87c9ee8186c92af5285",
+    ".github/workflows/creative-harness.yml": "1e79209c849dc57a118c675990c912501d6e6538",
+    "tests/integration/test_harness_metrics_mcp.py": "e5cd920efc44e7a1307ea718205aad2ce978fd2e",
+    "validation/run_p57_acceptance.py": "7b6a657e31cec0d45e989e97509428f2f34c7146",
+    "src/novel_factory/application/mcp_runtime.py": "7d715dcc9ba24979363c01f479d7bac69f81f737"
+  },
+  "transcribed_docs": {
+    "reports/harness/S6_METRICS.md": "9b96d7e5be6cc07966326c0d78342ac89d6f80db",
+    "reports/harness/S6_ENGINEERING_COMPARISON.md": "4cd3d852be502d1eb28e3af87ccffd95393a5db6"
+  },
+  "replay_inputs": {
+    "metrics.py": "5d2cf8ed2bda89873f3b99de091dba35347606aa",
+    "observations.py": "c62adb06f1015c8dd65169dca002267f1c83974d"
+  },
+  "scope": "Recovery objects are stored as data until the whole tree and outstanding engineering gates are verified.",
+  "observed_before_disconnect": {
+    "contracts": {
+      "pytest": "432 passed, 17 subtests passed",
+      "seconds": 35.17
+    },
+    "faults_concurrency": {
+      "passed": 105,
+      "seconds": 128.65
+    },
+    "nf_older_upgrades": {
+      "passed": 7,
+      "seconds": 61.91
+    },
+    "w3_to_w6_upgrades": {
+      "passed": 17,
+      "seconds": 168.231
+    },
+    "paired_service_restore": {
+      "passed": 1,
+      "seconds": 49.9
+    },
+    "physical_pg17_wal_pitr": {
+      "status": "PASS",
+      "seconds": 20.359846714000014,
+      "target_commits_lost": 0,
+      "unknown_calls_preserved": 1,
+      "reserved_amount_preserved": "0.5",
+      "old_worker_rejected": true
+    },
+    "native_p5_role_container": {
+      "passed": 2,
+      "seconds": 9.7
+    },
+    "pre_freeze_native_history": {
+      "passed": 96,
+      "seconds": 463.24
+    },
+    "pre_freeze_metrics_and_stdio": {
+      "passed": 7,
+      "seconds": 38.92
+    },
+    "three_arm_final_driver_rehearsal": {
+      "experiment": "9cb81217-29c5-498b-9f2b-e3dd3c719996",
+      "sha256_of_original_rehearsal_json": "b7403cb65f94926b795b18ff1e8e72928c2fd241a48d8af8d670be6644ba3d58",
+      "windows": 3,
+      "attempts": 9,
+      "paid": 0,
+      "exact_span_true_positives": [
+        1,
+        1,
+        2
+      ],
+      "false_positives": [
+        0,
+        0,
+        0
+      ],
+      "independent_confirmatory_batches": 0
+    },
+    "supplementary_projection": {
+      "passed_cases": 58,
+      "failed_cases": 1,
+      "case": "50-agent timeline HTTP",
+      "observed_successes": 293,
+      "required_successes": 300,
+      "observed_error_sample": "429 BACKPRESSURE",
+      "isolated_repeat": "NOT_VERIFIED"
+    }
+  },
+  "pending": [
+    "Recover original 30 staged paths and verify against product tree",
+    "Complete exact frozen suites harness, dual, comparison, history and P6 and preserve per-case receipts",
+    "Rerun original unchanged 50-agent supplementary HTTP gate",
+    "Finish stage reports and original S6 milestone",
+    "Verify latest main, pre-push integration tests, non-fast-forward merge and fetched remote retest",
+    "Start independent review only after verified main merge"
+  ],
+  "paid_calls": 0,
+  "literary": "NOT_EVALUATED",
+  "p6": "BLOCKED_LOCAL_AUTHORIZATION",
+  "at30": "NOT_MET"
+}

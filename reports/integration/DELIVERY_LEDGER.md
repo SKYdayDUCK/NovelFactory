@@ -1,5 +1,7 @@
 # 串行交付台账
 
+S6 已保存冻结源码恢复检查点和当前验收数据。最终阶段签收仍待完整回归。[S6 恢复清单](../harness/evidence/s6/recovery/manifest.json)
+
 S5 指令根因、受控对照、独立发布和回滚 已在开发分支验证并进入阶段提交。[S5 工程回执](../harness/evidence/s5/receipt.json)
 
 S4 动态角色、Skill 版本与代际恢复已推送至开发分支，提交为 `7e8659f286407b0428a37f3fae8e9c6905e7c203`。[远端 Actions 回执](../harness/evidence/s4/remote-receipt.json)。[S4 工程回执](../harness/evidence/s4/receipt.json)
