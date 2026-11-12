@@ -1,0 +1,27 @@
+{
+  "exit_code": 1,
+  "argv": [
+    "/workspace/scratch/2f68328c379c/local-evidence/venv-core/bin/python",
+    "-m",
+    "benchmarks.p3_open_arrival",
+    "--agents",
+    "1000",
+    "--rounds",
+    "5",
+    "--arrival-rps",
+    "1000",
+    "--hot-fraction",
+    ".8",
+    "--api-processes",
+    "2",
+    "--output",
+    "/workspace/scratch/2f68328c379c/perf-work/raw/at30/1000-open/load.json"
+  ],
+  "elapsed_seconds": 227.40713262557983,
+  "started_epoch_seconds": 1794495984.6662629,
+  "cpu_affinity": [
+    7,
+    8
+  ],
+  "has_evidence": true
+}

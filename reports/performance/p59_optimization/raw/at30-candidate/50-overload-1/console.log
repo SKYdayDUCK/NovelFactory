@@ -1,0 +1,378 @@
+{
+  "file": "/workspace/scratch/2f68328c379c/perf-work/raw/at30-candidate/50-overload-1/load.json",
+  "correctness": "PASS",
+  "logical_agents": 50,
+  "first_attempt_capacity_gate": "NOT_MET",
+  "bounded_recovery_business_gate": "PASS",
+  "capacity_gate": "NOT_MET",
+  "open_loop_offered_rate": {
+    "gate": "NOT_MET",
+    "transport_header_starts": 250,
+    "transport_header_start_rps": 77.51983838514663,
+    "target_rps": 1000.0,
+    "first_attempts": 250,
+    "actual_call_start_rps": 246.07879858203287,
+    "start_window_seconds": 1.0118709999999993,
+    "max_schedule_delay_ms": 762.9986,
+    "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+    "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+  },
+  "gate_scope": "capacity",
+  "metrics": {
+    "duration_seconds": 39.41135,
+    "planned_requests": 536,
+    "emitted_requests": 673,
+    "completed_requests": 673,
+    "client_requests_never_emitted": 0,
+    "emitted_logical_operations": 536,
+    "completed_logical_operations": 536,
+    "first_attempt_failure_count": 105,
+    "first_attempt_status_counts": {
+      "200": 427,
+      "409": 4,
+      "429": 105
+    },
+    "first_attempt_latency": {
+      "count": 536,
+      "p50_ms": 146.0118,
+      "p95_ms": 2179.8697,
+      "p99_ms": 3128.7064
+    },
+    "recovered_logical_operations": 105,
+    "logical_operation_completion_latency": {
+      "count": 536,
+      "p50_ms": 332.8639,
+      "p95_ms": 4610.2168,
+      "p99_ms": 5042.4796
+    },
+    "api_tool_calls": 673,
+    "mcp_tool_calls": 0,
+    "status_counts": {
+      "200": 532,
+      "409": 4,
+      "429": 137
+    },
+    "valid_successful_calls": 532,
+    "api_success_rps": 13.4986,
+    "successful_duplicate_receipts": 6,
+    "effective_call_rps_excluding_duplicates": 13.3464,
+    "new_world_commit_receipts": 6,
+    "accepted_original_input_after_unrelated_head_progress": 5,
+    "cross_head_accept_rate_among_unique_commits": 0.8333333333333334,
+    "semantic_replan_requests_in_load": 0,
+    "effective_world_commits_per_second": 0.1522,
+    "conflict_count": 4,
+    "conflict_rate_all_requests": 0.005943536404160475,
+    "failure_rate_all_requests": 0.20950965824665677,
+    "idempotent_retry_rate_all_requests": 0.008915304606240713,
+    "infrastructure_retries": 137,
+    "model_retries": 0,
+    "peak_outstanding_client_requests": 151,
+    "client_connection_limit": 256,
+    "outstanding_definition": "Includes HTTPX connection-pool wait; server ingress is measured separately",
+    "latency_all_responses": {
+      "count": 673,
+      "p50_ms": 210.8999,
+      "p95_ms": 2475.4898,
+      "p99_ms": 3128.7064
+    },
+    "latency_successes": {
+      "count": 532,
+      "p50_ms": 197.9444,
+      "p95_ms": 2612.1314,
+      "p99_ms": 3202.9681
+    },
+    "latency_rejections_and_failures": {
+      "count": 141,
+      "p50_ms": 225.2373,
+      "p95_ms": 1320.3298,
+      "p99_ms": 1871.5267
+    },
+    "scheduled_to_completion_latency": {
+      "count": 673,
+      "p50_ms": 577.7274,
+      "p95_ms": 4535.6815,
+      "p99_ms": 5041.5361
+    },
+    "client_pool_wait_timing_note": "HTTPcore wait_for_connection await wall time includes event-loop scheduling; not pure server or pool queue time.",
+    "client_pool_wait": {
+      "count": 673,
+      "p50_ms": 0.0023,
+      "p95_ms": 0.0411,
+      "p99_ms": 0.121
+    },
+    "client_response_validation_cpu_seconds": 1.5396004649999857,
+    "transport_headers_started": 673,
+    "arrival_schedule_delay": {
+      "count": 673,
+      "p50_ms": 54.9158,
+      "p95_ms": 2734.8027,
+      "p99_ms": 4951.9465
+    },
+    "per_operation": {
+      "accept_conflict": {
+        "calls": 4,
+        "successes": 0,
+        "latency_all_responses": {
+          "count": 4,
+          "p50_ms": 30.8884,
+          "p95_ms": 58.0338,
+          "p99_ms": 58.0338
+        },
+        "scheduled_to_completion_latency": {
+          "count": 4,
+          "p50_ms": 32.2574,
+          "p95_ms": 60.998,
+          "p99_ms": 60.998
+        }
+      },
+      "accept_independent": {
+        "calls": 5,
+        "successes": 5,
+        "latency_all_responses": {
+          "count": 5,
+          "p50_ms": 139.1271,
+          "p95_ms": 168.0589,
+          "p99_ms": 168.0589
+        },
+        "scheduled_to_completion_latency": {
+          "count": 5,
+          "p50_ms": 139.2155,
+          "p95_ms": 169.444,
+          "p99_ms": 169.444
+        }
+      },
+      "accept_retry": {
+        "calls": 6,
+        "successes": 6,
+        "latency_all_responses": {
+          "count": 6,
+          "p50_ms": 53.1986,
+          "p95_ms": 60.7449,
+          "p99_ms": 60.7449
+        },
+        "scheduled_to_completion_latency": {
+          "count": 6,
+          "p50_ms": 53.2316,
+          "p95_ms": 60.7842,
+          "p99_ms": 60.7842
+        }
+      },
+      "accept_selected_fixture": {
+        "calls": 1,
+        "successes": 1,
+        "latency_all_responses": {
+          "count": 1,
+          "p50_ms": 214.8935,
+          "p95_ms": 214.8935,
+          "p99_ms": 214.8935
+        },
+        "scheduled_to_completion_latency": {
+          "count": 1,
+          "p50_ms": 214.9268,
+          "p95_ms": 214.9268,
+          "p99_ms": 214.9268
+        }
+      },
+      "certificate": {
+        "calls": 10,
+        "successes": 10,
+        "latency_all_responses": {
+          "count": 10,
+          "p50_ms": 124.1634,
+          "p95_ms": 475.6851,
+          "p99_ms": 475.6851
+        },
+        "scheduled_to_completion_latency": {
+          "count": 10,
+          "p50_ms": 124.1836,
+          "p95_ms": 475.701,
+          "p99_ms": 475.701
+        }
+      },
+      "compile": {
+        "calls": 50,
+        "successes": 50,
+        "latency_all_responses": {
+          "count": 50,
+          "p50_ms": 91.6351,
+          "p95_ms": 560.8666,
+          "p99_ms": 656.0141
+        },
+        "scheduled_to_completion_latency": {
+          "count": 50,
+          "p50_ms": 92.2054,
+          "p95_ms": 593.0346,
+          "p99_ms": 657.098
+        }
+      },
+      "graph": {
+        "calls": 5,
+        "successes": 5,
+        "latency_all_responses": {
+          "count": 5,
+          "p50_ms": 78.7731,
+          "p95_ms": 249.5894,
+          "p99_ms": 249.5894
+        },
+        "scheduled_to_completion_latency": {
+          "count": 5,
+          "p50_ms": 80.086,
+          "p95_ms": 250.7749,
+          "p99_ms": 250.7749
+        }
+      },
+      "history": {
+        "calls": 50,
+        "successes": 50,
+        "latency_all_responses": {
+          "count": 50,
+          "p50_ms": 87.6211,
+          "p95_ms": 414.3972,
+          "p99_ms": 632.396
+        },
+        "scheduled_to_completion_latency": {
+          "count": 50,
+          "p50_ms": 89.7541,
+          "p95_ms": 435.4952,
+          "p99_ms": 647.9548
+        }
+      },
+      "overload": {
+        "calls": 387,
+        "successes": 250,
+        "latency_all_responses": {
+          "count": 387,
+          "p50_ms": 1009.5976,
+          "p95_ms": 2736.8569,
+          "p99_ms": 3346.0344
+        },
+        "scheduled_to_completion_latency": {
+          "count": 387,
+          "p50_ms": 2027.4522,
+          "p95_ms": 4799.4686,
+          "p99_ms": 5129.4878
+        }
+      },
+      "propose": {
+        "calls": 10,
+        "successes": 10,
+        "latency_all_responses": {
+          "count": 10,
+          "p50_ms": 156.7019,
+          "p95_ms": 551.0565,
+          "p99_ms": 551.0565
+        },
+        "scheduled_to_completion_latency": {
+          "count": 10,
+          "p50_ms": 158.4399,
+          "p95_ms": 551.8717,
+          "p99_ms": 551.8717
+        }
+      },
+      "state_cold": {
+        "calls": 50,
+        "successes": 50,
+        "latency_all_responses": {
+          "count": 50,
+          "p50_ms": 75.2905,
+          "p95_ms": 258.3778,
+          "p99_ms": 370.4062
+        },
+        "scheduled_to_completion_latency": {
+          "count": 50,
+          "p50_ms": 79.409,
+          "p95_ms": 286.2438,
+          "p99_ms": 401.7967
+        }
+      },
+      "state_mixed": {
+        "calls": 45,
+        "successes": 45,
+        "latency_all_responses": {
+          "count": 45,
+          "p50_ms": 61.8433,
+          "p95_ms": 227.2779,
+          "p99_ms": 250.3655
+        },
+        "scheduled_to_completion_latency": {
+          "count": 45,
+          "p50_ms": 63.1577,
+          "p95_ms": 228.0227,
+          "p99_ms": 252.9616
+        }
+      },
+      "state_warm": {
+        "calls": 50,
+        "successes": 50,
+        "latency_all_responses": {
+          "count": 50,
+          "p50_ms": 54.5061,
+          "p95_ms": 102.821,
+          "p99_ms": 111.2765
+        },
+        "scheduled_to_completion_latency": {
+          "count": 50,
+          "p50_ms": 57.9446,
+          "p95_ms": 104.3464,
+          "p99_ms": 112.518
+        }
+      }
+    },
+    "successful_calls_by_agent": {
+      "1": 14,
+      "0": 14,
+      "2": 14,
+      "3": 14,
+      "4": 14,
+      "5": 14,
+      "6": 12,
+      "7": 12,
+      "8": 12,
+      "9": 12,
+      "10": 10,
+      "11": 10,
+      "12": 10,
+      "13": 10,
+      "14": 10,
+      "15": 10,
+      "16": 10,
+      "17": 10,
+      "18": 10,
+      "19": 10,
+      "20": 10,
+      "21": 10,
+      "22": 10,
+      "23": 10,
+      "24": 10,
+      "25": 10,
+      "26": 10,
+      "27": 10,
+      "28": 10,
+      "29": 10,
+      "30": 10,
+      "31": 10,
+      "32": 10,
+      "33": 10,
+      "34": 10,
+      "35": 10,
+      "36": 10,
+      "38": 10,
+      "37": 10,
+      "39": 10,
+      "40": 10,
+      "41": 10,
+      "42": 10,
+      "43": 10,
+      "44": 10,
+      "45": 10,
+      "46": 10,
+      "47": 10,
+      "48": 10,
+      "49": 10
+    },
+    "latency_warning": "P99 for individual write categories has few samples; descriptive only",
+    "correctness_errors": [],
+    "unresolved_operational_errors": []
+  }
+}

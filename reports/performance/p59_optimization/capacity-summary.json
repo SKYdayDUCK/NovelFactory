@@ -1,0 +1,178 @@
+[
+  {
+    "arm": "at30",
+    "scenario": "10-mixed-1",
+    "gate": "PASS",
+    "business": "PASS",
+    "wire_rps": null,
+    "status": {
+      "200": 58
+    },
+    "validated": 58,
+    "latency": {
+      "count": 58,
+      "p50_ms": 73.3604,
+      "p95_ms": 138.562,
+      "p99_ms": 165.1331
+    },
+    "raw": "raw/at30/10-mixed-1/load.json.gz"
+  },
+  {
+    "arm": "at30",
+    "scenario": "1000-open",
+    "gate": "NOT_MET",
+    "business": null,
+    "wire_rps": 41.95011893740728,
+    "status": {
+      "429": 3627,
+      "200": 1319,
+      "transport_error": 54
+    },
+    "validated": 1319,
+    "latency": {
+      "count": 5000,
+      "p50_ms": 2885.4526,
+      "p95_ms": 8812.4084,
+      "p99_ms": 11335.9863
+    },
+    "raw": "raw/at30/1000-open/load.json.gz"
+  },
+  {
+    "arm": "at30",
+    "scenario": "200-overload-1",
+    "gate": "NOT_MET",
+    "business": "PASS",
+    "wire_rps": 40.08035650092952,
+    "status": {
+      "200": 2114,
+      "409": 19,
+      "429": 849
+    },
+    "validated": 2114,
+    "latency": {
+      "count": 2141,
+      "p50_ms": 159.06,
+      "p95_ms": 6155.1655,
+      "p99_ms": 10152.5247
+    },
+    "raw": "raw/at30/200-overload-1/load.json.gz"
+  },
+  {
+    "arm": "at30",
+    "scenario": "50-mixed-1",
+    "gate": "PASS",
+    "business": "PASS",
+    "wire_rps": null,
+    "status": {
+      "200": 282,
+      "409": 4
+    },
+    "validated": 282,
+    "latency": {
+      "count": 286,
+      "p50_ms": 59.8225,
+      "p95_ms": 133.8795,
+      "p99_ms": 202.683
+    },
+    "raw": "raw/at30/50-mixed-1/load.json.gz"
+  },
+  {
+    "arm": "at30",
+    "scenario": "50-overload-1",
+    "gate": "NOT_MET",
+    "business": "PASS",
+    "wire_rps": 58.36971282335704,
+    "status": {
+      "200": 532,
+      "409": 4,
+      "429": 48
+    },
+    "validated": 532,
+    "latency": {
+      "count": 536,
+      "p50_ms": 138.3016,
+      "p95_ms": 4297.155,
+      "p99_ms": 5432.4797
+    },
+    "raw": "raw/at30/50-overload-1/load.json.gz"
+  },
+  {
+    "arm": "at30",
+    "scenario": "500-mixed-1",
+    "gate": "PASS",
+    "business": "PASS",
+    "wire_rps": null,
+    "status": {
+      "200": 2802,
+      "409": 49
+    },
+    "validated": 2802,
+    "latency": {
+      "count": 2851,
+      "p50_ms": 179.7781,
+      "p95_ms": 846.3769,
+      "p99_ms": 1164.4145
+    },
+    "raw": "raw/at30/500-mixed-1/load.json.gz"
+  },
+  {
+    "arm": "at30-candidate",
+    "scenario": "1000-open",
+    "gate": "NOT_MET",
+    "business": null,
+    "wire_rps": 38.25644640147347,
+    "status": {
+      "200": 1434,
+      "429": 3534,
+      "transport_error": 32
+    },
+    "validated": 1434,
+    "latency": {
+      "count": 5000,
+      "p50_ms": 2920.187,
+      "p95_ms": 8224.5946,
+      "p99_ms": 11531.4994
+    },
+    "raw": "raw/at30-candidate/1000-open/load.json.gz"
+  },
+  {
+    "arm": "at30-candidate",
+    "scenario": "200-overload-1",
+    "gate": "NOT_MET",
+    "business": "PASS",
+    "wire_rps": 27.799719025262277,
+    "status": {
+      "200": 2092,
+      "409": 19,
+      "429": 840
+    },
+    "validated": 2092,
+    "latency": {
+      "count": 2141,
+      "p50_ms": 226.7959,
+      "p95_ms": 10925.5297,
+      "p99_ms": 17373.7792
+    },
+    "raw": "raw/at30-candidate/200-overload-1/load.json.gz"
+  },
+  {
+    "arm": "at30-candidate",
+    "scenario": "50-overload-1",
+    "gate": "NOT_MET",
+    "business": "PASS",
+    "wire_rps": 77.51983838514663,
+    "status": {
+      "200": 532,
+      "409": 4,
+      "429": 137
+    },
+    "validated": 532,
+    "latency": {
+      "count": 536,
+      "p50_ms": 146.0118,
+      "p95_ms": 2179.8697,
+      "p99_ms": 3128.7064
+    },
+    "raw": "raw/at30-candidate/50-overload-1/load.json.gz"
+  }
+]
