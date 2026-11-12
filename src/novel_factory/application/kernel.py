@@ -283,17 +283,20 @@ class Kernel:
         grant = self.authorize(r, principal, work_id, "READ")
         artifact = self.artifact(r, ref, work_id)
         if artifact["kind"].startswith("AGENT_"):
-            from .dynamic_runtime import audit_assignment
+            from .dynamic_runtime import audit_branches
 
-            assignment = audit_assignment(r, work_id, artifact, ref)
-            if assignment:
-                kind, assignment_ref = assignment
-                frozen = self.artifact(r, assignment_ref, work_id, kind=kind)["payload"]
-                branch = frozen["scope"]["world_ref"]["branch_id"]
-                if artifact["kind"] != "AGENT_CANDIDATE" or "ADMIN" in grant["capabilities"]:
-                    self.authorize(r, principal, work_id, "ADMIN", branch)
+            branches = audit_branches(self, r, work_id, artifact, ref)
+            if branches is not None:
+                # Some historical inputs were prepared but never assigned to a branch.
+                if not branches:
+                    require("ADMIN" in grant["capabilities"] and grant["branch_ids"] == ["*"],
+                            "VIEW_DENIED", "Agent input has no registered branch")
                     return
-                self.authorize(r, principal, work_id, "READ", branch)
+                raw = artifact["kind"] != "AGENT_CANDIDATE" or "ADMIN" in grant["capabilities"]
+                for branch in branches:
+                    self.authorize(r, principal, work_id, "ADMIN" if raw else "READ", branch)
+                if raw:
+                    return
         if artifact["kind"].startswith("CREATIVE_"):
             # Raw records combine internal prompts, plan choices or evaluation
             # evidence. Task-scoped read ports return their permitted sections.
@@ -477,6 +480,11 @@ class Kernel:
         wr = spec["world_ref"]
         g=self.authorize(r,principal,wr["work_id"],"TASK_CREATE",wr["branch_id"])
         self.revision(r,wr)
+        from .dynamic_runtime import check_input_branch
+        inputs = {ref["artifact_revision_id"]: ref for ref in spec["input_artifacts"]}
+        for row in r.many("artifacts", {"work_id": wr["work_id"], "kind": "AGENT_INPUT",
+                                        "artifact_revision_id": list(inputs)}):
+            check_input_branch(self, r, wr, row, inputs[row["artifact_revision_id"]])
         require(spec["capability_grant_id"]==g["grant_id"] and spec["role_id"]==g["role_id"],"VIEW_DENIED","Task grant mismatch")
         require(point_key(spec["story_time"])<=point_key(g["max_story_time"]),"VIEW_DENIED","Task time outside grant")
         require(spec["context_bundle_id"] is None and spec["dependency_fingerprint"] is None,"INVALID_ARGUMENT","Only compiler may bind task context")

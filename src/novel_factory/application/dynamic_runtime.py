@@ -1,6 +1,9 @@
 """Apply a provisioned assignment to one NF task and one live Workshop delegation."""
 from hashlib import sha256
+import json
 from uuid import UUID, uuid5
+
+from sqlalchemy import select, text
 
 from novel_factory.application.kernel import require
 
@@ -101,12 +104,14 @@ def _candidate_scope_id(ref):
     return str(uuid5(UUID(ref["artifact_revision_id"]), "dynamic-candidate-scope"))
 
 
-def protect_candidate(kernel, repo, task, world_ref, ref, assignment_ref, *, adaptive_ref=None):
+def protect_candidate(kernel, repo, task, world_ref, ref, assignment_ref, *, adaptive_ref=None, context_ref=None):
     """Preserve the validated output schema, registering its access scope in the same transaction."""
     scope = {"world_ref": world_ref, "task_id": task["task_id"], "generation": task["generation"]}
     payload = {"scope": scope, "candidate_ref": ref, "dynamic_assignment_ref": assignment_ref}
     if adaptive_ref is not None:
         payload["adaptive_instruction_ref"] = adaptive_ref
+    if context_ref is not None:
+        payload["creative_context_ref"] = context_ref
     marker = kernel._blob(payload)
     marker["artifact_revision_id"] = _candidate_scope_id(ref)
     kernel._register_artifact(repo, marker, task["work_id"], payload, "CREATIVE_DYNAMIC_CANDIDATE_SCOPE",
@@ -128,7 +133,67 @@ def audit_assignment(repo, work, artifact, ref):
     else:
         return None
     for name, expected_kind in (("dynamic_assignment_ref", "CREATIVE_DYNAMIC_FREEZE"),
-                                ("adaptive_instruction_ref", "CREATIVE_INSTRUCTION_SELECTION")):
+                                ("adaptive_instruction_ref", "CREATIVE_INSTRUCTION_SELECTION"),
+                                ("creative_context_ref", "CREATIVE_CONTEXT_SNAPSHOT")):
         if payload.get(name):
             return expected_kind, payload[name]
     return None
+
+def audit_branches(kernel, repo, work, artifact, ref):
+    """Return protected branches, None for static content, or () for an unbound legacy input."""
+    kind = artifact["kind"]
+    if kind != "AGENT_CANDIDATE" and not kind.startswith("AGENT_ROLE_TOOL_") and kind not in {
+        "AGENT_INPUT", "AGENT_PROMPT", "AGENT_RESPONSE", "AGENT_BLOCKED", "AGENT_CALL_EVIDENCE",
+    }:
+        return None
+    assignment = audit_assignment(repo, work, artifact, ref)
+    if assignment:
+        scope_kind, scope_ref = assignment
+        record = kernel.artifact(repo, scope_ref, work, kind=scope_kind)["payload"]
+        scope = record["packet"]["scope"] if scope_kind == "CREATIVE_CONTEXT_SNAPSHOT" else record["scope"]
+        return (scope["world_ref"]["branch_id"],)
+    if kind == "AGENT_INPUT":
+        if not artifact["payload"].get("creative_harness", {}).get("creative_harness", {}).get("enabled"):
+            return None
+        # A prepared input can outlive (or precede) its first task. New inputs have
+        # an origin in the same transaction as preparation. Older bound inputs
+        # retain their original TaskSpecs, including after cancellation or recovery.
+        branch = repo.conn.scalar(text("""
+            SELECT branch_id::text FROM nf_audit_events WHERE event_id=:id AND work_id=:work
+            AND evidence_id=:id AND event_type='artifact.agent_input'
+        """), {"id": ref["artifact_revision_id"], "work": work})
+        if branch:
+            return (branch,)
+        return tuple(repo.conn.scalars(text("""
+            SELECT DISTINCT i.spec->'world_ref'->>'branch_id'
+            FROM nf_task_inputs i JOIN nf_tasks t ON t.task_id=i.task_id
+            WHERE t.work_id=:work AND i.spec->'input_artifacts' @> CAST(:refs AS jsonb)
+        """), {"work": work, "refs": json.dumps([ref])}))
+
+    # Older responses, candidates and role-tool records have no scope field.
+    # Every gateway stage registered its audit event in the artifact transaction.
+    # Use the original generation, even when its task has since been reclaimed.
+    event = repo.conn.execute(text("""
+        SELECT c.context_bundle_id::text, e.branch_id::text
+        FROM nf_audit_events e JOIN nf_contexts c ON c.work_id=e.work_id
+             AND c.task_id=e.task_id AND c.generation=e.generation
+        WHERE e.event_id=:id AND e.evidence_id=:id AND e.work_id=:work AND e.event_type=:event
+    """), {"id": ref["artifact_revision_id"], "work": work,
+           "event": "model.completed" if kind == "AGENT_CALL_EVIDENCE" else "artifact." + kind.lower()})
+    from .creative_context_store import _revision
+
+    artifacts = repo.tables["artifacts"]
+    for context_id, branch in event:
+        exists = repo.conn.scalar(select(artifacts.c.artifact_revision_id).where(
+            artifacts.c.work_id == work, artifacts.c.kind == "CREATIVE_CONTEXT_SNAPSHOT",
+            artifacts.c.artifact_revision_id == _revision(context_id)))
+        if exists:
+            return (branch,)
+    return None
+
+
+def check_input_branch(kernel, repo, world_ref, artifact, ref):
+    """A new binding cannot establish provenance for a previously unbound legacy input."""
+    branches = audit_branches(kernel, repo, world_ref["work_id"], artifact, ref)
+    require(branches is None or branches == (world_ref["branch_id"],),
+            "VIEW_DENIED", "Agent input is unavailable on this branch")
