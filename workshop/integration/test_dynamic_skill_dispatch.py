@@ -226,7 +226,7 @@ def dynamic_site(dual_databases, tmp_path, monkeypatch, request):
             "content_sha": row["content_sha"],
         }
 
-    def delegate(slot_id, instance_ref=None, *, accept_summary=False, knowledge_cut=None, input_artifacts=()):
+    def delegate(slot_id, instance_ref=None, *, accept_summary=False, knowledge_cut=None, input_artifacts=(), story_time=None):
         frozen = tasks.define(
             owner,
             wr,
@@ -234,7 +234,7 @@ def dynamic_site(dual_databases, tmp_path, monkeypatch, request):
             task_kind=task_kind,
             knowledge_cut=knowledge_cut,
             input_artifacts=input_artifacts,
-            story_time=point(1),
+            story_time=story_time or point(1),
             subject_ids=[world["ids"]["sword"]],
             predicates=["owner"],
             assignment="辨清灯船的动作。",
@@ -307,7 +307,7 @@ def dynamic_site(dual_databases, tmp_path, monkeypatch, request):
                     "max_wait_ms": 0,
                 },
                 "knowledge_cut": frozen.cut,
-                "subject_time": {"kind": "POINT", "at": point(1)},
+                "subject_time": {"kind": "POINT", "at": frozen.spec["story_time"]},
                 "token_budget": 30000,
                 "idempotency_key": "compile-" + slot_id,
             },
@@ -550,7 +550,7 @@ def test_planning_controller_rejects_source_skill_revoked_after_proposal(dynamic
     planner = PlanningService(site.kernel)
     plan, anchor = make_plan(planner, site.world)
     selected = planner.adopt_plan(site.owner, site.wr, anchor, None, "initial-plan")
-    inputs = {"knowledge_cut": selected["knowledge_cut"],
+    inputs = {"story_time": point(1, 1), "knowledge_cut": selected["knowledge_cut"],
               "input_artifacts": [anchor, plan["volume_contract_ref"], selected["plan_manifest_ref"]]}
     source = site.delegate("source-plan", **inputs)
     instruction = "Compare the consequences of each available route."
