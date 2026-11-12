@@ -27,6 +27,8 @@ HTTP 请求经过 ASGI 接入、Bearer 凭据校验、每身份速率限制和�
 
 原 HTTPX 发生器在这些 runner 上对固定 2,104 字节响应的头发送率为 208–254 次/秒；单分片轻量发生器也接近 1,000 次/秒，因此不能把提速全部归于多进程。完整业务过载时，客户端调度延迟 P95 为 1.57 ms，但等可用连接的 P95 约 2.69 s，只有 3,162 项在计划的 5 秒内开始发头。服务端最终收到 5,000 项；认证拒绝 4,459 项、认证等待超时 356 项，业务拒绝 8 项、业务等待超时 84 项。池的两个进程峰值之和为 8。这组计数能够定位拒绝发生的阶段；它不能单独判定每一项等待由哪条 SQL 或 Python GIL 引起。各层的有效速率不能相减来推算单段服务时间。[逐层原始记录](../../reports/performance/p59_database/raw/http/verified-results.json)
 
+[十层资源和延迟明细](../../reports/performance/p59_database/LAYER_METRICS.md) 逐层列出身份数、样本、有效吞吐、P50/P95/P99、CPU、内存、数据库连接、锁等待采样和缺失的观测项；各层使用各自的计时边界。
+
 ## 业务、协议与数据库
 
 | 测量对象 | 负载、校验及观察 |
@@ -196,3 +198,9 @@ Linux 的独立双 PostgreSQL 集群和 Redis 运行，在协调器定稿源 `d9
 [源码与树 SHA 对照](../../reports/performance/p59_database/source-manifest.json) 将每个使用 GitHub runner 的试验映射到可检出的源码。相同树在本地与远端的提交身份可以不同。冻结基线作业另记录实际检出的被测提交，不能将其与承载 workflow 的提交混用。原始归档分别含时长、数据配置、程序输出及适用的平台/数据库版本。[运行登记](../../reports/performance/p59_database/archive-runs.json) · [原始文件](../../reports/performance/p59_database/raw/actions/) · [本机验证环境](../../reports/performance/p59_database/raw/validation/README.md)
 
 PR #33 在实验途中前进。以最新核验的 `877be80d7c1dfa8b6fb9c9c5a2a570c7b14d3ca0` 与候选定稿生成未发布的组合树 `cfaadaf9007fa129985f2d5c722c7ba40915e69e`，无冲突。相对上次 `293e6f4c`，上游新增的 9 个文件差异仅为文档与数据。组合树的产品源、迁移、实验与基准均与定稿一致。该树用真实 PG17.11 运行 62 项检查，59 通过，3 个 Windows 专有用例按平台跳过。覆盖上游已变动的 Provider 用例。候选、运行日志、否决记录和环境说明统一保存在一条实验分支，没有建立待合并的候选分支。[兼容性收据](../../reports/performance/p59_database/raw/compatibility.json) · [兼容性 JUnit](../../reports/performance/p59_database/raw/compatibility.xml)
+
+完整检出分支后，在仓库根目录可离线校验所有登记的原始 ZIP。该命令检查运行来源、清单与目录的一致性、每份 ZIP 的字节数与 SHA-256，并解压读取各成员验证 CRC。
+
+```bash
+python scripts/archive_database_experiment.py --verify-local
+```
