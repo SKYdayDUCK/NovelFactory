@@ -95,7 +95,7 @@ def author(z):
                 continue
             if key in {"work_id","branch_id","world_revision_id","principal_id","event_id","evidence_id","trace_id","span_id"}:
                 check(re.fullmatch(r"[a-f0-9-]{36}", str(value)), "unexpected trace identifier")
-            elif key == "event_time":
+            elif key in {"event_time","recorded_at"}:
                 check(re.fullmatch(r"[0-9T: .+Z-]+", str(value)), "unexpected trace time")
             else:
                 check(key == "event_type", "unexpected public trace field")
