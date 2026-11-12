@@ -71,7 +71,7 @@ def evaluate(root, experiment, scene, receipt=None):
     from novel_factory.application.joint_handoff import validate_item_gift
     from novel_factory.application.planning import PlanningService
     from novel_factory.application.scene_continuation import validate_slots, validate_volume_end
-    from novel_factory.contracts.registry import validate_contract
+    from novel_factory.contracts.registry import schema_for, validate_contract
     from novel_factory.domain.canonical import fingerprint
     from novel_factory.domain.errors import DomainError
     from novel_factory.infrastructure.model_gateway import OpenAICompatibleAdapter
@@ -106,16 +106,16 @@ def evaluate(root, experiment, scene, receipt=None):
         slots = scene_runtime._participants(scene["participants"])
         if not 3 <= len(slots) <= 5:
             errors.add("first_scene.participants")
-        if "allowed_item_gift" in scene:
+        if scene.get("allowed_item_gift") is not None:
             validate_item_gift(scene["allowed_item_gift"], slots)
         check("first_scene.subject_id", scene["subject_id"] in slots)
         limit = scene["scene_limit"]
         check("first_scene.scene_limit", type(limit) is int and 1 <= limit <= 32)
-        if "following_scenes" in scene:
+        if scene.get("following_scenes") is not None:
             validate_slots(scene["following_scenes"], limit)
-        if "volume_end" in scene:
+        if scene.get("volume_end") is not None:
             validate_volume_end(scene["volume_end"])
-            check("first_scene.final_window", "following_scenes" not in scene)
+            check("first_scene.final_window", scene.get("following_scenes") is None)
         deadline = scene.get("deadline_seconds", 3600)
         check("first_scene.deadline", type(deadline) is int and 1 <= deadline <= 86400)
         for name in ("volume_id", "budget_id", "destination_id"):
@@ -125,9 +125,20 @@ def evaluate(root, experiment, scene, receipt=None):
         scopes = scene["scope_ids"]
         check("first_scene.scope_ids", isinstance(scopes, list) and scopes and
               all(valid("UUID", scope) for scope in scopes))
-        locations = [scene["destination_id"], *scene.get("alternative_destination_ids", [])]
-        check("first_scene.locations", all(valid("UUID", item) for item in locations) and
-              len(set(locations)) == len(locations) and scene["subject_id"] not in locations)
+        alternatives = scene.get("alternative_destination_ids")
+        if alternatives is None:
+            alternatives = []
+        if isinstance(alternatives, list):
+            locations = [scene["destination_id"], *alternatives]
+            check("first_scene.locations", all(valid("UUID", item) for item in locations) and
+                  len(set(locations)) == len(locations) and scene["subject_id"] not in locations)
+        else:
+            errors.add("first_scene.locations")
+        check("first_scene.reserve_amount", valid("NonnegativeDecimal", scene["reserve_amount"]))
+        dispatch = schema_for("AgentDispatchRequest", "agent")["$defs"]["AgentDispatchRequest"]
+        token_limit = dispatch["properties"]["token_reservation"]["maximum"]
+        check("first_scene.token_reservation", positive_integer(scene["token_reservation"]) and
+              scene["token_reservation"] <= token_limit)
     except (DomainError, TypeError, KeyError, ValueError):
         errors.add("first_scene.register_scene_arguments")
 

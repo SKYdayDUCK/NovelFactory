@@ -1,0 +1,15 @@
+# A fictional character uses a task lease and an independently enrolled Workshop employee.
+# The two OpenSSH aliases and server-side forced commands are provisioned by the operator.
+[mcp_servers.novelfactory]
+command = "ssh"
+args = ["-T", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "ForwardAgent=no", "-o", "ClearAllForwardings=yes", "nf-role-service"]
+enabled_tools = ["nf_task_get", "nf_context_get", "nf_query_batch", "nf_artifact_put"]
+startup_timeout_sec = 30
+tool_timeout_sec = 30
+
+[mcp_servers.workshop]
+command = "ssh"
+args = ["-T", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "ForwardAgent=no", "-o", "ClearAllForwardings=yes", "aw-role-service"]
+enabled_tools = ["aw_capabilities", "aw_roster_get", "aw_mailbox_get", "aw_delivery_ack", "aw_message_body_get", "aw_message_body_put", "aw_message_send"]
+startup_timeout_sec = 30
+tool_timeout_sec = 30

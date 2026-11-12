@@ -188,6 +188,8 @@ class RuntimeUpgradeService:
                                         "history_epoch": branch["history_epoch"]})
             inherit_schedule_state(current, revision)
             repo.add("revisions", revision)
+            from .semantic_dependencies import record_change
+            record_change(repo, revision)
             repo.add_many("revision_events", [{**{k: row[k] for k in ("occurrence_id", "work_id", "branch_id", "event_version_id", "effect_group_id")},
                                                 "world_revision_id": revision["world_revision_id"]}
                                                for row in repo.many("revision_events", {"world_revision_id": wr["world_revision_id"]})])

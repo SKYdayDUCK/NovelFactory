@@ -1,0 +1,26 @@
+{
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "port": 46927,
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "tests/reliability/test_workflow.py",
+    "tests/reliability/test_tasks.py",
+    "tests/reliability/test_recovery.py",
+    "tests/integration/test_p5_workflow_migration.py",
+    "-q",
+    "--tb=short",
+    "--junitxml=../wf-final.xml"
+  ],
+  "started_at_utc": "2026-11-11T05:03:17.466896+00:00",
+  "authentication": "loopback_trust_generated_test_data_only",
+  "fsync": true,
+  "synchronous_commit": true,
+  "max_connections": 60,
+  "data_directory_reused": false,
+  "exit_status": 0,
+  "postgres_exit_status": 0,
+  "duration_seconds": 7.550098,
+  "finished_at_utc": "2026-11-11T05:03:25.017036+00:00"
+}

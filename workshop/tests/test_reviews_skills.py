@@ -1,3 +1,4 @@
+import asyncio
 import os
 from hashlib import sha256
 from uuid import uuid4
@@ -5,9 +6,11 @@ from uuid import uuid4
 import pytest
 from agent_workshop import reviews_skills as rs
 from agent_workshop.admin import enroll
-from agent_workshop.auth import Denied, Session, authenticate, connect
+from agent_workshop.auth import Denied, authenticate, connect
 from agent_workshop.organization import bootstrap
 from agent_workshop.provision import allow_slot
+from agent_workshop.reconcile import reconcile
+from agent_workshop.recovery import LEDGER_FIELDS, freeze, permit
 from agent_workshop.review_admin import review_slot, subject
 
 
@@ -17,7 +20,7 @@ def team():
     dsn = os.environ["AW_DATABASE_URL"]
     with connect(dsn) as conn:
         conn.execute("INSERT INTO aw_installations VALUES (%s,%s,true)", (install, str(uuid4())))
-        bootstrap(conn, org, "Research-Audit")
+        bootstrap(conn, org, "Research-Audit", installation_id=install)
         for person, group in (
             ("writer", "producer"),
             ("stats", "producer"),
@@ -41,8 +44,11 @@ def team():
             routine_eligible=True,
         )
 
+        members = conn.execute("SELECT employee_id FROM aw_employees WHERE org_id=%s", (org,)).fetchall()
+        sessions = {m["employee_id"]: authenticate(conn, enroll(conn, install, org, m["employee_id"], 1, 1)) for m in members}
+
     def identity(name):
-        return Session(org, name, 1, 1, install)
+        return sessions[name]
 
     return dsn, identity
 
@@ -53,7 +59,7 @@ def request(conn, identity, mode="PROSE", op="r", **kw):
     )
 
 
-@pytest.mark.parametrize("mode", rs.MODES)
+@pytest.mark.parametrize("mode", ["SCRIPT", "DIRECTION", "CHARACTER", "PROSE", "WORLD", "STABILITY", "STATISTICS"])
 def test_modes_and_deterministic_first(team, mode):
     dsn, idn = team
     with connect(dsn) as c:
@@ -217,33 +223,68 @@ def test_paid_review_cannot_spend_without_hold_or_ignore_unknown(team):
             rs.delegate(c, lead, "direct", "slot", "1", 100)
         r = rs.review_request(c, lead, **args)
         assert rs.review_request(c, lead, **args) == r
-        op = r["operation_id"]
-        c.execute(
-            "INSERT INTO aw_remote_receipts VALUES (%s,%s,%s,%s,0,'RUNNING','UNKNOWN')",
-            (org, op, uuid4(), uuid4()),
-        )
-        with pytest.raises(Denied, match="WAITING_NF"):
-            rs.decide(c, idn("reviewer"), "d", r["review_id"], "APPROVED", "VOICE", "source-A")
-        assert (
-            c.execute("SELECT status FROM aw_budget_holds WHERE operation_id=%s", (op,)).fetchone()[
-                "status"
-            ]
-            == "HELD"
-        )
-        c.execute(
-            "UPDATE aw_remote_receipts SET task_state='ACCEPTED',accounting_state='SETTLED' WHERE operation_id=%s",
-            (op,),
-        )
-        c.execute(
-            "UPDATE aw_budget_holds SET status='SETTLED',settled_amount=0.1 WHERE operation_id=%s",
-            (op,),
-        )
-        assert (
-            rs.decide(c, idn("reviewer"), "d", r["review_id"], "APPROVED", "VOICE", "source-A")[
-                "state"
-            ]
-            == "APPROVED"
-        )
+    op, review = r["operation_id"], r["review_id"]
+    task, receipt, attempt = (str(uuid4()) for _ in range(3))
+    reply = {}
+
+    async def peer(tool, request):
+        if tool == "nf_delegation_submit":
+            reply.update(
+                request, task_id=task, receipt_ref=receipt, task_state="ACCEPTED",
+                world_ref={"work_id": request["work_id"], "branch_id": request["branch_id"],
+                           "world_revision_id": str(uuid4())},
+                accounting_state="UNKNOWN", actual_amount="0", actual_tokens=0,
+                attempts=[{"attempt_id": attempt, "state": "UNKNOWN",
+                           "actual_amount": None, "actual_tokens": None}],
+                attempt_ids=[attempt],
+            )
+        else:
+            assert tool == "nf_delegation_get" and request["operation_id"] == op
+        return reply
+
+    def tick(call):
+        with connect(dsn) as c:
+            c.execute("UPDATE aw_delegations SET next_check=now() WHERE operation_id=%s", (op,))
+        return asyncio.run(reconcile(dsn, session.installation_id, org, op, call))
+
+    def decide():
+        with connect(dsn) as c:
+            return rs.decide(c, idn("reviewer"), "d", review, "APPROVED", "VOICE", "source-A")
+
+    assert tick(peer) == "BOUND"
+    with pytest.raises(Denied, match="WAITING_NF_RECONCILIATION"):
+        decide()
+    with connect(dsn) as c:
+        assert c.execute(
+            "SELECT status FROM aw_budget_holds WHERE operation_id=%s", (op,)
+        ).fetchone()["status"] == "HELD"
+    reply.update(
+        accounting_state="SETTLED", actual_amount="0.10", actual_tokens=7,
+        attempts=[{"attempt_id": attempt, "state": "SUCCEEDED",
+                   "actual_amount": "0.10", "actual_tokens": 7}],
+    )
+    assert tick(peer) == "SETTLED"
+    with connect(dsn) as c:
+        freeze(c, session.installation_id)
+
+    async def missing(tool, request):
+        assert tool == "nf_delegation_get" and request["operation_id"] == op
+        raise Denied("DELEGATION_NOT_FOUND")
+
+    assert tick(missing) == "WAITING_OPERATOR"
+    with connect(dsn) as c:
+        old = c.execute(
+            """SELECT h.status,r.task_state,r.accounting_state FROM aw_remote_receipts r
+            JOIN aw_budget_holds h USING(org_id,operation_id) WHERE operation_id=%s""", (op,),
+        ).fetchone()
+        assert old == {"status": "SETTLED", "task_state": "ACCEPTED", "accounting_state": "SETTLED"}
+    with pytest.raises(Denied, match="WAITING_NF_RECONCILIATION"):
+        decide()
+    assert tick(peer) == "SETTLED"
+    with connect(dsn) as c:
+        permit(c, session.installation_id, {op: {key: reply[key] for key in LEDGER_FIELDS}})
+    assert decide()["state"] == "APPROVED"
+
 
 
 def test_review_get_reassignment_and_offline_expiry(team):
@@ -269,6 +310,7 @@ def test_review_get_reassignment_and_offline_expiry(team):
             supervisor_id="review-lead",
             team_id="audit",
         )
+        relief = authenticate(c, enroll(c, lead.installation_id, lead.org_id, "relief", 1, 1))
         subject(c, lead.org_id, "relief", "second-independent")
         TOOLS["aw_suspend"][2](
             c, idn("manager"), expected_revision=2, operation_id="s", employee_id="reviewer"
@@ -278,8 +320,8 @@ def test_review_get_reassignment_and_offline_expiry(team):
         assert rs.reconcile_review(c, lead, "ok", review, "relief")["reviewer_id"] == "relief"
         with pytest.raises(Denied, match="STALE_EMPLOYMENT"):
             rs.get_review(c, idn("reviewer"), review)
-        assert rs.get_review(c, idn("relief"), review)["artifact_ref"] == "text"
-        rs.decide(c, idn("relief"), "decide", review, "APPROVED", "VOICE", "source-A")
+        assert rs.get_review(c, relief, review)["artifact_ref"] == "text"
+        rs.decide(c, relief, "decide", review, "APPROVED", "VOICE", "source-A")
         assert (
             c.execute(
                 "SELECT count(*) AS n FROM aw_review_evidence WHERE review_id=%s", (review,)

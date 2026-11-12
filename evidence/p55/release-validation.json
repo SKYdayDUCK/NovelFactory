@@ -1,0 +1,36 @@
+{
+  "tests": 762,
+  "errors": 0,
+  "failures": 0,
+  "skipped": 0,
+  "pytest_seconds": 467.39,
+  "junit_seconds": 467.383,
+  "input_files": 460,
+  "input_manifest_sha256": "80d586e060cb0d318d1bbee5df0a34c4100005bdff155195c9be29e86edba5ef",
+  "manifest_format": "sha256 of JSON serialized with Python json.dumps(path_to_sha256, sort_keys=True), no trailing newline",
+  "input_paths": [
+    ".github/",
+    "benchmarks/",
+    "configs/",
+    "contracts/",
+    "experiments/",
+    "migrations/",
+    "runtime/",
+    "scripts/",
+    "src/",
+    "tests/",
+    "alembic.ini",
+    "pyproject.toml",
+    "requirements.lock",
+    "uv.lock"
+  ],
+  "postgres": "17.11",
+  "redis": "8.0.2",
+  "python": "3.12.14",
+  "warnings": [
+    "Starlette TestClient reports deprecation of its current httpx integration."
+  ],
+  "original_standalone_tests": 35,
+  "design_validator": "PASS",
+  "junit": "release-suite.xml"
+}

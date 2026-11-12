@@ -1,0 +1,116 @@
+{
+  "method": "one precommitted burst at each size; sequential relay/drain phases; warm processes",
+  "postgres": "17.11 (Debian 17.11-0+deb13u1)",
+  "redis": "8.0.2",
+  "workers_per_phase": 4,
+  "per_worker_pg_pool": 1,
+  "redis_batch": 32,
+  "traffic": "synthetic audit.recorded reference + one SQL witness",
+  "world_accepts": 0,
+  "model_calls": 0,
+  "capacity_gate": "NOT_MET (existing Agent workload, not evaluated here)",
+  "results": [
+    {
+      "initial_committed_events": 200,
+      "relay": {
+        "phase_seconds": 0.07964,
+        "observed_entries": 200,
+        "entries_per_s": 2511.16,
+        "per_process_entries": [
+          32,
+          64,
+          64,
+          40
+        ],
+        "redis_cpu_ms": 2.528
+      },
+      "consumer": {
+        "phase_seconds": 0.12802,
+        "observed_entries": 200,
+        "entries_per_s": 1562.21,
+        "per_process_entries": [
+          64,
+          32,
+          40,
+          64
+        ],
+        "redis_cpu_ms": 7.318
+      },
+      "peak_group_lag": 200,
+      "end_pending": 0,
+      "end_lag": 0,
+      "distinct_sql_effects": 200,
+      "duplicate_effects": 0,
+      "batch_to_effect_p95_ms": 204.17,
+      "batch_to_effect_p99_ms": 209.494
+    },
+    {
+      "initial_committed_events": 500,
+      "relay": {
+        "phase_seconds": 0.12084,
+        "observed_entries": 500,
+        "entries_per_s": 4137.8,
+        "per_process_entries": [
+          160,
+          116,
+          96,
+          128
+        ],
+        "redis_cpu_ms": 2.745
+      },
+      "consumer": {
+        "phase_seconds": 0.30154,
+        "observed_entries": 500,
+        "entries_per_s": 1658.17,
+        "per_process_entries": [
+          116,
+          128,
+          128,
+          128
+        ],
+        "redis_cpu_ms": 18.909
+      },
+      "peak_group_lag": 500,
+      "end_pending": 0,
+      "end_lag": 0,
+      "distinct_sql_effects": 500,
+      "duplicate_effects": 0,
+      "batch_to_effect_p95_ms": 406.03,
+      "batch_to_effect_p99_ms": 420.158
+    },
+    {
+      "initial_committed_events": 1000,
+      "relay": {
+        "phase_seconds": 0.25726,
+        "observed_entries": 1000,
+        "entries_per_s": 3887.18,
+        "per_process_entries": [
+          256,
+          224,
+          256,
+          264
+        ],
+        "redis_cpu_ms": 4.974
+      },
+      "consumer": {
+        "phase_seconds": 0.4749,
+        "observed_entries": 1000,
+        "entries_per_s": 2105.69,
+        "per_process_entries": [
+          224,
+          256,
+          256,
+          264
+        ],
+        "redis_cpu_ms": 34.959
+      },
+      "peak_group_lag": 1000,
+      "end_pending": 0,
+      "end_lag": 0,
+      "distinct_sql_effects": 1000,
+      "duplicate_effects": 0,
+      "batch_to_effect_p95_ms": 698.052,
+      "batch_to_effect_p99_ms": 722.929
+    }
+  ]
+}

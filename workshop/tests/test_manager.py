@@ -15,8 +15,8 @@ def test_manager_restart_cut_and_idle():
     dsn = os.environ["AW_DATABASE_URL"]
     org, install = uuid4().hex, uuid4().hex
     with connect(dsn) as conn:
-        bootstrap(conn, org)
         conn.execute("INSERT INTO aw_installations VALUES (%s,'nf-test',true)", (install,))
+        bootstrap(conn, org, installation_id=install)
         manager = authenticate(conn, enroll(conn, install, org, "manager", 1, 1))
         actor = authenticate(conn, enroll(conn, install, org, "actor-1", 1, 1))
         first = history(conn, manager, limit=1)
@@ -65,10 +65,20 @@ def test_installation_isolates_progress_history_and_idempotency():
         nf_instance = c.execute(
             "SELECT nf_instance_id FROM aw_installations WHERE installation_id=%s", (original,)
         ).fetchone()["nf_instance_id"]
-        other = str(uuid4())
+        other, other_org = str(uuid4()), str(uuid4())
         c.execute("INSERT INTO aw_installations VALUES (%s,%s,true)", (other, nf_instance))
+        # An installation can negotiate before the directory exists. Its old token
+        # cannot become a member when a different installation provisions the org.
+        handshake = enroll(c, original, other_org, "manager", 1, 1)
+        bootstrap(c, other_org, installation_id=other)
+        c.execute("INSERT INTO aw_budget_accounts VALUES (%s,1,'USD')", (other_org,))
+        with pytest.raises(Denied, match="VIEW_DENIED"):
+            request_resume(c, authenticate(c, handshake), "same-author-request")
+        for installation, directory in ((other, org), (original, other_org)):
+            with pytest.raises(Denied, match="ORGANIZATION_UNAVAILABLE"):
+                enroll(c, installation, directory, "manager", 1, 1)
         local = authenticate(c, enroll(c, original, org, "manager", 1, 1))
-        foreign = authenticate(c, enroll(c, other, org, "manager", 1, 1))
+        foreign = authenticate(c, enroll(c, other, other_org, "manager", 1, 1))
         local_resume = request_resume(c, local, "same-author-request")
         other_resume = request_resume(c, foreign, "same-author-request")
         assert local_resume["request_id"] != other_resume["request_id"]
@@ -84,14 +94,13 @@ def test_installation_isolates_progress_history_and_idempotency():
         )
         assert other_resume["request_id"] in {e["ref_id"] for e in foreign_events}
         assert state(c, foreign)["delegations"] == {}
-        other_volume = authenticate(c, enroll(c, other, org, "volume", 1, 1))
+        other_volume = authenticate(c, enroll(c, other, other_org, "volume", 1, 1))
         with pytest.raises(Denied, match="VIEW_DENIED"):
             delegate(c, other_volume, "request-A", "scene-A", "1", 200)
         policy = c.execute(
             "SELECT config FROM aw_delegation_slots WHERE org_id=%s AND slot_id='scene-A'", (org,)
         ).fetchone()["config"]
-        c.execute("UPDATE aw_budget_accounts SET limit_amount=2 WHERE org_id=%s", (org,))
-        allow_slot(c, org, other, "other-slot", "actor-1", policy)
+        allow_slot(c, other_org, other, "other-slot", "actor-1", policy)
         second = delegate(c, other_volume, "request-A", "other-slot", "1", 200)
         assert second["operation_id"] != op
         assert delegate(c, other_volume, "request-A", "other-slot", "1", 200) == second

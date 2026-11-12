@@ -1,12 +1,13 @@
 """PostgreSQL organization authority. All handlers run within the caller's transaction."""
 
+from hashlib import sha256
 import json
 import re
-from hashlib import sha256
 
 from psycopg.types.json import Jsonb
 
 from .auth import Denied
+from .roster_projection import project_employees
 
 IDENTIFIER = {"type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,96}$"}
 POSITIVE = {"type": "integer", "minimum": 1}
@@ -130,7 +131,9 @@ def employee(conn, org_id, employee_id):
 
 def require_employee(conn, session):
     # Writers hold this lock exclusively through commit, including tenure and route changes.
-    lock_org(conn, session.org_id)
+    org = lock_org(conn, session.org_id)
+    if not session.org_member or org["owner_installation_id"] != session.installation_id:
+        raise Denied("VIEW_DENIED")
     row = employee(conn, session.org_id, session.employee_id)
     if (
         not row
@@ -141,12 +144,14 @@ def require_employee(conn, session):
     return row
 
 
-def _insert_employee(conn, org, revision, emp, role, supervisor, team, scope):
+def _insert_employee(conn, org, revision, emp, role, supervisor, team, scope, *,
+                     display_name=None, slot_id=None):
     conn.execute(
         """INSERT INTO aw_employees
-        (org_id,employee_id,employment_revision,role_id,supervisor_id,team_id,scope_ref,status)
-        VALUES (%s,%s,1,%s,%s,%s,%s,'ACTIVE')""",
-        (org, emp, role, supervisor, team, scope),
+        (org_id,employee_id,employment_revision,role_id,supervisor_id,team_id,scope_ref,status,
+         display_name,slot_id)
+        VALUES (%s,%s,1,%s,%s,%s,%s,'ACTIVE',%s,%s)""",
+        (org, emp, role, supervisor, team, scope, display_name or emp, slot_id or emp),
     )
     _snapshot(conn, org, revision, emp)
 
@@ -154,7 +159,10 @@ def _insert_employee(conn, org, revision, emp, role, supervisor, team, scope):
 def _snapshot(conn, org, revision, emp):
     conn.execute(
         """INSERT INTO aw_employment_versions
-        SELECT org_id,employee_id,employment_revision,%s,role_id,team_id,supervisor_id,scope_ref,status
+        (org_id,employee_id,employment_revision,org_revision,role_id,team_id,supervisor_id,
+         scope_ref,status,display_name,slot_id)
+        SELECT org_id,employee_id,employment_revision,%s,role_id,team_id,supervisor_id,
+               scope_ref,status,display_name,slot_id
         FROM aw_employees WHERE org_id=%s AND employee_id=%s""",
         (revision, org, emp),
     )
@@ -195,20 +203,48 @@ def _graph(conn, org, revision):
         cur.executemany("INSERT INTO aw_edges VALUES (%s,%s,%s,%s,%s,%s)", sorted(edges))
 
 
-def bootstrap(conn, org_id, preset="Minimal", manager_id="manager", scope_ref="organization"):
+def provisioning_installation(conn, installation_id):
+    if installation_id is None:
+        rows = conn.execute(
+            "SELECT installation_id FROM aw_installations WHERE enabled ORDER BY installation_id LIMIT 2 FOR SHARE"
+        ).fetchall()
+        if len(rows) != 1:
+            raise Denied("INSTALLATION_REQUIRED")
+        return rows[0]["installation_id"]
+    if not conn.execute(
+        "SELECT installation_id FROM aw_installations WHERE installation_id=%s AND enabled FOR SHARE",
+        (installation_id,),
+    ).fetchone():
+        raise Denied("INSTALLATION_UNAVAILABLE")
+    return installation_id
+
+
+def claim_organization(conn, org_id, installation_id):
+    """A trusted operator assigns ownership to a pre-upgrade directory after verifying it."""
+    owner = provisioning_installation(conn, installation_id)
+    org = lock_org(conn, org_id, write=True)
+    if org["owner_installation_id"] not in (None, owner):
+        raise Denied("ORGANIZATION_UNAVAILABLE")
+    conn.execute("UPDATE aw_organizations SET owner_installation_id=%s WHERE org_id=%s", (owner, org_id))
+
+
+def bootstrap(conn, org_id, preset="Minimal", manager_id="manager", scope_ref="organization", *, installation_id=None):
     """Installation-admin CLI operation. Repeated provisioning must match the original preset."""
     for key in (org_id, manager_id, scope_ref):
         _id(key)
+    owner = provisioning_installation(conn, installation_id)
     slots = _preset(preset, manager_id)
     digest = fingerprint(
         [preset, slots, NF_ROLES, sorted((list(k), v) for k, v in DOWN.items()), UP]
     )
     new = conn.execute(
-        """INSERT INTO aw_organizations VALUES (%s,1,%s,%s,%s)
-        ON CONFLICT DO NOTHING RETURNING org_id""",
-        (org_id, preset, digest, scope_ref),
+        """INSERT INTO aw_organizations (org_id,active_revision,preset,preset_sha,scope_ref,owner_installation_id)
+        VALUES (%s,1,%s,%s,%s,%s) ON CONFLICT DO NOTHING RETURNING org_id""",
+        (org_id, preset, digest, scope_ref, owner),
     ).fetchone()
     org = lock_org(conn, org_id, write=True)
+    if org["owner_installation_id"] != owner:
+        raise Denied("ORGANIZATION_UNAVAILABLE")
     if not new:
         initial = conn.execute(
             "SELECT preset_sha FROM aw_org_revisions WHERE org_id=%s AND revision=1", (org_id,)
@@ -301,16 +337,28 @@ def _change(conn, session, action, expected_revision, operation_id, employee_id,
                 if ancestor["supervisor_id"]
                 else None
             )
+        slot_id = _id(fields.get("slot_id", row["slot_id"] if row else employee_id))
+        display_name = fields.get("display_name", row["display_name"] if row else employee_id)
+        if (not isinstance(display_name, str) or not 1 <= len(display_name) <= 128
+                or not display_name.strip() or not display_name.isprintable()):
+            raise Denied("INVALID_DISPLAY_NAME")
+        if conn.execute(
+            """SELECT 1 FROM aw_employees WHERE org_id=%s AND slot_id=%s
+               AND status='ACTIVE' AND employee_id<>%s""",
+            (org_id, slot_id, employee_id),
+        ).fetchone():
+            raise Denied("SLOT_OCCUPIED")
         if action == "HIRE":
             _insert_employee(
-                conn, org_id, newrev, employee_id, role, sup_id, team, org["scope_ref"]
+                conn, org_id, newrev, employee_id, role, sup_id, team, org["scope_ref"],
+                display_name=display_name, slot_id=slot_id,
             )
         else:
             conn.execute(
                 """UPDATE aw_employees SET employment_revision=employment_revision+1,
-                role_id=%s,supervisor_id=%s,team_id=%s,status='ACTIVE'
+                role_id=%s,supervisor_id=%s,team_id=%s,status='ACTIVE',display_name=%s,slot_id=%s
                 WHERE org_id=%s AND employee_id=%s""",
-                (role, sup_id, team, org_id, employee_id),
+                (role, sup_id, team, display_name, slot_id, org_id, employee_id),
             )
     else:
         if (action == "SUSPEND" and row["status"] != "ACTIVE") or conn.execute(
@@ -350,12 +398,14 @@ def roster(conn, session):
     org = lock_org(conn, session.org_id)
     whole = viewer["role_id"] in ("workshop_manager", "author")
     visible = conn.execute(
-        """SELECT employee_id,role_id,team_id,supervisor_id,employment_revision,status
-        FROM aw_roster_views WHERE org_id=%s AND revision=%s AND audience=%s ORDER BY employee_id""",
+        """SELECT v.employee_id,v.role_id,v.team_id,v.supervisor_id,v.employment_revision,
+                  v.status,e.display_name
+           FROM aw_roster_views v JOIN aw_employees e USING (org_id,employee_id)
+           WHERE v.org_id=%s AND v.revision=%s AND v.audience=%s ORDER BY v.employee_id""",
         (session.org_id, org["active_revision"], session.employee_id),
     ).fetchall()
     routes = conn.execute(
-        """SELECT src,dst,kind,scope_ref FROM aw_edges WHERE org_id=%s AND graph_revision=%s
+        """SELECT src,dst,kind,scope_ref FROM aw_current_message_edges WHERE org_id=%s AND graph_revision=%s
         AND (%s OR src=%s OR dst=%s) ORDER BY src,dst,kind,scope_ref""",
         (session.org_id, org["active_revision"], whole, session.employee_id, session.employee_id),
     ).fetchall()
@@ -363,14 +413,17 @@ def roster(conn, session):
         "org_id": session.org_id,
         "revision": org["active_revision"],
         "preset": org["preset"],
-        "employees": visible,
+        "employees": project_employees(visible, viewer, routes, NF_ROLES[viewer["role_id"]]),
         "routes": routes,
     }
 
 
 def state(conn, session):
     view = roster(conn, session)
-    return {k: v for k, v in view.items() if k != "routes"}
+    view.pop("routes")
+    for member in view["employees"]:
+        member.pop("allowed_routes", None)
+    return view
 
 
 def _handler(action):
@@ -396,7 +449,11 @@ TOOLS = {
     **{
         "aw_" + action.lower(): (
             f"{action.title()} an employee using organization revision CAS.",
-            schema(CHANGE | (ROLE if action in ("HIRE", "TRANSFER") else {})),
+            schema(
+                CHANGE | ROLE | {"slot_id": IDENTIFIER, "display_name":
+                                {"type": "string", "minLength": 1, "maxLength": 128}},
+                required=[*CHANGE, *ROLE],
+            ) if action in ("HIRE", "TRANSFER") else schema(CHANGE),
             _handler(action),
         )
         for action in ("HIRE", "TRANSFER", "SUSPEND", "END")

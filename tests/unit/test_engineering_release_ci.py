@@ -10,35 +10,36 @@ from scripts.engineering_release_ci import WORKFLOWS, both_workflows_passed, nf_
 
 
 class SourceTests(unittest.TestCase):
-    def test_only_integrated_source_at_event_sha_can_qualify_on_main(self):
+    def test_verify_integrated_event_tree_for_main_and_pr(self):
         with TemporaryDirectory() as tmp:
             root = Path(tmp)
-            subprocess.run(["git", "init", "-q", str(root)], check=True)
-            subprocess.run(["git", "-C", tmp, "-c", "user.name=fixture", "-c", "user.email=fixture@example.invalid",
-                            "commit", "-q", "--allow-empty", "-m", "fixture"], check=True)
-            sha = subprocess.check_output(["git", "-C", tmp, "rev-parse", "HEAD"], text=True).strip()
-            for entry in ("scripts/p6_budget.py", "src/novel_factory/interfaces/delegation_stdio.py"):
-                peer = root / "nf-peer"
-                (peer / entry).parent.mkdir(parents=True)
-                (peer / entry).touch()
-                self.assertEqual(nf_source(root, entry, "pull_request", "refs/pull/16/merge", sha), peer)
-                for event in ("push", "workflow_dispatch"):
-                    with self.assertRaisesRegex(ValueError, "absent on main"):
-                        nf_source(root, entry, event, "refs/heads/main", sha)
-                (root / entry).parent.mkdir(parents=True)
-                (root / entry).touch()
-                with self.assertRaisesRegex(ValueError, "differs from the event commit"):
-                    nf_source(root, entry, "push", "refs/heads/main", sha)
-                subprocess.run(["git", "-C", tmp, "add", "--", entry], check=True)
-                subprocess.run(["git", "-C", tmp, "-c", "user.name=fixture", "-c", "user.email=fixture@example.invalid",
-                                "commit", "-q", "-m", "integrated entry"], check=True)
-                sha = subprocess.check_output(["git", "-C", tmp, "rev-parse", "HEAD"], text=True).strip()
-                self.assertEqual(nf_source(root, entry, "push", "refs/heads/main", sha), root)
-                (root / entry).write_text("local replacement")
-                with self.assertRaisesRegex(ValueError, "differs from the event commit"):
-                    nf_source(root, entry, "push", "refs/heads/main", sha)
-                with self.assertRaisesRegex(ValueError, "event SHA"):
-                    nf_source(root, entry, "push", "refs/heads/main", "0" * 40)
+            git = ["git", "-C", tmp]
+            subprocess.run([*git, "init", "-q"], check=True)
+            commit = [*git, "-c", "user.name=fixture", "-c", "user.email=fixture@example.invalid",
+                      "commit", "-q", "-m", "fixture"]
+            entry = "scripts/p6_budget.py"
+            source = root / entry
+            source.parent.mkdir()
+            source.write_text("frozen")
+            subprocess.run([*git, "add", "--", entry], check=True)
+            subprocess.run(commit, check=True)
+            sha = subprocess.check_output([*git, "rev-parse", "HEAD"], text=True).strip()
+            peer = root / "nf-peer" / entry
+            peer.parent.mkdir(parents=True)
+            peer.write_text("previous release")
+            for event, ref in (("push", "refs/heads/main"), ("pull_request", "refs/pull/16/merge"),
+                               ("workflow_dispatch", "refs/heads/main")):
+                with self.subTest(event=event):
+                    self.assertEqual(nf_source(root, entry, event, ref, sha), root)
+                    with self.assertRaisesRegex(ValueError, "event SHA"):
+                        nf_source(root, entry, event, ref, "0" * 40)
+                    source.write_text("uncommitted")
+                    with self.assertRaisesRegex(ValueError, "differs from the event commit"):
+                        nf_source(root, entry, event, ref, sha)
+                    source.unlink()
+                    with self.assertRaisesRegex(ValueError, "absent"):
+                        nf_source(root, entry, event, ref, sha)
+                    source.write_text("frozen")
 
 
 class GateTests(unittest.TestCase):

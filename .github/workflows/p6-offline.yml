@@ -7,14 +7,25 @@ on:
       - 'tests/unit/test_engineering_release_ci.py'
       - 'scripts/P6_*'
       - 'scripts/p6_budget.py'
+      - 'scripts/p6_export_release.py'
+      - 'tests/integration/test_p6_export_release.py'
       - 'src/novel_factory/application/budget_limits.py'
-      - 'reports/handoff/ENGINEERING_RELEASE.json'
+      - 'scripts/pitr_drill.py'
+      - 'scripts/ci_install_pg17.sh'
+      - 'reports/handoff/P6*'
       - '.github/workflows/p6-offline.yml'
+      - 'reports/handoff/ENGINEERING_RELEASE.json'
   pull_request:
     paths:
       - 'scripts/engineering_release_ci.py'
       - 'tests/unit/test_engineering_release_ci.py'
       - 'scripts/P6_*'
+      - 'scripts/p6_budget.py'
+      - 'scripts/p6_export_release.py'
+      - 'tests/integration/test_p6_export_release.py'
+      - 'src/novel_factory/application/budget_limits.py'
+      - 'scripts/pitr_drill.py'
+      - 'scripts/ci_install_pg17.sh'
       - 'reports/handoff/P6*'
       - '.github/workflows/p6-offline.yml'
   workflow_dispatch:
@@ -27,39 +38,45 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - uses: actions/checkout@v4
-        if: github.event_name == 'pull_request' || github.ref != 'refs/heads/main'
-        with:
-          ref: 43dc369ab73e2faacb509b6ca16995848fc92c28
-          path: nf-peer
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
-      - name: Select the integrated NF source or the pinned peer
+      - name: Verify the integrated source at the workflow checkout
         run: |
-          source_dir=$(python scripts/engineering_release_ci.py scripts/p6_budget.py)
-          git -C "$source_dir" rev-parse HEAD
-          echo "NF_SOURCE=$source_dir" >> "$GITHUB_ENV"
-      - name: Install locked NF and verify preflight with synthetic local input
+          python scripts/engineering_release_ci.py scripts/p6_budget.py
+          mkdir -p "$RUNNER_TEMP/p6-offline"
+          git rev-parse HEAD > "$RUNNER_TEMP/p6-offline/checkout.txt"
+      - name: Verify offline preflight and engineering release checks
+        shell: bash
         run: |
-          uv sync --project "$NF_SOURCE" --locked
-          "$NF_SOURCE/.venv/bin/python" scripts/P6_preflight_smoke.py --nf-checkout "$NF_SOURCE"
+          uv sync --locked --group dev
+          .venv/bin/python -m pytest -q tests/unit/test_engineering_release_ci.py --junitxml="$RUNNER_TEMP/p6-offline/release-checks.xml"
+          .venv/bin/python scripts/P6_preflight_smoke.py --nf-checkout "$GITHUB_WORKSPACE" | tee "$RUNNER_TEMP/p6-offline/preflight.log"
+      - name: Verify the unconfigured author templates without credentials
+        shell: bash
+        run: |
+          status=0
+          env -i PATH="$PATH" HOME="$RUNNER_TEMP" .venv/bin/python scripts/P6_preflight.py \
+            --nf-checkout "$GITHUB_WORKSPACE" \
+            --experiment reports/handoff/P6_experiment.example.json \
+            --scene-file reports/handoff/P6_scene.example.json \
+            --output "$RUNNER_TEMP/p6-offline/preflight-unconfigured.json" || status=$?
+          test "$status" -eq 2
+          python - "$RUNNER_TEMP/p6-offline/preflight-unconfigured.json" <<'PY'
+          import json, os, sys
+          from pathlib import Path
+          receipt = json.loads(Path(sys.argv[1]).read_text())
+          assert receipt["nf_source_sha"] == os.environ["GITHUB_SHA"]
+          assert receipt["local_input_checks"] == "BLOCKED_ENVIRONMENT" and receipt["missing_or_inconsistent"]
+          assert receipt["scenes_dispatched"] == receipt["db_connections_opened"] == 0
+          assert receipt["production_model_requests_sent"] == receipt["http_provider_requests_sent"] == 0
+          assert receipt["actual_cost"] is None and receipt["literary_acceptance"] == "NOT_EVALUATED"
+          PY
       - name: Install physical PostgreSQL 17 restore tools
         run: |
-          set -euo pipefail
-          if ! test -x /usr/lib/postgresql/17/bin/pg_verifybackup || ! test -x /usr/lib/postgresql/17/bin/postgres; then
-            if test -f /etc/apt/apt-mirrors.txt; then
-              printf '%s\n' 'https://mirrors.edge.kernel.org/ubuntu/' 'https://archive.ubuntu.com/ubuntu/' | sudo tee /etc/apt/apt-mirrors.txt >/dev/null
-            fi
-            sudo install -d -m 0755 /usr/share/postgresql-common/pgdg
-            curl --fail --silent --show-error --retry 3 https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo tee /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc >/dev/null
-            echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
-            sudo apt-get -o Acquire::Retries=3 update -qq
-            sudo apt-get -o Acquire::Retries=3 install -y postgresql-17 postgresql-client-17
-          fi
+          bash scripts/ci_install_pg17.sh postgresql-17 postgresql-client-17
           /usr/lib/postgresql/17/bin/pg_verifybackup --version
       - uses: actions/checkout@v4
         with:
@@ -80,13 +97,16 @@ jobs:
           echo "$PWD/.ci-redis8/src" >> "$GITHUB_PATH"
       - name: Restore the shared token budget and its original UNKNOWN attempt
         run: |
-          cd "$NF_SOURCE"
-          git apply --check "$GITHUB_WORKSPACE/evidence/p6/shared-token-pitr/drill.patch"
-          git apply "$GITHUB_WORKSPACE/evidence/p6/shared-token-pitr/drill.patch"
-          .venv/bin/python scripts/pitr_drill.py --output "$RUNNER_TEMP/p6-budget-drill" --with-redis
+          .venv/bin/python scripts/pitr_drill.py --output "$RUNNER_TEMP/p6-budget-drill" --with-redis --shared-token-budget
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: p6-shared-token-recovery
           path: ${{ runner.temp }}/p6-budget-drill/result.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p6-offline-checks
+          path: ${{ runner.temp }}/p6-offline
           if-no-files-found: error

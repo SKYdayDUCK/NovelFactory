@@ -1,0 +1,77 @@
+{
+  "stage": "B",
+  "status": "BLOCKED",
+  "source_sha": "b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5",
+  "tree": "057a3de8d6c3c28df016446ee7aa2b9acf05ceec",
+  "pr": 6,
+  "base": "main",
+  "actions_checkout_sha": "01876116289defc1f6a3b6f20ae563732c3d8a12",
+  "immutable_evidence": "evidence/p55/s9-local/final-b3b0e9b/verification.json",
+  "pytest_recovered": {
+    "passed": 802
+  },
+  "open_capacity_jobs": [
+    130535530269,
+    130535529772,
+    130535530103,
+    130535530409,
+    130535530542
+  ],
+  "next": "Check the new merged head CI and unchanged capacity gates before advancing stage B.",
+  "latest_fix": {
+    "parent": "d423007bd55d78952ad846729e735845f7f24284",
+    "paths": [
+      "src/novel_factory/application/queries.py",
+      "tests/queries/test_query_delivery.py"
+    ],
+    "before": "two new SQL-count assertions failed on predecessor code; two existing fence cases passed",
+    "after": {
+      "command": "python -m pytest tests/queries tests/integration/test_s9_query_coverage.py -q",
+      "passed": 33,
+      "junit": "evidence/p55/s9-local/query-sampling-junit.xml"
+    },
+    "new_sha_ci": "see PR #6 Actions for the tested head; pending at commit",
+    "capacity_status": "NOT_MET at previous source, not yet measured for fix"
+  },
+  "base_integration": {
+    "main": "a8f37b72286163e9117f8874a0e175c61204ff8b",
+    "p55": "bf0541a4ea2a07974c7230780e8202e07644cea9",
+    "method": "two-parent merge with unchanged histories",
+    "postgres17_tests": 12,
+    "junit": "evidence/p55/s9-local/main-integrated-junit.xml"
+  },
+  "projection_integrity_fix": {
+    "parent": "9630d95fa5c11b9327f223b8316d7c277e9d20f2",
+    "prior_capacity": "NOT_MET",
+    "corruption_regressions": [
+      "changed stored digest",
+      "changed live snapshot preserving the recorded digest"
+    ],
+    "method": "Fresh exact PG snapshot text and recorded digest for each read. Reuse successful canonical validation only for identical pairs within a bounded single-entry witness. Fresh decoded result per caller. Verify schedule provenance every time.",
+    "junit": "evidence/p55/s9-local/projection-witness/junit.xml",
+    "paired_sql": "evidence/p55/s9-local/projection-witness/pair.json",
+    "prior_remote_soak": "evidence/p55/s9-local/projection-witness/previous-soak.json",
+    "release": "PITR at previous source hit runner apt DNS before checkout tests ran. Re-run in progress. Await exact candidate CI and independent review."
+  },
+  "runner_and_repository_compatibility": {
+    "parent": "e2f0fabadcf673984fddacc9bd7a924d6588b816",
+    "failure": "Two tests using the original decoded-JSON repository port failed before audit delivery; 395 of 397 passed.",
+    "fix": "Preserve canonical hash validation on the original repository.one API; PostgreSQL gets the live text witness. No audit test or security assertion changed.",
+    "before_unit_job": 130571937972,
+    "unchanged_repo_unit_tests": 397,
+    "unchanged_postgres_group": 56,
+    "runner_failure_jobs": [
+      130566050277,
+      130570628944,
+      130566050833
+    ],
+    "runner_failure": "Ubuntu Azure-mirror DNS repeatedly failed before packages were installed. Select signed HTTPS Ubuntu mirror indexes; retain every requested package and version and use standard apt retries.",
+    "earlier_integrated_full": {
+      "sha": "9630d95fa5c11b9327f223b8316d7c277e9d20f2",
+      "passed": 804,
+      "failed": 0,
+      "skipped": 0
+    },
+    "latest_soak": "See exact-head CI; locally the prior witness tree delivered all 600/600 at 20 rps in 30 s. This was a short probe only."
+  }
+}

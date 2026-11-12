@@ -144,6 +144,18 @@ def revoke(conn, session, operation_id, binding_id):
         return out
 
 
+def _review_origin_matches(conn, session, review):
+    # Historical W4 queues predate explicit installation ownership. A paid review is tied
+    # to the NF installation of both its original delegation and its provisioned slot.
+    if review["execution"] != "BUDGETED_NF":
+        return True
+    return conn.execute(
+        """SELECT 1 FROM aw_delegations d JOIN aw_delegation_slots s USING(org_id,slot_id)
+        WHERE d.org_id=%s AND d.operation_id=%s AND d.installation_id=%s AND s.installation_id=%s""",
+        (session.org_id, review["operation_id"], session.installation_id, session.installation_id),
+    ).fetchone() is not None
+
+
 def freeze(conn, session, binding_id, mode, task_ref):
     item = _skill(conn, session, binding_id, mode)
     owned = conn.execute(
@@ -151,8 +163,7 @@ def freeze(conn, session, binding_id, mode, task_ref):
         JOIN aw_delegation_slots s ON (s.org_id,s.slot_id)=(d.org_id,d.slot_id)
         WHERE r.org_id=%s AND r.task_id=%s AND d.installation_id=%s AND s.employee_id=%s
         AND s.employment_revision=%s AND d.state='BOUND' AND d.payload->>'task_template_id'=%s
-        UNION ALL SELECT 1 FROM aw_reviews WHERE org_id=%s AND review_id=%s AND reviewer_id=%s
-        AND reviewer_revision=%s AND state='PENDING' AND deadline>clock_timestamp() AND mode=%s""",
+        AND s.installation_id=d.installation_id""",
         (
             session.org_id,
             task_ref,
@@ -160,15 +171,16 @@ def freeze(conn, session, binding_id, mode, task_ref):
             session.employee_id,
             session.employment_revision,
             mode,
-            session.org_id,
-            task_ref,
-            session.employee_id,
-            session.employment_revision,
-            mode,
         ),
     ).fetchone()
     if not owned:
-        raise Denied("TASK_SCOPE_DENIED")
+        review = conn.execute(
+            """SELECT execution,operation_id FROM aw_reviews WHERE org_id=%s AND review_id=%s AND reviewer_id=%s
+            AND reviewer_revision=%s AND state='PENDING' AND deadline>clock_timestamp() AND mode=%s FOR SHARE""",
+            (session.org_id, task_ref, session.employee_id, session.employment_revision, mode),
+        ).fetchone()
+        if not review or not _review_origin_matches(conn, session, review):
+            raise Denied("TASK_SCOPE_DENIED")
     row = conn.execute(
         """INSERT INTO aw_skill_snapshots VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
         ON CONFLICT (org_id,employee_id,employment_revision,task_ref,skill_id)
@@ -198,6 +210,15 @@ def skill_history(conn, session, task_ref, skill_id):
         (session.org_id, session.employee_id, session.employment_revision, task_ref, skill_id),
     ).fetchone()
     if not result:
+        raise Denied("TASK_SCOPE_DENIED")
+    # A historical freeze is immutable, including across revocation. Preserve its
+    # originating installation fence even when a legacy organization is claimed later.
+    origins = conn.execute(
+        """SELECT execution,operation_id FROM aw_reviews WHERE org_id=%s AND review_id=%s
+        UNION ALL SELECT 'BUDGETED_NF',operation_id FROM aw_remote_receipts WHERE org_id=%s AND task_id=%s""",
+        (session.org_id, task_ref, session.org_id, task_ref),
+    ).fetchall()
+    if not origins or any(not _review_origin_matches(conn, session, origin) for origin in origins):
         raise Denied("TASK_SCOPE_DENIED")
     return {**result, "historical": True}
 
@@ -302,6 +323,22 @@ def _independent(conn, org, reviewer, artifact):
         raise Denied("INDEPENDENT_REVIEW_REQUIRED")
 
 
+def _require_review_team(conn, session, viewer, review):
+    if viewer["role_id"] != "review_lead":
+        return
+    if review["reviewer_id"] is None:
+        # A deterministic review has no employee assignment. Its requesting lead owns the summary.
+        if review["requested_by"] == session.employee_id:
+            return
+    elif conn.execute(
+        """SELECT 1 FROM aw_employment_versions
+        WHERE (org_id,employee_id,employment_revision,supervisor_id)=(%s,%s,%s,%s)""",
+        (session.org_id, review["reviewer_id"], review["reviewer_revision"], session.employee_id),
+    ).fetchone():
+        return
+    raise Denied("REVIEW_DENIED")
+
+
 def review_request(
     conn,
     session,
@@ -318,6 +355,7 @@ def review_request(
 ):
     viewer = require_role(conn, session, {"workshop_manager", "review_lead"})
     org = session.org_id
+    lead = session.employee_id if viewer["role_id"] == "review_lead" else None
     fields = [
         artifact_ref,
         artifact_revision,
@@ -333,6 +371,15 @@ def review_request(
         raise Denied("INVALID_REVIEW")
     with operation(conn, session, "REVIEW_REQUEST", operation_id, fields) as (old, out):
         if old:
+            # Legacy operation keys did not include the originating installation.
+            review = conn.execute(
+                """SELECT r.* FROM aw_reviews r JOIN aw_review_artifacts a
+                USING(org_id,artifact_ref,artifact_revision) WHERE r.org_id=%s AND r.review_id=%s
+                AND a.scope_ref=%s""", (org, out["review_id"], viewer["scope_ref"]),
+            ).fetchone()
+            if not review or not _review_origin_matches(conn, session, review):
+                raise Denied("REVIEW_DENIED")
+            _require_review_team(conn, session, viewer, review)
             return out
         a = conn.execute(
             """SELECT * FROM aw_review_artifacts WHERE (org_id,artifact_ref,artifact_revision,scope_ref)=(%s,%s,%s,%s)
@@ -366,10 +413,11 @@ def review_request(
                 candidate = conn.execute(
                     """SELECT e.employee_id FROM aw_employees e JOIN aw_review_identities i
                     USING (org_id,employee_id) WHERE e.org_id=%s AND e.scope_ref=%s AND e.role_id='reviewer'
+                    AND (%s::text IS NULL OR e.supervisor_id=%s)
                     AND e.status='ACTIVE' AND NOT (i.subject_group=ANY(%s)) AND NOT (e.employee_id=ANY(%s))
                     ORDER BY (SELECT count(*) FROM aw_reviews pending WHERE pending.org_id=e.org_id AND
                          pending.reviewer_id=e.employee_id AND pending.state='PENDING'),e.employee_id LIMIT 1""",
-                    (org, viewer["scope_ref"], a["producer_groups"], a["producer_ids"]),
+                    (org, viewer["scope_ref"], lead, lead, a["producer_groups"], a["producer_ids"]),
                 ).fetchone()
                 reviewer_id = candidate["employee_id"] if candidate else None
             reviewer = employee(conn, org, reviewer_id)
@@ -378,6 +426,7 @@ def review_request(
                 or reviewer["role_id"] != "reviewer"
                 or reviewer["status"] != "ACTIVE"
                 or reviewer["scope_ref"] != viewer["scope_ref"]
+                or (lead is not None and reviewer["supervisor_id"] != lead)
             ):
                 raise Denied("INDEPENDENT_REVIEW_REQUIRED")
             _independent(conn, org, reviewer, a)
@@ -468,6 +517,9 @@ def get_review(conn, session, review_id):
     )
     if not row or (viewer["role_id"] == "reviewer" and not assigned):
         raise Denied("REVIEW_DENIED")
+    _require_review_team(conn, session, viewer, row)
+    if assigned and not _review_origin_matches(conn, session, row):
+        raise Denied("REVIEW_DENIED")
     result = {
         k: row[k]
         for k in ("mode", "state", "round_no", "reviewer_id", "execution", "policy_revision")
@@ -504,25 +556,39 @@ def expire_due_reviews(conn, org, limit=32):
 def reconcile_review(conn, session, operation_id, review_id, replacement=None):
     viewer = require_role(conn, session, {"workshop_manager", "review_lead"})
     org = session.org_id
+    lead = session.employee_id if viewer["role_id"] == "review_lead" else None
     with operation(conn, session, "REVIEW_RECONCILE", operation_id, [review_id, replacement]) as (
         old,
         out,
     ):
-        if old:
-            return out
         row = conn.execute(
             """SELECT r.*,deadline>clock_timestamp() AS live,a.scope_ref,a.source_receipt,
-            a.producer_ids,a.producer_groups FROM aw_reviews r JOIN aw_review_artifacts a USING(org_id,artifact_ref,artifact_revision)
+            a.producer_ids,a.producer_groups FROM aw_reviews r JOIN aw_review_artifacts a
+            USING(org_id,artifact_ref,artifact_revision)
             WHERE r.org_id=%s AND r.review_id=%s AND a.scope_ref=%s FOR UPDATE OF r""",
             (org, review_id, viewer["scope_ref"]),
         ).fetchone()
         if not row:
             raise Denied("REVIEW_DENIED")
+        _require_review_team(conn, session, viewer, row)
+        same_origin = _review_origin_matches(conn, session, row)
+        if old and same_origin:
+            return out
         state = row["state"]
         if state != "PENDING":
             if replacement:
                 raise Denied("REVIEW_ALREADY_FINAL")
             out.update(review_id=review_id, state=state)
+            return out
+        if not same_origin:
+            if replacement:
+                raise Denied("EXISTING_DELEGATION_OR_DEADLINE")
+            conn.execute(
+                "UPDATE aw_reviews SET state='ESCALATED',decision_reason='ORIGIN_MISMATCH' WHERE org_id=%s AND review_id=%s",
+                (org, review_id),
+            )
+            _audit(conn, org, review_id, session.employee_id, "ORIGIN_MISMATCH", row["source_receipt"])
+            out.update(review_id=review_id, state="ESCALATED")
             return out
         old_member = employee(conn, org, row["reviewer_id"])
         current = (
@@ -540,6 +606,7 @@ def reconcile_review(conn, session, operation_id, review_id, replacement=None):
                 or peer["status"] != "ACTIVE"
                 or peer["role_id"] != "reviewer"
                 or peer["scope_ref"] != viewer["scope_ref"]
+                or (lead is not None and peer["supervisor_id"] != lead)
             ):
                 raise Denied("INDEPENDENT_REVIEW_REQUIRED")
             _independent(conn, org, peer, row)
@@ -577,14 +644,13 @@ def decide(conn, session, operation_id, review_id, outcome, reason, evidence_ref
     with operation(
         conn, session, "REVIEW_DECIDE", operation_id, [review_id, outcome, reason, evidence_ref]
     ) as (old, out):
-        if old:
-            return out
         r = conn.execute(
             """SELECT *,deadline>clock_timestamp() AS live FROM aw_reviews
             WHERE org_id=%s AND review_id=%s AND reviewer_id=%s AND reviewer_revision=%s FOR UPDATE""",
             (session.org_id, review_id, session.employee_id, session.employment_revision),
         ).fetchone()
-        if not r or r["state"] != "PENDING":
+        if (not r or not _review_origin_matches(conn, session, r)
+                or (not old and r["state"] != "PENDING")):
             raise Denied("REVIEW_DENIED")
         a = conn.execute(
             """SELECT * FROM aw_review_artifacts WHERE org_id=%s AND artifact_ref=%s AND artifact_revision=%s
@@ -594,6 +660,8 @@ def decide(conn, session, operation_id, review_id, outcome, reason, evidence_ref
         if not a or evidence_ref not in a["evidence_refs"]:
             raise Denied("EVIDENCE_SCOPE_DENIED")
         _independent(conn, session.org_id, viewer, a)
+        if old:
+            return out
         if not r["live"]:
             state = "ESCALATED"
             reason = "DEADLINE"
@@ -601,9 +669,12 @@ def decide(conn, session, operation_id, review_id, outcome, reason, evidence_ref
             if (
                 r["execution"] == "BUDGETED_NF"
                 and not conn.execute(
-                    """SELECT 1 FROM aw_remote_receipts r
-                JOIN aw_budget_holds h USING(org_id,operation_id) WHERE r.org_id=%s AND r.operation_id=%s
-                AND h.status='SETTLED' AND r.accounting_state='SETTLED' AND r.task_state='ACCEPTED'""",
+                    """SELECT 1 FROM aw_delegations d
+                    JOIN aw_remote_receipts r USING(org_id,operation_id)
+                    JOIN aw_budget_holds h USING(org_id,operation_id)
+                    WHERE d.org_id=%s AND d.operation_id=%s AND d.state='SETTLED'
+                    AND h.status='SETTLED' AND r.accounting_state='SETTLED'
+                    AND r.task_state='ACCEPTED' FOR SHARE OF d""",
                     (session.org_id, r["operation_id"]),
                 ).fetchone()
             ):

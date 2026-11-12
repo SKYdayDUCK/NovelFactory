@@ -2,7 +2,7 @@
 
 ## 部署入口
 
-先按 `workshop/docs/operations.md` 配置不同的 NF 与 Workshop 服务账户、PostgreSQL 17 数据库和只可经 stdio 使用的 broker。NF 的迁移及 supervisor 在 NF 虚拟环境执行，Workshop 使用自己的 wheel、迁移和环境。部署 W6 时核对 `aw-migrate current` 返回 `w008`。作品登记和继续运行的命令见 `P6_RUNTIME.md` 与 `docs/P6_本地真实模型创作交接.md`。实验封套与场景登记文件仅放在作者私有目录。
+先按 `workshop/docs/operations.md` 配置不同的 NF 与 Workshop 服务账户、PostgreSQL 17 数据库和只可经 stdio 使用的 broker。NF 的迁移及 supervisor 在 NF 虚拟环境执行，Workshop 使用自己的 wheel、迁移和环境。在本版本分别核对 NF `python -m alembic current` 与 `python -m alembic heads` 指向 `0018_p6_shared_tokens`，Workshop `aw-migrate current` 与 `aw-migrate heads` 指向 `w010`。升级时使用该部署 SHA 自带的迁移并复核两边实际输出。作品登记和继续运行的命令见 `P6_RUNTIME.md` 与 `docs/P6_本地真实模型创作交接.md`。实验封套与场景登记文件仅放在作者私有目录。
 
 | 操作主体 | 允许操作 | 权限或账本证据 |
 |---|---|---|
@@ -13,10 +13,34 @@
 | NF supervisor | 按冻结策略调度角色，提交 NF 领域的裁决和正式接受 | NF 原任务、角色授权代际、私有沙箱、同事务 S9 守卫和计费 attempt |
 | 运维恢复身份 | 在隔离副本核对两侧并显式恢复派工 | PG 备份 manifest、WAL LSN、冻结 epoch 中的逐 operation 和 attempt 账本 |
 
+## 双服务启停
+
+先以各自的服务账户准备 NF 与 Workshop 的私有配置、数据库、对象库、Redis 和 stdio 安装绑定。待备份、迁移、隔离检查及实验授权完成后，在 NF 主机启动 relay、接收组及获准的作品执行器，在 Workshop 主机启用三个定时器。正常停派时先停 Workshop 定时器和正在执行的 oneshot，再停止 NF 的作品执行器。待在途任务状态和账本留痕后，再停接收组与 relay。以下 unit 名称对应仓库 systemd 样例，权限来自各服务账户的部署环境。[NF 安装与 unit 配置](../../docs/implementation/P5.5_安装与运维.md) · [Workshop 安装、启停及冻结核对](../../workshop/docs/operations.md)
+
+```sh
+# NF 主机
+systemctl start novelfactory-relay.service
+for group in model world compute recovery log statistics; do systemctl start "novelfactory-intake@$group.service"; done
+for processor in model world compute recovery; do systemctl start "novelfactory-project-worker@$processor.service"; done
+
+# Workshop 主机
+systemctl start aw-delegations.timer aw-manager.timer aw-notifications.timer
+systemctl list-timers aw-delegations.timer aw-manager.timer aw-notifications.timer
+journalctl -u aw-delegations.service -u aw-manager.service -u aw-notifications.service -n 50
+
+# 计划停派，先在 Workshop 主机执行
+systemctl stop aw-delegations.timer aw-manager.timer aw-notifications.timer
+systemctl stop aw-delegations.service aw-manager.service aw-notifications.service
+# 再在 NF 主机执行
+for processor in model world compute recovery; do systemctl stop "novelfactory-project-worker@$processor.service"; done
+for group in model world compute recovery log statistics; do systemctl stop "novelfactory-intake@$group.service"; done
+systemctl stop novelfactory-relay.service
+```
+
 ## 上线与异常处理
 
 - 启动前记下两个 Git SHA、数据库迁移头及对象快照标识。运行部署手册中的 stdio 冒烟和双向数据库拒绝测试，再按 `P6_RUNTIME.md` 校验实验材料、HTTP 模型绑定和金额/Token 授权。
 - 用同一作者请求键继续。场景和任务进度可凭原 operation 查询。服务停止与 systemd timer 的命令见部署手册。启动时禁止未经对账重发 UNKNOWN 模型请求。
-- 一个数据库恢复到旧时间点时，先关闭两端派工，在新实例校验备份。两套账本按原 task、generation、attempt、金额与 Token 校对。相同 receipt 但结算不同也会冻结。恢复证据在 `evidence/workshop/recovery/paired.json`。保留原数据库与对象历史直至新实例验收完毕。
+- 一个数据库恢复到旧时间点时，先关闭两端派工，在新实例校验备份。两套账本按原 task、generation、attempt、金额与 Token 校对。相同 receipt 但结算不同也会冻结。停派后，按 Workshop 运维手册执行安装级 `freeze`、`aw-reconcile --lookup-only`、两侧各自的 `snapshot`，再用对方账本执行 `reconcile` 与 `permit`。核对 UNKNOWN 的原 attempt、金额和 Token 全额预留，已确认发票按同一回执结算一次。Redis 从各自的 PostgreSQL outbox 重建。保留原数据库与对象历史直至新实例验收完毕。
 - 原 NF 200/500/1000-agent 范围与工坊 10/50/200 人范围有不同负载、计时和验收口径。原失败与后续变动均以各 GitHub run 与 issue #13 为据。不得用工坊消息吞吐推断正式创作使用的 Token 或费用。
 - 这次工程场景保留世界事件、角色可见性、定向修复、独立任务与账本证据。真实小说正文、供应商实际费用和两份独立文学审读仍待作者授权的作品现场产生。

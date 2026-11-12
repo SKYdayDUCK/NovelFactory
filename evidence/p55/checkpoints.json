@@ -1,0 +1,415 @@
+{
+  "observed_at": "2026-11-11 10:57:32 UTC",
+  "checkpoints": [
+    {
+      "stage": "S0",
+      "subject": "S0: record P5 takeover, capability gaps and CI baseline",
+      "head": "d49d1559c49b6acc64940e0f89c5e1115aee1f37",
+      "tree": "dafcdc02a0f95806a71e88a76fdeff5717575e36",
+      "runs": [
+        {
+          "id": 42996766548,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42996766548"
+        }
+      ]
+    },
+    {
+      "stage": "S1",
+      "subject": "S1: add versioned reference-only envelopes and Redis Streams groups",
+      "head": "940b58f66522cabe7194b328a7e5597664cd98a5",
+      "tree": "5dba1be08c9065496fea16865b933f526638f1e6",
+      "runs": [
+        {
+          "id": 42996985720,
+          "name": "P2 measured capacity and recovery",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42996985720"
+        },
+        {
+          "id": 42996985323,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42996985323"
+        },
+        {
+          "id": 42996985152,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42996985152"
+        },
+        {
+          "id": 42996985212,
+          "name": "P3 P4 measured evidence",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42996985212"
+        }
+      ]
+    },
+    {
+      "stage": "S2",
+      "subject": "S2: relay durable outbox with independent receipts, recovery and retention",
+      "head": "fd12a82a23029da9f8a22d7338d78af2c95ecbfa",
+      "tree": "d6924abbc5eaec4ef07d3c19fb602da73db24590",
+      "runs": [
+        {
+          "id": 42998344776,
+          "name": "P3 P4 measured evidence",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42998344776"
+        },
+        {
+          "id": 42998344736,
+          "name": "P2 measured capacity and recovery",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42998344736"
+        },
+        {
+          "id": 42998344624,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42998344624"
+        },
+        {
+          "id": 42998344636,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42998344636"
+        }
+      ]
+    },
+    {
+      "stage": "S3",
+      "subject": "S3: route scoped Redis work through existing authorization and admission",
+      "head": "8f1b3199773f04bc18ee27ddd6a8e9d3f643c4ea",
+      "tree": "1f7af5b4f22ab2601b48544f3c9ef89b5968c782",
+      "runs": [
+        {
+          "id": 42998464395,
+          "name": "P3 P4 measured evidence",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42998464395"
+        },
+        {
+          "id": 42998464276,
+          "name": "P2 measured capacity and recovery",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42998464276"
+        },
+        {
+          "id": 42998464302,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42998464302"
+        },
+        {
+          "id": 42998464303,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42998464303"
+        }
+      ]
+    },
+    {
+      "stage": "S4",
+      "subject": "S4: bound adaptive workers by observed pressure and existing hard quotas",
+      "head": "127b74197e2e0aab15104b6651a092d977d121cf",
+      "tree": "b6ec4bb17d2a3d096f7d15bf393e7466bbba5def",
+      "runs": [
+        {
+          "id": 42998962941,
+          "name": "P2 measured capacity and recovery",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42998962941"
+        },
+        {
+          "id": 42998962810,
+          "name": "P3 P4 measured evidence",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42998962810"
+        },
+        {
+          "id": 42998962818,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42998962818"
+        },
+        {
+          "id": 42998962841,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42998962841"
+        }
+      ]
+    },
+    {
+      "stage": "S5",
+      "subject": "S5: persist scoped MCP audits and link scene, model, world and editorial spans",
+      "head": "0e7412625cd0c50f53e6d9357a758168dfea135d",
+      "tree": "c56f0bcd83f18c6148058b824c6232627a30319c",
+      "runs": [
+        {
+          "id": 42999047155,
+          "name": "P2 measured capacity and recovery",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42999047155"
+        },
+        {
+          "id": 42999047368,
+          "name": "P3 P4 measured evidence",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42999047368"
+        },
+        {
+          "id": 42999047277,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42999047277"
+        },
+        {
+          "id": 42999047439,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42999047439"
+        }
+      ]
+    },
+    {
+      "stage": "S6",
+      "subject": "S6: rebuild and verify versioned projections at a durable source cut",
+      "head": "6c47700908514098ba65e4fd55f2ba3c586130bf",
+      "tree": "25db73b7ff67aceab594e68dd5a7930322675df2",
+      "runs": [
+        {
+          "id": 42999182500,
+          "name": "P2 measured capacity and recovery",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42999182500"
+        },
+        {
+          "id": 42999182606,
+          "name": "P3 P4 measured evidence",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42999182606"
+        },
+        {
+          "id": 42999182622,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42999182622"
+        },
+        {
+          "id": 42999182602,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42999182602"
+        }
+      ]
+    },
+    {
+      "stage": "S7",
+      "subject": "S7: audit role snapshots and exercise the nine bound tools over MCP and Codex Host",
+      "head": "72c5484aac8b861af40e38d6828cc40c67115a4f",
+      "tree": "cf36fb5c1304a34ec537f574109d7ec6a17d03ea",
+      "runs": [
+        {
+          "id": 42999474454,
+          "name": "P3 P4 measured evidence",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42999474454"
+        },
+        {
+          "id": 42999474436,
+          "name": "P2 measured capacity and recovery",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42999474436"
+        },
+        {
+          "id": 42999474675,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42999474675"
+        },
+        {
+          "id": 42999474536,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42999474536"
+        }
+      ]
+    },
+    {
+      "stage": "S8",
+      "subject": "S8: validate multistream recovery, scoped scaling, metering and the Redis scene across processes",
+      "head": "e831d8f97d28e2c53aa0a4d87864b05993cc5e3d",
+      "tree": "d41a5a156e7432175412c8523adddae972e91264",
+      "runs": [
+        {
+          "id": 42999742259,
+          "name": "P4 real isolated WAL PITR and verified recovery",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42999742259"
+        },
+        {
+          "id": 42999741932,
+          "name": "P3 P4 measured evidence",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42999741932"
+        },
+        {
+          "id": 42999742064,
+          "name": "P2 measured capacity and recovery",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42999742064"
+        },
+        {
+          "id": 42999742048,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42999742048"
+        },
+        {
+          "id": 42999741965,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/42999741965"
+        }
+      ]
+    },
+    {
+      "stage": "S8",
+      "subject": "S8: verify lost replies, persist recovery diagnostics and pin scoped chapter costs",
+      "head": "4bab5e42d624d5909617fc7f7a8f360e99ee42bc",
+      "tree": "13d405e2434967ad5ffc93b392afaa37f339b267",
+      "runs": [
+        {
+          "id": 43001145754,
+          "name": "P4 real isolated WAL PITR and verified recovery",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43001145754"
+        },
+        {
+          "id": 43001146034,
+          "name": "P5 native desktop resume",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43001146034"
+        },
+        {
+          "id": 43001145731,
+          "name": "P3 P4 measured evidence",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43001145731"
+        },
+        {
+          "id": 43001145893,
+          "name": "P2 measured capacity and recovery",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43001145893"
+        },
+        {
+          "id": 43001146022,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43001146022"
+        },
+        {
+          "id": 43001146315,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43001146315"
+        }
+      ]
+    },
+    {
+      "stage": "S8",
+      "subject": "S8: publish the 762-test regression, scoped utilization and historical literary verification",
+      "head": "441db1a9a380bca002b5f6470693a4e887e2acd0",
+      "tree": "691eff6e5acd18147bdb40eb4c32dd3fdad49a12",
+      "runs": [
+        {
+          "id": 43003778835,
+          "name": "P5 native desktop resume",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43003778835"
+        },
+        {
+          "id": 43003778858,
+          "name": "P3 P4 measured evidence",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43003778858"
+        },
+        {
+          "id": 43003779011,
+          "name": "P2 measured capacity and recovery",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43003779011"
+        },
+        {
+          "id": 43003779104,
+          "name": "P3 scale experiments with strict unmet gates",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43003779104"
+        },
+        {
+          "id": 43003779108,
+          "name": "P4 real isolated WAL PITR and verified recovery",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43003779108"
+        },
+        {
+          "id": 43003779059,
+          "name": "P1 and P2 production integrity",
+          "status": "completed",
+          "conclusion": "failure",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43003779059"
+        }
+      ]
+    }
+  ]
+}

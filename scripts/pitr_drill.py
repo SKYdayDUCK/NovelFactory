@@ -24,6 +24,7 @@ import time
 
 from sqlalchemy import text
 
+from novel_factory.application.budget_limits import SharedBudgetService
 from novel_factory.application.kernel import Kernel
 from novel_factory.domain.errors import DomainError
 from novel_factory.fixtures import create_bound_task, load_fixture, point, run_command
@@ -101,6 +102,10 @@ def main():
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--pg-bin", default=os.environ.get("PG_BIN", "/usr/lib/postgresql/17/bin"), type=Path)
     parser.add_argument("--keep-clusters", action="store_true")
+    parser.add_argument("--shared-token-budget", action="store_true",
+                        help="Verify the shared token ceiling and original reservation after WAL replay")
+    parser.add_argument("--with-redis", action="store_true",
+                        help="Exercise a separate, disposable Redis left ahead of the recovered PG cluster")
     args = parser.parse_args()
     root, pg_bin = args.output.resolve(), args.pg_bin.resolve()
     # This is a dedicated CLI process with generated credentials and clusters.
@@ -148,7 +153,7 @@ def main():
                 "archive_command": f"{shlex.quote(sys.executable)} {shlex.quote(str(archiver))} %p {shlex.quote(str(archive))}/%f"}
     source_config = root / "source.conf"
     _config(source_config, settings)
-    source = restored = database = recovered_database = None
+    source = restored = database = recovered_database = streams_drill = None
     result = {"status": "FAILED", "postgres": version, "execution_kind": "REAL_ISOLATED_POSTGRESQL",
               "source_port": source_port, "restored_port": restored_port,
               "durability": {"fsync": True, "synchronous_commit": True, "data_checksums": True},
@@ -178,6 +183,9 @@ def main():
         first = transfer(initial, "10", 10)
         task = create_bound_task(kernel, principal, first["world_ref"], point(10))
         budget = kernel.tasks.create_budget(initial["work_id"], "5")
+        if args.shared_token_budget:
+            budget_scope = (principal, initial["work_id"], initial["branch_id"], budget)
+            SharedBudgetService(kernel).set_limit(*budget_scope, 150)
         call = kernel.tasks.reserve_call(task["task_id"], task["generation"], task["worker_id"],
                                         budget_id=budget, amount="0.5", call_key="pitr-unknown",
                                         request_hash="a" * 64, token_amount=100)
@@ -189,6 +197,11 @@ def main():
         result["base_backup_seconds"] = time.monotonic() - base_started
         result["pg_verifybackup"] = _run([str(pg_bin / "pg_verifybackup"), str(base)])
         target = transfer(first["world_ref"], "5", 20)
+        if args.with_redis:
+            from pitr_streams import StreamsDrill
+            streams_drill = StreamsDrill(root, _port())
+            semantic_target = streams_drill.create_semantic_case(kernel)
+            streams_drill.publish(database)
         backup_service = OnlineBackupService(database.engine, objects, pg_bin=pg_bin)
         logical = backup_service.create(root / "target-logical-snapshot")
         # This workload is exclusively owned by the drill. No application write
@@ -197,7 +210,11 @@ def main():
             target_at = conn.scalar(text("SELECT clock_timestamp()"))
             target_lsn = conn.scalar(text("SELECT pg_create_restore_point('nf_p4_verified_target')"))
             conn.commit()
+        if streams_drill:
+            streams_drill.acknowledge_target(database)
         later = transfer(target["world_ref"], "7", 30)
+        if streams_drill:
+            streams_drill.publish(database)
         with database.engine.connect() as conn:
             wal_file = conn.scalar(text("SELECT pg_walfile_name(pg_current_wal_lsn())"))
             conn.execute(text("SELECT pg_switch_wal()"))
@@ -253,6 +270,12 @@ def main():
             _check(repo.one("revisions", {"world_revision_id": later["world_ref"]["world_revision_id"]}) is None, "Later revision was not excluded")
             expected_state_hash = recovered.revision(repo, target["world_ref"])["state_hash"]
         fenced = fence_recovered_tasks(recovered_database.engine, recovered_objects, tables=tables)
+        if args.shared_token_budget:
+            shared = SharedBudgetService(recovered).status(*budget_scope)
+            _check((shared["total_tokens"], shared["reserved_tokens"], shared["spent_tokens"],
+                    shared["available_tokens"]) == (150, 100, 0, 50),
+                   "Physical recovery lost the shared token ceiling or its original reservation")
+            result["shared_token_budget_after_physical_restore"] = shared
         with recovered.db.uow(write=False) as repo:
             _check(repo.one("call_attempts", {"attempt_id": call["attempt_id"]})["state"] == "UNKNOWN", "External call was not retained as unknown")
             _check(repo.one("budgets", {"budget_id": budget})["reserved_amount"] == Decimal("0.5"), "Reserved budget was lost")
@@ -266,6 +289,12 @@ def main():
             raise AssertionError("A worker from before the disaster was allowed to resume")
         # Replaying a pre-disaster accepted command returns its exact receipt.
         _check(recovered.accept(principal, target["request"]) == target["receipt"], "Restored accepted receipt differs")
+        if streams_drill:
+            restored_semantic = streams_drill.semantic_witness(recovered_database, semantic_target["case_id"])
+            _check(restored_semantic == semantic_target, "Restored semantic decision or statistics differs")
+            result["restored_semantic_conflict"] = restored_semantic
+            result["redis_pitr_reconciliation"] = streams_drill.verify(recovered_database,
+                target["world_ref"]["world_revision_id"], later["world_ref"]["world_revision_id"])
         result.update(status="PASS", target_world_ref=target["world_ref"], target_lsn=str(target_lsn),
                       restored_state_sha256=expected_state_hash, snapshot_equal_before_fencing=True,
                       table_count=len(recovered_snapshot), object_count=len(logical["objects"]),
@@ -279,6 +308,8 @@ def main():
         _write(root / "target_database_digests.json", recovered_snapshot)
         _write(root / "fenced_tasks.json", fenced)
     finally:
+        if streams_drill:
+            streams_drill.close()
         if recovered_database:
             recovered_database.close()
         if database:

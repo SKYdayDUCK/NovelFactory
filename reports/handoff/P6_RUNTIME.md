@@ -6,9 +6,9 @@
 
 1. 在隔离服务账户中读入 NF 服务配置，固定已验收的 Git SHA、PostgreSQL 与 Redis 版本、作品与分支、对象备份、初始 WorldRef、角色 KnowledgeCut 和审核人身份。
 2. 执行 `uv run --no-sync python scripts/probe_model_environment.py --output p6-route.json`，检查回执中的 http_route。作者确认价卡、币种、总金额、每次预留、Token 总额和单次最大输出。
-3. 按[真实场景运行手册](https://github.com/SKYdayDUCK/NovelFactory/blob/b3b0e9b08a4ef2160a70fd858ca64de1fd58b6a5/docs/P6_本地真实模型创作交接.md)登记已授权的 3–5 个角色、初始场景及后继窗口。事先标出密信被证伪影响的任务和无关的远方场景。
+3. 按[真实场景运行手册](../../docs/P6_本地真实模型创作交接.md)登记已授权的 3–5 个角色、初始场景及后继窗口。事先标出密信被证伪影响的任务和无关的远方场景。
 4. 首场与后继验证通过后按同一实验扩展至 10–20 场。逐场保存 NF Task/Attempt、KnowledgeCut、变更或冲突案件、费用回执、正式接受的正文和 WorldRef。UNKNOWN 保留原 attempt 与费用预留直到供应商对账。
-5. 冻结匿名正文交给两个独立读者，分别保存因果、角色认知、动机、文风、可读性的评分、例句及分歧。当前没有分配评阅人。
+5. 正文接受并冻结后，由具备该作品与分支权限的作者操作员导出，核对回执的正文 SHA-256，分别向两位独立读者发放同一份正文和空表。协调人分别收回原表，随后核对分歧。当前没有分配评阅人。[导出正文、日志与分发步骤](../../docs/P6_本地真实模型创作交接.md#导出冻结卷与独立审读材料) · [独立读者空表](P6_READER_FORM.md)
 
 ## 可复核的离线首场预检
 

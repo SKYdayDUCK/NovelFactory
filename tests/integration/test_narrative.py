@@ -14,7 +14,7 @@ from novel_factory.domain.errors import DomainError
 from novel_factory.domain.reconciliation import span_for
 from novel_factory.fixtures import load_fixture, point, run_command
 from test_planning import make_plan
-from test_release import runtime_grant, task_for
+from test_release import runtime_grant, setup_batch, task_for, write_scene
 
 pytestmark = [pytest.mark.postgres, pytest.mark.integration]
 
@@ -39,9 +39,9 @@ def arrange(k, f=None):
     return {**f, "plan": plan, "plan_ref": plan_ref, "narrative_id": uid()}
 
 
-def scene_for(k, f, *, event_refs=(), checks=(), ordinal=0, disclosures=()):
+def scene_for(k, f, *, event_refs=(), checks=(), ordinal=0, disclosures=(), interval=None):
     scene = {"schema_version": "2.2", "scene_contract": {"schema_version": "2.0", "scene_id": uid(),
-        "input_world_ref": f["world_ref"], "story_interval": {"start": point(1), "end": point(2, 1), "bounds": "[)"},
+        "input_world_ref": f["world_ref"], "story_interval": interval or {"start": point(1), "end": point(2, 1), "bounds": "[)"},
         "event_refs": list(event_refs), "entry_commitments": [], "exit_commitments": [],
         "pov_actor_id": f["ids"]["protagonist"], "narrator_mode": "limited", "narrative_revision_id": f["narrative_id"],
         "arrangement_version": "narrative-tests-1", "reader_cut_ordinal": ordinal, "allowed_invention": ["surface detail"],
@@ -51,7 +51,7 @@ def scene_for(k, f, *, event_refs=(), checks=(), ordinal=0, disclosures=()):
         "entry_checks": [], "exit_checks": list(checks), "allowed_disclosures": list(disclosures), "literary_purpose": "counterexample evidence"}
     ref = NarrativeService(k).save_scene(f["principal"], scene, "scene:" + scene["scene_contract"]["scene_id"])
     writer = runtime_grant(k, f, "writer")
-    task = task_for(k, f, writer, [ref, f["plan_ref"]], story_time=point(2, 1))
+    task = task_for(k, f, writer, [ref, f["plan_ref"]], story_time=scene["scene_contract"]["story_interval"]["end"])
     PlanningService(k).bind_task_for_controller(f["principal"], task["task_id"], task["generation"], f["plan_ref"], scene["plan_node_ids"], "bind:" + task["task_id"])
     return {"scene": scene, "scene_ref": ref, "writer": writer, "task": task}
 
@@ -66,7 +66,7 @@ def draft_for(k, f, text, *, deltas=(), **scene_options):
 def extract(k, f, item, assertions):
     s = NarrativeService(k)
     reader = runtime_grant(k, f, "reviewer")
-    task = task_for(k, f, reader, [item["draft_ref"]], "extract", story_time=point(2, 1))
+    task = task_for(k, f, reader, [item["draft_ref"]], "extract", story_time=item["scene"]["scene_contract"]["story_interval"]["end"])
     s.bind_reader_task(f["principal"], task["task_id"], task["generation"], [item["draft_ref"]], "reader:" + task["task_id"])
     read = s.read_text(reader, task["task_id"], task["generation"], item["draft_ref"])
     ref = s.submit_extraction(reader, task["task_id"], task["generation"], item["draft_ref"], read["delivery_ref"], assertions, "extract:" + task["task_id"])
@@ -95,6 +95,43 @@ def test_world_event_can_be_narrated_twice_without_effect_reapplication(kernel_e
             assert k.head(repo, f["world_ref"]["work_id"]) == f["world_ref"]
             assert k.revision(repo, f["world_ref"])["snapshot"] == before
             assert len(repo.many("events", {"work_id": f["world_ref"]["work_id"]})) == 1
+
+
+def test_local_plan_change_between_reconciliation_and_prose_acceptance(kernel_env):
+    kernel = kernel_env["kernel"]
+    fixture = setup_batch(kernel, count=2)
+    owner, world = fixture["principal"], fixture["world_ref"]
+    planning, narrative = PlanningService(kernel), NarrativeService(kernel)
+    reconciled = []
+    for index, text in enumerate(["北门前的石阶还有水迹。", "窗纸在风里响了一声。"]):
+        draft = write_scene(kernel, fixture, index, text)
+        reader = extract(kernel, fixture, {**draft, "scene": fixture["scenes"][index]}, [assertion(text)])
+        report = narrative.reconcile(owner, draft["draft_ref"], reader["extraction_ref"],
+                                     world, f"check-scene-{index}")
+        assert report["status"] == "CLEAR"
+        reconciled.append((draft, report["reconciliation_ref"]))
+
+    replacement = deepcopy(fixture["plan"])
+    replacement.update(prior_plan_ref=fixture["plan_ref"], plan_revision_id=uid())
+    replacement["nodes"][0]["goal"] = "改去南门接应晚到的客人"
+    revised = planning.save_plan(owner, replacement, "save-revision")
+    selection = planning.adopt_plan(owner, world, revised, fixture["plan_ref"], "select-revision")
+    affected, affected_report = reconciled[0]
+    independent, independent_report = reconciled[1]
+    assert selection["fenced_task_ids"] == [affected["task"]["task_id"]]
+    assert kernel.get_task(affected["writer"], affected["task"]["task_id"])["state"] == "STALE"
+    with pytest.raises(DomainError) as stale:
+        narrative.accept_narrative(owner, affected["draft_ref"], affected_report, world, "late-accept")
+    assert stale.value.code == "TASK_NOT_ACCEPTABLE"
+
+    accepted = narrative.accept_narrative(owner, independent["draft_ref"], independent_report, world, "accept-independent")
+    assert narrative.accept_narrative(owner, independent["draft_ref"], independent_report, world, "accept-independent") == accepted
+    with kernel.db.uow(write=False) as repo:
+        records = repo.many("artifacts", {"work_id": world["work_id"], "kind": "NARRATIVE_ACCEPTANCE"})
+        assert [record["payload"]["draft_ref"] for record in records] == [independent["draft_ref"]]
+        assert records[0]["payload"]["world_effects_applied"] == 0
+        assert kernel.head(repo, world["work_id"], world["branch_id"]) == world
+        assert not repo.many("events", {"work_id": world["work_id"]})
 
 
 def test_text_first_delta_must_use_formal_kernel_acceptance_then_exact_alignment(kernel_env):

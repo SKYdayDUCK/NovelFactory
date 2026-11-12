@@ -1,0 +1,37 @@
+2026-11-11T17:30:30.7375827Z Commit: 54898b74c23fde5556c9b3c3a2290865feef0dfe
+2026-11-11T17:30:33.6063304Z 4d03a1daa16fb485289055bd59479cce4d44fa2748289e26448e6a942c2ca15e
+2026-11-11T17:30:39.8731676Z Digest: sha256:665dc7b37ac52a17e298511414c21d23ffa4e6a6ef6225b3e5d59c7afb35e994
+2026-11-11T17:30:39.9103666Z 1ca655784a2af3393c8ebe1e985c0f5a9e81e8f6ba76ecec7fe9a0ad0a76c715
+2026-11-11T17:30:39.9130890Z ##[command]/usr/bin/docker start 1ca655784a2af3393c8ebe1e985c0f5a9e81e8f6ba76ecec7fe9a0ad0a76c715
+2026-11-11T17:30:40.7894182Z 1ca655784a2af3393c8ebe1e985c0f5a9e81e8f6ba76ecec7fe9a0ad0a76c715
+2026-11-11T17:30:40.8097296Z ##[command]/usr/bin/docker port 1ca655784a2af3393c8ebe1e985c0f5a9e81e8f6ba76ecec7fe9a0ad0a76c715
+2026-11-11T17:30:41.2348937Z Digest: sha256:665dc7b37ac52a17e298511414c21d23ffa4e6a6ef6225b3e5d59c7afb35e994
+2026-11-11T17:30:41.2858870Z 7abb23d88fcb21604c69df4a483c63240cf9453d7524d71f21d0a6bf3ec66f97
+2026-11-11T17:30:41.2883480Z ##[command]/usr/bin/docker start 7abb23d88fcb21604c69df4a483c63240cf9453d7524d71f21d0a6bf3ec66f97
+2026-11-11T17:30:41.4514482Z 7abb23d88fcb21604c69df4a483c63240cf9453d7524d71f21d0a6bf3ec66f97
+2026-11-11T17:30:41.4760687Z ##[command]/usr/bin/docker port 7abb23d88fcb21604c69df4a483c63240cf9453d7524d71f21d0a6bf3ec66f97
+2026-11-11T17:30:41.4988845Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" 1ca655784a2af3393c8ebe1e985c0f5a9e81e8f6ba76ecec7fe9a0ad0a76c715
+2026-11-11T17:30:43.5183606Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" 1ca655784a2af3393c8ebe1e985c0f5a9e81e8f6ba76ecec7fe9a0ad0a76c715
+2026-11-11T17:30:47.4395725Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" 1ca655784a2af3393c8ebe1e985c0f5a9e81e8f6ba76ecec7fe9a0ad0a76c715
+2026-11-11T17:30:47.4572985Z ##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" 7abb23d88fcb21604c69df4a483c63240cf9453d7524d71f21d0a6bf3ec66f97
+2026-11-11T17:30:50.4250853Z HEAD is now at 9c28a89 Merge 48c20a10c1e28af608a4c52f207351eaa1c45e06 into c4939e24b6b5501d82127f528f2054e9c1992856
+2026-11-11T17:30:50.4369461Z 9c28a89d9fa07482fd2af4c564a92f9dca41cf39
+2026-11-11T17:30:50.7960035Z ##[group]Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+2026-11-11T17:30:53.3657895Z Trying to restore cache from GitHub Actions cache with key: setup-uv-2-x86_64-unknown-linux-gnu-ubuntu-24.04-unknown-956ede083be37361200ded5fc0cdbfa9068e9beddb45495e72aed40453657858
+2026-11-11T17:30:53.4811243Z Cache hit for: setup-uv-2-x86_64-unknown-linux-gnu-ubuntu-24.04-unknown-956ede083be37361200ded5fc0cdbfa9068e9beddb45495e72aed40453657858
+2026-11-11T17:30:54.6792512Z cache restored from GitHub Actions cache with key: setup-uv-2-x86_64-unknown-linux-gnu-ubuntu-24.04-unknown-956ede083be37361200ded5fc0cdbfa9068e9beddb45495e72aed40453657858
+2026-11-11T17:30:57.8381111Z   AW_POSTGRES: 1ca655784a2af3393c8ebe1e985c0f5a9e81e8f6ba76ecec7fe9a0ad0a76c715
+2026-11-11T17:30:57.8381637Z   NF_POSTGRES: 7abb23d88fcb21604c69df4a483c63240cf9453d7524d71f21d0a6bf3ec66f97
+2026-11-11T17:31:06.2200325Z 16 passed in 5.02s
+2026-11-11T17:31:10.3592826Z 1 passed in 3.77s
+2026-11-11T17:31:39.9762713Z 5 passed in 16.22s
+2026-11-11T17:31:44.1704806Z 2 passed in 3.77s
+2026-11-11T17:31:44.9911083Z SHA256 digest of uploaded artifact zip is 0da8ec911157352d76c468af8c3e82577e21c78d54d3f89624637454feb95040
+2026-11-11T17:31:45.3587072Z Artifact workshop-results.zip successfully finalized. Artifact ID 13876778443
+2026-11-11T17:31:45.3588271Z Artifact workshop-results has been successfully uploaded! Final size is 3465 bytes. Artifact ID is 13876778443
+2026-11-11T17:31:46.0182840Z ##[command]/usr/bin/docker logs --details 1ca655784a2af3393c8ebe1e985c0f5a9e81e8f6ba76ecec7fe9a0ad0a76c715
+2026-11-11T17:31:46.0426068Z ##[command]/usr/bin/docker rm --force 1ca655784a2af3393c8ebe1e985c0f5a9e81e8f6ba76ecec7fe9a0ad0a76c715
+2026-11-11T17:31:46.8198137Z 1ca655784a2af3393c8ebe1e985c0f5a9e81e8f6ba76ecec7fe9a0ad0a76c715
+2026-11-11T17:31:46.8234005Z ##[command]/usr/bin/docker logs --details 7abb23d88fcb21604c69df4a483c63240cf9453d7524d71f21d0a6bf3ec66f97
+2026-11-11T17:31:46.8423372Z ##[command]/usr/bin/docker rm --force 7abb23d88fcb21604c69df4a483c63240cf9453d7524d71f21d0a6bf3ec66f97
+2026-11-11T17:31:46.9691146Z 7abb23d88fcb21604c69df4a483c63240cf9453d7524d71f21d0a6bf3ec66f97

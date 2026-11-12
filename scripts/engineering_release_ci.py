@@ -12,23 +12,18 @@ WORKFLOWS = ("agent-workshop.yml", "p6-offline.yml")
 
 
 def nf_source(workspace, entry, event, ref, sha):
-    """Main always exercises its own release tree. Stacked PRs can use their pinned peer."""
-    source = workspace
-    if ref == "refs/heads/main" and event in {"push", "workflow_dispatch"}:
-        checked_out = subprocess.check_output(["git", "-C", str(source), "rev-parse", "HEAD"], text=True).strip()
-        if checked_out != sha:
-            raise ValueError("Main checkout differs from the workflow event SHA")
-        if not (source / entry).is_file():
-            raise ValueError(f"Integrated NF entry is absent on main: {entry}")
-        tracked = subprocess.check_output(["git", "-C", str(source), "ls-tree", "--name-only", sha, "--", entry],
-                                          text=True).splitlines()
-        if tracked != [entry] or subprocess.run(["git", "-C", str(source), "diff", "--quiet", sha, "--", entry]).returncode:
-            raise ValueError(f"Integrated NF entry differs from the event commit: {entry}")
-    elif not (source / entry).is_file():
-        source = workspace / "nf-peer"
-    if not (source / entry).is_file():
-        raise ValueError(f"NF entry unavailable in selected checkout: {entry}")
-    return source
+    """Verify the integrated checkout at the workflow SHA, including a PR's synthetic merge."""
+    git = ["git", "-C", str(workspace)]
+    checked_out = subprocess.check_output([*git, "rev-parse", "HEAD"], text=True).strip()
+    if checked_out != sha:
+        raise ValueError(f"{event} checkout at {ref} differs from the workflow event SHA")
+    if not (workspace / entry).is_file():
+        raise ValueError(f"Integrated NF entry is absent: {entry}")
+    tracked = subprocess.check_output([*git, "ls-tree", "--name-only", sha, "--", entry],
+                                      text=True).splitlines()
+    if tracked != [entry] or subprocess.run([*git, "diff", "--quiet", sha, "--", entry]).returncode:
+        raise ValueError(f"Integrated NF entry differs from the event commit: {entry}")
+    return workspace
 
 
 def github_get(endpoint):

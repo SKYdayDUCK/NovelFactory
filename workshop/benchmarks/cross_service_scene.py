@@ -36,6 +36,7 @@ from test_p5_supervisor import backend
 from test_narrative import assertion, draft_for, extract
 from test_s9_dependencies import query as observed_query
 from novel_factory.application.narrative import NarrativeService
+from novel_factory.application.planning import PlanningService
 from novel_factory.application.conflict_resolution import ConflictResolutionService
 from novel_factory.application.semantic_dependencies import check_task_dependencies
 from novel_factory.domain.errors import DomainError
@@ -165,7 +166,7 @@ class Mail:
         return mid
 
 
-@pytest.mark.parametrize("preset", ["Minimal", "Standard"])
+@pytest.mark.parametrize("preset", ["Minimal", "Standard", "Long-form", "Research-Audit"])
 def test_real_delegation_unblocks_banquet_actor(
     kernel_env, dual_databases, tmp_path, monkeypatch, preset
 ):
@@ -181,7 +182,10 @@ def test_real_delegation_unblocks_banquet_actor(
         assert (
             repo.conn.exec_driver_sql("SELECT to_regclass('aw_organizations')").scalar_one() is None
         )
-    state = {"preset": preset, "organization": org, "nf_instance_id": instance}
+    maintainer = "memory" if preset == "Long-form" else "clerk"
+    reviewer = "stats" if preset == "Research-Audit" else "reviewer"
+    review_mode = "STATISTICS" if preset == "Research-Audit" else "PROSE"
+    state = {"maintainer": maintainer, "reviewer": reviewer, "review_mode": review_mode, "preset": preset, "organization": org, "nf_instance_id": instance}
     state["source"] = {
         "NovelFactory": source_identity(
             NF, ["src", "migrations", "tests/integration", "pyproject.toml"]
@@ -212,7 +216,7 @@ def test_real_delegation_unblocks_banquet_actor(
                 "INSERT INTO aw_installations(installation_id,nf_instance_id) VALUES (%s,%s)",
                 (installation, instance),
             )
-            bootstrap(conn, org, preset)
+            bootstrap(conn, org, preset, installation_id=installation)
             conn.execute("INSERT INTO aw_budget_accounts VALUES (%s,%s,%s)", (org, "2", "USD"))
         path = private_file(
             tmp_path / "nf-delegate.json",
@@ -281,7 +285,7 @@ def test_real_delegation_unblocks_banquet_actor(
                         rev,
                         content="Verify the warehouse record before the second actor makes a choice.",
                     )
-                    hires = [("clerk", "evidence_maintainer", "chief")]
+                    hires = [] if preset == "Long-form" else [(maintainer, "evidence_maintainer", "chief")]
                     if preset == "Minimal":
                         hires.extend(
                             [
@@ -310,7 +314,7 @@ def test_real_delegation_unblocks_banquet_actor(
                     for actor in ("actor-1", "actor-2", "actor-3"):
                         await mail.message("volume", actor, "ASSIGN", rev, parent=m)
                     with connect(aw_dsn) as conn:
-                        allow_slot(conn, org, installation, "inventory", "clerk", policy)
+                        allow_slot(conn, org, installation, "inventory", maintainer, policy)
                     intent = await mail.call(
                         "chief",
                         "aw_delegate",
@@ -377,14 +381,47 @@ def test_real_delegation_unblocks_banquet_actor(
             {"task": changed["task_id"]},
         ).scalar_one()
         plan = kernel.artifact(repo, scene["selected_plan_ref"], new_wr["work_id"])["payload"]
-    resolution = ConflictResolutionService(kernel).resolve(
-        owner, new_wr["work_id"], new_wr["branch_id"], str(case)
-    )
+    resolution_service = ConflictResolutionService(kernel)
+    resolution = resolution_service.resolve(owner, new_wr["work_id"], new_wr["branch_id"], str(case))
+    assert resolution["outcome"] == "REVIEW_REQUIRED"
+    independent = kernel.issue_grant(
+        owner, new_wr["work_id"], role_id="control_operator", branch_ids=[new_wr["branch_id"]],
+        capabilities=["ADMIN", "APPROVE", "ARTIFACT_WRITE"], planes=["WORLD"], max_story_time=point(60),
+    )["principal"]
+    decision = "DISCARD_CANDIDATE"
+    signed = kernel.put_artifact(independent, new_wr["work_id"], {
+        "case_id": str(case), "world_ref": new_wr, "decision": decision,
+        "reason": "The late reader used the old actor location. Keep the NF-selected future window.",
+    }, "EVIDENCE")
+    def finish_review():
+        return resolution_service.decide_review(
+            independent, new_wr, str(case), decision=decision, evidence_ref=signed
+        )
+    resolved = finish_review()
+    assert resolved["outcome"] == "REVIEW_DECIDED" and finish_review() == resolved
+    with kernel.db.uow(write=False) as repo:
+        original = kernel.artifact(repo, scene["initial_plan_ref"], new_wr["work_id"])["payload"]
+        selection = repo.one("selections", {
+            "work_id": new_wr["work_id"], "selection_kind": PlanningService.selection_key(plan["volume_id"])
+        })["artifact_ref"]
+        assert selection == scene["selected_plan_ref"] and selection != scene["initial_plan_ref"]
+        changes = [n["node_id"] for o, n in zip(original["nodes"], plan["nodes"], strict=True) if o != n]
+        retained = [n["node_id"] for o, n in zip(original["nodes"], plan["nodes"], strict=True) if o == n]
+        assert len(changes) == 2 and retained
+        assert repo.one("tasks", {"task_id": resolved["review_task_id"]})["state"] == "ACCEPTED"
+        check_task_dependencies(repo, unaffected["task_id"], unaffected["generation"])
+        assert kernel.head(repo, new_wr["work_id"], new_wr["branch_id"]) == new_wr
+    state["selected_plan_repair"] = {
+        "initial": scene["initial_plan_ref"], "selected": selection, "world_ref": new_wr,
+        "change_point": scene["change_point_ref"], "window": scene["window_ref"],
+        "revised_node_ids": changes, "retained_node_ids": retained,
+    }
     state["s9"] = {
         "case_id": str(case),
         "affected_task": changed["task_id"],
         "independent_task": unaffected["task_id"],
         "strategy_receipt": resolution,
+        "final_decision": resolved,
     }
     now = {
         **story,
@@ -418,7 +455,7 @@ def test_real_delegation_unblocks_banquet_actor(
     }
     with connect(aw_dsn) as conn:
         subject(conn, org, "script", "production")
-        subject(conn, org, "reviewer", "separate-review")
+        subject(conn, org, reviewer, "separate-review")
         register_artifact(
             conn,
             org,
@@ -444,10 +481,28 @@ def test_real_delegation_unblocks_banquet_actor(
             ],
             env={"PYTHONPATH": str(NF / "src")},
         )
-        assert (
-            await reconcile(aw_dsn, installation, org, state["operation_id"], remote(args))
-            == "BOUND"
-        )
+        async def scheduled_lookup():
+            operation = state["operation_id"]
+            with connect(aw_dsn) as conn:
+                row = conn.execute(
+                    """SELECT state, next_check - clock_timestamp() AS remaining
+                       FROM aw_delegations
+                       WHERE installation_id=%s AND org_id=%s AND operation_id=%s""",
+                    (installation, org, operation),
+                ).fetchone()
+                assert row and row["state"] == "BOUND"
+            # The broker persists its next eligible claim after each receipt.
+            # Independent review and author reporting can finish before that time.
+            wait_seconds = max(0.0, row["remaining"].total_seconds())
+            async with asyncio.timeout(30):
+                await asyncio.sleep(wait_seconds)
+                result = await reconcile(aw_dsn, installation, org, operation, remote(args))
+            state.setdefault("scheduled_lookups", []).append(
+                {"wait_seconds": wait_seconds, "result": result}
+            )
+            return result
+
+        assert await scheduled_lookup() == "BOUND"
         with connect(aw_dsn) as conn:
             attempt = conn.execute(
                 "SELECT attempt_id FROM aw_cost_observations WHERE org_id=%s AND state='UNKNOWN'",
@@ -477,15 +532,15 @@ def test_real_delegation_unblocks_banquet_actor(
                     "operation_id": "independent-review",
                     "artifact_ref": text_ref["artifact_id"],
                     "artifact_revision": text_ref["artifact_revision_id"],
-                    "mode": "PROSE",
+                    "mode": review_mode,
                     "risk_reason": "MATERIAL_CHANGE",
                     "ttl_seconds": 600,
-                    "reviewer_id": "reviewer",
+                    "reviewer_id": reviewer,
                 },
             )
             assert review["state"] == "PENDING"
             assigned = await mail.call(
-                "reviewer", "aw_review_get", {"review_id": review["review_id"]}
+                reviewer, "aw_review_get", {"review_id": review["review_id"]}
             )
             assert assigned["content_sha"] == text_ref["sha256"]
             assert assigned["evidence_refs"] == [
@@ -501,7 +556,7 @@ def test_real_delegation_unblocks_banquet_actor(
             assert task_view["task_state"] == "ACCEPTED" and task_view["hold"] == "HELD"
             state["author_task_progress"] = task_view
             decision = await mail.call(
-                "reviewer",
+                reviewer,
                 "aw_review_decide",
                 {
                     "operation_id": "review-result",
@@ -532,10 +587,7 @@ def test_real_delegation_unblocks_banquet_actor(
                 ),
             )
             state["author_retrieval"] = mail.history
-        assert (
-            await reconcile(aw_dsn, installation, org, state["operation_id"], remote(args))
-            == "SETTLED"
-        )
+        assert await scheduled_lookup() == "SETTLED"
 
     asyncio.run(finish())
     with connect(aw_dsn) as conn:

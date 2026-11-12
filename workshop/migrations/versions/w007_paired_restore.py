@@ -9,12 +9,12 @@ depends_on = None
 
 
 def upgrade():
-    op.execute("""CREATE TABLE aw_recovery_fences (
+    op.execute("""CREATE TABLE IF NOT EXISTS aw_recovery_fences (
         installation_id text PRIMARY KEY REFERENCES aw_installations(installation_id),
         epoch bigint NOT NULL CHECK(epoch>0), frozen boolean NOT NULL,
         reason text NOT NULL, changed_at timestamptz NOT NULL DEFAULT clock_timestamp()
     );
-    CREATE TABLE aw_recovery_proofs(
+    CREATE TABLE IF NOT EXISTS aw_recovery_proofs(
         installation_id text NOT NULL REFERENCES aw_installations,
         org_id text NOT NULL, operation_id uuid NOT NULL,
         epoch bigint NOT NULL CHECK(epoch>0), ledger jsonb,

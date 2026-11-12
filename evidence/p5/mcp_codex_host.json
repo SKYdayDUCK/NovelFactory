@@ -1,0 +1,22 @@
+{
+  "host": "codex-cli 0.167.0-alpha.4",
+  "transport": "Codex app-server to local stdio MCP",
+  "server": "NovelFactory",
+  "tools": [
+    "nf_project_status",
+    "nf_resume_project"
+  ],
+  "thread_id": "01a1c902-190d-72a0-8cf5-372075549f27",
+  "model_turns": 0,
+  "call": "nf_resume_project",
+  "result": {
+    "counts": {
+      "READY": 0,
+      "WAITING": 0,
+      "RUNNING": 0
+    },
+    "ready_count": 0,
+    "awakened": 0,
+    "recovered": 0
+  }
+}

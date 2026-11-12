@@ -1,0 +1,121 @@
+{
+  "status": "PASS_ENGINEERING",
+  "preregistered_at_commit": "ac579e0b89b55e613d32750ce1c07210e0b07022",
+  "workshop_harness_source": "b1c3e1519e4900673a6d3d2e0755d62a45b0ea9e",
+  "nf_product_source": "43dc369ab73e2faacb509b6ca16995848fc92c28",
+  "source_verification": "Compared the benchmark, contract and Workshop runtime files with the frozen Workshop source, and NF src/migrations and provider fixture with the frozen NF source. All byte-identical. Combined checkout was used for this paired suite. The separate four-preset suite records both clean worktree SHAs.",
+  "synthetic_model": "loopback HTTP adapter with fixed 50 ms simulated delay; 18 synthetic tokens per request",
+  "design": "Same executor, deterministic roster and task-to-employee order, two authorized slots, fixed or real NF AdaptiveController. Admissions, actual model concurrency and end-to-end queue-inclusive latency are measured separately. Other independent tests shared this host. Results are descriptive; no claim of causal speedup.",
+  "cases": [
+    {
+      "n": 10,
+      "arm": "fixed-2",
+      "source": "delegations-10-fixed-2.json",
+      "completed": 10,
+      "seconds": 4.316,
+      "completed_per_s": 2.317,
+      "p99_ms": 4074.492,
+      "concurrency_limit": 2,
+      "actual_peak": 1,
+      "admission_changes": [
+        {
+          "admitted": 0,
+          "completed": 0,
+          "target": 2
+        }
+      ]
+    },
+    {
+      "n": 10,
+      "arm": "adaptive-2",
+      "source": "delegations-10-adaptive-2.json",
+      "completed": 10,
+      "seconds": 6.042,
+      "completed_per_s": 1.655,
+      "p99_ms": 5749.944,
+      "concurrency_limit": 2,
+      "actual_peak": 1,
+      "admission_changes": [
+        {
+          "admitted": 0,
+          "completed": 0,
+          "target": 2
+        }
+      ]
+    },
+    {
+      "n": 50,
+      "arm": "fixed-2",
+      "source": "delegations-50-fixed-2.json",
+      "completed": 50,
+      "seconds": 18.901,
+      "completed_per_s": 2.645,
+      "p99_ms": 17205.356,
+      "concurrency_limit": 2,
+      "actual_peak": 2,
+      "admission_changes": [
+        {
+          "admitted": 0,
+          "completed": 0,
+          "target": 2
+        }
+      ]
+    },
+    {
+      "n": 50,
+      "arm": "adaptive-2",
+      "source": "delegations-50-adaptive-2.json",
+      "completed": 50,
+      "seconds": 34.85,
+      "completed_per_s": 1.435,
+      "p99_ms": 33464.86,
+      "concurrency_limit": 2,
+      "actual_peak": 1,
+      "admission_changes": [
+        {
+          "admitted": 0,
+          "completed": 0,
+          "target": 2
+        }
+      ]
+    },
+    {
+      "n": 200,
+      "arm": "fixed-2",
+      "source": "delegations-200-fixed-2.json",
+      "completed": 200,
+      "seconds": 122.205,
+      "completed_per_s": 1.637,
+      "p99_ms": 114768.91,
+      "concurrency_limit": 2,
+      "actual_peak": 1,
+      "admission_changes": [
+        {
+          "admitted": 0,
+          "completed": 0,
+          "target": 2
+        }
+      ]
+    },
+    {
+      "n": 200,
+      "arm": "adaptive-2",
+      "source": "delegations-200-adaptive-2.json",
+      "completed": 200,
+      "seconds": 357.919,
+      "completed_per_s": 0.559,
+      "p99_ms": 350108.338,
+      "concurrency_limit": 2,
+      "actual_peak": 1,
+      "admission_changes": [
+        {
+          "admitted": 0,
+          "completed": 0,
+          "target": 2
+        }
+      ]
+    }
+  ],
+  "paired_junit": "paired-verified.xml",
+  "previous_harness_failure": "The first attempted recording shadowed the arm variable with a slot policy dictionary and failed at the file-name expression. It produced no valid paired measurements. The corrected harness has separate variable names and ran all six arms again."
+}

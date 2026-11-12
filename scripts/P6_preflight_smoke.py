@@ -67,6 +67,20 @@ def main():
                   total_tokens=5000, reserved_tokens=100, spent_tokens=700, available_tokens=4200,
                   unquantified_attempts=0)
     run("saved budget receipt", experiment, scene, receipt=ledger)
+    optional = {**scene, "alternative_destination_ids": None, "allowed_item_gift": None,
+                "following_scenes": None, "volume_end": None}
+    run("explicit null scene options", experiment, optional)
+    run("final scene with no following slots", experiment,
+        {**optional, "volume_end": {"series_id": uid()}})
+    for invalid in ({}, ""):
+        run("invalid alternative locations", experiment,
+            {**scene, "alternative_destination_ids": invalid}, ("first_scene.locations",))
+    run("noncanonical task budget", experiment, {**scene, "reserve_amount": "1e-2"},
+        ("first_scene.reserve_amount",))
+    high_limits = {**experiment, "authorized_limits": {**limits, "total_tokens": 500001}}
+    run("dispatch token boundary", high_limits, {**scene, "token_reservation": 500000})
+    run("dispatch token overflow", high_limits, {**scene, "token_reservation": 500001},
+        ("first_scene.token_reservation",))
     run("unresolved usage", experiment, scene, ("shared_budget.receipt",),
         receipt={**ledger, "unquantified_attempts": 1})
     run("spent token allowance", experiment, scene, ("shared_budget.receipt",),

@@ -18,7 +18,7 @@ def team():
     install = uuid4().hex
     with connect(url) as conn:
         conn.execute("INSERT INTO aw_installations VALUES(%s,%s,true)", (install, "nf-test"))
-        bootstrap(conn, org, "Research-Audit")
+        bootstrap(conn, org, "Research-Audit", installation_id=install)
         names = conn.execute(
             "SELECT employee_id FROM aw_employees WHERE org_id=%s", (org,)
         ).fetchall()
@@ -26,6 +26,8 @@ def team():
             r["employee_id"]: authenticate(conn, enroll(conn, install, org, r["employee_id"], 1, 1))
             for r in names
         }
+
+    assert all(member.org_member and member.installation_id == install for member in ids.values())
 
     def identity(name):
         return ids[name]
@@ -176,3 +178,36 @@ def test_incident_whitelist_and_rate_limit(team):
             send(conn, ident, "actor-1", "ops", "INCIDENT", str(n), incident_code="SERVICE_OFFLINE")
         with pytest.raises(Denied, match="INCIDENT_RATE_LIMIT"):
             send(conn, ident, "actor-1", "ops", "INCIDENT", "next", incident_code="SERVICE_OFFLINE")
+
+
+def test_default_edges_enforce_each_direction_and_message_type(team):
+    url, ident = team
+    # These message kinds come from the W2 communication contract. Management edges also
+    # allow employees to request review and escalate an exception to their direct supervisor.
+    routes = [
+        ("script", "chief", ("PROPOSE_SCRIPT",), "REQUEST_REVISION"),
+        ("chief", "script", ("REQUEST_REVISION", "REPORT"), "PROPOSE_SCRIPT"),
+        ("chief", "volume", ("ASSIGN", "PAUSE", "REQUEST_REVISION"), "REPORT"),
+        ("volume", "chief", ("REPORT", "ASK", "REQUEST_DECISION", "EXCEPTION", "REQUEST_REVIEW"), "ASSIGN"),
+        ("volume", "actor-1", ("ASSIGN", "PLAN_NOTICE"), "ASK"),
+        ("actor-1", "volume", ("REPORT", "ASK", "REQUEST_RESOURCE", "EXCEPTION", "REQUEST_REVIEW"), "PLAN_NOTICE"),
+        ("review-lead", "reviewer", ("ASSIGN_REVIEW",), "REPORT"),
+        ("reviewer", "review-lead", ("REPORT", "EXCEPTION", "REQUEST_REVIEW"), "ASK"),
+    ]
+    with connect(url) as conn:
+        # An organization created with the signed W1 preset retains its original frozen edges.
+        org = ident("reviewer").org_id
+        assert conn.execute(
+            """SELECT 1 FROM aw_edges WHERE org_id=%s AND graph_revision=1
+               AND src='reviewer' AND dst='review-lead' AND kind='ASK'""",
+            (org,),
+        ).fetchone()
+        for source, target, allowed, denied in routes:
+            as_sender = TOOLS["aw_roster_get"][2](conn, ident(source))
+            advertised = {x["kind"] for x in as_sender["routes"] if x["src"] == source and x["dst"] == target}
+            assert set(allowed) <= advertised and denied not in advertised
+            for kind in allowed:
+                args = (conn, ident, source, target, kind, source + "-" + target + "-" + kind)
+                assert send(*args)["status"] == "QUEUED"
+            with pytest.raises(Denied, match="^ROUTE_DENIED$"):
+                send(conn, ident, source, target, denied, source + "-" + target + "-denied")
