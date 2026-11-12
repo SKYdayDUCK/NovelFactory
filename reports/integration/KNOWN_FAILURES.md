@@ -38,3 +38,5 @@ W6 已复现主管调任后的两项不相容岗位扩编，修复及红绿原�
 ## W6 签收与已知遗留
 
 [#25 的第一次文档检查](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43134466602)发现 16 处相对证据链接失效。修复链接后[候选检查](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43136015001)通过。W6 六条主线工作流中三条历史容量工作流失败，原结果、条件和 Issue #13 均见 [W6 主线签收](W6_主线签收.md)。P6_REAL_CREATION = BLOCKED_LOCAL_AUTHORIZATION，文学质量为 NOT_EVALUATED。
+
+#25 的合并主线两个作业均成功。W6 原始高压失败数字、宿主跳过项、双库演练拓扑及九档准入的实测并发边界见[原始证据核对](evidence/W6/signoff-ba892d3/w6-main-receipts.md)。

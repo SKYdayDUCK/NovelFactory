@@ -1,0 +1,151 @@
+{
+  "run_id": 43137991893,
+  "event": "push",
+  "head_sha": "ba892d3a424be39efccb697232a5614b26609cc4",
+  "conclusion": "success",
+  "run_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43137991893",
+  "jobs": {
+    "PostgreSQL 17 integration, concurrency and restore": {
+      "id": 130917850393,
+      "conclusion": "success",
+      "completed_at": "2026-11-12T02:10:06Z"
+    },
+    "Schema, domain, HTTP and production boundaries": {
+      "id": 130917850698,
+      "conclusion": "success",
+      "completed_at": "2026-11-12T01:57:49Z"
+    }
+  },
+  "hosted": {
+    "unit": {
+      "artifact_id": 13908825390,
+      "artifact_sha256": "8370b8c03fafac2029b022ada66440edfeafee95d16754298d9d72994a77dd7a",
+      "junit_file": "unit.xml",
+      "junit_sha256": "a42690868f25c22176ea1de2a799c4dfca94ec35357df47f0e1e27b41c756a16",
+      "pytest_json_summary": {
+        "passed": 398,
+        "total": 398,
+        "collected": 398
+      },
+      "junit_counts": {
+        "tests": 398,
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0,
+        "passed": 398
+      },
+      "skipped_test_names_and_reasons": {},
+      "schema": {
+        "status": "PASS",
+        "local_markdown_links": 1330,
+        "failures": []
+      }
+    },
+    "postgres": {
+      "artifact_id": 13909176667,
+      "artifact_sha256": "0f0788e1dd29ecb07eddb14d4d0b41bf20b90cefeee39c468d886f905dc039f6",
+      "junit_file": "postgres-all.xml",
+      "junit_sha256": "ceecd5f323b71333e08e36fb88c6af28176990d89abe9a244e49049dcb322dd7",
+      "pytest_json_summary": {
+        "passed": 817,
+        "skipped": 17,
+        "total": 834,
+        "collected": 834
+      },
+      "junit_counts": {
+        "tests": 834,
+        "errors": 0,
+        "failures": 0,
+        "skipped": 17,
+        "passed": 817
+      },
+      "skipped_test_names_and_reasons": {
+        "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[read-states0]": "Linux container setup denied by this runner",
+        "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[resume-after-choice-states1]": "Linux container setup denied by this runner",
+        "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[out-of-scope-states2]": "Linux container setup denied by this runner",
+        "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[concurrent-reentry-states3]": "Linux container setup denied by this runner",
+        "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[revoke-observation-states4]": "Linux container setup denied by this runner",
+        "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[budget-prevents-final-states5]": "Linux container setup denied by this runner",
+        "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[invalid-uuid-states6]": "Linux container setup denied by this runner",
+        "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[oversized-choice-states7]": "Linux container setup denied by this runner",
+        "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[over-token-cap-states8]": "Linux container setup denied by this runner",
+        "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[skip-states9]": "Linux container setup denied by this runner",
+        "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[unknown-first-states10]": "Linux container setup denied by this runner",
+        "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[unknown-final-states11]": "Linux container setup denied by this runner",
+        "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[wrong-tool-states12]": "Linux container setup denied by this runner",
+        "tests.integration.test_p5_role_container::test_role_container_calls_actual_task_mcp": "Linux container setup denied by this runner",
+        "tests.integration.test_p5_role_container::test_namespace_hides_service_resources": "Linux container setup denied by this runner",
+        "tests.integration.test_p5_supervised_role_read::test_supervisor_uses_bounded_role_read[single-send]": "Linux container setup denied by this runner",
+        "tests.integration.test_p5_supervised_role_read::test_supervisor_uses_bounded_role_read[fail-before-reserving]": "Linux container setup denied by this runner"
+      },
+      "r1-acceptance.json": {
+        "check_counts": {
+          "PASS": 34,
+          "PARTIAL_SYNC_FENCE_ONLY": 1,
+          "PASS_VISIBLE_SHAPE_ONLY": 1,
+          "NOT_IN_SCOPE_P3_02": 1
+        },
+        "correctness_check_gate": "PARTIAL_WITH_STATED_BOUNDARIES",
+        "mapped_test_execution_gate": "PASS",
+        "provided_load_run_gate": "PASS_FOR_PROVIDED_RUNS",
+        "provided_capacity_run_gate": "PASS_FOR_PROVIDED_RUNS",
+        "load_coverage_gate": "NOT_EXECUTED",
+        "overall_engineering_gate": "NOT_MET",
+        "independent_gates": {
+          "real_model_production": "BLOCKED_ENVIRONMENT",
+          "author_full_read": "PENDING_AUTHOR",
+          "overall_p2": "NOT_FULLY_ACCEPTED"
+        },
+        "cli_gate_scope": "executed-tests",
+        "cli_exit_code": 0
+      },
+      "load-smoke-10.json": {
+        "engineer_correctness": "PASS",
+        "capacity_gate": "PASS",
+        "bounded_recovery_business_gate": "PASS",
+        "logical_agent_task_count": 10,
+        "profile": "mixed"
+      }
+    }
+  },
+  "complementary_historical_native_receipt": {
+    "source": "50c8c5ed36cc2cfb83d6624c65ed33336e0f1771",
+    "evidence_url": "https://github.com/SKYdayDUCK/NovelFactory/blob/df8bea90fe19ea492220448e07323f63c4e496ea/reports/integration/evidence/W6/candidate-50c8c5e/creative-and-roles/role-namespaces.zip",
+    "zip_sha256": "79e9a18313b67766af3f8b6d7c1da2e98e54116080224fd1bdc7440995d422ae",
+    "junit_counts": {
+      "tests": 17,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 17
+    },
+    "matched_hosted_skip_nodeids": [
+      "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[budget-prevents-final-states5]",
+      "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[concurrent-reentry-states3]",
+      "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[invalid-uuid-states6]",
+      "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[out-of-scope-states2]",
+      "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[over-token-cap-states8]",
+      "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[oversized-choice-states7]",
+      "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[read-states0]",
+      "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[resume-after-choice-states1]",
+      "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[revoke-observation-states4]",
+      "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[skip-states9]",
+      "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[unknown-final-states11]",
+      "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[unknown-first-states10]",
+      "tests.integration.test_p5_actor_tool_choice::test_model_selects_scoped_lookup_before_final_candidate[wrong-tool-states12]",
+      "tests.integration.test_p5_role_container::test_namespace_hides_service_resources",
+      "tests.integration.test_p5_role_container::test_role_container_calls_actual_task_mcp",
+      "tests.integration.test_p5_supervised_role_read::test_supervisor_uses_bounded_role_read[fail-before-reserving]",
+      "tests.integration.test_p5_supervised_role_read::test_supervisor_uses_bounded_role_read[single-send]"
+    ],
+    "hosted_skips_without_native_match": [],
+    "source_diff_to_push": [
+      "reports/integration/CURRENT_STAGE.md",
+      "reports/integration/DELIVERY_LEDGER.md",
+      "reports/integration/KNOWN_FAILURES.md",
+      "reports/integration/NEXT_AGENT_HANDOFF.md",
+      "reports/integration/PR_MERGE_MATRIX.md",
+      "reports/integration/W6_主线签收.md"
+    ]
+  }
+}

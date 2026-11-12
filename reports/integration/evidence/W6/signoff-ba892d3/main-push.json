@@ -1,0 +1,196 @@
+{
+  "commit": "ba892d3a424be39efccb697232a5614b26609cc4",
+  "tree": "628cdba5309671150ca0edff9159386bc6693e25",
+  "event": "push",
+  "run_id": 43137991893,
+  "status": "completed",
+  "conclusion": "success",
+  "jobs": [
+    {
+      "name": "PostgreSQL 17 integration, concurrency and restore",
+      "id": 130917850393,
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43137991893/job/130917850393",
+      "conclusion": "success",
+      "started_at": "2026-11-12T01:57:12Z",
+      "completed_at": "2026-11-12T02:10:06Z",
+      "steps": [
+        [
+          "Set up job",
+          "success"
+        ],
+        [
+          "Initialize containers",
+          "success"
+        ],
+        [
+          "Run actions/checkout@v4",
+          "success"
+        ],
+        [
+          "Run actions/setup-python@v5",
+          "success"
+        ],
+        [
+          "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+          "success"
+        ],
+        [
+          "Install PostgreSQL 17 client and Linux role isolation dependencies",
+          "success"
+        ],
+        [
+          "Install the pinned native Codex app-server for the restart test",
+          "success"
+        ],
+        [
+          "Install locked dependencies",
+          "success"
+        ],
+        [
+          "Record runtime and initialize fresh PostgreSQL database",
+          "success"
+        ],
+        [
+          "All tests with real PostgreSQL 17, race and recovery evidence",
+          "success"
+        ],
+        [
+          "Compare current genesis replay with the pinned baseline",
+          "success"
+        ],
+        [
+          "Compare current strict canonical checks on the same world",
+          "success"
+        ],
+        [
+          "Reproduce historical Context Compiler experiment at e0b0f2b",
+          "success"
+        ],
+        [
+          "Probe actual memory services and authorization boundaries",
+          "success"
+        ],
+        [
+          "Persist the complete six-scene TEST_FIXTURE production run",
+          "success"
+        ],
+        [
+          "Exercise the real HTTP and PostgreSQL behavioral load harness",
+          "success"
+        ],
+        [
+          "Join A-H design checks to executed JUnit evidence",
+          "success"
+        ],
+        [
+          "Upload PostgreSQL, concurrency and recovery audit evidence",
+          "success"
+        ],
+        [
+          "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+          "success"
+        ],
+        [
+          "Post Run actions/setup-python@v5",
+          "success"
+        ],
+        [
+          "Post Run actions/checkout@v4",
+          "success"
+        ],
+        [
+          "Stop containers",
+          "success"
+        ],
+        [
+          "Complete job",
+          "success"
+        ]
+      ]
+    },
+    {
+      "name": "Schema, domain, HTTP and production boundaries",
+      "id": 130917850698,
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43137991893/job/130917850698",
+      "conclusion": "success",
+      "started_at": "2026-11-12T01:57:12Z",
+      "completed_at": "2026-11-12T01:57:49Z",
+      "steps": [
+        [
+          "Set up job",
+          "success"
+        ],
+        [
+          "Run actions/checkout@v4",
+          "success"
+        ],
+        [
+          "Run actions/setup-python@v5",
+          "success"
+        ],
+        [
+          "Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+          "success"
+        ],
+        [
+          "Install locked dependencies",
+          "success"
+        ],
+        [
+          "Schema and original design validation",
+          "success"
+        ],
+        [
+          "Original standalone mechanisms",
+          "success"
+        ],
+        [
+          "Python unit, contract and ASGI slow-body regression tests",
+          "success"
+        ],
+        [
+          "Deterministic Chinese memory retrieval evaluation",
+          "success"
+        ],
+        [
+          "Same-source Chinese context and review ablations",
+          "success"
+        ],
+        [
+          "Upload immutable unit and schema run evidence",
+          "success"
+        ],
+        [
+          "Post Run astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e",
+          "success"
+        ],
+        [
+          "Post Run actions/setup-python@v5",
+          "success"
+        ],
+        [
+          "Post Run actions/checkout@v4",
+          "success"
+        ],
+        [
+          "Complete job",
+          "success"
+        ]
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "p1-postgres-concurrency-1",
+      "id": 13909176667,
+      "digest": "sha256:0f0788e1dd29ecb07eddb14d4d0b41bf20b90cefeee39c468d886f905dc039f6",
+      "size": 1779790
+    },
+    {
+      "name": "p1-schema-unit-1",
+      "id": 13908825390,
+      "digest": "sha256:8370b8c03fafac2029b022ada66440edfeafee95d16754298d9d72994a77dd7a",
+      "size": 301148
+    }
+  ]
+}
