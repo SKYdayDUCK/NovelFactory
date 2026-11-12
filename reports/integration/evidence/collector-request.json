@@ -1,139 +1,24 @@
 {
   "schema": 1,
   "repository": "SKYdayDUCK/NovelFactory",
-  "event": "push",
-  "head": "0420356b0bd0bfd675494e581799946c4b967f6e",
-  "checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
-  "tree": "c15a497115b404e05a1abc194363888c3ca66725",
-  "base": "533c1f526ef8841610d5c414e77ecbea8bbd5e35",
+  "event": "pull_request",
+  "head": "5aa9b71b66c7800f58214fa368e22ebeb9c3d56b",
+  "checkout": "3ada28b0c35e59dfbcc903f981403fb0e0467dfe",
+  "tree": "f8b5f9ff2f53d726cf5c666aea7cacf176f1fac9",
+  "base": "0420356b0bd0bfd675494e581799946c4b967f6e",
   "runs": {
-    "p4-recovery-drill.yml": {
-      "id": 43152869943,
-      "artifacts": [
-        {
-          "id": 13914801152,
-          "name": "p4-real-pitr-1",
-          "digest": "sha256:218506f869355dcedda5e5da3b2144cf74af02f153b1535e3d6e898f7438ee9b"
-        }
-      ]
-    },
-    "p6-offline.yml": {
-      "id": 43152869372,
-      "artifacts": [
-        {
-          "id": 13914746770,
-          "name": "p6-offline-checks",
-          "digest": "sha256:fcce748660dcb2a2f2fbdc1e7cb35296071c7ca0726a457fc8fd79e109ff8860"
-        },
-        {
-          "id": 13914746768,
-          "name": "p6-shared-token-recovery",
-          "digest": "sha256:95ad8893188479ba1ac9cb29f1a80d09bfe9fbe7f7e45fefeef54488812b237a"
-        }
-      ]
-    },
-    "p3-p4-evidence.yml": {
-      "id": 43152869367,
-      "artifacts": [
-        {
-          "id": 13914751383,
-          "name": "p3-context-paired-1",
-          "digest": "sha256:47d1aa02c31688f5b8624f7630d364aa92733bd47d88e43f2b83eca558a4784a"
-        },
-        {
-          "id": 13914268447,
-          "name": "p3-isolated-200-overload-1",
-          "digest": "sha256:7d32981283088417e7f4cfabf4a191449cec48e4ae7098df0a94bcf170127005"
-        },
-        {
-          "id": 13914008744,
-          "name": "p3-isolated-200-mixed-1",
-          "digest": "sha256:13ccb639340f2260db6a85e33d54c537aae1bb8e3bf68cb24d301423cef5cb35"
-        }
-      ]
-    },
-    "agent-workshop.yml": {
-      "id": 43152869330,
-      "artifacts": [
-        {
-          "id": 13915155254,
-          "name": "workshop-results",
-          "digest": "sha256:196e9b6dd3758991a1f8d9ab0058dccb2d4f1a0f12e87e381e872692016e3b9c"
-        },
-        {
-          "id": 13915080342,
-          "name": "workshop-scene-recovery-results",
-          "digest": "sha256:db172b91b85cb2f2366f6dfa9a73e1e3f806252e55d57a223a06cd7b46e3ae77"
-        },
-        {
-          "id": 13914333735,
-          "name": "nf-bridge-results",
-          "digest": "sha256:a3824d9aa9b8bebcfac30afafb2c5f7002ecaac84d6f2e3b453968701ddb3d5c"
-        },
-        {
-          "id": 13914228878,
-          "name": "workshop-comparisons",
-          "digest": "sha256:9a6eab2ca44f9edc78dfa4e45474c12321098dbb8a1c6c853a25dafd3a353e4c"
-        }
-      ]
-    },
-    "p2-load.yml": {
-      "id": 43152869523,
-      "artifacts": [
-        {
-          "id": 13915190405,
-          "name": "p2-load-200-overload-1",
-          "digest": "sha256:b6ed369ac774d41f9a11deb402d0ec091b0a48a33932d3e1e09a0521c46a9543"
-        },
-        {
-          "id": 13914836408,
-          "name": "p2-load-50-overload-1",
-          "digest": "sha256:79c77542ed142e526693b3d2a1fdd0f99c69d60ad9b94b7ca4b42d1a162b6141"
-        },
-        {
-          "id": 13913759419,
-          "name": "p2-load-200-mixed-1",
-          "digest": "sha256:d3f200dfac2da7f6fd1ca267c5fec753221aca70dd9f1442e0d7911ca84b46d9"
-        },
-        {
-          "id": 13913414894,
-          "name": "p2-load-50-mixed-1",
-          "digest": "sha256:652686e1beeb4ece648ff3f087e898ac8193dcf2bf065b7692e46479b82c855e"
-        }
-      ]
-    },
-    "p3-scale-experiments.yml": {
-      "id": 43152869356,
-      "artifacts": [
-        {
-          "id": 13915520702,
-          "name": "p3-scale-500-read-soak-1",
-          "digest": "sha256:2289008e826a84bd377595c1a4ac39882f5eb21807659078b1f238c7511e7818"
-        },
-        {
-          "id": 13915120898,
-          "name": "p3-scale-500-mixed-1",
-          "digest": "sha256:7c0414e261e7473eeb93da10955cfd5bf2be79ec89e4ee174055ecf3d56a834d"
-        },
-        {
-          "id": 13913879031,
-          "name": "p3-scale-1000-read-open-1",
-          "digest": "sha256:cc71182d1ac5ab4d25f4c47daa8c96ef87819a200fb41e4e5f63660eb21596ae"
-        }
-      ]
-    },
     "p1-integrity.yml": {
-      "id": 43152869266,
+      "id": 43157805358,
       "artifacts": [
         {
-          "id": 13915776485,
+          "id": 13917332767,
           "name": "p1-postgres-concurrency-1",
-          "digest": "sha256:f72ad1615cf66385f1d84923a913d110c722abb26800acb7df1b856c1b396d19"
+          "digest": "sha256:9c6be1d3b57521477558bcc68420a33af336eef7dfd1abd86d4fb56e87b2b2d5"
         },
         {
-          "id": 13913939177,
+          "id": 13915884774,
           "name": "p1-schema-unit-1",
-          "digest": "sha256:8652299982e69362fd10587934b739e4368fdb2fc1eb216ffdde2cedce804ed5"
+          "digest": "sha256:ddeea0069b5136e4aded0c1fc8da11bc972348e3a40da1c8117c2367f0401173"
         }
       ]
     }
