@@ -1,0 +1,310 @@
+{
+  "stage": "P5.7-S0",
+  "scope": "offline contract, static runtime and source audit",
+  "checkout_sha": "a8073b6664df8953330dd3bc0240038fcb64f09a",
+  "checkout_tree": "fa1a10cc5f237d5a06bbac283c1c5e492fdf5ed6",
+  "event": "push",
+  "examples": [
+    {
+      "name": "default_configuration",
+      "expected_valid": true,
+      "observed_valid": true
+    },
+    {
+      "name": "configuration_adaptive_independent",
+      "expected_valid": true,
+      "observed_valid": true
+    },
+    {
+      "name": "configuration_dynamic_independent",
+      "expected_valid": true,
+      "observed_valid": true
+    },
+    {
+      "name": "context_packet_actor",
+      "expected_valid": true,
+      "observed_valid": true
+    },
+    {
+      "name": "bounded_plan_candidate",
+      "expected_valid": true,
+      "observed_valid": true
+    },
+    {
+      "name": "hypothetical_simulation",
+      "expected_valid": true,
+      "observed_valid": true
+    },
+    {
+      "name": "engineering_review",
+      "expected_valid": true,
+      "observed_valid": true
+    },
+    {
+      "name": "blind_literary_review",
+      "expected_valid": true,
+      "observed_valid": true
+    },
+    {
+      "name": "scoped_role_skill_proposal",
+      "expected_valid": true,
+      "observed_valid": true
+    },
+    {
+      "name": "instruction_candidate",
+      "expected_valid": true,
+      "observed_valid": true
+    },
+    {
+      "name": "frozen_three_arm_experiment",
+      "expected_valid": true,
+      "observed_valid": true
+    },
+    {
+      "name": "frozen_ab_experiment",
+      "expected_valid": true,
+      "observed_valid": true
+    },
+    {
+      "name": "promotion_recommendation",
+      "expected_valid": true,
+      "observed_valid": true
+    },
+    {
+      "name": "promotion_with_independent_authority",
+      "expected_valid": true,
+      "observed_valid": true
+    },
+    {
+      "name": "disabled_execution_witness",
+      "expected_valid": true,
+      "observed_valid": true
+    },
+    {
+      "name": "unknown_hold_execution_log",
+      "expected_valid": true,
+      "observed_valid": true
+    }
+  ],
+  "invalid_examples": [
+    {
+      "name": "configuration_missing_explicit_default",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "dynamic_without_master",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "adaptive_without_master",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "promotion_without_adaptive",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "context_unversioned_source",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "actor_unfiltered_world",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "context_missing_source_hash",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "unbounded_plan",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "quota_missing",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "simulation_commits_hypothesis",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "simulation_unbounded",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "unchecked_engineering_literary_claim",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "unsupported_factual_contradiction",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "reviewer_independence_receipt_missing",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "unscoped_workshop_binding",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "role_proposal_installs_itself",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "candidate_already_published",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "candidate_ignores_failures",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "adaptive_arm_enables_production_promotion",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "static_arm_enables_harness",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "freeze_cherry_picks_successes",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "promotion_without_authority",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "unproven_literature_with_claimed_readers",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "auto_route_without_feature_or_authority",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "local_ledger_fabricated",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "disabled_dispatch",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "no_attempt_billed",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "unknown_called_settled",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "role_requests_admin",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "ab_discloses_arm_or_enables_promotion",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "rework_with_no_findings",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "unknown_amount_exceeds_nf_precision",
+      "expected_valid": false,
+      "observed_valid": false
+    },
+    {
+      "name": "h5_without_dynamic_feature",
+      "expected_valid": false,
+      "observed_valid": false
+    }
+  ],
+  "default_configuration": {
+    "schema_version": "1.0",
+    "kind": "CONFIGURATION",
+    "creative_harness": {
+      "enabled": false,
+      "dynamic_agents": {
+        "enabled": false
+      },
+      "adaptive_instructions": {
+        "enabled": false,
+        "auto_promote": false
+      }
+    }
+  },
+  "world_ref": {
+    "deployed_contract": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef",
+    "valid_and_invalid_checked": [
+      "scope.world_ref",
+      "context.world_ref"
+    ]
+  },
+  "actor_snapshot": {
+    "role_version": "2.1.0",
+    "skill_version": "2.1.0",
+    "runtime_sha256": "f1bf28443b2c37c6881fd83f1332e3101e37e2f898b381054d32378ecd5c38a4",
+    "role_blob": "89f0910970c8daf55fe764784ebfeb5f0bd9f029",
+    "skill_blob": "23d291058a5a44e71bbf68a964238f64beb9386e",
+    "role_id": "character_actor",
+    "task_kind": "character_action",
+    "skill_name": "simulate-character"
+  },
+  "runtime": {
+    "roles": 10,
+    "skills": 12,
+    "snapshots_checked": 66,
+    "rejected_combinations": [
+      [
+        "character_actor",
+        "S0_UNREGISTERED_MODE",
+        "simulate-character"
+      ],
+      [
+        "character_actor",
+        "character_action",
+        "prepare-world"
+      ]
+    ]
+  },
+  "source_audit": {
+    "source_commit": "276820316129d546b0a13118bcbe283b06507795",
+    "entries": 77,
+    "required_instruction_paths": 34
+  },
+  "status": "PASS"
+}
