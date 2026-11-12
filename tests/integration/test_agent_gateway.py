@@ -58,9 +58,11 @@ class FixtureAdapter:
             raw_response={"fixture": True}, request_sha256=request.request_sha256)
 
 
-def setup_gateway(env, adapter=None, *, role="writer", materials=(), private_material=False):
+def setup_gateway(env, adapter=None, *, role="writer", materials=(), private_material=False,
+                  world=None, actor_key="protagonist", story_time=None, task_inputs=()):
     kernel = env["kernel"]
-    world = load_fixture(kernel)
+    story_time = point(1) if story_time is None else story_time
+    world = load_fixture(kernel) if world is None else world
     kind = "character_action" if role == "character_actor" else "scene_draft"
     adapter = adapter or FixtureAdapter()
     gateway = AgentGateway(kernel, {"fixture": adapter})
@@ -69,18 +71,19 @@ def setup_gateway(env, adapter=None, *, role="writer", materials=(), private_mat
                                         {"secret": "future-only-cause"}, "TEXT")]
     prepared = gateway.prepare_input(world["principal"], world["world_ref"], role_id=role, task_kind=kind,
         assignment="完成当前合法上下文允许的候选任务；未知内容保持未知。", adapter_id="fixture", material_refs=materials)
-    actor_id = world["ids"]["protagonist"] if role == "character_actor" else None
+    actor_id = world["ids"][actor_key] if role == "character_actor" else None
     plane = "BELIEF" if actor_id else "WORLD"
     granted = kernel.issue_grant(world["principal"], world["world_ref"]["work_id"], role_id=role, actor_id=actor_id,
-        capabilities=["READ", "COMPILE", "TASK_CREATE", "TASK_CLAIM"], planes=[plane], max_story_time=point(1))
+        branch_ids=[world["world_ref"]["branch_id"]], capabilities=["READ", "COMPILE", "TASK_CREATE", "TASK_CLAIM"],
+        planes=[plane], max_story_time=story_time)
     principal = granted["principal"]
     manifest = kernel.put_artifact(world["principal"], world["world_ref"]["work_id"],
         {"subject_ids": [world["ids"]["sword"]], "predicates": ["owner", "active_holder"]}, "INPUT_MANIFEST")
     spec = {"schema_version": "2.0", "task_id": str(uuid4()), "generation": 0, "role_id": role, "task_kind": kind,
-            "state": "READY", "world_ref": world["world_ref"], "story_time": point(1), "context_bundle_id": None,
+            "state": "READY", "world_ref": world["world_ref"], "story_time": story_time, "context_bundle_id": None,
             "policy_version": "nf-policy-1", "dependency_fingerprint": None,
             "runtime_contract_version": prepared["runtime_contract_version"], "capability_grant_id": principal.grant_id,
-            "input_artifacts": [manifest, prepared["input_ref"]],
+            "input_artifacts": [manifest, prepared["input_ref"], *task_inputs],
             "budget": {"currency": "USD", "max_amount": "1", "token_budget": 250000},
             "wall_deadline": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()}
     kernel.create_task(principal, spec, spec["task_id"])
@@ -88,13 +91,13 @@ def setup_gateway(env, adapter=None, *, role="writer", materials=(), private_mat
     task = kernel.claim_task(principal, worker, task_id=spec["task_id"], lease_seconds=600)
     cut = {"plane": plane}
     if actor_id:
-        cut.update(actor_id=actor_id, known_at=point(1))
+        cut.update(actor_id=actor_id, known_at=story_time)
     compiled = WorldQueryService(kernel).context_compile(principal, {
         "schema_version": "2.1", "task_id": task["task_id"], "generation": task["generation"],
         "recipe_id": "ACTOR" if actor_id else "WRITER", "input_manifest_ref": manifest,
         "read_contract": {"revision": {"mode": "FIXED", "world_ref": world["world_ref"]},
                           "process_policy": "ALLOW_PARTIAL", "index_policy": "AUTHORITATIVE", "max_wait_ms": 0},
-        "knowledge_cut": cut, "subject_time": {"kind": "POINT", "at": point(1)},
+        "knowledge_cut": cut, "subject_time": {"kind": "POINT", "at": story_time},
         "token_budget": 20000, "idempotency_key": "compile:" + task["task_id"]})
     assert compiled["status"] == "READY"
     budget = kernel.tasks.create_budget(world["world_ref"]["work_id"], "2")

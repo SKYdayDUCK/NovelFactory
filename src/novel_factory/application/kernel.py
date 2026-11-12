@@ -278,7 +278,13 @@ class Kernel:
         grant cannot expose bytes through a read/revocation race.
         """
         grant = self.authorize(r, principal, work_id, "READ")
-        self.artifact(r, ref, work_id)
+        artifact = self.artifact(r, ref, work_id)
+        if artifact["kind"] == "CREATIVE_CONTEXT_SNAPSHOT":
+            # The snapshot joins control metadata and private prose. Its UUID is
+            # an audit reference, never a transferable literary read capability.
+            branch = artifact["payload"]["packet"]["scope"]["world_ref"]["branch_id"]
+            self.authorize(r, principal, work_id, "ADMIN", branch)
+            return
         if "ADMIN" in grant["capabilities"]:
             return
         from novel_factory.application.queries import WorldQueryService

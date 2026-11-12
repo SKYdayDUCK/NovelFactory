@@ -1,0 +1,221 @@
+{
+  "stage": "S1",
+  "base_commit": "1ef78e6b6a4a22339508de52a854e11a4be65bec",
+  "code_and_tests_tree_before_evidence": "7ad771cce45f46e0b1bde4c080af543e42f3a263",
+  "tested_blobs": {
+    "contracts/agent.schema.json": "f7a66b8c5e0a2040cfa5380ac0d4f0d05db20ac5",
+    "contracts/harness.schema.json": "0530ee935e3305e64a2cf723f6683e5be8024190",
+    "migrations/versions/0019_p57_context_sources.py": "fe88c63b02f942e9a621ee9bd3f298e383e47cef",
+    "runtime/provenance.json": "c0a15313284b375343a5e0933d3e8e7ce522d0c1",
+    "src/novel_factory/application/actor_lookup.py": "f6b4b9a1c9d8b941f32d72737a54e3d6a15099e2",
+    "src/novel_factory/application/agent_gateway.py": "7196f6427312195d66c32c20273bd3a451505d38",
+    "src/novel_factory/application/candidate_delivery.py": "25fc8b117fd11ab94bef4d9b848f8249cace0816",
+    "src/novel_factory/application/creative_context.py": "710e3daa29787c4248d2a2f6ecc104cd5e0cad2e",
+    "src/novel_factory/application/creative_context_store.py": "b88f7dac8924060fd575b57d619e8b2e24aed251",
+    "src/novel_factory/application/kernel.py": "31bdbe81c49f7cf7eef9f4ea138d164ee2313b8b",
+    "src/novel_factory/application/narrative.py": "3fba0254e8884382043b94bea9aed11e24ea910e",
+    "src/novel_factory/application/supervisor.py": "6458769a1eef358c3f94d31134ca89d8285ae17a",
+    "src/novel_factory/contracts/_schema_bundle.py": "f225f0986c5304668353be1196bb5fd427fa5dd3",
+    "src/novel_factory/contracts/registry.py": "3edded1f2051937c540e8ed37e940ac1c61b98c3",
+    "src/novel_factory/infrastructure/creative_config.py": "6d0fc8bb924a2ffb467922b758a4ae0f899a7085",
+    "tests/integration/test_agent_gateway.py": "b38e36969a60296b6599984acefd29afa23ce6c3",
+    "tests/integration/test_harness_actor_hosts.py": "1df18562e35af73c7986857b3a9b98e6c56dc97b",
+    "tests/integration/test_harness_context.py": "d033679d56cb7f5792532933b35c3d19d4ce74be",
+    "tests/integration/test_harness_creative_materials.py": "54e2b7ac5efba6a01e92a1419ed20d2d8475f3d0",
+    "tests/integration/test_harness_isolation.py": "02b17037ba5256f479fd9adb1b85eedd669fb38d",
+    "tests/unit/test_harness_configuration.py": "667d89ed10e146b0dc671ef6e035707a809c938e"
+  },
+  "local_time_zone": "UTC",
+  "postgres": "17.11",
+  "redis": "8.0.2",
+  "model": "deterministic fixtures only",
+  "paid_calls": 0,
+  "literary_quality": "NOT_EVALUATED",
+  "summary": {
+    "passed": 39,
+    "total": 39,
+    "collected": 39
+  },
+  "duration_seconds": 40.508612871170044,
+  "tests": [
+    {
+      "id": "tests/integration/test_harness_actor_hosts.py::test_harness_actor_uses_frozen_prose_and_control_identity[host-read]",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/integration/test_harness_actor_hosts.py::test_harness_actor_uses_frozen_prose_and_control_identity[model-selected-lookup]",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/integration/test_harness_context.py::test_frozen_model_input_survives_restart_with_feature_off",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/integration/test_harness_context.py::test_existing_static_task_survives_new_enabled_gateway",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/integration/test_harness_context.py::test_revocation_during_external_call_prevents_harness_delivery",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/integration/test_harness_context.py::test_restart_after_freeze_reuses_same_bytes_without_reading_materials_again",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/integration/test_harness_creative_materials.py::test_writer_receives_assigned_style_voice_and_adjacent_prose",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/integration/test_harness_isolation.py::test_actors_receive_only_their_own_belief_in_production_dispatch",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/integration/test_harness_isolation.py::test_foreign_draft_never_reaches_model[work]",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/integration/test_harness_isolation.py::test_foreign_draft_never_reaches_model[branch]",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/integration/test_harness_isolation.py::test_superseded_manuscript_blocks_delivery_and_replay",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/integration/test_agent_gateway.py::test_validated_candidate_replays_without_model_or_world_effects",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/integration/test_agent_gateway.py::test_unknown_actual_cost_preserves_money_and_measured_usage",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/integration/test_agent_gateway.py::test_timeout_retains_unknown_and_cannot_retry_using_another_key",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/integration/test_agent_gateway.py::test_nested_wrong_actor_is_not_an_accepted_result",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/integration/test_agent_gateway.py::test_cancel_or_revoke_during_model_wait_retains_evidence_but_blocks_delivery[cancel]",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/integration/test_agent_gateway.py::test_cancel_or_revoke_during_model_wait_retains_evidence_but_blocks_delivery[revoke]",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/integration/test_agent_gateway.py::test_missing_credential_is_blocked_before_any_call_or_reservation",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/integration/test_agent_gateway.py::test_character_host_without_verified_isolation_cannot_dispatch",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/integration/test_agent_gateway.py::test_same_call_concurrently_dispatches_only_once",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/integration/test_agent_gateway.py::test_distinct_call_keys_race_is_fenced_inside_reservation_transaction",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/integration/test_agent_gateway.py::test_unbound_input_wrong_generation_or_worker_never_calls_model",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/integration/test_agent_gateway.py::test_input_manifest_does_not_grant_access_to_private_material",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/integration/test_agent_gateway.py::test_actor_receives_only_own_compiled_belief_and_frozen_runtime",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/integration/test_agent_gateway.py::test_protocol_failure_keeps_raw_output_and_never_creates_a_candidate",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/queries/test_context_dependency_atomicity.py::test_context_preserves_positive_negative_alias_and_coverage_dependencies",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/queries/test_context_dependency_atomicity.py::test_failed_dependency_write_rolls_back_context_binding_receipt_and_outbox",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/queries/test_context_dependency_atomicity.py::test_revocation_after_sampling_prevents_any_dependency_binding",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/unit/test_harness_configuration.py::test_absent_configuration_retains_all_static_defaults",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/unit/test_harness_configuration.py::test_explicit_configuration_round_trips_at_service_boundary[values0]",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/unit/test_harness_configuration.py::test_explicit_configuration_round_trips_at_service_boundary[values1]",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/unit/test_harness_configuration.py::test_explicit_configuration_round_trips_at_service_boundary[values2]",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/unit/test_harness_configuration.py::test_explicit_configuration_round_trips_at_service_boundary[values3]",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/unit/test_harness_configuration.py::test_malformed_or_unsafe_configuration_does_not_become_static[unknown]",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/unit/test_harness_configuration.py::test_malformed_or_unsafe_configuration_does_not_become_static[missing]",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/unit/test_harness_configuration.py::test_malformed_or_unsafe_configuration_does_not_become_static[coercion]",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/unit/test_harness_configuration.py::test_malformed_or_unsafe_configuration_does_not_become_static[parent]",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/unit/test_harness_configuration.py::test_malformed_or_unsafe_configuration_does_not_become_static[promotion]",
+      "outcome": "passed"
+    },
+    {
+      "id": "tests/unit/test_harness_configuration.py::test_deployed_defs_are_identical_to_the_frozen_s0_shapes",
+      "outcome": "passed"
+    }
+  ],
+  "unit_contract_admission_stdout": "391 passed, 17 subtests passed in 17.15s",
+  "S0": {
+    "status": "PASS",
+    "source_files": 77,
+    "runtime_snapshots": 66
+  },
+  "additional_checks": [
+    "35 historical unittest experiments",
+    "packaged wheel: 18 legitimate role/skill pairings",
+    "populated 0018 -> 0019 -> 0018 -> 0019 with retained draft hashes"
+  ],
+  "early_failures": [
+    "Isolation exercised before compiler file was materialized",
+    "Actor host fixture initially lacked required text-only backend",
+    "Physical PITR fingerprint drift on live checkout; isolated frozen-source rehearsal passed. This predates final S1 files."
+  ],
+  "historical_regression": {
+    "cases": 96,
+    "passed": 96,
+    "seconds": 374.44,
+    "qualification": "started before the final S1 file freeze; see focused.json for the final focused run",
+    "raw": "historical.json"
+  }
+}

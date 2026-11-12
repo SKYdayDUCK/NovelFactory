@@ -1,10 +1,7 @@
 # 串行交付交接
 
-在唯一开发分支检查本地状态、远端 tip、阶段证据与在途工作，从尚未完成的 S1 接续。各阶段先测试再独立提交和推送；合并后审查记录仅保存在该开发分支。 [本轮二十节委托](P57_SINGLE_BRANCH_MANDATE.md) · [现场记录](../harness/S1_RECOVERY.md)
+从 `dev/p57-creative-harness-s1-s6` 的实际远端 tip 恢复。先查本地工作树和并行执行者，保留已有实现。S1 已接入真实 AgentGateway，NF 迁移 head 为 `0019_p57_context_sources`。下一阶段 S2 须确认 PlanningService、RollingPlanning、演员 BELIEF 及 NF 原预算记录，并按冻结的 PlanCandidate/SimulationReport 定义实现可放弃、可恢复的有界候选；在数据库核对正式历史和预算。
 
+[本轮委托](P57_SINGLE_BRANCH_MANDATE.md) · [现场记录](../harness/S1_RECOVERY.md) · [S1 证据](../harness/evidence/s1/receipt.json) · [工程验收矩阵](../harness/S0_ACCEPTANCE_MATRIX.md)
 
-[PRE_HARNESS_BASELINE](PRE_HARNESS_BASELINE.md) 已签收。当前主线为 `276820316129d546b0a13118bcbe283b06507795`。只开放 Scion #4。原始范围与已完成的四项正式 PR 见[委托](https://github.com/SKYdayDUCK/NovelFactory/blob/05b5b0e38ffa86ed483568388aa2c2a2674f66e5/reports/integration/CREATIVE_HARNESS_DELIVERY_SCOPE.md)以及[交付台账](DELIVERY_LEDGER.md)。
-
-下一阶段 P5.7-S0 交付 Core、Workshop、Harness 三层架构映射，逐文件运行时及开发指令审计，接口、数据模型、权限及开关设计，创作评价协议和可执行回归矩阵。S0 至 S6 分开集成，在每个精确主线上保存工程结果、原始失败及数据边界。真实创作和独立文学评级等待作者本地授权。
-
-S0 的入口为[技术架构](../harness/S0_ARCHITECTURE.md)、[指令审计](../harness/S0_INSTRUCTION_AUDIT.md)、[验收矩阵](../harness/S0_ACCEPTANCE_MATRIX.md)与[创作评价协议](../harness/S0_EVALUATION.md)。
+S2–S6 按顺序验收后在此分支提交和推送。最终仅一次非快进合入 main，独立审核结果单独提交保留的开发分支。Scion #4 与容量 #13 单独保留；真实模型授权和独立文学评估仍待作者完成。

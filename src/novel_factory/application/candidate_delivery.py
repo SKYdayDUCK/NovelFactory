@@ -90,6 +90,9 @@ class CandidateDelivery:
             "INVALID_EVIDENCE",
             "Task result does not match audited candidate",
         )
+        if "creative_context_ref" in evidence:
+            from .creative_context_store import check_candidate_snapshot
+            check_candidate_snapshot(self.kernel, repo, task, evidence)
         response = self.kernel.artifact(repo, evidence["response_ref"], task["work_id"], kind="AGENT_RESPONSE")
         require(
             not json.loads(response["payload"]["text"])["unresolved_questions"],

@@ -83,6 +83,9 @@
         },
         "output_contract": {
           "$ref": "#/$defs/OutputContract"
+        },
+        "creative_harness": {
+          "$ref": "https://novel-factory.example/contracts/1.0/harness.schema.json#/$defs/HarnessConfiguration"
         }
       },
       "required": [

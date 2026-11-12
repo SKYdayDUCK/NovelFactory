@@ -255,6 +255,11 @@ class NarrativeService:
                 require(result and result["disposition"] == "CURRENT" and fingerprint(result["payload"]) == result["payload_hash"]
                         and result["task_id"] == task_id and result["generation"] == generation
                         and agent_output_ref in result["payload"]["artifacts"], "INVALID_EVIDENCE", "Model output is not this task's current result")
+                first = result["payload"]["artifacts"][0]
+                audit = self.kernel.artifact(repo, first, task["work_id"])
+                if audit["kind"] == "AGENT_CALL_EVIDENCE" and "creative_context_ref" in audit["payload"]:
+                    from .creative_context_store import check_candidate_snapshot
+                    check_candidate_snapshot(self.kernel, repo, task, audit["payload"])
                 require(output.get("text") == text and output.get("important_deltas", []) == request["declared_important_deltas"],
                         "INVALID_EVIDENCE", "Draft text or declarations differ from the saved model candidate")
             if prior_draft_ref is not None:

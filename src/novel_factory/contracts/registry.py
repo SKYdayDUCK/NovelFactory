@@ -24,7 +24,7 @@ _FILES = {"2.0": "core.schema.json", "2.1": "temporal_concurrency.schema.json",
           "literary": "literary.schema.json", "kernel": "kernel.schema.json",
           "commands": "commands.schema.json", "http": "http.schema.json",
           "planning": "planning.schema.json", "simulation": "simulation.schema.json",
-          "agent": "agent.schema.json", "narrative": "narrative.schema.json",
+          "harness": "harness.schema.json", "agent": "agent.schema.json", "narrative": "narrative.schema.json",
           "editorial": "editorial.schema.json", "release": "release.schema.json",
           "upgrades": "upgrades.schema.json", "refinement": "refinement.schema.json", "continuity": "continuity.schema.json"}
 

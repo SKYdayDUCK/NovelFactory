@@ -323,24 +323,26 @@ class RuntimeSupervisor:
                         and audit["payload"]["result_status"] == "SUCCEEDED"
                         and audit["payload"]["context_bundle_id"] == task["context_bundle_id"]):
                     interaction_id = row["config"].get("seal_interaction_id")
-                    if interaction_id:
-                        from novel_factory.application.simulation import WorldSchedulerService
-                        try:
-                            with repo.conn.begin_nested():
+                    try:
+                        with repo.conn.begin_nested():
+                            if "creative_context_ref" in audit["payload"]:
+                                from .creative_context_store import check_candidate_snapshot
+                                check_candidate_snapshot(self.kernel, repo, task, audit["payload"])
+                            if interaction_id:
+                                from novel_factory.application.simulation import WorldSchedulerService
                                 candidate = self.kernel.artifact(repo, audit["payload"]["output_ref"], work_id,
                                                                  kind="AGENT_CANDIDATE")
                                 WorldSchedulerService(self.kernel).seal_in_transaction(repo, owner, interaction_id,
                                                                                       candidate["payload"])
-                        except DomainError as exc:
-                            # The stored result remains auditable. Repeated scans
-                            # cannot spend again or spin on this rejected handoff.
-                            repo.change("tasks", {"task_id": task["task_id"]}, {"state": "WAITING_REVIEW",
-                                        "lease_owner": None, "lease_expiry": None, "updated_at": repo.now()})
-                            self.kernel.tasks._emit(repo.conn, task["task_id"], task["generation"], "WAITING_REVIEW")
-                            repo.outbox("supervisor.handoff.blocked", "task", task["task_id"],
-                                {"generation": task["generation"], "reason": exc.code},
-                                f"handoff:{task['task_id']}:{task['generation']}:blocked")
-                            continue
+                    except DomainError as exc:
+                        # Preserve the stored result and avoid retrying a rejected handoff.
+                        repo.change("tasks", {"task_id": task["task_id"]}, {"state": "WAITING_REVIEW",
+                                    "lease_owner": None, "lease_expiry": None, "updated_at": repo.now()})
+                        self.kernel.tasks._emit(repo.conn, task["task_id"], task["generation"], "WAITING_REVIEW")
+                        repo.outbox("supervisor.handoff.blocked", "task", task["task_id"],
+                                    {"generation": task["generation"], "reason": exc.code},
+                                    f"handoff:{task['task_id']}:{task['generation']}:blocked")
+                        continue
                     self.kernel.tasks.accept_in_transaction(repo.conn, task["task_id"], task["generation"])
 
     def _execute(self, owner, task, worker, config):

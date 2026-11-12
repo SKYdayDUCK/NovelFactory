@@ -1,0 +1,398 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novel-factory.example/contracts/1.0/harness.schema.json",
+  "title": "Deployed Creative Harness contracts",
+  "$defs": {
+    "HarnessConfiguration": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "kind": {
+          "const": "CONFIGURATION"
+        },
+        "creative_harness": {
+          "$ref": "#/$defs/HarnessFlags"
+        }
+      },
+      "required": [
+        "schema_version",
+        "kind",
+        "creative_harness"
+      ],
+      "additionalProperties": false
+    },
+    "HarnessFlags": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "dynamic_agents": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "required": [
+            "enabled"
+          ],
+          "additionalProperties": false
+        },
+        "adaptive_instructions": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false
+            },
+            "auto_promote": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "required": [
+            "enabled",
+            "auto_promote"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "enabled",
+        "dynamic_agents",
+        "adaptive_instructions"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "enabled": {
+                "const": false
+              }
+            },
+            "required": [
+              "enabled"
+            ]
+          },
+          "then": {
+            "properties": {
+              "dynamic_agents": {
+                "properties": {
+                  "enabled": {
+                    "const": false
+                  }
+                }
+              },
+              "adaptive_instructions": {
+                "properties": {
+                  "enabled": {
+                    "const": false
+                  },
+                  "auto_promote": {
+                    "const": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "adaptive_instructions": {
+                "properties": {
+                  "enabled": {
+                    "const": false
+                  }
+                }
+              }
+            },
+            "required": [
+              "adaptive_instructions"
+            ]
+          },
+          "then": {
+            "properties": {
+              "adaptive_instructions": {
+                "properties": {
+                  "auto_promote": {
+                    "const": false
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ContextPacket": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "kind": {
+          "const": "CONTEXT_PACKET"
+        },
+        "scope": {
+          "$ref": "#/$defs/TaskScope"
+        },
+        "runtime": {
+          "$ref": "#/$defs/RuntimeSnapshot"
+        },
+        "context": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ContextBundle"
+        },
+        "knowledge_cut": {
+          "$ref": "https://novel-factory.example/contracts/2.1/temporal_concurrency.schema.json#/$defs/KnowledgeCut"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AuthorizedSource"
+          },
+          "minItems": 0,
+          "maxItems": 64
+        },
+        "omissions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "\\S"
+          },
+          "minItems": 0,
+          "maxItems": 64
+        },
+        "token_budget": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "output_status": {
+          "const": "NON_AUTHORITATIVE"
+        }
+      },
+      "required": [
+        "schema_version",
+        "kind",
+        "scope",
+        "runtime",
+        "context",
+        "knowledge_cut",
+        "sources",
+        "omissions",
+        "token_budget",
+        "output_status"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "runtime": {
+                "properties": {
+                  "role_id": {
+                    "const": "character_actor"
+                  }
+                }
+              }
+            },
+            "required": [
+              "runtime"
+            ]
+          },
+          "then": {
+            "properties": {
+              "context": {
+                "properties": {
+                  "role_id": {
+                    "const": "character_actor"
+                  },
+                  "actor_id": {
+                    "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+                  }
+                }
+              },
+              "knowledge_cut": {
+                "properties": {
+                  "plane": {
+                    "const": "BELIEF"
+                  }
+                }
+              },
+              "sources": {
+                "items": {
+                  "properties": {
+                    "visibility": {
+                      "const": "BELIEF"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "TaskScope": {
+      "type": "object",
+      "properties": {
+        "world_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"
+        },
+        "task_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "world_ref",
+        "task_id",
+        "generation"
+      ],
+      "additionalProperties": false
+    },
+    "RuntimeSnapshot": {
+      "type": "object",
+      "properties": {
+        "role_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "\\S"
+        },
+        "task_kind": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "\\S"
+        },
+        "role_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "\\S"
+        },
+        "role_blob": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "skill_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "\\S"
+        },
+        "skill_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "\\S"
+        },
+        "skill_blob": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "runtime_sha256": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/Sha256"
+        },
+        "source_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      },
+      "required": [
+        "role_id",
+        "task_kind",
+        "role_version",
+        "role_blob",
+        "skill_name",
+        "skill_version",
+        "skill_blob",
+        "runtime_sha256",
+        "source_commit"
+      ],
+      "additionalProperties": false
+    },
+    "AuthorizedSource": {
+      "type": "object",
+      "properties": {
+        "evidence": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EvidenceRef"
+        },
+        "authority": {
+          "$ref": "#/$defs/NFPrincipal"
+        },
+        "world_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"
+        },
+        "visibility": {
+          "type": "string",
+          "enum": [
+            "WORLD",
+            "BELIEF",
+            "READER",
+            "PLAN",
+            "SIMULATION",
+            "LITERARY"
+          ]
+        },
+        "selection_reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "pattern": "\\S"
+        },
+        "content_sha256": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/Sha256"
+        }
+      },
+      "required": [
+        "evidence",
+        "authority",
+        "world_ref",
+        "visibility",
+        "selection_reason",
+        "content_sha256"
+      ],
+      "additionalProperties": false
+    },
+    "NFPrincipal": {
+      "type": "object",
+      "properties": {
+        "principal_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "pattern": "\\S"
+        },
+        "grant_id": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+        },
+        "permission_epoch": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "principal_id",
+        "grant_id",
+        "permission_epoch"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
