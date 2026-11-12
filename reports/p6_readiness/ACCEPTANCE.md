@@ -28,3 +28,5 @@
 本次独立验收还从全新的数据库和对象目录重走了手册的管理者与双作品命令。专项组合测试及未配置环境的原始返回分别见 [P6 工程组合](raw/p6-focused-postgres.xml)、[离线配置检查](raw/offline-provider-preflight.json)、[真实执行状态](raw/readiness-status.json)。源码及镜像配置在 Linux 上验证，Docker Desktop 本身不在本次运行环境中。
 
 集成期间 Linux NF 全量用例为 986 passed，另 17 个 subtests passed；该运行开始于最终审核修订前。双服务完整组合为 19 passed。单元作业中有一项 OAuth 签名用例原先意外依赖本机是否安装 Codex，修订后在没有 Codex 的 PATH 下也实际执行签名及声明校验。真实宿主测试在安装原生 CLI 的独立作业中仍然运行。最终合并按最新 SHA 的托管检查记录核对。
+
+六个工程工作流通过后，A 合并至 main。已合并提交另行重跑的 33 项 P6 专项和 2 项双服务/物理恢复用例全部通过，零跳过。[合并复验与托管记录](MERGED_MAIN.md)

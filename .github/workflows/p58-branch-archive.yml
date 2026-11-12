@@ -1,0 +1,48 @@
+name: Verify and archive reviewed P5.8 historical branches
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - reports/branch_archive/p58/cleanup-plan.json
+permissions:
+  contents: read
+concurrency:
+  group: p58-reviewed-branch-archive
+  cancel-in-progress: false
+jobs:
+  archive:
+    if: github.repository == 'SKYdayDUCK/NovelFactory' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    permissions:
+      contents: write
+      actions: read
+      issues: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+      - name: Verify restoration from the published release before atomic deletion
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/p58_branch_archive.py apply \
+            --inventory reports/branch_archive/p58/branch-inventory.json.gz \
+            --plan reports/branch_archive/p58/cleanup-plan.json \
+            --receipt "$RUNNER_TEMP/p58-branch-cleanup-receipt.json"
+      - name: Persist the final exact ref inventory
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          receipt="$RUNNER_TEMP/p58-branch-cleanup-receipt.json"
+          if [[ ! -f "$receipt" ]]; then exit 0; fi
+          release=$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["archive_tag"])' "$receipt")
+          name="p58-refs-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.json"
+          cp "$receipt" "$RUNNER_TEMP/$name"
+          gh release upload "$release" "$RUNNER_TEMP/$name"
+          gh release download "$release" --pattern "$name" --dir "$RUNNER_TEMP/verify-receipt"
+          cmp "$receipt" "$RUNNER_TEMP/verify-receipt/$name"

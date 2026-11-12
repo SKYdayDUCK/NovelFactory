@@ -4,7 +4,21 @@
 
 ## 1. 在 Windows 上准备两个服务库
 
-PowerShell 可用 `wsl --status` 和 `wsl -l -v` 确认发行版使用 WSL 2。已有 WSL2 发行版可直接使用，新机器可在管理员 PowerShell 执行 `wsl --install` 后按 Windows 提示重启。在 Docker Desktop 为该发行版启用 WSL 集成，或在 Linux 内使用 Docker Engine 和 Compose v2。进入 Linux home 下的工作树。私有绑定需要 POSIX 文件权限。
+PowerShell 可用 `wsl --status` 和 `wsl -l -v` 确认发行版使用 WSL 2。已有 WSL2 发行版可直接使用，新机器可在管理员 PowerShell 执行 `wsl --install` 后按 Windows 提示重启。首次安装 Docker Desktop 可在 PowerShell 执行 `winget install -e --id Docker.DockerDesktop`，启动后选择 WSL 2 引擎，并在 Settings → Resources → WSL Integration 启用该发行版。已使用 Docker Engine 和 Compose v2 的 Linux 安装也可运行以下命令。工作树和私有绑定放在 Linux home 下，以保留 POSIX 文件权限。[Docker Desktop 的 WSL 配置](https://docs.docker.com/desktop/features/wsl/)
+
+以下以 Ubuntu WSL2 为例。已有所需工具可跳过对应安装行。在 WSL 终端检查 `docker info` 可以连接到引擎，并记录 Compose 版本。uv 管理本项目要求的 Python 3.12。[uv 安装说明](https://docs.astral.sh/uv/getting-started/installation/)
+
+```bash
+sudo apt-get update
+sudo apt-get install -y git curl ca-certificates jq nodejs npm python3
+curl -LsSf https://astral.sh/uv/0.13.6/install.sh | sh
+export PATH="$HOME/.local/bin:$PATH"
+uv python install 3.12
+git --version && jq --version && node --version && npm --version && uv --version
+docker info --format '{{.ServerVersion}}'
+docker compose version
+cd "$HOME"
+```
 
 ```bash
 git clone https://github.com/SKYdayDUCK/NovelFactory.git
@@ -50,7 +64,18 @@ Workshop 的管理面可用 `aw-mcp --binding "$P6_PRIVATE/manager.json"` 通过
 
 ## 2. 配置 Codex、DeepSeek 和预算
 
-在 WSL 的 PATH 中安装 Codex CLI，执行 `codex --version` 记录二进制版本。复制模型目录，把两个 `REPLACE_WITH_...` 改成账户实际有权运行的模型 ID。示例的 Codex 路线使用真正的 app-server，配合 OpenAI API Key 和一次受控的第一方 Responses 请求。DeepSeek 路线使用独立的 Chat Completions 接口。两种 API 分别计费。普通桌面 Codex 登录本身不能证明该实验已经取得订阅额度或产生模型结果。授权和实际费用需要从该账户核实。
+在 WSL 中配置原生 Linux Codex CLI。以下命令使用仓库 CI 的 `NF_P5_CODEX_VERSION`，把 npm 可执行入口放在当前用户的 PATH 上。已配置该版本的用户可直接运行最后两行。新开终端时恢复下列 PATH，或将这一行加入运行 Supervisor 的启动环境。版本检查不会启动推理。
+
+```bash
+export NF_P5_CODEX_VERSION=0.167.0-alpha.4
+P6_CODEX_PREFIX="$HOME/.local/share/novelfactory/codex-$NF_P5_CODEX_VERSION"
+npm install --prefix "$P6_CODEX_PREFIX" --include=optional --no-save --no-audit --no-fund "@openai/codex@$NF_P5_CODEX_VERSION"
+export PATH="$HOME/.local/share/novelfactory/codex-0.167.0-alpha.4/node_modules/.bin:$PATH"
+codex --version
+test "$(codex --version)" = "codex-cli 0.167.0-alpha.4"
+```
+
+复制模型目录，把两个 `REPLACE_WITH_...` 改成账户实际有权运行的模型 ID。示例的 Codex 路线使用真正的 app-server，配合 OpenAI API Key 和一次受控的第一方 Responses 请求。DeepSeek 路线使用独立的 Chat Completions 接口。两种 API 分别计费。普通桌面 Codex 登录本身不能证明该实验已经取得订阅额度或产生模型结果。授权和实际费用需要从该账户核实。
 
 ```bash
 cp -n reports/p6_readiness/templates/providers.json "$P6_PRIVATE/providers.json"
@@ -63,11 +88,11 @@ export NF_RUNTIME_PROFILES="$P6_PRIVATE/providers.json"
 
 使用 ChatGPT 计划额度必须有为本应用登记的 Sign in with ChatGPT 客户端。可改从 `templates/providers-plan.example.json` 开始。填写 OAuth client ID 和授权模型，从本应用正常授权流程取得访问令牌，并由服务身份注入 `NF_CODEX_PLAN_TOKEN`。模型条目中的两个上限 `null` 是未填写的占位，必须改为该模型文档确认的**完整输出硬上限**并相应配置每次预留。该计划接口不接受每次请求的 max_output_tokens。缺少已确认的模型上限时请保持该路线停派。运行时校验官方签名、令牌的 issuer、audience、client_id、scope 和有效期。API Key 不具备这些声明。仅在真正调用成功后记录访问资格，已结算费用仍由独立账单证明。[官方令牌说明](https://developers.openai.com/siwc/token-sharing-open-source/token-reference)
 
-将 `templates/book.json` 分别复制为 `$P6_PRIVATE/book-A.json` 与 `book-B.json`，填写书名、角色、章细纲、未来卷前提。预算字段包括币种、全书金额、单次金额预留、全书 Token 和单次 Token 预留。离线建书可直接用零预算模板。计划真实运行的作品必须采用作者针对该作品确认的金额和 Token 上限。每次预留还需容纳冻结输入及最大输出。预算属于特定作品，跨作品资金不能互换。
+将 `templates/book.json` 分别复制为 `$P6_PRIVATE/book-A.json` 与 `book-B.json`，填写书名、角色、章细纲、未来卷前提。预算字段包括币种、全书金额、单次金额预留、全书 Token 和单次 Token 预留。离线建书可直接用零预算模板。计划真实运行的作品必须采用作者针对该作品确认的金额和 Token 上限。每次预留还需容纳冻结输入及最大输出。预算属于特定作品，跨作品资金不能互换。Bootstrap 会把首次建书的配置哈希绑定到该书的私有目录。已用零预算模板做过预演时，保留原书和预演回执，按获批预算准备配置，在第 3 节使用 `D="$P6_PRIVATE/live-$BOOK"`，后面的启动和取证命令也使用 `live-A`、`live-B` 目录。直接改写原模板再对原目录执行 bootstrap 会返回 `INVALID_ARGUMENT`。
 
 ## 3. 创建两本书并采用各自的路由
 
-以下假设已安装 jq。Bootstrap 以私有目录作为恢复点，重复执行可核对原作品。每个目录持有独立控制凭据、作品与分支、第一卷有效细纲、预算和生产请求。
+Bootstrap 以私有目录作为恢复点，重复执行可核对原作品。每个目录持有独立控制凭据、作品与分支、第一卷有效细纲、预算和生产请求。
 
 ```bash
 for BOOK in A B; do
