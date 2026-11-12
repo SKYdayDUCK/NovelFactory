@@ -1,0 +1,74 @@
+{
+  "scope": "Early development calibrations, reconstructed from contemporaneous run outputs after the local workspace disconnected. The separate hosted engineering comparison retains its full original JSON.",
+  "model": "local deterministic HTTP fixture",
+  "independent_confirmatory_batches": 0,
+  "paid_calls": 0,
+  "literary": "NOT_EVALUATED",
+  "experiments": [
+    {
+      "experiment_id": "1007d50b-ed91-4a0a-9d60-d22a78c0cbbe",
+      "planned_windows": 3,
+      "completed_windows": 1,
+      "windows": [
+        {
+          "arm": "BASELINE",
+          "state": "COMPLETE"
+        },
+        {
+          "arm": "HARNESS",
+          "state": "FAILED",
+          "error": "VIEW_DENIED",
+          "reason": "Attempt to submit after the original reviewer lease closed."
+        },
+        {
+          "arm": "HARNESS_ADAPTIVE",
+          "state": "FAILED",
+          "error": "PROMOTION_REVOKED",
+          "reason": "Opinion deadline exceeded signed reviewer attestation."
+        }
+      ],
+      "freeze_ref_sha256": "c40c48a9428bcc28898b0f13796699260ad1113b54a493d8fc653d4dbe707fe7"
+    },
+    {
+      "experiment_id": "8559a847-51ec-4c91-8f24-186883a296b1",
+      "role": "corrected development calibration",
+      "completed_windows": 3
+    },
+    {
+      "experiment_id": "e37cffa3-b335-454c-867f-84dc9a0b7e73",
+      "role": "public export calibration",
+      "completed_windows": 3
+    },
+    {
+      "experiment_id": "9cb81217-29c5-498b-9f2b-e3dd3c719996",
+      "role": "final local driver including official-history guard",
+      "planned_windows": 3,
+      "completed_windows": 3,
+      "successful_nf_attempts": 9,
+      "workshop_attestations": 8,
+      "milliseconds_wall": 76240,
+      "exact_span_true_positives": [
+        1,
+        1,
+        2
+      ],
+      "false_positives": [
+        0,
+        0,
+        0
+      ],
+      "fixture_utf8_units": [
+        47788,
+        40685,
+        41347
+      ],
+      "model_generated_text_sha256": [
+        "518ae2ddee13912c3a4c1d65b90a9b4f49c039880085299c32fe2b0af40fedd5",
+        "518ae2ddee13912c3a4c1d65b90a9b4f49c039880085299c32fe2b0af40fedd5",
+        "fce57f33babd2ed975a2b1d51834a6cb17e3c35d5504341eba3d865a29078eb2"
+      ],
+      "original_json_bytes": 70321,
+      "original_json_sha256": "b7403cb65f94926b795b18ff1e8e72928c2fd241a48d8af8d670be6644ba3d58"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "stage": "S2",
+  "name": "剧情规划与隔离推演",
+  "branch": "dev/p57-creative-harness-s1-s6",
+  "base_commit": "4b5b058ab408c329f19fc1fd53623f9431dffeb5",
+  "product_tree_before_evidence": "c734ccc1896884471acc80fd050546b0cb20bd3b",
+  "tested_blobs": {
+    "contracts/harness.schema.json": "13386e346e8f01910ec14c669a63dc54f112d154",
+    "src/novel_factory/application/creative_planning.py": "3b8fab01570a4d47dafe7a1f2bd63bdb76179194",
+    "src/novel_factory/application/creative_simulation.py": "b8a37670ffa3e9cdb8ae1ca11b5a5a8616118e49",
+    "src/novel_factory/application/kernel.py": "6f7839f146cb4fc7470fe6071b1d2b0acb1560d0",
+    "src/novel_factory/application/mcp_runtime.py": "ee2ef7cd56bbeb037cca44aa94d30c66b33de0fa",
+    "src/novel_factory/contracts/_schema_bundle.py": "0608e3244b0737d48bff456622ec780e46fdf4d7",
+    "src/novel_factory/interfaces/mcp_stdio.py": "ee688f458725d8769f24c8048b11e6634e4da841",
+    "tests/integration/test_harness_planning_mcp.py": "e1d643ce983452a8292cfec74071642baad3446b",
+    "tests/integration/test_harness_planning_simulation.py": "c3fd34cfeb921be99f873e9ef9b19b4ea9a5317f"
+  },
+  "postgres": "17.11",
+  "model": "deterministic engine or fixture",
+  "paid_calls": 0,
+  "literary_quality": "NOT_EVALUATED",
+  "verification": "S2 通过真实 stdio 客户端和两类已授权身份执行。候选采用后 NF 原生 PLAN manifest 区分 READY 与 DRAFT，同一候选的重复推演复用冻结结果。S3 应沿用正式阅读凭证、精确稿件版本、已有审核服务和 Workshop 审核独立性。",
+  "runs": {
+    "final": {
+      "file": "final.json.gz",
+      "summary": {
+        "passed": 38,
+        "total": 38,
+        "collected": 38
+      },
+      "seconds": 53.998056173324585
+    },
+    "legacy": {
+      "file": "legacy.json.gz",
+      "summary": {
+        "passed": 30,
+        "total": 30,
+        "collected": 30
+      },
+      "seconds": 91.58141255378723
+    }
+  },
+  "earlier_failures": [
+    "preliminary.txt.gz",
+    "intermediate.txt.gz"
+  ]
+}

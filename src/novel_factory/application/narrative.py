@@ -247,6 +247,10 @@ class NarrativeService:
                    "title": title, "declared_important_deltas": declared_important_deltas or [], "prior_draft_ref": prior_draft_ref,
                    "handoff_refs": handoff_refs or [], "agent_output_ref": agent_output_ref}
 
+        from .dynamic_runtime import refresh_task, verify_task
+
+        proof = refresh_task(self.kernel, principal, task_id, generation) if agent_output_ref is not None else None
+
         def check(repo):
             task, grant, spec, context, scene = self._writer_binding(repo, principal, task_id, generation, scene_ref)
             if agent_output_ref is not None:
@@ -255,6 +259,11 @@ class NarrativeService:
                 require(result and result["disposition"] == "CURRENT" and fingerprint(result["payload"]) == result["payload_hash"]
                         and result["task_id"] == task_id and result["generation"] == generation
                         and agent_output_ref in result["payload"]["artifacts"], "INVALID_EVIDENCE", "Model output is not this task's current result")
+                first = result["payload"]["artifacts"][0]
+                audit = self.kernel.artifact(repo, first, task["work_id"])
+                if audit["kind"] == "AGENT_CALL_EVIDENCE" and "creative_context_ref" in audit["payload"]:
+                    from .creative_context_store import check_candidate_snapshot
+                    check_candidate_snapshot(self.kernel, repo, task, audit["payload"])
                 require(output.get("text") == text and output.get("important_deltas", []) == request["declared_important_deltas"],
                         "INVALID_EVIDENCE", "Draft text or declarations differ from the saved model candidate")
             if prior_draft_ref is not None:
@@ -275,6 +284,8 @@ class NarrativeService:
 
         with self.kernel.db.uow(write=False) as repo:
             task, _ = self.kernel._task_owner(repo, principal, task_id, "ARTIFACT_WRITE")
+            if agent_output_ref is not None:
+                verify_task(self.kernel, repo, principal, task, proof)
             old = self.kernel._prior(repo, principal, task["work_id"], "NARRATIVE_DRAFT", idempotency_key, request)
             if old:
                 return old
@@ -288,7 +299,9 @@ class NarrativeService:
         ref = self.kernel._blob(payload)
         with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
             repo.one("works", {"work_id": task["work_id"]}, lock="update")
-            self.kernel._task_owner(repo, principal, task_id, "ARTIFACT_WRITE")
+            task, _ = self.kernel._task_owner(repo, principal, task_id, "ARTIFACT_WRITE")
+            if agent_output_ref is not None:
+                verify_task(self.kernel, repo, principal, task, proof)
             old = self.kernel._prior(repo, principal, task["work_id"], "NARRATIVE_DRAFT", idempotency_key, request)
             if old:
                 return old
@@ -353,8 +366,8 @@ class NarrativeService:
             self.kernel._receipt(repo, principal, spec["world_ref"], "NARRATIVE_READ_BIND", idempotency_key, request, ref)
         return ref
 
-    def _reader_binding(self, repo, principal, task_id, generation, draft_ref):
-        task, grant, spec, context = self._task(repo, principal, task_id, generation)
+    def _reader_binding(self, repo, principal, task_id, generation, draft_ref, *, allow_accepted=False):
+        task, grant, spec, context = self._task(repo, principal, task_id, generation, allow_accepted=allow_accepted)
         require(grant["role_id"] in {"writer", "reviewer", "evidence_maintainer", "literary_editor", "chief_editor", "volume_director", "control_operator"},
                 "VIEW_DENIED", "Role cannot read literary source text")
         plane = context["read_cut"]["knowledge_cut"]["plane"]
@@ -445,7 +458,7 @@ class NarrativeService:
             self.kernel._receipt(repo, principal, spec["world_ref"], "NARRATIVE_EXTRACTION", idempotency_key, request, ref)
         return ref
 
-    def _extraction(self, repo, extraction_ref, draft_ref, draft):
+    def _extraction(self, repo, extraction_ref, draft_ref, draft, *, allow_accepted=False):
         wid = draft["input_world_ref"]["work_id"]
         extraction = self._artifact(repo, extraction_ref, wid, "ASSERTION_EXTRACTION")
         require(extraction["draft_ref"] == draft_ref and extraction["text_ref"] == draft["text_ref"] and extraction["scene_ref"] == draft["scene_ref"],
@@ -453,7 +466,8 @@ class NarrativeService:
         task = repo.one("tasks", {"task_id": extraction["task_id"]})
         require(task and task["generation"] == extraction["generation"], "STALE_GENERATION", "Extraction generation is no longer current")
         principal = Principal(task["grant_id"], task["principal_id"])
-        _, grant, _, _ = self._reader_binding(repo, principal, task["task_id"], task["generation"], draft_ref)
+        _, grant, _, _ = self._reader_binding(repo, principal, task["task_id"], task["generation"], draft_ref,
+                                                    allow_accepted=allow_accepted)
         require(grant["role_id"] in {"evidence_maintainer", "reviewer", "control_operator"}, "VIEW_DENIED", "Extraction source is not eligible")
         delivery = self._artifact(repo, extraction["delivery_ref"], wid, "TEXT_DELIVERY")
         require(delivery["task_id"] == task["task_id"] and delivery["generation"] == task["generation"]

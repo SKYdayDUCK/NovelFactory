@@ -1,0 +1,340 @@
+{
+  "stage": "S6",
+  "branch": "dev/p57-creative-harness-s1-s6",
+  "original_frozen_tree": "9a7b09f11e98a1eec87316869eca54240db2c15f",
+  "original_phase_parent": "976e3212fcb42b9251fc2858a3b9d9ce3c3a646c",
+  "restoration": 43192523546,
+  "qualified_commit": "a7f41ae7d32ad322fe48895950b0245b3096fee6",
+  "qualified_commit_tree": "60c8320b9aee952a667e50a1fc617123f940311d",
+  "original_product_file_count": 30,
+  "final_product_changes_since_recovery": [
+    ".github/workflows/creative-harness.yml"
+  ],
+  "qualified_product_blobs": {
+    "tests/integration/test_s6_engineering_comparison.py": "207513ef16e22e0e09c2a06d74883dc84f8942c0",
+    "migrations/versions/0020_p57_harness_observations.py": "1efaf449b50b471ebba982c394578e929d6918f2",
+    "workshop/migrations/versions/w011_harness_observations.py": "47d53dfe6ba2ab35a62b065897c14a4c7ec4e86e",
+    "tests/integration/adaptive_helpers.py": "2b1390b3e34366e75fc8f3e4c352613be4affde2",
+    "scripts/pitr_drill.py": "534e2ba7a5a615742fa4d3a75aa0f3aae76a118f",
+    "src/novel_factory/interfaces/mcp_stdio.py": "278923e913f4a8075706e854d4dda70cd13e4173",
+    "scripts/p57_pitr.py": "1483f68983edc63318ae6a5c062b562266a43cb3",
+    "src/novel_factory/application/agent_gateway.py": "899f9ab70846bf6127acfd938b3838c2157ef3bb",
+    "src/novel_factory/application/audit_log.py": "aec20cf8a63e00ad14dd00372f229074482751c6",
+    "src/novel_factory/application/creative_context_store.py": "322fc5931c01954c112466c8078fe3a43526e272",
+    "src/novel_factory/application/delegation.py": "8e2bfcd5efa06fedc389668609d1414371a5f2e0",
+    "src/novel_factory/application/kernel.py": "9d4b99762e0a71b0ed24042f6f884929de502775",
+    "src/novel_factory/application/queries.py": "ec331bab138b322e7d4ddff00d97462194b3c698",
+    "src/novel_factory/application/workshop_skills.py": "a22efc39e329c689a640ae617f8a933b07e26427",
+    "src/novel_factory/infrastructure/recovery.py": "31cdef8be530897424a51cfe917fd4910d1b9066",
+    "src/novel_factory/orchestration/tasks.py": "48ace92580d64214040c0354f55c096ff3149d62",
+    "tests/integration/test_s9_upgrade.py": "89dfef45eac44220e019db1123452ce6777bafa3",
+    "workshop/src/agent_workshop/manager.py": "f2c99b17028d4636f729ed67001631c0b7f023b4",
+    "workshop/src/agent_workshop/reviews_skills.py": "361c7272cdc8e8885cc1a87c9ee8186c92af5285",
+    ".github/workflows/creative-harness.yml": "de1dc8e4cdad4d8ca2d4e32af66280738e12cbb3",
+    "tests/integration/test_harness_metrics_mcp.py": "e5cd920efc44e7a1307ea718205aad2ce978fd2e",
+    "validation/run_p57_acceptance.py": "7b6a657e31cec0d45e989e97509428f2f34c7146",
+    "src/novel_factory/application/mcp_runtime.py": "7d715dcc9ba24979363c01f479d7bac69f81f737",
+    "src/novel_factory/application/creative_metrics.py": "2dfed2fcb8c299a77d76c64cf4d165882f75db39",
+    "src/novel_factory/application/harness_observations.py": "ef5c07463907328e6c172958891b029a9c304090",
+    "tests/integration/test_creative_metrics.py": "8f98c37171122bda01ecdb2b138c430c33a02de7",
+    "tests/integration/test_harness_log_upgrade.py": "c2594b0e83831b96e6d4c0ad9a350d4a16086199",
+    "tests/integration/test_harness_observations.py": "b59c57c0dfc11a28e37f3aa6ae1ccb116907ae94",
+    "workshop/integration/test_workshop_harness_log_upgrade.py": "7701f4c590bf27d9029f26e203c416068a5f775f",
+    "workshop/integration/test_workshop_harness_observations.py": "6e0c22b8779db224b8ccb0c1ba2557c2717e180c"
+  },
+  "runs": {
+    "contracts": {
+      "job": 131105980580,
+      "workflow_run": 43195702902,
+      "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43195702902/job/131105980580",
+      "result": "PASS",
+      "pytest": "432 passed, 17 subtests passed in 21.26s",
+      "counts": {
+        "passed": 429,
+        "subtests passed": 3,
+        "total": 432,
+        "collected": 432
+      },
+      "seconds": 23.272,
+      "evidence": "contracts.json.gz",
+      "public_json_sha256": "ac8e7accf306de8e8250776481a9597b70635d8eaac83a1c94baa55a2362572c",
+      "gzip_sha256": "bebdc2b93ecd7d84e20bd3de0af67d82dddb19b0034fdf541d99e83d519f1c5f",
+      "source_file_sha256": {
+        "run.json": "2b2fd3ec4cbfbde75917d47a217fd30a830d114ea1ab32b2087422526c84975e",
+        "cases.json": "832e44bd5a530dd907157b22bead5b06c77fc40733c9399d1efe803785616ed3"
+      }
+    },
+    "harness": {
+      "job": 131101205409,
+      "workflow_run": 43194312720,
+      "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43194312720/job/131101205409",
+      "result": "PASS",
+      "pytest": "68 passed in 186.58s (0:03:06)",
+      "counts": {
+        "passed": 68,
+        "total": 68,
+        "collected": 68
+      },
+      "seconds": 188.523,
+      "evidence": "harness.json.gz",
+      "public_json_sha256": "1c139a08817bbfd42b1b3e1e3a4cf51bcd5305b72ad7528cb8329e71ff81e549",
+      "gzip_sha256": "9106cc61a501845d185fbbb9cb537d74b5ef1f3df5a52cb5d0daaa65428913a9",
+      "source_file_sha256": {
+        "run.json": "d7485501d3433e5b5aa949cf9f4b17c0ed6738874dd4be46ccb7fb121cdede97",
+        "cases.json": "32db3e237bc07d3d584bdc2e6bf98e8cbd7d4fe46734f2d2953a46851569ddad"
+      }
+    },
+    "dual": {
+      "job": 131101205299,
+      "workflow_run": 43194312720,
+      "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43194312720/job/131101205299",
+      "result": "PASS",
+      "pytest": "11 passed in 117.26s (0:01:57)",
+      "counts": {
+        "passed": 11,
+        "total": 11,
+        "collected": 11
+      },
+      "seconds": 118.904,
+      "evidence": "dual.json.gz",
+      "public_json_sha256": "9a7366491c73decc0ccee8e5197e29214cf0154b6e8b4c6e93041a56c3a4cf1a",
+      "gzip_sha256": "b48de97f3dad792d0524a49f5460c0a67bbb4277efc6dc439408b9b8748d8ef4",
+      "source_file_sha256": {
+        "run.json": "2a382c725c0014536b10c59b3bdfda47e9a545d35453f10b989c72ade9b97ef0",
+        "cases.json": "360bc1a6bdd604f729c797534652776e3362dfbef00807e41309efd7bf2a3111"
+      }
+    },
+    "faults": {
+      "job": 131105980494,
+      "workflow_run": 43195702902,
+      "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43195702902/job/131105980494",
+      "result": "PASS",
+      "pytest": "105 passed in 51.78s",
+      "counts": {
+        "passed": 105,
+        "total": 105,
+        "collected": 105
+      },
+      "seconds": 53.215,
+      "evidence": "faults.json.gz",
+      "public_json_sha256": "7940d4549146e67f56f603ee50665b55f80ee2e98803c1e8cf6c3079c24aa27f",
+      "gzip_sha256": "2670a687cb9309fd3529f84650c001e94f01fda46e09251df1eaa2fac91316bc",
+      "source_file_sha256": {
+        "run.json": "ecdaf424abd3122488348bc23218bd353ae9f0b764bc3342f6cdad0f1e6f3f7a",
+        "cases.json": "e9151d1fe820f3a095f77ec672c7bf701c3e1e66285a116624f44d11786cd5d3"
+      }
+    },
+    "upgrades": {
+      "job": 131105980752,
+      "workflow_run": 43195702902,
+      "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43195702902/job/131105980752",
+      "result": "PASS",
+      "pytest": "7 passed in 25.30s",
+      "counts": {
+        "passed": 7,
+        "total": 7,
+        "collected": 7
+      },
+      "seconds": 27.514,
+      "evidence": "upgrades.json.gz",
+      "public_json_sha256": "9224c0be0bfe1436adf6e2a4dba232b67a8a4aef27d43e71050fe74ba354255f",
+      "gzip_sha256": "4b3941d892f5799088fed85bd81066039dcdd322ff92d19f132a3016bf2f7dcc",
+      "source_file_sha256": {
+        "run.json": "e4a23e6b5a0d974c515d215fde556cf0ef4c54529b75fbb5a323b66205768ba0",
+        "cases.json": "433ae5b637410e8223e83af0f122c6dcfb37db9642e37192bf69a8081b04f26d"
+      }
+    },
+    "p6": {
+      "job": 131105980800,
+      "workflow_run": 43195702902,
+      "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43195702902/job/131105980800",
+      "result": "PASS",
+      "pytest": "3 passed in 49.48s",
+      "counts": {
+        "passed": 3,
+        "total": 3,
+        "collected": 3
+      },
+      "seconds": 50.851,
+      "evidence": "p6.json.gz",
+      "public_json_sha256": "96d80e22cfcade971d83fe9e8ed34194ed852b67d610d67f2866a98cb409e70b",
+      "gzip_sha256": "471f1dfa2894548bb0418042b3afaf0de03ac19d947e0d6a41040d5a783749c7",
+      "source_file_sha256": {
+        "run.json": "574dfde95bb8057a78fa8f7704f8c70b23ca55afdbfd68d8add2bd41881d8697",
+        "cases.json": "a13d1439566f80f07fcb8b3ab3a90f22c369a38ed7a2787b8b4bef73b0c4c53e"
+      }
+    },
+    "comparison": {
+      "job": 131101205684,
+      "workflow_run": 43194312720,
+      "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43194312720/job/131101205684",
+      "result": "PASS",
+      "pytest": "1 passed in 30.27s",
+      "counts": {
+        "passed": 1,
+        "total": 1,
+        "collected": 1
+      },
+      "seconds": 32.215,
+      "evidence": "comparison.json.gz",
+      "public_json_sha256": "f9346a9e583bf05b02b4e0f2625a188c9f0d297fe2c9dd978893970a1c80f1b0",
+      "gzip_sha256": "eb6f819b05fdd874069be26f0d31563ff79e6debb71a6388f99cb2f5ef74fb31",
+      "source_file_sha256": {
+        "run.json": "18e01d9fe04625bee10ff8843c6a35684fc0fcbdf3b7777860784ee8e04ea141",
+        "cases.json": "acd457e9de230f69dc5393175e4d3181a6abd0348e84d4a04cd9f48d33594ee1",
+        "comparison.json": "b36240d010e45d9e6a5d4bea72386633acd085a8148cca0086b0d4193c01ab82"
+      }
+    },
+    "paired-restore": {
+      "job": 131105980975,
+      "workflow_run": 43195702902,
+      "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43195702902/job/131105980975",
+      "result": "PASS",
+      "pytest": "1 passed in 20.25s",
+      "counts": {
+        "passed": 1,
+        "total": 1,
+        "collected": 1
+      },
+      "seconds": 21.558,
+      "evidence": "paired-restore.json.gz",
+      "public_json_sha256": "ca31a3e8e148db7e881ea913a3fa5bfa74de4b1dc2896a8a803bb383c137a71a",
+      "gzip_sha256": "1f87da1f1a9c1cdeab8a2f75910f4344e860b29854baa1ff6302412d31cbfa16",
+      "source_file_sha256": {
+        "run.json": "3f9f837024c6293657e77d1f5a63973c6a8f3e2d55c2a86e6c18ce183647803d",
+        "cases.json": "079881a271ea8ee1ee7d4853f31979439f7e0afe0e1f7870163105e4dea9a220",
+        "paired-restore.json": "93334584dae734f5c52084ac4383fc4597c1040360ed0793aa1c35a4a21f7761"
+      }
+    },
+    "workshops-upgrades": {
+      "job": 131105980659,
+      "workflow_run": 43195702902,
+      "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43195702902/job/131105980659",
+      "result": "PASS",
+      "pytest": "17 passed in 77.93s (0:01:17)",
+      "counts": {
+        "passed": 17,
+        "total": 17,
+        "collected": 17
+      },
+      "seconds": 78.992,
+      "evidence": "workshops-upgrades.json.gz",
+      "public_json_sha256": "e2a3db7765088c21a8ff705e9a243b0d0427eeaec64b63736fee2dc7df54ce7d",
+      "gzip_sha256": "be710560811b3a7a6940fd74a25168adf47b848afe03695bcd21b4e02591cdff",
+      "source_file_sha256": {
+        "run.json": "620a455e88c076ead507689ca3be75e3163dfa5ace42d4f35e469ebac49a3f47",
+        "cases.json": "5a83cf686f2b94c4c08f5925e1b25e47593cfe3243708944572435a480aa66d1"
+      }
+    },
+    "history": {
+      "job": 131108555354,
+      "workflow_run": 43196450625,
+      "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43196450625/job/131108555354",
+      "result": "PASS",
+      "pytest": "96 passed in 186.53s (0:03:06)",
+      "counts": {
+        "passed": 96,
+        "total": 96,
+        "collected": 96
+      },
+      "seconds": 188.722,
+      "evidence": "history.json.gz",
+      "public_json_sha256": "5937c0b09a2c2d6106ead615402b1f2b80869a2e1b57c55cdd9c8852f9a168b3",
+      "gzip_sha256": "f251ac009f897112db653070ca4fa89308c2f7c1b953eba461bcfa1b4525380a",
+      "source_file_sha256": {
+        "run.json": "c8d274d3985cbe2573ffcb21a7443dd1410bb76d650ace363bf2d4b17c45077a",
+        "cases.json": "472221c9cfbf85e56caf4e9058b55e872e7442b662d4079a1ab27779f82457b4"
+      }
+    },
+    "projection": {
+      "job": 131105980564,
+      "workflow_run": 43195702902,
+      "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43195702902/job/131105980564",
+      "result": "PASS",
+      "pytest": "59 passed, 1 warning in 80.59s (0:01:20)",
+      "counts": {
+        "passed": 59,
+        "total": 59,
+        "collected": 59
+      },
+      "seconds": 82.07,
+      "evidence": "projection.json.gz",
+      "public_json_sha256": "75e895b9a8f3c367f9ba62cde00314f1011b28f462c948023e9246397a5c19b9",
+      "gzip_sha256": "3732e07a5ba595bfcc01594e0e828be0a48add264222d7da5aa8c5c92934cb2a",
+      "source_file_sha256": {
+        "run.json": "0f8ae024033139fa988777b0af2a0ca0ad1bdfdc70080c16c3869c50f2c81da0",
+        "cases.json": "f41b534bd75bdd249533cbca6cfdb73f26338181622200b94058a0eed554dee5"
+      }
+    },
+    "pitr": {
+      "job": 131101205637,
+      "workflow_run": 43194312720,
+      "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43194312720/job/131101205637",
+      "result": "PASS",
+      "pytest": null,
+      "counts": null,
+      "seconds": 7.042,
+      "evidence": "pitr.json.gz",
+      "public_json_sha256": "9079b61c8afca5b3e9264042c11ffd8e732bb4fe4d76e76b03d1e864c8e406ff",
+      "gzip_sha256": "ff640a93336f538f1303a87255b603103991c700e5d01ee37d80018967e72907",
+      "source_file_sha256": {
+        "run.json": "17b73dd19f5d1260d8ac45d732fd778c75440d4d6469066f1222ced970aea2ef",
+        "pitr/result.json": "2f400e1b2001e779229db2fc9343f00440aa520e25eb47f00e96ec9f102a125e"
+      }
+    },
+    "packaging": {
+      "job": 131101205335,
+      "workflow_run": 43194312720,
+      "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43194312720/job/131101205335",
+      "result": "PASS",
+      "pytest": null,
+      "counts": null,
+      "seconds": null,
+      "evidence": "packaging.json.gz",
+      "public_json_sha256": "a921f5a1223fe7065761ba7cab1a4ffc334d079d8cf4133cdd32c2331e974e93",
+      "gzip_sha256": "d6d3cbaddf766b251fc2e89b442083a2e76413283ebbd102e96a441e78dc8a88",
+      "source_file_sha256": {
+        "packaging-evidence.json": "5508195ed6d5e0ed613a054ecb63ca29c9398cf16a57f2a634f88375cb633e4a"
+      }
+    }
+  },
+  "three_arm": {
+    "file": "three-arm-comparison.json",
+    "source_sha256": "b36240d010e45d9e6a5d4bea72386633acd085a8148cca0086b0d4193c01ab82",
+    "windows": 3,
+    "planned": 3,
+    "attempts": 9,
+    "real_model_calls": 0,
+    "commercial_cost_usd": "0",
+    "independent_confirmatory_batches": 0
+  },
+  "pitr": {
+    "file": "physical-pitr.json",
+    "source_job": 131098651573,
+    "source_run": 43193557710,
+    "postgres": "postgres (PostgreSQL) 17.11 (Ubuntu 17.11-1.pgdg24.04+2)",
+    "redis": "7.0.15",
+    "rows_verified_tables": 71,
+    "objects": 39,
+    "target_commits_lost": 0
+  },
+  "supplementary_http": {
+    "file": "supplementary-http.json",
+    "original_successful_requests": 293,
+    "repeat_successful_requests": 300,
+    "original_threshold": 300,
+    "product_gate": "MET",
+    "capacity_at30": "NOT_MET"
+  },
+  "known_diagnostics": [
+    "The first hosted history environment skipped 17 cases because unprivileged Linux namespaces were unavailable. The next native environment exercised all 96 assertions but the disposable fixture owner could not close a session on database teardown. The final independent run exercised and cleaned up all 96 cases with zero skipped.",
+    "The original 50-agent closed-loop local probe retained 293/300. Unchanged isolated repeat reached 300/300.",
+    "The first hosted dual/three-arm setup lacked Workshop in the child interpreter. A subsequent dual restart lacked a local redis-server. Both were installed and the original tests passed.",
+    "The first supplementary receipt exporter rejected pytest's nested subtest aggregate after all native test cases had passed. Both the native outcome and the corrected durable export are preserved in Actions.",
+    "An early three-arm driver stopped after one of three preregistered windows. The retained diagnostic and a later fully recorded calibration have separate run identifiers."
+  ],
+  "literary": "NOT_EVALUATED",
+  "p6": "BLOCKED_LOCAL_AUTHORIZATION",
+  "at30": "NOT_MET",
+  "paid_calls": 0
+}

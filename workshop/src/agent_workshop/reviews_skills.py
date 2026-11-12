@@ -134,12 +134,22 @@ def revoke(conn, session, operation_id, binding_id):
     with operation(conn, session, "SKILL_REVOKE", operation_id, binding_id) as (old, out):
         if not old:
             row = conn.execute(
-                """UPDATE aw_skill_bindings SET epoch=epoch+CASE WHEN revoked THEN 0 ELSE 1 END,revoked=true
-                WHERE org_id=%s AND binding_id=%s RETURNING epoch""",
+                """WITH old AS MATERIALIZED (SELECT org_id,binding_id,revoked FROM aw_skill_bindings
+                     WHERE org_id=%s AND binding_id=%s FOR UPDATE)
+                   UPDATE aw_skill_bindings b SET epoch=b.epoch+CASE WHEN old.revoked THEN 0 ELSE 1 END,
+                     revoked=true FROM old WHERE (b.org_id,b.binding_id)=(old.org_id,old.binding_id)
+                     RETURNING b.epoch,old.revoked AS already_revoked""",
                 (session.org_id, binding_id),
             ).fetchone()
             if not row:
                 raise Denied("SKILL_DENIED")
+            if not row["already_revoked"]:
+                conn.execute(
+                    """SELECT aw_append_projection(%s,'harness.skill.withdrawn',%s,NULL,NULL,
+                        jsonb_build_object('stage','S4','installation_id',%s::text,'binding_id',%s::text,
+                                           'skill_epoch',%s::bigint,'action','REVOKE'))""",
+                    (session.org_id, str(binding_id), session.installation_id, str(binding_id), row["epoch"]),
+                )
             out.update(binding_id=binding_id, epoch=row["epoch"])
         return out
 

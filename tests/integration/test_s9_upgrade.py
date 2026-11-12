@@ -75,6 +75,8 @@ finally:
 
     with k.db.uow(write=False) as r:
         before = database_snapshot(r.conn)
+        original_audit = r.conn.execute(text(
+            "SELECT to_jsonb(a) FROM nf_audit_events a ORDER BY event_id")).scalars().all()
         old_reads = r.conn.execute(text(
             "SELECT to_jsonb(r) FROM nf_semantic_reads r ORDER BY observation_id")).scalars().all()
     assert old_reads and old["receipt"]["outcome"] == "RECOMPUTE_QUEUED"
@@ -92,8 +94,14 @@ finally:
     head = old["world_ref"]
     with k.db.uow() as r:
         after = database_snapshot(r.conn)
-        for table in before.keys() - {"alembic_version", "nf_semantic_reads"}:
+        for table in before.keys() - {"alembic_version", "nf_semantic_reads", "nf_audit_events"}:
             assert before[table] == after[table], table
+        # 0020 adds one nullable audit metadata column. Verify every legacy
+        # row and original field verbatim, and require the new field to be NULL.
+        assert r.conn.execute(text(
+            "SELECT to_jsonb(a) - 'harness_details' FROM nf_audit_events a ORDER BY event_id"
+        )).scalars().all() == original_audit
+        assert not r.conn.scalar(text("SELECT count(*) FROM nf_audit_events WHERE harness_details IS NOT NULL"))
         reads = r.conn.execute(text(
             "SELECT to_jsonb(r) - 'created_at' FROM nf_semantic_reads r ORDER BY observation_id")).scalars().all()
         assert old_reads == reads

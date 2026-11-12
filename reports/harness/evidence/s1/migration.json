@@ -1,0 +1,34 @@
+{
+  "status": "PASS",
+  "steps": [
+    {
+      "alembic": "upgrade",
+      "target": "0019_p57_context_sources",
+      "index": "nf_draft_prior_revision",
+      "same_two_draft_hashes": true
+    },
+    {
+      "alembic": "downgrade",
+      "target": "0018_p6_shared_tokens",
+      "index": null,
+      "same_two_draft_hashes": true
+    },
+    {
+      "alembic": "upgrade",
+      "target": "0019_p57_context_sources",
+      "index": "nf_draft_prior_revision",
+      "same_two_draft_hashes": true
+    }
+  ],
+  "plan": [
+    "Limit  (cost=0.13..8.15 rows=1 width=16)",
+    "  ->  Index Scan using nf_draft_prior_revision on nf_artifacts  (cost=0.13..8.15 rows=1 width=16)",
+    "        Index Cond: ((work_id = 'dca7a97f-b719-4e8f-ae3b-c1cb1b5bef2a'::uuid) AND ((payload #>> '{prior_draft_ref,artifact_revision_id}'::text[]) = ANY ('{0d1df67b-bd5c-4186-87da-19fedcc08152}'::text[])))",
+    "        Filter: ((payload #>> '{input_world_ref,branch_id}'::text[]) = '8c477030-0aaa-46e3-8411-41cda7e9b07b'::text)"
+  ],
+  "verified_source_hashes": [
+    "1f018f151c409083e769f7c646b963154fc52702750cd813974cc851abeee95e",
+    "f918c3ea799cb3ec31ebc4d425b2fa2b3f9af21873cc5fdeb82bb32b7e120951"
+  ],
+  "successor_found": true
+}

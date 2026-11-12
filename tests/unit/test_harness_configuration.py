@@ -1,0 +1,77 @@
+import json
+
+import pytest
+
+from novel_factory.domain.errors import DomainError
+from novel_factory.infrastructure.creative_config import CreativeHarnessConfig
+
+
+@pytest.mark.unit
+def test_absent_configuration_retains_all_static_defaults(monkeypatch):
+    monkeypatch.delenv("NF_CREATIVE_HARNESS_CONFIG", raising=False)
+    cfg = CreativeHarnessConfig.from_env()
+    assert (cfg.enabled, cfg.dynamic_agents, cfg.adaptive_instructions, cfg.auto_promote) == (False,) * 4
+    assert cfg == CreativeHarnessConfig.parse(cfg.as_dict())
+
+
+@pytest.mark.parametrize("values", [
+    (True, False, False, False), (True, True, False, False),
+    (True, False, True, False), (True, True, True, True),
+])
+def test_explicit_configuration_round_trips_at_service_boundary(monkeypatch, values):
+    cfg = CreativeHarnessConfig(*values)
+    monkeypatch.setenv("NF_CREATIVE_HARNESS_CONFIG", json.dumps(cfg.as_dict()))
+    assert CreativeHarnessConfig.from_env() == cfg
+
+
+@pytest.mark.parametrize("change", ["unknown", "missing", "coercion", "parent", "promotion"])
+def test_malformed_or_unsafe_configuration_does_not_become_static(monkeypatch, change):
+    cfg = CreativeHarnessConfig().as_dict()
+    flags = cfg["creative_harness"]
+    if change == "unknown":
+        flags["another_flag"] = True
+    elif change == "missing":
+        del flags["adaptive_instructions"]
+    elif change == "coercion":
+        flags["enabled"] = 1
+    elif change == "parent":
+        flags["dynamic_agents"]["enabled"] = True
+    else:
+        flags["enabled"] = True
+        flags["adaptive_instructions"]["auto_promote"] = True
+    monkeypatch.setenv("NF_CREATIVE_HARNESS_CONFIG", json.dumps(cfg))
+    with pytest.raises(DomainError) as err:
+        CreativeHarnessConfig.from_env()
+    assert err.value.code == "INVALID_ARGUMENT"
+
+
+def test_deployed_defs_are_identical_to_the_frozen_s0_shapes():
+    from pathlib import Path
+    from novel_factory.contracts._schema_bundle import SCHEMAS
+    source = Path(__file__).resolve().parents[2] / "contracts/creative_harness/creative_harness.schema.json"
+    candidates = json.loads(source.read_text())["$defs"]
+    deployed = SCHEMAS["harness.schema.json"]["$defs"]
+    assert "ContextPacket" in deployed
+    for name, contract in deployed.items():
+        assert contract == candidates[name]
+
+
+@pytest.mark.parametrize(("field", "flag"), [
+    ("dynamic_assignment_ref", "dynamic_agents"), ("adaptive_instruction_ref", "adaptive_instructions"),
+])
+def test_frozen_runtime_selection_requires_its_flag_and_remains_optional_for_old_inputs(field, flag):
+    from novel_factory.contracts.registry import validate_contract
+
+    ref = {"artifact_id": "36ebae0c-7ecb-4e35-ba62-c5951cb426fb",
+           "artifact_revision_id": "c1f7d985-8e7f-4487-908a-e879c0d2895f", "sha256": "d" * 64}
+    baseline = {"schema_version": "2.1", "role_id": "writer", "task_kind": "scene_prose",
+                "runtime_ref": ref, "runtime_sha256": ref["sha256"], "adapter_id": "fixture",
+                "model_config_sha256": "a" * 64, "assignment": "Write the scene.", "material_refs": [],
+                "output_contract": {"name": "AgentTextOutput", "version": "agent"}}
+    assert validate_contract("AgentInput", baseline, "agent") == baseline
+    for disabled in ({}, {"creative_harness": CreativeHarnessConfig(enabled=True).as_dict()}):
+        with pytest.raises(DomainError):
+            validate_contract("AgentInput", {**baseline, **disabled, field: ref}, "agent")
+    enabled = {**baseline, field: ref,
+               "creative_harness": CreativeHarnessConfig(enabled=True, **{flag: True}).as_dict()}
+    assert validate_contract("AgentInput", enabled, "agent") == enabled

@@ -1,5 +1,20 @@
 # 串行交付台账
 
+S6 观测、三组工程对照、真实服务及恢复验收已通过。[逐项回执](../harness/evidence/s6/receipt.json)
+
+S5 已推送为 `976e3212fcb42b9251fc2858a3b9d9ce3c3a646c`，远端检出及 Actions 成功。[远端回执](../harness/evidence/s5/remote-receipt.json)
+
+S5 指令根因、受控对照、独立发布和回滚 已在开发分支验证并进入阶段提交。[S5 工程回执](../harness/evidence/s5/receipt.json)
+
+S4 动态角色、Skill 版本与代际恢复已推送至开发分支，提交为 `7e8659f286407b0428a37f3fae8e9c6905e7c203`。[远端 Actions 回执](../harness/evidence/s4/remote-receipt.json)。[S4 工程回执](../harness/evidence/s4/receipt.json)
+
+S3 细粒度文学审核及定向修订已推送至开发分支，提交为 `7a480d0371622966520f354c19e80257465398b9`。[远端 Actions 回执](../harness/evidence/s3/remote-receipt.json)。[S3 工程回执](../harness/evidence/s3/receipt.json)
+
+S2 剧情规划与隔离推演已推送至开发分支，提交为 `32ef8b3ced7fb5ea06cb25ecd4ccfa436fe9150b`。[远端 Actions 回执](../harness/evidence/s2/remote-receipt.json)。[S2 工程回执](../harness/evidence/s2/receipt.json)
+
+2026-11-12 接管核实 S0 主线 `1cce11b5f0ead0d6ba4d57658a5ff5533b2ef37b`。接管记录已推送（1ef78e6b6a4a22339508de52a854e11a4be65bec）。S1 已推送至开发分支，提交为 `2d47a66f297dd017c6bac3f207abb6f6752cc742`（[远端和物理恢复回执](../harness/evidence/s1/remote-receipt.json)），见 [S1 测试及产品文件摘要](../harness/evidence/s1/receipt.json)。 [本轮二十节委托](P57_SINGLE_BRANCH_MANDATE.md) · [现场记录](../harness/S1_RECOVERY.md)
+
+
 | 阶段 | PR | 存证状态 | 实际 main SHA 与时间 |
 |---|---|---|---|
 | P5 | [#5](https://github.com/SKYdayDUCK/NovelFactory/pull/5) | 历史合并已核实；工程/原生桌面/恢复的合并依据见 #5。既有 AT-30 保留 | `a8f37b72286163e9117f8874a0e175c61204ff8b`，2026-11-11 13:50:15 UTC |

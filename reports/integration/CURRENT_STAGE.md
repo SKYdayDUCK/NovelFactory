@@ -1,5 +1,5 @@
-# 当前唯一阶段
+# 工程资格签收
 
-P5.7-S0 正在交付 Creative Harness 架构与现状审计。第一大阶段已在 `main@276820316129d546b0a13118bcbe283b06507795` 签收，合并后开放 PR 查询仅有 Scion #4。S0 验收范围为三层职责、逐文件审计、加载验证、接口/数据契约和实验回归矩阵。
+S1–S6 的产品功能均已完成开发分支验收。本文件记录随 S6 归档的工程资格。逐案回执、三臂冻结、恢复演练和适用环境见 [S6 工程验收](../harness/S6_ACCEPTANCE.md)。
 
-[正式门禁签收](https://github.com/SKYdayDUCK/NovelFactory/blob/1b0302a6867c56f5871c0b570477d88dc1ffe0a7/reports/integration/PRE_HARNESS_BASELINE.md) · [S0 技术架构](../harness/S0_ARCHITECTURE.md) · [已知失败](KNOWN_FAILURES.md)。
+正式主线合并 SHA、合并后复验和独立审核结论由保留开发分支的[主线签收记录](https://github.com/SKYdayDUCK/NovelFactory/blob/dev/p57-creative-harness-s1-s6/reports/code_review/p57_creative_harness/MAIN_MERGE_RECEIPT.md)记录。Scion #4 保持独立，AT-30 为 `NOT_MET`，P6 真实本地商业模型为 `BLOCKED_LOCAL_AUTHORIZATION`，文学质量为 `NOT_EVALUATED`。

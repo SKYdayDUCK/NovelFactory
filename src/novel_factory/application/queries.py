@@ -12,6 +12,7 @@ from copy import deepcopy
 import json
 import threading
 from uuid import UUID, uuid4, uuid5
+from time import monotonic
 
 from novel_factory.contracts.registry import validate_contract
 from novel_factory.domain.canonical import canonical_bytes, fingerprint, strict_json_loads
@@ -577,6 +578,7 @@ class WorldQueryService:
         return result
 
     def context_compile(self, principal, request):
+        started = monotonic()
         request = validate_contract('ContextCompileRequest', request, '2.1')
         _require(request['read_contract']['index_policy'] == 'AUTHORITATIVE', 'INVALID_ARGUMENT', 'Context compilation requires authoritative input')
         _require(request['subject_time']['kind'] == 'POINT', 'INVALID_ARGUMENT', 'P1 context compilation pins one story point')
@@ -712,6 +714,8 @@ class WorldQueryService:
             repo.add('receipts', {'work_id': wr['work_id'], 'principal_id': principal.principal_id, 'command_type': 'CONTEXT_COMPILE',
                                  'idempotency_key': request['idempotency_key'], 'request_hash': command_hash,
                                  'branch_id': wr['branch_id'], 'proposal_id': None, 'payload': result})
-            repo.outbox('context.compiled', 'task', request['task_id'], {'task_id': request['task_id'], 'generation': request['generation'],
+            event_id = repo.outbox('context.compiled', 'task', request['task_id'], {'task_id': request['task_id'], 'generation': request['generation'],
                         'context_bundle_id': context_id}, f'context:{request["task_id"]}:{request["generation"]}')
+            from .harness_observations import compiled_context
+            compiled_context(repo.conn, event_id, compiled, started)
         return result

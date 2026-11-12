@@ -5,6 +5,8 @@ from uuid import UUID, uuid5
 
 from sqlalchemy import text
 
+from novel_factory.application.authorization import Principal
+from novel_factory.application.dynamic_runtime import refresh_task, verify_task
 from novel_factory.application.kernel import require
 from novel_factory.domain.errors import DomainError
 
@@ -26,14 +28,21 @@ class CandidateDelivery:
             """),
                 {"work": work, "branch": branch, "route": self.route},
             )
-        if not task_id:
-            return None
+            if not task_id:
+                return None
+            selected = repo.one("tasks", {"task_id": task_id})
+            owner = Principal(selected["grant_id"], selected["principal_id"])
+        try:
+            proof = refresh_task(self.kernel, owner, task_id, selected["generation"])
+            proof_error = None
+        except DomainError as error:
+            proof, proof_error = None, error
         with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
             repo.one("works", {"work_id": work}, lock="update")
             self.kernel.authorize(repo, controller, work, "ADMIN", branch)
             repo.one("branches", {"work_id": work, "branch_id": branch}, lock="update")
             task = repo.one("tasks", {"task_id": task_id}, lock="update")
-            if task["state"] != "RESULT_STORED":
+            if task["state"] != "RESULT_STORED" or task["generation"] != selected["generation"]:
                 return None
             generation = task["generation"]
             key = f"{self.route}:{task_id}:{generation}"
@@ -41,6 +50,9 @@ class CandidateDelivery:
                 with repo.conn.begin_nested():
                     from novel_factory.application.semantic_dependencies import check_task_dependencies
                     check_task_dependencies(repo, task_id, generation)
+                    if proof_error:
+                        raise proof_error
+                    verify_task(self.kernel, repo, owner, task, proof)
                     result = self._deliver(repo, task, key)
             except DomainError as exc:
                 repo.change(
@@ -90,6 +102,9 @@ class CandidateDelivery:
             "INVALID_EVIDENCE",
             "Task result does not match audited candidate",
         )
+        if "creative_context_ref" in evidence:
+            from .creative_context_store import check_candidate_snapshot
+            check_candidate_snapshot(self.kernel, repo, task, evidence)
         response = self.kernel.artifact(repo, evidence["response_ref"], task["work_id"], kind="AGENT_RESPONSE")
         require(
             not json.loads(response["payload"]["text"])["unresolved_questions"],

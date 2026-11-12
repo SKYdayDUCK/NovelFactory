@@ -421,6 +421,8 @@ class Delegations:
             budget_reservation_ref=hold_key,
         )
         repo.add("delegation_receipts", receipt)
+        from .harness_observations import delegation
+        delegation(repo.conn, task["task_id"], task["generation"], receipt)
         repo.outbox(
             "delegation.bound",
             "task",

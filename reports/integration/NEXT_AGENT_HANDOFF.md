@@ -1,7 +1,5 @@
-# 串行交付交接
+# 工程签收与交接
 
-[PRE_HARNESS_BASELINE](PRE_HARNESS_BASELINE.md) 已签收。当前主线为 `276820316129d546b0a13118bcbe283b06507795`。只开放 Scion #4。原始范围与已完成的四项正式 PR 见[委托](https://github.com/SKYdayDUCK/NovelFactory/blob/05b5b0e38ffa86ed483568388aa2c2a2674f66e5/reports/integration/CREATIVE_HARNESS_DELIVERY_SCOPE.md)以及[交付台账](DELIVERY_LEDGER.md)。
+本轮起点是 S0 主线 `1cce11b5f0ead0d6ba4d57658a5ff5533b2ef37b`。依次核对六个阶段和 [S6 签收](../harness/evidence/s6/receipt.json)。首先读取远端两条分支，根据主线合并的父提交、文件树和验证回执确定下一步。
 
-下一阶段 P5.7-S0 交付 Core、Workshop、Harness 三层架构映射，逐文件运行时及开发指令审计，接口、数据模型、权限及开关设计，创作评价协议和可执行回归矩阵。S0 至 S6 分开集成，在每个精确主线上保存工程结果、原始失败及数据边界。真实创作和独立文学评级等待作者本地授权。
-
-S0 的入口为[技术架构](../harness/S0_ARCHITECTURE.md)、[指令审计](../harness/S0_INSTRUCTION_AUDIT.md)、[验收矩阵](../harness/S0_ACCEPTANCE_MATRIX.md)与[创作评价协议](../harness/S0_EVALUATION.md)。
+若尚无正式合并，确认 main 最新基线，在候选合并上运行主线工程套件，通过后以非强制方式一次更新 main，再重新检出并验证。若已有合并，根据[开发分支主线签收与独立审核](https://github.com/SKYdayDUCK/NovelFactory/tree/dev/p57-creative-harness-s1-s6/reports/code_review/p57_creative_harness)继续尚未完成的复核或选择性修复。审查目录只保存在开发分支。[原始委托](P57_SINGLE_BRANCH_MANDATE.md)

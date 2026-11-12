@@ -23,12 +23,21 @@ class HostJournal:
         self.kernel = kernel
 
     def authorize_send(self, attempt_id):
+        from .dynamic_runtime import refresh_task, verify_task
+
+        with self.kernel.db.uow(write=False) as repo:
+            call = repo.one("call_attempts", {"attempt_id": attempt_id})
+            require(call and call["state"] == "SENT", "INVALID_CALL_TRANSITION", "No live host call")
+            task = repo.one("tasks", {"task_id": call["task_id"]})
+            owner = Principal(task["grant_id"], task["principal_id"])
+        proof = refresh_task(self.kernel, owner, call["task_id"], call["generation"])
         with self.kernel.db.uow() as repo:
             call = repo.one("call_attempts", {"attempt_id": attempt_id})
             require(call and call["state"] == "SENT", "INVALID_CALL_TRANSITION", "No live host call")
             task = self.kernel.tasks.guard_task(repo.conn, call["task_id"], call["generation"])
             owner = Principal(task["grant_id"], task["principal_id"])
             _, grant, spec = WorldQueryService(self.kernel)._task(repo, owner, task["task_id"], task["generation"])
+            verify_task(self.kernel, repo, owner, task, proof)
             job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})
             if job:
                 from novel_factory.application.volume_successor import guard_volume_send
@@ -273,11 +282,14 @@ class RuntimeSupervisor:
         Accept validated summaries or seal one specifically enrolled actor
         slot. World effects and joint adjudication use independent decisions.
         """
-        with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
+        from .dynamic_runtime import refresh_task, verify_task
+
+        with self.kernel.db.uow(write=False) as repo:
             self.kernel.authorize(repo, controller, work_id, "ADMIN", branch_id)
-            repo.one("branches", {"work_id": work_id, "branch_id": branch_id}, lock="share")
             rows = repo.conn.execute(text("""
-                SELECT t.task_id::text AS task_id, j.config FROM nf_tasks t JOIN nf_supervisor_jobs j USING(task_id)
+                SELECT t.task_id::text AS task_id, t.generation,t.grant_id::text,t.principal_id::text,
+                       jsonb_exists(a.payload,'dynamic_assignment_ref') AS delegated, j.config
+                FROM nf_tasks t JOIN nf_supervisor_jobs j USING(task_id)
                 JOIN nf_grants g ON t.grant_id=g.grant_id
                 JOIN nf_works w ON w.work_id=t.work_id
                 JOIN nf_call_attempts c ON c.task_id=t.task_id AND c.generation=t.generation
@@ -294,10 +306,25 @@ class RuntimeSupervisor:
                   AND (g.branch_ids='["*"]'::jsonb OR g.branch_ids @> jsonb_build_array(t.branch_id))
                   AND g.capabilities @> '["READ"]'::jsonb
                   AND w.policy_version=j.config->>'policy_version'
-                ORDER BY t.updated_at LIMIT 32 FOR UPDATE OF t SKIP LOCKED
+                ORDER BY t.updated_at,t.task_id LIMIT 32
             """), {"work": work_id, "branch": branch_id}).mappings().all()
-            for row in rows:
-                task = repo.one("tasks", {"task_id": row["task_id"]})
+        for row in rows:
+            owner = Principal(row["grant_id"], row["principal_id"])
+            proof = None
+            if row["delegated"]:
+                try:
+                    proof = refresh_task(self.kernel, owner, row["task_id"], row["generation"])
+                except DomainError as error:
+                    proof = error
+            with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
+                self.kernel.authorize(repo, controller, work_id, "ADMIN", branch_id)
+                repo.one("branches", {"work_id": work_id, "branch_id": branch_id}, lock="share")
+                task = repo.one("tasks", {"task_id": row["task_id"]}, lock="update")
+                if task["state"] != "RESULT_STORED" or task["generation"] != row["generation"]:
+                    continue
+                job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})
+                if not job or job["config"] != row["config"]:
+                    continue
                 from novel_factory.application.semantic_dependencies import check_task_dependencies
                 try:
                     check_task_dependencies(repo, task["task_id"], task["generation"])
@@ -323,24 +350,29 @@ class RuntimeSupervisor:
                         and audit["payload"]["result_status"] == "SUCCEEDED"
                         and audit["payload"]["context_bundle_id"] == task["context_bundle_id"]):
                     interaction_id = row["config"].get("seal_interaction_id")
-                    if interaction_id:
-                        from novel_factory.application.simulation import WorldSchedulerService
-                        try:
-                            with repo.conn.begin_nested():
+                    try:
+                        with repo.conn.begin_nested():
+                            if isinstance(proof, DomainError):
+                                raise proof
+                            verify_task(self.kernel, repo, owner, task, proof)
+                            if "creative_context_ref" in audit["payload"]:
+                                from .creative_context_store import check_candidate_snapshot
+                                check_candidate_snapshot(self.kernel, repo, task, audit["payload"])
+                            if interaction_id:
+                                from novel_factory.application.simulation import WorldSchedulerService
                                 candidate = self.kernel.artifact(repo, audit["payload"]["output_ref"], work_id,
                                                                  kind="AGENT_CANDIDATE")
                                 WorldSchedulerService(self.kernel).seal_in_transaction(repo, owner, interaction_id,
                                                                                       candidate["payload"])
-                        except DomainError as exc:
-                            # The stored result remains auditable. Repeated scans
-                            # cannot spend again or spin on this rejected handoff.
-                            repo.change("tasks", {"task_id": task["task_id"]}, {"state": "WAITING_REVIEW",
-                                        "lease_owner": None, "lease_expiry": None, "updated_at": repo.now()})
-                            self.kernel.tasks._emit(repo.conn, task["task_id"], task["generation"], "WAITING_REVIEW")
-                            repo.outbox("supervisor.handoff.blocked", "task", task["task_id"],
-                                {"generation": task["generation"], "reason": exc.code},
-                                f"handoff:{task['task_id']}:{task['generation']}:blocked")
-                            continue
+                    except DomainError as exc:
+                        # Preserve the stored result and avoid retrying a rejected handoff.
+                        repo.change("tasks", {"task_id": task["task_id"]}, {"state": "WAITING_REVIEW",
+                                    "lease_owner": None, "lease_expiry": None, "updated_at": repo.now()})
+                        self.kernel.tasks._emit(repo.conn, task["task_id"], task["generation"], "WAITING_REVIEW")
+                        repo.outbox("supervisor.handoff.blocked", "task", task["task_id"],
+                                    {"generation": task["generation"], "reason": exc.code},
+                                    f"handoff:{task['task_id']}:{task['generation']}:blocked")
+                        continue
                     self.kernel.tasks.accept_in_transaction(repo.conn, task["task_id"], task["generation"])
 
     def _execute(self, owner, task, worker, config):

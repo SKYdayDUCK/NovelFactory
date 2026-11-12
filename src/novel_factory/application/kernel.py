@@ -128,6 +128,9 @@ class Kernel:
         r.add("objects", {"hash":ref["sha256"],"size":verified.size}, ignore_conflict=True)
         r.add("artifacts", {**ref,"work_id":work_id,"kind":kind,"payload":None if isinstance(payload,bytes) else payload,"created_by":principal_id})
         r.add("object_refs", {"owner_type":"artifact","owner_id":ref["artifact_revision_id"],"object_hash":ref["sha256"]})
+        if kind.startswith("CREATIVE_"):
+            from .harness_observations import artifact_observation
+            artifact_observation(r.conn, kind, ref, work_id, payload, principal_id)
         if kind in {"CHANGE_POINT", "REVIEW_REPORT"}:
             from novel_factory.application.audit_log import LogService
             LogService.artifact(r.conn, kind, ref["artifact_revision_id"], work_id, payload, principal_id)
@@ -278,7 +281,29 @@ class Kernel:
         grant cannot expose bytes through a read/revocation race.
         """
         grant = self.authorize(r, principal, work_id, "READ")
-        self.artifact(r, ref, work_id)
+        artifact = self.artifact(r, ref, work_id)
+        if artifact["kind"].startswith("AGENT_"):
+            from .dynamic_runtime import audit_assignment
+
+            assignment = audit_assignment(r, work_id, artifact, ref)
+            if assignment:
+                kind, assignment_ref = assignment
+                frozen = self.artifact(r, assignment_ref, work_id, kind=kind)["payload"]
+                branch = frozen["scope"]["world_ref"]["branch_id"]
+                if artifact["kind"] != "AGENT_CANDIDATE" or "ADMIN" in grant["capabilities"]:
+                    self.authorize(r, principal, work_id, "ADMIN", branch)
+                    return
+                self.authorize(r, principal, work_id, "READ", branch)
+        if artifact["kind"].startswith("CREATIVE_"):
+            # Raw records combine internal prompts, plan choices or evaluation
+            # evidence. Task-scoped read ports return their permitted sections.
+            payload = artifact["payload"]
+            scoped = payload["packet"] if artifact["kind"] == "CREATIVE_CONTEXT_SNAPSHOT" else payload
+            world_ref = scoped.get("scope", {}).get("world_ref", {})
+            require(world_ref.get("work_id") == work_id and world_ref.get("branch_id"),
+                    "VIEW_DENIED", "Creative artifact has no readable branch scope")
+            self.authorize(r, principal, work_id, "ADMIN", world_ref["branch_id"])
+            return
         if "ADMIN" in grant["capabilities"]:
             return
         from novel_factory.application.queries import WorldQueryService

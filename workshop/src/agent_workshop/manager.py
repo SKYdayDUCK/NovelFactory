@@ -49,6 +49,7 @@ def history(conn, session, cursor=None, limit=50):
         """SELECT seq,source,ref_id,data FROM aw_change_log h
         WHERE org_id=%s AND seq>%s AND seq<=%s AND (%s OR (employee_id=%s AND employment_revision=%s))
         AND CASE
+            WHEN source IN ('harness.skill.frozen','harness.skill.withdrawn') THEN h.data->>'installation_id'=%s
             WHEN source IN ('aw_remote_receipts','aw_budget_holds','aw_delegations') THEN EXISTS (
                 SELECT 1 FROM aw_delegations d WHERE d.org_id=h.org_id AND
                     d.operation_id=h.ref_id::uuid AND d.installation_id=%s)
@@ -76,6 +77,7 @@ def history(conn, session, cursor=None, limit=50):
             whole,
             session.employee_id,
             session.employment_revision,
+            session.installation_id,
             session.installation_id,
             session.installation_id,
             whole,

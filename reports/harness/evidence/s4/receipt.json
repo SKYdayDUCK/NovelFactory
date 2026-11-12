@@ -1,0 +1,149 @@
+{
+  "stage": "S4",
+  "name": "动态角色、Skill 版本与代际恢复",
+  "branch": "dev/p57-creative-harness-s1-s6",
+  "base_commit": "7a480d0371622966520f354c19e80257465398b9",
+  "product_tree_before_evidence": "9a74aa031421bde674b279be24c88c2a13337b34",
+  "tested_blobs": {
+    "contracts/agent.schema.json": "af50d6b531eeaf260737ea1e48f5d8e5aa6b4b38",
+    "contracts/harness.schema.json": "4f35e04d608aff36c64a4c2e2bb8f2c3d2e11b84",
+    "src/novel_factory/application/actor_lookup.py": "7e1f5c85bcd2e2701dfa3cba5ae06e86ad4034de",
+    "src/novel_factory/application/agent_gateway.py": "f8e93e2f6a3d7bf1826b9139d1cf6d49741a3c99",
+    "src/novel_factory/application/candidate_delivery.py": "6b98ff0a291d91ba0d8b85ec0b17f9d9e2e15f10",
+    "src/novel_factory/application/creative_context_store.py": "ffb646463f8111faec4ae8a991b4ce559b0d6c51",
+    "src/novel_factory/application/dynamic_agents.py": "87e1e3a79674e495f29c379a0d751b5675c0937f",
+    "src/novel_factory/application/dynamic_runtime.py": "a6eee2923b3c52b18f095eed5f60c1b6be08884a",
+    "src/novel_factory/application/kernel.py": "07bc88c3f32d90d2b779f80c39b743a51341c973",
+    "src/novel_factory/application/mcp_runtime.py": "310d5be8904266a1b8b7efb92d386c48148c894d",
+    "src/novel_factory/application/narrative.py": "d0a9aeb1245ee7af731d07c2521e1e867ca5f6eb",
+    "src/novel_factory/application/runtime_tasks.py": "f86573ffb18d00f81f8753063e936881108a6064",
+    "src/novel_factory/application/supervisor.py": "c4d11773d683bc368f750ce400e117c69787d9e7",
+    "src/novel_factory/application/workshop_skills.py": "e3a4d0a827a1aa1288c84d639ee10c3d49cb2016",
+    "src/novel_factory/contracts/_schema_bundle.py": "6c3d1f9c7e95691409e6950fbc2f533d413bcf27",
+    "src/novel_factory/interfaces/mcp_stdio.py": "db6c32584b0e915e58d4c4a811fd61536d1fcc40",
+    "tests/integration/test_harness_dynamic_mcp.py": "ce165dd2634523537b0d372ea55f6b28f6a8202d",
+    "tests/integration/test_harness_dynamic_registry.py": "8dc8c45eeba7c6d5695565303c49137f275e8e34",
+    "tests/unit/test_harness_configuration.py": "9b27d47dc9c343860493cdff9ad1cc13b94cd187",
+    "workshop/integration/test_dynamic_late_delivery.py": "b35f15e2208f2296ed822b4e3d44084d133da7d0",
+    "workshop/integration/test_dynamic_skill_dispatch.py": "1b226499442aa90ddbd24c3c19453391d6602767",
+    "workshop/integration/test_dynamic_version_switch.py": "f72854c4bcff868413af5c8ff3690924ec01479a",
+    "workshop/src/agent_workshop/dynamic_skills.py": "8d7415374b046657259856a3a1da9beae958898e",
+    "workshop/src/agent_workshop/server.py": "a512bda99c48241d77fb0b9680f99cfd5f32fc2b"
+  },
+  "postgres": "17.11",
+  "model": "deterministic offline HTTP endpoint or local fixture",
+  "paid_calls": 0,
+  "literary_quality": "NOT_EVALUATED",
+  "verification": "业务代码复用 NF 现有工件、选择指针、任务、模型 Attempt 与 Workshop W4 授权，无新增数据库表。真实 NF/Workshop MCP 演练登记、选择、V1→V2→V1 路由，三个独立冻结的任务各自发出应有的原文。进程间的正文/指令隔离、运行中退出与撤回、预算预留至发送前撤权、返回后交付前撤权、代际恢复及 UNKNOWN 阻止重发均有实测。独立 PG 集群和回环 HTTP 代表工程测试；0.02 USD / 18 tokens 是一次模拟账单，真实商业消耗为零。下一阶段应以有精确稿件证据的失败为输入，冻结样本、基线、候选、评估与审批各方，并通过版本选择进行获准的晋级或回滚，保持正式世界与旧任务记录。",
+  "runs": {
+    "dynamic_nf": {
+      "file": "dynamic_nf.json.gz",
+      "summary": {
+        "passed": 24,
+        "total": 24,
+        "collected": 24
+      },
+      "seconds": 35.3513457775116
+    },
+    "live_workshop": {
+      "file": "live_workshop.json.gz",
+      "summary": {
+        "passed": 4,
+        "total": 4,
+        "collected": 4
+      },
+      "seconds": 118.64615368843079
+    },
+    "live_pointer_rollback": {
+      "file": "live_pointer_rollback.json.gz",
+      "summary": {
+        "passed": 1,
+        "total": 1,
+        "collected": 1
+      },
+      "seconds": 89.03456544876099
+    },
+    "live_handoff": {
+      "file": "live_handoff.json.gz",
+      "summary": {
+        "passed": 2,
+        "total": 2,
+        "collected": 2
+      },
+      "seconds": 84.18587064743042
+    },
+    "final_authority": {
+      "file": "final_authority.json.gz",
+      "summary": {
+        "passed": 11,
+        "total": 11,
+        "collected": 11
+      },
+      "seconds": 88.44994854927063
+    },
+    "final_branch_read": {
+      "file": "final_branch_read.json.gz",
+      "summary": {
+        "passed": 15,
+        "total": 15,
+        "collected": 15
+      },
+      "seconds": 59.47955560684204
+    },
+    "nf_legacy": {
+      "file": "nf_legacy.json.gz",
+      "summary": {
+        "passed": 96,
+        "total": 96,
+        "collected": 96
+      },
+      "seconds": 385.3718514442444
+    },
+    "w4_legacy": {
+      "file": "w4_legacy.json.gz",
+      "summary": {
+        "passed": 22,
+        "total": 22,
+        "collected": 22
+      },
+      "seconds": 31.900264739990234
+    },
+    "unit_and_contract": {
+      "file": "unit_and_contract.json.gz",
+      "summary": {
+        "passed": 405,
+        "subtests passed": 3,
+        "total": 408,
+        "collected": 408
+      },
+      "seconds": 17.43625545501709
+    }
+  },
+  "earlier_failures": [
+    "intermediate.txt.gz",
+    "original_workshop_operator.txt.gz",
+    "offline_provider_not_sent.txt.gz",
+    "recovery_fixture_isolation.txt.gz"
+  ],
+  "services": {
+    "rollback": {
+      "postgres_nf_id": 7707197568409387033,
+      "postgres_workshop_id": 7707197568556163096,
+      "distinct_clusters": true,
+      "redis": "8.0.2"
+    },
+    "live_workshop": {
+      "postgres_nf_id": 7707197566466826265,
+      "postgres_workshop_id": 7707197563081908247,
+      "distinct_clusters": true,
+      "redis": "8.0.2"
+    },
+    "authority": {
+      "postgres_nf_id": 7707198256610500655,
+      "postgres_workshop_id": 7707198256530509869,
+      "distinct_clusters": true,
+      "redis": "8.0.2"
+    }
+  },
+  "earlier_failure_resolution": "登记的派生标识统一以可规范编码的数组生成。回环测试端点使用本地工程凭证，供应商不可用时的 NOT_SENT 原样留证；原始故障中的临时连接配置已删除。监督器夹具使用注册的无状态文本路由后复验。"
+}
