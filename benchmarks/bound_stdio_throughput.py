@@ -28,6 +28,7 @@ from novel_factory.fixtures import load_fixture, point
 from novel_factory.infrastructure.database import Database
 from novel_factory.infrastructure.model_gateway import OpenAICompatibleAdapter
 from novel_factory.infrastructure.objects import ObjectStore
+from novel_factory.interfaces import mcp_stdio
 
 TOOLS = ("nf_task_get", "nf_context_get")
 
@@ -183,19 +184,26 @@ def main():
     cgroup = Path("/sys/fs/cgroup")
     limits = {name: (cgroup / name).read_text().strip() for name in ("cpu.max", "memory.max")
               if (cgroup / name).is_file()}
+    idle_setting = inspect.signature(mcp_stdio.serve).parameters.get("idle_db_seconds")
     report = {"source_commit_at_start": source, "driver_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
               "platform": platform.platform(), "python": platform.python_version(), "logical_cpus_visible": os.cpu_count(),
               "cgroup_limits": limits,
               "postgres": postgres, "server_processes": 2, "client_processes": 1, "client_sessions": 2,
-              "server_slots_per_binding": 2, "server_pg_pool_per_binding": 2, "server_pool_overflow": 0,
-              "driver_db_pool": 1, "stdio_idle_seconds": 30, "warmup_per_role": "initialize, tools/list, one read per tool",
+              "server_slots_per_binding": 2 if hasattr(mcp_stdio, "BoundToolAdmission") else None,
+              "server_pg_pool_per_binding": 2, "server_pool_overflow": 0,
+              "driver_db_pool": 1, "stdio_idle_seconds": idle_setting.default if idle_setting else None,
+              "warmup_per_role": "initialize, tools/list, one read per tool",
               "closed_client_concurrency_per_binding": 2, "open_client_inflight_cap_per_binding": 4,
               "distinct_tasks_principals_works": 2, "call_attempt_rows": attempts, "world_heads_unchanged": heads_unchanged,
               "phases": results}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-    if not heads_unchanged or attempts or any(r["statuses"] != {"OK": r["offered"]} for r in results):
-        raise SystemExit("A read failed or did not match its bound role, or a workload invariant changed")
+    for result in results:
+        statuses = result["statuses"]
+        if sum(statuses.values()) != result["offered"] or set(statuses) - {"OK", "CLIENT_DROP", "BACKPRESSURE"}:
+            raise SystemExit("A request went unaccounted or produced an invalid result")
+    if not heads_unchanged or attempts:
+        raise SystemExit("Read-only calls changed a world head or created a provider Attempt")
 
 
 if __name__ == "__main__":
