@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/p57-target-engineering.yml'
       - 'validation/p57_export_gate_receipt.py'
+      - 'validation/p57_verify_packaging.py'
       - 'reports/harness/evidence/s6/remote-qualification-target.txt'
 permissions:
   contents: read
