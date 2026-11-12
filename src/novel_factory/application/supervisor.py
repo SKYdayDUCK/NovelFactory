@@ -153,6 +153,10 @@ class RuntimeSupervisor:
                 "VIEW_DENIED", "Automatic completion is limited to an explicitly enrolled evidence summary")
         config = {"accept_summary": accept_summary, "manifest_ref": manifest_ref, "knowledge_cut": knowledge_cut, "context_tokens": context_tokens,
                   "dispatch": dispatch, "grant_epoch": grant["epoch"], "policy_version": spec["policy_version"]}
+        from novel_factory.orchestration.runtime_admission import scope_for
+        scope = scope_for(route, payload, spec["world_ref"]["work_id"])
+        if scope:
+            config["runtime_scope"] = scope
         return config, payload
 
     @staticmethod

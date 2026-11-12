@@ -58,6 +58,55 @@ def test_project_authority_freeze_and_unknown_fence(kernel_env):
             assert "policy_sha256" not in str(packet["messages"]) and "routing_decision" not in str(packet["messages"])
 
 
+def test_two_works_hold_separate_scopes_and_share_account_slot(kernel_env):
+    kernel = kernel_env["kernel"]
+    worlds = [load_fixture(kernel) for _ in range(2)]
+    with backend(concurrent=True) as (one, requests, service):
+        one.provider_key, one.account_key = "synthetic", "one-account"
+        gateway = AgentGateway(kernel, {"one": one})
+        sup = RuntimeSupervisor(kernel, gateway)
+        args = []
+        for w in worlds:
+            wr, owner = w["world_ref"], w["principal"]
+            activate(kernel, owner, wr, policy(w), gateway.adapters, expected_revision=0)
+            budget = kernel.tasks.create_budget(wr["work_id"], "1")
+            _job(kernel, gateway, sup, w, budget, "READY", adapter_id="@policy")
+            args.append((owner, wr["work_id"], wr["branch_id"]))
+        with kernel.db.uow() as repo:
+            repo.conn.execute(text("INSERT INTO nf_runtime_limits VALUES ('account','one-account',1,NULL,NULL)"))
+        entered, release = Event(), Event()
+
+        def hold(_):
+            entered.set()
+            assert release.wait(20)
+            return {"text": "Synthetic summary", "event_refs": [], "important_deltas": [], "evidence_refs": []}
+
+        service.packet_candidate = hold
+        try:
+            with ThreadPoolExecutor(2) as pool:
+                fut = pool.submit(sup.run_once, *args[0])
+                try:
+                    assert entered.wait(10)
+                    assert sup.run_once(*args[1])["status"] == "IDLE"
+                    assert len(requests) == 1
+                    with kernel.db.uow() as repo:
+                        repo.conn.execute(text("UPDATE nf_runtime_limits SET slots=2 WHERE subject='one-account'"))
+                    second = pool.submit(sup.run_once, *args[1])
+                    # Synchronize on HTTP receive, not CPU scheduling.
+                    from time import monotonic, sleep
+                    until = monotonic()+8
+                    while len(requests)<2 and monotonic()<until:
+                        sleep(.02)
+                    assert len(requests) == 2
+                    assert args[0][1] != args[1][1]
+                finally:
+                    release.set()
+                assert fut.result()["status"] == second.result()["status"] == "RESULT_STORED"
+        finally:
+            with kernel.db.uow() as repo:
+                repo.conn.execute(text("DELETE FROM nf_runtime_limits WHERE subject='one-account'"))
+
+
 def test_unsent_reservation_rebinds_generation_without_recharging(kernel_env):
     from novel_factory.application.model_routing import rebind
     kernel = kernel_env["kernel"]
@@ -143,3 +192,45 @@ def test_one_scene_dispatches_two_private_actor_inputs_concurrently(kernel_env):
             assert packet["context"]["actor_id"] == actor
             assert packet["context"]["task_id"] == registration["actor_tasks"][actor]
             assert "actor-override" not in str(packet) and "policy_sha256" not in str(packet)
+
+
+def test_direct_profile_cannot_bypass_org_or_quota_change_after_reserve(kernel_env, monkeypatch):
+    """Clamp between the preliminary admission and actual send, then clear it and retry."""
+    kernel = kernel_env["kernel"]
+    world = load_fixture(kernel)
+    wr, owner = world["world_ref"], world["principal"]
+    with backend() as (one, requests, _):
+        one.provider_key, one.account_key = "synthetic", "restricted-account"
+        gateway = AgentGateway(kernel, {"one": one})
+        sup = RuntimeSupervisor(kernel, gateway)
+        activate(kernel, owner, wr, {**policy(world), "org_id": "direct"}, gateway.adapters, expected_revision=0)
+        budget = kernel.tasks.create_budget(wr["work_id"], "1")
+        job = _job(kernel, gateway, sup, world, budget, "READY", adapter_id="one")
+        args = (owner, wr["work_id"], wr["branch_id"])
+        mark_sent = gateway._mark_sent
+        def restrict(*a, **kwargs):
+            with kernel.db.uow() as repo:
+                repo.conn.execute(text("INSERT INTO nf_runtime_limits VALUES ('organization','local/direct',0,1,100000)"))
+            return mark_sent(*a, **kwargs)
+        try:
+            with monkeypatch.context() as m:
+                m.setattr(gateway, "_mark_sent", restrict)
+                assert sup.run_once(*args)["reason"] == "RUNTIME_CAPACITY_LIMIT"
+            assert sup.run_once(*args)["status"] == "IDLE" and not requests
+            with kernel.db.uow() as repo:
+                attempts = repo.many("call_attempts", {"task_id": job.task["task_id"]})
+                assert len(attempts) == 1 and attempts[0]["state"] == "FAILED" and attempts[0]["actual_amount"] == 0
+                repo.conn.execute(text("UPDATE nf_runtime_limits SET slots=1 WHERE subject='local/direct'"))
+            assert sup.run_once(*args)["status"] == "RESULT_STORED"
+            second = _job(kernel, gateway, sup, world, budget, "READY", adapter_id="one")
+            # Even with an available concurrent slot, rolling RPM/TPM still reflect the first send.
+            assert sup.run_once(*args)["status"] == "IDLE" and len(requests) == 1
+            with kernel.db.uow() as repo:
+                permit = repo.conn.execute(text("""
+                    SELECT scope,expires_at-started_at AS lifetime FROM nf_runtime_permits WHERE task_id=:task
+                """), {"task": job.task["task_id"]}).mappings().one()
+                assert permit["scope"]["organization"] == "local/direct" and permit["lifetime"].total_seconds() >= 69
+                assert not repo.many("call_attempts", {"task_id": second.task["task_id"]})
+        finally:
+            with kernel.db.uow() as repo:
+                repo.conn.execute(text("DELETE FROM nf_runtime_limits WHERE subject='local/direct'"))

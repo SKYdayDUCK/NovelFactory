@@ -252,16 +252,37 @@ class AgentGateway:
     def _mark_sent(self, principal, binding, attempt, worker, authorize):
         try:
             self._refresh_dynamic(principal, binding)
-            return self.kernel.tasks.mark_call_sent(attempt, worker_id=worker, authorize_in_tx=authorize)
-        except DomainError:
-            if "dynamic_assignment_ref" in binding:
+            from novel_factory.orchestration import runtime_admission
+            adapter = self.adapters[binding["input"]["adapter_id"]]
+            scope = runtime_admission.scope_for(adapter, binding["input"], binding["task"]["work_id"])
+
+            def authorize_send(conn):
+                authorize(conn)
+                if scope:
+                    call = KernelRepository(conn, tables).one("call_attempts", {"attempt_id": attempt})
+                    timeout = float(binding["config"].get("timeout_seconds", 60))
+                    if binding["config"].get("adapter_kind") == "codex-cli":
+                        timeout *= 2  # native startup/turn and the guarded upstream transfer
+                    runtime_admission.take(conn, scope, call["task_id"], attempt, call["reserved_tokens"], timeout)
+
+            return self.kernel.tasks.mark_call_sent(attempt, worker_id=worker, authorize_in_tx=authorize_send)
+        except DomainError as exc:
+            if ("dynamic_assignment_ref" in binding or binding["input"].get("routing_decision")
+                    or getattr(self.adapters[binding["input"]["adapter_id"]], "provider_key", None)):
                 # Revocation between reserve and send cannot consume money. The
                 # task lock serializes this release with any concurrent sender.
                 with self.kernel.db.uow() as repo:
-                    repo.one("tasks", {"task_id": binding["task"]["task_id"]}, lock="update")
+                    task = repo.one("tasks", {"task_id": binding["task"]["task_id"]}, lock="update")
                     call = repo.one("call_attempts", {"attempt_id": attempt})
                     if call and call["state"] == "PREPARED":
                         self.kernel.tasks._settle_locked_task_call(repo.conn, call, "FAILED", Decimal(0), 0, None)
+                        if exc.code == "RUNTIME_CAPACITY_LIMIT":
+                            from sqlalchemy import text
+                            repo.conn.execute(text("""
+                                INSERT INTO nf_runtime_unsent(attempt_id,generation) VALUES (:id,:generation)
+                            """), {"id": attempt, "generation": call["generation"]})
+                            if task["state"] == "RUNNING" and task["generation"] == call["generation"]:
+                                self.kernel.tasks._recover_task(repo.conn, task, reason="RUNTIME_CAPACITY_LIMIT")
             raise
 
     def _authorized_materials(self, principal, binding):
@@ -574,7 +595,8 @@ class AgentGateway:
                 # terminal billing receipt does not prove task delivery.
                 other = [c for c in pending if (c["generation"], c["call_key"]) !=
                          (request["generation"], request["call_key"])]
-                if other and "routing_decision" in binding["input"]:
+                if other and ("routing_decision" in binding["input"] or
+                              getattr(self.adapters[binding["input"]["adapter_id"]], "provider_key", None)):
                     from sqlalchemy import text
                     released = set(repo.conn.scalars(text("""
                         SELECT u.attempt_id::text FROM nf_runtime_unsent u JOIN nf_call_attempts c USING(attempt_id)
@@ -602,7 +624,12 @@ class AgentGateway:
                  "actual_amount": None, "currency": None, "cost_status": "UNKNOWN_COST"}
         outcome, result_status, reason, provider_receipt = "UNKNOWN", "FAILED", None, None
         try:
-            response = adapter.generate(replace(model_request, attempt_id=attempt))
+            try:
+                response = adapter.generate(replace(model_request, attempt_id=attempt))
+            finally:
+                if binding["input"].get("routing_decision") or getattr(adapter, "provider_key", None):
+                    from novel_factory.orchestration.runtime_admission import release
+                    release(self.kernel.db, attempt)
             provider_receipt = response.provider_receipt
             require(response.request_sha256 == request_hash, "HOST_BINDING_MISMATCH", "Response is not bound to the dispatched request")
             require(isinstance(response.text, str) and len(response.text.encode("utf-8")) <= 2_000_000,

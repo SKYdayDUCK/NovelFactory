@@ -81,6 +81,7 @@ def rebind(kernel, owner, wr, task_id, expected_generation, adapters, idempotenc
     from .planning import PlanningService
     from .semantic_dependencies import check_task_dependencies
     from novel_factory.contracts.registry import validate_contract
+    from novel_factory.orchestration.runtime_admission import scope_for
 
     PlanningService._key(idempotency_key)
     request = {"task_id": task_id, "generation": expected_generation, "work_id": wr["work_id"],
@@ -152,8 +153,9 @@ def rebind(kernel, owner, wr, task_id, expected_generation, adapters, idempotenc
                     "context_bundle_id": None, "dependency_fingerprint": None, "lease_owner": None,
                     "attempt_id": None, "lease_expiry": None, "updated_at": repo.now()})
         repo.conn.execute(text("DELETE FROM nf_dispatch_slots WHERE task_id=:task"), {"task": task_id})
+        scope = scope_for(adapters[decision["profile_id"]], new, wr["work_id"])
         repo.change("supervisor_jobs", {"task_id": task_id}, {"config": {
-            **cfg, "dispatch": {**cfg["dispatch"], "input_ref": ref}}})
+            **cfg, "runtime_scope": scope, "dispatch": {**cfg["dispatch"], "input_ref": ref}}})
         kernel.tasks._emit(repo.conn, task_id, gen, state)
         result = {"task_id": task_id, "generation": gen, "old_input_ref": old_ref, "input_ref": ref,
                   "policy_revision": decision["revision"], "released_unsent": len(calls)}

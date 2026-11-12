@@ -270,6 +270,10 @@ class TaskService:
             conn.execute(t.update().where(t.c.task_id == task_id).values(lease_expiry=expiry, updated_at=self._now(conn)))
             slots = self.tables["dispatch_slots"]
             conn.execute(slots.update().where(slots.c.attempt_id == task["attempt_id"]).values(expires_at=expiry))
+            conn.execute(text("""
+                UPDATE nf_runtime_permits p SET expires_at=greatest(p.expires_at,:expiry) FROM nf_call_attempts c
+                WHERE c.attempt_id=p.attempt_id AND c.task_id=:task AND c.generation=:gen AND NOT p.released
+            """), {"expiry": expiry, "task": task_id, "gen": generation})
             return expiry
 
     def _register_object(self, conn, ref, owner_type, owner_id):
@@ -400,7 +404,7 @@ class TaskService:
         self._emit(conn, str(task_id), generation, "ACCEPTED")
         return {"task_id": str(task_id), "generation": generation, "state": "ACCEPTED"}
 
-    def _recover_task(self, conn, task):
+    def _recover_task(self, conn, task, *, reason="LEASE_RECOVERY"):
         calls = self.tables["call_attempts"]
         conn.execute(calls.update().where(calls.c.task_id == task["task_id"], calls.c.generation == task["generation"], calls.c.state == "SENT").values(state="UNKNOWN", updated_at=self._now(conn)))
         unresolved = conn.scalar(select(func.count()).select_from(calls).where(calls.c.task_id == task["task_id"], calls.c.state.in_(["UNKNOWN", "PREPARED"])))
@@ -433,7 +437,7 @@ class TaskService:
         conn.execute(t.update().where(t.c.task_id == task["task_id"]).values(state=state, generation=next_generation, lease_owner=None, lease_expiry=None, attempt_id=None, updated_at=self._now(conn)))
         self._emit(conn, task["task_id"], next_generation, state)
         from novel_factory.application.harness_observations import recovery
-        recovery(conn, task, next_generation, state, "LEASE_RECOVERY", unresolved=unresolved)
+        recovery(conn, task, next_generation, state, reason, unresolved=unresolved)
         return {"task_id": task["task_id"], "generation": next_generation, "state": state}
 
     def recover_expired(self, *, limit=100):
