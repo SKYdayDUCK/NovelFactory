@@ -113,7 +113,7 @@
       "process_exit": 1
     }
   ],
-  "file_count": 190,
+  "file_count": 201,
   "files": [
     {
       "path": "BASELINE.md",
@@ -156,6 +156,11 @@
       "sha256": "a8709ecbb6012b46d26d0c116a42dfe1806bea90f8e10823fd25538a72752434"
     },
     {
+      "path": "MULTIWORK.md",
+      "sha256": "db8e2f91867d551302e02efd7c328bf465f2688f23832c493b79915ade23e109",
+      "size": 2523
+    },
+    {
       "path": "OPERATION_MATRIX.md",
       "size": 3398,
       "sha256": "7c20044fb4eb58548dcf1000a583b193cdebc01fec2f2a4c63eac1043b879b30"
@@ -182,8 +187,8 @@
     },
     {
       "path": "REPRODUCE.md",
-      "size": 3471,
-      "sha256": "b0b12526f4cc48d20543caf3835ec575a2a9ea43ce36d3c977175da4cb17f53e"
+      "size": 3563,
+      "sha256": "e1d89f44f3f8fb11d4c919bff4b95ada2274281aa6a8c162891977ba257f7bbb"
     },
     {
       "path": "RESEARCH_SURVEY.md",
@@ -951,6 +956,16 @@
       "sha256": "8cb271c7864251c11d2f7f3eb9d4031bac11fd85747a8d368d32222e7efab7d8"
     },
     {
+      "path": "raw/routing-baseline.json",
+      "sha256": "370e994500540ce665b07cebd5e368befa730a3e727c91de2904a9f5c8f4b041",
+      "size": 13803
+    },
+    {
+      "path": "raw/routing-baseline.prof.txt",
+      "sha256": "775c992e4454764149c6a43a3309ad101c2d905b5d98219b23b147d2693753d7",
+      "size": 2236
+    },
+    {
       "path": "raw/scope-pair-session/postgres_session.json",
       "size": 647,
       "sha256": "ad08769d527b0eb0029382cdf18196e8844f588ec18c24d9d902e063e6591a61"
@@ -1004,6 +1019,26 @@
       "path": "raw/subsystems/delegation-success.json",
       "size": 1048,
       "sha256": "9081ca663c99bc5ebb345ce5146761177d505f13769c00c14d05cb31f253587f"
+    },
+    {
+      "path": "raw/subsystems/multiwork-baseline.json",
+      "sha256": "d52b373c5d1668e343c7b0b0305857da53a2295b3463cfd53603d357b53052f1",
+      "size": 25591
+    },
+    {
+      "path": "raw/subsystems/multiwork-by-project.json",
+      "sha256": "0655c290da10710b6081b69e9e92ec6b29f71fafcd22f457fdf5abe4d1f53120",
+      "size": 24446
+    },
+    {
+      "path": "raw/subsystems/route-abba.json",
+      "sha256": "307b01aae22cd9662844eb1f7df8b43bdb2a98acf5e0e84e7aa8834792033a6d",
+      "size": 69462
+    },
+    {
+      "path": "raw/subsystems/routing-regression.xml",
+      "sha256": "308d400bfc3af3447a160ef1e3c1d395b4410fd15d77a8775f2043945763df4e",
+      "size": 513
     },
     {
       "path": "raw/validation-pair-session/postgres_session.json",
@@ -1066,9 +1101,24 @@
       "sha256": "4e94dda3f5ed976a02778b9b40b0eda7481833dbe3be7d0c1bd92dcb0f3d3bc7"
     },
     {
+      "path": "scripts/multiwork-by-project.py",
+      "sha256": "fa50b50ad29e5229dd5cf3e84407f83f47e7c8f77bd1ac3655d6cf449c399b36",
+      "size": 6564
+    },
+    {
+      "path": "scripts/multiwork.py",
+      "sha256": "55933a4761f8ff7e7e766ff87b1eb2306805ce43a319ddbf6494b27a5740f33c",
+      "size": 6771
+    },
+    {
       "path": "scripts/p59_meter.py",
       "size": 3643,
       "sha256": "0e75e411a75c4f00bdb14244fd15cfa7b4298ca9eaef093ca443ed4fc2a05bf5"
+    },
+    {
+      "path": "scripts/profile_route.py",
+      "sha256": "01e52e93c1530a6116b5d7342d29529947f7564e7fa9796f26867c9341da7fec",
+      "size": 2662
     },
     {
       "path": "scripts/redis_lag.py",
@@ -1079,6 +1129,11 @@
       "path": "scripts/redis_matrix.sh",
       "size": 612,
       "sha256": "775715ae594da9604f89c361a6a84df059f0bc0c5dcc250d4f7d5164ad7730d0"
+    },
+    {
+      "path": "scripts/route_abba.py",
+      "sha256": "8724a711f27d406400d6da3b834b5cb2de691dab36c41e7c61ee311333b65bc9",
+      "size": 4387
     },
     {
       "path": "scripts/scope_pair.py",
@@ -1116,5 +1171,6 @@
       "sha256": "51b05746415c38413a86c98be5df24be0956dbcd70d49ff696ab6a83ad396742"
     }
   ],
-  "editorial_note": "Three narrative files clarify the P2 call-start and P3 transport-header gates after independent editorial review. Raw observations and test exits retain their original checksums."
+  "editorial_note": "Three narrative files clarify the P2 call-start and P3 transport-header gates after independent editorial review. Raw observations and test exits retain their original checksums.",
+  "local_candidate_tree_equivalent_github_commit": "2cee68f8417acf0f2588b5e067c9522a4bd56da3"
 }

@@ -1,6 +1,6 @@
 # Reproduce the measurements
 
-Run these commands from a checkout at the recorded SHA. Start from main `5e322e8af8ddb4465f68f8cab84c9685832461a9` for BASELINE. Use the product commit containing the single scope-upsert change (`5cfcfa4` on the P5.9 development line), or apply that change alone to the base, for the isolated candidate. Keep this evidence directory available separately if switching trees. A pinned uv environment, installed PG17, Redis server/CLI and a Linux host with loopback networking are required. Use a fresh output folder for each invocation.
+Run these commands from a checkout at the recorded SHA. Start from main `5e322e8af8ddb4465f68f8cab84c9685832461a9` for BASELINE. Use the product commit containing the single scope-upsert change (GitHub `2cee68f8417acf0f2588b5e067c9522a4bd56da3`, the exact Git tree tested locally as `5cfcfa4001042fd1611df31c82618eb2690832c2`), or apply that change alone to the base, for the isolated candidate. Keep this evidence directory available separately if switching trees. A pinned uv environment, installed PG17, Redis server/CLI and a Linux host with loopback networking are required. Use a fresh output folder for each invocation.
 
 ```bash
 uv sync --locked --group dev --python 3.12

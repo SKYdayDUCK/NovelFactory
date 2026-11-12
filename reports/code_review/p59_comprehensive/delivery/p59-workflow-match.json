@@ -1,0 +1,431 @@
+{
+  "diff_base": "5e322e8af8ddb4465f68f8cab84c9685832461a9",
+  "diff_head": "0b7c63f5d0b188f2ede06b998f0957c12b9d8cc4",
+  "public_file_count": 41,
+  "workflows": {
+    "agent-workshop.yml": {
+      "pull_request": {
+        "branches": [],
+        "paths": [
+          "scripts/engineering_release_ci.py",
+          "tests/unit/test_engineering_release_ci.py",
+          "scripts/P6_*",
+          ".github/workflows/p6-offline.yml",
+          "workshop/**",
+          ".github/workflows/agent-workshop.yml",
+          "runtime/roles/**",
+          "runtime/skills/**",
+          "src/novel_factory/application/mcp_runtime.py",
+          "src/novel_factory/interfaces/mcp_stdio.py",
+          "tests/integration/test_p5_mcp.py",
+          "tests/integration/test_p5_rolling.py",
+          "migrations/versions/0017_nf_workshop_delegation.py",
+          "scripts/manage_workshop_binding.py",
+          "src/novel_factory/application/delegation.py",
+          "src/novel_factory/application/runtime_tasks.py",
+          "src/novel_factory/application/supervisor.py",
+          "src/novel_factory/infrastructure/delegation_tables.py",
+          "src/novel_factory/infrastructure/recovery.py",
+          "src/novel_factory/interfaces/delegation_stdio.py",
+          "tests/integration/test_workshop_delegation*.py"
+        ],
+        "main_match": true,
+        "example_matched_changed_file": ".github/workflows/agent-workshop.yml"
+      },
+      "push": {
+        "branches": [
+          "main"
+        ],
+        "paths": [
+          "scripts/engineering_release_ci.py",
+          "tests/unit/test_engineering_release_ci.py",
+          "scripts/P6_*",
+          ".github/workflows/p6-offline.yml",
+          "reports/handoff/ENGINEERING_RELEASE.json",
+          "workshop/**",
+          ".github/workflows/agent-workshop.yml",
+          "runtime/roles/**",
+          "runtime/skills/**",
+          "src/novel_factory/application/mcp_runtime.py",
+          "src/novel_factory/interfaces/mcp_stdio.py",
+          "tests/integration/test_p5_mcp.py",
+          "tests/integration/test_p5_rolling.py",
+          "migrations/versions/0017_nf_workshop_delegation.py",
+          "scripts/manage_workshop_binding.py",
+          "src/novel_factory/application/delegation.py",
+          "src/novel_factory/application/runtime_tasks.py",
+          "src/novel_factory/application/supervisor.py",
+          "src/novel_factory/infrastructure/delegation_tables.py",
+          "src/novel_factory/infrastructure/recovery.py",
+          "src/novel_factory/interfaces/delegation_stdio.py",
+          "tests/integration/test_workshop_delegation*.py"
+        ],
+        "main_match": true,
+        "example_matched_changed_file": ".github/workflows/agent-workshop.yml"
+      },
+      "workflow_dispatch": {
+        "branches": [],
+        "paths": []
+      }
+    },
+    "creative-harness.yml": {
+      "pull_request": {
+        "branches": [
+          "main"
+        ],
+        "paths": [
+          ".github/workflows/creative-harness.yml",
+          "validation/validate_creative_harness.py",
+          "validation/run_p57_acceptance.py",
+          "scripts/p57_pitr.py",
+          "scripts/pitr_drill.py",
+          "src/novel_factory/application/**",
+          "src/novel_factory/interfaces/**",
+          "src/novel_factory/infrastructure/**",
+          "src/novel_factory/domain/creative_review.py",
+          "migrations/**",
+          "workshop/src/**",
+          "workshop/migrations/**",
+          "workshop/integration/**",
+          "tests/integration/test_harness_*.py",
+          "tests/integration/test_adaptive_*.py",
+          "tests/integration/adaptive_helpers.py",
+          "tests/integration/test_s6_*.py",
+          "tests/integration/test_creative_metrics.py",
+          "contracts/**",
+          "reports/harness/**",
+          "AGENTS.md",
+          "SKILLS.md",
+          ".agents/skills/**",
+          "runtime/**",
+          "src/novel_factory/infrastructure/runtime_catalog.py",
+          "src/novel_factory/contracts/**",
+          "src/novel_factory/domain/canonical.py",
+          "pyproject.toml",
+          "uv.lock"
+        ],
+        "main_match": true,
+        "example_matched_changed_file": "contracts/README.md"
+      },
+      "push": {
+        "branches": [
+          "main",
+          "dev/p57-*"
+        ],
+        "paths": [
+          ".github/workflows/creative-harness.yml",
+          "validation/validate_creative_harness.py",
+          "validation/run_p57_acceptance.py",
+          "scripts/p57_pitr.py",
+          "scripts/pitr_drill.py",
+          "src/novel_factory/application/**",
+          "src/novel_factory/interfaces/**",
+          "src/novel_factory/infrastructure/**",
+          "src/novel_factory/domain/creative_review.py",
+          "migrations/**",
+          "workshop/src/**",
+          "workshop/migrations/**",
+          "workshop/integration/**",
+          "tests/integration/test_harness_*.py",
+          "tests/integration/test_adaptive_*.py",
+          "tests/integration/adaptive_helpers.py",
+          "tests/integration/test_s6_*.py",
+          "tests/integration/test_creative_metrics.py",
+          "contracts/**",
+          "reports/harness/**",
+          "AGENTS.md",
+          "SKILLS.md",
+          ".agents/skills/**",
+          "runtime/**",
+          "src/novel_factory/infrastructure/runtime_catalog.py",
+          "src/novel_factory/contracts/**",
+          "src/novel_factory/domain/canonical.py",
+          "pyproject.toml",
+          "uv.lock"
+        ],
+        "main_match": true,
+        "example_matched_changed_file": "contracts/README.md"
+      },
+      "workflow_dispatch": {
+        "branches": [],
+        "paths": []
+      }
+    },
+    "p1-integrity.yml": {
+      "pull_request": {
+        "branches": [],
+        "paths": [],
+        "main_match": true,
+        "example_matched_changed_file": ".github/workflows/agent-workshop.yml"
+      },
+      "push": {
+        "branches": [
+          "main",
+          "dev/p2-*",
+          "dev/p3-p4-*"
+        ],
+        "paths": [],
+        "main_match": true,
+        "example_matched_changed_file": ".github/workflows/agent-workshop.yml"
+      },
+      "workflow_dispatch": {
+        "branches": [],
+        "paths": []
+      }
+    },
+    "p2-load.yml": {
+      "pull_request": {
+        "branches": [],
+        "paths": [
+          ".github/workflows/p2-load.yml",
+          "benchmarks/**",
+          "src/**",
+          "tests/**",
+          "contracts/**",
+          "migrations/**",
+          "runtime/**",
+          "pyproject.toml",
+          "uv.lock"
+        ],
+        "main_match": true,
+        "example_matched_changed_file": "contracts/README.md"
+      },
+      "push": {
+        "branches": [
+          "main",
+          "dev/p2-production-loop",
+          "dev/p3-p4-*"
+        ],
+        "paths": [
+          ".github/workflows/p2-load.yml",
+          "benchmarks/**",
+          "src/**",
+          "tests/**",
+          "contracts/**",
+          "migrations/**",
+          "runtime/**",
+          "pyproject.toml",
+          "uv.lock"
+        ],
+        "main_match": true,
+        "example_matched_changed_file": "contracts/README.md"
+      },
+      "workflow_dispatch": {
+        "branches": [],
+        "paths": []
+      }
+    },
+    "p3-p4-evidence.yml": {
+      "pull_request": {
+        "branches": [],
+        "paths": [
+          ".github/workflows/p3-p4-evidence.yml",
+          "src/**",
+          "tests/**",
+          "benchmarks/**",
+          "scripts/**",
+          "contracts/**"
+        ],
+        "main_match": true,
+        "example_matched_changed_file": "contracts/README.md"
+      },
+      "push": {
+        "branches": [
+          "main",
+          "dev/p2-production-loop",
+          "dev/p3-p4-*"
+        ],
+        "paths": [
+          "src/**",
+          "tests/**",
+          "benchmarks/**",
+          "scripts/**",
+          "contracts/**",
+          ".github/workflows/p3-p4-evidence.yml"
+        ],
+        "main_match": true,
+        "example_matched_changed_file": "contracts/README.md"
+      },
+      "workflow_dispatch": {
+        "branches": [],
+        "paths": []
+      }
+    },
+    "p3-scale-experiments.yml": {
+      "pull_request": {
+        "branches": [],
+        "paths": [
+          "src/**",
+          "tests/**",
+          "benchmarks/**",
+          "contracts/**",
+          "migrations/**",
+          "runtime/**",
+          "pyproject.toml",
+          "uv.lock",
+          ".github/workflows/p3-scale-experiments.yml"
+        ],
+        "main_match": true,
+        "example_matched_changed_file": "contracts/README.md"
+      },
+      "push": {
+        "branches": [
+          "main",
+          "dev/p3-p4-*"
+        ],
+        "paths": [
+          "src/**",
+          "tests/**",
+          "benchmarks/**",
+          "contracts/**",
+          "migrations/**",
+          "runtime/**",
+          "pyproject.toml",
+          "uv.lock",
+          ".github/workflows/p3-scale-experiments.yml"
+        ],
+        "main_match": true,
+        "example_matched_changed_file": "contracts/README.md"
+      },
+      "workflow_dispatch": {
+        "branches": [],
+        "paths": []
+      }
+    },
+    "p4-recovery-drill.yml": {
+      "pull_request": {
+        "branches": [],
+        "paths": [
+          "src/novel_factory/infrastructure/recovery.py",
+          "src/novel_factory/infrastructure/online_backup.py",
+          "src/novel_factory/application/upgrades.py",
+          "scripts/ci_install_pg17.sh",
+          "workshop/migrations/**",
+          "workshop/integration/test_paired_restore.py",
+          "scripts/pitr_drill.py",
+          "scripts/pitr_streams.py",
+          "src/novel_factory/infrastructure/eventhub.py",
+          ".github/workflows/p4-recovery-drill.yml"
+        ],
+        "main_match": false,
+        "example_matched_changed_file": null
+      },
+      "push": {
+        "branches": [
+          "main",
+          "dev/p3-p4-*"
+        ],
+        "paths": [
+          "src/novel_factory/infrastructure/recovery.py",
+          "src/novel_factory/infrastructure/online_backup.py",
+          "src/novel_factory/application/upgrades.py",
+          "scripts/ci_install_pg17.sh",
+          "workshop/migrations/**",
+          "workshop/integration/test_paired_restore.py",
+          "scripts/pitr_drill.py",
+          "scripts/pitr_streams.py",
+          "src/novel_factory/infrastructure/eventhub.py",
+          ".github/workflows/p4-recovery-drill.yml"
+        ],
+        "main_match": false,
+        "example_matched_changed_file": null
+      },
+      "workflow_dispatch": {
+        "branches": [],
+        "paths": []
+      }
+    },
+    "p5-native-desktop.yml": {
+      "pull_request": {
+        "branches": [],
+        "paths": [
+          ".github/workflows/p5-native-desktop.yml",
+          "src/novel_factory/interfaces/mcp_stdio.py",
+          "src/novel_factory/application/mcp_runtime.py",
+          "src/novel_factory/application/audit_log.py",
+          "scripts/probe_vscode_desktop.py",
+          "scripts/probe_vscode_offline_transport.py"
+        ],
+        "main_match": false,
+        "example_matched_changed_file": null
+      },
+      "workflow_dispatch": {
+        "branches": [],
+        "paths": []
+      }
+    },
+    "p56-engineering-tag.yml": {
+      "workflow_run": {
+        "branches": [
+          "main"
+        ],
+        "paths": [],
+        "source_workflows": [
+          "Agent Workshop PostgreSQL and stdio",
+          "P6 offline experiment and authorization checks"
+        ]
+      }
+    },
+    "p58-branch-archive.yml": {
+      "push": {
+        "branches": [
+          "main"
+        ],
+        "paths": [
+          "reports/branch_archive/p58/cleanup-plan.json"
+        ],
+        "main_match": false,
+        "example_matched_changed_file": null
+      },
+      "workflow_dispatch": {
+        "branches": [],
+        "paths": []
+      }
+    },
+    "p6-offline.yml": {
+      "pull_request": {
+        "branches": [],
+        "paths": [
+          "scripts/engineering_release_ci.py",
+          "tests/unit/test_engineering_release_ci.py",
+          "scripts/P6_*",
+          "scripts/p6_budget.py",
+          "scripts/p6_export_release.py",
+          "tests/integration/test_p6_export_release.py",
+          "src/novel_factory/application/budget_limits.py",
+          "scripts/pitr_drill.py",
+          "scripts/ci_install_pg17.sh",
+          "reports/handoff/P6*",
+          ".github/workflows/p6-offline.yml"
+        ],
+        "main_match": false,
+        "example_matched_changed_file": null
+      },
+      "push": {
+        "branches": [
+          "main"
+        ],
+        "paths": [
+          "scripts/engineering_release_ci.py",
+          "tests/unit/test_engineering_release_ci.py",
+          "scripts/P6_*",
+          "scripts/p6_budget.py",
+          "scripts/p6_export_release.py",
+          "tests/integration/test_p6_export_release.py",
+          "src/novel_factory/application/budget_limits.py",
+          "scripts/pitr_drill.py",
+          "scripts/ci_install_pg17.sh",
+          "reports/handoff/P6*",
+          ".github/workflows/p6-offline.yml",
+          "reports/handoff/ENGINEERING_RELEASE.json"
+        ],
+        "main_match": false,
+        "example_matched_changed_file": null
+      },
+      "workflow_dispatch": {
+        "branches": [],
+        "paths": []
+      }
+    }
+  }
+}

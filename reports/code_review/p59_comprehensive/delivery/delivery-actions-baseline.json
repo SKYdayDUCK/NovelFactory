@@ -1,0 +1,605 @@
+{
+  "captured_at": "2026-11-12 15:56:38 UTC",
+  "repository": "SKYdayDUCK/NovelFactory",
+  "branch": {
+    "name": "main",
+    "sha": "5e322e8af8ddb4465f68f8cab84c9685832461a9",
+    "protected": false,
+    "main_get_protection": {
+      "enabled": false,
+      "required_status_checks": {
+        "enforcement_level": "off",
+        "contexts": [],
+        "checks": []
+      }
+    },
+    "visible_rulesets_including_parents": [],
+    "dedicated_admin_protection_endpoint": "403 Resource not accessible by integration"
+  },
+  "frozen": [
+    {
+      "id": 43228784812,
+      "workflow": ".github/workflows/p1-integrity.yml",
+      "name": "P1 and P2 production integrity",
+      "event": "push",
+      "sha": "5e322e8af8ddb4465f68f8cab84c9685832461a9",
+      "state": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43228784812",
+      "jobs": [
+        {
+          "id": 131218902619,
+          "name": "PostgreSQL 17 integration, concurrency and restore",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43228784812/job/131218902619",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131218902822,
+          "name": "Schema, domain, HTTP and production boundaries",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43228784812/job/131218902822",
+          "conclusion": "success",
+          "failed_steps": []
+        }
+      ]
+    }
+  ],
+  "major": [
+    {
+      "id": 43227003270,
+      "workflow": ".github/workflows/p56-engineering-tag.yml",
+      "name": "Publish the reviewed P5.6 engineering tag",
+      "event": "workflow_run",
+      "sha": "630c4bcf1f1a7d71f1632d6eb2d273923ac08014",
+      "state": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43227003270",
+      "jobs": [
+        {
+          "id": 131212639811,
+          "name": "tag",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43227003270/job/131212639811",
+          "conclusion": "success",
+          "failed_steps": []
+        }
+      ]
+    },
+    {
+      "id": 43226668528,
+      "workflow": ".github/workflows/p1-integrity.yml",
+      "name": "P1 and P2 production integrity",
+      "event": "push",
+      "sha": "630c4bcf1f1a7d71f1632d6eb2d273923ac08014",
+      "state": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668528",
+      "jobs": [
+        {
+          "id": 131211502453,
+          "name": "PostgreSQL 17 integration, concurrency and restore",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668528/job/131211502453",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131211503060,
+          "name": "Schema, domain, HTTP and production boundaries",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668528/job/131211503060",
+          "conclusion": "success",
+          "failed_steps": []
+        }
+      ]
+    },
+    {
+      "id": 43226668533,
+      "workflow": ".github/workflows/p4-recovery-drill.yml",
+      "name": "P4 real isolated WAL PITR and verified recovery",
+      "event": "push",
+      "sha": "630c4bcf1f1a7d71f1632d6eb2d273923ac08014",
+      "state": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668533",
+      "jobs": [
+        {
+          "id": 131211501753,
+          "name": "Physical base backup, SIGKILL, WAL replay and application verification",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668533/job/131211501753",
+          "conclusion": "success",
+          "failed_steps": []
+        }
+      ]
+    },
+    {
+      "id": 43226668645,
+      "workflow": ".github/workflows/p6-offline.yml",
+      "name": "P6 offline experiment and authorization checks",
+      "event": "push",
+      "sha": "630c4bcf1f1a7d71f1632d6eb2d273923ac08014",
+      "state": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668645",
+      "jobs": [
+        {
+          "id": 131211502007,
+          "name": "offline",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668645/job/131211502007",
+          "conclusion": "success",
+          "failed_steps": []
+        }
+      ]
+    },
+    {
+      "id": 43226668897,
+      "workflow": ".github/workflows/creative-harness.yml",
+      "name": "Creative Harness engineering",
+      "event": "push",
+      "sha": "630c4bcf1f1a7d71f1632d6eb2d273923ac08014",
+      "state": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668897",
+      "jobs": [
+        {
+          "id": 131211503626,
+          "name": "contracts-and-static-runtime",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668897/job/131211503626",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131211503975,
+          "name": "P5.7 harness",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668897/job/131211503975",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131211503992,
+          "name": "P5.7 comparison",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668897/job/131211503992",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131211504064,
+          "name": "P5.7 pitr",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668897/job/131211504064",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131211504273,
+          "name": "P5.7 dual",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668897/job/131211504273",
+          "conclusion": "success",
+          "failed_steps": []
+        }
+      ]
+    },
+    {
+      "id": 43226668984,
+      "workflow": ".github/workflows/agent-workshop.yml",
+      "name": "Agent Workshop PostgreSQL and stdio",
+      "event": "push",
+      "sha": "630c4bcf1f1a7d71f1632d6eb2d273923ac08014",
+      "state": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668984",
+      "jobs": [
+        {
+          "id": 131211504847,
+          "name": "workshop",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668984/job/131211504847",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131211505128,
+          "name": "W6 message capacity and end-to-end scenes",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668984/job/131211505128",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131211505403,
+          "name": "Matched admission and extended scene presets",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668984/job/131211505403",
+          "conclusion": "success",
+          "failed_steps": []
+        }
+      ]
+    },
+    {
+      "id": 43226668635,
+      "workflow": ".github/workflows/p3-scale-experiments.yml",
+      "name": "P3 scale experiments with strict unmet gates",
+      "event": "push",
+      "sha": "630c4bcf1f1a7d71f1632d6eb2d273923ac08014",
+      "state": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668635",
+      "jobs": [
+        {
+          "id": 131211503048,
+          "name": "Measured 500-read-soak",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668635/job/131211503048",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131211503212,
+          "name": "Measured 500-mixed",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668635/job/131211503212",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131211503488,
+          "name": "Measured 1000-read-open",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668635/job/131211503488",
+          "conclusion": "failure",
+          "failed_steps": [
+            "Original targets and actual network evidence"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 43226668505,
+      "workflow": ".github/workflows/p3-p4-evidence.yml",
+      "name": "P3 P4 measured evidence",
+      "event": "push",
+      "sha": "630c4bcf1f1a7d71f1632d6eb2d273923ac08014",
+      "state": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668505",
+      "jobs": [
+        {
+          "id": 131211502437,
+          "name": "Same world CPU and SQL paired comparison",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668505/job/131211502437",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131211502994,
+          "name": "Independent load process / 200 / mixed",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668505/job/131211502994",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131211503267,
+          "name": "Independent load process / 200 / overload",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668505/job/131211503267",
+          "conclusion": "failure",
+          "failed_steps": [
+            "Actual requests and strict capacity gate"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 43226668608,
+      "workflow": ".github/workflows/p2-load.yml",
+      "name": "P2 measured capacity and recovery",
+      "event": "push",
+      "sha": "630c4bcf1f1a7d71f1632d6eb2d273923ac08014",
+      "state": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668608",
+      "jobs": [
+        {
+          "id": 131211503194,
+          "name": "200 agents / mixed / full capacity gate",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668608/job/131211503194",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131211503280,
+          "name": "200 agents / overload / full capacity gate",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668608/job/131211503280",
+          "conclusion": "failure",
+          "failed_steps": [
+            "Measure fixed population, requests and business completion"
+          ]
+        },
+        {
+          "id": 131211503526,
+          "name": "50 agents / mixed / full capacity gate",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668608/job/131211503526",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131211503545,
+          "name": "50 agents / overload / full capacity gate",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43226668608/job/131211503545",
+          "conclusion": "failure",
+          "failed_steps": [
+            "Measure fixed population, requests and business completion"
+          ]
+        }
+      ]
+    }
+  ],
+  "pr": [
+    {
+      "id": 43222704789,
+      "workflow": ".github/workflows/p5-native-desktop.yml",
+      "name": "P5 native desktop resume",
+      "event": "pull_request",
+      "sha": "60641790dabe34c3b9f68a7820c794f6287372d2",
+      "state": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704789",
+      "jobs": [
+        {
+          "id": 131198000343,
+          "name": "native-desktop",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704789/job/131198000343",
+          "conclusion": "success",
+          "failed_steps": []
+        }
+      ]
+    },
+    {
+      "id": 43222704887,
+      "workflow": ".github/workflows/p6-offline.yml",
+      "name": "P6 offline experiment and authorization checks",
+      "event": "pull_request",
+      "sha": "60641790dabe34c3b9f68a7820c794f6287372d2",
+      "state": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704887",
+      "jobs": [
+        {
+          "id": 131198000982,
+          "name": "offline",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704887/job/131198000982",
+          "conclusion": "success",
+          "failed_steps": []
+        }
+      ]
+    },
+    {
+      "id": 43222704737,
+      "workflow": ".github/workflows/p4-recovery-drill.yml",
+      "name": "P4 real isolated WAL PITR and verified recovery",
+      "event": "pull_request",
+      "sha": "60641790dabe34c3b9f68a7820c794f6287372d2",
+      "state": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704737",
+      "jobs": [
+        {
+          "id": 131198000789,
+          "name": "Physical base backup, SIGKILL, WAL replay and application verification",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704737/job/131198000789",
+          "conclusion": "success",
+          "failed_steps": []
+        }
+      ]
+    },
+    {
+      "id": 43222704654,
+      "workflow": ".github/workflows/creative-harness.yml",
+      "name": "Creative Harness engineering",
+      "event": "pull_request",
+      "sha": "60641790dabe34c3b9f68a7820c794f6287372d2",
+      "state": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704654",
+      "jobs": [
+        {
+          "id": 131198000337,
+          "name": "P5.7 pitr",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704654/job/131198000337",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131198000664,
+          "name": "P5.7 dual",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704654/job/131198000664",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131198000829,
+          "name": "P5.7 comparison",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704654/job/131198000829",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131198000865,
+          "name": "P5.7 harness",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704654/job/131198000865",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131198000909,
+          "name": "contracts-and-static-runtime",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704654/job/131198000909",
+          "conclusion": "success",
+          "failed_steps": []
+        }
+      ]
+    },
+    {
+      "id": 43222704746,
+      "workflow": ".github/workflows/p3-p4-evidence.yml",
+      "name": "P3 P4 measured evidence",
+      "event": "pull_request",
+      "sha": "60641790dabe34c3b9f68a7820c794f6287372d2",
+      "state": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704746",
+      "jobs": [
+        {
+          "id": 131198001367,
+          "name": "Independent load process / 200 / overload",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704746/job/131198001367",
+          "conclusion": "failure",
+          "failed_steps": [
+            "Actual requests and strict capacity gate"
+          ]
+        },
+        {
+          "id": 131198001787,
+          "name": "Same world CPU and SQL paired comparison",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704746/job/131198001787",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131198002255,
+          "name": "Independent load process / 200 / mixed",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704746/job/131198002255",
+          "conclusion": "success",
+          "failed_steps": []
+        }
+      ]
+    },
+    {
+      "id": 43222704773,
+      "workflow": ".github/workflows/agent-workshop.yml",
+      "name": "Agent Workshop PostgreSQL and stdio",
+      "event": "pull_request",
+      "sha": "60641790dabe34c3b9f68a7820c794f6287372d2",
+      "state": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704773",
+      "jobs": [
+        {
+          "id": 131198000628,
+          "name": "W6 message capacity and end-to-end scenes",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704773/job/131198000628",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131198001060,
+          "name": "Matched admission and extended scene presets",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704773/job/131198001060",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131198001135,
+          "name": "workshop",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704773/job/131198001135",
+          "conclusion": "success",
+          "failed_steps": []
+        }
+      ]
+    },
+    {
+      "id": 43222704876,
+      "workflow": ".github/workflows/p2-load.yml",
+      "name": "P2 measured capacity and recovery",
+      "event": "pull_request",
+      "sha": "60641790dabe34c3b9f68a7820c794f6287372d2",
+      "state": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704876",
+      "jobs": [
+        {
+          "id": 131198001506,
+          "name": "200 agents / mixed / full capacity gate",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704876/job/131198001506",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131198001701,
+          "name": "50 agents / mixed / full capacity gate",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704876/job/131198001701",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131198001736,
+          "name": "200 agents / overload / full capacity gate",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704876/job/131198001736",
+          "conclusion": "failure",
+          "failed_steps": [
+            "Measure fixed population, requests and business completion"
+          ]
+        },
+        {
+          "id": 131198001881,
+          "name": "50 agents / overload / full capacity gate",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704876/job/131198001881",
+          "conclusion": "failure",
+          "failed_steps": [
+            "Measure fixed population, requests and business completion"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 43222704724,
+      "workflow": ".github/workflows/p3-scale-experiments.yml",
+      "name": "P3 scale experiments with strict unmet gates",
+      "event": "pull_request",
+      "sha": "60641790dabe34c3b9f68a7820c794f6287372d2",
+      "state": "completed",
+      "conclusion": "failure",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704724",
+      "jobs": [
+        {
+          "id": 131198001142,
+          "name": "Measured 500-mixed",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704724/job/131198001142",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131198001436,
+          "name": "Measured 500-read-soak",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704724/job/131198001436",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131198001691,
+          "name": "Measured 1000-read-open",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704724/job/131198001691",
+          "conclusion": "failure",
+          "failed_steps": [
+            "Original targets and actual network evidence"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 43222704846,
+      "workflow": ".github/workflows/p1-integrity.yml",
+      "name": "P1 and P2 production integrity",
+      "event": "pull_request",
+      "sha": "60641790dabe34c3b9f68a7820c794f6287372d2",
+      "state": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704846",
+      "jobs": [
+        {
+          "id": 131198000996,
+          "name": "Schema, domain, HTTP and production boundaries",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704846/job/131198000996",
+          "conclusion": "success",
+          "failed_steps": []
+        },
+        {
+          "id": 131198001517,
+          "name": "PostgreSQL 17 integration, concurrency and restore",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43222704846/job/131198001517",
+          "conclusion": "success",
+          "failed_steps": []
+        }
+      ]
+    }
+  ]
+}

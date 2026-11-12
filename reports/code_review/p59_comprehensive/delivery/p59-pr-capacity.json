@@ -1,0 +1,801 @@
+{
+  "captured_at": "2026-11-12 16:07:16 UTC",
+  "phase": "pr32",
+  "head_sha": "3bd0de0fa783c5deca189874b4ee808f1950c1ee",
+  "runs": [
+    {
+      "id": 43253099900,
+      "name": "P3 scale experiments with strict unmet gates",
+      "sha": "3bd0de0fa783c5deca189874b4ee808f1950c1ee",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43253099900",
+      "path": ".github/workflows/p3-scale-experiments.yml",
+      "status": "completed",
+      "event": "pull_request",
+      "conclusion": "failure",
+      "run_attempt": 1,
+      "jobs": [
+        {
+          "id": 131303974484,
+          "name": "Measured 500-mixed",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43253099900/job/131303974484",
+          "failed_steps": [],
+          "running_steps": [],
+          "samples": [
+            {
+              "file": "ci-evidence/result.json",
+              "correctness": "PASS",
+              "logical_agents": 500,
+              "first_attempt_capacity_gate": "PASS",
+              "bounded_recovery_business_gate": "PASS",
+              "capacity_gate": "PASS",
+              "gate_scope": "capacity",
+              "open_loop_offered_rate": {
+                "gate": "NOT_APPLICABLE",
+                "target_rps": null,
+                "first_attempts": 0
+              },
+              "metrics": {
+                "planned_requests": 2851,
+                "completed_logical_operations": 2851,
+                "first_attempt_failure_count": 0,
+                "first_attempt_status_counts": {
+                  "200": 2802,
+                  "409": 49
+                },
+                "recovered_logical_operations": 0,
+                "valid_successful_calls": 2802,
+                "new_world_commit_receipts": 51,
+                "unresolved_operational_errors": [],
+                "status_counts": {
+                  "200": 2802,
+                  "409": 49
+                },
+                "correctness_errors": []
+              }
+            }
+          ],
+          "capacity_lines": [
+            "\"first_attempt_capacity_gate\": \"PASS\",",
+            "\"bounded_recovery_business_gate\": \"PASS\",",
+            "\"capacity_gate\": \"PASS\",",
+            "\"open_loop_offered_rate\": {",
+            "\"first_attempt_status_counts\": {",
+            "\"status_counts\": {",
+            "\"effective_world_commits_per_second\": 0.1461,"
+          ],
+          "log_warnings": [
+            "warning: Using incompatible environment (`.venv`) due to `--no-sync` (The project environment's Python version does not satisfy the request: `Python 3.12.14`)"
+          ]
+        },
+        {
+          "id": 131303975120,
+          "name": "Measured 500-read-soak",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43253099900/job/131303975120",
+          "failed_steps": [],
+          "running_steps": [],
+          "samples": [
+            {
+              "probe_gate": "PASS",
+              "long_duration_gate": "NOT_EXECUTED",
+              "duration_seconds": 600.0722634389999,
+              "actual_call_start_rps": 20.00071216410288,
+              "successful_query_rps": 19.997591508776434,
+              "status_counts": {
+                "200": 12000
+              }
+            }
+          ],
+          "capacity_lines": [
+            "\"actual_call_start_rps\": 20.00071216410288,",
+            "\"successful_query_rps\": 19.997591508776434,",
+            "\"status_counts\": {"
+          ],
+          "log_warnings": [
+            "warning: Using incompatible environment (`.venv`) due to `--no-sync` (The project environment's Python version does not satisfy the request: `Python 3.12.14`)"
+          ],
+          "artifact": {
+            "id": 13960637882,
+            "name": "p3-scale-500-read-soak-1",
+            "digest": "sha256:2488e959888bcfeb6ccd8cbf589bebff4c19a7c70f9234d879696ab237ace212",
+            "size_in_bytes": 475451,
+            "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43253099900/artifacts/13960637882",
+            "verified_summary": {
+              "evidence_kind": "REAL_HTTP_POSTGRESQL_READ_ONLY_STABILITY_PROBE",
+              "configuration": {
+                "agents": 500,
+                "seconds": 600.0,
+                "read_rps": 20.0,
+                "api_processes": 2,
+                "output": "ci-evidence/result.json"
+              },
+              "scheduled_count": 12000,
+              "actual_call_start_rps": 20.00071216410288,
+              "successful_query_rps": 19.997591508776434,
+              "correctness_errors": [],
+              "status_counts": {
+                "200": 12000
+              },
+              "world_unchanged": true,
+              "new_world_commits": 0,
+              "probe_gate": "PASS",
+              "long_duration_gate": "NOT_EXECUTED",
+              "duration_seconds": 600.0722634389999,
+              "latency_all_attempts": {
+                "count": 12000,
+                "p50_ms": 129.34,
+                "p95_ms": 179.0416,
+                "p99_ms": 204.6825
+              }
+            }
+          }
+        },
+        {
+          "id": 131303975192,
+          "name": "Measured 1000-read-open",
+          "status": "completed",
+          "conclusion": "failure",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43253099900/job/131303975192",
+          "failed_steps": [
+            "Original targets and actual network evidence"
+          ],
+          "running_steps": [],
+          "samples": [
+            {
+              "capacity_gate": "NOT_MET",
+              "offered_wire_rate_gate": "NOT_MET",
+              "dispatch_start_rps": 39.53288000140306,
+              "observed_wire_start_rps": 39.42815256408786,
+              "successful_query_rps": 13.734176612474753,
+              "status_counts": {
+                "200": 1775,
+                "429": 3211,
+                "transport_error": 14
+              }
+            }
+          ],
+          "capacity_lines": [
+            "\"capacity_gate\": \"NOT_MET\",",
+            "\"offered_wire_rate_gate\": \"NOT_MET\",",
+            "\"observed_wire_start_rps\": 39.42815256408786,",
+            "\"successful_query_rps\": 13.734176612474753,",
+            "\"status_counts\": {",
+            "##[error]Process completed with exit code 1."
+          ],
+          "log_warnings": [
+            "warning: Using incompatible environment (`.venv`) due to `--no-sync` (The project environment's Python version does not satisfy the request: `Python 3.12.14`)"
+          ],
+          "artifact": {
+            "id": 13961006669,
+            "name": "p3-scale-1000-read-open-1",
+            "digest": "sha256:38555e03c4ac12cdcc2eb793423c37264f1a7165d071217d0ebe80a4c76ac833",
+            "size_in_bytes": 501854,
+            "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43253099900/artifacts/13961006669",
+            "verified_summary": {
+              "evidence_kind": "REAL_HTTP_POSTGRESQL_OPEN_ARRIVAL",
+              "configuration": {
+                "agents": 1000,
+                "rounds": 5,
+                "arrival_rps": 1000.0,
+                "hot_fraction": 0.8,
+                "api_processes": 2,
+                "output": "ci-evidence/result.json"
+              },
+              "scheduled_requests": 5000,
+              "completed_requests": 5000,
+              "validated_successes": 1775,
+              "wire_started_requests": 5000,
+              "dispatch_start_rps": 39.53288000140306,
+              "observed_wire_start_rps": 39.42815256408786,
+              "successful_query_rps": 13.734176612474753,
+              "correctness_errors": [],
+              "status_counts": {
+                "429": 3211,
+                "200": 1775,
+                "transport_error": 14
+              },
+              "world_unchanged": true,
+              "new_world_commits": 0,
+              "capacity_gate": "NOT_MET",
+              "offered_wire_rate_gate": "NOT_MET",
+              "latency_all_attempts": {
+                "count": 5000,
+                "p50_ms": 2782.2286,
+                "p95_ms": 7065.233,
+                "p99_ms": 10347.5931
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 43253099539,
+      "name": "P2 measured capacity and recovery",
+      "sha": "3bd0de0fa783c5deca189874b4ee808f1950c1ee",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43253099539",
+      "path": ".github/workflows/p2-load.yml",
+      "status": "completed",
+      "event": "pull_request",
+      "conclusion": "failure",
+      "run_attempt": 1,
+      "jobs": [
+        {
+          "id": 131303974089,
+          "name": "50 agents / overload / full capacity gate",
+          "status": "completed",
+          "conclusion": "failure",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43253099539/job/131303974089",
+          "failed_steps": [
+            "Measure fixed population, requests and business completion"
+          ],
+          "running_steps": [],
+          "samples": [
+            {
+              "file": "ci-evidence/run-1/load.json",
+              "correctness": "PASS",
+              "logical_agents": 50,
+              "first_attempt_capacity_gate": "NOT_MET",
+              "bounded_recovery_business_gate": "PASS",
+              "capacity_gate": "NOT_MET",
+              "gate_scope": "capacity",
+              "open_loop_offered_rate": {
+                "gate": "NOT_MET",
+                "transport_header_starts": 250,
+                "transport_header_start_rps": 98.348689948053,
+                "target_rps": 1000,
+                "first_attempts": 250,
+                "actual_call_start_rps": 164.87718636088215,
+                "start_window_seconds": 1.5102150000000023,
+                "max_schedule_delay_ms": 1261.3048,
+                "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+                "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+              },
+              "metrics": {
+                "planned_requests": 536,
+                "completed_logical_operations": 536,
+                "first_attempt_failure_count": 98,
+                "first_attempt_status_counts": {
+                  "200": 434,
+                  "409": 4,
+                  "429": 98
+                },
+                "recovered_logical_operations": 98,
+                "valid_successful_calls": 532,
+                "new_world_commit_receipts": 6,
+                "unresolved_operational_errors": [],
+                "status_counts": {
+                  "200": 532,
+                  "409": 4,
+                  "429": 118
+                },
+                "correctness_errors": []
+              }
+            },
+            {
+              "file": "ci-evidence/run-2/load.json",
+              "correctness": "PASS",
+              "logical_agents": 50,
+              "first_attempt_capacity_gate": "NOT_MET",
+              "bounded_recovery_business_gate": "PASS",
+              "capacity_gate": "NOT_MET",
+              "gate_scope": "capacity",
+              "open_loop_offered_rate": {
+                "gate": "NOT_MET",
+                "transport_header_starts": 250,
+                "transport_header_start_rps": 70.43337172753536,
+                "target_rps": 1000,
+                "first_attempts": 250,
+                "actual_call_start_rps": 116.80264715139906,
+                "start_window_seconds": 2.131801000000003,
+                "max_schedule_delay_ms": 1882.8879,
+                "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+                "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+              },
+              "metrics": {
+                "planned_requests": 536,
+                "completed_logical_operations": 536,
+                "first_attempt_failure_count": 74,
+                "first_attempt_status_counts": {
+                  "200": 458,
+                  "409": 4,
+                  "429": 74
+                },
+                "recovered_logical_operations": 74,
+                "valid_successful_calls": 532,
+                "new_world_commit_receipts": 6,
+                "unresolved_operational_errors": [],
+                "status_counts": {
+                  "200": 532,
+                  "409": 4,
+                  "429": 87
+                },
+                "correctness_errors": []
+              }
+            }
+          ],
+          "capacity_lines": [
+            "\"first_attempt_capacity_gate\": \"NOT_MET\",",
+            "\"bounded_recovery_business_gate\": \"PASS\",",
+            "\"capacity_gate\": \"NOT_MET\",",
+            "\"open_loop_offered_rate\": {",
+            "\"actual_call_start_rps\": 164.87718636088215,",
+            "\"first_attempt_status_counts\": {",
+            "\"status_counts\": {",
+            "\"effective_world_commits_per_second\": 0.1486,",
+            "\"first_attempt_capacity_gate\": \"NOT_MET\",",
+            "\"bounded_recovery_business_gate\": \"PASS\",",
+            "\"capacity_gate\": \"NOT_MET\",",
+            "\"open_loop_offered_rate\": {",
+            "\"actual_call_start_rps\": 116.80264715139906,",
+            "\"first_attempt_status_counts\": {",
+            "\"status_counts\": {",
+            "\"effective_world_commits_per_second\": 0.1455,",
+            "##[error]Process completed with exit code 1."
+          ],
+          "log_warnings": [
+            "warning: Using incompatible environment (`.venv`) due to `--no-sync` (The project environment's Python version does not satisfy the request: `Python 3.12.14`)"
+          ]
+        },
+        {
+          "id": 131303974740,
+          "name": "50 agents / mixed / full capacity gate",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43253099539/job/131303974740",
+          "failed_steps": [],
+          "running_steps": [],
+          "samples": [
+            {
+              "file": "ci-evidence/run-1/load.json",
+              "correctness": "PASS",
+              "logical_agents": 50,
+              "first_attempt_capacity_gate": "PASS",
+              "bounded_recovery_business_gate": "PASS",
+              "capacity_gate": "PASS",
+              "gate_scope": "capacity",
+              "open_loop_offered_rate": {
+                "gate": "NOT_APPLICABLE",
+                "target_rps": null,
+                "first_attempts": 0
+              },
+              "metrics": {
+                "planned_requests": 286,
+                "completed_logical_operations": 286,
+                "first_attempt_failure_count": 0,
+                "first_attempt_status_counts": {
+                  "200": 282,
+                  "409": 4
+                },
+                "recovered_logical_operations": 0,
+                "valid_successful_calls": 282,
+                "new_world_commit_receipts": 6,
+                "unresolved_operational_errors": [],
+                "status_counts": {
+                  "200": 282,
+                  "409": 4
+                },
+                "correctness_errors": []
+              }
+            },
+            {
+              "file": "ci-evidence/run-2/load.json",
+              "correctness": "PASS",
+              "logical_agents": 50,
+              "first_attempt_capacity_gate": "PASS",
+              "bounded_recovery_business_gate": "PASS",
+              "capacity_gate": "PASS",
+              "gate_scope": "capacity",
+              "open_loop_offered_rate": {
+                "gate": "NOT_APPLICABLE",
+                "target_rps": null,
+                "first_attempts": 0
+              },
+              "metrics": {
+                "planned_requests": 286,
+                "completed_logical_operations": 286,
+                "first_attempt_failure_count": 0,
+                "first_attempt_status_counts": {
+                  "200": 282,
+                  "409": 4
+                },
+                "recovered_logical_operations": 0,
+                "valid_successful_calls": 282,
+                "new_world_commit_receipts": 6,
+                "unresolved_operational_errors": [],
+                "status_counts": {
+                  "200": 282,
+                  "409": 4
+                },
+                "correctness_errors": []
+              }
+            }
+          ],
+          "capacity_lines": [
+            "\"first_attempt_capacity_gate\": \"PASS\",",
+            "\"bounded_recovery_business_gate\": \"PASS\",",
+            "\"capacity_gate\": \"PASS\",",
+            "\"open_loop_offered_rate\": {",
+            "\"first_attempt_status_counts\": {",
+            "\"status_counts\": {",
+            "\"effective_world_commits_per_second\": 0.1764,",
+            "\"first_attempt_capacity_gate\": \"PASS\",",
+            "\"bounded_recovery_business_gate\": \"PASS\",",
+            "\"capacity_gate\": \"PASS\",",
+            "\"open_loop_offered_rate\": {",
+            "\"first_attempt_status_counts\": {",
+            "\"status_counts\": {",
+            "\"effective_world_commits_per_second\": 0.1762,"
+          ],
+          "log_warnings": [
+            "warning: Using incompatible environment (`.venv`) due to `--no-sync` (The project environment's Python version does not satisfy the request: `Python 3.12.14`)"
+          ]
+        },
+        {
+          "id": 131303974745,
+          "name": "200 agents / overload / full capacity gate",
+          "status": "completed",
+          "conclusion": "failure",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43253099539/job/131303974745",
+          "failed_steps": [
+            "Measure fixed population, requests and business completion"
+          ],
+          "running_steps": [],
+          "samples": [
+            {
+              "file": "ci-evidence/run-1/load.json",
+              "correctness": "PASS",
+              "logical_agents": 200,
+              "first_attempt_capacity_gate": "NOT_MET",
+              "bounded_recovery_business_gate": "PASS",
+              "capacity_gate": "NOT_MET",
+              "gate_scope": "capacity",
+              "open_loop_offered_rate": {
+                "gate": "NOT_MET",
+                "transport_header_starts": 1000,
+                "transport_header_start_rps": 42.67051837503999,
+                "target_rps": 1000,
+                "first_attempts": 1000,
+                "actual_call_start_rps": 46.43023961071106,
+                "start_window_seconds": 21.516149999999982,
+                "max_schedule_delay_ms": 20517.2749,
+                "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+                "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+              },
+              "metrics": {
+                "planned_requests": 2141,
+                "completed_logical_operations": 2141,
+                "first_attempt_failure_count": 503,
+                "first_attempt_status_counts": {
+                  "200": 1619,
+                  "409": 19,
+                  "429": 503
+                },
+                "recovered_logical_operations": 497,
+                "valid_successful_calls": 2116,
+                "new_world_commit_receipts": 21,
+                "unresolved_operational_errors": [],
+                "status_counts": {
+                  "200": 2116,
+                  "409": 19,
+                  "429": 792
+                },
+                "correctness_errors": []
+              }
+            },
+            {
+              "file": "ci-evidence/run-2/load.json",
+              "correctness": "PASS",
+              "logical_agents": 200,
+              "first_attempt_capacity_gate": "NOT_MET",
+              "bounded_recovery_business_gate": "PASS",
+              "capacity_gate": "NOT_MET",
+              "gate_scope": "capacity",
+              "open_loop_offered_rate": {
+                "gate": "NOT_MET",
+                "transport_header_starts": 1000,
+                "transport_header_start_rps": 43.80338235775144,
+                "target_rps": 1000,
+                "first_attempts": 1000,
+                "actual_call_start_rps": 47.625224664488925,
+                "start_window_seconds": 20.976278999999977,
+                "max_schedule_delay_ms": 19977.4074,
+                "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+                "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+              },
+              "metrics": {
+                "planned_requests": 2141,
+                "completed_logical_operations": 2141,
+                "first_attempt_failure_count": 521,
+                "first_attempt_status_counts": {
+                  "200": 1601,
+                  "409": 19,
+                  "429": 521
+                },
+                "recovered_logical_operations": 519,
+                "valid_successful_calls": 2120,
+                "new_world_commit_receipts": 21,
+                "unresolved_operational_errors": [],
+                "status_counts": {
+                  "200": 2120,
+                  "409": 19,
+                  "429": 844
+                },
+                "correctness_errors": []
+              }
+            }
+          ],
+          "capacity_lines": [
+            "\"first_attempt_capacity_gate\": \"NOT_MET\",",
+            "\"bounded_recovery_business_gate\": \"PASS\",",
+            "\"capacity_gate\": \"NOT_MET\",",
+            "\"open_loop_offered_rate\": {",
+            "\"actual_call_start_rps\": 46.43023961071106,",
+            "\"first_attempt_status_counts\": {",
+            "\"status_counts\": {",
+            "\"effective_world_commits_per_second\": 0.1232,",
+            "\"first_attempt_capacity_gate\": \"NOT_MET\",",
+            "\"bounded_recovery_business_gate\": \"PASS\",",
+            "\"capacity_gate\": \"NOT_MET\",",
+            "\"open_loop_offered_rate\": {",
+            "\"actual_call_start_rps\": 47.625224664488925,",
+            "\"first_attempt_status_counts\": {",
+            "\"status_counts\": {",
+            "\"effective_world_commits_per_second\": 0.1256,",
+            "##[error]Process completed with exit code 1."
+          ],
+          "log_warnings": [
+            "warning: Using incompatible environment (`.venv`) due to `--no-sync` (The project environment's Python version does not satisfy the request: `Python 3.12.14`)"
+          ]
+        },
+        {
+          "id": 131303975044,
+          "name": "200 agents / mixed / full capacity gate",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43253099539/job/131303975044",
+          "failed_steps": [],
+          "running_steps": [],
+          "samples": [
+            {
+              "file": "ci-evidence/run-1/load.json",
+              "correctness": "PASS",
+              "logical_agents": 200,
+              "first_attempt_capacity_gate": "PASS",
+              "bounded_recovery_business_gate": "PASS",
+              "capacity_gate": "PASS",
+              "gate_scope": "capacity",
+              "open_loop_offered_rate": {
+                "gate": "NOT_APPLICABLE",
+                "target_rps": null,
+                "first_attempts": 0
+              },
+              "metrics": {
+                "planned_requests": 1141,
+                "completed_logical_operations": 1141,
+                "first_attempt_failure_count": 0,
+                "first_attempt_status_counts": {
+                  "200": 1122,
+                  "409": 19
+                },
+                "recovered_logical_operations": 0,
+                "valid_successful_calls": 1122,
+                "new_world_commit_receipts": 21,
+                "unresolved_operational_errors": [],
+                "status_counts": {
+                  "200": 1122,
+                  "409": 19
+                },
+                "correctness_errors": []
+              }
+            },
+            {
+              "file": "ci-evidence/run-2/load.json",
+              "correctness": "PASS",
+              "logical_agents": 200,
+              "first_attempt_capacity_gate": "PASS",
+              "bounded_recovery_business_gate": "PASS",
+              "capacity_gate": "PASS",
+              "gate_scope": "capacity",
+              "open_loop_offered_rate": {
+                "gate": "NOT_APPLICABLE",
+                "target_rps": null,
+                "first_attempts": 0
+              },
+              "metrics": {
+                "planned_requests": 1141,
+                "completed_logical_operations": 1141,
+                "first_attempt_failure_count": 0,
+                "first_attempt_status_counts": {
+                  "200": 1122,
+                  "409": 19
+                },
+                "recovered_logical_operations": 0,
+                "valid_successful_calls": 1122,
+                "new_world_commit_receipts": 21,
+                "unresolved_operational_errors": [],
+                "status_counts": {
+                  "200": 1122,
+                  "409": 19
+                },
+                "correctness_errors": []
+              }
+            }
+          ],
+          "capacity_lines": [
+            "\"first_attempt_capacity_gate\": \"PASS\",",
+            "\"bounded_recovery_business_gate\": \"PASS\",",
+            "\"capacity_gate\": \"PASS\",",
+            "\"open_loop_offered_rate\": {",
+            "\"first_attempt_status_counts\": {",
+            "\"status_counts\": {",
+            "\"effective_world_commits_per_second\": 0.1509,",
+            "\"first_attempt_capacity_gate\": \"PASS\",",
+            "\"bounded_recovery_business_gate\": \"PASS\",",
+            "\"capacity_gate\": \"PASS\",",
+            "\"open_loop_offered_rate\": {",
+            "\"first_attempt_status_counts\": {",
+            "\"status_counts\": {",
+            "\"effective_world_commits_per_second\": 0.151,"
+          ],
+          "log_warnings": [
+            "warning: Using incompatible environment (`.venv`) due to `--no-sync` (The project environment's Python version does not satisfy the request: `Python 3.12.14`)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 43253099717,
+      "name": "P3 P4 measured evidence",
+      "sha": "3bd0de0fa783c5deca189874b4ee808f1950c1ee",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43253099717",
+      "path": ".github/workflows/p3-p4-evidence.yml",
+      "status": "completed",
+      "event": "pull_request",
+      "conclusion": "failure",
+      "run_attempt": 1,
+      "jobs": [
+        {
+          "id": 131303974028,
+          "name": "Independent load process / 200 / overload",
+          "status": "completed",
+          "conclusion": "failure",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43253099717/job/131303974028",
+          "failed_steps": [
+            "Actual requests and strict capacity gate"
+          ],
+          "running_steps": [],
+          "samples": [
+            {
+              "file": "ci-evidence/load.json",
+              "correctness": "PASS",
+              "logical_agents": 200,
+              "first_attempt_capacity_gate": "NOT_MET",
+              "bounded_recovery_business_gate": "PASS",
+              "capacity_gate": "NOT_MET",
+              "gate_scope": "capacity",
+              "open_loop_offered_rate": {
+                "gate": "NOT_MET",
+                "transport_header_starts": 1000,
+                "transport_header_start_rps": 29.992927793722636,
+                "target_rps": 1000,
+                "first_attempts": 1000,
+                "actual_call_start_rps": 32.65045937954388,
+                "start_window_seconds": 30.596812999999997,
+                "max_schedule_delay_ms": 29597.9816,
+                "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+                "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+              },
+              "metrics": {
+                "planned_requests": 2141,
+                "completed_logical_operations": 2141,
+                "first_attempt_failure_count": 547,
+                "first_attempt_status_counts": {
+                  "200": 1575,
+                  "409": 19,
+                  "429": 547
+                },
+                "recovered_logical_operations": 525,
+                "valid_successful_calls": 2100,
+                "new_world_commit_receipts": 21,
+                "unresolved_operational_errors": [],
+                "status_counts": {
+                  "200": 2100,
+                  "409": 19,
+                  "429": 943
+                },
+                "correctness_errors": []
+              }
+            }
+          ],
+          "capacity_lines": [
+            "\"first_attempt_capacity_gate\": \"NOT_MET\",",
+            "\"bounded_recovery_business_gate\": \"PASS\",",
+            "\"capacity_gate\": \"NOT_MET\",",
+            "\"open_loop_offered_rate\": {",
+            "\"actual_call_start_rps\": 32.65045937954388,",
+            "\"first_attempt_status_counts\": {",
+            "\"status_counts\": {",
+            "\"effective_world_commits_per_second\": 0.1177,",
+            "##[error]Process completed with exit code 1."
+          ],
+          "log_warnings": [
+            "warning: Using incompatible environment (`.venv`) due to `--no-sync` (The project environment's Python version does not satisfy the request: `Python 3.12.14`)"
+          ]
+        },
+        {
+          "id": 131303974209,
+          "name": "Same world CPU and SQL paired comparison",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43253099717/job/131303974209",
+          "failed_steps": [],
+          "running_steps": [],
+          "samples": [],
+          "capacity_lines": [],
+          "log_warnings": [
+            "warning: Using incompatible environment (`.venv`) due to `--no-sync` (The project environment's Python version does not satisfy the request: `Python 3.12.14`)"
+          ]
+        },
+        {
+          "id": 131303974818,
+          "name": "Independent load process / 200 / mixed",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43253099717/job/131303974818",
+          "failed_steps": [],
+          "running_steps": [],
+          "samples": [
+            {
+              "file": "ci-evidence/load.json",
+              "correctness": "PASS",
+              "logical_agents": 200,
+              "first_attempt_capacity_gate": "PASS",
+              "bounded_recovery_business_gate": "PASS",
+              "capacity_gate": "PASS",
+              "gate_scope": "capacity",
+              "open_loop_offered_rate": {
+                "gate": "NOT_APPLICABLE",
+                "target_rps": null,
+                "first_attempts": 0
+              },
+              "metrics": {
+                "planned_requests": 1141,
+                "completed_logical_operations": 1141,
+                "first_attempt_failure_count": 0,
+                "first_attempt_status_counts": {
+                  "200": 1122,
+                  "409": 19
+                },
+                "recovered_logical_operations": 0,
+                "valid_successful_calls": 1122,
+                "new_world_commit_receipts": 21,
+                "unresolved_operational_errors": [],
+                "status_counts": {
+                  "200": 1122,
+                  "409": 19
+                },
+                "correctness_errors": []
+              }
+            }
+          ],
+          "capacity_lines": [
+            "\"first_attempt_capacity_gate\": \"PASS\",",
+            "\"bounded_recovery_business_gate\": \"PASS\",",
+            "\"capacity_gate\": \"PASS\",",
+            "\"open_loop_offered_rate\": {",
+            "\"first_attempt_status_counts\": {",
+            "\"status_counts\": {",
+            "\"effective_world_commits_per_second\": 0.1509,"
+          ],
+          "log_warnings": [
+            "warning: Using incompatible environment (`.venv`) due to `--no-sync` (The project environment's Python version does not satisfy the request: `Python 3.12.14`)"
+          ]
+        }
+      ]
+    }
+  ]
+}
