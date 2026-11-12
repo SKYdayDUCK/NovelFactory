@@ -37,3 +37,5 @@ W6 已复现主管调任后的两项不相容岗位扩编，修复及红绿原�
 
 
 - W6 main `98a8bbed289a29d0326454c86dd3db54ac85ae5c` 2026-11-11 的独立容量证据：50/200 overload [P2 https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43122517430](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43122517430)、200 overload [P3 https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43122517311](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43122517311)、1000 open-read [scale https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43122517551](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43122517551) 仍为 NOT_MET；500 mixed/read-soak 与 50/200 mixed 成功。历史 AT-30 未满足但未更改参数/门槛。[W6 正式签收](W6_主线签收.md)，Issue #13 继续开放。
+
+#25 合并主线 NF PostgreSQL 作业 817 项通过，17 项因宿主 Linux namespace 限制跳过；可逐项核对同运行时代码的原生回执。R1 原工件仍记录 `overall_engineering_gate=NOT_MET` 和 `load_coverage_gate=NOT_EXECUTED`。[计数、工件摘要与原生对应](https://github.com/SKYdayDUCK/NovelFactory/blob/9eb7bb52e422f1a8e33a91fe01a1e67fef6375d3/reports/integration/evidence/W6/signoff-ba892d3/verified-main-summary.json)。

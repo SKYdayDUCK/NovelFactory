@@ -14,7 +14,7 @@ from novel_factory.domain.errors import DomainError
 from novel_factory.domain.reconciliation import span_for
 from novel_factory.fixtures import load_fixture, point, run_command
 from test_planning import make_plan
-from test_release import runtime_grant, task_for
+from test_release import runtime_grant, setup_batch, task_for, write_scene
 
 pytestmark = [pytest.mark.postgres, pytest.mark.integration]
 
@@ -95,6 +95,43 @@ def test_world_event_can_be_narrated_twice_without_effect_reapplication(kernel_e
             assert k.head(repo, f["world_ref"]["work_id"]) == f["world_ref"]
             assert k.revision(repo, f["world_ref"])["snapshot"] == before
             assert len(repo.many("events", {"work_id": f["world_ref"]["work_id"]})) == 1
+
+
+def test_local_plan_change_between_reconciliation_and_prose_acceptance(kernel_env):
+    kernel = kernel_env["kernel"]
+    fixture = setup_batch(kernel, count=2)
+    owner, world = fixture["principal"], fixture["world_ref"]
+    planning, narrative = PlanningService(kernel), NarrativeService(kernel)
+    reconciled = []
+    for index, text in enumerate(["北门前的石阶还有水迹。", "窗纸在风里响了一声。"]):
+        draft = write_scene(kernel, fixture, index, text)
+        reader = extract(kernel, fixture, {**draft, "scene": fixture["scenes"][index]}, [assertion(text)])
+        report = narrative.reconcile(owner, draft["draft_ref"], reader["extraction_ref"],
+                                     world, f"check-scene-{index}")
+        assert report["status"] == "CLEAR"
+        reconciled.append((draft, report["reconciliation_ref"]))
+
+    replacement = deepcopy(fixture["plan"])
+    replacement.update(prior_plan_ref=fixture["plan_ref"], plan_revision_id=uid())
+    replacement["nodes"][0]["goal"] = "改去南门接应晚到的客人"
+    revised = planning.save_plan(owner, replacement, "save-revision")
+    selection = planning.adopt_plan(owner, world, revised, fixture["plan_ref"], "select-revision")
+    affected, affected_report = reconciled[0]
+    independent, independent_report = reconciled[1]
+    assert selection["fenced_task_ids"] == [affected["task"]["task_id"]]
+    assert kernel.get_task(affected["writer"], affected["task"]["task_id"])["state"] == "STALE"
+    with pytest.raises(DomainError) as stale:
+        narrative.accept_narrative(owner, affected["draft_ref"], affected_report, world, "late-accept")
+    assert stale.value.code == "TASK_NOT_ACCEPTABLE"
+
+    accepted = narrative.accept_narrative(owner, independent["draft_ref"], independent_report, world, "accept-independent")
+    assert narrative.accept_narrative(owner, independent["draft_ref"], independent_report, world, "accept-independent") == accepted
+    with kernel.db.uow(write=False) as repo:
+        records = repo.many("artifacts", {"work_id": world["work_id"], "kind": "NARRATIVE_ACCEPTANCE"})
+        assert [record["payload"]["draft_ref"] for record in records] == [independent["draft_ref"]]
+        assert records[0]["payload"]["world_effects_applied"] == 0
+        assert kernel.head(repo, world["work_id"], world["branch_id"]) == world
+        assert not repo.many("events", {"work_id": world["work_id"]})
 
 
 def test_text_first_delta_must_use_formal_kernel_acceptance_then_exact_alignment(kernel_env):
