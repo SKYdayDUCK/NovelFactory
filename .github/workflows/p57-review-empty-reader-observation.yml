@@ -1,0 +1,68 @@
+name: P5.7 review empty-reader-observation regression
+on:
+  push:
+    branches: [dev/p57-creative-harness-s1-s6]
+    paths: ['.github/workflows/p57-review-empty-reader-observation.yml']
+permissions:
+  contents: read
+jobs:
+  regression:
+    name: empty-reader-observation ${{ matrix.version }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [original, corrected]
+    services:
+      nf:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_PASSWORD: ephemeral-nf-test
+        ports: ['5433:5432']
+        options: --health-cmd "pg_isready -U postgres" --health-interval 3s --health-timeout 4s --health-retries 30
+      workshop:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_PASSWORD: ephemeral-workshop-test
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U postgres" --health-interval 3s --health-timeout 4s --health-retries 30
+      redis:
+        image: redis:8.0.2
+        ports: ['6379:6379']
+        options: --health-cmd "redis-cli ping" --health-interval 3s --health-timeout 4s --health-retries 30
+    env:
+      NF_TEST_DATABASE_URL: postgresql+psycopg://postgres:ephemeral-nf-test@127.0.0.1:5433/postgres
+      AW_DUAL_TEST_NF_ADMIN_URL: postgresql://postgres:ephemeral-nf-test@127.0.0.1:5433/postgres
+      AW_DUAL_TEST_ADMIN_URL: postgresql://postgres:ephemeral-workshop-test@127.0.0.1:5432/postgres
+      AW_REDIS_TEST_URL: redis://127.0.0.1:6379/0
+      NF_TEST_REDIS_URL: redis://127.0.0.1:6379/1
+      PG_BIN: /usr/lib/postgresql/17/bin
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Select frozen source and identical regression tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          original=1de471076b8fb4240f95ff8033c60db34c187404
+          corrected=8020e677a246f9f1267cfe9f842e8458dc8862aa
+          git fetch --no-tags origin "$corrected"
+          if [ "${{ matrix.version }}" = original ]; then target="$original"; else target="$corrected"; fi
+          git checkout --detach "$target"
+          git checkout "$corrected" -- tests/integration/test_p57_reading_observation_evidence.py
+          git show -s --format='P57_SOURCE %H %T %P' HEAD
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - run: uv sync --locked --group dev
+      - run: uv pip install --python .venv/bin/python --no-deps ./workshop
+      - name: Exercise the production entry and its ordinary regression cases
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$PWD/.venv/bin:$PATH"
+          .venv/bin/python -m pytest -s -c pyproject.toml -q --tb=short tests/integration/test_p57_reading_observation_evidence.py
