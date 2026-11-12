@@ -33,7 +33,7 @@ The HTTP command runs in the foreground. To run a world processor in another ter
 uv run --no-sync python scripts/nf.py supervisor --access-file "$private/supervisor.json" --processor world --adaptive
 ```
 
-The operator can restore eligible work through the branch binding using `'{}' | uv run --no-sync python scripts/nf.py call --binding "$private/resume.json" nf_resume_project`. Linux runs the same Python commands after setting the environment below. The original two-service bootstrap scripts and the Bubblewrap role-tool sandbox require Linux. The Windows job covers native bootstrap, real MCP stdio, simulated providers, object publication, lease recovery, cancellation and idle session retirement on real PostgreSQL 17. The job result identifies the exact tested commit.
+The operator can restore eligible work through the branch binding using `'{}' | uv run --no-sync python scripts/nf.py call --binding "$private/resume.json" nf_resume_project`. Linux runs the same Python commands after setting the environment below. The original two-service bootstrap scripts and the Bubblewrap role-tool sandbox require Linux. The Windows job covers native bootstrap, real MCP stdio, simulated providers, object publication, lease recovery, cancellation and idle session retirement on real PostgreSQL 17. The Windows provider test runs the pinned native `codex.exe` app-server against a synthetic upstream. The job result identifies the exact tested commit.
 
 ## Provision the two-service installation on Linux
 
