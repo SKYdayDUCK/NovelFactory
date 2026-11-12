@@ -12,6 +12,7 @@ from novel_factory.application.release import ReleaseService
 from novel_factory.application.review_independence import ReviewIndependenceService
 from novel_factory.application.runtime_tasks import RuntimeTaskService
 from novel_factory.domain.errors import DomainError
+from novel_factory.domain.reconciliation import span_for
 from novel_factory.fixtures import point
 from novel_factory.infrastructure.creative_config import CreativeHarnessConfig
 from editorial_helpers import binding_for, decision_request, uid
