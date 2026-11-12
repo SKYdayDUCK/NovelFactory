@@ -1,0 +1,57 @@
+name: Verify selective P5.7 code corrections
+on:
+  push:
+    branches: [dev/p57-creative-harness-s1-s6]
+    paths: ['.github/workflows/p57-review-selective.yml']
+permissions:
+  contents: read
+jobs:
+  cherry-pick:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Replay each exact fix and independently verify patch and tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          old=1de471076b8fb4240f95ff8033c60db34c187404
+          git fetch --no-tags origin main
+          test "$(git rev-parse FETCH_HEAD)" = "$old"
+          git config user.name 'Read-only qualification'
+          git config user.email qualification@localhost
+          git checkout --detach "$old"
+          while read -r dev target expected; do
+            git fetch --no-tags origin "$target"
+            test "$(git rev-parse HEAD)" = "$(git rev-parse "$target^")"
+            test "$(git show -s --format=%P "$target" | wc -w)" = 1
+            git cherry-pick --no-commit "$dev"
+            tree=$(git write-tree)
+            test "$tree" = "$expected"
+            test "$tree" = "$(git rev-parse "$target^{tree}")"
+            diff1=$(git diff --binary "$dev^" "$dev" | sha256sum | cut -d' ' -f1)
+            diff2=$(git diff --binary "$target^" "$target" | sha256sum | cut -d' ' -f1)
+            test "$diff1" = "$diff2"
+            git diff --check "$target^" "$target"
+            git diff --cached --name-status
+            echo "P57_CHERRY_MATCH $dev $target $tree $diff1"
+            git checkout --detach "$target"
+          done <<'PICKS'
+          0a24898c6a6719b6e61d454ce05ef13eb4f72d4a 1c01dabe7f2de2308a814be14c79e02ab17cc3aa 591ef96111e8396ad86f2ec4c426289c365e2347
+          3cfb4884120ddeb9a08e8c1396766a78f17dbc8a bc165661cf2960979df9f15d5789e2c441ac14b6 91ff8e8fedd85c6ef48b9864d15b7d13f1249038
+          0fba1c9e852ac10ef4f4edb801a9b890a5718490 b4970e8622f72e1965dc5d878d0cd13bd3961f46 ef33e825fc58bac39a43500209f5e3b85c7cc590
+          e1f74c72ea7ddd08ca349c3203dfb96a3ae89a47 fb1160cbe610c50c2b4e1532c5e42ebf1f7da761 0b1bafecbf11ea11d23a114a8525769a497e1787
+          9a205cdd897d66f981eaf346673908fb15c64edc bcc691aa671a0f402b1c005ea513e7a691f90376 e6e81701217dd30b7f673166353441a6d58e5daf
+          2e5c3a34d7173199387913c6a3b3da7bd2cded21 a1047b0038917c4de58ae4a4831d7a08abd8044b 9616c4aa27b104d13b799e6e4ea5da11880b505d
+          425b80002aff73b78f30b6a27503001775b22907 52dea422b5e931d5e2c16eeaeaf4170f01a470a2 27a0ce6170483261c75c991f516579c3f01851cc
+          3a979cb0fd74170e256fb26703ad9e59396b428f 95fd21afec125276a4794351526a5f959153389a e7764975c25af73b48e9371c20723292e4757c1e
+          7e63ef5e8c60f5988a05e06a75fa2176c450d0ad 2b26f54b4ec9a196c33edd23e6ff12f853821d6a a7f0b21b7e579cabe39ee74b72924519becc5121
+          a6f08bf65b4c66a913964d7e88b250500f05c985 92fbf9bcdfaa1dde80516c211aad04605b1af801 18f2f4d8f15533c5485b64395f38594b10d043d9
+          PICKS
+          test -z "$(git ls-tree -r --name-only HEAD reports/code_review/p57_creative_harness)"
+          git diff --stat "$old" HEAD
+          git diff --binary "$old" HEAD | sha256sum
+          git diff --name-status "$old" HEAD | sha256sum

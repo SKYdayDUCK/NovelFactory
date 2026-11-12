@@ -48,11 +48,11 @@ jobs:
         run: |
           set -euo pipefail
           original=1de471076b8fb4240f95ff8033c60db34c187404
-          corrected=7e63ef5e8c60f5988a05e06a75fa2176c450d0ad
+          corrected=a6f08bf65b4c66a913964d7e88b250500f05c985
           git fetch --no-tags origin "$corrected"
           if [ "${{ matrix.version }}" = original ]; then target="$original"; else target="$corrected"; fi
           git checkout --detach "$target"
-          git checkout "$corrected" -- tests/integration/test_review_independence.py tests/integration/test_harness_review_workflow.py tests/integration/test_harness_editor_independence.py tests/integration/test_creative_metrics.py workshop/integration/test_creative_review_independence.py
+          git checkout "$corrected" -- tests/integration/test_harness_editor_independence.py
           git show -s --format='P57_SOURCE %H %T %P' HEAD
       - uses: actions/setup-python@v5
         with:
@@ -66,4 +66,4 @@ jobs:
           set -euo pipefail
           export PATH="$PWD/.venv/bin:$PATH"
           export AW_NF_SOURCE="$PWD"
-          .venv/bin/python -m pytest -c pyproject.toml -q --tb=short tests/integration/test_review_independence.py tests/integration/test_harness_review_workflow.py tests/integration/test_harness_editor_independence.py tests/integration/test_creative_metrics.py::test_rework_is_not_fixed_until_independent_reread_and_native_editor_acceptance workshop/integration/test_creative_review_independence.py::test_final_editor_covers_all_workshop_producer_groups
+          .venv/bin/python -m pytest -c pyproject.toml -q --tb=short tests/integration/test_harness_editor_independence.py tests/integration/test_harness_review_workflow.py tests/integration/test_review_independence.py tests/integration/test_creative_metrics.py::test_rework_is_not_fixed_until_independent_reread_and_native_editor_acceptance workshop/integration/test_creative_review_independence.py::test_final_editor_covers_all_workshop_producer_groups
