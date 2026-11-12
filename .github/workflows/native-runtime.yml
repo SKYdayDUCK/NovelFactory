@@ -57,7 +57,8 @@ jobs:
         if: "!cancelled() && runner.os == 'Windows' && steps.postgres.outcome == 'success'"
         run: >-
           uv run --no-sync python -m pytest -q tests/integration/test_m0_bootstrap.py tests/integration/test_native_operator_cli.py
-          tests/reliability/test_tasks.py
+          tests/reliability/test_tasks.py tests/integration/test_bound_tool_entrypoints.py
+          tests/integration/test_mcp_idle_pool.py
           tests/integration/test_p5_scheduler_admission.py::test_supervisor_drains_sent_attempt_and_leaves_next_job_ready
           tests/integration/test_p58_routing.py
           --junitxml=native-postgres.xml
