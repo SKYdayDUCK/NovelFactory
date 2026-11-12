@@ -2,7 +2,7 @@
 
 The private loopback transport removes CLI tools, injected filesystem context and
 retry authority before contacting OpenAI. It relays actual provider SSE events.
-Only the parent process holds the operator's credential.
+Only the outbound transport receives the operator's credential.
 """
 from __future__ import annotations
 
@@ -11,12 +11,14 @@ import json
 import os
 import secrets
 import shutil
+import socket
 import tempfile
+import time
+from contextlib import suppress
 from dataclasses import replace
-from datetime import UTC, datetime
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
-from threading import Thread
+from threading import Event, Lock, Thread
 
 from .host_process import ISOLATED_PLUGIN_OPTIONS, start_host, stop_host
 from .protocol import ModelCallFailure, ModelResponse
@@ -86,6 +88,51 @@ def _message(item):
     return value
 
 
+class _OneTurnServer(HTTPServer):
+    def __init__(self, timeout):
+        super().__init__(("127.0.0.1", 0), _Transport)
+        self.closed = Event()
+        self.gate = Lock()
+        self.active_socket = None
+        self.timeout = .1
+        self.deadline = time.monotonic() + timeout
+        self.used = self.forwarded = False
+        self.answer = self.failure = None
+
+    def get_request(self):
+        connection, address = super().get_request()
+        with self.gate:
+            if self.closed.is_set():
+                connection.close()
+                raise OSError("Host closed")
+            self.active_socket = connection
+            connection.settimeout(3)
+        return connection, address
+
+    def handle_error(self, request, client_address):
+        # Disconnected loopback clients cannot publish exceptions or request data.
+        pass
+
+    def serve(self):
+        while not self.closed.is_set() and time.monotonic() < self.deadline:
+            self.handle_request()
+
+    def stop(self):
+        with self.gate:
+            self.closed.set()
+            if self.active_socket:
+                with suppress(OSError):
+                    self.active_socket.shutdown(socket.SHUT_RDWR)
+
+    def begin_forward(self):
+        with self.gate:
+            remaining = self.deadline - time.monotonic()
+            if self.closed.is_set() or self.forwarded or remaining <= 0:
+                raise ModelCallFailure("CODEX_SEND_FENCED", sent=self.forwarded)
+            self.forwarded = True
+            return remaining
+
+
 class _Transport(BaseHTTPRequestHandler):
     def log_message(self, *args):
         pass
@@ -98,7 +145,6 @@ class _Transport(BaseHTTPRequestHandler):
         if owner.used:
             self.send_error(409)
             return
-        self.connection.settimeout(5)
         try:
             size = int(self.headers["Content-Length"])
             if not 0 < size <= 4_000_000:
@@ -120,15 +166,13 @@ class _Transport(BaseHTTPRequestHandler):
                 for m in authorized_messages], "stream": True, "store": False, "tools": []}
             if profile.auth_mode == "api-key":
                 payload["max_output_tokens"] = request.max_output_tokens
-            started_at = datetime.now(UTC).isoformat()
-            content, receipt = post(url=OPENAI_RESPONSES, payload=payload, credential=key,
-                request_hash=request.request_sha256, timeout=profile.timeout_seconds, limit=8_000_000,
+            content, receipt, window = post(url=OPENAI_RESPONSES, payload=payload, credential=key,
+                request_hash=request.request_sha256, timeout=owner.begin_forward(), limit=8_000_000,
                 headers={"User-Agent": self.headers.get("User-Agent", "novel_factory"),
                          "originator": "novel_factory", "Accept": "text/event-stream"})
-            received_at = datetime.now(UTC).isoformat()
             stream, answer = _text_stream(content, request.request_sha256, receipt)
             owner.answer = replace(answer, raw_response={**answer.raw_response,
-                "transport_window": {"started_at": started_at, "received_at": received_at}})
+                "transport_window": window})
             self.send_response(200)
             self.send_header("Content-Type", "text/event-stream")
             self.send_header("Content-Length", str(len(stream)))
@@ -147,13 +191,12 @@ def generate(profile, request, *, authorize, record):
     profile.preflight()
     if profile.auth_mode == "chatgpt-plan" and request.max_output_tokens < profile.model_output_ceiling:
         raise ProfileError("MODEL_OUTPUT_CEILING_REQUIRED")
-    with tempfile.TemporaryDirectory(prefix="nf-native-") as tmp, HTTPServer(("127.0.0.1", 0), _Transport) as relay:
+    with tempfile.TemporaryDirectory(prefix="nf-native-") as tmp, _OneTurnServer(profile.timeout_seconds) as relay:
         relay.profile, relay.request, relay.authorize = profile, request, authorize
         relay.route = "/" + secrets.token_hex(32)
         relay.turn_input = json.dumps({"request_sha256": request.request_sha256, "messages": list(request.messages)},
                                       ensure_ascii=False, separators=(",", ":"))
-        relay.used, relay.answer, relay.failure = False, None, None
-        server = Thread(target=relay.serve_forever, kwargs={"poll_interval": .05}, daemon=True)
+        server = Thread(target=relay.serve, daemon=True)
         server.start()
         try:
             try:
@@ -167,8 +210,10 @@ def generate(profile, request, *, authorize, record):
             return replace(relay.answer, raw_response={**relay.answer.raw_response,
                     "codex_thread_id": thread_id, "codex_turn_id": turn_id, "auth_mode": profile.auth_mode})
         finally:
-            relay.shutdown()
-            server.join()
+            relay.stop()
+            server.join(timeout=max(2, relay.deadline-time.monotonic()+2))
+            if server.is_alive():
+                raise ModelCallFailure("CODEX_TRANSPORT_CLEANUP_FAILED", sent=relay.forwarded)
 
 
 async def _turn(tmp, relay, record):
@@ -196,7 +241,7 @@ async def _turn(tmp, relay, record):
         async with asyncio.timeout(relay.profile.timeout_seconds):
             return await _exchange(proc, cwd, relay, record)
     except (TimeoutError, OSError, ValueError, KeyError, TypeError):
-        raise ModelCallFailure("CODEX_TRANSPORT_UNKNOWN", sent=relay.used) from None
+        raise ModelCallFailure("CODEX_TRANSPORT_UNKNOWN", sent=relay.forwarded) from None
     finally:
         await stop_host(proc)
 
@@ -205,10 +250,10 @@ async def _exchange(proc, cwd, relay, record):
     async def read():
         raw = await proc.stdout.readline()
         if not raw:
-            raise ModelCallFailure("CODEX_HOST_EXITED", sent=relay.used)
+            raise ModelCallFailure("CODEX_HOST_EXITED", sent=relay.forwarded)
         event = json.loads(raw)
         if "id" in event and "method" in event:
-            raise ModelCallFailure("UNEXPECTED_HOST_TOOL_REQUEST", sent=relay.used)
+            raise ModelCallFailure("UNEXPECTED_HOST_TOOL_REQUEST", sent=relay.forwarded)
         return event
 
     async def send(method, params, identifier=None):
@@ -222,7 +267,7 @@ async def _exchange(proc, cwd, relay, record):
                 event = await read()
                 if event.get("id") == identifier:
                     if "error" in event:
-                        raise ModelCallFailure("CODEX_RPC_ERROR", sent=relay.used)
+                        raise ModelCallFailure("CODEX_RPC_ERROR", sent=relay.forwarded)
                     return event["result"]
 
     await send("initialize", {"clientInfo": {"name": "novel_factory", "title": "NovelFactory", "version": "2.1"}}, 1)
@@ -246,6 +291,6 @@ async def _exchange(proc, cwd, relay, record):
             final_text = params["item"]["text"]
         if event.get("method") == "turn/completed" and params["turn"]["id"] == turn_id:
             if params["turn"]["status"] != "completed":
-                raise ModelCallFailure("CODEX_TURN_INCOMPLETE", sent=relay.used)
+                raise ModelCallFailure("CODEX_TURN_INCOMPLETE", sent=relay.forwarded)
             record(attempt, thread_id, turn_id, "COMPLETED")
             return thread_id, turn_id, final_text

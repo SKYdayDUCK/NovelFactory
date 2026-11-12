@@ -2,6 +2,7 @@
 import json
 import shutil
 from concurrent.futures import ThreadPoolExecutor
+from datetime import UTC, datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from threading import Barrier, Thread
 
@@ -71,7 +72,7 @@ def test_catalog_preview_no_credentials_and_alias_quota_binding(tmp_path, monkey
 def test_plan_requires_hard_model_bound_and_trusted_origin():
     with pytest.raises(ProfileError, match="MODEL_OUTPUT_CEILING_REQUIRED"):
         plan(auth_mode="chatgpt-plan")
-    assert plan(auth_mode="chatgpt-plan", model_output_ceiling=300).model_output_ceiling == 300
+    assert plan(auth_mode="chatgpt-plan", model_output_ceiling=300, oauth_client_id="oaiapp_test").model_output_ceiling == 300
     with pytest.raises(ProfileError):
         plan(endpoint="https://other.invalid")
     with pytest.raises(ProfileError):
@@ -84,7 +85,7 @@ def test_vendor_wire_fields_and_receipt(monkeypatch, kind, token_field):
     observed = []
     def fixture(**kwargs):
         observed.append(kwargs)
-        return chat_reply(), None
+        return chat_reply(), None, {}
     monkeypatch.setattr(providers, "post", fixture)
     value = invoke(deepseek(kind=kind, endpoint="https://api.deepseek.com/chat/completions"),
                    REQUEST, authorize=lambda attempt: attempt == REQUEST.attempt_id, record=None)
@@ -101,7 +102,7 @@ def test_incomplete_deepseek_never_retries(monkeypatch, body):
     calls = []
     def response(**kwargs):
         calls.append(1)
-        return body, "synthetic"
+        return body, "synthetic", {}
     monkeypatch.setattr(providers, "post", response)
     with pytest.raises(ModelCallFailure, match="MODEL_PROTOCOL_ERROR"):
         invoke(deepseek(), REQUEST, authorize=lambda _: True, record=None)
@@ -150,8 +151,10 @@ def test_real_cli_and_deepseek_wire_overlap_with_no_provider_egress(monkeypatch)
             assert payload["messages"] == list(REQUEST.messages)
             assert payload["max_tokens"] == 300 and "tools" not in payload
         sends.append((is_native, kwargs["request_hash"]))
+        started_at = datetime.now(UTC).isoformat()
         barrier.wait(timeout=9)
-        return (codex_reply(), "synthetic-openai") if is_native else (chat_reply(), "synthetic-deepseek")
+        window = {"started_at": started_at, "received_at": datetime.now(UTC).isoformat()}
+        return (codex_reply(), "synthetic-openai", window) if is_native else (chat_reply(), "synthetic-deepseek", window)
     monkeypatch.setattr(codex, "post", fake_wire)
     monkeypatch.setattr(providers, "post", fake_wire)
     def run(profile):
@@ -182,3 +185,92 @@ def test_completed_tool_item_is_never_delivered_to_cli():
     data = codex_reply().replace(b'"type": "message"', b'"type": "function_call"')
     with pytest.raises(ValueError):
         codex._text_stream(data, REQUEST.request_sha256, None)
+
+
+def test_transport_deadline_kills_trickling_response_and_never_retries():
+    from threading import Event
+    from time import monotonic
+
+    stop, paths = Event(), []
+
+    class Trickles(BaseHTTPRequestHandler):
+        def do_POST(self):
+            paths.append(self.path)
+            self.send_response(200)
+            self.send_header("Content-Length", "999")
+            self.end_headers()
+            while not stop.wait(.025):
+                try:
+                    self.wfile.write(b"x")
+                    self.wfile.flush()
+                except OSError:
+                    break
+
+        def log_message(self, *args):
+            pass
+
+    with ThreadingHTTPServer(("127.0.0.1", 0), Trickles) as server:
+        worker = Thread(target=server.serve_forever)
+        worker.start()
+        try:
+            started = monotonic()
+            with pytest.raises(ModelCallFailure, match="MODEL_TRANSPORT_UNKNOWN") as caught:
+                providers.post(url=f"http://127.0.0.1:{server.server_port}/fixture", credential="fixture",
+                               payload={}, request_hash="b" * 64, timeout=1, limit=1024)
+            assert monotonic() - started < 4 and caught.value.sent
+            assert paths == ["/fixture"]
+        finally:
+            stop.set()
+            server.shutdown()
+            worker.join()
+
+
+def test_subscription_source_requires_signed_access_scope_and_client(monkeypatch):
+    from time import time
+    from types import SimpleNamespace
+
+    import jwt
+    from cryptography.hazmat.primitives.asymmetric import rsa
+
+    from agent_runtime import plan_auth
+
+    profile = plan(auth_mode="chatgpt-plan", model_output_ceiling=300, oauth_client_id="oaiapp_fixture")
+    enable_synthetic_credentials(monkeypatch)
+    with pytest.raises(ProfileError, match="MODEL_PLAN_AUTH_UNVERIFIED"):
+        profile.preflight()  # Arbitrary secret under a subscription profile.
+    private = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    public = SimpleNamespace(key=private.public_key(), algorithm_name="RS256")
+    monkeypatch.setattr(plan_auth, "_issuer_keys", lambda: SimpleNamespace(get_signing_key_from_jwt=lambda _: public))
+    now = int(time())
+    claims = {"iss": plan_auth.ISSUER, "aud": plan_auth.AUDIENCE, "exp": now+3600, "nbf": now,
+              "iat": now, "sub": "fixture", "client_id": "oaiapp_fixture", "scope": "resource.invoke chatgpt.tokens.use.direct"}
+    def sign(fields, key=private):
+        return jwt.encode(fields, key, algorithm="RS256", headers={"kid": "fixture"})
+
+    good = sign(claims)
+    monkeypatch.setenv("NF_TEST_CODEX", good)
+    assert profile.preflight() == good
+    impostor = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    for invalid in (sign({**claims, "aud": "other"}), sign({**claims, "iss": "other"}),
+                    sign({**claims, "client_id": "other"}), sign({**claims, "scope": "resource.invoke"}),
+                    sign({**claims, "exp": now-1}), sign(claims, impostor)):
+        monkeypatch.setenv("NF_TEST_CODEX", invalid)
+        with pytest.raises(ProfileError, match="MODEL_PLAN_AUTH_UNVERIFIED"):
+            profile.preflight()
+
+
+def test_stalled_loopback_headers_do_not_hold_shutdown_or_start_late_request():
+    import socket
+    from time import monotonic
+
+    with codex._OneTurnServer(5) as relay:
+        worker = Thread(target=relay.serve, daemon=True)
+        worker.start()
+        with socket.create_connection(relay.server_address, timeout=2) as client:
+            client.sendall(b"POST /incomplete")
+            started = monotonic()
+            relay.stop()
+            worker.join(timeout=1)
+            assert not worker.is_alive() and monotonic()-started < 1 and not relay.forwarded
+            with pytest.raises(ModelCallFailure, match="CODEX_SEND_FENCED"):
+                relay.begin_forward()

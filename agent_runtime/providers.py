@@ -1,17 +1,17 @@
 """Immutable administrator profile snapshots and bounded, stateless HTTP invocations."""
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 import os
 import re
 import shutil
+import subprocess
+import sys
 from dataclasses import dataclass
-from datetime import UTC, datetime
 from pathlib import Path
-from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
-from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 from .protocol import ModelCallFailure, ModelResponse
 
@@ -39,6 +39,7 @@ class Profile:
     endpoint: str | None = None
     auth_mode: str | None = None
     model_output_ceiling: int | None = None
+    oauth_client_id: str | None = None
 
     def __post_init__(self):
         if (self.kind not in ("codex-cli", "deepseek", "openai-compatible")
@@ -56,10 +57,13 @@ class Profile:
                 if (type(self.model_output_ceiling) is not int
                         or self.model_output_ceiling != self.max_output_tokens):
                     raise ProfileError("MODEL_OUTPUT_CEILING_REQUIRED")
-            elif self.model_output_ceiling is not None:
+                if (not isinstance(self.oauth_client_id, str)
+                        or not re.fullmatch(r"oaiapp_[A-Za-z0-9_-]{1,120}", self.oauth_client_id)):
+                    raise ProfileError("MODEL_PLAN_CLIENT_REQUIRED")
+            elif self.model_output_ceiling is not None or self.oauth_client_id is not None:
                 raise ProfileError("INVALID_MODEL_CONFIG")
         else:
-            if self.auth_mode is not None or self.model_output_ceiling is not None:
+            if self.auth_mode is not None or self.model_output_ceiling is not None or self.oauth_client_id is not None:
                 raise ProfileError("INVALID_MODEL_CONFIG")
             if self.endpoint is None and self.kind == "deepseek":
                 object.__setattr__(self, "endpoint", "https://api.deepseek.com/chat/completions")
@@ -88,13 +92,20 @@ class Profile:
     def preflight(self):
         if os.environ.get("NF_RUNTIME_LIVE_APPROVED") != "1":
             raise ProfileError("MODEL_CALL_NOT_AUTHORIZED")
-        if not os.environ.get(self.secret_ref) or (self.kind == "codex-cli" and not shutil.which("codex")):
+        credential = os.environ.get(self.secret_ref)
+        if not credential or (self.kind == "codex-cli" and not shutil.which("codex")):
             raise ProfileError("MODEL_UNAVAILABLE")
+
+        if self.auth_mode == "chatgpt-plan":
+            from .plan_auth import verify
+            verify(credential, self.oauth_client_id)
+        return credential
 
     def describe(self):
         return {"adapter_kind": self.kind, "provider": self.provider_key, "model": self.model,
                     "endpoint": self.endpoint, "account_key": self.account_key, "auth_mode": self.auth_mode,
                     "max_output_tokens": self.max_output_tokens, "timeout_seconds": self.timeout_seconds,
+                    **({"oauth_client_id": self.oauth_client_id} if self.oauth_client_id is not None else {}),
                     "isolation": "STATELESS_TEXT_ONLY", "isolation_evidence": "Frozen context; one text-only request per attempt",
                     "execution_kind": "REAL_HOST" if self.kind == "codex-cli" else "REAL_EXTERNAL"}
 
@@ -118,27 +129,30 @@ def read_profiles(path):
         raise ProfileError("INVALID_MODEL_CONFIG") from None
 
 
-class _NoRedirect(HTTPRedirectHandler):
-    def redirect_request(self, *args):
-        return None
-
-
 def post(*, url, payload, credential, request_hash, timeout, limit, headers=None):
-    body = json.dumps(payload, ensure_ascii=False, separators=(",", ":"), allow_nan=False).encode()
-    req = Request(url, data=body, method="POST", headers={
-        "Authorization": "Bearer " + credential, "Content-Type": "application/json",
-        "X-Client-Request-Id": request_hash, **(headers or {})})
+    """Bound DNS, connection, headers and body to one wall-clock deadline.
+
+    A socket inactivity timeout alone lets a trickling response hold the executor
+    after its capacity lease expires. Only private stdio carries this request and
+    its credential. subprocess.run kills and waits for the helper on timeout.
+    """
+    packet = json.dumps({"url": url, "payload": payload, "credential": credential,
+        "request_hash": request_hash, "timeout": timeout, "limit": limit, "headers": headers},
+        ensure_ascii=False, allow_nan=False).encode()
+    allowed = ("PATH", "SYSTEMROOT", "SSL_CERT_FILE", "SSL_CERT_DIR", "https_proxy", "HTTPS_PROXY",
+               "http_proxy", "HTTP_PROXY", "no_proxy", "NO_PROXY", "ALL_PROXY", "all_proxy")
+    env = {key: os.environ[key] for key in allowed if key in os.environ}
     try:
-        with build_opener(_NoRedirect).open(req, timeout=timeout) as reply:
-            content = reply.read(limit + 1)
-            if len(content) > limit:
-                raise ModelCallFailure("MODEL_RESPONSE_TOO_LARGE")
-            return content, reply.headers.get("x-request-id")
-    except HTTPError as exc:
-        exc.close()
-        raise ModelCallFailure("MODEL_RATE_LIMITED" if exc.code == 429 else "MODEL_HTTP_ERROR",
-                               http_status=exc.code) from None
-    except (URLError, TimeoutError, OSError):
+        proc = subprocess.run([sys.executable, "-I", str(Path(__file__).with_name("_http_worker.py"))],
+            input=packet, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, timeout=timeout, env=env,
+            check=False)
+        if proc.returncode:
+            raise ModelCallFailure("MODEL_TRANSPORT_UNKNOWN")
+        parsed = json.loads(proc.stdout)
+        if "failure" in parsed:
+            raise ModelCallFailure(parsed["failure"], http_status=parsed.get("status"))
+        return base64.b64decode(parsed["content"], validate=True), parsed["receipt"], parsed["transport_window"]
+    except (OSError, ValueError, KeyError, subprocess.TimeoutExpired):
         raise ModelCallFailure("MODEL_TRANSPORT_UNKNOWN") from None
 
 
@@ -161,12 +175,10 @@ def invoke(profile, request, *, authorize, record):
     credential = _authorized_credential(profile, request, authorize)
     deepseek = profile.kind == "deepseek"
     limit_field = "max_tokens" if deepseek else "max_completion_tokens"
-    started_at = datetime.now(UTC).isoformat()
-    content, receipt = post(url=profile.endpoint, credential=credential,
+    content, receipt, window = post(url=profile.endpoint, credential=credential,
             payload={"model": profile.model, "messages": list(request.messages), limit_field: request.max_output_tokens,
                      "response_format": {"type": "json_object"}, "stream": False},
             request_hash=request.request_sha256, timeout=profile.timeout_seconds, limit=2_000_000)
-    received_at = datetime.now(UTC).isoformat()
     try:
         raw = json.loads(content)
         choice, usage = raw["choices"][0], raw.get("usage") or {}
@@ -179,13 +191,13 @@ def invoke(profile, request, *, authorize, record):
             input_tokens=usage_value(usage.get("prompt_tokens")), output_tokens=usage_value(usage.get("completion_tokens")),
             cached_input_tokens=usage_value(cached), request_sha256=request.request_sha256,
             raw_response={"id": raw.get("id"), "model": raw.get("model"), "finish_reason": "stop",
-                          "transport_window": {"started_at": started_at, "received_at": received_at}})
+                          "transport_window": window})
     except (TypeError, ValueError, KeyError, IndexError, AttributeError):
         raise ModelCallFailure("MODEL_PROTOCOL_ERROR") from None
 
 
 def _authorized_credential(profile, request, authorize):
-    profile.preflight()
+    credential = profile.preflight()
     if authorize(request.attempt_id) is False:
         raise ModelCallFailure("MODEL_CALL_NOT_AUTHORIZED", sent=False)
-    return os.environ[profile.secret_ref]
+    return credential
