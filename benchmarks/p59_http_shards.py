@@ -14,8 +14,8 @@ import hashlib
 import json
 import multiprocessing as mp
 import os
-import resource
 import socket
+import sys
 import tempfile
 import time
 from collections import Counter
@@ -24,16 +24,7 @@ from pathlib import Path
 
 import h11
 
-from benchmarks import client_calibration as calibration
-from benchmarks import process_server
 from benchmarks.http_load import percentiles
-from benchmarks.p2_behavioral_load import (
-    DatabaseObserver,
-    hardware,
-    isolated_kernel,
-    make_population,
-)
-from benchmarks.p3_open_arrival import rate_from_times, validate_responses
 from novel_factory.contracts.registry import validate_contract
 
 
@@ -93,6 +84,8 @@ class Lane:
 
 
 def usage():
+    import resource
+
     current = resource.getrusage(resource.RUSAGE_SELF)
     return {"cpu_seconds": current.ru_utime + current.ru_stime, "peak_rss_kib": current.ru_maxrss}
 
@@ -241,6 +234,8 @@ class ServerTiming:
 def observed_worker(channel, listener, url, objects, processes, pool_size, layer):
     # This interpreter belongs exclusively to the benchmark. The production
     # app closure still performs the actual authentication, limiter and admission.
+    from benchmarks import process_server
+
     create_app = process_server.create_app
 
     def measured(*args, **kwargs):
@@ -258,6 +253,9 @@ def observed_worker(channel, listener, url, objects, processes, pool_size, layer
 
 @contextmanager
 def server(layer, url, objects, workers):
+    from benchmarks import client_calibration as calibration
+    from benchmarks import process_server
+
     with socket.socket() as listener, child_group() as launch:
         listener.bind(("127.0.0.1", 0))
         listener.listen(128)
@@ -303,10 +301,15 @@ def request_for(layer, actor):
 
 def validate(rows, fixture, layer):
     if layer == "query":
+        from benchmarks.p3_open_arrival import validate_responses
+
         validate_responses(rows, fixture)
         return
     population = fixture["population"]
-    expected_transport = calibration.response_body(2104)
+    if layer == "transport":
+        from benchmarks.client_calibration import response_body
+
+        expected_transport = response_body(2104)
     for row in rows:
         data = row.pop("_content", None)
         if data is None:
@@ -350,7 +353,8 @@ def summarize(rows, count, target, metrics, layer):
     if indices != list(range(count)):
         raise RuntimeError("Lost, duplicated, or out-of-order sample")
     wire = [r["wire_start_seconds"] for r in rows if "wire_start_seconds" in r]
-    wire_rate = rate_from_times(wire)
+    wire_span = max(wire) - min(wire) if wire else 0
+    wire_rate = (len(wire) - 1) / wire_span if wire_span else None
     status = Counter(str(r["status"]) for r in rows)
     validated = sum(r["valid"] for r in rows)
     if layer == "transport":
@@ -424,6 +428,16 @@ def main():
     parser.add_argument("--timeout", type=float, default=30)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    if sys.platform != "linux":
+        parser.error("The frozen receiver uses Linux resource and affinity instrumentation")
+    from benchmarks import client_calibration as calibration
+    from benchmarks.p2_behavioral_load import (
+        DatabaseObserver,
+        hardware,
+        isolated_kernel,
+        make_population,
+    )
+
     if not __debug__:
         parser.error("Normal assertion mode is required by the frozen query validator")
     if not (

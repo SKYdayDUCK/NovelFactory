@@ -11,6 +11,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import re
 import subprocess
 import sys
 import tempfile
@@ -79,7 +80,7 @@ def seed(kernel, agents):
         op = task_fixture(kernel, book, owner, "control_operator", i)
         worker = f"fixture-supervisor-{i}"
         claim = kernel.claim_task(owner, worker, lease_seconds=3600, task_id=op.task_id)
-        writes.append(LeaseRenewal(op.task_id, claim["generation"], worker))
+        writes.append(LeaseRenewal(op.task_id, claim["generation"], worker, lease_seconds=3600))
     reads, expected = [], []
     for i in range(agents):
         book = books[i % 2]
@@ -92,33 +93,69 @@ def seed(kernel, agents):
 
 class Observer:
     def __init__(self, url):
-        self.engine = create_engine(url, pool_size=1, max_overflow=0, isolation_level="AUTOCOMMIT")
+        url = make_url(url)
+        self.name = url.database
+        self.engine = create_engine(url.set(database="postgres"), pool_size=1, max_overflow=0,
+                                    isolation_level="AUTOCOMMIT")
         self.stop = threading.Event()
         self.ready = threading.Event()
         self.samples = []
+        self.statements = {}
+        self.failure = None
+
+    def _stats(self, conn):
+        query = text("""SELECT queryid, min(query), sum(calls), sum(total_exec_time),
+                        sum(rows), sum(wal_bytes), sum(shared_blks_read), sum(shared_blks_hit)
+                        FROM pg_stat_statements WHERE dbid=(SELECT oid FROM pg_database WHERE datname=:name)
+                        GROUP BY queryid""")
+        return {row[0]: (row[1], [float(n) for n in row[2:]])
+                for row in conn.execute(query, {"name": self.name})}
 
     def run(self):
+        try:
+            self._observe()
+        except Exception as error:
+            self.failure = type(error).__name__
+            self.ready.set()
+
+    def _observe(self):
         with self.engine.connect() as conn:
             query = text("""SELECT count(*), count(*) FILTER (WHERE state='active'),
                      count(*) FILTER (WHERE wait_event_type='Lock') FROM pg_stat_activity
-                     WHERE datname=current_database() AND pid<>pg_backend_pid()""")
+                     WHERE datname=:name""")
+            enabled = conn.scalar(text("SELECT to_regclass('pg_stat_statements') IS NOT NULL AND "
+                                       "current_setting('shared_preload_libraries') LIKE '%pg_stat_statements%'"))
+            before = self._stats(conn) if enabled else {}
             while not self.stop.is_set():
-                n, active, locked = conn.execute(query).one()
+                n, active, locked = conn.execute(query, {"name": self.name}).one()
                 self.samples.append((time.monotonic(), n, active, locked))
                 self.ready.set()
                 self.stop.wait(.05)
+            after = self._stats(conn) if enabled else {}
+            fields = ("calls", "exec_ms", "rows", "wal_bytes", "shared_blks_read", "shared_blks_hit")
+            self.statements = {"available": bool(enabled), "deltas": []}
+            for key, (sql, counters) in after.items():
+                previous = before.get(key, (None, [0] * len(fields)))[1]
+                delta = {k: v - old for k, v, old in zip(fields, counters, previous, strict=True)}
+                if delta["calls"]:
+                    # Store normalized operation and table identities only. Keep
+                    # values, credentials, literal utility text and row data out.
+                    self.statements["deltas"].append({"queryid": str(key), "command": sql.split()[0].upper(),
+                        "tables": sorted(set(re.findall(r"\bnf_[a-z_]+\b", sql))), **delta})
 
     def __enter__(self):
         self.thread = threading.Thread(target=self.run, daemon=True)
         self.thread.start()
-        if not self.ready.wait(5):
-            raise RuntimeError("PostgreSQL observer did not start")
+        if not self.ready.wait(5) or self.failure:
+            raise RuntimeError(f"PostgreSQL observer did not start ({self.failure})")
         return self
 
     def __exit__(self, *_):
         self.stop.set()
         self.thread.join(5)
         self.engine.dispose()
+        if self.thread.is_alive() or self.failure:
+            raise RuntimeError(f"PostgreSQL observer failed ({self.failure})")
 
 
 async def measure(kernel, url, fixture, args):
@@ -134,6 +171,7 @@ async def measure(kernel, url, fixture, args):
     semaphore = asyncio.Semaphore(args.workers)
     nearest = []
     results = []
+    expiries = [[], []]
     started = 0.
     next_seq = 0
 
@@ -144,7 +182,8 @@ async def measure(kernel, url, fixture, args):
             next_seq += 1
             is_write = args.write_every > 0 and i % args.write_every == 0
             # Rotate books across renewals and readers independently.
-            agent = i % len(reads)
+            prior_writes = (i + args.write_every - 1) // args.write_every if args.write_every else 0
+            agent = (i - prior_writes) % len(reads)
             book = (i // args.write_every) % 2 if is_write else agent % 2
             op = writes[book] if is_write else reads[agent]
             begin = loop.time()
@@ -161,6 +200,8 @@ async def measure(kernel, url, fixture, args):
                     if isinstance(value, Exception):
                         raise value
                 ok = value > datetime.now(timezone.utc) if is_write else value == expected[agent]
+                if is_write and ok:
+                    expiries[book].append(value)
                 code = "verified" if ok else "WRONG_RESULT"
             except Exception as exc:
                 code = getattr(exc, "code", type(exc).__name__)
@@ -182,11 +223,13 @@ async def measure(kernel, url, fixture, args):
             await coordinator.__aexit__(None, None, None)
         pool.shutdown()
     # Verify the durable lease binding after every operation has drained.
-    for op in writes:
+    for book, op in enumerate(writes):
         with kernel.db.uow(write=False) as repo:
             task = repo.one("tasks", {"task_id": op.task_id})
             if (task["generation"], task["lease_owner"], task["state"]) != (op.generation, op.worker_id, "RUNNING"):
                 raise ValueError("Unexpected durable lease state")
+            if expiries[book] and task["lease_expiry"] != max(expiries[book]):
+                raise ValueError("Renewal acknowledgements differ from the persisted lease")
     errors = Counter(r["result"] for r in results)
     per_kind = {kind: percentiles([r["latency_s"] for r in results if r["kind"] == kind]) for kind in ("status", "renew")}
     try:
@@ -202,7 +245,9 @@ async def measure(kernel, url, fixture, args):
             "cpu_process_s": cpu, "peak_process_rss_bytes_including_setup": rss_bytes,
             "goodput": errors["verified"] / duration, "outcomes": errors,
             "latency": percentiles([r["latency_s"] for r in results]), "latency_by_kind": per_kind,
-            "sql": metrics, "stats_activity_interval_s": .05,
+            "sql": metrics, "pg_stat_statements": observer.statements, "stats_activity_interval_s": .05,
+            "verified_by_book_and_kind": {str(book): dict(Counter(r["kind"] for r in results
+                if r["book"] == book and r["result"] == "verified")) for book in range(2)},
             "pg_samples_time_connections_active_lockwait": [[round(t-started, 6), n, a, l] for t,n,a,l in observer.samples],
             "queue": dict(coordinator.counts), "batch_sizes": dict(coordinator.batches),
             "max_queue_wait_s": coordinator.max_queue_wait_s if queue_mode else max(nearest, default=0),
