@@ -15,3 +15,18 @@ Baseline `434840593179e6c1faa6b7aeca3d7d747644506d`. Windows and Linux run ordin
 The local Linux native selection covered 32 tests plus three Windows-specific skips. The independently installed Workshop passed its native binding check and original POSIX link-refusal test. The fresh PG17 operator, task-recovery, graceful-drain and route-quota run completed 27 tests. The three packaged wheels imported in isolated interpreters outside the checkout. The Windows and Linux jobs publish a JUnit receipt from the native runtime workflow on each PR and main push. The selected Windows cases include a stateless simulated provider. Actual billed requests and hardware power-cut durability have independent acceptance boundaries. Realm-wide role-tool isolation using Bubblewrap and the original dual-service container template retain their Linux dependencies. macOS native qualification was not executed.
 
 [Local PG17 JUnit](raw/native-operator-linux.xml) · [Windows/Linux workflow](../../../.github/workflows/native-runtime.yml) · [English deployment](../../../docs/en/08-configuration-and-deployment.md) · [中文部署](../../../docs/zh-CN/08-配置与部署.md)
+
+## Hosted verification on PR 33
+
+The native matrix passed on commit `23c62ab14a50481cd35023195eedd743b5006237`. The Windows PostgreSQL step ran real migrations, project bootstrap, authorized status and resume, competing claims, cancellation, lease recovery, the UNKNOWN fence, multi-work routing, graceful drain and quota-timer recovery.
+
+| Host / job | Core cases | Separately installed Workshop binding | PostgreSQL cases in this job |
+|---|---|---|---|
+| [Windows Server 2025 job 131383116189](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43275626989/job/131383116189) | 31 passed, 4 skipped | 1 passed | 27 passed |
+| [Ubuntu 24.04 job 131383116068](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43275626989/job/131383116068) | 31 passed, 4 skipped | 1 passed | Linux PG17 covered separately in the local JUnit and the repository integrity workflow |
+
+Windows skipped two POSIX directory-fsync syscall assertions, one Linux session-group assertion and the real Codex executable test. Linux skipped the Windows write-through, explicit executable selection and native resource-counter cases, plus the real Codex executable test. Each host executed its process-lifetime and filesystem assertions. Real commercial endpoints, Windows Docker Desktop startup, and macOS were outside this run.
+
+The retained attempts show how each native gate failed before the corresponding fix. The first two Windows jobs exposed a stalled grandchild handshake. The next Windows job passed the core checks and refused the CRLF-modified migration inputs. After correcting checkout attributes the native database suite passed; a separate stalled-loopback case still failed intermittently. The Codex relay now selects on both client input and a shutdown socket, keeping the 3-second read limit and the original one-second shutdown regression gate. The previous Workshop symlink-error regression is also covered by its original Linux test, and the standalone Workshop workflow passed at the corrected `cd08799e` PR head.
+
+[Native workflow receipts and historical failures](raw/native-pr33.json) · [Standalone Workshop run 43274260764](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43274260764)

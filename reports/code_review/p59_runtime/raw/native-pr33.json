@@ -1,0 +1,694 @@
+{
+  "repository": "SKYdayDUCK/NovelFactory",
+  "workflow": "Native runtime",
+  "runs": [
+    {
+      "id": 43273075679,
+      "head_sha": "9bc6b79df1e22f988602cd8245bc42145aaccf58",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43273075679",
+      "status": "completed",
+      "conclusion": "failure",
+      "jobs": [
+        {
+          "id": 131374252832,
+          "name": "Native runtime / windows-2025",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43273075679/job/131374252832",
+          "status": "completed",
+          "conclusion": "failure",
+          "steps": [
+            {
+              "number": 5,
+              "name": "Run uv sync --locked --group dev --python 3.12",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 6,
+              "name": "Run uv run --no-sync python scripts/nf.py doctor",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 7,
+              "name": "Run uv run --no-sync python scripts/nf.py mcp --help",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 8,
+              "name": "Run uv run --no-sync python scripts/nf.py supervisor --help",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 9,
+              "name": "Filesystem, child lifetime, capacity and offline provider contracts",
+              "status": "completed",
+              "conclusion": "failure"
+            },
+            {
+              "number": 10,
+              "name": "Standalone Workshop install and private binding",
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "number": 11,
+              "name": "Start runner's disposable Windows PostgreSQL 17",
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "number": 12,
+              "name": "Migrate, bootstrap, claim, cancel, recover and reconcile on Windows",
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "number": 13,
+              "name": "Run actions/upload-artifact@v4",
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 131374253322,
+          "name": "Native runtime / ubuntu-24.04",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43273075679/job/131374253322",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "number": 5,
+              "name": "Run uv sync --locked --group dev --python 3.12",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 6,
+              "name": "Run uv run --no-sync python scripts/nf.py doctor",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 7,
+              "name": "Run uv run --no-sync python scripts/nf.py mcp --help",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 8,
+              "name": "Run uv run --no-sync python scripts/nf.py supervisor --help",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 9,
+              "name": "Filesystem, child lifetime, capacity and offline provider contracts",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 10,
+              "name": "Standalone Workshop install and private binding",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 11,
+              "name": "Start runner's disposable Windows PostgreSQL 17",
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "number": 12,
+              "name": "Migrate, bootstrap, claim, cancel, recover and reconcile on Windows",
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "number": 13,
+              "name": "Run actions/upload-artifact@v4",
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 43273612243,
+      "head_sha": "4f07637cafd7b144a353cb516d47a797d91b0175",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43273612243",
+      "status": "completed",
+      "conclusion": "failure",
+      "jobs": [
+        {
+          "id": 131376072974,
+          "name": "Native runtime / windows-2025",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43273612243/job/131376072974",
+          "status": "completed",
+          "conclusion": "failure",
+          "steps": [
+            {
+              "number": 5,
+              "name": "Run uv sync --locked --group dev --python 3.12",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 6,
+              "name": "Run uv run --no-sync python scripts/nf.py doctor",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 7,
+              "name": "Run uv run --no-sync python scripts/nf.py mcp --help",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 8,
+              "name": "Run uv run --no-sync python scripts/nf.py supervisor --help",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 9,
+              "name": "Filesystem, child lifetime, capacity and offline provider contracts",
+              "status": "completed",
+              "conclusion": "failure"
+            },
+            {
+              "number": 10,
+              "name": "Standalone Workshop install and private binding",
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "number": 11,
+              "name": "Start runner's disposable Windows PostgreSQL 17",
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "number": 12,
+              "name": "Migrate, bootstrap, claim, cancel, recover and reconcile on Windows",
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "number": 13,
+              "name": "Run actions/upload-artifact@v4",
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 131376073475,
+          "name": "Native runtime / ubuntu-24.04",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43273612243/job/131376073475",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "number": 5,
+              "name": "Run uv sync --locked --group dev --python 3.12",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 6,
+              "name": "Run uv run --no-sync python scripts/nf.py doctor",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 7,
+              "name": "Run uv run --no-sync python scripts/nf.py mcp --help",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 8,
+              "name": "Run uv run --no-sync python scripts/nf.py supervisor --help",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 9,
+              "name": "Filesystem, child lifetime, capacity and offline provider contracts",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 10,
+              "name": "Standalone Workshop install and private binding",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 11,
+              "name": "Start runner's disposable Windows PostgreSQL 17",
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "number": 12,
+              "name": "Migrate, bootstrap, claim, cancel, recover and reconcile on Windows",
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "number": 13,
+              "name": "Run actions/upload-artifact@v4",
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 43274260749,
+      "head_sha": "cd08799e5c3ed3b42f5283f737140bca6dfe6b22",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43274260749",
+      "status": "completed",
+      "conclusion": "failure",
+      "jobs": [
+        {
+          "id": 131378349303,
+          "name": "Native runtime / ubuntu-24.04",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43274260749/job/131378349303",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "number": 5,
+              "name": "Run uv sync --locked --group dev --python 3.12",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 6,
+              "name": "Run uv run --no-sync python scripts/nf.py doctor",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 7,
+              "name": "Run uv run --no-sync python scripts/nf.py mcp --help",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 8,
+              "name": "Run uv run --no-sync python scripts/nf.py supervisor --help",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 9,
+              "name": "Filesystem, child lifetime, capacity and offline provider contracts",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 10,
+              "name": "Standalone Workshop install and private binding",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 11,
+              "name": "Start runner's disposable Windows PostgreSQL 17",
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "number": 12,
+              "name": "Migrate, bootstrap, claim, cancel, recover and reconcile on Windows",
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "number": 13,
+              "name": "Run actions/upload-artifact@v4",
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 131378350161,
+          "name": "Native runtime / windows-2025",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43274260749/job/131378350161",
+          "status": "completed",
+          "conclusion": "failure",
+          "steps": [
+            {
+              "number": 5,
+              "name": "Run uv sync --locked --group dev --python 3.12",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 6,
+              "name": "Run uv run --no-sync python scripts/nf.py doctor",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 7,
+              "name": "Run uv run --no-sync python scripts/nf.py mcp --help",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 8,
+              "name": "Run uv run --no-sync python scripts/nf.py supervisor --help",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 9,
+              "name": "Filesystem, child lifetime, capacity and offline provider contracts",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 10,
+              "name": "Standalone Workshop install and private binding",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 11,
+              "name": "Start runner's disposable Windows PostgreSQL 17",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 12,
+              "name": "Migrate, bootstrap, claim, cancel, recover and reconcile on Windows",
+              "status": "completed",
+              "conclusion": "failure"
+            },
+            {
+              "number": 13,
+              "name": "Run actions/upload-artifact@v4",
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 43274790417,
+      "head_sha": "ce74f265b9072df52e9a485c6dfd48d5612d1907",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43274790417",
+      "status": "completed",
+      "conclusion": "failure",
+      "jobs": [
+        {
+          "id": 131380207207,
+          "name": "Native runtime / windows-2025",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43274790417/job/131380207207",
+          "status": "completed",
+          "conclusion": "failure",
+          "steps": [
+            {
+              "number": 5,
+              "name": "Run uv sync --locked --group dev --python 3.12",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 6,
+              "name": "Run uv run --no-sync python scripts/nf.py doctor",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 7,
+              "name": "Run uv run --no-sync python scripts/nf.py mcp --help",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 8,
+              "name": "Run uv run --no-sync python scripts/nf.py supervisor --help",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 9,
+              "name": "Filesystem, child lifetime, capacity and offline provider contracts",
+              "status": "completed",
+              "conclusion": "failure"
+            },
+            {
+              "number": 10,
+              "name": "Standalone Workshop install and private binding",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 11,
+              "name": "Start runner's disposable Windows PostgreSQL 17",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 12,
+              "name": "Migrate, bootstrap, claim, cancel, recover and reconcile on Windows",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 13,
+              "name": "Run actions/upload-artifact@v4",
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 131380208320,
+          "name": "Native runtime / ubuntu-24.04",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43274790417/job/131380208320",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "number": 5,
+              "name": "Run uv sync --locked --group dev --python 3.12",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 6,
+              "name": "Run uv run --no-sync python scripts/nf.py doctor",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 7,
+              "name": "Run uv run --no-sync python scripts/nf.py mcp --help",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 8,
+              "name": "Run uv run --no-sync python scripts/nf.py supervisor --help",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 9,
+              "name": "Filesystem, child lifetime, capacity and offline provider contracts",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 10,
+              "name": "Standalone Workshop install and private binding",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 11,
+              "name": "Start runner's disposable Windows PostgreSQL 17",
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "number": 12,
+              "name": "Migrate, bootstrap, claim, cancel, recover and reconcile on Windows",
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "number": 13,
+              "name": "Run actions/upload-artifact@v4",
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 43275626989,
+      "head_sha": "23c62ab14a50481cd35023195eedd743b5006237",
+      "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43275626989",
+      "status": "completed",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 131383116068,
+          "name": "Native runtime / ubuntu-24.04",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43275626989/job/131383116068",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "number": 5,
+              "name": "Run uv sync --locked --group dev --python 3.12",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 6,
+              "name": "Run uv run --no-sync python scripts/nf.py doctor",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 7,
+              "name": "Run uv run --no-sync python scripts/nf.py mcp --help",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 8,
+              "name": "Run uv run --no-sync python scripts/nf.py supervisor --help",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 9,
+              "name": "Filesystem, child lifetime, capacity and offline provider contracts",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 10,
+              "name": "Standalone Workshop install and private binding",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 11,
+              "name": "Start runner's disposable Windows PostgreSQL 17",
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "number": 12,
+              "name": "Migrate, bootstrap, claim, cancel, recover and reconcile on Windows",
+              "status": "completed",
+              "conclusion": "skipped"
+            },
+            {
+              "number": 13,
+              "name": "Run actions/upload-artifact@v4",
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 131383116189,
+          "name": "Native runtime / windows-2025",
+          "html_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43275626989/job/131383116189",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "number": 5,
+              "name": "Run uv sync --locked --group dev --python 3.12",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 6,
+              "name": "Run uv run --no-sync python scripts/nf.py doctor",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 7,
+              "name": "Run uv run --no-sync python scripts/nf.py mcp --help",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 8,
+              "name": "Run uv run --no-sync python scripts/nf.py supervisor --help",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 9,
+              "name": "Filesystem, child lifetime, capacity and offline provider contracts",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 10,
+              "name": "Standalone Workshop install and private binding",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 11,
+              "name": "Start runner's disposable Windows PostgreSQL 17",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 12,
+              "name": "Migrate, bootstrap, claim, cancel, recover and reconcile on Windows",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 13,
+              "name": "Run actions/upload-artifact@v4",
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "last_green_counts": {
+    "windows-2025": {
+      "core_passed": 31,
+      "core_skipped": 4,
+      "workshop_binding_passed": 1,
+      "postgres_passed": 27
+    },
+    "ubuntu-24.04": {
+      "core_passed": 31,
+      "core_skipped": 4,
+      "workshop_binding_passed": 1
+    }
+  }
+}
