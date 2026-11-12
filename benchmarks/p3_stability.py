@@ -19,14 +19,6 @@ from pathlib import Path
 
 import httpx
 
-from benchmarks.http_load import percentiles
-from benchmarks.p2_behavioral_load import (
-    DatabaseObserver,
-    hardware,
-    isolated_kernel,
-    make_population,
-)
-from benchmarks.process_server import ServiceProcesses
 from novel_factory.contracts.registry import validate_contract
 
 
@@ -124,6 +116,15 @@ async def steady_with_renewal(services, kernel, fixture, *, seconds, rate, renew
 
 
 def main():
+    from benchmarks.http_load import percentiles
+    from benchmarks.p2_behavioral_load import (
+        DatabaseObserver,
+        hardware,
+        isolated_kernel,
+        make_population,
+    )
+    from benchmarks.process_server import ServiceProcesses
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--agents', type=int, choices=[10, 50, 200, 500, 1000], required=True)
     parser.add_argument('--seconds', type=float, default=600)
