@@ -1,5 +1,7 @@
 # 当前唯一阶段
 
-Workshop W6 [#15](https://github.com/SKYdayDUCK/NovelFactory/pull/15)。W5 已在实际 main `b30e76978830bec4c596c04194d749fd01f67402` 完成两条 push CI、双服务、四个历史部署、管理者与故障恢复测试，状态为 **MERGED_AND_VERIFIED**。[W5 主线签收](W5_主线签收.md)。
+**W6 #15 在 `main` 98a8bbed289a29d0326454c86dd3db54ac85ae5c 已完成实际合并、六项同 SHA push 工作流和 W6 范围工程验收：MERGED_AND_VERIFIED。** [主线签收](W6_主线签收.md)。原 AT-30 50/200 overload、1000 read-open 保持 NOT_MET，Issue #13 和原阈值保留。
 
-从该主线整理原 W6 提交和证据，核对真实双服务协作、10/50/200 员工和恢复情况。W6 签收后完成 P5.6 主线综合验收，再进入 P6。
+**下一唯一阶段：P5.6 双服务全系统综合验收（尚未完成）。** 在精确主线另行执行完整组织与权限、BELIEF、Skills、审核、预算、Redis/双库故障、迁移、PITR、冲突、10/50/200 员工及 NF 容量验收并签收。之后才可开启 P6 #17，后续 #16、#18、P5.7 S0–S5 仍冻结。
+
+P6_REAL_CREATION = BLOCKED_LOCAL_AUTHORIZATION；《潮闸余灯》仅 TEST_FIXTURE。
