@@ -9,9 +9,9 @@
 
 - W2 早期候选 `772ee36f` 的 PEL 测试错误地假定全库随机顺序前两项均可采纳；终态使用两笔真实授权事件，仍全量重放并覆盖拒绝和去重。[原失败](evidence/W2/candidate-162af26/previous-pel-failure.log) · [修复及主线验收](W2_主线签收.md)
 
-- NF Bridge 原实现允许已过期安装触及新预留或发送。相同数据库和发送前拦截协议下，旧实现失败两项，修复后通过两项。此前 UNKNOWN 的原始费用仍可对账。[对照证据](evidence/NF-Bridge/candidate-26bf033/expiry-control.zip)
+- NF Bridge 原实现允许已过期安装触及新预留或发送。相同数据库和发送前拦截协议下，旧实现失败两项，修复后通过两项。此前 UNKNOWN 的原始费用仍可对账。[对照证据](https://github.com/SKYdayDUCK/NovelFactory/blob/df8bea90fe19ea492220448e07323f63c4e496ea/reports/integration/evidence/NF-Bridge/candidate-26bf033/expiry-control.zip)
 
-- 桥接初版 `26bf0337` 的托管 PG 套件有 1 项失败、805 项通过、17 项跳过。历史 S9 用例的目标迁移写成 head，导致以 0016 断言查验 0017。新版本将历史边界固定在 0016，另验从发布库升级到 0017、非空降级拒绝和原 67 张表内容。[失败与修复原件](evidence/NF-Bridge/review-26bf033/upgrade-controls.zip)
+- 桥接初版 `26bf0337` 的托管 PG 套件有 1 项失败、805 项通过、17 项跳过。历史 S9 用例的目标迁移写成 head，导致以 0016 断言查验 0017。新版本将历史边界固定在 0016，另验从发布库升级到 0017、非空降级拒绝和原 67 张表内容。[失败与修复原件](https://github.com/SKYdayDUCK/NovelFactory/blob/df8bea90fe19ea492220448e07323f63c4e496ea/reports/integration/evidence/NF-Bridge/review-26bf033/upgrade-controls.zip)
 
 - NF Bridge 已修复出站权限变化、跨安装操作、旧升级端点及 S9 等待进度。已用独立本地实测覆盖托管跳过的 17 项 Linux 角色约束，四项 AT-30 原门槛仍保留。[主线签收](NF_Bridge_主线签收.md)
 
@@ -19,32 +19,31 @@
 W3 主线验收。原四项 AT-30 继续在 #13 跟踪，未涉及付费模型创作。[签收](W3_主线签收.md)。
 
 - W4 公开候选的首次完整 NF 运行 831 项通过、3 项失败；测试用 `nf_fixture` 在建立受控损坏样本时缺少 PostgreSQL 参数 `session_replication_role` 的 SET 权限。只对一次性 fixture 身份补充此权后，4 项定点复跑和全部 834 项均通过，两轮全量节点集合一致。首轮日志/原 XML 各脱敏三处实际口令，其余原件字节与执行结果一致。[NF 全量原件及三次运行](https://github.com/SKYdayDUCK/NovelFactory/blob/5f07125458a0249c3203c9c0d5b03ff92abdcd50/reports/integration/evidence/W4/candidate-3ed83ff/independent/local-nf-full.md)。
-- 2026-11-11 21:02:59 UTC，GitHub Actions 组件为 `major_outage`。W4 两条正式 CI 从 20:28:33 UTC 起排队，尚无被分配的作业，两条运行也没有待部署审批。发布流程保留原未合并状态。历史 AT-30 仍沿用 Issue #13。[GitHub 平台事件](https://www.githubstatus.com/incidents/dvy0t3mvh1lg) · [该时点的 GitHub 状态、PR、main、作业与部署审批回执](evidence/W4/candidate-3ed83ff/platform-outage-20261111T210259Z/checkpoint.json)。
+- 2026-11-11 21:02:59 UTC，GitHub Actions 组件为 `major_outage`。W4 两条正式 CI 从 20:28:33 UTC 起排队，尚无被分配的作业，两条运行也没有待部署审批。发布流程保留原未合并状态。历史 AT-30 仍沿用 Issue #13。[GitHub 平台事件](https://www.githubstatus.com/incidents/dvy0t3mvh1lg) · [该时点的 GitHub 状态、PR、main、作业与部署审批回执](https://github.com/SKYdayDUCK/NovelFactory/blob/df8bea90fe19ea492220448e07323f63c4e496ea/reports/integration/evidence/W4/candidate-3ed83ff/platform-outage-20261111T210259Z/checkpoint.json)。
 
-- Actions 官方事件结案后，W4 旧 `3ed83ff` 两项运行在 21:26:37 UTC 仍各有零个作业。无产品变化的普通快进 `1cc12ca` 已获得新的独立运行编号；同树旧 NF 834/834、本机 Docker 跳过以及原平台事故均各自保留原证据。[正式运行、合并模拟树和父提交](evidence/W4/candidate-1cc12ca/independent/candidate-checkpoint.json) · [前一候选 834/834 原件](https://github.com/SKYdayDUCK/NovelFactory/blob/5f07125458a0249c3203c9c0d5b03ff92abdcd50/reports/integration/evidence/W4/candidate-3ed83ff/independent/local-nf-full.md)。
+- Actions 官方事件结案后，W4 旧 `3ed83ff` 两项运行在 21:26:37 UTC 仍各有零个作业。无产品变化的普通快进 `1cc12ca` 已获得新的独立运行编号；同树旧 NF 834/834、本机 Docker 跳过以及原平台事故均各自保留原证据。[正式运行、合并模拟树和父提交](https://github.com/SKYdayDUCK/NovelFactory/blob/df8bea90fe19ea492220448e07323f63c4e496ea/reports/integration/evidence/W4/candidate-1cc12ca/independent/candidate-checkpoint.json) · [前一候选 834/834 原件](https://github.com/SKYdayDUCK/NovelFactory/blob/5f07125458a0249c3203c9c0d5b03ff92abdcd50/reports/integration/evidence/W4/candidate-3ed83ff/independent/local-nf-full.md)。
 
 - W4 已在真实主线 `6c711adf794842bdf4469ab51e89093d37761bcc` 签收。平台事故、旧 w004b 缺失视图以及测试 fixture 参数权限的原试次均保留。两项主线 CI 成功，原 17 项托管宿主限制由同 SHA 原生复验覆盖。#13 容量门槛与 P6 本地实验条件继续单列。[W4 主线签收](W4_主线签收.md)。
 
-- W5 候选 `455cf92` 的原生 JUnit 保留本机无 Docker sidecar 的停机用例跳过。相同通知断电场景在真实原生 Redis 停启、两次新 worker 和 PostgreSQL 中通过，正式托管 Docker 原用例也通过。历史资格观测只覆盖管理者停调，本轮验证了 Workshop 数据库实际拒绝连接期间的 NF 完成与原键恢复。[候选实测与原件](evidence/W5/candidate-455cf92/independent/README.md)。
+- W5 候选 `455cf92` 的原生 JUnit 保留本机无 Docker sidecar 的停机用例跳过。相同通知断电场景在真实原生 Redis 停启、两次新 worker 和 PostgreSQL 中通过，正式托管 Docker 原用例也通过。历史资格观测只覆盖管理者停调，本轮验证了 Workshop 数据库实际拒绝连接期间的 NF 完成与原键恢复。[候选实测与原件](https://github.com/SKYdayDUCK/NovelFactory/blob/df8bea90fe19ea492220448e07323f63c4e496ea/reports/integration/evidence/W5/candidate-455cf92/independent/README.md)。
 
-- W5 合并点 `b30e76978830` 已通过候选两项 CI。原生本地 Docker 跳过与托管 PG 的 17 项命名空间跳过均在候选有逐项同源码补验，新的 main 重新验证这些范围。[合并双亲、时间与主线工作流](evidence/W5/main-b30e769/independent/merge-checkpoint.json)。
+- W5 合并点 `b30e76978830` 已通过候选两项 CI。原生本地 Docker 跳过与托管 PG 的 17 项命名空间跳过均在候选有逐项同源码补验，新的 main 重新验证这些范围。[合并双亲、时间与主线工作流](https://github.com/SKYdayDUCK/NovelFactory/blob/df8bea90fe19ea492220448e07323f63c4e496ea/reports/integration/evidence/W5/main-b30e769/independent/merge-checkpoint.json)。
 
 - W5 主线 `b30e76978830bec4c596c04194d749fd01f67402` 的本地 Docker 项另经原生 Redis 进程停启复验通过。托管 PG 的 17 项宿主限制已同 SHA 逐节点对应。既有 AT-30 性能事实与 Issue #13 继续保留。[W5 主线签收](W5_主线签收.md)。
 
-W6 已复现主管调任后的两项不相容岗位扩编，修复及红绿原件可追溯。[红绿 JUnit、复演脚本与 633cf1a 补丁](evidence/W6/preset-supervisor/W6-preset-supervisor-633cf1a.zip)。八条旧库升级路径还发现两套同名 w009_rehearsal 中早期部署缺少岗位列和唯一索引，按真实旧库修复复验。AT-30 保持 Issue #13 原始口径。
+W6 已复现主管调任后的两项不相容岗位扩编，修复及红绿原件可追溯。[红绿 JUnit、复演脚本与 633cf1a 补丁](https://github.com/SKYdayDUCK/NovelFactory/blob/df8bea90fe19ea492220448e07323f63c4e496ea/reports/integration/evidence/W6/preset-supervisor/W6-preset-supervisor-633cf1a.zip)。八条旧库升级路径还发现两套同名 w009_rehearsal 中早期部署缺少岗位列和唯一索引，按真实旧库修复复验。AT-30 保持 Issue #13 原始口径。
 
 首轮候选 23d195d 暴露两个验收入口故障。容量脚本从 Workshop 目录导入共享物理恢复模块时缺仓库根模块路径，长篇场景在持久化的下次可查询时间之前取回 IDLE。同条件修正后原始结算断言通过，产品的退避、授权和容量阈值均保持原值。 [当时的正式工作流与两项失败](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43116965757)。
 
-## W6 签收与已知遗留
 
-[#25 的第一次文档检查](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43134466602)发现 16 处相对证据链接失效。修复链接后[候选检查](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43136015001)通过。W6 六条主线工作流中三条历史容量工作流失败，原结果、条件和 Issue #13 均见 [W6 主线签收](W6_主线签收.md)。P6_REAL_CREATION = BLOCKED_LOCAL_AUTHORIZATION，文学质量为 NOT_EVALUATED。
+- W6 main `98a8bbed289a29d0326454c86dd3db54ac85ae5c` 2026-11-11 的独立容量证据：50/200 overload [P2 https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43122517430](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43122517430)、200 overload [P3 https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43122517311](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43122517311)、1000 open-read [scale https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43122517551](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43122517551) 仍为 NOT_MET；500 mixed/read-soak 与 50/200 mixed 成功。历史 AT-30 未满足但未更改参数/门槛。[W6 正式签收](W6_主线签收.md)，Issue #13 继续开放。
 
-#25 的合并主线两个作业均成功。W6 原始高压失败数字、宿主跳过项、双库演练拓扑及九档准入的实测并发边界见[原始证据核对](evidence/W6/signoff-ba892d3/w6-main-receipts.md)。
+#25 合并主线 NF PostgreSQL 作业 817 项通过，17 项因宿主 Linux namespace 限制跳过；可逐项核对同运行时代码的原生回执。R1 原工件仍记录 `overall_engineering_gate=NOT_MET` 和 `load_coverage_gate=NOT_EXECUTED`。[计数、工件摘要与原生对应](https://github.com/SKYdayDUCK/NovelFactory/blob/9eb7bb52e422f1a8e33a91fe01a1e67fef6375d3/reports/integration/evidence/W6/signoff-ba892d3/verified-main-summary.json)。
 
-P5.6 [#26](https://github.com/SKYdayDUCK/NovelFactory/pull/26) 在 `4e8fc5a3c2331a0de669ad8851d82c5b08a1e5dc` 完成主线复验。**MERGED_AND_VERIFIED**，保留历史 AT-30 NOT_MET、托管宿主跳过及真实创作授权边界。[P5.6 综合验收签收](evidence/P56/main-4e8fc5a/SIGNOFF.md)。
+P5.6 #26 的候选与主线各有 4 个高压容量作业未达标；对照、两档 mixed、500 mixed 及 500 read-soak 通过。合并主线有 27 次 1000 开环传输错误。逐档原件和真实回放限制见[综合签收](https://github.com/SKYdayDUCK/NovelFactory/blob/3ef5a72d7a65edb76a988132a72c4e82ee0805ee/reports/integration/evidence/P56/main-4e8fc5a/SIGNOFF.md)。
 
-- P6 #17 初次集成时，公开取消遗留未发送的当代预留，旧实现有两项回归失败。冻结候选对同样测试通过，旧代、SENT 和 UNKNOWN 继续占用。[原始修前修后回执](evidence/P6-C1/local-evidence.zip)
+#17 的原版取消曾遗留可确认未发送的预留，修复后原失败测试通过。主线四个历史容量作业继续未达标，1000 开环读记录 12 个传输错误。[#17 主线签收](https://github.com/SKYdayDUCK/NovelFactory/blob/fee462dfb6923059512b9797b4707e61eec8e8a3/reports/integration/evidence/P6-C1/main-533c1f5/SIGNOFF.md)。
 
-#17 的主线执行 3 个工程工作流通过，三个容量工作流共 4 个历史失败。50/200 热点以及 1000 开环读继续 **NOT_MET**。主线开环读 12 个传输错误。[逐档回执](evidence/P6-C1/main-533c1f5/qualification.json)。
+#18 已归档关闭，原输入、测试版本和采用决策见 [S9 归档](evidence/S9-PR18/README.md)。[PRE_HARNESS_BASELINE](PRE_HARNESS_BASELINE.md)保留 #16 实际主线、开放列表和原始容量边界。
 
-P6 #16 主线四项历史容量仍未达标。1000 开环读出现 10 个传输错误，500 读稳态有 12000/12000 成功，长时档没有执行。文学质量 NOT_EVALUATED。[精确签收](evidence/P6-C2/main-0420356/SIGNOFF.md)。
+第一大阶段在 276820316129d546b0a13118bcbe283b06507795 签收。#27 的 PostgreSQL 主测试有 17 项因宿主机隔离条件跳过；主线原始测试逐项列出跳过的理由。#13 原 AT-30 的容量失败项继续保留。[PRE_HARNESS_BASELINE](PRE_HARNESS_BASELINE.md) 链接完整 XML、各阶段规格及独立阅读状态。

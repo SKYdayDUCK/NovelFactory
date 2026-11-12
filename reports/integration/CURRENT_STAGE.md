@@ -1,5 +1,5 @@
 # 当前唯一阶段
 
-P6 工程 [#17](https://github.com/SKYdayDUCK/NovelFactory/pull/17) 和 [#16](https://github.com/SKYdayDUCK/NovelFactory/pull/16) 已合并并在各自精确主线复验。最新主线为 `0420356b0bd0bfd675494e581799946c4b967f6e`。[本地预检与部署签收](evidence/P6-C2/main-0420356/SIGNOFF.md)。
+2026-11-12 05:27:49 UTC，第一大阶段已在 `main@276820316129d546b0a13118bcbe283b06507795` 完成签收。GitHub 确认仅开放 Scion #4。下一唯一阶段为 P5.7-S0 架构与现状审计。[PRE_HARNESS_BASELINE](PRE_HARNESS_BASELINE.md) 保存原始 PR、精确主线与双份 JUnit。
 
-当前仅处理存量历史 PR [#18](https://github.com/SKYdayDUCK/NovelFactory/pull/18)，核对每项原始输入、结果、源码和采用决策。正式确认只剩 Scion #4 开放后签发 PRE_HARNESS_BASELINE，再开展 P5.7-S0。Issue #13 的原始高压档继续 NOT_MET，P6_REAL_CREATION = BLOCKED_LOCAL_AUTHORIZATION，文学质量 NOT_EVALUATED。
+历史容量 Issue #13 为 `NOT_MET`。作者真实创作保留 `BLOCKED_LOCAL_AUTHORIZATION`，文学质量为 `NOT_EVALUATED`。
