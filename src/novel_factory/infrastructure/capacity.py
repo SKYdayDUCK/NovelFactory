@@ -20,6 +20,8 @@ from sqlalchemy.exc import TimeoutError as PoolTimeout
 
 
 def _read(path):
+    if os.name == "nt":
+        return ""
     try:
         return Path(path).read_text().strip()
     except (FileNotFoundError, PermissionError, OSError):
@@ -34,6 +36,30 @@ def _kv(path):
 def _number(path):
     raw = _read(path)
     return int(raw) if raw.isdigit() else None
+
+
+def _windows_resources():
+    import ctypes
+    from ctypes import wintypes
+
+    class MemoryStatus(ctypes.Structure):
+        _fields_ = [("length", wintypes.DWORD), ("load", wintypes.DWORD),
+                    ("total", ctypes.c_ulonglong), ("available", ctypes.c_ulonglong),
+                    ("page_total", ctypes.c_ulonglong), ("page_available", ctypes.c_ulonglong),
+                    ("virtual_total", ctypes.c_ulonglong), ("virtual_available", ctypes.c_ulonglong),
+                    ("extended", ctypes.c_ulonglong)]
+
+    memory = MemoryStatus(length=ctypes.sizeof(MemoryStatus))
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    available = memory.available if kernel.GlobalMemoryStatusEx(ctypes.byref(memory)) else None
+    idle, system, user = (wintypes.FILETIME() for _ in range(3))
+    if not kernel.GetSystemTimes(ctypes.byref(idle), ctypes.byref(system), ctypes.byref(user)):
+        return 0, 0, available
+
+    def ticks(stamp):
+        return (stamp.dwHighDateTime << 32) | stamp.dwLowDateTime
+
+    return ticks(system) + ticks(user), ticks(idle), available
 
 
 def percentile(values, fraction):
@@ -151,6 +177,9 @@ class ResourceMonitor:
         lines = _read("/proc/stat").splitlines()
         ticks = [int(v) for v in lines[0].split()[1:9]] if lines and lines[0].startswith("cpu ") else []
         total, idle = (sum(ticks), sum(ticks[3:5])) if ticks else (0, 0)
+        windows_available = None
+        if os.name == "nt":
+            total, idle, windows_available = _windows_resources()
         process = time.process_time()
         cpu_stat = _kv(self.cg / "cpu.stat")
         use, throttle = cpu_stat.get("usage_usec"), cpu_stat.get("throttled_usec")
@@ -180,6 +209,8 @@ class ResourceMonitor:
             available *= 1024
         if mem_limit is not None and current is not None:
             available = min(available if available is not None else mem_limit, max(0, mem_limit - current))
+        if os.name == "nt":
+            available = windows_available
         children = _read(f"/proc/self/task/{os.getpid()}/children").split()
         child_rss = [_kv(f"/proc/{pid}/status").get("VmRSS") for pid in children if pid.isdigit()]
         samples = [(elapsed, ok) for ended, elapsed, ok in self.results if ended >= self.sample_time]
@@ -225,7 +256,9 @@ class ResourceMonitor:
                         SELECT t.task_id FROM nf_tasks t JOIN nf_supervisor_jobs j USING(task_id)
                         WHERE t.branch_id=:branch AND t.work_id=:work AND t.state='READY'
                           AND t.deadline > statement_timestamp()
-                          AND NOT EXISTS (SELECT FROM nf_call_attempts c WHERE c.task_id=t.task_id) LIMIT 1024
+                          AND NOT EXISTS (SELECT FROM nf_call_attempts c WHERE c.task_id=t.task_id
+                              AND NOT EXISTS (SELECT FROM nf_runtime_unsent u WHERE u.attempt_id=c.attempt_id))
+                          LIMIT 1024
                     ) eligible"""), scope)
                 elif group in {"world", "recovery"}:
                     stats["project_hint"] = repo.conn.scalar(text("""SELECT count(*) FROM nf_processor_hints h
@@ -299,6 +332,7 @@ class CapacityPolicy:
     next_growth: float = 0
     previous_rate: float = 0
     previous_tail: float = 0
+    idle_since: float | None = None
 
     def __post_init__(self):
         if not 1 <= self.minimum <= self.target <= self.maximum <= 16 or self.cooldown <= 0:
@@ -329,6 +363,17 @@ class CapacityPolicy:
             if self.previous_tail and tail > 1.5 * self.previous_tail and rate < .95 * self.previous_rate:
                 reason = reason or "throughput_and_tail_regressed"
             self.previous_rate, self.previous_tail = rate, tail
+        idle = (sample.get("available") and sample.get("backlog") == 0 and not sample.get("observations")
+                and not sample.get("in_flight") and not sample.get("worker_utilization_pct"))
+        if not idle:
+            self.idle_since = None
+        elif self.idle_since is None:
+            self.idle_since = now
+        elif not reason and self.target > self.minimum and now - self.idle_since >= 2 * self.cooldown:
+            # Drain new admissions only. Running hosts retain their leases and permits.
+            self.target = self.minimum
+            self.next_growth = now + self.cooldown
+            return self.target, "idle"
         if reason:
             self.target = max(self.minimum, self.target // 2)
             self.next_growth = now + self.cooldown

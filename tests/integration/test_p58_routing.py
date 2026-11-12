@@ -221,6 +221,10 @@ def test_direct_profile_cannot_bypass_org_or_quota_change_after_reserve(kernel_e
                 attempts = repo.many("call_attempts", {"task_id": job.task["task_id"]})
                 assert len(attempts) == 1 and attempts[0]["state"] == "FAILED" and attempts[0]["actual_amount"] == 0
                 repo.conn.execute(text("UPDATE nf_runtime_limits SET slots=1 WHERE subject='local/direct'"))
+            from novel_factory.infrastructure.capacity import ResourceMonitor
+
+            sample = ResourceMonitor().sample(kernel.db, "model", wr["work_id"], wr["branch_id"])
+            assert sample["enrolled_ready"] == sample["backlog"] == 1
             assert sup.run_once(*args)["status"] == "RESULT_STORED"
             second = _job(kernel, gateway, sup, world, budget, "READY", adapter_id="one")
             # Even with an available concurrent slot, rolling RPM/TPM still reflect the first send.
