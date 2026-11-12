@@ -28,6 +28,8 @@ python -m novel_factory.interfaces.bound_call --binding /path/to/private/project
 
 The binding sets the role, task generation or project branch. Each call checks the current tool grant and preserves the original business idempotency key. NF MCP calls use the same service and allow up to two in-flight operations per binding, capped by the database pool size. A full binding returns `BACKPRESSURE` on a tool call. A cancelled MCP request retains its slot until the worker finishes. Local tool audits use `local_tool.started` and `local_tool.finished`. MCP retains `mcp.started` and `mcp.finished`. HTTP and a bound role's state lookups share `WorldQueryService.batch`. A role additionally checks its frozen manifest, lease and knowledge cut at delivery. Workshop continues to use its own authenticated service and database.
 
+A standalone `python scripts/nf.py mcp --binding PATH` process releases its checked-in PostgreSQL connections after 30 idle seconds, including the connection used for startup authentication. Set `--idle-db-seconds SECONDS` to a finite nonnegative value. Zero releases connections as soon as the binding is idle. The next tool operation reconnects and checks current authority. Embedded servers keep the host Kernel's pool under the host's control. When sizing PostgreSQL, include all bindings that are starting, processing calls or still inside their idle interval.
+
 ## Operator and development entry points
 
 | Entry | Use and authority |
