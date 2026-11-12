@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-import os
 import secrets
 import shutil
 import socket
@@ -20,7 +19,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from threading import Event, Lock, Thread
 
-from .host_process import ISOLATED_PLUGIN_OPTIONS, start_host, stop_host
+from .host_process import ISOLATED_PLUGIN_OPTIONS, isolated_host_environment, start_host, stop_host
 from .protocol import ModelCallFailure, ModelResponse
 from .providers import ProfileError, _authorized_credential, post, usage_value
 
@@ -231,7 +230,7 @@ async def _turn(tmp, relay, record):
         args.extend(["-c", key + "=" + json.dumps(value)])
     for feature in ("shell_tool", "multi_agent", "apps", "browser_use", "computer_use", "view_image", "hooks", "image_generation"):
         args.extend(["--disable", feature])
-    env = {"HOME": tmp, "CODEX_HOME": str(home), "PATH": os.defpath, "NO_PROXY": "127.0.0.1"}
+    env = isolated_host_environment(tmp)
     try:
         proc = await start_host(*args, cwd=cwd, env=env, stdin=asyncio.subprocess.PIPE,
                 stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.DEVNULL, limit=4_000_000)

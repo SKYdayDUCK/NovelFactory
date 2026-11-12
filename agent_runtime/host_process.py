@@ -21,13 +21,36 @@ ISOLATED_PLUGIN_OPTIONS = (
 
 async def start_host(*argv, **kwargs):
     """Start a session owned by just this invocation, never the caller's group."""
+    job = None
     if os.name == "posix":
         kwargs["start_new_session"] = True
     elif os.name == "nt":
+        from ._windows_host import create_job
+
+        job, name = create_job()
         kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
-    proc = await asyncio.create_subprocess_exec(*argv, **kwargs)
+        argv = (sys.executable, "-I", str(Path(__file__).with_name("_windows_host.py")), name, *argv)
+    try:
+        proc = await asyncio.create_subprocess_exec(*argv, **kwargs)
+    except BaseException:
+        if job is not None:
+            job.Close()
+        raise
+    proc._nf_host_job = job
     proc._nf_host_group = proc.pid
     return proc
+
+
+def isolated_host_environment(home):
+    base = str(home)
+    env = {"HOME": base, "CODEX_HOME": str(Path(base) / "codex"), "PATH": os.defpath, "NO_PROXY": "127.0.0.1"}
+    if os.name == "nt":
+        system = Path(os.environ["SystemRoot"])
+        # Windows process/DLL initialization needs SystemRoot. The child gets
+        # private profile and temporary directories rather than the user's.
+        env.update(SystemRoot=str(system), PATH=str(system / "System32"), USERPROFILE=base,
+                   TMP=base, TEMP=base, LOCALAPPDATA=base, APPDATA=base)
+    return env
 
 
 def _live_groups(session):
@@ -99,21 +122,12 @@ async def _stop_owned(proc):
                     await asyncio.sleep(.03)
             if _live_groups(session):
                 raise RuntimeError("Owned Host helpers did not stop within the deadline")
+        elif os.name == "nt":
+            # Closing the final handle fences descendants after parent exit too.
+            proc._nf_host_job.Close()
         elif proc.returncode is None:
-            # Windows has no killpg. Use its native PID-scoped tree termination.
-            if os.name == "nt":
-                cleanup = await asyncio.create_subprocess_exec(
-                    str(Path(os.environ["SystemRoot"]) / "System32" / "taskkill.exe"),
-                    "/T", "/F", "/PID", str(proc.pid), stdout=asyncio.subprocess.DEVNULL,
-                    stderr=asyncio.subprocess.DEVNULL)
-                try:
-                    await asyncio.wait_for(cleanup.wait(), 2)
-                except TimeoutError:
-                    cleanup.kill()
-                    await cleanup.wait()
-            if proc.returncode is None:
-                with suppress(ProcessLookupError):
-                    proc.kill()
+            with suppress(ProcessLookupError):
+                proc.kill()
         await asyncio.wait_for(asyncio.shield(finished), 2)
     finally:
         if not finished.done():

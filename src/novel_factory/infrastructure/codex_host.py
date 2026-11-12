@@ -11,7 +11,6 @@ from contextlib import contextmanager
 from dataclasses import replace
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
-import os
 from pathlib import Path
 import secrets
 import shutil
@@ -20,7 +19,7 @@ from threading import Event, Thread
 from uuid import uuid4
 
 from novel_factory.domain.errors import DomainError
-from novel_factory.infrastructure.host_process import ISOLATED_PLUGIN_OPTIONS, start_host, stop_host
+from novel_factory.infrastructure.host_process import ISOLATED_PLUGIN_OPTIONS, isolated_host_environment, start_host, stop_host
 from novel_factory.infrastructure.model_gateway import ModelCallFailure, OpenAICompatibleAdapter
 
 
@@ -162,7 +161,7 @@ class CodexAppServerAdapter:
             args.extend(["-c", key + "=" + json.dumps(value)])
         for feature in ("shell_tool", "multi_agent", "apps", "browser_use", "computer_use"):
             args.extend(["--disable", feature])
-        env = {"HOME": tmp, "CODEX_HOME": str(home), "PATH": os.defpath, "NO_PROXY": "127.0.0.1"}
+        env = isolated_host_environment(tmp)
         try:
             process = await start_host(*args, cwd=cwd, env=env,
                 stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE,
