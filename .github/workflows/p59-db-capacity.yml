@@ -1,0 +1,91 @@
+name: Independent database experiment HTTP baselines
+
+on:
+  push:
+    branches: [experiment/p59-database-throughput]
+    paths: ['.github/workflows/p59-db-capacity.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  measure:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {profile: read-hour, source: '3e6b59268f1e89520230c8b70e9a26b9950a2f79'}
+          - {profile: renewed-hour, source: '3e6b59268f1e89520230c8b70e9a26b9950a2f79'}
+          - {profile: overload-200, source: '434840593179e6c1faa6b7aeca3d7d747644506d'}
+          - {profile: overload-200, source: '3e6b59268f1e89520230c8b70e9a26b9950a2f79'}
+          - {profile: open-1000, source: '434840593179e6c1faa6b7aeca3d7d747644506d'}
+          - {profile: open-1000, source: '3e6b59268f1e89520230c8b70e9a26b9950a2f79'}
+    services:
+      postgres:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_DB: nf_test
+          POSTGRES_USER: nf_test
+          POSTGRES_PASSWORD: isolated_ci_only
+          POSTGRES_INITDB_ARGS: --data-checksums
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 2s --health-timeout 2s --health-retries 30
+    env:
+      PROFILE: ${{ matrix.profile }}
+      NF_TEST_DATABASE_URL: postgresql+psycopg://nf_test:isolated_ci_only@127.0.0.1:5432/nf_test
+      NF_POOL_SIZE: 8
+      NF_POOL_OVERFLOW: 0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.source }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - run: uv sync --locked --group dev --python 3.12
+      - name: Record runner, source and transport control
+        shell: bash
+        run: |
+          mkdir evidence-out
+          git rev-parse HEAD > evidence-out/source
+          lscpu > evidence-out/lscpu
+          uv run --no-sync python -m benchmarks.client_calibration --response-bytes 2104 --repeats 2 --output evidence-out/transport.json
+      - name: Execute frozen workload and preserve exit status
+        shell: bash
+        run: |
+          case "$PROFILE" in
+            overload-200)
+              export NF_BENCH_DIAGNOSTICS=1
+              args=(benchmarks.p2_behavioral_load --agents 200 --profile overload --hot-fraction .8 --arrival-rps 10 --open-loop-rps 1000 --rounds 5 --max-attempts 5 --retry-budget-seconds 30 --gate-scope capacity --service-mode isolated-process --api-processes 1)
+              ;;
+            open-1000)
+              args=(benchmarks.p3_open_arrival --agents 1000 --rounds 5 --arrival-rps 1000 --hot-fraction .8 --api-processes 2)
+              ;;
+            read-hour|renewed-hour)
+              args=(benchmarks.p3_stability --agents 500 --seconds 3600 --read-rps 20 --api-processes 2)
+              if [[ "$PROFILE" == renewed-hour ]]; then args+=(--renew-worker-leases); fi
+              ;;
+          esac
+          set +e
+          uv run --no-sync python -m "${args[@]}" --output evidence-out/result.json >evidence-out/probe.log 2>&1
+          code=$?
+          echo "$code" > evidence-out/exit-code
+          tail -40 evidence-out/probe.log
+          exit "$code"
+      - if: always()
+        shell: bash
+        run: |
+          for path in evidence-out/*.json; do
+            if [[ -f "$path" ]]; then sha256sum "$path" >> evidence-out/manifest.sha256; gzip -n "$path"; fi
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: db-http-${{ matrix.profile }}-${{ matrix.source }}-${{ github.run_attempt }}
+          path: evidence-out/
+          if-no-files-found: error
