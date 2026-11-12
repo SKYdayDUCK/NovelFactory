@@ -6,6 +6,7 @@ plan, another actor's evidence, or a tentative world event.
 """
 from __future__ import annotations
 
+from contextlib import ExitStack
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 import json
@@ -16,6 +17,7 @@ from sqlalchemy import select, text
 
 from novel_factory.application.authorization import Principal
 from novel_factory.application.creative_planning import load_plan_candidate, option_node, planning_binding
+from novel_factory.application.dynamic_runtime import refresh_task, verify_task
 from novel_factory.application.kernel import require
 from novel_factory.application.queries import WorldQueryService
 from novel_factory.application.semantic_dependencies import check_task_dependencies
@@ -27,7 +29,7 @@ from novel_factory.infrastructure.creative_config import CreativeHarnessConfig
 from novel_factory.infrastructure.database import tables
 
 
-def _actor_scope(kernel, repo, wr, story_time, selector):
+def _actor_scope(kernel, repo, wr, story_time, selector, proof):
     task = repo.one("tasks", {"task_id": selector["task_id"]}, lock="share")
     require(task and task["work_id"] == wr["work_id"] and task["branch_id"] == wr["branch_id"],
             "VIEW_DENIED", "Actor cut is outside this simulation")
@@ -49,6 +51,7 @@ def _actor_scope(kernel, repo, wr, story_time, selector):
             and point_key(cut["knowledge_cut"]["known_at"]) <= point_key(story_time) <= point_key(grant["max_story_time"])
             and bundle["dependency_fingerprint"] == task["dependency_fingerprint"],
             "VIEW_DENIED", "Actor knowledge is outside its fixed authorization")
+    verify_task(kernel, repo, owner, task, proof)
     check_task_dependencies(repo, task["task_id"], task["generation"])
     compiled = kernel.artifact(repo, context["artifact_ref"], wr["work_id"], kind="COMPILED_CONTEXT")["payload"]
     require(fingerprint(compiled) == context["artifact_ref"]["sha256"] and compiled["bundle"] == bundle
@@ -254,7 +257,36 @@ class CreativeSimulationService:
     def __init__(self, kernel):
         self.kernel = kernel
 
-    def _read(self, repo, controller, request, *, writing=False):
+    def _runtime_proofs(self, controller, request):
+        selectors = [(request["task_id"], request["generation"]),
+                     *((s["task_id"], s["generation"]) for s in request["actor_tasks"])]
+        assignments = []
+        with self.kernel.db.uow(write=False) as repo:
+            planner = repo.one("tasks", {"task_id": request["task_id"]})
+            require(planner, "VIEW_DENIED", "Simulation task is unavailable")
+            work, branch = planner["work_id"], planner["branch_id"]
+            grant = self.kernel.authorize(repo, controller, work, "ADMIN", branch)
+            require(grant["role_id"] == "control_operator", "VIEW_DENIED", "Simulation requires a control operator")
+            ids = [task_id for task_id, _ in selectors]
+            rows = {t["task_id"]: t for t in repo.many("tasks", {"work_id": work, "branch_id": branch, "task_id": ids})}
+            delegated = {r["task_id"] for r in repo.many("delegation_receipts", {"task_id": ids})}
+            for task_id, generation in selectors:
+                task = rows.get(task_id)
+                require(task and task["generation"] == generation, "VIEW_DENIED", "Simulation source is outside this assignment")
+                if task_id in delegated:
+                    assignments.append((Principal(task["grant_id"], task["principal_id"]), task_id, generation))
+        if not assignments:
+            return {}
+        from concurrent.futures import ThreadPoolExecutor
+
+        def read(item):
+            principal, task_id, generation = item
+            return task_id, refresh_task(self.kernel, principal, task_id, generation)
+
+        with ThreadPoolExecutor(max_workers=min(4, len(assignments))) as pool:
+            return dict(pool.map(read, assignments))
+
+    def _read(self, repo, controller, request, proofs, *, writing=False):
         planner = repo.one("tasks", {"task_id": request["task_id"]})
         require(planner, "VIEW_DENIED", "Simulation task is unavailable")
         grant = self.kernel.authorize(repo, controller, planner["work_id"], "ADMIN", planner["branch_id"])
@@ -265,11 +297,14 @@ class CreativeSimulationService:
         owner = Principal(planner["grant_id"], planner["principal_id"])
         task, _, spec, context, bound = planning_binding(
             self.kernel, repo, owner, planner["task_id"], request["generation"])
+        verify_task(self.kernel, repo, owner, task, proofs.get(task["task_id"]), required_tools=("plan_propose",),
+                    required_capabilities=("PLAN_READ", "ARTIFACT_WRITE"))
         candidate = load_plan_candidate(self.kernel, repo, task, bound, request["candidate_ref"])
         plan = self.kernel.artifact(repo, candidate["plan_anchor"], task["work_id"], kind="PLAN_REVISION")["payload"]
         actors, refs = [], []
         for selector in sorted(request["actor_tasks"], key=lambda x: x["task_id"]):
-            actor, ref, facts = _actor_scope(self.kernel, repo, spec["world_ref"], spec["story_time"], selector)
+            actor, ref, facts = _actor_scope(self.kernel, repo, spec["world_ref"], spec["story_time"], selector,
+                                            proofs.get(selector["task_id"]))
             actors.append((actor, facts))
             refs.append(ref)
         require(len(set(a[0] for a in actors)) == len(actors), "INVALID_ARGUMENT",
@@ -295,8 +330,9 @@ class CreativeSimulationService:
                    "actor_tasks": sorted(actor_tasks, key=lambda a: a["task_id"]),
                    "max_branches": max_branches, "max_steps_per_branch": max_steps_per_branch, "seed": seed}
         command = "CREATIVE_SIMULATION_RUN"
+        proofs = self._runtime_proofs(controller, request)
         with self.kernel.db.uow(write=False) as repo:
-            candidate, plan, actors, cut_ref, actor_refs, permitted = self._read(repo, controller, request)
+            candidate, plan, actors, cut_ref, actor_refs, permitted = self._read(repo, controller, request, proofs)
             wr = candidate["scope"]["world_ref"]
             previous = self.kernel._prior(repo, controller, wr["work_id"], command, idempotency_key, request)
             if previous is not None:
@@ -308,7 +344,9 @@ class CreativeSimulationService:
         # local rules. No world, grant, branch or task row is locked during
         # the calculation. A crashed process automatically loses this lock.
         frozen_id = str(uuid5(UUID(candidate_ref["artifact_revision_id"]), "creative-simulation-run"))
-        with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
+        # Only the candidate-specific advisory lock spans computation and external
+        # re-attestation. Hold the object/GC lock through the later NF commit.
+        with ExitStack() as locks, self.kernel.db.uow() as repo:
             repo.conn.execute(text("SELECT pg_advisory_xact_lock(hashtextextended(:key,0))"), {"key": frozen_id})
             frozen = repo.one("artifacts", {"work_id": wr["work_id"], "artifact_revision_id": frozen_id,
                                             "kind": "CREATIVE_SIMULATION_RUN"})
@@ -323,7 +361,10 @@ class CreativeSimulationService:
                           "seed": seed, "quota": candidate["quota"], "outcomes": outcomes, "accepted_world_events": 0,
                           "status": "HYPOTHESIS_ONLY"}
                 validate_contract("SimulationReport", report, "harness")
-            current, _, _, live_cut, live_actors, live_nodes = self._read(repo, controller, request, writing=True)
+            if any(proofs.values()):
+                proofs = self._runtime_proofs(controller, request)
+            locks.enter_context(self.kernel.objects.lock())
+            current, _, _, live_cut, live_actors, live_nodes = self._read(repo, controller, request, proofs, writing=True)
             require(current == candidate and live_cut == cut_ref and live_actors == actor_refs and live_nodes == permitted,
                     "TASK_REBIND_REQUIRED", "Simulation sources have changed")
             previous = self.kernel._prior(repo, controller, wr["work_id"], command, idempotency_key, request)

@@ -5,6 +5,7 @@ from decimal import Decimal
 from uuid import UUID, uuid4, uuid5
 
 from novel_factory.application.authorization import Principal
+from novel_factory.application.dynamic_runtime import refresh_task, verify_task
 from novel_factory.application.kernel import require
 from novel_factory.application.planning import PlanningService, validate_task_plan_binding
 from novel_factory.application.queries import WorldQueryService
@@ -217,8 +218,11 @@ class CreativePlanningService:
         require(len(set(node_ids)) == len(node_ids), "INVALID_ARGUMENT", "Repeated planning node")
         request = {"task_id": task_id, "generation": generation, "plan_ref": plan_ref, "node_ids": node_ids,
                    "trigger": trigger, "horizon_scenes": horizon_scenes, "quota": quota}
+        proof = refresh_task(self.kernel, principal, task_id, generation)
         with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
             task, grant, spec, ctx, binding = planning_binding(self.kernel, repo, principal, task_id, generation)
+            verify_task(self.kernel, repo, principal, task, proof, required_tools=("plan_propose",),
+                        required_capabilities=("PLAN_READ", "ARTIFACT_WRITE"))
             require(task["state"] == "RUNNING" and (worker_id is None or worker_id == task["lease_owner"]),
                     "VIEW_DENIED", "A current planning lease is required")
             wr = spec["world_ref"]
@@ -268,6 +272,13 @@ class CreativePlanningService:
             validate_contract("ArtifactRef", rolling_review_ref)
         request = {"task_id": task_id, "generation": generation, "candidate_ref": candidate_ref,
                    "option_id": option_id, "rolling_review_ref": rolling_review_ref}
+        with self.kernel.db.uow(write=False) as repo:
+            task = repo.one("tasks", {"task_id": task_id})
+            require(task and task["generation"] == generation, "VIEW_DENIED", "Unknown planning assignment")
+            owner = Principal(task["grant_id"], task["principal_id"])
+            capability = "ARTIFACT_WRITE" if principal == owner and option_id is None else "APPROVE"
+            self.kernel.authorize(repo, principal, task["work_id"], capability, task["branch_id"])
+        proof = refresh_task(self.kernel, owner, task_id, generation)
         with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
             task = repo.one("tasks", {"task_id": task_id})
             require(task is not None, "VIEW_DENIED", "Unknown planning assignment")
@@ -286,6 +297,8 @@ class CreativePlanningService:
                     and row["payload"]["scope"]["world_ref"]["branch_id"] == task["branch_id"],
                     "VIEW_DENIED", "Unavailable candidate scope")
             check_profile(approver, "PLAN")
+            verify_task(self.kernel, repo, owner, task, proof, required_tools=("plan_propose",),
+                        required_capabilities=("PLAN_READ", "ARTIFACT_WRITE"))
             old = self.kernel._prior(repo, principal, work, "CREATIVE_PLAN_DECIDE", idempotency_key, request)
             if old:
                 return old
