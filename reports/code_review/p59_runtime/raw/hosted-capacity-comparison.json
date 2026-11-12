@@ -1,0 +1,868 @@
+{
+  "repository": "SKYdayDUCK/NovelFactory",
+  "note": "Selected public Actions job/log fields only. Each entry links to the full original job and retained CI artifact.",
+  "observations": {
+    "baseline": {
+      "source_head": "434840593179e6c1faa6b7aeca3d7d747644506d",
+      "jobs": [
+        {
+          "run_id": 43255886020,
+          "job_id": 131313842325,
+          "name": "Independent load process / 200 / mixed",
+          "conclusion": "success",
+          "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43255886020/job/131313842325",
+          "measurements": [
+            {
+              "file": "ci-evidence/load.json",
+              "logical_agents": 200,
+              "correctness": "PASS",
+              "first_attempt_capacity_gate": "PASS",
+              "capacity_gate": "PASS",
+              "bounded_recovery_business_gate": "PASS",
+              "offered": {
+                "gate": "NOT_APPLICABLE",
+                "target_rps": null,
+                "first_attempts": 0
+              },
+              "results": {
+                "duration_seconds": 139.093907,
+                "planned_requests": 1141,
+                "completed_logical_operations": 1141,
+                "first_attempt_failure_count": 0,
+                "first_attempt_status_counts": {
+                  "200": 1122,
+                  "409": 19
+                },
+                "correctness_errors": [],
+                "unresolved_operational_errors": []
+              }
+            }
+          ]
+        },
+        {
+          "run_id": 43255886020,
+          "job_id": 131313842557,
+          "name": "Independent load process / 200 / overload",
+          "conclusion": "failure",
+          "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43255886020/job/131313842557",
+          "measurements": [
+            {
+              "file": "ci-evidence/load.json",
+              "logical_agents": 200,
+              "correctness": "PASS",
+              "first_attempt_capacity_gate": "NOT_MET",
+              "capacity_gate": "NOT_MET",
+              "bounded_recovery_business_gate": "PASS",
+              "offered": {
+                "gate": "NOT_MET",
+                "transport_header_starts": 1000,
+                "transport_header_start_rps": 30.652017191148555,
+                "target_rps": 1000,
+                "first_attempts": 1000,
+                "actual_call_start_rps": 36.69522172013314,
+                "start_window_seconds": 27.224253000000004,
+                "max_schedule_delay_ms": 26225.3796,
+                "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+                "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+              },
+              "results": {
+                "duration_seconds": 177.009095,
+                "planned_requests": 2141,
+                "completed_logical_operations": 2141,
+                "first_attempt_failure_count": 540,
+                "first_attempt_status_counts": {
+                  "200": 1582,
+                  "409": 19,
+                  "429": 540
+                },
+                "correctness_errors": [],
+                "unresolved_operational_errors": []
+              }
+            }
+          ]
+        },
+        {
+          "run_id": 43255886020,
+          "job_id": 131313842602,
+          "name": "Same world CPU and SQL paired comparison",
+          "conclusion": "success",
+          "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43255886020/job/131313842602",
+          "measurements": []
+        },
+        {
+          "run_id": 43255887232,
+          "job_id": 131313847541,
+          "name": "200 agents / overload / full capacity gate",
+          "conclusion": "failure",
+          "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43255887232/job/131313847541",
+          "measurements": [
+            {
+              "file": "ci-evidence/run-1/load.json",
+              "logical_agents": 200,
+              "correctness": "PASS",
+              "first_attempt_capacity_gate": "NOT_MET",
+              "capacity_gate": "NOT_MET",
+              "bounded_recovery_business_gate": "PASS",
+              "offered": {
+                "gate": "NOT_MET",
+                "transport_header_starts": 1000,
+                "transport_header_start_rps": 30.126945721195657,
+                "target_rps": 1000,
+                "first_attempts": 1000,
+                "actual_call_start_rps": 36.18804481753512,
+                "start_window_seconds": 27.605801999999983,
+                "max_schedule_delay_ms": 26606.9188,
+                "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+                "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+              },
+              "results": {
+                "duration_seconds": 177.747122,
+                "planned_requests": 2141,
+                "completed_logical_operations": 2141,
+                "first_attempt_failure_count": 527,
+                "first_attempt_status_counts": {
+                  "200": 1595,
+                  "409": 19,
+                  "429": 527
+                },
+                "correctness_errors": [],
+                "unresolved_operational_errors": []
+              }
+            },
+            {
+              "file": "ci-evidence/run-2/load.json",
+              "logical_agents": 200,
+              "correctness": "PASS",
+              "first_attempt_capacity_gate": "NOT_MET",
+              "capacity_gate": "NOT_MET",
+              "bounded_recovery_business_gate": "PASS",
+              "offered": {
+                "gate": "NOT_MET",
+                "transport_header_starts": 1000,
+                "transport_header_start_rps": 29.568309780699636,
+                "target_rps": 1000,
+                "first_attempts": 1000,
+                "actual_call_start_rps": 35.2330805827107,
+                "start_window_seconds": 28.35403500000001,
+                "max_schedule_delay_ms": 27355.1701,
+                "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+                "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+              },
+              "results": {
+                "duration_seconds": 178.241602,
+                "planned_requests": 2141,
+                "completed_logical_operations": 2141,
+                "first_attempt_failure_count": 551,
+                "first_attempt_status_counts": {
+                  "200": 1571,
+                  "409": 19,
+                  "429": 551
+                },
+                "correctness_errors": [],
+                "unresolved_operational_errors": []
+              }
+            }
+          ]
+        },
+        {
+          "run_id": 43255887232,
+          "job_id": 131313847830,
+          "name": "50 agents / overload / full capacity gate",
+          "conclusion": "failure",
+          "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43255887232/job/131313847830",
+          "measurements": [
+            {
+              "file": "ci-evidence/run-1/load.json",
+              "logical_agents": 50,
+              "correctness": "PASS",
+              "first_attempt_capacity_gate": "NOT_MET",
+              "capacity_gate": "NOT_MET",
+              "bounded_recovery_business_gate": "PASS",
+              "offered": {
+                "gate": "NOT_MET",
+                "transport_header_starts": 250,
+                "transport_header_start_rps": 80.18512781638185,
+                "target_rps": 1000,
+                "first_attempts": 250,
+                "actual_call_start_rps": 227.59014031983332,
+                "start_window_seconds": 1.094071999999997,
+                "max_schedule_delay_ms": 845.1477,
+                "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+                "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+              },
+              "results": {
+                "duration_seconds": 40.060825,
+                "planned_requests": 536,
+                "completed_logical_operations": 536,
+                "first_attempt_failure_count": 108,
+                "first_attempt_status_counts": {
+                  "200": 424,
+                  "409": 4,
+                  "429": 108
+                },
+                "correctness_errors": [],
+                "unresolved_operational_errors": []
+              }
+            },
+            {
+              "file": "ci-evidence/run-2/load.json",
+              "logical_agents": 50,
+              "correctness": "PASS",
+              "first_attempt_capacity_gate": "NOT_MET",
+              "capacity_gate": "NOT_MET",
+              "bounded_recovery_business_gate": "PASS",
+              "offered": {
+                "gate": "NOT_MET",
+                "transport_header_starts": 250,
+                "transport_header_start_rps": 104.79352519105886,
+                "target_rps": 1000,
+                "first_attempts": 250,
+                "actual_call_start_rps": 216.55318641924637,
+                "start_window_seconds": 1.1498329999999939,
+                "max_schedule_delay_ms": 900.9414,
+                "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+                "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+              },
+              "results": {
+                "duration_seconds": 40.144982,
+                "planned_requests": 536,
+                "completed_logical_operations": 536,
+                "first_attempt_failure_count": 93,
+                "first_attempt_status_counts": {
+                  "200": 439,
+                  "409": 4,
+                  "429": 93
+                },
+                "correctness_errors": [],
+                "unresolved_operational_errors": []
+              }
+            }
+          ]
+        },
+        {
+          "run_id": 43255887232,
+          "job_id": 131313847906,
+          "name": "200 agents / mixed / full capacity gate",
+          "conclusion": "success",
+          "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43255887232/job/131313847906",
+          "measurements": [
+            {
+              "file": "ci-evidence/run-1/load.json",
+              "logical_agents": 200,
+              "correctness": "PASS",
+              "first_attempt_capacity_gate": "PASS",
+              "capacity_gate": "PASS",
+              "bounded_recovery_business_gate": "PASS",
+              "offered": {
+                "gate": "NOT_APPLICABLE",
+                "target_rps": null,
+                "first_attempts": 0
+              },
+              "results": {
+                "duration_seconds": 139.172308,
+                "planned_requests": 1141,
+                "completed_logical_operations": 1141,
+                "first_attempt_failure_count": 0,
+                "first_attempt_status_counts": {
+                  "200": 1122,
+                  "409": 19
+                },
+                "correctness_errors": [],
+                "unresolved_operational_errors": []
+              }
+            },
+            {
+              "file": "ci-evidence/run-2/load.json",
+              "logical_agents": 200,
+              "correctness": "PASS",
+              "first_attempt_capacity_gate": "PASS",
+              "capacity_gate": "PASS",
+              "bounded_recovery_business_gate": "PASS",
+              "offered": {
+                "gate": "NOT_APPLICABLE",
+                "target_rps": null,
+                "first_attempts": 0
+              },
+              "results": {
+                "duration_seconds": 139.117093,
+                "planned_requests": 1141,
+                "completed_logical_operations": 1141,
+                "first_attempt_failure_count": 0,
+                "first_attempt_status_counts": {
+                  "200": 1122,
+                  "409": 19
+                },
+                "correctness_errors": [],
+                "unresolved_operational_errors": []
+              }
+            }
+          ]
+        },
+        {
+          "run_id": 43255887232,
+          "job_id": 131313848039,
+          "name": "50 agents / mixed / full capacity gate",
+          "conclusion": "success",
+          "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43255887232/job/131313848039",
+          "measurements": [
+            {
+              "file": "ci-evidence/run-1/load.json",
+              "logical_agents": 50,
+              "correctness": "PASS",
+              "first_attempt_capacity_gate": "PASS",
+              "capacity_gate": "PASS",
+              "bounded_recovery_business_gate": "PASS",
+              "offered": {
+                "gate": "NOT_APPLICABLE",
+                "target_rps": null,
+                "first_attempts": 0
+              },
+              "results": {
+                "duration_seconds": 33.815491,
+                "planned_requests": 286,
+                "completed_logical_operations": 286,
+                "first_attempt_failure_count": 0,
+                "first_attempt_status_counts": {
+                  "200": 282,
+                  "409": 4
+                },
+                "correctness_errors": [],
+                "unresolved_operational_errors": []
+              }
+            },
+            {
+              "file": "ci-evidence/run-2/load.json",
+              "logical_agents": 50,
+              "correctness": "PASS",
+              "first_attempt_capacity_gate": "PASS",
+              "capacity_gate": "PASS",
+              "bounded_recovery_business_gate": "PASS",
+              "offered": {
+                "gate": "NOT_APPLICABLE",
+                "target_rps": null,
+                "first_attempts": 0
+              },
+              "results": {
+                "duration_seconds": 33.810705,
+                "planned_requests": 286,
+                "completed_logical_operations": 286,
+                "first_attempt_failure_count": 0,
+                "first_attempt_status_counts": {
+                  "200": 282,
+                  "409": 4
+                },
+                "correctness_errors": [],
+                "unresolved_operational_errors": []
+              }
+            }
+          ]
+        },
+        {
+          "run_id": 43255886481,
+          "job_id": 131313843344,
+          "name": "Measured 500-read-soak",
+          "conclusion": "success",
+          "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43255886481/job/131313843344",
+          "measurements": [
+            {
+              "successful_query_rps": 19.99789434167986,
+              "status_counts": {
+                "200": 12000
+              },
+              "probe_gate": "PASS",
+              "long_duration_gate": "NOT_EXECUTED",
+              "duration_seconds": 600.063176401,
+              "actual_call_start_rps": 20.00079506782507
+            }
+          ]
+        },
+        {
+          "run_id": 43255886481,
+          "job_id": 131313843997,
+          "name": "Measured 1000-read-open",
+          "conclusion": "failure",
+          "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43255886481/job/131313843997",
+          "measurements": [
+            {
+              "capacity_gate": "NOT_MET",
+              "offered_wire_rate_gate": "NOT_MET",
+              "dispatch_start_rps": 47.06902573384396,
+              "observed_wire_start_rps": 46.31402461327724,
+              "successful_query_rps": 18.62849883620418,
+              "status_counts": {
+                "200": 2037,
+                "429": 2960,
+                "transport_error": 3
+              }
+            }
+          ]
+        },
+        {
+          "run_id": 43255886481,
+          "job_id": 131313844175,
+          "name": "Measured 500-mixed",
+          "conclusion": "success",
+          "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43255886481/job/131313844175",
+          "measurements": [
+            {
+              "file": "ci-evidence/result.json",
+              "logical_agents": 500,
+              "correctness": "PASS",
+              "first_attempt_capacity_gate": "PASS",
+              "capacity_gate": "PASS",
+              "bounded_recovery_business_gate": "PASS",
+              "offered": {
+                "gate": "NOT_APPLICABLE",
+                "target_rps": null,
+                "first_attempts": 0
+              },
+              "results": {
+                "duration_seconds": 349.46244,
+                "planned_requests": 2851,
+                "completed_logical_operations": 2851,
+                "first_attempt_failure_count": 0,
+                "first_attempt_status_counts": {
+                  "200": 2802,
+                  "409": 49
+                },
+                "correctness_errors": [],
+                "unresolved_operational_errors": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "candidate": {
+      "source_head": "ce74f265b9072df52e9a485c6dfd48d5612d1907",
+      "jobs": [
+        {
+          "run_id": 43274790292,
+          "job_id": 131380207757,
+          "name": "Independent load process / 200 / overload",
+          "conclusion": "failure",
+          "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43274790292/job/131380207757",
+          "measurements": [
+            {
+              "file": "ci-evidence/load.json",
+              "logical_agents": 200,
+              "correctness": "PASS",
+              "first_attempt_capacity_gate": "NOT_MET",
+              "capacity_gate": "NOT_MET",
+              "bounded_recovery_business_gate": "PASS",
+              "offered": {
+                "gate": "NOT_MET",
+                "transport_header_starts": 1000,
+                "transport_header_start_rps": 29.524563210094936,
+                "target_rps": 1000,
+                "first_attempts": 1000,
+                "actual_call_start_rps": 35.432367094928956,
+                "start_window_seconds": 28.194559999999996,
+                "max_schedule_delay_ms": 27195.6815,
+                "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+                "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+              },
+              "results": {
+                "duration_seconds": 178.189808,
+                "planned_requests": 2141,
+                "completed_logical_operations": 2141,
+                "first_attempt_failure_count": 557,
+                "first_attempt_status_counts": {
+                  "200": 1565,
+                  "409": 19,
+                  "429": 557
+                },
+                "correctness_errors": [],
+                "unresolved_operational_errors": []
+              }
+            }
+          ]
+        },
+        {
+          "run_id": 43274790292,
+          "job_id": 131380208048,
+          "name": "Independent load process / 200 / mixed",
+          "conclusion": "success",
+          "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43274790292/job/131380208048",
+          "measurements": [
+            {
+              "file": "ci-evidence/load.json",
+              "logical_agents": 200,
+              "correctness": "PASS",
+              "first_attempt_capacity_gate": "PASS",
+              "capacity_gate": "PASS",
+              "bounded_recovery_business_gate": "PASS",
+              "offered": {
+                "gate": "NOT_APPLICABLE",
+                "target_rps": null,
+                "first_attempts": 0
+              },
+              "results": {
+                "duration_seconds": 139.239326,
+                "planned_requests": 1141,
+                "completed_logical_operations": 1141,
+                "first_attempt_failure_count": 0,
+                "first_attempt_status_counts": {
+                  "200": 1122,
+                  "409": 19
+                },
+                "correctness_errors": [],
+                "unresolved_operational_errors": []
+              }
+            }
+          ]
+        },
+        {
+          "run_id": 43274790292,
+          "job_id": 131380208301,
+          "name": "Same world CPU and SQL paired comparison",
+          "conclusion": "success",
+          "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43274790292/job/131380208301",
+          "measurements": []
+        },
+        {
+          "run_id": 43274790274,
+          "job_id": 131380207170,
+          "name": "50 agents / overload / full capacity gate",
+          "conclusion": "failure",
+          "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43274790274/job/131380207170",
+          "measurements": [
+            {
+              "file": "ci-evidence/run-1/load.json",
+              "logical_agents": 50,
+              "correctness": "PASS",
+              "first_attempt_capacity_gate": "NOT_MET",
+              "capacity_gate": "NOT_MET",
+              "bounded_recovery_business_gate": "PASS",
+              "offered": {
+                "gate": "NOT_MET",
+                "transport_header_starts": 250,
+                "transport_header_start_rps": 72.75117782403849,
+                "target_rps": 1000,
+                "first_attempts": 250,
+                "actual_call_start_rps": 120.22939188552998,
+                "start_window_seconds": 2.071041000000001,
+                "max_schedule_delay_ms": 1822.1286,
+                "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+                "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+              },
+              "results": {
+                "duration_seconds": 41.28344,
+                "planned_requests": 536,
+                "completed_logical_operations": 536,
+                "first_attempt_failure_count": 83,
+                "first_attempt_status_counts": {
+                  "200": 449,
+                  "409": 4,
+                  "429": 83
+                },
+                "correctness_errors": [],
+                "unresolved_operational_errors": []
+              }
+            },
+            {
+              "file": "ci-evidence/run-2/load.json",
+              "logical_agents": 50,
+              "correctness": "PASS",
+              "first_attempt_capacity_gate": "NOT_MET",
+              "capacity_gate": "NOT_MET",
+              "bounded_recovery_business_gate": "PASS",
+              "offered": {
+                "gate": "NOT_MET",
+                "transport_header_starts": 250,
+                "transport_header_start_rps": 54.760489932646855,
+                "target_rps": 1000,
+                "first_attempts": 250,
+                "actual_call_start_rps": 101.2493107727639,
+                "start_window_seconds": 2.4592760000000027,
+                "max_schedule_delay_ms": 2210.3627,
+                "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+                "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+              },
+              "results": {
+                "duration_seconds": 40.627392,
+                "planned_requests": 536,
+                "completed_logical_operations": 536,
+                "first_attempt_failure_count": 67,
+                "first_attempt_status_counts": {
+                  "200": 465,
+                  "409": 4,
+                  "429": 67
+                },
+                "correctness_errors": [],
+                "unresolved_operational_errors": []
+              }
+            }
+          ]
+        },
+        {
+          "run_id": 43274790274,
+          "job_id": 131380207641,
+          "name": "50 agents / mixed / full capacity gate",
+          "conclusion": "success",
+          "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43274790274/job/131380207641",
+          "measurements": [
+            {
+              "file": "ci-evidence/run-1/load.json",
+              "logical_agents": 50,
+              "correctness": "PASS",
+              "first_attempt_capacity_gate": "PASS",
+              "capacity_gate": "PASS",
+              "bounded_recovery_business_gate": "PASS",
+              "offered": {
+                "gate": "NOT_APPLICABLE",
+                "target_rps": null,
+                "first_attempts": 0
+              },
+              "results": {
+                "duration_seconds": 33.867469,
+                "planned_requests": 286,
+                "completed_logical_operations": 286,
+                "first_attempt_failure_count": 0,
+                "first_attempt_status_counts": {
+                  "200": 282,
+                  "409": 4
+                },
+                "correctness_errors": [],
+                "unresolved_operational_errors": []
+              }
+            },
+            {
+              "file": "ci-evidence/run-2/load.json",
+              "logical_agents": 50,
+              "correctness": "PASS",
+              "first_attempt_capacity_gate": "PASS",
+              "capacity_gate": "PASS",
+              "bounded_recovery_business_gate": "PASS",
+              "offered": {
+                "gate": "NOT_APPLICABLE",
+                "target_rps": null,
+                "first_attempts": 0
+              },
+              "results": {
+                "duration_seconds": 33.742003,
+                "planned_requests": 286,
+                "completed_logical_operations": 286,
+                "first_attempt_failure_count": 0,
+                "first_attempt_status_counts": {
+                  "200": 282,
+                  "409": 4
+                },
+                "correctness_errors": [],
+                "unresolved_operational_errors": []
+              }
+            }
+          ]
+        },
+        {
+          "run_id": 43274790274,
+          "job_id": 131380207682,
+          "name": "200 agents / overload / full capacity gate",
+          "conclusion": "failure",
+          "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43274790274/job/131380207682",
+          "measurements": [
+            {
+              "file": "ci-evidence/run-1/load.json",
+              "logical_agents": 200,
+              "correctness": "PASS",
+              "first_attempt_capacity_gate": "NOT_MET",
+              "capacity_gate": "NOT_MET",
+              "bounded_recovery_business_gate": "PASS",
+              "offered": {
+                "gate": "NOT_MET",
+                "transport_header_starts": 1000,
+                "transport_header_start_rps": 47.53943905650918,
+                "target_rps": 1000,
+                "first_attempts": 1000,
+                "actual_call_start_rps": 61.13624183955096,
+                "start_window_seconds": 16.340553,
+                "max_schedule_delay_ms": 15341.7204,
+                "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+                "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+              },
+              "results": {
+                "duration_seconds": 165.273379,
+                "planned_requests": 2141,
+                "completed_logical_operations": 2141,
+                "first_attempt_failure_count": 466,
+                "first_attempt_status_counts": {
+                  "200": 1656,
+                  "409": 19,
+                  "429": 466
+                },
+                "correctness_errors": [],
+                "unresolved_operational_errors": []
+              }
+            },
+            {
+              "file": "ci-evidence/run-2/load.json",
+              "logical_agents": 200,
+              "correctness": "PASS",
+              "first_attempt_capacity_gate": "NOT_MET",
+              "capacity_gate": "NOT_MET",
+              "bounded_recovery_business_gate": "PASS",
+              "offered": {
+                "gate": "NOT_MET",
+                "transport_header_starts": 1000,
+                "transport_header_start_rps": 47.670879105409924,
+                "target_rps": 1000,
+                "first_attempts": 1000,
+                "actual_call_start_rps": 61.1220428540776,
+                "start_window_seconds": 16.344348999999994,
+                "max_schedule_delay_ms": 15345.4738,
+                "criterion": "Actual first call starts >=95% of frozen target; HTTPX waits still included",
+                "scope": "Client call-start rate only, not a claim of network wire rate or sustained capacity"
+              },
+              "results": {
+                "duration_seconds": 165.305063,
+                "planned_requests": 2141,
+                "completed_logical_operations": 2141,
+                "first_attempt_failure_count": 513,
+                "first_attempt_status_counts": {
+                  "200": 1609,
+                  "409": 19,
+                  "429": 513
+                },
+                "correctness_errors": [],
+                "unresolved_operational_errors": []
+              }
+            }
+          ]
+        },
+        {
+          "run_id": 43274790274,
+          "job_id": 131380207766,
+          "name": "200 agents / mixed / full capacity gate",
+          "conclusion": "success",
+          "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43274790274/job/131380207766",
+          "measurements": [
+            {
+              "file": "ci-evidence/run-1/load.json",
+              "logical_agents": 200,
+              "correctness": "PASS",
+              "first_attempt_capacity_gate": "PASS",
+              "capacity_gate": "PASS",
+              "bounded_recovery_business_gate": "PASS",
+              "offered": {
+                "gate": "NOT_APPLICABLE",
+                "target_rps": null,
+                "first_attempts": 0
+              },
+              "results": {
+                "duration_seconds": 138.826959,
+                "planned_requests": 1141,
+                "completed_logical_operations": 1141,
+                "first_attempt_failure_count": 0,
+                "first_attempt_status_counts": {
+                  "200": 1122,
+                  "409": 19
+                },
+                "correctness_errors": [],
+                "unresolved_operational_errors": []
+              }
+            },
+            {
+              "file": "ci-evidence/run-2/load.json",
+              "logical_agents": 200,
+              "correctness": "PASS",
+              "first_attempt_capacity_gate": "PASS",
+              "capacity_gate": "PASS",
+              "bounded_recovery_business_gate": "PASS",
+              "offered": {
+                "gate": "NOT_APPLICABLE",
+                "target_rps": null,
+                "first_attempts": 0
+              },
+              "results": {
+                "duration_seconds": 138.863784,
+                "planned_requests": 1141,
+                "completed_logical_operations": 1141,
+                "first_attempt_failure_count": 0,
+                "first_attempt_status_counts": {
+                  "200": 1122,
+                  "409": 19
+                },
+                "correctness_errors": [],
+                "unresolved_operational_errors": []
+              }
+            }
+          ]
+        },
+        {
+          "run_id": 43274790266,
+          "job_id": 131380207134,
+          "name": "Measured 1000-read-open",
+          "conclusion": "failure",
+          "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43274790266/job/131380207134",
+          "measurements": [
+            {
+              "capacity_gate": "NOT_MET",
+              "offered_wire_rate_gate": "NOT_MET",
+              "dispatch_start_rps": 42.44056263201699,
+              "observed_wire_start_rps": 42.43212149785109,
+              "successful_query_rps": 15.063936707908917,
+              "status_counts": {
+                "200": 1815,
+                "429": 3159,
+                "transport_error": 26
+              }
+            }
+          ]
+        },
+        {
+          "run_id": 43274790266,
+          "job_id": 131380207335,
+          "name": "Measured 500-read-soak",
+          "conclusion": "success",
+          "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43274790266/job/131380207335",
+          "measurements": [
+            {
+              "successful_query_rps": 19.99759917786528,
+              "status_counts": {
+                "200": 12000
+              },
+              "probe_gate": "PASS",
+              "long_duration_gate": "NOT_EXECUTED",
+              "duration_seconds": 600.072033311,
+              "actual_call_start_rps": 20.000709803771723
+            }
+          ]
+        },
+        {
+          "run_id": 43274790266,
+          "job_id": 131380207480,
+          "name": "Measured 500-mixed",
+          "conclusion": "success",
+          "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43274790266/job/131380207480",
+          "measurements": [
+            {
+              "file": "ci-evidence/result.json",
+              "logical_agents": 500,
+              "correctness": "PASS",
+              "first_attempt_capacity_gate": "PASS",
+              "capacity_gate": "PASS",
+              "bounded_recovery_business_gate": "PASS",
+              "offered": {
+                "gate": "NOT_APPLICABLE",
+                "target_rps": null,
+                "first_attempts": 0
+              },
+              "results": {
+                "duration_seconds": 349.441282,
+                "planned_requests": 2851,
+                "completed_logical_operations": 2851,
+                "first_attempt_failure_count": 0,
+                "first_attempt_status_counts": {
+                  "200": 2802,
+                  "409": 49
+                },
+                "correctness_errors": [],
+                "unresolved_operational_errors": []
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
