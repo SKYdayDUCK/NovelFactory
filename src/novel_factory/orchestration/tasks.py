@@ -545,13 +545,19 @@ class TaskService:
             if budget["spent_amount"] + budget["reserved_amount"] + reserve > budget["limit_amount"]:
                 raise _error("BUDGET_EXCEEDED", "Call cannot be reserved within the budget")
             spec = self._spec(conn, task)
-            task_reserved = conn.scalar(select(func.coalesce(func.sum(calls.c.reserved_amount), 0)).where(calls.c.task_id == task_id, calls.c.state.in_(["PREPARED", "SENT", "UNKNOWN"])))
-            task_spent = conn.scalar(select(func.coalesce(func.sum(calls.c.actual_amount), 0)).where(calls.c.task_id == task_id, calls.c.state.in_(["SUCCEEDED", "FAILED"])))
-            if spec["budget"]["currency"] != budget["currency"] or task_reserved + task_spent + reserve > Decimal(spec["budget"]["max_amount"]):
+            outstanding = calls.c.state.in_(("PREPARED", "SENT", "UNKNOWN"))
+            settled = calls.c.state.in_(("SUCCEEDED", "FAILED"))
+            task_amount, task_tokens = conn.execute(
+                select(
+                    func.coalesce(func.sum(calls.c.reserved_amount).filter(outstanding), 0)
+                    + func.coalesce(func.sum(calls.c.actual_amount).filter(settled), 0),
+                    func.coalesce(func.sum(calls.c.reserved_tokens).filter(outstanding), 0)
+                    + func.coalesce(func.sum(calls.c.actual_tokens).filter(settled), 0),
+                ).where(calls.c.task_id == task_id)
+            ).one()
+            if spec["budget"]["currency"] != budget["currency"] or task_amount + reserve > Decimal(spec["budget"]["max_amount"]):
                 raise _error("BUDGET_EXCEEDED", "Task monetary budget would be exceeded")
-            task_reserved_tokens = conn.scalar(select(func.coalesce(func.sum(calls.c.reserved_tokens), 0)).where(calls.c.task_id == task_id, calls.c.state.in_(["PREPARED", "SENT", "UNKNOWN"])))
-            task_spent_tokens = conn.scalar(select(func.coalesce(func.sum(calls.c.actual_tokens), 0)).where(calls.c.task_id == task_id, calls.c.state.in_(["SUCCEEDED", "FAILED"])))
-            if task_reserved_tokens + task_spent_tokens + token_amount > spec["budget"]["token_budget"]:
+            if task_tokens + token_amount > spec["budget"]["token_budget"]:
                 raise _error("BUDGET_EXCEEDED", "Task token budget would be exceeded")
             self._check_delegation_deadline(conn, deadline)
             attempt_id = str(uuid4())

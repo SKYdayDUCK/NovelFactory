@@ -1,0 +1,614 @@
+{
+  "postgres": "17.11 (Debian 17.11-0+deb13u1)",
+  "source_sha256": "bf602b2d0b0ac156d0e329ac83921bc991118bcd1be2acb15f4160fa11ff36f1",
+  "states": {
+    "FAILED": 120,
+    "PREPARED": 120,
+    "SENT": 120,
+    "SUCCEEDED": 120,
+    "UNKNOWN": 120
+  },
+  "median_ms": 7.0065705,
+  "observations": [
+    {
+      "history": 500,
+      "elapsed_ns": 4935120,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 501,
+      "elapsed_ns": 5267198,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 502,
+      "elapsed_ns": 5095670,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 503,
+      "elapsed_ns": 4875602,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 504,
+      "elapsed_ns": 9012982,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 505,
+      "elapsed_ns": 6079194,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 506,
+      "elapsed_ns": 9742660,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 507,
+      "elapsed_ns": 5633086,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 508,
+      "elapsed_ns": 5513948,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 509,
+      "elapsed_ns": 9168250,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 510,
+      "elapsed_ns": 7848312,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 511,
+      "elapsed_ns": 6822817,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 512,
+      "elapsed_ns": 9604783,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 513,
+      "elapsed_ns": 13592806,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 514,
+      "elapsed_ns": 9689279,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 515,
+      "elapsed_ns": 7138650,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 516,
+      "elapsed_ns": 6846778,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 517,
+      "elapsed_ns": 5910210,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 518,
+      "elapsed_ns": 8542652,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 519,
+      "elapsed_ns": 7578229,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 520,
+      "elapsed_ns": 9756019,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 521,
+      "elapsed_ns": 10263280,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 522,
+      "elapsed_ns": 6557329,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 523,
+      "elapsed_ns": 7519215,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 524,
+      "elapsed_ns": 6842767,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 525,
+      "elapsed_ns": 6666794,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 526,
+      "elapsed_ns": 7011950,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 527,
+      "elapsed_ns": 6728606,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 528,
+      "elapsed_ns": 8108141,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 529,
+      "elapsed_ns": 7160493,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 530,
+      "elapsed_ns": 11331378,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 531,
+      "elapsed_ns": 7245119,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 532,
+      "elapsed_ns": 8022103,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 533,
+      "elapsed_ns": 7623816,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 534,
+      "elapsed_ns": 8953839,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 535,
+      "elapsed_ns": 7760731,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 536,
+      "elapsed_ns": 8041993,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 537,
+      "elapsed_ns": 6725719,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 538,
+      "elapsed_ns": 7517947,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 539,
+      "elapsed_ns": 7309294,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 540,
+      "elapsed_ns": 13036764,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 541,
+      "elapsed_ns": 7001191,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 542,
+      "elapsed_ns": 11628366,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 543,
+      "elapsed_ns": 10071677,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 544,
+      "elapsed_ns": 7951085,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 545,
+      "elapsed_ns": 8915882,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 546,
+      "elapsed_ns": 7399829,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 547,
+      "elapsed_ns": 6486724,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 548,
+      "elapsed_ns": 5866480,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 549,
+      "elapsed_ns": 6753500,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 550,
+      "elapsed_ns": 4705477,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 551,
+      "elapsed_ns": 7156294,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 552,
+      "elapsed_ns": 8396824,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 553,
+      "elapsed_ns": 5110676,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 554,
+      "elapsed_ns": 9405197,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 555,
+      "elapsed_ns": 5527881,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 556,
+      "elapsed_ns": 8702213,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 557,
+      "elapsed_ns": 5424666,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 558,
+      "elapsed_ns": 6087481,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 559,
+      "elapsed_ns": 6696093,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 560,
+      "elapsed_ns": 15698530,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 561,
+      "elapsed_ns": 11578347,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 562,
+      "elapsed_ns": 11923849,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 563,
+      "elapsed_ns": 8775202,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 564,
+      "elapsed_ns": 7359939,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 565,
+      "elapsed_ns": 10484675,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 566,
+      "elapsed_ns": 8653219,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 567,
+      "elapsed_ns": 12856653,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 568,
+      "elapsed_ns": 5912778,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 569,
+      "elapsed_ns": 8552598,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 570,
+      "elapsed_ns": 8396974,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 571,
+      "elapsed_ns": 6851116,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 572,
+      "elapsed_ns": 6951988,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 573,
+      "elapsed_ns": 8858471,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 574,
+      "elapsed_ns": 9425337,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 575,
+      "elapsed_ns": 7935763,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 576,
+      "elapsed_ns": 6644516,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 577,
+      "elapsed_ns": 9778277,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 578,
+      "elapsed_ns": 5334211,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 579,
+      "elapsed_ns": 5201643,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 580,
+      "elapsed_ns": 4909103,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 581,
+      "elapsed_ns": 5317106,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 582,
+      "elapsed_ns": 4953279,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 583,
+      "elapsed_ns": 5206820,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 584,
+      "elapsed_ns": 8070084,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 585,
+      "elapsed_ns": 5395623,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 586,
+      "elapsed_ns": 5371607,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 587,
+      "elapsed_ns": 4955573,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 588,
+      "elapsed_ns": 4799498,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 589,
+      "elapsed_ns": 5222634,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 590,
+      "elapsed_ns": 5607721,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 591,
+      "elapsed_ns": 5262523,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 592,
+      "elapsed_ns": 4999588,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 593,
+      "elapsed_ns": 5319618,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 594,
+      "elapsed_ns": 4887732,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 595,
+      "elapsed_ns": 5054931,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 596,
+      "elapsed_ns": 5488282,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 597,
+      "elapsed_ns": 4939138,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 598,
+      "elapsed_ns": 4965227,
+      "statements": 15,
+      "aggregates": 4
+    },
+    {
+      "history": 599,
+      "elapsed_ns": 4820830,
+      "statements": 15,
+      "aggregates": 4
+    }
+  ]
+}
