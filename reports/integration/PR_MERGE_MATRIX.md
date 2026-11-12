@@ -12,9 +12,11 @@
 | Workshop W5 | [#14](https://github.com/SKYdayDUCK/NovelFactory/pull/14) | `609e92278476c60a893658ef53b6ff15f659b153` | `dev/aw-w4` | MERGED_AND_VERIFIED，main `b30e76978830` |
 | Workshop W6 | [#15](https://github.com/SKYdayDUCK/NovelFactory/pull/15) | `50c8c5ed36cc2cfb83d6624c65ed33336e0f1771` | `main` | **MERGED_AND_VERIFIED**, main `98a8bbed289a29d0326454c86dd3db54ac85ae5c`, AT-30 NOT_MET |
 | P5.6 综合验收 | [#26](https://github.com/SKYdayDUCK/NovelFactory/pull/26) | `e5f5348ca07dc50c9fe52ab271a733ac31fa063c` | `main` | **MERGED_AND_VERIFIED**，[主线 `4e8fc5a`](https://github.com/SKYdayDUCK/NovelFactory/blob/3ef5a72d7a65edb76a988132a72c4e82ee0805ee/reports/integration/evidence/P56/main-4e8fc5a/SIGNOFF.md) |
-| P6 本地验收 | [#16](https://github.com/SKYdayDUCK/NovelFactory/pull/16) | `1d950705ccdebaca02171bd24293682f6efeab54` | `dev/aw-w6` | 冻结 |
-| P6 预算 | [#17](https://github.com/SKYdayDUCK/NovelFactory/pull/17) | `43dc369ab73e2faacb509b6ca16995848fc92c28` | `main` | 在 `4e8fc5a` 集成 |
-| Scion 实验 | [#4](https://github.com/SKYdayDUCK/NovelFactory/pull/4) | `4f249d520c921c8d6effee9978f7338b912f1dd0` | `dev/p3-p4-continuity` | 冻结 |
+| P6 本地验收 | [#16](https://github.com/SKYdayDUCK/NovelFactory/pull/16) | `1d950705ccdebaca02171bd24293682f6efeab54` | `dev/aw-w6` | **MERGED_AND_VERIFIED**，main `0420356b0bd0bfd675494e581799946c4b967f6e` |
+| P6 预算 | [#17](https://github.com/SKYdayDUCK/NovelFactory/pull/17) | `43dc369ab73e2faacb509b6ca16995848fc92c28` | `main` | **MERGED_AND_VERIFIED**，main `533c1f526ef8841610d5c414e77ecbea8bbd5e35` |
+| Scion 实验 | [#4](https://github.com/SKYdayDUCK/NovelFactory/pull/4) | `4f249d520c921c8d6effee9978f7338b912f1dd0` | `dev/p3-p4-continuity` | Open、Draft，原头与目标未变 |
+| S9 历史实验 | [#18](https://github.com/SKYdayDUCK/NovelFactory/pull/18) | `3985ebd4f90ff9f7d2e9626df9c0fbf5e8cdb1be` | 历史分支 | ARCHIVED_AND_CLOSED，2026-11-12T04:42:53Z |
+| 第一阶段门禁 | [#27](https://github.com/SKYdayDUCK/NovelFactory/pull/27) | `5aa9b71b66c7800f58214fa368e22ebeb9c3d56b` | `main` | **MERGED_AND_VERIFIED**，`276820316129d546b0a13118bcbe283b06507795` |
 
 阶段状态详见 [交付台账](DELIVERY_LEDGER.md)，接管字段为历史快照。
 

@@ -1,0 +1,62 @@
+name: Creative Harness S0
+on:
+  push:
+    branches: [main, 'dev/p57-*']
+    paths:
+      - '.github/workflows/creative-harness.yml'
+      - 'validation/validate_creative_harness.py'
+      - 'contracts/**'
+      - 'reports/harness/**'
+      - 'AGENTS.md'
+      - 'SKILLS.md'
+      - '.agents/skills/**'
+      - 'runtime/**'
+      - 'src/novel_factory/infrastructure/runtime_catalog.py'
+      - 'src/novel_factory/contracts/**'
+      - 'src/novel_factory/domain/canonical.py'
+      - 'pyproject.toml'
+      - 'uv.lock'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/creative-harness.yml'
+      - 'validation/validate_creative_harness.py'
+      - 'contracts/**'
+      - 'reports/harness/**'
+      - 'AGENTS.md'
+      - 'SKILLS.md'
+      - '.agents/skills/**'
+      - 'runtime/**'
+      - 'src/novel_factory/infrastructure/runtime_catalog.py'
+      - 'src/novel_factory/contracts/**'
+      - 'src/novel_factory/domain/canonical.py'
+      - 'pyproject.toml'
+      - 'uv.lock'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contracts-and-static-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - run: uv sync --locked --no-dev --python 3.12
+      - name: Verify S0 examples, static snapshots and the frozen instruction audit
+        run: uv run --no-sync python validation/validate_creative_harness.py --output ci-evidence/creative-harness/s0.json
+      - name: Preserve the exact checkout receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: creative-harness-s0-${{ github.run_attempt }}
+          path: ci-evidence/creative-harness/s0.json
+          if-no-files-found: error

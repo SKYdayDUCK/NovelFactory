@@ -1,5 +1,5 @@
 # 当前唯一阶段
 
-存量功能主线为 `0420356b0bd0bfd675494e581799946c4b967f6e`，P5.6、P6 工程已签收，#18 已在原件保全后关闭。2026-11-12 04:42:54 UTC 的 [Open PR 原件](evidence/S9-PR18/open-after-closure.json)仅有 Scion #4。本归档 PR 验收实际主线后签发 [PRE_HARNESS_BASELINE](PRE_HARNESS_BASELINE.md)。后续唯一阶段为 Creative Harness S0 架构与现状审计。
+P5.7-S0 正在交付 Creative Harness 架构与现状审计。第一大阶段已在 `main@276820316129d546b0a13118bcbe283b06507795` 签收，合并后开放 PR 查询仅有 Scion #4。S0 验收范围为三层职责、逐文件审计、加载验证、接口/数据契约和实验回归矩阵。
 
-Issue #13 仍为 NOT_MET。P6_REAL_CREATION = BLOCKED_LOCAL_AUTHORIZATION，文学质量 NOT_EVALUATED。
+[正式门禁签收](https://github.com/SKYdayDUCK/NovelFactory/blob/1b0302a6867c56f5871c0b570477d88dc1ffe0a7/reports/integration/PRE_HARNESS_BASELINE.md) · [S0 技术架构](../harness/S0_ARCHITECTURE.md) · [已知失败](KNOWN_FAILURES.md)。

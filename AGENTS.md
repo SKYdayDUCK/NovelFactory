@@ -81,6 +81,8 @@ PR #2、#3 已合入 main，形成 P0–P4 工程基线。Scion 是独立的 Dra
 
 开发阶段以正式 PR 合并到 main、合并后的验证通过并保存回执为结束。每次只激活当前阶段一个 PR。先从 [当前阶段](reports/integration/CURRENT_STAGE.md)、[交付台账](reports/integration/DELIVERY_LEDGER.md) 和其链接的 GitHub 回执恢复现场。前一阶段完成才启动后一阶段。容量与功能分别按原验收规则判定，保留所有失败和既有分支。
 
+P5.7 Creative Harness 的架构、运行时指令边界和逐阶段验收见[创作架构与接口](reports/harness/S0_ARCHITECTURE.md)。本文件约束仓库开发。小说任务实际读取的 Role、Skill 和素材由绑定任务的运行时加载器及服务端授权决定。
+
 ## 7. 任务导航
 
 | 任务 | 首要资料 |

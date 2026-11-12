@@ -1,5 +1,7 @@
 # 串行交付交接
 
-[PRE_HARNESS_BASELINE](PRE_HARNESS_BASELINE.md)汇集存量正式合并、原始验收、#18 关单依据和精确开放列表。先核对本归档 PR 的主线结果与证据分支签收，再进入 S0。Scion #4 保留原状。
+[PRE_HARNESS_BASELINE](PRE_HARNESS_BASELINE.md) 已签收。当前主线为 `276820316129d546b0a13118bcbe283b06507795`。只开放 Scion #4。原始范围与已完成的四项正式 PR 见[委托](https://github.com/SKYdayDUCK/NovelFactory/blob/05b5b0e38ffa86ed483568388aa2c2a2674f66e5/reports/integration/CREATIVE_HARNESS_DELIVERY_SCOPE.md)以及[交付台账](DELIVERY_LEDGER.md)。
 
-S0 应提交现有架构、开发/运行时指令的逐文件审计、数据及接口契约、开关权限设计和验收矩阵。S1–S6 各自执行测试、PR、CI、合并、主线复验与签收。真实模型创作、费用和独立审读沿用作者的单独授权边界。[原始十六节委托](https://github.com/SKYdayDUCK/NovelFactory/blob/05b5b0e38ffa86ed483568388aa2c2a2674f66e5/reports/integration/CREATIVE_HARNESS_DELIVERY_SCOPE.md)。
+下一阶段 P5.7-S0 交付 Core、Workshop、Harness 三层架构映射，逐文件运行时及开发指令审计，接口、数据模型、权限及开关设计，创作评价协议和可执行回归矩阵。S0 至 S6 分开集成，在每个精确主线上保存工程结果、原始失败及数据边界。真实创作和独立文学评级等待作者本地授权。
+
+S0 的入口为[技术架构](../harness/S0_ARCHITECTURE.md)、[指令审计](../harness/S0_INSTRUCTION_AUDIT.md)、[验收矩阵](../harness/S0_ACCEPTANCE_MATRIX.md)与[创作评价协议](../harness/S0_EVALUATION.md)。

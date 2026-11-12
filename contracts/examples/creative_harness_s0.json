@@ -1,0 +1,1148 @@
+[
+  {
+    "name": "default_configuration",
+    "instance": {
+      "schema_version": "1.0",
+      "kind": "CONFIGURATION",
+      "creative_harness": {
+        "enabled": false,
+        "dynamic_agents": {"enabled":false},
+        "adaptive_instructions": {"enabled":false,"auto_promote":false}
+      }
+    }
+  },
+  {
+    "name": "configuration_adaptive_independent",
+    "instance": {
+      "schema_version": "1.0",
+      "kind": "CONFIGURATION",
+      "creative_harness": {
+        "enabled": true,
+        "dynamic_agents": {"enabled":false},
+        "adaptive_instructions": {"enabled":true,"auto_promote":false}
+      }
+    }
+  },
+  {
+    "name": "configuration_dynamic_independent",
+    "instance": {
+      "schema_version": "1.0",
+      "kind": "CONFIGURATION",
+      "creative_harness": {
+        "enabled": true,
+        "dynamic_agents": {"enabled":true},
+        "adaptive_instructions": {"enabled":false,"auto_promote":false}
+      }
+    }
+  },
+  {
+    "name": "context_packet_actor",
+    "instance": {
+      "schema_version": "1.0",
+      "kind": "CONTEXT_PACKET",
+      "scope": {
+        "world_ref": {
+          "work_id": "00000000-0000-4000-8000-000000000001",
+          "branch_id": "00000000-0000-4000-8000-000000000002",
+          "world_revision_id": "00000000-0000-4000-8000-000000000003"
+        },
+        "task_id": "00000000-0000-4000-8000-000000000004",
+        "generation": 1
+      },
+      "runtime": {
+        "role_id": "character_actor",
+        "task_kind": "character_action",
+        "role_version": "2.1.0",
+        "role_blob": "89f0910970c8daf55fe764784ebfeb5f0bd9f029",
+        "skill_name": "simulate-character",
+        "skill_version": "2.1.0",
+        "skill_blob": "23d291058a5a44e71bbf68a964238f64beb9386e",
+        "runtime_sha256": "f1bf28443b2c37c6881fd83f1332e3101e37e2f898b381054d32378ecd5c38a4",
+        "source_commit": "276820316129d546b0a13118bcbe283b06507795"
+      },
+      "context": {
+        "schema_version": "2.0",
+        "context_bundle_id": "00000000-0000-4000-8000-000000000011",
+        "task_id": "00000000-0000-4000-8000-000000000004",
+        "generation": 1,
+        "world_ref": {
+          "work_id": "00000000-0000-4000-8000-000000000001",
+          "branch_id": "00000000-0000-4000-8000-000000000002",
+          "world_revision_id": "00000000-0000-4000-8000-000000000003"
+        },
+        "story_time": {"tick":5,"phase":0},
+        "role_id": "character_actor",
+        "actor_id": "00000000-0000-4000-8000-000000000006",
+        "policy_version": "fixture-policy-1",
+        "dependency_fingerprint": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+        "dependency_handle": "00000000-0000-4000-8000-000000000012",
+        "permitted_evidence_refs": [
+          {
+            "kind": "ARTIFACT",
+            "artifact_ref": {
+              "artifact_id": "00000000-0000-4000-8000-000000000010",
+              "artifact_revision_id": "00000000-0000-4000-8000-000000000310",
+              "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+            }
+          }
+        ],
+        "facts": [
+          {
+            "statement": "The actor heard the bell.",
+            "status": "BELIEF",
+            "evidence_refs": [
+              {
+                "kind": "ARTIFACT",
+                "artifact_ref": {
+                  "artifact_id": "00000000-0000-4000-8000-000000000010",
+                  "artifact_revision_id": "00000000-0000-4000-8000-000000000310",
+                  "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+                }
+              }
+            ]
+          }
+        ],
+        "limitations": ["The cause of the bell is unknown to the actor."]
+      },
+      "knowledge_cut": {
+        "plane": "BELIEF",
+        "actor_id": "00000000-0000-4000-8000-000000000006",
+        "known_at": {"tick":5,"phase":0}
+      },
+      "sources": [
+        {
+          "evidence": {
+            "kind": "ARTIFACT",
+            "artifact_ref": {
+              "artifact_id": "00000000-0000-4000-8000-000000000010",
+              "artifact_revision_id": "00000000-0000-4000-8000-000000000310",
+              "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+            }
+          },
+          "authority": {
+            "principal_id": "00000000-0000-4000-8000-000000000007",
+            "grant_id": "00000000-0000-4000-8000-000000000157",
+            "permission_epoch": 2
+          },
+          "world_ref": {
+            "work_id": "00000000-0000-4000-8000-000000000001",
+            "branch_id": "00000000-0000-4000-8000-000000000002",
+            "world_revision_id": "00000000-0000-4000-8000-000000000003"
+          },
+          "visibility": "BELIEF",
+          "selection_reason": "Previously delivered testimony in this actor's cut.",
+          "content_sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        }
+      ],
+      "omissions": ["Events outside this actor's cut."],
+      "token_budget": 128,
+      "output_status": "NON_AUTHORITATIVE"
+    }
+  },
+  {
+    "name": "bounded_plan_candidate",
+    "instance": {
+      "schema_version": "1.0",
+      "kind": "PLAN_CANDIDATE",
+      "scope": {
+        "world_ref": {
+          "work_id": "00000000-0000-4000-8000-000000000001",
+          "branch_id": "00000000-0000-4000-8000-000000000002",
+          "world_revision_id": "00000000-0000-4000-8000-000000000003"
+        },
+        "task_id": "00000000-0000-4000-8000-000000000004",
+        "generation": 1
+      },
+      "candidate": {
+        "candidate_id": "00000000-0000-4000-8000-000000000040",
+        "revision": 1,
+        "parent_ref": null,
+        "content_sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+        "created_by": {
+          "principal_id": "00000000-0000-4000-8000-000000000007",
+          "grant_id": "00000000-0000-4000-8000-000000000157",
+          "permission_epoch": 2
+        }
+      },
+      "plan_anchor": {
+        "artifact_id": "00000000-0000-4000-8000-000000000015",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000315",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "alternatives": [
+        {
+          "option_id": "00000000-0000-4000-8000-000000000017",
+          "goal": "Inspect the signal.",
+          "premises": [
+            {
+              "artifact_id": "00000000-0000-4000-8000-000000000010",
+              "artifact_revision_id": "00000000-0000-4000-8000-000000000310",
+              "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+            }
+          ],
+          "expected_consequences": ["A witness may identify the signal."],
+          "risks": ["Witness unavailable."],
+          "disconfirming_evidence": [
+            {
+              "kind": "ARTIFACT",
+              "artifact_ref": {
+                "artifact_id": "00000000-0000-4000-8000-000000000010",
+                "artifact_revision_id": "00000000-0000-4000-8000-000000000310",
+                "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+              }
+            }
+          ],
+          "selection_reason": "Compare as a candidate without modifying the accepted plan."
+        }
+      ],
+      "assumptions": ["The witness remains available."],
+      "protected_commitments": [
+        {
+          "artifact_id": "00000000-0000-4000-8000-000000000018",
+          "artifact_revision_id": "00000000-0000-4000-8000-000000000318",
+          "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        }
+      ],
+      "horizon_scenes": 2,
+      "quota": {
+        "budget_id": "00000000-0000-4000-8000-000000000090",
+        "currency": "USD",
+        "max_amount": "0.00",
+        "max_tokens": 128,
+        "max_attempts": 2,
+        "deadline": "2026-11-13T12:00:00Z"
+      },
+      "status": "HYPOTHESIS_ONLY"
+    }
+  },
+  {
+    "name": "hypothetical_simulation",
+    "instance": {
+      "schema_version": "1.0",
+      "kind": "SIMULATION_REPORT",
+      "scope": {
+        "world_ref": {
+          "work_id": "00000000-0000-4000-8000-000000000001",
+          "branch_id": "00000000-0000-4000-8000-000000000002",
+          "world_revision_id": "00000000-0000-4000-8000-000000000003"
+        },
+        "task_id": "00000000-0000-4000-8000-000000000004",
+        "generation": 1
+      },
+      "plan_candidate_ref": {
+        "artifact_id": "00000000-0000-4000-8000-000000000016",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000316",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "input_cut": {
+        "artifact_id": "00000000-0000-4000-8000-000000000012",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000312",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "assumptions": ["Assume the passage stays open."],
+      "method": "RULE_REPLAY",
+      "max_branches": 2,
+      "max_steps_per_branch": 3,
+      "seed": 7,
+      "quota": {
+        "budget_id": "00000000-0000-4000-8000-000000000090",
+        "currency": "USD",
+        "max_amount": "0.00",
+        "max_tokens": 128,
+        "max_attempts": 2,
+        "deadline": "2026-11-13T12:00:00Z"
+      },
+      "outcomes": [
+        {
+          "option_id": "00000000-0000-4000-8000-000000000017",
+          "conditional_result": "Arrival is possible under these assumptions.",
+          "supporting_refs": [
+            {
+              "kind": "ARTIFACT",
+              "artifact_ref": {
+                "artifact_id": "00000000-0000-4000-8000-000000000010",
+                "artifact_revision_id": "00000000-0000-4000-8000-000000000310",
+                "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+              }
+            }
+          ],
+          "uncertainties": ["The witness may leave."],
+          "stop_reason": "HORIZON"
+        }
+      ],
+      "accepted_world_events": 0,
+      "status": "HYPOTHESIS_ONLY"
+    }
+  },
+  {
+    "name": "engineering_review",
+    "instance": {
+      "schema_version": "1.0",
+      "kind": "REVIEW_REPORT",
+      "scope": {
+        "world_ref": {
+          "work_id": "00000000-0000-4000-8000-000000000001",
+          "branch_id": "00000000-0000-4000-8000-000000000002",
+          "world_revision_id": "00000000-0000-4000-8000-000000000003"
+        },
+        "task_id": "00000000-0000-4000-8000-000000000004",
+        "generation": 1
+      },
+      "target_ref": {
+        "artifact_id": "00000000-0000-4000-8000-000000000011",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000311",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "review_binding": {
+        "producer": {
+          "principal_id": "00000000-0000-4000-8000-000000000007",
+          "grant_id": "00000000-0000-4000-8000-000000000157",
+          "permission_epoch": 2
+        },
+        "reviewer": {
+          "principal_id": "00000000-0000-4000-8000-000000000008",
+          "grant_id": "00000000-0000-4000-8000-000000000158",
+          "permission_epoch": 2
+        },
+        "independence_receipt": {
+          "artifact_id": "00000000-0000-4000-8000-000000000015",
+          "artifact_revision_id": "00000000-0000-4000-8000-000000000315",
+          "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        }
+      },
+      "mode": "ENGINEERING",
+      "rubric_ref": {
+        "artifact_id": "00000000-0000-4000-8000-000000000014",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000314",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "findings": [
+        {
+          "dimension": "CONTINUITY",
+          "severity": "MAJOR",
+          "target_ref": {
+            "artifact_id": "00000000-0000-4000-8000-000000000011",
+            "artifact_revision_id": "00000000-0000-4000-8000-000000000311",
+            "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+          },
+          "text_span": {
+            "start": 0,
+            "end": 3,
+            "unit": "UNICODE_CODEPOINT",
+            "quote_sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+          },
+          "judgment": "CONTRADICTION",
+          "reason": "Compare the quoted passage to the frozen earlier passage.",
+          "evidence_refs": [
+            {
+              "kind": "ARTIFACT",
+              "artifact_ref": {
+                "artifact_id": "00000000-0000-4000-8000-000000000010",
+                "artifact_revision_id": "00000000-0000-4000-8000-000000000310",
+                "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+              }
+            }
+          ],
+          "requested_change": "Reconcile the character's knowledge with the earlier scene."
+        }
+      ],
+      "recommendation": "REVISE",
+      "rework_limit": 1,
+      "evaluation": {
+        "kind": "ENGINEERING",
+        "check_receipts": [
+          {
+            "artifact_id": "00000000-0000-4000-8000-000000000019",
+            "artifact_revision_id": "00000000-0000-4000-8000-000000000319",
+            "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+          }
+        ],
+        "literary_conclusion": "NOT_EVALUATED"
+      },
+      "status": "ADVISORY",
+      "independence_policy": "DISTINCT_PRINCIPALS_AND_NO_SUBSTANTIVE_PROXY"
+    }
+  },
+  {
+    "name": "blind_literary_review",
+    "instance": {
+      "schema_version": "1.0",
+      "kind": "REVIEW_REPORT",
+      "scope": {
+        "world_ref": {
+          "work_id": "00000000-0000-4000-8000-000000000001",
+          "branch_id": "00000000-0000-4000-8000-000000000002",
+          "world_revision_id": "00000000-0000-4000-8000-000000000003"
+        },
+        "task_id": "00000000-0000-4000-8000-000000000004",
+        "generation": 1
+      },
+      "target_ref": {
+        "artifact_id": "00000000-0000-4000-8000-000000000011",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000311",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "review_binding": {
+        "producer": {
+          "principal_id": "00000000-0000-4000-8000-000000000007",
+          "grant_id": "00000000-0000-4000-8000-000000000157",
+          "permission_epoch": 2
+        },
+        "reviewer": {
+          "principal_id": "00000000-0000-4000-8000-000000000008",
+          "grant_id": "00000000-0000-4000-8000-000000000158",
+          "permission_epoch": 2
+        },
+        "independence_receipt": {
+          "artifact_id": "00000000-0000-4000-8000-000000000015",
+          "artifact_revision_id": "00000000-0000-4000-8000-000000000315",
+          "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        }
+      },
+      "mode": "LITERARY",
+      "rubric_ref": {
+        "artifact_id": "00000000-0000-4000-8000-000000000014",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000314",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "findings": [
+        {
+          "dimension": "CONTINUITY",
+          "severity": "MAJOR",
+          "target_ref": {
+            "artifact_id": "00000000-0000-4000-8000-000000000011",
+            "artifact_revision_id": "00000000-0000-4000-8000-000000000311",
+            "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+          },
+          "text_span": {
+            "start": 0,
+            "end": 3,
+            "unit": "UNICODE_CODEPOINT",
+            "quote_sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+          },
+          "judgment": "CONTRADICTION",
+          "reason": "Compare the quoted passage to the frozen earlier passage.",
+          "evidence_refs": [
+            {
+              "kind": "ARTIFACT",
+              "artifact_ref": {
+                "artifact_id": "00000000-0000-4000-8000-000000000010",
+                "artifact_revision_id": "00000000-0000-4000-8000-000000000310",
+                "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+              }
+            }
+          ],
+          "requested_change": "Reconcile the character's knowledge with the earlier scene."
+        }
+      ],
+      "recommendation": "REVISE",
+      "rework_limit": 1,
+      "evaluation": {
+        "kind": "LITERARY",
+        "reader_id": "00000000-0000-4000-8000-000000000008",
+        "blind_sample_id": "00000000-0000-4000-8000-000000000022",
+        "blind_assignment_receipt": {
+          "artifact_id": "00000000-0000-4000-8000-000000000023",
+          "artifact_revision_id": "00000000-0000-4000-8000-000000000323",
+          "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        },
+        "reading_ref": {
+          "artifact_id": "00000000-0000-4000-8000-000000000024",
+          "artifact_revision_id": "00000000-0000-4000-8000-000000000324",
+          "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        },
+        "rubric_scores": [
+          {
+            "dimension": "VOICE",
+            "score": 3,
+            "passage": {
+              "start": 0,
+              "end": 3,
+              "unit": "UNICODE_CODEPOINT",
+              "quote_sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+            },
+            "reason": "The passage changes register relative to the character's earlier voice."
+          }
+        ]
+      },
+      "status": "ADVISORY",
+      "independence_policy": "DISTINCT_PRINCIPALS_AND_NO_SUBSTANTIVE_PROXY"
+    }
+  },
+  {
+    "name": "scoped_role_skill_proposal",
+    "instance": {
+      "schema_version": "1.0",
+      "kind": "ROLE_SKILL_PROPOSAL",
+      "scope": {
+        "world_ref": {
+          "work_id": "00000000-0000-4000-8000-000000000001",
+          "branch_id": "00000000-0000-4000-8000-000000000002",
+          "world_revision_id": "00000000-0000-4000-8000-000000000003"
+        },
+        "task_id": "00000000-0000-4000-8000-000000000004",
+        "generation": 1
+      },
+      "candidate": {
+        "candidate_id": "00000000-0000-4000-8000-000000000040",
+        "revision": 1,
+        "parent_ref": null,
+        "content_sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+        "created_by": {
+          "principal_id": "00000000-0000-4000-8000-000000000007",
+          "grant_id": "00000000-0000-4000-8000-000000000157",
+          "permission_epoch": 2
+        }
+      },
+      "trigger": "SKILL_GAP",
+      "evidence_refs": [
+        {
+          "artifact_id": "00000000-0000-4000-8000-000000000011",
+          "artifact_revision_id": "00000000-0000-4000-8000-000000000311",
+          "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        }
+      ],
+      "parent_runtime": {
+        "role_id": "character_actor",
+        "task_kind": "character_action",
+        "role_version": "2.1.0",
+        "role_blob": "89f0910970c8daf55fe764784ebfeb5f0bd9f029",
+        "skill_name": "simulate-character",
+        "skill_version": "2.1.0",
+        "skill_blob": "23d291058a5a44e71bbf68a964238f64beb9386e",
+        "runtime_sha256": "f1bf28443b2c37c6881fd83f1332e3101e37e2f898b381054d32378ecd5c38a4",
+        "source_commit": "276820316129d546b0a13118bcbe283b06507795"
+      },
+      "proposed_role_id": "character_actor",
+      "proposed_skill_name": "fixture-voice-check",
+      "proposed_revision": "0.1.0",
+      "instruction_ref": {
+        "artifact_id": "00000000-0000-4000-8000-000000000025",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000325",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "requested_workshop_binding": {
+        "org_id": "fixture-org",
+        "installation_id": "fixture-install",
+        "employee_id": "fixture-reviewer",
+        "employment_revision": 4,
+        "grant_epoch": 2,
+        "binding_id": "00000000-0000-4000-8000-000000000041",
+        "skill_id": "fixture-voice-check",
+        "source_revision": "r1",
+        "content_sha": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "scope_limit": {
+        "work_id": "00000000-0000-4000-8000-000000000001",
+        "branch_id": "00000000-0000-4000-8000-000000000002",
+        "task_modes": ["reaction"],
+        "requested_capabilities": ["READ"],
+        "max_agents": 1,
+        "expires_at": "2026-11-13T12:00:00Z"
+      },
+      "quota": {
+        "budget_id": "00000000-0000-4000-8000-000000000090",
+        "currency": "USD",
+        "max_amount": "0.00",
+        "max_tokens": 128,
+        "max_attempts": 2,
+        "deadline": "2026-11-13T12:00:00Z"
+      },
+      "fallback_runtime": {
+        "role_id": "character_actor",
+        "task_kind": "character_action",
+        "role_version": "2.1.0",
+        "role_blob": "89f0910970c8daf55fe764784ebfeb5f0bd9f029",
+        "skill_name": "simulate-character",
+        "skill_version": "2.1.0",
+        "skill_blob": "23d291058a5a44e71bbf68a964238f64beb9386e",
+        "runtime_sha256": "f1bf28443b2c37c6881fd83f1332e3101e37e2f898b381054d32378ecd5c38a4",
+        "source_commit": "276820316129d546b0a13118bcbe283b06507795"
+      },
+      "status": "PROPOSED_NOT_INSTALLED"
+    }
+  },
+  {
+    "name": "instruction_candidate",
+    "instance": {
+      "schema_version": "1.0",
+      "kind": "INSTRUCTION_CANDIDATE",
+      "scope": {
+        "world_ref": {
+          "work_id": "00000000-0000-4000-8000-000000000001",
+          "branch_id": "00000000-0000-4000-8000-000000000002",
+          "world_revision_id": "00000000-0000-4000-8000-000000000003"
+        },
+        "task_id": "00000000-0000-4000-8000-000000000004",
+        "generation": 1
+      },
+      "candidate": {
+        "candidate_id": "00000000-0000-4000-8000-000000000040",
+        "revision": 1,
+        "parent_ref": null,
+        "content_sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+        "created_by": {
+          "principal_id": "00000000-0000-4000-8000-000000000007",
+          "grant_id": "00000000-0000-4000-8000-000000000157",
+          "permission_epoch": 2
+        }
+      },
+      "baseline_runtime": {
+        "role_id": "character_actor",
+        "task_kind": "character_action",
+        "role_version": "2.1.0",
+        "role_blob": "89f0910970c8daf55fe764784ebfeb5f0bd9f029",
+        "skill_name": "simulate-character",
+        "skill_version": "2.1.0",
+        "skill_blob": "23d291058a5a44e71bbf68a964238f64beb9386e",
+        "runtime_sha256": "f1bf28443b2c37c6881fd83f1332e3101e37e2f898b381054d32378ecd5c38a4",
+        "source_commit": "276820316129d546b0a13118bcbe283b06507795"
+      },
+      "change_kind": "SKILL_INSTRUCTIONS",
+      "instruction_ref": {
+        "artifact_id": "00000000-0000-4000-8000-000000000025",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000325",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "change_summary": "Require a passage citation for a voice finding.",
+      "evidence_refs": [
+        {
+          "artifact_id": "00000000-0000-4000-8000-000000000020",
+          "artifact_revision_id": "00000000-0000-4000-8000-000000000320",
+          "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        }
+      ],
+      "failure_examples": [
+        {
+          "artifact_id": "00000000-0000-4000-8000-000000000026",
+          "artifact_revision_id": "00000000-0000-4000-8000-000000000326",
+          "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        }
+      ],
+      "success_examples": [],
+      "expected_effect": "Reduce unsupported findings.",
+      "risk": "A citation can still be misinterpreted.",
+      "freeze_ref": {
+        "artifact_id": "00000000-0000-4000-8000-000000000027",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000327",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "rollback_ref": {
+        "artifact_id": "00000000-0000-4000-8000-000000000028",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000328",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "status": "PROPOSED_NOT_ACTIVE"
+    }
+  },
+  {
+    "name": "frozen_three_arm_experiment",
+    "instance": {
+      "schema_version": "1.0",
+      "kind": "EXPERIMENT_FREEZE",
+      "experiment_id": "00000000-0000-4000-8000-000000000026",
+      "frozen_at": "2026-11-12T00:00:00Z",
+      "source_commit": "276820316129d546b0a13118bcbe283b06507795",
+      "works": [
+        {
+          "work_id": "00000000-0000-4000-8000-000000000001",
+          "branch_id": "00000000-0000-4000-8000-000000000002",
+          "world_revision_id": "00000000-0000-4000-8000-000000000003"
+        }
+      ],
+      "shared_input_ref": {
+        "artifact_id": "00000000-0000-4000-8000-000000000033",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000333",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "case_manifest_ref": {
+        "artifact_id": "00000000-0000-4000-8000-000000000034",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000334",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "model_config_sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+      "budget_policy_ref": {
+        "artifact_id": "00000000-0000-4000-8000-000000000035",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000335",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "quota": {
+        "budget_id": "00000000-0000-4000-8000-000000000090",
+        "currency": "USD",
+        "max_amount": "0.00",
+        "max_tokens": 128,
+        "max_attempts": 2,
+        "deadline": "2026-11-13T12:00:00Z"
+      },
+      "rubric_ref": {
+        "artifact_id": "00000000-0000-4000-8000-000000000036",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000336",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "blind_allocation_ref": {
+        "artifact_id": "00000000-0000-4000-8000-000000000037",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000337",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "order_seed": 3,
+      "repetitions": 1,
+      "arms": [
+        {
+          "arm_id": "BASELINE",
+          "candidate_ref": {
+            "artifact_id": "00000000-0000-4000-8000-000000000030",
+            "artifact_revision_id": "00000000-0000-4000-8000-000000000330",
+            "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+          },
+          "creative_harness": {
+            "enabled": false,
+            "dynamic_agents": {"enabled":false},
+            "adaptive_instructions": {"enabled":false,"auto_promote":false}
+          }
+        },
+        {
+          "arm_id": "HARNESS",
+          "candidate_ref": {
+            "artifact_id": "00000000-0000-4000-8000-000000000031",
+            "artifact_revision_id": "00000000-0000-4000-8000-000000000331",
+            "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+          },
+          "creative_harness": {
+            "enabled": true,
+            "dynamic_agents": {"enabled":false},
+            "adaptive_instructions": {"enabled":false,"auto_promote":false}
+          }
+        },
+        {
+          "arm_id": "HARNESS_ADAPTIVE",
+          "candidate_ref": {
+            "artifact_id": "00000000-0000-4000-8000-000000000032",
+            "artifact_revision_id": "00000000-0000-4000-8000-000000000332",
+            "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+          },
+          "creative_harness": {
+            "enabled": true,
+            "dynamic_agents": {"enabled":true},
+            "adaptive_instructions": {"enabled":true,"auto_promote":false}
+          }
+        }
+      ],
+      "sampling": "ALL_PREREGISTERED_CASES_INCLUDING_FAILURES",
+      "metrics": {
+        "engineering": "REQUIRED",
+        "review_effectiveness": "REQUIRED",
+        "tokens": "REQUIRED",
+        "cost": "REQUIRED",
+        "latency": "REQUIRED",
+        "rework": "REQUIRED",
+        "literary": "INDEPENDENT_READING_OR_UNPROVEN"
+      },
+      "design": "THREE_ARM"
+    }
+  },
+  {
+    "name": "frozen_ab_experiment",
+    "instance": {
+      "schema_version": "1.0",
+      "kind": "EXPERIMENT_FREEZE",
+      "experiment_id": "00000000-0000-4000-8000-000000000026",
+      "frozen_at": "2026-11-12T00:00:00Z",
+      "source_commit": "276820316129d546b0a13118bcbe283b06507795",
+      "works": [
+        {
+          "work_id": "00000000-0000-4000-8000-000000000001",
+          "branch_id": "00000000-0000-4000-8000-000000000002",
+          "world_revision_id": "00000000-0000-4000-8000-000000000003"
+        }
+      ],
+      "shared_input_ref": {
+        "artifact_id": "00000000-0000-4000-8000-000000000033",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000333",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "case_manifest_ref": {
+        "artifact_id": "00000000-0000-4000-8000-000000000034",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000334",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "model_config_sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+      "budget_policy_ref": {
+        "artifact_id": "00000000-0000-4000-8000-000000000035",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000335",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "quota": {
+        "budget_id": "00000000-0000-4000-8000-000000000090",
+        "currency": "USD",
+        "max_amount": "0.00",
+        "max_tokens": 128,
+        "max_attempts": 2,
+        "deadline": "2026-11-13T12:00:00Z"
+      },
+      "rubric_ref": {
+        "artifact_id": "00000000-0000-4000-8000-000000000036",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000336",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "blind_allocation_ref": {
+        "artifact_id": "00000000-0000-4000-8000-000000000037",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000337",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "order_seed": 3,
+      "repetitions": 1,
+      "arms": [
+        {
+          "arm_id": "CONTROL",
+          "candidate_ref": {
+            "artifact_id": "00000000-0000-4000-8000-000000000030",
+            "artifact_revision_id": "00000000-0000-4000-8000-000000000330",
+            "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+          },
+          "creative_harness": {
+            "enabled": true,
+            "dynamic_agents": {"enabled":false},
+            "adaptive_instructions": {"enabled":false,"auto_promote":false}
+          }
+        },
+        {
+          "arm_id": "TREATMENT",
+          "candidate_ref": {
+            "artifact_id": "00000000-0000-4000-8000-000000000031",
+            "artifact_revision_id": "00000000-0000-4000-8000-000000000331",
+            "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+          },
+          "creative_harness": {
+            "enabled": true,
+            "dynamic_agents": {"enabled":false},
+            "adaptive_instructions": {"enabled":false,"auto_promote":false}
+          }
+        }
+      ],
+      "sampling": "ALL_PREREGISTERED_CASES_INCLUDING_FAILURES",
+      "metrics": {
+        "engineering": "REQUIRED",
+        "review_effectiveness": "REQUIRED",
+        "tokens": "REQUIRED",
+        "cost": "REQUIRED",
+        "latency": "REQUIRED",
+        "rework": "REQUIRED",
+        "literary": "INDEPENDENT_READING_OR_UNPROVEN"
+      },
+      "design": "A_B"
+    }
+  },
+  {
+    "name": "promotion_recommendation",
+    "instance": {
+      "schema_version": "1.0",
+      "kind": "PROMOTION_DECISION",
+      "scope": {
+        "world_ref": {
+          "work_id": "00000000-0000-4000-8000-000000000001",
+          "branch_id": "00000000-0000-4000-8000-000000000002",
+          "world_revision_id": "00000000-0000-4000-8000-000000000003"
+        },
+        "task_id": "00000000-0000-4000-8000-000000000004",
+        "generation": 1
+      },
+      "candidate_ref": {
+        "artifact_id": "00000000-0000-4000-8000-000000000031",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000331",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "previous_version_ref": {
+        "artifact_id": "00000000-0000-4000-8000-000000000030",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000330",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "decision": "RECOMMEND",
+      "route": "MANUAL",
+      "creative_harness": {
+        "enabled": true,
+        "dynamic_agents": {"enabled":false},
+        "adaptive_instructions": {"enabled":false,"auto_promote":false}
+      },
+      "independence": {
+        "producer": {
+          "principal_id": "00000000-0000-4000-8000-000000000007",
+          "grant_id": "00000000-0000-4000-8000-000000000157",
+          "permission_epoch": 2
+        },
+        "reviewer": {
+          "principal_id": "00000000-0000-4000-8000-000000000008",
+          "grant_id": "00000000-0000-4000-8000-000000000158",
+          "permission_epoch": 2
+        },
+        "independence_receipt": {
+          "artifact_id": "00000000-0000-4000-8000-000000000015",
+          "artifact_revision_id": "00000000-0000-4000-8000-000000000315",
+          "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        }
+      },
+      "evidence": {
+        "freeze_ref": {
+          "artifact_id": "00000000-0000-4000-8000-000000000027",
+          "artifact_revision_id": "00000000-0000-4000-8000-000000000327",
+          "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        },
+        "engineering_report_ref": {
+          "artifact_id": "00000000-0000-4000-8000-000000000019",
+          "artifact_revision_id": "00000000-0000-4000-8000-000000000319",
+          "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        },
+        "run_manifest_ref": {
+          "artifact_id": "00000000-0000-4000-8000-000000000038",
+          "artifact_revision_id": "00000000-0000-4000-8000-000000000338",
+          "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        },
+        "literary_status": "UNPROVEN",
+        "blind_review_refs": [],
+        "reviewer_ids": [],
+        "decision_reason": "Engineering outcomes are available; literary benefit remains unproven."
+      },
+      "authority": null,
+      "rollback_ref": {
+        "artifact_id": "00000000-0000-4000-8000-000000000028",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000328",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "status": "DECISION_RECORD"
+    }
+  },
+  {
+    "name": "promotion_with_independent_authority",
+    "instance": {
+      "schema_version": "1.0",
+      "kind": "PROMOTION_DECISION",
+      "scope": {
+        "world_ref": {
+          "work_id": "00000000-0000-4000-8000-000000000001",
+          "branch_id": "00000000-0000-4000-8000-000000000002",
+          "world_revision_id": "00000000-0000-4000-8000-000000000003"
+        },
+        "task_id": "00000000-0000-4000-8000-000000000004",
+        "generation": 1
+      },
+      "candidate_ref": {
+        "artifact_id": "00000000-0000-4000-8000-000000000031",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000331",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "previous_version_ref": {
+        "artifact_id": "00000000-0000-4000-8000-000000000030",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000330",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "decision": "APPROVE",
+      "route": "POLICY_AUTOMATIC",
+      "creative_harness": {
+        "enabled": true,
+        "dynamic_agents": {"enabled":false},
+        "adaptive_instructions": {"enabled":true,"auto_promote":true}
+      },
+      "independence": {
+        "producer": {
+          "principal_id": "00000000-0000-4000-8000-000000000007",
+          "grant_id": "00000000-0000-4000-8000-000000000157",
+          "permission_epoch": 2
+        },
+        "reviewer": {
+          "principal_id": "00000000-0000-4000-8000-000000000008",
+          "grant_id": "00000000-0000-4000-8000-000000000158",
+          "permission_epoch": 2
+        },
+        "independence_receipt": {
+          "artifact_id": "00000000-0000-4000-8000-000000000015",
+          "artifact_revision_id": "00000000-0000-4000-8000-000000000315",
+          "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        }
+      },
+      "evidence": {
+        "freeze_ref": {
+          "artifact_id": "00000000-0000-4000-8000-000000000027",
+          "artifact_revision_id": "00000000-0000-4000-8000-000000000327",
+          "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        },
+        "engineering_report_ref": {
+          "artifact_id": "00000000-0000-4000-8000-000000000019",
+          "artifact_revision_id": "00000000-0000-4000-8000-000000000319",
+          "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        },
+        "run_manifest_ref": {
+          "artifact_id": "00000000-0000-4000-8000-000000000038",
+          "artifact_revision_id": "00000000-0000-4000-8000-000000000338",
+          "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        },
+        "literary_status": "INDEPENDENTLY_REVIEWED",
+        "blind_review_refs": [
+          {
+            "artifact_id": "00000000-0000-4000-8000-000000000041",
+            "artifact_revision_id": "00000000-0000-4000-8000-000000000341",
+            "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+          },
+          {
+            "artifact_id": "00000000-0000-4000-8000-000000000042",
+            "artifact_revision_id": "00000000-0000-4000-8000-000000000342",
+            "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+          }
+        ],
+        "reviewer_ids": ["00000000-0000-4000-8000-000000000008","00000000-0000-4000-8000-000000000009"],
+        "decision_reason": "Independent findings and frozen held-out cases meet the recorded engineering and reading criteria."
+      },
+      "authority": {
+        "approver": {
+          "principal_id": "00000000-0000-4000-8000-000000000013",
+          "grant_id": "00000000-0000-4000-8000-000000000163",
+          "permission_epoch": 2
+        },
+        "authority_receipt": {
+          "artifact_id": "00000000-0000-4000-8000-000000000043",
+          "artifact_revision_id": "00000000-0000-4000-8000-000000000343",
+          "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        },
+        "policy_ref": {
+          "artifact_id": "00000000-0000-4000-8000-000000000044",
+          "artifact_revision_id": "00000000-0000-4000-8000-000000000344",
+          "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        },
+        "valid_until": "2026-11-13T12:00:00Z"
+      },
+      "rollback_ref": {
+        "artifact_id": "00000000-0000-4000-8000-000000000028",
+        "artifact_revision_id": "00000000-0000-4000-8000-000000000328",
+        "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      },
+      "status": "DECISION_RECORD"
+    }
+  },
+  {
+    "name": "disabled_execution_witness",
+    "instance": {
+      "schema_version": "1.0",
+      "kind": "EXECUTION_LOG",
+      "trace_id": "00000000-0000-4000-8000-000000000045",
+      "recorded_at": "2026-11-12T01:00:00Z",
+      "module": "H1",
+      "scope": {
+        "world_ref": {
+          "work_id": "00000000-0000-4000-8000-000000000001",
+          "branch_id": "00000000-0000-4000-8000-000000000002",
+          "world_revision_id": "00000000-0000-4000-8000-000000000003"
+        },
+        "task_id": "00000000-0000-4000-8000-000000000004",
+        "generation": 1
+      },
+      "actor": {
+        "principal_id": "00000000-0000-4000-8000-000000000007",
+        "grant_id": "00000000-0000-4000-8000-000000000157",
+        "permission_epoch": 2
+      },
+      "flags": {
+        "enabled": false,
+        "dynamic_agents": {"enabled":false},
+        "adaptive_instructions": {"enabled":false,"auto_promote":false}
+      },
+      "runtime": {
+        "role_id": "character_actor",
+        "task_kind": "character_action",
+        "role_version": "2.1.0",
+        "role_blob": "89f0910970c8daf55fe764784ebfeb5f0bd9f029",
+        "skill_name": "simulate-character",
+        "skill_version": "2.1.0",
+        "skill_blob": "23d291058a5a44e71bbf68a964238f64beb9386e",
+        "runtime_sha256": "f1bf28443b2c37c6881fd83f1332e3101e37e2f898b381054d32378ecd5c38a4",
+        "source_commit": "276820316129d546b0a13118bcbe283b06507795"
+      },
+      "input_refs": [],
+      "output_refs": [],
+      "decision": "SKIPPED_DISABLED",
+      "reason_code": "HARNESS_DISABLED",
+      "nf_trace_id": "00000000-0000-4000-8000-000000000046",
+      "workshop_operation_id": null,
+      "latency_ms": 0,
+      "rework_count": 0,
+      "accounting": {
+        "source": "NF_ATTEMPT_LEDGER",
+        "state": "NO_ATTEMPT",
+        "attempts": [],
+        "reserved_amount": "0",
+        "spent_amount": null,
+        "reported_tokens": 0,
+        "invoice_ref": null
+      },
+      "literary_status": "NOT_EVALUATED",
+      "literary_evidence_refs": [],
+      "official_change_receipt": null
+    }
+  },
+  {
+    "name": "unknown_hold_execution_log",
+    "instance": {
+      "schema_version": "1.0",
+      "kind": "EXECUTION_LOG",
+      "trace_id": "00000000-0000-4000-8000-000000000045",
+      "recorded_at": "2026-11-12T01:00:00Z",
+      "module": "H1",
+      "scope": {
+        "world_ref": {
+          "work_id": "00000000-0000-4000-8000-000000000001",
+          "branch_id": "00000000-0000-4000-8000-000000000002",
+          "world_revision_id": "00000000-0000-4000-8000-000000000003"
+        },
+        "task_id": "00000000-0000-4000-8000-000000000004",
+        "generation": 1
+      },
+      "actor": {
+        "principal_id": "00000000-0000-4000-8000-000000000007",
+        "grant_id": "00000000-0000-4000-8000-000000000157",
+        "permission_epoch": 2
+      },
+      "flags": {
+        "enabled": true,
+        "dynamic_agents": {"enabled":false},
+        "adaptive_instructions": {"enabled":false,"auto_promote":false}
+      },
+      "runtime": {
+        "role_id": "character_actor",
+        "task_kind": "character_action",
+        "role_version": "2.1.0",
+        "role_blob": "89f0910970c8daf55fe764784ebfeb5f0bd9f029",
+        "skill_name": "simulate-character",
+        "skill_version": "2.1.0",
+        "skill_blob": "23d291058a5a44e71bbf68a964238f64beb9386e",
+        "runtime_sha256": "f1bf28443b2c37c6881fd83f1332e3101e37e2f898b381054d32378ecd5c38a4",
+        "source_commit": "276820316129d546b0a13118bcbe283b06507795"
+      },
+      "input_refs": [],
+      "output_refs": [],
+      "decision": "AWAITING_RECONCILIATION",
+      "reason_code": "NF_ATTEMPT_UNKNOWN",
+      "nf_trace_id": "00000000-0000-4000-8000-000000000046",
+      "workshop_operation_id": null,
+      "latency_ms": 0,
+      "rework_count": 0,
+      "accounting": {
+        "source": "NF_ATTEMPT_LEDGER",
+        "state": "RECONCILIATION_REQUIRED",
+        "attempts": [
+          {
+            "attempt_id": "00000000-0000-4000-8000-000000000047",
+            "task_id": "00000000-0000-4000-8000-000000000004",
+            "generation": 1,
+            "budget_id": "00000000-0000-4000-8000-000000000090",
+            "state": "UNKNOWN",
+            "provider_receipt_ref": null
+          }
+        ],
+        "reserved_amount": "0.02",
+        "spent_amount": null,
+        "reported_tokens": null,
+        "invoice_ref": null
+      },
+      "literary_status": "NOT_EVALUATED",
+      "literary_evidence_refs": [],
+      "official_change_receipt": null
+    }
+  }
+]
