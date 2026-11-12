@@ -1,5 +1,5 @@
 {
-  "acceptance": "P6_READINESS_BEFORE_HOSTED_MERGE",
+  "acceptance": "P6_READINESS_AFTER_MERGE",
   "engineering_scope": "PostgreSQL 17, two private works, scoped runtime, real local Codex process, synthetic upstream, separate physical PITR",
   "nf_and_workshop_cli_on_linux": "PASS",
   "windows_wsl2_desktop_execution": "NOT_EXECUTED",
@@ -10,5 +10,12 @@
   "real_reader_evaluations": 0,
   "literary_quality": "NOT_EVALUATED",
   "historical_AT_30": "NOT_MET",
-  "PERF_01": "OPEN"
+  "PERF_01": "OPEN",
+  "engineering": "MERGED_AND_VERIFIED",
+  "accepted_main": "630c4bcf1f1a7d71f1632d6eb2d273923ac08014",
+  "post_merge_functional_tests": {
+    "passed": 35,
+    "skipped": 0,
+    "failed": 0
+  }
 }

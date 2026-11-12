@@ -1,0 +1,65 @@
+{
+  "candidate_sha": "60641790dabe34c3b9f68a7820c794f6287372d2",
+  "started_at": "2026-11-12T13:10:41.403937+00:00",
+  "python": "3.12.14",
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "codex": "codex-cli 0.167.0-alpha.4",
+  "compose_cli": "2.39.4",
+  "pg_system_identifiers": {
+    "NF": "7707271746628296740",
+    "Workshop": "7707271749771366461"
+  },
+  "operator_exit": 0,
+  "providers-and-policy_exit": 0,
+  "no_key_preflight_api-keys": {
+    "exit_code": 2,
+    "stderr": ""
+  },
+  "no_key_preflight_subscription": {
+    "exit_code": 2,
+    "stderr": "INVALID_MODEL_CONFIG"
+  },
+  "compose": {
+    "definition": "A plus operator healthcheck patch",
+    "config_exit": 0,
+    "services": {
+      "aw-db": {
+        "image": "postgres:17.11-bookworm",
+        "healthcheck": [
+          "CMD",
+          "pg_isready",
+          "-h",
+          "127.0.0.1",
+          "-U",
+          "postgres"
+        ]
+      },
+      "nf-db": {
+        "image": "postgres:17.11-bookworm",
+        "healthcheck": [
+          "CMD",
+          "pg_isready",
+          "-h",
+          "127.0.0.1",
+          "-U",
+          "postgres"
+        ]
+      },
+      "redis": {
+        "image": "redis:8.0.2-bookworm",
+        "healthcheck": null
+      }
+    },
+    "engine_containers_started": false
+  },
+  "finished_at": "2026-11-12T13:10:58.130089+00:00",
+  "source_state": {
+    "production_inference_calls": 0,
+    "live_dual_provider": "NOT_EXECUTED",
+    "actual_paid_amount": null,
+    "real_reader_scores": 0,
+    "literary_quality": "NOT_EVALUATED",
+    "windows_wsl2_desktop": "NOT_EXECUTED",
+    "model_fixtures": "synthetic, native Linux Codex executable used with local transport"
+  }
+}
