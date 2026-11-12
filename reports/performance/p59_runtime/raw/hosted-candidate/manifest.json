@@ -2,6 +2,93 @@
   "github_run": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43284920794",
   "head": "3e6b59268f1e89520230c8b70e9a26b9950a2f79",
   "profiles": {
+    "read-hour-500": {
+      "profile": "read-hour-500",
+      "source": "3e6b59268f1e89520230c8b70e9a26b9950a2f79",
+      "tree": "b3169c3dd316e5f9a0a43e9195998eb3dc22ff98",
+      "artifact": {
+        "repository": "SKYdayDUCK/NovelFactory",
+        "artifact": {
+          "id": 13977713775,
+          "name": "p59-read-hour-500-3e6b59268f1e89520230c8b70e9a26b9950a2f79-1",
+          "size_in_bytes": 2806479,
+          "url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/artifacts/13977713775",
+          "archive_download_url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/artifacts/13977713775/zip",
+          "expired": false,
+          "created_at": "2026-11-12T19:56:54Z",
+          "expires_at": "2027-02-10T18:55:57Z",
+          "updated_at": "2026-11-12T19:56:54Z",
+          "digest": "sha256:f50f3b49e86f7e2d42e717159bcc177963037256b88fd1722d18b6d3e4dc88e8",
+          "workflow_run": {
+            "id": 43284920794,
+            "repository_id": 1452373944,
+            "head_repository_id": 1452373944,
+            "head_branch": "dev/p59-runtime-architecture-refactor",
+            "head_sha": "3e6b59268f1e89520230c8b70e9a26b9950a2f79"
+          }
+        },
+        "files_sha256": {
+          "benchmark-step.txt": "81b2bd4ea98c8db66554fbc8d7637a1a69a130f331feb732b75caab4c4868fd5",
+          "result.json.gz": "db3e58d00219019fed929469a01905f98d54e0ad98b80445d1b6be5aa38b5588",
+          "commit.txt": "c8247ae52c4be5315471c4c193d9129edb728ffbc3dcc4f271e850fc5f08e16e",
+          "result.sha256": "03c1c71cc708156d9363e4980676b49b40fa8a338053d52128947378869536ed",
+          "run.log": "db851a1a8daa49b87e59b59ef1f10dd61c8e340662722991ae77a4f218c7f8ba",
+          "summary.json": "ccdd1e2821de42357897afb5414348cfd8cc8f7725560cc602f189322a594de7",
+          "source.sha256": "48a32220132c7b8b3eb065389760bb0c9822ec4dd821241cf3d5b5be0017104e",
+          "tree.txt": "0989a9105e2683cdc2f09c049680b17625496d8d55df868a2f70a4acfde9fc3f"
+        }
+      },
+      "driver_hashes": [
+        "648c86c9e25ec9f318061e4c0b74ff8d12080e0c42720152342755e0385f4464  benchmarks/p59_workflow_load.py",
+        "baa67898eacce28c4b3f228275d24eff9eed26a8febf717cb37d2d28c16acf73  benchmarks/p3_stability.py",
+        "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f  benchmarks/p2_behavioral_load.py",
+        "2b0d7d46dc49ec0b9f782fdeeaab3902fa5f44075e7e12ea5aff3938b80b594f  benchmarks/process_server.py",
+        "50423a60d7cf72201c773ab10f6e80303b9bfcff3650b84db2431f579d61ae14  benchmarks/http_load.py",
+        "cda895ae3546591afac83c342753b817950a4d157932afb5ee0aefa306b7281a  uv.lock"
+      ],
+      "result_sha256": "23622acc383573fd267f6d4476009f232d342ccf4f9edd130db97139e7084cd9",
+      "result_gzip_sha256": "db3e58d00219019fed929469a01905f98d54e0ad98b80445d1b6be5aa38b5588",
+      "gate": "PASS",
+      "raw_parts": [
+        "read-hour-500.json.gz.001",
+        "read-hour-500.json.gz.002",
+        "read-hour-500.json.gz.003",
+        "read-hour-500.json.gz.004"
+      ],
+      "summary": {
+        "scheduled_count": 72000,
+        "duration_seconds": 3600.03650298,
+        "actual_call_start_rps": 20.00014282158685,
+        "successful_query_rps": 19.999797207722924,
+        "latency_all_attempts": {
+          "count": 72000,
+          "p50_ms": 78.7015,
+          "p95_ms": 90.7129,
+          "p99_ms": 107.278
+        },
+        "status_counts": {
+          "200": 72000
+        },
+        "long_duration_gate": "PARTIAL_READ_ONLY",
+        "worker_lease_renewals": [
+          {
+            "leases": 500,
+            "duration_seconds": 1.958566047999966
+          },
+          {
+            "leases": 500,
+            "duration_seconds": 2.0731393689998185
+          }
+        ],
+        "world_unchanged": true,
+        "new_world_commits": 0,
+        "real_model_calls": 0,
+        "validated": 72000,
+        "invalid_codes": {},
+        "agent_count": 500,
+        "remaining_connections": 0
+      }
+    },
     "workflow-1000": {
       "profile": "workflow-1000",
       "source": "3e6b59268f1e89520230c8b70e9a26b9950a2f79",
