@@ -1,0 +1,19 @@
+{
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "port": 52681,
+  "command": [
+    "/workspace/scratch/2f68328c379c/perf-base/../local-evidence/venv-core/bin/python",
+    "../perf-work/scripts/write_baseline.py",
+    "../perf-work/raw/write-baseline.json"
+  ],
+  "started_at_utc": "2026-11-12T15:03:58.974938+00:00",
+  "authentication": "loopback_trust_generated_test_data_only",
+  "fsync": true,
+  "synchronous_commit": true,
+  "max_connections": 60,
+  "data_directory_reused": false,
+  "exit_status": 0,
+  "postgres_exit_status": 0,
+  "duration_seconds": 3.668794,
+  "finished_at_utc": "2026-11-12T15:04:02.643789+00:00"
+}

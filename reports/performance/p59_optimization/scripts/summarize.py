@@ -55,10 +55,19 @@ def run():
         if isinstance(offer,str):offer={}
         rate=x.get('observed_wire_start_rps',offer.get('transport_header_start_rps'))
         status=x.get('status_counts',m.get('status_counts',{}))
-        capacity=x.get('capacity_gate',x.get('stability_gate','see raw'))
-        latency=x.get('latency_all_attempts',m.get('first_attempt_latency',{}))
-        checked=x.get('validated_successes',m.get('valid_successful_calls'))
-        caps.append({"arm":group,"scenario":test,"gate":capacity,"business":x.get('bounded_recovery_business_gate'),"wire_rps":rate,"status":status,"validated":checked,"latency":latency,"raw":str(path.relative_to(ROOT))})
+        capacity=x.get('capacity_gate',x.get('probe_gate','see raw'))
+        latency=x.get('latency_all_attempts',m.get('latency_all_responses',{}))
+        checked=x.get('validated_successes',m.get('valid_successful_calls',status.get('200')))
+        resource=x.get("service_resources") or (x.get("service_metrics") or x.get("service_final") or {}).get("resources") or {}
+        db=x.get("database_application") or (x.get("service_metrics") or x.get("service_final") or {}).get("database") or {}
+        n_attempts=m.get("completed_requests")
+        retries=n_attempts-m.get("completed_logical_operations",0) if n_attempts is not None else 0
+        caps.append({"retry_attempts":retries,"validated_rps":x.get("successful_query_rps",m.get("effective_call_rps_excluding_duplicates")),"new_world_commits":x.get("new_world_commits",m.get("new_world_commit_receipts")),"database_pool_peak":db.get("peak_checked_out_connections"),"database_sql":db.get("sql_statements"),"service_cpu_seconds":resource.get("service_user_cpu_seconds",0)+resource.get("service_system_cpu_seconds",0),"service_sum_peak_rss_kib":resource.get("service_sum_peak_rss_kib"),"arm":group,"scenario":test,"gate":capacity,"business":x.get('bounded_recovery_business_gate'),"wire_rps":rate,"status":status,"validated":checked,"latency":latency,"raw":str(path.relative_to(ROOT))})
     write("CAPACITY_RUNS.md","# Original capacity gate executions\n\nThe 200 overload offered-call target remains 1000/s and its original minimum 950/s. 1000 open uses the actual header-start and requires all responses validated. P2 status counts include retries and other workflow phases. Each raw asset retains the original configuration, offered traffic, latency distributions, correctness, resource metrics and exit status. Read soak groups are separate repetitions.\n\n"+table(["Arm","Scenario","Capacity","Business recovery","Wire starts/s","HTTP/transport outcomes"],[[r["arm"],r["scenario"],r["gate"],r["business"] or "—",f"{r['wire_rps']:.2f}" if isinstance(r['wire_rps'],(int,float)) else "—",str(r["status"])] for r in caps]))
+    with (ROOT/"CAPACITY_RUNS.md").open("a") as file:
+        file.write("\n## Latency, useful work and resource use\n\nP2 uses all HTTP responses across phases; P3 uses all attempted responses, including transport failures. P2 useful throughput excludes successful duplicate receipts. The read-only P3 value is validated query throughput. RSS is the sum of per-worker high-water marks. The database column counts application cursor executions. P2 contention retries are counted from actual HTTP completions minus distinct completed logical operations.\n\n")
+        file.write(table(["Arm / scenario","P50/P95/P99 ms","Useful/s","Commits","Retries","SQL","Peak pool","CPU s","Peak RSS KiB"],[
+          [r["arm"]+"/"+r["scenario"],"/".join(f"{r['latency'][k]:.1f}" for k in ("p50_ms","p95_ms","p99_ms")),f"{r['validated_rps']:.2f}",r["new_world_commits"],r["retry_attempts"],r["database_sql"],r["database_pool_peak"],f"{r['service_cpu_seconds']:.1f}",r["service_sum_peak_rss_kib"]] for r in caps]))
+        file.write("\n")
     write("capacity-summary.json",json.dumps(caps,indent=2))
 if __name__=="__main__":run()

@@ -1,0 +1,19 @@
+{
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "port": 48329,
+  "command": [
+    "/workspace/scratch/2f68328c379c/perf-base/../local-evidence/venv-core/bin/python",
+    "../perf-work/scripts/tenant_fairness.py",
+    "../perf-work/raw/fairness.json"
+  ],
+  "started_at_utc": "2026-11-12T15:15:18.954211+00:00",
+  "authentication": "loopback_trust_generated_test_data_only",
+  "fsync": true,
+  "synchronous_commit": true,
+  "max_connections": 60,
+  "data_directory_reused": false,
+  "exit_status": 0,
+  "postgres_exit_status": 0,
+  "duration_seconds": 13.265465,
+  "finished_at_utc": "2026-11-12T15:15:32.219729+00:00"
+}

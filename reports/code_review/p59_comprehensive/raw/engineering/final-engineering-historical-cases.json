@@ -1,0 +1,116 @@
+{
+  "raw_xml_sha256": "b69dbb752047cd2c70526b671585de6564fd63bdcf99c83137aaae7d99420479",
+  "counts": {
+    "PASS": 21,
+    "FAILURE": 0,
+    "ERROR": 0,
+    "SKIPPED": 0
+  },
+  "cases": [
+    {
+      "name": "acceptance.test_w1_historical_upgrade.test_w0_binding_survives_upgrade_without_acquiring_membership",
+      "seconds": 4.788,
+      "outcome": "PASS"
+    },
+    {
+      "name": "acceptance.test_w2_historical_upgrades.test_upgrade_historical_service[released-w1]",
+      "seconds": 2.988,
+      "outcome": "PASS"
+    },
+    {
+      "name": "acceptance.test_w2_historical_upgrades.test_upgrade_historical_service[historical-w2]",
+      "seconds": 5.05,
+      "outcome": "PASS"
+    },
+    {
+      "name": "acceptance.test_w2_historical_upgrades.test_upgrade_historical_service[released-bridge]",
+      "seconds": 3.801,
+      "outcome": "PASS"
+    },
+    {
+      "name": "acceptance.test_w3_historical_upgrades.test_old_queue_upgrade[w003-15d1cf51c357627866d06bd49fd326798dda56a3-AW_W3_FROM_W3_DATABASE_URL]",
+      "seconds": 3.574,
+      "outcome": "PASS"
+    },
+    {
+      "name": "acceptance.test_w3_historical_upgrades.test_old_queue_upgrade[w003a-ea7549cb471e5822bb3ce29723484cf9c7b06d6f-AW_W3_FROM_W3A_DATABASE_URL]",
+      "seconds": 3.576,
+      "outcome": "PASS"
+    },
+    {
+      "name": "acceptance.test_w4_historical_upgrades.test_release_history_reaches_canonical_routes[e6763d844f023d7c6a13060dbaebca0416fe3099-w003b-AW_W4_FROM_W3_DATABASE_URL]",
+      "seconds": 2.644,
+      "outcome": "PASS"
+    },
+    {
+      "name": "acceptance.test_w4_historical_upgrades.test_release_history_reaches_canonical_routes[71b471416c9407e348d4bdce817588def5f11d5b-w004-AW_W4_FROM_W4_DATABASE_URL]",
+      "seconds": 3.101,
+      "outcome": "PASS"
+    },
+    {
+      "name": "acceptance.test_w4_historical_upgrades.test_release_history_reaches_canonical_routes[4f7d8ca35bdf0e04045986950edf5819bd572e80-w004b-AW_W4_FROM_W4B_DATABASE_URL]",
+      "seconds": 4.478,
+      "outcome": "PASS"
+    },
+    {
+      "name": "acceptance.test_w5_historical_upgrades.test_historical_ledger_and_wake_authority[signed-w4]",
+      "seconds": 7.463,
+      "outcome": "PASS"
+    },
+    {
+      "name": "acceptance.test_w5_historical_upgrades.test_historical_ledger_and_wake_authority[original-w5]",
+      "seconds": 6.627,
+      "outcome": "PASS"
+    },
+    {
+      "name": "acceptance.test_w5_historical_upgrades.test_historical_ledger_and_wake_authority[w5a]",
+      "seconds": 7.365,
+      "outcome": "PASS"
+    },
+    {
+      "name": "acceptance.test_w5_historical_upgrades.test_historical_ledger_and_wake_authority[w5b]",
+      "seconds": 6.751,
+      "outcome": "PASS"
+    },
+    {
+      "name": "acceptance.test_w6_historical_upgrades.test_released_presets_and_inflight_receipts[w5c]",
+      "seconds": 4.564,
+      "outcome": "PASS"
+    },
+    {
+      "name": "acceptance.test_w6_historical_upgrades.test_released_presets_and_inflight_receipts[w006]",
+      "seconds": 5.467,
+      "outcome": "PASS"
+    },
+    {
+      "name": "acceptance.test_w6_historical_upgrades.test_released_presets_and_inflight_receipts[w007]",
+      "seconds": 5.183,
+      "outcome": "PASS"
+    },
+    {
+      "name": "acceptance.test_w6_historical_upgrades.test_released_presets_and_inflight_receipts[w008]",
+      "seconds": 4.941,
+      "outcome": "PASS"
+    },
+    {
+      "name": "acceptance.test_w6_historical_upgrades.test_released_presets_and_inflight_receipts[w008a]",
+      "seconds": 5.221,
+      "outcome": "PASS"
+    },
+    {
+      "name": "acceptance.test_w6_historical_upgrades.test_released_presets_and_inflight_receipts[rehearsal_early]",
+      "seconds": 5.103,
+      "outcome": "PASS"
+    },
+    {
+      "name": "acceptance.test_w6_historical_upgrades.test_released_presets_and_inflight_receipts[rehearsal_late]",
+      "seconds": 5.131,
+      "outcome": "PASS"
+    },
+    {
+      "name": "acceptance.test_w6_historical_upgrades.test_released_presets_and_inflight_receipts[w009]",
+      "seconds": 6.174,
+      "outcome": "PASS"
+    }
+  ]
+}

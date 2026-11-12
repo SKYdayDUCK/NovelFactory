@@ -26,3 +26,9 @@ python scripts/with_postgres.py --migrate --log-dir "$OUT/validation-session" --
 ```
 
 The local AT-30 launcher wraps each scenario's real exit status and never discards a failed result. Inspect **each status.json and capacity_gate**; the outer supervisor succeeds when it finishes collecting evidence. `gzip -dc` restores original JSON bytes. CPU affinities and resources used in each original run are stored per scenario. Calibration ran the original `benchmarks.client_calibration` client for two repetitions at the observed 2104-byte response size with one CPU per process.
+
+For the frozen-base contract experiment, run the time-only alternatives in an isolated PG17 process. Every proposed validation change exists only inside this script.
+
+```bash
+python scripts/with_postgres.py --migrate --log-dir "$OUT/validators-session" -- python "$EVIDENCE/scripts/validation_pair.py" "$OUT/validators.json"
+```

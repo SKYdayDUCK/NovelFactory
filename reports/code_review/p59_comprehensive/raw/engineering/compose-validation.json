@@ -1,0 +1,21 @@
+{
+  "docker-compose.yml": {
+    "sha256": "f3efca081e14da1aa41cd4c7118fdc3119b1d1b58fa8bbba1ea961fd6a909526",
+    "exit": 0,
+    "services": [
+      "postgres"
+    ]
+  },
+  "reports/p6_readiness/templates/wsl/compose.yaml": {
+    "sha256": "f63b5301c02480fec85b579fa1dbd43210c9684f8203c89458d1ac1a19e9f877",
+    "exit": 0,
+    "services": [
+      "aw-db",
+      "nf-db",
+      "redis"
+    ]
+  },
+  "tool": "Docker Compose version v2.32.4",
+  "daemon_up": "NOT_EXECUTED",
+  "secrets": "fresh owner-private namespace; removed after validation"
+}
