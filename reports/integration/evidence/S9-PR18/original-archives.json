@@ -1,0 +1,541 @@
+{
+  "repository": "SKYdayDUCK/NovelFactory",
+  "pr": 18,
+  "original_pr_head": "3985ebd4f90ff9f7d2e9626df9c0fbf5e8cdb1be",
+  "collection_run": 43155669120,
+  "collection_job_permissions": {
+    "contents": "read",
+    "actions": "read"
+  },
+  "count": 10,
+  "bytes": 2025233,
+  "members": 80,
+  "artifacts": [
+    {
+      "run": 43054332525,
+      "workflow": "p55-admission-paired.yml",
+      "event": "push",
+      "head": "e8b0fa61a8ceb86b92ff4bae82296273d16adf06",
+      "conclusion": "success",
+      "artifact": {
+        "id": 13871700305,
+        "name": "p55-original-http50-f2e6-0f8017",
+        "size": 19737,
+        "digest": "sha256:37cbfed3c4eb77522a52296dda465c716719b2837150c4cad3d4cff594a21b2a"
+      },
+      "git_blob": "bfff68774356497e64b606ee68dac817cd3f64dc",
+      "collector_jobs": [
+        130974903098
+      ],
+      "members": {
+        "1-baseline/end.txt": {
+          "bytes": 21,
+          "sha256": "3f6e8e4044319aba0f4b93f19ec198d83fd4b06a5954a53211dc30a09ded9d52"
+        },
+        "1-baseline/exit.txt": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "1-baseline/http_agents_50.json": {
+          "bytes": 7136,
+          "sha256": "2e23fb7d379ecbd8416c43346b024da93d3395acb304a9e9dd015b2b84de7894"
+        },
+        "1-baseline/junit.xml": {
+          "bytes": 392,
+          "sha256": "ba71700cf1d64ccd0f17ca28752ba1fd2de80270b537b8778e72b5880bab321e"
+        },
+        "1-baseline/load-after.txt": {
+          "bytes": 26,
+          "sha256": "f6a9e4954b4ff50653c1c5b28f30b24880ca6eae672140668ff2605f307cab16"
+        },
+        "1-baseline/load-before.txt": {
+          "bytes": 26,
+          "sha256": "ccf21d8abb15b6bfa1ffa40a805706120ebf187cfb24fd1dcbd0e6e84ea82383"
+        },
+        "1-baseline/source.txt": {
+          "bytes": 82,
+          "sha256": "22fb18e215b2740477a5efb53356cbe9ba8401d065cc9130f249959c264a9486"
+        },
+        "1-baseline/start.txt": {
+          "bytes": 21,
+          "sha256": "9f2190836d6a1db5cba8e8be5e059e2d3f9c514925b275d141c17fbf435071bb"
+        },
+        "1-baseline/test.log": {
+          "bytes": 99,
+          "sha256": "705e31f07295b0547487ecbade5ff291d6f40c1d112e9fa4e2a0c714c8cd6343"
+        },
+        "2-candidate/end.txt": {
+          "bytes": 21,
+          "sha256": "b9eefce89f7e1e04d370a9f3c5698f5d70d7d0c677b11386c9e368862ea9a67d"
+        },
+        "2-candidate/exit.txt": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "2-candidate/http_agents_50.json": {
+          "bytes": 7158,
+          "sha256": "61f195a5d30a8bd0e0c45a75f23b9777ce15901f8e19238e1760e7ba7c591a9e"
+        },
+        "2-candidate/junit.xml": {
+          "bytes": 392,
+          "sha256": "ba8254178bed13bd9c5bfc6c16721699f0da1ff536d5c3d2da3b3ed445ec1d33"
+        },
+        "2-candidate/load-after.txt": {
+          "bytes": 26,
+          "sha256": "8dbf1ea39ae988e6ba005143ac8743b947b5392a05645e013fd507a89f5095a7"
+        },
+        "2-candidate/load-before.txt": {
+          "bytes": 26,
+          "sha256": "49038118cddc6fb554816fd729b8c490b1c0c9ab7f9d5e07b7644ec73d9f1138"
+        },
+        "2-candidate/source.txt": {
+          "bytes": 82,
+          "sha256": "b063826505e1edb3b67c0ca574434bed496fb3193ed30748b4449b9b1363194d"
+        },
+        "2-candidate/start.txt": {
+          "bytes": 21,
+          "sha256": "3f6e8e4044319aba0f4b93f19ec198d83fd4b06a5954a53211dc30a09ded9d52"
+        },
+        "2-candidate/test.log": {
+          "bytes": 99,
+          "sha256": "efdf0c54c0f847f2554d56d59b499783066e33fd123b0d93fcc4d85bf4f904e2"
+        },
+        "3-candidate/end.txt": {
+          "bytes": 21,
+          "sha256": "85224dd0ebd88e5d385ded9d2778b30f37bad3fd2c2ecdd4b7c83805e33ffa89"
+        },
+        "3-candidate/exit.txt": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "3-candidate/http_agents_50.json": {
+          "bytes": 7158,
+          "sha256": "947d5e2fd96565dfa49b792787ea9ea09753aea48247e550c7e74f0cc06206da"
+        },
+        "3-candidate/junit.xml": {
+          "bytes": 392,
+          "sha256": "3404e9790f6548ec462245a200b68d2a56760afc72dbd97de70b7798e44db5b8"
+        },
+        "3-candidate/load-after.txt": {
+          "bytes": 26,
+          "sha256": "206077d576f4456ef6757f97464f22ebb8ddea157c9079c5714047b912447962"
+        },
+        "3-candidate/load-before.txt": {
+          "bytes": 26,
+          "sha256": "81fc5e284007002c0a937546f88dc829412496b8bedc46985f3c85e21e53cff7"
+        },
+        "3-candidate/source.txt": {
+          "bytes": 82,
+          "sha256": "b063826505e1edb3b67c0ca574434bed496fb3193ed30748b4449b9b1363194d"
+        },
+        "3-candidate/start.txt": {
+          "bytes": 21,
+          "sha256": "b9eefce89f7e1e04d370a9f3c5698f5d70d7d0c677b11386c9e368862ea9a67d"
+        },
+        "3-candidate/test.log": {
+          "bytes": 99,
+          "sha256": "bc9885578ecdb07fec3735eef5953c5c2cd5404e402d4a27aa4752bc6cafac16"
+        },
+        "4-baseline/end.txt": {
+          "bytes": 21,
+          "sha256": "b424bfdcbd5de4adbbdc16a8412328ba8792e2b34a649e611e4d043f4e6c89d3"
+        },
+        "4-baseline/exit.txt": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "4-baseline/http_agents_50.json": {
+          "bytes": 7138,
+          "sha256": "b89ce67c363c957f4e64b984e51967e1f6d456e91e1a8efc862e32e034cfb7a8"
+        },
+        "4-baseline/junit.xml": {
+          "bytes": 392,
+          "sha256": "b8f951df47cd12245289de0b0df27aa1d190f39ab49dc698683a83de32e4f86f"
+        },
+        "4-baseline/load-after.txt": {
+          "bytes": 26,
+          "sha256": "d3c20a8bd41b905337c14e3a1f44bdd184de422477ee92f74d3d7d4044ce34f0"
+        },
+        "4-baseline/load-before.txt": {
+          "bytes": 26,
+          "sha256": "f8e27e339e10f8efdf8c1b9ae864f8dfc3af86f3e7257e68f85257b771b97091"
+        },
+        "4-baseline/source.txt": {
+          "bytes": 82,
+          "sha256": "22fb18e215b2740477a5efb53356cbe9ba8401d065cc9130f249959c264a9486"
+        },
+        "4-baseline/start.txt": {
+          "bytes": 21,
+          "sha256": "85224dd0ebd88e5d385ded9d2778b30f37bad3fd2c2ecdd4b7c83805e33ffa89"
+        },
+        "4-baseline/test.log": {
+          "bytes": 99,
+          "sha256": "1e78c5ed63c2578e2fa11d643fba2f326351e212b4b19359639d235adb9efac2"
+        }
+      },
+      "archive_path": "original-zips/43054332525-13871700305.zip"
+    },
+    {
+      "run": 43044231150,
+      "workflow": "p55-large-qualification.yml",
+      "event": "push",
+      "head": "a08294964b29c63cbc74902f2552cb0a19851a5c",
+      "conclusion": "success",
+      "artifact": {
+        "id": 13867723125,
+        "name": "same-runner-600s-55d897-and-8f245a5",
+        "size": 979390,
+        "digest": "sha256:acd627ca328954a5d1b328e22ab7d0371241bf436adee6c16480d31b2d5c0ab5"
+      },
+      "git_blob": "a8a938aaf2b82a0dcfb82a37b1b8ffa8ab8f541d",
+      "collector_jobs": [
+        130974902753,
+        130974902985,
+        130974903077,
+        130974903096
+      ],
+      "members": {
+        "baseline-exit.txt": {
+          "bytes": 2,
+          "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+        },
+        "baseline-sha.txt": {
+          "bytes": 41,
+          "sha256": "24da363f8c5c618c4d568a3418c32e0b264063952720b797e8ef1a4ecd58fc79"
+        },
+        "baseline.json": {
+          "bytes": 5475721,
+          "sha256": "cb3d9d55d5990e7a8d96238ee5f848474a362a42ddf71ce9690be331f77c2caf"
+        },
+        "candidate-exit.txt": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "candidate-queries.xml": {
+          "bytes": 5155,
+          "sha256": "85799fe66f54046720c4b0dd0bcdb1efbdd006c6055cd999e7eec1d69aa71584"
+        },
+        "candidate-sha.txt": {
+          "bytes": 41,
+          "sha256": "0c270b1a305902c09b10139c740e3d788e4b842de52511a9632dc9760c728b2b"
+        },
+        "candidate.json": {
+          "bytes": 5333214,
+          "sha256": "68cc9129add0a6b0409a87d2a3bf9ec7bca39e86a848d337b59e81c11bb4453c"
+        },
+        "large-world-registration.json": {
+          "bytes": 893,
+          "sha256": "d7caf4b12c9ffc2c3379439d8abab3575fc024a70b51d2e0fc29a2e77a9f9473"
+        }
+      },
+      "archive_path": "original-zips/43044231150-13867723125.zip"
+    },
+    {
+      "run": 43042702151,
+      "workflow": "p55-profile.yml",
+      "event": "push",
+      "head": "07c4f6d38ad3237ff34482741845031f1d0dedcc",
+      "conclusion": "success",
+      "artifact": {
+        "id": 13866072369,
+        "name": "p55-exact-500-fixed-cut-profile",
+        "size": 19691,
+        "digest": "sha256:eee6b05063eaf9ecc90fef32225f1e3b1e15e0a10a6c286ee89a41bece636569"
+      },
+      "git_blob": "673f391b43d1a8021250e72e7b077c3602193520",
+      "collector_jobs": [
+        130974903097
+      ],
+      "members": {
+        "profile-accepted-p5.json": {
+          "bytes": 39777,
+          "sha256": "7be34bc12e5caaa1c177634eeb9c212cef77c6e07a68caf543be9787da978662"
+        },
+        "profile-subject.json": {
+          "bytes": 54583,
+          "sha256": "9478046768b7fe8b950c1f3ac579a700e10cbe02ab9890951ddd9fd3ec7d16ea"
+        }
+      },
+      "archive_path": "original-zips/43042702151-13866072369.zip"
+    },
+    {
+      "run": 43042439465,
+      "workflow": "p55-guard-acceptance.yml",
+      "event": "push",
+      "head": "6673629617bb67e02860dcee2a41ff959b0ac2b0",
+      "conclusion": "success",
+      "artifact": {
+        "id": 13866426181,
+        "name": "exact-55d897-s9-guard-and-junit",
+        "size": 4311,
+        "digest": "sha256:14ba32ffbee12ad3719f1ce859d5f15643e183e0826bfc0411dca1429a1f0aac"
+      },
+      "git_blob": "d8d4e0cc05586f627700d8917cb7d120304562f1",
+      "collector_jobs": [
+        130974903153
+      ],
+      "members": {
+        "SHA256SUMS": {
+          "bytes": 337,
+          "sha256": "1bf093a17d77e3323655305af8d12c0de5638e22df2193bfd586a0e4e280ad98"
+        },
+        "guard-comparison.json": {
+          "bytes": 8108,
+          "sha256": "a10994c1cad6deffe398d3ebad2b5efcbc17b0227e9cf0f15ad3e6105086b6e1"
+        },
+        "guard-registration.json": {
+          "bytes": 768,
+          "sha256": "d66cb747461518fc56bc508772dae0c54ec1c86d82251622d23391c0f3672944"
+        },
+        "queries.xml": {
+          "bytes": 5363,
+          "sha256": "8e8a5ed9da543e33ae8ac0b9c161941000b1ed43c308b6fb32c0c7f74c9c8f25"
+        },
+        "source-sha.txt": {
+          "bytes": 41,
+          "sha256": "24da363f8c5c618c4d568a3418c32e0b264063952720b797e8ef1a4ecd58fc79"
+        }
+      },
+      "archive_path": "original-zips/43042439465-13866426181.zip"
+    },
+    {
+      "run": 43042439565,
+      "workflow": "p55-profile.yml",
+      "event": "push",
+      "head": "6673629617bb67e02860dcee2a41ff959b0ac2b0",
+      "conclusion": "success",
+      "artifact": {
+        "id": 13865697546,
+        "name": "p55-exact-500-fixed-cut-profile",
+        "size": 3550,
+        "digest": "sha256:5f0bda4441a1cee124a9f9d9a0d723d6aac923217bd80eb85925aec718cc6ffa"
+      },
+      "git_blob": "1c39e9ba5be07730f0338e667e7a74a76b8ac3cc",
+      "collector_jobs": [
+        130974903024
+      ],
+      "members": {
+        "profile.json": {
+          "bytes": 10145,
+          "sha256": "7ca076e2f6ded43b9eadcdfee0780e3385e423ed4c9eba2666615694ceac581e"
+        }
+      },
+      "archive_path": "original-zips/43042439565-13865697546.zip"
+    },
+    {
+      "run": 43041235141,
+      "workflow": "p55-guard-acceptance.yml",
+      "event": "push",
+      "head": "b54db47093ead1d3396f23bcf6caa4ed5d06fff5",
+      "conclusion": "success",
+      "artifact": {
+        "id": 13866055835,
+        "name": "exact-55d897-s9-guard-and-junit",
+        "size": 4319,
+        "digest": "sha256:1156fab3fbbb5cd5a1309bde9107a4e36768a59299c8141ac3afc5fd2fe68a1e"
+      },
+      "git_blob": "e9cf51342aca1721cfffd4c22431d38e0a17ba5b",
+      "collector_jobs": [
+        130974903121
+      ],
+      "members": {
+        "SHA256SUMS": {
+          "bytes": 337,
+          "sha256": "d92be6b24c4a589e90f5a6ea5b8e601ed523aa9da74d66c4a068cebc218db53a"
+        },
+        "guard-comparison.json": {
+          "bytes": 8120,
+          "sha256": "e2a15075e1e6df0484c015d90ae73d7340ba33643c44ed155b84392dc0662341"
+        },
+        "guard-registration.json": {
+          "bytes": 768,
+          "sha256": "d66cb747461518fc56bc508772dae0c54ec1c86d82251622d23391c0f3672944"
+        },
+        "queries.xml": {
+          "bytes": 5363,
+          "sha256": "d42f0522a427486b488f8088cf65a1a1a97ff0d273a7beb499030442b0b39958"
+        },
+        "source-sha.txt": {
+          "bytes": 41,
+          "sha256": "24da363f8c5c618c4d568a3418c32e0b264063952720b797e8ef1a4ecd58fc79"
+        }
+      },
+      "archive_path": "original-zips/43041235141-13866055835.zip"
+    },
+    {
+      "run": 43040555093,
+      "workflow": "p55-guard-acceptance.yml",
+      "event": "push",
+      "head": "9526c7734835453a0ef7c9cbf22ac145da90d830",
+      "conclusion": "success",
+      "artifact": {
+        "id": 13864898356,
+        "name": "exact-55d897-s9-guard-and-junit",
+        "size": 4327,
+        "digest": "sha256:e688c8af64ebca896438b3b0890456ba8f57b739131f6a30bd38a6f656b499fd"
+      },
+      "git_blob": "8b1caafb7b035a2d262606bec0f9c1dd479378fd",
+      "collector_jobs": [
+        130974903056
+      ],
+      "members": {
+        "SHA256SUMS": {
+          "bytes": 337,
+          "sha256": "076aa4de1825efcad855f76ff9a9666a4f249d073d153dc0c35b4e7ec2a477bb"
+        },
+        "guard-comparison.json": {
+          "bytes": 8121,
+          "sha256": "9406420eb591c873a9fb1c2c57518b64ea93ac086fad20a4c68695e95d1f6d1a"
+        },
+        "guard-registration.json": {
+          "bytes": 768,
+          "sha256": "d66cb747461518fc56bc508772dae0c54ec1c86d82251622d23391c0f3672944"
+        },
+        "queries.xml": {
+          "bytes": 5363,
+          "sha256": "e79bae97b40ade6351687d9176932f8ab1c14ce40414b860f366ff76a3281976"
+        },
+        "source-sha.txt": {
+          "bytes": 41,
+          "sha256": "24da363f8c5c618c4d568a3418c32e0b264063952720b797e8ef1a4ecd58fc79"
+        }
+      },
+      "archive_path": "original-zips/43040555093-13864898356.zip"
+    },
+    {
+      "run": 43040245181,
+      "workflow": "p55-query-comparison.yml",
+      "event": "push",
+      "head": "51e5ac1cda8770e244b8f9fd95803bdd80d0e08d",
+      "conclusion": "success",
+      "artifact": {
+        "id": 13867065861,
+        "name": "same-runner-600s-55d897-and-598f4ee",
+        "size": 981296,
+        "digest": "sha256:919813deea15f5e179764f86092e4306c2ea7737c16d9e9ca64543c608284762"
+      },
+      "git_blob": "0d38b94c959a671936021e05bd879965711ffa91",
+      "collector_jobs": [
+        130974903046,
+        130974903118,
+        130974903136,
+        130974903325
+      ],
+      "members": {
+        "baseline-exit.txt": {
+          "bytes": 2,
+          "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+        },
+        "baseline-sha.txt": {
+          "bytes": 41,
+          "sha256": "24da363f8c5c618c4d568a3418c32e0b264063952720b797e8ef1a4ecd58fc79"
+        },
+        "baseline.json": {
+          "bytes": 5458943,
+          "sha256": "e3f0aacf705e1b2a6ba0b87e9939a3118dd9463024ad8bbf87c2b8eb8a07ce5b"
+        },
+        "candidate-exit.txt": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "candidate-queries.xml": {
+          "bytes": 4686,
+          "sha256": "ac189a7337dbd3730d7f0480d6bcf2569891926c4ba3e08e972481df72434c31"
+        },
+        "candidate-sha.txt": {
+          "bytes": 41,
+          "sha256": "71a10a1995bbeda9855a4727f3236797c5d7a55c8786f5c9d7195799730178f7"
+        },
+        "candidate.json": {
+          "bytes": 5476334,
+          "sha256": "858c511a2b371d99487b0e359ec927e93aaadb37d747fd7911b77bb3b27a2d99"
+        },
+        "query-comparison.json": {
+          "bytes": 902,
+          "sha256": "bd0dc88ab4f3b9283a1f57f4d42a93d8516f1a714fe722107ef97c6f668c9b1c"
+        }
+      },
+      "archive_path": "original-zips/43040245181-13867065861.zip"
+    },
+    {
+      "run": 43040245115,
+      "workflow": "p55-guard-acceptance.yml",
+      "event": "push",
+      "head": "51e5ac1cda8770e244b8f9fd95803bdd80d0e08d",
+      "conclusion": "success",
+      "artifact": {
+        "id": 13865002753,
+        "name": "exact-55d897-s9-guard-and-junit",
+        "size": 4284,
+        "digest": "sha256:56cb46c686f74ebd2e2ea36a81880437cf4bad10d83c4afd5a4d62eebdd41c25"
+      },
+      "git_blob": "6283183e0a65aaf6d755fb4c78ee8aa81054de4f",
+      "collector_jobs": [
+        130974903014
+      ],
+      "members": {
+        "SHA256SUMS": {
+          "bytes": 337,
+          "sha256": "73e94e28e15bf2fa4259139010145f5d9985b9234642b6a7599f02b79101f54a"
+        },
+        "guard-comparison.json": {
+          "bytes": 8107,
+          "sha256": "d33d85f17e4f3d7d0e74b66270be95fe581f56626a04c3f4037d21151e59cc88"
+        },
+        "guard-registration.json": {
+          "bytes": 768,
+          "sha256": "d66cb747461518fc56bc508772dae0c54ec1c86d82251622d23391c0f3672944"
+        },
+        "queries.xml": {
+          "bytes": 5363,
+          "sha256": "4e8105d052d77cf6e78deebe69fea0548555220a277c135cfa8d566834b081dc"
+        },
+        "source-sha.txt": {
+          "bytes": 41,
+          "sha256": "24da363f8c5c618c4d568a3418c32e0b264063952720b797e8ef1a4ecd58fc79"
+        }
+      },
+      "archive_path": "original-zips/43040245115-13865002753.zip"
+    },
+    {
+      "run": 43039818150,
+      "workflow": "p55-guard-acceptance.yml",
+      "event": "push",
+      "head": "c775013e16fd71717d5c6a309df92df90842ea05",
+      "conclusion": "success",
+      "artifact": {
+        "id": 13864487840,
+        "name": "exact-55d897-s9-guard-and-junit",
+        "size": 4328,
+        "digest": "sha256:87665a0d85221d504fc8b5fad5bb595951c197302b67e2a2aea3beeaa7b44cc1"
+      },
+      "git_blob": "a1cdd5e08add0bbe9544e6101a807f065961729b",
+      "collector_jobs": [
+        130974903052
+      ],
+      "members": {
+        "SHA256SUMS": {
+          "bytes": 337,
+          "sha256": "3915cab23926001edc1301577253458b3b972bd8f084cd686987e5cbaee22516"
+        },
+        "guard-comparison.json": {
+          "bytes": 8122,
+          "sha256": "771fd3636b950d7164b444bbf04e676f2cfefb18f388b2dff6f32cbdd20c9e11"
+        },
+        "guard-registration.json": {
+          "bytes": 768,
+          "sha256": "d66cb747461518fc56bc508772dae0c54ec1c86d82251622d23391c0f3672944"
+        },
+        "queries.xml": {
+          "bytes": 5363,
+          "sha256": "ea79caca3df6a308cda4522e6c4a2f745160372e215f0531aeda1b8906e9c3e1"
+        },
+        "source-sha.txt": {
+          "bytes": 41,
+          "sha256": "24da363f8c5c618c4d568a3418c32e0b264063952720b797e8ef1a4ecd58fc79"
+        }
+      },
+      "archive_path": "original-zips/43039818150-13864487840.zip"
+    }
+  ]
+}

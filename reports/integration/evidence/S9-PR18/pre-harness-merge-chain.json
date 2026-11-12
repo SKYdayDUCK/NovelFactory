@@ -1,0 +1,453 @@
+{
+  "version": 1,
+  "observed_utc": "2026-11-12 04:41:07 UTC",
+  "scope": "Product merge/source/ancestry verification through C2. The baseline declaration is signed separately after the #18 administrative closure.",
+  "repository": "SKYdayDUCK/NovelFactory",
+  "main_sha": "0420356b0bd0bfd675494e581799946c4b967f6e",
+  "main_tree": "c15a497115b404e05a1abc194363888c3ca66725",
+  "source_main_url": "https://github.com/SKYdayDUCK/NovelFactory/commit/0420356b0bd0bfd675494e581799946c4b967f6e",
+  "every_listed_phase_merged_into_main_and_reachable": true,
+  "merged_stages": [
+    {
+      "stage": "P5",
+      "pr": 5,
+      "pr_url": "https://github.com/SKYdayDUCK/NovelFactory/pull/5",
+      "title": "P5 · MCP 恢复入口、持久等待与受限 Agent 执行",
+      "state": "closed",
+      "merged_at_utc": "2026-11-11T13:50:16Z",
+      "merged_into": "main",
+      "source_branch": "dev/p5-agent-runtime",
+      "head_sha": "f2e6d38534214e79630b807cec9a720d99e975b1",
+      "merge_sha": "a8f37b72286163e9117f8874a0e175c61204ff8b",
+      "merge_tree": "297ffb6776d299cec2771f36939a1022dc58c619",
+      "merge_parents": [
+        "c8d35c74c342b58fd72fa379f18ac1b480eed468",
+        "f2e6d38534214e79630b807cec9a720d99e975b1"
+      ],
+      "merge_url": "https://github.com/SKYdayDUCK/NovelFactory/commit/a8f37b72286163e9117f8874a0e175c61204ff8b",
+      "reachable_on_pre_harness_main": {
+        "pr": 5,
+        "merge": "a8f37b72286163e9117f8874a0e175c61204ff8b",
+        "main": "0420356b0bd0bfd675494e581799946c4b967f6e",
+        "merge_is_reachable": true,
+        "github_status": "ahead",
+        "ahead_by": 177,
+        "behind_by": 0,
+        "merge_base": "a8f37b72286163e9117f8874a0e175c61204ff8b",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/compare/a8f37b72286163e9117f8874a0e175c61204ff8b...0420356b0bd0bfd675494e581799946c4b967f6e"
+      },
+      "merge_commit_second_parent_is_pr_head": true
+    },
+    {
+      "stage": "P5.5 / S9",
+      "pr": 6,
+      "pr_url": "https://github.com/SKYdayDUCK/NovelFactory/pull/6",
+      "title": "P5.5 S0–S9 · Redis 运行时、语义依赖与有界冲突处置",
+      "state": "closed",
+      "merged_at_utc": "2026-11-11T16:33:42Z",
+      "merged_into": "main",
+      "source_branch": "dev/p5-5-redis-eventhub",
+      "head_sha": "67e8836fd8aceb5d4b8d054594f5f3bdfdddaac9",
+      "merge_sha": "df1e0cc904e3b94a360d86e3a3e00bfec3258673",
+      "merge_tree": "6355c1814d840cc3f2fd1dae94777df9dba4ad76",
+      "merge_parents": [
+        "a8f37b72286163e9117f8874a0e175c61204ff8b",
+        "67e8836fd8aceb5d4b8d054594f5f3bdfdddaac9"
+      ],
+      "merge_url": "https://github.com/SKYdayDUCK/NovelFactory/commit/df1e0cc904e3b94a360d86e3a3e00bfec3258673",
+      "reachable_on_pre_harness_main": {
+        "pr": 6,
+        "merge": "df1e0cc904e3b94a360d86e3a3e00bfec3258673",
+        "main": "0420356b0bd0bfd675494e581799946c4b967f6e",
+        "merge_is_reachable": true,
+        "github_status": "ahead",
+        "ahead_by": 144,
+        "behind_by": 0,
+        "merge_base": "df1e0cc904e3b94a360d86e3a3e00bfec3258673",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/compare/df1e0cc904e3b94a360d86e3a3e00bfec3258673...0420356b0bd0bfd675494e581799946c4b967f6e"
+      },
+      "merge_commit_second_parent_is_pr_head": true
+    },
+    {
+      "stage": "Workshop W0",
+      "pr": 7,
+      "pr_url": "https://github.com/SKYdayDUCK/NovelFactory/pull/7",
+      "title": "W0: independent Workshop MCP service and exact NF catalog",
+      "state": "closed",
+      "merged_at_utc": "2026-11-11T17:11:10Z",
+      "merged_into": "main",
+      "source_branch": "dev/aw-w0",
+      "head_sha": "e5a47f51f39e3ad618e822e451eb89110395e7dc",
+      "merge_sha": "c4939e24b6b5501d82127f528f2054e9c1992856",
+      "merge_tree": "013e2acd2e19a1cfa391dc40c813bc7c76714551",
+      "merge_parents": [
+        "df1e0cc904e3b94a360d86e3a3e00bfec3258673",
+        "e5a47f51f39e3ad618e822e451eb89110395e7dc"
+      ],
+      "merge_url": "https://github.com/SKYdayDUCK/NovelFactory/commit/c4939e24b6b5501d82127f528f2054e9c1992856",
+      "reachable_on_pre_harness_main": {
+        "pr": 7,
+        "merge": "c4939e24b6b5501d82127f528f2054e9c1992856",
+        "main": "0420356b0bd0bfd675494e581799946c4b967f6e",
+        "merge_is_reachable": true,
+        "github_status": "ahead",
+        "ahead_by": 138,
+        "behind_by": 0,
+        "merge_base": "c4939e24b6b5501d82127f528f2054e9c1992856",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/compare/c4939e24b6b5501d82127f528f2054e9c1992856...0420356b0bd0bfd675494e581799946c4b967f6e"
+      },
+      "merge_commit_second_parent_is_pr_head": true
+    },
+    {
+      "stage": "Workshop W1",
+      "pr": 8,
+      "pr_url": "https://github.com/SKYdayDUCK/NovelFactory/pull/8",
+      "title": "W1: roster revisions, four team presets and tenure fences",
+      "state": "closed",
+      "merged_at_utc": "2026-11-11T17:48:11Z",
+      "merged_into": "main",
+      "source_branch": "dev/aw-w1",
+      "head_sha": "48c20a10c1e28af608a4c52f207351eaa1c45e06",
+      "merge_sha": "d039839fe68f6403ea6e5590af3ed787318d5b5f",
+      "merge_tree": "ec211b1d01badd4f07ca631de93ffa229baf187d",
+      "merge_parents": [
+        "c4939e24b6b5501d82127f528f2054e9c1992856",
+        "48c20a10c1e28af608a4c52f207351eaa1c45e06"
+      ],
+      "merge_url": "https://github.com/SKYdayDUCK/NovelFactory/commit/d039839fe68f6403ea6e5590af3ed787318d5b5f",
+      "reachable_on_pre_harness_main": {
+        "pr": 8,
+        "merge": "d039839fe68f6403ea6e5590af3ed787318d5b5f",
+        "main": "0420356b0bd0bfd675494e581799946c4b967f6e",
+        "merge_is_reachable": true,
+        "github_status": "ahead",
+        "ahead_by": 129,
+        "behind_by": 0,
+        "merge_base": "d039839fe68f6403ea6e5590af3ed787318d5b5f",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/compare/d039839fe68f6403ea6e5590af3ed787318d5b5f...0420356b0bd0bfd675494e581799946c4b967f6e"
+      },
+      "merge_commit_second_parent_is_pr_head": true
+    },
+    {
+      "stage": "Workshop W2",
+      "pr": 9,
+      "pr_url": "https://github.com/SKYdayDUCK/NovelFactory/pull/9",
+      "title": "W2: typed communication routes, revocation and recoverable mail",
+      "state": "closed",
+      "merged_at_utc": "2026-11-11T18:16:58Z",
+      "merged_into": "main",
+      "source_branch": "dev/aw-w2",
+      "head_sha": "162af2695b76b20c0257b28217a3eb5b4096d7f6",
+      "merge_sha": "f2c584ec8e738e09d31b05ddd5c032bb2b8f96b1",
+      "merge_tree": "bb41e0bb3d2deaaccbbb26bd18a18676718cd7c8",
+      "merge_parents": [
+        "d039839fe68f6403ea6e5590af3ed787318d5b5f",
+        "162af2695b76b20c0257b28217a3eb5b4096d7f6"
+      ],
+      "merge_url": "https://github.com/SKYdayDUCK/NovelFactory/commit/f2c584ec8e738e09d31b05ddd5c032bb2b8f96b1",
+      "reachable_on_pre_harness_main": {
+        "pr": 9,
+        "merge": "f2c584ec8e738e09d31b05ddd5c032bb2b8f96b1",
+        "main": "0420356b0bd0bfd675494e581799946c4b967f6e",
+        "merge_is_reachable": true,
+        "github_status": "ahead",
+        "ahead_by": 123,
+        "behind_by": 0,
+        "merge_base": "f2c584ec8e738e09d31b05ddd5c032bb2b8f96b1",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/compare/f2c584ec8e738e09d31b05ddd5c032bb2b8f96b1...0420356b0bd0bfd675494e581799946c4b967f6e"
+      },
+      "merge_commit_second_parent_is_pr_head": true
+    },
+    {
+      "stage": "Workshop W3 / NF delegation bridge",
+      "pr": 11,
+      "pr_url": "https://github.com/SKYdayDUCK/NovelFactory/pull/11",
+      "title": "W3 · Workshop 受限委托、NF 原子收据和账务对账",
+      "state": "closed",
+      "merged_at_utc": "2026-11-11T19:02:35Z",
+      "merged_into": "main",
+      "source_branch": "dev/nf-workshop-delegation",
+      "head_sha": "695668b87f6a76acbe7e27c71fcb259b7b3f0795",
+      "merge_sha": "15f606c99c765deeffd904ad540441eb6476b3af",
+      "merge_tree": "788dc4b190299894509593a23982452f0362f9ef",
+      "merge_parents": [
+        "f2c584ec8e738e09d31b05ddd5c032bb2b8f96b1",
+        "695668b87f6a76acbe7e27c71fcb259b7b3f0795"
+      ],
+      "merge_url": "https://github.com/SKYdayDUCK/NovelFactory/commit/15f606c99c765deeffd904ad540441eb6476b3af",
+      "reachable_on_pre_harness_main": {
+        "pr": 11,
+        "merge": "15f606c99c765deeffd904ad540441eb6476b3af",
+        "main": "0420356b0bd0bfd675494e581799946c4b967f6e",
+        "merge_is_reachable": true,
+        "github_status": "ahead",
+        "ahead_by": 111,
+        "behind_by": 0,
+        "merge_base": "15f606c99c765deeffd904ad540441eb6476b3af",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/compare/15f606c99c765deeffd904ad540441eb6476b3af...0420356b0bd0bfd675494e581799946c4b967f6e"
+      },
+      "merge_commit_second_parent_is_pr_head": true
+    },
+    {
+      "stage": "Workshop W3 / organizational delegation",
+      "pr": 10,
+      "pr_url": "https://github.com/SKYdayDUCK/NovelFactory/pull/10",
+      "title": "W3: reserve organizational budget and reconcile remote NF tasks",
+      "state": "closed",
+      "merged_at_utc": "2026-11-11T19:53:57Z",
+      "merged_into": "main",
+      "source_branch": "dev/aw-w3",
+      "head_sha": "a15f41b40ed4a0cd4716e7335954ec0a1c5efadf",
+      "merge_sha": "e6763d844f023d7c6a13060dbaebca0416fe3099",
+      "merge_tree": "7edb5550e8cbe3c1feb70ff8baa0c79974cf8155",
+      "merge_parents": [
+        "15f606c99c765deeffd904ad540441eb6476b3af",
+        "a15f41b40ed4a0cd4716e7335954ec0a1c5efadf"
+      ],
+      "merge_url": "https://github.com/SKYdayDUCK/NovelFactory/commit/e6763d844f023d7c6a13060dbaebca0416fe3099",
+      "reachable_on_pre_harness_main": {
+        "pr": 10,
+        "merge": "e6763d844f023d7c6a13060dbaebca0416fe3099",
+        "main": "0420356b0bd0bfd675494e581799946c4b967f6e",
+        "merge_is_reachable": true,
+        "github_status": "ahead",
+        "ahead_by": 105,
+        "behind_by": 0,
+        "merge_base": "e6763d844f023d7c6a13060dbaebca0416fe3099",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/compare/e6763d844f023d7c6a13060dbaebca0416fe3099...0420356b0bd0bfd675494e581799946c4b967f6e"
+      },
+      "merge_commit_second_parent_is_pr_head": true
+    },
+    {
+      "stage": "Workshop W4",
+      "pr": 12,
+      "pr_url": "https://github.com/SKYdayDUCK/NovelFactory/pull/12",
+      "title": "W4: versioned skill sharing and independent, bounded specialist reviews",
+      "state": "closed",
+      "merged_at_utc": "2026-11-11T21:42:09Z",
+      "merged_into": "main",
+      "source_branch": "dev/aw-w4",
+      "head_sha": "1cc12cab018213e05b70c226dcdf63974ee7dd93",
+      "merge_sha": "6c711adf794842bdf4469ab51e89093d37761bcc",
+      "merge_tree": "cb601579cceafd8cd33d35664a31f8d9dd38c879",
+      "merge_parents": [
+        "e6763d844f023d7c6a13060dbaebca0416fe3099",
+        "1cc12cab018213e05b70c226dcdf63974ee7dd93"
+      ],
+      "merge_url": "https://github.com/SKYdayDUCK/NovelFactory/commit/6c711adf794842bdf4469ab51e89093d37761bcc",
+      "reachable_on_pre_harness_main": {
+        "pr": 12,
+        "merge": "6c711adf794842bdf4469ab51e89093d37761bcc",
+        "main": "0420356b0bd0bfd675494e581799946c4b967f6e",
+        "merge_is_reachable": true,
+        "github_status": "ahead",
+        "ahead_by": 85,
+        "behind_by": 0,
+        "merge_base": "6c711adf794842bdf4469ab51e89093d37761bcc",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/compare/6c711adf794842bdf4469ab51e89093d37761bcc...0420356b0bd0bfd675494e581799946c4b967f6e"
+      },
+      "merge_commit_second_parent_is_pr_head": true
+    },
+    {
+      "stage": "Workshop W5",
+      "pr": 14,
+      "pr_url": "https://github.com/SKYdayDUCK/NovelFactory/pull/14",
+      "title": "W5: durable author resume, scoped organization history and manager operation",
+      "state": "closed",
+      "merged_at_utc": "2026-11-11T22:31:34Z",
+      "merged_into": "main",
+      "source_branch": "dev/aw-w5",
+      "head_sha": "455cf92cc6fe5e1d0e565d627a4d5651a56bc8d4",
+      "merge_sha": "b30e76978830bec4c596c04194d749fd01f67402",
+      "merge_tree": "d6cf8513c8df97902eb08fe1666492097d3d025a",
+      "merge_parents": [
+        "6c711adf794842bdf4469ab51e89093d37761bcc",
+        "455cf92cc6fe5e1d0e565d627a4d5651a56bc8d4"
+      ],
+      "merge_url": "https://github.com/SKYdayDUCK/NovelFactory/commit/b30e76978830bec4c596c04194d749fd01f67402",
+      "reachable_on_pre_harness_main": {
+        "pr": 14,
+        "merge": "b30e76978830bec4c596c04194d749fd01f67402",
+        "main": "0420356b0bd0bfd675494e581799946c4b967f6e",
+        "merge_is_reachable": true,
+        "github_status": "ahead",
+        "ahead_by": 67,
+        "behind_by": 0,
+        "merge_base": "b30e76978830bec4c596c04194d749fd01f67402",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/compare/b30e76978830bec4c596c04194d749fd01f67402...0420356b0bd0bfd675494e581799946c4b967f6e"
+      },
+      "merge_commit_second_parent_is_pr_head": true
+    },
+    {
+      "stage": "Workshop W6",
+      "pr": 15,
+      "pr_url": "https://github.com/SKYdayDUCK/NovelFactory/pull/15",
+      "title": "W6: validate two-service creative workflow and 10/50/200 employee workloads",
+      "state": "closed",
+      "merged_at_utc": "2026-11-11T23:47:40Z",
+      "merged_into": "main",
+      "source_branch": "dev/aw-w6",
+      "head_sha": "50c8c5ed36cc2cfb83d6624c65ed33336e0f1771",
+      "merge_sha": "98a8bbed289a29d0326454c86dd3db54ac85ae5c",
+      "merge_tree": "7053bf12cc789dc6bf4220d0217a93253a2b75f9",
+      "merge_parents": [
+        "b30e76978830bec4c596c04194d749fd01f67402",
+        "50c8c5ed36cc2cfb83d6624c65ed33336e0f1771"
+      ],
+      "merge_url": "https://github.com/SKYdayDUCK/NovelFactory/commit/98a8bbed289a29d0326454c86dd3db54ac85ae5c",
+      "reachable_on_pre_harness_main": {
+        "pr": 15,
+        "merge": "98a8bbed289a29d0326454c86dd3db54ac85ae5c",
+        "main": "0420356b0bd0bfd675494e581799946c4b967f6e",
+        "merge_is_reachable": true,
+        "github_status": "ahead",
+        "ahead_by": 19,
+        "behind_by": 0,
+        "merge_base": "98a8bbed289a29d0326454c86dd3db54ac85ae5c",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/compare/98a8bbed289a29d0326454c86dd3db54ac85ae5c...0420356b0bd0bfd675494e581799946c4b967f6e"
+      },
+      "merge_commit_second_parent_is_pr_head": true
+    },
+    {
+      "stage": "W6 sign-off / stage A",
+      "pr": 25,
+      "pr_url": "https://github.com/SKYdayDUCK/NovelFactory/pull/25",
+      "title": "W6 main sign-off: six CI receipts and AT-30 non-waiver",
+      "state": "closed",
+      "merged_at_utc": "2026-11-12T01:57:08Z",
+      "merged_into": "main",
+      "source_branch": "integration/w6-signed-98a8bb",
+      "head_sha": "e6f79f1063fd52acbaefd20dedd5a1f186b3168b",
+      "merge_sha": "ba892d3a424be39efccb697232a5614b26609cc4",
+      "merge_tree": "628cdba5309671150ca0edff9159386bc6693e25",
+      "merge_parents": [
+        "98a8bbed289a29d0326454c86dd3db54ac85ae5c",
+        "e6f79f1063fd52acbaefd20dedd5a1f186b3168b"
+      ],
+      "merge_url": "https://github.com/SKYdayDUCK/NovelFactory/commit/ba892d3a424be39efccb697232a5614b26609cc4",
+      "reachable_on_pre_harness_main": {
+        "pr": 25,
+        "merge": "ba892d3a424be39efccb697232a5614b26609cc4",
+        "main": "0420356b0bd0bfd675494e581799946c4b967f6e",
+        "merge_is_reachable": true,
+        "github_status": "ahead",
+        "ahead_by": 16,
+        "behind_by": 0,
+        "merge_base": "ba892d3a424be39efccb697232a5614b26609cc4",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/compare/ba892d3a424be39efccb697232a5614b26609cc4...0420356b0bd0bfd675494e581799946c4b967f6e"
+      },
+      "merge_commit_second_parent_is_pr_head": true
+    },
+    {
+      "stage": "P5.6 integrated qualification / stage B",
+      "pr": 26,
+      "pr_url": "https://github.com/SKYdayDUCK/NovelFactory/pull/26",
+      "title": "P5.6 综合验收：双服务、局部重规划与跨作业证据",
+      "state": "closed",
+      "merged_at_utc": "2026-11-12T02:36:05Z",
+      "merged_into": "main",
+      "source_branch": "integration/p56-full-acceptance",
+      "head_sha": "e5f5348ca07dc50c9fe52ab271a733ac31fa063c",
+      "merge_sha": "4e8fc5a3c2331a0de669ad8851d82c5b08a1e5dc",
+      "merge_tree": "515ade557fc82c4ab1a5b67218539a030d0e18cc",
+      "merge_parents": [
+        "ba892d3a424be39efccb697232a5614b26609cc4",
+        "e5f5348ca07dc50c9fe52ab271a733ac31fa063c"
+      ],
+      "merge_url": "https://github.com/SKYdayDUCK/NovelFactory/commit/4e8fc5a3c2331a0de669ad8851d82c5b08a1e5dc",
+      "reachable_on_pre_harness_main": {
+        "pr": 26,
+        "merge": "4e8fc5a3c2331a0de669ad8851d82c5b08a1e5dc",
+        "main": "0420356b0bd0bfd675494e581799946c4b967f6e",
+        "merge_is_reachable": true,
+        "github_status": "ahead",
+        "ahead_by": 14,
+        "behind_by": 0,
+        "merge_base": "4e8fc5a3c2331a0de669ad8851d82c5b08a1e5dc",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/compare/4e8fc5a3c2331a0de669ad8851d82c5b08a1e5dc...0420356b0bd0bfd675494e581799946c4b967f6e"
+      },
+      "merge_commit_second_parent_is_pr_head": true
+    },
+    {
+      "stage": "P6 shared budget / stage C1",
+      "pr": 17,
+      "pr_url": "https://github.com/SKYdayDUCK/NovelFactory/pull/17",
+      "title": "P6: enforce one authorized Token ceiling across tasks and recovered attempts",
+      "state": "closed",
+      "merged_at_utc": "2026-11-12T03:19:32Z",
+      "merged_into": "main",
+      "source_branch": "dev/p6-token-ceiling",
+      "head_sha": "f96d26bcf449d8e7905099402ddb4ddcf8679a60",
+      "merge_sha": "533c1f526ef8841610d5c414e77ecbea8bbd5e35",
+      "merge_tree": "86c524a7ba91e38fa3832a515e890a87ce7599cc",
+      "merge_parents": [
+        "4e8fc5a3c2331a0de669ad8851d82c5b08a1e5dc",
+        "f96d26bcf449d8e7905099402ddb4ddcf8679a60"
+      ],
+      "merge_url": "https://github.com/SKYdayDUCK/NovelFactory/commit/533c1f526ef8841610d5c414e77ecbea8bbd5e35",
+      "reachable_on_pre_harness_main": {
+        "pr": 17,
+        "merge": "533c1f526ef8841610d5c414e77ecbea8bbd5e35",
+        "main": "0420356b0bd0bfd675494e581799946c4b967f6e",
+        "merge_is_reachable": true,
+        "github_status": "ahead",
+        "ahead_by": 10,
+        "behind_by": 0,
+        "merge_base": "533c1f526ef8841610d5c414e77ecbea8bbd5e35",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/compare/533c1f526ef8841610d5c414e77ecbea8bbd5e35...0420356b0bd0bfd675494e581799946c4b967f6e"
+      },
+      "merge_commit_second_parent_is_pr_head": true
+    },
+    {
+      "stage": "P6 preflight and deployment / stage C2",
+      "pr": 16,
+      "pr_url": "https://github.com/SKYdayDUCK/NovelFactory/pull/16",
+      "title": "P6: offline experiment preflight, deployment entry points and real-run blocker",
+      "state": "closed",
+      "merged_at_utc": "2026-11-12T04:08:54Z",
+      "merged_into": "main",
+      "source_branch": "dev/p6-local-validation",
+      "head_sha": "6c01eee41f0366dd9a136038161b2d030d07ab67",
+      "merge_sha": "0420356b0bd0bfd675494e581799946c4b967f6e",
+      "merge_tree": "c15a497115b404e05a1abc194363888c3ca66725",
+      "merge_parents": [
+        "533c1f526ef8841610d5c414e77ecbea8bbd5e35",
+        "6c01eee41f0366dd9a136038161b2d030d07ab67"
+      ],
+      "merge_url": "https://github.com/SKYdayDUCK/NovelFactory/commit/0420356b0bd0bfd675494e581799946c4b967f6e",
+      "reachable_on_pre_harness_main": {
+        "pr": 16,
+        "merge": "0420356b0bd0bfd675494e581799946c4b967f6e",
+        "main": "0420356b0bd0bfd675494e581799946c4b967f6e",
+        "merge_is_reachable": true,
+        "github_status": "identical",
+        "ahead_by": 0,
+        "behind_by": 0,
+        "merge_base": "0420356b0bd0bfd675494e581799946c4b967f6e",
+        "url": "https://github.com/SKYdayDUCK/NovelFactory/compare/0420356b0bd0bfd675494e581799946c4b967f6e...0420356b0bd0bfd675494e581799946c4b967f6e"
+      },
+      "merge_commit_second_parent_is_pr_head": true
+    }
+  ],
+  "issue13": {
+    "state": "open",
+    "capacity": "NOT_MET",
+    "frozen_evidence_blob": "92d1a94d8dbdd9634f959f8213d6513339353746"
+  },
+  "p6": {
+    "real_creation": "BLOCKED_LOCAL_AUTHORIZATION",
+    "literary_quality": "NOT_EVALUATED",
+    "independent_human_scorecards_received": 0
+  },
+  "c2_receipts": {
+    "pr": [
+      "2072e1d023e1ed9f8d75035e5bfcdb401f9cf515",
+      "60260710a129ec94f6ab66e2cefa4485762c1d92"
+    ],
+    "main": [
+      "288f2303eb9025800bf16195a9ba6f2a790245f1",
+      "7d1c2a55ffca7fad935e5c6ac53a3dbfde835401"
+    ]
+  },
+  "evidence_pr18_ci_index": "a4f70bf3c6885eba95f77a8c757ddeeaeb0f4cbe"
+}

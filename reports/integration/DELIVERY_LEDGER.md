@@ -14,7 +14,7 @@
 | W6 | [#15](https://github.com/SKYdayDUCK/NovelFactory/pull/15) | **MERGED_AND_VERIFIED** scoped W6, AT-30 NOT_MET; [主线签收](W6_主线签收.md) | `98a8bbed289a29d0326454c86dd3db54ac85ae5c`, 2026-11-11T23:47:40Z |
 | P5.6 双服务综合验收 | [#26](https://github.com/SKYdayDUCK/NovelFactory/pull/26) | **MERGED_AND_VERIFIED**，[主线签收](https://github.com/SKYdayDUCK/NovelFactory/blob/3ef5a72d7a65edb76a988132a72c4e82ee0805ee/reports/integration/evidence/P56/main-4e8fc5a/SIGNOFF.md) | `4e8fc5a3c2331a0de669ad8851d82c5b08a1e5dc`，2026-11-12 02:36:05 UTC |
 | P6 全局 Token 预算 | [#17](https://github.com/SKYdayDUCK/NovelFactory/pull/17) | **MERGED_AND_VERIFIED**，[#17 主线签收](https://github.com/SKYdayDUCK/NovelFactory/blob/fee462dfb6923059512b9797b4707e61eec8e8a3/reports/integration/evidence/P6-C1/main-533c1f5/SIGNOFF.md) | `533c1f526ef8841610d5c414e77ecbea8bbd5e35`，2026-11-12 03:19:32 UTC |
-| P6 本地预检和部署 | [#16](https://github.com/SKYdayDUCK/NovelFactory/pull/16) | 当前交付 | 基于已签收的 #17 主线 |
+| P6 本地预检和部署 | [#16](https://github.com/SKYdayDUCK/NovelFactory/pull/16) | **MERGED_AND_VERIFIED**，[#16 签收](https://github.com/SKYdayDUCK/NovelFactory/blob/a9d77b86c425de3cfe67c1b82996377003ac4200/reports/integration/evidence/P6-C2/main-0420356/SIGNOFF.md) | `0420356b0bd0bfd675494e581799946c4b967f6e`，2026-11-12 04:08:54 UTC |
 
 每阶段的原 PR 讨论保存合并后的完整 SHA、时间、主线验收作业、遗留问题和下一阶段是否开放。后续阶段 PR 将前一阶段已确认的回执归入本表，保留原 PR 上可即时复查的记录。
 
@@ -35,3 +35,5 @@ W6 #15 的当前正式候选为 `50c8c5ed36cc2cfb83d6624c65ed33336e0f1771`，树
 W6 main 六条正式 push 工作流三绿三红：Workshop、NF integrity、PITR 成功；P2/P3 历史 AT-30 原容量门槛失败保留。[原始主线回执](W6_主线签收.md)。
 
 [#25](https://github.com/SKYdayDUCK/NovelFactory/pull/25) 的合并提交为 `ba892d3a424be39efccb697232a5614b26609cc4`，2026-11-12 01:57:08 UTC 合并。已在[精确主线](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43137991893)复验并[签收](https://github.com/SKYdayDUCK/NovelFactory/tree/9eb7bb52e422f1a8e33a91fe01a1e67fef6375d3/reports/integration/evidence/W6/signoff-ba892d3)。 [P5.6 独立综合验收](P56_SYSTEM_ACCEPTANCE.md)。
+
+#18 已归档关闭，原输入、测试版本和采用决策见 [S9 归档](evidence/S9-PR18/README.md)。[PRE_HARNESS_BASELINE](PRE_HARNESS_BASELINE.md)保留 #16 实际主线、开放列表和原始容量边界。
