@@ -1,0 +1,81 @@
+{
+  "status": "PASS",
+  "run_id": 43152869330,
+  "run_attempt": 1,
+  "event": "push",
+  "head_sha": "0420356b0bd0bfd675494e581799946c4b967f6e",
+  "checkout_sha": "0420356b0bd0bfd675494e581799946c4b967f6e",
+  "archives": {
+    "workshop-results": {
+      "artifact_id": 13915155254,
+      "job_id": 130965942057,
+      "job_attempt": 1,
+      "sha256": "196e9b6dd3758991a1f8d9ab0058dccb2d4f1a0f12e87e381e872692016e3b9c"
+    },
+    "workshop-scene-recovery-results": {
+      "artifact_id": 13915080342,
+      "job_id": 130965942394,
+      "job_attempt": 1,
+      "sha256": "db172b91b85cb2f2366f6dfa9a73e1e3f806252e55d57a223a06cd7b46e3ae77"
+    },
+    "workshop-comparisons": {
+      "artifact_id": 13914228878,
+      "job_id": 130965942549,
+      "job_attempt": 1,
+      "sha256": "9a6eab2ca44f9edc78dfa4e45474c12321098dbb8a1c6c853a25dafd3a353e4c"
+    }
+  },
+  "messages": {
+    "10": 30,
+    "50": 150,
+    "200": 600
+  },
+  "delegations": {
+    "fixed-1": {
+      "10": 10,
+      "50": 50,
+      "200": 200
+    },
+    "fixed-2": {
+      "10": 10,
+      "50": 50,
+      "200": 200
+    },
+    "adaptive-2": {
+      "10": 10,
+      "50": 50,
+      "200": 200
+    }
+  },
+  "scenes": {
+    "Minimal": {
+      "operation_id": "dfcf8253-2f19-432b-91b0-0b485e33ae96",
+      "review_id": "74c3d5b5-c5f0-49c3-97b9-5358c900b237"
+    },
+    "Standard": {
+      "operation_id": "0a9944fe-cea6-45f5-98a2-f533879ee84b",
+      "review_id": "eb072478-a1d1-40e3-881b-4f0fdb2d5b3f"
+    },
+    "Long-form": {
+      "operation_id": "4b61052d-0649-4977-be25-589281b34f2b",
+      "review_id": "1f5f2656-b672-4123-b8b3-34a2a014bc62"
+    },
+    "Research-Audit": {
+      "operation_id": "68abe411-18d9-44f2-9721-f56b250a0164",
+      "review_id": "01cf717d-4fe3-4960-a29c-1d2d5fd4ebdc"
+    }
+  },
+  "literary_quality": "NOT_EVALUATED",
+  "historical_nf_capacity": "NOT_EVALUATED_BY_THIS_RUN",
+  "services_and_recovery": {
+    "postgres_system_ids": [
+      "7707132208395681829",
+      "7707132212175810597"
+    ],
+    "wal_targets": [
+      "0/402B9A8",
+      "0/4077960"
+    ],
+    "redis_replayed_operation": "0d11fb61-012c-4ece-b41d-2ad5ca7c29cf"
+  }
+}

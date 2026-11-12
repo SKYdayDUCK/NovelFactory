@@ -39,3 +39,5 @@ P5.6 [#26](https://github.com/SKYdayDUCK/NovelFactory/pull/26) 在 `4e8fc5a3c233
 [#17 候选本地证据](evidence/P6-C1/README.md)记录了旧发行真实升级、预算取消修前失败和修后回归，以及两端账本随物理 WAL 回放同一 attempt 的结果。PR 和 main 的 GitHub 工作流分轮验收。
 
 P6 C1 [#17](https://github.com/SKYdayDUCK/NovelFactory/pull/17) **MERGED_AND_VERIFIED**，2026-11-12 03:19:32 UTC，主线 `533c1f526ef8841610d5c414e77ecbea8bbd5e35`。[P6 全局预算主线签收](evidence/P6-C1/main-533c1f5/SIGNOFF.md)。
+
+P6 C2 [#16](https://github.com/SKYdayDUCK/NovelFactory/pull/16) **MERGED_AND_VERIFIED**。2026-11-12 04:08:54 UTC 主线合并 `0420356b0bd0bfd675494e581799946c4b967f6e`。[精确签收](evidence/P6-C2/main-0420356/SIGNOFF.md)。

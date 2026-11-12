@@ -1,0 +1,1082 @@
+{
+  "event": "push",
+  "head": "0420356b0bd0bfd675494e581799946c4b967f6e",
+  "checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+  "tree": "c15a497115b404e05a1abc194363888c3ca66725",
+  "base": "533c1f526ef8841610d5c414e77ecbea8bbd5e35",
+  "remote_receipt_run": 43155006768,
+  "workflows": [
+    {
+      "workflow": "p6-offline.yml",
+      "id": 43152869372,
+      "conclusion": "success"
+    },
+    {
+      "workflow": "p4-recovery-drill.yml",
+      "id": 43152869943,
+      "conclusion": "success"
+    },
+    {
+      "workflow": "agent-workshop.yml",
+      "id": 43152869330,
+      "conclusion": "success"
+    },
+    {
+      "workflow": "p3-p4-evidence.yml",
+      "id": 43152869367,
+      "conclusion": "failure"
+    },
+    {
+      "workflow": "p3-scale-experiments.yml",
+      "id": 43152869356,
+      "conclusion": "failure"
+    },
+    {
+      "workflow": "p2-load.yml",
+      "id": 43152869523,
+      "conclusion": "failure"
+    },
+    {
+      "workflow": "p1-integrity.yml",
+      "id": 43152869266,
+      "conclusion": "success"
+    }
+  ],
+  "capacity": [
+    {
+      "case": "Same world CPU and SQL paired comparison",
+      "run_id": 43152869367,
+      "job_id": 130965942262,
+      "archive_id": 13914751383,
+      "archive_sha256": "47d1aa02c31688f5b8624f7630d364aa92733bd47d88e43f2b83eca558a4784a",
+      "conclusion": "success",
+      "failed_steps": [],
+      "measurements": [
+        {
+          "member": "context-p3.json",
+          "member_sha256": "b605e58fa42d1d7ba584e38cf0c3732c40a39db592eca8e9d254cffc4a998231",
+          "recorded_checkout": null,
+          "metrics": {},
+          "offered_first_attempts": {}
+        }
+      ]
+    },
+    {
+      "case": "Independent load process / 200 / overload",
+      "run_id": 43152869367,
+      "job_id": 130965942617,
+      "archive_id": 13914268447,
+      "archive_sha256": "7d32981283088417e7f4cfabf4a191449cec48e4ae7098df0a94bcf170127005",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Actual requests and strict capacity gate"
+      ],
+      "measurements": [
+        {
+          "profile": "overload",
+          "logical_agent_task_count": 200,
+          "engineer_correctness": "PASS",
+          "first_attempt_capacity_gate": "NOT_MET",
+          "capacity_gate": "NOT_MET",
+          "bounded_recovery_business_gate": "PASS",
+          "member": "load.json",
+          "member_sha256": "d8f8ddba49cdd69b624f945fa2f7be20ddb5aea3d359da872268812e1aea3a7b",
+          "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+          "metrics": {
+            "planned_requests": 2141,
+            "completed_requests": 2906,
+            "first_attempt_status_counts": {
+              "200": 1629,
+              "409": 19,
+              "429": 493
+            },
+            "status_counts": {
+              "200": 2122,
+              "409": 19,
+              "429": 765
+            },
+            "valid_successful_calls": 2122,
+            "api_success_rps": 12.7928
+          },
+          "offered_first_attempts": {
+            "gate": "NOT_MET",
+            "transport_header_starts": 1000,
+            "transport_header_start_rps": 45.921837447176095,
+            "target_rps": 1000,
+            "first_attempts": 1000,
+            "actual_call_start_rps": 58.40090602662861
+          }
+        }
+      ],
+      "comparison": "MATCHES_EXISTING_ISSUE_13"
+    },
+    {
+      "case": "Independent load process / 200 / mixed",
+      "run_id": 43152869367,
+      "job_id": 130965942538,
+      "archive_id": 13914008744,
+      "archive_sha256": "13ccb639340f2260db6a85e33d54c537aae1bb8e3bf68cb24d301423cef5cb35",
+      "conclusion": "success",
+      "failed_steps": [],
+      "measurements": [
+        {
+          "profile": "mixed",
+          "logical_agent_task_count": 200,
+          "engineer_correctness": "PASS",
+          "first_attempt_capacity_gate": "PASS",
+          "capacity_gate": "PASS",
+          "bounded_recovery_business_gate": "PASS",
+          "member": "load.json",
+          "member_sha256": "ce0d7f56979e76f57697980a26e4946771fbb25e720e1818b9514e5b8c12f87e",
+          "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+          "metrics": {
+            "planned_requests": 1141,
+            "completed_requests": 1141,
+            "first_attempt_status_counts": {
+              "200": 1122,
+              "409": 19
+            },
+            "status_counts": {
+              "200": 1122,
+              "409": 19
+            },
+            "valid_successful_calls": 1122,
+            "api_success_rps": 8.0618
+          },
+          "offered_first_attempts": {
+            "gate": "NOT_APPLICABLE",
+            "target_rps": null,
+            "first_attempts": 0
+          }
+        }
+      ]
+    },
+    {
+      "case": "Measured 500-read-soak",
+      "run_id": 43152869356,
+      "job_id": 130965942630,
+      "archive_id": 13915520702,
+      "archive_sha256": "2289008e826a84bd377595c1a4ac39882f5eb21807659078b1f238c7511e7818",
+      "conclusion": "success",
+      "failed_steps": [],
+      "measurements": [
+        {
+          "correctness_errors": [],
+          "world_unchanged": true,
+          "new_world_commits": 0,
+          "status_counts": {
+            "200": 12000
+          },
+          "successful_query_rps": 20.000361081685547,
+          "probe_gate": "PASS",
+          "long_duration_gate": "NOT_EXECUTED",
+          "duration_seconds": 599.989167745,
+          "scheduled_count": 12000,
+          "actual_call_start_rps": 20.00048134159504,
+          "member": "result.json",
+          "member_sha256": "87bfa39a8d29627a9fd122ef8d2a744364a36c9f4e654d81a261c75e8b98f795",
+          "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+          "metrics": {},
+          "offered_first_attempts": {}
+        }
+      ]
+    },
+    {
+      "case": "Measured 500-mixed",
+      "run_id": 43152869356,
+      "job_id": 130965942849,
+      "archive_id": 13915120898,
+      "archive_sha256": "7c0414e261e7473eeb93da10955cfd5bf2be79ec89e4ee174055ecf3d56a834d",
+      "conclusion": "success",
+      "failed_steps": [],
+      "measurements": [
+        {
+          "profile": "mixed",
+          "logical_agent_task_count": 500,
+          "engineer_correctness": "PASS",
+          "first_attempt_capacity_gate": "PASS",
+          "capacity_gate": "PASS",
+          "bounded_recovery_business_gate": "PASS",
+          "member": "result.json",
+          "member_sha256": "dc51c884144f13f789162dbc0bc7aa9152e88e14b238dab6b109ab11a1658d12",
+          "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+          "metrics": {
+            "planned_requests": 2851,
+            "completed_requests": 2851,
+            "first_attempt_status_counts": {
+              "200": 2802,
+              "409": 49
+            },
+            "status_counts": {
+              "200": 2802,
+              "409": 49
+            },
+            "valid_successful_calls": 2802,
+            "api_success_rps": 8.019
+          },
+          "offered_first_attempts": {
+            "gate": "NOT_APPLICABLE",
+            "target_rps": null,
+            "first_attempts": 0
+          }
+        }
+      ]
+    },
+    {
+      "case": "Measured 1000-read-open",
+      "run_id": 43152869356,
+      "job_id": 130965942962,
+      "archive_id": 13913879031,
+      "archive_sha256": "cc71182d1ac5ab4d25f4c47daa8c96ef87819a200fb41e4e5f63660eb21596ae",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Original targets and actual network evidence"
+      ],
+      "measurements": [
+        {
+          "capacity_gate": "NOT_MET",
+          "offered_wire_rate_gate": "NOT_MET",
+          "correctness_errors": [],
+          "world_unchanged": true,
+          "new_world_commits": 0,
+          "scheduled_requests": 5000,
+          "completed_requests": 5000,
+          "status_counts": {
+            "200": 2100,
+            "429": 2890,
+            "transport_error": 10
+          },
+          "validated_successes": 2100,
+          "observed_wire_start_rps": 47.967275799532246,
+          "successful_query_rps": 19.67831164788166,
+          "member": "result.json",
+          "member_sha256": "845acbcfd3a3e8a509ca8dae3c5018b81324cb2f5172d899b0b225d7206969ea",
+          "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+          "metrics": {},
+          "offered_first_attempts": {}
+        }
+      ],
+      "comparison": "MATCHES_EXISTING_ISSUE_13"
+    },
+    {
+      "case": "200 agents / overload / full capacity gate",
+      "run_id": 43152869523,
+      "job_id": 130965943619,
+      "archive_id": 13915190405,
+      "archive_sha256": "b6ed369ac774d41f9a11deb402d0ec091b0a48a33932d3e1e09a0521c46a9543",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Measure fixed population, requests and business completion"
+      ],
+      "measurements": [
+        {
+          "profile": "overload",
+          "logical_agent_task_count": 200,
+          "engineer_correctness": "PASS",
+          "first_attempt_capacity_gate": "NOT_MET",
+          "capacity_gate": "NOT_MET",
+          "bounded_recovery_business_gate": "PASS",
+          "member": "run-1/load.json",
+          "member_sha256": "c50079cf477346a795141f2a1ce34c794dca949fc43ca2704dcdea014426d551",
+          "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+          "metrics": {
+            "planned_requests": 2141,
+            "completed_requests": 3104,
+            "first_attempt_status_counts": {
+              "200": 1570,
+              "409": 19,
+              "429": 552
+            },
+            "status_counts": {
+              "200": 2103,
+              "409": 19,
+              "429": 982
+            },
+            "valid_successful_calls": 2103,
+            "api_success_rps": 11.8464
+          },
+          "offered_first_attempts": {
+            "gate": "NOT_MET",
+            "transport_header_starts": 1000,
+            "transport_header_start_rps": 30.32052620408229,
+            "target_rps": 1000,
+            "first_attempts": 1000,
+            "actual_call_start_rps": 32.78352076438964
+          }
+        },
+        {
+          "profile": "overload",
+          "logical_agent_task_count": 200,
+          "engineer_correctness": "PASS",
+          "first_attempt_capacity_gate": "NOT_MET",
+          "capacity_gate": "NOT_MET",
+          "bounded_recovery_business_gate": "PASS",
+          "member": "run-2/load.json",
+          "member_sha256": "9990a32136ffd81603be19c6448dbc4417b7aaf3408596451824d0860306981e",
+          "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+          "metrics": {
+            "planned_requests": 2141,
+            "completed_requests": 3084,
+            "first_attempt_status_counts": {
+              "200": 1589,
+              "409": 19,
+              "429": 533
+            },
+            "status_counts": {
+              "200": 2100,
+              "409": 19,
+              "429": 965
+            },
+            "valid_successful_calls": 2100,
+            "api_success_rps": 11.8528
+          },
+          "offered_first_attempts": {
+            "gate": "NOT_MET",
+            "transport_header_starts": 1000,
+            "transport_header_start_rps": 30.75288700807501,
+            "target_rps": 1000,
+            "first_attempts": 1000,
+            "actual_call_start_rps": 32.97694139363724
+          }
+        }
+      ],
+      "comparison": "MATCHES_EXISTING_ISSUE_13"
+    },
+    {
+      "case": "50 agents / overload / full capacity gate",
+      "run_id": 43152869523,
+      "job_id": 130965943631,
+      "archive_id": 13914836408,
+      "archive_sha256": "79c77542ed142e526693b3d2a1fdd0f99c69d60ad9b94b7ca4b42d1a162b6141",
+      "conclusion": "failure",
+      "failed_steps": [
+        "Measure fixed population, requests and business completion"
+      ],
+      "measurements": [
+        {
+          "profile": "overload",
+          "logical_agent_task_count": 50,
+          "engineer_correctness": "PASS",
+          "first_attempt_capacity_gate": "NOT_MET",
+          "capacity_gate": "NOT_MET",
+          "bounded_recovery_business_gate": "PASS",
+          "member": "run-1/load.json",
+          "member_sha256": "2e534b4af5d8ff748aec3b9467dfaa5089e963f851f1d35e32f0614abb7cf3e4",
+          "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+          "metrics": {
+            "planned_requests": 536,
+            "completed_requests": 629,
+            "first_attempt_status_counts": {
+              "200": 454,
+              "409": 4,
+              "429": 78
+            },
+            "status_counts": {
+              "200": 532,
+              "409": 4,
+              "429": 93
+            },
+            "valid_successful_calls": 532,
+            "api_success_rps": 12.9236
+          },
+          "offered_first_attempts": {
+            "gate": "NOT_MET",
+            "transport_header_starts": 250,
+            "transport_header_start_rps": 69.77338501234073,
+            "target_rps": 1000,
+            "first_attempts": 250,
+            "actual_call_start_rps": 106.23143349720283
+          }
+        },
+        {
+          "profile": "overload",
+          "logical_agent_task_count": 50,
+          "engineer_correctness": "PASS",
+          "first_attempt_capacity_gate": "NOT_MET",
+          "capacity_gate": "NOT_MET",
+          "bounded_recovery_business_gate": "PASS",
+          "member": "run-2/load.json",
+          "member_sha256": "83be862be2d0bcb2437b5951293aa431a0742f71dc7344d9d29035710cf4151c",
+          "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+          "metrics": {
+            "planned_requests": 536,
+            "completed_requests": 625,
+            "first_attempt_status_counts": {
+              "200": 449,
+              "409": 4,
+              "429": 83
+            },
+            "status_counts": {
+              "200": 532,
+              "409": 4,
+              "429": 89
+            },
+            "valid_successful_calls": 532,
+            "api_success_rps": 13.0691
+          },
+          "offered_first_attempts": {
+            "gate": "NOT_MET",
+            "transport_header_starts": 250,
+            "transport_header_start_rps": 55.41045236959792,
+            "target_rps": 1000,
+            "first_attempts": 250,
+            "actual_call_start_rps": 91.16047281898582
+          }
+        }
+      ],
+      "comparison": "MATCHES_EXISTING_ISSUE_13"
+    },
+    {
+      "case": "200 agents / mixed / full capacity gate",
+      "run_id": 43152869523,
+      "job_id": 130965943607,
+      "archive_id": 13913759419,
+      "archive_sha256": "d3f200dfac2da7f6fd1ca267c5fec753221aca70dd9f1442e0d7911ca84b46d9",
+      "conclusion": "success",
+      "failed_steps": [],
+      "measurements": [
+        {
+          "profile": "mixed",
+          "logical_agent_task_count": 200,
+          "engineer_correctness": "PASS",
+          "first_attempt_capacity_gate": "PASS",
+          "capacity_gate": "PASS",
+          "bounded_recovery_business_gate": "PASS",
+          "member": "run-1/load.json",
+          "member_sha256": "48e7cc77f8ff43e982d2d371cea0b7e05e84ea47cff404366d816aca58d6275e",
+          "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+          "metrics": {
+            "planned_requests": 1141,
+            "completed_requests": 1141,
+            "first_attempt_status_counts": {
+              "200": 1122,
+              "409": 19
+            },
+            "status_counts": {
+              "200": 1122,
+              "409": 19
+            },
+            "valid_successful_calls": 1122,
+            "api_success_rps": 8.061
+          },
+          "offered_first_attempts": {
+            "gate": "NOT_APPLICABLE",
+            "target_rps": null,
+            "first_attempts": 0
+          }
+        },
+        {
+          "profile": "mixed",
+          "logical_agent_task_count": 200,
+          "engineer_correctness": "PASS",
+          "first_attempt_capacity_gate": "PASS",
+          "capacity_gate": "PASS",
+          "bounded_recovery_business_gate": "PASS",
+          "member": "run-2/load.json",
+          "member_sha256": "ee05935e5fd76739088d7cc581997b6b01972663be1153839b8f11e5a6a2100c",
+          "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+          "metrics": {
+            "planned_requests": 1141,
+            "completed_requests": 1141,
+            "first_attempt_status_counts": {
+              "200": 1122,
+              "409": 19
+            },
+            "status_counts": {
+              "200": 1122,
+              "409": 19
+            },
+            "valid_successful_calls": 1122,
+            "api_success_rps": 8.0661
+          },
+          "offered_first_attempts": {
+            "gate": "NOT_APPLICABLE",
+            "target_rps": null,
+            "first_attempts": 0
+          }
+        }
+      ]
+    },
+    {
+      "case": "50 agents / mixed / full capacity gate",
+      "run_id": 43152869523,
+      "job_id": 130965943333,
+      "archive_id": 13913414894,
+      "archive_sha256": "652686e1beeb4ece648ff3f087e898ac8193dcf2bf065b7692e46479b82c855e",
+      "conclusion": "success",
+      "failed_steps": [],
+      "measurements": [
+        {
+          "profile": "mixed",
+          "logical_agent_task_count": 50,
+          "engineer_correctness": "PASS",
+          "first_attempt_capacity_gate": "PASS",
+          "capacity_gate": "PASS",
+          "bounded_recovery_business_gate": "PASS",
+          "member": "run-1/load.json",
+          "member_sha256": "5d5f552b8131e712bda51e709af0bff89450637d72b3d1793086291bb0c45eac",
+          "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+          "metrics": {
+            "planned_requests": 286,
+            "completed_requests": 286,
+            "first_attempt_status_counts": {
+              "200": 282,
+              "409": 4
+            },
+            "status_counts": {
+              "200": 282,
+              "409": 4
+            },
+            "valid_successful_calls": 282,
+            "api_success_rps": 8.2775
+          },
+          "offered_first_attempts": {
+            "gate": "NOT_APPLICABLE",
+            "target_rps": null,
+            "first_attempts": 0
+          }
+        },
+        {
+          "profile": "mixed",
+          "logical_agent_task_count": 50,
+          "engineer_correctness": "PASS",
+          "first_attempt_capacity_gate": "PASS",
+          "capacity_gate": "PASS",
+          "bounded_recovery_business_gate": "PASS",
+          "member": "run-2/load.json",
+          "member_sha256": "627628d5e517ad41e39418d1baa4af00285bcec90071a990e43cdfb0c2a724a6",
+          "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+          "metrics": {
+            "planned_requests": 286,
+            "completed_requests": 286,
+            "first_attempt_status_counts": {
+              "200": 282,
+              "409": 4
+            },
+            "status_counts": {
+              "200": 282,
+              "409": 4
+            },
+            "valid_successful_calls": 282,
+            "api_success_rps": 8.2767
+          },
+          "offered_first_attempts": {
+            "gate": "NOT_APPLICABLE",
+            "target_rps": null,
+            "first_attempts": 0
+          }
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "p6": {
+    "status": "PASS",
+    "native_pg": "postgres (PostgreSQL) 17.11 (Ubuntu 17.11-1.pgdg24.04+2)",
+    "redis": {
+      "redis_version": "8.0.2",
+      "target_subscriber_receipts": 1,
+      "target_audit_rows": 1,
+      "excluded_redis_entries_quarantined": 1,
+      "excluded_world_revisions": 0
+    },
+    "lsn": "0/310D7F8",
+    "held": {
+      "work_id": "7db0b6fc-c81b-4ed6-8a83-6d9859ec7cc8",
+      "budget_id": "2021462b-6258-4d60-9542-3c0058e7629f",
+      "currency": "USD",
+      "limit_amount": "5.000000",
+      "reserved_amount": "0.500000",
+      "spent_amount": "0.000000",
+      "total_tokens": 150,
+      "reserved_tokens": 100,
+      "spent_tokens": 0,
+      "available_tokens": 50,
+      "unquantified_attempts": 0
+    },
+    "unknown": 1,
+    "loss": 0,
+    "model_calls": 0,
+    "empty_templates": {
+      "saved_shared_budget_receipt": "NOT_SUPPLIED",
+      "nf_source_sha": "0420356b0bd0bfd675494e581799946c4b967f6e",
+      "nf_tree": "c15a497115b404e05a1abc194363888c3ca66725",
+      "http_route": "BLOCKED_ENVIRONMENT",
+      "backend_config_sha256": null,
+      "local_input_checks": "BLOCKED_ENVIRONMENT",
+      "missing_or_inconsistent": [
+        "accepted_plan_ref",
+        "authorized_limits.amounts",
+        "authorized_limits.authorization_ref",
+        "authorized_limits.currency",
+        "authorized_limits.model_name",
+        "authorized_limits.provider_endpoint",
+        "authorized_limits.tokens",
+        "codex_host_binary",
+        "first_scene.register_scene_arguments",
+        "material_seed",
+        "model_route.environment",
+        "nf_source_sha",
+        "preregistered_conflict_labels",
+        "registered_runtime_skill_tree",
+        "role_mcp_relay"
+      ],
+      "distinct_readers_listed": false,
+      "deployment_authority_and_runtime_quota": "REQUIRES_LIVE_VERIFICATION",
+      "literary_acceptance": "NOT_EVALUATED",
+      "scenes_dispatched": 0,
+      "http_provider_requests_sent": 0,
+      "production_model_requests_sent": 0,
+      "actual_cost": null,
+      "db_connections_opened": 0
+    },
+    "ci_unit": {
+      "raw_sha256": "795919a053f3c40e85d7a8dea295f7a77618e49648d693de49da457dfa5d6259",
+      "totals": {
+        "tests": 22,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "p6_nodes": [
+        {
+          "module": "tests.unit.test_engineering_release_ci.SourceTests",
+          "test": "test_verify_integrated_event_tree_for_main_and_pr",
+          "result": "PASS"
+        },
+        {
+          "module": "tests.unit.test_engineering_release_ci.GateTests",
+          "test": "test_both_latest_main_pushes_succeeded",
+          "result": "PASS"
+        },
+        {
+          "module": "tests.unit.test_engineering_release_ci.GateTests",
+          "test": "test_newer_run_preempts_earlier_success_even_when_listing_order_changes",
+          "result": "PASS"
+        },
+        {
+          "module": "tests.unit.test_engineering_release_ci.GateTests",
+          "test": "test_other_path_branch_event_sha_and_missing_check_cannot_qualify",
+          "result": "PASS"
+        },
+        {
+          "module": "tests.unit.test_engineering_release_ci.GateTests",
+          "test": "test_run_attempt_changed_between_listing_and_check",
+          "result": "PASS"
+        }
+      ]
+    }
+  },
+  "p4": {
+    "status": "PASS",
+    "unknown": 1,
+    "loss": 0,
+    "lsn": "0/310EB20",
+    "model_calls": 0,
+    "unchanged_receipt": true
+  },
+  "workshop": {
+    "status": "PASS",
+    "checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+    "messages": {
+      "10": 30,
+      "50": 150,
+      "200": 600
+    },
+    "delegations": {
+      "fixed-1": {
+        "10": 10,
+        "50": 50,
+        "200": 200
+      },
+      "fixed-2": {
+        "10": 10,
+        "50": 50,
+        "200": 200
+      },
+      "adaptive-2": {
+        "10": 10,
+        "50": 50,
+        "200": 200
+      }
+    },
+    "scenes": [
+      "Minimal",
+      "Standard",
+      "Long-form",
+      "Research-Audit"
+    ],
+    "result_archives": {
+      "workshop-results": {
+        "artifact_id": 13915155254,
+        "job_id": 130965942057,
+        "job_attempt": 1,
+        "sha256": "196e9b6dd3758991a1f8d9ab0058dccb2d4f1a0f12e87e381e872692016e3b9c"
+      },
+      "workshop-scene-recovery-results": {
+        "artifact_id": 13915080342,
+        "job_id": 130965942394,
+        "job_attempt": 1,
+        "sha256": "db172b91b85cb2f2366f6dfa9a73e1e3f806252e55d57a223a06cd7b46e3ae77"
+      },
+      "workshop-comparisons": {
+        "artifact_id": 13914228878,
+        "job_id": 130965942549,
+        "job_attempt": 1,
+        "sha256": "9a6eab2ca44f9edc78dfa4e45474c12321098dbb8a1c6c853a25dafd3a353e4c"
+      }
+    },
+    "paired_token": {
+      "budget_id": "592975b3-434e-4b93-a5a2-ee8032a41bec",
+      "total_tokens": 100000,
+      "original_attempt_id": "10d5894b-9120-4d01-b7b1-91a9facac529",
+      "before_first_call": {
+        "reserved_tokens": 0,
+        "spent_tokens": 0,
+        "available_tokens": 100000
+      },
+      "live_unknown": {
+        "reserved_tokens": 100000,
+        "spent_tokens": 0,
+        "available_tokens": 0
+      },
+      "unknown_wal_target": "unknown_usage_before_invoice",
+      "unknown_target_lsn": "0/40B0C28",
+      "unknown_replayed_lsn": "0/40B0C28",
+      "recovered_unknown": {
+        "reserved_tokens": 100000,
+        "spent_tokens": 0,
+        "available_tokens": 0
+      },
+      "recovered_workshop_observations": [
+        [
+          "10d5894b-9120-4d01-b7b1-91a9facac529",
+          "UNKNOWN",
+          null
+        ]
+      ],
+      "after_repeated_invoice": {
+        "reserved_tokens": 0,
+        "spent_tokens": 18,
+        "available_tokens": 99982
+      },
+      "final_workshop_observations": [
+        [
+          "10d5894b-9120-4d01-b7b1-91a9facac529",
+          "UNKNOWN",
+          null
+        ],
+        [
+          "10d5894b-9120-4d01-b7b1-91a9facac529",
+          "SUCCEEDED",
+          18
+        ]
+      ]
+    },
+    "untouched_cancel": {
+      "budget_id": "5268ba9b-c1a3-43e0-ab02-c4f1c456393b",
+      "operation_id": "0d11fb61-012c-4ece-b41d-2ad5ca7c29cf",
+      "receipt_ref": "3c7891a1-3e29-4257-a637-df49b6253505",
+      "nf_after_cancel": {
+        "work_id": "d9128ffb-d824-4046-9910-98511339451c",
+        "budget_id": "5268ba9b-c1a3-43e0-ab02-c4f1c456393b",
+        "currency": "USD",
+        "limit_amount": "2.000000",
+        "reserved_amount": "0.000000",
+        "spent_amount": "0.000000",
+        "total_tokens": 2000,
+        "reserved_tokens": 0,
+        "spent_tokens": 0,
+        "available_tokens": 2000,
+        "unquantified_attempts": 0
+      },
+      "nf_reported_tokens": 0,
+      "workshop_hold": "SETTLED",
+      "workshop_settled_amount": "0.000000",
+      "workshop_remote_task": "CANCELLED",
+      "attempt_count": 0
+    },
+    "native": {
+      "source": "0420356b0bd0bfd675494e581799946c4b967f6e",
+      "workshop": "0420356b0bd0bfd675494e581799946c4b967f6e",
+      "uid_isolation": true,
+      "cluster_isolation": true,
+      "cross_service_binding_reads_denied": 2,
+      "model_turns": 0
+    }
+  },
+  "pg": {
+    "raw_sha256": "bdce8fa41d24d92f804854ec6202acb8343860d3918c2354a441f54668971b03",
+    "totals": {
+      "tests": 869,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 17
+    },
+    "p6_nodes": [
+      {
+        "module": "tests.integration.test_p6_export_release",
+        "test": "test_export_frozen_prose_scoped_log_and_blank_reader_forms",
+        "result": "PASS"
+      },
+      {
+        "module": "tests.integration.test_p6_export_release",
+        "test": "test_export_rejects_another_work_bound_branch_actor_and_revocation",
+        "result": "PASS"
+      },
+      {
+        "module": "tests.integration.test_p6_preflight_registration",
+        "test": "test_operator_registers_once_and_leaves_dispatch_idle",
+        "result": "PASS"
+      },
+      {
+        "module": "tests.unit.test_engineering_release_ci.SourceTests",
+        "test": "test_verify_integrated_event_tree_for_main_and_pr",
+        "result": "PASS"
+      },
+      {
+        "module": "tests.unit.test_engineering_release_ci.GateTests",
+        "test": "test_both_latest_main_pushes_succeeded",
+        "result": "PASS"
+      },
+      {
+        "module": "tests.unit.test_engineering_release_ci.GateTests",
+        "test": "test_newer_run_preempts_earlier_success_even_when_listing_order_changes",
+        "result": "PASS"
+      },
+      {
+        "module": "tests.unit.test_engineering_release_ci.GateTests",
+        "test": "test_other_path_branch_event_sha_and_missing_check_cannot_qualify",
+        "result": "PASS"
+      },
+      {
+        "module": "tests.unit.test_engineering_release_ci.GateTests",
+        "test": "test_run_attempt_changed_between_listing_and_check",
+        "result": "PASS"
+      }
+    ]
+  },
+  "schema": {
+    "raw_sha256": "6d57d476d039760e590201c1f5c63eb9c5b8b3d6d8eb468da3fc5afd2c7fb4a8",
+    "totals": {
+      "tests": 420,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "p6_nodes": [
+      {
+        "module": "tests.unit.test_engineering_release_ci.SourceTests",
+        "test": "test_verify_integrated_event_tree_for_main_and_pr",
+        "result": "PASS"
+      },
+      {
+        "module": "tests.unit.test_engineering_release_ci.GateTests",
+        "test": "test_both_latest_main_pushes_succeeded",
+        "result": "PASS"
+      },
+      {
+        "module": "tests.unit.test_engineering_release_ci.GateTests",
+        "test": "test_newer_run_preempts_earlier_success_even_when_listing_order_changes",
+        "result": "PASS"
+      },
+      {
+        "module": "tests.unit.test_engineering_release_ci.GateTests",
+        "test": "test_other_path_branch_event_sha_and_missing_check_cannot_qualify",
+        "result": "PASS"
+      },
+      {
+        "module": "tests.unit.test_engineering_release_ci.GateTests",
+        "test": "test_run_attempt_changed_between_listing_and_check",
+        "result": "PASS"
+      }
+    ]
+  },
+  "register_only": {
+    "actor_skills": {
+      "4f430e6d-c279-50e1-80c8-0c37c30ffba4": {
+        "sha256": "f1bf28443b2c37c6881fd83f1332e3101e37e2f898b381054d32378ecd5c38a4",
+        "skill": "simulate-character",
+        "version": "2.1.0"
+      },
+      "6f352e8f-1163-588f-af0a-71d2660e9e4b": {
+        "sha256": "f1bf28443b2c37c6881fd83f1332e3101e37e2f898b381054d32378ecd5c38a4",
+        "skill": "simulate-character",
+        "version": "2.1.0"
+      },
+      "7743abb4-dd13-5149-8358-264531bfc3c7": {
+        "sha256": "f1bf28443b2c37c6881fd83f1332e3101e37e2f898b381054d32378ecd5c38a4",
+        "skill": "simulate-character",
+        "version": "2.1.0"
+      }
+    },
+    "attempts": 0,
+    "budget": {
+      "available_tokens": 5000,
+      "budget_id": "8ce74e2d-eedf-4a5b-9369-52d9d3defa33",
+      "currency": "USD",
+      "limit_amount": "0.500000",
+      "reserved_amount": "0.000000",
+      "reserved_tokens": 0,
+      "spent_amount": "0.000000",
+      "spent_tokens": 0,
+      "total_tokens": 5000,
+      "unquantified_attempts": 0,
+      "work_id": "5ee6eb36-4d07-4335-9b1d-cc22af313565"
+    },
+    "plan_ref": {
+      "artifact_id": "1afb0e9f-5416-4d0c-9179-0b27768e7745",
+      "artifact_revision_id": "d44fd0c8-3fe3-462e-9bc8-3d6175f3c62d",
+      "sha256": "a8de285a6a462c6c260bb69c37bb12a85d7bf7d653256500fade4df113cbfd4a"
+    },
+    "preflight": {
+      "missing": [
+        "authorized_limits.authorization_ref",
+        "preregistered_conflict_labels"
+      ],
+      "shared_budget_receipt": "MATCHED_SAVED_NF_RECEIPT"
+    },
+    "provider_calls": 0,
+    "redis_outbox_id": "9eb95638-cbf2-4d12-a5d1-a973612ec4cf",
+    "registered_tasks": 6,
+    "registration_replays": 1,
+    "trace_id": "30b49d90-8f3d-520f-97f6-20e65913d21d",
+    "world_ref": {
+      "branch_id": "0eb684e1-d1ef-4730-b1f0-934b460953f9",
+      "work_id": "5ee6eb36-4d07-4335-9b1d-cc22af313565",
+      "world_revision_id": "cd046ffd-8116-44a4-a4da-b197f0e7f047"
+    }
+  },
+  "author": {
+    "execution_kind": "TEST_FIXTURE",
+    "real_model_calls": 0,
+    "fixture_calls": 15,
+    "fixture_cost": {
+      "currency": "USD",
+      "amount": "0",
+      "basis": "DETERMINISTIC_TEST"
+    },
+    "literary_acceptance": "NOT_EVALUATED",
+    "human_reviews_received": 0,
+    "author_status": "PENDING_AUTHOR",
+    "export": {
+      "release_ref": {
+        "artifact_id": "118109d2-ba4a-4a7b-8354-752e83faa2ae",
+        "artifact_revision_id": "badbeb21-08e6-4f9c-8754-941b14da9354",
+        "sha256": "2c7a70697eb18839b9e6ca84f39da712653a32dcb2107297157c7af69407a0f5"
+      },
+      "manifest_sha256": "e7d47918171b8d1bc02ff038985ff4961c396801d4434208a8f7240c03cb3e84",
+      "text_sha256": "12c1d512f5bad133466c9164354207642237c62349f4231fcaeb3049d2135781",
+      "bytes": 6500,
+      "scene_count": 6,
+      "external_delivery": "NOT_REQUESTED"
+    },
+    "trace_id": "badbeb21-08e6-4f9c-8754-941b14da9354",
+    "trace_event_types": [
+      "selection.release_freeze"
+    ],
+    "sha256": {
+      "reader-A.md": "620fffee4e19a0a513d7ab20f5a47915be0bf71cc90885f7dd19a37272d09f24",
+      "reader-B.md": "061c6f3da3e8daca87fa69664ed258a1e8f5cbe07e637e0350c953096b25c290",
+      "release.txt": "12c1d512f5bad133466c9164354207642237c62349f4231fcaeb3049d2135781",
+      "trace.json": "ce71422c9fe3a3f8fbcae74755e8afcc88309dec0783282a85eb4346f015f2b1"
+    }
+  },
+  "author_files": [
+    {
+      "path": "p6-author/author-receipt.json",
+      "bytes": 1299,
+      "sha256": "dd9f03d8eb152df7de96af96d2f171d71d86821e548a9d764ee294554b1e177e",
+      "git_blob": "fc58b83403140bcd6ac844b9899b8d2172def638"
+    },
+    {
+      "path": "p6-author/reader-A.md",
+      "bytes": 1029,
+      "sha256": "620fffee4e19a0a513d7ab20f5a47915be0bf71cc90885f7dd19a37272d09f24",
+      "git_blob": "e08c4e0e460422ca4edf7c3b1b3eb934bc4adbea"
+    },
+    {
+      "path": "p6-author/reader-B.md",
+      "bytes": 1029,
+      "sha256": "061c6f3da3e8daca87fa69664ed258a1e8f5cbe07e637e0350c953096b25c290",
+      "git_blob": "6088a5732e3fffc74db41b2ea2c0541ffa568c42"
+    },
+    {
+      "path": "p6-author/release.txt",
+      "bytes": 6500,
+      "sha256": "12c1d512f5bad133466c9164354207642237c62349f4231fcaeb3049d2135781",
+      "git_blob": "7331370c61bc8927634f4b4b2aa7e6e8e9a455be"
+    },
+    {
+      "path": "p6-author/trace.json",
+      "bytes": 920,
+      "sha256": "ce71422c9fe3a3f8fbcae74755e8afcc88309dec0783282a85eb4346f015f2b1",
+      "git_blob": "f4495eb8d6dedc8d14266968e1bc02af1b8be530"
+    }
+  ],
+  "migration": [
+    "0018_p6_shared_tokens (head)"
+  ],
+  "r1": "NOT_MET",
+  "skip_reasons": {
+    "Linux container setup denied by this runner": 17
+  },
+  "engineering": "PASS",
+  "historical_capacity": "NOT_MET",
+  "literary": "NOT_EVALUATED",
+  "production_p6": "BLOCKED_LOCAL_AUTHORIZATION",
+  "tag_guard": {
+    "rows": [
+      {
+        "run_id": 43153466308,
+        "head": "0420356b0bd0bfd675494e581799946c4b967f6e",
+        "event": "workflow_run",
+        "run_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43153466308",
+        "job_id": 130967862903,
+        "job_conclusion": "success",
+        "verify": {
+          "name": "Verify integrated CI and merged pull requests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-12T04:14:29Z",
+          "completed_at": "2026-11-12T04:14:29Z"
+        },
+        "create_tag": {
+          "name": "Create the immutable engineering tag",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 4,
+          "started_at": "2026-11-12T04:14:29Z",
+          "completed_at": "2026-11-12T04:14:29Z"
+        }
+      },
+      {
+        "run_id": 43153099603,
+        "head": "0420356b0bd0bfd675494e581799946c4b967f6e",
+        "event": "workflow_run",
+        "run_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43153099603",
+        "job_id": 130966685242,
+        "job_conclusion": "success",
+        "verify": {
+          "name": "Verify integrated CI and merged pull requests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-12T04:11:09Z",
+          "completed_at": "2026-11-12T04:11:09Z"
+        },
+        "create_tag": {
+          "name": "Create the immutable engineering tag",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 4,
+          "started_at": "2026-11-12T04:11:09Z",
+          "completed_at": "2026-11-12T04:11:09Z"
+        }
+      }
+    ],
+    "blob": "57aad9d4fd9f9ca226e81ceeb6c1e5dfbe28d569"
+  },
+  "github_run_provenance": "86c742c2f4036d1b26671e5eea6f6a6cf9a3b954"
+}
