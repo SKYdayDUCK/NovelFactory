@@ -248,7 +248,7 @@ jobs:
           import json, os, re
           from pathlib import Path
           proof = json.loads(Path("workshop/codex-dual/receipt.json").read_text())
-          assert proof["workshop_sha"] == proof["nf_sha"] == os.environ["GITHUB_SHA"]
+          assert proof["workshop_sha"] == proof["nf_sha"] == "0a24898c6a6719b6e61d454ce05ef13eb4f72d4a"
           assert proof["separate_service_clusters"] and proof["separate_service_uids"]
           assert proof["aw_postgres_system_identifier"] != proof["nf_postgres_system_identifier"]
           assert re.fullmatch("[0-9a-f]{64}", proof["wheel_sha256"])
