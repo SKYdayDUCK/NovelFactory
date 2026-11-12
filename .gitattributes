@@ -3,3 +3,5 @@
 * text=auto eol=lf
 # The original benchmark export intentionally contains CRLF in its Git blob.
 benchmarks/load_model_table.csv -text
+# Byte offsets in the literary-source fixture include mixed line terminators.
+contracts/examples/literary_source.txt -text
