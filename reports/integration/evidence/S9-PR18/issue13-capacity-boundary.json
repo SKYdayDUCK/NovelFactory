@@ -1,0 +1,1195 @@
+{
+  "version": 1,
+  "observed_utc": "2026-11-12 04:40:29 UTC",
+  "repository": "SKYdayDUCK/NovelFactory",
+  "issue": {
+    "number": 13,
+    "state": "open",
+    "is_issue": true,
+    "title": "AT-30 · 50/200 热点及 1000 开环读容量仍未达标",
+    "url": "https://github.com/SKYdayDUCK/NovelFactory/issues/13",
+    "body": "P5 已集成到 `main`，工程结果与容量单独验收。保留原工作负载、请求语义、计时点、资源预算、重试、结果校验与门槛。`f2e6d38534214e79630b807cec9a720d99e975b1` 的 200 热点两轮首次 call-start 为 55.23、56.93 次/秒（目标至少 950），HTTP header-start 为 35.11、36.22。1000 开环 5000 次中 1387 个 HTTP 200，header-start 43.32 次/秒。500 持续读本轮 12000/12000，通过；历史有不同结果。\n\n复核原始输入、数据库端采样、客户端开销及输出：[P2 50/200](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030461014) · [独立 200 进程](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030460915) · [P3 500/1000](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030460895) · [相同场景历史对照](https://github.com/SKYdayDUCK/NovelFactory/pull/5)。仅在原始容量门槛可重复达成并保留原始矩阵、各阶段服务/客户端观测和失败记录后关闭。"
+  },
+  "comments": [
+    {
+      "id": 6798904447,
+      "time": "2026-11-11T14:45:18Z",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/issues/13#issuecomment-6798904447",
+      "body": "P5.5 55d8979b on the original 500-reader / 600-second / 20-rps gate produced two NOT_MET results, 11,508/12,000 successful (492 HTTP 429) and 11,954/12,000 (46 HTTP 429). First run retained zero correctness errors, no world changes and a P99 of 2364.80 ms. Earlier e2f0faba reached 12,000/12,000, P99 1349.95 ms, on a different hosted runner. The original failed and successful observations remain separate. The two exact-head observations do not alone isolate a code-level regression. Retained raw and preregistered S9 evidence: https://github.com/SKYdayDUCK/NovelFactory/tree/df1410337d69c5c064886a7c50dc75d82c4e0244/evidence/p55/s9-local/remote-55d897 .\n\n#18/#20 run a same-runner SQL comparison and #21/#22 independently measure removal of repeated HTTP validation. #19 compares AT-30 overload on the pre-bridge and bridge heads. None of these experiments changes the existing gates or production configuration. The Workshop 10/50/200-member message and delegated-task workloads are separate."
+    },
+    {
+      "id": 6799018612,
+      "time": "2026-11-11T14:50:06Z",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/issues/13#issuecomment-6799018612",
+      "body": "200-agent AT-30 同机复验已完成。使用相同 Ubuntu 24.04 runner、PostgreSQL 17.11、冻结基准 seed 20261110，每轮由基准自建独立 PostgreSQL 数据库。两份源码分别为 #6 `55d8979b5361a4837701d762feacd83036096b11` 和 #11 `74350760dfd063f3596e5b6838a56a40d3006ad6`。四轮按 A–B–B–A 顺序执行。\n\n| 顺序 | 源码 | 调用开始 req/s | 传输头开始 req/s | 业务恢复 | 原容量门禁 |\n|---|---|---:|---:|---|---|\n| 1 | A | 31.5210 | 30.5766 | PASS | NOT_MET |\n| 2 | B | 34.4716 | 27.6361 | PASS | NOT_MET |\n| 3 | B | 31.9154 | 29.9212 | PASS | NOT_MET |\n| 4 | A | 33.7754 | 27.8044 | PASS | NOT_MET |\n\nA 与 B 的调用开始均值分别为 32.6482、33.1935 req/s，传输头开始均值为 29.1905、28.7786 req/s。此次配对结果未复现不同 hosted runner 的约 40% 调用开始差异。四次均低于冻结的 950 req/s 门槛，原任务以失败退出。该问题继续保持打开。[四轮工作流](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43039855189) · [完整原始 artifact](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43039855189/artifacts/13864813704) · [可重放工作流版本](https://github.com/SKYdayDUCK/NovelFactory/blob/143c33c5c6a9d87624a0ada36228956322d7db75/.github/workflows/s9-delegation-capacity-pair.yml)"
+    },
+    {
+      "id": 6799571502,
+      "time": "2026-11-11T15:13:50Z",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/issues/13#issuecomment-6799571502",
+      "body": "四轮原始 `load.json` 已以可逆 gzip 存入独立证据提交 `373cb63305d2066013e2e4a6b42382d801bd189f`。归档器核对源 Actions ZIP 的 SHA256、四份源码 commit/tree、原始阈值结果及零模型调用。再次核对 GitHub 树的四个 blob 标识和字节长度与清单一致。原 ZIP SHA256 为 `e92fe600b707c3e29b2e1d8a3a082d11b2785039bcc9fdee33273b4e1c3dfbbc`。[永久结果目录](https://github.com/SKYdayDUCK/NovelFactory/tree/373cb63305d2066013e2e4a6b42382d801bd189f/evidence/at30/s9-nf-delegation-abba) · [SHA256SUMS](https://github.com/SKYdayDUCK/NovelFactory/blob/373cb63305d2066013e2e4a6b42382d801bd189f/evidence/at30/s9-nf-delegation-abba/SHA256SUMS) · [归档 CI](https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43046052740)"
+    }
+  ],
+  "linked_runs": [
+    {
+      "id": 43030461014,
+      "head": "f2e6d38534214e79630b807cec9a720d99e975b1",
+      "path": ".github/workflows/p2-load.yml",
+      "event": "pull_request",
+      "branch": "dev/p5-agent-runtime",
+      "attempt": 1,
+      "conclusion": "failure",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030461014",
+      "jobs": [
+        {
+          "id": 130555852373,
+          "name": "50 agents / overload / full capacity gate",
+          "conclusion": "failure",
+          "attempt": 1,
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030461014/job/130555852373"
+        },
+        {
+          "id": 130555852709,
+          "name": "50 agents / mixed / full capacity gate",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030461014/job/130555852709"
+        },
+        {
+          "id": 130555852766,
+          "name": "200 agents / mixed / full capacity gate",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030461014/job/130555852766"
+        },
+        {
+          "id": 130555852852,
+          "name": "200 agents / overload / full capacity gate",
+          "conclusion": "failure",
+          "attempt": 1,
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030461014/job/130555852852"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13861052827,
+          "name": "p2-load-50-overload-1",
+          "size": 362205,
+          "digest": "sha256:7e50931167e759a01709a86a194189a13502420337c6b0b28208fc7a68253f29",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030461014/artifacts/13861052827"
+        },
+        {
+          "id": 13860772777,
+          "name": "p2-load-50-mixed-1",
+          "size": 186182,
+          "digest": "sha256:13f50c00b9ff03f8fd623a27abda4d8e1cf956daba656d6ff419627d315731de",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030461014/artifacts/13860772777"
+        },
+        {
+          "id": 13860673452,
+          "name": "p2-load-200-overload-1",
+          "size": 1432063,
+          "digest": "sha256:d09b68b8faa9abcc98362de31abbece767a5534cc9ecabb49c3885cafa86c2a2",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030461014/artifacts/13860673452"
+        },
+        {
+          "id": 13860454436,
+          "name": "p2-load-200-mixed-1",
+          "size": 587790,
+          "digest": "sha256:a28d3477ef17fbcd6f8fb28346baa7e747051057913979b72e544e579b27dc7c",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030461014/artifacts/13860454436"
+        }
+      ]
+    },
+    {
+      "id": 43030460915,
+      "head": "f2e6d38534214e79630b807cec9a720d99e975b1",
+      "path": ".github/workflows/p3-p4-evidence.yml",
+      "event": "pull_request",
+      "branch": "dev/p5-agent-runtime",
+      "attempt": 1,
+      "conclusion": "failure",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030460915",
+      "jobs": [
+        {
+          "id": 130555852103,
+          "name": "Same world CPU and SQL paired comparison",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030460915/job/130555852103"
+        },
+        {
+          "id": 130555852514,
+          "name": "Independent load process / 200 / mixed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030460915/job/130555852514"
+        },
+        {
+          "id": 130555852531,
+          "name": "Independent load process / 200 / overload",
+          "conclusion": "failure",
+          "attempt": 1,
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030460915/job/130555852531"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13860538919,
+          "name": "p3-isolated-200-mixed-1",
+          "size": 294768,
+          "digest": "sha256:c18518f7b06d899ad9ec1a9039aeddb9d513fd20e350eda9e11d3380f139030b",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030460915/artifacts/13860538919"
+        },
+        {
+          "id": 13859738447,
+          "name": "p3-context-paired-1",
+          "size": 281693,
+          "digest": "sha256:b16f18019433d65bc3a05fe33698e7ebac12dab1cd262525ce42696677aafac3",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030460915/artifacts/13859738447"
+        },
+        {
+          "id": 13859474090,
+          "name": "p3-isolated-200-overload-1",
+          "size": 745289,
+          "digest": "sha256:0cb1f1ca468b85630b4921498c11339c7d0e28eb2708e872e4b0b1e38bd2eee7",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030460915/artifacts/13859474090"
+        }
+      ]
+    },
+    {
+      "id": 43030460895,
+      "head": "f2e6d38534214e79630b807cec9a720d99e975b1",
+      "path": ".github/workflows/p3-scale-experiments.yml",
+      "event": "pull_request",
+      "branch": "dev/p5-agent-runtime",
+      "attempt": 1,
+      "conclusion": "failure",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030460895",
+      "jobs": [
+        {
+          "id": 130555851671,
+          "name": "Measured 1000-read-open",
+          "conclusion": "failure",
+          "attempt": 1,
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030460895/job/130555851671"
+        },
+        {
+          "id": 130555852150,
+          "name": "Measured 500-read-soak",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030460895/job/130555852150"
+        },
+        {
+          "id": 130555852205,
+          "name": "Measured 500-mixed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030460895/job/130555852205"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13860384589,
+          "name": "p3-scale-500-read-soak-1",
+          "size": 474798,
+          "digest": "sha256:7d3d20859cc35ace4873d1684ef0ae4f873e111a0d0ee23c365f2b9c464c24e0",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030460895/artifacts/13860384589"
+        },
+        {
+          "id": 13860084704,
+          "name": "p3-scale-500-mixed-1",
+          "size": 645156,
+          "digest": "sha256:efcac0e275720d54b3bde6cad6efad72316adea57ed9aa3d8d536acb9715e6a4",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030460895/artifacts/13860084704"
+        },
+        {
+          "id": 13859184901,
+          "name": "p3-scale-1000-read-open-1",
+          "size": 500644,
+          "digest": "sha256:57b2fe83b3c2b94de803ce7f0c82d4f0cf00c63a0e01bff91edaee0015eae7e0",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43030460895/artifacts/13859184901"
+        }
+      ]
+    },
+    {
+      "id": 43036514307,
+      "head": "55d8979b5361a4837701d762feacd83036096b11",
+      "path": ".github/workflows/p3-scale-experiments.yml",
+      "event": "pull_request",
+      "branch": "dev/p5-5-redis-eventhub",
+      "attempt": 2,
+      "conclusion": "failure",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43036514307",
+      "jobs": [
+        {
+          "id": 130576648463,
+          "name": "Measured 500-mixed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43036514307/job/130576648463"
+        },
+        {
+          "id": 130576649018,
+          "name": "Measured 1000-read-open",
+          "conclusion": "failure",
+          "attempt": 1,
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43036514307/job/130576649018"
+        },
+        {
+          "id": 130576649020,
+          "name": "Measured 500-read-soak",
+          "conclusion": "failure",
+          "attempt": 1,
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43036514307/job/130576649020"
+        },
+        {
+          "id": 130586087962,
+          "name": "Measured 500-read-soak",
+          "conclusion": "failure",
+          "attempt": 2,
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43036514307/job/130586087962"
+        },
+        {
+          "id": 130586090991,
+          "name": "Measured 1000-read-open",
+          "conclusion": "failure",
+          "attempt": 2,
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43036514307/job/130586090991"
+        },
+        {
+          "id": 130586091832,
+          "name": "Measured 500-mixed",
+          "conclusion": "success",
+          "attempt": 2,
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43036514307/job/130586091832"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13864590591,
+          "name": "p3-scale-1000-read-open-1",
+          "size": 500275,
+          "digest": "sha256:17032f8d53fe870bb9c859bad7472742318740ebe565aefe6cb7e4306499dc9e",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43036514307/artifacts/13864590591"
+        },
+        {
+          "id": 13864227631,
+          "name": "p3-scale-500-read-soak-1",
+          "size": 489080,
+          "digest": "sha256:7153d6668be5a6244559fdf399e0e8a7396821d2bd1d96d8e724ffb16980a216",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43036514307/artifacts/13864227631"
+        },
+        {
+          "id": 13863984683,
+          "name": "p3-scale-500-read-soak-2",
+          "size": 489381,
+          "digest": "sha256:218e08b98a5a2fa3c5a3f67b392f81e7018d4bba04ab18f6d271cc02ff9c4ed2",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43036514307/artifacts/13863984683"
+        },
+        {
+          "id": 13863921640,
+          "name": "p3-scale-500-mixed-1",
+          "size": 643769,
+          "digest": "sha256:d6700556471b4d53341ea7cbd53561d7a2651bb398ea3b8875bcd4b49fc05928",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43036514307/artifacts/13863921640"
+        }
+      ]
+    },
+    {
+      "id": 43035161204,
+      "head": "e2f0fabadcf673984fddacc9bd7a924d6588b816",
+      "path": ".github/workflows/p3-scale-experiments.yml",
+      "event": "pull_request",
+      "branch": "dev/p5-5-redis-eventhub",
+      "attempt": 1,
+      "conclusion": "failure",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43035161204",
+      "jobs": [
+        {
+          "id": 130571937231,
+          "name": "Measured 1000-read-open",
+          "conclusion": "failure",
+          "attempt": 1,
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43035161204/job/130571937231"
+        },
+        {
+          "id": 130571937777,
+          "name": "Measured 500-mixed",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43035161204/job/130571937777"
+        },
+        {
+          "id": 130571937813,
+          "name": "Measured 500-read-soak",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43035161204/job/130571937813"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13864160530,
+          "name": "p3-scale-500-read-soak-1",
+          "size": 489593,
+          "digest": "sha256:4666915db6085c9bf09f41346209e3fcd59346e449a33380380da957a692d4d0",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43035161204/artifacts/13864160530"
+        },
+        {
+          "id": 13863560751,
+          "name": "p3-scale-500-mixed-1",
+          "size": 640580,
+          "digest": "sha256:dee18c9605de45c17a7e1af8cbaf026a1db286cf9d619dfd0e7d622e48ae614d",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43035161204/artifacts/13863560751"
+        },
+        {
+          "id": 13862189255,
+          "name": "p3-scale-1000-read-open-1",
+          "size": 503923,
+          "digest": "sha256:5d65b4e8f3815b7fbeaffe215964dccac7566d8e39049a6bd84ef16747741280",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43035161204/artifacts/13862189255"
+        }
+      ]
+    },
+    {
+      "id": 43039855189,
+      "head": "143c33c5c6a9d87624a0ada36228956322d7db75",
+      "path": ".github/workflows/s9-delegation-capacity-pair.yml",
+      "event": "pull_request",
+      "branch": "ci/at30-delegation-pair",
+      "attempt": 1,
+      "conclusion": "failure",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43039855189",
+      "jobs": [
+        {
+          "id": 130588422643,
+          "name": "paired",
+          "conclusion": "failure",
+          "attempt": 1,
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43039855189/job/130588422643"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 13864813704,
+          "name": "at30-s9-delegation-abba",
+          "size": 2840790,
+          "digest": "sha256:e92fe600b707c3e29b2e1d8a3a082d11b2785039bcc9fdee33273b4e1c3dfbbc",
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43039855189/artifacts/13864813704"
+        }
+      ]
+    },
+    {
+      "id": 43046052740,
+      "head": "e74d0156e22b62a9632603c726762dceeab822a9",
+      "path": ".github/workflows/archive-at30-s9-delegation.yml",
+      "event": "push",
+      "branch": "ci/archive-at30-s9-delegation",
+      "attempt": 1,
+      "conclusion": "success",
+      "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43046052740",
+      "jobs": [
+        {
+          "id": 130610146463,
+          "name": "archive",
+          "conclusion": "success",
+          "attempt": 1,
+          "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43046052740/job/130610146463"
+        }
+      ],
+      "artifacts": []
+    }
+  ],
+  "historical_p55_retained_on_pre_harness_main": {
+    "checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+    "long_read": {
+      "path": "evidence/p55/s9-local/remote-55d897/long-read-summaries.json",
+      "blob": "ac4537ec96339f740a4de68e29dc536330706393",
+      "source": "https://github.com/SKYdayDUCK/NovelFactory/blob/0420356b0bd0bfd675494e581799946c4b967f6e/evidence/p55/s9-local/remote-55d897/long-read-summaries.json",
+      "observations": [
+        {
+          "arm": "candidate-attempt-1",
+          "run": 43036514307,
+          "job": 130576649020,
+          "artifact_name": "p3-scale-500-read-soak-1",
+          "member_sha256": "2f8c9410042397963ce85d760e7663df90a89eb3700b610c1bdd4d6bcb9e2421",
+          "source_result_sha256_if_provided": "2f8c9410042397963ce85d760e7663df90a89eb3700b610c1bdd4d6bcb9e2421",
+          "scheduled_count": 12000,
+          "duration_seconds": 601.924329983,
+          "actual_call_start_rps": 20.000608229580855,
+          "successful_query_rps": 19.118682244203384,
+          "http_status_counts": {
+            "200": 11508,
+            "429": 492
+          },
+          "p99_ms": 2364.7984,
+          "correctness_errors": [],
+          "world_unchanged": true,
+          "new_world_commits": 0,
+          "real_model_calls": 0,
+          "probe_gate": "NOT_MET",
+          "long_duration_gate": "NOT_EXECUTED"
+        },
+        {
+          "arm": "candidate-attempt-2",
+          "run": 43036514307,
+          "job": 130586087962,
+          "artifact_name": "p3-scale-500-read-soak-2",
+          "member_sha256": "1d206777041c3c64a047d39c49560d4c405b39706e642bc646a120fc083ce667",
+          "source_result_sha256_if_provided": "1d206777041c3c64a047d39c49560d4c405b39706e642bc646a120fc083ce667",
+          "scheduled_count": 12000,
+          "duration_seconds": 601.7988231910001,
+          "actual_call_start_rps": 20.00071214780036,
+          "successful_query_rps": 19.863780950276162,
+          "http_status_counts": {
+            "200": 11954,
+            "429": 46
+          },
+          "p99_ms": 2261.9615,
+          "correctness_errors": [],
+          "world_unchanged": true,
+          "new_world_commits": 0,
+          "real_model_calls": 0,
+          "probe_gate": "NOT_MET",
+          "long_duration_gate": "NOT_EXECUTED"
+        },
+        {
+          "arm": "previous-attempt-1",
+          "run": 43035161204,
+          "job": 130571937813,
+          "artifact_name": "p3-scale-500-read-soak-1",
+          "member_sha256": "b9d3b025cbd08323054a2621aef2dd9f5e4cda9c64adbff36f445105fd22896f",
+          "source_result_sha256_if_provided": "b9d3b025cbd08323054a2621aef2dd9f5e4cda9c64adbff36f445105fd22896f",
+          "scheduled_count": 12000,
+          "duration_seconds": 600.867890897,
+          "actual_call_start_rps": 20.002629013929322,
+          "successful_query_rps": 19.9711120893578,
+          "http_status_counts": {
+            "200": 12000
+          },
+          "p99_ms": 1349.9489,
+          "correctness_errors": [],
+          "world_unchanged": true,
+          "new_world_commits": 0,
+          "real_model_calls": 0,
+          "probe_gate": "PASS",
+          "long_duration_gate": "NOT_EXECUTED"
+        }
+      ]
+    },
+    "s9_registration": {
+      "path": "evidence/p55/s9-local/remote-55d897/guard-registration.json",
+      "blob": "bfa29a5dd60658fdd5f4e0a484546061b22a8f6b",
+      "subject_sha": "55d8979b5361a4837701d762feacd83036096b11",
+      "fixture": "One PostgreSQL seed materialized once; A/B/C/D use the same concrete fixed inputs, previous and current WorldRef, change and receipts.",
+      "numeric_workload_seed": "not exposed by the original benchmark",
+      "python_hash_seed": 550897,
+      "labels": {
+        "same_object": true,
+        "causal_read_other_write": true,
+        "independent": false
+      },
+      "repetitions": 12,
+      "hypotheses": [
+        "A invalidates unrelated actions.",
+        "B and C can miss cross-object causal reads.",
+        "D checks actual semantic observations."
+      ],
+      "not_measured": [
+        "narrative end-to-end business throughput",
+        "production false positive/negative rates",
+        "external model token and invoice evidence"
+      ]
+    },
+    "s9_guard": {
+      "path": "evidence/p55/s9-local/remote-55d897/guard-comparison.json",
+      "blob": "075e810a5798eaf7b2d007098473fe5dfeaafcad",
+      "workload": "three labelled tasks in one world; latency repeats reuse the same receipts",
+      "rows": [
+        {
+          "arm": "A",
+          "false_positives": 1,
+          "false_negatives": 0,
+          "affected_fraction": 1,
+          "valid_retention_fraction": 0,
+          "context_reexecutions": 3,
+          "mean_decision_ms": 0.8687379166666667,
+          "p95_decision_ms": 1.682819,
+          "p99_decision_ms": 2.07593,
+          "serial_decisions_per_second": 1151.0951471267465,
+          "model_calls": 0,
+          "model_tokens": 0,
+          "invoiced_cost": null,
+          "labels": [
+            {
+              "scenario": "same_object",
+              "oracle_affected": true,
+              "invalidated": true,
+              "samples": 12
+            },
+            {
+              "scenario": "causal_read_other_write",
+              "oracle_affected": true,
+              "invalidated": true,
+              "samples": 12
+            },
+            {
+              "scenario": "independent",
+              "oracle_affected": false,
+              "invalidated": true,
+              "samples": 12
+            }
+          ]
+        },
+        {
+          "arm": "B",
+          "false_positives": 0,
+          "false_negatives": 1,
+          "affected_fraction": 0.3333333333333333,
+          "valid_retention_fraction": 1,
+          "context_reexecutions": 1,
+          "mean_decision_ms": 1.7256270833333334,
+          "p95_decision_ms": 1.892239,
+          "p99_decision_ms": 1.900347,
+          "serial_decisions_per_second": 579.4994814686931,
+          "model_calls": 0,
+          "model_tokens": 0,
+          "invoiced_cost": null,
+          "labels": [
+            {
+              "scenario": "same_object",
+              "oracle_affected": true,
+              "invalidated": true,
+              "samples": 12
+            },
+            {
+              "scenario": "causal_read_other_write",
+              "oracle_affected": true,
+              "invalidated": false,
+              "samples": 12
+            },
+            {
+              "scenario": "independent",
+              "oracle_affected": false,
+              "invalidated": false,
+              "samples": 12
+            }
+          ]
+        },
+        {
+          "arm": "C",
+          "false_positives": 0,
+          "false_negatives": 1,
+          "affected_fraction": 0.3333333333333333,
+          "valid_retention_fraction": 1,
+          "context_reexecutions": 1,
+          "mean_decision_ms": 8.729469111111111,
+          "p95_decision_ms": 15.176925,
+          "p99_decision_ms": 19.835905,
+          "serial_decisions_per_second": 114.55450351810882,
+          "model_calls": 0,
+          "model_tokens": 0,
+          "invoiced_cost": null,
+          "labels": [
+            {
+              "scenario": "same_object",
+              "oracle_affected": true,
+              "invalidated": true,
+              "samples": 12
+            },
+            {
+              "scenario": "causal_read_other_write",
+              "oracle_affected": true,
+              "invalidated": false,
+              "samples": 12
+            },
+            {
+              "scenario": "independent",
+              "oracle_affected": false,
+              "invalidated": false,
+              "samples": 12
+            }
+          ]
+        },
+        {
+          "arm": "D",
+          "false_positives": 0,
+          "false_negatives": 0,
+          "affected_fraction": 0.6666666666666666,
+          "valid_retention_fraction": 1,
+          "context_reexecutions": 2,
+          "mean_decision_ms": 8.887577861111112,
+          "p95_decision_ms": 14.259196,
+          "p99_decision_ms": 14.261142,
+          "serial_decisions_per_second": 112.5165951429405,
+          "model_calls": 0,
+          "model_tokens": 0,
+          "invoiced_cost": null,
+          "labels": [
+            {
+              "scenario": "same_object",
+              "oracle_affected": true,
+              "invalidated": true,
+              "samples": 12
+            },
+            {
+              "scenario": "causal_read_other_write",
+              "oracle_affected": true,
+              "invalidated": true,
+              "samples": 12
+            },
+            {
+              "scenario": "independent",
+              "oracle_affected": false,
+              "invalidated": false,
+              "samples": 12
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "active_baseline": {
+    "checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+    "capacity_jobs": [
+      {
+        "case": "Same world CPU and SQL paired comparison",
+        "run_id": 43152869367,
+        "job_id": 130965942262,
+        "archive_id": 13914751383,
+        "archive_sha256": "47d1aa02c31688f5b8624f7630d364aa92733bd47d88e43f2b83eca558a4784a",
+        "conclusion": "success",
+        "failed_steps": [],
+        "measurements": [
+          {
+            "member": "context-p3.json",
+            "member_sha256": "b605e58fa42d1d7ba584e38cf0c3732c40a39db592eca8e9d254cffc4a998231",
+            "recorded_checkout": null,
+            "metrics": {},
+            "offered_first_attempts": {}
+          }
+        ]
+      },
+      {
+        "case": "Independent load process / 200 / overload",
+        "run_id": 43152869367,
+        "job_id": 130965942617,
+        "archive_id": 13914268447,
+        "archive_sha256": "7d32981283088417e7f4cfabf4a191449cec48e4ae7098df0a94bcf170127005",
+        "conclusion": "failure",
+        "failed_steps": [
+          "Actual requests and strict capacity gate"
+        ],
+        "measurements": [
+          {
+            "profile": "overload",
+            "logical_agent_task_count": 200,
+            "engineer_correctness": "PASS",
+            "first_attempt_capacity_gate": "NOT_MET",
+            "capacity_gate": "NOT_MET",
+            "bounded_recovery_business_gate": "PASS",
+            "member": "load.json",
+            "member_sha256": "d8f8ddba49cdd69b624f945fa2f7be20ddb5aea3d359da872268812e1aea3a7b",
+            "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+            "metrics": {
+              "planned_requests": 2141,
+              "completed_requests": 2906,
+              "first_attempt_status_counts": {
+                "200": 1629,
+                "409": 19,
+                "429": 493
+              },
+              "status_counts": {
+                "200": 2122,
+                "409": 19,
+                "429": 765
+              },
+              "valid_successful_calls": 2122,
+              "api_success_rps": 12.7928
+            },
+            "offered_first_attempts": {
+              "gate": "NOT_MET",
+              "transport_header_starts": 1000,
+              "transport_header_start_rps": 45.921837447176095,
+              "target_rps": 1000,
+              "first_attempts": 1000,
+              "actual_call_start_rps": 58.40090602662861
+            }
+          }
+        ],
+        "comparison": "MATCHES_EXISTING_ISSUE_13"
+      },
+      {
+        "case": "Independent load process / 200 / mixed",
+        "run_id": 43152869367,
+        "job_id": 130965942538,
+        "archive_id": 13914008744,
+        "archive_sha256": "13ccb639340f2260db6a85e33d54c537aae1bb8e3bf68cb24d301423cef5cb35",
+        "conclusion": "success",
+        "failed_steps": [],
+        "measurements": [
+          {
+            "profile": "mixed",
+            "logical_agent_task_count": 200,
+            "engineer_correctness": "PASS",
+            "first_attempt_capacity_gate": "PASS",
+            "capacity_gate": "PASS",
+            "bounded_recovery_business_gate": "PASS",
+            "member": "load.json",
+            "member_sha256": "ce0d7f56979e76f57697980a26e4946771fbb25e720e1818b9514e5b8c12f87e",
+            "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+            "metrics": {
+              "planned_requests": 1141,
+              "completed_requests": 1141,
+              "first_attempt_status_counts": {
+                "200": 1122,
+                "409": 19
+              },
+              "status_counts": {
+                "200": 1122,
+                "409": 19
+              },
+              "valid_successful_calls": 1122,
+              "api_success_rps": 8.0618
+            },
+            "offered_first_attempts": {
+              "gate": "NOT_APPLICABLE",
+              "target_rps": null,
+              "first_attempts": 0
+            }
+          }
+        ]
+      },
+      {
+        "case": "Measured 500-read-soak",
+        "run_id": 43152869356,
+        "job_id": 130965942630,
+        "archive_id": 13915520702,
+        "archive_sha256": "2289008e826a84bd377595c1a4ac39882f5eb21807659078b1f238c7511e7818",
+        "conclusion": "success",
+        "failed_steps": [],
+        "measurements": [
+          {
+            "correctness_errors": [],
+            "world_unchanged": true,
+            "new_world_commits": 0,
+            "status_counts": {
+              "200": 12000
+            },
+            "successful_query_rps": 20.000361081685547,
+            "probe_gate": "PASS",
+            "long_duration_gate": "NOT_EXECUTED",
+            "duration_seconds": 599.989167745,
+            "scheduled_count": 12000,
+            "actual_call_start_rps": 20.00048134159504,
+            "member": "result.json",
+            "member_sha256": "87bfa39a8d29627a9fd122ef8d2a744364a36c9f4e654d81a261c75e8b98f795",
+            "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+            "metrics": {},
+            "offered_first_attempts": {}
+          }
+        ]
+      },
+      {
+        "case": "Measured 500-mixed",
+        "run_id": 43152869356,
+        "job_id": 130965942849,
+        "archive_id": 13915120898,
+        "archive_sha256": "7c0414e261e7473eeb93da10955cfd5bf2be79ec89e4ee174055ecf3d56a834d",
+        "conclusion": "success",
+        "failed_steps": [],
+        "measurements": [
+          {
+            "profile": "mixed",
+            "logical_agent_task_count": 500,
+            "engineer_correctness": "PASS",
+            "first_attempt_capacity_gate": "PASS",
+            "capacity_gate": "PASS",
+            "bounded_recovery_business_gate": "PASS",
+            "member": "result.json",
+            "member_sha256": "dc51c884144f13f789162dbc0bc7aa9152e88e14b238dab6b109ab11a1658d12",
+            "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+            "metrics": {
+              "planned_requests": 2851,
+              "completed_requests": 2851,
+              "first_attempt_status_counts": {
+                "200": 2802,
+                "409": 49
+              },
+              "status_counts": {
+                "200": 2802,
+                "409": 49
+              },
+              "valid_successful_calls": 2802,
+              "api_success_rps": 8.019
+            },
+            "offered_first_attempts": {
+              "gate": "NOT_APPLICABLE",
+              "target_rps": null,
+              "first_attempts": 0
+            }
+          }
+        ]
+      },
+      {
+        "case": "Measured 1000-read-open",
+        "run_id": 43152869356,
+        "job_id": 130965942962,
+        "archive_id": 13913879031,
+        "archive_sha256": "cc71182d1ac5ab4d25f4c47daa8c96ef87819a200fb41e4e5f63660eb21596ae",
+        "conclusion": "failure",
+        "failed_steps": [
+          "Original targets and actual network evidence"
+        ],
+        "measurements": [
+          {
+            "capacity_gate": "NOT_MET",
+            "offered_wire_rate_gate": "NOT_MET",
+            "correctness_errors": [],
+            "world_unchanged": true,
+            "new_world_commits": 0,
+            "scheduled_requests": 5000,
+            "completed_requests": 5000,
+            "status_counts": {
+              "200": 2100,
+              "429": 2890,
+              "transport_error": 10
+            },
+            "validated_successes": 2100,
+            "observed_wire_start_rps": 47.967275799532246,
+            "successful_query_rps": 19.67831164788166,
+            "member": "result.json",
+            "member_sha256": "845acbcfd3a3e8a509ca8dae3c5018b81324cb2f5172d899b0b225d7206969ea",
+            "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+            "metrics": {},
+            "offered_first_attempts": {}
+          }
+        ],
+        "comparison": "MATCHES_EXISTING_ISSUE_13"
+      },
+      {
+        "case": "200 agents / overload / full capacity gate",
+        "run_id": 43152869523,
+        "job_id": 130965943619,
+        "archive_id": 13915190405,
+        "archive_sha256": "b6ed369ac774d41f9a11deb402d0ec091b0a48a33932d3e1e09a0521c46a9543",
+        "conclusion": "failure",
+        "failed_steps": [
+          "Measure fixed population, requests and business completion"
+        ],
+        "measurements": [
+          {
+            "profile": "overload",
+            "logical_agent_task_count": 200,
+            "engineer_correctness": "PASS",
+            "first_attempt_capacity_gate": "NOT_MET",
+            "capacity_gate": "NOT_MET",
+            "bounded_recovery_business_gate": "PASS",
+            "member": "run-1/load.json",
+            "member_sha256": "c50079cf477346a795141f2a1ce34c794dca949fc43ca2704dcdea014426d551",
+            "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+            "metrics": {
+              "planned_requests": 2141,
+              "completed_requests": 3104,
+              "first_attempt_status_counts": {
+                "200": 1570,
+                "409": 19,
+                "429": 552
+              },
+              "status_counts": {
+                "200": 2103,
+                "409": 19,
+                "429": 982
+              },
+              "valid_successful_calls": 2103,
+              "api_success_rps": 11.8464
+            },
+            "offered_first_attempts": {
+              "gate": "NOT_MET",
+              "transport_header_starts": 1000,
+              "transport_header_start_rps": 30.32052620408229,
+              "target_rps": 1000,
+              "first_attempts": 1000,
+              "actual_call_start_rps": 32.78352076438964
+            }
+          },
+          {
+            "profile": "overload",
+            "logical_agent_task_count": 200,
+            "engineer_correctness": "PASS",
+            "first_attempt_capacity_gate": "NOT_MET",
+            "capacity_gate": "NOT_MET",
+            "bounded_recovery_business_gate": "PASS",
+            "member": "run-2/load.json",
+            "member_sha256": "9990a32136ffd81603be19c6448dbc4417b7aaf3408596451824d0860306981e",
+            "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+            "metrics": {
+              "planned_requests": 2141,
+              "completed_requests": 3084,
+              "first_attempt_status_counts": {
+                "200": 1589,
+                "409": 19,
+                "429": 533
+              },
+              "status_counts": {
+                "200": 2100,
+                "409": 19,
+                "429": 965
+              },
+              "valid_successful_calls": 2100,
+              "api_success_rps": 11.8528
+            },
+            "offered_first_attempts": {
+              "gate": "NOT_MET",
+              "transport_header_starts": 1000,
+              "transport_header_start_rps": 30.75288700807501,
+              "target_rps": 1000,
+              "first_attempts": 1000,
+              "actual_call_start_rps": 32.97694139363724
+            }
+          }
+        ],
+        "comparison": "MATCHES_EXISTING_ISSUE_13"
+      },
+      {
+        "case": "50 agents / overload / full capacity gate",
+        "run_id": 43152869523,
+        "job_id": 130965943631,
+        "archive_id": 13914836408,
+        "archive_sha256": "79c77542ed142e526693b3d2a1fdd0f99c69d60ad9b94b7ca4b42d1a162b6141",
+        "conclusion": "failure",
+        "failed_steps": [
+          "Measure fixed population, requests and business completion"
+        ],
+        "measurements": [
+          {
+            "profile": "overload",
+            "logical_agent_task_count": 50,
+            "engineer_correctness": "PASS",
+            "first_attempt_capacity_gate": "NOT_MET",
+            "capacity_gate": "NOT_MET",
+            "bounded_recovery_business_gate": "PASS",
+            "member": "run-1/load.json",
+            "member_sha256": "2e534b4af5d8ff748aec3b9467dfaa5089e963f851f1d35e32f0614abb7cf3e4",
+            "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+            "metrics": {
+              "planned_requests": 536,
+              "completed_requests": 629,
+              "first_attempt_status_counts": {
+                "200": 454,
+                "409": 4,
+                "429": 78
+              },
+              "status_counts": {
+                "200": 532,
+                "409": 4,
+                "429": 93
+              },
+              "valid_successful_calls": 532,
+              "api_success_rps": 12.9236
+            },
+            "offered_first_attempts": {
+              "gate": "NOT_MET",
+              "transport_header_starts": 250,
+              "transport_header_start_rps": 69.77338501234073,
+              "target_rps": 1000,
+              "first_attempts": 250,
+              "actual_call_start_rps": 106.23143349720283
+            }
+          },
+          {
+            "profile": "overload",
+            "logical_agent_task_count": 50,
+            "engineer_correctness": "PASS",
+            "first_attempt_capacity_gate": "NOT_MET",
+            "capacity_gate": "NOT_MET",
+            "bounded_recovery_business_gate": "PASS",
+            "member": "run-2/load.json",
+            "member_sha256": "83be862be2d0bcb2437b5951293aa431a0742f71dc7344d9d29035710cf4151c",
+            "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+            "metrics": {
+              "planned_requests": 536,
+              "completed_requests": 625,
+              "first_attempt_status_counts": {
+                "200": 449,
+                "409": 4,
+                "429": 83
+              },
+              "status_counts": {
+                "200": 532,
+                "409": 4,
+                "429": 89
+              },
+              "valid_successful_calls": 532,
+              "api_success_rps": 13.0691
+            },
+            "offered_first_attempts": {
+              "gate": "NOT_MET",
+              "transport_header_starts": 250,
+              "transport_header_start_rps": 55.41045236959792,
+              "target_rps": 1000,
+              "first_attempts": 250,
+              "actual_call_start_rps": 91.16047281898582
+            }
+          }
+        ],
+        "comparison": "MATCHES_EXISTING_ISSUE_13"
+      },
+      {
+        "case": "200 agents / mixed / full capacity gate",
+        "run_id": 43152869523,
+        "job_id": 130965943607,
+        "archive_id": 13913759419,
+        "archive_sha256": "d3f200dfac2da7f6fd1ca267c5fec753221aca70dd9f1442e0d7911ca84b46d9",
+        "conclusion": "success",
+        "failed_steps": [],
+        "measurements": [
+          {
+            "profile": "mixed",
+            "logical_agent_task_count": 200,
+            "engineer_correctness": "PASS",
+            "first_attempt_capacity_gate": "PASS",
+            "capacity_gate": "PASS",
+            "bounded_recovery_business_gate": "PASS",
+            "member": "run-1/load.json",
+            "member_sha256": "48e7cc77f8ff43e982d2d371cea0b7e05e84ea47cff404366d816aca58d6275e",
+            "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+            "metrics": {
+              "planned_requests": 1141,
+              "completed_requests": 1141,
+              "first_attempt_status_counts": {
+                "200": 1122,
+                "409": 19
+              },
+              "status_counts": {
+                "200": 1122,
+                "409": 19
+              },
+              "valid_successful_calls": 1122,
+              "api_success_rps": 8.061
+            },
+            "offered_first_attempts": {
+              "gate": "NOT_APPLICABLE",
+              "target_rps": null,
+              "first_attempts": 0
+            }
+          },
+          {
+            "profile": "mixed",
+            "logical_agent_task_count": 200,
+            "engineer_correctness": "PASS",
+            "first_attempt_capacity_gate": "PASS",
+            "capacity_gate": "PASS",
+            "bounded_recovery_business_gate": "PASS",
+            "member": "run-2/load.json",
+            "member_sha256": "ee05935e5fd76739088d7cc581997b6b01972663be1153839b8f11e5a6a2100c",
+            "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+            "metrics": {
+              "planned_requests": 1141,
+              "completed_requests": 1141,
+              "first_attempt_status_counts": {
+                "200": 1122,
+                "409": 19
+              },
+              "status_counts": {
+                "200": 1122,
+                "409": 19
+              },
+              "valid_successful_calls": 1122,
+              "api_success_rps": 8.0661
+            },
+            "offered_first_attempts": {
+              "gate": "NOT_APPLICABLE",
+              "target_rps": null,
+              "first_attempts": 0
+            }
+          }
+        ]
+      },
+      {
+        "case": "50 agents / mixed / full capacity gate",
+        "run_id": 43152869523,
+        "job_id": 130965943333,
+        "archive_id": 13913414894,
+        "archive_sha256": "652686e1beeb4ece648ff3f087e898ac8193dcf2bf065b7692e46479b82c855e",
+        "conclusion": "success",
+        "failed_steps": [],
+        "measurements": [
+          {
+            "profile": "mixed",
+            "logical_agent_task_count": 50,
+            "engineer_correctness": "PASS",
+            "first_attempt_capacity_gate": "PASS",
+            "capacity_gate": "PASS",
+            "bounded_recovery_business_gate": "PASS",
+            "member": "run-1/load.json",
+            "member_sha256": "5d5f552b8131e712bda51e709af0bff89450637d72b3d1793086291bb0c45eac",
+            "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+            "metrics": {
+              "planned_requests": 286,
+              "completed_requests": 286,
+              "first_attempt_status_counts": {
+                "200": 282,
+                "409": 4
+              },
+              "status_counts": {
+                "200": 282,
+                "409": 4
+              },
+              "valid_successful_calls": 282,
+              "api_success_rps": 8.2775
+            },
+            "offered_first_attempts": {
+              "gate": "NOT_APPLICABLE",
+              "target_rps": null,
+              "first_attempts": 0
+            }
+          },
+          {
+            "profile": "mixed",
+            "logical_agent_task_count": 50,
+            "engineer_correctness": "PASS",
+            "first_attempt_capacity_gate": "PASS",
+            "capacity_gate": "PASS",
+            "bounded_recovery_business_gate": "PASS",
+            "member": "run-2/load.json",
+            "member_sha256": "627628d5e517ad41e39418d1baa4af00285bcec90071a990e43cdfb0c2a724a6",
+            "recorded_checkout": "0420356b0bd0bfd675494e581799946c4b967f6e",
+            "metrics": {
+              "planned_requests": 286,
+              "completed_requests": 286,
+              "first_attempt_status_counts": {
+                "200": 282,
+                "409": 4
+              },
+              "status_counts": {
+                "200": 282,
+                "409": 4
+              },
+              "valid_successful_calls": 282,
+              "api_success_rps": 8.2767
+            },
+            "offered_first_attempts": {
+              "gate": "NOT_APPLICABLE",
+              "target_rps": null,
+              "first_attempts": 0
+            }
+          }
+        ]
+      }
+    ],
+    "workshop_message_counts": {
+      "10": 30,
+      "50": 150,
+      "200": 600
+    },
+    "source_qualification_blob": "7d1c2a55ffca7fad935e5c6ac53a3dbfde835401",
+    "source_workflow_provenance_blob": "86c742c2f4036d1b26671e5eea6f6a6cf9a3b954",
+    "historical_capacity_gate": "NOT_MET",
+    "literary_evaluation": "NOT_EVALUATED",
+    "production_p6": "BLOCKED_LOCAL_AUTHORIZATION"
+  },
+  "gate_interpretation": "Issue #13 remains OPEN. The exact-head tests and S9 technical measurements do not waive the preregistered load gates, separate Workshop’s employee/message measurements from NF capacity, and do not evaluate literary quality."
+}

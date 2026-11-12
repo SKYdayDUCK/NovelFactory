@@ -1,0 +1,126 @@
+{
+  "collector_run": 43156283289,
+  "bytes": 1469088,
+  "count": 4,
+  "purpose": "Original source inputs to the allowlisted P55 export plus the original native desktop workflow it requested",
+  "artifacts": [
+    {
+      "run": 43059877408,
+      "workflow": "p5-native-desktop.yml",
+      "event": "workflow_dispatch",
+      "head": "df1e0cc904e3b94a360d86e3a3e00bfec3258673",
+      "branch": "main",
+      "conclusion": "success",
+      "artifact": {
+        "id": 13873727201,
+        "name": "p5-native-codex-desktop-43059877408-1",
+        "size": 1034,
+        "digest": "sha256:ba6c07ae9f2914b882089bd1863ddf385aeae13d8a38b4a9adb57e6dba602829"
+      },
+      "git_blob": "5e3958c30fa65b6b118f35c9132fd01dc93f3165",
+      "collector_jobs": [
+        130976869616
+      ],
+      "members": {
+        "native.json": {
+          "bytes": 3177,
+          "sha256": "849fc3b7e16a1e5939d41693c1696fafd40a11dcf4fa524462d9bb5ff5f57e8b"
+        }
+      },
+      "archive_path": "related-zips/43059877408-13873727201.zip"
+    },
+    {
+      "run": 43036514307,
+      "workflow": "p3-scale-experiments.yml",
+      "event": "pull_request",
+      "head": "55d8979b5361a4837701d762feacd83036096b11",
+      "branch": "dev/p5-5-redis-eventhub",
+      "conclusion": "failure",
+      "artifact": {
+        "id": 13864227631,
+        "name": "p3-scale-500-read-soak-1",
+        "size": 489080,
+        "digest": "sha256:7153d6668be5a6244559fdf399e0e8a7396821d2bd1d96d8e724ffb16980a216"
+      },
+      "expected_result_sha256": "2f8c9410042397963ce85d760e7663df90a89eb3700b610c1bdd4d6bcb9e2421",
+      "git_blob": "86b99d4af22f8b0435c0556fc0dee9c6ee013feb",
+      "collector_jobs": [
+        130976869666,
+        130976869685
+      ],
+      "members": {
+        "result.json": {
+          "bytes": 5469550,
+          "sha256": "2f8c9410042397963ce85d760e7663df90a89eb3700b610c1bdd4d6bcb9e2421"
+        },
+        "run.log": {
+          "bytes": 418,
+          "sha256": "deaf62295836315af91e5ef0e5be968126d9206f2e0476d1809725c059cc47ae"
+        }
+      },
+      "archive_path": "related-zips/43036514307-13864227631.zip"
+    },
+    {
+      "run": 43036514307,
+      "workflow": "p3-scale-experiments.yml",
+      "event": "pull_request",
+      "head": "55d8979b5361a4837701d762feacd83036096b11",
+      "branch": "dev/p5-5-redis-eventhub",
+      "conclusion": "failure",
+      "artifact": {
+        "id": 13863984683,
+        "name": "p3-scale-500-read-soak-2",
+        "size": 489381,
+        "digest": "sha256:218e08b98a5a2fa3c5a3f67b392f81e7018d4bba04ab18f6d271cc02ff9c4ed2"
+      },
+      "expected_result_sha256": "1d206777041c3c64a047d39c49560d4c405b39706e642bc646a120fc083ce667",
+      "git_blob": "f8b6a03787b7488c8ffdbc8a3ef9266af2518a82",
+      "collector_jobs": [
+        130976869335,
+        130976869675
+      ],
+      "members": {
+        "result.json": {
+          "bytes": 5469371,
+          "sha256": "1d206777041c3c64a047d39c49560d4c405b39706e642bc646a120fc083ce667"
+        },
+        "run.log": {
+          "bytes": 420,
+          "sha256": "465cd89525872d084884dafefdb302fdd256f6b6bd9762be8e6a4c51efbdb2fd"
+        }
+      },
+      "archive_path": "related-zips/43036514307-13863984683.zip"
+    },
+    {
+      "run": 43035161204,
+      "workflow": "p3-scale-experiments.yml",
+      "event": "pull_request",
+      "head": "e2f0fabadcf673984fddacc9bd7a924d6588b816",
+      "branch": "dev/p5-5-redis-eventhub",
+      "conclusion": "failure",
+      "artifact": {
+        "id": 13864160530,
+        "name": "p3-scale-500-read-soak-1",
+        "size": 489593,
+        "digest": "sha256:4666915db6085c9bf09f41346209e3fcd59346e449a33380380da957a692d4d0"
+      },
+      "expected_result_sha256": "b9d3b025cbd08323054a2621aef2dd9f5e4cda9c64adbff36f445105fd22896f",
+      "git_blob": "80e473ab1162c57371de54df4957350fb3e94bb7",
+      "collector_jobs": [
+        130976869601,
+        130976869649
+      ],
+      "members": {
+        "result.json": {
+          "bytes": 5486151,
+          "sha256": "b9d3b025cbd08323054a2621aef2dd9f5e4cda9c64adbff36f445105fd22896f"
+        },
+        "run.log": {
+          "bytes": 397,
+          "sha256": "a922767680ef4623d70e1ee1b15c7db3e8d5c0609bd21c0dcf0a0b71e5b50b9f"
+        }
+      },
+      "archive_path": "related-zips/43035161204-13864160530.zip"
+    }
+  ]
+}
