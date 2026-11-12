@@ -71,11 +71,22 @@ def test_large_state_and_relation_timeline_do_not_fetch_events():
         assert repo.event_calls == 0, (kind, batch)
 
 
-def test_fact_timeline_still_fetches_selected_versions_exactly_once():
+def test_source_fact_timeline_still_fetches_selected_versions_exactly_once():
     for batch in (False, True):
         service, principal, request, repo, expected_ids = fixture("TIMELINE", batch=batch, size=150)
         fact_query = request["items"][0]["query"] if batch else request["query"]
         fact_query["entry_kinds"].append("FACT")
+        fact_query["time_axis"] = "SOURCE"
         packet = service._sample(principal, request)
         assert packet["events"] == []  # mocked DB returns no payload; selection itself remains immutable
         assert repo.event_calls == 1 and repo.requested == len(expected_ids)
+
+
+def test_valid_axis_fact_filter_does_not_fetch_source_event_bodies():
+    for batch in (False, True):
+        service, principal, request, repo, _ = fixture("TIMELINE", batch=batch, size=150)
+        query = request["items"][0]["query"] if batch else request["query"]
+        query["entry_kinds"].append("FACT")
+        assert query["time_axis"] == "VALID"
+        assert service._sample(principal, request)["events"] == []
+        assert repo.event_calls == 0
