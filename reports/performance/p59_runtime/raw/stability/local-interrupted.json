@@ -1,0 +1,11 @@
+{
+  "status": "INTERRUPTED",
+  "source_public": "c732efd31685838a9e46cd8966829ee6db98ebe3",
+  "scope": "500 principals, 20 fixed reads per second, two API processes, 3600 seconds requested, active owner renewal, Linux affinity 0-4",
+  "cluster_start_log": "2026-11-12 18:32:58.562 UTC [20] LOG:  starting PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+  "last_available_checkpoint": "2026-11-12 18:48:03.464 UTC [22] LOG:  checkpoint complete: wrote 61 buffers (0.4%); 0 WAL file(s) added, 0 removed, 0 recycled; write=4.619 s, sync=0.001 s, total=4.621 s; sync files=7, longest=0.001 s, average=0.001 s; distance=2961 kB, estimate=19031 kB; lsn=0/338A8B8, redo lsn=0/336A848",
+  "monitor_absent_utc": "2026-11-12T18:52:04Z",
+  "completed_result_available": false,
+  "counted_as_completed_hours": 0,
+  "note": "The local execution session was no longer available and did not produce a result JSON or cluster exit receipt. Partial request-level counts cannot be recovered from the server checkpoint."
+}
