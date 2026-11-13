@@ -154,6 +154,15 @@ def test_fresh_dependent_scenes_wait_for_acceptance_and_recover_to_release(kerne
         writer_packets = [json.loads(call["messages"][1]["content"]) for call in calls]
         lengths = [p["assignment"] for p in writer_packets if p["context"]["role_id"] == "writer"]
         assert len(lengths) == 3
+        cards = [json.loads(p["authorized_materials"][0]["content"]) for p in writer_packets
+                 if p["context"]["role_id"] == "writer"]
+        assert all("predecessor_passages" not in card for card in cards[:2])
+        passages = cards[2]["predecessor_passages"]
+        assert len(passages) == 2
+        assert len({p["acceptance_ref"]["artifact_revision_id"] for p in passages}) == 2
+        for passage in passages:
+            assert passage["text"] == "北窗的雨声很轻。"
+            assert passage["end"] - passage["start"] == len(passage["text"])
         assert all("6–8 个汉字" in assignment for assignment in lengths[:2])
         assert "5–7 个汉字" in lengths[2]
         for packet in writer_packets:

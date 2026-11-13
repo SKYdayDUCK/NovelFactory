@@ -894,6 +894,22 @@ class NarrativeService:
                         "required_event_refs": scene["required_event_refs"], "entry_checks": scene["entry_checks"],
                         "exit_checks": scene["exit_checks"], "allowed_disclosures": scene["allowed_disclosures"],
                         "literary_purpose": scene["literary_purpose"], "selected_styles": styles}
+                if scene["required_predecessor_scene_ids"] and scene["batch_ref"] is not None:
+                    # _writer_binding has checked the exact immutable handoffs against this batch.
+                    from .release import validate_writing_task_binding
+                    handoff = validate_writing_task_binding(repo, self.kernel, task, scene_ref)
+                    passages = []
+                    refs = handoff["predecessor_acceptance_refs"]
+                    for ref in refs:
+                        prior = self._artifact(repo, ref, task["work_id"], "NARRATIVE_ACCEPTANCE")
+                        text_ref = prior["text_ref"]
+                        self.kernel.artifact(repo, text_ref, task["work_id"], kind="TEXT")
+                        original = self.kernel.objects.read(text_ref["sha256"]).decode("utf-8")
+                        tail = original[-min(1200, 4800 // len(refs)):]
+                        passages.append({"acceptance_ref": ref, "text_ref": text_ref,
+                                         "start": len(original) - len(tail), "end": len(original),
+                                         "text": tail})
+                    card["predecessor_passages"] = passages
                 return canonical_bytes(card)
             draft_ref = artifact_ref if kind == "NARRATIVE_DRAFT" else None
             if draft_ref is None:
