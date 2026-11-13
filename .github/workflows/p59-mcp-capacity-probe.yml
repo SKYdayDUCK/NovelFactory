@@ -7,7 +7,7 @@ on:
 permissions:
   contents: read
 jobs:
-  stock:
+  short-idle-single-slot:
     runs-on: ubuntu-24.04
     timeout-minutes: 42
     services:
@@ -18,7 +18,7 @@ jobs:
           POSTGRES_USER: probe
           POSTGRES_PASSWORD: isolated_runner
         ports: ['5432:5432']
-        options: --health-cmd pg_isready --health-interval 2s --health-timeout 2s --health-retries 30
+        options: --health-cmd "pg_isready -U probe -d probe" --health-interval 2s --health-timeout 2s --health-retries 30
     env:
       NF_DATABASE_URL: postgresql+psycopg://probe:isolated_runner@127.0.0.1:5432/probe
     steps:
@@ -32,16 +32,22 @@ jobs:
       - run: uv sync --locked --group dev
       - run: uv pip install --python .venv/bin/python psutil==7.2.2
       - run: uv run --no-sync python -m alembic upgrade head
-      - name: Record all launches and verify each completed level
+      - name: Measure retained connections, bounded reads and same-time arrivals
         run: |
           mkdir -p probe-out
           df -h / > probe-out/disk.txt
           head /proc/meminfo > probe-out/memory.txt
-          .venv/bin/python benchmarks/p59_mcp_stock_capacity.py probe-out/stock.json.gz
+          set -o pipefail
+          .venv/bin/python benchmarks/p59_mcp_stock_capacity.py probe-out/stock.json.gz --idle-arm 2>&1 | tee probe-out/launcher.txt
+      - name: Collect isolated database logs
+        if: always()
+        env:
+          PG_SERVICE_ID: ${{ job.services.postgres.id }}
+        run: docker logs "$PG_SERVICE_ID" > probe-out/postgres.txt 2>&1
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: stock-MCP-${{ github.sha }}
+          name: idle-arm-MCP-${{ github.sha }}
           path: probe-out/
       - name: Report attained independent process and live-call populations
         if: always()
@@ -55,6 +61,8 @@ jobs:
               print("STOCK_RECEIPT", json.dumps({
                   "source": d["source"], "handshakes": len(d["steps"]), "final_live": d.get("final_live"),
                   "stop": d.get("stop"), "final_sweep": d.get("final_sweep", {}).get("statuses"),
+                  "cold_pool_sessions": d.get("cold_bound_pg_sessions_before_burst"),
+                  "simultaneous_burst": d.get("simultaneous_burst", {}).get("statuses"),
                   "steps": [(i["n"],i["sweep"]["statuses"]) for i in d["steps"] if "sweep" in i],
                   "host_memory_bytes": d["host_memory_bytes"], "final_memory": d.get("final_memory")}))
           PY

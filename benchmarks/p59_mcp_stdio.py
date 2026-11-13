@@ -12,6 +12,7 @@ from dataclasses import dataclass
 import gzip
 import hashlib
 from importlib.metadata import version
+from hashlib import sha256
 import json
 import math
 import os
@@ -44,7 +45,8 @@ NAMES = {"nf_task_get", "nf_context_get", "nf_query_batch", "nf_artifact_put"}
 READS = ["nf_task_get", "nf_context_get"]
 MIX = ["tools/list", *READS, "nf_query_batch"]
 VARIANTS = {"A": [], "B": ["--compact-role-reads"], "C": ["--batch-discovery"],
-            "S": ["--pool-slots", "1"], "G": ["--compact-role-reads", "--batch-discovery"]}
+            "S": ["--pool-slots", "1"], "G": ["--compact-role-reads", "--batch-discovery"],
+            "H": ["--compact-role-reads", "--bench-task-batch"]}
 
 
 def write_file(path, data):
@@ -58,6 +60,12 @@ def write_file(path, data):
 def serve_with_metrics(target):
     """Timestamp SDK dispatch, admission, sync service, pool checkout and cursor IO."""
     current = ContextVar("current_request", default=None)
+    collectors = []
+    if "--bench-task-batch" in sys.argv:
+        from p59_role_read_group import install
+
+        sys.argv.remove("--bench-task-batch")
+        collectors = install()
     original_handle = Server._handle_request
     original_run = mcp_stdio.BoundToolAdmission.run
     original_connect = QueuePool.connect
@@ -120,6 +128,8 @@ def serve_with_metrics(target):
         mcp_stdio.main()
     finally:
         write_file(target, rows)
+        if collectors:
+            Path(str(target)+".groups").write_text(json.dumps(dict(collectors[0].shapes)))
 
 
 class WriteProbe:
@@ -154,6 +164,7 @@ class Bound:
     pid: int
     trace: Path
     cold_ns: int
+    arm_open_time: object = None
 
 
 async def invoke(bound, tool):
@@ -333,17 +344,46 @@ def attach_traces(bindings, phases):
             phase_data["closed_client_outstanding_limit"] = phase_data["lanes"] * len(bindings)
 
 
+def check_audits(db, bindings, phases):
+    # SDK restarts recycle wire ids. Scope by the database high-water time
+    # (arm_open_time) to exclude all earlier server processes' audit records.
+    for phase_data in phases:
+        checked = 0
+        for index, b in enumerate(bindings):
+            expected = {sha256(str(row["wire_id"]).encode()).hexdigest() for row in phase_data["rows"]
+                        if row["binding"] == index and row["status"] == "OK"}
+            with db.uow(write=False) as repo:
+                found = repo.conn.execute(text("""
+                    SELECT a.request_id, count(*) FROM nf_audit_events a
+                    JOIN nf_audit_events f ON f.parent_span_id=a.event_id AND f.causation_id=a.event_id
+                    WHERE a.event_type='mcp.started' AND f.event_type='mcp.finished'
+                      AND a.task_id=:task AND a.tool_name='nf_task_get' AND f.outcome='OK'
+                      AND a.request_id=ANY(:expected) AND a.event_time >= :opened
+                    GROUP BY a.request_id
+                """), {"task": b.role.expected["nf_task_get"]["task_id"], "expected": list(expected),
+                       "opened": b.arm_open_time}).all()
+            assert {k: n for k, n in found} == {k: 1 for k in expected}
+            checked += len(found)
+        phase_data["correct_audit_pairs"] = checked
+
+
 async def matrix(db, kernel, directory, args, report):
     roles = [provision(kernel, directory, i) for i in range(args.bindings)]
     assert len({r.principal_id for r in roles}) == args.bindings
     assert len({r.expected["nf_task_get"]["world_ref"]["work_id"] for r in roles}) == args.bindings
     for arm in args.arms:
         bindings = []
+        with db.uow(write=False) as repo:
+            arm_open = repo.conn.scalar(text("SELECT clock_timestamp()"))
         async with AsyncExitStack() as stack:
             for i, role in enumerate(roles):
-                bindings.append(await open_binding(stack, role, directory, i, arm))
+                b = await open_binding(stack, role, directory, i, arm)
+                b.arm_open_time = arm_open
+                bindings.append(b)
             phases = [await phase(db, bindings, args.names, args.count, args.lanes, rate)
                       for rate in (None, args.rps)]
+            if args.suite == "task-batch":
+                check_audits(db, bindings, phases)
         attach_traces(bindings, phases)
         with db.uow(write=False) as repo:
             ref = [r.expected["nf_task_get"]["world_ref"] for r in roles]
@@ -354,6 +394,8 @@ async def matrix(db, kernel, directory, args, report):
         if not unchanged or attempts:
             raise RuntimeError("unexpected durable effect in read-only workload")
         report["trials"].append({"arm": arm, "pids": [b.pid for b in bindings],
+            "group_sizes_including_warmup": [json.loads(Path(str(b.trace)+".groups").read_text())
+                                               for b in bindings] if arm == "H" else None,
             "cold_ms": [round(b.cold_ns/1e6, 2) for b in bindings], "sessions": len(bindings),
             "expected_heads_unchanged": unchanged, "provider_attempts": attempts, "phases": phases})
         write_file(args.output, report)
@@ -394,7 +436,7 @@ async def staircase(db, kernel, directory, args, report):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("output", type=Path)
-    parser.add_argument("--suite", choices=["reads", "discovery", "mixed", "connections"], default="reads")
+    parser.add_argument("--suite", choices=["reads", "discovery", "mixed", "connections", "task-batch"], default="reads")
     parser.add_argument("--arms", default="ABBA")
     parser.add_argument("--bindings", type=int, default=2)
     parser.add_argument("--rss-budget", type=int, default=4096, help="Maximum server RSS, MiB, for connection sweep")
@@ -403,7 +445,7 @@ def main():
         parser.error("invalid arm sequence, binding count, or memory budget")
     args.names, args.count, args.lanes, args.rps = {
         "reads": (READS, 24, 2, 12), "discovery": (["tools/list"], 40, 4, 60),
-        "mixed": (MIX, 16, 2, 12), "connections": (MIX, 4, 1, 0)}[args.suite]
+        "task-batch": (["nf_task_get"], 40, 2, 12), "mixed": (MIX, 16, 2, 12), "connections": (MIX, 4, 1, 0)}[args.suite]
     db = Database(pool_size=2)
     with db.uow(write=False) as repo:
         postgres = repo.conn.scalar(text("SELECT version()"))
