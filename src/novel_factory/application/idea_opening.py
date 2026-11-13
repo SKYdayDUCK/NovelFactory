@@ -409,7 +409,8 @@ def advance_opening(kernel, gateway, controller, work, branch):
         sim = opening["simulation"]
         joint = _delivery(repo, "joint", sim["adjudicator_task_id"])
         if not joint or joint.get("status") != "JOINT_ACCEPTED":
-            return None
+            from .opening_recovery import recover_opening
+            return recover_opening(kernel, repo, gateway, owner, opening)
         tid = sim["director_task_id"]
         verdict = None
         while tid:

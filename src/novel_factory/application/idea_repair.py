@@ -56,7 +56,7 @@ def structured_diagnostic(raw, audit, bound):
     return {"location": "payload", **error} if error else None
 
 
-def returned_design(kernel, repo, gateway, task, wr, designer, *, allow_malformed=False, allow_contract=False, board_node=None):
+def returned_design(kernel, repo, gateway, task, wr, designer, *, allow_malformed=False, allow_contract=False, board_node=None, opening_slot=None):
     work = wr["work_id"]
     expected_role = (task["role_id"], task["task_kind"])
     if board_node is not None:
@@ -67,7 +67,18 @@ def returned_design(kernel, repo, gateway, task, wr, designer, *, allow_malforme
                 "VIEW_DENIED", "Malformed return is outside the bound production node")
         board, _, _ = guard_send(kernel, repo, task, job["config"])
         require(board.get("production_mode") == "quality", "VIEW_DENIED", "Quality repair is disabled")
-    require(task["state"] == "FAILED" and (board_node is not None or expected_role == ("world_designer", "initial_world")
+    if opening_slot is not None:
+        interaction_id, actor = opening_slot
+        job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})["config"]
+        group = repo.one("simulation_interactions", {"work_id": wr["work_id"], "branch_id": wr["branch_id"],
+                                                      "interaction_id": interaction_id})
+        require(expected_role == ("character_actor", "character_action") and group
+                and group["payload"]["base_world_ref"] == wr and job.get("seal_interaction_id") == interaction_id
+                and job["dispatch"]["input_ref"] == designer["input_ref"]
+                and {"actor_id": actor, "grant_id": task["grant_id"]} in group["payload"]["participant_slots"]
+                and job["knowledge_cut"]["plane"] == "BELIEF" and job["knowledge_cut"]["actor_id"] == actor,
+                "VIEW_DENIED", "Rejected intent belongs to a different sealed slot")
+    require(task["state"] == "FAILED" and (board_node is not None or opening_slot is not None or expected_role == ("world_designer", "initial_world")
             or allow_contract and expected_role == ("reviewer", "fact")),
             "TASK_NOT_ACCEPTABLE", "Only a current rejected design can be repaired")
     call = repo.one("call_attempts", {"task_id": task["task_id"], "generation": task["generation"],
@@ -97,7 +108,7 @@ def returned_design(kernel, repo, gateway, task, wr, designer, *, allow_malforme
             and raw["request_sha256"] == call["request_hash"] == audit["request_sha256"]
             and raw["provider_receipt"] == call["provider_receipt"],
             "INVALID_EVIDENCE", "The design response does not match the original supervised call")
-    if board_node is not None and call["state"] == "UNKNOWN":
+    if (board_node is not None or opening_slot is not None) and call["state"] == "UNKNOWN":
         from .board_schema_repair import verify_board_transport
         try:
             verify_board_transport(kernel, audit, raw)
@@ -110,7 +121,7 @@ def returned_design(kernel, repo, gateway, task, wr, designer, *, allow_malforme
             if call["state"] == "UNKNOWN":
                 from .postpaid_delivery import verify_postpaid_transport
                 verify_postpaid_transport(kernel, repo, task, call, row, kernel.artifact(repo, audit["response_ref"], work),
-                                          contract_source=True, board_node=board_node)
+                                          contract_source=True, board_node=board_node, opening_slot=opening_slot)
             else:
                 require(call["state"] == "FAILED" and call["actual_amount"] is not None and call["actual_tokens"] is not None,
                         "CALL_RECONCILIATION_REQUIRED", "Contract failure has no settled accounting")
@@ -125,7 +136,7 @@ def returned_design(kernel, repo, gateway, task, wr, designer, *, allow_malforme
             from .postpaid_delivery import verify_postpaid_transport
             verify_postpaid_transport(kernel, repo, task, call, row,
                                       kernel.artifact(repo, audit["response_ref"], work, kind="AGENT_RESPONSE"),
-                                      syntax_source=True, board_node=board_node)
+                                      syntax_source=True, board_node=board_node, opening_slot=opening_slot)
         else:
             require(call["state"] == "FAILED" and call["actual_amount"] is not None and call["actual_tokens"] is not None,
                     "CALL_RECONCILIATION_REQUIRED", "The rejected return is not a completed, accounted attempt")

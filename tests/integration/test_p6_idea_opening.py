@@ -151,6 +151,9 @@ def test_reviewed_design_opens_sealed_interaction_before_any_writing(
                     "evidence_refs": [],
                 }
             if role == "character_actor":
+                if harness and not getattr(answer, "rejected_once", False):
+                    answer.rejected_once = True
+                    return {"unexpected": True}
                 actor = ctx["actor_id"]
                 actors[actor] = packet["assignment"]
                 return {
@@ -246,6 +249,8 @@ def test_reviewed_design_opens_sealed_interaction_before_any_writing(
             if turn.get("status") == "OPENING_ACCEPTED":
                 break
         assert turn.get("status") == "OPENING_ACCEPTED", statuses
+        if harness:
+            assert ("OPENING_FORMAT_REPAIR_ENROLLED", None) in statuses
         assert len(actors) == 2
         assert all("市场" in brief and "末班渡船" not in brief for brief in actors.values())
         assert "父亲嘱咐" not in actors[_uid(work, "protagonist")]

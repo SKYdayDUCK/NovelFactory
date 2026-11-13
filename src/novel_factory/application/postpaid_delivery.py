@@ -122,6 +122,7 @@ def verify_postpaid_transport(
     syntax_source=False,
     contract_source=False,
     board_node=None,
+    opening_slot=None,
 ):
     audit = audit_row["payload"]
     config, usage, raw = audit["model_configuration"], audit["usage"], response_row["payload"]
@@ -215,15 +216,25 @@ def verify_postpaid_transport(
                    job["config"]["dispatch"]["input_ref"] == audit["input_ref"] and (syntax_source or contract_source))
             board, _, _ = guard_send(kernel, repo, task, job["config"])
             _check(board.get("production_mode") == "quality")
+        if opening_slot is not None:
+            interaction_id, actor = opening_slot
+            group = repo.one("simulation_interactions", {"work_id": task["work_id"], "branch_id": task["branch_id"],
+                                                          "interaction_id": interaction_id})
+            job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})["config"]
+            _check((syntax_source or contract_source) and (task["role_id"], task["task_kind"]) ==
+                   ("character_actor", "character_action") and job.get("seal_interaction_id") == interaction_id
+                   and group and group["payload"]["base_world_ref"] == wr and
+                   {"actor_id": actor, "grant_id": task["grant_id"]} in group["payload"]["participant_slots"]
+                   and audit["actor_id"] == actor and audit["input_ref"] == job["dispatch"]["input_ref"])
         if contract_source:
-            _check(task["state"] == "FAILED" and (design_scope or board_node is not None)
+            _check(task["state"] == "FAILED" and (design_scope or board_node is not None or opening_slot is not None)
                    and audit["outcome"] == "REJECTED" and audit["result_status"] == "FAILED" and audit["output_ref"] is None
                    and audit["reason"] in {"INVALID_ARGUMENT", "MODEL_PROTOCOL_ERROR", "MODEL_IDENTITY_MISMATCH"})
             from .idea_repair import structured_diagnostic
             _check(structured_diagnostic(raw, audit, bound_input))
             return None, bound_input
         if syntax_source:
-            _check(task["state"] == "FAILED" and (design_scope or board_node is not None)
+            _check(task["state"] == "FAILED" and (design_scope or board_node is not None or opening_slot is not None)
                    and audit["outcome"] == "REJECTED" and audit["result_status"] == "FAILED"
                    and audit["reason"] == "INVALID_MODEL_OUTPUT" and audit["output_ref"] is None)
             from .idea_repair import unparsed_diagnostic

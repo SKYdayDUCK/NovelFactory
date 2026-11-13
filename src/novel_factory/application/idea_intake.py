@@ -344,6 +344,9 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
     if is_revision and intake["profile"].get("production_mode") == "quality":
         family = "schema" if syntax_source or structure_repair or diagnostics else "editorial"
         if syntax_source:
+            if "opening" in design.diagnostic.get("missing", []):
+                content["opening_format"] = ("opening 必须是 payload 内的对象。依输出契约逐项给出对方人物、场所、"
+                                             "各自所知与当前处境。所有叙事内容由本角色决定。")
             observed = {key: value for key, value in design.diagnostic.items() if key not in {"offset", "line", "column"}}
             if design.withhold_response or len(design.text) > 16000:
                 content.pop("raw_response_text")
@@ -355,6 +358,8 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
                     content[key] = reviewed_assignment[key]
                 content["format_instruction"] = "依据原审稿意见完成原任务，按本次冻结契约纠正返回结构。"
                 inputs.extend([reviewed_assignment["candidate_ref"], reviewed_assignment["review_ref"]])
+            if content.get("opening_format"):
+                observed["repair_focus"] = "opening_object"
         elif revision:
             report = revision[0]
             observed = sorted(i["category"] + "/" + i["issue_kind"] + "/" + i["severity"]
