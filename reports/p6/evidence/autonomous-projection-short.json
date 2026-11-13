@@ -1,0 +1,46 @@
+{
+  "work_id": "2c537838-ddfc-4bf4-9837-d9971ff30638",
+  "baseline_commit": "9f85631c98e04b03a810103c6f846ac4f78b7081",
+  "returns": [
+    {
+      "attempt_id": "5903ced0-9b46-4d2c-8ce3-3c9ac709253b",
+      "model": "deepseek-flash",
+      "received_utc": "2026-11-13T06:27:14.495412+00:00",
+      "transport_seconds": 15.667173,
+      "input_tokens": 3729,
+      "cached_input_tokens": 1408,
+      "output_tokens": 1162,
+      "total_tokens": 4891,
+      "estimated_cny": "0.01399432",
+      "response_sha256": "c38db65cdcb1e8e77c96408582e128a95a65dd77cf463e101ce7a5eedf703590"
+    }
+  ],
+  "known_tokens": 4891,
+  "known_estimated_cny": "0.01399432",
+  "invoiced_cny": null,
+  "idea": {
+    "idea": "一名乡村放映员发现，停业多年的露天影院每逢雨夜都会卖出一张票。",
+    "genre": "灵异",
+    "length": {
+      "preset": "short",
+      "unit": "han_characters",
+      "min": 6000,
+      "max": 10000
+    }
+  },
+  "run_status": "BLOCKED_BEFORE_INITIAL_DESIGN",
+  "first_error": {
+    "native_result": "REJECTED",
+    "native_transition": "INVALID_ARGUMENT",
+    "response_format": "invalid JSON",
+    "parser_diagnostic": "Expecting ',' delimiter",
+    "offset_codepoints": 1929
+  },
+  "frozen_manuscripts": 0,
+  "independent_whole_book_reviews": 0,
+  "internal_release_count": 0,
+  "formal_manuscript_versions": 0,
+  "operator_story_edits": 0,
+  "paid_retries": 0,
+  "price_card": "deepseek-cny-20261113.json"
+}
