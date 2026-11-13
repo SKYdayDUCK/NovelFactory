@@ -1,0 +1,29 @@
+PONG
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______________ test_backfill_cannot_publish_an_earlier_snapshot _______________
+
+kernel_env = {'db': <novel_factory.infrastructure.database.Database object at 0x7f722eee34a0>, 'store': <novel_factory.infrastructu....Kernel object at 0x7f722d515910>, 'url': 'postgresql+psycopg://agent@127.0.0.1:54059/nf_kernel_a5363d2d86f340b5', ...}
+
+    def test_backfill_cannot_publish_an_earlier_snapshot(kernel_env):
+        from concurrent.futures import ThreadPoolExecutor
+    
+        kernel = kernel_env["kernel"]
+        book = load_fixture(kernel)
+        work, branch = book["world_ref"]["work_id"], book["world_ref"]["branch_id"]
+        role = kernel.issue_grant(book["principal"], work, role_id="writer", max_story_time=point(1))["principal"]
+        spec = task_spec(book, principal=role, role="writer")
+        with kernel.db.uow(repeatable_read=True) as repo:
+            params = {"work": work}
+            assert repo.conn.scalar(text("SELECT count(*) FROM nf_tasks WHERE work_id=:work"), params) == 0
+            with ThreadPoolExecutor(1) as writer:
+                writer.submit(kernel.create_task, role, spec, "concurrent-backfill").result(timeout=10)
+            assert repo.conn.scalar(text("SELECT count(*) FROM nf_tasks WHERE work_id=:work"), params) == 0
+>           with pytest.raises(ValueError, match="READ COMMITTED"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+tests/integration/test_hera_progress.py:125: Failed
+=========================== short test summary info ============================
+FAILED tests/integration/test_hera_progress.py::test_backfill_cannot_publish_an_earlier_snapshot
+1 failed in 3.60s

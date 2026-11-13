@@ -106,3 +106,26 @@ def test_operator_can_suspend_only_an_empty_projection_and_restore_from_tasks(ke
         set_progress_maintenance(repo.conn,suspended=True)
         set_progress_maintenance(repo.conn,suspended=False)
         assert enabled(repo.conn) == "O"
+
+
+def test_backfill_cannot_publish_an_earlier_snapshot(kernel_env):
+    from concurrent.futures import ThreadPoolExecutor
+
+    kernel = kernel_env["kernel"]
+    book = load_fixture(kernel)
+    work, branch = book["world_ref"]["work_id"], book["world_ref"]["branch_id"]
+    role = kernel.issue_grant(book["principal"], work, role_id="writer", max_story_time=point(1))["principal"]
+    spec = task_spec(book, principal=role, role="writer")
+    with kernel.db.uow(repeatable_read=True) as repo:
+        params = {"work": work}
+        assert repo.conn.scalar(text("SELECT count(*) FROM nf_tasks WHERE work_id=:work"), params) == 0
+        with ThreadPoolExecutor(1) as writer:
+            writer.submit(kernel.create_task, role, spec, "concurrent-backfill").result(timeout=10)
+        assert repo.conn.scalar(text("SELECT count(*) FROM nf_tasks WHERE work_id=:work"), params) == 0
+        with pytest.raises(ValueError, match="READ COMMITTED"):
+            configure_progress(repo.conn, work, branch, enabled=True)
+    with kernel.db.uow() as repo:
+        assert check_progress(repo.conn, work, branch) == "DISABLED"
+        configure_progress(repo.conn, work, branch, enabled=True)
+        assert check_progress(repo.conn, work, branch) == "OK"
+        configure_progress(repo.conn, work, branch, enabled=False)

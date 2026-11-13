@@ -13,6 +13,14 @@ def _valid_counts(counts):
     )
 
 
+def _lock_configuration(conn):
+    # Under transaction-wide snapshot isolation, acquiring this lock cannot
+    # refresh rows committed by a writer after the operator's first statement.
+    if conn.scalar(text("SHOW transaction_isolation")) != "read committed":
+        raise ValueError("Progress configuration requires a READ COMMITTED transaction")
+    conn.execute(text("LOCK TABLE nf_tasks IN SHARE ROW EXCLUSIVE MODE"))
+
+
 def _maintenance_suspended(conn):
     return conn.scalar(text("""
         SELECT EXISTS (SELECT FROM pg_constraint
@@ -24,7 +32,7 @@ def set_progress_maintenance(conn, *, suspended):
     """Operator-only switch. Change both protections in the caller's transaction."""
     # The backfill uses the same task lock. Also exclude a concurrent direct
     # INSERT of a projection before proving the table empty.
-    conn.execute(text("LOCK TABLE nf_tasks IN SHARE ROW EXCLUSIVE MODE"))
+    _lock_configuration(conn)
     conn.execute(text("LOCK TABLE nf_hera_progress IN ACCESS EXCLUSIVE MODE"))
     if suspended == _maintenance_suspended(conn):
         return
@@ -41,7 +49,7 @@ def set_progress_maintenance(conn, *, suspended):
 def configure_progress(conn, work_id, branch_id, *, enabled):
     # Serialize the initial snapshot with concurrent task transitions. This is an
     # explicit operator operation, never performed on a reader's cold path.
-    conn.execute(text("LOCK TABLE nf_tasks IN SHARE ROW EXCLUSIVE MODE"))
+    _lock_configuration(conn)
     params = {"w": work_id, "b": branch_id}
     if not enabled:
         conn.execute(text("DELETE FROM nf_hera_progress WHERE work_id=:w AND branch_id=:b"), params)
