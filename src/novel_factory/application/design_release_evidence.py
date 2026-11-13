@@ -226,6 +226,10 @@ def verify_adopted_design(kernel, repo, delivery, receipt, adopted):
         and idea == receipt["creative_input"]
         and receipt.get("model_routes") == intake.get("model_routes")
     )
+    from .idea_intake import _first_window_limit
+    from .idea_window import frozen_window_minimum, window_diagnostics
+    maximum = _first_window_limit(intake["profile"], idea)
+    minimum = frozen_window_minimum(_assignment(kernel, repo, source, intake), maximum)
     design = intake
     rounds = receipt.get("design_revision_round", 0)
     quality = intake["profile"].get("production_mode") == "quality"
@@ -278,6 +282,8 @@ def verify_adopted_design(kernel, repo, delivery, receipt, adopted):
                 ending_revision=not final and revised.get("revision_purpose") == "SHORT_ENDING",
             )
         if final:
+            if minimum > 1:
+                _check(not window_diagnostics(candidate["chapter_goals"], maximum, minimum))
             norm = derivation if origin["kind"] == "NORMALIZED_DESIGN_CANDIDATE" else None
             ending_plan = derivation if origin["kind"] == "ENDING_PLAN_CANDIDATE" else None
             _check(receipt.get("design_ending_plan") == ending_plan)
@@ -363,9 +369,7 @@ def verify_adopted_design(kernel, repo, delivery, receipt, adopted):
                 new_input = kernel.artifact(repo, revised["input_ref"], source["work_id"], kind="AGENT_INPUT")["payload"]
                 _check(all(new_input[k] == old_input[k] for k in ("output_contract", "model_config_sha256", "adapter_id")))
             if revised.get("revision_purpose") == "WINDOW_SCHEMA_CORRECTION":
-                from .idea_intake import _first_window_limit
-                from .idea_window import window_diagnostics
-                errors = window_diagnostics(candidate["chapter_goals"], _first_window_limit(intake["profile"], idea))
+                errors = window_diagnostics(candidate["chapter_goals"], maximum, minimum)
                 _check(errors and errors == packet["validation_errors"] == revised["validation_errors"]
                        and audit["attempt_id"] == revised["source_attempt_id"] == packet["source_attempt_id"])
                 correction_source = {k: v for k, v in candidate.items() if k != "chapter_goals"}

@@ -17,6 +17,13 @@ from novel_factory.domain.errors import DomainError
 pytestmark = [pytest.mark.postgres, pytest.mark.integration]
 
 
+def payload_schema(request):
+    # The schema occupies one JSON value. Frozen method instructions may follow it.
+    system = request["messages"][0]["content"]
+    schema, _ = json.JSONDecoder().raw_decode(system.split("\nPayload JSON Schema: ", 1)[1])
+    return schema
+
+
 @pytest.mark.parametrize("case", ["legacy_input", "new_input", "exhausted", "unknown", "drift"])
 def test_window_protocol_keeps_first_attempt_and_corrects_only_the_requested_array(kernel_env, tmp_path, monkeypatch, case):
     monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[2] / "scripts"))
@@ -72,7 +79,7 @@ def test_window_protocol_keeps_first_attempt_and_corrects_only_the_requested_arr
             with kernel.db.uow(write=False) as repo:
                 assert not repo.many("receipts", {"work_id": enrolled["world_ref"]["work_id"], "command_type": "P6_IDEA_REVISE"})
             return
-        schema = json.loads(calls[0]["messages"][0]["content"].split("Payload JSON Schema: ", 1)[1])
+        schema = payload_schema(calls[0])
         validator = Draft202012Validator(schema)
         assert validator.is_valid(valid) and validator.is_valid(design) == (case == "legacy_input")
         assert validator.is_valid({**valid, "chapter_goals": ["一", "一"]}) == (case == "legacy_input")
@@ -87,7 +94,7 @@ def test_window_protocol_keeps_first_attempt_and_corrects_only_the_requested_arr
             assert original["state"] == "RESULT_STORED" and attempt["attempt_id"] == proposal["source_attempt_id"]
             assert kernel.artifact(repo, proposal["candidate_ref"], original["work_id"])["payload"] == design
         run("advance")
-        repaired_schema = json.loads(calls[1]["messages"][0]["content"].split("Payload JSON Schema: ", 1)[1])
+        repaired_schema = payload_schema(calls[1])
         assert not Draft202012Validator(repaired_schema).is_valid(design)
         if case == "exhausted":
             stopped = run("advance")
@@ -107,3 +114,70 @@ def test_window_protocol_keeps_first_attempt_and_corrects_only_the_requested_arr
             with kernel.db.uow(write=False) as repo:
                 assert kernel.artifact(repo, final["design_ref"], final["world_ref"]["work_id"])["payload"] == valid
                 assert len(repo.many("call_attempts", {"task_id": original["task_id"]})) == 1
+
+
+@pytest.mark.parametrize("legacy", [False, True])
+def test_quality_han_plan_fits_writer_scenes_and_replays_frozen_window(kernel_env, tmp_path, monkeypatch, legacy):
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[2] / "scripts"))
+    cli = importlib.import_module("p6_idea")
+    kernel, project = kernel_env["kernel"], tmp_path / "quality-intake"
+    idea = {"idea": "结构校验测试", "genre": "测试",
+            "length": {"preset": "medium", "unit": "han_characters", "min": 30000, "max": 60000}}
+    allowance = {"adapter_id": "fixture", "currency": "USD", "reserve_amount": "0.1", "total_amount": "2",
+                 "token_reservation": 100000, "total_tokens": 800000, "production_mode": "quality"}
+    small = {"title": "输入", "protagonist": "甲", "place": "乙", "storyline": "流程测试。",
+             "world_rules": ["测试规则。"], "chapter_goals": ["1"]}
+    valid = {**small, "chapter_goals": list("123456")}
+    with backend() as (adapter, calls, server):
+        generate = adapter.generate
+        adapter.generate = lambda request: replace(generate(request), actual_amount=Decimal(0), currency="USD")
+        gateway = AgentGateway(kernel, {"fixture": adapter})
+
+        def run(mode):
+            return cli.run_intake(mode, kernel, gateway, project, idea, allowance)
+
+        def response(packet):
+            if packet["context"]["role_id"] == "reviewer":
+                return {"summary": "合成审核", "counterinterpretations": [], "evidence_refs": [], "issues": []}
+            assignment = json.loads(packet["assignment"])
+            if "validation_errors" in assignment:
+                assert assignment["first_window_minimum"] == 6 and assignment["first_window_limit"] == 8
+                assert assignment["candidate"] == small and assignment["repair_strategy"]
+                return valid
+            return small
+
+        server.packet_candidate = response
+        with monkeypatch.context() as historical:
+            if legacy:
+                original = RuntimeTaskService.prepare
+                def old_input(service, *args, **kwargs):
+                    assignment = json.loads(kwargs["assignment"])
+                    assignment["window_constraints_version"] = 1
+                    del assignment["first_window_minimum"], assignment["planning_scope"]
+                    kwargs["assignment"] = json.dumps(assignment)
+                    return original(service, *args, **kwargs)
+                historical.setattr(RuntimeTaskService, "prepare", old_input)
+            first = run("enroll")
+        run("advance")
+        schema = Draft202012Validator(payload_schema(calls[0]))
+        assert schema.is_valid(small) is legacy and schema.is_valid(valid)
+        if not legacy:
+            repaired = run("advance")
+            assert repaired["validation_errors"] == [{"path": "/chapter_goals", "keyword": "minItems", "limit": 6, "actual": 1}]
+            assert repaired["revision_purpose"] == "WINDOW_SCHEMA_CORRECTION" and repaired["source_attempt_id"]
+            with kernel.db.uow(write=False) as repo:
+                wr = first["world_ref"]
+                reflection = kernel.artifact(repo, repaired["repair_plan"]["reflection_ref"], wr["work_id"],
+                                             kind="P6_REFLECTION_RECORD")["payload"]
+                assert reflection["attempt_id"] == repaired["source_attempt_id"]
+                assert kernel.artifact(repo, repaired["candidate_ref"], wr["work_id"])["payload"] == small
+            run("advance")
+            assert not Draft202012Validator(payload_schema(calls[1])).is_valid(small)
+        for _ in range(5):
+            final = run("advance")
+            if final["status"] == "INITIAL_PLAN_MATERIALIZED":
+                break
+        assert final["status"] == "INITIAL_PLAN_MATERIALIZED" and len(calls) == (2 if legacy else 3)
+        with kernel.db.uow(write=False) as repo:
+            adopted = kernel.artifact(repo, final["design_ref"], final["world_ref"]["work_id"])["payload"]
+            assert adopted == (small if legacy else valid)

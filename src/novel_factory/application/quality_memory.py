@@ -115,20 +115,11 @@ def reflect_repair(kernel, repo, owner, wr, task_id, attempt_id, evidence_ref, p
 
 def _wire_proof(kernel, repo, wr, audit):
     """An adapter-declared REAL_EXTERNAL is insufficient for promoting a production method."""
-    from urllib.parse import urlsplit
-
-    from .statistics import is_fixture_configuration
+    from .statistics import is_official_deepseek
     from ..infrastructure.wire_receipts import read_receipt
 
     config = audit["model_configuration"]
-    endpoint = urlsplit(config.get("endpoint") or "")
-    if (config.get("adapter_kind") != "deepseek" or is_fixture_configuration(config)
-            or config.get("execution_kind") != "REAL_EXTERNAL" or endpoint.scheme != "https"
-            or endpoint.netloc.lower() not in {"api.deepseek.com", "api.deepseek.com:443"}
-            or endpoint.path not in {"/chat/completions", "/v1/chat/completions"}
-            or endpoint.query or endpoint.fragment
-            or config.get("provider") != "https://api.deepseek.com"
-            or not audit.get("response_ref") or not audit.get("provider_receipt")):
+    if not is_official_deepseek(config) or not audit.get("response_ref") or not audit.get("provider_receipt"):
         return None
     try:
         wire = read_receipt(kernel.objects, audit["attempt_id"], audit["request_sha256"])

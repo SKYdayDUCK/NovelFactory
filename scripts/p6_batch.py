@@ -23,6 +23,7 @@ from novel_factory.application.production_pipeline import (
     production_material_reader,
 )
 from novel_factory.application.rolling_production import rolling_status
+from novel_factory.application.statistics import is_official_deepseek
 from novel_factory.application.supervisor import RuntimeSupervisor
 from novel_factory.domain.canonical import fingerprint
 from novel_factory.domain.errors import DomainError
@@ -62,7 +63,7 @@ def check_models(gateway):
     for role, route in ROUTES.items():
         adapter = gateway.adapters[route]
         config = adapter.configuration
-        require(config["adapter_kind"] == "deepseek" and config["model"] == MODELS[role],
+        require(is_official_deepseek(config) and config["model"] == MODELS[role],
                 "INVALID_MODEL_CONFIG", "The official production model must match its assigned role")
         key = adapter.profile.preflight()
         if key not in verified:

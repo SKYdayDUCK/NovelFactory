@@ -12,7 +12,7 @@ from uuid import UUID
 from sqlalchemy import text
 
 from .audit_log import LogService
-from .statistics import is_fixture_configuration
+from .statistics import is_fixture_configuration, is_official_deepseek
 
 # All joins originate from a task, receipt, or selection inside this exact branch.
 _GENERATIONS = """
@@ -192,6 +192,7 @@ def _project(row, kind):
             "provider": result["provider"],
             "adapter_kind": result["adapter"],
         }
+        result["official_deepseek_endpoint"] = is_official_deepseek(cfg)
         result["call_origin"] = (
             "UNOBSERVED"
             if not result["evidence_revision_id"]

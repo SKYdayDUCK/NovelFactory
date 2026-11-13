@@ -6,7 +6,7 @@ from uuid import UUID, uuid5
 from novel_factory.application.budget_limits import SharedBudgetService
 from novel_factory.application.candidate_delivery import CandidateDelivery
 from novel_factory.application.idea_revision import derive_revision_patch, full_design_contract
-from novel_factory.application.idea_window import window_diagnostics
+from novel_factory.application.idea_window import frozen_window_minimum, initial_window_minimum, window_diagnostics
 from novel_factory.application.idea_ending import confirm_ending, derive_ending_plan
 from novel_factory.application.idea_repair import UnparsedDesign, initial_or_structural_repair, normalized_design, returned_design
 from novel_factory.application.kernel import require
@@ -113,12 +113,17 @@ def enroll_idea(kernel, gateway, inspiration, allowance, prep_work_id):
     # tasks (including legacy AgentTextOutput) keep their original dispatch contract.
     design_contract = full_design_contract(profile, model_routes)
     bound_gateway.output_contracts[("world_designer", "initial_world")] = (design_contract, "production_profile")
+    maximum = _first_window_limit(profile, inspiration)
+    minimum = initial_window_minimum(profile, inspiration["length"], maximum)
     assignment = {
         "creative_input": inspiration,
-        "first_window_limit": _first_window_limit(profile, inspiration),
+        "first_window_limit": maximum,
         "window_constraints_version": 1,
         "instructions": "依据灵感自主设计初始身份、地点、世界规则、故事线及首个窗口的章节目标。",
     }
+    if minimum > 1:
+        assignment.update(window_constraints_version=2, first_window_minimum=minimum,
+                          planning_scope="本次章节目标覆盖全书，每章对应一个正文场景，在授权总字数内安排完整的开端、发展和收束。")
     if model_routes and profile["preset"] == "short":
         assignment["extent_instruction"] = "章节目标覆盖整部短篇的开场、中段、转折与结局，在给定篇幅内收束核心冲突。"
     if allowance.get("review_adapter_id"):
@@ -260,7 +265,14 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
         contract = source["output_contract"]
         gateway.output_contracts[(role_id, task_kind)] = (contract["name"], contract["version"])
         content["first_window_limit"] = _first_window_limit(intake["profile"], intake["creative_input"])
-        content["window_constraints_version"] = 1
+        original = kernel.artifact(repo, intake["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]
+        frozen = json.loads(original["assignment"])
+        minimum = frozen_window_minimum(frozen, content["first_window_limit"])
+        if minimum > 1:
+            content.update(window_constraints_version=2, first_window_minimum=minimum,
+                           planning_scope=frozen["planning_scope"])
+        else:
+            content["window_constraints_version"] = 1
         if syntax_source:
             del content["candidate"]
             content.update(task="上次完整返回见 raw_response_text。请按原契约重新输出合法 JSON，"
@@ -520,7 +532,9 @@ def materialize_design(kernel, gateway, owner, wr):
             require({k: v for k, v in design.items() if k != "chapter_goals"} ==
                     {k: v for k, v in prior.items() if k != "chapter_goals"}, "INVALID_MODEL_OUTPUT",
                     "Window format correction changed a field outside the diagnostic")
-        diagnostics = window_diagnostics(design["chapter_goals"], limit)
+        bound_input = kernel.artifact(repo, intake["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]
+        minimum = frozen_window_minimum(json.loads(bound_input["assignment"]), limit)
+        diagnostics = window_diagnostics(design["chapter_goals"], limit, minimum)
         if diagnostics:
             if selected_review or (not quality and designer["structure_count"] >= intake["profile"]["max_reworks"]):
                 return None, {"status": "DESIGN_SCHEMA_REWORK_REQUIRED", "validation_errors": diagnostics,

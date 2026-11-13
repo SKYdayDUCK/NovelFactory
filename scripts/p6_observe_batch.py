@@ -24,6 +24,7 @@ from novel_factory.application.kernel import Kernel, require
 from novel_factory.application.production_extent import _count_han
 from novel_factory.application.rolling_production import _load as load_rolling
 from novel_factory.application.runtime_evidence import export_runtime_evidence
+from novel_factory.application.statistics import is_official_deepseek
 from novel_factory.domain.canonical import fingerprint
 from novel_factory.domain.errors import DomainError
 from novel_factory.infrastructure.database import Database
@@ -85,6 +86,7 @@ def is_official(call):
         == ("PROVIDER", "deepseek", "api.deepseek.com")
         and call.get("model") in MODELS.values()
         and call.get("execution_kind") == "REAL_EXTERNAL"
+        and call.get("official_deepseek_endpoint") is True
     )
 
 
@@ -101,10 +103,15 @@ def corroborated_spans(store, rows):
         receipt, body = saved
         if not receipt["complete"] or receipt["http_status"] != 200:
             continue
-        decoded = json.loads(body)
-        window = receipt["transport_window"]
-        worker_span = transport({"sent_at": window["started_at"], "received_at": window["received_at"]})
-        receipt_id = receipt.get("receipt") or decoded.get("id")
+        try:
+            decoded = json.loads(body)
+            window = receipt["transport_window"]
+            worker_span = transport({"sent_at": window["started_at"], "received_at": window["received_at"]})
+            receipt_id = receipt.get("receipt") or decoded.get("id")
+        except (AttributeError, KeyError, TypeError, ValueError):
+            continue
+        if not isinstance(decoded, dict):
+            continue
         if (worker_span == span and decoded.get("model") == row["model"] and isinstance(receipt_id, str)
                 and sha256(receipt_id.encode()).hexdigest() == row["provider_receipt_sha256"]):
             output.append((row["attempt_id"], *span))
@@ -422,9 +429,7 @@ def observe(kernel, root, output, price_card=None, start_wait=600):
     require(
         set(manifest["models"]) == set(MODELS)
         and all(
-            v["adapter_kind"] == "deepseek"
-            and v["execution_kind"] == "REAL_EXTERNAL"
-            and v["provider"] == "https://api.deepseek.com"
+            is_official_deepseek(v)
             and v["model"] == MODELS[k]
             for k, v in manifest["models"].items()
         ),
@@ -477,8 +482,11 @@ def observe(kernel, root, output, price_card=None, start_wait=600):
         save(output, f"sample-{offset}.json", sample)
         samples.append(sample)
     end = start + timedelta(seconds=MILESTONES[-1])
+    transports = overlap(spans, start, end)
+    proven = transports["all_three_overlap_proven"]
     summary = {
         "status": "OBSERVATION_COMPLETE",
+        "parallel_execution": "THREE_BOOK_OVERLAP_VERIFIED" if proven else "THREE_BOOK_OVERLAP_UNPROVEN",
         "source_sha": manifest["source_sha"],
         "harness": manifest["harness"],
         "window_start_utc": start.isoformat(),
@@ -511,7 +519,7 @@ def observe(kernel, root, output, price_card=None, start_wait=600):
             }
             for k, b in check["books"].items()
         },
-        "overlap": overlap(spans, start, end),
+        "overlap": transports,
         "estimates": {},
         "price_estimates_cumulative": None,
         "price_status": "NO_DATED_VERIFIED_CARD",
@@ -531,7 +539,7 @@ def observe(kernel, root, output, price_card=None, start_wait=600):
             price_status="DATED_CARD_APPLIED_TO_TRANSPORT_UTC",
         )
     save(output, "summary.json", summary)
-    return 0
+    return 0 if proven else 4
 
 
 def main():

@@ -37,6 +37,7 @@ def test_enrollment_and_live_workers_do_not_start_clock(kernel_env, tmp_path, ob
             "execution_kind": "REAL_EXTERNAL",
             "adapter_kind": "deepseek",
             "provider": "https://api.deepseek.com",
+            "endpoint": "https://api.deepseek.com/chat/completions",
         }
         for k, v in observer.MODELS.items()
     }
@@ -91,6 +92,7 @@ def test_transport_overlap_excludes_duplicates_boundaries_and_non_native(observe
         "request_hash": "b" * 64,
         "provider_receipt_sha256": sha256(b"fixture-receipt").hexdigest(),
         "call_origin": "PROVIDER",
+        "official_deepseek_endpoint": True,
         "adapter": "deepseek",
         "provider": "api.deepseek.com",
         "model": "deepseek-flash",
@@ -111,6 +113,7 @@ def test_transport_overlap_excludes_duplicates_boundaries_and_non_native(observe
                 [
                     call,
                     {**call, "call_origin": "FIXTURE"},
+                    {**call, "official_deepseek_endpoint": False},
                     {**call, "model": "deepseek-v4-pro"},
                     {**call, "sent_at": (t + timedelta(seconds=1)).isoformat()},
                     {**call, "received_at": None},
@@ -141,7 +144,8 @@ def test_whole_book_eta_requires_more_than_raw_tokens(observer):
 
 @pytest.mark.unit
 @pytest.mark.skipif(os.name != "posix", reason="POSIX service host")
-def test_observer_schedule_and_successful_gate_receipts(tmp_path, observer, monkeypatch):
+@pytest.mark.parametrize("concurrent", [False, True])
+def test_observer_reports_parallel_execution_separately_from_sampling(tmp_path, observer, monkeypatch, concurrent):
     """Virtual time tests scheduling only; no real book, transport, or observation is claimed."""
     from types import SimpleNamespace
 
@@ -160,6 +164,7 @@ def test_observer_schedule_and_successful_gate_receipts(tmp_path, observer, monk
             "adapter_kind": "deepseek",
             "execution_kind": "REAL_EXTERNAL",
             "provider": "https://api.deepseek.com",
+            "endpoint": "https://api.deepseek.com/chat/completions",
         }
         for k, v in observer.MODELS.items()
     }
@@ -211,18 +216,25 @@ def test_observer_schedule_and_successful_gate_receipts(tmp_path, observer, monk
         }
         path = out / f"{stamp}-A-preparation.jsonl"
         path.write_text("instrumentation test")
+        spans = {}
+        for i, book in enumerate(books):
+            offset = 10 if concurrent else 10 + i * 5
+            spans[book] = ([(book, base + timedelta(seconds=offset), base + timedelta(seconds=offset + 5))]
+                           if tick[0] >= offset + 5 else [])
         return (
             {"books": books, "captured_at": observer.utc().isoformat()},
-            {k: [] for k in books},
+            spans,
             [path],
         )
 
     monkeypatch.setattr(observer, "snapshot", capture)
-    assert observer.observe(kernel, project, target, start_wait=0) == 0
+    assert observer.observe(kernel, project, target, start_wait=0) == (0 if concurrent else 4)
     assert received == [("gate", 0), ("0", 0), ("120", 120), ("300", 300), ("600", 600)]
     assert (target / "gate-A-preparation.jsonl").is_file()
     summary = json.loads((target / "summary.json").read_bytes())
-    assert (
-        summary["captured_wall_seconds"] == 600
-        and not summary["overlap"]["all_three_overlap_proven"]
+    assert summary["status"] == "OBSERVATION_COMPLETE"
+    assert summary["captured_wall_seconds"] == 600
+    assert summary["overlap"]["all_three_overlap_proven"] is concurrent
+    assert summary["parallel_execution"] == (
+        "THREE_BOOK_OVERLAP_VERIFIED" if concurrent else "THREE_BOOK_OVERLAP_UNPROVEN"
     )
