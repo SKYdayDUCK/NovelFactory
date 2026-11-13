@@ -308,6 +308,8 @@ class ContinuityService:
             ref = self.kernel._blob(review)
             self.kernel._register_artifact(repo, ref, work_id, review, "CONTINUITY_REVIEW", principal.principal_id)
             self.kernel._receipt(repo, principal, wr, "CONTINUITY_REVIEW", request["idempotency_key"], request, ref)
+            from .rolling_publication import record_continuity
+            record_continuity(self.kernel, repo, candidate, ref)
             if request["decision"] == "APPROVED":
                 from novel_factory.application.volume_settlement import publish_after_review
                 publish_after_review(self.kernel, repo, work_id, request["candidate_ref"], ref)
@@ -438,6 +440,20 @@ class ContinuityService:
         check_profile(grant, cut["plane"])
         return task, grant, spec
 
+    def validate_task_world(self, repo, snapshot, ref, target):
+        source = snapshot["request"]["world_ref"]
+        if source == target:
+            return
+        require(repo.ancestor(source, target), "TASK_REBIND_REQUIRED", "Continuity has no ancestry in the task world")
+        selected = repo.one("selections", {"work_id": target["work_id"],
+                            "selection_kind": "CONTINUITY:" + snapshot["request"]["series_id"]})
+        require(selected and selected["artifact_ref"] == ref, "CONTINUITY_REVALIDATION_REQUIRED",
+                "The continuation requires the current published edition")
+        fixed, current = self.kernel.revision(repo, source), self.kernel.revision(repo, target)
+        require(fixed["interpretation_ref"] == current["interpretation_ref"]
+                and all(current["selection"].get(k) == v for k, v in fixed["selection"].items()),
+                "CONTINUITY_REVALIDATION_REQUIRED", "An inherited occurrence or interpretation changed")
+
     def read_for_task(self, principal, task_id, generation, snapshot_ref, *, budget_bytes=100_000):
         """Deliver source-bound continuity only to the exact assigned task cut.
 
@@ -455,9 +471,9 @@ class ContinuityService:
                     "VIEW_DENIED", "Continuity is not assigned to this non-actor task generation")
             snapshot = self._snapshot(repo, snapshot_ref, task["work_id"])
             wr = snapshot["request"]["world_ref"]
-            require(wr == spec["world_ref"], "TASK_REBIND_REQUIRED", "Continuity and task must pin the same world cut")
+            self.validate_task_world(repo, snapshot, snapshot_ref, spec["world_ref"])
             head = self.kernel.head(repo, task["work_id"])
-            require(repo.ancestor(wr, head), "CONTINUITY_REVALIDATION_REQUIRED",
+            require(repo.ancestor(spec["world_ref"], head), "CONTINUITY_REVALIDATION_REQUIRED",
                     "Canonical history changed after this continuity input was reviewed")
             fixed, current = self.kernel.revision(repo, wr), self.kernel.revision(repo, head)
             require(fixed["interpretation_ref"] == current["interpretation_ref"],
@@ -492,6 +508,7 @@ class ContinuityService:
                                     "VIEW_DENIED", "Source prose exceeds the task's story-time cut")
                 delivered.append({key: deepcopy(value) for key, value in entry.items() if key != "planned_payoff_at"})
             result = {"snapshot_ref": snapshot_ref, "world_ref": wr, "entries": delivered,
+                **({"task_world_ref": spec["world_ref"]} if wr != spec["world_ref"] else {}),
                 "authority": "DERIVED_EDITORIAL_MEMORY_NOT_WORLD_FACT_OR_ACTOR_BELIEF", "world_effects_applied": 0}
             require(len(canonical_bytes(result)) <= budget_bytes, "CONTEXT_BUDGET_EXCEEDED",
                     "The complete assigned continuity evidence exceeds this context budget")

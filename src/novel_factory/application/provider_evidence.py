@@ -179,3 +179,117 @@ def reconcile_invoice(
             repo, owner, kernel.head(repo, work, branch), "P6_INVOICE", attempt, request, result
         )
         return result
+
+
+def inspect_wire_receipt(kernel, owner, work, branch, attempt):
+    """Authorized local read only. Delivery and supplier settlement retain their original gates."""
+    import hashlib
+    import json
+    from uuid import UUID, uuid5
+
+    from ..domain.canonical import fingerprint
+    from ..infrastructure.wire_receipts import read_receipt
+
+    with kernel.db.uow(write=False) as repo:
+        kernel.authorize(repo, owner, work, "ADMIN", branch)
+        call = repo.one("call_attempts", {"attempt_id": attempt})
+        require(
+            call
+            and repo.one(
+                "tasks", {"task_id": call["task_id"], "work_id": work, "branch_id": branch}
+            ),
+            "VIEW_DENIED",
+            "Attempt unavailable",
+        )
+        refs = {}
+        for label, kind in (
+            ("prompt", "AGENT_PROMPT"),
+            ("response", "AGENT_RESPONSE"),
+            ("candidate", "AGENT_CANDIDATE"),
+            ("audit", "AGENT_CALL_EVIDENCE"),
+        ):
+            row = repo.one(
+                "artifacts",
+                {
+                    "artifact_revision_id": str(uuid5(UUID(attempt), label + ":revision")),
+                    "kind": kind,
+                    "work_id": work,
+                },
+            )
+            refs[label] = row and {
+                k: row[k] for k in ("artifact_id", "artifact_revision_id", "sha256")
+            }
+        result = {
+            "attempt_id": attempt,
+            "ledger_state": call["state"],
+            "request_sha256": call["request_hash"],
+            "artifacts": refs,
+            "wire_receipt": None,
+            "supplier_invoice_recorded": bool(
+                repo.one(
+                    "receipts",
+                    {
+                        "work_id": work,
+                        "branch_id": branch,
+                        "command_type": "P6_INVOICE",
+                        "idempotency_key": attempt,
+                    },
+                )
+            ),
+        }
+        try:
+            wire = read_receipt(kernel.objects, attempt, call["request_hash"])
+            if wire is None:
+                headers = read_receipt(kernel.objects, attempt, call["request_hash"], headers_only=True)
+                if headers:
+                    value = headers[0]
+                    request_id = value.get("receipt")
+                    result["response_headers"] = {
+                        "http_status": value["http_status"], "transport_window": value["transport_window"],
+                        "receipt_sha256": hashlib.sha256(request_id.encode()).hexdigest() if request_id else None,
+                    }
+        except (ValueError, TypeError, KeyError):
+            require(
+                False, "INVALID_EVIDENCE", "Private receipt does not match the original request"
+            )
+        if wire is not None:
+            require(
+                refs["prompt"] and refs["prompt"]["sha256"] == call["request_hash"],
+                "INVALID_EVIDENCE",
+                "Missing matching authorized prompt",
+            )
+            envelope, body = wire
+            raw_id, usage = envelope.get("receipt"), {}
+            if envelope["complete"]:
+                try:
+                    content = json.loads(body)
+                except (UnicodeDecodeError, ValueError):
+                    content = None
+                if isinstance(content, dict):
+                    raw_id = raw_id or content.get("id")
+                    stats = content.get("usage")
+                    if isinstance(stats, dict):
+                        usage = {
+                            k: stats[k]
+                            for k in (
+                                "prompt_tokens",
+                                "completion_tokens",
+                                "prompt_cache_hit_tokens",
+                                "prompt_cache_miss_tokens",
+                                "total_tokens",
+                            )
+                            if type(stats.get(k)) is int and stats[k] >= 0
+                        }
+            result["wire_receipt"] = {
+                "envelope_sha256": fingerprint(envelope),
+                "body_sha256": envelope["body_sha256"],
+                "body_bytes": len(body),
+                "complete": envelope["complete"],
+                "http_status": envelope["http_status"],
+                "receipt_sha256": hashlib.sha256(raw_id.encode()).hexdigest()
+                if isinstance(raw_id, str)
+                else None,
+                "transport_window": envelope["transport_window"],
+                "reported_usage": usage,
+            }
+        return result

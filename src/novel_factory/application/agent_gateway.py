@@ -19,7 +19,8 @@ from sqlalchemy import select
 from novel_factory.application.kernel import require
 from novel_factory.application.queries import WorldQueryService
 from novel_factory.application.query_policy import check_profile
-from novel_factory.application.prompt_schema import inline_schema, prompt_schema
+from novel_factory.application.prompt_schema import inline_schema, validated_payload
+from novel_factory.application.idea_window import design_prompt_schema
 from novel_factory.contracts.registry import schema_for, validate_contract
 from novel_factory.domain.canonical import canonical_bytes, fingerprint
 from novel_factory.domain.errors import DomainError
@@ -316,13 +317,18 @@ class AgentGateway:
                 kinds = dict(repo.conn.execute(select(artifacts.c.artifact_revision_id, artifacts.c.kind).where(
                     artifacts.c.work_id == task["work_id"],
                     artifacts.c.artifact_revision_id.in_([r["artifact_revision_id"] for r in refs]))).all())
+                editing_job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})
+                editing = (editing_job or {}).get("config", {}).get("frozen_editing")
         for ref in refs:
             kind = kinds.get(ref["artifact_revision_id"])
             if creative:
                 require(kind is not None and kind != "CREATIVE_CONTEXT_SNAPSHOT",
                         "VIEW_DENIED", "Material is unavailable to this assignment")
             content = None
-            if kind == "CONTINUITY_SNAPSHOT":
+            if editing:
+                from .frozen_editing import material as editing_material
+                content = editing_material(self.kernel, principal, task, ref, editing)
+            elif kind == "CONTINUITY_SNAPSHOT":
                 from novel_factory.application.continuity import ContinuityService
                 scoped = ContinuityService(self.kernel).read_for_task(principal, task["task_id"], task["generation"], ref)
                 content = canonical_bytes(scoped)
@@ -369,11 +375,17 @@ class AgentGateway:
 
     def _messages(self, principal, binding):
         task, spec, context, data = (binding[k] for k in ("task", "spec", "context", "input"))
+        if task["role_id"] == "reviewer" and task["task_kind"] == "literary":
+            with self.kernel.db.uow(write=False) as repo:
+                job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})
+                if job and "book_review_packet" in job["config"]:
+                    from .book_review import blind_messages
+                    return blind_messages(self.kernel, repo, binding, job["config"])
         creative = "creative_snapshot" in binding
         cached = binding.get("creative_snapshot")
         runtime = binding["runtime"]
         output = data["output_contract"]
-        contract_text = prompt_schema(output["name"], output["version"])
+        contract_text = design_prompt_schema(data)
         identity = {"schema_version": "2.1", "task_id": task["task_id"], "generation": task["generation"],
                     "context_bundle_id": task["context_bundle_id"], "world_ref": spec["world_ref"],
                     "role_id": spec["role_id"], "actor_id": binding["grant"]["actor_id"]}
@@ -391,6 +403,17 @@ class AgentGateway:
                   + "\nPayload JSON Schema: " + contract_text)
         if "verified_experience" in data:
             system += "\nPreviously verified method for this task contract: " + data["verified_experience"]["method"]
+        if binding["config"].get("adapter_kind") == "deepseek":
+            envelope = {key: value for key, value in identity.items() if key != "dependency_fingerprint"}
+            envelope.update(status="SUCCEEDED", unresolved_questions=[], payload={})
+            system += ("\nCopy this exact outer JSON object. Fill its payload object using the payload schema. "
+                       "All listed keys are at the top level. There is no key named identity. "
+                       "Keep the types and values of the identifying fields intact. "
+                       "Treat unresolved_questions as a request for an outside decision that prevents completion. "
+                       "When the assigned work is complete, keep it empty. Record editorial suggestions and questions "
+                       "about the story in the review payload where provided. When a prerequisite is genuinely missing, "
+                       "use NEEDS_INPUT and state it. Emit only properties allowed by the selected payload schema.\n"
+                       + canonical_bytes(envelope).decode())
         if binding.get("method_notes"):
             system += "\nPublic craft methods. Use within the supplied perspective and task only:\n" + canonical_bytes(binding["method_notes"]).decode()
         if "dynamic_assignment" in binding:
@@ -420,11 +443,15 @@ class AgentGateway:
         joint = joint_material(self.kernel, principal, binding)
         if joint:
             user["joint"] = joint
+        from .proposal_prompt import proposal_prompt
+        protocol = proposal_prompt(binding, editorial, joint)
+        if protocol:
+            user["proposal_protocol"] = protocol
         if creative:
             from .creative_context import build_context_packet
             from .creative_context_store import freeze_snapshot
 
-            packet, user = build_context_packet(binding, material, editorial, joint)
+            packet, user = build_context_packet(binding, material, editorial, joint, protocol)
             self._refresh_dynamic(principal, binding)
             with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
                 live = self._binding(repo, principal, binding["dispatch_request"], dynamic_live=binding.get("dynamic_live"))
@@ -649,8 +676,13 @@ class AgentGateway:
                  "actual_amount": None, "currency": None, "cost_status": "UNKNOWN_COST"}
         outcome, result_status, reason, provider_receipt = "UNKNOWN", "FAILED", None, None
         try:
+            protocol_failure = None
             try:
                 response = adapter.generate(replace(model_request, attempt_id=attempt))
+            except ModelCallFailure as exc:
+                if exc.received is None:
+                    raise
+                response, protocol_failure = exc.received, exc
             finally:
                 if binding["input"].get("routing_decision") or getattr(adapter, "provider_key", None):
                     from novel_factory.orchestration.runtime_admission import release
@@ -671,6 +703,8 @@ class AgentGateway:
                    "provider_receipt": provider_receipt, "request_sha256": request_hash, "usage": usage}
             response_ref = self._audit_artifact(binding, attempt, "response", raw, "AGENT_RESPONSE")
             outcome = "REJECTED"
+            if protocol_failure is not None:
+                raise protocol_failure
             try:
                 envelope = json.loads(response.text, object_pairs_hook=_unique_pairs)
             except (ValueError, TypeError):
@@ -682,7 +716,7 @@ class AgentGateway:
             require(all(envelope[k] == value for k, value in expected.items()),
                     "MODEL_IDENTITY_MISMATCH", "External output does not match its task and actor")
             target = binding["input"]["output_contract"]
-            candidate = validate_contract(target["name"], envelope["payload"], target["version"])
+            candidate = validated_payload(envelope, target["name"], target["version"])
             # Core ActionProposal repeats task identity. Do not let a correctly
             # wrapped envelope carry a different actor/WorldRef in its payload.
             for key, value in {**expected, "input_world_ref": expected["world_ref"],

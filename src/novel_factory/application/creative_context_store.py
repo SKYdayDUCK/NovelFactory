@@ -72,6 +72,10 @@ def _check_sources(kernel, repo, task, sources, input_ref):
         head = kernel.head(repo, work)
         current = kernel.revision(repo, head)
         for source in sources["continuity_refs"]:
+            if source.get("source_selection_fixed"):
+                original = kernel.revision(repo, source["world_ref"])["selection"]
+                require(all(current["selection"].get(k) == v for k, v in original.items()),
+                        "TASK_REBIND_REQUIRED", "A published prefix occurrence changed after simulation")
             require(repo.ancestor(source["world_ref"], head)
                     and source["interpretation_ref"] == current["interpretation_ref"]
                     and all(current["selection"].get(e["occurrence_id"]) == e["event_version_id"]
@@ -114,12 +118,17 @@ def source_fences(kernel, repo, binding, material_sources, input_ref):
         if "continuity_ref" in source:
             record = kernel.artifact(repo, source["continuity_ref"], work, kind="CONTINUITY_SNAPSHOT")["payload"]
             wr = record["request"]["world_ref"]
-            require(wr == binding["spec"]["world_ref"], "VIEW_DENIED", "Continuity belongs to another world cut")
+            if wr != binding["spec"]["world_ref"]:
+                from .continuity import ContinuityService
+
+                ContinuityService(kernel).validate_task_world(repo, record, source["continuity_ref"], binding["spec"]["world_ref"])
+                selection_keys.add("CONTINUITY:" + record["request"]["series_id"])
             active = set(record["active_thread_entries"].values())
             events = [item["event_ref"] for entry in record["request"]["entries"] if entry["entry_id"] in active
                       for item in entry["source_events"]]
             continuities.append({"world_ref": wr, "interpretation_ref": kernel.revision(repo, wr)["interpretation_ref"],
-                                 "events": events})
+                                 "events": events,
+                                 **({"source_selection_fixed": True} if wr != binding["spec"]["world_ref"] else {})})
         if source.get("standalone_style"):
             for ref in binding["spec"]["input_artifacts"]:
                 row = kernel.artifact(repo, ref, work)

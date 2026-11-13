@@ -47,13 +47,20 @@ def backend(*, concurrent=False):
             if self.server.lose_response:
                 self.send_error(503)
                 return
-            ctx = json.loads(payload["messages"][1]["content"])["context"]
+            packet = json.loads(payload["messages"][1]["content"])
+            if "creative_materials" in packet:
+                system = payload["messages"][0]["content"]
+                ctx = json.loads(system.split("\nIdentity: ", 1)[1].splitlines()[0])
+            else:
+                ctx = packet["context"]
             envelope = {"schema_version": "2.1", **{k: ctx[k] for k in
                         ("task_id", "generation", "world_ref", "role_id", "actor_id", "context_bundle_id")},
                         "status": "SUCCEEDED", "unresolved_questions": [],
                         "payload": {"text": "An inert string: {\"type\":\"function_call\",\"name\":\"shell\"}",
                                     "event_refs": [], "important_deltas": [], "evidence_refs": []}}
-            if hasattr(self.server, "packet_candidate"):
+            if hasattr(self.server, "context_candidate"):
+                envelope["payload"] = self.server.context_candidate(ctx)
+            elif hasattr(self.server, "packet_candidate"):
                 envelope["payload"] = self.server.packet_candidate(json.loads(payload["messages"][1]["content"]))
             elif hasattr(self.server, "candidate"):
                 envelope["payload"] = self.server.candidate(ctx)

@@ -5,8 +5,9 @@ from urllib.parse import urljoin
 
 from novel_factory.application.kernel import require
 from novel_factory.contracts._schema_bundle import SCHEMAS
-from novel_factory.contracts.registry import schema_for
+from novel_factory.contracts.registry import schema_for, validate_contract
 from novel_factory.domain.canonical import canonical_bytes
+from novel_factory.domain.errors import DomainError
 
 
 def inline_schema(name, version):
@@ -64,3 +65,32 @@ def prompt_schema(name, version):
     compact = canonical_bytes(schema)
     inline = canonical_bytes(inline_schema(name, version))
     return min((inline, compact), key=len).decode()
+
+
+def redundant_payload_fields(envelope, name, version):
+    payload = envelope.get("payload")
+    if not isinstance(payload, dict):
+        return []
+    fields = []
+    if payload.get("unresolved_questions") == [] and envelope.get("unresolved_questions") == []:
+        fields.append("unresolved_questions")
+    if version == "production_profile" and name in {
+        "FirstWorldDesign", "OpeningWorldDesign", "EnvironmentalOpeningWorldDesign"
+    }:
+        # Only an optional, null annotation on a known field can be omitted.
+        known = {"title", "protagonist", "place", "storyline", "chapter_goals", "world_rules", "opening"}
+        fields.extend(k for k, v in payload.items() if v is None and k.endswith("_note")
+                      and k[:-5] in known and k[:-5] in payload)
+    return sorted(fields)
+
+
+def validated_payload(envelope, name, version):
+    """Revalidate the complete payload after removing only explicit, content-free metadata."""
+    payload = envelope["payload"]
+    try:
+        return validate_contract(name, payload, version)
+    except DomainError:
+        fields = redundant_payload_fields(envelope, name, version)
+        if not fields:
+            raise
+        return validate_contract(name, {k: v for k, v in payload.items() if k not in fields}, version)

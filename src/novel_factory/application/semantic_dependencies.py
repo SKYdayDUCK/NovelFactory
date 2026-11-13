@@ -540,7 +540,7 @@ def inherit_material(repo, task_id, generation, revision, refs, cut, head_id):
     if not refs or cut['plane'] == 'BELIEF':
         return
     wr = _wr(revision)
-    rows = list(repo.conn.execute(text("""
+    rows = repo.conn.execute(text("""
         SELECT DISTINCT r.observation_id,r.work_id,r.branch_id,r.world_revision_id,r.branch_seq,
                r.keys || coalesce(s.keys,ARRAY[]::text[]) AS keys,r.details,
                s.uncertain_keys,a.evidence_id AS product,r.created_at IS NULL AS legacy
@@ -553,10 +553,11 @@ def inherit_material(repo, task_id, generation, revision, refs, cut, head_id):
         LEFT JOIN nf_semantic_read_supplements s USING(observation_id)
         WHERE a.work_id=:work AND r.work_id=:work
           AND a.task_id IS NOT NULL AND a.task_id<>:task AND a.event_type LIKE 'artifact.%'
-          AND (r.created_at IS NULL OR r.created_at<=a.recorded_at) ORDER BY r.observation_id LIMIT 257
-    """), {'work':wr['work_id'], 'refs':json.dumps(refs), 'task':task_id}).mappings())
-    if len(rows) > 256:
-        raise DomainError('CAPACITY_LIMIT', 'Material dependency budget requires a narrower task.')
+          AND (r.created_at IS NULL OR r.created_at<=a.recorded_at) ORDER BY product,r.observation_id
+    """), {'work':wr['work_id'], 'refs':json.dumps(refs), 'task':task_id}).mappings()
+    # Reading a revised draft can inherit the same semantic scope through many
+    # distinct tasks. Keep every source id and group only identical conflict facts.
+    groups = {}
     for row in rows:
         if row['details'].get('knowledge_cut', {}).get('plane') == 'BELIEF':
             # The consumer depends on frozen attributed testimony. The sender's
@@ -575,7 +576,19 @@ def inherit_material(repo, task_id, generation, revision, refs, cut, head_id):
             inherited.add('uncertain')
         elif row['details'].get('historical_through'):
             details['historical_through'] = row['details']['historical_through']
-        record_observation(repo, task_id, generation, row, inherited, details, head_id=head_id)
+        source = details.pop('source_observation_id')
+        scope = (str(row['world_revision_id']), tuple(sorted(inherited)), fingerprint(details))
+        if scope not in groups:
+            groups[scope] = (row, inherited, details, [])
+        groups[scope][3].append(source)
+    if len(groups) > 256:
+        raise DomainError('CAPACITY_LIMIT', 'Material dependency budget requires a narrower task.')
+    for original, keys, details, sources in groups.values():
+        if len(sources) == 1:
+            details['source_observation_id'] = sources[0]
+        else:
+            details['source_observation_ids'] = sorted(sources)
+        record_observation(repo, task_id, generation, original, keys, details, head_id=head_id)
 
 
 def record_material_read(repo, task_id, generation, revision, ref, knowledge_cut, story_time, head_id):

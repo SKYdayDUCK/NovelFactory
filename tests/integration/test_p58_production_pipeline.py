@@ -67,13 +67,15 @@ def test_native_parallel_drafts_conditional_plans_and_early_review(kernel_env):
                 assert "北窗的雨声很轻。" in packet["authorized_materials"][0]["content"]
                 return {"summary": "合成测试中的章节阅读意见。", "issues": [], "counterinterpretations": [], "evidence_refs": []}
             assert ctx["role_id"] == "volume_director" and packet["read_cut"]["knowledge_cut"]["plane"] == "PLAN"
-            return {"schema_version": "2.0", "window_plan_id": uid(), "volume_contract_revision_id": contract["contract_revision_id"],
-                    "input_world_ref": ctx["world_ref"], "dependency_fingerprint": ctx["dependency_fingerprint"],
+            fixed = packet["proposal_protocol"]["copy_into_payload"]
+            assert fixed["input_world_ref"] == ctx["world_ref"] and fixed["dependency_fingerprint"] == ctx["dependency_fingerprint"]
+            assert ids["south"] in packet["assignment"] and fixed["status"] == "DRAFT"
+            return {**fixed, "volume_contract_revision_id": contract["contract_revision_id"],
                     "story_interval": {"start": point(13), "end": point(14), "bounds": "[)"},
                     "scope_ids": [ids["south"]], "focus_actor_ids": [ids["protagonist"]], "process_ids": [],
                     "resolution_strategy": "MIXED", "candidate_goals": ["前提成立时检查渡口"],
                     "next_decision_reason": "复核前卷结局", "assumptions": [], "adopted_event_refs": [],
-                    "expected_outputs": ["REPLAN_REPORT"], "status": "DRAFT"}
+                    "expected_outputs": ["REPLAN_REPORT"]}
         server.packet_candidate = model
         invalid = deepcopy(options)
         invalid["future"][0]["distance"] = 2

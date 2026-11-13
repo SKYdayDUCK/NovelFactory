@@ -597,11 +597,12 @@ def run_banquet(kernel_env, tmp_path, *, redis_workers=None, prepare_prerequisit
                     cfg = repo.one("supervisor_jobs", {"task_id": task["task_id"]})["config"]
                     frozen = kernel.artifact(repo, cfg["dispatch"]["input_ref"], work, kind="AGENT_INPUT")
                     contract = frozen["payload"]["output_contract"]
-                    emitted = messages[0]["content"].split("Payload JSON Schema: ", 1)[1]
+                    schema_section = messages[0]["content"].split("\nPayload JSON Schema: ", 1)[1]
+                    _, schema_end = json.JSONDecoder().raw_decode(schema_section)
                     payload_sizes[labels[task["task_id"]]] = {
                         "prompt_utf8_bytes": sum(len(m["content"].encode()) for m in messages),
                         "inlined_schema_bytes": len(canonical_bytes(inline_schema(contract["name"], contract["version"]))),
-                        "emitted_schema_bytes": len(emitted.encode()),
+                        "emitted_schema_bytes": len(schema_section[:schema_end].encode()),
                         "authorized_materials": len(packet["authorized_materials"]),
                     }
                 assert len(payload_sizes) == len(requests) == 8
