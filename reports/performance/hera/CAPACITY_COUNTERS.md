@@ -41,3 +41,22 @@ python -m benchmarks.hera_capacity_summary capacity.json.gz
 python -m benchmarks.hera_capacity_stripes --output stripes.json.gz
 python -m pytest -q tests/integration/test_hera_durable_admission.py
 ```
+
+## Matched eight-depth sweep and borrowing probe
+
+At each depth four clients made 24 authorized kernel creates per arm, in scan/exact/exact/scan order twice on PG 17.11. Each create was cancelled and the database count returned to the starting depth. Both the driver and PG used CPU 4, with four product connections and one observation connection. These are medians of the four correct-create rates at each depth. All 1,536 creates and all cleanup checks passed. The initial backlog consists of seeded task rows and receipts, and the measured operations use the real kernel. The source product for this run is identical to the incoming version for these operations.
+
+| Starting depth | Scan creates/s | Exact creates/s |
+|---:|---:|---:|
+| 0 | 64.56 | 68.31 |
+| 50 | 65.90 | 68.69 |
+| 200 | 59.72 | 59.82 |
+| 500 | 54.26 | 58.26 |
+| 1,000 | 59.45 | 68.49 |
+| 2,000 | 53.02 | 69.23 |
+| 5,000 | 44.03 | 63.91 |
+| 7,500 | 21.95 | 53.87 |
+
+Reproduce with `python -m benchmarks.hera_capacity --depth 0 50 200 500 1000 2000 5000 7500 --count 24 --output sweep.json.gz`. The raw JSON was losslessly recompressed with XZ. It includes individual operations, SQL intervals, wait observations, WAL and the per-arm totals. [Complete sweep](raw/final-round/capacity-sweep.json.xz)
+
+A separate four-process quota experiment allowed a request to spill into another physical bucket independently for each of four scopes. A fallback waits for eligible locked rows before rejecting the request. The transaction records the assigned bucket for each scope so a different process can release it after the client exits. Under fully skewed preferences, plain eight-bucket partitions consumed 16/128 units in each arm. Both spill arms consumed 128/128. The 128 admissions required 512 scope allocations, which reconciled and returned to zero. Under skew, the spill rates were 141.59 and 257.06 admissions/s. The single-bucket controls were 243.79 and 351.71/s. The workload measures physical quota acquisition and release on PostgreSQL, with no transport, authorization or business execution. Spilling fixed the stranded-capacity problem here but adds allocation cost and has no product-level throughput qualification. Production keeps its original scan and optional exact-counter modes. Run `python -m benchmarks.hera_capacity_spill --output spill.json.gz`. [Twelve unfiltered runs](raw/final-round/quota-spill.json.gz)
