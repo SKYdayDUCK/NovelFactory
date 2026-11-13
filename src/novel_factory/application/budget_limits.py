@@ -1,10 +1,12 @@
 """Work-authorized views and audited CAS edits for cross-task experiment budgets."""
 
+from decimal import Decimal
 from uuid import uuid4
 
 from sqlalchemy import text
 
 from novel_factory.application.kernel import require
+from novel_factory.orchestration.tasks import _money
 
 
 class SharedBudgetService:
@@ -46,6 +48,30 @@ class SharedBudgetService:
     def status(self, principal, work_id, branch_id, budget_id):
         with self.kernel.db.uow(write=False) as repo:
             return self._read(repo, principal, work_id, branch_id, budget_id)
+
+    def provision_next(self, principal, work_id, branch_id, budget_id, amount, tokens):
+        """Authorize headroom for the next dispatch while preserving all existing holds."""
+        amount = _money(amount)
+        require(0 < amount < 10**14 and type(tokens) is int and 0 < tokens < 2**63,
+                "INVALID_ARGUMENT", "Invalid dispatch reservation")
+        scope = principal, work_id, branch_id, budget_id
+        with self.kernel.db.uow() as repo:
+            current = self._read(repo, *scope, write=True)
+            require(current["total_tokens"] is not None and not current["unquantified_attempts"],
+                    "CALL_RECONCILIATION_REQUIRED", "A metered token ledger is required")
+            needed = Decimal(current["reserved_amount"]) + Decimal(current["spent_amount"]) + amount
+            require(needed < 10**14, "BUDGET_EXCEEDED", "Amount exceeds ledger precision")
+            if needed > Decimal(current["limit_amount"]):
+                repo.change("budgets", {"budget_id": budget_id}, {"limit_amount": needed})
+                repo.outbox("budget.amount_limit_changed", "budget", budget_id,
+                            {"work_id": work_id, "grant_id": principal.grant_id,
+                             "previous": current["limit_amount"], "limit_amount": str(needed)},
+                            "budget-amount-limit:" + str(uuid4()))
+            if tokens > current["available_tokens"]:
+                new_total = current["reserved_tokens"] + current["spent_tokens"] + tokens
+                bound = SharedBudgetService(self.kernel.in_transaction(repo))
+                return bound.set_limit(*scope, new_total, expected_total_tokens=current["total_tokens"])
+            return self._read(repo, *scope)
 
     def set_limit(
         self, principal, work_id, branch_id, budget_id, total_tokens, *, expected_total_tokens=None
