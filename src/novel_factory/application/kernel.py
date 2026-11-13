@@ -526,12 +526,14 @@ class Kernel:
         require(spec["context_bundle_id"] is None and spec["dependency_fingerprint"] is None,"INVALID_ARGUMENT","Only compiler may bind task context")
         require(spec["policy_version"]==work["policy_version"],"INVALID_ARGUMENT","Task policy version is not current")
 
-    def claim_task(self, principal, worker_id, *, lease_seconds=30, task_id=None):
+    def claim_task(self, principal, worker_id, *, lease_seconds=30, task_id=None, scope=None):
         with self.db.uow() as repo:
             identity = repo.one("grants", {"grant_id": principal.grant_id})
             require(identity, "VIEW_DENIED", "Grant unavailable")
-            grant = self.authorize(repo, principal, identity["work_id"], "TASK_CLAIM")
-            branches = grant["branch_ids"]
+            work_id = scope.work_id if scope is not None else identity["work_id"]
+            branch_id = scope.branch_id if scope is not None else None
+            grant = self.authorize(repo, principal, work_id, "TASK_CLAIM", branch_id)
+            branches = [branch_id] if scope is not None else grant["branch_ids"]
             return self.tasks.claim_in_transaction(
                 repo.conn, worker_id, work_id=grant["work_id"], principal_id=principal.principal_id,
                 grant_id=principal.grant_id, branch_ids=None if branches == ["*"] else branches,
@@ -568,10 +570,12 @@ class Kernel:
                 scope.check(task)
         return self.tasks.cancel(task_id,generation,principal_id=principal.principal_id,idempotency_key=idempotency_key,authorize_in_tx=authorize_cancel)
 
-    def submit_result(self,principal,result,worker_id):
+    def submit_result(self,principal,result,worker_id, *, scope=None):
         def authorize_result(conn):
             from novel_factory.infrastructure.repository import KernelRepository
-            self._task_owner(KernelRepository(conn,tables),principal,result["task_id"])
+            task, _ = self._task_owner(KernelRepository(conn,tables),principal,result["task_id"])
+            if scope is not None:
+                scope.check(task)
         return self.tasks.store_result(result,worker_id=worker_id,authorize_in_tx=authorize_result)
 
     def _prior(self,r,principal,work_id,command_type,key,request):

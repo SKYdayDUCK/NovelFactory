@@ -27,6 +27,7 @@ from sqlalchemy.exc import SQLAlchemyError, TimeoutError as PoolTimeout
 
 from novel_factory.contracts.registry import plain, validate_contract
 from novel_factory.domain.errors import DomainError
+from novel_factory.application.task_operations import TaskOperations, TaskOperationsBinding
 from .admission import AdmissionController, ConnectionBudget, TokenBucketLimiter
 
 log = logging.getLogger("novel_factory.http")
@@ -306,17 +307,38 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
                                   "exception_type": type(exc).__name__}))
             raise DomainError("INTERNAL_ERROR", "Application operation failed", False, "NONE") from None
 
-    from novel_factory.application.task_operations import TaskOperations, TaskOperationsBinding
+    def task_binding(principal):
+        binding = bindings.get(principal) if bindings is not None else None
+        return binding if isinstance(binding, TaskOperationsBinding) else None
 
     def task_operations(principal):
-        binding = bindings.get(principal) if bindings is not None else None
-        return TaskOperations(kernel, principal, binding if isinstance(binding, TaskOperationsBinding) else None)
+        return TaskOperations(kernel, principal, task_binding(principal))
 
     if bindings is not None:
         from .mcp_http import RemoteTools
 
         remote = RemoteTools(kernel, bindings, authenticate, admitted_operation, settings)
         app.router.routes.append(remote.route())
+
+        @app.get("/api/v1/works/{work_id}/branches/{branch_id}/workflow")
+        @app.post("/api/v1/works/{work_id}/branches/{branch_id}/workflow/resume")
+        async def workflow(request: Request, work_id: str, branch_id: str):
+            from novel_factory.application.mcp_runtime import McpRuntime, ProjectBinding
+
+            validate_contract("UUID", work_id)
+            validate_contract("UUID", branch_id)
+            resume = request.method == "POST"
+            if resume and await request.body() and await _json_body(request) != {}:
+                raise DomainError("INVALID_ARGUMENT", "Project resume accepts an empty object")
+
+            def project(principal):
+                binding = bindings.get(principal)
+                if binding != ProjectBinding(work_id, branch_id):
+                    raise DomainError("VIEW_DENIED", "Project binding unavailable")
+                return McpRuntime(kernel, principal, binding).project(resume=resume)
+
+            return await execute(request, "task" if resume else "query", project)
+
 
     @app.get("/health")
     async def health():
@@ -466,25 +488,10 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
         payload = await _body(request, "TaskCreateRequest", "http")
         return await execute(request, "task", lambda principal: task_operations(principal).create(**payload))
 
-    @app.get("/api/v1/works/{work_id}/branches/{branch_id}/workflow")
-    @app.post("/api/v1/works/{work_id}/branches/{branch_id}/workflow/resume")
-    async def workflow(request: Request, work_id: str, branch_id: str):
-        from novel_factory.application.mcp_runtime import McpRuntime, ProjectBinding
-
-        validate_contract("UUID", work_id)
-        validate_contract("UUID", branch_id)
-        resume = request.method == "POST"
-        if resume and await request.body() and await _json_body(request) != {}:
-            raise DomainError("INVALID_ARGUMENT", "Project resume accepts an empty object")
-        return await execute(request, "task" if resume else "query", lambda principal: McpRuntime(
-            kernel, principal, ProjectBinding(work_id, branch_id)).project(resume=resume))
-
     @app.post("/api/v1/tasks/claim")
     async def claim_task(request: Request):
         payload = await _body(request, "TaskClaimRequest", "http")
-        return await execute(request, "task", lambda principal: kernel.claim_task(
-            principal, payload["worker_id"], task_id=payload.get("task_id"),
-            lease_seconds=payload.get("lease_seconds", 30)))
+        return await execute(request, "task", lambda principal: task_operations(principal).claim(**payload))
 
     @app.get("/api/v1/tasks/{task_id}")
     async def get_task(request: Request, task_id: str):
@@ -499,8 +506,7 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
     @app.post("/api/v1/tasks/results")
     async def submit_result(request: Request):
         payload = await _body(request, "TaskResultHttpRequest", "http")
-        return await execute(request, "task", lambda principal: kernel.submit_result(
-            principal, payload["result"], payload["worker_id"]))
+        return await execute(request, "task", lambda principal: task_operations(principal).result(**payload))
 
     @app.post("/api/v1/branches")
     async def fork(request: Request):

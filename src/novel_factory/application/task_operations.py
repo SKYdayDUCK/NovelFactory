@@ -34,6 +34,17 @@ class TaskOperations:
         return {key: value.isoformat() if isinstance(value, datetime) else
                 str(value) if isinstance(value, Decimal) else value for key, value in task.items()}
 
+    def claim(self, worker_id, task_id=None, lease_seconds=30):
+        kwargs = {"task_id": task_id, "lease_seconds": lease_seconds}
+        if self.binding is not None:
+            kwargs["scope"] = self.binding
+        return self.kernel.claim_task(self.principal, worker_id, **kwargs)
+
+    def result(self, result, worker_id):
+        if self.binding is None:
+            return self.kernel.submit_result(self.principal, result, worker_id)
+        return self.kernel.submit_result(self.principal, result, worker_id, scope=self.binding)
+
     def cancel(self, task_id, generation, idempotency_key):
         if self.binding is None:
             return self.kernel.cancel_task(self.principal, task_id, generation, idempotency_key)

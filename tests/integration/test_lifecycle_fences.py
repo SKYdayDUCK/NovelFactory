@@ -63,3 +63,17 @@ def test_interleaved_create_witness_rechecks_actual_projection(kernel_env):
     with kernel.db.uow(write=False) as repo, pytest.raises(DomainError) as damaged:
         kernel._read_revision(repo, first["world_ref"], materialize=False)
     assert damaged.value.code == "PROJECTION_CORRUPT"
+
+
+def test_addressed_claims_inside_caller_transaction_keep_exclusive_queue_lock(kernel_env):
+    # A caller may perform addressed and unaddressed claims in one transaction.
+    # Two sessions holding the same shared gate cannot both upgrade it to exclusive.
+    from novel_factory.orchestration.tasks import MAINTENANCE_GATE
+
+    kernel = kernel_env["kernel"]
+    with kernel.db.uow() as first, kernel.db.uow() as second:
+        assert kernel.tasks.claim_in_transaction(first.conn, "worker", task_id=str(uuid4())) is None
+        can_share = second.conn.scalar(text("SELECT pg_try_advisory_xact_lock_shared(:key)"),
+                                       {"key": MAINTENANCE_GATE + 1})
+        assert can_share is False
+        assert kernel.tasks.claim_in_transaction(first.conn, "worker", work_id=str(uuid4())) is None

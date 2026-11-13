@@ -46,11 +46,23 @@ class RemoteTools:
                                                      stateless=True, security_settings=security)
 
     async def run(self, runtime, method, args, kwargs, *, kind):
-        return await self.execute(runtime.principal, kind, lambda _: method(*args, **kwargs))
+        try:
+            return await self.execute(runtime.principal, kind, lambda _: method(*args, **kwargs))
+        except DomainError:
+            raise
+        except Exception:
+            # SDK method errors are included in JSON-RPC responses. Preserve
+            # protocol error codes without exposing database or driver text.
+            raise DomainError("SERVICE_UNAVAILABLE", "Tool temporarily unavailable", True, "WAIT") from None
 
     async def __call__(self, scope, receive, send):
         request = Request(scope)
-        principal = await self.authenticate(request)
+        try:
+            principal = await self.authenticate(request)
+        except DomainError:
+            raise
+        except Exception:
+            raise DomainError("SERVICE_UNAVAILABLE", "Authentication temporarily unavailable", True, "WAIT") from None
         binding = self.bindings.get(principal)
         if binding is None:
             raise DomainError("VIEW_DENIED", "Remote binding unavailable")

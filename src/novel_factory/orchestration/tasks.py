@@ -203,13 +203,13 @@ class TaskService:
         if not worker_id or not 0 < lease_seconds <= 3600:
             raise _error("INVALID_ARGUMENT", "Invalid worker lease")
         t, fair = self.tables["tasks"], self.tables["task_fairness"]
-        # A short queue-only scheduler lock produces persistent round-robin
-        # shares. It never participates in world acceptance or model waits.
-        # Addressed claims make no queue-selection decision. They may overlap
-        # one another, while every fair selector still takes the exclusive gate.
-        gate = "pg_advisory_xact_lock_shared" if task_id else "pg_advisory_xact_lock"
-        now = conn.execute(text(f"WITH gate AS MATERIALIZED (SELECT {gate}(:key)) "
-                                "SELECT clock_timestamp() FROM gate"), {"key": MAINTENANCE_GATE + 1}).scalar_one()
+        # The caller's transaction can claim multiple tasks with either selection
+        # mode. Keep one exclusive queue gate to avoid shared-to-exclusive
+        # upgrades, and sample lease time only after the gate has been acquired.
+        now = conn.execute(text("""
+            WITH gate AS MATERIALIZED (SELECT pg_advisory_xact_lock(:key))
+            SELECT clock_timestamp() FROM gate
+        """), {"key": MAINTENANCE_GATE + 1}).scalar_one()
         conditions = [t.c.state == "READY", t.c.deadline > now,
                       text("""NOT EXISTS (SELECT FROM nf_quota_retry_deadlines d
                            WHERE (d.task_id,d.generation)=(nf_tasks.task_id,nf_tasks.generation)

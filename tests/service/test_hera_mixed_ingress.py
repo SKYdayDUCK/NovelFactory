@@ -44,6 +44,9 @@ def test_mixed_task_lifecycle(service_env, service_world, tmp_path):
     resume = kernel.issue_grant(world["principal"], wr["work_id"], role_id="resume_operator",
                                 branch_ids=[wr["branch_id"]], capabilities=["PROJECT_RESUME"],
                                 expires_at=datetime.now(UTC) + timedelta(hours=1))
+    unlisted_resume = kernel.issue_grant(world["principal"], wr["work_id"], role_id="resume_operator",
+                                branch_ids=[wr["branch_id"]], capabilities=["PROJECT_RESUME"],
+                                expires_at=datetime.now(UTC) + timedelta(hours=1))
     project = ProjectBinding(wr["work_id"], wr["branch_id"])
     bindings = {world["principal"]: binding, other["principal"]: binding, resume["principal"]: project}
     app = create_app(kernel, mcp_bindings=bindings)
@@ -83,6 +86,13 @@ def test_mixed_task_lifecycle(service_env, service_world, tmp_path):
                                                                 "idempotency_key": "foreign-cancel"})).status_code == 403
             assert (await mcp.call_tool("nf_task_cancel", {"task_id": foreign_id, "generation": 0,
                                                            "idempotency_key": "foreign-cancel"})).isError
+            claim = await rest.post("/api/v1/tasks/claim", json={"worker_id": "outside", "task_id": foreign_id})
+            assert claim.status_code == 200 and claim.json() is None
+            result = {"schema_version": "2.0", "result_id": str(uuid4()), "task_id": foreign_id,
+                      "generation": 0, "attempt_id": str(uuid4()), "context_bundle_id": str(uuid4()),
+                      "dependency_fingerprint": "0" * 64, "status": "SUCCEEDED", "artifacts": [],
+                      "safe_summary": "scope check"}
+            assert (await rest.post("/api/v1/tasks/results", json={"result": result, "worker_id": "outside"})).status_code == 403
             assert kernel.get_task(world["principal"], foreign_id)["state"] == "READY"
             async with remote(base, other["token"]) as (other_rest, other_mcp):
                 denied = await other_mcp.call_tool("nf_task_status", status)
@@ -97,6 +107,10 @@ def test_mixed_task_lifecycle(service_env, service_world, tmp_path):
 
         async with remote(base, resume["token"]) as (rest, mcp):
             url = "/api/v1/works/{work_id}/branches/{branch_id}/workflow".format(**wr)
+            foreign_url = "/api/v1/works/{work_id}/branches/{branch_id}/workflow".format(**foreign["world_ref"])
+            assert (await rest.get(foreign_url)).status_code == 403
+            assert (await rest.post(url + "/resume", headers={
+                "Authorization": "Bearer " + unlisted_resume["token"]})).status_code == 403
             assert (await rest.get(url)).json() == (await mcp.call_tool("nf_project_status", {})).structuredContent
             assert (await rest.post(url + "/resume")).json() == (await mcp.call_tool("nf_resume_project", {})).structuredContent
         path = tmp_path / "binding.json"
@@ -120,3 +134,39 @@ def test_mixed_task_lifecycle(service_env, service_world, tmp_path):
                                 {"id": task_id}) == 2
         assert repo.conn.scalar(text("SELECT count(*) FROM nf_task_commands WHERE principal_id=:id"),
                                 {"id": world["principal"].principal_id}) == 3
+
+
+def test_mcp_transport_redacts_database_errors(service_env, service_world, monkeypatch):
+    from sqlalchemy.exc import OperationalError
+
+    from novel_factory.interfaces.http import HttpSettings
+    from novel_factory.interfaces.mcp_http import RemoteTools
+
+    def inject(*args, **kwargs):
+        raise OperationalError("private query text", {}, RuntimeError("private database detail"))
+
+    kernel = service_env["kernel"]
+    world = service_world
+    binding = TaskOperationsBinding(world["world_ref"]["work_id"], world["world_ref"]["branch_id"])
+    bindings = {world["principal"]: binding}
+    app = create_app(kernel, mcp_bindings=bindings)
+
+    async def exercise(base):
+        async with remote(base, world["token"]) as (client, _):
+            with monkeypatch.context() as patch:
+                patch.setattr(kernel, "authenticate", inject)
+                response = await client.post("/mcp", json={})
+                assert response.status_code == 503
+                assert response.json()["code"] == "SERVICE_UNAVAILABLE" and "private" not in response.text
+
+        async def bad_operation(*_):
+            inject()
+        from novel_factory.application.mcp_runtime import McpRuntime
+        from novel_factory.domain.errors import DomainError
+        transport = RemoteTools(kernel, bindings, None, bad_operation, HttpSettings())
+        with pytest.raises(DomainError) as exc:
+            await transport.run(McpRuntime(kernel, world["principal"], binding), lambda: None, (), {}, kind="query")
+        assert exc.value.code == "SERVICE_UNAVAILABLE" and "private" not in exc.value.safe_message
+
+    with loopback_server(app, lifespan="on") as base:
+        asyncio.run(exercise(base))
