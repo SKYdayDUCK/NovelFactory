@@ -376,7 +376,8 @@ def test_repair_cannot_reference_nonexistent_rules_or_adjudication(race_kernel, 
         assert k.head(repo, repair["work_id"], repair["branch_id"]) == repair
 
 
-def test_task_authorization_is_rechecked_inside_mutation_transaction(race_kernel, race_world, monkeypatch):
+@pytest.mark.parametrize("compact", [False, True], ids=["original", "compact"])
+def test_task_authorization_is_rechecked_inside_mutation_transaction(race_kernel, race_world, monkeypatch, compact):
     from datetime import datetime, timedelta, timezone
     from novel_factory.domain.canonical import fingerprint
     k, w = race_kernel, race_world
@@ -387,16 +388,41 @@ def test_task_authorization_is_rechecked_inside_mutation_transaction(race_kernel
         "dependency_fingerprint": None, "runtime_contract_version": fingerprint({"test": "authorization-race"}), "capability_grant_id": delegate.grant_id,
         "input_artifacts": [], "budget": {"currency": "USD", "max_amount": "1", "token_budget": 100},
         "wall_deadline": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()}
-    original = k.tasks.create
-    def revoke_between_precheck_and_mutation(*args, **kwargs):
-        k.revoke_grant(w["principal"], delegate.grant_id)
-        return original(*args, **kwargs)
-    monkeypatch.setattr(k.tasks, "create", revoke_between_precheck_and_mutation)
+    import novel_factory.application.kernel as kernel_module
+    monkeypatch.setattr(k, "_compact_create", compact)
+    validate = kernel_module.validate_contract
+    revoked = False
+
+    def revoke_after_validation(name, payload, *args, **kwargs):
+        nonlocal revoked
+        checked = validate(name, payload, *args, **kwargs)
+        if name == "TaskSpec" and not revoked:
+            k.revoke_grant(w["principal"], delegate.grant_id)
+            revoked = True
+        return checked
+
+    if compact:
+        monkeypatch.setattr(kernel_module, "validate_contract", revoke_after_validation)
+    else:
+        original = k.tasks.create
+
+        def revoke_between_precheck_and_mutation(*args, **kwargs):
+            nonlocal revoked
+            k.revoke_grant(w["principal"], delegate.grant_id)
+            revoked = True
+            return original(*args, **kwargs)
+
+        monkeypatch.setattr(k.tasks, "create", revoke_between_precheck_and_mutation)
     with pytest.raises(DomainError) as exc:
         k.create_task(delegate, spec, "auth-before-mutation")
+    assert revoked
     assert exc.value.code == "VIEW_DENIED"
     with k.db.uow(write=False) as repo:
+        assert repo.one("grants", {"grant_id": delegate.grant_id})["active"] is False
         assert repo.one("tasks", {"task_id": spec["task_id"]}) is None
+        assert repo.one("task_commands", {"principal_id":delegate.principal_id,
+                                          "idempotency_key":"auth-before-mutation"}) is None
+        assert repo.one("outbox", {"aggregate_id":spec["task_id"]}) is None
 
 
 def _reviewer(kernel, world):
