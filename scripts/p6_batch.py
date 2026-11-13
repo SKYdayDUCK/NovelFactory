@@ -234,9 +234,10 @@ def writing_step(kernel, gateway, project, allowance):
             if cursor["state"] == "FROZEN" and (complete_text or cursor["reason"] == "RELEASE_INCOMPLETE"):
                 edit = frozen_editing.start(kernel, owner, work, branch)
                 if edit["status"] == "EDITORIAL_APPROVED" and complete_text:
-                    from novel_factory.application.rolling_publication import final_review_request
-                    final_review_request(kernel, owner, work, branch)
-                    return {"status": "AWAITING_INDEPENDENT_REVIEW", "frozen_chapters": cursor["frozen_chapters"]}
+                    from novel_factory.application.rolling_publication import queue_final_readers
+                    queued = queue_final_readers(kernel, owner, work, branch)
+                    return {"status": "AWAITING_INDEPENDENT_REVIEW", "frozen_chapters": cursor["frozen_chapters"],
+                            **queued}
                 if edit["status"] in PAUSES:
                     return edit
             if result["status"] == "IDLE" and cursor["state"] == "WAITING_ACCEPTANCE":
@@ -250,7 +251,7 @@ def writing_step(kernel, gateway, project, allowance):
 
 
 def emit(project, result):
-    public = {k: result[k] for k in ("status", "reason", "state", "task_id", "generation", "frozen_chapters")
+    public = {k: result[k] for k in ("status", "reason", "state", "task_id", "generation", "frozen_chapters", "edition_sha256", "reader_tickets")
               if k in result}
     public["at"] = now()
     save(project, "worker-state.json", public)

@@ -187,3 +187,20 @@ def final_review_request(kernel, owner, work, branch):
         request = _approved_request(kernel, repo, cursor, wr, volume)
         require(request is not None, "RELEASE_INCOMPLETE", "Final editorial approval is missing")
         return request
+
+
+def queue_final_readers(kernel, owner, work, branch):
+    """Durable host handoff for each blind reader, bound to the same complete approved edition."""
+    with kernel.db.uow() as repo:
+        repo.one("works", {"work_id": work}, lock="update")
+        bound = kernel.in_transaction(repo)
+        request = final_review_request(bound, owner, work, branch)
+        edition = fingerprint(request)
+        tickets = []
+        for track in (1, 2):
+            ticket = {"work_id": work, "branch_id": branch, "edition_sha256": edition, "track": track,
+                      "editorial_approval_ref": request["editorial_approval_ref"]}
+            event = repo.outbox("production.independent_gpt_review.requested", "work", work, ticket,
+                                f"p6-external-read:{edition}:{track}")
+            tickets.append(str(event))
+        return {"edition_sha256": edition, "reader_tickets": tickets}

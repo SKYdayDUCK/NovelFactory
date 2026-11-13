@@ -161,3 +161,11 @@ def test_one_frozen_volume_needs_actual_model_opinions_and_a_separate_decision(
                 final_review_request(kernel, owner, work, branch)["editorial_approval_ref"]
                 == state["approval_ref"]
             )
+            from novel_factory.application.rolling_publication import queue_final_readers
+            handed = queue_final_readers(kernel, owner, work, branch)
+            assert handed == queue_final_readers(kernel, owner, work, branch)
+            assert len(set(handed["reader_tickets"])) == 2
+            with kernel.db.uow(write=False) as repo:
+                rows = repo.many("outbox", {"topic": "production.independent_gpt_review.requested", "aggregate_id": work})
+                assert sorted(r["payload"]["track"] for r in rows) == [1, 2]
+                assert all(r["payload"]["edition_sha256"] == handed["edition_sha256"] for r in rows)

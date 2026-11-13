@@ -138,3 +138,13 @@ def test_epistemic_reading_keeps_advice_and_blocks_active_hard_findings():
     finding = dict(advice, category="HARD_CONSISTENCY", issue_kind="HARD_CONFLICT", severity="QUESTION")
     mandatory = dict(advice, issue_kind="CHANGE_REQUEST")
     assert epistemic_blockers([advice, finding, dict(finding, disposition="RESOLVED"), mandatory]) == [finding, mandatory]
+
+
+def test_review_enum_reassessment_uses_original_contract_values():
+    from novel_factory.application.board_schema_repair import board_format_method
+    diag = {"keyword": "enum", "location": "payload", "schema_path": "properties/issues/items/properties/severity/enum"}
+    node = {"stage": "review", "schema_repairs": [{"diagnostic": diag, "output_contract": {"name": "AgentReviewOutput", "version": "agent"}}]}
+    method = board_format_method(node)
+    assert all(v in method for v in ("BLOCKER", "SUGGESTION", "QUESTION"))
+    diag["schema_path"] = "properties/unknown_field/enum"
+    assert board_format_method(node) is None

@@ -36,8 +36,23 @@ def board_format_method(node):
         return ("继续本角色的写作任务。先完成正文，再作为 JSON 字符串写入 payload.text。"
                 "换行使用 JSON 换行转义，字符串中的双引号和反斜杠必须转义。仅返回一个完整 JSON 对象。"
                 "在发送前从报错位置附近核对字符串边界与括号，检查全文可解析。")
+    if node["stage"] == "facts" and diag.get("keyword") in {"truncated", "jsonSyntax"}:
+        return ("把同一事实判断的连续段合并，用 passage_ids，summary 仅写一句。保持整场覆盖与全部实质判断，"
+                "避免重抄正文与 Schema，预留尾部空间完整闭合内层数组及外层 JSON。")
     if node["stage"] not in {"review", "epistemic"}:
         return None
+    if (diag.get("location") == "payload" and diag.get("keyword") == "enum"
+            and last.get("output_contract") == {"name": "AgentReviewOutput", "version": "agent"}):
+        from .prompt_schema import inline_schema
+        rule = inline_schema("AgentReviewOutput", "agent")
+        path = diag.get("schema_path", "").split("/")
+        for part in path:
+            if not isinstance(rule, dict) or part not in rule:
+                return None
+            rule = rule[part]
+        if path[-1] == "enum" and isinstance(rule, list) and all(isinstance(v, str) for v in rule):
+            return ("保留审稿的全部实质判断。按字段分别选用所给枚举，不互借类别或严重程度。"
+                    + diag["schema_path"] + " 的合法值为 " + json.dumps(rule) + "。")
     fields = diag.get("move_inside_payload")
     if (not fields or diag.get("location") != "envelope" or diag.get("keyword") != "additionalProperties"
             or not set(fields) <= {"summary", "issues", "counterinterpretations", "evidence_refs"}):
@@ -63,7 +78,7 @@ def resume_review_format(kernel, repo, owner, board, identity):
     plan = {"family":"schema", "signature":last["signature"], "occurrences":last["occurrences"],
             "decision":"CHANGED_STRATEGY", "strategy_version":2, "method":method}
     plan = reflect_repair(kernel, repo, owner, board["world_ref"], task["task_id"], last["attempt_id"],
-                          last["audit_ref"], plan, "WRITER_JSON_SYNTAX" if node["stage"] == "draft" else "REVIEW_PAYLOAD_PLACEMENT")
+                          last["audit_ref"], plan, "BOARD_FORMAT_" + node["stage"].upper() + "_" + last["diagnostic"]["keyword"])
     last["reassessment"] = plan
     node.pop("task_id")
     node.pop("enrolled_at", None)
