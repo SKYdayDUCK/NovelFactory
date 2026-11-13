@@ -13,7 +13,7 @@ from novel_factory.contracts.registry import validate_contract
 from novel_factory.fixtures import load_fixture
 from novel_factory.interfaces.http import jsonable_encoder, plain
 from decimal import Decimal
-from driver import fresh_database
+from seven_call import fresh_database
 def run():
  with TemporaryDirectory() as tmp, fresh_database(os.environ['NF_TEST_DATABASE_URL'],Path.cwd()) as url:
   db=Database(url,pool_size=4); k=Kernel(db,ObjectStore(tmp))

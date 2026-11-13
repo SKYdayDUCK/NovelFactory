@@ -1,0 +1,197 @@
+diff --git a/src/novel_factory/contracts/registry.py b/src/novel_factory/contracts/registry.py
+index 3edded1..d102743 100644
+--- a/src/novel_factory/contracts/registry.py
++++ b/src/novel_factory/contracts/registry.py
+@@ -6,6 +6,7 @@ through the Draft 2020-12 validator. No schema retrieval uses the network.
+ """
+ from __future__ import annotations
+ 
++import os
+ from copy import deepcopy
+ from functools import lru_cache
+ from typing import Any, Annotated, ClassVar, Literal, Union
+@@ -16,6 +17,7 @@ from referencing import Registry, Resource
+ from pydantic import BaseModel, ConfigDict, Field, RootModel, create_model, model_validator
+ 
+ from ._schema_bundle import SCHEMAS
++from .static_validation import StaticValidationPlan
+ from novel_factory.domain.errors import DomainError
+ 
+ _BY_ID = {schema["$id"]: schema for schema in SCHEMAS.values()}
+@@ -42,9 +44,18 @@ def _source(name: str, version: str):
+     return schema
+ 
+ 
++@lru_cache(maxsize=1)
++def _static_plan():
++    return StaticValidationPlan(_BY_ID)
++
++
+ @lru_cache(maxsize=256)
+-def _validator(name: str, version: str):
++def _validator(name: str, version: str, static: bool):
+     source = _source(name, version)
++    if static:
++        plan = _static_plan()
++        if plan.supported:
++            return plan.validator(source, name)
+     schema = {"$schema": source["$schema"], "$ref": source["$id"] + "#/$defs/" + name}
+     return Draft202012Validator(schema, registry=_REGISTRY, format_checker=FormatChecker())
+ 
+@@ -61,8 +72,9 @@ def plain(value: Any) -> Any:
+ 
+ def validate_contract(name: str, payload: Any, version: str = "2.0") -> Any:
+     value = plain(payload)
+-    errors = sorted(_validator(name, version).iter_errors(value), key=lambda e: str(list(e.path)))
+-    if errors:
++    static = os.environ.get("NF_HERA_STATIC_CONTRACTS") == "1"
++    validator = _validator(name, version, static)
++    if not validator.is_valid(value):
+         # Do not echo instance values: they can be secret or attacker-controlled.
+         raise DomainError("INVALID_ARGUMENT", f"Invalid {name}: contract constraints failed")
+     return deepcopy(value)
+diff --git a/src/novel_factory/contracts/static_validation.py b/src/novel_factory/contracts/static_validation.py
+new file mode 100644
+index 0000000..0d4ebab
+--- /dev/null
++++ b/src/novel_factory/contracts/static_validation.py
+@@ -0,0 +1,94 @@
++"""Prebind Draft 2020-12 keyword evaluators for the immutable contract bundle.
++
++Only boolean validity is public. No payload, error, permission or parsed result
++enters the plan. Unknown keywords and changes to reference scope select the
++ordinary validator for the complete bundle.
++"""
++from urllib.parse import urljoin
++
++from jsonschema import Draft202012Validator, FormatChecker, ValidationError
++from referencing.jsonschema import DRAFT202012
++
++
++# The supported handlers use the validator's type checker, descend/evolve and
++# format checker. Annotation-tracking and dynamically scoped refs need the
++# ordinary resolver and are deliberately excluded.
++_KEYWORDS = frozenset({
++    'additionalProperties', 'allOf', 'anyOf', 'const', 'dependentSchemas',
++    'enum', 'format', 'if', 'items', 'maxItems', 'maxLength', 'maxProperties',
++    'maximum', 'minItems', 'minLength', 'minimum', 'not', 'oneOf', 'pattern',
++    'prefixItems', 'properties', 'required', 'type', 'uniqueItems',
++})
++_METADATA = frozenset({'title', 'description', '$comment', 'default', 'examples',
++                       'then', 'else', '$defs', '$ref'})
++
++
++class StaticValidationPlan:
++    def __init__(self, documents):
++        self.nodes = {}
++        self.references = {}
++        self.format_checker = FormatChecker()
++        self.supported = True
++        for uri, root in documents.items():
++            if root.get('$schema') != 'https://json-schema.org/draft/2020-12/schema':
++                self.supported = False
++                return
++            for name, schema in root.get('$defs', {}).items():
++                self.references[uri + '#/$defs/' + name] = schema
++                self._register(uri, schema)
++        if any(node.ref and node.ref not in self.references for node in self.nodes.values()):
++            self.supported = False
++
++    def _register(self, uri, schema):
++        if not isinstance(schema, (bool, dict)):
++            self.supported = False
++            return
++        if id(schema) in self.nodes:
++            return
++        if isinstance(schema, dict) and schema.keys() - _KEYWORDS - _METADATA:
++            self.supported = False
++        self.nodes[id(schema)] = _Node(self, uri, schema)
++        for child in DRAFT202012.subresources_of(schema):
++            self._register(uri, child)
++
++    def validator(self, source, name):
++        return self.nodes[id(source['$defs'][name])]
++
++
++class _Node:
++    # Each node refers to the same immutable schema object throughout the life
++    # of the bundle. The upstream handlers inspect this API during traversal.
++    __slots__ = ('plan', 'schema', 'ref', 'checks', 'format_checker')
++
++    def __init__(self, plan, uri, schema):
++        self.plan = plan
++        self.schema = schema
++        self.format_checker = plan.format_checker
++        self.ref = urljoin(uri, schema['$ref']) if isinstance(schema, dict) and '$ref' in schema else None
++        self.checks = []
++        if isinstance(schema, dict):
++            self.checks = [(Draft202012Validator.VALIDATORS[key], value)
++                           for key, value in schema.items() if key in _KEYWORDS]
++
++    @staticmethod
++    def is_type(instance, type_name):
++        return Draft202012Validator.TYPE_CHECKER.is_type(instance, type_name)
++
++    def evolve(self, *, schema):
++        return self.plan.nodes[id(schema)]
++
++    def descend(self, instance, schema, **_path):
++        yield from self.evolve(schema=schema).iter_errors(instance)
++
++    def iter_errors(self, instance):
++        if self.schema is False:
++            yield ValidationError('False schema')
++            return
++        if self.ref is not None:
++            target = self.plan.references[self.ref]
++            yield from self.evolve(schema=target).iter_errors(instance)
++        for check, value in self.checks:
++            yield from check(self, value, instance, self.schema) or ()
++
++    def is_valid(self, instance):
++        return next(self.iter_errors(instance), None) is None
+diff --git a/tests/contracts/test_static_validation.py b/tests/contracts/test_static_validation.py
+new file mode 100644
+index 0000000..bba651d
+--- /dev/null
++++ b/tests/contracts/test_static_validation.py
+@@ -0,0 +1,39 @@
++"""Compare both paths on malformed discriminator, numeric and conditional values."""
++from copy import deepcopy
++import json
++from pathlib import Path
++
++from jsonschema import Draft202012Validator, FormatChecker
++
++from novel_factory.contracts.registry import _REGISTRY, _source, _static_plan
++from novel_factory.contracts.static_validation import StaticValidationPlan
++
++EXAMPLES = Path(__file__).resolve().parents[2] / 'contracts' / 'examples'
++
++
++def test_static_and_standard_validators_agree_on_mutated_wire_contracts():
++    index = json.loads((EXAMPLES / 'r1_index.json').read_text())
++    compiled = _static_plan()
++    assert compiled.supported
++    for filename, definition in index['examples'].items():
++        payload = json.loads((EXAMPLES / filename).read_text())
++        source = _source(definition, '2.1')
++        ordinary = Draft202012Validator(
++            {'$ref': source['$id'] + '#/$defs/' + definition},
++            registry=_REGISTRY, format_checker=FormatChecker(),
++        )
++        optimized = compiled.validator(source, definition)
++        candidates = [payload, {}, False, {'extra': True, **payload}]
++        for field in payload:
++            missing = deepcopy(payload)
++            del missing[field]
++            candidates.extend((missing, {**payload, field: None}, {**payload, field: True}))
++        for candidate in candidates:
++            assert optimized.is_valid(candidate) == ordinary.is_valid(candidate), (filename, candidate)
++
++
++def test_dynamic_subschema_forces_complete_bundle_fallback():
++    uri = 'https://example.test/contracts'
++    schema = {'$id': uri, '$schema': 'https://json-schema.org/draft/2020-12/schema',
++              '$defs': {'Root': {'type': 'object', 'properties': {'value': {'$dynamicRef': '#x'}}}}}
++    assert not StaticValidationPlan({uri: schema}).supported

@@ -1,0 +1,72 @@
+diff --git a/src/novel_factory/application/audit_log.py b/src/novel_factory/application/audit_log.py
+index d5ed5ca..b52f038 100644
+--- a/src/novel_factory/application/audit_log.py
++++ b/src/novel_factory/application/audit_log.py
+@@ -17,6 +17,15 @@ _FIELDS = (
+ _INSERT = text(f"""INSERT INTO nf_audit_events ({','.join(_FIELDS)})
+     VALUES ({','.join(':'+key for key in _FIELDS)})
+     ON CONFLICT(event_id) DO NOTHING RETURNING event_id""")
++_TOOL_EVENT_AND_OUTBOX = text(f"""
++    WITH recorded AS ({_INSERT.text}), published AS (
++        INSERT INTO nf_outbox (outbox_id,topic,aggregate_type,aggregate_id,payload,dedupe_key)
++        SELECT :outbox_id,'audit.recorded','audit',event_id::text,CAST(:envelope AS jsonb),
++               'audit:' || event_id::text FROM recorded
++        ON CONFLICT(dedupe_key) DO NOTHING RETURNING outbox_id
++    )
++    SELECT EXISTS (SELECT FROM recorded), EXISTS (SELECT FROM published)
++""")
+ 
+ 
+ def _uuid(value):
+@@ -51,7 +60,7 @@ def supports_harness_details(conn):
+     """))
+ 
+ 
+-def record(conn, event_type, *, event_id=None, conflict_details=None, harness_details=None, **fields):
++def record(conn, event_type, *, event_id=None, conflict_details=None, harness_details=None, compact_outbox=False, **fields):
+     """Internal transaction boundary. Only typed identifiers, counters and bounded labels persist."""
+     event_id = str(event_id or uuid4())
+     values = dict.fromkeys(_FIELDS)
+@@ -68,11 +77,20 @@ def record(conn, event_type, *, event_id=None, conflict_details=None, harness_de
+         statement = text(f"""INSERT INTO nf_audit_events ({columns}) VALUES ({parameters})
+             ON CONFLICT(event_id) DO NOTHING RETURNING event_id""")
+         values.update({key: json.dumps(value) for key, value in extras.items()})
+-    inserted = conn.execute(statement, values).scalar_one_or_none()
++    envelope = {k: str(values[k]) for k in ("work_id", "branch_id", "task_id", "trace_id") if values[k]}
++    if values["generation"] is not None:
++        envelope["generation"] = values["generation"]
++    if compact_outbox and not extras:
++        inserted, published = conn.execute(_TOOL_EVENT_AND_OUTBOX, {
++            **values, "outbox_id": str(uuid4()), "envelope": json.dumps(envelope)
++        }).one()
++        if published or not inserted:
++            return event_id
++        # A pre-existing Outbox key requires the normal content check. Run it
++        # in a new statement so a concurrent publisher's commit is visible.
++    else:
++        inserted = conn.execute(statement, values).scalar_one_or_none()
+     if inserted:
+-        envelope = {k:str(values[k]) for k in ("work_id","branch_id","task_id","trace_id") if values[k]}
+-        if values["generation"] is not None:
+-            envelope["generation"] = values["generation"]
+         enqueue_outbox(conn, tables, "audit.recorded", "audit", event_id, envelope, "audit:"+event_id)
+     return event_id
+ 
+@@ -223,7 +241,8 @@ class LogService:
+             invocation = str(uuid4())
+             scope.update(tool_name=safe_tool, request_id=sha256(str(request_id).encode()).hexdigest(),
+                          trace_id=scope.get("trace_id") or scope.get("task_id") or invocation)
+-            record(repo.conn, transport + ".started", event_id=invocation, **scope)
++            record(repo.conn, transport + ".started", event_id=invocation, **scope,
++                   compact_outbox=runtime.compact_role_reads)
+             return invocation, scope
+ 
+     @staticmethod
+@@ -231,6 +250,7 @@ class LogService:
+         with runtime.kernel.db.uow() as repo:
+             record(repo.conn, transport + ".finished", **{**scope, "parent_span_id":invocation},
+                    causation_id=invocation, outcome="ERROR" if error else "OK",
++                   compact_outbox=runtime.compact_role_reads,
+                    error_code=error, duration_ms=elapsed_ms, evidence_id=_uuid(evidence_id) if not error else None)
+ 
+     @staticmethod

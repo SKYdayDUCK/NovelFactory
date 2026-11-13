@@ -1,0 +1,27 @@
+diff --git a/src/novel_factory/application/bound_tools.py b/src/novel_factory/application/bound_tools.py
+index 50d98ed..e6900a2 100644
+--- a/src/novel_factory/application/bound_tools.py
++++ b/src/novel_factory/application/bound_tools.py
+@@ -5,6 +5,7 @@ from uuid import uuid4
+ 
+ from novel_factory.domain.errors import DomainError
+ from .audit_log import LogService
++from .mcp_runtime import TaskBinding
+ from .task_operations import TaskOperationsBinding
+ from .tool_catalog import _TOOLS, _VALIDATORS
+ 
+@@ -82,6 +83,14 @@ def invoke_bound_tool(runtime, name, arguments, *, ceiling=None, request_id=None
+         if (name == "nf_task_status" and isinstance(runtime.binding, TaskOperationsBinding)
+                 and runtime.fuse_status_auth and _VALIDATORS[name].is_valid(arguments)):
+             return runtime.task_operation(name, arguments)
++        # Compact task/context reads evaluate the live role ceiling inside the
++        # same unit of work that reads the payload. Malformed calls retain the
++        # normal discovery-first denial precedence.
++        if (name in {"nf_task_get", "nf_context_get"} and isinstance(runtime.binding, TaskBinding)
++                and runtime.compact_role_reads and _VALIDATORS[name].is_valid(arguments)):
++            result = _dispatch(runtime, name, arguments)
++            evidence = _evidence_id(name, result)
++            return result
+         if name not in runtime.available_tools():
+             raise DomainError("VIEW_DENIED", "Tool unavailable for this binding")
+         if not _VALIDATORS[name].is_valid(arguments):

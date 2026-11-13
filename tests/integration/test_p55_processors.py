@@ -7,6 +7,7 @@ from test_p5_supervisor import _job, backend
 
 from novel_factory.application.agent_gateway import AgentGateway
 from novel_factory.application.supervisor import RuntimeSupervisor
+from novel_factory.domain.errors import DomainError
 from novel_factory.fixtures import load_fixture
 from novel_factory.orchestration.processors import PROCESSORS, TaskDispatcher, handler_for
 
@@ -67,3 +68,18 @@ def test_compute_only_rebuilds_authorized_scope_without_model_calls(kernel_env):
         with kernel.db.uow(write=False) as repo:
             assert kernel.head(repo, wr["work_id"], wr["branch_id"]) == wr
             assert repo.one("index_watermarks", {"branch_id": wr["branch_id"], "index_name": "timeline"})
+
+
+def test_idle_compute_probe_still_rejects_a_revoked_controller(kernel_env):
+    kernel = kernel_env["kernel"]
+    book = load_fixture(kernel)
+    ref = book["world_ref"]
+    actor = kernel.issue_grant(book["principal"], ref["work_id"], role_id="control_operator",
+                               capabilities=["READ", "ADMIN"], branch_ids=[ref["branch_id"]])["principal"]
+    supervisor = RuntimeSupervisor(kernel, AgentGateway(kernel, {}))
+    dispatcher = TaskDispatcher(supervisor, actor, ref["work_id"], ref["branch_id"])
+    assert dispatcher.run_once("compute", reconcile=True)["status"] == "IDLE"
+    kernel.revoke_grant(book["principal"], actor.grant_id)
+    with pytest.raises(DomainError) as rejected:
+        dispatcher.run_once("compute", reconcile=True)
+    assert rejected.value.code == "VIEW_DENIED"

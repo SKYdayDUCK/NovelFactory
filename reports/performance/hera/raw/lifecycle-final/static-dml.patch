@@ -1,0 +1,62 @@
+diff --git a/src/novel_factory/orchestration/tasks.py b/src/novel_factory/orchestration/tasks.py
+index 92aa1d4..1d50331 100644
+--- a/src/novel_factory/orchestration/tasks.py
++++ b/src/novel_factory/orchestration/tasks.py
+@@ -57,6 +57,21 @@ _CLAIM_RECORDS = text("""
+ """).bindparams(bindparam("spec", type_=JSONB))
+ 
+ 
++_INSERT_TASK = text("""
++    INSERT INTO nf_tasks(task_id, work_id, branch_id, principal_id, grant_id, role_id, task_kind,
++                         state, generation, context_bundle_id, dependency_fingerprint, deadline)
++    VALUES (:task_id, :work_id, :branch_id, :principal_id, :grant_id, :role_id, :task_kind,
++            :state, :generation, :context_bundle_id, :dependency_fingerprint, :deadline)
++    ON CONFLICT (task_id) DO NOTHING RETURNING task_id
++""")
++
++_INSERT_OUTBOX = text("""
++    INSERT INTO nf_outbox(outbox_id, topic, aggregate_type, aggregate_id, payload, dedupe_key)
++    VALUES (:outbox_id, :topic, :aggregate_type, :aggregate_id, :payload, :dedupe_key)
++    ON CONFLICT (dedupe_key) DO NOTHING RETURNING outbox_id::text
++""").bindparams(bindparam("payload", type_=JSONB))
++
++
+ def mutation_gate(conn) -> None:
+     conn.execute(text("SELECT pg_advisory_xact_lock_shared(:key)"), {"key": MAINTENANCE_GATE})
+ 
+@@ -88,7 +103,10 @@ def enqueue_outbox(conn, tables, topic, aggregate_type, aggregate_id, payload, d
+     t = tables["outbox"]
+     value = {"outbox_id": str(uuid4()), "topic": topic, "aggregate_type": aggregate_type,
+              "aggregate_id": str(aggregate_id), "payload": payload, "dedupe_key": dedupe_key}
+-    result = conn.execute(insert(t).values(**value).on_conflict_do_nothing(index_elements=[t.c.dedupe_key]).returning(t.c.outbox_id)).scalar_one_or_none()
++    if os.environ.get("NF_HERA_STATIC_DML") == "1":
++        result = conn.execute(_INSERT_OUTBOX, value).scalar_one_or_none()
++    else:
++        result = conn.execute(insert(t).values(**value).on_conflict_do_nothing(index_elements=[t.c.dedupe_key]).returning(t.c.outbox_id)).scalar_one_or_none()
+     if result:
+         return result
+     existing = conn.execute(select(t).where(t.c.dedupe_key == dedupe_key)).mappings().one()
+@@ -173,7 +191,7 @@ class TaskService:
+         t = self.tables["tasks"]
+         admission = durable_admission.admit(conn, spec, principal_id, deadline)
+         wr = spec["world_ref"]
+-        task_insert = insert(t).values(
++        task_values = dict(
+             task_id=spec["task_id"], work_id=wr["work_id"], branch_id=wr["branch_id"],
+             principal_id=str(principal_id), grant_id=spec["capability_grant_id"],
+             role_id=spec["role_id"], task_kind=spec["task_kind"], state=spec["state"],
+@@ -181,8 +199,12 @@ class TaskService:
+             dependency_fingerprint=spec["dependency_fingerprint"], deadline=deadline,
+         )
+         with durable_admission.translate_capacity_error():
+-            created = conn.scalar(task_insert.on_conflict_do_nothing(index_elements=[t.c.task_id])
+-                                  .returning(t.c.task_id))
++            if os.environ.get("NF_HERA_STATIC_DML") == "1":
++                created = conn.scalar(_INSERT_TASK, task_values)
++            else:
++                task_insert = insert(t).values(**task_values)
++                created = conn.scalar(task_insert.on_conflict_do_nothing(index_elements=[t.c.task_id])
++                                      .returning(t.c.task_id))
+         if created is None:
+             raise _error("ALREADY_EXISTS", "Task identity is already assigned")
+         receipt = {"task_id": spec["task_id"], "generation": 0, "state": spec["state"]}

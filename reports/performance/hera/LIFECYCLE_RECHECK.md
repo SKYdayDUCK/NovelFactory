@@ -35,3 +35,19 @@ python "$EVIDENCE/seven_call_tcp.py" --product candidate --revision "$(git rev-p
 ```
 
 Use --product main --trigger off and omit --quota in the clean main worktree. For the 9148aae run also export NF_HERA_JOIN_STATUS=1 and NF_HERA_PREPARED_HTTP_TASK=1 and use --rounds 6. Each arm creates and drops its own isolated database. Copy the supplied driver out of the checkout to protect import isolation. The experiment stage patch and reports do not alter production semantics on the HERA integration branch.
+
+## Ordered policy reads, static validation and SQL compilation
+
+A further optional design locks the complete typed work row in a materialized PostgreSQL CTE and then the corresponding grant row, retaining the lock order, policy checks and fields. This reduced the seven-call path from 50 to 46 application SQL statements per cycle. At 16 clients and six warm rounds each the warm A/B/B/A order measured 10.697 / 17.784 / 17.013 / 11.088 correct cycles/s (+66.2%, +53.4%). Request P95 was 326 / 205 / 238 / 396 ms and P99 was 391 / 268 / 416 / 499 ms. The first control is the last control of the preceding experiment. [Policy code and observations](raw/lifecycle-final/ordered-policy.patch)
+
+After adding the static contract validators from 69b81bf, a new full independent A/B/B/A at each load produced the following observations. The tables count completed seven-call cycles. The last two columns list all four arms in execution order. All 1,352 first-use and warm cycles and all 9,464 HTTP responses across the twelve arms passed the declared database and wire oracles.
+
+| Clients | Main / HERA / HERA / main cycles/s | Adjacent uplift | Request P95, ms | Request P99, ms |
+|---:|---|---|---|---|
+| 2 | 10.87 / 15.45 / 13.19 / 11.55 | +42.1% / +14.2% | 56 / 33 / 55 / 40 | 72 / 69 / 106 / 59 |
+| 16 | 10.95 / 11.57 / 18.07 / 11.28 | +5.7% / +60.1% | 360 / 423 / 198 / 323 | 544 / 898 / 287 / 430 |
+| 32 | 9.95 / 14.20 / 17.36 / 11.48 | +42.8% / +51.1% | 707 / 608 / 453 / 587 | 805 / 1096 / 540 / 729 |
+
+The low and medium repeated throughput gates and several P99 gates failed. To reproduce, apply ordered-policy.patch on 9148aae followed by static-validation.patch, then commit in a clean isolated worktree. Use seven_call_tcp.py and the previous switches plus NF_HERA_JOIN_AUTHORITY=1 and NF_HERA_STATIC_CONTRACTS=1, with the warm rounds in the frozen plan. [Raw per-request results, SQL, timing and PostgreSQL counters](raw/lifecycle-final/)
+
+SQLAlchemy does not cache the compilation of the existing dialect's ON CONFLICT insert objects. A follow-on experiment introduced parameterized SQL of fixed shape for task creation and outbox insertion and retained collision fallback reads. Twenty-one PostgreSQL/permission/rollback/contract tests passed. Four independently migrated direct-driver runs (32 sequential seven-operation cycles per run, SQL unchanged logically, same code with NF_HERA_STATIC_DML=0/1/1/0) made 160 / 32 / 32 / 160 calls into visit_insert, spending 182 / 45 / 16 / 179 ms on that function. Total profiled times were 5.89 / 10.42 / 5.38 / 6.37 seconds. This establishes that compilation work was removed; it does not establish a repeatable wall-time improvement. Each profile retained 1,600 SQLAlchemy execute contexts and 224 psycopg commits. The first arm accumulated 2.78 seconds in execute contexts, 0.54 seconds in commit and 2.36 seconds in the two create paths combined. The scopes overlap. To replay the profile, apply static-dml.patch, commit, set the same switches and invoke direct-profile.py --output sample.prof from the product checkout with the direct driver and seven_call.py in the same external directory and PostgreSQL/driver pinned to the same CPU. [Raw profiles and timings](raw/lifecycle-final/insert-profile.json) · [Experimental source](raw/lifecycle-final/static-dml.patch) · [Regression cases](raw/lifecycle-final/static-dml-regression.xml)

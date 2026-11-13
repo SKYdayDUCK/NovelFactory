@@ -1,0 +1,63 @@
+diff --git a/src/novel_factory/application/kernel.py b/src/novel_factory/application/kernel.py
+index 2d3bf8c..c55adf6 100644
+--- a/src/novel_factory/application/kernel.py
++++ b/src/novel_factory/application/kernel.py
+@@ -37,6 +37,7 @@ class Kernel:
+         self.db, self.objects = db, objects
+         self._last_verified_projection = None
+         self._recent_verified_projections = ()
++        self._join_authority = os.environ.get("NF_HERA_JOIN_AUTHORITY") == "1"
+         self._join_status = os.environ.get("NF_HERA_JOIN_STATUS") == "1"
+         self._prepared_http_task = os.environ.get("NF_HERA_PREPARED_HTTP_TASK") == "1"
+         self._narrow_auth = os.environ.get("NF_HERA_NARROW_AUTH") == "1"
+@@ -84,8 +85,11 @@ class Kernel:
+     def _authorize_with_work(self, r, principal, work_id, capability, branch_id):
+         """Return both SHARE-locked rows to a caller in this transaction."""
+         require(isinstance(principal, Principal), "VIEW_DENIED", "Authenticated identity required")
+-        work = r.one("works", {"work_id":work_id}, lock="share")
+-        grant = r.one("grants", {"grant_id":principal.grant_id}, lock="share")
++        if self._join_authority and hasattr(r, "locked_work_grant"):
++            work, grant = r.locked_work_grant(work_id, principal.grant_id)
++        else:
++            work = r.one("works", {"work_id":work_id}, lock="share")
++            grant = r.one("grants", {"grant_id":principal.grant_id}, lock="share")
+         return self._validate_locked_grant(r, principal, work_id, capability, branch_id, work, grant)
+ 
+     def _validate_locked_grant(self, r, principal, work_id, capability, branch_id, work, grant):
+diff --git a/src/novel_factory/infrastructure/repository.py b/src/novel_factory/infrastructure/repository.py
+index cca2cb4..ddb1c40 100644
+--- a/src/novel_factory/infrastructure/repository.py
++++ b/src/novel_factory/infrastructure/repository.py
+@@ -52,6 +52,16 @@ _FENCED_STATUS = text("""
+ """)
+ 
+ 
++@lru_cache(maxsize=4)
++def _locked_policy_query(works, grants):
++    work = (select(works).where(works.c.work_id == bindparam("wid")).with_for_update(read=True)
++            .cte("locked_work").prefix_with("MATERIALIZED"))
++    grant = (select(grants).where(grants.c.grant_id == bindparam("gid"), grants.c.work_id == work.c.work_id)
++             .correlate(work).with_for_update(read=True, of=grants).lateral("locked_grant"))
++    return (select(*work.c, *(col.label("gr_" + col.key) for col in grant.c))
++            .select_from(work.outerjoin(grant, true())))
++
++
+ class KernelRepository:
+     def __init__(self, conn, tables):
+         self.conn, self.tables = conn, tables
+@@ -71,6 +81,15 @@ class KernelRepository:
+                 if row["locked_work_work_id"] is not None else None)
+         return task, work, row["world_ref"]
+ 
++    def locked_work_grant(self, work_id, grant_id):
++        works, grants = self.tables["works"], self.tables["grants"]
++        row = self.conn.execute(_locked_policy_query(works, grants), {"wid": work_id, "gid": grant_id}).mappings().one_or_none()
++        if row is None:
++            return None, None
++        work = {col.key: row[col.key] for col in works.c}
++        grant = {col.key: row["gr_" + col.key] for col in grants.c} if row["gr_grant_id"] else None
++        return work, grant
++
+     def status_with_locked_grant(self, task_id, grant_id):
+         row = self.conn.execute(_FENCED_STATUS, {"task_id": task_id, "grant_id": grant_id}).mappings().one_or_none()
+         if row is None:

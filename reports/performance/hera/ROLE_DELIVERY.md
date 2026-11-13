@@ -22,3 +22,9 @@ taskset -c 6 python /path/to/hera_role_delivery.py --clients 1000 --server-cpu 7
 ```
 
 The first stdio test invocation lacked the package path in the child interpreter. After installing the worktree in the child's environment, all 11 role/MCP tests passed. Fourteen additional tool-entry, audit and mixed-ingress cases passed on the paired-write path, including conflicting Outbox rollback. A draft audit patch failed Python import before execution; its log is preserved alongside the subsequent passing result. [Regression transcripts](raw/final-round/)
+
+## Repeat on the identical product and driver
+
+The second clean 1,000-session burst drained in 51.80 s, with P95/P99 of 48.65/50.80 s. Client/server peak RSS were 872,196/108,512 KiB. All 1,000 exact replies, 2,000 paired audit/Outbox entries, 15,000 statements and 4,000 transactions were verified. Both runs used the same source tree, API/PG core, separate client core and two application connections. The 35.26 s gate was met in one of two runs. Per-call event rows allow recomputation of overlap, timing and outcomes. [Second raw trace](raw/final-round/role-final-1000-repeat.json.gz)
+
+To reconstruct each intermediate role implementation, start at incoming PR commit eb1a75e and apply the numbered patches in order. The third resulting src tree is f914f3104cd66a5cf32daab24dcee709958b4193, also published at b617fa821d3334f7b22eee779cbe66ee9c688108. Use the archived role driver with the socket implementation from the corresponding product checkout for timing parity. [Patches and results](raw/final-round/)

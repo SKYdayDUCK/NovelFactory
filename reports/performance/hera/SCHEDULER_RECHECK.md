@@ -32,3 +32,29 @@ Three fresh PG17 fixtures on CPUs 0 and 8 each ran eight genuine index jobs. Two
 All 52 concurrent 10-second task-lease renewals succeeded, all 24 index events were consumed once, the final watermarks matched, and zero active index leases remained. This finite test establishes observed progress and enforcement at each capacity boundary; it provides no unbounded starvation guarantee. A preflight assertion used the outer dispatcher result shape for a direct index receipt and was corrected to verify its actual persisted consumption flag and event ID. [Per-lease, permit, watermark and renewal timings](raw/index-topology/resize.json.gz) · [Driver](../../../benchmarks/hera_index_resize.py) · [Preflight diagnostic](raw/index-topology/resize-fixture-failure.txt)
 
 Replay with `python -m benchmarks.hera_index_resize --output resize.json.gz` in a disposable PG17 database.
+
+## Scheduler wake traffic from an unrelated work
+
+A separate real compute supervisor with two worker slots listened for PostgreSQL commit notifications while another work created 64 authorized tasks. Before measurement, one transfer started the worker pool. After the unrelated traffic, four accepted transfers produced their own world events and durable compute hints. Each arm verified every task, all five distinct index receipts, and the graph/timeline watermarks at the correct final branch revision. The existing fixed scheduler and its one-second reconciliation interval stayed active. The candidate only coalesced hints during idle waits, up to the smaller of 25 ms and time remaining until the next reconciliation. The maximum in-flight worker count stayed fixed.
+
+| Window in mirrored order | Unrelated task creates/s | Durable compute hint reads | Total supervisor SQL during unrelated commits | Four new index receipts after hint commit, ms |
+|---|---:|---:|---:|---|
+| 0 ms | 21.41 | 63 | 271 | 93, 79, 81, 98 |
+| 25 ms | 48.75 | 31 | 130 | 166, 111, 107, 153 |
+| 25 ms | 35.57 | 33 | 144 | 140, 249, 128, 114 |
+| 0 ms | 39.15 | 63 | 265 | 257, 80, 87, 73 |
+
+The bounded waits reduced redundant probes, but median latency to an index receipt rose in both pairs. Unrelated creation throughput improved in only one pair. This experiment retains the original immediate wake behavior. All 13 focused PostgreSQL scheduler and supervisor regression tests passed. Apply the archived patch to `eb1a75e`, set `NF_TEST_DATABASE_URL` to PostgreSQL 17, pin PostgreSQL and the driver to the same CPU, and run `python -m benchmarks.hera_idle_wakes --output wakes.json.gz`. The harness dispatches committed source envelopes through the real compute subscriber in-process and verifies the separate supervisor's PostgreSQL effects. It does not time Redis relay delivery. [Full SQL records, delays, rejected patch and tests](raw/index-worker-qualification/wake-coalescing/)
+
+### Preserve immediate wake and join the two scheduler checks
+
+After locking and authorizing the live administrator and work, a single SQL query reads the enrollment and the current processor hint. An absent enrollment returns idle even for reconciliation. A configured branch with a null hint performs the same periodic scan as before. The durable hint occurrence and compare-before-clear, authoritative reservation, lease expiry and scope checks stay in place. This has no new schema or required configuration. Reverting the query restores the two-read version without moving data.
+
+| Arm | Other-work creates/s | Actual compute hint probes | Supervisor SQL in the measured traffic window | Median commit-to-index receipt ms (four post-window transfers) |
+|---|---:|---:|---:|---:|
+| Original | 42.14 | 63 | 264 | 80.4 |
+| Joined | 42.31 | 63 | 202 | 81.7 |
+| Joined | 42.06 | 63 | 202 | 76.3 |
+| Original | 40.92 | 63 | 264 | 87.5 |
+
+The adjacent controls each needed 264 SQL statements and both treatments needed 202 (−23.5%). All 256 unrelated tasks and 20 separate branch index receipts finished the fixture with the correct watermarks. The small changes in external task throughput are insufficient to establish a workload-wide acceleration. Eight PostgreSQL scheduler and processor tests passed, including denial after administrator revocation even when the transport is disabled. The query avoids an extra database round trip during immediate wake and introduces no intentional waiting. Execute the same `benchmarks/hera_idle_wakes.py` driver by absolute path with each measured checkout as the working directory and `PYTHONPATH` set to that checkout, using `--output OUT.json.gz`; pin all processes including PostgreSQL to one CPU. [Four original traces and focused regressions](raw/index-worker-qualification/scheduler-hints/)
