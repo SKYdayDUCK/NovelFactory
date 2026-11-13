@@ -5,6 +5,7 @@ from uuid import UUID, uuid5
 
 from novel_factory.application.budget_limits import SharedBudgetService
 from novel_factory.application.candidate_delivery import CandidateDelivery
+from novel_factory.application.idea_ending import confirm_ending, derive_ending_plan
 from novel_factory.application.idea_repair import normalized_design, returned_design
 from novel_factory.application.kernel import require
 from novel_factory.application.model_routing import POLICY_ROUTE, activate, check_idea_models, idea_policy
@@ -193,10 +194,10 @@ def _check_design_authority(repo, task, wr):
     )
 
 
-def _audited_design_result(kernel, gateway, repo, task, wr, *, design_revision_read=False):
+def _audited_design_result(kernel, gateway, repo, task, wr, *, design_revision_read=False, ending_plan_read=False):
     _check_design_authority(repo, task, wr)
     return CandidateDelivery(kernel, gateway).audited_candidate(repo, task, production_accounting=True,
-                                                              design_revision_read=design_revision_read)
+                                                              design_revision_read=design_revision_read, ending_plan_read=ending_plan_read)
 
 
 def design_round(kernel, repo, owner, wr, intake):
@@ -252,10 +253,11 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
                            review_ref=review_ref, issues=[{key: issue[key] for key in
                            ("category", "severity", "issue_kind", "disposition", "description", "suggested_change")} for issue in findings["issues"]])
             if ending_plan:
+                gateway.output_contracts[(role_id, task_kind)] = ("ShortEndingPlan", "production_profile")
                 content["unresolved_questions"] = findings.get("unresolved_questions", [])
                 content.update(task="根据独立审核指出的成篇缺口，在原有篇幅和章节数量内定向改写现有章节目标、故事线。"
                                     "保留人物、开场事实和世界规则。最后目标必须落实一个由人物行动产生的最终后果，"
-                                    "让核心冲突得到回应。请返回完整设计。",
+                                    "让核心冲突得到回应。只返回 storyline、与原章数相同的 chapter_goals；开场需改时才给 opening。",
                                short_arc=findings["short_arc"])
             inputs.append(review_ref)
     else:
@@ -266,6 +268,14 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
                 "逐项填写 short_arc，引用 chapter_goals 实际覆盖的开场、中段、转折和结局；缺失的一项明确写缺失。"
                 "若最后一章仍仅出现事端、疑虑或未来行动的打算，核心选择或结果留待续篇，选 ENDING_PLAN_REQUIRED。"
                 "有可辨认的结局（含开放式结局）且在该章已经落实时，选 COMPLETE。"
+            )
+        if "ending_plan" in evidence:
+            gateway.output_contracts[(role_id, task_kind)] = ("ShortEndingPlanReview", "production_profile")
+            content["ending_plan_source"] = evidence["ending_plan"]["source"]
+            content["ending_plan_instruction"] = (
+                "对照收到的原始阶段、分组后的各章目标和原有开场，只有判断每一章均可成立、全篇已闭合时"
+                "勾选 opening_and_chapters_confirmed。candidate_ref 逐字复制本次候选引用。answers 按源中的"
+                " unresolved_questions 顺序，逐条原样复制 question 并填写实质答复，不能把问题留到以后。"
             )
         content["task"] = ("独立核查当前设计与灵感、世界规则、人物初始所知和首窗目标是否相容。"
                            "阻止成书的矛盾列为 BLOCKER，普通改善建议和待讨论问题分别用 SUGGESTION、QUESTION。")
@@ -347,7 +357,10 @@ def materialize_design(kernel, gateway, owner, wr):
         if task and task["state"] == "FAILED" and intake.get("model_routes"):
             _check_design_authority(repo, task, wr)
             envelope, audit, audit_ref = returned_design(kernel, repo, gateway, task, wr, designer)
-            normalized = normalized_design(kernel, repo, owner, task, wr, designer, envelope, audit, audit_ref)
+            if designer.get("revision_purpose") == "SHORT_ENDING":
+                normalized = derive_ending_plan(kernel, repo, owner, wr, designer, envelope, audit, audit_ref)
+            else:
+                normalized = normalized_design(kernel, repo, owner, task, wr, designer, envelope, audit, audit_ref)
             if normalized is None:
                 design = validate_contract("FirstWorldDesign", envelope.get("payload"), "production_profile")
                 require(selected_review is None and designer["structure_count"] < intake["profile"]["max_reworks"],
@@ -360,7 +373,14 @@ def materialize_design(kernel, gateway, owner, wr):
             evidence, design = normalized
         else:
             require(task and task["state"] == "RESULT_STORED", "TASK_NOT_ACCEPTABLE", "Design awaits a current result")
-            evidence, design = _audited_design_result(kernel, gateway, repo, task, wr)
+            ending_task = designer.get("revision_purpose") == "SHORT_ENDING"
+            evidence, design = _audited_design_result(kernel, gateway, repo, task, wr, ending_plan_read=ending_task)
+            if ending_task:
+                audit_row = gateway._read_audit(repo, evidence["attempt_id"])
+                audit_ref = {k: audit_row[k] for k in ("artifact_id", "artifact_revision_id", "sha256")}
+                raw = kernel.artifact(repo, evidence["response_ref"], wr["work_id"], kind="AGENT_RESPONSE")
+                evidence, design = derive_ending_plan(kernel, repo, owner, wr, designer,
+                                                       json.loads(raw["payload"]["text"]), evidence, audit_ref)
         validate_contract("FirstWorldDesign", design, "production_profile")
         require(
             len(design["chapter_goals"])
@@ -413,6 +433,8 @@ def materialize_design(kernel, gateway, owner, wr):
                 )
             return None, {"status": "DESIGN_REWORK_REQUIRED", "reason": "SHORT_ENDING_REQUIRED",
                           "review_task_id": review["task_id"], "review_ref": review_evidence["output_ref"]}
+        if "ending_plan" in evidence:
+            confirm_ending(review_payload, evidence["ending_plan"]["source"], evidence["output_ref"])
         issues = review_payload["issues"]
         revision_available = (intake.get("model_routes") and
                               designer["editorial_count"] < intake["profile"]["max_reworks"])
@@ -466,6 +488,7 @@ def materialize_design(kernel, gateway, owner, wr):
             "result_ref": evidence["output_ref"],
             "execution_kind": evidence["execution_kind"],
             "source_input_ref": designer["input_ref"],
+            **({"design_ending_plan": evidence["ending_plan"]} if "ending_plan" in evidence else {}),
             **({"design_normalization": evidence["normalization"]} if "normalization" in evidence else {}),
             **({"design_revision_round": round_index, "original_input_ref": intake["input_ref"]} if round_index else {}),
             **({"model_routes": intake["model_routes"], "routing_policy_ref": activation["policy_ref"]}
@@ -485,7 +508,7 @@ def materialize_design(kernel, gateway, owner, wr):
             **({"short_arc": arc} if arc else {}),
         }
         kernel.tasks.accept_in_transaction(repo.conn, review["task_id"], review["generation"])
-        if "normalization" not in evidence:
+        if task["state"] == "RESULT_STORED":
             kernel.tasks.accept_in_transaction(repo.conn, task["task_id"], task["generation"])
         kernel._receipt(repo, owner, wr, "P6_IDEA_MATERIALIZE", "initial", {}, receipt)
         kernel._receipt(

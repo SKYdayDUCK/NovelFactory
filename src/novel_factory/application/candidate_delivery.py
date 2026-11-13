@@ -71,7 +71,7 @@ class CandidateDelivery:
             repo.outbox(f"supervisor.{self.route}.delivery", "task", task_id, result, key)
             return result
 
-    def audited_candidate(self, repo, task, *, production_accounting=False, design_revision_read=False):
+    def audited_candidate(self, repo, task, *, production_accounting=False, design_revision_read=False, ending_plan_read=False):
         task_id, gen = task["task_id"], task["generation"]
         call = repo.one(
             "call_attempts", {"task_id": task_id, "generation": gen, "call_key": "supervised-candidate"}
@@ -115,15 +115,22 @@ class CandidateDelivery:
                 and source["output_contract"] == {"name": "ShortDesignReview", "version": "production_profile"}
                 and candidate["payload"].get("short_arc", {}).get("decision") == "ENDING_PLAN_REQUIRED"
             )
+        if ending_plan_read and questions:
+            from .postpaid_delivery import bound_ending_input
+            source = self.kernel.artifact(repo, evidence["input_ref"], task["work_id"], kind="AGENT_INPUT")["payload"]
+            ending_plan_read = bound_ending_input(repo, task, evidence["input_ref"], source["output_contract"])
         require(
-            not questions or design_revision_read,
+            not questions or design_revision_read or ending_plan_read,
             "REVIEW_REQUIRED",
             "A model-reported unresolved question needs a decision",
         )
         if production_accounting and call["state"] != "SUCCEEDED":
             from .postpaid_delivery import require_postpaid_delivery
 
-            if design_revision_read and questions:
+            if ending_plan_read and questions:
+                require_postpaid_delivery(self.kernel, repo, task, call, audit, response, candidate,
+                                          ending_plan_read=True)
+            elif design_revision_read and questions:
                 require_postpaid_delivery(self.kernel, repo, task, call, audit, response, candidate,
                                           design_revision_read=True)
             else:
