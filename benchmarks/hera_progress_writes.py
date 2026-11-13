@@ -53,6 +53,7 @@ FROM stats WHERE work_id=%s AND branch_id=%s AND stats.n>0 RETURNING n"""
 READ = {
     "raw": SOURCE,
     "disabled": SOURCE,
+    "suspended": SOURCE,
     "fused_empty": SOURCE,
     "sync": """SELECT coalesce((counts->>'READY')::bigint,0),coalesce((counts->>'PAUSED')::bigint,0)
                FROM nf_hera_progress WHERE work_id=%s AND branch_id=%s""",
@@ -73,14 +74,19 @@ def trigger(conn, function):
         )
 
 
-def prepare(conn, mode, original, branch):
+def prepare(conn, mode, original, branch, db):
+    from novel_factory.orchestration.progress import set_progress_maintenance
+
+    with db.uow() as repo:
+        set_progress_maintenance(repo.conn, suspended=False)
+
     trigger(conn, None)
     conn.execute(
         "TRUNCATE bench_progress_outbox,bench_progress_shard,bench_progress_checkpoint,nf_hera_progress"
     )
     conn.execute("UPDATE nf_tasks SET state='READY' WHERE state='PAUSED'")
     n = conn.execute(SOURCE, branch).fetchone()[0]
-    if mode in ("sync", "fused", "disabled", "fused_empty"):
+    if mode in ("sync", "fused", "disabled", "fused_empty", "suspended"):
         if mode in ("sync", "fused"):
             conn.execute(
                 "INSERT INTO nf_hera_progress(work_id,branch_id,counts) VALUES(%s,%s,jsonb_build_object('READY',%s::int))",
@@ -92,6 +98,10 @@ def prepare(conn, mode, original, branch):
             else original
         )
         trigger(conn, "nf_hera_count_transition")
+        if mode == "suspended":
+            with db.uow() as repo:
+                set_progress_maintenance(repo.conn, suspended=True)
+
     elif mode == "shard":
         conn.execute("""INSERT INTO bench_progress_shard SELECT work_id,branch_id,bench_task_shard(task_id),
                      count(*),0 FROM nf_tasks GROUP BY 1,2,3""")
@@ -252,7 +262,7 @@ def main():
                 arms=[],
             )
             for mode in modes:
-                prepare(conn, mode, original, branch)
+                prepare(conn, mode, original, branch, kernel.db)
                 arm = run_arm(dsn, conn, mode, branch, ids, args.workers, args.operations)
                 out["arms"].append(arm)
                 print(mode, round(arm["tps"], 2), arm["latency"], arm["functions"], flush=True)

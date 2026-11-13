@@ -64,3 +64,45 @@ def test_optional_projection_matches_existing_and_future_tasks(kernel_env, monke
     kernel.revoke_grant(owner, resume.grant_id)
     with pytest.raises(DomainError, match="unavailable"):
         reader.project()
+
+
+def test_operator_can_suspend_only_an_empty_projection_and_restore_from_tasks(kernel_env):
+    from sqlalchemy.exc import IntegrityError
+
+    from novel_factory.orchestration.progress import set_progress_maintenance
+
+    kernel = kernel_env["kernel"]
+    book = load_fixture(kernel)
+    work, branch = book["world_ref"]["work_id"], book["world_ref"]["branch_id"]
+    role = kernel.issue_grant(book["principal"], work, role_id="writer", max_story_time=point(1))["principal"]
+    def enabled(conn):
+        return conn.scalar(text("""SELECT tgenabled FROM pg_trigger
+            WHERE tgrelid='nf_tasks'::regclass AND tgname='nf_hera_progress_delta'"""))
+
+    with pytest.raises(RuntimeError), kernel.db.uow() as repo:
+        set_progress_maintenance(repo.conn, suspended=True)
+        assert enabled(repo.conn) == "D"
+        raise RuntimeError("abort configuration")
+
+    with kernel.db.uow() as repo:
+        assert enabled(repo.conn) == "O"
+        set_progress_maintenance(repo.conn, suspended=True)
+        set_progress_maintenance(repo.conn, suspended=True)
+    with pytest.raises(IntegrityError), kernel.db.uow() as repo:
+        repo.conn.execute(text("INSERT INTO nf_hera_progress VALUES (:w,:b,'{}',0)"),
+                          {"w":work,"b":branch})
+    spec = task_spec(book, principal=role, role="writer")
+    kernel.create_task(role,spec,"suspended-write")
+    with kernel.db.uow() as repo:
+        configure_progress(repo.conn,work,branch,enabled=True)
+        assert enabled(repo.conn) == "O"
+        assert check_progress(repo.conn,work,branch) == "OK"
+    with pytest.raises(ValueError, match="Disable all"), kernel.db.uow() as repo:
+        set_progress_maintenance(repo.conn,suspended=True)
+    kernel.cancel_task(role,spec["task_id"],0,"resumed-write")
+    with kernel.db.uow() as repo:
+        assert check_progress(repo.conn,work,branch) == "OK"
+        configure_progress(repo.conn,work,branch,enabled=False)
+        set_progress_maintenance(repo.conn,suspended=True)
+        set_progress_maintenance(repo.conn,suspended=False)
+        assert enabled(repo.conn) == "O"

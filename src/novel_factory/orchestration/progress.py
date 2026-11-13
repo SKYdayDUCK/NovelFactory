@@ -14,6 +14,31 @@ def _valid_counts(counts):
     )
 
 
+def _maintenance_suspended(conn):
+    return conn.scalar(text("""
+        SELECT EXISTS (SELECT FROM pg_constraint
+            WHERE conrelid='nf_hera_progress'::regclass AND conname='nf_hera_progress_empty')
+    """))
+
+
+def set_progress_maintenance(conn, *, suspended):
+    """Operator-only switch. Change both protections in the caller's transaction."""
+    # The backfill uses the same task lock. Also exclude a concurrent direct
+    # INSERT of a projection before proving the table empty.
+    conn.execute(text("LOCK TABLE nf_tasks IN SHARE ROW EXCLUSIVE MODE"))
+    conn.execute(text("LOCK TABLE nf_hera_progress IN ACCESS EXCLUSIVE MODE"))
+    if suspended == _maintenance_suspended(conn):
+        return
+    if suspended:
+        if conn.scalar(text("SELECT EXISTS (SELECT FROM nf_hera_progress)")):
+            raise ValueError("Disable all configured branch projections before suspending maintenance")
+        conn.execute(text("ALTER TABLE nf_hera_progress ADD CONSTRAINT nf_hera_progress_empty CHECK (false)"))
+        conn.execute(text("ALTER TABLE nf_tasks DISABLE TRIGGER nf_hera_progress_delta"))
+    else:
+        conn.execute(text("ALTER TABLE nf_tasks ENABLE TRIGGER nf_hera_progress_delta"))
+        conn.execute(text("ALTER TABLE nf_hera_progress DROP CONSTRAINT nf_hera_progress_empty"))
+
+
 def configure_progress(conn, work_id, branch_id, *, enabled):
     # Serialize the initial snapshot with concurrent task transitions. This is an
     # explicit operator operation, never performed on a reader's cold path.
@@ -22,6 +47,8 @@ def configure_progress(conn, work_id, branch_id, *, enabled):
     if not enabled:
         conn.execute(text("DELETE FROM nf_hera_progress WHERE work_id=:w AND branch_id=:b"), params)
         return
+    if _maintenance_suspended(conn):
+        set_progress_maintenance(conn, suspended=False)
     conn.execute(text("""
         INSERT INTO nf_hera_progress(work_id, branch_id, counts)
         SELECT :w, :b, COALESCE(jsonb_object_agg(state, n), '{}'::jsonb)
