@@ -300,13 +300,18 @@ class AgentGateway:
                 kinds = dict(repo.conn.execute(select(artifacts.c.artifact_revision_id, artifacts.c.kind).where(
                     artifacts.c.work_id == task["work_id"],
                     artifacts.c.artifact_revision_id.in_([r["artifact_revision_id"] for r in refs]))).all())
+                editing_job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})
+                editing = (editing_job or {}).get("config", {}).get("frozen_editing")
         for ref in refs:
             kind = kinds.get(ref["artifact_revision_id"])
             if creative:
                 require(kind is not None and kind != "CREATIVE_CONTEXT_SNAPSHOT",
                         "VIEW_DENIED", "Material is unavailable to this assignment")
             content = None
-            if kind == "CONTINUITY_SNAPSHOT":
+            if editing:
+                from .frozen_editing import material as editing_material
+                content = editing_material(self.kernel, principal, task, ref, editing)
+            elif kind == "CONTINUITY_SNAPSHOT":
                 from novel_factory.application.continuity import ContinuityService
                 scoped = ContinuityService(self.kernel).read_for_task(principal, task["task_id"], task["generation"], ref)
                 content = canonical_bytes(scoped)

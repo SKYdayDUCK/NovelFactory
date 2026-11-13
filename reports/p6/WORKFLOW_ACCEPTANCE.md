@@ -42,3 +42,9 @@ uv run python -m pytest -q tests/integration/test_p6_rolling_production.py tests
 首次 `register-window` 返回 `OPENING_ENROLLED`。当环境过程启用时，原生调度器先求值并按证书接受该实体的到达事件。两名人物随后分别从自己的 BELIEF 切面提出行动。联合裁决读取密封提案，业务接受范围为主角停留或移动到登记地点。启用局部重规划时，卷导演检查已发生的事件。重大偏离触发计划修订和上级批准。Supervisor 将已接受的事件、采用的目标和固定世界版本绑定到首场写作卡。后续窗口继续使用已有滚动生产。自动登记的演绎目前覆盖开场。
 
 PostgreSQL 17.11 的三组开场测试分别覆盖保留原计划、重大偏离后采用修改目标、短篇跳过环境过程和局部重规划。模型响应来自本地 HTTP 测试服务。另运行历史联合裁决、后续场景和契约兼容回归。[原始 JUnit 记录](evidence/native-opening-pg.xml)
+
+## 冻结卷的原生编辑验收
+
+在已有滚动授权、可用审核路由与余额内，项目控制者可运行 `python scripts/p6_frozen_edit.py enroll --binding 私有项目控制文件`。此命令登记当前完整冻结卷，Supervisor 才会按原预算逐项执行。使用同一命令的 `status` 子命令可查看实际任务、Attempt、候选及回执。单场卷需要七次审核或编辑候选；多场卷另按实际场、章和相邻接缝登记。含多场或长文的整卷模型输入仍受现有上下文限制。
+
+每位审核者固定本次文本及知识切面，实际发送原文时取得服务端阅读覆盖。事实、认知、文学和适用的接缝报告经 `ReviewService.submit_review` 写入。结构、接缝、语言三个编辑阶段交由单独的总编任务，结构功能引用须唯一匹配原文。末次总编任务明确批准后，生产控制者才通过原生 `approve_editorial` 核验完整回执。退回会保存候选并停止，硬冲突须先修订并重新核查。正式作品仍需另行完成外部独立评审、发布与费用验收。[单场卷批准与退回的 PostgreSQL 工程记录](evidence/frozen-edit-pg.xml)

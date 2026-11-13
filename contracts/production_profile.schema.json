@@ -502,6 +502,121 @@
           }
         }
       ]
+    },
+    "FrozenPhaseAdvice": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "decision": {
+          "enum": [
+            "APPROVED",
+            "RETURNED"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000,
+          "pattern": "\\S"
+        },
+        "scene_functions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "scene": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "function": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 800,
+                "pattern": "\\S"
+              },
+              "quote": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500,
+                "pattern": "\\S"
+              }
+            },
+            "required": [
+              "scene",
+              "function",
+              "quote"
+            ]
+          },
+          "maxItems": 128
+        },
+        "considered_options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "summary": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 8000
+              },
+              "disposition": {
+                "enum": [
+                  "SELECTED",
+                  "REJECTED",
+                  "DEFERRED"
+                ]
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 8000
+              },
+              "benefits": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8000
+                },
+                "maxItems": 16
+              },
+              "costs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8000
+                },
+                "maxItems": 16
+              }
+            },
+            "required": [
+              "summary",
+              "disposition",
+              "reason",
+              "benefits",
+              "costs"
+            ]
+          },
+          "maxItems": 10
+        },
+        "issue_decisions": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.1/editorial.schema.json#/$defs/IssueDecision"
+          },
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "decision",
+        "summary",
+        "scene_functions",
+        "considered_options",
+        "issue_decisions"
+      ]
     }
   }
 }
