@@ -15,10 +15,11 @@ from novel_factory.domain.errors import DomainError
 
 
 @pytest.mark.postgres
-@pytest.mark.parametrize("return_final", [False, True, "quality_repair"])
+@pytest.mark.parametrize("return_final", [False, True, "quality_repair", "child_edition", "unchanged_child"])
 def test_one_frozen_volume_needs_actual_model_opinions_and_a_separate_decision(
     kernel_env, monkeypatch, return_final
 ):
+    child_case = return_final in {"child_edition", "unchanged_child"}
     kernel = kernel_env["kernel"]
     f = setup_batch(kernel, count=1)
     wr, owner = f["world_ref"], f["principal"]
@@ -33,7 +34,7 @@ def test_one_frozen_volume_needs_actual_model_opinions_and_a_separate_decision(
         gateway = connect(kernel, adapter)
         server.packet_candidate = answer
         params = request(kernel, f, 1)
-        if return_final == "quality_repair":
+        if return_final in {"quality_repair", "child_edition", "unchanged_child"}:
             params["profile"].setdefault("overrides", {})["production_mode"] = "quality"
         register_rolling(kernel, gateway, owner, **params)
         for _ in range(30):
@@ -44,6 +45,18 @@ def test_one_frozen_volume_needs_actual_model_opinions_and_a_separate_decision(
         seen = []
 
         def judgment(packet):
+            assignment = json.loads(packet["assignment"])
+            if assignment.get("operation") == "revise_returned_edition":
+                assert assignment["editor_reason"] and packet["context"]["role_id"] == "writer"
+                assert any("北窗" in p["content"] for p in packet["authorized_materials"])
+                original_output = answer(packet)
+                return {**original_output, "text": original_output["text"] + ("。" if return_final == "child_edition" else "")}
+            if assignment.get("operation") == "read_returned_edition":
+                assert packet["context"]["role_id"] == "reviewer"
+                before, after = [json.loads(i["content"])["text"] for i in packet["authorized_materials"]]
+                assert after == before + ("。" if return_final == "child_edition" else "")
+                return {"summary": "Fixture compared both exact versions.", "issues": [],
+                        "counterinterpretations": [], "evidence_refs": []}
             original = json.loads(packet["authorized_materials"][0]["content"])
             assert original["text"] == "北窗的雨声很轻。" and original["coverage_ref"]
             assignment = json.loads(packet["assignment"])
@@ -58,7 +71,7 @@ def test_one_frozen_volume_needs_actual_model_opinions_and_a_separate_decision(
                 }
             if phase == "APPROVAL":
                 return {
-                    "decision": "RETURNED" if return_final is True else "APPROVED",
+                    "decision": "RETURNED" if return_final is True or child_case else "APPROVED",
                     "reason": "复核已完成的编辑阶段和原文。",
                     "deferred_questions": [],
                     "evidence_refs": [],
@@ -104,8 +117,34 @@ def test_one_frozen_volume_needs_actual_model_opinions_and_a_separate_decision(
             turn = RuntimeSupervisor(kernel, gateway).run_once(owner, work, branch)
             observed.append((turn.get("status"), turn.get("reason")))
             state = frozen_editing.status(kernel, owner, work, branch)
-            if state["status"] != "EDITING_ACTIVE" or turn.get("status") == "BLOCKED":
+            if state["status"] not in {"EDITING_ACTIVE", "EDITION_REVISING"} or turn.get("status") == "BLOCKED":
                 break
+        if child_case:
+            assert state["status"] == "EDITION_HANDOFF_REQUIRED", (state["status"], state["reason"], observed[-5:])
+            expected_reason = "CANDIDATE_ACCEPTANCE_REQUIRED" if return_final == "child_edition" else "EDITORIAL_NO_PROGRESS"
+            assert state["reason"] == expected_reason and state["approval_ref"] is None
+            from novel_factory.application.volume_successor import _selected
+            with kernel.db.uow(write=False) as repo:
+                edition = kernel.artifact(repo, state["edition_ref"], work, kind="P6_RETURNED_EDITION_CANDIDATE")["payload"]
+                child = edition["candidates"][0]
+                assert _selected(repo, work, "P6_FROZEN_SCENE:" + child["scene_id"]) == edition["parent_checkpoint"]
+                original = kernel.artifact(repo, _selected(repo, work, "NARRATIVE_SCENE:" + child["scene_id"]), work)["payload"]
+                candidate = kernel.artifact(repo, child["draft_ref"], work, kind="NARRATIVE_DRAFT")["payload"]
+                assert original["draft_ref"] == candidate["prior_draft_ref"] == child["parent_ref"]
+                assert (original["text_ref"]["sha256"] != candidate["text_ref"]["sha256"]) == (return_final == "child_edition")
+                reflection = kernel.artifact(repo, edition["reflection_ref"], work, kind="P6_REFLECTION_RECORD")["payload"]
+                assert reflection["error_ref"] == edition["error_ref"] and reflection["attempt_id"] == edition["editor_attempt_id"]
+                assert edition["editor_output_ref"] == state["returned_ref"]
+                assert edition["readings"][0]["attempt_id"] != child["attempt_id"]
+                assert not _selected(repo, work, "RELEASE:" + edition["volume"])
+            ordinary = kernel.issue_grant(owner, work, role_id="writer", branch_ids=[branch], planes=["WORLD"])["principal"]
+            with pytest.raises(DomainError):
+                kernel.get_artifact(ordinary, work, state["edition_ref"])
+            assert json.loads(kernel.get_artifact(owner, work, state["edition_ref"])) == edition
+            assert frozen_editing.start(kernel, owner, work, branch)["status"] == "EDITION_HANDOFF_REQUIRED"
+            with pytest.raises(DomainError, match="editorial approval is missing"):
+                final_review_request(kernel, owner, work, branch)
+            return
         assert state["status"] == ("EDITING_RETURNED" if return_final is True else "EDITORIAL_APPROVED"), (
             state["reason"],
             state["index"],

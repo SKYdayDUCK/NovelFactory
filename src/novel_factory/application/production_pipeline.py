@@ -439,7 +439,7 @@ def production_material_reader(kernel):
     def read(owner, *, task_id, generation, context_bundle_id, artifact_ref):
         with kernel.db.uow(write=False) as repo:
             job = repo.one("supervisor_jobs", {"task_id": task_id})
-            if not job or "production_node" not in job["config"]:
+            if not job or not ({"production_node", "returned_edition"} & job["config"].keys()):
                 return None
         return NarrativeService(kernel).read_agent_material(owner, task_id=task_id, generation=generation,
             context_bundle_id=context_bundle_id, artifact_ref=artifact_ref)

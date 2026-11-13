@@ -38,6 +38,7 @@ def _save(kernel, repo, owner, state):
         "active_task": state["active"],
         "approval_ref": state.get("approval_ref"),
         "reason": state.get("reason"),
+        **({"edition_ref": state["edition_ref"]} if "edition_ref" in state else {}),
     }
 
 
@@ -86,7 +87,7 @@ def start(kernel, owner, work, branch):
                 "approval_ref": previous.get("approval_ref"),
             }
         require(
-            not previous or previous["status"] != "EDITING_ACTIVE",
+            not previous or previous["status"] not in {"EDITING_ACTIVE", "EDITION_REVISING"},
             "CAPACITY_LIMIT",
             "An earlier editorial session remains active",
         )
@@ -452,13 +453,13 @@ def _deliver(kernel, repo, owner, state, task, proof, output):
 def advance(kernel, gateway, controller, work, branch):
     with kernel.db.uow(write=False) as repo:
         state = _state(kernel, repo, work, branch)
-        if not state or state["status"] != "EDITING_ACTIVE":
+        if not state or state["status"] not in {"EDITING_ACTIVE", "EDITION_REVISING"}:
             return None
     with kernel.objects.lock(), kernel.db.uow() as repo:
         repo.one("works", {"work_id": work}, lock="update")
         kernel.authorize(repo, controller, work, "ADMIN", branch)
         state = _state(kernel, repo, work, branch)
-        if state["status"] != "EDITING_ACTIVE":
+        if state["status"] not in {"EDITING_ACTIVE", "EDITION_REVISING"}:
             return None
         bound = kernel.in_transaction(repo)
         cursor = _load(bound, repo, work, branch)
@@ -472,12 +473,19 @@ def advance(kernel, gateway, controller, work, branch):
         task = proof = None
         try:
             with repo.conn.begin_nested():
-                if state["active"]:
+                if state["status"] == "EDITION_REVISING":
+                    from .returned_edition import advance as revise_returned
+                    if not revise_returned(bound, repo, gateway.with_kernel(bound), owner, state, cursor):
+                        return None
+                elif state["active"]:
                     task = repo.one("tasks", {"task_id": state["active"]})
                     if task["state"] != "RESULT_STORED":
                         return None
                     proof, output = _audited_design_result(bound, gateway.with_kernel(bound), repo, task, state["binding"]["world_ref"])
                     _deliver(bound, repo, owner, state, task, proof, output)
+                    if state["status"] == "EDITING_RETURNED" and cursor["profile"].get("production_mode") == "quality":
+                        from .returned_edition import begin
+                        begin(bound, repo, owner, state, cursor, task, proof, output)
                 else:
                     _assign(bound, repo, gateway.with_kernel(bound), owner, state, cursor)
         except DomainError as error:
@@ -500,7 +508,8 @@ def advance(kernel, gateway, controller, work, branch):
                     state.update(active=None, technical_correction={**chosen, "diagnostic": issue,
                                                                   "attempt_id": proof["attempt_id"]})
             else:
-                state.update(status="EDITING_BLOCKED", reason=error.code)
+                state.update(status="EDITION_REVISION_BLOCKED" if state["status"] == "EDITION_REVISING" else "EDITING_BLOCKED",
+                             reason=error.code)
         return _save(bound, repo, owner, state)
 
 
@@ -512,5 +521,5 @@ def status(kernel, owner, work, branch):
             return {"status": "NOT_ENROLLED"}
         return {
             key: state.get(key)
-            for key in ("status", "active", "index", "reason", "approval_ref", "receipts")
+            for key in ("status", "active", "index", "reason", "approval_ref", "receipts", "returned_ref", "edition_ref")
         }

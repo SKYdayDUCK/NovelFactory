@@ -67,9 +67,9 @@ systemctl enable --now novelfactory-p6-book@{A,B,C}.service
 
 ## 冻结卷的编辑实质退回
 
-1. **识别退回。** 在生产主机上用该书的 `control.json` 执行 `python scripts/p6_frozen_edit.py status --binding "$binding"`。编辑阶段的决定非 `APPROVED`，或最终批准仍有待答问题时，状态为 `EDITING_RETURNED`、原因为 `EDITOR_RETURNED`。保存退回阶段索引和最后一条回执的 `task_id`、`attempt_id`、`candidate_ref`。将 `python scripts/p6_runtime_evidence.py --binding "$binding" --output "$new_file"` 写入新的私有文件。由有权读取该作品的人员按原候选核对问题、原文位置及相关稿件范围。结构化输出验证失败进入另一条技术诊断路径，不能把一份有效的退回决定登记为响应格式错误。[决定与回执](../../src/novel_factory/application/frozen_editing.py)
-2. **保持原卷未发布。** 相同有序验收引用和 WorldRef 再次 enroll 会返回原决定。推进器只处理 `EDITING_ACTIVE`。卷内正文顺序取自不可变的 `ROLLING_CHECKPOINT` 链，局部重排只接受尚未打开的窗口。现有接口可以建立有父版本的场景草稿，但单独接受新稿会使旧发布清单过期。若前驱发生变化，后继场景还需要新的交接证明。将此卷与依赖它的后续卷标为等待候选版本恢复，保留原游标、账务及上一已发布前缀。[冻结与窗口替换](../../src/novel_factory/application/rolling_production.py) · [草稿版本](../../src/novel_factory/application/narrative.py) · [发布约束的回归](../../tests/integration/test_release.py)
-3. **恢复的工程前置条件。** 当前没有可将已退回卷的修订稿接回同一滚动生产链的候选版本接口。后续实现须把受权修订任务绑定到退回回执、原冻结卷及涉及的场景，由内部生产角色写稿。为受影响的场景与后继交接重新取得事实、认知、连续性和正文验收。保留原检查点，以明确的父版本建立候选检查点链，并防止并发替换同一旧版本。独立编辑必须实际阅读候选有序稿件、提供覆盖回执并批准同一组引用，然后才能用常规 RELEASE 与跨卷连续性核验推进。开发者、部署管理员和后续 GPT 全文评阅均不代签这些门槛。[冻结卷复核](../../src/novel_factory/application/frozen_editing.py) · [发布清单](../../src/novel_factory/application/release.py) · [跨卷发布](../../src/novel_factory/application/rolling_publication.py)
+1. **保留退回决定。** 质量模式在收到独立编辑的有效退回后进入 `EDITION_REVISING`。用 `python scripts/p6_frozen_edit.py status --binding "$binding"` 查看原决定的 `returned_ref`、当前任务和候选版本引用。旧的普通模式继续返回 `EDITING_RETURNED`。两条路径都保留原始 Attempt。
+2. **复核候选。** 作品授权的 writer/targeted_revision 读取原稿、场景契约、编辑理由和定位到本场的正式审稿意见。新草稿引用 `prior_draft_ref`，沿用原版前驱交接。独立 reviewer/literary 按顺序阅读该场原稿和新稿并提出意见。Supervisor 恢复时校验同一卷、运行、编辑会话、世界版本和冻结父检查点。子稿与复读 Attempt 均归入作品预算和候选清单。`EDITION_HANDOFF_REQUIRED` 时，可按 `edition_ref` 定位父稿、子稿、模型读后意见及原退回决定。`EDITORIAL_NO_PROGRESS` 表示新旧正文逐场相同。
+3. **正式替换仍需工程交接。** 逐场读后意见用于候选评阅，新稿仍引用父版前驱验收。正式替代需要隔离的候选验收选择，为修改及受影响后继场景重新取得事实、认知和连续性验收。独立编辑需重新阅读完整的候选有序稿件并批准精确清单。完成这些步骤并提供原子性的父版比较与切换接口后，滚动游标才可接续候选。操作员按候选清单接管，原 `ROLLING_CHECKPOINT`、`NARRATIVE_SCENE`、世界版本和已发布前缀可继续核查。[候选与逐场复读](../../src/novel_factory/application/returned_edition.py) · [冻结卷复核](../../src/novel_factory/application/frozen_editing.py) · [发布对前驱的验证](../../src/novel_factory/application/release.py)
 
 ## 中间卷的连续性复核
 

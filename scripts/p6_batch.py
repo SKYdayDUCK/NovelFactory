@@ -41,7 +41,7 @@ MODELS = {"creative": "deepseek-flash", "review": "deepseek-v4-pro"}
 HARNESS = CreativeHarnessConfig(enabled=True, dynamic_agents=True, adaptive_instructions=True)
 FIELDS = {"total_amount", "reserve_amount", "total_tokens", "token_reservation"}
 PAUSES = {"CONTINUITY_REVIEW_RETURNED", "CONTINUITY_REVIEW_BLOCKED", "PAUSED", "STRATEGY_REASSESSMENT_REQUIRED", "DESIGN_REWORK_REQUIRED", "DESIGN_SCHEMA_REWORK_REQUIRED", "OPENING_REVIEW_REQUIRED",
-          "EDITING_RETURNED", "EDITING_BLOCKED", "NEXT_PLAN_BLOCKED"}
+          "EDITING_RETURNED", "EDITING_BLOCKED", "EDITION_REVISION_BLOCKED", "EDITION_HANDOFF_REQUIRED", "NEXT_PLAN_BLOCKED"}
 
 
 def private(path):
