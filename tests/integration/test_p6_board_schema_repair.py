@@ -148,3 +148,12 @@ def test_review_enum_reassessment_uses_original_contract_values():
     assert all(v in method for v in ("BLOCKER", "SUGGESTION", "QUESTION"))
     diag["schema_path"] = "properties/unknown_field/enum"
     assert board_format_method(node) is None
+
+
+def test_board_missing_identity_rebuilds_from_original_template_only():
+    from novel_factory.application.board_schema_repair import board_format_method
+    diag = {"keyword": "required", "location": "envelope", "schema_path": "required", "missing": ["task_id", "world_ref"]}
+    node = {"stage":"epistemic", "schema_repairs":[{"diagnostic":diag}]}
+    assert "task_id" in board_format_method(node)
+    diag["missing"] = ["invented"]
+    assert board_format_method(node) is None

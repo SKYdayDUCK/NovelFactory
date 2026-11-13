@@ -373,7 +373,11 @@ def _enroll(kernel, repo, gateway, owner, board, identity):
         assignment += "须改的具体问题标为 BLOCKER 或 CHANGE_REQUEST；每项 subject_ref 引用给定原稿的 draft_ref。可选的文学意见列为建议。"
     if stage == "facts":
         from .rolling_facts import assignment as fact_assignment
-        assignment = fact_assignment()
+        parent = board["nodes"][node["parents"][0]]
+        scene = kernel.artifact(repo, parent["scene_ref"], work, kind="SCENE_PLAN")["payload"]
+        scope = {"subject_ids": board["subject_ids"], "predicates": board["predicates"],
+                 "story_interval": scene["scene_contract"]["story_interval"]}
+        assignment = fact_assignment() + "\n可核对的本场标识与时段：" + json.dumps(scope, ensure_ascii=False)
         # Qualify the source of reconciliation obligations for this exact draft.
         refs.append(board["nodes"][node["parents"][0]]["scene_ref"])
         role, kind = "evidence_maintainer", "assertion_extract"

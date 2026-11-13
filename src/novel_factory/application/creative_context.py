@@ -182,6 +182,9 @@ def build_context_packet(binding, materials, editorial=None, joint=None, proposa
         name = {"BELIEF": "beliefs", "FACT": "facts", "HYPOTHESIS": "hypotheses"}[f["status"]]
         statement = _fact(f["statement"])
         creative.setdefault(name, []).append(statement)
+        if (task["role_id"], task["task_kind"]) == ("evidence_maintainer", "assertion_extract"):
+            structured.append({"value": {"statement": f["statement"], "status": f["status"],
+                                         "evidence_refs": f["evidence_refs"]}})
         for e in f["evidence_refs"]:
             require(fingerprint(e) in permitted, "VIEW_DENIED", "Fact evidence is outside the compiled cut")
             select(e, cut["plane"], "Source of a selected fixed-cut statement.", statement)

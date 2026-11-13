@@ -32,6 +32,20 @@ def board_format_method(node):
         return None
     last = repairs[-1]
     diag = last.get("diagnostic", {})
+    if diag.get("keyword") == "required" and diag.get("schema_path") == "required":
+        from .prompt_schema import inline_schema
+        contract = last.get("output_contract", {})
+        if diag.get("location") == "envelope":
+            allowed = inline_schema("AgentModelResponse", "agent")["required"]
+        elif diag.get("location") == "payload" and contract.get("version") == "agent" and contract.get("name") in {
+                "AgentReviewOutput", "AgentTextOutput"}:
+            allowed = inline_schema(contract["name"], "agent")["required"]
+        else:
+            return None
+        missing = diag.get("missing", [])
+        if missing and set(missing) <= set(allowed):
+            return ("先按当前模板逐项复制授权任务身份；审核或写作结果放到 payload。提交前核对 "
+                    + diag["location"] + " 层的必填键 " + json.dumps(allowed) + "。保留全部原始判断。")
     if node["stage"] == "draft" and diag.get("keyword") == "jsonSyntax":
         return ("继续本角色的写作任务。先完成正文，再作为 JSON 字符串写入 payload.text。"
                 "换行使用 JSON 换行转义，字符串中的双引号和反斜杠必须转义。仅返回一个完整 JSON 对象。"
@@ -164,7 +178,12 @@ def recover_fact_reading(kernel, repo, gateway, owner, board, identity):
         return False
     history = node.setdefault("fact_format_repairs", [])
     findings = {k: v for k, v in diagnostic.items() if k not in {"assertion_index", "start", "end"}}
-    plan = plan_repair("schema", findings, history)
+    # Counts from a different manuscript must not prematurely pause its reader.
+    same_draft = [h for h in history if h["source_draft_ref"] == source]
+    plan = plan_repair("schema", findings, same_draft)
+    if diagnostic["keyword"] == "missingSpeechOrBeliefBinding" and plan["decision"] != PAUSED:
+        plan["method"] = ("核对本项的说话或认知主体、时点与获准来源，按原文填写完整 knowledge_use。"
+                          "若不能建立本项认知依据，说明欠缺并标记为 UNCERTAIN 交核查；切勿删除实质发现。")
     plan = reflect_repair(kernel, repo, owner, wr, task["task_id"], evidence["attempt_id"],
                           evidence["output_ref"], plan, "ASSERTION_READING_FORMAT")
     source_input = kernel.artifact(repo, evidence["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]

@@ -40,6 +40,8 @@ def assignment():
         "按原文顺序引用，覆盖整场正文的每个非空白字符，包括标点。摘引须逐字复制对应正文，"
         "不可用省略号或摘要替代；可将连续同类描写合并为一段。有台词的段落区分说法与已证事实。"
         "只标识确有文本依据的非持久感官细节为 SURFACE_DETAIL。缺乏事实证据时标为 UNCERTAIN。"
+        "SPEECH_OR_BELIEF 需要完整 knowledge_use，区分有来源的知识、推测与外部发言。"
+        "若所需来源缺失，保留未决事实并说明缺少的证据，勿伪造。declared_delta_index 每项只可映射一次。"
         "对照材料的 required_event_refs 与 declared_important_deltas。已表现的事件引用对应 EventRef；"
         "写作方声明的重要变化用零基 declared_delta_index 对应。正文缺少所需事件或证据不足时如实标出。"
         "不要自行创造正式事件或更改世界。NEW_WORLD_EFFECT 必须有非空 proposed_command，按 TemplateCommand 中一个正式模板填写 template_id 和 args。不得自编模板名、参数键或实体编号。需要正式变化但授权材料不足以构造命令，应如实标记 UNCERTAIN 交给核查，不能降格为表面描写。"
@@ -171,6 +173,8 @@ def extract_assertions(body, value, key, *, declared_count=None):
                          span=span_for(body, begin, end))
         if diagnostic := contract_diagnostic("AssertionCandidate", assertion, "narrative"):
             raise ReadingFormatError({**where, **diagnostic})
+        if assertion["classification"] == "SPEECH_OR_BELIEF" and assertion["knowledge_use"] is None:
+            raise ReadingFormatError({**where, "keyword": "missingSpeechOrBeliefBinding"})
         delta = assertion["declared_delta_index"]
         if delta is not None:
             if delta in declared or (declared_count is not None and delta >= declared_count):

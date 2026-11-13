@@ -605,3 +605,14 @@ def test_numbered_fact_spans_preserve_coverage_and_native_contract():
     for bad in ([0], [True], ids[1:], ids[::-1], [1, 1], [1, 3], [999]):
         with pytest.raises(ReadingFormatError):
             parse(bad)
+
+
+def test_fact_reader_owns_missing_knowledge_binding():
+    from novel_factory.application.rolling_facts import extract_assertions, ReadingFormatError
+    body = "工程示例。"
+    claim = {"passage_ids": [1], "classification": "SPEECH_OR_BELIEF", "summary": "工程样例", "event_ref": None,
+             "world_check": None, "knowledge_use": None, "proposed_command": None, "disclosure_id": None,
+             "declared_delta_index": None}
+    with pytest.raises(ReadingFormatError) as missing:
+        extract_assertions(body, json.dumps({"assertions": [claim]}), "test")
+    assert missing.value.diagnostic["keyword"] == "missingSpeechOrBeliefBinding"
