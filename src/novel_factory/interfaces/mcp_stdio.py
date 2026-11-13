@@ -113,11 +113,11 @@ def make_server(runtime, *, ceiling=None, admission=None, resolve=None, run=None
                              {"ceiling": ceiling, "request_id": server.request_context.request_id,
                               "transport": "mcp"}, kind=kind)
         except DomainError as error:
-            if error.retryable and error.code in {"BACKPRESSURE", "RATE_LIMITED", "POOL_TIMEOUT"}:
-                return types.CallToolResult(isError=True,
-                    content=[types.TextContent(type="text", text=error.code)],
-                    structuredContent={"error": {"code": error.code, "retryable": True, "retry_after_ms": 1000}})
-            return tool_error(error.code)
+            result = tool_error(error.code)
+            if resolve is not None and error.retryable and error.code in {"BACKPRESSURE", "RATE_LIMITED", "POOL_TIMEOUT"}:
+                # The fixed stdio binding retains its original code-only wire contract.
+                result.structuredContent["error"].update(retryable=True, retry_after_ms=1000)
+            return result
 
     return server
 

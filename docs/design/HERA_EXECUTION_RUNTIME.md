@@ -28,3 +28,5 @@
 连接预算的配置总数由 API 池、Worker 池、维护预留、每个活动 stdio 进程两条连接、每个 compute 子进程一条连接、以及 LISTEN 长连接组成。分别设置 NF_ACTIVE_STDIO_PROCESSES、NF_COMPUTE_CHILD_PROCESSES、NF_LISTEN_CONNECTIONS 并在部署时计入全部进程。数据库角色可设置统一的 CONNECTION LIMIT 作为最终硬上限。各个进程不能自行发现其他机器的进程数。多副本测量使用固定部署清单，具体预算随报告保存。
 
 [预登记指标](../../reports/performance/hera/BASELINE.md) · [验收矩阵](../../reports/performance/hera/FINAL_ACCEPTANCE.md)
+
+用 `python -m scripts.workflow_projection check WORK_UUID BRANCH_UUID` 在同一 PostgreSQL 语句快照中对比投影和权威任务总数。已启用且一致时输出 OK，未启用时输出 DISABLED，不一致时输出 MISMATCH 并以 1 退出。发现不一致可执行同一命令的 rebuild 或 disable。计数格式损坏时读取回退到原任务统计；若任务状态变化无法为损坏的计数应用增减，0026 迁移会移除受影响的派生行，让正式事务正常提交。格式仍合法但数值不实的计数需要上述核对命令识别。

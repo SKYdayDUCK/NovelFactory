@@ -35,7 +35,7 @@ def load_roster(path):
 
 class RemoteTools:
     def __init__(self, kernel, bindings, authenticate, execute, settings, coalescer):
-        self.bindings = dict(bindings)
+        self.bindings = bindings
         self.kernel = kernel
         self.authenticate = authenticate
         self.execute = execute

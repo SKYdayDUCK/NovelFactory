@@ -16,3 +16,20 @@ Replay `python -m benchmarks.hera_model_isolation --output /tmp/model.json.gz` a
 ## Two-work, 2,000-identity workflow
 
 The 65e5afe candidate ran `python -m benchmarks.p59_workflow_load --agents 2000 --output /tmp/workflow.json` on two books and 2,000 independently granted principals with a shared eight-connection pool and two model slots. It registered and metered real PostgreSQL tasks, call attempts, wait DAGs and results. Both books reached all expected dispositions. Exactly 399 barriers woke, 1,958 tasks stored results, two prerequisites were accepted, and twenty cancelled before send. Twenty injected provider-response losses paused with UNKNOWN. No incorrect task, leftover slot or changed world head was observed. The 1,980 in-process provider calls peaked at two concurrent. PostgreSQL peak checkout was four; client/service peak RSS was 88,464 KiB. Provisioning and drain took 914.74 s together, including 787.33 s for drain (2.489 correct successful results/s). The measured two-book task outcomes reflect fault injection by input index, not a comparative fairness gain. This run sends zero ingress requests and does not measure a 2,000-connection API. [Every task and ledger outcome](raw/workflow_2000.json.gz)
+
+## Follow-up with one or two concurrent index leases
+
+Two worker threads competed under the shared four-connection pool in every run. Each arm offered 100 status reads and 100 durable world-index builds. The one-client tier used REST; the ten-client tier used five MCP SDK sessions and five REST clients. Index workers waited on capacity and resumed until every source event had exactly one index receipt. The index records and caller timings share one monotonic clock. The quiet reference ordering above is a different experiment.
+
+| Clients | Index slots | Reads/s | Read P95 ms | Read P99 ms | Indexes/s during reads | Indexes/s through drain | Indexes finished during reads |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 2 | 11.23 | 140.50 | 240.87 | 11.23 | 13.06 | 100 |
+| 1 | 1 | 13.11 | 99.84 | 127.44 | 11.41 | 11.73 | 87 |
+| 1 | 1 | 11.34 | 152.67 | 307.59 | 10.21 | 10.23 | 90 |
+| 1 | 2 | 10.71 | 130.52 | 151.41 | 10.71 | 12.04 | 100 |
+| 10 | 2 | 27.07 | 553.28 | 630.88 | 8.93 | 11.80 | 33 |
+| 10 | 1 | 30.47 | 468.98 | 515.94 | 5.79 | 9.85 | 19 |
+| 10 | 1 | 26.22 | 594.25 | 653.74 | 4.72 | 7.59 | 18 |
+| 10 | 2 | 25.27 | 490.91 | 576.60 | 9.35 | 12.18 | 37 |
+
+All 800 reads and 800 index builds were verified. One index slot improved low-load read goodput in both reciprocal pairs, but the second pair more than doubled P99. In the first ten-client pair, reads rose about 13% while concurrent index throughput fell about 35%. The candidate fails the predeclared joint throughput/tail gate and is not promoted. Operators can still set a class cap when they explicitly prefer reserved compute headroom. Benchmark source 5795961, execution checkout 609172a as recorded in the raw file. Reproduce with `python -m benchmarks.hera_db_isolation --slot-comparison --output out.json.gz`. [Per-read and per-index results](raw/index_slots.json.gz)

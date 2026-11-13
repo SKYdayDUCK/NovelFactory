@@ -213,6 +213,9 @@ async def _finish_short_call(function, *args):
 def create_app(kernel, *, query_service=None, settings: HttpSettings | None = None,
                connection_budget: ConnectionBudget | None = None, model_adapters=None, mcp_bindings=None) -> FastAPI:
     settings = settings or HttpSettings()
+    # Both wire adapters use the same startup snapshot of operator-provisioned ceilings.
+    if mcp_bindings is not None:
+        mcp_bindings = dict(mcp_bindings)
     if (settings.max_body_bytes < 1024 or settings.max_inflight_requests < 1
             or settings.body_read_timeout_seconds <= 0 or settings.max_body_chunks < 1):
         raise ValueError("invalid HTTP request budget")

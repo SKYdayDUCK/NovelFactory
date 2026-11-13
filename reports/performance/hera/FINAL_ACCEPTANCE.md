@@ -1,0 +1,34 @@
+# HERA 候选验收
+
+**发布判定为 Draft，性能验收未通过。** 在真实 PostgreSQL 17.11、MCP SDK 1.29.0、REST、stdio、Redis 和模拟 Provider 上核实了若干业务能力。普通全量进度读取、同预算的千角色突发完成时间及重索引下的读隔离均未达到开发前冻结的目标。历史 AT-30 保留每秒 950 次正确完成的原门槛和 NOT_MET 记录。[预登记](BASELINE.md) · [历史报告](../p59_runtime/RESULTS.md) · [Issue #13](https://github.com/SKYdayDUCK/NovelFactory/issues/13)
+
+## 二十项验收
+
+| # | 判定和业务范围 | 核对数据 |
+|---:|---|---|
+| 1 | **共享任务和状态。** REST、stdio 与远程 MCP 调用同一个 TaskService。带模型的受信委托通过同一个 Delegations 事务建立任务、预算预留关联、Supervisor 登记和回执。 | [入口契约](../../../docs/design/HERA_UNIFIED_MCP_HTTP.md) · [跨协议测试](../../../tests/service/test_hera_mixed_ingress.py) |
+| 2 | **HTTP → MCP 可查询、可取消。** 有独立分支恢复授权的 MCP 管理者还可重查并推动工作流；普通任务持有者的查询权限不会赋予项目恢复权。 | [兼容性](COMPATIBILITY.md) · [双协议恢复与授权](../../../tests/service/test_hera_mixed_ingress.py) |
+| 3 | **MCP → HTTP 可查询、可恢复。** 同一 Task ID 在 API 上保留原来的状态与代际。指定终态回执的项目恢复还要复核安装、分支及当前权限。 | [接口](../../../docs/design/HERA_UNIFIED_MCP_HTTP.md) · [事件桥](../../../docs/design/HERA_EVENT_BRIDGE.md) |
+| 4 | **同键、同正文、同身份只产生一次业务效果。** 两种入口竞态和连接丢失后重试取回原回执，更改内容或跨权重放被拒绝。对已提交但结局未知的模型调用保留对账状态。 | [持久接纳](DURABLE_QUEUE.md) · [故障与回放](FAILURE_RECOVERY.md) |
+| 5 | **减少了拒绝，时间目标未达。** 1000 个独立绑定的完整角色读取四轮各 1000/1000，零 429。共享两个连接槽的两轮为 48.19 和 52.75 秒，历史 Host 排队为 35.26 秒。500 MCP + 500 REST 另测，普通命令和预授权模型委托各取得 1000 份正确持久回执。 | [角色读取、提交和分母](MIXED_INGRESS.md) |
+| 6 | **断线和服务重启后可继续执行。** 所有客户端退出并销毁原服务与连接池后，新 Supervisor 在两个槽上交付 1000/1000 个 ACCEPTED，各有一个 CURRENT 结果和一个成功账本记录，重启后历时 534.06 秒。两作品预留余额均为零。 | [逐项回执及 PostgreSQL 终态](raw/supervised-1000-final.json.gz) |
+| 7 | **单项状态和完整进度未达 3 倍或 P95 <100 ms。** 单项状态每次节省两次 SQL，但在多种协议配比上吞吐方向不一致。5000 个任务的分支聚合进度，吞吐提高 14.2% / 9.3%，P95 为 241 / 231 ms。 | [Fast Path](FAST_PATH.md) |
+| 8 | **模型等待时可查询，尾延迟未全部通过。** 两次各有两个未决 SENT 模型调用；100 次混合查询/臂，含静默对照的 400 次全部正确。吞吐变化 +4.31% / −6.74%，P99 上升 11.99% / 24.84%。此项压测读的是任务状态。 | [模型与索引隔离](RESOURCE_ISOLATION.md) |
+| 9 | **模型等待释放数据库连接；重数据库竞争仍在。** 两个模型正在等待时测到零个已借出连接。双索引 Worker 运行期间，快速查询吞吐下降 45.43% / 36.30%。把索引槽减为一个虽改善读吞吐，却牺牲索引吞吐及一组尾延迟。 | [并发读和索引原始记录](RESOURCE_ISOLATION.md) · [配额边界](../../../docs/design/HERA_RESOURCE_SCHEDULING.md) |
+| 10 | **只在小范围省 SQL，CPU 没有稳定收益。** 单项融合查询纯 HTTP 为 5→3，纯 MCP 为 18→16。热点请求合并每个 36 请求臂省 10 次 SQL（342→332），一组 CPU 从 0.964 升到 1.081 秒，另一组从 1.030 降到 0.962 秒。它们是不同功能。 | [SQL、CPU、命中和 P99](CACHE_BATCHING.md) · [快读](FAST_PATH.md) |
+| 11 | **同权限已到达的多个状态查询适合集合化。** 预登记高负载下，自适应分组的每秒正确任务状态数为相邻单查的 6.16 / 4.96 倍，1000 项从 1000 次降到 140 次实际调用。固定窗口低负载有一组 P99 从 406 增至 526 ms。Workshop 就绪消息 128 条成组时，两组时间比为 6.53 / 5.91 倍。 | [批次、填充、逐请求记录](STATUS_BATCHES.md) · [Workshop 交付](FAILURE_RECOVERY.md) |
+| 12 | **两作品 2000 个独立身份按预期推进。** 399 个依赖唤醒，1958 个 RESULT_STORED、2 个 ACCEPTED，另有 20 个按计划取消、20 个因注入的 UNKNOWN 暂停。总排空 787.33 秒，模型并发峰值 2，剩余活动槽 0。 | [2000 项逐项核对](raw/workflow_2000.json.gz) |
+| 13 | **5000 个逻辑任务的传输、内存和持久化均有单独数据。** 20 个活动客户端在 197.75 秒内创建并复核了 5000 个 READY，客户端与服务合计峰值 RSS 121,988 KiB。独立深度对照的数据库分别增长 12.26 / 14.05 MiB，差约 377 字节/任务，不含 WAL。已启用组在深度 5000 的创建提交中位数为 36.80 ms，未启用组为 27.83 ms。 | [混合创建](MIXED_INGRESS.md) · [存储、内存、查询计划](ADMISSION_DEPTH.md) |
+| 14 | **保留静态默认。** 两组固定 / 自适应 A/B/B/A 共验证 192 个真实索引事件；自适应在四个相邻比较都损失吞吐。既有 WFQ/DRR 的失败记录保留；HERA 没有新增支持全局切换的 WFQ/DRR 对照。 | [弹性结果](ELASTIC_SCALING.md) · [历史参考](BASELINE.md) |
+| 15 | **双副本在已饱和的混合读取负载上有效。** 固定总共四个 PG 连接、两个业务槽，2048/2048 正确，轮询相邻两组获益 74.1% / 39.8%。两候选时 least-outstanding 与不放回 P2C 比较同一对副本，数据不能区分二者优劣；新增进程有内存成本。 | [多副本](LOAD_BALANCING.md) |
+| 16 | **两部作品均获服务，公平性提升尚无对照依据。** 已获领取的作品 0 / 1 分别有 1000 / 980 项；创建到领取的中位数 464.55 / 451.38 秒，P95 为 766.11 / 754.77 秒。等待唤醒分别 199 / 200 个。故障按输入序号注入，分布不均。 | [逐作品原始记录](raw/workflow_2000.json.gz) · [既有组织/作品权重回归](../../../tests/integration/test_p59_weighted_admission.py) |
+| 17 | **验证了故障后的恢复边界。** PG 在提交前断连时，任务、命令、准入、Outbox 均无残留；同键重试只提交一次。Redis 重复提示后 72 条提示得到 40 份唯一 SQL 回执，重放新增零份；不确定的 Provider 结果等待对账。 | [PG 断连](DURABLE_QUEUE.md) · [消息、Worker 和账本](FAILURE_RECOVERY.md) |
+| 18 | **所测权限和版本边界通过。** 覆盖实体归属、角色工具、角色认知、固定 WorldRef、撤权、分支恢复与代际、幂等限额和预算。按请求复核授权。投影可核查和重建，格式损坏可回退。 | [独立代码复核](../../code_review/hera/REVIEW.md) · [故障与回归](FAILURE_RECOVERY.md) |
+| 19 | **保留原 TaskService、Supervisor、世界版本、角色工具、账本和 Workshop。** 增加显式的同域批读、按授权的订阅唤醒及可选的短事务准入。没有证据支持替换全部单查、全局响应缓存、全局微批、全量动态扩容或自动部署多副本。 | [兼容与回退](COMPATIBILITY.md) · [架构及开关](../../../docs/design/HERA_EXECUTION_RUNTIME.md) |
+| 20 | **共用 REST 生命周期比当前 main 快 23.7% / 15.3%。** 两个干净版本、相同四连接的 A/B/B/A，1792/1792 次请求、256/256 个完整生命周期正确。包含创建、查询、重试、领取、取消和终态；两版本的远程 MCP、模型、Workshop 合同不全相同，不能从这些结果推出一个全系统百分比。 | [同负载对照和全部回执](MAIN_REST_COMPARISON.md) |
+
+## 发布范围
+
+全局数据库连接数的配置核算必须包括所有 API、执行进程、stdio 子进程、维护和 LISTEN。全局任务准入与模型/索引槽由 PostgreSQL 裁定。认证速率和 HTTP 内存队列按进程限制；新建副本需要重新核对部署连接清单。DB_READ_HEAVY、DB_WRITE、MAINTENANCE、NOTIFICATION 各有现有的处理入口和局部限额，尚缺统一的跨进程分类执行预留。项目身份延用既有 work/branch 和 task/generation/attempt，新 ID 适配没有覆盖所有历史工作流。多作品读写、正式世界接受、ContextBundle、历史/冻结查询及租约存在各自的回归；同一组固定权重的混合负载没有把全部十四类操作都放在一起。5000 个逻辑任务的验证截至 PG READY，没有对该组逐项执行模型。
+
+[源码与阶段提交](PROVENANCE.md) · [独立审查](../../code_review/hera/REVIEW.md) · [Draft PR #36](https://github.com/SKYdayDUCK/NovelFactory/pull/36)

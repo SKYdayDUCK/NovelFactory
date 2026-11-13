@@ -32,3 +32,16 @@ A second, separate 1,000-client burst used 1,000 independently provisioned insta
 | Drain starting at supervisor restart, through verified delivery | 534.06 s |
 
 The simulated provider returned known, zero-cost usage. This scenario exercised actual task claim, fixed context, attempt accounting, result storage and acceptance. The older 35.26 s role-read burst has no model execution and uses a different timing interval. [All 1,000 responses and corresponding final PostgreSQL rows](raw/supervised-1000-final.json.gz) · [Driver](../../../benchmarks/hera_delegated_burst.py)
+
+## Same role-read contract as the historical 1,000-client burst
+
+A real `nf_task_get` response had to equal its complete role-specific reference on every client. One Uvicorn process and the load driver shared a Python process, using a physical pool of two PostgreSQL connections, zero overflow, two works, 1,000 unique grants and 1,000 initialized remote SDK sessions. The timer opens after all initializations. The calls then start together with no client-side two-slot limiter. Every arm returned 1,000 correct responses, zero 429s, zero model attempts and unchanged world heads. A preliminary split-pool run drained in 51.29 s and returned 554 responses within 30 seconds. [Preliminary raw responses](raw/actor-1000.json.gz)
+
+| Mode in execution order | Last complete response (s) | Completed in 30 s | P50 / P95 / P99 (s) |
+|---|---:|---:|---|
+| A1, one business lane + one authentication lane | 71.16 | 376 | 37.22 / 67.60 / 70.54 |
+| B1, two jointly bounded lanes | 48.19 | 572 | 26.49 / 45.91 / 47.85 |
+| B2, two jointly bounded lanes | 52.75 | 587 | 24.87 / 50.37 / 52.32 |
+| A2, one business lane + one authentication lane | 68.58 | 393 | 36.76 / 65.53 / 68.01 |
+
+Sharing the two slots reduced total drain time by 32.3% and 23.1% against the adjacent split arms. The historical Host queue finished the same operation in 35.26 s with 860 correct responses in 30 s; neither candidate arm met that target here. Shared CPU load, client placement and software versions across historical and contemporary measurements can differ. On the current server a successful `nf_task_get` includes bound-tool verification and audit. Keep these measurements distinct from fast task metadata and from asynchronous model submission. The pool allocation remains optional through `NF_HERA_SHARE_AUTH_SLOTS`. No fleet-level Host limiter was applied to the four arms. To replay from frozen `4f809f3`, run `python -m benchmarks.hera_actor_burst --clients 1000 --order ABBA --output /tmp/actor.json.gz` against a fresh disposable PG17 cluster. [Preregistered comparison](ACTOR_BURST_PLAN.md) · [A1](raw/actor-1000-0A.json.gz) · [B1](raw/actor-1000-1B.json.gz) · [B2](raw/actor-1000-2B.json.gz) · [A2](raw/actor-1000-3A.json.gz)
