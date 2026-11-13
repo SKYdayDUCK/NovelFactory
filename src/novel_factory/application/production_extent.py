@@ -79,7 +79,7 @@ def check_length(length, characters, chapters):
 
 
 def _real_candidate(delivery, repo, task):
-    audit, candidate = delivery.audited_candidate(repo, task)
+    audit, candidate = delivery.audited_candidate(repo, task, production_accounting=True)
     require(audit["execution_kind"] in {"REAL_EXTERNAL", "REAL_HOST"} and audit["provider_receipt"]
             and not is_fixture_configuration(audit["model_configuration"])
             and audit["model_configuration"].get("model") and audit["role_id"] == task["role_id"]
@@ -87,8 +87,8 @@ def _real_candidate(delivery, repo, task):
             "INVALID_EVIDENCE", "Production output lacks a real native provider receipt")
     call = repo.one("call_attempts", {"attempt_id": audit["attempt_id"], "task_id": task["task_id"],
                                       "generation": task["generation"]})
-    require(call and call["state"] == "SUCCEEDED" and call["provider_receipt"] == audit["provider_receipt"],
-            "CALL_RECONCILIATION_REQUIRED", "Settle the production attempt before final submission")
+    require(call and call["provider_receipt"] == audit["provider_receipt"],
+            "CALL_RECONCILIATION_REQUIRED", "The production attempt has a different supplier receipt")
     return audit, candidate
 
 

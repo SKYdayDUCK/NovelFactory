@@ -212,9 +212,15 @@ def _register(kernel, gateway, owner, *, world_ref, series_id, volume_id, chapte
         if active:
             previous_tasks = [record["task_id"] for n in active["nodes"].values() for record in [n, *n.get("history", [])]
                               if "task_id" in record]
-            require(not previous_tasks or not repo.one("call_attempts", {"task_id": previous_tasks,
-                    "state": ["PREPARED", "SENT", "UNKNOWN"]}), "CALL_RECONCILIATION_REQUIRED",
-                    "Reconcile outstanding attempts before replacing this production allowance")
+            if previous_tasks:
+                for call in repo.many("call_attempts", {"task_id": previous_tasks,
+                                                        "state": ["PREPARED", "SENT", "UNKNOWN"]}):
+                    task = repo.one("tasks", {"task_id": call["task_id"]})
+                    require(call["state"] == "UNKNOWN" and task["state"] == "ACCEPTED"
+                            and call["generation"] == task["generation"]
+                            and call["call_key"] == "supervised-candidate", "CALL_RECONCILIATION_REQUIRED",
+                            "Reconcile unresolved dispatches before replacing this production allowance")
+                    CandidateDelivery(kernel, gateway).audited_candidate(repo, task, production_accounting=True)
         require(kernel.head(repo, work, branch) == wr and repo.one("budgets", {"work_id": work, "budget_id": budget_id}),
                 "VIEW_DENIED", "Current work head and a work-owned budget are required")
         plan_ref = _selected(repo, work, PlanningService.selection_key(volume_id))
@@ -425,11 +431,8 @@ def _deliver(kernel, repo, gateway, board, node, task):
 
     owner = _current_owner(kernel, repo, board)
     check_task_dependencies(repo, task["task_id"], task["generation"])
-    evidence, candidate = CandidateDelivery(kernel, gateway).audited_candidate(repo, task)
-    if board.get("rolling"):
-        call = repo.one("call_attempts", {"attempt_id": evidence["attempt_id"]})
-        require(call and call["state"] == "SUCCEEDED", "CALL_RECONCILIATION_REQUIRED",
-                "A rolling candidate needs its settled supervised attempt")
+    evidence, candidate = CandidateDelivery(kernel, gateway).audited_candidate(
+        repo, task, production_accounting=bool(board.get("rolling")))
     key = "production-result:" + task["task_id"]
     if node["stage"] == "draft":
         actor = Principal(task["grant_id"], task["principal_id"])

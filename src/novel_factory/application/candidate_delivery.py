@@ -71,7 +71,7 @@ class CandidateDelivery:
             repo.outbox(f"supervisor.{self.route}.delivery", "task", task_id, result, key)
             return result
 
-    def audited_candidate(self, repo, task):
+    def audited_candidate(self, repo, task, *, production_accounting=False):
         task_id, gen = task["task_id"], task["generation"]
         call = repo.one(
             "call_attempts", {"task_id": task_id, "generation": gen, "call_key": "supervised-candidate"}
@@ -111,7 +111,9 @@ class CandidateDelivery:
             "REVIEW_REQUIRED",
             "A model-reported unresolved question needs a decision",
         )
-        candidate = self.kernel.artifact(repo, evidence["output_ref"], task["work_id"], kind="AGENT_CANDIDATE")[
-            "payload"
-        ]
-        return evidence, candidate
+        candidate = self.kernel.artifact(repo, evidence["output_ref"], task["work_id"], kind="AGENT_CANDIDATE")
+        if production_accounting and call["state"] != "SUCCEEDED":
+            from .postpaid_delivery import require_postpaid_delivery
+
+            require_postpaid_delivery(self.kernel, repo, task, call, audit, response, candidate)
+        return evidence, candidate["payload"]
