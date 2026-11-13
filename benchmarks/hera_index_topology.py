@@ -219,13 +219,15 @@ def run(url, objects, roster, records, scope, mode, count):
     try:
         assert host.poll(60)
         base = host.recv()
+        client_before = process_info()
         read = asyncio.run(measure([(base, host)], records, "single"))
+        read["client_process"] = {"before": client_before, "after": process_info()}
         assert read["verified"] == read["offered"] == 128
         # hera_routing originally reports four product connections; use this trial's actual bounds.
         read["pool_budget_total"] = 6
         assert read["operation_budget_total"] == read["metrics"][0]["operation"]["capacity"] == 2
         assert read["auth_budget_total"] == read["metrics"][0]["auth"]["capacity"] == 2
-        end = read["metrics"][0]["epoch"] + read["seconds"]
+        end = read["clock_origin"] + read["seconds"]
         if mode == "process":
             assert idx_chan.poll(180)
             worker = idx_chan.recv()

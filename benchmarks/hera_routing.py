@@ -170,6 +170,7 @@ async def measure(servers, records, mode):
     duration = max(r[-1] for r in raw)
     ok = sum(r[7] for r in raw)
     return {"mode": mode, "clients": len(records), "offered": len(raw), "verified": ok, "seconds": duration,
+            "clock_origin": epoch,
             "mcp_sessions": sum(protocols)*len(servers), "peak_inflight": peak, "goodput_s": ok/duration,
             "pool_budget_total": 4, "operation_budget_total": 2, "auth_budget_total": 2,
             "service_processes": len(servers), "client_processes": 1, "metrics": metrics,
