@@ -1,11 +1,11 @@
 """Recover a returned, rejected board candidate without trusting its story or identity."""
 import json
 
+from ..infrastructure.wire_receipts import read_receipt
 from .idea_repair import UnparsedDesign, returned_design
 from .kernel import require
 from .quality_memory import PAUSED, plan_repair, reflect_repair
 from .semantic_dependencies import check_task_dependencies
-from ..infrastructure.wire_receipts import read_receipt
 
 
 def verify_board_transport(kernel, audit, raw):
@@ -31,6 +31,8 @@ def board_format_method(node):
     if not repairs:
         return None
     last = repairs[-1]
+    if last.get("actual_fix") or (node.get("task_id") and last.get("task_id") != node["task_id"]):
+        return None
     diag = last.get("diagnostic", {})
     if diag.get("keyword") == "required" and diag.get("schema_path") == "required":
         from .prompt_schema import inline_schema
@@ -137,7 +139,41 @@ def recover_board_node(kernel, repo, gateway, owner, board, identity, task):
     node.update(state="PENDING", reason="SCHEMA_REPAIR_REQUESTED")
 
 
-def recover_fact_reading(kernel, repo, gateway, owner, board, identity):
+def fact_format_method(diagnostic):
+    """A bounded alternative representation; never invent missing story evidence."""
+    keyword = diagnostic.get("keyword")
+    if keyword in {"uniqueExactQuote", "contiguousPassageIds", "unreadPassage"}:
+        return ("本次更换定位方法：只用已投递材料的整数 passage_ids，不使用 quote。"
+                "每项段号必须连续，按正文顺序列出并完整覆盖从首段到末段；不要新增或猜测段号。"
+                "可合并连续同类段落，保留全部实质判断和标点覆盖；不手填 assertion_id 或 span。")
+    if keyword == "missingSpeechOrBeliefBinding":
+        from .prompt_schema import prompt_schema
+        schema = json.loads(prompt_schema("AssertionCandidate", "narrative"))["$defs"]["KnowledgeUse"]
+        return ("本次先核对每一项 classification 与 knowledge_use，再输出其余字段。"
+                "凡判为 SPEECH_OR_BELIEF，knowledge_use 必须是满足下列 Schema 的完整对象，不能填 null。"
+                "只使用任务已授权的主体、时点及来源标识；没有依据则保留该原文与判断为 UNCERTAIN，"
+                "在 summary 中说明缺失依据，不伪造来源，也不删除这一项。完整覆盖正文。"
+                "knowledge_use Schema：" + json.dumps(schema, ensure_ascii=False, separators=(",", ":")))
+    return None
+
+
+def resume_fact_reading_format(kernel, repo, gateway, owner, board, identity):
+    node = board["nodes"][identity]
+    history = node.get("fact_format_repairs") or []
+    if (node["stage"] != "facts" or node["state"] != "STOPPED" or node.get("reason") != PAUSED
+            or not history or history[-1]["decision"] != PAUSED
+            or history[-1]["task_id"] != node.get("task_id")):
+        return False
+    last = history[-1]
+    if not fact_format_method(last["diagnostic"]) or any(
+        row.get("reassessment") and row["signature"] == last["signature"]
+        and row["source_draft_ref"] == last["source_draft_ref"] for row in history
+    ):
+        return False
+    return recover_fact_reading(kernel, repo, gateway, owner, board, identity, reassess=True)
+
+
+def recover_fact_reading(kernel, repo, gateway, owner, board, identity, *, reassess=False):
     """Reproduce an inner-format failure on the same authorized text before requesting another reading."""
     from .authorization import Principal
     from .candidate_delivery import CandidateDelivery
@@ -181,13 +217,24 @@ def recover_fact_reading(kernel, repo, gateway, owner, board, identity):
     # Counts from a different manuscript must not prematurely pause its reader.
     same_draft = [h for h in history if h["source_draft_ref"] == source]
     plan = plan_repair("schema", findings, same_draft)
-    if diagnostic["keyword"] == "missingSpeechOrBeliefBinding" and plan["decision"] != PAUSED:
+    if reassess:
+        last = same_draft[-1]
+        require(plan["decision"] == PAUSED and last["task_id"] == task["task_id"]
+                and last["generation"] == task["generation"] and last["signature"] == plan["signature"]
+                and last["candidate_ref"] == evidence["output_ref"],
+                "STALE_GENERATION", "Fact format decision no longer binds the returned reading")
+        method = fact_format_method(diagnostic)
+        require(method is not None, "INVALID_ARGUMENT", "No supported alternate fact representation")
+        plan.update(decision="CHANGED_STRATEGY", strategy_version=2, method=method)
+    if diagnostic["keyword"] == "missingSpeechOrBeliefBinding" and plan["decision"] != PAUSED and not reassess:
         plan["method"] = ("核对本项的说话或认知主体、时点与获准来源，按原文填写完整 knowledge_use。"
                           "若不能建立本项认知依据，说明欠缺并标记为 UNCERTAIN 交核查；切勿删除实质发现。")
     plan = reflect_repair(kernel, repo, owner, wr, task["task_id"], evidence["attempt_id"],
-                          evidence["output_ref"], plan, "ASSERTION_READING_FORMAT")
+                          evidence["output_ref"], plan,
+                          "ASSERTION_READING_FORMAT_REASSESSMENT" if reassess else "ASSERTION_READING_FORMAT")
     source_input = kernel.artifact(repo, evidence["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]
-    history.append({**plan, "diagnostic": diagnostic, "task_id": task["task_id"], "generation": task["generation"],
+    history.append({**plan, **({"reassessment": plan} if reassess else {}),
+                    "diagnostic": diagnostic, "task_id": task["task_id"], "generation": task["generation"],
                     "attempt_id": evidence["attempt_id"], "source_draft_ref": source,
                     "candidate_ref": evidence["output_ref"],
                     **{k: source_input[k] for k in ("runtime_sha256", "model_config_sha256", "output_contract")}})
@@ -202,6 +249,8 @@ def recover_fact_reading(kernel, repo, gateway, owner, board, identity):
 
 def record_contract_recovery(node, task, audit, output_ref):
     # Technical recovery can succeed even when a later editorial/extent check requests revision.
+    if node.get("active_format_repair", {}).get("history") == "fact_format_repairs":
+        return
     history = node.get("schema_repairs")
     if history and "actual_fix" not in history[-1]:
         history[-1].update(actual_fix=output_ref, corrected_task_id=task["task_id"],

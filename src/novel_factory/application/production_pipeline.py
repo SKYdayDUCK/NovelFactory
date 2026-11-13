@@ -15,8 +15,8 @@ from novel_factory.application.kernel import require
 from novel_factory.application.narrative import NarrativeService
 from novel_factory.application.planning import PlanningService
 from novel_factory.application.release import ReleaseService
-from novel_factory.application.scene_revision import editorial_blockers, revise_scene
 from novel_factory.application.runtime_tasks import RuntimeTaskService
+from novel_factory.application.scene_revision import editorial_blockers, revise_scene
 from novel_factory.application.volume_successor import _selected
 from novel_factory.contracts.registry import validate_contract
 from novel_factory.domain.canonical import fingerprint
@@ -416,6 +416,10 @@ def _enroll(kernel, repo, gateway, owner, board, identity):
         currency=repo.one("budgets", {"work_id": work, "budget_id": board["budget_id"]})["currency"],
         queue_state="READY", lease_seconds=min(600, seconds), deadline_seconds=seconds)
     if repair:
+        node["active_format_repair"] = {
+            "history": "fact_format_repairs" if stage == "facts" and node.get("reason") == "FACT_FORMAT_REPAIR_REQUESTED" else "schema_repairs",
+            "source_task_id": repair["task_id"],
+        }
         frozen = kernel.artifact(repo, task.agent_input["input_ref"], work, kind="AGENT_INPUT")["payload"]
         require(all(frozen[k] == repair[k] for k in ("runtime_sha256", "model_config_sha256", "output_contract")),
                 "TASK_REBIND_REQUIRED", "Technical repair cannot silently change the role, model or output contract")
@@ -482,8 +486,9 @@ def prepare_materials(kernel, task, config):
 
 
 def _deliver(kernel, repo, gateway, board, node, task):
-    from .board_schema_repair import record_contract_recovery
     from novel_factory.application.semantic_dependencies import check_task_dependencies
+
+    from .board_schema_repair import record_contract_recovery
 
     owner = _current_owner(kernel, repo, board)
     check_task_dependencies(repo, task["task_id"], task["generation"])
@@ -706,11 +711,12 @@ def advance_pipeline(kernel, gateway, controller, work, branch):
                 return {"status": status, "node_id": revised, "board_ref": _save(bound, repo, controller, board)}
         for identity, node in nodes.items():
             if board.get("production_mode") == "quality" and not expired and node.get("reason") == "STRATEGY_REASSESSMENT_REQUIRED":
+                from .board_schema_repair import resume_fact_reading_format, resume_review_format
                 from .scene_revision import resume_extent_revision
-                from .board_schema_repair import resume_review_format
                 owner = _current_owner(bound, repo, board)
                 if (resume_extent_revision(bound, repo, owner, board, identity)
-                        or resume_review_format(bound, repo, owner, board, identity)):
+                        or resume_review_format(bound, repo, owner, board, identity)
+                        or resume_fact_reading_format(bound, repo, gateway, owner, board, identity)):
                     break
             if (board.get("production_mode") == "quality" and not expired and node["stage"] == "facts"
                     and node["state"] == "STOPPED" and node.get("task_id") and not node.get("output_ref")
