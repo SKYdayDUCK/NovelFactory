@@ -8,6 +8,7 @@ from uuid import UUID, uuid5
 
 from ..domain.canonical import fingerprint
 from .kernel import require
+from .prompt_schema import validated_payload
 
 
 def _check(condition):
@@ -18,8 +19,106 @@ def _check(condition):
     )
 
 
-def require_postpaid_delivery(kernel, repo, task, call, audit_row, response_row, candidate_row):
+def require_postpaid_delivery(
+    kernel,
+    repo,
+    task,
+    call,
+    audit_row,
+    response_row,
+    candidate_row,
+    *,
+    design_revision_read=False,
+    ending_plan_read=False,
+):
     """A pure evidence read: no spending, reservation reduction, invoice or provider redispatch."""
+    audit = audit_row["payload"]
+    _check(
+        audit["outcome"] == "VALIDATED_CANDIDATE"
+        and audit["result_status"] == "SUCCEEDED"
+        and audit["reason"] is None
+        and fingerprint(candidate_row["payload"]) == audit["output_ref"]["sha256"]
+        and audit["output_ref"]["artifact_revision_id"]
+        == str(uuid5(UUID(call["attempt_id"]), "candidate:revision"))
+    )
+    envelope, bound_input = verify_postpaid_transport(
+        kernel,
+        repo,
+        task,
+        call,
+        audit_row,
+        response_row,
+        design_revision_read=design_revision_read,
+        ending_plan_read=ending_plan_read,
+    )
+    _check(
+        validated_payload(
+            envelope,
+            bound_input["output_contract"]["name"],
+            bound_input["output_contract"]["version"],
+        )
+        == candidate_row["payload"]
+    )
+
+
+def bound_ending_input(repo, task, input_ref, contract):
+    """Only a registered ending-plan task may hand unresolved questions to its dedicated reviewer."""
+    if (task["role_id"], task["task_kind"]) != (
+        "world_designer",
+        "initial_world",
+    ) or contract not in (
+        {"name": "ShortEndingPlan", "version": "production_profile"},
+        {"name": "ShortEndingFix", "version": "production_profile"},
+        {"name": "OpeningWorldDesign", "version": "production_profile"},
+        {"name": "EnvironmentalOpeningWorldDesign", "version": "production_profile"},
+    ):
+        return False
+    rounds = repo.many(
+        "receipts",
+        {
+            "work_id": task["work_id"],
+            "branch_id": task["branch_id"],
+            "command_type": "P6_IDEA_REVISE",
+        },
+    )
+    purpose = "SHORT_ENDING_FIX" if contract["name"] == "ShortEndingFix" else "SHORT_ENDING"
+    return any(
+        r["payload"].get("revision_purpose") == purpose
+        and r["payload"]["task_id"] == task["task_id"]
+        and r["payload"]["input_ref"] == input_ref
+        for r in rounds
+    )
+
+
+def _transport_identity(envelope, audit, task, *, structural_source):
+    fields = ("task_id", "generation", "role_id", "actor_id", "context_bundle_id", "world_ref")
+    identity = envelope
+    if structural_source and "identity" in envelope:
+        _check(
+            audit["outcome"] == "REJECTED"
+            and audit["output_ref"] is None
+            and task["state"] == "FAILED"
+            and (task["role_id"], task["task_kind"]) == ("world_designer", "initial_world")
+            and set(envelope) == {"identity", "status", "payload", "unresolved_questions"}
+            and set(envelope["identity"]) == {*fields, "schema_version"}
+            and envelope["identity"]["schema_version"] == "2.1"
+        )
+        identity = envelope["identity"]
+    return all(identity[key] == audit[key] for key in fields)
+
+
+def verify_postpaid_transport(
+    kernel,
+    repo,
+    task,
+    call,
+    audit_row,
+    response_row,
+    *,
+    design_revision_read=False,
+    ending_plan_read=False,
+    structural_source=False,
+):
     audit = audit_row["payload"]
     config, usage, raw = audit["model_configuration"], audit["usage"], response_row["payload"]
     wr, attempt = audit["world_ref"], call["attempt_id"]
@@ -35,10 +134,7 @@ def require_postpaid_delivery(kernel, repo, task, call, audit_row, response_row,
         and not any((endpoint.username, endpoint.password, endpoint.query, endpoint.fragment))
         and config.get("isolation") == "STATELESS_TEXT_ONLY"
         and audit["execution_kind"] == config.get("execution_kind") == "REAL_EXTERNAL"
-        and audit["outcome"] == "VALIDATED_CANDIDATE"
-        and audit["result_status"] == "SUCCEEDED"
         and audit["accounting_state"] == call["state"] == "UNKNOWN"
-        and audit["reason"] is None
         and call["actual_amount"] is None
         and call["actual_tokens"] is None
         and usage["actual_amount"] is None
@@ -90,13 +186,11 @@ def require_postpaid_delivery(kernel, repo, task, call, audit_row, response_row,
         and prompt["token_reservation"] == call["reserved_tokens"]
         and fingerprint(raw) == audit["response_ref"]["sha256"]
         and fingerprint(audit) == audit_row["sha256"]
-        and fingerprint(candidate_row["payload"]) == audit["output_ref"]["sha256"]
         and all(
             audit[key]["artifact_revision_id"] == str(uuid5(UUID(attempt), label + ":revision"))
             for key, label in (
                 ("prompt_ref", "prompt"),
                 ("response_ref", "response"),
-                ("output_ref", "candidate"),
             )
         )
     )
@@ -107,6 +201,25 @@ def require_postpaid_delivery(kernel, repo, task, call, audit_row, response_row,
             datetime.fromisoformat(window[key]) for key in ("started_at", "received_at")
         )
         envelope = json.loads(raw["text"])
+        if structural_source:
+            _check(
+                task["state"] == "FAILED"
+                and audit["outcome"] == "REJECTED"
+                and (task["role_id"], task["task_kind"]) == ("world_designer", "initial_world")
+                and any(
+                    r["payload"]["design_task_id"] == task["task_id"]
+                    and r["payload"]["candidate_ref"] == audit["response_ref"]
+                    and "review_ref" not in r["payload"]
+                    for r in repo.many(
+                        "receipts",
+                        {
+                            "work_id": task["work_id"],
+                            "branch_id": task["branch_id"],
+                            "command_type": "P6_IDEA_REVISE",
+                        },
+                    )
+                )
+            )
         _check(
             started.utcoffset() is not None
             and received.utcoffset() is not None
@@ -116,20 +229,27 @@ def require_postpaid_delivery(kernel, repo, task, call, audit_row, response_row,
             and isinstance(metadata["model"], str)
             and metadata["model"] == config["model"]
             and metadata["finish_reason"] == "stop"
-            and all(
-                envelope[key] == audit[key]
-                for key in (
-                    "task_id",
-                    "generation",
-                    "role_id",
-                    "actor_id",
-                    "context_bundle_id",
-                    "world_ref",
+            and _transport_identity(envelope, audit, task, structural_source=structural_source)
+            and envelope["status"] == "SUCCEEDED"
+            and (
+                envelope["unresolved_questions"] == []
+                or structural_source
+                or (
+                    design_revision_read
+                    and task["role_id"] == "reviewer"
+                    and task["task_kind"] == "fact"
+                    and bound_input["output_contract"]["name"] == "ShortDesignReview"
+                    and bound_input["output_contract"]["version"] == "production_profile"
+                    and envelope["payload"]["short_arc"]["decision"] == "ENDING_PLAN_REQUIRED"
+                )
+                or (
+                    ending_plan_read
+                    and bound_ending_input(
+                        repo, task, audit["input_ref"], bound_input["output_contract"]
+                    )
                 )
             )
-            and envelope["status"] == "SUCCEEDED"
-            and envelope["unresolved_questions"] == []
-            and envelope["payload"] == candidate_row["payload"]
         )
     except (KeyError, TypeError, ValueError, AttributeError):
         _check(False)
+    return envelope, bound_input

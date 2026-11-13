@@ -78,8 +78,9 @@ def check_length(length, characters, chapters):
                 "MANUSCRIPT_EXTENT_NOT_MET", "The ordered final work does not meet its explicit length")
 
 
-def _real_candidate(delivery, repo, task):
-    audit, candidate = delivery.audited_candidate(repo, task, production_accounting=True)
+def _real_candidate(delivery, repo, task, *, design_revision_read=False, ending_plan_read=False):
+    audit, candidate = delivery.audited_candidate(repo, task, production_accounting=True,
+                                                  design_revision_read=design_revision_read, ending_plan_read=ending_plan_read)
     require(audit["execution_kind"] in {"REAL_EXTERNAL", "REAL_HOST"} and audit["provider_receipt"]
             and not is_fixture_configuration(audit["model_configuration"])
             and audit["model_configuration"].get("model") and audit["role_id"] == task["role_id"]
@@ -101,23 +102,11 @@ def _idea_evidence(kernel, repo, wr, extent_ref, length, delivery):
     source = receipt["source_world_ref"]
     require(receipt["length_ref"] == extent_ref and receipt["creative_input"]["length"] == length
             and source["work_id"] != wr["work_id"], "INVALID_EVIDENCE", "Original idea length binding changed")
+    require(all(receipt["world_ref"][k] == wr[k] for k in ("work_id", "branch_id")),
+            "INVALID_EVIDENCE", "The adopted design belongs to another work or branch")
     design_ref = kernel.artifact(repo, receipt["design_ref"], wr["work_id"], kind="INITIAL_STORY_DESIGN")
-    creators = []
-    for evidence, role in ((receipt, "world_designer"), (receipt["design_review"], "reviewer")):
-        task = repo.one("tasks", {"task_id": evidence["task_id"], "work_id": source["work_id"],
-                         "branch_id": source["branch_id"], "generation": evidence["generation"]})
-        require(task and task["role_id"] == role and task["state"] == "ACCEPTED"
-                and task["context_bundle_id"] == evidence["context_bundle_id"], "INVALID_EVIDENCE",
-                "Missing accepted design or independent assessment")
-        audit, candidate = _real_candidate(delivery, repo, task)
-        require(audit["world_ref"] == source and audit["attempt_id"] == evidence["attempt_id"]
-                and audit["output_ref"] == evidence["result_ref"], "INVALID_EVIDENCE", "Idea provenance changed")
-        if role == "world_designer":
-            require(candidate == design_ref["payload"], "INVALID_EVIDENCE", "Adopted design differs from model output")
-        else:
-            require(not candidate["issues"], "INVALID_EVIDENCE", "Design still has open issues")
-        creators.append(task["principal_id"])
-    require(creators[0] != creators[1], "INVALID_EVIDENCE", "Design and design review share a principal")
+    from .design_release_evidence import verify_adopted_design
+    verify_adopted_design(kernel, repo, delivery, receipt, design_ref["payload"])
     return "NATIVE_IDEA"
 
 

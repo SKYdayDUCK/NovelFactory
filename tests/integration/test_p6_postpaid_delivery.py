@@ -21,7 +21,8 @@ from novel_factory.infrastructure.runtime_providers import RuntimeModelAdapter
 pytestmark = [pytest.mark.postgres, pytest.mark.integration]
 
 
-def fake_transport(kernel, monkeypatch, mode, respond):
+def fake_transport(kernel, monkeypatch, mode, respond, *, questions=lambda packet, candidate: [],
+                   nested_identity=lambda packet: False):
     profile = providers.Profile(
         kind="deepseek",
         model="deepseek-flash",
@@ -54,12 +55,14 @@ def fake_transport(kernel, monkeypatch, mode, respond):
             "schema_version": "2.1",
             **identity,
             "status": "SUCCEEDED",
-            "unresolved_questions": [],
+            "unresolved_questions": questions(packet, candidate),
             "payload": candidate,
         }
+        if nested_identity(packet):
+            envelope["identity"] = {k: envelope.pop(k) for k in (*identity, "schema_version")}
         answer = {
             "id": "fixture-response-" + str(len(requests)),
-            "model": "deepseek-flash",
+            "model": kwargs["payload"]["model"],
             "choices": [{"message": {"content": json.dumps(envelope)}, "finish_reason": "stop"}],
             "usage": {"prompt_tokens": 19, "completion_tokens": 8, "prompt_cache_hit_tokens": 5},
         }
