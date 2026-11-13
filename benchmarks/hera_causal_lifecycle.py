@@ -268,7 +268,7 @@ def bench(args):
                     phase.update(server_before=before,server_after=after,db_activity=samples,
                         wal_bytes=int(ctl.execute('SELECT pg_wal_lsn_diff(pg_current_wal_insert_lsn(),%s)',(lsn,)).fetchone()[0]),
                         pg_stat_statements=ctl.execute("""SELECT queryid,query,calls,total_exec_time,rows,shared_blks_hit,
-                            shared_blks_read,blk_read_time,blk_write_time,wal_bytes FROM pg_stat_statements
+                            shared_blks_read,shared_blk_read_time,shared_blk_write_time,wal_bytes FROM pg_stat_statements
                             WHERE dbid=%s ORDER BY total_exec_time DESC""",(oid,)).fetchall())
                     result['phases'].append(phase)
             finally:
