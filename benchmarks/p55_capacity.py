@@ -31,7 +31,7 @@ def warm():
     return os.getpid()
 
 
-def trial(kernel, jobs, workers, adaptive):
+def trial(kernel, jobs, workers, adaptive, *, measure_resize=False):
     fixture = load_fixture(kernel, "white_bridge")
     principal, wr, ids = fixture["principal"], fixture["world_ref"], fixture["ids"]
     for n in range(jobs):
@@ -94,6 +94,18 @@ def trial(kernel, jobs, workers, adaptive):
                                 "service_s": service, "status": receipt["status"]})
                 controller.monitor.completed(service)
         elapsed = time.monotonic() - start
+        resize = []
+        if measure_resize and adaptive:
+            # Sample the real monitor after the last receipt. Stop as soon as
+            # admission returns to the minimum or after bounded observation.
+            drained = time.monotonic()
+            while True:
+                limit = controller.limit()
+                age = time.monotonic() - drained
+                resize.append([age, limit])
+                if limit == controller.policy.minimum or age >= 5:
+                    break
+                time.sleep(controller.interval)
     with db.uow(write=False) as repo:
         assert repo.one("index_watermarks", {"branch_id": wr["branch_id"], "index_name": "timeline"})["world_revision_id"] == wr["world_revision_id"]
         calls = repo.conn.scalar(text("""SELECT count(*) FROM nf_call_attempts c JOIN nf_tasks t USING(task_id)
@@ -110,7 +122,7 @@ def trial(kernel, jobs, workers, adaptive):
             "p95_service_s": percentile(service_times,.95), "mean_cpu_pct": avg("cpu_pct"), "mean_cpu_psi_avg10": avg("cpu_psi"),
             "mean_parent_rss_kib": avg("rss_kib"), "mean_available_bytes": avg("available_bytes"),
             "warm_processes": len(warmed), "capacity_series": limits, "scale_decisions": [dict(r) for r in decisions],
-            "provider_calls": calls, "provider_invoice": None, "records": records}
+            "post_drain_targets": resize, "provider_calls": calls, "provider_invoice": None, "records": records}
 
 
 def warm_noarg(_):
@@ -122,6 +134,7 @@ def main():
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--jobs", type=int, default=24)
     parser.add_argument("--workers", type=int, default=2)
+    parser.add_argument("--measure-resize", action="store_true", help="record the real admission target after drain")
     args = parser.parse_args()
     if not 4 <= args.jobs <= 60 or not 1 <= args.workers <= 2:
         parser.error("Benchmark fixture supports 4–60 transfers and up to two default database slots")
@@ -131,7 +144,7 @@ def main():
         with tempfile.TemporaryDirectory() as directory:
             kernel = Kernel(db, ObjectStore(directory))
             # Symmetric ordering across two paired repeats.
-            trials = [trial(kernel,args.jobs,args.workers,adaptive) for adaptive in (False, True, True, False)]
+            trials = [trial(kernel,args.jobs,args.workers,adaptive,measure_resize=args.measure_resize) for adaptive in (False, True, True, False)]
         import subprocess
         commit = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
         output = {"source_commit": commit, "measured_at": datetime.now(UTC).isoformat(), "system": platform.platform(),
