@@ -11,7 +11,7 @@ dependencies = ["PyJWT[crypto]>=2.10,<3", "pywin32>=312; sys_platform == 'win32'
 
 
 [tool.hatch.build.targets.wheel]
-only-include = ["__init__.py", "providers.py", "plan_auth.py", "_http_worker.py", "_windows_host.py", "codex.py", "host_process.py", "routing.py", "protocol.py"]
+only-include = ["__init__.py", "providers.py", "credentials.py", "plan_auth.py", "_http_worker.py", "_windows_host.py", "codex.py", "host_process.py", "routing.py", "protocol.py"]
 
 [tool.hatch.build.targets.wheel.sources]
 "" = "agent_runtime"

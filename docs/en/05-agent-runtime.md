@@ -6,7 +6,9 @@ A novel can use one model to draft a scene and another to review it. Operators i
 
 ## Install a profile
 
-`NF_RUNTIME_PROFILES` names a JSON file with a `profiles` object. The following profile can be validated offline. Before making a live call, substitute a model authorized for the account and supply the credential in the named host environment variable.
+`NF_RUNTIME_PROFILES` names a JSON file with a `profiles` object. The following profile can be validated offline. Before making a live call, substitute a model authorized for the account and register the credential on the execution host.
+
+Use `python scripts/nf.py credentials set NF_DEEPSEEK_API_KEY` for a masked prompt, `status` to inspect configuration without revealing the value, and `remove` to delete the saved item. Deployment tools may supply the value through stdin with `set ... --stdin`; values are never command arguments. Runtime lookup prefers the named environment variable, then Windows Credential Manager or owner-private POSIX files under `$XDG_DATA_HOME/novel-factory/credentials` (default `~/.local/share/novel-factory/credentials`). Windows, WSL and different users have separate stores. Only the reference belongs in catalogs and Workshop routes. Live opt-in, task authorization, attempt fencing and budgets remain required.
 
 ```json
 {

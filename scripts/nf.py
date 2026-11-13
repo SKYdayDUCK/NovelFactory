@@ -17,7 +17,7 @@ SCRIPTS = {
     "processor": "run_processor.py",
 }
 MODULES = {"migrate": "alembic", "call": "novel_factory.interfaces.bound_call",
-           "mcp": "novel_factory.interfaces.mcp_stdio"}
+           "mcp": "novel_factory.interfaces.mcp_stdio", "credentials": "agent_runtime.credentials"}
 
 
 def main():

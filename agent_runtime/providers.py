@@ -96,7 +96,11 @@ class Profile:
     def preflight(self):
         if os.environ.get("NF_RUNTIME_LIVE_APPROVED") != "1":
             raise ProfileError("MODEL_CALL_NOT_AUTHORIZED")
-        credential = os.environ.get(self.secret_ref)
+        from .credentials import CredentialError, resolve
+        try:
+            credential = resolve(self.secret_ref)
+        except (CredentialError, OSError, UnicodeError):
+            raise ProfileError("CREDENTIAL_STORE_UNAVAILABLE") from None
         if not credential or (self.kind == "codex-cli" and not resolve_host_binary()):
             raise ProfileError("MODEL_UNAVAILABLE")
 

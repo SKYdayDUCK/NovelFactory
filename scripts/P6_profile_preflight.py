@@ -4,8 +4,9 @@ import argparse
 import json
 import os
 from pathlib import Path
-import shutil
 
+from agent_runtime.credentials import resolve
+from agent_runtime.host_process import resolve_host_binary
 from agent_runtime.providers import ProfileError, read_profiles
 
 
@@ -15,9 +16,9 @@ def inspect_profiles(path):
         reasons = []
         if profile.model.startswith("REPLACE_"):
             reasons.append("MODEL_NOT_SELECTED")
-        if not os.environ.get(profile.secret_ref):
+        if not resolve(profile.secret_ref):
             reasons.append("CREDENTIAL_NOT_CONFIGURED")
-        if profile.kind == "codex-cli" and not shutil.which("codex"):
+        if profile.kind == "codex-cli" and not resolve_host_binary():
             reasons.append("CODEX_EXECUTABLE_UNAVAILABLE")
         rows.append(
             {

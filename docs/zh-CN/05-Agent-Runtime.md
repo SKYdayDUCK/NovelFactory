@@ -6,7 +6,23 @@
 
 ## 配置模型
 
-`NF_RUNTIME_PROFILES` 指向含 `profiles` 对象的 JSON 文件。下面是可以离线校验的单配置示例。实际开通调用前，将模型名改为账号获准使用的模型，并在宿主环境设置相应凭据。
+`NF_RUNTIME_PROFILES` 指向含 `profiles` 对象的 JSON 文件。下面是可以离线校验的单配置示例。实际开通调用前，将模型名改为账号获准使用的模型，并登记相应凭据。
+
+## 管理 API Key
+
+在运行 Supervisor 的同一操作系统用户下执行：
+
+```bash
+python scripts/nf.py credentials set NF_DEEPSEEK_API_KEY
+python scripts/nf.py credentials status NF_DEEPSEEK_API_KEY
+python scripts/nf.py credentials remove NF_DEEPSEEK_API_KEY
+```
+
+`set` 使用不回显的输入框；自动部署可用 `--stdin` 从标准输入读取。命令行参数不接收 Key 原文。`status` 只报告引用、是否配置和来源，`remove` 删除本机保存项。已有同名环境变量优先，删除本机项不会删除环境变量。
+
+Windows 使用当前用户的 Credential Manager；Linux/macOS 保存到 `$XDG_DATA_HOME/novel-factory/credentials`，未设置时使用 `~/.local/share/novel-factory/credentials`。POSIX 目录为 0700、文件为 0600，读取拒绝符号链接和其他用户可访问的文件。不同用户、Windows 与 WSL 各有自己的凭据存储。Supervisor 每次发送前解析引用，轮换 Key 后无需把密钥写入任务或重新发布模型目录。真实调用仍需要独立的任务授权、预算和 `NF_RUNTIME_LIVE_APPROVED=1`。
+
+Workshop 的模型路由继续引用 Provider 配置名，配置中的 `secret_ref` 指向本机项。数据库、Git、模型目录和对外报告均不保存 Key 原文。岗位默认由 Codex 负责大纲、规划、审核，DeepSeek 负责正文和角色扮演；通过下文的角色路由规则实现，已开始的任务保留原绑定。
 
 ```json
 {
