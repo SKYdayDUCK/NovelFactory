@@ -1,0 +1,102 @@
+{
+  "work_id": "d0d29344-6bac-4d72-8d78-4fbc9134e046",
+  "baseline_commit": "ecc56094448eb41415df8392fb9b3d5105ca69ea",
+  "returns": [
+    {
+      "attempt_id": "5f4b3f6a-3f36-4a11-bd1d-b7dc7ab46b3f",
+      "model": "deepseek-flash",
+      "received_utc": "2026-11-13T06:39:46.504630+00:00",
+      "transport_seconds": 19.649191,
+      "input_tokens": 3731,
+      "cached_input_tokens": 1408,
+      "output_tokens": 1271,
+      "total_tokens": 5002,
+      "estimated_cny": "0.01487032",
+      "response_sha256": "0e08ccbd0f6d6becd3e8da49f2b788cffb2cfca2565b09dc00aa0662e3e5e34d"
+    },
+    {
+      "attempt_id": "1f0c1186-0d23-4afe-82a8-4b92313bffd3",
+      "model": "deepseek-flash",
+      "received_utc": "2026-11-13T06:40:04.190793+00:00",
+      "transport_seconds": 13.80918,
+      "input_tokens": 4940,
+      "cached_input_tokens": 1408,
+      "output_tokens": 1609,
+      "total_tokens": 6549,
+      "estimated_cny": "0.01999232",
+      "response_sha256": "743343903e7291fcbe62931ff7253706f337bb322934e8c45c970f12ea8c1a30"
+    }
+  ],
+  "known_tokens": 11551,
+  "known_estimated_cny": "0.03486264",
+  "invoiced_cny": null,
+  "idea": {
+    "idea": "海岛邮递员收到一封从明天寄来的退信。",
+    "genre": "灵异",
+    "length": {
+      "preset": "short",
+      "unit": "han_characters",
+      "min": 6000,
+      "max": 10000
+    }
+  },
+  "native_transitions": [
+    {
+      "at": "2026-11-13T06:39:25.505967+00:00",
+      "step": "p6_idea.py",
+      "task_id": "a5cc6fed-ebd2-4923-88a9-d9ae469f1bb5"
+    },
+    {
+      "at": "2026-11-13T06:39:46.889906+00:00",
+      "step": "p6_idea.py",
+      "status": "RESULT_STORED",
+      "validation_status": "REJECTED",
+      "task_id": "a5cc6fed-ebd2-4923-88a9-d9ae469f1bb5",
+      "generation": 1
+    },
+    {
+      "at": "2026-11-13T06:39:48.431157+00:00",
+      "step": "p6_idea.py",
+      "status": "DESIGN_REVISION_ENROLLED",
+      "task_id": "f9b803a8-533e-4fc7-8dca-852d7cf469b9"
+    },
+    {
+      "at": "2026-11-13T06:40:04.555188+00:00",
+      "step": "p6_idea.py",
+      "status": "RESULT_STORED",
+      "validation_status": "REJECTED",
+      "task_id": "f9b803a8-533e-4fc7-8dca-852d7cf469b9",
+      "generation": 1
+    },
+    {
+      "at": "2026-11-13T06:40:05.737025+00:00",
+      "step": "p6_idea.py",
+      "error": "INVALID_ARGUMENT"
+    }
+  ],
+  "native_audit": [
+    {
+      "attempt_id": "5f4b3f6a-3f36-4a11-bd1d-b7dc7ab46b3f",
+      "audit_reason": "INVALID_ARGUMENT",
+      "contract": "OpeningWorldDesign",
+      "strict_json": "valid",
+      "identity_mismatches": []
+    },
+    {
+      "attempt_id": "1f0c1186-0d23-4afe-82a8-4b92313bffd3",
+      "audit_reason": "INVALID_MODEL_OUTPUT",
+      "contract": "OpeningWorldDesign",
+      "strict_json": "Duplicate JSON object key",
+      "identity_mismatches": []
+    }
+  ],
+  "registered_structure_reworks": 1,
+  "short_profile_max_reworks": 1,
+  "frozen_manuscripts": 0,
+  "independent_whole_book_reviews": 0,
+  "internal_release_count": 0,
+  "formal_manuscript_versions": 0,
+  "operator_story_edits": 0,
+  "next_book_started": false,
+  "price_card": "deepseek-cny-20261113.json"
+}
