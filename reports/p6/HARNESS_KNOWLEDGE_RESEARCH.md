@@ -30,16 +30,16 @@
 
 |来源和章节|证据适用范围|
 |---|---|
-|[Start writing fiction: 1.1 Creating characters | OpenLearn - Open University](https://www.open.edu/openlearn/history-the-arts/creative-writing/start-writing-fiction/content-section-1.1)|通过人物欲望和阻碍检视因果，不要求一种固定结构。|
-|[Start writing fiction: 1.5 Tips on character creation | OpenLearn - Open University](https://www.open.edu/openlearn/mod/oucontent/view.php?id=1622&section=1.5)|情境、对象和意图可改变说话方式。|
+|[Start writing fiction: 1.1 Creating characters · OpenLearn - Open University](https://www.open.edu/openlearn/history-the-arts/creative-writing/start-writing-fiction/content-section-1.1)|通过人物欲望和阻碍检视因果，不要求一种固定结构。|
+|[Start writing fiction: 1.5 Tips on character creation · OpenLearn - Open University](https://www.open.edu/openlearn/mod/oucontent/view.php?id=1622&section=1.5)|情境、对象和意图可改变说话方式。|
 |[Fiction Basics](https://owl.purdue.edu/owl/subject_specific_writing/creative_writing/writers/fiction_writing_basics/index.html)|把故事中的先后关系与实质因果分别记账。|
 |[Fiction Writing Basics 2](https://owl.purdue.edu/owl/subject_specific_writing/creative_writing/writers/fiction_writing_basics/fiction_writing_basics_2.html)|分开叙述者、观察者与角色可知范围。|
-|[10.1 Motivation - Psychology 2e | OpenStax](https://openstax.org/books/psychology-2e/pages/10-1-motivation)|把内外在动机当作多种可能解释。|
-|[10.4 Emotion - Psychology 2e | OpenStax](https://openstax.org/books/psychology-2e/pages/10-4-emotion)|区分生理反应、主观体验和评价；理论之间保留分歧。|
-|[12.4 Conformity, Compliance, and Obedience - Psychology 2e | OpenStax](https://openstax.org/books/psychology-2e/pages/12-4-conformity-compliance-and-obedience)|群体信息可影响判断；研究结果不能预言某个角色的选择。|
-|[Time | the living handbook of narratology](https://www-archiv.fdm.uni-hamburg.de/lhn/node/106.html)|区分故事持续时间、叙述顺序及叙述篇幅。|
-|[Song Dynasty China | Asia for Educators](https://afe.easia.columbia.edu/songdynasty-module/cities-hangzhou.html)|用于核查南宋杭州日常生活的资料入口，第三方引语保留其观察者身份。|
-|[4.3 Social Constructions of Reality - Introduction to Sociology 3e | OpenStax](https://openstax.org/books/introduction-sociology-3e/pages/4-3-social-constructions-of-reality)|区分角色集合和角色冲突，避免把现代生活写成同一阶层的经历。|
+|[10.1 Motivation - Psychology 2e · OpenStax](https://openstax.org/books/psychology-2e/pages/10-1-motivation)|把内外在动机当作多种可能解释。|
+|[10.4 Emotion - Psychology 2e · OpenStax](https://openstax.org/books/psychology-2e/pages/10-4-emotion)|区分生理反应、主观体验和评价；理论之间保留分歧。|
+|[12.4 Conformity, Compliance, and Obedience - Psychology 2e · OpenStax](https://openstax.org/books/psychology-2e/pages/12-4-conformity-compliance-and-obedience)|群体信息可影响判断；研究结果不能预言某个角色的选择。|
+|[Time · the living handbook of narratology](https://www-archiv.fdm.uni-hamburg.de/lhn/node/106.html)|区分故事持续时间、叙述顺序及叙述篇幅。|
+|[Song Dynasty China · Asia for Educators](https://afe.easia.columbia.edu/songdynasty-module/cities-hangzhou.html)|用于核查南宋杭州日常生活的资料入口，第三方引语保留其观察者身份。|
+|[4.3 Social Constructions of Reality - Introduction to Sociology 3e · OpenStax](https://openstax.org/books/introduction-sociology-3e/pages/4-3-social-constructions-of-reality)|区分角色集合和角色冲突，避免把现代生活写成同一阶层的经历。|
 
 大学教学材料和叙事理论提供分析视角，教科书解释受样本与情境限制的机制，开源代码仅说明一种实现。灵异、玄幻与无限流条目是本项目的编辑判断；无限流的副本作用域检查借鉴了连载与状态连续性方法，尚无质量提升数据。
 

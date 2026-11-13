@@ -1,0 +1,82 @@
+{
+  "scope": "current three-book batch only; excludes past production, PG tests and the anonymous catalog lookup",
+  "started_at_utc": "2026-11-13T09:20:21+00:00",
+  "finished_at_utc": "2026-11-13T09:20:28+00:00",
+  "release": "176b719334785866ff90129bb0243e3d7abe8bbe",
+  "release_tree": "b13d9cda9a60782e40d88bba23bacb4f6f14fc30",
+  "clean_checkout": true,
+  "command": "NF_RUNTIME_LIVE_APPROVED=1 python scripts/p6_batch.py preflight",
+  "result": {
+    "status": "BLOCKED",
+    "reason": "MODEL_UNAVAILABLE"
+  },
+  "exit_code": 3,
+  "environment_received": {
+    "NF_DEEPSEEK_API_KEY": false,
+    "NF_DATABASE_URL": false,
+    "NF_OBJECT_ROOT": false,
+    "NF_P6_BATCH_DIR": false
+  },
+  "system": {
+    "pid_1": "codex",
+    "systemd_socket_present": false,
+    "systemd_system": {
+      "exit": 1,
+      "state": "offline"
+    },
+    "systemd_user": {
+      "exit": 1,
+      "state": "offline"
+    },
+    "docker_socket_present": false
+  },
+  "provider": {
+    "origin": "https://api.deepseek.com",
+    "anonymous_catalog_http_status": 401,
+    "credentialed_catalog_verified": false,
+    "creative": "deepseek-flash",
+    "independent_internal_review": "deepseek-v4-pro",
+    "batch_generation_posts": 0
+  },
+  "enrollment_attempted": false,
+  "books": {
+    "A": {
+      "inspiration_sha256": "0703550ae3f9f7ef41ae9af9c9765ec8398b87a0cb6ea5347f8e9480c61b91dc",
+      "work_id": null,
+      "preparation_task_id": null,
+      "formal_attempts": 0,
+      "frozen_chapters": 0,
+      "frozen_han": 0
+    },
+    "B": {
+      "inspiration_sha256": "26565204471f52811b8acd2e31e9a9c38ff2595afc4b0522c353dc7618a4b388",
+      "work_id": null,
+      "preparation_task_id": null,
+      "formal_attempts": 0,
+      "frozen_chapters": 0,
+      "frozen_han": 0
+    },
+    "C": {
+      "inspiration_sha256": "d200cde5ff5b905785b72baf6631c16397c9d72278407434664eec7b9dd1e029",
+      "work_id": null,
+      "preparation_task_id": null,
+      "formal_attempts": 0,
+      "frozen_chapters": 0,
+      "frozen_han": 0
+    }
+  },
+  "books_scheduled": 0,
+  "formal_attempts": 0,
+  "production_tokens": 0,
+  "estimated_generation_cost_usd": "0",
+  "account_invoice_observed": false,
+  "formal_observation": {
+    "began_at": null,
+    "ended_at": null,
+    "observed_seconds": null,
+    "snapshot_count": 0,
+    "three_way_overlap_seconds": null
+  },
+  "durable_production_workers_verified": 0,
+  "batch_2": "NOT_STARTED"
+}
