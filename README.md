@@ -57,6 +57,8 @@ uv run --no-sync python scripts/with_postgres.py --migrate -- \
 | 核心行为与恢复 | PostgreSQL 17 上的完整候选回归通过 1,008 项，另有 17 项子测试。验证覆盖双服务、历史升级、Redis Streams 和 WAL/PITR。 |
 | 容量 | 两轮 500 Agent、每轮 10 分钟的读测试各完成 12,000 次请求。200 Agent 过载及 1000 Agent 开放到达仍未达到原门槛。 |
 | 文学与费用 | 短卷和供应商故障测试使用合成输入。真人全文评分与商业模型账单需要单独取证。 |
+| 离线整书流程 | 50 组三书各五章达到整书最终冻结；27 类、1,350 个模拟场景检查通过。[验收记录](reports/dry_run/README.md) |
+| 本机真实生成 | A、B 使用 Codex 审核与 Flash 写作，已完成修复后的十分钟观察，Worker 继续运行。[运行报告](reports/runtime-monitor-20261114.md) |
 
 项目使用 Python、SQLAlchemy、PostgreSQL 17、可选的 Redis Streams、MCP stdio 和 HTTP。可先运行 `python scripts/nf.py dry-run --books 3 --chapters 5 --seed 42`，经过真实 Harness 边界模拟规划、写作、随机审核、返工、双路全文审核及整书最终冻结，数据库和上游模型调用均为 0。默认命令必须达到全部小说最终冻结才返回成功。[Dry Run 与生命周期](docs/zh-CN/11-Dry-Run与程序生命周期.md)
 

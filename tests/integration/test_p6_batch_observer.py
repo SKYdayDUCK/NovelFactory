@@ -2,7 +2,6 @@
 
 import importlib
 import json
-import os
 from contextlib import ExitStack
 from datetime import UTC, datetime, timedelta
 from hashlib import sha256
@@ -71,6 +70,17 @@ def test_enrollment_and_live_workers_do_not_start_clock(kernel_env, tmp_path, ob
     )
     assert not (output / "sample-0.json").exists()
     assert not (output / "summary.json").exists()
+
+
+@pytest.mark.unit
+def test_historical_transport_inventory_is_independent_of_new_batch_defaults(observer):
+    from p6_batch import MODELS as defaults
+
+    assert defaults["review"] == "gpt-6.1-sol"
+    assert observer.MODELS["review"] == "deepseek-v4-pro"
+    assert observer.is_official({"call_origin": "PROVIDER", "adapter": "deepseek",
+        "provider": "api.deepseek.com", "model": "deepseek-v4-pro", "execution_kind": "REAL_EXTERNAL",
+        "official_deepseek_endpoint": True})
 
 
 @pytest.mark.unit

@@ -1,4 +1,8 @@
-"""Observe one enrolled production batch from its persistent worker host (read-only)."""
+"""Observe the legacy P6 DeepSeek HTTP transport experiment (read-only).
+
+Its historical model inventory must not follow defaults for new Codex batches.
+Native Codex turns require their separate host-journal evidence.
+"""
 
 import argparse
 import json
@@ -14,7 +18,7 @@ from tempfile import TemporaryDirectory
 from uuid import UUID, uuid5
 
 from bootstrap_p5_m0 import save
-from p6_batch import BOOKS, MODELS, ROOT, private
+from p6_batch import BOOKS, ROOT, private
 from p6_deepseek_costs import summarize as price_exports
 from p6_deepseek_costs import transport
 from sqlalchemy import text
@@ -34,6 +38,7 @@ from novel_factory.infrastructure.private_files import prepare_private_directory
 from novel_factory.infrastructure.wire_receipts import read_receipt
 
 MILESTONES = (0, 120, 300, 600)
+MODELS = {"creative": "deepseek-flash", "review": "deepseek-v4-pro"}
 
 
 def utc():
