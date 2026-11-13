@@ -24,7 +24,7 @@ def test_each_fault_path_preserves_scheduling_invariants(scenario):
         assert report["unknown_reservations_held"] == 1
         unknown = next(row for row in report["trace"] if row["event"] == "UNKNOWN_HELD")
         assert sum(row["event"] == "HARNESS_REQUEST" and row["task"] == unknown["task"] for row in report["trace"]) == 1
-    elif scenario in {"authorization_revoked", "budget_exhausted", "review_exhausted", "dependencies", "needs_input"}:
+    elif scenario in {"authorization_revoked", "budget_exhausted", "review_exhausted", "dependencies", "needs_input", "review_questions"}:
         assert report["workflow_status"] == "STOPPED_WITH_BLOCKERS"
     else:
         assert report["workflow_status"] == "COMPLETED" and report["frozen_chapters"] == 3
@@ -59,6 +59,25 @@ def test_legal_needs_input_holds_without_accepting_payload_or_retrying_its_call(
     assert sum(row["event"] == "HARNESS_REQUEST" and row["task"] == task.id for row in report["trace"]) == 1
     assert not any(row["event"] == "RETRY_SCHEDULED" and row["task"] == task.id for row in report["trace"])
     assert simulation.ledger[held["attempt"]]["state"] == "SUCCEEDED"
+    assert report["frozen_chapters"] == report["frozen_books"] == report["unknown_reservations_held"] == 0
+
+
+def test_succeeded_review_with_outer_questions_pauses_without_acceptance_retry_or_freeze():
+    simulation = Simulation(scenario="review_questions", review_pass_rate=1)
+    report = simulation.run()
+    assert len(SCENARIOS) == 27
+    assert report["status"] == "PASS" and report["workflow_status"] == "STOPPED_WITH_BLOCKERS"
+    held = next(row for row in report["trace"] if row["event"] == "REVIEW_REQUIRED")
+    task = simulation.jobs[held["task"]]
+    assert task.stage == "review" and task.state == "PAUSED" and task.approved is None
+    assert task.reason == "REVIEW_REQUIRED" and task.id not in simulation.acceptances
+    assert sum(row["event"] == "HARNESS_REQUEST" and row["task"] == task.id for row in report["trace"]) == 1
+    assert not any(row["event"] == "RETRY_SCHEDULED" and row["task"] == task.id for row in report["trace"])
+    response = next(row for row in report["trace"] if row["event"] == "HARNESS_RESPONSE" and row["task"] == task.id)
+    assert response["result_status"] == "SUCCEEDED"
+    call = simulation.ledger[held["attempt"]]
+    assert call["state"] == "SUCCEEDED" and call["unresolved_questions"] == held["unresolved_questions"]
+    assert held["unresolved_questions"] == ["DRY_RUN_OUTSIDE_REVIEW_DECISION_REQUIRED"]
     assert report["frozen_chapters"] == report["frozen_books"] == report["unknown_reservations_held"] == 0
 
 

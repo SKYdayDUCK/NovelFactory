@@ -61,6 +61,8 @@ export NF_RUNTIME_PROFILES="$PWD/providers.json"
 
 已返回但因格式反复失败而停止的事实读取，可用 `python scripts/nf.py recover-reading --help` 预览显式策略迁移。管理员提供旧任务代际及当前生产板哈希；`--apply` 在事务中核验原回执、封存旧返工诊断、采用新版路由，为同一份正文登记独立读取任务和新阶段预算。旧 Attempt、原预留及未知账务不改写。此操作不会自动处理仍在发送或丢失结果的请求。
 
+审核完成时，外层 `unresolved_questions` 应为空；对情节的疑问、可选解读或修改建议放在审核 payload 的相应字段。该协议说明对 Codex 和 DeepSeek 一致。非空外层问题不会被自动清除以通过验收；管理员可在核验完整原生回执后，为同稿登记新独立审读，旧报告与费用证据保留。
+
 ### 输入缓存与上下文
 
 WORLD 切面的事实抽取任务另取得 `FACT_READING_SCOPE`：固定版本、限定主体的实体名称映射与完整状态查询结果，来源绑定到不可变编译产物。UNKNOWN/PENDING 明确保留，不因没有已知事实而只收到 UUID。名称登记不等于事实成立；该视图不投递给 BELIEF 角色或其他岗位。合法 `NEEDS_INPUT` 会保存结果并在生产板显示 `MODEL_INPUT_REQUIRED`，不继续显示空闲，也不自动重发原请求。修补授权材料后，管理员可为同一正文登记独立读取，原结果和账务保留。

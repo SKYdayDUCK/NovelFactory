@@ -67,6 +67,20 @@ def test_harness_returns_a_typed_needs_input_response_without_review_approval():
     assert response.dry_run and response.raw_response["review_approved"] is None
 
 
+@pytest.mark.parametrize("kind", ["deepseek", "codex-cli"])
+def test_succeeded_review_with_outer_questions_is_schema_legal_and_retains_questions(kind):
+    profile = providers.Profile(kind, "deepseek-flash" if kind == "deepseek" else "gpt-6.1-sol", "NO_REAL_CREDENTIAL", 8192,
+        **({"auth_mode": "host-login", "model_output_ceiling": 8192} if kind == "codex-cli" else {}))
+    response = providers.invoke(profile, request(rate=1, outcome="review_questions"),
+                                authorize=lambda _: True, record=lambda *args: None)
+    envelope = json.loads(response.text)
+    validate_contract("AgentModelResponse", envelope, "agent")
+    validate_contract("AgentReviewOutput", envelope["payload"], "agent")
+    assert envelope["status"] == "SUCCEEDED" and envelope["payload"]["issues"] == []
+    assert envelope["unresolved_questions"] == ["DRY_RUN_OUTSIDE_REVIEW_DECISION_REQUIRED"]
+    assert response.dry_run and response.raw_response["review_approved"] is None
+
+
 def test_dry_run_cannot_publish_a_live_wire_receipt():
     with pytest.raises(ModelCallFailure, match="DRY_RUN_LIVE_RECEIPT_FORBIDDEN"):
         providers.invoke(providers.Profile("deepseek", "deepseek-flash", "NO_REAL_CREDENTIAL", 8192), request(),

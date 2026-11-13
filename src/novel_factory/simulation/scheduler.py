@@ -18,7 +18,8 @@ SCENARIOS = ("novel", "idle", "normal", "review_return", "review_exhausted", "ra
              "unknown_reconciled", "crash_before_send", "crash_after_send", "invalid_json",
              "truncated", "lost_notification", "duplicate_notification", "duplicate_result",
              "late_result", "lease_expired", "restart", "authorization_revoked", "budget_exhausted", "dependencies",
-             "storage_disconnect", "worker_pool_failure", "context_mismatch", "book_review_return", "needs_input")
+             "storage_disconnect", "worker_pool_failure", "context_mismatch", "book_review_return", "needs_input",
+             "review_questions")
 TERMINAL = {"ACCEPTED", "FAILED", "CANCELLED"}
 PROGRAM_STAGES = {"marker", "reconcile", "freeze", "continuity", "assemble", "book_reconcile", "book_freeze"}
 ROLE_STAGES = {
@@ -227,6 +228,10 @@ class Simulation:
     def _outcome(self, job):
         fault_stage = job.stage == "draft"
         fault = self.scenario
+        if fault == "review_questions" and job.stage == "review" and fault not in self.used_faults:
+            self.used_faults.add(fault)
+            self.emit("FAULT_INJECTED", fault=fault, task=job.id)
+            return fault
         if (fault_stage and fault not in self.used_faults
                 and fault in {"rate_limit", "timeout", "crash_before_send", "crash_after_send", "invalid_json", "truncated", "unknown_reconciled", "context_mismatch", "needs_input"}):
             self.used_faults.add(fault)
@@ -389,6 +394,15 @@ class Simulation:
             job.state, job.reason, job.approved = "PAUSED", "INPUT_REQUIRED", None
             self.emit("INPUT_REQUIRED", task=job.id, generation=generation, attempt=attempt,
                       unresolved_question_count=len(envelope["unresolved_questions"]))
+            self._wake()
+            return
+        if envelope["unresolved_questions"]:
+            # Production delivery requires a separate decision even if the
+            # outer model response claims success and its review has no issues.
+            job.state, job.reason, job.approved = "PAUSED", "REVIEW_REQUIRED", None
+            call["unresolved_questions"] = list(envelope["unresolved_questions"])
+            self.emit("REVIEW_REQUIRED", task=job.id, generation=generation, attempt=attempt,
+                      unresolved_questions=list(envelope["unresolved_questions"]))
             self._wake()
             return
         role = ROLE_STAGES[job.stage]

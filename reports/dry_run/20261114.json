@@ -2,9 +2,9 @@
   "schema_version": "nf.dry-run-evidence.v1",
   "date": "2026-11-14",
   "source_sha256": {
-    "src/novel_factory/simulation/scheduler.py": "afc0d5dc533dff63dc979d8d423278407fa3bee95216442f15d4150f88cfe0b6",
-    "agent_runtime/dry_run.py": "e5bb08bb8327ffc91f2755d9d9692f3c82dcf33b0a466cc71489f01ff0ea387e",
-    "scripts/nf_dry_run.py": "9d2b8f5db8cfa409bdf4396cae9350a82db3365f81c6b35809fd95a99c114d04"
+    "src/novel_factory/simulation/scheduler.py": "bf9eb6c8403f598f68b64bdbee348c87f32aebfc50c1237d54a3ff09171de777",
+    "agent_runtime/dry_run.py": "d78e4f0d57760c55c9f8d80014c1c0cf3237f9e21ed3deb625cea397dbd9ec6e",
+    "scripts/nf_dry_run.py": "bb2c8133dcb2b9e2a9b2640d57c953c279cd7234943cc23f3efec132c8208a76"
   },
   "runs": [
     {
@@ -13,8 +13,8 @@
       "mode": "DRY_RUN",
       "success_goal": "BOOK_RELEASE_FREEZE",
       "completion_required": false,
-      "scenario_count": 1300,
-      "harness_requests_total": 179182,
+      "scenario_count": 1350,
+      "harness_requests_total": 185442,
       "database_connections": 0,
       "upstream_model_calls": 0,
       "external_io_attempts": [],
@@ -171,6 +171,12 @@
           "frozen_books": 104
         },
         "needs_input": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 0,
+          "frozen_books": 75
+        },
+        "review_questions": {
           "runs": 50,
           "checks_passed": 50,
           "completed": 0,

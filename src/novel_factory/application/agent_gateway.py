@@ -400,17 +400,17 @@ class AgentGateway:
                   "and payload conforming to the selected schema. Your output is only a candidate.\n"
                   + runtime["role_contract"] + "\n" + runtime["skill_instructions"]
                   + "\nRestricted mode: " + str(runtime["restricted_mode"])
-                  + "\nPayload JSON Schema: " + contract_text)
+                  + "\nPayload JSON Schema: " + contract_text
+                  + "\nTreat unresolved_questions as a request for an outside decision that prevents completion. "
+                    "When the assigned work is complete, keep it empty. Record editorial suggestions and questions "
+                    "about the story in the review payload where provided. When a prerequisite is genuinely missing, "
+                    "use NEEDS_INPUT and state it. Emit only properties allowed by the selected payload schema.")
         if "verified_experience" in data:
             system += "\nPreviously verified method for this task contract: " + data["verified_experience"]["method"]
         if binding["config"].get("adapter_kind") == "deepseek":
             system += ("\nCopy the outer JSON template in the final task response binding. Fill its payload object using the payload schema. "
                        "All listed keys are at the top level. There is no key named identity. "
-                       "Keep the types and values of the identifying fields intact. "
-                       "Treat unresolved_questions as a request for an outside decision that prevents completion. "
-                       "When the assigned work is complete, keep it empty. Record editorial suggestions and questions "
-                       "about the story in the review payload where provided. When a prerequisite is genuinely missing, "
-                       "use NEEDS_INPUT and state it. Emit only properties allowed by the selected payload schema.")
+                       "Keep the types and values of the identifying fields intact.")
         if binding.get("method_notes"):
             system += "\nPublic craft methods. Use within the supplied perspective and task only:\n" + canonical_bytes(binding["method_notes"]).decode()
         if "dynamic_assignment" in binding:
@@ -730,7 +730,7 @@ class AgentGateway:
             reason = exc.code
         except DomainError as exc:
             reason = exc.code
-        except Exception:
+        except Exception:  # noqa: BLE001 -- retain UNKNOWN without leaking provider headers or credentials.
             # Adapter exceptions may contain request headers/keys. Only a
             # stable diagnostic is retained; the call remains accounting-unknown.
             reason = "MODEL_ADAPTER_FAILURE"

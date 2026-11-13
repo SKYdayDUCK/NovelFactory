@@ -1,16 +1,15 @@
 """S1 exercises the real gateway's task, dispatch, snapshot, and delivery paths."""
-from dataclasses import replace
 import json
+from dataclasses import replace
 
 import pytest
+from test_agent_gateway import FixtureAdapter, setup_gateway
 
 from novel_factory.application.agent_gateway import AgentGateway
 from novel_factory.contracts.registry import validate_contract
 from novel_factory.domain.canonical import fingerprint
 from novel_factory.domain.errors import DomainError
 from novel_factory.infrastructure.creative_config import CreativeHarnessConfig
-from test_agent_gateway import FixtureAdapter, setup_gateway
-
 
 pytestmark = [pytest.mark.postgres, pytest.mark.integration]
 
@@ -40,6 +39,8 @@ def test_frozen_model_input_survives_restart_with_feature_off(kernel_env, monkey
     receipt = gateway.execute(item["principal"], request)
     assert receipt["validation_status"] == "VALIDATED_CANDIDATE"
     user = json.loads(item["adapter"].calls[0].messages[1]["content"])
+    # The protocol rule applies to Codex and every other adapter, too.
+    assert "outside decision that prevents completion" in item["adapter"].calls[0].messages[0]["content"]
     assert "creative_materials" in user and "read_cut" not in user
     assert "dependency_fingerprint" not in json.dumps(user["creative_materials"])
     with item["kernel"].db.uow(write=False) as repo:

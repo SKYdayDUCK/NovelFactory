@@ -1,17 +1,26 @@
 """Real, isolated PostgreSQL test databases. Missing PG is a failure, not a skip."""
 import os
-from pathlib import Path
 import subprocess
 import sys
+from pathlib import Path
 from uuid import uuid4
 
 import pytest
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import make_url
 
+from novel_factory.application.kernel import Kernel
 from novel_factory.infrastructure.database import Database
 from novel_factory.infrastructure.objects import ObjectStore
-from novel_factory.application.kernel import Kernel
+
+
+@pytest.fixture(autouse=True)
+def isolate_model_authorization(monkeypatch):
+    # Local deployment runners may carry production approval. A test that
+    # exercises the live boundary must set its own flag and synthetic backend;
+    # a missed mock must not inherit permission to spend from the operator.
+    monkeypatch.delenv("NF_RUNTIME_LIVE_APPROVED", raising=False)
+
 
 @pytest.fixture(scope="module")
 def kernel_env(tmp_path_factory):

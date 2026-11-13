@@ -103,3 +103,55 @@ def test_missing_input_native_receipt_is_only_a_recovery_proof(kernel_env):
         with pytest.raises(DomainError):
             CandidateDelivery(kernel, gateway).audited_candidate(repo, task, production_accounting=True)
         assert repo.one("call_attempts", {"attempt_id": call["attempt_id"]}) == call
+
+
+@pytest.mark.parametrize("role,kind,permitted", [("reviewer", "literary", True), ("reviewer", "epistemic", True),
+                                                ("writer", "scene_draft", False)])
+def test_unresolved_review_proof_does_not_relax_default_delivery(kernel_env, role, kind, permitted):
+    from novel_factory.application.agent_gateway import AgentGateway
+    from novel_factory.application.native_delivery import require_native_delivery
+    from novel_factory.application.runtime_tasks import RuntimeTaskService
+    from novel_factory.fixtures import load_fixture, point
+
+    kernel = kernel_env["kernel"]
+    world = load_fixture(kernel)
+
+    class UnresolvedReturn(NativeProtocolFixture):
+        def generate(self, request):
+            response = super().generate(request)
+            envelope = json.loads(response.text)
+            if envelope["role_id"] == "reviewer":
+                envelope["payload"] = {"summary": "Synthetic completed reading", "issues": [],
+                                       "counterinterpretations": [], "evidence_refs": []}
+            envelope["unresolved_questions"] = ["Synthetic interpretation remains open in this chapter."]
+            return replace(response, text=json.dumps(envelope))
+
+    adapter = UnresolvedReturn(kernel, "valid")
+    gateway = AgentGateway(kernel, {"fixture": adapter})
+    prepared = RuntimeTaskService(kernel, gateway).prepare(world["principal"], world["world_ref"],
+        role_id=role, task_kind=kind, story_time=point(1), subject_ids=[world["ids"]["sword"]],
+        predicates=["owner"], assignment="Synthetic complete reading with interpretation question", adapter_id="fixture")
+    result = gateway.execute(prepared.principal, {"schema_version": "2.1", "task_id": prepared.task["task_id"],
+        "generation": prepared.task["generation"], "worker_id": prepared.worker_id,
+        "input_ref": prepared.agent_input["input_ref"], "budget_id": kernel.tasks.create_budget(world["world_ref"]["work_id"], "1"),
+        "call_key": "supervised-candidate", "reserve_amount": "0.1", "token_reservation": 100000})
+    with kernel.db.uow(write=False) as repo:
+        task = repo.one("tasks", {"task_id": prepared.task["task_id"]})
+        assert task["state"] == "RESULT_STORED"
+        call = repo.one("call_attempts", {"attempt_id": result["attempt_id"]})
+        budget = repo.one("budgets", {"budget_id": call["budget_id"]})
+        audit = gateway._read_audit(repo, call["attempt_id"])
+        evidence = audit["payload"]
+        args = kernel, repo, task, call, audit, kernel.artifact(repo, evidence["response_ref"], task["work_id"]), kernel.artifact(repo, evidence["output_ref"], task["work_id"])
+        if permitted:
+            require_native_delivery(*args, allow_unresolved_review=True)
+        else:
+            with pytest.raises(DomainError):
+                require_native_delivery(*args, allow_unresolved_review=True)
+        with pytest.raises(DomainError):
+            require_native_delivery(*args)
+        with pytest.raises(DomainError) as default_delivery:
+            CandidateDelivery(kernel, gateway).audited_candidate(repo, task, production_accounting=True)
+        assert default_delivery.value.code == "REVIEW_REQUIRED"
+        assert repo.one("call_attempts", {"attempt_id": call["attempt_id"]}) == call
+        assert repo.one("budgets", {"budget_id": call["budget_id"]}) == budget
