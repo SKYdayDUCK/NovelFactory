@@ -99,10 +99,22 @@
         "output_contract": {
           "$ref": "#/$defs/OutputContract"
         },
+        "verified_experience": {
+          "type": "object", "additionalProperties": false,
+          "required": ["experience_ref", "method", "version"],
+          "properties": {
+            "experience_ref": {"$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"},
+            "method": {"type": "string", "minLength": 1, "maxLength": 1000},
+            "version": {"type": "integer", "minimum": 1}
+          }
+        },
         "creative_harness": {
           "$ref": "https://novel-factory.example/contracts/1.0/harness.schema.json#/$defs/HarnessConfiguration"
         },
         "dynamic_assignment_ref": {
+          "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+        },
+        "knowledge_profile_ref": {
           "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
         },
         "adaptive_instruction_ref": {

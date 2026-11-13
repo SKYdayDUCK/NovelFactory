@@ -511,3 +511,40 @@ def test_blocked_or_incomplete_factual_reading_cannot_accept(kernel_env, failure
             assert not repo.many("artifacts", {"work_id": work, "kind": "NARRATIVE_ACCEPTANCE"})
         assert rolling_status(kernel, owner, work, branch)["frozen_chapters"] == 0
         assert len(calls) == (3 if failure == "epistemic_conflict" else 4)
+
+
+def test_quality_length_checked_before_readers_and_freeze(kernel_env):
+    from novel_factory.application.production_extent import bind_extent
+    kernel = kernel_env["kernel"]
+    f = setup_batch(kernel, count=1)
+    owner, wr = f["principal"], f["world_ref"]
+    work, branch = wr["work_id"], wr["branch_id"]
+    params = request(kernel, f, 1)
+    params["profile"].setdefault("overrides", {})["production_mode"] = "quality"
+    with kernel.objects.lock(), kernel.db.uow() as repo:
+        bind_extent(kernel, repo, owner, wr, {"preset": "short", "unit": "han_characters", "min": 6, "max": 10})
+    with backend() as (adapter, calls, server):
+        original = adapter.generate
+        adapter.generate = lambda packet: replace(original(packet), actual_amount=Decimal(0), currency="USD")
+        lengths = iter([1, 3, 5, 7])
+        def candidate(packet):
+            result = answer(packet)
+            if packet["context"]["role_id"] == "writer":
+                result["text"] = "字" * next(lengths)
+            return result
+        server.packet_candidate = candidate
+        gateway = connect(kernel, adapter)
+        register_rolling(kernel, gateway, owner, **params)
+        for _ in range(60):
+            RuntimeSupervisor(kernel, gateway).run_once(owner, work, branch)
+            cursor = rolling_status(kernel, owner, work, branch)
+            if cursor["state"] == "FROZEN":
+                break
+        assert cursor["state"] == "FROZEN"
+        with kernel.db.uow(write=False) as repo:
+            from novel_factory.application.production_pipeline import _load
+            board = _load(kernel, repo, work, branch)
+            writer = next(node for node in board["nodes"].values() if node["stage"] == "draft")
+            assert [r["actual"] for r in writer["extent_repairs"]] == [1, 3, 5]
+            assert len({r["task_id"] for r in writer["history"]}) == 3
+            assert len(repo.many("tasks", {"work_id": work, "role_id": "reviewer", "task_kind": "epistemic"})) == 1

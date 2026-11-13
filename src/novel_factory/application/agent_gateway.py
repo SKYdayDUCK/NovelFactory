@@ -85,7 +85,8 @@ class AgentGateway:
                             creative_harness=self.creative_harness)
 
     def prepare_input(self, principal, world_ref, *, role_id, task_kind, assignment,
-                      adapter_id=None, skill_name=None, material_refs=(), task_id=None, dynamic_instance_ref=None, routing_instance_id=None, routing_override=None):
+                      adapter_id=None, skill_name=None, material_refs=(), task_id=None, dynamic_instance_ref=None, routing_instance_id=None, routing_override=None,
+                      knowledge_reread_reason=None):
         """Freeze safe instructions/configuration before creating a task.
 
         This is a controller-only operation. material_refs are not granted by
@@ -133,6 +134,12 @@ class AgentGateway:
                 instance_ref=dynamic_instance_ref, generation=1)
         with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
             self.kernel.authorize(repo, principal, world_ref["work_id"], "ADMIN", world_ref["branch_id"])
+            from .knowledge_delivery import freeze_for_task
+
+            knowledge_ref = freeze_for_task(self.kernel, repo, principal, world_ref, role_id,
+                                            task_kind, knowledge_reread_reason)
+            if knowledge_ref is not None:
+                data["knowledge_profile_ref"] = knowledge_ref
             if self.creative_harness.adaptive_instructions:
                 from .adaptive_promotion import AdaptivePromotionService
 
@@ -143,6 +150,11 @@ class AgentGateway:
                     require(selected["baseline_runtime_sha256"] == runtime["sha256"],
                             "TASK_REBIND_REQUIRED", "The released instruction targets a different runtime")
                     data["adaptive_instruction_ref"] = selected["selection_ref"]
+            from .quality_memory import recall, task_scope
+            scope = task_scope(world_ref, role_id, task_kind, runtime["sha256"], data["output_contract"], data["model_config_sha256"])
+            prior_method = recall(self.kernel, repo, world_ref, scope)
+            if prior_method:
+                data["verified_experience"] = prior_method
             validate_contract("AgentInput", data, "agent")
             input_ref = self.kernel._blob(data)
             for ref in data["material_refs"]:
@@ -204,6 +216,10 @@ class AgentGateway:
             require(config["isolation"] == "STATELESS_TEXT_ONLY", "HOST_ISOLATION_UNVERIFIED", "Character execution requires a verified text-only route")
         binding = {"task": task, "grant": grant, "spec": spec, "context": context,
                    "input": data, "runtime": runtime, "config": config}
+        if "knowledge_profile_ref" in data:
+            from .knowledge_delivery import bound_methods
+
+            binding["method_notes"] = bound_methods(self.kernel, repo, spec, data["knowledge_profile_ref"])
         if "routing_decision" in data:
             decision = data["routing_decision"]
             policy = self.kernel.artifact(repo, decision["policy_ref"], task["work_id"],
@@ -385,6 +401,8 @@ class AgentGateway:
                   + "\nRestricted mode: " + str(runtime["restricted_mode"])
                   + "\nIdentity: " + canonical_bytes(identity).decode()
                   + "\nPayload JSON Schema: " + contract_text)
+        if "verified_experience" in data:
+            system += "\nPreviously verified method for this task contract: " + data["verified_experience"]["method"]
         if binding["config"].get("adapter_kind") == "deepseek":
             envelope = {key: value for key, value in identity.items() if key != "dependency_fingerprint"}
             envelope.update(status="SUCCEEDED", unresolved_questions=[], payload={})
@@ -396,6 +414,8 @@ class AgentGateway:
                        "about the story in the review payload where provided. When a prerequisite is genuinely missing, "
                        "use NEEDS_INPUT and state it. Emit only properties allowed by the selected payload schema.\n"
                        + canonical_bytes(envelope).decode())
+        if binding.get("method_notes"):
+            system += "\nPublic craft methods. Use within the supplied perspective and task only:\n" + canonical_bytes(binding["method_notes"]).decode()
         if "dynamic_assignment" in binding:
             chosen = binding["dynamic_assignment"]
             system += ("\nTask-specific role instructions:\n" + chosen["role_instructions"]
@@ -481,6 +501,8 @@ class AgentGateway:
                 from novel_factory.application.audit_log import LogService
                 if kind == "AGENT_CALL_EVIDENCE":
                     LogService.model(repo.conn, artifact_revision_id, payload)
+                    from .quality_memory import observe_attempt
+                    observe_attempt(self.kernel, repo, binding, payload, ref)
                 else:
                     LogService.model_stage(repo.conn, binding["task"], identity, kind, artifact_revision_id,
                                            model=binding["config"]["model"] if kind=="AGENT_ROLE_TOOL_RESPONSE" else None)

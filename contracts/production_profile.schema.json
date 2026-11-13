@@ -129,6 +129,7 @@
             "chapter_volume_and_work"
           ]
         },
+        "production_mode": {"enum": ["standard", "quality"]},
         "max_reworks": {
           "type": "integer",
           "minimum": 0,
@@ -272,6 +273,7 @@
             "chapter_volume_and_work"
           ]
         },
+        "production_mode": {"enum": ["standard", "quality"]},
         "max_reworks": {
           "type": "integer",
           "minimum": 0,

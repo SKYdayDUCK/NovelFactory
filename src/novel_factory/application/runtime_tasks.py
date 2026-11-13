@@ -49,7 +49,8 @@ class RuntimeTaskService:
                 knowledge_cut=None, actor_id=None, input_artifacts=(), material_refs=(),
                 max_amount="1", token_budget=200_000,
                 currency="USD", lease_seconds=600, deadline_seconds=3600,
-                skill_name=None, queue_state=None, dynamic_instance_ref=None, routing_override=None):
+                skill_name=None, queue_state=None, dynamic_instance_ref=None, routing_override=None,
+                knowledge_reread_reason=None):
         """Freeze authorized inputs and issue a fresh role grant, without enqueueing work.
 
         The controller must possess ADMIN already. Runtime grants receive only
@@ -80,7 +81,8 @@ class RuntimeTaskService:
         task_id = str(uuid4())
         prepared = self.gateway.prepare_input(controller, world_ref, role_id=role_id,
             task_kind=task_kind, assignment=assignment, adapter_id=adapter_id,
-            skill_name=skill_name, material_refs=material_refs, task_id=task_id, dynamic_instance_ref=dynamic_instance_ref, routing_instance_id=actor_id, routing_override=routing_override)
+            skill_name=skill_name, material_refs=material_refs, task_id=task_id, dynamic_instance_ref=dynamic_instance_ref, routing_instance_id=actor_id, routing_override=routing_override,
+            knowledge_reread_reason=knowledge_reread_reason)
         manifest = self.kernel.put_artifact(controller, world_ref["work_id"],
             {"subject_ids": list(subject_ids), "predicates": list(predicates)}, "INPUT_MANIFEST")
         caps = ["READ", "COMPILE", "TASK_CREATE", "TASK_CLAIM", "ARTIFACT_WRITE"]

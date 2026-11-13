@@ -15,6 +15,7 @@ from .production_pipeline import _artifact
 class UnparsedDesign:
     text: str
     diagnostic: dict
+    withhold_response: bool = False
 
 
 def unparsed_diagnostic(error):
@@ -33,10 +34,36 @@ def initial_or_structural_repair(round_index, designer):
     )
 
 
-def returned_design(kernel, repo, gateway, task, wr, designer, *, allow_malformed=False):
+def structured_diagnostic(raw, audit, bound):
+    """Reproduce an envelope/contract failure from the frozen bytes without adopting its payload."""
+    import json
+    from ..contracts.registry import contract_diagnostic
+    if audit["reason"] == "MODEL_PROTOCOL_ERROR":
+        return {"keyword": "truncated"} if json.loads(raw["provider_response_json"]).get("finish_reason") == "length" else None
+    value = strict_json_loads(raw["text"])
+    error = contract_diagnostic("AgentModelResponse", value, "agent")
+    if error:
+        return {"location": "envelope", **error}
+    if any(value[key] != audit[key] for key in ("task_id", "generation", "role_id", "actor_id", "world_ref", "context_bundle_id")):
+        return {"keyword": "identityMismatch", "location": "envelope"}
+    target = bound["output_contract"]
+    error = contract_diagnostic(target["name"], value["payload"], target["version"])
+    return {"location": "payload", **error} if error else None
+
+
+def returned_design(kernel, repo, gateway, task, wr, designer, *, allow_malformed=False, allow_contract=False, board_node=None):
     work = wr["work_id"]
-    require(task["state"] == "FAILED" and task["role_id"] == "world_designer"
-            and task["task_kind"] == "initial_world",
+    expected_role = (task["role_id"], task["task_kind"])
+    if board_node is not None:
+        from .production_pipeline import guard_send
+        job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})
+        require(job and job["config"].get("production_node") == board_node
+                and job["config"]["dispatch"]["input_ref"] == designer["input_ref"],
+                "VIEW_DENIED", "Malformed return is outside the bound production node")
+        board, _, _ = guard_send(kernel, repo, task, job["config"])
+        require(board.get("production_mode") == "quality", "VIEW_DENIED", "Quality repair is disabled")
+    require(task["state"] == "FAILED" and (board_node is not None or expected_role == ("world_designer", "initial_world")
+            or allow_contract and expected_role == ("reviewer", "fact")),
             "TASK_NOT_ACCEPTABLE", "Only a current rejected design can be repaired")
     call = repo.one("call_attempts", {"task_id": task["task_id"], "generation": task["generation"],
                                      "call_key": "supervised-candidate"})
@@ -51,7 +78,7 @@ def returned_design(kernel, repo, gateway, task, wr, designer, *, allow_malforme
     result = repo.one("task_results", {"task_id": task["task_id"], "generation": task["generation"],
                       "result_id": task["current_result_id"], "disposition": "CURRENT"})
     require(audit["outcome"] == "REJECTED" and audit["result_status"] == "FAILED"
-            and audit["output_ref"] is None and audit["reason"] in {"INVALID_ARGUMENT", "INVALID_MODEL_OUTPUT"}
+            and audit["output_ref"] is None and (audit["reason"] in {"INVALID_ARGUMENT", "INVALID_MODEL_OUTPUT"} or allow_contract and audit["reason"] in {"MODEL_PROTOCOL_ERROR", "MODEL_IDENTITY_MISMATCH"})
             and result and result["result_id"] == str(uuid5(UUID(attempt), "task-result"))
             and result["payload"]["status"] == "FAILED" and result["payload"]["artifacts"] == [audit_ref]
             and fingerprint(audit) == audit_ref["sha256"] and audit["world_ref"] == wr
@@ -65,6 +92,24 @@ def returned_design(kernel, repo, gateway, task, wr, designer, *, allow_malforme
             and raw["request_sha256"] == call["request_hash"] == audit["request_sha256"]
             and raw["provider_receipt"] == call["provider_receipt"],
             "INVALID_EVIDENCE", "The design response does not match the original supervised call")
+    if board_node is not None and call["state"] == "UNKNOWN":
+        from .board_schema_repair import verify_board_transport
+        try:
+            verify_board_transport(kernel, audit, raw)
+        except (OSError, ValueError, TypeError, KeyError):
+            raise DomainError("CALL_RECONCILIATION_REQUIRED", "Unreadable transport evidence for board repair") from None
+    if allow_contract and audit["reason"] in {"INVALID_ARGUMENT", "MODEL_IDENTITY_MISMATCH", "MODEL_PROTOCOL_ERROR"}:
+        bound = kernel.artifact(repo, designer["input_ref"], work, kind="AGENT_INPUT")["payload"]
+        diagnostic = structured_diagnostic(raw, audit, bound)
+        if diagnostic:
+            if call["state"] == "UNKNOWN":
+                from .postpaid_delivery import verify_postpaid_transport
+                verify_postpaid_transport(kernel, repo, task, call, row, kernel.artifact(repo, audit["response_ref"], work),
+                                          contract_source=True, board_node=board_node)
+            else:
+                require(call["state"] == "FAILED" and call["actual_amount"] is not None and call["actual_tokens"] is not None,
+                        "CALL_RECONCILIATION_REQUIRED", "Contract failure has no settled accounting")
+            return UnparsedDesign(raw["text"], diagnostic, withhold_response=True), audit, audit_ref
     try:
         envelope = strict_json_loads(raw["text"])
     except DomainError as error:
@@ -75,7 +120,7 @@ def returned_design(kernel, repo, gateway, task, wr, designer, *, allow_malforme
             from .postpaid_delivery import verify_postpaid_transport
             verify_postpaid_transport(kernel, repo, task, call, row,
                                       kernel.artifact(repo, audit["response_ref"], work, kind="AGENT_RESPONSE"),
-                                      syntax_source=True)
+                                      syntax_source=True, board_node=board_node)
         else:
             require(call["state"] == "FAILED" and call["actual_amount"] is not None and call["actual_tokens"] is not None,
                     "CALL_RECONCILIATION_REQUIRED", "The rejected return is not a completed, accounted attempt")

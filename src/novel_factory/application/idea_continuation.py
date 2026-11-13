@@ -15,6 +15,9 @@ from novel_factory.application.kernel import require
 from novel_factory.application.planning import PlanningService
 from novel_factory.application.production_pipeline import _current_owner
 from novel_factory.application.runtime_tasks import RuntimeTaskService
+from .idea_window import window_diagnostics
+from .quality_memory import PAUSED, plan_repair, reflect_repair, verify_method
+from .scene_revision import editorial_blockers
 from novel_factory.application.supervisor import RuntimeSupervisor
 from novel_factory.application.volume_successor import _selected
 from novel_factory.domain.errors import DomainError
@@ -29,13 +32,13 @@ def _pending(cursor):
     )
 
 
-def _enroll(kernel, repo, gateway, owner, wr, cursor, assignment, refs, *, reviewing):
+def _enroll(kernel, repo, gateway, owner, wr, cursor, assignment, refs, *, reviewing, review_kind="fact"):
     auth = cursor["allowance"]
     seconds = int(
         (datetime.fromisoformat(cursor["authorization"]["deadline"]) - repo.now()).total_seconds()
     )
     require(seconds > 0, "TASK_EXPIRED", "Planning allowance expired")
-    kind = "fact" if reviewing else "window_plan"
+    kind = review_kind if reviewing else "window_plan"
     role = "reviewer" if reviewing else "volume_director"
     text = json.dumps(assignment, ensure_ascii=False)
     require(len(text) <= 32000, "CAPACITY_LIMIT", "Planning brief exceeds the role prompt boundary")
@@ -124,7 +127,19 @@ def _plan_turn(kernel, gateway, repo, owner, wr, cursor, key, source):
         cursor["target_chapters"] - cursor["chapter_count"], cursor["profile"]["window_chapters"]
     )
     base = {"work_head": wr, "checkpoint": cursor["last_checkpoint"], "plan_ref": previous_plan}
+    quality = cursor["profile"].get("production_mode") == "quality"
     planned = kernel._prior(repo, owner, work, "P6_NEXT_PLANNER", key, {})
+    history = []
+    round_key = key
+    if planned and quality:
+        while True:
+            next_key = key + ":revision:" + str(len(history) + 1)
+            newer = kernel._prior(repo, owner, work, "P6_NEXT_PLAN_REVISE", next_key, {})
+            if newer is None:
+                break
+            planned, round_key = newer, next_key
+            history.append(newer["repair_plan"])
+
     if not planned:
         assignment = {
             "task": "根据已接受前文、现有规则及读者已知信息，自主规划下一卷。只提交未来目标，不把计划记作世界事实。",
@@ -165,12 +180,32 @@ def _plan_turn(kernel, gateway, repo, owner, wr, cursor, key, source):
         return None
     evidence, plan = _audited_design_result(kernel, gateway, repo, task, wr)
     goals = plan["chapter_goals"]
+    def revise(family, diagnostics, trigger_task, proof):
+        selection = plan_repair(family, diagnostics, history)
+        decision = reflect_repair(kernel, repo, owner, wr, trigger_task["task_id"], proof["attempt_id"],
+                                  proof["output_ref"], selection, "NEXT_VOLUME_REPAIR")
+        if decision["decision"] == PAUSED:
+            return {"status": "NEXT_PLAN_BLOCKED", "reason": PAUSED, "repair_plan": decision}
+        packet = kernel.artifact(repo, evidence["input_ref"], work, kind="AGENT_INPUT")["payload"]
+        assignment = json.loads(packet["assignment"])
+        assignment.update(previous_candidate=plan, targeted_findings=diagnostics, repair_strategy=decision["method"])
+        refs = [source["design_ref"], previous_plan, cursor["last_checkpoint"], evidence["output_ref"]]
+        if proof["output_ref"] != evidence["output_ref"]:
+            refs.append(proof["output_ref"])
+        tid = _enroll(kernel, repo, gateway, owner, wr, cursor, assignment, refs, reviewing=False)
+        receipt = {**base, "task_id": tid, "prior_task": task["task_id"], "error_attempt": proof["attempt_id"],
+                   "previous_ref": evidence["output_ref"], "repair_plan": decision, "status": "NEXT_PLAN_REVISION_ENROLLED"}
+        kernel._receipt(repo, owner, wr, "P6_NEXT_PLAN_REVISE", key + ":revision:" + str(len(history) + 1), {}, receipt)
+        return receipt
+
+    if quality and (diagnostics := window_diagnostics(goals, max_goals)):
+        return revise("schema", diagnostics, task, evidence)
     require(
         0 < len(goals) <= max_goals and len(set(goals)) == len(goals),
         "CAPACITY_LIMIT",
         "Next volume must fit the remaining authorized chapter extent",
     )
-    reviewed = kernel._prior(repo, owner, work, "P6_NEXT_PLAN_REVIEW", key, {})
+    reviewed = kernel._prior(repo, owner, work, "P6_NEXT_PLAN_REVIEW", round_key, {})
     if reviewed is None:
         review_brief = {
             "task": "独立检查下一卷目标是否延续已接受的前文，核查矛盾、遗漏或重复。登记须修改的问题。",
@@ -195,7 +230,7 @@ def _plan_turn(kernel, gateway, repo, owner, wr, cursor, key, source):
             "candidate_ref": evidence["output_ref"],
             "status": "NEXT_PLAN_REVIEW_ENROLLED",
         }
-        kernel._receipt(repo, owner, wr, "P6_NEXT_PLAN_REVIEW", key, {}, receipt)
+        kernel._receipt(repo, owner, wr, "P6_NEXT_PLAN_REVIEW", round_key, {}, receipt)
         return receipt
     review = repo.one("tasks", {"task_id": reviewed["task_id"], "work_id": work}, lock="update")
     if review["state"] != "RESULT_STORED":
@@ -207,7 +242,17 @@ def _plan_turn(kernel, gateway, repo, owner, wr, cursor, key, source):
         "Review must address this planning revision from another principal",
     )
     proof, findings = _audited_design_result(kernel, gateway, repo, review, wr)
-    require(not findings["issues"], "REVIEW_REQUIRED", "Next plan requires targeted revision")
+    issues = findings["issues"]
+    if quality:
+        blockers = editorial_blockers(issues)
+        if blockers:
+            diagnostics = [{k: issue[k] for k in ("category", "severity", "description", "suggested_change")}
+                           for issue in blockers]
+            return revise("editorial", diagnostics, review, proof)
+        verify_method(kernel, repo, owner, wr, planned.get("repair_plan"), evidence, "window_plan",
+                      evidence["output_ref"], proof["attempt_id"], proof["output_ref"])
+    else:
+        require(not issues, "REVIEW_REQUIRED", "Next plan requires targeted revision")
     volume, refs = create_planned_window(
         kernel,
         owner,

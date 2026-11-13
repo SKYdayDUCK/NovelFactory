@@ -1,0 +1,72 @@
+# 三书生产与双批次交接
+
+## 在生产机启动第一批
+
+部署到具有持久 PostgreSQL 17、对象存储和 systemd 的 Linux 主机。服务用户使用独立的、只读的源码检出和该版本的 Python 3.12 环境。源码位于 /srv/novelfactory 时可直接使用仓库中的 unit。冻结、实跑和复查都使用同一提交。私有批次目录和对象存储放在 /var/lib/novelfactory；每个批次使用新目录。已运行作品用原目录和相同数据库恢复。编辑代码或轮换已冻结的模型配置时另保留独立检出和实验记录。
+
+服务环境文件为 /etc/novelfactory/p6-production.env。以部署端的密钥管理方式提供 NF_DEEPSEEK_API_KEY，同时设置 NF_RUNTIME_LIVE_APPROVED=1、NF_DATABASE_URL、NF_OBJECT_ROOT、NF_P6_BATCH_DIR。模型配置缺省读取 configs/deepseek-p6.example.json。使用已安装的项目与 Workshop 依赖；从源目录运行时，在服务环境中设置与安装目录一致的 PYTHONPATH。三本共用 Provider 帐户可以受相同 RPM、TPM 和并发限制，每本各有准备和创作账本。宿主机需保留数据库、对象存储、批次私有文件及 Worker 日志。将各环境文件限制为授权服务账户和管理员可读。
+
+在实验专用数据库部署本提交的迁移。核对 nf_dispatch_limits 的 GLOBAL:* 及 ROLE:world_designer 的有效槽位；默认 GLOBAL:* 和 ROLE:* 都是 2。三书初始同时发起三个世界设计请求，需要全局、世界设计角色和实际供应商账户均允许至少三席。在专用库、三席已获授权的情况下，可在一次事务中设置全局和世界设计角色，保留其他职业和已有较高上限。共享部署先核对现有负荷与配额。
+
+```sql
+BEGIN;
+UPDATE nf_dispatch_limits SET slots = GREATEST(slots, 3)
+ WHERE scope = 'GLOBAL' AND subject = '*';
+INSERT INTO nf_dispatch_limits(scope, subject, slots) VALUES ('ROLE','world_designer',3)
+ ON CONFLICT(scope,subject) DO UPDATE SET slots=GREATEST(nf_dispatch_limits.slots, EXCLUDED.slots);
+COMMIT;
+```
+
+以服务账号采用同一套环境运行。授权文件是 0600 的 JSON 对象，顶层键为 A、B、C。每个对象都要包含 preparation 和 writing，每阶段保存 total_amount、reserve_amount（十进制 USD），total_tokens、token_reservation（整数）。可选的 meter_per_dispatch=true 采用已实现的逐任务计量：为确已就绪的下一任务按已授权的单次预留补足账本，保留未决费用。要执行固定总额授权时省略这个字段。不得将预留金额作为已付费用，或在外部账务未决时擅自清除既有预留。单次 Token 预留需覆盖模型输出上限和实际输入的保守估计。不同阶段使用各自的明确授权值。
+
+```bash
+cd /srv/novelfactory
+.venv/bin/python -m alembic upgrade head
+.venv/bin/python scripts/p6_batch.py preflight
+.venv/bin/python scripts/p6_batch.py enroll \
+  --private-dir "$NF_P6_BATCH_DIR" \
+  --allowances /etc/novelfactory/p6-allowances.json
+```
+
+enroll 会验证真实账号能访问两个指定模型，原样读取 examples/p6 中的三条灵感，登记独立作品后写入 enrolled.json。若中途退出，重跑相同命令。三部均登记后由部署管理员启用三个实例。
+
+```bash
+install -m 0644 adapters/systemd/novelfactory-p6-book@.service /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable --now novelfactory-p6-book@{A,B,C}.service
+```
+
+关闭启动控制会话，从独立会话执行 systemctl is-active 检查三个实例，并取得退出后的新任务或回执。观察器必须在实例所在的 POSIX 主机上运行。输出指向一个尚不存在的私有目录；价格卡覆盖的日期必须包含实际有效时段。
+
+```bash
+.venv/bin/python scripts/p6_observe_batch.py \
+  --private-dir "$NF_P6_BATCH_DIR" --output "$NF_P6_BATCH_DIR/observation-01" \
+  --price-card reports/p6/evidence/deepseek-usd-20261113.json
+```
+
+保存启动门槛、0/120/300/600 秒快照、各范围 JSONL、最终汇总和服务日志。三方重叠秒数须来自不同作品原生 HTTP 传输区间的交集。起步时 SENT 或持有 Worker 锁只能解释调度进度。SQL 等待是采样瞬间的观测；价格卡推算、供应商发票、未知金额各自列示。覆盖不完整时保留未测字段。观察输出不含作品正文，原始材料与认证文件继续留在授权生产端。
+
+## 暂停、重启与账务
+
+查看 A、B、C 下的 worker-state.json 和 journalctl -u novelfactory-p6-book@A（按作品替换实例）。用相同版本重启原 unit。任务和代际、Attempt、来源哈希、原始回执以及精确修复契约决定恢复点。普通瞬时进程故障可由 systemd 接管；退出码 3 表示已记录的显式阻断，需要处理其原因。源码或路由变了，先恢复原冻结配置。短时间出现 IDLE 时检查数据库就绪/等待状态、准入票据、服务心跳、租约和凭据期限。跨日生产同时核对授权和账务时效。
+
+用 scripts/p6_runtime_evidence.py 按 preparation-control.json 及后续 control.json 分别导出原生账本。只有证据证明未发送、或使用既有回执按规则恢复时才继续。对于费用未知的已发送请求，先用 p6_inspect_attempt.py、p6_provider_evidence.py 和财务回执核对原 Attempt，通过 p6_reconcile_invoice.py 记录确凿的结算；重新启动不得重复发同一付费请求。对正式编辑退回、授权不足、重复相同错误后的策略重评，记录原候选与判定后交给职权相符的内部角色。开发者仅修共用工程缺陷。新版本另行登记，保留历史拒收。
+
+## 第一批验收和第二批对照
+
+1. 按三书独立 Work/Branch、冻结章序、场景、汉字和世界事件对账。A 为 6,000–10,000 字，B 为 30,000–60,000 字，C 的验收底线是完整 100 章，允许 100–500 章。逐卷检查事实、认知、连续性、独立编辑意见和内部 RELEASE。缺一项就按作品保留未完成原因。
+2. 对每本冻结全文建立两个隔离 GPT 评阅会话。用 p6_external_review.py 的 keygen、enroll、export、sign、import、status，读取同一稿件全部分片，核对原文定位和签名。平均分为两份独立分数的算术平均，85 为最低线，95 为目标。按 p6_finalize_rolling.py 核验最终发布回执。
+3. 第一批完成与独立故障复盘后，记录变更假设、原始证据、负例、回归和适用角色。只向第二批迁移已验证且获准共享的方法，保留各书正文、BELIEF 和私有证据的作用域。更新受保护来源清单，冻结新提交；沿用相同三条灵感、长度、模型路由和可比资源配置，但使用新目录与全新作品、世界、授权和账本。外部模型实际版本、价格时段、并发配置变化要披露。
+4. 两批分别报告完整成书数/3、正式 RELEASE 数/3、首次有效候选数/有首次回执任务数、相同阶段与错误签名复发数、技术与内容返工的调用次数、两次独立评分和均值、真实 Token/价格估算/已结算额、冻结正文汉字/章的每小时速率、队列延迟以及实测三方传输重叠。记录未返回、UNKNOWN、被限流和未成交付的分母，防止幸存者偏差。按相同题材和长度成对比较；三对书不足以单独归因于某项知识或 Skill 变更。
+
+## 冻结卷的编辑实质退回
+
+1. **识别退回。** 在生产主机上用该书的 `control.json` 执行 `python scripts/p6_frozen_edit.py status --binding "$binding"`。编辑阶段的决定非 `APPROVED`，或最终批准仍有待答问题时，状态为 `EDITING_RETURNED`、原因为 `EDITOR_RETURNED`。保存退回阶段索引和最后一条回执的 `task_id`、`attempt_id`、`candidate_ref`。将 `python scripts/p6_runtime_evidence.py --binding "$binding" --output "$new_file"` 写入新的私有文件。由有权读取该作品的人员按原候选核对问题、原文位置及相关稿件范围。结构化输出验证失败进入另一条技术诊断路径，不能把一份有效的退回决定登记为响应格式错误。[决定与回执](../../src/novel_factory/application/frozen_editing.py)
+2. **保持原卷未发布。** 相同有序验收引用和 WorldRef 再次 enroll 会返回原决定。推进器只处理 `EDITING_ACTIVE`。卷内正文顺序取自不可变的 `ROLLING_CHECKPOINT` 链，局部重排只接受尚未打开的窗口。现有接口可以建立有父版本的场景草稿，但单独接受新稿会使旧发布清单过期。若前驱发生变化，后继场景还需要新的交接证明。将此卷与依赖它的后续卷标为等待候选版本恢复，保留原游标、账务及上一已发布前缀。[冻结与窗口替换](../../src/novel_factory/application/rolling_production.py) · [草稿版本](../../src/novel_factory/application/narrative.py) · [发布约束的回归](../../tests/integration/test_release.py)
+3. **恢复的工程前置条件。** 当前没有可将已退回卷的修订稿接回同一滚动生产链的候选版本接口。后续实现须把受权修订任务绑定到退回回执、原冻结卷及涉及的场景，由内部生产角色写稿。为受影响的场景与后继交接重新取得事实、认知、连续性和正文验收。保留原检查点，以明确的父版本建立候选检查点链，并防止并发替换同一旧版本。独立编辑必须实际阅读候选有序稿件、提供覆盖回执并批准同一组引用，然后才能用常规 RELEASE 与跨卷连续性核验推进。开发者、部署管理员和后续 GPT 全文评阅均不代签这些门槛。[冻结卷复核](../../src/novel_factory/application/frozen_editing.py) · [发布清单](../../src/novel_factory/application/release.py) · [跨卷发布](../../src/novel_factory/application/rolling_publication.py)
+
+## 中间卷的连续性复核
+
+质量模式下，中间卷完成 RELEASE 后，Supervisor 取出每个已验收场景的首段原文（最多 600 个字符）。自动记录的含义仅为“读者已看到此段文字”。每条记录使用稳定的来源标识，状态 RESOLVED 只表示该段披露已经发生。情节线、人物动机、伏笔和客观世界变化另有各自的证据和登记入口。这组摘录不能证明该卷所有文学线索均已登记。
+
+独立 reviewer/continuity 通过作品审核路由逐页读取完整的已发布前缀；旧页带入已批准且引用该页来源的读者记录，新页带入最近四条可见披露的压缩内容与原文位置。每页均须提交明确决定，并在清单上关联成功的 Attempt。全部通过后，系统发布这次追加的连续性快照；收益和成本进入本作品账本。未决判断或实质退回可查看 P6_SERIAL_PAGE 收据对应的模型输出。已有历史卷的事件选择或世界解释发生变化时，保留候选与受影响卷清单，交由现有完整的独立连续性复核入口处理。每次完整原文复核仍受原生 2 MB 已发布前缀门槛约束。

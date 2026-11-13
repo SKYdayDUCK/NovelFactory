@@ -76,6 +76,10 @@ def proposal_prompt(binding, editorial=None, joint=None):
             "对白和试探可在 reasoning_summary 中说明，明确区分意图与判定。"
             "证据不足且无法裁决时，可在 unresolved_questions 写明疑问。",
         }
+    if name == "WindowPlan" and not editorial:
+        fixed.update(window_plan_id=candidate_id("window"), status="DRAFT", input_world_ref=spec["world_ref"])
+        return {"copy_into_payload": fixed, "story_time": spec["story_time"],
+                "complete": "按本次获准卷契约与任务给出的范围填写候选窗口及目标。"}
     if name == "WindowPlan" and editorial and editorial["operation"] == "propose_window":
         materials = editorial["materials"]
         change = materials["change_point_ref"]["content"]

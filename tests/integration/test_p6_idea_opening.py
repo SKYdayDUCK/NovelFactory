@@ -19,13 +19,18 @@ from novel_factory.application.supervisor import RuntimeSupervisor
 @pytest.mark.postgres
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    ("deviation", "preset"), [(False, "medium_long"), (True, "medium_long"), (False, "short")]
+    ("deviation", "preset", "harness"), [(False, "medium_long", False), (True, "medium_long", False),
+                                        (False, "short", False), (False, "medium_long", True)]
 )
 def test_reviewed_design_opens_sealed_interaction_before_any_writing(
-    kernel_env, tmp_path, monkeypatch, deviation, preset
+    kernel_env, tmp_path, monkeypatch, deviation, preset, harness
 ):
     monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[2] / "scripts"))
     cli = importlib.import_module("p6_idea")
+    if harness:
+        from novel_factory.infrastructure.creative_config import CreativeHarnessConfig
+        monkeypatch.setenv("NF_CREATIVE_HARNESS_CONFIG", json.dumps(CreativeHarnessConfig(
+            enabled=True, dynamic_agents=True, adaptive_instructions=True).as_dict()))
     kernel = kernel_env["kernel"]
     idea = {
         "idea": "两人在市集丢了信。",
@@ -59,6 +64,8 @@ def test_reviewed_design_opens_sealed_interaction_before_any_writing(
         "total_tokens": 2000000,
         "token_reservation": 100000,
     }
+    if across:
+        allowance["production_mode"] = "quality"
     with backend() as (adapter, _requests, server):
         generate = adapter.generate
         monkeypatch.setattr(
@@ -73,7 +80,31 @@ def test_reviewed_design_opens_sealed_interaction_before_any_writing(
         inherited_reads = []
 
         def answer(packet):
-            ctx = packet["context"]
+            if harness:
+                assert "context" not in packet and "creative_materials" in packet
+                system = _requests[-1]["messages"][0]["content"]
+                ctx = json.loads(system.split("\nIdentity: ", 1)[1].splitlines()[0])
+                # The fixture only translates bytes actually offered on the wire for the
+                # shared responder. It does not consult a DB or reconstruct omitted fields.
+                materials = packet["creative_materials"]
+                refs = [item["value"] for item in packet.get("structured_evidence", [])]
+                fixture_reads = []
+                for scene in materials.get("scene", []):
+                    event_sets = [v["required_event_refs"] for v in refs if "required_event_refs" in v]
+                    fixture_reads.append({"scene_contract": scene, "required_event_refs": sum(event_sets, [])})
+                for passage in materials.get("prose", []):
+                    info = next((v for v in refs if "declared_important_deltas" in v), {})
+                    fixture_reads.append({**info, "text": passage})
+                if ctx["role_id"] == "reviewer" and materials.get("prose"):
+                    sources = [v for v in refs if "prose_index" in v]
+                    assert [v["prose_index"] for v in sources] == list(range(len(materials["prose"])))
+                    assert all(v["draft_ref"] and v["span"] for v in sources)
+                if materials.get("continuity"):
+                    inherited_reads.extend(materials["continuity"])
+                packet = {**packet, **packet.get("candidate_workflow", {}), "context": ctx,
+                          "authorized_materials": [{"content": json.dumps(v)} for v in fixture_reads]}
+            else:
+                ctx = packet["context"]
             role = ctx["role_id"]
             if role == "world_designer":
                 return design
@@ -107,6 +138,11 @@ def test_reviewed_design_opens_sealed_interaction_before_any_writing(
                 assert "simulation_scope" in json.loads(packet["assignment"])
                 return {"volume_brief": "再会", "chapter_goals": ["重回码头"],
                         "scene_situation": "渡船重新靠近市场", "environment_destination": "INITIAL_PLACE"}
+            if role == "reviewer" and "review_serial_continuity" in packet["assignment"]:
+                reading = json.loads(packet["assignment"])
+                assert reading["source_text"] and reading["new_source_entries"]
+                return {"decision": "APPROVED", "reason": "Scoped regression reading.",
+                        "deferred_questions": [], "evidence_refs": []}
             if role == "reviewer":
                 return {
                     "summary": "fixture inspected sources",
@@ -248,14 +284,15 @@ def test_reviewed_design_opens_sealed_interaction_before_any_writing(
             _check_subsequent_volume(kernel, gateway, owner, work, branch, turn, source, actors)
             assert len(inherited_reads) == 1
             memory = inherited_reads[0]
-            assert memory["world_ref"] == turn["world_ref"] and memory["task_world_ref"] != memory["world_ref"]
-            assert memory["entries"] and all("planned_payoff_at" not in e for e in memory["entries"])
+            if harness:
+                assert memory and all(e["interpretation"] and "planned_payoff_at" not in e for e in memory)
+            else:
+                assert memory["world_ref"] == turn["world_ref"] and memory["task_world_ref"] != memory["world_ref"]
+                assert memory["entries"] and all("planned_payoff_at" not in e for e in memory["entries"])
 
 
 def _check_subsequent_volume(kernel, gateway, owner, work, branch, opening, source, actors):
     from editorial_helpers import approve_binding, binding_for
-    from test_continuity import entry, qualify, request, reviewer
-    from novel_factory.application.continuity import ContinuityService
     from novel_factory.application.release import ReleaseService
     from novel_factory.application import rolling_production as rolling
 
@@ -291,9 +328,12 @@ def _check_subsequent_volume(kernel, gateway, owner, work, branch, opening, sour
     release = ReleaseService(kernel).get_release(owner, work, released["release_ref"])
     with kernel.db.uow(write=False) as repo:
         assert kernel.head(repo, work, branch) == wr
-    service = ContinuityService(kernel)
-    pub = request(f, [release], [entry(f, release, 1)], series_id=source["series_id"])
-    qualify(service, owner, reviewer(kernel, f), work, pub)
+    reviewed = until("CONTINUITY_REVIEW_APPROVED")
+    assert reviewed["pages"] == len(release["manifest"]["ordered_artifacts"])
+    with kernel.db.uow(write=False) as repo:
+        decisions = repo.many("receipts", {"work_id": work, "command_type": "P6_SERIAL_PAGE_PASS"})
+        assert len(decisions) == reviewed["pages"]
+        assert all(d["payload"]["attempt_id"] for d in decisions)
     until("ROLLING_CONTINUITY_PUBLISHED")
     enrol = until("VOLUME_SIMULATION_ENROLLED")
     with kernel.db.uow(write=False) as repo:
@@ -337,3 +377,24 @@ def test_split_model_design_contract_requires_profile_specific_opening():
     validate_contract("EnvironmentalOpeningWorldDesign", {**design, "opening": {**opening, "environment": {"moving_entity": "渡船"}}}, "production_profile")
     with pytest.raises(DomainError):
         validate_contract("OpeningWorldDesign", {**design, "protagonist": "陆，年龄二十。", "opening": opening}, "production_profile")
+
+
+def test_serial_reader_projects_only_earlier_approved_reader_evidence_on_exact_source_pages():
+    from novel_factory.application.serial_continuity_review import _pages
+
+    def entry(key, plane, source, ordinal):
+        return {"entry_id": key, "plane": plane, "volume_ordinal": ordinal, "interpretation": key,
+                "source_texts": [{"text_ref": source, "span": {"start": 0, "end": 1}}]}
+
+    entries = [entry("read-before", "READER", "earlier", 1), entry("plan-secret", "LITERARY", "earlier", 1),
+               entry("event", "WORLD_EVIDENCE", "earlier", 1), entry("disclosure", "READER", "later", 2)]
+    pages = _pages({"candidate": {"input_sha256": "frozen", "request": {
+                        "ordered_release_refs": ["old", "new"], "entries": entries}},
+                    "original_texts": [{"volume_ordinal": 1, "text_ref": "earlier", "text": "a" * 8001},
+                                       {"volume_ordinal": 2, "text_ref": "later", "text": "b"}]})
+    assert "".join(p["source_text"] for p in pages) == "a" * 8001 + "b"
+    assert [p["range"] for p in pages] == [[0, 8000], [8000, 8001], [0, 1]]
+    assert all([e["entry_id"] for e in p["previous_reader_evidence"]] == ["read-before"] for p in pages)
+    assert all(not p["new_source_entries"] for p in pages[:-1])
+    assert [e["entry_id"] for e in pages[-1]["new_source_entries"]] == ["disclosure"]
+    assert "plan-secret" not in json.dumps(pages)

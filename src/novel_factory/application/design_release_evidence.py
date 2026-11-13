@@ -49,10 +49,10 @@ def _assignment(kernel, repo, source, record):
 
 
 def _returned(
-    kernel, repo, delivery, task, source, record, *, structural_source=False, ending_plan_read=False, syntax_source=False
+    kernel, repo, delivery, task, source, record, *, structural_source=False, ending_plan_read=False, syntax_source=False, contract_source=False
 ):
     envelope, audit, audit_ref = returned_design(
-        kernel, repo, delivery.gateway, task, source, record, allow_malformed=syntax_source
+        kernel, repo, delivery.gateway, task, source, record, allow_malformed=syntax_source, allow_contract=contract_source
     )
     call = repo.one("call_attempts", {"attempt_id": audit["attempt_id"]})
     _check(
@@ -136,7 +136,7 @@ def _design_output(kernel, repo, delivery, source, record, selected_ref, kind, i
         _check(audit["input_ref"] == record["input_ref"] and audit["output_ref"] == selected_ref)
         return task, audit, candidate, None
     envelope, audit, audit_ref = _returned(
-        kernel, repo, delivery, task, source, record, structural_source=kind == "AGENT_RESPONSE", syntax_source=syntax_source
+        kernel, repo, delivery, task, source, record, structural_source=kind == "AGENT_RESPONSE", syntax_source=syntax_source, contract_source=syntax_source and intake["profile"].get("production_mode") == "quality"
     )
     if kind == "AGENT_RESPONSE":
         _check(selected_ref == audit["response_ref"])
@@ -228,7 +228,8 @@ def verify_adopted_design(kernel, repo, delivery, receipt, adopted):
     )
     design = intake
     rounds = receipt.get("design_revision_round", 0)
-    _check(type(rounds) is int and 0 <= rounds <= 2 + 2 * intake["profile"]["max_reworks"])
+    quality = intake["profile"].get("production_mode") == "quality"
+    _check(type(rounds) is int and rounds >= 0 and (quality or rounds <= 2 + 2 * intake["profile"]["max_reworks"]))
     if rounds:
         _check(receipt["original_input_ref"] == intake["input_ref"])
     structural = editorial = ending = fixes = 0
@@ -261,6 +262,9 @@ def verify_adopted_design(kernel, repo, delivery, receipt, adopted):
             review = _receipt(
                 repo, source, "P6_IDEA_REVIEW", "initial" if index == 0 else str(index)
             )
+            if quality:
+                from .idea_intake import latest_intake_review
+                review = latest_intake_review(repo, source, review)
             review_task, review_audit, report = _review(
                 kernel,
                 repo,
@@ -319,7 +323,7 @@ def verify_adopted_design(kernel, repo, delivery, receipt, adopted):
             if revised.get("revision_purpose") == "SHORT_ENDING":
                 ending += 1
                 _check(
-                    ending == 1
+                    (quality or ending == 1)
                     and packet["short_arc"] == report["short_arc"]
                     and report["short_arc"]["decision"] == "ENDING_PLAN_REQUIRED"
                 )
@@ -341,16 +345,16 @@ def verify_adopted_design(kernel, repo, delivery, receipt, adopted):
                 )
             else:
                 editorial += 1
-                _check(editorial <= intake["profile"]["max_reworks"])
+                _check(quality or editorial <= intake["profile"]["max_reworks"])
         else:
             structural += 1
-            _check(structural <= intake["profile"]["max_reworks"])
+            _check(quality or structural <= intake["profile"]["max_reworks"])
             if revised.get("revision_purpose") == "JSON_SYNTAX_CORRECTION":
                 audit_row = delivery.gateway._read_audit(repo, audit["attempt_id"])
                 audit_ref = {k: audit_row[k] for k in ("artifact_id", "artifact_revision_id", "sha256")}
                 _check(intake.get("model_routes") and initial_or_structural_repair(index, design)
                        and isinstance(candidate, UnparsedDesign) and "candidate" not in packet
-                       and packet["raw_response_text"] == candidate.text
+                       and (("raw_response_text" not in packet) if candidate.withhold_response or (quality and len(candidate.text) > 16000) else packet["raw_response_text"] == candidate.text)
                        and revised["source_attempt_id"] == audit["attempt_id"] == packet["source_attempt_id"]
                        and revised["source_audit_ref"] == audit_ref == packet["source_audit_ref"]
                        and revised["validation_errors"] == [candidate.diagnostic] == packet["validation_errors"])

@@ -174,7 +174,7 @@ def register_pipeline(kernel, gateway, owner, *, world_ref, series_id, volume_id
 
 def _register(kernel, gateway, owner, *, world_ref, series_id, volume_id, chapters, future, story_time,
               subject_ids, predicates, routes, budget_id, reserve_amount, token_reservation, limits,
-              deadline_seconds, idempotency_key, rolling, continuity_ref=None, scene_extents=None, max_reworks=0):
+              deadline_seconds, idempotency_key, rolling, continuity_ref=None, scene_extents=None, max_reworks=0, quality=False):
     validate_contract("WorldRef", world_ref)
     validate_contract("StoryPoint", story_time)
     for uid in (series_id, volume_id, budget_id):
@@ -241,6 +241,8 @@ def _register(kernel, gateway, owner, *, world_ref, series_id, volume_id, chapte
         board = {k: v for k, v in request.items() if k not in {"chapters", "future", "deadline_seconds"}}
         if rolling is not None:
             board["rolling"] = rolling
+            if quality:
+                board["production_mode"] = "quality"
             if max_reworks:
                 board["max_reworks"] = max_reworks
             if continuity_ref:
@@ -301,7 +303,7 @@ def _ready(board):
     reviews = [k for k, n in nodes.items() if n["stage"] in READING_STAGES and n["state"] == "PENDING"
                and all(nodes[p]["state"] == "DRAFT_STORED" for p in n["parents"])
                and ("knowledge_node" not in n or nodes[n["knowledge_node"]]["state"] == "KNOWLEDGE_CLEAR")]
-    if board.get("max_reworks"):
+    if (board.get("production_mode") == "quality" or board.get("max_reworks")):
         # A later scene within this chapter may need this exact acceptance before it can be written.
         # In that case the full chapter reading can only follow the predecessor's factual clearance.
         def chapter_ready(key):
@@ -346,7 +348,8 @@ def _enroll(kernel, repo, gateway, owner, board, identity):
         assignment = ("在下列前卷假设条件下为未来卷提供候选细纲，使用获准时点之后的窗口，不宣称结局已经发生。"
                       + json.dumps({"contract_revision_id": contract["contract_revision_id"],
                                     "brief": contract["creative_brief"], "intentions": contract["narrative_intents"],
-                                    "assumptions": node["dependencies"], "goal_limit": board["limits"]["window_goals"]},
+                                    "assumptions": node["dependencies"], "goal_limit": board["limits"]["window_goals"],
+                                    "authorized_subject_ids": board["subject_ids"]},
                                    ensure_ascii=False))
     elif stage == "draft":
         scene = kernel.artifact(repo, node["scene_ref"], work, kind="SCENE_PLAN")["payload"]
@@ -362,7 +365,7 @@ def _enroll(kernel, repo, gateway, owner, board, identity):
     else:
         materials = [board["nodes"][p]["output_ref"] for p in node["parents"]]
         assignment = "独立阅读本章给定顺序的全部场景，报告文学观察、证据和仍未判断的问题。"
-    if stage == "review" and board.get("max_reworks"):
+    if stage == "review" and (board.get("production_mode") == "quality" or board.get("max_reworks")):
         assignment += "须改的具体问题标为 BLOCKER 或 CHANGE_REQUEST；每项 subject_ref 引用给定原稿的 draft_ref。可选的文学意见列为建议。"
     if stage == "facts":
         from .rolling_facts import assignment as fact_assignment
@@ -382,16 +385,30 @@ def _enroll(kernel, repo, gateway, owner, board, identity):
         role, kind = "writer", "targeted_revision"
         materials.append(node["prior_draft_ref"])
         refs.append(node["revision_feedback"]["report_ref"])
+        if strategy := node["revision_feedback"].get("strategy_instruction"):
+            assignment += strategy
         assignment += "请只修订指出的问题并返回完整新正文；其余原稿的视角、措辞和事件边界尽量保留。" + json.dumps(
             node["revision_feedback"]["findings"], ensure_ascii=False)
     seconds = int((datetime.fromisoformat(board["authorization"]["deadline"]) - repo.now()).total_seconds())
     require(seconds > 0, "TASK_EXPIRED", "No time remains")
+    repair = (node.get("schema_repairs") or [None])[-1]
+    if repair and repair.get("actual_fix"):
+        repair = None
+    if repair:
+        assignment += "\n上一次任务的结构化输出诊断与修复方法：" + json.dumps(
+            {"diagnostic": repair["diagnostic"], "method": repair["method"]}, ensure_ascii=False)
     task = RuntimeTaskService(kernel, gateway).prepare(owner, wr, role_id=role, task_kind=kind,
+        knowledge_reread_reason="known_error" if repair else None,
         assignment=assignment, knowledge_cut=cut, subject_ids=board["subject_ids"], predicates=board["predicates"],
         story_time=story_time, material_refs=materials, input_artifacts=refs,
         adapter_id=board["routes"]["review" if stage in READING_STAGES else stage], max_amount=board["reserve_amount"], token_budget=board["token_reservation"],
         currency=repo.one("budgets", {"work_id": work, "budget_id": board["budget_id"]})["currency"],
         queue_state="READY", lease_seconds=min(600, seconds), deadline_seconds=seconds)
+    if repair:
+        frozen = kernel.artifact(repo, task.agent_input["input_ref"], work, kind="AGENT_INPUT")["payload"]
+        require(all(frozen[k] == repair[k] for k in ("runtime_sha256", "model_config_sha256", "output_contract")),
+                "TASK_REBIND_REQUIRED", "Technical repair cannot silently change the role, model or output contract")
+        node.pop("reason", None)
     supervisor = RuntimeSupervisor(kernel, gateway)
     role_grant = repo.one("grants", {"grant_id": task.principal.grant_id})
     config, _ = supervisor.dispatch_config(repo, task.spec, role_grant, manifest_ref=task.manifest_ref,
@@ -454,18 +471,25 @@ def prepare_materials(kernel, task, config):
 
 
 def _deliver(kernel, repo, gateway, board, node, task):
+    from .board_schema_repair import record_contract_recovery
     from novel_factory.application.semantic_dependencies import check_task_dependencies
 
     owner = _current_owner(kernel, repo, board)
     check_task_dependencies(repo, task["task_id"], task["generation"])
     evidence, candidate = CandidateDelivery(kernel, gateway).audited_candidate(
         repo, task, production_accounting=bool(board.get("rolling")))
+    model_audit = evidence
     key = "production-result:" + task["task_id"]
     if node["stage"] == "draft":
         actor = Principal(task["grant_id"], task["principal_id"])
         ref = NarrativeService(kernel).store_draft(actor, task["task_id"], task["generation"],
             node["scene_ref"], candidate["text"], key, declared_important_deltas=candidate["important_deltas"],
             handoff_refs=node["handoff_refs"], prior_draft_ref=node.get("prior_draft_ref"), agent_output_ref=evidence["output_ref"])
+        from .scene_revision import repair_scene_extent
+        if repair_scene_extent(kernel, repo, owner, board, node, task, evidence, ref, candidate["text"]):
+            record_contract_recovery(node, task, evidence, ref)
+            kernel.tasks.accept_in_transaction(repo.conn, task["task_id"], task["generation"])
+            return
         state = "DRAFT_STORED"
     elif node["stage"] == "epistemic":
         from .rolling_facts import record_knowledge
@@ -487,7 +511,7 @@ def _deliver(kernel, repo, gateway, board, node, task):
                         {"draft_refs": drafts, "generation": task["generation"], "task_id": task["task_id"],
                          "candidate_ref": evidence["output_ref"], "literary_quality": "NOT_EVALUATED"})
         state = "ADVISORY_REVIEW"
-        if board.get("max_reworks") and (issues := editorial_blockers(candidate["issues"])):
+        if (board.get("production_mode") == "quality" or board.get("max_reworks")) and (issues := editorial_blockers(candidate["issues"])):
             state = "STOPPED"
             node["reason"] = "CHAPTER_REWORK_REQUIRED"
             node["revision_targets"] = [key for key in node["parents"]
@@ -506,6 +530,19 @@ def _deliver(kernel, repo, gateway, board, node, task):
         PlanningService(kernel)._validate_window(repo, kernel.revision(repo, wr), candidate, node["contract_ref"])
         ref = evidence["output_ref"]
         state = "PROVISIONAL_WITH_ASSUMPTIONS"
+    if state in {"KNOWLEDGE_CLEAR", "FACTS_ACCEPTED", "ADVISORY_REVIEW"} and board.get("production_mode") == "quality":
+        from .quality_memory import verify_method
+        for target in node["parents"]:
+            writer = board["nodes"][target]
+            plans = writer.get("repair_plans", [])
+            if not plans or plans[-1].get("review_stage") != node["stage"]:
+                continue
+            writer_call = repo.one("call_attempts", {"task_id": writer["task_id"], "generation": writer["generation"],
+                                                    "call_key": "supervised-candidate"})
+            writer_audit = gateway._read_audit(repo, writer_call["attempt_id"])["payload"]
+            verify_method(kernel, repo, owner, board["world_ref"], plans[-1], writer_audit, "targeted_revision",
+                          writer["output_ref"], model_audit["attempt_id"], ref)
+    record_contract_recovery(node, task, model_audit, ref)
     kernel.tasks.accept_in_transaction(repo.conn, task["task_id"], task["generation"])
     node.update(state=state, output_ref=ref, generation=task["generation"], completed_at=repo.now().isoformat())
 
@@ -640,11 +677,12 @@ def advance_pipeline(kernel, gateway, controller, work, branch):
         expired = repo.now() >= datetime.fromisoformat(board["authorization"]["deadline"])
         settlement = _settlement(bound, repo, board) if any(n["state"] in {
             "PROVISIONAL_WITH_ASSUMPTIONS", "READY_FOR_ADOPTION"} for n in nodes.values()) else None
-        if board.get("max_reworks") and not expired and any(n.get("output_ref") and n["state"] == "STOPPED" for n in nodes.values()):
+        if (board.get("production_mode") == "quality" or board.get("max_reworks")) and not expired and any(n.get("output_ref") and n["state"] == "STOPPED" for n in nodes.values()):
             _current_owner(bound, repo, board)
             revised = revise_scene(bound, repo, board)
             if revised:
-                return {"status": "SCENE_REVISION_REQUESTED", "node_id": revised, "board_ref": _save(bound, repo, controller, board)}
+                status = "STRATEGY_REASSESSMENT_REQUIRED" if nodes[revised].get("repair_plans", [{}])[-1].get("decision") == "STRATEGY_REASSESSMENT_REQUIRED" else "SCENE_REVISION_REQUESTED"
+                return {"status": status, "node_id": revised, "board_ref": _save(bound, repo, controller, board)}
         for identity, node in nodes.items():
             if node["state"] == "WAITING_HANDOFF":
                 if expired:
@@ -672,7 +710,15 @@ def advance_pipeline(kernel, gateway, controller, work, branch):
                     continue
             elif node["state"] == "ENROLLED":
                 task = repo.one("tasks", {"task_id": node["task_id"]}, lock="update")
-                if task["state"] in {"PAUSED", "STALE", "FAILED", "CANCELLED", "WAITING_REVIEW"}:
+                if task["state"] == "FAILED" and board.get("production_mode") == "quality" and not expired:
+                    from .board_schema_repair import recover_board_node
+                    try:
+                        with repo.conn.begin_nested():
+                            recover_board_node(bound, repo, gateway, _current_owner(bound, repo, board),
+                                               board, identity, task)
+                    except DomainError as error:
+                        node.update(state="STOPPED", reason=error.code)
+                elif task["state"] in {"PAUSED", "STALE", "FAILED", "CANCELLED", "WAITING_REVIEW"}:
                     node.update(state="STOPPED", reason="TASK_" + task["state"])
                 elif task["state"] == "RESULT_STORED":
                     try:

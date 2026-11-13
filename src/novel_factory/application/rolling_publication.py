@@ -151,11 +151,19 @@ def require_volume_memory(cursor, request):
         )
 
 
-def advance_approved_publication(kernel, repo, owner, cursor, volume):
+def advance_approved_publication(kernel, repo, owner, cursor, volume, *, gateway=None):
     wr = kernel.head(repo, cursor["world_ref"]["work_id"], cursor["world_ref"]["branch_id"])
     release_ref = _selected(repo, wr["work_id"], "RELEASE:" + volume)
     if release_ref is None:
         return _freeze(kernel, repo, owner, cursor, wr, volume)
+    if cursor["profile"].get("production_mode") == "quality" and gateway:
+        series = cursor["series_id"]
+        releases = [*cursor["release_refs"], release_ref]
+        review_key = _continuity_key(wr, series, cursor["continuity_ref"], releases)
+        if (_selected(repo, wr["work_id"], "CONTINUITY:" + series) == cursor["continuity_ref"]
+                and not _selected(repo, wr["work_id"], review_key)):
+            from .serial_continuity_review import advance_serial_reading
+            return advance_serial_reading(kernel, repo, gateway, owner, wr, cursor, volume, release_ref)
     return _publish(kernel, repo, owner, cursor, wr, volume, release_ref)
 
 def final_review_request(kernel, owner, work, branch):

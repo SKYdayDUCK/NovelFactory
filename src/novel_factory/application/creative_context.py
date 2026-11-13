@@ -35,13 +35,17 @@ def _builtin_provenance():
 
 
 def runtime_provenance(runtime, frozen=None):
-    if frozen is None:
-        manifest = _builtin_provenance()
-        frozen = {"source_commit": manifest["source_commit"],
-                  "role_blob": manifest["roles"].get(runtime["role_id"]),
-                  "skill_blob": manifest["skills"].get(runtime["skill_name"])}
     expected = {"role_blob": _blob_oid(runtime["role_contract"]),
                 "skill_blob": _blob_oid(runtime["skill_instructions"])}
+    if frozen is None:
+        current = _builtin_provenance()
+        # Pre-upgrade tasks contain their selected text. Match both blobs from
+        # a single release, including for a task dispatched after deployment.
+        for release in (current, *current.get("previous", ())):
+            if (release["roles"].get(runtime["role_id"]) == expected["role_blob"]
+                    and release["skills"].get(runtime["skill_name"]) == expected["skill_blob"]):
+                return {"source_commit": release["source_commit"], **expected}
+        raise DomainError("RUNTIME_UNAVAILABLE", "No released source matches these frozen instructions")
     require(all(frozen.get(key) == value for key, value in expected.items()),
              "RUNTIME_UNAVAILABLE", "No verified source revision for these frozen instructions")
     return {"source_commit": frozen["source_commit"], **expected}
@@ -82,6 +86,8 @@ def _boundaries(checks):
                 "meaning": check["expected_status"].lower().replace("_", " "), "value": check["expected_value"]}
         if check["plane"] == "BELIEF":
             item["believed_by"] = check["actor_id"]
+            item["known_at"] = check["known_at"]
+        item["at"] = check["at"]
         result.append(item)
     return result
 
@@ -101,6 +107,7 @@ def _project_material(item):
         card = value["scene_contract"]
         return "scene", {"purpose": value["literary_purpose"], "narrator": card["narrator_mode"],
                          "point_of_view": card["pov_actor_id"], "allowed_invention": card["allowed_invention"],
+                         "story_interval": card["story_interval"], "reader_ordinal": card["reader_cut_ordinal"],
                          "opening": _boundaries(value["entry_checks"]), "closing": _boundaries(value["exit_checks"]),
                          "disclosures": [{k: v[k] for k in ("statement", "truth_status")}
                                          for v in value["allowed_disclosures"]],
@@ -241,8 +248,21 @@ def build_context_packet(binding, materials, editorial=None, joint=None, proposa
                     )}
                     structured.append({"ref": ref, "value": obligations})
                     select(evidence, cut["plane"], "Reconciliation obligations of the assigned draft.", obligations)
+                if task["role_id"] == "reviewer":
+                    # The literary view keeps prose unlabelled; a chapter can contain several
+                    # distinct drafts. Bind issue.subject_ref to the corresponding passage.
+                    pointer = {"prose_index": len(creative["prose"]) - 1, "draft_ref": delivery["draft_ref"],
+                               "text_ref": delivery["text_ref"], "span": delivery["span"]}
+                    structured.append({"ref": ref, "value": pointer})
+                    select(evidence, cut["plane"], "Exact passage for a review finding.", pointer)
         if name == "scene":
-            for style in _decode(item["content"])["selected_styles"]:
+            card = _decode(item["content"])
+            events = {"required_event_refs": card["required_event_refs"],
+                      "event_refs": card["scene_contract"]["event_refs"]}
+            if any(events.values()):
+                structured.append({"ref": ref, "value": events})
+                select(evidence, cut["plane"], "Events bound to this writing card.", events)
+            for style in card["selected_styles"]:
                 select({"kind": "ARTIFACT", "artifact_ref": style["source_ref"]}, "LITERARY",
                        "Style bound to the selected scene.", _style(style["style"]))
 

@@ -209,6 +209,7 @@ def _open(kernel, repo, gateway, owner, cursor):
         idempotency_key="rolling-open:" + cursor["run_id"] + ":" + str(cursor["index"]),
         rolling={"run_id": cursor["run_id"], "index": cursor["index"]},
         max_reworks=cursor.get("max_reworks", 0),
+        quality=cursor["profile"].get("production_mode") == "quality",
         scene_extents=_scene_extents(length, window["chapters"], cursor["frozen_chapters"],
                                      cursor["chapter_count"]),
         continuity_ref=cursor["continuity_ref"]
@@ -592,7 +593,7 @@ def advance_rolling(kernel, gateway, controller, work, branch):
                         from .rolling_publication import advance_approved_publication
 
                         result = advance_approved_publication(
-                            kernel.in_transaction(repo), repo, owner, cursor, window["volume_id"]
+                            kernel.in_transaction(repo), repo, owner, cursor, window["volume_id"], gateway=gateway
                         )
                         if result:
                             return result
@@ -665,7 +666,9 @@ def retry_rolling(kernel, owner, *, world_ref, run_id, window_index, node_id, id
         )
         history = node.get("history", [])
         require(
-            len(history) < cursor["profile"]["max_reworks"],
+            (cursor["profile"].get("production_mode") == "quality" and
+             node.get("reason") not in {event.get("reason") for event in history})
+            or len(history) < cursor["profile"]["max_reworks"],
             "CAPACITY_LIMIT",
             "Node retry allowance exhausted",
         )

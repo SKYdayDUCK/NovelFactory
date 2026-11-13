@@ -120,6 +120,8 @@ def verify_postpaid_transport(
     ending_plan_read=False,
     structural_source=False,
     syntax_source=False,
+    contract_source=False,
+    board_node=None,
 ):
     audit = audit_row["payload"]
     config, usage, raw = audit["model_configuration"], audit["usage"], response_row["payload"]
@@ -204,9 +206,24 @@ def verify_postpaid_transport(
         )
         _check(started.utcoffset() is not None and received.utcoffset() is not None and started < received
                and isinstance(metadata["id"], str) and bool(metadata["id"].strip())
-               and metadata["model"] == config["model"] and metadata["finish_reason"] == "stop")
+               and metadata["model"] == config["model"] and (metadata["finish_reason"] == "stop" or contract_source and metadata["finish_reason"] == "length"))
+        design_scope = (task["role_id"], task["task_kind"]) in {("world_designer", "initial_world"), ("reviewer", "fact")}
+        if board_node is not None:
+            from .production_pipeline import guard_send
+            job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})
+            _check(job and job["config"].get("production_node") == board_node and
+                   job["config"]["dispatch"]["input_ref"] == audit["input_ref"] and (syntax_source or contract_source))
+            board, _, _ = guard_send(kernel, repo, task, job["config"])
+            _check(board.get("production_mode") == "quality")
+        if contract_source:
+            _check(task["state"] == "FAILED" and (design_scope or board_node is not None)
+                   and audit["outcome"] == "REJECTED" and audit["result_status"] == "FAILED" and audit["output_ref"] is None
+                   and audit["reason"] in {"INVALID_ARGUMENT", "MODEL_PROTOCOL_ERROR", "MODEL_IDENTITY_MISMATCH"})
+            from .idea_repair import structured_diagnostic
+            _check(structured_diagnostic(raw, audit, bound_input))
+            return None, bound_input
         if syntax_source:
-            _check(task["state"] == "FAILED" and (task["role_id"], task["task_kind"]) == ("world_designer", "initial_world")
+            _check(task["state"] == "FAILED" and (design_scope or board_node is not None)
                    and audit["outcome"] == "REJECTED" and audit["result_status"] == "FAILED"
                    and audit["reason"] == "INVALID_MODEL_OUTPUT" and audit["output_ref"] is None)
             from .idea_repair import unparsed_diagnostic

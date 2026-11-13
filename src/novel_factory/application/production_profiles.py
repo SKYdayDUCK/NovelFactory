@@ -201,7 +201,7 @@ def compile_dag(profile):
         when=p["review_intensity"] == "chapter_volume_and_work")
     add("literary_edit", 3, ("continuity", "chapter_review", "volume_review"), ("literary_editor", "structure", "edit-volume"))
     add("revise", 3, ("literary_edit",), ("writer", "targeted_revision", "write-scene"),
-        when=p["max_reworks"] > 0, trigger="revision_requested", settings=("max_reworks",))
+        when=p.get("production_mode") == "quality" or p["max_reworks"] > 0, trigger="revision_requested", settings=("max_reworks",))
     add("accept_text", 3, ("reconcile", "knowledge", "literary_edit", "revise"))
     for judge in ("blind_review_a", "blind_review_b"):
         add(judge, 3, ("accept_text",), ("reviewer", "literary", "review-consistency"))

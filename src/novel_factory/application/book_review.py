@@ -539,6 +539,8 @@ def blind_messages(kernel, repo, binding, config):
         + runtime["role_contract"]
         + "\n"
         + runtime["skill_instructions"]
+        + ("\nPublic craft methods:\n" + canonical_bytes(binding["method_notes"]).decode()
+           if binding.get("method_notes") else "")
         + "\nIdentity: "
         + canonical_bytes(identity).decode()
         + "\nPayload JSON Schema: "

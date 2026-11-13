@@ -27,7 +27,7 @@ from novel_factory.interfaces.bindings import read_private_config, runtime_from_
 pytestmark = [pytest.mark.postgres, pytest.mark.integration]
 
 
-@pytest.mark.parametrize("outcome", ["approved", "rejected", "unknown_cost", "continue"])
+@pytest.mark.parametrize("outcome", ["approved", "rejected", "unknown_cost", "continue", "quality_continue"])
 def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypatch, outcome):
     monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[2] / "scripts"))
     cli = importlib.import_module("p6_idea")
@@ -37,7 +37,8 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
         "length": {"preset": "short", "unit": "han_characters", "min": 6000, "max": 10000},
         "genre": "现实",
     }
-    if outcome == "continue":
+    continuation = outcome in {"continue", "quality_continue"}
+    if continuation:
         idea["length"] = {"preset": "medium_long", "unit": "chapters", "min": 3, "max": 3}
     allowance = {
         "adapter_id": "test",
@@ -50,7 +51,7 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
     with ExitStack() as stack:
         adapter, requests, server = stack.enter_context(backend())
         adapters = {"test": adapter}
-        if outcome == "continue":
+        if continuation:
             reviewer, review_requests, review_server = stack.enter_context(backend())
             reviewer.model = "fixture-internal-review"
             review_generate = reviewer.generate
@@ -77,6 +78,10 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
             "chapter_goals": ["选择", "解决"],
         }
 
+        next_reviews = []
+        if outcome == "quality_continue":
+            allowance["production_mode"] = "quality"
+
         def candidate(packet):
             if packet["context"]["role_id"] == "world_designer":
                 return expected
@@ -88,7 +93,7 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
             ref = json.loads(packet["assignment"])["candidate_ref"]
             issues = (
                 []
-                if outcome in {"approved", "continue"}
+                if outcome in {"approved", "continue", "quality_continue"}
                 else [
                     {
                         "issue_id": str(uuid4()),
@@ -103,6 +108,13 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
                     }
                 ]
             )
+            if outcome == "quality_continue" and "actual_text" in json.loads(packet["assignment"]):
+                next_reviews.append(ref)
+                mandatory = len(next_reviews) == 1
+                issues = [{"issue_id": str(uuid4()), "category": "CONTINUITY", "severity": "BLOCKER" if mandatory else "SUGGESTION",
+                           "subject_ref": ref, "description": "Synthetic continuation review",
+                           "evidence_refs": [], "suggested_change": "Check continuity", "disposition": "OPEN",
+                           "issue_kind": "CHANGE_REQUEST" if mandatory else "SEMANTIC_CONCERN"}]
             return {
                 "summary": "fixture checked design",
                 "issues": issues,
@@ -111,7 +123,7 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
             }
 
         server.packet_candidate = candidate
-        if outcome == "continue":
+        if continuation:
             review_server.packet_candidate = candidate
         private = tmp_path / "private-project"
 
@@ -167,7 +179,7 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
                 == 1
             )
             assert repo.one("tasks", {"task_id": receipt["task_id"]})["state"] == "ACCEPTED"
-        if outcome == "continue":
+        if continuation:
             # An already materialized pre-policy idea can opt in at its first
             # window, with every subsequent window inheriting that allowance.
             allowance["review_adapter_id"] = "internal-review"
@@ -194,7 +206,7 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
             )
         assert denied.value.code == "VIEW_DENIED"
 
-        if outcome == "continue":
+        if continuation:
             canon = cli._load_private(private / "supervisor.json")
             owner, wr = kernel.authenticate(canon["token"]), receipt["world_ref"]
             for _ in range(65):
@@ -204,6 +216,13 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
                 if step["status"] in {"NEXT_PLAN_BLOCKED", "NEXT_PLAN_ACCEPTED"}:
                     break
             assert step["status"] == "NEXT_PLAN_ACCEPTED", step
+            if outcome == "quality_continue":
+                assert len(next_reviews) == 2 and next_reviews[0] != next_reviews[1]
+                with kernel.db.uow(write=False) as repo:
+                    row = repo.one("receipts", {"work_id": wr["work_id"], "command_type": "P6_NEXT_PLAN_REVISE"})
+                    assert row["payload"]["prior_task"] != step["plan_task"]
+                    assert row["payload"]["previous_ref"] == next_reviews[0]
+
             cursor = rolling_status(kernel, owner, wr["work_id"], wr["branch_id"])
             assert cursor["chapter_count"] == 3 and cursor["window_count"] == 2
             assert cursor["frozen_chapters"] == 2

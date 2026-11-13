@@ -15,6 +15,7 @@ from .kernel import require
 from .narrative import NarrativeService
 from .planning import PlanningService
 from .production_pipeline import _artifact, _current_owner
+from .quality_memory import PAUSED, plan_repair, reflect_repair
 from .rolling_production import _load, _window, frozen_volume_scenes
 from .runtime_tasks import RuntimeTaskService
 from .volume_successor import _selected
@@ -216,6 +217,10 @@ def _assign(kernel, repo, gateway, owner, state, cursor):
         require(manifest, "STALE_PLAN", "Editors require the current plan manifest")
         cut = {"plane": "PLAN", "plan_manifest_ref": manifest}
         extra.append(manifest)
+    correction = state.get("technical_correction")
+    if correction:
+        assignment.update(repair_strategy=correction["method"], validation_errors=[correction["diagnostic"]],
+                          source_attempt_id=correction["attempt_id"])
     auth = cursor["allowance"]
     seconds = int(
         (datetime.fromisoformat(cursor["authorization"]["deadline"]) - repo.now()).total_seconds()
@@ -227,6 +232,7 @@ def _assign(kernel, repo, gateway, owner, state, cursor):
         "story_time": auth["story_time"],
         "input_artifacts": [*binding["ordered_draft_refs"], *extra],
         "knowledge_cut": cut,
+        "knowledge_reread_reason": "known_error" if correction else None,
         "material_refs": job["scope"],
         "max_amount": auth["reserve_amount"],
         "token_budget": auth["token_reservation"],
@@ -315,10 +321,9 @@ def material(kernel, principal, task, ref, mark):
     return canonical_bytes(delivered)
 
 
-def _deliver(kernel, repo, gateway, owner, state, task):
+def _deliver(kernel, repo, owner, state, task, proof, output):
     wr = state["binding"]["world_ref"]
     job = state["jobs"][state["index"]]
-    proof, output = _audited_design_result(kernel, gateway, repo, task, wr)
     actor = Principal(task["grant_id"], task["principal_id"])
     key = task["task_id"] + ":" + str(task["generation"])
     review = ReviewService(kernel)
@@ -440,6 +445,7 @@ def _deliver(kernel, repo, gateway, owner, state, task):
             )
         )
     kernel.tasks.accept_in_transaction(repo.conn, task["task_id"], task["generation"])
+    state.pop("technical_correction", None)
     state.update(index=state["index"] + 1, active=None)
 
 
@@ -463,20 +469,38 @@ def advance(kernel, gateway, controller, work, branch):
             "TASK_REBIND_REQUIRED",
             "Frozen state changed",
         )
+        task = proof = None
         try:
             with repo.conn.begin_nested():
                 if state["active"]:
                     task = repo.one("tasks", {"task_id": state["active"]})
                     if task["state"] != "RESULT_STORED":
                         return None
-                    _deliver(bound, repo, gateway.with_kernel(bound), owner, state, task)
+                    proof, output = _audited_design_result(bound, gateway.with_kernel(bound), repo, task, state["binding"]["world_ref"])
+                    _deliver(bound, repo, owner, state, task, proof, output)
                 else:
                     _assign(bound, repo, gateway.with_kernel(bound), owner, state, cursor)
         except DomainError as error:
             if error.code == "CALL_RECONCILIATION_REQUIRED":
                 return None
             state = _state(bound, repo, work, branch)
-            state.update(status="EDITING_BLOCKED", reason=error.code)
+            if (cursor["profile"].get("production_mode") == "quality" and proof and state["active"] == task["task_id"]
+                    and error.code in {"INVALID_EVIDENCE", "INVALID_ARGUMENT", "INVALID_MODEL_OUTPUT"}):
+                # Semantic validation of a *completed* structured return failed. The exact
+                # candidate and transport/accounting evidence must still pass native delivery.
+                history = state.setdefault("technical_history", {}).setdefault(str(state["index"]), [])
+                issue = {"kind": error.code, "constraint": error.safe_message}
+                chosen = reflect_repair(bound, repo, owner, state["binding"]["world_ref"], task["task_id"],
+                                        proof["attempt_id"], proof["output_ref"], plan_repair("schema", issue, history),
+                                        "FROZEN_EDITORIAL_CONTRACT")
+                history.append(chosen)
+                if chosen["decision"] == PAUSED:
+                    state.update(status="EDITING_BLOCKED", reason=PAUSED)
+                else:
+                    state.update(active=None, technical_correction={**chosen, "diagnostic": issue,
+                                                                  "attempt_id": proof["attempt_id"]})
+            else:
+                state.update(status="EDITING_BLOCKED", reason=error.code)
         return _save(bound, repo, owner, state)
 
 

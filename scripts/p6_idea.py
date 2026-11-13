@@ -50,8 +50,8 @@ def configured_gateway(kernel, route, review_route=None):
     return AgentGateway(kernel, adapters)
 
 
-def preview(inspiration, adapter_id, review_adapter_id=None):
-    profile = parse_inspiration(inspiration)
+def preview(inspiration, adapter_id, review_adapter_id=None, production_mode=None):
+    profile = parse_inspiration(inspiration, production_mode)
     try:
         configured_gateway(None, adapter_id, review_adapter_id)
     except DomainError as error:
@@ -127,6 +127,8 @@ def _register_window(kernel, gateway, private, allowance):
             owner, work, branch, budget_id, allowance["total_tokens"]
         )
         profile = source["profile"]
+        require("production_mode" not in allowance or allowance["production_mode"] == profile.get("production_mode", "standard"),
+                "TASK_REBIND_REQUIRED", "Window must retain the enrolled production mode")
         length = source["creative_input"]["length"]
         target = (
             length["min"] if isinstance(length, dict) and length["unit"] == "chapters" else None
@@ -152,6 +154,7 @@ def _register_window(kernel, gateway, private, allowance):
                 "preset": profile["preset"],
                 "genre": profile["genre"],
                 "complexity": profile["complexity"],
+                **({"overrides": {"production_mode": profile["production_mode"]}} if "production_mode" in profile else {}),
             },
             world_ref=source["world_ref"],
             series_id=source["series_id"],
@@ -262,7 +265,8 @@ def run_intake(mode, kernel, gateway, private, inspiration=None, allowance=None)
                 "state": task["state"],
                 "context_bundle_id": task["context_bundle_id"],
             }
-        repairable_design = (task["state"] == "FAILED" and intake.get("model_routes") and review is None)
+        repairable_design = (task["state"] == "FAILED" and intake.get("model_routes") and
+                             (review is None or intake["profile"].get("production_mode") == "quality"))
         if mode == "advance" and task["state"] not in {"RESULT_STORED", "ACCEPTED"} and not repairable_design:
             # The supervisor controls call, budget, waiting, and lease recovery.
             return RuntimeSupervisor(kernel, gateway).run_once(
@@ -302,6 +306,7 @@ def main():
         "action", choices=["preflight", "enroll", "advance", "status", "register-window", "authorize-ending-fix"]
     )
     parser.add_argument("--idea", type=Path, help="JSON containing only idea, length and genre")
+    parser.add_argument("--production-mode", choices=("standard", "quality"), help="Freeze the revision policy on enrollment")
     parser.add_argument("--adapter", help="Creation profile (default: codex-text on enrollment)")
     parser.add_argument("--review-adapter", help="Use a distinct model profile for internal reviews")
     parser.add_argument("--private-dir", type=Path)
@@ -333,7 +338,7 @@ def main():
         inspiration = json.loads(args.idea.read_text(encoding="utf-8")) if args.idea else None
         adapter, review_adapter = _requested_routes(args)
         if args.action == "preflight":
-            result = preview(inspiration, adapter, review_adapter)
+            result = preview(inspiration, adapter, review_adapter, args.production_mode)
         else:
             db = Database()
             kernel = Kernel(db, ObjectStore(os.environ.get("NF_OBJECT_ROOT", "var/objects")))
@@ -342,6 +347,7 @@ def main():
                 "adapter_id": adapter,
                 **({"review_adapter_id": review_adapter} if review_adapter is not None else {}),
                 "currency": "USD",
+                **({"production_mode": args.production_mode} if args.production_mode else {}),
                 "total_amount": args.total_amount,
                 "reserve_amount": args.reserve_amount,
                 "total_tokens": args.total_tokens,

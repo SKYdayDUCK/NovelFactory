@@ -15,7 +15,7 @@ from novel_factory.domain.errors import DomainError
 
 
 @pytest.mark.postgres
-@pytest.mark.parametrize("return_final", [False, True])
+@pytest.mark.parametrize("return_final", [False, True, "quality_repair"])
 def test_one_frozen_volume_needs_actual_model_opinions_and_a_separate_decision(
     kernel_env, monkeypatch, return_final
 ):
@@ -32,7 +32,10 @@ def test_one_frozen_volume_needs_actual_model_opinions_and_a_separate_decision(
         )
         gateway = connect(kernel, adapter)
         server.packet_candidate = answer
-        register_rolling(kernel, gateway, owner, **request(kernel, f, 1))
+        params = request(kernel, f, 1)
+        if return_final == "quality_repair":
+            params["profile"].setdefault("overrides", {})["production_mode"] = "quality"
+        register_rolling(kernel, gateway, owner, **params)
         for _ in range(30):
             RuntimeSupervisor(kernel, gateway).run_once(owner, work, branch)
             if rolling_status(kernel, owner, work, branch)["state"] == "FROZEN":
@@ -55,7 +58,7 @@ def test_one_frozen_volume_needs_actual_model_opinions_and_a_separate_decision(
                 }
             if phase == "APPROVAL":
                 return {
-                    "decision": "RETURNED" if return_final else "APPROVED",
+                    "decision": "RETURNED" if return_final is True else "APPROVED",
                     "reason": "复核已完成的编辑阶段和原文。",
                     "deferred_questions": [],
                     "evidence_refs": [],
@@ -76,10 +79,16 @@ def test_one_frozen_volume_needs_actual_model_opinions_and_a_separate_decision(
                     "costs": ["损失定位"],
                 },
             ]
+            quote = "北窗"
+            if return_final == "quality_repair" and phase == "STRUCTURE":
+                if seen.count("STRUCTURE") == 1:
+                    quote = "missing from the original"
+                else:
+                    assert assignment["validation_errors"][0]["kind"] == "INVALID_EVIDENCE"
             return {
                 "decision": "APPROVED",
                 "summary": "保留北窗和雨声。",
-                "scene_functions": [{"scene": 1, "function": "建立观察位置", "quote": "北窗"}]
+                "scene_functions": [{"scene": 1, "function": "建立观察位置", "quote": quote}]
                 if phase == "STRUCTURE"
                 else [],
                 "considered_options": options if phase == "STRUCTURE" else [],
@@ -97,15 +106,15 @@ def test_one_frozen_volume_needs_actual_model_opinions_and_a_separate_decision(
             state = frozen_editing.status(kernel, owner, work, branch)
             if state["status"] != "EDITING_ACTIVE" or turn.get("status") == "BLOCKED":
                 break
-        assert state["status"] == ("EDITING_RETURNED" if return_final else "EDITORIAL_APPROVED"), (
+        assert state["status"] == ("EDITING_RETURNED" if return_final is True else "EDITORIAL_APPROVED"), (
             state["reason"],
             state["index"],
             seen,
             observed[-3:],
         )
-        assert seen == ["SCENE", "CHAPTER", "VOLUME", "STRUCTURE", "SEAM", "LANGUAGE", "APPROVAL"]
-        assert len({r["attempt_id"] for r in state["receipts"]}) == len(seen)
-        if return_final:
+        assert seen == ["SCENE", "CHAPTER", "VOLUME", "STRUCTURE", *(["STRUCTURE"] if return_final == "quality_repair" else []), "SEAM", "LANGUAGE", "APPROVAL"]
+        assert len({r["attempt_id"] for r in state["receipts"]}) == len(seen) - int(return_final == "quality_repair")
+        if return_final is True:
             with pytest.raises(DomainError, match="editorial approval is missing"):
                 final_review_request(kernel, owner, work, branch)
         else:

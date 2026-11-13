@@ -33,6 +33,9 @@ pytestmark = [pytest.mark.postgres, pytest.mark.integration]
         "legacy_ending",
         "authorized_fix",
         "malformed_json",
+        "quality_recovery",
+        "quality_pause",
+        "quality_no_wire",
         "malformed_exhausted",
         "duplicate_key",
         "syntax_then_duplicate",
@@ -78,6 +81,8 @@ def test_adopted_design_and_review_bound_to_release(kernel_env, tmp_path, monkey
         role = packet["context"]["role_id"]
         counts[role] += 1
         if role == "world_designer":
+            if scenario.startswith("quality_"):
+                return design
             if syntax_case:
                 if counts[role] == 1 and scenario == "structural_then_duplicate":
                     return {k: v for k, v in design.items() if k != "opening"}
@@ -201,6 +206,37 @@ def test_adopted_design_and_review_bound_to_release(kernel_env, tmp_path, monkey
         questions=questions,
         nested_identity=original_identity,
     )
+    if scenario.startswith("quality_"):
+        fixture_post = providers.post
+        def contract_failure(**kwargs):
+            raw, receipt, window = fixture_post(**kwargs)
+            supplied = json.loads(raw)
+            if counts["reviewer"] == 0:
+                choice = supplied["choices"][0]
+                value = json.loads(choice["message"]["content"])
+                number = counts["world_designer"]
+                if scenario == "quality_pause" or number <= 2:
+                    del value["payload"]["title"]
+                elif number == 3:
+                    value["world_ref"]["work_id"] = str(uuid4())
+                elif number == 4:
+                    choice["finish_reason"] = "length"
+                elif number == 5:
+                    value["payload"]["world_rules"] = "incorrect type"
+                choice["message"]["content"] = json.dumps(value)
+            body = json.dumps(supplied).encode()
+            if scenario == "quality_recovery":
+                # Exercise the independent on-disk worker evidence fence with synthetic bytes.
+                # No physical network invocation or real model is claimed by this test.
+                from agent_runtime._http_worker import _persist
+                _persist(kwargs, 200, body, True, receipt, window)
+            if scenario == "quality_no_wire" and counts["reviewer"] == 1:
+                v = json.loads(supplied["choices"][0]["message"]["content"])
+                del v["payload"]["summary"]
+                supplied["choices"][0]["message"]["content"] = json.dumps(v)
+                body = json.dumps(supplied).encode()
+            return body, receipt, window
+        monkeypatch.setattr(providers, "post", contract_failure)
     if syntax_case:
         fixture_post = providers.post
         def syntax_failure(**kwargs):
@@ -254,6 +290,9 @@ def test_adopted_design_and_review_bound_to_release(kernel_env, tmp_path, monkey
         "total_tokens": 2000000,
         "token_reservation": 100000,
     }
+
+    if scenario.startswith("quality_"):
+        allowance["production_mode"] = "quality"
 
     def run(action):
         return cli.run_intake(action, kernel, gateway, tmp_path / "project", idea, allowance)
@@ -320,6 +359,12 @@ def test_adopted_design_and_review_bound_to_release(kernel_env, tmp_path, monkey
                 if duplicate_case:
                     rejected = kernel.artifact(repo, result["response_ref"], work, kind="AGENT_RESPONSE")["payload"]["text"]
                     assert rejected == malformed_texts[-1] and rejected.count('"title"') == 2
+            return
+        if scenario == "quality_pause" and result.get("reason") == "STRATEGY_REASSESSMENT_REQUIRED":
+            assert result["repair_plan"]["occurrences"] == 3 and len(requests) == 3
+            assert result == run("advance")
+            with kernel.db.uow(write=False) as repo:
+                assert not repo.one("artifacts", {"work_id": enrolled["world_ref"]["work_id"], "kind": "P6_EXPERIENCE_MEMORY"})
             return
         if result.get("reason") == "ENDING_PLAN_BLOCKERS" and scenario == "authorized_fix":
             from novel_factory.application.idea_ending import authorize_fix
@@ -397,6 +442,8 @@ def test_adopted_design_and_review_bound_to_release(kernel_env, tmp_path, monkey
             == {
                 "malformed_json": 2,
                 "duplicate_key": 2,
+                "quality_recovery": 6,
+                "quality_no_wire": 6,
                 "normalized": 1,
                 "null_annotation": 1,
                 "revised": 2,
@@ -409,6 +456,37 @@ def test_adopted_design_and_review_bound_to_release(kernel_env, tmp_path, monkey
         )
         assert len(requests) == sum(counts.values())
 
+    if scenario == "quality_no_wire":
+        assert counts["reviewer"] == 2
+        with kernel.db.uow(write=False) as repo:
+            assert not repo.one("artifacts", {"work_id": enrolled["world_ref"]["work_id"], "kind": "P6_EXPERIENCE_MEMORY"})
+    if scenario == "quality_recovery":
+        from novel_factory.application.quality_memory import recall, revoke_experience, transfer_verified_method
+        prep = enrolled["world_ref"]
+        with kernel.db.uow(write=False) as repo:
+            mem = repo.one("artifacts", {"work_id": prep["work_id"], "kind": "P6_EXPERIENCE_MEMORY"})
+            assert mem["payload"]["fix_attempt_id"] == result["attempt_id"]
+            scope = mem["payload"]["scope"]
+            frozen = recall(kernel, repo, prep, scope)
+            assert frozen and recall(kernel, repo, wr, scope) is None
+            assert recall(kernel, repo, prep, {**scope, "role_id": "writer"}) is None
+            rounds = sorted((r["payload"] for r in repo.many("receipts", {"work_id": prep["work_id"], "command_type": "P6_IDEA_REVISE"})), key=lambda r: r["round"])
+            assert rounds[1]["repair_plan"]["decision"] == "CHANGED_STRATEGY"
+            assert [r["validation_errors"][0]["keyword"] for r in rounds] == ["required", "required", "identityMismatch", "truncated", "type"]
+            assert len(repo.many("call_attempts", {"task_id": enrolled["task_id"]})) == 1
+        access = cli._load_private(tmp_path / "project" / "preparation.json")
+        prep_owner = kernel.authenticate(access["token"])
+        literary = cli._load_private(tmp_path / "project" / "supervisor.json")
+        literary_owner = kernel.authenticate(literary["token"])
+        transferred = transfer_verified_method(kernel, prep_owner, prep, frozen["experience_ref"], literary_owner, wr)
+        assert transfer_verified_method(kernel, prep_owner, prep, frozen["experience_ref"], literary_owner, wr) == transferred
+        with kernel.db.uow(write=False) as repo:
+            exported = kernel.artifact(repo, transferred, wr["work_id"])["payload"]
+            assert exported["method"] == frozen["method"] and "actual_fix" not in exported and "error_ref" not in exported
+        revoke_experience(kernel, prep_owner, prep, frozen["experience_ref"])
+        with kernel.db.uow(write=False) as repo:
+            assert recall(kernel, repo, prep, scope) is None
+            assert kernel.artifact(repo, frozen["experience_ref"], prep["work_id"])["payload"]["status"] == "VERIFIED"
     if scenario in {"revised", "authorized_fix", "historical_ordinary_patch", "malformed_json"}:
         production = True
         run("register-window")

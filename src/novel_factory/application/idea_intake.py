@@ -16,6 +16,7 @@ from novel_factory.application.planning import PlanningService
 from novel_factory.application.production_pipeline import _artifact
 from novel_factory.application.production_profiles import bind_profile, resolve_profile
 from novel_factory.application.release import ReleaseService
+from novel_factory.application.quality_memory import PAUSED, plan_repair, reflect_repair, verify_method
 from novel_factory.application.runtime_tasks import RuntimeTaskService
 from novel_factory.application.semantic_dependencies import check_task_dependencies
 from novel_factory.application.supervisor import RuntimeSupervisor
@@ -23,7 +24,7 @@ from novel_factory.contracts.registry import validate_contract
 from novel_factory.domain.canonical import fingerprint
 
 
-def parse_inspiration(data):
+def parse_inspiration(data, production_mode=None):
     require(
         isinstance(data, dict)
         and set(data) == {"idea", "length", "genre"}
@@ -45,7 +46,7 @@ def parse_inspiration(data):
             "Invalid length bounds",
         )
         length = length["preset"]
-    return resolve_profile(length, data["genre"])
+    return resolve_profile(length, data["genre"], {"production_mode": production_mode} if production_mode else {})
 
 
 def _first_window_limit(profile, inspiration):
@@ -70,7 +71,7 @@ def enroll_idea(kernel, gateway, inspiration, allowance, prep_work_id):
     The preparation work contains only an editorial intake record. Its grant cannot
     see or write the literary world, which does not exist until delivery.
     """
-    profile = parse_inspiration(inspiration)
+    profile = parse_inspiration(inspiration, allowance.get("production_mode"))
     route = allowance["adapter_id"]
     review_route = allowance.get("review_adapter_id")
     check_idea_models(gateway.adapters, route, review_route)
@@ -89,6 +90,10 @@ def enroll_idea(kernel, gateway, inspiration, allowance, prep_work_id):
         work_id=prep_work_id,
     )
     wr, owner = created["world_ref"], created["principal"]
+    # Preparation and literary production are separate works. Bind only the
+    # public genre/method selection here, before the first task is frozen.
+    with kernel.db.uow() as repo:
+        bind_profile(kernel, repo, owner, wr, profile)
     model_routes = None
     policy_ref = None
     if review_route is not None:
@@ -212,6 +217,8 @@ def design_round(kernel, repo, owner, wr, intake):
         review = kernel._prior(repo, owner, wr["work_id"], "P6_IDEA_REVIEW", key, {})
         next_design = kernel._prior(repo, owner, wr["work_id"], "P6_IDEA_REVISE", str(round_index + 1), {})
         if next_design is None:
+            if review and intake["profile"].get("production_mode") == "quality":
+                review = latest_intake_review(repo, wr, review)
             return round_index, {**designer, "structure_count": structure_count, "editorial_count": editorial_count,
                                  "ending_count": ending_count}, review
         if next_design.get("revision_purpose") == "SHORT_ENDING":
@@ -224,8 +231,22 @@ def design_round(kernel, repo, owner, wr, intake):
         round_index += 1
 
 
+def latest_intake_review(repo, wr, review):
+    while True:
+        next_review = repo.one("receipts", {"work_id": wr["work_id"], "branch_id": wr["branch_id"],
+                               "command_type": "P6_IDEA_REVIEW_REPAIR", "idempotency_key": review["task_id"]})
+        if not next_review:
+            return review
+        review = next_review["payload"]
+
+
+def editor_review_task(kernel, repo, owner, wr, index):
+    receipt = kernel._prior(repo, owner, wr["work_id"], "P6_IDEA_REVIEW", str(index) if index else "initial", {})
+    return latest_intake_review(repo, wr, receipt)["task_id"]
+
+
 def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence,
-                        design, round_index, *, revision=None, structure_repair=False, ending_plan=False, editor_decision=None, diagnostics=None):
+                        design, round_index, *, revision=None, structure_repair=False, ending_plan=False, editor_decision=None, diagnostics=None, failed_review=None):
     job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})["config"]
     source = kernel.artifact(repo, job["dispatch"]["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]
     budget = repo.one("budgets", {"budget_id": intake["budget_id"], "work_id": wr["work_id"]})
@@ -308,6 +329,44 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
                 content["resolution_instruction"] = "按 issue_ids 顺序逐一核对原问题在新版本是否已实质解决并写明理由；未解决填 OPEN。"
         content["task"] = ("独立核查当前设计与灵感、世界规则、人物初始所知和首窗目标是否相容。"
                            "阻止成书的矛盾列为 BLOCKER，普通改善建议和待讨论问题分别用 SUGGESTION、QUESTION。")
+    if failed_review:
+        content["repair_strategy"] = failed_review["plan"]["method"]
+        content["validation_errors"] = [failed_review["diagnostic"]]
+    repair_plan = None
+    if is_revision and intake["profile"].get("production_mode") == "quality":
+        family = "schema" if syntax_source or structure_repair or diagnostics else "editorial"
+        if syntax_source:
+            observed = {key: value for key, value in design.diagnostic.items() if key not in {"offset", "line", "column"}}
+            if design.withhold_response or len(design.text) > 16000:
+                content.pop("raw_response_text")
+                content["task"] = "上次返回未通过契约校验。请从授权灵感及本次 Schema 重新构造完整结果，严格使用本次身份。"
+        elif revision:
+            report = revision[0]
+            observed = sorted(i["category"] + "/" + i["issue_kind"] + "/" + i["severity"]
+                              for i in report["issues"] if i["disposition"] in {"OPEN", "ACCEPT"})
+            if ending_plan:
+                observed.append("ENDING_PLAN_REQUIRED")
+        else:
+            observed = diagnostics or ["opening"]
+        history = [r["payload"]["repair_plan"] for r in repo.many("receipts", {
+            "work_id": wr["work_id"], "branch_id": wr["branch_id"], "command_type": "P6_IDEA_REVISE"})
+            if "repair_plan" in r["payload"]]
+        attempt = evidence.get("attempt_id")
+        if revision:
+            review_task = repo.one("tasks", {"task_id": editor_review_task(kernel, repo, owner, wr, round_index - 1)})
+            reviewed = repo.one("call_attempts", {"task_id": review_task["task_id"], "generation": review_task["generation"],
+                                                  "call_key": "supervised-candidate"})
+            attempt = reviewed["attempt_id"]
+            failed_task = reviewed["task_id"]
+        else:
+            failed_task = task["task_id"]
+        repair_plan = reflect_repair(kernel, repo, owner, wr, failed_task, attempt,
+                                     revision[1] if revision else evidence["output_ref"],
+                                     plan_repair(family, observed, history), "DESIGN_REVISION")
+        if repair_plan["decision"] == PAUSED:
+            return {"status": "DESIGN_REWORK_REQUIRED", "reason": PAUSED, "repair_plan": repair_plan,
+                    "source_attempt_id": attempt}
+        content["repair_strategy"] = repair_plan["method"]
     if intake["profile"]["preset"] == "short" and not diagnostics and not syntax_source:
         content["extent_instruction"] = ("在给定篇幅和章节数内完成整部短篇。核对开场条件、中段发展、转折和结局"
                                          "都由这些章节目标承载，并给核心冲突安排可辨认的收束。")
@@ -324,6 +383,8 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
         role_id=role_id,
         task_kind=task_kind,
         skill_name=skill,
+        knowledge_reread_reason=("known_error" if diagnostics or syntax_source else
+                                 "review_failure" if revision else None),
         assignment=assignment,
         adapter_id=POLICY_ROUTE if "routing_decision" in source else source["adapter_id"],
         subject_ids=[_uid(wr["work_id"], "editorial-intake")],
@@ -337,7 +398,9 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
         currency=budget["currency"],
         input_artifacts=inputs,
     )
-    if diagnostics or syntax_source:
+    if diagnostics or syntax_source or failed_review:
+        if failed_review:
+            source = kernel.artifact(repo, failed_review["record"]["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]
         frozen = kernel.artifact(repo, role.agent_input["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]
         require(frozen["adapter_id"] == source["adapter_id"]
                 and frozen["model_config_sha256"] == source["model_config_sha256"]
@@ -357,6 +420,7 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
     receipt = {
         "status": "DESIGN_REVISION_ENROLLED" if is_revision else "DESIGN_REVIEW_ENROLLED",
         "round": round_index,
+        **({"repair_plan": repair_plan} if repair_plan else {}),
         **({"review_ref": revision[1]} if revision else {}),
         **({"revision_purpose": "JSON_SYNTAX_CORRECTION", "validation_errors": [design.diagnostic],
             "source_attempt_id": evidence["attempt_id"], "source_audit_ref": evidence["audit_ref"]} if syntax_source else {}),
@@ -369,6 +433,13 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
         "input_ref": role.agent_input["input_ref"],
         "candidate_ref": evidence["output_ref"],
     }
+    if failed_review:
+        before = failed_review["record"]
+        receipt.update(previous_review_task_id=before["task_id"],
+                       repair_plans=[*before.get("repair_plans", []), failed_review["plan"]],
+                       validation_errors=[failed_review["diagnostic"]])
+        kernel._receipt(repo, owner, wr, "P6_IDEA_REVIEW_REPAIR", before["task_id"], {}, receipt)
+        return receipt
     kernel._receipt(repo, owner, wr, "P6_IDEA_REVISE" if is_revision else "P6_IDEA_REVIEW",
                     str(round_index) if round_index else "initial", {}, receipt)
     return receipt
@@ -392,6 +463,7 @@ def materialize_design(kernel, gateway, owner, wr):
             "HEAD_CONFLICT",
             "Preparation head changed",
         )
+        quality = intake["profile"].get("production_mode") == "quality"
         round_index, designer, selected_review = design_round(kernel, repo, owner, wr, intake)
         task = repo.one(
             "tasks",
@@ -403,9 +475,10 @@ def materialize_design(kernel, gateway, owner, wr):
             envelope, audit, audit_ref = returned_design(
                 kernel, repo, gateway, task, wr, designer,
                 allow_malformed=initial_or_structural_repair(round_index, designer),
+                allow_contract=quality and initial_or_structural_repair(round_index, designer),
             )
             if isinstance(envelope, UnparsedDesign):
-                if selected_review or designer["structure_count"] >= intake["profile"]["max_reworks"]:
+                if selected_review or (not quality and designer["structure_count"] >= intake["profile"]["max_reworks"]):
                     return None, {"status": "DESIGN_SCHEMA_REWORK_REQUIRED", "reason": "JSON_SYNTAX_REPAIR_EXHAUSTED",
                                   "source_attempt_id": audit["attempt_id"], "response_ref": audit["response_ref"],
                                   "validation_errors": [envelope.diagnostic]}
@@ -418,11 +491,11 @@ def materialize_design(kernel, gateway, owner, wr):
                 normalized = normalized_design(kernel, repo, owner, task, wr, designer, envelope, audit, audit_ref)
             if normalized is None:
                 design = validate_contract("FirstWorldDesign", envelope.get("payload"), "production_profile")
-                require(selected_review is None and designer["structure_count"] < intake["profile"]["max_reworks"],
+                require(selected_review is None and (quality or designer["structure_count"] < intake["profile"]["max_reworks"]),
                         "REVIEW_REQUIRED", "The initial design has exhausted its authorized revisions")
                 return None, _enroll_design_step(
                     kernel, gateway, repo, owner, wr, intake, task,
-                    {"output_ref": audit["response_ref"], "audit_ref": audit_ref}, design, round_index + 1,
+                    {"output_ref": audit["response_ref"], "audit_ref": audit_ref, "attempt_id": audit["attempt_id"]}, design, round_index + 1,
                     structure_repair=True,
                 )
             evidence, design = normalized
@@ -449,7 +522,7 @@ def materialize_design(kernel, gateway, owner, wr):
                     "Window format correction changed a field outside the diagnostic")
         diagnostics = window_diagnostics(design["chapter_goals"], limit)
         if diagnostics:
-            if selected_review or designer["structure_count"] >= intake["profile"]["max_reworks"]:
+            if selected_review or (not quality and designer["structure_count"] >= intake["profile"]["max_reworks"]):
                 return None, {"status": "DESIGN_SCHEMA_REWORK_REQUIRED", "validation_errors": diagnostics,
                               "source_attempt_id": evidence["attempt_id"], "candidate_ref": evidence["output_ref"]}
             return None, _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence, design,
@@ -475,6 +548,19 @@ def materialize_design(kernel, gateway, owner, wr):
             },
             lock="update",
         )
+        if review and review["state"] == "FAILED" and quality:
+            _check_design_authority(repo, review, wr)
+            failed, proof, audit_ref = returned_design(kernel, repo, gateway, review, wr, selected_review,
+                                                       allow_malformed=True, allow_contract=True)
+            require(isinstance(failed, UnparsedDesign), "INVALID_EVIDENCE", "Review failure needs manual diagnosis")
+            findings = {k: v for k, v in failed.diagnostic.items() if k not in {"offset", "column", "line"}}
+            plan = reflect_repair(kernel, repo, owner, wr, review["task_id"], proof["attempt_id"], audit_ref,
+                                  plan_repair("schema", findings, selected_review.get("repair_plans", [])), "REVIEW_SCHEMA")
+            if plan["decision"] == PAUSED:
+                return None, {"status": "DESIGN_SCHEMA_REWORK_REQUIRED", "reason": PAUSED, "repair_plan": plan}
+            return None, _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence, design,
+                                             round_index, failed_review={"record": selected_review, "plan": plan,
+                                             "diagnostic": failed.diagnostic})
         require(
             review
             and review["state"] == "RESULT_STORED"
@@ -490,7 +576,7 @@ def materialize_design(kernel, gateway, owner, wr):
         )
         arc = review_payload.get("short_arc")
         if arc and arc["decision"] == "ENDING_PLAN_REQUIRED":
-            if designer["ending_count"] == 0:
+            if designer["ending_count"] == 0 or quality:
                 return None, _enroll_design_step(
                     kernel, gateway, repo, owner, wr, intake, task, evidence, design, round_index + 1,
                     revision=({**review_payload, "unresolved_questions": review_evidence.get("revision_questions", [])},
@@ -507,12 +593,16 @@ def materialize_design(kernel, gateway, owner, wr):
                     return None, _enroll_design_step(
                         kernel, gateway, repo, owner, wr, intake, task, evidence, design, round_index + 1,
                         revision=(review_payload, review_evidence["output_ref"]), editor_decision=decision)
+                if quality:
+                    return None, _enroll_design_step(
+                        kernel, gateway, repo, owner, wr, intake, task, evidence, design, round_index + 1,
+                        revision=(review_payload, review_evidence["output_ref"]))
                 return None, {"status": "DESIGN_REWORK_REQUIRED", "reason": "ENDING_PLAN_BLOCKERS",
                               "review_attempt": review_evidence["attempt_id"], "review_ref": review_evidence["output_ref"]}
             confirm_ending(review_payload, evidence["ending_plan"]["source"], evidence["output_ref"])
         issues = review_payload["issues"]
         revision_available = (intake.get("model_routes") and
-                              designer["editorial_count"] < intake["profile"]["max_reworks"])
+                              (quality or designer["editorial_count"] < intake["profile"]["max_reworks"]))
         if intake.get("model_routes"):
             from .scene_revision import editorial_blockers
             open_questions = [i for i in issues if i["disposition"] == "OPEN"
@@ -532,6 +622,8 @@ def materialize_design(kernel, gateway, owner, wr):
                 "review_ref": review_evidence["output_ref"],
                 "issue_count": len(review_payload["issues"]),
             }
+        verify_method(kernel, repo, owner, wr, designer.get("repair_plan"), evidence, "initial_world",
+                      evidence["output_ref"], review_evidence["attempt_id"], review_evidence["output_ref"])
         target_id = _uid(wr["work_id"], "literary-work")
         created, inputs = _build_story(kernel, repo, target_id, design)
         literary_wr = created["world_ref"]
