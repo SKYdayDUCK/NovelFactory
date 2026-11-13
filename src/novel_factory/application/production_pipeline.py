@@ -728,6 +728,10 @@ def advance_pipeline(kernel, gateway, controller, work, branch):
                     continue
             elif node["state"] == "ENROLLED":
                 task = repo.one("tasks", {"task_id": node["task_id"]}, lock="update")
+                if task["state"] == "PAUSED" and board.get("production_mode") == "quality" and not expired:
+                    from .scene_revision import restore_unsent_extent_source
+                    if restore_unsent_extent_source(bound, repo, board, identity, task):
+                        break
                 if task["state"] == "FAILED" and board.get("production_mode") == "quality" and not expired:
                     from .board_schema_repair import recover_board_node
                     try:

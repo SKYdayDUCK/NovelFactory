@@ -547,6 +547,6 @@ def test_quality_length_checked_before_readers_and_freeze(kernel_env):
             writer = next(node for node in board["nodes"].values() if node["stage"] == "draft")
             assert [r["actual"] for r in writer["extent_repairs"]] == [1, 5, 3, 2]
             assert writer["extent_repairs"][-1]["decision"] == "STRATEGY_REASSESSMENT_REQUIRED"
-            assert writer["prior_draft_ref"] == writer["history"][1]["output_ref"]
+            assert writer["prior_draft_ref"] == writer["history"][-1]["output_ref"]
             assert len({r["task_id"] for r in writer["history"]}) == 4
             assert len(repo.many("tasks", {"work_id": work, "role_id": "reviewer", "task_kind": "epistemic"})) == 1

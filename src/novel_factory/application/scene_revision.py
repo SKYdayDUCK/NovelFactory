@@ -93,7 +93,7 @@ def revise_scene(kernel, repo, board):
 
 
 def resume_extent_revision(kernel, repo, owner, board, identity):
-    """Resume a measured length plateau using the closest draft under the same editorial feedback."""
+    """Resume a measured length plateau without replacing the current authorized draft."""
     from .production_extent import _count_han
     writer = board["nodes"][identity]
     history = writer.get("extent_repairs", [])
@@ -109,36 +109,52 @@ def resume_extent_revision(kernel, repo, owner, board, identity):
     findings = editorial_findings(writer)
     extent = writer["han_characters"]
     target = (extent["min"] + extent["max"]) // 2
-    options = []
-    for record in [*writer.get("history", []), writer]:
-        if not record.get("output_ref") or editorial_findings(record) != findings:
-            continue
-        draft = kernel.artifact(repo, record["output_ref"], wr["work_id"], kind="NARRATIVE_DRAFT")["payload"]
-        if (draft["input_world_ref"] != wr or draft["scene_ref"] != writer["scene_ref"]
-                or draft["handoff_refs"] != writer["handoff_refs"]):
-            continue
-        measured = _count_han(kernel.objects.read(draft["text_ref"]["sha256"]).decode("utf-8"))
-        if extent["min"] <= measured <= extent["max"]:
-            continue
-        distance = max(extent["min"] - measured, measured - extent["max"])
-        options.append((distance, measured, record["output_ref"]))
-    require(options, "INVALID_EVIDENCE", "No authorized earlier draft has a measured length")
-    _, measured, prior = min(options, key=lambda o:o[0])
     current = writer["output_ref"]
+    draft = kernel.artifact(repo, current, wr["work_id"], kind="NARRATIVE_DRAFT")["payload"]
+    require(draft["input_world_ref"] == wr and draft["scene_ref"] == writer["scene_ref"]
+            and draft["handoff_refs"] == writer["handoff_refs"], "INVALID_EVIDENCE", "Writer source changed")
+    measured = _count_han(kernel.objects.read(draft["text_ref"]["sha256"]).decode("utf-8"))
+    require(measured == history[-1]["actual"], "INVALID_EVIDENCE", "Length measurement differs from the latest draft")
+    best = min(history, key=lambda item:item["distance"])["actual"]
     task = repo.one("tasks", {"task_id":writer["task_id"], "generation":writer["generation"]})
     require(task and task["state"] == "ACCEPTED", "INVALID_EVIDENCE", "Length recovery requires an accepted writer task")
     call = repo.one("call_attempts", {"task_id":task["task_id"], "generation":task["generation"],
                                       "call_key":"supervised-candidate"})
-    method = (f"以本次提供的最接近目标的原稿为底本。实测{measured}个汉字，目标{target}个。"
+    method = (f"以本次提供的最新原稿为底本。实测{measured}个汉字，目标{target}个。此前最接近区间的实测值为{best}个。"
               f"请{'删减' if measured > target else '补足'}约{abs(measured-target)}个汉字；"
               "保留已处理的审稿意见和场景事件，逐段核对后提交完整正文。")
     plan = {**history[-1], "decision":"CHANGED_STRATEGY", "method":method, "strategy_version":2}
     plan = reflect_repair(kernel, repo, owner, wr, task["task_id"], call["attempt_id"], current,
-                          plan, "MEASURED_EXTENT_REVISION")
+                          plan, "CURRENT_DRAFT_EXTENT_REVISION")
     _archive(writer)
-    writer.update(prior_draft_ref=prior, revision_count=writer.get("revision_count", 0)+1,
+    writer.update(prior_draft_ref=current, revision_count=writer.get("revision_count", 0)+1,
                   revision_feedback={"report_ref":plan["reflection_ref"], "strategy_instruction":method,
                                      "findings":[*findings, {"actual_han":measured, "target_han":extent}]})
+    return True
+
+
+def restore_unsent_extent_source(kernel, repo, board, identity, task):
+    """Recover old length tasks whose input draft already has a known successor."""
+    writer = board["nodes"][identity]
+    plans = writer.get("extent_repairs", [])
+    records = writer.get("history") or []
+    if (writer["stage"] != "draft" or task["state"] != "PAUSED" or not records or not plans
+            or plans[-1]["decision"] != PAUSED or not writer.get("prior_draft_ref")
+            or records[-1].get("reason") != PAUSED or not records[-1].get("output_ref")
+            or records[-1]["output_ref"] == writer["prior_draft_ref"]):
+        return False
+    wr = board["world_ref"]
+    require(not repo.many("call_attempts", {"task_id":task["task_id"]}), "CALL_RECONCILIATION_REQUIRED",
+            "Old extent task has provider accounting and needs reconciliation")
+    latest = records[-1]
+    old_draft = kernel.artifact(repo, latest["output_ref"], wr["work_id"], kind="NARRATIVE_DRAFT")["payload"]
+    require(old_draft["task_id"] == latest["task_id"] and old_draft["generation"] == latest["generation"]
+            and old_draft["scene_ref"] == writer["scene_ref"] and old_draft["input_world_ref"] == wr
+            and any(row.get("output_ref") == writer["prior_draft_ref"] for row in records),
+            "INVALID_EVIDENCE", "The earlier extent source does not belong to this scene")
+    restored = dict(latest)
+    _archive(writer)
+    writer.update(restored, state="STOPPED", reason=PAUSED)
     return True
 
 
