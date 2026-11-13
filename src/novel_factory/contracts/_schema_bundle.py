@@ -1,5 +1,5 @@
 # Generated from contracts/*.schema.json. Do not edit by hand.
-SOURCE_SHA256 = {'agent.schema.json': 'c3b3dc2759b11dced2935e0a505498353d038840e680c13a39301a67ed576188', 'commands.schema.json': '3dff553f8b7b1b3b4ab3cc4b77ce8a97ca96b7c1253a99a976e477a2add671fd', 'continuity.schema.json': 'cd0138779ce4a89557b0a6fb955891309d4190e5d47202ecb79861874d1dd446', 'core.schema.json': '472bfa809db9270b7b212969a3896f1567295c0fd68f70e94d9a404dd53ac552', 'editorial.schema.json': '87e7c1d571150431e96c27dac67a2615f980c01040f75560e2f80ddc3823798b', 'harness.schema.json': 'f6fb1a29844f6a1eaf15ef906c849a085f1e842c13272cf3c1d8d5eec240fac1', 'http.schema.json': '52251014597789e4ee23a51bd37833cf8118a8245dcde2ed22e2da9633267df9', 'kernel.schema.json': '46584afa0183147b02acfea6bf1f75ddb9b6375f91e7117ee463f189ebef24e0', 'literary.schema.json': 'aea5e58465ee3ba008ab9de54002a304cddac6e405c3195201157a278c1433cc', 'narrative.schema.json': 'd9145f2ebe4508294c460b8ab98f2ca94315d2dc5ccfeec1be6b6e121fb72c5b', 'planning.schema.json': 'de0e7a051dbec434fb68057b6c15adb58cc2dfd67fd55a8412c513a7600d912d', 'production_profile.schema.json': 'cf9c6c74be060fe931ca8aef1ebc7321b11cd87efd293e3189eb84f41970efeb', 'refinement.schema.json': '88affbc5697427ec9ab4c56764ec0d753c5f0b25a7b1095087a6036be3cfcca3', 'release.schema.json': '0b2841b2daec82911486c42de02863be33478b2ebf37795d2be4cccc0d08f6bc', 'simulation.schema.json': '67c95aef637756785643ab50bc5f3a2027ab7768769e0baea7296946b2e002b4', 'temporal_concurrency.schema.json': '677118bb3ea9ef7a89ac1fbd8a82a71ce611ac9efa00d67de566e7070b83d749', 'upgrades.schema.json': '6ec08ef373a5de1870db24e10f100d335e9bc35b7180bd39a1acd413e9619932'}
+SOURCE_SHA256 = {'agent.schema.json': 'c3b3dc2759b11dced2935e0a505498353d038840e680c13a39301a67ed576188', 'commands.schema.json': '3dff553f8b7b1b3b4ab3cc4b77ce8a97ca96b7c1253a99a976e477a2add671fd', 'continuity.schema.json': 'cd0138779ce4a89557b0a6fb955891309d4190e5d47202ecb79861874d1dd446', 'core.schema.json': '472bfa809db9270b7b212969a3896f1567295c0fd68f70e94d9a404dd53ac552', 'editorial.schema.json': '87e7c1d571150431e96c27dac67a2615f980c01040f75560e2f80ddc3823798b', 'harness.schema.json': 'f6fb1a29844f6a1eaf15ef906c849a085f1e842c13272cf3c1d8d5eec240fac1', 'http.schema.json': '52251014597789e4ee23a51bd37833cf8118a8245dcde2ed22e2da9633267df9', 'kernel.schema.json': '46584afa0183147b02acfea6bf1f75ddb9b6375f91e7117ee463f189ebef24e0', 'literary.schema.json': 'aea5e58465ee3ba008ab9de54002a304cddac6e405c3195201157a278c1433cc', 'narrative.schema.json': 'd9145f2ebe4508294c460b8ab98f2ca94315d2dc5ccfeec1be6b6e121fb72c5b', 'planning.schema.json': 'de0e7a051dbec434fb68057b6c15adb58cc2dfd67fd55a8412c513a7600d912d', 'production_profile.schema.json': '385af67d856f8b0fc047c90fcdfd64bf2fde114086b972c460591c7b12f06db1', 'refinement.schema.json': '88affbc5697427ec9ab4c56764ec0d753c5f0b25a7b1095087a6036be3cfcca3', 'release.schema.json': '0b2841b2daec82911486c42de02863be33478b2ebf37795d2be4cccc0d08f6bc', 'simulation.schema.json': '67c95aef637756785643ab50bc5f3a2027ab7768769e0baea7296946b2e002b4', 'temporal_concurrency.schema.json': '677118bb3ea9ef7a89ac1fbd8a82a71ce611ac9efa00d67de566e7070b83d749', 'upgrades.schema.json': '6ec08ef373a5de1870db24e10f100d335e9bc35b7180bd39a1acd413e9619932'}
 SCHEMAS = {'agent.schema.json': {'$defs': {'AgentDecisionOutput': {'additionalProperties': False,
                                                          'properties': {'decision': {'maxLength': 64000,
                                                                                      'minLength': 1,
@@ -5246,7 +5246,11 @@ SCHEMAS = {'agent.schema.json': {'$defs': {'AgentDecisionOutput': {'additionalPr
                           '$id': 'https://novel-factory.example/contracts/2.1/planning.schema.json',
                           '$schema': 'https://json-schema.org/draft/2020-12/schema',
                           'title': 'P2 evidence-bound world dossier and conditional volume plans'},
- 'production_profile.schema.json': {'$defs': {'FirstWorldDesign': {'additionalProperties': False,
+ 'production_profile.schema.json': {'$defs': {'EnvironmentalOpeningWorldDesign': {'allOf': [{'$ref': '#/$defs/OpeningWorldDesign'},
+                                                                                            {'properties': {'opening': {'required': ['environment'],
+                                                                                                                        'type': 'object'}},
+                                                                                             'type': 'object'}]},
+                                              'FirstWorldDesign': {'additionalProperties': False,
                                                                    'properties': {'chapter_goals': {'items': {'maxLength': 1200,
                                                                                                               'minLength': 1,
                                                                                                               'pattern': '\\S',
@@ -5333,6 +5337,54 @@ SCHEMAS = {'agent.schema.json': {'$defs': {'AgentDecisionOutput': {'additionalPr
                                                                   'required': ['chapter_goals',
                                                                                'volume_brief'],
                                                                   'type': 'object'},
+                                              'OpeningWorldDesign': {'allOf': [{'$ref': '#/$defs/FirstWorldDesign'},
+                                                                               {'properties': {'opening': {'properties': {'counterpart': {'description': '仅填单一人名、称呼或地名，人物经历和处境写入 '
+                                                                                                                                                         'opening '
+                                                                                                                                                         '的 '
+                                                                                                                                                         'knowledge '
+                                                                                                                                                         '或 '
+                                                                                                                                                         'situation '
+                                                                                                                                                         '字段。',
+                                                                                                                                          'maxLength': 40,
+                                                                                                                                          'minLength': 1,
+                                                                                                                                          'pattern': '^[^，。；：\\n\\r]{1,40}$',
+                                                                                                                                          'type': 'string'},
+                                                                                                                          'other_place': {'description': '仅填单一人名、称呼或地名，人物经历和处境写入 '
+                                                                                                                                                         'opening '
+                                                                                                                                                         '的 '
+                                                                                                                                                         'knowledge '
+                                                                                                                                                         '或 '
+                                                                                                                                                         'situation '
+                                                                                                                                                         '字段。',
+                                                                                                                                          'maxLength': 40,
+                                                                                                                                          'minLength': 1,
+                                                                                                                                          'pattern': '^[^，。；：\\n\\r]{1,40}$',
+                                                                                                                                          'type': 'string'}},
+                                                                                                           'type': 'object'},
+                                                                                               'place': {'description': '仅填单一人名、称呼或地名，人物经历和处境写入 '
+                                                                                                                        'opening '
+                                                                                                                        '的 '
+                                                                                                                        'knowledge '
+                                                                                                                        '或 '
+                                                                                                                        'situation '
+                                                                                                                        '字段。',
+                                                                                                         'maxLength': 40,
+                                                                                                         'minLength': 1,
+                                                                                                         'pattern': '^[^，。；：\\n\\r]{1,40}$',
+                                                                                                         'type': 'string'},
+                                                                                               'protagonist': {'description': '仅填单一人名、称呼或地名，人物经历和处境写入 '
+                                                                                                                              'opening '
+                                                                                                                              '的 '
+                                                                                                                              'knowledge '
+                                                                                                                              '或 '
+                                                                                                                              'situation '
+                                                                                                                              '字段。',
+                                                                                                               'maxLength': 40,
+                                                                                                               'minLength': 1,
+                                                                                                               'pattern': '^[^，。；：\\n\\r]{1,40}$',
+                                                                                                               'type': 'string'}},
+                                                                                'required': ['opening'],
+                                                                                'type': 'object'}]},
                                               'ProductionComplexity': {'additionalProperties': False,
                                                                        'properties': {'characters': {'maximum': 100000,
                                                                                                      'minimum': 1,

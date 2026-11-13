@@ -102,10 +102,12 @@ def enroll_idea(kernel, gateway, inspiration, allowance, prep_work_id):
     bound_gateway = gateway.with_kernel(kernel)
     # Only the new task freezes this structured result type. Existing initial_world
     # tasks (including legacy AgentTextOutput) keep their original dispatch contract.
-    bound_gateway.output_contracts[("world_designer", "initial_world")] = (
-        "FirstWorldDesign",
-        "production_profile",
-    )
+    design_contract = "FirstWorldDesign"
+    if model_routes:
+        design_contract = (
+            "EnvironmentalOpeningWorldDesign" if profile["environment_processes"] else "OpeningWorldDesign"
+        )
+    bound_gateway.output_contracts[("world_designer", "initial_world")] = (design_contract, "production_profile")
     assignment = {
         "creative_input": inspiration,
         "first_window_limit": _first_window_limit(profile, inspiration),
@@ -186,22 +188,7 @@ def _audited_design_result(kernel, gateway, repo, task, wr):
         "VIEW_DENIED",
         "Design task authority expired",
     )
-    evidence, candidate = CandidateDelivery(kernel, gateway).audited_candidate(repo, task)
-    call = repo.one(
-        "call_attempts",
-        {
-            "attempt_id": evidence["attempt_id"],
-            "task_id": task["task_id"],
-            "generation": task["generation"],
-        },
-        lock="share",
-    )
-    require(
-        call and call["state"] == "SUCCEEDED",
-        "CALL_RECONCILIATION_REQUIRED",
-        "An unresolved model attempt must be reconciled before project creation",
-    )
-    return evidence, candidate
+    return CandidateDelivery(kernel, gateway).audited_candidate(repo, task, production_accounting=True)
 
 
 def stage_receipt(kernel, repo, owner, wr):

@@ -436,6 +436,72 @@
           "pattern": "\\S"
         }
       }
+    },
+    "OpeningWorldDesign": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/FirstWorldDesign"
+        },
+        {
+          "type": "object",
+          "required": [
+            "opening"
+          ],
+          "properties": {
+            "protagonist": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40,
+              "pattern": "^[^，。；：\\n\\r]{1,40}$",
+              "description": "仅填单一人名、称呼或地名，人物经历和处境写入 opening 的 knowledge 或 situation 字段。"
+            },
+            "place": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40,
+              "pattern": "^[^，。；：\\n\\r]{1,40}$",
+              "description": "仅填单一人名、称呼或地名，人物经历和处境写入 opening 的 knowledge 或 situation 字段。"
+            },
+            "opening": {
+              "type": "object",
+              "properties": {
+                "counterpart": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 40,
+                  "pattern": "^[^，。；：\\n\\r]{1,40}$",
+                  "description": "仅填单一人名、称呼或地名，人物经历和处境写入 opening 的 knowledge 或 situation 字段。"
+                },
+                "other_place": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 40,
+                  "pattern": "^[^，。；：\\n\\r]{1,40}$",
+                  "description": "仅填单一人名、称呼或地名，人物经历和处境写入 opening 的 knowledge 或 situation 字段。"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "EnvironmentalOpeningWorldDesign": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/OpeningWorldDesign"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "opening": {
+              "type": "object",
+              "required": [
+                "environment"
+              ]
+            }
+          }
+        }
+      ]
     }
   }
 }

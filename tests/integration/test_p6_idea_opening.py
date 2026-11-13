@@ -233,3 +233,20 @@ def test_reviewed_design_opens_sealed_interaction_before_any_writing(
                 "改去桥头等信" if deviation else "寻找目击者"
             )
             assert (turn["reviewed_plan_ref"] != source["plan_ref"]) == deviation
+
+
+def test_split_model_design_contract_requires_profile_specific_opening():
+    from novel_factory.contracts.registry import validate_contract
+    from novel_factory.domain.errors import DomainError
+
+    design = dict(title="风", protagonist="陆", place="桥", storyline="寻人", world_rules=["一日两班"], chapter_goals=["等候"])
+    validate_contract("FirstWorldDesign", design, "production_profile")
+    with pytest.raises(DomainError):
+        validate_contract("OpeningWorldDesign", design, "production_profile")
+    opening = dict(counterpart="周", other_place="埠", protagonist_knowledge="已领工钱", counterpart_knowledge="记得信号", situation="班船晚点")
+    validate_contract("OpeningWorldDesign", {**design, "opening": opening}, "production_profile")
+    with pytest.raises(DomainError):
+        validate_contract("EnvironmentalOpeningWorldDesign", {**design, "opening": opening}, "production_profile")
+    validate_contract("EnvironmentalOpeningWorldDesign", {**design, "opening": {**opening, "environment": {"moving_entity": "渡船"}}}, "production_profile")
+    with pytest.raises(DomainError):
+        validate_contract("OpeningWorldDesign", {**design, "protagonist": "陆，年龄二十。", "opening": opening}, "production_profile")
