@@ -133,7 +133,7 @@ def read_profiles(path):
         raise ProfileError("INVALID_MODEL_CONFIG") from None
 
 
-def post(*, url, payload, credential, request_hash, timeout, limit, headers=None):
+def post(*, url, payload, credential, request_hash, timeout, limit, headers=None, receipt_target=None):
     """Bound DNS, connection, headers and body to one wall-clock deadline.
 
     A socket inactivity timeout alone lets a trickling response hold the executor
@@ -141,7 +141,8 @@ def post(*, url, payload, credential, request_hash, timeout, limit, headers=None
     its credential. subprocess.run kills and waits for the helper on timeout.
     """
     packet = json.dumps({"url": url, "payload": payload, "credential": credential,
-        "request_hash": request_hash, "timeout": timeout, "limit": limit, "headers": headers},
+        "request_hash": request_hash, "timeout": timeout, "limit": limit, "headers": headers,
+        "receipt_target": receipt_target},
         ensure_ascii=False, allow_nan=False).encode()
     allowed = ("PATH", "SYSTEMROOT", "SSL_CERT_FILE", "SSL_CERT_DIR", "https_proxy", "HTTPS_PROXY",
                "http_proxy", "HTTP_PROXY", "no_proxy", "NO_PROXY", "ALL_PROXY", "all_proxy")
@@ -166,7 +167,7 @@ def usage_value(value):
     return value
 
 
-def invoke(profile, request, *, authorize, record):
+def invoke(profile, request, *, authorize, record, receipt_target=None):
     """The host rechecks a durable attempt immediately before upstream I/O."""
     if (not request.attempt_id or type(request.max_output_tokens) is not int
             or not 1 <= request.max_output_tokens <= profile.max_output_tokens or not request.messages
@@ -182,7 +183,8 @@ def invoke(profile, request, *, authorize, record):
     content, receipt, window = post(url=profile.endpoint, credential=credential,
             payload={"model": profile.model, "messages": list(request.messages), limit_field: request.max_output_tokens,
                      "response_format": {"type": "json_object"}, "stream": False},
-            request_hash=request.request_sha256, timeout=profile.timeout_seconds, limit=2_000_000)
+            request_hash=request.request_sha256, timeout=profile.timeout_seconds, limit=2_000_000,
+            receipt_target=receipt_target)
     try:
         raw = json.loads(content)
         choice, usage = raw["choices"][0], raw.get("usage") or {}
