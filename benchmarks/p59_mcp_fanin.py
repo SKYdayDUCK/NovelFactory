@@ -25,6 +25,9 @@ from novel_factory.fixtures import load_fixture
 from novel_factory.interfaces.bindings import read_private_config
 
 
+ROLE_TOOLS = {"nf_task_get", "nf_context_get", "nf_query_batch", "nf_artifact_put"}
+
+
 async def burst(kernel, roles, directory, host_window=None):
     limit = asyncio.Semaphore(2)
     outbound = asyncio.Semaphore(host_window) if host_window else None
@@ -60,7 +63,7 @@ async def burst(kernel, roles, directory, host_window=None):
                         async with ClientSession(streams[0], streams[1]) as session:
                             init = await session.initialize()
                             names = {x.name for x in (await session.list_tools()).tools}
-                            assert init.protocolVersion == "2025-11-25" and len(names) == 4 and streams[2]() is None
+                            assert init.protocolVersion == "2025-11-25" and names == ROLE_TOOLS and streams[2]() is None
                             limit.release()
                             released = True
                             record["initialized"] = True
@@ -137,6 +140,8 @@ def main():
     p.add_argument("--host-window", type=int, choices=(1, 2),
                    help="After the simultaneous release, cap actual SDK calls across all role sessions")
     args=p.parse_args()
+    source_hash = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    source_head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     logging.disable(logging.CRITICAL)
     with tempfile.TemporaryDirectory() as temp, isolated_kernel(os.environ["NF_TEST_DATABASE_URL"],Path(temp)/"objects") as (kernel,_):
         directory=Path(temp)
@@ -148,8 +153,7 @@ def main():
             heads=[b["world_ref"] for b in books]
             data["heads_unchanged"]=all(kernel.head(repo,h["work_id"],h["branch_id"])==h for h in heads)
             data["attempts"]=repo.conn.scalar(text("SELECT count(*) FROM nf_call_attempts"))
-        data.update(population=args.population,git_sha=subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip(),
-                    driver_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
+        data.update(population=args.population,git_sha=source_head, driver_sha256=source_hash)
         with gzip.open(args.output,"wt") as out:
             json.dump(data,out,separators=(",",":"))
         print(args.population,data["states"],data["correct_per_s"],flush=True)

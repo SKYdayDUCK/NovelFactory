@@ -1,0 +1,53 @@
+{
+  "run": 43359012779,
+  "job": 131667813759,
+  "source": "65c993aa4c55f2fd7f57a63c2b93f7085d62ac50",
+  "handshakes": 200,
+  "final_live": 200,
+  "stop": null,
+  "final_sweep": {
+    "OK": 800
+  },
+  "cold_pool_sessions": 0,
+  "simultaneous_burst": {
+    "OK": 99,
+    "SERVICE_UNAVAILABLE": 101
+  },
+  "steps": [
+    [
+      2,
+      {
+        "OK": 8
+      }
+    ],
+    [
+      10,
+      {
+        "OK": 40
+      }
+    ],
+    [
+      50,
+      {
+        "OK": 200
+      }
+    ],
+    [
+      200,
+      {
+        "OK": 800
+      }
+    ]
+  ],
+  "host_memory_bytes": 16760344576,
+  "final_memory": {
+    "rss": 17757290496,
+    "pss": 12492334080,
+    "uss": 12466225152
+  },
+  "archive": {
+    "id": 14008010739,
+    "digest": "sha256:854812c167fd742676acbd5092942250d0b81f28982aa9178696c241a72cd8b1",
+    "bytes": 72506
+  }
+}
