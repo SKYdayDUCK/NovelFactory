@@ -43,6 +43,10 @@ def upgrade():
               (('work',t.work_id::text),('principal',t.principal_id),('resource',resource));
             GET DIAGNOSTICS changed = ROW_COUNT;
             IF changed <> 3 THEN RAISE EXCEPTION 'Missing scoped admission count'; END IF;
+            -- The total row remains the lock anchor. Expired principal/work
+            -- subjects do not become a second, ever-growing history table.
+            DELETE FROM nf_hera_capacity WHERE used=0 AND (scope,subject) IN
+              (('work',t.work_id::text),('principal',t.principal_id),('resource',resource));
           END IF;
         END $$;
 
