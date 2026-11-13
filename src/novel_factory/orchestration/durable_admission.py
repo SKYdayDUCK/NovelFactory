@@ -5,9 +5,11 @@ inside the task INSERT, sharing the configuration lock across clients.
 Acceptance, cancellation, execution and model accounting retain their own guards.
 All nonterminal tasks, including tasks created before activation, consume capacity.
 """
+from contextlib import contextmanager
 from datetime import timedelta
 
 from sqlalchemy import text
+from sqlalchemy.exc import DBAPIError
 
 from novel_factory.domain.errors import DomainError
 
@@ -33,6 +35,18 @@ _OCCUPANCY = text("""
     LEFT JOIN nf_durable_admissions a ON a.task_id=t.task_id
     WHERE p.singleton AND t.state NOT IN ('ACCEPTED','FAILED','CANCELLED','STALE')
 """)
+
+
+@contextmanager
+def translate_capacity_error():
+    """Translate only the database quota guard; callers own the transaction."""
+    try:
+        yield
+    except DBAPIError as exc:
+        if getattr(exc.orig, "sqlstate", None) != "NF001":
+            raise
+        raise DomainError("BACKPRESSURE", "Durable task capacity is full; retry after one second",
+                          True, "WAIT") from exc
 
 
 def admit(conn, spec, principal_id, deadline):

@@ -179,7 +179,11 @@ class Database:
     @contextmanager
     def uow(self, *, write: bool = True, repeatable_read: bool = False):
         from novel_factory.infrastructure.repository import KernelRepository
-        with self.engine.connect() as conn:
+        from novel_factory.orchestration.durable_admission import translate_capacity_error
+
+        # A terminal task can regain capacity through an authorized conflict
+        # repair. Let the owner transaction roll back before returning a retry.
+        with translate_capacity_error(), self.engine.connect() as conn:
             if repeatable_read:
                 conn = conn.execution_options(isolation_level="REPEATABLE READ")
             with conn.begin():

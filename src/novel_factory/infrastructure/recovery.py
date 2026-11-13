@@ -72,7 +72,7 @@ def fence_recovered_tasks(engine, object_store, *, tables=None):
         mutation_gate(conn)
         task_table, calls, outbox = tables["tasks"], tables["call_attempts"], tables["outbox"]
         rows = conn.execute(select(task_table).where(task_table.c.state.not_in(
-            ["ACCEPTED", "CANCELLED", "FAILED"])).order_by(task_table.c.task_id).with_for_update()).mappings().all()
+            ["ACCEPTED", "CANCELLED", "FAILED", "STALE"])).order_by(task_table.c.task_id).with_for_update()).mappings().all()
         # The partner database may have retained later receipts. Keep same-key
         # reconciliation readable but stop newly accepted Workshop operations.
         if inspect(conn).has_table("nf_delegation_installations"):

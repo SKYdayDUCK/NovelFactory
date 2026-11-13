@@ -16,7 +16,7 @@ from uuid import uuid4
 
 from sqlalchemy import and_, func, or_, select, text
 from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
+from sqlalchemy.exc import IntegrityError, NoResultFound
 
 from novel_factory.contracts.registry import validate_contract
 from novel_factory.domain.errors import DomainError
@@ -146,14 +146,9 @@ class TaskService:
             generation=0, context_bundle_id=spec["context_bundle_id"],
             dependency_fingerprint=spec["dependency_fingerprint"], deadline=deadline,
         )
-        try:
+        with durable_admission.translate_capacity_error():
             created = conn.scalar(task_insert.on_conflict_do_nothing(index_elements=[t.c.task_id])
                                   .returning(t.c.task_id))
-        except DBAPIError as exc:
-            if getattr(exc.orig, "sqlstate", None) != "NF001":
-                raise
-            raise DomainError("BACKPRESSURE", "Durable task capacity is full; retry after one second",
-                              True, "WAIT") from exc
         if created is None:
             raise _error("ALREADY_EXISTS", "Task identity is already assigned")
         if admission is not None:

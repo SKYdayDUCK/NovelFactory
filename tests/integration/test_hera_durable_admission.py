@@ -242,3 +242,34 @@ def test_exact_backfill_remap_and_restart_use_existing_receipts(kernel_env):
         with k.db.uow() as repo:
             repo.conn.execute(text("SELECT nf_hera_set_capacity_mode(false)"))
             repo.conn.execute(text("UPDATE nf_durable_admission_policy SET enabled=false, role_resources='{}'"))
+
+
+def test_saturated_restore_preserves_stale_generation_and_fences_live_task(kernel_env):
+    from novel_factory.infrastructure.recovery import fence_recovered_tasks
+
+    k = kernel_env["kernel"]
+    world = load_fixture(k)
+    owner = world["principal"]
+    stale, live = spec(world), spec(world)
+    k.create_task(owner, stale, "restore-old")
+    with k.db.uow() as r:
+        r.conn.execute(text("UPDATE nf_tasks SET state='STALE' WHERE task_id=:id"), {"id": stale["task_id"]})
+        r.conn.execute(text("UPDATE nf_durable_admission_policy SET enabled=true, total_limit=1"))
+        r.conn.execute(text("SELECT nf_hera_set_capacity_mode(true)"))
+    try:
+        k.create_task(owner, live, "restore-live")
+        fenced = fence_recovered_tasks(k.db.engine, k.objects)
+        assert [(item["task_id"], item["state"], item["generation"]) for item in fenced] == [
+            (live["task_id"], "PAUSED", 1)]
+        with pytest.raises(DomainError) as denied, k.db.uow() as r:
+            # A separate, authorized repair that later needs a slot must retry.
+            r.conn.execute(text("UPDATE nf_tasks SET state='PAUSED' WHERE task_id=:id"), {"id": stale["task_id"]})
+        assert (denied.value.code, denied.value.retryable, denied.value.recovery) == ("BACKPRESSURE", True, "WAIT")
+        with k.db.uow(write=False) as r:
+            task = r.one("tasks", {"task_id": stale["task_id"]})
+            assert (task["state"], task["generation"]) == ("STALE", 0)
+            assert r.conn.scalar(text("SELECT used FROM nf_hera_capacity WHERE scope='total'")) == 1
+    finally:
+        with k.db.uow() as r:
+            r.conn.execute(text("SELECT nf_hera_set_capacity_mode(false)"))
+            r.conn.execute(text("UPDATE nf_durable_admission_policy SET enabled=false"))
