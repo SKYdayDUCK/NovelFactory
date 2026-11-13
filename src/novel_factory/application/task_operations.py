@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
+from uuid import UUID
 
 from sqlalchemy import select, tuple_
 
@@ -53,9 +54,35 @@ class TaskOperations:
         task = read(self.principal, task_id)
         if self.binding is not None:
             self.binding.check(task)
+        return self._wire_status(task)
+
+    @staticmethod
+    def _wire_status(task):
         # The SDK structured result must carry the same JSON values as REST.
         return {k: v.isoformat() if isinstance(v, datetime) else str(v) if isinstance(v, Decimal) else v
                 for k, v in task.items()}
+
+    def status_batch(self, work_id, branch_id, task_ids):
+        require(isinstance(task_ids, list) and 1 <= len(task_ids) <= 32,
+                "INVALID_ARGUMENT", "Supply 1 to 32 task IDs")
+        work_id, branch_id = (str(UUID(validate_contract("UUID", value))) for value in (work_id, branch_id))
+        ids = [str(UUID(validate_contract("UUID", value))) for value in task_ids]
+        require(len(set(ids)) == len(ids), "INVALID_ARGUMENT", "Duplicate task ID")
+        if self.binding is not None:
+            self.binding.check({"work_id": work_id, "branch_id": branch_id})
+        tasks, inputs = tables["tasks"], tables["task_inputs"]
+        with self.kernel.db.uow(write=False) as repo:
+            self.kernel.authorize(repo, self.principal, work_id, "READ", branch_id)
+            # The generation join pins the WorldRef in the same MVCC statement.
+            query = (select(tasks, inputs.c.spec["world_ref"].label("world_ref"))
+                     .join(inputs, (tasks.c.task_id == inputs.c.task_id) &
+                                   (tasks.c.generation == inputs.c.generation))
+                     .where(tasks.c.task_id.in_(ids), tasks.c.work_id == work_id,
+                            tasks.c.branch_id == branch_id, tasks.c.grant_id == self.principal.grant_id,
+                            tasks.c.principal_id == self.principal.principal_id))
+            rows = {row["task_id"]: row for row in repo.conn.execute(query).mappings()}
+            require(len(rows) == len(ids), "VIEW_DENIED", "Task unavailable")
+            return {"tasks": [self._wire_status(self.kernel._public_task(rows[i], rows[i]["world_ref"])) for i in ids]}
 
     def cancel(self, task_id, generation, idempotency_key):
         return self.kernel.cancel_task(self.principal, task_id, generation, idempotency_key,

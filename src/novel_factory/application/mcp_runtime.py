@@ -50,7 +50,7 @@ class McpRuntime:
                 if not grant or not grant["active"] or grant["principal_id"] != self.principal.principal_id:
                     return []
                 tools = []
-                for capability, names in (("READ", ["nf_task_status", "nf_task_cancel", "nf_task_events"]),
+                for capability, names in (("READ", ["nf_task_status", "nf_task_status_batch", "nf_task_cancel", "nf_task_events"]),
                                           ("TASK_CREATE", ["nf_task_submit"])):
                     if capability in grant["capabilities"]:
                         self.kernel.authorize(repo, self.principal, self.binding.work_id, capability, self.binding.branch_id)
@@ -152,7 +152,8 @@ class McpRuntime:
         operations = TaskOperations(self.kernel, self.principal, binding=self.binding,
                                     fenced_status=self.fenced_task_status, coalescer=self.status_coalescer)
         methods = {"nf_task_submit": operations.submit, "nf_task_status": operations.status,
-                   "nf_task_cancel": operations.cancel, "nf_task_events": operations.events}
+                   "nf_task_status_batch": operations.status_batch, "nf_task_cancel": operations.cancel,
+                   "nf_task_events": operations.events}
         return methods[name](**arguments)
 
     def _role_proof(self):

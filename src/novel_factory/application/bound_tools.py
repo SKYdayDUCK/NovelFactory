@@ -26,7 +26,7 @@ _METHODS = {
 
 
 def _dispatch(runtime, name, arguments):
-    if name in {"nf_task_status", "nf_task_submit", "nf_task_cancel", "nf_task_events"}:
+    if name in {"nf_task_status", "nf_task_status_batch", "nf_task_submit", "nf_task_cancel", "nf_task_events"}:
         return runtime.task_operation(name, arguments)
     if name in {"nf_project_status", "nf_resume_project"}:
         return runtime.project(resume=name == "nf_resume_project", **arguments)

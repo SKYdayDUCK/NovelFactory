@@ -6,6 +6,7 @@ The existing Kernel and TaskService own task identity, world/branch checks, gene
 |---|---|---|
 | nf_task_submit | POST /api/v1/hera/tasks | Durable task receipt after commit. REST returns 202 and MCP returns ordinary CallToolResult. Same TaskSpec and idempotency key replay the same receipt. |
 | nf_task_status | GET /api/v1/tasks/{id} | Current authorized task metadata. |
+| nf_task_status_batch | POST /api/v1/hera/tasks/status-batch | Read 1–32 distinct tasks of one grant, work and branch in input order. A denial fails the entire batch. Select this explicit batch operation when requesting multiple statuses. |
 | nf_task_cancel | POST /api/v1/tasks/cancel | Existing TaskService generation-checked cancellation receipt. |
 | nf_task_events | GET /api/v1/tasks/{id}/events | Page of task.changed outbox events with a task-scoped cursor, 1–100 records. Only state, generation and identifiers are exposed. |
 | nf_project_status | GET /api/v1/works/{work}/branches/{branch}/workflow | Branch state and status counts under a live, unexpired PROJECT_RESUME grant. |

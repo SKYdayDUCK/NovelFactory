@@ -66,11 +66,18 @@ async def trial(kernel, actors, count, percent, fast, operation, *, on_start=Non
                             rate_burst=1000, rate_per_second=1000, fenced_task_status=fast)
     app = create_app(kernel, settings=settings, mcp_bindings=bindings)
     # Cross-protocol split is by identity. Interleave the two protocols across works.
-    mcp_ids = {i for i in range(len(lanes)) if (i + 1) * percent // 100 > i * percent // 100}
-    # Avoid aliasing a 50/50 transport split to a 50/50 work split.
-    permutation = list(range(len(lanes)))
-    random.Random(807).shuffle(permutation)
-    mcp_ids = {permutation[i] for i in mcp_ids}
+    # Each lane handles its round-robin share of requests. Choose lanes within
+    # each size group so a partial final round preserves the requested split.
+    rng = random.Random(807)
+    full_rounds, extra = divmod(count, len(lanes))
+    longer = list(range(extra))
+    shorter = list(range(extra, len(lanes)))
+    rng.shuffle(longer)
+    rng.shuffle(shorter)
+    mcp_lanes = len(lanes) * percent // 100
+    extra_mcp = min(len(longer), mcp_lanes,
+                    max(mcp_lanes - len(shorter), count * percent // 100 - full_rounds * mcp_lanes))
+    mcp_ids = set(longer[:extra_mcp] + shorter[:mcp_lanes - extra_mcp])
     ready = asyncio.Queue()
     start = asyncio.Event()
     init_slots = asyncio.Semaphore(4)

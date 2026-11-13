@@ -232,6 +232,7 @@ class DerivedWorldWorker:
         with self.kernel.db.uow() as repo:
             # Lock order matches project index/model admissions: advisory gate,
             # configuration, outbox row, lease. No IO or indexing under these locks.
+            require(bool(worker_id) and 0 < lease_seconds <= 3600, "INVALID_ARGUMENT", "Invalid outbox lease")
             repo.conn.execute(text("SELECT pg_advisory_xact_lock(:gate)"), {"gate": MAINTENANCE_GATE + 1})
             repo.conn.execute(text("LOCK TABLE nf_dispatch_limits IN SHARE MODE"))
             scoped = repo.conn.scalar(text("SELECT EXISTS (SELECT FROM nf_dispatch_limits WHERE scope='RESOURCE')"))

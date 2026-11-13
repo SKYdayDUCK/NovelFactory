@@ -49,6 +49,8 @@ class HttpSettings:
     coalesce_task_status: bool = False
     max_queued_ingress: int = 0
     max_queued_per_principal: int = 8
+    share_auth_slots: bool = False
+    fast_slots: int = 0
     compact_remote_role_reads: bool = False
     hera_delegations: bool = False
     fenced_task_status: bool = False
@@ -225,9 +227,9 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
     if query_service is None:
         query_service = WorldQueryService(kernel)
     auth_capacity = min(2, pool_size - 1)
-    operation_capacity = pool_size - auth_capacity
+    operation_capacity = pool_size if settings.share_auth_slots else pool_size - auth_capacity
     admission = AdmissionController(
-        operation_capacity, per_principal=settings.per_principal_concurrency,
+        operation_capacity, per_principal=settings.per_principal_concurrency, fast_slots=settings.fast_slots,
         max_waiters=settings.max_queued_operations, max_waiters_per_principal=settings.max_queued_per_principal,
         timeout=settings.queue_timeout_seconds,
         class_limits={"query": operation_capacity, "context": min(2, operation_capacity),
@@ -237,6 +239,8 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
                                           max_waiters=settings.max_queued_operations,
                                           max_waiters_per_principal=settings.max_queued_per_principal,
                                           timeout=settings.queue_timeout_seconds)
+    if settings.share_auth_slots:
+        authentication = admission
     ingress = AdmissionController(settings.max_inflight_requests,
                                   per_principal=settings.max_inflight_requests,
                                   max_waiters=settings.max_queued_ingress,
@@ -286,7 +290,7 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
             raise DomainError("UNAUTHENTICATED", "Valid Bearer authentication is required")
         token = parts[1]
         auth_key = hashlib.sha256(token.encode()).hexdigest()
-        async with authentication.slot(auth_key):
+        async with authentication.slot(auth_key, "fast"):
             try:
                 principal = await _finish_short_call(kernel.authenticate, token)
             except DomainError as exc:
@@ -493,10 +497,19 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
         return await execute(request, "task", lambda principal: task_operations(principal).submit(**payload),
                              status_code=202)
 
+    @app.post("/api/v1/hera/tasks/status-batch")
+    async def read_task_batch(request: Request):
+        from novel_factory.application.tool_catalog import _VALIDATORS
+
+        arguments = await _json_body(request)
+        if not _VALIDATORS["nf_task_status_batch"].is_valid(arguments):
+            raise DomainError("INVALID_ARGUMENT", "Invalid scoped task batch")
+        return await execute(request, "query", lambda principal: task_operations(principal).status_batch(**arguments))
+
     @app.get("/api/v1/tasks/{task_id}/events")
     async def task_events(request: Request, task_id: str, cursor: str | None = None, limit: int = 50):
         validate_contract("UUID", task_id)
-        return await execute(request, "query", lambda principal: task_operations(principal).events(
+        return await execute(request, "fast", lambda principal: task_operations(principal).events(
             task_id, cursor, limit))
 
     @app.get("/api/v1/works/{work_id}/branches/{branch_id}/workflow")
@@ -514,7 +527,7 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
             arguments = await _json_body(request)
             if not _VALIDATORS["nf_resume_project"].is_valid(arguments):
                 raise DomainError("INVALID_ARGUMENT", "Invalid project resume scope")
-        return await execute(request, "task" if resume else "query", lambda principal: McpRuntime(
+        return await execute(request, "task" if resume else "fast", lambda principal: McpRuntime(
             kernel, principal, ProjectBinding(work_id, branch_id)).project(resume=resume, **arguments))
 
     @app.post("/api/v1/tasks/claim")
@@ -527,12 +540,12 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
     @app.get("/api/v1/tasks/{task_id}")
     async def get_task(request: Request, task_id: str):
         validate_contract("UUID", task_id)
-        return await execute(request, "query", lambda principal: task_operations(principal).status(task_id))
+        return await execute(request, "fast", lambda principal: task_operations(principal).status(task_id))
 
     @app.post("/api/v1/tasks/cancel")
     async def cancel_task(request: Request):
         payload = await _body(request, "TaskCancelHttpRequest", "http")
-        return await execute(request, "task", lambda principal: task_operations(principal).cancel(**payload))
+        return await execute(request, "fast", lambda principal: task_operations(principal).cancel(**payload))
 
     @app.post("/api/v1/tasks/results")
     async def submit_result(request: Request):
@@ -587,6 +600,8 @@ def from_environment() -> FastAPI:
         max_queued_per_principal=int(os.environ.get("NF_HTTP_MAX_QUEUED_PER_PRINCIPAL", "8")),
         queue_timeout_seconds=float(os.environ.get("NF_HTTP_QUEUE_TIMEOUT", "2")),
         coalesce_task_status=os.environ.get("NF_HERA_COALESCE_TASK_STATUS", "0") == "1",
+        share_auth_slots=os.environ.get("NF_HERA_SHARE_AUTH_SLOTS", "0") == "1",
+        fast_slots=int(os.environ.get("NF_HERA_FAST_SLOTS", "0")),
         compact_remote_role_reads=os.environ.get("NF_HERA_COMPACT_ROLE_READS", "0") == "1",
         hera_delegations=os.environ.get("NF_HERA_DELEGATIONS", "0") == "1",
         fenced_task_status=os.environ.get("NF_HTTP_FENCED_TASK_STATUS", "0") == "1",

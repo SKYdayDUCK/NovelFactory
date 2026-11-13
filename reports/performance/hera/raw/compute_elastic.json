@@ -1,0 +1,213 @@
+{
+  "measured_at": "2026-11-13T05:42:26.056063+00:00",
+  "system": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "python": "3.12.14",
+  "affinity": 9,
+  "postgres": [
+    17,
+    11
+  ],
+  "load": "closed loop drain of simultaneously READY fixed-shape world revisions",
+  "model": "no provider call or synthetic usage",
+  "parent_pool": 3,
+  "child_pool_per_process": 1,
+  "cpu_quota_reported": null,
+  "trials": [
+    {
+      "mode": "fixed",
+      "jobs": 24,
+      "successful": 24,
+      "failures": 0,
+      "elapsed_s": 0.6522846270017908,
+      "jobs_per_s": 36.79375384073571,
+      "mean_completion_s": 0.35902264050037047,
+      "p95_completion_s": 0.6087468069999886,
+      "p99_completion_s": 0.6522737980012607,
+      "p95_service_s": 0.07739242100069532,
+      "mean_cpu_pct": 31.078,
+      "mean_cpu_psi_avg10": null,
+      "mean_parent_rss_kib": 68553.333,
+      "mean_available_bytes": 7343498581.333,
+      "warm_processes": 2,
+      "capacity_series": [
+        [
+          0.002,
+          2
+        ],
+        [
+          0.129,
+          2
+        ],
+        [
+          0.238,
+          2
+        ],
+        [
+          0.374,
+          2
+        ],
+        [
+          0.479,
+          2
+        ],
+        [
+          0.594,
+          2
+        ]
+      ],
+      "scale_decisions": [],
+      "provider_calls": 0,
+      "provider_invoice": null
+    },
+    {
+      "mode": "adaptive",
+      "jobs": 24,
+      "successful": 24,
+      "failures": 0,
+      "elapsed_s": 0.6576515680026205,
+      "jobs_per_s": 36.49348860049304,
+      "mean_completion_s": 0.3671779382099582,
+      "p95_completion_s": 0.6434192490014539,
+      "p99_completion_s": 0.6576404060033383,
+      "p95_service_s": 0.07928815400009626,
+      "mean_cpu_pct": 36.376,
+      "mean_cpu_psi_avg10": null,
+      "mean_parent_rss_kib": 68988.0,
+      "mean_available_bytes": 7362553856.0,
+      "warm_processes": 2,
+      "capacity_series": [
+        [
+          0.001,
+          2
+        ],
+        [
+          0.149,
+          2
+        ],
+        [
+          0.258,
+          2
+        ],
+        [
+          0.381,
+          2
+        ],
+        [
+          0.505,
+          2
+        ],
+        [
+          0.611,
+          2
+        ]
+      ],
+      "scale_decisions": [
+        {
+          "previous": 1,
+          "target": 2,
+          "reason": "backlog_and_headroom"
+        }
+      ],
+      "provider_calls": 0,
+      "provider_invoice": null
+    },
+    {
+      "mode": "adaptive",
+      "jobs": 24,
+      "successful": 24,
+      "failures": 0,
+      "elapsed_s": 0.7713836020011513,
+      "jobs_per_s": 31.112924798684247,
+      "mean_completion_s": 0.3946017876667914,
+      "p95_completion_s": 0.7272128719996545,
+      "p99_completion_s": 0.7713739300015732,
+      "p95_service_s": 0.08515430899933563,
+      "mean_cpu_pct": 37.842,
+      "mean_cpu_psi_avg10": null,
+      "mean_parent_rss_kib": 69020.0,
+      "mean_available_bytes": 7327683145.143,
+      "warm_processes": 2,
+      "capacity_series": [
+        [
+          0.001,
+          2
+        ],
+        [
+          0.137,
+          2
+        ],
+        [
+          0.245,
+          2
+        ],
+        [
+          0.346,
+          2
+        ],
+        [
+          0.449,
+          2
+        ],
+        [
+          0.582,
+          2
+        ],
+        [
+          0.702,
+          2
+        ]
+      ],
+      "scale_decisions": [
+        {
+          "previous": 1,
+          "target": 2,
+          "reason": "backlog_and_headroom"
+        }
+      ],
+      "provider_calls": 0,
+      "provider_invoice": null
+    },
+    {
+      "mode": "fixed",
+      "jobs": 24,
+      "successful": 24,
+      "failures": 0,
+      "elapsed_s": 0.5739228909988014,
+      "jobs_per_s": 41.81746429077372,
+      "mean_completion_s": 0.3160078953334657,
+      "p95_completion_s": 0.5528994300002523,
+      "p99_completion_s": 0.5739153399990755,
+      "p95_service_s": 0.06410804099868983,
+      "mean_cpu_pct": 35.099,
+      "mean_cpu_psi_avg10": null,
+      "mean_parent_rss_kib": 69140.0,
+      "mean_available_bytes": 7320903680.0,
+      "warm_processes": 2,
+      "capacity_series": [
+        [
+          0.005,
+          2
+        ],
+        [
+          0.119,
+          2
+        ],
+        [
+          0.236,
+          2
+        ],
+        [
+          0.344,
+          2
+        ],
+        [
+          0.464,
+          2
+        ]
+      ],
+      "scale_decisions": [],
+      "provider_calls": 0,
+      "provider_invoice": null
+    }
+  ]
+}

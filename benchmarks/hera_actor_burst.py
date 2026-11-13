@@ -25,7 +25,7 @@ from novel_factory.interfaces.bindings import parse_binding, read_private_config
 from novel_factory.interfaces.http import HttpSettings, create_app
 
 
-async def actor_burst(kernel, roles):
+async def actor_burst(kernel, roles, *, shared=False):
     roster, tokens = {}, []
     for role in roles:
         cfg=read_private_config(role.path)
@@ -34,7 +34,7 @@ async def actor_burst(kernel, roles):
     # Split two physical connections into one auth and one active operation.
     # The historical experiment allowed both SQL workers on either phase.
     settings=HttpSettings(max_inflight_requests=64,max_queued_ingress=1500,max_queued_operations=1024,
-                          queue_timeout_seconds=180,compact_remote_role_reads=True)
+                          queue_timeout_seconds=180,compact_remote_role_reads=True,share_auth_slots=shared)
     app=create_app(kernel,mcp_bindings=roster,settings=settings)
     gate, ready, init=asyncio.Event(),asyncio.Queue(),asyncio.Semaphore(4)
     rows=[]
@@ -82,6 +82,7 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--clients",type=int,required=True)
     p.add_argument("--output",type=Path,required=True)
+    p.add_argument("--order",choices=["A","ABBA"],default="A")
     args=p.parse_args()
     if not 2<=args.clients<=1000:
         p.error("use 2..1000 clients")
@@ -93,14 +94,16 @@ def main():
         setup.db.close()
         kernel=Kernel(Database(url,pool_size=2,max_overflow=0),setup.objects)
         try:
-            data=asyncio.run(actor_burst(kernel,roles))
-            with kernel.db.uow(write=False) as repo:
-                data["unchanged_heads"]=all(kernel.head(repo,b["world_ref"]["work_id"],b["world_ref"]["branch_id"])==b["world_ref"] for b in books)
-                data["attempts"]=repo.conn.scalar(text("SELECT count(*) FROM nf_call_attempts"))
-            data["environment"]=hardware()
-            with gzip.open(args.output,"wt") as out:
-                json.dump(data,out,separators=(",",":"))
-            print({k:v for k,v in data.items() if k not in ("environment","rows")})
+            for i, mode in enumerate(args.order):
+                data=asyncio.run(actor_burst(kernel,roles,shared=mode=="B"))
+                with kernel.db.uow(write=False) as repo:
+                    data["unchanged_heads"]=all(kernel.head(repo,b["world_ref"]["work_id"],b["world_ref"]["branch_id"])==b["world_ref"] for b in books)
+                    data["attempts"]=repo.conn.scalar(text("SELECT count(*) FROM nf_call_attempts"))
+                data.update(environment=hardware(), shared_auth_slots=mode=="B")
+                path=args.output if args.order=="A" else args.output.parent/f"actor-{args.clients}-{i}{mode}.json.gz"
+                with gzip.open(path,"wt") as out:
+                    json.dump(data,out,separators=(",",":"))
+                print(mode, {k:v for k,v in data.items() if k not in ("environment","rows")},flush=True)
         finally:
             kernel.db.close()
 

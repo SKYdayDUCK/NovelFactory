@@ -9,6 +9,7 @@ from sqlalchemy import text
 from novel_factory.application.agent_gateway import AgentGateway
 from novel_factory.application.derived_worker import DerivedWorldWorker
 from novel_factory.application.supervisor import RuntimeSupervisor
+from novel_factory.domain.errors import DomainError
 from novel_factory.fixtures import load_fixture
 from novel_factory.orchestration.processors import TaskDispatcher
 from scripts.run_supervisor import serve
@@ -43,6 +44,8 @@ def test_model_and_compute_limits_share_global_leases(kernel_env):
             assert dispatcher.run_once("compute", reconcile=True)["status"] == "IDLE"
             legacy = DerivedWorldWorker(kernel)
             assert legacy.run_once("standalone") is None
+            with pytest.raises(DomainError, match="Invalid outbox lease"):
+                legacy.run_once("")
             with kernel.db.uow() as repo:
                 repo.conn.execute(text("UPDATE nf_dispatch_limits SET slots=1 WHERE subject='CPU_COMPUTE'"))
             lease = legacy.reserve_index(*scope)

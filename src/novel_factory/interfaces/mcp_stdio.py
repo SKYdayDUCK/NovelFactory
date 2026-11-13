@@ -103,7 +103,12 @@ def make_server(runtime, *, ceiling=None, admission=None, resolve=None, run=None
     async def call_tool(name, arguments):
         try:
             active = bound()
-            kind = "query" if name in {"nf_task_status", "nf_task_events", "nf_project_status"} else "task"
+            if name == "nf_task_status_batch":
+                kind = "query"
+            elif name in {"nf_task_status", "nf_task_events", "nf_project_status", "nf_task_cancel"}:
+                kind = "fast"
+            else:
+                kind = "task"
             return await run(active, invoke_bound_tool, (active, name, arguments),
                              {"ceiling": ceiling, "request_id": server.request_context.request_id,
                               "transport": "mcp"}, kind=kind)

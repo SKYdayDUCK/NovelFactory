@@ -65,7 +65,7 @@ def test_mixed_task_lifecycle(service_env, service_world, tmp_path):
     async def exercise(base):
         async with remote(base, world["token"]) as (rest, mcp):
             assert {tool.name for tool in (await mcp.list_tools()).tools} == {
-                "nf_task_submit", "nf_task_status", "nf_task_cancel", "nf_task_events"}
+                "nf_task_submit", "nf_task_status", "nf_task_status_batch", "nf_task_cancel", "nf_task_events"}
             m, h = await asyncio.gather(mcp.call_tool("nf_task_submit", command),
                                          rest.post("/api/v1/hera/tasks", json=command))
             assert h.status_code == 202, h.text
@@ -73,6 +73,14 @@ def test_mixed_task_lifecycle(service_env, service_world, tmp_path):
             assert h.json()["status_url"] == task_url
             m, h = await asyncio.gather(mcp.call_tool("nf_task_status", status), rest.get(task_url))
             assert h.status_code == 200 and h.json() == m.structuredContent
+            batch = {"work_id": wr["work_id"], "branch_id": wr["branch_id"], "task_ids": [task_id]}
+            mb, hb = await asyncio.gather(mcp.call_tool("nf_task_status_batch", batch),
+                                           rest.post("/api/v1/hera/tasks/status-batch", json=batch))
+            assert mb.structuredContent == hb.json() == {"tasks": [h.json()]}
+            denied_batch = {**batch, "task_ids": [task_id, foreign["task_id"]]}
+            mb, hb = await asyncio.gather(mcp.call_tool("nf_task_status_batch", denied_batch),
+                                           rest.post("/api/v1/hera/tasks/status-batch", json=denied_batch))
+            assert mb.isError and hb.status_code == 403
             # A deployment may give a broad kernel principal a narrower installed binding.
             # Both adapters must recheck that same ceiling on status, submission and cancellation.
             foreign_id = foreign["task_id"]

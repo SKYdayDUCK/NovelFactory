@@ -11,3 +11,5 @@ python -m pytest -q tests/integration/test_hera_durable_admission.py tests/relia
 Six real database cases reject invalid resource-map values, including nested arrays, nonstrings and unknown classes.
 
 The enabled singleton serializes short admission transactions. The initial implementation counts nonterminal tasks against the configured policy on each new command, adding work proportional to the rows inspected. It does not hold a database connection during model work. This correctness gate does not establish a throughput improvement. See [the design and rollback](../../../docs/design/HERA_DURABLE_ADMISSION.md) and [the mixed-traffic measurements](MIXED_INGRESS.md) for the performance workload and its separate terminal-work criterion.
+
+At 5,000 live tasks the separate [storage and depth experiment](ADMISSION_DEPTH.md) measured per-relation byte growth, backend RSS and additional policy scan cost against a disabled baseline.

@@ -139,3 +139,21 @@ def test_connection_inventory_counts_child_pools_stdio_and_listeners():
     assert budget.total == 40
     with pytest.raises(ValueError, match="aggregate"):
         ConnectionBudget(**inventory, postgres_max_connections=39).validate()
+
+
+
+def test_status_and_control_can_bypass_saturated_class_within_same_principal():
+    async def scenario():
+        controller = AdmissionController(3, per_principal=3, fast_slots=1)
+        order = []
+        async def record(name, kind):
+            async with controller.slot("same", kind):
+                order.append(name)
+        async with controller.slot("same", "query"), controller.slot("same", "write"):
+            queued = asyncio.create_task(record("third-heavy", "context"))
+            await asyncio.sleep(0)
+            await asyncio.wait_for(record("status", "fast"), timeout=1)
+            assert order == ["status"] and controller.snapshot()["queued"] == 1
+        await queued
+        assert order == ["status", "third-heavy"]
+    asyncio.run(scenario())
