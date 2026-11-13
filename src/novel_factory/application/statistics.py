@@ -34,6 +34,15 @@ def _source(conn, event):
     ).scalar_one()
 
 
+def is_official_deepseek(config):
+    """Match only the production adapter and its supported HTTPS inference URLs."""
+    return (config.get("adapter_kind") == "deepseek" and config.get("execution_kind") == "REAL_EXTERNAL"
+            and config.get("provider") == "https://api.deepseek.com" and config.get("endpoint") in {
+                "https://api.deepseek.com/chat/completions", "https://api.deepseek.com/v1/chat/completions",
+                "https://api.deepseek.com:443/chat/completions", "https://api.deepseek.com:443/v1/chat/completions",
+            })
+
+
 def _usage(conn, event, data, version):
     usage = data["usage"]
     config = data["model_configuration"]

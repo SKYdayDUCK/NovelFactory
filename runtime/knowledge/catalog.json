@@ -1,0 +1,566 @@
+{
+  "version": "p6-craft-1",
+  "genres": {
+    "古代": "ancient",
+    "历史": "ancient",
+    "现代": "modern",
+    "都市": "modern",
+    "玄幻": "fantasy",
+    "奇幻": "fantasy",
+    "xuanhuan": "fantasy",
+    "灵异": "supernatural",
+    "无限流": "infinite_flow",
+    "悬疑": "mystery",
+    "infinite flow": "infinite_flow",
+    "ancient": "ancient",
+    "modern": "modern",
+    "fantasy": "fantasy",
+    "supernatural": "supernatural",
+    "infinite_flow": "infinite_flow",
+    "mystery": "mystery"
+  },
+  "sources": {
+    "skill-creator": {
+      "title": "skills/skill-creator/SKILL.md",
+      "url": "https://github.com/anthropics/skills/blob/2c5958ecac7cee2b583967a2c4981d0f4a75c579/skills/skill-creator/SKILL.md",
+      "author": "Anthropic",
+      "license": "Apache-2.0",
+      "grade": "implementation",
+      "hash_kind": "git-blob-sha1",
+      "hash": "65b3a402dbd09b8e83f9d637c6b553875189085c"
+    },
+    "writing-skills": {
+      "title": "plugins/superpowers/skills/writing-skills/SKILL.md",
+      "url": "https://github.com/openai/plugins/blob/d420d13051bffe4543ed39e30fa46b87148e47dd/plugins/superpowers/skills/writing-skills/SKILL.md",
+      "author": "Jesse Vincent / OpenAI plugin distribution",
+      "license": "MIT",
+      "grade": "implementation",
+      "hash_kind": "git-blob-sha1",
+      "hash": "f33f39f523c8a3ae2ec0eaf365a524571df8ff3d"
+    },
+    "story-start": {
+      "title": "docs/getting-started.md",
+      "url": "https://github.com/danjdewhurst/story-skills/blob/74dd2f92dd757d4b262085bddccb09ed5a4281d1/docs/getting-started.md",
+      "author": "Daniel Dewhurst",
+      "license": "MIT",
+      "grade": "implementation",
+      "hash_kind": "git-blob-sha1",
+      "hash": "a8ba86c921a7e5db66bd89e3e9ded702ed8193ec"
+    },
+    "verify-cites": {
+      "title": "skills/citation-verification/SKILL.md",
+      "url": "https://github.com/KalarisLabs/research-agent-skills/blob/802bbea44e551abac24d6856f83fc55149bbdba3/skills/citation-verification/SKILL.md",
+      "author": "Kalaris Labs",
+      "license": "MIT",
+      "grade": "implementation",
+      "hash_kind": "git-blob-sha1",
+      "hash": "e5ba6b3d305658cd8bcf018dc64e5673ca695e65"
+    },
+    "review-issues": {
+      "title": "skills/沁言学术skills/qinyan-nature-review/SKILL.md",
+      "url": "https://github.com/LeonChaoX/qinyan-academic-skills/blob/df5a498a81e0f9c8f79d814446dcf9e9b8f68888/skills/%E6%B2%81%E8%A8%80%E5%AD%A6%E6%9C%AFskills/qinyan-nature-review/SKILL.md",
+      "author": "LeonChaoX",
+      "license": "MIT",
+      "grade": "implementation",
+      "hash_kind": "git-blob-sha1",
+      "hash": "6beabf2313ff5d3d486dccd83037a00cbac10814"
+    },
+    "integrity": {
+      "title": "academic-pipeline/references/ai_research_failure_modes.md",
+      "url": "https://github.com/IorioD/claude-academic-research-skills/blob/5a1a5a687602c79c31b1ab8603ebcf8de65a9579/academic-pipeline/references/ai_research_failure_modes.md",
+      "author": "Cheng-I Wu / IorioD fork",
+      "license": "CC BY-NC 4.0",
+      "grade": "implementation",
+      "hash_kind": "git-blob-sha1",
+      "hash": "56da63e6e9a43ca126aad67fd97799a55a4d0845"
+    },
+    "source-review": {
+      "title": "skills/sci-manuscript-review/SKILL.md",
+      "url": "https://github.com/FonaTech/Academic_Writing_Skills/blob/086d3a5cc8d1a002a1f0dcb8df4d193b8423eb1f/skills/sci-manuscript-review/SKILL.md",
+      "author": "Hu Group and Yufeng Zhan",
+      "license": "MIT",
+      "grade": "implementation",
+      "hash_kind": "git-blob-sha1",
+      "hash": "01dc8ff4d6996cfe69c47ac9199b05a20d61a755"
+    },
+    "edit-passes": {
+      "title": "skills/sciwrite-prose/SKILL.md",
+      "url": "https://github.com/dvdsosa/scientific-writing-skills/blob/2eb42c9afb4c9edd4ad5c3a4ae9351e139bae0a0/skills/sciwrite-prose/SKILL.md",
+      "author": "David Sosa-Trejo",
+      "license": "MIT",
+      "grade": "implementation",
+      "hash_kind": "git-blob-sha1",
+      "hash": "6d44ff0c67f297a18a840d7c505dae68c20101ab"
+    },
+    "series": {
+      "title": "skills/series-continuity/SKILL.md",
+      "url": "https://github.com/danjdewhurst/story-skills/blob/74dd2f92dd757d4b262085bddccb09ed5a4281d1/skills/series-continuity/SKILL.md",
+      "author": "Daniel Dewhurst",
+      "license": "MIT",
+      "grade": "implementation",
+      "hash_kind": "git-blob-sha1",
+      "hash": "748e30b4169f3b512eee85055a9848687d728ad7"
+    },
+    "genre-routing": {
+      "title": "skills/genre-craft/SKILL.md",
+      "url": "https://github.com/danjdewhurst/story-skills/blob/74dd2f92dd757d4b262085bddccb09ed5a4281d1/skills/genre-craft/SKILL.md",
+      "author": "Daniel Dewhurst",
+      "license": "MIT",
+      "grade": "implementation",
+      "hash_kind": "git-blob-sha1",
+      "hash": "d3204477d408ba54e06d415f5006da83d206e5a1"
+    },
+    "reflexion": {
+      "title": "alfworld_runs/generate_reflections.py",
+      "url": "https://github.com/noahshinn/reflexion/blob/218cf0ef1df84b05ce379dd4a8e47f17766733a0/alfworld_runs/generate_reflections.py",
+      "author": "Noah Shinn et al.",
+      "license": "MIT",
+      "grade": "implementation",
+      "hash_kind": "git-blob-sha1",
+      "hash": "1092cbd6dc1f0e25cf6ee60e2ea2d27e35001bf7"
+    },
+    "sepia": {
+      "title": "skills/sepia-review/SKILL.md",
+      "url": "https://github.com/Nanako0129/sepia/blob/0eb11d6c64c962fcc35f596c167c6e38045d6cb8/skills/sepia-review/SKILL.md",
+      "author": "Nanako Tsai",
+      "license": "MIT",
+      "grade": "implementation",
+      "hash_kind": "git-blob-sha1",
+      "hash": "7b1639fbbbbb232e17ffd7ccfbe0976ae02693af"
+    },
+    "novelclaw": {
+      "title": "apps/multiagent/agents/writer_agent.py",
+      "url": "https://github.com/iLearn-Lab/NovelClaw/blob/eac2fda3534205f5c70732e653b6f07a575f5ac9/apps/multiagent/agents/writer_agent.py",
+      "author": "iLearn-Lab",
+      "license": "MIT",
+      "grade": "implementation",
+      "hash_kind": "git-blob-sha1",
+      "hash": "6aaac2eba78f8c04dd48b46069fcf900a41e2685"
+    },
+    "fantasy-ref": {
+      "title": "skills/genre-craft/references/fantasy.md",
+      "url": "https://github.com/danjdewhurst/story-skills/blob/74dd2f92dd757d4b262085bddccb09ed5a4281d1/skills/genre-craft/references/fantasy.md",
+      "author": "Daniel Dewhurst",
+      "license": "MIT",
+      "grade": "implementation",
+      "hash_kind": "git-blob-sha1",
+      "hash": "04ebe5caf6a51b341ff38eb92127e4f6ae08b0fb"
+    },
+    "horror-ref": {
+      "title": "skills/genre-craft/references/horror.md",
+      "url": "https://github.com/danjdewhurst/story-skills/blob/74dd2f92dd757d4b262085bddccb09ed5a4281d1/skills/genre-craft/references/horror.md",
+      "author": "Daniel Dewhurst",
+      "license": "MIT",
+      "grade": "implementation",
+      "hash_kind": "git-blob-sha1",
+      "hash": "279be285f3f6d306d872a647c8ffbc2926920d6c"
+    },
+    "mystery-ref": {
+      "title": "skills/genre-craft/references/mystery-fair-play.md",
+      "url": "https://github.com/danjdewhurst/story-skills/blob/74dd2f92dd757d4b262085bddccb09ed5a4281d1/skills/genre-craft/references/mystery-fair-play.md",
+      "author": "Daniel Dewhurst",
+      "license": "MIT",
+      "grade": "implementation",
+      "hash_kind": "git-blob-sha1",
+      "hash": "bc2e57d0f07e9d33e044c8960799c24b45737049"
+    },
+    "serial-ref": {
+      "title": "skills/genre-craft/references/serial-episodic.md",
+      "url": "https://github.com/danjdewhurst/story-skills/blob/74dd2f92dd757d4b262085bddccb09ed5a4281d1/skills/genre-craft/references/serial-episodic.md",
+      "author": "Daniel Dewhurst",
+      "license": "MIT",
+      "grade": "implementation",
+      "hash_kind": "git-blob-sha1",
+      "hash": "4c94376598a3b5fe748e2a2c3f98ca45333f9d87"
+    },
+    "openlearn-plot": {
+      "url": "https://www.open.edu/openlearn/history-the-arts/creative-writing/start-writing-fiction/content-section-1.1",
+      "title": "Start writing fiction: 1.1 Creating characters | OpenLearn - Open University",
+      "hash_kind": "sha256-original-html",
+      "hash": "a097246f1b0beb1e427df0febad492fe4e99b7ddab52f1607f396f52d25ea99f",
+      "author": "The Open University",
+      "license": "Course CC BY-NC; separately credited extracts excluded",
+      "grade": "teaching"
+    },
+    "openlearn-voice": {
+      "url": "https://www.open.edu/openlearn/mod/oucontent/view.php?id=1622&section=1.5",
+      "title": "Start writing fiction: 1.5 Tips on character creation | OpenLearn - Open University",
+      "hash_kind": "sha256-original-html",
+      "hash": "92e6f02b3683ae2c8c2ef1f92181beb874c9d6a0e1ab55ab458df4c53ce40c82",
+      "author": "The Open University",
+      "license": "Course CC BY-NC; separately credited extracts excluded",
+      "grade": "teaching"
+    },
+    "purdue-plot": {
+      "url": "https://owl.purdue.edu/owl/subject_specific_writing/creative_writing/writers/fiction_writing_basics/index.html",
+      "title": "Fiction Basics",
+      "hash_kind": "sha256-reviewed-section-text",
+      "hash": "44be8a8d24ebf103f1b0cb7d1c1e6b5f9b26eac1fd3bf0fb0035e29c4f5b42ec",
+      "locator": "Plot heading and first three paragraphs",
+      "author": "Purdue University Writing Lab / OWL",
+      "license": "All rights reserved",
+      "grade": "teaching"
+    },
+    "purdue-view": {
+      "url": "https://owl.purdue.edu/owl/subject_specific_writing/creative_writing/writers/fiction_writing_basics/fiction_writing_basics_2.html",
+      "title": "Fiction Writing Basics 2",
+      "hash_kind": "sha256-reviewed-section-text",
+      "hash": "5c92e59f4f1a5a2b9d912b50f280e180e021bcc7b87d98a4fcbd38012431e67e",
+      "locator": "Point of View heading and first two paragraphs",
+      "author": "Purdue University Writing Lab / OWL",
+      "license": "All rights reserved",
+      "grade": "teaching"
+    },
+    "motivation": {
+      "url": "https://openstax.org/books/psychology-2e/pages/10-1-motivation",
+      "title": "10.1 Motivation - Psychology 2e | OpenStax",
+      "hash_kind": "sha256-original-html",
+      "hash": "e59595f7d2a34e47892dce4691a7a9fc569f9069d5d328f7dc0efc6f86a5be17",
+      "author": "Rose M. Spielman, William J. Jenkins, Marilyn D. Lovett / OpenStax",
+      "license": "CC BY-NC-SA 4.0; publisher conditions on generative ingestion",
+      "grade": "textbook"
+    },
+    "emotion": {
+      "url": "https://openstax.org/books/psychology-2e/pages/10-4-emotion",
+      "title": "10.4 Emotion - Psychology 2e | OpenStax",
+      "hash_kind": "sha256-original-html",
+      "hash": "b11d8bb6eadbfc5afd9b6aebcc4f41a1342f1298bacc182d508358e6577d7257",
+      "author": "Rose M. Spielman, William J. Jenkins, Marilyn D. Lovett / OpenStax",
+      "license": "CC BY-NC-SA 4.0; publisher conditions on generative ingestion",
+      "grade": "textbook"
+    },
+    "social": {
+      "url": "https://openstax.org/books/psychology-2e/pages/12-4-conformity-compliance-and-obedience",
+      "title": "12.4 Conformity, Compliance, and Obedience - Psychology 2e | OpenStax",
+      "hash_kind": "sha256-original-html",
+      "hash": "5914f63d41db5de7312cd568348f5906146e72c954ae67e5d0aed3254878a3a8",
+      "author": "Rose M. Spielman, William J. Jenkins, Marilyn D. Lovett / OpenStax",
+      "license": "CC BY-NC-SA 4.0; publisher conditions on generative ingestion",
+      "grade": "textbook"
+    },
+    "time": {
+      "url": "https://www-archiv.fdm.uni-hamburg.de/lhn/node/106.html",
+      "title": "Time | the living handbook of narratology",
+      "hash_kind": "sha256-original-html",
+      "hash": "cfcec639052c01883711e87f25103049e1cde8141a2c5474f496abcdfe8fc7b1",
+      "author": "Michael Scheffel, Antonius Weixler, Lukas Werner",
+      "license": "No reuse license verified on chapter; link only",
+      "grade": "scholarship"
+    },
+    "song": {
+      "url": "https://afe.easia.columbia.edu/songdynasty-module/cities-hangzhou.html",
+      "title": "Song Dynasty China | Asia for Educators",
+      "hash_kind": "sha256-original-html",
+      "hash": "fc7ff02f5fa0eb27f225c821d825a057f95bfeffe395f767147d6467d259baa4",
+      "author": "Asia for Educators, Columbia University",
+      "license": "University and credited third parties; no reuse rights assumed",
+      "grade": "teaching"
+    },
+    "roles": {
+      "url": "https://openstax.org/books/introduction-sociology-3e/pages/4-3-social-constructions-of-reality",
+      "title": "4.3 Social Constructions of Reality - Introduction to Sociology 3e | OpenStax",
+      "hash_kind": "sha256-original-html",
+      "hash": "875673a1f44b8384100ecf4ab654a9df85905039f639e64a4ff63805c144070b",
+      "author": "Tonja R. Conerly, Kathleen Holmes, Asha Lal Tamang / OpenStax",
+      "license": "CC BY-NC-SA 4.0; publisher conditions on generative ingestion",
+      "grade": "textbook"
+    }
+  },
+  "entries": [
+    {
+      "id": "screenwriting",
+      "roles": [
+        "chief_editor",
+        "volume_director"
+      ],
+      "tasks": [
+        "book_direction",
+        "window_plan",
+        "scene_plan",
+        "volume_contract",
+        "replan"
+      ],
+      "genres": [],
+      "version": "1.0",
+      "sources": [
+        "openlearn-plot",
+        "purdue-plot"
+      ],
+      "original_ref": "references/screenwriting.md",
+      "original_sha256": "a8fe0243897951c5f6e98401fabafa642946c7909e764da20daa3c633e042d7d"
+    },
+    {
+      "id": "world",
+      "roles": [
+        "world_designer",
+        "environment_director",
+        "adjudication_advisor"
+      ],
+      "tasks": [],
+      "genres": [],
+      "version": "1.0",
+      "sources": [
+        "fantasy-ref",
+        "series"
+      ],
+      "original_ref": "references/world.md",
+      "original_sha256": "2833387de1b2d3c200272468bc8b3ece64c444f72762fafe0f72d164adc7b48d"
+    },
+    {
+      "id": "volume",
+      "roles": [
+        "volume_director",
+        "chief_editor"
+      ],
+      "tasks": [
+        "volume_contract",
+        "window_plan",
+        "replan",
+        "volume_review",
+        "editorial_decision",
+        "release_review"
+      ],
+      "genres": [],
+      "version": "1.0",
+      "sources": [
+        "series",
+        "time",
+        "serial-ref"
+      ],
+      "original_ref": "references/volume.md",
+      "original_sha256": "e2bfddd5c79fd4473e57b3e6db3a2e6f4b26e77c1319dba0da8517d5b2cfbcb0"
+    },
+    {
+      "id": "acting",
+      "roles": [
+        "character_actor"
+      ],
+      "tasks": [],
+      "genres": [],
+      "version": "1.0",
+      "sources": [
+        "motivation",
+        "emotion",
+        "social",
+        "openlearn-voice"
+      ],
+      "original_ref": "references/acting.md",
+      "original_sha256": "3b6cab6ce617114ad0ab27769e0567f6021f0fdc683d02ef88a375e805cafdbd"
+    },
+    {
+      "id": "draft",
+      "roles": [
+        "writer"
+      ],
+      "tasks": [],
+      "genres": [],
+      "version": "1.0",
+      "sources": [
+        "openlearn-voice",
+        "purdue-view",
+        "time"
+      ],
+      "original_ref": "references/draft.md",
+      "original_sha256": "00c1d60802c4fc5e35e487d025daaee50e1ded4fac583640460dd40c4c595a50"
+    },
+    {
+      "id": "edit",
+      "roles": [
+        "literary_editor",
+        "reviewer",
+        "chief_editor"
+      ],
+      "tasks": [
+        "research",
+        "structure",
+        "seam",
+        "cross_volume",
+        "literary",
+        "editorial_decision",
+        "release_review"
+      ],
+      "genres": [],
+      "version": "1.0",
+      "sources": [
+        "review-issues",
+        "edit-passes",
+        "openlearn-voice"
+      ],
+      "original_ref": "references/edit.md",
+      "original_sha256": "42949aa9fa4dedcb0dc9d1b4683bd637d44c62c0ae7f422369aa6c90ae3b7b93"
+    },
+    {
+      "id": "audit",
+      "roles": [
+        "reviewer",
+        "evidence_maintainer"
+      ],
+      "tasks": [],
+      "genres": [],
+      "version": "1.0",
+      "sources": [
+        "verify-cites",
+        "source-review",
+        "series"
+      ],
+      "original_ref": "references/audit.md",
+      "original_sha256": "d50d961980d0635450c7665a9660da05de511fcdc3ef5a59df8ec3b81d940518"
+    },
+    {
+      "id": "ancient",
+      "roles": [
+        "world_designer",
+        "environment_director",
+        "chief_editor",
+        "volume_director",
+        "character_actor",
+        "writer",
+        "literary_editor",
+        "reviewer",
+        "adjudication_advisor",
+        "evidence_maintainer"
+      ],
+      "tasks": [],
+      "genres": [
+        "ancient"
+      ],
+      "version": "1.0",
+      "sources": [
+        "song",
+        "openlearn-voice"
+      ],
+      "original_ref": "references/ancient.md",
+      "original_sha256": "bb0cc55c3b6232e59d7345c8bc7e47a209ae1aade44aaa7802b99033d33b5eed"
+    },
+    {
+      "id": "modern",
+      "roles": [
+        "world_designer",
+        "environment_director",
+        "chief_editor",
+        "volume_director",
+        "character_actor",
+        "writer",
+        "literary_editor",
+        "reviewer",
+        "adjudication_advisor",
+        "evidence_maintainer"
+      ],
+      "tasks": [],
+      "genres": [
+        "modern"
+      ],
+      "version": "1.0",
+      "sources": [
+        "roles",
+        "openlearn-voice"
+      ],
+      "original_ref": "references/modern.md",
+      "original_sha256": "07fc28c2553f40269ab8d504cf500be7a9c9b896e73563bc6bb5d44e85e0e2c6"
+    },
+    {
+      "id": "fantasy",
+      "roles": [
+        "world_designer",
+        "environment_director",
+        "chief_editor",
+        "volume_director",
+        "character_actor",
+        "writer",
+        "literary_editor",
+        "reviewer",
+        "adjudication_advisor",
+        "evidence_maintainer"
+      ],
+      "tasks": [],
+      "genres": [
+        "fantasy"
+      ],
+      "version": "1.0",
+      "sources": [
+        "fantasy-ref"
+      ],
+      "original_ref": "references/fantasy.md",
+      "original_sha256": "7ab1db01055bfce7b26767ae2d87f54b8020fb944fe9db2484d8627bbac836ee"
+    },
+    {
+      "id": "supernatural",
+      "roles": [
+        "world_designer",
+        "environment_director",
+        "chief_editor",
+        "volume_director",
+        "character_actor",
+        "writer",
+        "literary_editor",
+        "reviewer",
+        "adjudication_advisor",
+        "evidence_maintainer"
+      ],
+      "tasks": [],
+      "genres": [
+        "supernatural"
+      ],
+      "version": "1.0",
+      "sources": [
+        "horror-ref",
+        "purdue-view"
+      ],
+      "original_ref": "references/supernatural.md",
+      "original_sha256": "2543ff9b2a7d360c6afb584866cd6613ee30b75f8b4ed396fcdf130b13a65584"
+    },
+    {
+      "id": "infinite-flow",
+      "roles": [
+        "world_designer",
+        "environment_director",
+        "chief_editor",
+        "volume_director",
+        "character_actor",
+        "writer",
+        "literary_editor",
+        "reviewer",
+        "adjudication_advisor",
+        "evidence_maintainer"
+      ],
+      "tasks": [],
+      "genres": [
+        "infinite_flow"
+      ],
+      "version": "1.0",
+      "sources": [
+        "series",
+        "serial-ref"
+      ],
+      "original_ref": "references/infinite-flow.md",
+      "original_sha256": "080124a7fc23024f3e34d8b11dda407927a86f1baad03a65eb4cc94693ec7df7"
+    },
+    {
+      "id": "mystery",
+      "roles": [
+        "world_designer",
+        "environment_director",
+        "chief_editor",
+        "volume_director",
+        "character_actor",
+        "writer",
+        "literary_editor",
+        "reviewer",
+        "adjudication_advisor",
+        "evidence_maintainer"
+      ],
+      "tasks": [],
+      "genres": [
+        "mystery"
+      ],
+      "version": "1.0",
+      "sources": [
+        "mystery-ref",
+        "purdue-view"
+      ],
+      "original_ref": "references/mystery.md",
+      "original_sha256": "63a1b2f28ed2e49deece5ccd6530d17ffc8c062bf9f2a2ab87d3598e48947412"
+    }
+  ],
+  "methods_sha256": "dd8c7051228d3d00053a0eefd1bb07197d17256c376d4e936034502b9545de66"
+}

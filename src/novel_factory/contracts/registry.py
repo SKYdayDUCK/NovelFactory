@@ -26,6 +26,7 @@ _FILES = {"2.0": "core.schema.json", "2.1": "temporal_concurrency.schema.json",
           "planning": "planning.schema.json", "simulation": "simulation.schema.json",
           "harness": "harness.schema.json", "agent": "agent.schema.json", "narrative": "narrative.schema.json",
           "editorial": "editorial.schema.json", "release": "release.schema.json",
+          "production_profile": "production_profile.schema.json",
           "upgrades": "upgrades.schema.json", "refinement": "refinement.schema.json", "continuity": "continuity.schema.json"}
 
 
