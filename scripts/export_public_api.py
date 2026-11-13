@@ -14,6 +14,8 @@ sys.path[:0] = [str(ROOT / 'src'), str(ROOT / 'workshop/src'), str(ROOT)]
 
 from jsonschema import Draft202012Validator, FormatChecker
 
+from mcp.types import JSONRPCMessage
+
 from agent_workshop.server import TOOLS
 from novel_factory.application.delegation import SCHEMAS
 from novel_factory.contracts.registry import _REGISTRY, _source
@@ -25,7 +27,9 @@ def http_routes():
     source = Path('src/novel_factory/interfaces/http.py')
     module = ast.parse((ROOT / source).read_text(encoding='utf-8'))
     factory = next(node for node in module.body if isinstance(node, ast.FunctionDef) and node.name == 'create_app')
-    for handler in factory.body:
+    conditional = [node for statement in factory.body if isinstance(statement, ast.If)
+                   and ast.unparse(statement.test) == 'bindings is not None' for node in statement.body]
+    for handler in [*factory.body, *conditional]:
         if not isinstance(handler, ast.AsyncFunctionDef):
             continue
         for route in handler.decorator_list:
@@ -37,6 +41,8 @@ def http_routes():
             path = route.args[0].value
             entry = {'transport': 'http', 'method': method, 'path': path,
                      'source': str(source), 'handler': handler.name}
+            if handler in conditional:
+                entry['requires'] = 'NF_MCP_BINDINGS_FILE'
             parameters = re.findall(r'\{([^{}]+)\}', path)
             if parameters:
                 entry['pathParameters'] = {param: {'type': 'string', 'format': 'uuid'} for param in parameters}
@@ -46,8 +52,17 @@ def http_routes():
                          and isinstance(call.func, ast.Name)]
                 schema_call = next((c for c in calls if c.func.id == '_body'), None)
                 if schema_call is None:
-                    schema_call = next(c for c in calls if c.func.id == 'validate_contract'
-                                       and c.args[0].value != 'UUID')
+                    schema_call = next((c for c in calls if c.func.id == 'validate_contract'
+                                       and c.args[0].value != 'UUID'), None)
+                    if schema_call is None:
+                        for node in ast.walk(handler):
+                            if isinstance(node, ast.Subscript) and isinstance(node.value, ast.Name) and node.value.id == '_VALIDATORS':
+                                entry['inputSchema'] = _TOOLS[node.slice.value][1]
+                                break
+                        else:
+                            raise ValueError(f'No registered POST input contract in {handler.name}')
+                        yield f'{method} {path}', entry
+                        continue
                     name, version = schema_call.args[0].value, schema_call.args[2].value
                 else:
                     name, version = (arg.value for arg in schema_call.args[1:3])
@@ -68,6 +83,16 @@ def catalog():
         entries[name] = {'transport': 'installation-mcp', 'description': _DESCRIPTIONS[name],
                          'inputSchema': schema, 'source': 'src/novel_factory/application/delegation.py'}
     entries.update(http_routes())
+    # The SDK carries JSON-RPC envelopes on one optional ASGI transport route.
+    # The same role-bound tools and their argument schemas are catalogued above.
+    from novel_factory.interfaces.mcp_http import RemoteTools
+
+    for method in RemoteTools.methods:
+        entries[f'{method} {RemoteTools.path}'] = {
+            'transport': 'mcp-streamable-http', 'method': method, 'path': RemoteTools.path,
+            'source': 'src/novel_factory/interfaces/mcp_http.py', 'handler': 'RemoteTools',
+            'requires': 'NF_MCP_BINDINGS_FILE', 'inputSchema': JSONRPCMessage.model_json_schema(),
+        }
     return dict(sorted(entries.items()))
 
 

@@ -85,7 +85,10 @@ jobs:
           tests/reliability/test_tasks.py tests/integration/test_bound_tool_entrypoints.py
           tests/integration/test_mcp_idle_pool.py
           tests/integration/test_p5_scheduler_admission.py::test_supervisor_drains_sent_attempt_and_leaves_next_job_ready
-          tests/integration/test_p58_routing.py
+          tests/integration/test_p58_routing.py tests/contracts/test_static_validation.py
+          tests/service/test_hera_mixed_ingress.py tests/integration/test_hera_compact_role_authority.py
+          tests/integration/test_lifecycle_fences.py
+          tests/concurrency/test_world_races.py::test_task_authorization_is_rechecked_inside_mutation_transaction
           --junitxml=native-postgres.xml
       - uses: actions/upload-artifact@v4
         if: always()

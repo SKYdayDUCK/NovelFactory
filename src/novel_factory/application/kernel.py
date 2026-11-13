@@ -32,9 +32,10 @@ def require(condition, code, message):
 
 
 class Kernel:
+    _verified_projections = ()
+
     def __init__(self, db, objects):
         self.db, self.objects = db, objects
-        self._last_verified_projection = None
         self.tasks = TaskService(db.engine, tables, object_store=objects)
 
     def in_transaction(self, repo):
@@ -50,8 +51,14 @@ class Kernel:
 
     def authenticate(self, token: str) -> Principal:
         require(isinstance(token,str) and 16 <= len(token) <= 256, "VIEW_DENIED", "Credentials unavailable")
+        digest = sha256(token.encode()).hexdigest()
+        if hasattr(self.db, "bearer_identity"):
+            record = self.db.bearer_identity(digest)
+            require(record, "VIEW_DENIED", "Credentials unavailable")
+            if record["role_id"] != "resume_operator":
+                return Principal(record["grant_id"], record["principal_id"])
         with self.db.uow(write=False) as r:
-            grant = r.one("grants", {"token_hash":sha256(token.encode()).hexdigest()})
+            grant = r.one("grants", {"token_hash": digest})
             require(grant and grant["active"],
                     "VIEW_DENIED", "Credentials unavailable")
             self._check_resume_grant(r, grant)
@@ -72,17 +79,26 @@ class Kernel:
     def _authorize_with_work(self, r, principal, work_id, capability, branch_id):
         """Return both SHARE-locked rows to a caller in this transaction."""
         require(isinstance(principal, Principal), "VIEW_DENIED", "Authenticated identity required")
-        work = r.one("works", {"work_id":work_id}, lock="share")
-        grant = r.one("grants", {"grant_id":principal.grant_id}, lock="share")
-        require(work and grant and grant["active"] and grant["principal_id"] == principal.principal_id
+        if hasattr(r, "locked_work_grant"):
+            work, grant = r.locked_work_grant(work_id, principal.grant_id)
+        else:
+            work = r.one("works", {"work_id":work_id}, lock="share")
+            grant = r.one("grants", {"grant_id":principal.grant_id}, lock="share")
+        self._check_locked_grant(r, principal, work_id, capability, branch_id, grant if work else None)
+        return work, grant
+
+    def _check_locked_grant(self, r, principal, work_id, capability, branch_id, grant):
+        require(grant and grant["active"] and grant["principal_id"] == principal.principal_id
                 and grant["work_id"] == work_id, "VIEW_DENIED", "Resource unavailable for this identity")
         self._check_resume_grant(r, grant)
         require(capability in grant["capabilities"], "VIEW_DENIED", "Operation is outside this grant")
         require(branch_id is None or grant["branch_ids"] == ["*"] or branch_id in grant["branch_ids"],
                 "VIEW_DENIED", "Resource unavailable for this identity")
-        return work, grant
 
     def revision(self, r, wr):
+        return self._read_revision(r, wr, materialize=True)
+
+    def _read_revision(self, r, wr, *, materialize):
         validate_contract("WorldRef", wr)
         read_text = getattr(r, "revision_with_snapshot_text", None)
         row = read_text(wr) if read_text is not None else r.one("revisions", wr)
@@ -98,16 +114,19 @@ class Kernel:
             # only its digest gives small and large valid worlds the same
             # bounded witness, with no projection bytes or mutable results shared.
             witness = (row["state_hash"], sha256(raw.encode("utf-8")).digest())
-            # Decode a private Python object even on a hit. Only evidence that
-            # these exact bytes passed NF-CANON-1 is shared between readers.
-            row["snapshot"] = json.loads(raw)
-            if witness != self._last_verified_projection:
+            # Hold only eight digest pairs for interleaved works. Concurrent
+            # replacement may evict a witness early, which only costs a recheck.
+            verified = self._verified_projections
+            miss = witness not in verified
+            if materialize or miss:
+                row["snapshot"] = json.loads(raw)
+            if miss:
                 require(fingerprint(row["snapshot"]) == row["state_hash"],
                         "PROJECTION_CORRUPT", "Projection integrity failed")
-                self._last_verified_projection = witness
+                self._verified_projections = (witness, *verified[:7])
         from novel_factory.application.simulation import verify_schedule_revision
         verify_schedule_revision(row)
-        return row
+        return row if materialize else None
 
     def head(self, r, work_id, branch_id=None):
         if branch_id is None:
@@ -470,44 +489,58 @@ class Kernel:
             r.outbox("authorization.revoked","grant",grant_id,{"epoch":target["epoch"]+1},f"revoke:{grant_id}:{target['epoch']+1}")
 
     def create_task(self, principal, spec, idempotency_key):
-        validate_contract("TaskSpec", spec)
+        checked = validate_contract("TaskSpec", spec)
+        with self.db.uow() as repo:
+            return self._create_checked_task(repo, principal, checked, idempotency_key)
 
-        def authorize_task(conn):
-            from novel_factory.infrastructure.repository import KernelRepository
-            self._authorize_task_create(KernelRepository(conn, tables), principal, spec)
+    def prepare_task_create_request(self, request):
+        """Validate the public envelope once, before admission; capture its private copy."""
+        checked = validate_contract("TaskCreateRequest", request, "http")
 
-        return self.tasks.create(spec, principal_id=principal.principal_id,
-                                 idempotency_key=idempotency_key, authorize_in_tx=authorize_task)
+        def create(principal, scope=None):
+            if scope is not None:
+                scope.check(checked["spec"]["world_ref"])
+            with self.db.uow() as repo:
+                return self._create_checked_task(repo, principal, checked["spec"], checked["idempotency_key"])
+
+        return create
 
     def create_task_in_transaction(self, r, principal, spec, idempotency_key):
-        validate_contract("TaskSpec", spec)
+        return self._create_checked_task(r, principal, validate_contract("TaskSpec", spec), idempotency_key)
+
+    def _create_checked_task(self, r, principal, spec, idempotency_key):
         self._authorize_task_create(r, principal, spec)
-        return self.tasks.create_in_transaction(r.conn, spec, principal_id=principal.principal_id,
-                                                idempotency_key=idempotency_key)
+        return self.tasks._insert_checked_task(r.conn, spec, principal_id=principal.principal_id,
+                                               idempotency_key=idempotency_key)
 
     def _authorize_task_create(self, r, principal, spec):
         wr = spec["world_ref"]
-        g=self.authorize(r,principal,wr["work_id"],"TASK_CREATE",wr["branch_id"])
-        self.revision(r,wr)
+        work, g = self._authorize_with_work(r, principal, wr["work_id"], "TASK_CREATE", wr["branch_id"])
+        self._read_revision(r, wr, materialize=False)
         from .dynamic_runtime import check_input_branch
         inputs = {ref["artifact_revision_id"]: ref for ref in spec["input_artifacts"]}
-        for row in r.many("artifacts", {"work_id": wr["work_id"], "kind": "AGENT_INPUT",
-                                        "artifact_revision_id": list(inputs)}):
-            check_input_branch(self, r, wr, row, inputs[row["artifact_revision_id"]])
+        if inputs:
+            for row in r.many("artifacts", {"work_id": wr["work_id"], "kind": "AGENT_INPUT",
+                                            "artifact_revision_id": list(inputs)}):
+                check_input_branch(self, r, wr, row, inputs[row["artifact_revision_id"]])
         require(spec["capability_grant_id"]==g["grant_id"] and spec["role_id"]==g["role_id"],"VIEW_DENIED","Task grant mismatch")
         require(point_key(spec["story_time"])<=point_key(g["max_story_time"]),"VIEW_DENIED","Task time outside grant")
         require(spec["context_bundle_id"] is None and spec["dependency_fingerprint"] is None,"INVALID_ARGUMENT","Only compiler may bind task context")
-        require(spec["policy_version"]==r.one("works",{"work_id":wr["work_id"]})["policy_version"],"INVALID_ARGUMENT","Task policy version is not current")
+        require(spec["policy_version"]==work["policy_version"],"INVALID_ARGUMENT","Task policy version is not current")
 
-    def claim_task(self, principal, worker_id, *, lease_seconds=30, task_id=None):
+    def claim_task(self, principal, worker_id, *, lease_seconds=30, task_id=None, scope=None):
         with self.db.uow() as repo:
             identity = repo.one("grants", {"grant_id": principal.grant_id})
             require(identity, "VIEW_DENIED", "Grant unavailable")
-            grant = self.authorize(repo, principal, identity["work_id"], "TASK_CLAIM")
-            branches = grant["branch_ids"]
+            work_id = scope.work_id if scope is not None else identity["work_id"]
+            branch_id = scope.branch_id if scope is not None else None
+            grant = self.authorize(repo, principal, work_id, "TASK_CLAIM", branch_id)
+            branches = grant["branch_ids"] if grant["branch_ids"] != ["*"] else None
+            if scope is not None:
+                branches = [branch_id]
             return self.tasks.claim_in_transaction(
                 repo.conn, worker_id, work_id=grant["work_id"], principal_id=principal.principal_id,
-                grant_id=principal.grant_id, branch_ids=None if branches == ["*"] else branches,
+                grant_id=principal.grant_id, branch_ids=branches,
                 task_id=task_id, lease_seconds=lease_seconds,
             )
 
@@ -520,20 +553,33 @@ class Kernel:
 
     def get_task(self,principal,task_id):
         with self.db.uow(write=False) as r:
-            task,_=self._task_owner(r,principal,task_id)
-            task["world_ref"]=r.one("task_inputs",{"task_id":task_id,"generation":task["generation"]})["spec"]["world_ref"]
+            if isinstance(principal, Principal) and hasattr(r, "locked_task_status"):
+                task, grant, ref = r.locked_task_status(task_id, principal.grant_id)
+                require(task, "VIEW_DENIED", "Task unavailable")
+                self._check_locked_grant(r, principal, task["work_id"], "READ", task["branch_id"], grant)
+                require(task["principal_id"] == principal.principal_id and task["grant_id"] == principal.grant_id,
+                        "VIEW_DENIED", "Task unavailable")
+                require(ref is not None, "INTERNAL_ERROR", "Task input unavailable")
+                task["world_ref"] = ref
+            else:
+                task, _ = self._task_owner(r, principal, task_id)
+                task["world_ref"] = r.one("task_inputs", {"task_id": task_id, "generation": task["generation"]})["spec"]["world_ref"]
         return {k:v for k,v in task.items() if k not in {"principal_id","grant_id","lease_owner"}}
 
-    def cancel_task(self,principal,task_id,generation,idempotency_key):
+    def cancel_task(self,principal,task_id,generation,idempotency_key, *, scope=None):
         def authorize_cancel(conn):
             from novel_factory.infrastructure.repository import KernelRepository
-            self._task_owner(KernelRepository(conn,tables),principal,task_id)
+            task, _ = self._task_owner(KernelRepository(conn,tables),principal,task_id)
+            if scope is not None:
+                scope.check(task)
         return self.tasks.cancel(task_id,generation,principal_id=principal.principal_id,idempotency_key=idempotency_key,authorize_in_tx=authorize_cancel)
 
-    def submit_result(self,principal,result,worker_id):
+    def submit_result(self,principal,result,worker_id, *, scope=None):
         def authorize_result(conn):
             from novel_factory.infrastructure.repository import KernelRepository
-            self._task_owner(KernelRepository(conn,tables),principal,result["task_id"])
+            task, _ = self._task_owner(KernelRepository(conn,tables),principal,result["task_id"])
+            if scope is not None:
+                scope.check(task)
         return self.tasks.store_result(result,worker_id=worker_id,authorize_in_tx=authorize_result)
 
     def _prior(self,r,principal,work_id,command_type,key,request):

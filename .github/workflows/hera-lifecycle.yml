@@ -1,0 +1,87 @@
+name: HERA paired task lifecycle
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/hera-lifecycle.yml'
+      - 'reports/performance/hera/reproduction/**'
+      - 'src/novel_factory/**'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/hera-lifecycle.yml'
+      - 'src/novel_factory/**'
+  workflow_dispatch:
+    inputs:
+      baseline:
+        description: Full baseline commit SHA
+        required: true
+permissions:
+  contents: read
+jobs:
+  paired:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - run: uv sync --locked --group dev --python 3.12
+      - name: Two interleaved series on an isolated runner and PostgreSQL 17.11
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || inputs.baseline || github.event.before }}
+        run: |
+          set -euo pipefail
+          [[ "$BASE" =~ ^[a-f0-9]{40}$ ]]
+          CANDIDATE="$(git rev-parse HEAD)"
+          root="$GITHUB_WORKSPACE"
+          out="$RUNNER_TEMP/hera-acceptance"
+          mkdir -p "$out" "$RUNNER_TEMP/hera-driver"
+          git worktree add --detach "$RUNNER_TEMP/main-control" "$BASE"
+          ref=6e3f6c9f36f3c6a766978e66ce7b789816e583e2
+          git fetch --no-tags origin "$ref"
+          for file in seven_call_tcp.py standard_http_load.py; do
+            git show "$ref:reports/performance/hera/raw/lifecycle-final/$file" > "$RUNNER_TEMP/hera-driver/$file"
+          done
+          (cd "$RUNNER_TEMP/hera-driver" && sha256sum *.py) > "$out/driver.sha256"
+          read -r client api pg < <(python -c 'import os; c=sorted(os.sched_getaffinity(0)); assert len(c)>=2; print(c[0], c[1], c[min(2,len(c)-1)])')
+          docker run -d --name hera-pg --pid=host --cpuset-cpus="$pg" \
+            -p 127.0.0.1::5432 -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -e POSTGRES_INITDB_ARGS=--data-checksums postgres:17.11-bookworm \
+            -c shared_preload_libraries=pg_stat_statements -c pg_stat_statements.track=all \
+            -c track_functions=pl -c track_io_timing=on > "$out/container-id"
+          trap 'docker logs hera-pg > "$out/postgres.log" 2>&1; docker rm -f hera-pg >/dev/null' EXIT
+          port="$(docker port hera-pg 5432/tcp | cut -d: -f2)"
+          export NF_TEST_DATABASE_URL="postgresql+psycopg://postgres@127.0.0.1:$port/postgres"
+          for i in $(seq 1 60); do
+            if docker exec hera-pg pg_isready -h 127.0.0.1 -U postgres >/dev/null; then break; fi
+            sleep 1
+          done
+          lscpu > "$out/runner-cpu.txt"
+          free -b > "$out/runner-memory.txt"
+          echo "$BASE $CANDIDATE" > "$out/versions.txt"
+          for repeat in 1 2; do
+            for lanes in 2 16 32; do
+              case "$lanes" in 2) rounds=16;; 16) rounds=8;; 32) rounds=4;; esac
+              for arm in a1 b1 b2 a2; do
+                if [[ "$arm" == a* ]]; then cd "$RUNNER_TEMP/main-control"; else cd "$root"; fi
+                PYTHONPATH="$PWD/src:$PWD/workshop/src:$PWD" "$root/.venv/bin/python" \
+                  "$RUNNER_TEMP/hera-driver/seven_call_tcp.py" --revision "$(git rev-parse HEAD)" \
+                  --product main --trigger installed --schema-root "$RUNNER_TEMP/main-control" \
+                  --server-cpus "$api" --client-cpus "$client" --lanes "$lanes" --rounds "$rounds" \
+                  --output "$out/r$repeat-$lanes-$arm.json.gz"
+              done
+            done
+          done
+          python "$root/reports/performance/hera/reproduction/check_lifecycle.py" "$out" "$BASE" "$CANDIDATE" | tee "$out/check.txt"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hera-paired-lifecycle-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/hera-acceptance

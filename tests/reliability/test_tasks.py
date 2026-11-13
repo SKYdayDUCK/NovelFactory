@@ -314,3 +314,18 @@ def test_token_reservations_cannot_exceed_task_budget(rel_env, rel_scope):
     service.settle_call(call["attempt_id"], state="SUCCEEDED", actual_amount="0.50", actual_tokens=11000)
     next_call = service.reserve_call(task["task_id"], 1, "worker", budget_id=budget, amount="1", call_key="token-remainder", request_hash="3" * 64, token_amount=1000)
     assert next_call["reserved_tokens"] == 1000
+
+
+def test_create_deadline_precedes_identity_conflict_but_not_exact_replay(rel_env, rel_scope):
+    service = rel_env["service"]
+    spec = task_spec(rel_scope)
+    principal = rel_scope["principal_id"]
+    first = service.create(spec, principal_id=principal, idempotency_key="deadline-order")
+    for next_spec, expected in (
+        (spec, "ALREADY_EXISTS"),
+        ({**spec, "wall_deadline": "2000-01-01T00:00:00+00:00"}, "DEADLINE_EXCEEDED"),
+    ):
+        with pytest.raises(DomainError) as error:
+            service.create(next_spec, principal_id=principal, idempotency_key="new-key")
+        assert error.value.code == expected
+    assert service.create(spec, principal_id=principal, idempotency_key="deadline-order") == first

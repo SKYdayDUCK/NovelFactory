@@ -1,0 +1,12 @@
+2026-11-13 23:13:37.806 JST [29] LOG:  starting PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+2026-11-13 23:13:37.806 JST [29] LOG:  listening on IPv4 address "127.0.0.1", port 49507
+2026-11-13 23:13:37.815 JST [32] LOG:  database system was shut down at 2026-11-13 23:13:36 JST
+2026-11-13 23:13:37.826 JST [29] LOG:  database system is ready to accept connections
+2026-11-13 23:15:36.969 JST [30] LOG:  checkpoint starting: immediate force wait
+2026-11-13 23:15:38.099 JST [30] LOG:  checkpoint complete: wrote 978 buffers (6.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.102 s, sync=1.012 s, total=1.130 s; sync files=311, longest=0.069 s, average=0.004 s; distance=15013 kB, estimate=15013 kB; lsn=0/25FD188, redo lsn=0/25FD130
+2026-11-13 23:17:08.133 JST [30] LOG:  checkpoint starting: immediate force wait
+2026-11-13 23:17:08.178 JST [30] LOG:  checkpoint complete: wrote 41 buffers (0.3%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.011 s, sync=0.015 s, total=0.046 s; sync files=11, longest=0.003 s, average=0.002 s; distance=10802 kB, estimate=14592 kB; lsn=0/3089C98, redo lsn=0/3089C40
+2026-11-13 23:18:21.395 JST [30] LOG:  checkpoint starting: immediate force wait
+2026-11-13 23:18:21.413 JST [30] LOG:  checkpoint complete: wrote 10 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.004 s, sync=0.009 s, total=0.019 s; sync files=6, longest=0.004 s, average=0.002 s; distance=10448 kB, estimate=14178 kB; lsn=0/3ABE020, redo lsn=0/3ABDFB0
+2026-11-13 23:19:23.846 JST [30] LOG:  checkpoint starting: immediate force wait
+2026-11-13 23:19:23.858 JST [30] LOG:  checkpoint complete: wrote 8 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.003 s, sync=0.004 s, total=0.013 s; sync files=6, longest=0.002 s, average=0.001 s; distance=10397 kB, estimate=13800 kB; lsn=0/44E5550, redo lsn=0/44E54F8

@@ -1,0 +1,23 @@
+2026-11-13 23:15:54.545 JST [24] LOG:  starting PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+2026-11-13 23:15:54.545 JST [24] LOG:  listening on IPv4 address "127.0.0.1", port 55201
+2026-11-13 23:15:54.552 JST [27] LOG:  database system was shut down at 2026-11-13 23:15:52 JST
+2026-11-13 23:15:54.564 JST [24] LOG:  database system is ready to accept connections
+2026-11-13 23:16:35.402 JST [25] LOG:  checkpoint starting: immediate force wait
+2026-11-13 23:16:36.228 JST [25] LOG:  checkpoint complete: wrote 944 buffers (5.8%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.043 s, sync=0.750 s, total=0.829 s; sync files=302, longest=0.060 s, average=0.003 s; distance=11738 kB, estimate=11738 kB; lsn=0/20816C0, redo lsn=0/2081668
+2026-11-13 23:17:03.167 JST [25] LOG:  checkpoint starting: immediate force wait
+2026-11-13 23:17:03.191 JST [25] LOG:  checkpoint complete: wrote 8 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.006 s, sync=0.009 s, total=0.024 s; sync files=6, longest=0.004 s, average=0.002 s; distance=7697 kB, estimate=11334 kB; lsn=0/2805C30, redo lsn=0/2805BD8
+2026-11-13 23:17:22.893 JST [25] LOG:  checkpoint starting: immediate force wait
+2026-11-13 23:17:22.915 JST [25] LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.006 s, sync=0.007 s, total=0.023 s; sync files=6, longest=0.003 s, average=0.002 s; distance=7760 kB, estimate=10977 kB; lsn=0/2F99EE8, redo lsn=0/2F99E90
+2026-11-13 23:17:41.607 JST [25] LOG:  checkpoint starting: immediate force wait
+2026-11-13 23:17:41.629 JST [25] LOG:  checkpoint complete: wrote 50 buffers (0.3%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.003 s, sync=0.013 s, total=0.023 s; sync files=16, longest=0.002 s, average=0.001 s; distance=7924 kB, estimate=10672 kB; lsn=0/37571E8, redo lsn=0/3757190
+2026-11-13 23:18:03.000 JST [25] LOG:  checkpoint starting: immediate force wait
+2026-11-13 23:18:03.014 JST [25] LOG:  checkpoint complete: wrote 7 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.005 s, sync=0.004 s, total=0.015 s; sync files=6, longest=0.001 s, average=0.001 s; distance=7871 kB, estimate=10391 kB; lsn=0/3F07148, redo lsn=0/3F070F0
+2026-11-13 23:18:23.966 JST [25] LOG:  checkpoint starting: immediate force wait
+2026-11-13 23:18:24.043 JST [25] LOG:  checkpoint complete: wrote 8 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.016 s, sync=0.024 s, total=0.078 s; sync files=6, longest=0.011 s, average=0.004 s; distance=7911 kB, estimate=10143 kB; lsn=0/46C0D88, redo lsn=0/46C0D30
+2026-11-13 23:18:24.120 JST [24] LOG:  received fast shutdown request
+2026-11-13 23:18:24.122 JST [24] LOG:  aborting any active transactions
+2026-11-13 23:18:24.131 JST [24] LOG:  background worker "logical replication launcher" (PID 30) exited with exit code 1
+2026-11-13 23:18:24.135 JST [25] LOG:  shutting down
+2026-11-13 23:18:24.136 JST [25] LOG:  checkpoint starting: shutdown immediate
+2026-11-13 23:18:24.148 JST [25] LOG:  checkpoint complete: wrote 1 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.002 s, sync=0.001 s, total=0.014 s; sync files=1, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=9129 kB; lsn=0/46C0E90, redo lsn=0/46C0E90
+2026-11-13 23:18:24.169 JST [24] LOG:  database system is shut down

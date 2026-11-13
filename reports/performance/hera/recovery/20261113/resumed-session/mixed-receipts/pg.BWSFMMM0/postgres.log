@@ -1,0 +1,13 @@
+2026-11-13 23:15:43.140 JST [32] LOG:  starting PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+2026-11-13 23:15:43.140 JST [32] LOG:  listening on IPv4 address "127.0.0.1", port 43229
+2026-11-13 23:15:43.147 JST [35] LOG:  database system was shut down at 2026-11-13 23:15:40 JST
+2026-11-13 23:15:43.154 JST [32] LOG:  database system is ready to accept connections
+2026-11-13 23:15:50.598 JST [33] LOG:  checkpoint starting: immediate force wait
+2026-11-13 23:15:51.324 JST [33] LOG:  checkpoint complete: wrote 943 buffers (5.8%); 1 WAL file(s) added, 0 removed, 0 recycled; write=0.029 s, sync=0.627 s, total=0.727 s; sync files=301, longest=0.030 s, average=0.003 s; distance=10883 kB, estimate=10883 kB; lsn=0/1FAB9F0, redo lsn=0/1FAB998
+2026-11-13 23:15:52.522 JST [32] LOG:  received fast shutdown request
+2026-11-13 23:15:52.533 JST [32] LOG:  aborting any active transactions
+2026-11-13 23:15:52.543 JST [32] LOG:  background worker "logical replication launcher" (PID 38) exited with exit code 1
+2026-11-13 23:15:52.543 JST [33] LOG:  shutting down
+2026-11-13 23:15:52.548 JST [33] LOG:  checkpoint starting: shutdown immediate
+2026-11-13 23:15:52.567 JST [33] LOG:  checkpoint complete: wrote 1 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.004 s, sync=0.002 s, total=0.025 s; sync files=1, longest=0.002 s, average=0.002 s; distance=0 kB, estimate=9795 kB; lsn=0/1FABAF8, redo lsn=0/1FABAF8
+2026-11-13 23:15:52.589 JST [32] LOG:  database system is shut down

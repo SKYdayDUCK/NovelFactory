@@ -176,6 +176,15 @@ class Database:
         self.engine = create_engine(url, pool_size=pool_size, max_overflow=max_overflow, pool_timeout=pool_timeout,
             pool_pre_ping=True, connect_args={"options": "-c lock_timeout=3000 -c statement_timeout=15000 -c idle_in_transaction_session_timeout=10000"})
 
+    def bearer_identity(self, token_hash):
+        # Ordinary bearer resolution needs one statement snapshot. Authorization
+        # still locks and checks the live policy inside the operation transaction.
+        with self.engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
+            return conn.execute(text("""
+                SELECT principal_id::text, grant_id::text, role_id
+                FROM nf_grants WHERE token_hash = :hash AND active
+            """), {"hash": token_hash}).mappings().one_or_none()
+
     @contextmanager
     def uow(self, *, write: bool = True, repeatable_read: bool = False):
         from novel_factory.infrastructure.repository import KernelRepository

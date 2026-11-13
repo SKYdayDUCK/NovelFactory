@@ -1,0 +1,2641 @@
+{
+  "source_commit_at_start": "d03dd07ddb4481a6243088f36a46cab37715e198",
+  "driver_sha256": "98e7308d902137f19fa1778c50ab732b76818b73dd8b4342217ec1dcda528822",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "python": "3.12.14",
+  "logical_cpus_visible": 9,
+  "cgroup_limits": {},
+  "postgres": "PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+  "server_processes": 2,
+  "client_processes": 1,
+  "client_sessions": 2,
+  "server_slots_per_binding": 2,
+  "server_pg_pool_per_binding": 2,
+  "server_pool_overflow": 0,
+  "driver_db_pool": 1,
+  "stdio_idle_seconds": 30.0,
+  "warmup_per_role": "initialize, tools/list, one read per tool",
+  "closed_client_concurrency_per_binding": 2,
+  "open_client_inflight_cap_per_binding": 4,
+  "distinct_tasks_principals_works": 2,
+  "call_attempt_rows": 0,
+  "world_heads_unchanged": true,
+  "phases": [
+    {
+      "mode": "closed",
+      "offered_rps": null,
+      "started_utc": "2026-11-13T14:17:50.472234+00:00",
+      "elapsed_s": 2.819679623004049,
+      "offered": 128,
+      "statuses": {
+        "OK": 128
+      },
+      "verified_rps": 45.395228222286654,
+      "all_replies_arrival_to_reply_ms": {
+        "p50": 84.667,
+        "p95": 123.787,
+        "p99": 135.566
+      },
+      "samples": [
+        {
+          "role": 0,
+          "sequence": 0,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 0.102,
+          "sent_ms": 0.104,
+          "call_ms": 119.845,
+          "arrival_to_reply_ms": 119.847
+        },
+        {
+          "role": 0,
+          "sequence": 1,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 0.233,
+          "sent_ms": 0.234,
+          "call_ms": 128.619,
+          "arrival_to_reply_ms": 128.62
+        },
+        {
+          "role": 0,
+          "sequence": 2,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 119.967,
+          "sent_ms": 119.969,
+          "call_ms": 84.676,
+          "arrival_to_reply_ms": 84.678
+        },
+        {
+          "role": 0,
+          "sequence": 3,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 129.028,
+          "sent_ms": 129.03,
+          "call_ms": 91.465,
+          "arrival_to_reply_ms": 91.468
+        },
+        {
+          "role": 0,
+          "sequence": 4,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 204.659,
+          "sent_ms": 204.66,
+          "call_ms": 96.773,
+          "arrival_to_reply_ms": 96.774
+        },
+        {
+          "role": 0,
+          "sequence": 5,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 220.507,
+          "sent_ms": 220.508,
+          "call_ms": 99.548,
+          "arrival_to_reply_ms": 99.549
+        },
+        {
+          "role": 0,
+          "sequence": 6,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 301.443,
+          "sent_ms": 301.444,
+          "call_ms": 100.84,
+          "arrival_to_reply_ms": 100.841
+        },
+        {
+          "role": 0,
+          "sequence": 7,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 320.072,
+          "sent_ms": 320.073,
+          "call_ms": 82.597,
+          "arrival_to_reply_ms": 82.598
+        },
+        {
+          "role": 0,
+          "sequence": 8,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 402.295,
+          "sent_ms": 402.296,
+          "call_ms": 71.632,
+          "arrival_to_reply_ms": 71.633
+        },
+        {
+          "role": 0,
+          "sequence": 9,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 402.677,
+          "sent_ms": 402.678,
+          "call_ms": 73.87,
+          "arrival_to_reply_ms": 73.871
+        },
+        {
+          "role": 0,
+          "sequence": 10,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 473.937,
+          "sent_ms": 473.938,
+          "call_ms": 110.411,
+          "arrival_to_reply_ms": 110.412
+        },
+        {
+          "role": 0,
+          "sequence": 11,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 476.559,
+          "sent_ms": 476.56,
+          "call_ms": 94.266,
+          "arrival_to_reply_ms": 94.267
+        },
+        {
+          "role": 0,
+          "sequence": 12,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 584.384,
+          "sent_ms": 584.386,
+          "call_ms": 90.427,
+          "arrival_to_reply_ms": 90.429
+        },
+        {
+          "role": 0,
+          "sequence": 13,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 570.84,
+          "sent_ms": 570.841,
+          "call_ms": 75.941,
+          "arrival_to_reply_ms": 75.943
+        },
+        {
+          "role": 0,
+          "sequence": 14,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 674.829,
+          "sent_ms": 674.83,
+          "call_ms": 93.056,
+          "arrival_to_reply_ms": 93.057
+        },
+        {
+          "role": 0,
+          "sequence": 15,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 646.8,
+          "sent_ms": 646.802,
+          "call_ms": 77.378,
+          "arrival_to_reply_ms": 77.379
+        },
+        {
+          "role": 0,
+          "sequence": 16,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 767.9,
+          "sent_ms": 767.902,
+          "call_ms": 81.421,
+          "arrival_to_reply_ms": 81.422
+        },
+        {
+          "role": 0,
+          "sequence": 17,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 724.192,
+          "sent_ms": 724.193,
+          "call_ms": 86.797,
+          "arrival_to_reply_ms": 86.798
+        },
+        {
+          "role": 0,
+          "sequence": 18,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 849.339,
+          "sent_ms": 849.34,
+          "call_ms": 90.466,
+          "arrival_to_reply_ms": 90.467
+        },
+        {
+          "role": 0,
+          "sequence": 19,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 811.0,
+          "sent_ms": 811.002,
+          "call_ms": 90.517,
+          "arrival_to_reply_ms": 90.519
+        },
+        {
+          "role": 0,
+          "sequence": 20,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 939.853,
+          "sent_ms": 939.854,
+          "call_ms": 61.101,
+          "arrival_to_reply_ms": 61.102
+        },
+        {
+          "role": 0,
+          "sequence": 21,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 901.536,
+          "sent_ms": 901.537,
+          "call_ms": 96.731,
+          "arrival_to_reply_ms": 96.732
+        },
+        {
+          "role": 0,
+          "sequence": 22,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1000.966,
+          "sent_ms": 1000.967,
+          "call_ms": 104.609,
+          "arrival_to_reply_ms": 104.61
+        },
+        {
+          "role": 0,
+          "sequence": 23,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 998.281,
+          "sent_ms": 998.283,
+          "call_ms": 89.58,
+          "arrival_to_reply_ms": 89.582
+        },
+        {
+          "role": 0,
+          "sequence": 24,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1105.593,
+          "sent_ms": 1105.594,
+          "call_ms": 99.088,
+          "arrival_to_reply_ms": 99.089
+        },
+        {
+          "role": 0,
+          "sequence": 25,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1087.874,
+          "sent_ms": 1087.876,
+          "call_ms": 96.111,
+          "arrival_to_reply_ms": 96.113
+        },
+        {
+          "role": 0,
+          "sequence": 26,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1204.696,
+          "sent_ms": 1204.697,
+          "call_ms": 77.719,
+          "arrival_to_reply_ms": 77.72
+        },
+        {
+          "role": 0,
+          "sequence": 27,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1184.0,
+          "sent_ms": 1184.001,
+          "call_ms": 87.883,
+          "arrival_to_reply_ms": 87.885
+        },
+        {
+          "role": 0,
+          "sequence": 28,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1282.428,
+          "sent_ms": 1282.43,
+          "call_ms": 135.565,
+          "arrival_to_reply_ms": 135.566
+        },
+        {
+          "role": 0,
+          "sequence": 29,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1271.899,
+          "sent_ms": 1271.9,
+          "call_ms": 130.686,
+          "arrival_to_reply_ms": 130.688
+        },
+        {
+          "role": 0,
+          "sequence": 30,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1418.008,
+          "sent_ms": 1418.009,
+          "call_ms": 67.933,
+          "arrival_to_reply_ms": 67.934
+        },
+        {
+          "role": 0,
+          "sequence": 31,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1402.876,
+          "sent_ms": 1402.878,
+          "call_ms": 74.052,
+          "arrival_to_reply_ms": 74.055
+        },
+        {
+          "role": 0,
+          "sequence": 32,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1486.017,
+          "sent_ms": 1486.018,
+          "call_ms": 89.965,
+          "arrival_to_reply_ms": 89.967
+        },
+        {
+          "role": 0,
+          "sequence": 33,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1476.943,
+          "sent_ms": 1476.944,
+          "call_ms": 81.269,
+          "arrival_to_reply_ms": 81.27
+        },
+        {
+          "role": 0,
+          "sequence": 34,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1575.996,
+          "sent_ms": 1575.998,
+          "call_ms": 69.955,
+          "arrival_to_reply_ms": 69.956
+        },
+        {
+          "role": 0,
+          "sequence": 35,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1558.335,
+          "sent_ms": 1558.336,
+          "call_ms": 81.271,
+          "arrival_to_reply_ms": 81.273
+        },
+        {
+          "role": 0,
+          "sequence": 36,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1645.962,
+          "sent_ms": 1645.963,
+          "call_ms": 69.806,
+          "arrival_to_reply_ms": 69.807
+        },
+        {
+          "role": 0,
+          "sequence": 37,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1639.619,
+          "sent_ms": 1639.621,
+          "call_ms": 72.996,
+          "arrival_to_reply_ms": 72.997
+        },
+        {
+          "role": 0,
+          "sequence": 38,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1715.781,
+          "sent_ms": 1715.783,
+          "call_ms": 84.543,
+          "arrival_to_reply_ms": 84.544
+        },
+        {
+          "role": 0,
+          "sequence": 39,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1712.628,
+          "sent_ms": 1712.629,
+          "call_ms": 80.465,
+          "arrival_to_reply_ms": 80.466
+        },
+        {
+          "role": 0,
+          "sequence": 40,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1800.337,
+          "sent_ms": 1800.338,
+          "call_ms": 70.628,
+          "arrival_to_reply_ms": 70.628
+        },
+        {
+          "role": 0,
+          "sequence": 41,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1793.105,
+          "sent_ms": 1793.106,
+          "call_ms": 74.509,
+          "arrival_to_reply_ms": 74.51
+        },
+        {
+          "role": 0,
+          "sequence": 42,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1870.975,
+          "sent_ms": 1870.976,
+          "call_ms": 66.551,
+          "arrival_to_reply_ms": 66.552
+        },
+        {
+          "role": 0,
+          "sequence": 43,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1867.626,
+          "sent_ms": 1867.627,
+          "call_ms": 64.383,
+          "arrival_to_reply_ms": 64.384
+        },
+        {
+          "role": 0,
+          "sequence": 44,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1937.537,
+          "sent_ms": 1937.538,
+          "call_ms": 74.242,
+          "arrival_to_reply_ms": 74.243
+        },
+        {
+          "role": 0,
+          "sequence": 45,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1932.215,
+          "sent_ms": 1932.216,
+          "call_ms": 72.083,
+          "arrival_to_reply_ms": 72.085
+        },
+        {
+          "role": 0,
+          "sequence": 46,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 2011.793,
+          "sent_ms": 2011.794,
+          "call_ms": 74.888,
+          "arrival_to_reply_ms": 74.889
+        },
+        {
+          "role": 0,
+          "sequence": 47,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 2004.312,
+          "sent_ms": 2004.314,
+          "call_ms": 79.312,
+          "arrival_to_reply_ms": 79.313
+        },
+        {
+          "role": 0,
+          "sequence": 48,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 2086.69,
+          "sent_ms": 2086.69,
+          "call_ms": 116.147,
+          "arrival_to_reply_ms": 116.148
+        },
+        {
+          "role": 0,
+          "sequence": 49,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 2083.636,
+          "sent_ms": 2083.637,
+          "call_ms": 112.112,
+          "arrival_to_reply_ms": 112.113
+        },
+        {
+          "role": 0,
+          "sequence": 50,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 2202.854,
+          "sent_ms": 2202.855,
+          "call_ms": 82.074,
+          "arrival_to_reply_ms": 82.076
+        },
+        {
+          "role": 0,
+          "sequence": 51,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 2195.759,
+          "sent_ms": 2195.76,
+          "call_ms": 87.985,
+          "arrival_to_reply_ms": 87.986
+        },
+        {
+          "role": 0,
+          "sequence": 52,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 2284.938,
+          "sent_ms": 2284.94,
+          "call_ms": 83.504,
+          "arrival_to_reply_ms": 83.505
+        },
+        {
+          "role": 0,
+          "sequence": 53,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 2283.757,
+          "sent_ms": 2283.758,
+          "call_ms": 78.726,
+          "arrival_to_reply_ms": 78.727
+        },
+        {
+          "role": 0,
+          "sequence": 54,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 2368.455,
+          "sent_ms": 2368.456,
+          "call_ms": 75.449,
+          "arrival_to_reply_ms": 75.451
+        },
+        {
+          "role": 0,
+          "sequence": 55,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 2362.498,
+          "sent_ms": 2362.499,
+          "call_ms": 82.213,
+          "arrival_to_reply_ms": 82.214
+        },
+        {
+          "role": 0,
+          "sequence": 56,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 2443.916,
+          "sent_ms": 2443.917,
+          "call_ms": 75.525,
+          "arrival_to_reply_ms": 75.527
+        },
+        {
+          "role": 0,
+          "sequence": 57,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 2444.72,
+          "sent_ms": 2444.721,
+          "call_ms": 80.944,
+          "arrival_to_reply_ms": 80.945
+        },
+        {
+          "role": 0,
+          "sequence": 58,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 2519.457,
+          "sent_ms": 2519.459,
+          "call_ms": 90.541,
+          "arrival_to_reply_ms": 90.542
+        },
+        {
+          "role": 0,
+          "sequence": 59,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 2525.678,
+          "sent_ms": 2525.679,
+          "call_ms": 89.422,
+          "arrival_to_reply_ms": 89.423
+        },
+        {
+          "role": 0,
+          "sequence": 60,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 2610.01,
+          "sent_ms": 2610.011,
+          "call_ms": 94.423,
+          "arrival_to_reply_ms": 94.423
+        },
+        {
+          "role": 0,
+          "sequence": 61,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 2615.113,
+          "sent_ms": 2615.114,
+          "call_ms": 84.666,
+          "arrival_to_reply_ms": 84.667
+        },
+        {
+          "role": 0,
+          "sequence": 62,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 2704.442,
+          "sent_ms": 2704.443,
+          "call_ms": 115.169,
+          "arrival_to_reply_ms": 115.17
+        },
+        {
+          "role": 0,
+          "sequence": 63,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 2699.792,
+          "sent_ms": 2699.794,
+          "call_ms": 119.467,
+          "arrival_to_reply_ms": 119.469
+        },
+        {
+          "role": 1,
+          "sequence": 0,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 0.282,
+          "sent_ms": 0.283,
+          "call_ms": 123.786,
+          "arrival_to_reply_ms": 123.787
+        },
+        {
+          "role": 1,
+          "sequence": 1,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 0.327,
+          "sent_ms": 0.328,
+          "call_ms": 138.165,
+          "arrival_to_reply_ms": 138.165
+        },
+        {
+          "role": 1,
+          "sequence": 2,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 124.083,
+          "sent_ms": 124.085,
+          "call_ms": 89.211,
+          "arrival_to_reply_ms": 89.212
+        },
+        {
+          "role": 1,
+          "sequence": 3,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 138.511,
+          "sent_ms": 138.512,
+          "call_ms": 94.348,
+          "arrival_to_reply_ms": 94.349
+        },
+        {
+          "role": 1,
+          "sequence": 4,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 213.306,
+          "sent_ms": 213.307,
+          "call_ms": 92.675,
+          "arrival_to_reply_ms": 92.677
+        },
+        {
+          "role": 1,
+          "sequence": 5,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 232.878,
+          "sent_ms": 232.879,
+          "call_ms": 111.846,
+          "arrival_to_reply_ms": 111.847
+        },
+        {
+          "role": 1,
+          "sequence": 6,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 305.992,
+          "sent_ms": 305.993,
+          "call_ms": 86.972,
+          "arrival_to_reply_ms": 86.974
+        },
+        {
+          "role": 1,
+          "sequence": 7,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 344.741,
+          "sent_ms": 344.743,
+          "call_ms": 77.703,
+          "arrival_to_reply_ms": 77.705
+        },
+        {
+          "role": 1,
+          "sequence": 8,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 392.974,
+          "sent_ms": 392.975,
+          "call_ms": 74.341,
+          "arrival_to_reply_ms": 74.342
+        },
+        {
+          "role": 1,
+          "sequence": 9,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 422.462,
+          "sent_ms": 422.464,
+          "call_ms": 76.892,
+          "arrival_to_reply_ms": 76.893
+        },
+        {
+          "role": 1,
+          "sequence": 10,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 467.329,
+          "sent_ms": 467.33,
+          "call_ms": 65.893,
+          "arrival_to_reply_ms": 65.895
+        },
+        {
+          "role": 1,
+          "sequence": 11,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 499.4,
+          "sent_ms": 499.402,
+          "call_ms": 98.758,
+          "arrival_to_reply_ms": 98.76
+        },
+        {
+          "role": 1,
+          "sequence": 12,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 533.239,
+          "sent_ms": 533.24,
+          "call_ms": 94.606,
+          "arrival_to_reply_ms": 94.607
+        },
+        {
+          "role": 1,
+          "sequence": 13,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 598.183,
+          "sent_ms": 598.185,
+          "call_ms": 81.355,
+          "arrival_to_reply_ms": 81.357
+        },
+        {
+          "role": 1,
+          "sequence": 14,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 627.856,
+          "sent_ms": 627.857,
+          "call_ms": 97.164,
+          "arrival_to_reply_ms": 97.165
+        },
+        {
+          "role": 1,
+          "sequence": 15,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 679.552,
+          "sent_ms": 679.553,
+          "call_ms": 99.661,
+          "arrival_to_reply_ms": 99.662
+        },
+        {
+          "role": 1,
+          "sequence": 16,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 725.03,
+          "sent_ms": 725.031,
+          "call_ms": 94.817,
+          "arrival_to_reply_ms": 94.818
+        },
+        {
+          "role": 1,
+          "sequence": 17,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 779.229,
+          "sent_ms": 779.231,
+          "call_ms": 83.67,
+          "arrival_to_reply_ms": 83.672
+        },
+        {
+          "role": 1,
+          "sequence": 18,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 819.859,
+          "sent_ms": 819.861,
+          "call_ms": 93.83,
+          "arrival_to_reply_ms": 93.832
+        },
+        {
+          "role": 1,
+          "sequence": 19,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 862.917,
+          "sent_ms": 862.918,
+          "call_ms": 83.937,
+          "arrival_to_reply_ms": 83.939
+        },
+        {
+          "role": 1,
+          "sequence": 20,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 913.706,
+          "sent_ms": 913.708,
+          "call_ms": 85.425,
+          "arrival_to_reply_ms": 85.427
+        },
+        {
+          "role": 1,
+          "sequence": 21,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 946.872,
+          "sent_ms": 946.874,
+          "call_ms": 86.548,
+          "arrival_to_reply_ms": 86.549
+        },
+        {
+          "role": 1,
+          "sequence": 22,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 999.141,
+          "sent_ms": 999.142,
+          "call_ms": 109.366,
+          "arrival_to_reply_ms": 109.367
+        },
+        {
+          "role": 1,
+          "sequence": 23,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1033.439,
+          "sent_ms": 1033.44,
+          "call_ms": 101.776,
+          "arrival_to_reply_ms": 101.777
+        },
+        {
+          "role": 1,
+          "sequence": 24,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1108.52,
+          "sent_ms": 1108.521,
+          "call_ms": 98.303,
+          "arrival_to_reply_ms": 98.304
+        },
+        {
+          "role": 1,
+          "sequence": 25,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1135.232,
+          "sent_ms": 1135.234,
+          "call_ms": 84.721,
+          "arrival_to_reply_ms": 84.722
+        },
+        {
+          "role": 1,
+          "sequence": 26,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1206.835,
+          "sent_ms": 1206.836,
+          "call_ms": 79.387,
+          "arrival_to_reply_ms": 79.388
+        },
+        {
+          "role": 1,
+          "sequence": 27,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1219.966,
+          "sent_ms": 1219.967,
+          "call_ms": 64.864,
+          "arrival_to_reply_ms": 64.865
+        },
+        {
+          "role": 1,
+          "sequence": 28,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1286.233,
+          "sent_ms": 1286.234,
+          "call_ms": 126.485,
+          "arrival_to_reply_ms": 126.486
+        },
+        {
+          "role": 1,
+          "sequence": 29,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1284.843,
+          "sent_ms": 1284.844,
+          "call_ms": 126.462,
+          "arrival_to_reply_ms": 126.463
+        },
+        {
+          "role": 1,
+          "sequence": 30,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1412.733,
+          "sent_ms": 1412.734,
+          "call_ms": 75.72,
+          "arrival_to_reply_ms": 75.721
+        },
+        {
+          "role": 1,
+          "sequence": 31,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1411.318,
+          "sent_ms": 1411.319,
+          "call_ms": 71.02,
+          "arrival_to_reply_ms": 71.021
+        },
+        {
+          "role": 1,
+          "sequence": 32,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1488.465,
+          "sent_ms": 1488.466,
+          "call_ms": 92.299,
+          "arrival_to_reply_ms": 92.3
+        },
+        {
+          "role": 1,
+          "sequence": 33,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1482.352,
+          "sent_ms": 1482.354,
+          "call_ms": 77.556,
+          "arrival_to_reply_ms": 77.557
+        },
+        {
+          "role": 1,
+          "sequence": 34,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1580.781,
+          "sent_ms": 1580.782,
+          "call_ms": 70.159,
+          "arrival_to_reply_ms": 70.16
+        },
+        {
+          "role": 1,
+          "sequence": 35,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1559.944,
+          "sent_ms": 1560.008,
+          "call_ms": 74.887,
+          "arrival_to_reply_ms": 74.952
+        },
+        {
+          "role": 1,
+          "sequence": 36,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1650.957,
+          "sent_ms": 1650.959,
+          "call_ms": 68.886,
+          "arrival_to_reply_ms": 68.888
+        },
+        {
+          "role": 1,
+          "sequence": 37,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1634.909,
+          "sent_ms": 1634.91,
+          "call_ms": 68.858,
+          "arrival_to_reply_ms": 68.859
+        },
+        {
+          "role": 1,
+          "sequence": 38,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1719.857,
+          "sent_ms": 1719.858,
+          "call_ms": 74.38,
+          "arrival_to_reply_ms": 74.381
+        },
+        {
+          "role": 1,
+          "sequence": 39,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1703.783,
+          "sent_ms": 1703.784,
+          "call_ms": 76.931,
+          "arrival_to_reply_ms": 76.933
+        },
+        {
+          "role": 1,
+          "sequence": 40,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1794.248,
+          "sent_ms": 1794.248,
+          "call_ms": 69.93,
+          "arrival_to_reply_ms": 69.931
+        },
+        {
+          "role": 1,
+          "sequence": 41,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1780.73,
+          "sent_ms": 1780.731,
+          "call_ms": 70.587,
+          "arrival_to_reply_ms": 70.588
+        },
+        {
+          "role": 1,
+          "sequence": 42,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1864.188,
+          "sent_ms": 1864.189,
+          "call_ms": 67.02,
+          "arrival_to_reply_ms": 67.021
+        },
+        {
+          "role": 1,
+          "sequence": 43,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1851.33,
+          "sent_ms": 1851.331,
+          "call_ms": 68.879,
+          "arrival_to_reply_ms": 68.881
+        },
+        {
+          "role": 1,
+          "sequence": 44,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1931.22,
+          "sent_ms": 1931.222,
+          "call_ms": 55.901,
+          "arrival_to_reply_ms": 55.902
+        },
+        {
+          "role": 1,
+          "sequence": 45,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1920.225,
+          "sent_ms": 1920.227,
+          "call_ms": 77.954,
+          "arrival_to_reply_ms": 77.955
+        },
+        {
+          "role": 1,
+          "sequence": 46,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1987.134,
+          "sent_ms": 1987.136,
+          "call_ms": 56.479,
+          "arrival_to_reply_ms": 56.48
+        },
+        {
+          "role": 1,
+          "sequence": 47,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1998.195,
+          "sent_ms": 1998.197,
+          "call_ms": 87.316,
+          "arrival_to_reply_ms": 87.318
+        },
+        {
+          "role": 1,
+          "sequence": 48,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 2043.631,
+          "sent_ms": 2043.632,
+          "call_ms": 112.445,
+          "arrival_to_reply_ms": 112.446
+        },
+        {
+          "role": 1,
+          "sequence": 49,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 2085.523,
+          "sent_ms": 2085.524,
+          "call_ms": 105.703,
+          "arrival_to_reply_ms": 105.704
+        },
+        {
+          "role": 1,
+          "sequence": 50,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 2156.108,
+          "sent_ms": 2156.11,
+          "call_ms": 79.529,
+          "arrival_to_reply_ms": 79.531
+        },
+        {
+          "role": 1,
+          "sequence": 51,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 2191.237,
+          "sent_ms": 2191.238,
+          "call_ms": 88.633,
+          "arrival_to_reply_ms": 88.634
+        },
+        {
+          "role": 1,
+          "sequence": 52,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 2235.654,
+          "sent_ms": 2235.655,
+          "call_ms": 87.848,
+          "arrival_to_reply_ms": 87.849
+        },
+        {
+          "role": 1,
+          "sequence": 53,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 2279.88,
+          "sent_ms": 2279.881,
+          "call_ms": 93.435,
+          "arrival_to_reply_ms": 93.436
+        },
+        {
+          "role": 1,
+          "sequence": 54,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 2323.519,
+          "sent_ms": 2323.52,
+          "call_ms": 90.168,
+          "arrival_to_reply_ms": 90.17
+        },
+        {
+          "role": 1,
+          "sequence": 55,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 2373.33,
+          "sent_ms": 2373.331,
+          "call_ms": 75.676,
+          "arrival_to_reply_ms": 75.677
+        },
+        {
+          "role": 1,
+          "sequence": 56,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 2413.713,
+          "sent_ms": 2413.714,
+          "call_ms": 76.745,
+          "arrival_to_reply_ms": 76.747
+        },
+        {
+          "role": 1,
+          "sequence": 57,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 2449.017,
+          "sent_ms": 2449.018,
+          "call_ms": 71.119,
+          "arrival_to_reply_ms": 71.12
+        },
+        {
+          "role": 1,
+          "sequence": 58,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 2490.473,
+          "sent_ms": 2490.474,
+          "call_ms": 98.702,
+          "arrival_to_reply_ms": 98.703
+        },
+        {
+          "role": 1,
+          "sequence": 59,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 2520.147,
+          "sent_ms": 2520.148,
+          "call_ms": 92.655,
+          "arrival_to_reply_ms": 92.656
+        },
+        {
+          "role": 1,
+          "sequence": 60,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 2589.193,
+          "sent_ms": 2589.195,
+          "call_ms": 90.609,
+          "arrival_to_reply_ms": 90.611
+        },
+        {
+          "role": 1,
+          "sequence": 61,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 2612.816,
+          "sent_ms": 2612.817,
+          "call_ms": 81.578,
+          "arrival_to_reply_ms": 81.579
+        },
+        {
+          "role": 1,
+          "sequence": 62,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 2679.818,
+          "sent_ms": 2679.819,
+          "call_ms": 80.23,
+          "arrival_to_reply_ms": 80.231
+        },
+        {
+          "role": 1,
+          "sequence": 63,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 2694.411,
+          "sent_ms": 2694.413,
+          "call_ms": 122.272,
+          "arrival_to_reply_ms": 122.273
+        }
+      ],
+      "binding_sessions_at_finish": [
+        2,
+        2
+      ]
+    },
+    {
+      "mode": "open",
+      "offered_rps": 15.0,
+      "started_utc": "2026-11-13T14:17:53.299716+00:00",
+      "elapsed_s": 8.51450378500158,
+      "offered": 128,
+      "statuses": {
+        "OK": 110,
+        "BACKPRESSURE": 17,
+        "CLIENT_DROP": 1
+      },
+      "verified_rps": 12.91913219814014,
+      "all_replies_arrival_to_reply_ms": {
+        "p50": 56.519,
+        "p95": 453.018,
+        "p99": 710.453
+      },
+      "samples": [
+        {
+          "role": 0,
+          "sequence": 0,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 0.0,
+          "sent_ms": 0.28,
+          "call_ms": 46.886,
+          "arrival_to_reply_ms": 47.166
+        },
+        {
+          "role": 0,
+          "sequence": 1,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 133.333,
+          "sent_ms": 134.106,
+          "call_ms": 37.474,
+          "arrival_to_reply_ms": 38.247
+        },
+        {
+          "role": 0,
+          "sequence": 2,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 266.667,
+          "sent_ms": 268.326,
+          "call_ms": 55.081,
+          "arrival_to_reply_ms": 56.74
+        },
+        {
+          "role": 0,
+          "sequence": 3,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 400.0,
+          "sent_ms": 402.775,
+          "call_ms": 58.426,
+          "arrival_to_reply_ms": 61.2
+        },
+        {
+          "role": 0,
+          "sequence": 4,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 533.333,
+          "sent_ms": 534.289,
+          "call_ms": 49.231,
+          "arrival_to_reply_ms": 50.186
+        },
+        {
+          "role": 0,
+          "sequence": 5,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 666.667,
+          "sent_ms": 667.728,
+          "call_ms": 39.362,
+          "arrival_to_reply_ms": 40.424
+        },
+        {
+          "role": 0,
+          "sequence": 6,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 800.0,
+          "sent_ms": 800.642,
+          "call_ms": 49.487,
+          "arrival_to_reply_ms": 50.128
+        },
+        {
+          "role": 0,
+          "sequence": 7,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 933.333,
+          "sent_ms": 934.421,
+          "call_ms": 49.931,
+          "arrival_to_reply_ms": 51.018
+        },
+        {
+          "role": 0,
+          "sequence": 8,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1066.667,
+          "sent_ms": 1078.799,
+          "call_ms": 60.326,
+          "arrival_to_reply_ms": 72.458
+        },
+        {
+          "role": 0,
+          "sequence": 9,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1200.0,
+          "sent_ms": 1200.861,
+          "call_ms": 38.235,
+          "arrival_to_reply_ms": 39.096
+        },
+        {
+          "role": 0,
+          "sequence": 10,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1333.333,
+          "sent_ms": 1335.585,
+          "call_ms": 81.098,
+          "arrival_to_reply_ms": 83.35
+        },
+        {
+          "role": 0,
+          "sequence": 11,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1466.667,
+          "sent_ms": 1467.439,
+          "call_ms": 53.792,
+          "arrival_to_reply_ms": 54.565
+        },
+        {
+          "role": 0,
+          "sequence": 12,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1600.0,
+          "sent_ms": 1601.147,
+          "call_ms": 32.374,
+          "arrival_to_reply_ms": 33.521
+        },
+        {
+          "role": 0,
+          "sequence": 13,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1733.333,
+          "sent_ms": 1735.036,
+          "call_ms": 45.51,
+          "arrival_to_reply_ms": 47.212
+        },
+        {
+          "role": 0,
+          "sequence": 14,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1866.667,
+          "sent_ms": 1867.79,
+          "call_ms": 45.571,
+          "arrival_to_reply_ms": 46.695
+        },
+        {
+          "role": 0,
+          "sequence": 15,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 2000.0,
+          "sent_ms": 2001.147,
+          "call_ms": 47.757,
+          "arrival_to_reply_ms": 48.904
+        },
+        {
+          "role": 0,
+          "sequence": 16,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 2133.333,
+          "sent_ms": 2134.171,
+          "call_ms": 56.882,
+          "arrival_to_reply_ms": 57.719
+        },
+        {
+          "role": 0,
+          "sequence": 17,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 2266.667,
+          "sent_ms": 2273.731,
+          "call_ms": 63.546,
+          "arrival_to_reply_ms": 70.61
+        },
+        {
+          "role": 0,
+          "sequence": 18,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 2400.0,
+          "sent_ms": 2401.513,
+          "call_ms": 63.826,
+          "arrival_to_reply_ms": 65.339
+        },
+        {
+          "role": 0,
+          "sequence": 19,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 2533.333,
+          "sent_ms": 2534.039,
+          "call_ms": 42.686,
+          "arrival_to_reply_ms": 43.391
+        },
+        {
+          "role": 0,
+          "sequence": 20,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 2666.667,
+          "sent_ms": 2666.967,
+          "call_ms": 38.68,
+          "arrival_to_reply_ms": 38.98
+        },
+        {
+          "role": 0,
+          "sequence": 21,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 2800.0,
+          "sent_ms": 2812.91,
+          "call_ms": 501.24,
+          "arrival_to_reply_ms": 514.15
+        },
+        {
+          "role": 0,
+          "sequence": 22,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 2933.333,
+          "sent_ms": 3026.216,
+          "call_ms": 726.093,
+          "arrival_to_reply_ms": 818.975
+        },
+        {
+          "role": 0,
+          "sequence": 23,
+          "tool": "nf_context_get",
+          "status": "BACKPRESSURE",
+          "due_ms": 3066.667,
+          "sent_ms": 3081.997,
+          "call_ms": 22.163,
+          "arrival_to_reply_ms": 37.493
+        },
+        {
+          "role": 0,
+          "sequence": 24,
+          "tool": "nf_task_get",
+          "status": "BACKPRESSURE",
+          "due_ms": 3200.0,
+          "sent_ms": 3201.357,
+          "call_ms": 53.924,
+          "arrival_to_reply_ms": 55.281
+        },
+        {
+          "role": 0,
+          "sequence": 25,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 3333.333,
+          "sent_ms": 3344.044,
+          "call_ms": 442.307,
+          "arrival_to_reply_ms": 453.018
+        },
+        {
+          "role": 0,
+          "sequence": 26,
+          "tool": "nf_task_get",
+          "status": "BACKPRESSURE",
+          "due_ms": 3466.667,
+          "sent_ms": 3487.655,
+          "call_ms": 215.616,
+          "arrival_to_reply_ms": 236.604
+        },
+        {
+          "role": 0,
+          "sequence": 27,
+          "tool": "nf_context_get",
+          "status": "BACKPRESSURE",
+          "due_ms": 3600.0,
+          "sent_ms": 3602.829,
+          "call_ms": 101.598,
+          "arrival_to_reply_ms": 104.427
+        },
+        {
+          "role": 0,
+          "sequence": 28,
+          "tool": "nf_task_get",
+          "status": "BACKPRESSURE",
+          "due_ms": 3733.333,
+          "sent_ms": 3735.565,
+          "call_ms": 6.535,
+          "arrival_to_reply_ms": 8.766
+        },
+        {
+          "role": 0,
+          "sequence": 29,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 3866.667,
+          "sent_ms": 3894.8,
+          "call_ms": 300.339,
+          "arrival_to_reply_ms": 328.473
+        },
+        {
+          "role": 0,
+          "sequence": 30,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 4000.0,
+          "sent_ms": 4001.818,
+          "call_ms": 255.753,
+          "arrival_to_reply_ms": 257.571
+        },
+        {
+          "role": 0,
+          "sequence": 31,
+          "tool": "nf_context_get",
+          "status": "BACKPRESSURE",
+          "due_ms": 4133.333,
+          "sent_ms": 4156.217,
+          "call_ms": 26.378,
+          "arrival_to_reply_ms": 49.261
+        },
+        {
+          "role": 0,
+          "sequence": 32,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 4266.667,
+          "sent_ms": 4268.609,
+          "call_ms": 78.937,
+          "arrival_to_reply_ms": 80.88
+        },
+        {
+          "role": 0,
+          "sequence": 33,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 4400.0,
+          "sent_ms": 4400.434,
+          "call_ms": 149.99,
+          "arrival_to_reply_ms": 150.424
+        },
+        {
+          "role": 0,
+          "sequence": 34,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 4533.333,
+          "sent_ms": 4534.905,
+          "call_ms": 138.217,
+          "arrival_to_reply_ms": 139.788
+        },
+        {
+          "role": 0,
+          "sequence": 35,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 4666.667,
+          "sent_ms": 4668.841,
+          "call_ms": 51.827,
+          "arrival_to_reply_ms": 54.002
+        },
+        {
+          "role": 0,
+          "sequence": 36,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 4800.0,
+          "sent_ms": 4801.366,
+          "call_ms": 57.062,
+          "arrival_to_reply_ms": 58.428
+        },
+        {
+          "role": 0,
+          "sequence": 37,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 4933.333,
+          "sent_ms": 4990.981,
+          "call_ms": 415.081,
+          "arrival_to_reply_ms": 472.729
+        },
+        {
+          "role": 0,
+          "sequence": 38,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 5066.667,
+          "sent_ms": 5129.144,
+          "call_ms": 278.126,
+          "arrival_to_reply_ms": 340.603
+        },
+        {
+          "role": 0,
+          "sequence": 39,
+          "tool": "nf_context_get",
+          "status": "BACKPRESSURE",
+          "due_ms": 5200.0,
+          "sent_ms": 5214.134,
+          "call_ms": 14.769,
+          "arrival_to_reply_ms": 28.903
+        },
+        {
+          "role": 0,
+          "sequence": 40,
+          "tool": "nf_task_get",
+          "status": "BACKPRESSURE",
+          "due_ms": 5333.333,
+          "sent_ms": 5334.369,
+          "call_ms": 18.542,
+          "arrival_to_reply_ms": 19.578
+        },
+        {
+          "role": 0,
+          "sequence": 41,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 5466.667,
+          "sent_ms": 5473.975,
+          "call_ms": 361.024,
+          "arrival_to_reply_ms": 368.332
+        },
+        {
+          "role": 0,
+          "sequence": 42,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 5600.0,
+          "sent_ms": 5601.713,
+          "call_ms": 259.258,
+          "arrival_to_reply_ms": 260.971
+        },
+        {
+          "role": 0,
+          "sequence": 43,
+          "tool": "nf_context_get",
+          "status": "BACKPRESSURE",
+          "due_ms": 5733.333,
+          "sent_ms": 5735.133,
+          "call_ms": 8.038,
+          "arrival_to_reply_ms": 9.838
+        },
+        {
+          "role": 0,
+          "sequence": 44,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 5866.667,
+          "sent_ms": 5867.313,
+          "call_ms": 94.385,
+          "arrival_to_reply_ms": 95.032
+        },
+        {
+          "role": 0,
+          "sequence": 45,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 6000.0,
+          "sent_ms": 6000.986,
+          "call_ms": 72.65,
+          "arrival_to_reply_ms": 73.636
+        },
+        {
+          "role": 0,
+          "sequence": 46,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 6133.333,
+          "sent_ms": 6133.775,
+          "call_ms": 151.203,
+          "arrival_to_reply_ms": 151.645
+        },
+        {
+          "role": 0,
+          "sequence": 47,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 6266.667,
+          "sent_ms": 6268.129,
+          "call_ms": 84.009,
+          "arrival_to_reply_ms": 85.471
+        },
+        {
+          "role": 0,
+          "sequence": 48,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 6400.0,
+          "sent_ms": 6400.556,
+          "call_ms": 62.419,
+          "arrival_to_reply_ms": 62.976
+        },
+        {
+          "role": 0,
+          "sequence": 49,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 6533.333,
+          "sent_ms": 6535.223,
+          "call_ms": 76.402,
+          "arrival_to_reply_ms": 78.291
+        },
+        {
+          "role": 0,
+          "sequence": 50,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 6666.667,
+          "sent_ms": 6667.828,
+          "call_ms": 40.59,
+          "arrival_to_reply_ms": 41.751
+        },
+        {
+          "role": 0,
+          "sequence": 51,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 6800.0,
+          "sent_ms": 6800.529,
+          "call_ms": 58.928,
+          "arrival_to_reply_ms": 59.457
+        },
+        {
+          "role": 0,
+          "sequence": 52,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 6933.333,
+          "sent_ms": 6934.453,
+          "call_ms": 42.774,
+          "arrival_to_reply_ms": 43.893
+        },
+        {
+          "role": 0,
+          "sequence": 53,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 7066.667,
+          "sent_ms": 7068.315,
+          "call_ms": 54.839,
+          "arrival_to_reply_ms": 56.488
+        },
+        {
+          "role": 0,
+          "sequence": 54,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 7200.0,
+          "sent_ms": 7200.578,
+          "call_ms": 57.191,
+          "arrival_to_reply_ms": 57.769
+        },
+        {
+          "role": 0,
+          "sequence": 55,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 7333.333,
+          "sent_ms": 7339.321,
+          "call_ms": 78.817,
+          "arrival_to_reply_ms": 84.804
+        },
+        {
+          "role": 0,
+          "sequence": 56,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 7466.667,
+          "sent_ms": 7468.214,
+          "call_ms": 49.36,
+          "arrival_to_reply_ms": 50.906
+        },
+        {
+          "role": 0,
+          "sequence": 57,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 7600.0,
+          "sent_ms": 7601.073,
+          "call_ms": 38.137,
+          "arrival_to_reply_ms": 39.21
+        },
+        {
+          "role": 0,
+          "sequence": 58,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 7733.333,
+          "sent_ms": 7734.206,
+          "call_ms": 116.341,
+          "arrival_to_reply_ms": 117.213
+        },
+        {
+          "role": 0,
+          "sequence": 59,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 7866.667,
+          "sent_ms": 7868.231,
+          "call_ms": 39.23,
+          "arrival_to_reply_ms": 40.795
+        },
+        {
+          "role": 0,
+          "sequence": 60,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 8000.0,
+          "sent_ms": 8001.539,
+          "call_ms": 48.502,
+          "arrival_to_reply_ms": 50.041
+        },
+        {
+          "role": 0,
+          "sequence": 61,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 8133.333,
+          "sent_ms": 8134.705,
+          "call_ms": 46.563,
+          "arrival_to_reply_ms": 47.935
+        },
+        {
+          "role": 0,
+          "sequence": 62,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 8266.667,
+          "sent_ms": 8267.999,
+          "call_ms": 67.674,
+          "arrival_to_reply_ms": 69.007
+        },
+        {
+          "role": 0,
+          "sequence": 63,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 8400.0,
+          "sent_ms": 8400.372,
+          "call_ms": 50.631,
+          "arrival_to_reply_ms": 51.003
+        },
+        {
+          "role": 1,
+          "sequence": 0,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 66.667,
+          "sent_ms": 67.477,
+          "call_ms": 38.293,
+          "arrival_to_reply_ms": 39.103
+        },
+        {
+          "role": 1,
+          "sequence": 1,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 200.0,
+          "sent_ms": 201.075,
+          "call_ms": 56.994,
+          "arrival_to_reply_ms": 58.069
+        },
+        {
+          "role": 1,
+          "sequence": 2,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 333.333,
+          "sent_ms": 333.726,
+          "call_ms": 56.049,
+          "arrival_to_reply_ms": 56.442
+        },
+        {
+          "role": 1,
+          "sequence": 3,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 466.667,
+          "sent_ms": 467.915,
+          "call_ms": 48.902,
+          "arrival_to_reply_ms": 50.15
+        },
+        {
+          "role": 1,
+          "sequence": 4,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 600.0,
+          "sent_ms": 600.863,
+          "call_ms": 36.336,
+          "arrival_to_reply_ms": 37.198
+        },
+        {
+          "role": 1,
+          "sequence": 5,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 733.333,
+          "sent_ms": 734.958,
+          "call_ms": 58.264,
+          "arrival_to_reply_ms": 59.889
+        },
+        {
+          "role": 1,
+          "sequence": 6,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 866.667,
+          "sent_ms": 867.546,
+          "call_ms": 47.366,
+          "arrival_to_reply_ms": 48.245
+        },
+        {
+          "role": 1,
+          "sequence": 7,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1000.0,
+          "sent_ms": 1000.837,
+          "call_ms": 47.239,
+          "arrival_to_reply_ms": 48.076
+        },
+        {
+          "role": 1,
+          "sequence": 8,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1133.333,
+          "sent_ms": 1135.143,
+          "call_ms": 48.3,
+          "arrival_to_reply_ms": 50.109
+        },
+        {
+          "role": 1,
+          "sequence": 9,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1266.667,
+          "sent_ms": 1267.518,
+          "call_ms": 48.692,
+          "arrival_to_reply_ms": 49.543
+        },
+        {
+          "role": 1,
+          "sequence": 10,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1400.0,
+          "sent_ms": 1400.597,
+          "call_ms": 54.55,
+          "arrival_to_reply_ms": 55.146
+        },
+        {
+          "role": 1,
+          "sequence": 11,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1533.333,
+          "sent_ms": 1536.2,
+          "call_ms": 45.592,
+          "arrival_to_reply_ms": 48.459
+        },
+        {
+          "role": 1,
+          "sequence": 12,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1666.667,
+          "sent_ms": 1667.776,
+          "call_ms": 39.976,
+          "arrival_to_reply_ms": 41.086
+        },
+        {
+          "role": 1,
+          "sequence": 13,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 1800.0,
+          "sent_ms": 1801.04,
+          "call_ms": 55.479,
+          "arrival_to_reply_ms": 56.519
+        },
+        {
+          "role": 1,
+          "sequence": 14,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 1933.333,
+          "sent_ms": 1933.934,
+          "call_ms": 79.645,
+          "arrival_to_reply_ms": 80.246
+        },
+        {
+          "role": 1,
+          "sequence": 15,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 2066.667,
+          "sent_ms": 2068.247,
+          "call_ms": 40.587,
+          "arrival_to_reply_ms": 42.167
+        },
+        {
+          "role": 1,
+          "sequence": 16,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 2200.0,
+          "sent_ms": 2201.586,
+          "call_ms": 98.559,
+          "arrival_to_reply_ms": 100.145
+        },
+        {
+          "role": 1,
+          "sequence": 17,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 2333.333,
+          "sent_ms": 2334.71,
+          "call_ms": 73.447,
+          "arrival_to_reply_ms": 74.824
+        },
+        {
+          "role": 1,
+          "sequence": 18,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 2466.667,
+          "sent_ms": 2467.97,
+          "call_ms": 50.559,
+          "arrival_to_reply_ms": 51.862
+        },
+        {
+          "role": 1,
+          "sequence": 19,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 2600.0,
+          "sent_ms": 2601.063,
+          "call_ms": 50.607,
+          "arrival_to_reply_ms": 51.67
+        },
+        {
+          "role": 1,
+          "sequence": 20,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 2733.333,
+          "sent_ms": 2734.172,
+          "call_ms": 48.838,
+          "arrival_to_reply_ms": 49.677
+        },
+        {
+          "role": 1,
+          "sequence": 21,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 2866.667,
+          "sent_ms": 2870.745,
+          "call_ms": 389.739,
+          "arrival_to_reply_ms": 393.817
+        },
+        {
+          "role": 1,
+          "sequence": 22,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 3000.0,
+          "sent_ms": 3028.442,
+          "call_ms": 682.011,
+          "arrival_to_reply_ms": 710.453
+        },
+        {
+          "role": 1,
+          "sequence": 23,
+          "tool": "nf_context_get",
+          "status": "BACKPRESSURE",
+          "due_ms": 3133.333,
+          "sent_ms": 3161.39,
+          "call_ms": 97.932,
+          "arrival_to_reply_ms": 125.989
+        },
+        {
+          "role": 1,
+          "sequence": 24,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 3266.667,
+          "sent_ms": 3267.8,
+          "call_ms": 517.892,
+          "arrival_to_reply_ms": 519.026
+        },
+        {
+          "role": 1,
+          "sequence": 25,
+          "tool": "nf_context_get",
+          "status": "BACKPRESSURE",
+          "due_ms": 3400.0,
+          "sent_ms": 3401.483,
+          "call_ms": 297.813,
+          "arrival_to_reply_ms": 299.296
+        },
+        {
+          "role": 1,
+          "sequence": 26,
+          "tool": "nf_task_get",
+          "status": "BACKPRESSURE",
+          "due_ms": 3533.333,
+          "sent_ms": 3576.311,
+          "call_ms": 123.768,
+          "arrival_to_reply_ms": 166.746
+        },
+        {
+          "role": 1,
+          "sequence": 27,
+          "tool": "nf_context_get",
+          "status": "CLIENT_DROP",
+          "due_ms": 3666.667
+        },
+        {
+          "role": 1,
+          "sequence": 28,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 3800.0,
+          "sent_ms": 3800.657,
+          "call_ms": 130.725,
+          "arrival_to_reply_ms": 131.382
+        },
+        {
+          "role": 1,
+          "sequence": 29,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 3933.333,
+          "sent_ms": 3937.848,
+          "call_ms": 271.156,
+          "arrival_to_reply_ms": 275.671
+        },
+        {
+          "role": 1,
+          "sequence": 30,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 4066.667,
+          "sent_ms": 4139.2,
+          "call_ms": 122.377,
+          "arrival_to_reply_ms": 194.911
+        },
+        {
+          "role": 1,
+          "sequence": 31,
+          "tool": "nf_context_get",
+          "status": "BACKPRESSURE",
+          "due_ms": 4200.0,
+          "sent_ms": 4200.566,
+          "call_ms": 6.883,
+          "arrival_to_reply_ms": 7.449
+        },
+        {
+          "role": 1,
+          "sequence": 32,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 4333.333,
+          "sent_ms": 4337.772,
+          "call_ms": 47.37,
+          "arrival_to_reply_ms": 51.809
+        },
+        {
+          "role": 1,
+          "sequence": 33,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 4466.667,
+          "sent_ms": 4469.493,
+          "call_ms": 164.601,
+          "arrival_to_reply_ms": 167.428
+        },
+        {
+          "role": 1,
+          "sequence": 34,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 4600.0,
+          "sent_ms": 4614.124,
+          "call_ms": 80.354,
+          "arrival_to_reply_ms": 94.479
+        },
+        {
+          "role": 1,
+          "sequence": 35,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 4733.333,
+          "sent_ms": 4734.958,
+          "call_ms": 56.05,
+          "arrival_to_reply_ms": 57.675
+        },
+        {
+          "role": 1,
+          "sequence": 36,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 4866.667,
+          "sent_ms": 4867.168,
+          "call_ms": 483.85,
+          "arrival_to_reply_ms": 484.351
+        },
+        {
+          "role": 1,
+          "sequence": 37,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 5000.0,
+          "sent_ms": 5117.744,
+          "call_ms": 279.714,
+          "arrival_to_reply_ms": 397.458
+        },
+        {
+          "role": 1,
+          "sequence": 38,
+          "tool": "nf_task_get",
+          "status": "BACKPRESSURE",
+          "due_ms": 5133.333,
+          "sent_ms": 5134.428,
+          "call_ms": 24.687,
+          "arrival_to_reply_ms": 25.782
+        },
+        {
+          "role": 1,
+          "sequence": 39,
+          "tool": "nf_context_get",
+          "status": "BACKPRESSURE",
+          "due_ms": 5266.667,
+          "sent_ms": 5267.413,
+          "call_ms": 10.164,
+          "arrival_to_reply_ms": 10.91
+        },
+        {
+          "role": 1,
+          "sequence": 40,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 5400.0,
+          "sent_ms": 5402.423,
+          "call_ms": 450.465,
+          "arrival_to_reply_ms": 452.888
+        },
+        {
+          "role": 1,
+          "sequence": 41,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 5533.333,
+          "sent_ms": 5563.041,
+          "call_ms": 298.065,
+          "arrival_to_reply_ms": 327.773
+        },
+        {
+          "role": 1,
+          "sequence": 42,
+          "tool": "nf_task_get",
+          "status": "BACKPRESSURE",
+          "due_ms": 5666.667,
+          "sent_ms": 5669.107,
+          "call_ms": 45.978,
+          "arrival_to_reply_ms": 48.418
+        },
+        {
+          "role": 1,
+          "sequence": 43,
+          "tool": "nf_context_get",
+          "status": "BACKPRESSURE",
+          "due_ms": 5800.0,
+          "sent_ms": 5804.995,
+          "call_ms": 26.338,
+          "arrival_to_reply_ms": 31.332
+        },
+        {
+          "role": 1,
+          "sequence": 44,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 5933.333,
+          "sent_ms": 5934.209,
+          "call_ms": 94.337,
+          "arrival_to_reply_ms": 95.212
+        },
+        {
+          "role": 1,
+          "sequence": 45,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 6066.667,
+          "sent_ms": 6067.927,
+          "call_ms": 55.239,
+          "arrival_to_reply_ms": 56.499
+        },
+        {
+          "role": 1,
+          "sequence": 46,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 6200.0,
+          "sent_ms": 6223.906,
+          "call_ms": 70.902,
+          "arrival_to_reply_ms": 94.807
+        },
+        {
+          "role": 1,
+          "sequence": 47,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 6333.333,
+          "sent_ms": 6334.188,
+          "call_ms": 69.041,
+          "arrival_to_reply_ms": 69.896
+        },
+        {
+          "role": 1,
+          "sequence": 48,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 6466.667,
+          "sent_ms": 6467.637,
+          "call_ms": 81.042,
+          "arrival_to_reply_ms": 82.012
+        },
+        {
+          "role": 1,
+          "sequence": 49,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 6600.0,
+          "sent_ms": 6602.025,
+          "call_ms": 50.536,
+          "arrival_to_reply_ms": 52.561
+        },
+        {
+          "role": 1,
+          "sequence": 50,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 6733.333,
+          "sent_ms": 6733.791,
+          "call_ms": 55.42,
+          "arrival_to_reply_ms": 55.878
+        },
+        {
+          "role": 1,
+          "sequence": 51,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 6866.667,
+          "sent_ms": 6867.797,
+          "call_ms": 63.393,
+          "arrival_to_reply_ms": 64.524
+        },
+        {
+          "role": 1,
+          "sequence": 52,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 7000.0,
+          "sent_ms": 7000.494,
+          "call_ms": 53.299,
+          "arrival_to_reply_ms": 53.793
+        },
+        {
+          "role": 1,
+          "sequence": 53,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 7133.333,
+          "sent_ms": 7134.678,
+          "call_ms": 60.398,
+          "arrival_to_reply_ms": 61.742
+        },
+        {
+          "role": 1,
+          "sequence": 54,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 7266.667,
+          "sent_ms": 7268.027,
+          "call_ms": 84.02,
+          "arrival_to_reply_ms": 85.381
+        },
+        {
+          "role": 1,
+          "sequence": 55,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 7400.0,
+          "sent_ms": 7400.707,
+          "call_ms": 53.199,
+          "arrival_to_reply_ms": 53.906
+        },
+        {
+          "role": 1,
+          "sequence": 56,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 7533.333,
+          "sent_ms": 7533.908,
+          "call_ms": 45.868,
+          "arrival_to_reply_ms": 46.442
+        },
+        {
+          "role": 1,
+          "sequence": 57,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 7666.667,
+          "sent_ms": 7670.337,
+          "call_ms": 84.424,
+          "arrival_to_reply_ms": 88.095
+        },
+        {
+          "role": 1,
+          "sequence": 58,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 7800.0,
+          "sent_ms": 7804.978,
+          "call_ms": 79.786,
+          "arrival_to_reply_ms": 84.763
+        },
+        {
+          "role": 1,
+          "sequence": 59,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 7933.333,
+          "sent_ms": 7934.78,
+          "call_ms": 47.412,
+          "arrival_to_reply_ms": 48.858
+        },
+        {
+          "role": 1,
+          "sequence": 60,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 8066.667,
+          "sent_ms": 8067.76,
+          "call_ms": 47.572,
+          "arrival_to_reply_ms": 48.665
+        },
+        {
+          "role": 1,
+          "sequence": 61,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 8200.0,
+          "sent_ms": 8200.565,
+          "call_ms": 42.985,
+          "arrival_to_reply_ms": 43.55
+        },
+        {
+          "role": 1,
+          "sequence": 62,
+          "tool": "nf_task_get",
+          "status": "OK",
+          "due_ms": 8333.333,
+          "sent_ms": 8333.587,
+          "call_ms": 49.482,
+          "arrival_to_reply_ms": 49.735
+        },
+        {
+          "role": 1,
+          "sequence": 63,
+          "tool": "nf_context_get",
+          "status": "OK",
+          "due_ms": 8466.667,
+          "sent_ms": 8467.319,
+          "call_ms": 46.721,
+          "arrival_to_reply_ms": 47.373
+        }
+      ],
+      "binding_sessions_at_finish": [
+        2,
+        2
+      ]
+    }
+  ],
+  "arm": "default",
+  "order": 4,
+  "child_compact_flag": "0",
+  "source_tree": "5e59b4a57c8103f38001d077d690f878f0633820",
+  "audit_outbox_evidence_counts": "484|484|242|0",
+  "runner_sha256": "0562adf3c336d0454c1124e106ce5979964e2b352f454b7fec8ebd5539d2e1e0",
+  "worker_driver_affinity": [
+    1,
+    2
+  ],
+  "postgres_affinity": [
+    3
+  ]
+}

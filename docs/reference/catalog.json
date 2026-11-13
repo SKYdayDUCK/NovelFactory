@@ -12,6 +12,24 @@
       }
     }
   },
+  "GET /api/v1/works/{work_id}/branches/{branch_id}/workflow": {
+    "transport": "http",
+    "method": "GET",
+    "path": "/api/v1/works/{work_id}/branches/{branch_id}/workflow",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "workflow",
+    "requires": "NF_MCP_BINDINGS_FILE",
+    "pathParameters": {
+      "work_id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "branch_id": {
+        "type": "string",
+        "format": "uuid"
+      }
+    }
+  },
   "GET /health": {
     "transport": "http",
     "method": "GET",
@@ -205,6 +223,30 @@
       "$ref": "https://novel-factory.example/contracts/2.3/continuity.schema.json#/$defs/ContinuityTaskReadRequest"
     }
   },
+  "POST /api/v1/works/{work_id}/branches/{branch_id}/workflow/resume": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/works/{work_id}/branches/{branch_id}/workflow/resume",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "workflow",
+    "requires": "NF_MCP_BINDINGS_FILE",
+    "pathParameters": {
+      "work_id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "branch_id": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    }
+  },
   "POST /api/v1/works/{work_id}/continuity/inspect": {
     "transport": "http",
     "method": "POST",
@@ -307,6 +349,209 @@
     "handler": "promote",
     "inputSchema": {
       "$ref": "https://novel-factory.example/contracts/p1/http.schema.json#/$defs/PromotionHttpRequest"
+    }
+  },
+  "POST /mcp": {
+    "transport": "mcp-streamable-http",
+    "method": "POST",
+    "path": "/mcp",
+    "source": "src/novel_factory/interfaces/mcp_http.py",
+    "handler": "RemoteTools",
+    "requires": "NF_MCP_BINDINGS_FILE",
+    "inputSchema": {
+      "$defs": {
+        "ErrorData": {
+          "additionalProperties": true,
+          "description": "Error information for JSON-RPC error responses.",
+          "properties": {
+            "code": {
+              "title": "Code",
+              "type": "integer"
+            },
+            "message": {
+              "title": "Message",
+              "type": "string"
+            },
+            "data": {
+              "anyOf": [
+                {},
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Data"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "title": "ErrorData",
+          "type": "object"
+        },
+        "JSONRPCError": {
+          "additionalProperties": true,
+          "description": "A response to a request that indicates an error occurred.",
+          "properties": {
+            "jsonrpc": {
+              "const": "2.0",
+              "title": "Jsonrpc",
+              "type": "string"
+            },
+            "id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
+              "title": "Id"
+            },
+            "error": {
+              "$ref": "#/$defs/ErrorData"
+            }
+          },
+          "required": [
+            "jsonrpc",
+            "id",
+            "error"
+          ],
+          "title": "JSONRPCError",
+          "type": "object"
+        },
+        "JSONRPCNotification": {
+          "additionalProperties": true,
+          "description": "A notification which does not expect a response.",
+          "properties": {
+            "method": {
+              "title": "Method",
+              "type": "string"
+            },
+            "params": {
+              "anyOf": [
+                {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Params"
+            },
+            "jsonrpc": {
+              "const": "2.0",
+              "title": "Jsonrpc",
+              "type": "string"
+            }
+          },
+          "required": [
+            "method",
+            "jsonrpc"
+          ],
+          "title": "JSONRPCNotification",
+          "type": "object"
+        },
+        "JSONRPCRequest": {
+          "additionalProperties": true,
+          "description": "A request that expects a response.",
+          "properties": {
+            "method": {
+              "title": "Method",
+              "type": "string"
+            },
+            "params": {
+              "anyOf": [
+                {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Params"
+            },
+            "jsonrpc": {
+              "const": "2.0",
+              "title": "Jsonrpc",
+              "type": "string"
+            },
+            "id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ],
+              "title": "Id"
+            }
+          },
+          "required": [
+            "method",
+            "jsonrpc",
+            "id"
+          ],
+          "title": "JSONRPCRequest",
+          "type": "object"
+        },
+        "JSONRPCResponse": {
+          "additionalProperties": true,
+          "description": "A successful (non-error) response to a request.",
+          "properties": {
+            "jsonrpc": {
+              "const": "2.0",
+              "title": "Jsonrpc",
+              "type": "string"
+            },
+            "id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ],
+              "title": "Id"
+            },
+            "result": {
+              "additionalProperties": true,
+              "title": "Result",
+              "type": "object"
+            }
+          },
+          "required": [
+            "jsonrpc",
+            "id",
+            "result"
+          ],
+          "title": "JSONRPCResponse",
+          "type": "object"
+        }
+      },
+      "anyOf": [
+        {
+          "$ref": "#/$defs/JSONRPCRequest"
+        },
+        {
+          "$ref": "#/$defs/JSONRPCNotification"
+        },
+        {
+          "$ref": "#/$defs/JSONRPCResponse"
+        },
+        {
+          "$ref": "#/$defs/JSONRPCError"
+        }
+      ],
+      "title": "JSONRPCMessage"
     }
   },
   "aw_capabilities": {
@@ -6313,6 +6558,35 @@
     },
     "source": "src/novel_factory/interfaces/mcp_stdio.py"
   },
+  "nf_task_cancel": {
+    "transport": "nf-mcp",
+    "description": "Cancel an owned task at its expected generation.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "generation": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "idempotency_key": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+        },
+        "task_id": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "idempotency_key"
+      ],
+      "type": "object"
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
   "nf_task_get": {
     "transport": "nf-mcp",
     "description": "Read the bound task's current execution identity.",
@@ -6321,6 +6595,272 @@
       "properties": {},
       "required": [],
       "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_task_status": {
+    "transport": "nf-mcp",
+    "description": "Read the current state of an owned task.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "task_id"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_task_submit": {
+    "transport": "nf-mcp",
+    "description": "Durably submit a task within the installed branch.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "idempotency_key": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+        },
+        "spec": {
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "state": {
+                    "enum": [
+                      "RESULT_STORED",
+                      "VALIDATING",
+                      "WAITING_REVIEW",
+                      "ACCEPTED"
+                    ]
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "context_bundle_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "dependency_fingerprint": {
+                    "pattern": "^[a-f0-9]{64}$",
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          ],
+          "description": "Wall deadline controls execution only. It cannot make a character late in the story. READY/BLOCKED or RUNNING preparation may have no bundle yet; before any external call the service must bind a persisted bundle/fingerprint to the current generation. Result receipt verifies task/generation/attempt/context together.",
+          "properties": {
+            "budget": {
+              "additionalProperties": false,
+              "properties": {
+                "currency": {
+                  "enum": [
+                    "USD",
+                    "CNY"
+                  ],
+                  "type": "string"
+                },
+                "max_amount": {
+                  "description": "Nonnegative exact decimal; domain enforces unit and finite precision.",
+                  "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+                  "type": "string"
+                },
+                "token_budget": {
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "currency",
+                "max_amount",
+                "token_budget"
+              ],
+              "type": "object"
+            },
+            "capability_grant_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "context_bundle_id": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "dependency_fingerprint": {
+              "anyOf": [
+                {
+                  "pattern": "^[a-f0-9]{64}$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "generation": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "input_artifacts": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "artifact_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "artifact_revision_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "sha256": {
+                    "pattern": "^[a-f0-9]{64}$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "artifact_id",
+                  "artifact_revision_id",
+                  "sha256"
+                ],
+                "type": "object"
+              },
+              "minItems": 0,
+              "type": "array"
+            },
+            "policy_version": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "role_id": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "runtime_contract_version": {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            "schema_version": {
+              "enum": [
+                "2.0"
+              ],
+              "type": "string"
+            },
+            "state": {
+              "enum": [
+                "BLOCKED",
+                "READY",
+                "RUNNING",
+                "RESULT_STORED",
+                "VALIDATING",
+                "WAITING_REVIEW",
+                "ACCEPTED",
+                "STALE",
+                "PAUSED",
+                "CANCELLED",
+                "FAILED"
+              ],
+              "type": "string"
+            },
+            "story_time": {
+              "additionalProperties": false,
+              "description": "tick uses work calendar; phase is accepted causal stage, never database sequence or model completion order.",
+              "properties": {
+                "phase": {
+                  "maximum": 2147483647,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "tick": {
+                  "maximum": 9007199254740991,
+                  "minimum": -9007199254740991,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "tick",
+                "phase"
+              ],
+              "type": "object"
+            },
+            "task_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "task_kind": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "wall_deadline": {
+              "format": "date-time",
+              "type": "string"
+            },
+            "world_ref": {
+              "additionalProperties": false,
+              "description": "All three identifiers are checked together against an immutable branch/revision membership; main is resolved before issue.",
+              "properties": {
+                "branch_id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "work_id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "world_revision_id": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "work_id",
+                "branch_id",
+                "world_revision_id"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "schema_version",
+            "task_id",
+            "generation",
+            "role_id",
+            "task_kind",
+            "state",
+            "world_ref",
+            "story_time",
+            "context_bundle_id",
+            "policy_version",
+            "dependency_fingerprint",
+            "runtime_contract_version",
+            "capability_grant_id",
+            "input_artifacts",
+            "budget",
+            "wall_deadline"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "spec",
+        "idempotency_key"
+      ],
+      "type": "object"
     },
     "source": "src/novel_factory/interfaces/mcp_stdio.py"
   }
