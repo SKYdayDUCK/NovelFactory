@@ -39,7 +39,7 @@ class McpRuntime:
         self.kernel = kernel
         self.principal = principal
         self.binding = binding
-        self.compact_role_reads = (os.getenv("NF_HERA_COMPACT_ROLE_READS", "1") == "1"
+        self.compact_role_reads = (os.getenv("NF_HERA_COMPACT_ROLE_READS", "0") == "1"
                                    if compact_role_reads is None else compact_role_reads)
         self.queries = WorldQueryService(kernel)
 

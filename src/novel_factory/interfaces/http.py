@@ -328,8 +328,12 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
             validate_contract("UUID", work_id)
             validate_contract("UUID", branch_id)
             resume = request.method == "POST"
-            if resume and await request.body() and await _json_body(request) != {}:
-                raise DomainError("INVALID_ARGUMENT", "Project resume accepts an empty object")
+            if resume:
+                from novel_factory.application.tool_catalog import _VALIDATORS
+
+                arguments = await _json_body(request) if await request.body() else {}
+                if not _VALIDATORS["nf_resume_project"].is_valid(arguments):
+                    raise DomainError("INVALID_ARGUMENT", "Project resume accepts an empty object")
 
             def project(principal):
                 binding = bindings.get(principal)

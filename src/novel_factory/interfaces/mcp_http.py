@@ -34,6 +34,9 @@ def load_roster(path):
 
 
 class RemoteTools:
+    path = "/mcp"
+    methods = ("POST",)
+
     def __init__(self, kernel, bindings, authenticate, execute, settings):
         self.bindings = dict(bindings)
         self.kernel = kernel
@@ -73,4 +76,4 @@ class RemoteTools:
 
     def route(self):
         # Disallow long-lived GET event streams. Stateless clients poll the durable ledger.
-        return Route("/mcp", self, methods=["POST"])
+        return Route(self.path, self, methods=self.methods)

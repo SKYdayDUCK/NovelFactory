@@ -387,13 +387,21 @@ def test_task_authorization_is_rechecked_inside_mutation_transaction(race_kernel
         "dependency_fingerprint": None, "runtime_contract_version": fingerprint({"test": "authorization-race"}), "capability_grant_id": delegate.grant_id,
         "input_artifacts": [], "budget": {"currency": "USD", "max_amount": "1", "token_budget": 100},
         "wall_deadline": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()}
-    original = k.tasks.create
-    def revoke_between_precheck_and_mutation(*args, **kwargs):
+    # Revoke from a second transaction after validation and after opening the
+    # real write transaction, immediately before its live authorization fence.
+    original = k._create_checked_task
+    revoked = []
+
+    def revoke_between_precheck_and_mutation(repo, *args, **kwargs):
+        assert repo.conn.in_transaction()
         k.revoke_grant(w["principal"], delegate.grant_id)
-        return original(*args, **kwargs)
-    monkeypatch.setattr(k.tasks, "create", revoke_between_precheck_and_mutation)
+        revoked.append(delegate.grant_id)
+        return original(repo, *args, **kwargs)
+
+    monkeypatch.setattr(k, "_create_checked_task", revoke_between_precheck_and_mutation)
     with pytest.raises(DomainError) as exc:
         k.create_task(delegate, spec, "auth-before-mutation")
+    assert revoked == [delegate.grant_id]
     assert exc.value.code == "VIEW_DENIED"
     with k.db.uow(write=False) as repo:
         assert repo.one("tasks", {"task_id": spec["task_id"]}) is None

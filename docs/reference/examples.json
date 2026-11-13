@@ -29,6 +29,29 @@
     },
     "test": "tests/service/test_http.py::test_http_real_task_cancellation_blocks_late_result"
   },
+  "GET /api/v1/works/{work_id}/branches/{branch_id}/workflow": {
+    "kind": "HTTP_FIXTURE",
+    "test": "tests/service/test_hera_mixed_ingress.py::test_mixed_task_lifecycle",
+    "request": {},
+    "response": {
+      "counts": {
+        "READY": 0,
+        "WAITING": 0,
+        "RUNNING": 0,
+        "CANCELLED": 1
+      },
+      "ready_count": 0,
+      "workflow_state": "IDLE",
+      "blockers": {},
+      "pending_review_count": 0,
+      "pending_author_approval_count": 0,
+      "resume_grant_expires_at": "2026-11-13T21:58:38.358746+09:00"
+    },
+    "pathBindings": {
+      "work_id": "c3409ce4-8bdd-46e6-a029-58a8e83c8bc5",
+      "branch_id": "18e3f707-3eb6-4b97-a2f6-db06c54c4f3b"
+    }
+  },
   "GET /health": {
     "kind": "HTTP_FIXTURE",
     "test": "tests/service/test_http.py::test_two_independent_http_processes_share_task_and_revocation_state",
@@ -1136,6 +1159,33 @@
     },
     "test": "tests/integration/test_continuity.py::test_task_delivery_is_generation_bound_and_never_exposes_future_plan_fields"
   },
+  "POST /api/v1/works/{work_id}/branches/{branch_id}/workflow/resume": {
+    "kind": "HTTP_FIXTURE",
+    "test": "tests/service/test_hera_mixed_ingress.py::test_mixed_task_lifecycle",
+    "request": {},
+    "response": {
+      "counts": {
+        "READY": 0,
+        "WAITING": 0,
+        "RUNNING": 0,
+        "CANCELLED": 1
+      },
+      "ready_count": 0,
+      "workflow_state": "IDLE",
+      "blockers": {},
+      "pending_review_count": 0,
+      "pending_author_approval_count": 0,
+      "awakened": 0,
+      "recovered": 0,
+      "closed_waits": 0,
+      "expired_ready": 0,
+      "resume_grant_expires_at": "2026-11-13T21:58:38.358746+09:00"
+    },
+    "pathBindings": {
+      "work_id": "c3409ce4-8bdd-46e6-a029-58a8e83c8bc5",
+      "branch_id": "18e3f707-3eb6-4b97-a2f6-db06c54c4f3b"
+    }
+  },
   "POST /api/v1/works/{work_id}/continuity/inspect": {
     "kind": "HTTP_FIXTURE",
     "pathBindings": {
@@ -1569,6 +1619,40 @@
       "work_id": "aacc7d01-b43b-44df-aedb-504052016fc5",
       "branch_id": "4c9396de-9ce3-4597-9a4e-e0b55693a588",
       "world_revision_id": "d929c4a1-b01b-4a85-a002-8dd0507eae88"
+    }
+  },
+  "POST /mcp": {
+    "kind": "SDK_FIXTURE",
+    "test": "tests/service/test_hera_mixed_ingress.py::test_mixed_task_lifecycle",
+    "request": {
+      "method": "initialize",
+      "params": {
+        "protocolVersion": "2025-11-25",
+        "capabilities": {},
+        "clientInfo": {
+          "name": "mcp",
+          "version": "0.1.0"
+        }
+      },
+      "jsonrpc": "2.0",
+      "id": 0
+    },
+    "response": {
+      "jsonrpc": "2.0",
+      "id": 0,
+      "result": {
+        "protocolVersion": "2025-11-25",
+        "capabilities": {
+          "experimental": {},
+          "tools": {
+            "listChanged": false
+          }
+        },
+        "serverInfo": {
+          "name": "NovelFactory",
+          "version": "2.1.0"
+        }
+      }
     }
   },
   "aw_capabilities": {
@@ -4461,6 +4545,21 @@
       }
     }
   },
+  "nf_task_cancel": {
+    "kind": "SDK_FIXTURE",
+    "test": "tests/service/test_hera_mixed_ingress.py::test_mixed_task_lifecycle",
+    "request": {
+      "task_id": "f95ab5c1-b423-4a88-800a-4fc642201682",
+      "generation": 0,
+      "idempotency_key": "hera-cancel"
+    },
+    "response": {
+      "status": "CANCELLED",
+      "task_id": "f95ab5c1-b423-4a88-800a-4fc642201682",
+      "generation": 0,
+      "receipt_id": "2926e895-1eb8-4ba6-b962-a03989bb87fe"
+    }
+  },
   "nf_task_get": {
     "kind": "MCP_FIXTURE",
     "test": "tests/integration/test_p5_mcp.py::test_actor_stdio_own_cut_only_and_candidate_replay",
@@ -4475,6 +4574,76 @@
         "branch_id": "d5fd739a-8362-447f-9977-046fa300251e",
         "world_revision_id": "638de02f-89bf-4580-9b16-83d72c61f53f"
       }
+    }
+  },
+  "nf_task_status": {
+    "kind": "SDK_FIXTURE",
+    "test": "tests/service/test_hera_mixed_ingress.py::test_mixed_task_lifecycle",
+    "request": {
+      "task_id": "f95ab5c1-b423-4a88-800a-4fc642201682"
+    },
+    "response": {
+      "task_id": "f95ab5c1-b423-4a88-800a-4fc642201682",
+      "work_id": "c3409ce4-8bdd-46e6-a029-58a8e83c8bc5",
+      "branch_id": "18e3f707-3eb6-4b97-a2f6-db06c54c4f3b",
+      "task_kind": "hera_mixed",
+      "role_id": "control_operator",
+      "state": "READY",
+      "generation": 0,
+      "context_bundle_id": null,
+      "dependency_fingerprint": null,
+      "lease_expiry": null,
+      "deadline": "2026-11-13T21:58:38.675912+09:00",
+      "current_result_id": null,
+      "attempt_id": null,
+      "created_at": "2026-11-13T20:58:39.264812+09:00",
+      "updated_at": "2026-11-13T20:58:39.264812+09:00",
+      "world_ref": {
+        "work_id": "c3409ce4-8bdd-46e6-a029-58a8e83c8bc5",
+        "branch_id": "18e3f707-3eb6-4b97-a2f6-db06c54c4f3b",
+        "world_revision_id": "5fac62f9-db95-4066-b142-24a16ad5a9a8"
+      }
+    }
+  },
+  "nf_task_submit": {
+    "kind": "SDK_FIXTURE",
+    "test": "tests/service/test_hera_mixed_ingress.py::test_mixed_task_lifecycle",
+    "request": {
+      "spec": {
+        "schema_version": "2.0",
+        "task_id": "f95ab5c1-b423-4a88-800a-4fc642201682",
+        "generation": 0,
+        "role_id": "control_operator",
+        "task_kind": "hera_mixed",
+        "state": "READY",
+        "world_ref": {
+          "work_id": "c3409ce4-8bdd-46e6-a029-58a8e83c8bc5",
+          "branch_id": "18e3f707-3eb6-4b97-a2f6-db06c54c4f3b",
+          "world_revision_id": "5fac62f9-db95-4066-b142-24a16ad5a9a8"
+        },
+        "story_time": {
+          "tick": 0,
+          "phase": 0
+        },
+        "context_bundle_id": null,
+        "policy_version": "nf-policy-1",
+        "dependency_fingerprint": null,
+        "runtime_contract_version": "0120ac86e22439cd723d8064513dd80bd9149713880efd86df1cd3ebe6e43b7e",
+        "capability_grant_id": "7793f9bb-878d-4974-ac13-68179dc7a4dc",
+        "input_artifacts": [],
+        "budget": {
+          "currency": "USD",
+          "max_amount": "1",
+          "token_budget": 10
+        },
+        "wall_deadline": "2026-11-13T12:58:38.675912+00:00"
+      },
+      "idempotency_key": "hera-create"
+    },
+    "response": {
+      "state": "READY",
+      "task_id": "f95ab5c1-b423-4a88-800a-4fc642201682",
+      "generation": 0
     }
   }
 }
