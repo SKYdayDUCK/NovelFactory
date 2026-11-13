@@ -2,23 +2,9 @@
 from __future__ import annotations
 
 from functools import lru_cache
-import os
 
 from sqlalchemy import Text, bindparam, select, update, delete, and_, func, text, true
 from sqlalchemy.dialects.postgresql import insert
-
-# Only SQLAlchemy statement shapes are shared. Every lookup executes against
-# PostgreSQL with the caller's parameters, transaction snapshot and row lock.
-_REUSE_LOOKUP_SQL = os.environ.get("NF_HERA_REUSE_LOOKUP_SQL", "0") == "1"
-
-
-@lru_cache(maxsize=128)
-def _scalar_lookup(table, columns, lock):
-    query = select(table).where(*(table.c[key] == bindparam("lookup_" + key) for key in columns))
-    if lock:
-        query = query.with_for_update(read=lock == "share")
-    return query.limit(1)
-
 
 @lru_cache(maxsize=4)
 def _revision_text_query(revision):
@@ -53,12 +39,6 @@ class KernelRepository:
         self.conn, self.tables = conn, tables
 
     def one(self, name, where, *, lock=None):
-        if _REUSE_LOOKUP_SQL and where and all(
-                value is not None and not isinstance(value, (list, set, tuple, bool)) for value in where.values()):
-            query = _scalar_lookup(self.tables[name], tuple(where), lock)
-            params = {"lookup_" + key: value for key, value in where.items()}
-            row = self.conn.execute(query, params).mappings().first()
-            return dict(row) if row is not None else None
         rows = self.many(name, where, lock=lock, limit=1)
         return rows[0] if rows else None
 
