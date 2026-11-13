@@ -1,6 +1,7 @@
 """Durable admission in the same transaction as an authorized TaskService create.
 
-The singleton serializes *admissions* across database clients only when enabled.
+The scan path serializes admissions on the policy. The exact path enforces limits
+inside the task INSERT, sharing the configuration lock across clients.
 Acceptance, cancellation, execution and model accounting retain their own guards.
 All nonterminal tasks, including tasks created before activation, consume capacity.
 """
@@ -11,12 +12,14 @@ from sqlalchemy import text
 from novel_factory.domain.errors import DomainError
 
 
-_POLICY_DISABLED = text("""
-    SELECT true FROM nf_durable_admission_policy WHERE singleton AND NOT enabled FOR SHARE
+_SHARED_POLICY = text("""
+    SELECT enabled, exact_counters, max_age_seconds, max_queue_seconds, role_resources,
+           clock_timestamp() AS db_now
+    FROM nf_durable_admission_policy WHERE singleton AND (NOT enabled OR exact_counters) FOR SHARE
 """)
 _LOCK_POLICY = text("""
-    UPDATE nf_durable_admission_policy SET enabled=enabled WHERE singleton AND enabled
-    RETURNING total_limit, work_limit, principal_limit, resource_limit,
+    UPDATE nf_durable_admission_policy SET enabled=enabled WHERE singleton AND enabled AND NOT exact_counters
+    RETURNING enabled, exact_counters, clock_timestamp() AS db_now, total_limit, work_limit, principal_limit, resource_limit,
         max_age_seconds, max_queue_seconds, role_resources
 """)
 _OCCUPANCY = text("""
@@ -33,19 +36,16 @@ _OCCUPANCY = text("""
 
 
 def admit(conn, spec, principal_id, deadline):
-    # Share-lock the disabled configuration so activation sees every prior
-    # commit. Enabled clients update it in canonical order before counting.
-    # An actual row version also fences repeatable-read callers via PostgreSQL.
-    if conn.scalar(_POLICY_DISABLED):
-        return None
-    policy = conn.execute(_LOCK_POLICY).mappings().one_or_none()
+    policy = conn.execute(_SHARED_POLICY).mappings().one_or_none()
     if policy is None:
-        # A concurrent disable can change the predicate after our first read.
-        # Recheck under a SHARE lock. A missing policy fails closed.
-        if conn.scalar(_POLICY_DISABLED):
-            return None
-        raise DomainError("SERVICE_UNAVAILABLE", "Admission policy changed; retry", True, "WAIT")
-    now = conn.scalar(text("SELECT clock_timestamp()"))
+        policy = conn.execute(_LOCK_POLICY).mappings().one_or_none()
+        if policy is None:
+            policy = conn.execute(_SHARED_POLICY).mappings().one_or_none()
+        if policy is None:
+            raise DomainError("SERVICE_UNAVAILABLE", "Admission policy changed; retry", True, "WAIT")
+    if not policy["enabled"]:
+        return None
+    now = policy["db_now"]
     if deadline <= now:
         raise DomainError("DEADLINE_EXCEEDED", "Task deadline has passed")
     if deadline - now > timedelta(seconds=policy["max_age_seconds"]):
@@ -53,10 +53,11 @@ def admit(conn, spec, principal_id, deadline):
     # Kernel already matched the task role against the caller's locked grant.
     # The resource mapping is trusted database configuration; clients supply no class.
     resource = policy["role_resources"].get(spec["role_id"], "MODEL")
-    occupancy = conn.execute(_OCCUPANCY, {
-        "work": spec["world_ref"]["work_id"], "principal": str(principal_id), "resource": resource,
-    }).mappings().one()
-    if any(occupancy[scope] >= policy[scope + "_limit"] for scope in occupancy):
-        raise DomainError("BACKPRESSURE", "Durable task capacity is full; retry after one second", True, "WAIT")
+    if not policy["exact_counters"]:
+        occupancy = conn.execute(_OCCUPANCY, {
+            "work": spec["world_ref"]["work_id"], "principal": str(principal_id), "resource": resource,
+        }).mappings().one()
+        if any(occupancy[scope] >= policy[scope + "_limit"] for scope in occupancy):
+            raise DomainError("BACKPRESSURE", "Durable task capacity is full; retry after one second", True, "WAIT")
     return {"resource_class": resource,
             "queue_deadline": min(deadline, now + timedelta(seconds=policy["max_queue_seconds"]))}

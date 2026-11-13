@@ -29,9 +29,12 @@ def spec(world, *, principal=None, role="control_operator", kind="application", 
             "wall_deadline": (datetime.now(UTC) + timedelta(hours=1)).isoformat()}
 
 
-@pytest.fixture
-def policy(kernel_env):
+@pytest.fixture(params=[False, True], ids=["scan", "exact"])
+def policy(kernel_env, request):
     db = kernel_env["db"]
+
+    with db.uow() as repo:
+        repo.conn.execute(text("SELECT nf_hera_set_capacity_mode(:on)"), {"on": request.param})
 
     def configure(total=1000, work=1000, principal=1000, resource=1000):
         with db.uow() as repo:
@@ -44,6 +47,7 @@ def policy(kernel_env):
     yield configure
     with db.uow() as repo:
         repo.conn.execute(text("UPDATE nf_durable_admission_policy SET enabled=false"))
+        repo.conn.execute(text("SELECT nf_hera_set_capacity_mode(false)"))
 
 
 def test_racing_clients_retries_and_capacity_share_one_commit(kernel_env, policy):
@@ -203,3 +207,38 @@ def test_reject_invalid_server_resource_classes(kernel_env, invalid):
         repo.conn.execute(text("""
             UPDATE nf_durable_admission_policy SET role_resources=CAST(:mapping AS jsonb)
         """), {"mapping": json.dumps({"writer": invalid})})
+
+
+def test_exact_backfill_remap_and_restart_use_existing_receipts(kernel_env):
+    k = kernel_env["kernel"]
+    world = load_fixture(k)
+    owner = world["principal"]
+    legacy = spec(world)
+    legacy_id = legacy["task_id"]
+    k.create_task(owner, legacy, "before-policy")
+    frozen = spec(world)
+    with k.db.uow() as repo:
+        repo.conn.execute(text("UPDATE nf_durable_admission_policy SET enabled=true, resource_limit=5, total_limit=10, work_limit=10, principal_limit=10"))
+    k.create_task(owner, frozen, "old-scan-receipt")
+    with k.db.uow() as repo:
+        repo.conn.execute(text("SELECT nf_hera_set_capacity_mode(true)"))
+        repo.conn.execute(text("""UPDATE nf_durable_admission_policy
+            SET role_resources=jsonb_build_object('control_operator','DB_WRITE'),resource_limit=1"""))
+        scoped = dict(repo.conn.execute(text("""
+            SELECT subject,used FROM nf_hera_capacity WHERE scope='resource' AND used>0
+        """)).all())
+        assert scoped == {"MODEL": 1, "DB_WRITE": 1}
+    try:
+        with pytest.raises(DomainError, match="capacity"):
+            k.create_task(owner, spec(world), "denied-after-rebuild")
+        k.cancel_task(owner, legacy_id, 0, "release-legacy")
+        new = spec(world)
+        k.create_task(owner, new, "reused-counter")
+        k.cancel_task(owner, new["task_id"], 0, "release-new")
+        k.cancel_task(owner, frozen["task_id"], 0, "release-old-receipt")
+        with k.db.uow() as repo:
+            assert repo.conn.scalar(text("SELECT sum(used) FROM nf_hera_capacity")) == 0
+    finally:
+        with k.db.uow() as repo:
+            repo.conn.execute(text("SELECT nf_hera_set_capacity_mode(false)"))
+            repo.conn.execute(text("UPDATE nf_durable_admission_policy SET enabled=false, role_resources='{}'"))
