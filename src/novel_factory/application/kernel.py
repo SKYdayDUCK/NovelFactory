@@ -498,7 +498,10 @@ class Kernel:
 
     def _authorize_task_create(self, r, principal, spec):
         wr = spec["world_ref"]
-        work, g = self._authorize_with_work(r, principal, wr["work_id"], "TASK_CREATE", wr["branch_id"])
+        if self._compact_create:
+            work, g = self._authorize_with_work(r, principal, wr["work_id"], "TASK_CREATE", wr["branch_id"])
+        else:
+            g = self.authorize(r, principal, wr["work_id"], "TASK_CREATE", wr["branch_id"])
         self.revision(r,wr)
         from .dynamic_runtime import check_input_branch
         inputs = {ref["artifact_revision_id"]: ref for ref in spec["input_artifacts"]}
