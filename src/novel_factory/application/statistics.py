@@ -34,6 +34,17 @@ def _source(conn, event):
     ).scalar_one()
 
 
+def is_fixture_configuration(config):
+    host = urlsplit(config.get("endpoint", "")).hostname or ""
+    return (
+        config["execution_kind"] not in {"REAL_EXTERNAL", "REAL_HOST"}
+        or config.get("adapter_kind") == "DETERMINISTIC_TEST"
+        or config.get("provider") == "fixture"
+        or host in {"localhost", "127.0.0.1", "::1"}
+        or host.endswith((".test", ".invalid", ".localhost"))
+    )
+
+
 def is_official_deepseek(config):
     """Match only the production adapter and its supported HTTPS inference URLs."""
     return (config.get("adapter_kind") == "deepseek" and config.get("execution_kind") == "REAL_EXTERNAL"
@@ -46,14 +57,8 @@ def is_official_deepseek(config):
 def _usage(conn, event, data, version):
     usage = data["usage"]
     config = data["model_configuration"]
+    fixture = is_fixture_configuration(config)
     host = urlsplit(config.get("endpoint", "")).hostname or ""
-    fixture = (
-        config["execution_kind"] not in {"REAL_EXTERNAL", "REAL_HOST"}
-        or config.get("adapter_kind") == "DETERMINISTIC_TEST"
-        or config.get("provider") == "fixture"
-        or host in {"localhost", "127.0.0.1", "::1"}
-        or host.endswith((".test", ".invalid", ".localhost"))
-    )
     origin = "fixture" if fixture else "reported"
     metrics = {f"model.{origin}.calls": 1}
     for field in ("input_tokens", "output_tokens", "cached_input_tokens"):

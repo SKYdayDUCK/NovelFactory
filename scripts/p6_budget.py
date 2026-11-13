@@ -17,7 +17,10 @@ def main():
     parser.add_argument("--binding", type=Path, required=True)
     commands = parser.add_subparsers(dest="mode", required=True)
     show, edit = commands.add_parser("show"), commands.add_parser("set")
-    for command in (show, edit):
+    provision = commands.add_parser("provision-next", help="Authorize one dispatch worth of free headroom")
+    provision.add_argument("--reserve-amount", required=True)
+    provision.add_argument("--reserve-tokens", type=int, required=True)
+    for command in (show, edit, provision):
         command.add_argument("--budget-id", type=UUID, required=True)
     edit.add_argument("--total-tokens", type=int, required=True)
     edit.add_argument("--expected-total-tokens", type=int)
@@ -33,13 +36,12 @@ def main():
             str(args.budget_id),
         )
         service = SharedBudgetService(runtime.kernel)
-        result = (
-            service.status(*scope)
-            if args.mode == "show"
-            else service.set_limit(
-                *scope, args.total_tokens, expected_total_tokens=args.expected_total_tokens
-            )
-        )
+        if args.mode == "show":
+            result = service.status(*scope)
+        elif args.mode == "provision-next":
+            result = service.provision_next(*scope, args.reserve_amount, args.reserve_tokens)
+        else:
+            result = service.set_limit(*scope, args.total_tokens, expected_total_tokens=args.expected_total_tokens)
         print(json.dumps(result))
     finally:
         runtime.kernel.db.close()

@@ -29,6 +29,8 @@ class ModelResponse:
 
 class ModelCallFailure(Exception):
     """Only stable diagnostics are exposed; provider error text can be secret."""
-    def __init__(self, code: str, *, sent: bool = True, http_status: int | None = None):
+    def __init__(self, code: str, *, sent: bool = True, http_status: int | None = None,
+                 received: ModelResponse | None = None):
         super().__init__(code)
         self.code, self.sent, self.http_status = code, sent, http_status
+        self.received = received

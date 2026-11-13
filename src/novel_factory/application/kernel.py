@@ -282,6 +282,9 @@ class Kernel:
         """
         grant = self.authorize(r, principal, work_id, "READ")
         artifact = self.artifact(r, ref, work_id)
+        if artifact["kind"] == "P6_RETURNED_EDITION_CANDIDATE":
+            self.authorize(r, principal, work_id, "ADMIN", artifact["payload"]["world_ref"]["branch_id"])
+            return
         if artifact["kind"] in {"P6_ERROR_RECORD", "P6_REFLECTION_RECORD", "P6_EXPERIENCE_MEMORY"}:
             evidence = artifact["payload"]
             branch = evidence.get("branch_id") or evidence.get("world_ref", {}).get("branch_id") or evidence.get("scope", {}).get("branch_id")

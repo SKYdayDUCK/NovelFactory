@@ -40,6 +40,8 @@ class Profile:
     auth_mode: str | None = None
     model_output_ceiling: int | None = None
     oauth_client_id: str | None = None
+    thinking: str | None = None
+    defer_invoice: bool = False
 
     def __post_init__(self):
         if (self.kind not in ("codex-cli", "deepseek", "openai-compatible")
@@ -47,6 +49,11 @@ class Profile:
                 or not isinstance(self.secret_ref, str) or not re.fullmatch(r"[A-Z][A-Z0-9_]{0,127}", self.secret_ref)
                 or type(self.max_output_tokens) is not int or not 1 <= self.max_output_tokens <= 1_000_000
                 or type(self.timeout_seconds) is not int or not 1 <= self.timeout_seconds <= 600):
+            raise ProfileError("INVALID_MODEL_CONFIG")
+        if type(self.defer_invoice) is not bool or (self.defer_invoice and self.kind != "deepseek"):
+            raise ProfileError("INVALID_MODEL_CONFIG")
+        if self.thinking is not None and (
+                self.kind != "deepseek" or self.thinking not in ("enabled", "disabled")):
             raise ProfileError("INVALID_MODEL_CONFIG")
         if self.kind == "codex-cli":
             if self.endpoint is not None or self.auth_mode not in ("chatgpt-plan", "api-key"):
@@ -109,6 +116,8 @@ class Profile:
         return {"adapter_kind": self.kind, "provider": self.provider_key, "model": self.model,
                     "endpoint": self.endpoint, "account_key": self.account_key, "auth_mode": self.auth_mode,
                     "max_output_tokens": self.max_output_tokens, "timeout_seconds": self.timeout_seconds,
+                    **({"defer_invoice": True} if self.defer_invoice else {}),
+                    **({"thinking": self.thinking} if self.thinking is not None else {}),
                     **({"oauth_client_id": self.oauth_client_id} if self.oauth_client_id is not None else {}),
                     "isolation": "STATELESS_TEXT_ONLY", "isolation_evidence": "Frozen context; one text-only request per attempt",
                     "execution_kind": "REAL_HOST" if self.kind == "codex-cli" else "REAL_EXTERNAL"}
@@ -182,22 +191,25 @@ def invoke(profile, request, *, authorize, record, receipt_target=None):
     limit_field = "max_tokens" if deepseek else "max_completion_tokens"
     content, receipt, window = post(url=profile.endpoint, credential=credential,
             payload={"model": profile.model, "messages": list(request.messages), limit_field: request.max_output_tokens,
-                     "response_format": {"type": "json_object"}, "stream": False},
+                     "response_format": {"type": "json_object"}, "stream": False,
+                     **({"thinking": {"type": profile.thinking}} if profile.thinking else {})},
             request_hash=request.request_sha256, timeout=profile.timeout_seconds, limit=2_000_000,
-            receipt_target=receipt_target)
+            **({"receipt_target": receipt_target} if receipt_target is not None else {}))
     try:
         raw = json.loads(content)
         choice, usage = raw["choices"][0], raw.get("usage") or {}
         text = choice["message"]["content"]
-        if (choice.get("finish_reason") != "stop" or choice["message"].get("tool_calls")
-                or not isinstance(text, str) or not text.strip()):
-            raise ValueError
+        finish = choice.get("finish_reason")
         cached = usage.get("prompt_cache_hit_tokens") if deepseek else (usage.get("prompt_tokens_details") or {}).get("cached_tokens")
-        return ModelResponse(text=text, provider_receipt=receipt or raw.get("id"),
+        observed = ModelResponse(text=text if isinstance(text, str) else "", provider_receipt=receipt or raw.get("id"),
             input_tokens=usage_value(usage.get("prompt_tokens")), output_tokens=usage_value(usage.get("completion_tokens")),
             cached_input_tokens=usage_value(cached), request_sha256=request.request_sha256,
-            raw_response={"id": raw.get("id"), "model": raw.get("model"), "finish_reason": "stop",
+            raw_response={"id": raw.get("id"), "model": raw.get("model"), "finish_reason": finish,
                           "transport_window": window})
+        if (finish != "stop" or choice["message"].get("tool_calls")
+                or not isinstance(text, str) or not text.strip()):
+            raise ModelCallFailure("MODEL_PROTOCOL_ERROR", received=observed)
+        return observed
     except (TypeError, ValueError, KeyError, IndexError, AttributeError):
         raise ModelCallFailure("MODEL_PROTOCOL_ERROR") from None
 

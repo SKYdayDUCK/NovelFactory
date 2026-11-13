@@ -11,6 +11,22 @@ from novel_factory.infrastructure.runtime_catalog import RuntimeCatalog
 PRESETS = ("short", "medium", "medium_long", "long", "ultra_long")
 
 
+def test_scene_budgets_preserve_requested_book_bounds_after_replanning():
+    from novel_factory.application.rolling_production import _scene_extents
+
+    length = {"unit": "han_characters", "min": 11, "max": 17}
+    def chapter(*ids):
+        return {"scenes": [{"scene_ref": {"artifact_revision_id": ref}} for ref in ids]}
+
+    first = _scene_extents(length, [chapter("a", "b")], 0, 2)
+    assert first == {"a": {"min": 3, "max": 5}, "b": {"min": 3, "max": 4}}
+    for replacement in (chapter("c"), chapter("x", "y", "z")):
+        ranges = {**first, **_scene_extents(length, [replacement], 1, 2)}
+        assert sum(scene["min"] for scene in ranges.values()) == length["min"]
+        assert sum(scene["max"] for scene in ranges.values()) == length["max"]
+    assert _scene_extents({"unit": "chapters"}, [chapter("c")], 1, 2) == {}
+
+
 @pytest.mark.parametrize("preset", PRESETS)
 def test_resolved_profile_has_closed_graph_and_registered_role_bindings(preset):
     profile = resolve_profile(preset, "现实主义")
@@ -94,3 +110,30 @@ def test_failed_and_triggered_nodes_cannot_be_replayed_as_complete_or_skipped():
         project_dag(p, {"volume_plan": "COMPLETED"})
     with pytest.raises(DomainError, match="optional"):
         project_dag(p, {}, ["volume_plan"])
+
+
+def test_first_world_design_admissible_for_new_bound_output_and_legacy_type_still_valid():
+    output = {"title": "例", "protagonist": "甲", "place": "乙地", "storyline": "甲作出选择",
+              "world_rules": ["一项本地规则"], "chapter_goals": ["解决当章的问题"]}
+    validate_contract("FirstWorldDesign", output, "production_profile")
+    validate_contract("OutputContract", {"name": "FirstWorldDesign", "version": "production_profile"}, "agent")
+    validate_contract("OutputContract", {"name": "AgentTextOutput", "version": "agent"}, "agent")
+    for bad in ({"title": " "}, {"world_rules": []}, {"chapter_goals": ["一"] * 33}, {"provider": "surplus"}):
+        with pytest.raises(DomainError):
+            validate_contract("FirstWorldDesign", {**output, **bad}, "production_profile")
+
+
+def test_open_ended_chapter_goal_accepts_larger_manuscripts():
+    from novel_factory.application.idea_intake import _first_window_limit, parse_inspiration
+    from novel_factory.application.production_extent import check_length
+
+    length = {"preset": "medium_long", "unit": "chapters", "min": 100}
+    idea = {"idea": "测试", "genre": "无限流", "length": length}
+    profile = parse_inspiration(idea, "quality")
+    assert _first_window_limit(profile, idea) == profile["window_chapters"]
+    for count in (100, 101, 501):
+        check_length(length, 999999, count)
+    with pytest.raises(DomainError):
+        check_length(length, 999999, 99)
+    with pytest.raises(DomainError):
+        parse_inspiration({**idea, "length": {**length, "unit": "han_characters"}})

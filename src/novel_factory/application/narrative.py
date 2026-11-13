@@ -715,7 +715,10 @@ class NarrativeService:
                 and not alignment["open_change_refs"] and not alignment["blocking_issues"] and not alignment["unmatched_critical_spans"],
                 "NARRATIVE_BLOCKED", "Text has unresolved world, cognition, or disclosure changes")
         origin, grant, _, context = self._origin(repo, draft)
-        extraction, extraction_task, extraction_grant = self._extraction(repo, report["extraction_ref"], draft_ref, draft)
+        # A finished extractor remains a historical source for this exact verified report.
+        # Its generation, grant epoch, delivery and semantic dependencies are rechecked below.
+        extraction, extraction_task, extraction_grant = self._extraction(
+            repo, report["extraction_ref"], draft_ref, draft, allow_accepted=True)
         # Both a new narrative acceptance and a subsequent release freeze pass
         # this guard again under the branch lock. Existing release reads stay historical.
         from novel_factory.application.semantic_dependencies import check_task_dependencies
@@ -803,6 +806,8 @@ class NarrativeService:
             if old:
                 return old
             self.validate_for_acceptance(repo, principal, draft_ref, reconciliation_ref, world_ref)
+            from .rolling_production import protect_chapter
+            protect_chapter(self.kernel, repo, world_ref, contract["scene_id"], draft_ref)
             key = "NARRATIVE_SCENE:" + contract["scene_id"]
             selection = repo.one("selections", {"work_id": world_ref["work_id"], "selection_kind": key})
             if selection:
@@ -889,6 +894,22 @@ class NarrativeService:
                         "required_event_refs": scene["required_event_refs"], "entry_checks": scene["entry_checks"],
                         "exit_checks": scene["exit_checks"], "allowed_disclosures": scene["allowed_disclosures"],
                         "literary_purpose": scene["literary_purpose"], "selected_styles": styles}
+                if scene["required_predecessor_scene_ids"] and scene["batch_ref"] is not None:
+                    # _writer_binding has checked the exact immutable handoffs against this batch.
+                    from .release import validate_writing_task_binding
+                    handoff = validate_writing_task_binding(repo, self.kernel, task, scene_ref)
+                    passages = []
+                    refs = handoff["predecessor_acceptance_refs"]
+                    for ref in refs:
+                        prior = self._artifact(repo, ref, task["work_id"], "NARRATIVE_ACCEPTANCE")
+                        text_ref = prior["text_ref"]
+                        self.kernel.artifact(repo, text_ref, task["work_id"], kind="TEXT")
+                        original = self.kernel.objects.read(text_ref["sha256"]).decode("utf-8")
+                        tail = original[-min(1200, 4800 // len(refs)):]
+                        passages.append({"acceptance_ref": ref, "text_ref": text_ref,
+                                         "start": len(original) - len(tail), "end": len(original),
+                                         "text": tail})
+                    card["predecessor_passages"] = passages
                 return canonical_bytes(card)
             draft_ref = artifact_ref if kind == "NARRATIVE_DRAFT" else None
             if draft_ref is None:
@@ -898,4 +919,13 @@ class NarrativeService:
                 matches = [ref for ref in scope["draft_refs"] if self._draft(repo, ref, task["work_id"])["text_ref"] == artifact_ref]
                 require(len(matches) == 1, "VIEW_DENIED", "Text is not an unambiguous assigned draft")
                 draft_ref = matches[0]
-        return canonical_bytes(self.read_text(principal, task_id, generation, draft_ref))
+        delivery = self.read_text(principal, task_id, generation, draft_ref)
+        if (task["role_id"], task["task_kind"]) == ("evidence_maintainer", "assertion_extract") and (
+            delivery["scene_ref"] in spec["input_artifacts"]
+        ):
+            with self.kernel.db.uow(write=False) as repo:
+                _, _, _, draft = self._reader_binding(repo, principal, task_id, generation, draft_ref)
+                scene = self._scene(repo, draft["scene_ref"], task["work_id"])
+                delivery.update(required_event_refs=scene["required_event_refs"],
+                                declared_important_deltas=draft["declared_important_deltas"])
+        return canonical_bytes(delivery)

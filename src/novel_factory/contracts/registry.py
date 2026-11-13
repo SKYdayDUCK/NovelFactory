@@ -60,6 +60,18 @@ def plain(value: Any) -> Any:
     return value
 
 
+def contract_diagnostic(name, value, version):
+    """Describe the first failing schema rule without quoting untrusted values or arbitrary keys."""
+    failure = next(_validator(name, version).iter_errors(value), None)
+    if failure is None:
+        return None
+    result = {"keyword": str(failure.validator),
+              "schema_path": "/".join(str(part) for part in failure.absolute_schema_path)}
+    if failure.validator == "required":
+        result["missing"] = [key for key in failure.validator_value if key not in failure.instance]
+    return result
+
+
 def validate_contract(name: str, payload: Any, version: str = "2.0") -> Any:
     value = plain(payload)
     errors = sorted(_validator(name, version).iter_errors(value), key=lambda e: str(list(e.path)))

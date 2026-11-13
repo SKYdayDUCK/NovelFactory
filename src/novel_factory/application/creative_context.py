@@ -86,6 +86,8 @@ def _boundaries(checks):
                 "meaning": check["expected_status"].lower().replace("_", " "), "value": check["expected_value"]}
         if check["plane"] == "BELIEF":
             item["believed_by"] = check["actor_id"]
+            item["known_at"] = check["known_at"]
+        item["at"] = check["at"]
         result.append(item)
     return result
 
@@ -105,10 +107,13 @@ def _project_material(item):
         card = value["scene_contract"]
         return "scene", {"purpose": value["literary_purpose"], "narrator": card["narrator_mode"],
                          "point_of_view": card["pov_actor_id"], "allowed_invention": card["allowed_invention"],
+                         "story_interval": card["story_interval"], "reader_ordinal": card["reader_cut_ordinal"],
                          "opening": _boundaries(value["entry_checks"]), "closing": _boundaries(value["exit_checks"]),
                          "disclosures": [{k: v[k] for k in ("statement", "truth_status")}
                                          for v in value["allowed_disclosures"]],
-                         "styles": [_style(s["style"]) for s in value["selected_styles"]]}
+                         "styles": [_style(s["style"]) for s in value["selected_styles"]],
+                         **({"predecessor_passages": [p["text"] for p in value["predecessor_passages"]]}
+                            if value.get("predecessor_passages") else {})}
     if kind in {"NARRATIVE_DRAFT", "TEXT"} and isinstance(value, dict) and "text" in value and "span" in value:
         text = value["text"]
         span = value["span"]
@@ -130,7 +135,7 @@ def _project_material(item):
     return "evidence", item["content"]
 
 
-def build_context_packet(binding, materials, editorial=None, joint=None):
+def build_context_packet(binding, materials, editorial=None, joint=None, proposal_protocol=None):
     task, grant, spec = (binding[key] for key in ("task", "grant", "spec"))
     context, compiled = binding["context"], binding["compiled_context"]
     bundle, read_cut = context["payload"], context["read_cut"]
@@ -236,8 +241,28 @@ def build_context_packet(binding, materials, editorial=None, joint=None):
             if isinstance(delivery, dict) and {"text_ref", "span"} <= delivery.keys():
                 select({"kind": "ARTIFACT", "artifact_ref": delivery["text_ref"], "span": delivery["span"]},
                        cut["plane"] if restricted else "LITERARY", "Exact text range offered by the assigned reader.", content)
+                if ((task["role_id"], task["task_kind"]) == ("evidence_maintainer", "assertion_extract")
+                        and "required_event_refs" in delivery and "declared_important_deltas" in delivery):
+                    obligations = {key: delivery[key] for key in (
+                        "draft_ref", "required_event_refs", "declared_important_deltas"
+                    )}
+                    structured.append({"ref": ref, "value": obligations})
+                    select(evidence, cut["plane"], "Reconciliation obligations of the assigned draft.", obligations)
+                if task["role_id"] == "reviewer":
+                    # The literary view keeps prose unlabelled; a chapter can contain several
+                    # distinct drafts. Bind issue.subject_ref to the corresponding passage.
+                    pointer = {"prose_index": len(creative["prose"]) - 1, "draft_ref": delivery["draft_ref"],
+                               "text_ref": delivery["text_ref"], "span": delivery["span"]}
+                    structured.append({"ref": ref, "value": pointer})
+                    select(evidence, cut["plane"], "Exact passage for a review finding.", pointer)
         if name == "scene":
-            for style in _decode(item["content"])["selected_styles"]:
+            card = _decode(item["content"])
+            events = {"required_event_refs": card["required_event_refs"],
+                      "event_refs": card["scene_contract"]["event_refs"]}
+            if any(events.values()):
+                structured.append({"ref": ref, "value": events})
+                select(evidence, cut["plane"], "Events bound to this writing card.", events)
+            for style in card["selected_styles"]:
                 select({"kind": "ARTIFACT", "artifact_ref": style["source_ref"]}, "LITERARY",
                        "Style bound to the selected scene.", _style(style["style"]))
 
@@ -259,6 +284,8 @@ def build_context_packet(binding, materials, editorial=None, joint=None):
     user = {"assignment": binding["input"]["assignment"], "creative_materials": creative}
     # Typed outputs can require exact citations and operation handles. Keep
     # them outside the literary view. Neither section has system authority.
+    if proposal_protocol:
+        user["proposal_protocol"] = proposal_protocol
     if structured:
         user["structured_evidence"] = structured
     if editorial or joint:

@@ -385,3 +385,23 @@ def test_task_and_shared_money_and_token_limits_are_independent(kernel_env):
     reserve(task_c, "exact-remaining", ".20", 39_000)
     final = service.status(*scope)
     assert (final["reserved_amount"], final["reserved_tokens"], final["available_tokens"]) == ("1.300000", 60_000, 0)
+
+
+def test_provision_next_preserves_unknowns_and_is_idempotent(kernel_env):
+    kernel = kernel_env["kernel"]
+    fixture = load_fixture(kernel)
+    owner, wr = fixture["principal"], fixture["world_ref"]
+    budget = kernel.tasks.create_budget(wr["work_id"], ".40")
+    service = SharedBudgetService(kernel)
+    scope = owner, wr["work_id"], wr["branch_id"], budget
+    service.set_limit(*scope, 40)
+    job = create_bound_task(kernel, owner, wr, point(1))
+    attempt = _reserve_cancellable(kernel, job, budget, "original", 40, ".40")
+    kernel.tasks.mark_call_sent(attempt, worker_id=job["worker_id"])
+    kernel.tasks.settle_call(attempt, state="UNKNOWN")
+    result = service.provision_next(*scope, ".25", 50)
+    assert result["reserved_tokens"] == 40 and result["available_tokens"] == 50
+    assert result["reserved_amount"] == "0.400000" and result["limit_amount"] == "0.650000"
+    assert service.provision_next(*scope, ".25", 50) == result
+    with kernel.db.uow(write=False) as repo:
+        assert repo.one("call_attempts", {"attempt_id": attempt})["state"] == "UNKNOWN"
