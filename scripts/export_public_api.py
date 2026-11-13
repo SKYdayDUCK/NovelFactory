@@ -21,10 +21,30 @@ from novel_factory.interfaces.delegation_stdio import _DESCRIPTIONS
 from novel_factory.interfaces.mcp_stdio import _TOOLS
 
 
-def http_routes():
-    source = Path('src/novel_factory/interfaces/http.py')
+def post_input_schema(handler):
+    """Resolve the contract the handler actually consults, including shared tool schemas."""
+    for call in (node for node in ast.walk(handler) if isinstance(node, ast.Call)):
+        if isinstance(call.func, ast.Name):
+            if call.func.id == '_body':
+                name, version = (arg.value for arg in call.args[1:3])
+            elif call.func.id == 'validate_contract' and call.args[0].value != 'UUID':
+                name, version = call.args[0].value, call.args[2].value
+            elif call.func.id == 'rest' and call.args[-1].value in SCHEMAS:
+                return SCHEMAS[call.args[-1].value]
+            else:
+                continue
+            return {'$ref': _source(name, version)['$id'] + '#/$defs/' + name}
+        if isinstance(call.func, ast.Attribute) and call.func.attr == 'is_valid':
+            validator = call.func.value
+            if isinstance(validator, ast.Subscript) and isinstance(validator.value, ast.Name) and validator.value.id == '_VALIDATORS':
+                return _TOOLS[validator.slice.value][1]
+    raise ValueError(f'No registered POST input contract in {handler.name}')
+
+
+def http_routes(source, factory_name):
+    source = Path(source)
     module = ast.parse((ROOT / source).read_text(encoding='utf-8'))
-    factory = next(node for node in module.body if isinstance(node, ast.FunctionDef) and node.name == 'create_app')
+    factory = next(node for node in module.body if isinstance(node, ast.FunctionDef) and node.name == factory_name)
     for handler in factory.body:
         if not isinstance(handler, ast.AsyncFunctionDef):
             continue
@@ -41,17 +61,7 @@ def http_routes():
             if parameters:
                 entry['pathParameters'] = {param: {'type': 'string', 'format': 'uuid'} for param in parameters}
             if method == 'POST':
-                # Each handler validates its actual body or explicitly constructs a prepared request.
-                calls = [call for call in ast.walk(handler) if isinstance(call, ast.Call)
-                         and isinstance(call.func, ast.Name)]
-                schema_call = next((c for c in calls if c.func.id == '_body'), None)
-                if schema_call is None:
-                    schema_call = next(c for c in calls if c.func.id == 'validate_contract'
-                                       and c.args[0].value != 'UUID')
-                    name, version = schema_call.args[0].value, schema_call.args[2].value
-                else:
-                    name, version = (arg.value for arg in schema_call.args[1:3])
-                entry['inputSchema'] = {'$ref': _source(name, version)['$id'] + '#/$defs/' + name}
+                entry['inputSchema'] = post_input_schema(handler)
             yield f'{method} {path}', entry
 
 
@@ -67,7 +77,8 @@ def catalog():
     for name, schema in SCHEMAS.items():
         entries[name] = {'transport': 'installation-mcp', 'description': _DESCRIPTIONS[name],
                          'inputSchema': schema, 'source': 'src/novel_factory/application/delegation.py'}
-    entries.update(http_routes())
+    entries.update(http_routes('src/novel_factory/interfaces/http.py', 'create_app'))
+    entries.update(http_routes('src/novel_factory/interfaces/delegation_http.py', 'mount_delegations'))
     return dict(sorted(entries.items()))
 
 

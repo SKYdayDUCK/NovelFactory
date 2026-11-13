@@ -29,6 +29,52 @@
     },
     "test": "tests/service/test_http.py::test_http_real_task_cancellation_blocks_late_result"
   },
+  "GET /api/v1/tasks/{task_id}/events": {
+    "kind": "HTTP_FIXTURE",
+    "pathBindings": {
+      "task_id": "75a8fe57-6a64-451b-b2fa-9b5ba422924b"
+    },
+    "queryParameters": {
+      "limit": "1"
+    },
+    "request": {},
+    "response": {
+      "cursor": "16f92dd3-e80c-41de-a192-21e4fb689db7",
+      "events": [
+        {
+          "event_id": "16f92dd3-e80c-41de-a192-21e4fb689db7",
+          "generation": 0,
+          "state": "READY",
+          "task_id": "75a8fe57-6a64-451b-b2fa-9b5ba422924b"
+        }
+      ],
+      "has_more": true
+    },
+    "test": "tests/service/test_hera_mixed_ingress.py::test_mixed_task_lifecycle"
+  },
+  "GET /api/v1/works/{work_id}/branches/{branch_id}/workflow": {
+    "kind": "HTTP_FIXTURE",
+    "pathBindings": {
+      "branch_id": "c18ec337-0586-4fcf-8837-33d74879cd3c",
+      "work_id": "c79b85aa-2bdb-4665-872c-3a87a8869940"
+    },
+    "request": {},
+    "response": {
+      "blockers": {},
+      "counts": {
+        "CANCELLED": 1,
+        "READY": 0,
+        "RUNNING": 0,
+        "WAITING": 0
+      },
+      "pending_author_approval_count": 0,
+      "pending_review_count": 0,
+      "ready_count": 0,
+      "resume_grant_expires_at": "2026-11-13T16:28:37.947997+09:00",
+      "workflow_state": "IDLE"
+    },
+    "test": "tests/service/test_hera_mixed_ingress.py::test_mixed_task_lifecycle"
+  },
   "GET /health": {
     "kind": "HTTP_FIXTURE",
     "test": "tests/service/test_http.py::test_two_independent_http_processes_share_task_and_revocation_state",
@@ -230,6 +276,184 @@
       "artifact_revision_id": "afb2c33a-eb35-484a-a5fe-fc626a510bdc",
       "sha256": "f2267018a0fbc4b7a7101644bea41362d51e08e0778a82fb41a00aac51237dbb"
     }
+  },
+  "POST /api/v1/hera/installations/{installation}/delegations/status": {
+    "kind": "HTTP_FIXTURE",
+    "pathBindings": {
+      "installation": "6fe7bbe9-b05e-4b76-b052-fb80aa00c31f"
+    },
+    "request": {
+      "branch_id": "cba09da6-aa4c-4b5f-974c-60658cb8762b",
+      "grant_epoch": 1,
+      "nf_instance_id": "b80b727d-a1a5-4a39-8315-34cee1e32a09",
+      "operation_id": "48dbc89f-c7a0-47ef-8db8-92cfb3656301",
+      "protocol_version": "aw-nf.v1",
+      "work_id": "d7cdc7b5-358f-4867-a87f-fa946f45e457"
+    },
+    "response": {
+      "accounting_state": "UNKNOWN",
+      "actual_amount": "0",
+      "actual_tokens": 0,
+      "attempt_ids": [
+        "cec845e5-3a58-4fe4-9ee4-433d5c8d24ea"
+      ],
+      "attempts": [
+        {
+          "actual_amount": null,
+          "actual_tokens": null,
+          "attempt_id": "cec845e5-3a58-4fe4-9ee4-433d5c8d24ea",
+          "state": "UNKNOWN"
+        }
+      ],
+      "branch_id": "cba09da6-aa4c-4b5f-974c-60658cb8762b",
+      "currency": "USD",
+      "generation": 1,
+      "nf_instance_id": "b80b727d-a1a5-4a39-8315-34cee1e32a09",
+      "operation_id": "48dbc89f-c7a0-47ef-8db8-92cfb3656301",
+      "protocol_version": "aw-nf.v1",
+      "receipt_ref": "b0f4df03-adbc-4737-849c-e658c93e26a1",
+      "result_ref": "1ee793ad-0f90-58f8-86f7-1f900fa62c55",
+      "task_id": "a1e1d6ec-c27b-43ba-ab84-e40865d9eb5c",
+      "task_state": "ACCEPTED",
+      "wait_reason": null,
+      "work_id": "d7cdc7b5-358f-4867-a87f-fa946f45e457",
+      "world_ref": {
+        "branch_id": "cba09da6-aa4c-4b5f-974c-60658cb8762b",
+        "work_id": "d7cdc7b5-358f-4867-a87f-fa946f45e457",
+        "world_revision_id": "a2862886-37f0-4dc3-aaf3-8afbfbbc8f96"
+      }
+    },
+    "test": "tests/integration/test_workshop_delegation.py::test_rest_delegation_disconnect_then_stdio_lookup_and_execution"
+  },
+  "POST /api/v1/hera/installations/{installation}/delegations/submit": {
+    "kind": "HTTP_FIXTURE",
+    "pathBindings": {
+      "installation": "6fe7bbe9-b05e-4b76-b052-fb80aa00c31f"
+    },
+    "request": {
+      "actor_binding_ref": null,
+      "branch_id": "cba09da6-aa4c-4b5f-974c-60658cb8762b",
+      "budget_reservation_ref": "f195c753-d0e5-4175-ad7f-639b7ce8ea89",
+      "currency": "USD",
+      "generation": 0,
+      "grant_epoch": 1,
+      "max_amount": "0.100000",
+      "nf_instance_id": "b80b727d-a1a5-4a39-8315-34cee1e32a09",
+      "operation_id": "48dbc89f-c7a0-47ef-8db8-92cfb3656301",
+      "protocol_version": "aw-nf.v1",
+      "role_id": "evidence_maintainer",
+      "scope_ref": "scene.summary.1",
+      "task_template_id": "summary.v1",
+      "token_limit": 100000,
+      "work_id": "d7cdc7b5-358f-4867-a87f-fa946f45e457"
+    },
+    "response": {
+      "accounting_state": "NO_ATTEMPT",
+      "actual_amount": "0",
+      "actual_tokens": 0,
+      "attempt_ids": [],
+      "attempts": [],
+      "branch_id": "cba09da6-aa4c-4b5f-974c-60658cb8762b",
+      "currency": "USD",
+      "generation": 0,
+      "nf_instance_id": "b80b727d-a1a5-4a39-8315-34cee1e32a09",
+      "operation_id": "48dbc89f-c7a0-47ef-8db8-92cfb3656301",
+      "protocol_version": "aw-nf.v1",
+      "receipt_ref": "b0f4df03-adbc-4737-849c-e658c93e26a1",
+      "result_ref": null,
+      "task_id": "a1e1d6ec-c27b-43ba-ab84-e40865d9eb5c",
+      "task_state": "READY",
+      "wait_reason": null,
+      "work_id": "d7cdc7b5-358f-4867-a87f-fa946f45e457",
+      "world_ref": {
+        "branch_id": "cba09da6-aa4c-4b5f-974c-60658cb8762b",
+        "work_id": "d7cdc7b5-358f-4867-a87f-fa946f45e457",
+        "world_revision_id": "a2862886-37f0-4dc3-aaf3-8afbfbbc8f96"
+      }
+    },
+    "test": "tests/integration/test_workshop_delegation.py::test_rest_delegation_disconnect_then_stdio_lookup_and_execution"
+  },
+  "POST /api/v1/hera/tasks": {
+    "kind": "HTTP_FIXTURE",
+    "request": {
+      "idempotency_key": "hera-create",
+      "spec": {
+        "budget": {
+          "currency": "USD",
+          "max_amount": "1",
+          "token_budget": 10
+        },
+        "capability_grant_id": "07d9a669-910b-42e4-85f3-8a521d3a3c63",
+        "context_bundle_id": null,
+        "dependency_fingerprint": null,
+        "generation": 0,
+        "input_artifacts": [],
+        "policy_version": "nf-policy-1",
+        "role_id": "control_operator",
+        "runtime_contract_version": "0120ac86e22439cd723d8064513dd80bd9149713880efd86df1cd3ebe6e43b7e",
+        "schema_version": "2.0",
+        "state": "READY",
+        "story_time": {
+          "phase": 0,
+          "tick": 0
+        },
+        "task_id": "75a8fe57-6a64-451b-b2fa-9b5ba422924b",
+        "task_kind": "hera_mixed",
+        "wall_deadline": "2026-11-13T07:28:38.072827+00:00",
+        "world_ref": {
+          "branch_id": "c18ec337-0586-4fcf-8837-33d74879cd3c",
+          "work_id": "c79b85aa-2bdb-4665-872c-3a87a8869940",
+          "world_revision_id": "b605c2ee-dbf1-4c18-8f4f-b0eb1361ab46"
+        }
+      }
+    },
+    "response": {
+      "generation": 0,
+      "poll_after_ms": 1000,
+      "state": "READY",
+      "status_tool": "nf_task_status",
+      "status_url": "/api/v1/tasks/75a8fe57-6a64-451b-b2fa-9b5ba422924b",
+      "task_id": "75a8fe57-6a64-451b-b2fa-9b5ba422924b",
+      "wall_deadline": "2026-11-13T07:28:38.072827+00:00"
+    },
+    "test": "tests/service/test_hera_mixed_ingress.py::test_mixed_task_lifecycle"
+  },
+  "POST /api/v1/hera/tasks/status-batch": {
+    "kind": "HTTP_FIXTURE",
+    "request": {
+      "branch_id": "c18ec337-0586-4fcf-8837-33d74879cd3c",
+      "task_ids": [
+        "75a8fe57-6a64-451b-b2fa-9b5ba422924b"
+      ],
+      "work_id": "c79b85aa-2bdb-4665-872c-3a87a8869940"
+    },
+    "response": {
+      "tasks": [
+        {
+          "attempt_id": null,
+          "branch_id": "c18ec337-0586-4fcf-8837-33d74879cd3c",
+          "context_bundle_id": null,
+          "created_at": "2026-11-13T15:28:38.435050+09:00",
+          "current_result_id": null,
+          "deadline": "2026-11-13T16:28:38.072827+09:00",
+          "dependency_fingerprint": null,
+          "generation": 0,
+          "lease_expiry": null,
+          "role_id": "control_operator",
+          "state": "READY",
+          "task_id": "75a8fe57-6a64-451b-b2fa-9b5ba422924b",
+          "task_kind": "hera_mixed",
+          "updated_at": "2026-11-13T15:28:38.435050+09:00",
+          "work_id": "c79b85aa-2bdb-4665-872c-3a87a8869940",
+          "world_ref": {
+            "branch_id": "c18ec337-0586-4fcf-8837-33d74879cd3c",
+            "work_id": "c79b85aa-2bdb-4665-872c-3a87a8869940",
+            "world_revision_id": "b605c2ee-dbf1-4c18-8f4f-b0eb1361ab46"
+          }
+        }
+      ]
+    },
+    "test": "tests/service/test_hera_mixed_ingress.py::test_mixed_task_lifecycle"
   },
   "POST /api/v1/model-routes/select": {
     "kind": "HTTP_FIXTURE",
@@ -1135,6 +1359,33 @@
       }
     },
     "test": "tests/integration/test_continuity.py::test_task_delivery_is_generation_bound_and_never_exposes_future_plan_fields"
+  },
+  "POST /api/v1/works/{work_id}/branches/{branch_id}/workflow/resume": {
+    "kind": "HTTP_FIXTURE",
+    "pathBindings": {
+      "branch_id": "c18ec337-0586-4fcf-8837-33d74879cd3c",
+      "work_id": "c79b85aa-2bdb-4665-872c-3a87a8869940"
+    },
+    "request": {},
+    "response": {
+      "awakened": 0,
+      "blockers": {},
+      "closed_waits": 0,
+      "counts": {
+        "CANCELLED": 1,
+        "READY": 0,
+        "RUNNING": 0,
+        "WAITING": 0
+      },
+      "expired_ready": 0,
+      "pending_author_approval_count": 0,
+      "pending_review_count": 0,
+      "ready_count": 0,
+      "recovered": 0,
+      "resume_grant_expires_at": "2026-11-13T16:28:37.947997+09:00",
+      "workflow_state": "IDLE"
+    },
+    "test": "tests/service/test_hera_mixed_ingress.py::test_mixed_task_lifecycle"
   },
   "POST /api/v1/works/{work_id}/continuity/inspect": {
     "kind": "HTTP_FIXTURE",
@@ -4461,6 +4712,41 @@
       }
     }
   },
+  "nf_task_cancel": {
+    "kind": "MCP_FIXTURE",
+    "request": {
+      "generation": 0,
+      "idempotency_key": "hera-cancel",
+      "task_id": "75a8fe57-6a64-451b-b2fa-9b5ba422924b"
+    },
+    "response": {
+      "generation": 0,
+      "receipt_id": "ee004972-fa71-42a2-93b8-92d05cc7818f",
+      "status": "CANCELLED",
+      "task_id": "75a8fe57-6a64-451b-b2fa-9b5ba422924b"
+    },
+    "test": "tests/service/test_hera_mixed_ingress.py::test_mixed_task_lifecycle"
+  },
+  "nf_task_events": {
+    "kind": "MCP_FIXTURE",
+    "request": {
+      "cursor": "16f92dd3-e80c-41de-a192-21e4fb689db7",
+      "task_id": "75a8fe57-6a64-451b-b2fa-9b5ba422924b"
+    },
+    "response": {
+      "cursor": "6b4a3d7d-f9f3-421b-9488-fb7a543b6cf4",
+      "events": [
+        {
+          "event_id": "6b4a3d7d-f9f3-421b-9488-fb7a543b6cf4",
+          "generation": 0,
+          "state": "CANCELLED",
+          "task_id": "75a8fe57-6a64-451b-b2fa-9b5ba422924b"
+        }
+      ],
+      "has_more": false
+    },
+    "test": "tests/service/test_hera_mixed_ingress.py::test_mixed_task_lifecycle"
+  },
   "nf_task_get": {
     "kind": "MCP_FIXTURE",
     "test": "tests/integration/test_p5_mcp.py::test_actor_stdio_own_cut_only_and_candidate_replay",
@@ -4476,5 +4762,116 @@
         "world_revision_id": "638de02f-89bf-4580-9b16-83d72c61f53f"
       }
     }
+  },
+  "nf_task_status": {
+    "kind": "MCP_FIXTURE",
+    "request": {
+      "task_id": "75a8fe57-6a64-451b-b2fa-9b5ba422924b"
+    },
+    "response": {
+      "attempt_id": null,
+      "branch_id": "c18ec337-0586-4fcf-8837-33d74879cd3c",
+      "context_bundle_id": null,
+      "created_at": "2026-11-13T15:28:38.435050+09:00",
+      "current_result_id": null,
+      "deadline": "2026-11-13T16:28:38.072827+09:00",
+      "dependency_fingerprint": null,
+      "generation": 0,
+      "lease_expiry": null,
+      "role_id": "control_operator",
+      "state": "READY",
+      "task_id": "75a8fe57-6a64-451b-b2fa-9b5ba422924b",
+      "task_kind": "hera_mixed",
+      "updated_at": "2026-11-13T15:28:38.435050+09:00",
+      "work_id": "c79b85aa-2bdb-4665-872c-3a87a8869940",
+      "world_ref": {
+        "branch_id": "c18ec337-0586-4fcf-8837-33d74879cd3c",
+        "work_id": "c79b85aa-2bdb-4665-872c-3a87a8869940",
+        "world_revision_id": "b605c2ee-dbf1-4c18-8f4f-b0eb1361ab46"
+      }
+    },
+    "test": "tests/service/test_hera_mixed_ingress.py::test_mixed_task_lifecycle"
+  },
+  "nf_task_status_batch": {
+    "kind": "MCP_FIXTURE",
+    "request": {
+      "branch_id": "c18ec337-0586-4fcf-8837-33d74879cd3c",
+      "task_ids": [
+        "75a8fe57-6a64-451b-b2fa-9b5ba422924b"
+      ],
+      "work_id": "c79b85aa-2bdb-4665-872c-3a87a8869940"
+    },
+    "response": {
+      "tasks": [
+        {
+          "attempt_id": null,
+          "branch_id": "c18ec337-0586-4fcf-8837-33d74879cd3c",
+          "context_bundle_id": null,
+          "created_at": "2026-11-13T15:28:38.435050+09:00",
+          "current_result_id": null,
+          "deadline": "2026-11-13T16:28:38.072827+09:00",
+          "dependency_fingerprint": null,
+          "generation": 0,
+          "lease_expiry": null,
+          "role_id": "control_operator",
+          "state": "READY",
+          "task_id": "75a8fe57-6a64-451b-b2fa-9b5ba422924b",
+          "task_kind": "hera_mixed",
+          "updated_at": "2026-11-13T15:28:38.435050+09:00",
+          "work_id": "c79b85aa-2bdb-4665-872c-3a87a8869940",
+          "world_ref": {
+            "branch_id": "c18ec337-0586-4fcf-8837-33d74879cd3c",
+            "work_id": "c79b85aa-2bdb-4665-872c-3a87a8869940",
+            "world_revision_id": "b605c2ee-dbf1-4c18-8f4f-b0eb1361ab46"
+          }
+        }
+      ]
+    },
+    "test": "tests/service/test_hera_mixed_ingress.py::test_mixed_task_lifecycle"
+  },
+  "nf_task_submit": {
+    "kind": "MCP_FIXTURE",
+    "request": {
+      "idempotency_key": "hera-create",
+      "spec": {
+        "budget": {
+          "currency": "USD",
+          "max_amount": "1",
+          "token_budget": 10
+        },
+        "capability_grant_id": "07d9a669-910b-42e4-85f3-8a521d3a3c63",
+        "context_bundle_id": null,
+        "dependency_fingerprint": null,
+        "generation": 0,
+        "input_artifacts": [],
+        "policy_version": "nf-policy-1",
+        "role_id": "control_operator",
+        "runtime_contract_version": "0120ac86e22439cd723d8064513dd80bd9149713880efd86df1cd3ebe6e43b7e",
+        "schema_version": "2.0",
+        "state": "READY",
+        "story_time": {
+          "phase": 0,
+          "tick": 0
+        },
+        "task_id": "75a8fe57-6a64-451b-b2fa-9b5ba422924b",
+        "task_kind": "hera_mixed",
+        "wall_deadline": "2026-11-13T07:28:38.072827+00:00",
+        "world_ref": {
+          "branch_id": "c18ec337-0586-4fcf-8837-33d74879cd3c",
+          "work_id": "c79b85aa-2bdb-4665-872c-3a87a8869940",
+          "world_revision_id": "b605c2ee-dbf1-4c18-8f4f-b0eb1361ab46"
+        }
+      }
+    },
+    "response": {
+      "generation": 0,
+      "poll_after_ms": 1000,
+      "state": "READY",
+      "status_tool": "nf_task_status",
+      "status_url": "/api/v1/tasks/75a8fe57-6a64-451b-b2fa-9b5ba422924b",
+      "task_id": "75a8fe57-6a64-451b-b2fa-9b5ba422924b",
+      "wall_deadline": "2026-11-13T07:28:38.072827+00:00"
+    },
+    "test": "tests/service/test_hera_mixed_ingress.py::test_mixed_task_lifecycle"
   }
 }

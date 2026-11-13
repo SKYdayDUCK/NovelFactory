@@ -12,6 +12,36 @@
       }
     }
   },
+  "GET /api/v1/tasks/{task_id}/events": {
+    "transport": "http",
+    "method": "GET",
+    "path": "/api/v1/tasks/{task_id}/events",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "task_events",
+    "pathParameters": {
+      "task_id": {
+        "type": "string",
+        "format": "uuid"
+      }
+    }
+  },
+  "GET /api/v1/works/{work_id}/branches/{branch_id}/workflow": {
+    "transport": "http",
+    "method": "GET",
+    "path": "/api/v1/works/{work_id}/branches/{branch_id}/workflow",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "workflow",
+    "pathParameters": {
+      "work_id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "branch_id": {
+        "type": "string",
+        "format": "uuid"
+      }
+    }
+  },
   "GET /health": {
     "transport": "http",
     "method": "GET",
@@ -47,6 +77,210 @@
     "handler": "prepare_continuity",
     "inputSchema": {
       "$ref": "https://novel-factory.example/contracts/2.3/continuity.schema.json#/$defs/ContinuityRequest"
+    }
+  },
+  "POST /api/v1/hera/installations/{installation}/delegations/status": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/hera/installations/{installation}/delegations/status",
+    "source": "src/novel_factory/interfaces/delegation_http.py",
+    "handler": "status",
+    "pathParameters": {
+      "installation": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "protocol_version": {
+          "const": "aw-nf.v1"
+        },
+        "nf_instance_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "work_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "branch_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "operation_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "grant_epoch": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "protocol_version",
+        "nf_instance_id",
+        "work_id",
+        "branch_id",
+        "operation_id",
+        "grant_epoch"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "POST /api/v1/hera/installations/{installation}/delegations/submit": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/hera/installations/{installation}/delegations/submit",
+    "source": "src/novel_factory/interfaces/delegation_http.py",
+    "handler": "submit",
+    "pathParameters": {
+      "installation": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "protocol_version": {
+          "const": "aw-nf.v1"
+        },
+        "nf_instance_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "work_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "branch_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "operation_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "grant_epoch": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "task_template_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "scope_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "actor_binding_ref": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "role_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "generation": {
+          "type": "integer",
+          "const": 0
+        },
+        "budget_reservation_ref": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "max_amount": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,6})?$"
+        },
+        "currency": {
+          "enum": [
+            "USD",
+            "CNY"
+          ]
+        },
+        "token_limit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "protocol_version",
+        "nf_instance_id",
+        "work_id",
+        "branch_id",
+        "operation_id",
+        "grant_epoch",
+        "task_template_id",
+        "scope_ref",
+        "actor_binding_ref",
+        "role_id",
+        "generation",
+        "budget_reservation_ref",
+        "max_amount",
+        "currency",
+        "token_limit"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "POST /api/v1/hera/tasks": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/hera/tasks",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "accept_task",
+    "inputSchema": {
+      "$ref": "https://novel-factory.example/contracts/p1/http.schema.json#/$defs/TaskCreateRequest"
+    }
+  },
+  "POST /api/v1/hera/tasks/status-batch": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/hera/tasks/status-batch",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "read_task_batch",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "work_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "branch_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "task_ids": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "required": [
+        "work_id",
+        "branch_id",
+        "task_ids"
+      ],
+      "additionalProperties": false
     }
   },
   "POST /api/v1/model-routes/select": {
@@ -203,6 +437,88 @@
     },
     "inputSchema": {
       "$ref": "https://novel-factory.example/contracts/2.3/continuity.schema.json#/$defs/ContinuityTaskReadRequest"
+    }
+  },
+  "POST /api/v1/works/{work_id}/branches/{branch_id}/workflow/resume": {
+    "transport": "http",
+    "method": "POST",
+    "path": "/api/v1/works/{work_id}/branches/{branch_id}/workflow/resume",
+    "source": "src/novel_factory/interfaces/http.py",
+    "handler": "workflow",
+    "pathParameters": {
+      "work_id": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "branch_id": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "expected_scope": {
+          "type": "object",
+          "properties": {
+            "work_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "branch_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "org_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nf_instance_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "installation_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "operation_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "receipt_ref": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "task_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "generation": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "grant_epoch": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "work_id",
+            "branch_id",
+            "org_id",
+            "nf_instance_id",
+            "installation_id",
+            "operation_id",
+            "receipt_ref",
+            "task_id",
+            "generation",
+            "grant_epoch"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [],
+      "additionalProperties": false
     }
   },
   "POST /api/v1/works/{work_id}/continuity/inspect": {
@@ -1116,6 +1432,10 @@
         "operation_id": {
           "type": "string",
           "pattern": "^[A-Za-z0-9_.:-]{1,96}$"
+        },
+        "after_delegation_id": {
+          "type": "string",
+          "format": "uuid"
         }
       },
       "required": [
@@ -6260,7 +6580,66 @@
     "description": "Recover eligible work and wake satisfied waits in the configured branch.",
     "inputSchema": {
       "type": "object",
-      "properties": {},
+      "properties": {
+        "expected_scope": {
+          "type": "object",
+          "properties": {
+            "work_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "branch_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "org_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nf_instance_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "installation_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "operation_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "receipt_ref": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "task_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "generation": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "grant_epoch": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "work_id",
+            "branch_id",
+            "org_id",
+            "nf_instance_id",
+            "installation_id",
+            "operation_id",
+            "receipt_ref",
+            "task_id",
+            "generation",
+            "grant_epoch"
+          ],
+          "additionalProperties": false
+        }
+      },
       "required": [],
       "additionalProperties": false
     },
@@ -6313,6 +6692,62 @@
     },
     "source": "src/novel_factory/interfaces/mcp_stdio.py"
   },
+  "nf_task_cancel": {
+    "transport": "nf-mcp",
+    "description": "Cancel the authorized task at its expected generation.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "generation": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "idempotency_key": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+        },
+        "task_id": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "task_id",
+        "generation",
+        "idempotency_key"
+      ],
+      "type": "object"
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_task_events": {
+    "transport": "nf-mcp",
+    "description": "Read a page of state transitions for the authorized task.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "cursor": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "task_id"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
   "nf_task_get": {
     "transport": "nf-mcp",
     "description": "Read the bound task's current execution identity.",
@@ -6321,6 +6756,306 @@
       "properties": {},
       "required": [],
       "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_task_status": {
+    "transport": "nf-mcp",
+    "description": "Read the authorized task state.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "task_id"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_task_status_batch": {
+    "transport": "nf-mcp",
+    "description": "Read ordered statuses for tasks owned by one authorized work and branch.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "work_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "branch_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "task_ids": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "required": [
+        "work_id",
+        "branch_id",
+        "task_ids"
+      ],
+      "additionalProperties": false
+    },
+    "source": "src/novel_factory/interfaces/mcp_stdio.py"
+  },
+  "nf_task_submit": {
+    "transport": "nf-mcp",
+    "description": "Durably submit an authorized task and return its receipt.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "idempotency_key": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+        },
+        "spec": {
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "state": {
+                    "enum": [
+                      "RESULT_STORED",
+                      "VALIDATING",
+                      "WAITING_REVIEW",
+                      "ACCEPTED"
+                    ]
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "context_bundle_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "dependency_fingerprint": {
+                    "pattern": "^[a-f0-9]{64}$",
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          ],
+          "description": "Wall deadline controls execution only. It cannot make a character late in the story. READY/BLOCKED or RUNNING preparation may have no bundle yet; before any external call the service must bind a persisted bundle/fingerprint to the current generation. Result receipt verifies task/generation/attempt/context together.",
+          "properties": {
+            "budget": {
+              "additionalProperties": false,
+              "properties": {
+                "currency": {
+                  "enum": [
+                    "USD",
+                    "CNY"
+                  ],
+                  "type": "string"
+                },
+                "max_amount": {
+                  "description": "Nonnegative exact decimal; domain enforces unit and finite precision.",
+                  "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+                  "type": "string"
+                },
+                "token_budget": {
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "currency",
+                "max_amount",
+                "token_budget"
+              ],
+              "type": "object"
+            },
+            "capability_grant_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "context_bundle_id": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "dependency_fingerprint": {
+              "anyOf": [
+                {
+                  "pattern": "^[a-f0-9]{64}$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "generation": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "input_artifacts": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "artifact_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "artifact_revision_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "sha256": {
+                    "pattern": "^[a-f0-9]{64}$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "artifact_id",
+                  "artifact_revision_id",
+                  "sha256"
+                ],
+                "type": "object"
+              },
+              "minItems": 0,
+              "type": "array"
+            },
+            "policy_version": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "role_id": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "runtime_contract_version": {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            "schema_version": {
+              "enum": [
+                "2.0"
+              ],
+              "type": "string"
+            },
+            "state": {
+              "enum": [
+                "BLOCKED",
+                "READY",
+                "RUNNING",
+                "RESULT_STORED",
+                "VALIDATING",
+                "WAITING_REVIEW",
+                "ACCEPTED",
+                "STALE",
+                "PAUSED",
+                "CANCELLED",
+                "FAILED"
+              ],
+              "type": "string"
+            },
+            "story_time": {
+              "additionalProperties": false,
+              "description": "tick uses work calendar; phase is accepted causal stage, never database sequence or model completion order.",
+              "properties": {
+                "phase": {
+                  "maximum": 2147483647,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "tick": {
+                  "maximum": 9007199254740991,
+                  "minimum": -9007199254740991,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "tick",
+                "phase"
+              ],
+              "type": "object"
+            },
+            "task_id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "task_kind": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "wall_deadline": {
+              "format": "date-time",
+              "type": "string"
+            },
+            "world_ref": {
+              "additionalProperties": false,
+              "description": "All three identifiers are checked together against an immutable branch/revision membership; main is resolved before issue.",
+              "properties": {
+                "branch_id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "work_id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "world_revision_id": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "work_id",
+                "branch_id",
+                "world_revision_id"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "schema_version",
+            "task_id",
+            "generation",
+            "role_id",
+            "task_kind",
+            "state",
+            "world_ref",
+            "story_time",
+            "context_bundle_id",
+            "policy_version",
+            "dependency_fingerprint",
+            "runtime_contract_version",
+            "capability_grant_id",
+            "input_artifacts",
+            "budget",
+            "wall_deadline"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "spec",
+        "idempotency_key"
+      ],
+      "type": "object"
     },
     "source": "src/novel_factory/interfaces/mcp_stdio.py"
   }

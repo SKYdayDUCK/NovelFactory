@@ -42,3 +42,5 @@ git fetch /tmp/hera-source.bundle refs/heads/hera-evidence-source-stage:refs/rem
 git worktree add --detach ../hera-final-product a918a91
 git worktree add --detach ../hera-same-rest-baseline bcb03637
 ```
+
+在只取回上述 main 基线的全新 bare 仓库中，已再次验证分块重组字节、执行 bundle fetch 和 `git fsck --full`。取回的阶段 tip 为 ca2c4c7，最终测量候选 a918a91 的 src tree 为 a50ff321f1d67f712198a9c819e888264344f2cf。P1 的 API 文档导出与示例更新在 bundle 快照之后，使用本 PR 的对应交付提交复查。
