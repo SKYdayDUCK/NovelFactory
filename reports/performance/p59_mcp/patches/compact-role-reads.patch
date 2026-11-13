@@ -1,0 +1,145 @@
+diff --git a/src/novel_factory/application/mcp_runtime.py b/src/novel_factory/application/mcp_runtime.py
+index 920c6af910d93e0c1b155d90ecde08992a6b0057..8e2dac666d66ce30457caf834af57e9724f3d252 100644
+--- a/src/novel_factory/application/mcp_runtime.py
++++ b/src/novel_factory/application/mcp_runtime.py
+@@ -33,10 +33,11 @@ class TaskBinding:
+ 
+ 
+ class McpRuntime:
+-    def __init__(self, kernel, principal, binding):
++    def __init__(self, kernel, principal, binding, *, compact_role_reads=False):
+         self.kernel = kernel
+         self.principal = principal
+         self.binding = binding
++        self.compact_role_reads = compact_role_reads
+         self.queries = WorldQueryService(kernel)
+ 
+     def available_tools(self):
+@@ -327,18 +328,32 @@ class McpRuntime:
+                     "VIEW_DENIED", "Task cut unavailable")
+         return task, grant, ctx, spec
+ 
+-    def task_get(self):
+-        proof = self._role_proof()
++    def _read_role(self, tool):
++        if self.compact_role_reads:
++            with self.kernel.db.uow(write=False) as repo:
++                state = self._bound_state(repo)
++                task, grant, context, spec = state
++                inputs = matching_inputs(repo, task, spec)
++                ref = assignment_from_inputs(inputs)
++                if ref is None:
++                    require(tool in self._task_tools(repo, state, inputs), "VIEW_DENIED", "Tool outside task authority")
++                    return task, grant, context
++            # A Workshop witness requires I/O. Release local locks, then recheck
++            # task generation, current grant and the exact assignment on delivery.
++            proof = ref, refresh(self.kernel, self.principal, task["task_id"], task["generation"], ref)
++        else:
++            proof = self._role_proof()
+         with self.kernel.db.uow(write=False) as repo:
+-            task, _, ctx = self._role_task(repo, "nf_task_get", proof)
+-            return {**{k: task[k] for k in ("task_id", "generation", "state", "context_bundle_id")},
+-                    "world_ref": ctx["payload"]["world_ref"]}
++            return self._role_task(repo, tool, proof)
++
++    def task_get(self):
++        task, _, ctx = self._read_role("nf_task_get")
++        return {**{k: task[k] for k in ("task_id", "generation", "state", "context_bundle_id")},
++                "world_ref": ctx["payload"]["world_ref"]}
+ 
+     def context_get(self):
+-        proof = self._role_proof()
+-        with self.kernel.db.uow(write=False) as repo:
+-            _, _, ctx = self._role_task(repo, "nf_context_get", proof)
+-            return ctx["payload"]
++        _, _, ctx = self._read_role("nf_context_get")
++        return ctx["payload"]
+ 
+     def query_batch(self, lookups):
+         proof = self._role_proof()
+diff --git a/src/novel_factory/interfaces/bindings.py b/src/novel_factory/interfaces/bindings.py
+index 5d759e2b86339b8ad0288a55145766437b388cb5..e66b6215706d08c7ff29d8a40d573409a03dc797 100644
+--- a/src/novel_factory/interfaces/bindings.py
++++ b/src/novel_factory/interfaces/bindings.py
+@@ -14,7 +14,7 @@ def read_private_config(path):
+     return json.loads(read_private_bytes(path, 16384))
+ 
+ 
+-def runtime_from_config(config):
++def runtime_from_config(config, *, compact_role_reads=False):
+     required = {"token", "database_url", "object_root", "binding"}
+     if set(config) != required or not Path(config["object_root"]).is_absolute():
+         raise ValueError("Invalid server configuration")
+@@ -30,7 +30,7 @@ def runtime_from_config(config):
+     database = Database(config["database_url"], pool_size=2)
+     try:
+         kernel = Kernel(database, ObjectStore(config["object_root"]))
+-        return McpRuntime(kernel, kernel.authenticate(config["token"]), bound)
++        return McpRuntime(kernel, kernel.authenticate(config["token"]), bound, compact_role_reads=compact_role_reads)
+     except BaseException:
+         database.close()
+         raise
+diff --git a/src/novel_factory/interfaces/mcp_stdio.py b/src/novel_factory/interfaces/mcp_stdio.py
+index 4aa19dd52d306e984768005ce8c609ac3a049cb0..16238aff8e666c6ec546f43faf3bdb87b53b4803 100644
+--- a/src/novel_factory/interfaces/mcp_stdio.py
++++ b/src/novel_factory/interfaces/mcp_stdio.py
+@@ -116,10 +116,10 @@ async def character_input():
+             return
+ 
+ 
+-async def serve(config, *, character_only=False, idle_db_seconds=30.0):
++async def serve(config, *, character_only=False, idle_db_seconds=30.0, compact_role_reads=False):
+     if not math.isfinite(idle_db_seconds) or idle_db_seconds < 0:
+         raise ValueError("Idle database timeout must be finite and nonnegative")
+-    runtime = runtime_from_config(config)
++    runtime = runtime_from_config(config, compact_role_reads=compact_role_reads)
+     engine = runtime.kernel.db.engine
+     admission = BoundToolAdmission(min(2, engine.pool.size()), owned_engine=engine, idle_seconds=idle_db_seconds)
+     try:
+@@ -142,10 +142,12 @@ def main():
+     parser.add_argument("--character-only", action="store_true", help="Require a live character task binding")
+     parser.add_argument("--idle-db-seconds", type=float, default=30.0,
+                         help="Release this stdio process's unused database connections after this idle period")
++    parser.add_argument("--compact-role-reads", action="store_true",
++                        help="Resolve static role proof and read in one transaction")
+     args = parser.parse_args()
+     try:
+         asyncio.run(serve(read_private_config(args.binding), character_only=args.character_only,
+-                          idle_db_seconds=args.idle_db_seconds))
++                          idle_db_seconds=args.idle_db_seconds, compact_role_reads=args.compact_role_reads))
+     except KeyboardInterrupt:
+         return
+     except Exception:
+diff --git a/tests/integration/test_p5_mcp.py b/tests/integration/test_p5_mcp.py
+index c51e1605d9b3652510b24d1d228dd870c2f53483..18bf53617a7b6ab72a8aceeb034ec252096974bf 100644
+--- a/tests/integration/test_p5_mcp.py
++++ b/tests/integration/test_p5_mcp.py
+@@ -117,7 +117,8 @@ def test_operator_database_fences_apply_outside_mcp(kernel_env, fence):
+         kernel.authorize(repo, scoped["principal"], wr["work_id"], "PROJECT_RESUME", wr["branch_id"])
+ 
+ 
+-def test_actor_stdio_own_cut_only_and_candidate_replay(kernel_env, tmp_path, record_testsuite_property):
++@pytest.mark.parametrize("flags", [[], ["--compact-role-reads"]])
++def test_actor_stdio_own_cut_only_and_candidate_replay(kernel_env, tmp_path, record_testsuite_property, flags):
+     kernel = kernel_env["kernel"]
+     world = load_fixture(kernel)
+     subject = world["ids"]["sword"]
+@@ -164,11 +165,15 @@ def test_actor_stdio_own_cut_only_and_candidate_replay(kernel_env, tmp_path, rec
+         await error(session, "nf_context_get", {}, "TASK_NOT_ACCEPTABLE")
+         await error(session, "nf_artifact_put", candidate, "TASK_NOT_ACCEPTABLE")
+ 
+-    asyncio.run(exercise(config(tmp_path / "actor.json", kernel_env, a.private_token, binding), check))
++    params = config(tmp_path / "actor.json", kernel_env, a.private_token, binding)
++    params.args.extend(flags)
++    asyncio.run(exercise(params, check))
+ 
+     async def bad_binding(session):
+         await error(session, "nf_context_get", {}, "VIEW_DENIED")
+         assert not (await session.list_tools()).tools
+ 
+-    asyncio.run(exercise(config(tmp_path / "swapped.json", kernel_env, a.private_token,
+-        {"task_id": b.task["task_id"], "generation": b.task["generation"], "worker_id": b.worker_id}), bad_binding))
++    params = config(tmp_path / "swapped.json", kernel_env, a.private_token,
++                    {"task_id": b.task["task_id"], "generation": b.task["generation"], "worker_id": b.worker_id})
++    params.args.extend(flags)
++    asyncio.run(exercise(params, bad_binding))

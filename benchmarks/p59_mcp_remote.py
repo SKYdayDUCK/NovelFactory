@@ -53,6 +53,8 @@ async def serve(paths, slots):
     managers = {}
     for config in configs:
         principal = kernel.authenticate(config["token"])
+        if principal in managers:
+            raise ValueError("This experiment requires one trusted task binding per principal")
         runtime = McpRuntime(kernel, principal, TaskBinding(**config["binding"]))
         managers[principal] = StreamableHTTPSessionManager(
             make_server(runtime, admission=admission), stateless=True,

@@ -1,0 +1,281 @@
+diff --git a/tests/integration/test_workshop_delegation.py b/tests/integration/test_workshop_delegation.py
+index d5dd24787eefa62651919f26e0cf654c2529a335..658ff8c4b8d16371dbbf4efab6a8685bc105d9ac 100644
+--- a/tests/integration/test_workshop_delegation.py
++++ b/tests/integration/test_workshop_delegation.py
+@@ -506,3 +506,44 @@ def test_denied_accounting_caller_cannot_distinguish_missing_from_expired(site):
+             ledger.mark_call_sent(attempt, worker_id="denied", authorize_in_tx=deny)
+         assert blocked.value.as_dict("same") == DomainError("VIEW_DENIED", "Caller unavailable").as_dict("same")
+     assert len(requests) == 1
++
++
++def test_reused_workshop_transport_reconnects_after_peer_death(site, monkeypatch):
++    """A later read can find a committed submit after loss of its persistent NF peer."""
++    import signal
++    from pathlib import Path
++
++    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[2] / "workshop/src"))
++    from agent_workshop.reconcile import batch_remote
++    from anyio import BrokenResourceError, ClosedResourceError, EndOfStream
++    from mcp.shared.exceptions import McpError
++
++    runtime, submit, get, config, _, _, _, _ = site
++    expected = runtime.call("nf_delegation_submit", submit)
++    pidfile = config.with_name("stdio.pid")
++    launcher = config.with_name("tracked_peer.py")
++    launcher.write_text(
++        "import os, runpy, sys\n"
++        "from pathlib import Path\n"
++        "Path(sys.argv.pop(1)).write_text(str(os.getpid()))\n"
++        "runpy.run_module('novel_factory.interfaces.delegation_stdio', run_name='__main__')\n",
++        encoding="utf-8",
++    )
++    params = StdioServerParameters(command=sys.executable, args=[
++        str(launcher), str(pidfile), "--binding", str(config),
++    ])
++
++    async def run():
++        async with batch_remote(params) as invoke:
++            assert await invoke("nf_delegation_get", get) == expected
++            pid = int(pidfile.read_text())
++            # SIGTERM on POSIX / TerminateProcess via os.kill on Windows.
++            os.kill(pid, signal.SIGTERM)
++            with pytest.raises((BrokenResourceError, ClosedResourceError, EndOfStream, McpError, EOFError)):
++                async with asyncio.timeout(5):
++                    await invoke("nf_delegation_get", get)
++            async with asyncio.timeout(15):
++                assert await invoke("nf_delegation_get", get) == expected
++            assert int(pidfile.read_text()) != pid
++
++    asyncio.run(run())
+diff --git a/workshop/integration/test_dual_stdio.py b/workshop/integration/test_dual_stdio.py
+index 9cf2e8b96ecb963eb580d785569625ae3ccad43c..ded1278f078c246ffd19c14a6903ae25fb37f0f8 100644
+--- a/workshop/integration/test_dual_stdio.py
++++ b/workshop/integration/test_dual_stdio.py
+@@ -5,6 +5,8 @@ import os
+ from pathlib import Path
+ import subprocess
+ import sys
++
++import pytest
+ from uuid import uuid4
+ 
+ from mcp import StdioServerParameters
+@@ -38,7 +40,8 @@ def bound_process(tmp, module, config, src):
+     )
+ 
+ 
+-def test_two_live_mcp_servers_recover_accepted_task_after_lost_reply(dual_databases, tmp_path):
++@pytest.mark.parametrize("session_option", [(), ("--reuse-session",)], ids=["cold", "reuse"])
++def test_two_live_mcp_servers_recover_accepted_task_after_lost_reply(dual_databases, tmp_path, session_option):
+     dsn = dual_databases["aw"]
+     db = Database(dual_databases["nf"])
+     kernel = Kernel(db, ObjectStore(tmp_path / "objects"))
+@@ -169,7 +172,7 @@ def test_two_live_mcp_servers_recover_accepted_task_after_lost_reply(dual_databa
+             wake()
+             worker = subprocess.run(
+                 [sys.executable, "-m", "agent_workshop.reconcile", "--installation", installation,
+-                 "--org", org, "--operation", op, "--", nf_params.command, *nf_params.args],
++                 "--org", org, "--operation", op, *session_option, "--", nf_params.command, *nf_params.args],
+                 env={**os.environ, "AW_DATABASE_URL": dsn}, capture_output=True, text=True, check=True,
+             )
+             restarted_worker = json.loads(worker.stdout)
+@@ -222,7 +225,7 @@ def test_two_live_mcp_servers_recover_accepted_task_after_lost_reply(dual_databa
+             assert cancelled["attempts"] == [] and cancelled["actual_tokens"] == 0
+             after_cancel = budget_view.status(*budget_scope)
+             assert after_cancel == before_call
+-            if receipt_path := os.environ.get("AW_W3_REDIS_EVIDENCE"):
++            if (receipt_path := os.environ.get("AW_W3_REDIS_EVIDENCE")) and not session_option:
+                 redis_receipt["cancel_before_attempt"] = {
+                     "budget_id": budget, "operation_id": op, "receipt_ref": cancelled["receipt_ref"],
+                     "nf_after_cancel": after_cancel, "nf_reported_tokens": cancelled["actual_tokens"],
+diff --git a/workshop/src/agent_workshop/reconcile.py b/workshop/src/agent_workshop/reconcile.py
+index daba22623def50c028b2e0463aee2bc9aabb9881..0824bfd80e7807d9a62c570927de64026d094f07 100644
+--- a/workshop/src/agent_workshop/reconcile.py
++++ b/workshop/src/agent_workshop/reconcile.py
+@@ -4,6 +4,7 @@ import argparse
+ import asyncio
+ import json
+ import os
++from contextlib import AsyncExitStack, asynccontextmanager
+ from decimal import Decimal
+ from uuid import UUID
+ 
+@@ -337,25 +338,59 @@ async def reconcile(dsn, installation, org, operation, invoke, lookup_only=False
+         )
+ 
+ 
++async def _request(client, tool, request):
++    advertised = {t.name for t in (await client.list_tools()).tools}
++    return await client.call_tool(tool, request) if tool in advertised else None
++
++
++def _result(response):
++    if response is None:
++        raise Denied("VIEW_DENIED")
++    if response.isError:
++        raise Denied(
++            (response.structuredContent or {}).get("error", {}).get("code", "REMOTE_REJECTED")
++        )
++    return response.structuredContent
++
++
+ def remote(params):
+     async def invoke(tool, request):
+         async with stdio_client(params) as streams, ClientSession(*streams) as client:
+             await client.initialize()
+-            advertised = {t.name for t in (await client.list_tools()).tools}
+-            response = await client.call_tool(tool, request) if tool in advertised else None
+-        # Raise after both anyio task groups have closed. An ExceptionGroup would
+-        # otherwise erase the service error used to distinguish missing history.
+-        if response is None:
+-            raise Denied("VIEW_DENIED")
+-        if response.isError:
+-            raise Denied(
+-                (response.structuredContent or {}).get("error", {}).get("code", "REMOTE_REJECTED")
+-            )
+-        return response.structuredContent
++            response = await _request(client, tool, request)
++        # Decode after the task groups have closed so the original service error survives.
++        return _result(response)
+ 
+     return invoke
+ 
+ 
++@asynccontextmanager
++async def batch_remote(params):
++    """One trusted installation, sequential calls, one owning asyncio task.
++
++    Open lazily on the first claimed operation. A failed transport is retired.
++    Only a later operation may open a new session; never replay the failed call.
++    """
++    async with AsyncExitStack() as stack:
++        client = None
++
++        async def invoke(tool, request):
++            nonlocal client
++            try:
++                if client is None:
++                    streams = await stack.enter_async_context(stdio_client(params))
++                    client = await stack.enter_async_context(ClientSession(*streams))
++                    await client.initialize()
++                response = await _request(client, tool, request)
++            except BaseException:
++                client = None
++                await stack.aclose()
++                raise
++            return _result(response)
++
++        yield invoke
++
++
+ def main():
+     parser = argparse.ArgumentParser(description=__doc__)
+     parser.add_argument("--installation", required=True)
+@@ -363,6 +398,8 @@ def main():
+     parser.add_argument(
+         "--lookup-only", action="store_true", help="Recovery mode: only read old operation IDs"
+     )
++    parser.add_argument("--reuse-session", action="store_true",
++                        help="Reuse one NF stdio connection for this installation and batch")
+     parser.add_argument("--operation")
+     parser.add_argument("--limit", type=int, default=20)
+     parser.add_argument(
+@@ -393,18 +430,17 @@ def main():
+                     ),
+                 )
+             ]
+-    invoke = remote(StdioServerParameters(command=argv[0], args=argv[1:]))
+-    for op in operations:
+-        print(
+-            json.dumps(
+-                {
+-                    "operation_id": op,
+-                    "state": asyncio.run(
+-                        reconcile(dsn, args.installation, args.org, op, invoke, args.lookup_only)
+-                    ),
+-                }
+-            )
+-        )
++    params = StdioServerParameters(command=argv[0], args=argv[1:])
++
++    async def drain():
++        async with AsyncExitStack() as stack:
++            invoke = (await stack.enter_async_context(batch_remote(params))
++                      if args.reuse_session else remote(params))
++            for operation in operations:
++                state = await reconcile(dsn, args.installation, args.org, operation, invoke, args.lookup_only)
++                print(json.dumps({"operation_id": operation, "state": state}))
++
++    asyncio.run(drain())
+ 
+ 
+ if __name__ == "__main__":
+diff --git a/workshop/tests/test_reconcile_batch_transport.py b/workshop/tests/test_reconcile_batch_transport.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..e567bd6b088863e929f2fd0613f58f3d53f3dd6c
+--- /dev/null
++++ b/workshop/tests/test_reconcile_batch_transport.py
+@@ -0,0 +1,63 @@
++"""A lost transport response retires its handle without replaying the operation."""
++import asyncio
++from contextlib import asynccontextmanager
++from types import SimpleNamespace
++
++from agent_workshop import reconcile
++
++
++def test_failed_batch_call_is_not_replayed_and_next_operation_can_reconnect(monkeypatch):
++    launched = []
++    closed = []
++    calls = []
++
++    @asynccontextmanager
++    async def transport(_):
++        number = len(launched)
++        launched.append(number)
++        try:
++            yield (number,)
++        finally:
++            closed.append(number)
++
++    class Session:
++        def __init__(self, number):
++            self.number = number
++
++        async def __aenter__(self):
++            return self
++
++        async def __aexit__(self, *_):
++            pass
++
++        async def initialize(self):
++            pass
++
++        async def list_tools(self):
++            return SimpleNamespace(tools=[SimpleNamespace(name="nf_delegation_submit")])
++
++        async def call_tool(self, _, args):
++            calls.append((self.number, args["operation_id"]))
++            if self.number == 0:
++                raise ConnectionError("injected lost response")
++            return SimpleNamespace(isError=False, structuredContent={"received": args["operation_id"]})
++
++    monkeypatch.setattr(reconcile, "stdio_client", transport)
++    monkeypatch.setattr(reconcile, "ClientSession", Session)
++
++    async def run():
++        async with reconcile.batch_remote(None) as invoke:
++            assert not launched
++            try:
++                await invoke("nf_delegation_submit", {"operation_id": "original"})
++            except ConnectionError:
++                pass
++            else:
++                raise AssertionError("Lost response was reported as confirmed")
++            assert calls == [(0, "original")] and closed == [0]
++            assert await invoke("nf_delegation_submit", {"operation_id": "later"}) == {"received": "later"}
++            assert await invoke("nf_delegation_submit", {"operation_id": "last"}) == {"received": "last"}
++
++    asyncio.run(run())
++    assert launched == closed == [0, 1]
++    assert calls == [(0, "original"), (1, "later"), (1, "last")]

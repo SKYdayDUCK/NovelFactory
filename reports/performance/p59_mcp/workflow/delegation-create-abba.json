@@ -1,0 +1,255 @@
+{
+  "phases": [
+    {
+      "arm": "A",
+      "elapsed_s": 5.821015741001247,
+      "verified_rps": 0.6871652951950235,
+      "operation_ms": {
+        "p50": 1233.0825879998883,
+        "p95": 2053.456180001376,
+        "p99": 2053.456180001376
+      },
+      "rows": [
+        {
+          "operation_id": "a9bd9810-8318-4634-a729-e4ccc67a5a02",
+          "state": "BOUND",
+          "service_ms": 2053.456180001376,
+          "completed_s": 2.053456180001376,
+          "task_id": "9a31345c-c89d-4e13-b9b5-b6d2a7dd1d61",
+          "task_state": "READY",
+          "hold": "HELD",
+          "budget_amount": "1.000000",
+          "receipt_ref": "3953256f-560d-4a1c-a4bd-fe3032cdd1c1"
+        },
+        {
+          "operation_id": "d729a766-01a6-48a7-bb74-b617c209954d",
+          "state": "BOUND",
+          "service_ms": 1233.0825879998883,
+          "completed_s": 3.2865387680012645,
+          "task_id": "7b18ad3a-b3a4-4d2a-82b0-2ee74da8ee90",
+          "task_state": "READY",
+          "hold": "HELD",
+          "budget_amount": "1.000000",
+          "receipt_ref": "afd8eccc-a362-4f34-83db-cf4e7c2395f4"
+        },
+        {
+          "operation_id": "28db4dc2-6edf-4662-b232-b5ac70f0bc01",
+          "state": "BOUND",
+          "service_ms": 1180.2423400004045,
+          "completed_s": 4.466781108001669,
+          "task_id": "7e1de68d-7ed7-47b9-a677-7f93bc6ac479",
+          "task_state": "READY",
+          "hold": "HELD",
+          "budget_amount": "1.000000",
+          "receipt_ref": "48cfeac6-ad0b-442f-a9dd-0752e201862f"
+        },
+        {
+          "operation_id": "eeb55d6b-6fd3-4985-a242-3518605dc600",
+          "state": "BOUND",
+          "service_ms": 1236.94693699872,
+          "completed_s": 5.703728045000389,
+          "task_id": "cb19afce-32dd-4041-992a-75115cb7ef3c",
+          "task_state": "READY",
+          "hold": "HELD",
+          "budget_amount": "1.000000",
+          "receipt_ref": "5a384c0f-d3ca-454f-b2ce-fa7b6d9f3de5"
+        }
+      ]
+    },
+    {
+      "arm": "B",
+      "elapsed_s": 2.6059114409999893,
+      "verified_rps": 1.5349715792586738,
+      "operation_ms": {
+        "p50": 88.38116299921239,
+        "p95": 1896.723818999817,
+        "p99": 1896.723818999817
+      },
+      "rows": [
+        {
+          "operation_id": "f215e4c0-6e81-4b17-839a-702b67960238",
+          "state": "BOUND",
+          "service_ms": 1896.723818999817,
+          "completed_s": 1.896723818999817,
+          "task_id": "80e6177f-c010-4b3f-a87a-6e6cc49da20a",
+          "task_state": "READY",
+          "hold": "HELD",
+          "budget_amount": "1.000000",
+          "receipt_ref": "f4b4ec83-91e1-4578-84d5-bef62822b528"
+        },
+        {
+          "operation_id": "cfa0c878-61ef-4147-bba9-48e5cea2646c",
+          "state": "BOUND",
+          "service_ms": 96.27763100070297,
+          "completed_s": 1.99300145000052,
+          "task_id": "d7260bdf-c653-4f4d-9fb2-8c5e2138d673",
+          "task_state": "READY",
+          "hold": "HELD",
+          "budget_amount": "1.000000",
+          "receipt_ref": "3c902c7d-fcde-4369-a846-b290e0175161"
+        },
+        {
+          "operation_id": "44b2a744-b879-4a4f-9a30-d1c567fd073e",
+          "state": "BOUND",
+          "service_ms": 84.1220729998895,
+          "completed_s": 2.0771235230004095,
+          "task_id": "cf1c7e90-dedf-4bc1-9e8f-4817ccacb885",
+          "task_state": "READY",
+          "hold": "HELD",
+          "budget_amount": "1.000000",
+          "receipt_ref": "3218a955-30c9-4505-adf9-6b9bae125d9b"
+        },
+        {
+          "operation_id": "eff2e356-cee1-4708-8fce-9aebd07a3ba1",
+          "state": "BOUND",
+          "service_ms": 88.38116299921239,
+          "completed_s": 2.165504685999622,
+          "task_id": "fcf58054-50e3-4ee0-80c9-120c8f4e2413",
+          "task_state": "READY",
+          "hold": "HELD",
+          "budget_amount": "1.000000",
+          "receipt_ref": "6257541d-d082-4119-9d55-f4c920e98878"
+        }
+      ]
+    },
+    {
+      "arm": "B",
+      "elapsed_s": 2.7174475810006697,
+      "verified_rps": 1.4719695157935833,
+      "operation_ms": {
+        "p50": 84.40838500064274,
+        "p95": 1926.5009650007414,
+        "p99": 1926.5009650007414
+      },
+      "rows": [
+        {
+          "operation_id": "d845a390-3749-4403-aaa8-a9c44abc0268",
+          "state": "BOUND",
+          "service_ms": 1926.5009650007414,
+          "completed_s": 1.9265009650007414,
+          "task_id": "07f01413-7af5-4a7a-afa3-0001d85d1ce3",
+          "task_state": "READY",
+          "hold": "HELD",
+          "budget_amount": "1.000000",
+          "receipt_ref": "e2029699-1eb8-4bac-a42c-510505a0b870"
+        },
+        {
+          "operation_id": "7cc55a96-32b1-460f-a19e-26a8a48b7f7d",
+          "state": "BOUND",
+          "service_ms": 88.29631899970991,
+          "completed_s": 2.0147972840004513,
+          "task_id": "0656d67c-17f4-4fdf-baca-05bd04870e1b",
+          "task_state": "READY",
+          "hold": "HELD",
+          "budget_amount": "1.000000",
+          "receipt_ref": "b295cd8a-eb9e-4df1-b96e-f19d1e19a339"
+        },
+        {
+          "operation_id": "7889bfb3-31af-47bb-ac73-22dde501f5f2",
+          "state": "BOUND",
+          "service_ms": 83.61310699910973,
+          "completed_s": 2.098410390999561,
+          "task_id": "92555bae-6c8d-42ec-87df-920d8c6c1b67",
+          "task_state": "READY",
+          "hold": "HELD",
+          "budget_amount": "1.000000",
+          "receipt_ref": "bbb291c6-1bb6-42c8-868d-efc759d96a50"
+        },
+        {
+          "operation_id": "804a504c-a4f6-4060-bcc7-134db231e180",
+          "state": "BOUND",
+          "service_ms": 84.40838500064274,
+          "completed_s": 2.182818776000204,
+          "task_id": "1f0a3ac7-1eb9-4721-9aa2-1a77555aa1be",
+          "task_state": "READY",
+          "hold": "HELD",
+          "budget_amount": "1.000000",
+          "receipt_ref": "fb48353c-ba2f-4606-bea0-8bc78d646642"
+        }
+      ]
+    },
+    {
+      "arm": "A",
+      "elapsed_s": 7.86386356499861,
+      "verified_rps": 0.5086558238120586,
+      "operation_ms": {
+        "p50": 1797.2732889993495,
+        "p95": 2333.7997939997877,
+        "p99": 2333.7997939997877
+      },
+      "rows": [
+        {
+          "operation_id": "41ad411c-d2ad-4d65-803f-0471e74098d8",
+          "state": "BOUND",
+          "service_ms": 2333.7997939997877,
+          "completed_s": 2.3337997939997877,
+          "task_id": "0ea04af2-2aae-43cd-a656-42297c6b811f",
+          "task_state": "READY",
+          "hold": "HELD",
+          "budget_amount": "1.000000",
+          "receipt_ref": "83a51162-595f-4509-b089-de01b11934d8"
+        },
+        {
+          "operation_id": "4f0a234c-4158-4a7d-bcae-2b372d2d8e37",
+          "state": "BOUND",
+          "service_ms": 1733.9486519995262,
+          "completed_s": 4.067748445999314,
+          "task_id": "4be18880-547e-4cf1-bd15-932caeb4dfc0",
+          "task_state": "READY",
+          "hold": "HELD",
+          "budget_amount": "1.000000",
+          "receipt_ref": "3d047c3a-658d-4f9b-b890-035a88bceffd"
+        },
+        {
+          "operation_id": "8f951e33-74df-48a5-9130-ede36f54b9c3",
+          "state": "BOUND",
+          "service_ms": 1797.2732889993495,
+          "completed_s": 5.865021734998663,
+          "task_id": "aa6fb67c-c23a-4822-a176-2e1a02fbc6ac",
+          "task_state": "READY",
+          "hold": "HELD",
+          "budget_amount": "1.000000",
+          "receipt_ref": "b330e321-de87-493a-838c-e6bfef8d37ca"
+        },
+        {
+          "operation_id": "47932351-51af-49ef-b0c4-4edfab840e2e",
+          "state": "BOUND",
+          "service_ms": 1802.835534001133,
+          "completed_s": 7.667857268999796,
+          "task_id": "fd7dedb0-7892-4b5c-bd43-219e065ce946",
+          "task_state": "READY",
+          "hold": "HELD",
+          "budget_amount": "1.000000",
+          "receipt_ref": "8dec11d1-b1f6-4623-8b4c-bb9ce64972d3"
+        }
+      ]
+    }
+  ],
+  "pairs": [
+    {
+      "rps_ratio": 2.233773431213571,
+      "tail_ratios": {
+        "p95": 0.9236738711407739,
+        "p99": 0.9236738711407739
+      },
+      "passed": true
+    },
+    {
+      "rps_ratio": 2.893841861009451,
+      "tail_ratios": {
+        "p95": 0.8254782479430267,
+        "p99": 0.8254782479430267
+      },
+      "passed": true
+    }
+  ],
+  "source_commit": "47ef968fbf97ed30dd87c30a238a14951f84ae16",
+  "commercial_attempts": 0,
+  "python": "3.12.14",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "sdk": "1.29.0",
+  "affinity": [
+    8
+  ],
+  "source_sha256": "3f0ed5f8569328a817fa05e9efea2b7fad1baf3573942772a0a79146804a9f0c"
+}

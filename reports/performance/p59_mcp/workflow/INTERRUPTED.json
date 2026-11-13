@@ -1,0 +1,9 @@
+{
+  "workload": "2000 durable participants, two project MCP sessions",
+  "first_attempt_date_utc": "2026-11-13",
+  "outcome": "INTERRUPTED",
+  "launcher_stderr": "with-postgres: line 22: 204 Killed \"$@\"",
+  "verified_completions": null,
+  "request_capacity_claim": null,
+  "notes": "No completed JSON was produced. Stock-stdio and remote-session client experiments overlapped on the shared VM and experienced memory pressure. Kernel OOM event counters were unavailable. This is not evidence of an intrinsic 2,000-workflow ceiling. A retry from a new private PostgreSQL cluster started after the competing memory tests stopped."
+}

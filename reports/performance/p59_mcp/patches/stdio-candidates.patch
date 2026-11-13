@@ -1,0 +1,431 @@
+diff --git a/src/novel_factory/application/mcp_runtime.py b/src/novel_factory/application/mcp_runtime.py
+index 920c6af910d93e0c1b155d90ecde08992a6b0057..0837442bfd6bb699c2af76830c1232248de26217 100644
+--- a/src/novel_factory/application/mcp_runtime.py
++++ b/src/novel_factory/application/mcp_runtime.py
+@@ -33,10 +33,11 @@ class TaskBinding:
+ 
+ 
+ class McpRuntime:
+-    def __init__(self, kernel, principal, binding):
++    def __init__(self, kernel, principal, binding, *, compact_role_reads=False):
+         self.kernel = kernel
+         self.principal = principal
+         self.binding = binding
++        self.compact_role_reads = compact_role_reads
+         self.queries = WorldQueryService(kernel)
+ 
+     def available_tools(self):
+@@ -77,6 +78,24 @@ class McpRuntime:
+             require(assignment_from_inputs(inputs) == ref, "TASK_REBIND_REQUIRED", "Runtime assignment changed")
+             return self._task_tools(repo, state, inputs, dynamic_ref=ref, dynamic_live=live)
+ 
++    def discover_group(self, count):
++        """Serve requests already present on this one immutable server binding."""
++        if count > 1 and isinstance(self.binding, TaskBinding):
++            with self.kernel.db.uow(write=False) as repo:
++                state = self._bound_state(repo)
++                inputs = matching_inputs(repo, state[0], state[3])
++                if assignment_from_inputs(inputs) is None:
++                    names = self._task_tools(repo, state, inputs)
++                    return [names.copy() for _ in range(count)]
++        # Remote authority and controller operations retain individual decisions.
++        answers = []
++        for _ in range(count):
++            try:
++                answers.append(self.available_tools())
++            except Exception:
++                answers.append([])
++        return answers
++
+     def _task_tools(self, repo, state, inputs, *, dynamic_ref=None, dynamic_live=None):
+         task, grant, context, identity = state
+         # Evaluate the frozen role/skill ceiling from this authorized snapshot.
+@@ -327,18 +346,32 @@ class McpRuntime:
+                     "VIEW_DENIED", "Task cut unavailable")
+         return task, grant, ctx, spec
+ 
+-    def task_get(self):
+-        proof = self._role_proof()
++    def _read_role(self, tool):
++        if self.compact_role_reads:
++            with self.kernel.db.uow(write=False) as repo:
++                state = self._bound_state(repo)
++                task, grant, context, spec = state
++                inputs = matching_inputs(repo, task, spec)
++                ref = assignment_from_inputs(inputs)
++                if ref is None:
++                    require(tool in self._task_tools(repo, state, inputs), "VIEW_DENIED", "Tool outside task authority")
++                    return task, grant, context
++            # A Workshop witness requires I/O. Release local locks, then recheck
++            # task generation, current grant and the exact assignment on delivery.
++            proof = ref, refresh(self.kernel, self.principal, task["task_id"], task["generation"], ref)
++        else:
++            proof = self._role_proof()
+         with self.kernel.db.uow(write=False) as repo:
+-            task, _, ctx = self._role_task(repo, "nf_task_get", proof)
+-            return {**{k: task[k] for k in ("task_id", "generation", "state", "context_bundle_id")},
+-                    "world_ref": ctx["payload"]["world_ref"]}
++            return self._role_task(repo, tool, proof)
++
++    def task_get(self):
++        task, _, ctx = self._read_role("nf_task_get")
++        return {**{k: task[k] for k in ("task_id", "generation", "state", "context_bundle_id")},
++                "world_ref": ctx["payload"]["world_ref"]}
+ 
+     def context_get(self):
+-        proof = self._role_proof()
+-        with self.kernel.db.uow(write=False) as repo:
+-            _, _, ctx = self._role_task(repo, "nf_context_get", proof)
+-            return ctx["payload"]
++        _, _, ctx = self._read_role("nf_context_get")
++        return ctx["payload"]
+ 
+     def query_batch(self, lookups):
+         proof = self._role_proof()
+diff --git a/src/novel_factory/interfaces/bindings.py b/src/novel_factory/interfaces/bindings.py
+index 5d759e2b86339b8ad0288a55145766437b388cb5..9121f37a3918f2ecb370598968947dea53d0c254 100644
+--- a/src/novel_factory/interfaces/bindings.py
++++ b/src/novel_factory/interfaces/bindings.py
+@@ -14,7 +14,7 @@ def read_private_config(path):
+     return json.loads(read_private_bytes(path, 16384))
+ 
+ 
+-def runtime_from_config(config):
++def runtime_from_config(config, *, pool_slots=2, compact_role_reads=False):
+     required = {"token", "database_url", "object_root", "binding"}
+     if set(config) != required or not Path(config["object_root"]).is_absolute():
+         raise ValueError("Invalid server configuration")
+@@ -27,10 +27,12 @@ def runtime_from_config(config):
+         bound = TaskBinding(**binding)
+     else:
+         raise ValueError("Invalid binding")
+-    database = Database(config["database_url"], pool_size=2)
++    if type(pool_slots) is not int or pool_slots not in (1, 2):
++        raise ValueError("A stdio binding supports one or two local database slots")
++    database = Database(config["database_url"], pool_size=pool_slots)
+     try:
+         kernel = Kernel(database, ObjectStore(config["object_root"]))
+-        return McpRuntime(kernel, kernel.authenticate(config["token"]), bound)
++        return McpRuntime(kernel, kernel.authenticate(config["token"]), bound, compact_role_reads=compact_role_reads)
+     except BaseException:
+         database.close()
+         raise
+diff --git a/src/novel_factory/interfaces/mcp_stdio.py b/src/novel_factory/interfaces/mcp_stdio.py
+index 4aa19dd52d306e984768005ce8c609ac3a049cb0..3ea3411a930d08ba4f955bc036a084e9d834963d 100644
+--- a/src/novel_factory/interfaces/mcp_stdio.py
++++ b/src/novel_factory/interfaces/mcp_stdio.py
+@@ -75,7 +75,47 @@ class BoundToolAdmission:
+             self._note_idle()
+ 
+ 
+-def make_server(runtime, *, ceiling=None, admission=None):
++class DiscoveryGroup:
++    """Collect at most four requests before their shared static-role authority check."""
++
++    def __init__(self, runtime, admission):
++        self.runtime = runtime
++        self.admission = admission
++        self.waiters = []
++        self.pending = set()
++
++    async def list_tools(self):
++        if len(self.waiters) >= 4:
++            return []
++        if not self.waiters:
++            group = self.waiters
++            job = asyncio.create_task(self._dispatch(group))
++            self.pending.add(job)
++            job.add_done_callback(self.pending.discard)
++        waiter = asyncio.get_running_loop().create_future()
++        self.waiters.append(waiter)
++        return await waiter
++
++    async def _dispatch(self, group):
++        await asyncio.sleep(0.001)
++        self.waiters = []
++        active = [waiter for waiter in group if not waiter.cancelled()]
++        if not active:
++            return
++        try:
++            answers = await self.admission.run(self.runtime.discover_group, len(active))
++        except Exception:
++            answers = [[] for _ in active]
++        for waiter, names in zip(active, answers, strict=True):
++            if not waiter.done():
++                waiter.set_result(names)
++
++    async def drain(self):
++        if self.pending:
++            await asyncio.gather(*tuple(self.pending))
++
++
++def make_server(runtime, *, ceiling=None, admission=None, discovery_group=None):
+     server = Server("NovelFactory", version="2.1.0")
+     if admission is None:
+         admission = BoundToolAdmission(min(2, runtime.kernel.db.engine.pool.size()))
+@@ -83,7 +123,8 @@ def make_server(runtime, *, ceiling=None, admission=None):
+     @server.list_tools()
+     async def list_tools():
+         try:
+-            names = await admission.run(runtime.available_tools)
++            names = (await discovery_group.list_tools() if discovery_group is not None
++                     else await admission.run(runtime.available_tools))
+         except DomainError:
+             return []
+         except Exception:
+@@ -116,22 +157,26 @@ async def character_input():
+             return
+ 
+ 
+-async def serve(config, *, character_only=False, idle_db_seconds=30.0):
++async def serve(config, *, character_only=False, idle_db_seconds=30.0, pool_slots=2,
++                compact_role_reads=False, batch_discovery=False):
+     if not math.isfinite(idle_db_seconds) or idle_db_seconds < 0:
+         raise ValueError("Idle database timeout must be finite and nonnegative")
+-    runtime = runtime_from_config(config)
++    runtime = runtime_from_config(config, pool_slots=pool_slots, compact_role_reads=compact_role_reads)
+     engine = runtime.kernel.db.engine
+     admission = BoundToolAdmission(min(2, engine.pool.size()), owned_engine=engine, idle_seconds=idle_db_seconds)
++    discovery = DiscoveryGroup(runtime, admission) if batch_discovery else None
+     try:
+         if character_only:
+             with runtime.kernel.db.uow(write=False) as repo:
+                 _, grant, _ = runtime._task(repo)
+                 if grant["role_id"] != "character_actor":
+                     raise ValueError("Character binding required")
+-        server = make_server(runtime, admission=admission)
++        server = make_server(runtime, admission=admission, discovery_group=discovery)
+         async with stdio_server(stdin=character_input() if character_only else None) as (reader, writer):
+             await server.run(reader, writer, server.create_initialization_options())
+     finally:
++        if discovery is not None:
++            await discovery.drain()
+         admission.close()
+         runtime.kernel.db.close()
+ 
+@@ -142,10 +187,17 @@ def main():
+     parser.add_argument("--character-only", action="store_true", help="Require a live character task binding")
+     parser.add_argument("--idle-db-seconds", type=float, default=30.0,
+                         help="Release this stdio process's unused database connections after this idle period")
++    parser.add_argument("--pool-slots", type=int, choices=(1, 2), default=2,
++                        help="Local connection and worker limit for this process")
++    parser.add_argument("--compact-role-reads", action="store_true",
++                        help="Resolve static role proof and read in one transaction")
++    parser.add_argument("--batch-discovery", action="store_true",
++                        help="Group already waiting tools/list requests on this binding")
+     args = parser.parse_args()
+     try:
+         asyncio.run(serve(read_private_config(args.binding), character_only=args.character_only,
+-                          idle_db_seconds=args.idle_db_seconds))
++                          idle_db_seconds=args.idle_db_seconds, pool_slots=args.pool_slots,
++                          compact_role_reads=args.compact_role_reads, batch_discovery=args.batch_discovery))
+     except KeyboardInterrupt:
+         return
+     except Exception:
+diff --git a/tests/integration/test_p59_mcp_authority.py b/tests/integration/test_p59_mcp_authority.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..c0edf5a87d4d85708116bf92453ff9a01d52c4a7
+--- /dev/null
++++ b/tests/integration/test_p59_mcp_authority.py
+@@ -0,0 +1,124 @@
++"""Candidate read/discovery fences with real PostgreSQL grants and the pinned SDK."""
++
++import asyncio
++from concurrent.futures import ThreadPoolExecutor
++from itertools import count
++from threading import Event
++from time import monotonic
++
++import pytest
++from sqlalchemy import text
++
++from novel_factory.application import mcp_runtime
++from novel_factory.application.agent_gateway import AgentGateway
++from novel_factory.application.mcp_runtime import McpRuntime, TaskBinding
++from novel_factory.application.runtime_tasks import RuntimeTaskService
++from novel_factory.domain.errors import DomainError
++from novel_factory.fixtures import load_fixture, point
++from novel_factory.infrastructure.model_gateway import OpenAICompatibleAdapter
++from test_p5_mcp import config, error, exercise
++
++pytestmark = [pytest.mark.postgres, pytest.mark.integration]
++
++
++@pytest.fixture
++def actor_read(kernel_env):
++    kernel = kernel_env["kernel"]
++    world = load_fixture(kernel)
++    adapter = OpenAICompatibleAdapter(
++        endpoint="https://example.test/v1/chat/completions", model="fixture", api_key=None
++    )
++    role = RuntimeTaskService(kernel, AgentGateway(kernel, {"fixture": adapter})).prepare(
++        world["principal"], world["world_ref"], role_id="character_actor",
++        task_kind="character_action", actor_id=world["ids"]["protagonist"], story_time=point(1),
++        subject_ids=[world["ids"]["sword"]], predicates=["owner"],
++        assignment="Observe from your own knowledge cut.", adapter_id="fixture",
++    )
++    binding = TaskBinding(role.task["task_id"], role.task["generation"], role.worker_id)
++    return kernel, world, role, McpRuntime(kernel, role.principal, binding, compact_role_reads=True)
++
++
++def test_group_started_behind_revocation_cannot_disclose(actor_read):
++    kernel, _, role, runtime = actor_read
++    # Hold an uncommitted revoke. Observe this exact lock owner blocking the reader
++    # before committing, so outcomes do not depend on thread timing.
++    with ThreadPoolExecutor(1) as pool:
++        with kernel.db.uow() as repo:
++            grant = repo.one("grants", {"grant_id": role.principal.grant_id}, lock="update")
++            repo.change("grants", {"grant_id": role.principal.grant_id},
++                        {"active": False, "epoch": grant["epoch"] + 1})
++            blocker = repo.conn.scalar(text("SELECT pg_backend_pid()"))
++            group = pool.submit(runtime.discover_group, 3)
++            deadline = monotonic() + 5
++            while True:
++                with kernel.db.uow(write=False) as observer:
++                    blocked = observer.conn.scalar(text(
++                        "SELECT EXISTS (SELECT FROM pg_stat_activity a WHERE a.datname=current_database()"
++                        " AND :ours = ANY(pg_blocking_pids(a.pid)))"), {"ours": blocker})
++                if blocked:
++                    break
++                assert monotonic() < deadline, "reader never attempted the grant lock"
++            assert not group.done()
++        with pytest.raises(DomainError) as denied:
++            group.result(timeout=3)
++        assert denied.value.code == "VIEW_DENIED"
++
++
++def test_dynamic_refresh_is_outside_uow_and_rechecks_local_grant(actor_read, monkeypatch):
++    kernel, world, role, runtime = actor_read
++    entered = Event()
++    release = Event()
++    # Inject a dynamic reference solely to stop at the Workshop I/O boundary.
++    # The test exercises the *local* revalidation on return; no remote provider is called.
++    monkeypatch.setattr(mcp_runtime, "assignment_from_inputs", lambda inputs: {"test": "assignment"})
++
++    def wait_for_witness(*_):
++        entered.set()
++        assert release.wait(5)
++        return {"fixture": "witness"}
++
++    monkeypatch.setattr(mcp_runtime, "refresh", wait_for_witness)
++    with ThreadPoolExecutor(2) as pool:
++        get = pool.submit(runtime.context_get)
++        try:
++            assert entered.wait(5)
++            pool.submit(kernel.revoke_grant, world["principal"], role.principal.grant_id).result(3)
++        finally:
++            release.set()
++        with pytest.raises(DomainError) as denied:
++            get.result(3)
++    assert denied.value.code == "VIEW_DENIED"
++
++
++def test_dynamic_group_has_independent_outcomes(actor_read, monkeypatch):
++    _, _, _, runtime = actor_read
++    monkeypatch.setattr(mcp_runtime, "assignment_from_inputs", lambda inputs: {"test": "assignment"})
++    calls = count(0)
++
++    def discover():
++        if next(calls) == 0:
++            return ["nf_context_get"]
++        raise DomainError("VIEW_DENIED", "No longer authorized")
++
++    monkeypatch.setattr(runtime, "available_tools", discover)
++    assert runtime.discover_group(3) == [["nf_context_get"], [], []]
++    assert next(calls) == 3
++
++
++def test_initialized_stdio_sdk_cache_does_not_authorize_after_revoke(actor_read, kernel_env, tmp_path):
++    kernel, world, role, runtime = actor_read
++    params = config(tmp_path / "bound", kernel_env, role.private_token, vars(runtime.binding))
++    params.args.extend(["--compact-role-reads", "--batch-discovery"])
++
++    async def probe(session):
++        allowed = [item.name for item in (await session.list_tools()).tools]
++        assert "nf_context_get" in allowed
++        before = await session.call_tool("nf_context_get", {})
++        assert not before.isError and before.structuredContent["actor_id"] == world["ids"]["protagonist"]
++        kernel.revoke_grant(world["principal"], role.principal.grant_id)
++        # Call directly while the SDK still has a populated definition cache.
++        await error(session, "nf_context_get", {}, "VIEW_DENIED")
++        replies = await asyncio.gather(*(session.list_tools() for _ in range(3)))
++        assert all(not reply.tools for reply in replies)
++
++    asyncio.run(exercise(params, probe))
+diff --git a/tests/integration/test_p5_mcp.py b/tests/integration/test_p5_mcp.py
+index c51e1605d9b3652510b24d1d228dd870c2f53483..5ee0e52d8786a51660b0991c8801570677183954 100644
+--- a/tests/integration/test_p5_mcp.py
++++ b/tests/integration/test_p5_mcp.py
+@@ -117,7 +117,8 @@ def test_operator_database_fences_apply_outside_mcp(kernel_env, fence):
+         kernel.authorize(repo, scoped["principal"], wr["work_id"], "PROJECT_RESUME", wr["branch_id"])
+ 
+ 
+-def test_actor_stdio_own_cut_only_and_candidate_replay(kernel_env, tmp_path, record_testsuite_property):
++@pytest.mark.parametrize("flags", [[], ["--compact-role-reads", "--batch-discovery", "--pool-slots", "1"]])
++def test_actor_stdio_own_cut_only_and_candidate_replay(kernel_env, tmp_path, record_testsuite_property, flags):
+     kernel = kernel_env["kernel"]
+     world = load_fixture(kernel)
+     subject = world["ids"]["sword"]
+@@ -164,11 +165,15 @@ def test_actor_stdio_own_cut_only_and_candidate_replay(kernel_env, tmp_path, rec
+         await error(session, "nf_context_get", {}, "TASK_NOT_ACCEPTABLE")
+         await error(session, "nf_artifact_put", candidate, "TASK_NOT_ACCEPTABLE")
+ 
+-    asyncio.run(exercise(config(tmp_path / "actor.json", kernel_env, a.private_token, binding), check))
++    params = config(tmp_path / "actor.json", kernel_env, a.private_token, binding)
++    params.args.extend(flags)
++    asyncio.run(exercise(params, check))
+ 
+     async def bad_binding(session):
+         await error(session, "nf_context_get", {}, "VIEW_DENIED")
+         assert not (await session.list_tools()).tools
+ 
+-    asyncio.run(exercise(config(tmp_path / "swapped.json", kernel_env, a.private_token,
+-        {"task_id": b.task["task_id"], "generation": b.task["generation"], "worker_id": b.worker_id}), bad_binding))
++    params = config(tmp_path / "swapped.json", kernel_env, a.private_token,
++                    {"task_id": b.task["task_id"], "generation": b.task["generation"], "worker_id": b.worker_id})
++    params.args.extend(flags)
++    asyncio.run(exercise(params, bad_binding))
+diff --git a/tests/unit/test_bound_tool_admission.py b/tests/unit/test_bound_tool_admission.py
+index 09df638f0e91d92fb503964c69dfffaccc005fd0..fc756cdd3e34acd8bdfeae253379e978d2d12434 100644
+--- a/tests/unit/test_bound_tool_admission.py
++++ b/tests/unit/test_bound_tool_admission.py
+@@ -96,3 +96,39 @@ def test_embedded_server_leaves_its_shared_kernel_pool_with_its_owner():
+         runtime.kernel.db.engine.dispose.assert_not_called()
+ 
+     anyio.run(scenario)
++
++
++def test_static_discovery_group_closes_before_authority_is_read():
++    from novel_factory.interfaces.mcp_stdio import DiscoveryGroup
++
++    runtime = Mock()
++    release = threading.Event()
++    started = threading.Event()
++    authority = ["old"]
++
++    def discover(count):
++        snapshot = list(authority)
++        started.set()
++        assert release.wait(3)
++        return [snapshot.copy() for _ in range(count)]
++
++    runtime.discover_group.side_effect = discover
++
++    async def probe():
++        group = DiscoveryGroup(runtime, BoundToolAdmission(2))
++        first = [asyncio.create_task(group.list_tools()) for _ in range(5)]
++        assert await asyncio.to_thread(started.wait, 2)
++        assert await first[-1] == []  # bounded overflow
++        first[2].cancel()
++        authority[:] = ["current"]
++        later = asyncio.create_task(group.list_tools())
++        release.set()
++        results = await asyncio.gather(*first, return_exceptions=True)
++        assert results[:2] == [["old"], ["old"]]
++        assert isinstance(results[2], asyncio.CancelledError)
++        assert results[3] == ["old"]
++        assert await later == ["current"]
++        await group.drain()
++        assert [call.args for call in runtime.discover_group.call_args_list] == [(4,), (1,)]
++
++    asyncio.run(probe())

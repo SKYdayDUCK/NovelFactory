@@ -64,7 +64,7 @@ async def trial(kernel, directory, output, report):
                 break
             # An arm may hit a real process/session/PG startup error even when
             # there is spare memory. Preserve the observation and drain peers.
-            role = provision(kernel, directory, i)
+            role = provision(kernel, directory, i, lease_seconds=3600)
             nested = AsyncExitStack()
             try:
                 b = await stock(nested, role)
