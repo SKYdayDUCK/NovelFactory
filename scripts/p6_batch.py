@@ -154,7 +154,7 @@ def provision_metered_work(kernel, project, preparation):
 
 def resume_unsent_metered_job(kernel, project, state):
     """A previously paused reservation may resume only if no attempt was ever recorded for that task."""
-    if state.get("status") != "BLOCKED" or state.get("reason") != "BUDGET_EXCEEDED" or not state.get("task_id"):
+    if state.get("status") != "BLOCKED" or state.get("reason") not in {"BUDGET_EXCEEDED", "INPUTS_PENDING"} or not state.get("task_id"):
         return
     binding = private(project / "supervisor.json")
     owner = kernel.authenticate(binding["token"])
@@ -166,11 +166,29 @@ def resume_unsent_metered_job(kernel, project, state):
             return
         require(not repo.many("call_attempts", {"task_id": task["task_id"]}), "CALL_RECONCILIATION_REQUIRED",
                 "Metered recovery requires proof that no attempt was reserved")
-        job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})["config"]["dispatch"]
+        config = repo.one("supervisor_jobs", {"task_id": task["task_id"]})["config"]
+        if state["reason"] == "INPUTS_PENDING" and "joint" not in config:
+            return
+        job = config["dispatch"]
         bound = kernel.in_transaction(repo)
         SharedBudgetService(bound).provision_next(owner, work, branch, job["budget_id"],
                                                  job["reserve_amount"], job["token_reservation"])
         bound.tasks.resume(task["task_id"], task["generation"])
+        if "joint" in config:
+            # Reinstall the last verified AND barrier for this claim generation.
+            # Adjudication still verifies every sealed intent and its current actor grant.
+            wait = repo.conn.execute(text("""
+                SELECT generation,mode FROM nf_workflow_waits WHERE task_id=:tid
+                AND generation < :generation AND woken_at IS NOT NULL
+                ORDER BY generation DESC LIMIT 1
+            """), {"tid": task["task_id"], "generation": task["generation"]}).mappings().one_or_none()
+            require(wait and wait["mode"] == "AND", "INPUTS_PENDING", "Missing accepted joint prerequisites")
+            edges = repo.many("workflow_edges", {"task_id": task["task_id"], "generation": wait["generation"]})
+            repo.change("tasks", {"task_id": task["task_id"]}, {"state": "BLOCKED"})
+            from novel_factory.orchestration.workflow import WorkflowService
+            WorkflowService(bound.tasks).wait(task["task_id"], task["generation"],
+                [e["predecessor_id"] for e in edges], work_id=work, branch_id=branch, mode="AND",
+                authorize_in_tx=lambda _: bound.authorize(repo, owner, work, "ADMIN", branch))
 
 
 def writing_step(kernel, gateway, project, allowance):

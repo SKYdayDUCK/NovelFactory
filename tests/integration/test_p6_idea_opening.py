@@ -253,7 +253,24 @@ def test_reviewed_design_opens_sealed_interaction_before_any_writing(
             p6_batch.resume_unsent_metered_job(kernel, private, {"status": "BLOCKED", "reason": "BUDGET_EXCEEDED",
                                                "task_id": target, "generation": 0})
             assert kernel.tasks.get(target)["state"] == "READY"
-        for _ in range(25):
+        repaired_joint = False
+        for _ in range(30):
+            if harness and any(status == "OPENING_FORMAT_REPAIR_ENROLLED" for status, _ in statuses) and not repaired_joint:
+                supervisor._deliver_candidates(owner, work, branch)
+                supervisor.recover_project(owner, work, branch)
+                with kernel.db.uow() as repo:
+                    target = repo.conn.scalar(text("""
+                        SELECT t.task_id::text FROM nf_tasks t
+                        WHERE t.work_id=:wid AND task_kind='joint_outcome' AND state='READY'
+                    """), {"wid": work})
+                if target:
+                    claim = kernel.tasks.claim("test-interrupted-claim", task_id=target, lease_seconds=60)
+                    assert claim and claim["generation"] == 1
+                    with kernel.db.uow() as repo:
+                        repo.change("tasks", {"task_id": target}, {"state":"PAUSED","lease_owner":None,"lease_expiry":None})
+                    p6_batch.resume_unsent_metered_job(kernel, private, {"status": "BLOCKED", "reason": "INPUTS_PENDING",
+                        "task_id": target, "generation": claim["generation"]})
+                    repaired_joint = True
             if harness:
                 # A blocked joint task may wake and dispatch inside the same supervisor tick.
                 import p6_batch
@@ -265,6 +282,7 @@ def test_reviewed_design_opens_sealed_interaction_before_any_writing(
         assert turn.get("status") == "OPENING_ACCEPTED", statuses
         if harness:
             assert ("OPENING_FORMAT_REPAIR_ENROLLED", None) in statuses
+            assert repaired_joint
         assert len(actors) == 2
         assert all("市场" in brief and "末班渡船" not in brief for brief in actors.values())
         assert "父亲嘱咐" not in actors[_uid(work, "protagonist")]
