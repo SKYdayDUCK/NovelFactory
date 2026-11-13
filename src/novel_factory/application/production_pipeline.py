@@ -642,7 +642,9 @@ def revise_window(kernel, owner, *, world_ref, candidate_id, expected_candidate_
         require(settlement and settlement[1]["request"]["world_ref"] == world_ref,
                 "CONTINUITY_REVALIDATION_REQUIRED", "Revision requires the current published predecessor")
         history = node.get("history", [])
-        require(len(history) < 2, "CAPACITY_LIMIT", "The run allows two explicit local revisions per candidate")
+        quality = board.get("production_mode") == "quality"
+        if not quality:
+            require(len(history) < 2, "CAPACITY_LIMIT", "The run allows two explicit local revisions per candidate")
         plan_ref = _selected(repo, work, PlanningService.selection_key(board["volume_id"]))
         plan = kernel.artifact(repo, plan_ref, work, kind="PLAN_REVISION")["payload"]
         replacement = {k: node[k] for k in ("stage", "volume_id", "distance", "contract_ref")}
@@ -653,6 +655,11 @@ def revise_window(kernel, owner, *, world_ref, candidate_id, expected_candidate_
         verdict = _revalidate(kernel, repo, board, replacement, settlement)
         require(verdict and verdict["state"] == "READY_FOR_ADOPTION", "STALE_PLAN",
                 "Revised assumptions already conflict with the published predecessor")
+        if quality:
+            basis = fingerprint([settlement[0], world_ref, plan_ref, replacement["dependencies"]])
+            require(all(old.get("revision_basis") != basis for old in replacement["history"]),
+                    "STRATEGY_REASSESSMENT_REQUIRED", "Reassess the unchanged assumptions and frozen evidence")
+            replacement["revision_basis"] = basis
         board["nodes"][key] = replacement
         result = {"status": "REVISION_PENDING", "node_id": key, "prior_candidate_ref": expected_candidate_ref,
                   "board_ref": _save(kernel, repo, owner, board)}
