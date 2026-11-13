@@ -5,6 +5,7 @@ import socket
 import subprocess
 import sys
 import time
+from urllib.parse import urlsplit
 from contextlib import contextmanager
 from pathlib import Path
 from secrets import token_hex
@@ -112,9 +113,12 @@ def private_redis():
             text=True,
         ).strip()
         try:
-            port = subprocess.check_output(
-                ["docker", "port", container, "6379/tcp"], text=True
-            ).strip()
+            def endpoint():
+                # Docker may choose a new ephemeral host port after "start".
+                port = subprocess.check_output(
+                    ["docker", "port", container, "6379/tcp"], text=True
+                ).strip()
+                return f"redis://{port}/0"
 
             @contextmanager
             def outage():
@@ -124,7 +128,7 @@ def private_redis():
                 finally:
                     subprocess.run(["docker", "start", container], check=True, capture_output=True)
 
-            yield f"redis://{port}/0", outage, "docker"
+            yield endpoint, outage, "docker"
         finally:
             subprocess.run(["docker", "rm", "--force", container], check=True, capture_output=True)
         return
@@ -180,7 +184,7 @@ def private_redis():
                 process = start()
 
         try:
-            yield endpoint, outage, "native"
+            yield lambda: endpoint, outage, "native"
         finally:
             process.terminate()
             process.wait(timeout=10)
@@ -193,16 +197,18 @@ def test_postgres_mail_during_redis_outage_and_new_worker_processes(private_redi
     from redis.retry import Retry
 
     dsn = os.environ["AW_DATABASE_URL"]
-    endpoint, outage, mode = private_redis
-    redis = Redis.from_url(
-        endpoint,
-        decode_responses=True,
-        socket_connect_timeout=1,
-        socket_timeout=1,
-        retry=Retry(NoBackoff(), 0),
-    )
+    resolve_endpoint, outage, mode = private_redis
 
-    def wait_online():
+    def new_client(endpoint):
+        return Redis.from_url(
+            endpoint,
+            decode_responses=True,
+            socket_connect_timeout=1,
+            socket_timeout=1,
+            retry=Retry(NoBackoff(), 0),
+        )
+
+    def wait_online(redis):
         until = time.monotonic() + 10
         while True:
             try:
@@ -213,7 +219,10 @@ def test_postgres_mail_during_redis_outage_and_new_worker_processes(private_redi
                 time.sleep(0.05)
 
     stream, group, org = f"aw-restart-{uuid4().hex}", uuid4().hex, uuid4().hex
-    before = wait_online()
+    initial_endpoint = resolve_endpoint()
+    record_property("initial_redis_port", urlsplit(initial_endpoint).port)
+    redis = new_client(initial_endpoint)
+    before = wait_online(redis)
     with connect(dsn) as conn:
         conn.execute("INSERT INTO aw_installations VALUES(%s,%s,true)", (org, "nf-outage"))
         bootstrap(conn, org, installation_id=org)
@@ -255,7 +264,11 @@ def test_postgres_mail_during_redis_outage_and_new_worker_processes(private_redi
             ).fetchone()
             assert row["last_notified"] is None
             event = str(row["event_id"])
-    after = wait_online()
+    redis.close()
+    endpoint = resolve_endpoint()
+    record_property("restarted_redis_port", urlsplit(endpoint).port)
+    redis = new_client(endpoint)
+    after = wait_online(redis)
     assert before["run_id"] != after["run_id"]
     assert redis.dbsize() == 0  # The previously published entry disappeared with the process.
     assert replay(dsn) >= 1
@@ -323,4 +336,7 @@ def test_postgres_mail_during_redis_outage_and_new_worker_processes(private_redi
             ),
         )
     finally:
-        redis.delete(stream)
+        try:
+            redis.delete(stream)
+        finally:
+            redis.close()
