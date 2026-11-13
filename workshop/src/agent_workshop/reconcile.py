@@ -4,6 +4,7 @@ import argparse
 import asyncio
 import json
 import os
+from contextlib import AsyncExitStack, asynccontextmanager
 from decimal import Decimal
 from uuid import UUID
 
@@ -337,23 +338,57 @@ async def reconcile(dsn, installation, org, operation, invoke, lookup_only=False
         )
 
 
+async def _request(client, tool, request):
+    advertised = {t.name for t in (await client.list_tools()).tools}
+    return await client.call_tool(tool, request) if tool in advertised else None
+
+
+def _result(response):
+    if response is None:
+        raise Denied("VIEW_DENIED")
+    if response.isError:
+        raise Denied(
+            (response.structuredContent or {}).get("error", {}).get("code", "REMOTE_REJECTED")
+        )
+    return response.structuredContent
+
+
 def remote(params):
     async def invoke(tool, request):
         async with stdio_client(params) as streams, ClientSession(*streams) as client:
             await client.initialize()
-            advertised = {t.name for t in (await client.list_tools()).tools}
-            response = await client.call_tool(tool, request) if tool in advertised else None
-        # Raise after both anyio task groups have closed. An ExceptionGroup would
-        # otherwise erase the service error used to distinguish missing history.
-        if response is None:
-            raise Denied("VIEW_DENIED")
-        if response.isError:
-            raise Denied(
-                (response.structuredContent or {}).get("error", {}).get("code", "REMOTE_REJECTED")
-            )
-        return response.structuredContent
+            response = await _request(client, tool, request)
+        # Decode after the task groups have closed so the original service error survives.
+        return _result(response)
 
     return invoke
+
+
+@asynccontextmanager
+async def batch_remote(params):
+    """One trusted installation, sequential calls, one owning asyncio task.
+
+    Open lazily on the first claimed operation. A failed transport is retired.
+    Only a later operation may open a new session; never replay the failed call.
+    """
+    async with AsyncExitStack() as stack:
+        client = None
+
+        async def invoke(tool, request):
+            nonlocal client
+            try:
+                if client is None:
+                    streams = await stack.enter_async_context(stdio_client(params))
+                    client = await stack.enter_async_context(ClientSession(*streams))
+                    await client.initialize()
+                response = await _request(client, tool, request)
+            except BaseException:
+                client = None
+                await stack.aclose()
+                raise
+            return _result(response)
+
+        yield invoke
 
 
 def main():
@@ -363,6 +398,8 @@ def main():
     parser.add_argument(
         "--lookup-only", action="store_true", help="Recovery mode: only read old operation IDs"
     )
+    parser.add_argument("--reuse-session", action="store_true",
+                        help="Reuse one NF stdio connection for this installation and batch")
     parser.add_argument("--operation")
     parser.add_argument("--limit", type=int, default=20)
     parser.add_argument(
@@ -393,18 +430,17 @@ def main():
                     ),
                 )
             ]
-    invoke = remote(StdioServerParameters(command=argv[0], args=argv[1:]))
-    for op in operations:
-        print(
-            json.dumps(
-                {
-                    "operation_id": op,
-                    "state": asyncio.run(
-                        reconcile(dsn, args.installation, args.org, op, invoke, args.lookup_only)
-                    ),
-                }
-            )
-        )
+    params = StdioServerParameters(command=argv[0], args=argv[1:])
+
+    async def drain():
+        async with AsyncExitStack() as stack:
+            invoke = (await stack.enter_async_context(batch_remote(params))
+                      if args.reuse_session else remote(params))
+            for operation in operations:
+                state = await reconcile(dsn, args.installation, args.org, operation, invoke, args.lookup_only)
+                print(json.dumps({"operation_id": operation, "state": state}))
+
+    asyncio.run(drain())
 
 
 if __name__ == "__main__":

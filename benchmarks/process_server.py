@@ -132,7 +132,7 @@ class ServiceProcesses:
 
     def __enter__(self):
         context = multiprocessing.get_context('spawn')
-        listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
         listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         listener.bind(('127.0.0.1', 0))
         listener.listen(128)

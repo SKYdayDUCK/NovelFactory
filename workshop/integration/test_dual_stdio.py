@@ -5,13 +5,16 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+
+import pytest
 from uuid import uuid4
 
 from mcp import StdioServerParameters
 from redis_rebuild import rebuild_outboxes
 
 from agent_workshop.admin import enroll
-from agent_workshop.auth import connect
+from agent_workshop.auth import Denied, connect
+from agent_workshop.manager_worker import run_once as manager_run_once
 from agent_workshop.organization import bootstrap
 from agent_workshop.provision import allow_slot
 from agent_workshop.reconcile import reconcile, remote
@@ -38,7 +41,8 @@ def bound_process(tmp, module, config, src):
     )
 
 
-def test_two_live_mcp_servers_recover_accepted_task_after_lost_reply(dual_databases, tmp_path):
+@pytest.mark.parametrize("session_option", [(), ("--reuse-session",)], ids=["cold", "reuse"])
+def test_two_live_mcp_servers_recover_accepted_task_after_lost_reply(dual_databases, tmp_path, session_option):
     dsn = dual_databases["aw"]
     db = Database(dual_databases["nf"])
     kernel = Kernel(db, ObjectStore(tmp_path / "objects"))
@@ -112,6 +116,18 @@ def test_two_live_mcp_servers_recover_accepted_task_after_lost_reply(dual_databa
             c.execute("INSERT INTO aw_budget_accounts VALUES (%s,1,'USD')", (org,))
             allow_slot(c, org, installation, "scene-A", "actor-1", policy)
             token = enroll(c, installation, org, "volume", 1, 1)
+            manager_token = enroll(c, installation, org, "manager", 1, 1)
+        project_grant = kernel.issue_grant(controller, wr["work_id"], role_id="resume_operator",
+            capabilities=["PROJECT_RESUME"], branch_ids=[wr["branch_id"]],
+            expires_at=datetime.now(UTC) + timedelta(hours=1))
+        project = remote(bound_process(tmp_path, "novel_factory.interfaces.mcp_stdio", {
+            "token": project_grant["token"], "database_url": dual_databases["nf"],
+            "binding": {key: wr[key] for key in ("work_id", "branch_id")},
+            "object_root": str(tmp_path / "objects")}, Path(os.environ["AW_NF_SOURCE"]) / "src"))
+        manager_dir = tmp_path / "manager"
+        manager_dir.mkdir()
+        manager = remote(bound_process(manager_dir, "agent_workshop.server",
+            {"token": manager_token, "database_url": dsn}, Path(__file__).resolve().parents[1] / "src"))
         aw = remote(
             bound_process(
                 tmp_path,
@@ -143,6 +159,12 @@ def test_two_live_mcp_servers_recover_accepted_task_after_lost_reply(dual_databa
                 "operation_id": op, "recipient": "actor-1", "kind": "ASSIGN",
                 "scope_ref": "organization", "graph_revision": 1, "ttl_seconds": 600,
             })
+            wake_key = {"operation_id": "on-terminal", "after_delegation_id": op}
+            subscribed = await manager("aw_resume_project", wake_key)
+            assert subscribed["state"] == "WAITING_DELEGATION"
+            assert await manager_run_once(dsn, org, installation, project, nf) == "IDLE"
+            with pytest.raises(Denied, match="IDEMPOTENCY_MISMATCH"):
+                await manager("aw_resume_project", {"operation_id": wake_key["operation_id"]})
             committed = {}
 
             async def fail_after_commit(tool, request):
@@ -169,7 +191,7 @@ def test_two_live_mcp_servers_recover_accepted_task_after_lost_reply(dual_databa
             wake()
             worker = subprocess.run(
                 [sys.executable, "-m", "agent_workshop.reconcile", "--installation", installation,
-                 "--org", org, "--operation", op, "--", nf_params.command, *nf_params.args],
+                 "--org", org, "--operation", op, *session_option, "--", nf_params.command, *nf_params.args],
                 env={**os.environ, "AW_DATABASE_URL": dsn}, capture_output=True, text=True, check=True,
             )
             restarted_worker = json.loads(worker.stdout)
@@ -217,12 +239,27 @@ def test_two_live_mcp_servers_recover_accepted_task_after_lost_reply(dual_databa
                 ).fetchone()
                 assert hold["status"] == "SETTLED" and hold["settled_amount"] == 0
                 assert str(receipt["task_id"]) == task and receipt["task_state"] == "CANCELLED"
+            # Reconnect over independent AW and NF SDK stdio sessions. Only
+            # this manager's preauthorized event can release the project wake.
+            assert (await manager("aw_resume_project", wake_key))["state"] == "PENDING"
+            checked = {}
+            async def scoped_project(tool, args):
+                checked.update(args["expected_scope"])
+                for key in ("branch_id", "receipt_ref"):
+                    wrong_scope = {**checked, key: str(uuid4())}
+                    with pytest.raises(Denied, match="VIEW_DENIED"):
+                        await project(tool, {"expected_scope": wrong_scope})
+                return await project(tool, args)
+            assert await manager_run_once(dsn, org, installation, scoped_project, nf) == "DONE"
+            assert checked["receipt_ref"] == committed["receipt_ref"] and checked["task_id"] == task
+            assert await manager_run_once(dsn, org, installation, project, nf) == "IDLE"
+            assert (await manager("aw_resume_project", wake_key))["state"] == "DONE"
             cancelled = await nf("nf_delegation_get", get)
             assert cancelled["receipt_ref"] == committed["receipt_ref"]
             assert cancelled["attempts"] == [] and cancelled["actual_tokens"] == 0
             after_cancel = budget_view.status(*budget_scope)
             assert after_cancel == before_call
-            if receipt_path := os.environ.get("AW_W3_REDIS_EVIDENCE"):
+            if (receipt_path := os.environ.get("AW_W3_REDIS_EVIDENCE")) and not session_option:
                 redis_receipt["cancel_before_attempt"] = {
                     "budget_id": budget, "operation_id": op, "receipt_ref": cancelled["receipt_ref"],
                     "nf_after_cancel": after_cancel, "nf_reported_tokens": cancelled["actual_tokens"],

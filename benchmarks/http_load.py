@@ -137,15 +137,16 @@ class SqlMeasurements:
 
 
 @contextmanager
-def loopback_server(app):
+def loopback_server(app, *, lifespan="off", keepalive=5):
     """A real TCP Uvicorn server, with no ASGI in-process HTTP shortcut."""
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # asyncio enables TCP_NODELAY on accepted streams with an explicit TCP protocol.
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind(("127.0.0.1", 0))
     sock.listen(128)
     port = sock.getsockname()[1]
     server = uvicorn.Server(uvicorn.Config(app, host="127.0.0.1", port=port,
-        log_level="warning", access_log=False, lifespan="off", timeout_keep_alive=5))
+        log_level="warning", access_log=False, lifespan=lifespan, timeout_keep_alive=keepalive))
     thread = threading.Thread(target=server.run, kwargs={"sockets": [sock]}, daemon=True)
     thread.start()
     deadline = time.monotonic() + 10

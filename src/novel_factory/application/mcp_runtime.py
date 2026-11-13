@@ -6,6 +6,7 @@ from novel_factory.application.kernel import require
 from novel_factory.application.planning import validate_task_plan_binding
 from novel_factory.application.queries import WorldQueryService
 from novel_factory.application.query_policy import check_profile
+from novel_factory.application.task_operations import TaskOperations, TaskOperationsBinding
 from novel_factory.domain.canonical import fingerprint
 from novel_factory.domain.temporal import point_key
 from novel_factory.infrastructure.database import tables
@@ -33,14 +34,30 @@ class TaskBinding:
 
 
 class McpRuntime:
-    def __init__(self, kernel, principal, binding):
+    def __init__(self, kernel, principal, binding, *, compact_role_reads=False, fenced_task_status=False, status_coalescer=None,
+                 fuse_status_auth=False):
         self.kernel = kernel
         self.principal = principal
         self.binding = binding
+        self.compact_role_reads = compact_role_reads
+        self.fenced_task_status = fenced_task_status
+        self.fuse_status_auth = fuse_status_auth
+        self.status_coalescer = status_coalescer
         self.queries = WorldQueryService(kernel)
 
     def available_tools(self):
         with self.kernel.db.uow(write=False) as repo:
+            if isinstance(self.binding, TaskOperationsBinding):
+                grant = repo.one("grants", {"grant_id": self.principal.grant_id})
+                if not grant or not grant["active"] or grant["principal_id"] != self.principal.principal_id:
+                    return []
+                tools = []
+                for capability, names in (("READ", ["nf_task_status", "nf_task_status_batch", "nf_task_cancel", "nf_task_events"]),
+                                          ("TASK_CREATE", ["nf_task_submit"])):
+                    if capability in grant["capabilities"]:
+                        self.kernel.authorize(repo, self.principal, self.binding.work_id, capability, self.binding.branch_id)
+                        tools.extend(names)
+                return tools
             if isinstance(self.binding, CreativeControllerBinding):
                 from novel_factory.infrastructure.creative_config import CreativeHarnessConfig
 
@@ -131,6 +148,15 @@ class McpRuntime:
                 if "review-change-point" in skills and "review_submit" in requested:
                     names.append("nf_change_point_review")
         return names
+
+    def task_operation(self, name, arguments):
+        require(isinstance(self.binding, TaskOperationsBinding), "VIEW_DENIED", "Task operations binding required")
+        operations = TaskOperations(self.kernel, self.principal, binding=self.binding,
+                                    fenced_status=self.fenced_task_status, coalescer=self.status_coalescer)
+        methods = {"nf_task_submit": operations.submit, "nf_task_status": operations.status,
+                   "nf_task_status_batch": operations.status_batch, "nf_task_cancel": operations.cancel,
+                   "nf_task_events": operations.events}
+        return methods[name](**arguments)
 
     def _role_proof(self):
         with self.kernel.db.uow(write=False) as repo:
@@ -281,7 +307,7 @@ class McpRuntime:
                 and grant["capabilities"] == ["PROJECT_RESUME"],
                 "VIEW_DENIED", "A branch-bound resume grant is required")
 
-    def project(self, *, resume=False):
+    def project(self, *, resume=False, expected_scope=None):
         require(isinstance(self.binding, ProjectBinding), "VIEW_DENIED", "Project grant required")
         service = WorkflowService(self.kernel.tasks)
         operation = service.resume_project if resume else service.status
@@ -289,6 +315,29 @@ class McpRuntime:
 
         def authorize(conn):
             self._project_auth(conn)
+            if expected_scope is not None:
+                require(resume and expected_scope["work_id"] == self.binding.work_id
+                        and expected_scope["branch_id"] == self.binding.branch_id, "VIEW_DENIED",
+                        "Completion scope does not match the bound project")
+                # This hint confers no authority. Lock the live enrollment, exact
+                # canonical receipt and task generation before invoking the normal DAG wake.
+                from sqlalchemy import text
+                matches = conn.scalar(text("""
+                    SELECT 1 FROM nf_delegation_receipts r JOIN nf_delegation_installations i USING(installation_id)
+                    JOIN nf_delegation_slots s ON (s.installation_id,s.scope_ref)=(r.installation_id,r.scope_ref)
+                    JOIN nf_tasks t ON t.task_id=r.task_id JOIN nf_grants g ON g.grant_id=t.grant_id
+                    JOIN nf_works w ON w.work_id=i.work_id
+                    WHERE i.installation_id=:installation_id AND i.org_id=:org_id
+                    AND i.nf_instance_id=:nf_instance_id AND i.active AND NOT i.outbound_fenced
+                    AND i.expires_at>clock_timestamp() AND i.epoch=:grant_epoch AND i.policy_version=w.policy_version
+                    AND i.work_id=:work_id AND i.branch_id=:branch_id
+                    AND r.operation_id=:operation_id AND r.receipt_ref=:receipt_ref AND r.task_id=:task_id
+                    AND t.work_id=i.work_id AND t.branch_id=i.branch_id AND t.generation=:generation
+                    AND t.state IN ('ACCEPTED','FAILED','CANCELLED') AND g.active
+                    AND s.grant_id=g.grant_id AND s.grant_epoch=g.epoch
+                    FOR SHARE OF i,s,t,g,w
+                """), expected_scope)
+                require(matches, "VIEW_DENIED", "Completion receipt is no longer current")
             fence = KernelRepository(conn, tables).one("resume_grants", {"grant_id": self.principal.grant_id})
             expiration["resume_grant_expires_at"] = fence["expires_at"].isoformat()
 
@@ -327,18 +376,32 @@ class McpRuntime:
                     "VIEW_DENIED", "Task cut unavailable")
         return task, grant, ctx, spec
 
-    def task_get(self):
-        proof = self._role_proof()
+    def _read_role(self, tool):
+        if self.compact_role_reads:
+            with self.kernel.db.uow(write=False) as repo:
+                state = self._bound_state(repo)
+                task, grant, context, spec = state
+                inputs = matching_inputs(repo, task, spec)
+                ref = assignment_from_inputs(inputs)
+                if ref is None:
+                    require(tool in self._task_tools(repo, state, inputs), "VIEW_DENIED", "Tool outside task authority")
+                    return task, grant, context
+            # A Workshop witness requires I/O. Release local locks, then recheck
+            # task generation, current grant and the exact assignment on delivery.
+            proof = ref, refresh(self.kernel, self.principal, task["task_id"], task["generation"], ref)
+        else:
+            proof = self._role_proof()
         with self.kernel.db.uow(write=False) as repo:
-            task, _, ctx = self._role_task(repo, "nf_task_get", proof)
-            return {**{k: task[k] for k in ("task_id", "generation", "state", "context_bundle_id")},
-                    "world_ref": ctx["payload"]["world_ref"]}
+            return self._role_task(repo, tool, proof)
+
+    def task_get(self):
+        task, _, ctx = self._read_role("nf_task_get")
+        return {**{k: task[k] for k in ("task_id", "generation", "state", "context_bundle_id")},
+                "world_ref": ctx["payload"]["world_ref"]}
 
     def context_get(self):
-        proof = self._role_proof()
-        with self.kernel.db.uow(write=False) as repo:
-            _, _, ctx = self._role_task(repo, "nf_context_get", proof)
-            return ctx["payload"]
+        _, _, ctx = self._read_role("nf_context_get")
+        return ctx["payload"]
 
     def query_batch(self, lookups):
         proof = self._role_proof()

@@ -1,0 +1,64 @@
+PONG
+.F                                                                       [100%]
+=================================== FAILURES ===================================
+__ test_operator_can_suspend_only_an_empty_projection_and_restore_from_tasks ___
+
+kernel_env = {'db': <novel_factory.infrastructure.database.Database object at 0x7fc1d9bcfa70>, 'store': <novel_factory.infrastructu....Kernel object at 0x7fc1d8118e60>, 'url': 'postgresql+psycopg://agent@127.0.0.1:55687/nf_kernel_9e4054f5c42d45bb', ...}
+
+    def test_operator_can_suspend_only_an_empty_projection_and_restore_from_tasks(kernel_env):
+        from sqlalchemy.exc import IntegrityError
+    
+        from novel_factory.orchestration.progress import set_progress_maintenance
+    
+        kernel = kernel_env["kernel"]
+        book = load_fixture(kernel)
+        work, branch = book["world_ref"]["work_id"], book["world_ref"]["branch_id"]
+        role = kernel.issue_grant(book["principal"], work, role_id="writer")["principal"]
+        def enabled(conn):
+            return conn.scalar(text("""SELECT tgenabled FROM pg_trigger
+                WHERE tgrelid='nf_tasks'::regclass AND tgname='nf_hera_progress_delta'"""))
+    
+        with pytest.raises(RuntimeError), kernel.db.uow() as repo:
+            set_progress_maintenance(repo.conn, suspended=True)
+            assert enabled(repo.conn) == "D"
+            raise RuntimeError("abort configuration")
+    
+        with kernel.db.uow() as repo:
+            assert enabled(repo.conn) == "O"
+            set_progress_maintenance(repo.conn, suspended=True)
+            set_progress_maintenance(repo.conn, suspended=True)
+        with pytest.raises(IntegrityError), kernel.db.uow() as repo:
+            repo.conn.execute(text("INSERT INTO nf_hera_progress VALUES (:w,:b,'{}',0)"),
+                              {"w":work,"b":branch})
+        spec = task_spec(book, principal=role, role="writer")
+>       kernel.create_task(role,spec,"suspended-write")
+
+tests/integration/test_hera_progress.py:95: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/novel_factory/application/kernel.py:477: in create_task
+    return self.tasks.create(spec, principal_id=principal.principal_id,
+src/novel_factory/orchestration/tasks.py:121: in create
+    with self._tx(authorize_in_tx) as conn:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+src/novel_factory/orchestration/tasks.py:77: in _tx
+    authorize_in_tx(conn)
+src/novel_factory/application/kernel.py:475: in authorize_task
+    self._authorize_task_create(KernelRepository(conn, tables), principal, spec)
+src/novel_factory/application/kernel.py:496: in _authorize_task_create
+    require(point_key(spec["story_time"])<=point_key(g["max_story_time"]),"VIEW_DENIED","Task time outside grant")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+condition = False, code = 'VIEW_DENIED', message = 'Task time outside grant'
+
+    def require(condition, code, message):
+>       if not condition: raise DomainError(code, message)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       novel_factory.domain.errors.DomainError: Task time outside grant
+
+src/novel_factory/application/kernel.py:31: DomainError
+=========================== short test summary info ============================
+FAILED tests/integration/test_hera_progress.py::test_operator_can_suspend_only_an_empty_projection_and_restore_from_tasks
+1 failed, 1 passed in 2.26s

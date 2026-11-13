@@ -173,7 +173,7 @@ class RuntimeSupervisor:
                         f"supervisor:enroll:{task_id}")
         return {"task_id": task_id, "enrolled": True}
 
-    def run_once(self, controller, work_id, branch_id, *, executor=None):
+    def run_once(self, controller, work_id, branch_id, *, executor=None, admit_model=True):
         with self.kernel.db.uow(write=False) as repo:
             self.kernel.authorize(repo, controller, work_id, "ADMIN", branch_id)
             if dispatch.redis_enabled(repo.conn, work_id, branch_id):
@@ -182,6 +182,8 @@ class RuntimeSupervisor:
         if result:
             return result
         summary = self.recover_project(controller, work_id, branch_id)
+        if not admit_model:
+            return {"status": "IDLE", **summary}
         return self.admit_model(controller, work_id, branch_id, executor=executor, summary=summary)
 
     def advance_world(self, controller, work_id, branch_id):

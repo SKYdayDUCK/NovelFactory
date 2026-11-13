@@ -17,6 +17,15 @@ _FIELDS = (
 _INSERT = text(f"""INSERT INTO nf_audit_events ({','.join(_FIELDS)})
     VALUES ({','.join(':'+key for key in _FIELDS)})
     ON CONFLICT(event_id) DO NOTHING RETURNING event_id""")
+_TOOL_EVENT_AND_OUTBOX = text(f"""
+    WITH recorded AS ({_INSERT.text}), published AS (
+        INSERT INTO nf_outbox (outbox_id,topic,aggregate_type,aggregate_id,payload,dedupe_key)
+        SELECT :outbox_id,'audit.recorded','audit',event_id::text,CAST(:envelope AS jsonb),
+               'audit:' || event_id::text FROM recorded
+        ON CONFLICT(dedupe_key) DO NOTHING RETURNING outbox_id
+    )
+    SELECT EXISTS (SELECT FROM recorded), EXISTS (SELECT FROM published)
+""")
 
 
 def _uuid(value):
@@ -43,6 +52,32 @@ def _task_scope(conn, task_id, generation=None):
     return scope
 
 
+def _bound_tool_scope(conn, runtime):
+    """Read a grant and only its own bound task's audit scope in one snapshot."""
+    binding = runtime.binding
+    row = conn.execute(text("""
+        SELECT coalesce(t.work_id,g.work_id) AS work_id, g.role_id AS grant_role,
+               t.role_id AS task_role, g.actor_id, t.principal_id AS task_principal,
+               t.branch_id,t.task_id,i.generation,
+               i.spec->'world_ref'->>'world_revision_id' AS world_revision_id,
+               tt.trace_id,tt.volume_id
+        FROM nf_grants g
+        LEFT JOIN nf_tasks t ON t.grant_id=g.grant_id AND t.task_id=:task
+        LEFT JOIN nf_task_inputs i ON i.task_id=t.task_id AND i.generation=:generation
+        LEFT JOIN nf_trace_tasks tt ON tt.task_id=t.task_id
+        WHERE g.grant_id=:grant
+    """), {"task": binding.task_id, "generation": binding.generation,
+           "grant": runtime.principal.grant_id}).mappings().one()
+    scope = dict(work_id=row["work_id"], role_id=row["grant_role"], actor_id=row["actor_id"],
+                 principal_id=runtime.principal.principal_id)
+    if row["task_id"] is not None:
+        scope.update({key: row[key] for key in ("branch_id", "task_id", "generation", "world_revision_id",
+                                                "trace_id", "volume_id")})
+        scope.update(role_id=row["task_role"], principal_id=_uuid(row["task_principal"]),
+                     parent_span_id=row["task_id"])
+    return scope
+
+
 def supports_harness_details(conn):
     """Read the active database catalog, including on historical upgrade rehearsals."""
     return conn.scalar(text("""
@@ -51,7 +86,7 @@ def supports_harness_details(conn):
     """))
 
 
-def record(conn, event_type, *, event_id=None, conflict_details=None, harness_details=None, **fields):
+def record(conn, event_type, *, event_id=None, conflict_details=None, harness_details=None, compact_outbox=False, **fields):
     """Internal transaction boundary. Only typed identifiers, counters and bounded labels persist."""
     event_id = str(event_id or uuid4())
     values = dict.fromkeys(_FIELDS)
@@ -68,11 +103,20 @@ def record(conn, event_type, *, event_id=None, conflict_details=None, harness_de
         statement = text(f"""INSERT INTO nf_audit_events ({columns}) VALUES ({parameters})
             ON CONFLICT(event_id) DO NOTHING RETURNING event_id""")
         values.update({key: json.dumps(value) for key, value in extras.items()})
-    inserted = conn.execute(statement, values).scalar_one_or_none()
+    envelope = {k: str(values[k]) for k in ("work_id", "branch_id", "task_id", "trace_id") if values[k]}
+    if values["generation"] is not None:
+        envelope["generation"] = values["generation"]
+    if compact_outbox and not extras:
+        inserted, published = conn.execute(_TOOL_EVENT_AND_OUTBOX, {
+            **values, "outbox_id": str(uuid4()), "envelope": json.dumps(envelope)
+        }).one()
+        if published or not inserted:
+            return event_id
+        # A pre-existing Outbox key requires the normal content check. Run it
+        # in a new statement so a concurrent publisher's commit is visible.
+    else:
+        inserted = conn.execute(statement, values).scalar_one_or_none()
     if inserted:
-        envelope = {k:str(values[k]) for k in ("work_id","branch_id","task_id","trace_id") if values[k]}
-        if values["generation"] is not None:
-            envelope["generation"] = values["generation"]
         enqueue_outbox(conn, tables, "audit.recorded", "audit", event_id, envelope, "audit:"+event_id)
     return event_id
 
@@ -208,22 +252,26 @@ class LogService:
     def begin_tool(runtime, safe_tool, request_id, *, transport="mcp"):
         """Capture an admitted call before execution, including calls later denied by policy."""
         with runtime.kernel.db.uow() as repo:
-            grant = repo.one("grants", {"grant_id":runtime.principal.grant_id})
-            scope = dict(work_id=grant["work_id"], role_id=grant["role_id"], actor_id=grant["actor_id"],
-                         principal_id=runtime.principal.principal_id)
-            bound_task = getattr(runtime.binding, "task_id", None)
-            if bound_task:
-                task = repo.one("tasks", {"task_id":bound_task, "grant_id":grant["grant_id"]})
-                if task:
-                    scope.update(_task_scope(repo.conn, bound_task, runtime.binding.generation))
-            elif getattr(runtime.binding, "branch_id", None):
-                branch = repo.one("branches", {"work_id":grant["work_id"], "branch_id":runtime.binding.branch_id})
-                if branch and (grant["branch_ids"] == ["*"] or branch["branch_id"] in grant["branch_ids"]):
-                    scope["branch_id"] = branch["branch_id"]
+            if runtime.compact_role_reads and getattr(runtime.binding, "task_id", None):
+                scope = _bound_tool_scope(repo.conn, runtime)
+            else:
+                grant = repo.one("grants", {"grant_id":runtime.principal.grant_id})
+                scope = dict(work_id=grant["work_id"], role_id=grant["role_id"], actor_id=grant["actor_id"],
+                             principal_id=runtime.principal.principal_id)
+                bound_task = getattr(runtime.binding, "task_id", None)
+                if bound_task:
+                    task = repo.one("tasks", {"task_id":bound_task, "grant_id":grant["grant_id"]})
+                    if task:
+                        scope.update(_task_scope(repo.conn, bound_task, runtime.binding.generation))
+                elif getattr(runtime.binding, "branch_id", None):
+                    branch = repo.one("branches", {"work_id":grant["work_id"], "branch_id":runtime.binding.branch_id})
+                    if branch and (grant["branch_ids"] == ["*"] or branch["branch_id"] in grant["branch_ids"]):
+                        scope["branch_id"] = branch["branch_id"]
             invocation = str(uuid4())
             scope.update(tool_name=safe_tool, request_id=sha256(str(request_id).encode()).hexdigest(),
                          trace_id=scope.get("trace_id") or scope.get("task_id") or invocation)
-            record(repo.conn, transport + ".started", event_id=invocation, **scope)
+            record(repo.conn, transport + ".started", event_id=invocation, **scope,
+                   compact_outbox=runtime.compact_role_reads)
             return invocation, scope
 
     @staticmethod
@@ -231,6 +279,7 @@ class LogService:
         with runtime.kernel.db.uow() as repo:
             record(repo.conn, transport + ".finished", **{**scope, "parent_span_id":invocation},
                    causation_id=invocation, outcome="ERROR" if error else "OK",
+                   compact_outbox=runtime.compact_role_reads,
                    error_code=error, duration_ms=elapsed_ms, evidence_id=_uuid(evidence_id) if not error else None)
 
     @staticmethod

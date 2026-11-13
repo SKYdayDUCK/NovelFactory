@@ -1,0 +1,71 @@
+diff --git a/src/novel_factory/application/audit_log.py b/src/novel_factory/application/audit_log.py
+index b52f038..138b6c8 100644
+--- a/src/novel_factory/application/audit_log.py
++++ b/src/novel_factory/application/audit_log.py
+@@ -52,6 +52,32 @@ def _task_scope(conn, task_id, generation=None):
+     return scope
+ 
+ 
++def _bound_tool_scope(conn, runtime):
++    """Read a grant and only its own bound task's audit scope in one snapshot."""
++    binding = runtime.binding
++    row = conn.execute(text("""
++        SELECT coalesce(t.work_id,g.work_id) AS work_id, g.role_id AS grant_role,
++               t.role_id AS task_role, g.actor_id, t.principal_id AS task_principal,
++               t.branch_id,t.task_id,i.generation,
++               i.spec->'world_ref'->>'world_revision_id' AS world_revision_id,
++               tt.trace_id,tt.volume_id
++        FROM nf_grants g
++        LEFT JOIN nf_tasks t ON t.grant_id=g.grant_id AND t.task_id=:task
++        LEFT JOIN nf_task_inputs i ON i.task_id=t.task_id AND i.generation=:generation
++        LEFT JOIN nf_trace_tasks tt ON tt.task_id=t.task_id
++        WHERE g.grant_id=:grant
++    """), {"task": binding.task_id, "generation": binding.generation,
++           "grant": runtime.principal.grant_id}).mappings().one()
++    scope = dict(work_id=row["work_id"], role_id=row["grant_role"], actor_id=row["actor_id"],
++                 principal_id=runtime.principal.principal_id)
++    if row["task_id"] is not None:
++        scope.update({key: row[key] for key in ("branch_id", "task_id", "generation", "world_revision_id",
++                                                "trace_id", "volume_id")})
++        scope.update(role_id=row["task_role"], principal_id=_uuid(row["task_principal"]),
++                     parent_span_id=row["task_id"])
++    return scope
++
++
+ def supports_harness_details(conn):
+     """Read the active database catalog, including on historical upgrade rehearsals."""
+     return conn.scalar(text("""
+@@ -226,18 +252,21 @@ class LogService:
+     def begin_tool(runtime, safe_tool, request_id, *, transport="mcp"):
+         """Capture an admitted call before execution, including calls later denied by policy."""
+         with runtime.kernel.db.uow() as repo:
+-            grant = repo.one("grants", {"grant_id":runtime.principal.grant_id})
+-            scope = dict(work_id=grant["work_id"], role_id=grant["role_id"], actor_id=grant["actor_id"],
+-                         principal_id=runtime.principal.principal_id)
+-            bound_task = getattr(runtime.binding, "task_id", None)
+-            if bound_task:
+-                task = repo.one("tasks", {"task_id":bound_task, "grant_id":grant["grant_id"]})
+-                if task:
+-                    scope.update(_task_scope(repo.conn, bound_task, runtime.binding.generation))
+-            elif getattr(runtime.binding, "branch_id", None):
+-                branch = repo.one("branches", {"work_id":grant["work_id"], "branch_id":runtime.binding.branch_id})
+-                if branch and (grant["branch_ids"] == ["*"] or branch["branch_id"] in grant["branch_ids"]):
+-                    scope["branch_id"] = branch["branch_id"]
++            if runtime.compact_role_reads and getattr(runtime.binding, "task_id", None):
++                scope = _bound_tool_scope(repo.conn, runtime)
++            else:
++                grant = repo.one("grants", {"grant_id":runtime.principal.grant_id})
++                scope = dict(work_id=grant["work_id"], role_id=grant["role_id"], actor_id=grant["actor_id"],
++                             principal_id=runtime.principal.principal_id)
++                bound_task = getattr(runtime.binding, "task_id", None)
++                if bound_task:
++                    task = repo.one("tasks", {"task_id":bound_task, "grant_id":grant["grant_id"]})
++                    if task:
++                        scope.update(_task_scope(repo.conn, bound_task, runtime.binding.generation))
++                elif getattr(runtime.binding, "branch_id", None):
++                    branch = repo.one("branches", {"work_id":grant["work_id"], "branch_id":runtime.binding.branch_id})
++                    if branch and (grant["branch_ids"] == ["*"] or branch["branch_id"] in grant["branch_ids"]):
++                        scope["branch_id"] = branch["branch_id"]
+             invocation = str(uuid4())
+             scope.update(tool_name=safe_tool, request_id=sha256(str(request_id).encode()).hexdigest(),
+                          trace_id=scope.get("trace_id") or scope.get("task_id") or invocation)

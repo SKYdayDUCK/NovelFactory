@@ -1,0 +1,150 @@
+diff --git a/src/novel_factory/application/derived_worker.py b/src/novel_factory/application/derived_worker.py
+index 7d0015f..7cc2fa9 100644
+--- a/src/novel_factory/application/derived_worker.py
++++ b/src/novel_factory/application/derived_worker.py
+@@ -7,7 +7,7 @@ world facts, tasks, permissions, canon selection or published text.
+ """
+ from __future__ import annotations
+ 
+-from copy import deepcopy
++from hashlib import sha256
+ from uuid import UUID, uuid4, uuid5
+ 
+ from sqlalchemy import text
+@@ -70,29 +70,32 @@ class DerivedWorldWorker:
+             # world revision belong in this reproducible index generation.
+             invalidations = [row for row in invalidations
+                              if row["version"] <= revision["scope_versions"].get(row["scope_key"], -1)]
++        # revision() decoded a private snapshot. Sorting creates new lists, and
++        # nothing mutates their elements before the bytes and artifact are persisted.
+         payload = {
+             "projector_version": PROJECTOR_VERSION, "world_ref": wr,
+             "branch_seq": revision["branch_seq"], "source_manifest_sha256": revision["manifest_hash"],
+             "source_state_sha256": revision["state_hash"], "interpretation_ref": revision["interpretation_ref"],
+-            "timeline": sorted(deepcopy(revision["snapshot"]["events"]), key=fingerprint),
+-            "relations": sorted(deepcopy(revision["snapshot"]["relations"]), key=fingerprint),
++            "timeline": sorted(revision["snapshot"]["events"], key=fingerprint),
++            "relations": sorted(revision["snapshot"]["relations"], key=fingerprint),
+             # Cognitions remain classified records; a worker never promotes
+             # these into objective world truth or exposes an unfiltered API.
+-            "cognitions": sorted(deepcopy(revision["snapshot"]["cognitions"]), key=fingerprint),
+-            "resource_history": sorted(deepcopy(revision["snapshot"]["resource_history"]), key=fingerprint),
+-            "lifecycle_history": sorted(deepcopy(revision["snapshot"]["lifecycle_history"]), key=fingerprint),
+-            "frontiers": deepcopy(revision["frontiers"]),
++            "cognitions": sorted(revision["snapshot"]["cognitions"], key=fingerprint),
++            "resource_history": sorted(revision["snapshot"]["resource_history"], key=fingerprint),
++            "lifecycle_history": sorted(revision["snapshot"]["lifecycle_history"], key=fingerprint),
++            "frontiers": revision["frontiers"],
+             "invalidations": sorted([
+                 {key: row[key] for key in ("invalidation_id", "scope_key", "version")}
+                 for row in invalidations], key=lambda row: row["invalidation_id"]),
+-            "scope_versions": deepcopy(revision["scope_versions"]),
++            "scope_versions": revision["scope_versions"],
+             "authority": "DERIVED_ONLY_REAUTHORIZE_AT_READ",
+         }
+-        digest = fingerprint(payload)
++        content = canonical_bytes(payload)
++        digest = sha256(content).hexdigest()
+         ref = {"artifact_id": str(uuid5(UUID(wr["branch_id"]), PROJECTOR_VERSION)),
+                "artifact_revision_id": str(uuid5(UUID(wr["world_revision_id"]), PROJECTOR_VERSION)),
+                "sha256": digest}
+-        return payload, ref
++        return payload, ref, content
+ 
+     def process_claimed(self, lease, worker_id, *, fault=None):
+         """Prepare outside the transaction, then publish with transactional inbox.
+@@ -144,8 +147,8 @@ class DerivedWorldWorker:
+ 
+     def _materialize(self, lease, *, worker_id=None, scope=None, fault=None):
+         kernel = self.kernel
+-        payload, ref = self._material(lease)
+-        stored = kernel.objects.put(canonical_bytes(payload))
++        payload, ref, content = self._material(lease)
++        stored = kernel.objects.put(content)
+         require(stored.sha256 == ref["sha256"], "INVALID_EVIDENCE", "Derived content hash differs")
+         if fault:
+             fault("after_object_before_consume")
+@@ -175,15 +178,22 @@ class DerivedWorldWorker:
+             # Acquire work share before branch update, matching normal world
+             # operations; runtime/canon changes take work update then branch.
+             # Reversing these could deadlock against an administrative change.
+-            require(repo.one("works", {"work_id": wr["work_id"]}, lock="share"),
+-                    "INVALID_EVIDENCE", "Source work is unavailable")
++            # Scoped delivery already took this exact work lock in authorize().
++            if scope is None:
++                require(repo.one("works", {"work_id": wr["work_id"]}, lock="share"),
++                        "INVALID_EVIDENCE", "Source work is unavailable")
+             # Lock only this branch, in the same direction as world accepts.
+             # A candidate's sequence number never competes with canon's.
+             branch = repo.one("branches", {"work_id": wr["work_id"], "branch_id": wr["branch_id"]}, lock="update")
+             require(branch, "INVALID_EVIDENCE", "Source branch is unavailable")
+             if fault:
+                 fault("after_branch_lock")
+-            source = repo.one("revisions", wr)
++            # The snapshot was verified during preparation. Recheck only the
++            # immutable source witnesses used by the commit, under the branch lock.
++            source = conn.execute(text("""
++                SELECT branch_seq, state_hash, manifest_hash FROM nf_revisions
++                WHERE work_id=:work_id AND branch_id=:branch_id AND world_revision_id=:world_revision_id
++            """), wr).mappings().one_or_none()
+             require(source and source["branch_seq"] == payload["branch_seq"]
+                     and source["state_hash"] == payload["source_state_sha256"]
+                     and source["manifest_hash"] == payload["source_manifest_sha256"],
+@@ -198,22 +208,7 @@ class DerivedWorldWorker:
+                                           str(uuid5(UUID(wr["work_id"]), CONSUMER)))
+             if fault:
+                 fault("after_artifact_before_watermark")
+-            activated = False
+-            for name in INDEX_NAMES:
+-                old = repo.one("index_watermarks", {"branch_id": wr["branch_id"], "index_name": name})
+-                if old and old["branch_seq"] > source["branch_seq"]:
+-                    continue
+-                if old and old["branch_seq"] == source["branch_seq"]:
+-                    require(old["world_revision_id"] == wr["world_revision_id"], "PROJECTION_CORRUPT",
+-                            "The same branch sequence cannot identify two world revisions")
+-                    continue
+-                value = {"world_revision_id": wr["world_revision_id"], "branch_seq": source["branch_seq"],
+-                         "generation": 1 if old is None else old["generation"] + 1}
+-                if old:
+-                    repo.change("index_watermarks", {"branch_id": wr["branch_id"], "index_name": name}, value)
+-                else:
+-                    repo.add("index_watermarks", {"branch_id": wr["branch_id"], "index_name": name, **value})
+-                activated = True
++            activated = self._advance_watermarks(repo, wr, source["branch_seq"])
+             status.update(materialization="STORED", activated=activated)
+             if fault:
+                 fault("after_watermark_before_commit")
+@@ -227,6 +222,33 @@ class DerivedWorldWorker:
+         return {"message_id": lease["outbox_id"], "consumed": consumed, "artifact_ref": ref,
+                 "world_ref": payload["world_ref"], **status}
+ 
++    @staticmethod
++    def _advance_watermarks(repo, wr, branch_seq):
++        # The caller holds this branch's UPDATE lock. Read both generations
++        # together, preserving the equal-sequence corruption check for each.
++        current = {row["index_name"]: row for row in repo.many("index_watermarks", {
++            "branch_id": wr["branch_id"], "index_name": INDEX_NAMES,
++        })}
++        advance = []
++        for name in INDEX_NAMES:
++            previous = current.get(name)
++            if previous and previous["branch_seq"] == branch_seq:
++                require(previous["world_revision_id"] == wr["world_revision_id"],
++                        "PROJECTION_CORRUPT", "The same branch sequence cannot identify two world revisions")
++            if previous is None or previous["branch_seq"] < branch_seq:
++                advance.append(name)
++        if advance:
++            repo.conn.execute(text("""
++                INSERT INTO nf_index_watermarks AS w
++                    (branch_id, index_name, world_revision_id, branch_seq, generation)
++                SELECT :branch_id, name, :world_revision_id, :seq, 1
++                FROM unnest(CAST(:names AS text[])) AS entries(name)
++                ON CONFLICT (branch_id,index_name) DO UPDATE SET
++                    world_revision_id=EXCLUDED.world_revision_id, branch_seq=EXCLUDED.branch_seq,
++                    generation=w.generation+1
++            """), {**wr, "seq": branch_seq, "names": advance})
++        return bool(advance)
++
+     def run_once(self, worker_id, *, lease_seconds=30, fault=None):
+         token = str(uuid4())
+         with self.kernel.db.uow() as repo:

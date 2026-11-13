@@ -1,0 +1,13 @@
+PONG
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/scratch/3bc0ddb93804/projection/benchmarks/p55_capacity.py", line 162, in <module>
+    main()
+  File "/workspace/scratch/3bc0ddb93804/projection/benchmarks/p55_capacity.py", line 147, in main
+    trials = [trial(kernel,args.jobs,args.workers,adaptive,measure_resize=args.measure_resize) for adaptive in (False, True, True, False)]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/3bc0ddb93804/projection/benchmarks/p55_capacity.py", line 60, in trial
+    assert len(warmed) == workers
+           ^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

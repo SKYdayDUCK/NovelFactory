@@ -1,0 +1,386 @@
+[
+  {
+    "filename": "raw/dml-prof-1.prof",
+    "function_calls": 1126733,
+    "profiled_elapsed": 5.888559175,
+    "functions": {
+      "visit_insert": [
+        {
+          "name": "compiler.py:6015",
+          "calls": 160,
+          "cumulative_s": 0.181578
+        }
+      ],
+      "_execute_context": [
+        {
+          "name": "base.py:1836",
+          "calls": 1600,
+          "cumulative_s": 2.781443
+        }
+      ],
+      "_maybe_prepare_gen": [
+        {
+          "name": "_cursor_base.py:275",
+          "calls": 4102,
+          "cumulative_s": 1.352876
+        }
+      ],
+      "_send_query_prepared": [
+        {
+          "name": "_cursor_base.py:583",
+          "calls": 1600,
+          "cumulative_s": 0.934448
+        }
+      ],
+      "do_commit": [
+        {
+          "name": "default.py:726",
+          "calls": 224,
+          "cumulative_s": 0.540312
+        }
+      ],
+      "claim_task": [
+        {
+          "name": "kernel.py:543",
+          "calls": 32,
+          "cumulative_s": 1.142167
+        }
+      ],
+      "create_task": [
+        {
+          "name": "kernel.py:494",
+          "calls": 64,
+          "cumulative_s": 2.35811
+        }
+      ],
+      "cancel_task": [
+        {
+          "name": "kernel.py:597",
+          "calls": 32,
+          "cumulative_s": 0.885461
+        }
+      ],
+      "authenticate": [
+        {
+          "name": "kernel.py:58",
+          "calls": 224,
+          "cumulative_s": 0.688381
+        }
+      ],
+      "get_task_with_locked_work": [
+        {
+          "name": "kernel.py:578",
+          "calls": 96,
+          "cumulative_s": 0.592025
+        }
+      ],
+      "_compile_w_cache": [
+        {
+          "name": "elements.py:679",
+          "calls": 1600,
+          "cumulative_s": 0.406016
+        }
+      ],
+      "is_valid": [
+        {
+          "name": "static_validation.py:93",
+          "calls": 608,
+          "cumulative_s": 0.343247
+        },
+        {
+          "name": "base.py:1508",
+          "calls": 224,
+          "cumulative_s": 0.000101
+        }
+      ]
+    }
+  },
+  {
+    "filename": "raw/dml-prof-2.prof",
+    "function_calls": 1032941,
+    "profiled_elapsed": 10.423518184999985,
+    "functions": {
+      "visit_insert": [
+        {
+          "name": "compiler.py:6015",
+          "calls": 32,
+          "cumulative_s": 0.044819
+        }
+      ],
+      "_execute_context": [
+        {
+          "name": "base.py:1836",
+          "calls": 1600,
+          "cumulative_s": 4.750879
+        }
+      ],
+      "_maybe_prepare_gen": [
+        {
+          "name": "_cursor_base.py:275",
+          "calls": 4101,
+          "cumulative_s": 2.088802
+        }
+      ],
+      "_send_query_prepared": [
+        {
+          "name": "_cursor_base.py:583",
+          "calls": 1600,
+          "cumulative_s": 1.23924
+        }
+      ],
+      "do_commit": [
+        {
+          "name": "default.py:726",
+          "calls": 224,
+          "cumulative_s": 1.193501
+        }
+      ],
+      "claim_task": [
+        {
+          "name": "kernel.py:543",
+          "calls": 32,
+          "cumulative_s": 1.519192
+        }
+      ],
+      "create_task": [
+        {
+          "name": "kernel.py:494",
+          "calls": 64,
+          "cumulative_s": 3.57478
+        }
+      ],
+      "cancel_task": [
+        {
+          "name": "kernel.py:597",
+          "calls": 32,
+          "cumulative_s": 2.554964
+        }
+      ],
+      "authenticate": [
+        {
+          "name": "kernel.py:58",
+          "calls": 224,
+          "cumulative_s": 1.257268
+        }
+      ],
+      "get_task_with_locked_work": [
+        {
+          "name": "kernel.py:578",
+          "calls": 96,
+          "cumulative_s": 1.028349
+        }
+      ],
+      "_compile_w_cache": [
+        {
+          "name": "elements.py:679",
+          "calls": 1600,
+          "cumulative_s": 0.479382
+        }
+      ],
+      "is_valid": [
+        {
+          "name": "static_validation.py:93",
+          "calls": 608,
+          "cumulative_s": 0.596613
+        },
+        {
+          "name": "base.py:1508",
+          "calls": 224,
+          "cumulative_s": 0.000324
+        }
+      ]
+    }
+  },
+  {
+    "filename": "raw/dml-prof-3.prof",
+    "function_calls": 1032937,
+    "profiled_elapsed": 5.3795367210000045,
+    "functions": {
+      "visit_insert": [
+        {
+          "name": "compiler.py:6015",
+          "calls": 32,
+          "cumulative_s": 0.01604
+        }
+      ],
+      "_execute_context": [
+        {
+          "name": "base.py:1836",
+          "calls": 1600,
+          "cumulative_s": 2.499494
+        }
+      ],
+      "_maybe_prepare_gen": [
+        {
+          "name": "_cursor_base.py:275",
+          "calls": 4100,
+          "cumulative_s": 1.241565
+        }
+      ],
+      "_send_query_prepared": [
+        {
+          "name": "_cursor_base.py:583",
+          "calls": 1600,
+          "cumulative_s": 0.809607
+        }
+      ],
+      "do_commit": [
+        {
+          "name": "default.py:726",
+          "calls": 224,
+          "cumulative_s": 0.541161
+        }
+      ],
+      "claim_task": [
+        {
+          "name": "kernel.py:543",
+          "calls": 32,
+          "cumulative_s": 0.873726
+        }
+      ],
+      "create_task": [
+        {
+          "name": "kernel.py:494",
+          "calls": 64,
+          "cumulative_s": 2.092249
+        }
+      ],
+      "cancel_task": [
+        {
+          "name": "kernel.py:597",
+          "calls": 32,
+          "cumulative_s": 0.959167
+        }
+      ],
+      "authenticate": [
+        {
+          "name": "kernel.py:58",
+          "calls": 224,
+          "cumulative_s": 0.690699
+        }
+      ],
+      "get_task_with_locked_work": [
+        {
+          "name": "kernel.py:578",
+          "calls": 96,
+          "cumulative_s": 0.528078
+        }
+      ],
+      "_compile_w_cache": [
+        {
+          "name": "elements.py:679",
+          "calls": 1600,
+          "cumulative_s": 0.257602
+        }
+      ],
+      "is_valid": [
+        {
+          "name": "static_validation.py:93",
+          "calls": 608,
+          "cumulative_s": 0.286627
+        },
+        {
+          "name": "base.py:1508",
+          "calls": 224,
+          "cumulative_s": 0.000121
+        }
+      ]
+    }
+  },
+  {
+    "filename": "raw/dml-prof-4.prof",
+    "function_calls": 1126723,
+    "profiled_elapsed": 6.371201750000013,
+    "functions": {
+      "visit_insert": [
+        {
+          "name": "compiler.py:6015",
+          "calls": 160,
+          "cumulative_s": 0.179287
+        }
+      ],
+      "_execute_context": [
+        {
+          "name": "base.py:1836",
+          "calls": 1600,
+          "cumulative_s": 2.916509
+        }
+      ],
+      "_maybe_prepare_gen": [
+        {
+          "name": "_cursor_base.py:275",
+          "calls": 4096,
+          "cumulative_s": 1.345333
+        }
+      ],
+      "_send_query_prepared": [
+        {
+          "name": "_cursor_base.py:583",
+          "calls": 1600,
+          "cumulative_s": 0.802519
+        }
+      ],
+      "do_commit": [
+        {
+          "name": "default.py:726",
+          "calls": 224,
+          "cumulative_s": 0.583453
+        }
+      ],
+      "claim_task": [
+        {
+          "name": "kernel.py:543",
+          "calls": 32,
+          "cumulative_s": 1.307924
+        }
+      ],
+      "create_task": [
+        {
+          "name": "kernel.py:494",
+          "calls": 64,
+          "cumulative_s": 2.424501
+        }
+      ],
+      "cancel_task": [
+        {
+          "name": "kernel.py:597",
+          "calls": 32,
+          "cumulative_s": 0.906859
+        }
+      ],
+      "authenticate": [
+        {
+          "name": "kernel.py:58",
+          "calls": 224,
+          "cumulative_s": 0.810259
+        }
+      ],
+      "get_task_with_locked_work": [
+        {
+          "name": "kernel.py:578",
+          "calls": 96,
+          "cumulative_s": 0.672777
+        }
+      ],
+      "_compile_w_cache": [
+        {
+          "name": "elements.py:679",
+          "calls": 1600,
+          "cumulative_s": 0.447417
+        }
+      ],
+      "is_valid": [
+        {
+          "name": "static_validation.py:93",
+          "calls": 608,
+          "cumulative_s": 0.321509
+        },
+        {
+          "name": "base.py:1508",
+          "calls": 224,
+          "cumulative_s": 9.3e-05
+        }
+      ]
+    }
+  }
+]

@@ -5,9 +5,9 @@ from novel_factory.orchestration.tasks import MAINTENANCE_GATE
 
 _NEXT = text("""
     WITH active AS MATERIALIZED (
-        SELECT t.work_id, t.role_id FROM nf_dispatch_slots s
+        SELECT t.work_id, t.role_id, 'MODEL' AS resource FROM nf_dispatch_slots s
         JOIN nf_tasks t USING(task_id) WHERE s.expires_at > statement_timestamp()
-        UNION ALL SELECT work_id, 'derived_index' AS role_id FROM nf_index_leases WHERE expires_at > statement_timestamp()
+        UNION ALL SELECT work_id, 'derived_index', 'CPU_COMPUTE' FROM nf_index_leases WHERE expires_at > statement_timestamp()
     ), next_job AS (
         SELECT t.task_id, t.branch_id
         FROM nf_dispatch_waiters q
@@ -27,6 +27,9 @@ _NEXT = text("""
           AND NOT EXISTS (SELECT FROM nf_quota_retry_deadlines d
                           WHERE (d.task_id,d.generation)=(t.task_id,t.generation)
                             AND d.retry_not_before > statement_timestamp())
+          AND NOT EXISTS (SELECT FROM nf_durable_admissions a WHERE a.task_id=t.task_id
+              AND a.queue_deadline <= statement_timestamp()
+              AND NOT EXISTS (SELECT FROM nf_task_executions e WHERE e.task_id=t.task_id))
           AND t.deadline > statement_timestamp() AND g.active AND g.work_id=t.work_id
           AND g.principal_id::text=t.principal_id AND g.role_id=t.role_id
           AND g.epoch=(j.config->>'grant_epoch')::bigint AND w.policy_version=j.config->>'policy_version'
@@ -40,6 +43,8 @@ _NEXT = text("""
                          AND sc.generation=t.generation AND NOT EXISTS
                          (SELECT FROM nf_conflict_resolutions sr WHERE sr.case_id=sc.case_id
                           AND sr.outcome IN ('REVALIDATED','CERTIFICATE_REISSUED')))
+          AND NOT EXISTS (SELECT FROM nf_dispatch_limits lim WHERE lim.scope='RESOURCE'
+              AND lim.subject='MODEL' AND lim.slots <= (SELECT count(*) FROM active WHERE resource='MODEL'))
           AND (SELECT count(*) FROM active) <
               (SELECT slots FROM nf_dispatch_limits WHERE scope='GLOBAL' AND subject='*')
           AND (SELECT count(*) FROM active a WHERE a.work_id=t.work_id) <

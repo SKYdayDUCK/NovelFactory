@@ -86,6 +86,9 @@ jobs:
           tests/integration/test_mcp_idle_pool.py
           tests/integration/test_p5_scheduler_admission.py::test_supervisor_drains_sent_attempt_and_leaves_next_job_ready
           tests/integration/test_p58_routing.py
+          tests/integration/test_hera_durable_admission.py tests/integration/test_hera_progress.py
+          tests/integration/test_hera_status_batch.py tests/integration/test_hera_supervisor.py
+          tests/service/test_hera_mixed_ingress.py
           --junitxml=native-postgres.xml
       - uses: actions/upload-artifact@v4
         if: always()

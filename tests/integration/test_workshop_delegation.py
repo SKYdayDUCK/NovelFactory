@@ -506,3 +506,103 @@ def test_denied_accounting_caller_cannot_distinguish_missing_from_expired(site):
             ledger.mark_call_sent(attempt, worker_id="denied", authorize_in_tx=deny)
         assert blocked.value.as_dict("same") == DomainError("VIEW_DENIED", "Caller unavailable").as_dict("same")
     assert len(requests) == 1
+
+
+def test_reused_workshop_transport_reconnects_after_peer_death(site, monkeypatch):
+    """A later read can find a committed submit after loss of its persistent NF peer."""
+    import signal
+    from pathlib import Path
+
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[2] / "workshop/src"))
+    from agent_workshop.reconcile import batch_remote
+    from anyio import BrokenResourceError, ClosedResourceError, EndOfStream
+    from mcp.shared.exceptions import McpError
+
+    runtime, submit, get, config, _, _, _, _ = site
+    expected = runtime.call("nf_delegation_submit", submit)
+    pidfile = config.with_name("stdio.pid")
+    launcher = config.with_name("tracked_peer.py")
+    launcher.write_text(
+        "import os, runpy, sys\n"
+        "from pathlib import Path\n"
+        "Path(sys.argv.pop(1)).write_text(str(os.getpid()))\n"
+        "runpy.run_module('novel_factory.interfaces.delegation_stdio', run_name='__main__')\n",
+        encoding="utf-8",
+    )
+    params = StdioServerParameters(command=sys.executable, args=[
+        str(launcher), str(pidfile), "--binding", str(config),
+    ])
+
+    async def run():
+        async with batch_remote(params) as invoke:
+            assert await invoke("nf_delegation_get", get) == expected
+            pid = int(pidfile.read_text())
+            # SIGTERM on POSIX / TerminateProcess via os.kill on Windows.
+            os.kill(pid, signal.SIGTERM)
+            with pytest.raises((BrokenResourceError, ClosedResourceError, EndOfStream, McpError, EOFError)):
+                async with asyncio.timeout(5):
+                    await invoke("nf_delegation_get", get)
+            async with asyncio.timeout(15):
+                assert await invoke("nf_delegation_get", get) == expected
+            assert int(pidfile.read_text()) != pid
+
+    asyncio.run(run())
+
+
+def test_rest_delegation_disconnect_then_stdio_lookup_and_execution(site):
+    from benchmarks.http_load import loopback_server
+    from novel_factory.interfaces.http import HttpSettings, create_app
+    import httpx
+
+    runtime, submit, get, config, supervisor, owner, requests, frozen = site
+    private = json.loads(config.read_text())
+    path = "/api/v1/hera/installations/" + runtime.installation_id + "/delegations/"
+    headers = {"Authorization": "Bearer " + private["token"]}
+    app = create_app(runtime.kernel, settings=HttpSettings(hera_delegations=True,
+                                                           per_principal_concurrency=1, queue_timeout_seconds=.2))
+    async def two_entries(base):
+        from mcp.client.streamable_http import streamable_http_client
+        async with httpx.AsyncClient(base_url=base, headers=headers, trust_env=False) as rest:
+            async with streamable_http_client(base+"/mcp/installations/"+runtime.installation_id, http_client=rest) as streams:
+                async with ClientSession(streams[0], streams[1]) as sdk:
+                    await sdk.initialize()
+                    # Exhaust the shared, real application slot after protocol initialization.
+                    async with app.state.admission.slot("installation:" + runtime.installation_id, "task"):
+                        busy_rest, busy_mcp = await asyncio.gather(rest.post(path + "submit", json=submit),
+                                                                  sdk.call_tool("nf_delegation_submit", submit))
+                    assert busy_rest.status_code == 429 and busy_rest.headers["Retry-After"] == "1"
+                    assert busy_mcp.isError and busy_mcp.structuredContent["error"] == {
+                        "code": "BACKPRESSURE", "retryable": True, "retry_after_ms": 1000,
+                        "recovery": "WAIT", "retry_same_operation": True}
+                    with runtime.kernel.db.uow(write=False) as repo:
+                        assert not repo.many("delegation_receipts", {"installation_id": runtime.installation_id})
+                    response, replay = await asyncio.gather(rest.post(path + "submit", json=submit),
+                                                           sdk.call_tool("nf_delegation_submit", submit))
+                    assert response.status_code == 202 and response.json()["task_state"] == "READY"
+                    assert not replay.isError and replay.structuredContent == response.json()
+                    return response.json()["receipt_ref"]
+
+    with loopback_server(app, lifespan="on") as base:
+        receipt_id = asyncio.run(two_entries(base))
+
+    async def read_via_stdio():
+        params = StdioServerParameters(command=sys.executable,
+            args=["-m", "novel_factory.interfaces.delegation_stdio", "--binding", str(config)])
+        async with stdio_client(params) as stream, ClientSession(*stream) as sdk:
+            await sdk.initialize()
+            replay = await sdk.call_tool("nf_delegation_submit", submit)
+            assert not replay.isError and replay.structuredContent["receipt_ref"] == receipt_id
+
+    asyncio.run(read_via_stdio())
+    for _ in range(2):
+        supervisor.run_once(owner, get["work_id"], get["branch_id"])
+    # New server and connection recover the receipt after the submitter left.
+    with loopback_server(create_app(runtime.kernel, settings=HttpSettings(hera_delegations=True))) as base:
+        with httpx.Client(base_url=base, trust_env=False) as rest:
+            final = rest.post(path + "status", headers=headers, json=get)
+            assert final.status_code == 200
+            assert final.json()["task_id"] == frozen.spec["task_id"]
+            assert final.json()["task_state"] == "ACCEPTED"
+            assert len(requests) == len(final.json()["attempts"]) == 1
+            revoke(runtime.kernel, owner, runtime.installation_id)
+            assert rest.post(path + "status", headers=headers, json=get).status_code == 403

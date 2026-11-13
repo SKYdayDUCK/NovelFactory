@@ -1,0 +1,263 @@
+diff --git a/src/novel_factory/application/kernel.py b/src/novel_factory/application/kernel.py
+index 01438ab..baf5916 100644
+--- a/src/novel_factory/application/kernel.py
++++ b/src/novel_factory/application/kernel.py
+@@ -36,6 +36,8 @@ class Kernel:
+     def __init__(self, db, objects):
+         self.db, self.objects = db, objects
+         self._last_verified_projection = None
++        self._recent_verified_projections = ()
++        self._narrow_auth = os.environ.get("NF_HERA_NARROW_AUTH") == "1"
+         self._compact_create = os.environ.get("NF_HERA_COMPACT_CREATE", "0") == "1"
+         self.tasks = TaskService(db.engine, tables, object_store=objects)
+ 
+@@ -52,8 +54,14 @@ class Kernel:
+ 
+     def authenticate(self, token: str) -> Principal:
+         require(isinstance(token,str) and 16 <= len(token) <= 256, "VIEW_DENIED", "Credentials unavailable")
++        digest = sha256(token.encode()).hexdigest()
++        if self._narrow_auth and hasattr(self.db, "bearer_identity"):
++            record = self.db.bearer_identity(digest)
++            require(record, "VIEW_DENIED", "Credentials unavailable")
++            if record["role_id"] != "resume_operator":
++                return Principal(record["grant_id"], record["principal_id"])
+         with self.db.uow(write=False) as r:
+-            grant = r.one("grants", {"token_hash":sha256(token.encode()).hexdigest()})
++            grant = r.one("grants", {"token_hash": digest})
+             require(grant and grant["active"],
+                     "VIEW_DENIED", "Credentials unavailable")
+             self._check_resume_grant(r, grant)
+@@ -89,6 +97,9 @@ class Kernel:
+         return work, grant
+ 
+     def revision(self, r, wr):
++        return self._read_revision(r, wr, materialize=True)
++
++    def _read_revision(self, r, wr, *, materialize):
+         validate_contract("WorldRef", wr)
+         read_text = getattr(r, "revision_with_snapshot_text", None)
+         row = read_text(wr) if read_text is not None else r.one("revisions", wr)
+@@ -104,12 +115,17 @@ class Kernel:
+             # only its digest gives small and large valid worlds the same
+             # bounded witness, with no projection bytes or mutable results shared.
+             witness = (row["state_hash"], sha256(raw.encode("utf-8")).digest())
+-            # Decode a private Python object even on a hit. Only evidence that
+-            # these exact bytes passed NF-CANON-1 is shared between readers.
+-            row["snapshot"] = json.loads(raw)
+-            if witness != self._last_verified_projection:
++            # A bounded tuple of content witnesses can serve interleaved works.
++            # It contains no projection data, and concurrent replacement only
++            # evicts a witness. Every caller still verifies the current bytes.
++            recent = getattr(self, "_recent_verified_projections", ())
++            miss = witness != self._last_verified_projection and witness not in recent
++            if miss or materialize:
++                row["snapshot"] = json.loads(raw)
++            if miss:
+                 require(fingerprint(row["snapshot"]) == row["state_hash"],
+                         "PROJECTION_CORRUPT", "Projection integrity failed")
++                self._recent_verified_projections = (witness, *recent[:7])
+                 self._last_verified_projection = witness
+         from novel_factory.application.simulation import verify_schedule_revision
+         verify_schedule_revision(row)
+@@ -502,7 +518,10 @@ class Kernel:
+             work, g = self._authorize_with_work(r, principal, wr["work_id"], "TASK_CREATE", wr["branch_id"])
+         else:
+             g = self.authorize(r, principal, wr["work_id"], "TASK_CREATE", wr["branch_id"])
+-        self.revision(r,wr)
++        if self._compact_create:
++            self._read_revision(r, wr, materialize=False)
++        else:
++            self.revision(r, wr)
+         from .dynamic_runtime import check_input_branch
+         inputs = {ref["artifact_revision_id"]: ref for ref in spec["input_artifacts"]}
+         if inputs or not self._compact_create:
+diff --git a/src/novel_factory/infrastructure/database.py b/src/novel_factory/infrastructure/database.py
+index 2668171..944cccb 100644
+--- a/src/novel_factory/infrastructure/database.py
++++ b/src/novel_factory/infrastructure/database.py
+@@ -176,6 +176,15 @@ class Database:
+         self.engine = create_engine(url, pool_size=pool_size, max_overflow=max_overflow, pool_timeout=pool_timeout,
+             pool_pre_ping=True, connect_args={"options": "-c lock_timeout=3000 -c statement_timeout=15000 -c idle_in_transaction_session_timeout=10000"})
+ 
++    def bearer_identity(self, token_hash):
++        # Ordinary bearer resolution needs one statement snapshot. Authorization
++        # still locks and checks the live policy inside the operation transaction.
++        with self.engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
++            return conn.execute(text("""
++                SELECT principal_id::text, grant_id::text, role_id
++                FROM nf_grants WHERE token_hash = :hash AND active
++            """), {"hash": token_hash}).mappings().one_or_none()
++
+     @contextmanager
+     def uow(self, *, write: bool = True, repeatable_read: bool = False):
+         from novel_factory.infrastructure.repository import KernelRepository
+diff --git a/src/novel_factory/orchestration/tasks.py b/src/novel_factory/orchestration/tasks.py
+index e34c125..92aa1d4 100644
+--- a/src/novel_factory/orchestration/tasks.py
++++ b/src/novel_factory/orchestration/tasks.py
+@@ -11,11 +11,12 @@ from datetime import datetime, timedelta, timezone
+ from decimal import Decimal, InvalidOperation
+ import hashlib
+ import json
++import os
+ from typing import Callable, Mapping
+ from uuid import uuid4
+ 
+-from sqlalchemy import and_, func, or_, select, text
+-from sqlalchemy.dialects.postgresql import insert
++from sqlalchemy import and_, bindparam, func, or_, select, text
++from sqlalchemy.dialects.postgresql import JSONB, insert
+ from sqlalchemy.exc import IntegrityError, NoResultFound
+ 
+ from novel_factory.contracts.registry import validate_contract
+@@ -25,6 +26,37 @@ from novel_factory.orchestration import durable_admission
+ MAINTENANCE_GATE = 721943001
+ 
+ 
++# Each statement starts after the authoritative task row is inserted or locked.
++# A single failure rolls all these rows and the enclosing task change back.
++_CREATE_RECORDS = text("""
++    WITH save_receipt AS (
++        INSERT INTO nf_task_commands (principal_id, idempotency_key, command_hash, receipt)
++        VALUES (:principal_id, :key, :command_hash, :receipt)
++    ), durable_receipt AS (
++        INSERT INTO nf_durable_admissions (task_id, resource_class, queue_deadline)
++        SELECT :task_id, :resource_class, :queue_deadline
++        WHERE CAST(:resource_class AS text) IS NOT NULL
++    ), fairness AS (
++        INSERT INTO nf_task_fairness (work_id, task_kind) VALUES (:work_id, :kind)
++        ON CONFLICT DO NOTHING
++    )
++    INSERT INTO nf_task_inputs (task_id, generation, spec, input_hash)
++    VALUES (:task_id, 0, :spec, :input_hash)
++""").bindparams(bindparam("spec", type_=JSONB), bindparam("receipt", type_=JSONB))
++
++_CLAIM_RECORDS = text("""
++    WITH save_input AS (
++        INSERT INTO nf_task_inputs (task_id, generation, spec, input_hash)
++        VALUES (:task_id, :generation, :spec, :input_hash)
++    ), save_attempt AS (
++        INSERT INTO nf_task_executions (attempt_id, task_id, generation, worker_id)
++        VALUES (:attempt_id, :task_id, :generation, :worker_id)
++    )
++    UPDATE nf_task_fairness SET last_served_at=GREATEST(last_served_at, :now), claims=claims+1
++    WHERE work_id=:work_id AND task_kind=:kind
++""").bindparams(bindparam("spec", type_=JSONB))
++
++
+ def mutation_gate(conn) -> None:
+     conn.execute(text("SELECT pg_advisory_xact_lock_shared(:key)"), {"key": MAINTENANCE_GATE})
+ 
+@@ -68,6 +100,8 @@ def enqueue_outbox(conn, tables, topic, aggregate_type, aggregate_id, payload, d
+ class TaskService:
+     def __init__(self, engine, tables: Mapping, object_store=None):
+         self.engine, self.tables, self.objects = engine, tables, object_store
++        self._direct_claim = os.environ.get("NF_HERA_DIRECT_CLAIM") == "1"
++        self._group_task_records = os.environ.get("NF_HERA_GROUP_TASK_RECORDS") == "1"
+ 
+     @contextmanager
+     def _tx(self, authorize_in_tx=None):
+@@ -151,19 +185,28 @@ class TaskService:
+                                   .returning(t.c.task_id))
+         if created is None:
+             raise _error("ALREADY_EXISTS", "Task identity is already assigned")
+-        if admission is not None:
+-            conn.execute(text("""
+-                INSERT INTO nf_durable_admissions(task_id,resource_class,queue_deadline)
+-                VALUES (:task_id,:resource_class,:queue_deadline)
+-            """), {"task_id": spec["task_id"], **admission})
+-        self._save_input(conn, spec["task_id"], 0, spec, spec["state"])
+-        conn.execute(insert(self.tables["task_fairness"]).values(work_id=wr["work_id"], task_kind=spec["task_kind"]).on_conflict_do_nothing())
+         receipt = {"task_id": spec["task_id"], "generation": 0, "state": spec["state"]}
+         if admission is not None:
+             receipt.update(resource_class=admission["resource_class"],
+                            queue_deadline=admission["queue_deadline"].isoformat(),
+                            wall_deadline=deadline.isoformat(), retry_after_seconds=1)
+-        self._command_record(conn, principal_id, idempotency_key, content, receipt)
++        if self._group_task_records:
++            conn.execute(_CREATE_RECORDS, {
++                "principal_id": str(principal_id), "key": idempotency_key,
++                "command_hash": _hash(content), "receipt": receipt,
++                "task_id": spec["task_id"], "resource_class": admission["resource_class"] if admission else None,
++                "queue_deadline": admission["queue_deadline"] if admission else None,
++                "work_id": wr["work_id"], "kind": spec["task_kind"], "spec": spec, "input_hash": _hash(spec),
++            })
++        else:
++            if admission is not None:
++                conn.execute(text("""
++                    INSERT INTO nf_durable_admissions(task_id,resource_class,queue_deadline)
++                    VALUES (:task_id,:resource_class,:queue_deadline)
++                """), {"task_id": spec["task_id"], **admission})
++            self._save_input(conn, spec["task_id"], 0, spec, spec["state"])
++            conn.execute(insert(self.tables["task_fairness"]).values(work_id=wr["work_id"], task_kind=spec["task_kind"]).on_conflict_do_nothing())
++            self._command_record(conn, principal_id, idempotency_key, content, receipt)
+         self._emit(conn, spec["task_id"], 0, spec["state"])
+         return receipt
+ 
+@@ -193,8 +236,17 @@ class TaskService:
+         t, fair = self.tables["tasks"], self.tables["task_fairness"]
+         # A short queue-only scheduler lock produces persistent round-robin
+         # shares. It never participates in world acceptance or model waits.
+-        conn.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": MAINTENANCE_GATE + 1})
+-        now = self._now(conn)
++        direct = bool(task_id) and self._direct_claim
++        if direct:
++            # Targeted claims make no queue-selection decision. They may overlap
++            # each other, but still fence the exclusive fair queue selector.
++            now = conn.execute(text("""
++                WITH gate AS MATERIALIZED (SELECT pg_advisory_xact_lock_shared(:key))
++                SELECT clock_timestamp() FROM gate
++            """), {"key": MAINTENANCE_GATE + 1}).scalar_one()
++        else:
++            conn.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": MAINTENANCE_GATE + 1})
++            now = self._now(conn)
+         conditions = [t.c.state == "READY", t.c.deadline > now,
+                       text("""NOT EXISTS (SELECT FROM nf_durable_admissions a
+                             WHERE a.task_id=nf_tasks.task_id AND a.queue_deadline <= statement_timestamp()
+@@ -225,10 +277,15 @@ class TaskService:
+              .outerjoin(waits, and_(waits.c.task_id == t.c.task_id, waits.c.generation == t.c.generation))
+              .where(*conditions).order_by(fair.c.last_served_at, t.c.created_at, t.c.task_id)
+              .limit(1).with_for_update(skip_locked=True, of=t))
++        if direct:
++            inputs = self.tables["task_inputs"]
++            q = q.add_columns(inputs.c.spec.label("input_spec")).outerjoin(
++                inputs, and_(inputs.c.task_id == t.c.task_id, inputs.c.generation == t.c.generation))
+         row = conn.execute(q).mappings().one_or_none()
+         if row is None:
+             return None
+         task = dict(row)
++        input_spec = task.pop("input_spec", None)
+         wait_epoch = task.pop("wait_epoch")
+         if wait_epoch is not None:
+             from novel_factory.orchestration.workflow import current_task_epoch
+@@ -240,7 +297,8 @@ class TaskService:
+                 conn.execute(t.update().where(t.c.task_id == task["task_id"]).values(state="STALE", updated_at=now))
+                 self._emit(conn, task["task_id"], task["generation"], "STALE")
+                 return None
+-        spec = {**self._spec(conn, task), "context_bundle_id": None, "dependency_fingerprint": None}
++        spec = {**(input_spec if input_spec is not None else self._spec(conn, task)),
++                "context_bundle_id": None, "dependency_fingerprint": None}
+         if (task["role_id"], task["task_kind"]) == ("volume_director", "volume_review"):
+             from novel_factory.orchestration.workflow import review_acceptance
+             spec["world_ref"] = review_acceptance(conn, task, spec)["world_ref"]
+@@ -249,9 +307,17 @@ class TaskService:
+         updates = {"state": "RUNNING", "generation": generation, "attempt_id": attempt_id,
+                    "lease_owner": worker_id, "lease_expiry": now + timedelta(seconds=lease_seconds), "updated_at": now, "current_result_id": None, "context_bundle_id": None, "dependency_fingerprint": None}
+         conn.execute(t.update().where(t.c.task_id == task["task_id"]).values(**updates))
+-        self._save_input(conn, task["task_id"], generation, spec, "RUNNING")
+-        conn.execute(insert(self.tables["task_executions"]).values(attempt_id=attempt_id, task_id=task["task_id"], generation=generation, worker_id=worker_id))
+-        conn.execute(fair.update().where(fair.c.work_id == task["work_id"], fair.c.task_kind == task["task_kind"]).values(last_served_at=now, claims=fair.c.claims + 1))
++        if self._group_task_records:
++            snapshot = {**spec, "generation": generation, "state": "RUNNING"}
++            conn.execute(_CLAIM_RECORDS, {
++                "task_id": task["task_id"], "generation": generation, "spec": snapshot,
++                "input_hash": _hash(snapshot), "attempt_id": attempt_id, "worker_id": worker_id,
++                "now": now, "work_id": task["work_id"], "kind": task["task_kind"],
++            })
++        else:
++            self._save_input(conn, task["task_id"], generation, spec, "RUNNING")
++            conn.execute(insert(self.tables["task_executions"]).values(attempt_id=attempt_id, task_id=task["task_id"], generation=generation, worker_id=worker_id))
++            conn.execute(fair.update().where(fair.c.work_id == task["work_id"], fair.c.task_kind == task["task_kind"]).values(last_served_at=func.greatest(fair.c.last_served_at, now) if direct else now, claims=fair.c.claims + 1))
+         self._emit(conn, task["task_id"], generation, "RUNNING")
+         return {**task, **updates, "world_ref": spec["world_ref"]}
+ 

@@ -6,6 +6,7 @@ through the Draft 2020-12 validator. No schema retrieval uses the network.
 """
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from functools import lru_cache
 from typing import Any, Annotated, ClassVar, Literal, Union
@@ -16,6 +17,7 @@ from referencing import Registry, Resource
 from pydantic import BaseModel, ConfigDict, Field, RootModel, create_model, model_validator
 
 from ._schema_bundle import SCHEMAS
+from .static_validation import StaticValidationPlan
 from novel_factory.domain.errors import DomainError
 
 _BY_ID = {schema["$id"]: schema for schema in SCHEMAS.values()}
@@ -42,9 +44,18 @@ def _source(name: str, version: str):
     return schema
 
 
+@lru_cache(maxsize=1)
+def _static_plan():
+    return StaticValidationPlan(_BY_ID)
+
+
 @lru_cache(maxsize=256)
-def _validator(name: str, version: str):
+def _validator(name: str, version: str, static: bool):
     source = _source(name, version)
+    if static:
+        plan = _static_plan()
+        if plan.supported:
+            return plan.validator(source, name)
     schema = {"$schema": source["$schema"], "$ref": source["$id"] + "#/$defs/" + name}
     return Draft202012Validator(schema, registry=_REGISTRY, format_checker=FormatChecker())
 
@@ -61,8 +72,9 @@ def plain(value: Any) -> Any:
 
 def validate_contract(name: str, payload: Any, version: str = "2.0") -> Any:
     value = plain(payload)
-    errors = sorted(_validator(name, version).iter_errors(value), key=lambda e: str(list(e.path)))
-    if errors:
+    static = os.environ.get("NF_HERA_STATIC_CONTRACTS") == "1"
+    validator = _validator(name, version, static)
+    if not validator.is_valid(value):
         # Do not echo instance values: they can be secret or attacker-controlled.
         raise DomainError("INVALID_ARGUMENT", f"Invalid {name}: contract constraints failed")
     return deepcopy(value)

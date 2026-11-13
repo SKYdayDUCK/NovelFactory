@@ -5,6 +5,8 @@ from uuid import uuid4
 
 from novel_factory.domain.errors import DomainError
 from .audit_log import LogService
+from .mcp_runtime import TaskBinding
+from .task_operations import TaskOperationsBinding
 from .tool_catalog import _TOOLS, _VALIDATORS
 
 
@@ -26,8 +28,10 @@ _METHODS = {
 
 
 def _dispatch(runtime, name, arguments):
+    if name in {"nf_task_status", "nf_task_status_batch", "nf_task_submit", "nf_task_cancel", "nf_task_events"}:
+        return runtime.task_operation(name, arguments)
     if name in {"nf_project_status", "nf_resume_project"}:
-        return runtime.project(resume=name == "nf_resume_project")
+        return runtime.project(resume=name == "nf_resume_project", **arguments)
     if name.startswith("nf_harness_instruction_"):
         return runtime.adaptive_instruction_call(name, **arguments)
     if name.startswith("nf_harness_agent_"):
@@ -69,7 +73,25 @@ def invoke_bound_tool(runtime, name, arguments, *, ceiling=None, request_id=None
     error = None
     evidence = None
     try:
-        if (ceiling is not None and name not in ceiling) or name not in runtime.available_tools():
+        if ceiling is not None and name not in ceiling:
+            raise DomainError("VIEW_DENIED", "Tool unavailable for this binding")
+        # The ordinary status tool's only capability is READ. For a valid call
+        # its business read checks this under work/grant locks, then checks the
+        # owner and installed branch before returning. Other bindings can have
+        # dynamic tool ceilings; keep discovery for them and preserve denial
+        # precedence over argument errors for malformed calls.
+        if (name == "nf_task_status" and isinstance(runtime.binding, TaskOperationsBinding)
+                and runtime.fuse_status_auth and _VALIDATORS[name].is_valid(arguments)):
+            return runtime.task_operation(name, arguments)
+        # Compact task/context reads evaluate the live role ceiling inside the
+        # same unit of work that reads the payload. Malformed calls retain the
+        # normal discovery-first denial precedence.
+        if (name in {"nf_task_get", "nf_context_get"} and isinstance(runtime.binding, TaskBinding)
+                and runtime.compact_role_reads and _VALIDATORS[name].is_valid(arguments)):
+            result = _dispatch(runtime, name, arguments)
+            evidence = _evidence_id(name, result)
+            return result
+        if name not in runtime.available_tools():
             raise DomainError("VIEW_DENIED", "Tool unavailable for this binding")
         if not _VALIDATORS[name].is_valid(arguments):
             raise DomainError("INVALID_ARGUMENT", "Tool arguments are invalid")

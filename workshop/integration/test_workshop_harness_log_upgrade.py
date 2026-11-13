@@ -4,6 +4,7 @@ from uuid import uuid4
 
 import pytest
 from alembic import command
+from alembic.script import ScriptDirectory
 from psycopg import sql
 from sqlalchemy.engine import make_url
 
@@ -41,11 +42,13 @@ def test_populated_w010_preserves_historical_cut_and_guarded_downgrade(dual_data
 
         before = snapshot()
         assert before and any(r["source"] == "aw_employment_versions" for r in before)
-        command.upgrade(config(), "head")
+        migrations = config()
+        expected_head = ScriptDirectory.from_config(migrations).get_current_head()
+        command.upgrade(migrations, "head")
         assert before == snapshot()
         with connect(dsn) as conn:
             assert (
-                conn.execute("SELECT version_num FROM aw_alembic_version").fetchone()["version_num"] == "w012"
+                conn.execute("SELECT version_num FROM aw_alembic_version").fetchone()["version_num"] == expected_head
             )
             assert (
                 conn.execute("SELECT cut FROM aw_source_cuts WHERE org_id=%s", (org,)).fetchone()["cut"]

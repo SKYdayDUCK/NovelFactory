@@ -114,7 +114,7 @@ def _server(channel, listener, body, cpus):
 def run_once(fixture, size, cpus):
     context = multiprocessing.get_context("spawn")
     parent, child = context.Pipe()
-    listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
     listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     listener.bind(("127.0.0.1", 0))
     listener.listen(128)

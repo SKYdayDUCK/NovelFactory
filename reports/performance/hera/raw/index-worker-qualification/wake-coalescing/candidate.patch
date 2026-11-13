@@ -1,0 +1,281 @@
+diff --git a/benchmarks/hera_idle_wakes.py b/benchmarks/hera_idle_wakes.py
+new file mode 100644
+index 0000000..e5c9f5e
+--- /dev/null
++++ b/benchmarks/hera_idle_wakes.py
+@@ -0,0 +1,173 @@
++"""Two live index workers wake on committed notifications while an unrelated work submits tasks."""
++
++import argparse
++import gzip
++import json
++import multiprocessing
++import os
++from pathlib import Path
++from tempfile import TemporaryDirectory
++from time import monotonic, process_time, sleep
++
++from sqlalchemy import event, func, select, text
++
++from benchmarks.hera_mixed import population, task_spec
++from benchmarks.p2_behavioral_load import isolated_kernel
++from novel_factory.application.agent_gateway import AgentGateway
++from novel_factory.application.derived_worker import CONSUMER
++from novel_factory.application.kernel import Kernel
++from novel_factory.application.supervisor import RuntimeSupervisor
++from novel_factory.fixtures import load_fixture, point, run_command
++from novel_factory.infrastructure.database import Database, tables
++from novel_factory.infrastructure.event_streams import EventEnvelope
++from novel_factory.infrastructure.objects import ObjectStore
++from novel_factory.orchestration.processors import TaskDispatcher, handler_for
++from scripts.run_supervisor import serve
++
++
++def worker(pipe, url, scope, objects, stop, coalesce_ms):
++    db = Database(url, pool_size=2, max_overflow=0)
++    kernel = Kernel(db, ObjectStore(objects))
++    sql = []
++
++    def count(conn, cursor, statement, parameters, ctx, many):
++        sql.append((monotonic(), statement))
++
++    event.listen(db.engine, "before_cursor_execute", count)
++    try:
++        pipe.send("started")
++        cpu = process_time()
++        serve(
++            RuntimeSupervisor(kernel, AgentGateway(kernel, {})),
++            *scope,
++            workers=2,
++            interval=1,
++            processor="compute",
++            stop_event=stop,
++            idle_wake_coalesce_ms=coalesce_ms,
++        )
++        pipe.send({"sql": sql, "cpu_s": process_time() - cpu})
++    finally:
++        db.close()
++        pipe.close()
++
++
++def trial(kernel, url, coalesce_ms):
++    actor, actor_ref = population(kernel, 1)[0]
++    work = load_fixture(kernel)
++    ref, ids = work["world_ref"], work["ids"]
++    scope = work["principal"], ref["work_id"], ref["branch_id"]
++    TaskDispatcher(RuntimeSupervisor(kernel, AgentGateway(kernel, {})), *scope).switch("redis")
++    ctx = multiprocessing.get_context("spawn")
++    stop = ctx.Event()
++    client, server = ctx.Pipe()
++    child = ctx.Process(
++        target=worker, args=(server, url, scope, str(kernel.objects.root), stop, coalesce_ms)
++    )
++    child.start()
++    server.close()
++
++    def indexing(seq):
++        nonlocal ref
++        ref = run_command(
++            kernel,
++            work["principal"],
++            ref,
++            "RESOURCE_TRANSFER",
++            {
++                "from_account": ids["warehouse"],
++                "to_account": ids["relief"],
++                "resource_id": ids["grain"],
++                "unit": "bag",
++                "quantity": "1",
++                "at": point(30 + seq),
++            },
++        )["world_ref"]
++        # Feed the actual committed world.accepted source to the normal compute
++        # subscriber, which persists its branch hint before emitting the wake.
++        with kernel.db.uow() as repo:
++            message = repo.one("outbox", {"dedupe_key": "world:" + ref["world_revision_id"]})
++            handler_for("compute")(repo.conn, EventEnvelope.from_source(message))
++        committed = monotonic()
++        with kernel.db.uow(write=False) as repo:
++            # Poll each real receipt with READ COMMITTED, without locking any row.
++            while monotonic() - committed < 10:
++                if repo.conn.scalar(
++                    text("""SELECT EXISTS(SELECT FROM nf_inbox i JOIN nf_outbox o
++                    ON o.outbox_id=i.message_id WHERE i.consumer=:consumer AND o.dedupe_key=:key)"""),
++                    {"consumer": CONSUMER, "key": "world:" + ref["world_revision_id"]},
++                ):
++                    return monotonic() - committed
++                sleep(0.005)
++        raise TimeoutError("Index never materialized")
++
++    try:
++        assert client.poll(30) and client.recv() == "started"
++        indexing(0)  # Start the pool on real work before measuring scans or latency.
++        sleep(0.15)
++        begin = monotonic()
++        created = []
++        for _ in range(64):
++            spec = task_spec(actor["principal"], actor_ref)
++            kernel.create_task(actor["principal"], spec, spec["task_id"])
++            created.append(spec["task_id"])
++        end = monotonic()
++        tail = [indexing(n) for n in range(1, 5)]
++        # Final physical oracle includes every source and never counts a mere notification.
++        with kernel.db.uow(write=False) as repo:
++            assert repo.conn.scalar(
++                select(func.count()).where(tables["tasks"].c.task_id.in_(created))
++            ) == len(created)
++            assert (
++                repo.conn.scalar(
++                    text("SELECT count(*) FROM nf_inbox WHERE consumer=:consumer"),
++                    {"consumer": CONSUMER},
++                )
++                == 5
++            )
++            marks = repo.many("index_watermarks", {"branch_id": ref["branch_id"]})
++            assert len(marks) == 2 and all(
++                mark["world_revision_id"] == ref["world_revision_id"] for mark in marks
++            )
++        stop.set()
++        assert client.poll(12)
++        counts = client.recv()
++        child.join(10)
++        assert child.exitcode == 0
++        window = [s for t, s in counts["sql"] if begin <= t <= end]
++        return {
++            "coalesce_ms": coalesce_ms,
++            "tasks": len(created),
++            "noise_seconds": end - begin,
++            "parent_sql_while_submitting": len(window),
++            "compute_hint_reads": sum(
++                "SELECT occurrence FROM nf_processor_hints" in s for s in window
++            ),
++            "parent_cpu_s_including_warmup": counts["cpu_s"],
++            "new_work_seconds": tail,
++            "verified_index_receipts": 5,
++            "sql": counts["sql"],
++        }
++    finally:
++        stop.set()
++        child.join(10)
++        if child.is_alive():
++            child.terminate()
++            child.join()
++        client.close()
++
++
++if __name__ == "__main__":
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--output", type=Path, required=True)
++    args = parser.parse_args()
++    rows = []
++    for delay in [0, 25, 25, 0]:
++        with (
++            TemporaryDirectory() as tmp,
++            isolated_kernel(os.environ["NF_TEST_DATABASE_URL"], Path(tmp)) as (kernel, url),
++        ):
++            rows.append(trial(kernel, url, delay))
++        with gzip.open(args.output, "wt") as out:
++            json.dump(rows, out, separators=(",", ":"))
++        print({k: v for k, v in rows[-1].items() if k != "sql"}, flush=True)
+diff --git a/scripts/run_supervisor.py b/scripts/run_supervisor.py
+index d4bc76f..2fdd292 100644
+--- a/scripts/run_supervisor.py
++++ b/scripts/run_supervisor.py
+@@ -12,6 +12,7 @@ from concurrent.futures import (
+     ThreadPoolExecutor,
+     wait,
+ )
++from functools import partial
+ from pathlib import Path
+ from threading import Event
+ 
+@@ -51,7 +52,7 @@ def log_result(result):
+                       if key in result}), flush=True)
+ 
+ 
+-def serve(supervisor, principal, work, branch, *, workers, interval, processor=None, controller=None, observation_seconds=60, stop_event=None, control_while_busy=False):
++def serve(supervisor, principal, work, branch, *, workers, interval, processor=None, controller=None, observation_seconds=60, stop_event=None, control_while_busy=False, idle_wake_coalesce_ms=0):
+     stop_event = stop_event if stop_event is not None else Event()
+     pending = {}
+     windows = None
+@@ -75,7 +76,8 @@ def serve(supervisor, principal, work, branch, *, workers, interval, processor=N
+                 try:
+                     with wake_listener(supervisor.kernel.db.engine) as listener:
+                         retire = _drain(supervisor, principal, work, branch, execution, workers, pending, listener,
+-                                        interval, processor, controller, windows, stop_event, control_while_busy)
++                                        interval, processor, controller, windows, stop_event, control_while_busy,
++                                        idle_wake_coalesce_ms)
+                     if retire:
+                         break
+                 except (psycopg.OperationalError, OperationalError, PoolTimeout):
+@@ -84,8 +86,10 @@ def serve(supervisor, principal, work, branch, *, workers, interval, processor=N
+                     stop_event.wait(min(interval, 5))
+ 
+ 
+-def _drain(supervisor, principal, work, branch, pool, workers, pending, listener, interval, processor, controller, windows, stop_event, control_while_busy):
++def _drain(supervisor, principal, work, branch, pool, workers, pending, listener, interval, processor, controller, windows, stop_event, control_while_busy, idle_wake_coalesce_ms):
+     dispatcher = TaskDispatcher(supervisor, principal, work, branch) if processor else None
++    idle_wait = (partial(wait_for_change, coalesce_seconds=idle_wake_coalesce_ms / 1000)
++                 if idle_wake_coalesce_ms else wait_for_change)
+     next_reconciliation = 0.0
+     next_busy_scan = 0.0
+     busy_signaled = True
+@@ -149,7 +153,7 @@ def _drain(supervisor, principal, work, branch, pool, workers, pending, listener
+             # call from triggering repeated durable scans while slots are free.
+             until = time.monotonic() + timeout
+             while not stop_event.is_set() and (remaining := until - time.monotonic()) > 0:
+-                if any(future.done() for future in pending) or wait_for_change(listener, min(remaining, 1)):
++                if any(future.done() for future in pending) or idle_wait(listener, min(remaining, 1)):
+                     break
+         else:
+             log_result(result)
+@@ -159,6 +163,8 @@ def main():
+     parser = argparse.ArgumentParser(description=__doc__)
+     parser.add_argument("--access-file", required=True, type=Path, help="Private JSON with token, work_id and branch_id")
+     parser.add_argument("--interval", type=float, default=60, help="Maximum seconds between durable reconciliations")
++    parser.add_argument("--idle-wake-coalesce-ms", type=int, choices=range(101), default=0, metavar="0..100",
++                        help="Wait at most this many milliseconds after a wake before one durable idle rescan")
+     parser.add_argument("--workers", type=int, default=2, help="Maximum concurrent Host tasks in this process")
+     parser.add_argument("--db-pool-size", type=int, default=5,
+                         help="Maximum parent database pool connections; the listener uses one separate connection")
+@@ -283,7 +289,7 @@ def main():
+             serve(supervisor, principal, access["work_id"], access["branch_id"],
+                   workers=args.workers, interval=args.interval, processor=args.processor, controller=controller,
+                   observation_seconds=args.observation_seconds, stop_event=stop_event,
+-                  control_while_busy=args.control_while_busy)
++                  control_while_busy=args.control_while_busy, idle_wake_coalesce_ms=args.idle_wake_coalesce_ms)
+         finally:
+             for sig, handler in previous.items():
+                 signal.signal(sig, handler)
+diff --git a/src/novel_factory/infrastructure/supervisor_wake.py b/src/novel_factory/infrastructure/supervisor_wake.py
+index f721f4c..3c069a8 100644
+--- a/src/novel_factory/infrastructure/supervisor_wake.py
++++ b/src/novel_factory/infrastructure/supervisor_wake.py
+@@ -1,5 +1,6 @@
+ """One session-scoped LISTEN connection per service, outside its task pool."""
+ from contextlib import contextmanager
++from time import monotonic
+ 
+ import psycopg
+ 
+@@ -14,9 +15,18 @@ def wake_listener(engine):
+         yield conn
+ 
+ 
+-def wait_for_change(listener, timeout):
++def wait_for_change(listener, timeout, *, coalesce_seconds=0):
++    deadline = monotonic() + timeout
+     notices = listener.notifies(timeout=timeout, stop_after=1)
+     try:
+-        return next(notices, None) is not None
++        received = next(notices, None) is not None
+     finally:
+         notices.close()
++    if received and coalesce_seconds > 0:
++        remaining = min(coalesce_seconds, deadline - monotonic())
++        if remaining > 0:
++            # These messages are hints. One durable scan sees all committed
++            # work. Never extend a previously scheduled reconciliation deadline.
++            for _ in listener.notifies(timeout=remaining):
++                pass
++    return received

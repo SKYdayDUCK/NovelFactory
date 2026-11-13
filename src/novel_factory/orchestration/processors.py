@@ -6,7 +6,6 @@ from uuid import uuid4
 from sqlalchemy import text
 
 from novel_factory.infrastructure.event_streams import DEFAULT_HANDLER_FAILURE_LIMIT
-from novel_factory.orchestration import dispatch
 from novel_factory.orchestration.tasks import MAINTENANCE_GATE
 
 
@@ -116,10 +115,17 @@ class TaskDispatcher:
         params = {"branch": self.branch, "processor": processor}
         with self.kernel.db.uow(write=False) as repo:
             self._authorize(repo)
-            if not dispatch.redis_enabled(repo.conn, self.work, self.branch):
+            # A configured branch with no hint still reconciles at its deadline.
+            # A branch absent from the active Redis scope must always stay idle.
+            row = repo.conn.execute(text("""
+                SELECT h.occurrence FROM nf_redis_branches AS b
+                LEFT JOIN nf_processor_hints AS h
+                  ON h.branch_id=b.branch_id AND h.processor=:processor
+                WHERE b.work_id=:work AND b.branch_id=:branch
+            """), {**params, "work": self.work}).one_or_none()
+            if row is None:
                 return {"status": "IDLE"}
-            occurrence = repo.conn.scalar(text("""SELECT occurrence FROM nf_processor_hints
-                WHERE branch_id=:branch AND processor=:processor"""), params)
+            occurrence = row.occurrence
         if not occurrence and not reconcile:
             return {"status": "IDLE"}
         args = (self.principal, self.work, self.branch)

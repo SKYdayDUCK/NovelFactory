@@ -1,0 +1,54 @@
+# 实验源码和远端交付
+
+本分支通过 GitHub Git Data API 发布。发布者对本地目标提交和远端新提交的根 Git tree SHA 逐次比较，通过期望分支头执行原子更新。发布提交作者、时间和提交拆分可能使远端 HEAD 与报告内开发提交 SHA 不同。两次对照使用同一 tree 才能证明源文件一致。
+
+主要测量由 Python 3.12 的仓库锁定环境运行。Linux 测试使用 PostgreSQL 17.11、Redis、真实 Python MCP SDK 和真实回环 TCP/stdio。每个独立 PostgreSQL 实验启动新的实例或数据库。启动时 max_connections=128；生产应用连接池的 2 / 4 / 8 上限分别写在各实验中，监视连接及客户端进程单列。实验机由并行任务共享。封闭环吞吐反映这台主机上的对应测试时段，不能用不同负载、主机时段或线程数的点计算单一系统加速比。个别早期试验在活动工作树中发起，后续复验使用固定 worktree；报告列出两者及错误尝试。没有调用商业模型。
+
+本地复现先从下文登记的 Git bundle 取回报告中使用的开发提交，然后用相应 README 中的 CLI。需要外部 PostgreSQL 的驱动只接受一个明确设置的 NF_TEST_DATABASE_URL。原始请求记录保存业务 ID、验证结果、计时和计数，测试 bearer、安装密钥及 Provider 配置不入库。ABBA 表中 A 和 B 的准确含义见每项实验，不跨实验复用分母。
+
+| 阶段 | 冻结或实现提交 | 可单独复查的改动 |
+|---|---|---|
+| 基线 | 41ff440、52c8aa3、637119a | 从 bcb03637 建立指标，选择性移植角色读取、同安装会话复用及任务元数据读取 |
+| A | 2e1f734、317b114、fc38dc3 | 普通任务跨协议操作、安装预授权委托、精确恢复范围 |
+| B | a1a54d9、2807a41、146ede9 | 分支增量统计、5000 项进度对比、损坏时的检查与重建 |
+| C | fd059ce、adb7236、e9c930a | 数据库串行准入、失败前提交检验和深度/存储实验 |
+| D | 65e5afe、443ea20、609172a | 执行类别租约、旧索引入口和总连接池核算 |
+| E | e62db03、c79715e、046294b | 成组消息、安装范围内订阅唤醒、到期操作员处置 |
+| F | 135d3b8、d31fa06、770cd07、7e7dd4d | 合并、集合同域读取和实际 Host 组批 |
+| G | d00d1ab、5795961、4f809f3、9b599d8 | 固定资源副本路由、资源竞争、共享认证槽和 30 组混合读 |
+| H | 2c1d065、f5a1c51、b7a73e5、a13661a | 交叉审核、同 main 生命周期测试、二十项验收 |
+
+完整实验运行还需克隆库里的合同、运行时角色资料、Alembic 迁移及 `uv.lock`。不要在正式库上运行会创建、丢弃数据库或注入故障的基准。独立恢复环境的最小流程如下。
+
+```sh
+uv sync --locked --group dev --python 3.12
+uv sync --project workshop --locked --extra streams --group dev --python 3.12
+uv run python -m alembic upgrade head
+uv run python -m pytest tests -q
+uv run python -m benchmarks.hera_mixed --help
+```
+
+NF 使用 NF_DATABASE_URL 和 NF_TEST_DATABASE_URL，Workshop 使用 AW_DATABASE_URL，真实 Redis 用 AW_REDIS_TEST_URL 等各测试指定的变量。双服务故障验证创建两个受限 SQL 账户和数据库，需要 AW_DUAL_TEST_ADMIN_URL 和指向该检出的 AW_NF_SOURCE。每份专题报告另列运行该实验所需的命令与配置。
+
+
+## 取回每个测量使用的原始 Git 提交
+
+[分块 Git bundle](reproduction/) 包含主线 bcb03637 之后到 ca2c4c7 的完整本地提交、tree 和 blob。这个快照含最终主产品代码及截至 ca2c4c7 的 HERA 测量程序和前置修订。后续的兼容性和实验更新、原始数据可从本 PR 直接取得。文件总计 2,828,547 字节，以 393,216 字节为上限分块，按文件名顺序还原。完整 bundle 的 SHA-256 为 `96cccdf61757a163af6df1bbfe5a0daedf66d043f2ac1b2756fd727a9f7061dc`。在已经检出本仓库的工作树中运行以下命令（Git Bash、Linux 或 macOS）。Alembic 实验要使用与当时源码对应的迁移及新建的实验库。
+
+```sh
+cat reports/performance/hera/reproduction/hera-source.bundle.part* > /tmp/hera-source.bundle
+git bundle verify /tmp/hera-source.bundle
+git fetch /tmp/hera-source.bundle refs/heads/hera-evidence-source-stage:refs/remotes/evidence/hera
+git worktree add --detach ../hera-final-product a918a91
+git worktree add --detach ../hera-same-rest-baseline bcb03637
+```
+
+在只取回上述 main 基线的全新 bare 仓库中，已再次验证分块重组字节、执行 bundle fetch 和 `git fsck --full`。取回的阶段 tip 为 ca2c4c7，最终测量候选 a918a91 的 src tree 为 a50ff321f1d67f712198a9c819e888264344f2cf。P1 的 API 文档导出与示例更新在 bundle 快照之后，使用本 PR 的对应交付提交复查。
+
+模型等待期间项目进度复验的驱动在主快照之后。此 PR 中的 [benchmarks/hera_progress_model_isolation.py](../../../benchmarks/hera_progress_model_isolation.py) 对应开发提交 20801bc，Git blob 为 `706d33f9dfe03377a93f5d8f2546b769166d35cf`。在 PR 分支运行 `git hash-object benchmarks/hera_progress_model_isolation.py` 可独立核对。
+
+## November 13 optimization rerun
+
+During this rerun each candidate was committed independently in a disposable worktree. The GitHub Git Data API assigned new commit IDs to the published commits. A local raw record's sha identifies its measured commit; its product tree and runtime settings identify the executable. The repository contains the benchmark source, rejected candidates, reports and raw traces. The source and full tree of the last product code measured on Linux are available on the published branch. The compressed catalog stores the original commit objects, including parents and tree IDs, so a published candidate can be matched to its measured source without relying on commit subjects. All recorded object IDs can be verified offline with `git hash-object -t commit --stdin` using each UTF-8 commit body. [Original commits and tree IDs](reproduction/recheck-commits.json.gz)
+
+The early product used in the three-version comparison is the previously archived `0fcf453a`. The incoming PR head is `1478ddf56e87ecf683b5b021c7ad557f42129683`. Both are retained. The final product's `src` tree is `c8d890caab742e568a9809f3b8bba4c77e2e2035` on the measured checkout `e3cd05a97874d71cedf329c38d1d6ac5bc5f5af4`. Compare `git rev-parse HEAD:src` on the candidate before reusing its evidence. Source SHA alone does not specify PostgreSQL configuration, diagnostic overhead, CPU allocation, feature flags or data depth; those fields are part of the individual experiment manifests.

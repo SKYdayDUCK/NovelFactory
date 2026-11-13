@@ -51,7 +51,7 @@ def log_result(result):
                       if key in result}), flush=True)
 
 
-def serve(supervisor, principal, work, branch, *, workers, interval, processor=None, controller=None, observation_seconds=60, stop_event=None):
+def serve(supervisor, principal, work, branch, *, workers, interval, processor=None, controller=None, observation_seconds=60, stop_event=None, control_while_busy=False):
     stop_event = stop_event if stop_event is not None else Event()
     pending = {}
     windows = None
@@ -75,7 +75,7 @@ def serve(supervisor, principal, work, branch, *, workers, interval, processor=N
                 try:
                     with wake_listener(supervisor.kernel.db.engine) as listener:
                         retire = _drain(supervisor, principal, work, branch, execution, workers, pending, listener,
-                                        interval, processor, controller, windows, stop_event)
+                                        interval, processor, controller, windows, stop_event, control_while_busy)
                     if retire:
                         break
                 except (psycopg.OperationalError, OperationalError, PoolTimeout):
@@ -84,9 +84,12 @@ def serve(supervisor, principal, work, branch, *, workers, interval, processor=N
                     stop_event.wait(min(interval, 5))
 
 
-def _drain(supervisor, principal, work, branch, pool, workers, pending, listener, interval, processor, controller, windows, stop_event):
+def _drain(supervisor, principal, work, branch, pool, workers, pending, listener, interval, processor, controller, windows, stop_event, control_while_busy):
     dispatcher = TaskDispatcher(supervisor, principal, work, branch) if processor else None
     next_reconciliation = 0.0
+    next_busy_scan = 0.0
+    busy_signaled = True
+    last_busy_scan = float("-inf")
     used_pool = bool(pending)
     while not stop_event.is_set():
         for future in tuple(pending):
@@ -109,7 +112,21 @@ def _drain(supervisor, principal, work, branch, pool, workers, pending, listener
             windows.tick(target)
         if len(pending) >= target:
             timeout = min(windows.timeout(), controller.interval if controller else interval) if windows else interval
-            wait(pending, timeout=min(timeout, 1), return_when=FIRST_COMPLETED)
+            if control_while_busy and not processor:
+                now = time.monotonic()
+                if now >= next_busy_scan or (busy_signaled and now - last_busy_scan >= .1):
+                    # The bounded control path can close expired jobs and advance durable
+                    # dependencies even when every local model worker is still waiting.
+                    result = supervisor.run_once(principal, work, branch, admit_model=False)
+                    if result["status"] != "IDLE":
+                        log_result(result)
+                    last_busy_scan = now
+                    next_busy_scan = now + interval
+                    busy_signaled = False
+                timeout = min(timeout, max(.001, next_busy_scan - time.monotonic()), 1)
+                busy_signaled = wait_for_change(listener, timeout) or busy_signaled
+            else:
+                wait(pending, timeout=min(timeout, 1), return_when=FIRST_COMPLETED)
             continue
         if dispatcher:
             now = time.monotonic()
@@ -147,6 +164,8 @@ def main():
                         help="Maximum parent database pool connections; the listener uses one separate connection")
     parser.add_argument("--processor", choices=SCOPED, help="Run this Redis-mode project processor")
     parser.add_argument("--adaptive", action="store_true", help="Adjust new admissions under the fixed worker ceiling")
+    parser.add_argument("--control-while-busy", action="store_true",
+                        help="Continue bounded world and recovery scans with all local model slots occupied")
     parser.add_argument("--sample-seconds", type=float, default=3)
     parser.add_argument("--observation-seconds", type=float, default=60, help="Worker utilization reporting window")
     mode = parser.add_mutually_exclusive_group()
@@ -263,7 +282,8 @@ def main():
         try:
             serve(supervisor, principal, access["work_id"], access["branch_id"],
                   workers=args.workers, interval=args.interval, processor=args.processor, controller=controller,
-                  observation_seconds=args.observation_seconds, stop_event=stop_event)
+                  observation_seconds=args.observation_seconds, stop_event=stop_event,
+                  control_while_busy=args.control_while_busy)
         finally:
             for sig, handler in previous.items():
                 signal.signal(sig, handler)

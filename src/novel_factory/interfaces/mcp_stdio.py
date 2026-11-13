@@ -75,15 +75,23 @@ class BoundToolAdmission:
             self._note_idle()
 
 
-def make_server(runtime, *, ceiling=None, admission=None):
+def make_server(runtime, *, ceiling=None, admission=None, resolve=None, run=None):
     server = Server("NovelFactory", version="2.1.0")
-    if admission is None:
-        admission = BoundToolAdmission(min(2, runtime.kernel.db.engine.pool.size()))
+    if run is None:
+        if admission is None:
+            admission = BoundToolAdmission(min(2, runtime.kernel.db.engine.pool.size()))
+
+        async def run(runtime, method, args, kwargs, *, kind):
+            return await admission.run(method, *args, **kwargs)
+
+    def bound():
+        return runtime if resolve is None else resolve(server.request_context.request)
 
     @server.list_tools()
     async def list_tools():
         try:
-            names = await admission.run(runtime.available_tools)
+            active = bound()
+            names = await run(active, active.available_tools, (), {}, kind="query")
         except DomainError:
             return []
         except Exception:
@@ -94,12 +102,22 @@ def make_server(runtime, *, ceiling=None, admission=None):
     @server.call_tool(validate_input=False)
     async def call_tool(name, arguments):
         try:
-            return await admission.run(
-                invoke_bound_tool, runtime, name, arguments, ceiling=ceiling,
-                request_id=server.request_context.request_id, transport="mcp",
-            )
+            active = bound()
+            if name == "nf_task_status_batch":
+                kind = "query"
+            elif name in {"nf_task_status", "nf_task_events", "nf_project_status", "nf_task_cancel"}:
+                kind = "fast"
+            else:
+                kind = "task"
+            return await run(active, invoke_bound_tool, (active, name, arguments),
+                             {"ceiling": ceiling, "request_id": server.request_context.request_id,
+                              "transport": "mcp"}, kind=kind)
         except DomainError as error:
-            return tool_error(error.code)
+            result = tool_error(error.code)
+            if resolve is not None and error.retryable and error.code in {"BACKPRESSURE", "RATE_LIMITED", "POOL_TIMEOUT"}:
+                # The fixed stdio binding retains its original code-only wire contract.
+                result.structuredContent["error"].update(retryable=True, retry_after_ms=1000)
+            return result
 
     return server
 
@@ -116,10 +134,10 @@ async def character_input():
             return
 
 
-async def serve(config, *, character_only=False, idle_db_seconds=30.0):
+async def serve(config, *, character_only=False, idle_db_seconds=30.0, compact_role_reads=False):
     if not math.isfinite(idle_db_seconds) or idle_db_seconds < 0:
         raise ValueError("Idle database timeout must be finite and nonnegative")
-    runtime = runtime_from_config(config)
+    runtime = runtime_from_config(config, compact_role_reads=compact_role_reads)
     engine = runtime.kernel.db.engine
     admission = BoundToolAdmission(min(2, engine.pool.size()), owned_engine=engine, idle_seconds=idle_db_seconds)
     try:
@@ -142,10 +160,12 @@ def main():
     parser.add_argument("--character-only", action="store_true", help="Require a live character task binding")
     parser.add_argument("--idle-db-seconds", type=float, default=30.0,
                         help="Release this stdio process's unused database connections after this idle period")
+    parser.add_argument("--compact-role-reads", action="store_true",
+                        help="Resolve static role proof and read in one transaction")
     args = parser.parse_args()
     try:
         asyncio.run(serve(read_private_config(args.binding), character_only=args.character_only,
-                          idle_db_seconds=args.idle_db_seconds))
+                          idle_db_seconds=args.idle_db_seconds, compact_role_reads=args.compact_role_reads))
     except KeyboardInterrupt:
         return
     except Exception:

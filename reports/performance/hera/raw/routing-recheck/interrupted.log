@@ -1,0 +1,32 @@
+PONG
+saturation-0-8 128 36.45 {'count': 128, 'p50_ms': 188.1167, 'p95_ms': 295.9369, 'p99_ms': 332.6464}
+saturation-1-32 128 35.71 {'count': 128, 'p50_ms': 811.893, 'p95_ms': 1099.2145, 'p99_ms': 1149.1574}
+saturation-2-32 128 39.31 {'count': 128, 'p50_ms': 785.7855, 'p95_ms': 928.1753, 'p99_ms': 976.9007}
+saturation-3-8 128 38.18 {'count': 128, 'p50_ms': 175.001, 'p95_ms': 337.6218, 'p99_ms': 458.0246}
+rr-0-single 128 12.7 {'count': 128, 'p50_ms': 1310.0688, 'p95_ms': 7139.2051, 'p99_ms': 7232.248}
+rr-1-rr 128 53.51 {'count': 128, 'p50_ms': 543.0975, 'p95_ms': 827.3547, 'p99_ms': 848.3186}
+rr-2-rr 128 52.2 {'count': 128, 'p50_ms': 490.4613, 'p95_ms': 781.1943, 'p99_ms': 809.6623}
+rr-3-single 128 41.55 {'count': 128, 'p50_ms': 791.6591, 'p95_ms': 903.4758, 'p99_ms': 968.4494}
+least-0-single 128 45.74 {'count': 128, 'p50_ms': 569.8646, 'p95_ms': 881.1954, 'p99_ms': 899.2309}
+least-1-least 128 48.5 {'count': 128, 'p50_ms': 535.787, 'p95_ms': 987.819, 'p99_ms': 1019.4233}
+least-2-least 128 53.34 {'count': 128, 'p50_ms': 486.72, 'p95_ms': 632.501, 'p99_ms': 748.2111}
+least-3-single 128 30.52 {'count': 128, 'p50_ms': 982.7465, 'p95_ms': 1400.5707, 'p99_ms': 1444.5}
+/workspace/scratch/3bc0ddb93804/pg-run: line 38:   644 Killed                  "$@"
+Process SpawnProcess-17:
+Traceback (most recent call last):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/workspace/scratch/3bc0ddb93804/probes/benchmarks/hera_routing.py", line 43, in serve
+    if channel.recv() != "measure":
+       ^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/multiprocessing/connection.py", line 250, in recv
+    buf = self._recv_bytes()
+          ^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/multiprocessing/connection.py", line 430, in _recv_bytes
+    buf = self._recv(4)
+          ^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/multiprocessing/connection.py", line 399, in _recv
+    raise EOFError
+EOFError

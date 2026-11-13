@@ -25,18 +25,23 @@ class ConnectionBudget:
     worker_pool_size: int = 4
     maintenance_reserve: int = 16
     postgres_max_connections: int = 60
+    active_stdio_processes: int = 0
+    compute_child_processes: int = 0
+    listen_connections: int = 0
 
     @property
     def total(self) -> int:
         return (self.api_processes * (self.api_pool_size + self.api_pool_overflow)
-                + self.worker_processes * self.worker_pool_size + self.maintenance_reserve)
+                + self.worker_processes * self.worker_pool_size + self.maintenance_reserve
+                + 2 * self.active_stdio_processes + self.compute_child_processes + self.listen_connections)
 
     def validate(self) -> None:
         values = (self.api_processes, self.api_pool_size, self.worker_pool_size,
                   self.postgres_max_connections)
         if any(value < 1 for value in values):
             raise ValueError("process and pool sizes must be positive")
-        if min(self.api_pool_overflow, self.worker_processes, self.maintenance_reserve) < 0:
+        if min(self.api_pool_overflow, self.worker_processes, self.maintenance_reserve,
+               self.active_stdio_processes, self.compute_child_processes, self.listen_connections) < 0:
             raise ValueError("connection budgets cannot be negative")
         if self.total > self.postgres_max_connections:
             raise ValueError("aggregate configured connection budget exceeds PostgreSQL limit")
@@ -57,11 +62,14 @@ class AdmissionController:
 
     def __init__(self, capacity: int, *, per_principal: int = 2, max_waiters: int = 64,
                  max_waiters_per_principal: int = 8, timeout: float = 2.0,
-                 class_limits: dict[str, int] | None = None):
+                 class_limits: dict[str, int] | None = None, fast_slots: int = 0):
         if capacity < 1 or per_principal < 1 or max_waiters < 0 or max_waiters_per_principal < 0 or timeout <= 0:
             raise ValueError("invalid admission budget")
         if class_limits and any(limit < 1 or limit > capacity for limit in class_limits.values()):
             raise ValueError("invalid category budget")
+        if type(fast_slots) is not int or not 0 <= fast_slots < capacity:
+            raise ValueError("fast slots must leave at least one shared execution slot")
+        self.fast_slots = fast_slots
         self.capacity = capacity
         self.per_principal = per_principal
         self.max_waiters = max_waiters
@@ -85,6 +93,8 @@ class AdmissionController:
 
     def _available(self, ticket: _Ticket) -> bool:
         return (self._active < self.capacity
+                and (not self.fast_slots or ticket.kind == "fast"
+                     or self._active - self._active_by_kind["fast"] < self.capacity - self.fast_slots)
                 and self._active_by_key[ticket.key] < self.per_principal
                 and self._active_by_kind[ticket.kind] < self.class_limits.get(ticket.kind, self.capacity))
 
@@ -95,8 +105,13 @@ class AdmissionController:
                 key = self._rotation[0]
                 self._rotation.rotate(-1)
                 queue = self._queues[key]
-                if queue and self._available(queue[0]):
+                if self._available(queue[0]):
                     selected = queue.popleft()
+                elif self.fast_slots:
+                    selected = next((t for t in queue if t.kind == "fast" and self._available(t)), None)
+                    if selected is not None:
+                        queue.remove(selected)
+                if selected is not None:
                     if not queue:
                         del self._queues[key]
                         self._rotation.remove(key)

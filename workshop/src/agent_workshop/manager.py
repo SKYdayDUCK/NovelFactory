@@ -3,7 +3,7 @@
 import base64
 import hmac
 import json
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from .auth import Denied
 from .delegation import UUID_FIELD
@@ -164,14 +164,29 @@ def progress(conn, session, operation_id):
     return result
 
 
-def request_resume(conn, session, operation_id):
+def request_resume(conn, session, operation_id, after_delegation_id=None):
     viewer = require_employee(conn, session)
     if viewer["role_id"] not in MANAGEMENT:
         raise Denied("VIEW_DENIED")
+    state = "PENDING"
+    if after_delegation_id is not None:
+        after_delegation_id = str(UUID(str(after_delegation_id)))
+        # Serialize registration and settlement so a committed signal cannot be missed.
+        delegation = conn.execute(
+            """SELECT state,deadline>clock_timestamp() AS live FROM aw_delegations WHERE org_id=%s AND installation_id=%s
+               AND operation_id=%s FOR UPDATE""",
+            (session.org_id, session.installation_id, after_delegation_id),
+        ).fetchone()
+        if not delegation:
+            raise Denied("VIEW_DENIED")
+        if delegation["state"] in {"WAITING_OPERATOR", "RELEASED"} or not delegation["live"] and delegation["state"] != "SETTLED":
+            state = "WAITING_OPERATOR"
+        elif delegation["state"] != "SETTLED":
+            state = "WAITING_DELEGATION"
     conn.execute(
         """INSERT INTO aw_resume_requests
-        (org_id,request_id,installation_id,employee_id,employment_revision,binding_digest,operation_id,state)
-        VALUES(%s,%s,%s,%s,%s,%s,%s,'PENDING') ON CONFLICT DO NOTHING""",
+        (org_id,request_id,installation_id,employee_id,employment_revision,binding_digest,operation_id,state,after_delegation_id)
+        VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT DO NOTHING""",
         (
             session.org_id,
             str(uuid4()),
@@ -180,10 +195,12 @@ def request_resume(conn, session, operation_id):
             session.employment_revision,
             session.binding_digest,
             operation_id,
+            state,
+            after_delegation_id,
         ),
     )
     row = conn.execute(
-        """SELECT request_id,state,result FROM aw_resume_requests WHERE org_id=%s AND employee_id=%s
+        """SELECT request_id,state,result,after_delegation_id::text FROM aw_resume_requests WHERE org_id=%s AND employee_id=%s
         AND employment_revision=%s AND operation_id=%s AND installation_id=%s""",
         (
             session.org_id,
@@ -195,6 +212,8 @@ def request_resume(conn, session, operation_id):
     ).fetchone()
     if not row:
         raise Denied("VIEW_DENIED")
+    if row.pop("after_delegation_id") != after_delegation_id:
+        raise Denied("IDEMPOTENCY_MISMATCH")
     return {**row, "request_id": str(row["request_id"])}
 
 
@@ -222,7 +241,7 @@ TOOLS = {
     ),
     "aw_resume_project": (
         "Persist one authorized wake request for the bound NF project and end this turn.",
-        schema({"operation_id": IDENTIFIER}),
+        schema({"operation_id": IDENTIFIER, "after_delegation_id": UUID_FIELD}, ["operation_id"]),
         request_resume,
     ),
 }

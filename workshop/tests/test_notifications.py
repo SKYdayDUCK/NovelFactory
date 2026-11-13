@@ -1,7 +1,15 @@
+import json
 import os
+import shutil
+import socket
 import subprocess
 import sys
 import time
+from urllib.parse import urlsplit
+from contextlib import contextmanager
+from pathlib import Path
+from secrets import token_hex
+from tempfile import TemporaryDirectory
 from uuid import uuid4
 
 import pytest
@@ -79,59 +87,209 @@ def test_recover_pending_ack_and_rebuild_lost_stream():
     redis.delete(stream)
 
 
-@pytest.mark.skipif(
-    not os.environ.get("AW_REDIS_TEST_CONTAINER"),
-    reason="Requires a disposable Redis sidecar for a real stop and restart",
-)
-def test_postgres_mail_during_redis_outage_and_new_worker_processes():
+@pytest.fixture
+def private_redis():
+    """Only terminate processes or containers started by this test."""
+    sidecar = os.environ.get("AW_REDIS_TEST_CONTAINER")
+    if sidecar:
+        # CI supplies an image via its configured sidecar. Leave that service running.
+        image = subprocess.check_output(
+            ["docker", "inspect", "--format", "{{.Image}}", sidecar], text=True
+        ).strip()
+        container = subprocess.check_output(
+            [
+                "docker",
+                "run",
+                "--detach",
+                "--publish",
+                "127.0.0.1::6379",
+                image,
+                "redis-server",
+                "--save",
+                "",
+                "--appendonly",
+                "no",
+            ],
+            text=True,
+        ).strip()
+        try:
+            def endpoint():
+                # Docker may choose a new ephemeral host port after "start".
+                port = subprocess.check_output(
+                    ["docker", "port", container, "6379/tcp"], text=True
+                ).strip()
+                return f"redis://{port}/0"
+
+            @contextmanager
+            def outage():
+                subprocess.run(["docker", "kill", container], check=True, capture_output=True)
+                try:
+                    yield
+                finally:
+                    subprocess.run(["docker", "start", container], check=True, capture_output=True)
+
+            yield endpoint, outage, "docker"
+        finally:
+            subprocess.run(["docker", "rm", "--force", container], check=True, capture_output=True)
+        return
+
+    binary = shutil.which("redis-server")
+    if not binary:
+        pytest.skip("Requires redis-server or a disposable Redis test container")
+    from redis import Redis
+    from redis.exceptions import ConnectionError
+
+    with TemporaryDirectory() as directory:
+        with socket.socket() as port_probe:
+            port_probe.bind(("127.0.0.1", 0))
+            port = port_probe.getsockname()[1]
+        # An independently generated password and exact PID check prevent a raced port from
+        # admitting this test to another service. Only Popen handles are signaled.
+        password = token_hex(32)
+        endpoint = f"redis://:{password}@127.0.0.1:{port}/0"
+        config = Path(directory) / "redis.conf"
+        config.write_text(
+            f"bind 127.0.0.1\nport {port}\nrequirepass {password}\n"
+            f'dir "{directory}"\nsave ""\nappendonly no\n'
+        )
+        config.chmod(0o600)
+
+        def start():
+            process = subprocess.Popen([binary, str(config)], stdout=subprocess.DEVNULL)
+            try:
+                with Redis.from_url(endpoint, socket_connect_timeout=0.2) as client:
+                    until = time.monotonic() + 10
+                    while process.poll() is None and time.monotonic() < until:
+                        try:
+                            assert client.info("server")["process_id"] == process.pid
+                            return process
+                        except ConnectionError:
+                            time.sleep(0.05)
+                raise RuntimeError("Private Redis child did not start")
+            except BaseException:
+                process.terminate()
+                process.wait(timeout=10)
+                raise
+
+        process = start()
+
+        @contextmanager
+        def outage():
+            nonlocal process
+            process.kill()
+            process.wait(timeout=10)
+            try:
+                yield
+            finally:
+                process = start()
+
+        try:
+            yield lambda: endpoint, outage, "native"
+        finally:
+            process.terminate()
+            process.wait(timeout=10)
+
+
+def test_postgres_mail_during_redis_outage_and_new_worker_processes(private_redis, record_property):
     from redis import Redis
     from redis.backoff import NoBackoff
     from redis.exceptions import ConnectionError, TimeoutError
     from redis.retry import Retry
 
     dsn = os.environ["AW_DATABASE_URL"]
-    endpoint = os.environ["AW_REDIS_TEST_URL"]
-    container = os.environ["AW_REDIS_TEST_CONTAINER"]
-    redis = Redis.from_url(endpoint, decode_responses=True, socket_connect_timeout=1,
-                           socket_timeout=1, retry=Retry(NoBackoff(), 0))
+    resolve_endpoint, outage, mode = private_redis
+
+    def new_client(endpoint):
+        return Redis.from_url(
+            endpoint,
+            decode_responses=True,
+            socket_connect_timeout=1,
+            socket_timeout=1,
+            retry=Retry(NoBackoff(), 0),
+        )
+
+    def wait_online(redis):
+        until = time.monotonic() + 10
+        while True:
+            try:
+                return redis.info("server")
+            except (ConnectionError, TimeoutError):
+                if time.monotonic() >= until:
+                    raise
+                time.sleep(0.05)
+
     stream, group, org = f"aw-restart-{uuid4().hex}", uuid4().hex, uuid4().hex
-    assert redis.ping()
+    initial_endpoint = resolve_endpoint()
+    record_property("initial_redis_port", urlsplit(initial_endpoint).port)
+    redis = new_client(initial_endpoint)
+    before = wait_online(redis)
     with connect(dsn) as conn:
         conn.execute("INSERT INTO aw_installations VALUES(%s,%s,true)", (org, "nf-outage"))
         bootstrap(conn, org, installation_id=org)
         director_token = enroll(conn, org, org, "volume", 1, 1)
         actor_token = enroll(conn, org, org, "actor-1", 1, 1)
 
-    subprocess.run(["docker", "stop", "-t", "2", container], check=True, capture_output=True)
-    try:
+        director = authenticate(conn, director_token)
+        prior = send(conn, director, "before-outage", "actor-1", "ASSIGN", "organization", 1, 3600)
+        earlier_event = str(
+            conn.execute(
+                "SELECT event_id FROM aw_outbox WHERE org_id=%s AND message_id=%s",
+                (org, prior["message_id"]),
+            ).fetchone()["event_id"]
+        )
+    while notify_batch(dsn, redis, stream):
+        pass
+    assert earlier_event in {fields["event_id"] for _, fields in redis.xrange(stream)}
+
+    with outage():
         with connect(dsn) as conn:
             director = authenticate(conn, director_token)
-            message = send(conn, director, "during-outage", "actor-1", "ASSIGN", "organization", 1, 3600)
+            message = send(
+                conn, director, "during-outage", "actor-1", "ASSIGN", "organization", 1, 3600
+            )
         with pytest.raises((ConnectionError, TimeoutError)):
             notify_batch(dsn, redis, stream)
         with connect(dsn) as conn:
             actor = authenticate(conn, actor_token)
-            assert mailbox(conn, actor)["items"][0]["message_id"] == message["message_id"]
-            assert ack(conn, actor, message["message_id"]) == ack(conn, actor, message["message_id"])
-            row = conn.execute("SELECT event_id,last_notified FROM aw_outbox WHERE org_id=%s", (org,)).fetchone()
+            assert {m["message_id"] for m in mailbox(conn, actor)["items"]} == {
+                message["message_id"],
+                prior["message_id"],
+            }
+            assert ack(conn, actor, message["message_id"]) == ack(
+                conn, actor, message["message_id"]
+            )
+            row = conn.execute(
+                "SELECT event_id,last_notified FROM aw_outbox WHERE org_id=%s AND message_id=%s",
+                (org, message["message_id"]),
+            ).fetchone()
             assert row["last_notified"] is None
             event = str(row["event_id"])
-    finally:
-        subprocess.run(["docker", "start", container], check=True, capture_output=True)
-    until = time.monotonic() + 30
-    while True:
-        try:
-            if redis.ping():
-                break
-        except (ConnectionError, TimeoutError):
-            if time.monotonic() >= until:
-                raise
-            time.sleep(0.2)
+    redis.close()
+    endpoint = resolve_endpoint()
+    record_property("restarted_redis_port", urlsplit(endpoint).port)
+    redis = new_client(endpoint)
+    after = wait_online(redis)
+    assert before["run_id"] != after["run_id"]
+    assert redis.dbsize() == 0  # The previously published entry disappeared with the process.
+    assert replay(dsn) >= 1
 
     def worker(action, name):
         result = subprocess.run(
-            [sys.executable, "-m", "agent_workshop.notifications", action, "--stream", stream,
-             "--subscriber", group, "--worker", name], check=True, capture_output=True, text=True,
+            [
+                sys.executable,
+                "-m",
+                "agent_workshop.notifications",
+                action,
+                "--stream",
+                stream,
+                "--subscriber",
+                group,
+                "--worker",
+                name,
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
             env={**os.environ, "AW_REDIS_URL": endpoint},
         )
         return int(result.stdout.strip())
@@ -145,13 +303,40 @@ def test_postgres_mail_during_redis_outage_and_new_worker_processes():
         assert worker("receive", "replacement-consumer") == 0
         assert redis.xpending(stream, group)["pending"] == 0
         with connect(dsn) as conn:
-            assert conn.execute(
-                "SELECT count(*) AS n FROM aw_inbox WHERE subscriber=%s AND event_id=%s",
-                (group, event),
-            ).fetchone()["n"] == 1
-            assert conn.execute(
-                "SELECT count(*) AS n FROM aw_deliveries WHERE org_id=%s AND acknowledged_at IS NOT NULL",
-                (org,),
-            ).fetchone()["n"] == 1
+            accepted = conn.execute(
+                """SELECT event_id FROM aw_inbox JOIN aw_outbox USING(event_id)
+                WHERE subscriber=%s AND org_id=%s""",
+                (group, org),
+            ).fetchall()
+            assert sorted(str(r["event_id"]) for r in accepted) == sorted([earlier_event, event])
+            assert (
+                conn.execute(
+                    "SELECT count(*) AS n FROM aw_deliveries WHERE org_id=%s AND acknowledged_at IS NOT NULL",
+                    (org,),
+                ).fetchone()["n"]
+                == 1
+            )
+        record_property(
+            "physical_redis_outage",
+            json.dumps(
+                {
+                    "mode": mode,
+                    "version": after["redis_version"],
+                    "old_run_id": before["run_id"],
+                    "new_run_id": after["run_id"],
+                    "old_pid": before["process_id"],
+                    "new_pid": after["process_id"],
+                    "prior_event": earlier_event,
+                    "outage_event": event,
+                    "accepted_once_each": len(accepted),
+                    "acknowledged": 1,
+                    "redis_pending": 0,
+                },
+                sort_keys=True,
+            ),
+        )
     finally:
-        redis.delete(stream)
+        try:
+            redis.delete(stream)
+        finally:
+            redis.close()
