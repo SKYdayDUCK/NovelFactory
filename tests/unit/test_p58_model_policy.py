@@ -32,21 +32,21 @@ def test_resolve_validates_each_policy_revision_before_matching():
         resolve(policy, actor)
 
 
-def test_p6_review_duties_select_their_own_model_even_within_one_role():
+def test_new_ideas_route_planning_and_review_separately_from_prose_and_roleplay():
     from novel_factory.application.model_routing import idea_policy
 
     policy = idea_policy({"work_id": "work", "branch_id": "branch"},
                          {"creative": "flash", "review": "pro"})
     assignments = {
-        "world_designer": {"initial_world": "flash", "rule_review": "pro"},
-        "volume_director": {"window_plan": "flash", "replan": "flash", "volume_review": "pro"},
-        "chief_editor": {"book_direction": "flash", "editorial_decision": "pro", "release_review": "pro"},
+        "world_designer": {"initial_world": "pro", "rule_review": "pro"},
+        "volume_director": {"window_plan": "pro", "replan": "pro", "volume_review": "pro"},
+        "chief_editor": {"book_direction": "pro", "editorial_decision": "pro", "release_review": "pro"},
         "character_actor": {"character_action": "flash", "reaction": "flash"},
         "writer": {"scene_draft": "flash", "chapter_draft": "flash", "targeted_revision": "flash"},
         "adjudication_advisor": {"joint_outcome": "pro"},
-        "evidence_maintainer": {"assertion_extract": "pro", "event_alignment": "pro", "summary": "flash"},
+        "evidence_maintainer": {"assertion_extract": "pro", "event_alignment": "pro", "summary": "pro"},
         "reviewer": dict.fromkeys(("fact", "epistemic", "continuity", "literary"), "pro"),
-        "literary_editor": {"research": "flash", "structure": "pro", "seam": "pro", "cross_volume": "pro"},
+        "literary_editor": {"research": "pro", "structure": "pro", "seam": "pro", "cross_volume": "pro"},
     }
     for role, kinds in assignments.items():
         for kind, expected in kinds.items():

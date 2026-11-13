@@ -10,22 +10,15 @@ POLICY_ROUTE = "@policy"
 
 
 def idea_policy(wr, model_routes):
-    """A local idea's creative and internal review assignments use the native policy resolver."""
+    """New works use the writing model only for prose and character performance.
+
+    Existing intakes retain their immutable policy artifact, including when
+    materialized as a literary work; this default never rewrites that history.
+    """
     creative, review = model_routes["creative"], model_routes["review"]
-    review_roles = ("reviewer", "adjudication_advisor")
-    review_modes = {
-        "world_designer": ("rule_review",),
-        "volume_director": ("volume_review",),
-        "evidence_maintainer": ("assertion_extract", "event_alignment"),
-        "chief_editor": ("editorial_decision", "release_review"),
-        "literary_editor": ("structure", "seam", "cross_volume"),
-    }
-    rules = [{"id": "creative", "when": {}, "profile": creative}]
-    for role in review_roles:
-        rules.append({"id": role, "when": {"role_id": role}, "profile": review})
-    for role, kinds in review_modes.items():
-        for kind in kinds:
-            rules.append({"id": kind, "when": {"role_id": role, "task_kind": kind}, "profile": review})
+    rules = [{"id": "planning-review", "when": {}, "profile": review},
+             *({"id": role, "when": {"role_id": role}, "profile": creative}
+               for role in ("writer", "character_actor"))]
     return {"work_id": wr["work_id"], "branch_id": wr["branch_id"], "installation_id": "local",
             "org_id": "p6", "revision": 1, "rules": rules}
 

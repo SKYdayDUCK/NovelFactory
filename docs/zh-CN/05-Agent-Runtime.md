@@ -57,6 +57,8 @@ export NF_RUNTIME_PROFILES="$PWD/providers.json"
 
 可从 [双模型目录](../../configs/codex-deepseek.example.json) 和 [岗位路由](../../configs/codex-deepseek-routes.example.json) 配置后续作品：写作与角色行动使用 DeepSeek，其余规划、设定、审读和编辑使用 Codex。示例的保守输出预留须结合当前账户调整。原三书快照继续使用其冻结的双 DeepSeek 配置，换模型须经过任务重绑，不能改写已开始的调用。
 
+新作品的 P6 双模型 intake 也采用此分工：`creative` 配置只供 writer/character_actor 使用，`review` 配置承担大纲、设定、规划及审核。旧 intake 与已物化作品继续采用其已保存的策略 Artifact，源码默认值变更不重写历史路由。
+
 ### 输入缓存与上下文
 
 网关先完成固定切面、授权裁剪及不可变上下文快照，再组装三条消息：角色/技能/Schema 指令、已授权材料、任务身份与外层响应模板。任务 UUID 不插在固定指令和正文前。材料 JSON 先放正文与结构化证据，最后放具体任务和诊断；值、数组顺序及校验规则不变。Actor 查询后的最终请求保留同一身份尾部。既有 Attempt 的请求哈希与旧回执保留，不能把旧调用按新布局重发。
