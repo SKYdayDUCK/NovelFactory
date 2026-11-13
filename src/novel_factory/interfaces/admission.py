@@ -25,18 +25,23 @@ class ConnectionBudget:
     worker_pool_size: int = 4
     maintenance_reserve: int = 16
     postgres_max_connections: int = 60
+    active_stdio_processes: int = 0
+    compute_child_processes: int = 0
+    listen_connections: int = 0
 
     @property
     def total(self) -> int:
         return (self.api_processes * (self.api_pool_size + self.api_pool_overflow)
-                + self.worker_processes * self.worker_pool_size + self.maintenance_reserve)
+                + self.worker_processes * self.worker_pool_size + self.maintenance_reserve
+                + 2 * self.active_stdio_processes + self.compute_child_processes + self.listen_connections)
 
     def validate(self) -> None:
         values = (self.api_processes, self.api_pool_size, self.worker_pool_size,
                   self.postgres_max_connections)
         if any(value < 1 for value in values):
             raise ValueError("process and pool sizes must be positive")
-        if min(self.api_pool_overflow, self.worker_processes, self.maintenance_reserve) < 0:
+        if min(self.api_pool_overflow, self.worker_processes, self.maintenance_reserve,
+               self.active_stdio_processes, self.compute_child_processes, self.listen_connections) < 0:
             raise ValueError("connection budgets cannot be negative")
         if self.total > self.postgres_max_connections:
             raise ValueError("aggregate configured connection budget exceeds PostgreSQL limit")

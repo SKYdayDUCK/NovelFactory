@@ -34,12 +34,13 @@ class TaskBinding:
 
 
 class McpRuntime:
-    def __init__(self, kernel, principal, binding, *, compact_role_reads=False, fenced_task_status=False):
+    def __init__(self, kernel, principal, binding, *, compact_role_reads=False, fenced_task_status=False, status_coalescer=None):
         self.kernel = kernel
         self.principal = principal
         self.binding = binding
         self.compact_role_reads = compact_role_reads
         self.fenced_task_status = fenced_task_status
+        self.status_coalescer = status_coalescer
         self.queries = WorldQueryService(kernel)
 
     def available_tools(self):
@@ -149,7 +150,7 @@ class McpRuntime:
     def task_operation(self, name, arguments):
         require(isinstance(self.binding, TaskOperationsBinding), "VIEW_DENIED", "Task operations binding required")
         operations = TaskOperations(self.kernel, self.principal, binding=self.binding,
-                                    fenced_status=self.fenced_task_status)
+                                    fenced_status=self.fenced_task_status, coalescer=self.status_coalescer)
         methods = {"nf_task_submit": operations.submit, "nf_task_status": operations.status,
                    "nf_task_cancel": operations.cancel, "nf_task_events": operations.events}
         return methods[name](**arguments)
@@ -303,7 +304,7 @@ class McpRuntime:
                 and grant["capabilities"] == ["PROJECT_RESUME"],
                 "VIEW_DENIED", "A branch-bound resume grant is required")
 
-    def project(self, *, resume=False):
+    def project(self, *, resume=False, expected_scope=None):
         require(isinstance(self.binding, ProjectBinding), "VIEW_DENIED", "Project grant required")
         service = WorkflowService(self.kernel.tasks)
         operation = service.resume_project if resume else service.status
@@ -311,6 +312,29 @@ class McpRuntime:
 
         def authorize(conn):
             self._project_auth(conn)
+            if expected_scope is not None:
+                require(resume and expected_scope["work_id"] == self.binding.work_id
+                        and expected_scope["branch_id"] == self.binding.branch_id, "VIEW_DENIED",
+                        "Completion scope does not match the bound project")
+                # This hint confers no authority. Lock the live enrollment, exact
+                # canonical receipt and task generation before invoking the normal DAG wake.
+                from sqlalchemy import text
+                matches = conn.scalar(text("""
+                    SELECT 1 FROM nf_delegation_receipts r JOIN nf_delegation_installations i USING(installation_id)
+                    JOIN nf_delegation_slots s ON (s.installation_id,s.scope_ref)=(r.installation_id,r.scope_ref)
+                    JOIN nf_tasks t ON t.task_id=r.task_id JOIN nf_grants g ON g.grant_id=t.grant_id
+                    JOIN nf_works w ON w.work_id=i.work_id
+                    WHERE i.installation_id=:installation_id AND i.org_id=:org_id
+                    AND i.nf_instance_id=:nf_instance_id AND i.active AND NOT i.outbound_fenced
+                    AND i.expires_at>clock_timestamp() AND i.epoch=:grant_epoch AND i.policy_version=w.policy_version
+                    AND i.work_id=:work_id AND i.branch_id=:branch_id
+                    AND r.operation_id=:operation_id AND r.receipt_ref=:receipt_ref AND r.task_id=:task_id
+                    AND t.work_id=i.work_id AND t.branch_id=i.branch_id AND t.generation=:generation
+                    AND t.state IN ('ACCEPTED','FAILED','CANCELLED') AND g.active
+                    AND s.grant_id=g.grant_id AND s.grant_epoch=g.epoch
+                    FOR SHARE OF i,s,t,g,w
+                """), expected_scope)
+                require(matches, "VIEW_DENIED", "Completion receipt is no longer current")
             fence = KernelRepository(conn, tables).one("resume_grants", {"grant_id": self.principal.grant_id})
             expiration["resume_grant_expires_at"] = fence["expires_at"].isoformat()
 

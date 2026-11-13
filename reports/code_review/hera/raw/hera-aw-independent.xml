@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="3" time="69.246" timestamp="2026-11-13T14:53:16.549677+09:00" hostname="4c2564e7b1b0"><testcase classname="integration.test_dual_stdio" name="test_two_live_mcp_servers_recover_accepted_task_after_lost_reply[cold]" time="35.427" /><testcase classname="integration.test_dual_stdio" name="test_two_live_mcp_servers_recover_accepted_task_after_lost_reply[reuse]" time="32.402" /><testcase classname="tests.test_hera_relay" name="test_grouped_relay_publication_crash_and_authorized_inbox_replay" time="0.002"><error message="failed on setup with &quot;KeyError: 'AW_DATABASE_URL'&quot;">workshop/tests/test_installation_ownership.py:20: in isolated_database
+    base = os.environ["AW_DATABASE_URL"]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'AW_DATABASE_URL'</error></testcase></testsuite></testsuites>

@@ -7,6 +7,7 @@ import pytest
 from sqlalchemy import text
 
 from novel_factory.application.agent_gateway import AgentGateway
+from novel_factory.application.derived_worker import DerivedWorldWorker
 from novel_factory.application.supervisor import RuntimeSupervisor
 from novel_factory.fixtures import load_fixture
 from novel_factory.orchestration.processors import TaskDispatcher
@@ -40,9 +41,16 @@ def test_model_and_compute_limits_share_global_leases(kernel_env):
             assert server.started.wait(8)
             assert dispatcher.run_once("model", executor=pool, reconcile=True)["status"] == "IDLE"
             assert dispatcher.run_once("compute", reconcile=True)["status"] == "IDLE"
+            legacy = DerivedWorldWorker(kernel)
+            assert legacy.run_once("standalone") is None
             with kernel.db.uow() as repo:
                 repo.conn.execute(text("UPDATE nf_dispatch_limits SET slots=1 WHERE subject='CPU_COMPUTE'"))
-            assert dispatcher.run_once("compute", reconcile=True)["status"] == "INDEXED"
+            lease = legacy.reserve_index(*scope)
+            assert lease and legacy.run_once("standalone") is None
+            assert legacy.process_reserved(*scope, lease)["consumed"]
+            # The legacy worker still acknowledges its durable delivery after the
+            # scoped worker built the exact same index. No duplicate formal effect.
+            assert legacy.run_once("standalone")["consumed"] is False
             assert not first.done() and len(requests) == 1
         finally:
             server.release.set()

@@ -131,3 +131,11 @@ def test_deployment_connection_budget_counts_all_processes():
     assert budget.total == 40
     with pytest.raises(ValueError, match="aggregate"):
         ConnectionBudget(api_processes=8).validate()
+
+def test_connection_inventory_counts_child_pools_stdio_and_listeners():
+    inventory = dict(active_stdio_processes=3, compute_child_processes=4, listen_connections=2)
+    budget = ConnectionBudget(**inventory, postgres_max_connections=40)
+    budget.validate()
+    assert budget.total == 40
+    with pytest.raises(ValueError, match="aggregate"):
+        ConnectionBudget(**inventory, postgres_max_connections=39).validate()

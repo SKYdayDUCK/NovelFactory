@@ -547,3 +547,62 @@ def test_reused_workshop_transport_reconnects_after_peer_death(site, monkeypatch
             assert int(pidfile.read_text()) != pid
 
     asyncio.run(run())
+
+
+def test_rest_delegation_disconnect_then_stdio_lookup_and_execution(site):
+    from benchmarks.http_load import loopback_server
+    from novel_factory.interfaces.http import HttpSettings, create_app
+    import httpx
+
+    runtime, submit, get, config, supervisor, owner, requests, frozen = site
+    private = json.loads(config.read_text())
+    path = "/api/v1/hera/installations/" + runtime.installation_id + "/delegations/"
+    headers = {"Authorization": "Bearer " + private["token"]}
+    app = create_app(runtime.kernel, settings=HttpSettings(hera_delegations=True,
+                                                           per_principal_concurrency=1, queue_timeout_seconds=.2))
+    async def two_entries(base):
+        from mcp.client.streamable_http import streamable_http_client
+        async with httpx.AsyncClient(base_url=base, headers=headers, trust_env=False) as rest:
+            async with streamable_http_client(base+"/mcp/installations/"+runtime.installation_id, http_client=rest) as streams:
+                async with ClientSession(streams[0], streams[1]) as sdk:
+                    await sdk.initialize()
+                    # Exhaust the shared, real application slot after protocol initialization.
+                    async with app.state.admission.slot("installation:" + runtime.installation_id, "task"):
+                        busy_rest, busy_mcp = await asyncio.gather(rest.post(path + "submit", json=submit),
+                                                                  sdk.call_tool("nf_delegation_submit", submit))
+                    assert busy_rest.status_code == 429 and busy_rest.headers["Retry-After"] == "1"
+                    assert busy_mcp.isError and busy_mcp.structuredContent["error"] == {
+                        "code": "BACKPRESSURE", "retryable": True, "retry_after_ms": 1000,
+                        "recovery": "WAIT", "retry_same_operation": True}
+                    with runtime.kernel.db.uow(write=False) as repo:
+                        assert not repo.many("delegation_receipts", {"installation_id": runtime.installation_id})
+                    response, replay = await asyncio.gather(rest.post(path + "submit", json=submit),
+                                                           sdk.call_tool("nf_delegation_submit", submit))
+                    assert response.status_code == 202 and response.json()["task_state"] == "READY"
+                    assert not replay.isError and replay.structuredContent == response.json()
+                    return response.json()["receipt_ref"]
+
+    with loopback_server(app, lifespan="on") as base:
+        receipt_id = asyncio.run(two_entries(base))
+
+    async def read_via_stdio():
+        params = StdioServerParameters(command=sys.executable,
+            args=["-m", "novel_factory.interfaces.delegation_stdio", "--binding", str(config)])
+        async with stdio_client(params) as stream, ClientSession(*stream) as sdk:
+            await sdk.initialize()
+            replay = await sdk.call_tool("nf_delegation_submit", submit)
+            assert not replay.isError and replay.structuredContent["receipt_ref"] == receipt_id
+
+    asyncio.run(read_via_stdio())
+    for _ in range(2):
+        supervisor.run_once(owner, get["work_id"], get["branch_id"])
+    # New server and connection recover the receipt after the submitter left.
+    with loopback_server(create_app(runtime.kernel, settings=HttpSettings(hera_delegations=True))) as base:
+        with httpx.Client(base_url=base, trust_env=False) as rest:
+            final = rest.post(path + "status", headers=headers, json=get)
+            assert final.status_code == 200
+            assert final.json()["task_id"] == frozen.spec["task_id"]
+            assert final.json()["task_state"] == "ACCEPTED"
+            assert len(requests) == len(final.json()["attempts"]) == 1
+            revoke(runtime.kernel, owner, runtime.installation_id)
+            assert rest.post(path + "status", headers=headers, json=get).status_code == 403

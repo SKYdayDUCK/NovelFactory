@@ -48,6 +48,7 @@ def trial(kernel, jobs, workers, adaptive):
     assert source == jobs
     completions, service_times, limits, pressure, pending = [], [], [], [], {}
     done_ids = set()
+    records = []
     monitor = ResourceMonitor()
     with ProcessPoolExecutor(max_workers=workers, mp_context=multiprocessing.get_context("spawn"),
             initializer=initialize_index_worker, initargs=(db.engine.url.render_as_string(hide_password=False), str(kernel.objects.root))) as pool:
@@ -89,6 +90,8 @@ def trial(kernel, jobs, workers, adaptive):
                 done_ids.add(receipt["message_id"])
                 service_times.append(service)
                 completions.append(completed - start)
+                records.append({"source_event": receipt["message_id"], "completed_s": completed - start,
+                                "service_s": service, "status": receipt["status"]})
                 controller.monitor.completed(service)
         elapsed = time.monotonic() - start
     with db.uow(write=False) as repo:
@@ -107,7 +110,7 @@ def trial(kernel, jobs, workers, adaptive):
             "p95_service_s": percentile(service_times,.95), "mean_cpu_pct": avg("cpu_pct"), "mean_cpu_psi_avg10": avg("cpu_psi"),
             "mean_parent_rss_kib": avg("rss_kib"), "mean_available_bytes": avg("available_bytes"),
             "warm_processes": len(warmed), "capacity_series": limits, "scale_decisions": [dict(r) for r in decisions],
-            "provider_calls": calls, "provider_invoice": None}
+            "provider_calls": calls, "provider_invoice": None, "records": records}
 
 
 def warm_noarg(_):
@@ -129,7 +132,9 @@ def main():
             kernel = Kernel(db, ObjectStore(directory))
             # Symmetric ordering across two paired repeats.
             trials = [trial(kernel,args.jobs,args.workers,adaptive) for adaptive in (False, True, True, False)]
-        output = {"measured_at": datetime.now(UTC).isoformat(), "system": platform.platform(),
+        import subprocess
+        commit = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+        output = {"source_commit": commit, "measured_at": datetime.now(UTC).isoformat(), "system": platform.platform(),
                   "python": platform.python_version(), "affinity": len(os.sched_getaffinity(0)),
                   "postgres": db.engine.dialect.server_version_info, "load": "closed loop drain of simultaneously READY fixed-shape world revisions",
                   "model": "no provider call or synthetic usage", "parent_pool": 3, "child_pool_per_process": 1,

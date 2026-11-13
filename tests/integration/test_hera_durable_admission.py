@@ -1,11 +1,13 @@
 """Persistent capacity and expiry over actual PostgreSQL transactions and workers."""
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
+import json
 from threading import Barrier
 from uuid import uuid4
 
 import pytest
 from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
 
 from novel_factory.application.kernel import Kernel
 from novel_factory.domain.errors import DomainError
@@ -160,3 +162,44 @@ def test_age_and_expired_unclaimed_wait_survive_restart_and_disable(kernel_env, 
                                         {"ids": ids})
     finally:
         restart_db.close()
+
+
+def test_database_connection_loss_rolls_back_admission_and_retry_completes(kernel_env, policy, monkeypatch):
+    """Kill the writing PostgreSQL backend after it emitted the event, before COMMIT."""
+    from sqlalchemy.exc import DBAPIError
+
+    kernel = kernel_env["kernel"]
+    world = load_fixture(kernel)
+    owner = world["principal"]
+    task = spec(world)
+    policy(total=1)
+    original = kernel.tasks._emit
+
+    def disconnect(conn, *args):
+        result = original(conn, *args)
+        pid = conn.scalar(text("SELECT pg_backend_pid()"))
+        with kernel_env["admin"].connect() as admin:
+            assert admin.scalar(text("SELECT pg_terminate_backend(:pid, 2000)"), {"pid": pid})
+        return result
+
+    with monkeypatch.context() as injected:
+        injected.setattr(kernel.tasks, "_emit", disconnect)
+        with pytest.raises(DBAPIError):
+            kernel.create_task(owner, task, "lost-before-commit")
+    with kernel.db.uow(write=False) as repo:
+        assert repo.one("tasks", {"task_id": task["task_id"]}) is None
+        assert repo.one("task_commands", {"principal_id": owner.principal_id, "idempotency_key": "lost-before-commit"}) is None
+        assert not repo.conn.scalar(text("SELECT EXISTS (SELECT FROM nf_durable_admissions WHERE task_id=:id)"),
+                                    {"id": task["task_id"]})
+        assert not repo.one("outbox", {"aggregate_id": task["task_id"]})
+    receipt = kernel.create_task(owner, task, "lost-before-commit")
+    assert kernel.create_task(owner, task, "lost-before-commit") == receipt
+    kernel.cancel_task(owner, task["task_id"], 0, "release")
+
+
+@pytest.mark.parametrize("invalid", [None, 1, [], ["MODEL"], {}, "INVALID"])
+def test_reject_invalid_server_resource_classes(kernel_env, invalid):
+    with pytest.raises(IntegrityError), kernel_env["db"].uow() as repo:
+        repo.conn.execute(text("""
+            UPDATE nf_durable_admission_policy SET role_resources=CAST(:mapping AS jsonb)
+        """), {"mapping": json.dumps({"writer": invalid})})

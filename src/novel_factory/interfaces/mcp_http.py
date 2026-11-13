@@ -34,12 +34,13 @@ def load_roster(path):
 
 
 class RemoteTools:
-    def __init__(self, kernel, bindings, authenticate, execute, settings):
+    def __init__(self, kernel, bindings, authenticate, execute, settings, coalescer):
         self.bindings = dict(bindings)
         self.kernel = kernel
         self.authenticate = authenticate
         self.execute = execute
         self.settings = settings
+        self.coalescer = coalescer
         server = make_server(None, resolve=lambda request: request.state.nf_runtime, run=self.run)
         security = TransportSecuritySettings(allowed_hosts=list(settings.mcp_allowed_hosts),
                                              allowed_origins=list(settings.allowed_origins))
@@ -58,7 +59,9 @@ class RemoteTools:
         # The SDK forwards this HTTP Request to this JSON-RPC handler, even
         # when several grants run concurrently in the same server task group.
         request.state.nf_runtime = McpRuntime(self.kernel, principal, binding,
-                                              fenced_task_status=self.settings.fenced_task_status)
+                                              compact_role_reads=self.settings.compact_remote_role_reads,
+                                              fenced_task_status=self.settings.fenced_task_status,
+                                              status_coalescer=self.coalescer)
         await self.manager.handle_request(scope, receive, send)
 
     def route(self):

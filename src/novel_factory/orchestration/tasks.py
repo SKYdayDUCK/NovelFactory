@@ -673,23 +673,28 @@ class OutboxService:
         self.engine, self.tables = engine, tables
 
     def claim(self, worker_id, *, lease_seconds=30, topic=None):
-        if not worker_id or not 0 < lease_seconds <= 3600:
-            raise _error("INVALID_ARGUMENT", "Invalid outbox lease")
         with self.engine.begin() as conn:
             mutation_gate(conn)
-            now = conn.scalar(select(func.clock_timestamp()))
-            t = self.tables["outbox"]
-            condition = or_(t.c.state == "PENDING", and_(t.c.state == "DELIVERING", t.c.lease_expiry <= now))
-            q = select(t).where(condition)
-            if topic:
-                q = q.where(t.c.topic == topic)
-            row = conn.execute(q.order_by(t.c.created_at, t.c.outbox_id).limit(1).with_for_update(skip_locked=True)).mappings().one_or_none()
-            if row is None:
-                return None
-            updates = {"state": "DELIVERING", "generation": row["generation"] + 1, "lease_owner": worker_id,
-                       "lease_expiry": now + timedelta(seconds=lease_seconds), "attempts": row["attempts"] + 1}
-            conn.execute(t.update().where(t.c.outbox_id == row["outbox_id"]).values(**updates))
-            return {**dict(row), **updates}
+            return self.claim_in_transaction(conn, worker_id, lease_seconds=lease_seconds, topic=topic)
+
+    def claim_in_transaction(self, conn, worker_id, *, lease_seconds=30, topic=None, message_id=None):
+        if not worker_id or not 0 < lease_seconds <= 3600:
+            raise _error("INVALID_ARGUMENT", "Invalid outbox lease")
+        now = conn.scalar(select(func.clock_timestamp()))
+        t = self.tables["outbox"]
+        condition = or_(t.c.state == "PENDING", and_(t.c.state == "DELIVERING", t.c.lease_expiry <= now))
+        q = select(t).where(condition)
+        if message_id is not None:
+            q = q.where(t.c.outbox_id == message_id)
+        if topic:
+            q = q.where(t.c.topic == topic)
+        row = conn.execute(q.order_by(t.c.created_at, t.c.outbox_id).limit(1).with_for_update(skip_locked=True)).mappings().one_or_none()
+        if row is None:
+            return None
+        updates = {"state": "DELIVERING", "generation": row["generation"] + 1, "lease_owner": worker_id,
+                   "lease_expiry": now + timedelta(seconds=lease_seconds), "attempts": row["attempts"] + 1}
+        conn.execute(t.update().where(t.c.outbox_id == row["outbox_id"]).values(**updates))
+        return {**dict(row), **updates}
 
     def consume(self, consumer, message_id, handler: Callable):
         """handler(conn, payload) must only mutate this database transaction.

@@ -344,3 +344,23 @@ def test_manager_rechecks_author_after_delegation_and_before_resume():
 
     assert asyncio.run(run_once(dsn, org, install, resume, revoke_during_lookup)) == "REVOKED"
     assert calls == ["nf_delegation_submit"]
+
+
+def test_completion_subscription_retains_unfulfilled_deadline_for_operator():
+    from agent_workshop.manager import request_resume
+    from agent_workshop.manager_worker import take
+
+    dsn, org, install, token = setup_slot()
+    op = make(dsn, token)
+    with connect(dsn) as conn:
+        manager = authenticate(conn, enroll(conn, install, org, "manager", 1, 1))
+        subscription = request_resume(conn, manager, "after-final", op)
+        assert subscription["state"] == "WAITING_DELEGATION"
+        with pytest.raises(Denied, match="VIEW_DENIED"):
+            request_resume(conn, authenticate(conn, token), "other-role", op)
+        conn.execute("UPDATE aw_delegations SET deadline=now() WHERE operation_id=%s", (op,))
+    assert take(dsn, org, install) is None
+    with connect(dsn) as conn:
+        result = request_resume(conn, manager, "after-final", op)
+        assert result["request_id"] == subscription["request_id"]
+        assert result["state"] == "WAITING_OPERATOR" and result["result"]["error"] == "DELEGATION_INCOMPLETE"

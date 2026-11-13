@@ -22,11 +22,12 @@ class TaskOperationsBinding:
 
 
 class TaskOperations:
-    def __init__(self, kernel, principal, *, binding=None, fenced_status=False):
+    def __init__(self, kernel, principal, *, binding=None, fenced_status=False, coalescer=None):
         self.kernel = kernel
         self.principal = principal
         self.binding = binding
         self.fenced_status = fenced_status
+        self.coalescer = coalescer
 
     def create(self, spec, idempotency_key):
         if self.binding is not None:
@@ -40,6 +41,14 @@ class TaskOperations:
                 "wall_deadline": spec["wall_deadline"]}
 
     def status(self, task_id):
+        if self.coalescer is None:
+            return self._status(task_id)
+        # The instance belongs to one application/kernel and status contract. All
+        # participants join before the leader rechecks grant, owner and generation.
+        key = (self.principal, self.binding, task_id, self.fenced_status)
+        return self.coalescer.read(key, lambda: self._status(task_id))
+
+    def _status(self, task_id):
         read = self.kernel.get_task_with_locked_work if self.fenced_status else self.kernel.get_task
         task = read(self.principal, task_id)
         if self.binding is not None:

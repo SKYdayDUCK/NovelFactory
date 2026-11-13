@@ -26,6 +26,27 @@ CONSUMER = "derived-world:" + PROJECTOR_VERSION
 INDEX_NAMES = ("graph", "timeline")
 
 
+# Both the project dispatcher and standalone durable outbox consumer draw from
+# these exact live leases whenever the operator configures resource limits.
+_ACTIVE_INDEX_BUDGET = """
+                WITH active AS MATERIALIZED (
+                    SELECT t.work_id,t.role_id,'MODEL' AS resource FROM nf_dispatch_slots s JOIN nf_tasks t USING(task_id)
+                    WHERE s.expires_at>statement_timestamp() UNION ALL
+                    SELECT work_id,'derived_index','CPU_COMPUTE' FROM nf_index_leases WHERE expires_at>statement_timestamp()
+                )
+"""
+_INDEX_LIMITS = """
+                  AND NOT EXISTS (SELECT FROM nf_dispatch_limits lim WHERE lim.scope='RESOURCE'
+                    AND lim.subject='CPU_COMPUTE' AND lim.slots <=
+                        (SELECT count(*) FROM active WHERE resource='CPU_COMPUTE'))
+                  AND (SELECT count(*) FROM active)<(SELECT slots FROM nf_dispatch_limits WHERE scope='GLOBAL' AND subject='*')
+                  AND (SELECT count(*) FROM active WHERE work_id=b.work_id)<(SELECT slots FROM nf_dispatch_limits
+                    WHERE scope='WORK' AND subject IN ('*',b.work_id::text) ORDER BY subject='*' LIMIT 1)
+                  AND (SELECT count(*) FROM active WHERE role_id='derived_index')<(SELECT slots FROM nf_dispatch_limits
+                    WHERE scope='ROLE' AND subject IN ('*','derived_index') ORDER BY subject='*' LIMIT 1)
+"""
+
+
 class DerivedWorldWorker:
     def __init__(self, kernel):
         self.kernel = kernel
@@ -95,22 +116,11 @@ class DerivedWorldWorker:
             self.kernel.authorize(repo, principal, work_id, "ADMIN", branch_id)
             repo.conn.execute(text("SELECT pg_advisory_xact_lock(:gate)"), scope)
             repo.conn.execute(text("LOCK TABLE nf_dispatch_limits IN SHARE MODE"))
-            event = repo.conn.scalar(text("""
-                WITH active AS MATERIALIZED (
-                    SELECT t.work_id,t.role_id,'MODEL' AS resource FROM nf_dispatch_slots s JOIN nf_tasks t USING(task_id)
-                    WHERE s.expires_at>now() UNION ALL
-                    SELECT work_id,'derived_index','CPU_COMPUTE' FROM nf_index_leases WHERE expires_at>now()
-                )
-                SELECT o.outbox_id FROM nf_outbox o WHERE o.topic='world.accepted'
-                  AND EXISTS(SELECT FROM nf_redis_branches WHERE branch_id=:branch AND work_id=:work)
-                  AND NOT EXISTS (SELECT FROM nf_dispatch_limits lim WHERE lim.scope='RESOURCE'
-                    AND lim.subject='CPU_COMPUTE' AND lim.slots <=
-                        (SELECT count(*) FROM active WHERE resource='CPU_COMPUTE'))
-                  AND (SELECT count(*) FROM active)<(SELECT slots FROM nf_dispatch_limits WHERE scope='GLOBAL' AND subject='*')
-                  AND (SELECT count(*) FROM active WHERE work_id=:work)<(SELECT slots FROM nf_dispatch_limits
-                    WHERE scope='WORK' AND subject IN ('*',:work_text) ORDER BY subject='*' LIMIT 1)
-                  AND (SELECT count(*) FROM active WHERE role_id='derived_index')<(SELECT slots FROM nf_dispatch_limits
-                    WHERE scope='ROLE' AND subject IN ('*','derived_index') ORDER BY subject='*' LIMIT 1)
+            event = repo.conn.scalar(text(_ACTIVE_INDEX_BUDGET + """
+                SELECT o.outbox_id FROM nf_outbox o
+                JOIN nf_redis_branches b ON b.branch_id=:branch AND b.work_id=:work
+                WHERE o.topic='world.accepted'
+            """ + _INDEX_LIMITS + """
                   AND o.payload->'world_ref'->>'work_id'=:work_text AND o.payload->'world_ref'->>'branch_id'=:branch_text
                   AND NOT EXISTS (SELECT FROM nf_index_leases l WHERE l.event_id=o.outbox_id AND l.expires_at>now())
                   AND NOT EXISTS (SELECT FROM nf_inbox i WHERE i.consumer=:consumer AND i.message_id=o.outbox_id)
@@ -218,10 +228,46 @@ class DerivedWorldWorker:
                 "world_ref": payload["world_ref"], **status}
 
     def run_once(self, worker_id, *, lease_seconds=30, fault=None):
-        lease = self.outbox.claim(worker_id, topic="world.accepted", lease_seconds=lease_seconds)
-        if lease is None:
-            return None
-        return self.process_claimed(lease, worker_id, fault=fault)
+        token = str(uuid4())
+        with self.kernel.db.uow() as repo:
+            # Lock order matches project index/model admissions: advisory gate,
+            # configuration, outbox row, lease. No IO or indexing under these locks.
+            repo.conn.execute(text("SELECT pg_advisory_xact_lock(:gate)"), {"gate": MAINTENANCE_GATE + 1})
+            repo.conn.execute(text("LOCK TABLE nf_dispatch_limits IN SHARE MODE"))
+            scoped = repo.conn.scalar(text("SELECT EXISTS (SELECT FROM nf_dispatch_limits WHERE scope='RESOURCE')"))
+            message_id = None
+            if scoped:
+                message_id = repo.conn.scalar(text(_ACTIVE_INDEX_BUDGET + """
+                    SELECT o.outbox_id FROM nf_outbox o JOIN nf_branches b
+                      ON b.branch_id::text=o.payload->'world_ref'->>'branch_id'
+                     AND b.work_id::text=o.payload->'world_ref'->>'work_id'
+                    WHERE o.topic='world.accepted' AND (o.state='PENDING' OR
+                      (o.state='DELIVERING' AND o.lease_expiry<=statement_timestamp()))
+                      AND NOT EXISTS (SELECT FROM nf_index_leases l WHERE l.event_id=o.outbox_id
+                                      AND l.expires_at>statement_timestamp())
+                """ + _INDEX_LIMITS + """
+                    ORDER BY o.created_at,o.outbox_id LIMIT 1 FOR UPDATE OF o SKIP LOCKED"""))
+                if message_id is None:
+                    return None
+            lease = self.outbox.claim_in_transaction(repo.conn, worker_id, topic="world.accepted",
+                                                      lease_seconds=lease_seconds, message_id=message_id)
+            if not lease:
+                return None
+            if scoped:
+                wr = lease["payload"]["world_ref"]
+                repo.conn.execute(text("""
+                    INSERT INTO nf_index_leases(event_id,token,work_id,branch_id,expires_at)
+                    VALUES(:event,:token,:work,:branch,:expiry) ON CONFLICT(event_id)
+                    DO UPDATE SET token=EXCLUDED.token,expires_at=EXCLUDED.expires_at
+                """), {"event": message_id, "token": token, "work": wr["work_id"], "branch": wr["branch_id"],
+                        "expiry": lease["lease_expiry"]})
+        try:
+            return self.process_claimed(lease, worker_id, fault=fault)
+        finally:
+            if scoped:
+                with self.kernel.db.uow() as repo:
+                    repo.conn.execute(text("DELETE FROM nf_index_leases WHERE event_id=:event AND token=:token"),
+                                      {"event": message_id, "token": token})
 
     def dependency_impacts(self, principal, wr, *, limit=1000):
         """Read bounded current owners against the consumed invalidation corpus.

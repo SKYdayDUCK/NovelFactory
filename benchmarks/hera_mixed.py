@@ -52,7 +52,7 @@ def population(kernel, count):
     return rows
 
 
-async def trial(kernel, actors, count, percent, fast, operation):
+async def trial(kernel, actors, count, percent, fast, operation, *, on_start=None):
     bindings = {}
     lanes = []
     for i, (identity, wr) in enumerate(actors[:count]):
@@ -152,6 +152,8 @@ async def trial(kernel, actors, count, percent, fast, operation):
                 await asyncio.wait_for(ready.get(), timeout=120)
             with SqlMeasurements(kernel.db.engine) as sql:
                 cpu, baseline = process_time(), perf_counter()
+                if on_start is not None:
+                    on_start(baseline)
                 start.set()
                 # Lane teardown includes SDK notifications. Time response completion separately.
                 while len(raw) < count:

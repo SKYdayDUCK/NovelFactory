@@ -47,6 +47,17 @@ def take(dsn, org, installation):
         ).fetchone()
         if owns_org:
             expire_due_reviews(c, org)
+            # Bound the wait even when an unavailable peer can never produce a
+            # settled receipt. Preserve the intent for the submitting manager.
+            c.execute("""
+                WITH expired AS (SELECT r.request_id FROM aw_resume_requests r
+                  JOIN aw_delegations d ON (d.org_id,d.operation_id)=(r.org_id,r.after_delegation_id)
+                  WHERE r.org_id=%s AND r.installation_id=%s AND r.state='WAITING_DELEGATION'
+                    AND (d.deadline<=clock_timestamp() OR d.state IN ('RELEASED','WAITING_OPERATOR'))
+                  ORDER BY d.deadline,r.request_id LIMIT 32 FOR UPDATE OF r SKIP LOCKED)
+                UPDATE aw_resume_requests r SET state='WAITING_OPERATOR',
+                    result='{"error":"DELEGATION_INCOMPLETE"}'::jsonb
+                FROM expired WHERE r.request_id=expired.request_id""", (org, installation))
         row = c.execute(
             """SELECT * FROM aw_resume_requests WHERE org_id=%s AND installation_id=%s
             AND state IN ('PENDING','RUNNING') AND eligible_at<=clock_timestamp()
@@ -115,7 +126,26 @@ async def run_once(dsn, org, installation, nf_project, nf_delegation):
     try:
         # Only broker-configured commands may select a project. An MCP caller never provides a path.
         with connect(dsn) as c:
-            operations = c.execute(
+            binding = c.execute(
+                """SELECT w.after_delegation_id,d.payload, d.state, r.task_id, r.receipt_ref, r.generation
+                   FROM aw_resume_requests w LEFT JOIN aw_delegations d ON d.org_id=w.org_id
+                     AND d.installation_id=w.installation_id AND d.operation_id=w.after_delegation_id
+                   LEFT JOIN aw_remote_receipts r ON (r.org_id,r.operation_id)=(d.org_id,d.operation_id)
+                   WHERE w.request_id=%s""", (ident,),
+            ).fetchone()
+            args = {}
+            if binding["after_delegation_id"]:
+                if binding["state"] != "SETTLED" or binding["receipt_ref"] is None:
+                    raise ValueError("Completion receipt unavailable")
+                args["expected_scope"] = {
+                    **{k: binding["payload"][k] for k in ("work_id", "branch_id", "nf_instance_id", "grant_epoch")},
+                    "installation_id": str(installation), "org_id": str(org),
+                    "operation_id": str(binding["after_delegation_id"]), "task_id": str(binding["task_id"]),
+                    "receipt_ref": str(binding["receipt_ref"]), "generation": binding["generation"],
+                }
+            # Pre-authorized completion wakes must not initiate unrelated
+            # delegation submissions. Ordinary manager resumes retain their recovery pass.
+            operations = [] if args else c.execute(
                 """SELECT operation_id FROM aw_delegations WHERE org_id=%s
                 AND installation_id=%s AND state=ANY(%s) AND next_check<=clock_timestamp()
                 ORDER BY next_check LIMIT 4""",
@@ -129,7 +159,7 @@ async def run_once(dsn, org, installation, nf_project, nf_delegation):
         if blocked := before_peer_call(dsn, org, installation, request):
             return blocked
         async with asyncio.timeout(20):
-            receipt = await nf_project("nf_resume_project", {})
+            receipt = await nf_project("nf_resume_project", args)
         result = {
             key: receipt[key]
             for key in (

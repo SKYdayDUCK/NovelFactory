@@ -46,13 +46,16 @@ def test_mixed_task_lifecycle(service_env, service_world, tmp_path):
                                 expires_at=datetime.now(UTC) + timedelta(hours=1))
     project = ProjectBinding(wr["work_id"], wr["branch_id"])
     bindings = {world["principal"]: binding, other["principal"]: binding, resume["principal"]: project}
-    app = create_app(kernel, mcp_bindings=bindings, settings=HttpSettings(fenced_task_status=True))
+    app = create_app(kernel, mcp_bindings=bindings, settings=HttpSettings(fenced_task_status=True, coalesce_task_status=True))
     spec = dict(schema_version="2.0", task_id=str(uuid4()), generation=0, role_id="control_operator",
                 task_kind="hera_mixed", state="READY", world_ref=wr, story_time=point(0),
                 context_bundle_id=None, policy_version="nf-policy-1", dependency_fingerprint=None,
                 runtime_contract_version=fingerprint({"hera": 1}), capability_grant_id=world["principal"].grant_id,
                 input_artifacts=[], budget={"currency": "USD", "max_amount": "1", "token_budget": 10},
                 wall_deadline=(datetime.now(UTC) + timedelta(hours=1)).isoformat())
+    foreign = dict(spec, task_id=str(uuid4()),
+                   world_ref=kernel.fork(world["principal"], wr, "CANDIDATE", "test-foreign-branch"))
+    kernel.create_task(world["principal"], foreign, "foreign-create")
     task_id = spec["task_id"]
     command = {"spec": spec, "idempotency_key": "hera-create"}
     status = {"task_id": task_id}
@@ -70,6 +73,17 @@ def test_mixed_task_lifecycle(service_env, service_world, tmp_path):
             assert h.json()["status_url"] == task_url
             m, h = await asyncio.gather(mcp.call_tool("nf_task_status", status), rest.get(task_url))
             assert h.status_code == 200 and h.json() == m.structuredContent
+            # A deployment may give a broad kernel principal a narrower installed binding.
+            # Both adapters must recheck that same ceiling on status, submission and cancellation.
+            foreign_id = foreign["task_id"]
+            assert (await rest.get("/api/v1/tasks/" + foreign_id)).status_code == 403
+            assert (await mcp.call_tool("nf_task_status", {"task_id": foreign_id})).isError
+            assert (await rest.post("/api/v1/tasks", json={"spec": foreign, "idempotency_key": "foreign-create"})).status_code == 403
+            assert (await rest.post("/api/v1/tasks/cancel", json={"task_id": foreign_id, "generation": 0,
+                                                                "idempotency_key": "foreign-cancel"})).status_code == 403
+            assert (await mcp.call_tool("nf_task_cancel", {"task_id": foreign_id, "generation": 0,
+                                                           "idempotency_key": "foreign-cancel"})).isError
+            assert kernel.get_task(world["principal"], foreign_id)["state"] == "READY"
             async with remote(base, other["token"]) as (other_rest, other_mcp):
                 denied = await other_mcp.call_tool("nf_task_status", status)
                 assert denied.isError and denied.structuredContent["error"]["code"] == "VIEW_DENIED"
@@ -89,6 +103,15 @@ def test_mixed_task_lifecycle(service_env, service_world, tmp_path):
             url = "/api/v1/works/{work_id}/branches/{branch_id}/workflow".format(**wr)
             assert (await rest.get(url)).json() == (await mcp.call_tool("nf_project_status", {})).structuredContent
             assert (await rest.post(url + "/resume")).json() == (await mcp.call_tool("nf_resume_project", {})).structuredContent
+            scoped = {"expected_scope": {
+                **{k: str(uuid4()) for k in ("org_id", "nf_instance_id", "installation_id", "operation_id", "receipt_ref")},
+                "work_id": wr["work_id"], "branch_id": wr["branch_id"], "task_id": task_id,
+                "generation": 1, "grant_epoch": 1,
+            }}
+            denied = await mcp.call_tool("nf_resume_project", scoped)
+            assert denied.isError and denied.structuredContent["error"]["code"] == "VIEW_DENIED"
+            assert (await rest.post(url + "/resume", json=scoped)).json()["code"] == "VIEW_DENIED"
+            assert (await rest.post(url + "/resume", json={"invalid": True})).status_code == 422
 
         path = tmp_path / "binding.json"
         with os.fdopen(create_private_file(path), "w", encoding="utf8") as output:
@@ -110,4 +133,4 @@ def test_mixed_task_lifecycle(service_env, service_world, tmp_path):
         assert repo.conn.scalar(text("SELECT count(*) FROM nf_outbox WHERE aggregate_id=:id AND topic='task.changed'"),
                                 {"id": task_id}) == 2
         assert repo.conn.scalar(text("SELECT count(*) FROM nf_task_commands WHERE principal_id=:id"),
-                                {"id": world["principal"].principal_id}) == 2
+                                {"id": world["principal"].principal_id}) == 3

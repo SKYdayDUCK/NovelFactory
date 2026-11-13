@@ -19,7 +19,7 @@ def upgrade():
             max_queue_seconds integer NOT NULL CHECK (max_queue_seconds > 0),
             max_age_seconds integer NOT NULL CHECK (max_age_seconds >= max_queue_seconds),
             role_resources jsonb NOT NULL DEFAULT '{}' CHECK (jsonb_typeof(role_resources)='object'
-                AND NOT jsonb_path_exists(role_resources, '$.* ? (@ != "MODEL" && @ != "CPU_COMPUTE" && @ != "DB_READ_LIGHT" && @ != "DB_READ_HEAVY" && @ != "DB_WRITE" && @ != "MAINTENANCE" && @ != "NOTIFICATION")'))
+                AND NOT jsonb_path_exists(role_resources, 'strict $.* ? (@.type() != "string" || (@ != "MODEL" && @ != "CPU_COMPUTE" && @ != "DB_READ_LIGHT" && @ != "DB_READ_HEAVY" && @ != "DB_WRITE" && @ != "MAINTENANCE" && @ != "NOTIFICATION"))'))
         );
         INSERT INTO nf_durable_admission_policy
             (singleton,total_limit,work_limit,principal_limit,resource_limit,max_queue_seconds,max_age_seconds)

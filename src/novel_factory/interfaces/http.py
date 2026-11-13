@@ -6,7 +6,7 @@ all operation, plane, actor and branch checks remain in application services.
 from __future__ import annotations
 
 import asyncio
-from contextlib import asynccontextmanager
+from contextlib import AsyncExitStack, asynccontextmanager
 from dataclasses import dataclass
 from decimal import Decimal
 import hashlib
@@ -46,8 +46,11 @@ class HttpSettings:
     rate_burst: int = 100
     allowed_origins: tuple[str, ...] = ()
     mcp_allowed_hosts: tuple[str, ...] = ("127.0.0.1:*", "localhost:*", "[::1]:*")
+    coalesce_task_status: bool = False
     max_queued_ingress: int = 0
     max_queued_per_principal: int = 8
+    compact_remote_role_reads: bool = False
+    hera_delegations: bool = False
     fenced_task_status: bool = False
 
 
@@ -240,15 +243,17 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
                                   max_waiters_per_principal=settings.max_queued_per_principal,
                                   timeout=settings.queue_timeout_seconds)
     rate_limiter = TokenBucketLimiter(settings.rate_per_second, settings.rate_burst)
-    remote = None
+    from novel_factory.application.status_coalescing import StatusCoalescer
+
+    coalescer = StatusCoalescer() if settings.coalesce_task_status else None
+    mcp_managers = []
 
     @asynccontextmanager
     async def lifespan(_app):
-        if remote is None:
+        async with AsyncExitStack() as stack:
+            for manager in mcp_managers:
+                await stack.enter_async_context(manager.run())
             yield
-        else:
-            async with remote.manager.run():
-                yield
 
     app = FastAPI(lifespan=lifespan, title="Novel Factory P0/P1 kernel", version="2.0.1",
                   docs_url=None, redoc_url=None, openapi_url=None)
@@ -258,6 +263,7 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
     app.state.authentication_admission = authentication
     app.state.ingress = ingress
     app.state.connection_budget = connection_budget
+    app.state.status_coalescer = coalescer
     app.add_middleware(RequestBoundaryMiddleware, settings=settings, ingress=ingress)
 
     @app.exception_handler(DomainError)
@@ -319,13 +325,22 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
         binding = mcp_bindings.get(principal) if mcp_bindings else None
         return TaskOperations(kernel, principal,
                               binding=binding if isinstance(binding, TaskOperationsBinding) else None,
-                              fenced_status=settings.fenced_task_status)
+                              fenced_status=settings.fenced_task_status, coalescer=coalescer)
 
     if mcp_bindings is not None:
         from .mcp_http import RemoteTools
 
-        remote = RemoteTools(kernel, mcp_bindings, authenticate, admitted_operation, settings)
+        remote = RemoteTools(kernel, mcp_bindings, authenticate, admitted_operation, settings, coalescer)
         app.router.routes.append(remote.route())
+        mcp_managers.append(remote.manager)
+
+    if settings.hera_delegations:
+        from .delegation_http import mount_delegations
+
+        manager = mount_delegations(app, kernel, authenticate_slots=authentication, admission=admission,
+                                    rate=rate_limiter, short_call=_finish_short_call, read_body=_json_body,
+                                    settings=settings)
+        mcp_managers.append(manager)
 
     @app.get("/health")
     async def health():
@@ -492,8 +507,15 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
         validate_contract("UUID", work_id)
         validate_contract("UUID", branch_id)
         resume = request.method == "POST"
+        arguments = {}
+        if resume and await request.body():
+            from novel_factory.application.tool_catalog import _VALIDATORS
+
+            arguments = await _json_body(request)
+            if not _VALIDATORS["nf_resume_project"].is_valid(arguments):
+                raise DomainError("INVALID_ARGUMENT", "Invalid project resume scope")
         return await execute(request, "task" if resume else "query", lambda principal: McpRuntime(
-            kernel, principal, ProjectBinding(work_id, branch_id)).project(resume=resume))
+            kernel, principal, ProjectBinding(work_id, branch_id)).project(resume=resume, **arguments))
 
     @app.post("/api/v1/tasks/claim")
     async def claim_task(request: Request):
@@ -547,6 +569,9 @@ def from_environment() -> FastAPI:
         worker_pool_size=int(os.environ.get("NF_WORKER_POOL_SIZE", "4")),
         maintenance_reserve=int(os.environ.get("NF_MAINTENANCE_CONNECTIONS", "16")),
         postgres_max_connections=int(os.environ.get("NF_PG_MAX_CONNECTIONS", "60")),
+        active_stdio_processes=int(os.environ.get("NF_ACTIVE_STDIO_PROCESSES", "0")),
+        compute_child_processes=int(os.environ.get("NF_COMPUTE_CHILD_PROCESSES", "0")),
+        listen_connections=int(os.environ.get("NF_LISTEN_CONNECTIONS", "0")),
     )
     budget.validate()
     database = Database(pool_size=pool, max_overflow=overflow,
@@ -561,6 +586,9 @@ def from_environment() -> FastAPI:
         max_queued_operations=int(os.environ.get("NF_HTTP_MAX_QUEUED_OPERATIONS", "64")),
         max_queued_per_principal=int(os.environ.get("NF_HTTP_MAX_QUEUED_PER_PRINCIPAL", "8")),
         queue_timeout_seconds=float(os.environ.get("NF_HTTP_QUEUE_TIMEOUT", "2")),
+        coalesce_task_status=os.environ.get("NF_HERA_COALESCE_TASK_STATUS", "0") == "1",
+        compact_remote_role_reads=os.environ.get("NF_HERA_COMPACT_ROLE_READS", "0") == "1",
+        hera_delegations=os.environ.get("NF_HERA_DELEGATIONS", "0") == "1",
         fenced_task_status=os.environ.get("NF_HTTP_FENCED_TASK_STATUS", "0") == "1",
     )
     from .mcp_http import load_roster

@@ -163,7 +163,10 @@ _TOOLS = {
                        object_schema(optional=("cursor", "limit"), task_id=_UUID, cursor=_UUID,
                                      limit={"type": "integer", "minimum": 1, "maximum": 100})),
     "nf_project_status": ("Read task counts for the configured project branch.", object_schema()),
-    "nf_resume_project": ("Recover eligible work and wake satisfied waits in the configured branch.", object_schema()),
+    "nf_resume_project": ("Recover eligible work and wake satisfied waits in the configured branch.",
+        object_schema(optional=("expected_scope",), expected_scope=object_schema(
+            work_id=_UUID, branch_id=_UUID, org_id=_UUID, nf_instance_id=_UUID, installation_id=_UUID,
+            operation_id=_UUID, receipt_ref=_UUID, task_id=_UUID, generation=_EPOCH, grant_epoch=_EPOCH))),
     "nf_task_get": ("Read the bound task's current execution identity.", object_schema()),
     "nf_context_get": ("Read the bound task's authorized context.", object_schema()),
     "nf_query_batch": ("Read selected state values at this task's bound time and knowledge cut.",

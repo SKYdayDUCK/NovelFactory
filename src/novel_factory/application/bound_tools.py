@@ -29,7 +29,7 @@ def _dispatch(runtime, name, arguments):
     if name in {"nf_task_status", "nf_task_submit", "nf_task_cancel", "nf_task_events"}:
         return runtime.task_operation(name, arguments)
     if name in {"nf_project_status", "nf_resume_project"}:
-        return runtime.project(resume=name == "nf_resume_project")
+        return runtime.project(resume=name == "nf_resume_project", **arguments)
     if name.startswith("nf_harness_instruction_"):
         return runtime.adaptive_instruction_call(name, **arguments)
     if name.startswith("nf_harness_agent_"):
