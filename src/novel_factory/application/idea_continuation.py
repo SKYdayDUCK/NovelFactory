@@ -24,7 +24,7 @@ def _pending(cursor):
         cursor
         and cursor["state"] == "FROZEN"
         and cursor["index"] + 1 == cursor["window_count"]
-        and cursor["chapter_count"] < cursor["target_chapters"]
+        and cursor["chapter_count"] < cursor.get("target_chapters", cursor["chapter_count"])
     )
 
 

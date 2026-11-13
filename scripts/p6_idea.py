@@ -72,6 +72,20 @@ def _load_private(path):
     return json.loads(read_private_bytes(path, 1000000))
 
 
+def _project_control(kernel, directory, filename, token, wr):
+    binding = {"work_id": wr["work_id"], "branch_id": wr["branch_id"]}
+    save(
+        directory,
+        filename,
+        {
+            "token": token,
+            "binding": binding,
+            "object_root": str(kernel.objects.root),
+            "database_url": kernel.db.engine.url.render_as_string(hide_password=False),
+        },
+    )
+
+
 def _register_window(kernel, gateway, private, allowance):
     access = _load_private(private / "supervisor.json")
     owner = kernel.authenticate(access["token"])
@@ -167,9 +181,17 @@ def run_intake(mode, kernel, gateway, private, inspiration=None, allowance=None)
                 bound = kernel.in_transaction(repo)
                 if repo.one("works", {"work_id": marker["work_id"]}):
                     access = _load_private(private / "preparation.json")
-                    return intake_receipt(
+                    receipt = intake_receipt(
                         bound, repo, bound.authenticate(access["token"]), access["world_ref"]
                     )
+                    _project_control(
+                        kernel,
+                        private,
+                        "preparation-control.json",
+                        access["token"],
+                        access["world_ref"],
+                    )
+                    return receipt
                 created, receipt = enroll_idea(
                     bound, gateway, inspiration, allowance, marker["work_id"]
                 )
@@ -177,6 +199,13 @@ def run_intake(mode, kernel, gateway, private, inspiration=None, allowance=None)
                     private,
                     "preparation.json",
                     {"token": created["token"], "world_ref": created["world_ref"]},
+                )
+                _project_control(
+                    kernel,
+                    private,
+                    "preparation-control.json",
+                    created["token"],
+                    created["world_ref"],
                 )
                 return receipt
         access = _load_private(private / "preparation.json")
@@ -213,17 +242,15 @@ def run_intake(mode, kernel, gateway, private, inspiration=None, allowance=None)
                         "branch_id": seed["branch_id"],
                     },
                 )
-                save(
-                    private,
-                    "control.json",
-                    {
-                        "token": created["token"],
-                        "binding": seed,
-                        "object_root": str(kernel.objects.root),
-                        "database_url": kernel.db.engine.url.render_as_string(hide_password=False),
-                    },
-                )
             if receipt["status"] == "INITIAL_PLAN_MATERIALIZED":
+                canonical = _load_private(private / "supervisor.json")
+                literary_wr = receipt["world_ref"]
+                literary_owner = bound.authenticate(canonical["token"])
+                bound.authorize(
+                    repo, literary_owner, literary_wr["work_id"], "ADMIN", literary_wr["branch_id"]
+                )
+                _project_control(kernel, private, "control.json", canonical["token"], literary_wr)
+                _project_control(kernel, private, "preparation-control.json", access["token"], wr)
                 save(private, "first-window.json", receipt)
             return receipt
 

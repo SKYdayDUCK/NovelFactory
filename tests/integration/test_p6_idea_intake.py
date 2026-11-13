@@ -11,7 +11,6 @@ import pytest
 from sqlalchemy import text
 from test_p5_supervisor import backend
 from test_p6_rolling_production import answer
-from test_release import accept_draft
 
 from novel_factory.application.agent_gateway import AgentGateway
 from novel_factory.application.production_pipeline import (
@@ -21,6 +20,7 @@ from novel_factory.application.production_pipeline import (
 from novel_factory.application.rolling_production import rolling_status
 from novel_factory.application.supervisor import RuntimeSupervisor
 from novel_factory.domain.errors import DomainError
+from novel_factory.interfaces.bindings import read_private_config, runtime_from_config
 
 pytestmark = [pytest.mark.postgres, pytest.mark.integration]
 
@@ -158,6 +158,17 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
             registered == run("register-window")
             and registered["budget_id"] != enrolled["budget_id"]
         )
+        for name, expected_wr in (
+            ("preparation-control.json", enrolled["world_ref"]),
+            ("control.json", receipt["world_ref"]),
+        ):
+            config = read_private_config(private / name)
+            assert config["binding"] == {key: expected_wr[key] for key in ("work_id", "branch_id")}
+            runtime = runtime_from_config(config)
+            try:
+                assert runtime.binding.work_id == expected_wr["work_id"]
+            finally:
+                runtime.kernel.db.close()
         prep = cli._load_private(private / "preparation.json")
         with kernel.db.uow() as repo, pytest.raises(DomainError) as denied:
             kernel.authorize(
@@ -168,42 +179,19 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
         if outcome == "continue":
             canon = cli._load_private(private / "supervisor.json")
             owner, wr = kernel.authenticate(canon["token"]), receipt["world_ref"]
-            fixture = {
-                "principal": owner,
-                "world_ref": wr,
-                "ids": {"sword": receipt["subject_ids"][0]},
-            }
-            accepted = set()
-            for _ in range(45):
+            for _ in range(65):
                 step = RuntimeSupervisor(kernel, gateway).run_once(
                     owner, wr["work_id"], wr["branch_id"]
                 )
-                board = pipeline_status(
-                    kernel, owner, wr["work_id"], wr["branch_id"], include_outputs=True
-                )
-                for key, node in board["nodes"].items():
-                    if node["state"] == "DRAFT_STORED" and key not in accepted:
-                        draft = board["outputs"][key]
-                        accepted.add(key)
-                        # The legacy test helper reads at the end of chapter 1. These
-                        # two committed chapters extend its fixture role's reading time.
-                        import test_release
-
-                        def compiled(*args, _compile=test_release.task_for, **kwargs):
-                            kwargs.setdefault("story_time", {"tick": 3, "phase": 1})
-                            return _compile(*args, **kwargs)
-
-                        with monkeypatch.context() as m:
-                            m.setattr(test_release, "task_for", compiled)
-                            accept_draft(
-                                kernel,
-                                fixture,
-                                {"draft_ref": draft["draft_ref"], "text": draft["text"]},
-                            )
                 if step["status"] in {"NEXT_PLAN_BLOCKED", "NEXT_PLAN_ACCEPTED"}:
                     break
             assert step["status"] == "NEXT_PLAN_ACCEPTED", step
             cursor = rolling_status(kernel, owner, wr["work_id"], wr["branch_id"])
             assert cursor["chapter_count"] == 3 and cursor["window_count"] == 2
-            assert cursor["frozen_chapters"] == 2 and len(accepted) == 2
+            assert cursor["frozen_chapters"] == 2
+            board = pipeline_status(
+                kernel, owner, wr["work_id"], wr["branch_id"], include_outputs=True
+            )
+            facts = [key for key, node in board["nodes"].items() if node["stage"] == "facts"]
+            assert len(facts) == 2 and all(board["outputs"][key]["acceptance_ref"] for key in facts)
             assert step["plan_task"] != step["review_task"]

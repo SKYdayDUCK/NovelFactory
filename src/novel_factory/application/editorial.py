@@ -657,6 +657,8 @@ class ReviewService:
             repo.add("selections", {"work_id": wr["work_id"], "selection_kind": "EDITORIAL_APPROVAL_ACTIVE:" + approval["approval_id"],
                                     "artifact_ref": ref, "epoch": 0})
             self.kernel._receipt(repo, principal, wr, "EDITORIAL_APPROVE", key, request, ref)
+            from .rolling_publication import record_editorial
+            record_editorial(self.kernel, repo, binding, ref)
         return ref
 
     def validate_editorial_approval(self, repo, principal, approval_ref, world_ref, ordered_draft_refs,

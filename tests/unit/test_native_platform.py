@@ -8,10 +8,26 @@ import sys
 import pytest
 
 from agent_runtime.host_process import isolated_host_environment, start_host, stop_host
-from novel_factory.infrastructure.native_files import publish_file
+from novel_factory.infrastructure.native_files import private_export, publish_file
 from novel_factory.infrastructure.private_files import (
     check_private_directory, prepare_private_directory, private_temporary_file, read_private_bytes,
 )
+
+
+def test_private_export_publishes_once_and_discards_interrupted_bytes(tmp_path):
+    output = tmp_path / "作品与运行证据"
+    with pytest.raises(RuntimeError), private_export(output) as pending:
+        pending.write(b"unfinished")
+        raise RuntimeError("interrupted")
+    assert not list(tmp_path.iterdir())
+    with private_export(output) as pending:
+        pending.write("正文".encode())
+        assert not output.exists()
+    assert read_private_bytes(output, 10) == "正文".encode()
+    with pytest.raises(FileExistsError), private_export(output) as pending:
+        pending.write(b"replacement")
+    assert read_private_bytes(output, 10) == "正文".encode()
+    assert list(tmp_path.iterdir()) == [output]
 
 
 def test_private_binding_is_verified_and_size_bounded(tmp_path):

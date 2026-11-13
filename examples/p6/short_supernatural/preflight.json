@@ -42,7 +42,10 @@
       "role_id": "world_designer",
       "task_kind": "initial_world",
       "skill_name": "prepare-world",
-      "trigger": null
+      "trigger": null,
+      "settings": {
+        "world_depth": "minimal"
+      }
     },
     {
       "id": "world_detail",
@@ -56,7 +59,8 @@
       "role_id": "world_designer",
       "task_kind": "world_extension",
       "skill_name": "prepare-world",
-      "trigger": null
+      "trigger": null,
+      "settings": {}
     },
     {
       "id": "world_rules_review",
@@ -68,7 +72,8 @@
       "role_id": "world_designer",
       "task_kind": "rule_review",
       "skill_name": "prepare-world",
-      "trigger": null
+      "trigger": null,
+      "settings": {}
     },
     {
       "id": "world_process_plan",
@@ -80,7 +85,8 @@
       "role_id": "environment_director",
       "task_kind": "process_semantics",
       "skill_name": "prepare-world",
-      "trigger": null
+      "trigger": null,
+      "settings": {}
     },
     {
       "id": "characters",
@@ -94,7 +100,8 @@
       "role_id": "world_designer",
       "task_kind": "initial_world",
       "skill_name": "prepare-world",
-      "trigger": null
+      "trigger": null,
+      "settings": {}
     },
     {
       "id": "storyline",
@@ -109,7 +116,8 @@
       "role_id": "chief_editor",
       "task_kind": "book_direction",
       "skill_name": "plan-volume",
-      "trigger": null
+      "trigger": null,
+      "settings": {}
     },
     {
       "id": "volume_plan",
@@ -123,7 +131,8 @@
       "role_id": "volume_director",
       "task_kind": "volume_contract",
       "skill_name": "plan-volume",
-      "trigger": null
+      "trigger": null,
+      "settings": {}
     },
     {
       "id": "chapter_plan",
@@ -137,7 +146,11 @@
       "role_id": "volume_director",
       "task_kind": "window_plan",
       "skill_name": "plan-volume",
-      "trigger": null
+      "trigger": null,
+      "settings": {
+        "chapter_granularity": "story",
+        "planning_depth": "storyline"
+      }
     },
     {
       "id": "series_plan",
@@ -149,7 +162,8 @@
       "role_id": "chief_editor",
       "task_kind": "book_direction",
       "skill_name": "plan-volume",
-      "trigger": null
+      "trigger": null,
+      "settings": {}
     },
     {
       "id": "bind_plan",
@@ -163,7 +177,8 @@
       "role_id": null,
       "task_kind": null,
       "skill_name": null,
-      "trigger": null
+      "trigger": null,
+      "settings": {}
     },
     {
       "id": "future_volumes",
@@ -177,7 +192,10 @@
       "role_id": "volume_director",
       "task_kind": "window_plan",
       "skill_name": "roll-window",
-      "trigger": null
+      "trigger": null,
+      "settings": {
+        "future_volume_lookahead": 0
+      }
     },
     {
       "id": "character_actions",
@@ -192,7 +210,8 @@
       "role_id": "character_actor",
       "task_kind": "character_action",
       "skill_name": "simulate-character",
-      "trigger": null
+      "trigger": null,
+      "settings": {}
     },
     {
       "id": "environment",
@@ -207,7 +226,8 @@
       "role_id": "environment_director",
       "task_kind": "environment_change",
       "skill_name": "prepare-world",
-      "trigger": null
+      "trigger": null,
+      "settings": {}
     },
     {
       "id": "adjudication",
@@ -222,7 +242,8 @@
       "role_id": "adjudication_advisor",
       "task_kind": "joint_outcome",
       "skill_name": "adjudicate-actions",
-      "trigger": "unresolved_action_outcome"
+      "trigger": "unresolved_action_outcome",
+      "settings": {}
     },
     {
       "id": "world_acceptance",
@@ -239,7 +260,8 @@
       "role_id": null,
       "task_kind": null,
       "skill_name": null,
-      "trigger": null
+      "trigger": null,
+      "settings": {}
     },
     {
       "id": "replan",
@@ -253,7 +275,8 @@
       "role_id": "volume_director",
       "task_kind": "replan",
       "skill_name": "roll-window",
-      "trigger": "accepted_deviation"
+      "trigger": "accepted_deviation",
+      "settings": {}
     },
     {
       "id": "cross_volume_memory",
@@ -267,7 +290,8 @@
       "role_id": "evidence_maintainer",
       "task_kind": "literary_memory",
       "skill_name": "maintain-memory",
-      "trigger": null
+      "trigger": null,
+      "settings": {}
     },
     {
       "id": "scene_inputs",
@@ -282,7 +306,11 @@
       "role_id": "volume_director",
       "task_kind": "scene_plan",
       "skill_name": "plan-volume",
-      "trigger": null
+      "trigger": null,
+      "settings": {
+        "chapter_granularity": "story",
+        "scene_granularity": "compact"
+      }
     },
     {
       "id": "draft",
@@ -296,7 +324,12 @@
       "role_id": "writer",
       "task_kind": "scene_draft",
       "skill_name": "write-scene",
-      "trigger": null
+      "trigger": null,
+      "settings": {
+        "writing_concurrency": 1,
+        "window_chapters": 4,
+        "scene_granularity": "compact"
+      }
     },
     {
       "id": "handoff",
@@ -310,10 +343,13 @@
       "role_id": "evidence_maintainer",
       "task_kind": "summary",
       "skill_name": "maintain-memory",
-      "trigger": null
+      "trigger": null,
+      "settings": {
+        "memory_scope": "work"
+      }
     },
     {
-      "id": "distributed_handoff",
+      "id": "volume_handoff",
       "stage": 2,
       "decision": "SKIPPED_BY_PROFILE",
       "state": "SKIPPED_BY_PROFILE",
@@ -324,7 +360,8 @@
       "role_id": "literary_editor",
       "task_kind": "cross_volume",
       "skill_name": "maintain-memory",
-      "trigger": null
+      "trigger": null,
+      "settings": {}
     },
     {
       "id": "reconcile",
@@ -339,7 +376,8 @@
       "role_id": "reviewer",
       "task_kind": "fact",
       "skill_name": "review-consistency",
-      "trigger": null
+      "trigger": null,
+      "settings": {}
     },
     {
       "id": "knowledge",
@@ -353,7 +391,8 @@
       "role_id": "reviewer",
       "task_kind": "epistemic",
       "skill_name": "review-consistency",
-      "trigger": null
+      "trigger": null,
+      "settings": {}
     },
     {
       "id": "continuity",
@@ -369,7 +408,8 @@
       "role_id": "reviewer",
       "task_kind": "continuity",
       "skill_name": "review-consistency",
-      "trigger": null
+      "trigger": null,
+      "settings": {}
     },
     {
       "id": "chapter_review",
@@ -383,7 +423,11 @@
       "role_id": "reviewer",
       "task_kind": "literary",
       "skill_name": "review-consistency",
-      "trigger": null
+      "trigger": null,
+      "settings": {
+        "review_intensity": "whole_work",
+        "review_concurrency": 1
+      }
     },
     {
       "id": "volume_review",
@@ -397,7 +441,8 @@
       "role_id": "volume_director",
       "task_kind": "volume_review",
       "skill_name": "volume-director-review",
-      "trigger": null
+      "trigger": null,
+      "settings": {}
     },
     {
       "id": "literary_edit",
@@ -411,7 +456,8 @@
       "role_id": "literary_editor",
       "task_kind": "structure",
       "skill_name": "edit-volume",
-      "trigger": null
+      "trigger": null,
+      "settings": {}
     },
     {
       "id": "revise",
@@ -425,7 +471,10 @@
       "role_id": "writer",
       "task_kind": "targeted_revision",
       "skill_name": "write-scene",
-      "trigger": "revision_requested"
+      "trigger": "revision_requested",
+      "settings": {
+        "max_reworks": 1
+      }
     },
     {
       "id": "accept_text",
@@ -443,7 +492,8 @@
       "role_id": null,
       "task_kind": null,
       "skill_name": null,
-      "trigger": null
+      "trigger": null,
+      "settings": {}
     },
     {
       "id": "blind_review_a",
@@ -457,7 +507,8 @@
       "role_id": "reviewer",
       "task_kind": "literary",
       "skill_name": "review-consistency",
-      "trigger": null
+      "trigger": null,
+      "settings": {}
     },
     {
       "id": "blind_review_b",
@@ -471,7 +522,8 @@
       "role_id": "reviewer",
       "task_kind": "literary",
       "skill_name": "review-consistency",
-      "trigger": null
+      "trigger": null,
+      "settings": {}
     },
     {
       "id": "release",
@@ -487,7 +539,17 @@
       "role_id": null,
       "task_kind": null,
       "skill_name": null,
-      "trigger": null
+      "trigger": null,
+      "settings": {
+        "release_conditions": [
+          "complete_text",
+          "accepted_world",
+          "reconciled_drafts",
+          "editorial_approval",
+          "two_full_independent_reviews",
+          "internal_release"
+        ]
+      }
     }
   ],
   "route_status": "MODEL_UNAVAILABLE",

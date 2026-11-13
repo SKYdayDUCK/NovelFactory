@@ -8,3 +8,5 @@
 冻结主线与 #33 候选同条件测试，200 Agent 过载的首次调用分别为每秒 44.94585 与 45.20040，门槛为 950。四项历史红灯与冻结主线对照一致，GitHub 当时没有将这些列为受保护分支必需检查。[独立容量原始检查链接](evidence/p59-qualification.json) · [核对结果](evidence/serial-source-comparison.json) · [遗留问题 #13](https://github.com/SKYdayDUCK/NovelFactory/issues/13)
 
 两次合并均已核实 merged=true，并安全归档对应旧开发分支。P6 分支从第二次合并 SHA 新建。旧文学作品在 13 份原始对账上仍有阻断，每书仅有一份旧评阅，内部正式发布为零。本轮 P6 签收记录只接收新作品原生证据。
+
+实际合并提交的所有托管检查已结束。#33 主线共 27 项，23 项通过，包括一小时持续读取、全量 PostgreSQL 17 回归与 Windows/Linux 原生测试，4 项为保留的容量遗留。#34 主线共 20 项，17 项通过，3 项为历史容量遗留。[#33 主线逐项链接](evidence/postmain-33-ci.json) · [#34 主线逐项链接](evidence/postmain-34-ci.json)

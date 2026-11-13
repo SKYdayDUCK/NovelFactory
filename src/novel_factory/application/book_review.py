@@ -172,6 +172,7 @@ def start_review(
         prior = kernel._prior(repo, owner, work, "P6_BOOK_REVIEW", idempotency_key, registration)
         if prior:
             return prior
+    readers = []
     for route in routes:
         adapter = gateway.adapters.get(route)
         require(
@@ -184,6 +185,17 @@ def start_review(
             "Select two registered stateless production reader routes",
         )
         adapter.check_available()
+        config = adapter.configuration
+        readers.append(
+            {
+                "route": route,
+                "model": config["model"],
+                "configuration_sha256": fingerprint(config),
+                "tasks": [],
+                "notes": [],
+                "note_frontier": [],
+            }
+        )
     with kernel.objects.lock(), kernel.db.uow() as repo:
         repo.one("works", {"work_id": work}, lock="update")
         grant = kernel.authorize(repo, owner, work, "ADMIN", branch)
@@ -281,9 +293,7 @@ def start_review(
             "revision_evidence": revision_evidence,
             "revision_note": revision_note,
             "state": "READING",
-            "readers": [
-                {"route": r, "tasks": [], "notes": [], "note_frontier": []} for r in routes
-            ],
+            "readers": readers,
             "packets": [
                 _artifact(kernel, repo, work, owner, "BOOK_PASSAGES", {"passages": item})
                 for item in reading_packets(parts)
@@ -418,6 +428,12 @@ def _assignment(kernel, repo, reader, packet, action, work):
 
 def _enqueue(kernel, repo, gateway, owner, state, reader, packet, action):
     work = state["world_ref"]["work_id"]
+    adapter = gateway.adapters.get(reader["route"])
+    require(
+        adapter and fingerprint(adapter.configuration) == reader["configuration_sha256"],
+        "MODEL_CONFIG_CHANGED",
+        "The reader route changed after its round was registered",
+    )
     data = _assignment(kernel, repo, reader, packet, action, work)
     ref = _artifact(kernel, repo, work, owner, "BOOK_READER_PACKET", data)
     seconds = max(
@@ -572,6 +588,11 @@ def _advance_reader(kernel, repo, gateway, owner, state):
         )
         evidence, result = CandidateDelivery(kernel, gateway).audited_candidate(repo, task)
         config = evidence["model_configuration"]
+        require(
+            fingerprint(config) == reader["configuration_sha256"],
+            "MODEL_CONFIG_CHANGED",
+            "The model receipt differs from the enrolled reader",
+        )
         call = repo.one("call_attempts", {"attempt_id": evidence["attempt_id"]})
         require(
             call and call["state"] == "SUCCEEDED",
@@ -768,6 +789,11 @@ def review_status(kernel, owner, work, branch, *, include_reports=False):
             packet_count=len(state["packets"]),
         )
         result["readers"] = [{**r, "complete_packets": len(r["notes"])} for r in state["readers"]]
+        result["model_correlation"] = (
+            "SAME_MODEL"
+            if len({r["model"] for r in state["readers"]}) == 1
+            else "DIFFERENT_MODEL_IDS_FAMILY_UNVERIFIED"
+        )
         if include_reports:
             for reader in result["readers"]:
                 reader["passage_notes"] = [
@@ -790,7 +816,7 @@ def resume_review(kernel, owner, work, branch):
         require(state and state["state"] == "BLOCKED", "INVALID_ARGUMENT", "Round is not blocked")
         _owner(kernel, repo, state)
         require(
-            state["reason"] == "CALL_RECONCILIATION_REQUIRED",
+            state["reason"] in {"CALL_RECONCILIATION_REQUIRED", "MODEL_CONFIG_CHANGED"},
             "BOOK_REVIEW_BLOCKED",
             "This failure requires a separate operator repair of its source",
         )

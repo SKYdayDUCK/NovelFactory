@@ -45,7 +45,7 @@ def partition_volumes(volumes, size):
         # A native board holds at most 128 scene and chapter-review nodes.
         group, nodes = [], 0
         for chapter in chapters:
-            weight = 2 * len(chapter["scenes"]) + 1
+            weight = 3 * len(chapter["scenes"]) + 1
             if len(group) == size or nodes + weight > 128:
                 windows.append({"volume_id": vid, "chapters": group})
                 group, nodes = [], 0
@@ -371,6 +371,15 @@ def _freeze_window(kernel, repo, owner, cursor, board, window):
                 "NARRATIVE_ALIGNMENT_REQUIRED",
                 "Factual report does not match the accepted draft",
             )
+            if "knowledge_node" in facts:
+                from .rolling_facts import check_knowledge
+
+                knowledge_ref = check_knowledge(kernel, repo, board, facts, node["output_ref"])
+                require(
+                    report.get("knowledge_ref") == knowledge_ref,
+                    "EPISTEMIC_REVIEW_REQUIRED",
+                    "Factual acceptance must cite the reviewed text",
+                )
             accepted, _ = _load_acceptance(repo, kernel, owner, selected, head)
             reviewed_draft_ref = node["output_ref"]
             reviewed_draft = _payload(kernel, repo, wr, reviewed_draft_ref, "NARRATIVE_DRAFT")
@@ -389,6 +398,7 @@ def _freeze_window(kernel, repo, owner, cursor, board, window):
                     "draft_ref": node["output_ref"],
                     "text_ref": accepted["text_ref"],
                     "acceptance_ref": selected,
+                    **({"knowledge_ref": report["knowledge_ref"]} if "knowledge_ref" in report else {}),
                 }
             )
         require(
@@ -490,6 +500,9 @@ def _verify_volume(kernel, repo, cursor, volume, *, crossing):
             "CONTINUITY_REVALIDATION_REQUIRED",
             "Continuity does not match the frozen series",
         )
+        from .rolling_publication import require_volume_memory
+
+        require_volume_memory(cursor, snapshot["request"])
         cursor["continuity_ref"] = published
     cursor["release_refs"].append(ref)
 
@@ -541,6 +554,14 @@ def advance_rolling(kernel, gateway, controller, work, branch):
                         )
                     )
                     crossing = not final and next_window["volume_id"] != window["volume_id"]
+                    if crossing:
+                        from .rolling_publication import advance_approved_publication
+
+                        result = advance_approved_publication(
+                            kernel.in_transaction(repo), repo, owner, cursor, window["volume_id"]
+                        )
+                        if result:
+                            return result
                     if final or crossing:
                         _verify_volume(kernel, repo, cursor, window["volume_id"], crossing=crossing)
                     if final:
@@ -648,7 +669,7 @@ def retry_rolling(kernel, owner, *, world_ref, run_id, window_index, node_id, id
             if (
                 other["state"] == "STOPPED"
                 and other.get("reason") == "PREDECESSOR_STOPPED"
-                and node_id in other.get("parents", [])
+                and (node_id in other.get("parents", []) or node_id == other.get("knowledge_node"))
             ):
                 other.update(state="PENDING")
                 del other["reason"]

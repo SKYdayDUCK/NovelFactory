@@ -2,7 +2,7 @@
 
 | 中断或变化 | 实际观察 |
 |---|---|
-| 进程内 Supervisor 对象在调度调用后重建 | 新实例从 PostgreSQL 的当前生产板、`ROLLING_CURSOR` 和不可变章检查点继续。三章跨三个窗口按最初顺序冻结，每场写作、事实核查和读稿各执行一次。 |
+| 进程内 Supervisor 对象在调度调用后重建 | 新实例从 PostgreSQL 的当前生产板、`ROLLING_CURSOR` 和不可变章检查点继续。三章跨三个窗口按最初顺序冻结，每场写作、认知评阅和事实核查及每章读稿各执行一次。 |
 | 写手在模型已经收到请求时被操作系统终止 | 运行在独立 Python 进程的写手在真实 PostgreSQL 中领取 3 秒实验租约，回环 HTTP Provider 确认请求已到达后由父进程 kill。重启的 Supervisor 等待租约自然过期，原代际的唯一 Attempt 由 SENT 变为 UNKNOWN，任务递增代际进入 PAUSED，租约释放，模型请求总数始终为 1，已冻结章节为 0。该测试于 7.32 秒通过，见 [原始回执](evidence/writer-process-exit.xml)。 |
 | 尚未发送模型请求的写手被取消 | 以原申请者、run ID、窗口和 node ID 对该节点定向重排，保留旧 task ID/reason，同时解开仅因该前驱停止的子节点。重复提交同一幂等键返回相同回执。重排后的新 task ID 不同，至其再次派发前模型调用数为零。 |
 | Provider 已收到请求但响应失败 | 故障后同一已送出的请求在账本中仍未明确结算。重排返回 `CALL_RECONCILIATION_REQUIRED`；无第二次调用，冻结章数为零。 |

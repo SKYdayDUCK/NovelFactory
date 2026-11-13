@@ -23,9 +23,87 @@ def assignment():
     )
 
 
+def record_knowledge(kernel, repo, owner, board, node, task, evidence, candidate):
+    from .production_pipeline import _artifact
+
+    parent = board["nodes"][node["parents"][0]]
+    draft_ref = parent["output_ref"]
+    reader = Principal(task["grant_id"], task["principal_id"])
+    delivered = NarrativeService(kernel).read_text(
+        reader, task["task_id"], task["generation"], draft_ref
+    )
+    clear = not candidate["issues"]
+    receipt = {
+        "world_ref": board["world_ref"],
+        "draft_ref": draft_ref,
+        "text_ref": delivered["text_ref"],
+        "delivery_ref": delivered["delivery_ref"],
+        "reader_task": task["task_id"],
+        "generation": task["generation"],
+        "attempt_id": evidence["attempt_id"],
+        "candidate_ref": evidence["output_ref"],
+        "status": "CLEAR" if clear else "BLOCKED",
+    }
+    ref = _artifact(kernel, repo, task["work_id"], owner, "EPISTEMIC_READING", receipt)
+    return ref, "KNOWLEDGE_CLEAR" if clear else "STOPPED"
+
+
+def check_knowledge(kernel, repo, board, node, draft_ref):
+    from .semantic_dependencies import check_task_dependencies
+
+    reading = board["nodes"][node["knowledge_node"]]
+    require(
+        reading["state"] == "KNOWLEDGE_CLEAR",
+        "EPISTEMIC_REVIEW_REQUIRED",
+        "No clear epistemic reading",
+    )
+    wr = board["world_ref"]
+    record = kernel.artifact(repo, reading["output_ref"], wr["work_id"], kind="EPISTEMIC_READING")[
+        "payload"
+    ]
+    task = repo.one(
+        "tasks", {"task_id": reading["task_id"], "work_id": wr["work_id"]}, lock="share"
+    )
+    require(
+        task
+        and task["role_id"] == "reviewer"
+        and task["task_kind"] == "epistemic"
+        and task["state"] == "ACCEPTED"
+        and task["task_id"] == record["reader_task"]
+        and task["generation"] == record["generation"]
+        and record["status"] == "CLEAR"
+        and record["draft_ref"] == draft_ref
+        and record["world_ref"] == wr,
+        "EPISTEMIC_REVIEW_REQUIRED",
+        "The review no longer binds this manuscript",
+    )
+    check_task_dependencies(repo, task["task_id"], task["generation"])
+    reader = Principal(task["grant_id"], task["principal_id"])
+    _, _, _, draft = NarrativeService(kernel)._reader_binding(
+        repo, reader, task["task_id"], task["generation"], draft_ref, allow_accepted=True
+    )
+    require(
+        record["text_ref"] == draft["text_ref"],
+        "EPISTEMIC_REVIEW_REQUIRED",
+        "Reviewed text changed",
+    )
+    return reading["output_ref"]
+
+
 def audit(kernel, repo, owner, board, node, task, candidate):
     source = board["nodes"][node["parents"][0]]
     draft_ref = source["output_ref"]
+    knowledge_ref = None
+    if "knowledge_node" in node:
+        knowledge = board["nodes"][node["knowledge_node"]]
+        reader = repo.one("tasks", {"task_id": knowledge["task_id"]})
+        require(
+            reader["principal_id"] != task["principal_id"]
+            and reader["grant_id"] != task["grant_id"],
+            "INDEPENDENT_REVIEW_REQUIRED",
+            "Fact and epistemic readers require independent identities",
+        )
+        knowledge_ref = check_knowledge(kernel, repo, board, node, draft_ref)
     actor = Principal(task["grant_id"], task["principal_id"])
     service = NarrativeService(kernel)
     key = "rolling-facts:" + task["task_id"] + ":" + str(task["generation"])
@@ -95,6 +173,7 @@ def audit(kernel, repo, owner, board, node, task, candidate):
     evidence = {
         "extraction_ref": extraction,
         "text_delivery_ref": delivered["delivery_ref"],
+        **({"knowledge_ref": knowledge_ref} if knowledge_ref else {}),
         **result,
     }
     if result["status"] == "CLEAR":

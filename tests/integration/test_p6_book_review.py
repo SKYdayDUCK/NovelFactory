@@ -115,6 +115,17 @@ def test_two_separate_reader_tracks_replay_and_release_gate(
     )
     enrollment = book_review.start_review(k, gateway, owner, **params)
     assert enrollment == book_review.start_review(k, gateway, owner, **params)
+    if packet_size == 6000:
+        adapter.model = "unregistered-replacement"
+        RuntimeSupervisor(k, gateway).run_once(owner, work, branch)
+        changed = book_review.review_status(k, owner, work, branch)
+        assert (
+            changed["state"] == "BLOCKED"
+            and changed["reason"] == "MODEL_CONFIG_CHANGED"
+            and not adapter.messages
+        )
+        adapter.model = "blind-review-test"
+        book_review.resume_review(k, owner, work, branch)
     outcomes = []
     for step in range(110):
         outcome = RuntimeSupervisor(k, gateway).run_once(owner, work, branch)
@@ -123,7 +134,7 @@ def test_two_separate_reader_tracks_replay_and_release_gate(
         assert status["state"] != "BLOCKED", (status.get("reason"), outcomes)
         if status["state"] == "ASSESSED":
             break
-    assert status["state"] == "ASSESSED", status
+    assert status["state"] == "ASSESSED" and status["model_correlation"] == "SAME_MODEL", status
     assert len(adapter.messages) == expected_calls
     assert len({tid for r in status["readers"] for tid in r["tasks"]}) == expected_calls
     assert all(r["complete_packets"] == enrollment["packets"] for r in status["readers"])

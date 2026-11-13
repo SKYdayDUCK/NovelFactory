@@ -3,15 +3,14 @@
 import argparse
 from hashlib import sha256
 import json
-import os
 from pathlib import Path
 import sys
-from tempfile import NamedTemporaryFile
 
 from novel_factory.application.mcp_runtime import ProjectBinding
 from novel_factory.application.release import ReleaseService
 from novel_factory.domain.canonical import strict_json_loads
 from novel_factory.domain.errors import DomainError
+from novel_factory.infrastructure.native_files import private_export
 from novel_factory.interfaces.mcp_stdio import read_private_config, runtime_from_config
 
 
@@ -46,10 +45,8 @@ def main():
 
     data = result["text"].encode("utf-8")
     # Publish complete bytes at a new name; a retry preserves any prior export.
-    with NamedTemporaryFile(dir=args.output.parent, prefix=".p6-prose-") as pending:
+    with private_export(args.output) as pending:
         pending.write(data)
-        pending.flush()
-        os.link(pending.name, args.output)
     print(json.dumps({
         **({"round_ref": result["round_ref"], "score_refs": result["score_refs"], "chapters": result["chapters"],
             "scenes": result["scenes"]} if args.reviewed_book else {}),

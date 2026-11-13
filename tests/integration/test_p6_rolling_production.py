@@ -140,7 +140,7 @@ def test_fresh_dependent_scenes_wait_for_acceptance_and_recover_to_release(kerne
             cursor = rolling_status(kernel, owner, work, branch)
             if cursor["state"] == "FROZEN" and cursor["frozen_chapters"] == 3:
                 break
-        assert cursor["frozen_chapters"] == 3 and len(calls) == 9, (
+        assert cursor["frozen_chapters"] == 3 and len(calls) == 12, (
             cursor["state"],
             cursor["reason"],
             [(n["state"], n.get("reason")) for n in board["nodes"].values()],
@@ -175,7 +175,7 @@ def test_fresh_dependent_scenes_wait_for_acceptance_and_recover_to_release(kerne
         assert no_blind_scores.value.code == "INDEPENDENT_REVIEW_REQUIRED"
         cursor = rolling_status(kernel, owner, work, branch)
         assert cursor["state"] == "FROZEN" and cursor["release_refs"] == []
-        assert advance_rolling(kernel, gateway, owner, work, branch) is None and len(calls) == 9
+        assert advance_rolling(kernel, gateway, owner, work, branch) is None and len(calls) == 12
 
 
 def test_unknown_attempt_cannot_retry_or_manufacture_an_acceptance(kernel_env):
@@ -262,25 +262,78 @@ def test_release_and_continuity_gate_two_volumes_across_restart(kernel_env):
                 assert state["release_refs"] == [released["release_ref"]]
                 break
             assert state["final_volume_id"] == second["volume_id"] and state["state"] == "FROZEN"
-            assert len(calls) == 3
+            assert len(calls) == 4
             binding = binding_for(f, [draft])
+            from novel_factory.application.editorial import ReviewService
+
+            missing = advance_rolling(kernel, gateway, owner, work, branch)
+            assert (missing or rolling_status(kernel, owner, work, branch))[
+                "reason"
+            ] == "RELEASE_INCOMPLETE"
             proof = approve_binding(kernel, f, binding)
-            released = ReleaseService(kernel).freeze(
-                owner, release_request(f, binding, proof["approval_ref"]), uid()
+            editorial = ReviewService(kernel)
+            editorial.revoke_editorial(owner, wr, proof["approval_ref"], "测试已撤回的审核", uid())
+            blocked = advance_rolling(kernel, gateway, owner, work, branch)
+            assert blocked["reason"] == "EDITORIAL_APPROVAL_REVOKED"
+            with kernel.db.uow(write=False) as repo:
+                assert not repo.one(
+                    "selections", {"work_id": work, "selection_kind": "RELEASE:" + f["volume_id"]}
+                )
+            approval = editorial.approve_editorial(
+                owner, {**proof["approval_request"], "idempotency_key": uid()}
             )
+            auto = RuntimeSupervisor(kernel, gateway).run_once(owner, work, branch)
+            assert auto["status"] == "ROLLING_VOLUME_RELEASED", auto
+            released = ReleaseService(kernel).get_release(owner, work, auto["release_ref"])
+            assert released["record"]["editorial_approval_ref"] == approval
             next_step = advance_rolling(kernel, gateway, owner, work, branch)
             assert next_step["reason"] == "CONTINUITY_REVALIDATION_REQUIRED"
             service = ContinuityService(kernel)
+            independent = reviewer(kernel, f)
+            empty = continuity_request(f, [released], [], series_id=req["series_id"])
+            qualify(service, owner, independent, work, empty)
+            advance_rolling(kernel, gateway, owner, work, branch)
+            with kernel.db.uow(write=False) as repo:
+                assert not repo.one(
+                    "selections",
+                    {"work_id": work, "selection_kind": "CONTINUITY:" + req["series_id"]},
+                )
             report = continuity_request(
                 f, [released], [entry(f, released, 1)], series_id=req["series_id"]
             )
-            pub, _, _ = qualify(service, owner, reviewer(kernel, f), work, report)
-            service.publish(owner, work, pub)
+            pub, _, review_payload = qualify(service, owner, independent, work, report)
+            service.review(
+                independent,
+                work,
+                {
+                    **review_payload,
+                    "decision": "CHANGES_REQUIRED",
+                    "reason": "回归用例要求再读",
+                    "idempotency_key": uid(),
+                },
+            )
+            advance_rolling(kernel, gateway, owner, work, branch)
+            with kernel.db.uow(write=False) as repo:
+                assert not repo.one(
+                    "selections",
+                    {"work_id": work, "selection_kind": "CONTINUITY:" + req["series_id"]},
+                )
+            approved = service.review(
+                independent, work, {**review_payload, "idempotency_key": uid()}
+            )
+            auto = RuntimeSupervisor(kernel, gateway).run_once(owner, work, branch)
+            assert auto["status"] == "ROLLING_CONTINUITY_PUBLISHED", auto
+            with kernel.db.uow(write=False) as repo:
+                snapshot = kernel.artifact(
+                    repo, auto["snapshot_ref"], work, kind="CONTINUITY_SNAPSHOT"
+                )["payload"]
+                assert snapshot["review_ref"] == approved and approved != pub["review_ref"]
+                assert snapshot["request"]["ordered_release_refs"] == [released["release_ref"]]
             # First supervisor object is discarded after the durable event.
             gateway = connect(kernel, adapter)
-        assert len(calls) == 6
+        assert len(calls) == 8
 
-        packet = json.loads(calls[3]["messages"][1]["content"])
+        packet = json.loads(calls[4]["messages"][1]["content"])
         assert len(packet["authorized_materials"]) == 2
 
 
@@ -351,7 +404,7 @@ def test_retry_cancelled_unsent_node_and_replace_only_unopened_window(kernel_env
         assert calls == []
 
 
-@pytest.mark.parametrize("failure", ["unresolved_fact", "missed_ending"])
+@pytest.mark.parametrize("failure", ["unresolved_fact", "missed_ending", "epistemic_conflict"])
 def test_blocked_or_incomplete_factual_reading_cannot_accept(kernel_env, failure):
     kernel = kernel_env["kernel"]
     f = setup_batch(kernel, count=1)
@@ -361,6 +414,21 @@ def test_blocked_or_incomplete_factual_reading_cannot_accept(kernel_env, failure
 
         def candidate(packet):
             response = answer(packet)
+            if failure == "epistemic_conflict" and "逐项核查人物所知" in packet["assignment"]:
+                read = json.loads(packet["authorized_materials"][0]["content"])
+                response["issues"] = [
+                    {
+                        "issue_id": uid(),
+                        "category": "HARD_CONSISTENCY",
+                        "severity": "BLOCKER",
+                        "subject_ref": read["draft_ref"],
+                        "description": "角色获知信息的来源不明",
+                        "evidence_refs": [],
+                        "suggested_change": "补上可验证的获知时序",
+                        "disposition": "OPEN",
+                        "issue_kind": "HARD_CONFLICT",
+                    }
+                ]
             if packet["context"]["role_id"] == "evidence_maintainer":
                 doc = json.loads(response["text"])
                 claim = doc["assertions"][0]
@@ -372,6 +440,10 @@ def test_blocked_or_incomplete_factual_reading_cannot_accept(kernel_env, failure
             return response
 
         server.packet_candidate = candidate
+        generate = adapter.generate
+        adapter.generate = lambda packet: replace(
+            generate(packet), actual_amount=Decimal(0), currency="USD"
+        )
         gateway = connect(kernel, adapter)
         register_rolling(kernel, gateway, owner, **request(kernel, f, 1))
         for _ in range(25):
@@ -388,9 +460,14 @@ def test_blocked_or_incomplete_factual_reading_cannot_accept(kernel_env, failure
                     repo, evidence["reconciliation_ref"], work, kind="RECONCILIATION_REPORT"
                 )
             assert report["payload"]["hard_blockers"]
+        elif failure == "epistemic_conflict":
+            knowledge = board["nodes"][key]["knowledge_node"]
+            assert board["outputs"][knowledge]["status"] == "BLOCKED"
+            assert board["nodes"][key]["reason"] == "PREDECESSOR_STOPPED"
+            assert "task_id" not in board["nodes"][key]
         else:
             assert board["nodes"][key]["reason"] == "INVALID_EVIDENCE"
         with kernel.db.uow(write=False) as repo:
             assert not repo.many("artifacts", {"work_id": work, "kind": "NARRATIVE_ACCEPTANCE"})
         assert rolling_status(kernel, owner, work, branch)["frozen_chapters"] == 0
-        assert len(calls) == 3
+        assert len(calls) == (3 if failure == "epistemic_conflict" else 4)

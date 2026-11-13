@@ -89,6 +89,8 @@ jobs:
           tests/integration/test_p58_routing.py tests/integration/test_p6_profile_binding.py
           tests/integration/test_p6_idea_intake.py tests/integration/test_p6_rolling_production.py
           tests/integration/test_p6_book_review.py tests/integration/test_p6_manuscript_extent.py
+          tests/integration/test_p6_runtime_evidence.py::test_runtime_export_roles_skills_calls_and_ledger_state
+          tests/integration/test_p6_export_release.py
           --junitxml=native-postgres.xml
       - uses: actions/upload-artifact@v4
         if: always()

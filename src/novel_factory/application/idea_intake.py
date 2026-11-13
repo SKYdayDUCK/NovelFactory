@@ -43,6 +43,14 @@ def parse_inspiration(data):
     return resolve_profile(length, data["genre"])
 
 
+def _first_window_limit(profile, inspiration):
+    limit = profile["window_chapters"]
+    extent = inspiration["length"]
+    if isinstance(extent, dict) and extent["unit"] == "chapters":
+        return min(limit, extent["max"])
+    return limit
+
+
 def _uid(namespace, name):
     return str(uuid5(UUID(namespace), name))
 
@@ -91,7 +99,7 @@ def enroll_idea(kernel, gateway, inspiration, allowance, prep_work_id):
     )
     assignment = {
         "creative_input": inspiration,
-        "first_window_limit": profile["window_chapters"],
+        "first_window_limit": _first_window_limit(profile, inspiration),
         "instructions": "依据灵感自主设计初始身份、地点、世界规则、故事线及首个窗口的章节目标。",
     }
     role = RuntimeTaskService(kernel, bound_gateway).prepare(
@@ -281,7 +289,8 @@ def materialize_design(kernel, gateway, owner, wr):
         evidence, design = _audited_design_result(kernel, gateway, repo, task, wr)
         validate_contract("FirstWorldDesign", design, "production_profile")
         require(
-            len(design["chapter_goals"]) <= intake["profile"]["window_chapters"]
+            len(design["chapter_goals"])
+            <= _first_window_limit(intake["profile"], intake["creative_input"])
             and len(set(design["chapter_goals"])) == len(design["chapter_goals"]),
             "INVALID_MODEL_OUTPUT",
             "Design violates the approved first window",
