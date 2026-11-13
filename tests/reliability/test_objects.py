@@ -92,6 +92,7 @@ def test_reference_transaction_excludes_gc(tmp_path):
     assert store.read(ref.sha256) == b"in-flight reference"
 
 
+@pytest.mark.skipif(os.name == "nt", reason="POSIX directory-fsync assertion; Windows checks write-through publication")
 @pytest.mark.parametrize("operation", ["verify", "put"])
 def test_reuse_after_publish_crash_reconfirms_durable_directory_entry(tmp_path, monkeypatch, operation):
     process = multiprocessing.get_context("spawn").Process(target=_killed_writer, args=(str(tmp_path), "after_publish"))

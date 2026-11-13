@@ -1,0 +1,403 @@
+{
+  "status": "PASS",
+  "pg": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "topology": "one_cluster_two_databases",
+  "physical_domains": {
+    "nf": {
+      "system_identifier": "7707343044676079779",
+      "source_timeline": 1,
+      "data_checksums": "on",
+      "restore_points": {
+        "aw_intent_before_nf": {
+          "lsn": "0/40270D8",
+          "wal_segment": "000000010000000000000004",
+          "wal_sha256": "5e16e0fe9bd0558af60851bcd4a91957150cf02fc53fe8df9f324928ff252df7"
+        },
+        "nf_bound_before_inference": {
+          "lsn": "0/4085540",
+          "wal_segment": "000000010000000000000004",
+          "wal_sha256": "5e16e0fe9bd0558af60851bcd4a91957150cf02fc53fe8df9f324928ff252df7"
+        },
+        "unknown_usage_before_invoice": {
+          "lsn": "0/40BC0D8",
+          "wal_segment": "000000010000000000000004",
+          "wal_sha256": "5e16e0fe9bd0558af60851bcd4a91957150cf02fc53fe8df9f324928ff252df7"
+        }
+      },
+      "recoveries": {
+        "aw_intent_before_nf": {
+          "target": "aw_intent_before_nf",
+          "system_identifier": "7707343044676079779",
+          "promoted_timeline": 2,
+          "replay_lsn": "0/40270D8"
+        },
+        "nf_bound_before_inference": {
+          "target": "nf_bound_before_inference",
+          "system_identifier": "7707343044676079779",
+          "promoted_timeline": 2,
+          "replay_lsn": "0/4085540"
+        },
+        "unknown_usage_before_invoice": {
+          "target": "unknown_usage_before_invoice",
+          "system_identifier": "7707343044676079779",
+          "promoted_timeline": 2,
+          "replay_lsn": "0/40BC0D8"
+        }
+      },
+      "manifest_sha256": "6d00b2e59f9009861a12051e7210a6b01c2898c9ab156bc0ee0be2858cbcf1ca",
+      "verification": {
+        "exit_code": 0,
+        "stdout": "backup successfully verified"
+      }
+    },
+    "workshop": {
+      "system_identifier": "7707343044676079779",
+      "source_timeline": 1,
+      "data_checksums": "on",
+      "restore_points": {
+        "aw_intent_before_nf": {
+          "lsn": "0/40270D8",
+          "wal_segment": "000000010000000000000004",
+          "wal_sha256": "5e16e0fe9bd0558af60851bcd4a91957150cf02fc53fe8df9f324928ff252df7"
+        },
+        "nf_bound_before_inference": {
+          "lsn": "0/4085540",
+          "wal_segment": "000000010000000000000004",
+          "wal_sha256": "5e16e0fe9bd0558af60851bcd4a91957150cf02fc53fe8df9f324928ff252df7"
+        },
+        "unknown_usage_before_invoice": {
+          "lsn": "0/40BC0D8",
+          "wal_segment": "000000010000000000000004",
+          "wal_sha256": "5e16e0fe9bd0558af60851bcd4a91957150cf02fc53fe8df9f324928ff252df7"
+        }
+      },
+      "recoveries": {
+        "aw_intent_before_nf": {
+          "target": "aw_intent_before_nf",
+          "system_identifier": "7707343044676079779",
+          "promoted_timeline": 2,
+          "replay_lsn": "0/40270D8"
+        },
+        "nf_bound_before_inference": {
+          "target": "nf_bound_before_inference",
+          "system_identifier": "7707343044676079779",
+          "promoted_timeline": 2,
+          "replay_lsn": "0/4085540"
+        },
+        "unknown_usage_before_invoice": {
+          "target": "unknown_usage_before_invoice",
+          "system_identifier": "7707343044676079779",
+          "promoted_timeline": 2,
+          "replay_lsn": "0/40BC0D8"
+        }
+      },
+      "manifest_sha256": "6d00b2e59f9009861a12051e7210a6b01c2898c9ab156bc0ee0be2858cbcf1ca",
+      "verification": {
+        "exit_code": 0,
+        "stdout": "backup successfully verified"
+      }
+    }
+  },
+  "independently_restored_mismatched_pairs": {},
+  "nf_object_snapshots": {
+    "aw_intent_before_nf": {
+      "verified_objects": 7,
+      "inventory_sha256": "5ffc1ced21038246a5e7d7e6aa138b01e324d8451a434b9f6268e193872dd8e1"
+    },
+    "unknown_usage_before_invoice": {
+      "verified_objects": 14,
+      "inventory_sha256": "08c7f3fe9643fb58deca6d927144e0c890698ec632fd49ba964908e62817322c"
+    }
+  },
+  "basebackup": "physical pg_basebackup -Fp -Xstream",
+  "verification": {
+    "exit_code": 0,
+    "stdout": "backup successfully verified"
+  },
+  "manifest_sha256": "6d00b2e59f9009861a12051e7210a6b01c2898c9ab156bc0ee0be2858cbcf1ca",
+  "target": "aw_intent_before_nf",
+  "target_lsn": "0/40270D8",
+  "replayed_lsn": "0/40270D8",
+  "second_wal_target": "nf_bound_before_inference",
+  "second_target_lsn": "0/4085540",
+  "second_replay_lsn": "0/4085540",
+  "shared_token_budget": {
+    "budget_id": "c1f5a4c4-e49d-43c3-9bca-7bbeab155195",
+    "total_tokens": 100000,
+    "original_attempt_id": "5c9798a7-d5f4-40eb-98cb-ec31a6f72810",
+    "before_first_call": {
+      "reserved_tokens": 0,
+      "spent_tokens": 0,
+      "available_tokens": 100000
+    },
+    "live_unknown": {
+      "reserved_tokens": 100000,
+      "spent_tokens": 0,
+      "available_tokens": 0
+    },
+    "unknown_wal_target": "unknown_usage_before_invoice",
+    "unknown_target_lsn": "0/40BC0D8",
+    "unknown_replayed_lsn": "0/40BC0D8",
+    "recovered_unknown": {
+      "reserved_tokens": 100000,
+      "spent_tokens": 0,
+      "available_tokens": 0
+    },
+    "recovered_workshop_observations": [
+      [
+        "5c9798a7-d5f4-40eb-98cb-ec31a6f72810",
+        "UNKNOWN",
+        null
+      ]
+    ],
+    "after_repeated_invoice": {
+      "reserved_tokens": 0,
+      "spent_tokens": 18,
+      "available_tokens": 99982
+    },
+    "final_workshop_observations": [
+      [
+        "5c9798a7-d5f4-40eb-98cb-ec31a6f72810",
+        "UNKNOWN",
+        null
+      ],
+      [
+        "5c9798a7-d5f4-40eb-98cb-ec31a6f72810",
+        "SUCCEEDED",
+        18
+      ]
+    ]
+  },
+  "same_receipt_missing_attempt_peer": {
+    "task_id": "f145cc3e-bd68-4683-9c7b-d4d710a34bcd",
+    "receipt_ref": "7fb8cd2b-7542-46ee-b3c3-c72107afb4b1",
+    "generation": 1,
+    "task_state": "PAUSED",
+    "accounting_state": "NO_ATTEMPT",
+    "attempts": []
+  },
+  "after_settled_history_mismatch": {
+    "state": "WAITING_OPERATOR",
+    "last_error": "REMOTE_HISTORY_MISMATCH",
+    "hold": "SETTLED",
+    "receipt_ref": "7fb8cd2b-7542-46ee-b3c3-c72107afb4b1",
+    "task_id": "f145cc3e-bd68-4683-9c7b-d4d710a34bcd",
+    "accounting_state": "SETTLED",
+    "settled_amount": "0.020000",
+    "task_token_limit": 100000,
+    "token_observations": [
+      [
+        "5c9798a7-d5f4-40eb-98cb-ec31a6f72810",
+        "UNKNOWN",
+        null
+      ],
+      [
+        "5c9798a7-d5f4-40eb-98cb-ec31a6f72810",
+        "SUCCEEDED",
+        18
+      ]
+    ],
+    "observations": 2
+  },
+  "rolled_back_nf_task_count": 0,
+  "rolled_back_aw_intent": {
+    "state": "REQUESTED",
+    "last_error": null,
+    "hold": "HELD",
+    "receipt_ref": null,
+    "task_id": null,
+    "accounting_state": null,
+    "settled_amount": null,
+    "task_token_limit": 100000,
+    "token_observations": null,
+    "observations": 0
+  },
+  "live_nf": {
+    "protocol_version": "aw-nf.v1",
+    "nf_instance_id": "da85902a-1ed2-4c9a-a13f-d056e3b43118",
+    "work_id": "b8de57af-d8f0-4e8f-941f-277f598db055",
+    "branch_id": "18742b71-e8e7-4b1e-a752-d750074660eb",
+    "operation_id": "498f4189-4020-4825-ac48-c714e8487b8e",
+    "task_id": "f145cc3e-bd68-4683-9c7b-d4d710a34bcd",
+    "receipt_ref": "7fb8cd2b-7542-46ee-b3c3-c72107afb4b1",
+    "world_ref": {
+      "work_id": "b8de57af-d8f0-4e8f-941f-277f598db055",
+      "branch_id": "18742b71-e8e7-4b1e-a752-d750074660eb",
+      "world_revision_id": "029616e4-724f-4d03-842f-8d5012fc21c4"
+    },
+    "generation": 1,
+    "task_state": "ACCEPTED",
+    "accounting_state": "UNKNOWN",
+    "currency": "USD",
+    "actual_amount": "0",
+    "actual_tokens": 0,
+    "attempt_ids": [
+      "5c9798a7-d5f4-40eb-98cb-ec31a6f72810"
+    ],
+    "attempts": [
+      {
+        "attempt_id": "5c9798a7-d5f4-40eb-98cb-ec31a6f72810",
+        "state": "UNKNOWN",
+        "actual_amount": null,
+        "actual_tokens": null
+      }
+    ],
+    "result_ref": "40f3dc3f-4ec2-59f0-ae63-881d97359a38",
+    "wait_reason": null
+  },
+  "nf_restored_aw_live": {
+    "state": "WAITING_OPERATOR",
+    "last_error": "REMOTE_HISTORY_MISMATCH",
+    "hold": "HELD",
+    "receipt_ref": "7fb8cd2b-7542-46ee-b3c3-c72107afb4b1",
+    "task_id": "f145cc3e-bd68-4683-9c7b-d4d710a34bcd",
+    "accounting_state": "UNKNOWN",
+    "settled_amount": null,
+    "task_token_limit": 100000,
+    "token_observations": [
+      [
+        "5c9798a7-d5f4-40eb-98cb-ec31a6f72810",
+        "UNKNOWN",
+        null
+      ]
+    ],
+    "observations": 1
+  },
+  "aw_restored_nf_live_before_invoice": {
+    "state": "BOUND",
+    "last_error": null,
+    "hold": "HELD",
+    "receipt_ref": "7fb8cd2b-7542-46ee-b3c3-c72107afb4b1",
+    "task_id": "f145cc3e-bd68-4683-9c7b-d4d710a34bcd",
+    "accounting_state": "UNKNOWN",
+    "settled_amount": null,
+    "task_token_limit": 100000,
+    "token_observations": [
+      [
+        "5c9798a7-d5f4-40eb-98cb-ec31a6f72810",
+        "UNKNOWN",
+        null
+      ]
+    ],
+    "observations": 1
+  },
+  "after_explicit_synthetic_invoice": {
+    "state": "SETTLED",
+    "last_error": null,
+    "hold": "SETTLED",
+    "receipt_ref": "7fb8cd2b-7542-46ee-b3c3-c72107afb4b1",
+    "task_id": "f145cc3e-bd68-4683-9c7b-d4d710a34bcd",
+    "accounting_state": "SETTLED",
+    "settled_amount": "0.020000",
+    "task_token_limit": 100000,
+    "token_observations": [
+      [
+        "5c9798a7-d5f4-40eb-98cb-ec31a6f72810",
+        "UNKNOWN",
+        null
+      ],
+      [
+        "5c9798a7-d5f4-40eb-98cb-ec31a6f72810",
+        "SUCCEEDED",
+        18
+      ]
+    ],
+    "observations": 2
+  },
+  "resulting_nf_tasks": 1,
+  "loopback_synthetic_http_requests": 1,
+  "supplier_model_calls": 0,
+  "recovery_mcp_calls": [
+    [
+      "nf_delegation_get",
+      "498f4189-4020-4825-ac48-c714e8487b8e"
+    ],
+    [
+      "nf_delegation_get",
+      "498f4189-4020-4825-ac48-c714e8487b8e"
+    ],
+    [
+      "nf_delegation_get",
+      "498f4189-4020-4825-ac48-c714e8487b8e"
+    ],
+    [
+      "nf_delegation_get",
+      "498f4189-4020-4825-ac48-c714e8487b8e"
+    ],
+    [
+      "nf_delegation_get",
+      "498f4189-4020-4825-ac48-c714e8487b8e"
+    ],
+    [
+      "nf_delegation_get",
+      "498f4189-4020-4825-ac48-c714e8487b8e"
+    ]
+  ],
+  "frozen_manager": "IDLE",
+  "workshop_offline": {
+    "status": "PASS",
+    "operation_id": "498f4189-4020-4825-ac48-c714e8487b8e",
+    "recorded_utc": "2026-11-12T17:47:30.925811+00:00",
+    "scope": "Workshop database refused connections across two real NF supervisor scans.",
+    "aw_database_allowed_connections": false,
+    "aw_live_client_backends": 0,
+    "aw_author_mcp_during_outage": "VIEW_DENIED",
+    "pending_wake_preserved": "c7ec1b98-ff18-4460-b7eb-bf0cfe539501",
+    "aw_unchanged_while_offline": {
+      "delegation": "BOUND",
+      "task_id": "f145cc3e-bd68-4683-9c7b-d4d710a34bcd",
+      "receipt_ref": "7fb8cd2b-7542-46ee-b3c3-c72107afb4b1",
+      "task_state": "READY",
+      "accounting_state": "NO_ATTEMPT",
+      "budget_hold": "HELD",
+      "attempts_observed": 0
+    },
+    "nf_supervisor_scans": [
+      {
+        "before": {
+          "state": "READY",
+          "attempts": []
+        },
+        "after": {
+          "state": "RESULT_STORED",
+          "attempts": [
+            "5c9798a7-d5f4-40eb-98cb-ec31a6f72810"
+          ]
+        },
+        "status": "RESULT_STORED"
+      },
+      {
+        "before": {
+          "state": "RESULT_STORED",
+          "attempts": [
+            "5c9798a7-d5f4-40eb-98cb-ec31a6f72810"
+          ]
+        },
+        "after": {
+          "state": "ACCEPTED",
+          "attempts": [
+            "5c9798a7-d5f4-40eb-98cb-ec31a6f72810"
+          ]
+        },
+        "status": "IDLE"
+      }
+    ],
+    "nf_stdio_during_outage": {
+      "receipt_ref": "7fb8cd2b-7542-46ee-b3c3-c72107afb4b1",
+      "attempt_ids": [
+        "5c9798a7-d5f4-40eb-98cb-ec31a6f72810"
+      ]
+    },
+    "aw_after_reconciliation": {
+      "delegation": "BOUND",
+      "task_id": "f145cc3e-bd68-4683-9c7b-d4d710a34bcd",
+      "receipt_ref": "7fb8cd2b-7542-46ee-b3c3-c72107afb4b1",
+      "task_state": "ACCEPTED",
+      "accounting_state": "UNKNOWN",
+      "budget_hold": "HELD",
+      "attempts_observed": 1
+    },
+    "production_provider_calls": 0
+  },
+  "elapsed_seconds": 17.41
+}

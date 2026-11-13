@@ -1,0 +1,110 @@
+name: P5.9 workflow and one-hour read qualification
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, dev/p59-runtime-architecture-refactor]
+    paths:
+      - '.github/workflows/p59-runtime-qualification.yml'
+      - 'benchmarks/p59_workflow_load.py'
+      - 'benchmarks/p3_stability.py'
+      - 'benchmarks/p2_behavioral_load.py'
+      - 'benchmarks/process_server.py'
+      - 'benchmarks/http_load.py'
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  qualify:
+    name: ${{ matrix.profile }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: ${{ matrix.timeout }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {profile: workflow-500, agents: 500, timeout: 45}
+          - {profile: workflow-1000, agents: 1000, timeout: 45}
+          - {profile: workflow-2000, agents: 2000, timeout: 60}
+          - {profile: read-hour-500, agents: 500, timeout: 85}
+    services:
+      postgres:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_DB: nf_test
+          POSTGRES_USER: nf_dev
+          POSTGRES_PASSWORD: nf_dev_ci_only
+          POSTGRES_INITDB_ARGS: --data-checksums
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U nf_dev -d nf_test"
+          --health-interval 2s --health-timeout 2s --health-retries 30
+    env:
+      NF_TEST_DATABASE_URL: postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/nf_test
+      NF_POOL_SIZE: '8'
+      NF_POOL_OVERFLOW: '0'
+      PROFILE: ${{ matrix.profile }}
+      AGENTS: ${{ matrix.agents }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Record checked-out source
+        run: |
+          out="$RUNNER_TEMP/p59-results"
+          mkdir -p "$out"
+          git rev-parse HEAD > "$out/commit.txt"
+          git rev-parse 'HEAD^{tree}' > "$out/tree.txt"
+          sha256sum benchmarks/{p59_workflow_load,p3_stability,p2_behavioral_load,process_server,http_load}.py uv.lock > "$out/source.sha256"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - name: Install the locked runtime
+        run: uv sync --locked --group dev --python 3.12
+      - name: Run the measured profile
+        id: benchmark
+        run: |
+          out="$RUNNER_TEMP/p59-results"
+          if [[ "$PROFILE" == read-hour-500 ]]; then
+            args=(-m benchmarks.p3_stability --seconds 3600 --read-rps 20 --api-processes 2 --renew-worker-leases)
+          else
+            args=(-m benchmarks.p59_workflow_load)
+          fi
+          set -o pipefail
+          uv run --no-sync python "${args[@]}" --agents "$AGENTS" --output "$out/result.json" 2>&1 | tee "$out/run.log"
+      - name: Preserve the measured gate and raw bytes
+        if: always()
+        env:
+          OUTCOME: ${{ steps.benchmark.outcome }}
+        run: |
+          out="$RUNNER_TEMP/p59-results"
+          mkdir -p "$out"
+          cd "$out"
+          printf '%s\n' "$OUTCOME" > benchmark-step.txt
+          if [[ -s result.json ]]; then
+            jq '{gate, probe_gate, long_duration_gate, population, successful_results, awakened, states, successful_results_per_total_s, duration_seconds, scheduled_count, successful_query_rps, status_counts} | with_entries(select(.value != null))' result.json > summary.json
+            sha256sum result.json > result.sha256
+            gzip -n result.json
+            sha256sum result.json.gz >> result.sha256
+          fi
+          {
+            printf '### %s\n\nBenchmark step `%s` at `%s`.\n' "$PROFILE" "$OUTCOME" "$GITHUB_SHA"
+            if [[ -f summary.json ]]; then
+              printf '\n```json\n'
+              cat summary.json
+              printf '```\n'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p59-${{ matrix.profile }}-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/p59-results/
+          if-no-files-found: error
+          retention-days: 90

@@ -1,0 +1,116 @@
+{
+  "cli_version": "0.167.0-alpha.4",
+  "runs": [
+    {
+      "label": "initial-win",
+      "pull_request_head": "41d594a137fe290c3e1c03fa150110d122964f1d",
+      "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43288492305/job/131428151905",
+      "archive_artifact_id": 13974989245,
+      "archive_sha256": "16e9a8dd26b833a2a27b04f6b2774cd62034c4ee31bcfbcf8b7eadd7f1601dae",
+      "suites": [
+        {
+          "filename": "initial-win-native-core.xml.gz",
+          "original_sha256": "8a6a96ab0e466879a5f4e471fe22ffd5120ee4ab43626527a3253575c1708eec",
+          "tests": 35,
+          "failures": 2,
+          "errors": 0,
+          "skipped": 3,
+          "passed": 30,
+          "selected_protocol_tests": {
+            "test_real_cli_and_deepseek_wire_overlap_with_no_provider_egress": "failure",
+            "test_native_crash_before_initialization": "failure"
+          }
+        },
+        {
+          "filename": "initial-win-native-postgres.xml.gz",
+          "original_sha256": "e8036281d2bafc4272a7eb1a9f972fec1d79b713754fcb38c47283bdaa6c80a0",
+          "tests": 29,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "passed": 29
+        },
+        {
+          "filename": "initial-win-native-workshop.xml.gz",
+          "original_sha256": "a15b5165116c2cbaa026864b63c3ae62cd1daece69658cd4b55ec907a64d2641",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "passed": 1
+        }
+      ]
+    },
+    {
+      "label": "verified-win",
+      "pull_request_head": "128c18481af050a1f403cee760ba9389eb34b298",
+      "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43289377028/job/131431221507",
+      "archive_artifact_id": 13975433454,
+      "archive_sha256": "de1b1b22ee3074b12c337ea798b93fbec22d8cf682ff13e0e7b5acac66481189",
+      "suites": [
+        {
+          "filename": "verified-win-native-core.xml.gz",
+          "original_sha256": "373d45fbc6e76f0a461aa8a2371df18129431e077761534f0039fd6e54d78366",
+          "tests": 35,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 3,
+          "passed": 32,
+          "selected_protocol_tests": {
+            "test_real_cli_and_deepseek_wire_overlap_with_no_provider_egress": "passed",
+            "test_native_crash_before_initialization": "passed"
+          }
+        },
+        {
+          "filename": "verified-win-native-postgres.xml.gz",
+          "original_sha256": "8c44c2d76bf505403ea74f279d62052c877f3399069dba93bda31ccd16cef174",
+          "tests": 29,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "passed": 29
+        },
+        {
+          "filename": "verified-win-native-workshop.xml.gz",
+          "original_sha256": "880d03b689de1fef83f3d59327d2bb3cb4e01fb08f104a0f442956b41e91a54d",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "passed": 1
+        }
+      ]
+    },
+    {
+      "label": "verified-linux",
+      "pull_request_head": "128c18481af050a1f403cee760ba9389eb34b298",
+      "job_url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43289377028/job/131431220951",
+      "archive_artifact_id": 13977230110,
+      "archive_sha256": "0e19f133fa9ba804890954f873250a1dc236be4f21e25333b526c2afadde538c",
+      "suites": [
+        {
+          "filename": "verified-linux-native-core.xml.gz",
+          "original_sha256": "51f4f10984de40c54cb9d01c7205e884bb265187673df78191614b95c7bd2987",
+          "tests": 35,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 4,
+          "passed": 31,
+          "selected_protocol_tests": {
+            "test_real_cli_and_deepseek_wire_overlap_with_no_provider_egress": "skipped",
+            "test_native_crash_before_initialization": "passed"
+          }
+        },
+        {
+          "filename": "verified-linux-native-workshop.xml.gz",
+          "original_sha256": "177fdd1baafa8862939918ad57901121339e431b8f8e707beacf85d39069b6cb",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "passed": 1
+        }
+      ]
+    }
+  ]
+}

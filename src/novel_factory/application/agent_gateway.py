@@ -250,9 +250,10 @@ class AgentGateway:
             binding["dynamic_live"] = refresh(self.kernel, principal, task["task_id"], task["generation"], ref)
 
     def _mark_sent(self, principal, binding, attempt, worker, authorize):
+        from novel_factory.orchestration import runtime_admission
+
         try:
             self._refresh_dynamic(principal, binding)
-            from novel_factory.orchestration import runtime_admission
             adapter = self.adapters[binding["input"]["adapter_id"]]
             scope = runtime_admission.scope_for(adapter, binding["input"], binding["task"]["work_id"])
 
@@ -282,7 +283,9 @@ class AgentGateway:
                                 INSERT INTO nf_runtime_unsent(attempt_id,generation) VALUES (:id,:generation)
                             """), {"id": attempt, "generation": call["generation"]})
                             if task["state"] == "RUNNING" and task["generation"] == call["generation"]:
-                                self.kernel.tasks._recover_task(repo.conn, task, reason="RUNTIME_CAPACITY_LIMIT")
+                                receipt = self.kernel.tasks._recover_task(repo.conn, task, reason="RUNTIME_CAPACITY_LIMIT")
+                                if receipt["state"] == "READY":
+                                    runtime_admission.delay_repeated_denial(repo.conn, task["task_id"], attempt)
             raise
 
     def _authorized_materials(self, principal, binding):

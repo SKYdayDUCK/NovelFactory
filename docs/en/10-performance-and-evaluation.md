@@ -31,7 +31,7 @@ A sorted, deduplicated scope update runs in the existing transaction. The timer 
 | 1000 open arrival | Out of 5,000 attempts, the baseline had 1,319 valid replies, 3,627 HTTP 429s and 54 transport errors. The candidate had 1,434 valid replies, 3,534 HTTP 429s and 32 transport errors. Both missed the gate. |
 | Four books, one model slot | With three equal-sized tasks per book, all four finished three. Fixture endpoints exercised fixed, mixed and failed providers for one, two and four books. |
 
-The 200-agent baseline recorded 716 authentication-admission rejections, 80 ingress rejections, 46 business-admission rejections and seven wait timeouts. The pool reached 8/8 connections, but only two observation samples saw transaction-ID lock waits. The same load client with a 2,104-byte fixed response achieved 140.59 and 153.94 wire starts/s in two calibration runs. Both the client and application limit this setup. It sent no requests to commercial model providers. The original capacity gate remains **NOT_MET**. One-hour and multi-hour sustained runs are **NOT_EXECUTED**.
+The 200-agent baseline recorded 716 authentication-admission rejections, 80 ingress rejections, 46 business-admission rejections and seven wait timeouts. The pool reached 8/8 connections, but only two observation samples saw transaction-ID lock waits. The same load client with a 2,104-byte fixed response achieved 140.59 and 153.94 wire starts/s in two calibration runs. Both the client and application limit this setup. It sent no requests to commercial model providers. The original capacity gate remains **NOT_MET**. The original report covered 600-second runs. The runtime extension below records subsequent measurements.
 
 ## Reproduce a workload
 
@@ -55,3 +55,7 @@ python scripts/with_postgres.py --log-dir "$out/pg-soak" -- \
 ```
 
 A genuine Codex CLI process with a fixture upstream exercises the host protocol. The loopback HTTP adapter exercises requests, cancellation, provider faults and usage recording. Billable inference, provider latency on the public network, settled invoices and ratings by human readers each require their own evidence. [Benchmark programs](../../benchmarks) · [Quick start](02-quick-start.md)
+
+## Runtime extension measurements
+
+Two works with 500, 1,000 and 2,000 distinct task principals produced 490, 980 and 1,960 validated results. The remaining tasks took the two deliberate cancellation and unknown-response paths. The maximum simultaneous model calls was two, and four of eight PostgreSQL connections were checked out. The largest queue had a 491-second P95 from creation to first claim. The independent original HTTP gate remains unmet. Two one-hour read runs on a contended host validated 70,978 and 71,133 of 72,000 requests. Renewal removed the end-of-hour lease failures. The remaining pressure failures kept these strict read gates open. The independent hosted one-hour repeat validated 72,000/72,000 at 20.00 reads/s. Its strict gate was `PASS` and its scope was fixed reads with active lease renewal. [Result tables and raw evidence](../../reports/performance/p59_runtime/RESULTS.md) · [Reproduction and measurement boundaries](../../reports/performance/p59_runtime/METHOD.md)

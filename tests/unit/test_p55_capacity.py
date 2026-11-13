@@ -43,3 +43,36 @@ def test_overlapping_slot_seconds_across_sample_and_shrink():
     assert second["worker_utilization_pct"] == 60
     assert meter.sample(now=20)["worker_utilization_pct"] == 0
     assert ResourceMonitor().host()["worker_utilization_pct"] is None
+
+
+def test_idle_slots_shrink_after_cooldown_and_regrow_within_ceiling():
+    policy = CapacityPolicy(4, "model", cooldown=3, target=4)
+    idle = healthy(backlog=0, observations=0, worker_utilization_pct=0)
+    assert policy.decide(idle, 0) == (4, "hold")
+    assert policy.decide(dict(idle, in_flight=1), 3) == (4, "hold")
+    assert policy.decide(idle, 6) == (4, "hold")
+    assert policy.decide(idle, 12) == (1, "idle")
+    assert policy.decide(healthy(), 13) == (1, "hold")
+    assert policy.decide(healthy(), 15) == (2, "backlog_and_headroom")
+
+
+def test_native_windows_monitor_reports_physical_headroom():
+    import os
+    import time
+
+    import pytest
+
+    if os.name != "nt":
+        pytest.skip("Uses native GetSystemTimes and GlobalMemoryStatusEx")
+    monitor = ResourceMonitor()
+    sample = monitor.host()
+    assert sample["available_bytes"] > 0
+    # FILETIME CPU tick resolution differs across Windows machines.
+    for _ in range(20):
+        time.sleep(.02)
+        cpu = monitor.host()["cpu_pct"]
+        if cpu is not None:
+            assert 0 <= cpu <= 100
+            break
+    else:
+        pytest.fail("Windows CPU counters did not advance")

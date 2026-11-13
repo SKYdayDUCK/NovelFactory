@@ -1,7 +1,6 @@
 import hashlib
 import json
-import os
-import stat
+from .private_files import read_private_bytes
 from dataclasses import dataclass
 
 import psycopg
@@ -43,13 +42,11 @@ def authenticate(conn, token, lock=True):
 
 
 def private_binding(path):
-    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
-    with os.fdopen(fd) as handle:
-        meta = os.fstat(fd)
-        if (not stat.S_ISREG(meta.st_mode) or meta.st_uid != os.getuid()
-                or meta.st_mode & 0o077 or meta.st_size > 16384):
-            raise Denied("INVALID_BINDING")
-        data = json.load(handle)
+    try:
+        content = read_private_bytes(path, 16384)
+    except ValueError:
+        raise Denied("INVALID_BINDING") from None
+    data = json.loads(content)
     if set(data) != {"database_url", "token"} or not all(
         isinstance(v, str) and v for v in data.values()
     ):

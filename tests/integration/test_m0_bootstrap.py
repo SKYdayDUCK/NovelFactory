@@ -36,7 +36,14 @@ def test_bootstrap_replay_scopes_and_permissions(kernel_env, tmp_path):
     admin = json.loads((private / "supervisor.json").read_text())
     assert all(token not in first.stdout + first.stderr + second.stdout + second.stderr
                for token in [binding["token"], admin["token"]])
-    assert all(stat.S_IMODE(path.stat().st_mode) == 0o600 for path in private.iterdir())
+    if os.name == "nt":
+        from novel_factory.infrastructure.private_files import check_private_directory, read_private_bytes
+
+        check_private_directory(private)
+        for path in private.glob("*.json"):
+            assert read_private_bytes(path, 16384)
+    else:
+        assert all(stat.S_IMODE(path.stat().st_mode) == 0o600 for path in private.iterdir())
     assert binding["token"] != admin["token"]
     assert kernel.authenticate(binding["token"]) != kernel.authenticate(admin["token"])
     with kernel.db.uow(write=False) as repo:

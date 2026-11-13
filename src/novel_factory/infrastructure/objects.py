@@ -7,16 +7,16 @@ of the ObjectStore port and must be preserved by callers.
 """
 from __future__ import annotations
 
-from contextlib import contextmanager
 from dataclasses import dataclass
-import fcntl
 import hashlib
 import os
 from pathlib import Path
 import re
 import tempfile
 import time
-from typing import Callable, Iterable, Iterator
+from typing import Callable, Iterable
+
+from .native_files import file_lock, publish_file, sync_directory
 
 _HASH = re.compile(r"^[0-9a-f]{64}$")
 
@@ -39,7 +39,7 @@ class ObjectRef:
 
 
 class ObjectStore:
-    """Atomic, non-overwriting SHA-256 store on a local POSIX filesystem."""
+    """Atomic, non-overwriting SHA-256 store on a local POSIX filesystem or NTFS volume."""
 
     def __init__(self, root: str | Path):
         self.root = Path(root).resolve()
@@ -53,27 +53,11 @@ class ObjectStore:
         self._fsync_dir(self.root)
         self._fsync_dir(self.root.parent)
 
-    @staticmethod
-    def _fsync_dir(path: Path) -> None:
-        fd = os.open(path, os.O_RDONLY | os.O_DIRECTORY)
-        try:
-            os.fsync(fd)
-        finally:
-            os.close(fd)
+    _fsync_dir = staticmethod(sync_directory)
 
-    @contextmanager
-    def lock(self, *, exclusive: bool = False) -> Iterator[None]:
-        """Hold over both verification and the database reference commit.
-
-        Do not nest exclusive/shared locks: each invocation owns a separate fd.
-        """
-        fd = os.open(self._lock_path, os.O_RDWR | os.O_CREAT, 0o600)
-        try:
-            fcntl.flock(fd, fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH)
-            yield
-        finally:
-            fcntl.flock(fd, fcntl.LOCK_UN)
-            os.close(fd)
+    def lock(self, *, exclusive: bool = False):
+        """Hold over both verification and the database reference commit."""
+        return file_lock(self._lock_path, exclusive=exclusive)
 
     def path(self, digest: str) -> Path:
         if not isinstance(digest, str) or not _HASH.fullmatch(digest):
@@ -94,7 +78,7 @@ class ObjectStore:
                 raise ObjectStoreError("OBJECT_CORRUPT", "Object path is a symlink")
             size = 0
             h = hashlib.sha256()
-            with p.open("rb") as f:
+            with p.open("rb+" if os.name == "nt" else "rb") as f:
                 for block in iter(lambda: f.read(1024 * 1024), b""):
                     h.update(block)
                     size += len(block)
@@ -126,19 +110,18 @@ class ObjectStore:
                     stream.flush()
                     if fault:
                         fault("after_write")
-                    os.fchmod(stream.fileno(), 0o444)
+                    if os.name != "nt":
+                        os.fchmod(stream.fileno(), 0o444)
                     os.fsync(stream.fileno())
                     if fault:
                         fault("after_file_fsync")
-                # link is atomic and fails if another writer already published
-                # the same content. Unlike replace, it never overwrites bytes.
+                # Only the first writer publishes. Other writers verify the winner.
                 try:
-                    os.link(temp, dest)
+                    publish_file(temp, dest)
                 except FileExistsError:
                     self.verify(digest, expected_size=len(content))
                 if fault:
                     fault("after_publish")
-                self._fsync_dir(dest.parent)
                 result = self.verify(digest, expected_size=len(content))
                 if fault:
                     fault("before_return")

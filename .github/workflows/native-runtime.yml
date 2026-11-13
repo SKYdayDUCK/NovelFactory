@@ -1,0 +1,95 @@
+name: Native runtime
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    name: Native runtime / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2025, ubuntu-24.04]
+    env:
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - id: install
+        run: uv sync --locked --group dev --python 3.12
+      - name: Install the pinned native Windows app-server for the synthetic provider test
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          NF_P5_CODEX_VERSION: '0.167.0-alpha.4'
+        run: |
+          $prefix = Join-Path $env:RUNNER_TEMP 'nf-test-codex'
+          npm install --prefix $prefix --include=optional --no-save --no-audit --no-fund "@openai/codex@$env:NF_P5_CODEX_VERSION"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $package = Join-Path $prefix 'node_modules/@openai/codex-win32-x64'
+          $images = @(Get-ChildItem -LiteralPath $package -Recurse -File -Filter 'codex.exe')
+          if ($images.Count -ne 1) { throw 'Expected exactly one native codex.exe in the pinned win32-x64 package' }
+          $image = $images[0]
+          $version = & $image.FullName --version
+          if ($LASTEXITCODE -ne 0 -or $version -ne "codex-cli $env:NF_P5_CODEX_VERSION") { throw "Unexpected native Codex version: $version" }
+          Write-Output $version
+          "NF_CODEX_EXECUTABLE=$($image.FullName)" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          $image.DirectoryName | Out-File $env:GITHUB_PATH -Append -Encoding utf8
+      - run: uv run --no-sync python scripts/nf.py doctor
+      - run: uv run --no-sync python scripts/nf.py mcp --help
+      - run: uv run --no-sync python scripts/nf.py supervisor --help
+      - name: Filesystem, child lifetime, capacity and offline provider contracts
+        run: >-
+          uv run --no-sync python -m pytest -q tests/unit/test_native_platform.py
+          tests/reliability/test_objects.py tests/unit/test_host_process.py tests/unit/test_p55_capacity.py
+          tests/unit/test_p58_providers.py --junitxml=native-core.xml
+      - name: Verify Windows ran the real app-server protocol case
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          [xml]$junit = Get-Content -LiteralPath native-core.xml -Raw
+          $cases = $junit.SelectNodes("//testcase[@name='test_real_cli_and_deepseek_wire_overlap_with_no_provider_egress']")
+          if ($cases.Count -ne 1 -or $cases[0].SelectSingleNode('skipped|failure|error')) { throw 'Expected a passing native app-server protocol test' }
+      - name: Standalone Workshop install and private binding
+        if: "!cancelled() && steps.install.outcome == 'success'"
+        run: uv run --project workshop --locked --group dev python -m pytest -q workshop/tests/test_private_binding.py --junitxml=native-workshop.xml
+      - name: Start runner's disposable Windows PostgreSQL 17
+        id: postgres
+        if: "!cancelled() && runner.os == 'Windows' && steps.install.outcome == 'success'"
+        shell: pwsh
+        run: |
+          Set-Service -Name postgresql-x64-17 -StartupType Manual
+          Start-Service -Name postgresql-x64-17
+          $env:PGPASSWORD = 'root'
+          $version = & "$env:PGBIN/psql.exe" -XAt -h 127.0.0.1 -U postgres -c 'show server_version_num'
+          if ($LASTEXITCODE -ne 0 -or [int]$version -lt 170000 -or [int]$version -ge 180000) { throw 'PostgreSQL 17 required' }
+          & "$env:PGBIN/createdb.exe" -h 127.0.0.1 -U postgres nf_native
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          'NF_TEST_DATABASE_URL=postgresql+psycopg://postgres:root@127.0.0.1:5432/nf_native' | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Migrate, bootstrap, claim, cancel, recover and reconcile on Windows
+        if: "!cancelled() && runner.os == 'Windows' && steps.postgres.outcome == 'success'"
+        run: >-
+          uv run --no-sync python -m pytest -q tests/integration/test_m0_bootstrap.py tests/integration/test_native_operator_cli.py
+          tests/reliability/test_tasks.py tests/integration/test_bound_tool_entrypoints.py
+          tests/integration/test_mcp_idle_pool.py
+          tests/integration/test_p5_scheduler_admission.py::test_supervisor_drains_sent_attempt_and_leaves_next_job_ready
+          tests/integration/test_p58_routing.py
+          --junitxml=native-postgres.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-runtime-${{ matrix.os }}-${{ github.run_attempt }}
+          path: native-*.xml
+          if-no-files-found: warn

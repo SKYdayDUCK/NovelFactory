@@ -494,14 +494,16 @@ class Kernel:
         require(spec["policy_version"]==r.one("works",{"work_id":wr["work_id"]})["policy_version"],"INVALID_ARGUMENT","Task policy version is not current")
 
     def claim_task(self, principal, worker_id, *, lease_seconds=30, task_id=None):
-        with self.db.uow(write=False) as r:
-            g=r.one("grants",{"grant_id":principal.grant_id})
-            require(g,"VIEW_DENIED","Grant unavailable")
-            self.authorize(r,principal,g["work_id"],"TASK_CLAIM")
-        def authorize_claim(conn):
-            from novel_factory.infrastructure.repository import KernelRepository
-            self.authorize(KernelRepository(conn,tables),principal,g["work_id"],"TASK_CLAIM")
-        return self.tasks.claim(worker_id,work_id=g["work_id"],principal_id=principal.principal_id,grant_id=principal.grant_id,task_id=task_id,lease_seconds=lease_seconds,authorize_in_tx=authorize_claim)
+        with self.db.uow() as repo:
+            identity = repo.one("grants", {"grant_id": principal.grant_id})
+            require(identity, "VIEW_DENIED", "Grant unavailable")
+            grant = self.authorize(repo, principal, identity["work_id"], "TASK_CLAIM")
+            branches = grant["branch_ids"]
+            return self.tasks.claim_in_transaction(
+                repo.conn, worker_id, work_id=grant["work_id"], principal_id=principal.principal_id,
+                grant_id=principal.grant_id, branch_ids=None if branches == ["*"] else branches,
+                task_id=task_id, lease_seconds=lease_seconds,
+            )
 
     def _task_owner(self,r,principal,task_id,capability="READ"):
         task=r.one("tasks",{"task_id":task_id})

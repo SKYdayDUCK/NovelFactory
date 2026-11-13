@@ -1,0 +1,29 @@
+{
+  "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)",
+  "port": 55439,
+  "command": [
+    "../NovelFactory/.venv/bin/python",
+    "-m",
+    "benchmarks.p3_stability",
+    "--agents",
+    "500",
+    "--seconds",
+    "3600",
+    "--read-rps",
+    "20",
+    "--api-processes",
+    "2",
+    "--output",
+    "../runs/soak-baseline.json"
+  ],
+  "started_at_utc": "2026-11-12T17:31:18.509516+00:00",
+  "authentication": "loopback_trust_generated_test_data_only",
+  "fsync": true,
+  "synchronous_commit": true,
+  "max_connections": 60,
+  "data_directory_reused": false,
+  "exit_status": 1,
+  "postgres_exit_status": 0,
+  "duration_seconds": 3634.463156,
+  "finished_at_utc": "2026-11-12T18:31:52.972765+00:00"
+}

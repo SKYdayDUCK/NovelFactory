@@ -1,14 +1,16 @@
 """AR-01/05 protocol fixtures. No model network or accounting authority."""
 import json
-import shutil
+import sys
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from threading import Barrier, Thread
+from time import sleep
 
 import pytest
 
 from agent_runtime import codex, providers
+from agent_runtime.host_process import resolve_host_binary
 from agent_runtime.protocol import ModelCallFailure, ModelRequest
 from agent_runtime.providers import Profile, ProfileError, invoke, read_profiles
 
@@ -155,7 +157,7 @@ def test_http_rate_limit_and_redirect_never_retry_or_leak_body():
             worker.join()
 
 
-@pytest.mark.skipif(not shutil.which("codex"), reason="Real app-server binary unavailable")
+@pytest.mark.skipif(not resolve_host_binary(), reason="Real app-server binary unavailable")
 def test_real_cli_and_deepseek_wire_overlap_with_no_provider_egress(monkeypatch):
     enable_synthetic_credentials(monkeypatch)
     barrier, sends, identities = Barrier(2), [], []
@@ -173,6 +175,8 @@ def test_real_cli_and_deepseek_wire_overlap_with_no_provider_egress(monkeypatch)
         sends.append((is_native, kwargs["request_hash"]))
         started_at = datetime.now(UTC).isoformat()
         barrier.wait(timeout=9)
+        # Keep both synthetic requests in flight across a Windows wall-clock tick.
+        sleep(0.05)
         window = {"started_at": started_at, "received_at": datetime.now(UTC).isoformat()}
         return (codex_reply(), "synthetic-openai", window) if is_native else (chat_reply(), "synthetic-deepseek", window)
     monkeypatch.setattr(codex, "post", fake_wire)
@@ -194,11 +198,20 @@ def test_real_cli_and_deepseek_wire_overlap_with_no_provider_egress(monkeypatch)
 
 def test_native_crash_before_initialization(monkeypatch):
     enable_synthetic_credentials(monkeypatch)
-    monkeypatch.setattr(shutil, "which", lambda _: "/bin/false")
-    monkeypatch.setattr(codex, "post", lambda **kw: pytest.fail("Crashed host must not send"))
+    # Python exits when asked to execute the absent app-server script in the
+    # fresh private work directory. Both entry points select this real process.
+    monkeypatch.setattr(providers, "resolve_host_binary", lambda: sys.executable)
+    monkeypatch.setattr(codex, "resolve_host_binary", lambda: sys.executable)
+    forwarded = []
+    def observe_send(**kw):
+        forwarded.append(kw["request_hash"])
+        raise AssertionError("Crashed host attempted a send")
+    monkeypatch.setattr(codex, "post", observe_send)
+    events = []
     with pytest.raises(ModelCallFailure) as error:
-        invoke(plan(), REQUEST, authorize=lambda _: True, record=lambda *args: None)
+        invoke(plan(), REQUEST, authorize=lambda _: True, record=lambda *args: events.append(args))
     assert not error.value.sent
+    assert not forwarded and not events
 
 
 def test_completed_tool_item_is_never_delivered_to_cli():
@@ -257,7 +270,7 @@ def test_subscription_source_requires_signed_access_scope_and_client(monkeypatch
     profile = plan(auth_mode="chatgpt-plan", model_output_ceiling=300, oauth_client_id="oaiapp_fixture")
     enable_synthetic_credentials(monkeypatch)
     # This test exercises signed credentials only. The native host has its own integration test.
-    monkeypatch.setattr(providers.shutil, "which", lambda name: "/fixture/codex" if name == "codex" else None)
+    monkeypatch.setattr(providers, "resolve_host_binary", lambda: "/fixture/codex")
     with pytest.raises(ProfileError, match="MODEL_PLAN_AUTH_UNVERIFIED"):
         profile.preflight()  # Arbitrary secret under a subscription profile.
     private = rsa.generate_private_key(public_exponent=65537, key_size=2048)

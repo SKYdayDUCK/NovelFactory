@@ -6,13 +6,13 @@ import hashlib
 import json
 import os
 import re
-import shutil
 import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlsplit
 
+from .host_process import resolve_host_binary
 from .protocol import ModelCallFailure, ModelResponse
 
 
@@ -97,7 +97,7 @@ class Profile:
         if os.environ.get("NF_RUNTIME_LIVE_APPROVED") != "1":
             raise ProfileError("MODEL_CALL_NOT_AUTHORIZED")
         credential = os.environ.get(self.secret_ref)
-        if not credential or (self.kind == "codex-cli" and not shutil.which("codex")):
+        if not credential or (self.kind == "codex-cli" and not resolve_host_binary()):
             raise ProfileError("MODEL_UNAVAILABLE")
 
         if self.auth_mode == "chatgpt-plan":

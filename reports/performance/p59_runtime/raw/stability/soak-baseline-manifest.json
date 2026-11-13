@@ -1,0 +1,81 @@
+{
+  "uncompressed_name": "soak-baseline.json",
+  "uncompressed_bytes": 32392544,
+  "uncompressed_sha256": "eba3a198a623b3106e84fca0a8471979afea1abaa16e0cb1f0d33c76c75eaaa2",
+  "gzip_bytes": 3022734,
+  "gzip_sha256": "d2384cfc2170b893af5398cc9de8829fd9b5610ba8fd13e2035c65b07ecdb00f",
+  "parts": [
+    {
+      "name": "soak-baseline.json.gz.001",
+      "bytes": 750000,
+      "sha256": "d86afe14d40b365b71dc50af95534efa25495570c7bc42d4b796fe56e0f98102"
+    },
+    {
+      "name": "soak-baseline.json.gz.002",
+      "bytes": 750000,
+      "sha256": "2937b09b2fde3cee070d8fc9fc02fe761fb06c5bae9a1c56f9af87340d2e93a3"
+    },
+    {
+      "name": "soak-baseline.json.gz.003",
+      "bytes": 750000,
+      "sha256": "ae34f46def21fd36e29dd648e4647159bd7664d148fa1f220165b255c03f8a8b"
+    },
+    {
+      "name": "soak-baseline.json.gz.004",
+      "bytes": 750000,
+      "sha256": "d41488a381fbdbb6ac4edc8a402262d49434a8a3398bf1816b7c4eedb705acef"
+    },
+    {
+      "name": "soak-baseline.json.gz.005",
+      "bytes": 22734,
+      "sha256": "8c87ef7077a8fe4f3bbf2df30cf247bea4e10ee8d06bb6f2e38c5ac10992a1b4"
+    }
+  ],
+  "summary": {
+    "probe_gate": "NOT_MET",
+    "long_duration_gate": "NOT_MET",
+    "duration_seconds": 3600.0197125109994,
+    "configuration": {
+      "agents": 500,
+      "seconds": 3600.0,
+      "read_rps": 20.0,
+      "api_processes": 2,
+      "output": "../runs/soak-baseline.json"
+    },
+    "scheduled_count": 72000,
+    "actual_call_start_rps": 20.000040767365977,
+    "successful_query_rps": 19.716003152241942,
+    "latency_all_attempts": {
+      "count": 72000,
+      "p50_ms": 114.9115,
+      "p95_ms": 1943.259,
+      "p99_ms": 2280.5331
+    },
+    "status_counts": {
+      "200": 70978,
+      "429": 736,
+      "409": 286
+    },
+    "world_unchanged": true,
+    "new_world_commits": 0,
+    "real_model_calls": 0,
+    "source_sha256": "8ad0e0781fbec0464b6385cab9ac89f4a6e51705e456d6394012a016460ec7ed",
+    "worker_lease_renewals": [],
+    "valid_responses": 70978,
+    "distinct_agents": 500,
+    "correctness_error_count": 286,
+    "status_error_codes": {
+      "429 BACKPRESSURE": 736,
+      "409 LEASE_EXPIRED": 286
+    },
+    "pool": {
+      "peak_checked_out_connections": 8,
+      "checked_out_at_end": 0,
+      "configured_pool_size": 8
+    },
+    "first_and_last_invalid_start_seconds": [
+      1521.85102645,
+      3599.951005317
+    ]
+  }
+}

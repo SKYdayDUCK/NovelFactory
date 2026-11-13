@@ -231,3 +231,36 @@ def test_wait_deadline_closes_once_and_reports_without_model_call(rel_env, rel_s
         event = repo.one("outbox", {"dedupe_key": f"workflow:{target}:0:closed"})
         assert event["payload"]["reason"] == "WAIT_DEADLINE"
         assert not repo.many("call_attempts", {"task_id": target})
+
+
+def test_restart_replays_accepted_review_racing_waiter_cancellation(rel_env, rel_scope):
+    service = rel_env["service"]
+    review = start_task(rel_env, rel_scope, kind="editorial_review")
+    waiter = blocked(rel_env, rel_scope)
+    opts = scope_args(rel_scope)
+    WorkflowService(service).wait(waiter, 0, [review["task_id"]], mode="AND", **opts)
+    accept(rel_env, review)
+
+    barrier = Barrier(2)
+    def replay():
+        barrier.wait(timeout=10)
+        return WorkflowService(service).resume_project(**opts)["awakened"]
+
+    def cancel():
+        barrier.wait(timeout=10)
+        return service.cancel(waiter, 0, principal_id=rel_scope["principal_id"],
+                              idempotency_key="cancel:" + waiter)
+
+    with ThreadPoolExecutor(max_workers=2) as workers:
+        woken, cancelled = workers.submit(replay), workers.submit(cancel)
+        assert woken.result(timeout=15) in (0, 1)
+        assert cancelled.result(timeout=15)["status"] == "CANCELLED"
+
+    # A fresh supervisor rechecks durable state after replaying the same event.
+    assert WorkflowService(service).resume_project(**opts)["awakened"] == 0
+    assert service.get(waiter)["state"] == "CANCELLED"
+    assert service.claim("late-worker", task_id=waiter) is None
+    with rel_env["db"].uow(write=False) as repo:
+        assert len(repo.many("inbox", {"consumer": f"workflow:{waiter}:0"})) <= 1
+        assert repo.many("task_executions", {"task_id": waiter}) == []
+        assert repo.many("call_attempts", {"task_id": waiter}) == []

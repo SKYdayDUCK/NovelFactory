@@ -36,9 +36,16 @@ dev = [
 packages = ["src/novel_factory", "agent_runtime"]
 exclude = ["agent_runtime/pyproject.toml"]
 
+[tool.hatch.build.targets.sdist.force-include]
+"workshop/src/agent_workshop/private_files.py" = "workshop/src/agent_workshop/private_files.py"
+
 [tool.hatch.build.targets.wheel.force-include]
+"workshop/src/agent_workshop/private_files.py" = "nf_private_files.py"
 "contracts" = "novel_factory/data/contracts"
 "runtime" = "novel_factory/data/runtime"
+
+[tool.uv]
+cache-keys = [{ file = "pyproject.toml" }, { file = "workshop/src/agent_workshop/private_files.py" }]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
