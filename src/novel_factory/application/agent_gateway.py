@@ -379,6 +379,13 @@ class AgentGateway:
                   + "\nRestricted mode: " + str(runtime["restricted_mode"])
                   + "\nIdentity: " + canonical_bytes(identity).decode()
                   + "\nPayload JSON Schema: " + contract_text)
+        if binding["config"].get("adapter_kind") == "deepseek":
+            envelope = {key: value for key, value in identity.items() if key != "dependency_fingerprint"}
+            envelope.update(status="SUCCEEDED", unresolved_questions=[], payload={})
+            system += ("\nCopy this exact outer JSON object. Fill its payload object using the payload schema. "
+                       "All listed keys are at the top level. There is no key named identity. "
+                       "Keep the types and values of the identifying fields intact.\n"
+                       + canonical_bytes(envelope).decode())
         if "dynamic_assignment" in binding:
             chosen = binding["dynamic_assignment"]
             system += ("\nTask-specific role instructions:\n" + chosen["role_instructions"]
@@ -633,8 +640,13 @@ class AgentGateway:
                  "actual_amount": None, "currency": None, "cost_status": "UNKNOWN_COST"}
         outcome, result_status, reason, provider_receipt = "UNKNOWN", "FAILED", None, None
         try:
+            protocol_failure = None
             try:
                 response = adapter.generate(replace(model_request, attempt_id=attempt))
+            except ModelCallFailure as exc:
+                if exc.received is None:
+                    raise
+                response, protocol_failure = exc.received, exc
             finally:
                 if binding["input"].get("routing_decision") or getattr(adapter, "provider_key", None):
                     from novel_factory.orchestration.runtime_admission import release
@@ -655,6 +667,8 @@ class AgentGateway:
                    "provider_receipt": provider_receipt, "request_sha256": request_hash, "usage": usage}
             response_ref = self._audit_artifact(binding, attempt, "response", raw, "AGENT_RESPONSE")
             outcome = "REJECTED"
+            if protocol_failure is not None:
+                raise protocol_failure
             try:
                 envelope = json.loads(response.text, object_pairs_hook=_unique_pairs)
             except (ValueError, TypeError):

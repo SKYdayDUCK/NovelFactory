@@ -2,11 +2,11 @@
   "profiles": {
     "deepseek_flash_writer": {
       "kind": "deepseek", "model": "deepseek-flash", "secret_ref": "NF_DEEPSEEK_API_KEY",
-      "max_output_tokens": 8192, "timeout_seconds": 300
+      "max_output_tokens": 8192, "timeout_seconds": 300, "thinking": "disabled", "defer_invoice": true
     },
     "deepseek_pro_reviewer": {
       "kind": "deepseek", "model": "deepseek-v4-pro", "secret_ref": "NF_DEEPSEEK_API_KEY",
-      "max_output_tokens": 8192, "timeout_seconds": 300
+      "max_output_tokens": 8192, "timeout_seconds": 300, "thinking": "disabled", "defer_invoice": true
     }
   }
 }
