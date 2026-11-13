@@ -18,6 +18,18 @@ Call after the host has initialized a bound MCP session. On success, inspect `st
 
 Use a bearer credential for authenticated HTTP endpoints. The default request limit is 262,144 bytes with a five-second body deadline. Error responses include a request ID. Authentication and scope failures map to 401 and 403, missing resources to 404, body size and media type to 413 and 415, schema errors to 422, and most state conflicts to 409. A request deadline can return 408. Admission and availability errors at 429 or 503 may supply `Retry-After`. Check the call's replay rules before trying again. [HTTP adapter](../../src/novel_factory/interfaces/http.py)
 
+## Calling from a local agent
+
+A trusted in-process host with a provisioned `McpRuntime` calls `invoke_bound_tool(runtime, name, arguments)` from `novel_factory.application.bound_tools`. A one-shot CLI accepts the same JSON argument object on standard input. With the checkout's environment active, run the command below and supply `{}` on stdin for a project status request. The CLI writes the result as JSON on stdout, or an error object with `error.code` and a nonzero exit code. Only the private binding path appears in the command line.
+
+```text
+python -m novel_factory.interfaces.bound_call --binding /path/to/private/project.json nf_project_status
+```
+
+The binding sets the role, task generation or project branch. Each call checks the current tool grant and preserves the original business idempotency key. NF MCP calls use the same service and allow up to two in-flight operations per binding, capped by the database pool size. A full binding returns `BACKPRESSURE` on a tool call. A cancelled MCP request retains its slot until the worker finishes. Local tool audits use `local_tool.started` and `local_tool.finished`. MCP retains `mcp.started` and `mcp.finished`. HTTP and a bound role's state lookups share `WorldQueryService.batch`. A role additionally checks its frozen manifest, lease and knowledge cut at delivery. Workshop continues to use its own authenticated service and database.
+
+A standalone `python scripts/nf.py mcp --binding PATH` process releases its checked-in PostgreSQL connections after 30 idle seconds, including the connection used for startup authentication. Set `--idle-db-seconds SECONDS` to a finite nonnegative value. Zero releases connections as soon as the binding is idle. The next tool operation reconnects and checks current authority. Embedded servers keep the host Kernel's pool under the host's control. When sizing PostgreSQL, include all bindings that are starting, processing calls or still inside their idle interval.
+
 ## Operator and development entry points
 
 | Entry | Use and authority |

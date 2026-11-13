@@ -205,7 +205,7 @@ class LogService:
         record(conn, "artifact."+kind.lower(), event_id=evidence_id, evidence_id=evidence_id, text_characters=text_characters, event_time=event_time, **scope)
 
     @staticmethod
-    def begin_tool(runtime, safe_tool, request_id):
+    def begin_tool(runtime, safe_tool, request_id, *, transport="mcp"):
         """Capture an admitted call before execution, including calls later denied by policy."""
         with runtime.kernel.db.uow() as repo:
             grant = repo.one("grants", {"grant_id":runtime.principal.grant_id})
@@ -223,13 +223,13 @@ class LogService:
             invocation = str(uuid4())
             scope.update(tool_name=safe_tool, request_id=sha256(str(request_id).encode()).hexdigest(),
                          trace_id=scope.get("trace_id") or scope.get("task_id") or invocation)
-            record(repo.conn, "mcp.started", event_id=invocation, **scope)
+            record(repo.conn, transport + ".started", event_id=invocation, **scope)
             return invocation, scope
 
     @staticmethod
-    def finish_tool(runtime, invocation, scope, error, elapsed_ms, evidence_id=None):
+    def finish_tool(runtime, invocation, scope, error, elapsed_ms, evidence_id=None, *, transport="mcp"):
         with runtime.kernel.db.uow() as repo:
-            record(repo.conn, "mcp.finished", **{**scope, "parent_span_id":invocation},
+            record(repo.conn, transport + ".finished", **{**scope, "parent_span_id":invocation},
                    causation_id=invocation, outcome="ERROR" if error else "OK",
                    error_code=error, duration_ms=elapsed_ms, evidence_id=_uuid(evidence_id) if not error else None)
 

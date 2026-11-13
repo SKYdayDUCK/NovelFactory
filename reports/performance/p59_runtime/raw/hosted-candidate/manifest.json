@@ -1,0 +1,360 @@
+{
+  "github_run": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43284920794",
+  "head": "3e6b59268f1e89520230c8b70e9a26b9950a2f79",
+  "profiles": {
+    "read-hour-500": {
+      "profile": "read-hour-500",
+      "source": "3e6b59268f1e89520230c8b70e9a26b9950a2f79",
+      "tree": "b3169c3dd316e5f9a0a43e9195998eb3dc22ff98",
+      "artifact": {
+        "repository": "SKYdayDUCK/NovelFactory",
+        "artifact": {
+          "id": 13977713775,
+          "name": "p59-read-hour-500-3e6b59268f1e89520230c8b70e9a26b9950a2f79-1",
+          "size_in_bytes": 2806479,
+          "url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/artifacts/13977713775",
+          "archive_download_url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/artifacts/13977713775/zip",
+          "expired": false,
+          "created_at": "2026-11-12T19:56:54Z",
+          "expires_at": "2027-02-10T18:55:57Z",
+          "updated_at": "2026-11-12T19:56:54Z",
+          "digest": "sha256:f50f3b49e86f7e2d42e717159bcc177963037256b88fd1722d18b6d3e4dc88e8",
+          "workflow_run": {
+            "id": 43284920794,
+            "repository_id": 1452373944,
+            "head_repository_id": 1452373944,
+            "head_branch": "dev/p59-runtime-architecture-refactor",
+            "head_sha": "3e6b59268f1e89520230c8b70e9a26b9950a2f79"
+          }
+        },
+        "files_sha256": {
+          "benchmark-step.txt": "81b2bd4ea98c8db66554fbc8d7637a1a69a130f331feb732b75caab4c4868fd5",
+          "result.json.gz": "db3e58d00219019fed929469a01905f98d54e0ad98b80445d1b6be5aa38b5588",
+          "commit.txt": "c8247ae52c4be5315471c4c193d9129edb728ffbc3dcc4f271e850fc5f08e16e",
+          "result.sha256": "03c1c71cc708156d9363e4980676b49b40fa8a338053d52128947378869536ed",
+          "run.log": "db851a1a8daa49b87e59b59ef1f10dd61c8e340662722991ae77a4f218c7f8ba",
+          "summary.json": "ccdd1e2821de42357897afb5414348cfd8cc8f7725560cc602f189322a594de7",
+          "source.sha256": "48a32220132c7b8b3eb065389760bb0c9822ec4dd821241cf3d5b5be0017104e",
+          "tree.txt": "0989a9105e2683cdc2f09c049680b17625496d8d55df868a2f70a4acfde9fc3f"
+        }
+      },
+      "driver_hashes": [
+        "648c86c9e25ec9f318061e4c0b74ff8d12080e0c42720152342755e0385f4464  benchmarks/p59_workflow_load.py",
+        "baa67898eacce28c4b3f228275d24eff9eed26a8febf717cb37d2d28c16acf73  benchmarks/p3_stability.py",
+        "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f  benchmarks/p2_behavioral_load.py",
+        "2b0d7d46dc49ec0b9f782fdeeaab3902fa5f44075e7e12ea5aff3938b80b594f  benchmarks/process_server.py",
+        "50423a60d7cf72201c773ab10f6e80303b9bfcff3650b84db2431f579d61ae14  benchmarks/http_load.py",
+        "cda895ae3546591afac83c342753b817950a4d157932afb5ee0aefa306b7281a  uv.lock"
+      ],
+      "result_sha256": "23622acc383573fd267f6d4476009f232d342ccf4f9edd130db97139e7084cd9",
+      "result_gzip_sha256": "db3e58d00219019fed929469a01905f98d54e0ad98b80445d1b6be5aa38b5588",
+      "gate": "PASS",
+      "raw_parts": [
+        "read-hour-500.json.gz.001",
+        "read-hour-500.json.gz.002",
+        "read-hour-500.json.gz.003",
+        "read-hour-500.json.gz.004"
+      ],
+      "summary": {
+        "scheduled_count": 72000,
+        "duration_seconds": 3600.03650298,
+        "actual_call_start_rps": 20.00014282158685,
+        "successful_query_rps": 19.999797207722924,
+        "latency_all_attempts": {
+          "count": 72000,
+          "p50_ms": 78.7015,
+          "p95_ms": 90.7129,
+          "p99_ms": 107.278
+        },
+        "status_counts": {
+          "200": 72000
+        },
+        "long_duration_gate": "PARTIAL_READ_ONLY",
+        "worker_lease_renewals": [
+          {
+            "leases": 500,
+            "duration_seconds": 1.958566047999966
+          },
+          {
+            "leases": 500,
+            "duration_seconds": 2.0731393689998185
+          }
+        ],
+        "world_unchanged": true,
+        "new_world_commits": 0,
+        "real_model_calls": 0,
+        "validated": 72000,
+        "invalid_codes": {},
+        "agent_count": 500,
+        "remaining_connections": 0
+      }
+    },
+    "workflow-1000": {
+      "profile": "workflow-1000",
+      "source": "3e6b59268f1e89520230c8b70e9a26b9950a2f79",
+      "tree": "b3169c3dd316e5f9a0a43e9195998eb3dc22ff98",
+      "artifact": {
+        "repository": "SKYdayDUCK/NovelFactory",
+        "artifact": {
+          "id": 13974528028,
+          "name": "p59-workflow-1000-3e6b59268f1e89520230c8b70e9a26b9950a2f79-1",
+          "size_in_bytes": 78650,
+          "url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/artifacts/13974528028",
+          "archive_download_url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/artifacts/13974528028/zip",
+          "expired": false,
+          "created_at": "2026-11-12T19:00:04Z",
+          "expires_at": "2027-02-10T18:55:57Z",
+          "updated_at": "2026-11-12T19:00:04Z",
+          "digest": "sha256:fd570e1175a9065d8c09e2e770a55ebec233859d9802a0e789c3b3a7e3311590",
+          "workflow_run": {
+            "id": 43284920794,
+            "repository_id": 1452373944,
+            "head_repository_id": 1452373944,
+            "head_branch": "dev/p59-runtime-architecture-refactor",
+            "head_sha": "3e6b59268f1e89520230c8b70e9a26b9950a2f79"
+          }
+        },
+        "files_sha256": {
+          "benchmark-step.txt": "81b2bd4ea98c8db66554fbc8d7637a1a69a130f331feb732b75caab4c4868fd5",
+          "result.json.gz": "59a949a3a6347294da904ab16870a9993291656be34be7e73bb2b09705dd0649",
+          "commit.txt": "c8247ae52c4be5315471c4c193d9129edb728ffbc3dcc4f271e850fc5f08e16e",
+          "result.sha256": "4f1eb9cf892e50329f4d200cb8b5d273a198760f4569f4237429a937bf16391b",
+          "run.log": "edaf3789aae6f76251f9414f86135c257da39b71134cf9aeb16a8ff48ad3db58",
+          "source.sha256": "48a32220132c7b8b3eb065389760bb0c9822ec4dd821241cf3d5b5be0017104e",
+          "summary.json": "7846e980637faa9e7074901b68af051690967f6801ebd195df634b2c3cf71787",
+          "tree.txt": "0989a9105e2683cdc2f09c049680b17625496d8d55df868a2f70a4acfde9fc3f"
+        }
+      },
+      "driver_hashes": [
+        "648c86c9e25ec9f318061e4c0b74ff8d12080e0c42720152342755e0385f4464  benchmarks/p59_workflow_load.py",
+        "baa67898eacce28c4b3f228275d24eff9eed26a8febf717cb37d2d28c16acf73  benchmarks/p3_stability.py",
+        "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f  benchmarks/p2_behavioral_load.py",
+        "2b0d7d46dc49ec0b9f782fdeeaab3902fa5f44075e7e12ea5aff3938b80b594f  benchmarks/process_server.py",
+        "50423a60d7cf72201c773ab10f6e80303b9bfcff3650b84db2431f579d61ae14  benchmarks/http_load.py",
+        "cda895ae3546591afac83c342753b817950a4d157932afb5ee0aefa306b7281a  uv.lock"
+      ],
+      "result_sha256": "131214777af2cdcc0b012f1c9bdc5918c397cf03d7e150d28f1cc89fc7a8614e",
+      "result_gzip_sha256": "59a949a3a6347294da904ab16870a9993291656be34be7e73bb2b09705dd0649",
+      "gate": "PASS",
+      "raw_parts": [
+        "workflow-1000.json.gz"
+      ],
+      "summary": {
+        "population": 1000,
+        "distinct_principals": 1000,
+        "successful_results": 980,
+        "awakened": 199,
+        "states": {
+          "RESULT_STORED": 978,
+          "CANCELLED": 10,
+          "PAUSED": 10,
+          "ACCEPTED": 2
+        },
+        "postgres_checkout_peak": 4,
+        "postgres_pool_limit": 8,
+        "execution_futures_peak": 2,
+        "model_inflight_peak": 2,
+        "model_fixture_calls": 990,
+        "commercial_calls": 0,
+        "transport_requests": 0,
+        "drain_s": 171.31228383300004,
+        "total_s": 222.207640074,
+        "successful_results_per_drain_s": 5.720547167273371,
+        "successful_results_per_total_s": 4.410289401721914,
+        "admission_to_result": {
+          "count": 988,
+          "p50_ms": 323.304,
+          "p95_ms": 439.4085,
+          "p99_ms": 513.6961
+        },
+        "creation_to_claim": {
+          "count": 990,
+          "p50_ms": 116332.109,
+          "p95_ms": 165817.751,
+          "p99_ms": 170623.724
+        },
+        "head_unchanged": true,
+        "incorrect_indices": [],
+        "remaining_slots": 0
+      }
+    },
+    "workflow-2000": {
+      "profile": "workflow-2000",
+      "source": "3e6b59268f1e89520230c8b70e9a26b9950a2f79",
+      "tree": "b3169c3dd316e5f9a0a43e9195998eb3dc22ff98",
+      "artifact": {
+        "repository": "SKYdayDUCK/NovelFactory",
+        "artifact": {
+          "id": 13975790173,
+          "name": "p59-workflow-2000-3e6b59268f1e89520230c8b70e9a26b9950a2f79-1",
+          "size_in_bytes": 153669,
+          "url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/artifacts/13975790173",
+          "archive_download_url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/artifacts/13975790173/zip",
+          "expired": false,
+          "created_at": "2026-11-12T19:04:02Z",
+          "expires_at": "2027-02-10T18:55:57Z",
+          "updated_at": "2026-11-12T19:04:02Z",
+          "digest": "sha256:df6f1143a4ae70c901b0944034034904ea4ccfd27da8e4c0dd671da8d596d545",
+          "workflow_run": {
+            "id": 43284920794,
+            "repository_id": 1452373944,
+            "head_repository_id": 1452373944,
+            "head_branch": "dev/p59-runtime-architecture-refactor",
+            "head_sha": "3e6b59268f1e89520230c8b70e9a26b9950a2f79"
+          }
+        },
+        "files_sha256": {
+          "commit.txt": "c8247ae52c4be5315471c4c193d9129edb728ffbc3dcc4f271e850fc5f08e16e",
+          "result.json.gz": "f45cefe107bfbf1620663e5007dc33e4ff105b6cbb57b4d3762b2a1e9dad6f18",
+          "benchmark-step.txt": "81b2bd4ea98c8db66554fbc8d7637a1a69a130f331feb732b75caab4c4868fd5",
+          "result.sha256": "010f5b21a539dc2680304cd8d8163ea9d3ce1e8696340a92eb2c8c5ba5f2ad49",
+          "run.log": "1b063f145a13b541201cedfa128482cb1391a10f0baf1ad16d8edf0b49806bbc",
+          "source.sha256": "48a32220132c7b8b3eb065389760bb0c9822ec4dd821241cf3d5b5be0017104e",
+          "summary.json": "f3976d963cdf02d43b43fc4f0e382158cbeb7eb082ae9398c4f6454edbb1149c",
+          "tree.txt": "0989a9105e2683cdc2f09c049680b17625496d8d55df868a2f70a4acfde9fc3f"
+        }
+      },
+      "driver_hashes": [
+        "648c86c9e25ec9f318061e4c0b74ff8d12080e0c42720152342755e0385f4464  benchmarks/p59_workflow_load.py",
+        "baa67898eacce28c4b3f228275d24eff9eed26a8febf717cb37d2d28c16acf73  benchmarks/p3_stability.py",
+        "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f  benchmarks/p2_behavioral_load.py",
+        "2b0d7d46dc49ec0b9f782fdeeaab3902fa5f44075e7e12ea5aff3938b80b594f  benchmarks/process_server.py",
+        "50423a60d7cf72201c773ab10f6e80303b9bfcff3650b84db2431f579d61ae14  benchmarks/http_load.py",
+        "cda895ae3546591afac83c342753b817950a4d157932afb5ee0aefa306b7281a  uv.lock"
+      ],
+      "result_sha256": "9cec71860169c19bf6bb1018aa35f2d403fb03034c56c04c730da2b995e3cc64",
+      "result_gzip_sha256": "f45cefe107bfbf1620663e5007dc33e4ff105b6cbb57b4d3762b2a1e9dad6f18",
+      "gate": "PASS",
+      "raw_parts": [
+        "workflow-2000.json.gz"
+      ],
+      "summary": {
+        "population": 2000,
+        "distinct_principals": 2000,
+        "successful_results": 1960,
+        "awakened": 399,
+        "states": {
+          "RESULT_STORED": 1958,
+          "CANCELLED": 20,
+          "PAUSED": 20,
+          "ACCEPTED": 2
+        },
+        "postgres_checkout_peak": 4,
+        "postgres_pool_limit": 8,
+        "execution_futures_peak": 2,
+        "model_inflight_peak": 2,
+        "model_fixture_calls": 1980,
+        "commercial_calls": 0,
+        "transport_requests": 0,
+        "drain_s": 375.562234655,
+        "total_s": 462.146702205,
+        "successful_results_per_drain_s": 5.218842096305291,
+        "successful_results_per_total_s": 4.241077542365712,
+        "admission_to_result": {
+          "count": 1978,
+          "p50_ms": 282.5691,
+          "p95_ms": 827.5771,
+          "p99_ms": 853.4573
+        },
+        "creation_to_claim": {
+          "count": 1980,
+          "p50_ms": 273123.393,
+          "p95_ms": 365982.005,
+          "p99_ms": 374209.723
+        },
+        "head_unchanged": true,
+        "incorrect_indices": [],
+        "remaining_slots": 0
+      }
+    },
+    "workflow-500": {
+      "profile": "workflow-500",
+      "source": "3e6b59268f1e89520230c8b70e9a26b9950a2f79",
+      "tree": "b3169c3dd316e5f9a0a43e9195998eb3dc22ff98",
+      "artifact": {
+        "repository": "SKYdayDUCK/NovelFactory",
+        "artifact": {
+          "id": 13974781464,
+          "name": "p59-workflow-500-3e6b59268f1e89520230c8b70e9a26b9950a2f79-1",
+          "size_in_bytes": 41173,
+          "url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/artifacts/13974781464",
+          "archive_download_url": "https://api.github.com/repos/SKYdayDUCK/NovelFactory/actions/artifacts/13974781464/zip",
+          "expired": false,
+          "created_at": "2026-11-12T18:58:07Z",
+          "expires_at": "2027-02-10T18:55:57Z",
+          "updated_at": "2026-11-12T18:58:07Z",
+          "digest": "sha256:662fc3ce91b0b2acd7e722eb9ecc383dfb6d074a9809b3a2c2d08d7bd101b3b6",
+          "workflow_run": {
+            "id": 43284920794,
+            "repository_id": 1452373944,
+            "head_repository_id": 1452373944,
+            "head_branch": "dev/p59-runtime-architecture-refactor",
+            "head_sha": "3e6b59268f1e89520230c8b70e9a26b9950a2f79"
+          }
+        },
+        "files_sha256": {
+          "benchmark-step.txt": "81b2bd4ea98c8db66554fbc8d7637a1a69a130f331feb732b75caab4c4868fd5",
+          "result.json.gz": "841bb91fb8823ef35df82adaf6183d5c893e821d14f4bcca004648ca2cc8bbd1",
+          "commit.txt": "c8247ae52c4be5315471c4c193d9129edb728ffbc3dcc4f271e850fc5f08e16e",
+          "result.sha256": "75c7435ef4ea9fc59a4447b825ab0c93e177c369f557aa1fe9ece0827b68ea17",
+          "run.log": "dcf38f475e577b7e2549034f6b6af5d0967118647e56611edba683700b69db7f",
+          "source.sha256": "48a32220132c7b8b3eb065389760bb0c9822ec4dd821241cf3d5b5be0017104e",
+          "summary.json": "f89dd18888e0b74f49376a36616de47091369196506266cddbe5cc961cc64fca",
+          "tree.txt": "0989a9105e2683cdc2f09c049680b17625496d8d55df868a2f70a4acfde9fc3f"
+        }
+      },
+      "driver_hashes": [
+        "648c86c9e25ec9f318061e4c0b74ff8d12080e0c42720152342755e0385f4464  benchmarks/p59_workflow_load.py",
+        "baa67898eacce28c4b3f228275d24eff9eed26a8febf717cb37d2d28c16acf73  benchmarks/p3_stability.py",
+        "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f  benchmarks/p2_behavioral_load.py",
+        "2b0d7d46dc49ec0b9f782fdeeaab3902fa5f44075e7e12ea5aff3938b80b594f  benchmarks/process_server.py",
+        "50423a60d7cf72201c773ab10f6e80303b9bfcff3650b84db2431f579d61ae14  benchmarks/http_load.py",
+        "cda895ae3546591afac83c342753b817950a4d157932afb5ee0aefa306b7281a  uv.lock"
+      ],
+      "result_sha256": "06491e82c0db32972a6e6075dd1109c343fa17dab5e97eead22f88b6b4c09a63",
+      "result_gzip_sha256": "841bb91fb8823ef35df82adaf6183d5c893e821d14f4bcca004648ca2cc8bbd1",
+      "gate": "PASS",
+      "raw_parts": [
+        "workflow-500.json.gz"
+      ],
+      "summary": {
+        "population": 500,
+        "distinct_principals": 500,
+        "successful_results": 490,
+        "awakened": 99,
+        "states": {
+          "RESULT_STORED": 488,
+          "CANCELLED": 5,
+          "PAUSED": 5,
+          "ACCEPTED": 2
+        },
+        "postgres_checkout_peak": 4,
+        "postgres_pool_limit": 8,
+        "execution_futures_peak": 2,
+        "model_inflight_peak": 2,
+        "model_fixture_calls": 495,
+        "commercial_calls": 0,
+        "transport_requests": 0,
+        "drain_s": 80.342635179,
+        "total_s": 104.350868013,
+        "successful_results_per_drain_s": 6.09887886933632,
+        "successful_results_per_total_s": 4.695696445370785,
+        "admission_to_result": {
+          "count": 493,
+          "p50_ms": 310.7786,
+          "p95_ms": 413.8046,
+          "p99_ms": 442.9004
+        },
+        "creation_to_claim": {
+          "count": 495,
+          "p50_ms": 53113.445,
+          "p95_ms": 77473.433,
+          "p99_ms": 79877.533
+        },
+        "head_unchanged": true,
+        "incorrect_indices": [],
+        "remaining_slots": 0
+      }
+    }
+  }
+}

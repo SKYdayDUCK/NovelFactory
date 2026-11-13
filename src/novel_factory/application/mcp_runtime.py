@@ -1,6 +1,7 @@
 """Application boundary for a server-provisioned stdio binding."""
 from dataclasses import dataclass
 
+from novel_factory.application.dynamic_runtime import assignment_from_inputs, matching_inputs, refresh
 from novel_factory.application.kernel import require
 from novel_factory.application.planning import validate_task_plan_binding
 from novel_factory.application.queries import WorldQueryService
@@ -63,33 +64,27 @@ class McpRuntime:
             if isinstance(self.binding, ProjectBinding):
                 self._project_auth(repo.conn)
                 return ["nf_project_status", "nf_resume_project"]
-            task, _, _ = self._task(repo)
-            spec = repo.one("task_inputs", {"task_id": task["task_id"], "generation": task["generation"]})["spec"]
-            from .dynamic_runtime import assignment_for, refresh
-
-            ref = assignment_for(repo, task, spec)
+            state = self._bound_state(repo)
+            task, _, _, spec = state
+            inputs = matching_inputs(repo, task, spec)
+            ref = assignment_from_inputs(inputs)
             if ref is None:
-                return self._task_tools(repo)
+                return self._task_tools(repo, state, inputs)
         live = refresh(self.kernel, self.principal, task["task_id"], task["generation"], ref)
         with self.kernel.db.uow(write=False) as repo:
-            return self._task_tools(repo, dynamic_ref=ref, dynamic_live=live)
+            state = self._bound_state(repo)
+            inputs = matching_inputs(repo, state[0], state[3])
+            require(assignment_from_inputs(inputs) == ref, "TASK_REBIND_REQUIRED", "Runtime assignment changed")
+            return self._task_tools(repo, state, inputs, dynamic_ref=ref, dynamic_live=live)
 
-    def _task_tools(self, repo, *, dynamic_ref=None, dynamic_live=None):
-        task, grant, context = self._task(repo)
-        identity = repo.one("task_inputs", {"task_id": task["task_id"], "generation": task["generation"]})["spec"]
-        # Only the role/skill ceilings selected at provisioning time apply. A later
-        # catalog revision cannot silently add tools to an existing execution.
-        inputs = repo.many("artifacts", {"work_id": task["work_id"], "kind": "AGENT_INPUT",
-                          "artifact_revision_id": [r["artifact_revision_id"] for r in identity["input_artifacts"]]})
+    def _task_tools(self, repo, state, inputs, *, dynamic_ref=None, dynamic_live=None):
+        task, grant, context, identity = state
+        # Evaluate the frozen role/skill ceiling from this authorized snapshot.
         adaptive_enabled = False
         creative_enabled = False
         requested = set()
         skills = set()
-        for record in inputs:
-            data = record["payload"]
-            if (data["role_id"], data["task_kind"], data["runtime_sha256"]) != (
-                    task["role_id"], task["task_kind"], identity["runtime_contract_version"]):
-                continue
+        for data in inputs:
             snapshot = self.kernel.artifact(repo, data["runtime_ref"], task["work_id"], kind="AGENT_RUNTIME")["payload"]
             if fingerprint(snapshot) == identity["runtime_contract_version"]:
                 # Pre-P5 text-only snapshots never declared MCP tool ceilings.
@@ -138,22 +133,23 @@ class McpRuntime:
         return names
 
     def _role_proof(self):
-        from .dynamic_runtime import assignment_for, refresh
-
         with self.kernel.db.uow(write=False) as repo:
-            task, _, _ = self._task(repo)
-            spec = repo.one("task_inputs", {"task_id": task["task_id"], "generation": task["generation"]})["spec"]
-            ref = assignment_for(repo, task, spec)
+            task, _, _, spec = self._bound_state(repo)
+            ref = assignment_from_inputs(matching_inputs(repo, task, spec))
         if ref is None:
             return None
         live = refresh(self.kernel, self.principal, task["task_id"], task["generation"], ref)
         return ref, live
 
     def _role_task(self, repo, tool, proof, capability="READ"):
-        if proof is not None:
-            require(tool in self._task_tools(repo, dynamic_ref=proof[0], dynamic_live=proof[1]),
-                    "VIEW_DENIED", "Tool outside task authority")
-        return self._task(repo, capability)
+        state = self._bound_state(repo, capability)
+        task, grant, context, spec = state
+        inputs = matching_inputs(repo, task, spec)
+        dynamic_ref, live = proof if proof is not None else (None, None)
+        require(assignment_from_inputs(inputs) == dynamic_ref, "TASK_REBIND_REQUIRED", "Runtime assignment changed")
+        tools = self._task_tools(repo, state, inputs, dynamic_ref=dynamic_ref, dynamic_live=live)
+        require(tool in tools, "VIEW_DENIED", "Tool outside task authority")
+        return task, grant, context
 
     def creative_review_call(self, tool, **arguments):
         from .creative_review import CreativeReviewService
@@ -300,6 +296,10 @@ class McpRuntime:
                 **expiration}
 
     def _task(self, repo, capability="READ"):
+        task, grant, context, _ = self._bound_state(repo, capability)
+        return task, grant, context
+
+    def _bound_state(self, repo, capability="READ"):
         b = self.binding
         require(isinstance(b, TaskBinding), "VIEW_DENIED", "Task grant required")
         task, grant, spec = self.queries._task(repo, self.principal, b.task_id, b.generation, capability)
@@ -325,7 +325,7 @@ class McpRuntime:
             require(knowledge["plane"] == "BELIEF" and knowledge["actor_id"] == grant["actor_id"]
                     and point_key(knowledge["known_at"]) <= point_key(spec["story_time"]),
                     "VIEW_DENIED", "Task cut unavailable")
-        return task, grant, ctx
+        return task, grant, ctx, spec
 
     def task_get(self):
         proof = self._role_proof()

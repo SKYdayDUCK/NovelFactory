@@ -1,0 +1,99 @@
+{
+  "hosted": {
+    "url": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43273075639/job/131374253443",
+    "head": "9bc6b79df1e22f988602cd8245bc42145aaccf58",
+    "git_tree": "777e093c5af9bc034db3c8911fb35946c9a60ef9",
+    "status": "FAILED",
+    "pytest": {
+      "failed": 1,
+      "passed": 1005,
+      "skipped": 21,
+      "subtests_passed": 17
+    },
+    "case": "tests/unit/test_design_validator_output.py::test_validator_writes_selected_output_outside_checkout",
+    "reproduced_validator_failures": [
+      "missing local Markdown link: reports/code_review/p59_runtime/SCHEDULER.md -> raw/scheduler-spend-linux.xml"
+    ],
+    "seconds": 732.43,
+    "matching_local_commit": "5b7bc207b7b47564f7c247be1c7e3e312f0deca4"
+  },
+  "frozen_rerun": {
+    "commit": "e23b8e0ffa4efaba314e82fcb1a5af326e80dfee",
+    "tree": "4e200ba613b8b4f0e0d022f4ceb41838c6019194",
+    "validator_status": "PASS",
+    "validator_failures": [],
+    "api_registrations": 98,
+    "api_origin_examples": 98,
+    "alembic_heads": [
+      "0022_quota_retry"
+    ],
+    "same_hosted_validator_test": "PASS, 1 passed in 2.61 s",
+    "hosted_commit_with_identical_tree": "ce74f265b9072df52e9a485c6dfd48d5612d1907"
+  },
+  "mixed_local_run": {
+    "primary_checkout": "c7e6924f1cf9cf7799d78ab4b8743960e8571062",
+    "proof": [
+      "This checkout has no migration 0022.",
+      "PG logfile 17:51:31Z includes a query for the uncommitted retry_not_before column; 17:51:37Z and later include a query for the replacement nf_quota_retry_deadlines table. Neither exists in the frozen parent source.",
+      "The Workshop stdio child imported NovelFactory/src/novel_factory/infrastructure/host_process.py and candidate-core/agent_runtime/host_process.py, raising ImportError for resolve_host_binary before MCP initialization."
+    ],
+    "frozen_subprocess_repeats": [
+      {
+        "name": "test_eventhub_multi_process_banquet",
+        "seconds": 36.382,
+        "status": "PASS"
+      },
+      {
+        "name": "test_scene_trace_survives_worker_pause",
+        "seconds": 24.088,
+        "status": "PASS"
+      },
+      {
+        "name": "test_one_author_resume_through_autonomous_banquet",
+        "seconds": 20.706,
+        "status": "PASS"
+      },
+      {
+        "name": "test_project_stdio_resume_is_scoped_and_live",
+        "seconds": 11.472,
+        "status": "PASS"
+      },
+      {
+        "name": "test_one_resume_drives_real_process_restart",
+        "seconds": 29.531,
+        "status": "PASS"
+      }
+    ],
+    "results": {
+      "pytest_failed": 7,
+      "pytest_passed": 1016,
+      "skipped": 3,
+      "subtests_passed": 17,
+      "seconds": 1290.9
+    },
+    "original_junit_sha256": "80c201d1a1ec8d94be74195391a6c63a85e6979b01228b1f9bb4ea466aaacc41",
+    "command": [
+      "../NovelFactory/.venv/bin/python",
+      "-m",
+      "pytest",
+      "tests",
+      "-q",
+      "--junitxml=../runs/candidate-core.xml"
+    ],
+    "original_failed_nodes": [
+      "tests.integration.test_p55_redis_banquet::test_eventhub_multi_process_banquet",
+      "tests.integration.test_p55_scene_trace::test_scene_trace_survives_worker_pause",
+      "tests.integration.test_p5_autonomous_banquet::test_one_author_resume_through_autonomous_banquet",
+      "tests.integration.test_p5_mcp::test_project_stdio_resume_is_scoped_and_live",
+      "tests.integration.test_p5_process_resume::test_one_resume_drives_real_process_restart",
+      "tests.integration.test_workshop_delegation::test_stdio_receipt_survives_lost_reply_and_supervisor_execution",
+      "tests.unit.test_design_validator_output::test_validator_writes_selected_output_outside_checkout"
+    ],
+    "workshop_recheck": {
+      "name": "test_stdio_receipt_survives_lost_reply_and_supervisor_execution",
+      "status": "PASS",
+      "pytest_seconds": 7.21
+    }
+  },
+  "fixed_by": "408825f added the exact spend JUnit target of the earlier report link."
+}

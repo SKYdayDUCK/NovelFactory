@@ -6,9 +6,7 @@ authenticate a human, a provider, or a history without an external anchor.
 """
 from __future__ import annotations
 
-from contextlib import contextmanager
 from datetime import datetime, timezone
-import fcntl
 from hashlib import sha256
 import os
 from pathlib import Path
@@ -17,6 +15,7 @@ from uuid import UUID, uuid5
 
 from novel_factory.domain.canonical import canonical_bytes, fingerprint, strict_json_loads
 from novel_factory.domain.errors import DomainError
+from novel_factory.infrastructure.native_files import file_lock, open_append, publish_file, sync_directory
 from .contracts import validate
 from .protocol import condition_accounting, controls_signature, require, state_for, validate_plan
 
@@ -53,17 +52,13 @@ def _immutable_file(path, data):
             stream.flush()
             os.fsync(stream.fileno())
         try:
-            os.link(temporary, path)
+            publish_file(temporary, path)
         except FileExistsError:
             require(not path.is_symlink() and path.read_bytes() == data,
                     "EVALUATION_OBJECT_CONFLICT", "Existing immutable evidence differs")
-        directory = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
-        try:
-            os.fsync(directory)
-        finally:
-            os.close(directory)
+            sync_directory(path.parent)
     finally:
-        os.unlink(temporary)
+        Path(temporary).unlink(missing_ok=True)
 
 
 class EvaluationStore:
@@ -71,17 +66,10 @@ class EvaluationStore:
         self.root = Path(root).absolute()
         self.objects = self.root / "objects"
 
-    @contextmanager
     def _locked(self):
         self.root.mkdir(parents=True, exist_ok=True, mode=0o700)
         path = self.root / ".ledger.lock"
-        descriptor = os.open(path, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
-        with os.fdopen(descriptor, "a+b") as stream:
-            fcntl.flock(stream, fcntl.LOCK_EX)
-            try:
-                yield
-            finally:
-                fcntl.flock(stream, fcntl.LOCK_UN)
+        return file_lock(path)
 
     def put(self, content, media_type="application/json"):
         if isinstance(content, str):
@@ -225,8 +213,7 @@ class EvaluationStore:
         data = canonical_bytes(record) + b"\n"
         ledger = self.root / "ledger.jsonl"
         require(ledger.stat().st_size + len(data) <= MAX_LEDGER_BYTES, "EVALUATION_LEDGER_LIMIT", "Ledger byte capacity reached")
-        descriptor = os.open(ledger, os.O_WRONLY | os.O_APPEND | os.O_NOFOLLOW)
-        with os.fdopen(descriptor, "ab") as stream:
+        with open_append(ledger) as stream:
             stream.write(data)
             stream.flush()
             os.fsync(stream.fileno())

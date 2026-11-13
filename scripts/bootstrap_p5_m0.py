@@ -1,12 +1,9 @@
 """Prepare an isolated, two-turn P5 sample project without starting a model."""
 import argparse
 from datetime import UTC, datetime, timedelta
-import fcntl
 import json
 import os
 from pathlib import Path
-import stat
-import tempfile
 from uuid import uuid4
 
 from novel_factory.application.agent_gateway import AgentGateway
@@ -18,22 +15,19 @@ from novel_factory.infrastructure.codex_host import CodexAppServerAdapter
 from novel_factory.infrastructure.database import Database, tables
 from novel_factory.infrastructure.model_gateway import OpenAICompatibleAdapter
 from novel_factory.infrastructure.objects import ObjectStore
+from novel_factory.infrastructure.native_files import file_lock, publish_file
+from novel_factory.infrastructure.private_files import prepare_private_directory, private_temporary_file, read_private_bytes
 from novel_factory.infrastructure.repository import KernelRepository
 
 
 def save(directory, name, value):
-    fd, tmp = tempfile.mkstemp(dir=directory)
+    fd, tmp = private_temporary_file(directory)
     try:
         with os.fdopen(fd, "w") as output:
             json.dump(value, output)
             output.flush()
             os.fsync(output.fileno())
-        os.replace(tmp, directory / name)
-        handle = os.open(directory, os.O_RDONLY)
-        try:
-            os.fsync(handle)
-        finally:
-            os.close(handle)
+        publish_file(tmp, directory / name, replace=True)
     finally:
         Path(tmp).unlink(missing_ok=True)
 
@@ -56,7 +50,7 @@ def provision(db, store, private, route_name, hours):
     with db.uow() as repo:
         existing = repo.one("works", {"work_id": marker["work_id"]})
         if existing:
-            access = json.loads((private / "supervisor.json").read_text())
+            access = json.loads(read_private_bytes(private / "supervisor.json", 16384))
             verification = Kernel(db, store)
             principal = verification.authenticate(access["token"])
             verification.authorize(repo, principal, marker["work_id"], "ADMIN", access["branch_id"])
@@ -107,14 +101,10 @@ def main():
     if not 1 <= args.hours <= 24:
         parser.error("The sample's one-day task deadline requires 1–24 hours")
     private = args.private_dir
-    private.mkdir(mode=0o700, parents=True, exist_ok=True)
-    meta = private.lstat()
-    if not stat.S_ISDIR(meta.st_mode) or meta.st_uid != os.getuid() or stat.S_IMODE(meta.st_mode) != 0o700:
-        parser.error("Use an owned 0700 private directory")
+    prepare_private_directory(private)
     db = Database()
     try:
-        with os.fdopen(os.open(private / ".lock", os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600), "a") as lock:
-            fcntl.flock(lock, fcntl.LOCK_EX)
+        with file_lock(private / ".lock"):
             print(json.dumps(provision(db, ObjectStore(os.environ.get("NF_OBJECT_ROOT", "var/objects")),
                                        private, args.route, args.hours)))
     finally:

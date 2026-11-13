@@ -1,0 +1,66 @@
+{
+  "before_loss": {
+    "run_id": "58885f2f213088e36128e4fb6212d6c7ae058223",
+    "redis_version": "8.0.2",
+    "initial_keys": 0,
+    "aw_event_id": "bd8ab2c9-4889-4578-b4ec-02518ea19eb6",
+    "nf_task_events": [
+      "11ea4322-8407-4167-a457-d9266436294d",
+      "59f14cda-491d-480c-8ca4-4dc0eb289523",
+      "7b121126-88e3-47a4-af31-9069bc59923e",
+      "fa09523f-2b3b-4c6b-b6bc-2f1a9e18d75b"
+    ]
+  },
+  "after_rebuild": {
+    "run_id": "547b91c406528a9d4058b5e3e792e263e6b80b4c",
+    "redis_version": "8.0.2",
+    "initial_keys": 0,
+    "aw_event_id": "bd8ab2c9-4889-4578-b4ec-02518ea19eb6",
+    "nf_task_events": [
+      "11ea4322-8407-4167-a457-d9266436294d",
+      "59f14cda-491d-480c-8ca4-4dc0eb289523",
+      "7b121126-88e3-47a4-af31-9069bc59923e",
+      "fa09523f-2b3b-4c6b-b6bc-2f1a9e18d75b"
+    ]
+  },
+  "operation_id": "faf0252a-b3c9-4818-aef2-a0b97688b51c",
+  "task_id": "f9e99ddb-433a-425c-a71c-14e7fa2e8194",
+  "generation": 0,
+  "receipt_ref": "c3138efb-ef2d-48a4-acfd-981b11c07c55",
+  "hold_after_loss": "HELD",
+  "reserved_amount": "1.000000",
+  "world_ref": {
+    "work_id": "cc23dae2-0972-414c-9cb1-55dbde14e734",
+    "branch_id": "7b6c794d-ed7d-4cd0-ba29-b8b1818ca440",
+    "world_revision_id": "1755a603-4056-4284-b392-ac57b9c3bded"
+  },
+  "restarted_aw_state": "RECONCILING",
+  "restarted_worker": {
+    "operation_id": "faf0252a-b3c9-4818-aef2-a0b97688b51c",
+    "state": "BOUND"
+  },
+  "nf_after_get_matches_lost_reply": true,
+  "cancel_before_attempt": {
+    "budget_id": "775da066-2b6f-40c6-a9b4-7cd600d22487",
+    "operation_id": "faf0252a-b3c9-4818-aef2-a0b97688b51c",
+    "receipt_ref": "c3138efb-ef2d-48a4-acfd-981b11c07c55",
+    "nf_after_cancel": {
+      "work_id": "cc23dae2-0972-414c-9cb1-55dbde14e734",
+      "budget_id": "775da066-2b6f-40c6-a9b4-7cd600d22487",
+      "currency": "USD",
+      "limit_amount": "2.000000",
+      "reserved_amount": "0.000000",
+      "spent_amount": "0.000000",
+      "total_tokens": 2000,
+      "reserved_tokens": 0,
+      "spent_tokens": 0,
+      "available_tokens": 2000,
+      "unquantified_attempts": 0
+    },
+    "nf_reported_tokens": 0,
+    "workshop_hold": "SETTLED",
+    "workshop_settled_amount": "0.000000",
+    "workshop_remote_task": "CANCELLED",
+    "attempt_count": 0
+  }
+}

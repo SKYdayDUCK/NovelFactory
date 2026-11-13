@@ -1,0 +1,91 @@
+{
+  "uncompressed_name": "soak-renew.json",
+  "uncompressed_bytes": 32268271,
+  "uncompressed_sha256": "6b2248340cda9eee0cc90b1fa6d2b487f4ce1c9e55a0f0f45c9ffdce5f4c5c02",
+  "gzip_bytes": 3027556,
+  "gzip_sha256": "cf447a72232b0f597168c017bb85f1c1d9535eaa601dfc55649e057cbebfee02",
+  "parts": [
+    {
+      "name": "soak-renew.json.gz.001",
+      "bytes": 750000,
+      "sha256": "c96214a455df4444975a4d2b7577e73eb8ad93e42300791aa659544fc7ffad72"
+    },
+    {
+      "name": "soak-renew.json.gz.002",
+      "bytes": 750000,
+      "sha256": "b9818ccda1f9b0b6782874bad523b414e1895ca035e092ca7f533f95ad134b27"
+    },
+    {
+      "name": "soak-renew.json.gz.003",
+      "bytes": 750000,
+      "sha256": "65b0e4bf597f48e058fd7391bbd013885f4d239116a16c3d55c00760835481ec"
+    },
+    {
+      "name": "soak-renew.json.gz.004",
+      "bytes": 750000,
+      "sha256": "df5ca70841ee82b02bc50b166cf933c69b5e386e89d6e68e7a4ef21fe005881a"
+    },
+    {
+      "name": "soak-renew.json.gz.005",
+      "bytes": 27556,
+      "sha256": "721c0b5a4ab2a41527d843c6e515ffe5d51f828d409807df20b53b1263075efc"
+    }
+  ],
+  "summary": {
+    "probe_gate": "NOT_MET",
+    "long_duration_gate": "NOT_MET",
+    "duration_seconds": 3600.040255666,
+    "configuration": {
+      "agents": 500,
+      "seconds": 3600.0,
+      "read_rps": 20.0,
+      "api_processes": 2,
+      "output": "../runs/soak-renew.json",
+      "renew_worker_leases": true
+    },
+    "scheduled_count": 72000,
+    "actual_call_start_rps": 20.000110411443014,
+    "successful_query_rps": 19.758945719577945,
+    "latency_all_attempts": {
+      "count": 72000,
+      "p50_ms": 117.2578,
+      "p95_ms": 1950.0751,
+      "p99_ms": 2292.7629
+    },
+    "status_counts": {
+      "200": 71133,
+      "429": 866,
+      "transport_error": 1
+    },
+    "world_unchanged": true,
+    "new_world_commits": 0,
+    "real_model_calls": 0,
+    "source_sha256": "e69a4fb63c276ee86d49dfe65d2a9a8cbe7bc743b6967ba69e1be19a35af2568",
+    "worker_lease_renewals": [
+      {
+        "leases": 500,
+        "duration_seconds": 8.668806642000163
+      },
+      {
+        "leases": 500,
+        "duration_seconds": 2.478038912000102
+      }
+    ],
+    "valid_responses": 71133,
+    "distinct_agents": 500,
+    "correctness_error_count": 0,
+    "status_error_codes": {
+      "429 BACKPRESSURE": 866,
+      "transport_error ReadError": 1
+    },
+    "pool": {
+      "peak_checked_out_connections": 8,
+      "checked_out_at_end": 0,
+      "configured_pool_size": 8
+    },
+    "first_and_last_invalid_start_seconds": [
+      1012.1064796570001,
+      1276.5035291460001
+    ]
+  }
+}

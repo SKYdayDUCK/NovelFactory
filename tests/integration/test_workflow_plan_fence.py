@@ -61,3 +61,58 @@ def test_bound_plan_cannot_be_reclaimed_without_new_guards(kernel_env):
     replacement = task_with_plan(kernel, world, ref)
     assert planning.bind_task(owner, replacement["task_id"], replacement["generation"], ref,
                               [plan["nodes"][0]["node_id"]], "fresh")
+
+
+@pytest.mark.parametrize("change_after_wake", [False, True], ids=["sleeping", "awaiting-claim"])
+def test_suspended_generation_keeps_semantic_read_fence(kernel_env, change_after_wake):
+    from novel_factory.fixtures import create_bound_task, point, run_command
+
+    kernel = kernel_env["kernel"]
+    world = load_fixture(kernel)
+    owner, wr = world["principal"], world["world_ref"]
+    task = create_bound_task(kernel, owner, wr, point(1), [world["ids"]["sword"]], ["lifecycle"])
+    upstream = create_bound_task(kernel, owner, wr, point(1))
+    wf = WorkflowService(kernel.tasks)
+
+    def authorize(conn):
+        kernel.authorize(KernelRepository(conn, tables), owner, wr["work_id"], "ADMIN", wr["branch_id"])
+
+    scope = dict(work_id=wr["work_id"], branch_id=wr["branch_id"], authorize_in_tx=authorize)
+    wf.wait(task["task_id"], task["generation"], [upstream["task_id"]], mode="AND",
+            worker_id=task["worker_id"], **scope)
+    with kernel.db.uow() as repo:
+        kernel.tasks.accept_in_transaction(repo.conn, upstream["task_id"], upstream["generation"])
+    if change_after_wake:
+        assert wf.resume_project(**scope)["awakened"] == 1
+    run_command(kernel, owner, wr, "DESTROY_ITEM", {"item_id": world["ids"]["sword"], "at": point(40)})
+    assert wf.resume_project(**scope)["awakened"] == 0
+    assert kernel.claim_task(owner, "late-worker", task_id=task["task_id"]) is None
+    assert kernel.tasks.get(task["task_id"])["state"] == "STALE"
+    with kernel.db.uow() as repo:
+        assert not repo.many("call_attempts", {"task_id": task["task_id"]})
+        assert len(repo.many("task_executions", {"task_id": task["task_id"]})) == 1
+
+
+def test_ordinary_claim_uses_live_branch_set_before_queue_order(kernel_env):
+    from uuid import uuid4
+
+    from novel_factory.fixtures import create_bound_task, point
+
+    kernel = kernel_env["kernel"]
+    world = load_fixture(kernel)
+    owner, wr = world["principal"], world["world_ref"]
+    sibling = kernel.fork(owner, wr, "CANDIDATE", "branch-queue")
+    exemplar = create_bound_task(kernel, owner, wr, point(1))
+    with kernel.db.uow() as repo:
+        template = repo.one("task_inputs", {"task_id": exemplar["task_id"], "generation": 0})["spec"]
+    queued = []
+    for world_ref in (sibling, wr):
+        task_id = str(uuid4())
+        kernel.create_task(owner, {**template, "task_id": task_id, "world_ref": world_ref}, f"queue:{task_id}")
+        queued.append(task_id)
+    with kernel.db.uow() as repo:
+        repo.change("grants", {"grant_id": owner.grant_id}, {"branch_ids": [wr["branch_id"]]})
+    selected = kernel.claim_task(owner, "scoped-worker")
+    assert selected["task_id"] == queued[1] and selected["world_ref"] == wr
+    assert kernel.tasks.get(queued[0])["state"] == "READY"
+    assert kernel.claim_task(owner, "scoped-worker") is None

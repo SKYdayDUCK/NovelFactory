@@ -313,3 +313,175 @@ def test_overdue_ready_job_closes_its_dependent_without_an_external_call(kernel_
         with kernel.db.uow(write=False) as repo:
             assert repo.one("outbox", {"dedupe_key": f"supervisor:{first}:0:expired"})["payload"]["reason"] == "DEADLINE_EXCEEDED"
             assert repo.one("outbox", {"dedupe_key": f"workflow:{dependent}:0:closed"})["payload"]["reason"] == "PREREQUISITE_CLOSED"
+
+
+def test_suspension_releases_only_its_own_dispatch_slot(kernel_env):
+    from novel_factory.infrastructure.database import tables
+    from novel_factory.infrastructure.repository import KernelRepository
+    from novel_factory.orchestration import dispatch
+
+    kernel = kernel_env["kernel"]
+    world = load_fixture(kernel)
+    owner, wr = world["principal"], world["world_ref"]
+    work, branch = wr["work_id"], wr["branch_id"]
+
+    def authorize(conn):
+        kernel.authorize(KernelRepository(conn, tables), owner, work, "ADMIN", branch)
+
+    with backend() as (route, requests, _):
+        gateway = AgentGateway(kernel, {"test": route})
+        supervisor = RuntimeSupervisor(kernel, gateway)
+        budget = kernel.tasks.create_budget(work, "2")
+        waiting, sibling = [_job(kernel, gateway, supervisor, world, budget, "READY").task["task_id"]
+                            for _ in range(2)]
+        with kernel.db.uow() as repo:
+            repo.add("dispatch_limits", {"scope": "WORK", "subject": work, "slots": 1})
+            assert dispatch.next_job(repo.conn, work, branch) == waiting
+            claim = kernel.tasks.claim_in_transaction(repo.conn, "sleeper", task_id=waiting, lease_seconds=900)
+            dispatch.reserve(repo, claim)
+        supervisor.workflow.wait(waiting, claim["generation"], [sibling], mode="AND",
+                                 worker_id="sleeper", work_id=work, branch_id=branch, authorize_in_tx=authorize)
+        with kernel.db.uow() as repo:
+            assert repo.one("dispatch_slots", {"attempt_id": claim["attempt_id"]}) is None
+            assert dispatch.next_job(repo.conn, work, branch) == sibling
+        assert supervisor.run_once(owner, work, branch)["task_id"] == sibling
+        assert len(requests) == 1
+
+
+def test_supervisor_drains_sent_attempt_and_leaves_next_job_ready(kernel_env):
+    from concurrent.futures import ThreadPoolExecutor
+
+    from scripts.run_supervisor import serve
+
+    kernel = kernel_env["kernel"]
+    book = load_fixture(kernel)
+    wr = book["world_ref"]
+    work, branch = wr["work_id"], wr["branch_id"]
+    stop = Event()
+    with backend() as (route, requests, server), ThreadPoolExecutor(1) as driver:
+        server.started, server.release = Event(), Event()
+        gateway = AgentGateway(kernel, {"test": route})
+        supervisor = RuntimeSupervisor(kernel, gateway)
+        budget = kernel.tasks.create_budget(work, "1")
+        jobs = [_job(kernel, gateway, supervisor, book, budget, "READY").task["task_id"] for _ in range(2)]
+        future = driver.submit(serve, supervisor, book["principal"], work, branch, workers=1, interval=60,
+                               stop_event=stop)
+        try:
+            assert server.started.wait(10)
+            stop.set()
+            with kernel.db.uow(write=False) as repo:
+                assert [r["state"] for r in repo.many("call_attempts", {"task_id": jobs})] == ["SENT"]
+                assert repo.one("tasks", {"task_id": jobs[1]})["state"] == "READY"
+        finally:
+            stop.set()
+            server.release.set()
+        future.result(timeout=10)
+        with kernel.db.uow(write=False) as repo:
+            # This loopback returns a valid candidate and token usage, but no price.
+            assert [r["state"] for r in repo.many("call_attempts", {"task_id": jobs})] == ["UNKNOWN"]
+            assert repo.one("tasks", {"task_id": jobs[0]})["state"] == "RESULT_STORED"
+            assert not repo.many("dispatch_slots", {"task_id": jobs})
+            assert repo.one("tasks", {"task_id": jobs[1]})["state"] == "READY"
+        assert supervisor.run_once(book["principal"], work, branch)["task_id"] == jobs[1]
+        assert len(requests) == 2
+
+
+def test_idle_pool_retires_and_listener_recovers_sql_outage(kernel_env, monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+
+    from sqlalchemy.exc import OperationalError
+
+    from novel_factory.infrastructure.capacity import AdaptiveController
+    from scripts import run_supervisor
+
+    kernel = kernel_env["kernel"]
+    book = load_fixture(kernel)
+    wr = book["world_ref"]
+    work, branch = wr["work_id"], wr["branch_id"]
+    stop, retired, reconnected = Event(), Event(), Event()
+
+    class ObservedExecutor(ThreadPoolExecutor):
+        def shutdown(self, wait=True, *, cancel_futures=False):
+            super().shutdown(wait=wait, cancel_futures=cancel_futures)
+            retired.set()
+
+    monkeypatch.setattr(run_supervisor, "ThreadPoolExecutor", ObservedExecutor)
+    with backend() as (route, requests, _), ThreadPoolExecutor(1) as driver:
+        gateway = AgentGateway(kernel, {"test": route})
+        supervisor = RuntimeSupervisor(kernel, gateway)
+        budget = kernel.tasks.create_budget(work, "1")
+        first = _job(kernel, gateway, supervisor, book, budget, "READY").task["task_id"]
+        run = supervisor.run_once
+
+        def interrupt_first_scan(*args, **kwargs):
+            if not reconnected.is_set():
+                reconnected.set()
+                raise OperationalError("SELECT", {}, Exception("simulated disconnect before claim"))
+            return run(*args, **kwargs)
+
+        monkeypatch.setattr(supervisor, "run_once", interrupt_first_scan)
+        controller = AdaptiveController(kernel.db, "model", 2, "model", work=work, branch=branch, interval=.1)
+        future = driver.submit(run_supervisor.serve, supervisor, book["principal"], work, branch,
+                               workers=2, interval=.2, stop_event=stop, controller=controller, observation_seconds=.5)
+        try:
+            assert reconnected.wait(4)
+            assert retired.wait(12)
+            assert not future.done()
+            assert kernel.tasks.get(first)["state"] == "RESULT_STORED"
+            second = _job(kernel, gateway, supervisor, book, budget, "READY").task["task_id"]
+            import time
+
+            deadline = time.monotonic() + 10
+            while time.monotonic() < deadline and kernel.tasks.get(second)["state"] == "READY":
+                time.sleep(.05)
+        finally:
+            stop.set()
+        future.result(timeout=10)
+        assert kernel.tasks.get(second)["state"] == "RESULT_STORED"
+        assert len(requests) == 2
+
+
+def test_waiting_provider_with_free_slot_does_not_poll_database(kernel_env, monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+
+    from scripts import run_supervisor
+
+    kernel = kernel_env["kernel"]
+    book = load_fixture(kernel)
+    wr = book["world_ref"]
+    work, branch = wr["work_id"], wr["branch_id"]
+    quiet = []
+    scans = []
+    observed, stop = Event(), Event()
+    with backend() as (route, requests, server), ThreadPoolExecutor(1) as driver:
+        server.started, server.release = Event(), Event()
+        gw = AgentGateway(kernel, {"test": route})
+        supervisor = RuntimeSupervisor(kernel, gw)
+        _job(kernel, gw, supervisor, book, kernel.tasks.create_budget(work, "1"), "READY")
+        scan = supervisor.run_once
+        wait_change = run_supervisor.wait_for_change
+
+        def record_scan(*args, **kwargs):
+            scans.append(None)
+            return scan(*args, **kwargs)
+
+        def observe_wait(listener, timeout):
+            changed = wait_change(listener, min(timeout, .3))
+            if server.started.is_set() and not changed:
+                quiet.append(len(scans))
+                if len(quiet) >= 3:
+                    observed.set()
+            return changed
+
+        monkeypatch.setattr(supervisor, "run_once", record_scan)
+        monkeypatch.setattr(run_supervisor, "wait_for_change", observe_wait)
+        future = driver.submit(run_supervisor.serve, supervisor, book["principal"], work, branch, workers=2,
+                               interval=60, stop_event=stop)
+        try:
+            assert observed.wait(12)
+            assert len(set(quiet[-3:])) == 1
+        finally:
+            stop.set()
+            server.release.set()
+        future.result(timeout=10)
+        assert len(requests) == 1

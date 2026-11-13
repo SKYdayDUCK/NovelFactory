@@ -3,6 +3,7 @@ import argparse
 import json
 import multiprocessing
 import os
+import signal
 import time
 from concurrent.futures import (
     FIRST_COMPLETED,
@@ -12,8 +13,10 @@ from concurrent.futures import (
     wait,
 )
 from pathlib import Path
+from threading import Event
 
 import psycopg
+from sqlalchemy.exc import OperationalError, TimeoutError as PoolTimeout
 
 from novel_factory.application.agent_gateway import AgentGateway
 from novel_factory.application.kernel import Kernel
@@ -33,6 +36,7 @@ from novel_factory.infrastructure.codex_host import (
 from novel_factory.infrastructure.database import Database
 from novel_factory.infrastructure.model_gateway import OpenAICompatibleAdapter
 from novel_factory.infrastructure.objects import ObjectStore
+from novel_factory.infrastructure.private_files import read_private_bytes
 from novel_factory.infrastructure.supervisor_wake import wait_for_change, wake_listener
 from novel_factory.orchestration.processors import (
     PROCESSORS,
@@ -47,7 +51,8 @@ def log_result(result):
                       if key in result}), flush=True)
 
 
-def serve(supervisor, principal, work, branch, *, workers, interval, processor=None, controller=None, observation_seconds=60):
+def serve(supervisor, principal, work, branch, *, workers, interval, processor=None, controller=None, observation_seconds=60, stop_event=None):
+    stop_event = stop_event if stop_event is not None else Event()
     pending = {}
     windows = None
     if processor in (None, "model", "compute"):
@@ -56,29 +61,34 @@ def serve(supervisor, principal, work, branch, *, workers, interval, processor=N
                               work=work, branch=branch, instance=controller.instance if controller else None)
         if controller:
             controller.monitor.occupancy = windows.meter
-    if processor == "compute":
-        url = supervisor.kernel.db.engine.url.render_as_string(hide_password=False)
-        pool = ProcessPoolExecutor(max_workers=workers, mp_context=multiprocessing.get_context("spawn"),
-                                   initializer=initialize_index_worker, initargs=(url, str(supervisor.kernel.objects.root), windows.meter))
-    else:
-        pool = ThreadPoolExecutor(max_workers=workers)
-    execution = MeasuredThreadExecutor(pool, windows.meter) if windows and processor != "compute" else pool
-    with pool:
-        while True:
-            try:
-                with wake_listener(supervisor.kernel.db.engine) as listener:
-                    _drain(supervisor, principal, work, branch, execution, workers, pending, listener, interval, processor, controller, windows)
-            except psycopg.OperationalError:
-                # A new LISTEN session always begins with a durable scan.
-                # Already admitted futures remain owned by this pool.
-                print(json.dumps({"status": "RECONNECTING", "reason": "LISTENER_UNAVAILABLE"}), flush=True)
-                time.sleep(min(interval, 5))
+    while not stop_event.is_set():
+        if processor == "compute":
+            url = supervisor.kernel.db.engine.url.render_as_string(hide_password=False)
+            pool = ProcessPoolExecutor(max_workers=workers, mp_context=multiprocessing.get_context("spawn"),
+                                       initializer=initialize_index_worker,
+                                       initargs=(url, str(supervisor.kernel.objects.root), windows.meter))
+        else:
+            pool = ThreadPoolExecutor(max_workers=workers)
+        execution = MeasuredThreadExecutor(pool, windows.meter) if windows and processor != "compute" else pool
+        with pool:
+            while not stop_event.is_set():
+                try:
+                    with wake_listener(supervisor.kernel.db.engine) as listener:
+                        retire = _drain(supervisor, principal, work, branch, execution, workers, pending, listener,
+                                        interval, processor, controller, windows, stop_event)
+                    if retire:
+                        break
+                except (psycopg.OperationalError, OperationalError, PoolTimeout):
+                    # Reopen LISTEN, then rescan durable state. Keep admitted futures in this pool.
+                    print(json.dumps({"status": "RECONNECTING", "reason": "DATABASE_UNAVAILABLE"}), flush=True)
+                    stop_event.wait(min(interval, 5))
 
 
-def _drain(supervisor, principal, work, branch, pool, workers, pending, listener, interval, processor=None, controller=None, windows=None):
+def _drain(supervisor, principal, work, branch, pool, workers, pending, listener, interval, processor, controller, windows, stop_event):
     dispatcher = TaskDispatcher(supervisor, principal, work, branch) if processor else None
     next_reconciliation = 0.0
-    while True:
+    used_pool = bool(pending)
+    while not stop_event.is_set():
         for future in tuple(pending):
             if future.done():
                 started = pending.pop(future)
@@ -90,11 +100,16 @@ def _drain(supervisor, principal, work, branch, pool, workers, pending, listener
                     controller.monitor.completed(time.monotonic() - started, result["status"] not in {"BLOCKED", "FAILED"})
                 log_result(result)
         target = controller.limit() if controller else workers
+        if (used_pool and not pending and controller and controller.policy.idle_since is not None
+                and time.monotonic() - controller.policy.idle_since >= 2 * controller.policy.cooldown):
+            # No admitted execution owns the pool. Exit its context and release
+            # native threads/processes; the replacement spawns on first submit.
+            return True
         if windows:
             windows.tick(target)
         if len(pending) >= target:
             timeout = min(windows.timeout(), controller.interval if controller else interval) if windows else interval
-            wait(pending, timeout=timeout, return_when=FIRST_COMPLETED)
+            wait(pending, timeout=min(timeout, 1), return_when=FIRST_COMPLETED)
             continue
         if dispatcher:
             now = time.monotonic()
@@ -106,12 +121,19 @@ def _drain(supervisor, principal, work, branch, pool, workers, pending, listener
             result = supervisor.run_once(principal, work, branch, executor=pool)
         if isinstance(result, Future):
             pending[result] = time.monotonic()
+            used_pool = True
         elif result["status"] == "IDLE":
-            # Completion of CPU work, and changes in the target, can predate the periodic rescan.
-            if pending:
-                wait(pending, timeout=min(interval, .25), return_when=FIRST_COMPLETED)
-            else:
-                wait_for_change(listener, min(interval, windows.timeout()) if windows else interval)
+            timeout = min(interval, windows.timeout()) if windows else interval
+            if "retry_after_seconds" in result:
+                timeout = min(timeout, result["retry_after_seconds"])
+                next_reconciliation = min(next_reconciliation, time.monotonic() + timeout)
+            # Slot releases and new work both publish commit-time wake hints.
+            # Check local futures between socket waits, keeping a quiet provider
+            # call from triggering repeated durable scans while slots are free.
+            until = time.monotonic() + timeout
+            while not stop_event.is_set() and (remaining := until - time.monotonic()) > 0:
+                if any(future.done() for future in pending) or wait_for_change(listener, min(remaining, 1)):
+                    break
         else:
             log_result(result)
 
@@ -121,6 +143,8 @@ def main():
     parser.add_argument("--access-file", required=True, type=Path, help="Private JSON with token, work_id and branch_id")
     parser.add_argument("--interval", type=float, default=60, help="Maximum seconds between durable reconciliations")
     parser.add_argument("--workers", type=int, default=2, help="Maximum concurrent Host tasks in this process")
+    parser.add_argument("--db-pool-size", type=int, default=5,
+                        help="Maximum parent database pool connections; the listener uses one separate connection")
     parser.add_argument("--processor", choices=SCOPED, help="Run this Redis-mode project processor")
     parser.add_argument("--adaptive", action="store_true", help="Adjust new admissions under the fixed worker ceiling")
     parser.add_argument("--sample-seconds", type=float, default=3)
@@ -141,14 +165,16 @@ def main():
         parser.error("interval must be between 0.1 and 60 seconds")
     if not 1 <= args.workers <= 16:
         parser.error("workers must be between 1 and 16")
+    if not 1 <= args.db_pool_size <= 20:
+        parser.error("db-pool-size must be between 1 and 20")
     if not .5 <= args.observation_seconds <= 3600:
         parser.error("observation-seconds must be between 0.5 and 3600")
     if not .1 <= args.sample_seconds <= 60:
         parser.error("sample-seconds must be between 0.1 and 60")
     if args.processor and args.workers > PROCESSORS[args.processor].max_workers:
         parser.error("workers exceeds this processor limit")
-    access = json.loads(args.access_file.read_text())
-    db = Database(pool_size=max(5, args.workers + 2))
+    access = json.loads(read_private_bytes(args.access_file, 16384))
+    db = Database(pool_size=args.db_pool_size)
     try:
         kernel = Kernel(db, ObjectStore(os.environ.get("NF_OBJECT_ROOT", "var/objects")))
         principal = kernel.authenticate(access["token"])
@@ -225,8 +251,22 @@ def main():
         processor = args.processor or "model"
         controller = AdaptiveController(db, processor, args.workers, PROCESSORS[processor].resource,
             work=access["work_id"], branch=access["branch_id"], interval=args.sample_seconds) if args.adaptive else None
-        serve(supervisor, principal, access["work_id"], access["branch_id"],
-              workers=args.workers, interval=args.interval, processor=args.processor, controller=controller, observation_seconds=args.observation_seconds)
+        stop_event = Event()
+
+        def request_stop(signum, frame):
+            stop_event.set()
+
+        signals = [signal.SIGINT, signal.SIGTERM]
+        if hasattr(signal, "SIGBREAK"):
+            signals.append(signal.SIGBREAK)
+        previous = {sig: signal.signal(sig, request_stop) for sig in signals}
+        try:
+            serve(supervisor, principal, access["work_id"], access["branch_id"],
+                  workers=args.workers, interval=args.interval, processor=args.processor, controller=controller,
+                  observation_seconds=args.observation_seconds, stop_event=stop_event)
+        finally:
+            for sig, handler in previous.items():
+                signal.signal(sig, handler)
     except DomainError as exc:
         raise SystemExit(exc.code) from None
     finally:

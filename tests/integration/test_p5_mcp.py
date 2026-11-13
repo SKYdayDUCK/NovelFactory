@@ -15,12 +15,13 @@ from novel_factory.application.runtime_tasks import RuntimeTaskService
 from novel_factory.domain.errors import DomainError
 from novel_factory.fixtures import load_fixture, point
 from novel_factory.infrastructure.model_gateway import OpenAICompatibleAdapter
+from novel_factory.infrastructure.private_files import create_private_file
 
 pytestmark = [pytest.mark.postgres, pytest.mark.integration]
 
 
 def config(path, env, token, binding):
-    with os.fdopen(os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600), "w") as file:
+    with os.fdopen(create_private_file(path), "w") as file:
         json.dump({"binding": binding, "database_url": env["url"], "token": token,
                    "object_root": str(env["store"].root)}, file)
     return StdioServerParameters(command=sys.executable,

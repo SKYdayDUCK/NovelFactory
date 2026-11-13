@@ -3,7 +3,6 @@ import asyncio
 import hmac
 import json
 import os
-import stat
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
@@ -22,6 +21,9 @@ from novel_factory.domain.canonical import canonical_bytes, fingerprint
 from novel_factory.domain.errors import DomainError
 
 
+from novel_factory.infrastructure.private_files import check_private_directory, read_private_bytes
+
+
 PROOF_KIND = "CREATIVE_REVIEW_INDEPENDENCE"
 
 
@@ -30,18 +32,14 @@ def _check(value):
 
 
 def _private_bytes(path):
-    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
-    with os.fdopen(fd, "rb") as source:
-        meta = os.fstat(fd)
-        _check(stat.S_ISREG(meta.st_mode) and meta.st_uid == os.getuid()
-               and not meta.st_mode & 0o077 and 0 < meta.st_size <= 65536)
-        return source.read(65537)
+    data = read_private_bytes(path, 65536)
+    _check(data)
+    return data
 
 
 def native_case_path(binding):
     root = Path(os.environ["NF_REVIEW_NATIVE_ATTESTATIONS"])
-    meta = root.lstat()
-    _check(stat.S_ISDIR(meta.st_mode) and meta.st_uid == os.getuid() and not meta.st_mode & 0o077)
+    check_private_directory(root)
     return root / (fingerprint(binding) + ".json")
 
 

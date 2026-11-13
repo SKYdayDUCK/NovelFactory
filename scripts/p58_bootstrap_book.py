@@ -1,9 +1,7 @@
 """Create one author-configured book and its offline, unsubmitted production request."""
 import argparse
-import fcntl
 import json
 import os
-import stat
 from pathlib import Path
 from uuid import uuid4
 
@@ -18,6 +16,8 @@ from novel_factory.domain.canonical import fingerprint
 from novel_factory.domain.errors import DomainError
 from novel_factory.infrastructure.database import Database
 from novel_factory.infrastructure.objects import ObjectStore
+from novel_factory.infrastructure.native_files import file_lock
+from novel_factory.infrastructure.private_files import prepare_private_directory, read_private_bytes
 
 
 def _id():
@@ -120,7 +120,7 @@ def provision(db, objects, book, private):
         # An interrupted run either committed the entire work plus access files or can be repeated here.
         kernel = Kernel(db, objects).in_transaction(repo)
         if repo.one("works", {"work_id": work}):
-            access = json.loads((private / "supervisor.json").read_text())
+            access = json.loads(read_private_bytes(private / "supervisor.json", 16384))
             kernel.authorize(repo, kernel.authenticate(access["token"]), work, "ADMIN", access["branch_id"])
             pipeline = json.loads((private / "pipeline.json").read_text())
             require(pipeline["world_ref"]["work_id"] == work, "VIEW_DENIED", "Saved request belongs to another work")
@@ -141,15 +141,11 @@ def main():
     parser.add_argument("--private-dir", required=True, type=Path)
     args = parser.parse_args()
     directory = args.private_dir
-    directory.mkdir(mode=0o700, parents=True, exist_ok=True)
-    meta = directory.lstat()
-    if not stat.S_ISDIR(meta.st_mode) or meta.st_uid != os.getuid() or stat.S_IMODE(meta.st_mode) != 0o700:
-        parser.error("Use a private directory owned by your WSL user (mode 0700)")
+    prepare_private_directory(directory)
     db = Database()
     try:
         book = json.loads(args.book.read_text(encoding="utf-8"))
-        with os.fdopen(os.open(directory / ".lock", os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600), "a") as lock:
-            fcntl.flock(lock, fcntl.LOCK_EX)
+        with file_lock(directory / ".lock"):
             print(json.dumps(provision(db, ObjectStore(os.environ.get("NF_OBJECT_ROOT", "var/objects")), book, directory)))
     except DomainError as error:
         parser.exit(2, error.code + "\n")
