@@ -5,7 +5,6 @@ import json
 from dataclasses import replace
 from decimal import Decimal
 from pathlib import Path
-from uuid import uuid4
 
 import pytest
 from test_p5_supervisor import backend
@@ -85,56 +84,35 @@ def test_reviewed_design_opens_sealed_interaction_before_any_writing(
                 actor = ctx["actor_id"]
                 actors[actor] = packet["assignment"]
                 return {
-                    "schema_version": "2.0",
-                    "proposal_id": str(uuid4()),
+                    **packet["proposal_protocol"]["copy_into_payload"],
                     "intent": "先寻找证据",
                     "targets": [],
-                    **{
-                        key: ctx[key]
-                        for key in (
-                            "task_id",
-                            "generation",
-                            "context_bundle_id",
-                            "world_ref",
-                            "actor_id",
-                            "dependency_fingerprint",
-                        )
-                    },
-                    "story_interval": {
-                        "start": ctx["story_time"],
-                        "end": {"tick": 1, "phase": 0},
-                        "bounds": "[)",
-                    },
                     "resource_requests": [],
                     "preconditions": [],
                     "evidence_refs": [],
-                    "idempotency_key": "one-action",
                 }
             if role == "adjudication_advisor":
                 joint = packet["joint"]
+                protocol = packet["proposal_protocol"]
+                scene = json.loads(packet["assignment"].split("\n", 1)[1])
+                assert scene["setting_rules"] == ["来信不得代领"]
+                assert set(scene["authorized_entities"].values()) == (
+                    {"乔", "林", "市场", "旧桥"} | ({"末班渡船"} if preset != "short" else set())
+                )
+                locations = {scene["authorized_entities"][r["subject_id"]]: r for r in scene["last_recorded_locations"]}
+                assert scene["authorized_entities"][locations["乔"]["place_id"]] == "市场"
+                assert scene["authorized_entities"][locations["林"]["place_id"]] == "市场"
+                if preset == "medium_long":
+                    assert scene["authorized_entities"][locations["末班渡船"]["place_id"]] == "旧桥"
+                    assert locations["末班渡船"]["event_refs"]
+                assert "欠薪" not in packet["assignment"] and "父亲嘱咐" not in packet["assignment"]
+                options = protocol["authorized_effect_choices"]
+                assert {e["subject_id"] for e in options} == {joint["allowed_location"]["subject_id"]}
                 return {
-                    "schema_version": "2.0",
-                    "proposal_id": str(uuid4()),
-                    "input_world_ref": ctx["world_ref"],
-                    "interaction_id": joint["interaction_id"],
-                    "action_proposal_refs": [item["ref"] for item in joint["action_proposals"]],
-                    "ruleset_ref": joint["ruleset_ref"],
-                    "story_time": joint["story_time"],
-                    "effect_group_id": str(uuid4()),
-                    "representation_id": str(uuid4()),
-                    "effects": [
-                        {
-                            "kind": "RELATION_SET",
-                            "effect_key": "departure",
-                            "subject_id": joint["allowed_location"]["subject_id"],
-                            "predicate": "located_in",
-                            "object_id": joint["allowed_location"]["destination_id"],
-                            "value_status": "VALUE",
-                        }
-                    ],
+                    **protocol["copy_into_payload"],
+                    "effects": [options[0]],
                     "reasoning_summary": "乔前往旧桥",
                     "unresolved_questions": [],
-                    "dependency_fingerprint": ctx["dependency_fingerprint"],
                 }
             editorial = packet["editorial"]
             if editorial["operation"] == "request_change":
@@ -145,20 +123,9 @@ def test_reviewed_design_opens_sealed_interaction_before_any_writing(
                     "evidence_refs": [],
                 }
             if editorial["operation"] == "propose_window":
-                materials = editorial["materials"]
                 work = ctx["world_ref"]["work_id"]
                 return {
-                    "schema_version": "2.0",
-                    "window_plan_id": str(uuid4()),
-                    "volume_contract_revision_id": materials["volume_contract_ref"]["content"][
-                        "contract_revision_id"
-                    ],
-                    "input_world_ref": ctx["world_ref"],
-                    "story_interval": {
-                        "start": {"tick": 1, "phase": 0},
-                        "end": {"tick": 2, "phase": 1},
-                        "bounds": "[)",
-                    },
+                    **packet["proposal_protocol"]["copy_into_payload"],
                     "scope_ids": [_uid(work, "place")],
                     "focus_actor_ids": [_uid(work, "protagonist")],
                     "process_ids": [],
@@ -166,10 +133,7 @@ def test_reviewed_design_opens_sealed_interaction_before_any_writing(
                     "candidate_goals": ["改去桥头等信", "核实地址"],
                     "next_decision_reason": "等来信",
                     "assumptions": [],
-                    "adopted_event_refs": materials["change_point_ref"]["content"]["event_refs"],
                     "expected_outputs": ["SCENE_CONTRACT"],
-                    "dependency_fingerprint": ctx["dependency_fingerprint"],
-                    "status": "DRAFT",
                 }
             assert editorial["operation"] == "review_and_adopt"
             return {
@@ -212,6 +176,7 @@ def test_reviewed_design_opens_sealed_interaction_before_any_writing(
                 break
         assert turn.get("status") == "OPENING_ACCEPTED", statuses
         assert len(actors) == 2
+        assert all("市场" in brief and "末班渡船" not in brief for brief in actors.values())
         assert "父亲嘱咐" not in actors[_uid(work, "protagonist")]
         assert "欠薪" not in actors[_uid(work, "counterpart")]
         assert all(
@@ -233,6 +198,16 @@ def test_reviewed_design_opens_sealed_interaction_before_any_writing(
                 "改去桥头等信" if deviation else "寻找目击者"
             )
             assert (turn["reviewed_plan_ref"] != source["plan_ref"]) == deviation
+            from novel_factory.application.editorial_effects import scoped_accepted_effects
+
+            projection = scoped_accepted_effects(
+                kernel, repo, turn["world_ref"], {"tick": 1, "phase": 0}, source, card["required_event_refs"]
+            )
+            assert projection["accepted_event_refs"] == turn["accepted_event_refs"]
+            assert any(
+                e.get("subject_id") == _uid(work, "protagonist")
+                for event in projection["accepted_effects"] for e in event["effects"]
+            )
 
 
 def test_split_model_design_contract_requires_profile_specific_opening():

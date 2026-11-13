@@ -72,6 +72,7 @@ def register_scene(
     volume_end=None,
     allowed_item_gift=None,
     opening_scene=False,
+    observed_subject_ids=None,
     local_replanning=True,
 ):
     """Preauthorize one registered interaction, one location allowance, and its editorial response.
@@ -114,6 +115,10 @@ def register_scene(
         "Participant and authorized locations must be distinct",
     )
     location_options = {"alternative_destination_ids": alternatives} if alternatives else {}
+    if observed_subject_ids is not None:
+        require(isinstance(observed_subject_ids, list) and 0 < len(observed_subject_ids) <= 64,
+                "INVALID_ARGUMENT", "Observed subjects need a bounded nonempty list")
+        location_options["observed_subject_ids"] = [validate_contract("UUID", s) for s in observed_subject_ids]
     slots = _participants(participants)
     if allowed_item_gift is not None:
         validate_item_gift(allowed_item_gift, slots)
@@ -314,7 +319,7 @@ def register_scene(
         if opening_scene:
             from .idea_opening import adjudication_brief
 
-            brief += adjudication_brief(bound, repo, world_ref, interaction_id, targets)
+            brief += adjudication_brief(bound, repo, controller, world_ref, interaction_id, targets)
         joint = prepare(
             "adjudication_advisor",
             "joint_outcome",

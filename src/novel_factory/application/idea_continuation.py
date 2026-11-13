@@ -4,6 +4,7 @@ import json
 from datetime import datetime
 
 from novel_factory.application import rolling_production as rolling
+from novel_factory.application.editorial_effects import scoped_accepted_effects
 from novel_factory.application.idea_intake import (
     _audited_design_result,
     _point,
@@ -86,13 +87,19 @@ def _memory(kernel, repo, owner, cursor, checkpoint, work, wr):
         )
         kernel.artifact(repo, final["text_ref"], work, kind="TEXT")
         text = kernel.objects.read(final["text_ref"]["sha256"]).decode("utf-8")
-        recent.append(
-            {
-                "chapter": chapter["ordinal"],
-                "excerpt": text[-800:],
-                "text_hash": final["text_ref"]["sha256"],
-            }
-        )
+        scene = kernel.artifact(repo, final["scene_ref"], work, kind="SCENE_PLAN")["payload"]
+        require(accepted["scene_ref"] == final["scene_ref"], "NARRATIVE_SELECTION_CONFLICT",
+                "Checkpoint scene does not match the accepted text")
+        entry = {
+            "chapter": chapter["ordinal"], "excerpt": text[-800:], "text_hash": final["text_ref"]["sha256"]
+        }
+        events = scene["required_event_refs"]
+        if events:
+            projection = scoped_accepted_effects(
+                kernel, repo, wr, _point(cursor["frozen_chapters"]), cursor["allowance"], events
+            )
+            entry["accepted_effects"] = projection["accepted_effects"]
+        recent.append(entry)
     return recent
 
 
@@ -204,6 +211,7 @@ def _plan_turn(kernel, gateway, repo, owner, wr, cursor, key, source):
         goals,
         design["world_rules"],
         start_after=cursor["chapter_count"],
+        upstream_refs=[cursor["last_checkpoint"], previous_plan, evidence["output_ref"], proof["output_ref"]],
     )
     cursor_ref = rolling.append_generated_volume(kernel, repo, owner, cursor, volume)
     for row in (task, review):

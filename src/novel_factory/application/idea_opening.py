@@ -1,11 +1,13 @@
 """Connect a reviewed opening design to sealed actors, native world effects and writing."""
 
+import json
 from datetime import datetime, timedelta
 
 from ..domain.canonical import fingerprint
 from ..domain.propositions import encode_proposition
 from ..domain.scheduling import state_from_revision
 from ..domain.temporal import point_key
+from ..domain.world import state_at
 from .authorization import Principal
 from .idea_intake import _point, _uid, create_planned_window
 from .kernel import require
@@ -87,23 +89,47 @@ def actor_brief(kernel, repo, wr, at, actor):
         and point_key(r["acquired_at"]) <= point_key(at)
     ]
     require(len(records) == 1, "INVALID_EVIDENCE", "Actor's opening memory is unavailable")
-    return (
-        "\n你的身份：" + snapshot["entities"][actor]["name"] + "。你自己的开场记忆：" + records[0]
-    )
+    brief = {"你的身份": snapshot["entities"][actor]["name"], "你自己的开场记忆": records[0]}
+    location = state_at(snapshot, actor, "located_in", at, actor_id=actor, known_at=at)
+    if location["value_status"] == "VALUE" and location["data"]["kind"] == "ENTITY":
+        place = location["data"]["entity_id"]
+        brief["你记得自己所在的地点"] = {"name": snapshot["entities"][place]["name"], "id": place}
+    return "\n" + json.dumps(brief, ensure_ascii=False)
 
 
-def adjudication_brief(kernel, repo, wr, interaction_id, targets):
+def adjudication_brief(kernel, repo, controller, wr, interaction_id, targets):
     interaction = repo.one("simulation_interactions", {"interaction_id": interaction_id})["payload"]
     revision = kernel.revision(repo, wr)
-    process = state_from_revision(revision)["processes"][interaction["process_ids"][0]][
-        "definition"
-    ]
-    names = {eid: revision["snapshot"]["entities"][eid]["name"] for eid in targets}
-    from json import dumps
-
-    return "\n" + dumps(
-        {"starting_situation": process["goal"], "authorized_entities": names}, ensure_ascii=False
-    )
+    process = state_from_revision(revision)["processes"][interaction["process_ids"][0]]["definition"]
+    source = kernel._prior(repo, controller, wr["work_id"], "P6_IDEA_PROVENANCE", "initial", {})
+    require(source and repo.ancestor(source["world_ref"], wr), "INVALID_EVIDENCE",
+            "Opening rules need a reviewed design on this branch")
+    design = kernel.artifact(repo, source["design_ref"], wr["work_id"], kind="INITIAL_STORY_DESIGN")["payload"]
+    snapshot = revision["snapshot"]
+    names = {eid: snapshot["entities"][eid]["name"] for eid in targets}
+    prior_locations = []
+    # The interaction is pending. Report each past record at its own time.
+    for rel in snapshot["relations"]:
+        subject = rel["subject_id"]
+        start = rel["valid_time"]["start"]
+        if (subject in names and rel["plane"] == "WORLD" and rel["predicate"] == "located_in"
+                and rel["object_value"]["entity_id"] in names and rel["valid_time"]["end"] is None
+                and point_key(start) < point_key(interaction["story_time"])):
+            prior_locations.append({"subject_id": subject, "place_id": rel["object_value"]["entity_id"],
+                                    "recorded_at": start, "source": rel["origin"]["kind"],
+                                    "event_refs": rel["source_event_refs"]})
+    # The full ruleset remains in the design. Mark the digest as partial if this task's prompt
+    # budget does not permit all setting rules. These are literary premises, not kernel commands.
+    rules, used = [], 0
+    for rule in design["world_rules"]:
+        if used + len(rule) > 6000:
+            break
+        rules.append(rule)
+        used += len(rule)
+    return "\n" + json.dumps({
+        "starting_situation": process["goal"], "authorized_entities": names,
+        "last_recorded_locations": prior_locations, "setting_rules": rules, "remaining_rule_count": len(design["world_rules"]) - len(rules),
+    }, ensure_ascii=False)
 
 
 def _accept(kernel, repo, owner, wr, at, subjects, label, record_ref, propose):
@@ -276,10 +302,11 @@ def enroll_opening(kernel, repo, gateway, owner, source, registration):
         receipts.append(accepted)
         wr = accepted["world_ref"]
         events = accepted["accepted_event_refs"]
+    observed_items = [_uid(work, "moving-entity")] if source["profile"]["environment_processes"] else []
     wr = register(
         "interaction",
         "INTERACTION",
-        [first, other],
+        [first, other, *observed_items],
         actors,
         _point(0, 4),
         _point(0, 5),
@@ -307,6 +334,7 @@ def enroll_opening(kernel, repo, gateway, owner, source, registration):
         deadline_seconds=registration["deadline_seconds"],
         idempotency_key="idea-opening",
         opening_scene=True,
+        observed_subject_ids=[actors[1], *observed_items],
         local_replanning=source["profile"]["local_replanning"],
     )
     grant = kernel.authorize(repo, owner, work, "ADMIN", branch)
@@ -398,7 +426,11 @@ def advance_opening(kernel, gateway, controller, work, branch):
             "payload"
         ]
         snapshot = kernel.revision(repo, wr)["snapshot"]
-        facts = "开场行动已裁决。"
+        facts = (
+            "开场设计中的情境：" + design["opening"]["situation"]
+            + "。人物是" + design["protagonist"] + "与" + design["opening"]["counterpart"]
+            + "。以下为已接受的行动后果。"
+        )
         for command in effect["commands"]:
             args = command["args"]
             require(
@@ -414,7 +446,7 @@ def advance_opening(kernel, gateway, controller, work, branch):
 
         if opening["environment_events"]:
             facts += (
-                "。已发生的环境变化："
+                "已发生的环境变化："
                 + design["opening"]["environment"]["moving_entity"]
                 + "抵达"
                 + design["opening"]["other_place"]

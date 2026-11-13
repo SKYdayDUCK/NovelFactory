@@ -104,7 +104,9 @@ def _project_material(item):
                          "opening": _boundaries(value["entry_checks"]), "closing": _boundaries(value["exit_checks"]),
                          "disclosures": [{k: v[k] for k in ("statement", "truth_status")}
                                          for v in value["allowed_disclosures"]],
-                         "styles": [_style(s["style"]) for s in value["selected_styles"]]}
+                         "styles": [_style(s["style"]) for s in value["selected_styles"]],
+                         **({"predecessor_passages": [p["text"] for p in value["predecessor_passages"]]}
+                            if value.get("predecessor_passages") else {})}
     if kind in {"NARRATIVE_DRAFT", "TEXT"} and isinstance(value, dict) and "text" in value and "span" in value:
         text = value["text"]
         span = value["span"]
@@ -126,7 +128,7 @@ def _project_material(item):
     return "evidence", item["content"]
 
 
-def build_context_packet(binding, materials, editorial=None, joint=None):
+def build_context_packet(binding, materials, editorial=None, joint=None, proposal_protocol=None):
     task, grant, spec = (binding[key] for key in ("task", "grant", "spec"))
     context, compiled = binding["context"], binding["compiled_context"]
     bundle, read_cut = context["payload"], context["read_cut"]
@@ -262,6 +264,8 @@ def build_context_packet(binding, materials, editorial=None, joint=None):
     user = {"assignment": binding["input"]["assignment"], "creative_materials": creative}
     # Typed outputs can require exact citations and operation handles. Keep
     # them outside the literary view. Neither section has system authority.
+    if proposal_protocol:
+        user["proposal_protocol"] = proposal_protocol
     if structured:
         user["structured_evidence"] = structured
     if editorial or joint:

@@ -418,11 +418,15 @@ class AgentGateway:
         joint = joint_material(self.kernel, principal, binding)
         if joint:
             user["joint"] = joint
+        from .proposal_prompt import proposal_prompt
+        protocol = proposal_prompt(binding, editorial, joint)
+        if protocol:
+            user["proposal_protocol"] = protocol
         if creative:
             from .creative_context import build_context_packet
             from .creative_context_store import freeze_snapshot
 
-            packet, user = build_context_packet(binding, material, editorial, joint)
+            packet, user = build_context_packet(binding, material, editorial, joint, protocol)
             self._refresh_dynamic(principal, binding)
             with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
                 live = self._binding(repo, principal, binding["dispatch_request"], dynamic_live=binding.get("dynamic_live"))
