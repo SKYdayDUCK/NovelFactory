@@ -926,6 +926,7 @@ class NarrativeService:
             with self.kernel.db.uow(write=False) as repo:
                 _, _, _, draft = self._reader_binding(repo, principal, task_id, generation, draft_ref)
                 scene = self._scene(repo, draft["scene_ref"], task["work_id"])
-                delivery.update(required_event_refs=scene["required_event_refs"],
+                from .rolling_facts import passage_index
+                delivery.update(passage_index=passage_index(delivery["text"]), required_event_refs=scene["required_event_refs"],
                                 declared_important_deltas=draft["declared_important_deltas"])
         return canonical_bytes(delivery)

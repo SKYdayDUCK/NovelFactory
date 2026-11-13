@@ -108,6 +108,64 @@ def recover_board_node(kernel, repo, gateway, owner, board, identity, task):
     node.update(state="PENDING", reason="SCHEMA_REPAIR_REQUESTED")
 
 
+def recover_fact_reading(kernel, repo, gateway, owner, board, identity):
+    """Reproduce an inner-format failure on the same authorized text before requesting another reading."""
+    from .authorization import Principal
+    from .candidate_delivery import CandidateDelivery
+    from .narrative import NarrativeService
+    from .rolling_facts import ReadingFormatError, check_knowledge, extract_assertions
+
+    node = board["nodes"][identity]
+    wr = board["world_ref"]
+    parent = board["nodes"][node["parents"][0]]
+    source = parent["output_ref"]
+    task = repo.one("tasks", {"task_id": node["task_id"], "work_id": wr["work_id"],
+                              "branch_id": wr["branch_id"], "state": "RESULT_STORED",
+                              "role_id": "evidence_maintainer", "task_kind": "assertion_extract"}, lock="share")
+    require(task and task["deadline"] > repo.now(), "TASK_REBIND_REQUIRED", "Fact reading authorization changed")
+    job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})["config"]
+    grant = repo.one("grants", {"grant_id": task["grant_id"]}, lock="share")
+    require(grant and grant["active"] and grant["epoch"] == job["grant_epoch"]
+            and job["production_node"] == identity and parent["state"] == "DRAFT_STORED"
+            and not repo.one("selections", {"work_id": wr["work_id"],
+                            "selection_kind": "NARRATIVE_SCENE:" + identity.removeprefix("facts:")}),
+            "TASK_REBIND_REQUIRED", "Source fact job or manuscript changed")
+    check_task_dependencies(repo, task["task_id"], task["generation"])
+    check_knowledge(kernel, repo, board, node, source)
+    evidence, candidate = CandidateDelivery(kernel, gateway).audited_candidate(repo, task, production_accounting=True)
+    if repo.one("call_attempts", {"attempt_id": evidence["attempt_id"]})["state"] != "SUCCEEDED":
+        response = kernel.artifact(repo, evidence["response_ref"], task["work_id"], kind="AGENT_RESPONSE")
+        verify_board_transport(kernel, evidence, response["payload"])
+    reader = Principal(task["grant_id"], task["principal_id"])
+    service = NarrativeService(kernel)
+    delivered = service.read_text(reader, task["task_id"], task["generation"], source)
+    _, _, _, draft = service._reader_binding(repo, reader, task["task_id"], task["generation"], source)
+    try:
+        key = "rolling-facts:" + task["task_id"] + ":" + str(task["generation"])
+        extract_assertions(delivered["text"], candidate["text"], key, declared_count=len(draft["declared_important_deltas"]))
+    except ReadingFormatError as error:
+        diagnostic = error.diagnostic
+    else:
+        return False
+    history = node.setdefault("fact_format_repairs", [])
+    findings = {k: v for k, v in diagnostic.items() if k not in {"assertion_index", "start", "end"}}
+    plan = plan_repair("schema", findings, history)
+    plan = reflect_repair(kernel, repo, owner, wr, task["task_id"], evidence["attempt_id"],
+                          evidence["output_ref"], plan, "ASSERTION_READING_FORMAT")
+    source_input = kernel.artifact(repo, evidence["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]
+    history.append({**plan, "diagnostic": diagnostic, "task_id": task["task_id"], "generation": task["generation"],
+                    "attempt_id": evidence["attempt_id"], "source_draft_ref": source,
+                    "candidate_ref": evidence["output_ref"],
+                    **{k: source_input[k] for k in ("runtime_sha256", "model_config_sha256", "output_contract")}})
+    if plan["decision"] == PAUSED:
+        node.update(state="STOPPED", reason=PAUSED)
+        return True
+    node.pop("task_id")
+    node.pop("enrolled_at", None)
+    node.update(state="PENDING", reason="FACT_FORMAT_REPAIR_REQUESTED")
+    return True
+
+
 def record_contract_recovery(node, task, audit, output_ref):
     # Technical recovery can succeed even when a later editorial/extent check requests revision.
     history = node.get("schema_repairs")

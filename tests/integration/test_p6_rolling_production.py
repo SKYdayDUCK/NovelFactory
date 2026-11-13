@@ -550,3 +550,58 @@ def test_quality_length_checked_before_readers_and_freeze(kernel_env):
             assert writer["prior_draft_ref"] == writer["history"][-1]["output_ref"]
             assert len({r["task_id"] for r in writer["history"]}) == 4
             assert len(repo.many("tasks", {"work_id": work, "role_id": "reviewer", "task_kind": "epistemic"})) == 1
+
+
+def test_quality_reissues_only_a_verified_malformed_fact_reading(kernel_env):
+    kernel = kernel_env["kernel"]
+    f = setup_batch(kernel, count=1)
+    owner, wr = f["principal"], f["world_ref"]
+    params = request(kernel, f, 1)
+    params["profile"]["overrides"]["production_mode"] = "quality"
+    readings = []
+    with backend() as (adapter, calls, server):
+        def candidate(packet):
+            result = answer(packet)
+            if packet["context"]["role_id"] == "evidence_maintainer":
+                reading = json.loads(result["text"])
+                entry = reading["assertions"][0]
+                entry.pop("quote")
+                entry["passage_ids"] = [1]
+                if not readings:
+                    entry["proposed_command"] = "invalid"
+                readings.append(packet["assignment"])
+                result["text"] = json.dumps(reading)
+            return result
+        server.packet_candidate = candidate
+        generate = adapter.generate
+        adapter.generate = lambda packet: replace(generate(packet), actual_amount=Decimal(0), currency="USD")
+        gateway = connect(kernel, adapter)
+        register_rolling(kernel, gateway, owner, **params)
+        for _ in range(40):
+            RuntimeSupervisor(kernel, gateway).run_once(owner, wr["work_id"], wr["branch_id"])
+            board = pipeline_status(kernel, owner, wr["work_id"], wr["branch_id"], include_outputs=True)
+            fact = next(n for n in board["nodes"].values() if n["stage"] == "facts")
+            if fact["state"] == "FACTS_ACCEPTED":
+                break
+        assert fact["state"] == "FACTS_ACCEPTED", (fact["state"], fact.get("reason"))
+        assert len(readings) == 2 and len(calls) == 5
+        assert "properties/proposed_command" in readings[1]
+        repair, = fact["fact_format_repairs"]
+        assert repair["corrected_attempt_id"] != repair["attempt_id"] and repair["actual_fix"] == fact["output_ref"]
+
+
+def test_numbered_fact_spans_preserve_coverage_and_native_contract():
+    from novel_factory.application.rolling_facts import extract_assertions, passage_index, ReadingFormatError
+    body = "一。\n二！？三"
+    index = passage_index(body)
+    assert "".join(p["text"] for p in index) == body.replace("\n", "")
+    entry = {"classification": "SURFACE_DETAIL", "summary": "工程样例", "event_ref": None,
+             "world_check": None, "knowledge_use": None, "proposed_command": None,
+             "disclosure_id": None, "declared_delta_index": None}
+    ids = list(range(1, len(index) + 1))
+    def parse(numbers):
+        return extract_assertions(body, json.dumps({"assertions": [{**entry, "passage_ids": numbers}]}), "fixture")
+    assert parse(ids)[0]["span"]["end"] == len(body)
+    for bad in ([0], [True], ids[1:], ids[::-1], [1, 1], [1, 3], [999]):
+        with pytest.raises(ReadingFormatError):
+            parse(bad)

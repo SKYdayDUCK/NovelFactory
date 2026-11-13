@@ -246,6 +246,8 @@ def build_context_packet(binding, materials, editorial=None, joint=None, proposa
                     obligations = {key: delivery[key] for key in (
                         "draft_ref", "required_event_refs", "declared_important_deltas"
                     )}
+                    if "passage_index" in delivery:
+                        obligations["passage_index"] = delivery["passage_index"]
                     structured.append({"ref": ref, "value": obligations})
                     select(evidence, cut["plane"], "Reconciliation obligations of the assigned draft.", obligations)
                 if task["role_id"] == "reviewer":

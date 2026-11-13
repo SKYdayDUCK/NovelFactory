@@ -396,6 +396,9 @@ def _enroll(kernel, repo, gateway, owner, board, identity):
     seconds = int((datetime.fromisoformat(board["authorization"]["deadline"]) - repo.now()).total_seconds())
     require(seconds > 0, "TASK_EXPIRED", "No time remains")
     repair = (node.get("schema_repairs") or [None])[-1]
+    if stage == "facts" and node.get("reason") == "FACT_FORMAT_REPAIR_REQUESTED":
+        repair = node["fact_format_repairs"][-1]
+        require(repair["source_draft_ref"] == materials[0], "STALE_GENERATION", "Repaired reading source changed")
     if repair and repair.get("actual_fix"):
         repair = None
     if repair:
@@ -504,6 +507,9 @@ def _deliver(kernel, repo, gateway, board, node, task):
         from .rolling_facts import audit
         evidence = audit(kernel, repo, owner, board, node, task, candidate)
         ref = _artifact(kernel, repo, task["work_id"], owner, "ROLLING_FACT_REPORT", evidence)
+        if (repairs := node.get("fact_format_repairs")) and not repairs[-1].get("actual_fix"):
+            repairs[-1].update(actual_fix=ref, corrected_attempt_id=model_audit["attempt_id"],
+                               regression_result="ASSERTION_READING_VALIDATED")
         if evidence["status"] == "CLEAR":
             state = "FACTS_ACCEPTED"
         else:
@@ -702,6 +708,21 @@ def advance_pipeline(kernel, gateway, controller, work, branch):
                 if (resume_extent_revision(bound, repo, owner, board, identity)
                         or resume_review_format(bound, repo, owner, board, identity)):
                     break
+            if (board.get("production_mode") == "quality" and not expired and node["stage"] == "facts"
+                    and node["state"] == "STOPPED" and node.get("task_id") and not node.get("output_ref")
+                    and node.get("reason") in {"INVALID_ARGUMENT", "INVALID_EVIDENCE"}):
+                from .board_schema_repair import recover_fact_reading
+                try:
+                    with repo.conn.begin_nested():
+                        recovered = recover_fact_reading(bound, repo, gateway, _current_owner(bound, repo, board),
+                                                         board, identity)
+                except DomainError as error:
+                    if node.get("reason") == error.code:
+                        continue
+                    node["reason"] = error.code
+                    break
+                if recovered:
+                    break
             if node["state"] == "WAITING_HANDOFF":
                 if expired:
                     node.update(state="STOPPED", reason="TASK_EXPIRED")
@@ -754,6 +775,14 @@ def advance_pipeline(kernel, gateway, controller, work, branch):
                     node.update(state="STOPPED", reason="TASK_EXPIRED")
                 else:
                     continue
+            elif (node["stage"] in READING_STAGES and node["state"] == "STOPPED"
+                  and node.get("reason") == "PREDECESSOR_STOPPED" and not node.get("task_id")
+                  and not node.get("output_ref") and not expired
+                  and all(nodes[parent]["state"] == "DRAFT_STORED" for parent in node["parents"])
+                  and ("knowledge_node" not in node or nodes[node["knowledge_node"]]["state"] == "KNOWLEDGE_CLEAR")):
+                # The previous hold was inherited. Nothing has been dispatched for this node.
+                node.update(state="PENDING")
+                node.pop("reason")
             elif node["stage"] in READING_STAGES and node["state"] == "PENDING" and (
                     any(nodes[p]["state"] == "STOPPED" for p in node["parents"]) or
                     ("knowledge_node" in node and nodes[node["knowledge_node"]]["state"] == "STOPPED")):
