@@ -261,3 +261,19 @@ class LogService:
                 WHERE a.work_id=:work AND a.branch_id=:branch AND a.trace_id=:trace
                 ORDER BY event_time,event_id"""), {"work":work_id,"branch":branch_id,"trace":trace_id})
             return [dict(row) for row in result.mappings()]
+
+    @staticmethod
+    def scoped_event_metadata(kernel, repo, principal, work, branch):
+        """Read original event metadata at the caller's transaction cut, including non-task tools."""
+        kernel.authorize(repo, principal, work, "ADMIN", branch)
+        kernel.head(repo, work, branch)
+        return repo.conn.execute(text("""
+            SELECT e.event_id,e.event_type,e.event_time,e.recorded_at,e.trace_id,e.span_id,
+                   e.parent_span_id,e.causation_id,e.task_id,e.generation,e.actor_id,e.role_id,
+                   e.world_revision_id,e.attempt_id,e.volume_id,e.tool_name,e.outcome,e.error_code,
+                   e.duration_ms,e.text_characters,e.evidence_id,a.kind AS artifact_kind,
+                   a.artifact_id,a.sha256 AS artifact_sha256
+            FROM nf_audit_events e LEFT JOIN nf_artifacts a
+              ON a.work_id=e.work_id AND a.artifact_revision_id=e.evidence_id
+            WHERE e.work_id=:work AND e.branch_id=:branch ORDER BY e.event_time,e.event_id
+        """).execution_options(yield_per=256), {"work": work, "branch": branch}).mappings()

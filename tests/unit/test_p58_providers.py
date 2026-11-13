@@ -309,3 +309,33 @@ def test_stalled_loopback_headers_do_not_hold_shutdown_or_start_late_request():
             assert not worker.is_alive() and monotonic()-started < 1 and not relay.forwarded
             with pytest.raises(ModelCallFailure, match="CODEX_SEND_FENCED"):
                 relay.begin_forward()
+
+
+def test_explicit_deepseek_thinking_mode_is_frozen_and_goes_on_wire(monkeypatch):
+    enable_synthetic_credentials(monkeypatch)
+    captured = {}
+    def respond(**kwargs):
+        captured.update(kwargs["payload"])
+        return chat_reply(), "synthetic", {}
+    monkeypatch.setattr(providers, "post", respond)
+    profile = deepseek(thinking="disabled")
+    assert profile.describe()["thinking"] == "disabled"
+    invoke(profile, REQUEST, authorize=lambda _: True, record=None)
+    assert captured["thinking"] == {"type": "disabled"}
+    with pytest.raises(ProfileError):
+        plan(thinking="disabled")
+
+
+def test_truncated_generation_retains_usage_and_receipt_without_accepting_partial_json(monkeypatch):
+    enable_synthetic_credentials(monkeypatch)
+    monkeypatch.setattr(providers, "post", lambda **_: (chat_reply(finish="length"), "upstream-id", {}))
+    with pytest.raises(ModelCallFailure) as failed:
+        invoke(deepseek(), REQUEST, authorize=lambda _: True, record=None)
+    assert failed.value.code == "MODEL_PROTOCOL_ERROR"
+    partial = failed.value.received
+    assert partial.provider_receipt == "upstream-id" and partial.output_tokens == 20
+    assert partial.raw_response["finish_reason"] == "length"
+    assert not deepseek().describe().get("defer_invoice")
+    assert deepseek(defer_invoice=True).describe()["defer_invoice"] is True
+    with pytest.raises(ProfileError):
+        plan(defer_invoice=True)

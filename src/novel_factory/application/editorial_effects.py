@@ -42,9 +42,13 @@ def review_effects(kernel, repo, task, spec, manifest_ref, read_cut):
             "VIEW_DENIED", "The review requires its enrolled and compiled input manifest")
     manifest = validate_contract("InputManifest", kernel.artifact(repo, manifest_ref, wr["work_id"],
                                  kind="INPUT_MANIFEST")["payload"], "kernel")
+    return scoped_accepted_effects(kernel, repo, wr, spec["story_time"], manifest, receipt["accepted_event_refs"])
+
+
+def scoped_accepted_effects(kernel, repo, wr, at, manifest, refs):
+    """Project only selected events, through this story time, within the caller's task material allowance."""
     subjects = set(manifest["subject_ids"])
     predicates = {ALIASES.get(name, name) for name in manifest["predicates"]}
-    refs = receipt["accepted_event_refs"]
     PlanningService(kernel)._events(kernel.revision(repo, wr), refs)
     entries = []
     for ref in refs:
@@ -53,11 +57,11 @@ def review_effects(kernel, repo, task, spec, manifest_ref, read_cut):
         event = row["payload"]
         occurrence = event["occurrence_time"]
         end = occurrence.get("at", occurrence.get("latest"))
-        require(end is not None and point_key(end) <= point_key(spec["story_time"]),
+        require(end is not None and point_key(end) <= point_key(at),
                 "VIEW_DENIED", "The accepted event exceeds the review's story horizon")
         effects = []
         for effect in event["effects"]:
-            item = _visible_effect(effect, subjects, predicates, spec["story_time"])
+            item = _visible_effect(effect, subjects, predicates, at)
             if item is not None:
                 effects.append(item)
         entries.append({"event_ref": ref, "occurrence_time": occurrence, "effects": effects})

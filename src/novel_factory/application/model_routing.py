@@ -9,6 +9,40 @@ from novel_factory.domain.errors import DomainError
 POLICY_ROUTE = "@policy"
 
 
+def idea_policy(wr, model_routes):
+    """A local idea's creative and internal review assignments use the native policy resolver."""
+    creative, review = model_routes["creative"], model_routes["review"]
+    review_roles = ("reviewer", "adjudication_advisor")
+    review_modes = {
+        "world_designer": ("rule_review",),
+        "volume_director": ("volume_review",),
+        "evidence_maintainer": ("assertion_extract", "event_alignment"),
+        "chief_editor": ("editorial_decision", "release_review"),
+        "literary_editor": ("structure", "seam", "cross_volume"),
+    }
+    rules = [{"id": "creative", "when": {}, "profile": creative}]
+    for role in review_roles:
+        rules.append({"id": role, "when": {"role_id": role}, "profile": review})
+    for role, kinds in review_modes.items():
+        for kind in kinds:
+            rules.append({"id": kind, "when": {"role_id": role, "task_kind": kind}, "profile": review})
+    return {"work_id": wr["work_id"], "branch_id": wr["branch_id"], "installation_id": "local",
+            "org_id": "p6", "revision": 1, "rules": rules}
+
+
+def check_idea_models(adapters, creative, review=None):
+    """Preflight both named profiles locally, before setting up a new project."""
+    for profile in (creative,) if review is None else (creative, review):
+        require(profile in adapters, "MODEL_UNAVAILABLE", "Requested adapter is not configured")
+        adapters[profile].check_available()
+    if review is not None:
+        configurations = [adapters[profile].configuration for profile in (creative, review)]
+        require(all(c.get("isolation") == "STATELESS_TEXT_ONLY" for c in configurations),
+                "HOST_ISOLATION_UNVERIFIED", "Policy dispatch requires stateless text-only models")
+        require(configurations[0]["model"] != configurations[1]["model"], "INVALID_MODEL_CONFIG",
+                "Select distinct model IDs for creation and internal review")
+
+
 def _key(wr):
     return {"work_id": wr["work_id"], "selection_kind": "RUNTIME_POLICY:" + wr["branch_id"]}
 

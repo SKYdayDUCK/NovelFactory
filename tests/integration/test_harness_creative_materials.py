@@ -78,3 +78,34 @@ def test_writer_receives_assigned_style_voice_and_adjacent_prose(kernel_env, mon
         sources = [source["evidence"] for source in snapshot["payload"]["packet"]["sources"]]
         assert {"kind": "ARTIFACT", "artifact_ref": style_ref} in sources
         assert any(e.get("span") == span_for(prior) for e in sources)
+
+
+def test_fact_extractor_receives_only_its_bound_draft_obligations(kernel_env, monkeypatch):
+    configured(monkeypatch)
+    kernel = kernel_env["kernel"]
+    work = setup_batch(kernel, count=1)
+    world, owner = work["world_ref"], work["principal"]
+    prior = write_scene(kernel, work, 0, "门帘被风撩起。")
+    narrative = NarrativeService(kernel)
+    adapter = EnvelopeFixture()
+    gateway = AgentGateway(kernel, {"fixture": adapter}, material_reader=narrative.read_agent_material)
+    prepared = RuntimeTaskService(kernel, gateway).prepare(
+        owner, world, role_id="evidence_maintainer", task_kind="assertion_extract",
+        story_time=point(1, 1), subject_ids=[work["ids"]["sword"]], predicates=["owner"],
+        assignment="核对正文。", adapter_id="fixture", input_artifacts=[work["scene_refs"][0]],
+        material_refs=[prior["draft_ref"]],
+    )
+    task, gen = prepared.task["task_id"], prepared.task["generation"]
+    narrative.bind_reader_task(owner, task, gen, [prior["draft_ref"]], "fact-reader")
+    receipt = gateway.execute(prepared.principal, {
+        "schema_version": "2.1", "task_id": task, "generation": gen, "worker_id": prepared.worker_id,
+        "input_ref": prepared.agent_input["input_ref"], "budget_id": kernel.tasks.create_budget(world["work_id"], "1"),
+        "call_key": "fact-read", "reserve_amount": "0.2", "token_reservation": 100000,
+    })
+    assert receipt["validation_status"] == "VALIDATED_CANDIDATE"
+    packet = json.loads(adapter.calls[0].messages[1]["content"])
+    assert packet["creative_materials"]["prose"] == [prior["text"]]
+    assert packet["structured_evidence"] == [
+        {"ref": prior["draft_ref"], "value": {"draft_ref": prior["draft_ref"], "required_event_refs": [],
+                                              "declared_important_deltas": []}}
+    ]

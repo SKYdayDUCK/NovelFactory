@@ -19,7 +19,7 @@ def _destinations(route):
 
 
 def joint_manifest(route):
-    subjects = [route["subject_id"], *_destinations(route)]
+    subjects = [route["subject_id"], *_destinations(route), *route.get("observed_subject_ids", [])]
     predicates = ["located_in"]
     if gift := route.get("allowed_item_gift"):
         subjects.extend([gift["item_id"], gift["from_id"], *gift["recipient_ids"]])
@@ -43,7 +43,7 @@ def validate_item_gift(gift, actors):
 def _interaction(kernel, repo, route):
     require(
         isinstance(route, dict)
-        and set(route) - {"alternative_destination_ids", "allowed_item_gift"}
+        and set(route) - {"alternative_destination_ids", "allowed_item_gift", "observed_subject_ids"}
         == {"interaction_id", "subject_id", "destination_id", "control_task_id"},
         "INVALID_ARGUMENT",
         "Joint authorization must specify one interaction, participant, destination and control task",
@@ -72,6 +72,14 @@ def _interaction(kernel, repo, route):
         "VIEW_DENIED",
         "Location is outside the registered participant and scope",
     )
+    if "observed_subject_ids" in route:
+        observed = route["observed_subject_ids"]
+        require(isinstance(observed, list) and 0 < len(observed) <= 64,
+                "INVALID_ARGUMENT", "Joint observation needs a bounded list")
+        for subject in observed:
+            validate_contract("UUID", subject)
+        require(len(set(observed)) == len(observed) and set(observed) <= set(interaction["scope_ids"]),
+                "VIEW_DENIED", "Observed subject falls outside the registered interaction")
     if "allowed_item_gift" in route:
         validate_item_gift(route["allowed_item_gift"], [slot["actor_id"] for slot in interaction["participant_slots"]])
     revision = kernel.revision(repo, interaction["base_world_ref"])
@@ -103,6 +111,7 @@ def create_control_task(
     destination_id,
     alternative_destination_ids=(),
     allowed_item_gift=None,
+    observed_subject_ids=None,
     deadline_seconds=3600,
 ):
     """Reserve one deterministic Kernel task. No lease, model grant or provider call is created."""
@@ -122,6 +131,8 @@ def create_control_task(
     require(
         isinstance(alternative_destination_ids, (tuple, list)), "INVALID_ARGUMENT", "Expected destination list"
     )
+    if observed_subject_ids is not None:
+        route["observed_subject_ids"] = observed_subject_ids
     if allowed_item_gift is not None:
         route["allowed_item_gift"] = allowed_item_gift
     if alternative_destination_ids:

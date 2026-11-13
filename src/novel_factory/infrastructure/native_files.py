@@ -39,6 +39,23 @@ def publish_file(source, destination, *, replace=False):
 
 
 @contextmanager
+def private_export(destination):
+    """Publish complete owner-private bytes at a new local path on POSIX or Windows."""
+    from .private_files import private_temporary_file
+
+    destination = Path(destination)
+    descriptor, temporary = private_temporary_file(destination.parent)
+    try:
+        with os.fdopen(descriptor, "wb") as pending:
+            yield pending
+            pending.flush()
+            os.fsync(pending.fileno())
+        publish_file(temporary, destination)
+    finally:
+        Path(temporary).unlink(missing_ok=True)
+
+
+@contextmanager
 def file_lock(path, *, exclusive=True):
     if os.name == "nt":
         import pywintypes

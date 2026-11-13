@@ -11,6 +11,7 @@ import sys
 import pytest
 
 from novel_factory.fixtures import load_fixture, point
+from novel_factory.infrastructure.private_files import create_private_file, read_private_bytes
 from novel_factory.orchestration.short_volume import ShortVolumeRunner
 from novel_factory.orchestration.short_volume_fixture import TEXTS
 
@@ -26,7 +27,7 @@ def run_cli(script, *args):
 def binding(path, env, token, wr):
     config = {"token": token, "database_url": env["url"], "object_root": str(env["store"].root),
               "binding": {"work_id": wr["work_id"], "branch_id": wr["branch_id"]}}
-    with os.fdopen(os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600), "w") as stream:
+    with os.fdopen(create_private_file(path), "w") as stream:
         json.dump(config, stream)
     return path
 
@@ -65,7 +66,7 @@ def test_export_frozen_prose_scoped_log_and_blank_reader_forms(kernel_env, volum
     assert exported["manifest_sha256"] == result["release"]["manifest"]["manifest_sha256"]
     assert exported["text_sha256"] == digest and exported["scene_count"] == len(TEXTS) == 6
     assert exported["bytes"] == len(content) and exported["external_delivery"] == "NOT_REQUESTED"
-    assert out.stat().st_mode & 0o077 == 0
+    assert read_private_bytes(out, len(content)) == content
     out.write_bytes(b"existing author file")
     retry = export(author_config, ref, out)
     assert retry.returncode != 0 and retry.stderr.strip() == "OUTPUT_EXISTS"
