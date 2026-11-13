@@ -258,8 +258,20 @@ def test_release_and_continuity_gate_two_volumes_across_restart(kernel_env):
                 state["reason"],
                 info,
             )
+            from novel_factory.application.rolling_publication import final_review_request
+
+            with pytest.raises(DomainError) as missing_final:
+                final_review_request(kernel, owner, work, branch)
+            assert missing_final.value.code == "RELEASE_INCOMPLETE"
             if volume_no == 1:
                 assert state["release_refs"] == [released["release_ref"]]
+                final_approval = approve_binding(kernel, f, binding_for(f, [draft]))
+                final = final_review_request(kernel, owner, work, branch)
+                assert final["editorial_approval_ref"] == final_approval["approval_ref"]
+                assert final["volume_id"] == second["volume_id"]
+                assert final["ordered_acceptance_refs"] == [draft["acceptance_ref"]]
+                with pytest.raises(DomainError):
+                    ReleaseService(kernel).freeze(owner, final, "no-final-blind-scores")
                 break
             assert state["final_volume_id"] == second["volume_id"] and state["state"] == "FROZEN"
             assert len(calls) == 4
