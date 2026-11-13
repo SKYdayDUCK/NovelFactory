@@ -416,7 +416,8 @@ def advance_opening(kernel, gateway, controller, work, branch):
         while tid:
             verdict = _delivery(repo, "editorial", tid)
             if not verdict or verdict.get("status") != "EDITORIAL_DELIVERED":
-                return None
+                from .opening_recovery import recover_opening_director
+                return recover_opening_director(kernel, repo, gateway, owner, opening, tid)
             tid = verdict.get("successor_task_id")
         if verdict and verdict.get("decision") not in {"NO_MAJOR_CHANGE", "APPROVED"}:
             key = "p6-opening-decision:" + verdict["task_id"] + ":" + str(verdict["generation"])

@@ -75,13 +75,13 @@ def revise_scene(kernel, repo, board):
                 call = repo.one("call_attempts", {"task_id": reader["task_id"], "generation": task["generation"],
                                                   "call_key": "supervised-candidate"})
                 from .production_pipeline import _current_owner
+                if plan["decision"] == PAUSED:
+                    plan = {**plan, "decision":"CHANGED_STRATEGY", "strategy_version":2,
+                            "method":"按本次逐条审稿意见先核对原稿对应段落，再逐项修改，并逐项核实保留的情节和视角。"}
                 plan = reflect_repair(kernel, repo, _current_owner(kernel, repo, board), board["world_ref"],
                                       reader["task_id"], call["attempt_id"], reader["output_ref"], plan, target)
                 plan["review_stage"] = reader["stage"]
                 history.append(plan)
-                if plan["decision"] == PAUSED:
-                    reader["reason"] = PAUSED
-                    return target
                 feedback["strategy_instruction"] = plan["method"]
             for key in (target, "knowledge:" + target[6:], "facts:" + target[6:], "review:" + reader["chapter_id"]):
                 _archive(nodes[key])
@@ -90,6 +90,56 @@ def revise_scene(kernel, repo, board):
                           revision_count=writer.get("revision_count", 0) + 1)
             return target
     return None
+
+
+def resume_extent_revision(kernel, repo, owner, board, identity):
+    """Resume a measured length plateau using the closest draft under the same editorial feedback."""
+    from .production_extent import _count_han
+    writer = board["nodes"][identity]
+    history = writer.get("extent_repairs", [])
+    if not (writer["stage"] == "draft" and writer["state"] == "STOPPED" and writer.get("reason") == PAUSED
+            and history and history[-1]["decision"] == PAUSED and writer.get("output_ref")):
+        return False
+    wr = board["world_ref"]
+    require(not repo.one("selections", {"work_id":wr["work_id"], "selection_kind":"NARRATIVE_SCENE:" + identity[6:]}),
+            "NARRATIVE_SELECTION_CONFLICT", "A frozen scene cannot be revised here")
+    def editorial_findings(record):
+        return [f for f in record.get("revision_feedback", {}).get("findings", [])
+                if not isinstance(f, dict) or "actual_han" not in f]
+    findings = editorial_findings(writer)
+    extent = writer["han_characters"]
+    target = (extent["min"] + extent["max"]) // 2
+    options = []
+    for record in [*writer.get("history", []), writer]:
+        if not record.get("output_ref") or editorial_findings(record) != findings:
+            continue
+        draft = kernel.artifact(repo, record["output_ref"], wr["work_id"], kind="NARRATIVE_DRAFT")["payload"]
+        if (draft["input_world_ref"] != wr or draft["scene_ref"] != writer["scene_ref"]
+                or draft["handoff_refs"] != writer["handoff_refs"]):
+            continue
+        measured = _count_han(kernel.objects.read(draft["text_ref"]["sha256"]).decode("utf-8"))
+        if extent["min"] <= measured <= extent["max"]:
+            continue
+        distance = max(extent["min"] - measured, measured - extent["max"])
+        options.append((distance, measured, record["output_ref"]))
+    require(options, "INVALID_EVIDENCE", "No authorized earlier draft has a measured length")
+    _, measured, prior = min(options, key=lambda o:o[0])
+    current = writer["output_ref"]
+    task = repo.one("tasks", {"task_id":writer["task_id"], "generation":writer["generation"]})
+    require(task and task["state"] == "ACCEPTED", "INVALID_EVIDENCE", "Length recovery requires an accepted writer task")
+    call = repo.one("call_attempts", {"task_id":task["task_id"], "generation":task["generation"],
+                                      "call_key":"supervised-candidate"})
+    method = (f"以本次提供的最接近目标的原稿为底本。实测{measured}个汉字，目标{target}个。"
+              f"请{'删减' if measured > target else '补足'}约{abs(measured-target)}个汉字；"
+              "保留已处理的审稿意见和场景事件，逐段核对后提交完整正文。")
+    plan = {**history[-1], "decision":"CHANGED_STRATEGY", "method":method, "strategy_version":2}
+    plan = reflect_repair(kernel, repo, owner, wr, task["task_id"], call["attempt_id"], current,
+                          plan, "MEASURED_EXTENT_REVISION")
+    _archive(writer)
+    writer.update(prior_draft_ref=prior, revision_count=writer.get("revision_count", 0)+1,
+                  revision_feedback={"report_ref":plan["reflection_ref"], "strategy_instruction":method,
+                                     "findings":[*findings, {"actual_han":measured, "target_han":extent}]})
+    return True
 
 
 def repair_scene_extent(kernel, repo, owner, board, writer, task, audit, draft_ref, prose):

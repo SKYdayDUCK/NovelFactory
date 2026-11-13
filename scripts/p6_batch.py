@@ -209,6 +209,14 @@ def writing_step(kernel, gateway, project, allowance):
         if task and task["state"] == "FAILED" and job and "production_node" in job["config"]:
             return {"status": "BOARD_DIAGNOSIS_PENDING", "task_id": task["task_id"], "reason": result.get("reason")}
     if (result["status"] == "PRODUCTION_HANDOFF" and result.get("state") == "STOPPED"
+            and result.get("reason") == "STRATEGY_REASSESSMENT_REQUIRED"):
+        node = pipeline_status(kernel, owner, work, branch)["nodes"].get(result.get("node_id"), {})
+        from novel_factory.application.board_schema_repair import reviewer_format_method
+        if reviewer_format_method(node):
+            return {**result, "status":"REVIEW_FORMAT_REASSESSMENT_PENDING"}
+        if node.get("stage") == "draft" and (node.get("extent_repairs") or [{}])[-1].get("decision") == "STRATEGY_REASSESSMENT_REQUIRED":
+            return {**result, "status":"EXTENT_REASSESSMENT_PENDING"}
+    if (result["status"] == "PRODUCTION_HANDOFF" and result.get("state") == "STOPPED"
             and result.get("reason") in {"STRATEGY_REASSESSMENT_REQUIRED", "CALL_RECONCILIATION_REQUIRED"}):
         return {**result, "status": "PAUSED"}
     # Re-read authoritative state even after a crash between a checkpoint and editor enrollment.

@@ -92,3 +92,35 @@ def test_postpaid_board_separates_returned_bytes_from_unknown_charge(kernel_env,
         source = repo.one("call_attempts", {"attempt_id": repair["attempt_id"]})
         assert source["state"] == "UNKNOWN" and source["actual_amount"] is None
     assert node["state"] == "DRAFT_STORED" and repair["actual_fix"] == node["output_ref"]
+
+
+def test_quality_reviewer_recovers_repeated_misplaced_payload(kernel_env):
+    kernel = kernel_env["kernel"]
+    fixture = setup_batch(kernel, count=1)
+    wr, owner = fixture["world_ref"], fixture["principal"]
+    args = request(kernel, fixture, 1)
+    args["profile"]["overrides"]["production_mode"] = "quality"
+    with backend() as (adapter, calls, server):
+        server.packet_candidate = answer
+        original = adapter.generate
+        rejected = 0
+        def generate(packet):
+            nonlocal rejected
+            output = original(packet)
+            envelope = json.loads(output.text)
+            if envelope["role_id"] == "reviewer" and rejected < 3:
+                rejected += 1
+                envelope.update(envelope["payload"])
+                output = replace(output, text=json.dumps(envelope))
+            return replace(output, actual_amount=Decimal(0), currency="USD")
+        adapter.generate = generate
+        gateway = connect(kernel, adapter)
+        register_rolling(kernel, gateway, owner, **args)
+        for _ in range(48):
+            RuntimeSupervisor(kernel, gateway).run_once(owner, wr["work_id"], wr["branch_id"])
+            board = pipeline_status(kernel, owner, wr["work_id"], wr["branch_id"])
+            repairs = [entry for node in board["nodes"].values() for entry in node.get("schema_repairs", [])]
+            if any(entry.get("reassessment") and entry.get("actual_fix") for entry in repairs):
+                break
+        assert rejected == 3
+        assert any(entry.get("reassessment") and entry.get("actual_fix") for entry in repairs)

@@ -56,7 +56,7 @@ def structured_diagnostic(raw, audit, bound):
     return {"location": "payload", **error} if error else None
 
 
-def returned_design(kernel, repo, gateway, task, wr, designer, *, allow_malformed=False, allow_contract=False, board_node=None, opening_slot=None):
+def returned_design(kernel, repo, gateway, task, wr, designer, *, allow_malformed=False, allow_contract=False, board_node=None, opening_slot=None, opening_director=False):
     work = wr["work_id"]
     expected_role = (task["role_id"], task["task_kind"])
     if board_node is not None:
@@ -78,7 +78,10 @@ def returned_design(kernel, repo, gateway, task, wr, designer, *, allow_malforme
                 and {"actor_id": actor, "grant_id": task["grant_id"]} in group["payload"]["participant_slots"]
                 and job["knowledge_cut"]["plane"] == "BELIEF" and job["knowledge_cut"]["actor_id"] == actor,
                 "VIEW_DENIED", "Rejected intent belongs to a different sealed slot")
-    require(task["state"] == "FAILED" and (board_node is not None or opening_slot is not None or expected_role == ("world_designer", "initial_world")
+    if opening_director:
+        from .opening_recovery import verify_director_binding
+        require(verify_director_binding(kernel, repo, task, designer["input_ref"]) == wr, "VIEW_DENIED", "Wrong director world")
+    require(task["state"] == "FAILED" and (board_node is not None or opening_director or opening_slot is not None or expected_role == ("world_designer", "initial_world")
             or allow_contract and expected_role == ("reviewer", "fact")),
             "TASK_NOT_ACCEPTABLE", "Only a current rejected design can be repaired")
     call = repo.one("call_attempts", {"task_id": task["task_id"], "generation": task["generation"],
@@ -108,7 +111,7 @@ def returned_design(kernel, repo, gateway, task, wr, designer, *, allow_malforme
             and raw["request_sha256"] == call["request_hash"] == audit["request_sha256"]
             and raw["provider_receipt"] == call["provider_receipt"],
             "INVALID_EVIDENCE", "The design response does not match the original supervised call")
-    if (board_node is not None or opening_slot is not None) and call["state"] == "UNKNOWN":
+    if (board_node is not None or opening_director or opening_slot is not None) and call["state"] == "UNKNOWN":
         from .board_schema_repair import verify_board_transport
         try:
             verify_board_transport(kernel, audit, raw)
@@ -121,7 +124,7 @@ def returned_design(kernel, repo, gateway, task, wr, designer, *, allow_malforme
             if call["state"] == "UNKNOWN":
                 from .postpaid_delivery import verify_postpaid_transport
                 verify_postpaid_transport(kernel, repo, task, call, row, kernel.artifact(repo, audit["response_ref"], work),
-                                          contract_source=True, board_node=board_node, opening_slot=opening_slot)
+                                          contract_source=True, board_node=board_node, opening_slot=opening_slot, opening_director=opening_director)
             else:
                 require(call["state"] == "FAILED" and call["actual_amount"] is not None and call["actual_tokens"] is not None,
                         "CALL_RECONCILIATION_REQUIRED", "Contract failure has no settled accounting")
@@ -136,7 +139,7 @@ def returned_design(kernel, repo, gateway, task, wr, designer, *, allow_malforme
             from .postpaid_delivery import verify_postpaid_transport
             verify_postpaid_transport(kernel, repo, task, call, row,
                                       kernel.artifact(repo, audit["response_ref"], work, kind="AGENT_RESPONSE"),
-                                      syntax_source=True, board_node=board_node, opening_slot=opening_slot)
+                                      syntax_source=True, board_node=board_node, opening_slot=opening_slot, opening_director=opening_director)
         else:
             require(call["state"] == "FAILED" and call["actual_amount"] is not None and call["actual_tokens"] is not None,
                     "CALL_RECONCILIATION_REQUIRED", "The rejected return is not a completed, accounted attempt")

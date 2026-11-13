@@ -123,6 +123,7 @@ def verify_postpaid_transport(
     contract_source=False,
     board_node=None,
     opening_slot=None,
+    opening_director=False,
 ):
     audit = audit_row["payload"]
     config, usage, raw = audit["model_configuration"], audit["usage"], response_row["payload"]
@@ -226,15 +227,18 @@ def verify_postpaid_transport(
                    and group and group["payload"]["base_world_ref"] == wr and
                    {"actor_id": actor, "grant_id": task["grant_id"]} in group["payload"]["participant_slots"]
                    and audit["actor_id"] == actor and audit["input_ref"] == job["dispatch"]["input_ref"])
+        if opening_director:
+            from .opening_recovery import verify_director_binding
+            _check((syntax_source or contract_source) and verify_director_binding(kernel, repo, task, audit["input_ref"]) == wr)
         if contract_source:
-            _check(task["state"] == "FAILED" and (design_scope or board_node is not None or opening_slot is not None)
+            _check(task["state"] == "FAILED" and (design_scope or board_node is not None or opening_director or opening_slot is not None)
                    and audit["outcome"] == "REJECTED" and audit["result_status"] == "FAILED" and audit["output_ref"] is None
                    and audit["reason"] in {"INVALID_ARGUMENT", "MODEL_PROTOCOL_ERROR", "MODEL_IDENTITY_MISMATCH"})
             from .idea_repair import structured_diagnostic
             _check(structured_diagnostic(raw, audit, bound_input))
             return None, bound_input
         if syntax_source:
-            _check(task["state"] == "FAILED" and (design_scope or board_node is not None or opening_slot is not None)
+            _check(task["state"] == "FAILED" and (design_scope or board_node is not None or opening_director or opening_slot is not None)
                    and audit["outcome"] == "REJECTED" and audit["result_status"] == "FAILED"
                    and audit["reason"] == "INVALID_MODEL_OUTPUT" and audit["output_ref"] is None)
             from .idea_repair import unparsed_diagnostic

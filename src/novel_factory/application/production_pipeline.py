@@ -400,7 +400,7 @@ def _enroll(kernel, repo, gateway, owner, board, identity):
         repair = None
     if repair:
         assignment += "\n上一次任务的结构化输出诊断与修复方法：" + json.dumps(
-            {"diagnostic": repair["diagnostic"], "method": repair["method"]}, ensure_ascii=False)
+            {"diagnostic": repair["diagnostic"], "method": repair.get("reassessment", repair)["method"]}, ensure_ascii=False)
     task = RuntimeTaskService(kernel, gateway).prepare(owner, wr, role_id=role, task_kind=kind,
         knowledge_reread_reason="known_error" if repair else None,
         assignment=assignment, knowledge_cut=cut, subject_ids=board["subject_ids"], predicates=board["predicates"],
@@ -695,6 +695,13 @@ def advance_pipeline(kernel, gateway, controller, work, branch):
                 status = "STRATEGY_REASSESSMENT_REQUIRED" if nodes[revised].get("repair_plans", [{}])[-1].get("decision") == "STRATEGY_REASSESSMENT_REQUIRED" else "SCENE_REVISION_REQUESTED"
                 return {"status": status, "node_id": revised, "board_ref": _save(bound, repo, controller, board)}
         for identity, node in nodes.items():
+            if board.get("production_mode") == "quality" and not expired and node.get("reason") == "STRATEGY_REASSESSMENT_REQUIRED":
+                from .scene_revision import resume_extent_revision
+                from .board_schema_repair import resume_review_format
+                owner = _current_owner(bound, repo, board)
+                if (resume_extent_revision(bound, repo, owner, board, identity)
+                        or resume_review_format(bound, repo, owner, board, identity)):
+                    break
             if node["state"] == "WAITING_HANDOFF":
                 if expired:
                     node.update(state="STOPPED", reason="TASK_EXPIRED")

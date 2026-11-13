@@ -526,7 +526,7 @@ def test_quality_length_checked_before_readers_and_freeze(kernel_env):
     with backend() as (adapter, calls, server):
         original = adapter.generate
         adapter.generate = lambda packet: replace(original(packet), actual_amount=Decimal(0), currency="USD")
-        lengths = iter([1, 3, 5, 7])
+        lengths = iter([1, 5, 3, 2, 7])
         def candidate(packet):
             result = answer(packet)
             if packet["context"]["role_id"] == "writer":
@@ -545,6 +545,8 @@ def test_quality_length_checked_before_readers_and_freeze(kernel_env):
             from novel_factory.application.production_pipeline import _load
             board = _load(kernel, repo, work, branch)
             writer = next(node for node in board["nodes"].values() if node["stage"] == "draft")
-            assert [r["actual"] for r in writer["extent_repairs"]] == [1, 3, 5]
-            assert len({r["task_id"] for r in writer["history"]}) == 3
+            assert [r["actual"] for r in writer["extent_repairs"]] == [1, 5, 3, 2]
+            assert writer["extent_repairs"][-1]["decision"] == "STRATEGY_REASSESSMENT_REQUIRED"
+            assert writer["prior_draft_ref"] == writer["history"][1]["output_ref"]
+            assert len({r["task_id"] for r in writer["history"]}) == 4
             assert len(repo.many("tasks", {"work_id": work, "role_id": "reviewer", "task_kind": "epistemic"})) == 1

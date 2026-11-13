@@ -6,6 +6,7 @@ from uuid import uuid4
 from sqlalchemy import text
 
 from .authorization import Principal
+from .volume_successor import _selected
 from .idea_repair import UnparsedDesign, returned_design
 from .kernel import require
 from .planning import PlanningService
@@ -15,7 +16,65 @@ from .semantic_dependencies import check_task_dependencies
 from .supervisor import RuntimeSupervisor
 
 
-def _successor(kernel, repo, supervisor, controller, task, *, actor=False, diagnosis=None, method=None):
+def verify_director_binding(kernel, repo, task, input_ref):
+    """Bind a rejected initial director to the current opening and its accepted joint event."""
+    from .idea_opening import _delivery
+    work, branch = task["work_id"], task["branch_id"]
+    ref = _selected(repo, work, "P6_OPENING:" + branch)
+    require(ref and not _selected(repo, work, "P6_OPENING_DONE:" + branch), "VIEW_DENIED", "Opening already changed")
+    opening = kernel.artifact(repo, ref, work, kind="P6_OPENING")["payload"]
+    sim = opening["simulation"]
+    config = repo.one("supervisor_jobs", {"task_id":task["task_id"]})["config"]
+    joint = _delivery(repo, "joint", sim["adjudicator_task_id"])
+    require(task["task_id"] == sim["director_task_id"] and (task["role_id"], task["task_kind"]) ==
+            ("volume_director", "volume_review") and config["dispatch"]["input_ref"] == input_ref
+            and config.get("editorial", {}).get("operation") == "request_change" and config["continue_editorial"]
+            and config["editorial"]["reference_timeline_ref"] == sim["reference_timeline_ref"]
+            and config["knowledge_cut"]["plane"] == "PLAN" and joint and joint["status"] == "JOINT_ACCEPTED"
+            and joint["world_ref"] == kernel.head(repo, work, branch), "VIEW_DENIED", "Director task no longer owns this cut")
+    from .editorial_handoff import check_authorizer
+    require(check_authorizer(kernel, repo, config, task) == Principal(opening["grant_id"], opening["principal_id"]),
+            "VIEW_DENIED", "Opening director authorizer changed")
+    return joint["world_ref"]
+
+
+def recover_opening_director(kernel, repo, gateway, owner, opening, task_id):
+    from .production_profiles import load_profile
+    wr = opening["world_ref"]
+    if task_id != opening["simulation"]["director_task_id"]:
+        return None
+    task = repo.one("tasks", {"work_id":wr["work_id"], "branch_id":wr["branch_id"], "task_id":task_id}, lock="update")
+    if task["state"] != "FAILED":
+        return None
+    profile = load_profile(kernel, repo, owner, wr["work_id"], wr["branch_id"])
+    if not profile or profile["profile"].get("production_mode") != "quality":
+        return None
+    config = repo.one("supervisor_jobs", {"task_id":task_id})["config"]
+    input_ref = config["dispatch"]["input_ref"]
+    cut = verify_director_binding(kernel, repo, task, input_ref)
+    result, audit, ref = returned_design(kernel, repo, gateway, task, cut, {"input_ref":input_ref},
+                                        allow_contract=True, allow_malformed=True, opening_director=True)
+    require(isinstance(result, UnparsedDesign), "INVALID_EVIDENCE", "No verified director format rejection")
+    history = opening.setdefault("director_repairs", [])
+    plan = reflect_repair(kernel, repo, owner, cut, task_id, audit["attempt_id"], ref,
+                          plan_repair("schema", result.diagnostic, history), "OPENING_DIRECTOR")
+    if plan["decision"] == PAUSED:
+        return {"status":"OPENING_REVIEW_REQUIRED", "reason":PAUSED, "task_id":task_id}
+    history.append({**plan, "task_id":task_id, "attempt_id":audit["attempt_id"]})
+    bound = kernel.in_transaction(repo)
+    supervisor = RuntimeSupervisor(bound, gateway.with_kernel(bound))
+    successor = _successor(bound, repo, supervisor, owner, task, director_cut=cut,
+                           diagnosis=result.diagnostic, method=plan["method"])
+    supervisor.workflow.wait(successor, 0, [opening["simulation"]["control_task_id"]],
+        work_id=wr["work_id"], branch_id=wr["branch_id"], mode="AND",
+        authorize_in_tx=lambda _: bound.authorize(repo, owner, wr["work_id"], "ADMIN", wr["branch_id"]))
+    opening["simulation"]["director_task_id"] = successor
+    new_ref = _artifact(kernel, repo, wr["work_id"], owner, "P6_OPENING", opening)
+    PlanningService(bound)._select(repo, cut, "P6_OPENING:" + wr["branch_id"], new_ref)
+    return {"status":"OPENING_DIRECTOR_REPAIR_ENROLLED", "task_id":successor}
+
+
+def _successor(kernel, repo, supervisor, controller, task, *, actor=False, director_cut=None, diagnosis=None, method=None):
     config = repo.one("supervisor_jobs", {"task_id": task["task_id"]})["config"]
     spec = deepcopy(repo.one("task_inputs", {"task_id": task["task_id"], "generation": 0})["spec"])
     grant = repo.one("grants", {"grant_id": task["grant_id"]}, lock="share")
@@ -25,19 +84,24 @@ def _successor(kernel, repo, supervisor, controller, task, *, actor=False, diagn
     dispatch = dict(config["dispatch"])
     new_id = str(uuid4())
     spec.update(task_id=new_id, state="READY" if actor else "BLOCKED")
-    if actor:
+    if director_cut:
+        current = repo.one("task_inputs", {"task_id":task["task_id"], "generation":task["generation"]})["spec"]
+        require(current["world_ref"] == director_cut, "TASK_REBIND_REQUIRED", "Director read cut changed")
+        # The director claims its accepted world through the original control-task wait.
+        # Its unclaimed TaskSpec must retain the earlier world, exactly like the original.
+    if actor or director_cut:
         source_ref = dispatch["input_ref"]
         original = kernel.artifact(repo, source_ref, task["work_id"], kind="AGENT_INPUT")["payload"]
-        require(not original.get("dynamic_assignment_ref") and original["output_contract"] ==
-                {"name": "ActionProposal", "version": "2.0"}, "TASK_REBIND_REQUIRED", "Cannot transfer task-specific instructions")
+        require(not original.get("dynamic_assignment_ref") and (director_cut or original["output_contract"] ==
+                {"name": "ActionProposal", "version": "2.0"}), "TASK_REBIND_REQUIRED", "Cannot transfer task-specific instructions")
         assignment = original["assignment"] + "\n" + json.dumps({
-            "format_correction": "使用本次任务外层身份。将全部行动字段放入 payload，外层不增加任何字段。",
+            "format_correction": "使用本次任务外层身份，将本角色的业务字段放入 payload，遵守冻结的字段名、类型和嵌套层级。",
             "diagnostic": diagnosis, "method": method,
         }, ensure_ascii=False)
         runtime = kernel.artifact(repo, original["runtime_ref"], task["work_id"], kind="AGENT_RUNTIME")["payload"]
         prepared = supervisor.gateway.prepare_input(controller, spec["world_ref"], role_id=task["role_id"],
             task_kind=task["task_kind"], skill_name=runtime["skill_name"], assignment=assignment, task_id=new_id,
-            routing_instance_id=config["knowledge_cut"]["actor_id"], material_refs=original["material_refs"],
+            routing_instance_id=config["knowledge_cut"].get("actor_id"), material_refs=original["material_refs"],
             adapter_id="@policy" if original.get("routing_decision") else original["adapter_id"],
             knowledge_reread_reason="known_error")
         revised = prepared["input_ref"]
@@ -50,9 +114,15 @@ def _successor(kernel, repo, supervisor, controller, task, *, actor=False, diagn
         dispatch["input_ref"] = revised
     role_owner = Principal(task["grant_id"], task["principal_id"])
     kernel.create_task(role_owner, spec, "opening-recovery:" + new_id)
+    if director_cut:
+        route = {"editorial":config["editorial"], "continue_editorial":config["continue_editorial"]}
+    elif actor:
+        route = {"seal_interaction_id":config["seal_interaction_id"]}
+    else:
+        route = {"joint":config["joint"]}
     supervisor.enroll(controller, new_id, manifest_ref=config["manifest_ref"], knowledge_cut=config["knowledge_cut"],
                       context_tokens=config["context_tokens"], **dispatch,
-                      **({"seal_interaction_id": config["seal_interaction_id"]} if actor else {"joint": config["joint"]}))
+                      **route)
     repo.conn.execute(text("""
         INSERT INTO nf_trace_tasks(task_id, trace_id, volume_id)
         SELECT :new_id, trace_id, volume_id FROM nf_trace_tasks WHERE task_id=:source

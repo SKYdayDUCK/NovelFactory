@@ -25,6 +25,46 @@ def verify_board_transport(kernel, audit, raw):
     require(valid, "CALL_RECONCILIATION_REQUIRED", "Board response bytes require transport reconciliation")
 
 
+def reviewer_format_method(node):
+    """Specific repair for observed reviewer fields misplaced on the envelope."""
+    repairs = node.get("schema_repairs") or []
+    if not repairs or node["stage"] not in {"review", "epistemic"}:
+        return None
+    last = repairs[-1]
+    diag = last.get("diagnostic", {})
+    fields = diag.get("move_inside_payload")
+    if (not fields or diag.get("location") != "envelope" or diag.get("keyword") != "additionalProperties"
+            or not set(fields) <= {"summary", "issues", "counterinterpretations", "evidence_refs"}):
+        return None
+    from .prompt_schema import inline_schema
+    allowed = inline_schema("AgentModelResponse", "agent")["required"]
+    return ("先单独完成审核内容，再将它作为一个对象赋给外层 payload。外层只保留这些键：" +
+            json.dumps(allowed) + "。下列键只能位于 payload 内：" + json.dumps(fields) +
+            "。发送前逐个核对最外层键；保留全部实质审核意见。")
+
+
+def resume_review_format(kernel, repo, owner, board, identity):
+    node = board["nodes"][identity]
+    method = reviewer_format_method(node)
+    if not method or node["state"] != "STOPPED" or node.get("reason") != PAUSED:
+        return False
+    last = node["schema_repairs"][-1]
+    require(last["decision"] == PAUSED and last["task_id"] == node["task_id"] and not last.get("actual_fix"),
+            "STALE_GENERATION", "Review format no longer matches the rejected candidate")
+    task = repo.one("tasks", {"task_id":last["task_id"], "generation":last["generation"], "state":"FAILED"})
+    require(task, "TASK_REBIND_REQUIRED", "Rejected review generation changed")
+    check_task_dependencies(repo, task["task_id"], task["generation"])
+    plan = {"family":"schema", "signature":last["signature"], "occurrences":last["occurrences"],
+            "decision":"CHANGED_STRATEGY", "strategy_version":2, "method":method}
+    plan = reflect_repair(kernel, repo, owner, board["world_ref"], task["task_id"], last["attempt_id"],
+                          last["audit_ref"], plan, "REVIEW_PAYLOAD_PLACEMENT")
+    last["reassessment"] = plan
+    node.pop("task_id")
+    node.pop("enrolled_at", None)
+    node.update(state="PENDING", reason="SCHEMA_REPAIR_REQUESTED")
+    return True
+
+
 def recover_board_node(kernel, repo, gateway, owner, board, identity, task):
     node = board["nodes"][identity]
     wr = node.get("world_ref", board["world_ref"])

@@ -190,6 +190,9 @@ def test_reviewed_design_opens_sealed_interaction_before_any_writing(
                 }
             editorial = packet["editorial"]
             if editorial["operation"] == "request_change":
+                if harness and not getattr(answer, "director_rejected_once", False):
+                    answer.director_rejected_once = True
+                    return {"unexpected": True}
                 return {
                     "text": "改去桥头等信" if deviation else "原计划仍可实行",
                     "important_deltas": ["会面地点改变"] if deviation else [],
@@ -282,6 +285,7 @@ def test_reviewed_design_opens_sealed_interaction_before_any_writing(
         assert turn.get("status") == "OPENING_ACCEPTED", statuses
         if harness:
             assert ("OPENING_FORMAT_REPAIR_ENROLLED", None) in statuses
+            assert ("OPENING_DIRECTOR_REPAIR_ENROLLED", None) in statuses
             assert repaired_joint
         assert len(actors) == 2
         assert all("市场" in brief and "末班渡船" not in brief for brief in actors.values())
