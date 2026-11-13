@@ -34,3 +34,17 @@ Run on Linux using an isolated PG17 cluster and an administrative test URL:
 taskset -c 6 python -m benchmarks.hera_mcp_status_auth --server-cpus 7 \
   --order ABBA --clients 8 --warm-calls 24 --output /tmp/hera-status-auth
 ```
+
+
+## Two-client SDK stage probe
+
+An additional four arms reuse the same server/PG quotas and separate processes with two SDK clients. Each arm recorded two first and 24 warm reads. The benchmark wraps the locked SDK's stateless manager up to transport dispatch, JSON byte decoding, Pydantic JSON-RPC envelope validation and final JSON response construction. The latter includes the response body encode and Response construction, excluding socket delivery. The setup stage includes scheduling of the per-request SDK task. Reported microseconds are warm per-call medians. This low-concurrency diagnostic does not replace the eight-client A/B/B/A above.
+
+| Arm | Stateless setup µs | JSON decode µs | Envelope validation µs | Encode response µs | Warm P95 ms | Verified audit/Outbox |
+|---|---:|---:|---:|---:|---:|---:|
+| 0-off | 705.2 | 14.6 | 42.9 | 83.4 | 191.17 | 52/52 |
+| 1-on | 597.3 | 14.8 | 42.7 | 69.5 | 107.49 | 52/52 |
+| 2-on | 630.7 | 15.3 | 43.5 | 58.9 | 136.98 | 52/52 |
+| 3-off | 731.2 | 15.5 | 45.1 | 66.9 | 111.69 | 52/52 |
+
+[Raw SDK and application traces](raw/mcp-codec-abba).
