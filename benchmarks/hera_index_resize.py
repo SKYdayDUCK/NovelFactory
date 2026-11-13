@@ -79,7 +79,7 @@ def run(kernel):
         begin = perf_counter_ns()
         res = svc.process_reserved(*scope, lease)
         end = perf_counter_ns()
-        assert res["status"] == "INDEXED" and res["message_id"] == lease["outbox_id"]
+        assert res["consumed"] and res["message_id"] == lease["outbox_id"]
         return [res["message_id"], begin, end]
 
     def renew():
