@@ -697,6 +697,256 @@
         "short_arc"
       ],
       "additionalProperties": false
+    },
+    "ShortEndingPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "storyline",
+        "chapter_goals"
+      ],
+      "properties": {
+        "storyline": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000,
+          "pattern": "\\S"
+        },
+        "chapter_goals": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1200,
+            "pattern": "\\S"
+          }
+        },
+        "opening": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "counterpart",
+            "other_place",
+            "protagonist_knowledge",
+            "counterpart_knowledge",
+            "situation"
+          ],
+          "properties": {
+            "counterpart": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "\\S"
+            },
+            "other_place": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "\\S"
+            },
+            "protagonist_knowledge": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 800,
+              "pattern": "\\S"
+            },
+            "counterpart_knowledge": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 800,
+              "pattern": "\\S"
+            },
+            "situation": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 800,
+              "pattern": "\\S"
+            },
+            "environment": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "moving_entity"
+              ],
+              "properties": {
+                "moving_entity": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200,
+                  "pattern": "\\S"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ShortEndingPlanReview": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64000
+        },
+        "issues": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ReviewIssue"
+          },
+          "maxItems": 64
+        },
+        "counterinterpretations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "maxItems": 32
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EvidenceRef"
+          },
+          "maxItems": 128
+        },
+        "short_arc": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "beginning": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "development": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "turning_point": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "ending": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "decision": {
+              "enum": [
+                "COMPLETE",
+                "ENDING_PLAN_REQUIRED"
+              ]
+            }
+          },
+          "required": [
+            "beginning",
+            "development",
+            "turning_point",
+            "ending",
+            "decision"
+          ]
+        },
+        "ending_plan_review": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "candidate_ref",
+            "opening_and_chapters_confirmed",
+            "answers"
+          ],
+          "properties": {
+            "candidate_ref": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+            },
+            "opening_and_chapters_confirmed": {
+              "type": "boolean"
+            },
+            "answers": {
+              "type": "array",
+              "maxItems": 32,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "question",
+                  "answer"
+                ],
+                "properties": {
+                  "question": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4000
+                  },
+                  "answer": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4000
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "summary",
+        "issues",
+        "counterinterpretations",
+        "evidence_refs",
+        "short_arc",
+        "ending_plan_review"
+      ],
+      "additionalProperties": false
+    },
+    "NextSimulatedVolume": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "chapter_goals",
+        "volume_brief",
+        "scene_situation",
+        "environment_destination"
+      ],
+      "properties": {
+        "chapter_goals": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1200,
+            "pattern": "\\S"
+          }
+        },
+        "volume_brief": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000,
+          "pattern": "\\S"
+        },
+        "scene_situation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 800,
+          "description": "下一次独立行动要裁决的当前条件，不能预定后果。"
+        },
+        "environment_destination": {
+          "enum": [
+            "INITIAL_PLACE",
+            "OTHER_PLACE",
+            "NO_MOVEMENT"
+          ],
+          "description": "既有环境实体的下一步位置。NO_MOVEMENT 表示本卷没有新的环境位移。"
+        }
+      }
     }
   }
 }
