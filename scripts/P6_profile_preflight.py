@@ -16,7 +16,7 @@ def inspect_profiles(path):
         reasons = []
         if profile.model.startswith("REPLACE_"):
             reasons.append("MODEL_NOT_SELECTED")
-        if not resolve(profile.secret_ref):
+        if profile.auth_mode != "host-login" and not resolve(profile.secret_ref):
             reasons.append("CREDENTIAL_NOT_CONFIGURED")
         if profile.kind == "codex-cli" and not resolve_host_binary():
             reasons.append("CODEX_EXECUTABLE_UNAVAILABLE")

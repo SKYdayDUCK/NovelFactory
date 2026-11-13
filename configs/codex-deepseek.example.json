@@ -1,0 +1,20 @@
+{
+  "profiles": {
+    "codex_planner_reviewer": {
+      "kind": "codex-cli",
+      "model": "gpt-6.1-sol",
+      "secret_ref": "NF_CODEX_HOST_ACCOUNT",
+      "auth_mode": "host-login",
+      "max_output_tokens": 262144,
+      "model_output_ceiling": 262144,
+      "timeout_seconds": 600
+    },
+    "deepseek_flash_writer": {
+      "kind": "deepseek",
+      "model": "deepseek-flash",
+      "secret_ref": "NF_DEEPSEEK_API_KEY",
+      "max_output_tokens": 8192,
+      "timeout_seconds": 300
+    }
+  }
+}

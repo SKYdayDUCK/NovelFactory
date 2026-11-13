@@ -49,17 +49,19 @@ class Profile:
                 or type(self.timeout_seconds) is not int or not 1 <= self.timeout_seconds <= 600):
             raise ProfileError("INVALID_MODEL_CONFIG")
         if self.kind == "codex-cli":
-            if self.endpoint is not None or self.auth_mode not in ("chatgpt-plan", "api-key"):
+            if self.endpoint is not None or self.auth_mode not in ("chatgpt-plan", "api-key", "host-login"):
                 raise ProfileError("INVALID_MODEL_CONFIG")
             # Sign in with ChatGPT rejects max_output_tokens. This mode therefore
             # requires reserving the whole documented ceiling of the selected model.
-            if self.auth_mode == "chatgpt-plan":
+            if self.auth_mode in ("chatgpt-plan", "host-login"):
                 if (type(self.model_output_ceiling) is not int
                         or self.model_output_ceiling != self.max_output_tokens):
                     raise ProfileError("MODEL_OUTPUT_CEILING_REQUIRED")
-                if (not isinstance(self.oauth_client_id, str)
+                if self.auth_mode == "chatgpt-plan" and (not isinstance(self.oauth_client_id, str)
                         or not re.fullmatch(r"oaiapp_[A-Za-z0-9_-]{1,120}", self.oauth_client_id)):
                     raise ProfileError("MODEL_PLAN_CLIENT_REQUIRED")
+                if self.auth_mode == "host-login" and self.oauth_client_id is not None:
+                    raise ProfileError("INVALID_MODEL_CONFIG")
             elif self.model_output_ceiling is not None or self.oauth_client_id is not None:
                 raise ProfileError("INVALID_MODEL_CONFIG")
         else:
@@ -96,6 +98,10 @@ class Profile:
     def preflight(self):
         if os.environ.get("NF_RUNTIME_LIVE_APPROVED") != "1":
             raise ProfileError("MODEL_CALL_NOT_AUTHORIZED")
+        if self.auth_mode == "host-login":
+            if not resolve_host_binary():
+                raise ProfileError("MODEL_UNAVAILABLE")
+            return None  # The native CLI owns its authenticated account and refresh.
         from .credentials import CredentialError, resolve
         try:
             credential = resolve(self.secret_ref)
@@ -179,6 +185,11 @@ def invoke(profile, request, *, authorize, record, receipt_target=None):
                    or not isinstance(m["content"], str) for m in request.messages)):
         raise ModelCallFailure("INVALID_MODEL_REQUEST", sent=False)
     if profile.kind == "codex-cli":
+        if profile.auth_mode == "host-login":
+            if request.max_output_tokens != profile.max_output_tokens:
+                raise ModelCallFailure("MODEL_OUTPUT_CEILING_REQUIRED", sent=False)
+            from .native_codex import generate
+            return generate(profile, request, authorize=authorize, record=record)
         from .codex import generate
         return generate(profile, request, authorize=authorize, record=record)
     credential = _authorized_credential(profile, request, authorize)
