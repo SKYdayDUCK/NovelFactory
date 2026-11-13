@@ -1,0 +1,940 @@
+{
+  "source_commit": "f130ebecf82c224e2225cc2a0c50ba722973654f",
+  "measured_at": "2026-11-13T09:05:41.701478+00:00",
+  "system": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "python": "3.12.14",
+  "affinity": 1,
+  "postgres": [
+    17,
+    11
+  ],
+  "load": "closed loop drain of simultaneously READY fixed-shape world revisions",
+  "model": "no provider call or synthetic usage",
+  "parent_pool": 3,
+  "child_pool_per_process": 1,
+  "cpu_quota_reported": null,
+  "trials": [
+    {
+      "mode": "fixed",
+      "jobs": 24,
+      "successful": 24,
+      "failures": 0,
+      "elapsed_s": 1.7129405129999213,
+      "jobs_per_s": 14.010994437844266,
+      "mean_completion_s": 0.977448154792152,
+      "p95_completion_s": 1.6982722719985759,
+      "p99_completion_s": 1.7129309420015488,
+      "p95_service_s": 0.1959003429983568,
+      "mean_cpu_pct": 90.009,
+      "mean_cpu_psi_avg10": null,
+      "mean_parent_rss_kib": 68349.231,
+      "mean_available_bytes": 1441845563.077,
+      "warm_processes": 2,
+      "capacity_series": [
+        [
+          0.002,
+          2
+        ],
+        [
+          0.151,
+          2
+        ],
+        [
+          0.334,
+          2
+        ],
+        [
+          0.492,
+          2
+        ],
+        [
+          0.628,
+          2
+        ],
+        [
+          0.746,
+          2
+        ],
+        [
+          0.874,
+          2
+        ],
+        [
+          1.043,
+          2
+        ],
+        [
+          1.166,
+          2
+        ],
+        [
+          1.307,
+          2
+        ],
+        [
+          1.445,
+          2
+        ],
+        [
+          1.58,
+          2
+        ],
+        [
+          1.698,
+          2
+        ]
+      ],
+      "scale_decisions": [],
+      "post_drain_targets": [],
+      "provider_calls": 0,
+      "provider_invoice": null,
+      "records": [
+        {
+          "source_event": "d603104f-06c7-4929-b2bc-10192ca95c0d",
+          "completed_s": 0.19902434799951152,
+          "service_s": 0.1959003429983568,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "1c857ecf-70fd-4600-8476-488261478289",
+          "completed_s": 0.24272620999909122,
+          "service_s": 0.21168934500019532,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "4f9fafdb-361a-4ff1-b6d1-60dd24fe2ac2",
+          "completed_s": 0.3335822590015596,
+          "service_s": 0.13453283100170665,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "998be148-819f-4755-a584-8b8e3affbaf3",
+          "completed_s": 0.3656671600001573,
+          "service_s": 0.12292393199822982,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "9588a188-3ff6-4775-a98b-b843aa7230a9",
+          "completed_s": 0.4915480320014467,
+          "service_s": 0.15701472900036606,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "1531c269-4182-4ccd-b8e9-b888579848bc",
+          "completed_s": 0.5387798330011719,
+          "service_s": 0.17310037200149964,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "6f951a27-aba3-427e-bfec-7f3374d75ad0",
+          "completed_s": 0.6275088820002566,
+          "service_s": 0.13353399599873228,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "d238e9d4-0695-419d-a2d5-c079d58e7efc",
+          "completed_s": 0.659363963000942,
+          "service_s": 0.12057333600023412,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "431a75e9-abaa-4dcb-a763-46f6b7fb3fa4",
+          "completed_s": 0.7461220840013993,
+          "service_s": 0.11694763700143085,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "ec8779c6-82ab-4273-b2a7-db0f699aca11",
+          "completed_s": 0.7867694859996845,
+          "service_s": 0.1273918019978737,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "ab636400-db54-4e1c-a4a7-63c8462743c1",
+          "completed_s": 0.8744666499987943,
+          "service_s": 0.1272548499982804,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "3233284e-5c03-4442-b2b5-98abb09f1a9a",
+          "completed_s": 0.9096566600019287,
+          "service_s": 0.12287469100192538,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "e8892f6d-af01-40ea-a913-3f996110d9c0",
+          "completed_s": 1.0433239500016498,
+          "service_s": 0.1678511800018896,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "6bd1c5ea-e914-40d5-8fd3-11a1b5440a2f",
+          "completed_s": 1.077520168000774,
+          "service_s": 0.1678494320003665,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "423e3c2c-cd1c-4a45-8833-9aa460b9ac40",
+          "completed_s": 1.166487237002002,
+          "service_s": 0.12140361199999461,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "994becd2-bfd9-4fbd-88aa-f474be223e82",
+          "completed_s": 1.2046806610014755,
+          "service_s": 0.1271479110000655,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "ebcb6cd1-0eb1-4134-883e-5d4882db05ba",
+          "completed_s": 1.3069879639988358,
+          "service_s": 0.13960496599975158,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "893f13c0-2146-4ed3-a509-e316c7c73985",
+          "completed_s": 1.3554600429997663,
+          "service_s": 0.15076742299788748,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "44407581-751f-4ad5-9527-0a7adb2a4ce0",
+          "completed_s": 1.4454598580014135,
+          "service_s": 0.1373282710010244,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "2d5f699f-4706-4774-a0ee-db582a8dae99",
+          "completed_s": 1.4833544319990324,
+          "service_s": 0.12788252300015301,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "59f0d5b8-7472-4675-9945-cfa577403c85",
+          "completed_s": 1.5801413299996057,
+          "service_s": 0.13375464199998532,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "cc4aea40-2a1c-4244-b82d-110481d05ff7",
+          "completed_s": 1.6089212910010247,
+          "service_s": 0.12555458299902966,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "6a70210b-336e-4a61-b28e-e08a8bf84058",
+          "completed_s": 1.6982722719985759,
+          "service_s": 0.11706726799820899,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "a6e90184-472c-46f4-ab73-544010f03ad9",
+          "completed_s": 1.7129309420015488,
+          "service_s": 0.10399752900048043,
+          "status": "INDEXED"
+        }
+      ]
+    },
+    {
+      "mode": "adaptive",
+      "jobs": 24,
+      "successful": 24,
+      "failures": 0,
+      "elapsed_s": 1.535298230999615,
+      "jobs_per_s": 15.632142026486852,
+      "mean_completion_s": 0.8141747247074514,
+      "p95_completion_s": 1.471403832998476,
+      "p99_completion_s": 1.5352862270010519,
+      "p95_service_s": 0.08841246099837008,
+      "mean_cpu_pct": 88.656,
+      "mean_cpu_psi_avg10": null,
+      "mean_parent_rss_kib": 68768.0,
+      "mean_available_bytes": 1437981696.0,
+      "warm_processes": 2,
+      "capacity_series": [
+        [
+          0.001,
+          1
+        ],
+        [
+          0.186,
+          1
+        ],
+        [
+          0.29,
+          1
+        ],
+        [
+          0.407,
+          1
+        ],
+        [
+          0.597,
+          1
+        ],
+        [
+          0.719,
+          1
+        ],
+        [
+          0.846,
+          1
+        ],
+        [
+          0.966,
+          1
+        ],
+        [
+          1.096,
+          1
+        ],
+        [
+          1.222,
+          1
+        ],
+        [
+          1.341,
+          1
+        ],
+        [
+          1.471,
+          1
+        ]
+      ],
+      "scale_decisions": [],
+      "post_drain_targets": [
+        [
+          3.492001269478351e-06,
+          1
+        ]
+      ],
+      "provider_calls": 0,
+      "provider_invoice": null,
+      "records": [
+        {
+          "source_event": "1fdf2fe6-fa8c-4979-8b69-0fe0cde10a48",
+          "completed_s": 0.09806951999780722,
+          "service_s": 0.08841246099837008,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "ed4bc0d4-75e9-4be8-b7d3-53c4b4718a05",
+          "completed_s": 0.18646966199958115,
+          "service_s": 0.08838749400092638,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "835e4000-86e2-419f-a77a-454a7fad2c48",
+          "completed_s": 0.24115293900104007,
+          "service_s": 0.04755352700158255,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "25834fd1-f975-4592-a7f2-82466eb11a08",
+          "completed_s": 0.2904758689983282,
+          "service_s": 0.049307211997074774,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "bca25b35-7e17-4011-95c6-294323cdddc6",
+          "completed_s": 0.3422738240005856,
+          "service_s": 0.05096198300088872,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "a3e1bd68-7df2-4f6e-bf40-adb084660501",
+          "completed_s": 0.40734288100065896,
+          "service_s": 0.05735713100148132,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "aa0a6a2b-5c7e-4b9e-b9b1-17b5e24c066a",
+          "completed_s": 0.45761372099877917,
+          "service_s": 0.0492121520001092,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "3d210d3a-2404-4bc4-9091-04c31a0e4f59",
+          "completed_s": 0.5007072420012264,
+          "service_s": 0.0430772910003725,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "df8db0c5-45d7-4932-8963-32e6c2888020",
+          "completed_s": 0.5971261689992389,
+          "service_s": 0.09083350400032941,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "44b0f655-639c-4228-bd45-e4ff05f25ed7",
+          "completed_s": 0.651191316999757,
+          "service_s": 0.05309512399981031,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "c4e87201-e161-485f-b92e-6f6d33111109",
+          "completed_s": 0.7189190709977993,
+          "service_s": 0.06042123299994273,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "230e5de8-ea1d-44de-9770-c7a5db3fc5e8",
+          "completed_s": 0.7907325599990145,
+          "service_s": 0.07038651800030493,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "982bf38a-9441-4592-b3e4-2814cf4da9f8",
+          "completed_s": 0.846486032998655,
+          "service_s": 0.05573767099849647,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "22472fdf-c2b9-43a9-af47-4b31fba6bf01",
+          "completed_s": 0.9063694969991047,
+          "service_s": 0.05128205100118066,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "23e7e984-b0b5-436b-aab3-ffe2e0f62cdb",
+          "completed_s": 0.9655909619978047,
+          "service_s": 0.05920663399956538,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "c95e4157-10fb-419d-867a-5dbb96fda9c1",
+          "completed_s": 1.0251937180000823,
+          "service_s": 0.05812106200028211,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "3aed5207-a955-4b9d-9e60-d2dc6614cc82",
+          "completed_s": 1.0961745969980257,
+          "service_s": 0.06388336899908609,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "9094feda-0608-416f-a1dc-c337cc70b5c8",
+          "completed_s": 1.1536434039990127,
+          "service_s": 0.05656512399946223,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "4fd4de4e-cbe8-4ca6-b937-efbf4ac9d64a",
+          "completed_s": 1.222245289998682,
+          "service_s": 0.06858652899973094,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "97be4b11-065a-40ef-a481-7d84f20f995c",
+          "completed_s": 1.2838035559980199,
+          "service_s": 0.05563767499916139,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "1019b145-0252-4e3f-8275-c500513ed8fe",
+          "completed_s": 1.341359490998002,
+          "service_s": 0.05754255299689248,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "930eb66e-9504-45c9-94ac-6e0e97f2d523",
+          "completed_s": 1.4105620099981024,
+          "service_s": 0.06832891699741594,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "930cb5bd-c67c-4446-bd68-dd0a8abe39f5",
+          "completed_s": 1.471403832998476,
+          "service_s": 0.05664074499873095,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "66b89cf8-079d-460d-9223-b128f260711a",
+          "completed_s": 1.5352862270010519,
+          "service_s": 0.06199982000180171,
+          "status": "INDEXED"
+        }
+      ]
+    },
+    {
+      "mode": "adaptive",
+      "jobs": 24,
+      "successful": 24,
+      "failures": 0,
+      "elapsed_s": 2.0061683189996984,
+      "jobs_per_s": 11.963103879522288,
+      "mean_completion_s": 1.1260709331252958,
+      "p95_completion_s": 1.94530800800203,
+      "p99_completion_s": 2.0061560430003738,
+      "p95_service_s": 0.18954905999999028,
+      "mean_cpu_pct": 81.53,
+      "mean_cpu_psi_avg10": null,
+      "mean_parent_rss_kib": 68796.0,
+      "mean_available_bytes": 1666607786.667,
+      "warm_processes": 2,
+      "capacity_series": [
+        [
+          0.001,
+          1
+        ],
+        [
+          0.221,
+          1
+        ],
+        [
+          0.362,
+          1
+        ],
+        [
+          0.484,
+          1
+        ],
+        [
+          0.66,
+          1
+        ],
+        [
+          0.812,
+          1
+        ],
+        [
+          0.976,
+          1
+        ],
+        [
+          1.094,
+          1
+        ],
+        [
+          1.204,
+          1
+        ],
+        [
+          1.311,
+          1
+        ],
+        [
+          1.441,
+          1
+        ],
+        [
+          1.561,
+          1
+        ],
+        [
+          1.678,
+          1
+        ],
+        [
+          1.814,
+          1
+        ],
+        [
+          1.945,
+          1
+        ]
+      ],
+      "scale_decisions": [],
+      "post_drain_targets": [
+        [
+          3.1230010790750384e-06,
+          1
+        ]
+      ],
+      "provider_calls": 0,
+      "provider_invoice": null,
+      "records": [
+        {
+          "source_event": "8188c152-5b2a-40a0-9c86-f5b6e388ce2e",
+          "completed_s": 0.09394634899945231,
+          "service_s": 0.0882711529993685,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "74fcf6fe-86c8-4f1a-ab9c-271151f5f329",
+          "completed_s": 0.248507210999378,
+          "service_s": 0.15454615499766078,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "7efd5059-3d0c-493e-b458-c9780faa5f28",
+          "completed_s": 0.30878152700097417,
+          "service_s": 0.06026148900127737,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "764997ef-b31f-4130-bca4-29ac0c1fc513",
+          "completed_s": 0.3617628079991846,
+          "service_s": 0.052964243997848826,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "495f9a73-0bab-480d-b6ae-6359b2254f2d",
+          "completed_s": 0.4214200690003054,
+          "service_s": 0.058694393999758177,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "4878109b-71de-454c-b6e1-ff8c2ad6a40f",
+          "completed_s": 0.48370146399975056,
+          "service_s": 0.057106893000309356,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "4b6e20e9-b9f3-43a3-8d3e-c52bcd5c2bb5",
+          "completed_s": 0.6854337030017632,
+          "service_s": 0.199947114000679,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "1a20f0d4-c070-4074-b30f-b6659cea7172",
+          "completed_s": 0.7489219710005273,
+          "service_s": 0.06347514599838178,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "70d9d869-8cae-488a-9dcd-9f51219c5549",
+          "completed_s": 0.8123103729994909,
+          "service_s": 0.06337137299851747,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "6ef311f7-84c4-4311-bf46-2d434820f106",
+          "completed_s": 1.026850566999201,
+          "service_s": 0.18954905999999028,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "944a7383-894c-4f03-a865-2268bc98ad0a",
+          "completed_s": 1.0935771250005928,
+          "service_s": 0.06671376899976167,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "f986ec65-916b-4fa7-8126-fa9a24291615",
+          "completed_s": 1.2035954470011347,
+          "service_s": 0.08826106600099592,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "22076d82-716b-4190-a18c-95d6143f3e66",
+          "completed_s": 1.2617164889998094,
+          "service_s": 0.05262620799840079,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "b5aee407-ca47-46b9-b10b-1fc6a8f0e317",
+          "completed_s": 1.3108103320009832,
+          "service_s": 0.04905096400034381,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "2d578924-3595-4c59-8fa5-fef7b26cbe27",
+          "completed_s": 1.3746006930014119,
+          "service_s": 0.06209235999995144,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "1d92fa93-0cab-4edd-a25f-1450895c5096",
+          "completed_s": 1.4411916079989169,
+          "service_s": 0.06159160099923611,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "fc8e42ab-35c3-471b-bd87-5ad529dfde96",
+          "completed_s": 1.500082124999608,
+          "service_s": 0.05643881799915107,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "b71b0d87-f6d0-4f07-93e1-f66a96c22f3b",
+          "completed_s": 1.5609047830002964,
+          "service_s": 0.060804158998507774,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "7f4afe82-2565-410a-9f86-a10b3f57445c",
+          "completed_s": 1.6889649930017185,
+          "service_s": 0.12284179100242909,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "11d28b3f-a83c-4b7b-9d08-c5ca7c907935",
+          "completed_s": 1.751177475998702,
+          "service_s": 0.06219480699655833,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "0af3629e-138b-44d8-8e4f-443f10f2bce7",
+          "completed_s": 1.8139500050019706,
+          "service_s": 0.05753120200097328,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "bb70fc94-131e-4625-8897-03740c241bdf",
+          "completed_s": 1.8820312259995262,
+          "service_s": 0.06670943000062834,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "af0c3dfb-4aff-48eb-8098-c6547daa8a1d",
+          "completed_s": 1.94530800800203,
+          "service_s": 0.06326099900252302,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "88d0b031-de82-415a-b8b1-fd501b05807b",
+          "completed_s": 2.0061560430003738,
+          "service_s": 0.05431651400067494,
+          "status": "INDEXED"
+        }
+      ]
+    },
+    {
+      "mode": "fixed",
+      "jobs": 24,
+      "successful": 24,
+      "failures": 0,
+      "elapsed_s": 3.218222635001439,
+      "jobs_per_s": 7.457532533323093,
+      "mean_completion_s": 1.794504821667336,
+      "p95_completion_s": 2.8610135720009566,
+      "p99_completion_s": 3.2182115860014164,
+      "p95_service_s": 0.7477124340002774,
+      "mean_cpu_pct": 80.453,
+      "mean_cpu_psi_avg10": null,
+      "mean_parent_rss_kib": 68868.0,
+      "mean_available_bytes": 1663633300.211,
+      "warm_processes": 2,
+      "capacity_series": [
+        [
+          0.004,
+          2
+        ],
+        [
+          0.43,
+          2
+        ],
+        [
+          0.534,
+          2
+        ],
+        [
+          0.641,
+          2
+        ],
+        [
+          0.753,
+          2
+        ],
+        [
+          0.926,
+          2
+        ],
+        [
+          1.068,
+          2
+        ],
+        [
+          1.236,
+          2
+        ],
+        [
+          1.419,
+          2
+        ],
+        [
+          1.645,
+          2
+        ],
+        [
+          1.841,
+          2
+        ],
+        [
+          1.948,
+          2
+        ],
+        [
+          2.058,
+          2
+        ],
+        [
+          2.228,
+          2
+        ],
+        [
+          2.331,
+          2
+        ],
+        [
+          2.552,
+          2
+        ],
+        [
+          2.798,
+          2
+        ],
+        [
+          2.968,
+          2
+        ],
+        [
+          3.14,
+          2
+        ]
+      ],
+      "scale_decisions": [],
+      "post_drain_targets": [],
+      "provider_calls": 0,
+      "provider_invoice": null,
+      "records": [
+        {
+          "source_event": "d4adccf9-ec8a-4234-8283-9fd83ca4e0d6",
+          "completed_s": 0.7533326240009046,
+          "service_s": 0.7477124340002774,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "2336c079-d72c-440b-8f63-153188f895ab",
+          "completed_s": 0.8453691760005313,
+          "service_s": 0.8137128899979871,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "fad9c0c6-ab91-4efd-9a51-7fd57c783a05",
+          "completed_s": 0.9264179359997797,
+          "service_s": 0.1720069250004599,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "ba194470-67ed-4b9b-8bfb-6bf55af42725",
+          "completed_s": 0.97146616900136,
+          "service_s": 0.12608719900163123,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "7ba306c3-be9a-4c48-a434-5b60f1fbc864",
+          "completed_s": 1.0683155580009043,
+          "service_s": 0.1408401059998141,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "e702557e-a0ca-4871-a365-13977dddb81f",
+          "completed_s": 1.1183223020016158,
+          "service_s": 0.14684694500101614,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "227d1db6-d884-4a58-8a0c-999dd76a75f6",
+          "completed_s": 1.2362667390007118,
+          "service_s": 0.1663962070015259,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "582b63b0-2c81-44ff-bb87-9649d3bc6dd7",
+          "completed_s": 1.2725192239995522,
+          "service_s": 0.15418470599979628,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "6243a745-9c75-4334-80ce-f1ecd0ec42be",
+          "completed_s": 1.4190202040008444,
+          "service_s": 0.18100747900098213,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "ad941342-6e0c-4278-9153-bf0dc0645b4b",
+          "completed_s": 1.4562758339998254,
+          "service_s": 0.183744365000166,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "228c3963-5928-4013-87be-77899d5a095d",
+          "completed_s": 1.658455369000876,
+          "service_s": 0.23872657800166053,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "8e43fbf0-3aaf-4cb7-a866-1695ad472f67",
+          "completed_s": 1.7008994370007713,
+          "service_s": 0.24461158600024646,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "5b67caca-657e-4565-a8a4-0d32a16e5c41",
+          "completed_s": 1.8404918939995696,
+          "service_s": 0.1820244169975922,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "1cb56037-3388-4716-91f3-8a314962df05",
+          "completed_s": 1.9137176430012914,
+          "service_s": 0.21280573799958802,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "e3c93f7e-3b3d-4ebd-9cb9-98a5d3d14158",
+          "completed_s": 1.9481089350010734,
+          "service_s": 0.0980140149986255,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "71a946e1-8fa2-4f9a-9242-12cc04527ff1",
+          "completed_s": 2.0124602560026688,
+          "service_s": 0.09873013000105857,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "b7502436-216b-409f-88bf-b58923c29388",
+          "completed_s": 2.0576787360005255,
+          "service_s": 0.10224996200122405,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "ae4c63ca-986f-4f80-a5b1-71185f49e91a",
+          "completed_s": 2.333786376999342,
+          "service_s": 0.2738117919980141,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "6845f9d3-5675-4913-a7d7-ab7eed44adc9",
+          "completed_s": 2.40602213999955,
+          "service_s": 0.39343946099688765,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "4c52907c-a7af-488b-8fc0-cc1d1f36629a",
+          "completed_s": 2.589911662002123,
+          "service_s": 0.2561153230017226,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "ea1c5063-533f-4d57-991f-5ab316adcf3b",
+          "completed_s": 2.6478621930000372,
+          "service_s": 0.2418254429976514,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "9e2bf014-21d5-40d0-8158-123b4df94f2f",
+          "completed_s": 2.812190153999836,
+          "service_s": 0.22226239500014344,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "85a4a8f8-4675-4809-9dd4-f6e01104fae9",
+          "completed_s": 2.8610135720009566,
+          "service_s": 0.2130495269993844,
+          "status": "INDEXED"
+        },
+        {
+          "source_event": "ad2aedf5-6838-48cf-84ce-085f1f5ab4ca",
+          "completed_s": 3.2182115860014164,
+          "service_s": 0.4060047730017686,
+          "status": "INDEXED"
+        }
+      ]
+    }
+  ]
+}
