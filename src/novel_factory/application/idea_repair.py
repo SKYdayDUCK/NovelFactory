@@ -43,6 +43,11 @@ def structured_diagnostic(raw, audit, bound):
     value = strict_json_loads(raw["text"])
     error = contract_diagnostic("AgentModelResponse", value, "agent")
     if error:
+        if bound.get("role_id") == "reviewer" and isinstance(value, dict) and error["keyword"] == "additionalProperties":
+            # Only allowlisted schema names can enter a subsequent model's diagnostics.
+            misplaced = sorted({"counterinterpretations", "evidence_refs", "issues", "summary"} & value.keys())
+            if misplaced:
+                error["move_inside_payload"] = misplaced
         return {"location": "envelope", **error}
     if any(value[key] != audit[key] for key in ("task_id", "generation", "role_id", "actor_id", "world_ref", "context_bundle_id")):
         return {"keyword": "identityMismatch", "location": "envelope"}

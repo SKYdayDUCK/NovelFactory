@@ -337,6 +337,9 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
     if failed_review:
         content["repair_strategy"] = failed_review["plan"]["method"]
         content["validation_errors"] = [failed_review["diagnostic"]]
+        if failed_review["diagnostic"].get("move_inside_payload"):
+            content["envelope_instruction"] = ("上次把审稿字段写在了外层。将列出的字段全部放在 payload 对象中。"
+                                               "外层只填写 AgentModelResponse 契约字段，使用本次任务身份。")
     repair_plan = None
     if is_revision and intake["profile"].get("production_mode") == "quality":
         family = "schema" if syntax_source or structure_repair or diagnostics else "editorial"

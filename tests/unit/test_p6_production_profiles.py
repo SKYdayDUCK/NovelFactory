@@ -137,3 +137,12 @@ def test_open_ended_chapter_goal_accepts_larger_manuscripts():
         check_length(length, 999999, 99)
     with pytest.raises(DomainError):
         parse_inspiration({**idea, "length": {**length, "unit": "han_characters"}})
+
+
+def test_review_diagnostic_only_transfers_known_misplaced_payload_keys():
+    import json
+    from novel_factory.application.idea_repair import structured_diagnostic
+    raw = {"text": json.dumps({"summary": "", "issues": [], "untrusted_key": "private"})}
+    diagnosis = structured_diagnostic(raw, {"reason": "INVALID_ARGUMENT"}, {"role_id": "reviewer"})
+    assert diagnosis["move_inside_payload"] == ["issues", "summary"]
+    assert "untrusted_key" not in str(diagnosis) and "private" not in str(diagnosis)
