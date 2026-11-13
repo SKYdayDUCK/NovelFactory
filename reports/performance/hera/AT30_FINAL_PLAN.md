@@ -1,0 +1,7 @@
+# AT-30 validation on the HERA candidate
+
+Frozen before this series on baseline product eb1a75e6ad964bf6502d8dd0bd1d4dddd8bc04ec.
+
+Keep the original P2 overload and P3 open-read gates, unchanged request bodies, independently authorized task bindings, eight aggregate application DB slots, retries, validation, explicit conflicts and accepted world effects. Also require at least 950 correct completed reads/s in the measured overload window. The additional P2 measure counts distinct, schema- and semantics-validated first-attempt overload reads. The interval starts at the first scheduled overload arrival and ends after the last first-attempt response, including failures. Report recovery separately. In P3 use successful_query_rps over the complete arrival and drain window. All checks and the unchanged historical gates must pass together.
+
+Use a private PostgreSQL 17 cluster per arm, original dependency lock, and a distinct actual TCP API process. Run a 50-agent P2 diagnostic with one CPU shared by PG, API and client to identify CPU costs, separately from the original deployment-budget gates. Retain unsuccessful arms. Compare access checks, SQL, resource/correctness, offered starts, wire starts, validated completions, tails, rejected attempts and client validation CPU. The original P2 200-agent 80% hotspot five-round overload and P3 1,000-agent / 5,000 scheduled reads over five seconds remain independent final checks. Keep a fixed-byte transport calibration separate from every business result.

@@ -48,3 +48,18 @@ An additional four arms reuse the same server/PG quotas and separate processes w
 | 3-off | 731.2 | 15.5 | 45.1 | 66.9 | 111.69 | 52/52 |
 
 [Raw SDK and application traces](raw/mcp-codec-abba).
+
+## Single-statement task, work and grant lock experiment
+
+A dependent `LATERAL` join acquired the task's work SHARE lock before matching its live grant under SHARE. Ordinary HTTP fast status went from three statements (including authentication) to two. The legacy full-work repository interface remains available. A concurrent revocation blocked the read with the work lock already held. After the revocation committed, the read was denied. Regular HTTP, grant-scoped exceptions, response fields, installation branch checks and the MCP start/finish audit remained in force.
+
+| Mirrored arm | Warm verified SDK reads/s | P95 / P99 ms | App SQL/read | All verified replies / audited events |
+|---|---:|---:|---:|---:|
+| A1 | 45.59 | 233 / 250 | 11 | 136 / 272 |
+| C1 | 44.36 | 277 / 359 | 10 | 136 / 272 |
+| C2 | 40.22 | 283 / 348 | 10 | 136 / 272 |
+| A2 | 40.78 | 275 / 288 | 11 | 136 / 272 |
+
+All four isolated databases used PostgreSQL 17.11, four application connections and eight independently granted SDK sessions across two works. The server, PostgreSQL and client shared one pinned CPU. Each session issued one first-use call and sixteen measured calls. All 1,088 audit events had matching Outbox rows. The first implementation broke an existing private repository read and correctly reduced a SQL-count assertion by one. The method was restored and the assertion tightened. All seven focused tests then passed, including blocking revocation and revalidation after the MCP start audit.
+
+Source `eb1a75e` supplied controls, with the existing ordinary MCP status fusion enabled on every arm. Replay `taskset -c 8 python -m benchmarks.hera_mcp_status_auth --server-cpus 8 --order B --clients 8 --warm-calls 16 --output OUT` for each checkout against a fresh PG17 administrative URL. Apply the archived candidate patch to the original tree for both C arms. Traces include timings, peak RSS, app SQL shapes, errors and the ledger oracle. Retain the existing fast status implementation because the lower SQL count did not yield a consistent end-to-end win. [All four SDK traces, candidate patch and both test results](raw/index-worker-qualification/status-join/)

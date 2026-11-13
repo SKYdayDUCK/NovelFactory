@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="7" time="7.311" timestamp="2026-11-13T19:25:00.383144+09:00" hostname="4c2564e7b1b0"><testcase classname="tests.integration.test_http_fenced_task_status" name="test_singleton_status_holds_work_lock_and_rechecks_grant" time="2.312" /><testcase classname="tests.integration.test_http_fenced_task_status" name="test_complete_locked_work_and_generation_are_separate_from_task" time="0.191"><failure message="AttributeError: 'KernelRepository' object has no attribute 'task_with_locked_work'. Did you mean: 'task_with_locked_authority'?">kernel_env = {'db': &lt;novel_factory.infrastructure.database.Database object at 0x7eff71fdeb70&gt;, 'store': &lt;novel_factory.infrastructu....Kernel object at 0x7eff71dffb60&gt;, 'url': 'postgresql+psycopg://agent@127.0.0.1:33873/nf_kernel_cd93dd451ae94f8b', ...}
+
+    def test_complete_locked_work_and_generation_are_separate_from_task(kernel_env):
+        kernel = kernel_env['kernel']
+        book = load_fixture(kernel)
+        grant = kernel.issue_grant(book['principal'], book['world_ref']['work_id'], role_id='writer')['principal']
+        task_id = ready_task(kernel, book, grant)
+        claim = kernel.claim_task(grant, 'trusted-worker', task_id=task_id)
+        with kernel.db.uow(write=False) as repo:
+&gt;           task, work, world_ref = repo.task_with_locked_work(task_id)
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'KernelRepository' object has no attribute 'task_with_locked_work'. Did you mean: 'task_with_locked_authority'?
+
+tests/integration/test_http_fenced_task_status.py:77: AttributeError</failure></testcase><testcase classname="tests.integration.test_http_fenced_task_status" name="test_environment_setting_selects_only_authenticated_http_status[None-5]" time="1.166" /><testcase classname="tests.integration.test_http_fenced_task_status" name="test_environment_setting_selects_only_authenticated_http_status[0-5]" time="0.357" /><testcase classname="tests.integration.test_http_fenced_task_status" name="test_environment_setting_selects_only_authenticated_http_status[1-3]" time="0.599"><failure message="AssertionError: assert 2 == 3&#10; +  where 2 = len(['SELECT nf_grants.grant_id, nf_grants.principal_id, nf_grants.work_id, nf_grants.token_hash, nf_grants.role_id, nf_gr...cked_work.work_id FOR SHARE OF nf_grants) AS locked_grant ON true \nWHERE nf_tasks.task_id = %(requested_task)s::UUID'])">kernel_env = {'db': &lt;novel_factory.infrastructure.database.Database object at 0x7eff71fdeb70&gt;, 'store': &lt;novel_factory.infrastructu....Kernel object at 0x7eff71dffb60&gt;, 'url': 'postgresql+psycopg://agent@127.0.0.1:33873/nf_kernel_cd93dd451ae94f8b', ...}
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7eff6da23830&gt;
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-271/test_environment_setting_selec2')
+setting = '1', expected_sql = 3
+
+    @pytest.mark.parametrize('setting,expected_sql', [(None, 5), ('0', 5), ('1', 3)])
+    def test_environment_setting_selects_only_authenticated_http_status(kernel_env, monkeypatch, tmp_path,
+                                                                        setting, expected_sql):
+        from fastapi.testclient import TestClient
+        from fastapi.encoders import jsonable_encoder
+        from sqlalchemy import event
+        from novel_factory.interfaces.http import from_environment
+        from novel_factory.contracts.registry import validate_contract
+    
+        kernel = kernel_env['kernel']
+        book = load_fixture(kernel)
+        own = kernel.issue_grant(book['principal'], book['world_ref']['work_id'], role_id='writer')
+        peer = kernel.issue_grant(book['principal'], book['world_ref']['work_id'], role_id='writer')
+        task_id = ready_task(kernel, book, own['principal'])
+        expected = kernel.get_task(own['principal'], task_id)
+        monkeypatch.setenv('NF_DATABASE_URL', kernel_env['url'])
+        monkeypatch.setenv('NF_OBJECT_ROOT', str(tmp_path / 'http-settings'))
+        monkeypatch.setenv('NF_POOL_SIZE', '4')
+        if setting is None:
+            monkeypatch.delenv('NF_HTTP_FENCED_TASK_STATUS', raising=False)
+        else:
+            monkeypatch.setenv('NF_HTTP_FENCED_TASK_STATUS', setting)
+        app = from_environment()
+        engine = app.state.kernel.db.engine
+        statements = []
+    
+        def record(conn, cursor, sql, *_):
+            statements.append(sql)
+    
+        def headers(actor):
+            return {'Authorization': 'Bearer ' + actor['token']}
+    
+        try:
+            with TestClient(app) as client:
+                path = '/api/v1/tasks/' + task_id.upper()
+                event.listen(engine, 'before_cursor_execute', record)
+                try:
+                    response = client.get(path, headers=headers(own))
+                    assert response.status_code == 200 and response.json() == jsonable_encoder(expected)
+&gt;                   assert len(statements) == expected_sql
+E                   AssertionError: assert 2 == 3
+E                    +  where 2 = len(['SELECT nf_grants.grant_id, nf_grants.principal_id, nf_grants.work_id, nf_grants.token_hash, nf_grants.role_id, nf_gr...cked_work.work_id FOR SHARE OF nf_grants) AS locked_grant ON true \nWHERE nf_tasks.task_id = %(requested_task)s::UUID'])
+
+tests/integration/test_http_fenced_task_status.py:124: AssertionError</failure></testcase><testcase classname="tests.integration.test_hera_fused_status" name="test_live_status_authorization_with_audit[False]" time="1.837" /><testcase classname="tests.integration.test_hera_fused_status" name="test_live_status_authorization_with_audit[True]" time="0.369" /></testsuite></testsuites>
