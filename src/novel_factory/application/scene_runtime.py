@@ -71,6 +71,8 @@ def register_scene(
     following_scenes=None,
     volume_end=None,
     allowed_item_gift=None,
+    opening_scene=False,
+    local_replanning=True,
 ):
     """Preauthorize one registered interaction, one location allowance, and its editorial response.
 
@@ -132,6 +134,14 @@ def register_scene(
         deadline_seconds=deadline_seconds,
         **location_options,
     )
+    require(type(opening_scene) is bool, "INVALID_ARGUMENT", "Invalid opening scene flag")
+    require(type(local_replanning) is bool, "INVALID_ARGUMENT", "Invalid local replanning flag")
+    if not local_replanning:
+        require(opening_scene and following_scenes is None and volume_end is None, "INVALID_ARGUMENT",
+                "An opening without local replanning cannot enroll an editorial continuation")
+        request["local_replanning"] = False
+    if opening_scene:
+        request["opening_scene"] = True
     if volume_end is not None:
         from novel_factory.application.scene_continuation import validate_volume_end
         validate_volume_end(volume_end)
@@ -190,6 +200,9 @@ def register_scene(
                 controller, world_ref, volume_id, scenes=scene_limit, idempotency_key=receipt_key
             )
 
+        currency = repo.one("budgets", {"budget_id": budget_id, "work_id": wid})
+        require(currency, "VIEW_DENIED", "The scene needs an authorized budget for this work")
+
         def prepare(
             role,
             mode,
@@ -221,6 +234,7 @@ def register_scene(
                 adapter_id=adapter_id,
                 max_amount=reserve_amount,
                 token_budget=token_reservation,
+                currency=currency["currency"],
                 lease_seconds=min(600, deadline_seconds),
                 deadline_seconds=deadline_seconds,
             )
@@ -255,10 +269,15 @@ def register_scene(
         jobs = {}
         for actor, (peers, other) in slots.items():
             cut = {"plane": "BELIEF", "actor_id": actor, "known_at": story_time}
+            instruction = "依据自己在此刻所知及自身动机，独立作出行动。"
+            if opening_scene:
+                from .idea_opening import actor_brief
+
+                instruction += actor_brief(bound, repo, world_ref, story_time, actor)
             job = prepare(
                 "character_actor",
                 "character_action",
-                "依据自己在此刻所知及自身动机，独立作出行动。",
+                instruction,
                 cut,
                 [actor],
                 actor=actor,
@@ -291,10 +310,15 @@ def register_scene(
         )
         visible = joint_manifest({"subject_id": subject_id, "destination_id": destination_id, **location_options})
         targets = visible["subject_ids"]
+        brief = "根据规则和已齐的密封意图，提出一次联合裁决。"
+        if opening_scene:
+            from .idea_opening import adjudication_brief
+
+            brief += adjudication_brief(bound, repo, world_ref, interaction_id, targets)
         joint = prepare(
             "adjudication_advisor",
             "joint_outcome",
-            "根据规则和已齐的密封意图，提出一次联合裁决。",
+            brief,
             {"plane": "WORLD"},
             targets,
             predicates=visible["predicates"],
@@ -314,46 +338,49 @@ def register_scene(
             },
         )
         wait(joint, list(actor_tasks.values()))
-        plan_cut = {"plane": "PLAN", "plan_manifest_ref": manifest["artifact_ref"]}
-        director = prepare(
-            "volume_director",
-            "volume_review",
-            "复核已接受的后果，有重大偏离时请求有限重规划。",
-            plan_cut,
-            targets,
-            predicates=visible["predicates"],
-            refs=[plan_cut["plan_manifest_ref"], plan["artifact_ref"], anchor_ref],
-            at=after(story_time),
-            skill="volume-director-review",
-            state="BLOCKED",
-        )
-        enroll(
-            director,
-            plan_cut,
-            editorial={
-                "operation": "request_change",
-                "volume_id": volume_id,
-                "prior_plan_ref": plan["artifact_ref"],
-                "reference_timeline_ref": anchor_ref,
-            },
-            continue_editorial=True,
-        )
-        wait(director, [control["task_id"]])
-        if following_scenes is not None or volume_end is not None:
-            from novel_factory.application.scene_continuation import authorize_slots
-            authorize_slots(bound, repo, controller, director.task["task_id"], request, plan["artifact_ref"])
+        director_id = None
+        if local_replanning:
+            plan_cut = {"plane": "PLAN", "plan_manifest_ref": manifest["artifact_ref"]}
+            director = prepare(
+                "volume_director",
+                "volume_review",
+                "复核已接受的后果，有重大偏离时请求有限重规划。",
+                plan_cut,
+                targets,
+                predicates=visible["predicates"],
+                refs=[plan_cut["plan_manifest_ref"], plan["artifact_ref"], anchor_ref],
+                at=after(story_time),
+                skill="volume-director-review",
+                state="BLOCKED",
+            )
+            enroll(
+                director,
+                plan_cut,
+                editorial={
+                    "operation": "request_change",
+                    "volume_id": volume_id,
+                    "prior_plan_ref": plan["artifact_ref"],
+                    "reference_timeline_ref": anchor_ref,
+                },
+                continue_editorial=True,
+            )
+            wait(director, [control["task_id"]])
+            if following_scenes is not None or volume_end is not None:
+                from novel_factory.application.scene_continuation import authorize_slots
+                authorize_slots(bound, repo, controller, director.task["task_id"], request, plan["artifact_ref"])
+            director_id = director.task["task_id"]
         result = {
             "interaction_id": interaction_id,
             "actor_tasks": actor_tasks,
             "control_task_id": control["task_id"],
             "adjudicator_task_id": joint.task["task_id"],
-            "director_task_id": director.task["task_id"],
+            "director_task_id": director_id,
             "reference_timeline_ref": anchor_ref,
         }
         repo.conn.execute(text("""
             INSERT INTO nf_trace_tasks(task_id,trace_id,volume_id) VALUES (:task,:scene,:volume)
         """), [{"task":task_id, "scene":interaction_id, "volume":volume_id}
-               for task_id in [*actor_tasks.values(), control["task_id"], joint.task["task_id"], director.task["task_id"]]])
+               for task_id in [*actor_tasks.values(), control["task_id"], joint.task["task_id"], *([director_id] if director_id else [])]])
         from novel_factory.application.audit_log import record
         record(repo.conn, "scene.registered", event_id=interaction_id, work_id=wid, branch_id=bid,
                trace_id=interaction_id, volume_id=volume_id, world_revision_id=world_ref["world_revision_id"],

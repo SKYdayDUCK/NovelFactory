@@ -147,10 +147,7 @@ def _register_window(kernel, gateway, private, allowance):
                      gateway.adapters, expected_revision=0)
             route = POLICY_ROUTE
         routes = dict.fromkeys(("draft", "review", "plan"), route)
-        result = register_rolling(
-            bound,
-            gateway.with_kernel(bound),
-            owner,
+        registration = dict(
             profile={
                 "preset": profile["preset"],
                 "genre": profile["genre"],
@@ -170,6 +167,12 @@ def _register_window(kernel, gateway, private, allowance):
             idempotency_key="intake-first-window",
             target_chapters=max(target, native_chapters) if target is not None else None,
         )
+        if source.get("opening_version"):
+            from novel_factory.application.idea_opening import enroll_opening
+
+            result = enroll_opening(bound, repo, gateway.with_kernel(bound), owner, source, registration)
+        else:
+            result = register_rolling(bound, gateway.with_kernel(bound), owner, **registration)
         response = {
             "budget_id": budget_id,
             "writing_registration": result,

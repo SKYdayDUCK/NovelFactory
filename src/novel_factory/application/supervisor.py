@@ -200,6 +200,10 @@ class RuntimeSupervisor:
         settled = resolution.reconcile_one(controller, work_id, branch_id)
         if settled:
             return {"status": "CONFLICT_COORDINATED", **settled}
+        from .idea_opening import advance_opening
+        opening = advance_opening(self.kernel, self.gateway, controller, work_id, branch_id)
+        if opening:
+            return opening
         from novel_factory.application.production_pipeline import advance_pipeline
         handoff = advance_pipeline(self.kernel, self.gateway, controller, work_id, branch_id)
         if handoff:

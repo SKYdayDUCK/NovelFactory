@@ -349,6 +349,64 @@
             "maxLength": 1200,
             "pattern": "\\S"
           }
+        },
+        "opening": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "counterpart",
+            "other_place",
+            "protagonist_knowledge",
+            "counterpart_knowledge",
+            "situation"
+          ],
+          "properties": {
+            "counterpart": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "\\S"
+            },
+            "other_place": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "\\S"
+            },
+            "protagonist_knowledge": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 800,
+              "pattern": "\\S"
+            },
+            "counterpart_knowledge": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 800,
+              "pattern": "\\S"
+            },
+            "situation": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 800,
+              "pattern": "\\S"
+            },
+            "environment": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "moving_entity"
+              ],
+              "properties": {
+                "moving_entity": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200,
+                  "pattern": "\\S"
+                }
+              }
+            }
+          }
         }
       }
     },

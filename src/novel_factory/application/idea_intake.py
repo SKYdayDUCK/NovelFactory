@@ -111,6 +111,11 @@ def enroll_idea(kernel, gateway, inspiration, allowance, prep_work_id):
         "first_window_limit": _first_window_limit(profile, inspiration),
         "instructions": "依据灵感自主设计初始身份、地点、世界规则、故事线及首个窗口的章节目标。",
     }
+    if allowance.get("review_adapter_id"):
+        assignment["opening_requirements"] = {
+            "instructions": "为第一场设计两个有独立认知的人物和两个地点。opening 中各人的知识只写其已知身份、所见及动机。situation 是尚未确定后果的开场条件。",
+            "environment": "另填 environment.moving_entity，指独立于人物决定从初始地点抵达另一地点的实物或环境过程。" if profile["environment_processes"] else "可省略 environment。",
+        }
     role = RuntimeTaskService(kernel, bound_gateway).prepare(
         owner,
         wr,
@@ -305,6 +310,14 @@ def materialize_design(kernel, gateway, owner, wr):
             "INVALID_MODEL_OUTPUT",
             "Design violates the approved first window",
         )
+        if intake.get("model_routes"):
+            require(
+                design.get("opening") and (
+                    not intake["profile"]["environment_processes"] or design["opening"].get("environment")
+                ),
+                "INVALID_MODEL_OUTPUT",
+                "The opening must identify both characters and the profile's environmental process",
+            )
         selected_review = stage_receipt(kernel, repo, owner, wr)
         if not selected_review:
             return None, _enroll_review(
@@ -400,11 +413,16 @@ def materialize_design(kernel, gateway, owner, wr):
 def _build_story(kernel, repo, work, design):
     """Translate literary decisions into immutable genesis, adopted plan and authorized scene inputs."""
     actor, place = [_uid(work, key) for key in ("protagonist", "place")]
-    first = _point(1)
+    opening = design.get("opening")
+    first = _point(0 if opening else 1)
     facts = [(actor, "CHARACTER", design["protagonist"]), (place, "REGION", design["place"])]
     facts.extend(
         (_uid(work, f"rule:{i}"), "KNOWLEDGE", rule) for i, rule in enumerate(design["world_rules"])
     )
+    if opening:
+        from .idea_opening import opening_entities
+
+        facts.extend(opening_entities(work, design))
     entities = {
         eid: {"entity_id": eid, "entity_kind": kind, "name": name, "created_at": first}
         for eid, kind, name in facts
@@ -415,10 +433,15 @@ def _build_story(kernel, repo, work, design):
         "object_value": {"kind": "ENTITY", "entity_id": place},
         "valid_time": {"start": first, "end": None, "bounds": "[)"},
     }
+    genesis = {"entities": entities, "relations": [relation]}
+    if opening:
+        from .idea_opening import add_opening_facts
+
+        add_opening_facts(genesis, work, design, first)
     created = kernel.bootstrap_work(
         design["title"],
-        {"entities": entities, "relations": [relation]},
-        frontiers={eid: _point(1, 1) for eid in entities},
+        genesis,
+        frontiers={eid: _point(first["tick"], 1) for eid in entities},
         work_id=work,
     )
     owner, wr = created["principal"], created["world_ref"]
@@ -440,6 +463,7 @@ def _build_story(kernel, repo, work, design):
         "series_id": _uid(work, "series"),
         **refs,
         "design_ref": design_ref,
+        **({"opening_version": 1} if opening else {}),
         "volumes": [volume],
         "story_time": _point(len(design["chapter_goals"]), 1),
         "subject_ids": list(entities),
@@ -448,7 +472,8 @@ def _build_story(kernel, repo, work, design):
 
 
 def create_planned_window(
-    kernel, owner, wr, volume, actor, place, design_ref, brief, goals, rules, *, start_after=0
+    kernel, owner, wr, volume, actor, place, design_ref, brief, goals, rules, *, start_after=0,
+    opening_events=(), opening_explanation="", upstream_refs=(),
 ):
     plans = PlanningService(kernel)
     contract = {
@@ -463,7 +488,7 @@ def create_planned_window(
         "open_choices": ["人物的行动及后果由正式演绎决定。"],
         "completion_or_stop_conditions": ["完成已登记写作窗口"],
         "budget": {"max_semantic_calls": 2 * len(goals) + 1, "max_candidate_branches": 1},
-        "upstream_literary_refs": [],
+        "upstream_literary_refs": list(upstream_refs),
         "dependency_fingerprint": fingerprint([wr, design_ref]),
     }
     contract_ref = plans.save_volume_contract(owner, contract, "intake-volume:" + volume)
@@ -534,12 +559,13 @@ def create_planned_window(
     )
     chapters = []
     for node, slot in zip(nodes, slots, strict=True):
+        events = list(opening_events) if not slot["reader_cut_ordinal"] else []
         card = {
             "schema_version": "2.0",
             "scene_id": slot["scene_id"],
             "input_world_ref": wr,
             "story_interval": slot["story_interval"],
-            "event_refs": [],
+            "event_refs": events,
             "entry_commitments": [],
             "exit_commitments": [],
             "pov_actor_id": actor,
@@ -560,12 +586,12 @@ def create_planned_window(
                 "plan_node_ids": [node["node_id"]],
                 "batch_ref": batch,
                 "prior_scene_ref": None,
-                "required_event_refs": [],
+                "required_event_refs": events,
                 "required_predecessor_scene_ids": slot["required_predecessor_scene_ids"],
                 "entry_checks": [],
                 "exit_checks": [],
                 "allowed_disclosures": [],
-                "literary_purpose": node["goal"],
+                "literary_purpose": node["goal"] + ("\n" + opening_explanation if events else ""),
             },
             "intake-scene:" + slot["scene_id"],
         )
