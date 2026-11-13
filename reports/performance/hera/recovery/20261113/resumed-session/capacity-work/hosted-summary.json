@@ -1,0 +1,1435 @@
+[
+  {
+    "source": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43418280576/artifacts/14033490633",
+    "source_sha256": "sha256:90e1b5300e9d951bd358127844721387f6faa97769d23a1e5651b6f20fe775c5",
+    "job": "p2-load-50-overload-1",
+    "member": "run-1/load.json",
+    "tested_sha": "c4f54c0684d366b6c909d97efbe25d878e628d09",
+    "driver_sha256": "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f",
+    "cpu_models": [
+      "AMD EPYC 7763 64-Core Processor"
+    ],
+    "versions": {
+      "SQLAlchemy": "2.0.57",
+      "psycopg": "3.3.8",
+      "uvicorn": "0.54.0",
+      "httpx": "0.28.1"
+    },
+    "affinity": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "capacity_gate": "NOT_MET",
+    "call_starts_s": 183.69808592496392,
+    "header_starts_s": 92.77156734023535,
+    "overload_original_attempts": 250,
+    "overload_original_counts": {
+      "429": 137,
+      "200": 113
+    },
+    "validated_original_successes": 113,
+    "overload_first_completion_window_s": 6.059418800000003,
+    "overload_validated_per_first_completion_window": 18.6486532338712,
+    "first_call_rate_gate": "NOT_MET",
+    "correctness": "PASS",
+    "recovery": "PASS",
+    "all_phase_planned_logical_operations": 536,
+    "all_phase_finished_logical_operations": 536,
+    "all_phase_validated_successes_including_retries": 532,
+    "all_phase_unique_world_commit_receipts": 6,
+    "all_phase_target_world_commits": 6,
+    "all_phase_validated_success_rate": 11.909,
+    "all_phase_final_unresolved_errors": 0,
+    "all_phase_client_validation_thread_cpu_s": 2.408089104999977,
+    "all_phase_client_response_validation_overload_first_cpu_s": 0.5618899800000046,
+    "all_phase_first_statuses": {
+      "200": 395,
+      "409": 4,
+      "429": 137
+    },
+    "all_phase_latency_ms": {
+      "count": 776,
+      "p50_ms": 168.3739,
+      "p95_ms": 3215.1371,
+      "p99_ms": 4064.041
+    },
+    "all_phase_httpx_pool_wait_ms": {
+      "count": 776,
+      "p50_ms": 0.0023,
+      "p95_ms": 0.0269,
+      "p99_ms": 0.0656
+    },
+    "client_process": {
+      "process_user_cpu_seconds": 6.755178,
+      "process_system_cpu_seconds": 0.34278400000000003,
+      "process_peak_rss_kib": 103124,
+      "minor_page_faults": 1998,
+      "major_page_faults": 0
+    },
+    "server": {
+      "admissions": {
+        "ingress": {
+          "admitted": 776,
+          "completed": 776,
+          "rejected": 0,
+          "peak_queued": 0,
+          "peak_active": 115,
+          "wait_seconds_total": 0.013801720999850886
+        },
+        "authentication_admission": {
+          "admitted": 570,
+          "completed": 570,
+          "rejected": 192,
+          "peak_queued": 64,
+          "peak_active": 2,
+          "wait_seconds_total": 235.16208924400024
+        },
+        "admission": {
+          "admitted": 536,
+          "completed": 536,
+          "rejected": 29,
+          "peak_queued": 64,
+          "peak_active": 6,
+          "wait_seconds_total": 226.85744460299978
+        }
+      },
+      "process_resources": {
+        "service_user_cpu_seconds": 16.969797,
+        "service_system_cpu_seconds": 2.080213,
+        "service_sum_peak_rss_kib": 121444
+      },
+      "db": {
+        "sql_statements": 11703,
+        "transactions": 1706,
+        "sql_statements_per_second": 261.97504017661066,
+        "sql_cursor_execution_seconds": 35.95762313099931,
+        "peak_checked_out_connections": 8,
+        "configured_pool_size": 8,
+        "checked_out_at_end": 0,
+        "failed_statements": 0
+      },
+      "deadlock_delta": 0,
+      "observations": 220,
+      "sampled_connection_wait_type": {
+        "Client": 986,
+        "active/none": 12,
+        "Lock": 1,
+        "Timeout": 1,
+        "IO": 1
+      },
+      "observer_errors": [],
+      "wal_bytes": 3247656
+    }
+  },
+  {
+    "source": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43418280576/artifacts/14033490633",
+    "source_sha256": "sha256:90e1b5300e9d951bd358127844721387f6faa97769d23a1e5651b6f20fe775c5",
+    "job": "p2-load-50-overload-1",
+    "member": "run-2/load.json",
+    "tested_sha": "c4f54c0684d366b6c909d97efbe25d878e628d09",
+    "driver_sha256": "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f",
+    "cpu_models": [
+      "AMD EPYC 7763 64-Core Processor"
+    ],
+    "versions": {
+      "SQLAlchemy": "2.0.57",
+      "psycopg": "3.3.8",
+      "uvicorn": "0.54.0",
+      "httpx": "0.28.1"
+    },
+    "affinity": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "capacity_gate": "NOT_MET",
+    "call_starts_s": 222.43999703413368,
+    "header_starts_s": 102.24268718418725,
+    "overload_original_attempts": 250,
+    "overload_original_counts": {
+      "429": 148,
+      "200": 102
+    },
+    "validated_original_successes": 102,
+    "overload_first_completion_window_s": 5.639099299999998,
+    "overload_validated_per_first_completion_window": 18.087995010125116,
+    "first_call_rate_gate": "NOT_MET",
+    "correctness": "PASS",
+    "recovery": "PASS",
+    "all_phase_planned_logical_operations": 536,
+    "all_phase_finished_logical_operations": 536,
+    "all_phase_validated_successes_including_retries": 532,
+    "all_phase_unique_world_commit_receipts": 6,
+    "all_phase_target_world_commits": 6,
+    "all_phase_validated_success_rate": 12.0474,
+    "all_phase_final_unresolved_errors": 0,
+    "all_phase_client_validation_thread_cpu_s": 2.3502013060000175,
+    "all_phase_client_response_validation_overload_first_cpu_s": 0.5047635790000014,
+    "all_phase_first_statuses": {
+      "200": 384,
+      "409": 4,
+      "429": 148
+    },
+    "all_phase_latency_ms": {
+      "count": 809,
+      "p50_ms": 144.5779,
+      "p95_ms": 2739.0799,
+      "p99_ms": 3598.7424
+    },
+    "all_phase_httpx_pool_wait_ms": {
+      "count": 809,
+      "p50_ms": 0.002,
+      "p95_ms": 0.0284,
+      "p99_ms": 0.0499
+    },
+    "client_process": {
+      "process_user_cpu_seconds": 6.289193,
+      "process_system_cpu_seconds": 0.31565800000000005,
+      "process_peak_rss_kib": 96964,
+      "minor_page_faults": 1362,
+      "major_page_faults": 0
+    },
+    "server": {
+      "admissions": {
+        "ingress": {
+          "admitted": 809,
+          "completed": 809,
+          "rejected": 0,
+          "peak_queued": 0,
+          "peak_active": 121,
+          "wait_seconds_total": 0.012810078000200065
+        },
+        "authentication_admission": {
+          "admitted": 568,
+          "completed": 568,
+          "rejected": 230,
+          "peak_queued": 64,
+          "peak_active": 2,
+          "wait_seconds_total": 215.08960089600072
+        },
+        "admission": {
+          "admitted": 536,
+          "completed": 536,
+          "rejected": 24,
+          "peak_queued": 64,
+          "peak_active": 6,
+          "wait_seconds_total": 189.62776458099978
+        }
+      },
+      "process_resources": {
+        "service_user_cpu_seconds": 15.761,
+        "service_system_cpu_seconds": 2.097999,
+        "service_sum_peak_rss_kib": 119992
+      },
+      "db": {
+        "sql_statements": 11701,
+        "transactions": 1704,
+        "sql_statements_per_second": 264.9744984827674,
+        "sql_cursor_execution_seconds": 33.77556774199874,
+        "peak_checked_out_connections": 8,
+        "configured_pool_size": 8,
+        "checked_out_at_end": 0,
+        "failed_statements": 0
+      },
+      "deadlock_delta": 0,
+      "observations": 218,
+      "sampled_connection_wait_type": {
+        "Client": 898,
+        "active/none": 9,
+        "Lock": 1,
+        "IO": 1
+      },
+      "observer_errors": [],
+      "wal_bytes": 2888120
+    }
+  },
+  {
+    "source": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43418280576/artifacts/14032324613",
+    "source_sha256": "sha256:f849a2ab8b2bc0634a0ad10a59213ea70d5eabe40fd04aec5d7067ccb810ffac",
+    "job": "p2-load-200-overload-1",
+    "member": "run-1/load.json",
+    "tested_sha": "c4f54c0684d366b6c909d97efbe25d878e628d09",
+    "driver_sha256": "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f",
+    "cpu_models": [
+      "AMD EPYC 9V45 96-Core Processor"
+    ],
+    "versions": {
+      "SQLAlchemy": "2.0.57",
+      "psycopg": "3.3.8",
+      "uvicorn": "0.54.0",
+      "httpx": "0.28.1"
+    },
+    "affinity": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "capacity_gate": "NOT_MET",
+    "call_starts_s": 61.790747828246914,
+    "header_starts_s": 47.64881023925716,
+    "overload_original_attempts": 1000,
+    "overload_original_counts": {
+      "429": 528,
+      "200": 472
+    },
+    "validated_original_successes": 472,
+    "overload_first_completion_window_s": 22.760713899999985,
+    "overload_validated_per_first_completion_window": 20.7374866216301,
+    "first_call_rate_gate": "NOT_MET",
+    "correctness": "PASS",
+    "recovery": "PASS",
+    "all_phase_planned_logical_operations": 2141,
+    "all_phase_finished_logical_operations": 2141,
+    "all_phase_validated_successes_including_retries": 2116,
+    "all_phase_unique_world_commit_receipts": 21,
+    "all_phase_target_world_commits": 21,
+    "all_phase_validated_success_rate": 12.81,
+    "all_phase_final_unresolved_errors": 0,
+    "all_phase_client_validation_thread_cpu_s": 4.722791442999925,
+    "all_phase_client_response_validation_overload_first_cpu_s": 1.1731793569999436,
+    "all_phase_first_statuses": {
+      "200": 1594,
+      "409": 19,
+      "429": 528
+    },
+    "all_phase_latency_ms": {
+      "count": 2958,
+      "p50_ms": 772.2999,
+      "p95_ms": 5777.6864,
+      "p99_ms": 8839.1817
+    },
+    "all_phase_httpx_pool_wait_ms": {
+      "count": 2958,
+      "p50_ms": 0.0019,
+      "p95_ms": 16.0973,
+      "p99_ms": 111.2116
+    },
+    "client_process": {
+      "process_user_cpu_seconds": 25.533779,
+      "process_system_cpu_seconds": 1.547831,
+      "process_peak_rss_kib": 119652,
+      "minor_page_faults": 4001,
+      "major_page_faults": 0
+    },
+    "server": {
+      "admissions": {
+        "ingress": {
+          "admitted": 2942,
+          "completed": 2942,
+          "rejected": 16,
+          "peak_queued": 0,
+          "peak_active": 128,
+          "wait_seconds_total": 0.026507118000360208
+        },
+        "authentication_admission": {
+          "admitted": 2159,
+          "completed": 2159,
+          "rejected": 783,
+          "peak_queued": 64,
+          "peak_active": 2,
+          "wait_seconds_total": 369.76800420699914
+        },
+        "admission": {
+          "admitted": 2135,
+          "completed": 2135,
+          "rejected": 22,
+          "peak_queued": 64,
+          "peak_active": 6,
+          "wait_seconds_total": 528.4536305869997
+        }
+      },
+      "process_resources": {
+        "service_user_cpu_seconds": 45.965761,
+        "service_system_cpu_seconds": 6.297087,
+        "service_sum_peak_rss_kib": 147040
+      },
+      "db": {
+        "sql_statements": 46496,
+        "transactions": 6688,
+        "sql_statements_per_second": 281.47998332999236,
+        "sql_cursor_execution_seconds": 110.2245894159978,
+        "peak_checked_out_connections": 8,
+        "configured_pool_size": 8,
+        "checked_out_at_end": 0,
+        "failed_statements": 0
+      },
+      "deadlock_delta": 0,
+      "observations": 818,
+      "sampled_connection_wait_type": {
+        "Client": 3803,
+        "active/none": 45,
+        "IO": 12,
+        "LWLock": 2
+      },
+      "observer_errors": [],
+      "wal_bytes": 13060584
+    }
+  },
+  {
+    "source": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43418280576/artifacts/14032324613",
+    "source_sha256": "sha256:f849a2ab8b2bc0634a0ad10a59213ea70d5eabe40fd04aec5d7067ccb810ffac",
+    "job": "p2-load-200-overload-1",
+    "member": "run-2/load.json",
+    "tested_sha": "c4f54c0684d366b6c909d97efbe25d878e628d09",
+    "driver_sha256": "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f",
+    "cpu_models": [
+      "AMD EPYC 9V45 96-Core Processor"
+    ],
+    "versions": {
+      "SQLAlchemy": "2.0.57",
+      "psycopg": "3.3.8",
+      "uvicorn": "0.54.0",
+      "httpx": "0.28.1"
+    },
+    "affinity": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "capacity_gate": "NOT_MET",
+    "call_starts_s": 58.57353907831279,
+    "header_starts_s": 46.35450365323598,
+    "overload_original_attempts": 1000,
+    "overload_original_counts": {
+      "429": 490,
+      "200": 510
+    },
+    "validated_original_successes": 510,
+    "overload_first_completion_window_s": 24.034426500000023,
+    "overload_validated_per_first_completion_window": 21.219561864727645,
+    "first_call_rate_gate": "NOT_MET",
+    "correctness": "PASS",
+    "recovery": "PASS",
+    "all_phase_planned_logical_operations": 2141,
+    "all_phase_finished_logical_operations": 2141,
+    "all_phase_validated_successes_including_retries": 2119,
+    "all_phase_unique_world_commit_receipts": 21,
+    "all_phase_target_world_commits": 21,
+    "all_phase_validated_success_rate": 12.7754,
+    "all_phase_final_unresolved_errors": 0,
+    "all_phase_client_validation_thread_cpu_s": 4.828671321999953,
+    "all_phase_client_response_validation_overload_first_cpu_s": 1.2614870939999925,
+    "all_phase_first_statuses": {
+      "200": 1632,
+      "409": 19,
+      "429": 490
+    },
+    "all_phase_latency_ms": {
+      "count": 2929,
+      "p50_ms": 796.582,
+      "p95_ms": 6580.3937,
+      "p99_ms": 9483.8283
+    },
+    "all_phase_httpx_pool_wait_ms": {
+      "count": 2929,
+      "p50_ms": 0.0021,
+      "p95_ms": 0.0431,
+      "p99_ms": 191.7907
+    },
+    "client_process": {
+      "process_user_cpu_seconds": 26.877249000000003,
+      "process_system_cpu_seconds": 1.657372,
+      "process_peak_rss_kib": 115212,
+      "minor_page_faults": 4177,
+      "major_page_faults": 0
+    },
+    "server": {
+      "admissions": {
+        "ingress": {
+          "admitted": 2804,
+          "completed": 2804,
+          "rejected": 125,
+          "peak_queued": 0,
+          "peak_active": 128,
+          "wait_seconds_total": 0.03289042299903144
+        },
+        "authentication_admission": {
+          "admitted": 2165,
+          "completed": 2165,
+          "rejected": 639,
+          "peak_queued": 64,
+          "peak_active": 2,
+          "wait_seconds_total": 366.43925143400196
+        },
+        "admission": {
+          "admitted": 2138,
+          "completed": 2138,
+          "rejected": 23,
+          "peak_queued": 64,
+          "peak_active": 6,
+          "wait_seconds_total": 601.3955889599997
+        }
+      },
+      "process_resources": {
+        "service_user_cpu_seconds": 51.494225,
+        "service_system_cpu_seconds": 6.5071140000000005,
+        "service_sum_peak_rss_kib": 141068
+      },
+      "db": {
+        "sql_statements": 46550,
+        "transactions": 6700,
+        "sql_statements_per_second": 280.6478698206485,
+        "sql_cursor_execution_seconds": 114.10322176999964,
+        "peak_checked_out_connections": 8,
+        "configured_pool_size": 8,
+        "checked_out_at_end": 0,
+        "failed_statements": 0
+      },
+      "deadlock_delta": 0,
+      "observations": 820,
+      "sampled_connection_wait_type": {
+        "Client": 2830,
+        "active/none": 63,
+        "IO": 5,
+        "Lock": 1
+      },
+      "observer_errors": [],
+      "wal_bytes": 12812192
+    }
+  },
+  {
+    "source": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43418280647/artifacts/14033381026",
+    "source_sha256": "sha256:0d4c0ce78a9b0ca0f383f4e24ae44898e10f8fd05a3d438a8047adddff2a0a7c",
+    "job": "p3-isolated-200-overload-1",
+    "member": "load.json",
+    "tested_sha": "c4f54c0684d366b6c909d97efbe25d878e628d09",
+    "driver_sha256": "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f",
+    "cpu_models": [
+      "AMD EPYC 9V74 80-Core Processor"
+    ],
+    "versions": {
+      "SQLAlchemy": "2.0.57",
+      "psycopg": "3.3.8",
+      "uvicorn": "0.54.0",
+      "httpx": "0.28.1"
+    },
+    "affinity": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "capacity_gate": "NOT_MET",
+    "call_starts_s": 50.55934885631866,
+    "header_starts_s": 33.99987380227021,
+    "overload_original_attempts": 1000,
+    "overload_original_counts": {
+      "429": 544,
+      "200": 456
+    },
+    "validated_original_successes": 456,
+    "overload_first_completion_window_s": 30.9599609,
+    "overload_validated_per_first_completion_window": 14.728700771711893,
+    "first_call_rate_gate": "NOT_MET",
+    "correctness": "PASS",
+    "recovery": "PASS",
+    "all_phase_planned_logical_operations": 2141,
+    "all_phase_finished_logical_operations": 2141,
+    "all_phase_validated_successes_including_retries": 2109,
+    "all_phase_unique_world_commit_receipts": 21,
+    "all_phase_target_world_commits": 21,
+    "all_phase_validated_success_rate": 12.0384,
+    "all_phase_final_unresolved_errors": 0,
+    "all_phase_client_validation_thread_cpu_s": 6.021934470000048,
+    "all_phase_client_response_validation_overload_first_cpu_s": 1.3644376150000035,
+    "all_phase_first_statuses": {
+      "200": 1578,
+      "409": 19,
+      "429": 544
+    },
+    "all_phase_latency_ms": {
+      "count": 3026,
+      "p50_ms": 1394.9799,
+      "p95_ms": 10669.2729,
+      "p99_ms": 15883.6409
+    },
+    "all_phase_httpx_pool_wait_ms": {
+      "count": 3026,
+      "p50_ms": 0.003,
+      "p95_ms": 0.0645,
+      "p99_ms": 283.7277
+    },
+    "client_process": {
+      "process_user_cpu_seconds": 34.20671,
+      "process_system_cpu_seconds": 2.419503,
+      "process_peak_rss_kib": 120640,
+      "minor_page_faults": 4633,
+      "major_page_faults": 0
+    },
+    "server": {
+      "admissions": {
+        "ingress": {
+          "admitted": 3026,
+          "completed": 3026,
+          "rejected": 0,
+          "peak_queued": 0,
+          "peak_active": 118,
+          "wait_seconds_total": 0.03886922199988874
+        },
+        "authentication_admission": {
+          "admitted": 2384,
+          "completed": 2384,
+          "rejected": 642,
+          "peak_queued": 64,
+          "peak_active": 2,
+          "wait_seconds_total": 422.14141504800097
+        },
+        "admission": {
+          "admitted": 2129,
+          "completed": 2128,
+          "rejected": 228,
+          "peak_queued": 64,
+          "peak_active": 6,
+          "wait_seconds_total": 905.2236368490003
+        }
+      },
+      "process_resources": {
+        "service_user_cpu_seconds": 62.081624000000005,
+        "service_system_cpu_seconds": 8.007779000000001,
+        "service_sum_peak_rss_kib": 150000
+      },
+      "db": {
+        "sql_statements": 46609,
+        "transactions": 6899,
+        "sql_statements_per_second": 266.0488484862184,
+        "sql_cursor_execution_seconds": 129.43452716200176,
+        "peak_checked_out_connections": 8,
+        "configured_pool_size": 8,
+        "checked_out_at_end": 0,
+        "failed_statements": 0
+      },
+      "deadlock_delta": 0,
+      "observations": 865,
+      "sampled_connection_wait_type": {
+        "active/none": 71,
+        "Client": 4526,
+        "IO": 86,
+        "LWLock": 111,
+        "Lock": 5
+      },
+      "observer_errors": [],
+      "wal_bytes": 13334912
+    }
+  },
+  {
+    "source": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43418280635/artifacts/14032598570",
+    "source_sha256": "sha256:f04c78c4b152ff3db64a40cd15587c74db8057e5ccde87ee0c22893073e92c82",
+    "job": "p3-scale-1000-read-open-1",
+    "member": "result.json",
+    "tested_sha": "c4f54c0684d366b6c909d97efbe25d878e628d09",
+    "driver_sha256": "515ec1ec61e03317cd6f160a22a309aa38bc6df8bbfd4604e3dacfa43b14e9da",
+    "cpu_models": [
+      "AMD EPYC 9V74 80-Core Processor"
+    ],
+    "versions": {
+      "SQLAlchemy": "2.0.57",
+      "psycopg": "3.3.8",
+      "uvicorn": "0.54.0",
+      "httpx": "0.28.1"
+    },
+    "affinity": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "capacity_gate": "NOT_MET",
+    "call_starts_s": 48.00990711429873,
+    "header_starts_s": 48.02992640883807,
+    "overload_original_attempts": 5000,
+    "overload_original_counts": {
+      "429": 2817,
+      "200": 2179,
+      "transport_error": 4
+    },
+    "validated_original_successes": 2179,
+    "network_window_s": 106.88936165899999,
+    "correct_query_rate": 20.385564720196175,
+    "post_network_validation_wall_s": 4.142447225000012,
+    "all_phase_latency_ms": {
+      "count": 5000,
+      "p50_ms": 2193.389,
+      "p95_ms": 5624.983,
+      "p99_ms": 9144.4246
+    },
+    "wire_rate_gate": "NOT_MET",
+    "world_unchanged": true,
+    "new_world_commits": 0,
+    "correctness_errors": [],
+    "server": {
+      "admissions": {
+        "ingress": {
+          "admitted": 4996,
+          "completed": 4996,
+          "rejected": 0,
+          "peak_queued": 0,
+          "peak_active": 177,
+          "wait_seconds_total": 0.06461171899913154
+        },
+        "authentication_admission": {
+          "admitted": 3834,
+          "completed": 3834,
+          "rejected": 1162,
+          "peak_queued": 128,
+          "peak_active": 4,
+          "wait_seconds_total": 702.3841230479978
+        },
+        "admission": {
+          "admitted": 2203,
+          "completed": 2179,
+          "rejected": 481,
+          "peak_queued": 128,
+          "peak_active": 4,
+          "wait_seconds_total": 1803.3380041560024
+        }
+      },
+      "process_resources": {
+        "service_user_cpu_seconds": 145.889201,
+        "service_system_cpu_seconds": 14.217480000000002,
+        "service_sum_peak_rss_kib": 326104
+      },
+      "db": {
+        "sql_statements": 38698,
+        "transactions": 8192,
+        "sql_statements_per_second": 362.0378997439888,
+        "sql_cursor_execution_seconds": 163.55782395900053,
+        "peak_checked_out_connections": 8,
+        "configured_pool_size": 8,
+        "checked_out_at_end": 0,
+        "failed_statements": 0
+      },
+      "deadlock_delta": 0,
+      "observations": 515,
+      "sampled_connection_wait_type": {
+        "Client": 3738,
+        "active/none": 362,
+        "IO": 8,
+        "LWLock": 3
+      },
+      "observer_errors": [],
+      "wal_bytes": 4029600
+    }
+  },
+  {
+    "source": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43422112210/artifacts/14036190997",
+    "source_sha256": "sha256:064bb5d40e596ea77a0467c750b6471f4664a0d2ba9267d8f61b37914a87e85d",
+    "job": "p2-load-50-overload-1",
+    "member": "run-1/load.json",
+    "tested_sha": "ad09af8686adc9619d6d2e585665732ec578c4e5",
+    "driver_sha256": "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f",
+    "cpu_models": [
+      "AMD EPYC 9V74 80-Core Processor"
+    ],
+    "versions": {
+      "SQLAlchemy": "2.0.57",
+      "psycopg": "3.3.8",
+      "uvicorn": "0.54.0",
+      "httpx": "0.28.1"
+    },
+    "affinity": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "capacity_gate": "NOT_MET",
+    "call_starts_s": 102.84037686661482,
+    "header_starts_s": 69.63764930144212,
+    "overload_original_attempts": 250,
+    "overload_original_counts": {
+      "200": 190,
+      "429": 60
+    },
+    "validated_original_successes": 190,
+    "overload_first_completion_window_s": 4.0264146000000025,
+    "overload_validated_per_first_completion_window": 47.18838442519056,
+    "first_call_rate_gate": "NOT_MET",
+    "correctness": "PASS",
+    "recovery": "PASS",
+    "all_phase_planned_logical_operations": 536,
+    "all_phase_finished_logical_operations": 536,
+    "all_phase_validated_successes_including_retries": 532,
+    "all_phase_unique_world_commit_receipts": 6,
+    "all_phase_target_world_commits": 6,
+    "all_phase_validated_success_rate": 14.02,
+    "all_phase_final_unresolved_errors": 0,
+    "all_phase_client_validation_thread_cpu_s": 0.6305119880000172,
+    "all_phase_client_response_validation_overload_first_cpu_s": 0.23093512300001606,
+    "all_phase_first_statuses": {
+      "200": 472,
+      "409": 4,
+      "429": 60
+    },
+    "all_phase_latency_ms": {
+      "count": 596,
+      "p50_ms": 158.8492,
+      "p95_ms": 2313.0139,
+      "p99_ms": 3311.8992
+    },
+    "all_phase_httpx_pool_wait_ms": {
+      "count": 596,
+      "p50_ms": 0.0014,
+      "p95_ms": 0.0316,
+      "p99_ms": 0.0587
+    },
+    "client_process": {
+      "process_user_cpu_seconds": 4.39831,
+      "process_system_cpu_seconds": 0.34827099999999994,
+      "process_peak_rss_kib": 104192,
+      "minor_page_faults": 1846,
+      "major_page_faults": 0
+    },
+    "server": {
+      "admissions": {
+        "ingress": {
+          "admitted": 596,
+          "completed": 596,
+          "rejected": 0,
+          "peak_queued": 0,
+          "peak_active": 75,
+          "wait_seconds_total": 0.0072633349999833285
+        },
+        "authentication_admission": {
+          "admitted": 536,
+          "completed": 536,
+          "rejected": 60,
+          "peak_queued": 64,
+          "peak_active": 2,
+          "wait_seconds_total": 37.73783810600005
+        },
+        "admission": {
+          "admitted": 536,
+          "completed": 536,
+          "rejected": 0,
+          "peak_queued": 58,
+          "peak_active": 6,
+          "wait_seconds_total": 52.63211627199987
+        }
+      },
+      "process_resources": {
+        "service_user_cpu_seconds": 7.9005860000000006,
+        "service_system_cpu_seconds": 1.242252,
+        "service_sum_peak_rss_kib": 122012
+      },
+      "db": {
+        "sql_statements": 10543,
+        "transactions": 1672,
+        "sql_statements_per_second": 277.8436476688173,
+        "sql_cursor_execution_seconds": 15.241528971000037,
+        "peak_checked_out_connections": 8,
+        "configured_pool_size": 8,
+        "checked_out_at_end": 0,
+        "failed_statements": 0
+      },
+      "deadlock_delta": 0,
+      "observations": 188,
+      "sampled_connection_wait_type": {
+        "active/none": 8,
+        "Client": 467,
+        "IO": 6,
+        "Lock": 2,
+        "LWLock": 1
+      },
+      "observer_errors": [],
+      "wal_bytes": 2914976
+    }
+  },
+  {
+    "source": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43422112210/artifacts/14036190997",
+    "source_sha256": "sha256:064bb5d40e596ea77a0467c750b6471f4664a0d2ba9267d8f61b37914a87e85d",
+    "job": "p2-load-50-overload-1",
+    "member": "run-2/load.json",
+    "tested_sha": "ad09af8686adc9619d6d2e585665732ec578c4e5",
+    "driver_sha256": "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f",
+    "cpu_models": [
+      "AMD EPYC 9V74 80-Core Processor"
+    ],
+    "versions": {
+      "SQLAlchemy": "2.0.57",
+      "psycopg": "3.3.8",
+      "uvicorn": "0.54.0",
+      "httpx": "0.28.1"
+    },
+    "affinity": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "capacity_gate": "NOT_MET",
+    "call_starts_s": 292.90775052729344,
+    "header_starts_s": 270.44023107977324,
+    "overload_original_attempts": 250,
+    "overload_original_counts": {
+      "429": 110,
+      "200": 140
+    },
+    "validated_original_successes": 140,
+    "overload_first_completion_window_s": 2.824985500000004,
+    "overload_validated_per_first_completion_window": 49.5577764912421,
+    "first_call_rate_gate": "NOT_MET",
+    "correctness": "PASS",
+    "recovery": "PASS",
+    "all_phase_planned_logical_operations": 536,
+    "all_phase_finished_logical_operations": 536,
+    "all_phase_validated_successes_including_retries": 532,
+    "all_phase_unique_world_commit_receipts": 6,
+    "all_phase_target_world_commits": 6,
+    "all_phase_validated_success_rate": 14.0032,
+    "all_phase_final_unresolved_errors": 0,
+    "all_phase_client_validation_thread_cpu_s": 0.6277659719999937,
+    "all_phase_client_response_validation_overload_first_cpu_s": 0.17749674199999887,
+    "all_phase_first_statuses": {
+      "200": 422,
+      "409": 4,
+      "429": 110
+    },
+    "all_phase_latency_ms": {
+      "count": 652,
+      "p50_ms": 122.3461,
+      "p95_ms": 1971.5442,
+      "p99_ms": 2562.1583
+    },
+    "all_phase_httpx_pool_wait_ms": {
+      "count": 652,
+      "p50_ms": 0.0015,
+      "p95_ms": 0.0214,
+      "p99_ms": 0.0296
+    },
+    "client_process": {
+      "process_user_cpu_seconds": 4.525796,
+      "process_system_cpu_seconds": 0.345348,
+      "process_peak_rss_kib": 98172,
+      "minor_page_faults": 1438,
+      "major_page_faults": 0
+    },
+    "server": {
+      "admissions": {
+        "ingress": {
+          "admitted": 652,
+          "completed": 652,
+          "rejected": 0,
+          "peak_queued": 0,
+          "peak_active": 123,
+          "wait_seconds_total": 0.0077971730000570005
+        },
+        "authentication_admission": {
+          "admitted": 565,
+          "completed": 565,
+          "rejected": 87,
+          "peak_queued": 64,
+          "peak_active": 2,
+          "wait_seconds_total": 63.25560336699992
+        },
+        "admission": {
+          "admitted": 536,
+          "completed": 536,
+          "rejected": 29,
+          "peak_queued": 64,
+          "peak_active": 6,
+          "wait_seconds_total": 100.07939020500014
+        }
+      },
+      "process_resources": {
+        "service_user_cpu_seconds": 7.856553,
+        "service_system_cpu_seconds": 1.308311,
+        "service_sum_peak_rss_kib": 119712
+      },
+      "db": {
+        "sql_statements": 10572,
+        "transactions": 1701,
+        "sql_statements_per_second": 278.27459123408664,
+        "sql_cursor_execution_seconds": 15.579276933000529,
+        "peak_checked_out_connections": 8,
+        "configured_pool_size": 8,
+        "checked_out_at_end": 0,
+        "failed_statements": 0
+      },
+      "deadlock_delta": 0,
+      "observations": 189,
+      "sampled_connection_wait_type": {
+        "active/none": 8,
+        "Client": 483,
+        "IO": 2,
+        "LWLock": 1
+      },
+      "observer_errors": [],
+      "wal_bytes": 3248608
+    }
+  },
+  {
+    "source": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43422112210/artifacts/14035477496",
+    "source_sha256": "sha256:60ed0797f744c14dfc7e92507390e0ec41770c4bbddb268d9d86bfa6eee24fd2",
+    "job": "p2-load-200-overload-1",
+    "member": "run-1/load.json",
+    "tested_sha": "ad09af8686adc9619d6d2e585665732ec578c4e5",
+    "driver_sha256": "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f",
+    "cpu_models": [
+      "AMD EPYC 9V45 96-Core Processor"
+    ],
+    "versions": {
+      "SQLAlchemy": "2.0.57",
+      "psycopg": "3.3.8",
+      "uvicorn": "0.54.0",
+      "httpx": "0.28.1"
+    },
+    "affinity": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "capacity_gate": "NOT_MET",
+    "call_starts_s": 69.8449791038364,
+    "header_starts_s": 53.550580372506204,
+    "overload_original_attempts": 1000,
+    "overload_original_counts": {
+      "429": 436,
+      "200": 564
+    },
+    "validated_original_successes": 564,
+    "overload_first_completion_window_s": 20.316458600000004,
+    "overload_validated_per_first_completion_window": 27.760743695754137,
+    "first_call_rate_gate": "NOT_MET",
+    "correctness": "PASS",
+    "recovery": "PASS",
+    "all_phase_planned_logical_operations": 2141,
+    "all_phase_finished_logical_operations": 2141,
+    "all_phase_validated_successes_including_retries": 2122,
+    "all_phase_unique_world_commit_receipts": 21,
+    "all_phase_target_world_commits": 21,
+    "all_phase_validated_success_rate": 13.0012,
+    "all_phase_final_unresolved_errors": 0,
+    "all_phase_client_validation_thread_cpu_s": 2.262878735999953,
+    "all_phase_client_response_validation_overload_first_cpu_s": 0.5961941619999429,
+    "all_phase_first_statuses": {
+      "200": 1686,
+      "409": 19,
+      "429": 436
+    },
+    "all_phase_latency_ms": {
+      "count": 2730,
+      "p50_ms": 445.3177,
+      "p95_ms": 6871.2412,
+      "p99_ms": 10234.2122
+    },
+    "all_phase_httpx_pool_wait_ms": {
+      "count": 2730,
+      "p50_ms": 0.0022,
+      "p95_ms": 0.0383,
+      "p99_ms": 0.0611
+    },
+    "client_process": {
+      "process_user_cpu_seconds": 22.282125,
+      "process_system_cpu_seconds": 1.634423,
+      "process_peak_rss_kib": 120752,
+      "minor_page_faults": 4199,
+      "major_page_faults": 0
+    },
+    "server": {
+      "admissions": {
+        "ingress": {
+          "admitted": 2730,
+          "completed": 2730,
+          "rejected": 0,
+          "peak_queued": 0,
+          "peak_active": 112,
+          "wait_seconds_total": 0.034082285999254225
+        },
+        "authentication_admission": {
+          "admitted": 2202,
+          "completed": 2202,
+          "rejected": 528,
+          "peak_queued": 64,
+          "peak_active": 2,
+          "wait_seconds_total": 221.89490673399976
+        },
+        "admission": {
+          "admitted": 2141,
+          "completed": 2141,
+          "rejected": 61,
+          "peak_queued": 64,
+          "peak_active": 6,
+          "wait_seconds_total": 536.6005296939993
+        }
+      },
+      "process_resources": {
+        "service_user_cpu_seconds": 43.354108000000004,
+        "service_system_cpu_seconds": 5.820843,
+        "service_sum_peak_rss_kib": 146716
+      },
+      "db": {
+        "sql_statements": 42134,
+        "transactions": 6743,
+        "sql_statements_per_second": 258.14976854879103,
+        "sql_cursor_execution_seconds": 92.06388747999799,
+        "peak_checked_out_connections": 8,
+        "configured_pool_size": 8,
+        "checked_out_at_end": 0,
+        "failed_statements": 0
+      },
+      "deadlock_delta": 0,
+      "observations": 807,
+      "sampled_connection_wait_type": {
+        "active/none": 63,
+        "Client": 2903,
+        "IO": 13,
+        "LWLock": 3,
+        "Lock": 3
+      },
+      "observer_errors": [],
+      "wal_bytes": 13064208
+    }
+  },
+  {
+    "source": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43422112210/artifacts/14035477496",
+    "source_sha256": "sha256:60ed0797f744c14dfc7e92507390e0ec41770c4bbddb268d9d86bfa6eee24fd2",
+    "job": "p2-load-200-overload-1",
+    "member": "run-2/load.json",
+    "tested_sha": "ad09af8686adc9619d6d2e585665732ec578c4e5",
+    "driver_sha256": "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f",
+    "cpu_models": [
+      "AMD EPYC 9V45 96-Core Processor"
+    ],
+    "versions": {
+      "SQLAlchemy": "2.0.57",
+      "psycopg": "3.3.8",
+      "uvicorn": "0.54.0",
+      "httpx": "0.28.1"
+    },
+    "affinity": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "capacity_gate": "NOT_MET",
+    "call_starts_s": 62.70133546312849,
+    "header_starts_s": 56.67266126137689,
+    "overload_original_attempts": 1000,
+    "overload_original_counts": {
+      "429": 448,
+      "200": 552
+    },
+    "validated_original_successes": 552,
+    "overload_first_completion_window_s": 19.451240100000007,
+    "overload_validated_per_first_completion_window": 28.378653348688026,
+    "first_call_rate_gate": "NOT_MET",
+    "correctness": "PASS",
+    "recovery": "PASS",
+    "all_phase_planned_logical_operations": 2141,
+    "all_phase_finished_logical_operations": 2141,
+    "all_phase_validated_successes_including_retries": 2122,
+    "all_phase_unique_world_commit_receipts": 21,
+    "all_phase_target_world_commits": 21,
+    "all_phase_validated_success_rate": 13.1152,
+    "all_phase_final_unresolved_errors": 0,
+    "all_phase_client_validation_thread_cpu_s": 2.1323666590000503,
+    "all_phase_client_response_validation_overload_first_cpu_s": 0.6371931500000168,
+    "all_phase_first_statuses": {
+      "200": 1674,
+      "409": 19,
+      "429": 448
+    },
+    "all_phase_latency_ms": {
+      "count": 2787,
+      "p50_ms": 463.51,
+      "p95_ms": 4995.3167,
+      "p99_ms": 7931.7807
+    },
+    "all_phase_httpx_pool_wait_ms": {
+      "count": 2787,
+      "p50_ms": 0.0018,
+      "p95_ms": 0.0369,
+      "p99_ms": 119.6077
+    },
+    "client_process": {
+      "process_user_cpu_seconds": 21.049751,
+      "process_system_cpu_seconds": 1.465172,
+      "process_peak_rss_kib": 117728,
+      "minor_page_faults": 4337,
+      "major_page_faults": 0
+    },
+    "server": {
+      "admissions": {
+        "ingress": {
+          "admitted": 2787,
+          "completed": 2787,
+          "rejected": 0,
+          "peak_queued": 0,
+          "peak_active": 103,
+          "wait_seconds_total": 0.02875828199913144
+        },
+        "authentication_admission": {
+          "admitted": 2164,
+          "completed": 2164,
+          "rejected": 623,
+          "peak_queued": 64,
+          "peak_active": 2,
+          "wait_seconds_total": 158.20379680099913
+        },
+        "admission": {
+          "admitted": 2141,
+          "completed": 2141,
+          "rejected": 23,
+          "peak_queued": 64,
+          "peak_active": 6,
+          "wait_seconds_total": 466.00916700299837
+        }
+      },
+      "process_resources": {
+        "service_user_cpu_seconds": 38.931667000000004,
+        "service_system_cpu_seconds": 5.658406,
+        "service_sum_peak_rss_kib": 142172
+      },
+      "db": {
+        "sql_statements": 42096,
+        "transactions": 6705,
+        "sql_statements_per_second": 260.17754827556075,
+        "sql_cursor_execution_seconds": 86.20875095200066,
+        "peak_checked_out_connections": 8,
+        "configured_pool_size": 8,
+        "checked_out_at_end": 0,
+        "failed_statements": 0
+      },
+      "deadlock_delta": 0,
+      "observations": 801,
+      "sampled_connection_wait_type": {
+        "Client": 2604,
+        "active/none": 44,
+        "IO": 4,
+        "Lock": 1
+      },
+      "observer_errors": [],
+      "wal_bytes": 12981456
+    }
+  },
+  {
+    "source": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43422112270/artifacts/14037790894",
+    "source_sha256": "sha256:b0bfc66c1ce0480b24933dd044b92fcb4892ad4b2415305bbe2d8c2b5a0cbb2a",
+    "job": "p3-isolated-200-overload-1",
+    "member": "load.json",
+    "tested_sha": "ad09af8686adc9619d6d2e585665732ec578c4e5",
+    "driver_sha256": "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f",
+    "cpu_models": [
+      "AMD EPYC 9V74 80-Core Processor"
+    ],
+    "versions": {
+      "SQLAlchemy": "2.0.57",
+      "psycopg": "3.3.8",
+      "uvicorn": "0.54.0",
+      "httpx": "0.28.1"
+    },
+    "affinity": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "capacity_gate": "NOT_MET",
+    "call_starts_s": 51.62761081835655,
+    "header_starts_s": 40.95867405087187,
+    "overload_original_attempts": 1000,
+    "overload_original_counts": {
+      "429": 473,
+      "200": 527
+    },
+    "validated_original_successes": 527,
+    "overload_first_completion_window_s": 25.578794699999975,
+    "overload_validated_per_first_completion_window": 20.603003627844924,
+    "first_call_rate_gate": "NOT_MET",
+    "correctness": "PASS",
+    "recovery": "PASS",
+    "all_phase_planned_logical_operations": 2141,
+    "all_phase_finished_logical_operations": 2141,
+    "all_phase_validated_successes_including_retries": 2119,
+    "all_phase_unique_world_commit_receipts": 21,
+    "all_phase_target_world_commits": 21,
+    "all_phase_validated_success_rate": 12.8397,
+    "all_phase_final_unresolved_errors": 0,
+    "all_phase_client_validation_thread_cpu_s": 2.67612171699997,
+    "all_phase_client_response_validation_overload_first_cpu_s": 0.7053184579999722,
+    "all_phase_first_statuses": {
+      "200": 1649,
+      "409": 19,
+      "429": 473
+    },
+    "all_phase_latency_ms": {
+      "count": 2811,
+      "p50_ms": 726.124,
+      "p95_ms": 6144.6082,
+      "p99_ms": 9806.501
+    },
+    "all_phase_httpx_pool_wait_ms": {
+      "count": 2811,
+      "p50_ms": 0.0021,
+      "p95_ms": 0.0312,
+      "p99_ms": 0.0562
+    },
+    "client_process": {
+      "process_user_cpu_seconds": 27.08399,
+      "process_system_cpu_seconds": 2.073433,
+      "process_peak_rss_kib": 120220,
+      "minor_page_faults": 3579,
+      "major_page_faults": 0
+    },
+    "server": {
+      "admissions": {
+        "ingress": {
+          "admitted": 2780,
+          "completed": 2780,
+          "rejected": 31,
+          "peak_queued": 0,
+          "peak_active": 128,
+          "wait_seconds_total": 0.0352032540007059
+        },
+        "authentication_admission": {
+          "admitted": 2264,
+          "completed": 2264,
+          "rejected": 516,
+          "peak_queued": 64,
+          "peak_active": 2,
+          "wait_seconds_total": 261.76556479899983
+        },
+        "admission": {
+          "admitted": 2138,
+          "completed": 2138,
+          "rejected": 118,
+          "peak_queued": 64,
+          "peak_active": 6,
+          "wait_seconds_total": 671.7097899310013
+        }
+      },
+      "process_resources": {
+        "service_user_cpu_seconds": 49.141953,
+        "service_system_cpu_seconds": 6.984539,
+        "service_sum_peak_rss_kib": 146720
+      },
+      "db": {
+        "sql_statements": 42154,
+        "transactions": 6799,
+        "sql_statements_per_second": 255.42464694365722,
+        "sql_cursor_execution_seconds": 102.83593792299466,
+        "peak_checked_out_connections": 8,
+        "configured_pool_size": 8,
+        "checked_out_at_end": 0,
+        "failed_statements": 0
+      },
+      "deadlock_delta": 0,
+      "observations": 816,
+      "sampled_connection_wait_type": {
+        "IO": 79,
+        "LWLock": 88,
+        "Client": 3605,
+        "active/none": 74,
+        "Timeout": 1,
+        "Lock": 3
+      },
+      "observer_errors": [],
+      "wal_bytes": 13333192
+    }
+  },
+  {
+    "source": "https://github.com/SKYdayDUCK/NovelFactory/actions/runs/43422112310/artifacts/14036295943",
+    "source_sha256": "sha256:d0a9de99333e7520bf78d1c3e9fa58b86528f9fc10bf56b124d3d5375b5c90b1",
+    "job": "p3-scale-1000-read-open-1",
+    "member": "result.json",
+    "tested_sha": "ad09af8686adc9619d6d2e585665732ec578c4e5",
+    "driver_sha256": "515ec1ec61e03317cd6f160a22a309aa38bc6df8bbfd4604e3dacfa43b14e9da",
+    "cpu_models": [
+      "AMD EPYC 7763 64-Core Processor"
+    ],
+    "versions": {
+      "SQLAlchemy": "2.0.57",
+      "psycopg": "3.3.8",
+      "uvicorn": "0.54.0",
+      "httpx": "0.28.1"
+    },
+    "affinity": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "capacity_gate": "NOT_MET",
+    "call_starts_s": 41.52851759563732,
+    "header_starts_s": 41.270694528781945,
+    "overload_original_attempts": 5000,
+    "overload_original_counts": {
+      "429": 2968,
+      "200": 2027,
+      "transport_error": 5
+    },
+    "validated_original_successes": 2027,
+    "network_window_s": 123.26104694399999,
+    "correct_query_rate": 16.444773513248737,
+    "post_network_validation_wall_s": 2.262787127999985,
+    "all_phase_latency_ms": {
+      "count": 5000,
+      "p50_ms": 2520.8003,
+      "p95_ms": 6091.8369,
+      "p99_ms": 9126.7624
+    },
+    "wire_rate_gate": "NOT_MET",
+    "world_unchanged": true,
+    "new_world_commits": 0,
+    "correctness_errors": [],
+    "server": {
+      "admissions": {
+        "ingress": {
+          "admitted": 4990,
+          "completed": 4990,
+          "rejected": 5,
+          "peak_queued": 0,
+          "peak_active": 228,
+          "wait_seconds_total": 0.08723576100014441
+        },
+        "authentication_admission": {
+          "admitted": 4192,
+          "completed": 4192,
+          "rejected": 798,
+          "peak_queued": 128,
+          "peak_active": 4,
+          "wait_seconds_total": 735.8317893299998
+        },
+        "admission": {
+          "admitted": 2069,
+          "completed": 2027,
+          "rejected": 811,
+          "peak_queued": 128,
+          "peak_active": 4,
+          "wait_seconds_total": 1758.3351575050006
+        }
+      },
+      "process_resources": {
+        "service_user_cpu_seconds": 161.744953,
+        "service_system_cpu_seconds": 17.144280000000002,
+        "service_sum_peak_rss_kib": 329968
+      },
+      "db": {
+        "sql_statements": 32570,
+        "transactions": 8246,
+        "sql_statements_per_second": 264.2359513204299,
+        "sql_cursor_execution_seconds": 179.19379451699893,
+        "peak_checked_out_connections": 8,
+        "configured_pool_size": 8,
+        "checked_out_at_end": 0,
+        "failed_statements": 0
+      },
+      "deadlock_delta": 0,
+      "observations": 582,
+      "sampled_connection_wait_type": {
+        "active/none": 392,
+        "Client": 4250,
+        "IO": 3
+      },
+      "observer_errors": [],
+      "wal_bytes": 3319512
+    }
+  }
+]

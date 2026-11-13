@@ -1,0 +1,126 @@
+[
+  {
+    "arm": "50/a1",
+    "client_sha": "c4f54c0684d366b6c909d97efbe25d878e628d09",
+    "api_sha": "c4f54c0684d366b6c909d97efbe25d878e628d09",
+    "source_sha256": "8b08559829f1eb70849103fc6e9f0c134670f38cc1cabfc5b36b352aef9bdd2e",
+    "tested_sha": "c4f54c0684d366b6c909d97efbe25d878e628d09",
+    "driver_sha256": "07c0644803a08f0f512dd14595975211d3dfb6483e07505133566fe5fee5a06f",
+    "cpu_models": [
+      "Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz"
+    ],
+    "versions": {
+      "SQLAlchemy": "2.0.57",
+      "psycopg": "3.3.8",
+      "uvicorn": "0.54.0",
+      "httpx": "0.28.1"
+    },
+    "affinity": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "capacity_gate": "NOT_MET",
+    "call_starts_s": 167.2298080080918,
+    "header_starts_s": 166.11550564826106,
+    "overload_original_attempts": 250,
+    "overload_original_counts": {
+      "429": 235,
+      "200": 15
+    },
+    "validated_original_successes": 15,
+    "overload_first_completion_window_s": 10.4920361,
+    "overload_validated_per_first_completion_window": 1.4296557748214382,
+    "first_call_rate_gate": "NOT_MET",
+    "correctness": "PASS",
+    "recovery": "PASS",
+    "all_phase_planned_logical_operations": 536,
+    "all_phase_finished_logical_operations": 536,
+    "all_phase_validated_successes_including_retries": 414,
+    "all_phase_unique_world_commit_receipts": 6,
+    "all_phase_target_world_commits": 6,
+    "all_phase_validated_success_rate": 4.5656,
+    "all_phase_final_unresolved_errors": 0,
+    "all_phase_client_validation_thread_cpu_s": 9.295728006999994,
+    "all_phase_client_response_validation_overload_first_cpu_s": 0.7696476850000168,
+    "all_phase_first_statuses": {
+      "200": 250,
+      "429": 282,
+      "409": 4
+    },
+    "all_phase_latency_ms": {
+      "count": 1154,
+      "p50_ms": 4000.0657,
+      "p95_ms": 10695.9289,
+      "p99_ms": 13499.3212
+    },
+    "all_phase_httpx_pool_wait_ms": {
+      "count": 1154,
+      "p50_ms": 0.0038,
+      "p95_ms": 0.0325,
+      "p99_ms": 0.4951
+    },
+    "client_process": {
+      "process_user_cpu_seconds": 36.230061000000006,
+      "process_system_cpu_seconds": 4.974222,
+      "process_peak_rss_kib": 82472,
+      "minor_page_faults": 2525,
+      "major_page_faults": 0
+    },
+    "server": {
+      "admissions": {
+        "ingress": {
+          "admitted": 1153,
+          "completed": 1153,
+          "rejected": 0,
+          "peak_queued": 0,
+          "peak_active": 91,
+          "wait_seconds_total": 0.1367493320867652
+        },
+        "authentication_admission": {
+          "admitted": 550,
+          "completed": 509,
+          "rejected": 432,
+          "peak_queued": 64,
+          "peak_active": 2,
+          "wait_seconds_total": 217.99239672594558
+        },
+        "admission": {
+          "admitted": 425,
+          "completed": 418,
+          "rejected": 0,
+          "peak_queued": 29,
+          "peak_active": 6,
+          "wait_seconds_total": 256.6537292940484
+        }
+      },
+      "process_resources": {
+        "service_user_cpu_seconds": 55.026393999999996,
+        "service_system_cpu_seconds": 9.227723000000001,
+        "service_sum_peak_rss_kib": 103592
+      },
+      "db": {
+        "sql_statements": 9754,
+        "transactions": 1409,
+        "sql_statements_per_second": 107.56672556934751,
+        "sql_cursor_execution_seconds": 137.75633171823574,
+        "peak_checked_out_connections": 8,
+        "configured_pool_size": 8,
+        "checked_out_at_end": 0,
+        "failed_statements": 0
+      },
+      "deadlock_delta": 0,
+      "observations": 380,
+      "sampled_connection_wait_type": {
+        "Client": 2334,
+        "active/none": 62,
+        "IO": 25,
+        "LWLock": 11,
+        "Lock": 43
+      },
+      "observer_errors": [],
+      "wal_bytes": 3213752
+    }
+  }
+]

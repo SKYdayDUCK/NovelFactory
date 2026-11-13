@@ -1,0 +1,54 @@
+2026-11-13 23:11:39.025 JST [28] LOG:  starting PostgreSQL 17.11 (Debian 17.11-0+deb13u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+2026-11-13 23:11:39.026 JST [28] LOG:  listening on IPv4 address "127.0.0.1", port 53639
+2026-11-13 23:11:39.041 JST [31] LOG:  database system was shut down at 2026-11-13 23:11:37 JST
+2026-11-13 23:11:39.068 JST [28] LOG:  database system is ready to accept connections
+2026-11-13 23:11:52.248 JST [29] LOG:  checkpoint starting: immediate force wait
+2026-11-13 23:11:52.606 JST [29] LOG:  checkpoint complete: wrote 944 buffers (5.8%); 1 WAL file(s) added, 0 removed, 0 recycled; write=0.011 s, sync=0.291 s, total=0.359 s; sync files=302, longest=0.026 s, average=0.001 s; distance=10897 kB, estimate=10897 kB; lsn=0/1FAF370, redo lsn=0/1FAF318
+2026-11-13 23:11:55.394 JST [29] LOG:  checkpoint starting: immediate force wait
+2026-11-13 23:11:55.414 JST [29] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.006 s, sync=0.004 s, total=0.020 s; sync files=4, longest=0.002 s, average=0.001 s; distance=6484 kB, estimate=10456 kB; lsn=0/2604538, redo lsn=0/26044E0
+2026-11-13 23:11:58.679 JST [29] LOG:  checkpoint starting: immediate force wait
+2026-11-13 23:11:58.702 JST [29] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.011 s, sync=0.005 s, total=0.024 s; sync files=4, longest=0.002 s, average=0.002 s; distance=6467 kB, estimate=10057 kB; lsn=0/2C55268, redo lsn=0/2C55210
+2026-11-13 23:12:08.526 JST [29] LOG:  checkpoint starting: immediate force wait
+2026-11-13 23:12:08.576 JST [29] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.010 s, sync=0.019 s, total=0.051 s; sync files=4, longest=0.009 s, average=0.005 s; distance=6398 kB, estimate=9691 kB; lsn=0/3294AA8, redo lsn=0/3294A50
+2026-11-13 23:12:11.781 JST [92] ERROR:  immutable authoritative record: nf_task_inputs
+2026-11-13 23:12:11.781 JST [92] CONTEXT:  PL/pgSQL function nf_reject_immutable_mutation() line 1 at RAISE
+2026-11-13 23:12:11.781 JST [92] STATEMENT:  UPDATE nf_task_inputs SET input_hash=$1::VARCHAR WHERE nf_task_inputs.task_id = $2::UUID
+2026-11-13 23:12:14.002 JST [95] ERROR:  insert or update on table "nf_object_refs" violates foreign key constraint "fk_nf_object_refs_object_hash_nf_objects"
+2026-11-13 23:12:14.002 JST [95] DETAIL:  Key (object_hash)=(ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) is not present in table "nf_objects".
+2026-11-13 23:12:14.002 JST [95] STATEMENT:  INSERT INTO nf_object_refs (owner_type, owner_id, object_hash) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR)
+2026-11-13 23:12:14.201 JST [92] FATAL:  terminating connection due to administrator command
+2026-11-13 23:12:14.304 JST [29] LOG:  checkpoint starting: immediate force wait
+2026-11-13 23:12:14.320 JST [29] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.004 s, sync=0.003 s, total=0.017 s; sync files=4, longest=0.001 s, average=0.001 s; distance=6581 kB, estimate=9380 kB; lsn=0/39020D8, redo lsn=0/3902080
+2026-11-13 23:12:19.623 JST [106] FATAL:  terminating connection due to administrator command
+2026-11-13 23:12:19.729 JST [29] LOG:  checkpoint starting: immediate force wait
+2026-11-13 23:12:19.782 JST [29] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.007 s, sync=0.012 s, total=0.054 s; sync files=4, longest=0.006 s, average=0.003 s; distance=6599 kB, estimate=9102 kB; lsn=0/3F74090, redo lsn=0/3F74038
+2026-11-13 23:12:22.820 JST [29] LOG:  checkpoint starting: immediate force wait
+2026-11-13 23:12:22.847 JST [29] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.004 s, sync=0.007 s, total=0.027 s; sync files=4, longest=0.003 s, average=0.002 s; distance=6348 kB, estimate=8827 kB; lsn=0/45A7188, redo lsn=0/45A7130
+2026-11-13 23:12:27.044 JST [29] LOG:  checkpoint starting: immediate force wait
+2026-11-13 23:12:27.122 JST [29] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.008 s, sync=0.005 s, total=0.079 s; sync files=4, longest=0.003 s, average=0.002 s; distance=6476 kB, estimate=8592 kB; lsn=0/4BFA2E0, redo lsn=0/4BFA288
+2026-11-13 23:12:51.985 JST [143] FATAL:  terminating connection due to administrator command
+2026-11-13 23:13:06.078 JST [124] FATAL:  terminating connection due to administrator command
+2026-11-13 23:13:06.211 JST [29] LOG:  checkpoint starting: immediate force wait
+2026-11-13 23:13:06.229 JST [29] LOG:  checkpoint complete: wrote 7 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.005 s, sync=0.006 s, total=0.019 s; sync files=6, longest=0.002 s, average=0.001 s; distance=8366 kB, estimate=8569 kB; lsn=0/5425D08, redo lsn=0/5425CB0
+2026-11-13 23:13:12.623 JST [175] LOG:  unexpected EOF on client connection with an open transaction
+2026-11-13 23:13:15.018 JST [177] LOG:  unexpected EOF on client connection with an open transaction
+2026-11-13 23:13:26.273 JST [170] FATAL:  terminating connection due to administrator command
+2026-11-13 23:13:26.278 JST [182] FATAL:  terminating connection due to administrator command
+2026-11-13 23:13:26.376 JST [29] LOG:  checkpoint starting: immediate force wait
+2026-11-13 23:13:26.410 JST [29] LOG:  checkpoint complete: wrote 47 buffers (0.3%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.008 s, sync=0.014 s, total=0.034 s; sync files=14, longest=0.003 s, average=0.001 s; distance=8628 kB, estimate=8628 kB; lsn=0/5C930C0, redo lsn=0/5C93068
+2026-11-13 23:13:30.916 JST [29] LOG:  checkpoint starting: immediate force wait
+2026-11-13 23:13:30.940 JST [29] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.003 s, sync=0.007 s, total=0.025 s; sync files=4, longest=0.004 s, average=0.002 s; distance=6497 kB, estimate=8415 kB; lsn=0/62EB628, redo lsn=0/62EB5D0
+2026-11-13 23:13:52.363 JST [29] LOG:  checkpoint starting: immediate force wait
+2026-11-13 23:13:52.390 JST [29] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.005 s, sync=0.006 s, total=0.027 s; sync files=4, longest=0.003 s, average=0.002 s; distance=6556 kB, estimate=8229 kB; lsn=0/69528F8, redo lsn=0/69528A0
+2026-11-13 23:13:59.807 JST [29] LOG:  checkpoint starting: immediate force wait
+2026-11-13 23:13:59.833 JST [29] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.006 s, sync=0.006 s, total=0.026 s; sync files=4, longest=0.003 s, average=0.002 s; distance=6513 kB, estimate=8058 kB; lsn=0/6FAED78, redo lsn=0/6FAED20
+2026-11-13 23:14:23.824 JST [224] FATAL:  terminating connection due to administrator command
+2026-11-13 23:14:23.926 JST [29] LOG:  checkpoint starting: immediate force wait
+2026-11-13 23:14:23.966 JST [29] LOG:  checkpoint complete: wrote 6 buffers (0.0%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.007 s, sync=0.014 s, total=0.040 s; sync files=6, longest=0.004 s, average=0.003 s; distance=7870 kB, estimate=8039 kB; lsn=0/775E690, redo lsn=0/775E638
+2026-11-13 23:14:27.346 JST [28] LOG:  received fast shutdown request
+2026-11-13 23:14:27.348 JST [28] LOG:  aborting any active transactions
+2026-11-13 23:14:27.362 JST [28] LOG:  background worker "logical replication launcher" (PID 34) exited with exit code 1
+2026-11-13 23:14:27.362 JST [29] LOG:  shutting down
+2026-11-13 23:14:27.363 JST [29] LOG:  checkpoint starting: shutdown immediate
+2026-11-13 23:14:27.381 JST [29] LOG:  checkpoint complete: wrote 2 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.002 s, sync=0.004 s, total=0.019 s; sync files=2, longest=0.003 s, average=0.002 s; distance=0 kB, estimate=7235 kB; lsn=0/775E798, redo lsn=0/775E798
+2026-11-13 23:14:27.448 JST [28] LOG:  database system is shut down

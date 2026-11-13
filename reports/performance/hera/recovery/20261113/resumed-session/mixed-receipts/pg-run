@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Scratch-only launcher: independent cluster, port and namespace per invocation.
+set -Eeuo pipefail
+root=/workspace/scratch/96d4dcc78a83/.runtime
+job="$(mktemp -d /workspace/scratch/51782f441037/mixed-receipts/pg.XXXXXXXX)"
+lockenv=/workspace/scratch/e4bbbff84872/hera-venv
+export UV_CACHE_DIR="$root/uv-cache" UV_PROJECT_ENVIRONMENT="$lockenv"
+export PATH="$lockenv/bin:$root/pgbin/usr/lib/postgresql/17/bin:$root/redis-dist/usr/bin:$PATH"
+export LD_LIBRARY_PATH="$root/pgbin/usr/lib/x86_64-linux-gnu:$root/redis-dist/usr/lib/x86_64-linux-gnu${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+export PG_BIN="$root/pgbin/usr/lib/postgresql/17/bin"
+export PYTHONPATH="$PWD/src:$PWD/workshop/src:$PWD"
+port="$(python -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1]);s.close()')"
+initdb -A trust -D "$job/data" -U agent -L "$root/pgbin/usr/share/postgresql/17" --locale=C --encoding=UTF8 > "$job/init.log"
+pg_ctl -D "$job/data" -l "$job/postgres.log" -o "-k '' -h 127.0.0.1 -p $port -c max_connections=128 -c shared_preload_libraries=pg_stat_statements -c track_io_timing=on" -w start > "$job/start.log"
+cleanup() { pg_ctl -D "$job/data" -m fast -w stop >> "$job/start.log" || true; if [ "${KEEP_PGDATA:-0}" = 0 ]; then rm -rf -- "$job/data"; fi; }
+trap cleanup EXIT
+export PGHOST=127.0.0.1 PGPORT="$port" PGUSER=agent PGDATABASE=postgres
+createdb novel_mcp
+export PGDATABASE=novel_mcp
+psql -Xq -vON_ERROR_STOP=1 -c 'create extension pg_stat_statements'
+export DATABASE_URL="postgresql+psycopg://agent@127.0.0.1:$port/novel_mcp"
+export NF_TEST_DATABASE_URL="$DATABASE_URL"
+export NOVEL_FACTORY_DATABASE_URL="$DATABASE_URL" NF_DATABASE_URL="$DATABASE_URL" TEST_DATABASE_URL="$DATABASE_URL"
+export MCP_BENCH_PG_DSN="postgresql://agent@127.0.0.1:$port/novel_mcp"
+export AW_DUAL_TEST_ADMIN_URL="postgresql://agent@127.0.0.1:$port/postgres" AW_NF_SOURCE="$PWD"
+export NF_BENCH_RUNTIME_ROOT="$job"
+redis_port="$(python -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1]);s.close()')"
+redis-server --bind 127.0.0.1 --port "$redis_port" --daemonize no --save '' --appendonly no --dir "$job" >"$job/redis.log" 2>&1 &
+redis_process=$!
+stop_all() { kill "$redis_process" 2>/dev/null || true; wait "$redis_process" 2>/dev/null || true; cleanup; }
+trap stop_all EXIT
+for ((i=0;i<50;i++)); do
+ if redis-cli -h 127.0.0.1 -p "$redis_port" ping 2>/dev/null | grep -q PONG; then break; fi
+ sleep .1
+done
+redis-cli -h 127.0.0.1 -p "$redis_port" ping >&2
+export NF_TEST_REDIS_URL="redis://127.0.0.1:$redis_port/1" AW_REDIS_TEST_URL="redis://127.0.0.1:$redis_port/0"
+"$@"

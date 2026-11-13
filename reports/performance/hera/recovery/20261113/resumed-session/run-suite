@@ -1,0 +1,11 @@
+#!/bin/bash
+set -euo pipefail
+root=$(pwd)
+evidence=$1
+mkdir -p "$evidence"
+export PATH="/workspace/scratch/749fdd922bc0/qa/env/bin:$PATH" PYTHONPATH="$root/src:$root/workshop/src:$root" AW_NF_SOURCE="$root"
+export AW_REDIS_TEST_URL="${NF_TEST_REDIS_URL%/*}/0" NF_CODEX_EXECUTABLE="$(command -v codex)"
+createdb nf_test
+export NF_TEST_DATABASE_URL="postgresql+psycopg://agent@127.0.0.1:$PGPORT/nf_test" NF_DATABASE_URL="postgresql+psycopg://agent@127.0.0.1:$PGPORT/nf_test"
+python -m alembic upgrade head > "$evidence/migration.log" 2>&1
+python -m pytest tests -q --tb=short --junitxml="$evidence/full.xml" >"$evidence/full.log" 2>&1
