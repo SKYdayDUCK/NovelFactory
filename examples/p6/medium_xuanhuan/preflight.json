@@ -1,0 +1,506 @@
+{
+  "input_sha256": "3e3a7d254f72f389b7843633aaaa4fcd74f4498d43cc0bfc204571edad0f7e1e",
+  "profile": {
+    "version": "p6-profile-v1",
+    "preset": "medium",
+    "genre": "玄幻",
+    "complexity": {},
+    "world_depth": "core",
+    "planning_depth": "chapters",
+    "volume_planning": false,
+    "character_simulation": true,
+    "environment_processes": false,
+    "local_replanning": true,
+    "future_volume_lookahead": 0,
+    "cross_volume_memory": false,
+    "writing_concurrency": 2,
+    "review_concurrency": 2,
+    "window_chapters": 8,
+    "chapter_granularity": "chapter",
+    "scene_granularity": "standard",
+    "memory_scope": "chapter",
+    "review_intensity": "chapter_and_work",
+    "max_reworks": 2,
+    "independent_reviewers": 2,
+    "release_conditions": [
+      "complete_text",
+      "accepted_world",
+      "reconciled_drafts",
+      "editorial_approval",
+      "two_full_independent_reviews",
+      "internal_release"
+    ]
+  },
+  "dag": [
+    {
+      "id": "world",
+      "stage": 1,
+      "decision": "REQUIRED",
+      "state": "WAITING",
+      "dependencies": [],
+      "conditional_dependencies": [],
+      "role_id": "world_designer",
+      "task_kind": "initial_world",
+      "skill_name": "prepare-world",
+      "trigger": null
+    },
+    {
+      "id": "world_detail",
+      "stage": 1,
+      "decision": "ENABLED",
+      "state": "WAITING",
+      "dependencies": [
+        "world"
+      ],
+      "conditional_dependencies": [],
+      "role_id": "world_designer",
+      "task_kind": "world_extension",
+      "skill_name": "prepare-world",
+      "trigger": null
+    },
+    {
+      "id": "world_rules_review",
+      "stage": 1,
+      "decision": "SKIPPED_BY_PROFILE",
+      "state": "SKIPPED_BY_PROFILE",
+      "dependencies": [
+        "world_detail"
+      ],
+      "conditional_dependencies": [],
+      "role_id": "world_designer",
+      "task_kind": "rule_review",
+      "skill_name": "prepare-world",
+      "trigger": null
+    },
+    {
+      "id": "world_process_plan",
+      "stage": 1,
+      "decision": "SKIPPED_BY_PROFILE",
+      "state": "SKIPPED_BY_PROFILE",
+      "dependencies": [],
+      "conditional_dependencies": [],
+      "role_id": "environment_director",
+      "task_kind": "process_semantics",
+      "skill_name": "prepare-world",
+      "trigger": null
+    },
+    {
+      "id": "characters",
+      "stage": 1,
+      "decision": "REQUIRED",
+      "state": "WAITING",
+      "dependencies": [
+        "world"
+      ],
+      "conditional_dependencies": [],
+      "role_id": "world_designer",
+      "task_kind": "initial_world",
+      "skill_name": "prepare-world",
+      "trigger": null
+    },
+    {
+      "id": "storyline",
+      "stage": 1,
+      "decision": "REQUIRED",
+      "state": "WAITING",
+      "dependencies": [
+        "world",
+        "world_detail",
+        "characters"
+      ],
+      "conditional_dependencies": [],
+      "role_id": "chief_editor",
+      "task_kind": "book_direction",
+      "skill_name": "plan-volume",
+      "trigger": null
+    },
+    {
+      "id": "volume_plan",
+      "stage": 1,
+      "decision": "SKIPPED_BY_PROFILE",
+      "state": "SKIPPED_BY_PROFILE",
+      "dependencies": [
+        "storyline"
+      ],
+      "conditional_dependencies": [],
+      "role_id": "volume_director",
+      "task_kind": "volume_contract",
+      "skill_name": "plan-volume",
+      "trigger": null
+    },
+    {
+      "id": "chapter_plan",
+      "stage": 1,
+      "decision": "ENABLED",
+      "state": "WAITING",
+      "dependencies": [
+        "storyline"
+      ],
+      "conditional_dependencies": [],
+      "role_id": "volume_director",
+      "task_kind": "window_plan",
+      "skill_name": "plan-volume",
+      "trigger": null
+    },
+    {
+      "id": "series_plan",
+      "stage": 1,
+      "decision": "SKIPPED_BY_PROFILE",
+      "state": "SKIPPED_BY_PROFILE",
+      "dependencies": [],
+      "conditional_dependencies": [],
+      "role_id": "chief_editor",
+      "task_kind": "book_direction",
+      "skill_name": "plan-volume",
+      "trigger": null
+    },
+    {
+      "id": "bind_plan",
+      "stage": 1,
+      "decision": "REQUIRED",
+      "state": "WAITING",
+      "dependencies": [
+        "storyline",
+        "chapter_plan"
+      ],
+      "conditional_dependencies": [],
+      "role_id": null,
+      "task_kind": null,
+      "skill_name": null,
+      "trigger": null
+    },
+    {
+      "id": "future_volumes",
+      "stage": 1,
+      "decision": "SKIPPED_BY_PROFILE",
+      "state": "SKIPPED_BY_PROFILE",
+      "dependencies": [
+        "bind_plan"
+      ],
+      "conditional_dependencies": [],
+      "role_id": "volume_director",
+      "task_kind": "window_plan",
+      "skill_name": "roll-window",
+      "trigger": null
+    },
+    {
+      "id": "character_actions",
+      "stage": 2,
+      "decision": "ENABLED",
+      "state": "WAITING",
+      "dependencies": [
+        "characters",
+        "bind_plan"
+      ],
+      "conditional_dependencies": [],
+      "role_id": "character_actor",
+      "task_kind": "character_action",
+      "skill_name": "simulate-character",
+      "trigger": null
+    },
+    {
+      "id": "environment",
+      "stage": 2,
+      "decision": "SKIPPED_BY_PROFILE",
+      "state": "SKIPPED_BY_PROFILE",
+      "dependencies": [
+        "world",
+        "bind_plan"
+      ],
+      "conditional_dependencies": [],
+      "role_id": "environment_director",
+      "task_kind": "environment_change",
+      "skill_name": "prepare-world",
+      "trigger": null
+    },
+    {
+      "id": "adjudication",
+      "stage": 2,
+      "decision": "OPTIONAL",
+      "state": "WAITING",
+      "dependencies": [
+        "character_actions",
+        "bind_plan"
+      ],
+      "conditional_dependencies": [],
+      "role_id": "adjudication_advisor",
+      "task_kind": "joint_outcome",
+      "skill_name": "adjudicate-actions",
+      "trigger": "unresolved_action_outcome"
+    },
+    {
+      "id": "world_acceptance",
+      "stage": 2,
+      "decision": "REQUIRED",
+      "state": "WAITING",
+      "dependencies": [
+        "bind_plan",
+        "character_actions"
+      ],
+      "conditional_dependencies": [
+        "adjudication"
+      ],
+      "role_id": null,
+      "task_kind": null,
+      "skill_name": null,
+      "trigger": null
+    },
+    {
+      "id": "replan",
+      "stage": 2,
+      "decision": "OPTIONAL",
+      "state": "WAITING",
+      "dependencies": [
+        "world_acceptance"
+      ],
+      "conditional_dependencies": [],
+      "role_id": "volume_director",
+      "task_kind": "replan",
+      "skill_name": "roll-window",
+      "trigger": "accepted_deviation"
+    },
+    {
+      "id": "cross_volume_memory",
+      "stage": 2,
+      "decision": "SKIPPED_BY_PROFILE",
+      "state": "SKIPPED_BY_PROFILE",
+      "dependencies": [
+        "bind_plan"
+      ],
+      "conditional_dependencies": [],
+      "role_id": "evidence_maintainer",
+      "task_kind": "literary_memory",
+      "skill_name": "maintain-memory",
+      "trigger": null
+    },
+    {
+      "id": "scene_inputs",
+      "stage": 2,
+      "decision": "REQUIRED",
+      "state": "WAITING",
+      "dependencies": [
+        "world_acceptance",
+        "bind_plan"
+      ],
+      "conditional_dependencies": [
+        "replan"
+      ],
+      "role_id": "volume_director",
+      "task_kind": "scene_plan",
+      "skill_name": "plan-volume",
+      "trigger": null
+    },
+    {
+      "id": "draft",
+      "stage": 2,
+      "decision": "REQUIRED",
+      "state": "WAITING",
+      "dependencies": [
+        "scene_inputs"
+      ],
+      "conditional_dependencies": [],
+      "role_id": "writer",
+      "task_kind": "scene_draft",
+      "skill_name": "write-scene",
+      "trigger": null
+    },
+    {
+      "id": "handoff",
+      "stage": 2,
+      "decision": "REQUIRED",
+      "state": "WAITING",
+      "dependencies": [
+        "draft"
+      ],
+      "conditional_dependencies": [],
+      "role_id": "evidence_maintainer",
+      "task_kind": "summary",
+      "skill_name": "maintain-memory",
+      "trigger": null
+    },
+    {
+      "id": "distributed_handoff",
+      "stage": 2,
+      "decision": "SKIPPED_BY_PROFILE",
+      "state": "SKIPPED_BY_PROFILE",
+      "dependencies": [
+        "handoff"
+      ],
+      "conditional_dependencies": [],
+      "role_id": "literary_editor",
+      "task_kind": "cross_volume",
+      "skill_name": "maintain-memory",
+      "trigger": null
+    },
+    {
+      "id": "reconcile",
+      "stage": 3,
+      "decision": "REQUIRED",
+      "state": "WAITING",
+      "dependencies": [
+        "world_acceptance",
+        "draft"
+      ],
+      "conditional_dependencies": [],
+      "role_id": "reviewer",
+      "task_kind": "fact",
+      "skill_name": "review-consistency",
+      "trigger": null
+    },
+    {
+      "id": "knowledge",
+      "stage": 3,
+      "decision": "REQUIRED",
+      "state": "WAITING",
+      "dependencies": [
+        "draft"
+      ],
+      "conditional_dependencies": [],
+      "role_id": "reviewer",
+      "task_kind": "epistemic",
+      "skill_name": "review-consistency",
+      "trigger": null
+    },
+    {
+      "id": "continuity",
+      "stage": 3,
+      "decision": "REQUIRED",
+      "state": "WAITING",
+      "dependencies": [
+        "handoff",
+        "reconcile",
+        "knowledge"
+      ],
+      "conditional_dependencies": [],
+      "role_id": "reviewer",
+      "task_kind": "continuity",
+      "skill_name": "review-consistency",
+      "trigger": null
+    },
+    {
+      "id": "chapter_review",
+      "stage": 3,
+      "decision": "ENABLED",
+      "state": "WAITING",
+      "dependencies": [
+        "draft"
+      ],
+      "conditional_dependencies": [],
+      "role_id": "reviewer",
+      "task_kind": "literary",
+      "skill_name": "review-consistency",
+      "trigger": null
+    },
+    {
+      "id": "volume_review",
+      "stage": 3,
+      "decision": "SKIPPED_BY_PROFILE",
+      "state": "SKIPPED_BY_PROFILE",
+      "dependencies": [
+        "chapter_review",
+        "continuity"
+      ],
+      "conditional_dependencies": [],
+      "role_id": "volume_director",
+      "task_kind": "volume_review",
+      "skill_name": "volume-director-review",
+      "trigger": null
+    },
+    {
+      "id": "literary_edit",
+      "stage": 3,
+      "decision": "REQUIRED",
+      "state": "WAITING",
+      "dependencies": [
+        "continuity",
+        "chapter_review"
+      ],
+      "conditional_dependencies": [],
+      "role_id": "literary_editor",
+      "task_kind": "structure",
+      "skill_name": "edit-volume",
+      "trigger": null
+    },
+    {
+      "id": "revise",
+      "stage": 3,
+      "decision": "OPTIONAL",
+      "state": "WAITING",
+      "dependencies": [
+        "literary_edit"
+      ],
+      "conditional_dependencies": [],
+      "role_id": "writer",
+      "task_kind": "targeted_revision",
+      "skill_name": "write-scene",
+      "trigger": "revision_requested"
+    },
+    {
+      "id": "accept_text",
+      "stage": 3,
+      "decision": "REQUIRED",
+      "state": "WAITING",
+      "dependencies": [
+        "reconcile",
+        "knowledge",
+        "literary_edit"
+      ],
+      "conditional_dependencies": [
+        "revise"
+      ],
+      "role_id": null,
+      "task_kind": null,
+      "skill_name": null,
+      "trigger": null
+    },
+    {
+      "id": "blind_review_a",
+      "stage": 3,
+      "decision": "REQUIRED",
+      "state": "WAITING",
+      "dependencies": [
+        "accept_text"
+      ],
+      "conditional_dependencies": [],
+      "role_id": "reviewer",
+      "task_kind": "literary",
+      "skill_name": "review-consistency",
+      "trigger": null
+    },
+    {
+      "id": "blind_review_b",
+      "stage": 3,
+      "decision": "REQUIRED",
+      "state": "WAITING",
+      "dependencies": [
+        "accept_text"
+      ],
+      "conditional_dependencies": [],
+      "role_id": "reviewer",
+      "task_kind": "literary",
+      "skill_name": "review-consistency",
+      "trigger": null
+    },
+    {
+      "id": "release",
+      "stage": 3,
+      "decision": "REQUIRED",
+      "state": "WAITING",
+      "dependencies": [
+        "accept_text",
+        "blind_review_a",
+        "blind_review_b"
+      ],
+      "conditional_dependencies": [],
+      "role_id": null,
+      "task_kind": null,
+      "skill_name": null,
+      "trigger": null
+    }
+  ],
+  "route_status": "MODEL_UNAVAILABLE",
+  "tasks_enrolled": 0,
+  "model_requests": 0,
+  "stage": "PREFLIGHT",
+  "internal_releases": 0
+}

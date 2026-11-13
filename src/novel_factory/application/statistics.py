@@ -34,17 +34,22 @@ def _source(conn, event):
     ).scalar_one()
 
 
-def _usage(conn, event, data, version):
-    usage = data["usage"]
-    config = data["model_configuration"]
+def is_fixture_configuration(config):
     host = urlsplit(config.get("endpoint", "")).hostname or ""
-    fixture = (
+    return (
         config["execution_kind"] not in {"REAL_EXTERNAL", "REAL_HOST"}
         or config.get("adapter_kind") == "DETERMINISTIC_TEST"
         or config.get("provider") == "fixture"
         or host in {"localhost", "127.0.0.1", "::1"}
         or host.endswith((".test", ".invalid", ".localhost"))
     )
+
+
+def _usage(conn, event, data, version):
+    usage = data["usage"]
+    config = data["model_configuration"]
+    fixture = is_fixture_configuration(config)
+    host = urlsplit(config.get("endpoint", "")).hostname or ""
     origin = "fixture" if fixture else "reported"
     metrics = {f"model.{origin}.calls": 1}
     for field in ("input_tokens", "output_tokens", "cached_input_tokens"):

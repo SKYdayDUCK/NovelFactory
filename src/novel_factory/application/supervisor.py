@@ -204,6 +204,18 @@ class RuntimeSupervisor:
         handoff = advance_pipeline(self.kernel, self.gateway, controller, work_id, branch_id)
         if handoff:
             return handoff
+        from novel_factory.application.idea_continuation import advance_idea_planning
+        handoff = advance_idea_planning(self.kernel, self.gateway, controller, work_id, branch_id)
+        if handoff:
+            return handoff
+        from novel_factory.application.rolling_production import advance_rolling
+        handoff = advance_rolling(self.kernel, self.gateway, controller, work_id, branch_id)
+        if handoff:
+            return handoff
+        from .book_review import advance_review
+        reviewed = advance_review(self.kernel, self.gateway, controller, work_id, branch_id)
+        if reviewed:
+            return reviewed
         from novel_factory.application.volume_successor import advance_volume
         volume = advance_volume(self.kernel, self.gateway, controller, work_id, branch_id)
         if volume:

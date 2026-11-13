@@ -715,7 +715,10 @@ class NarrativeService:
                 and not alignment["open_change_refs"] and not alignment["blocking_issues"] and not alignment["unmatched_critical_spans"],
                 "NARRATIVE_BLOCKED", "Text has unresolved world, cognition, or disclosure changes")
         origin, grant, _, context = self._origin(repo, draft)
-        extraction, extraction_task, extraction_grant = self._extraction(repo, report["extraction_ref"], draft_ref, draft)
+        # A finished extractor remains a historical source for this exact verified report.
+        # Its generation, grant epoch, delivery and semantic dependencies are rechecked below.
+        extraction, extraction_task, extraction_grant = self._extraction(
+            repo, report["extraction_ref"], draft_ref, draft, allow_accepted=True)
         # Both a new narrative acceptance and a subsequent release freeze pass
         # this guard again under the branch lock. Existing release reads stay historical.
         from novel_factory.application.semantic_dependencies import check_task_dependencies
@@ -803,6 +806,8 @@ class NarrativeService:
             if old:
                 return old
             self.validate_for_acceptance(repo, principal, draft_ref, reconciliation_ref, world_ref)
+            from .rolling_production import protect_chapter
+            protect_chapter(self.kernel, repo, world_ref, contract["scene_id"], draft_ref)
             key = "NARRATIVE_SCENE:" + contract["scene_id"]
             selection = repo.one("selections", {"work_id": world_ref["work_id"], "selection_kind": key})
             if selection:

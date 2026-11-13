@@ -1,0 +1,104 @@
+{
+  "recorded_at_utc": "2026-11-13T03:03:10.561238+00:00",
+  "purpose": "AUTHORIZED_MODEL_ROUTE_PREFLIGHT_ONLY",
+  "configured": {
+    "NF_MODEL_ENDPOINT": false,
+    "NF_MODEL_NAME": false,
+    "NF_MODEL_API_KEY": false,
+    "OPENAI_API_KEY": false,
+    "ANTHROPIC_API_KEY": false
+  },
+  "credentials_read_from_files": false,
+  "credentials_or_user_configuration_modified": false,
+  "http_provider_requests_sent": 0,
+  "production_model_requests_sent": 0,
+  "actual_cost": null,
+  "cost_status": "NO_PROVIDER_BILLING_EVIDENCE",
+  "literary_acceptance": "NOT_EVALUATED",
+  "http_route": "BLOCKED_ENVIRONMENT",
+  "http_reason": "MODEL_UNAVAILABLE",
+  "host_installed": true,
+  "existing_host_login_detected": true,
+  "host_probe": {
+    "attempts": 1,
+    "exit_status": 1,
+    "sandbox": "read-only",
+    "ephemeral": true,
+    "configuration_overrides": [],
+    "prompt_contains_project_or_private_data": false,
+    "status": "BLOCKED_ENVIRONMENT",
+    "diagnostics": [
+      "READ_ONLY_FILESYSTEM",
+      "SERVICE_INITIALIZATION_FAILED"
+    ],
+    "raw_output_retained": false,
+    "raw_output_omission_reason": "Host diagnostics can include private runtime configuration",
+    "host_isolation_verified": false
+  },
+  "real_production_acceptance": "BLOCKED_ENVIRONMENT",
+  "git_tree_assessed": "877be80d7c1dfa8b6fb9c9c5a2a570c7b14d3ca0",
+  "codex_version": "codex-cli 0.167.0-alpha.4",
+  "app_server_probes": [
+    {
+      "mode": "managed-existing-home",
+      "initialized": false,
+      "get_account_completed": false,
+      "login_detected": null,
+      "thread_started": false,
+      "turns_submitted": 0,
+      "reason_class": "EOFError"
+    },
+    {
+      "mode": "isolated-empty-home",
+      "initialized": true,
+      "get_account_completed": true,
+      "login_detected": false,
+      "thread_started": false,
+      "turns_submitted": 0
+    },
+    {
+      "mode": "existing-login-temporary-sqlite-state",
+      "turns_submitted": 0,
+      "policy_overrides": [],
+      "initialized": false,
+      "get_account_completed": false,
+      "login_detected": null,
+      "failure_type": "EOFError",
+      "diagnostic_classes": [
+        "READ_ONLY_FS"
+      ],
+      "exit_code": 1
+    }
+  ],
+  "registered_adapter_kinds": [
+    "codex-cli",
+    "deepseek",
+    "openai-compatible"
+  ],
+  "non_secret_configuration_present": {
+    "NF_RUNTIME_LIVE_APPROVED": false,
+    "NF_CODEX_PLAN_TOKEN": false,
+    "NF_OPENAI_API_KEY": false,
+    "NF_DEEPSEEK_API_KEY": false,
+    "DEEPSEEK_API_KEY": false,
+    "NF_MODEL_ENDPOINT": false,
+    "NF_MODEL_NAME": false,
+    "NF_MODEL_API_KEY": false
+  },
+  "adapter_counts": {
+    "NF_production_requests_sent": 0,
+    "novels_attempted": 0,
+    "literary_reviews": 0,
+    "release_receipts": 0,
+    "authenticated_nf_routes_confirmed": 0,
+    "app_server_turns_submitted_by_rpc_preflight": 0,
+    "ephemeral_cli_connectivity_attempts": 1
+  },
+  "route_findings": {
+    "codex_cli_chatgpt_plan": "Runtime profile expects independently provisioned plan credential reference, verified OAuth client ID and exact model output ceiling. No provider credential reference is populated. Login status alone does not supply this profile.",
+    "codex_api_and_deepseek": "No environment credential or enabled operator profile available.",
+    "legacy_nf_stateless_bridge": "Requires a configured backend model and endpoint. Both are absent.",
+    "corpus": "No story data sent. No production usage or provider billing established."
+  },
+  "observed_at_utc": "2026-11-13T03:04:03.559761+00:00"
+}

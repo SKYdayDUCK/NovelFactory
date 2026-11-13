@@ -54,7 +54,8 @@ jobs:
         run: >-
           uv run --no-sync python -m pytest -q tests/unit/test_native_platform.py
           tests/reliability/test_objects.py tests/unit/test_host_process.py tests/unit/test_p55_capacity.py
-          tests/unit/test_p58_providers.py --junitxml=native-core.xml
+          tests/unit/test_p58_providers.py tests/unit/test_p6_book_rubric.py tests/unit/test_p6_production_profiles.py
+          --junitxml=native-core.xml
       - name: Verify Windows ran the real app-server protocol case
         if: runner.os == 'Windows'
         shell: pwsh
@@ -85,7 +86,9 @@ jobs:
           tests/reliability/test_tasks.py tests/integration/test_bound_tool_entrypoints.py
           tests/integration/test_mcp_idle_pool.py
           tests/integration/test_p5_scheduler_admission.py::test_supervisor_drains_sent_attempt_and_leaves_next_job_ready
-          tests/integration/test_p58_routing.py
+          tests/integration/test_p58_routing.py tests/integration/test_p6_profile_binding.py
+          tests/integration/test_p6_idea_intake.py tests/integration/test_p6_rolling_production.py
+          tests/integration/test_p6_book_review.py tests/integration/test_p6_manuscript_extent.py
           --junitxml=native-postgres.xml
       - uses: actions/upload-artifact@v4
         if: always()

@@ -8,7 +8,6 @@ from novel_factory.domain.canonical import fingerprint
 from novel_factory.domain.errors import DomainError
 from novel_factory.infrastructure.runtime_catalog import RuntimeCatalog
 
-
 PRESETS = ("short", "medium", "medium_long", "long", "ultra_long")
 
 
@@ -26,7 +25,7 @@ def test_resolved_profile_has_closed_graph_and_registered_role_bindings(preset):
         if node["role_id"]:
             snap = catalog.snapshot(node["role_id"], node["task_kind"], node["skill_name"])["snapshot"]
             assert snap["effective_model_tools"] == []
-    assert set(n["stage"] for n in graph) == {1, 2, 3}
+    assert {n["stage"] for n in graph} == {1, 2, 3}
     assert graph[-1]["dependencies"] == ["accept_text", "blind_review_a", "blind_review_b"]
     assert profile["independent_reviewers"] == 2
     assert validate_contract("ProductionProfile", profile, "production_profile") == profile

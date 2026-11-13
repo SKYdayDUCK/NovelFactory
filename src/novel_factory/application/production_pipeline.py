@@ -103,7 +103,7 @@ def _dependencies(assumptions, plan_nodes, subjects, predicates):
     return deps
 
 
-def _nodes(kernel, repo, wr, current_volume, current_plan, chapters, future, lookahead, subjects, predicates):
+def _nodes(kernel, repo, wr, current_volume, current_plan, chapters, future, lookahead, subjects, predicates, *, rolling=False):
     work, nodes, used_scenes = wr["work_id"], {}, set()
     plan_nodes = {n["node_id"]: n for n in current_plan["nodes"]}
     current_ref = _selected(repo, work, PlanningService.selection_key(current_volume))
@@ -123,11 +123,18 @@ def _nodes(kernel, repo, wr, current_volume, current_plan, chapters, future, loo
             used_scenes.add(scene_id)
             for ref in _list(item["handoff_refs"], 32, "Bounded predecessor acceptances"):
                 kernel.artifact(repo, ref, work, kind="NARRATIVE_ACCEPTANCE")
-            require(len(item["handoff_refs"]) == len(scene["required_predecessor_scene_ids"]),
+            waiting = rolling and not item["handoff_refs"] and bool(scene["required_predecessor_scene_ids"])
+            require(waiting or len(item["handoff_refs"]) == len(scene["required_predecessor_scene_ids"]),
                     "TASK_REBIND_REQUIRED", "A dependent scene requires exact accepted handoffs")
             node_id = "draft:" + scene_id
             parents.append(node_id)
-            nodes[node_id] = {"stage": "draft", "chapter_id": chapter_id, **item, "state": "PENDING"}
+            nodes[node_id] = {"stage": "draft", "chapter_id": chapter_id, **item,
+                              "state": "WAITING_HANDOFF" if waiting else "PENDING"}
+            if waiting:
+                nodes[node_id]["predecessor_scene_ids"] = scene["required_predecessor_scene_ids"]
+            if rolling:
+                nodes["facts:" + scene_id] = {"stage": "facts", "chapter_id": chapter_id,
+                                                "parents": [node_id], "state": "PENDING"}
         nodes[review_id] = {"stage": "review", "chapter_id": chapter_id, "parents": parents, "state": "PENDING"}
     future_volumes = set()
     for item in _list(future, 8, "At most eight provisional candidates per run"):
@@ -154,6 +161,15 @@ def register_pipeline(kernel, gateway, owner, *, world_ref, series_id, volume_id
                       story_time, subject_ids, predicates, routes, budget_id, reserve_amount,
                       token_reservation, limits, deadline_seconds, idempotency_key):
     """Persist a finite controller allowance. Registration sends no model requests."""
+    return _register(kernel, gateway, owner, world_ref=world_ref, series_id=series_id, volume_id=volume_id,
+        chapters=chapters, future=future, story_time=story_time, subject_ids=subject_ids, predicates=predicates,
+        routes=routes, budget_id=budget_id, reserve_amount=reserve_amount, token_reservation=token_reservation,
+        limits=limits, deadline_seconds=deadline_seconds, idempotency_key=idempotency_key, rolling=None)
+
+
+def _register(kernel, gateway, owner, *, world_ref, series_id, volume_id, chapters, future, story_time,
+              subject_ids, predicates, routes, budget_id, reserve_amount, token_reservation, limits,
+              deadline_seconds, idempotency_key, rolling, continuity_ref=None):
     validate_contract("WorldRef", world_ref)
     validate_contract("StoryPoint", story_time)
     for uid in (series_id, volume_id, budget_id):
@@ -166,7 +182,7 @@ def register_pipeline(kernel, gateway, owner, *, world_ref, series_id, volume_id
         require(isinstance(routes[stage], str) and (routes[stage] in gateway.adapters or routes[stage] == "@policy"),
                 "MODEL_UNAVAILABLE", "Unknown stage route")
     _bounded(limits["review_backlog"], 32, "Review backlog must be 1..32")
-    _bounded(limits["lookahead"], 2, "Lookahead must be 1..2")
+    _bounded(limits["lookahead"], 2, "Invalid lookahead", 0 if rolling else 1)
     _bounded(limits["window_goals"], 32, "Future window must be 1..32")
     _bounded(deadline_seconds, 86400, "Deadline must be 1..86400 seconds")
     PlanningService._key(idempotency_key)
@@ -181,9 +197,13 @@ def register_pipeline(kernel, gateway, owner, *, world_ref, series_id, volume_id
         previous = kernel._prior(repo, owner, work, "PRODUCTION_REGISTER", idempotency_key, request)
         if previous:
             return previous
+        if rolling is None:
+            from .rolling_production import _load as rolling_cursor
+            cursor = rolling_cursor(kernel, repo, work, branch)
+            require(not cursor or cursor["state"] == "COMPLETED", "CAPACITY_LIMIT", "A rolling allowance owns this branch")
         active = _load(kernel, repo, work, branch)
         require(not active or all(n["state"] in {"DRAFT_STORED", "ADVISORY_REVIEW", "WINDOW_TRANSFERRED",
-                "REPLAN_REQUIRED", "STOPPED"} for n in active["nodes"].values()), "CAPACITY_LIMIT",
+                "REPLAN_REQUIRED", "FACTS_ACCEPTED", "STOPPED"} for n in active["nodes"].values()), "CAPACITY_LIMIT",
                 "The branch has an unfinished production allowance")
         if active:
             previous_tasks = [record["task_id"] for n in active["nodes"].values() for record in [n, *n.get("history", [])]
@@ -202,8 +222,12 @@ def register_pipeline(kernel, gateway, owner, *, world_ref, series_id, volume_id
                           "worker_id": "registration", "call_key": "pipeline", "input_ref": plan_ref,
                           "budget_id": budget_id, "reserve_amount": reserve_amount,
                           "token_reservation": token_reservation}, "agent")
-        nodes = _nodes(kernel, repo, wr, volume_id, plan, chapters, future, limits["lookahead"], subject_ids, predicates)
+        nodes = _nodes(kernel, repo, wr, volume_id, plan, chapters, future, limits["lookahead"], subject_ids, predicates, rolling=bool(rolling))
         board = {k: v for k, v in request.items() if k not in {"chapters", "future", "deadline_seconds"}}
+        if rolling is not None:
+            board["rolling"] = rolling
+            if continuity_ref:
+                board["continuity_ref"] = continuity_ref
         board.update(nodes=nodes, plan_ref=plan_ref, manifest_ref=manifest, authorization={
             "grant_id": owner.grant_id, "principal_id": owner.principal_id, "epoch": grant["epoch"],
             "policy_version": current_work["policy_version"],
@@ -240,6 +264,8 @@ def pipeline_status(kernel, owner, work, branch, *, include_outputs=False):
                 kernel.artifact(repo, draft["text_ref"], work, kind="TEXT")
                 outputs[key] = {"draft_ref": ref, "text_ref": draft["text_ref"],
                                 "text": kernel.objects.read(draft["text_ref"]["sha256"]).decode("utf-8")}
+            elif stage == "facts":
+                outputs[key] = kernel.artifact(repo, ref, work, kind="ROLLING_FACT_REPORT")["payload"]
             elif stage == "review":
                 advice = kernel.artifact(repo, ref, work, kind="CHAPTER_READING_ADVICE")["payload"]
                 outputs[key] = {**advice, "advice": kernel.artifact(repo, advice["candidate_ref"], work,
@@ -253,11 +279,11 @@ def pipeline_status(kernel, owner, work, branch, *, include_outputs=False):
 def _ready(board):
     nodes, limits = board["nodes"], board["limits"]
     busy = Counter(n["stage"] for n in nodes.values() if n["state"] == "ENROLLED")
-    reviews = [k for k, n in nodes.items() if n["stage"] == "review" and n["state"] == "PENDING"
+    reviews = [k for k, n in nodes.items() if n["stage"] in {"facts", "review"} and n["state"] == "PENDING"
                and all(nodes[p]["state"] == "DRAFT_STORED" for p in n["parents"])]
-    if reviews and busy["review"] < limits["review"]:
+    if reviews and busy["review"] + busy["facts"] < limits["review"]:
         return min(reviews)
-    if len(reviews) + busy["review"] >= limits["review_backlog"]:
+    if len(reviews) + busy["review"] + busy["facts"] >= limits["review_backlog"]:
         return None
     for stage in ("plan", "draft"):
         if busy[stage] < limits[stage]:
@@ -289,18 +315,25 @@ def _enroll(kernel, repo, gateway, owner, board, identity):
     elif stage == "draft":
         scene = kernel.artifact(repo, node["scene_ref"], work, kind="SCENE_PLAN")["payload"]
         materials = [node["scene_ref"]]
+        if board.get("continuity_ref"):
+            materials.append(board["continuity_ref"])
         refs = [board["plan_ref"], scene["batch_ref"], *node["handoff_refs"]]
         assignment = "依据获准场景卡写出正文，保留人物视角、披露边界和已接受前序交接。"
     else:
         materials = [board["nodes"][p]["output_ref"] for p in node["parents"]]
         assignment = "独立阅读本章给定顺序的全部场景，报告文学观察、证据和仍未判断的问题。"
-    role, kind = ROLES[stage]
+    if stage == "facts":
+        from .rolling_facts import assignment as fact_assignment
+        assignment = fact_assignment()
+        role, kind = "evidence_maintainer", "assertion_extract"
+    else:
+        role, kind = ROLES[stage]
     seconds = int((datetime.fromisoformat(board["authorization"]["deadline"]) - repo.now()).total_seconds())
     require(seconds > 0, "TASK_EXPIRED", "No time remains")
     task = RuntimeTaskService(kernel, gateway).prepare(owner, wr, role_id=role, task_kind=kind,
         assignment=assignment, knowledge_cut=cut, subject_ids=board["subject_ids"], predicates=board["predicates"],
         story_time=board["story_time"], material_refs=materials, input_artifacts=refs,
-        adapter_id=board["routes"][stage], max_amount=board["reserve_amount"], token_budget=board["token_reservation"],
+        adapter_id=board["routes"]["review" if stage == "facts" else stage], max_amount=board["reserve_amount"], token_budget=board["token_reservation"],
         currency=repo.one("budgets", {"work_id": work, "budget_id": board["budget_id"]})["currency"],
         queue_state="READY", lease_seconds=min(600, seconds), deadline_seconds=seconds)
     supervisor = RuntimeSupervisor(kernel, gateway)
@@ -353,7 +386,7 @@ def prepare_materials(kernel, task, config):
             PlanningService(bound).bind_task_for_controller(owner, tid, gen, board["plan_ref"], scene["plan_node_ids"], key)
             actor = Principal(task["grant_id"], task["principal_id"])
             ReleaseService(bound).bind_writer_task(actor, tid, gen, node["scene_ref"], node["handoff_refs"], key)
-        elif node["stage"] == "review":
+        elif node["stage"] in {"review", "facts"}:
             drafts = [board["nodes"][p]["output_ref"] for p in node["parents"]]
             for parent in node["parents"]:
                 source = repo.one("tasks", {"task_id": board["nodes"][parent]["task_id"]})
@@ -375,6 +408,15 @@ def _deliver(kernel, repo, gateway, board, node, task):
             node["scene_ref"], candidate["text"], key, declared_important_deltas=candidate["important_deltas"],
             handoff_refs=node["handoff_refs"], agent_output_ref=evidence["output_ref"])
         state = "DRAFT_STORED"
+    elif node["stage"] == "facts":
+        from .rolling_facts import audit
+        evidence = audit(kernel, repo, owner, board, node, task, candidate)
+        ref = _artifact(kernel, repo, task["work_id"], owner, "ROLLING_FACT_REPORT", evidence)
+        if evidence["status"] == "CLEAR":
+            state = "FACTS_ACCEPTED"
+        else:
+            state = "STOPPED"
+            node["reason"] = "NARRATIVE_ALIGNMENT_REQUIRED"
     elif node["stage"] == "review":
         drafts = [board["nodes"][p]["output_ref"] for p in node["parents"]]
         ref = _artifact(kernel, repo, task["work_id"], owner, "CHAPTER_READING_ADVICE",
@@ -530,6 +572,15 @@ def advance_pipeline(kernel, gateway, controller, work, branch):
         settlement = _settlement(bound, repo, board) if any(n["state"] in {
             "PROVISIONAL_WITH_ASSUMPTIONS", "READY_FOR_ADOPTION"} for n in nodes.values()) else None
         for identity, node in nodes.items():
+            if node["state"] == "WAITING_HANDOFF":
+                if expired:
+                    node.update(state="STOPPED", reason="TASK_EXPIRED")
+                    break
+                refs = [_selected(repo, work, "NARRATIVE_SCENE:" + parent) for parent in node["predecessor_scene_ids"]]
+                if not all(refs):
+                    continue
+                node.update(state="PENDING", handoff_refs=refs)
+                break
             if node["state"] in {"PROVISIONAL_WITH_ASSUMPTIONS", "READY_FOR_ADOPTION"}:
                 if expired:
                     node.update(state="STOPPED", reason="TASK_EXPIRED")
@@ -559,7 +610,7 @@ def advance_pipeline(kernel, gateway, controller, work, branch):
                     node.update(state="STOPPED", reason="TASK_EXPIRED")
                 else:
                     continue
-            elif node["stage"] == "review" and node["state"] == "PENDING" and any(
+            elif node["stage"] in {"facts", "review"} and node["state"] == "PENDING" and any(
                     nodes[p]["state"] == "STOPPED" for p in node["parents"]):
                 node.update(state="STOPPED", reason="PREDECESSOR_STOPPED")
             else:

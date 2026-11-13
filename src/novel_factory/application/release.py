@@ -270,7 +270,7 @@ class ReleaseService:
             self.kernel._receipt(repo, principal, wr, "WRITING_BIND", idempotency_key, request, ref)
         return ref
 
-    def _collect(self, repo, principal, request):
+    def _collect(self, repo, principal, request, *, preparing_review=False):
         from novel_factory.application.continuity import guard_serial_prefix
         guard_serial_prefix(repo, request)
         wr, wid = request["world_ref"], request["world_ref"]["work_id"]
@@ -351,6 +351,9 @@ class ReleaseService:
                         "RELEASE_REVISION_REQUIRED", "Changed reading order requires new narrative, arrangement and disclosure versions")
         else:
             require(request["revision_reason"] is None, "INVALID_ARGUMENT", "An initial release has no revision reason")
+        if not preparing_review:
+            from .book_review import require_book_review
+            require_book_review(self.kernel, repo, principal, request, entries)
         return {"entries": entries, "approval": approval, "prior_record": prior_record, "prior_manifest": prior_manifest,
                 "policy_version": work["policy_version"]}
 

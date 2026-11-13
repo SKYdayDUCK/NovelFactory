@@ -9,7 +9,6 @@ from novel_factory.contracts.registry import schema_for, validate_contract
 from novel_factory.domain.canonical import fingerprint
 from novel_factory.domain.errors import DomainError
 
-
 _COMMON = {
     "world_depth": "core",
     "planning_depth": "chapters",

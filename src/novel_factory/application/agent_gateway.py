@@ -353,6 +353,12 @@ class AgentGateway:
 
     def _messages(self, principal, binding):
         task, spec, context, data = (binding[k] for k in ("task", "spec", "context", "input"))
+        if task["role_id"] == "reviewer" and task["task_kind"] == "literary":
+            with self.kernel.db.uow(write=False) as repo:
+                job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})
+                if job and "book_review_packet" in job["config"]:
+                    from .book_review import blind_messages
+                    return blind_messages(self.kernel, repo, binding, job["config"])
         creative = "creative_snapshot" in binding
         cached = binding.get("creative_snapshot")
         runtime = binding["runtime"]

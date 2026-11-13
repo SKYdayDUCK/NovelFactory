@@ -6,7 +6,11 @@ import pytest
 from sqlalchemy import text
 
 from novel_factory.application.kernel import Kernel
-from novel_factory.application.production_profiles import bind_profile, load_profile, resolve_profile
+from novel_factory.application.production_profiles import (
+    bind_profile,
+    load_profile,
+    resolve_profile,
+)
 from novel_factory.application.rolling_production import _store, partition_volumes
 from novel_factory.domain.canonical import fingerprint
 from novel_factory.fixtures import load_fixture

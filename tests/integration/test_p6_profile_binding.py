@@ -4,12 +4,16 @@ from uuid import uuid4
 import pytest
 
 from novel_factory.application.kernel import Kernel
-from novel_factory.application.production_profiles import bind_profile, compile_dag, load_profile, resolve_profile
+from novel_factory.application.production_profiles import (
+    bind_profile,
+    compile_dag,
+    load_profile,
+    resolve_profile,
+)
 from novel_factory.domain.errors import DomainError
 from novel_factory.fixtures import load_fixture
 from novel_factory.infrastructure.database import Database
 from novel_factory.infrastructure.objects import ObjectStore
-
 
 pytestmark = [pytest.mark.integration, pytest.mark.postgres]
 
