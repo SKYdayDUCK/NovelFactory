@@ -146,10 +146,31 @@ def provision_metered_work(kernel, project, preparation):
                             j.config->'dispatch'->>'reserve_amount' AS amount,
                             (j.config->'dispatch'->>'token_reservation')::bigint AS tokens
             FROM nf_supervisor_jobs j JOIN nf_tasks t USING(task_id)
-            WHERE t.work_id=:work AND t.branch_id=:branch AND t.state='READY'
+            WHERE t.work_id=:work AND t.branch_id=:branch AND t.state IN ('READY','BLOCKED')
         """), {"work": wr["work_id"], "branch": wr["branch_id"]}).all()
     for budget, amount, tokens in jobs:
         SharedBudgetService(kernel).provision_next(owner, wr["work_id"], wr["branch_id"], budget, amount, tokens)
+
+
+def resume_unsent_metered_job(kernel, project, state):
+    """A previously paused reservation may resume only if no attempt was ever recorded for that task."""
+    if state.get("status") != "BLOCKED" or state.get("reason") != "BUDGET_EXCEEDED" or not state.get("task_id"):
+        return
+    binding = private(project / "supervisor.json")
+    owner = kernel.authenticate(binding["token"])
+    work, branch = binding["work_id"], binding["branch_id"]
+    with kernel.db.uow() as repo:
+        kernel.authorize(repo, owner, work, "ADMIN", branch)
+        task = repo.one("tasks", {"task_id": state["task_id"], "work_id": work, "branch_id": branch}, lock="update")
+        if not task or task["state"] != "PAUSED" or task["generation"] != state["generation"]:
+            return
+        require(not repo.many("call_attempts", {"task_id": task["task_id"]}), "CALL_RECONCILIATION_REQUIRED",
+                "Metered recovery requires proof that no attempt was reserved")
+        job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})["config"]["dispatch"]
+        bound = kernel.in_transaction(repo)
+        SharedBudgetService(bound).provision_next(owner, work, branch, job["budget_id"],
+                                                 job["reserve_amount"], job["token_reservation"])
+        bound.tasks.resume(task["task_id"], task["generation"])
 
 
 def writing_step(kernel, gateway, project, allowance):
@@ -219,6 +240,9 @@ def serve(kernel, gateway, root, book, stop):
             "IDEMPOTENCY_MISMATCH", "Wrong work binding")
     # One independent service per work. Process exit releases the local lock. The DB owns attempt recovery.
     with file_lock(project / ".worker.lock"), wake_listener(kernel.db.engine) as listener:
+        state_path = project / "worker-state.json"
+        if (project / "supervisor.json").exists() and state_path.exists() and manifest["allowances"][book]["writing"].get("meter_per_dispatch"):
+            resume_unsent_metered_job(kernel, project, private(state_path))
         while not stop.is_set():
             require(source_release() == manifest["source_sha"], "SOURCE_CHANGED", "Release changed during execution")
             prep = not (project / "first-window.json").exists()

@@ -243,7 +243,21 @@ def test_reviewed_design_opens_sealed_interaction_before_any_writing(
         assert bool(result["writing_registration"]["director_task_id"]) == (preset != "short")
         supervisor = RuntimeSupervisor(kernel, gateway)
         statuses = []
+        if harness:
+            import p6_batch
+            from sqlalchemy import text
+            target = next(iter(result["writing_registration"]["actor_tasks"].values()))
+            # Recreate a local reservation refusal before any provider attempt exists.
+            with kernel.db.uow() as repo:
+                repo.conn.execute(text("UPDATE nf_tasks SET state='PAUSED' WHERE task_id=:id"), {"id": target})
+            p6_batch.resume_unsent_metered_job(kernel, private, {"status": "BLOCKED", "reason": "BUDGET_EXCEEDED",
+                                               "task_id": target, "generation": 0})
+            assert kernel.tasks.get(target)["state"] == "READY"
         for _ in range(25):
+            if harness:
+                # A blocked joint task may wake and dispatch inside the same supervisor tick.
+                import p6_batch
+                p6_batch.provision_metered_work(kernel, private, False)
             turn = supervisor.run_once(owner, work, branch)
             statuses.append((turn.get("status"), turn.get("reason")))
             if turn.get("status") == "OPENING_ACCEPTED":
