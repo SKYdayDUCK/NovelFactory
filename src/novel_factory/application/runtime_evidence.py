@@ -55,7 +55,12 @@ SELECT c.attempt_id,c.task_id,c.generation,c.budget_id,c.state AS ledger_state,c
        a.payload#>'{usage,cached_input_tokens}' AS cached_input_tokens,
        a.payload->>'execution_kind' AS execution_kind,a.payload#>>'{model_configuration,adapter_kind}' AS adapter,
        a.payload#>>'{model_configuration,provider}' AS provider,a.payload#>>'{model_configuration,model}' AS model,
-       a.payload#>>'{model_configuration,endpoint}' AS endpoint,
+       a.payload#>>'{model_configuration,endpoint}' AS endpoint, a.payload->>'reason' AS call_reason,
+       (r.payload->>'provider_response_json')::jsonb#>>'{transport_window,started_at}' AS sent_at,
+       (r.payload->>'provider_response_json')::jsonb#>>'{transport_window,received_at}' AS received_at,
+       EXISTS (SELECT 1 FROM nf_receipts invoice WHERE invoice.work_id=t.work_id
+         AND invoice.branch_id=t.branch_id AND invoice.command_type='P6_INVOICE'
+         AND invoice.idempotency_key=c.attempt_id::text) AS invoice_reconciled,
        e.event_time AS recorded_at,e.duration_ms AS elapsed_ms
 FROM nf_tasks t JOIN nf_call_attempts c USING(task_id)
 JOIN nf_budgets b ON b.budget_id=c.budget_id AND b.work_id=t.work_id
@@ -63,6 +68,9 @@ LEFT JOIN nf_audit_events e ON e.work_id=t.work_id AND e.branch_id=t.branch_id A
   AND e.generation=c.generation AND e.attempt_id=c.attempt_id AND e.event_type='model.completed'
 LEFT JOIN nf_artifacts a ON a.work_id=t.work_id AND a.artifact_revision_id=e.evidence_id
   AND a.kind='AGENT_CALL_EVIDENCE' AND a.payload->>'request_sha256'=c.request_hash
+LEFT JOIN nf_artifacts r ON r.work_id=t.work_id AND r.kind='AGENT_RESPONSE'
+  AND r.artifact_revision_id=(a.payload#>>'{response_ref,artifact_revision_id}')::uuid
+  AND r.sha256=a.payload#>>'{response_ref,sha256}'
 WHERE t.work_id=:work AND t.branch_id=:branch ORDER BY c.created_at,c.attempt_id
 """
 _TRANSITIONS = """
@@ -134,6 +142,7 @@ _LABELS = {
     "adapter",
     "model",
     "provider",
+    "call_reason",
     "output_status",
     "execution_kind",
     "recorded_accounting_state",
@@ -190,6 +199,13 @@ def _project(row, kind):
             if is_fixture_configuration(cfg)
             else "PROVIDER"
         )
+        # Raw transport metadata is adapter-controlled. Export only parseable times with offsets.
+        for key in ("sent_at", "received_at"):
+            try:
+                when = datetime.fromisoformat(result[key])
+                result[key] = when.isoformat() if when.utcoffset() is not None else None
+            except (ValueError, TypeError):
+                result[key] = None
         # Some native adapters store a provider base URL. Only its hostname is a provider label.
         if "://" in (result["provider"] or ""):
             result["provider"] = urlsplit(result["provider"]).hostname
