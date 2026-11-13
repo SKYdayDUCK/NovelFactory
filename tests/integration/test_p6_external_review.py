@@ -259,3 +259,38 @@ def test_authenticated_blind_handoff(kernel_env, tmp_path, monkeypatch, outcome)
         with pytest.raises(DomainError) as failed:
             ReleaseService(k).freeze(owner, request, "failed-review")
         assert failed.value.code == "INDEPENDENT_REVIEW_REQUIRED"
+
+
+def test_automatic_host_handoff_signs_each_track_and_resumes(kernel_env, tmp_path, monkeypatch):
+    import sys
+    from pathlib import Path
+    from novel_factory.domain.canonical import fingerprint
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[2] / "scripts"))
+    import p6_gpt_handoff as host
+    k = kernel_env["kernel"]
+    fixture, _, _, _, request = complete_candidate(k)
+    owner, wr = fixture["principal"], fixture["world_ref"]
+    work, branch = wr["work_id"], wr["branch_id"]
+    with k.db.uow() as repo:
+        bind_profile(k, repo, owner, wr, resolve_profile("short", "测试", {"production_mode":"quality"}))
+    monkeypatch.setattr(production_extent, "measure_submission", lambda *args: {"source": "TEST_FIXTURE"})
+    private_json(tmp_path/"control.json", {"database_url":kernel_env["url"], "object_root":str(k.objects.root),
+                "token":fixture["token"], "binding":{"work_id":work,"branch_id":branch}})
+    monkeypatch.setattr(host, "queue_final_readers", lambda *args: {"reader_tickets":["fixture-1","fixture-2"],
+                                                                    "edition_sha256":fingerprint(request)})
+    monkeypatch.setattr(host, "final_review_request", lambda *args: request)
+    def fixture_judge(folder, action):
+        folder.mkdir(mode=0o700, exist_ok=True)
+        if action == "register":
+            if not (folder/"identity.json").exists():
+                pub = main(["keygen","--key",str(folder/"key")])
+                private_json(folder/"identity.json", {**pub, "session_id":folder.name})
+        elif not (folder/"signed.json").exists():
+            package = host.read(folder/"assignment.json")
+            private_json(folder/"assessment.json", assessment(package))
+            main(["sign","--key",str(folder/"key"),"--assignment",str(folder/"assignment.json"),
+                  "--assessment",str(folder/"assessment.json"),"--output",str(folder/"signed.json")])
+    monkeypatch.setattr(host, "run_reader", fixture_judge)
+    result = host.handle(k, owner, tmp_path, work, branch)
+    assert result["status"] == "EXTERNAL_REVIEWS_ACCEPTED" and result["release_ref"]
+    assert host.handle(k, owner, tmp_path, work, branch)["release_ref"] == result["release_ref"]

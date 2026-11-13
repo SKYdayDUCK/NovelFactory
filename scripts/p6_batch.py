@@ -290,7 +290,15 @@ def serve(kernel, gateway, root, book, stop):
             emit(project, result)
             status = result["status"]
             if status == "AWAITING_INDEPENDENT_REVIEW":
-                return 0
+                from p6_gpt_handoff import handle
+                auth = private(project / "supervisor.json")
+                try:
+                    verdict = handle(kernel, kernel.authenticate(auth["token"]), project, auth["work_id"], auth["branch_id"])
+                except DomainError as error:
+                    emit(project, {**result, "status": "GPT_READER_RECOVERY_REQUIRED", "reason": error.code})
+                    return 3
+                emit(project, verdict)
+                return 0 if verdict["status"] == "EXTERNAL_REVIEWS_ACCEPTED" else 3
             if status in PAUSES:
                 return 3
             if status in {"IDLE", "BLOCKED"}:
