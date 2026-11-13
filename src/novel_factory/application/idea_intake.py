@@ -218,7 +218,7 @@ def design_round(kernel, repo, owner, wr, intake):
         if next_design.get("revision_purpose") == "SHORT_ENDING":
             ending_count += 1
         elif next_design.get("review_ref"):
-            editorial_count += 1
+            editorial_count += int(next_design.get("revision_purpose") != "SHORT_ENDING_FIX")
         else:
             structure_count += 1
         designer = next_design
@@ -226,7 +226,7 @@ def design_round(kernel, repo, owner, wr, intake):
 
 
 def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence,
-                        design, round_index, *, revision=None, structure_repair=False, ending_plan=False):
+                        design, round_index, *, revision=None, structure_repair=False, ending_plan=False, editor_decision=None):
     job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})["config"]
     source = kernel.artifact(repo, job["dispatch"]["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]
     budget = repo.one("budgets", {"budget_id": intake["budget_id"], "work_id": wr["work_id"]})
@@ -259,6 +259,13 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
                                     "保留人物、开场事实和世界规则。最后目标必须落实一个由人物行动产生的最终后果，"
                                     "让核心冲突得到回应。只返回 storyline、与原章数相同的 chapter_goals；开场需改时才给 opening。",
                                short_arc=findings["short_arc"])
+            if editor_decision:
+                gateway.output_contracts[(role_id, task_kind)] = ("ShortEndingFix", "production_profile")
+                content.update(task="只修改以下开放阻断问题关联的章节或开场字段。chapter 从 1 开始，replacement 是"
+                                   "该章完整目标或该开场字段的新文字，每处用 issue_ids 标识所修问题。保持其余各段原文。",
+                               editor_decision=editor_decision, ending_plan_source=evidence["ending_plan"]["source"],
+                               issues=[i for i in findings["issues"] if i["issue_id"] in editor_decision["issue_ids"]])
+                inputs.append(editor_decision["decision_ref"])
             inputs.append(review_ref)
     else:
         role_id, task_kind, skill = "reviewer", "fact", "review-consistency"
@@ -277,6 +284,12 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
                 "勾选 opening_and_chapters_confirmed。candidate_ref 逐字复制本次候选引用。answers 按源中的"
                 " unresolved_questions 顺序，逐条原样复制 question 并填写实质答复，不能把问题留到以后。"
             )
+            if "issue_ids" in content["ending_plan_source"]:
+                gateway.output_contracts[(role_id, task_kind)] = ("ShortEndingFixReview", "production_profile")
+                prior_review = kernel.artifact(repo, content["ending_plan_source"]["review_ref"], wr["work_id"])["payload"]
+                content["prior_blockers"] = [issue for issue in prior_review["issues"]
+                                             if issue["issue_id"] in content["ending_plan_source"]["issue_ids"]]
+                content["resolution_instruction"] = "按 issue_ids 顺序逐一核对原问题在新版本是否已实质解决并写明理由；未解决填 OPEN。"
         content["task"] = ("独立核查当前设计与灵感、世界规则、人物初始所知和首窗目标是否相容。"
                            "阻止成书的矛盾列为 BLOCKER，普通改善建议和待讨论问题分别用 SUGGESTION、QUESTION。")
     if intake["profile"]["preset"] == "short":
@@ -320,6 +333,7 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
         "round": round_index,
         **({"review_ref": revision[1]} if revision else {}),
         **({"revision_purpose": "SHORT_ENDING"} if ending_plan else {}),
+        **({"revision_purpose": "SHORT_ENDING_FIX", "editor_decision": editor_decision} if editor_decision else {}),
         "task_id": role.task["task_id"],
         "design_task_id": task["task_id"],
         "input_ref": role.agent_input["input_ref"],
@@ -357,7 +371,7 @@ def materialize_design(kernel, gateway, owner, wr):
         if task and task["state"] == "FAILED" and intake.get("model_routes"):
             _check_design_authority(repo, task, wr)
             envelope, audit, audit_ref = returned_design(kernel, repo, gateway, task, wr, designer)
-            if designer.get("revision_purpose") == "SHORT_ENDING":
+            if designer.get("revision_purpose") in {"SHORT_ENDING", "SHORT_ENDING_FIX"}:
                 normalized = derive_ending_plan(kernel, repo, owner, wr, designer, envelope, audit, audit_ref)
             else:
                 normalized = normalized_design(kernel, repo, owner, task, wr, designer, envelope, audit, audit_ref)
@@ -373,7 +387,7 @@ def materialize_design(kernel, gateway, owner, wr):
             evidence, design = normalized
         else:
             require(task and task["state"] == "RESULT_STORED", "TASK_NOT_ACCEPTABLE", "Design awaits a current result")
-            ending_task = designer.get("revision_purpose") == "SHORT_ENDING"
+            ending_task = designer.get("revision_purpose") in {"SHORT_ENDING", "SHORT_ENDING_FIX"}
             evidence, design = _audited_design_result(kernel, gateway, repo, task, wr, ending_plan_read=ending_task)
             if ending_task:
                 audit_row = gateway._read_audit(repo, evidence["attempt_id"])
@@ -434,6 +448,16 @@ def materialize_design(kernel, gateway, owner, wr):
             return None, {"status": "DESIGN_REWORK_REQUIRED", "reason": "SHORT_ENDING_REQUIRED",
                           "review_task_id": review["task_id"], "review_ref": review_evidence["output_ref"]}
         if "ending_plan" in evidence:
+            from .scene_revision import editorial_blockers
+            if editorial_blockers(review_payload["issues"]):
+                decision = kernel._prior(repo, owner, wr["work_id"], "P6_ENDING_FIX_AUTHORIZATION",
+                                         review_evidence["attempt_id"], {})
+                if designer.get("revision_purpose") == "SHORT_ENDING" and decision:
+                    return None, _enroll_design_step(
+                        kernel, gateway, repo, owner, wr, intake, task, evidence, design, round_index + 1,
+                        revision=(review_payload, review_evidence["output_ref"]), editor_decision=decision)
+                return None, {"status": "DESIGN_REWORK_REQUIRED", "reason": "ENDING_PLAN_BLOCKERS",
+                              "review_attempt": review_evidence["attempt_id"], "review_ref": review_evidence["output_ref"]}
             confirm_ending(review_payload, evidence["ending_plan"]["source"], evidence["output_ref"])
         issues = review_payload["issues"]
         revision_available = (intake.get("model_routes") and

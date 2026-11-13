@@ -234,7 +234,7 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
 
 
 @pytest.mark.parametrize("first_result", ["approved", "missing_opening", "review_rejected", "historical_duplicate", "historical_null_note",
-                                          "repaired_then_question", "ending_plan", "unresolved_ending", "historical_ending"])
+                                          "repaired_then_question", "ending_plan", "unresolved_ending", "historical_ending", "editor_fix"])
 def test_cli_persists_two_model_roles_across_intake_restarts(kernel_env, tmp_path, monkeypatch, capsys, first_result):
     monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[2] / "scripts"))
     cli = importlib.import_module("p6_idea")
@@ -270,13 +270,13 @@ def test_cli_persists_two_model_roles_across_intake_restarts(kernel_env, tmp_pat
                         "environment": {"moving_entity": "刚到的邮车"}},
         }
         def arc(packet):
-            complete = first_result != "unresolved_ending" and (first_result not in {"ending_plan", "historical_ending"} or len(review_calls) > 1)
+            complete = first_result != "unresolved_ending" and (first_result not in {"ending_plan", "historical_ending", "editor_fix"} or len(review_calls) > 1)
             assert "short_arc_review" in json.loads(packet["assignment"])
             return {"beginning": "原件出现。", "development": "送信人辨认墨色。", "turning_point": "两人对证。",
                     "ending": "双方撤回误认的落款。" if complete else "没有给出最后结果。",
                     "decision": "COMPLETE" if complete else "ENDING_PLAN_REQUIRED"}
         review_generate = review.generate
-        if first_result in {"ending_plan", "unresolved_ending", "historical_ending"}:
+        if first_result in {"ending_plan", "unresolved_ending", "historical_ending", "editor_fix"}:
             def review_with_questions(request):
                 response = review_generate(request)
                 envelope = json.loads(response.text)
@@ -291,14 +291,24 @@ def test_cli_persists_two_model_roles_across_intake_restarts(kernel_env, tmp_pat
             if "ending_plan_source" in content:
                 source = content["ending_plan_source"]
                 assert source["ordered_stages"] == ["第一项", "第二项", "最后签字"]
-                assert content["candidate"]["chapter_goals"] == ["第一项\n第二项\n最后签字"]
+                fixed = first_result == "editor_fix" and len(review_calls) == 3
+                assert content["candidate"]["chapter_goals"] == (["两人对证后签字。"] if fixed else ["第一项\n第二项\n最后签字"])
+                if fixed:
+                    result["issue_resolutions"] = [{"issue_id": i["issue_id"], "decision": "RESOLVED",
+                                                    "reason": "章末双方已经对证。"} for i in content["prior_blockers"]]
                 assert content["candidate"]["opening"] == design["opening"]
                 result["ending_plan_review"] = {"candidate_ref": content["candidate_ref"],
                     "opening_and_chapters_confirmed": first_result != "unresolved_ending",
                     "answers": [{"question": q, "answer": "送信人接受签字。"} for q in source["unresolved_questions"]]}
+                if first_result == "editor_fix" and len(review_calls) == 2:
+                    result["ending_plan_review"]["opening_and_chapters_confirmed"] = False
+                    result["issues"] = [{"issue_id": str(uuid4()), "category": "CONTINUITY", "severity": "BLOCKER",
+                                         "issue_kind": "HARD_CONFLICT", "disposition": "OPEN", "evidence_refs": [],
+                                         "subject_ref": content["candidate_ref"], "description": "签字顺序冲突。",
+                                         "suggested_change": "对证后签收。"}]
             return result
         review_server.packet_candidate = complete_review
-        if first_result in {"ending_plan", "historical_ending"}:
+        if first_result in {"ending_plan", "historical_ending", "editor_fix"}:
             original = creative.generate
             def ending_with_question(request):
                 result = original(request)
@@ -318,9 +328,12 @@ def test_cli_persists_two_model_roles_across_intake_restarts(kernel_env, tmp_pat
             if len(creative_calls) > 1:
                 handed = json.loads(packet["assignment"])
                 assert handed["candidate"]["title"] == design["title"]
+                if first_result == "editor_fix" and len(creative_calls) == 3:
+                    return {"opening_changes": [], "chapter_changes": [{"chapter": 1, "replacement": "两人对证后签字。",
+                             "issue_ids": handed["editor_decision"]["issue_ids"]}]}
                 if first_result == "review_rejected" or len(creative_calls) == 3:
                     assert handed["issues"][0]["suggested_change"] == "写明两次委托的先后"
-                elif first_result in {"ending_plan", "unresolved_ending", "historical_ending"}:
+                elif first_result in {"ending_plan", "unresolved_ending", "historical_ending", "editor_fix"}:
                     assert handed["short_arc"]["decision"] == "ENDING_PLAN_REQUIRED"
                     assert handed["unresolved_questions"] == ["画师最后如何处理委托？"]
                     stages = ["第一项", "第二项", "最后签字"]
@@ -376,6 +389,14 @@ def test_cli_persists_two_model_roles_across_intake_restarts(kernel_env, tmp_pat
                     result = call("advance")
             else:
                 result = call("advance")
+            if first_result == "editor_fix" and result.get("reason") == "ENDING_PLAN_BLOCKERS":
+                attempt = result["review_attempt"]
+                assert call("advance") == result and len(creative_calls) == len(review_calls) == 2
+                assert call("authorize-ending-fix", "--review-attempt", str(uuid4()), status=2)["error"] == "REVIEW_REQUIRED"
+                decision = call("authorize-ending-fix", "--review-attempt", attempt)
+                assert len(decision["issue_ids"]) == 1 and decision == call("authorize-ending-fix", "--review-attempt", attempt)
+                assert len(creative_calls) == len(review_calls) == 2
+                continue
             if result.get("status") in {"INITIAL_PLAN_MATERIALIZED", "DESIGN_REWORK_REQUIRED"}:
                 break
         if first_result == "unresolved_ending":
@@ -386,9 +407,9 @@ def test_cli_persists_two_model_roles_across_intake_restarts(kernel_env, tmp_pat
         assert result["model"] == creative.model and result["design_review"]["model"] == review.model
         assert result["model_routes"] == model_routes
         assert call("advance") == result
-        creative_count = {"approved": 1, "historical_duplicate": 1, "historical_null_note": 1, "repaired_then_question": 3}.get(first_result, 2)
+        creative_count = {"approved": 1, "historical_duplicate": 1, "historical_null_note": 1, "repaired_then_question": 3, "editor_fix": 3}.get(first_result, 2)
         assert [r["model"] for r in creative_calls] == [creative.model] * creative_count
-        assert [r["model"] for r in review_calls] == [review.model] * (2 if first_result in {"review_rejected", "repaired_then_question", "ending_plan", "historical_ending"} else 1)
+        assert [r["model"] for r in review_calls] == [review.model] * (3 if first_result == "editor_fix" else 2 if first_result in {"review_rejected", "repaired_then_question", "ending_plan", "historical_ending"} else 1)
         if creative_count > 1:
             assert result["original_input_ref"] == enrolled["input_ref"] != result["source_input_ref"]
             assert result["design_revision_round"] == creative_count - 1

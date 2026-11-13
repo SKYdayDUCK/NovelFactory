@@ -947,6 +947,243 @@
           "description": "既有环境实体的下一步位置。NO_MOVEMENT 表示本卷没有新的环境位移。"
         }
       }
+    },
+    "ShortEndingFix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "chapter_changes",
+        "opening_changes"
+      ],
+      "properties": {
+        "chapter_changes": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "chapter",
+              "replacement",
+              "issue_ids"
+            ],
+            "properties": {
+              "chapter": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 32
+              },
+              "replacement": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1200,
+                "pattern": "\\S"
+              },
+              "issue_ids": {
+                "type": "array",
+                "uniqueItems": true,
+                "minItems": 1,
+                "maxItems": 64,
+                "items": {
+                  "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+                }
+              }
+            }
+          }
+        },
+        "opening_changes": {
+          "type": "array",
+          "maxItems": 6,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "field",
+              "replacement",
+              "issue_ids"
+            ],
+            "properties": {
+              "field": {
+                "enum": [
+                  "protagonist_knowledge",
+                  "counterpart_knowledge",
+                  "situation",
+                  "counterpart",
+                  "other_place"
+                ]
+              },
+              "replacement": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1200,
+                "pattern": "\\S"
+              },
+              "issue_ids": {
+                "type": "array",
+                "uniqueItems": true,
+                "minItems": 1,
+                "maxItems": 64,
+                "items": {
+                  "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ShortEndingFixReview": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64000
+        },
+        "issues": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ReviewIssue"
+          },
+          "maxItems": 64
+        },
+        "counterinterpretations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "maxItems": 32
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EvidenceRef"
+          },
+          "maxItems": 128
+        },
+        "short_arc": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "beginning": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "development": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "turning_point": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "ending": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "decision": {
+              "enum": [
+                "COMPLETE",
+                "ENDING_PLAN_REQUIRED"
+              ]
+            }
+          },
+          "required": [
+            "beginning",
+            "development",
+            "turning_point",
+            "ending",
+            "decision"
+          ]
+        },
+        "ending_plan_review": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "candidate_ref",
+            "opening_and_chapters_confirmed",
+            "answers"
+          ],
+          "properties": {
+            "candidate_ref": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+            },
+            "opening_and_chapters_confirmed": {
+              "type": "boolean"
+            },
+            "answers": {
+              "type": "array",
+              "maxItems": 32,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "question",
+                  "answer"
+                ],
+                "properties": {
+                  "question": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4000
+                  },
+                  "answer": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "issue_resolutions": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "issue_id",
+              "decision",
+              "reason"
+            ],
+            "properties": {
+              "issue_id": {
+                "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+              },
+              "decision": {
+                "enum": [
+                  "RESOLVED",
+                  "OPEN"
+                ]
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1200,
+                "pattern": "\\S"
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "summary",
+        "issues",
+        "counterinterpretations",
+        "evidence_refs",
+        "short_arc",
+        "ending_plan_review",
+        "issue_resolutions"
+      ],
+      "additionalProperties": false
     }
   }
 }

@@ -79,7 +79,7 @@ def _load_private(path):
 def _requested_routes(args):
     # The marker survives restarts before either branch exists. Enrolled tasks
     # obtain their actual model from the immutable AgentInput in the database.
-    if args.action in {"advance", "register-window"}:
+    if args.action in {"advance", "register-window", "authorize-ending-fix"}:
         saved = _load_private(args.private_dir / "project.json").get("model_routes")
         if saved:
             require(args.adapter in (None, saved["creative"]) and
@@ -247,6 +247,9 @@ def run_intake(mode, kernel, gateway, private, inspiration=None, allowance=None)
                 return receipt
         access = _load_private(private / "preparation.json")
         owner, wr = kernel.authenticate(access["token"]), access["world_ref"]
+        if mode == "authorize-ending-fix":
+            from novel_factory.application.idea_ending import authorize_fix
+            return authorize_fix(kernel, gateway, owner, wr, allowance["review_attempt"])
         with kernel.db.uow(write=False) as repo:
             intake = intake_receipt(kernel, repo, owner, wr)
             _, designer, review = design_round(kernel, repo, owner, wr, intake)
@@ -296,12 +299,13 @@ def run_intake(mode, kernel, gateway, private, inspiration=None, allowance=None)
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "action", choices=["preflight", "enroll", "advance", "status", "register-window"]
+        "action", choices=["preflight", "enroll", "advance", "status", "register-window", "authorize-ending-fix"]
     )
     parser.add_argument("--idea", type=Path, help="JSON containing only idea, length and genre")
     parser.add_argument("--adapter", help="Creation profile (default: codex-text on enrollment)")
     parser.add_argument("--review-adapter", help="Use a distinct model profile for internal reviews")
     parser.add_argument("--private-dir", type=Path)
+    parser.add_argument("--review-attempt", help="Exact rejected ending-review attempt authorized for one targeted correction")
     parser.add_argument(
         "--total-amount", help="Authorized monetary cap for the selected work, in USD"
     )
@@ -311,6 +315,8 @@ def main():
     parser.add_argument("--total-tokens", type=int)
     parser.add_argument("--reserve-tokens", type=int)
     args = parser.parse_args()
+    if args.action == "authorize-ending-fix" and not args.review_attempt:
+        parser.error("--review-attempt is required for an ending correction")
     if args.action in {"preflight", "enroll"} and not args.idea:
         parser.error("--idea is required")
     if args.action != "preflight" and not args.private_dir:
@@ -341,6 +347,8 @@ def main():
                 "total_tokens": args.total_tokens,
                 "token_reservation": args.reserve_tokens,
             }
+            if args.action == "authorize-ending-fix":
+                allowance["review_attempt"] = args.review_attempt
             result = run_intake(
                 args.action, kernel, gateway, args.private_dir, inspiration, allowance
             )
