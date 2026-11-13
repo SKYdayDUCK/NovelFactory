@@ -244,7 +244,7 @@ def editor_review_task(kernel, repo, owner, wr, index):
 
 
 def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence,
-                        design, round_index, *, revision=None, structure_repair=False, ending_plan=False, editor_decision=None, diagnostics=None, failed_review=None):
+                        design, round_index, *, revision=None, structure_repair=False, ending_plan=False, editor_decision=None, diagnostics=None, failed_review=None, reviewed_assignment=None):
     job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})["config"]
     source = kernel.artifact(repo, job["dispatch"]["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]
     budget = repo.one("budgets", {"budget_id": intake["budget_id"], "work_id": wr["work_id"]})
@@ -345,6 +345,13 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
             if design.withhold_response or len(design.text) > 16000:
                 content.pop("raw_response_text")
                 content["task"] = "上次返回未通过契约校验。请从授权灵感及本次 Schema 重新构造完整结果，严格使用本次身份。"
+            if reviewed_assignment is not None:
+                # A new task corrects the rejected representation of the same editorial
+                # revision. Reuse only its frozen, previously authorized design and review.
+                for key in ("candidate", "candidate_ref", "review_ref", "issues", "task"):
+                    content[key] = reviewed_assignment[key]
+                content["format_instruction"] = "依据原审稿意见完成原任务，按本次冻结契约纠正返回结构。"
+                inputs.extend([reviewed_assignment["candidate_ref"], reviewed_assignment["review_ref"]])
         elif revision:
             report = revision[0]
             observed = sorted(i["category"] + "/" + i["issue_kind"] + "/" + i["severity"]
@@ -427,6 +434,8 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
         "round": round_index,
         **({"repair_plan": repair_plan} if repair_plan else {}),
         **({"review_ref": revision[1]} if revision else {}),
+        **({"reviewed_revision_source": {k: reviewed_assignment[k] for k in ("candidate_ref", "review_ref")}}
+           if reviewed_assignment is not None else {}),
         **({"revision_purpose": "JSON_SYNTAX_CORRECTION", "validation_errors": [design.diagnostic],
             "source_attempt_id": evidence["attempt_id"], "source_audit_ref": evidence["audit_ref"]} if syntax_source else {}),
         **({"revision_purpose": "WINDOW_SCHEMA_CORRECTION", "validation_errors": diagnostics,
@@ -477,10 +486,22 @@ def materialize_design(kernel, gateway, owner, wr):
         )
         if task and task["state"] == "FAILED" and intake.get("model_routes"):
             _check_design_authority(repo, task, wr)
+            structural = initial_or_structural_repair(round_index, designer)
+            reviewed_assignment = None
+            if quality and (designer.get("review_ref") or designer.get("reviewed_revision_source")):
+                binding = kernel.artifact(repo, designer["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]
+                if binding["output_contract"] == {"name": full_design_contract(intake["profile"], True),
+                                                  "version": "production_profile"}:
+                    packet = json.loads(binding["assignment"])
+                    review_ref = designer.get("review_ref") or designer["reviewed_revision_source"]["review_ref"]
+                    candidate_ref = (designer.get("reviewed_revision_source") or designer)["candidate_ref"]
+                    require(packet["review_ref"] == review_ref and packet["candidate_ref"] == candidate_ref,
+                            "INVALID_EVIDENCE", "Revision handoff differs from its frozen source")
+                    reviewed_assignment = packet
+            repairable = structural or reviewed_assignment is not None
             envelope, audit, audit_ref = returned_design(
                 kernel, repo, gateway, task, wr, designer,
-                allow_malformed=initial_or_structural_repair(round_index, designer),
-                allow_contract=quality and initial_or_structural_repair(round_index, designer),
+                allow_malformed=repairable, allow_contract=quality and repairable,
             )
             if isinstance(envelope, UnparsedDesign):
                 if selected_review or (not quality and designer["structure_count"] >= intake["profile"]["max_reworks"]):
@@ -489,7 +510,7 @@ def materialize_design(kernel, gateway, owner, wr):
                                   "validation_errors": [envelope.diagnostic]}
                 return None, _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task,
                                                  {**audit, "output_ref": audit["response_ref"], "audit_ref": audit_ref},
-                                                 envelope, round_index + 1)
+                                                 envelope, round_index + 1, reviewed_assignment=reviewed_assignment)
             if designer.get("revision_purpose") in {"SHORT_ENDING", "SHORT_ENDING_FIX"}:
                 normalized = derive_ending_plan(kernel, repo, owner, wr, designer, envelope, audit, audit_ref)
             else:

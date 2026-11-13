@@ -253,7 +253,7 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
 
 
 @pytest.mark.parametrize("first_result", ["approved", "missing_opening", "review_rejected", "historical_duplicate", "historical_null_note",
-                                          "repaired_then_question", "ending_plan", "unresolved_ending", "historical_ending", "editor_fix"])
+                                          "repaired_then_question", "quality_revision_schema", "ending_plan", "unresolved_ending", "historical_ending", "editor_fix"])
 def test_cli_persists_two_model_roles_across_intake_restarts(kernel_env, tmp_path, monkeypatch, capsys, first_result):
     monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[2] / "scripts"))
     cli = importlib.import_module("p6_idea")
@@ -347,6 +347,12 @@ def test_cli_persists_two_model_roles_across_intake_restarts(kernel_env, tmp_pat
             if len(creative_calls) > 1:
                 handed = json.loads(packet["assignment"])
                 assert handed["candidate"]["title"] == design["title"]
+                if first_result == "quality_revision_schema":
+                    assert handed["issues"][0]["suggested_change"] == "写明两次委托的先后"
+                    if len(creative_calls) == 2:
+                        return {**design, "unexpected_field": True}
+                    assert handed["validation_errors"][0]["keyword"] == "additionalProperties"
+                    return design
                 if first_result == "editor_fix" and len(creative_calls) == 3:
                     return {"opening_changes": [], "chapter_changes": [{"chapter": 1, "replacement": "两人对证后签字。",
                              "issue_ids": handed["editor_decision"]["issue_ids"]}]}
@@ -363,7 +369,7 @@ def test_cli_persists_two_model_roles_across_intake_restarts(kernel_env, tmp_pat
                     assert "opening" in handed["task"] and "opening" not in handed["candidate"]
             return design
         creative_server.packet_candidate = design_reply
-        if first_result in {"review_rejected", "repaired_then_question"}:
+        if first_result in {"review_rejected", "repaired_then_question", "quality_revision_schema"}:
             def review_reply(packet):
                 ref = json.loads(packet["assignment"])["candidate_ref"]
                 issue = {"issue_id": str(uuid4()), "category": "CONTINUITY", "severity": "BLOCKER",
@@ -379,6 +385,8 @@ def test_cli_persists_two_model_roles_across_intake_restarts(kernel_env, tmp_pat
         review.model = creative.model
         assert call("preflight", "--idea", str(idea_path), *flags, status=2)["route_status"] == "INVALID_MODEL_CONFIG"
         review.model = "fixture-internal-review"
+        if first_result == "quality_revision_schema":
+            flags.extend(["--production-mode", "quality"])
         enrolled = call("enroll", "--idea", str(idea_path), *flags, "--reserve-amount", "0.1",
                         "--total-amount", "2", "--reserve-tokens", "100000", "--total-tokens", "600000")
         assert enrolled["model_routes"] == model_routes and not creative_calls and not review_calls
@@ -426,9 +434,9 @@ def test_cli_persists_two_model_roles_across_intake_restarts(kernel_env, tmp_pat
         assert result["model"] == creative.model and result["design_review"]["model"] == review.model
         assert result["model_routes"] == model_routes
         assert call("advance") == result
-        creative_count = {"approved": 1, "historical_duplicate": 1, "historical_null_note": 1, "repaired_then_question": 3, "editor_fix": 3}.get(first_result, 2)
+        creative_count = {"approved": 1, "historical_duplicate": 1, "historical_null_note": 1, "repaired_then_question": 3, "quality_revision_schema": 3, "editor_fix": 3}.get(first_result, 2)
         assert [r["model"] for r in creative_calls] == [creative.model] * creative_count
-        assert [r["model"] for r in review_calls] == [review.model] * (3 if first_result == "editor_fix" else 2 if first_result in {"review_rejected", "repaired_then_question", "ending_plan", "historical_ending"} else 1)
+        assert [r["model"] for r in review_calls] == [review.model] * (3 if first_result == "editor_fix" else 2 if first_result in {"review_rejected", "repaired_then_question", "quality_revision_schema", "ending_plan", "historical_ending"} else 1)
         if creative_count > 1:
             assert result["original_input_ref"] == enrolled["input_ref"] != result["source_input_ref"]
             assert result["design_revision_round"] == creative_count - 1
