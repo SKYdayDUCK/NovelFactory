@@ -71,3 +71,13 @@ The last positive reply arrived at 376.40 s and the last client closed at 376.40
 After shutdown fresh physical DB connections verified 5,000 READY tasks, 5,000 durable admission rows, 5,000 matching creation commands, 5,000 distinct stored credential hashes and one task-change outbox record for every expected task. Both branch heads were unchanged, with zero model attempts. All positive requests succeeded and all three admission queues drained. Separately, each protocol rejected a cross-work read and an over-capacity submit. REST returned 403 and 429. Remote MCP returned VIEW_DENIED and retryable BACKPRESSURE with retry_after_ms=1000. The controls left the verified counts unchanged.
 
 PG CPU and sampled RSS cover the four application backends. Summed RSS includes shared pages once per backend. The single low-frequency TCP/RSS sampler can miss instantaneous peaks. Client and server CPU share one Python process. The completion boundary is committed READY with no model execution. Reproduce on frozen source `ca2c4c7` with `python -m benchmarks.hera_distinct_admission --count 5000 --output out.json.gz` using an isolated PG17 administrator URL in `NF_TEST_DATABASE_URL`. [Preregistration](IDENTITY_ADMISSION_PLAN.md) · [Per-identity receipts and telemetry](raw/distinct-admission-full.json.gz) · [Smoke run](raw/distinct-admission-smoke.json.gz)
+
+## 2026-11-13 分进程复验
+
+在两个作品上预置 5,000 项不同的 READY 任务。对 50、200、500、1,000、2,000、5,000 六种逻辑规模分别运行 0%、20%、50%、80%、100% MCP，30 格共 43,750/43,750 项状态与权威任务匹配。常规矩阵每格使用 20 个独立授权身份，SDK 会话数依次为 0、4、10、16、20；其余客户端发 REST。在途数、实际建立的 MCP 会话、每个被查任务、持久任务总数和模型槽均在各格原始记录中分列。服务池四连接，读取阶段模型槽使用数为零。最后两格复跑时数据库 CPU 亲和性发生变化，具体条件见矩阵报告。
+
+单独同时放行 1,000 个独立授权客户端（500 MCP、500 REST），峰值 1,000 个在途请求，1,000/1,000 项正确，23.18 s 排空，P95 为 22.40 s。5,000 逻辑任务、20 活动客户端的 100% MCP 格为 46.72 次/秒，P95 为 701 ms，P99 为 970 ms。此批全矩阵使用冻结的 MCP 优化代码。SDK 单项授权融合、深队列精确计数和最终组合分别测量。
+
+跨协议操作复跑 182 项，含 154 次授权成功和 28 次预期拒绝，创建、重放、取消、任务所有权、WorldRef、代际及状态均按预期核对。另启动 40 个独立委托客户端（20 个 MCP 会话，20 个 REST 客户端），响应、任务、世代及 Provider 账本逐项对账；销毁入口服务、重新建立连接池后 40/40 得到 ACCEPTED，40 次模拟 Provider 调用、两部作品剩余预留均为零。服务重启后的排空时间为 12.59 s。早期 1,000 项委托数据保留在原报告中。
+
+[全矩阵及全部逐请求记录](MIXED_PROCESS_MATRIX.md) · [混合授权、拒绝与幂等](raw/component-reruns/mixed-operations/) · [重启、交付和逐项账本](raw/component-reruns/delegations-rerun.json.gz)
