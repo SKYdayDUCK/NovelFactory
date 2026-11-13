@@ -1,4 +1,4 @@
-"""Observe one enrolled production batch from its persistent Linux Worker host (read-only)."""
+"""Observe one enrolled production batch from its persistent worker host (read-only)."""
 
 import argparse
 import json
@@ -28,7 +28,7 @@ from novel_factory.application.statistics import is_official_deepseek
 from novel_factory.domain.canonical import fingerprint
 from novel_factory.domain.errors import DomainError
 from novel_factory.infrastructure.database import Database
-from novel_factory.infrastructure.native_files import private_export
+from novel_factory.infrastructure.native_files import lock_is_held, private_export
 from novel_factory.infrastructure.objects import ObjectStore
 from novel_factory.infrastructure.private_files import prepare_private_directory
 from novel_factory.infrastructure.wire_receipts import read_receipt
@@ -41,21 +41,8 @@ def utc():
 
 
 def worker_active(project):
-    """An atomic nonblocking probe of the same POSIX lock held throughout serve()."""
-    import fcntl
-
-    try:
-        fd = os.open(project / ".worker.lock", os.O_RDONLY | os.O_NOFOLLOW)
-    except FileNotFoundError:
-        return False
-    try:
-        try:
-            fcntl.flock(fd, fcntl.LOCK_SH | fcntl.LOCK_NB)
-        except BlockingIOError:
-            return True
-        return False
-    finally:
-        os.close(fd)
+    """An atomic nonblocking probe of the native lock held throughout serve()."""
+    return lock_is_held(project / ".worker.lock")
 
 
 def scopes(kernel, project, registration):
@@ -409,11 +396,6 @@ def stage_estimate(samples, book, target):
 
 
 def observe(kernel, root, output, price_card=None, start_wait=600):
-    require(
-        os.name == "posix",
-        "INVALID_ARGUMENT",
-        "Observe on the same POSIX host as the persistent workers",
-    )
     manifest, enrolled = private(root / "batch.json"), private(root / "enrolled.json")
     require(
         set(enrolled) == set(BOOKS) and len({v["work_id"] for v in enrolled.values()}) == 3,
@@ -436,8 +418,7 @@ def observe(kernel, root, output, price_card=None, start_wait=600):
         "INVALID_EVIDENCE",
         "Wrong models",
     )
-    output.mkdir(mode=0o700, parents=False, exist_ok=False)
-    prepare_private_directory(output)
+    prepare_private_directory(output, exist_ok=False)
     deadline = time.monotonic() + start_wait
     while True:
         with TemporaryDirectory(dir=output) as tmp:

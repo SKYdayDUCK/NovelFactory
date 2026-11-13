@@ -26,7 +26,6 @@ def observer(monkeypatch):
 
 @pytest.mark.postgres
 @pytest.mark.integration
-@pytest.mark.skipif(os.name != "posix", reason="POSIX service-host liveness probe")
 def test_enrollment_and_live_workers_do_not_start_clock(kernel_env, tmp_path, observer):
     kernel = kernel_env["kernel"]
     root, output = tmp_path / "batch", tmp_path / "monitor"
@@ -143,7 +142,6 @@ def test_whole_book_eta_requires_more_than_raw_tokens(observer):
 
 
 @pytest.mark.unit
-@pytest.mark.skipif(os.name != "posix", reason="POSIX service host")
 @pytest.mark.parametrize("concurrent", [False, True])
 def test_observer_reports_parallel_execution_separately_from_sampling(tmp_path, observer, monkeypatch, concurrent):
     """Virtual time tests scheduling only; no real book, transport, or observation is claimed."""

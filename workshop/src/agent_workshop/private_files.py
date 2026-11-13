@@ -130,10 +130,10 @@ def check_private_directory(path):
             raise ValueError("Use an owner-private directory")
 
 
-def prepare_private_directory(path):
+def prepare_private_directory(path, *, exist_ok=True):
     path = Path(path)
     if os.name != "nt":
-        path.mkdir(mode=0o700, parents=True, exist_ok=True)
+        path.mkdir(mode=0o700, parents=True, exist_ok=exist_ok)
     else:
         import pywintypes
         import win32file
@@ -147,4 +147,6 @@ def prepare_private_directory(path):
         except pywintypes.error as error:
             if error.winerror != winerror.ERROR_ALREADY_EXISTS:
                 raise
+            if not exist_ok:
+                raise FileExistsError(path) from error
     check_private_directory(path)

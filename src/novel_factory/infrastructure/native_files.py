@@ -1,6 +1,6 @@
 """Single-host file publication and locking on POSIX and local Windows NTFS."""
-from contextlib import closing, contextmanager
 import os
+from contextlib import closing, contextmanager
 from pathlib import Path
 
 
@@ -17,9 +17,9 @@ def sync_directory(path):
 
 def publish_file(source, destination, *, replace=False):
     if os.name == "nt":
+        import pywintypes
         import win32file
         import winerror
-        import pywintypes
 
         # No COPY_ALLOWED: both names must reside on the same local volume.
         flags = win32file.MOVEFILE_WRITE_THROUGH
@@ -89,6 +89,7 @@ def open_append(path):
     """Open an existing ledger without following a final symlink/reparse point."""
     if os.name == "nt":
         import msvcrt
+
         import win32con
         import win32file
 
@@ -105,3 +106,47 @@ def open_append(path):
     else:
         fd = os.open(path, os.O_WRONLY | os.O_APPEND | os.O_NOFOLLOW)
     return os.fdopen(fd, "ab")
+
+
+def lock_is_held(path):
+    """Probe the existing worker's exclusive lock without waiting or creating a file."""
+    if os.name == "nt":
+        import pywintypes
+        import win32con
+        import win32file
+        import winerror
+
+        try:
+            handle = win32file.CreateFile(str(path), win32con.GENERIC_READ,
+                win32con.FILE_SHARE_READ | win32con.FILE_SHARE_WRITE, None,
+                win32con.OPEN_EXISTING, win32file.FILE_FLAG_OPEN_REPARSE_POINT, None)
+        except pywintypes.error as error:
+            if error.winerror in (winerror.ERROR_FILE_NOT_FOUND, winerror.ERROR_PATH_NOT_FOUND):
+                return False
+            raise
+        with closing(handle):
+            if win32file.GetFileInformationByHandle(handle)[0] & win32con.FILE_ATTRIBUTE_REPARSE_POINT:
+                raise ValueError("Invalid worker lock")
+            offset = pywintypes.OVERLAPPED()
+            try:
+                win32file.LockFileEx(handle, win32con.LOCKFILE_FAIL_IMMEDIATELY, 1, 0, offset)
+            except pywintypes.error as error:
+                if error.winerror == winerror.ERROR_LOCK_VIOLATION:
+                    return True
+                raise
+            win32file.UnlockFileEx(handle, 1, 0, offset)
+            return False
+    import fcntl
+
+    try:
+        fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
+    except FileNotFoundError:
+        return False
+    try:
+        try:
+            fcntl.flock(fd, fcntl.LOCK_SH | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return True
+        return False
+    finally:
+        os.close(fd)

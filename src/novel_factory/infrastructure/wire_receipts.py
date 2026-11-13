@@ -26,6 +26,12 @@ def read_receipt(store, attempt, request_hash, *, headers_only=False):
         data = read_private_bytes(path, 3_000_000)
     except FileNotFoundError:
         return None
+    except ValueError as error:
+        # The Windows private-file reader wraps CreateFile errors. Only a
+        # genuinely absent file is optional; ACL, reparse and corrupt data fail.
+        if getattr(error.__cause__, "winerror", None) in (2, 3):
+            return None
+        raise
     receipt = json.loads(data)
     content = base64.b64decode(receipt["content"], validate=True)
     if (
