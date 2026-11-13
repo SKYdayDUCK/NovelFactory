@@ -30,3 +30,17 @@
 [预登记指标](../../reports/performance/hera/BASELINE.md) · [验收矩阵](../../reports/performance/hera/FINAL_ACCEPTANCE.md)
 
 用 `python -m scripts.workflow_projection check WORK_UUID BRANCH_UUID` 在同一 PostgreSQL 语句快照中对比投影和权威任务总数。已启用且一致时输出 OK，未启用时输出 DISABLED，不一致时输出 MISMATCH 并以 1 退出。发现不一致可执行同一命令的 rebuild 或 disable。计数格式损坏时读取回退到原任务统计；若任务状态变化无法为损坏的计数应用增减，0026 迁移会移除受影响的派生行，让正式事务正常提交。格式仍合法但数值不实的计数需要上述核对命令识别。
+
+## 2026-11-13 独立性能复验的可选路径
+
+| 配置 | 启用条件、状态边界和回退 |
+|---|---|
+| `NF_HERA_FUSE_STATUS_AUTH=1` | 已安装普通任务绑定、宿主工具白名单允许的合法单项状态读取，可在业务读取的同一授权检查中确认 READ。每次请求仍有 bearer 鉴权、作品和 grant 行锁、持有人和分支检查、开始及结束审计及两份 Outbox。其他绑定或无效参数继续按原通路检查。置 0 并重新启动服务恢复。 |
+| `NF_HERA_COMPACT_CREATE=1` | Kernel 对私有 TaskSpec 副本做完整校验，在同一写事务中复用已锁定的作品政策。无输入工件时省去空集合查询；有输入的任务仍逐项检查分支归属。直接调用 TaskService 的入口仍校验契约。原有 TaskService 保留幂等命令、任务代际、Outbox 和 Provider 账本语义。置 0 并重启可退回。 |
+| `SELECT nf_hera_set_capacity_mode(true)` | 升级 0027 后，在 READ COMMITTED 的短管理事务中执行。数据库阻塞新的任务写入，从权威非终态任务回填全局、作品、身份和资源计数。激活后每次变更在同事务中增减，任何维度满额均整体回滚。普通角色无法从客户端设置配额。改为 false 恢复扫描策略；队列较浅时扫描仍是默认。 |
+| `python -m scripts.workflow_projection suspend-maintenance` | 仅当全库没有配置任何分支投影时可暂停空触发器。任务表与计数表在一个事务中加锁，并加约束阻止误插投影。新管理命令 rebuild 会先恢复维护并从权威表回填。显式回退使用 resume-maintenance。 |
+| 索引进程、SQL 形状复用、路由与弹性 | 索引进程拆分及连接池、FIFO、分片计数和异步投影均在隔离实验中对照。发布配置仍需按总连接数计算 API、索引及通知监听；此次复验没有启用新的全局默认。SQL 形状复用候选的源代码和回退提交保存在分支历史中。 |
+
+数据库恢复保留 STALE 的任务代际，对仍可运行的任务按原规则推进代际并暂停。合法修复试图将终态任务重新激活、但准入容量已满时，写事务回滚并给出可重试的 BACKPRESSURE。模型 SENT / UNKNOWN 保留原有账本语义。
+
+[根因与三版本测量](../../reports/performance/hera/ROOT_CAUSE_ANALYSIS.md) · [精确配额及恢复](../../reports/performance/hera/CAPACITY_COUNTERS.md) · [投影对照](../../reports/performance/hera/PROJECTION_CONTENTION.md) · [最终选择](../../reports/performance/hera/OPTIMIZATION_ABLATIONS.md)
