@@ -30,3 +30,24 @@ def test_resolve_validates_each_policy_revision_before_matching():
     policy["rules"][1]["when"]["work_id"] = "work"
     with pytest.raises(RoutingError, match="^INVALID_ROUTING_SELECTOR$"):
         resolve(policy, actor)
+
+
+def test_p6_review_duties_select_their_own_model_even_within_one_role():
+    from novel_factory.application.model_routing import idea_policy
+
+    policy = idea_policy({"work_id": "work", "branch_id": "branch"},
+                         {"creative": "flash", "review": "pro"})
+    assignments = {
+        "world_designer": {"initial_world": "flash", "rule_review": "pro"},
+        "volume_director": {"window_plan": "flash", "replan": "flash", "volume_review": "pro"},
+        "chief_editor": {"book_direction": "flash", "editorial_decision": "pro", "release_review": "pro"},
+        "character_actor": {"character_action": "flash", "reaction": "flash"},
+        "writer": {"scene_draft": "flash", "chapter_draft": "flash", "targeted_revision": "flash"},
+        "adjudication_advisor": {"joint_outcome": "pro"},
+        "evidence_maintainer": {"assertion_extract": "pro", "event_alignment": "pro", "summary": "flash"},
+        "reviewer": dict.fromkeys(("fact", "epistemic", "continuity", "literary"), "pro"),
+        "literary_editor": {"research": "flash", "structure": "pro", "seam": "pro", "cross_volume": "pro"},
+    }
+    for role, kinds in assignments.items():
+        for kind, expected in kinds.items():
+            assert resolve(policy, {"role_id": role, "task_kind": kind})["profile_id"] == expected

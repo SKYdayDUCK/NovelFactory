@@ -6,6 +6,7 @@ from uuid import UUID, uuid5
 from novel_factory.application.budget_limits import SharedBudgetService
 from novel_factory.application.candidate_delivery import CandidateDelivery
 from novel_factory.application.kernel import require
+from novel_factory.application.model_routing import POLICY_ROUTE, activate, check_idea_models, idea_policy
 from novel_factory.application.narrative import NarrativeService
 from novel_factory.application.planning import PlanningService
 from novel_factory.application.production_pipeline import _artifact
@@ -67,8 +68,8 @@ def enroll_idea(kernel, gateway, inspiration, allowance, prep_work_id):
     """
     profile = parse_inspiration(inspiration)
     route = allowance["adapter_id"]
-    require(route in gateway.adapters, "MODEL_UNAVAILABLE", "Model route is not registered")
-    gateway.adapters[route].check_available()
+    review_route = allowance.get("review_adapter_id")
+    check_idea_models(gateway.adapters, route, review_route)
     subject = _uid(prep_work_id, "editorial-intake")
     mark = _point(0)
     metadata = {
@@ -84,6 +85,14 @@ def enroll_idea(kernel, gateway, inspiration, allowance, prep_work_id):
         work_id=prep_work_id,
     )
     wr, owner = created["world_ref"], created["principal"]
+    model_routes = None
+    policy_ref = None
+    if review_route is not None:
+        model_routes = {"creative": route, "review": review_route}
+        activation = activate(kernel, owner, wr, idea_policy(wr, model_routes),
+                              gateway.adapters, expected_revision=0)
+        policy_ref = activation["policy_ref"]
+        route = POLICY_ROUTE
     budget = kernel.tasks.create_budget(
         prep_work_id, allowance["total_amount"], currency=allowance["currency"]
     )
@@ -139,6 +148,7 @@ def enroll_idea(kernel, gateway, inspiration, allowance, prep_work_id):
         "budget_id": budget,
         "profile": profile,
         "creative_input": inspiration,
+        **({"model_routes": model_routes, "routing_policy_ref": policy_ref} if model_routes else {}),
     }
     with kernel.db.uow() as repo:
         kernel._receipt(repo, owner, wr, "P6_IDEA_ENROLL", "initial", {}, receipt)
@@ -224,7 +234,7 @@ def _enroll_review(kernel, gateway, repo, owner, wr, intake, task, evidence, des
         task_kind="fact",
         skill_name="review-consistency",
         assignment=assignment,
-        adapter_id=source["adapter_id"],
+        adapter_id=POLICY_ROUTE if "routing_decision" in source else source["adapter_id"],
         subject_ids=[_uid(wr["work_id"], "editorial-intake")],
         predicates=["lifecycle"],
         story_time=_point(0),
@@ -331,6 +341,13 @@ def materialize_design(kernel, gateway, owner, wr):
         created, inputs = _build_story(kernel, repo, target_id, design)
         literary_wr = created["world_ref"]
         literary_owner = created["principal"]
+        if "model_routes" in intake:
+            policy = kernel.artifact(repo, intake["routing_policy_ref"], wr["work_id"],
+                                     kind="RUNTIME_ROUTING_POLICY")["payload"]
+            activation = activate(kernel, literary_owner, literary_wr,
+                                  {**policy, "work_id": literary_wr["work_id"],
+                                   "branch_id": literary_wr["branch_id"]},
+                                  gateway.adapters, expected_revision=0)
         profile_refs = bind_profile(kernel, repo, literary_owner, literary_wr, intake["profile"])
         from novel_factory.application.production_extent import bind_extent
 
@@ -351,6 +368,8 @@ def materialize_design(kernel, gateway, owner, wr):
             "result_ref": evidence["output_ref"],
             "execution_kind": evidence["execution_kind"],
             "source_input_ref": intake["input_ref"],
+            **({"model_routes": intake["model_routes"], "routing_policy_ref": activation["policy_ref"]}
+               if "model_routes" in intake else {}),
             "profile": intake["profile"],
             "status": "INITIAL_PLAN_MATERIALIZED",
         }
@@ -360,6 +379,7 @@ def materialize_design(kernel, gateway, owner, wr):
             "attempt_id": review_evidence["attempt_id"],
             "context_bundle_id": review["context_bundle_id"],
             "result_ref": review_evidence["output_ref"],
+            "model": review_evidence["model_configuration"]["model"],
             "execution_kind": review_evidence["execution_kind"],
         }
         kernel.tasks.accept_in_transaction(repo.conn, review["task_id"], review["generation"])

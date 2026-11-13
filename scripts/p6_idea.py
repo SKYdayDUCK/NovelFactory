@@ -18,6 +18,7 @@ from novel_factory.application.idea_intake import (
     stage_receipt,
 )
 from novel_factory.application.kernel import Kernel, require
+from novel_factory.application.model_routing import POLICY_ROUTE, activate, check_idea_models, idea_policy
 from novel_factory.application.production_profiles import compile_dag
 from novel_factory.application.rolling_production import register_rolling
 from novel_factory.application.supervisor import HostJournal, RuntimeSupervisor
@@ -32,26 +33,27 @@ from novel_factory.infrastructure.private_files import prepare_private_directory
 from novel_factory.infrastructure.runtime_providers import load_runtime_profiles
 
 
-def configured_gateway(kernel, route):
+def configured_gateway(kernel, route, review_route=None):
     if os.environ.get("NF_RUNTIME_PROFILES"):
         adapters = load_runtime_profiles(os.environ["NF_RUNTIME_PROFILES"], HostJournal(kernel))
     else:
         adapters = {}
-    if route in {"external", "codex-text"}:
-        require(route not in adapters, "INVALID_MODEL_CONFIG", "Ambiguous provider name")
+    legacy = {route, review_route} & {"external", "codex-text"}
+    if legacy:
+        require(not legacy.intersection(adapters), "INVALID_MODEL_CONFIG", "Ambiguous provider name")
         adapter = OpenAICompatibleAdapter.from_environment()
-        adapters[route] = (
-            adapter if route == "external" else CodexAppServerAdapter(adapter, HostJournal(kernel))
-        )
-    require(route in adapters, "MODEL_UNAVAILABLE", "Requested adapter is not configured")
-    adapters[route].check_available()
+        for name in legacy:
+            adapters[name] = (
+                adapter if name == "external" else CodexAppServerAdapter(adapter, HostJournal(kernel))
+            )
+    check_idea_models(adapters, route, review_route)
     return AgentGateway(kernel, adapters)
 
 
-def preview(inspiration, adapter_id):
+def preview(inspiration, adapter_id, review_adapter_id=None):
     profile = parse_inspiration(inspiration)
     try:
-        configured_gateway(None, adapter_id)
+        configured_gateway(None, adapter_id, review_adapter_id)
     except DomainError as error:
         readiness = error.code
     else:
@@ -61,6 +63,8 @@ def preview(inspiration, adapter_id):
         "profile": profile,
         "dag": compile_dag(profile),
         "route_status": readiness,
+        **({"model_routes": {"creative": adapter_id, "review": review_adapter_id}}
+           if review_adapter_id is not None else {}),
         "tasks_enrolled": 0,
         "model_requests": 0,
         "stage": "PREFLIGHT",
@@ -70,6 +74,19 @@ def preview(inspiration, adapter_id):
 
 def _load_private(path):
     return json.loads(read_private_bytes(path, 1000000))
+
+
+def _requested_routes(args):
+    # The marker survives restarts before either branch exists. Enrolled tasks
+    # obtain their actual model from the immutable AgentInput in the database.
+    if args.action in {"advance", "register-window"}:
+        saved = _load_private(args.private_dir / "project.json").get("model_routes")
+        if saved:
+            require(args.adapter in (None, saved["creative"]) and
+                    args.review_adapter in (None, saved["review"]),
+                    "IDEMPOTENCY_MISMATCH", "Requested routes differ from the enrolled idea")
+            return saved["creative"], saved["review"]
+    return args.adapter or "codex-text", args.review_adapter
 
 
 def _project_control(kernel, directory, filename, token, wr):
@@ -116,6 +133,20 @@ def _register_window(kernel, gateway, private, allowance):
         )
         native_chapters = sum(len(volume["chapters"]) for volume in source["volumes"])
         horizon = {"tick": max(target or native_chapters, native_chapters), "phase": 1}
+        route = allowance["adapter_id"]
+        review_route = allowance.get("review_adapter_id")
+        if "model_routes" in source:
+            require(route == source["model_routes"]["creative"] and
+                    review_route in (None, source["model_routes"]["review"]),
+                    "IDEMPOTENCY_MISMATCH", "Window routes differ from the enrolled idea")
+            route = POLICY_ROUTE
+        elif review_route is not None:
+            check_idea_models(gateway.adapters, route, review_route)
+            activate(bound, owner, source["world_ref"],
+                     idea_policy(source["world_ref"], {"creative": route, "review": review_route}),
+                     gateway.adapters, expected_revision=0)
+            route = POLICY_ROUTE
+        routes = dict.fromkeys(("draft", "review", "plan"), route)
         result = register_rolling(
             bound,
             gateway.with_kernel(bound),
@@ -131,7 +162,7 @@ def _register_window(kernel, gateway, private, allowance):
             story_time=horizon,
             subject_ids=source["subject_ids"],
             predicates=source["predicates"],
-            routes={stage: allowance["adapter_id"] for stage in ("draft", "review", "plan")},
+            routes=routes,
             budget_id=budget_id,
             reserve_amount=allowance["reserve_amount"],
             token_reservation=allowance["token_reservation"],
@@ -169,7 +200,10 @@ def run_intake(mode, kernel, gateway, private, inspiration=None, allowance=None)
                 save(
                     private,
                     "project.json",
-                    {"work_id": str(uuid4()), "request_hash": fingerprint(scope)},
+                    {"work_id": str(uuid4()), "request_hash": fingerprint(scope),
+                     **({"model_routes": {"creative": allowance["adapter_id"],
+                                          "review": allowance["review_adapter_id"]}}
+                        if allowance.get("review_adapter_id") is not None else {})},
                 )
             marker = _load_private(marker_file)
             require(
@@ -261,7 +295,8 @@ def main():
         "action", choices=["preflight", "enroll", "advance", "status", "register-window"]
     )
     parser.add_argument("--idea", type=Path, help="JSON containing only idea, length and genre")
-    parser.add_argument("--adapter", default="codex-text")
+    parser.add_argument("--adapter", help="Creation profile (default: codex-text on enrollment)")
+    parser.add_argument("--review-adapter", help="Use a distinct model profile for internal reviews")
     parser.add_argument("--private-dir", type=Path)
     parser.add_argument(
         "--total-amount", help="Authorized monetary cap for the selected work, in USD"
@@ -286,14 +321,16 @@ def main():
     db = None
     try:
         inspiration = json.loads(args.idea.read_text(encoding="utf-8")) if args.idea else None
+        adapter, review_adapter = _requested_routes(args)
         if args.action == "preflight":
-            result = preview(inspiration, args.adapter)
+            result = preview(inspiration, adapter, review_adapter)
         else:
             db = Database()
             kernel = Kernel(db, ObjectStore(os.environ.get("NF_OBJECT_ROOT", "var/objects")))
-            gateway = None if args.action == "status" else configured_gateway(kernel, args.adapter)
+            gateway = None if args.action == "status" else configured_gateway(kernel, adapter, review_adapter)
             allowance = {
-                "adapter_id": args.adapter,
+                "adapter_id": adapter,
+                **({"review_adapter_id": review_adapter} if review_adapter is not None else {}),
                 "currency": "USD",
                 "total_amount": args.total_amount,
                 "reserve_amount": args.reserve_amount,

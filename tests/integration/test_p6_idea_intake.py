@@ -2,6 +2,8 @@
 
 import importlib
 import json
+import sys
+from contextlib import ExitStack
 from dataclasses import replace
 from decimal import Decimal
 from pathlib import Path
@@ -45,7 +47,17 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
         "total_tokens": 2000000,
         "token_reservation": 100000,
     }
-    with backend() as (adapter, requests, server):
+    with ExitStack() as stack:
+        adapter, requests, server = stack.enter_context(backend())
+        adapters = {"test": adapter}
+        if outcome == "continue":
+            reviewer, review_requests, review_server = stack.enter_context(backend())
+            reviewer.model = "fixture-internal-review"
+            review_generate = reviewer.generate
+            reviewer.generate = lambda request: replace(
+                review_generate(request), actual_amount=Decimal(0), currency="USD"
+            )
+            adapters["internal-review"] = reviewer
         generate = adapter.generate
 
         def settled_fixture(request):
@@ -54,7 +66,7 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
         if outcome != "unknown_cost":
             monkeypatch.setattr(adapter, "generate", settled_fixture)
         gateway = AgentGateway(
-            kernel, {"test": adapter}, material_reader=production_material_reader(kernel)
+            kernel, adapters, material_reader=production_material_reader(kernel)
         )
         expected = {
             "title": "测试计划",
@@ -99,6 +111,8 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
             }
 
         server.packet_candidate = candidate
+        if outcome == "continue":
+            review_server.packet_candidate = candidate
         private = tmp_path / "private-project"
 
         def run(action):
@@ -153,6 +167,10 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
                 == 1
             )
             assert repo.one("tasks", {"task_id": receipt["task_id"]})["state"] == "ACCEPTED"
+        if outcome == "continue":
+            # An already materialized pre-policy idea can opt in at its first
+            # window, with every subsequent window inheriting that allowance.
+            allowance["review_adapter_id"] = "internal-review"
         registered = run("register-window")
         assert (
             registered == run("register-window")
@@ -195,3 +213,87 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
             facts = [key for key, node in board["nodes"].items() if node["stage"] == "facts"]
             assert len(facts) == 2 and all(board["outputs"][key]["acceptance_ref"] for key in facts)
             assert step["plan_task"] != step["review_task"]
+            assert {r["model"] for r in review_requests} == {reviewer.model}
+            assert {r["model"] for r in requests} == {adapter.model}
+            tasks_by_route = {}
+            with kernel.db.uow(write=False) as repo:
+                for route, packets in (("test", requests[2:]), ("internal-review", review_requests)):
+                    tasks_by_route[route] = set()
+                    for packet in packets:
+                        ctx = json.loads(packet["messages"][1]["content"])["context"]
+                        job = repo.one("supervisor_jobs", {"task_id": ctx["task_id"]})
+                        data = kernel.artifact(repo, job["config"]["dispatch"]["input_ref"], work)["payload"]
+                        tasks_by_route[route].add((data["role_id"], data["task_kind"]))
+                        assert data["adapter_id"] == data["routing_decision"]["profile_id"] == route
+                        assert data["model_config_sha256"] == data["routing_decision"]["configuration_sha256"]
+            assert tasks_by_route == {
+                "test": {("writer", "scene_draft"), ("volume_director", "window_plan")},
+                "internal-review": {("reviewer", "epistemic"), ("reviewer", "literary"),
+                                    ("reviewer", "fact"), ("evidence_maintainer", "assertion_extract")},
+            }
+
+
+def test_cli_persists_two_model_roles_across_intake_restarts(kernel_env, tmp_path, monkeypatch, capsys):
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[2] / "scripts"))
+    cli = importlib.import_module("p6_idea")
+    idea_path = tmp_path / "idea.json"
+    idea_path.write_text(json.dumps({"idea": "画师发现另一份落款。", "length": "short", "genre": "现实"}))
+    private = tmp_path / "project"
+    monkeypatch.setenv("NF_DATABASE_URL", kernel_env["url"])
+    monkeypatch.setenv("NF_OBJECT_ROOT", str(kernel_env["store"].root))
+    monkeypatch.setenv("NF_RUNTIME_PROFILES", "synthetic-catalog")
+    model_routes = {"creative": "flash-fixture", "review": "pro-fixture"}
+    flags = ["--adapter", model_routes["creative"], "--review-adapter", model_routes["review"]]
+
+    def call(action, *args, status=0):
+        monkeypatch.setattr(sys, "argv", ["p6_idea.py", action, "--private-dir", str(private), *args])
+        assert cli.main() == status
+        return json.loads(capsys.readouterr().out)
+
+    with backend() as (creative, creative_calls, creative_server), backend() as (review, review_calls, review_server):
+        creative.model, review.model = "fixture-creative", "fixture-internal-review"
+        adapters = {model_routes["creative"]: creative, model_routes["review"]: review}
+        monkeypatch.setattr(cli, "load_runtime_profiles", lambda path, journal: adapters)
+        for adapter in adapters.values():
+            generate = adapter.generate
+            adapter.generate = lambda request, send=generate: replace(send(request), actual_amount=Decimal(0), currency="USD")
+
+        creative_server.packet_candidate = lambda packet: {
+            "title": "双落款", "protagonist": "画师", "place": "画室", "storyline": "辨别两份相互冲突的委托。",
+            "world_rules": ["委托须本人签收。"], "chapter_goals": ["画师核对落款。"],
+            "opening": {"counterpart": "送信人", "other_place": "档案室",
+                        "protagonist_knowledge": "画师见过原件，怀疑眼前的落款。",
+                        "counterpart_knowledge": "送信人保管委托，急于确认签收。",
+                        "situation": "两人需要在收件时处理相互冲突的委托。",
+                        "environment": {"moving_entity": "刚到的邮车"}},
+        }
+        review_server.packet_candidate = lambda packet: {
+            "summary": "已核查开场人物、设定和计划。", "issues": [],
+            "counterinterpretations": [], "evidence_refs": [],
+        }
+        preview = call("preflight", "--idea", str(idea_path), *flags)
+        assert preview["model_routes"] == model_routes and preview["model_requests"] == 0
+        review.model = creative.model
+        assert call("preflight", "--idea", str(idea_path), *flags, status=2)["route_status"] == "INVALID_MODEL_CONFIG"
+        review.model = "fixture-internal-review"
+        enrolled = call("enroll", "--idea", str(idea_path), *flags, "--reserve-amount", "0.1",
+                        "--total-amount", "2", "--reserve-tokens", "100000", "--total-tokens", "400000")
+        assert enrolled["model_routes"] == model_routes and not creative_calls and not review_calls
+        assert call("advance", "--adapter", "pro-fixture", status=2)["error"] == "IDEMPOTENCY_MISMATCH"
+        for _ in range(6):
+            result = call("advance")
+            if result.get("status") == "INITIAL_PLAN_MATERIALIZED":
+                break
+        assert result["status"] == "INITIAL_PLAN_MATERIALIZED", result
+        assert result["model"] == creative.model and result["design_review"]["model"] == review.model
+        assert result["model_routes"] == model_routes
+        assert call("advance") == result
+        assert [r["model"] for r in creative_calls] == [creative.model]
+        assert [r["model"] for r in review_calls] == [review.model]
+        kernel = kernel_env["kernel"]
+        with kernel.db.uow(write=False) as repo:
+            policies = [kernel.artifact(repo, item["routing_policy_ref"], item["world_ref"]["work_id"],
+                                        kind="RUNTIME_ROUTING_POLICY")["payload"]
+                        for item in (enrolled, result)]
+        assert policies[0]["rules"] == policies[1]["rules"]
+        assert policies[0]["work_id"] != policies[1]["work_id"]
