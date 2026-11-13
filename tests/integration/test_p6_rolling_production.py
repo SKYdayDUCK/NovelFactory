@@ -112,6 +112,11 @@ def test_fresh_dependent_scenes_wait_for_acceptance_and_recover_to_release(kerne
     owner, wr = f["principal"], f["world_ref"]
     work, branch = wr["work_id"], wr["branch_id"]
     req = request(kernel, f, size)
+    from novel_factory.application.production_extent import bind_extent
+
+    with kernel.objects.lock(), kernel.db.uow() as repo:
+        bind_extent(kernel, repo, owner, wr,
+                    {"preset": "short", "unit": "han_characters", "min": 17, "max": 23})
     with backend() as (adapter, calls, server):
         server.packet_candidate = answer
         # This specific isolated backend charges exactly zero; production HTTP usage alone
@@ -146,6 +151,20 @@ def test_fresh_dependent_scenes_wait_for_acceptance_and_recover_to_release(kerne
             [(n["state"], n.get("reason")) for n in board["nodes"].values()],
         )
         assert cursor["index"] == (2 if size == 1 else 0)
+        writer_packets = [json.loads(call["messages"][1]["content"]) for call in calls]
+        lengths = [p["assignment"] for p in writer_packets if p["context"]["role_id"] == "writer"]
+        assert len(lengths) == 3
+        assert all("6–8 个汉字" in assignment for assignment in lengths[:2])
+        assert "5–7 个汉字" in lengths[2]
+        for packet in writer_packets:
+            role_id = packet["context"]["role_id"]
+            if role_id in ("reviewer", "evidence_maintainer"):
+                for material in packet["authorized_materials"]:
+                    delivery = json.loads(material["content"])
+                    if role_id == "evidence_maintainer":
+                        assert delivery["required_event_refs"] == delivery["declared_important_deltas"] == []
+                    else:
+                        assert "required_event_refs" not in delivery and "declared_important_deltas" not in delivery
         advance_rolling(kernel, gateway, owner, work, branch)
         assert rolling_status(kernel, owner, work, branch)["reason"] == "RELEASE_INCOMPLETE"
         # Same-draft retries remain legal. Replacing a frozen scene with other approved prose fails.

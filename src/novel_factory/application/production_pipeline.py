@@ -173,7 +173,7 @@ def register_pipeline(kernel, gateway, owner, *, world_ref, series_id, volume_id
 
 def _register(kernel, gateway, owner, *, world_ref, series_id, volume_id, chapters, future, story_time,
               subject_ids, predicates, routes, budget_id, reserve_amount, token_reservation, limits,
-              deadline_seconds, idempotency_key, rolling, continuity_ref=None):
+              deadline_seconds, idempotency_key, rolling, continuity_ref=None, scene_extents=None):
     validate_contract("WorldRef", world_ref)
     validate_contract("StoryPoint", story_time)
     for uid in (series_id, volume_id, budget_id):
@@ -227,6 +227,10 @@ def _register(kernel, gateway, owner, *, world_ref, series_id, volume_id, chapte
                           "budget_id": budget_id, "reserve_amount": reserve_amount,
                           "token_reservation": token_reservation}, "agent")
         nodes = _nodes(kernel, repo, wr, volume_id, plan, chapters, future, limits["lookahead"], subject_ids, predicates, rolling=bool(rolling))
+        if scene_extents:
+            for node in nodes.values():
+                if node["stage"] == "draft":
+                    node["han_characters"] = scene_extents[node["scene_ref"]["artifact_revision_id"]]
         board = {k: v for k, v in request.items() if k not in {"chapters", "future", "deadline_seconds"}}
         if rolling is not None:
             board["rolling"] = rolling
@@ -328,12 +332,18 @@ def _enroll(kernel, repo, gateway, owner, board, identity):
             materials.append(board["continuity_ref"])
         refs = [board["plan_ref"], scene["batch_ref"], *node["handoff_refs"]]
         assignment = "依据获准场景卡写出正文，保留人物视角、披露边界和已接受前序交接。"
+        if extent := node.get("han_characters"):
+            target = (extent["min"] + extent["max"]) // 2
+            assignment += (f"本场正文分配 {extent['min']}–{extent['max']} 个汉字，目标约 {target} 个。"
+                           "字数只计 text 中的汉字，标点、空白和 JSON 字段不计。")
     else:
         materials = [board["nodes"][p]["output_ref"] for p in node["parents"]]
         assignment = "独立阅读本章给定顺序的全部场景，报告文学观察、证据和仍未判断的问题。"
     if stage == "facts":
         from .rolling_facts import assignment as fact_assignment
         assignment = fact_assignment()
+        # Qualify the source of reconciliation obligations for this exact draft.
+        refs.append(board["nodes"][node["parents"][0]]["scene_ref"])
         role, kind = "evidence_maintainer", "assertion_extract"
     elif stage == "epistemic":
         parent = board["nodes"][node["parents"][0]]

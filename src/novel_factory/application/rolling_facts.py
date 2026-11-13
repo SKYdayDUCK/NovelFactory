@@ -1,25 +1,43 @@
 """Map an independent full-text assertion reading into the native reconciliation service."""
 
 from uuid import NAMESPACE_URL, uuid5
+from functools import lru_cache
+import json
 
 from ..domain.canonical import strict_json_loads
 from ..domain.reconciliation import span_for
 from .authorization import Principal
 from .kernel import require
 from .narrative import NarrativeService
+from .prompt_schema import prompt_schema
 
 
+@lru_cache(maxsize=1)
 def assignment():
-    # Full schema is supplied outside the task assignment's bounded text field.
+    # The kernel derives the native span and UUID from a unique exact quotation.
+    # Keep all semantic fields, conditional constraints and their reachable definitions.
+    item = json.loads(prompt_schema("AssertionCandidate", "narrative"))
+    definitions = item.pop("$defs", {})
+    for derived in ("assertion_id", "span"):
+        del item["properties"][derived]
+        item["required"].remove(derived)
+    item["properties"]["quote"] = {"type": "string", "minLength": 1}
+    item["required"].append("quote")
+    schema = {"type": "object", "additionalProperties": False, "required": ["assertions"],
+              "properties": {"assertions": {"type": "array", "minItems": 1, "maxItems": 512,
+                                             "items": item}}, "$defs": definitions}
     return (
         "逐句独立审读获准正文，找出人物认知、事实变化、事件、披露、重要资源以及后果。"
-        "在 AgentTextOutput.text 返回一个 JSON 对象，唯一键 assertions 为数组。"
+        "在 AgentTextOutput.text 字符串内编码一个 JSON 对象，唯一键 assertions 为数组。"
         "每项包含 quote（正文中逐字且唯一的片段）、classification、summary、event_ref、world_check、"
         "knowledge_use、proposed_command、disclosure_id、declared_delta_index。无依据的引用填 null。"
-        "分类仅限 EXISTING_EVENT_PRESENTATION、SURFACE_DETAIL、SPEECH_OR_BELIEF、NEW_WORLD_EFFECT、"
-        "HISTORICAL_CONFLICT、READER_DISCLOSURE_CHANGE、UNCERTAIN。涵盖全文，可将连续表层描写分为一段。"
+        "按原文顺序引用，覆盖整场正文的每个非空白字符，包括标点。摘引须逐字复制对应正文，"
+        "不可用省略号或摘要替代；可将连续同类描写合并为一段。有台词的段落区分说法与已证事实。"
         "只标识确有文本依据的非持久感官细节为 SURFACE_DETAIL。缺乏事实证据时标为 UNCERTAIN。"
+        "对照材料的 required_event_refs 与 declared_important_deltas。已表现的事件引用对应 EventRef；"
+        "写作方声明的重要变化用零基 declared_delta_index 对应。正文缺少所需事件或证据不足时如实标出。"
         "不要自行创造正式事件或更改世界。"
+        "\nAgentTextOutput.text 内层 JSON Schema：" + json.dumps(schema, ensure_ascii=False, separators=(",", ":"))
     )
 
 

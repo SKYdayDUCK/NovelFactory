@@ -11,6 +11,22 @@ from novel_factory.infrastructure.runtime_catalog import RuntimeCatalog
 PRESETS = ("short", "medium", "medium_long", "long", "ultra_long")
 
 
+def test_scene_budgets_preserve_requested_book_bounds_after_replanning():
+    from novel_factory.application.rolling_production import _scene_extents
+
+    length = {"unit": "han_characters", "min": 11, "max": 17}
+    def chapter(*ids):
+        return {"scenes": [{"scene_ref": {"artifact_revision_id": ref}} for ref in ids]}
+
+    first = _scene_extents(length, [chapter("a", "b")], 0, 2)
+    assert first == {"a": {"min": 3, "max": 5}, "b": {"min": 3, "max": 4}}
+    for replacement in (chapter("c"), chapter("x", "y", "z")):
+        ranges = {**first, **_scene_extents(length, [replacement], 1, 2)}
+        assert sum(scene["min"] for scene in ranges.values()) == length["min"]
+        assert sum(scene["max"] for scene in ranges.values()) == length["max"]
+    assert _scene_extents({"unit": "chapters"}, [chapter("c")], 1, 2) == {}
+
+
 @pytest.mark.parametrize("preset", PRESETS)
 def test_resolved_profile_has_closed_graph_and_registered_role_bindings(preset):
     profile = resolve_profile(preset, "现实主义")

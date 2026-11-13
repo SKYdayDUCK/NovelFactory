@@ -95,6 +95,28 @@ def _window(kernel, repo, cursor):
     )
 
 
+def _scene_extents(length, chapters, first_chapter, total_chapters):
+    """Split inclusive manuscript bounds in reading order, preserving the two totals exactly."""
+    if not isinstance(length, dict) or length.get("unit") != "han_characters":
+        return {}
+
+    def share(total, index, count):
+        quotient, remainder = divmod(total, count)
+        return quotient + int(index < remainder)
+
+    extents = {}
+    for index, chapter in enumerate(chapters, start=first_chapter):
+        scenes = chapter["scenes"]
+        lower = share(length["min"], index, total_chapters)
+        upper = share(length["max"], index, total_chapters)
+        for ordinal, scene in enumerate(scenes):
+            extents[scene["scene_ref"]["artifact_revision_id"]] = {
+                "min": share(lower, ordinal, len(scenes)),
+                "max": share(upper, ordinal, len(scenes)),
+            }
+    return extents
+
+
 def rolling_status(kernel, owner, work, branch):
     with kernel.db.uow(write=False, repeatable_read=True) as repo:
         kernel.authorize(repo, owner, work, "ADMIN", branch)
@@ -172,6 +194,8 @@ def _open(kernel, repo, gateway, owner, cursor):
         "RELEASE_ORDER_MISMATCH",
         "Planned chapter order differs from scene reader order",
     )
+    extent_ref = _selected(repo, wr["work_id"], "P6_EXTENT:" + wr["branch_id"])
+    length = _payload(kernel, repo, wr, extent_ref, "MANUSCRIPT_EXTENT")["length"] if extent_ref else None
     result = boards._register(
         kernel,
         gateway,
@@ -184,6 +208,8 @@ def _open(kernel, repo, gateway, owner, cursor):
         deadline_seconds=remaining,
         idempotency_key="rolling-open:" + cursor["run_id"] + ":" + str(cursor["index"]),
         rolling={"run_id": cursor["run_id"], "index": cursor["index"]},
+        scene_extents=_scene_extents(length, window["chapters"], cursor["frozen_chapters"],
+                                     cursor["chapter_count"]),
         continuity_ref=cursor["continuity_ref"]
         if cursor["profile"]["cross_volume_memory"]
         else None,
@@ -271,7 +297,7 @@ def register_rolling(
         )
         provenance = kernel._prior(repo, owner, work, "P6_IDEA_PROVENANCE", "initial", {})
         extent = (provenance or {}).get("creative_input", {}).get("length", {})
-        if extent.get("unit") == "chapters":
+        if isinstance(extent, dict) and extent.get("unit") == "chapters":
             target_chapters = extent["min"] if requested_extent is None else requested_extent
             require(
                 type(target_chapters) is int and extent["min"] <= target_chapters <= extent["max"],

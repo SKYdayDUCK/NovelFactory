@@ -903,4 +903,13 @@ class NarrativeService:
                 matches = [ref for ref in scope["draft_refs"] if self._draft(repo, ref, task["work_id"])["text_ref"] == artifact_ref]
                 require(len(matches) == 1, "VIEW_DENIED", "Text is not an unambiguous assigned draft")
                 draft_ref = matches[0]
-        return canonical_bytes(self.read_text(principal, task_id, generation, draft_ref))
+        delivery = self.read_text(principal, task_id, generation, draft_ref)
+        if (task["role_id"], task["task_kind"]) == ("evidence_maintainer", "assertion_extract") and (
+            delivery["scene_ref"] in spec["input_artifacts"]
+        ):
+            with self.kernel.db.uow(write=False) as repo:
+                _, _, _, draft = self._reader_binding(repo, principal, task_id, generation, draft_ref)
+                scene = self._scene(repo, draft["scene_ref"], task["work_id"])
+                delivery.update(required_event_refs=scene["required_event_refs"],
+                                declared_important_deltas=draft["declared_important_deltas"])
+        return canonical_bytes(delivery)

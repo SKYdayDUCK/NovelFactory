@@ -232,6 +232,13 @@ def build_context_packet(binding, materials, editorial=None, joint=None):
             if isinstance(delivery, dict) and {"text_ref", "span"} <= delivery.keys():
                 select({"kind": "ARTIFACT", "artifact_ref": delivery["text_ref"], "span": delivery["span"]},
                        cut["plane"] if restricted else "LITERARY", "Exact text range offered by the assigned reader.", content)
+                if ((task["role_id"], task["task_kind"]) == ("evidence_maintainer", "assertion_extract")
+                        and "required_event_refs" in delivery and "declared_important_deltas" in delivery):
+                    obligations = {key: delivery[key] for key in (
+                        "draft_ref", "required_event_refs", "declared_important_deltas"
+                    )}
+                    structured.append({"ref": ref, "value": obligations})
+                    select(evidence, cut["plane"], "Reconciliation obligations of the assigned draft.", obligations)
         if name == "scene":
             for style in _decode(item["content"])["selected_styles"]:
                 select({"kind": "ARTIFACT", "artifact_ref": style["source_ref"]}, "LITERARY",

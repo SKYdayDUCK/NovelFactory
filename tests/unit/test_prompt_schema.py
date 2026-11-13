@@ -30,3 +30,20 @@ def test_compact_role_contracts_expand_exactly_to_original_constraints():
         reductions[name] = len(canonical_bytes(original)) - len(prompt_schema(name, version).encode())
     assert all(saved >= 0 for saved in reductions.values())
     assert reductions["ActionProposal"] > 0
+
+
+def test_fact_reader_gets_conditional_assertion_fields_and_exact_quotes():
+    from novel_factory.application.rolling_facts import assignment
+
+    instructions = assignment()
+    assert len(instructions) <= 32_000
+    schema = json.loads(instructions.split("内层 JSON Schema：", 1)[1])
+    Draft202012Validator.check_schema(schema)
+    schema_check = Draft202012Validator(schema)
+    claim = {"classification": "SURFACE_DETAIL", "quote": "灯亮了。", "summary": "光线明亮",
+             "event_ref": None, "world_check": None, "knowledge_use": None, "proposed_command": None,
+             "disclosure_id": None, "declared_delta_index": None}
+    assert schema_check.is_valid({"assertions": [claim]})
+    assert not schema_check.is_valid({"assertions": [{**claim, "quote": ""}]})
+    assert not schema_check.is_valid({"assertions": [{**claim, "classification": "NEW_WORLD_EFFECT"}]})
+    assert not schema_check.is_valid({"assertions": [{**claim, "classification": "EXISTING_EVENT_PRESENTATION"}]})
