@@ -1,4 +1,4 @@
-"""Price scoped DeepSeek runtime exports against a dated, operator-verified USD price card."""
+"""Price scoped DeepSeek runtime exports against a dated, operator-verified price card."""
 
 import argparse
 import json
@@ -40,10 +40,14 @@ def applicable_rate(card, model, span):
 
 
 def summarize(exports, card):
-    if card["currency"] != "USD":
-        raise ValueError("Expected a USD price card")
+    currency = card["currency"]
+    if currency not in {"USD", "CNY"}:
+        raise ValueError("Expected a USD or CNY price card")
+    estimated = "estimated_" + currency.lower()
+    known_estimated = "known_" + estimated
+    savings_field = "cache_savings_" + currency.lower()
     scopes, seen, rows, endpoints = set(), set(), [], []
-    groups = defaultdict(lambda: {"calls": 0, "estimated_calls": 0, "estimated_usd": Decimal(0)})
+    groups = defaultdict(lambda: {"calls": 0, "estimated_calls": 0, estimated: Decimal(0)})
     unknown = Counter()
     unclassified_by_scope = Counter()
     for path in exports:
@@ -87,7 +91,7 @@ def summarize(exports, card):
             if cost is None:
                 unknown[uncertainty] += 1
             else:
-                group["estimated_usd"] += cost
+                group[estimated] += cost
                 group["estimated_calls"] += 1
             savings = None
             if cost is not None and call["cached_input_tokens"] is not None:
@@ -118,8 +122,8 @@ def summarize(exports, card):
                     "branch_id": book[1],
                     "stage": task["task_kind"],
                     "price_period": band,
-                    "estimated_usd": cost,
-                    "cache_savings_usd": savings,
+                    estimated: cost,
+                    savings_field: savings,
                     "missing_estimate": uncertainty,
                     "invoiced_amount": call["actual_amount"]
                     if call.get("invoice_reconciled")
@@ -140,7 +144,7 @@ def summarize(exports, card):
             for r in attempts
             if type(r["input_tokens"]) is int and type(r["output_tokens"]) is int
         ]
-        priced = [r["estimated_usd"] for r in attempts if r["estimated_usd"] is not None]
+        priced = [r[estimated] for r in attempts if r[estimated] is not None]
         bills = defaultdict(Decimal)
         invoiced = 0
         for r in attempts:
@@ -160,8 +164,8 @@ def summarize(exports, card):
                 "total_tokens": sum(r["input_tokens"] + r["output_tokens"] for r in observed)
                 if not unobserved and len(observed) == len(attempts)
                 else None,
-                "known_estimated_usd": sum(priced) if priced else None,
-                "estimated_usd": sum(priced)
+                known_estimated: sum(priced) if priced else None,
+                estimated: sum(priced)
                 if not unobserved and len(priced) == len(attempts)
                 else None,
                 "invoiced_calls": invoiced,
@@ -173,6 +177,7 @@ def summarize(exports, card):
         )
     return {
         "source": card["source"],
+        "estimate_currency": currency,
         "by_work": by_work,
         "attempts": rows,
         "by_work_stage_model": [
@@ -183,10 +188,10 @@ def summarize(exports, card):
                 "role": role,
                 "model": m,
                 **metrics,
-                "known_estimated_usd": metrics["estimated_usd"]
+                known_estimated: metrics[estimated]
                 if metrics["estimated_calls"]
                 else None,
-                "estimated_usd": metrics["estimated_usd"]
+                estimated: metrics[estimated]
                 if metrics["estimated_calls"] == metrics["calls"]
                 else None,
             }

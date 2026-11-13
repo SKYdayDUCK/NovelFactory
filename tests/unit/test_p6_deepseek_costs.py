@@ -126,3 +126,18 @@ def test_half_open_call_ending_at_midnight_uses_only_prior_date(tmp_path):
     prior, crossed = summarize([path], CARD)["attempts"]
     assert prior["price_period"] == "off_peak" and prior["estimated_usd"] > 0
     assert crossed["missing_estimate"] == "CROSSES_DATE_BOUNDARY"
+
+
+def test_cny_rates_preserve_invoice_currency(tmp_path):
+    source = Path(__file__).resolve().parents[2] / "reports/p6/evidence/deepseek-cny-20261113.json"
+    path = snapshot(tmp_path / "a", [
+        {"sent_at": "2026-11-13T06:13:03Z", "received_at": "2026-11-13T06:13:22Z",
+         "input_tokens": 3698, "cached_input_tokens": 1408, "output_tokens": 1301,
+         "currency": "USD", "actual_amount": "0.03", "invoice_reconciled": True}
+    ])
+    report = summarize([path], json.loads(source.read_text()))
+    assert report["estimate_currency"] == "CNY"
+    assert report["attempts"][0]["estimated_cny"] == Decimal("0.01504432")
+    assert report["by_work"][0]["estimated_cny"] == Decimal("0.01504432")
+    assert report["by_work_stage_model"][0]["known_estimated_cny"] == Decimal("0.01504432")
+    assert report["by_work"][0]["total_invoiced_by_currency"] == {"USD": Decimal("0.03")}
