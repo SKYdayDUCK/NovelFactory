@@ -18,3 +18,17 @@ The one-CPU replay processed 24 immutable world-index jobs per arm with two warm
 To replay use `python -m benchmarks.hera_claim_scheduler --per-work 48 --output claim.json.gz`. On a separate freshly migrated database run `python -m benchmarks.p55_capacity --jobs 24 --workers 2 --measure-resize --output scaling.json`. Both tools use NF_TEST_DATABASE_URL.
 
 A second run pinned every process to CPUs 0 and 8. Fixed, adaptive, adaptive, fixed rates were 20.01, 13.05, 10.65 and 23.94 jobs/s, with P99 completion times of 1.20, 1.84, 2.25 and 1.00 s. All 96 index jobs verified; neither adaptive arm grew above one and no scale decision was persisted. Physical child processes were warmed ahead of timing in every arm. Consequently these results provide throughput and effective admission target samples, with neither an actual scale-out latency nor an observed two-to-one transition. Initial two-CPU testing uncovered a race in the original warm-up driver; one already-started process could take every short warm-up job before its sibling was ready. A process-initializer barrier now proves each child has opened its PG connection before timing. [Two-CPU run](raw/index-topology/scaling-2cpu.json) · [Preserved preflight failure](raw/index-topology/warmup-failure.txt)
+
+## Live downscale and reacquisition
+
+Three fresh PG17 fixtures on CPUs 0 and 8 each ran eight genuine index jobs. Two independent index workers owned valid leases before the database's CPU_COMPUTE limit changed from two to one. Barrier controls kept the existing leases alive until their admission checks were observed, then released each worker to materialize its actual immutable index receipt. A third claim was rejected at depth two and again at depth one. After depth reached zero the authoritative query granted exactly one new permit. Raising the cap back to two immediately admitted an additional real job. These times include the diagnostic queries and controlled ordering; they measure the live quota's nonpreemptive behavior rather than OS process creation or destruction.
+
+| Repetition | Lower-limit commit ms | Request → active depth 1 ms | Request → old leases drained ms | Request → next valid permit ms | Raise request → second valid permit ms | Task renewals / slowest ms |
+|---|---:|---:|---:|---:|---:|---:|
+| 1 | 16.36 | 112.66 | 195.25 | 212.97 | 19.69 | 16 / 32.21 |
+| 2 | 14.81 | 101.23 | 176.32 | 196.70 | 19.13 | 17 / 17.51 |
+| 3 | 24.28 | 139.50 | 236.49 | 248.49 | 13.99 | 19 / 32.68 |
+
+All 52 concurrent 10-second task-lease renewals succeeded, all 24 index events were consumed once, the final watermarks matched, and zero active index leases remained. This finite test establishes observed progress and enforcement at each capacity boundary; it provides no unbounded starvation guarantee. A preflight assertion used the outer dispatcher result shape for a direct index receipt and was corrected to verify its actual persisted consumption flag and event ID. [Per-lease, permit, watermark and renewal timings](raw/index-topology/resize.json.gz) · [Driver](../../../benchmarks/hera_index_resize.py) · [Preflight diagnostic](raw/index-topology/resize-fixture-failure.txt)
+
+Replay with `python -m benchmarks.hera_index_resize --output resize.json.gz` in a disposable PG17 database.
