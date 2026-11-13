@@ -27,12 +27,11 @@ def main():
                 a = read_arm(args.raw, block, f"a{pair}", args.baseline)
                 b = read_arm(args.raw, block, f"b{pair}", args.candidate)
                 ratio = b["goodput"] / a["goodput"]
-                tail = {key: round(b["latency"][key] / a["latency"][key], 3)
+                tail = {key: b["latency"][key] / a["latency"][key]
                         for key in ("p95_ms", "p99_ms")}
                 print(block, pair, round(a["goodput"], 3), round(b["goodput"], 3),
-                      round(ratio, 4), tail, flush=True)
-                passed &= ratio >= 1.30
-    # Tail latency also requires examination of the adjacent pairs in the report.
+                      round(ratio, 4), {k: round(v, 3) for k, v in tail.items()}, flush=True)
+                passed &= ratio >= 1.30 and max(tail.values()) <= 1.20
     raise SystemExit(0 if passed else 1)
 
 

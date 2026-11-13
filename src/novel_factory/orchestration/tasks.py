@@ -9,6 +9,7 @@ from __future__ import annotations
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal, InvalidOperation
+from functools import cached_property
 import hashlib
 import json
 from typing import Callable, Mapping
@@ -22,6 +23,42 @@ from novel_factory.contracts.registry import validate_contract
 from novel_factory.domain.errors import DomainError
 
 MAINTENANCE_GATE = 721943001
+
+
+_INSERT_OUTBOX = text("""
+    INSERT INTO nf_outbox (outbox_id, topic, aggregate_type, aggregate_id, payload, dedupe_key)
+    VALUES (:outbox_id, :topic, :aggregate_type, :aggregate_id, :payload, :dedupe_key)
+    ON CONFLICT (dedupe_key) DO NOTHING RETURNING outbox_id::text
+""").bindparams(bindparam("payload", type_=JSONB))
+
+
+# Check the deadline in the same statement as the unique task insertion.
+# This preserves the error ordering (deadline before duplicate identity).
+_INSERT_TASK = text("""
+    WITH validity AS MATERIALIZED (
+        SELECT CAST(:deadline AS timestamptz) > clock_timestamp() AS timely
+    ), created AS (
+        INSERT INTO nf_tasks (task_id, work_id, branch_id, principal_id, grant_id, role_id,
+                              task_kind, state, generation, context_bundle_id, dependency_fingerprint, deadline)
+        SELECT :task_id, :work_id, :branch_id, :principal_id, :grant_id, :role_id, :task_kind,
+               :state, 0, :context_bundle_id, :dependency_fingerprint, :deadline FROM validity WHERE timely
+        ON CONFLICT (task_id) DO NOTHING RETURNING task_id
+    )
+    SELECT timely, EXISTS (SELECT FROM created) AS inserted FROM validity
+""")
+
+
+_CANCEL_TASK = text("""
+    WITH current AS MATERIALIZED (
+        SELECT task_id, generation, state FROM nf_tasks WHERE task_id=:task_id FOR UPDATE
+    ), changed AS (
+        UPDATE nf_tasks t SET state='CANCELLED', lease_expiry=NULL, updated_at=clock_timestamp()
+        FROM current c WHERE t.task_id=c.task_id AND c.generation=:generation
+          AND c.state NOT IN ('CANCELLED', 'ACCEPTED')
+        RETURNING t.task_id
+    )
+    SELECT current.generation, current.state, EXISTS (SELECT FROM changed) AS changed FROM current
+""")
 
 
 # Each statement starts after the authoritative task row is inserted or locked.
@@ -82,7 +119,7 @@ def enqueue_outbox(conn, tables, topic, aggregate_type, aggregate_id, payload, d
     t = tables["outbox"]
     value = {"outbox_id": str(uuid4()), "topic": topic, "aggregate_type": aggregate_type,
              "aggregate_id": str(aggregate_id), "payload": payload, "dedupe_key": dedupe_key}
-    result = conn.execute(insert(t).values(**value).on_conflict_do_nothing(index_elements=[t.c.dedupe_key]).returning(t.c.outbox_id)).scalar_one_or_none()
+    result = conn.scalar(_INSERT_OUTBOX, value)
     if result:
         return result
     existing = conn.execute(select(t).where(t.c.dedupe_key == dedupe_key)).mappings().one()
@@ -159,16 +196,16 @@ class TaskService:
         prior = self._command_prior(conn, principal_id, idempotency_key, content)
         if prior:
             return prior
-        if deadline <= self._now(conn):
-            raise _error("DEADLINE_EXCEEDED", "Task deadline has passed")
-        t = self.tables["tasks"]
         wr = spec["world_ref"]
-        task_insert = insert(t).values(
-            task_id=spec["task_id"], work_id=wr["work_id"], branch_id=wr["branch_id"],
-            principal_id=str(principal_id), grant_id=spec["capability_grant_id"], role_id=spec["role_id"],
-            task_kind=spec["task_kind"], state=spec["state"], generation=0, context_bundle_id=spec["context_bundle_id"],
-            dependency_fingerprint=spec["dependency_fingerprint"], deadline=deadline)
-        if conn.scalar(task_insert.on_conflict_do_nothing(index_elements=[t.c.task_id]).returning(t.c.task_id)) is None:
+        timely, inserted = conn.execute(_INSERT_TASK, {
+            "task_id": spec["task_id"], "work_id": wr["work_id"], "branch_id": wr["branch_id"],
+            "principal_id": str(principal_id), "grant_id": spec["capability_grant_id"], "role_id": spec["role_id"],
+            "task_kind": spec["task_kind"], "state": spec["state"], "deadline": deadline,
+            "context_bundle_id": spec["context_bundle_id"], "dependency_fingerprint": spec["dependency_fingerprint"],
+        }).one()
+        if not timely:
+            raise _error("DEADLINE_EXCEEDED", "Task deadline has passed")
+        if not inserted:
             raise _error("ALREADY_EXISTS", "Task identity is already assigned")
         receipt = {"task_id": spec["task_id"], "generation": 0, "state": spec["state"]}
         conn.execute(_CREATE_RECORDS, {
@@ -193,24 +230,11 @@ class TaskService:
                 .where(inputs.c.task_id == task_id, selections.c.work_id == work_id)
                 .correlate_except(inputs, selections).exists())
 
-    def claim(self, worker_id: str, *, work_id=None, task_kinds=None, principal_id=None, grant_id=None, task_id=None, lease_seconds=30, authorize_in_tx=None):
-        with self._tx(authorize_in_tx) as conn:
-            return self.claim_in_transaction(conn, worker_id, work_id=work_id, task_kinds=task_kinds,
-                principal_id=principal_id, grant_id=grant_id, task_id=task_id, lease_seconds=lease_seconds)
-
-    def claim_in_transaction(self, conn, worker_id, *, work_id=None, task_kinds=None, principal_id=None,
-                             grant_id=None, task_id=None, lease_seconds=30, branch_ids=None):
-        if not worker_id or not 0 < lease_seconds <= 3600:
-            raise _error("INVALID_ARGUMENT", "Invalid worker lease")
+    @cached_property
+    def _claim_select(self):
+        """Reuse the invariant SQL shape. Each claim still reads the live queue."""
         t, fair = self.tables["tasks"], self.tables["task_fairness"]
-        # The caller's transaction can claim multiple tasks with either selection
-        # mode. Keep one exclusive queue gate to avoid shared-to-exclusive
-        # upgrades, and sample lease time only after the gate has been acquired.
-        now = conn.execute(text("""
-            WITH gate AS MATERIALIZED (SELECT pg_advisory_xact_lock(:key))
-            SELECT clock_timestamp() FROM gate
-        """), {"key": MAINTENANCE_GATE + 1}).scalar_one()
-        conditions = [t.c.state == "READY", t.c.deadline > now,
+        conditions = [t.c.state == "READY", t.c.deadline > bindparam("eligible_at"),
                       text("""NOT EXISTS (SELECT FROM nf_quota_retry_deadlines d
                            WHERE (d.task_id,d.generation)=(nf_tasks.task_id,nf_tasks.generation)
                              AND d.retry_not_before > statement_timestamp())"""),
@@ -219,18 +243,6 @@ class TaskService:
                             AND NOT EXISTS(SELECT FROM nf_conflict_resolutions sr WHERE sr.case_id=sc.case_id
                                            AND sr.outcome IN ('REVALIDATED','CERTIFICATE_REISSUED')))"""),
                       or_(t.c.generation == 0, ~self.plan_binding_exists(t.c.task_id, t.c.work_id))]
-        if work_id:
-            conditions.append(t.c.work_id == str(work_id))
-        if branch_ids is not None:
-            conditions.append(t.c.branch_id.in_(branch_ids))
-        if task_kinds:
-            conditions.append(t.c.task_kind.in_(task_kinds))
-        if principal_id:
-            conditions.append(t.c.principal_id == str(principal_id))
-        if grant_id:
-            conditions.append(t.c.grant_id == str(grant_id))
-        if task_id:
-            conditions.append(t.c.task_id == str(task_id))
         waits = self.tables["workflow_waits"]
         q = (select(t, waits.c.grant_epoch.label("wait_epoch"))
              .join(fair, and_(t.c.work_id == fair.c.work_id, t.c.task_kind == fair.c.task_kind))
@@ -240,7 +252,39 @@ class TaskService:
         inputs = self.tables["task_inputs"]
         q = q.add_columns(inputs.c.spec.label("input_spec")).outerjoin(
             inputs, and_(inputs.c.task_id == t.c.task_id, inputs.c.generation == t.c.generation))
-        row = conn.execute(q).mappings().one_or_none()
+        return q
+
+    def claim(self, worker_id: str, *, work_id=None, task_kinds=None, principal_id=None, grant_id=None, task_id=None, lease_seconds=30, authorize_in_tx=None):
+        with self._tx(authorize_in_tx) as conn:
+            return self.claim_in_transaction(conn, worker_id, work_id=work_id, task_kinds=task_kinds,
+                principal_id=principal_id, grant_id=grant_id, task_id=task_id, lease_seconds=lease_seconds)
+
+    def claim_in_transaction(self, conn, worker_id, *, work_id=None, task_kinds=None, principal_id=None,
+                             grant_id=None, task_id=None, lease_seconds=30, branch_ids=None):
+        if not worker_id or not 0 < lease_seconds <= 3600:
+            raise _error("INVALID_ARGUMENT", "Invalid worker lease")
+        t = self.tables["tasks"]
+        # The caller's transaction can claim multiple tasks with either selection
+        # mode. Keep one exclusive queue gate to avoid shared-to-exclusive
+        # upgrades, and sample lease time only after the gate has been acquired.
+        now = conn.execute(text("""
+            WITH gate AS MATERIALIZED (SELECT pg_advisory_xact_lock(:key))
+            SELECT clock_timestamp() FROM gate
+        """), {"key": MAINTENANCE_GATE + 1}).scalar_one()
+        q = self._claim_select
+        if work_id:
+            q = q.where(t.c.work_id == str(work_id))
+        if branch_ids is not None:
+            q = q.where(t.c.branch_id.in_(branch_ids))
+        if task_kinds:
+            q = q.where(t.c.task_kind.in_(task_kinds))
+        if principal_id:
+            q = q.where(t.c.principal_id == str(principal_id))
+        if grant_id:
+            q = q.where(t.c.grant_id == str(grant_id))
+        if task_id:
+            q = q.where(t.c.task_id == str(task_id))
+        row = conn.execute(q, {"eligible_at": now}).mappings().one_or_none()
         if row is None:
             return None
         task = dict(row)
@@ -398,19 +442,20 @@ class TaskService:
         content = {"operation": "cancel", "task_id": str(task_id), "expected_generation": expected_generation, "reason": reason}
         with self._tx(authorize_in_tx) as conn:
             prior = self._command_prior(conn, principal_id, idempotency_key, content)
-            task = self._task(conn, task_id)
             if prior:
+                task = self._task(conn, task_id)
                 # Earlier releases recorded the cancellation without settling unsent attempts.
                 if task["state"] == "CANCELLED" and task["generation"] == expected_generation:
                     self._release_prepared_calls(conn, task_id, expected_generation)
                 return prior
+            task = conn.execute(_CANCEL_TASK, {"task_id": task_id, "generation": expected_generation}).mappings().one_or_none()
+            if task is None:
+                raise _error("NOT_FOUND", "Task is unavailable")
             if task["generation"] != expected_generation:
                 raise _error("STALE_GENERATION", "Cancellation expected another generation")
             if task["state"] == "ACCEPTED":
                 raise _error("TASK_ALREADY_ACCEPTED", "Cancellation cannot erase accepted work")
-            if task["state"] != "CANCELLED":
-                t = self.tables["tasks"]
-                conn.execute(t.update().where(t.c.task_id == task_id).values(state="CANCELLED", lease_expiry=None, updated_at=self._now(conn)))
+            if task["changed"]:
                 self._emit(conn, task_id, expected_generation, "CANCELLED")
             self._release_prepared_calls(conn, task_id, expected_generation)
             receipt = {"task_id": str(task_id), "generation": expected_generation, "receipt_id": str(uuid4()), "status": "CANCELLED"}
