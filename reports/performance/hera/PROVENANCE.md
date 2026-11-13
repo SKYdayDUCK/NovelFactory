@@ -33,7 +33,7 @@ NF 使用 NF_DATABASE_URL 和 NF_TEST_DATABASE_URL，Workshop 使用 AW_DATABASE
 
 ## 取回每个测量使用的原始 Git 提交
 
-[分块 Git bundle](reproduction/) 包含主线 bcb03637 之后到 ca2c4c7 的完整本地提交、tree 和 blob。这个快照含所有主产品代码、HERA 测量程序及对应的前置修订；同一分支随后增加的汇总和原始数据可从本 PR 直接取得。文件总计 2,828,547 字节，以 393,216 字节为上限分块，按文件名顺序还原。完整 bundle 的 SHA-256 为 `96cccdf61757a163af6df1bbfe5a0daedf66d043f2ac1b2756fd727a9f7061dc`。在已经检出本仓库的工作树中运行以下命令（Git Bash、Linux 或 macOS）。Alembic 实验要使用与当时源码对应的迁移及新建的实验库。
+[分块 Git bundle](reproduction/) 包含主线 bcb03637 之后到 ca2c4c7 的完整本地提交、tree 和 blob。这个快照含最终主产品代码及截至 ca2c4c7 的 HERA 测量程序和前置修订。后续的兼容性和实验更新、原始数据可从本 PR 直接取得。文件总计 2,828,547 字节，以 393,216 字节为上限分块，按文件名顺序还原。完整 bundle 的 SHA-256 为 `96cccdf61757a163af6df1bbfe5a0daedf66d043f2ac1b2756fd727a9f7061dc`。在已经检出本仓库的工作树中运行以下命令（Git Bash、Linux 或 macOS）。Alembic 实验要使用与当时源码对应的迁移及新建的实验库。
 
 ```sh
 cat reports/performance/hera/reproduction/hera-source.bundle.part* > /tmp/hera-source.bundle
@@ -44,3 +44,5 @@ git worktree add --detach ../hera-same-rest-baseline bcb03637
 ```
 
 在只取回上述 main 基线的全新 bare 仓库中，已再次验证分块重组字节、执行 bundle fetch 和 `git fsck --full`。取回的阶段 tip 为 ca2c4c7，最终测量候选 a918a91 的 src tree 为 a50ff321f1d67f712198a9c819e888264344f2cf。P1 的 API 文档导出与示例更新在 bundle 快照之后，使用本 PR 的对应交付提交复查。
+
+模型等待期间项目进度复验的驱动在主快照之后。此 PR 中的 [benchmarks/hera_progress_model_isolation.py](../../../benchmarks/hera_progress_model_isolation.py) 对应开发提交 20801bc，Git blob 为 `706d33f9dfe03377a93f5d8f2546b769166d35cf`。在 PR 分支运行 `git hash-object benchmarks/hera_progress_model_isolation.py` 可独立核对。

@@ -33,3 +33,18 @@ Two worker threads competed under the shared four-connection pool in every run. 
 | 10 | 2 | 25.27 | 490.91 | 576.60 | 9.35 | 12.18 | 37 |
 
 All 800 reads and 800 index builds were verified. One index slot improved low-load read goodput in both reciprocal pairs, but the second pair more than doubled P99. In the first ten-client pair, reads rose about 13% while concurrent index throughput fell about 35%. The candidate fails the predeclared joint throughput/tail gate and is not promoted. Operators can still set a class cap when they explicitly prefer reserved compute headroom. Benchmark source 5795961, execution checkout 609172a as recorded in the raw file. Reproduce with `python -m benchmarks.hera_db_isolation --slot-comparison --output out.json.gz`. [Per-read and per-index results](raw/index_slots.json.gz)
+
+## Project progress while both model slots wait
+
+Four separately migrated PostgreSQL 17 fixtures each enrolled two model tasks in each of two books. Four distinct branch-scoped project grants sent 20 reads each; each book had one REST workflow client and one MCP SDK 1.29.0 client calling `nf_project_status`. The optional workflow-count projection was disabled. A pre-existing cancelled task in the second book made the branch totals distinguishable. Every one of the 320 complete responses matched its own grant's authorized progress snapshot, including the grant expiry. Independent SQL state counts matched each snapshot. No task, lease or attempt changed between the before/after snapshots of any measured interval. These are warmed loopback observations from a shared host with the client and server in one process. [Preregistered workload](RESOURCE_EXPERIMENT_PLAN.md) · [Per-request timing, fingerprints, branch/grant IDs, complete snapshots and SQL counters](raw/progress_model_isolation.json.gz)
+
+| Arm in order | Correct progress reads | Correct reads/s | P95 ms | P99 ms | Peak DB connections | In-flight SENT / queued READY model tasks |
+|---|---:|---:|---:|---:|---:|---:|
+| Quiet A1 | 80/80 | 27.11 | 187.70 | 274.31 | 4 | 0 / 4 |
+| Loaded B1 | 80/80 | 26.94 | 220.85 | 262.60 | 4 | 2 / 2 |
+| Loaded B2 | 80/80 | 17.55 | 464.72 | 708.75 | 4 | 2 / 2 |
+| Quiet A2 | 80/80 | 32.27 | 152.56 | 189.69 | 4 | 0 / 4 |
+
+In each loaded interval, one task per book stayed in provider generation with a SENT attempt and a live model dispatch lease. One eligible task per book remained READY. At provider entry the pool had zero checked-out connections. After release, all eight jobs across the two loaded fixtures reached RESULT_STORED, with one provider call and one durable attempt per task and zero remaining dispatch leases. The provider was an in-process deterministic fixture.
+
+The first adjacent pair lost 0.62% goodput; P95 rose 17.66% and P99 fell 4.27%. The second pair lost 45.62% goodput; P95 rose 204.61% and P99 rose 273.63%. Authorized progress stayed readable under the observed backlog. The second pair crosses all three preregistered 20% degradation limits. This small single-host run cannot establish a latency guarantee or attribute the difference to a particular component. The separate 5,000-task projection benchmark tests a different question. To replay from frozen source `20801bc`, set `NF_TEST_DATABASE_URL` to a disposable PostgreSQL 17 administration connection and run `python -m benchmarks.hera_progress_model_isolation --output progress_model.json.gz`. [Driver](../../../benchmarks/hera_progress_model_isolation.py)

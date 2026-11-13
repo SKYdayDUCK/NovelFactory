@@ -45,3 +45,29 @@ A real `nf_task_get` response had to equal its complete role-specific reference 
 | A2, one business lane + one authentication lane | 68.58 | 393 | 36.76 / 65.53 / 68.01 |
 
 Sharing the two slots reduced total drain time by 32.3% and 23.1% against the adjacent split arms. The historical Host queue finished the same operation in 35.26 s with 860 correct responses in 30 s; neither candidate arm met that target here. Shared CPU load, client placement and software versions across historical and contemporary measurements can differ. On the current server a successful `nf_task_get` includes bound-tool verification and audit. Keep these measurements distinct from fast task metadata and from asynchronous model submission. The pool allocation remains optional through `NF_HERA_SHARE_AUTH_SLOTS`. No fleet-level Host limiter was applied to the four arms. To replay from frozen `4f809f3`, run `python -m benchmarks.hera_actor_burst --clients 1000 --order ABBA --output /tmp/actor.json.gz` against a fresh disposable PG17 cluster. [Preregistered comparison](ACTOR_BURST_PLAN.md) · [A1](raw/actor-1000-0A.json.gz) · [B1](raw/actor-1000-1B.json.gz) · [B2](raw/actor-1000-2B.json.gz) · [A2](raw/actor-1000-3A.json.gz)
+
+## Admission of 5,000 distinct authorized writers
+
+One fresh task per principal, grant and credential was offered at the common release. Each work received 1,250 REST and 1,250 remote MCP submissions. The driver admitted up to 20 identity lifecycles at once. Each MCP identity opened a fresh Python SDK session. The application served real loopback TCP and held a four-connection PostgreSQL pool with zero overflow. Grant provisioning was outside the measured interval. Both the 20-identity smoke and the 5,000-identity result passed the registered checks.
+
+| Submit transport | Offered | Correct READY acknowledgements | Initialized SDK sessions | Call P50 / P95 / P99, ms | Last acknowledgement after release, s |
+|---|---:|---:|---:|---:|---:|
+| Remote MCP | 2,500 | 2,500 | 2,500 | 1,680 / 2,494 / 3,231 | 376.40 |
+| REST | 2,500 | 2,500 | 0 | 649 / 1,059 / 1,525 | 375.70 |
+
+The last positive reply arrived at 376.40 s and the last client closed at 376.40 s. Whole-population goodput including handshakes was **13.28 correct acknowledgements/s**. Release-to-response P50/P95/P99 was 199.18/359.00/372.89 s. Those timings include waiting for a client lane. Creating the two fixture works, issuing all grants and preparing commands took 21.28 s before release. The earlier 20-principal run reused warmed clients for 5,000 commands in 197.75 s (25.28/s). These workloads have different connection lifecycles and do not supply a paired speedup.
+
+| Resource during positive admissions | Observed |
+|---|---:|
+| Peak live identity lifecycles / initialized SDK sessions / business calls | 20 / 18 / 20 |
+| Peak established API TCP connections, sampled every 0.5 s | 20 |
+| Peak PG pool checkouts / checkouts after drain | 4 / 0 |
+| Ingress / authentication / operation peak active | 20 / 2 / 2 |
+| Ingress / authentication / operation peak queued | 0 / 18 / 18 |
+| Combined load-generator and API CPU seconds / process lifetime peak RSS | 418.76 s / 138,512 KiB |
+| Four PG client backends' CPU seconds / peak sum of sampled RSS | 55.13 s / 193,392 KiB |
+| Application SQL statements / failed statements | 152,515 / 0 |
+
+After shutdown fresh physical DB connections verified 5,000 READY tasks, 5,000 durable admission rows, 5,000 matching creation commands, 5,000 distinct stored credential hashes and one task-change outbox record for every expected task. Both branch heads were unchanged, with zero model attempts. All positive requests succeeded and all three admission queues drained. Separately, each protocol rejected a cross-work read and an over-capacity submit. REST returned 403 and 429. Remote MCP returned VIEW_DENIED and retryable BACKPRESSURE with retry_after_ms=1000. The controls left the verified counts unchanged.
+
+PG CPU and sampled RSS cover the four application backends. Summed RSS includes shared pages once per backend. The single low-frequency TCP/RSS sampler can miss instantaneous peaks. Client and server CPU share one Python process. The completion boundary is committed READY with no model execution. Reproduce on frozen source `ca2c4c7` with `python -m benchmarks.hera_distinct_admission --count 5000 --output out.json.gz` using an isolated PG17 administrator URL in `NF_TEST_DATABASE_URL`. [Preregistration](IDENTITY_ADMISSION_PLAN.md) · [Per-identity receipts and telemetry](raw/distinct-admission-full.json.gz) · [Smoke run](raw/distinct-admission-smoke.json.gz)
