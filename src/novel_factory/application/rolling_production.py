@@ -208,6 +208,7 @@ def _open(kernel, repo, gateway, owner, cursor):
         deadline_seconds=remaining,
         idempotency_key="rolling-open:" + cursor["run_id"] + ":" + str(cursor["index"]),
         rolling={"run_id": cursor["run_id"], "index": cursor["index"]},
+        max_reworks=cursor.get("max_reworks", 0),
         scene_extents=_scene_extents(length, window["chapters"], cursor["frozen_chapters"],
                                      cursor["chapter_count"]),
         continuity_ref=cursor["continuity_ref"]
@@ -334,6 +335,7 @@ def register_rolling(
             "profile": effective,
             "final_volume_id": volumes[-1]["volume_id"],
             "allowance": allowance,
+            **({"max_reworks": effective["max_reworks"]} if (provenance or {}).get("model_routes") else {}),
             "state": "STARTING",
             "reason": None,
             "chapter_count": initial_chapters,

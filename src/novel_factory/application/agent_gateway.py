@@ -19,7 +19,7 @@ from sqlalchemy import select
 from novel_factory.application.kernel import require
 from novel_factory.application.queries import WorldQueryService
 from novel_factory.application.query_policy import check_profile
-from novel_factory.application.prompt_schema import inline_schema, prompt_schema
+from novel_factory.application.prompt_schema import inline_schema, prompt_schema, validated_payload
 from novel_factory.contracts.registry import schema_for, validate_contract
 from novel_factory.domain.canonical import canonical_bytes, fingerprint
 from novel_factory.domain.errors import DomainError
@@ -689,7 +689,7 @@ class AgentGateway:
             require(all(envelope[k] == value for k, value in expected.items()),
                     "MODEL_IDENTITY_MISMATCH", "External output does not match its task and actor")
             target = binding["input"]["output_contract"]
-            candidate = validate_contract(target["name"], envelope["payload"], target["version"])
+            candidate = validated_payload(envelope, target["name"], target["version"])
             # Core ActionProposal repeats task identity. Do not let a correctly
             # wrapped envelope carry a different actor/WorldRef in its payload.
             for key, value in {**expected, "input_world_ref": expected["world_ref"],

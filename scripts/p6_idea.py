@@ -15,7 +15,7 @@ from novel_factory.application.idea_intake import (
     intake_receipt,
     materialize_design,
     parse_inspiration,
-    stage_receipt,
+    design_round,
 )
 from novel_factory.application.kernel import Kernel, require
 from novel_factory.application.model_routing import POLICY_ROUTE, activate, check_idea_models, idea_policy
@@ -249,8 +249,8 @@ def run_intake(mode, kernel, gateway, private, inspiration=None, allowance=None)
         owner, wr = kernel.authenticate(access["token"]), access["world_ref"]
         with kernel.db.uow(write=False) as repo:
             intake = intake_receipt(kernel, repo, owner, wr)
-            review = stage_receipt(kernel, repo, owner, wr)
-            task = repo.one("tasks", {"task_id": (review or intake)["task_id"]})
+            _, designer, review = design_round(kernel, repo, owner, wr, intake)
+            task = repo.one("tasks", {"task_id": (review or designer)["task_id"]})
         if mode == "status":
             return {
                 "world_ref": wr,
@@ -259,7 +259,8 @@ def run_intake(mode, kernel, gateway, private, inspiration=None, allowance=None)
                 "state": task["state"],
                 "context_bundle_id": task["context_bundle_id"],
             }
-        if mode == "advance" and task["state"] not in {"RESULT_STORED", "ACCEPTED"}:
+        repairable_design = (task["state"] == "FAILED" and intake.get("model_routes") and review is None)
+        if mode == "advance" and task["state"] not in {"RESULT_STORED", "ACCEPTED"} and not repairable_design:
             # The supervisor controls call, budget, waiting, and lease recovery.
             return RuntimeSupervisor(kernel, gateway).run_once(
                 owner, wr["work_id"], wr["branch_id"]

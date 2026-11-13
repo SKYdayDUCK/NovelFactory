@@ -617,6 +617,86 @@
         "considered_options",
         "issue_decisions"
       ]
+    },
+    "ShortDesignReview": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64000
+        },
+        "issues": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ReviewIssue"
+          },
+          "maxItems": 64
+        },
+        "counterinterpretations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "maxItems": 32
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EvidenceRef"
+          },
+          "maxItems": 128
+        },
+        "short_arc": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "beginning": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "development": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "turning_point": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "ending": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "decision": {
+              "enum": [
+                "COMPLETE",
+                "ENDING_PLAN_REQUIRED"
+              ]
+            }
+          },
+          "required": [
+            "beginning",
+            "development",
+            "turning_point",
+            "ending",
+            "decision"
+          ]
+        }
+      },
+      "required": [
+        "summary",
+        "issues",
+        "counterinterpretations",
+        "evidence_refs",
+        "short_arc"
+      ],
+      "additionalProperties": false
     }
   }
 }

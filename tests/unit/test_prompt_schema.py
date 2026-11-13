@@ -1,5 +1,6 @@
 import json
 
+import pytest
 from jsonschema import Draft202012Validator
 
 from novel_factory.application.agent_gateway import OUTPUT_CONTRACTS, _inline_schema
@@ -47,3 +48,26 @@ def test_fact_reader_gets_conditional_assertion_fields_and_exact_quotes():
     assert not schema_check.is_valid({"assertions": [{**claim, "quote": ""}]})
     assert not schema_check.is_valid({"assertions": [{**claim, "classification": "NEW_WORLD_EFFECT"}]})
     assert not schema_check.is_valid({"assertions": [{**claim, "classification": "EXISTING_EVENT_PRESENTATION"}]})
+
+
+def test_lossless_payload_normalization_only_accepts_empty_metadata_and_known_design_fields():
+    from novel_factory.application.prompt_schema import validated_payload
+    from novel_factory.domain.errors import DomainError
+
+    design = {"title": "回声", "protagonist": "林", "place": "市集", "storyline": "追查回声",
+              "world_rules": ["回声会重复"], "chapter_goals": ["寻找声音"]}
+    def decode(extra, *, unresolved=None):
+        envelope = {"payload": {**design, **extra}, "unresolved_questions": unresolved or []}
+        return validated_payload(envelope, "FirstWorldDesign", "production_profile")
+
+    assert decode({"chapter_goals_note": None, "unresolved_questions": []}) == design
+    for extra in ({"chapter_goals_note": ""}, {"made_up_note": None}, {"opening_note": None},
+                  {"mystery": None}, {"unresolved_questions": ["?"]}):
+        with pytest.raises(DomainError):
+            decode(extra)
+    with pytest.raises(DomainError):
+        decode({"unresolved_questions": []}, unresolved=["?"])
+    with pytest.raises(DomainError):
+        validated_payload({"payload": {"text": "中文", "text_note": None, "event_refs": [],
+                                      "important_deltas": [], "evidence_refs": []},
+                           "unresolved_questions": []}, "AgentTextOutput", "agent")

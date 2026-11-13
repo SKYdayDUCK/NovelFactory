@@ -5,6 +5,7 @@ from uuid import UUID, uuid5
 
 from novel_factory.application.budget_limits import SharedBudgetService
 from novel_factory.application.candidate_delivery import CandidateDelivery
+from novel_factory.application.idea_repair import normalized_design, returned_design
 from novel_factory.application.kernel import require
 from novel_factory.application.model_routing import POLICY_ROUTE, activate, check_idea_models, idea_policy
 from novel_factory.application.narrative import NarrativeService
@@ -113,6 +114,8 @@ def enroll_idea(kernel, gateway, inspiration, allowance, prep_work_id):
         "first_window_limit": _first_window_limit(profile, inspiration),
         "instructions": "依据灵感自主设计初始身份、地点、世界规则、故事线及首个窗口的章节目标。",
     }
+    if model_routes and profile["preset"] == "short":
+        assignment["extent_instruction"] = "章节目标覆盖整部短篇的开场、中段、转折与结局，在给定篇幅内收束核心冲突。"
     if allowance.get("review_adapter_id"):
         assignment["opening_requirements"] = {
             "instructions": "为第一场设计两个有独立认知的人物和两个地点。opening 中各人的知识只写其已知身份、所见及动机。situation 是尚未确定后果的开场条件。",
@@ -171,7 +174,7 @@ def intake_receipt(kernel, repo, owner, wr):
     return receipt
 
 
-def _audited_design_result(kernel, gateway, repo, task, wr):
+def _check_design_authority(repo, task, wr):
     check_task_dependencies(repo, task["task_id"], task["generation"])
     job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})
     grant = repo.one("grants", {"grant_id": task["grant_id"]}, lock="share")
@@ -188,43 +191,96 @@ def _audited_design_result(kernel, gateway, repo, task, wr):
         "VIEW_DENIED",
         "Design task authority expired",
     )
-    return CandidateDelivery(kernel, gateway).audited_candidate(repo, task, production_accounting=True)
 
 
-def stage_receipt(kernel, repo, owner, wr):
+def _audited_design_result(kernel, gateway, repo, task, wr, *, design_revision_read=False):
+    _check_design_authority(repo, task, wr)
+    return CandidateDelivery(kernel, gateway).audited_candidate(repo, task, production_accounting=True,
+                                                              design_revision_read=design_revision_read)
+
+
+def design_round(kernel, repo, owner, wr, intake):
+    """Recover the current designer and its review from immutable round receipts."""
     kernel.authorize(repo, owner, wr["work_id"], "ADMIN", wr["branch_id"])
-    return kernel._prior(repo, owner, wr["work_id"], "P6_IDEA_REVIEW", "initial", {})
+    designer = intake
+    round_index = 0
+    structure_count = 0
+    editorial_count = 0
+    ending_count = 0
+    while True:
+        key = "initial" if round_index == 0 else str(round_index)
+        review = kernel._prior(repo, owner, wr["work_id"], "P6_IDEA_REVIEW", key, {})
+        next_design = kernel._prior(repo, owner, wr["work_id"], "P6_IDEA_REVISE", str(round_index + 1), {})
+        if next_design is None:
+            return round_index, {**designer, "structure_count": structure_count, "editorial_count": editorial_count,
+                                 "ending_count": ending_count}, review
+        if next_design.get("revision_purpose") == "SHORT_ENDING":
+            ending_count += 1
+        elif next_design.get("review_ref"):
+            editorial_count += 1
+        else:
+            structure_count += 1
+        designer = next_design
+        round_index += 1
 
 
-def _enroll_review(kernel, gateway, repo, owner, wr, intake, task, evidence, design):
+def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence,
+                        design, round_index, *, revision=None, structure_repair=False, ending_plan=False):
     job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})["config"]
-    source = kernel.artifact(repo, intake["input_ref"], wr["work_id"], kind="AGENT_INPUT")[
-        "payload"
-    ]
+    source = kernel.artifact(repo, job["dispatch"]["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]
     budget = repo.one("budgets", {"budget_id": intake["budget_id"], "work_id": wr["work_id"]})
-    # The reviewer receives only the original inspiration, audited final design and
-    # content identity. Prior role instructions, hidden reasoning and grants stay private.
-    assignment = json.dumps(
-        {
-            "task": "独立核查初始设计与灵感、世界规则、初始身份和首窗目标；把需要修订的具体问题逐项提交。",
-            "creative_input": intake["creative_input"],
-            "candidate": design,
-            "candidate_ref": evidence["output_ref"],
-        },
-        ensure_ascii=False,
-    )
-    require(
-        len(assignment) <= 32000,
-        "CAPACITY_LIMIT",
-        "Initial design exceeds the review prompt boundary",
-    )
+    content = {"creative_input": intake["creative_input"], "candidate": design,
+               "candidate_ref": evidence["output_ref"]}
+    inputs = [evidence["output_ref"]]
+    if revision or structure_repair:
+        role_id, task_kind, skill = "world_designer", "initial_world", "prepare-world"
+        contract = source["output_contract"]
+        gateway.output_contracts[(role_id, task_kind)] = (contract["name"], contract["version"])
+        content["first_window_limit"] = _first_window_limit(intake["profile"], intake["creative_input"])
+        if structure_repair:
+            content["task"] = ("修复已返回方案的输出结构，保留其中已提出的人物、地点、世界规则和章节构想。"
+                               "补齐 opening：counterpart、other_place、双方各自的知识和 situation；"
+                               "按当前契约提供 environment。返回规定的外层标识和完整修复后的 payload。")
+            inputs.append(evidence["audit_ref"])
+            gateway.output_contracts[(role_id, task_kind)] = (
+                "EnvironmentalOpeningWorldDesign" if intake["profile"]["environment_processes"] else "OpeningWorldDesign",
+                "production_profile",
+            )
+        else:
+            findings, review_ref = revision
+            content.update(task="依据给定审校意见定向修改先前的设计，保留其余设定并返回完整设计。",
+                           review_ref=review_ref, issues=[{key: issue[key] for key in
+                           ("category", "severity", "issue_kind", "disposition", "description", "suggested_change")} for issue in findings["issues"]])
+            if ending_plan:
+                content["unresolved_questions"] = findings.get("unresolved_questions", [])
+                content.update(task="根据独立审核指出的成篇缺口，在原有篇幅和章节数量内定向改写现有章节目标、故事线。"
+                                    "保留人物、开场事实和世界规则。最后目标必须落实一个由人物行动产生的最终后果，"
+                                    "让核心冲突得到回应。请返回完整设计。",
+                               short_arc=findings["short_arc"])
+            inputs.append(review_ref)
+    else:
+        role_id, task_kind, skill = "reviewer", "fact", "review-consistency"
+        if intake.get("model_routes") and intake["profile"]["preset"] == "short":
+            gateway.output_contracts[(role_id, task_kind)] = ("ShortDesignReview", "production_profile")
+            content["short_arc_review"] = (
+                "逐项填写 short_arc，引用 chapter_goals 实际覆盖的开场、中段、转折和结局；缺失的一项明确写缺失。"
+                "若最后一章仍仅出现事端、疑虑或未来行动的打算，核心选择或结果留待续篇，选 ENDING_PLAN_REQUIRED。"
+                "有可辨认的结局（含开放式结局）且在该章已经落实时，选 COMPLETE。"
+            )
+        content["task"] = ("独立核查当前设计与灵感、世界规则、人物初始所知和首窗目标是否相容。"
+                           "阻止成书的矛盾列为 BLOCKER，普通改善建议和待讨论问题分别用 SUGGESTION、QUESTION。")
+    if intake["profile"]["preset"] == "short":
+        content["extent_instruction"] = ("在给定篇幅和章节数内完成整部短篇。核对开场条件、中段发展、转折和结局"
+                                         "都由这些章节目标承载，并给核心冲突安排可辨认的收束。")
+    assignment = json.dumps(content, ensure_ascii=False)
+    require(len(assignment) <= 32000, "CAPACITY_LIMIT", "Design handoff exceeds the role prompt boundary")
     dispatch = job["dispatch"]
     role = RuntimeTaskService(kernel, gateway).prepare(
         owner,
         wr,
-        role_id="reviewer",
-        task_kind="fact",
-        skill_name="review-consistency",
+        role_id=role_id,
+        task_kind=task_kind,
+        skill_name=skill,
         assignment=assignment,
         adapter_id=POLICY_ROUTE if "routing_decision" in source else source["adapter_id"],
         subject_ids=[_uid(wr["work_id"], "editorial-intake")],
@@ -236,7 +292,7 @@ def _enroll_review(kernel, gateway, repo, owner, wr, intake, task, evidence, des
         max_amount=dispatch["reserve_amount"],
         token_budget=dispatch["token_reservation"],
         currency=budget["currency"],
-        input_artifacts=[evidence["output_ref"]],
+        input_artifacts=inputs,
     )
     RuntimeSupervisor(kernel, gateway).enroll(
         owner,
@@ -250,13 +306,17 @@ def _enroll_review(kernel, gateway, repo, owner, wr, intake, task, evidence, des
         token_reservation=dispatch["token_reservation"],
     )
     receipt = {
-        "status": "DESIGN_REVIEW_ENROLLED",
+        "status": "DESIGN_REVISION_ENROLLED" if revision or structure_repair else "DESIGN_REVIEW_ENROLLED",
+        "round": round_index,
+        **({"review_ref": revision[1]} if revision else {}),
+        **({"revision_purpose": "SHORT_ENDING"} if ending_plan else {}),
         "task_id": role.task["task_id"],
         "design_task_id": task["task_id"],
         "input_ref": role.agent_input["input_ref"],
         "candidate_ref": evidence["output_ref"],
     }
-    kernel._receipt(repo, owner, wr, "P6_IDEA_REVIEW", "initial", {}, receipt)
+    kernel._receipt(repo, owner, wr, "P6_IDEA_REVISE" if revision or structure_repair else "P6_IDEA_REVIEW",
+                    str(round_index) if round_index else "initial", {}, receipt)
     return receipt
 
 
@@ -278,17 +338,29 @@ def materialize_design(kernel, gateway, owner, wr):
             "HEAD_CONFLICT",
             "Preparation head changed",
         )
+        round_index, designer, selected_review = design_round(kernel, repo, owner, wr, intake)
         task = repo.one(
             "tasks",
-            {"task_id": intake["task_id"], "work_id": wr["work_id"], "branch_id": wr["branch_id"]},
+            {"task_id": designer["task_id"], "work_id": wr["work_id"], "branch_id": wr["branch_id"]},
             lock="update",
         )
-        require(
-            task and task["state"] == "RESULT_STORED",
-            "TASK_NOT_ACCEPTABLE",
-            "Design awaits a current result",
-        )
-        evidence, design = _audited_design_result(kernel, gateway, repo, task, wr)
+        if task and task["state"] == "FAILED" and intake.get("model_routes"):
+            _check_design_authority(repo, task, wr)
+            envelope, audit, audit_ref = returned_design(kernel, repo, gateway, task, wr, designer)
+            normalized = normalized_design(kernel, repo, owner, task, wr, designer, envelope, audit, audit_ref)
+            if normalized is None:
+                design = validate_contract("FirstWorldDesign", envelope.get("payload"), "production_profile")
+                require(selected_review is None and designer["structure_count"] < intake["profile"]["max_reworks"],
+                        "REVIEW_REQUIRED", "The initial design has exhausted its authorized revisions")
+                return None, _enroll_design_step(
+                    kernel, gateway, repo, owner, wr, intake, task,
+                    {"output_ref": audit["response_ref"], "audit_ref": audit_ref}, design, round_index + 1,
+                    structure_repair=True,
+                )
+            evidence, design = normalized
+        else:
+            require(task and task["state"] == "RESULT_STORED", "TASK_NOT_ACCEPTABLE", "Design awaits a current result")
+            evidence, design = _audited_design_result(kernel, gateway, repo, task, wr)
         validate_contract("FirstWorldDesign", design, "production_profile")
         require(
             len(design["chapter_goals"])
@@ -305,10 +377,9 @@ def materialize_design(kernel, gateway, owner, wr):
                 "INVALID_MODEL_OUTPUT",
                 "The opening must identify both characters and the profile's environmental process",
             )
-        selected_review = stage_receipt(kernel, repo, owner, wr)
         if not selected_review:
-            return None, _enroll_review(
-                kernel, gateway, repo, owner, wr, intake, task, evidence, design
+            return None, _enroll_design_step(
+                kernel, gateway, repo, owner, wr, intake, task, evidence, design, round_index
             )
         review = repo.one(
             "tasks",
@@ -329,8 +400,35 @@ def materialize_design(kernel, gateway, owner, wr):
             "REVIEW_REQUIRED",
             "An independent completed review of this design is required",
         )
-        review_evidence, review_payload = _audited_design_result(kernel, gateway, repo, review, wr)
-        if review_payload["issues"]:
+        review_evidence, review_payload = _audited_design_result(
+            kernel, gateway, repo, review, wr, design_revision_read=bool(intake.get("model_routes"))
+        )
+        arc = review_payload.get("short_arc")
+        if arc and arc["decision"] == "ENDING_PLAN_REQUIRED":
+            if designer["ending_count"] == 0:
+                return None, _enroll_design_step(
+                    kernel, gateway, repo, owner, wr, intake, task, evidence, design, round_index + 1,
+                    revision=({**review_payload, "unresolved_questions": review_evidence.get("revision_questions", [])},
+                              review_evidence["output_ref"]), ending_plan=True,
+                )
+            return None, {"status": "DESIGN_REWORK_REQUIRED", "reason": "SHORT_ENDING_REQUIRED",
+                          "review_task_id": review["task_id"], "review_ref": review_evidence["output_ref"]}
+        issues = review_payload["issues"]
+        revision_available = (intake.get("model_routes") and
+                              designer["editorial_count"] < intake["profile"]["max_reworks"])
+        if intake.get("model_routes"):
+            from .scene_revision import editorial_blockers
+            open_questions = [i for i in issues if i["disposition"] == "OPEN"
+                              and i["issue_kind"] == "SEMANTIC_CONCERN" and i["severity"] == "QUESTION"]
+            issues = editorial_blockers(issues)
+            if revision_available and designer["editorial_count"] == 0:
+                issues += open_questions
+        if issues:
+            if revision_available:
+                return None, _enroll_design_step(
+                    kernel, gateway, repo, owner, wr, intake, task, evidence, design, round_index + 1,
+                    revision=(review_payload, review_evidence["output_ref"]),
+                )
             return None, {
                 "status": "DESIGN_REWORK_REQUIRED",
                 "review_task_id": review["task_id"],
@@ -367,7 +465,9 @@ def materialize_design(kernel, gateway, owner, wr):
             "model": evidence["model_configuration"]["model"],
             "result_ref": evidence["output_ref"],
             "execution_kind": evidence["execution_kind"],
-            "source_input_ref": intake["input_ref"],
+            "source_input_ref": designer["input_ref"],
+            **({"design_normalization": evidence["normalization"]} if "normalization" in evidence else {}),
+            **({"design_revision_round": round_index, "original_input_ref": intake["input_ref"]} if round_index else {}),
             **({"model_routes": intake["model_routes"], "routing_policy_ref": activation["policy_ref"]}
                if "model_routes" in intake else {}),
             "profile": intake["profile"],
@@ -381,9 +481,12 @@ def materialize_design(kernel, gateway, owner, wr):
             "result_ref": review_evidence["output_ref"],
             "model": review_evidence["model_configuration"]["model"],
             "execution_kind": review_evidence["execution_kind"],
+            **({"advisories": review_payload["issues"]} if review_payload["issues"] else {}),
+            **({"short_arc": arc} if arc else {}),
         }
         kernel.tasks.accept_in_transaction(repo.conn, review["task_id"], review["generation"])
-        kernel.tasks.accept_in_transaction(repo.conn, task["task_id"], task["generation"])
+        if "normalization" not in evidence:
+            kernel.tasks.accept_in_transaction(repo.conn, task["task_id"], task["generation"])
         kernel._receipt(repo, owner, wr, "P6_IDEA_MATERIALIZE", "initial", {}, receipt)
         kernel._receipt(
             repo,

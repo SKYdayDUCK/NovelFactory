@@ -15,6 +15,7 @@ from novel_factory.application.kernel import require
 from novel_factory.application.narrative import NarrativeService
 from novel_factory.application.planning import PlanningService
 from novel_factory.application.release import ReleaseService
+from novel_factory.application.scene_revision import editorial_blockers, revise_scene
 from novel_factory.application.runtime_tasks import RuntimeTaskService
 from novel_factory.application.volume_successor import _selected
 from novel_factory.contracts.registry import validate_contract
@@ -173,7 +174,7 @@ def register_pipeline(kernel, gateway, owner, *, world_ref, series_id, volume_id
 
 def _register(kernel, gateway, owner, *, world_ref, series_id, volume_id, chapters, future, story_time,
               subject_ids, predicates, routes, budget_id, reserve_amount, token_reservation, limits,
-              deadline_seconds, idempotency_key, rolling, continuity_ref=None, scene_extents=None):
+              deadline_seconds, idempotency_key, rolling, continuity_ref=None, scene_extents=None, max_reworks=0):
     validate_contract("WorldRef", world_ref)
     validate_contract("StoryPoint", story_time)
     for uid in (series_id, volume_id, budget_id):
@@ -240,6 +241,8 @@ def _register(kernel, gateway, owner, *, world_ref, series_id, volume_id, chapte
         board = {k: v for k, v in request.items() if k not in {"chapters", "future", "deadline_seconds"}}
         if rolling is not None:
             board["rolling"] = rolling
+            if max_reworks:
+                board["max_reworks"] = max_reworks
             if continuity_ref:
                 board["continuity_ref"] = continuity_ref
         board.update(nodes=nodes, plan_ref=plan_ref, manifest_ref=manifest, authorization={
@@ -298,6 +301,20 @@ def _ready(board):
     reviews = [k for k, n in nodes.items() if n["stage"] in READING_STAGES and n["state"] == "PENDING"
                and all(nodes[p]["state"] == "DRAFT_STORED" for p in n["parents"])
                and ("knowledge_node" not in n or nodes[n["knowledge_node"]]["state"] == "KNOWLEDGE_CLEAR")]
+    if board.get("max_reworks"):
+        # A later scene within this chapter may need this exact acceptance before it can be written.
+        # In that case the full chapter reading can only follow the predecessor's factual clearance.
+        def chapter_ready(key):
+            node = nodes[key]
+            if node["stage"] != "facts":
+                return True
+            chapter = nodes["review:" + node["chapter_id"]]
+            return chapter["state"] == "ADVISORY_REVIEW" or any(
+                nodes[parent]["state"] == "WAITING_HANDOFF" and
+                key[6:] in nodes[parent].get("predecessor_scene_ids", [])
+                for parent in chapter["parents"]
+            )
+        reviews = [key for key in reviews if chapter_ready(key)]
     reading_wip = sum(busy[s] for s in READING_STAGES)
     if reviews and reading_wip < limits["review"]:
         return min(reviews)
@@ -345,6 +362,8 @@ def _enroll(kernel, repo, gateway, owner, board, identity):
     else:
         materials = [board["nodes"][p]["output_ref"] for p in node["parents"]]
         assignment = "独立阅读本章给定顺序的全部场景，报告文学观察、证据和仍未判断的问题。"
+    if stage == "review" and board.get("max_reworks"):
+        assignment += "须改的具体问题标为 BLOCKER 或 CHANGE_REQUEST；每项 subject_ref 引用给定原稿的 draft_ref。可选的文学意见列为建议。"
     if stage == "facts":
         from .rolling_facts import assignment as fact_assignment
         assignment = fact_assignment()
@@ -359,6 +378,12 @@ def _enroll(kernel, repo, gateway, owner, board, identity):
         role, kind = "reviewer", "epistemic"
     else:
         role, kind = ROLES[stage]
+    if stage == "draft" and node.get("prior_draft_ref"):
+        role, kind = "writer", "targeted_revision"
+        materials.append(node["prior_draft_ref"])
+        refs.append(node["revision_feedback"]["report_ref"])
+        assignment += "请只修订指出的问题并返回完整新正文；其余原稿的视角、措辞和事件边界尽量保留。" + json.dumps(
+            node["revision_feedback"]["findings"], ensure_ascii=False)
     seconds = int((datetime.fromisoformat(board["authorization"]["deadline"]) - repo.now()).total_seconds())
     require(seconds > 0, "TASK_EXPIRED", "No time remains")
     task = RuntimeTaskService(kernel, gateway).prepare(owner, wr, role_id=role, task_kind=kind,
@@ -417,6 +442,8 @@ def prepare_materials(kernel, task, config):
             PlanningService(bound).bind_task_for_controller(owner, tid, gen, board["plan_ref"], scene["plan_node_ids"], key)
             actor = Principal(task["grant_id"], task["principal_id"])
             ReleaseService(bound).bind_writer_task(actor, tid, gen, node["scene_ref"], node["handoff_refs"], key)
+            if node.get("prior_draft_ref"):
+                NarrativeService(bound).bind_reader_task(owner, tid, gen, [node["prior_draft_ref"]], key)
         elif node["stage"] in READING_STAGES:
             drafts = [board["nodes"][p]["output_ref"] for p in node["parents"]]
             for parent in node["parents"]:
@@ -438,7 +465,7 @@ def _deliver(kernel, repo, gateway, board, node, task):
         actor = Principal(task["grant_id"], task["principal_id"])
         ref = NarrativeService(kernel).store_draft(actor, task["task_id"], task["generation"],
             node["scene_ref"], candidate["text"], key, declared_important_deltas=candidate["important_deltas"],
-            handoff_refs=node["handoff_refs"], agent_output_ref=evidence["output_ref"])
+            handoff_refs=node["handoff_refs"], prior_draft_ref=node.get("prior_draft_ref"), agent_output_ref=evidence["output_ref"])
         state = "DRAFT_STORED"
     elif node["stage"] == "epistemic":
         from .rolling_facts import record_knowledge
@@ -460,6 +487,11 @@ def _deliver(kernel, repo, gateway, board, node, task):
                         {"draft_refs": drafts, "generation": task["generation"], "task_id": task["task_id"],
                          "candidate_ref": evidence["output_ref"], "literary_quality": "NOT_EVALUATED"})
         state = "ADVISORY_REVIEW"
+        if board.get("max_reworks") and (issues := editorial_blockers(candidate["issues"])):
+            state = "STOPPED"
+            node["reason"] = "CHAPTER_REWORK_REQUIRED"
+            node["revision_targets"] = [key for key in node["parents"]
+                                        if any(issue["subject_ref"] == board["nodes"][key]["output_ref"] for issue in issues)]
     else:
         wr = node.get("world_ref", board["world_ref"])
         require(candidate["input_world_ref"] == wr and candidate["dependency_fingerprint"] == task["dependency_fingerprint"]
@@ -608,6 +640,11 @@ def advance_pipeline(kernel, gateway, controller, work, branch):
         expired = repo.now() >= datetime.fromisoformat(board["authorization"]["deadline"])
         settlement = _settlement(bound, repo, board) if any(n["state"] in {
             "PROVISIONAL_WITH_ASSUMPTIONS", "READY_FOR_ADOPTION"} for n in nodes.values()) else None
+        if board.get("max_reworks") and not expired and any(n.get("output_ref") and n["state"] == "STOPPED" for n in nodes.values()):
+            _current_owner(bound, repo, board)
+            revised = revise_scene(bound, repo, board)
+            if revised:
+                return {"status": "SCENE_REVISION_REQUESTED", "node_id": revised, "board_ref": _save(bound, repo, controller, board)}
         for identity, node in nodes.items():
             if node["state"] == "WAITING_HANDOFF":
                 if expired:

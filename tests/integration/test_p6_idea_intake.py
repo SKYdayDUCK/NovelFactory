@@ -233,7 +233,9 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
             }
 
 
-def test_cli_persists_two_model_roles_across_intake_restarts(kernel_env, tmp_path, monkeypatch, capsys):
+@pytest.mark.parametrize("first_result", ["approved", "missing_opening", "review_rejected", "historical_duplicate", "historical_null_note",
+                                          "repaired_then_question", "ending_plan", "unresolved_ending"])
+def test_cli_persists_two_model_roles_across_intake_restarts(kernel_env, tmp_path, monkeypatch, capsys, first_result):
     monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[2] / "scripts"))
     cli = importlib.import_module("p6_idea")
     idea_path = tmp_path / "idea.json"
@@ -258,7 +260,7 @@ def test_cli_persists_two_model_roles_across_intake_restarts(kernel_env, tmp_pat
             generate = adapter.generate
             adapter.generate = lambda request, send=generate: replace(send(request), actual_amount=Decimal(0), currency="USD")
 
-        creative_server.packet_candidate = lambda packet: {
+        design = {
             "title": "双落款", "protagonist": "画师", "place": "画室", "storyline": "辨别两份相互冲突的委托。",
             "world_rules": ["委托须本人签收。"], "chapter_goals": ["画师核对落款。"],
             "opening": {"counterpart": "送信人", "other_place": "档案室",
@@ -267,31 +269,111 @@ def test_cli_persists_two_model_roles_across_intake_restarts(kernel_env, tmp_pat
                         "situation": "两人需要在收件时处理相互冲突的委托。",
                         "environment": {"moving_entity": "刚到的邮车"}},
         }
+        def arc(packet):
+            complete = first_result != "unresolved_ending" and (first_result != "ending_plan" or len(review_calls) > 1)
+            assert "short_arc_review" in json.loads(packet["assignment"])
+            return {"beginning": "原件出现。", "development": "送信人辨认墨色。", "turning_point": "两人对证。",
+                    "ending": "双方撤回误认的落款。" if complete else "没有给出最后结果。",
+                    "decision": "COMPLETE" if complete else "ENDING_PLAN_REQUIRED"}
+        review_generate = review.generate
+        if first_result in {"ending_plan", "unresolved_ending"}:
+            def review_with_questions(request):
+                response = review_generate(request)
+                envelope = json.loads(response.text)
+                if envelope["payload"]["short_arc"]["decision"] == "ENDING_PLAN_REQUIRED":
+                    envelope["unresolved_questions"] = ["画师最后如何处理委托？"]
+                return replace(response, text=json.dumps(envelope, ensure_ascii=False))
+            review.generate = review_with_questions
         review_server.packet_candidate = lambda packet: {
-            "summary": "已核查开场人物、设定和计划。", "issues": [],
+            "short_arc": arc(packet), "summary": "已核查开场人物、设定和计划。", "issues": [],
             "counterinterpretations": [], "evidence_refs": [],
         }
+        def design_reply(packet):
+            if len(creative_calls) == 1 and first_result in {"missing_opening", "repaired_then_question"}:
+                return {k: v for k, v in design.items() if k != "opening"}
+            if first_result == "historical_duplicate":
+                return {**design, "unresolved_questions": []}
+            if first_result == "historical_null_note":
+                return {**design, "chapter_goals_note": None}
+            if len(creative_calls) > 1:
+                handed = json.loads(packet["assignment"])
+                assert handed["candidate"]["title"] == design["title"]
+                if first_result == "review_rejected" or len(creative_calls) == 3:
+                    assert handed["issues"][0]["suggested_change"] == "写明两次委托的先后"
+                elif first_result in {"ending_plan", "unresolved_ending"}:
+                    assert handed["short_arc"]["decision"] == "ENDING_PLAN_REQUIRED"
+                    assert handed["unresolved_questions"] == ["画师最后如何处理委托？"]
+                else:
+                    assert "opening" in handed["task"] and "opening" not in handed["candidate"]
+            return design
+        creative_server.packet_candidate = design_reply
+        if first_result in {"review_rejected", "repaired_then_question"}:
+            def review_reply(packet):
+                ref = json.loads(packet["assignment"])["candidate_ref"]
+                issue = {"issue_id": str(uuid4()), "category": "CONTINUITY", "severity": "BLOCKER",
+                         "subject_ref": ref, "description": "两次委托顺序不清楚", "evidence_refs": [],
+                         "suggested_change": "写明两次委托的先后", "disposition": "OPEN", "issue_kind": "HARD_CONFLICT"}
+                if first_result == "repaired_then_question":
+                    issue.update(severity="QUESTION", issue_kind="SEMANTIC_CONCERN")
+                return {"short_arc": arc(packet), "summary": "独立核查设定", "counterinterpretations": [], "evidence_refs": [],
+                        "issues": [issue] if len(review_calls) == 1 or first_result == "repaired_then_question" else []}
+            review_server.packet_candidate = review_reply
         preview = call("preflight", "--idea", str(idea_path), *flags)
         assert preview["model_routes"] == model_routes and preview["model_requests"] == 0
         review.model = creative.model
         assert call("preflight", "--idea", str(idea_path), *flags, status=2)["route_status"] == "INVALID_MODEL_CONFIG"
         review.model = "fixture-internal-review"
         enrolled = call("enroll", "--idea", str(idea_path), *flags, "--reserve-amount", "0.1",
-                        "--total-amount", "2", "--reserve-tokens", "100000", "--total-tokens", "400000")
+                        "--total-amount", "2", "--reserve-tokens", "100000", "--total-tokens", "600000")
         assert enrolled["model_routes"] == model_routes and not creative_calls and not review_calls
         assert call("advance", "--adapter", "pro-fixture", status=2)["error"] == "IDEMPOTENCY_MISMATCH"
-        for _ in range(6):
+        if first_result in {"historical_duplicate", "historical_null_note"}:
+            from novel_factory.contracts.registry import validate_contract
+            from novel_factory.application import agent_gateway
+            # First call uses the historical strict parser to produce a real terminal REJECTED receipt.
+            with monkeypatch.context() as old:
+                old.setattr(agent_gateway, "validated_payload",
+                            lambda envelope, name, version: validate_contract(name, envelope["payload"], version))
+                for _ in range(4):
+                    call("advance")
+                    if creative_calls:
+                        break
+        for _ in range(22):
             result = call("advance")
-            if result.get("status") == "INITIAL_PLAN_MATERIALIZED":
+            if result.get("status") in {"INITIAL_PLAN_MATERIALIZED", "DESIGN_REWORK_REQUIRED"}:
                 break
+        if first_result == "unresolved_ending":
+            assert result["status"] == "DESIGN_REWORK_REQUIRED" and result["reason"] == "SHORT_ENDING_REQUIRED"
+            assert result == call("advance") and len(creative_calls) == len(review_calls) == 2
+            return
         assert result["status"] == "INITIAL_PLAN_MATERIALIZED", result
         assert result["model"] == creative.model and result["design_review"]["model"] == review.model
         assert result["model_routes"] == model_routes
         assert call("advance") == result
-        assert [r["model"] for r in creative_calls] == [creative.model]
-        assert [r["model"] for r in review_calls] == [review.model]
+        creative_count = {"approved": 1, "historical_duplicate": 1, "historical_null_note": 1, "repaired_then_question": 3}.get(first_result, 2)
+        assert [r["model"] for r in creative_calls] == [creative.model] * creative_count
+        assert [r["model"] for r in review_calls] == [review.model] * (2 if first_result in {"review_rejected", "repaired_then_question", "ending_plan"} else 1)
+        if creative_count > 1:
+            assert result["original_input_ref"] == enrolled["input_ref"] != result["source_input_ref"]
+            assert result["design_revision_round"] == creative_count - 1
         kernel = kernel_env["kernel"]
         with kernel.db.uow(write=False) as repo:
+            if first_result in {"historical_duplicate", "historical_null_note"}:
+                norm = result["design_normalization"]
+                assert norm["output_ref"] == result["result_ref"]
+                task = repo.one("tasks", {"task_id": result["task_id"]})
+                assert task["state"] == "FAILED"
+                audit = kernel.artifact(repo, norm["audit_ref"], task["work_id"])["payload"]
+                assert audit["outcome"] == "REJECTED" and audit["output_ref"] is None
+                raw = kernel.artifact(repo, norm["response_ref"], task["work_id"])["payload"]
+                original = json.loads(raw["text"])["payload"]
+                if first_result == "historical_null_note":
+                    assert norm["removed_fields"] == ["chapter_goals_note"] and original["chapter_goals_note"] is None
+                else:
+                    assert original["unresolved_questions"] == []
+                assert kernel.artifact(repo, norm["output_ref"], task["work_id"])["payload"] == design
+            if first_result == "repaired_then_question":
+                assert result["design_review"]["advisories"][0]["severity"] == "QUESTION"
             policies = [kernel.artifact(repo, item["routing_policy_ref"], item["world_ref"]["work_id"],
                                         kind="RUNTIME_ROUTING_POLICY")["payload"]
                         for item in (enrolled, result)]
