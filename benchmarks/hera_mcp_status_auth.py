@@ -6,6 +6,7 @@ from contextvars import ContextVar
 import gzip
 import json
 import multiprocessing
+from types import SimpleNamespace
 import os
 from pathlib import Path
 import resource
@@ -17,6 +18,8 @@ from unittest.mock import patch
 import httpx
 from mcp import ClientSession
 from mcp.client.streamable_http import streamable_http_client
+from mcp.server import streamable_http as sdk_transport
+from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 from sqlalchemy import event, text
 
 from benchmarks.hera_mixed import population, task_spec
@@ -32,6 +35,7 @@ from novel_factory.interfaces.admission import AdmissionController
 from novel_factory.interfaces.http import HttpSettings, create_app
 
 request_tag = ContextVar("request_tag", default="")
+session_start = ContextVar("session_start", default=None)
 
 
 def serve(pipe, url, objects, bindings, enabled, cpus):
@@ -75,6 +79,26 @@ def serve(pipe, url, objects, bindings, enabled, cpus):
                 log(name, start, monotonic_ns())
         return wrapper
 
+    # Pin wrappers to the locked SDK module. Other JSON users in the server
+    # keep using their own imported module. No request or token contents are stored.
+    original_manager = StreamableHTTPSessionManager.handle_request
+    transport = sdk_transport.StreamableHTTPServerTransport
+    original_handle = transport.handle_request
+
+    async def handle_stateless(manager, *args, **kwargs):
+        start = session_start.set(monotonic_ns())
+        try:
+            return await original_manager(manager, *args, **kwargs)
+        finally:
+            session_start.reset(start)
+
+    async def handle_transport(http_transport, *args, **kwargs):
+        start = session_start.get()
+        if start is not None:
+            log("sdk_transport_setup", start, monotonic_ns())
+        return await original_handle(http_transport, *args, **kwargs)
+
+    sdk_json = SimpleNamespace(loads=measure("sdk_json_decode", json.loads), JSONDecodeError=json.JSONDecodeError)
     original_slot = AdmissionController.slot
 
     @asynccontextmanager
@@ -98,7 +122,13 @@ def serve(pipe, url, objects, bindings, enabled, cpus):
 
     # Trace the same SDK and SQLAlchemy paths in both arms, without logging bearer
     # tokens, bind parameters, response bodies, or JSON-RPC message contents.
-    with patch.object(AdmissionController, "slot", slot), \
+    with patch.object(sdk_transport, "json", sdk_json), \
+            patch.object(StreamableHTTPSessionManager, "handle_request", handle_stateless), \
+            patch.object(transport, "handle_request", handle_transport), \
+            patch.object(transport, "_create_json_response", measure("sdk_encode_response", transport._create_json_response)), \
+            patch.object(sdk_transport.JSONRPCMessage, "model_validate", staticmethod(measure(
+                "sdk_validate_envelope", sdk_transport.JSONRPCMessage.model_validate))), \
+            patch.object(AdmissionController, "slot", slot), \
             patch.object(LogService, "begin_tool", staticmethod(measure("begin_tool", LogService.begin_tool))), \
             patch.object(LogService, "finish_tool", staticmethod(measure("finish_tool", LogService.finish_tool))), \
             patch.object(McpRuntime, "available_tools", measure("available_tools", McpRuntime.available_tools)), \
