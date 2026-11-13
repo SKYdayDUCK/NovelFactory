@@ -296,3 +296,12 @@ def test_protocol_failure_keeps_raw_output_and_never_creates_a_candidate(kernel_
         assert evidence["reason"] == "INVALID_MODEL_OUTPUT"
         response = item["kernel"].artifact(repo, evidence["response_ref"], item["world"]["world_ref"]["work_id"])["payload"]
         assert response["text"] == "not a JSON model envelope"
+        work = item["world"]["world_ref"]["work_id"]
+        for kind in ("P6_ERROR_RECORD", "P6_REFLECTION_RECORD"):
+            row = repo.one("artifacts", {"work_id": work, "kind": kind})
+            assert row["payload"]["attempt_id"] == evidence["attempt_id"]
+            assert row["payload"]["audit_ref"] == result["evidence_ref"]
+            ref = {k: row[k] for k in ("artifact_id", "artifact_revision_id", "sha256")}
+            with pytest.raises(DomainError) as denied:
+                item["kernel"].get_artifact(item["principal"], work, ref)
+            assert denied.value.code == "VIEW_DENIED"

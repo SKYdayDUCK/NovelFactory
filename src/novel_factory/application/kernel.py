@@ -282,6 +282,12 @@ class Kernel:
         """
         grant = self.authorize(r, principal, work_id, "READ")
         artifact = self.artifact(r, ref, work_id)
+        if artifact["kind"] in {"P6_ERROR_RECORD", "P6_REFLECTION_RECORD", "P6_EXPERIENCE_MEMORY"}:
+            evidence = artifact["payload"]
+            branch = evidence.get("branch_id") or evidence.get("world_ref", {}).get("branch_id") or evidence.get("scope", {}).get("branch_id")
+            require(branch, "VIEW_DENIED", "Quality record has no readable branch")
+            self.authorize(r, principal, work_id, "ADMIN", branch)
+            return
         if artifact["kind"] == "RUNTIME_ROUTING_POLICY":
             self.authorize(r, principal, work_id, "ADMIN", artifact["payload"]["branch_id"])
             return

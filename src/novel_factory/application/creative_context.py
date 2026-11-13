@@ -35,13 +35,17 @@ def _builtin_provenance():
 
 
 def runtime_provenance(runtime, frozen=None):
-    if frozen is None:
-        manifest = _builtin_provenance()
-        frozen = {"source_commit": manifest["source_commit"],
-                  "role_blob": manifest["roles"].get(runtime["role_id"]),
-                  "skill_blob": manifest["skills"].get(runtime["skill_name"])}
     expected = {"role_blob": _blob_oid(runtime["role_contract"]),
                 "skill_blob": _blob_oid(runtime["skill_instructions"])}
+    if frozen is None:
+        current = _builtin_provenance()
+        # Pre-upgrade tasks contain their selected text. Match both blobs from
+        # a single release, including for a task dispatched after deployment.
+        for release in (current, *current.get("previous", ())):
+            if (release["roles"].get(runtime["role_id"]) == expected["role_blob"]
+                    and release["skills"].get(runtime["skill_name"]) == expected["skill_blob"]):
+                return {"source_commit": release["source_commit"], **expected}
+        raise DomainError("RUNTIME_UNAVAILABLE", "No released source matches these frozen instructions")
     require(all(frozen.get(key) == value for key, value in expected.items()),
              "RUNTIME_UNAVAILABLE", "No verified source revision for these frozen instructions")
     return {"source_commit": frozen["source_commit"], **expected}

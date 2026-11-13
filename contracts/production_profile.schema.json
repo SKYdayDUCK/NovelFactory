@@ -1,0 +1,308 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novel-factory.example/contracts/p6/production_profile.schema.json",
+  "title": "NovelFactory branch-bound production profile",
+  "$defs": {
+    "ProductionComplexity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "characters": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "factions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "world_rules": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "storylines": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "target_hanzi": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000000
+        },
+        "target_chapters": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        }
+      }
+    },
+    "ProductionProfileOverrides": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "world_depth": {
+          "type": "string",
+          "enum": [
+            "minimal",
+            "core",
+            "detailed",
+            "layered"
+          ]
+        },
+        "planning_depth": {
+          "type": "string",
+          "enum": [
+            "storyline",
+            "chapters",
+            "volumes",
+            "layered"
+          ]
+        },
+        "volume_planning": {
+          "type": "boolean"
+        },
+        "character_simulation": {
+          "type": "boolean"
+        },
+        "environment_processes": {
+          "type": "boolean"
+        },
+        "local_replanning": {
+          "type": "boolean"
+        },
+        "future_volume_lookahead": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "cross_volume_memory": {
+          "type": "boolean"
+        },
+        "writing_concurrency": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "review_concurrency": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "window_chapters": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        },
+        "chapter_granularity": {
+          "type": "string",
+          "enum": [
+            "story",
+            "chapter",
+            "volume"
+          ]
+        },
+        "scene_granularity": {
+          "type": "string",
+          "enum": [
+            "compact",
+            "standard",
+            "detailed"
+          ]
+        },
+        "memory_scope": {
+          "type": "string",
+          "enum": [
+            "work",
+            "chapter",
+            "volume",
+            "cross_volume"
+          ]
+        },
+        "review_intensity": {
+          "type": "string",
+          "enum": [
+            "whole_work",
+            "chapter_and_work",
+            "chapter_volume_and_work"
+          ]
+        },
+        "production_mode": {
+          "enum": [
+            "standard",
+            "quality"
+          ]
+        },
+        "max_reworks": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8
+        }
+      }
+    },
+    "ProductionProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "preset",
+        "genre",
+        "complexity",
+        "world_depth",
+        "planning_depth",
+        "volume_planning",
+        "character_simulation",
+        "environment_processes",
+        "local_replanning",
+        "future_volume_lookahead",
+        "cross_volume_memory",
+        "writing_concurrency",
+        "review_concurrency",
+        "window_chapters",
+        "chapter_granularity",
+        "scene_granularity",
+        "memory_scope",
+        "review_intensity",
+        "max_reworks",
+        "independent_reviewers",
+        "release_conditions"
+      ],
+      "properties": {
+        "version": {
+          "const": "p6-profile-v1"
+        },
+        "preset": {
+          "type": "string",
+          "enum": [
+            "short",
+            "medium",
+            "medium_long",
+            "long",
+            "ultra_long"
+          ]
+        },
+        "genre": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "\\S"
+        },
+        "complexity": {
+          "$ref": "#/$defs/ProductionComplexity"
+        },
+        "world_depth": {
+          "type": "string",
+          "enum": [
+            "minimal",
+            "core",
+            "detailed",
+            "layered"
+          ]
+        },
+        "planning_depth": {
+          "type": "string",
+          "enum": [
+            "storyline",
+            "chapters",
+            "volumes",
+            "layered"
+          ]
+        },
+        "volume_planning": {
+          "type": "boolean"
+        },
+        "character_simulation": {
+          "type": "boolean"
+        },
+        "environment_processes": {
+          "type": "boolean"
+        },
+        "local_replanning": {
+          "type": "boolean"
+        },
+        "future_volume_lookahead": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "cross_volume_memory": {
+          "type": "boolean"
+        },
+        "writing_concurrency": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "review_concurrency": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "window_chapters": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        },
+        "chapter_granularity": {
+          "type": "string",
+          "enum": [
+            "story",
+            "chapter",
+            "volume"
+          ]
+        },
+        "scene_granularity": {
+          "type": "string",
+          "enum": [
+            "compact",
+            "standard",
+            "detailed"
+          ]
+        },
+        "memory_scope": {
+          "type": "string",
+          "enum": [
+            "work",
+            "chapter",
+            "volume",
+            "cross_volume"
+          ]
+        },
+        "review_intensity": {
+          "type": "string",
+          "enum": [
+            "whole_work",
+            "chapter_and_work",
+            "chapter_volume_and_work"
+          ]
+        },
+        "production_mode": {
+          "enum": [
+            "standard",
+            "quality"
+          ]
+        },
+        "max_reworks": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8
+        },
+        "independent_reviewers": {
+          "const": 2
+        },
+        "release_conditions": {
+          "const": [
+            "complete_text",
+            "accepted_world",
+            "reconciled_drafts",
+            "editorial_approval",
+            "two_full_independent_reviews",
+            "internal_release"
+          ]
+        }
+      }
+    }
+  }
+}
