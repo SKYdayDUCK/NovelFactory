@@ -18,7 +18,7 @@
 
 - [总编与协调者](chief_editor.md)：`chief_editor`；模式 book_direction, editorial_decision, release_review。
 - [世界设计与维护](world_designer.md)：`world_designer`；模式 initial_world, world_extension, rule_review。
-- [卷导演与剧情规划](volume_director.md)：`volume_director`；模式 volume_contract, window_plan, scene_plan, replan。
+- [卷导演与剧情规划](volume_director.md)：`volume_director`；模式 volume_contract, window_plan, scene_plan, replan, volume_review。
 - [角色与势力行动者](character_actor.md)：`character_actor`；模式 character_action, faction_action, reaction。
 - [环境与后台过程导演](environment_director.md)：`environment_director`；模式 environment_change, process_semantics, observation_proposal。
 - [独立语义裁决者](adjudication_advisor.md)：`adjudication_advisor`；模式 joint_outcome, semantic_rule_gap, refinement_review。
@@ -30,3 +30,9 @@
 ## R1统一查询与编译
 
 [query_profiles.json](../query_profiles.json)记录每角色的查询平面、操作和recipe上限；它不签发权限。通用工具仍逐操作核验GRAPH_READ、PLAN_READ及任务限制，不能绕过旧工具的权限边界。同一任务代际保留原WorldRef；动态cut不同则由控制面新建代际。Agent不调用acceptance_prepare/commit_guarded_request。
+
+## 文学方法与目录核对
+
+写作、分维度审读与整卷编辑的工作者可依[创作岗位任务卡](../../docs/literary_knowledge/TASK_METHODS.md)选一项方法。服务端签发的快照只固定当前 Role 和主 Skill。素材的实际送达以绑定任务的记录为准。
+
+目录核对使用 catalog 的 contract_version 与精确文本哈希。八份内文标题沿用较早的 2.0.0，目录登记为 2.1.0。卷导演另有 volume_review 模式；research-literature 只向 literary_editor 注册，总编接收 MethodNote 后用自己的任务作决定。内置来源清单对选中的文本按 Git blob 校验，更换正式字节须走独立发行。
