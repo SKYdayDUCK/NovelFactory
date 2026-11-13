@@ -108,7 +108,7 @@ async def serve(paths, slots):
 
 
 @asynccontextmanager
-async def replicas(roles, count):
+async def replicas(roles, count, *, directory=None):
     processes = []
     ports = []
     cold = []
@@ -117,7 +117,8 @@ async def replicas(roles, count):
             start = perf_counter()
             proc = await asyncio.create_subprocess_exec(
                 sys.executable, "-m", "benchmarks.p59_mcp_remote", "--worker", "--slots", str(2 // count),
-                *(str(role.path) for role in roles), stdout=asyncio.subprocess.PIPE,
+                *([str(directory)] if directory else [str(role.path) for role in roles]),
+                stdout=asyncio.subprocess.PIPE,
             )
             processes.append(proc)
             line = await asyncio.wait_for(proc.stdout.readline(), 45)
@@ -215,7 +216,10 @@ def main():
     args = parser.parse_args()
     logging.disable(logging.WARNING)
     if args.worker:
-        return asyncio.run(serve(args.paths, args.slots))
+        paths = args.paths
+        if len(paths) == 1 and Path(paths[0]).is_dir():
+            paths = sorted(Path(paths[0]).glob("binding-*.json"))
+        return asyncio.run(serve(paths, args.slots))
     if not args.output or args.calls < 4:
         parser.error("Pass --output and at least four calls")
     with tempfile.TemporaryDirectory() as tmp, isolated_kernel(os.environ["NF_TEST_DATABASE_URL"], Path(tmp)/"objects") as (kernel, _):

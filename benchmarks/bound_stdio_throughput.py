@@ -41,13 +41,13 @@ class Role:
     principal_id: str
 
 
-def provision(kernel, directory, index):
-    world = load_fixture(kernel)
+def provision(kernel, directory, index, *, world=None, lease_seconds=600):
+    world = load_fixture(kernel) if world is None else world
     adapter = OpenAICompatibleAdapter(endpoint="https://example.test/v1/chat/completions", model="fixture", api_key=None)
     role = RuntimeTaskService(kernel, AgentGateway(kernel, {"fixture": adapter})).prepare(
         world["principal"], world["world_ref"], role_id="character_actor", task_kind="character_action",
         actor_id=world["ids"]["protagonist"], story_time=point(1), subject_ids=[world["ids"]["sword"]],
-        predicates=["owner"], assignment=f"Role {index} proposes an action.", adapter_id="fixture")
+        predicates=["owner"], assignment=f"Role {index} proposes an action.", adapter_id="fixture", lease_seconds=lease_seconds)
     with kernel.db.uow(write=False) as repo:
         task = repo.one("tasks", {"task_id": role.task["task_id"]})
         context = repo.one("contexts", {"context_bundle_id": role.context_bundle_id})["payload"]
