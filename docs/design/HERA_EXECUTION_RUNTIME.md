@@ -44,3 +44,5 @@
 数据库恢复保留 STALE 的任务代际，对仍可运行的任务按原规则推进代际并暂停。合法修复试图将终态任务重新激活、但准入容量已满时，写事务回滚并给出可重试的 BACKPRESSURE。模型 SENT / UNKNOWN 保留原有账本语义。
 
 [根因与三版本测量](../../reports/performance/hera/ROOT_CAUSE_ANALYSIS.md) · [精确配额及恢复](../../reports/performance/hera/CAPACITY_COUNTERS.md) · [投影对照](../../reports/performance/hera/PROJECTION_CONTENTION.md) · [最终选择](../../reports/performance/hera/OPTIMIZATION_ABLATIONS.md)
+
+进度管理操作要求 READ COMMITTED 事务。管理员须在取得任务表写入围栏后以新的语句快照回填；已建立快照的 REPEATABLE READ 或 SERIALIZABLE 管理事务会被拒绝，以免漏计并发提交。实时缩小索引配额采用非抢占方式。已取得的租约继续完成，最后一条超额租约结束后才允许新的领取。通知和调度变化的耗时见[租约、限额与公平领取复验](../../reports/performance/hera/SCHEDULER_RECHECK.md)。

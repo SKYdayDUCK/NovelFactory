@@ -26,3 +26,20 @@ Four repetitions each on main (A), compact creation + empty projection suspensio
 | Exact 7.61, 8.01, 10.07, 7.35 | 7.81 | 399–705 ms | 525–1,358 ms |
 
 A single scan arm had a 6.4-second P99. It remains in the sample. Neither variant passed the +30% full-task target. The ratios of medians against main were -11.5% and -18.0% for this small-backlog workload. These descriptive comparisons do not establish equivalent regressions in deep admission or model execution. The final code also repairs capacity errors during conflict repair and recovery, and rejects stale administrator snapshots on projection rebuild.
+
+## Final source confirmation after the recovery fixes
+
+The run below used the repaired production `src` tree `c8d890caab742e568a9809f3b8bba4c77e2e2035`, product checkout `e3cd05a`, and the identical 0027 schema for main and HERA. It repeated the CPU 5/6/7 topology with eight lifecycles per warm lane instead of four, giving 128 warm and 16 first-use cycles per arm. Two separate A/B/B/A blocks isolated the two production choices. All 1,152 lifecycles and 8,064 HTTP responses matched the wire and database oracles. [Eight complete arms with SQL, queue, WAL, trigger, resource samples and commits](raw/causal-20261113/repair-confirmation/)
+
+| Order | Warm correct cycles/s | Warm request P95 ms | Warm request P99 ms | Application SQL / 128 cycles |
+|---|---:|---:|---:|---:|
+| Main before exact | 11.640 | 398.7 | 636.9 | 8,576 |
+| Exact count | 9.993 | 378.9 | 533.4 | 7,424 |
+| Exact count | 11.855 | 312.9 | 419.2 | 7,424 |
+| Main after exact | 10.243 | 397.0 | 534.3 | 8,576 |
+| Main before scan | 11.377 | 346.9 | 460.6 | 8,576 |
+| Scan | 13.733 | 261.7 | 320.9 | 7,680 |
+| Scan | 13.728 | 257.8 | 330.1 | 7,680 |
+| Main after scan | 12.818 | 277.1 | 374.2 | 8,576 |
+
+Scan gained **20.7% / 7.1%** over its adjacent main controls, with lower request P95 and P99 in both comparisons. Exact counting changed throughput by **−14.1% / +15.7%** on this shallow workload. Each arm contained all seven HTTP calls per cycle. The quota was active on both HERA variants; both used compact creation and suspended empty progress maintenance. These results supersede any claim about the current source based on the earlier 12-arm series alone. They still do not show the targeted 30% increase or a consistently faster exact-count lifecycle. The earlier weaker measurements remain part of the decision.
