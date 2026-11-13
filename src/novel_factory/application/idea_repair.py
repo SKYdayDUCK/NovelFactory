@@ -1,14 +1,23 @@
 """Verify a returned, rejected design before a targeted revision or lossless derivation."""
+from dataclasses import dataclass
+from json import JSONDecodeError
 from uuid import UUID, uuid5
 
 from novel_factory.contracts.registry import validate_contract
 from novel_factory.domain.canonical import fingerprint, strict_json_loads
+from novel_factory.domain.errors import DomainError
 from .kernel import require
 from .prompt_schema import redundant_payload_fields, validated_payload
 from .production_pipeline import _artifact
 
 
-def returned_design(kernel, repo, gateway, task, wr, designer):
+@dataclass(frozen=True)
+class UnparsedDesign:
+    text: str
+    diagnostic: dict
+
+
+def returned_design(kernel, repo, gateway, task, wr, designer, *, allow_malformed=False):
     work = wr["work_id"]
     require(task["state"] == "FAILED" and task["role_id"] == "world_designer"
             and task["task_kind"] == "initial_world",
@@ -40,7 +49,22 @@ def returned_design(kernel, repo, gateway, task, wr, designer):
             and raw["request_sha256"] == call["request_hash"] == audit["request_sha256"]
             and raw["provider_receipt"] == call["provider_receipt"],
             "INVALID_EVIDENCE", "The design response does not match the original supervised call")
-    envelope = strict_json_loads(raw["text"])
+    try:
+        envelope = strict_json_loads(raw["text"])
+    except DomainError as error:
+        syntax = error.__cause__
+        if not allow_malformed or audit["reason"] != "INVALID_MODEL_OUTPUT" or not isinstance(syntax, JSONDecodeError):
+            raise
+        if call["state"] == "UNKNOWN":
+            from .postpaid_delivery import verify_postpaid_transport
+            verify_postpaid_transport(kernel, repo, task, call, row,
+                                      kernel.artifact(repo, audit["response_ref"], work, kind="AGENT_RESPONSE"),
+                                      syntax_source=True)
+        else:
+            require(call["state"] == "FAILED" and call["actual_amount"] is not None and call["actual_tokens"] is not None,
+                    "CALL_RECONCILIATION_REQUIRED", "The rejected return is not a completed, accounted attempt")
+        return UnparsedDesign(raw["text"], {"keyword": "jsonSyntax", "line": syntax.lineno,
+                              "column": syntax.colno, "offset": syntax.pos}), audit, audit_ref
     require(isinstance(envelope, dict), "INVALID_EVIDENCE", "Returned design has no JSON envelope")
     return envelope, audit, audit_ref
 

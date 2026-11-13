@@ -8,7 +8,7 @@ from novel_factory.application.candidate_delivery import CandidateDelivery
 from novel_factory.application.idea_revision import derive_revision_patch, full_design_contract
 from novel_factory.application.idea_window import window_diagnostics
 from novel_factory.application.idea_ending import confirm_ending, derive_ending_plan
-from novel_factory.application.idea_repair import normalized_design, returned_design
+from novel_factory.application.idea_repair import UnparsedDesign, normalized_design, returned_design
 from novel_factory.application.kernel import require
 from novel_factory.application.model_routing import POLICY_ROUTE, activate, check_idea_models, idea_policy
 from novel_factory.application.narrative import NarrativeService
@@ -232,14 +232,22 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
     content = {"creative_input": intake["creative_input"], "candidate": design,
                "candidate_ref": evidence["output_ref"]}
     inputs = [evidence["output_ref"]]
-    is_revision = bool(revision or structure_repair or diagnostics)
+    syntax_source = isinstance(design, UnparsedDesign)
+    is_revision = bool(revision or structure_repair or diagnostics or syntax_source)
     if is_revision:
         role_id, task_kind, skill = "world_designer", "initial_world", "prepare-world"
         contract = source["output_contract"]
         gateway.output_contracts[(role_id, task_kind)] = (contract["name"], contract["version"])
         content["first_window_limit"] = _first_window_limit(intake["profile"], intake["creative_input"])
         content["window_constraints_version"] = 1
-        if diagnostics:
+        if syntax_source:
+            del content["candidate"]
+            content.update(task="上次完整返回见 raw_response_text。请按原契约重新输出合法 JSON，"
+                                "仅校正格式，保留原有创作内容。使用本次外层任务身份。",
+                           raw_response_text=design.text, validation_errors=[design.diagnostic],
+                           source_attempt_id=evidence["attempt_id"], source_audit_ref=evidence["audit_ref"])
+            inputs.append(evidence["audit_ref"])
+        elif diagnostics:
             content.update(task="根据下列 JSON Schema 校验诊断修正指定字段，返回原契约要求的完整对象。"
                                 "其余字段逐字保留。数组内容由你决定。",
                            validation_errors=diagnostics, source_attempt_id=evidence["attempt_id"])
@@ -300,10 +308,14 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
                 content["resolution_instruction"] = "按 issue_ids 顺序逐一核对原问题在新版本是否已实质解决并写明理由；未解决填 OPEN。"
         content["task"] = ("独立核查当前设计与灵感、世界规则、人物初始所知和首窗目标是否相容。"
                            "阻止成书的矛盾列为 BLOCKER，普通改善建议和待讨论问题分别用 SUGGESTION、QUESTION。")
-    if intake["profile"]["preset"] == "short" and not diagnostics:
+    if intake["profile"]["preset"] == "short" and not diagnostics and not syntax_source:
         content["extent_instruction"] = ("在给定篇幅和章节数内完成整部短篇。核对开场条件、中段发展、转折和结局"
                                          "都由这些章节目标承载，并给核心冲突安排可辨认的收束。")
     assignment = json.dumps(content, ensure_ascii=False)
+    if syntax_source and len(assignment) > 32000:
+        return {"status": "DESIGN_SCHEMA_REWORK_REQUIRED", "reason": "CAPACITY_LIMIT",
+                "source_attempt_id": evidence["attempt_id"], "response_ref": evidence["output_ref"],
+                "validation_errors": [design.diagnostic]}
     require(len(assignment) <= 32000, "CAPACITY_LIMIT", "Design handoff exceeds the role prompt boundary")
     dispatch = job["dispatch"]
     role = RuntimeTaskService(kernel, gateway).prepare(
@@ -325,7 +337,7 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
         currency=budget["currency"],
         input_artifacts=inputs,
     )
-    if diagnostics:
+    if diagnostics or syntax_source:
         frozen = kernel.artifact(repo, role.agent_input["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]
         require(frozen["adapter_id"] == source["adapter_id"]
                 and frozen["model_config_sha256"] == source["model_config_sha256"]
@@ -346,6 +358,8 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
         "status": "DESIGN_REVISION_ENROLLED" if is_revision else "DESIGN_REVIEW_ENROLLED",
         "round": round_index,
         **({"review_ref": revision[1]} if revision else {}),
+        **({"revision_purpose": "JSON_SYNTAX_CORRECTION", "validation_errors": [design.diagnostic],
+            "source_attempt_id": evidence["attempt_id"], "source_audit_ref": evidence["audit_ref"]} if syntax_source else {}),
         **({"revision_purpose": "WINDOW_SCHEMA_CORRECTION", "validation_errors": diagnostics,
             "source_attempt_id": evidence["attempt_id"]} if diagnostics else {}),
         **({"revision_purpose": "SHORT_ENDING"} if ending_plan else {}),
@@ -386,7 +400,18 @@ def materialize_design(kernel, gateway, owner, wr):
         )
         if task and task["state"] == "FAILED" and intake.get("model_routes"):
             _check_design_authority(repo, task, wr)
-            envelope, audit, audit_ref = returned_design(kernel, repo, gateway, task, wr, designer)
+            envelope, audit, audit_ref = returned_design(
+                kernel, repo, gateway, task, wr, designer,
+                allow_malformed=round_index == 0 or designer.get("revision_purpose") == "JSON_SYNTAX_CORRECTION",
+            )
+            if isinstance(envelope, UnparsedDesign):
+                if selected_review or designer["structure_count"] >= intake["profile"]["max_reworks"]:
+                    return None, {"status": "DESIGN_SCHEMA_REWORK_REQUIRED", "reason": "JSON_SYNTAX_REPAIR_EXHAUSTED",
+                                  "source_attempt_id": audit["attempt_id"], "response_ref": audit["response_ref"],
+                                  "validation_errors": [envelope.diagnostic]}
+                return None, _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task,
+                                                 {**audit, "output_ref": audit["response_ref"], "audit_ref": audit_ref},
+                                                 envelope, round_index + 1)
             if designer.get("revision_purpose") in {"SHORT_ENDING", "SHORT_ENDING_FIX"}:
                 normalized = derive_ending_plan(kernel, repo, owner, wr, designer, envelope, audit, audit_ref)
             else:

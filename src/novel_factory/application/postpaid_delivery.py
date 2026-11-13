@@ -118,6 +118,7 @@ def verify_postpaid_transport(
     design_revision_read=False,
     ending_plan_read=False,
     structural_source=False,
+    syntax_source=False,
 ):
     audit = audit_row["payload"]
     config, usage, raw = audit["model_configuration"], audit["usage"], response_row["payload"]
@@ -200,6 +201,20 @@ def verify_postpaid_transport(
         started, received = (
             datetime.fromisoformat(window[key]) for key in ("started_at", "received_at")
         )
+        _check(started.utcoffset() is not None and received.utcoffset() is not None and started < received
+               and isinstance(metadata["id"], str) and bool(metadata["id"].strip())
+               and metadata["model"] == config["model"] and metadata["finish_reason"] == "stop")
+        if syntax_source:
+            _check(task["state"] == "FAILED" and (task["role_id"], task["task_kind"]) == ("world_designer", "initial_world")
+                   and audit["outcome"] == "REJECTED" and audit["result_status"] == "FAILED"
+                   and audit["reason"] == "INVALID_MODEL_OUTPUT" and audit["output_ref"] is None)
+            try:
+                json.loads(raw["text"])
+            except json.JSONDecodeError:
+                # The authenticated transport binds these exact bytes to the original request.
+                # There is no model envelope, identity assertion or candidate to accept.
+                return None, bound_input
+            _check(False)
         envelope = json.loads(raw["text"])
         if structural_source:
             _check(
@@ -221,15 +236,7 @@ def verify_postpaid_transport(
                 )
             )
         _check(
-            started.utcoffset() is not None
-            and received.utcoffset() is not None
-            and started < received
-            and isinstance(metadata["id"], str)
-            and bool(metadata["id"].strip())
-            and isinstance(metadata["model"], str)
-            and metadata["model"] == config["model"]
-            and metadata["finish_reason"] == "stop"
-            and _transport_identity(envelope, audit, task, structural_source=structural_source)
+            _transport_identity(envelope, audit, task, structural_source=structural_source)
             and envelope["status"] == "SUCCEEDED"
             and (
                 envelope["unresolved_questions"] == []

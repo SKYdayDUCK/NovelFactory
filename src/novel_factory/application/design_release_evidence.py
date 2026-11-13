@@ -1,7 +1,7 @@
 """Read-only verification of the adopted design, its revision chain and its independent review."""
 
 from ..domain.canonical import fingerprint, strict_json_loads
-from .idea_repair import normalized_payload, returned_design
+from .idea_repair import UnparsedDesign, normalized_payload, returned_design
 from .kernel import require
 from .postpaid_delivery import verify_postpaid_transport
 from .statistics import is_fixture_configuration
@@ -49,17 +49,17 @@ def _assignment(kernel, repo, source, record):
 
 
 def _returned(
-    kernel, repo, delivery, task, source, record, *, structural_source=False, ending_plan_read=False
+    kernel, repo, delivery, task, source, record, *, structural_source=False, ending_plan_read=False, syntax_source=False
 ):
     envelope, audit, audit_ref = returned_design(
-        kernel, repo, delivery.gateway, task, source, record
+        kernel, repo, delivery.gateway, task, source, record, allow_malformed=syntax_source
     )
     call = repo.one("call_attempts", {"attempt_id": audit["attempt_id"]})
     _check(
         audit["execution_kind"] in {"REAL_EXTERNAL", "REAL_HOST"}
         and not is_fixture_configuration(audit["model_configuration"])
     )
-    if call["state"] == "UNKNOWN":
+    if call["state"] == "UNKNOWN" and not isinstance(envelope, UnparsedDesign):
         verify_postpaid_transport(
             kernel,
             repo,
@@ -70,7 +70,7 @@ def _returned(
             structural_source=structural_source,
             ending_plan_read=ending_plan_read,
         )
-    else:
+    elif call["state"] != "UNKNOWN":
         _check(
             call["state"] == "FAILED"
             and call["actual_amount"] is not None
@@ -113,7 +113,7 @@ def _ending_output(kernel, repo, delivery, source, record, task, selected_ref):
     return task, audit, candidate, derived
 
 
-def _design_output(kernel, repo, delivery, source, record, selected_ref, kind, intake):
+def _design_output(kernel, repo, delivery, source, record, selected_ref, kind, intake, *, syntax_source=False):
     from .production_extent import _real_candidate
 
     task = _task(repo, source, record, "world_designer")
@@ -136,11 +136,11 @@ def _design_output(kernel, repo, delivery, source, record, selected_ref, kind, i
         _check(audit["input_ref"] == record["input_ref"] and audit["output_ref"] == selected_ref)
         return task, audit, candidate, None
     envelope, audit, audit_ref = _returned(
-        kernel, repo, delivery, task, source, record, structural_source=kind == "AGENT_RESPONSE"
+        kernel, repo, delivery, task, source, record, structural_source=kind == "AGENT_RESPONSE", syntax_source=syntax_source
     )
     if kind == "AGENT_RESPONSE":
         _check(selected_ref == audit["response_ref"])
-        return task, audit, envelope["payload"], None
+        return task, audit, envelope if isinstance(envelope, UnparsedDesign) else envelope["payload"], None
     _check(kind == "NORMALIZED_DESIGN_CANDIDATE")
     norm = _receipt(repo, source, "P6_DESIGN_NORMALIZED", audit["attempt_id"])
     _check(
@@ -251,6 +251,7 @@ def verify_adopted_design(kernel, repo, delivery, receipt, adopted):
             selected_ref,
             origin["kind"],
             intake,
+            syntax_source=not final and revised.get("revision_purpose") == "JSON_SYNTAX_CORRECTION",
         )
         _check(audit["world_ref"] == source)
         if correction_source is not None:
@@ -310,7 +311,7 @@ def verify_adopted_design(kernel, repo, delivery, receipt, adopted):
         packet = _assignment(kernel, repo, source, revised)
         _check(
             packet["candidate_ref"] == selected_ref
-            and packet["candidate"] == candidate
+            and (isinstance(candidate, UnparsedDesign) or packet["candidate"] == candidate)
             and packet["creative_input"] == idea
         )
         if "review_ref" in revised:
@@ -344,15 +345,25 @@ def verify_adopted_design(kernel, repo, delivery, receipt, adopted):
         else:
             structural += 1
             _check(structural <= intake["profile"]["max_reworks"])
+            if revised.get("revision_purpose") == "JSON_SYNTAX_CORRECTION":
+                audit_row = delivery.gateway._read_audit(repo, audit["attempt_id"])
+                audit_ref = {k: audit_row[k] for k in ("artifact_id", "artifact_revision_id", "sha256")}
+                _check(intake.get("model_routes") and (index == 0 or design.get("revision_purpose") == "JSON_SYNTAX_CORRECTION")
+                       and isinstance(candidate, UnparsedDesign) and "candidate" not in packet
+                       and packet["raw_response_text"] == candidate.text
+                       and revised["source_attempt_id"] == audit["attempt_id"] == packet["source_attempt_id"]
+                       and revised["source_audit_ref"] == audit_ref == packet["source_audit_ref"]
+                       and revised["validation_errors"] == [candidate.diagnostic] == packet["validation_errors"])
+            if revised.get("revision_purpose") in {"WINDOW_SCHEMA_CORRECTION", "JSON_SYNTAX_CORRECTION"}:
+                old_input = kernel.artifact(repo, design["input_ref"], source["work_id"], kind="AGENT_INPUT")["payload"]
+                new_input = kernel.artifact(repo, revised["input_ref"], source["work_id"], kind="AGENT_INPUT")["payload"]
+                _check(all(new_input[k] == old_input[k] for k in ("output_contract", "model_config_sha256", "adapter_id")))
             if revised.get("revision_purpose") == "WINDOW_SCHEMA_CORRECTION":
                 from .idea_intake import _first_window_limit
                 from .idea_window import window_diagnostics
                 errors = window_diagnostics(candidate["chapter_goals"], _first_window_limit(intake["profile"], idea))
                 _check(errors and errors == packet["validation_errors"] == revised["validation_errors"]
                        and audit["attempt_id"] == revised["source_attempt_id"] == packet["source_attempt_id"])
-                old_input = kernel.artifact(repo, design["input_ref"], source["work_id"], kind="AGENT_INPUT")["payload"]
-                new_input = kernel.artifact(repo, revised["input_ref"], source["work_id"], kind="AGENT_INPUT")["payload"]
-                _check(all(new_input[k] == old_input[k] for k in ("output_contract", "model_config_sha256", "adapter_id")))
                 correction_source = {k: v for k, v in candidate.items() if k != "chapter_goals"}
             else:
                 _check(task["state"] == "FAILED" and selected_ref == audit["response_ref"])
