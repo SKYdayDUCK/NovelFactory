@@ -19,6 +19,7 @@ from novel_factory.application.runtime_tasks import RuntimeTaskService
 from novel_factory.domain.errors import DomainError
 from novel_factory.fixtures import point, run_command, load_fixture
 from novel_factory.interfaces.review_independence import enroll
+from novel_factory.infrastructure.private_files import prepare_private_directory
 
 
 pytestmark = [pytest.mark.postgres, pytest.mark.integration]
@@ -100,8 +101,10 @@ def enroll_case(prepared, tmp_path, *, same_group=False):
         "external comparative reviewer" if same_group else "release authority"
     )
     records = []
+    directory = Path(tmp_path) / "adaptive-identities"
+    prepare_private_directory(directory)
     for pid, group in groups.items():
-        path = Path(tmp_path) / (pid + "-adaptive-identity.json")
+        path = directory / (pid + "-adaptive-identity.json")
         path.write_text(
             json.dumps(
                 {

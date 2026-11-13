@@ -49,7 +49,7 @@ def backend(*, concurrent=False):
                 return
             packet = json.loads(payload["messages"][1]["content"])
             if "creative_materials" in packet:
-                system = payload["messages"][0]["content"]
+                system = payload["messages"][-1]["content"]
                 ctx = json.loads(system.split("\nIdentity: ", 1)[1].splitlines()[0])
             else:
                 ctx = packet["context"]

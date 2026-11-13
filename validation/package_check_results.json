@@ -1,8 +1,8 @@
 {
   "status": "PASS",
-  "checked_at_utc": "2026-11-11T05:47:52.251327+00:00",
-  "scope": "Static design-package validation; not runtime/business/DB/Host validation",
-  "python": "3.12.14",
+  "checked_at_utc": "2026-11-13T16:26:57.908728+00:00",
+  "scope": "Static checks of the design package, schemas, examples and source references",
+  "python": "3.12.9",
   "dependencies": {
     "jsonschema": "4.26.0",
     "referencing": "0.37.0",
@@ -10,19 +10,19 @@
   },
   "counts": {
     "additional_cases_planned": 16,
-    "agents_files": 9,
+    "agents_files": 10,
     "baseline_hashes": 14,
     "canonical_vectors": 2,
     "case_source_hashes": 60,
     "development_skills": 7,
     "invalid_examples_rejected": 31,
-    "json_files_parsed": 2017,
+    "json_files_parsed": 2289,
     "legacy_cases_preserved": 44,
     "legacy_contracts_preserved": 2,
     "load_model_calculated_rows": 15,
     "load_model_checks": 4,
-    "local_markdown_links": 1084,
-    "markdown_fences": 179,
+    "local_markdown_links": 2436,
+    "markdown_fences": 398,
     "mermaid_source_matches": 10,
     "mermaid_sources": 10,
     "planned_cases": 60,
@@ -39,19 +39,18 @@
     "runtime_query_profiles": 10,
     "runtime_skill_paths": 12,
     "runtime_skills": 12,
-    "schema_definitions": 207,
-    "schema_documents": 15,
+    "schema_definitions": 250,
+    "schema_documents": 17,
     "tool_definitions": 28,
     "tool_schema_bindings": 84,
     "valid_examples": 58
   },
   "failures": [],
   "limitations": [
-    "Markdown targets are checked, heading anchors and external URLs are not.",
-    "Mermaid fences/files are checked; no renderer has been executed.",
-    "Schema validity does not establish permissions, references, database constraints or semantics.",
-    "Role/skill metadata consistency is checked; server policy is not implemented.",
-    "60 prior business cases plus 8 R1 families/37 acceptance checks are planned, not executed.",
-    "15 load-model rows are arithmetic estimates; no service throughput or latency has been measured."
+    "Markdown checks cover local file targets and Mermaid blocks. Heading anchors, external URLs and diagram rendering require separate checks.",
+    "Schema examples exercise JSON structure. Database constraints, authorization and business semantics use runtime integration tests.",
+    "Role and Skill checks compare the catalogs, source files and declared tool names. The runtime enforces policy when handling a request.",
+    "The legacy matrices contain 60 planned business cases and 8 R1 families with 37 planned acceptance checks.",
+    "The 15 historical load-model rows contain arithmetic estimates. Runtime benchmarks record measured throughput and latency."
   ]
 }

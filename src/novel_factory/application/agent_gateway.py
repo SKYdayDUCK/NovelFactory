@@ -6,21 +6,21 @@ never approves or accepts a world event, a narrative, or a release.
 """
 from __future__ import annotations
 
-from concurrent.futures import ThreadPoolExecutor
-from dataclasses import replace
-from datetime import datetime, timezone
-from decimal import Decimal
 import json
 import time
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import replace
+from datetime import UTC, datetime
+from decimal import Decimal
 from uuid import UUID, uuid5
 
 from sqlalchemy import select
 
+from novel_factory.application.idea_window import design_prompt_schema
 from novel_factory.application.kernel import require
+from novel_factory.application.prompt_schema import inline_schema, validated_payload
 from novel_factory.application.queries import WorldQueryService
 from novel_factory.application.query_policy import check_profile
-from novel_factory.application.prompt_schema import inline_schema, validated_payload
-from novel_factory.application.idea_window import design_prompt_schema
 from novel_factory.contracts.registry import schema_for, validate_contract
 from novel_factory.domain.canonical import canonical_bytes, fingerprint
 from novel_factory.domain.errors import DomainError
@@ -32,6 +32,7 @@ from novel_factory.infrastructure.model_gateway import ModelCallFailure, ModelRe
 from novel_factory.infrastructure.repository import KernelRepository
 from novel_factory.infrastructure.runtime_catalog import RuntimeCatalog
 
+from .prompt_layout import material_json, role_messages
 
 # The stdio adapter and earlier callers request the fully inlined wire schema.
 _inline_schema = inline_schema
@@ -399,21 +400,17 @@ class AgentGateway:
                   "and payload conforming to the selected schema. Your output is only a candidate.\n"
                   + runtime["role_contract"] + "\n" + runtime["skill_instructions"]
                   + "\nRestricted mode: " + str(runtime["restricted_mode"])
-                  + "\nIdentity: " + canonical_bytes(identity).decode()
                   + "\nPayload JSON Schema: " + contract_text)
         if "verified_experience" in data:
             system += "\nPreviously verified method for this task contract: " + data["verified_experience"]["method"]
         if binding["config"].get("adapter_kind") == "deepseek":
-            envelope = {key: value for key, value in identity.items() if key != "dependency_fingerprint"}
-            envelope.update(status="SUCCEEDED", unresolved_questions=[], payload={})
-            system += ("\nCopy this exact outer JSON object. Fill its payload object using the payload schema. "
+            system += ("\nCopy the outer JSON template in the final task response binding. Fill its payload object using the payload schema. "
                        "All listed keys are at the top level. There is no key named identity. "
                        "Keep the types and values of the identifying fields intact. "
                        "Treat unresolved_questions as a request for an outside decision that prevents completion. "
                        "When the assigned work is complete, keep it empty. Record editorial suggestions and questions "
                        "about the story in the review payload where provided. When a prerequisite is genuinely missing, "
-                       "use NEEDS_INPUT and state it. Emit only properties allowed by the selected payload schema.\n"
-                       + canonical_bytes(envelope).decode())
+                       "use NEEDS_INPUT and state it. Emit only properties allowed by the selected payload schema.")
         if binding.get("method_notes"):
             system += "\nPublic craft methods. Use within the supplied perspective and task only:\n" + canonical_bytes(binding["method_notes"]).decode()
         if "dynamic_assignment" in binding:
@@ -429,8 +426,8 @@ class AgentGateway:
                        "required response fields. Use the supplied perspective, voices and prose excerpts "
                        "when composing literary text. Preserve uncertainty and missing materials.")
             if cached:
-                return ({"role": "system", "content": system},
-                        {"role": "user", "content": canonical_bytes(cached[1]["model_input"]).decode()})
+                return role_messages(system, cached[1]["model_input"], identity,
+                                     exact_envelope=binding["config"].get("adapter_kind") == "deepseek")
         packet_started = time.monotonic()
         material, source_fences = self._authorized_materials(principal, binding)
         user = {"assignment": data["assignment"], "context": context["payload"], "read_cut": context["read_cut"],
@@ -459,8 +456,8 @@ class AgentGateway:
                                                 packet, user, source_fences, started=packet_started)
             binding["creative_snapshot"] = ref, snapshot
             user = snapshot["model_input"]
-        return ({"role": "system", "content": system},
-                {"role": "user", "content": canonical_bytes(user).decode()})
+        return role_messages(system, user, identity,
+                             exact_envelope=binding["config"].get("adapter_kind") == "deepseek")
 
     def _audit_artifact(self, binding, identity, label, payload, kind):
         """Persist late/failed bytes too, without granting their caller access.
@@ -608,7 +605,7 @@ class AgentGateway:
                 require(scoped == expected, "HOST_BINDING_MISMATCH", "Role context differs from the frozen prompt")
                 if not binding.get("creative_snapshot"):
                     user_packet["context"] = scoped
-                authorized = (messages[0], {**messages[1], "content": canonical_bytes(user_packet).decode()})
+                authorized = (messages[0], {**messages[1], "content": material_json(user_packet)}, *messages[2:])
                 require(authorized == messages, "HOST_BINDING_MISMATCH", "Role read changed the frozen request")
                 model_request = replace(model_request, messages=authorized)
                 role_read = {"tool": "nf_context_get", "thread_id": thread_id,
@@ -638,7 +635,9 @@ class AgentGateway:
                     from novel_factory.application.editorial_handoff import check_authorizer
                     check_authorizer(self.kernel, repo, job["config"], binding["task"])
                 if job["config"].get("joint"):
-                    from novel_factory.application.joint_handoff import authorize_dispatch as authorize_joint
+                    from novel_factory.application.joint_handoff import (
+                        authorize_dispatch as authorize_joint,
+                    )
                     require(request["call_key"] == "supervised-candidate"
                             and all(request[k] == v for k, v in job["config"]["dispatch"].items()),
                             "VIEW_DENIED", "Joint delivery requires the enrolled call and budget")
@@ -756,7 +755,7 @@ class AgentGateway:
                  "result_status": result_status, "reason": reason, "usage": usage,
                  "accounting_state": accounting_state, "provider_receipt": provider_receipt,
                  "elapsed_seconds": format(time.monotonic() - started, ".6f"),
-                 "recorded_at": datetime.now(timezone.utc).isoformat()}
+                 "recorded_at": datetime.now(UTC).isoformat()}
         if binding.get("creative_snapshot"):
             audit["creative_context_ref"] = binding["creative_snapshot"][0]
         for key in ("dynamic_assignment_ref", "adaptive_instruction_ref"):

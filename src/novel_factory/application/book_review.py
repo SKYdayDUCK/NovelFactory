@@ -545,15 +545,11 @@ def blind_messages(kernel, repo, binding, config):
         + runtime["skill_instructions"]
         + ("\nPublic craft methods:\n" + canonical_bytes(binding["method_notes"]).decode()
            if binding.get("method_notes") else "")
-        + "\nIdentity: "
-        + canonical_bytes(identity).decode()
         + "\nPayload JSON Schema: "
         + prompt_schema("AgentReviewOutput", "agent")
     )
-    return (
-        {"role": "system", "content": system},
-        {"role": "user", "content": canonical_bytes(packet).decode()},
-    )
+    from .prompt_layout import role_messages
+    return role_messages(system, packet, identity)
 
 
 def advance_review(kernel, gateway, controller, work, branch):

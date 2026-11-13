@@ -85,9 +85,9 @@ class SceneFixture:
     """A fixed, inspectable calibration program. It never receives scoring labels or arm names."""
 
     def generate(self, req):
-        system = req.messages[0]["content"]
+        system = req.messages[-1]["content"]
         user = json.loads(req.messages[1]["content"])
-        identity = json.loads(system.split("\nIdentity: ", 1)[1].split("\nPayload JSON Schema:", 1)[0])
+        identity = json.loads(system.split("\nIdentity: ", 1)[1].splitlines()[0])
         role = identity["role_id"]
         if role == "reviewer":
             source = prose(user)

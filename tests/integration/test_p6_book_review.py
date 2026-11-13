@@ -29,9 +29,9 @@ class ReadingTransport(OpenAICompatibleAdapter):
 
     def generate(self, request):
         self.messages.append(request.messages)
-        system, user = request.messages
+        system, user = request.messages[-1], request.messages[1]
         identity = json.loads(
-            system["content"].split("\nIdentity: ")[1].split("\nPayload JSON Schema: ")[0]
+            system["content"].split("\nIdentity: ")[1].splitlines()[0]
         )
         package = json.loads(user["content"])
         if "passages" in package:

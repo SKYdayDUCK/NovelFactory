@@ -107,5 +107,6 @@ def test_fact_extractor_receives_only_its_bound_draft_obligations(kernel_env, mo
     assert packet["creative_materials"]["prose"] == [prior["text"]]
     assert packet["structured_evidence"] == [
         {"ref": prior["draft_ref"], "value": {"draft_ref": prior["draft_ref"], "required_event_refs": [],
-                                              "declared_important_deltas": []}}
+                                              "declared_important_deltas": [],
+                                              "passage_index": [{"id": 1, "start": 0, "end": 7, "text": "门帘被风撩起。"}]}}
     ]

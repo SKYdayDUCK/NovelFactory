@@ -334,7 +334,7 @@ def _ready(board):
     return None
 
 
-def _enroll(kernel, repo, gateway, owner, board, identity):
+def _enroll(kernel, repo, gateway, owner, board, identity, *, frozen_assignment=None):
     from novel_factory.application.supervisor import RuntimeSupervisor
 
     node = board["nodes"][identity]
@@ -408,6 +408,10 @@ def _enroll(kernel, repo, gateway, owner, board, identity):
     if repair:
         assignment += "\n上一次任务的结构化输出诊断与修复方法：" + json.dumps(
             {"diagnostic": repair["diagnostic"], "method": repair.get("reassessment", repair)["method"]}, ensure_ascii=False)
+    if frozen_assignment is not None:
+        # Only the administrator lost-review recovery supplies this already
+        # authenticated immutable input. Do not regenerate historical wording.
+        assignment = frozen_assignment
     task = RuntimeTaskService(kernel, gateway).prepare(owner, wr, role_id=role, task_kind=kind,
         knowledge_reread_reason="known_error" if repair else None,
         assignment=assignment, knowledge_cut=cut, subject_ids=board["subject_ids"], predicates=board["predicates"],

@@ -6,13 +6,26 @@ from pathlib import Path
 
 import pytest
 
-from scripts.p6_deepseek_costs import summarize
+from scripts.p6_deepseek_costs import cache_usage, summarize
 
 CARD = json.loads(
     (
         Path(__file__).resolve().parents[2] / "reports/p6/evidence/deepseek-usd-20261113.json"
     ).read_text()
 )
+
+
+def test_cache_ratio_weights_input_tokens_and_keeps_unknowns():
+    report = cache_usage([
+        {"input_tokens": 100, "cached_input_tokens": 0},
+        {"input_tokens": 900, "cached_input_tokens": 800},
+        {"input_tokens": None, "cached_input_tokens": None},
+        {"input_tokens": 50, "cached_input_tokens": 51},
+    ])
+    assert report["input_cache_hit_ratio"] == 0.8
+    assert report["cache_miss_input_tokens"] == 200
+    assert report["cache_measured_calls"] == report["cache_unknown_calls"] == 2
+    assert cache_usage([])["input_cache_hit_ratio"] is None
 
 
 def snapshot(path, calls):

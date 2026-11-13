@@ -9,6 +9,7 @@ import pytest
 from novel_factory.application.review_independence import ReviewIndependenceService, native_case_path
 from novel_factory.domain.errors import DomainError
 from novel_factory.interfaces.review_independence import enroll
+from novel_factory.infrastructure.private_files import prepare_private_directory
 from harness_review_helpers import review_assignment
 
 pytestmark = [pytest.mark.postgres, pytest.mark.integration]
@@ -21,7 +22,7 @@ def enroll_native_case(kernel, tmp_path, monkeypatch, manuscript_ref, reviewer_t
     request = {"manuscript_ref": manuscript_ref, "reviewer_task_id": reviewer_task_id, "reviewer_generation": reviewer_generation}
     binding = service.describe(controller, for_editor=editor_group is not None, **request)
     directory = tmp_path / "independence"
-    directory.mkdir(mode=0o700, exist_ok=True)
+    prepare_private_directory(directory)
     key = directory / "private-key"
     if not key.exists():
         key.write_bytes(os.urandom(32))

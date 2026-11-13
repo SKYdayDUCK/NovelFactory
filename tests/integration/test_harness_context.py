@@ -18,7 +18,7 @@ pytestmark = [pytest.mark.postgres, pytest.mark.integration]
 class EnvelopeFixture(FixtureAdapter):
     """Use the gateway's output identity to emit one deterministic author candidate."""
     def generate(self, request):
-        system = request.messages[0]["content"]
+        system = request.messages[-1]["content"]
         identity = json.loads(system.split("\nIdentity: ", 1)[1].split("\n", 1)[0])
         static_input = {"role": "user", "content": json.dumps({"context": identity})}
         result = super().generate(replace(request, messages=(request.messages[0], static_input)))

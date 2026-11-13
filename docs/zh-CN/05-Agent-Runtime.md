@@ -53,7 +53,17 @@ export NF_RUNTIME_PROFILES="$PWD/providers.json"
 
 已有 `codex login` 的 ChatGPT 用户可使用 `auth_mode: "host-login"`。CLI 管理登录与续期，不向 NF 导出访问令牌。该模式创建新的临时只读线程，关闭本机 MCP、插件、Shell 和浏览器工具，再检查服务状态；出现工具请求或动作即拒收结果。`secret_ref` 在此模式中仅作为账号配额命名空间，不需要另存 OpenAI API Key。需将当前模型的完整输出上界同时填入 `model_output_ceiling` 和 `max_output_tokens` 并预留相应 Token；任务内较小的上限不能作为 CLI 的硬截断。调用中断保留原 Attempt，不自动再次发起回合；CLI 内部传输及订阅金额不能冒充逐请求账单。
 
+生产交付会核验该 Attempt 的本机 Host journal 已达 `COMPLETED`，线程/回合、实际模型、任务代际、提示/响应/输入哈希及候选契约完全相符，才允许采用返回结果。采用不结算订阅费用，原 `UNKNOWN` 和预算预留保留。未完成、丢回执、换模型或换回合都不能仅凭声明为成功而交付。调度预算须覆盖输入与整个 CLI 输出上界，例如示例目录可使用 524288 的单次 Token 预留和更高的任务上限，不能沿用小于输出上界的旧实验预算。
+
 可从 [双模型目录](../../configs/codex-deepseek.example.json) 和 [岗位路由](../../configs/codex-deepseek-routes.example.json) 配置后续作品：写作与角色行动使用 DeepSeek，其余规划、设定、审读和编辑使用 Codex。示例的保守输出预留须结合当前账户调整。原三书快照继续使用其冻结的双 DeepSeek 配置，换模型须经过任务重绑，不能改写已开始的调用。
+
+### 输入缓存与上下文
+
+网关先完成固定切面、授权裁剪及不可变上下文快照，再组装三条消息：角色/技能/Schema 指令、已授权材料、任务身份与外层响应模板。任务 UUID 不插在固定指令和正文前。材料 JSON 先放正文与结构化证据，最后放具体任务和诊断；值、数组顺序及校验规则不变。Actor 查询后的最终请求保留同一身份尾部。既有 Attempt 的请求哈希与旧回执保留，不能把旧调用按新布局重发。
+
+DeepSeek 自动复用匹配的前缀，命中是供应商的尽力服务，并非本机 Redis 开关。见[官方缓存规则](https://api-docs.deepseek.com/guides/kv_cache/)。Redis/编译缓存减少本地查询，不能直接减少供应商输入账单。前缀调整只提高复用条件；节省以响应的 `prompt_cache_hit_tokens` 为准。不同角色的秘密上下文不拼接共享，不用摘要替代必须完整核查的正文与事实证据。
+
+`scripts/p6_deepseek_costs.py` 按作品和阶段/角色/模型输出 `input_cache_hit_ratio`，计算方式为已测输入命中 Token 总和除以同批输入 Token 总和。未知和无效用量另计 `cache_unknown_calls`，不作为零命中混入平均值；输出 Token 不放在命中率分母。价格估算需固定日期的价目表，不能等同供应商实付账单。高命中率仍不能消除重复审核、全篇改写和失败输出的开销。
 
 `max_output_tokens` 范围为 1–1,000,000，`timeout_seconds` 默认为 60，范围为 1–600。实际模型还受供应商和账户限制。模型标识和纯文本执行能力来自本地配置。加载器会验证整份目录，一项配置格式有误即可阻止启动。加载后，供应商请求失败记入该次 Attempt。宿主在发送前校验凭据、执行能力与授权。真实调用另需 `NF_RUNTIME_LIVE_APPROVED=1`。仅在已获费用授权的运行环境启用。
 

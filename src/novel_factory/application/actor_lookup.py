@@ -12,6 +12,8 @@ from novel_factory.infrastructure.database import tables
 from novel_factory.infrastructure.model_gateway import ModelRequest
 from novel_factory.infrastructure.repository import KernelRepository
 
+from .prompt_layout import material_json
+
 CHOICE_KEY = "actor-lookup-choice-v1"
 
 
@@ -164,4 +166,4 @@ def read_stage(gateway, adapter, principal, binding, request, messages):
     else:
         user["role_lookup"] = {"tool": None}
     return ActorLookup(attempt, str(final_amount), final_tokens,
-                       (messages[0], {**messages[1], "content": canonical_bytes(user).decode()}))
+                       (messages[0], {**messages[1], "content": material_json(user)}, *messages[2:]))

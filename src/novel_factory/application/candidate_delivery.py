@@ -125,16 +125,19 @@ class CandidateDelivery:
             "A model-reported unresolved question needs a decision",
         )
         if production_accounting and call["state"] != "SUCCEEDED":
-            from .postpaid_delivery import require_postpaid_delivery
+            if evidence["model_configuration"].get("auth_mode") == "host-login":
+                from .native_delivery import require_native_delivery as verify_delivery
+            else:
+                from .postpaid_delivery import require_postpaid_delivery as verify_delivery
 
             if ending_plan_read and questions:
-                require_postpaid_delivery(self.kernel, repo, task, call, audit, response, candidate,
+                verify_delivery(self.kernel, repo, task, call, audit, response, candidate,
                                           ending_plan_read=True)
             elif design_revision_read and questions:
-                require_postpaid_delivery(self.kernel, repo, task, call, audit, response, candidate,
+                verify_delivery(self.kernel, repo, task, call, audit, response, candidate,
                                           design_revision_read=True)
             else:
-                require_postpaid_delivery(self.kernel, repo, task, call, audit, response, candidate)
+                verify_delivery(self.kernel, repo, task, call, audit, response, candidate)
         if questions:
             evidence = {**evidence, "revision_questions": questions}
         return evidence, candidate["payload"]

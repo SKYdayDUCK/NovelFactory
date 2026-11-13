@@ -82,7 +82,7 @@ def test_reviewed_design_opens_sealed_interaction_before_any_writing(
         def answer(packet):
             if harness:
                 assert "context" not in packet and "creative_materials" in packet
-                system = _requests[-1]["messages"][0]["content"]
+                system = _requests[-1]["messages"][-1]["content"]
                 ctx = json.loads(system.split("\nIdentity: ", 1)[1].splitlines()[0])
                 # The fixture only translates bytes actually offered on the wire for the
                 # shared responder. It does not consult a DB or reconstruct omitted fields.

@@ -221,6 +221,7 @@ def test_completed_tool_item_is_never_delivered_to_cli():
 
 
 def test_transport_deadline_kills_trickling_response_and_never_retries():
+    import os
     from threading import Event
     from time import monotonic
 
@@ -246,11 +247,14 @@ def test_transport_deadline_kills_trickling_response_and_never_retries():
         worker = Thread(target=server.serve_forever)
         worker.start()
         try:
+            # The deadline includes cold interpreter/network startup on Windows.
+            # An endless trickle still cannot extend the hard wall-clock bound.
+            deadline = 3 if os.name == "nt" else 1
             started = monotonic()
             with pytest.raises(ModelCallFailure, match="MODEL_TRANSPORT_UNKNOWN") as caught:
                 providers.post(url=f"http://127.0.0.1:{server.server_port}/fixture", credential="fixture",
-                               payload={}, request_hash="b" * 64, timeout=1, limit=1024)
-            assert monotonic() - started < 4 and caught.value.sent
+                               payload={}, request_hash="b" * 64, timeout=deadline, limit=1024)
+            assert monotonic() - started < deadline + 3 and caught.value.sent
             assert paths == ["/fixture"]
         finally:
             stop.set()

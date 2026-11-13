@@ -33,7 +33,7 @@ def test_harness_actor_uses_frozen_prose_and_control_identity(kernel_env, mode, 
         return result, "fixture-thread"
 
     def generate(request):
-        system, user = request.messages[0]["content"], json.loads(request.messages[1]["content"])
+        system, user = request.messages[-1]["content"], json.loads(request.messages[1]["content"])
         model_inputs.append(user)
         if mode == "model-selected-lookup" and len(model_inputs) == 1:
             assert "dependency_fingerprint" not in user["context"]

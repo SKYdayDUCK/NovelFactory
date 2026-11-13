@@ -39,6 +39,19 @@ def applicable_rate(card, model, span):
     return card["models"][model]["off_peak"], "off_peak"
 
 
+def cache_usage(calls):
+    """Token-weight the observed input only; missing usage never means zero misses."""
+    measured = [call for call in calls if type(call.get("input_tokens")) is int
+                and type(call.get("cached_input_tokens")) is int
+                and 0 <= call["cached_input_tokens"] <= call["input_tokens"]]
+    inputs = sum(call["input_tokens"] for call in measured)
+    hits = sum(call["cached_input_tokens"] for call in measured)
+    return {"cache_measured_calls": len(measured), "cache_unknown_calls": len(calls) - len(measured),
+            "cache_measured_input_tokens": inputs, "cached_input_tokens": hits,
+            "cache_miss_input_tokens": inputs - hits,
+            "input_cache_hit_ratio": hits / inputs if inputs else None}
+
+
 def summarize(exports, card):
     currency = card["currency"]
     if currency not in {"USD", "CNY"}:
@@ -48,6 +61,7 @@ def summarize(exports, card):
     savings_field = "cache_savings_" + currency.lower()
     scopes, seen, rows, endpoints = set(), set(), [], []
     groups = defaultdict(lambda: {"calls": 0, "estimated_calls": 0, estimated: Decimal(0)})
+    cache_groups = defaultdict(list)
     unknown = Counter()
     unclassified_by_scope = Counter()
     for path in exports:
@@ -80,7 +94,9 @@ def summarize(exports, card):
                 raise ValueError("Duplicate attempt")
             seen.add(attempt)
             task = tasks[call["task_id"], call.get("generation")]
-            group = groups[(*book, task["task_kind"], task["role_id"], call["model"])]
+            group_key = (*book, task["task_kind"], task["role_id"], call["model"])
+            group = groups[group_key]
+            cache_groups[group_key].append(call)
             group["calls"] += 1
             span = transport(call)
             if span:
@@ -158,6 +174,7 @@ def summarize(exports, card):
                 "deepseek_attempts": len(attempts),
                 "unclassified_attempts": unobserved,
                 "measured_usage_calls": len(observed),
+                **cache_usage(attempts),
                 "known_tokens": sum(r["input_tokens"] + r["output_tokens"] for r in observed)
                 if observed
                 else None,
@@ -188,6 +205,7 @@ def summarize(exports, card):
                 "role": role,
                 "model": m,
                 **metrics,
+                **cache_usage(cache_groups[w, b, stage, role, m]),
                 known_estimated: metrics[estimated]
                 if metrics["estimated_calls"]
                 else None,
