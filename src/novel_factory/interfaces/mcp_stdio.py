@@ -75,7 +75,47 @@ class BoundToolAdmission:
             self._note_idle()
 
 
-def make_server(runtime, *, ceiling=None, admission=None):
+class DiscoveryGroup:
+    """Collect at most four requests before their shared static-role authority check."""
+
+    def __init__(self, runtime, admission):
+        self.runtime = runtime
+        self.admission = admission
+        self.waiters = []
+        self.pending = set()
+
+    async def list_tools(self):
+        if len(self.waiters) >= 4:
+            return []
+        if not self.waiters:
+            group = self.waiters
+            job = asyncio.create_task(self._dispatch(group))
+            self.pending.add(job)
+            job.add_done_callback(self.pending.discard)
+        waiter = asyncio.get_running_loop().create_future()
+        self.waiters.append(waiter)
+        return await waiter
+
+    async def _dispatch(self, group):
+        await asyncio.sleep(0.001)
+        self.waiters = []
+        active = [waiter for waiter in group if not waiter.cancelled()]
+        if not active:
+            return
+        try:
+            answers = await self.admission.run(self.runtime.discover_group, len(active))
+        except Exception:
+            answers = [[] for _ in active]
+        for waiter, names in zip(active, answers, strict=True):
+            if not waiter.done():
+                waiter.set_result(names)
+
+    async def drain(self):
+        if self.pending:
+            await asyncio.gather(*tuple(self.pending))
+
+
+def make_server(runtime, *, ceiling=None, admission=None, discovery_group=None):
     server = Server("NovelFactory", version="2.1.0")
     if admission is None:
         admission = BoundToolAdmission(min(2, runtime.kernel.db.engine.pool.size()))
@@ -83,7 +123,8 @@ def make_server(runtime, *, ceiling=None, admission=None):
     @server.list_tools()
     async def list_tools():
         try:
-            names = await admission.run(runtime.available_tools)
+            names = (await discovery_group.list_tools() if discovery_group is not None
+                     else await admission.run(runtime.available_tools))
         except DomainError:
             return []
         except Exception:
@@ -116,22 +157,26 @@ async def character_input():
             return
 
 
-async def serve(config, *, character_only=False, idle_db_seconds=30.0):
+async def serve(config, *, character_only=False, idle_db_seconds=30.0, pool_slots=2,
+                compact_role_reads=False, batch_discovery=False):
     if not math.isfinite(idle_db_seconds) or idle_db_seconds < 0:
         raise ValueError("Idle database timeout must be finite and nonnegative")
-    runtime = runtime_from_config(config)
+    runtime = runtime_from_config(config, pool_slots=pool_slots, compact_role_reads=compact_role_reads)
     engine = runtime.kernel.db.engine
     admission = BoundToolAdmission(min(2, engine.pool.size()), owned_engine=engine, idle_seconds=idle_db_seconds)
+    discovery = DiscoveryGroup(runtime, admission) if batch_discovery else None
     try:
         if character_only:
             with runtime.kernel.db.uow(write=False) as repo:
                 _, grant, _ = runtime._task(repo)
                 if grant["role_id"] != "character_actor":
                     raise ValueError("Character binding required")
-        server = make_server(runtime, admission=admission)
+        server = make_server(runtime, admission=admission, discovery_group=discovery)
         async with stdio_server(stdin=character_input() if character_only else None) as (reader, writer):
             await server.run(reader, writer, server.create_initialization_options())
     finally:
+        if discovery is not None:
+            await discovery.drain()
         admission.close()
         runtime.kernel.db.close()
 
@@ -142,10 +187,17 @@ def main():
     parser.add_argument("--character-only", action="store_true", help="Require a live character task binding")
     parser.add_argument("--idle-db-seconds", type=float, default=30.0,
                         help="Release this stdio process's unused database connections after this idle period")
+    parser.add_argument("--pool-slots", type=int, choices=(1, 2), default=2,
+                        help="Local connection and worker limit for this process")
+    parser.add_argument("--compact-role-reads", action="store_true",
+                        help="Resolve static role proof and read in one transaction")
+    parser.add_argument("--batch-discovery", action="store_true",
+                        help="Group already waiting tools/list requests on this binding")
     args = parser.parse_args()
     try:
         asyncio.run(serve(read_private_config(args.binding), character_only=args.character_only,
-                          idle_db_seconds=args.idle_db_seconds))
+                          idle_db_seconds=args.idle_db_seconds, pool_slots=args.pool_slots,
+                          compact_role_reads=args.compact_role_reads, batch_discovery=args.batch_discovery))
     except KeyboardInterrupt:
         return
     except Exception:

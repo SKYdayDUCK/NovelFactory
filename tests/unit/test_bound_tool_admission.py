@@ -96,3 +96,39 @@ def test_embedded_server_leaves_its_shared_kernel_pool_with_its_owner():
         runtime.kernel.db.engine.dispose.assert_not_called()
 
     anyio.run(scenario)
+
+
+def test_static_discovery_group_closes_before_authority_is_read():
+    from novel_factory.interfaces.mcp_stdio import DiscoveryGroup
+
+    runtime = Mock()
+    release = threading.Event()
+    started = threading.Event()
+    authority = ["old"]
+
+    def discover(count):
+        snapshot = list(authority)
+        started.set()
+        assert release.wait(3)
+        return [snapshot.copy() for _ in range(count)]
+
+    runtime.discover_group.side_effect = discover
+
+    async def probe():
+        group = DiscoveryGroup(runtime, BoundToolAdmission(2))
+        first = [asyncio.create_task(group.list_tools()) for _ in range(5)]
+        assert await asyncio.to_thread(started.wait, 2)
+        assert await first[-1] == []  # bounded overflow
+        first[2].cancel()
+        authority[:] = ["current"]
+        later = asyncio.create_task(group.list_tools())
+        release.set()
+        results = await asyncio.gather(*first, return_exceptions=True)
+        assert results[:2] == [["old"], ["old"]]
+        assert isinstance(results[2], asyncio.CancelledError)
+        assert results[3] == ["old"]
+        assert await later == ["current"]
+        await group.drain()
+        assert [call.args for call in runtime.discover_group.call_args_list] == [(4,), (1,)]
+
+    asyncio.run(probe())
