@@ -4,6 +4,7 @@ from uuid import uuid4
 import pytest
 from sqlalchemy import text
 
+from novel_factory.application.task_operations import TaskOperationsBinding
 from novel_factory.domain.errors import DomainError
 from novel_factory.fixtures import load_fixture
 
@@ -26,7 +27,11 @@ def test_status_and_policy_join_fence_work_grant_and_generation(kernel_env):
     }
     create = kernel.prepare_task_create_request({"spec": spec, "idempotency_key": "private"})
     spec["world_ref"] = other["world_ref"]
-    receipt = create(role)
+    foreign_scope = TaskOperationsBinding(other["world_ref"]["work_id"], other["world_ref"]["branch_id"])
+    with pytest.raises(DomainError) as outside:
+        create(role, foreign_scope)
+    assert outside.value.code == "VIEW_DENIED"
+    receipt = create(role, TaskOperationsBinding(wr["work_id"], wr["branch_id"]))
     assert create(role) == receipt
     task_id = receipt["task_id"]
     assert kernel.get_task(role, task_id)["world_ref"] == wr

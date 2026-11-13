@@ -170,3 +170,15 @@ def test_mcp_transport_redacts_database_errors(service_env, service_world, monke
 
     with loopback_server(app, lifespan="on") as base:
         asyncio.run(exercise(base))
+
+
+@pytest.mark.parametrize("field", ["branch_id", "work_id"])
+def test_task_operations_roster_requires_concrete_ids(field):
+    from novel_factory.domain.errors import DomainError
+    from novel_factory.interfaces.bindings import parse_binding
+
+    entry = {"mode": "task_operations", "work_id": str(uuid4()), "branch_id": str(uuid4())}
+    entry[field] = "*"
+    with pytest.raises(DomainError) as error:
+        parse_binding(entry)
+    assert error.value.code == "INVALID_ARGUMENT"

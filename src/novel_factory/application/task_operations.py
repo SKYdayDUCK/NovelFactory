@@ -4,12 +4,17 @@ from datetime import datetime
 from decimal import Decimal
 
 from novel_factory.application.kernel import require
+from novel_factory.contracts.registry import validate_contract
 
 
 @dataclass(frozen=True)
 class TaskOperationsBinding:
     work_id: str
     branch_id: str
+
+    def __post_init__(self):
+        validate_contract("UUID", self.work_id)
+        validate_contract("UUID", self.branch_id)
 
     def check(self, row):
         require((self.work_id, self.branch_id) == (row["work_id"], row["branch_id"]),

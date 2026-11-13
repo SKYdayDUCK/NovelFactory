@@ -6,6 +6,11 @@ on:
       - '.github/workflows/hera-lifecycle.yml'
       - 'reports/performance/hera/reproduction/**'
       - 'src/novel_factory/**'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/hera-lifecycle.yml'
+      - 'src/novel_factory/**'
   workflow_dispatch:
     inputs:
       baseline:
@@ -30,7 +35,7 @@ jobs:
       - run: uv sync --locked --group dev --python 3.12
       - name: Two interleaved series on an isolated runner and PostgreSQL 17.11
         env:
-          BASE: ${{ github.event.pull_request.base.sha || inputs.baseline }}
+          BASE: ${{ github.event.pull_request.base.sha || inputs.baseline || github.event.before }}
         run: |
           set -euo pipefail
           [[ "$BASE" =~ ^[a-f0-9]{40}$ ]]

@@ -497,7 +497,9 @@ class Kernel:
         """Validate the public envelope once, before admission; capture its private copy."""
         checked = validate_contract("TaskCreateRequest", request, "http")
 
-        def create(principal):
+        def create(principal, scope=None):
+            if scope is not None:
+                scope.check(checked["spec"]["world_ref"])
             with self.db.uow() as repo:
                 return self._create_checked_task(repo, principal, checked["spec"], checked["idempotency_key"])
 
@@ -533,10 +535,12 @@ class Kernel:
             work_id = scope.work_id if scope is not None else identity["work_id"]
             branch_id = scope.branch_id if scope is not None else None
             grant = self.authorize(repo, principal, work_id, "TASK_CLAIM", branch_id)
-            branches = [branch_id] if scope is not None else grant["branch_ids"]
+            branches = grant["branch_ids"] if grant["branch_ids"] != ["*"] else None
+            if scope is not None:
+                branches = [branch_id]
             return self.tasks.claim_in_transaction(
                 repo.conn, worker_id, work_id=grant["work_id"], principal_id=principal.principal_id,
-                grant_id=principal.grant_id, branch_ids=None if branches == ["*"] else branches,
+                grant_id=principal.grant_id, branch_ids=branches,
                 task_id=task_id, lease_seconds=lease_seconds,
             )
 

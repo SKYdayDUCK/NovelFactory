@@ -487,8 +487,9 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
     @app.post("/api/v1/tasks")
     async def create_task(request: Request):
         from novel_factory.application.kernel import Kernel
-        if bindings is None and type(kernel) is Kernel:
-            return await execute(request, "task", kernel.prepare_task_create_request(await _json_body(request)))
+        if type(kernel) is Kernel:
+            create = kernel.prepare_task_create_request(await _json_body(request))
+            return await execute(request, "task", lambda principal: create(principal, task_binding(principal)))
         payload = await _body(request, "TaskCreateRequest", "http")
         return await execute(request, "task", lambda principal: task_operations(principal).create(**payload))
 

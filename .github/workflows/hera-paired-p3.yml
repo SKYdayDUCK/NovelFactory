@@ -1,0 +1,84 @@
+name: HERA frozen P3 comparison
+on:
+  pull_request:
+    branches: [main]
+    paths: &inputs
+      - 'src/novel_factory/**'
+      - 'migrations/**'
+      - 'uv.lock'
+      - 'benchmarks/**'
+      - 'reports/performance/hera/reproduction/*p3*.py'
+      - '.github/workflows/hera-paired-p3.yml'
+  push:
+    branches: [main]
+    paths: *inputs
+  workflow_dispatch:
+    inputs:
+      baseline:
+        description: Full control SHA
+        required: true
+permissions:
+  contents: read
+jobs:
+  compare:
+    name: Same runner / frozen P3 client / ABBA
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    services:
+      postgres:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_DB: nf_test
+          POSTGRES_USER: nf_dev
+          POSTGRES_PASSWORD: nf_dev_ci_only
+          POSTGRES_INITDB_ARGS: --data-checksums
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U nf_dev -d nf_test"
+          --health-interval 2s --health-timeout 2s --health-retries 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - name: Measure unchanged P3 client against each API
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before || inputs.baseline }}
+          NF_TEST_DATABASE_URL: postgresql+psycopg://nf_dev:nf_dev_ci_only@127.0.0.1:5432/nf_test
+        run: |
+          set -euo pipefail
+          [[ "$BASE" =~ ^[a-f0-9]{40}$ ]]
+          head=$(git rev-parse HEAD)
+          export P3_CLIENT_ROOT="$RUNNER_TEMP/p3-base"
+          out="$RUNNER_TEMP/p3-evidence"
+          driver="$GITHUB_WORKSPACE/reports/performance/hera/reproduction"
+          mkdir "$out"
+          git worktree add --detach "$P3_CLIENT_ROOT" "$BASE"
+          cd "$P3_CLIENT_ROOT"
+          uv sync --locked --group dev --python 3.12
+          export PYTHONPATH="$P3_CLIENT_ROOT/src:$P3_CLIENT_ROOT/workshop/src:$P3_CLIENT_ROOT"
+          lscpu > "$out/cpu.txt"
+          free -b > "$out/memory.txt"
+          sha256sum benchmarks/{p3_open_arrival,p2_behavioral_load,http_load,process_server}.py uv.lock > "$out/driver.sha256"
+          for arm in a1 b1 b2 a2; do
+            export P3_ARM_DIR="$out/$arm"
+            mkdir "$P3_ARM_DIR"
+            if [[ "$arm" == a* ]]; then export P3_API_ROOT="$P3_CLIENT_ROOT"; else export P3_API_ROOT="$GITHUB_WORKSPACE"; fi
+            rc=0
+            .venv/bin/python "$driver/frozen_p3_client.py" --agents 1000 --rounds 5 --arrival-rps 1000 \
+              --hot-fraction .8 --api-processes 2 --output "$P3_ARM_DIR/raw.json" > "$P3_ARM_DIR/run.log" 2>&1 || rc=$?
+            echo "$rc" > "$P3_ARM_DIR/original.exit"
+            if [[ ! -s "$P3_ARM_DIR/raw.json" ]]; then tail -100 "$P3_ARM_DIR/run.log"; exit 1; fi
+          done
+          .venv/bin/python "$driver/check_p3.py" "$out" "$BASE" "$head"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hera-p3-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/p3-evidence
+          if-no-files-found: error
