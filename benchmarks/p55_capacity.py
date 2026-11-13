@@ -22,6 +22,13 @@ from novel_factory.infrastructure.objects import ObjectStore
 from novel_factory.orchestration.processors import TaskDispatcher, initialize_index_worker
 
 
+def initialize_warm_worker(url, objects, ready):
+    initialize_index_worker(url, objects)
+    # Every spawned process completes its actual PG warm-up before jobs are timed.
+    warm()
+    ready.wait(timeout=60)
+
+
 def warm():
     # Warm spawned Python interpreter and SQL driver before any measured interval.
     from novel_factory.orchestration.processors import _index_db
@@ -50,14 +57,16 @@ def trial(kernel, jobs, workers, adaptive, *, measure_resize=False):
     done_ids = set()
     records = []
     monitor = ResourceMonitor()
-    with ProcessPoolExecutor(max_workers=workers, mp_context=multiprocessing.get_context("spawn"),
-            initializer=initialize_index_worker, initargs=(db.engine.url.render_as_string(hide_password=False), str(kernel.objects.root))) as pool:
-        warmed = set()
-        for _ in range(5):
-            warmed.update(pool.map(warm_noarg, range(workers)))
-            if len(warmed) == workers:
-                break
-        assert len(warmed) == workers
+    ctx = multiprocessing.get_context("spawn")
+    ready = ctx.Barrier(workers + 1)
+    with ProcessPoolExecutor(max_workers=workers, mp_context=ctx,
+            initializer=initialize_warm_worker, initargs=(db.engine.url.render_as_string(hide_password=False),
+                                                         str(kernel.objects.root), ready)) as pool:
+        # Keep all bootstrap jobs outstanding until every initializer is ready.
+        started = [pool.submit(warm_noarg, i) for i in range(workers)]
+        ready.wait(timeout=60)
+        for job in started:
+            job.result(timeout=60)
         start = time.monotonic()
         monitor.host()
         controller.monitor.host()
@@ -121,7 +130,7 @@ def trial(kernel, jobs, workers, adaptive, *, measure_resize=False):
             "p95_completion_s": percentile(completions,.95), "p99_completion_s": percentile(completions,.99),
             "p95_service_s": percentile(service_times,.95), "mean_cpu_pct": avg("cpu_pct"), "mean_cpu_psi_avg10": avg("cpu_psi"),
             "mean_parent_rss_kib": avg("rss_kib"), "mean_available_bytes": avg("available_bytes"),
-            "warm_processes": len(warmed), "capacity_series": limits, "scale_decisions": [dict(r) for r in decisions],
+            "warm_processes": workers, "capacity_series": limits, "scale_decisions": [dict(r) for r in decisions],
             "post_drain_targets": resize, "provider_calls": calls, "provider_invoice": None, "records": records}
 
 
