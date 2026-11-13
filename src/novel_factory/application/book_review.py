@@ -198,6 +198,9 @@ def start_review(
         from .production_extent import measure_submission
 
         extent = measure_submission(kernel, repo, request, checked["entries"], refs)
+        from .rolling_production import _load as load_rolling
+
+        cursor = load_rolling(kernel, repo, work, branch)
         parts = _read(kernel, refs)
         book_hash = digest("\n\n".join(parts))
         previous = _load(kernel, repo, work, branch)
@@ -250,7 +253,8 @@ def start_review(
             )
             changed_ref = revision_evidence["changed_ref"]
             require(
-                changed_ref in method_refs and changed_ref not in previous["method_refs"],
+                changed_ref in method_refs
+                and changed_ref["sha256"] not in {ref["sha256"] for ref in previous["method_refs"]},
                 "REVIEW_ROUND_LIMIT",
                 "The new method must be used by the proposed edition",
             )
@@ -269,13 +273,17 @@ def start_review(
             "ordered_hash": _book_hash(refs),
             "rubric_sha256": PROTOCOL_HASH,
             "extent": extent,
+            "last_checkpoint": cursor["last_checkpoint"] if cursor else None,
+            "prior_volume_releases": list(cursor["release_refs"]) if cursor else [],
             "round": 2 if previous else 1,
             "previous_round_ref": prior_round_ref,
             "method_refs": method_refs,
             "revision_evidence": revision_evidence,
             "revision_note": revision_note,
             "state": "READING",
-            "readers": [{"route": r, "tasks": [], "notes": []} for r in routes],
+            "readers": [
+                {"route": r, "tasks": [], "notes": [], "note_frontier": []} for r in routes
+            ],
             "packets": [
                 _artifact(kernel, repo, work, owner, "BOOK_PASSAGES", {"passages": item})
                 for item in reading_packets(parts)
@@ -369,15 +377,33 @@ def guard_job(kernel, repo, task, config, request=None):
         )
 
 
-def _assignment(kernel, repo, reader, packet, scoring, work):
-    if scoring:
+_NOTE_GROUP = 4
+
+
+def _review_action(state, reader):
+    if len(reader["notes"]) < len(state["packets"]):
+        return "read"
+    return "condense" if len(reader["note_frontier"]) > _NOTE_GROUP else "score"
+
+
+def _assignment(kernel, repo, reader, packet, action, work):
+    if action in {"score", "condense"}:
         notes = []
-        for ref in reader["notes"]:
+        refs = reader["note_frontier"][:_NOTE_GROUP]
+        for ref in refs:
             notes.extend(
                 kernel.artifact(repo, ref, work, kind="BOOK_READING_NOTES")["payload"][
                     "observations"
                 ]
             )
+        if action == "condense":
+            return {
+                "rubric": PROTOCOL,
+                "observations": notes,
+                "instruction": "归纳这组属于你自己的阅读笔记，覆盖结构、人物、语言、类型与严重缺陷。"
+                "保留矛盾、长处、问题和有意义的差异。输出1至14条带原始scene、start、quote、observation的笔记。"
+                "引文须来自本组，至多80码点，每条观察至多160码点。将JSON数组写入summary。",
+            }
         return {
             "rubric": PROTOCOL,
             "observations": notes,
@@ -386,13 +412,13 @@ def _assignment(kernel, repo, reader, packet, scoring, work):
     return {
         "passages": packet,
         "rubric": PROTOCOL,
-        "instruction": "阅读全文片段。每一段给出具体观察，引用足以支撑原文判断的一句话。将JSON数组写入summary，每项含scene、start、quote、observation。start为该场的Unicode码点位置。",
+        "instruction": "阅读全文片段。每一段给出具体观察，引用足以支撑原文判断的一句话。将JSON数组写入summary，每项含scene、start、quote、observation。引文至多80码点，观察至多160码点。start为该场的Unicode码点位置。",
     }
 
 
-def _enqueue(kernel, repo, gateway, owner, state, reader, packet, scoring):
+def _enqueue(kernel, repo, gateway, owner, state, reader, packet, action):
     work = state["world_ref"]["work_id"]
-    data = _assignment(kernel, repo, reader, packet, scoring, work)
+    data = _assignment(kernel, repo, reader, packet, action, work)
     ref = _artifact(kernel, repo, work, owner, "BOOK_READER_PACKET", data)
     seconds = max(
         1,
@@ -513,7 +539,7 @@ def _advance_reader(kernel, repo, gateway, owner, state):
         if "score_ref" in reader:
             continue
         index = len(reader["notes"])
-        scoring = index == len(state["packets"])
+        action = _review_action(state, reader)
         if not reader.get("active"):
             if active < state["concurrency"]:
                 _enqueue(
@@ -524,14 +550,14 @@ def _advance_reader(kernel, repo, gateway, owner, state):
                     state,
                     reader,
                     None
-                    if scoring
+                    if action != "read"
                     else kernel.artifact(
                         repo,
                         state["packets"][index],
                         state["world_ref"]["work_id"],
                         kind="BOOK_PASSAGES",
                     )["payload"]["passages"],
-                    scoring,
+                    action,
                 )
                 return True
             continue
@@ -548,12 +574,16 @@ def _advance_reader(kernel, repo, gateway, owner, state):
         config = evidence["model_configuration"]
         call = repo.one("call_attempts", {"attempt_id": evidence["attempt_id"]})
         require(
-            call and call["state"] in {"SUCCEEDED", "RECEIPT_CHECKED"},
+            call and call["state"] == "SUCCEEDED",
             "CALL_RECONCILIATION_REQUIRED",
             "Reconcile the original provider receipt before accepting this review",
         )
         require(
             call["provider_receipt"]
+            and (
+                not evidence["provider_receipt"]
+                or call["provider_receipt"] == evidence["provider_receipt"]
+            )
             and evidence["execution_kind"] in {"REAL_HOST", "REAL_EXTERNAL"}
             and not is_fixture_configuration(config)
             and config.get("isolation") == "STATELESS_TEXT_ONLY",
@@ -574,11 +604,46 @@ def _advance_reader(kernel, repo, gateway, owner, state):
             )
         }
         provenance.update(model=config["model"], provider=config["provider"])
-        if scoring:
+        if action == "score":
             check_score(data, _read(kernel, state["text_refs"]))
             reader["score_ref"] = _artifact(
                 kernel, repo, work, owner, "BOOK_BLIND_SCORE", {"report": data, **provenance}
             )
+        elif action == "condense":
+            group = reader["note_frontier"][:_NOTE_GROUP]
+            evidence_keys = {
+                (n["scene"], n["start"], n["quote"])
+                for ref in group
+                for n in kernel.artifact(repo, ref, work, kind="BOOK_READING_NOTES")["payload"][
+                    "observations"
+                ]
+            }
+            require(
+                isinstance(data, list)
+                and 1 <= len(data) <= 14
+                and all(
+                    isinstance(n, dict)
+                    and type(n.get("scene")) is int
+                    and type(n.get("start")) is int
+                    and isinstance(n.get("quote"), str)
+                    and (n["scene"], n["start"], n["quote"]) in evidence_keys
+                    and isinstance(n.get("observation"), str)
+                    and n["observation"].strip()
+                    and len(n["observation"]) <= 160
+                    for n in data
+                ),
+                "INVALID_REVIEW_EVIDENCE",
+                "Condensed notes require the reader's own verifiable quotations",
+            )
+            summary = _artifact(
+                kernel,
+                repo,
+                work,
+                owner,
+                "BOOK_READING_NOTES",
+                {"observations": data, "source_notes": group, **provenance},
+            )
+            reader["note_frontier"] = [*reader["note_frontier"][_NOTE_GROUP:], summary]
         else:
             packet = kernel.artifact(repo, state["packets"][index], work, kind="BOOK_PASSAGES")[
                 "payload"
@@ -594,6 +659,7 @@ def _advance_reader(kernel, repo, gateway, owner, state):
                     {"observations": data, "packet_index": index, **provenance},
                 )
             )
+            reader["note_frontier"].append(reader["notes"][-1])
         kernel.tasks.accept_in_transaction(repo.conn, tid, task["generation"])
         del reader["active"]
         return True
@@ -651,6 +717,31 @@ def require_book_review(kernel, repo, owner, request, entries):
         "INVALID_REVIEW_EVIDENCE",
         "The assessed edition or its length has changed",
     )
+
+    return _selected(repo, wr["work_id"], _selection(wr["branch_id"]))
+
+
+def record_reviewed_release(kernel, repo, owner, request, release_ref, manifest_ref, round_ref):
+    """Save the round-to-release link in the same transaction as its immutable release."""
+    wr = request["world_ref"]
+    state = kernel.artifact(repo, round_ref, wr["work_id"], kind="BOOK_REVIEW_ROUND")["payload"]
+    payload = {
+        "world_ref": wr,
+        "release_ref": release_ref,
+        "manifest_ref": manifest_ref,
+        "round_ref": round_ref,
+        "round": state["round"],
+        "text_sha256": state["text_sha256"],
+        "ordered_hash": state["ordered_hash"],
+        "rubric_sha256": state["rubric_sha256"],
+        "score_refs": [r["score_ref"] for r in state["readers"]],
+        "result": state["result"],
+    }
+    ref = _artifact(kernel, repo, wr["work_id"], owner, "BOOK_REVIEWED_RELEASE", payload)
+    PlanningService(kernel)._select(
+        repo, wr, "P6_REVIEWED_RELEASE:" + release_ref["artifact_revision_id"], ref
+    )
+    return ref
 
 
 def review_status(kernel, owner, work, branch, *, include_reports=False):
@@ -725,3 +816,74 @@ def resume_review(kernel, owner, work, branch):
         state.update(state="READING")
         del state["reason"]
         return {"round_ref": _save(kernel, repo, owner, state), "state": state["state"]}
+
+
+def export_reviewed_book(kernel, owner, work, branch, release_ref):
+    """Reconstruct the historical assessed edition, even after a newer edition is selected."""
+    with kernel.objects.lock(), kernel.db.uow(write=False, repeatable_read=True) as repo:
+        kernel.authorize(repo, owner, work, "ADMIN", branch)
+        proof_ref = _selected(
+            repo, work, "P6_REVIEWED_RELEASE:" + release_ref["artifact_revision_id"]
+        )
+        require(proof_ref, "INDEPENDENT_REVIEW_REQUIRED", "Release has no signed book edition")
+        proof = kernel.artifact(repo, proof_ref, work, kind="BOOK_REVIEWED_RELEASE")["payload"]
+        require(
+            proof["release_ref"] == release_ref and proof["world_ref"]["branch_id"] == branch,
+            "VIEW_DENIED",
+            "Book does not belong to the requested branch",
+        )
+        state = kernel.artifact(repo, proof["round_ref"], work, kind="BOOK_REVIEW_ROUND")["payload"]
+        index = []
+        ordered = []
+        for ref in [*state["prior_volume_releases"], release_ref]:
+            record = kernel.artifact(repo, ref, work, kind="RELEASE_RECORD")["payload"]
+            manifest = kernel.artifact(repo, record["manifest_ref"], work, kind="RELEASE_MANIFEST")[
+                "payload"
+            ]
+            require(manifest["world_ref"]["branch_id"] == branch, "VIEW_DENIED", "Foreign chapter")
+            for entry in manifest["ordered_artifacts"]:
+                index.append(
+                    {
+                        "volume_id": record["volume_id"],
+                        "scene_id": entry["scene_id"],
+                        "text_ref": entry["artifact_ref"],
+                        "release_ref": ref,
+                    }
+                )
+                ordered.append(entry["artifact_ref"])
+        require(
+            ordered == state["text_refs"] and _book_hash(ordered) == proof["ordered_hash"],
+            "INVALID_EVIDENCE",
+            "Release order differs from its assessed edition",
+        )
+        chapters = []
+        checkpoint_ref = state["last_checkpoint"]
+        while checkpoint_ref:
+            checkpoint = kernel.artifact(repo, checkpoint_ref, work, kind="ROLLING_CHECKPOINT")[
+                "payload"
+            ]
+            chapters.extend(
+                {
+                    "chapter_id": c["chapter_id"],
+                    "ordinal": c["ordinal"],
+                    "scene_ids": [s["scene_id"] for s in c["scenes"]],
+                }
+                for c in checkpoint["chapters"]
+            )
+            checkpoint_ref = checkpoint["previous"]
+        chapters.sort(key=lambda c: c["ordinal"])
+        if chapters:
+            require(
+                [sid for c in chapters for sid in c["scene_ids"]] == [s["scene_id"] for s in index],
+                "INVALID_EVIDENCE",
+                "Frozen chapter order differs from its assessed edition",
+            )
+        text = "\n\n".join(_read(kernel, ordered))
+        require(digest(text) == proof["text_sha256"], "INVALID_EVIDENCE", "Book bytes have changed")
+        return {
+            "proof_ref": proof_ref,
+            **proof,
+            "chapters": chapters,
+            "scenes": index,
+            "text": text,
+        }

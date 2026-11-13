@@ -351,10 +351,11 @@ class ReleaseService:
                         "RELEASE_REVISION_REQUIRED", "Changed reading order requires new narrative, arrangement and disclosure versions")
         else:
             require(request["revision_reason"] is None, "INVALID_ARGUMENT", "An initial release has no revision reason")
+        round_ref = None
         if not preparing_review:
             from .book_review import require_book_review
-            require_book_review(self.kernel, repo, principal, request, entries)
-        return {"entries": entries, "approval": approval, "prior_record": prior_record, "prior_manifest": prior_manifest,
+            round_ref = require_book_review(self.kernel, repo, principal, request, entries)
+        return {"book_review_round_ref": round_ref, "entries": entries, "approval": approval, "prior_record": prior_record, "prior_manifest": prior_manifest,
                 "policy_version": work["policy_version"]}
 
     def freeze(self, principal, payload, idempotency_key, *, fault=None):
@@ -414,9 +415,13 @@ class ReleaseService:
                 pointer = repo.one("selections", {"work_id": wid, "selection_kind": key}, lock="update")
                 require((pointer["artifact_ref"] if pointer else None) == request["prior_release_ref"],
                         "RELEASE_SELECTION_CONFLICT", "Active release changed; review the intervening version")
-                self._collect(repo, principal, request)
+                checked = self._collect(repo, principal, request)
                 self.kernel._register_artifact(repo, manifest_ref, wid, manifest, "RELEASE_MANIFEST", principal.principal_id)
                 self.kernel._register_artifact(repo, release_ref, wid, record, "RELEASE_RECORD", principal.principal_id)
+                if checked["book_review_round_ref"]:
+                    from .book_review import record_reviewed_release
+                    record_reviewed_release(self.kernel, repo, principal, request, release_ref, manifest_ref,
+                                             checked["book_review_round_ref"])
                 epoch = pointer["epoch"] + 1 if pointer else 1
                 if pointer:
                     repo.change("selections", {"work_id": wid, "selection_kind": key}, {"artifact_ref": release_ref, "epoch": epoch})

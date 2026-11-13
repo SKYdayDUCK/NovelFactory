@@ -20,6 +20,7 @@ def main():
     parser.add_argument("--binding", type=Path, required=True)
     parser.add_argument("--release-ref", type=Path, required=True, help="JSON ArtifactRef from the freeze receipt")
     parser.add_argument("--output", type=Path, required=True, help="new prose file in an existing directory")
+    parser.add_argument("--reviewed-book", action="store_true", help="Export every released volume of the assessed P6 edition")
     args = parser.parse_args()
     with args.release_ref.open("rb") as stream:
         raw = stream.read(1025)
@@ -35,7 +36,11 @@ def main():
         frozen = releases.get_release(runtime.principal, binding.work_id, ref)
         if frozen["manifest"]["world_ref"]["branch_id"] != binding.branch_id:
             raise DomainError("VIEW_DENIED", "Release is outside the bound branch")
-        result = releases.export_release(runtime.principal, binding.work_id, ref)
+        if args.reviewed_book:
+            from novel_factory.application.book_review import export_reviewed_book
+            result = export_reviewed_book(runtime.kernel, runtime.principal, binding.work_id, binding.branch_id, ref)
+        else:
+            result = releases.export_release(runtime.principal, binding.work_id, ref)
     finally:
         runtime.kernel.db.close()
 
@@ -46,12 +51,14 @@ def main():
         pending.flush()
         os.link(pending.name, args.output)
     print(json.dumps({
+        **({"round_ref": result["round_ref"], "score_refs": result["score_refs"], "chapters": result["chapters"],
+            "scenes": result["scenes"]} if args.reviewed_book else {}),
         "release_ref": result["release_ref"],
-        "manifest_sha256": result["manifest"]["manifest_sha256"],
+        "manifest_sha256": frozen["manifest"]["manifest_sha256"],
         "text_sha256": sha256(data).hexdigest(),
         "bytes": len(data),
         "scene_count": len(result["scenes"]),
-        "external_delivery": result["external_delivery"],
+        "external_delivery": "NOT_REQUESTED",
     }))
 
 

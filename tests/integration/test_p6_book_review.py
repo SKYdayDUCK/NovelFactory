@@ -41,6 +41,8 @@ class ReadingTransport(OpenAICompatibleAdapter):
                 )
                 for p in package["passages"]
             ]
+        elif "归纳" in package["instruction"]:
+            result = [package["observations"][0]]
         else:
             citation = {k: package["observations"][0][k] for k in ("scene", "start", "quote")}
             result = {
@@ -74,7 +76,10 @@ class ReadingTransport(OpenAICompatibleAdapter):
         )
 
 
-def test_two_separate_reader_tracks_replay_and_release_gate(kernel_env, monkeypatch):
+@pytest.mark.parametrize("packet_size,expected_calls", [(6000, 4), (3, 16)])
+def test_two_separate_reader_tracks_replay_and_release_gate(
+    kernel_env, monkeypatch, packet_size, expected_calls
+):
     k = kernel_env["kernel"]
     f, accepted, binding, proof, request = complete_candidate(k)
     owner, wr = f["principal"], f["world_ref"]
@@ -104,10 +109,14 @@ def test_two_separate_reader_tracks_replay_and_release_gate(kernel_env, monkeypa
     monkeypatch.setattr(
         production_extent, "measure_submission", lambda *args: {"source": "TEST_FIXTURE"}
     )
+    original_packets = book_review.reading_packets
+    monkeypatch.setattr(
+        book_review, "reading_packets", lambda parts: original_packets(parts, limit=packet_size)
+    )
     enrollment = book_review.start_review(k, gateway, owner, **params)
     assert enrollment == book_review.start_review(k, gateway, owner, **params)
     outcomes = []
-    for step in range(25):
+    for step in range(110):
         outcome = RuntimeSupervisor(k, gateway).run_once(owner, work, branch)
         outcomes.append((outcome.get("status"), outcome.get("reason")))
         status = book_review.review_status(k, owner, work, branch)
@@ -115,9 +124,9 @@ def test_two_separate_reader_tracks_replay_and_release_gate(kernel_env, monkeypa
         if status["state"] == "ASSESSED":
             break
     assert status["state"] == "ASSESSED", status
-    assert len(adapter.messages) == 4
-    assert len({tid for r in status["readers"] for tid in r["tasks"]}) == 4
-    assert all(r["complete_packets"] == 1 for r in status["readers"])
+    assert len(adapter.messages) == expected_calls
+    assert len({tid for r in status["readers"] for tid in r["tasks"]}) == expected_calls
+    assert all(r["complete_packets"] == enrollment["packets"] for r in status["readers"])
     for messages in adapter.messages:
         package = json.loads(messages[1]["content"])
         assert "context" not in package and "scores" not in package and "creator" not in package
@@ -127,6 +136,27 @@ def test_two_separate_reader_tracks_replay_and_release_gate(kernel_env, monkeypa
     assert status["readers"][0]["score_ref"] != status["readers"][1]["score_ref"]
     release = ReleaseService(k).freeze(owner, request, "reviewed-fixture")
     assert release["release_ref"] and status["result"]["average"] == "100.0"
+    book = book_review.export_reviewed_book(k, owner, work, branch, release["release_ref"])
+    assert book["text"] == "北窗的雨声很轻。\n\n南岸的水声很远。"
+    assert [s["scene_id"] for s in book["scenes"]] == [
+        e["scene_id"] for e in release["manifest"]["ordered_artifacts"]
+    ]
+    with k.db.uow(write=False) as repo:
+        proof = k.artifact(
+            repo,
+            book_review._selected(
+                repo, work, "P6_REVIEWED_RELEASE:" + release["release_ref"]["artifact_revision_id"]
+            ),
+            work,
+            kind="BOOK_REVIEWED_RELEASE",
+        )["payload"]
+        assert (
+            proof["round_ref"] == status["round_ref"]
+            and proof["manifest_ref"] == release["manifest_ref"]
+        )
+        assert proof["score_refs"] == [r["score_ref"] for r in status["readers"]]
+    full = book_review.review_status(k, owner, work, branch, include_reports=True)
+    assert all(r["assessment"]["report"] and r["passage_notes"] for r in full["readers"])
     with pytest.raises(DomainError) as replay:
         book_review.start_review(
             k,

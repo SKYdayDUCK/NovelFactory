@@ -98,11 +98,13 @@ def check_notes(notes, packet):
             and scene == passage["scene"]
             and type(start) is int
             and isinstance(quote, str)
+            and len(quote) <= 80
             and quote.strip()
             and passage["start"] <= start < start + len(quote) <= passage["end"]
             and passage["text"][start - passage["start"] : start - passage["start"] + len(quote)]
             == quote
             and isinstance(note.get("observation"), str)
+            and len(note["observation"]) <= 160
             and note["observation"].strip(),
             "Each delivered passage needs a located observation",
         )
