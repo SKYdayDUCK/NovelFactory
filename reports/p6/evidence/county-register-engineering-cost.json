@@ -1,0 +1,98 @@
+{
+  "classification": "ENGINEERING_RUN_ONLY",
+  "work_id": "464f1096-4098-4140-8239-4c9302bc895a",
+  "reason": "Runtime changed after the first dispatch. Excluded from the autonomous frozen-baseline experiment.",
+  "source": "deepseek-cny-20261113.json",
+  "attempts": [
+    {
+      "attempt_id": "c329ec74-b51e-4e88-8f29-c0a9cf30caf0",
+      "model": "deepseek-flash",
+      "response_sha256": "e5f2375c0bbc90d85f23f30f80775cfb56837f0e87227fa324a1d621a3e5ad97",
+      "transport_window": {
+        "started_at": "2026-11-13T06:13:03.146620+00:00",
+        "received_at": "2026-11-13T06:13:22.245442+00:00"
+      },
+      "input_tokens": 3698,
+      "cached_input_tokens": 1408,
+      "output_tokens": 1301,
+      "total_tokens": 4999,
+      "estimated_cny": "0.01504432"
+    },
+    {
+      "attempt_id": "45a99855-55cf-4207-b0c8-1da84ca1ee58",
+      "model": "deepseek-flash",
+      "response_sha256": "ec3c8502b029985684a5c4a93d00fb2cd628c2f3629fa12ff39c8269aab7cb8b",
+      "transport_window": {
+        "started_at": "2026-11-13T06:20:27.644037+00:00",
+        "received_at": "2026-11-13T06:20:40.334802+00:00"
+      },
+      "input_tokens": 4949,
+      "cached_input_tokens": 1408,
+      "output_tokens": 1213,
+      "total_tokens": 6162,
+      "estimated_cny": "0.01684232"
+    },
+    {
+      "attempt_id": "c7b372db-3a29-4907-8934-5a623ea230c4",
+      "model": "deepseek-v4-pro",
+      "response_sha256": "9c3f1789b0978d05f3baea79aae5ff973efdd8fcb092c5420b9d49124bfc612f",
+      "transport_window": {
+        "started_at": "2026-11-13T06:20:44.649566+00:00",
+        "received_at": "2026-11-13T06:21:36.191235+00:00"
+      },
+      "input_tokens": 5571,
+      "cached_input_tokens": 1664,
+      "output_tokens": 2458,
+      "total_tokens": 8029,
+      "estimated_cny": "0.1020282"
+    },
+    {
+      "attempt_id": "1c06cd84-e8cb-4e69-8d80-46cf8de73ea5",
+      "model": "deepseek-flash",
+      "response_sha256": "d577fb480cc189b379ecacda104c8f0c147c953e557c7188479ff8abf99621ee",
+      "transport_window": {
+        "started_at": "2026-11-13T06:21:40.209489+00:00",
+        "received_at": "2026-11-13T06:21:55.859195+00:00"
+      },
+      "input_tokens": 5874,
+      "cached_input_tokens": 1408,
+      "output_tokens": 1821,
+      "total_tokens": 7695,
+      "estimated_cny": "0.02355632"
+    },
+    {
+      "attempt_id": "b67807d3-4d32-4e1a-90c9-41f4f09e3cad",
+      "model": "deepseek-v4-pro",
+      "response_sha256": "09953f10227046495d048ee09fc80e5bd99d80b434ba7841a7faeb18e393fd03",
+      "transport_window": {
+        "started_at": "2026-11-13T06:21:59.312164+00:00",
+        "received_at": "2026-11-13T06:22:39.275060+00:00"
+      },
+      "input_tokens": 7565,
+      "cached_input_tokens": 1664,
+      "output_tokens": 2478,
+      "total_tokens": 10043,
+      "estimated_cny": "0.1205142"
+    },
+    {
+      "attempt_id": "bc2549b5-aea4-4ae8-ad5b-a7f5e62621e5",
+      "model": "deepseek-flash",
+      "response_sha256": "44c09c7c548ebff84a00d9ebe9a9efb115afd2ea91a36944640a9a4c11abbbd1",
+      "transport_window": {
+        "started_at": "2026-11-13T06:22:41.969336+00:00",
+        "received_at": "2026-11-13T06:22:57.535217+00:00"
+      },
+      "input_tokens": 5801,
+      "cached_input_tokens": 1408,
+      "output_tokens": 2150,
+      "total_tokens": 7951,
+      "estimated_cny": "0.02604232"
+    }
+  ],
+  "observed_tokens": 44879,
+  "known_estimated_cny": "0.30402768",
+  "invoiced_cny": null,
+  "manuscripts_frozen": 0,
+  "independent_reviews": 0,
+  "releases": 0
+}

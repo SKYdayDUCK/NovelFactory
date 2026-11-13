@@ -1,0 +1,82 @@
+{
+  "attempt_id": "75e12cb7-2e3e-40b9-a73b-f5cff17549d6",
+  "ledger_state": "SENT",
+  "request_sha256": "7d99174865564c5c5ff53b44564d38d2c4ea872d4631b8c720f7091685af2b13",
+  "recorded_at": "2026-11-13T14:32:47.883785+09:00",
+  "last_transition_at": "2026-11-13T14:32:47.928626+09:00",
+  "provider_receipt_present": false,
+  "invoiced_amount": null,
+  "reserved_amount": "0.250000",
+  "database_evidence": {
+    "prompt": {
+      "kind": "AGENT_PROMPT",
+      "sha256": "7d99174865564c5c5ff53b44564d38d2c4ea872d4631b8c720f7091685af2b13"
+    },
+    "response": null,
+    "candidate": null,
+    "audit": null
+  },
+  "stored_results": 0,
+  "invoice_receipts": 0,
+  "audit_events": [
+    "artifact.agent_prompt"
+  ],
+  "content_store_json_objects_examined": 31,
+  "matching_unwrapped_response_or_audit_objects": [],
+  "worker_stdout_bytes": 0,
+  "evidence_scope": "Recovered database snapshot, content-addressed private objects and final worker stdout",
+  "upstream_requeries": 0,
+  "model_dispatches": 0,
+  "account_balance_observations": [
+    {
+      "timestamp_utc": "2026-11-13T05:27:14.332061+00:00",
+      "currency": "CNY",
+      "total_balance": "50.00",
+      "source_sha256": "856ffaad5b0e53a6deebb455d23f0e59a4a6a84c22b8d730b240f7879441c516"
+    },
+    {
+      "timestamp_utc": "2026-11-13T05:30:03.215994+00:00",
+      "currency": "CNY",
+      "total_balance": "50.00",
+      "source_sha256": "cf56158bbbf8a7f38aa5dd111d63e27cc266137ef5bae3bc610ef30b1c1914aa"
+    }
+  ],
+  "balance_window_observed_delta_cny": "0.00",
+  "balance_window_scope": "Account-level cent-rounded snapshots. Both probe transports were inside the observed interval. The first production reservation preceded it, the other two followed it.",
+  "short_story_production_attempts": [
+    {
+      "attempt_id": "562b0a3f-c42d-4e82-b0d9-4f9386c90e95",
+      "scope_work_id": "bb48e3dd-daff-441b-acd2-b64063396d02",
+      "reserved_at_utc": "2026-11-13T05:26:00.567721+00:00",
+      "outcome": "UNKNOWN",
+      "ledger_state": "UNKNOWN",
+      "known_tokens": null,
+      "known_estimated_cny": null,
+      "reserved_inside_balance_window": false
+    },
+    {
+      "attempt_id": "188e801c-2101-474d-ad92-21e1f07d5bb6",
+      "scope_work_id": "313767e0-96c4-4c96-9d6f-64e7f5cf744e",
+      "reserved_at_utc": "2026-11-13T05:30:17.663307+00:00",
+      "outcome": "REJECTED",
+      "ledger_state": "UNKNOWN",
+      "known_tokens": 4275,
+      "known_estimated_cny": "0.007872",
+      "reserved_inside_balance_window": false
+    },
+    {
+      "attempt_id": "75e12cb7-2e3e-40b9-a73b-f5cff17549d6",
+      "scope_work_id": "3999b940-b358-4d69-b933-79ea74f9743f",
+      "reserved_at_utc": "2026-11-13T05:32:47.883785+00:00",
+      "outcome": null,
+      "ledger_state": "SENT",
+      "known_tokens": null,
+      "known_estimated_cny": null,
+      "reserved_inside_balance_window": false
+    }
+  ],
+  "short_story_total_tokens": null,
+  "short_story_known_tokens": 4275,
+  "short_story_known_estimated_cny": "0.007872",
+  "short_story_actual_cost_cny": null
+}

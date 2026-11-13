@@ -2,8 +2,12 @@
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
+import os
 import sys
+import tempfile
+from pathlib import Path
 from datetime import UTC, datetime
 from urllib.error import HTTPError
 from urllib.request import HTTPRedirectHandler, Request, build_opener
@@ -12,6 +16,34 @@ from urllib.request import HTTPRedirectHandler, Request, build_opener
 class _NoRedirect(HTTPRedirectHandler):
     def redirect_request(self, *args):
         return None
+
+
+def _persist(options, status, content, complete, receipt, window):
+    """Publish only returned bytes/metadata. The parent may already be gone."""
+    target = options.get("receipt_target")
+    if target is None:
+        return
+    dest = Path(target["path"])
+    payload = {"version": "nf.http-receipt.v1", "attempt_id": target["attempt_id"],
+               "request_sha256": options["request_hash"], "http_status": status, "complete": complete,
+               "body_sha256": hashlib.sha256(content).hexdigest(),
+               "content": base64.b64encode(content).decode("ascii"),
+               "receipt": receipt, "transport_window": window}
+    fd, name = tempfile.mkstemp(dir=dest.parent)
+    try:
+        with os.fdopen(fd, "wb") as stream:
+            stream.write(json.dumps(payload, ensure_ascii=True).encode())
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.link(name, dest)
+        if os.name != "nt":
+            dfd = os.open(dest.parent, os.O_RDONLY | os.O_DIRECTORY)
+            try:
+                os.fsync(dfd)
+            finally:
+                os.close(dfd)
+    finally:
+        os.unlink(name)
 
 
 def main():
@@ -23,17 +55,24 @@ def main():
             "X-Client-Request-Id": options["request_hash"], **(options.get("headers") or {})})
         transport = build_opener(_NoRedirect)
         started_at = datetime.now(UTC).isoformat()
-        with transport.open(request, timeout=options["timeout"]) as reply:
-            content = reply.read(options["limit"] + 1)
-            received_at = datetime.now(UTC).isoformat()
-            if len(content) > options["limit"]:
+        try:
+            reply = transport.open(request, timeout=options["timeout"])
+        except HTTPError as err:
+            reply = err
+        with reply:
+            limit = options["limit"]
+            content = reply.read(limit + 1)
+            window = {"started_at": started_at, "received_at": datetime.now(UTC).isoformat()}
+            receipt = reply.headers.get("x-request-id")
+            _persist(options, reply.status, content[:limit], len(content) <= limit, receipt, window)
+            if reply.status >= 300:
+                result = {"failure": "MODEL_RATE_LIMITED" if reply.status == 429 else "MODEL_HTTP_ERROR",
+                          "status": reply.status}
+            elif len(content) > limit:
                 result = {"failure": "MODEL_RESPONSE_TOO_LARGE"}
             else:
-                result = {"content": base64.b64encode(content).decode("ascii"), "receipt": reply.headers.get("x-request-id"),
-                          "transport_window": {"started_at": started_at, "received_at": received_at}}
-    except HTTPError as exc:
-        exc.close()
-        result = {"failure": "MODEL_RATE_LIMITED" if exc.code == 429 else "MODEL_HTTP_ERROR", "status": exc.code}
+                result = {"content": base64.b64encode(content).decode("ascii"), "receipt": receipt,
+                          "transport_window": window}
     except (TimeoutError, OSError, ValueError, KeyError, TypeError):
         result = {"failure": "MODEL_TRANSPORT_UNKNOWN"}
     json.dump(result, sys.stdout)

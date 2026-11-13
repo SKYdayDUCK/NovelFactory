@@ -1,0 +1,542 @@
+{
+  "release_checked_for_preflight": "176b719334785866ff90129bb0243e3d7abe8bbe",
+  "scope": "Development PostgreSQL and regression test evidence; no official DeepSeek generation. Overlapping test sets must not be added. First P6 sweep ran during development; reruns are listed separately.",
+  "postgres": "17.11",
+  "unit_linux_skips": "Three Windows-native cases",
+  "creative_harness_audit": {
+    "checkout_sha": "176b719334785866ff90129bb0243e3d7abe8bbe",
+    "checkout_tree": "b13d9cda9a60782e40d88bba23bacb4f6f14fc30",
+    "status": "PASS"
+  },
+  "package_static_validation": {
+    "status": "PASS",
+    "python": "3.12.14",
+    "checked_at_utc": "2026-11-13T09:20:29.353669+00:00",
+    "failures": []
+  },
+  "runs": {
+    "unit_and_contracts": {
+      "cases": 509,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 3,
+      "elapsed_seconds": 34.67,
+      "test_modules": [
+        "tests.contracts.test_schema_compatibility",
+        "tests.service.test_admission",
+        "tests.unit.test_agent_adapter_protocol",
+        "tests.unit.test_audit_artifact_security",
+        "tests.unit.test_audit_http_boundary",
+        "tests.unit.test_audit_query_history",
+        "tests.unit.test_backup_connection_environment",
+        "tests.unit.test_bound_tool_admission",
+        "tests.unit.test_canonical_equivalence",
+        "tests.unit.test_continuity_rules",
+        "tests.unit.test_creative_review_rubrics",
+        "tests.unit.test_design_validator_output",
+        "tests.unit.test_domain",
+        "tests.unit.test_editorial_rules",
+        "tests.unit.test_engineering_release_ci.GateTests",
+        "tests.unit.test_engineering_release_ci.SourceTests",
+        "tests.unit.test_evidence_context",
+        "tests.unit.test_fixture_definitions",
+        "tests.unit.test_genesis_memo",
+        "tests.unit.test_harness_configuration",
+        "tests.unit.test_host_process",
+        "tests.unit.test_large_projection_witness",
+        "tests.unit.test_long_read_lease_renewal",
+        "tests.unit.test_memory_retrieval",
+        "tests.unit.test_native_platform",
+        "tests.unit.test_online_backup_runtime",
+        "tests.unit.test_open_arrival_evidence",
+        "tests.unit.test_p2_load_evidence",
+        "tests.unit.test_p55_capacity",
+        "tests.unit.test_p55_stream_contract",
+        "tests.unit.test_p58_branch_archive",
+        "tests.unit.test_p58_model_policy",
+        "tests.unit.test_p58_providers",
+        "tests.unit.test_p5_project_install",
+        "tests.unit.test_p6_book_rubric",
+        "tests.unit.test_p6_deepseek_costs",
+        "tests.unit.test_p6_knowledge_profiles",
+        "tests.unit.test_p6_production_profiles",
+        "tests.unit.test_planning_domain",
+        "tests.unit.test_prompt_schema",
+        "tests.unit.test_provider_role_receipt",
+        "tests.unit.test_reconciliation_rules",
+        "tests.unit.test_refinement_rules",
+        "tests.unit.test_releasing",
+        "tests.unit.test_scheduling",
+        "tests.unit.test_short_volume_extraction",
+        "tests.unit.test_temporal_coordinate_cache"
+      ]
+    },
+    "first_P6_PostgreSQL_sweep": {
+      "cases": 97,
+      "failures": 4,
+      "errors": 0,
+      "skipped": 1,
+      "elapsed_seconds": 987.678,
+      "test_modules": [
+        "tests.integration.test_p6_batch_observer",
+        "tests.integration.test_p6_batch_supervision",
+        "tests.integration.test_p6_board_schema_repair",
+        "tests.integration.test_p6_book_review",
+        "tests.integration.test_p6_design_release_lineage",
+        "tests.integration.test_p6_export_release",
+        "tests.integration.test_p6_external_review",
+        "tests.integration.test_p6_frozen_edit",
+        "tests.integration.test_p6_idea_intake",
+        "tests.integration.test_p6_idea_opening",
+        "tests.integration.test_p6_idea_window",
+        "tests.integration.test_p6_knowledge_delivery",
+        "tests.integration.test_p6_long_profile_metadata",
+        "tests.integration.test_p6_manuscript_extent",
+        "tests.integration.test_p6_postpaid_delivery",
+        "tests.integration.test_p6_preflight_registration",
+        "tests.integration.test_p6_profile_binding",
+        "tests.integration.test_p6_rolling_process_exit",
+        "tests.integration.test_p6_rolling_production",
+        "tests.integration.test_p6_runtime_evidence",
+        "tests.integration.test_p6_scene_revision",
+        "tests.integration.test_p6_wire_receipts"
+      ]
+    },
+    "quality_memory_and_native_repair": {
+      "cases": 37,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 379.466,
+      "test_modules": [
+        "tests.integration.test_p6_design_release_lineage",
+        "tests.integration.test_p6_idea_intake",
+        "tests.integration.test_p6_postpaid_delivery"
+      ]
+    },
+    "serial_review_and_reader_visibility": {
+      "cases": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 127.114,
+      "test_modules": [
+        "tests.integration.test_p6_idea_opening"
+      ],
+      "cases_observed": [
+        {
+          "name": "test_reviewed_design_opens_sealed_interaction_before_any_writing[False-medium_long-False]",
+          "seconds": 57.652,
+          "outcome": "passed"
+        },
+        {
+          "name": "test_reviewed_design_opens_sealed_interaction_before_any_writing[False-medium_long-True]",
+          "seconds": 68.699,
+          "outcome": "passed"
+        },
+        {
+          "name": "test_serial_reader_projects_only_earlier_approved_reader_evidence_on_exact_source_pages",
+          "seconds": 0.556,
+          "outcome": "passed"
+        }
+      ]
+    },
+    "three_way_loopback_and_interrupted_writer": {
+      "cases": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 23.966,
+      "test_modules": [
+        "tests.integration.test_p6_batch_supervision",
+        "tests.integration.test_p6_rolling_process_exit"
+      ],
+      "cases_observed": [
+        {
+          "name": "test_three_isolated_workers_dispatch_and_recover_original_enrollment",
+          "seconds": 9.741,
+          "outcome": "passed"
+        },
+        {
+          "name": "test_terminated_writer_sent_attempt_becomes_unknown_and_does_not_resend",
+          "seconds": 13.984,
+          "outcome": "passed"
+        }
+      ]
+    },
+    "corroborated_transport_observer_and_native_exports": {
+      "cases": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 100.13,
+      "test_modules": [
+        "tests.integration.test_p6_batch_observer",
+        "tests.integration.test_p6_batch_supervision",
+        "tests.integration.test_p6_runtime_evidence"
+      ],
+      "cases_observed": [
+        {
+          "name": "test_enrollment_and_live_workers_do_not_start_clock",
+          "seconds": 1.791,
+          "outcome": "passed"
+        },
+        {
+          "name": "test_transport_overlap_excludes_duplicates_boundaries_and_non_native",
+          "seconds": 0.009,
+          "outcome": "passed"
+        },
+        {
+          "name": "test_whole_book_eta_requires_more_than_raw_tokens",
+          "seconds": 0.001,
+          "outcome": "passed"
+        },
+        {
+          "name": "test_observer_reports_parallel_execution_separately_from_sampling[False]",
+          "seconds": 0.023,
+          "outcome": "passed"
+        },
+        {
+          "name": "test_observer_reports_parallel_execution_separately_from_sampling[True]",
+          "seconds": 0.259,
+          "outcome": "passed"
+        },
+        {
+          "name": "test_three_isolated_workers_dispatch_and_recover_original_enrollment",
+          "seconds": 4.652,
+          "outcome": "passed"
+        },
+        {
+          "name": "test_runtime_export_roles_skills_calls_and_ledger_state[True]",
+          "seconds": 7.05,
+          "outcome": "passed"
+        },
+        {
+          "name": "test_runtime_export_roles_skills_calls_and_ledger_state[False]",
+          "seconds": 4.007,
+          "outcome": "passed"
+        },
+        {
+          "name": "test_runtime_export_matches_ordered_release_and_manifest",
+          "seconds": 82.02,
+          "outcome": "passed"
+        }
+      ]
+    },
+    "dedicated_postgres_redis_operator_registration": {
+      "cases": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 20.526,
+      "test_modules": [
+        "tests.integration.test_p6_preflight_registration"
+      ]
+    },
+    "returned_edition_candidate": {
+      "cases": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 106.066,
+      "test_modules": [
+        "tests.integration.test_p6_frozen_edit"
+      ],
+      "cases_observed": [
+        {
+          "name": "test_one_frozen_volume_needs_actual_model_opinions_and_a_separate_decision[False]",
+          "seconds": 19.881,
+          "outcome": "passed"
+        },
+        {
+          "name": "test_one_frozen_volume_needs_actual_model_opinions_and_a_separate_decision[True]",
+          "seconds": 15.743,
+          "outcome": "passed"
+        },
+        {
+          "name": "test_one_frozen_volume_needs_actual_model_opinions_and_a_separate_decision[quality_repair]",
+          "seconds": 23.923,
+          "outcome": "passed"
+        },
+        {
+          "name": "test_one_frozen_volume_needs_actual_model_opinions_and_a_separate_decision[child_edition]",
+          "seconds": 21.786,
+          "outcome": "passed"
+        },
+        {
+          "name": "test_one_frozen_volume_needs_actual_model_opinions_and_a_separate_decision[unchanged_child]",
+          "seconds": 24.505,
+          "outcome": "passed"
+        }
+      ]
+    },
+    "quality_Han_plan_capacity": {
+      "cases": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 18.352,
+      "test_modules": [
+        "tests.integration.test_p6_idea_window"
+      ],
+      "cases_observed": [
+        {
+          "name": "test_window_protocol_keeps_first_attempt_and_corrects_only_the_requested_array[legacy_input]",
+          "seconds": 4.701,
+          "outcome": "passed"
+        },
+        {
+          "name": "test_window_protocol_keeps_first_attempt_and_corrects_only_the_requested_array[new_input]",
+          "seconds": 3.11,
+          "outcome": "passed"
+        },
+        {
+          "name": "test_window_protocol_keeps_first_attempt_and_corrects_only_the_requested_array[exhausted]",
+          "seconds": 1.931,
+          "outcome": "passed"
+        },
+        {
+          "name": "test_window_protocol_keeps_first_attempt_and_corrects_only_the_requested_array[unknown]",
+          "seconds": 1.608,
+          "outcome": "passed"
+        },
+        {
+          "name": "test_window_protocol_keeps_first_attempt_and_corrects_only_the_requested_array[drift]",
+          "seconds": 1.324,
+          "outcome": "passed"
+        },
+        {
+          "name": "test_quality_han_plan_fits_writer_scenes_and_replays_frozen_window[False]",
+          "seconds": 2.931,
+          "outcome": "passed"
+        },
+        {
+          "name": "test_quality_han_plan_fits_writer_scenes_and_replays_frozen_window[True]",
+          "seconds": 2.641,
+          "outcome": "passed"
+        }
+      ]
+    },
+    "final_design_release_and_plan_contracts": {
+      "cases": 23,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 160.909,
+      "test_modules": [
+        "tests.integration.test_p6_design_release_lineage",
+        "tests.integration.test_p6_idea_window"
+      ]
+    },
+    "final_supervision_and_release_boundaries": {
+      "cases": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 15.804,
+      "test_modules": [
+        "tests.integration.test_p6_batch_observer",
+        "tests.integration.test_p6_batch_supervision",
+        "tests.integration.test_p6_rolling_process_exit"
+      ]
+    },
+    "final_clean_checkout_unit_and_contracts": {
+      "cases": 502,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 3,
+      "elapsed_seconds": 31.686,
+      "test_modules": [
+        "tests.contracts.test_schema_compatibility",
+        "tests.unit.test_agent_adapter_protocol",
+        "tests.unit.test_audit_artifact_security",
+        "tests.unit.test_audit_http_boundary",
+        "tests.unit.test_audit_query_history",
+        "tests.unit.test_backup_connection_environment",
+        "tests.unit.test_bound_tool_admission",
+        "tests.unit.test_canonical_equivalence",
+        "tests.unit.test_continuity_rules",
+        "tests.unit.test_creative_review_rubrics",
+        "tests.unit.test_design_validator_output",
+        "tests.unit.test_domain",
+        "tests.unit.test_editorial_rules",
+        "tests.unit.test_engineering_release_ci.GateTests",
+        "tests.unit.test_engineering_release_ci.SourceTests",
+        "tests.unit.test_evidence_context",
+        "tests.unit.test_fixture_definitions",
+        "tests.unit.test_genesis_memo",
+        "tests.unit.test_harness_configuration",
+        "tests.unit.test_host_process",
+        "tests.unit.test_large_projection_witness",
+        "tests.unit.test_long_read_lease_renewal",
+        "tests.unit.test_memory_retrieval",
+        "tests.unit.test_native_platform",
+        "tests.unit.test_online_backup_runtime",
+        "tests.unit.test_open_arrival_evidence",
+        "tests.unit.test_p2_load_evidence",
+        "tests.unit.test_p55_capacity",
+        "tests.unit.test_p55_stream_contract",
+        "tests.unit.test_p58_branch_archive",
+        "tests.unit.test_p58_model_policy",
+        "tests.unit.test_p58_providers",
+        "tests.unit.test_p5_project_install",
+        "tests.unit.test_p6_book_rubric",
+        "tests.unit.test_p6_deepseek_costs",
+        "tests.unit.test_p6_knowledge_profiles",
+        "tests.unit.test_p6_production_profiles",
+        "tests.unit.test_planning_domain",
+        "tests.unit.test_prompt_schema",
+        "tests.unit.test_provider_role_receipt",
+        "tests.unit.test_reconciliation_rules",
+        "tests.unit.test_refinement_rules",
+        "tests.unit.test_releasing",
+        "tests.unit.test_scheduling",
+        "tests.unit.test_short_volume_extraction",
+        "tests.unit.test_temporal_coordinate_cache"
+      ]
+    },
+    "window_contract_five_case_retest": {
+      "passed": 5,
+      "elapsed_seconds": 17.98,
+      "previous_failure": "Four tests parsed appended knowledge instructions as continuation of a JSON schema. Read the single JSON value from the actual HTTP prompt, then reran the full test module. Frozen model inputs and production JSON validation retained."
+    },
+    "complete_final_P6_PostgreSQL_suite": {
+      "source_tree": "b13d9cda9a60782e40d88bba23bacb4f6f14fc30",
+      "modules": 22,
+      "cases": 106,
+      "outcomes": {
+        "passed": 106
+      },
+      "command": "python scripts/with_postgres.py -- python -m pytest -q tests/integration/test_p6*.py (8 mutually exclusive module groups, separate real databases, Redis available in its group)",
+      "module_results": {
+        "test_p6_batch_observer": {
+          "passed": 5
+        },
+        "test_p6_batch_supervision": {
+          "passed": 1
+        },
+        "test_p6_board_schema_repair": {
+          "passed": 5
+        },
+        "test_p6_book_review": {
+          "passed": 2
+        },
+        "test_p6_design_release_lineage": {
+          "passed": 16
+        },
+        "test_p6_export_release": {
+          "passed": 2
+        },
+        "test_p6_external_review": {
+          "passed": 3
+        },
+        "test_p6_frozen_edit": {
+          "passed": 5
+        },
+        "test_p6_idea_intake": {
+          "passed": 15
+        },
+        "test_p6_idea_opening": {
+          "passed": 6
+        },
+        "test_p6_idea_window": {
+          "passed": 7
+        },
+        "test_p6_knowledge_delivery": {
+          "passed": 1
+        },
+        "test_p6_long_profile_metadata": {
+          "passed": 3
+        },
+        "test_p6_manuscript_extent": {
+          "passed": 3
+        },
+        "test_p6_postpaid_delivery": {
+          "passed": 6
+        },
+        "test_p6_preflight_registration": {
+          "passed": 1
+        },
+        "test_p6_profile_binding": {
+          "passed": 6
+        },
+        "test_p6_rolling_process_exit": {
+          "passed": 1
+        },
+        "test_p6_rolling_production": {
+          "passed": 9
+        },
+        "test_p6_runtime_evidence": {
+          "passed": 3
+        },
+        "test_p6_scene_revision": {
+          "passed": 4
+        },
+        "test_p6_wire_receipts": {
+          "passed": 2
+        }
+      }
+    }
+  },
+  "hosted_CI_on_candidate": {
+    "at_utc": "2026-11-13 09:20:29 UTC",
+    "commit": "176b719334785866ff90129bb0243e3d7abe8bbe",
+    "runs": [
+      {
+        "name": "Native runtime",
+        "status": "queued",
+        "conclusion": null,
+        "id": 43400402400
+      },
+      {
+        "name": "P1 and P2 production integrity",
+        "status": "queued",
+        "conclusion": null,
+        "id": 43400402359
+      },
+      {
+        "name": "P2 measured capacity and recovery",
+        "status": "queued",
+        "conclusion": null,
+        "id": 43400402438
+      },
+      {
+        "name": "P3 scale experiments with strict unmet gates",
+        "status": "queued",
+        "conclusion": null,
+        "id": 43400402369
+      },
+      {
+        "name": "Agent Workshop PostgreSQL and stdio",
+        "status": "queued",
+        "conclusion": null,
+        "id": 43400402373
+      },
+      {
+        "name": "Creative Harness engineering",
+        "status": "queued",
+        "conclusion": null,
+        "id": 43400402362
+      },
+      {
+        "name": "P6 offline experiment and authorization checks",
+        "status": "queued",
+        "conclusion": null,
+        "id": 43400402337
+      },
+      {
+        "name": "P3 P4 measured evidence",
+        "status": "queued",
+        "conclusion": null,
+        "id": 43400402342
+      },
+      {
+        "name": "P5 native desktop resume",
+        "status": "queued",
+        "conclusion": null,
+        "id": 43400402436
+      }
+    ]
+  },
+  "official_batch_1_production_attempts": 0
+}

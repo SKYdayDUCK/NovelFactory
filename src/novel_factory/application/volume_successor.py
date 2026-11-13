@@ -306,6 +306,9 @@ def check_planner_cut(kernel, repo, task, spec, cut, snapshot_ref):
 
 def guard_volume_send(kernel, repo, task, spec, job, request=None):
     """Recheck a preauthorized volume at paid dispatch and at the Host forwarding boundary."""
+    if "book_review_packet" in job:
+        from .book_review import guard_job
+        guard_job(kernel, repo, task, job, request)
     if "production_node" in job:
         from .production_pipeline import guard_send
         guard_send(kernel, repo, task, job, request)

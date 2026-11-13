@@ -26,6 +26,7 @@ _FILES = {"2.0": "core.schema.json", "2.1": "temporal_concurrency.schema.json",
           "planning": "planning.schema.json", "simulation": "simulation.schema.json",
           "harness": "harness.schema.json", "agent": "agent.schema.json", "narrative": "narrative.schema.json",
           "editorial": "editorial.schema.json", "release": "release.schema.json",
+          "production_profile": "production_profile.schema.json",
           "upgrades": "upgrades.schema.json", "refinement": "refinement.schema.json", "continuity": "continuity.schema.json"}
 
 
@@ -57,6 +58,18 @@ def plain(value: Any) -> Any:
     if isinstance(value, (list, tuple)):
         return [plain(item) for item in value]
     return value
+
+
+def contract_diagnostic(name, value, version):
+    """Describe the first failing schema rule without quoting untrusted values or arbitrary keys."""
+    failure = next(_validator(name, version).iter_errors(value), None)
+    if failure is None:
+        return None
+    result = {"keyword": str(failure.validator),
+              "schema_path": "/".join(str(part) for part in failure.absolute_schema_path)}
+    if failure.validator == "required":
+        result["missing"] = [key for key in failure.validator_value if key not in failure.instance]
+    return result
 
 
 def validate_contract(name: str, payload: Any, version: str = "2.0") -> Any:

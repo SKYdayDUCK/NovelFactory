@@ -55,12 +55,17 @@ def fingerprint(value: Any) -> str:
     return hashlib.sha256(canonical_bytes(value)).hexdigest()
 
 
+class DuplicateJSONObjectKey(DomainError):
+    def __init__(self):
+        super().__init__("INVALID_ARGUMENT", "Duplicate JSON object key")
+
+
 def strict_json_loads(content: str | bytes) -> Any:
     def pairs(items):
         result = {}
         for key, value in items:
             if key in result:
-                raise DomainError("INVALID_ARGUMENT", "Duplicate JSON object key")
+                raise DuplicateJSONObjectKey()
             result[key] = value
         return result
     def reject_number(value):

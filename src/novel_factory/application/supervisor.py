@@ -200,10 +200,30 @@ class RuntimeSupervisor:
         settled = resolution.reconcile_one(controller, work_id, branch_id)
         if settled:
             return {"status": "CONFLICT_COORDINATED", **settled}
+        from .idea_opening import advance_opening
+        opening = advance_opening(self.kernel, self.gateway, controller, work_id, branch_id)
+        if opening:
+            return opening
         from novel_factory.application.production_pipeline import advance_pipeline
         handoff = advance_pipeline(self.kernel, self.gateway, controller, work_id, branch_id)
         if handoff:
             return handoff
+        from novel_factory.application.idea_continuation import advance_idea_planning
+        handoff = advance_idea_planning(self.kernel, self.gateway, controller, work_id, branch_id)
+        if handoff:
+            return handoff
+        from novel_factory.application.rolling_production import advance_rolling
+        handoff = advance_rolling(self.kernel, self.gateway, controller, work_id, branch_id)
+        if handoff:
+            return handoff
+        from .frozen_editing import advance as advance_edit
+        edited = advance_edit(self.kernel, self.gateway, controller, work_id, branch_id)
+        if edited:
+            return edited
+        from .book_review import advance_review
+        reviewed = advance_review(self.kernel, self.gateway, controller, work_id, branch_id)
+        if reviewed:
+            return reviewed
         from novel_factory.application.volume_successor import advance_volume
         volume = advance_volume(self.kernel, self.gateway, controller, work_id, branch_id)
         if volume:
@@ -407,6 +427,12 @@ class RuntimeSupervisor:
                 "subject_time": {"kind": "POINT", "at": spec["story_time"]}, "token_budget": config["context_tokens"],
                 "idempotency_key": f"supervisor-compile:{task_id}:{generation}"})
             require(context["status"] == "READY", "CONTEXT_REQUIRED", "Task requires an available fixed context")
+            if "returned_edition" in config:
+                from .returned_edition import prepare_materials as prepare_edition_materials
+                prepare_edition_materials(self.kernel, task, config["returned_edition"])
+            if "frozen_editing" in config:
+                from .frozen_editing import prepare_read
+                prepare_read(self.kernel, task, config["frozen_editing"])
             if "production_node" in config:
                 from novel_factory.application.production_pipeline import prepare_materials
                 prepare_materials(self.kernel, task, config)

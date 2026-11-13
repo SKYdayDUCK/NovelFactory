@@ -1,7 +1,6 @@
 """Exercise both actor gateway routes with a real BELIEF read and a fixture inference."""
 import json
 from decimal import Decimal
-from uuid import uuid4
 
 import pytest
 
@@ -43,12 +42,11 @@ def test_harness_actor_uses_frozen_prose_and_control_identity(kernel_env, mode, 
             assert "context" not in user and "creative_materials" in user
             assert "dependency_fingerprint" not in json.dumps(user["creative_materials"])
             identity = json.loads(system.split("\nIdentity: ", 1)[1].splitlines()[0])
-            payload = {"schema_version": "2.0", "proposal_id": str(uuid4()), "intent": "Wait",
-                       "targets": [], "resource_requests": [], "preconditions": [], "evidence_refs": [],
-                       "story_interval": {"start": point(1), "end": point(2), "bounds": "[)"},
-                       "idempotency_key": "wait"}
-            for field in ("task_id", "generation", "context_bundle_id", "actor_id", "world_ref", "dependency_fingerprint"):
-                payload[field] = identity[field]
+            fixed = user["proposal_protocol"]["copy_into_payload"]
+            assert fixed["actor_id"] == actor and fixed["story_interval"]["start"] == point(1)
+            assert fixed["dependency_fingerprint"] == identity["dependency_fingerprint"]
+            payload = {**fixed, "intent": "Wait", "targets": [], "resource_requests": [],
+                       "preconditions": [], "evidence_refs": []}
             response = {k: v for k, v in identity.items() if k != "dependency_fingerprint"}
             response.update(status="SUCCEEDED", unresolved_questions=[], payload=payload)
         return ModelResponse(json.dumps(response), provider_receipt=f"fixture-{len(model_inputs)}", input_tokens=12,

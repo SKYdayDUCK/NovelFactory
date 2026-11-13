@@ -108,7 +108,7 @@ def _amount(values):
     }
 
 
-def _estimate(usage, rate):
+def estimate_usage_cost(usage, rate):
     if rate is None:
         return None, "MISSING_RATE"
     inp, out, cached = (
@@ -270,7 +270,7 @@ class ChapterCostService:
                 (config.get("provider"), config.get("model")),
                 rates.get((None, config.get("model"))),
             )
-            value, uncertain = _estimate(data.get("usage", data), rate)
+            value, uncertain = estimate_usage_cost(data.get("usage", data), rate)
             source = next(
                 (k for k in ("fixture", "reported") if "model." + k + ".calls" in metrics),
                 "unclassified",

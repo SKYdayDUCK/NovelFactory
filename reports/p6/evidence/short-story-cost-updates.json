@@ -1,0 +1,195 @@
+{
+  "price_source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+  "currency": "CNY",
+  "scope": "Short-story production only. Capability probes recorded separately in the original snapshot.",
+  "previous_checkpoint": "short-supernatural-live-checkpoint.json",
+  "original_measured_tokens": 4275,
+  "original_known_estimated_cny": "0.007872",
+  "production_returns": [
+    {
+      "attempt_id": "48907c71-246c-43fa-a81b-175c7be03c47",
+      "model": "deepseek-flash",
+      "request_sha256": "9017e0c8fa07f154144d7cd2a3c8dc18a6e977f1141c38ceaed0e7b7c70021a6",
+      "body_sha256": "2fb4bac3bc62803ae8e1d76a2d200683e6dad365201c32bed453ea97df4ad2b4",
+      "supplier_receipt_sha256": "9ac2d18f5557244d9c211f4322e42407e28f50ad2fa17cd7df67662cdfabe194",
+      "http_status": 200,
+      "transport_window": {
+        "started_at": "2026-11-13T05:49:10.085696+00:00",
+        "received_at": "2026-11-13T05:49:25.796182+00:00"
+      },
+      "transport_seconds": 15.710486,
+      "price_period": "off_peak",
+      "input_tokens": 4615,
+      "cached_input_tokens": 1408,
+      "uncached_input_tokens": 3207,
+      "output_tokens": 1296,
+      "total_tokens": 5911,
+      "per_million_cny": {
+        "cached_input": "0.02",
+        "uncached_input": "1",
+        "output": "4"
+      },
+      "estimated_cny": "0.00841916",
+      "invoiced_amount": null,
+      "scope_work_id": "313767e0-96c4-4c96-9d6f-64e7f5cf744e",
+      "scope_branch_id": "81b88295-6042-486c-b88c-05793437902b"
+    },
+    {
+      "attempt_id": "946f6474-addc-4c04-995b-9a4573ae38da",
+      "model": "deepseek-v4-pro",
+      "request_sha256": "2a1bb5095eeaa97024d9b987486d671e720ef1fc6375c003ed9335ce4febc531",
+      "body_sha256": "364af4ae4c968561bc91472729b977247134064e64d13b14ec2da94e63100773",
+      "supplier_receipt_sha256": "7681d38fe4190f31f49eb209b512dd3f28a86d6b16f52dcdb7772c1889443aac",
+      "http_status": 200,
+      "transport_window": {
+        "started_at": "2026-11-13T05:52:04.915790+00:00",
+        "received_at": "2026-11-13T05:52:44.494783+00:00"
+      },
+      "transport_seconds": 39.578993,
+      "price_period": "off_peak",
+      "input_tokens": 5251,
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": 5251,
+      "output_tokens": 2547,
+      "total_tokens": 7798,
+      "per_million_cny": {
+        "cached_input": "0.15",
+        "uncached_input": "4.5",
+        "output": "13.5"
+      },
+      "estimated_cny": "0.058014",
+      "invoiced_amount": null,
+      "review_issue_count": 6,
+      "scope_work_id": "313767e0-96c4-4c96-9d6f-64e7f5cf744e",
+      "scope_branch_id": "81b88295-6042-486c-b88c-05793437902b"
+    },
+    {
+      "attempt_id": "b6350b99-1288-46bb-9650-abd43a775ea6",
+      "model": "deepseek-flash",
+      "request_sha256": "888146c268859c3683da092c4bb15955c65758c2dfa97495c77d6734ffdcd6c9",
+      "body_sha256": "12c27727fd659b9f86dec4cebc60c1fa307a3260e50f3140ac6579b66a2d2007",
+      "supplier_receipt_sha256": "1ce892767cc262f8153208c366f75358e27eca7155551582a62ff06e4efcf330",
+      "http_status": 200,
+      "transport_window": {
+        "started_at": "2026-11-13T05:56:23.020855+00:00",
+        "received_at": "2026-11-13T05:56:39.551048+00:00"
+      },
+      "transport_seconds": 16.530193,
+      "price_period": "off_peak",
+      "input_tokens": 6065,
+      "cached_input_tokens": 1408,
+      "uncached_input_tokens": 4657,
+      "output_tokens": 1739,
+      "total_tokens": 7804,
+      "per_million_cny": {
+        "cached_input": "0.02",
+        "uncached_input": "1",
+        "output": "4"
+      },
+      "estimated_cny": "0.01164116",
+      "invoiced_amount": null,
+      "scope_work_id": "313767e0-96c4-4c96-9d6f-64e7f5cf744e",
+      "scope_branch_id": "81b88295-6042-486c-b88c-05793437902b"
+    },
+    {
+      "attempt_id": "aa3aa52c-5c58-43a5-9d53-4f427424c2c5",
+      "model": "deepseek-v4-pro",
+      "request_sha256": "ada0bc075f93475fc6b881e816683f027b2062ed766e1bfbf021fa2a3078bcad",
+      "body_sha256": "6ed4e321c57c0d197716fac324d3fc24cdfa54860edb3a64dc715498b4c93c68",
+      "supplier_receipt_sha256": "66adb99fb883e88583416b6f6139e76262878131bf5e2ed6148a6ff6b11f4385",
+      "http_status": 200,
+      "transport_window": {
+        "started_at": "2026-11-13T06:00:05.103139+00:00",
+        "received_at": "2026-11-13T06:00:50.439332+00:00"
+      },
+      "transport_seconds": 45.336193,
+      "price_period": "peak",
+      "input_tokens": 6011,
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": 6011,
+      "output_tokens": 2600,
+      "total_tokens": 8611,
+      "per_million_cny": {
+        "cached_input": "0.30",
+        "uncached_input": "9.0",
+        "output": "27.0"
+      },
+      "estimated_cny": "0.124299",
+      "invoiced_amount": null,
+      "scope_work_id": "313767e0-96c4-4c96-9d6f-64e7f5cf744e",
+      "scope_branch_id": "81b88295-6042-486c-b88c-05793437902b"
+    },
+    {
+      "attempt_id": "bfa85087-2255-421f-a02a-88abcad2dec2",
+      "model": "deepseek-flash",
+      "request_sha256": "00c05ceb1f8b23e3a7e90d7b4f84f840ccdaed166a50a9d7426ce1d265e99edd",
+      "body_sha256": "fd82845115f793e21409936035a184169af61a42ae76d7ac57d7723518f84379",
+      "supplier_receipt_sha256": "04c8c5425a652b97cda6c7f4b4d39b403717f32f99b636a91dc11f991f5ac8f5",
+      "http_status": 200,
+      "transport_window": {
+        "started_at": "2026-11-13T06:03:07.758565+00:00",
+        "received_at": "2026-11-13T06:03:26.723305+00:00"
+      },
+      "transport_seconds": 18.96474,
+      "price_period": "peak",
+      "input_tokens": 6553,
+      "cached_input_tokens": 1408,
+      "uncached_input_tokens": 5145,
+      "output_tokens": 2179,
+      "total_tokens": 8732,
+      "per_million_cny": {
+        "cached_input": "0.04",
+        "uncached_input": "2",
+        "output": "8"
+      },
+      "estimated_cny": "0.02777832",
+      "invoiced_amount": null,
+      "scope_work_id": "313767e0-96c4-4c96-9d6f-64e7f5cf744e",
+      "scope_branch_id": "81b88295-6042-486c-b88c-05793437902b"
+    },
+    {
+      "attempt_id": "da07197b-12be-438e-9364-2134e9f654fd",
+      "model": "deepseek-v4-pro",
+      "request_sha256": "aa328392a355612bc2e701bf8784b8af96dd1d84076d1294d67fd8b2e2ba5460",
+      "body_sha256": "c2a49a89adc9851e484e0e5c8e1e5695c357616369205eda9fd9f84318d001da",
+      "supplier_receipt_sha256": "8ee8a2c2aea7d50b48ebb14c50465136bca60744b6aff55c5097fbf7e877fd06",
+      "http_status": 200,
+      "transport_window": {
+        "started_at": "2026-11-13T06:06:20.134843+00:00",
+        "received_at": "2026-11-13T06:07:14.157292+00:00"
+      },
+      "transport_seconds": 54.022449,
+      "price_period": "peak",
+      "input_tokens": 8202,
+      "cached_input_tokens": 1664,
+      "uncached_input_tokens": 6538,
+      "output_tokens": 3776,
+      "total_tokens": 11978,
+      "per_million_cny": {
+        "cached_input": "0.30",
+        "uncached_input": "9.0",
+        "output": "27.0"
+      },
+      "estimated_cny": "0.1612932",
+      "invoiced_amount": null,
+      "scope_work_id": "313767e0-96c4-4c96-9d6f-64e7f5cf744e",
+      "scope_branch_id": "81b88295-6042-486c-b88c-05793437902b"
+    }
+  ],
+  "cutoff_utc": "2026-11-13T06:07:14.157292+00:00",
+  "production_attempts_through_cutoff": 9,
+  "measured_production_tokens": 55109,
+  "known_estimated_production_cny": "0.39931684",
+  "production_total_tokens": null,
+  "production_actual_cny": null,
+  "unknown_usage_earlier_attempts": 2,
+  "experiment_title": "门外的鞋",
+  "experiment_status": "ABANDONED_BEFORE_FROZEN_MANUSCRIPT",
+  "formal_book_audits": 0,
+  "formal_book_releases": 0,
+  "preparation_work_ids": [
+    "313767e0-96c4-4c96-9d6f-64e7f5cf744e",
+    "3999b940-b358-4d69-b933-79ea74f9743f",
+    "bb48e3dd-daff-441b-acd2-b64063396d02"
+  ]
+}

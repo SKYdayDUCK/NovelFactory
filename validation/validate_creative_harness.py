@@ -140,6 +140,8 @@ def check_runtime(root, binding, report):
     runtime = root / "runtime"
     roles = named(read_json(runtime, "roles/catalog.json")["roles"], "role_id")
     skills = named(read_json(runtime, "skills/catalog.json")["skills"], "name")
+    from novel_factory.application.creative_context import runtime_provenance
+
     catalog = ObservedCatalog(runtime)
     count = 0
     selected = set()
@@ -168,14 +170,34 @@ def check_runtime(root, binding, report):
                         and snap["skill_version"] == skill["version"]
                         and snap["effective_model_tools"] == []
                         and view["sha256"] == fingerprint(snap), f"invalid static snapshot: {role_id}/{mode}")
+                source = runtime_provenance(snap)
+                revision = source["source_commit"]
+                require(git(root, "rev-parse", f"{revision}:runtime/roles/{role['contract_path']}").decode().strip()
+                        == source["role_blob"] and
+                        git(root, "rev-parse", f"{revision}:runtime/skills/{skill['path']}").decode().strip()
+                        == source["skill_blob"], "registered source bytes differ from released runtime")
                 count += 1
                 if (role_id, mode, skill_name) == (binding["role_id"], binding["task_kind"], binding["skill_name"]):
                     observed = {"role_version": snap["role_contract_version"], "skill_version": snap["skill_version"],
                                 "runtime_sha256": view["sha256"],
                                 "role_blob": git(root, "hash-object", str(role_path)).decode().strip(),
                                 "skill_blob": git(root, "hash-object", str(skill_path)).decode().strip()}
-                    require(all(binding[key] == value for key, value in observed.items()),
-                            "H1 runtime fixture differs from the real RuntimeCatalog snapshot")
+                    # Rebuild the historic actor snapshot from its own pinned
+                    # source. This also exercises post-upgrade provenance lookup.
+                    import tempfile
+                    with tempfile.TemporaryDirectory() as scratch:
+                        original = Path(scratch)
+                        for filename in sources:
+                            path = original / filename
+                            path.parent.mkdir(parents=True, exist_ok=True)
+                            path.write_bytes(git(root, "show", f"{binding['source_commit']}:runtime/{filename}"))
+                        historic = RuntimeCatalog(original).snapshot(role_id, mode, skill_name)
+                    original_snap = historic["snapshot"]
+                    require(binding["runtime_sha256"] == historic["sha256"]
+                            and binding["role_version"] == original_snap["role_contract_version"]
+                            and binding["skill_version"] == original_snap["skill_version"]
+                            and all(binding[k] == v for k, v in runtime_provenance(original_snap).items()),
+                            "H1 runtime fixture differs from its pinned source")
                     report["actor_snapshot"] = observed | {"role_id": role_id, "task_kind": mode, "skill_name": skill_name}
                     matched = True
     require(matched, "H1 runtime role/mode/skill was not selectable")

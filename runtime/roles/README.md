@@ -7,7 +7,7 @@
 - 每次任务读取 task_id、generation、attempt_id、context_bundle_id、policy_version、dependency_fingerprint，以及 WorldRef={work_id,branch_id,world_revision_id}。ArtifactRef={artifact_id,artifact_revision_id,sha256}。
 - 输入/输出遵循 [core.schema.json](../../contracts/core.schema.json) 与对应领域契约；字段不足返回限定问题，不假造状态。
 - 角色 catalog 中的 `restricted_skill_modes` 与技能 catalog 的 `restricted_role_modes` 指定共享技能的受限使用路径；先选角色模式再读通用步骤。它们仅指导交接，`requested_tools` 与本次服务端grant仍决定权限。
-- 工具名以 [08 工具目录](../../docs/08_MCP与工具接口.md) 为准。tool list 是所需能力上限，实际集合是任务 grant 的子集。`commit_request` 仅由授权控制服务执行，不给普通角色直接数据库权力。
+- 目录中的能力名是服务内注册键。MCP 客户端使用当前授权连接实际发现的工具名，纯文本模型的工具清单为空。`commit_request` 仅由授权控制服务执行，不给普通角色直接数据库权力。
 - 保存产物与 `task_result_submit` 只是收件；世界接受、正文接受、内部冻结和外部发表分别由对应服务完成。
 - 结果必须引用输入版本与实际证据，提供简短决定依据和未决项；不要求提供隐藏思维链。
 - 当前 generation、授权或依赖失效时停止正式提交，保留候选并返回原因；技术重试不推进故事时间、不重抽已选结果。
@@ -35,4 +35,4 @@
 
 写作、分维度审读与整卷编辑的工作者可依[创作岗位任务卡](../../docs/literary_knowledge/TASK_METHODS.md)选一项方法。服务端签发的快照只固定当前 Role 和主 Skill。素材的实际送达以绑定任务的记录为准。
 
-目录核对使用 catalog 的 contract_version 与精确文本哈希。八份内文标题沿用较早的 2.0.0，目录登记为 2.1.0。卷导演另有 volume_review 模式；research-literature 只向 literary_editor 注册，总编接收 MethodNote 后用自己的任务作决定。内置来源清单对选中的文本按 Git blob 校验，更换正式字节须走独立发行。
+角色与主 Skill 的 2.3.0 来源及早期版本见 [provenance.json](../provenance.json)。运行时检查选中的两个 Git blob 所属的同一次发行。Workshop 对接使用相同源码提交的 SHA-256 清单，已签发任务的输入仍按原快照重放。公开职业方法单独绑定到任务，角色的合法证据和认知范围保持在 NF。

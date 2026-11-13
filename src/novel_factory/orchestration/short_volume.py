@@ -672,7 +672,7 @@ class ShortVolumeRunner:
         write_json("model_call_results.json", self.calls)
         (root / "short_volume.md").write_text("# " + TITLE + "\n\n> TEST_FIXTURE：确定性工程样卷；尚未经过真实模型生产与作者文学验收。\n\n" +
             "\n\n".join("## " + TITLES[i] + "\n\n" + item["text"] for i, item in enumerate(accepted)) + "\n", encoding="utf-8")
-        (root / "release.txt").write_text(text, encoding="utf-8")
+        (root / "release.txt").write_bytes(text.encode("utf-8"))
         (root / "author_feedback.md").write_text(
             "# 作者全文阅读评价记录\n\n状态：PENDING_AUTHOR。以下栏目为空，未填写代表未取得反馈。\n\n"
             "- 对应发布清单 SHA-256：" + result["release"]["manifest"]["manifest_sha256"] + "\n"

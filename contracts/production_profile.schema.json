@@ -1,0 +1,1191 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://novel-factory.example/contracts/p6/production_profile.schema.json",
+  "title": "NovelFactory configurable P6 production and native world-design contracts",
+  "$defs": {
+    "ProductionComplexity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "characters": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "factions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "world_rules": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "storylines": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "target_hanzi": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000000
+        },
+        "target_chapters": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        }
+      }
+    },
+    "ProductionProfileOverrides": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "world_depth": {
+          "type": "string",
+          "enum": [
+            "minimal",
+            "core",
+            "detailed",
+            "layered"
+          ]
+        },
+        "planning_depth": {
+          "type": "string",
+          "enum": [
+            "storyline",
+            "chapters",
+            "volumes",
+            "layered"
+          ]
+        },
+        "volume_planning": {
+          "type": "boolean"
+        },
+        "character_simulation": {
+          "type": "boolean"
+        },
+        "environment_processes": {
+          "type": "boolean"
+        },
+        "local_replanning": {
+          "type": "boolean"
+        },
+        "future_volume_lookahead": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "cross_volume_memory": {
+          "type": "boolean"
+        },
+        "writing_concurrency": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "review_concurrency": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "window_chapters": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        },
+        "chapter_granularity": {
+          "type": "string",
+          "enum": [
+            "story",
+            "chapter",
+            "volume"
+          ]
+        },
+        "scene_granularity": {
+          "type": "string",
+          "enum": [
+            "compact",
+            "standard",
+            "detailed"
+          ]
+        },
+        "memory_scope": {
+          "type": "string",
+          "enum": [
+            "work",
+            "chapter",
+            "volume",
+            "cross_volume"
+          ]
+        },
+        "review_intensity": {
+          "type": "string",
+          "enum": [
+            "whole_work",
+            "chapter_and_work",
+            "chapter_volume_and_work"
+          ]
+        },
+        "production_mode": {"enum": ["standard", "quality"]},
+        "max_reworks": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8
+        }
+      }
+    },
+    "ProductionProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "preset",
+        "genre",
+        "complexity",
+        "world_depth",
+        "planning_depth",
+        "volume_planning",
+        "character_simulation",
+        "environment_processes",
+        "local_replanning",
+        "future_volume_lookahead",
+        "cross_volume_memory",
+        "writing_concurrency",
+        "review_concurrency",
+        "window_chapters",
+        "chapter_granularity",
+        "scene_granularity",
+        "memory_scope",
+        "review_intensity",
+        "max_reworks",
+        "independent_reviewers",
+        "release_conditions"
+      ],
+      "properties": {
+        "version": {
+          "const": "p6-profile-v1"
+        },
+        "preset": {
+          "type": "string",
+          "enum": [
+            "short",
+            "medium",
+            "medium_long",
+            "long",
+            "ultra_long"
+          ]
+        },
+        "genre": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "\\S"
+        },
+        "complexity": {
+          "$ref": "#/$defs/ProductionComplexity"
+        },
+        "world_depth": {
+          "type": "string",
+          "enum": [
+            "minimal",
+            "core",
+            "detailed",
+            "layered"
+          ]
+        },
+        "planning_depth": {
+          "type": "string",
+          "enum": [
+            "storyline",
+            "chapters",
+            "volumes",
+            "layered"
+          ]
+        },
+        "volume_planning": {
+          "type": "boolean"
+        },
+        "character_simulation": {
+          "type": "boolean"
+        },
+        "environment_processes": {
+          "type": "boolean"
+        },
+        "local_replanning": {
+          "type": "boolean"
+        },
+        "future_volume_lookahead": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "cross_volume_memory": {
+          "type": "boolean"
+        },
+        "writing_concurrency": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "review_concurrency": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "window_chapters": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        },
+        "chapter_granularity": {
+          "type": "string",
+          "enum": [
+            "story",
+            "chapter",
+            "volume"
+          ]
+        },
+        "scene_granularity": {
+          "type": "string",
+          "enum": [
+            "compact",
+            "standard",
+            "detailed"
+          ]
+        },
+        "memory_scope": {
+          "type": "string",
+          "enum": [
+            "work",
+            "chapter",
+            "volume",
+            "cross_volume"
+          ]
+        },
+        "review_intensity": {
+          "type": "string",
+          "enum": [
+            "whole_work",
+            "chapter_and_work",
+            "chapter_volume_and_work"
+          ]
+        },
+        "production_mode": {"enum": ["standard", "quality"]},
+        "max_reworks": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8
+        },
+        "independent_reviewers": {
+          "const": 2
+        },
+        "release_conditions": {
+          "const": [
+            "complete_text",
+            "accepted_world",
+            "reconciled_drafts",
+            "editorial_approval",
+            "two_full_independent_reviews",
+            "internal_release"
+          ]
+        }
+      }
+    },
+    "FirstWorldDesign": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "protagonist",
+        "place",
+        "storyline",
+        "world_rules",
+        "chapter_goals"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "pattern": "\\S"
+        },
+        "protagonist": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "pattern": "\\S"
+        },
+        "place": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "pattern": "\\S"
+        },
+        "storyline": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000,
+          "pattern": "\\S"
+        },
+        "world_rules": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 24,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000,
+            "pattern": "\\S"
+          }
+        },
+        "chapter_goals": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1200,
+            "pattern": "\\S"
+          }
+        },
+        "opening": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "counterpart",
+            "other_place",
+            "protagonist_knowledge",
+            "counterpart_knowledge",
+            "situation"
+          ],
+          "properties": {
+            "counterpart": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "\\S"
+            },
+            "other_place": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "\\S"
+            },
+            "protagonist_knowledge": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 800,
+              "pattern": "\\S"
+            },
+            "counterpart_knowledge": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 800,
+              "pattern": "\\S"
+            },
+            "situation": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 800,
+              "pattern": "\\S"
+            },
+            "environment": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "moving_entity"
+              ],
+              "properties": {
+                "moving_entity": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200,
+                  "pattern": "\\S"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "NextChapterPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "chapter_goals",
+        "volume_brief"
+      ],
+      "properties": {
+        "chapter_goals": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1200,
+            "pattern": "\\S"
+          }
+        },
+        "volume_brief": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000,
+          "pattern": "\\S"
+        }
+      }
+    },
+    "OpeningWorldDesign": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/FirstWorldDesign"
+        },
+        {
+          "type": "object",
+          "required": [
+            "opening"
+          ],
+          "properties": {
+            "protagonist": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40,
+              "pattern": "^[^，。；：\\n\\r]{1,40}$",
+              "description": "仅填单一人名、称呼或地名，人物经历和处境写入 opening 的 knowledge 或 situation 字段。"
+            },
+            "place": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40,
+              "pattern": "^[^，。；：\\n\\r]{1,40}$",
+              "description": "仅填单一人名、称呼或地名，人物经历和处境写入 opening 的 knowledge 或 situation 字段。"
+            },
+            "opening": {
+              "type": "object",
+              "properties": {
+                "counterpart": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 40,
+                  "pattern": "^[^，。；：\\n\\r]{1,40}$",
+                  "description": "仅填单一人名、称呼或地名，人物经历和处境写入 opening 的 knowledge 或 situation 字段。"
+                },
+                "other_place": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 40,
+                  "pattern": "^[^，。；：\\n\\r]{1,40}$",
+                  "description": "仅填单一人名、称呼或地名，人物经历和处境写入 opening 的 knowledge 或 situation 字段。"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "EnvironmentalOpeningWorldDesign": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/OpeningWorldDesign"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "opening": {
+              "type": "object",
+              "required": [
+                "environment"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "FrozenPhaseAdvice": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "decision": {
+          "enum": [
+            "APPROVED",
+            "RETURNED"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000,
+          "pattern": "\\S"
+        },
+        "scene_functions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "scene": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "function": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 800,
+                "pattern": "\\S"
+              },
+              "quote": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500,
+                "pattern": "\\S"
+              }
+            },
+            "required": [
+              "scene",
+              "function",
+              "quote"
+            ]
+          },
+          "maxItems": 128
+        },
+        "considered_options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "summary": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 8000
+              },
+              "disposition": {
+                "enum": [
+                  "SELECTED",
+                  "REJECTED",
+                  "DEFERRED"
+                ]
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 8000
+              },
+              "benefits": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8000
+                },
+                "maxItems": 16
+              },
+              "costs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8000
+                },
+                "maxItems": 16
+              }
+            },
+            "required": [
+              "summary",
+              "disposition",
+              "reason",
+              "benefits",
+              "costs"
+            ]
+          },
+          "maxItems": 10
+        },
+        "issue_decisions": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.1/editorial.schema.json#/$defs/IssueDecision"
+          },
+          "maxItems": 100
+        }
+      },
+      "required": [
+        "decision",
+        "summary",
+        "scene_functions",
+        "considered_options",
+        "issue_decisions"
+      ]
+    },
+    "ShortDesignReview": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64000
+        },
+        "issues": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ReviewIssue"
+          },
+          "maxItems": 64
+        },
+        "counterinterpretations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "maxItems": 32
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EvidenceRef"
+          },
+          "maxItems": 128
+        },
+        "short_arc": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "beginning": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "development": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "turning_point": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "ending": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "decision": {
+              "enum": [
+                "COMPLETE",
+                "ENDING_PLAN_REQUIRED"
+              ]
+            }
+          },
+          "required": [
+            "beginning",
+            "development",
+            "turning_point",
+            "ending",
+            "decision"
+          ]
+        }
+      },
+      "required": [
+        "summary",
+        "issues",
+        "counterinterpretations",
+        "evidence_refs",
+        "short_arc"
+      ],
+      "additionalProperties": false
+    },
+    "ShortEndingPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "storyline",
+        "chapter_goals"
+      ],
+      "properties": {
+        "storyline": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000,
+          "pattern": "\\S"
+        },
+        "chapter_goals": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1200,
+            "pattern": "\\S"
+          }
+        },
+        "opening": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "counterpart",
+            "other_place",
+            "protagonist_knowledge",
+            "counterpart_knowledge",
+            "situation"
+          ],
+          "properties": {
+            "counterpart": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "\\S"
+            },
+            "other_place": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "\\S"
+            },
+            "protagonist_knowledge": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 800,
+              "pattern": "\\S"
+            },
+            "counterpart_knowledge": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 800,
+              "pattern": "\\S"
+            },
+            "situation": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 800,
+              "pattern": "\\S"
+            },
+            "environment": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "moving_entity"
+              ],
+              "properties": {
+                "moving_entity": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200,
+                  "pattern": "\\S"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ShortEndingPlanReview": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64000
+        },
+        "issues": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ReviewIssue"
+          },
+          "maxItems": 64
+        },
+        "counterinterpretations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "maxItems": 32
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EvidenceRef"
+          },
+          "maxItems": 128
+        },
+        "short_arc": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "beginning": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "development": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "turning_point": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "ending": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "decision": {
+              "enum": [
+                "COMPLETE",
+                "ENDING_PLAN_REQUIRED"
+              ]
+            }
+          },
+          "required": [
+            "beginning",
+            "development",
+            "turning_point",
+            "ending",
+            "decision"
+          ]
+        },
+        "ending_plan_review": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "candidate_ref",
+            "opening_and_chapters_confirmed",
+            "answers"
+          ],
+          "properties": {
+            "candidate_ref": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+            },
+            "opening_and_chapters_confirmed": {
+              "type": "boolean"
+            },
+            "answers": {
+              "type": "array",
+              "maxItems": 32,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "question",
+                  "answer"
+                ],
+                "properties": {
+                  "question": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4000
+                  },
+                  "answer": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4000
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "summary",
+        "issues",
+        "counterinterpretations",
+        "evidence_refs",
+        "short_arc",
+        "ending_plan_review"
+      ],
+      "additionalProperties": false
+    },
+    "NextSimulatedVolume": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "chapter_goals",
+        "volume_brief",
+        "scene_situation",
+        "environment_destination"
+      ],
+      "properties": {
+        "chapter_goals": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1200,
+            "pattern": "\\S"
+          }
+        },
+        "volume_brief": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000,
+          "pattern": "\\S"
+        },
+        "scene_situation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 800,
+          "description": "下一次独立行动要裁决的当前条件，不能预定后果。"
+        },
+        "environment_destination": {
+          "enum": [
+            "INITIAL_PLACE",
+            "OTHER_PLACE",
+            "NO_MOVEMENT"
+          ],
+          "description": "既有环境实体的下一步位置。NO_MOVEMENT 表示本卷没有新的环境位移。"
+        }
+      }
+    },
+    "ShortEndingFix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "chapter_changes",
+        "opening_changes"
+      ],
+      "properties": {
+        "chapter_changes": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "chapter",
+              "replacement",
+              "issue_ids"
+            ],
+            "properties": {
+              "chapter": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 32
+              },
+              "replacement": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1200,
+                "pattern": "\\S"
+              },
+              "issue_ids": {
+                "type": "array",
+                "uniqueItems": true,
+                "minItems": 1,
+                "maxItems": 64,
+                "items": {
+                  "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+                }
+              }
+            }
+          }
+        },
+        "opening_changes": {
+          "type": "array",
+          "maxItems": 6,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "field",
+              "replacement",
+              "issue_ids"
+            ],
+            "properties": {
+              "field": {
+                "enum": [
+                  "protagonist_knowledge",
+                  "counterpart_knowledge",
+                  "situation",
+                  "counterpart",
+                  "other_place"
+                ]
+              },
+              "replacement": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1200,
+                "pattern": "\\S"
+              },
+              "issue_ids": {
+                "type": "array",
+                "uniqueItems": true,
+                "minItems": 1,
+                "maxItems": 64,
+                "items": {
+                  "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ShortEndingFixReview": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64000
+        },
+        "issues": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ReviewIssue"
+          },
+          "maxItems": 64
+        },
+        "counterinterpretations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "maxItems": 32
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EvidenceRef"
+          },
+          "maxItems": 128
+        },
+        "short_arc": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "beginning": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "development": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "turning_point": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "ending": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "decision": {
+              "enum": [
+                "COMPLETE",
+                "ENDING_PLAN_REQUIRED"
+              ]
+            }
+          },
+          "required": [
+            "beginning",
+            "development",
+            "turning_point",
+            "ending",
+            "decision"
+          ]
+        },
+        "ending_plan_review": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "candidate_ref",
+            "opening_and_chapters_confirmed",
+            "answers"
+          ],
+          "properties": {
+            "candidate_ref": {
+              "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"
+            },
+            "opening_and_chapters_confirmed": {
+              "type": "boolean"
+            },
+            "answers": {
+              "type": "array",
+              "maxItems": 32,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "question",
+                  "answer"
+                ],
+                "properties": {
+                  "question": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4000
+                  },
+                  "answer": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "issue_resolutions": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "issue_id",
+              "decision",
+              "reason"
+            ],
+            "properties": {
+              "issue_id": {
+                "$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/UUID"
+              },
+              "decision": {
+                "enum": [
+                  "RESOLVED",
+                  "OPEN"
+                ]
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1200,
+                "pattern": "\\S"
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "summary",
+        "issues",
+        "counterinterpretations",
+        "evidence_refs",
+        "short_arc",
+        "ending_plan_review",
+        "issue_resolutions"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

@@ -151,11 +151,19 @@ def main():
     parser.add_argument("--observation-seconds", type=float, default=60, help="Worker utilization reporting window")
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--set-transport", choices=("postgres", "redis"), help="Set admission mode for the authorized branch")
+    mode.add_argument("--start-book-review", type=Path, help="Enroll two scoped blind readers for a final release request")
+    mode.add_argument("--book-review-status", action="store_true", help="Inspect both reading tracks and the frozen score")
+    mode.add_argument("--book-review-reports", action="store_true", help="Export the two independent reports and their reading evidence")
+    mode.add_argument("--resume-book-review", action="store_true", help="Resume the same review after receipt reconciliation")
     mode.add_argument("--once", action="store_true")
     mode.add_argument("--enroll", type=Path, help="Private JSON with task_id, fixed input/manifest refs, cut and budget")
     mode.add_argument("--register-next-volume", type=Path, help="Preauthorize one next-volume planner on continuity publication")
     mode.add_argument("--register-scene", type=Path, help="Register a bounded scene from an authorized private JSON file")
     mode.add_argument("--register-pipeline", type=Path, help="Register chapter drafts, reviews and bounded future windows")
+    mode.add_argument("--register-rolling", type=Path, help="Register an authorized series of planned writing windows")
+    mode.add_argument("--rolling-status", action="store_true", help="Read frozen chapters, releases and the current window")
+    mode.add_argument("--replace-rolling-window", type=Path, help="Replace one unopened range with an adopted local plan")
+    mode.add_argument("--retry-rolling", type=Path, help="Retry an unsent, stopped node in the current window")
     mode.add_argument("--pipeline-status", action="store_true", help="Inspect production handoffs for this work and branch")
     mode.add_argument("--pipeline-results", action="store_true", help="Export this branch's exact draft text, advisory opinions and plan candidates")
     mode.add_argument("--revise-window", type=Path, help="Authorize a bounded new revision for one invalidated candidate")
@@ -179,7 +187,7 @@ def main():
         kernel = Kernel(db, ObjectStore(os.environ.get("NF_OBJECT_ROOT", "var/objects")))
         principal = kernel.authenticate(access["token"])
         adapters = {}
-        model_needed = not (args.set_transport or args.pipeline_status or args.pipeline_results or args.transfer_window or args.revise_window) and args.processor not in {"world", "compute", "recovery"}
+        model_needed = not (args.book_review_status or args.book_review_reports or args.resume_book_review or args.set_transport or args.rolling_status or args.replace_rolling_window or args.retry_rolling or args.pipeline_status or args.pipeline_results or args.transfer_window or args.revise_window) and args.processor not in {"world", "compute", "recovery"}
         configured = os.environ.get("NF_MODEL_ENDPOINT") and os.environ.get("NF_MODEL_NAME")
         profiles_file = os.environ.get("NF_RUNTIME_PROFILES")
         if profiles_file:
@@ -198,21 +206,48 @@ def main():
             adapters.update(legacy)
         gateway = AgentGateway(kernel, adapters, material_reader=production_material_reader(kernel))
         supervisor = RuntimeSupervisor(kernel, gateway)
+        if args.start_book_review or args.book_review_status or args.book_review_reports or args.resume_book_review:
+            from novel_factory.application.book_review import review_status, resume_review, start_review
+            work, branch = access["work_id"], access["branch_id"]
+            if args.start_book_review:
+                settings = json.loads(read_private_bytes(args.start_book_review, 8_000_000))
+                wr = settings["release_request"]["world_ref"]
+                if (wr["work_id"], wr["branch_id"]) != (work, branch):
+                    parser.error("Release request belongs to another project")
+                result = start_review(kernel, gateway, principal, **settings)
+            else:
+                result = (resume_review(kernel, principal, work, branch) if args.resume_book_review else
+                          review_status(kernel, principal, work, branch, include_reports=args.book_review_reports))
+            print(json.dumps(result, ensure_ascii=False))
+            return
         if args.set_transport:
             print(json.dumps(TaskDispatcher(supervisor, principal, access["work_id"], access["branch_id"]).switch(args.set_transport)))
+            return
+        if args.rolling_status:
+            from novel_factory.application.rolling_production import rolling_status
+            print(json.dumps(rolling_status(kernel, principal, access["work_id"], access["branch_id"]), ensure_ascii=False))
             return
         if args.pipeline_status or args.pipeline_results:
             from novel_factory.application.production_pipeline import pipeline_status
             print(json.dumps(pipeline_status(kernel, principal, access["work_id"], access["branch_id"],
                                              include_outputs=args.pipeline_results), ensure_ascii=False))
             return
-        if args.register_pipeline or args.transfer_window or args.revise_window:
+        if args.register_pipeline or args.register_rolling or args.replace_rolling_window or args.retry_rolling or args.transfer_window or args.revise_window:
             from novel_factory.application.production_pipeline import register_pipeline, revise_window, transfer_window
-            payload = json.loads((args.register_pipeline or args.transfer_window or args.revise_window).read_text(encoding="utf-8"))
+            payload = json.loads((args.register_pipeline or args.register_rolling or args.replace_rolling_window or args.retry_rolling or args.transfer_window or args.revise_window).read_text(encoding="utf-8"))
             if not isinstance(payload, dict) or not isinstance(payload.get("world_ref"), dict) or any(
                     payload["world_ref"].get(k) != access[k] for k in ("work_id", "branch_id")):
                 parser.error("Pipeline must belong to the configured work and branch")
-            if args.register_pipeline:
+            if args.register_rolling:
+                from novel_factory.application.rolling_production import register_rolling
+                result = register_rolling(kernel, gateway, principal, **payload)
+            elif args.replace_rolling_window:
+                from novel_factory.application.rolling_production import replace_planned_window
+                result = replace_planned_window(kernel, principal, **payload)
+            elif args.retry_rolling:
+                from novel_factory.application.rolling_production import retry_rolling
+                result = retry_rolling(kernel, principal, **payload)
+            elif args.register_pipeline:
                 result = register_pipeline(kernel, gateway, principal, **payload)
             else:
                 operation = transfer_window if args.transfer_window else revise_window

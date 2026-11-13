@@ -1,0 +1,148 @@
+{
+  "experiment": "short_supernatural",
+  "full_manuscripts": 0,
+  "external_scores": [],
+  "release_refs": [],
+  "recorded_ledger": [
+    {
+      "role": "world_designer",
+      "work": "bb48e3dd-daff-441b-acd2-b64063396d02",
+      "model": "deepseek-flash",
+      "state": "UNKNOWN",
+      "usage": {
+        "currency": null,
+        "cost_status": "UNKNOWN_COST",
+        "input_tokens": null,
+        "actual_amount": null,
+        "output_tokens": null,
+        "cached_input_tokens": null
+      },
+      "reason": "MODEL_PROTOCOL_ERROR",
+      "attempt": "562b0a3f-c42d-4e82-b0d9-4f9386c90e95",
+      "outcome": "UNKNOWN",
+      "task_kind": "initial_world",
+      "generation": 1,
+      "reserved_at": "2026-11-13T14:26:00.567721+09:00",
+      "actual_amount": null,
+      "elapsed_seconds": "68.795492",
+      "reserved_amount": "0.250000",
+      "known_estimated_cny": null,
+      "dispatch_route": "deepseek-flash"
+    },
+    {
+      "role": "world_designer",
+      "work": "313767e0-96c4-4c96-9d6f-64e7f5cf744e",
+      "model": "deepseek-flash",
+      "state": "UNKNOWN",
+      "usage": {
+        "currency": null,
+        "cost_status": "UNKNOWN_COST",
+        "input_tokens": 3076,
+        "actual_amount": null,
+        "output_tokens": 1199,
+        "cached_input_tokens": 0
+      },
+      "reason": "INVALID_ARGUMENT",
+      "attempt": "188e801c-2101-474d-ad92-21e1f07d5bb6",
+      "outcome": "REJECTED",
+      "task_kind": "initial_world",
+      "generation": 1,
+      "reserved_at": "2026-11-13T14:30:17.663307+09:00",
+      "actual_amount": null,
+      "elapsed_seconds": "16.526851",
+      "reserved_amount": "0.250000",
+      "receipt_sha256": "c4213cca694fbd228c407dfad08d6f11b7d292904d30b40665fc8fbe51b234f6",
+      "known_estimated_cny": "0.007872",
+      "dispatch_route": "deepseek-flash"
+    },
+    {
+      "role": "world_designer",
+      "work": "3999b940-b358-4d69-b933-79ea74f9743f",
+      "model": null,
+      "state": "SENT",
+      "usage": null,
+      "reason": null,
+      "attempt": "75e12cb7-2e3e-40b9-a73b-f5cff17549d6",
+      "outcome": null,
+      "task_kind": "initial_world",
+      "generation": 1,
+      "reserved_at": "2026-11-13T14:32:47.883785+09:00",
+      "actual_amount": null,
+      "elapsed_seconds": null,
+      "reserved_amount": "0.250000",
+      "known_estimated_cny": null,
+      "dispatch_route": "deepseek-flash"
+    }
+  ],
+  "capability_probes": [
+    {
+      "model": "deepseek-flash",
+      "purpose": "CAPABILITY_PROBE",
+      "request_tag": "5358e7a8caaf4c79b5c17d8327f7d478",
+      "sent_at": "2026-11-13T05:28:12.690934+00:00",
+      "http": 200,
+      "model_returned": "deepseek-flash",
+      "finish": "stop",
+      "usage": {
+        "prompt_tokens": 38,
+        "completion_tokens": 5,
+        "total_tokens": 43,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 38
+      },
+      "valid": true,
+      "received_at": "2026-11-13T05:28:18.653789+00:00",
+      "elapsed_seconds": 5.963,
+      "receipt_sha256": "92787a86fe70f51feff69940202545d666c2798f8f576c22f3609b501cfcc0e9",
+      "estimated_cny": "0.000058"
+    },
+    {
+      "model": "deepseek-v4-pro",
+      "purpose": "CAPABILITY_PROBE",
+      "request_tag": "a2f1883ea3e94d9ca8cb39153afaf39d",
+      "sent_at": "2026-11-13T05:28:18.655494+00:00",
+      "http": 200,
+      "model_returned": "deepseek-v4-pro",
+      "finish": "stop",
+      "usage": {
+        "prompt_tokens": 35,
+        "completion_tokens": 5,
+        "total_tokens": 40,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 35
+      },
+      "valid": true,
+      "received_at": "2026-11-13T05:28:22.406091+00:00",
+      "elapsed_seconds": 3.751,
+      "receipt_sha256": "dde7ce6ef20ed4b3c4e49b8de249e8c3d33703c186d63863f6bf304018d2c445",
+      "estimated_cny": "0.000225"
+    }
+  ],
+  "production_tokens_observed": 4275,
+  "probe_tokens_observed": 83,
+  "combined_tokens_observed": 4358,
+  "combined_estimate_known_rows_cny": "0.008155",
+  "total_experiment_tokens": null,
+  "total_experiment_cost": null,
+  "invoice_confirmed_charge": null,
+  "price_source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+  "price_window": "2026-11-13 Beijing local time 13:26–13:33, off peak",
+  "input_prices_per_million_cache_miss_cny": {
+    "deepseek-flash": "1",
+    "deepseek-v4-pro": "4.5"
+  },
+  "output_prices_per_million_cny": {
+    "deepseek-flash": "4",
+    "deepseek-v4-pro": "13.5"
+  },
+  "applicable_cache_hits": 0,
+  "billing_state": "Two production attempts lack measured usage. Full cost and tokens unavailable. Provider balances rounded to cents cannot attribute charges to requests.",
+  "latest_dispatch": "SENT; no completion or terminal failure receipt in the recovered ledger. Do not replay.",
+  "acceptance": "No reviewer assigned to a manuscript; literary scores and per-book cost unavailable."
+}
