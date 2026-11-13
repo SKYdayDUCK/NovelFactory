@@ -3,7 +3,11 @@ import argparse
 from uuid import UUID
 
 from novel_factory.infrastructure.database import Database
-from novel_factory.orchestration.progress import check_progress, configure_progress, set_progress_maintenance
+from novel_factory.orchestration.progress import (
+    check_progress,
+    configure_progress,
+    set_progress_maintenance,
+)
 
 
 def main():

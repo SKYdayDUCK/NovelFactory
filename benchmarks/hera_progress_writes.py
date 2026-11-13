@@ -1,15 +1,15 @@
 """Same-branch PG17 projection A/B tests in a disposable migrated database."""
 
 import argparse
-from concurrent.futures import ThreadPoolExecutor
 import gzip
 import json
 import os
-from pathlib import Path
 import subprocess
+import time
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 from tempfile import TemporaryDirectory
 from threading import Barrier, Event
-import time
 from uuid import UUID
 
 import psycopg
@@ -185,21 +185,21 @@ def run_arm(dsn, conn, mode, branch, ids, workers, operations):
         WHERE task_id=%s""",
         (sample_id,),
     ).fetchone()[0]
-    return dict(
-        mode=mode,
-        writes=len(rows),
-        tps=len(rows) / elapsed,
-        latency=percentiles([(r[-1] - r[4]) * 1e-9 for r in rows]),
-        wal_bytes=wal,
-        functions=functions,
-        sql=statements,
-        transactions=rows,
-        wait_samples=samples,
-        folded=folded,
-        write_plan=plan,
-        pre_fold_read_plan=dirty_read,
-        clean_read_plan=clean_read,
-    )
+    return {
+        "mode": mode,
+        "writes": len(rows),
+        "tps": len(rows) / elapsed,
+        "latency": percentiles([(r[-1] - r[4]) * 1e-9 for r in rows]),
+        "wal_bytes": wal,
+        "functions": functions,
+        "sql": statements,
+        "transactions": rows,
+        "wait_samples": samples,
+        "folded": folded,
+        "write_plan": plan,
+        "pre_fold_read_plan": dirty_read,
+        "clean_read_plan": clean_read,
+    }
 
 
 def main():
@@ -251,16 +251,18 @@ def main():
                 "SELECT pg_get_functiondef('nf_hera_count_transition()'::regprocedure)"
             ).fetchone()[0]
             conn.execute((SQL_DIR / "hera_progress_alternatives.sql").read_text())
-            out = dict(
-                revision=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
-                cpu_affinity=sorted(os.sched_getaffinity(0)),
-                server=conn.execute("SELECT version()").fetchone()[0],
-                workers=args.workers,
-                tasks=args.tasks,
-                operations_per_worker=args.operations,
-                order=modes,
-                arms=[],
-            )
+            out = {
+                "revision": subprocess.check_output(
+                    ["git", "rev-parse", "HEAD"], text=True
+                ).strip(),
+                "cpu_affinity": sorted(os.sched_getaffinity(0)),
+                "server": conn.execute("SELECT version()").fetchone()[0],
+                "workers": args.workers,
+                "tasks": args.tasks,
+                "operations_per_worker": args.operations,
+                "order": modes,
+                "arms": [],
+            }
             for mode in modes:
                 prepare(conn, mode, original, branch, kernel.db)
                 arm = run_arm(dsn, conn, mode, branch, ids, args.workers, args.operations)

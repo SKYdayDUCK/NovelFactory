@@ -3,12 +3,12 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 from sqlalchemy import text
+from test_hera_durable_admission import spec as task_spec
 
 from novel_factory.application.mcp_runtime import McpRuntime, ProjectBinding
 from novel_factory.domain.errors import DomainError
 from novel_factory.fixtures import load_fixture, point
 from novel_factory.orchestration.progress import check_progress, configure_progress
-from test_hera_durable_admission import spec as task_spec
 
 
 def test_optional_projection_matches_existing_and_future_tasks(kernel_env, monkeypatch):

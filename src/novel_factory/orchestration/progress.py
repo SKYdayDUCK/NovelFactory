@@ -1,7 +1,6 @@
 """Optional transactionally maintained task totals; authorization stays at the caller."""
 from sqlalchemy import text
 
-
 _TASK_STATES = frozenset({
     "BLOCKED", "READY", "RUNNING", "RESULT_STORED", "VALIDATING", "WAITING_REVIEW",
     "ACCEPTED", "STALE", "PAUSED", "CANCELLED", "FAILED",
