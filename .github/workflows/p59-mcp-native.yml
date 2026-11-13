@@ -1,0 +1,46 @@
+name: Isolated MCP experiment / native Windows
+on:
+  push:
+    branches: [experiment/p59-mcp-capacity-scheduler]
+    paths: ['.github/workflows/p59-mcp-native.yml', 'src/novel_factory/interfaces/mcp_stdio.py', 'src/novel_factory/application/mcp_runtime.py', 'workshop/src/agent_workshop/reconcile.py']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-2025
+    timeout-minutes: 25
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e
+      - run: uv sync --locked --group dev --python 3.12
+      - name: Start runner-private PostgreSQL 17
+        shell: pwsh
+        run: |
+          Set-Service -Name postgresql-x64-17 -StartupType Manual
+          Start-Service -Name postgresql-x64-17
+          $env:PGPASSWORD = 'root'
+          $version = & "$env:PGBIN/psql.exe" -XAt -h 127.0.0.1 -U postgres -c 'show server_version_num'
+          if ($LASTEXITCODE -ne 0 -or [int]$version -lt 170000 -or [int]$version -ge 180000) { throw 'PostgreSQL 17 required' }
+          & "$env:PGBIN/createdb.exe" -h 127.0.0.1 -U postgres nf_exp
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          'NF_TEST_DATABASE_URL=postgresql+psycopg://postgres:root@127.0.0.1:5432/nf_exp' | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Native role, cancellation, renewal and authority tests
+        run: >-
+          uv run --no-sync python -m pytest -q tests/unit/test_bound_tool_admission.py tests/integration/test_p5_mcp.py
+          tests/unit/test_p55_capacity.py
+          tests/unit/test_native_platform.py tests/integration/test_bound_tool_entrypoints.py
+          tests/integration/test_mcp_idle_pool.py tests/integration/test_p58_routing.py
+          --junitxml=windows.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mcp-native-windows-${{ github.sha }}
+          path: windows.xml
