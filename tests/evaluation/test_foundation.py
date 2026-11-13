@@ -2,6 +2,7 @@
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 import json
+import os
 from pathlib import Path
 import stat
 import subprocess
@@ -183,7 +184,11 @@ def test_seeded_blind_pack_is_reproducible_and_separate_from_key(populated, tmp_
                    *[c["condition_id"] for c in plan["conditions"]]):
         assert hidden.encode() not in visible
     assert {p.name for p in (tmp_path / "reviewer").iterdir()} == {"A.txt", "B.txt", "brief.txt", "review.json", "README.txt"}
-    assert stat.S_IMODE((tmp_path / "coordinator" / "allocation.json").stat().st_mode) == 0o600
+    from novel_factory.infrastructure.private_files import read_private_bytes
+    allocation = tmp_path / "coordinator" / "allocation.json"
+    assert read_private_bytes(allocation, 1_000_000) == allocation.read_bytes()
+    if os.name != "nt":
+        assert stat.S_IMODE(allocation.stat().st_mode) == 0o600
     assert key["seed"] == plan["randomization_seed"] and key["delivery_status"].startswith("PREPARED_NOT_DELIVERED")
     assert packet["status"] == "READY_FOR_REVIEW"
     report2 = run_demo(tmp_path / "second-independent-store")

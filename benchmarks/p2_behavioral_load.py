@@ -14,7 +14,6 @@ import importlib.metadata
 import json
 import os
 import platform
-import resource
 import subprocess
 import sys
 import threading
@@ -593,6 +592,10 @@ def load_exit_code(result, scope):
 def run_benchmark(kernel, url, *, agents, hot_fraction=.2, profile='mixed', arrival_rps=10,
                   open_loop_rps=1000, rounds=5, max_attempts=1, retry_budget_seconds=30,
                   service_mode='same-process', api_processes=1):
+    # Resource telemetry and the frozen capacity workload run on POSIX hosts.
+    # Pure response-validation helpers remain importable by Windows tests.
+    import resource
+
     if service_mode not in {'same-process', 'isolated-process'} or api_processes not in {1, 2, 4}:
         raise ValueError('unsupported service topology')
     if service_mode == 'same-process' and api_processes != 1:

@@ -55,6 +55,14 @@ jobs:
           uv run --no-sync python -m pytest -q tests/unit/test_native_platform.py
           tests/reliability/test_objects.py tests/unit/test_host_process.py tests/unit/test_p55_capacity.py
           tests/unit/test_p58_providers.py --junitxml=native-core.xml
+      - name: Provider vault, backup and platform-neutral interface regressions
+        run: >-
+          uv run --no-sync python -m pytest -q tests/unit/test_credentials.py
+          tests/unit/test_online_backup_runtime.py tests/unit/test_open_arrival_evidence.py
+          tests/unit/test_p2_load_evidence.py tests/evaluation/test_foundation.py
+          --junitxml=native-portability.xml
+      - name: Verify the platform-neutral public interface catalog
+        run: uv run --no-sync python scripts/export_public_api.py --check docs/reference/catalog.json --examples docs/reference/examples.json
       - name: Verify Windows ran the real app-server protocol case
         if: runner.os == 'Windows'
         shell: pwsh

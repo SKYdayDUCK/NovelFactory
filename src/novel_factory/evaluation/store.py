@@ -16,6 +16,7 @@ from uuid import UUID, uuid5
 from novel_factory.domain.canonical import canonical_bytes, fingerprint, strict_json_loads
 from novel_factory.domain.errors import DomainError
 from novel_factory.infrastructure.native_files import file_lock, open_append, publish_file, sync_directory
+from novel_factory.infrastructure.private_files import prepare_private_directory
 from .contracts import validate
 from .protocol import condition_accounting, controls_signature, require, state_for, validate_plan
 
@@ -383,6 +384,7 @@ class EvaluationStore:
                     "EVALUATION_BLINDING_LEAK", "Reviewer directory contains files outside the blind packet")
             for name, content in files.items():
                 _immutable_file(reviewer / name, content)
+            prepare_private_directory(coordinator)
             _immutable_file(coordinator / "allocation.json", canonical_bytes(allocation) + b"\n")
             return {"packet_ref": packet_ref, "allocation_ref": allocation_ref, "reviewer_directory": str(reviewer),
                     "coordinator_directory": str(coordinator), "delivery_status": allocation["delivery_status"]}

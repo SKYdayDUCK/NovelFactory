@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import multiprocessing
 import os
-import resource
 import socket
 import threading
 import time
@@ -30,6 +29,8 @@ from novel_factory.interfaces.http import HttpSettings, create_app
 
 def _worker(channel, listener, url, objects, processes, pool_size):
     """Spawn target: inherited engines/connections are deliberately impossible."""
+    import resource
+
     db = Database(url, pool_size=pool_size, max_overflow=0)
     kernel = Kernel(db, ObjectStore(objects))
     service = WorldQueryService(kernel)

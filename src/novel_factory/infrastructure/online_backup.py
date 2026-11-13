@@ -53,7 +53,7 @@ class OnlineBackupService(BackupService):
                     shutil.copyfile(source, target)
                 except FileNotFoundError as exc:
                     raise DomainError("INTERPRETATION_CHANGED", "Runtime disappeared during backup") from exc
-                with target.open("rb") as stream:
+                with target.open("r+b") as stream:
                     os.fsync(stream.fileno())
                 if _sha(target) != expected:
                     raise DomainError("INTERPRETATION_CHANGED", "Runtime changed while backing up")
@@ -99,7 +99,7 @@ class OnlineBackupService(BackupService):
                 rows = conn.execute(text("SELECT hash, size FROM nf_objects ORDER BY hash")).mappings().all()
                 dump = self._tool("pg_dump", ["--format=custom", "--no-owner", "--no-acl",
                                   "--snapshot=" + snapshot, "--file", str(dest / "database.dump")], self.engine.url)
-                with (dest / "database.dump").open("rb") as stream:
+                with (dest / "database.dump").open("r+b") as stream:
                     os.fsync(stream.fileno())
                 backup_objects = ObjectStore(dest / "objects")
                 objects = {}

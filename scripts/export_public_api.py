@@ -36,7 +36,7 @@ def http_routes():
             method = route.func.attr.upper()
             path = route.args[0].value
             entry = {'transport': 'http', 'method': method, 'path': path,
-                     'source': str(source), 'handler': handler.name}
+                     'source': source.as_posix(), 'handler': handler.name}
             parameters = re.findall(r'\{([^{}]+)\}', path)
             if parameters:
                 entry['pathParameters'] = {param: {'type': 'string', 'format': 'uuid'} for param in parameters}
