@@ -239,6 +239,15 @@ def inspect_wire_receipt(kernel, owner, work, branch, attempt):
         }
         try:
             wire = read_receipt(kernel.objects, attempt, call["request_hash"])
+            if wire is None:
+                headers = read_receipt(kernel.objects, attempt, call["request_hash"], headers_only=True)
+                if headers:
+                    value = headers[0]
+                    request_id = value.get("receipt")
+                    result["response_headers"] = {
+                        "http_status": value["http_status"], "transport_window": value["transport_window"],
+                        "receipt_sha256": hashlib.sha256(request_id.encode()).hexdigest() if request_id else None,
+                    }
         except (ValueError, TypeError, KeyError):
             require(
                 False, "INVALID_EVIDENCE", "Private receipt does not match the original request"

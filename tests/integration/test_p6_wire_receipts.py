@@ -159,3 +159,37 @@ def test_inspection_is_scoped_and_never_settles_or_dispatches(kernel_env):
         with pytest.raises(DomainError) as wrong:
             inspect_wire_receipt(*scope, attempt)
         assert wrong.value.code == "INVALID_EVIDENCE"
+
+
+def test_response_headers_survive_interrupted_body_without_success_receipt(tmp_path):
+    from agent_runtime.providers import post
+    from agent_runtime.protocol import ModelCallFailure
+    class Interrupted(BaseHTTPRequestHandler):
+        def log_message(self, *_):
+            pass
+
+        def do_POST(self):
+            self.rfile.read(int(self.headers["Content-Length"]))
+            self.send_response(200)
+            self.send_header("x-request-id", "fixture-request-id")
+            self.send_header("Content-Length", "30")
+            self.end_headers()
+            self.wfile.write(b"partial")
+            self.close_connection = True
+
+    server = HTTPServer(("127.0.0.1", 0), Interrupted)
+    thread = Thread(target=server.handle_request, daemon=True)
+    thread.start()
+    path = tmp_path / "attempt.json"
+    try:
+        with pytest.raises(ModelCallFailure):
+            post(url=f"http://127.0.0.1:{server.server_port}/", payload={"model":"fixture"},
+                 credential="test-key", request_hash="c"*64, timeout=5, limit=2000,
+                 receipt_target={"path":str(path), "attempt_id":str(uuid4())})
+        headers = json.loads(path.with_suffix(".headers.json").read_bytes())
+        assert headers["receipt"] == "fixture-request-id" and headers["complete"] is False
+        assert headers["content"] == "" and b"test-key" not in path.with_suffix(".headers.json").read_bytes()
+        assert not path.exists() or json.loads(path.read_bytes())["complete"] is False
+    finally:
+        thread.join(timeout=5)
+        server.server_close()

@@ -18,7 +18,7 @@ class _NoRedirect(HTTPRedirectHandler):
         return None
 
 
-def _persist(options, status, content, complete, receipt, window):
+def _persist(options, status, content, complete, receipt, window, *, headers_only=False):
     """Publish only returned bytes/metadata. The parent may already be gone."""
     target = options.get("receipt_target")
     if target is None:
@@ -29,6 +29,9 @@ def _persist(options, status, content, complete, receipt, window):
                "body_sha256": hashlib.sha256(content).hexdigest(),
                "content": base64.b64encode(content).decode("ascii"),
                "receipt": receipt, "transport_window": window}
+    if headers_only:
+        dest = dest.with_suffix(".headers.json")
+        payload["version"] = "nf.http-headers.v1"
     fd, name = tempfile.mkstemp(dir=dest.parent)
     try:
         with os.fdopen(fd, "wb") as stream:
@@ -61,15 +64,21 @@ def main():
             reply = err
         with reply:
             limit = options["limit"]
-            content = reply.read(limit + 1)
-            window = {"started_at": started_at, "received_at": datetime.now(UTC).isoformat()}
             receipt = reply.headers.get("x-request-id")
-            _persist(options, reply.status, content[:limit], len(content) <= limit, receipt, window)
+            _persist(options, reply.status, b"", False, receipt,
+                     {"started_at": started_at, "received_at": datetime.now(UTC).isoformat()}, headers_only=True)
+            content = reply.read(limit + 1)
+            size = reply.headers.get("Content-Length")
+            complete = len(content) <= limit and (size is None or size.isdecimal() and int(size) == len(content))
+            window = {"started_at": started_at, "received_at": datetime.now(UTC).isoformat()}
+            _persist(options, reply.status, content[:limit], complete, receipt, window)
             if reply.status >= 300:
                 result = {"failure": "MODEL_RATE_LIMITED" if reply.status == 429 else "MODEL_HTTP_ERROR",
                           "status": reply.status}
             elif len(content) > limit:
                 result = {"failure": "MODEL_RESPONSE_TOO_LARGE"}
+            elif not complete:
+                result = {"failure": "MODEL_TRANSPORT_UNKNOWN"}
             else:
                 result = {"content": base64.b64encode(content).decode("ascii"), "receipt": receipt,
                           "transport_window": window}
