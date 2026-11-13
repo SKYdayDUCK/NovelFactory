@@ -56,21 +56,39 @@ def replace_stopped_reading(kernel, gateway, principal, request, *, apply=False)
         task = repo.one("tasks", {"task_id": request.task_id, "work_id": request.work_id,
                                  "branch_id": request.branch_id}, lock="update")
         require(task and task["generation"] == request.expected_generation
-                and task["state"] == "RESULT_STORED" and task["role_id"] == "evidence_maintainer"
+                and task["state"] in {"RESULT_STORED", "BLOCKED"} and task["role_id"] == "evidence_maintainer"
                 and task["task_kind"] == "assertion_extract", "TASK_REBIND_REQUIRED",
                 "Only a returned fact reading can use this recovery")
         matches = [(key, node) for key, node in board["nodes"].items() if node.get("task_id") == request.task_id]
         require(len(matches) == 1, "STALE_GENERATION", "Selected reading changed")
         identity, node = matches[0]
         require(node["stage"] == "facts" and node["state"] == "STOPPED" and not node.get("output_ref")
-                and node.get("reason") == "STRATEGY_REASSESSMENT_REQUIRED"
+                and node.get("reason") in {"STRATEGY_REASSESSMENT_REQUIRED", "MODEL_INPUT_REQUIRED"}
                 and not any(n["state"] == "ENROLLED" for n in board["nodes"].values()),
                 "TASK_REBIND_REQUIRED", "Drain active handoffs before changing the phase policy")
         active = repo.conn.scalar(text("""SELECT count(*) FROM nf_call_attempts c JOIN nf_tasks t USING(task_id)
             WHERE t.work_id=:w AND t.branch_id=:b AND c.state IN ('PREPARED','SENT','RUNNING')"""),
             {"w": request.work_id, "b": request.branch_id})
         require(not active, "CALL_RECONCILIATION_REQUIRED", "Drain active upstream calls first")
-        evidence, _ = CandidateDelivery(kernel, gateway).audited_candidate(repo, task, production_accounting=True)
+        if task["state"] == "BLOCKED":
+            from .native_delivery import require_native_delivery
+
+            require(node.get("reason") == "MODEL_INPUT_REQUIRED", "TASK_REBIND_REQUIRED", "Missing-input handoff required")
+            call = repo.one("call_attempts", {"task_id": task["task_id"], "generation": task["generation"],
+                                             "call_key": "supervised-candidate"})
+            audit_row = call and gateway._read_audit(repo, call["attempt_id"])
+            evidence = audit_row and audit_row["payload"]
+            result = repo.one("task_results", {"result_id": task["current_result_id"], "disposition": "CURRENT"})
+            require(evidence and result and result["payload"]["status"] == "NEEDS_INPUT"
+                    and task["current_result_id"] == str(uuid5(UUID(call["attempt_id"]), "task-result"))
+                    and result["payload"]["artifacts"] == [
+                        {k: audit_row[k] for k in ("artifact_id", "artifact_revision_id", "sha256")}, evidence["output_ref"]],
+                    "INVALID_EVIDENCE", "Missing-input result identity differs")
+            require_native_delivery(kernel, repo, task, call, audit_row,
+                kernel.artifact(repo, evidence["response_ref"], request.work_id, kind="AGENT_RESPONSE"),
+                kernel.artifact(repo, evidence["output_ref"], request.work_id, kind="AGENT_CANDIDATE"), needs_input_read=True)
+        else:
+            evidence, _ = CandidateDelivery(kernel, gateway).audited_candidate(repo, task, production_accounting=True)
         job = repo.one("supervisor_jobs", {"task_id": request.task_id})
         old_input = kernel.artifact(repo, job["config"]["dispatch"]["input_ref"], request.work_id,
                                     kind="AGENT_INPUT")["payload"]
@@ -107,7 +125,7 @@ def replace_stopped_reading(kernel, gateway, principal, request, *, apply=False)
         history = {**result, "prior_node": deepcopy(node), "input_ref": job["config"]["dispatch"]["input_ref"],
                    "old_attempt_id": evidence["attempt_id"], "new_budget_id": budget,
                    "policy_ref": adopted["policy_ref"], "recovered_at": repo.now().isoformat()}
-        for field in ("task_id", "reason", "enrolled_at", "schema_repairs", "fact_format_repairs", "active_format_repair"):
+        for field in ("task_id", "reason", "enrolled_at", "schema_repairs", "fact_format_repairs", "active_format_repair", "input_requirement"):
             node.pop(field, None)
         node.setdefault("policy_recoveries", []).append(history)
         board.update(budget_id=budget, token_reservation=request.token_reservation,

@@ -27,8 +27,9 @@ def project_change_token(kernel, principal, work, branch):
               (SELECT jsonb_agg(jsonb_build_array(c.attempt_id,c.state,c.actual_amount,c.actual_tokens,c.provider_receipt)
                         ORDER BY c.attempt_id)::text FROM nf_call_attempts c JOIN nf_tasks t USING(task_id)
                WHERE t.work_id=:work AND t.branch_id=:branch),
-              (SELECT jsonb_agg(jsonb_build_array(budget_id,limit_amount,reserved_amount,spent_amount)
-                        ORDER BY budget_id)::text FROM nf_budgets WHERE work_id=:work),
+              (SELECT jsonb_agg(jsonb_build_array(b.budget_id,b.limit_amount,b.reserved_amount,b.spent_amount,l.total_tokens)
+                        ORDER BY b.budget_id)::text FROM nf_budgets b
+                        LEFT JOIN nf_budget_token_limits l USING(budget_id) WHERE b.work_id=:work),
               (SELECT jsonb_agg(jsonb_build_array(d.task_id,d.generation,d.retry_not_before<=statement_timestamp())
                         ORDER BY d.task_id)::text FROM nf_quota_retry_deadlines d JOIN nf_tasks t USING(task_id)
                WHERE t.work_id=:work AND t.branch_id=:branch),

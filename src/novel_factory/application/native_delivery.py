@@ -10,18 +10,24 @@ from .prompt_schema import validated_payload
 
 
 def require_native_delivery(kernel, repo, task, call, audit_row, response_row, candidate_row,
-                            *, design_revision_read=False, ending_plan_read=False):
+                            *, design_revision_read=False, ending_plan_read=False, needs_input_read=False):
     """Verify frozen bytes and the trusted Host journal; do not settle or redispatch."""
     audit, response, candidate = audit_row["payload"], response_row["payload"], candidate_row["payload"]
     config, usage = audit["model_configuration"], audit["usage"]
     attempt = call["attempt_id"]
     host = repo.one("host_turns", {"attempt_id": attempt})
     task_input = repo.one("task_inputs", {"task_id": task["task_id"], "generation": task["generation"]})
+    expected_status = "NEEDS_INPUT" if needs_input_read else "SUCCEEDED"
+    if needs_input_read:
+        # Only an administrator's independent fact-reading recovery uses this
+        # proof. It is never an approval or a successful candidate delivery.
+        _check((task["role_id"], task["task_kind"]) == ("evidence_maintainer", "assertion_extract")
+               and task["state"] == "BLOCKED" and task["current_result_id"])
     _check(config.get("adapter_kind") == "codex-cli" and config.get("auth_mode") == "host-login"
            and config.get("provider") == "codex-cli" and config.get("endpoint") is None
            and audit["execution_kind"] == config["execution_kind"] == "REAL_HOST"
            and config.get("isolation") == "STATELESS_TEXT_ONLY"
-           and audit["outcome"] == "VALIDATED_CANDIDATE" and audit["result_status"] == "SUCCEEDED"
+           and audit["outcome"] == "VALIDATED_CANDIDATE" and audit["result_status"] == expected_status
            and audit["reason"] is None and host and host["phase"] == "COMPLETED"
            and call["state"] == audit["accounting_state"] == "UNKNOWN"
            and call["actual_amount"] is call["actual_tokens"] is usage["actual_amount"] is None
@@ -65,8 +71,9 @@ def require_native_delivery(kernel, repo, task, call, audit_row, response_row, c
            == audit["provider_receipt"] == response["provider_receipt"] == call["provider_receipt"])
     envelope = strict_json_loads(response["text"])
     _check(_transport_identity(envelope, audit, task, structural_source=False)
-           and envelope["status"] == "SUCCEEDED"
-           and (not envelope["unresolved_questions"] or design_revision_read
+           and envelope["status"] == expected_status
+           and (needs_input_read and bool(envelope["unresolved_questions"])
+                or not needs_input_read and not envelope["unresolved_questions"] or design_revision_read
                 and (task["role_id"], task["task_kind"]) == ("reviewer", "fact")
                 and bound_input["output_contract"] == {"name": "ShortDesignReview", "version": "production_profile"}
                 and envelope["payload"].get("short_arc", {}).get("decision") == "ENDING_PLAN_REQUIRED"

@@ -6,9 +6,9 @@ result is the complete, deterministically projected user message.
 """
 from __future__ import annotations
 
+import json
 from functools import lru_cache
 from hashlib import sha1, sha256
-import json
 
 from novel_factory.application.kernel import require
 from novel_factory.contracts.registry import validate_contract
@@ -188,6 +188,23 @@ def build_context_packet(binding, materials, editorial=None, joint=None, proposa
         for e in f["evidence_refs"]:
             require(fingerprint(e) in permitted, "VIEW_DENIED", "Fact evidence is outside the compiled cut")
             select(e, cut["plane"], "Source of a selected fixed-cut statement.", statement)
+    if (cut["plane"] == "WORLD" and (task["role_id"], task["task_kind"])
+            == ("evidence_maintainer", "assertion_extract")):
+        for section in compiled["sections"]:
+            if section["section_kind"] != "EVIDENCE":
+                continue
+            value = _decode(section["content"])
+            if not isinstance(value, dict) or value.get("kind") != "FACT_READING_SCOPE":
+                continue
+            require(value["world_ref"] == bundle["world_ref"] and value["story_time"] == bundle["story_time"],
+                    "VIEW_DENIED", "Fact reading metadata differs from the compiled cut")
+            # _binding verified this artifact's hash, role, manifest, grant and
+            # fixed WorldRef. Keep unknown typed answers intact, rather than
+            # inventing facts or names from the manuscript.
+            compiled_ref = binding["compiled_ref"]
+            structured.append({"ref": compiled_ref, "value": value})
+            select({"kind": "ARTIFACT", "artifact_ref": compiled_ref}, "WORLD",
+                   "Authorized identity labels and typed state answers from this fixed compiler output.", value)
     if cut["plane"] == "PLAN":
         for section in compiled["sections"]:
             if section["section_kind"] == "PLAN":

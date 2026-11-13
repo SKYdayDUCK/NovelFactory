@@ -2,6 +2,7 @@
 
 import pytest
 
+from novel_factory.application.budget_limits import SharedBudgetService
 from novel_factory.application.lifecycle_state import project_change_token
 from novel_factory.domain.errors import DomainError
 from novel_factory.fixtures import load_fixture
@@ -52,3 +53,22 @@ def test_notification_burst_is_coalesced_without_repeated_scans(kernel_env):
             connection.exec_driver_sql("SELECT pg_notify('nf_supervisor_wake', n::text) FROM generate_series(1,12) n")
         assert wait_for_change(listener, 2)
         assert not wait_for_change(listener, 0)
+
+
+def test_token_allowance_change_wakes_without_changing_money_budget(kernel_env):
+    kernel = kernel_env["kernel"]
+    world = load_fixture(kernel)
+    principal, wr = world["principal"], world["world_ref"]
+    args = kernel, principal, wr["work_id"], wr["branch_id"]
+    budget = kernel.tasks.create_budget(wr["work_id"], "1")
+    with kernel.db.uow(write=False) as repo:
+        money_before = repo.one("budgets", {"budget_id": budget})
+    initial = project_change_token(*args)
+    service = SharedBudgetService(kernel)
+    service.set_limit(principal, wr["work_id"], wr["branch_id"], budget, 1000)
+    limited = project_change_token(*args)
+    assert limited != initial
+    service.set_limit(principal, wr["work_id"], wr["branch_id"], budget, 2000, expected_total_tokens=1000)
+    assert project_change_token(*args) != limited
+    with kernel.db.uow(write=False) as repo:
+        assert repo.one("budgets", {"budget_id": budget}) == money_before

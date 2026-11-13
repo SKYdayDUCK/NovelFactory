@@ -663,6 +663,21 @@ class WorldQueryService:
             {'section_kind': section_kind, 'content': canonical_bytes(facts if payload['kind'] == 'STATE' else payload['entries']).decode(),
              'source_refs': permitted, 'required': True},
         ]
+        if (cut['plane'] == 'WORLD' and packet['spec']['role_id'] == 'evidence_maintainer'
+                and packet['spec']['task_kind'] == 'assertion_extract'):
+            # Identity labels are registered metadata, not an assertion that a
+            # state is known or evaluated. Read only this immutable revision and
+            # the subjects explicitly authorized by the bound input manifest.
+            identities = []
+            for subject in manifest['subject_ids']:
+                entity = revision['snapshot']['entities'].get(subject)
+                if entity and point_key(entity['created_at']) <= point_key(at):
+                    identities.append({key: entity[key] for key in ('entity_id', 'entity_kind', 'name')})
+            reading_scope = {'kind': 'FACT_READING_SCOPE', 'world_ref': wr, 'story_time': at,
+                             'identity_semantics': 'REGISTERED_LABELS_NOT_STATE_FACTS',
+                             'entities': identities, 'state_items': payload['state_items']}
+            sections.append({'section_kind': 'EVIDENCE', 'content': canonical_bytes(reading_scope).decode(),
+                             'source_refs': permitted, 'required': True})
         if limitations:
             sections.append({'section_kind': 'UNRESOLVED', 'content': '\n'.join(dict.fromkeys(limitations)), 'source_refs': [], 'required': True})
         # A provider-independent conservative bound. This is neither a claimed

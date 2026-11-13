@@ -24,7 +24,7 @@ def test_each_fault_path_preserves_scheduling_invariants(scenario):
         assert report["unknown_reservations_held"] == 1
         unknown = next(row for row in report["trace"] if row["event"] == "UNKNOWN_HELD")
         assert sum(row["event"] == "HARNESS_REQUEST" and row["task"] == unknown["task"] for row in report["trace"]) == 1
-    elif scenario in {"authorization_revoked", "budget_exhausted", "review_exhausted", "dependencies"}:
+    elif scenario in {"authorization_revoked", "budget_exhausted", "review_exhausted", "dependencies", "needs_input"}:
         assert report["workflow_status"] == "STOPPED_WITH_BLOCKERS"
     else:
         assert report["workflow_status"] == "COMPLETED" and report["frozen_chapters"] == 3
@@ -46,6 +46,20 @@ def test_fixed_seed_is_replayable_and_random_review_can_exhaust_its_limit():
     assert report["status"] == "PASS" and report["workflow_status"] == "STOPPED_WITH_BLOCKERS"
     assert sum(row["event"] == "REWORK_ENROLLED" for row in report["trace"]) == 2
     assert report["frozen_chapters"] == report["frozen_books"] == 0
+
+
+def test_legal_needs_input_holds_without_accepting_payload_or_retrying_its_call():
+    simulation = Simulation(scenario="needs_input", review_pass_rate=1)
+    report = simulation.run()
+    assert report["status"] == "PASS" and report["workflow_status"] == "STOPPED_WITH_BLOCKERS"
+    held = next(row for row in report["trace"] if row["event"] == "INPUT_REQUIRED")
+    task = simulation.jobs[held["task"]]
+    assert task.state == "PAUSED" and task.reason == "INPUT_REQUIRED" and task.approved is None
+    assert task.id not in simulation.acceptances
+    assert sum(row["event"] == "HARNESS_REQUEST" and row["task"] == task.id for row in report["trace"]) == 1
+    assert not any(row["event"] == "RETRY_SCHEDULED" and row["task"] == task.id for row in report["trace"])
+    assert simulation.ledger[held["attempt"]]["state"] == "SUCCEEDED"
+    assert report["frozen_chapters"] == report["frozen_books"] == report["unknown_reservations_held"] == 0
 
 
 def test_real_model_routing_is_simulated_through_the_normal_adapter():
@@ -101,6 +115,27 @@ def test_book_cannot_freeze_before_chapters_and_final_review():
     simulation._dispatch(release)
     assert not simulation.releases
     assert "BOOK_FREEZE_GATE_REJECTED" in simulation.problems
+
+
+@pytest.mark.parametrize("mismatch", ["other_book", "older_edition"])
+def test_book_freeze_rejects_approved_readers_of_a_different_final_edition(mismatch):
+    simulation = Simulation(books=2, chapters=1, review_pass_rate=1)
+    assert simulation.run()["workflow_status"] == "COMPLETED"
+    release = next(job for job in simulation.jobs.values() if job.stage == "book_freeze" and job.book == 0)
+    editor = simulation.jobs[release.dependencies[0]]
+    if mismatch == "other_book":
+        editor.dependencies = [job.id for job in simulation.jobs.values()
+                               if job.book == 1 and job.stage in {"reader_1", "reader_2"}]
+    else:
+        # A new final-editor task was incorrectly wired to the approved old reads.
+        newer = simulation.add("final_editor", 0, revision=1, dependencies=editor.dependencies, state="ACCEPTED")
+        newer.approved = True
+        release.dependencies = [newer.id]
+    simulation.releases.pop(0)
+    release.state = "READY"
+    simulation._dispatch(release)
+    assert 0 not in simulation.releases
+    assert release.state == "FAILED" and release.reason == "BOOK_FREEZE_GATE_REJECTED"
 
 
 def test_cli_without_site_packages_ignores_live_connections_and_is_offline(tmp_path):

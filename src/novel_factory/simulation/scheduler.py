@@ -18,7 +18,7 @@ SCENARIOS = ("novel", "idle", "normal", "review_return", "review_exhausted", "ra
              "unknown_reconciled", "crash_before_send", "crash_after_send", "invalid_json",
              "truncated", "lost_notification", "duplicate_notification", "duplicate_result",
              "late_result", "lease_expired", "restart", "authorization_revoked", "budget_exhausted", "dependencies",
-             "storage_disconnect", "worker_pool_failure", "context_mismatch", "book_review_return")
+             "storage_disconnect", "worker_pool_failure", "context_mismatch", "book_review_return", "needs_input")
 TERMINAL = {"ACCEPTED", "FAILED", "CANCELLED"}
 PROGRAM_STAGES = {"marker", "reconcile", "freeze", "continuity", "assemble", "book_reconcile", "book_freeze"}
 ROLE_STAGES = {
@@ -228,7 +228,7 @@ class Simulation:
         fault_stage = job.stage == "draft"
         fault = self.scenario
         if (fault_stage and fault not in self.used_faults
-                and fault in {"rate_limit", "timeout", "crash_before_send", "crash_after_send", "invalid_json", "truncated", "unknown_reconciled", "context_mismatch"}):
+                and fault in {"rate_limit", "timeout", "crash_before_send", "crash_after_send", "invalid_json", "truncated", "unknown_reconciled", "context_mismatch", "needs_input"}):
             self.used_faults.add(fault)
             self.emit("FAULT_INJECTED", fault=fault, task=job.id)
             return "timeout" if fault == "unknown_reconciled" else fault
@@ -296,10 +296,12 @@ class Simulation:
             if job.stage == "book_freeze":
                 editor = self.jobs[job.dependencies[0]]
                 readers = [self.jobs[key] for key in editor.dependencies]
-                if (editor.state != "ACCEPTED" or editor.approved is not True or len(readers) != 2
+                if (editor.stage != "final_editor" or editor.book != job.book
+                        or editor.state != "ACCEPTED" or editor.approved is not True or len(readers) != 2
                         or {row.stage for row in readers} != {"reader_1", "reader_2"}
                         or any(row.state != "ACCEPTED" or row.approved is not True for row in readers)
-                        or len({self._subject(row)["sha256"] for row in readers}) != 1
+                        or any(row.book != editor.book or row.revision != editor.revision
+                               or self._subject(row) != self._subject(editor) for row in readers)
                         or any((job.book, chapter) not in self.frozen for chapter in range(self.chapters))):
                     job.state, job.reason = "FAILED", "BOOK_FREEZE_GATE_REJECTED"
                     self.problems.append(job.reason)
@@ -382,7 +384,13 @@ class Simulation:
             return
         call["state"], call["reserved"] = "SUCCEEDED", 0
         self.emit("HARNESS_RESPONSE", task=job.id, dry_run=response.dry_run,
-                  approved=response.raw_response["review_approved"])
+                  approved=response.raw_response["review_approved"], result_status=envelope["status"])
+        if envelope["status"] == "NEEDS_INPUT":
+            job.state, job.reason, job.approved = "PAUSED", "INPUT_REQUIRED", None
+            self.emit("INPUT_REQUIRED", task=job.id, generation=generation, attempt=attempt,
+                      unresolved_question_count=len(envelope["unresolved_questions"]))
+            self._wake()
+            return
         role = ROLE_STAGES[job.stage]
         job.approved = (not blocking_review_issues(envelope["payload"]["issues"]) if role == "reviewer" else
                         envelope["payload"].get("decision") == "DRY_RUN_APPROVE" if role == "chief_editor" else None)

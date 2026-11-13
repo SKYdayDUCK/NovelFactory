@@ -28,7 +28,7 @@ def test_three_isolated_workers_dispatch_and_recover_original_enrollment(kernel_
     budgets = {k: {"preparation": limits, "writing": limits} for k in books}
     monkeypatch.setattr(batch, "source_release", lambda: "f" * 40)
     kernel = kernel_env["kernel"]
-    with backend(concurrent=True) as (writer, calls, server), backend() as (reader, _, _):
+    with backend() as (writer, calls, _), backend(concurrent=True) as (reader, review_calls, review_server):
         reader.model = "fixture-internal-review"
         routes = {batch.ROUTES["creative"]: writer, batch.ROUTES["review"]: reader}
         def gateway():
@@ -37,7 +37,7 @@ def test_three_isolated_workers_dispatch_and_recover_original_enrollment(kernel_
             # Only this module's disposable cluster. The installation ships with two slots.
             repo.conn.execute(text("UPDATE nf_dispatch_limits SET slots=3 WHERE scope IN ('GLOBAL','ROLE')"))
         ids = batch.freeze(kernel, gateway(), root, books, budgets)
-        assert len({p["task_id"] for p in ids.values()}) == 3 and not calls
+        assert len({p["task_id"] for p in ids.values()}) == 3 and not calls and not review_calls
         assert batch.freeze(kernel, gateway(), root, books, budgets) == ids
         state = batch.private(root / "batch.json")
         barrier, stopped, lock = Barrier(3, timeout=15), Event(), Lock()
@@ -50,11 +50,12 @@ def test_three_isolated_workers_dispatch_and_recover_original_enrollment(kernel_
             finally:
                 stopped.set()
             return {}  # Deliberately malformed: no manuscript or simulated literary success.
-        server.context_candidate = concurrent_request
+        # Initial world design is complex planning and uses the review route.
+        review_server.context_candidate = concurrent_request
         with ThreadPoolExecutor(max_workers=3) as pool:
             workers = [pool.submit(batch.serve, kernel, gateway(), root, key, stopped) for key in books]
             assert [future.result(timeout=40) for future in workers] == [0, 0, 0]
-        assert len(calls) == 3 and set(entered) == {p["work_id"] for p in ids.values()}
+        assert not calls and len(review_calls) == 3 and set(entered) == {p["work_id"] for p in ids.values()}
         assert all(batch.private(root / key / "preparation.json")["world_ref"]["work_id"] == ids[key]["work_id"]
                    for key in books)
         ledger_ids, contexts = set(), set()
@@ -69,7 +70,7 @@ def test_three_isolated_workers_dispatch_and_recover_original_enrollment(kernel_
                 contexts.add(job["context_bundle_id"])
         assert len(ledger_ids) == len(contexts) == 3
         assert batch.freeze(kernel, gateway(), root, books, budgets) == ids
-        assert len(calls) == 3
+        assert not calls and len(review_calls) == 3
         changed = {**state["allowances"], "A": {**budgets["A"], "writing": {**limits, "total_tokens": 120000}}}
         with pytest.raises(DomainError, match="changed"):
             batch.freeze(kernel, gateway(), root, books, changed)

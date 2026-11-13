@@ -1,5 +1,6 @@
 """Native protocol simulation; these fixtures never call a real model."""
 
+import json
 from dataclasses import replace
 
 import pytest
@@ -62,3 +63,43 @@ def test_native_production_delivery_needs_completed_bound_host_result(kernel_env
         assert repo.one("call_attempts", {"attempt_id": result["attempt_id"]}) == call_before
         assert repo.one("budgets", {"budget_id": call_before["budget_id"]}) == budget_before
         assert len(item["adapter"].calls) == 1
+
+
+def test_missing_input_native_receipt_is_only_a_recovery_proof(kernel_env):
+    from novel_factory.application.agent_gateway import AgentGateway
+    from novel_factory.application.native_delivery import require_native_delivery
+    from novel_factory.application.runtime_tasks import RuntimeTaskService
+    from novel_factory.fixtures import load_fixture, point
+
+    kernel = kernel_env["kernel"]
+    world = load_fixture(kernel)
+
+    class MissingInput(NativeProtocolFixture):
+        def generate(self, request):
+            response = super().generate(request)
+            envelope = json.loads(response.text)
+            envelope.update(status="NEEDS_INPUT", unresolved_questions=["Synthetic missing entity mapping"])
+            return replace(response, text=json.dumps(envelope))
+
+    adapter = MissingInput(kernel, "valid")
+    gateway = AgentGateway(kernel, {"fixture": adapter})
+    prepared = RuntimeTaskService(kernel, gateway).prepare(world["principal"], world["world_ref"],
+        role_id="evidence_maintainer", task_kind="assertion_extract", story_time=point(1),
+        subject_ids=[world["ids"]["sword"]], predicates=["owner"], assignment="Synthetic fact reading",
+        adapter_id="fixture")
+    result = gateway.execute(prepared.principal, {"schema_version": "2.1", "task_id": prepared.task["task_id"],
+        "generation": prepared.task["generation"], "worker_id": prepared.worker_id,
+        "input_ref": prepared.agent_input["input_ref"], "budget_id": kernel.tasks.create_budget(world["world_ref"]["work_id"], "1"),
+        "call_key": "supervised-candidate", "reserve_amount": "0.1", "token_reservation": 100000})
+    with kernel.db.uow(write=False) as repo:
+        task = repo.one("tasks", {"task_id": prepared.task["task_id"]})
+        call = repo.one("call_attempts", {"attempt_id": result["attempt_id"]})
+        audit = gateway._read_audit(repo, call["attempt_id"])
+        evidence = audit["payload"]
+        args = kernel, repo, task, call, audit, kernel.artifact(repo, evidence["response_ref"], task["work_id"]), kernel.artifact(repo, evidence["output_ref"], task["work_id"])
+        require_native_delivery(*args, needs_input_read=True)
+        with pytest.raises(DomainError):
+            require_native_delivery(*args)
+        with pytest.raises(DomainError):
+            CandidateDelivery(kernel, gateway).audited_candidate(repo, task, production_accounting=True)
+        assert repo.one("call_attempts", {"attempt_id": call["attempt_id"]}) == call

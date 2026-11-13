@@ -10,7 +10,7 @@ from uuid import NAMESPACE_URL, uuid5
 from .protocol import DryRunSpec, ModelCallFailure, ModelResponse
 
 OUTCOMES = {"normal", "rate_limit", "timeout", "crash_before_send", "crash_after_send",
-            "invalid_json", "truncated", "context_mismatch"}
+            "invalid_json", "truncated", "context_mismatch", "needs_input"}
 
 
 def generate(profile, request, *, authorize, record):
@@ -46,7 +46,7 @@ def generate(profile, request, *, authorize, record):
     random_seed = hashlib.sha256(f"{spec.seed}:{request.attempt_id}".encode()).digest()
     approved = random.Random(int.from_bytes(random_seed)).random() < spec.review_pass_rate
     is_review = identity["role_id"] == "reviewer"
-    if is_review:
+    if is_review and spec.outcome != "needs_input":
         payload["summary"] = "DRY_RUN_REVIEW_PASS" if approved else "DRY_RUN_REVIEW_RETURN"
         if not approved:
             subject = user.get("dry_run_subject_ref")
@@ -59,6 +59,8 @@ def generate(profile, request, *, authorize, record):
                 "suggested_change": "DRY_RUN_TARGETED_REVISION", "disposition": "OPEN"}]
     envelope = {**{key: value for key, value in identity.items() if key != "dependency_fingerprint"},
                 "schema_version": "2.1", "status": "SUCCEEDED", "unresolved_questions": [], "payload": payload}
+    if spec.outcome == "needs_input":
+        envelope.update(status="NEEDS_INPUT", unresolved_questions=["DRY_RUN_AUTHORIZED_MATERIAL_REQUIRED"])
     if spec.outcome == "context_mismatch":
         envelope["context_bundle_id"] = str(uuid5(NAMESPACE_URL, "dry-run:wrong-context"))
     content = json.dumps(envelope, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
@@ -73,5 +75,6 @@ def generate(profile, request, *, authorize, record):
         output_tokens=min(request.max_output_tokens, max(1, len(content.encode()) // 4)), cached_input_tokens=0,
         actual_amount=Decimal(0), currency="USD", request_sha256=request.request_sha256, dry_run=True,
         raw_response={"dry_run": True, "execution_kind": "TEST_FIXTURE", "model": profile.model,
-                      "review_approved": approved if is_review else None, "usage_source": "SIMULATED_BYTES_ESTIMATE",
+                      "review_approved": approved if is_review and spec.outcome != "needs_input" else None,
+                      "usage_source": "SIMULATED_BYTES_ESTIMATE",
                       "finish_reason": "length" if spec.outcome == "truncated" else "stop"})

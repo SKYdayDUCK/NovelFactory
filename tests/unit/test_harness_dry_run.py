@@ -57,6 +57,16 @@ def test_live_journal_cannot_accept_a_simulation_request():
     assert not error.value.sent
 
 
+def test_harness_returns_a_typed_needs_input_response_without_review_approval():
+    response = providers.invoke(providers.Profile("deepseek", "deepseek-flash", "NO_REAL_CREDENTIAL", 8192),
+        request(outcome="needs_input"), authorize=lambda _: True, record=lambda *args: None)
+    envelope = json.loads(response.text)
+    validate_contract("AgentModelResponse", envelope, "agent")
+    validate_contract("AgentReviewOutput", envelope["payload"], "agent")
+    assert envelope["status"] == "NEEDS_INPUT" and envelope["unresolved_questions"]
+    assert response.dry_run and response.raw_response["review_approved"] is None
+
+
 def test_dry_run_cannot_publish_a_live_wire_receipt():
     with pytest.raises(ModelCallFailure, match="DRY_RUN_LIVE_RECEIPT_FORBIDDEN"):
         providers.invoke(providers.Profile("deepseek", "deepseek-flash", "NO_REAL_CREDENTIAL", 8192), request(),

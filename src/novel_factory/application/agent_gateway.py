@@ -526,6 +526,7 @@ class AgentGateway:
         receipt = self.kernel.tasks.store_result(result, worker_id=request["worker_id"],
                                                  authorize_in_tx=authorize_result)
         response = {"status": "RESULT_STORED", "attempt_id": audit["attempt_id"], "task_receipt": receipt,
+                    "result_status": audit["result_status"],
                     "output_ref": audit["output_ref"], "evidence_ref": audit_ref, "validation_status": audit["outcome"],
                     "cost_status": audit["usage"]["cost_status"], "execution_kind": audit["execution_kind"]}
         with self.kernel.db.uow() as repo:

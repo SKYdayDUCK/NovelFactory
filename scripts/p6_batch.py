@@ -43,8 +43,9 @@ from novel_factory.infrastructure.supervisor_wake import wait_for_change, wake_l
 
 ROOT = Path(__file__).resolve().parents[1]
 BOOKS = {"A": "short_supernatural", "B": "medium_xuanhuan", "C": "medium_long_infinite"}
-ROUTES = {"creative": "deepseek_flash_writer", "review": "deepseek_pro_reviewer"}
-MODELS = {"creative": "deepseek-flash", "review": "deepseek-v4-pro"}
+LEGACY_ROUTES = {"creative": "deepseek_flash_writer", "review": "deepseek_pro_reviewer"}
+ROUTES = {"creative": "deepseek_flash_writer", "review": "codex_planner_reviewer"}
+MODELS = {"creative": "deepseek-flash", "review": "gpt-6.1-sol"}
 HARNESS = CreativeHarnessConfig(enabled=True, dynamic_agents=True, adaptive_instructions=True)
 FIELDS = {"total_amount", "reserve_amount", "total_tokens", "token_reservation"}
 PAUSES = {"CONTINUITY_REVIEW_RETURNED", "CONTINUITY_REVIEW_BLOCKED", "PAUSED", "STRATEGY_REASSESSMENT_REQUIRED", "DESIGN_REWORK_REQUIRED", "DESIGN_SCHEMA_REWORK_REQUIRED", "OPENING_REVIEW_REQUIRED",
@@ -59,19 +60,35 @@ def now():
     return datetime.now(UTC).isoformat()
 
 
+def batch_routes(manifest):
+    """Pre-route manifests retain their original dual-DeepSeek inventory."""
+    routes = manifest.get("routes", LEGACY_ROUTES)
+    require(isinstance(routes, dict) and set(routes) == {"creative", "review"}
+            and all(isinstance(value, str) and value for value in routes.values()),
+            "INVALID_MODEL_CONFIG", "Frozen batch routes are invalid")
+    return routes
+
+
 class NoRedirect(HTTPRedirectHandler):
     def redirect_request(self, *args):
         return None
 
 
 def check_models(gateway):
-    """Only GET /models. A successful lookup is separate from a production attempt."""
+    """Check Flash's catalog and the native Codex host; never infer or select Pro."""
     verified = {}
     for role, route in ROUTES.items():
         adapter = gateway.adapters[route]
         config = adapter.configuration
-        require(is_official_deepseek(config) and config["model"] == MODELS[role],
-                "INVALID_MODEL_CONFIG", "The official production model must match its assigned role")
+        require(config["model"] == MODELS[role] and config.get("isolation") == "STATELESS_TEXT_ONLY",
+                "INVALID_MODEL_CONFIG", "The production model must match its assigned role")
+        if role == "review":
+            require(config.get("adapter_kind") == "codex-cli" and config.get("execution_kind") == "REAL_HOST"
+                    and config.get("auth_mode") == "host-login", "INVALID_MODEL_CONFIG",
+                    "Complex work requires the configured native Codex host")
+            adapter.check_available()
+            continue
+        require(is_official_deepseek(config), "INVALID_MODEL_CONFIG", "Writing requires official DeepSeek Flash")
         key = adapter.profile.preflight()
         if key not in verified:
             request = Request("https://api.deepseek.com/models", headers={"Authorization": "Bearer " + key})
@@ -118,7 +135,8 @@ def source_release():
 
 
 def freeze(kernel, gateway, root, books, allowances):
-    settings = {"source_sha": source_release(), "models": {k: gateway.adapters[v].configuration for k, v in ROUTES.items()},
+    settings = {"source_sha": source_release(), "routes": dict(ROUTES),
+                "models": {k: gateway.adapters[v].configuration for k, v in ROUTES.items()},
                 "harness": gateway.creative_harness.as_dict(), "ideas": {k: fingerprint(v) for k, v in books.items()},
                 "allowances": allowances, "objects": str(kernel.objects.root),
                 "database": kernel.db.engine.url.render_as_string(hide_password=True)}
@@ -290,7 +308,7 @@ def serve(kernel, gateway, root, book, stop, *, shared_listener=None):
     project = root / book
     manifest = private(root / "batch.json")
     require(manifest["source_sha"] == source_release() and manifest["harness"] == gateway.creative_harness.as_dict()
-            and manifest["models"] == {k: gateway.adapters[v].configuration for k, v in ROUTES.items()}
+            and manifest["models"] == {k: gateway.adapters[v].configuration for k, v in batch_routes(manifest).items()}
             and manifest["database"] == kernel.db.engine.url.render_as_string(hide_password=True)
             and manifest["objects"] == str(kernel.objects.root), "SOURCE_CHANGED", "Frozen batch binding differs")
     identity = private(root / "enrolled.json")[book]
@@ -317,6 +335,9 @@ def serve(kernel, gateway, root, book, stop, *, shared_listener=None):
                 emit(project, {"status": "PAUSED", "reason": error.code})
                 return 3
             emit(project, result)
+            if stop.is_set():
+                emit(project, {"status": "STOPPED", "reason": "OPERATOR_STOP_AFTER_CALL"})
+                return 0
             status = result["status"]
             if status == "AWAITING_INDEPENDENT_REVIEW":
                 from p6_gpt_handoff import handle
@@ -388,7 +409,7 @@ def main(argv=None):
         db = Database(pool_size=5)
         kernel = Kernel(db, ObjectStore(os.environ["NF_OBJECT_ROOT"]))
         gateway = (AgentGateway(kernel, load_runtime_profiles(os.environ["NF_RUNTIME_PROFILES"], HostJournal(kernel)))
-                   if args.action == "worker" and args.watch else
+                   if args.action == "worker" else
                    configured_gateway(kernel, ROUTES["creative"], ROUTES["review"]))
         gateway.material_reader = production_material_reader(kernel)
         prepare_private_directory(args.private_dir)

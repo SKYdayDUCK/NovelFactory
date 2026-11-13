@@ -1,14 +1,13 @@
 """Map an independent full-text assertion reading into the native reconciliation service."""
 
-from uuid import NAMESPACE_URL, uuid5
-from functools import lru_cache
 import json
 import re
+from functools import lru_cache
+from uuid import NAMESPACE_URL, uuid5
 
 from ..contracts.registry import contract_diagnostic
-from ..domain.errors import DomainError
-
 from ..domain.canonical import strict_json_loads
+from ..domain.errors import DomainError
 from ..domain.reconciliation import span_for
 from ..domain.review_gate import blocking_review_issues
 from .authorization import Principal
@@ -43,6 +42,10 @@ def assignment():
         "只标识确有文本依据的非持久感官细节为 SURFACE_DETAIL。缺乏事实证据时标为 UNCERTAIN。"
         "SPEECH_OR_BELIEF 需要完整 knowledge_use，区分有来源的知识、推测与外部发言。"
         "若所需来源缺失，保留未决事实并说明缺少的证据，勿伪造。declared_delta_index 每项只可映射一次。"
+        "FACT_READING_SCOPE 的实体名称仅是固定版本登记映射，不证明状态已成立。"
+        "其中 UNKNOWN 或 PENDING 是明确的核查结果，按原义保留为 UNCERTAIN，不能推成真或假。"
+        "本任务交付完整核查报告，不要求先解决所有未决剧情事实；未决问题写在相应断言的 summary，"
+        "仍可完成报告。只有缺少正文、任务身份或契约等使报告本身无法形成时才用 NEEDS_INPUT。"
         "对照材料的 required_event_refs 与 declared_important_deltas。已表现的事件引用对应 EventRef；"
         "写作方声明的重要变化用零基 declared_delta_index 对应。正文缺少所需事件或证据不足时如实标出。"
         "不要自行创造正式事件或更改世界。NEW_WORLD_EFFECT 必须有非空 proposed_command，按 TemplateCommand 中一个正式模板填写 template_id 和 args。不得自编模板名、参数键或实体编号。需要正式变化但授权材料不足以构造命令，应如实标记 UNCERTAIN 交给核查，不能降格为表面描写。"

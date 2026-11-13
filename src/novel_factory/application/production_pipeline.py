@@ -6,6 +6,7 @@ published continuity and selected plans keep their existing authorities.
 import json
 from collections import Counter, defaultdict
 from datetime import datetime, timedelta
+from uuid import UUID, uuid5
 
 from sqlalchemy import text
 
@@ -19,7 +20,7 @@ from novel_factory.application.runtime_tasks import RuntimeTaskService
 from novel_factory.application.scene_revision import editorial_blockers, revise_scene
 from novel_factory.application.volume_successor import _selected
 from novel_factory.contracts.registry import validate_contract
-from novel_factory.domain.canonical import fingerprint
+from novel_factory.domain.canonical import fingerprint, strict_json_loads
 from novel_factory.domain.errors import DomainError
 from novel_factory.domain.planning import condition_result
 from novel_factory.domain.temporal import point_key
@@ -431,7 +432,8 @@ def _enroll(kernel, repo, gateway, owner, board, identity, *, frozen_assignment=
     supervisor = RuntimeSupervisor(kernel, gateway)
     role_grant = repo.one("grants", {"grant_id": task.principal.grant_id})
     config, _ = supervisor.dispatch_config(repo, task.spec, role_grant, manifest_ref=task.manifest_ref,
-        knowledge_cut=cut, context_tokens=20000, input_ref=task.agent_input["input_ref"],
+        knowledge_cut=cut, context_tokens=min(100000, board["token_reservation"]) if stage == "facts" else 20000,
+        input_ref=task.agent_input["input_ref"],
         budget_id=board["budget_id"], reserve_amount=board["reserve_amount"], token_reservation=board["token_reservation"])
     supervisor.install_job(repo, task.task, {**config, "production_node": identity})
     node.update(state="ENROLLED", task_id=task.task["task_id"], enrolled_at=repo.now().isoformat())
@@ -691,6 +693,43 @@ def revise_window(kernel, owner, *, world_ref, candidate_id, expected_candidate_
         return result
 
 
+def input_requirement(kernel, repo, gateway, task):
+    """Bind a returned NEEDS_INPUT diagnostic without adopting its candidate or settling its bill."""
+    call = repo.one("call_attempts", {"task_id": task["task_id"], "generation": task["generation"],
+                                     "call_key": "supervised-candidate"})
+    require(call and task["state"] == "BLOCKED"
+            and task["current_result_id"] == str(uuid5(UUID(call["attempt_id"]), "task-result")),
+            "INVALID_EVIDENCE", "Input requirement is not the current returned call")
+    result = repo.one("task_results", {"task_id": task["task_id"], "generation": task["generation"],
+                                      "result_id": task["current_result_id"], "disposition": "CURRENT"})
+    audit_row = gateway._read_audit(repo, call["attempt_id"])
+    require(result and audit_row, "INVALID_EVIDENCE", "Input requirement evidence unavailable")
+    audit = audit_row["payload"]
+    audit_ref = {key: audit_row[key] for key in ("artifact_id", "artifact_revision_id", "sha256")}
+    require(audit["outcome"] == "VALIDATED_CANDIDATE" and audit["result_status"] == "NEEDS_INPUT"
+            and audit["attempt_id"] == call["attempt_id"] and audit["task_id"] == task["task_id"]
+            and audit["generation"] == task["generation"]
+            and audit["role_id"] == task["role_id"]
+            and (audit["world_ref"]["work_id"], audit["world_ref"]["branch_id"])
+            == (task["work_id"], task["branch_id"])
+            and audit["context_bundle_id"] == task["context_bundle_id"]
+            and fingerprint(audit) == audit_ref["sha256"]
+            and result["payload"]["status"] == "NEEDS_INPUT"
+            and result["payload"]["artifacts"] == [audit_ref, audit["output_ref"]],
+            "INVALID_EVIDENCE", "Input requirement does not match its task result and audit")
+    response = kernel.artifact(repo, audit["response_ref"], task["work_id"], kind="AGENT_RESPONSE")["payload"]
+    require(fingerprint(response) == audit["response_ref"]["sha256"],
+            "INVALID_EVIDENCE", "Input requirement response hash differs")
+    envelope = strict_json_loads(response["text"])
+    validate_contract("AgentModelResponse", envelope, "agent")
+    require(envelope["status"] == "NEEDS_INPUT" and all(envelope[key] == audit[key] for key in
+            ("task_id", "generation", "role_id", "actor_id", "world_ref", "context_bundle_id")),
+            "INVALID_EVIDENCE", "Input requirement response identity differs")
+    return {"task_id": task["task_id"], "generation": task["generation"], "attempt_id": call["attempt_id"],
+            "result_id": task["current_result_id"], "evidence_ref": audit_ref, "response_ref": audit["response_ref"],
+            "input_ref": audit["input_ref"], "unresolved_question_count": len(envelope["unresolved_questions"])}
+
+
 def advance_pipeline(kernel, gateway, controller, work, branch):
     """Project one recoverable handoff for the existing supervisor."""
     with kernel.db.uow(write=False) as repo:
@@ -767,7 +806,13 @@ def advance_pipeline(kernel, gateway, controller, work, branch):
                     from .scene_revision import restore_unsent_extent_source
                     if restore_unsent_extent_source(bound, repo, board, identity, task):
                         break
-                if task["state"] == "FAILED" and board.get("production_mode") == "quality" and not expired:
+                if task["state"] == "BLOCKED" and task["current_result_id"]:
+                    try:
+                        node["input_requirement"] = input_requirement(bound, repo, gateway, task)
+                        node.update(state="STOPPED", reason="MODEL_INPUT_REQUIRED")
+                    except DomainError as error:
+                        node.update(state="STOPPED", reason=error.code)
+                elif task["state"] == "FAILED" and board.get("production_mode") == "quality" and not expired:
                     from .board_schema_repair import recover_board_node
                     try:
                         with repo.conn.begin_nested():

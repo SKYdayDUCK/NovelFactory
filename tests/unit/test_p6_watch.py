@@ -6,6 +6,8 @@ from contextlib import nullcontext
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 
 def test_watch_does_not_repeat_unchanged_paused_work(monkeypatch, tmp_path):
     monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[2] / "scripts"))
@@ -54,8 +56,6 @@ def test_watch_does_not_repeat_unchanged_paused_work(monkeypatch, tmp_path):
 def test_private_stop_request_checks_frozen_binding(monkeypatch, tmp_path):
     from threading import Event
 
-    import pytest
-
     from novel_factory.domain.errors import DomainError
 
     monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[2] / "scripts"))
@@ -69,3 +69,44 @@ def test_private_stop_request_checks_frozen_binding(monkeypatch, tmp_path):
         stop.is_set()
     monkeypatch.setattr(script, "private", lambda _: {"action": "STOP_AFTER_CURRENT_CALL", "book": "A", "source_sha": "frozen-source"})
     assert stop.is_set()
+
+
+@pytest.mark.parametrize("legacy", [False, True])
+def test_stop_during_call_does_not_start_final_reader_handoff(monkeypatch, tmp_path, legacy):
+    import sys
+    from threading import Event
+
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[2] / "scripts"))
+    script = importlib.import_module("p6_batch")
+    stop, logs = Event(), []
+    project = tmp_path / "A"
+    project.mkdir()
+    (project / "first-window.json").touch()
+    wr = {"work_id": "simulated-work", "branch_id": "simulated-branch"}
+    models = {"creative": {"model": "simulated-flash"}, "review": {"model": "simulated-reviewer"}}
+    manifest = {"source_sha": "frozen", "harness": {}, "models": models, "database": "frozen-db",
+                "objects": str(tmp_path / "objects"), "allowances": {"A": {"writing": {}}}}
+    routes = script.LEGACY_ROUTES if legacy else script.ROUTES
+    if not legacy:
+        manifest["routes"] = dict(routes)
+    gateway = SimpleNamespace(creative_harness=SimpleNamespace(as_dict=dict),
+                              adapters={routes[key]: SimpleNamespace(configuration=value) for key, value in models.items()})
+    kernel = SimpleNamespace(objects=SimpleNamespace(root=tmp_path / "objects"),
+                             db=SimpleNamespace(engine=SimpleNamespace(url=SimpleNamespace(render_as_string=lambda **kwargs: "frozen-db"))))
+    documents = {"batch.json": manifest, "enrolled.json": {"A": wr}, "preparation.json": {"world_ref": wr}}
+    monkeypatch.setattr(script, "private", lambda path: documents[path.name])
+    monkeypatch.setattr(script, "source_release", lambda: "frozen")
+    monkeypatch.setattr(script, "file_lock", lambda _: nullcontext())
+    monkeypatch.setattr(script, "emit", lambda _project, result: logs.append(result))
+
+    def completed_call(*args):
+        stop.set()
+        return {"status": "AWAITING_INDEPENDENT_REVIEW"}
+
+    def forbidden_handoff(*args):
+        raise AssertionError("Stop request started another paid reading")
+
+    monkeypatch.setattr(script, "writing_step", completed_call)
+    monkeypatch.setitem(sys.modules, "p6_gpt_handoff", SimpleNamespace(handle=forbidden_handoff))
+    assert script.serve(kernel, gateway, tmp_path, "A", stop, shared_listener="simulation") == 0
+    assert logs[-1] == {"status": "STOPPED", "reason": "OPERATOR_STOP_AFTER_CALL"}
