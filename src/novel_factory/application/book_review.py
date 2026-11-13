@@ -1,8 +1,8 @@
 """Two fixed, independent reading tracks over the exact final manuscript.
 
-Packets and score submissions go through ordinary reviewer jobs. Only an audited
-candidate for an enrolled task is consumed. Reviewers receive book text and their
-own notes. Admission and spending continue to use the existing supervisor.
+Production-route readers run as supervised jobs. Development-platform readers
+return independently signed audits of a blind export. Both use the same frozen
+source, coverage checks, scoring arithmetic, and release gate.
 """
 
 from datetime import datetime, timedelta
@@ -10,14 +10,6 @@ from decimal import Decimal
 
 from sqlalchemy import text
 
-from .authorization import Principal
-from .candidate_delivery import CandidateDelivery
-from .kernel import require
-from .planning import PlanningService
-from .production_pipeline import _artifact
-from .runtime_tasks import RuntimeTaskService
-from .supervisor import RuntimeSupervisor
-from .volume_successor import _selected
 from ..contracts.registry import validate_contract
 from ..domain.book_review import (
     PROTOCOL,
@@ -30,10 +22,18 @@ from ..domain.book_review import (
 )
 from ..domain.canonical import canonical_bytes, fingerprint, strict_json_loads
 from ..domain.errors import DomainError
-from ..infrastructure.runtime_providers import RuntimeModelAdapter
-from ..infrastructure.model_gateway import OpenAICompatibleAdapter
 from ..infrastructure.codex_host import CodexAppServerAdapter
+from ..infrastructure.model_gateway import OpenAICompatibleAdapter
+from ..infrastructure.runtime_providers import RuntimeModelAdapter
+from .authorization import Principal
+from .candidate_delivery import CandidateDelivery
+from .kernel import require
+from .planning import PlanningService
+from .production_pipeline import _artifact
+from .runtime_tasks import RuntimeTaskService
 from .statistics import is_fixture_configuration
+from .supervisor import RuntimeSupervisor
+from .volume_successor import _selected
 
 
 def _selection(branch):
@@ -133,10 +133,11 @@ def start_review(
     owner,
     *,
     release_request,
-    routes,
-    budget_id,
-    reserve_amount,
-    token_reservation,
+    routes=None,
+    budget_id=None,
+    reserve_amount=None,
+    token_reservation=None,
+    external_judges=None,
     deadline_seconds,
     idempotency_key,
     revision_note=None,
@@ -148,14 +149,24 @@ def start_review(
     wr = request["world_ref"]
     work, branch = wr["work_id"], wr["branch_id"]
     require(
-        type(deadline_seconds) is int
-        and 1 <= deadline_seconds <= 86400
-        and type(routes) is list
-        and len(routes) == 2
-        and all(isinstance(r, str) for r in routes),
+        type(deadline_seconds) is int and 1 <= deadline_seconds <= 86400,
         "INVALID_ARGUMENT",
-        "Two fixed reader routes and a finite allowance are required",
+        "A finite reader enrollment is required",
     )
+    if external_judges is None:
+        require(
+            isinstance(routes, list)
+            and len(routes) == 2
+            and all(isinstance(r, str) for r in routes),
+            "INVALID_ARGUMENT",
+            "Two fixed reader routes are required",
+        )
+    else:
+        require(
+            all(value is None for value in (routes, budget_id, reserve_amount, token_reservation)),
+            "INVALID_ARGUMENT",
+            "Development-platform judges use independently enrolled signing keys",
+        )
     service = ReleaseService(kernel)
     service._key(idempotency_key)
     registration = {
@@ -168,13 +179,19 @@ def start_review(
         "revision_note": revision_note,
         "revision_evidence": revision_evidence,
     }
+    if external_judges is not None:
+        registration["external_judges"] = external_judges
     with kernel.db.uow(write=False) as repo:
         kernel.authorize(repo, owner, work, "ADMIN", branch)
         prior = kernel._prior(repo, owner, work, "P6_BOOK_REVIEW", idempotency_key, registration)
         if prior:
             return prior
     readers = []
-    for route in routes:
+    if external_judges is not None:
+        from .external_book_review import enroll_judges
+
+        readers = enroll_judges(external_judges)
+    for route in routes or []:
         adapter = gateway.adapters.get(route)
         require(
             isinstance(
@@ -251,6 +268,14 @@ def start_review(
                     method_refs.append(runtime)
         if previous:
             require(
+                previous.get("review_source", "SUPERVISED_PROVIDER")
+                == (
+                    "DEVELOPMENT_PLATFORM" if external_judges is not None else "SUPERVISED_PROVIDER"
+                ),
+                "REVIEW_ROUND_LIMIT",
+                "Revision readers must use the enrolled review method",
+            )
+            require(
                 previous["result"]["status"] != "QUALITY_TARGET_MET"
                 and isinstance(revision_evidence, dict)
                 and set(revision_evidence)
@@ -293,7 +318,10 @@ def start_review(
             "method_refs": method_refs,
             "revision_evidence": revision_evidence,
             "revision_note": revision_note,
-            "state": "READING",
+            "review_source": "DEVELOPMENT_PLATFORM"
+            if external_judges is not None
+            else "SUPERVISED_PROVIDER",
+            "state": "AWAITING_EXTERNAL_REVIEWS" if external_judges is not None else "READING",
             "readers": readers,
             "packets": [
                 _artifact(kernel, repo, work, owner, "BOOK_PASSAGES", {"passages": item})
@@ -315,26 +343,29 @@ def start_review(
                 "deadline": (repo.now() + timedelta(seconds=deadline_seconds)).isoformat(),
             },
         }
-        require(
-            repo.one("budgets", {"work_id": work, "budget_id": budget_id}),
-            "VIEW_DENIED",
-            "Budget unavailable",
-        )
-        validate_contract(
-            "AgentDispatchRequest",
-            {
-                "schema_version": "2.1",
-                "task_id": request["volume_id"],
-                "generation": 1,
-                "worker_id": "review-registration",
-                "call_key": "supervised-candidate",
-                "input_ref": refs[0],
-                "budget_id": budget_id,
-                "reserve_amount": reserve_amount,
-                "token_reservation": token_reservation,
-            },
-            "agent",
-        )
+        if external_judges is not None:
+            state["reader_context"] = {"genre": profile["genre"]}
+        else:
+            require(
+                repo.one("budgets", {"work_id": work, "budget_id": budget_id}),
+                "VIEW_DENIED",
+                "Budget unavailable",
+            )
+            validate_contract(
+                "AgentDispatchRequest",
+                {
+                    "schema_version": "2.1",
+                    "task_id": request["volume_id"],
+                    "generation": 1,
+                    "worker_id": "review-registration",
+                    "call_key": "supervised-candidate",
+                    "input_ref": refs[0],
+                    "budget_id": budget_id,
+                    "reserve_amount": reserve_amount,
+                    "token_reservation": token_reservation,
+                },
+                "agent",
+            )
         ref = _save(kernel, repo, owner, state)
         result = {
             "round_ref": ref,
@@ -789,6 +820,7 @@ def review_status(kernel, owner, work, branch, *, include_reports=False):
             )
         }
         result.update(
+            review_source=state.get("review_source", "SUPERVISED_PROVIDER"),
             result=state.get("result"),
             reason=state.get("reason"),
             round_ref=_selected(repo, work, _selection(branch)),
@@ -800,6 +832,8 @@ def review_status(kernel, owner, work, branch, *, include_reports=False):
             if len({r["model"] for r in state["readers"]}) == 1
             else "DIFFERENT_MODEL_IDS_FAMILY_UNVERIFIED"
         )
+        if state.get("review_source") == "DEVELOPMENT_PLATFORM":
+            result["model_correlation"] = "SAME_GPT_FAMILY_HOST_COORDINATOR_ATTESTED"
         if include_reports:
             for reader in result["readers"]:
                 reader["passage_notes"] = [
