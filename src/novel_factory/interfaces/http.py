@@ -6,6 +6,7 @@ all operation, plane, actor and branch checks remain in application services.
 from __future__ import annotations
 
 import asyncio
+from contextlib import asynccontextmanager, nullcontext
 from dataclasses import dataclass
 from decimal import Decimal
 import hashlib
@@ -43,6 +44,8 @@ class HttpSettings:
     rate_per_second: float = 20.0
     rate_burst: int = 100
     allowed_origins: tuple[str, ...] = ()
+    mcp_allowed_hosts: tuple[str, ...] = ("127.0.0.1:*", "localhost:*", "[::1]:*")
+    max_queued_ingress: int = 0
 
 
 def _status(code: str) -> int:
@@ -200,7 +203,7 @@ async def _finish_short_call(function, *args):
 
 
 def create_app(kernel, *, query_service=None, settings: HttpSettings | None = None,
-               connection_budget: ConnectionBudget | None = None, model_adapters=None) -> FastAPI:
+               connection_budget: ConnectionBudget | None = None, model_adapters=None, mcp_bindings=None) -> FastAPI:
     settings = settings or HttpSettings()
     if (settings.max_body_bytes < 1024 or settings.max_inflight_requests < 1
             or settings.body_read_timeout_seconds <= 0 or settings.max_body_chunks < 1):
@@ -228,9 +231,17 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
                                           timeout=settings.queue_timeout_seconds)
     ingress = AdmissionController(settings.max_inflight_requests,
                                   per_principal=settings.max_inflight_requests,
-                                  max_waiters=0, timeout=settings.queue_timeout_seconds)
+                                  max_waiters=settings.max_queued_ingress, timeout=settings.queue_timeout_seconds)
     rate_limiter = TokenBucketLimiter(settings.rate_per_second, settings.rate_burst)
-    app = FastAPI(title="Novel Factory P0/P1 kernel", version="2.0.1",
+    bindings = dict(mcp_bindings) if mcp_bindings is not None else None
+    remote = None
+
+    @asynccontextmanager
+    async def lifespan(_app):
+        async with remote.manager.run() if remote is not None else nullcontext():
+            yield
+
+    app = FastAPI(lifespan=lifespan, title="Novel Factory P0/P1 kernel", version="2.0.1",
                   docs_url=None, redoc_url=None, openapi_url=None)
     app.state.kernel = kernel
     app.state.query_service = query_service
@@ -253,24 +264,35 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
         code = "METHOD_NOT_ALLOWED" if exc.status_code == 405 else "NOT_FOUND"
         return _error_response(DomainError(code, "Requested endpoint is unavailable"), request.state.request_id)
 
-    async def execute(request: Request, kind: str, operation: Callable):
+    async def authenticate(request):
         raw = request.headers.get("authorization", "")
         parts = raw.split()
         if len(parts) != 2 or parts[0].lower() != "bearer" or len(parts[1]) > 512:
             raise DomainError("UNAUTHENTICATED", "Valid Bearer authentication is required")
         token = parts[1]
         auth_key = hashlib.sha256(token.encode()).hexdigest()
+        async with authentication.slot(auth_key):
+            try:
+                principal = await _finish_short_call(kernel.authenticate, token)
+            except DomainError as exc:
+                if exc.code == "VIEW_DENIED":
+                    raise DomainError("UNAUTHENTICATED", "Valid Bearer authentication is required") from None
+                raise
+            except PoolTimeout:
+                raise DomainError("POOL_TIMEOUT", "Database capacity is temporarily unavailable", True, "WAIT") from None
+            except SQLAlchemyError:
+                raise DomainError("SERVICE_UNAVAILABLE", "Authentication temporarily unavailable", True, "WAIT") from None
+        await rate_limiter.check(str(principal.principal_id))
+        return principal
+
+    async def admitted_operation(principal, kind, operation):
+        async with admission.slot(str(principal.principal_id), kind):
+            return await _finish_short_call(operation, principal)
+
+    async def execute(request: Request, kind: str, operation: Callable):
         try:
-            async with authentication.slot(auth_key):
-                try:
-                    principal = await _finish_short_call(kernel.authenticate, token)
-                except DomainError as exc:
-                    if exc.code == "VIEW_DENIED":
-                        raise DomainError("UNAUTHENTICATED", "Valid Bearer authentication is required") from None
-                    raise
-            await rate_limiter.check(str(principal.principal_id))
-            async with admission.slot(str(principal.principal_id), kind):
-                result = await _finish_short_call(operation, principal)
+            principal = await authenticate(request)
+            result = await admitted_operation(principal, kind, operation)
             return JSONResponse(jsonable_encoder(plain(result), custom_encoder={Decimal: str}))
         except DomainError:
             raise
@@ -283,6 +305,18 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
             log.error(json.dumps({"event": "application_operation_failed", "request_id": request.state.request_id,
                                   "exception_type": type(exc).__name__}))
             raise DomainError("INTERNAL_ERROR", "Application operation failed", False, "NONE") from None
+
+    from novel_factory.application.task_operations import TaskOperations, TaskOperationsBinding
+
+    def task_operations(principal):
+        binding = bindings.get(principal) if bindings is not None else None
+        return TaskOperations(kernel, principal, binding if isinstance(binding, TaskOperationsBinding) else None)
+
+    if bindings is not None:
+        from .mcp_http import RemoteTools
+
+        remote = RemoteTools(kernel, bindings, authenticate, admitted_operation, settings)
+        app.router.routes.append(remote.route())
 
     @app.get("/health")
     async def health():
@@ -426,9 +460,24 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
 
     @app.post("/api/v1/tasks")
     async def create_task(request: Request):
+        from novel_factory.application.kernel import Kernel
+        if bindings is None and type(kernel) is Kernel:
+            return await execute(request, "task", kernel.prepare_task_create_request(await _json_body(request)))
         payload = await _body(request, "TaskCreateRequest", "http")
-        return await execute(request, "task", lambda principal: kernel.create_task(
-            principal, payload["spec"], payload["idempotency_key"]))
+        return await execute(request, "task", lambda principal: task_operations(principal).create(**payload))
+
+    @app.get("/api/v1/works/{work_id}/branches/{branch_id}/workflow")
+    @app.post("/api/v1/works/{work_id}/branches/{branch_id}/workflow/resume")
+    async def workflow(request: Request, work_id: str, branch_id: str):
+        from novel_factory.application.mcp_runtime import McpRuntime, ProjectBinding
+
+        validate_contract("UUID", work_id)
+        validate_contract("UUID", branch_id)
+        resume = request.method == "POST"
+        if resume and await request.body() and await _json_body(request) != {}:
+            raise DomainError("INVALID_ARGUMENT", "Project resume accepts an empty object")
+        return await execute(request, "task" if resume else "query", lambda principal: McpRuntime(
+            kernel, principal, ProjectBinding(work_id, branch_id)).project(resume=resume))
 
     @app.post("/api/v1/tasks/claim")
     async def claim_task(request: Request):
@@ -440,13 +489,12 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
     @app.get("/api/v1/tasks/{task_id}")
     async def get_task(request: Request, task_id: str):
         validate_contract("UUID", task_id)
-        return await execute(request, "query", lambda principal: kernel.get_task(principal, task_id))
+        return await execute(request, "query", lambda principal: task_operations(principal).status(task_id))
 
     @app.post("/api/v1/tasks/cancel")
     async def cancel_task(request: Request):
         payload = await _body(request, "TaskCancelHttpRequest", "http")
-        return await execute(request, "task", lambda principal: kernel.cancel_task(
-            principal, payload["task_id"], payload["generation"], payload["idempotency_key"]))
+        return await execute(request, "task", lambda principal: task_operations(principal).cancel(**payload))
 
     @app.post("/api/v1/tasks/results")
     async def submit_result(request: Request):
@@ -489,8 +537,13 @@ def from_environment() -> FastAPI:
                         pool_timeout=float(os.environ.get("NF_POOL_TIMEOUT", "2")))
     settings = HttpSettings(
         allowed_origins=tuple(value for value in os.environ.get("NF_ALLOWED_ORIGINS", "").split(",") if value),
+        mcp_allowed_hosts=tuple(value for value in os.environ.get(
+            "NF_MCP_ALLOWED_HOSTS", "localhost:*,127.0.0.1:*,[::1]:*").split(",") if value),
+        max_queued_ingress=int(os.environ.get("NF_MAX_QUEUED_INGRESS", "0")),
         body_read_timeout_seconds=float(os.environ.get("NF_BODY_READ_TIMEOUT_SECONDS", "5.0")),
         max_body_chunks=int(os.environ.get("NF_MAX_BODY_CHUNKS", "1024")),
     )
+    from .mcp_http import load_roster
+    roster = load_roster(os.environ.get("NF_MCP_BINDINGS_FILE"))
     return create_app(Kernel(database, ObjectStore(os.environ.get("NF_OBJECT_ROOT", "var/objects"))),
-                      settings=settings, connection_budget=budget)
+                      settings=settings, connection_budget=budget, mcp_bindings=roster)

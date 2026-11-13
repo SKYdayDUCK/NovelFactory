@@ -5,6 +5,8 @@ from uuid import uuid4
 
 from novel_factory.domain.errors import DomainError
 from .audit_log import LogService
+from .mcp_runtime import TaskBinding
+from .task_operations import TaskOperationsBinding
 from .tool_catalog import _TOOLS, _VALIDATORS
 
 
@@ -26,6 +28,8 @@ _METHODS = {
 
 
 def _dispatch(runtime, name, arguments):
+    if name in {"nf_task_submit", "nf_task_status", "nf_task_cancel"}:
+        return runtime.task_operation(name, arguments)
     if name in {"nf_project_status", "nf_resume_project"}:
         return runtime.project(resume=name == "nf_resume_project")
     if name.startswith("nf_harness_instruction_"):
@@ -69,9 +73,20 @@ def invoke_bound_tool(runtime, name, arguments, *, ceiling=None, request_id=None
     error = None
     evidence = None
     try:
-        if (ceiling is not None and name not in ceiling) or name not in runtime.available_tools():
+        if ceiling is not None and name not in ceiling:
             raise DomainError("VIEW_DENIED", "Tool unavailable for this binding")
-        if not _VALIDATORS[name].is_valid(arguments):
+        # Both read handlers verify the current role and its exact frozen tool
+        # ceiling in the transaction delivering the payload. Invalid arguments
+        # still go through discovery first to retain denial precedence.
+        role_read = (name in {"nf_task_get", "nf_context_get"} and isinstance(runtime.binding, TaskBinding)
+                     and runtime.compact_role_reads)
+        task_status = name == "nf_task_status" and isinstance(runtime.binding, TaskOperationsBinding)
+        # Valid status calls check READ, ownership and the installed branch
+        # in the business read. Tool listing is never an authorization cache.
+        already_valid = (role_read or task_status) and _VALIDATORS[name].is_valid(arguments)
+        if not already_valid and name not in runtime.available_tools():
+            raise DomainError("VIEW_DENIED", "Tool unavailable for this binding")
+        if not already_valid and not _VALIDATORS[name].is_valid(arguments):
             raise DomainError("INVALID_ARGUMENT", "Tool arguments are invalid")
         result = _dispatch(runtime, name, arguments)
         evidence = _evidence_id(name, result)

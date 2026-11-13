@@ -59,7 +59,7 @@ class KernelRepository:
         if row is None:
             return None, None
         return ({col.key: row[col.key] for col in works.c},
-                {col.key: row["gr_" + col.key] for col in grants.c})
+                {col.key: row["gr_" + col.key] for col in grants.c} if row["gr_grant_id"] is not None else None)
 
     def locked_task_status(self, task_id, grant_id):
         tasks, inputs, works, grants = (self.tables[key] for key in ("tasks", "task_inputs", "works", "grants"))
@@ -68,7 +68,7 @@ class KernelRepository:
         if row is None:
             return None, None, None
         return ({col.key: row[col.key] for col in tasks.c},
-                {col.key: row["gr_" + col.key] for col in grants.c}, row["world_ref"])
+                {col.key: row["gr_" + col.key] for col in grants.c} if row["gr_grant_id"] is not None else None, row["world_ref"])
 
     def revision_with_snapshot_text(self, world_ref):
         query = _revision_text_query(self.tables["revisions"])

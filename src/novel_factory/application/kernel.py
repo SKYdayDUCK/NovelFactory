@@ -32,9 +32,10 @@ def require(condition, code, message):
 
 
 class Kernel:
+    _verified_projections = ()
+
     def __init__(self, db, objects):
         self.db, self.objects = db, objects
-        self._last_verified_projection = None
         self.tasks = TaskService(db.engine, tables, object_store=objects)
 
     def in_transaction(self, repo):
@@ -95,6 +96,9 @@ class Kernel:
                 "VIEW_DENIED", "Resource unavailable for this identity")
 
     def revision(self, r, wr):
+        return self._read_revision(r, wr, materialize=True)
+
+    def _read_revision(self, r, wr, *, materialize):
         validate_contract("WorldRef", wr)
         read_text = getattr(r, "revision_with_snapshot_text", None)
         row = read_text(wr) if read_text is not None else r.one("revisions", wr)
@@ -110,16 +114,19 @@ class Kernel:
             # only its digest gives small and large valid worlds the same
             # bounded witness, with no projection bytes or mutable results shared.
             witness = (row["state_hash"], sha256(raw.encode("utf-8")).digest())
-            # Decode a private Python object even on a hit. Only evidence that
-            # these exact bytes passed NF-CANON-1 is shared between readers.
-            row["snapshot"] = json.loads(raw)
-            if witness != self._last_verified_projection:
+            # Hold only eight digest pairs for interleaved works. Concurrent
+            # replacement may evict a witness early, which only costs a recheck.
+            verified = self._verified_projections
+            miss = witness not in verified
+            if materialize or miss:
+                row["snapshot"] = json.loads(raw)
+            if miss:
                 require(fingerprint(row["snapshot"]) == row["state_hash"],
                         "PROJECTION_CORRUPT", "Projection integrity failed")
-                self._last_verified_projection = witness
+                self._verified_projections = (witness, *verified[:7])
         from novel_factory.application.simulation import verify_schedule_revision
         verify_schedule_revision(row)
-        return row
+        return row if materialize else None
 
     def head(self, r, work_id, branch_id=None):
         if branch_id is None:
@@ -486,6 +493,16 @@ class Kernel:
         with self.db.uow() as repo:
             return self._create_checked_task(repo, principal, checked, idempotency_key)
 
+    def prepare_task_create_request(self, request):
+        """Validate the public envelope once, before admission; capture its private copy."""
+        checked = validate_contract("TaskCreateRequest", request, "http")
+
+        def create(principal):
+            with self.db.uow() as repo:
+                return self._create_checked_task(repo, principal, checked["spec"], checked["idempotency_key"])
+
+        return create
+
     def create_task_in_transaction(self, r, principal, spec, idempotency_key):
         return self._create_checked_task(r, principal, validate_contract("TaskSpec", spec), idempotency_key)
 
@@ -497,7 +514,7 @@ class Kernel:
     def _authorize_task_create(self, r, principal, spec):
         wr = spec["world_ref"]
         work, g = self._authorize_with_work(r, principal, wr["work_id"], "TASK_CREATE", wr["branch_id"])
-        self.revision(r,wr)
+        self._read_revision(r, wr, materialize=False)
         from .dynamic_runtime import check_input_branch
         inputs = {ref["artifact_revision_id"]: ref for ref in spec["input_artifacts"]}
         if inputs:
@@ -543,10 +560,12 @@ class Kernel:
                 task["world_ref"] = r.one("task_inputs", {"task_id": task_id, "generation": task["generation"]})["spec"]["world_ref"]
         return {k:v for k,v in task.items() if k not in {"principal_id","grant_id","lease_owner"}}
 
-    def cancel_task(self,principal,task_id,generation,idempotency_key):
+    def cancel_task(self,principal,task_id,generation,idempotency_key, *, scope=None):
         def authorize_cancel(conn):
             from novel_factory.infrastructure.repository import KernelRepository
-            self._task_owner(KernelRepository(conn,tables),principal,task_id)
+            task, _ = self._task_owner(KernelRepository(conn,tables),principal,task_id)
+            if scope is not None:
+                scope.check(task)
         return self.tasks.cancel(task_id,generation,principal_id=principal.principal_id,idempotency_key=idempotency_key,authorize_in_tx=authorize_cancel)
 
     def submit_result(self,principal,result,worker_id):
