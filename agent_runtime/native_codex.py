@@ -16,7 +16,7 @@ from .host_process import ISOLATED_PLUGIN_OPTIONS, resolve_host_binary, start_ho
 from .protocol import ModelCallFailure, ModelResponse
 
 
-def _options():
+def host_options():
     home = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex"))
     config = home / "config.toml"
     configured = tomllib.loads(config.read_text(encoding="utf-8")) if config.is_file() else {}
@@ -35,6 +35,20 @@ def _options():
     return options
 
 
+def host_environment():
+    allowed = {"HOME", "USERPROFILE", "CODEX_HOME", "PATH", "SystemRoot", "SYSTEMROOT", "APPDATA",
+               "LOCALAPPDATA", "TMP", "TEMP", "LANG", "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY",
+               "NO_PROXY", "http_proxy", "https_proxy", "all_proxy", "no_proxy", "SSL_CERT_FILE", "SSL_CERT_DIR"}
+    return {key: value for key, value in os.environ.items() if key in allowed}
+
+
+def tools_disabled(servers):
+    return not servers.get("nextCursor") and all(
+        row.get("runtimeStatus") == "disabled" and not row.get("tools") and not row.get("resources")
+        and not row.get("resourceTemplates") for row in servers.get("data", [])
+    )
+
+
 def generate(profile, request, *, authorize, record):
     profile.preflight()
     try:
@@ -47,12 +61,8 @@ def generate(profile, request, *, authorize, record):
 
 
 async def _session(profile, request, directory, authorize, record):
-    allowed = {"HOME", "USERPROFILE", "CODEX_HOME", "PATH", "SystemRoot", "SYSTEMROOT", "APPDATA",
-               "LOCALAPPDATA", "TMP", "TEMP", "LANG", "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY",
-               "NO_PROXY", "http_proxy", "https_proxy", "all_proxy", "no_proxy", "SSL_CERT_FILE", "SSL_CERT_DIR"}
-    env = {key: value for key, value in os.environ.items() if key in allowed}
-    proc = await start_host(resolve_host_binary(), "app-server", "--listen", "stdio://", *_options(),
-                            cwd=directory, env=env, stdin=asyncio.subprocess.PIPE,
+    proc = await start_host(resolve_host_binary(), "app-server", "--listen", "stdio://", *host_options(),
+                            cwd=directory, env=host_environment(), stdin=asyncio.subprocess.PIPE,
                             stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.DEVNULL, limit=4_000_000)
     sent = False
     sequence = 0
@@ -95,10 +105,7 @@ async def _session(profile, request, directory, authorize, record):
                 raise ModelCallFailure("CODEX_HOST_MODEL_MISMATCH", sent=False)
             thread = session["thread"]["id"]
             servers = await rpc("mcpServerStatus/list", {"threadId": thread})
-            if servers.get("nextCursor") or any(
-                row.get("runtimeStatus") != "disabled" or row.get("tools") or row.get("resources")
-                or row.get("resourceTemplates") for row in servers.get("data", [])
-            ):
+            if not tools_disabled(servers):
                 raise ModelCallFailure("CODEX_HOST_TOOLS_ENABLED", sent=False)
             record(request.attempt_id, thread, None, "THREAD_STARTED")
             if authorize(request.attempt_id) is False:

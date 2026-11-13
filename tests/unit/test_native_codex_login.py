@@ -39,7 +39,7 @@ def run_stub(tmp_path, monkeypatch, *, servers=None, item="agentMessage", author
     monkeypatch.setenv("NF_RUNTIME_LIVE_APPROVED", "1")
     monkeypatch.setattr(providers, "resolve_host_binary", lambda: sys.executable)
     monkeypatch.setattr(native_codex, "resolve_host_binary", lambda: sys.executable)
-    monkeypatch.setattr(native_codex, "_options", list)
+    monkeypatch.setattr(native_codex, "host_options", list)
 
     async def host(*args, **kwargs):
         return await real_start(sys.executable, str(stub), **kwargs)

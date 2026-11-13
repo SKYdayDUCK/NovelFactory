@@ -3,12 +3,14 @@ import argparse
 import asyncio
 import json
 import os
-import shutil
 import subprocess
 from pathlib import Path
 
 from bootstrap_p5_m0 import save
 from p6_external_review import main as external_review
+
+from agent_runtime.host_process import resolve_host_binary
+from agent_runtime.native_codex import host_environment, host_options, tools_disabled
 from novel_factory.domain.book_review import check_notes, check_score
 from novel_factory.domain.canonical import fingerprint, strict_json_loads
 from novel_factory.domain.errors import DomainError
@@ -123,23 +125,13 @@ async def run(folder, operation):
     directory = folder
     prepare_private_directory(directory)
     # Keep the host's existing login outside its empty read-only work directory.
-    catalog, room = directory / "host", directory / "room"
-    prepare_private_directory(catalog)
+    room = directory / "room"
     prepare_private_directory(room)
-    login = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex")) / "auth.json"
-    if not (catalog / "auth.json").exists():
-        if not login.is_file():
-            raise RuntimeError("GPT_HOST_LOGIN_REQUIRED")
-        (catalog / "auth.json").symlink_to(login.resolve())
-    opts = ["-c", "project_doc_max_bytes=0", "-c", 'web_search="disabled"', "-c", "mcp_servers={}"]
-    for feature in ("apps", "plugins", "browser_use", "computer_use", "shell_tool", "unified_exec", "multi_agent"):
-        opts.extend(["-c", "features." + feature + "=false"])
-    binary = shutil.which("codex")
+    binary = resolve_host_binary()
     if not binary:
         raise RuntimeError("GPT_HOST_UNAVAILABLE")
-    env = {k: v for k, v in os.environ.items() if k in {"HOME", "PATH", "LANG", "HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY", "SSL_CERT_FILE"}}
-    proc = await start_host(binary, "app-server", "--listen", "stdio://", *opts, cwd=room,
-                            env={**env, "CODEX_HOME": str(catalog)}, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+    proc = await start_host(binary, "app-server", "--listen", "stdio://", *host_options(), cwd=room,
+                            env=host_environment(), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                             stderr=subprocess.DEVNULL, limit=4_000_000)
     try:
         host = Host(proc)
@@ -159,12 +151,12 @@ async def run(folder, operation):
         else:
             if operation != "register":
                 raise RuntimeError("MISSING_READER_BINDING")
-            session = await host.request("thread/start", params)
+            session = await host.request("thread/start", {**params, "model": os.environ.get("NF_P6_READER_MODEL", "gpt-6.1-sol")})
         thread, model = session["thread"]["id"], session["model"]
         if session["modelProvider"] != "openai" or not model.startswith("gpt-"):
             raise RuntimeError("UNVERIFIED_GPT_IDENTITY")
         servers = await host.request("mcpServerStatus/list", {"threadId": thread})
-        if servers["data"]:
+        if not tools_disabled(servers):
             raise RuntimeError("READER_HAS_EXTERNAL_TOOLS")
         if operation == "register":
             await host.request("thread/inject_items", {"threadId": thread, "items": [
@@ -187,7 +179,7 @@ async def run(folder, operation):
                       "逐段读原文。仅返回 JSON 数组，每段一项，含 scene、start、quote（最多80码点）、observation（最多160码点）。用原文中的精确引句，start 为场景的 Unicode 偏移。",
                       "packet": packet}
             notes.append(await verdict(host, thread, directory, "packet-" + str(packet["number"]), prompt,
-                                       lambda value: check_notes(value, passages)))
+                                       lambda value, passages=passages: check_notes(value, passages)))
             for passage in passages:
                 fragments.setdefault(passage["scene"], []).append(passage["text"])
         parts = ["".join(fragments[i]) for i in range(1, len(fragments) + 1)]

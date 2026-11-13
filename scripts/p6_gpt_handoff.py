@@ -6,10 +6,11 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from bootstrap_p5_m0 import save
-from p6_gpt_reader import read
 from p6_external_review import main as review_cli
-from novel_factory.application.agent_gateway import AgentGateway
+from p6_gpt_reader import read
+
 from novel_factory.application import book_review
+from novel_factory.application.agent_gateway import AgentGateway
 from novel_factory.application.kernel import require
 from novel_factory.application.release import ReleaseService
 from novel_factory.application.rolling_publication import final_review_request, queue_final_readers
@@ -22,8 +23,11 @@ def run_reader(folder, operation):
     env = {k: v for k, v in os.environ.items() if k in {
         "HOME", "CODEX_HOME", "PATH", "PYTHONPATH", "LANG", "HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY",
         "SSL_CERT_FILE", "LD_LIBRARY_PATH", "TMPDIR"}}
+    env.update({k: v for k, v in os.environ.items() if k in {
+        "USERPROFILE", "APPDATA", "LOCALAPPDATA", "SystemRoot", "SYSTEMROOT", "TMP", "TEMP",
+        "NF_CODEX_EXECUTABLE", "NF_P6_READER_MODEL", "ALL_PROXY", "all_proxy", "http_proxy", "https_proxy", "no_proxy"}})
     result = subprocess.run([sys.executable, str(Path(__file__).with_name("p6_gpt_reader.py")), operation, str(folder)],
-                   env=env, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                   env=env, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
     require(result.returncode == 0, "GPT_READER_RECOVERY_REQUIRED", "Inspect the original reader session before retry")
 
 

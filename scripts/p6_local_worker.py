@@ -46,7 +46,10 @@ def main():
     key = resolve("NF_DEEPSEEK_API_KEY")
     if not key:
         raise ValueError("DeepSeek credential is not configured")
-    env.update(NF_DEEPSEEK_API_KEY=key, NF_RUNTIME_LIVE_APPROVED="1")
+    env["NF_RUNTIME_LIVE_APPROVED"] = "1"
+    if not (source / "agent_runtime/credentials.py").is_file():
+        # Frozen historical clients only understand environment references.
+        env["NF_DEEPSEEK_API_KEY"] = key
     return subprocess.run([sys.executable, str(source / "scripts/p6_batch.py"), "worker", "--private-dir",
                            str(state / "batch"), "--book", args.book], cwd=source, env=env, check=False).returncode
 
