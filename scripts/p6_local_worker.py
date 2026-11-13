@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 from agent_runtime.credentials import resolve
+from agent_runtime.providers import check_model_policy, read_profiles
 from novel_factory.infrastructure.private_files import read_private_bytes
 
 
@@ -16,6 +17,8 @@ def main():
     parser.add_argument("--state", type=Path, required=True)
     parser.add_argument("--book", choices=("A", "B", "C"), required=True)
     parser.add_argument("--run", action="store_true", help="Dispatch existing authorized tasks; may spend model budget")
+    parser.add_argument("--watch", action="store_true")
+    parser.add_argument("--stop-file", type=Path)
     args = parser.parse_args()
     source, state = args.source.resolve(), args.state.resolve()
     manifest = json.loads(read_private_bytes(state / "batch/batch.json", 100_000))
@@ -43,6 +46,14 @@ def main():
             "),{'w':a['work_id']}).mappings()]}));c.close();d.close()")
         env["NF_P6_ACCESS"] = str(state / "batch" / args.book / "supervisor.json")
         return subprocess.run([sys.executable, "-c", code], cwd=source, env=env, check=False).returncode
+    active = manifest.get("active_models", {}).get(args.book)
+    if active is not None:
+        configured = read_profiles(env["NF_RUNTIME_PROFILES"])
+        if not active or any(key not in configured or configured[key].describe() != value for key, value in active.items()):
+            raise ValueError("Active model inventory differs from frozen source")
+    for model in (active or manifest["models"]).values():
+        # Apply the current host policy even if historical source predates it.
+        check_model_policy(model["adapter_kind"], model["model"])
     key = resolve("NF_DEEPSEEK_API_KEY")
     if not key:
         raise ValueError("DeepSeek credential is not configured")
@@ -50,8 +61,13 @@ def main():
     if not (source / "agent_runtime/credentials.py").is_file():
         # Frozen historical clients only understand environment references.
         env["NF_DEEPSEEK_API_KEY"] = key
-    return subprocess.run([sys.executable, str(source / "scripts/p6_batch.py"), "worker", "--private-dir",
-                           str(state / "batch"), "--book", args.book], cwd=source, env=env, check=False).returncode
+    command = [sys.executable, str(source / "scripts/p6_batch.py"), "worker", "--private-dir",
+               str(state / "batch"), "--book", args.book]
+    if args.watch:
+        command.append("--watch")
+    if args.stop_file:
+        command.extend(["--stop-file", str(args.stop_file.resolve())])
+    return subprocess.run(command, cwd=source, env=env, check=False).returncode
 
 
 if __name__ == "__main__":

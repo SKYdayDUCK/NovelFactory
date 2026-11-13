@@ -1,5 +1,6 @@
 [
   {"id": "prose", "when": {"role_id": "writer"}, "profile": "deepseek_flash_writer"},
   {"id": "roleplay", "when": {"role_id": "character_actor"}, "profile": "deepseek_flash_writer"},
+  {"id": "memory-summary", "when": {"role_id": "evidence_maintainer", "task_kind": "summary"}, "profile": "deepseek_flash_writer"},
   {"id": "planning-review-and-other-roles", "when": {}, "profile": "codex_planner_reviewer"}
 ]

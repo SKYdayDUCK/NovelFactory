@@ -6,11 +6,21 @@ from decimal import Decimal
 
 
 @dataclass(frozen=True)
+class DryRunSpec:
+    seed: int = 0
+    review_pass_rate: float = 0.7
+    outcome: str = "normal"
+    payload: dict = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
 class ModelRequest:
     messages: tuple[dict, ...]
     request_sha256: str
     max_output_tokens: int
     attempt_id: str | None = None
+    dry_run: bool = False
+    simulation: DryRunSpec | None = None
 
 
 @dataclass(frozen=True)
@@ -25,6 +35,7 @@ class ModelResponse:
     raw_response: dict = field(default_factory=dict)
     request_sha256: str | None = None
     provider_reported_usd: Decimal | None = None
+    dry_run: bool = False
 
 
 class ModelCallFailure(Exception):

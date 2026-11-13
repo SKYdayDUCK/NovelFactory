@@ -3,13 +3,15 @@ import argparse
 import importlib.util
 import json
 import os
-from pathlib import Path
 import platform
 import runpy
 import sys
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = {
+    "dry-run": "nf_dry_run.py",
+    "recover-reading": "p6_recover_reading.py",
     "init-sample": "bootstrap_p5_m0.py",
     "init-book": "p58_bootstrap_book.py",
     "grant-resume": "provision_resume.py",

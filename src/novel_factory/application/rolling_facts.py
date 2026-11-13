@@ -10,6 +10,7 @@ from ..domain.errors import DomainError
 
 from ..domain.canonical import strict_json_loads
 from ..domain.reconciliation import span_for
+from ..domain.review_gate import blocking_review_issues
 from .authorization import Principal
 from .kernel import require
 from .narrative import NarrativeService
@@ -51,10 +52,7 @@ def assignment():
 
 def epistemic_blockers(issues):
     """Retain the complete reading. Gate advancement on active mandatory findings."""
-    return [issue for issue in issues if issue["disposition"] != "RESOLVED"
-            and (issue["category"] == "HARD_CONSISTENCY" or issue["issue_kind"] == "HARD_CONFLICT"
-                 or issue["severity"] == "BLOCKER" or
-                 (issue["issue_kind"] == "CHANGE_REQUEST" and issue["disposition"] in {"OPEN", "ACCEPT"}))]
+    return blocking_review_issues(issues)
 
 
 def record_knowledge(kernel, repo, owner, board, node, task, evidence, candidate):

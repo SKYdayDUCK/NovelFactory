@@ -1,0 +1,198 @@
+{
+  "schema_version": "nf.dry-run-evidence.v1",
+  "date": "2026-11-14",
+  "source_sha256": {
+    "src/novel_factory/simulation/scheduler.py": "0c81ab1faddd8b1ebd4b31809f0f16e5dec86c675ebc8acf42ca8c6be5b49ab6",
+    "agent_runtime/dry_run.py": "3f887873cf39cf7630362eab7cc21fa00da590e1cf3e88f7b38f219151495ce4",
+    "scripts/nf_dry_run.py": "e968dabbf6876a18c35afaead369503b5168485dbbd0f5f8aaf69616d1aaad7c"
+  },
+  "runs": [
+    {
+      "command": "python -S scripts/nf.py dry-run --scenario all --runs 50 --seed 42 --books 3 --chapters 5 --agents 5000 --workers 4 --max-reworks 2",
+      "status": "PASS",
+      "mode": "DRY_RUN",
+      "success_goal": "BOOK_RELEASE_FREEZE",
+      "completion_required": false,
+      "scenario_count": 1250,
+      "harness_requests_total": 173072,
+      "database_connections": 0,
+      "upstream_model_calls": 0,
+      "external_io_attempts": [],
+      "forbidden_imports": [],
+      "scenarios": {
+        "novel": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 50,
+          "frozen_books": 150
+        },
+        "idle": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 50,
+          "frozen_books": 0
+        },
+        "normal": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 22,
+          "frozen_books": 113
+        },
+        "review_return": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 21,
+          "frozen_books": 112
+        },
+        "review_exhausted": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 0,
+          "frozen_books": 0
+        },
+        "rate_limit": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 22,
+          "frozen_books": 113
+        },
+        "timeout": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 0,
+          "frozen_books": 75
+        },
+        "unknown_reconciled": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 22,
+          "frozen_books": 113
+        },
+        "crash_before_send": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 22,
+          "frozen_books": 113
+        },
+        "crash_after_send": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 0,
+          "frozen_books": 75
+        },
+        "invalid_json": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 22,
+          "frozen_books": 113
+        },
+        "truncated": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 22,
+          "frozen_books": 113
+        },
+        "lost_notification": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 22,
+          "frozen_books": 113
+        },
+        "duplicate_notification": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 22,
+          "frozen_books": 113
+        },
+        "duplicate_result": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 22,
+          "frozen_books": 113
+        },
+        "late_result": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 22,
+          "frozen_books": 113
+        },
+        "lease_expired": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 22,
+          "frozen_books": 113
+        },
+        "restart": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 22,
+          "frozen_books": 113
+        },
+        "authorization_revoked": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 0,
+          "frozen_books": 0
+        },
+        "budget_exhausted": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 0,
+          "frozen_books": 0
+        },
+        "dependencies": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 0,
+          "frozen_books": 0
+        },
+        "storage_disconnect": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 22,
+          "frozen_books": 113
+        },
+        "worker_pool_failure": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 22,
+          "frozen_books": 113
+        },
+        "context_mismatch": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 22,
+          "frozen_books": 113
+        },
+        "book_review_return": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 15,
+          "frozen_books": 104
+        }
+      }
+    },
+    {
+      "command": "python -S scripts/nf.py dry-run --scenario novel --runs 50 --seed 42 --books 3 --chapters 5 --agents 5000 --workers 4",
+      "status": "PASS",
+      "mode": "DRY_RUN",
+      "success_goal": "BOOK_RELEASE_FREEZE",
+      "completion_required": true,
+      "scenario_count": 50,
+      "harness_requests_total": 9793,
+      "database_connections": 0,
+      "upstream_model_calls": 0,
+      "external_io_attempts": [],
+      "forbidden_imports": [],
+      "scenarios": {
+        "novel": {
+          "runs": 50,
+          "checks_passed": 50,
+          "completed": 50,
+          "frozen_books": 150
+        }
+      }
+    }
+  ],
+  "scope": "Offline scheduler and real Harness dispatch boundary with simulated responses; no DB, billing or literary quality proof"
+}

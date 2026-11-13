@@ -1,12 +1,14 @@
 """Run the deterministic project scheduler. A stopped service resumes on restart."""
 import argparse
 import json
+import math
 import multiprocessing
 import os
 import signal
 import time
 from concurrent.futures import (
     FIRST_COMPLETED,
+    BrokenExecutor,
     Future,
     ProcessPoolExecutor,
     ThreadPoolExecutor,
@@ -16,13 +18,15 @@ from pathlib import Path
 from threading import Event
 
 import psycopg
-from sqlalchemy.exc import OperationalError, TimeoutError as PoolTimeout
+from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import TimeoutError as PoolTimeout
 
 from novel_factory.application.agent_gateway import AgentGateway
 from novel_factory.application.kernel import Kernel
 from novel_factory.application.production_pipeline import production_material_reader
 from novel_factory.application.supervisor import HostJournal, RuntimeSupervisor
 from novel_factory.domain.errors import DomainError
+from novel_factory.infrastructure.agent_lifecycle import AgentLifecycleManager
 from novel_factory.infrastructure.capacity import (
     AdaptiveController,
     MeasuredThreadExecutor,
@@ -51,7 +55,7 @@ def log_result(result):
                       if key in result}), flush=True)
 
 
-def serve(supervisor, principal, work, branch, *, workers, interval, processor=None, controller=None, observation_seconds=60, stop_event=None):
+def serve(supervisor, principal, work, branch, *, workers, interval, processor=None, controller=None, observation_seconds=60, stop_event=None, idle_seconds=45):
     stop_event = stop_event if stop_event is not None else Event()
     pending = {}
     windows = None
@@ -61,33 +65,31 @@ def serve(supervisor, principal, work, branch, *, workers, interval, processor=N
                               work=work, branch=branch, instance=controller.instance if controller else None)
         if controller:
             controller.monitor.occupancy = windows.meter
-    while not stop_event.is_set():
+    def pool_factory():
         if processor == "compute":
             url = supervisor.kernel.db.engine.url.render_as_string(hide_password=False)
-            pool = ProcessPoolExecutor(max_workers=workers, mp_context=multiprocessing.get_context("spawn"),
+            return ProcessPoolExecutor(max_workers=workers, mp_context=multiprocessing.get_context("spawn"),
                                        initializer=initialize_index_worker,
                                        initargs=(url, str(supervisor.kernel.objects.root), windows.meter))
-        else:
-            pool = ThreadPoolExecutor(max_workers=workers)
-        execution = MeasuredThreadExecutor(pool, windows.meter) if windows and processor != "compute" else pool
-        with pool:
-            while not stop_event.is_set():
-                try:
-                    with wake_listener(supervisor.kernel.db.engine) as listener:
-                        retire = _drain(supervisor, principal, work, branch, execution, workers, pending, listener,
-                                        interval, processor, controller, windows, stop_event)
-                    if retire:
-                        break
-                except (psycopg.OperationalError, OperationalError, PoolTimeout):
-                    # Reopen LISTEN, then rescan durable state. Keep admitted futures in this pool.
-                    print(json.dumps({"status": "RECONNECTING", "reason": "DATABASE_UNAVAILABLE"}), flush=True)
-                    stop_event.wait(min(interval, 5))
+        return ThreadPoolExecutor(max_workers=workers)
+
+    with AgentLifecycleManager(pool_factory, idle_seconds=idle_seconds, observe=log_result) as lifecycle:
+        execution = MeasuredThreadExecutor(lifecycle, windows.meter) if windows and processor != "compute" else lifecycle
+        while not stop_event.is_set():
+            try:
+                with wake_listener(supervisor.kernel.db.engine) as listener:
+                    _drain(supervisor, principal, work, branch, execution, workers, pending, listener,
+                           interval, processor, controller, windows, stop_event, lifecycle)
+            except (psycopg.OperationalError, psycopg.InterfaceError, OperationalError, PoolTimeout):
+                # Reopen LISTEN, then rescan durable state. Keep admitted futures.
+                log_result({"status": "RECONNECTING", "reason": "DATABASE_UNAVAILABLE"})
+                lifecycle.maintain()
+                stop_event.wait(min(interval, 5))
 
 
-def _drain(supervisor, principal, work, branch, pool, workers, pending, listener, interval, processor, controller, windows, stop_event):
+def _drain(supervisor, principal, work, branch, pool, workers, pending, listener, interval, processor, controller, windows, stop_event, lifecycle=None):
     dispatcher = TaskDispatcher(supervisor, principal, work, branch) if processor else None
     next_reconciliation = 0.0
-    used_pool = bool(pending)
     while not stop_event.is_set():
         for future in tuple(pending):
             if future.done():
@@ -96,37 +98,47 @@ def _drain(supervisor, principal, work, branch, pool, workers, pending, listener
                     result = future.result()
                 except DomainError as exc:
                     result = {"status": "BLOCKED", "reason": exc.code}
+                except BrokenExecutor:
+                    # Task/Attempt recovery decides eligibility, never resubmit this Future.
+                    result = {"status": "BLOCKED", "reason": "WORKER_PROCESS_EXITED"}
+                except Exception:  # noqa: BLE001 -- retain durable task evidence; exception text may contain credentials.
+                    result = {"status": "BLOCKED", "reason": "WORKER_EXECUTION_FAILED"}
                 if controller:
                     controller.monitor.completed(time.monotonic() - started, result["status"] not in {"BLOCKED", "FAILED"})
                 log_result(result)
         target = controller.limit() if controller else workers
-        if (used_pool and not pending and controller and controller.policy.idle_since is not None
-                and time.monotonic() - controller.policy.idle_since >= 2 * controller.policy.cooldown):
-            # No admitted execution owns the pool. Exit its context and release
-            # native threads/processes; the replacement spawns on first submit.
-            return True
+        if lifecycle:
+            lifecycle.maintain()
         if windows:
             windows.tick(target)
         if len(pending) >= target:
             timeout = min(windows.timeout(), controller.interval if controller else interval) if windows else interval
             wait(pending, timeout=min(timeout, 1), return_when=FIRST_COMPLETED)
             continue
-        if dispatcher:
-            now = time.monotonic()
-            reconcile = now >= next_reconciliation
-            if reconcile:
-                next_reconciliation = now + interval
-            result = dispatcher.run_once(processor, executor=pool, reconcile=reconcile)
-        else:
-            result = supervisor.run_once(principal, work, branch, executor=pool)
+        try:
+            if dispatcher:
+                now = time.monotonic()
+                reconcile = now >= next_reconciliation
+                if reconcile:
+                    next_reconciliation = now + interval
+                result = dispatcher.run_once(processor, executor=pool, reconcile=reconcile)
+            else:
+                result = supervisor.run_once(principal, work, branch, executor=pool)
+        except DomainError as exc:
+            result = {"status": "BLOCKED", "reason": exc.code}
+        except BrokenExecutor:
+            result = {"status": "BLOCKED", "reason": "WORKER_PROCESS_EXITED"}
         if isinstance(result, Future):
             pending[result] = time.monotonic()
-            used_pool = True
-        elif result["status"] == "IDLE":
+        elif result["status"] in {"IDLE", "BLOCKED", "PAUSED", "WAITING_REVIEW", "NEEDS_ATTENTION"}:
+            if result["status"] != "IDLE":
+                log_result(result)
             timeout = min(interval, windows.timeout()) if windows else interval
             if "retry_after_seconds" in result:
                 timeout = min(timeout, result["retry_after_seconds"])
                 next_reconciliation = min(next_reconciliation, time.monotonic() + timeout)
+            if lifecycle and (remaining_idle := lifecycle.idle_remaining()) is not None:
+                timeout = min(timeout, remaining_idle)
             # Slot releases and new work both publish commit-time wake hints.
             # Check local futures between socket waits, keeping a quiet provider
             # call from triggering repeated durable scans while slots are free.
@@ -143,6 +155,8 @@ def main():
     parser.add_argument("--access-file", required=True, type=Path, help="Private JSON with token, work_id and branch_id")
     parser.add_argument("--interval", type=float, default=60, help="Maximum seconds between durable reconciliations")
     parser.add_argument("--workers", type=int, default=2, help="Maximum concurrent Host tasks in this process")
+    parser.add_argument("--idle-seconds", type=float, default=45,
+                        help="Release an unused execution pool after this interval; keep the listener alive")
     parser.add_argument("--db-pool-size", type=int, default=5,
                         help="Maximum parent database pool connections; the listener uses one separate connection")
     parser.add_argument("--processor", choices=SCOPED, help="Run this Redis-mode project processor")
@@ -173,6 +187,8 @@ def main():
         parser.error("interval must be between 0.1 and 60 seconds")
     if not 1 <= args.workers <= 16:
         parser.error("workers must be between 1 and 16")
+    if not math.isfinite(args.idle_seconds) or not 0 <= args.idle_seconds <= 3600:
+        parser.error("idle-seconds must be between 0 and 3600 seconds")
     if not 1 <= args.db_pool_size <= 20:
         parser.error("db-pool-size must be between 1 and 20")
     if not .5 <= args.observation_seconds <= 3600:
@@ -207,7 +223,11 @@ def main():
         gateway = AgentGateway(kernel, adapters, material_reader=production_material_reader(kernel))
         supervisor = RuntimeSupervisor(kernel, gateway)
         if args.start_book_review or args.book_review_status or args.book_review_reports or args.resume_book_review:
-            from novel_factory.application.book_review import review_status, resume_review, start_review
+            from novel_factory.application.book_review import (
+                resume_review,
+                review_status,
+                start_review,
+            )
             work, branch = access["work_id"], access["branch_id"]
             if args.start_book_review:
                 settings = json.loads(read_private_bytes(args.start_book_review, 8_000_000))
@@ -233,7 +253,11 @@ def main():
                                              include_outputs=args.pipeline_results), ensure_ascii=False))
             return
         if args.register_pipeline or args.register_rolling or args.replace_rolling_window or args.retry_rolling or args.transfer_window or args.revise_window:
-            from novel_factory.application.production_pipeline import register_pipeline, revise_window, transfer_window
+            from novel_factory.application.production_pipeline import (
+                register_pipeline,
+                revise_window,
+                transfer_window,
+            )
             payload = json.loads((args.register_pipeline or args.register_rolling or args.replace_rolling_window or args.retry_rolling or args.transfer_window or args.revise_window).read_text(encoding="utf-8"))
             if not isinstance(payload, dict) or not isinstance(payload.get("world_ref"), dict) or any(
                     payload["world_ref"].get(k) != access[k] for k in ("work_id", "branch_id")):
@@ -298,7 +322,8 @@ def main():
         try:
             serve(supervisor, principal, access["work_id"], access["branch_id"],
                   workers=args.workers, interval=args.interval, processor=args.processor, controller=controller,
-                  observation_seconds=args.observation_seconds, stop_event=stop_event)
+                  observation_seconds=args.observation_seconds, stop_event=stop_event,
+                  idle_seconds=args.idle_seconds)
         finally:
             for sig, handler in previous.items():
                 signal.signal(sig, handler)

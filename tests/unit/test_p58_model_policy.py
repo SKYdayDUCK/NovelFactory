@@ -44,7 +44,7 @@ def test_new_ideas_route_planning_and_review_separately_from_prose_and_roleplay(
         "character_actor": {"character_action": "flash", "reaction": "flash"},
         "writer": {"scene_draft": "flash", "chapter_draft": "flash", "targeted_revision": "flash"},
         "adjudication_advisor": {"joint_outcome": "pro"},
-        "evidence_maintainer": {"assertion_extract": "pro", "event_alignment": "pro", "summary": "pro"},
+        "evidence_maintainer": {"assertion_extract": "pro", "event_alignment": "pro", "summary": "flash"},
         "reviewer": dict.fromkeys(("fact", "epistemic", "continuity", "literary"), "pro"),
         "literary_editor": {"research": "pro", "structure": "pro", "seam": "pro", "cross_volume": "pro"},
     }

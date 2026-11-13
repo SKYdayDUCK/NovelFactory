@@ -29,6 +29,25 @@ def _unique(pairs):
     return result
 
 
+def check_model_policy(kind, model):
+    """An optional host allowlist is checked before credentials or upstream I/O."""
+    raw = os.environ.get("NF_RUNTIME_ALLOWED_MODELS")
+    if raw is None:
+        return
+    try:
+        policy = json.loads(raw, object_pairs_hook=_unique)
+        if (not isinstance(policy, dict) or not policy
+                or set(policy) - {"deepseek", "codex-cli", "openai-compatible"}
+                or any(not isinstance(names, list) or not names or len(names) > 256
+                       or any(not isinstance(name, str) or not re.fullmatch(r"[a-zA-Z0-9][\w./:@-]{0,191}", name)
+                              for name in names) for names in policy.values())):
+            raise ValueError
+    except (TypeError, ValueError):
+        raise ProfileError("INVALID_MODEL_POLICY") from None
+    if model not in policy.get(kind, []):
+        raise ProfileError("MODEL_NOT_ALLOWED")
+
+
 @dataclass(frozen=True)
 class Profile:
     kind: str
@@ -105,6 +124,7 @@ class Profile:
     def preflight(self):
         if os.environ.get("NF_RUNTIME_LIVE_APPROVED") != "1":
             raise ProfileError("MODEL_CALL_NOT_AUTHORIZED")
+        check_model_policy(self.kind, self.model)
         if self.auth_mode == "host-login":
             if not resolve_host_binary():
                 raise ProfileError("MODEL_UNAVAILABLE")
@@ -188,11 +208,17 @@ def usage_value(value):
 
 def invoke(profile, request, *, authorize, record, receipt_target=None):
     """The host rechecks a durable attempt immediately before upstream I/O."""
-    if (not request.attempt_id or type(request.max_output_tokens) is not int
+    if (type(request.dry_run) is not bool or not request.dry_run and request.simulation is not None
+            or not request.attempt_id or type(request.max_output_tokens) is not int
             or not 1 <= request.max_output_tokens <= profile.max_output_tokens or not request.messages
             or any(set(m) != {"role", "content"} or m["role"] not in ("system", "user", "assistant", "developer")
                    or not isinstance(m["content"], str) for m in request.messages)):
         raise ModelCallFailure("INVALID_MODEL_REQUEST", sent=False)
+    if request.dry_run:
+        if receipt_target is not None:
+            raise ModelCallFailure("DRY_RUN_LIVE_RECEIPT_FORBIDDEN", sent=False)
+        from .dry_run import generate
+        return generate(profile, request, authorize=authorize, record=record)
     if profile.kind == "codex-cli":
         if profile.auth_mode == "host-login":
             if request.max_output_tokens != profile.max_output_tokens:

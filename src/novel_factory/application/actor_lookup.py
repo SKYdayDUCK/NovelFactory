@@ -116,6 +116,7 @@ def read_stage(gateway, adapter, principal, binding, request, messages):
         try:
             started = time.monotonic()
             response = adapter.generate(ModelRequest(selector_messages, digest, maximum, attempt))
+            require(not response.dry_run, "DRY_RUN_MODE_MISMATCH", "A simulation result cannot enter a live lookup")
             require(response.request_sha256 == digest, "HOST_BINDING_MISMATCH", "Unbound selection")
             receipt = response.provider_receipt
             amount_used = response.actual_amount

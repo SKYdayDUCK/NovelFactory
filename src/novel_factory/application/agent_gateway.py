@@ -686,6 +686,7 @@ class AgentGateway:
                 if binding["input"].get("routing_decision") or getattr(adapter, "provider_key", None):
                     from novel_factory.orchestration.runtime_admission import release
                     release(self.kernel.db, attempt)
+            require(not response.dry_run, "DRY_RUN_MODE_MISMATCH", "A simulation result cannot enter a live task")
             provider_receipt = response.provider_receipt
             require(response.request_sha256 == request_hash, "HOST_BINDING_MISMATCH", "Response is not bound to the dispatched request")
             require(isinstance(response.text, str) and len(response.text.encode("utf-8")) <= 2_000_000,

@@ -17,6 +17,17 @@ def wake_listener(engine):
 def wait_for_change(listener, timeout):
     notices = listener.notifies(timeout=timeout, stop_after=1)
     try:
-        return next(notices, None) is not None
+        changed = next(notices, None) is not None
     finally:
         notices.close()
+    if changed:
+        # Hints have no per-message meaning. Coalesce a bounded ready backlog
+        # instead of repeating a durable project scan for every duplicate hint.
+        queued = listener.notifies(timeout=0, stop_after=128)
+        try:
+            for index, _ in enumerate(queued, 1):
+                if index >= 128:
+                    break
+        finally:
+            queued.close()
+    return changed

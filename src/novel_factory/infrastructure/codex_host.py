@@ -124,6 +124,8 @@ class CodexAppServerAdapter:
             raise DomainError("MODEL_UNAVAILABLE", "Codex app-server executable is unavailable")
 
     def generate(self, request):
+        if request.dry_run:
+            raise ModelCallFailure("DRY_RUN_UNSUPPORTED_ADAPTER", sent=False)
         self.check_available()
         if not request.attempt_id:
             raise ModelCallFailure("CALL_IDENTITY_REQUIRED")

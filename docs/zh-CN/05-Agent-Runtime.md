@@ -53,11 +53,13 @@ export NF_RUNTIME_PROFILES="$PWD/providers.json"
 
 已有 `codex login` 的 ChatGPT 用户可使用 `auth_mode: "host-login"`。CLI 管理登录与续期，不向 NF 导出访问令牌。该模式创建新的临时只读线程，关闭本机 MCP、插件、Shell 和浏览器工具，再检查服务状态；出现工具请求或动作即拒收结果。`secret_ref` 在此模式中仅作为账号配额命名空间，不需要另存 OpenAI API Key。需将当前模型的完整输出上界同时填入 `model_output_ceiling` 和 `max_output_tokens` 并预留相应 Token；任务内较小的上限不能作为 CLI 的硬截断。调用中断保留原 Attempt，不自动再次发起回合；CLI 内部传输及订阅金额不能冒充逐请求账单。
 
-生产交付会核验该 Attempt 的本机 Host journal 已达 `COMPLETED`，线程/回合、实际模型、任务代际、提示/响应/输入哈希及候选契约完全相符，才允许采用返回结果。采用不结算订阅费用，原 `UNKNOWN` 和预算预留保留。未完成、丢回执、换模型或换回合都不能仅凭声明为成功而交付。调度预算须覆盖输入与整个 CLI 输出上界，例如示例目录可使用 524288 的单次 Token 预留和更高的任务上限，不能沿用小于输出上界的旧实验预算。
+生产交付会核验该 Attempt 的本机 Host journal 已达 `COMPLETED`，线程/回合、实际模型、任务代际、提示/响应/输入哈希及候选契约完全相符，才允许采用返回结果。采用不结算订阅费用，原 `UNKNOWN` 和预算预留保留。未完成、丢回执、换模型或换回合都不能仅凭声明为成功而交付。调度预算须覆盖输入与整个 CLI 输出上界，且满足派发契约的 500000 单次 Token 上限；当前 Codex 迁移阶段使用 500000，发送前仍会核对实际输入估算，不能沿用小于输出上界的旧实验预算。
 
 可从 [双模型目录](../../configs/codex-deepseek.example.json) 和 [岗位路由](../../configs/codex-deepseek-routes.example.json) 配置后续作品：写作与角色行动使用 DeepSeek，其余规划、设定、审读和编辑使用 Codex。示例的保守输出预留须结合当前账户调整。原三书快照继续使用其冻结的双 DeepSeek 配置，换模型须经过任务重绑，不能改写已开始的调用。
 
-新作品的 P6 双模型 intake 也采用此分工：`creative` 配置只供 writer/character_actor 使用，`review` 配置承担大纲、设定、规划及审核。旧 intake 与已物化作品继续采用其已保存的策略 Artifact，源码默认值变更不重写历史路由。
+新作品的 P6 双模型 intake 也采用此分工：`creative` 配置供 writer/character_actor 及 evidence_maintainer 的 summary 使用，复杂事实抽取、其余大纲、设定、规划及审核使用 `review` 配置。旧 intake 与已物化作品继续采用其已保存的策略 Artifact，源码默认值变更不重写历史路由。
+
+已返回但因格式反复失败而停止的事实读取，可用 `python scripts/nf.py recover-reading --help` 预览显式策略迁移。管理员提供旧任务代际及当前生产板哈希；`--apply` 在事务中核验原回执、封存旧返工诊断、采用新版路由，为同一份正文登记独立读取任务和新阶段预算。旧 Attempt、原预留及未知账务不改写。此操作不会自动处理仍在发送或丢失结果的请求。
 
 ### 输入缓存与上下文
 

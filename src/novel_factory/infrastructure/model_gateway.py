@@ -94,6 +94,8 @@ class OpenAICompatibleAdapter:
             raise DomainError("MODEL_UNAVAILABLE", "No authorized model credential is configured")
 
     def generate(self, request: ModelRequest) -> ModelResponse:
+        if request.dry_run:
+            raise ModelCallFailure("DRY_RUN_UNSUPPORTED_ADAPTER", sent=False)
         self.check_available()
         if request.max_output_tokens > self.max_output_tokens:
             raise DomainError("BUDGET_EXCEEDED", "Requested output exceeds the model configuration")
@@ -166,6 +168,8 @@ class TrustedHostAdapter:
             raise DomainError("MODEL_UNAVAILABLE", "The authorized Host is not available")
 
     def generate(self, request):
+        if request.dry_run:
+            raise ModelCallFailure("DRY_RUN_UNSUPPORTED_ADAPTER", sent=False)
         self.check_available()
         response = self.invoke(request)
         if not isinstance(response, ModelResponse) or response.request_sha256 != request.request_sha256:

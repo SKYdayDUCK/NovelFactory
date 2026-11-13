@@ -17,6 +17,7 @@ NovelFactory 是一个多智能体小说生产系统。作者可以让角色按�
 | 从软件或模型宿主调用项目 | [MCP、HTTP 与管理接口](docs/zh-CN/07-接口参考.md) |
 | 部署两个服务，演练中断与恢复 | [配置与部署](docs/zh-CN/08-配置与部署.md) · [运维与恢复](docs/zh-CN/09-运维与恢复.md) |
 | 判断负载是否适合自己的机器 | [性能与实验](docs/zh-CN/10-性能与实验.md) |
+| 不连接数据库和模型，测试到整书最终冻结 | [Dry Run 与程序生命周期](docs/zh-CN/11-Dry-Run与程序生命周期.md) |
 
 ## 一部小说如何推进
 
@@ -57,7 +58,11 @@ uv run --no-sync python scripts/with_postgres.py --migrate -- \
 | 容量 | 两轮 500 Agent、每轮 10 分钟的读测试各完成 12,000 次请求。200 Agent 过载及 1000 Agent 开放到达仍未达到原门槛。 |
 | 文学与费用 | 短卷和供应商故障测试使用合成输入。真人全文评分与商业模型账单需要单独取证。 |
 
-项目使用 Python、SQLAlchemy、PostgreSQL 17、可选的 Redis Streams、MCP stdio 和 HTTP。参与开发前请阅读仓库约定。设计沿革与历史验收保留在原路径。[开发约定](AGENTS.md) · [历史验收](reports/p6_readiness/README.md) · [容量问题 #13](https://github.com/SKYdayDUCK/NovelFactory/issues/13) · [GitHub Actions](https://github.com/SKYdayDUCK/NovelFactory/actions)
+项目使用 Python、SQLAlchemy、PostgreSQL 17、可选的 Redis Streams、MCP stdio 和 HTTP。可先运行 `python scripts/nf.py dry-run --books 3 --chapters 5 --seed 42`，经过真实 Harness 边界模拟规划、写作、随机审核、返工、双路全文审核及整书最终冻结，数据库和上游模型调用均为 0。默认命令必须达到全部小说最终冻结才返回成功。[Dry Run 与生命周期](docs/zh-CN/11-Dry-Run与程序生命周期.md)
+
+管理器是程序，空闲时休眠并回收 Worker，按持久任务变化唤醒。真实模型分工为 Codex 承担复杂工作、规划和审核，DeepSeek Flash 承担写作、角色扮演和简单摘要。密钥使用本机凭据库；稳定上下文前缀提高缓存复用条件，按真实回执统计命中率。`temp/` 和 `.runtime/` 均不提交 Git。
+
+参与开发前请阅读仓库约定。设计沿革与历史验收保留在原路径。[开发约定](AGENTS.md) · [历史验收](reports/p6_readiness/README.md) · [容量问题 #13](https://github.com/SKYdayDUCK/NovelFactory/issues/13) · [GitHub Actions](https://github.com/SKYdayDUCK/NovelFactory/actions)
 
 ## 许可证
 

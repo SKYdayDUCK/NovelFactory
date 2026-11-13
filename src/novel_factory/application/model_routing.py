@@ -10,7 +10,7 @@ POLICY_ROUTE = "@policy"
 
 
 def idea_policy(wr, model_routes):
-    """New works use the writing model only for prose and character performance.
+    """New works use the writing model for prose, character performance and summaries.
 
     Existing intakes retain their immutable policy artifact, including when
     materialized as a literary work; this default never rewrites that history.
@@ -18,7 +18,9 @@ def idea_policy(wr, model_routes):
     creative, review = model_routes["creative"], model_routes["review"]
     rules = [{"id": "planning-review", "when": {}, "profile": review},
              *({"id": role, "when": {"role_id": role}, "profile": creative}
-               for role in ("writer", "character_actor"))]
+               for role in ("writer", "character_actor")),
+             {"id": "memory-summary", "when": {"role_id": "evidence_maintainer", "task_kind": "summary"},
+              "profile": creative}]
     return {"work_id": wr["work_id"], "branch_id": wr["branch_id"], "installation_id": "local",
             "org_id": "p6", "revision": 1, "rules": rules}
 

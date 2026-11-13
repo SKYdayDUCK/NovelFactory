@@ -4,6 +4,7 @@ import json
 import os
 import subprocess
 import sys
+from contextlib import nullcontext
 from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
@@ -11,20 +12,25 @@ from threading import Event
 from urllib.error import URLError
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
+import psycopg
 from bootstrap_p5_m0 import save
 from p6_idea import configured_gateway, run_intake
 from sqlalchemy import text
+from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import TimeoutError as PoolTimeout
 
 from novel_factory.application import frozen_editing
+from novel_factory.application.agent_gateway import AgentGateway
 from novel_factory.application.budget_limits import SharedBudgetService
 from novel_factory.application.kernel import Kernel, require
+from novel_factory.application.lifecycle_state import project_change_token
 from novel_factory.application.production_pipeline import (
     pipeline_status,
     production_material_reader,
 )
 from novel_factory.application.rolling_production import rolling_status
 from novel_factory.application.statistics import is_official_deepseek
-from novel_factory.application.supervisor import RuntimeSupervisor
+from novel_factory.application.supervisor import HostJournal, RuntimeSupervisor
 from novel_factory.domain.canonical import fingerprint
 from novel_factory.domain.errors import DomainError
 from novel_factory.infrastructure.creative_config import CreativeHarnessConfig
@@ -32,6 +38,7 @@ from novel_factory.infrastructure.database import Database
 from novel_factory.infrastructure.native_files import file_lock
 from novel_factory.infrastructure.objects import ObjectStore
 from novel_factory.infrastructure.private_files import prepare_private_directory, read_private_bytes
+from novel_factory.infrastructure.runtime_providers import load_runtime_profiles
 from novel_factory.infrastructure.supervisor_wake import wait_for_change, wake_listener
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -258,7 +265,28 @@ def emit(project, result):
     print(json.dumps(public), flush=True)
 
 
-def serve(kernel, gateway, root, book, stop):
+class StopRequest:
+    """An owner-private stop file is observed only between paid calls."""
+
+    def __init__(self, event, path, book, source_sha):
+        self.event, self.path, self.book, self.source_sha = event, path, book, source_sha
+
+    def is_set(self):
+        if self.event.is_set():
+            return True
+        if self.path.exists():
+            request = private(self.path)
+            require(request == {"action": "STOP_AFTER_CURRENT_CALL", "book": self.book,
+                                "source_sha": self.source_sha},
+                    "INVALID_ARGUMENT", "Stop request differs from this frozen worker")
+            self.event.set()
+        return self.event.is_set()
+
+    def wait(self, seconds):
+        return self.event.wait(seconds)
+
+
+def serve(kernel, gateway, root, book, stop, *, shared_listener=None):
     project = root / book
     manifest = private(root / "batch.json")
     require(manifest["source_sha"] == source_release() and manifest["harness"] == gateway.creative_harness.as_dict()
@@ -270,7 +298,8 @@ def serve(kernel, gateway, root, book, stop):
     require(all(access["world_ref"][k] == identity[k] for k in ("work_id", "branch_id")),
             "IDEMPOTENCY_MISMATCH", "Wrong work binding")
     # One independent service per work. Process exit releases the local lock. The DB owns attempt recovery.
-    with file_lock(project / ".worker.lock"), wake_listener(kernel.db.engine) as listener:
+    listening = wake_listener(kernel.db.engine) if shared_listener is None else nullcontext(shared_listener)
+    with file_lock(project / ".worker.lock"), listening as listener:
         state_path = project / "worker-state.json"
         if (project / "supervisor.json").exists() and state_path.exists() and manifest["allowances"][book]["writing"].get("meter_per_dispatch"):
             resume_unsent_metered_job(kernel, project, private(state_path))
@@ -341,6 +370,9 @@ def main(argv=None):
     worker = sub.add_parser("worker")
     worker.add_argument("--private-dir", type=Path, required=True)
     worker.add_argument("--book", choices=BOOKS, required=True)
+    worker.add_argument("--watch", action="store_true",
+                        help="Keep the program listener alive; retry only after durable scheduling inputs change")
+    worker.add_argument("--stop-file", type=Path, help="Owner-private stop request; finish the current call before exit")
     args = parser.parse_args(argv)
     os.environ.setdefault("NF_RUNTIME_PROFILES", str(ROOT / "configs/deepseek-p6.example.json"))
     os.environ["NF_CREATIVE_HARNESS_CONFIG"] = json.dumps(HARNESS.as_dict())
@@ -355,7 +387,9 @@ def main(argv=None):
             return 0
         db = Database(pool_size=5)
         kernel = Kernel(db, ObjectStore(os.environ["NF_OBJECT_ROOT"]))
-        gateway = configured_gateway(kernel, ROUTES["creative"], ROUTES["review"])
+        gateway = (AgentGateway(kernel, load_runtime_profiles(os.environ["NF_RUNTIME_PROFILES"], HostJournal(kernel)))
+                   if args.action == "worker" and args.watch else
+                   configured_gateway(kernel, ROUTES["creative"], ROUTES["review"]))
         gateway.material_reader = production_material_reader(kernel)
         prepare_private_directory(args.private_dir)
         if args.action == "enroll":
@@ -367,7 +401,42 @@ def main(argv=None):
         stop = Event()
         signal.signal(signal.SIGTERM, lambda *_: stop.set())
         signal.signal(signal.SIGINT, lambda *_: stop.set())
-        return serve(kernel, gateway, args.private_dir, args.book, stop)
+        if args.stop_file:
+            event = stop
+            stop = StopRequest(event, args.stop_file, args.book, source_release())
+            signal.signal(signal.SIGTERM, lambda *_: event.set())
+            signal.signal(signal.SIGINT, lambda *_: event.set())
+        if not args.watch:
+            return serve(kernel, gateway, args.private_dir, args.book, stop)
+        project = args.private_dir / args.book
+        with file_lock(project / ".manager.lock"):
+            while not stop.is_set():
+                try:
+                    # LISTEN commits before the baseline scan; losing a notification
+                    # cannot hide a change because bounded periodic scans continue.
+                    with wake_listener(kernel.db.engine) as listener:
+                        def change_token():
+                            name = "supervisor.json" if (project / "first-window.json").exists() else "preparation.json"
+                            access = private(project / name)
+                            wr = access.get("world_ref", access)
+                            return project_change_token(kernel, kernel.authenticate(access["token"]), wr["work_id"], wr["branch_id"])
+
+                        before = change_token()
+                        result = serve(kernel, gateway, args.private_dir, args.book, stop, shared_listener=listener)
+                        if stop.is_set():
+                            return result
+                        # Use the pre-step token, so a concurrent change cannot be
+                        # swallowed between the worker's last read and its exit.
+                        emit(project, {"status": "WAITING_CHANGE", "reason": "DURABLE_INPUTS_REQUIRED"})
+                        while not stop.is_set() and change_token() == before:
+                            wait_for_change(listener, 30)
+                except DomainError as error:
+                    emit(project, {"status": "WAITING_CHANGE", "reason": error.code})
+                    stop.wait(30)
+                except (psycopg.OperationalError, psycopg.InterfaceError, OperationalError, PoolTimeout):
+                    emit(project, {"status": "RECONNECTING", "reason": "DATABASE_UNAVAILABLE"})
+                    stop.wait(5)
+        return 0
     except DomainError as error:
         print(json.dumps({"status": "BLOCKED", "reason": error.code}), flush=True)
         return 3
