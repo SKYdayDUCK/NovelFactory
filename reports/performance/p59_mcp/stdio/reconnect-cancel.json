@@ -1,0 +1,22 @@
+{
+  "registered_fault_exit": 75,
+  "killed_before_sdk_send": true,
+  "client_exception": "McpError",
+  "persisted_before_reconnect": true,
+  "identical_receipt_on_replay": true,
+  "changed_content_error": "IDEMPOTENCY_MISMATCH",
+  "candidate_artifacts": 1,
+  "receipts": 1,
+  "empty_discoveries_after_revocation": 4,
+  "compact_read_after_revocation": "VIEW_DENIED",
+  "canonical_head_unchanged": true,
+  "remaining_idle_in_transaction": 0,
+  "one_member_cancelled": {
+    "confirmed_pg_lock_wait": true,
+    "cancel_exception": "McpError",
+    "uncancelled_discoveries_correct": 1,
+    "next_role_read_correct": true
+  },
+  "source": "e532fbf90f5fe19fabaa7d21ba012d584420ad23",
+  "driver_sha256": "2e1260e8430b5a46eaf7d5ab7b2d479006baf03e4d968d8c60540eba995bed2b"
+}

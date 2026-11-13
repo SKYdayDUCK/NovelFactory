@@ -1,0 +1,30 @@
+{
+  "registered_fault_exit": 75,
+  "killed_before_sdk_send": true,
+  "client_exception": "McpError",
+  "persisted_before_reconnect": true,
+  "identical_receipt_on_replay": true,
+  "changed_content_error": "IDEMPOTENCY_MISMATCH",
+  "candidate_artifacts": 1,
+  "receipts": 1,
+  "empty_discoveries_after_revocation": 4,
+  "compact_read_after_revocation": "VIEW_DENIED",
+  "canonical_head_unchanged": true,
+  "remaining_idle_in_transaction": 0,
+  "one_member_cancelled": {
+    "confirmed_pg_lock_wait": true,
+    "cancel_exception": "McpError",
+    "forced_single_group_size": null,
+    "uncancelled_discoveries_correct": 1,
+    "next_role_read_correct": true
+  },
+  "one_of_four_forced_group_cancelled": {
+    "confirmed_pg_lock_wait": true,
+    "cancel_exception": "McpError",
+    "forced_single_group_size": 4,
+    "uncancelled_discoveries_correct": 3,
+    "next_role_read_correct": true
+  },
+  "source": "1271f982339a9e964f1b56ad89151b5d36b7b436",
+  "driver_sha256": "4db8cb3a0fe47209c07e5df91a92c30a28217b5989e60b7c390d43db1511a9af"
+}

@@ -225,7 +225,7 @@ def test_two_live_mcp_servers_recover_accepted_task_after_lost_reply(dual_databa
             assert cancelled["attempts"] == [] and cancelled["actual_tokens"] == 0
             after_cancel = budget_view.status(*budget_scope)
             assert after_cancel == before_call
-            if receipt_path := os.environ.get("AW_W3_REDIS_EVIDENCE"):
+            if (receipt_path := os.environ.get("AW_W3_REDIS_EVIDENCE")) and not session_option:
                 redis_receipt["cancel_before_attempt"] = {
                     "budget_id": budget, "operation_id": op, "receipt_ref": cancelled["receipt_ref"],
                     "nf_after_cancel": after_cancel, "nf_reported_tokens": cancelled["actual_tokens"],
