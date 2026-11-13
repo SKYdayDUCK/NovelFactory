@@ -1,0 +1,131 @@
+{
+  "postgres": "17.11 (Debian 17.11-0+deb13u1)",
+  "protocols": [
+    "2025-11-25",
+    "2025-11-25"
+  ],
+  "rows": [
+    {
+      "book": 0,
+      "stage": "connected",
+      "operation": "tools/list",
+      "sent_s": 0.9614629379993858,
+      "latency_ms": 10.437044000354945,
+      "verified_reply": [
+        "nf_project_status",
+        "nf_resume_project"
+      ]
+    },
+    {
+      "book": 0,
+      "stage": "awaiting_review",
+      "operation": "nf_project_status",
+      "sent_s": 0.9719166430004407,
+      "latency_ms": 79.81227900017984,
+      "verified_reply": {
+        "counts": {
+          "READY": 0,
+          "WAITING": 1,
+          "RUNNING": 0,
+          "ACCEPTED": 1,
+          "STALE": 1,
+          "WAITING_REVIEW": 1
+        },
+        "state": "NEEDS_ATTENTION",
+        "awakened": null
+      }
+    },
+    {
+      "book": 0,
+      "stage": "before_decision",
+      "operation": "nf_resume_project",
+      "sent_s": 1.0543975479995424,
+      "latency_ms": 76.3674150002771,
+      "verified_reply": {
+        "counts": {
+          "READY": 0,
+          "WAITING": 1,
+          "RUNNING": 0,
+          "ACCEPTED": 1,
+          "STALE": 1,
+          "WAITING_REVIEW": 1
+        },
+        "state": "NEEDS_ATTENTION",
+        "awakened": 0
+      }
+    },
+    {
+      "book": 0,
+      "stage": "reconnected",
+      "operation": "tools/list",
+      "sent_s": 2.4951400970003306,
+      "latency_ms": 10.972406998916995,
+      "verified_reply": [
+        "nf_project_status",
+        "nf_resume_project"
+      ]
+    },
+    {
+      "book": 0,
+      "stage": "first_resume",
+      "operation": "nf_resume_project",
+      "sent_s": 2.506118545999925,
+      "latency_ms": 75.03582400022424,
+      "verified_reply": {
+        "counts": {
+          "READY": 1,
+          "WAITING": 0,
+          "RUNNING": 0,
+          "ACCEPTED": 2,
+          "STALE": 1
+        },
+        "state": "READY",
+        "awakened": 1
+      }
+    },
+    {
+      "book": 0,
+      "stage": "second_resume",
+      "operation": "nf_resume_project",
+      "sent_s": 2.5826471309992485,
+      "latency_ms": 37.004757001341204,
+      "verified_reply": {
+        "counts": {
+          "READY": 1,
+          "WAITING": 0,
+          "RUNNING": 0,
+          "ACCEPTED": 2,
+          "STALE": 1
+        },
+        "state": "READY",
+        "awakened": 0
+      }
+    }
+  ],
+  "review_contract": "semantic conflict; independent operator REPAIR_HISTORY",
+  "reviewer": "script exercised a separately granted operator; no person clicked",
+  "self_review": "VIEW_DENIED",
+  "ticket": [
+    "WAITING_REVIEW",
+    "ACCEPTED"
+  ],
+  "follower": [
+    "BLOCKED",
+    "READY"
+  ],
+  "wake_counts": [
+    0,
+    1,
+    0
+  ],
+  "identical_decision_replay": true,
+  "ready_after_sdk_reconnect": true,
+  "provider_calls": 0,
+  "follower_lease_while_waiting": null,
+  "pending_review_count": 1,
+  "pending_author_approval_count": 0,
+  "canonical_head_unchanged": true,
+  "git": "5d6f85a7e8ccc95c5c61f8299c42614f7f0e5a00",
+  "test_sha256": "7a0ba136585278f5814c5135eaa91e4c47d1c7483cc0a050470a35743c3626f8",
+  "commercial_calls": 0
+}

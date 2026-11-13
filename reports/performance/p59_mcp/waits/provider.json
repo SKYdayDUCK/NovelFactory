@@ -1,0 +1,333 @@
+{
+  "postgres": "17.11 (Debian 17.11-0+deb13u1)",
+  "protocols": [
+    "2025-11-25"
+  ],
+  "rows": [
+    {
+      "book": 0,
+      "stage": "connected",
+      "operation": "tools/list",
+      "sent_s": 1.196291698001005,
+      "latency_ms": 19.00837399989541,
+      "verified_reply": [
+        "nf_project_status",
+        "nf_resume_project"
+      ]
+    },
+    {
+      "book": 0,
+      "stage": "before",
+      "operation": "nf_project_status",
+      "sent_s": 1.2153159480003524,
+      "latency_ms": 34.79305400105659,
+      "verified_reply": {
+        "counts": {
+          "READY": 1,
+          "WAITING": 0,
+          "RUNNING": 0
+        },
+        "state": "READY",
+        "awakened": null
+      }
+    },
+    {
+      "book": 0,
+      "stage": "before",
+      "operation": "nf_project_status",
+      "sent_s": 1.252327382000658,
+      "latency_ms": 29.630286999235977,
+      "verified_reply": {
+        "counts": {
+          "READY": 1,
+          "WAITING": 0,
+          "RUNNING": 0
+        },
+        "state": "READY",
+        "awakened": null
+      }
+    },
+    {
+      "book": 0,
+      "stage": "before",
+      "operation": "nf_project_status",
+      "sent_s": 1.2837647750002361,
+      "latency_ms": 26.11169600095309,
+      "verified_reply": {
+        "counts": {
+          "READY": 1,
+          "WAITING": 0,
+          "RUNNING": 0
+        },
+        "state": "READY",
+        "awakened": null
+      }
+    },
+    {
+      "book": 0,
+      "stage": "before",
+      "operation": "nf_project_status",
+      "sent_s": 1.3112918639999407,
+      "latency_ms": 31.967165001333342,
+      "verified_reply": {
+        "counts": {
+          "READY": 1,
+          "WAITING": 0,
+          "RUNNING": 0
+        },
+        "state": "READY",
+        "awakened": null
+      }
+    },
+    {
+      "book": 0,
+      "stage": "before",
+      "operation": "nf_project_status",
+      "sent_s": 1.3449237730001187,
+      "latency_ms": 35.35437900063698,
+      "verified_reply": {
+        "counts": {
+          "READY": 1,
+          "WAITING": 0,
+          "RUNNING": 0
+        },
+        "state": "READY",
+        "awakened": null
+      }
+    },
+    {
+      "book": 0,
+      "stage": "before",
+      "operation": "nf_project_status",
+      "sent_s": 1.382406553000692,
+      "latency_ms": 30.71090099911089,
+      "verified_reply": {
+        "counts": {
+          "READY": 1,
+          "WAITING": 0,
+          "RUNNING": 0
+        },
+        "state": "READY",
+        "awakened": null
+      }
+    },
+    {
+      "book": 0,
+      "stage": "provider_waiting",
+      "operation": "nf_project_status",
+      "sent_s": 1.989733903999877,
+      "latency_ms": 25.064695000764914,
+      "verified_reply": {
+        "counts": {
+          "READY": 0,
+          "WAITING": 0,
+          "RUNNING": 1
+        },
+        "state": "RUNNING",
+        "awakened": null
+      }
+    },
+    {
+      "book": 0,
+      "stage": "provider_waiting",
+      "operation": "nf_project_status",
+      "sent_s": 2.0163385400010156,
+      "latency_ms": 27.305182000418426,
+      "verified_reply": {
+        "counts": {
+          "READY": 0,
+          "WAITING": 0,
+          "RUNNING": 1
+        },
+        "state": "RUNNING",
+        "awakened": null
+      }
+    },
+    {
+      "book": 0,
+      "stage": "provider_waiting",
+      "operation": "nf_project_status",
+      "sent_s": 2.045549321999715,
+      "latency_ms": 44.977382000070065,
+      "verified_reply": {
+        "counts": {
+          "READY": 0,
+          "WAITING": 0,
+          "RUNNING": 1
+        },
+        "state": "RUNNING",
+        "awakened": null
+      }
+    },
+    {
+      "book": 0,
+      "stage": "provider_waiting",
+      "operation": "nf_project_status",
+      "sent_s": 2.092664802001309,
+      "latency_ms": 55.556669998622965,
+      "verified_reply": {
+        "counts": {
+          "READY": 0,
+          "WAITING": 0,
+          "RUNNING": 1
+        },
+        "state": "RUNNING",
+        "awakened": null
+      }
+    },
+    {
+      "book": 0,
+      "stage": "provider_waiting",
+      "operation": "nf_project_status",
+      "sent_s": 2.149672888999703,
+      "latency_ms": 67.68467800065991,
+      "verified_reply": {
+        "counts": {
+          "READY": 0,
+          "WAITING": 0,
+          "RUNNING": 1
+        },
+        "state": "RUNNING",
+        "awakened": null
+      }
+    },
+    {
+      "book": 0,
+      "stage": "provider_waiting",
+      "operation": "nf_project_status",
+      "sent_s": 2.219233826001073,
+      "latency_ms": 34.54438900007517,
+      "verified_reply": {
+        "counts": {
+          "READY": 0,
+          "WAITING": 0,
+          "RUNNING": 1
+        },
+        "state": "RUNNING",
+        "awakened": null
+      }
+    },
+    {
+      "book": 0,
+      "stage": "after",
+      "operation": "nf_project_status",
+      "sent_s": 5.13150904000031,
+      "latency_ms": 28.052977000697865,
+      "verified_reply": {
+        "counts": {
+          "READY": 0,
+          "WAITING": 0,
+          "RUNNING": 0,
+          "RESULT_STORED": 1
+        },
+        "state": "PROCESSING_RESULTS",
+        "awakened": null
+      }
+    },
+    {
+      "book": 0,
+      "stage": "after",
+      "operation": "nf_project_status",
+      "sent_s": 5.16121713100074,
+      "latency_ms": 32.78625699931581,
+      "verified_reply": {
+        "counts": {
+          "READY": 0,
+          "WAITING": 0,
+          "RUNNING": 0,
+          "RESULT_STORED": 1
+        },
+        "state": "PROCESSING_RESULTS",
+        "awakened": null
+      }
+    },
+    {
+      "book": 0,
+      "stage": "after",
+      "operation": "nf_project_status",
+      "sent_s": 5.195388987000115,
+      "latency_ms": 37.81621000052837,
+      "verified_reply": {
+        "counts": {
+          "READY": 0,
+          "WAITING": 0,
+          "RUNNING": 0,
+          "RESULT_STORED": 1
+        },
+        "state": "PROCESSING_RESULTS",
+        "awakened": null
+      }
+    },
+    {
+      "book": 0,
+      "stage": "after",
+      "operation": "nf_project_status",
+      "sent_s": 5.234577715000341,
+      "latency_ms": 28.379872999721556,
+      "verified_reply": {
+        "counts": {
+          "READY": 0,
+          "WAITING": 0,
+          "RUNNING": 0,
+          "RESULT_STORED": 1
+        },
+        "state": "PROCESSING_RESULTS",
+        "awakened": null
+      }
+    },
+    {
+      "book": 0,
+      "stage": "after",
+      "operation": "nf_project_status",
+      "sent_s": 5.264408974000617,
+      "latency_ms": 28.572576000442496,
+      "verified_reply": {
+        "counts": {
+          "READY": 0,
+          "WAITING": 0,
+          "RUNNING": 0,
+          "RESULT_STORED": 1
+        },
+        "state": "PROCESSING_RESULTS",
+        "awakened": null
+      }
+    },
+    {
+      "book": 0,
+      "stage": "after",
+      "operation": "nf_project_status",
+      "sent_s": 5.294522034000693,
+      "latency_ms": 25.86143799999263,
+      "verified_reply": {
+        "counts": {
+          "READY": 0,
+          "WAITING": 0,
+          "RUNNING": 0,
+          "RESULT_STORED": 1
+        },
+        "state": "PROCESSING_RESULTS",
+        "awakened": null
+      }
+    }
+  ],
+  "provider": "loopback synthetic HTTP; Event blocked after gateway send",
+  "sent_to_observed_s": 0.5685912480003026,
+  "held_after_observed_s": 3.001635112999793,
+  "worker_checked_out_before_observer": 0,
+  "slot_during": 1,
+  "slot_after": 0,
+  "attempt_during": "SENT",
+  "attempt_after": "UNKNOWN",
+  "attempt_count": 1,
+  "reserved_during": "0.100000",
+  "reserved_after": "0.100000",
+  "spent_before_reconciliation": "0.000000",
+  "reserved_after_test_receipt": "0.000000",
+  "spent_after_test_receipt": "0.010000",
+  "lease_renewal_ms": 10.712703999161022,
+  "renewal_before_provider_release": true,
+  "head_unchanged": true,
+  "git": "5d6f85a7e8ccc95c5c61f8299c42614f7f0e5a00",
+  "test_sha256": "7a0ba136585278f5814c5135eaa91e4c47d1c7483cc0a050470a35743c3626f8",
+  "commercial_calls": 0
+}

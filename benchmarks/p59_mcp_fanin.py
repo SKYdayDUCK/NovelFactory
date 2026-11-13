@@ -25,8 +25,9 @@ from novel_factory.fixtures import load_fixture
 from novel_factory.interfaces.bindings import read_private_config
 
 
-async def burst(kernel, roles, directory):
+async def burst(kernel, roles, directory, host_window=None):
     limit = asyncio.Semaphore(2)
+    outbound = asyncio.Semaphore(host_window) if host_window else None
     gate = asyncio.Event()
     ready = asyncio.Event()
     rows = []
@@ -67,9 +68,15 @@ async def burst(kernel, roles, directory):
                             if arrived == len(roles):
                                 ready.set()
                             await gate.wait()
-                            record["call_ms"] = (perf_counter()-zero)*1000
-                            async with asyncio.timeout(30):
-                                result = await session.call_tool("nf_task_get", {})
+                            if outbound is not None:
+                                await outbound.acquire()
+                            try:
+                                record["call_ms"] = (perf_counter()-zero)*1000
+                                async with asyncio.timeout(30):
+                                    result = await session.call_tool("nf_task_get", {})
+                            finally:
+                                if outbound is not None:
+                                    outbound.release()
                             if result.isError:
                                 record["status"] = (result.structuredContent or {}).get("error", {}).get("code", "MCP_ERROR")
                             else:
@@ -117,6 +124,7 @@ async def burst(kernel, roles, directory):
     elapsed = max((r.get("end_ms", 0) for r in rows), default=0)/1000
     counts = Counter(r["status"] for r in rows)
     return dict(rows=sorted(rows,key=lambda r:r["role"]), states=counts, cold_s=cold, samples=samples,
+                host_window=host_window,
                 initialized=sum(r["initialized"] for r in rows), replica_count=1, server_session_ids=0,
                 correct_per_s=counts["OK"]/elapsed if elapsed else 0, drain_s=elapsed,
                 correct_per_book=[sum(r["status"]=="OK" and r["book"]==i for r in rows) for i in (0,1)])
@@ -126,6 +134,8 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--population",type=int,choices=(10,200,500,1000),required=True)
     p.add_argument("--output",type=Path,required=True)
+    p.add_argument("--host-window", type=int, choices=(1, 2),
+                   help="After the simultaneous release, cap actual SDK calls across all role sessions")
     args=p.parse_args()
     logging.disable(logging.CRITICAL)
     with tempfile.TemporaryDirectory() as temp, isolated_kernel(os.environ["NF_TEST_DATABASE_URL"],Path(temp)/"objects") as (kernel,_):
@@ -133,7 +143,7 @@ def main():
         books=[load_fixture(kernel) for _ in range(2)]
         roles=[provision(kernel,directory,i,world=books[i%2],lease_seconds=3600) for i in range(args.population)]
         assert len({r.principal_id for r in roles})==args.population
-        data=asyncio.run(burst(kernel,roles,directory))
+        data=asyncio.run(burst(kernel,roles,directory,args.host_window))
         with kernel.db.uow(write=False) as repo:
             heads=[b["world_ref"] for b in books]
             data["heads_unchanged"]=all(kernel.head(repo,h["work_id"],h["branch_id"])==h for h in heads)

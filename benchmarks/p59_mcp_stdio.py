@@ -381,7 +381,7 @@ async def matrix(db, kernel, directory, args, report):
                 b.arm_open_time = arm_open
                 bindings.append(b)
             phases = [await phase(db, bindings, args.names, args.count, args.lanes, rate)
-                      for rate in (None, args.rps)]
+                      for rate in ((None,) if args.suite == "sustained" else (None, args.rps))]
             if args.suite == "task-batch":
                 check_audits(db, bindings, phases)
         attach_traces(bindings, phases)
@@ -436,7 +436,7 @@ async def staircase(db, kernel, directory, args, report):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("output", type=Path)
-    parser.add_argument("--suite", choices=["reads", "discovery", "mixed", "connections", "task-batch"], default="reads")
+    parser.add_argument("--suite", choices=["reads", "discovery", "mixed", "connections", "task-batch", "sustained"], default="reads")
     parser.add_argument("--arms", default="ABBA")
     parser.add_argument("--bindings", type=int, default=2)
     parser.add_argument("--rss-budget", type=int, default=4096, help="Maximum server RSS, MiB, for connection sweep")
@@ -444,7 +444,7 @@ def main():
     if not args.arms or any(a not in VARIANTS for a in args.arms) or not 1 <= args.bindings <= 200 or args.rss_budget < 1:
         parser.error("invalid arm sequence, binding count, or memory budget")
     args.names, args.count, args.lanes, args.rps = {
-        "reads": (READS, 24, 2, 12), "discovery": (["tools/list"], 40, 4, 60),
+        "sustained": (READS, 2000, 2, 0), "reads": (READS, 24, 2, 12), "discovery": (["tools/list"], 40, 4, 60),
         "task-batch": (["nf_task_get"], 40, 2, 12), "mixed": (MIX, 16, 2, 12), "connections": (MIX, 4, 1, 0)}[args.suite]
     db = Database(pool_size=2)
     with db.uow(write=False) as repo:
