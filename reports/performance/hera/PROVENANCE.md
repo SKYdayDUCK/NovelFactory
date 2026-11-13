@@ -29,3 +29,16 @@ uv run python -m benchmarks.hera_mixed --help
 ```
 
 NF 使用 NF_DATABASE_URL 和 NF_TEST_DATABASE_URL，Workshop 使用 AW_DATABASE_URL，真实 Redis 用 AW_REDIS_TEST_URL 等各测试指定的变量。双服务故障验证创建两个受限 SQL 账户和数据库，需要 AW_DUAL_TEST_ADMIN_URL 和指向该检出的 AW_NF_SOURCE。每份专题报告另列运行该实验所需的命令与配置。
+
+
+## 取回每个测量使用的原始 Git 提交
+
+[分块 Git bundle](reproduction/) 包含主线 bcb03637 之后到 ca2c4c7 的完整本地提交、tree 和 blob。这个快照含所有主产品代码、HERA 测量程序及对应的前置修订；同一分支随后增加的汇总和原始数据可从本 PR 直接取得。文件总计 2,828,547 字节，以 393,216 字节为上限分块，按文件名顺序还原。完整 bundle 的 SHA-256 为 `96cccdf61757a163af6df1bbfe5a0daedf66d043f2ac1b2756fd727a9f7061dc`。在已经检出本仓库的工作树中运行以下命令（Git Bash、Linux 或 macOS）。Alembic 实验要使用与当时源码对应的迁移及新建的实验库。
+
+```sh
+cat reports/performance/hera/reproduction/hera-source.bundle.part* > /tmp/hera-source.bundle
+git bundle verify /tmp/hera-source.bundle
+git fetch /tmp/hera-source.bundle refs/heads/hera-evidence-source-stage:refs/remotes/evidence/hera
+git worktree add --detach ../hera-final-product a918a91
+git worktree add --detach ../hera-same-rest-baseline bcb03637
+```
