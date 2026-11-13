@@ -20,7 +20,13 @@ class RuntimeModelAdapter:
 
     def generate(self, request):
         try:
-            return invoke(self.profile, request, authorize=self.journal.authorize_send, record=self.journal.record)
+            receipt_target = None
+            if self.profile.kind == "deepseek":
+                from .wire_receipts import destination
+                receipt_target = {"attempt_id": request.attempt_id,
+                                  "path": destination(self.journal.kernel.objects, request.attempt_id)}
+            return invoke(self.profile, request, authorize=self.journal.authorize_send,
+                          record=self.journal.record, receipt_target=receipt_target)
         except ProfileError as exc:
             raise DomainError(str(exc), "The selected model is unavailable for this dispatch") from None
 

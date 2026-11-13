@@ -1,0 +1,70 @@
+{
+  "price_source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+  "currency": "CNY",
+  "scope": "Short-story production only. Capability probes recorded separately in the original snapshot.",
+  "previous_checkpoint": "short-supernatural-live-checkpoint.json",
+  "original_measured_tokens": 4275,
+  "original_known_estimated_cny": "0.007872",
+  "production_returns": [
+    {
+      "attempt_id": "48907c71-246c-43fa-a81b-175c7be03c47",
+      "model": "deepseek-flash",
+      "request_sha256": "9017e0c8fa07f154144d7cd2a3c8dc18a6e977f1141c38ceaed0e7b7c70021a6",
+      "body_sha256": "2fb4bac3bc62803ae8e1d76a2d200683e6dad365201c32bed453ea97df4ad2b4",
+      "supplier_receipt_sha256": "9ac2d18f5557244d9c211f4322e42407e28f50ad2fa17cd7df67662cdfabe194",
+      "http_status": 200,
+      "transport_window": {
+        "started_at": "2026-11-13T05:49:10.085696+00:00",
+        "received_at": "2026-11-13T05:49:25.796182+00:00"
+      },
+      "transport_seconds": 15.710486,
+      "price_period": "off_peak",
+      "input_tokens": 4615,
+      "cached_input_tokens": 1408,
+      "uncached_input_tokens": 3207,
+      "output_tokens": 1296,
+      "total_tokens": 5911,
+      "per_million_cny": {
+        "cached_input": "0.02",
+        "uncached_input": "1",
+        "output": "4"
+      },
+      "estimated_cny": "0.00841916",
+      "invoiced_amount": null
+    },
+    {
+      "attempt_id": "946f6474-addc-4c04-995b-9a4573ae38da",
+      "model": "deepseek-v4-pro",
+      "request_sha256": "2a1bb5095eeaa97024d9b987486d671e720ef1fc6375c003ed9335ce4febc531",
+      "body_sha256": "364af4ae4c968561bc91472729b977247134064e64d13b14ec2da94e63100773",
+      "supplier_receipt_sha256": "7681d38fe4190f31f49eb209b512dd3f28a86d6b16f52dcdb7772c1889443aac",
+      "http_status": 200,
+      "transport_window": {
+        "started_at": "2026-11-13T05:52:04.915790+00:00",
+        "received_at": "2026-11-13T05:52:44.494783+00:00"
+      },
+      "transport_seconds": 39.578993,
+      "price_period": "off_peak",
+      "input_tokens": 5251,
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": 5251,
+      "output_tokens": 2547,
+      "total_tokens": 7798,
+      "per_million_cny": {
+        "cached_input": "0.15",
+        "uncached_input": "4.5",
+        "output": "13.5"
+      },
+      "estimated_cny": "0.058014",
+      "invoiced_amount": null,
+      "review_issue_count": 6
+    }
+  ],
+  "cutoff_utc": "2026-11-13T05:52:44.494783+00:00",
+  "production_attempts_through_cutoff": 5,
+  "measured_production_tokens": 17984,
+  "known_estimated_production_cny": "0.07430516",
+  "production_total_tokens": null,
+  "production_actual_cny": null,
+  "unknown_usage_earlier_attempts": 2
+}

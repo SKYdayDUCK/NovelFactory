@@ -24,7 +24,7 @@ def applicable_rate(card, model, span):
     if not span:
         return None, "MISSING_TRANSPORT_TIME"
     start, end = span
-    if start.date() != end.date():
+    if start.date() != (end - timedelta(microseconds=1)).date():
         return None, "CROSSES_DATE_BOUNDARY"
     day = card["utc_dates"].get(start.date().isoformat())
     if day is None or model not in card["models"]:
@@ -45,7 +45,7 @@ def summarize(exports, card):
     scopes, seen, rows, endpoints = set(), set(), [], []
     groups = defaultdict(lambda: {"calls": 0, "estimated_calls": 0, "estimated_usd": Decimal(0)})
     unknown = Counter()
-    unclassified = 0
+    unclassified_by_scope = Counter()
     for path in exports:
         tasks, calls = {}, []
         with path.open(encoding="utf8") as stream:
@@ -59,12 +59,12 @@ def summarize(exports, card):
             for line in stream:
                 item = json.loads(line)
                 if item["record"] == "task_generation":
-                    tasks[item["task_id"]] = item
+                    tasks[item["task_id"], item.get("generation")] = item
                 elif item["record"] == "call":
                     calls.append(item)
         for call in calls:
             if call["call_origin"] == "UNOBSERVED":
-                unclassified += 1
+                unclassified_by_scope[book] += 1
             if (call["call_origin"], call["adapter"], call["provider"]) != (
                 "PROVIDER",
                 "deepseek",
@@ -75,7 +75,7 @@ def summarize(exports, card):
             if attempt in seen:
                 raise ValueError("Duplicate attempt")
             seen.add(attempt)
-            task = tasks[call["task_id"]]
+            task = tasks[call["task_id"], call.get("generation")]
             group = groups[(*book, task["task_kind"], task["role_id"], call["model"])]
             group["calls"] += 1
             span = transport(call)
@@ -131,8 +131,49 @@ def summarize(exports, card):
     for _, delta in sorted(endpoints):  # Ends before starts at the same instant.
         active += delta
         peak = max(peak, active)
+    by_work = []
+    for work, branch in sorted(scopes):
+        attempts = [r for r in rows if (r["work_id"], r["branch_id"]) == (work, branch)]
+        unobserved = unclassified_by_scope[work, branch]
+        observed = [
+            r
+            for r in attempts
+            if type(r["input_tokens"]) is int and type(r["output_tokens"]) is int
+        ]
+        priced = [r["estimated_usd"] for r in attempts if r["estimated_usd"] is not None]
+        bills = defaultdict(Decimal)
+        invoiced = 0
+        for r in attempts:
+            if r["invoiced_amount"] is not None:
+                bills[r["currency"]] += Decimal(r["invoiced_amount"])
+                invoiced += 1
+        by_work.append(
+            {
+                "work_id": work,
+                "branch_id": branch,
+                "deepseek_attempts": len(attempts),
+                "unclassified_attempts": unobserved,
+                "measured_usage_calls": len(observed),
+                "known_tokens": sum(r["input_tokens"] + r["output_tokens"] for r in observed)
+                if observed
+                else None,
+                "total_tokens": sum(r["input_tokens"] + r["output_tokens"] for r in observed)
+                if not unobserved and len(observed) == len(attempts)
+                else None,
+                "known_estimated_usd": sum(priced) if priced else None,
+                "estimated_usd": sum(priced)
+                if not unobserved and len(priced) == len(attempts)
+                else None,
+                "invoiced_calls": invoiced,
+                "known_invoiced_by_currency": dict(bills),
+                "total_invoiced_by_currency": dict(bills)
+                if not unobserved and invoiced == len(attempts)
+                else None,
+            }
+        )
     return {
         "source": card["source"],
+        "by_work": by_work,
         "attempts": rows,
         "by_work_stage_model": [
             {
@@ -152,7 +193,7 @@ def summarize(exports, card):
             for (w, b, stage, role, m), metrics in sorted(groups.items())
         ],
         "missing_estimates": dict(unknown),
-        "unclassified_attempts": unclassified,
+        "unclassified_attempts": sum(unclassified_by_scope.values()),
         "peak_observed_transports": peak if endpoints else None,
         "attempts_with_transport": len(endpoints) // 2,
         "platform_judge_cost": "NOT_OBSERVABLE",

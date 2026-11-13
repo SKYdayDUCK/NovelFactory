@@ -15,3 +15,15 @@
 工程实验通过 `tests/integration/test_p6_rolling_production.py` 触发这些情况。在运行中的服务上，使用 `--rolling-status` 或 `--pipeline-results` 检查当前选区、节点与旧任务记录。对明确未发送且已停止的工作，使用 `--retry-rolling <private-retry.json>`；请求携带 `world_ref`、`run_id`、`window_index`、`node_id`、`idempotency_key`。对尚未打开的范围采用 `--replace-rolling-window <private-replan.json>`，并携带当前的 `expected_window_ref`、完整 `chapters`。已发送的未知 Attempt 继续使用既有财务对账边界。
 
 本轮窗口用例覆盖 Supervisor 重建、实际写手进程终止及租约过期、单节点停止、费用不明、同卷和跨卷恢复。真实模型限流、长时间租约到期后的真实创作恢复及实际平台的长时运行，没有在三部正式作品上取得回执。已有 P5.9 进程/租约测试的结果不能补充这些作品回执。
+
+### DeepSeek HTTP 原始回执
+
+使用正常 NF DeepSeek RuntimeModelAdapter 发出的后续请求，会在私有对象根目录的 `http-receipts` 中保存每个 Attempt 的独立文件。独立 HTTP 子进程收到上游字节后，先在私有目录中写临时文件、刷盘并以不可覆盖的文件名发布，再把响应交回主进程解码。原件包括原始响应字节、状态码、请求哈希、供应商回执及收发时间；上限为 2,000,000 字节，超限保留有明确标记的前缀。原件不保存请求头或上游 API 凭据。存放目录含未公开作品及未经筛选的供应商响应，备份时应与原对象根目录一起备份并保持私有权限。
+
+管理员可以使用对应的私有项目绑定执行下列本地查询。返回内容仅含元数据、原件哈希与实测用量，绝不触发供应商派发、接受正文或结算发票。旧 Attempt 如有仅存提示、缺失业务响应或未记录供应商发票，可由同一入口分辨。HTTP 子进程在收到回包前也被终止、机器断电或目标文件系统不可写时，可能没有可恢复原件；此类请求保留原有防重复派发和待对账边界。
+
+```sh
+uv run python scripts/p6_inspect_attempt.py --binding "$NF_P6_BINDING" --attempt "$NF_ATTEMPT"
+```
+
+回环测试覆盖父进程被杀、子进程仅收到一次请求后持久保存不合约响应、跨项目拒绝、私有原件哈希不符拒绝、原 Attempt 的金额继续待结算。[PostgreSQL 17 与传输回归](evidence/deepseek-response-recovery-pg.xml)
