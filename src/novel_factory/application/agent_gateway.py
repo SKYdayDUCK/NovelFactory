@@ -389,7 +389,11 @@ class AgentGateway:
             envelope.update(status="SUCCEEDED", unresolved_questions=[], payload={})
             system += ("\nCopy this exact outer JSON object. Fill its payload object using the payload schema. "
                        "All listed keys are at the top level. There is no key named identity. "
-                       "Keep the types and values of the identifying fields intact.\n"
+                       "Keep the types and values of the identifying fields intact. "
+                       "Treat unresolved_questions as a request for an outside decision that prevents completion. "
+                       "When the assigned work is complete, keep it empty. Record editorial suggestions and questions "
+                       "about the story in the review payload where provided. When a prerequisite is genuinely missing, "
+                       "use NEEDS_INPUT and state it. Emit only properties allowed by the selected payload schema.\n"
                        + canonical_bytes(envelope).decode())
         if "dynamic_assignment" in binding:
             chosen = binding["dynamic_assignment"]
