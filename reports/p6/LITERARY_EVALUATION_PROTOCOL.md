@@ -32,8 +32,10 @@ uv run python scripts/run_supervisor.py --access-file "$NF_P6_ACCESS" --book-rev
 uv run python scripts/run_supervisor.py --access-file "$NF_P6_ACCESS" --book-review-reports
 ```
 
-原来未知的财务回执已核清，或被更换的模型配置已恢复到登记版本后，使用 `--resume-book-review` 恢复原读者轨。原稿、原分支或授权失效需修复来源。两轨均通过后，正式发布继续走 `ReleaseService.freeze` 的完整条件检查；发布时将评阅读卷、两份分数及有序正文哈希绑定到确切 ReleaseRecord 和 Manifest。[工作流实现](../../src/novel_factory/application/book_review.py)
+恢复登记的模型配置或排除调用前故障后，可使用 `--resume-book-review`。暂停任务在其全部代际均无发送或交付证据时，可以重新领取原任务；已结算的零用量失败还须有运行时未发送凭证。核清已送达的成功结果后，系统继续处理该结果。两条原轨、阅读包、授权和预算均保留。已送达的无效评分或错位引文、过期或被撤销的授权均不能以此命令重新评阅。两轨均通过后，正式发布继续走 `ReleaseService.freeze` 的完整条件检查；发布时将评阅读卷、两份分数及有序正文哈希绑定到确切 ReleaseRecord 和 Manifest。[工作流实现](../../src/novel_factory/application/book_review.py)
 
 已生成内部 RELEASE 后，可用 `scripts/p6_export_release.py --reviewed-book --binding PRIVATE --release-ref REF --output NEW_FILE` 重建确切历史卷序，输出两份评分引用、有序章节/场景索引与全文 SHA-256。
 
 [双盲、分层汇总、换路由阻断、版本绑定和回读的工程回执](evidence/book-review-postgres.xml) · [原生编辑、发行与统计回归](evidence/shared-release-harness.xml)
+
+[PostgreSQL 恢复回执](evidence/blind-reader-resume.xml)记录断开路由调用凭据后的发送前暂停、同一任务重新领取与双轨发布校验；已交付的包无法重试。

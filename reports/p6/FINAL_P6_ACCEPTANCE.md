@@ -12,6 +12,10 @@
 | 篇幅、正文、审稿与 RELEASE | 登记的原始篇幅、实际章序、逐场真实写手来源、全书双盲及获准最终内容哈希均设有校验。三部正式作品没有这些运行产物。[评阅协议](LITERARY_EVALUATION_PROTOCOL.md) · [作品成绩](QUALITY_SCORECARD.md) |
 | 日志和文学 | 原始输入、三份无发送预检、部署诊断、工程运行与异常分别留存。无法归因尚未产生的文学缺陷。[异常分析](PIPELINE_FAILURE_ANALYSIS.md) · [脱敏运行日志导出](RUNTIME_EVIDENCE_EXPORT.md) · [首轮登记](ROUND1_REPORT.md) · [文学缺陷状态](LITERARY_DEFECT_ANALYSIS.md) |
 
+## 已完成的工程复验
+
+在 PostgreSQL 17.11 上联合运行 60 项 P6 预设、灵感入口、全文评阅、滚动、篇幅、长篇元数据及审计隔离用例，全部通过，无跳过。另行验证原生编辑与发行的 22 项回归、21 项跨卷批准与连续性检查、操作系统终止写手并保留原 UNKNOWN Attempt。各组有重叠，数量不累加。当前代码通过设计包检查。草稿 PR 的托管检查按提交在 GitHub 持续留存记录。[60 项联合回执](evidence/candidate-postgres.xml) · [22 项编辑/发行回执](evidence/shared-release-harness.xml) · [跨卷验收](WORKFLOW_ACCEPTANCE.md) · [进程退出回执](evidence/writer-process-exit.xml)
+
 ## 恢复点
 
 部署者应先在实际运行 NovelFactory 的私有环境配置一条有明确授权的原生路由，以及各作品的预算与输出上限。原签入 Home 在本环境初始化失败，新建 Home 没有登录账户。确认同一正式运行环境下的预检成功后，再按每部作品的原输入注册。生产 Attempt 需可关联任务、代际、上下文、供应商及结果。拒绝或账务未决时保留原记录。所有已启用义务、成稿、两份独立分数与最终 RELEASE 回执齐全后，才具备正式签收条件。[运行与恢复命令](MODEL_RUNTIME_EVIDENCE.md)

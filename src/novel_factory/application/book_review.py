@@ -6,6 +6,7 @@ own notes. Admission and spending continue to use the existing supervisor.
 """
 
 from datetime import datetime, timedelta
+from decimal import Decimal
 
 from sqlalchemy import text
 
@@ -581,6 +582,11 @@ def _advance_reader(kernel, repo, gateway, owner, state):
         task = repo.one("tasks", {"task_id": tid, "work_id": work}, lock="update")
         if task["state"] in {"READY", "RUNNING", "BLOCKED", "WAITING"}:
             continue
+        if task["state"] == "PAUSED":
+            _require_unsent(repo, task)
+            raise DomainError(
+                "REVIEWER_PAUSED_UNSENT", "The same reader assignment can resume after repair"
+            )
         require(
             task["state"] == "RESULT_STORED",
             "BOOK_REVIEW_BLOCKED",
@@ -807,6 +813,72 @@ def review_status(kernel, owner, work, branch, *, include_reports=False):
         return result
 
 
+def _require_unsent(repo, task):
+    """Admission may have paused a newer generation than the one that first attempted a send."""
+    unsafe = repo.conn.scalar(
+        text("""
+        SELECT EXISTS(SELECT FROM nf_call_attempts c WHERE c.task_id=:id AND NOT (
+            c.state='FAILED' AND c.actual_amount IS NOT DISTINCT FROM 0
+            AND c.actual_tokens IS NOT DISTINCT FROM 0 AND c.provider_receipt IS NULL
+            AND EXISTS(SELECT FROM nf_runtime_unsent u WHERE u.attempt_id=c.attempt_id AND u.generation=c.generation)))
+            OR EXISTS(SELECT FROM nf_task_results WHERE task_id=:id)
+    """),
+        {"id": task["task_id"]},
+    )
+    require(
+        not unsafe and not task["current_result_id"],
+        "CALL_RECONCILIATION_REQUIRED",
+        "There is a delivered result or a call without proof it was never sent",
+    )
+
+
+def _resume_unsent_reader(kernel, repo, state, task):
+    from .semantic_dependencies import check_task_dependencies
+
+    _require_unsent(repo, task)
+    wr = state["world_ref"]
+    task_owner = Principal(task["grant_id"], task["principal_id"])
+    _, grant = kernel._task_owner(repo, task_owner, task["task_id"], "TASK_CLAIM")
+    job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})
+    require(
+        task["role_id"] == "reviewer"
+        and task["task_kind"] == "literary"
+        and task["branch_id"] == wr["branch_id"]
+        and task["deadline"] > repo.now()
+        and job
+        and job["config"].get("book_review_packet")
+        and job["config"]["grant_epoch"] == grant["epoch"]
+        and job["config"]["policy_version"] == state["authorization"]["policy"],
+        "BOOK_REVIEW_BLOCKED",
+        "The original reader assignment or its authority changed",
+    )
+    check_task_dependencies(repo, task["task_id"], task["generation"])
+    budget = repo.one(
+        "budgets", {"work_id": wr["work_id"], "budget_id": state["budget_id"]}, lock="share"
+    )
+    require(
+        budget
+        and budget["limit_amount"] - budget["reserved_amount"] - budget["spent_amount"]
+        >= Decimal(state["reserve_amount"]),
+        "BUDGET_EXCEEDED",
+        "Original reading allowance unavailable",
+    )
+    available_tokens = repo.conn.scalar(
+        text("""
+        SELECT l.total_tokens-u.reserved_tokens-u.spent_tokens FROM nf_budget_token_limits l
+        CROSS JOIN LATERAL nf_shared_token_usage(l.budget_id) u WHERE l.budget_id=:budget
+    """),
+        {"budget": state["budget_id"]},
+    )
+    require(
+        available_tokens is None or state["token_reservation"] <= available_tokens,
+        "BUDGET_EXCEEDED",
+        "Original shared token allowance unavailable",
+    )
+    # Dispatch rechecks the same limits while atomically reserving the call.
+    kernel.in_transaction(repo).tasks.resume(task["task_id"], task["generation"])
+
+
 def resume_review(kernel, owner, work, branch):
     """Rescan the same two assigned tracks after an external repair or original receipt reconciliation."""
     with kernel.objects.lock(), kernel.db.uow() as repo:
@@ -816,16 +888,20 @@ def resume_review(kernel, owner, work, branch):
         require(state and state["state"] == "BLOCKED", "INVALID_ARGUMENT", "Round is not blocked")
         _owner(kernel, repo, state)
         require(
-            state["reason"] in {"CALL_RECONCILIATION_REQUIRED", "MODEL_CONFIG_CHANGED"},
+            state["reason"]
+            in {"CALL_RECONCILIATION_REQUIRED", "MODEL_CONFIG_CHANGED", "REVIEWER_PAUSED_UNSENT"},
             "BOOK_REVIEW_BLOCKED",
             "This failure requires a separate operator repair of its source",
         )
         blocked = [
-            repo.one("tasks", {"task_id": r["active"], "work_id": work})
+            repo.one("tasks", {"task_id": r["active"], "work_id": work}, lock="update")
             for r in state["readers"]
             if r.get("active")
         ]
         for task in blocked:
+            if task["state"] == "PAUSED":
+                _resume_unsent_reader(kernel, repo, state, task)
+                continue
             call = repo.one(
                 "call_attempts",
                 {

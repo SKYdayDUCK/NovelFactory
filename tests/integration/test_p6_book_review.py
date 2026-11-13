@@ -126,6 +126,31 @@ def test_two_separate_reader_tracks_replay_and_release_gate(
         )
         adapter.model = "blind-review-test"
         book_review.resume_review(k, owner, work, branch)
+        RuntimeSupervisor(k, gateway).run_once(owner, work, branch)
+        before = book_review.review_status(k, owner, work, branch)
+        reader_id = before["readers"][0]["active"]
+        credentials = adapter._api_key
+        adapter._api_key = None
+        for _ in range(5):
+            RuntimeSupervisor(k, gateway).run_once(owner, work, branch)
+            halted = book_review.review_status(k, owner, work, branch)
+            if halted["state"] == "BLOCKED":
+                break
+        assert halted["reason"] == "REVIEWER_PAUSED_UNSENT" and not adapter.messages
+        with k.db.uow(write=False) as repo:
+            paused = repo.one("tasks", {"task_id": reader_id})
+            assert paused["state"] == "PAUSED" and not repo.many(
+                "call_attempts", {"task_id": reader_id}
+            )
+        adapter._api_key = credentials
+        book_review.resume_review(k, owner, work, branch)
+        with k.db.uow(write=False) as repo:
+            resumed = repo.one("tasks", {"task_id": reader_id})
+            assert resumed["state"] == "READY" and resumed["grant_id"] == paused["grant_id"]
+            assert resumed["generation"] == paused["generation"]
+        assert (
+            book_review.review_status(k, owner, work, branch)["readers"][0]["active"] == reader_id
+        )
     outcomes = []
     for step in range(110):
         outcome = RuntimeSupervisor(k, gateway).run_once(owner, work, branch)
@@ -136,6 +161,13 @@ def test_two_separate_reader_tracks_replay_and_release_gate(
             break
     assert status["state"] == "ASSESSED" and status["model_correlation"] == "SAME_MODEL", status
     assert len(adapter.messages) == expected_calls
+    if packet_size == 6000:
+        with k.db.uow(write=False) as repo:
+            current = repo.one("tasks", {"task_id": reader_id})
+            assert current["generation"] > paused["generation"]
+            with pytest.raises(DomainError) as already_delivered:
+                book_review._require_unsent(repo, current)
+            assert already_delivered.value.code == "CALL_RECONCILIATION_REQUIRED"
     assert len({tid for r in status["readers"] for tid in r["tasks"]}) == expected_calls
     assert all(r["complete_packets"] == enrollment["packets"] for r in status["readers"])
     for messages in adapter.messages:
