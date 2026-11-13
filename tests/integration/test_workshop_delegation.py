@@ -506,3 +506,44 @@ def test_denied_accounting_caller_cannot_distinguish_missing_from_expired(site):
             ledger.mark_call_sent(attempt, worker_id="denied", authorize_in_tx=deny)
         assert blocked.value.as_dict("same") == DomainError("VIEW_DENIED", "Caller unavailable").as_dict("same")
     assert len(requests) == 1
+
+
+def test_reused_workshop_transport_reconnects_after_peer_death(site, monkeypatch):
+    """A later read can find a committed submit after loss of its persistent NF peer."""
+    import signal
+    from pathlib import Path
+
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[2] / "workshop/src"))
+    from agent_workshop.reconcile import batch_remote
+    from anyio import BrokenResourceError, ClosedResourceError, EndOfStream
+    from mcp.shared.exceptions import McpError
+
+    runtime, submit, get, config, _, _, _, _ = site
+    expected = runtime.call("nf_delegation_submit", submit)
+    pidfile = config.with_name("stdio.pid")
+    launcher = config.with_name("tracked_peer.py")
+    launcher.write_text(
+        "import os, runpy, sys\n"
+        "from pathlib import Path\n"
+        "Path(sys.argv.pop(1)).write_text(str(os.getpid()))\n"
+        "runpy.run_module('novel_factory.interfaces.delegation_stdio', run_name='__main__')\n",
+        encoding="utf-8",
+    )
+    params = StdioServerParameters(command=sys.executable, args=[
+        str(launcher), str(pidfile), "--binding", str(config),
+    ])
+
+    async def run():
+        async with batch_remote(params) as invoke:
+            assert await invoke("nf_delegation_get", get) == expected
+            pid = int(pidfile.read_text())
+            # SIGTERM on POSIX / TerminateProcess via os.kill on Windows.
+            os.kill(pid, signal.SIGTERM)
+            with pytest.raises((BrokenResourceError, ClosedResourceError, EndOfStream, McpError, EOFError)):
+                async with asyncio.timeout(5):
+                    await invoke("nf_delegation_get", get)
+            async with asyncio.timeout(15):
+                assert await invoke("nf_delegation_get", get) == expected
+            assert int(pidfile.read_text()) != pid
+
+    asyncio.run(run())

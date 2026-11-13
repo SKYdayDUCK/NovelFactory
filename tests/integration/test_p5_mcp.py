@@ -117,7 +117,8 @@ def test_operator_database_fences_apply_outside_mcp(kernel_env, fence):
         kernel.authorize(repo, scoped["principal"], wr["work_id"], "PROJECT_RESUME", wr["branch_id"])
 
 
-def test_actor_stdio_own_cut_only_and_candidate_replay(kernel_env, tmp_path, record_testsuite_property):
+@pytest.mark.parametrize("flags", [[], ["--compact-role-reads"]])
+def test_actor_stdio_own_cut_only_and_candidate_replay(kernel_env, tmp_path, record_testsuite_property, flags):
     kernel = kernel_env["kernel"]
     world = load_fixture(kernel)
     subject = world["ids"]["sword"]
@@ -164,11 +165,15 @@ def test_actor_stdio_own_cut_only_and_candidate_replay(kernel_env, tmp_path, rec
         await error(session, "nf_context_get", {}, "TASK_NOT_ACCEPTABLE")
         await error(session, "nf_artifact_put", candidate, "TASK_NOT_ACCEPTABLE")
 
-    asyncio.run(exercise(config(tmp_path / "actor.json", kernel_env, a.private_token, binding), check))
+    params = config(tmp_path / "actor.json", kernel_env, a.private_token, binding)
+    params.args.extend(flags)
+    asyncio.run(exercise(params, check))
 
     async def bad_binding(session):
         await error(session, "nf_context_get", {}, "VIEW_DENIED")
         assert not (await session.list_tools()).tools
 
-    asyncio.run(exercise(config(tmp_path / "swapped.json", kernel_env, a.private_token,
-        {"task_id": b.task["task_id"], "generation": b.task["generation"], "worker_id": b.worker_id}), bad_binding))
+    params = config(tmp_path / "swapped.json", kernel_env, a.private_token,
+                    {"task_id": b.task["task_id"], "generation": b.task["generation"], "worker_id": b.worker_id})
+    params.args.extend(flags)
+    asyncio.run(exercise(params, bad_binding))

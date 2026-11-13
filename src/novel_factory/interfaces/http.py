@@ -43,6 +43,7 @@ class HttpSettings:
     rate_per_second: float = 20.0
     rate_burst: int = 100
     allowed_origins: tuple[str, ...] = ()
+    fenced_task_status: bool = False
 
 
 def _status(code: str) -> int:
@@ -440,7 +441,8 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
     @app.get("/api/v1/tasks/{task_id}")
     async def get_task(request: Request, task_id: str):
         validate_contract("UUID", task_id)
-        return await execute(request, "query", lambda principal: kernel.get_task(principal, task_id))
+        read_task = kernel.get_task_with_locked_work if settings.fenced_task_status else kernel.get_task
+        return await execute(request, "query", lambda principal: read_task(principal, task_id))
 
     @app.post("/api/v1/tasks/cancel")
     async def cancel_task(request: Request):
@@ -491,6 +493,7 @@ def from_environment() -> FastAPI:
         allowed_origins=tuple(value for value in os.environ.get("NF_ALLOWED_ORIGINS", "").split(",") if value),
         body_read_timeout_seconds=float(os.environ.get("NF_BODY_READ_TIMEOUT_SECONDS", "5.0")),
         max_body_chunks=int(os.environ.get("NF_MAX_BODY_CHUNKS", "1024")),
+        fenced_task_status=os.environ.get("NF_HTTP_FENCED_TASK_STATUS", "0") == "1",
     )
     return create_app(Kernel(database, ObjectStore(os.environ.get("NF_OBJECT_ROOT", "var/objects"))),
                       settings=settings, connection_budget=budget)

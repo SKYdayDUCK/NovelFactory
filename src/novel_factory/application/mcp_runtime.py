@@ -33,10 +33,11 @@ class TaskBinding:
 
 
 class McpRuntime:
-    def __init__(self, kernel, principal, binding):
+    def __init__(self, kernel, principal, binding, *, compact_role_reads=False):
         self.kernel = kernel
         self.principal = principal
         self.binding = binding
+        self.compact_role_reads = compact_role_reads
         self.queries = WorldQueryService(kernel)
 
     def available_tools(self):
@@ -327,18 +328,32 @@ class McpRuntime:
                     "VIEW_DENIED", "Task cut unavailable")
         return task, grant, ctx, spec
 
-    def task_get(self):
-        proof = self._role_proof()
+    def _read_role(self, tool):
+        if self.compact_role_reads:
+            with self.kernel.db.uow(write=False) as repo:
+                state = self._bound_state(repo)
+                task, grant, context, spec = state
+                inputs = matching_inputs(repo, task, spec)
+                ref = assignment_from_inputs(inputs)
+                if ref is None:
+                    require(tool in self._task_tools(repo, state, inputs), "VIEW_DENIED", "Tool outside task authority")
+                    return task, grant, context
+            # A Workshop witness requires I/O. Release local locks, then recheck
+            # task generation, current grant and the exact assignment on delivery.
+            proof = ref, refresh(self.kernel, self.principal, task["task_id"], task["generation"], ref)
+        else:
+            proof = self._role_proof()
         with self.kernel.db.uow(write=False) as repo:
-            task, _, ctx = self._role_task(repo, "nf_task_get", proof)
-            return {**{k: task[k] for k in ("task_id", "generation", "state", "context_bundle_id")},
-                    "world_ref": ctx["payload"]["world_ref"]}
+            return self._role_task(repo, tool, proof)
+
+    def task_get(self):
+        task, _, ctx = self._read_role("nf_task_get")
+        return {**{k: task[k] for k in ("task_id", "generation", "state", "context_bundle_id")},
+                "world_ref": ctx["payload"]["world_ref"]}
 
     def context_get(self):
-        proof = self._role_proof()
-        with self.kernel.db.uow(write=False) as repo:
-            _, _, ctx = self._role_task(repo, "nf_context_get", proof)
-            return ctx["payload"]
+        _, _, ctx = self._read_role("nf_context_get")
+        return ctx["payload"]
 
     def query_batch(self, lookups):
         proof = self._role_proof()

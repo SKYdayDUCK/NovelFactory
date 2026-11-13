@@ -5,6 +5,8 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+
+import pytest
 from uuid import uuid4
 
 from mcp import StdioServerParameters
@@ -38,7 +40,8 @@ def bound_process(tmp, module, config, src):
     )
 
 
-def test_two_live_mcp_servers_recover_accepted_task_after_lost_reply(dual_databases, tmp_path):
+@pytest.mark.parametrize("session_option", [(), ("--reuse-session",)], ids=["cold", "reuse"])
+def test_two_live_mcp_servers_recover_accepted_task_after_lost_reply(dual_databases, tmp_path, session_option):
     dsn = dual_databases["aw"]
     db = Database(dual_databases["nf"])
     kernel = Kernel(db, ObjectStore(tmp_path / "objects"))
@@ -169,7 +172,7 @@ def test_two_live_mcp_servers_recover_accepted_task_after_lost_reply(dual_databa
             wake()
             worker = subprocess.run(
                 [sys.executable, "-m", "agent_workshop.reconcile", "--installation", installation,
-                 "--org", org, "--operation", op, "--", nf_params.command, *nf_params.args],
+                 "--org", org, "--operation", op, *session_option, "--", nf_params.command, *nf_params.args],
                 env={**os.environ, "AW_DATABASE_URL": dsn}, capture_output=True, text=True, check=True,
             )
             restarted_worker = json.loads(worker.stdout)
@@ -222,7 +225,7 @@ def test_two_live_mcp_servers_recover_accepted_task_after_lost_reply(dual_databa
             assert cancelled["attempts"] == [] and cancelled["actual_tokens"] == 0
             after_cancel = budget_view.status(*budget_scope)
             assert after_cancel == before_call
-            if receipt_path := os.environ.get("AW_W3_REDIS_EVIDENCE"):
+            if (receipt_path := os.environ.get("AW_W3_REDIS_EVIDENCE")) and not session_option:
                 redis_receipt["cancel_before_attempt"] = {
                     "budget_id": budget, "operation_id": op, "receipt_ref": cancelled["receipt_ref"],
                     "nf_after_cancel": after_cancel, "nf_reported_tokens": cancelled["actual_tokens"],

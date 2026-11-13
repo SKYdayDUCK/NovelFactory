@@ -14,7 +14,7 @@ def read_private_config(path):
     return json.loads(read_private_bytes(path, 16384))
 
 
-def runtime_from_config(config):
+def runtime_from_config(config, *, compact_role_reads=False):
     required = {"token", "database_url", "object_root", "binding"}
     if set(config) != required or not Path(config["object_root"]).is_absolute():
         raise ValueError("Invalid server configuration")
@@ -30,7 +30,7 @@ def runtime_from_config(config):
     database = Database(config["database_url"], pool_size=2)
     try:
         kernel = Kernel(database, ObjectStore(config["object_root"]))
-        return McpRuntime(kernel, kernel.authenticate(config["token"]), bound)
+        return McpRuntime(kernel, kernel.authenticate(config["token"]), bound, compact_role_reads=compact_role_reads)
     except BaseException:
         database.close()
         raise

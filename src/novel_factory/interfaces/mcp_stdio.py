@@ -116,10 +116,10 @@ async def character_input():
             return
 
 
-async def serve(config, *, character_only=False, idle_db_seconds=30.0):
+async def serve(config, *, character_only=False, idle_db_seconds=30.0, compact_role_reads=False):
     if not math.isfinite(idle_db_seconds) or idle_db_seconds < 0:
         raise ValueError("Idle database timeout must be finite and nonnegative")
-    runtime = runtime_from_config(config)
+    runtime = runtime_from_config(config, compact_role_reads=compact_role_reads)
     engine = runtime.kernel.db.engine
     admission = BoundToolAdmission(min(2, engine.pool.size()), owned_engine=engine, idle_seconds=idle_db_seconds)
     try:
@@ -142,10 +142,12 @@ def main():
     parser.add_argument("--character-only", action="store_true", help="Require a live character task binding")
     parser.add_argument("--idle-db-seconds", type=float, default=30.0,
                         help="Release this stdio process's unused database connections after this idle period")
+    parser.add_argument("--compact-role-reads", action="store_true",
+                        help="Resolve static role proof and read in one transaction")
     args = parser.parse_args()
     try:
         asyncio.run(serve(read_private_config(args.binding), character_only=args.character_only,
-                          idle_db_seconds=args.idle_db_seconds))
+                          idle_db_seconds=args.idle_db_seconds, compact_role_reads=args.compact_role_reads))
     except KeyboardInterrupt:
         return
     except Exception:
