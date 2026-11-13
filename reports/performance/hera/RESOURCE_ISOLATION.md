@@ -48,3 +48,28 @@ Four separately migrated PostgreSQL 17 fixtures each enrolled two model tasks in
 In each loaded interval, one task per book stayed in provider generation with a SENT attempt and a live model dispatch lease. One eligible task per book remained READY. At provider entry the pool had zero checked-out connections. After release, all eight jobs across the two loaded fixtures reached RESULT_STORED, with one provider call and one durable attempt per task and zero remaining dispatch leases. The provider was an in-process deterministic fixture.
 
 The first adjacent pair lost 0.62% goodput; P95 rose 17.66% and P99 fell 4.27%. The second pair lost 45.62% goodput; P95 rose 204.61% and P99 rose 273.63%. Authorized progress stayed readable under the observed backlog. The second pair crosses all three preregistered 20% degradation limits. This small single-host run cannot establish a latency guarantee or attribute the difference to a particular component. The separate 5,000-task projection benchmark tests a different question. To replay from frozen source `20801bc`, set `NF_TEST_DATABASE_URL` to a disposable PostgreSQL 17 administration connection and run `python -m benchmarks.hera_progress_model_isolation --output progress_model.json.gz`. [Driver](../../../benchmarks/hera_progress_model_isolation.py)
+
+## Repeated index-materialization and OS-priority experiments
+
+All processes, including PostgreSQL 17.11 and the mixed MCP/REST load generator, inherited Linux CPU 8 affinity. Host CPU time and filesystem I/O were shared with other workloads. Each arm populated two reader books and a third branch with 60 actual accepted transfers. Eight independent owners issued 128 exact task status reads. Every loaded arm ran two workers, drained 60 distinct receipts, and verified the authoritative final timeline watermark. API business/authentication slots stayed at 2+2. Six application/worker connections and an administrative observer remained available. The metrics below start at the client release and include all read outcomes. Index drain includes work after the read interval.
+
+| Source / topology in execution order | Correct reads/s | P95 / P99 ms | Index completions while reading | Index/s while reading / through drain |
+|---|---:|---:|---:|---:|
+| Original / quiet | 53.16 | 204 / 254 | 0 | 0.00 / 0.00 |
+| Original / shared | 31.36 | 343 / 411 | 37 | 9.06 / 10.79 |
+| Compact index / shared | 26.78 | 388 / 443 | 40 | 8.37 / 10.77 |
+| Compact index / shared | 22.79 | 709 / 1027 | 41 | 7.30 / 9.49 |
+| Original / shared | 27.73 | 421 / 746 | 35 | 7.58 / 9.83 |
+| Original / quiet | 46.79 | 236 / 298 | 0 | 0.00 / 0.00 |
+| Compact index, second block / quiet | 50.09 | 251 / 287 | 0 | 0.00 / 0.00 |
+| Compact index, second block / process | 29.55 | 354 / 383 | 39 | 9.00 / 11.71 |
+| Compact index, second block / process-nice | 32.64 | 344 / 463 | 3 | 0.76 / 8.19 |
+| Compact index, second block / process-nice | 34.35 | 391 / 470 | 2 | 0.54 / 9.04 |
+| Compact index, second block / process | 23.70 | 471 / 898 | 41 | 7.59 / 9.35 |
+| Compact index, second block / quiet | 49.32 | 228 / 307 | 0 | 0.00 / 0.00 |
+
+The index candidate removed duplicate canonical encoding and deep copies, rechecked only the three immutable revision witness fields at commit, and advanced both watermarks in one write. The standalone 60-job cProfile run used 1,800 SQL calls before the change and 1,620 after. Cumulative deep-copy time fell from 0.548 to 0.006 seconds. Profiled elapsed rose from 4.194 to 5.204 seconds. The two shared-pool loaded comparisons both lost read goodput, with no joint improvement in index throughput. The candidate stays out of production. The raw cProfile rows include overlapping cumulative times and instrumentation overhead. Fifteen PostgreSQL regressions passed, including interrupted publication, stale tokens, replay, role visibility and lock ordering.
+
+The second block exercised the candidate under the same CPU and total pool budgets. Only the worker process received Linux nice +10 for process-nice. PostgreSQL, API and client remained at their original priority. In both treatments very little indexing progressed while the reads were in flight. Nice +10 also missed the 100 ms read target. Do not deploy it as the fast-path default.
+
+Replay against an isolated PostgreSQL 17 admin URL in `NF_TEST_DATABASE_URL`. Pin PostgreSQL and every Python process to the same CPU. At incoming `eb1a75e`, run `python -m benchmarks.hera_index_topology --order quiet,shared --output A1.json.gz`. Apply the archived candidate patch in an isolated worktree and run `--order shared,shared`, then restore the original for `--order shared,quiet`. With the candidate and the priority probe together, run `--order quiet,process,process-nice,process-nice,process,quiet`. The independent `benchmarks/hera_profile_index.py --output profile.json.gz` driver uses the checkout selected by `PYTHONPATH` with script execution via Python. The two shared controls straddle the candidates in time. Original, unfiltered request, SQL, OS and index records are preserved in [the qualification directory](raw/index-worker-qualification/).

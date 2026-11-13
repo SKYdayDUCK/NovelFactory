@@ -73,7 +73,9 @@ def process_info():
     return {"pid": os.getpid(), "cpu_s": r.ru_utime + r.ru_stime, "rss_kib": r.ru_maxrss}
 
 
-def index_only(channel, url, objects, scope, count, gate, stop):
+def index_only(channel, url, objects, scope, count, gate, stop, nice_increment):
+    if nice_increment:
+        os.nice(nice_increment)
     db = Database(url, pool_size=2, max_overflow=0)
     try:
         t0 = perf_counter()
@@ -85,6 +87,7 @@ def index_only(channel, url, objects, scope, count, gate, stop):
                 "sql": meter.result(perf_counter() - t0),
                 "before": before,
                 "after": process_info(),
+                "nice": os.getpriority(os.PRIO_PROCESS, 0),
             }
         channel.send(result)
     finally:
@@ -93,7 +96,7 @@ def index_only(channel, url, objects, scope, count, gate, stop):
 
 
 def serve(channel, url, objects, roster, scope, mode, count, gate, stop):
-    separate = mode in ("pools", "process")
+    separate = mode in ("pools", "process", "process-nice")
     api_db = Database(url, pool_size=4 if separate else 6, max_overflow=0)
     with ExitStack() as stack:
         stack.callback(channel.close)
@@ -199,9 +202,10 @@ def run(url, objects, roster, records, scope, mode, count):
         target=serve, args=(server, url, objects, roster, scope, mode, count, gate, stop)
     )
     idx = idx_chan = None
-    if mode == "process":
+    if mode in ("process", "process-nice"):
         idx_chan, ix = ctx.Pipe()
-        idx = ctx.Process(target=index_only, args=(ix, url, objects, scope, count, gate, stop))
+        idx = ctx.Process(target=index_only, args=(ix, url, objects, scope, count, gate, stop,
+                                                 10 if mode == "process-nice" else 0))
         idx.start()
         ix.close()
     child.start()
@@ -228,7 +232,7 @@ def run(url, objects, roster, records, scope, mode, count):
         assert read["operation_budget_total"] == read["metrics"][0]["operation"]["capacity"] == 2
         assert read["auth_budget_total"] == read["metrics"][0]["auth"]["capacity"] == 2
         end = read["clock_origin"] + read["seconds"]
-        if mode == "process":
+        if mode in ("process", "process-nice"):
             assert idx_chan.poll(180)
             worker = idx_chan.recv()
             rows = worker.pop("rows")
@@ -246,8 +250,8 @@ def run(url, objects, roster, records, scope, mode, count):
         return {
             "mode": mode,
             "read": read,
-            "api_pool": 4 if mode in ("pools", "process") else 6,
-            "dedicated_index_pool": 2 if mode in ("pools", "process") else 0,
+            "api_pool": 4 if mode in ("pools", "process", "process-nice") else 6,
+            "dedicated_index_pool": 2 if mode in ("pools", "process", "process-nice") else 0,
             "sql_observer_connections": 1,
             "overlapping": sum(r[2] <= end for r in rows),
             "index_rows": rows,
@@ -278,7 +282,7 @@ def main():
     args = parser.parse_args()
     modes = args.order.split(",")
     if (
-        set(modes) - {"quiet", "shared", "logical", "pools", "process"}
+        set(modes) - {"quiet", "shared", "logical", "pools", "process", "process-nice"}
         or not 1 <= args.revisions <= 100
     ):
         parser.error("Unknown arm or invalid revision count")
