@@ -7,6 +7,19 @@ hashes and output validation remain the gateway's responsibility.
 from novel_factory.domain.canonical import canonical_bytes
 
 
+def _creative_json(materials):
+    if not isinstance(materials, dict):
+        # Approved context recipes express section priority as an array.
+        return canonical_bytes(materials).decode()
+    # A revised prior draft must not break reuse of the same scene/style facts.
+    # This is wire ordering only; each nested value keeps its canonical bytes.
+    keys = sorted(materials.keys() - {"prose"})
+    if "prose" in materials:
+        keys.append("prose")
+    return "{" + ",".join(canonical_bytes(key).decode() + ":" + canonical_bytes(materials[key]).decode()
+                          for key in keys) + "}"
+
+
 def material_json(packet):
     # Keep large source sections ahead of task-specific assignment/diagnostics.
     # Canonicalize each value, preserving every field and all array ordering.
@@ -16,7 +29,8 @@ def material_json(packet):
     keys += sorted(set(packet) - set(keys) - {"assignment"})
     if "assignment" in packet:
         keys.append("assignment")
-    return "{" + ",".join(canonical_bytes(key).decode() + ":" + canonical_bytes(packet[key]).decode()
+    return "{" + ",".join(canonical_bytes(key).decode() + ":" +
+                          (_creative_json(packet[key]) if key == "creative_materials" else canonical_bytes(packet[key]).decode())
                           for key in keys) + "}"
 
 
