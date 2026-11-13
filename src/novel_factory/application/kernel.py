@@ -546,10 +546,12 @@ class Kernel:
             require(world_ref is not None, "INTERNAL_ERROR", "Task input unavailable")
             return self._public_task(task, world_ref)
 
-    def cancel_task(self,principal,task_id,generation,idempotency_key):
+    def cancel_task(self,principal,task_id,generation,idempotency_key, *, scope=None):
         def authorize_cancel(conn):
             from novel_factory.infrastructure.repository import KernelRepository
-            self._task_owner(KernelRepository(conn,tables),principal,task_id)
+            task, _ = self._task_owner(KernelRepository(conn,tables),principal,task_id)
+            if scope is not None:
+                scope.check(task)
         return self.tasks.cancel(task_id,generation,principal_id=principal.principal_id,idempotency_key=idempotency_key,authorize_in_tx=authorize_cancel)
 
     def submit_result(self,principal,result,worker_id):

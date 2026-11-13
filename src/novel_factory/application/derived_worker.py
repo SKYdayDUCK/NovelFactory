@@ -97,12 +97,15 @@ class DerivedWorldWorker:
             repo.conn.execute(text("LOCK TABLE nf_dispatch_limits IN SHARE MODE"))
             event = repo.conn.scalar(text("""
                 WITH active AS MATERIALIZED (
-                    SELECT t.work_id,t.role_id FROM nf_dispatch_slots s JOIN nf_tasks t USING(task_id)
+                    SELECT t.work_id,t.role_id,'MODEL' AS resource FROM nf_dispatch_slots s JOIN nf_tasks t USING(task_id)
                     WHERE s.expires_at>now() UNION ALL
-                    SELECT work_id,'derived_index' FROM nf_index_leases WHERE expires_at>now()
+                    SELECT work_id,'derived_index','CPU_COMPUTE' FROM nf_index_leases WHERE expires_at>now()
                 )
                 SELECT o.outbox_id FROM nf_outbox o WHERE o.topic='world.accepted'
                   AND EXISTS(SELECT FROM nf_redis_branches WHERE branch_id=:branch AND work_id=:work)
+                  AND NOT EXISTS (SELECT FROM nf_dispatch_limits lim WHERE lim.scope='RESOURCE'
+                    AND lim.subject='CPU_COMPUTE' AND lim.slots <=
+                        (SELECT count(*) FROM active WHERE resource='CPU_COMPUTE'))
                   AND (SELECT count(*) FROM active)<(SELECT slots FROM nf_dispatch_limits WHERE scope='GLOBAL' AND subject='*')
                   AND (SELECT count(*) FROM active WHERE work_id=:work)<(SELECT slots FROM nf_dispatch_limits
                     WHERE scope='WORK' AND subject IN ('*',:work_text) ORDER BY subject='*' LIMIT 1)

@@ -6,6 +6,7 @@ from novel_factory.application.kernel import require
 from novel_factory.application.planning import validate_task_plan_binding
 from novel_factory.application.queries import WorldQueryService
 from novel_factory.application.query_policy import check_profile
+from novel_factory.application.task_operations import TaskOperations, TaskOperationsBinding
 from novel_factory.domain.canonical import fingerprint
 from novel_factory.domain.temporal import point_key
 from novel_factory.infrastructure.database import tables
@@ -33,15 +34,27 @@ class TaskBinding:
 
 
 class McpRuntime:
-    def __init__(self, kernel, principal, binding, *, compact_role_reads=False):
+    def __init__(self, kernel, principal, binding, *, compact_role_reads=False, fenced_task_status=False):
         self.kernel = kernel
         self.principal = principal
         self.binding = binding
         self.compact_role_reads = compact_role_reads
+        self.fenced_task_status = fenced_task_status
         self.queries = WorldQueryService(kernel)
 
     def available_tools(self):
         with self.kernel.db.uow(write=False) as repo:
+            if isinstance(self.binding, TaskOperationsBinding):
+                grant = repo.one("grants", {"grant_id": self.principal.grant_id})
+                if not grant or not grant["active"] or grant["principal_id"] != self.principal.principal_id:
+                    return []
+                tools = []
+                for capability, names in (("READ", ["nf_task_status", "nf_task_cancel", "nf_task_events"]),
+                                          ("TASK_CREATE", ["nf_task_submit"])):
+                    if capability in grant["capabilities"]:
+                        self.kernel.authorize(repo, self.principal, self.binding.work_id, capability, self.binding.branch_id)
+                        tools.extend(names)
+                return tools
             if isinstance(self.binding, CreativeControllerBinding):
                 from novel_factory.infrastructure.creative_config import CreativeHarnessConfig
 
@@ -132,6 +145,14 @@ class McpRuntime:
                 if "review-change-point" in skills and "review_submit" in requested:
                     names.append("nf_change_point_review")
         return names
+
+    def task_operation(self, name, arguments):
+        require(isinstance(self.binding, TaskOperationsBinding), "VIEW_DENIED", "Task operations binding required")
+        operations = TaskOperations(self.kernel, self.principal, binding=self.binding,
+                                    fenced_status=self.fenced_task_status)
+        methods = {"nf_task_submit": operations.submit, "nf_task_status": operations.status,
+                   "nf_task_cancel": operations.cancel, "nf_task_events": operations.events}
+        return methods[name](**arguments)
 
     def _role_proof(self):
         with self.kernel.db.uow(write=False) as repo:

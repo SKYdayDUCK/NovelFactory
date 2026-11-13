@@ -5,6 +5,7 @@ identity and supplies an authorization check that locks the current grant in
 the same transaction. A dependency is satisfied by the current predecessor's
 durable task acceptance. No model or external provider is called here.
 """
+import os
 from uuid import UUID
 
 from sqlalchemy import func, select, text
@@ -111,12 +112,18 @@ class WorkflowService:
 
     def _counts(self, conn, work_id, branch_id):
         counts = {"READY": 0, "WAITING": 0, "RUNNING": 0}
-        for state, count in conn.execute(text("""
-            SELECT CASE WHEN t.state='READY' AND d.retry_not_before > statement_timestamp()
-                        THEN 'BLOCKED' ELSE t.state END, count(*)
-            FROM nf_tasks t LEFT JOIN nf_quota_retry_deadlines d USING(task_id,generation)
-            WHERE t.work_id=:work AND t.branch_id=:branch GROUP BY 1
-        """), {"work": work_id, "branch": branch_id}):
+        rows = None
+        if os.environ.get("NF_HERA_PROJECT_PROGRESS") == "1":
+            from .progress import projected_counts
+            rows = projected_counts(conn, work_id, branch_id)
+        if rows is None:
+            rows = conn.execute(text("""
+                SELECT CASE WHEN t.state='READY' AND d.retry_not_before > statement_timestamp()
+                            THEN 'BLOCKED' ELSE t.state END, count(*)
+                FROM nf_tasks t LEFT JOIN nf_quota_retry_deadlines d USING(task_id,generation)
+                WHERE t.work_id=:work AND t.branch_id=:branch GROUP BY 1
+            """), {"work": work_id, "branch": branch_id})
+        for state, count in rows:
             counts["WAITING" if state == "BLOCKED" else state] = count
         blockers = {state: counts[state] for state in ("WAITING", "WAITING_REVIEW", "PAUSED", "FAILED", "STALE")
                     if counts.get(state)}
@@ -253,9 +260,15 @@ class WorkflowService:
                 self.tasks._emit(conn, task_id, generation, "STALE")
             overdue = conn.execute(text("""
                 SELECT t.task_id, t.generation
-                FROM nf_tasks t JOIN nf_supervisor_jobs j USING (task_id)
-                WHERE t.work_id=:work AND t.branch_id=:branch AND t.state='READY'
-                  AND t.deadline <= statement_timestamp()
+                FROM nf_tasks t
+                WHERE t.work_id=:work AND t.branch_id=:branch AND (
+                    (t.state='READY' AND t.deadline <= statement_timestamp() AND EXISTS
+                        (SELECT FROM nf_supervisor_jobs j WHERE j.task_id=t.task_id))
+                    OR (t.state IN ('READY','BLOCKED','PAUSED') AND EXISTS (
+                        SELECT FROM nf_durable_admissions a WHERE a.task_id=t.task_id
+                        AND a.queue_deadline <= statement_timestamp()
+                        AND NOT EXISTS (SELECT FROM nf_task_executions e WHERE e.task_id=t.task_id)
+                    )))
                   AND NOT EXISTS (SELECT FROM nf_call_attempts c WHERE c.task_id=t.task_id
                       AND NOT EXISTS (SELECT FROM nf_runtime_unsent u WHERE u.attempt_id=c.attempt_id))
                 ORDER BY t.deadline,t.task_id LIMIT :limit FOR UPDATE OF t SKIP LOCKED

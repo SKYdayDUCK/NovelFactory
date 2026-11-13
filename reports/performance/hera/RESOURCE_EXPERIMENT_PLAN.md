@@ -1,0 +1,7 @@
+# Supervisor and Workshop experiments
+
+The class-cap candidate bounds MODEL and CPU_COMPUTE under the existing global/work/role leases. Authorize and hold one model while trying a second model and a derived index against the same two-slot global limit. No paid inference. On the combined PostgreSQL supervisor hold its one local model slot; enroll an expired task and require its retirement without releasing the provider. Validate existing provider UNKNOWN, process death, dependency wake, and weighted admission regressions.
+
+Compare Workshop legacy per-event publication/receipt with immediate batches of at most 32 existing events (no fill timer), order A/B/B/A. Each run uses a newly migrated isolated schema, one publisher and one consumer, ordered groups of exactly 1, 32, 128 addressed messages with valid 1-hour TTL and identical roles, no prior history. Measure full publication and inbox reconciliation together, durable authorized receipts, Redis pending and published counts, and raw elapsed times per invocation; tail metrics are per invocation, with only two samples per arm and size. Require both reciprocal comparisons to improve at each size and no correctness regression before recommending a particular deployment. Original behavior is selectable and remains default. Reopen SQL after Redis network operations. Test explicit failure between publication and SQL marking plus replay, revocation and receiver crash.
+
+Do not infer availability/fairness across transports, novel generation, or paid inference from these measurements.

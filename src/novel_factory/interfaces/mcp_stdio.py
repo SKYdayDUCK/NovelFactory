@@ -75,15 +75,23 @@ class BoundToolAdmission:
             self._note_idle()
 
 
-def make_server(runtime, *, ceiling=None, admission=None):
+def make_server(runtime, *, ceiling=None, admission=None, resolve=None, run=None):
     server = Server("NovelFactory", version="2.1.0")
-    if admission is None:
-        admission = BoundToolAdmission(min(2, runtime.kernel.db.engine.pool.size()))
+    if run is None:
+        if admission is None:
+            admission = BoundToolAdmission(min(2, runtime.kernel.db.engine.pool.size()))
+
+        async def run(runtime, method, args, kwargs, *, kind):
+            return await admission.run(method, *args, **kwargs)
+
+    def bound():
+        return runtime if resolve is None else resolve(server.request_context.request)
 
     @server.list_tools()
     async def list_tools():
         try:
-            names = await admission.run(runtime.available_tools)
+            active = bound()
+            names = await run(active, active.available_tools, (), {}, kind="query")
         except DomainError:
             return []
         except Exception:
@@ -94,11 +102,16 @@ def make_server(runtime, *, ceiling=None, admission=None):
     @server.call_tool(validate_input=False)
     async def call_tool(name, arguments):
         try:
-            return await admission.run(
-                invoke_bound_tool, runtime, name, arguments, ceiling=ceiling,
-                request_id=server.request_context.request_id, transport="mcp",
-            )
+            active = bound()
+            kind = "query" if name in {"nf_task_status", "nf_task_events", "nf_project_status"} else "task"
+            return await run(active, invoke_bound_tool, (active, name, arguments),
+                             {"ceiling": ceiling, "request_id": server.request_context.request_id,
+                              "transport": "mcp"}, kind=kind)
         except DomainError as error:
+            if error.retryable and error.code in {"BACKPRESSURE", "RATE_LIMITED", "POOL_TIMEOUT"}:
+                return types.CallToolResult(isError=True,
+                    content=[types.TextContent(type="text", text=error.code)],
+                    structuredContent={"error": {"code": error.code, "retryable": True, "retry_after_ms": 1000}})
             return tool_error(error.code)
 
     return server

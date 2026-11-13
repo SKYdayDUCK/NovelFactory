@@ -20,6 +20,7 @@ from sqlalchemy.exc import IntegrityError, NoResultFound
 
 from novel_factory.contracts.registry import validate_contract
 from novel_factory.domain.errors import DomainError
+from novel_factory.orchestration import durable_admission
 
 MAINTENANCE_GATE = 721943001
 
@@ -132,13 +133,31 @@ class TaskService:
         if deadline <= self._now(conn):
             raise _error("DEADLINE_EXCEEDED", "Task deadline has passed")
         t = self.tables["tasks"]
-        if conn.scalar(select(t.c.task_id).where(t.c.task_id == spec["task_id"])):
-            raise _error("ALREADY_EXISTS", "Task identity is already assigned")
+        admission = durable_admission.admit(conn, spec, principal_id, deadline)
         wr = spec["world_ref"]
-        conn.execute(insert(t).values(task_id=spec["task_id"], work_id=wr["work_id"], branch_id=wr["branch_id"], principal_id=str(principal_id), grant_id=spec["capability_grant_id"], role_id=spec["role_id"], task_kind=spec["task_kind"], state=spec["state"], generation=0, context_bundle_id=spec["context_bundle_id"], dependency_fingerprint=spec["dependency_fingerprint"], deadline=deadline))
+        task_insert = insert(t).values(
+            task_id=spec["task_id"], work_id=wr["work_id"], branch_id=wr["branch_id"],
+            principal_id=str(principal_id), grant_id=spec["capability_grant_id"],
+            role_id=spec["role_id"], task_kind=spec["task_kind"], state=spec["state"],
+            generation=0, context_bundle_id=spec["context_bundle_id"],
+            dependency_fingerprint=spec["dependency_fingerprint"], deadline=deadline,
+        )
+        created = conn.scalar(task_insert.on_conflict_do_nothing(index_elements=[t.c.task_id])
+                              .returning(t.c.task_id))
+        if created is None:
+            raise _error("ALREADY_EXISTS", "Task identity is already assigned")
+        if admission is not None:
+            conn.execute(text("""
+                INSERT INTO nf_durable_admissions(task_id,resource_class,queue_deadline)
+                VALUES (:task_id,:resource_class,:queue_deadline)
+            """), {"task_id": spec["task_id"], **admission})
         self._save_input(conn, spec["task_id"], 0, spec, spec["state"])
         conn.execute(insert(self.tables["task_fairness"]).values(work_id=wr["work_id"], task_kind=spec["task_kind"]).on_conflict_do_nothing())
         receipt = {"task_id": spec["task_id"], "generation": 0, "state": spec["state"]}
+        if admission is not None:
+            receipt.update(resource_class=admission["resource_class"],
+                           queue_deadline=admission["queue_deadline"].isoformat(),
+                           wall_deadline=deadline.isoformat(), retry_after_seconds=1)
         self._command_record(conn, principal_id, idempotency_key, content, receipt)
         self._emit(conn, spec["task_id"], 0, spec["state"])
         return receipt
@@ -172,6 +191,9 @@ class TaskService:
         conn.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": MAINTENANCE_GATE + 1})
         now = self._now(conn)
         conditions = [t.c.state == "READY", t.c.deadline > now,
+                      text("""NOT EXISTS (SELECT FROM nf_durable_admissions a
+                            WHERE a.task_id=nf_tasks.task_id AND a.queue_deadline <= statement_timestamp()
+                              AND NOT EXISTS (SELECT FROM nf_task_executions e WHERE e.task_id=a.task_id))"""),
                       text("""NOT EXISTS (SELECT FROM nf_quota_retry_deadlines d
                            WHERE (d.task_id,d.generation)=(nf_tasks.task_id,nf_tasks.generation)
                              AND d.retry_not_before > statement_timestamp())"""),
