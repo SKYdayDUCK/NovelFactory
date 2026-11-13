@@ -72,7 +72,7 @@ class FixtureAdapter(OpenAICompatibleAdapter):
                 self.active -= 1
 
 
-def trial(kernel, population, *, dispatch_profile=None):
+def trial(kernel, population, *, dispatch_profile=None, project_stage=None):
     adapter = FixtureAdapter()
     gateway = AgentGateway(kernel, {"fixture": adapter})
     supervisor = RuntimeSupervisor(kernel, gateway)
@@ -130,8 +130,10 @@ def trial(kernel, population, *, dispatch_profile=None):
         return compare(kernel, args[0][2], dispatch_profile)
     pending = {}
     initial = []
-    for scope in args:
+    for book_index, scope in enumerate(args):
         initial.append(supervisor.recover_project(*scope)["counts"])
+        if project_stage:
+            project_stage("enrolled", book_index, books[book_index])
     drain = time.monotonic()
     expected = sum(r["index"] % 100 != 83 for r in jobs.values())
     completed = 0
@@ -144,7 +146,9 @@ def trial(kernel, population, *, dispatch_profile=None):
         completed += 1
         supervisor.advance_world(*scope)
     awakened = 0
-    for scope in args:
+    for book_index, scope in enumerate(args):
+        if project_stage:
+            awakened += project_stage("wake", book_index, books[book_index])
         while True:
             summary = supervisor.recover_project(*scope)
             awakened += summary["awakened"]
@@ -184,6 +188,9 @@ def trial(kernel, population, *, dispatch_profile=None):
                 completed += 1
                 last_progress = time.monotonic()
     duration = time.monotonic() - drain
+    if project_stage:
+        for book_index, book in enumerate(books):
+            project_stage("drained", book_index, book)
     with kernel.db.uow(write=False) as repo:
         rows = repo.conn.execute(text("""
             SELECT t.task_id::text, t.state, t.principal_id, t.generation,
