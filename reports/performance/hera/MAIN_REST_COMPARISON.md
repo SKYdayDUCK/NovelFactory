@@ -1,6 +1,25 @@
 # Comparable REST task lifecycle on main and HERA
 
-A used clean detached main `bcb03637d4f01030fc95b99d1ff743b3758297ad` and B used clean detached HERA `0fcf453a54d9791af52dbe39ee0d9ba1a4d054e3`. The same external driver checked the imported product path and git status for each arm before work began. It launched one independent Python process and one fresh real PostgreSQL 17.11 cluster per arm. Client and Uvicorn shared a process within each arm and communicated over TCP. All four runs configured four pooled connections, zero overflow, two authentication and two operation slots. Sixteen independent owners across two works each ran four sequential task lifecycles. HERA enabled the durable quota policy and fenced single-status reads. Requests included create, ready-state GET, exact same-key replay, claim, running-state GET, cancel and final GET.
+**The final HERA product completed 6.0% and 5.2% fewer full task lifecycles per second than main in the new A/B/B/A.** All correctness checks passed. Both comparisons stayed within the 20% P95/P99 tolerance, but neither passed the preregistered throughput gate. An earlier candidate was faster on both of its own reciprocal comparisons. [Preregistered workload and repetition](MAIN_REST_PLAN.md)
+
+Both series used clean detached main `bcb03637d4f01030fc95b99d1ff743b3758297ad`. Each arm ran one new Python process against a fresh PostgreSQL 17.11 cluster. The script verified the product import path and clean Git revision. Client and Uvicorn shared a process and communicated over TCP. Each application had four pooled database connections, zero overflow, two authentication slots and two operation slots. Sixteen independent grants across two works each ran four sequential tasks. HERA enabled durable quotas and fenced singleton status reads. Each lifecycle exercised legacy create, a ready-state GET, same-key create replay, claim, a running-state GET, cancellation and a final GET.
+
+## Final product with recovery trigger and transport fixes
+
+B used `a918a916e283988083e9ae9f891dc5f17b44de05` with migration 0026 present. Its product src tree is identical to `52f36d4`. Neither branch had a configured progress counter and the app had no remote roster. The migrated task-transition trigger still ran during ordinary task changes. The new series changed only the driver's clean-revision guard. All measured operations and assertions match the earlier series. [Four raw final-product arms](raw/main-rest-final/)
+
+| Run | Correct full cycles/s | Correct HTTP requests/s | Request P95 / P99 ms | Cycle P95 / P99 ms | SQL statements | Combined CPU s | Peak process MiB |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| A1 | 7.251 | 50.76 | 504.5 / 571.2 | 2579.2 / 2663.1 | 4288 | 8.44 | 90.1 |
+| B2 | 6.817 | 47.72 | 539.6 / 617.3 | 2622.5 / 2761.2 | 4160 | 8.59 | 92.6 |
+| B3 | 7.308 | 51.16 | 515.3 / 671.3 | 2471.9 / 2574.0 | 4160 | 8.00 | 89.7 |
+| A4 | 7.711 | 53.98 | 486.8 / 598.9 | 2327.8 / 2509.3 | 4288 | 8.24 | 89.5 |
+
+Final HERA request P95/P99 increased by 7.0%/8.1% and 5.8%/12.1% in the two pairs. Full-cycle P95/P99 increased by 1.7%/3.7% and 6.2%/2.6%. Each arm verified all 448 HTTP responses and 64 terminal lifecycles, peaked at four checked-out connections and closed with zero checked out. The application issued 128 fewer cursor statements per HERA arm. Cursor counts exclude SQL executed inside PostgreSQL triggers.
+
+## Earlier candidate
+
+B used `0fcf453a54d9791af52dbe39ee0d9ba1a4d054e3` with migration 0025. The earlier two comparisons measured 23.7% and 15.3% greater full-cycle throughput than their adjacent main controls. All 1,792 HTTP responses and 256 cycles were correct. [Four raw earlier arms](raw/main-rest/)
 
 | Run | Correct full cycles/s | Correct HTTP requests/s | Request P95 / P99 ms | Cycle P95 / P99 ms | SQL statements | Combined CPU s | Peak process MiB |
 |---|---:|---:|---:|---:|---:|---:|---:|
@@ -9,17 +28,19 @@ A used clean detached main `bcb03637d4f01030fc95b99d1ff743b3758297ad` and B used
 | B3 | 6.375 | 44.62 | 681.1 / 778.4 | 3071.3 / 3089.1 | 4160 | 8.97 | 90.0 |
 | A4 | 5.528 | 38.70 | 774.9 / 969.2 | 3811.1 / 3944.6 | 4288 | 10.32 | 89.9 |
 
-HERA completed **23.7% and 15.3% more full cycles per second** than adjacent main arms. In both comparisons the full-cycle tails improved and the preregistered throughput/correctness gate passed for this workload. Across the four runs all 1,792 HTTP responses and 256 complete task lifecycles matched the expected state/generation/WorldRef and replay semantics. Each task had exactly one claim, two command receipts, three state events and one generation-1 cancellation; no provider attempts were created and both canonical heads stayed at genesis. These are caller-requested cancellations, not completed model tasks. Suboperation tail latencies and per-request records are retained [for every arm](raw/main-rest).
+The two series used different time windows on a shared host. Main's own measured throughput ranged from 5.53–5.58 cycles/s in the earlier series to 7.25–7.71 in the repetition. This design gives a within-series contrast for each product and cannot isolate the recovery trigger's contribution to the change in relative performance.
 
-The measured percentages refer only to this mix on existing REST entry points, with zero model calls and a small steady queue. They cannot quantify a full-system gain including remote Tasks, Workshop or writing performance. Main did not expose the same remote MCP and durable admission contract. Shared host CPU and filesystem load were uncontrolled; reciprocal pairs provide limited repetition. The toggles for the candidate arm are independent; this comparison changes them together. The separate [5,000-task experiment](ADMISSION_DEPTH.md) isolates backlog cost and shows the additional cost of enabled durable admission under deeper queues.
+Across eight fresh clusters, all 3,584 HTTP responses and 512 complete lifecycles matched the expected generation, WorldRef, state and replay semantics. PostgreSQL showed one claim, two command receipts, three task state events and a generation-1 cancellation per task. Neither canonical branch head moved. There were zero provider attempts. The workload measures existing REST methods under a small steady backlog. Main has no directly comparable remote MCP and durable admission combination. For the separately measured cost of a larger queue, see [the 5,000-task depth study](ADMISSION_DEPTH.md).
 
-[Preregistration](MAIN_REST_PLAN.md). To reproduce, save the driver from commit `7dccd00` outside both clean matched source trees. Run these four commands from A, B, B, A worktrees respectively, each against its own fresh local PG17 service with NF_TEST_DATABASE_URL set and PYTHONPATH containing that checkout's src, workshop/src and root. Use the same pinned environment in both trees.
+## Reproduction
+
+Copy `benchmarks/hera_compare_main.py` from `67921a8` outside both worktrees. For the final series, run the commands below from the A, B, B, A clean worktrees respectively, each with a fresh local PG17 cluster, NF_TEST_DATABASE_URL, the pinned environment and PYTHONPATH containing that checkout's src, workshop/src and root. For the earlier series, use its candidate source and omit --candidate-revision. The original externally run driver is also available at `7dccd00`.
 
 ```sh
-python /tmp/hera_compare_main.py --arm A --output /tmp/main-rest/0-A.json.gz
-python /tmp/hera_compare_main.py --arm B --output /tmp/main-rest/1-B.json.gz
-python /tmp/hera_compare_main.py --arm B --output /tmp/main-rest/2-B.json.gz
-python /tmp/hera_compare_main.py --arm A --output /tmp/main-rest/3-A.json.gz
+python /tmp/hera_compare_main.py --arm A --candidate-revision a918a91 --output /tmp/main-rest-final/0-A.json.gz
+python /tmp/hera_compare_main.py --arm B --candidate-revision a918a91 --output /tmp/main-rest-final/1-B.json.gz
+python /tmp/hera_compare_main.py --arm B --candidate-revision a918a91 --output /tmp/main-rest-final/2-B.json.gz
+python /tmp/hera_compare_main.py --arm A --candidate-revision a918a91 --output /tmp/main-rest-final/3-A.json.gz
 ```
 
 Rollback this configuration by disabling the durable policy for new admissions and setting NF_HTTP_FENCED_TASK_STATUS=0. Keep workers able to honor earlier frozen first-start deadlines until those waits drain.

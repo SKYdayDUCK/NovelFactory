@@ -103,12 +103,13 @@ async def run(app, fixtures, kernel):
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--arm",choices=("A","B"),required=True)
+    parser.add_argument("--candidate-revision", choices=("0fcf453", "a918a91"), default="0fcf453")
     parser.add_argument("--output",type=Path,required=True)
     args=parser.parse_args()
     root=Path.cwd().resolve()
     assert Path(http.__file__).resolve().is_relative_to(root/"src")
     sha=subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip()
-    assert not subprocess.check_output(["git","status","--porcelain"]) and sha.startswith("bcb03637" if args.arm=="A" else "0fcf453")
+    assert not subprocess.check_output(["git","status","--porcelain"]) and sha.startswith("bcb03637" if args.arm=="A" else args.candidate_revision)
     with TemporaryDirectory() as tmp, isolated_kernel(os.environ["NF_TEST_DATABASE_URL"],Path(tmp)) as (original,url):
         original.db.close()
         db=Database(url,pool_size=4,max_overflow=0)
