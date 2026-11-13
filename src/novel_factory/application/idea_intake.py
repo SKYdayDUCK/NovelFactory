@@ -5,6 +5,7 @@ from uuid import UUID, uuid5
 
 from novel_factory.application.budget_limits import SharedBudgetService
 from novel_factory.application.candidate_delivery import CandidateDelivery
+from novel_factory.application.idea_revision import derive_revision_patch, full_design_contract
 from novel_factory.application.idea_window import window_diagnostics
 from novel_factory.application.idea_ending import confirm_ending, derive_ending_plan
 from novel_factory.application.idea_repair import normalized_design, returned_design
@@ -105,11 +106,7 @@ def enroll_idea(kernel, gateway, inspiration, allowance, prep_work_id):
     bound_gateway = gateway.with_kernel(kernel)
     # Only the new task freezes this structured result type. Existing initial_world
     # tasks (including legacy AgentTextOutput) keep their original dispatch contract.
-    design_contract = "FirstWorldDesign"
-    if model_routes:
-        design_contract = (
-            "EnvironmentalOpeningWorldDesign" if profile["environment_processes"] else "OpeningWorldDesign"
-        )
+    design_contract = full_design_contract(profile, model_routes)
     bound_gateway.output_contracts[("world_designer", "initial_world")] = (design_contract, "production_profile")
     assignment = {
         "creative_input": inspiration,
@@ -257,6 +254,9 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
             )
         else:
             findings, review_ref = revision
+            gateway.output_contracts[(role_id, task_kind)] = (
+                full_design_contract(intake["profile"], intake.get("model_routes")), "production_profile"
+            )
             content.update(task="依据给定审校意见定向修改先前的设计，保留其余设定并返回完整设计。",
                            review_ref=review_ref, issues=[{key: issue[key] for key in
                            ("category", "severity", "issue_kind", "disposition", "description", "suggested_change")} for issue in findings["issues"]])
@@ -405,6 +405,10 @@ def materialize_design(kernel, gateway, owner, wr):
             require(task and task["state"] == "RESULT_STORED", "TASK_NOT_ACCEPTABLE", "Design awaits a current result")
             ending_task = designer.get("revision_purpose") in {"SHORT_ENDING", "SHORT_ENDING_FIX"}
             evidence, design = _audited_design_result(kernel, gateway, repo, task, wr, ending_plan_read=ending_task)
+            if (not ending_task and designer.get("review_ref") and not designer.get("revision_purpose")
+                    and kernel.artifact(repo, designer["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]["output_contract"]
+                        == {"name": "ShortEndingPlan", "version": "production_profile"}):
+                evidence, design = derive_revision_patch(kernel, repo, owner, wr, designer, evidence, design, intake)
             if ending_task:
                 audit_row = gateway._read_audit(repo, evidence["attempt_id"])
                 audit_ref = {k: audit_row[k] for k in ("artifact_id", "artifact_revision_id", "sha256")}
@@ -534,6 +538,7 @@ def materialize_design(kernel, gateway, owner, wr):
             "result_ref": evidence["output_ref"],
             "execution_kind": evidence["execution_kind"],
             "source_input_ref": designer["input_ref"],
+            **({"design_revision_patch": evidence["revision_patch"]} if "revision_patch" in evidence else {}),
             **({"design_ending_plan": evidence["ending_plan"]} if "ending_plan" in evidence else {}),
             **({"design_normalization": evidence["normalization"]} if "normalization" in evidence else {}),
             **({"design_revision_round": round_index, "original_input_ref": intake["input_ref"]} if round_index else {}),

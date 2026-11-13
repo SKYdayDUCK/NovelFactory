@@ -113,12 +113,23 @@ def _ending_output(kernel, repo, delivery, source, record, task, selected_ref):
     return task, audit, candidate, derived
 
 
-def _design_output(kernel, repo, delivery, source, record, selected_ref, kind):
+def _design_output(kernel, repo, delivery, source, record, selected_ref, kind, intake):
     from .production_extent import _real_candidate
 
     task = _task(repo, source, record, "world_designer")
     if kind == "ENDING_PLAN_CANDIDATE":
         return _ending_output(kernel, repo, delivery, source, record, task, selected_ref)
+    if kind == "COMPLETE_REVISION_CANDIDATE":
+        from .idea_revision import replay_revision_patch
+        audit, patch = _real_candidate(delivery, repo, task)
+        candidate = replay_revision_patch(kernel, repo, source, record, audit, patch, intake)
+        proof = _receipt(repo, source, "P6_COMPLETE_REVISION_PATCH", audit["attempt_id"])
+        _check(proof == {"input_ref": record["input_ref"], "prior_design_ref": record["candidate_ref"],
+                         "review_ref": record["review_ref"], "response_ref": audit["response_ref"],
+                         "patch_ref": audit["output_ref"], "attempt_id": audit["attempt_id"], "output_ref": selected_ref})
+        adopted = kernel.artifact(repo, selected_ref, source["work_id"], kind=kind)
+        _check(adopted["payload"] == candidate and fingerprint(candidate) == adopted["sha256"])
+        return task, audit, candidate, proof
     if task["state"] != "FAILED":
         _check(kind == "AGENT_CANDIDATE")
         audit, candidate = _real_candidate(delivery, repo, task)
@@ -239,6 +250,7 @@ def verify_adopted_design(kernel, repo, delivery, receipt, adopted):
             design,
             selected_ref,
             origin["kind"],
+            intake,
         )
         _check(audit["world_ref"] == source)
         if correction_source is not None:
@@ -264,6 +276,8 @@ def verify_adopted_design(kernel, repo, delivery, receipt, adopted):
             norm = derivation if origin["kind"] == "NORMALIZED_DESIGN_CANDIDATE" else None
             ending_plan = derivation if origin["kind"] == "ENDING_PLAN_CANDIDATE" else None
             _check(receipt.get("design_ending_plan") == ending_plan)
+            revision_patch = derivation if origin["kind"] == "COMPLETE_REVISION_CANDIDATE" else None
+            _check(receipt.get("design_revision_patch") == revision_patch)
             if ending_plan:
                 from .idea_ending import confirm_ending
 

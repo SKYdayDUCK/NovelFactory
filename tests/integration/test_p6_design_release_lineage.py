@@ -32,6 +32,8 @@ pytestmark = [pytest.mark.postgres, pytest.mark.integration]
         "structural_then_ending",
         "legacy_ending",
         "authorized_fix",
+        "ordinary_after_ending",
+        "historical_ordinary_patch",
     ],
 )
 def test_adopted_design_and_review_bound_to_release(kernel_env, tmp_path, monkeypatch, scenario):
@@ -57,7 +59,9 @@ def test_adopted_design_and_review_bound_to_release(kernel_env, tmp_path, monkey
     }
 
     production = False
-    from_ending = scenario in {"structural_then_ending", "legacy_ending", "authorized_fix"}
+    after_ending = scenario in {"ordinary_after_ending", "historical_ordinary_patch"}
+    from_ending = after_ending or scenario in {"structural_then_ending", "legacy_ending", "authorized_fix"}
+    final_patch = {"storyline": "双方确认交接。", "chapter_goals": ["当场签收。"]}
 
     def respond(packet):
         if production:
@@ -84,6 +88,10 @@ def test_adopted_design_and_review_bound_to_release(kernel_env, tmp_path, monkey
                     **{k: v for k, v in design.items() if k != "opening"},
                     "chapter_goals": ["核对。", "签收。"],
                 }
+            if after_ending and counts[role] == 4:
+                handed = json.loads(packet["assignment"])
+                assert handed["candidate"]["storyline"] == "由画师签收。"
+                return final_patch if scenario == "historical_ordinary_patch" else {**handed["candidate"], **final_patch}
             if from_ending and counts[role] == 3:
                 return {"storyline": "由画师签收。", "chapter_goals": ["核对。", "签收。"]}
             return {**design, "storyline": "画师核对两份委托，向送信人签收原件。"}
@@ -110,6 +118,8 @@ def test_adopted_design_and_review_bound_to_release(kernel_env, tmp_path, monkey
         }
         if from_ending and counts[role] == 1:
             arc.update(decision="ENDING_PLAN_REQUIRED", ending="需交代最终签收。")
+        if after_ending and counts[role] == 2:
+            issue.update(severity="QUESTION", issue_kind="SEMANTIC_CONCERN")
         if scenario == "authorized_fix" and counts[role] == 2:
             issue.update(severity="BLOCKER", issue_kind="CHANGE_REQUEST")
         extra = {}
@@ -204,13 +214,16 @@ def test_adopted_design_and_review_bound_to_release(kernel_env, tmp_path, monkey
     def run(action):
         return cli.run_intake(action, kernel, gateway, tmp_path / "project", idea, allowance)
 
-    if scenario == "legacy_ending":
+    if scenario in {"legacy_ending", "historical_ordinary_patch"}:
         from novel_factory.application.runtime_tasks import RuntimeTaskService
 
         prepare = RuntimeTaskService.prepare
 
         def historical_ending_contract(service, *args, **kwargs):
-            if kwargs.get("role_id") == "world_designer" and '"short_arc"' in kwargs["assignment"]:
+            if (scenario == "historical_ordinary_patch" and kwargs.get("role_id") == "world_designer"
+                    and counts["reviewer"] == 2):
+                service.gateway.output_contracts[("world_designer", "initial_world")] = ("ShortEndingPlan", "production_profile")
+            if scenario == "legacy_ending" and kwargs.get("role_id") == "world_designer" and '"short_arc"' in kwargs["assignment"]:
                 service.gateway.output_contracts[("world_designer", "initial_world")] = (
                     "OpeningWorldDesign",
                     "production_profile",
@@ -272,6 +285,25 @@ def test_adopted_design_and_review_bound_to_release(kernel_env, tmp_path, monkey
                 "签收了什么？",
             ]
         adopted = kernel.artifact(repo, result["design_ref"], wr["work_id"])["payload"]
+        if after_ending:
+            assert adopted == {**design, **final_patch}
+            bound = kernel.artifact(repo, result["source_input_ref"], enrolled["world_ref"]["work_id"])["payload"]
+            writer_task = repo.one("tasks", {"task_id": result["task_id"]})
+            assert writer_task["state"] == "ACCEPTED" and len(repo.many("call_attempts", {"task_id": writer_task["task_id"]})) == 1
+            proof = result.get("design_revision_patch")
+            if scenario == "historical_ordinary_patch":
+                assert bound["output_contract"]["name"] == "ShortEndingPlan"
+                assert proof["output_ref"] == result["result_ref"] != proof["patch_ref"]
+                assert kernel.artifact(repo, proof["patch_ref"], writer_task["work_id"])["payload"] == final_patch
+                packet = json.loads(bound["assignment"])
+                assert proof["prior_design_ref"] == packet["candidate_ref"] and proof["review_ref"] == packet["review_ref"]
+                edited = deepcopy(result)
+                edited["design_revision_patch"]["patch_ref"] = edited["result_ref"]
+                with pytest.raises(DomainError, match="lineage"):
+                    verify_adopted_design(kernel, repo, delivery, edited, adopted)
+            else:
+                expected = "EnvironmentalOpeningWorldDesign" if enrolled["profile"]["environment_processes"] else "OpeningWorldDesign"
+                assert bound["output_contract"]["name"] == expected and proof is None
         with pytest.raises(DomainError, match="lineage"):
             verify_adopted_design(kernel, repo, delivery, result, {**adopted, "title": "另一版本"})
         altered = deepcopy(result)
@@ -287,11 +319,13 @@ def test_adopted_design_and_review_bound_to_release(kernel_env, tmp_path, monkey
                 "structural_then_ending": 3,
                 "legacy_ending": 3,
                 "authorized_fix": 4,
+                "ordinary_after_ending": 4,
+                "historical_ordinary_patch": 4,
             }[scenario]
         )
         assert len(requests) == sum(counts.values())
 
-    if scenario in {"revised", "authorized_fix"}:
+    if scenario in {"revised", "authorized_fix", "historical_ordinary_patch"}:
         production = True
         run("register-window")
         access = cli._load_private(tmp_path / "project" / "supervisor.json")
