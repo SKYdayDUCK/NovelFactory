@@ -6,7 +6,8 @@ from decimal import Decimal
 from urllib.parse import urlsplit
 from uuid import UUID, uuid5
 
-from ..domain.canonical import fingerprint
+from ..domain.canonical import fingerprint, strict_json_loads
+from ..domain.errors import DomainError
 from .kernel import require
 from .prompt_schema import validated_payload
 
@@ -208,12 +209,14 @@ def verify_postpaid_transport(
             _check(task["state"] == "FAILED" and (task["role_id"], task["task_kind"]) == ("world_designer", "initial_world")
                    and audit["outcome"] == "REJECTED" and audit["result_status"] == "FAILED"
                    and audit["reason"] == "INVALID_MODEL_OUTPUT" and audit["output_ref"] is None)
+            from .idea_repair import unparsed_diagnostic
             try:
-                json.loads(raw["text"])
-            except json.JSONDecodeError:
-                # The authenticated transport binds these exact bytes to the original request.
-                # There is no model envelope, identity assertion or candidate to accept.
-                return None, bound_input
+                strict_json_loads(raw["text"])
+            except DomainError as error:
+                # The supplier returned the bytes. Neither invalid syntax nor duplicate keys
+                # yield an unambiguous candidate or a model assertion about identity.
+                if unparsed_diagnostic(error) is not None:
+                    return None, bound_input
             _check(False)
         envelope = json.loads(raw["text"])
         if structural_source:

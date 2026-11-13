@@ -8,7 +8,7 @@ from novel_factory.application.candidate_delivery import CandidateDelivery
 from novel_factory.application.idea_revision import derive_revision_patch, full_design_contract
 from novel_factory.application.idea_window import window_diagnostics
 from novel_factory.application.idea_ending import confirm_ending, derive_ending_plan
-from novel_factory.application.idea_repair import UnparsedDesign, normalized_design, returned_design
+from novel_factory.application.idea_repair import UnparsedDesign, initial_or_structural_repair, normalized_design, returned_design
 from novel_factory.application.kernel import require
 from novel_factory.application.model_routing import POLICY_ROUTE, activate, check_idea_models, idea_policy
 from novel_factory.application.narrative import NarrativeService
@@ -402,7 +402,7 @@ def materialize_design(kernel, gateway, owner, wr):
             _check_design_authority(repo, task, wr)
             envelope, audit, audit_ref = returned_design(
                 kernel, repo, gateway, task, wr, designer,
-                allow_malformed=round_index == 0 or designer.get("revision_purpose") == "JSON_SYNTAX_CORRECTION",
+                allow_malformed=initial_or_structural_repair(round_index, designer),
             )
             if isinstance(envelope, UnparsedDesign):
                 if selected_review or designer["structure_count"] >= intake["profile"]["max_reworks"]:

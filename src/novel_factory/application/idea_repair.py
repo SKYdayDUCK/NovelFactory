@@ -4,7 +4,7 @@ from json import JSONDecodeError
 from uuid import UUID, uuid5
 
 from novel_factory.contracts.registry import validate_contract
-from novel_factory.domain.canonical import fingerprint, strict_json_loads
+from novel_factory.domain.canonical import DuplicateJSONObjectKey, fingerprint, strict_json_loads
 from novel_factory.domain.errors import DomainError
 from .kernel import require
 from .prompt_schema import redundant_payload_fields, validated_payload
@@ -15,6 +15,22 @@ from .production_pipeline import _artifact
 class UnparsedDesign:
     text: str
     diagnostic: dict
+
+
+def unparsed_diagnostic(error):
+    if isinstance(error, DuplicateJSONObjectKey):
+        return {"keyword": "duplicateKey"}
+    syntax = error.__cause__
+    if isinstance(syntax, JSONDecodeError):
+        return {"keyword": "jsonSyntax", "line": syntax.lineno, "column": syntax.colno, "offset": syntax.pos}
+    return None
+
+
+def initial_or_structural_repair(round_index, designer):
+    return round_index == 0 or (
+        designer.get("status") == "DESIGN_REVISION_ENROLLED" and not designer.get("review_ref")
+        and designer.get("revision_purpose") in {None, "JSON_SYNTAX_CORRECTION", "WINDOW_SCHEMA_CORRECTION"}
+    )
 
 
 def returned_design(kernel, repo, gateway, task, wr, designer, *, allow_malformed=False):
@@ -52,8 +68,8 @@ def returned_design(kernel, repo, gateway, task, wr, designer, *, allow_malforme
     try:
         envelope = strict_json_loads(raw["text"])
     except DomainError as error:
-        syntax = error.__cause__
-        if not allow_malformed or audit["reason"] != "INVALID_MODEL_OUTPUT" or not isinstance(syntax, JSONDecodeError):
+        diagnostic = unparsed_diagnostic(error)
+        if not allow_malformed or audit["reason"] != "INVALID_MODEL_OUTPUT" or diagnostic is None:
             raise
         if call["state"] == "UNKNOWN":
             from .postpaid_delivery import verify_postpaid_transport
@@ -63,8 +79,7 @@ def returned_design(kernel, repo, gateway, task, wr, designer, *, allow_malforme
         else:
             require(call["state"] == "FAILED" and call["actual_amount"] is not None and call["actual_tokens"] is not None,
                     "CALL_RECONCILIATION_REQUIRED", "The rejected return is not a completed, accounted attempt")
-        return UnparsedDesign(raw["text"], {"keyword": "jsonSyntax", "line": syntax.lineno,
-                              "column": syntax.colno, "offset": syntax.pos}), audit, audit_ref
+        return UnparsedDesign(raw["text"], diagnostic), audit, audit_ref
     require(isinstance(envelope, dict), "INVALID_EVIDENCE", "Returned design has no JSON envelope")
     return envelope, audit, audit_ref
 

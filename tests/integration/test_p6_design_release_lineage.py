@@ -34,6 +34,9 @@ pytestmark = [pytest.mark.postgres, pytest.mark.integration]
         "authorized_fix",
         "malformed_json",
         "malformed_exhausted",
+        "duplicate_key",
+        "syntax_then_duplicate",
+        "structural_then_duplicate",
         "ordinary_after_ending",
         "historical_ordinary_patch",
     ],
@@ -65,7 +68,8 @@ def test_adopted_design_and_review_bound_to_release(kernel_env, tmp_path, monkey
     from_ending = after_ending or scenario in {"structural_then_ending", "legacy_ending", "authorized_fix"}
     final_patch = {"storyline": "双方确认交接。", "chapter_goals": ["当场签收。"]}
 
-    syntax_case = scenario in {"malformed_json", "malformed_exhausted"}
+    duplicate_case = scenario in {"duplicate_key", "syntax_then_duplicate", "structural_then_duplicate"}
+    syntax_case = duplicate_case or scenario in {"malformed_json", "malformed_exhausted"}
     malformed_texts = []
 
     def respond(packet):
@@ -75,10 +79,15 @@ def test_adopted_design_and_review_bound_to_release(kernel_env, tmp_path, monkey
         counts[role] += 1
         if role == "world_designer":
             if syntax_case:
+                if counts[role] == 1 and scenario == "structural_then_duplicate":
+                    return {k: v for k, v in design.items() if k != "opening"}
                 if counts[role] == 2:
                     handed = json.loads(packet["assignment"])
-                    assert handed["raw_response_text"] == malformed_texts[0] and "candidate" not in handed
-                    assert handed["validation_errors"][0]["keyword"] == "jsonSyntax"
+                    if scenario == "structural_then_duplicate":
+                        assert "opening" not in handed["candidate"] and "raw_response_text" not in handed
+                    else:
+                        assert handed["raw_response_text"] == malformed_texts[0] and "candidate" not in handed
+                        assert handed["validation_errors"][0]["keyword"] == ("duplicateKey" if scenario == "duplicate_key" else "jsonSyntax")
                 return design
             if from_ending and counts[role] == 1:
                 return {k: v for k, v in design.items() if k != "opening"}
@@ -196,12 +205,22 @@ def test_adopted_design_and_review_bound_to_release(kernel_env, tmp_path, monkey
         fixture_post = providers.post
         def syntax_failure(**kwargs):
             payload, receipt, window = fixture_post(**kwargs)
-            if counts["reviewer"] == 0 and (counts["world_designer"] == 1 or scenario == "malformed_exhausted"):
+            designer_no = counts["world_designer"]
+            duplicate_reply = scenario == "duplicate_key" and designer_no == 1 or (
+                scenario in {"syntax_then_duplicate", "structural_then_duplicate"} and designer_no == 2)
+            comma_reply = scenario != "structural_then_duplicate" and (designer_no == 1 or scenario == "malformed_exhausted")
+            if counts["reviewer"] == 0 and (comma_reply or duplicate_reply):
                 supplied = json.loads(payload)
                 message = supplied["choices"][0]["message"]
-                message["content"] = message["content"].replace(', "generation":', ' "generation":', 1)
-                with pytest.raises(json.JSONDecodeError):
-                    json.loads(message["content"])
+                if duplicate_reply:
+                    # Contradictory nested values must stay in the original response as-is.
+                    raw = message["content"].replace('"title":', '"title":"first fixture value","title":', 1)
+                    assert raw != message["content"] and raw.count('"title"') == 2
+                    message["content"] = raw
+                else:
+                    message["content"] = message["content"].replace(', "generation":', ' "generation":', 1)
+                    with pytest.raises(json.JSONDecodeError):
+                        json.loads(message["content"])
                 malformed_texts.append(message["content"])
                 payload = json.dumps(supplied).encode()
             return payload, receipt, window
@@ -272,22 +291,35 @@ def test_adopted_design_and_review_bound_to_release(kernel_env, tmp_path, monkey
         access = cli._load_private(tmp_path / "project" / "preparation.json")
         owner = kernel.authenticate(access["token"])
         repair = run("advance")
-        assert len(requests) == 1 and repair["revision_purpose"] == "JSON_SYNTAX_CORRECTION"
+        assert len(requests) == 1
+        if scenario == "structural_then_duplicate":
+            assert "revision_purpose" not in repair and repair["status"] == "DESIGN_REVISION_ENROLLED"
+        else:
+            assert repair["revision_purpose"] == "JSON_SYNTAX_CORRECTION"
         with kernel.objects.lock(), kernel.db.uow() as repo:
             original = repo.one("tasks", {"task_id": enrolled["task_id"]})
             assert original["state"] == "FAILED"
             assert repo.one("call_attempts", {"task_id": original["task_id"]})["state"] == "UNKNOWN"
             raw = kernel.artifact(repo, repair["candidate_ref"], original["work_id"], kind="AGENT_RESPONSE")
-            assert raw["payload"]["text"] == malformed_texts[0]
+            if scenario != "structural_then_duplicate":
+                assert raw["payload"]["text"] == malformed_texts[0]
             assert kernel._prior(repo, owner, original["work_id"], "P6_IDEA_REVISE", "1", {}) == repair
         assert run("status")["task_id"] == repair["task_id"] != enrolled["task_id"] and len(requests) == 1
     for _ in range(32):
         result = run("advance")
-        if scenario == "malformed_exhausted" and result.get("status") == "DESIGN_SCHEMA_REWORK_REQUIRED":
+        if scenario in {"malformed_exhausted", "syntax_then_duplicate", "structural_then_duplicate"} and result.get("status") == "DESIGN_SCHEMA_REWORK_REQUIRED":
             assert result["reason"] == "JSON_SYNTAX_REPAIR_EXHAUSTED"
+            assert result["validation_errors"][0]["keyword"] == ("duplicateKey" if duplicate_case else "jsonSyntax")
             assert run("advance") == result and len(requests) == 2 and counts["reviewer"] == 0
             with kernel.db.uow(write=False) as repo:
-                assert not repo.many("artifacts", {"work_id": enrolled["world_ref"]["work_id"], "kind": "AGENT_CANDIDATE"})
+                work = enrolled["world_ref"]["work_id"]
+                assert enrolled["profile"]["max_reworks"] == 1
+                assert len(repo.many("receipts", {"work_id": work, "command_type": "P6_IDEA_REVISE"})) == 1
+                assert not repo.many("artifacts", {"work_id": work, "kind": "AGENT_CANDIDATE"})
+                assert repo.one("tasks", {"task_id": repair["task_id"]})["state"] == "FAILED"
+                if duplicate_case:
+                    rejected = kernel.artifact(repo, result["response_ref"], work, kind="AGENT_RESPONSE")["payload"]["text"]
+                    assert rejected == malformed_texts[-1] and rejected.count('"title"') == 2
             return
         if result.get("reason") == "ENDING_PLAN_BLOCKERS" and scenario == "authorized_fix":
             from novel_factory.application.idea_ending import authorize_fix
@@ -364,6 +396,7 @@ def test_adopted_design_and_review_bound_to_release(kernel_env, tmp_path, monkey
             counts["world_designer"]
             == {
                 "malformed_json": 2,
+                "duplicate_key": 2,
                 "normalized": 1,
                 "null_annotation": 1,
                 "revised": 2,

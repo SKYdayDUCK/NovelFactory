@@ -1,7 +1,7 @@
 """Read-only verification of the adopted design, its revision chain and its independent review."""
 
 from ..domain.canonical import fingerprint, strict_json_loads
-from .idea_repair import UnparsedDesign, normalized_payload, returned_design
+from .idea_repair import UnparsedDesign, initial_or_structural_repair, normalized_payload, returned_design
 from .kernel import require
 from .postpaid_delivery import verify_postpaid_transport
 from .statistics import is_fixture_configuration
@@ -348,7 +348,7 @@ def verify_adopted_design(kernel, repo, delivery, receipt, adopted):
             if revised.get("revision_purpose") == "JSON_SYNTAX_CORRECTION":
                 audit_row = delivery.gateway._read_audit(repo, audit["attempt_id"])
                 audit_ref = {k: audit_row[k] for k in ("artifact_id", "artifact_revision_id", "sha256")}
-                _check(intake.get("model_routes") and (index == 0 or design.get("revision_purpose") == "JSON_SYNTAX_CORRECTION")
+                _check(intake.get("model_routes") and initial_or_structural_repair(index, design)
                        and isinstance(candidate, UnparsedDesign) and "candidate" not in packet
                        and packet["raw_response_text"] == candidate.text
                        and revised["source_attempt_id"] == audit["attempt_id"] == packet["source_attempt_id"]
