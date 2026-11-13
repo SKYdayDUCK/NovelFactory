@@ -40,7 +40,8 @@ def _enroll(kernel, repo, gateway, owner, wr, cursor, assignment, refs, *, revie
     text = json.dumps(assignment, ensure_ascii=False)
     require(len(text) <= 32000, "CAPACITY_LIMIT", "Planning brief exceeds the role prompt boundary")
     if not reviewing:
-        gateway.output_contracts[(role, kind)] = ("NextChapterPlan", "production_profile")
+        name = "NextSimulatedVolume" if "simulation_scope" in assignment else "NextChapterPlan"
+        gateway.output_contracts[(role, kind)] = (name, "production_profile")
     budget = repo.one("budgets", {"budget_id": auth["budget_id"], "work_id": wr["work_id"]})
     prepared = RuntimeTaskService(kernel, gateway).prepare(
         owner,
@@ -136,6 +137,14 @@ def _plan_turn(kernel, gateway, repo, owner, wr, cursor, key, source):
             "target_chapters": cursor["target_chapters"],
             "maximum_new_goals": max_goals,
         }
+        if source.get("opening_version") and cursor["profile"]["character_simulation"]:
+            assignment["simulation_scope"] = {
+                "participants": [design["protagonist"], design["opening"]["counterpart"]],
+                "INITIAL_PLACE": design["place"], "OTHER_PLACE": design["opening"]["other_place"],
+                "environment_entity": (design["opening"].get("environment", {}).get("moving_entity")
+                                       if cursor["profile"]["environment_processes"] else None),
+                "instruction": "拟定下一卷首场可演绎的条件。仅据已有设定选择环境运动；未提供环境实体就填 NO_MOVEMENT。",
+            }
         tid = _enroll(
             kernel,
             repo,
@@ -213,6 +222,16 @@ def _plan_turn(kernel, gateway, repo, owner, wr, cursor, key, source):
         start_after=cursor["chapter_count"],
         upstream_refs=[cursor["last_checkpoint"], previous_plan, evidence["output_ref"], proof["output_ref"]],
     )
+    if "scene_situation" in plan:
+        require(cursor["profile"]["environment_processes"] or plan["environment_destination"] == "NO_MOVEMENT",
+                "VIEW_DENIED", "A volume without environment processes cannot move an item")
+        from .production_pipeline import _artifact
+        simulation_plan = _artifact(kernel, repo, work, owner, "P6_VOLUME_SIM_PLAN", {
+            "plan_output": evidence["output_ref"], "review_output": proof["output_ref"],
+            "plan_ref": refs["plan_ref"], "volume_id": volume["volume_id"], "checkpoint": base["checkpoint"],
+            "source": source["design_ref"], "start_tick": cursor["chapter_count"], "run_id": cursor["run_id"],
+        })
+        PlanningService(kernel)._select(repo, wr, "P6_VOLUME_SIM_PLAN:" + volume["volume_id"], simulation_plan)
     cursor_ref = rolling.append_generated_volume(kernel, repo, owner, cursor, volume)
     for row in (task, review):
         kernel.tasks.accept_in_transaction(repo.conn, row["task_id"], row["generation"])

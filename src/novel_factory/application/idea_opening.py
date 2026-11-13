@@ -79,7 +79,8 @@ def add_opening_facts(genesis, work, design, at):
 
 def actor_brief(kernel, repo, wr, at, actor):
     """The assignment can include only this character's own frozen opening memory."""
-    snapshot = kernel.revision(repo, wr)["snapshot"]
+    revision = kernel.revision(repo, wr)
+    snapshot = revision["snapshot"]
     records = [
         r["statement"]
         for r in snapshot["cognitions"]
@@ -94,6 +95,16 @@ def actor_brief(kernel, repo, wr, at, actor):
     if location["value_status"] == "VALUE" and location["data"]["kind"] == "ENTITY":
         place = location["data"]["entity_id"]
         brief["你记得自己所在的地点"] = {"name": snapshot["entities"][place]["name"], "id": place}
+    # Sealed intent is an actor's own historical choice, even if the adjudicator denied it.
+    # Read this actor's actions only; the accepted schedule verifies the branch and time cut.
+    interactions = state_from_revision(revision)["closed_interactions"]
+    for iid, closed in sorted(interactions.items(), key=lambda item: point_key(item[1]["at"]), reverse=True):
+        if point_key(closed["at"]) >= point_key(at):
+            continue
+        row = repo.one("simulation_intents", {"actor_id": actor, "interaction_id": iid})
+        if row:
+            brief["你上次在场内提出的行动（仅是自己的意图）"] = row["payload"]["intent"]
+            break
     return "\n" + json.dumps(brief, ensure_ascii=False)
 
 
@@ -209,15 +220,12 @@ def _accept(kernel, repo, owner, wr, at, subjects, label, record_ref, propose):
     )
 
 
-def enroll_opening(kernel, repo, gateway, owner, source, registration):
-    """Register and accept processes in the same transaction as the opening enrollment."""
-    wr = source["world_ref"]
+def enroll_volume_scene(kernel, repo, gateway, owner, source, registration, wr, volume, chapters,
+                        *, scene_key, start_tick, situation, environment_destination=None):
+    """Accept each independent process and enroll one scene against this volume's fixed plan."""
     work, branch = wr["work_id"], wr["branch_id"]
-    require(kernel.head(repo, work, branch) == wr, "HEAD_CONFLICT", "Opening genesis changed")
-    design = kernel.artifact(repo, source["design_ref"], work, kind="INITIAL_STORY_DESIGN")[
-        "payload"
-    ]
-    opening = design["opening"]
+    require(kernel.head(repo, work, branch) == wr, "HEAD_CONFLICT", "Simulation head changed")
+    snapshot = kernel.revision(repo, wr)["snapshot"]
     scheduler = WorldSchedulerService(kernel)
     rules = repo.one("works", {"work_id": work})["rules_ref"]
     first, other = _uid(work, "place"), _uid(work, "other-place")
@@ -225,7 +233,8 @@ def enroll_opening(kernel, repo, gateway, owner, source, registration):
     receipts = []
 
     def register(label, kind, scopes, participants, start, due, goal, **evaluation):
-        pid = _uid(work, "opening-process:" + label)
+        label = scene_key + ":" + label
+        pid = _uid(work, "volume-process:" + label)
         proc = {
             "schema_version": "2.2",
             "process_id": pid,
@@ -259,20 +268,19 @@ def enroll_opening(kernel, repo, gateway, owner, source, registration):
         return accepted["world_ref"]
 
     events = []
-    if source["profile"]["environment_processes"]:
-        moving = _uid(work, "moving-entity")
-        require(
-            opening.get("environment"), "INVALID_MODEL_OUTPUT", "No approved environmental process"
-        )
-        due = _point(0, 2)
+    moving = _uid(work, "moving-entity")
+    if source["profile"]["environment_processes"] and environment_destination is not None:
+        require(moving in snapshot["entities"] and environment_destination in (first, other),
+                "INVALID_MODEL_OUTPUT", "Environment needs an approved entity and enrolled destination")
+        due = _point(start_tick, 2)
         wr = register(
             "environment",
             "TRAVEL",
             [first, other, moving],
             [moving],
-            _point(0, 1),
+            _point(start_tick, 1),
             due,
-            opening["environment"]["moving_entity"] + "抵达" + opening["other_place"],
+            snapshot["entities"][moving]["name"] + "抵达" + snapshot["entities"][environment_destination]["name"],
             required_actor_ids=[],
             evaluator_kind="DETERMINISTIC",
             deterministic_commands=[
@@ -281,13 +289,13 @@ def enroll_opening(kernel, repo, gateway, owner, source, registration):
                     "args": {
                         "subject_id": moving,
                         "predicate": "located_in",
-                        "object_value": {"kind": "ENTITY", "entity_id": other},
+                        "object_value": {"kind": "ENTITY", "entity_id": environment_destination},
                         "at": due,
                     },
                 }
             ],
         )
-        outcome = scheduler.evaluate_due(owner, wr, due, [first, other], "opening-environment")
+        outcome = scheduler.evaluate_due(owner, wr, due, [first, other], scene_key + ":environment")
         accepted = _accept(
             kernel,
             repo,
@@ -295,7 +303,7 @@ def enroll_opening(kernel, repo, gateway, owner, source, registration):
             wr,
             due,
             [first, other, moving],
-            "evaluate-environment",
+            scene_key + ":evaluate-environment",
             outcome["outcome_ref"],
             scheduler.propose_outcome,
         )
@@ -308,9 +316,9 @@ def enroll_opening(kernel, repo, gateway, owner, source, registration):
         "INTERACTION",
         [first, other, *observed_items],
         actors,
-        _point(0, 4),
-        _point(0, 5),
-        opening["situation"],
+        _point(start_tick, 4),
+        _point(start_tick, 5),
+        situation,
         required_actor_ids=actors,
         evaluator_kind="SEMANTIC",
     )
@@ -319,10 +327,10 @@ def enroll_opening(kernel, repo, gateway, owner, source, registration):
         gateway,
         owner,
         world_ref=wr,
-        story_time=_point(0, 5),
+        story_time=_point(start_tick, 5),
         scope_ids=[first, other],
-        volume_id=source["volumes"][0]["volume_id"],
-        scene_limit=len(source["volumes"][0]["chapters"]),
+        volume_id=volume,
+        scene_limit=chapters,
         participants=[{"actor_id": actor} for actor in actors],
         subject_id=actors[0],
         destination_id=other,
@@ -332,10 +340,23 @@ def enroll_opening(kernel, repo, gateway, owner, source, registration):
         reserve_amount=registration["reserve_amount"],
         token_reservation=registration["token_reservation"],
         deadline_seconds=registration["deadline_seconds"],
-        idempotency_key="idea-opening",
+        idempotency_key=scene_key,
         opening_scene=True,
         observed_subject_ids=[actors[1], *observed_items],
         local_replanning=source["profile"]["local_replanning"],
+    )
+    return wr, simulation, events, receipts
+
+
+def enroll_opening(kernel, repo, gateway, owner, source, registration):
+    wr = source["world_ref"]
+    work, branch = wr["work_id"], wr["branch_id"]
+    design = kernel.artifact(repo, source["design_ref"], work, kind="INITIAL_STORY_DESIGN")["payload"]
+    volume = source["volumes"][0]
+    wr, simulation, events, receipts = enroll_volume_scene(
+        kernel, repo, gateway, owner, source, registration, wr, volume["volume_id"], len(volume["chapters"]),
+        scene_key="idea-opening", start_tick=0, situation=design["opening"]["situation"],
+        environment_destination=_uid(work, "other-place"),
     )
     grant = kernel.authorize(repo, owner, work, "ADMIN", branch)
     payload = {

@@ -562,7 +562,13 @@ def advance_rolling(kernel, gateway, controller, work, branch):
                     _freeze_window(kernel, repo, owner, cursor, board, window)
                     cursor.update(state="FROZEN", reason=None)
                 elif cursor["state"] == "OPEN_NEXT":
-                    _open(kernel.in_transaction(repo), repo, gateway, owner, cursor)
+                    from .idea_volume_scene import advance_volume_scene
+
+                    bound = kernel.in_transaction(repo)
+                    handled, result = advance_volume_scene(bound, repo, gateway.with_kernel(bound), owner, cursor)
+                    if handled:
+                        return result
+                    _open(bound, repo, gateway, owner, cursor)
                 else:
                     final = cursor["index"] + 1 == cursor["window_count"]
                     require(
