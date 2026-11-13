@@ -220,7 +220,14 @@ def bench(args):
             ctl.execute("SET application_name='hera-observer'")
             if args.quota:
                 ctl.execute("UPDATE nf_durable_admission_policy SET enabled=true")
-            if args.trigger == 'off':
+            if args.exact_quota:
+                ctl.execute("SELECT nf_hera_set_capacity_mode(true)")
+            if args.trigger == 'suspend':
+                from novel_factory.orchestration.progress import set_progress_maintenance
+                with db.uow() as repo:
+                    set_progress_maintenance(repo.conn, suspended=True)
+                db.close()
+            elif args.trigger == 'off':
                 ctl.execute('ALTER TABLE nf_tasks DISABLE TRIGGER nf_hera_progress_delta')
             elif args.trigger == '0025':
                 import importlib.util
@@ -245,7 +252,9 @@ def bench(args):
                     'server_version','track_functions','pg_stat_statements.track','shared_buffers','track_io_timing','fsync')}
                 postmaster = int(ctl.execute("SELECT split_part(pg_read_file('postmaster.pid'),E'\\n',1)").fetchone()[0])
                 result = dict(sha=args.revision, schema=revision(schema), product=args.product, trigger=args.trigger,
-                       quota=args.quota, startup_s=startup, service_pid=pid, client_pid=os.getpid(), pg_pid=postmaster,
+                       quota=args.quota, exact_quota=args.exact_quota,
+                       flags={key:os.environ.get(key,"0") for key in ("NF_HERA_COMPACT_CREATE","NF_HERA_REUSE_LOOKUP_SQL")},
+                       startup_s=startup, service_pid=pid, client_pid=os.getpid(), pg_pid=postmaster,
                        client_cpus=sorted(os.sched_getaffinity(0)), server_cpus=affinity, pg_cpus=sorted(os.sched_getaffinity(postmaster)),
                        postgres=pg_info, pool=4, overflow=0, auth_slots=2, operation_slots=2, model_slots_used=0,
                        driver_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(), phases=[])
@@ -308,7 +317,8 @@ if __name__ == '__main__':
     parser.add_argument('--product',choices=['main','early','prior','candidate'],required=True)
     parser.add_argument('--revision',required=True)
     parser.add_argument('--quota',action='store_true')
-    parser.add_argument('--trigger',choices=['off','0025','installed'],default='installed')
+    parser.add_argument('--exact-quota',action='store_true')
+    parser.add_argument('--trigger',choices=['off','0025','installed','suspend'],default='installed')
     parser.add_argument('--schema-root',type=Path,required=True)
     parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--server-cpus',default='')
