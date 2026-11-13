@@ -61,6 +61,7 @@ class RemoteTools:
         request.state.nf_runtime = McpRuntime(self.kernel, principal, binding,
                                               compact_role_reads=self.settings.compact_remote_role_reads,
                                               fenced_task_status=self.settings.fenced_task_status,
+                                              fuse_status_auth=self.settings.fuse_status_auth,
                                               status_coalescer=self.coalescer)
         await self.manager.handle_request(scope, receive, send)
 

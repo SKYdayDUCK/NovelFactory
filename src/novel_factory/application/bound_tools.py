@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from novel_factory.domain.errors import DomainError
 from .audit_log import LogService
+from .task_operations import TaskOperationsBinding
 from .tool_catalog import _TOOLS, _VALIDATORS
 
 
@@ -71,7 +72,17 @@ def invoke_bound_tool(runtime, name, arguments, *, ceiling=None, request_id=None
     error = None
     evidence = None
     try:
-        if (ceiling is not None and name not in ceiling) or name not in runtime.available_tools():
+        if ceiling is not None and name not in ceiling:
+            raise DomainError("VIEW_DENIED", "Tool unavailable for this binding")
+        # The ordinary status tool's only capability is READ. For a valid call
+        # its business read checks this under work/grant locks, then checks the
+        # owner and installed branch before returning. Other bindings can have
+        # dynamic tool ceilings; keep discovery for them and preserve denial
+        # precedence over argument errors for malformed calls.
+        if (name == "nf_task_status" and isinstance(runtime.binding, TaskOperationsBinding)
+                and runtime.fuse_status_auth and _VALIDATORS[name].is_valid(arguments)):
+            return runtime.task_operation(name, arguments)
+        if name not in runtime.available_tools():
             raise DomainError("VIEW_DENIED", "Tool unavailable for this binding")
         if not _VALIDATORS[name].is_valid(arguments):
             raise DomainError("INVALID_ARGUMENT", "Tool arguments are invalid")

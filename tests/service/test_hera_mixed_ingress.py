@@ -35,7 +35,8 @@ async def remote(base, token):
                 yield client, mcp
 
 
-def test_mixed_task_lifecycle(service_env, service_world, tmp_path):
+@pytest.mark.parametrize("fuse_status_auth", [False, True])
+def test_mixed_task_lifecycle(service_env, service_world, tmp_path, fuse_status_auth):
     env, world = service_env, service_world
     kernel, wr = env["kernel"], world["world_ref"]
     binding = TaskOperationsBinding(wr["work_id"], wr["branch_id"])
@@ -46,7 +47,8 @@ def test_mixed_task_lifecycle(service_env, service_world, tmp_path):
                                 expires_at=datetime.now(UTC) + timedelta(hours=1))
     project = ProjectBinding(wr["work_id"], wr["branch_id"])
     bindings = {world["principal"]: binding, other["principal"]: binding, resume["principal"]: project}
-    app = create_app(kernel, mcp_bindings=bindings, settings=HttpSettings(fenced_task_status=True, coalesce_task_status=True))
+    app = create_app(kernel, mcp_bindings=bindings, settings=HttpSettings(
+        fenced_task_status=True, coalesce_task_status=True, fuse_status_auth=fuse_status_auth))
     bindings.clear()  # Reusing the caller's manifest must not relax a mounted REST or MCP ceiling.
     spec = dict(schema_version="2.0", task_id=str(uuid4()), generation=0, role_id="control_operator",
                 task_kind="hera_mixed", state="READY", world_ref=wr, story_time=point(0),

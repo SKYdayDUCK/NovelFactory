@@ -54,6 +54,7 @@ class HttpSettings:
     compact_remote_role_reads: bool = False
     hera_delegations: bool = False
     fenced_task_status: bool = False
+    fuse_status_auth: bool = False
 
 
 def _status(code: str) -> int:
@@ -607,6 +608,7 @@ def from_environment() -> FastAPI:
         fast_slots=int(os.environ.get("NF_HERA_FAST_SLOTS", "0")),
         compact_remote_role_reads=os.environ.get("NF_HERA_COMPACT_ROLE_READS", "0") == "1",
         hera_delegations=os.environ.get("NF_HERA_DELEGATIONS", "0") == "1",
+        fuse_status_auth=os.environ.get("NF_HERA_FUSE_STATUS_AUTH", "0") == "1",
         fenced_task_status=os.environ.get("NF_HTTP_FENCED_TASK_STATUS", "0") == "1",
     )
     from .mcp_http import load_roster

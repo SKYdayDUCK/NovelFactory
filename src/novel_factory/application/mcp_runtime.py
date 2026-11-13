@@ -34,12 +34,14 @@ class TaskBinding:
 
 
 class McpRuntime:
-    def __init__(self, kernel, principal, binding, *, compact_role_reads=False, fenced_task_status=False, status_coalescer=None):
+    def __init__(self, kernel, principal, binding, *, compact_role_reads=False, fenced_task_status=False, status_coalescer=None,
+                 fuse_status_auth=False):
         self.kernel = kernel
         self.principal = principal
         self.binding = binding
         self.compact_role_reads = compact_role_reads
         self.fenced_task_status = fenced_task_status
+        self.fuse_status_auth = fuse_status_auth
         self.status_coalescer = status_coalescer
         self.queries = WorldQueryService(kernel)
 
