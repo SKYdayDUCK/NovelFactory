@@ -154,7 +154,7 @@ def provision_metered_work(kernel, project, preparation):
 
 def resume_unsent_metered_job(kernel, project, state):
     """A previously paused reservation may resume only if no attempt was ever recorded for that task."""
-    if state.get("status") != "BLOCKED" or state.get("reason") not in {"BUDGET_EXCEEDED", "INPUTS_PENDING"} or not state.get("task_id"):
+    if state.get("status") != "BLOCKED" or state.get("reason") not in {"BUDGET_EXCEEDED", "INPUTS_PENDING", "CAPACITY_LIMIT"} or not state.get("task_id"):
         return
     binding = private(project / "supervisor.json")
     owner = kernel.authenticate(binding["token"])
@@ -168,6 +168,10 @@ def resume_unsent_metered_job(kernel, project, state):
                 "Metered recovery requires proof that no attempt was reserved")
         config = repo.one("supervisor_jobs", {"task_id": task["task_id"]})["config"]
         if state["reason"] == "INPUTS_PENDING" and "joint" not in config:
+            return
+        if state["reason"] == "CAPACITY_LIMIT":
+            if "production_node" in config and task["role_id"] == "reviewer" and task["task_kind"] == "epistemic":
+                kernel.in_transaction(repo).tasks.resume(task["task_id"], task["generation"])
             return
         job = config["dispatch"]
         bound = kernel.in_transaction(repo)
@@ -211,9 +215,9 @@ def writing_step(kernel, gateway, project, allowance):
     if (result["status"] == "PRODUCTION_HANDOFF" and result.get("state") == "STOPPED"
             and result.get("reason") == "STRATEGY_REASSESSMENT_REQUIRED"):
         node = pipeline_status(kernel, owner, work, branch)["nodes"].get(result.get("node_id"), {})
-        from novel_factory.application.board_schema_repair import reviewer_format_method
-        if reviewer_format_method(node):
-            return {**result, "status":"REVIEW_FORMAT_REASSESSMENT_PENDING"}
+        from novel_factory.application.board_schema_repair import board_format_method
+        if board_format_method(node):
+            return {**result, "status":"FORMAT_REASSESSMENT_PENDING"}
         if node.get("stage") == "draft" and (node.get("extent_repairs") or [{}])[-1].get("decision") == "STRATEGY_REASSESSMENT_REQUIRED":
             return {**result, "status":"EXTENT_REASSESSMENT_PENDING"}
     if (result["status"] == "PRODUCTION_HANDOFF" and result.get("state") == "STOPPED"

@@ -59,7 +59,8 @@ def revise_scene(kernel, repo, board):
                 report = kernel.artifact(repo, record["candidate_ref"], work, kind="AGENT_CANDIDATE")["payload"]
                 if reader["stage"] == "epistemic":
                     require(record["draft_ref"] == prior, "NARRATIVE_SELECTION_CONFLICT", "Reading belongs to another draft")
-                    issues = report["issues"]
+                    from .rolling_facts import epistemic_blockers
+                    issues = epistemic_blockers(report["issues"])
                 else:
                     issues = [i for i in editorial_blockers(report["issues"])
                               if by_draft.get(i["subject_ref"]["artifact_revision_id"]) == target]

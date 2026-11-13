@@ -381,7 +381,7 @@ def _enroll(kernel, repo, gateway, owner, board, identity):
         parent = board["nodes"][node["parents"][0]]
         scene = kernel.artifact(repo, parent["scene_ref"], work, kind="SCENE_PLAN")["payload"]
         story_time = scene["scene_contract"]["story_interval"]["end"]
-        assignment = "独立通读本场正文，逐项核查人物所知、获知来源及披露时序。把无来源、时序矛盾或无法判断的知识归为问题，引用原句及可用证据。"
+        assignment = "独立通读本场正文，逐项核查人物所知、获知来源及披露时序。把无来源、时序矛盾或无法判断的知识归为问题，引用原句及可用证据。明确区分可验证的硬性认知矛盾、疑问和可选的文学建议，标注准确的严重程度与处置状态。"
         role, kind = "reviewer", "epistemic"
     else:
         role, kind = ROLES[stage]

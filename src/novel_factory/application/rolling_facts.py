@@ -41,6 +41,14 @@ def assignment():
     )
 
 
+def epistemic_blockers(issues):
+    """Retain the complete reading. Gate advancement on active mandatory findings."""
+    return [issue for issue in issues if issue["disposition"] != "RESOLVED"
+            and (issue["category"] == "HARD_CONSISTENCY" or issue["issue_kind"] == "HARD_CONFLICT"
+                 or issue["severity"] == "BLOCKER" or
+                 (issue["issue_kind"] == "CHANGE_REQUEST" and issue["disposition"] in {"OPEN", "ACCEPT"}))]
+
+
 def record_knowledge(kernel, repo, owner, board, node, task, evidence, candidate):
     from .production_pipeline import _artifact
 
@@ -50,7 +58,7 @@ def record_knowledge(kernel, repo, owner, board, node, task, evidence, candidate
     delivered = NarrativeService(kernel).read_text(
         reader, task["task_id"], task["generation"], draft_ref
     )
-    clear = not candidate["issues"]
+    clear = not epistemic_blockers(candidate["issues"])
     receipt = {
         "world_ref": board["world_ref"],
         "draft_ref": draft_ref,

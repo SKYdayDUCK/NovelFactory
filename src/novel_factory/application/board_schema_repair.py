@@ -25,13 +25,19 @@ def verify_board_transport(kernel, audit, raw):
     require(valid, "CALL_RECONCILIATION_REQUIRED", "Board response bytes require transport reconciliation")
 
 
-def reviewer_format_method(node):
+def board_format_method(node):
     """Specific repair for observed reviewer fields misplaced on the envelope."""
     repairs = node.get("schema_repairs") or []
-    if not repairs or node["stage"] not in {"review", "epistemic"}:
+    if not repairs:
         return None
     last = repairs[-1]
     diag = last.get("diagnostic", {})
+    if node["stage"] == "draft" and diag.get("keyword") == "jsonSyntax":
+        return ("继续本角色的写作任务。先完成正文，再作为 JSON 字符串写入 payload.text。"
+                "换行使用 JSON 换行转义，字符串中的双引号和反斜杠必须转义。仅返回一个完整 JSON 对象。"
+                "在发送前从报错位置附近核对字符串边界与括号，检查全文可解析。")
+    if node["stage"] not in {"review", "epistemic"}:
+        return None
     fields = diag.get("move_inside_payload")
     if (not fields or diag.get("location") != "envelope" or diag.get("keyword") != "additionalProperties"
             or not set(fields) <= {"summary", "issues", "counterinterpretations", "evidence_refs"}):
@@ -45,7 +51,7 @@ def reviewer_format_method(node):
 
 def resume_review_format(kernel, repo, owner, board, identity):
     node = board["nodes"][identity]
-    method = reviewer_format_method(node)
+    method = board_format_method(node)
     if not method or node["state"] != "STOPPED" or node.get("reason") != PAUSED:
         return False
     last = node["schema_repairs"][-1]
@@ -57,7 +63,7 @@ def resume_review_format(kernel, repo, owner, board, identity):
     plan = {"family":"schema", "signature":last["signature"], "occurrences":last["occurrences"],
             "decision":"CHANGED_STRATEGY", "strategy_version":2, "method":method}
     plan = reflect_repair(kernel, repo, owner, board["world_ref"], task["task_id"], last["attempt_id"],
-                          last["audit_ref"], plan, "REVIEW_PAYLOAD_PLACEMENT")
+                          last["audit_ref"], plan, "WRITER_JSON_SYNTAX" if node["stage"] == "draft" else "REVIEW_PAYLOAD_PLACEMENT")
     last["reassessment"] = plan
     node.pop("task_id")
     node.pop("enrolled_at", None)

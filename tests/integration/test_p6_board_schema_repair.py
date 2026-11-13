@@ -124,3 +124,17 @@ def test_quality_reviewer_recovers_repeated_misplaced_payload(kernel_env):
                 break
         assert rejected == 3
         assert any(entry.get("reassessment") and entry.get("actual_fix") for entry in repairs)
+
+
+def test_draft_syntax_reassessment_preserves_unknown_fence():
+    from novel_factory.application.board_schema_repair import board_format_method
+    assert board_format_method({"stage":"draft","schema_repairs":[{"diagnostic":{"keyword":"jsonSyntax"}}]})
+    assert not board_format_method({"stage":"draft","schema_repairs":[]})
+
+
+def test_epistemic_reading_keeps_advice_and_blocks_active_hard_findings():
+    from novel_factory.application.rolling_facts import epistemic_blockers
+    advice = dict(category="LITERARY", disposition="OPEN", severity="SUGGESTION", issue_kind="LITERARY_CHOICE")
+    finding = dict(advice, category="HARD_CONSISTENCY", issue_kind="HARD_CONFLICT", severity="QUESTION")
+    mandatory = dict(advice, issue_kind="CHANGE_REQUEST")
+    assert epistemic_blockers([advice, finding, dict(finding, disposition="RESOLVED"), mandatory]) == [finding, mandatory]
