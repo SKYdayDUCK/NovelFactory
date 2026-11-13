@@ -10,6 +10,7 @@ from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 import json
+import os
 import secrets
 from types import SimpleNamespace
 from uuid import uuid4, uuid5, UUID
@@ -35,6 +36,7 @@ class Kernel:
     def __init__(self, db, objects):
         self.db, self.objects = db, objects
         self._last_verified_projection = None
+        self._compact_create = os.environ.get("NF_HERA_COMPACT_CREATE", "0") == "1"
         self.tasks = TaskService(db.engine, tables, object_store=objects)
 
     def in_transaction(self, repo):
@@ -468,6 +470,10 @@ class Kernel:
             r.outbox("authorization.revoked","grant",grant_id,{"epoch":target["epoch"]+1},f"revoke:{grant_id}:{target['epoch']+1}")
 
     def create_task(self, principal, spec, idempotency_key):
+        if self._compact_create:
+            prepared = validate_contract("TaskSpec", spec)
+            with self.db.uow() as repo:
+                return self._create_checked_task(repo, principal, prepared, idempotency_key)
         validate_contract("TaskSpec", spec)
 
         def authorize_task(conn):
@@ -478,24 +484,33 @@ class Kernel:
                                  idempotency_key=idempotency_key, authorize_in_tx=authorize_task)
 
     def create_task_in_transaction(self, r, principal, spec, idempotency_key):
+        if self._compact_create:
+            return self._create_checked_task(r, principal, validate_contract("TaskSpec", spec), idempotency_key)
         validate_contract("TaskSpec", spec)
         self._authorize_task_create(r, principal, spec)
         return self.tasks.create_in_transaction(r.conn, spec, principal_id=principal.principal_id,
                                                 idempotency_key=idempotency_key)
 
+    def _create_checked_task(self, repo, principal, spec, idempotency_key):
+        self._authorize_task_create(repo, principal, spec)
+        return self.tasks._insert_checked_task(repo.conn, spec, principal_id=principal.principal_id,
+                                               idempotency_key=idempotency_key)
+
     def _authorize_task_create(self, r, principal, spec):
         wr = spec["world_ref"]
-        g=self.authorize(r,principal,wr["work_id"],"TASK_CREATE",wr["branch_id"])
+        work, g = self._authorize_with_work(r, principal, wr["work_id"], "TASK_CREATE", wr["branch_id"])
         self.revision(r,wr)
         from .dynamic_runtime import check_input_branch
         inputs = {ref["artifact_revision_id"]: ref for ref in spec["input_artifacts"]}
-        for row in r.many("artifacts", {"work_id": wr["work_id"], "kind": "AGENT_INPUT",
-                                        "artifact_revision_id": list(inputs)}):
-            check_input_branch(self, r, wr, row, inputs[row["artifact_revision_id"]])
+        if inputs or not self._compact_create:
+            for row in r.many("artifacts", {"work_id": wr["work_id"], "kind": "AGENT_INPUT",
+                                            "artifact_revision_id": list(inputs)}):
+                check_input_branch(self, r, wr, row, inputs[row["artifact_revision_id"]])
         require(spec["capability_grant_id"]==g["grant_id"] and spec["role_id"]==g["role_id"],"VIEW_DENIED","Task grant mismatch")
         require(point_key(spec["story_time"])<=point_key(g["max_story_time"]),"VIEW_DENIED","Task time outside grant")
         require(spec["context_bundle_id"] is None and spec["dependency_fingerprint"] is None,"INVALID_ARGUMENT","Only compiler may bind task context")
-        require(spec["policy_version"]==r.one("works",{"work_id":wr["work_id"]})["policy_version"],"INVALID_ARGUMENT","Task policy version is not current")
+        policy = work if self._compact_create else r.one("works", {"work_id": wr["work_id"]})
+        require(spec["policy_version"]==policy["policy_version"],"INVALID_ARGUMENT","Task policy version is not current")
 
     def claim_task(self, principal, worker_id, *, lease_seconds=30, task_id=None):
         with self.db.uow() as repo:

@@ -122,7 +122,11 @@ class TaskService:
             return self.create_in_transaction(conn, spec, principal_id=principal_id, idempotency_key=idempotency_key)
 
     def create_in_transaction(self, conn, spec, *, principal_id, idempotency_key):
-        validate_contract("TaskSpec", spec, version="2.0")
+        spec = validate_contract("TaskSpec", spec, version="2.0")
+        return self._insert_checked_task(conn, spec, principal_id=principal_id, idempotency_key=idempotency_key)
+
+    def _insert_checked_task(self, conn, spec, *, principal_id, idempotency_key):
+        """Persist the private validated spec in the caller's existing transaction."""
         if spec["generation"] != 0 or spec["state"] not in {"READY", "BLOCKED"}:
             raise _error("INVALID_ARGUMENT", "New tasks start in generation zero, READY or BLOCKED")
         deadline = datetime.fromisoformat(spec["wall_deadline"].replace("Z", "+00:00"))
