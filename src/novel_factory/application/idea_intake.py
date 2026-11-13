@@ -5,6 +5,7 @@ from uuid import UUID, uuid5
 
 from novel_factory.application.budget_limits import SharedBudgetService
 from novel_factory.application.candidate_delivery import CandidateDelivery
+from novel_factory.application.idea_window import window_diagnostics
 from novel_factory.application.idea_ending import confirm_ending, derive_ending_plan
 from novel_factory.application.idea_repair import normalized_design, returned_design
 from novel_factory.application.kernel import require
@@ -113,6 +114,7 @@ def enroll_idea(kernel, gateway, inspiration, allowance, prep_work_id):
     assignment = {
         "creative_input": inspiration,
         "first_window_limit": _first_window_limit(profile, inspiration),
+        "window_constraints_version": 1,
         "instructions": "依据灵感自主设计初始身份、地点、世界规则、故事线及首个窗口的章节目标。",
     }
     if model_routes and profile["preset"] == "short":
@@ -226,19 +228,25 @@ def design_round(kernel, repo, owner, wr, intake):
 
 
 def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence,
-                        design, round_index, *, revision=None, structure_repair=False, ending_plan=False, editor_decision=None):
+                        design, round_index, *, revision=None, structure_repair=False, ending_plan=False, editor_decision=None, diagnostics=None):
     job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})["config"]
     source = kernel.artifact(repo, job["dispatch"]["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]
     budget = repo.one("budgets", {"budget_id": intake["budget_id"], "work_id": wr["work_id"]})
     content = {"creative_input": intake["creative_input"], "candidate": design,
                "candidate_ref": evidence["output_ref"]}
     inputs = [evidence["output_ref"]]
-    if revision or structure_repair:
+    is_revision = bool(revision or structure_repair or diagnostics)
+    if is_revision:
         role_id, task_kind, skill = "world_designer", "initial_world", "prepare-world"
         contract = source["output_contract"]
         gateway.output_contracts[(role_id, task_kind)] = (contract["name"], contract["version"])
         content["first_window_limit"] = _first_window_limit(intake["profile"], intake["creative_input"])
-        if structure_repair:
+        content["window_constraints_version"] = 1
+        if diagnostics:
+            content.update(task="根据下列 JSON Schema 校验诊断修正指定字段，返回原契约要求的完整对象。"
+                                "其余字段逐字保留。数组内容由你决定。",
+                           validation_errors=diagnostics, source_attempt_id=evidence["attempt_id"])
+        elif structure_repair:
             content["task"] = ("修复已返回方案的输出结构，保留其中已提出的人物、地点、世界规则和章节构想。"
                                "补齐 opening：counterpart、other_place、双方各自的知识和 situation；"
                                "按当前契约提供 environment。返回规定的外层标识和完整修复后的 payload。")
@@ -292,7 +300,7 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
                 content["resolution_instruction"] = "按 issue_ids 顺序逐一核对原问题在新版本是否已实质解决并写明理由；未解决填 OPEN。"
         content["task"] = ("独立核查当前设计与灵感、世界规则、人物初始所知和首窗目标是否相容。"
                            "阻止成书的矛盾列为 BLOCKER，普通改善建议和待讨论问题分别用 SUGGESTION、QUESTION。")
-    if intake["profile"]["preset"] == "short":
+    if intake["profile"]["preset"] == "short" and not diagnostics:
         content["extent_instruction"] = ("在给定篇幅和章节数内完成整部短篇。核对开场条件、中段发展、转折和结局"
                                          "都由这些章节目标承载，并给核心冲突安排可辨认的收束。")
     assignment = json.dumps(content, ensure_ascii=False)
@@ -317,6 +325,12 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
         currency=budget["currency"],
         input_artifacts=inputs,
     )
+    if diagnostics:
+        frozen = kernel.artifact(repo, role.agent_input["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]
+        require(frozen["adapter_id"] == source["adapter_id"]
+                and frozen["model_config_sha256"] == source["model_config_sha256"]
+                and frozen["output_contract"] == source["output_contract"], "TASK_REBIND_REQUIRED",
+                "Structural correction requires the source task's model configuration and output contract")
     RuntimeSupervisor(kernel, gateway).enroll(
         owner,
         role.task["task_id"],
@@ -329,9 +343,11 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
         token_reservation=dispatch["token_reservation"],
     )
     receipt = {
-        "status": "DESIGN_REVISION_ENROLLED" if revision or structure_repair else "DESIGN_REVIEW_ENROLLED",
+        "status": "DESIGN_REVISION_ENROLLED" if is_revision else "DESIGN_REVIEW_ENROLLED",
         "round": round_index,
         **({"review_ref": revision[1]} if revision else {}),
+        **({"revision_purpose": "WINDOW_SCHEMA_CORRECTION", "validation_errors": diagnostics,
+            "source_attempt_id": evidence["attempt_id"]} if diagnostics else {}),
         **({"revision_purpose": "SHORT_ENDING"} if ending_plan else {}),
         **({"revision_purpose": "SHORT_ENDING_FIX", "editor_decision": editor_decision} if editor_decision else {}),
         "task_id": role.task["task_id"],
@@ -339,7 +355,7 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
         "input_ref": role.agent_input["input_ref"],
         "candidate_ref": evidence["output_ref"],
     }
-    kernel._receipt(repo, owner, wr, "P6_IDEA_REVISE" if revision or structure_repair else "P6_IDEA_REVIEW",
+    kernel._receipt(repo, owner, wr, "P6_IDEA_REVISE" if is_revision else "P6_IDEA_REVIEW",
                     str(round_index) if round_index else "initial", {}, receipt)
     return receipt
 
@@ -396,13 +412,19 @@ def materialize_design(kernel, gateway, owner, wr):
                 evidence, design = derive_ending_plan(kernel, repo, owner, wr, designer,
                                                        json.loads(raw["payload"]["text"]), evidence, audit_ref)
         validate_contract("FirstWorldDesign", design, "production_profile")
-        require(
-            len(design["chapter_goals"])
-            <= _first_window_limit(intake["profile"], intake["creative_input"])
-            and len(set(design["chapter_goals"])) == len(design["chapter_goals"]),
-            "INVALID_MODEL_OUTPUT",
-            "Design violates the approved first window",
-        )
+        limit = _first_window_limit(intake["profile"], intake["creative_input"])
+        if designer.get("revision_purpose") == "WINDOW_SCHEMA_CORRECTION":
+            prior = kernel.artifact(repo, designer["candidate_ref"], wr["work_id"])["payload"]
+            require({k: v for k, v in design.items() if k != "chapter_goals"} ==
+                    {k: v for k, v in prior.items() if k != "chapter_goals"}, "INVALID_MODEL_OUTPUT",
+                    "Window format correction changed a field outside the diagnostic")
+        diagnostics = window_diagnostics(design["chapter_goals"], limit)
+        if diagnostics:
+            if selected_review or designer["structure_count"] >= intake["profile"]["max_reworks"]:
+                return None, {"status": "DESIGN_SCHEMA_REWORK_REQUIRED", "validation_errors": diagnostics,
+                              "source_attempt_id": evidence["attempt_id"], "candidate_ref": evidence["output_ref"]}
+            return None, _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence, design,
+                                             round_index + 1, diagnostics=diagnostics)
         if intake.get("model_routes"):
             require(
                 design.get("opening") and (

@@ -71,3 +71,21 @@ def test_lossless_payload_normalization_only_accepts_empty_metadata_and_known_de
         validated_payload({"payload": {"text": "中文", "text_note": None, "event_refs": [],
                                       "important_deltas": [], "evidence_refs": []},
                            "unresolved_questions": []}, "AgentTextOutput", "agent")
+
+
+@pytest.mark.parametrize("name", ["FirstWorldDesign", "OpeningWorldDesign", "EnvironmentalOpeningWorldDesign"])
+def test_window_constraint_specializes_each_native_design_schema(name):
+    from novel_factory.application.idea_window import design_prompt_schema
+
+    binding = {"role_id": "world_designer", "task_kind": "initial_world",
+               "output_contract": {"version": "production_profile", "name": name},
+               "assignment": json.dumps({"first_window_limit": 2, "window_constraints_version": 1})}
+    schema = Draft202012Validator(json.loads(design_prompt_schema(binding)))
+    candidate = {"title": "输入", "protagonist": "甲", "place": "乙", "storyline": "合成流程测试。",
+                 "world_rules": ["测试规则。"], "chapter_goals": ["一", "二"],
+                 "opening": {"situation": "测试", "counterpart": "丙", "other_place": "丁",
+                             "protagonist_knowledge": "甲方信息", "counterpart_knowledge": "丙方信息",
+                             "environment": {"moving_entity": "雨"}}}
+    assert schema.is_valid(candidate)
+    assert not schema.is_valid({**candidate, "chapter_goals": ["一", "二", "三"]})
+    assert not schema.is_valid({**candidate, "chapter_goals": ["甲", "甲"]})

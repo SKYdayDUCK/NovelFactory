@@ -19,7 +19,8 @@ from sqlalchemy import select
 from novel_factory.application.kernel import require
 from novel_factory.application.queries import WorldQueryService
 from novel_factory.application.query_policy import check_profile
-from novel_factory.application.prompt_schema import inline_schema, prompt_schema, validated_payload
+from novel_factory.application.prompt_schema import inline_schema, validated_payload
+from novel_factory.application.idea_window import design_prompt_schema
 from novel_factory.contracts.registry import schema_for, validate_contract
 from novel_factory.domain.canonical import canonical_bytes, fingerprint
 from novel_factory.domain.errors import DomainError
@@ -368,7 +369,7 @@ class AgentGateway:
         cached = binding.get("creative_snapshot")
         runtime = binding["runtime"]
         output = data["output_contract"]
-        contract_text = prompt_schema(output["name"], output["version"])
+        contract_text = design_prompt_schema(data)
         identity = {"schema_version": "2.1", "task_id": task["task_id"], "generation": task["generation"],
                     "context_bundle_id": task["context_bundle_id"], "world_ref": spec["world_ref"],
                     "role_id": spec["role_id"], "actor_id": binding["grant"]["actor_id"]}

@@ -221,6 +221,7 @@ def verify_adopted_design(kernel, repo, delivery, receipt, adopted):
     if rounds:
         _check(receipt["original_input_ref"] == intake["input_ref"])
     structural = editorial = ending = fixes = 0
+    correction_source = None
     for index in range(rounds + 1):
         final = index == rounds
         if final:
@@ -240,6 +241,9 @@ def verify_adopted_design(kernel, repo, delivery, receipt, adopted):
             origin["kind"],
         )
         _check(audit["world_ref"] == source)
+        if correction_source is not None:
+            _check({k: v for k, v in candidate.items() if k != "chapter_goals"} == correction_source)
+            correction_source = None
         if final or "review_ref" in revised:
             review = _receipt(
                 repo, source, "P6_IDEA_REVIEW", "initial" if index == 0 else str(index)
@@ -325,9 +329,17 @@ def verify_adopted_design(kernel, repo, delivery, receipt, adopted):
                 _check(editorial <= intake["profile"]["max_reworks"])
         else:
             structural += 1
-            _check(
-                structural <= intake["profile"]["max_reworks"]
-                and task["state"] == "FAILED"
-                and selected_ref == audit["response_ref"]
-            )
+            _check(structural <= intake["profile"]["max_reworks"])
+            if revised.get("revision_purpose") == "WINDOW_SCHEMA_CORRECTION":
+                from .idea_intake import _first_window_limit
+                from .idea_window import window_diagnostics
+                errors = window_diagnostics(candidate["chapter_goals"], _first_window_limit(intake["profile"], idea))
+                _check(errors and errors == packet["validation_errors"] == revised["validation_errors"]
+                       and audit["attempt_id"] == revised["source_attempt_id"] == packet["source_attempt_id"])
+                old_input = kernel.artifact(repo, design["input_ref"], source["work_id"], kind="AGENT_INPUT")["payload"]
+                new_input = kernel.artifact(repo, revised["input_ref"], source["work_id"], kind="AGENT_INPUT")["payload"]
+                _check(all(new_input[k] == old_input[k] for k in ("output_contract", "model_config_sha256", "adapter_id")))
+                correction_source = {k: v for k, v in candidate.items() if k != "chapter_goals"}
+            else:
+                _check(task["state"] == "FAILED" and selected_ref == audit["response_ref"])
         design = revised
