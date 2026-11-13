@@ -71,3 +71,33 @@ def test_compact_audit_rejects_conflicting_outbox_and_rolls_back(kernel_env):
     with kernel.db.uow(write=False) as repo:
         assert repo.conn.scalar(text("SELECT count(*) FROM nf_audit_events WHERE event_id=:id"),
                                 {"id": event_id}) == 0
+
+
+def test_compact_audit_scope_matches_previous_join_on_foreign_and_stale_bindings(kernel_env, tmp_path):
+    from dataclasses import replace
+
+    kernel = kernel_env["kernel"]
+    first = provision(kernel, tmp_path, 0)
+    second = provision(kernel, tmp_path, 1)
+    config = read_private_config(first.path)
+    principal = kernel.authenticate(config["token"])
+    own = parse_binding(config["binding"])
+    foreign = parse_binding(read_private_config(second.path)["binding"])
+    for binding in (own, replace(own, generation=own.generation + 1), foreign):
+        records = []
+        for compact in (False, True):
+            runtime = McpRuntime(kernel, principal, binding, compact_role_reads=compact)
+            invocation, _ = LogService.begin_tool(runtime, "nf_context_get", "scope-parity")
+            with kernel.db.uow(write=False) as repo:
+                row = repo.conn.execute(text("""
+                    SELECT a.work_id,a.branch_id,a.task_id,a.generation,a.actor_id,a.role_id,
+                           a.principal_id,a.world_revision_id,a.volume_id,a.parent_span_id,
+                           NULLIF(a.trace_id,a.event_id) AS task_trace,o.payload - 'trace_id' AS envelope
+                    FROM nf_audit_events a JOIN nf_outbox o ON o.dedupe_key='audit:'||a.event_id::text
+                    WHERE a.event_id=:id
+                """), {"id": invocation}).mappings().one()
+            records.append(dict(row))
+        assert records[0] == records[1]
+        if binding == foreign:
+            assert records[1]["task_id"] is None and records[1]["branch_id"] is None
+            assert records[1]["world_revision_id"] is None

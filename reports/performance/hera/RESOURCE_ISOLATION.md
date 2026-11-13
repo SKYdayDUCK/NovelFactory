@@ -75,3 +75,24 @@ The second block exercised the candidate under the same CPU and total pool budge
 Replay against an isolated PostgreSQL 17 admin URL in `NF_TEST_DATABASE_URL`. Pin PostgreSQL and every Python process to the same CPU. At incoming `eb1a75e`, run `python -m benchmarks.hera_index_topology --order quiet,shared --output A1.json.gz`. Apply the archived candidate patch in an isolated worktree and run `--order shared,shared`, then restore the original for `--order shared,quiet`. With the candidate and the priority probe together, run `--order quiet,process,process-nice,process-nice,process,quiet`. The independent `benchmarks/hera_profile_index.py --output profile.json.gz` driver uses the checkout selected by `PYTHONPATH` with script execution via Python. The two shared controls straddle the candidates in time. Original, unfiltered request, SQL, OS and index records are preserved in [the qualification directory](raw/index-worker-qualification/).
 
 On one additional 60-revision fixture, the candidate's persisted content-addressed file was read through the verifying object store and compared byte-for-byte to the original `eb1a75e` materializer on each identical source row. All 60 artifact identities, hashes and all 3,212,325 bytes matched. The original projector's `_material` and the candidate run used the same migrated database and immutable revision identifiers. Per-source SHA-256 and object lengths are in [the equality results](raw/index-worker-qualification/object-equivalence.json.gz).
+
+## CPU8 service demand and CPU availability
+
+Eight fresh PostgreSQL 17.11 fixtures compared quiet and loaded reads at low (two identity/client lanes) and higher (eight lanes) concurrency. At both levels half of the clients used remote MCP and half used REST. All 1,024 reads and all 240 loaded indexes verified. Each loaded arm kept two worker threads in a dedicated process and six total product connections (four API, two index). The quiet arm used six connections for the API. Both kept the same two API operation slots and two authentication slots. The same unmodified `eb1a75e` product sources were used throughout. One observer connection and all processes shared CPU 8.
+
+| Clients / arm | Reads/s | P95 / P99 ms | Within-window CPU seconds client / API / index / PG | Kernel idle / I/O wait / steal % | API peak checkout | Index/s while reading / drain |
+|---|---:|---:|---|---|---:|---:|
+| 2 / quiet | 21.01 | 136 / 235 | 1.00 / 2.25 / 0.00 / 0.51 | 30.9 / 2.8 / 21.0 | 2 | 0.00 / 0.00 |
+| 2 / process | 12.68 | 236 / 528 | 1.13 / 2.51 / 3.48 / 1.39 | 4.2 / 0.7 / 31.8 | 2 | 5.95 / 8.51 |
+| 2 / process | 17.39 | 165 / 250 | 0.71 / 1.84 / 2.66 / 1.12 | 10.3 / 0.8 / 21.8 | 2 | 8.15 / 11.66 |
+| 2 / quiet | 23.15 | 96 / 250 | 0.74 / 1.85 / 0.00 / 0.38 | 36.4 / 5.6 / 15.3 | 2 | 0.00 / 0.00 |
+| 8 / quiet | 49.33 | 217 / 258 | 0.50 / 1.51 / 0.00 / 0.42 | 1.2 / 0.4 / 23.4 | 4 | 0.00 / 0.00 |
+| 8 / process | 23.05 | 450 / 500 | 0.75 / 2.08 / 1.50 / 1.06 | 0.0 / 0.0 / 25.3 | 4 | 5.76 / 8.03 |
+| 8 / process | 24.94 | 431 / 531 | 0.67 / 1.92 / 1.37 / 0.99 | 0.0 / 0.0 / 26.6 | 4 | 6.43 / 8.69 |
+| 8 / quiet | 47.51 | 233 / 264 | 0.53 / 1.59 / 0.00 / 0.44 | 0.4 / 0.4 / 21.7 | 4 | 0.00 / 0.00 |
+
+The four quiet trials observed 19.1–29.6 combined process/backend CPU ms per sampled correct read, including the same-host client. At the two eight-lane quiet controls, sustaining three times those measured control rates at unchanged CPU demand would consume 2.83–2.90 CPU-seconds per wall second across client, API and PostgreSQL, before indexing. This conditional sizing estimate covers the measured deployment. The formal 3× comparison uses the separate original full-query reference. It excludes setup, unobserved service processes, and unsampled intervals. A CPU reservation of that order or a corresponding drop in demand is necessary at that same demand, and would still require an independent replay to establish P95. The two-client quiet runs used a peak of two connections; raising the six-connection cap has no measured justification there.
+
+Time accounting uses only samples between client release and the last measured reply. The numerator sums process user/system deltas and PostgreSQL backend first-to-last samples. The denominator counts completions in the corresponding interval. Kernel `/proc/stat` idle, I/O wait, and hypervisor steal are separately reported for the same CPU and time span. Shared virtual host accounting is not exactly additive across these counters. A busy percentage is not interchangeable with any individual operation's CPU demand.
+
+Replay `python -m benchmarks.hera_index_topology --clients 2 --order quiet,process,process,quiet --output low.json.gz` and repeat with `--clients 8`. Pin the PostgreSQL service, observer, client, API, and worker to the same CPU. All CPU/PID samples, request timings, index receipts and pool counters are in [the raw files](raw/index-worker-qualification/).

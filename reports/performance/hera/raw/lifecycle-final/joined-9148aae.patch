@@ -1,0 +1,150 @@
+diff --git a/src/novel_factory/application/kernel.py b/src/novel_factory/application/kernel.py
+index baf5916..2d3bf8c 100644
+--- a/src/novel_factory/application/kernel.py
++++ b/src/novel_factory/application/kernel.py
+@@ -37,6 +37,8 @@ class Kernel:
+         self.db, self.objects = db, objects
+         self._last_verified_projection = None
+         self._recent_verified_projections = ()
++        self._join_status = os.environ.get("NF_HERA_JOIN_STATUS") == "1"
++        self._prepared_http_task = os.environ.get("NF_HERA_PREPARED_HTTP_TASK") == "1"
+         self._narrow_auth = os.environ.get("NF_HERA_NARROW_AUTH") == "1"
+         self._compact_create = os.environ.get("NF_HERA_COMPACT_CREATE", "0") == "1"
+         self.tasks = TaskService(db.engine, tables, object_store=objects)
+@@ -575,9 +577,14 @@ class Kernel:
+             # Preserve the regular path's error precedence and locking behavior.
+             return Kernel.get_task(self, principal, task_id)
+         with self.db.uow(write=False) as repo:
+-            task, work, world_ref = repo.task_with_locked_work(task_id)
+-            require(task is not None, "VIEW_DENIED", "Task unavailable")
+-            grant = repo.one("grants", {"grant_id": principal.grant_id}, lock="share")
++            if self._join_status:
++                task, grant, world_ref = repo.status_with_locked_grant(task_id, principal.grant_id)
++                require(task is not None, "VIEW_DENIED", "Task unavailable")
++                work = {"work_id": task["work_id"]}
++            else:
++                task, work, world_ref = repo.task_with_locked_work(task_id)
++                require(task is not None, "VIEW_DENIED", "Task unavailable")
++                grant = repo.one("grants", {"grant_id": principal.grant_id}, lock="share")
+             self._validate_locked_grant(repo, principal, task["work_id"], "READ", task["branch_id"], work, grant)
+             self._require_task_owner(task, principal)
+             require(world_ref is not None, "INTERNAL_ERROR", "Task input unavailable")
+diff --git a/src/novel_factory/application/task_operations.py b/src/novel_factory/application/task_operations.py
+index 416fa1f..73ef80e 100644
+--- a/src/novel_factory/application/task_operations.py
++++ b/src/novel_factory/application/task_operations.py
+@@ -1,5 +1,6 @@
+ """Transport-neutral operations on the existing owner-fenced task ledger."""
+ from dataclasses import dataclass
++import json
+ from datetime import datetime
+ from decimal import Decimal
+ from uuid import UUID
+@@ -22,6 +23,16 @@ class TaskOperationsBinding:
+                 "VIEW_DENIED", "Task unavailable")
+ 
+ 
++class PreparedTaskCreate(bytes):
++    """An immutable, schema-validated public HTTP task-create envelope."""
++
++    __slots__ = ()
++
++    def __new__(cls, envelope):
++        validated = validate_contract("TaskCreateRequest", envelope, "http")
++        return super().__new__(cls, json.dumps(validated, separators=(",", ":"), allow_nan=False).encode("ascii"))
++
++
+ class TaskOperations:
+     def __init__(self, kernel, principal, *, binding=None, fenced_status=False, coalescer=None):
+         self.kernel = kernel
+@@ -35,6 +46,16 @@ class TaskOperations:
+             self.binding.check(spec["world_ref"])
+         return self.kernel.create_task(self.principal, spec, idempotency_key)
+ 
++    def create_prepared(self, prepared):
++        if type(prepared) is not PreparedTaskCreate:
++            raise TypeError("Expected immutable checked task-create envelope")
++        payload = json.loads(prepared)
++        spec = payload["spec"]
++        if self.binding is not None:
++            self.binding.check(spec["world_ref"])
++        with self.kernel.db.uow() as repo:
++            return self.kernel._create_checked_task(repo, self.principal, spec, payload["idempotency_key"])
++
+     def submit(self, spec, idempotency_key):
+         receipt = self.create(spec, idempotency_key)
+         return {**receipt, "status_url": f"/api/v1/tasks/{receipt['task_id']}",
+diff --git a/src/novel_factory/infrastructure/repository.py b/src/novel_factory/infrastructure/repository.py
+index 749fa61..cca2cb4 100644
+--- a/src/novel_factory/infrastructure/repository.py
++++ b/src/novel_factory/infrastructure/repository.py
+@@ -34,6 +34,24 @@ def _task_with_locked_work_query(tasks, inputs, works):
+             .where(tasks.c.task_id == bindparam("requested_task")))
+ 
+ 
++_FENCED_STATUS = text("""
++    WITH locked_work AS MATERIALIZED (
++        SELECT t.*, i.spec->'world_ref' AS world_ref, w.work_id AS fenced_work
++        FROM nf_tasks t JOIN nf_works w ON w.work_id=t.work_id
++        LEFT JOIN nf_task_inputs i ON (i.task_id, i.generation)=(t.task_id, t.generation)
++        WHERE t.task_id=:task_id FOR SHARE OF w
++    )
++    SELECT s.*, g.grant_id::text AS authorized_grant, g.principal_id::text AS authorized_principal,
++           g.work_id::text AS authorized_work, g.active, g.role_id AS authorized_role,
++           g.capabilities, g.branch_ids
++    FROM locked_work s
++    LEFT JOIN LATERAL (
++        SELECT g.* FROM nf_grants g
++        WHERE g.grant_id=:grant_id AND g.work_id=s.fenced_work FOR SHARE OF g
++    ) g ON true
++""")
++
++
+ class KernelRepository:
+     def __init__(self, conn, tables):
+         self.conn, self.tables = conn, tables
+@@ -53,6 +71,21 @@ class KernelRepository:
+                 if row["locked_work_work_id"] is not None else None)
+         return task, work, row["world_ref"]
+ 
++    def status_with_locked_grant(self, task_id, grant_id):
++        row = self.conn.execute(_FENCED_STATUS, {"task_id": task_id, "grant_id": grant_id}).mappings().one_or_none()
++        if row is None:
++            return None, None, None
++        task = {column.key: row[column.key] for column in self.tables["tasks"].c}
++        # Untyped text() bypasses the UUID(as_uuid=False) adapter.
++        from uuid import UUID
++        task = {name: str(value) if isinstance(value, UUID) else value for name, value in task.items()}
++        grant = {
++            "grant_id": row["authorized_grant"], "principal_id": row["authorized_principal"],
++            "work_id": row["authorized_work"], "active": row["active"], "role_id": row["authorized_role"],
++            "capabilities": row["capabilities"], "branch_ids": row["branch_ids"],
++        }
++        return task, grant, row["world_ref"]
++
+     def revision_with_snapshot_text(self, world_ref):
+         query = _revision_text_query(self.tables["revisions"])
+         row = self.conn.execute(query, world_ref).mappings().one_or_none()
+diff --git a/src/novel_factory/interfaces/http.py b/src/novel_factory/interfaces/http.py
+index b822591..51cac9c 100644
+--- a/src/novel_factory/interfaces/http.py
++++ b/src/novel_factory/interfaces/http.py
+@@ -27,7 +27,7 @@ from sqlalchemy.exc import SQLAlchemyError, TimeoutError as PoolTimeout
+ 
+ from novel_factory.contracts.registry import plain, validate_contract
+ from novel_factory.domain.errors import DomainError
+-from novel_factory.application.task_operations import TaskOperations
++from novel_factory.application.task_operations import PreparedTaskCreate, TaskOperations
+ from .admission import AdmissionController, ConnectionBudget, TokenBucketLimiter
+ 
+ log = logging.getLogger("novel_factory.http")
+@@ -492,6 +492,9 @@ def create_app(kernel, *, query_service=None, settings: HttpSettings | None = No
+ 
+     @app.post("/api/v1/tasks")
+     async def create_task(request: Request):
++        if getattr(kernel, "_compact_create", False) and getattr(kernel, "_prepared_http_task", False):
++            payload = PreparedTaskCreate(await _json_body(request))
++            return await execute(request, "task", lambda principal: task_operations(principal).create_prepared(payload))
+         payload = await _body(request, "TaskCreateRequest", "http")
+         return await execute(request, "task", lambda principal: task_operations(principal).create(**payload))
+ 

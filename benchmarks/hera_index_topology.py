@@ -160,7 +160,23 @@ def serve(channel, url, objects, roster, scope, mode, count, gate, stop):
             assert channel.recv() == "stop"
 
 
-def observer(dsn, db_name, gate, finished, rows):
+def sample_cpu(pids):
+    ticks = os.sysconf("SC_CLK_TCK")
+    processes = {}
+    for name, pid in pids.items():
+        try:
+            cells = Path(f"/proc/{pid}/stat").read_text().rsplit(")", 1)[1].split()
+            processes[name] = (int(cells[11]) + int(cells[12])) / ticks
+        except (FileNotFoundError, ProcessLookupError):
+            pass
+    allowed = {f"cpu{i}" for i in os.sched_getaffinity(0)}
+    cpu = {fields[0]: list(map(int, fields[1:9]))
+           for fields in map(str.split, Path("/proc/stat").read_text().splitlines())
+           if fields and fields[0] in allowed}
+    return {"process_seconds": processes, "cpu_ticks": cpu}
+
+
+def observer(dsn, db_name, gate, finished, rows, pids, cpu_samples):
     with psycopg.connect(dsn, autocommit=True) as conn:
         clock_ticks = os.sysconf("SC_CLK_TCK")
         page_size = os.sysconf("SC_PAGE_SIZE")
@@ -190,7 +206,9 @@ def observer(dsn, db_name, gate, finished, rows):
                     )
                 except (FileNotFoundError, ProcessLookupError, PermissionError):
                     pass
-            rows.append((perf_counter(), active, counters))
+            sampled = perf_counter()
+            rows.append((sampled, active, counters))
+            cpu_samples.append((sampled, sample_cpu(pids)))
             finished.wait(0.05)
 
 
@@ -216,9 +234,12 @@ def run(url, objects, roster, records, scope, mode, count):
         .set(drivername="postgresql", database="postgres")
         .render_as_string(hide_password=False)
     )
-    thread = Thread(
-        target=observer, args=(admin, make_url(url).database, gate, finished, observed), daemon=True
-    )
+    pids = {"client": os.getpid(), "api": child.pid}
+    if idx is not None:
+        pids["index"] = idx.pid
+    cpu_samples = []
+    thread = Thread(target=observer, args=(admin, make_url(url).database, gate, finished,
+                                          observed, pids, cpu_samples), daemon=True)
     thread.start()
     try:
         assert host.poll(60)
@@ -257,6 +278,8 @@ def run(url, objects, roster, records, scope, mode, count):
             "index_rows": rows,
             "worker": worker,
             "pg_samples": observed,
+            "cpu_samples": cpu_samples,
+            "clock_ticks_per_second": os.sysconf("SC_CLK_TCK"),
         }
     finally:
         finished.set()
@@ -276,6 +299,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--revisions", type=int, default=60)
+    parser.add_argument("--clients", choices=(2, 8), type=int, default=8)
     parser.add_argument(
         "--order", default="quiet,shared,logical,pools,process,process,pools,logical,shared,quiet"
     )
@@ -298,7 +322,7 @@ def main():
             isolated_kernel(os.environ["NF_TEST_DATABASE_URL"], Path(directory)) as (kernel, url),
         ):
             records, roster = [], {}
-            for identity, wr in population(kernel, 8):
+            for identity, wr in population(kernel, args.clients):
                 spec = task_spec(identity["principal"], wr)
                 kernel.create_task(identity["principal"], spec, spec["task_id"])
                 records.append((identity, spec))

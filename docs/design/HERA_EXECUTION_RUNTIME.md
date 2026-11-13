@@ -46,3 +46,11 @@
 [根因与三版本测量](../../reports/performance/hera/ROOT_CAUSE_ANALYSIS.md) · [精确配额及恢复](../../reports/performance/hera/CAPACITY_COUNTERS.md) · [投影对照](../../reports/performance/hera/PROJECTION_CONTENTION.md) · [最终选择](../../reports/performance/hera/OPTIMIZATION_ABLATIONS.md)
 
 进度管理操作要求 READ COMMITTED 事务。管理员须在取得任务表写入围栏后以新的语句快照回填；已建立快照的 REPEATABLE READ 或 SERIALIZABLE 管理事务会被拒绝，以免漏计并发提交。实时缩小索引配额采用非抢占方式。已取得的租约继续完成，最后一条超额租约结束后才允许新的领取。通知和调度变化的耗时见[租约、限额与公平领取复验](../../reports/performance/hera/SCHEDULER_RECHECK.md)。
+
+### 角色读取与契约校验
+
+远程角色绑定可用 `NF_HERA_COMPACT_ROLE_READS=1`，stdio 可用 `--compact-role-reads`。合法的 `nf_task_get`、`nf_context_get` 调用在读取载荷的事务内核对当前权限、代际、租约、认知切面和冻结的工具范围。动态 Workshop 分配仍在本地事务外取得凭据，交付时重新核对绑定。畸形参数仍先走工具发现以保留原拒绝顺序。
+
+角色工具的开始与结束审计各自提交。同一条数据修改语句写入该次审计和相应的 Outbox；已有同键 Outbox 时用原逻辑比较内容。测试覆盖开始审计提交后撤权、宿主禁用工具、错误记录和冲突整体回滚。关闭角色紧凑读取并重启进程即可恢复原路径。[测量与限制](../../reports/performance/hera/ROLE_DELIVERY.md)
+
+`NF_HERA_STATIC_CONTRACTS=1` 允许 API 预先解析已发布的 JSON Schema 节点及静态引用。验证器仍逐次检查每份载荷，采用原有 Draft 2020-12 关键字和格式实现。不支持的 Schema 特性回退到原验证器。置 0 可恢复默认模式。[业务对照与适用范围](../../reports/performance/hera/AT30_CONTRACTS.md)

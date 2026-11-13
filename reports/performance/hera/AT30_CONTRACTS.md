@@ -44,3 +44,17 @@ taskset -c 4,5 python -m benchmarks.hera_transport_calibration --client-cpus 5 -
 The recorded driver layout is identified by filename. The original synthetic schema and response-byte hash are identical across layouts. On the original socket, the single pool produced 135.68 and 121.05 HTTP-header starts/s across 36.95 and 41.48 seconds, with client CPU occupying 99.6% and 88.3% of the elapsed time. The sixteen pools produced 388.76 and 399.47 starts/s over 13.13 and 12.72 seconds. Each arm returned all 5,000 expected bodies. The smaller pools diagnose generator overhead and provide a separate way to stress the service; these fixed-byte rates give no production throughput or universal hardware ceiling.
 
 A second two-by-two diagnostic ran on the same CPUs with an explicitly TCP listener (5242166, using the production socket protocol). The original single pool delivered 126.27 / 221.23 header starts/s over 39.85 / 22.63 seconds. Sixteen pools delivered 490.97 / 503.59 over 10.38 / 10.14 seconds. All 20,000 responses across the four new arms matched. These arms use the same size and per-arrival checks as above. The shared-host drift, visible in the original pool, limits estimates of the socket setting's independent effect. Raw output covers the complete run and includes all delays, client CPU and server CPU for each arm. [Single pool](raw/at30-final/transport-tcp.json.gz) · [Sixteen pools](raw/at30-final/transport-tcp-16x16.json.gz).
+
+## Client validation within the original single-threaded P2 window
+
+The frozen 200-agent P2 driver's send coroutine parses each successful response, computes its canonical digest, validates its complete Draft 2020-12 schema and checks its fixed WorldRef and both entity answers before recording latency. This part runs synchronously on the one client event-loop thread. The separate 1,000-agent P3 driver records network completion first and checks responses afterward. Its network goodput must not be charged the deferred validator CPU.
+
+A fresh PG17 fixture used the original 200-agent population generator (40 writers and 160 advisors, 80% hotspot) and separate real TCP service. All 200 grants returned their full 2,104-byte response with distinct request IDs and dependency handles across 41 subjects. A subsequent offline warm replay used only the original client validator on CPU 5. Four repetitions of five passes over these 200 byte strings occupied 5.191, 5.725, 5.043 and 4.909 thread-CPU seconds per 1,000 verified replies. The timed loop excludes sockets, a database, client pool waits, time spent acquiring the corpus, and storage. The fastest repetition still consumed 4.909 ms/correct reply versus a budget of 1.053 ms at 950 replies/s on that thread. These host-specific observations constrain the unchanged P2 client; they cannot establish the production server's maximum capacity. The earlier controlled 200-agent captures recorded 2.318 / 2.075 ms mean inclusive synchronous response validation CPU per successful first-attempt overload read. [Complete response corpus](raw/at30-final/response-corpus.json.gz) · [Thread CPU and source hashes](raw/at30-final/client-cpu.json)
+
+Replay the retained corpus with the ordinary client validator. To recapture it, supply a new corpus pathname and set NF_TEST_DATABASE_URL to a disposable PG17 administrator URL.
+
+```sh
+NF_HERA_STATIC_CONTRACTS=0 taskset -c 5 python -m benchmarks.hera_at30_validator_cpu \
+  --corpus reports/performance/hera/raw/at30-final/response-corpus.json.gz \
+  --output /tmp/at30-client-cpu.json
+```

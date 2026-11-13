@@ -43,3 +43,7 @@ The run below used the repaired production `src` tree `c8d890caab742e568a9809f3b
 | Main after scan | 12.818 | 277.1 | 374.2 | 8,576 |
 
 Scan gained **20.7% / 7.1%** over its adjacent main controls, with lower request P95 and P99 in both comparisons. Exact counting changed throughput by **−14.1% / +15.7%** on this shallow workload. Each arm contained all seven HTTP calls per cycle. The quota was active on both HERA variants; both used compact creation and suspended empty progress maintenance. These results supersede any claim about the current source based on the earlier 12-arm series alone. They still do not show the targeted 30% increase or a consistently faster exact-count lifecycle. The earlier weaker measurements remain part of the decision.
+
+## Current iteration
+
+[Audited role delivery](ROLE_DELIVERY.md) reduced SQL and transactions per independent full read. [Static schema traversal](AT30_CONTRACTS.md) improved valid first responses in both 50-agent overload comparisons. [Quota spill](CAPACITY_COUNTERS.md) fixed stranded physical quota on skew but did not justify deployment. [Index materialization and process priority](RESOURCE_ISOLATION.md) retained the full workload and measured background throughput; neither qualified for use. The benchmark listener change in [the calibration](LISTENER_CALIBRATION.md) applies to both products; its transport gains are excluded from product gains.

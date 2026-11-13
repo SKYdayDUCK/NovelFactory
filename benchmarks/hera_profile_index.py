@@ -73,6 +73,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', required=True, type=Path)
     args = parser.parse_args()
-    with TemporaryDirectory() as tmp, isolated_kernel(os.environ['NF_TEST_DATABASE_URL'], Path(tmp)) as (kernel, _):
-        with gzip.open(args.output, 'wt') as target:
-            json.dump(profile(kernel), target, separators=(',', ':'))
+    with (
+        TemporaryDirectory() as tmp,
+        isolated_kernel(os.environ['NF_TEST_DATABASE_URL'], Path(tmp)) as (kernel, _),
+        gzip.open(args.output, 'wt') as target,
+    ):
+        json.dump(profile(kernel), target, separators=(',', ':'))

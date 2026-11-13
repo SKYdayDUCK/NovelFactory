@@ -126,3 +126,50 @@ def test_revocation_after_nf_reserves_but_before_send_releases_only_the_unsent_a
         assert attempts[0]["actual_tokens"] == 0
         budget = repo.one("budgets", {"budget_id": site.budget_id})
         assert budget["spent_amount"] == budget["reserved_amount"] == 0
+
+
+def test_compact_mcp_reads_recheck_workshop_tool_ceiling_and_revocation(dynamic_site):
+    from sqlalchemy import text
+
+    from novel_factory.application.bound_tools import invoke_bound_tool
+
+    site = dynamic_site
+    source = site.delegate("compact-source")
+    instructions = "Record only the facts visible to the assigned reader."
+    binding = site.share("compact-read", instructions)
+    revision = site.activate(source, binding, instructions, requested_tools=["context_get"])
+    target = site.delegate("compact-target", revision["instance_ref"])
+    runtime = McpRuntime(site.kernel, target.principal,
+                         TaskBinding(target.task_id, target.generation, target.request["worker_id"]),
+                         compact_role_reads=True)
+    assert invoke_bound_tool(runtime, "nf_context_get", {}, transport="mcp")["task_id"] == target.task_id
+    with pytest.raises(DomainError) as excluded:
+        invoke_bound_tool(runtime, "nf_task_get", {}, transport="mcp")
+    assert excluded.value.code == "VIEW_DENIED"
+    with pytest.raises(DomainError) as malformed:
+        invoke_bound_tool(runtime, "nf_context_get", {"extra": True}, transport="mcp")
+    assert malformed.value.code == "INVALID_ARGUMENT"
+    call(site.ports["manager"], "aw_skill_revoke", operation_id="before-compact-read",
+         binding_id=binding["binding_id"])
+    with pytest.raises(DomainError) as revoked:
+        invoke_bound_tool(runtime, "nf_context_get", {}, transport="mcp")
+    with pytest.raises(DomainError) as malformed_revoked:
+        invoke_bound_tool(runtime, "nf_context_get", {"extra": True}, transport="mcp")
+    assert malformed_revoked.value.code == revoked.value.code == "DYNAMIC_SKILL_DENIED"
+    with site.kernel.db.uow(write=False) as repo:
+        records = repo.conn.execute(text("""
+            SELECT s.tool_name,f.error_code,s.work_id,s.branch_id,s.generation,
+                   so.payload AS started,fo.payload AS finished
+            FROM nf_audit_events s JOIN nf_audit_events f ON f.causation_id=s.event_id
+            JOIN nf_outbox so ON so.dedupe_key='audit:'||s.event_id::text
+            JOIN nf_outbox fo ON fo.dedupe_key='audit:'||f.event_id::text
+            WHERE s.task_id=:task AND s.event_type='mcp.started' AND f.event_type='mcp.finished'
+            ORDER BY s.event_time
+        """), {"task": target.task_id}).all()
+    assert [row.error_code for row in records] == [
+        None, "VIEW_DENIED", "INVALID_ARGUMENT", revoked.value.code, revoked.value.code,
+    ]
+    for row in records:
+        assert str(row.work_id) == site.wr["work_id"] and str(row.branch_id) == site.wr["branch_id"]
+        assert row.started == row.finished
+        assert row.started["task_id"] == target.task_id and row.generation == target.generation
