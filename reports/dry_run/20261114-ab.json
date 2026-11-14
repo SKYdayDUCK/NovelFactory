@@ -1,0 +1,643 @@
+{
+  "date": "2026-11-14",
+  "scope": "Offline two-book scheduler and real Harness; production SQL repair handoffs are separately verified by PostgreSQL integration tests. No real models or literary acceptance.",
+  "source_sha256": {
+    "src/novel_factory/simulation/scheduler.py": "bf9eb6c8403f598f68b64bdbee348c87f32aebfc50c1237d54a3ff09171de777",
+    "agent_runtime/dry_run.py": "d78e4f0d57760c55c9f8d80014c1c0cf3237f9e21ed3deb625cea397dbd9ec6e",
+    "scripts/nf_dry_run.py": "bb2c8133dcb2b9e2a9b2640d57c953c279cd7234943cc23f3efec132c8208a76"
+  },
+  "runs": [
+    {
+      "status": "PASS",
+      "seed": 142,
+      "runs": 50,
+      "scenario_count": 1350,
+      "success_goal": "BOOK_RELEASE_FREEZE",
+      "completion_required": false,
+      "upstream_model_calls": 0,
+      "database_connections": 0,
+      "external_io_attempts": [],
+      "forbidden_imports": [],
+      "fully_completed_runs": 635,
+      "frozen_books": 1648,
+      "novel_runs": [
+        {
+          "seed": 142,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 143,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 144,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 145,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 146,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 147,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 148,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 149,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 150,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 151,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 152,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 153,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 154,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 155,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 156,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 157,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 158,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 159,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 160,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 161,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 162,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 163,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 164,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 165,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 166,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 167,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 168,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 169,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 170,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 171,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 172,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 173,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 174,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 175,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 176,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 177,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 178,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 179,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 180,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 181,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 182,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 183,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 184,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 185,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 186,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 187,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 188,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 189,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 190,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 191,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        }
+      ]
+    },
+    {
+      "status": "PASS",
+      "seed": 142,
+      "runs": 50,
+      "scenario_count": 50,
+      "success_goal": "BOOK_RELEASE_FREEZE",
+      "completion_required": true,
+      "upstream_model_calls": 0,
+      "database_connections": 0,
+      "external_io_attempts": [],
+      "forbidden_imports": [],
+      "fully_completed_runs": 50,
+      "frozen_books": 100,
+      "novel_runs": [
+        {
+          "seed": 142,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 143,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 144,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 145,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 146,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 147,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 148,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 149,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 150,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 151,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 152,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 153,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 154,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 155,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 156,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 157,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 158,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 159,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 160,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 161,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 162,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 163,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 164,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 165,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 166,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 167,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 168,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 169,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 170,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 171,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 172,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 173,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 174,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 175,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 176,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 177,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 178,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 179,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 180,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 181,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 182,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 183,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 184,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 185,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 186,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 187,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 188,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 189,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 190,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        },
+        {
+          "seed": 191,
+          "workflow_status": "COMPLETED",
+          "frozen_books": 2,
+          "requested_books": 2
+        }
+      ]
+    }
+  ]
+}

@@ -2,9 +2,10 @@
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from urllib.parse import quote
 
 from sqlalchemy.engine import URL
@@ -13,6 +14,37 @@ from agent_runtime.credentials import resolve
 from novel_factory.infrastructure.private_files import read_private_bytes
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def start_services(config):
+    # Recovered private clusters are not necessarily registered with Debian's
+    # postgresql service. Run pg_ctl as their owner, never through a shell.
+    clusters = []
+    for cluster in config.get("postgres_clusters", []):
+        owner = cluster.get("owner", "")
+        directory = PurePosixPath(cluster.get("data_directory", ""))
+        port = cluster.get("port")
+        if (not re.fullmatch(r"[a-z_][a-z0-9_-]{0,31}", owner)
+                or not directory.is_absolute() or ".." in directory.parts
+                or not directory.is_relative_to(PurePosixPath("/home") / owner)
+                or directory == PurePosixPath("/home") / owner
+                or type(port) is not int or not 1024 <= port <= 65535):
+            raise ValueError("INVALID_PRIVATE_POSTGRES_CLUSTER")
+        command = ["wsl", "-d", config["wsl_distribution"], "--user", owner, "--",
+                   "/usr/lib/postgresql/17/bin/pg_ctl", "-D", str(directory)]
+        clusters.append((command, directory, port))
+    for service in ("postgresql", "redis-server"):
+        subprocess.run(["wsl", "-d", config["wsl_distribution"], "--", "service", service, "start"],
+                       check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    for command, directory, port in clusters:
+        result = subprocess.run([*command, "status"], check=False,
+                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if result.returncode == 3:
+            subprocess.run([*command, "-w", "-t", "60", "-l", str(directory / "server.log"),
+                            "-o", f"-p {port} -h 127.0.0.1", "start"], check=True,
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        elif result.returncode != 0:
+            raise ValueError("PRIVATE_POSTGRES_STATUS_FAILED")
 
 
 def environment(path):
@@ -49,9 +81,7 @@ def main():
             parser.error("run requires a command after --")
         return subprocess.run(command, cwd=ROOT, env=env, check=False).returncode
     if args.action == "start":
-        for service in ("postgresql", "redis-server"):
-            subprocess.run(["wsl", "-d", config["wsl_distribution"], "--", "service", service, "start"],
-                           check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        start_services(config)
     import redis
     from sqlalchemy import create_engine, text
 

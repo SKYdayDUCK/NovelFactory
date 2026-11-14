@@ -80,3 +80,13 @@ P6 原实验入口增加 `worker --watch`：预期暂停后保留轻量监听，
 运维启动器支持 `--stop-file PRIVATE_PATH`。在该私有文件中写入 `{"action":"STOP_AFTER_CURRENT_CALL","book":"A","source_sha":"实际冻结提交"}` 可请求在当前付费调用完成后退出；不能用强杀进程来更新运行源码。配置文件的 `active_models` 按作品绑定新阶段配置，旧 `models` 清单保留历史兼容，两个层次均校验冻结配置和宿主模型允许列表。
 
 生产服务的数据库恢复、操作系统托管、真实模型回执和正文质量需要各自的集成验收。离线 PASS 不代表生产小说已完成，也不代表实际吞吐或供应商恰好一次执行已得到证明。
+
+## Windows 持久宿主
+
+`scripts/p6_host.py --config PRIVATE_HOST_JSON plan|install|start|status|stop` 将已冻结的本地 P6 Worker 交给当前用户的 Windows 计划任务。私有配置只包含 `version`、源码 worktree 的绝对路径 `source`、恢复目录 `state`、本地部署配置 `deployment` 和 `books`（本次为 `["A","B"]`）。不登记 API Key；模型和数据库继续从当前用户凭据库读取。
+
+先 `plan` 核对版本，再 `install` 注册并 `start` 启动。宿主串行启动本地服务，确认原 P6 数据库和 Redis 健康后派发；状态以实际文件锁和数据库健康为准。它保持系统唤醒，支持登录后恢复和至多三次进程失败重启；调用重试仍由业务层判断，UNKNOWN 不会被宿主重发。`stop` 写入绑定源码和作品的优雅停止请求，等待当前调用结束。
+
+`local_runtime.py` 的私有部署配置可选 `postgres_clusters`，每项指定 `owner`、`data_directory` 和 `port`，用于启动恢复出的独立 PostgreSQL 17 集群。原有普通 PostgreSQL/Redis 配置保持兼容。当前计划任务使用登录用户的凭据和 Codex 登录状态，需要该用户保持登录；断电或注销期间不能生成。
+
+2026-11-14 新的双书离线验证：连续 50 组两本各五章全部最终冻结，另有 27 类共 1,350 项故障检查通过；数据库和上游模型调用均为零。[双书证据](../../reports/dry_run/20261114-ab.json)。生产返工诊断、独立复审和有限额度使用单独的 PostgreSQL 集成测试核验。

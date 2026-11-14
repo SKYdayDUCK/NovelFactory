@@ -21,7 +21,7 @@ def _archive(node):
 def revise_scene(kernel, repo, board):
     nodes = board["nodes"]
     work = board["world_ref"]["work_id"]
-    for identity, reader in nodes.items():
+    for reader in nodes.values():
         if (reader["stage"] not in {"review", "epistemic", "facts"} or reader["state"] != "STOPPED"
                 or not reader.get("output_ref")):
             continue
@@ -46,6 +46,11 @@ def revise_scene(kernel, repo, board):
             if repo.one("selections", {"work_id": work, "selection_kind": "NARRATIVE_SCENE:" + target[6:]}):
                 continue
             prior = writer["output_ref"]
+            if board.get("production_mode") == "quality":
+                from .production_reassessment import repair_budget
+                if reason := repair_budget(writer, phase="revision"):
+                    writer.update(state="STOPPED", reason=reason)
+                    return target
             if reader["stage"] == "facts":
                 record = kernel.artifact(repo, reader["output_ref"], work, kind="ROLLING_FACT_REPORT")["payload"]
                 report = kernel.artifact(repo, record["reconciliation_ref"], work, kind="RECONCILIATION_REPORT")["payload"]
@@ -76,14 +81,15 @@ def revise_scene(kernel, repo, board):
                 call = repo.one("call_attempts", {"task_id": reader["task_id"], "generation": task["generation"],
                                                   "call_key": "supervised-candidate"})
                 from .production_pipeline import _current_owner
-                if plan["decision"] == PAUSED:
-                    plan = {**plan, "decision":"CHANGED_STRATEGY", "strategy_version":2,
-                            "method":"按本次逐条审稿意见先核对原稿对应段落，再逐项修改，并逐项核实保留的情节和视角。"}
                 plan = reflect_repair(kernel, repo, _current_owner(kernel, repo, board), board["world_ref"],
                                       reader["task_id"], call["attempt_id"], reader["output_ref"], plan, target)
                 plan["review_stage"] = reader["stage"]
                 history.append(plan)
+                if plan["decision"] == PAUSED:
+                    from .production_strategy import request_strategy
+                    return request_strategy(board, target, reader, issues, plan)
                 feedback["strategy_instruction"] = plan["method"]
+                feedback.update(reflection_ref=plan["reflection_ref"], error_ref=plan["error_ref"])
             for key in (target, "knowledge:" + target[6:], "facts:" + target[6:], "review:" + reader["chapter_id"]):
                 _archive(nodes[key])
                 nodes[key].pop("revision_targets", None)
@@ -109,28 +115,17 @@ def resume_extent_revision(kernel, repo, owner, board, identity):
                 if not isinstance(f, dict) or "actual_han" not in f]
     findings = editorial_findings(writer)
     extent = writer["han_characters"]
-    target = (extent["min"] + extent["max"]) // 2
     current = writer["output_ref"]
     draft = kernel.artifact(repo, current, wr["work_id"], kind="NARRATIVE_DRAFT")["payload"]
     require(draft["input_world_ref"] == wr and draft["scene_ref"] == writer["scene_ref"]
             and draft["handoff_refs"] == writer["handoff_refs"], "INVALID_EVIDENCE", "Writer source changed")
     measured = _count_han(kernel.objects.read(draft["text_ref"]["sha256"]).decode("utf-8"))
     require(measured == history[-1]["actual"], "INVALID_EVIDENCE", "Length measurement differs from the latest draft")
-    best = min(history, key=lambda item:item["distance"])["actual"]
     task = repo.one("tasks", {"task_id":writer["task_id"], "generation":writer["generation"]})
     require(task and task["state"] == "ACCEPTED", "INVALID_EVIDENCE", "Length recovery requires an accepted writer task")
-    call = repo.one("call_attempts", {"task_id":task["task_id"], "generation":task["generation"],
-                                      "call_key":"supervised-candidate"})
-    method = (f"以本次提供的最新原稿为底本。实测{measured}个汉字，目标{target}个。此前最接近区间的实测值为{best}个。"
-              f"请{'删减' if measured > target else '补足'}约{abs(measured-target)}个汉字；"
-              "保留已处理的审稿意见和场景事件，逐段核对后提交完整正文。")
-    plan = {**history[-1], "decision":"CHANGED_STRATEGY", "method":method, "strategy_version":2}
-    plan = reflect_repair(kernel, repo, owner, wr, task["task_id"], call["attempt_id"], current,
-                          plan, "CURRENT_DRAFT_EXTENT_REVISION")
-    _archive(writer)
-    writer.update(prior_draft_ref=current, revision_count=writer.get("revision_count", 0)+1,
-                  revision_feedback={"report_ref":plan["reflection_ref"], "strategy_instruction":method,
-                                     "findings":[*findings, {"actual_han":measured, "target_han":extent}]})
+    from .production_strategy import request_strategy
+    request_strategy(board, identity, writer,
+                     [*findings, {"actual_han": measured, "target_han": extent}], history[-1])
     return True
 
 
@@ -179,6 +174,10 @@ def repair_scene_extent(kernel, repo, owner, board, writer, task, audit, draft_r
     history.append({**chosen, "distance": distance, "actual": actual})
     writer.update(state="DRAFT_STORED", output_ref=draft_ref, generation=task["generation"],
                   completed_at=repo.now().isoformat(), reason="SCENE_LENGTH_OUTSIDE_TARGET")
+    from .production_reassessment import repair_budget
+    if reason := repair_budget(writer, phase="revision"):
+        writer.update(state="STOPPED", reason=reason)
+        return True
     if chosen["decision"] == PAUSED:
         writer.update(state="STOPPED", reason=PAUSED)
         return True
@@ -188,5 +187,6 @@ def repair_scene_extent(kernel, repo, owner, board, writer, task, audit, draft_r
     findings.append({"actual_han": actual, "target_han": extent})
     writer.update(prior_draft_ref=draft_ref, revision_count=writer.get("revision_count", 0) + 1,
                   revision_feedback={"report_ref": chosen["reflection_ref"], "findings": findings,
+                                     "reflection_ref": chosen["reflection_ref"], "error_ref": chosen["error_ref"],
                                      "strategy_instruction": chosen["method"]})
     return True

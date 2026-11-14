@@ -6,9 +6,10 @@ and hypotheses stay inside the originating work and never grant material access.
 import json
 from uuid import UUID, uuid5
 
+from ..domain.canonical import canonical_bytes, fingerprint
+from ..domain.errors import DomainError
 from .kernel import require
 from .planning import PlanningService
-from ..domain.canonical import canonical_bytes, fingerprint
 
 METHODS = {
     "schema": (
@@ -114,14 +115,39 @@ def reflect_repair(kernel, repo, owner, wr, task_id, attempt_id, evidence_ref, p
 
 
 def _wire_proof(kernel, repo, wr, audit):
-    """An adapter-declared REAL_EXTERNAL is insufficient for promoting a production method."""
-    from .statistics import is_official_deepseek
+    """Require delivery evidence, never an adapter's declaration or model self-report."""
     from ..infrastructure.wire_receipts import read_receipt
+    from .agent_gateway import AgentGateway
+    from .candidate_delivery import CandidateDelivery
+    from .native_delivery import require_native_delivery
+    from .statistics import is_official_deepseek
 
-    config = audit["model_configuration"]
-    if not is_official_deepseek(config) or not audit.get("response_ref") or not audit.get("provider_receipt"):
-        return None
     try:
+        config = audit["model_configuration"]
+        task = repo.one("tasks", {"task_id": audit["task_id"], "generation": audit["generation"],
+                                   "work_id": wr["work_id"], "branch_id": wr["branch_id"]})
+        if not task or not audit.get("response_ref") or not audit.get("provider_receipt"):
+            return None
+        # This also binds the CURRENT task result, audit, candidate and unresolved-question gate.
+        delivery = CandidateDelivery(kernel, AgentGateway(kernel, {}))
+        persisted_audit, _ = delivery.audited_candidate(repo, task, production_accounting=True)
+        if persisted_audit != audit:
+            return None
+        if config.get("adapter_kind") == "codex-cli":
+            call = repo.one("call_attempts", {"attempt_id": audit["attempt_id"]})
+            audit_row = repo.one("artifacts", {"work_id": wr["work_id"], "kind": "AGENT_CALL_EVIDENCE",
+                "artifact_revision_id": str(uuid5(UUID(audit["attempt_id"]), "audit:revision"))})
+            response = kernel.artifact(repo, audit["response_ref"], wr["work_id"], kind="AGENT_RESPONSE")
+            candidate = kernel.artifact(repo, audit["output_ref"], wr["work_id"], kind="AGENT_CANDIDATE")
+            # Always run the full Host proof, even if a caller changed the accounting state.
+            # Recovery-only exemptions must never turn a review into a reusable method.
+            require_native_delivery(kernel, repo, task, call, audit_row, response, candidate)
+            host = repo.one("host_turns", {"attempt_id": audit["attempt_id"]})
+            return fingerprint({"kind": "COMPLETED_NATIVE_HOST", "attempt_id": audit["attempt_id"],
+                                "request_sha256": audit["request_sha256"], "response_ref": audit["response_ref"],
+                                "thread_id": host["thread_id"], "turn_id": host["turn_id"]})
+        if not is_official_deepseek(config):
+            return None
         wire = read_receipt(kernel.objects, audit["attempt_id"], audit["request_sha256"])
         if not wire:
             return None
@@ -136,19 +162,116 @@ def _wire_proof(kernel, repo, wr, audit):
                 or audit["outcome"] != "VALIDATED_CANDIDATE" or audit["result_status"] != "SUCCEEDED"):
             return None
         return receipt["body_sha256"]
-    except (KeyError, IndexError, TypeError, ValueError, OSError):
+    except (DomainError, KeyError, IndexError, TypeError, ValueError, OSError):
         return None
+
+
+def _review_of_revision(kernel, repo, wr, fix, fix_ref, review, review_ref):
+    """Bind an independent reading to the repaired revision and its controller result."""
+    from ..domain.review_gate import blocking_review_issues
+
+    try:
+        writer = repo.one("tasks", {"task_id": fix["task_id"], "generation": fix["generation"]})
+        reader = repo.one("tasks", {"task_id": review["task_id"], "generation": review["generation"]})
+        if (not writer or not reader or writer["principal_id"] == reader["principal_id"]
+                or writer["grant_id"] == reader["grant_id"]
+                or reader["role_id"] not in {"reviewer", "evidence_maintainer"}
+                or fix["world_ref"] != review["world_ref"]):
+            return False
+        candidate = kernel.artifact(repo, review["output_ref"], wr["work_id"], kind="AGENT_CANDIDATE")["payload"]
+        if reader["role_id"] == "reviewer" and blocking_review_issues(candidate["issues"]):
+            return False
+        frozen = kernel.artifact(repo, review["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]
+        source = repo.one("task_inputs", {"task_id": reader["task_id"], "generation": reader["generation"]})
+        if not source or fix_ref not in source["spec"]["input_artifacts"]:
+            return False
+        result = kernel.artifact(repo, review_ref, wr["work_id"])
+        if fix_ref == fix["output_ref"]:
+            packet = json.loads(frozen["assignment"])
+            return (reader["role_id"] == "reviewer" and packet.get("candidate_ref") == fix_ref
+                    and review_ref == review["output_ref"])
+        draft = kernel.artifact(repo, fix_ref, wr["work_id"], kind="NARRATIVE_DRAFT")["payload"]
+        if (draft["agent_output_ref"] != fix["output_ref"] or draft["task_id"] != writer["task_id"]
+                or draft["generation"] != writer["generation"] or fix_ref not in frozen["material_refs"]):
+            return False
+        scope = repo.one("selections", {"work_id": wr["work_id"],
+                    "selection_kind": f"NARRATIVE_READ:{reader['task_id']}:{reader['generation']}"})
+        if not scope:
+            return False
+        reading = kernel.artifact(repo, scope["artifact_ref"], wr["work_id"], kind="NARRATIVE_READ_SCOPE")["payload"]
+        if (fix_ref not in reading["draft_refs"] or reading["task_id"] != reader["task_id"]
+                or reading["generation"] != reader["generation"] or reading["grant_id"] != reader["grant_id"]):
+            return False
+        payload = result["payload"]
+        if result["kind"] == "CHAPTER_READING_ADVICE":
+            return (reader["role_id"] == "reviewer" and fix_ref in payload["draft_refs"]
+                    and payload["task_id"] == reader["task_id"] and payload["generation"] == reader["generation"]
+                    and payload["candidate_ref"] == review["output_ref"])
+        if result["kind"] == "EPISTEMIC_READING":
+            return (reader["role_id"] == "reviewer" and payload["draft_ref"] == fix_ref
+                    and payload["reader_task"] == reader["task_id"] and payload["generation"] == reader["generation"]
+                    and payload["attempt_id"] == review["attempt_id"] and payload["candidate_ref"] == review["output_ref"]
+                    and payload["status"] == "CLEAR")
+        if result["kind"] == "ROLLING_FACT_REPORT" and reader["role_id"] == "evidence_maintainer":
+            extraction = kernel.artifact(repo, payload["extraction_ref"], wr["work_id"], kind="ASSERTION_EXTRACTION")["payload"]
+            report = kernel.artifact(repo, payload["reconciliation_ref"], wr["work_id"], kind="RECONCILIATION_REPORT")["payload"]
+            return (payload["status"] == "CLEAR" and extraction["draft_ref"] == report["draft_ref"] == fix_ref
+                    and report["extraction_ref"] == payload["extraction_ref"]
+                    and extraction["task_id"] == reader["task_id"] and extraction["generation"] == reader["generation"])
+        return False
+    except (DomainError, KeyError, TypeError, ValueError, OSError):
+        return False
+
+
+def _method_applied(kernel, repo, wr, plan, evidence, fix_ref):
+    """A successful revision cannot validate a superseded or merely proposed strategy."""
+    try:
+        frozen = kernel.artifact(repo, evidence["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]
+        method, assignment = plan["method"], frozen["assignment"]
+        try:
+            packet = json.loads(assignment)
+        except ValueError:
+            packet = None
+        if (isinstance(packet, dict) and packet.get("repair_strategy") != method
+                or not isinstance(packet, dict) and method not in assignment):
+            return False
+        error = kernel.artifact(repo, plan["error_ref"], wr["work_id"], kind="P6_ERROR_RECORD")["payload"]
+        if (error.get("work_id") != wr["work_id"] or error.get("branch_id") != wr["branch_id"]):
+            return False
+        row = kernel.artifact(repo, plan["reflection_ref"], wr["work_id"])
+        reflection = row["payload"]
+        if row["kind"] == "P6_REFLECTION_RECORD":
+            if (reflection.get("phase") != "REPAIR_DECISION" or reflection.get("method") != method
+                    or reflection.get("error_ref") != plan["error_ref"]):
+                return False
+        elif row["kind"] == "PRODUCTION_REASSESSMENT":
+            if (reflection["outcome"] != "STRATEGY_READY" or reflection["method"] != method
+                    or not any(item.get("error_ref") == plan["error_ref"] and item["signature"] == plan["signature"]
+                               for item in reflection["request"]["history"]["repair_plans"])):
+                return False
+        else:
+            return False
+        if fix_ref != evidence["output_ref"]:
+            source = repo.one("task_inputs", {"task_id": evidence["task_id"], "generation": evidence["generation"]})
+            return source and all(ref in source["spec"]["input_artifacts"]
+                                  for ref in (plan["error_ref"], plan["reflection_ref"]))
+        return True
+    except (DomainError, KeyError, TypeError, ValueError, OSError):
+        return False
 
 
 def verify_method(kernel, repo, owner, wr, plan, evidence, task_kind, fix_ref, review_attempt, review_ref):
     """An independently cleared actual revision, never a proposed fix or an unrelated successful call."""
-    if not plan or evidence["execution_kind"] not in {"REAL_HOST", "REAL_EXTERNAL"}:
+    if (not plan or not isinstance(plan.get("method"), str) or not plan["method"].strip()
+            or plan.get("decision") == PAUSED or evidence["execution_kind"] not in {"REAL_HOST", "REAL_EXTERNAL"}):
         return
     review_row = repo.one("artifacts", {"work_id": wr["work_id"], "kind": "AGENT_CALL_EVIDENCE",
                     "artifact_revision_id": str(uuid5(UUID(review_attempt), "audit:revision"))})
     tested = _wire_proof(kernel, repo, wr, evidence)
     checked = _wire_proof(kernel, repo, wr, review_row["payload"]) if review_row else None
-    if not (tested and checked):
+    if not (tested and checked and _method_applied(kernel, repo, wr, plan, evidence, fix_ref)
+            and _review_of_revision(kernel, repo, wr, evidence, fix_ref,
+                                                      review_row["payload"], review_ref)):
         _record(kernel, repo, wr["work_id"], owner.principal_id, evidence["attempt_id"], "reviewed-local-repair", {
             "world_ref": wr, "phase": "STAGE_COMPLETED", "attempt_id": evidence["attempt_id"],
             "error_ref": plan["error_ref"], "actual_fix": fix_ref, "regression_result": review_ref,
@@ -157,11 +280,19 @@ def verify_method(kernel, repo, owner, wr, plan, evidence, task_kind, fix_ref, r
     frozen = kernel.artifact(repo, evidence["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]
     scope = task_scope(wr, evidence["role_id"], task_kind, frozen["runtime_sha256"],
                        frozen["output_contract"], frozen["model_config_sha256"])
+    # Preserve the exact historical DeepSeek-only record bytes on crash replay.
+    # For native deliveries the legacy *_wire_sha256 fields hold the Host proof digest.
+    delivery_kinds = {}
+    if "codex-cli" in {evidence["model_configuration"]["adapter_kind"],
+                       review_row["payload"]["model_configuration"]["adapter_kind"]}:
+        delivery_kinds = {"fix_delivery_kind": evidence["model_configuration"]["adapter_kind"],
+                          "review_delivery_kind": review_row["payload"]["model_configuration"]["adapter_kind"]}
     ref = _record(kernel, repo, wr["work_id"], owner.principal_id, evidence["attempt_id"], "verified-method",
                   {"record_version": 1, "status": "VERIFIED", "scope": scope, "method": plan["method"],
                    "error_ref": plan["error_ref"], "reflection_ref": plan["reflection_ref"],
                    "actual_fix": fix_ref, "regression_result": review_ref,
                    "fix_wire_sha256": tested, "review_wire_sha256": checked,
+                   **delivery_kinds,
                    "fix_attempt_id": evidence["attempt_id"], "review_attempt_id": review_attempt,
                    "validation_scope": "INDEPENDENT_REVIEW_OF_EXACT_REVISION",
                    "reusable": True}, "P6_EXPERIENCE_MEMORY")

@@ -296,6 +296,8 @@ def pipeline_status(kernel, owner, work, branch, *, include_outputs=False):
                 advice = kernel.artifact(repo, ref, work, kind="CHAPTER_READING_ADVICE")["payload"]
                 outputs[key] = {**advice, "advice": kernel.artifact(repo, advice["candidate_ref"], work,
                                                                       kind="AGENT_CANDIDATE")["payload"]}
+            elif stage == "reassessment":
+                outputs[key] = kernel.artifact(repo, ref, work, kind="PRODUCTION_REASSESSMENT")["payload"]
             else:
                 outputs[key] = kernel.artifact(repo, ref, work, kind="AGENT_CANDIDATE")["payload"]
         return {"world_ref": board["world_ref"], "volume_id": board["volume_id"], "nodes": nodes,
@@ -305,6 +307,9 @@ def pipeline_status(kernel, owner, work, branch, *, include_outputs=False):
 def _ready(board):
     nodes, limits = board["nodes"], board["limits"]
     busy = Counter(n["stage"] for n in nodes.values() if n["state"] == "ENROLLED")
+    diagnoses = sorted(k for k, n in nodes.items() if n["stage"] == "reassessment" and n["state"] == "PENDING")
+    if diagnoses and sum(busy[s] for s in READING_STAGES | {"reassessment"}) < limits["review"]:
+        return diagnoses[0]
     reviews = [k for k, n in nodes.items() if n["stage"] in READING_STAGES and n["state"] == "PENDING"
                and all(nodes[p]["state"] == "DRAFT_STORED" for p in n["parents"])
                and ("knowledge_node" not in n or nodes[n["knowledge_node"]]["state"] == "KNOWLEDGE_CLEAR")]
@@ -322,7 +327,7 @@ def _ready(board):
                 for parent in chapter["parents"]
             )
         reviews = [key for key in reviews if chapter_ready(key)]
-    reading_wip = sum(busy[s] for s in READING_STAGES)
+    reading_wip = sum(busy[s] for s in READING_STAGES | {"reassessment"})
     if reviews and reading_wip < limits["review"]:
         return min(reviews)
     if len(reviews) + reading_wip >= limits["review_backlog"]:
@@ -356,6 +361,16 @@ def _enroll(kernel, repo, gateway, owner, board, identity, *, frozen_assignment=
                                     "assumptions": node["dependencies"], "goal_limit": board["limits"]["window_goals"],
                                     "authorized_subject_ids": board["subject_ids"]},
                                    ensure_ascii=False))
+    elif stage == "reassessment":
+        from .production_reassessment import reassessment_assignment
+        request = node["reassessment_request"]
+        manifest_ref = board["manifest_ref"]
+        require(_selected(repo, work, "PLAN_MANIFEST:" + board["volume_id"]) == manifest_ref,
+                "STALE_PLAN", "Diagnosis plan changed before enrollment")
+        cut = {"plane": "PLAN", "plan_manifest_ref": manifest_ref}
+        materials = [request["source_draft_ref"]]
+        refs = [manifest_ref, request["report_ref"]]
+        assignment = reassessment_assignment(request)
     elif stage == "draft":
         scene = kernel.artifact(repo, node["scene_ref"], work, kind="SCENE_PLAN")["payload"]
         materials = [node["scene_ref"]]
@@ -388,12 +403,19 @@ def _enroll(kernel, repo, gateway, owner, board, identity, *, frozen_assignment=
         story_time = scene["scene_contract"]["story_interval"]["end"]
         assignment = "独立通读本场正文，逐项核查人物所知、获知来源及披露时序。把无来源、时序矛盾或无法判断的知识归为问题，引用原句及可用证据。明确区分可验证的硬性认知矛盾、疑问和可选的文学建议，标注准确的严重程度与处置状态。"
         role, kind = "reviewer", "epistemic"
+    elif stage == "reassessment":
+        role, kind = "chief_editor", "editorial_decision"
     else:
         role, kind = ROLES[stage]
     if stage == "draft" and node.get("prior_draft_ref"):
         role, kind = "writer", "targeted_revision"
         materials.append(node["prior_draft_ref"])
         refs.append(node["revision_feedback"]["report_ref"])
+        for label in ("reflection_ref", "error_ref"):
+            if (ref := node["revision_feedback"].get(label)) and ref not in refs:
+                refs.append(ref)
+        if strategy_ref := node["revision_feedback"].get("strategy_ref"):
+            refs.append(strategy_ref)
         if strategy := node["revision_feedback"].get("strategy_instruction"):
             assignment += strategy
         assignment += "请只修订指出的问题并返回完整新正文；其余原稿的视角、措辞和事件边界尽量保留。" + json.dumps(
@@ -414,12 +436,17 @@ def _enroll(kernel, repo, gateway, owner, board, identity, *, frozen_assignment=
         # authenticated immutable input. Do not regenerate historical wording.
         assignment = frozen_assignment
     task = RuntimeTaskService(kernel, gateway).prepare(owner, wr, role_id=role, task_kind=kind,
+        skill_name="edit-volume" if stage == "reassessment" else None,
         knowledge_reread_reason="known_error" if repair else None,
         assignment=assignment, knowledge_cut=cut, subject_ids=board["subject_ids"], predicates=board["predicates"],
         story_time=story_time, material_refs=materials, input_artifacts=refs,
-        adapter_id=board["routes"]["review" if stage in READING_STAGES else stage], max_amount=board["reserve_amount"], token_budget=board["token_reservation"],
+        adapter_id=board["routes"]["review" if stage in READING_STAGES | {"reassessment"} else stage], max_amount=board["reserve_amount"], token_budget=board["token_reservation"],
         currency=repo.one("budgets", {"work_id": work, "budget_id": board["budget_id"]})["currency"],
         queue_state="READY", lease_seconds=min(600, seconds), deadline_seconds=seconds)
+    if stage == "reassessment":
+        frozen_input = kernel.artifact(repo, task.agent_input["input_ref"], work, kind="AGENT_INPUT")["payload"]
+        require(gateway.adapters[frozen_input["adapter_id"]].configuration.get("adapter_kind") == "codex-cli",
+                "MODEL_UNAVAILABLE", "Production strategy diagnosis requires Codex")
     if repair:
         node["active_format_repair"] = {
             "history": "fact_format_repairs" if stage == "facts" and node.get("reason") == "FACT_FORMAT_REPAIR_REQUESTED" else "schema_repairs",
@@ -482,7 +509,7 @@ def prepare_materials(kernel, task, config):
             ReleaseService(bound).bind_writer_task(actor, tid, gen, node["scene_ref"], node["handoff_refs"], key)
             if node.get("prior_draft_ref"):
                 NarrativeService(bound).bind_reader_task(owner, tid, gen, [node["prior_draft_ref"]], key)
-        elif node["stage"] in READING_STAGES:
+        elif node["stage"] in READING_STAGES | {"reassessment"}:
             drafts = [board["nodes"][p]["output_ref"] for p in node["parents"]]
             for parent in node["parents"]:
                 source = repo.one("tasks", {"task_id": board["nodes"][parent]["task_id"]})
@@ -513,6 +540,9 @@ def _deliver(kernel, repo, gateway, board, node, task):
             kernel.tasks.accept_in_transaction(repo.conn, task["task_id"], task["generation"])
             return
         state = "DRAFT_STORED"
+    elif node["stage"] == "reassessment":
+        from .production_reassessment import record_reassessment
+        ref, state = record_reassessment(kernel, repo, owner, board, node, task, evidence, candidate)
     elif node["stage"] == "epistemic":
         from .rolling_facts import record_knowledge
         ref, state = record_knowledge(kernel, repo, owner, board, node, task, evidence, candidate)
@@ -744,13 +774,18 @@ def advance_pipeline(kernel, gateway, controller, work, branch):
         board = _load(bound, repo, work, branch)
         nodes = board["nodes"]
         expired = repo.now() >= datetime.fromisoformat(board["authorization"]["deadline"])
+        if not expired:
+            from .production_strategy import consume_strategy
+            if consumed := consume_strategy(bound, repo, board):
+                return {"status": "STRATEGY_CONSUMED", "node_id": consumed,
+                        "board_ref": _save(bound, repo, controller, board)}
         settlement = _settlement(bound, repo, board) if any(n["state"] in {
             "PROVISIONAL_WITH_ASSUMPTIONS", "READY_FOR_ADOPTION"} for n in nodes.values()) else None
         if (board.get("production_mode") == "quality" or board.get("max_reworks")) and not expired and any(n.get("output_ref") and n["state"] == "STOPPED" for n in nodes.values()):
             _current_owner(bound, repo, board)
             revised = revise_scene(bound, repo, board)
             if revised:
-                status = "STRATEGY_REASSESSMENT_REQUIRED" if nodes[revised].get("repair_plans", [{}])[-1].get("decision") == "STRATEGY_REASSESSMENT_REQUIRED" else "SCENE_REVISION_REQUESTED"
+                status = nodes[revised].get("reason", "SCENE_REVISION_REQUESTED")
                 return {"status": status, "node_id": revised, "board_ref": _save(bound, repo, controller, board)}
         for identity, node in nodes.items():
             if board.get("production_mode") == "quality" and not expired and node.get("reason") == "STRATEGY_REASSESSMENT_REQUIRED":

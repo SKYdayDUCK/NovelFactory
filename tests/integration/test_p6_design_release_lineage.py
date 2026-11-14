@@ -206,6 +206,13 @@ def test_adopted_design_and_review_bound_to_release(kernel_env, tmp_path, monkey
         questions=questions,
         nested_identity=original_identity,
     )
+    # Synthetic protocol tests must not depend on installed provider catalogs or
+    # operator authorization; the HTTP boundary above is fully replaced.
+    from agent_runtime import native_codex
+    monkeypatch.setattr(providers.Profile, "preflight", lambda _: None)
+    forbidden = lambda *args, **kwargs: pytest.fail("Synthetic lineage test reached a native model boundary")
+    monkeypatch.setattr(native_codex, "generate", forbidden)
+    monkeypatch.setattr(native_codex, "start_host", forbidden)
     if scenario.startswith("quality_"):
         fixture_post = providers.post
         def contract_failure(**kwargs):

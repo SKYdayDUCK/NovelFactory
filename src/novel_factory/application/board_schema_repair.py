@@ -6,6 +6,7 @@ from .idea_repair import UnparsedDesign, returned_design
 from .kernel import require
 from .quality_memory import PAUSED, plan_repair, reflect_repair
 from .semantic_dependencies import check_task_dependencies
+from .technical_repair_budget import technical_repair_budget
 
 
 def verify_board_transport(kernel, audit, raw):
@@ -85,6 +86,9 @@ def resume_review_format(kernel, repo, owner, board, identity):
     method = board_format_method(node)
     if not method or node["state"] != "STOPPED" or node.get("reason") != PAUSED:
         return False
+    if reason := technical_repair_budget(node):
+        node.update(state="STOPPED", reason=reason)
+        return True
     last = node["schema_repairs"][-1]
     require(last["decision"] == PAUSED and last["task_id"] == node["task_id"] and not last.get("actual_fix"),
             "STALE_GENERATION", "Review format no longer matches the rejected candidate")
@@ -104,6 +108,9 @@ def resume_review_format(kernel, repo, owner, board, identity):
 
 def recover_board_node(kernel, repo, gateway, owner, board, identity, task):
     node = board["nodes"][identity]
+    if reason := technical_repair_budget(node):
+        node.update(state="STOPPED", reason=reason)
+        return
     wr = node.get("world_ref", board["world_ref"])
     job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})["config"]
     require(job.get("production_node") == identity and task["state"] == "FAILED", "STALE_GENERATION",
@@ -181,6 +188,9 @@ def recover_fact_reading(kernel, repo, gateway, owner, board, identity, *, reass
     from .rolling_facts import ReadingFormatError, check_knowledge, extract_assertions
 
     node = board["nodes"][identity]
+    if reason := technical_repair_budget(node):
+        node.update(state="STOPPED", reason=reason)
+        return True
     wr = board["world_ref"]
     parent = board["nodes"][node["parents"][0]]
     source = parent["output_ref"]
