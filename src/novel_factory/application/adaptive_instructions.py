@@ -824,11 +824,13 @@ def _code_release():
     ) == source:
         cmd = ["git", "-C", str(checkout)]
         commit = subprocess.check_output(
-            [*cmd, "rev-parse", "--verify", "HEAD"], text=True, timeout=5
+            [*cmd, "rev-parse", "--verify", "HEAD"], text=True, timeout=5,
+            stdin=subprocess.DEVNULL, stderr=subprocess.PIPE,
         ).strip()
         relevant = [str(path.relative_to(checkout)) for path in _release_modules()]
         dirty = bool(
-            subprocess.check_output([*cmd, "status", "--porcelain", "--", *relevant], timeout=5)
+            subprocess.check_output([*cmd, "status", "--porcelain", "--", *relevant], timeout=5,
+                                    stdin=subprocess.DEVNULL, stderr=subprocess.PIPE)
         )
         origin = "CHECKOUT_WITH_LOCAL_MODULES" if dirty else "CHECKOUT"
     else:

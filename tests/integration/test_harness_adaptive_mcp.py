@@ -24,6 +24,7 @@ from novel_factory.application.review_independence import ReviewIndependenceServ
 from novel_factory.application.runtime_tasks import RuntimeTaskService
 from novel_factory.fixtures import load_fixture, point
 from novel_factory.infrastructure.creative_config import CreativeHarnessConfig
+from novel_factory.infrastructure.private_files import create_private_file
 from novel_factory.interfaces.review_independence import enroll
 
 pytestmark = [pytest.mark.postgres, pytest.mark.integration]
@@ -78,8 +79,8 @@ def signed_case(tmp_path, case, deadline):
             "verified_by": "offline integration registrar",
             **{key: case["world_ref"][key] for key in ("work_id", "branch_id")},
         }
-        path.write_text(json.dumps(record))
-        path.chmod(0o600)
+        with os.fdopen(create_private_file(path), "w", encoding="utf-8") as target:
+            json.dump(record, target)
         paths.append(path)
     return enroll(case, paths, deadline)
 
