@@ -10,6 +10,7 @@ from novel_factory.application.internal_review_resolution import (
     RESOLVED,
     WORLD_INPUT,
     assignment,
+    evidence_slots_instruction,
     parse_resolution,
     request_from_blocked,
     request_from_fact_report,
@@ -81,6 +82,61 @@ def test_case_freezes_original_questions_and_existing_second_slot():
     text = assignment(request)
     assert "实际获准MCP只读工具" in text and "UNREGISTERED" in text and "算术" in text
     assert len(board["nodes"][target]["reassessments"]) == 2
+
+
+def test_new_and_corrected_assignments_share_receipt_slots_without_rewriting_frozen_input(monkeypatch):
+    from types import SimpleNamespace
+
+    from novel_factory.application import production_verification as flow
+    from novel_factory.application.candidate_delivery import CandidateDelivery
+
+    request = request_from_blocked(*case())
+    original_assignment = assignment(request)
+    frozen = {"assignment": original_assignment, "runtime_sha256": "1" * 64, "model_config_sha256": "2" * 64,
+              "output_contract": {"name": "AgentDecisionOutput", "version": "agent"}}
+    source = deepcopy(frozen)
+    task = {"task_id": uid("new-verifier"), "generation": 1, "state": "RESULT_STORED",
+            "role_id": "reviewer", "task_kind": "verification", "work_id": request["world_ref"]["work_id"]}
+    node = {"stage": "internal_verification", "state": "ENROLLED", "task_id": task["task_id"], "internal_case": request}
+    evidence = {"attempt_id": uid("new-attempt"), "output_ref": ref("candidate"), "input_ref": ref("input")}
+    job = {"config": {"required_review_mcp": True, "production_node": "verification:" + request["case_hash"]}}
+    repo = SimpleNamespace(one=lambda *args, **kwargs: job, change=lambda *args, **kwargs: None, now=lambda: None, conn=None)
+    kernel = SimpleNamespace(artifact=lambda *args, **kwargs: {"payload": frozen}, tasks=SimpleNamespace(_emit=lambda *args: None))
+    monkeypatch.setattr(CandidateDelivery, "audited_candidate", lambda *args, **kwargs: (evidence, {}))
+    assert flow.recover_verification(kernel, repo, None, node, task,
+                                     DomainError("INVALID_EVIDENCE", "Every answer must cite its actual state-query evidence"))
+    instructions = evidence_slots_instruction()
+    assert instructions in original_assignment and instructions in node["verification_repair"]["method"]
+    assert "answers[index].evidence_refs至少1条必须" in instructions
+    assert "nf_query_batch工具响应顶层receipt_ref" in instructions and "只在外层evidence_refs引用不够" in instructions
+    assert frozen == source and node["internal_case"] == request
+
+
+@pytest.mark.parametrize("conclusion", ["CONFIRMED_CONFLICT", "NO_CONFLICT", "STALE_REPORT"])
+def test_documented_three_slot_examples_pass_query_gate_but_material_only_answers_do_not(monkeypatch, conclusion):
+    from test_query_state_conclusions import proof
+    from test_query_state_conclusions import ref as state_ref
+
+    from novel_factory.application.production_verification import _query_gate
+
+    arguments, receipts = proof(monkeypatch, status=conclusion,
+                               spans=() if conclusion == "STALE_REPORT" else [(0, 2), (6, 8)])
+    answer = arguments["parsed"]["answers"][0]
+    if conclusion == "STALE_REPORT":
+        request = arguments["request"]
+        provenance_ref, old_report = state_ref("slot-provenance"), state_ref("slot-old-report")
+        receipts[-1]["result"]["structuredContent"].update(finding_provenance_ref=provenance_ref,
+            finding_provenance={"version": 1, "case_hash": request["case_hash"], "current_draft_ref": request["source_draft_ref"],
+                "current_text_ref": state_ref("text"), "report_ref": request["report_ref"], "candidates": [{
+                    "report_ref": old_report, "source_draft_ref": state_ref("older-draft"),
+                    "matched_finding_indices": [0], "matches_current": False}]})
+        answer["evidence_refs"] = [{"kind": "ARTIFACT", "artifact_ref": arguments["query_ref"]},
+                                   {"kind": "ARTIFACT", "artifact_ref": provenance_ref},
+                                   {"kind": "ARTIFACT", "artifact_ref": old_report}]
+    assert len(answer["evidence_refs"]) == 3 and _query_gate(**arguments)
+    answer["evidence_refs"].pop(0)
+    with pytest.raises(DomainError, match="Every answer must cite its actual state-query evidence"):
+        _query_gate(**arguments)
 
 
 @pytest.mark.parametrize("statuses,outcome", [(["NO_CONFLICT", "STALE_REPORT"], RESOLVED),

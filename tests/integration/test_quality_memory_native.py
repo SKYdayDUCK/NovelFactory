@@ -153,6 +153,13 @@ def test_flash_repair_native_reading_requires_exact_independent_delivery(kernel_
             scope = task_scope(wr, "writer", "targeted_revision", frozen["runtime_sha256"],
                                frozen["output_contract"], frozen["model_config_sha256"])
             assert recall(kernel, repo, wr, scope)["method"] == plan["method"]
+            if mode == "valid":
+                recorded = repo.many("artifacts", {"work_id": wr["work_id"]})
+                selected = repo.many("selections", {"work_id": wr["work_id"]})
+                verify_method(kernel, repo, owner, wr, plan, evidence, "targeted_revision", fixed["output_ref"],
+                              reviewed["attempt_id"], reviewed["output_ref"])
+                assert repo.many("artifacts", {"work_id": wr["work_id"]}) == recorded
+                assert repo.many("selections", {"work_id": wr["work_id"]}) == selected
         else:
             assert memories == []
             reflections = repo.many("artifacts", {"work_id": wr["work_id"], "kind": "P6_REFLECTION_RECORD"})

@@ -1,6 +1,5 @@
 """Shared transactional delivery and verification of supervisor-enrolled model results."""
 
-import json
 from uuid import UUID, uuid5
 
 from sqlalchemy import text
@@ -75,9 +74,23 @@ class CandidateDelivery:
 
     def audited_candidate(self, repo, task, *, production_accounting=False, design_revision_read=False, ending_plan_read=False):
         task_id, gen = task["task_id"], task["generation"]
+        selected = repo.one("task_results", {"task_id": task_id, "generation": gen,
+                            "result_id": task["current_result_id"], "disposition": "CURRENT"}) if task["current_result_id"] else None
+        refs = selected["payload"]["artifacts"] if selected else []
+        first = self.kernel.artifact(repo, refs[0], task["work_id"]) if refs else None
+        if first and first["kind"] == "WRITER_FORMAT_DERIVATION":
+            from .writer_format_recovery import (
+                is_derived_writer_result,
+                verify_derived_writer_result,
+            )
+
+            require(is_derived_writer_result(self.kernel, repo, task), "INVALID_EVIDENCE", "Invalid derived writer result")
+            return verify_derived_writer_result(self.kernel, repo, self.gateway, task)
         call = repo.one(
             "call_attempts", {"task_id": task_id, "generation": gen, "call_key": "supervised-candidate"}
         )
+        from .writer_format_normalization import replay_response, result_artifacts
+
         require(
             call and task["current_result_id"] == str(uuid5(UUID(call["attempt_id"]), "task-result")),
             "INVALID_EVIDENCE",
@@ -100,7 +113,7 @@ class CandidateDelivery:
             evidence["outcome"] == "VALIDATED_CANDIDATE"
             and evidence["result_status"] == "SUCCEEDED"
             and task["context_bundle_id"] == evidence["context_bundle_id"]
-            and result["payload"]["artifacts"] == [audit_ref, evidence["output_ref"]],
+            and result["payload"]["artifacts"] == result_artifacts(audit_ref, evidence),
             "INVALID_EVIDENCE",
             "Task result does not match audited candidate",
         )
@@ -108,7 +121,7 @@ class CandidateDelivery:
             from .creative_context_store import check_candidate_snapshot
             check_candidate_snapshot(self.kernel, repo, task, evidence)
         response = self.kernel.artifact(repo, evidence["response_ref"], task["work_id"], kind="AGENT_RESPONSE")
-        questions = json.loads(response["payload"]["text"])["unresolved_questions"]
+        questions = replay_response(self.kernel, repo, task, evidence, response)["unresolved_questions"]
         candidate = self.kernel.artifact(repo, evidence["output_ref"], task["work_id"], kind="AGENT_CANDIDATE")
         if design_revision_read and questions:
             source = self.kernel.artifact(repo, evidence["input_ref"], task["work_id"], kind="AGENT_INPUT")["payload"]

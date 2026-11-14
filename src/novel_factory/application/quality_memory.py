@@ -53,6 +53,22 @@ def _record(kernel, repo, work, principal_id, namespace, label, payload, kind):
     return ref
 
 
+def _review_record(kernel, repo, work, principal_id, namespace, label, payload, kind):
+    """A replay may recreate the same controller result with a fresh reference."""
+    revision = str(uuid5(UUID(namespace), label + ":revision"))
+    existing = repo.one("artifacts", {"work_id": work, "artifact_revision_id": revision})
+    if existing and existing["payload"].get("regression_result") != payload["regression_result"]:
+        old_ref = existing["payload"]["regression_result"]
+        new_ref = payload["regression_result"]
+        old = kernel.artifact(repo, old_ref, work)
+        new = kernel.artifact(repo, new_ref, work)
+        require(old["kind"] == new["kind"] and old_ref["sha256"] == new_ref["sha256"]
+                and old["payload"] == new["payload"] and fingerprint(old["payload"]) == old_ref["sha256"],
+                "INVALID_EVIDENCE", "A repeated independent review produced a different controller result")
+        payload = {**payload, "regression_result": old_ref}
+    return _record(kernel, repo, work, principal_id, namespace, label, payload, kind)
+
+
 def task_scope(wr, role_id, task_kind, runtime_sha256, contract, model_sha256):
     return {"branch_id": wr["branch_id"], "role_id": role_id, "task_kind": task_kind,
             "runtime_sha256": runtime_sha256, "output_contract": contract, "model_sha256": model_sha256}
@@ -267,15 +283,23 @@ def verify_method(kernel, repo, owner, wr, plan, evidence, task_kind, fix_ref, r
         return
     review_row = repo.one("artifacts", {"work_id": wr["work_id"], "kind": "AGENT_CALL_EVIDENCE",
                     "artifact_revision_id": str(uuid5(UUID(review_attempt), "audit:revision"))})
+    # One writer can be read repeatedly after a transport or evidence repair.
+    # Retain legacy writer-only records; new records name this independent read.
+    review_identity = {"review_attempt_id": review_attempt,
+                       "review_candidate_ref": review_row["payload"]["output_ref"] if review_row else None,
+                       "review_generation": review_row["payload"]["generation"] if review_row else None}
+    namespace = str(uuid5(UUID(evidence["attempt_id"]), "quality-review:" + fingerprint({
+        "world_ref": wr, "actual_fix": fix_ref, "error_ref": plan["error_ref"],
+        "reflection_ref": plan.get("reflection_ref"), **review_identity})))
     tested = _wire_proof(kernel, repo, wr, evidence)
     checked = _wire_proof(kernel, repo, wr, review_row["payload"]) if review_row else None
     if not (tested and checked and _method_applied(kernel, repo, wr, plan, evidence, fix_ref)
             and _review_of_revision(kernel, repo, wr, evidence, fix_ref,
                                                       review_row["payload"], review_ref)):
-        _record(kernel, repo, wr["work_id"], owner.principal_id, evidence["attempt_id"], "reviewed-local-repair", {
+        _review_record(kernel, repo, wr["work_id"], owner.principal_id, namespace, "reviewed-local-repair", {
             "world_ref": wr, "phase": "STAGE_COMPLETED", "attempt_id": evidence["attempt_id"],
             "error_ref": plan["error_ref"], "actual_fix": fix_ref, "regression_result": review_ref,
-            "status": "LOCAL_VALIDATION_ONLY", "reusable": False}, "P6_REFLECTION_RECORD")
+            "status": "LOCAL_VALIDATION_ONLY", "reusable": False, **review_identity}, "P6_REFLECTION_RECORD")
         return
     frozen = kernel.artifact(repo, evidence["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]
     scope = task_scope(wr, evidence["role_id"], task_kind, frozen["runtime_sha256"],
@@ -287,20 +311,24 @@ def verify_method(kernel, repo, owner, wr, plan, evidence, task_kind, fix_ref, r
                        review_row["payload"]["model_configuration"]["adapter_kind"]}:
         delivery_kinds = {"fix_delivery_kind": evidence["model_configuration"]["adapter_kind"],
                           "review_delivery_kind": review_row["payload"]["model_configuration"]["adapter_kind"]}
-    ref = _record(kernel, repo, wr["work_id"], owner.principal_id, evidence["attempt_id"], "verified-method",
+    ref = _review_record(kernel, repo, wr["work_id"], owner.principal_id, namespace, "verified-method",
                   {"record_version": 1, "status": "VERIFIED", "scope": scope, "method": plan["method"],
                    "error_ref": plan["error_ref"], "reflection_ref": plan["reflection_ref"],
                    "actual_fix": fix_ref, "regression_result": review_ref,
                    "fix_wire_sha256": tested, "review_wire_sha256": checked,
                    **delivery_kinds,
                    "fix_attempt_id": evidence["attempt_id"], "review_attempt_id": review_attempt,
+                   "review_candidate_ref": review_identity["review_candidate_ref"],
+                   "review_generation": review_identity["review_generation"],
                    "validation_scope": "INDEPENDENT_REVIEW_OF_EXACT_REVISION",
                    "reusable": True}, "P6_EXPERIENCE_MEMORY")
-    PlanningService(kernel)._select(repo, wr, _key(scope), ref)
-    _record(kernel, repo, wr["work_id"], owner.principal_id, evidence["attempt_id"], "reviewed-repair", {
+    current = repo.one("selections", {"work_id": wr["work_id"], "selection_kind": _key(scope)})
+    if not current or current["artifact_ref"] != ref:
+        PlanningService(kernel)._select(repo, wr, _key(scope), ref)
+    _review_record(kernel, repo, wr["work_id"], owner.principal_id, namespace, "reviewed-repair", {
         "world_ref": wr, "phase": "STAGE_COMPLETED", "attempt_id": evidence["attempt_id"], "experience_ref": ref,
         "reflection_ref": plan["reflection_ref"], "error_ref": plan["error_ref"], "actual_fix": fix_ref,
-        "regression_result": review_ref, "scope": scope}, "P6_REFLECTION_RECORD")
+        "regression_result": review_ref, "scope": scope, **review_identity}, "P6_REFLECTION_RECORD")
 
 
 def revoke_experience(kernel, owner, wr, ref):

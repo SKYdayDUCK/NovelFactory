@@ -546,7 +546,8 @@ class AgentGateway:
         result = {"schema_version": "2.0", "task_id": task["task_id"], "generation": task["generation"],
                   "attempt_id": task["attempt_id"], "result_id": str(uuid5(UUID(audit["attempt_id"]), "task-result")),
                   "context_bundle_id": task["context_bundle_id"], "dependency_fingerprint": task["dependency_fingerprint"],
-                  "status": audit["result_status"], "artifacts": [audit_ref] + ([audit["output_ref"]] if audit["output_ref"] else []),
+                  "status": audit["result_status"], "artifacts": [audit_ref] + ([audit["output_ref"]] if audit["output_ref"] else [])
+                  + ([audit["normalization_ref"]] if audit.get("normalization_ref") else []),
                   "safe_summary": "External candidate recorded; no world, narrative, or release acceptance was performed."}
         def authorize_result(conn):
             self._binding(KernelRepository(conn, tables), principal, request, dynamic_live=binding.get("dynamic_live"))
@@ -698,7 +699,7 @@ class AgentGateway:
         if not self._mark_sent(principal, binding, attempt, request["worker_id"], authorize_dispatch):
             return {"status": "BLOCKED", "reason": "CALL_ALREADY_DISPATCHED", "attempt_id": attempt, "cost_status": "UNKNOWN_COST"}
         started = time.monotonic()
-        output_ref = response_ref = None
+        output_ref = response_ref = normalization_ref = None
         usage = {"input_tokens": None, "output_tokens": None, "cached_input_tokens": None,
                  "actual_amount": None, "currency": None, "cost_status": "UNKNOWN_COST"}
         outcome, result_status, reason, provider_receipt = "UNKNOWN", "FAILED", None, None
@@ -737,7 +738,23 @@ class AgentGateway:
             try:
                 envelope = json.loads(response.text, object_pairs_hook=_unique_pairs)
             except (ValueError, TypeError):
-                raise DomainError("INVALID_MODEL_OUTPUT", "External output is not one valid JSON object") from None
+                from .writer_format_normalization import (
+                    derive_completed_writer,
+                    record_normalization,
+                )
+
+                # Original bytes were already persisted above. A single frozen
+                # WorldRef quote can be derived only from complete HTTP stop
+                # evidence; every other malformed return retains its failure.
+                source = {"attempt_id": attempt, "request_sha256": request_hash,
+                          "input_ref": request["input_ref"], "response_ref": response_ref,
+                          "model_configuration": binding["config"], "provider_receipt": provider_receipt,
+                          **{key: binding["task"][key] for key in ("task_id", "generation", "context_bundle_id", "role_id")},
+                          "world_ref": binding["spec"]["world_ref"], "actor_id": binding["grant"]["actor_id"]}
+                with self.kernel.objects.lock(), self.kernel.db.uow() as repo:
+                    envelope, normalization = derive_completed_writer(self.kernel, repo, binding["task"], source,
+                        self.kernel.artifact(repo, response_ref, binding["task"]["work_id"], kind="AGENT_RESPONSE"))
+                    normalization_ref = record_normalization(self.kernel, repo, binding["task"], normalization)
             validate_contract("AgentModelResponse", envelope, "agent")
             expected = {"task_id": request["task_id"], "generation": request["generation"],
                         "context_bundle_id": binding["task"]["context_bundle_id"], "world_ref": binding["spec"]["world_ref"],
@@ -800,6 +817,8 @@ class AgentGateway:
                  "recorded_at": datetime.now(UTC).isoformat()}
         if binding.get("creative_snapshot"):
             audit["creative_context_ref"] = binding["creative_snapshot"][0]
+        if normalization_ref:
+            audit["normalization_ref"] = normalization_ref
         for key in ("dynamic_assignment_ref", "adaptive_instruction_ref"):
             if key in binding:
                 audit[key] = binding[key]

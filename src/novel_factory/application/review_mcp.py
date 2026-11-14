@@ -284,7 +284,10 @@ class ReviewMcpBroker:
                     lookup["predicate"]["enum"] = self.scope["query_scope"]["predicates"]
                     tool["description"] += " Fixed query plane: " + self.scope["query_scope"]["plane"] + "."
                 elif tool["name"] == "nf_review_material":
-                    tool["description"] += (" A diagnosis report may include frozen finding_provenance: exact historical report/draft"
+                    tool["description"] += (" Manuscript results include text_ref and passages[].span with server-computed Unicode offsets"
+                                            " and quote_sha256. For mandatory advice, cite text_ref as an ARTIFACT and copy the relevant"
+                                            " complete passage span into that evidence reference; do not calculate hashes or omit span."
+                                            " A diagnosis report may include frozen finding_provenance: exact historical report/draft"
                                             " versions and matching finding hashes, not a stale/current verdict. Compare all candidates.")
             self._result_limit = self.scope["result_byte_limit"] - len(canonical_bytes(self.tool_specs)) - 4096
             require(self._result_limit > 0, "CAPACITY_LIMIT", "Native tool schemas exceed the reserved input allowance")

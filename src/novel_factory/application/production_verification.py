@@ -12,6 +12,7 @@ from .internal_review_resolution import (
     WORLD_EVIDENCE,
     WORLD_INPUT,
     consume_resolution,
+    evidence_slots_instruction,
     record_resolution,
     request_from_blocked,
     request_from_fact_report,
@@ -59,7 +60,9 @@ def recover_verification(kernel, repo, gateway, node, task, error):
         **{key: frozen[key] for key in ("runtime_sha256", "model_config_sha256", "output_contract")},
         "method": "保持本次case_hash、原稿、WorldRef及全部问题不变，仅校正核查输出与证据对应。"
         "decision必须为包含case_hash和完整answers的JSON字符串；逐题按原index回答，explanation/correction各不超过256字，"
-        "每题最多3条证据。每题亲自查询相关主体、谓词、时点和人物认知切面，引用对应真实MCP查询回执及当前原稿/报告。"
+        "每题亲自查询相关主体、谓词、时点和人物认知切面。"
+        + evidence_slots_instruction()
+        + "不要将已经成功的工具结果改成自述查过。"
         "若DIAGNOSIS问题已解决必须给出不超过1000字的具体method；PENDING只可用PENDING_EVALUATION，已求值未知用UNKNOWN。"
         "PENDING必须按原稿scene发生区间查询，不能用board授权上限替代；全部已解决时deferred_questions必须为空。"
         "只有真实登记类ERROR才用UNREGISTERED，不能把VIEW_DENIED或UNRESOLVED说成缺登记。纯文本结论须引用本版两个独立不重叠span，"

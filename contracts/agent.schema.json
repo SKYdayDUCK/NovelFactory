@@ -3,6 +3,37 @@
   "$id": "https://novel-factory.example/contracts/2.1/agent.schema.json",
   "title": "P2 external Agent execution and accounting contracts",
   "$defs": {
+    "WriterFormatNormalization": {
+      "description": "A verified single closing-quote insertion in frozen writer WorldRef metadata. Original response and payload bytes remain unchanged.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "record_version": {"const": 1},
+        "policy": {"const": "nf-writer-worldref-closing-quote-v1"},
+        "operation": {"const": "INSERT_FROZEN_WORLDREF_UUID_CLOSING_QUOTE"},
+        "offset_codepoints": {"type": "integer", "minimum": 0, "maximum": 2000000},
+        "inserted_character": {"const": "\""},
+        "world_ref_field": {"enum": ["work_id", "branch_id", "world_revision_id"]},
+        "attempt_id": {"type": "string", "format": "uuid"},
+        "task_id": {"type": "string", "format": "uuid"},
+        "generation": {"type": "integer", "minimum": 1},
+        "source_world_ref": {"$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/WorldRef"},
+        "source_response_ref": {"$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"},
+        "source_input_ref": {"$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"},
+        "source_request_sha256": {"$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/Sha256"},
+        "original_response_sha256": {"$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/Sha256"},
+        "normalized_response_sha256": {"$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/Sha256"},
+        "original_payload_slice_sha256": {"$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/Sha256"},
+        "normalized_payload_slice_sha256": {"$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/Sha256"},
+        "candidate_sha256": {"$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/Sha256"},
+        "provider_calls_sent": {"const": 0},
+        "semantics": {"const": "STRUCTURAL_DERIVATION_NO_MODEL_OR_WORLD_ACCEPTANCE"}
+      },
+      "required": ["record_version", "policy", "operation", "offset_codepoints", "inserted_character", "world_ref_field",
+        "attempt_id", "task_id", "generation", "source_world_ref", "source_response_ref", "source_input_ref", "source_request_sha256",
+        "original_response_sha256", "normalized_response_sha256", "original_payload_slice_sha256", "normalized_payload_slice_sha256",
+        "candidate_sha256", "provider_calls_sent", "semantics"]
+    },
     "OutputContract": {
       "type": "object",
       "properties": {

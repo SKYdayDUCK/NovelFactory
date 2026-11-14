@@ -124,11 +124,24 @@ def verify_postpaid_transport(
     board_node=None,
     opening_slot=None,
     opening_director=False,
+    source_result=None,
 ):
     audit = audit_row["payload"]
     config, usage, raw = audit["model_configuration"], audit["usage"], response_row["payload"]
     wr, attempt = audit["world_ref"], call["attempt_id"]
     endpoint = urlsplit(config.get("endpoint") or "")
+    if source_result is not None:
+        # A controller's derivation may preserve the original FAILED row while
+        # installing a separate current result. Prove that exact source row,
+        # never a fabricated copy of the task's previous state.
+        saved = repo.one("task_results", {"result_id": source_result["result_id"],
+                         "task_id": task["task_id"], "generation": task["generation"]})
+        audit_ref = {key: audit_row[key] for key in ("artifact_id", "artifact_revision_id", "sha256")}
+        _check(syntax_source and not contract_source and not structural_source and board_node is not None
+               and task["role_id"] == "writer" and saved == source_result
+               and saved["result_id"] == str(uuid5(UUID(attempt), "task-result"))
+               and saved["payload_hash"] == fingerprint(saved["payload"])
+               and saved["payload"]["status"] == "FAILED" and saved["payload"]["artifacts"] == [audit_ref])
     _check(
         config.get("defer_invoice") is True
         and config.get("adapter_kind") == "deepseek"
@@ -215,8 +228,15 @@ def verify_postpaid_transport(
             job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})
             _check(job and job["config"].get("production_node") == board_node and
                    job["config"]["dispatch"]["input_ref"] == audit["input_ref"] and (syntax_source or contract_source))
-            board, _, _ = guard_send(kernel, repo, task, job["config"])
-            _check(board.get("production_mode") == "quality")
+            if source_result is None:
+                board, _, _ = guard_send(kernel, repo, task, job["config"])
+                _check(board.get("production_mode") == "quality")
+            else:
+                # The administrative derivation separately proves the frozen
+                # source board and current authority. Transport replay remains
+                # valid after that board has advanced to another window.
+                _check(bound_input["role_id"] == "writer" and bound_input["output_contract"] == {
+                    "name": "AgentTextOutput", "version": "agent"})
         if opening_slot is not None:
             interaction_id, actor = opening_slot
             group = repo.one("simulation_interactions", {"work_id": task["work_id"], "branch_id": task["branch_id"],
@@ -238,7 +258,8 @@ def verify_postpaid_transport(
             _check(structured_diagnostic(raw, audit, bound_input))
             return None, bound_input
         if syntax_source:
-            _check(task["state"] == "FAILED" and (design_scope or board_node is not None or opening_director or opening_slot is not None)
+            _check((task["state"] == "FAILED" or source_result is not None)
+                   and (design_scope or board_node is not None or opening_director or opening_slot is not None)
                    and audit["outcome"] == "REJECTED" and audit["result_status"] == "FAILED"
                    and audit["reason"] == "INVALID_MODEL_OUTPUT" and audit["output_ref"] is None)
             from .idea_repair import unparsed_diagnostic
@@ -250,7 +271,9 @@ def verify_postpaid_transport(
                 if unparsed_diagnostic(error) is not None:
                     return None, bound_input
             _check(False)
-        envelope = json.loads(raw["text"])
+        from .writer_format_normalization import replay_response
+
+        envelope = replay_response(kernel, repo, task, audit, response_row)
         if structural_source:
             _check(
                 task["state"] == "FAILED"

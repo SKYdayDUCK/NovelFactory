@@ -57,10 +57,10 @@ The verified run produced six scenes and 2,204 Unicode code points in 15 fixture
 
 | Area | Observed result |
 | --- | --- |
-| Correctness and recovery | Current unit/contract checks passed 824 cases and 17 subtests, with two platform skips. PostgreSQL shards and focused recovery runs are recorded separately; historical two-service, Redis and WAL/PITR evidence is retained. |
+| Correctness and recovery | Current unit/contract checks passed 852 cases and 17 subtests, with two platform skips. PostgreSQL shards and focused recovery runs are recorded separately; historical two-service, Redis and WAL/PITR evidence is retained. |
 | Capacity | Two ten-minute read runs with 500 logical agents completed 12,000 requests each. The 200-agent overload and 1000-agent open-arrival gates remain unmet. |
 | Editorial and billing evidence | The volume and provider fault scenarios used synthetic inputs. Human manuscript ratings and commercial invoices require separate evidence. |
-| Live readiness | An actual Codex engineering turn completed all three scoped MCP reads after repairing the native tool-host configuration. A/B production acceptance remains in progress; neither novel is complete. [Live tool and recovery evidence](reports/runtime-native-tools-20261114.md) |
+| Live readiness | Actual scoped MCP reads and automatic rereads now work. Writer identity formatting and independent-review record collisions received separate fixes. A/B production acceptance remains in progress; neither novel is complete. [Latest production observation](reports/runtime-review-format-20261114.md) · [Live tool evidence](reports/runtime-native-tools-20261114.md) |
 
 The services use Python, SQLAlchemy, PostgreSQL 17, optional Redis Streams, MCP over stdio, and a separate HTTP API. The contributing guide covers repository conventions. Historical designs and acceptance records remain available at their original paths. [Contributing](AGENTS.md) · [Engineering history](reports/p6_readiness/README.md) · [Capacity issue #13](https://github.com/SKYdayDUCK/NovelFactory/issues/13) · [GitHub Actions](https://github.com/SKYdayDUCK/NovelFactory/actions)
 

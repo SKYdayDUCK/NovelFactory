@@ -193,6 +193,22 @@ def _source_refs(request):
             *([request["parent_resolution_ref"], request["coverage_transition_ref"]] if "parent_case_hash" in request else [])]
 
 
+def evidence_slots_instruction():
+    """Share the per-answer receipt requirement with bounded correction tasks."""
+    return (
+        "每道题的answers[index].evidence_refs至少1条必须引用本轮nf_query_batch工具响应顶层receipt_ref："
+        "kind=ARTIFACT，artifact_ref复制该完整ArtifactRef；只在外层evidence_refs引用不够。"
+        "每题总计最多3条，先给真实query receipt保留1槽，其余2槽按结论选择。"
+        "纯文本CONFIRMED_CONFLICT/NO_CONFLICT的三槽示例：[本轮query receipt，当前text_ref的精确span A，"
+        "同一当前text_ref的精确span B]，A/B必须独立且不重叠，不再放第3个文本span挤掉query。"
+        "STALE_REPORT的三槽示例：[本轮query receipt，亲自读取的finding_provenance_ref，"
+        "该provenance明确指向的旧report_ref]，不要另加文本span替代query。"
+        "query必须覆盖本题所需主体、谓词和切面；能合并的selector放同一次nf_query_batch。"
+        "不得用查询items里的数据引用、材料读取receipt、原稿或报告ref冒充query receipt。"
+        "以上是槽位说明，所有实际引用必须来自本轮工具响应；外层evidence_refs同时包含逐题引用。"
+    )
+
+
 def assignment(request):
     require(request.get("case_hash") == _case_hash(request), "INVALID_EVIDENCE", "Internal question case changed")
     metadata = {key: request[key] for key in ("case_hash", "source_kind", "world_ref", "source_draft_ref",
@@ -225,7 +241,8 @@ def assignment(request):
         "status仅CONFIRMED_CONFLICT、NO_CONFLICT、STALE_REPORT、UNREGISTERED、EXTERNAL_DECISION_REQUIRED、PENDING_EVALUATION、UNKNOWN。"
         "explanation说明查询所得，最长256字；correction为核查或局部修订步骤字符串或null，最长256字，确认矛盾时必须非空；"
         "同一窗口可把各题所需主体、谓词、at及BELIEF的actor_id/known_at组合放在一次nf_query_batch中；每题引用确实覆盖该题selector的回执，不用重复同一查询。"
-        "每题evidence_refs最多3条，引用实际查询回执、原文span或报告的标准EvidenceRef，详细查询保留在可信回执中，外层evidence_refs也须包含这些引用。"
+        + evidence_slots_instruction()
+        + "详细查询保留在可信回执中。"
         "method只提出本场下一步方法，最长1000字，不写正文；DIAGNOSIS在内部问题已解决时必须给出method，FACT_RECONCILIATION可省略。UNREGISTERED保留待世界核查。"
         "所有问题必须给结论或明确待核类型，不得用自称查过代替工具回执，不把本结果当作文学验收。\n"
         + json.dumps(metadata, ensure_ascii=False, separators=(",", ":")))
