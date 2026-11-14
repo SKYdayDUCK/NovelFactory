@@ -14,14 +14,17 @@ from novel_factory.application import production_pipeline as boards
 from novel_factory.application.agent_gateway import AgentGateway
 from novel_factory.application.rolling_production import register_rolling, rolling_status
 from novel_factory.application.supervisor import HostJournal, RuntimeSupervisor
+from novel_factory.domain.canonical import fingerprint
 from novel_factory.domain.errors import DomainError
 from novel_factory.infrastructure import runtime_providers
+from novel_factory.infrastructure.creative_config import CreativeHarnessConfig
 from novel_factory.infrastructure.runtime_providers import RuntimeModelAdapter
 
 pytestmark = [pytest.mark.postgres, pytest.mark.integration]
 
 
-def synthetic_production(kernel, monkeypatch, *, lengths=None, target=(6, 10), diagnosis="new", editorial=False):
+def synthetic_production(kernel, monkeypatch, *, lengths=None, target=(6, 10), diagnosis="new", editorial=False,
+                         harness=False, token_reservation=100000):
     """Use actual native ledgers, never the real Codex host or HTTP send path."""
     from novel_factory.application.production_extent import bind_extent
     f = setup_batch(kernel, count=1)
@@ -29,6 +32,7 @@ def synthetic_production(kernel, monkeypatch, *, lengths=None, target=(6, 10), d
     params = request(kernel, f, 1)
     params["profile"]["overrides"]["production_mode"] = "quality"
     params["routes"] = {"draft": "creative", "review": "review", "plan": "review"}
+    params["token_reservation"] = token_reservation
     with kernel.objects.lock(), kernel.db.uow() as repo:
         bind_extent(kernel, repo, owner, wr,
                     {"preset": "short", "unit": "han_characters", "min": target[0], "max": target[1]})
@@ -94,7 +98,8 @@ def synthetic_production(kernel, monkeypatch, *, lengths=None, target=(6, 10), d
     creative = RuntimeModelAdapter(providers.Profile("deepseek", "deepseek-flash", "SYNTHETIC_NO_CREDENTIAL", 8192),
                                    HostJournal(kernel))
     gateway = AgentGateway(kernel, {"creative": creative, "review": native},
-                           material_reader=boards.production_material_reader(kernel))
+                           material_reader=boards.production_material_reader(kernel),
+                           creative_harness=CreativeHarnessConfig(enabled=harness))
     register_rolling(kernel, gateway, owner, **params)
     return gateway, owner, wr, calls, diagnoses
 
@@ -211,3 +216,55 @@ def test_strategy_consumer_rejects_source_or_generation_rebinding(kernel_env, mo
     assert restored["nodes"][target]["generation"] == board["nodes"][target]["generation"]
     assert any(n["state"] == "STRATEGY_READY" for n in restored["nodes"].values())
     assert len(calls) == before
+
+
+def test_long_legacy_history_resumes_one_unsent_diagnosis_and_delivers_complete_findings(kernel_env, monkeypatch):
+    from novel_factory.application.production_strategy import request_strategy
+    kernel = kernel_env["kernel"]
+    gateway, owner, wr, calls, diagnoses = synthetic_production(kernel, monkeypatch, lengths=[1, 5, 3, 2],
+                                                              harness=True, token_reservation=500000)
+    board, _ = drive(kernel, gateway, owner, wr,
+        until=lambda b: any(n.get("reason") == "STRATEGY_REASSESSMENT_REQUIRED" for n in b["nodes"].values()))
+    target = next(key for key, node in board["nodes"].items() if node["stage"] == "draft")
+    findings = [{"description": "Unabridged synthetic hard issue " * 1400},
+                {"actual_han": 2, "target_han": {"min": 6, "max": 10}}]
+    assert len(json.dumps(findings)) > 32000
+    with kernel.objects.lock(), kernel.db.uow() as repo:
+        repo.one("works", {"work_id": wr["work_id"]}, lock="update")
+        bound = kernel.in_transaction(repo)
+        board = boards._load(bound, repo, wr["work_id"], wr["branch_id"])
+        writer = board["nodes"][target]
+        writer.update(revision_count=75, repair_allowance={"revision_baseline": 75, "reassessment_baseline": 0})
+        latest = deepcopy(writer["extent_repairs"][-1])
+        writer["extent_repairs"] = [deepcopy(latest) for _ in range(35)]
+        writer["repair_plans"] = [{"method": f"Legacy method {index}: " + "local history " * 10,
+                                   "decision": "CHANGED_STRATEGY", "signature": fingerprint(index),
+                                   "private_diagnostic": "Immutable legacy trace " * 120}
+                                  for index in range(41)]
+        request_strategy(board, target, writer, findings, latest)
+        node = next(node for node in board["nodes"].values() if node["stage"] == "reassessment")
+        frozen = deepcopy(node["reassessment_request"])
+        # Reproduce the historical failed enrollment: there was no task and no send.
+        node.update(state="STOPPED", reason="INVALID_ARGUMENT")
+        boards._save(bound, repo, owner, board)
+    board, _ = drive(kernel, gateway, owner, wr,
+        until=lambda b: any(n["state"] == "STRATEGY_READY" for n in b["nodes"].values()))
+    assert len(diagnoses) == 1 and len(board["nodes"][target]["reassessments"]) == 1
+    assert board["nodes"][target]["revision_count"] == 75
+    node = next(node for node in board["nodes"].values() if node["stage"] == "reassessment")
+    assert node["reassessment_request"] == frozen
+    packet = next(user for identity, user, _ in calls if identity["role_id"] == "chief_editor")
+    assert len(packet["assignment"]) <= 32000
+    compact = json.loads(packet["assignment"].rsplit("\n", 1)[1])
+    assert "findings" not in compact and compact["findings_sha256"] == fingerprint(findings)
+    material = next(item["value"] for item in packet["structured_evidence"]
+                    if item["ref"] == frozen["report_ref"])
+    assert material["findings"] == findings and material["prior_methods"] == frozen["prior_methods"]
+    assert material["history_fingerprint"] == frozen["history_fingerprint"]
+    with kernel.db.uow(write=False) as repo:
+        tasks = repo.many("tasks", {"work_id": wr["work_id"], "role_id": "chief_editor"})
+        assert len(tasks) == 1 and tasks[0]["state"] == "ACCEPTED"
+        snapshots = repo.many("artifacts", {"work_id": wr["work_id"], "kind": "CREATIVE_CONTEXT_SNAPSHOT"})
+        model_input = next(row["payload"]["model_input"] for row in snapshots
+                           if row["payload"]["packet"]["scope"]["task_id"] == tasks[0]["task_id"])
+        assert any(item["value"].get("findings") == findings for item in model_input["structured_evidence"])

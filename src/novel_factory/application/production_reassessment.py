@@ -15,6 +15,8 @@ from .kernel import require
 
 MAX_REVISIONS = 12
 MAX_REASSESSMENTS = 2
+MAX_METHOD_CHARACTERS = 1000
+MAX_ASSIGNMENT_CHARACTERS = 32000
 READY = "STRATEGY_READY"
 BLOCKED = "REASSESSMENT_BLOCKED"
 EXHAUSTED = "REPAIR_BUDGET_EXHAUSTED"
@@ -87,22 +89,97 @@ def reassessment_request(board, target, reader, findings, plan):
     return deepcopy(request)
 
 
+def _method_summary(method):
+    if len(method) <= MAX_METHOD_CHARACTERS:
+        return method
+    return {"sha256": fingerprint(method), "characters": len(method)}
+
+
+def _recent_history(history):
+    """Interleave family tails: no family hides the latest other failure type."""
+    recent = []
+    for index in range(1, 7):
+        for family, rows in history.items():
+            if len(rows) < index:
+                continue
+            row = rows[-index]
+            summary = {"family": family}
+            for key in ("method", "decision", "signature", "actual", "distance"):
+                value = row.get(key)
+                if value is not None:
+                    summary[key] = _method_summary(value) if key == "method" else value
+            recent.append(summary)
+            if len(recent) == 6:
+                return list(reversed(recent))
+    return list(reversed(recent))
+
+
 def reassessment_assignment(request):
-    """Use the existing chief-editor contract without granting approval power."""
-    return (
+    """Bound the task assignment; complete findings arrive as scoped materials.
+
+    The board retains the full immutable request for validation and audit. This
+    rendering never copies its unbounded findings, histories or private fields.
+    """
+    methods = list(dict.fromkeys(request["prior_methods"]))
+    history = request["history"]
+    compact = {key: request[key] for key in (
+        "record_version", "world_ref", "target", "writer_task_id", "writer_generation",
+        "revision_count", "round", "source_draft_ref", "report_ref", "review_stage",
+        "failed_signature", "history_fingerprint",
+    )}
+    compact.update(request_sha256=fingerprint(request), findings_sha256=fingerprint(request["findings"]),
+                   findings_count=len(request["findings"]),
+                   history_counts={family: len(rows) for family, rows in history.items()},
+                   history=_recent_history(history), prior_methods_count=len(methods),
+                   prior_methods_sha256=fingerprint(methods),
+                   prior_methods=[method for method in methods if len(method) <= MAX_METHOD_CHARACTERS][-6:],
+                   oversized_prior_methods=[_method_summary(method) for method in methods
+                                            if len(method) > MAX_METHOD_CHARACTERS][-6:])
+    instructions = (
         "本任务仅诊断重复返工，不能批准原稿、关闭审稿问题、降低验收要求、改写正文或改变世界事实。"
+        "完整问题清单在 authorized_materials 的精确 report_ref 材料中；以下仅为历史摘要，不能据摘要忽略硬问题。"
         "阅读本次给定原稿、独立审稿或实测证据，解释旧方法为何没有收敛；比较历史方法，提出具体且不同的新修订步骤。"
         "只改变本场后续写作方法，保留人物视角、已接受事件与所有独立审核。禁止要求审核者通过或忽略问题。"
-        "按 AgentDecisionOutput 返回：decision 为给 Flash 写作者的可执行新方法；reason 为有本次证据的根因诊断；"
+        "按 AgentDecisionOutput 返回：decision 为给 Flash 写作者的可执行新方法，最多1000字符；reason 为有本次证据的根因诊断；"
         "若材料不足或无法在当前范围内解决，在 deferred_questions 写明具体阻塞，不猜测或伪造解决。"
         "evidence_refs 必须引用 source_draft_ref 和 report_ref，kind 均为 ARTIFACT；只引用本任务冻结输入。"
         "此方法尚未验证，不能宣称它已成为通用 Skill。后续仍由独立评审决定是否满足原验收要求。\n"
-        + json.dumps(request, ensure_ascii=False)
     )
+    assignment = instructions + json.dumps(compact, ensure_ascii=False)
+    # JSON control-character escapes can expand a 1000-character method sixfold.
+    # Remove only historical summaries; complete current findings stay in the
+    # separately authorized report material and all originals remain on board.
+    for field in ("history", "prior_methods"):
+        while len(assignment) > MAX_ASSIGNMENT_CHARACTERS and compact[field]:
+            compact[field].pop(0)
+            assignment = instructions + json.dumps(compact, ensure_ascii=False)
+    require(len(assignment) <= MAX_ASSIGNMENT_CHARACTERS,
+            "CAPACITY_LIMIT", "Diagnosis assignment metadata exceeds its frozen contract")
+    return assignment
 
 
 def _normalized_method(method):
     return " ".join(method.split()).casefold()
+
+
+def assignment_request_sha256(assignment):
+    """Find one frozen request digest, retaining appended format-repair guidance."""
+    require(isinstance(assignment, str), "INVALID_EVIDENCE", "Diagnosis assignment is unavailable")
+    digests = set()
+    for line in assignment.split("\n"):
+        try:
+            value = json.loads(line)
+        except (ValueError, TypeError):
+            continue
+        if not isinstance(value, dict) or "request_sha256" not in value:
+            continue
+        digest = value["request_sha256"]
+        require(isinstance(digest, str) and len(digest) == 64
+                and all(char in "0123456789abcdef" for char in digest.lower()),
+                "INVALID_EVIDENCE", "Diagnosis request digest is invalid")
+        digests.add(digest.lower())
+    require(len(digests) == 1, "INVALID_EVIDENCE", "Diagnosis assignment requires one unambiguous request digest")
+    return digests.pop()
 
 
 def record_reassessment(kernel, repo, owner, board, node, task, evidence, candidate):
@@ -133,6 +210,11 @@ def record_reassessment(kernel, repo, owner, board, node, task, evidence, candid
             and evidence["model_configuration"].get("adapter_kind") == "codex-cli",
             "INVALID_EVIDENCE", "Only the bound Codex editorial task may diagnose a production repair")
     spec = repo.one("task_inputs", {"task_id": task["task_id"], "generation": task["generation"]})["spec"]
+    require(evidence["input_ref"] in spec["input_artifacts"],
+            "INVALID_EVIDENCE", "Diagnosis input is outside its frozen task manifest")
+    frozen = kernel.artifact(repo, evidence["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]
+    require(assignment_request_sha256(frozen["assignment"]) == fingerprint(request),
+            "INVALID_EVIDENCE", "Diagnosis request differs from its frozen assignment")
     sources = [request["source_draft_ref"], request["report_ref"]]
     require(all(ref in spec["input_artifacts"] for ref in sources),
             "VIEW_DENIED", "Diagnosis sources are outside its frozen task input")
@@ -148,7 +230,7 @@ def record_reassessment(kernel, repo, owner, board, node, task, evidence, candid
     reason = None
     if candidate["deferred_questions"]:
         reason = "REASSESSMENT_NEEDS_INPUT"
-    elif not method or len(method.encode("utf-8")) > 16000 or not candidate["reason"].strip():
+    elif not method or len(method) > MAX_METHOD_CHARACTERS or not candidate["reason"].strip():
         reason = "REASSESSMENT_INVALID_METHOD"
     elif _normalized_method(method) in {_normalized_method(old) for old in request["prior_methods"]}:
         reason = "REASSESSMENT_REPEATED_METHOD"

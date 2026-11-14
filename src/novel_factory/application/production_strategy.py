@@ -18,6 +18,29 @@ def request_strategy(board, target, reader, findings, plan):
     return target
 
 
+def resume_unsent_strategy(board):
+    """Resume only a diagnosis rejected before task enrollment or provider send."""
+    from .production_reassessment import reassessment_assignment
+    for identity, node in board["nodes"].items():
+        if (node["stage"] != "reassessment" or node["state"] != "STOPPED"
+                or node.get("reason") != "INVALID_ARGUMENT" or node.get("task_id") or node.get("output_ref")):
+            continue
+        request = node["reassessment_request"]
+        writer = board["nodes"][request["target"]]
+        require(writer.get("output_ref") == request["source_draft_ref"]
+                and writer.get("task_id") == request["writer_task_id"]
+                and writer.get("generation") == request["writer_generation"]
+                and writer.get("revision_count", 0) == request["revision_count"]
+                and writer.get("repair_allowance", {}) == request["repair_allowance"],
+                "STALE_GENERATION", "Unsent diagnosis no longer belongs to this draft")
+        require(len(reassessment_assignment(request)) <= 32000,
+                "INVALID_ARGUMENT", "Diagnosis instructions exceed the frozen input contract")
+        node.update(state="PENDING")
+        node.pop("reason")
+        return identity
+    return None
+
+
 def consume_strategy(kernel, repo, board):
     from .production_reassessment import repair_budget
     work = board["world_ref"]["work_id"]

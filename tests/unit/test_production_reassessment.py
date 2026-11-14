@@ -1,4 +1,5 @@
 """Pure diagnosis-policy checks; no model, database or generated story text."""
+import json
 from copy import deepcopy
 from types import SimpleNamespace
 from uuid import NAMESPACE_URL, uuid5
@@ -11,6 +12,7 @@ from novel_factory.application.production_reassessment import (
     MAX_REASSESSMENTS,
     MAX_REVISIONS,
     READY,
+    assignment_request_sha256,
     reassessment_assignment,
     reassessment_request,
     record_reassessment,
@@ -44,6 +46,7 @@ def setup_case(*, extent=False, round=1):
             "task_kind": "editorial_decision", "work_id": wr["work_id"], "branch_id": wr["branch_id"]}
     evidence = {"task_id": task["task_id"], "generation": 1, "world_ref": wr,
                 "attempt_id": uid("attempt"), "output_ref": ref("candidate"),
+                "input_ref": ref("agent-input"),
                 "model_configuration": {"adapter_kind": "codex-cli"}}
     candidate = {"decision": "Use a distinct evidence-first revision method", "reason": "Prior ordering omitted verification",
                  "deferred_questions": [], "evidence_refs": [
@@ -53,10 +56,12 @@ def setup_case(*, extent=False, round=1):
 
 
 class Repo:
-    def __init__(self, task, sources):
+    def __init__(self, task, sources, request):
         self.task = task
-        self.sources = sources
-        self.artifacts = {}
+        self.sources = [*sources, ref("agent-input")]
+        self.artifacts = {ref("agent-input")["artifact_revision_id"]: {
+            "ref": ref("agent-input"), "kind": "AGENT_INPUT",
+            "payload": {"assignment": reassessment_assignment(request)}}}
 
     def one(self, table, query):
         if table == "task_inputs":
@@ -89,7 +94,7 @@ def deliver(case, *, kernel=None, repo=None):
     board, node, task, evidence, candidate = case
     request = node["reassessment_request"]
     kernel = kernel or Kernel()
-    repo = repo or Repo(task, [request["source_draft_ref"], request["report_ref"]])
+    repo = repo or Repo(task, [request["source_draft_ref"], request["report_ref"]], request)
     result = record_reassessment(kernel, repo, SimpleNamespace(principal_id=uid("owner")),
                                  board, node, task, evidence, candidate)
     return result, kernel, repo
@@ -105,6 +110,79 @@ def test_request_freezes_extent_evidence_and_method_history():
     board["nodes"]["draft:scene"]["repair_plans"][0]["method"] = "Later mutation"
     assert request["history"]["repair_plans"][0]["method"] == "Prior approach"
     assert "AgentDecisionOutput" in reassessment_assignment(request)
+
+
+@pytest.mark.parametrize("escaped", [False, True])
+def test_assignment_bounds_long_history_without_copying_or_mutating_hard_findings(escaped):
+    _, node, *_ = setup_case(extent=True)
+    request = node["reassessment_request"]
+    method = "\x00" * 999 if escaped else "旧方法" * 10000
+    request["prior_methods"] = [method + str(index) for index in range(75)] + ["Short latest method"] * 3
+    rows = [{"method": method + str(index), "decision": "CHANGED_STRATEGY", "signature": fingerprint(index),
+             "actual": index, "distance": 100 - index, "private_diagnostic": "must stay off assignment" * 1000}
+            for index in range(75)]
+    request["history"] = {"repair_plans": rows[:41], "extent_repairs": rows[41:]}
+    request["history_fingerprint"] = fingerprint(request["history"])
+    request["findings"] = [{"description": "Full hard issue must remain in scoped material" * 1000}] * 20
+    original = deepcopy(request)
+    assignment = reassessment_assignment(request)
+    compact = json.loads(assignment.rsplit("\n", 1)[1])
+    assert len(assignment) <= 32000 and "findings" not in compact
+    assert compact["findings_count"] == 20 and compact["findings_sha256"] == fingerprint(request["findings"])
+    assert compact["request_sha256"] == fingerprint(request)
+    assert len(compact["history"]) <= 6 and len(compact["prior_methods"]) <= 6
+    assert set().union(*(set(row) for row in compact["history"])) <= {
+        "family", "method", "decision", "signature", "actual", "distance"}
+    assert "private_diagnostic" not in assignment and request == original
+
+
+@pytest.mark.parametrize("characters,expected", [(1000, READY), (1001, BLOCKED)])
+def test_new_method_fits_verified_experience_contract(characters, expected):
+    case = setup_case()
+    case[-1]["decision"] = "步" * characters
+    (_, status), _, _ = deliver(case)
+    assert status == expected
+
+
+def test_repeat_detection_uses_complete_prior_methods_even_when_assignment_omits_old_one():
+    case = setup_case()
+    request = case[1]["reassessment_request"]
+    request["prior_methods"] = ["Old omitted method", *[f"Recent method {index}" for index in range(6)]]
+    compact = json.loads(reassessment_assignment(request).rsplit("\n", 1)[1])
+    assert "Old omitted method" not in compact["prior_methods"]
+    case[-1]["decision"] = "Old omitted method"
+    (reference, status), _, repo = deliver(case)
+    assert status == BLOCKED
+    assert repo.artifacts[reference["artifact_revision_id"]]["payload"]["reason"] == "REASSESSMENT_REPEATED_METHOD"
+
+
+def test_changed_findings_cannot_be_adopted_against_an_old_frozen_assignment():
+    case = setup_case()
+    request = case[1]["reassessment_request"]
+    repo = Repo(case[2], [request["source_draft_ref"], request["report_ref"]], request)
+    request["findings"].append({"diagnostic": "Different hard issue after enrollment"})
+    with pytest.raises(DomainError, match="frozen assignment"):
+        deliver(case, repo=repo)
+
+
+def test_appended_format_repair_guidance_retains_frozen_request_binding():
+    case = setup_case()
+    request = case[1]["reassessment_request"]
+    repo = Repo(case[2], [request["source_draft_ref"], request["report_ref"]], request)
+    frozen = repo.artifacts[ref("agent-input")["artifact_revision_id"]]["payload"]
+    frozen["assignment"] += '\n上一次任务的结构化输出诊断与修复方法：{"diagnostic":"required"}\n{"method":"repair JSON"}'
+    assert assignment_request_sha256(frozen["assignment"]) == fingerprint(request)
+    (_, status), _, _ = deliver(case, repo=repo)
+    assert status == READY
+
+
+@pytest.mark.parametrize("extra", ["f" * 64, "invalid", 123])
+def test_conflicting_or_invalid_frozen_request_digest_is_rejected(extra):
+    _, node, *_ = setup_case()
+    assignment = reassessment_assignment(node["reassessment_request"])
+    assignment += "\n" + json.dumps({"request_sha256": extra})
+    with pytest.raises(DomainError, match="digest"):
+        assignment_request_sha256(assignment)
 
 
 def test_changing_failure_signatures_does_not_reset_global_allowance():

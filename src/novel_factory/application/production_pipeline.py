@@ -20,7 +20,7 @@ from novel_factory.application.runtime_tasks import RuntimeTaskService
 from novel_factory.application.scene_revision import editorial_blockers, revise_scene
 from novel_factory.application.volume_successor import _selected
 from novel_factory.contracts.registry import validate_contract
-from novel_factory.domain.canonical import fingerprint, strict_json_loads
+from novel_factory.domain.canonical import canonical_bytes, fingerprint, strict_json_loads
 from novel_factory.domain.errors import DomainError
 from novel_factory.domain.planning import condition_result
 from novel_factory.domain.temporal import point_key
@@ -368,7 +368,7 @@ def _enroll(kernel, repo, gateway, owner, board, identity, *, frozen_assignment=
         require(_selected(repo, work, "PLAN_MANIFEST:" + board["volume_id"]) == manifest_ref,
                 "STALE_PLAN", "Diagnosis plan changed before enrollment")
         cut = {"plane": "PLAN", "plan_manifest_ref": manifest_ref}
-        materials = [request["source_draft_ref"]]
+        materials = [request["source_draft_ref"], request["report_ref"]]
         refs = [manifest_ref, request["report_ref"]]
         assignment = reassessment_assignment(request)
     elif stage == "draft":
@@ -418,8 +418,20 @@ def _enroll(kernel, repo, gateway, owner, board, identity, *, frozen_assignment=
             refs.append(strategy_ref)
         if strategy := node["revision_feedback"].get("strategy_instruction"):
             assignment += strategy
-        assignment += "请只修订指出的问题并返回完整新正文；其余原稿的视角、措辞和事件边界尽量保留。" + json.dumps(
-            node["revision_feedback"]["findings"], ensure_ascii=False)
+        assignment += "请只修订指出的问题并返回完整新正文；其余原稿的视角、措辞和事件边界尽量保留。"
+        if frozen_assignment is None:
+            brief = _artifact(kernel, repo, work, owner, "PRODUCTION_REVISION_BRIEF", {
+                "world_ref": wr, "scene_ref": node["scene_ref"], "prior_draft_ref": node["prior_draft_ref"],
+                "feedback": node["revision_feedback"]})
+            node["revision_brief_ref"] = brief
+            materials.append(brief)
+            refs.append(brief)
+            assignment += "完整修订问题在 authorized_materials 的 PRODUCTION_REVISION_BRIEF 中，逐项核验，不得忽略硬问题。"
+        elif node.get("revision_brief_ref"):
+            materials.append(node["revision_brief_ref"])
+            refs.append(node["revision_brief_ref"])
+        else:
+            assignment += json.dumps(node["revision_feedback"]["findings"], ensure_ascii=False)
     seconds = int((datetime.fromisoformat(board["authorization"]["deadline"]) - repo.now()).total_seconds())
     require(seconds > 0, "TASK_EXPIRED", "No time remains")
     repair = (node.get("schema_repairs") or [None])[-1]
@@ -462,7 +474,9 @@ def _enroll(kernel, repo, gateway, owner, board, identity, *, frozen_assignment=
         knowledge_cut=cut, context_tokens=min(100000, board["token_reservation"]) if stage == "facts" else 20000,
         input_ref=task.agent_input["input_ref"],
         budget_id=board["budget_id"], reserve_amount=board["reserve_amount"], token_reservation=board["token_reservation"])
-    supervisor.install_job(repo, task.task, {**config, "production_node": identity})
+    supervisor.install_job(repo, task.task, {**config, "production_node": identity,
+        **({"production_revision_brief_ref": node["revision_brief_ref"]}
+           if stage == "draft" and node.get("revision_brief_ref") else {})})
     node.update(state="ENROLLED", task_id=task.task["task_id"], enrolled_at=repo.now().isoformat())
     repo.conn.execute(text("INSERT INTO nf_trace_tasks(task_id,trace_id,volume_id) VALUES (:task,:trace,:volume)"),
                       {"task": task.task["task_id"], "trace": node.get("chapter_id", board["series_id"]),
@@ -489,6 +503,39 @@ def production_material_reader(kernel):
             job = repo.one("supervisor_jobs", {"task_id": task_id})
             if not job or not ({"production_node", "returned_edition"} & job["config"].keys()):
                 return None
+            task = repo.one("tasks", {"task_id": task_id})
+            board = _load(kernel, repo, task["work_id"], task["branch_id"])
+            node = board and board["nodes"].get(job["config"].get("production_node"))
+            brief_ref = job["config"].get("production_revision_brief_ref")
+            if brief_ref and artifact_ref == brief_ref:
+                task, _, spec, _ = NarrativeService(kernel)._task(repo, owner, task_id, generation)
+                require(node and node["state"] == "ENROLLED" and node.get("task_id") == task_id
+                        and task["context_bundle_id"] == context_bundle_id
+                        and (task["role_id"], task["task_kind"]) == ("writer", "targeted_revision")
+                        and artifact_ref in spec["input_artifacts"],
+                        "VIEW_DENIED", "Revision brief is outside this writer task")
+                brief = kernel.artifact(repo, brief_ref, task["work_id"], kind="PRODUCTION_REVISION_BRIEF")["payload"]
+                require(brief["world_ref"] == spec["world_ref"] and brief["scene_ref"] == node["scene_ref"]
+                        and brief["prior_draft_ref"] == node["prior_draft_ref"]
+                        and brief["feedback"] == node["revision_feedback"],
+                        "STALE_GENERATION", "Revision brief differs from the enrolled draft and feedback")
+                return canonical_bytes({"source_ref": brief_ref, **brief})
+            if node and node["stage"] == "reassessment" and artifact_ref == node["reassessment_request"]["report_ref"]:
+                from .production_reassessment import assignment_request_sha256
+                task, _, spec, _ = NarrativeService(kernel)._task(repo, owner, task_id, generation)
+                request = node["reassessment_request"]
+                frozen = kernel.artifact(repo, job["config"]["dispatch"]["input_ref"], task["work_id"], kind="AGENT_INPUT")["payload"]
+                require(node["state"] == "ENROLLED" and node.get("task_id") == task_id
+                        and task["context_bundle_id"] == context_bundle_id
+                        and (task["role_id"], task["task_kind"]) == ("chief_editor", "editorial_decision")
+                        and artifact_ref in spec["input_artifacts"] and artifact_ref in frozen["material_refs"]
+                        and assignment_request_sha256(frozen["assignment"]) == fingerprint(request)
+                        and spec["world_ref"] == request["world_ref"],
+                        "VIEW_DENIED", "Diagnosis report is outside this frozen reading task")
+                report = kernel.artifact(repo, artifact_ref, task["work_id"])
+                return canonical_bytes({"source_ref": artifact_ref, "report": report["payload"],
+                    "findings": request["findings"], "prior_methods": request["prior_methods"],
+                    "history_fingerprint": request["history_fingerprint"]})
         return NarrativeService(kernel).read_agent_material(owner, task_id=task_id, generation=generation,
             context_bundle_id=context_bundle_id, artifact_ref=artifact_ref)
     return read
@@ -775,9 +822,12 @@ def advance_pipeline(kernel, gateway, controller, work, branch):
         nodes = board["nodes"]
         expired = repo.now() >= datetime.fromisoformat(board["authorization"]["deadline"])
         if not expired:
-            from .production_strategy import consume_strategy
+            from .production_strategy import consume_strategy, resume_unsent_strategy
             if consumed := consume_strategy(bound, repo, board):
                 return {"status": "STRATEGY_CONSUMED", "node_id": consumed,
+                        "board_ref": _save(bound, repo, controller, board)}
+            if resumed := resume_unsent_strategy(board):
+                return {"status": "STRATEGY_DIAGNOSIS_RESUMED", "node_id": resumed,
                         "board_ref": _save(bound, repo, controller, board)}
         settlement = _settlement(bound, repo, board) if any(n["state"] in {
             "PROVISIONAL_WITH_ASSUMPTIONS", "READY_FOR_ADOPTION"} for n in nodes.values()) else None

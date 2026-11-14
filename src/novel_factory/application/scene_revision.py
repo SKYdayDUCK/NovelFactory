@@ -12,7 +12,7 @@ def editorial_blockers(issues):
 def _archive(node):
     # Keep the failed or superseded result, immutable task identity and report.
     record = {key: node.pop(key) for key in ("task_id", "output_ref", "generation", "completed_at",
-              "enrolled_at", "reason", "revision_feedback", "prior_draft_ref") if key in node}
+              "enrolled_at", "reason", "revision_feedback", "prior_draft_ref", "revision_brief_ref") if key in node}
     if record:
         node.setdefault("history", []).append({**record, "state": node["state"]})
     node["state"] = "PENDING"
