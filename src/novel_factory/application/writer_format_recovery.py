@@ -286,6 +286,7 @@ def verify_derived_writer_result(kernel, repo, gateway, task):
             "INVALID_EVIDENCE", "Derived writer candidate is not an exact replay of its original bytes")
     if audit.get("creative_context_ref"):
         from .creative_context_store import check_candidate_snapshot
-        check_candidate_snapshot(kernel, repo, task, audit)
+        check_candidate_snapshot(kernel, repo, task, {**audit, "output_ref": proof["candidate_ref"],
+                                                     "derivation_ref": proof_ref})
     return {**audit, "output_ref": proof["candidate_ref"], "derivation_ref": proof_ref,
             "normalization_ref": proof["normalization_ref"], "delivery_kind": "PROGRAM_DERIVED"}, candidate["payload"]

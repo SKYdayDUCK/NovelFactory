@@ -34,6 +34,7 @@ def test_one_frozen_volume_needs_actual_model_opinions_and_a_separate_decision(
         gateway = connect(kernel, adapter)
         server.packet_candidate = answer
         params = request(kernel, f, 1)
+        params["target_chapters"] = 9  # An estimate does not manufacture eight unwritten story goals.
         if return_final in {"quality_repair", "child_edition", "unchanged_child"}:
             params["profile"].setdefault("overrides", {})["production_mode"] = "quality"
         register_rolling(kernel, gateway, owner, **params)

@@ -498,11 +498,12 @@ def _enroll(kernel, repo, gateway, owner, board, identity, *, frozen_assignment=
         assignment = "依据获准场景卡写出正文，保留人物视角、披露边界和已接受前序交接。"
         if extent := node.get("han_characters"):
             target = (extent["min"] + extent["max"]) // 2
-            assignment += (f"本场正文分配 {extent['min']}–{extent['max']} 个汉字，目标约 {target} 个。"
-                           "字数只计 text 中的汉字，标点、空白和 JSON 字段不计。")
+            assignment += (f"本场篇幅参考为 {extent['min']}–{extent['max']} 个汉字，约 {target} 个。"
+                           "篇幅参考不作为返工、阻断或补章条件；按完整场景推进故事并保留必要事件、人物认知与披露。")
     else:
         materials = [board["nodes"][p]["output_ref"] for p in node["parents"]]
-        assignment = "独立阅读本章给定顺序的全部场景，报告文学观察、证据和仍未判断的问题。"
+        assignment = ("独立阅读本章给定顺序的全部场景，报告文学观察、证据和仍未判断的问题。"
+                      "篇幅数字只作参考；须改意见应指出具体事实、认知或文学问题，字数本身不构成必改理由。")
     if stage == "review" and (board.get("production_mode") == "quality" or board.get("max_reworks")):
         assignment += "须改的具体问题标为 BLOCKER 或 CHANGE_REQUEST；每项 subject_ref 引用给定原稿的 draft_ref。可选的文学意见列为建议。"
     if stage == "facts":

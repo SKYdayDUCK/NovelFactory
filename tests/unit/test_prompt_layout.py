@@ -55,3 +55,15 @@ def test_explicit_context_recipe_array_priority_is_preserved():
     packet = {"creative_materials": source}
     assert material_json(packet) == canonical_bytes(packet).decode()
     assert json.loads(material_json(packet))["creative_materials"] == source
+
+
+def test_author_length_policy_is_control_guidance_without_changing_story_materials():
+    packet = {"assignment": "write and review the story", "creative_materials": {"prose": ["原文保留。"]},
+              "length": {"min": 1500, "max": 2500}}
+    messages = role_messages("frozen role and schema", packet, {"task_id": "bound-task"})
+    assert messages[0]["content"] == "frozen role and schema"
+    assert json.loads(messages[1]["content"]) == packet
+    assert "advisory only" in messages[-1]["content"]
+    assert "add chapters solely to meet a length target" in messages[-1]["content"]
+    assert "factual, character-knowledge and literary review requirements" in messages[-1]["content"]
+    assert '"task_id":"bound-task"' in messages[-1]["content"]

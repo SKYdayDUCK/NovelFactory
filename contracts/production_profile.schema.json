@@ -505,6 +505,35 @@
         }
       ]
     },
+    "StoryCompletionAdvice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decision", "reason", "unfulfilled_commitments"],
+      "properties": {
+        "decision": {"enum": ["COMPLETE", "CONTINUE"]},
+        "reason": {"type": "string", "minLength": 1, "maxLength": 8000, "pattern": "\\S"},
+        "unfulfilled_commitments": {
+          "type": "array", "maxItems": 32,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["source_ref", "source_path", "commitment", "draft_ref", "quote", "missing_outcome", "continuation_goal"],
+            "properties": {
+              "source_ref": {"$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"},
+              "source_path": {"type": "string", "minLength": 1, "maxLength": 200},
+              "commitment": {"type": "string", "minLength": 1, "maxLength": 16000, "pattern": "\\S"},
+              "draft_ref": {"$ref": "https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/ArtifactRef"},
+              "quote": {"type": "string", "minLength": 1, "maxLength": 2000, "pattern": "\\S"},
+              "missing_outcome": {"type": "string", "minLength": 1, "maxLength": 4000, "pattern": "\\S"},
+              "continuation_goal": {"type": "string", "minLength": 1, "maxLength": 1200, "pattern": "\\S"}
+            }
+          }
+        }
+      },
+      "allOf": [
+        {"if": {"properties": {"decision": {"const": "COMPLETE"}}}, "then": {"properties": {"unfulfilled_commitments": {"maxItems": 0}}}},
+        {"if": {"properties": {"decision": {"const": "CONTINUE"}}}, "then": {"properties": {"unfulfilled_commitments": {"minItems": 1}}}}
+      ]
+    },
     "FrozenPhaseAdvice": {
       "type": "object",
       "additionalProperties": false,

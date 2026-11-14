@@ -3,25 +3,16 @@
 import json
 
 from novel_factory.domain.canonical import canonical_bytes
+
 from .kernel import require
 from .prompt_schema import prompt_schema
-
 
 _DESIGN_CONTRACTS = {"FirstWorldDesign", "OpeningWorldDesign", "EnvironmentalOpeningWorldDesign", "ShortEndingPlan"}
 
 
-# Each chapter in a native intake plan currently materializes one writer scene.
-# This planning target leaves headroom for a Chinese scene in the production
-# writer's 8192-token structured response. It is not a tokenizer conversion.
-_HAN_PER_PLANNED_SCENE = 5000
-
-
 def initial_window_minimum(profile, length, maximum):
-    if (profile.get("production_mode") != "quality" or not isinstance(length, dict)
-            or length["unit"] != "han_characters"):
-        return 1
-    needed = (length["min"] + _HAN_PER_PLANNED_SCENE - 1) // _HAN_PER_PLANNED_SCENE
-    return min(needed, maximum)
+    """New plans choose chapter structure from the story, never a word estimate."""
+    return 1
 
 
 def frozen_window_minimum(assignment, maximum):

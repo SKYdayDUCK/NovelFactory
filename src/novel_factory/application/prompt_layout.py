@@ -35,7 +35,11 @@ def material_json(packet):
 
 
 def role_messages(system, packet, identity, *, exact_envelope=False):
-    suffix = "Task response binding. Copy these identifying fields exactly.\nIdentity: " + canonical_bytes(identity).decode()
+    suffix = ("Story completion policy: finish the story with coherent plot and character logic. "
+              "Word counts, chapter lengths and estimated manuscript length are advisory only. "
+              "Do not require revision, reject a story or add chapters solely to meet a length target. "
+              "Keep factual, character-knowledge and literary review requirements; preserve complete output.\n"
+              "Task response binding. Copy these identifying fields exactly.\nIdentity: " + canonical_bytes(identity).decode())
     if exact_envelope:
         envelope = {key: value for key, value in identity.items() if key != "dependency_fingerprint"}
         envelope.update(status="SUCCEEDED", unresolved_questions=[], payload={})

@@ -26,7 +26,7 @@ pytestmark = [pytest.mark.postgres, pytest.mark.integration]
 
 
 def synthetic_production(kernel, monkeypatch, *, lengths=None, target=(6, 10), diagnosis="new", editorial=False,
-                         harness=False, token_reservation=100000):
+                         harness=False, token_reservation=100000, story_failures=False):
     """Use actual native ledgers, never the real Codex host or HTTP send path."""
     from novel_factory.application.production_extent import bind_extent
     f = setup_batch(kernel, count=1)
@@ -45,6 +45,7 @@ def synthetic_production(kernel, monkeypatch, *, lengths=None, target=(6, 10), d
     sizes = iter(lengths) if lengths is not None else None
     calls = []
     diagnoses = []
+    story_failures_by_task = {}
 
     def invoke(profile, packet, *, authorize, record, receipt_target=None):
         identity = json.loads(packet.messages[-1]["content"].split("\nIdentity: ", 1)[1].splitlines()[0])
@@ -73,7 +74,17 @@ def synthetic_production(kernel, monkeypatch, *, lengths=None, target=(6, 10), d
         calls.append(({**identity, "task_kind": task_kind}, deepcopy(user), profile.kind))
         result = answer(user)
         if identity["role_id"] == "writer" and sizes is not None:
-            result["text"] = "字" * next(sizes)
+            fixture_code = next(sizes)
+            result["text"] = "字" * fixture_code
+            if story_failures:
+                # These are explicit engineering scenario codes, not length
+                # judgments. The selected bad scenario omits its causal bridge;
+                # the independent reader actually reads and cites that marker.
+                failure = story_failures == "changing" or fixture_code != 7
+                if failure:
+                    result["text"] = "合成样本：结果已出现，必要起因未交代。" + result["text"]
+                    story_failures_by_task[identity["task_id"]] = (
+                        str(len(story_failures_by_task)) if story_failures == "changing" else "missing-cause")
         elif identity["role_id"] == "chief_editor":
             frozen = json.loads(user["assignment"].rsplit("\n", 1)[1])
             diagnoses.append(frozen)
@@ -84,14 +95,21 @@ def synthetic_production(kernel, monkeypatch, *, lengths=None, target=(6, 10), d
                       "deferred_questions": ["Synthetic missing prerequisite"] if diagnosis == "needs_input" else [],
                       "evidence_refs": [{"kind": "ARTIFACT", "artifact_ref": frozen[key]}
                                         for key in ("source_draft_ref", "report_ref")]}
-        elif editorial and identity["role_id"] == "reviewer" and task_kind == "literary" and not diagnoses:
+        elif identity["role_id"] == "reviewer" and task_kind == "literary":
             delivered = json.loads(user["authorized_materials"][0]["content"])
             source = delivered["draft_ref"]
-            result["issues"] = [{"issue_id": str(uuid4()), "category": "LITERARY", "severity": "BLOCKER",
+            with kernel.db.uow(write=False) as repo:
+                writer_id = kernel.artifact(repo, source, wr["work_id"], kind="NARRATIVE_DRAFT")["payload"]["task_id"]
+            failure_code = story_failures_by_task.get(writer_id)
+            if failure_code is not None or editorial and not diagnoses:
+                result["issues"] = [{"issue_id": str(uuid4()), "category": "LITERARY", "severity": "BLOCKER",
                 "subject_ref": source, "description": "Synthetic recurring editorial issue",
                 "evidence_refs": [{"kind": "ARTIFACT", "artifact_ref": delivered["text_ref"],
                                    "span": span_for(delivered["text"], 0, len(delivered["text"]))}],
                 "suggested_change": "Resolve the synthetic issue", "disposition": "OPEN", "issue_kind": "CHANGE_REQUEST"}]
+                if failure_code is not None:
+                    result["issues"][0].update(description="Synthetic causal prerequisite missing: " + failure_code,
+                                               suggested_change="Supply the missing causal bridge in the next fixture scenario")
         envelope = {**identity, "status": "SUCCEEDED", "payload": result, "unresolved_questions": []}
         if native:
             if job and job["config"].get("required_review_mcp") and task_kind == "verification":
@@ -163,11 +181,12 @@ def drive(kernel, gateway, owner, wr, *, until=None, ticks=120):
     pytest.fail(f"Durable synthetic production exceeded its tick bound: {previous!r}")
 
 
-@pytest.mark.parametrize("editorial", [False, True], ids=["extent-plateau", "editorial-recurrence"])
+@pytest.mark.parametrize("editorial", [False, True], ids=["causal-plateau", "editorial-recurrence"])
 def test_codex_changes_local_method_then_flash_and_independent_review_freeze(kernel_env, monkeypatch, editorial):
     kernel = kernel_env["kernel"]
-    lengths = None if editorial else [1, 5, 3, 2, 7]
-    gateway, owner, wr, calls, diagnoses = synthetic_production(kernel, monkeypatch, lengths=lengths, editorial=editorial)
+    lengths = None if editorial else [1, 5, 3, 7]
+    gateway, owner, wr, calls, diagnoses = synthetic_production(kernel, monkeypatch, lengths=lengths, editorial=editorial,
+                                                              story_failures=not editorial)
     board, cursor = drive(kernel, gateway, owner, wr)
     assert cursor["state"] == "FROZEN" and cursor["frozen_chapters"] == 1
     writer = next(n for n in board["nodes"].values() if n["stage"] == "draft")
@@ -195,7 +214,7 @@ def test_codex_changes_local_method_then_flash_and_independent_review_freeze(ker
 def test_diagnosis_without_new_solution_stops_without_more_paid_work(kernel_env, monkeypatch, diagnosis):
     kernel = kernel_env["kernel"]
     gateway, owner, wr, calls, diagnoses = synthetic_production(kernel, monkeypatch,
-        lengths=[1, 5, 3, 2, 2], diagnosis=diagnosis)
+        lengths=[1, 5, 3, 2, 2], diagnosis=diagnosis, story_failures=True)
     board, cursor = drive(kernel, gateway, owner, wr,
         until=lambda b: any(n.get("reason") == "REASSESSMENT_BLOCKED" for n in b["nodes"].values()))
     writer = next(n for n in board["nodes"].values() if n["stage"] == "draft")
@@ -221,17 +240,18 @@ def test_diagnosis_without_new_solution_stops_without_more_paid_work(kernel_env,
 
 
 @pytest.mark.parametrize("mode", ["plateau", "improving"])
-def test_sustained_extent_failure_has_finite_total_repair_or_diagnosis_allowance(kernel_env, monkeypatch, mode):
+def test_sustained_story_failure_has_finite_total_repair_or_diagnosis_allowance(kernel_env, monkeypatch, mode):
     kernel = kernel_env["kernel"]
     target = (100, 101) if mode == "improving" else (6, 10)
     lengths = list(range(1, 15)) if mode == "improving" else [1, 5, 3, 2, 2, 2]
-    gateway, owner, wr, calls, diagnoses = synthetic_production(kernel, monkeypatch, lengths=lengths, target=target)
+    gateway, owner, wr, calls, diagnoses = synthetic_production(kernel, monkeypatch, lengths=lengths, target=target,
+                                                              story_failures="changing" if mode == "improving" else True)
     board, cursor = drive(kernel, gateway, owner, wr,
-        until=lambda b: any(n.get("reason") == "REPAIR_BUDGET_EXHAUSTED" for n in b["nodes"].values()))
+        until=lambda b: any(n.get("reason") == "REPAIR_BUDGET_EXHAUSTED" for n in b["nodes"].values()), ticks=200)
     writer = next(n for n in board["nodes"].values() if n["stage"] == "draft")
     assert writer["state"] == "STOPPED" and cursor["frozen_chapters"] == 0
     assert len(diagnoses) == (0 if mode == "improving" else 2)
-    assert writer["revision_count"] == (12 if mode == "improving" else 5)
+    assert writer["revision_count"] == (12 if mode == "improving" else 4)
     before = len(calls)
     for _ in range(6):
         RuntimeSupervisor(kernel, gateway).run_once(owner, wr["work_id"], wr["branch_id"])
@@ -241,7 +261,7 @@ def test_sustained_extent_failure_has_finite_total_repair_or_diagnosis_allowance
 def test_strategy_consumer_rejects_source_or_generation_rebinding(kernel_env, monkeypatch):
     from novel_factory.application.production_strategy import consume_strategy
     kernel = kernel_env["kernel"]
-    gateway, owner, wr, calls, diagnoses = synthetic_production(kernel, monkeypatch, lengths=[1, 5, 3, 2, 7])
+    gateway, owner, wr, calls, diagnoses = synthetic_production(kernel, monkeypatch, lengths=[1, 5, 3, 2, 7], story_failures=True)
     board, _ = drive(kernel, gateway, owner, wr,
                      until=lambda b: any(n["state"] == "STRATEGY_READY" for n in b["nodes"].values()))
     node = next(n for n in board["nodes"].values() if n["stage"] == "reassessment")
@@ -268,9 +288,9 @@ def test_long_legacy_history_resumes_one_unsent_diagnosis_and_delivers_complete_
     from novel_factory.application.production_strategy import request_strategy
     kernel = kernel_env["kernel"]
     gateway, owner, wr, calls, diagnoses = synthetic_production(kernel, monkeypatch, lengths=[1, 5, 3, 2],
-                                                              harness=True, token_reservation=500000)
+                                                              harness=True, token_reservation=500000, story_failures=True)
     board, _ = drive(kernel, gateway, owner, wr,
-        until=lambda b: any(n.get("reason") == "STRATEGY_REASSESSMENT_REQUIRED" for n in b["nodes"].values()))
+        until=lambda b: any(n["stage"] == "reassessment" and n["state"] == "PENDING" for n in b["nodes"].values()))
     target = next(key for key, node in board["nodes"].items() if node["stage"] == "draft")
     findings = [{"description": "Unabridged synthetic hard issue " * 1400},
                 {"actual_han": 2, "target_han": {"min": 6, "max": 10}}]
@@ -281,13 +301,17 @@ def test_long_legacy_history_resumes_one_unsent_diagnosis_and_delivers_complete_
         board = boards._load(bound, repo, wr["work_id"], wr["branch_id"])
         writer = board["nodes"][target]
         writer.update(revision_count=75, repair_allowance={"revision_baseline": 75, "reassessment_baseline": 0})
-        latest = deepcopy(writer["extent_repairs"][-1])
+        latest = deepcopy(writer["repair_plans"][-1])
         writer["extent_repairs"] = [deepcopy(latest) for _ in range(35)]
         writer["repair_plans"] = [{"method": f"Legacy method {index}: " + "local history " * 10,
                                    "decision": "CHANGED_STRATEGY", "signature": fingerprint(index),
                                    "private_diagnostic": "Immutable legacy trace " * 120}
                                   for index in range(41)]
-        request_strategy(board, target, writer, findings, latest)
+        node = next(node for node in board["nodes"].values() if node["stage"] == "reassessment")
+        writer["reassessments"] = []
+        board["nodes"].pop(next(key for key, value in board["nodes"].items() if value is node))
+        reader = board["nodes"]["review:" + writer["chapter_id"]]
+        request_strategy(board, target, reader, findings, latest)
         node = next(node for node in board["nodes"].values() if node["stage"] == "reassessment")
         frozen = deepcopy(node["reassessment_request"])
         # Reproduce the historical failed enrollment: there was no task and no send.

@@ -19,7 +19,7 @@ def main(argv=None):
         "worker_pool_failure", "context_mismatch", "book_review_return", "needs_input", "review_questions",
         "internal_question_reread", "internal_question_strategy", "review_mcp_recovery", "review_mcp_exhausted",
         "verification_unknown", "stale_finding_provenance", "world_coverage_recovery", "world_coverage_blocked",
-        "multi_chapter_coverage", "coverage_semantic_changed"), default="novel")
+        "multi_chapter_coverage", "coverage_semantic_changed", "story_continuation"), default="novel")
     parser.add_argument("--seed", type=int, default=7)
     parser.add_argument("--runs", type=int, default=1, help="Repeat with consecutive seeds")
     parser.add_argument("--books", type=int, default=1)

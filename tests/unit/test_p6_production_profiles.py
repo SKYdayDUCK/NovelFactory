@@ -133,14 +133,14 @@ def test_open_ended_chapter_goal_accepts_larger_manuscripts():
     assert _first_window_limit(profile, idea) == profile["window_chapters"]
     for count in (100, 101, 501):
         check_length(length, 999999, count)
-    with pytest.raises(DomainError):
-        check_length(length, 999999, 99)
+    check_length(length, 999999, 99)
     with pytest.raises(DomainError):
         parse_inspiration({**idea, "length": {**length, "unit": "han_characters"}})
 
 
 def test_review_diagnostic_only_transfers_known_misplaced_payload_keys():
     import json
+
     from novel_factory.application.idea_repair import structured_diagnostic
     raw = {"text": json.dumps({"summary": "", "issues": [], "untrusted_key": "private"})}
     diagnosis = structured_diagnostic(raw, {"reason": "INVALID_ARGUMENT"}, {"role_id": "reviewer"})

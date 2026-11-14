@@ -19,6 +19,7 @@ from novel_factory.application.production_pipeline import (
     pipeline_status,
     production_material_reader,
 )
+from novel_factory.application.rolling_production import _load as load_rolling
 from novel_factory.application.rolling_production import rolling_status
 from novel_factory.application.supervisor import RuntimeSupervisor
 from novel_factory.domain.errors import DomainError
@@ -27,7 +28,7 @@ from novel_factory.interfaces.bindings import read_private_config, runtime_from_
 pytestmark = [pytest.mark.postgres, pytest.mark.integration]
 
 
-@pytest.mark.parametrize("outcome", ["approved", "rejected", "unknown_cost", "continue", "quality_continue"])
+@pytest.mark.parametrize("outcome", ["approved", "rejected", "unknown_cost", "continue", "quality_continue", "continue_capped"])
 def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypatch, outcome):
     monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[2] / "scripts"))
     cli = importlib.import_module("p6_idea")
@@ -37,9 +38,9 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
         "length": {"preset": "short", "unit": "han_characters", "min": 6000, "max": 10000},
         "genre": "现实",
     }
-    continuation = outcome in {"continue", "quality_continue"}
+    continuation = outcome in {"continue", "quality_continue", "continue_capped"}
     if continuation:
-        idea["length"] = {"preset": "medium_long", "unit": "chapters", "min": 3, "max": 3}
+        idea["length"] = {"preset": "medium_long", "unit": "chapters", "min": 1, "max": 1}
     allowance = {
         "adapter_id": "test",
         "reserve_amount": "0.1",
@@ -83,6 +84,18 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
             allowance["production_mode"] = "quality"
 
         def candidate(packet):
+            try:
+                assignment = json.loads(packet["assignment"])
+            except json.JSONDecodeError:
+                assignment = {}
+            if assignment.get("phase") == "STORY_COMPLETION":
+                sources = next(json.loads(row["content"]) for row in packet["authorized_materials"]
+                               if "commitments" in json.loads(row["content"]))
+                passage = json.loads(packet["authorized_materials"][0]["content"])
+                return {"decision": "CONTINUE", "reason": "Synthetic approved story outcome remains unfulfilled.",
+                        "unfulfilled_commitments": [{**sources["commitments"][0], "draft_ref": passage["draft_ref"],
+                            "quote": passage["text"], "missing_outcome": "Synthetic final outcome is still absent.",
+                            "continuation_goal": "Synthetic final outcome must occur."}]}
             if packet["context"]["role_id"] == "world_designer":
                 return expected
             if packet["context"]["role_id"] == "volume_director":
@@ -93,7 +106,7 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
             ref = json.loads(packet["assignment"])["candidate_ref"]
             issues = (
                 []
-                if outcome in {"approved", "continue", "quality_continue"}
+                if outcome == "approved" or continuation
                 else [
                     {
                         "issue_id": str(uuid4()),
@@ -209,12 +222,38 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
         if continuation:
             canon = cli._load_private(private / "supervisor.json")
             owner, wr = kernel.authenticate(canon["token"]), receipt["world_ref"]
+            if outcome == "continue_capped":
+                from sqlalchemy import update
+
+                from novel_factory.infrastructure.database import tables
+
+                with kernel.db.uow() as repo:
+                    repo.conn.execute(update(tables["grants"]).where(tables["grants"].c.grant_id == owner.grant_id)
+                                      .values(max_story_time={"tick": 2, "phase": 1}))
+            frozen_inputs = None
             for _ in range(65):
                 step = RuntimeSupervisor(kernel, gateway).run_once(
                     owner, wr["work_id"], wr["branch_id"]
                 )
+                cursor = rolling_status(kernel, owner, wr["work_id"], wr["branch_id"])
+                if cursor["state"] == "FROZEN":
+                    from novel_factory.application import frozen_editing
+
+                    if frozen_editing.status(kernel, owner, wr["work_id"], wr["branch_id"])["status"] == "NOT_ENROLLED":
+                        with kernel.db.uow(write=False) as repo:
+                            frozen_inputs = {(row["task_id"], row["generation"]): row["spec"]
+                                             for row in repo.many("task_inputs", {})
+                                             if row["spec"]["world_ref"]["work_id"] == wr["work_id"]}
+                        frozen_editing.start(kernel, owner, wr["work_id"], wr["branch_id"])
                 if step["status"] in {"NEXT_PLAN_BLOCKED", "NEXT_PLAN_ACCEPTED"}:
                     break
+            if outcome == "continue_capped":
+                assert step["status"] == "NEXT_PLAN_BLOCKED" and step["reason"] == "VIEW_DENIED"
+                with kernel.db.uow(write=False) as repo:
+                    current = rolling_status(kernel, owner, wr["work_id"], wr["branch_id"])
+                    assert current["chapter_count"] == 2 and current["window_count"] == 1
+                    assert not repo.many("receipts", {"work_id": wr["work_id"], "command_type": "ROLLING_STORY_TIME_EXTENSION"})
+                return
             assert step["status"] == "NEXT_PLAN_ACCEPTED", step
             if outcome == "quality_continue":
                 assert len(next_reviews) == 2 and next_reviews[0] != next_reviews[1]
@@ -225,7 +264,16 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
 
             cursor = rolling_status(kernel, owner, wr["work_id"], wr["branch_id"])
             assert cursor["chapter_count"] == 3 and cursor["window_count"] == 2
+            assert cursor["target_chapters"] == 1  # Necessary plot continuation, never length padding.
             assert cursor["frozen_chapters"] == 2
+            with kernel.db.uow(write=False) as repo:
+                current = load_rolling(kernel, repo, wr["work_id"], wr["branch_id"])
+                assert current["allowance"]["story_time"] == {"tick": 3, "phase": 1}
+                extension = repo.one("receipts", {"work_id": wr["work_id"], "command_type": "ROLLING_STORY_TIME_EXTENSION"})
+                proof = kernel.artifact(repo, extension["payload"]["extension_ref"], wr["work_id"], kind="ROLLING_STORY_TIME_EXTENSION")["payload"]
+                assert proof["from_story_time"] == {"tick": 2, "phase": 1} and proof["to_story_time"] == {"tick": 3, "phase": 1}
+                assert frozen_inputs and all(repo.one("task_inputs", {"task_id": key[0], "generation": key[1]})["spec"] == spec
+                                             for key, spec in frozen_inputs.items())
             board = pipeline_status(
                 kernel, owner, wr["work_id"], wr["branch_id"], include_outputs=True
             )
@@ -248,7 +296,9 @@ def test_model_design_delivery_recovery_and_scope(kernel_env, tmp_path, monkeypa
             assert tasks_by_route == {
                 "test": {("writer", "scene_draft")},
                 "internal-review": {("reviewer", "epistemic"), ("reviewer", "literary"),
+                                    ("reviewer", "continuity"),
                                     ("reviewer", "fact"), ("evidence_maintainer", "assertion_extract"),
+                                    ("chief_editor", "editorial_decision"),
                                     ("volume_director", "window_plan")},
             }
 

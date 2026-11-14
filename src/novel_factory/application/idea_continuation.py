@@ -15,21 +15,23 @@ from novel_factory.application.kernel import require
 from novel_factory.application.planning import PlanningService
 from novel_factory.application.production_pipeline import _current_owner
 from novel_factory.application.runtime_tasks import RuntimeTaskService
-from .idea_window import window_diagnostics
-from .quality_memory import PAUSED, plan_repair, reflect_repair, verify_method
-from .scene_revision import editorial_blockers
 from novel_factory.application.supervisor import RuntimeSupervisor
 from novel_factory.application.volume_successor import _selected
 from novel_factory.domain.errors import DomainError
 
+from .idea_window import window_diagnostics
+from .quality_memory import PAUSED, plan_repair, reflect_repair, verify_method
+from .scene_revision import editorial_blockers
 
-def _pending(cursor):
-    return (
-        cursor
-        and cursor["state"] == "FROZEN"
-        and cursor["index"] + 1 == cursor["window_count"]
-        and cursor["chapter_count"] < cursor.get("target_chapters", cursor["chapter_count"])
-    )
+
+def _pending(kernel, repo, cursor):
+    if not (cursor and cursor["state"] == "FROZEN"
+            and cursor["index"] + 1 == cursor["window_count"]):
+        return None
+    from .story_completion import current_decision
+
+    decision = current_decision(kernel, repo, cursor)
+    return decision if decision and decision["advice"]["decision"] == "CONTINUE" else None
 
 
 def _enroll(kernel, repo, gateway, owner, wr, cursor, assignment, refs, *, reviewing, review_kind="fact"):
@@ -65,9 +67,12 @@ def _enroll(kernel, repo, gateway, owner, wr, cursor, assignment, refs, *, revie
         token_budget=auth["token_reservation"],
         currency=budget["currency"],
     )
-    RuntimeSupervisor(kernel, gateway).enroll(
-        owner,
-        prepared.task["task_id"],
+    supervisor = RuntimeSupervisor(kernel, gateway)
+    kernel.authorize(repo, owner, wr["work_id"], "ADMIN", wr["branch_id"])
+    config, frozen_input = supervisor.dispatch_config(
+        repo,
+        prepared.spec,
+        repo.one("grants", {"grant_id": prepared.principal.grant_id}),
         manifest_ref=prepared.manifest_ref,
         knowledge_cut={"plane": "WORLD"},
         context_tokens=20000,
@@ -76,6 +81,9 @@ def _enroll(kernel, repo, gateway, owner, wr, cursor, assignment, refs, *, revie
         reserve_amount=auth["reserve_amount"],
         token_reservation=auth["token_reservation"],
     )
+    if reviewing and gateway.adapters[frozen_input["adapter_id"]].configuration.get("auth_mode") == "host-login":
+        config["required_review_mcp"] = True
+    supervisor.install_job(repo, prepared.task, config)
     return prepared.task["task_id"]
 
 
@@ -107,7 +115,7 @@ def _memory(kernel, repo, owner, cursor, checkpoint, work, wr):
     return recent
 
 
-def _plan_turn(kernel, gateway, repo, owner, wr, cursor, key, source):
+def _plan_turn(kernel, gateway, repo, owner, wr, cursor, key, source, completion):
     work = wr["work_id"]
     checkpoint = rolling._payload(kernel, repo, wr, cursor["last_checkpoint"], "ROLLING_CHECKPOINT")
     require(
@@ -123,10 +131,9 @@ def _plan_turn(kernel, gateway, repo, owner, wr, cursor, key, source):
     design = kernel.artifact(repo, source["design_ref"], work, kind="INITIAL_STORY_DESIGN")[
         "payload"
     ]
-    max_goals = min(
-        cursor["target_chapters"] - cursor["chapter_count"], cursor["profile"]["window_chapters"]
-    )
-    base = {"work_head": wr, "checkpoint": cursor["last_checkpoint"], "plan_ref": previous_plan}
+    max_goals = cursor["profile"]["window_chapters"]
+    base = {"work_head": wr, "checkpoint": cursor["last_checkpoint"], "plan_ref": previous_plan,
+            "story_completion_ref": completion["decision_ref"]}
     quality = cursor["profile"].get("production_mode") == "quality"
     planned = kernel._prior(repo, owner, work, "P6_NEXT_PLANNER", key, {})
     history = []
@@ -149,8 +156,10 @@ def _plan_turn(kernel, gateway, repo, owner, wr, cursor, key, source):
             "last_plan_goals": [n["goal"] for n in previous["nodes"][-4:]],
             "actual_text": _memory(kernel, repo, owner, cursor, checkpoint, work, wr),
             "frozen_chapters": cursor["chapter_count"],
-            "target_chapters": cursor["target_chapters"],
+            "estimated_chapters": cursor["target_chapters"],
+            "extent_policy": "篇幅仅作参考；只为完成有证据的未尽剧情规划必要章节，不为凑字数增加内容。",
             "maximum_new_goals": max_goals,
+            "unfinished_story": completion["advice"]["unfulfilled_commitments"],
         }
         if source.get("opening_version") and cursor["profile"]["character_simulation"]:
             assignment["simulation_scope"] = {
@@ -168,7 +177,7 @@ def _plan_turn(kernel, gateway, repo, owner, wr, cursor, key, source):
             wr,
             cursor,
             assignment,
-            [source["design_ref"], previous_plan, cursor["last_checkpoint"]],
+            [source["design_ref"], previous_plan, cursor["last_checkpoint"], completion["decision_ref"]],
             reviewing=False,
         )
         receipt = {**base, "task_id": tid, "status": "NEXT_PLAN_ENROLLED"}
@@ -189,7 +198,7 @@ def _plan_turn(kernel, gateway, repo, owner, wr, cursor, key, source):
         packet = kernel.artifact(repo, evidence["input_ref"], work, kind="AGENT_INPUT")["payload"]
         assignment = json.loads(packet["assignment"])
         assignment.update(previous_candidate=plan, targeted_findings=diagnostics, repair_strategy=decision["method"])
-        refs = [source["design_ref"], previous_plan, cursor["last_checkpoint"], evidence["output_ref"]]
+        refs = [source["design_ref"], previous_plan, cursor["last_checkpoint"], evidence["output_ref"], completion["decision_ref"]]
         if proof["output_ref"] != evidence["output_ref"]:
             refs.append(proof["output_ref"])
         tid = _enroll(kernel, repo, gateway, owner, wr, cursor, assignment, refs, reviewing=False)
@@ -203,7 +212,7 @@ def _plan_turn(kernel, gateway, repo, owner, wr, cursor, key, source):
     require(
         0 < len(goals) <= max_goals and len(set(goals)) == len(goals),
         "CAPACITY_LIMIT",
-        "Next volume must fit the remaining authorized chapter extent",
+        "Next volume must fit the bounded planning window",
     )
     reviewed = kernel._prior(repo, owner, work, "P6_NEXT_PLAN_REVIEW", round_key, {})
     if reviewed is None:
@@ -212,6 +221,8 @@ def _plan_turn(kernel, gateway, repo, owner, wr, cursor, key, source):
             "candidate": plan,
             "candidate_ref": evidence["output_ref"],
             "actual_text": _memory(kernel, repo, owner, cursor, checkpoint, work, wr),
+            "unfinished_story": completion["advice"]["unfulfilled_commitments"],
+            "instructions": "核对每个新目标确实解决指定未完剧情，保留已接受事实与人物因果，不为字数或预计章数添加内容。",
         }
         tid = _enroll(
             kernel,
@@ -221,7 +232,7 @@ def _plan_turn(kernel, gateway, repo, owner, wr, cursor, key, source):
             wr,
             cursor,
             review_brief,
-            [evidence["output_ref"], previous_plan, cursor["last_checkpoint"]],
+            [evidence["output_ref"], previous_plan, cursor["last_checkpoint"], completion["decision_ref"]],
             reviewing=True,
         )
         receipt = {
@@ -277,9 +288,19 @@ def _plan_turn(kernel, gateway, repo, owner, wr, cursor, key, source):
             "source": source["design_ref"], "start_tick": cursor["chapter_count"], "run_id": cursor["run_id"],
         })
         PlanningService(kernel)._select(repo, wr, "P6_VOLUME_SIM_PLAN:" + volume["volume_id"], simulation_plan)
-    cursor_ref = rolling.append_generated_volume(kernel, repo, owner, cursor, volume)
     for row in (task, review):
         kernel.tasks.accept_in_transaction(repo.conn, row["task_id"], row["generation"])
+    from .production_pipeline import _artifact
+
+    authorization = {**base, "run_id": cursor["run_id"], "volume_id": volume["volume_id"],
+                     "adopted_plan_ref": refs["plan_ref"], "plan_task": task["task_id"],
+                     "review_task": review["task_id"], "plan_output": evidence["output_ref"],
+                     "review_output": proof["output_ref"]}
+    authorization_ref = _artifact(kernel, repo, work, owner, "STORY_CONTINUATION_AUTHORIZATION", authorization)
+    kernel._receipt(repo, owner, wr, "STORY_CONTINUATION_ADOPT", key, authorization,
+                    {"authorization_ref": authorization_ref})
+    cursor_ref = rolling.append_generated_volume(kernel, repo, owner, cursor, volume,
+                                                 authorization_ref=authorization_ref)
     receipt = {
         "status": "NEXT_PLAN_ACCEPTED",
         "cursor_ref": cursor_ref,
@@ -300,13 +321,14 @@ def _plan_turn(kernel, gateway, repo, owner, wr, cursor, key, source):
 
 def advance_idea_planning(kernel, gateway, controller, work, branch):
     with kernel.db.uow(write=False) as repo:
-        if not _pending(rolling._load(kernel, repo, work, branch)):
+        if not _pending(kernel, repo, rolling._load(kernel, repo, work, branch)):
             return None
     with kernel.objects.lock(), kernel.db.uow() as repo:
         repo.one("works", {"work_id": work}, lock="update")
         kernel.authorize(repo, controller, work, "ADMIN", branch)
         cursor = rolling._load(kernel, repo, work, branch)
-        if not _pending(cursor):
+        completion = _pending(kernel, repo, cursor)
+        if not completion:
             return None
         owner = _current_owner(kernel, repo, cursor)
         wr = kernel.head(repo, work, branch)
@@ -319,7 +341,7 @@ def advance_idea_planning(kernel, gateway, controller, work, branch):
         try:
             with repo.conn.begin_nested():
                 return _plan_turn(
-                    bound, gateway.with_kernel(bound), repo, owner, wr, cursor, key, source
+                    bound, gateway.with_kernel(bound), repo, owner, wr, cursor, key, source, completion
                 )
         except DomainError as error:
             # A cost can reconcile on the same attempt. An unresolved call remains eligible

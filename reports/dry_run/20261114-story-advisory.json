@@ -1,0 +1,74 @@
+{
+  "schema_version": "nf.sanitized-dry-run-evidence.v1",
+  "date": "2026-11-14",
+  "source_lf_sha256": {
+    "src/novel_factory/simulation/scheduler.py": "0d77530294701cf6c862f455387ea90c2a107efb346c080ff9aa3b2f2d6e7bbd",
+    "scripts/nf_dry_run.py": "be5636b9c3b15998a2af215130b5a765a3abf25390e4165e16cb992a461fd23f",
+    "agent_runtime/dry_run.py": "d78e4f0d57760c55c9f8d80014c1c0cf3237f9e21ed3deb625cea397dbd9ec6e",
+    "src/novel_factory/application/prompt_layout.py": "7f34a16fd9c9f9d595490ae6c957d778e8e041873b07fe59e5452467d8e25880"
+  },
+  "configuration": {
+    "books_per_seed": 2,
+    "chapters_per_book": 8,
+    "review_pass_rate": 0.7,
+    "max_reworks": 12
+  },
+  "runs": {
+    "completion": {
+      "status": "PASS",
+      "mode": "DRY_RUN",
+      "seed": 7,
+      "runs": 50,
+      "scenario_count": 50,
+      "harness_requests_total": 9668,
+      "completion_required": true,
+      "database_connections": 0,
+      "upstream_model_calls": 0,
+      "scope": "Program scheduling and Harness simulation; no production DB, billing or literary acceptance is proven",
+      "workflow_outcomes": {
+        "COMPLETED": 50
+      },
+      "frozen_books": 100,
+      "invariant_failures": 0,
+      "raw_report_sha256": "7b19a9a8d13e77e28112f9d4414b8e154563591730f9525d441c75b63e98b09a"
+    },
+    "fault_matrix": {
+      "status": "PASS",
+      "mode": "DRY_RUN",
+      "seed": 7,
+      "runs": 20,
+      "scenario_count": 760,
+      "harness_requests_total": 122384,
+      "completion_required": false,
+      "database_connections": 0,
+      "upstream_model_calls": 0,
+      "scope": "Program scheduling and Harness simulation; no production DB, billing or literary acceptance is proven",
+      "workflow_outcomes": {
+        "COMPLETED": 540,
+        "STOPPED_WITH_BLOCKERS": 220
+      },
+      "frozen_books": 1160,
+      "invariant_failures": 0,
+      "raw_report_sha256": "9a8a5ddaca4e6f274c76d788beeed9d8b0cdd651946757fad2b6ac66a1917cdf"
+    },
+    "story_continuation": {
+      "status": "PASS",
+      "mode": "DRY_RUN",
+      "seed": 7,
+      "runs": 20,
+      "scenario_count": 20,
+      "harness_requests_total": 4216,
+      "completion_required": true,
+      "database_connections": 0,
+      "upstream_model_calls": 0,
+      "scope": "Program scheduling and Harness simulation; no production DB, billing or literary acceptance is proven",
+      "workflow_outcomes": {
+        "COMPLETED": 20
+      },
+      "frozen_books": 40,
+      "invariant_failures": 0,
+      "raw_report_sha256": "2e12002657645c30cd5b14e163af4d27b4382c20488d32294d47aed0b4f2ba9d"
+    }
+  },
+  "story_continuation_scope": "Offline manuscript expansion within its existing chapter plan; native multi-volume continuation uses separate PostgreSQL evidence"
+}

@@ -22,7 +22,7 @@ SCENARIOS = ("novel", "idle", "normal", "review_return", "review_exhausted", "ra
              "review_questions", "internal_question_reread", "internal_question_strategy",
              "review_mcp_recovery", "review_mcp_exhausted", "verification_unknown",
              "stale_finding_provenance", "world_coverage_recovery", "world_coverage_blocked",
-             "multi_chapter_coverage", "coverage_semantic_changed")
+             "multi_chapter_coverage", "coverage_semantic_changed", "story_continuation")
 COVERAGE_SCENARIOS = {"world_coverage_recovery", "world_coverage_blocked", "multi_chapter_coverage", "coverage_semantic_changed"}
 VERSION_SCENARIOS = COVERAGE_SCENARIOS | {"stale_finding_provenance"}
 INTERNAL_SCENARIOS = {"internal_question_reread", "internal_question_strategy", "verification_unknown"} | VERSION_SCENARIOS
@@ -39,6 +39,7 @@ ROLE_STAGES = {
     "book_revision": "writer", "book_facts": "evidence_maintainer",
     "reader_1": "reviewer", "reader_2": "reviewer", "final_editor": "chief_editor",
     "internal_verification": "reviewer",
+    "story_completion": "chief_editor", "story_plan": "volume_director",
 }
 
 
@@ -217,7 +218,8 @@ class Simulation:
         return self.add("chapter_decision", book, chapter, revision, dependencies=(review.id, reconciled.id))
 
     def _book_edition(self, book, edition, predecessor):
-        structure = self.add("book_structure", book, revision=edition, dependencies=(predecessor,))
+        story = self.add("story_completion", book, revision=edition, dependencies=(predecessor,))
+        structure = self.add("book_structure", book, revision=edition, dependencies=(story.id,))
         seam = self.add("book_seam", book, revision=edition, dependencies=(structure.id,))
         cross = self.add("book_cross_volume", book, revision=edition, dependencies=(seam.id,))
         readers = [self.add(stage, book, revision=edition, dependencies=(cross.id,)) for stage in ("reader_1", "reader_2")]
@@ -227,7 +229,7 @@ class Simulation:
         frozen = self.chapter_manifests.get((job.book, job.chapter))
         revision = frozen["revision"] if job.stage == "memory" and frozen else job.revision
         source = (f"book-edition:{job.book}:{job.revision}" if job.stage.startswith("book_")
-                  or job.stage in {"reader_1", "reader_2", "final_editor"}
+                  or job.stage in {"reader_1", "reader_2", "final_editor", "story_completion", "story_plan"}
                   else f"chapter-draft:{job.book}:{job.chapter}:{revision}")
         return {"artifact_id": uid(source), "artifact_revision_id": uid(source + ":revision"),
                 "sha256": sha256(source.encode()).hexdigest()}
@@ -297,6 +299,14 @@ class Simulation:
         if role == "chief_editor":
             payload = {"decision": "DRY_RUN_CHANGE_METHOD" if job.stage == "strategy" else "DRY_RUN_APPROVE",
                        "reason": "DRY_RUN_POLICY_DECISION", "deferred_questions": [], "evidence_refs": []}
+        if job.stage == "story_completion":
+            continuing = self.scenario == "story_continuation" and job.revision == 0
+            payload = {"decision": "CONTINUE" if continuing else "COMPLETE", "reason": "DRY_RUN_STORY_REVIEW",
+                       "unfulfilled_commitments": ([{"source_ref": self._subject(job), "source_path": "/storyline",
+                           "commitment": "DRY_RUN_APPROVED_ENDING", "draft_ref": self._subject(job),
+                           "quote": "DRY_RUN_PLACEHOLDER", "missing_outcome": "DRY_RUN_ENDING_NOT_WRITTEN",
+                           "continuation_goal": "DRY_RUN_COMPLETE_APPROVED_ENDING"}] if continuing else [])}
+            self.ledger[attempt]["story_advice"] = payload
         if job.stage == "internal_verification" and self.scenario in VERSION_SCENARIOS:
             payload["verification_status"] = self.jobs[job.dependencies[0]].query_receipt["result"]
         if job.stage == "facts":
@@ -403,13 +413,16 @@ class Simulation:
             if job.stage == "book_freeze":
                 editor = self.jobs[job.dependencies[0]]
                 readers = [self.jobs[key] for key in editor.dependencies]
+                story = self.jobs.get(uid(f"{job.book}:0:story_completion:{editor.revision}"))
                 if (editor.stage != "final_editor" or editor.book != job.book
                         or editor.state != "ACCEPTED" or editor.approved is not True or len(readers) != 2
                         or {row.stage for row in readers} != {"reader_1", "reader_2"}
                         or any(row.state != "ACCEPTED" or row.approved is not True for row in readers)
                         or any(row.book != editor.book or row.revision != editor.revision
                                or self._subject(row) != self._subject(editor) for row in readers)
-                        or any((job.book, chapter) not in self.frozen for chapter in range(self.chapters))):
+                        or any((job.book, chapter) not in self.frozen for chapter in range(self.chapters))
+                        or story is None or story.state != "ACCEPTED" or story.approved is not True
+                        or self._subject(story) != self._subject(editor)):
                     job.state, job.reason = "FAILED", "BOOK_FREEZE_GATE_REJECTED"
                     self.problems.append(job.reason)
                     return
@@ -444,7 +457,7 @@ class Simulation:
             return
         if job.stage == "draft" and job.chapter and not self._predecessor_gate(job):
             return
-        if ((job.stage.startswith("book_") or job.stage in {"reader_1", "reader_2", "final_editor"})
+        if ((job.stage.startswith("book_") or job.stage in {"reader_1", "reader_2", "final_editor", "story_completion", "story_plan"})
                 and not self._editing_gate(job)):
             return
         if self.scenario == "budget_exhausted" and job.stage == "draft":
@@ -733,8 +746,18 @@ class Simulation:
         role = ROLE_STAGES[job.stage]
         job.approved = (not blocking_review_issues(envelope["payload"]["issues"]) if role == "reviewer" else
                         envelope["payload"].get("decision") == "DRY_RUN_APPROVE" if role == "chief_editor" else None)
+        if job.stage == "story_completion":
+            if envelope["payload"] != call["story_advice"]:
+                job.state, job.reason = "PAUSED", "STORY_EVIDENCE_REQUIRED"
+                self.problems.append(job.reason)
+                return
+            job.approved = envelope["payload"]["decision"] == "COMPLETE"
+            self.emit("STORY_COMPLETION_REVIEWED", book=job.book, edition=job.revision,
+                      decision=envelope["payload"]["decision"], source_ref=self._subject(job))
         self._accept(job)
-        if job.stage == "internal_verification":
+        if job.stage == "story_completion" and not job.approved:
+            self._continue_story(job)
+        elif job.stage == "internal_verification":
             self._continue_internal_question(job)
         elif job.stage == "review" and not job.approved:
             self._return_chapter(job)
@@ -841,6 +864,23 @@ class Simulation:
                           reading_world=job.reading_world, canonical_effects_applied=0)
             freeze.dependencies = [decision.id]
         self.emit("REWORK_ENROLLED", book=job.book, chapter=job.chapter, revision=revision)
+
+    def _continue_story(self, job):
+        # This fixture expands the manuscript candidate within the same chapter
+        # plan. Native multi-volume planning and scope proofs have PG coverage.
+        for stage in ("book_structure", "book_seam", "book_cross_volume", "reader_1", "reader_2", "final_editor"):
+            prior = self.jobs[uid(f"{job.book}:0:{stage}:{job.revision}")]
+            prior.state, prior.reason = "CANCELLED", "STORY_NOT_COMPLETE"
+        revision = job.revision + 1
+        planner = self.add("story_plan", job.book, revision=revision, dependencies=(job.id,))
+        writer = self.add("book_revision", job.book, revision=revision, dependencies=(planner.id,))
+        facts = self.add("book_facts", job.book, revision=revision, dependencies=(writer.id,))
+        reconciled = self.add("book_reconcile", job.book, revision=revision, dependencies=(facts.id,))
+        editor = self._book_edition(job.book, revision, reconciled.id)
+        self.jobs[uid(f"{job.book}:0:book_freeze:0")].dependencies = [editor.id]
+        self.emit("STORY_CONTINUATION_ENROLLED", book=job.book, edition=revision,
+                  decision_task=job.id, planner_task=planner.id, writer_task=writer.id,
+                  reason="APPROVED_STORY_UNFINISHED", length_target_used=False)
 
     def _book_review(self, job):
         key = job.book, job.revision

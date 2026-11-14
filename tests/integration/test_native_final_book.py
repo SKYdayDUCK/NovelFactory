@@ -3,7 +3,7 @@ import json
 from decimal import Decimal
 
 import pytest
-from native_review_helpers import run_review_mcp
+from native_review_helpers import materialize_review_input, run_review_mcp
 from test_p6_rolling_production import answer
 from test_production_strategy import synthetic_production
 
@@ -39,11 +39,24 @@ def _editorial(phase, text):
         "issue_decisions": []}
 
 
-@pytest.mark.parametrize("missing_first", [False, True, "book_rework", "format_error", "policy"])
+@pytest.mark.parametrize("missing_first", [False, True, "book_rework", "format_error", "policy", "story_continuation"])
 def test_native_editing_blind_reading_restart_and_final_freeze(kernel_env, monkeypatch, missing_first):
     k = kernel_env["kernel"]
-    gateway, owner, wr, _, _ = synthetic_production(k, monkeypatch, lengths=[7], target=(6, 10))
+    continuation = missing_first == "story_continuation"
+    gateway, owner, wr, _, _ = synthetic_production(k, monkeypatch, lengths=[7], target=(6, 10), harness=continuation)
     work, branch = wr["work_id"], wr["branch_id"]
+    if continuation:
+        with k.objects.lock(), k.db.uow() as repo:
+            cursor = rolling_production._load(k, repo, work, branch)
+            cursor["target_chapters"] = 1
+            rolling_production._save(k, repo, owner, cursor)
+            design_ref = production_pipeline._artifact(k, repo, work, owner, "INITIAL_STORY_DESIGN", {
+                "storyline": "Synthetic core choice must produce its final consequence.",
+                "chapter_goals": ["Synthetic first choice."], "world_rules": ["Synthetic registered world rule."]})
+            k._receipt(repo, owner, wr, "P6_IDEA_PROVENANCE", "initial", {}, {
+                "design_ref": design_ref, "subject_ids": cursor["allowance"]["subject_ids"],
+                "creative_input": {"idea": "Synthetic story continuation.", "genre": "测试",
+                                   "length": {"preset": "short", "unit": "chapters", "min": 1, "max": 1}}})
     if missing_first == "policy":
         model_routing.activate(k, owner, wr, model_routing.idea_policy(wr, {"creative": "creative", "review": "review"}),
                                gateway.adapters, expected_revision=0)
@@ -68,7 +81,10 @@ def test_native_editing_blind_reading_restart_and_final_freeze(kernel_env, monke
         with k.db.uow(write=False) as repo:
             job = repo.one("supervisor_jobs", {"task_id": tid})["config"]
         native = adapter.profile.kind == "codex-cli"
-        assert job.get("required_review_mcp") if native else adapter.profile.model == "deepseek-flash"
+        if native and identity["role_id"] != "volume_director":
+            assert job.get("required_review_mcp")
+        if not native:
+            assert adapter.profile.model == "deepseek-flash"
         adapter.journal.authorize_send(request.attempt_id)
         thread, turn = "final-thread-" + request.attempt_id, "final-turn-" + request.attempt_id
         if native:
@@ -78,7 +94,7 @@ def test_native_editing_blind_reading_restart_and_final_freeze(kernel_env, monke
             refs = []
             missing.append(tid)
         else:
-            refs = run_review_mcp(k, request, thread, turn) if native else []
+            refs = run_review_mcp(k, request, thread, turn) if native and job.get("required_review_mcp") else []
         if native:
             adapter.journal.record(request.attempt_id, thread, turn, "COMPLETED")
             native_sent.append(request.attempt_id)
@@ -103,6 +119,25 @@ def test_native_editing_blind_reading_restart_and_final_freeze(kernel_env, monke
                                            "reason": "Synthetic assessment.", "improvement": "Synthetic precise revision."}
                                       for key, maximum in RUBRIC.items()}, "vetoes": []}
             payload = {"summary": json.dumps(summary), "issues": [], "counterinterpretations": [], "evidence_refs": []}
+        elif continuation and not job.get("frozen_editing"):
+            if job.get("production_node"):
+                view = materialize_review_input(k, user, refs) if refs else user
+                view["context"] = identity
+                payload = answer(view)
+            else:
+                assignment = json.loads(user["assignment"])
+                if identity["role_id"] == "volume_director":
+                    assert assignment["unfinished_story"] and assignment["extent_policy"]
+                    payload = {"volume_brief": "Synthetic required final consequence.",
+                               "chapter_goals": ["Synthetic final consequence follows the prior choice."]}
+                elif assignment.get("operation") == "review_serial_continuity":
+                    assert assignment["source_text"]
+                    payload = {"decision": "APPROVED", "reason": "Synthetic exact released text and reader disclosure checked.",
+                               "deferred_questions": [], "evidence_refs": []}
+                else:
+                    assert assignment["unfinished_story"] and assignment["candidate_ref"]
+                    payload = {"summary": "Synthetic independent continuation-plan review.", "issues": [],
+                               "counterinterpretations": [], "evidence_refs": []}
         elif job.get("returned_edition"):
             if not native:
                 before = next(json.loads(row["content"])["text"] for row in user["authorized_materials"]
@@ -127,7 +162,23 @@ def test_native_editing_blind_reading_restart_and_final_freeze(kernel_env, monke
                 # This deliberately deficient return is saved and rejected; no private file/model fallback.
                 material = {"text": "Synthetic missing evidence."}
             phase = json.loads(user["assignment"])["phase"]
-            payload = ({"decision": "RETURNED", "reason": "Synthetic bounded correction of the quoted blind-review finding.",
+            if continuation and phase == "STORY_COMPLETION":
+                with k.db.uow(write=False) as repo:
+                    sources = next(k.artifact(repo, ref, work)["payload"]["result"]["structuredContent"]
+                                   for ref in refs if k.artifact(repo, ref, work)["payload"]["tool"] == "nf_review_material"
+                                   and "commitments" in k.artifact(repo, ref, work)["payload"]["result"]["structuredContent"])
+                earlier = sources["previous_passages"]
+                if earlier:
+                    assert len(earlier) == 1 and earlier[0]["text"] == "字" * 7
+                    payload = {"decision": "COMPLETE", "reason": "Synthetic core choice has its visible final consequence.",
+                               "unfulfilled_commitments": []}
+                else:
+                    payload = {"decision": "CONTINUE", "reason": "Synthetic final consequence has not occurred.",
+                        "unfulfilled_commitments": [{**sources["commitments"][0], "draft_ref": material["draft_ref"],
+                            "quote": material["text"], "missing_outcome": "Synthetic choice still needs its consequence.",
+                            "continuation_goal": "Show the necessary final consequence."}]}
+            else:
+                payload = ({"decision": "RETURNED", "reason": "Synthetic bounded correction of the quoted blind-review finding.",
                         "deferred_questions": [], "evidence_refs": []} if phase == "BOOK_REWORK"
                        else _editorial(phase, material["text"]))
         sent.append(request.attempt_id)
@@ -143,11 +194,22 @@ def test_native_editing_blind_reading_restart_and_final_freeze(kernel_env, monke
 
     monkeypatch.setattr(RuntimeModelAdapter, "generate", generate)
     frozen_editing.start(k, owner, work, branch)
-    for _ in range(100):
+    for _ in range(200 if continuation else 100):
         # Fresh supervisor each tick reproduces Host/process reconstruction.
         RuntimeSupervisor(k, gateway).run_once(owner, work, branch)
         edit = frozen_editing.status(k, owner, work, branch)
         assert edit["status"] != "EDITING_BLOCKED", edit
+        if continuation:
+            cursor = rolling_status(k, owner, work, branch)
+            with k.db.uow(write=False) as repo:
+                full = rolling_production._load(k, repo, work, branch)
+                editing = frozen_editing._state(k, repo, work, branch)
+                volume = rolling_production._window(k, repo, full)["volume_id"]
+            if cursor["state"] == "FROZEN" and editing["volume"] != volume:
+                frozen_editing.start(k, owner, work, branch)
+                continue
+            if cursor["frozen_chapters"] != 2 or editing["volume"] != cursor["final_volume_id"]:
+                continue
         if edit["status"] == "EDITORIAL_APPROVED":
             break
     assert edit["status"] == "EDITORIAL_APPROVED", edit
@@ -188,6 +250,15 @@ def test_native_editing_blind_reading_restart_and_final_freeze(kernel_env, monke
     assert final_book_automation.advance(k, gateway, owner, work, branch) == frozen
     assert sent == before
     with k.db.uow(write=False) as repo:
+        if continuation:
+            from novel_factory.application import story_completion
+
+            cursor = rolling_production._load(k, repo, work, branch)
+            assert cursor["frozen_chapters"] == cursor["chapter_count"] == 2 and cursor["target_chapters"] == 1
+            assert len(cursor["release_refs"]) == 1 and cursor["continuity_ref"]
+            assert story_completion.current_decision(k, repo, cursor)["advice"]["decision"] == "COMPLETE"
+            assert len(repo.many("receipts", {"work_id": work, "command_type": "STORY_COMPLETION"})) == 2
+            assert len(repo.many("receipts", {"work_id": work, "command_type": "P6_NEXT_PLAN_ACCEPT"})) == 1
         assert all(repo.one("call_attempts", {"attempt_id": attempt})["state"] == "UNKNOWN" for attempt in native_sent)
         if missing_first is True:
             assert repo.one("tasks", {"task_id": missing[0]})["state"] == "WAITING_REVIEW"

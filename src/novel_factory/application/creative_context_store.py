@@ -4,6 +4,7 @@ The immutable artifact table and the existing task row are the storage and CAS
 boundary. No new task, world selection, or model call is created here.
 """
 import json
+from hashlib import sha256
 from uuid import UUID, uuid5
 
 from sqlalchemy import text
@@ -41,7 +42,169 @@ def bind_material(item):
     return []
 
 
-def _check_sources(kernel, repo, task, sources, input_ref):
+def _own_completed_draft(kernel, repo, task, audit, row):
+    """The completed writer may prove its own product, never requalify a send."""
+    if not audit or task["state"] != "ACCEPTED" or task["role_id"] != "writer":
+        return False
+    draft = row["payload"]
+    ref = {key: str(row[key]) for key in ("artifact_id", "artifact_revision_id", "sha256")}
+    if not (fingerprint(draft) == ref["sha256"] and draft["task_id"] == task["task_id"]
+            and draft["generation"] == task["generation"] and draft["context_bundle_id"] == task["context_bundle_id"]
+            and draft.get("agent_output_ref") == audit.get("output_ref") and draft["input_world_ref"] == audit["world_ref"]):
+        return False
+    result = repo.one("task_results", {"result_id": task["current_result_id"], "task_id": task["task_id"],
+                                       "generation": task["generation"], "disposition": "CURRENT"})
+    if not (result and result["payload_hash"] == fingerprint(result["payload"])
+            and result["attempt_id"] == task["attempt_id"] and result["payload"]["status"] == "SUCCEEDED"
+            and result["payload"]["context_bundle_id"] == task["context_bundle_id"]
+            and result["payload"]["dependency_fingerprint"] == task["dependency_fingerprint"]
+            and audit.get("output_ref") in result["payload"]["artifacts"]):
+        return False
+    candidate = kernel.artifact(repo, audit["output_ref"], task["work_id"], kind="AGENT_CANDIDATE")["payload"]
+    if not (fingerprint(candidate) == audit["output_ref"]["sha256"] and isinstance(candidate.get("text"), str)
+            and sha256(candidate["text"].encode()).hexdigest() == draft["text_ref"]["sha256"]
+            and candidate["important_deltas"] == draft["declared_important_deltas"]):
+        return False
+    kernel.objects.verify(draft["text_ref"]["sha256"])
+    request = {"task_id": task["task_id"], "generation": task["generation"], "scene_ref": draft["scene_ref"],
+               "text_sha256": draft["text_ref"]["sha256"], "title": draft["title"],
+               "declared_important_deltas": draft["declared_important_deltas"], "prior_draft_ref": draft["prior_draft_ref"],
+               "handoff_refs": draft["handoff_refs"], "agent_output_ref": draft["agent_output_ref"]}
+    if not any(receipt["payload"] == ref and receipt["request_hash"] == fingerprint(request)
+               for receipt in repo.many("receipts", {"work_id": task["work_id"], "principal_id": task["principal_id"],
+                                                     "command_type": "NARRATIVE_DRAFT"})):
+        return False
+    newer = repo.conn.scalar(text("""SELECT 1 FROM nf_artifacts WHERE work_id=:work AND kind='NARRATIVE_DRAFT'
+        AND payload #>> '{prior_draft_ref,artifact_revision_id}'=:prior LIMIT 1"""),
+        {"work": task["work_id"], "prior": ref["artifact_revision_id"]})
+    return newer is None
+
+
+def _assigned_draft(kernel, repo, task, input_ref, ref):
+    """Full identity must be frozen in task, model input and controller read scope."""
+    record = repo.one("task_inputs", {"task_id": task["task_id"], "generation": task["generation"]})
+    scoped = repo.one("selections", {"work_id": task["work_id"],
+        "selection_kind": "NARRATIVE_READ:" + task["task_id"] + ":" + str(task["generation"])})
+    if not record or not scoped or fingerprint(record["spec"]) != record["input_hash"]:
+        return False
+    frozen = kernel.artifact(repo, input_ref, task["work_id"], kind="AGENT_INPUT")["payload"]
+    scope = kernel.artifact(repo, scoped["artifact_ref"], task["work_id"], kind="NARRATIVE_READ_SCOPE")["payload"]
+    return (ref in record["spec"]["input_artifacts"] and ref in frozen["material_refs"] and ref in scope["draft_refs"]
+            and scope["task_id"] == task["task_id"] and scope["generation"] == task["generation"]
+            and scope["grant_id"] == task["grant_id"] and scope["world_ref"] == record["spec"]["world_ref"]
+            and fingerprint(frozen) == input_ref["sha256"] and fingerprint(scope) == scoped["artifact_ref"]["sha256"])
+
+
+def _known_assigned_successor(kernel, repo, task, sources, input_ref, row):
+    ref = {key: str(row[key]) for key in ("artifact_id", "artifact_revision_id", "sha256")}
+    prior = row["payload"]["prior_draft_ref"]
+    return (ref["artifact_revision_id"] in sources["draft_ids"] and prior
+            and prior["artifact_revision_id"] in sources["draft_ids"]
+            and fingerprint(row["payload"]) == ref["sha256"]
+            and _assigned_draft(kernel, repo, task, input_ref, ref)
+            and _assigned_draft(kernel, repo, task, input_ref, prior))
+
+
+def _completed_reader_draft(kernel, repo, task, audit, row):
+    if (not audit or task["state"] != "ACCEPTED" or task["role_id"] not in {
+            "reviewer", "evidence_maintainer", "literary_editor", "chief_editor"}
+            or audit["model_configuration"].get("adapter_kind") != "codex-cli"):
+        return False
+    ref = {key: str(row[key]) for key in ("artifact_id", "artifact_revision_id", "sha256")}
+    draft = row["payload"]
+    if fingerprint(draft) != ref["sha256"] or not _assigned_draft(kernel, repo, task, audit["input_ref"], ref):
+        return False
+    from .review_mcp import require_review_queries
+    receipts = require_review_queries(kernel, repo, task, audit)
+    for receipt in receipts:
+        material = receipt["result"].get("structuredContent", {})
+        if (receipt["tool"] != "nf_review_material" or receipt["outcome"] != "OK"
+                or receipt["arguments"].get("artifact_ref") != ref or material.get("draft_ref") != ref
+                or material.get("text_ref") != draft["text_ref"] or not material.get("delivery_ref")):
+            continue
+        delivery_ref = material["delivery_ref"]
+        delivery = kernel.artifact(repo, delivery_ref, task["work_id"], kind="TEXT_DELIVERY")["payload"]
+        if (fingerprint(delivery) == delivery_ref["sha256"] and delivery["task_id"] == task["task_id"]
+                and delivery["generation"] == task["generation"] and delivery["context_bundle_id"] == task["context_bundle_id"]
+                and delivery["draft_ref"] == ref and delivery["text_ref"] == draft["text_ref"]
+                and delivery["world_ref"] == audit["world_ref"] and delivery["read_mode"] == "FULL_TEXT"):
+            return True
+    return False
+
+
+def _edition_acceptance(kernel, repo, task, acceptance_ref, acceptance):
+    """Recognize only the actual atomic edition receipt family for this child."""
+    from .volume_successor import _selected
+    work = task["work_id"]
+    edition_ref = _selected(repo, work, "RETURNED_EDITION_FOR_DRAFT:" + acceptance["draft_ref"]["artifact_revision_id"])
+    if not edition_ref:
+        return False
+    manifest = kernel.artifact(repo, edition_ref, work, kind="P6_RETURNED_EDITION_CANDIDATE")["payload"]
+    accepted_ref = _selected(repo, work, "RETURNED_EDITION_ACCEPTANCE:" + edition_ref["artifact_revision_id"])
+    if not accepted_ref:
+        return False
+    atomic = kernel.artifact(repo, accepted_ref, work, kind="RETURNED_EDITION_ACCEPTANCE")["payload"]
+    checkpoint = kernel.artifact(repo, atomic["checkpoint_ref"], work, kind="ROLLING_CHECKPOINT")["payload"]
+    intent = {"world_ref": manifest["world_ref"], "edition_ref": edition_ref, "parent_checkpoint": manifest["parent_checkpoint"]}
+    receipt = repo.one("receipts", {"work_id": work, "branch_id": task["branch_id"], "command_type": "RETURNED_EDITION_ACCEPT",
+                                    "idempotency_key": edition_ref["artifact_revision_id"], "payload": accepted_ref})
+    scenes = [scene for chapter in checkpoint["chapters"] for scene in chapter["scenes"]]
+    children = manifest["candidates"]
+    if not (receipt and receipt["principal_id"] == manifest["controller"]["principal_id"]
+            and receipt["request_hash"] == fingerprint(intent)
+            and fingerprint(manifest) == edition_ref["sha256"] and fingerprint(atomic) == accepted_ref["sha256"]
+            and fingerprint(checkpoint) == atomic["checkpoint_ref"]["sha256"]
+            and atomic["edition_ref"] == checkpoint["edition_ref"] == edition_ref
+            and atomic["parent_checkpoint"] == checkpoint["parent_checkpoint"] == manifest["parent_checkpoint"]
+            and checkpoint["world_ref"] == manifest["world_ref"] and checkpoint["run_id"] == manifest["run"]
+            and checkpoint["volume_id"] == manifest["volume"]
+            and [scene["scene_id"] for scene in scenes] == [child["scene_id"] for child in children]
+            and atomic["acceptance_refs"] == [scene["acceptance_ref"] for scene in scenes]
+            and acceptance_ref in atomic["acceptance_refs"]):
+        return False
+    for child, scene in zip(children, scenes, strict=True):
+        adopted = kernel.artifact(repo, scene["acceptance_ref"], work, kind="NARRATIVE_ACCEPTANCE")["payload"]
+        request = {"draft_ref": child["draft_ref"], "reconciliation_ref": child["reconciliation_ref"],
+                   "world_ref": manifest["world_ref"], "alignment_ref": child["alignment_ref"], "edition_ref": edition_ref}
+        if not (adopted["draft_ref"] == scene["draft_ref"] == child["draft_ref"]
+                and adopted["text_ref"] == scene["text_ref"] == child["text_ref"]
+                and adopted["reconciliation_ref"] == child["reconciliation_ref"]
+                and adopted["alignment_ref"] == child["alignment_ref"]
+                and fingerprint(adopted) == scene["acceptance_ref"]["sha256"]
+                and repo.one("receipts", {"work_id": work, "branch_id": task["branch_id"], "command_type": "NARRATIVE_ACCEPT",
+                    "principal_id": manifest["controller"]["principal_id"], "payload": scene["acceptance_ref"], "request_hash": fingerprint(request)})):
+            return False
+    return any(child["draft_ref"] == acceptance["draft_ref"] and child["text_ref"] == acceptance["text_ref"] for child in children)
+
+
+def _own_acceptance(kernel, repo, task, audit, previous, current):
+    if not current["ref"] or not current["key"].startswith("NARRATIVE_SCENE:"):
+        return False
+    acceptance = kernel.artifact(repo, current["ref"], task["work_id"], kind="NARRATIVE_ACCEPTANCE")["payload"]
+    row = kernel.artifact(repo, acceptance["draft_ref"], task["work_id"], kind="NARRATIVE_DRAFT")
+    if not (_own_completed_draft(kernel, repo, task, audit, row)
+            or _completed_reader_draft(kernel, repo, task, audit, row)):
+        return False
+    draft = row["payload"]
+    scene = kernel.artifact(repo, draft["scene_ref"], task["work_id"], kind="SCENE_PLAN")["payload"]
+    if not (current["key"] == "NARRATIVE_SCENE:" + scene["scene_contract"]["scene_id"]
+            and acceptance["task_id"] == draft["task_id"] and acceptance["generation"] == draft["generation"]
+            and acceptance["text_ref"] == draft["text_ref"] and acceptance["scene_ref"] == draft["scene_ref"]
+            and fingerprint(acceptance) == current["ref"]["sha256"]):
+        return False
+    if previous["ref"]:
+        parent = kernel.artifact(repo, previous["ref"], task["work_id"], kind="NARRATIVE_ACCEPTANCE")["payload"]
+        if parent["draft_ref"] != draft["prior_draft_ref"] and parent["draft_ref"] != acceptance["draft_ref"]:
+            return False
+    hashes = {fingerprint({"draft_ref": acceptance["draft_ref"], "reconciliation_ref": acceptance["reconciliation_ref"],
+                           "world_ref": acceptance["world_ref"], "alignment_ref": alignment})
+              for alignment in (None, acceptance["alignment_ref"])}
+    return any(receipt["payload"] == current["ref"] and receipt["request_hash"] in hashes
+               for receipt in repo.many("receipts", {"work_id": task["work_id"], "branch_id": task["branch_id"],
+                                                     "command_type": "NARRATIVE_ACCEPT"})) or _edition_acceptance(kernel, repo, task, current["ref"], acceptance)
+
+
+def _check_sources(kernel, repo, task, sources, input_ref, *, completed_audit=None):
     """Called while the NF work SHARE lock fences literary selection changes."""
     work = task["work_id"]
     if sources["handoff"]:
@@ -67,7 +230,9 @@ def _check_sources(kernel, repo, task, sources, input_ref):
     expected = sources["selections"]
     if expected:
         current = _selections(repo, work, [item["key"] for item in expected])
-        require(current == expected, "TASK_REBIND_REQUIRED", "A selected literary source changed")
+        require(all(actual == old or _own_acceptance(kernel, repo, task, completed_audit, old, actual)
+                    for old, actual in zip(expected, current, strict=True)),
+                "TASK_REBIND_REQUIRED", "A selected literary source changed")
     if sources["continuity_refs"]:
         head = kernel.head(repo, work)
         current = kernel.revision(repo, head)
@@ -84,11 +249,13 @@ def _check_sources(kernel, repo, task, sources, input_ref):
     drafts = sources["draft_ids"]
     if drafts:
         query = text("""
-            SELECT 1 FROM nf_artifacts WHERE work_id = :work AND kind = 'NARRATIVE_DRAFT'
+            SELECT * FROM nf_artifacts WHERE work_id = :work AND kind = 'NARRATIVE_DRAFT'
               AND payload #>> '{prior_draft_ref,artifact_revision_id}' = ANY(CAST(:drafts AS text[]))
-              AND payload #>> '{input_world_ref,branch_id}' = :branch LIMIT 1
+              AND payload #>> '{input_world_ref,branch_id}' = :branch
         """)
-        require(repo.conn.scalar(query, {"work": work, "branch": task["branch_id"], "drafts": drafts}) is None,
+        changed = repo.conn.execute(query, {"work": work, "branch": task["branch_id"], "drafts": drafts}).mappings().all()
+        require(all(_known_assigned_successor(kernel, repo, task, sources, input_ref, row)
+                    or _own_completed_draft(kernel, repo, task, completed_audit, row) for row in changed),
                 "TASK_REBIND_REQUIRED", "A source manuscript now has a newer draft")
 
 
@@ -100,8 +267,8 @@ def _selections(repo, work, keys):
 
 def source_fences(kernel, repo, binding, material_sources, input_ref):
     """Resolve exact issued reading/writing scopes while holding the NF work lock."""
-    from novel_factory.application.narrative import NarrativeService
     from novel_factory.application.authorization import Principal
+    from novel_factory.application.narrative import NarrativeService
 
     task, context = binding["task"], binding["context"]
     owner = Principal(context["grant_id"], context["principal_id"])
@@ -170,7 +337,7 @@ def source_fences(kernel, repo, binding, material_sources, input_ref):
     return result
 
 
-def load_snapshot(kernel, repo, task, input_ref, *, required=False):
+def load_snapshot(kernel, repo, task, input_ref, *, required=False, completed_audit=None):
     row = repo.one("artifacts", {"work_id": task["work_id"], "kind": "CREATIVE_CONTEXT_SNAPSHOT",
                                  "artifact_revision_id": _revision(task["context_bundle_id"])})
     if row is None and not required:
@@ -182,7 +349,7 @@ def load_snapshot(kernel, repo, task, input_ref, *, required=False):
             and snap["packet"]["scope"]["generation"] == task["generation"]
             and snap["packet"]["context"]["context_bundle_id"] == task["context_bundle_id"],
             "TASK_REBIND_REQUIRED", "Frozen creative context does not match this task")
-    _check_sources(kernel, repo, task, snap["source_versions"], input_ref)
+    _check_sources(kernel, repo, task, snap["source_versions"], input_ref, completed_audit=completed_audit)
     return {key: row[key] for key in ("artifact_id", "artifact_revision_id", "sha256")}, snap
 
 
@@ -211,6 +378,6 @@ def freeze_snapshot(kernel, repo, binding, input_ref, packet, user, material_sou
 def check_candidate_snapshot(kernel, repo, task, audit):
     ref = audit.get("creative_context_ref")
     if ref is not None:
-        saved, snapshot = load_snapshot(kernel, repo, task, audit["input_ref"], required=True)
+        saved, snapshot = load_snapshot(kernel, repo, task, audit["input_ref"], required=True, completed_audit=audit)
         require(ref == saved and all(snapshot.get(k) == audit.get(k) for k in ("dynamic_assignment_ref", "adaptive_instruction_ref")),
                 "TASK_REBIND_REQUIRED", "Candidate used a different creative snapshot")

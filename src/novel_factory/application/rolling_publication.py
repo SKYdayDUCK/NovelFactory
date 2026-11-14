@@ -1,12 +1,13 @@
 """Consume signed native approvals when a rolling run reaches an intermediate volume."""
 
+from sqlalchemy import text
+
+from ..domain.canonical import fingerprint
 from .continuity import ContinuityService
 from .kernel import require
 from .planning import PlanningService
 from .release import ReleaseService
 from .volume_successor import _selected
-from sqlalchemy import text
-from ..domain.canonical import fingerprint
 
 
 def _editorial_key(world_ref, plan, acceptances):
@@ -177,12 +178,15 @@ def final_review_request(kernel, owner, work, branch):
             cursor
             and cursor["state"] in {"FROZEN", "COMPLETED"}
             and cursor["index"] + 1 == cursor["window_count"]
-            and cursor["frozen_chapters"] == cursor["chapter_count"] == cursor["target_chapters"],
+            and cursor["frozen_chapters"] == cursor["chapter_count"],
             "RELEASE_INCOMPLETE",
             "The full authorized set of chapters must be frozen",
         )
         volume = _window(kernel, repo, cursor)["volume_id"]
         require(volume == cursor["final_volume_id"], "RELEASE_INCOMPLETE", "Wrong final volume")
+        from .story_completion import require_complete
+
+        require_complete(kernel, repo, cursor)
         wr = kernel.head(repo, work, branch)
         request = _approved_request(kernel, repo, cursor, wr, volume)
         require(request is not None, "RELEASE_INCOMPLETE", "Final editorial approval is missing")

@@ -513,19 +513,17 @@ def test_blocked_or_incomplete_factual_reading_cannot_accept(kernel_env, failure
         assert len(calls) == (3 if failure == "epistemic_conflict" else 4)
 
 
-def test_quality_length_checked_before_readers_and_freeze(kernel_env, monkeypatch):
+def test_quality_length_is_advisory_before_independent_readers_and_freeze(kernel_env, monkeypatch):
     from test_production_strategy import drive, synthetic_production
     kernel = kernel_env["kernel"]
     gateway, owner, wr, _calls, diagnoses = synthetic_production(
-        kernel, monkeypatch, lengths=[1, 5, 3, 2, 7])
+        kernel, monkeypatch, lengths=[1])
     work = wr["work_id"]
     board, cursor = drive(kernel, gateway, owner, wr)
-    assert cursor["state"] == "FROZEN" and len(diagnoses) == 1
+    assert cursor["state"] == "FROZEN" and not diagnoses
     writer = next(node for node in board["nodes"].values() if node["stage"] == "draft")
-    assert [r["actual"] for r in writer["extent_repairs"]] == [1, 5, 3, 2]
-    assert writer["extent_repairs"][-1]["decision"] == "STRATEGY_REASSESSMENT_REQUIRED"
-    assert writer["prior_draft_ref"] == writer["history"][-1]["output_ref"]
-    assert len({r["task_id"] for r in writer["history"]}) == 4
+    assert not writer.get("extent_repairs") and writer["extent_observation"]["actual_han"] == 1
+    assert writer.get("revision_count", 0) == 0 and not writer.get("history")
     with kernel.db.uow(write=False) as repo:
         assert len(repo.many("tasks", {"work_id": work, "role_id": "reviewer", "task_kind": "epistemic"})) == 1
 

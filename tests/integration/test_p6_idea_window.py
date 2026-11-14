@@ -59,14 +59,15 @@ def test_window_protocol_keeps_first_attempt_and_corrects_only_the_requested_arr
             return cli.run_intake(mode, kernel, AgentGateway(kernel, {"fixture": adapter}), private, idea, allowance)
 
         with monkeypatch.context() as historical:
-            if case == "legacy_input":
-                prepare = RuntimeTaskService.prepare
-                def old_input(service, *args, **kwargs):
-                    selection = json.loads(kwargs["assignment"])
+            prepare = RuntimeTaskService.prepare
+            def bounded_input(service, *args, **kwargs):
+                selection = json.loads(kwargs["assignment"])
+                selection["first_window_limit"] = 2
+                if case == "legacy_input":
                     selection.pop("window_constraints_version")
-                    kwargs["assignment"] = json.dumps(selection, ensure_ascii=False)
-                    return prepare(service, *args, **kwargs)
-                historical.setattr(RuntimeTaskService, "prepare", old_input)
+                kwargs["assignment"] = json.dumps(selection, ensure_ascii=False)
+                return prepare(service, *args, **kwargs)
+            historical.setattr(RuntimeTaskService, "prepare", bounded_input)
             enrolled = run("enroll")
         run("advance")
         if case == "unknown":
@@ -116,8 +117,8 @@ def test_window_protocol_keeps_first_attempt_and_corrects_only_the_requested_arr
                 assert len(repo.many("call_attempts", {"task_id": original["task_id"]})) == 1
 
 
-@pytest.mark.parametrize("legacy", [False, True])
-def test_quality_han_plan_fits_writer_scenes_and_replays_frozen_window(kernel_env, tmp_path, monkeypatch, legacy):
+@pytest.mark.parametrize("historical_minimum", [False, True])
+def test_quality_han_estimate_is_advisory_and_replays_frozen_window(kernel_env, tmp_path, monkeypatch, historical_minimum):
     monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[2] / "scripts"))
     cli = importlib.import_module("p6_idea")
     kernel, project = kernel_env["kernel"], tmp_path / "quality-intake"
@@ -148,20 +149,20 @@ def test_quality_han_plan_fits_writer_scenes_and_replays_frozen_window(kernel_en
 
         server.packet_candidate = response
         with monkeypatch.context() as historical:
-            if legacy:
+            if historical_minimum:
                 original = RuntimeTaskService.prepare
                 def old_input(service, *args, **kwargs):
                     assignment = json.loads(kwargs["assignment"])
-                    assignment["window_constraints_version"] = 1
-                    del assignment["first_window_minimum"], assignment["planning_scope"]
+                    assignment.update(window_constraints_version=2, first_window_minimum=6,
+                                      planning_scope="Historical frozen whole-book window")
                     kwargs["assignment"] = json.dumps(assignment)
                     return original(service, *args, **kwargs)
                 historical.setattr(RuntimeTaskService, "prepare", old_input)
             first = run("enroll")
         run("advance")
         schema = Draft202012Validator(payload_schema(calls[0]))
-        assert schema.is_valid(small) is legacy and schema.is_valid(valid)
-        if not legacy:
+        assert schema.is_valid(small) is not historical_minimum and schema.is_valid(valid)
+        if historical_minimum:
             repaired = run("advance")
             assert repaired["validation_errors"] == [{"path": "/chapter_goals", "keyword": "minItems", "limit": 6, "actual": 1}]
             assert repaired["revision_purpose"] == "WINDOW_SCHEMA_CORRECTION" and repaired["source_attempt_id"]
@@ -177,7 +178,7 @@ def test_quality_han_plan_fits_writer_scenes_and_replays_frozen_window(kernel_en
             final = run("advance")
             if final["status"] == "INITIAL_PLAN_MATERIALIZED":
                 break
-        assert final["status"] == "INITIAL_PLAN_MATERIALIZED" and len(calls) == (2 if legacy else 3)
+        assert final["status"] == "INITIAL_PLAN_MATERIALIZED" and len(calls) == (3 if historical_minimum else 2)
         with kernel.db.uow(write=False) as repo:
             adopted = kernel.artifact(repo, final["design_ref"], final["world_ref"]["work_id"])["payload"]
-            assert adopted == (small if legacy else valid)
+            assert adopted == (valid if historical_minimum else small)

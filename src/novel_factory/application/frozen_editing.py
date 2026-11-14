@@ -68,9 +68,9 @@ def start(kernel, owner, work, branch):
             )
         if cursor["index"] + 1 == cursor["window_count"]:
             require(
-                cursor["frozen_chapters"] == cursor["target_chapters"],
+                cursor["frozen_chapters"] == cursor["chapter_count"],
                 "RELEASE_INCOMPLETE",
-                "Future chapters are still authorized",
+                "The registered story plan has unfrozen chapters",
             )
         wr = kernel.head(repo, work, branch)
         from .rolling_production import revalidate_frozen_volume
@@ -78,10 +78,16 @@ def start(kernel, owner, work, branch):
         scenes = revalidate_frozen_volume(kernel.in_transaction(repo), repo, owner, cursor, volume, wr)
         releases = [s["acceptance_ref"] for s in scenes]
         previous = _state(kernel, repo, work, branch)
+        from .story_completion import intake_source
+
+        story_check = (cursor["index"] + 1 == cursor["window_count"]
+                       and bool(intake_source(kernel, repo, owner, cursor)))
         if (
             previous
             and previous["binding"]["ordered_acceptance_refs"] == releases
             and previous["binding"]["world_ref"] == wr
+            and (not story_check or previous["status"] in {"EDITING_ACTIVE", "EDITION_REVISING"}
+                 or any(job.get("phase") == "STORY_COMPLETION" for job in previous["jobs"]))
         ):
             return {
                 "status": previous["status"],
@@ -121,7 +127,7 @@ def start(kernel, owner, work, branch):
                 "binding": binding,
                 "max_rounds": 3,
                 "max_issue_decisions": 100,
-                "idempotency_key": fingerprint(binding),
+                "idempotency_key": fingerprint(binding) + (":story-completion-v1" if story_check else ""),
             },
         )
         # Check actual chapter boundaries, including plans containing multiple scenes per chapter.
@@ -140,6 +146,12 @@ def start(kernel, owner, work, branch):
             for a, b in itertools.pairwise(drafts)
         ]
         jobs += [{"kind": "literary", "scale": "VOLUME", "scope": drafts}]
+        if story_check:
+            from .story_completion import source_packet
+
+            sources = source_packet(kernel, repo, owner, cursor, binding)
+            sources_ref = _artifact(kernel, repo, work, owner, "STORY_COMPLETION_SOURCES", sources)
+            jobs.append({"phase": "STORY_COMPLETION", "scope": drafts, "story_sources_ref": sources_ref})
         jobs += [
             {"phase": phase, "scope": drafts}
             for phase in ("STRUCTURE", "SEAM", "LANGUAGE", "APPROVAL")
@@ -205,7 +217,18 @@ def _assign(kernel, repo, gateway, owner, state, cursor):
             ]["summary"]
             for r in state["decisions"]
         ]
-        if phase == "APPROVAL":
+        if phase == "STORY_COMPLETION":
+            assignment["instructions"] = (
+                "通过MCP读取本次全部原稿、story_sources中的全部已发布前文及批准的剧情来源。逐一核对核心冲突、"
+                "人物选择及原计划结局是否已在实际正文落实。已完整（含成立的开放结局）填COMPLETE，"
+                "unfulfilled_commitments留空。确有尚未落实、必须用后续场景完成的原计划剧情承诺才填CONTINUE："
+                "source_ref/source_path/commitment逐字复制来源，draft_ref及唯一quote精确定位当前正文，"
+                "missing_outcome明确缺什么最终后果，continuation_goal给必要续写范围。"
+                "禁止凭字数、章数、猜测矛盾或个人封闭结局偏好续写；表达修订交现有编辑阶段。此判断不代替编辑批准或盲审。"
+            )
+            assignment["story_sources_ref"] = job["story_sources_ref"]
+            gateway.output_contracts[(role, kind)] = ("StoryCompletionAdvice", "production_profile")
+        elif phase == "APPROVAL":
             assignment["instructions"] = (
                 "通读原文、正式分维度审核与三阶段编辑决定。给出最终编辑批准 APPROVED 或退回 RETURNED，并提供理由。"
             )
@@ -224,6 +247,8 @@ def _assign(kernel, repo, gateway, owner, state, cursor):
             gateway.output_contracts[(role, kind)] = ("FrozenPhaseAdvice", "production_profile")
     cut = {"plane": "WORLD"}
     extra = []
+    if job.get("story_sources_ref"):
+        extra.append(job["story_sources_ref"])
     if phase:
         manifest = _selected(repo, wr["work_id"], "PLAN_MANIFEST:" + state["volume"])
         require(manifest, "STALE_PLAN", "Editors require the current plan manifest")
@@ -245,7 +270,8 @@ def _assign(kernel, repo, gateway, owner, state, cursor):
         "input_artifacts": [*binding["ordered_draft_refs"], *extra],
         "knowledge_cut": cut,
         "knowledge_reread_reason": "known_error" if correction else None,
-        "material_refs": [*job["scope"], *job.get("review_refs", [])],
+        "material_refs": [*job["scope"], *job.get("review_refs", []),
+                          *([job["story_sources_ref"]] if job.get("story_sources_ref") else [])],
         "max_amount": auth["reserve_amount"],
         "token_budget": auth["token_reservation"],
         "currency": repo.one("budgets", {"budget_id": auth["budget_id"]})["currency"],
@@ -285,6 +311,7 @@ def _assign(kernel, repo, gateway, owner, state, cursor):
         "index": state["index"],
         "scope": job["scope"],
         **({"review_refs": job["review_refs"]} if job.get("review_refs") else {}),
+        **({"story_sources_ref": job["story_sources_ref"]} if job.get("story_sources_ref") else {}),
     }
     frozen_input = kernel.artifact(repo, prepared.agent_input["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]
     if gateway.adapters[frozen_input["adapter_id"]].configuration.get("auth_mode") == "host-login":
@@ -331,7 +358,12 @@ def prepare_read(kernel, task, mark):
 
 def material(kernel, principal, task, ref, mark):
     with kernel.db.uow(write=False) as repo:
-        _current_job(kernel, repo, task, mark)
+        state = _current_job(kernel, repo, task, mark)
+        if ref == mark.get("story_sources_ref"):
+            job = state["jobs"][state["index"]]
+            require(job.get("phase") == "STORY_COMPLETION" and job.get("story_sources_ref") == ref,
+                    "VIEW_DENIED", "Story sources are outside this frozen editorial task")
+            return canonical_bytes(kernel.artifact(repo, ref, task["work_id"], kind="STORY_COMPLETION_SOURCES")["payload"])
     if ref in mark.get("review_refs", []):
         from .book_rework import material as book_material
         return book_material(kernel, principal, task, ref, mark)
@@ -375,6 +407,15 @@ def _deliver(kernel, repo, owner, state, task, proof, output):
         require(previous, "READING_COVERAGE_INCOMPLETE", "Missing actual task delivery")
         covers.append(previous["coverage_ref"])
     phase = job.get("phase")
+    if phase == "STORY_COMPLETION":
+        from .story_completion import record
+
+        state["story_completion_ref"] = record(kernel, repo, owner, _load(kernel, repo, wr["work_id"], wr["branch_id"]),
+                                                state, task, proof, output)
+        kernel.tasks.accept_in_transaction(repo.conn, task["task_id"], task["generation"])
+        state.pop("technical_correction", None)
+        state.update(index=state["index"] + 1, active=None)
+        return
     if phase == "BOOK_REWORK":
         require(output["decision"] == "RETURNED" and output["reason"].strip() and not output["deferred_questions"],
                 "INVALID_EVIDENCE", "Book revision needs a concrete editor decision against the failed round")

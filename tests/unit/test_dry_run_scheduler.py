@@ -49,6 +49,36 @@ def test_fixed_seed_is_replayable_and_random_review_can_exhaust_its_limit():
     assert report["frozen_chapters"] == report["frozen_books"] == 0
 
 
+def test_unfinished_story_uses_harness_planning_and_writing_then_rechecks_completion():
+    simulation = Simulation(scenario="story_continuation", books=2, chapters=2, review_pass_rate=1)
+    report = simulation.run()
+    assert report["status"] == "PASS" and report["workflow_status"] == "COMPLETED"
+    assert report["frozen_books"] == 2
+    decisions = [row for row in report["trace"] if row["event"] == "STORY_COMPLETION_REVIEWED"]
+    assert [(row["decision"], row["edition"]) for row in decisions].count(("CONTINUE", 0)) == 2
+    assert [(row["decision"], row["edition"]) for row in decisions].count(("COMPLETE", 1)) == 2
+    continuations = [row for row in report["trace"] if row["event"] == "STORY_CONTINUATION_ENROLLED"]
+    assert len(continuations) == 2 and all(row["length_target_used"] is False for row in continuations)
+    sent = {row["task"] for row in report["trace"] if row["event"] == "HARNESS_REQUEST"}
+    assert all(row["planner_task"] in sent and row["writer_task"] in sent for row in continuations)
+    assert all(release["edition"] == 1 and len(release["independent_readers"]) == 2 for release in report["releases"])
+    assert report["database_connections"] == report["upstream_model_calls"] == 0
+
+
+def test_final_freeze_cannot_ignore_a_missing_story_completion_decision():
+    class MissingStoryProof(Simulation):
+        def _dispatch(self, job):
+            if job.stage == "book_freeze":
+                editor = self.jobs[job.dependencies[0]]
+                self.jobs[next(key for key, row in self.jobs.items()
+                               if row.stage == "story_completion" and row.revision == editor.revision)].approved = False
+            super()._dispatch(job)
+
+    report = MissingStoryProof(review_pass_rate=1).run()
+    assert report["frozen_books"] == 0
+    assert "BOOK_FREEZE_GATE_REJECTED" in report["invariant_failures"]
+
+
 def test_legal_needs_input_holds_without_accepting_payload_or_retrying_its_call():
     simulation = Simulation(scenario="needs_input", review_pass_rate=1)
     report = simulation.run()

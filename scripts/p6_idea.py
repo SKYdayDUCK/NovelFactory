@@ -11,14 +11,19 @@ from bootstrap_p5_m0 import save
 from novel_factory.application.agent_gateway import AgentGateway
 from novel_factory.application.budget_limits import SharedBudgetService
 from novel_factory.application.idea_intake import (
+    design_round,
     enroll_idea,
     intake_receipt,
     materialize_design,
     parse_inspiration,
-    design_round,
 )
 from novel_factory.application.kernel import Kernel, require
-from novel_factory.application.model_routing import POLICY_ROUTE, activate, check_idea_models, idea_policy
+from novel_factory.application.model_routing import (
+    POLICY_ROUTE,
+    activate,
+    check_idea_models,
+    idea_policy,
+)
 from novel_factory.application.production_profiles import compile_dag
 from novel_factory.application.rolling_production import register_rolling
 from novel_factory.application.supervisor import HostJournal, RuntimeSupervisor
@@ -149,27 +154,27 @@ def _register_window(kernel, gateway, private, allowance):
                      gateway.adapters, expected_revision=0)
             route = POLICY_ROUTE
         routes = dict.fromkeys(("draft", "review", "plan"), route)
-        registration = dict(
-            profile={
+        registration = {
+            "profile": {
                 "preset": profile["preset"],
                 "genre": profile["genre"],
                 "complexity": profile["complexity"],
                 **({"overrides": {"production_mode": profile["production_mode"]}} if "production_mode" in profile else {}),
             },
-            world_ref=source["world_ref"],
-            series_id=source["series_id"],
-            volumes=source["volumes"],
-            story_time=horizon,
-            subject_ids=source["subject_ids"],
-            predicates=source["predicates"],
-            routes=routes,
-            budget_id=budget_id,
-            reserve_amount=allowance["reserve_amount"],
-            token_reservation=allowance["token_reservation"],
-            deadline_seconds=86400,
-            idempotency_key="intake-first-window",
-            target_chapters=max(target, native_chapters) if target is not None else None,
-        )
+            "world_ref": source["world_ref"],
+            "series_id": source["series_id"],
+            "volumes": source["volumes"],
+            "story_time": horizon,
+            "subject_ids": source["subject_ids"],
+            "predicates": source["predicates"],
+            "routes": routes,
+            "budget_id": budget_id,
+            "reserve_amount": allowance["reserve_amount"],
+            "token_reservation": allowance["token_reservation"],
+            "deadline_seconds": 86400,
+            "idempotency_key": "intake-first-window",
+            "target_chapters": target,
+        }
         if source.get("opening_version"):
             from novel_factory.application.idea_opening import enroll_opening
 

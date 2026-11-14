@@ -420,6 +420,18 @@ def _recover_coverage(kernel, repo, owner, board, identity, node):
     return identity
 
 
+def _extent_only_diagnosis(kernel, repo, request):
+    if request["source_kind"] != "DIAGNOSIS":
+        return False
+    source = kernel.artifact(repo, request["source_ref"], request["world_ref"]["work_id"],
+                             kind="PRODUCTION_REASSESSMENT")["payload"]
+    origin = source["request"]
+    findings = origin.get("findings", [])
+    return (origin.get("review_stage") == "extent" and origin["source_draft_ref"] == request["source_draft_ref"]
+            and bool(findings) and all(isinstance(item, dict) and set(item) == {"actual_han", "target_han"}
+                                      for item in findings))
+
+
 def consume_verification(kernel, repo, owner, board):
     from .production_pipeline import _artifact
     for identity, node in board["nodes"].items():
@@ -438,26 +450,14 @@ def consume_verification(kernel, repo, owner, board):
             node.update(state={WORLD_COVERAGE: "WAITING_WORLD_COVERAGE", WORLD_EVIDENCE: "WAITING_WORLD_EVIDENCE"}.get(node["state"], "VERIFICATION_HELD"),
                         reason=node["state"])
             return identity
-        if request["source_kind"] == "DIAGNOSIS" and not request.get("parent_case_hash"):
-            from .production_reassessment import repair_budget
-            if reason := repair_budget(writer, phase="revision"):
-                writer.update(state="STOPPED", reason=reason)
-                node["state"] = "VERIFICATION_HELD"
-                return identity
         record = kernel.artifact(repo, node["output_ref"], request["world_ref"]["work_id"], kind="INTERNAL_REVIEW_RESOLUTION")["payload"]
-        extent_findings = []
-        if request["source_kind"] == "DIAGNOSIS" and writer.get("han_characters"):
-            from .production_extent import _count_han
-            draft = kernel.artifact(repo, writer["output_ref"], request["world_ref"]["work_id"], kind="NARRATIVE_DRAFT")["payload"]
-            actual = _count_han(kernel.objects.read(draft["text_ref"]["sha256"]).decode("utf-8"))
-            extent = writer["han_characters"]
-            if not extent["min"] <= actual <= extent["max"]:
-                extent_findings.append({"actual_han": actual, "target_han": extent})
-        same_draft_coverage = (request.get("parent_case_hash") and not extent_findings
-                              and not any(answer["status"] == "CONFIRMED_CONFLICT" for answer in record["answers"]))
+        confirmed_conflict = any(answer["status"] == "CONFIRMED_CONFLICT" for answer in record["answers"])
+        same_draft_coverage = bool(request.get("parent_case_hash") and not confirmed_conflict)
+        advisory_only = not confirmed_conflict and _extent_only_diagnosis(kernel, repo, request)
+        same_draft = same_draft_coverage or advisory_only
         if request["source_kind"] == "DIAGNOSIS":
             from .production_reassessment import repair_budget
-            if request.get("parent_case_hash") and not same_draft_coverage and (reason := repair_budget(writer, phase="revision")):
+            if not same_draft and (reason := repair_budget(writer, phase="revision")):
                 writer.update(state="STOPPED", reason=reason)
                 node["state"] = "VERIFICATION_HELD"
                 return identity
@@ -468,21 +468,25 @@ def consume_verification(kernel, repo, owner, board):
             require(record["method"], "INVALID_EVIDENCE", "A verified diagnosis needs a concrete next method")
         result = consume_resolution(kernel, repo, owner, board, request, node["output_ref"])
         if result["consumed_now"]:
-            if same_draft_coverage:
+            if same_draft:
                 suffix = request["target"][6:]
                 for key in ("knowledge:" + suffix, "facts:" + suffix, "review:" + writer["chapter_id"]):
                     reading = board["nodes"][key]
                     require(reading["state"] != "ENROLLED", "TASK_NOT_ACCEPTABLE", "Drain the old-cut scene reading before coverage continuation")
                     _archive(reading)
-                    reading.update(reading_world_ref=request["world_ref"], coverage_transition_ref=request["coverage_transition_ref"])
+                    if same_draft_coverage:
+                        reading.update(reading_world_ref=request["world_ref"], coverage_transition_ref=request["coverage_transition_ref"])
                 board["nodes"]["facts:" + suffix].setdefault("internal_resolution_refs", []).append(node["output_ref"])
-                writer.update(state="DRAFT_STORED", coverage_continuation={"resolution_ref": node["output_ref"],
-                    "parent_case_hash": request["parent_case_hash"], "method": result["method"],
+                continuation = {"resolution_ref": node["output_ref"], "method": result["method"],
                     "source_world_ref": board["world_ref"], "adopted_world_ref": request["world_ref"],
-                    "coverage_transition_ref": request["coverage_transition_ref"], "method_validation": "INTERNAL_QUERY_ONLY"})
+                    "method_validation": "INTERNAL_QUERY_ONLY"}
+                if same_draft_coverage:
+                    continuation.update(parent_case_hash=request["parent_case_hash"], coverage_transition_ref=request["coverage_transition_ref"])
+                writer.update(state="DRAFT_STORED", **{
+                    "coverage_continuation" if same_draft_coverage else "extent_advisory_continuation": continuation})
                 writer.pop("reason", None)
                 _artifact(kernel, repo, request["world_ref"]["work_id"], owner, "INTERNAL_VERIFICATION_CONTINUATION", result)
-                node.update(state="VERIFICATION_CONSUMED", reason="SAME_DRAFT_COVERAGE_REREAD")
+                node.update(state="VERIFICATION_CONSUMED", reason="SAME_DRAFT_COVERAGE_REREAD" if same_draft_coverage else "SAME_DRAFT_ADVISORY_REREAD")
                 return identity
             if request["source_kind"] == "DIAGNOSIS":
                 current = writer["output_ref"]
@@ -491,7 +495,7 @@ def consume_verification(kernel, repo, owner, board):
                 writer.update(prior_draft_ref=current, revision_count=writer.get("revision_count", 0) + 1,
                     revision_feedback={"source_draft_ref": current, "report_ref": node["output_ref"],
                         "strategy_instruction": result["method"], "findings": [a for a in result["answers"]
-                                                       if a["status"] == "CONFIRMED_CONFLICT"] + extent_findings})
+                                                       if a["status"] == "CONFIRMED_CONFLICT"]})
                 if request.get("parent_case_hash"):
                     writer["revision_feedback"].update(adopted_world_ref=request["world_ref"], coverage_transition_ref=request["coverage_transition_ref"])
                     for key in keys[1:]:

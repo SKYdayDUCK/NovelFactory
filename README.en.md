@@ -22,6 +22,8 @@ Suppose a courier receives a letter in volume one and the protagonist reads it i
 
 Agent Workshop manages organizations, employees, grants and skills. NovelFactory binds each assignment to a work, branch, role and world revision. The supervisor selects an operator-configured model route. Creative Harness assembles context, plans, simulations and review evidence. The kernel checks dependencies and approvals before advancing the canonical head. Books can share model slots while keeping their task histories and ledgers separate.
 
+Length estimates are advisory. Word-count differences do not cause rejection, rewriting or extra chapters. Story completion depends on coherent plot and character logic, the approved plan and ending, followed by independent editorial review.
+
 ```mermaid
 flowchart TD
     A["Author / project binding"] --> NF["NovelFactory tasks"]
@@ -57,7 +59,7 @@ The verified run produced six scenes and 2,204 Unicode code points in 15 fixture
 
 | Area | Observed result |
 | --- | --- |
-| Correctness and recovery | Current unit/contract checks passed 852 cases and 17 subtests, with two platform skips. PostgreSQL shards and focused recovery runs are recorded separately; historical two-service, Redis and WAL/PITR evidence is retained. |
+| Correctness and recovery | Current unit/contract checks passed 860 cases and 17 subtests, with two platform skips. PostgreSQL shards and focused recovery runs are recorded separately; historical two-service, Redis and WAL/PITR evidence is retained. [Story completion and advisory length](reports/story-completion-advisory-20261114.md) |
 | Capacity | Two ten-minute read runs with 500 logical agents completed 12,000 requests each. The 200-agent overload and 1000-agent open-arrival gates remain unmet. |
 | Editorial and billing evidence | The volume and provider fault scenarios used synthetic inputs. Human manuscript ratings and commercial invoices require separate evidence. |
 | Live readiness | Actual scoped MCP reads and automatic rereads now work. Writer identity formatting and independent-review record collisions received separate fixes. A/B production acceptance remains in progress; neither novel is complete. [Latest production observation](reports/runtime-review-format-20261114.md) · [Live tool evidence](reports/runtime-native-tools-20261114.md) |

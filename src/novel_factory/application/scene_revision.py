@@ -117,92 +117,18 @@ def revise_scene(kernel, repo, board):
 
 
 def resume_extent_revision(kernel, repo, owner, board, identity):
-    """Resume a measured length plateau without replacing the current authorized draft."""
-    from .production_extent import _count_han
-    writer = board["nodes"][identity]
-    history = writer.get("extent_repairs", [])
-    if not (writer["stage"] == "draft" and writer["state"] == "STOPPED" and writer.get("reason") == PAUSED
-            and history and history[-1]["decision"] == PAUSED and writer.get("output_ref")):
-        return False
-    wr = _writer_world(kernel, repo, board, writer)
-    require(not repo.one("selections", {"work_id":wr["work_id"], "selection_kind":"NARRATIVE_SCENE:" + identity[6:]}),
-            "NARRATIVE_SELECTION_CONFLICT", "A frozen scene cannot be revised here")
-    extent = writer["han_characters"]
-    current = writer["output_ref"]
-    draft = kernel.artifact(repo, current, wr["work_id"], kind="NARRATIVE_DRAFT")["payload"]
-    require(draft["input_world_ref"] == wr and draft["scene_ref"] == writer["scene_ref"]
-            and draft["handoff_refs"] == writer["handoff_refs"], "INVALID_EVIDENCE", "Writer source changed")
-    measured = _count_han(kernel.objects.read(draft["text_ref"]["sha256"]).decode("utf-8"))
-    require(measured == history[-1]["actual"], "INVALID_EVIDENCE", "Length measurement differs from the latest draft")
-    task = repo.one("tasks", {"task_id":writer["task_id"], "generation":writer["generation"]})
-    require(task and task["state"] == "ACCEPTED", "INVALID_EVIDENCE", "Length recovery requires an accepted writer task")
-    from .production_strategy import request_strategy
-    request_strategy(board, identity, writer,
-                     [{"actual_han": measured, "target_han": extent}], history[-1])
-    return True
+    """Legacy length holds require explicit adoption of the advisory policy."""
+    return False
 
 
 def restore_unsent_extent_source(kernel, repo, board, identity, task):
-    """Recover old length tasks whose input draft already has a known successor."""
-    writer = board["nodes"][identity]
-    plans = writer.get("extent_repairs", [])
-    records = writer.get("history") or []
-    if (writer["stage"] != "draft" or task["state"] != "PAUSED" or not records or not plans
-            or plans[-1]["decision"] != PAUSED or not writer.get("prior_draft_ref")
-            or records[-1].get("reason") != PAUSED or not records[-1].get("output_ref")
-            or records[-1]["output_ref"] == writer["prior_draft_ref"]):
-        return False
-    wr = _writer_world(kernel, repo, board, writer)
-    require(not repo.many("call_attempts", {"task_id":task["task_id"]}), "CALL_RECONCILIATION_REQUIRED",
-            "Old extent task has provider accounting and needs reconciliation")
-    latest = records[-1]
-    old_draft = kernel.artifact(repo, latest["output_ref"], wr["work_id"], kind="NARRATIVE_DRAFT")["payload"]
-    require(old_draft["task_id"] == latest["task_id"] and old_draft["generation"] == latest["generation"]
-            and old_draft["scene_ref"] == writer["scene_ref"] and old_draft["input_world_ref"] == wr
-            and any(row.get("output_ref") == writer["prior_draft_ref"] for row in records),
-            "INVALID_EVIDENCE", "The earlier extent source does not belong to this scene")
-    restored = dict(latest)
-    _archive(writer)
-    writer.update(restored, state="STOPPED", reason=PAUSED)
-    return True
+    """Do not revive a paid rewrite solely to meet a historical length target."""
+    return False
 
 
 def repair_scene_extent(kernel, repo, owner, board, writer, task, audit, draft_ref, prose):
-    extent = writer.get("han_characters")
-    if board.get("production_mode") != "quality" or extent is None:
-        return False
+    """Record the observed size, then continue the normal independent readings."""
     from .production_extent import _count_han
-    actual = _count_han(prose)
-    if extent["min"] <= actual <= extent["max"]:
-        return False
-    history = writer.setdefault("extent_repairs", [])
-    distance = max(extent["min"] - actual, actual - extent["max"])
-    best_index = min(range(len(history)), key=lambda i: history[i]["distance"], default=0)
-    best = history[best_index]["distance"] if history else distance + 1
-    # Compare with the best measured result to distinguish net progress from oscillation.
-    failures = [] if distance < best else history[best_index:]
-    chosen = plan_repair("extent", extent, failures)
-    chosen = reflect_repair(kernel, repo, owner, board["world_ref"], task["task_id"], audit["attempt_id"],
-                            draft_ref, chosen, "SCENE_HAN_EXTENT")
-    history.append({**chosen, "distance": distance, "actual": actual})
-    writer.update(state="DRAFT_STORED", output_ref=draft_ref, generation=task["generation"],
-                  completed_at=repo.now().isoformat(), reason="SCENE_LENGTH_OUTSIDE_TARGET")
-    from .production_reassessment import repair_budget
-    if reason := repair_budget(writer, phase="revision"):
-        writer.update(state="STOPPED", reason=reason)
-        return True
-    if chosen["decision"] == PAUSED:
-        writer.update(state="STOPPED", reason=PAUSED)
-        return True
-    old = writer.get("revision_feedback", {})
-    historical = list(old.get("historical_report_refs", []))
-    if old.get("report_ref") and old["report_ref"] not in historical:
-        historical.append(old["report_ref"])
-    _archive(writer)
-    findings = [{"actual_han": actual, "target_han": extent}]
-    writer.update(prior_draft_ref=draft_ref, revision_count=writer.get("revision_count", 0) + 1,
-                  revision_feedback={"report_ref": chosen["reflection_ref"], "findings": findings,
-                                     "source_draft_ref": draft_ref, "historical_report_refs": historical,
-                                     "reflection_ref": chosen["reflection_ref"], "error_ref": chosen["error_ref"],
-                                     "strategy_instruction": chosen["method"]})
-    return True
+    writer["extent_observation"] = {"policy": "ADVISORY", "draft_ref": draft_ref,
+                                    "actual_han": _count_han(prose), "historical_target": writer.get("han_characters")}
+    return False

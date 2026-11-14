@@ -88,10 +88,12 @@ def _chapter_count(kernel, repo, wr, cursor, draft_refs):
 
 
 def check_length(length, characters, chapters):
-    if isinstance(length, dict):
-        quantity = chapters if length["unit"] == "chapters" else characters
-        require(within_length(length, quantity),
-                "MANUSCRIPT_EXTENT_NOT_MET", "The ordered final work does not meet its explicit length")
+    """Historical length requests are advisory; completion depends on story review.
+
+    Keep this compatibility entry point while preserving the measurements and
+    native writer provenance collected by ``measure_submission``.
+    """
+    return
 
 
 def _real_candidate(delivery, repo, task, *, design_revision_read=False, ending_plan_read=False):

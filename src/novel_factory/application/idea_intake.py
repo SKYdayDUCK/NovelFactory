@@ -5,18 +5,37 @@ from uuid import UUID, uuid5
 
 from novel_factory.application.budget_limits import SharedBudgetService
 from novel_factory.application.candidate_delivery import CandidateDelivery
-from novel_factory.application.idea_revision import derive_revision_patch, full_design_contract
-from novel_factory.application.idea_window import frozen_window_minimum, initial_window_minimum, window_diagnostics
 from novel_factory.application.idea_ending import confirm_ending, derive_ending_plan
-from novel_factory.application.idea_repair import UnparsedDesign, initial_or_structural_repair, normalized_design, returned_design
+from novel_factory.application.idea_repair import (
+    UnparsedDesign,
+    initial_or_structural_repair,
+    normalized_design,
+    returned_design,
+)
+from novel_factory.application.idea_revision import derive_revision_patch, full_design_contract
+from novel_factory.application.idea_window import (
+    frozen_window_minimum,
+    initial_window_minimum,
+    window_diagnostics,
+)
 from novel_factory.application.kernel import require
-from novel_factory.application.model_routing import POLICY_ROUTE, activate, check_idea_models, idea_policy
+from novel_factory.application.model_routing import (
+    POLICY_ROUTE,
+    activate,
+    check_idea_models,
+    idea_policy,
+)
 from novel_factory.application.narrative import NarrativeService
 from novel_factory.application.planning import PlanningService
 from novel_factory.application.production_pipeline import _artifact
 from novel_factory.application.production_profiles import bind_profile, resolve_profile
+from novel_factory.application.quality_memory import (
+    PAUSED,
+    plan_repair,
+    reflect_repair,
+    verify_method,
+)
 from novel_factory.application.release import ReleaseService
-from novel_factory.application.quality_memory import PAUSED, plan_repair, reflect_repair, verify_method
 from novel_factory.application.runtime_tasks import RuntimeTaskService
 from novel_factory.application.semantic_dependencies import check_task_dependencies
 from novel_factory.application.supervisor import RuntimeSupervisor
@@ -43,11 +62,7 @@ def parse_inspiration(data, production_mode=None):
 
 
 def _first_window_limit(profile, inspiration):
-    limit = profile["window_chapters"]
-    extent = inspiration["length"]
-    if isinstance(extent, dict) and extent["unit"] == "chapters":
-        return min(limit, extent.get("max", limit))
-    return limit
+    return profile["window_chapters"]
 
 
 def _uid(namespace, name):
@@ -113,12 +128,13 @@ def enroll_idea(kernel, gateway, inspiration, allowance, prep_work_id):
         "first_window_limit": maximum,
         "window_constraints_version": 1,
         "instructions": "依据灵感自主设计初始身份、地点、世界规则、故事线及首个窗口的章节目标。",
+        "extent_policy": "字数和预计章数仅作参考，按故事需要规划完整因果与人物选择，不为凑篇幅补章或删减必要情节。",
     }
     if minimum > 1:
         assignment.update(window_constraints_version=2, first_window_minimum=minimum,
                           planning_scope="本次章节目标覆盖全书，每章对应一个正文场景，在授权总字数内安排完整的开端、发展和收束。")
     if model_routes and profile["preset"] == "short":
-        assignment["extent_instruction"] = "章节目标覆盖整部短篇的开场、中段、转折与结局，在给定篇幅内收束核心冲突。"
+        assignment["extent_instruction"] = "章节目标覆盖整部故事的开场、中段、转折与结局，让核心冲突得到可辨认的回应；篇幅仅作参考。"
     if allowance.get("review_adapter_id"):
         assignment["opening_requirements"] = {
             "instructions": "为第一场设计两个有独立认知的人物和两个地点。opening 中各人的知识只写其已知身份、所见及动机。situation 是尚未确定后果的开场条件。",
@@ -257,9 +273,9 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
         role_id, task_kind, skill = "world_designer", "initial_world", "prepare-world"
         contract = source["output_contract"]
         gateway.output_contracts[(role_id, task_kind)] = (contract["name"], contract["version"])
-        content["first_window_limit"] = _first_window_limit(intake["profile"], intake["creative_input"])
         original = kernel.artifact(repo, intake["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]
         frozen = json.loads(original["assignment"])
+        content["first_window_limit"] = frozen.get("first_window_limit", _first_window_limit(intake["profile"], intake["creative_input"]))
         minimum = frozen_window_minimum(frozen, content["first_window_limit"])
         if minimum > 1:
             content.update(window_constraints_version=2, first_window_minimum=minimum,
@@ -297,7 +313,7 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
             if ending_plan:
                 gateway.output_contracts[(role_id, task_kind)] = ("ShortEndingPlan", "production_profile")
                 content["unresolved_questions"] = findings.get("unresolved_questions", [])
-                content.update(task="根据独立审核指出的成篇缺口，在原有篇幅和章节数量内定向改写现有章节目标、故事线。"
+                content.update(task="根据独立审核指出的成篇缺口，定向改写本次已绑定章节目标、故事线。篇幅仅作参考。"
                                     "保留人物、开场事实和世界规则。最后目标必须落实一个由人物行动产生的最终后果，"
                                     "让核心冲突得到回应。只返回 storyline、与原章数相同的 chapter_goals；开场需改时才给 opening。",
                                short_arc=findings["short_arc"])
@@ -388,7 +404,7 @@ def _enroll_design_step(kernel, gateway, repo, owner, wr, intake, task, evidence
                     "source_attempt_id": attempt}
         content["repair_strategy"] = repair_plan["method"]
     if intake["profile"]["preset"] == "short" and not diagnostics and not syntax_source:
-        content["extent_instruction"] = ("在给定篇幅和章节数内完成整部短篇。核对开场条件、中段发展、转折和结局"
+        content["extent_instruction"] = ("按故事需要完成整部故事，字数仅作参考。核对开场条件、中段发展、转折和结局"
                                          "都由这些章节目标承载，并给核心冲突安排可辨认的收束。")
     assignment = json.dumps(content, ensure_ascii=False)
     if syntax_source and len(assignment) > 32000:
@@ -548,14 +564,15 @@ def materialize_design(kernel, gateway, owner, wr):
                 evidence, design = derive_ending_plan(kernel, repo, owner, wr, designer,
                                                        json.loads(raw["payload"]["text"]), evidence, audit_ref)
         validate_contract("FirstWorldDesign", design, "production_profile")
-        limit = _first_window_limit(intake["profile"], intake["creative_input"])
+        bound_input = kernel.artifact(repo, intake["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]
+        frozen_assignment = json.loads(bound_input["assignment"])
+        limit = frozen_assignment.get("first_window_limit", _first_window_limit(intake["profile"], intake["creative_input"]))
         if designer.get("revision_purpose") == "WINDOW_SCHEMA_CORRECTION":
             prior = kernel.artifact(repo, designer["candidate_ref"], wr["work_id"])["payload"]
             require({k: v for k, v in design.items() if k != "chapter_goals"} ==
                     {k: v for k, v in prior.items() if k != "chapter_goals"}, "INVALID_MODEL_OUTPUT",
                     "Window format correction changed a field outside the diagnostic")
-        bound_input = kernel.artifact(repo, intake["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]
-        minimum = frozen_window_minimum(json.loads(bound_input["assignment"]), limit)
+        minimum = frozen_window_minimum(frozen_assignment, limit)
         diagnostics = window_diagnostics(design["chapter_goals"], limit, minimum)
         if diagnostics:
             if selected_review or (not quality and designer["structure_count"] >= intake["profile"]["max_reworks"]):

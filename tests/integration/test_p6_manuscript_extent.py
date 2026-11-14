@@ -15,16 +15,11 @@ from novel_factory.domain.errors import DomainError
 from novel_factory.fixtures import load_fixture
 
 
-def test_han_length_counts_prose_not_punctuation_and_accepts_explicit_bounds_only():
+def test_han_measurement_is_advisory_beyond_historical_bounds():
     assert _count_han("A 42，水\n𠀀〇。") == 3
-    for value in (6000, 10000):
+    for value in (1, 5999, 6000, 10000, 10001):
         check_length({"unit": "han_characters", "min": 6000, "max": 10000}, value, None)
-    for value in (5999, 10001):
-        with pytest.raises(DomainError) as err:
-            check_length({"unit": "han_characters", "min": 6000, "max": 10000}, value, None)
-        assert err.value.code == "MANUSCRIPT_EXTENT_NOT_MET"
-    with pytest.raises(DomainError):
-        check_length({"unit": "chapters", "min": 100, "max": 500}, 500000, None)
+    check_length({"unit": "chapters", "min": 100, "max": 500}, 500000, None)
 
 
 @pytest.mark.postgres
@@ -51,9 +46,7 @@ def test_minimum_chapters_cannot_be_satisfied_by_scene_count_or_reordered_scenes
         cursor = {"run_id": uid, "last_checkpoint": prior, "window_count": 2, "frozen_chapters": 2, "chapter_count": 2}
         count = _chapter_count(kernel, repo, wr, cursor, draft_refs)
         assert count == 2 and len(draft_refs) == 100
-        with pytest.raises(DomainError) as err:
-            check_length(length, 10000, count)
-        assert err.value.code == "MANUSCRIPT_EXTENT_NOT_MET"
+        check_length(length, 10000, count)
         with pytest.raises(DomainError):
             _chapter_count(kernel, repo, wr, cursor, list(reversed(draft_refs)))
         with pytest.raises(DomainError) as rebound:

@@ -25,6 +25,8 @@ Agent Workshop 维护组织、员工、授权和 Skills。NovelFactory 把一次
 
 原生 Codex 审核通过真实 MCP 核对固定版本的原文与系统数据，系统内疑问自动交独立角色补查。Flash 执行写作和退修；新稿重新通过认知、事实与文学审核。编辑批准后自动启动双路独立盲评，合格后冻结整书。退回、异常、重启和未知账务各自保留证据与有界恢复规则，离线模拟结果与真实作品验收分开记录。
 
+篇幅仅作参考，系统不因字数不足或超出目标暂停、返工或凑字数补章。完本依据故事、情节与人物逻辑，以及正式计划和结局的实际完成情况。
+
 ```mermaid
 flowchart TD
     A["作者 / 项目绑定"] --> NF["NovelFactory 任务"]
@@ -56,7 +58,7 @@ uv run --no-sync python scripts/with_postgres.py --migrate -- \
 
 | 范围 | 已取得的结果 |
 | --- | --- |
-| 核心行为与恢复 | 本轮单元/契约 852 项通过，另有 17 项子测试；PostgreSQL 分片与补测覆盖及平台限制单独记录。双服务、历史升级、Redis Streams 与 WAL/PITR 的历史证据保留。[本轮范围](reports/runtime-coverage-recovery-20261114.md) |
+| 核心行为与恢复 | 本轮单元/契约 860 项通过，另有 17 项子测试；PostgreSQL 分片与补测覆盖及平台限制单独记录。双服务、历史升级、Redis Streams 与 WAL/PITR 的历史证据保留。[最新范围](reports/story-completion-advisory-20261114.md) · [先前范围](reports/runtime-coverage-recovery-20261114.md) |
 | 容量 | 两轮 500 Agent、每轮 10 分钟的读测试各完成 12,000 次请求。200 Agent 过载及 1000 Agent 开放到达仍未达到原门槛。 |
 | 文学与费用 | 短卷和供应商故障测试使用合成输入。真人全文评分与商业模型账单需要单独取证。 |
 | 离线整书流程 | 多章多版本的 50 组双书各八章全部最终冻结；37 类、740 个场景的不变量检查通过。[最新恢复验收](reports/runtime-coverage-recovery-20261114.md) · [历史记录](reports/dry_run/README.md) |

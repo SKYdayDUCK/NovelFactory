@@ -25,6 +25,53 @@ from novel_factory.infrastructure.runtime_providers import RuntimeModelAdapter
 pytestmark = [pytest.mark.postgres, pytest.mark.integration]
 
 
+def test_resolved_legacy_length_diagnosis_rereads_same_body_without_another_writer(kernel_env, monkeypatch):
+    from novel_factory.application.production_pipeline import _save
+    from novel_factory.application.production_strategy import request_strategy
+    from novel_factory.application.quality_memory import PAUSED, plan_repair, reflect_repair
+
+    kernel = kernel_env["kernel"]
+    gateway, owner, wr, calls, diagnoses = synthetic_production(kernel, monkeypatch, target=(1, 2))
+    for _ in range(20):
+        RuntimeSupervisor(kernel, gateway).run_once(owner, wr["work_id"], wr["branch_id"])
+        with kernel.db.uow(write=False) as repo:
+            board = current_board(kernel, wr)
+            target, writer = next((key, node) for key, node in board["nodes"].items() if node["stage"] == "draft")
+            if writer["state"] == "DRAFT_STORED":
+                break
+    assert writer["state"] == "DRAFT_STORED"
+    original_draft = writer["output_ref"]
+    with kernel.objects.lock(), kernel.db.uow() as repo:
+        source = repo.one("call_attempts", {"task_id": writer["task_id"], "generation": writer["generation"],
+                                            "call_key": "supervised-candidate"})
+        plan = reflect_repair(kernel, repo, owner, wr, writer["task_id"], source["attempt_id"], original_draft,
+                              plan_repair("extent", writer["han_characters"], []), "SYNTHETIC_LEGACY_LENGTH")
+        writer.update(state="STOPPED", reason=PAUSED)
+        request_strategy(board, target, writer, [{"actual_han": 7, "target_han": writer["han_characters"]}], plan)
+        _save(kernel, repo, owner, board)
+    generate = RuntimeModelAdapter.generate
+
+    def blocked_diagnosis(adapter, packet):
+        response = generate(adapter, packet)
+        envelope = json.loads(response.text)
+        if envelope["role_id"] == "chief_editor":
+            envelope["payload"]["deferred_questions"] = ["Synthetic exact-version evidence question"]
+        return replace(response, text=json.dumps(envelope))
+
+    monkeypatch.setattr(RuntimeModelAdapter, "generate", blocked_diagnosis)
+    observed = intercept(kernel, monkeypatch, gateway)
+    board, cursor = drive(kernel, gateway, owner, wr)
+    writer = board["nodes"][target]
+    assert cursor["state"] == "FROZEN" and writer["output_ref"] == original_draft
+    assert writer.get("revision_count", 0) == 0 and len(diagnoses) == 1
+    assert len(observed["verification"]) == 1
+    assert len([identity for identity, _, _ in calls if identity["role_id"] == "writer"]) == 1
+    verification = next(node for node in board["nodes"].values() if node["stage"] == "internal_verification")
+    assert verification["state"] == "VERIFICATION_CONSUMED" and verification["reason"] == "SAME_DRAFT_ADVISORY_REREAD"
+    assert {node["state"] for node in board["nodes"].values() if node["stage"] in {"epistemic", "facts", "review"}} == {
+        "KNOWLEDGE_CLEAR", "FACTS_ACCEPTED", "ADVISORY_REVIEW"}
+
+
 def intercept(kernel, monkeypatch, gateway, *, facts=False, second_diagnosis=False, verification_failures=0):
     """Keep the existing synthetic Host's real MCP calls and replace only payloads."""
     original = RuntimeModelAdapter.generate
@@ -144,7 +191,7 @@ def intercept(kernel, monkeypatch, gateway, *, facts=False, second_diagnosis=Fal
 
 def test_second_diagnosis_queries_world_then_continues_once_without_renewing_old_budget(kernel_env, monkeypatch):
     kernel = kernel_env["kernel"]
-    gateway, owner, wr, calls, diagnoses = synthetic_production(kernel, monkeypatch, lengths=[1, 5, 3, 2, 2, 7])
+    gateway, owner, wr, calls, diagnoses = synthetic_production(kernel, monkeypatch, lengths=[1, 5, 3, 2, 7], story_failures=True)
     observed = intercept(kernel, monkeypatch, gateway, second_diagnosis=True)
     board, _ = drive(kernel, gateway, owner, wr,
         until=lambda b: any(n["stage"] == "internal_verification" and n["state"] == "PENDING" for n in b["nodes"].values()))
@@ -209,7 +256,7 @@ def test_thirty_five_unresolved_facts_are_verified_in_five_windows_before_one_re
 
 def test_internal_json_and_per_question_evidence_errors_receive_only_two_bounded_corrections(kernel_env, monkeypatch):
     kernel = kernel_env["kernel"]
-    gateway, owner, wr, _calls, diagnoses = synthetic_production(kernel, monkeypatch, lengths=[1, 5, 3, 2, 2, 7])
+    gateway, owner, wr, _calls, diagnoses = synthetic_production(kernel, monkeypatch, lengths=[1, 5, 3, 2, 7], story_failures=True)
     observed = intercept(kernel, monkeypatch, gateway, second_diagnosis=True, verification_failures=2)
     board, cursor = drive(kernel, gateway, owner, wr)
     assert cursor["state"] == "FROZEN" and len(diagnoses) == 2
@@ -228,7 +275,7 @@ def test_internal_json_and_per_question_evidence_errors_receive_only_two_bounded
 
 def test_repeated_inner_errors_stop_after_two_corrections_without_more_model_work(kernel_env, monkeypatch):
     kernel = kernel_env["kernel"]
-    gateway, owner, wr, calls, _ = synthetic_production(kernel, monkeypatch, lengths=[1, 5, 3, 2, 2])
+    gateway, owner, wr, calls, _ = synthetic_production(kernel, monkeypatch, lengths=[1, 5, 3, 2, 2], story_failures=True)
     observed = intercept(kernel, monkeypatch, gateway, second_diagnosis=True, verification_failures=3)
     board, _ = drive(kernel, gateway, owner, wr,
         until=lambda b: any(node.get("reason") == "INTERNAL_VERIFICATION_REPAIR_EXHAUSTED" for node in b["nodes"].values()))
@@ -242,7 +289,7 @@ def test_repeated_inner_errors_stop_after_two_corrections_without_more_model_wor
 
 
 def coverage_fixture(kernel, monkeypatch, *, diagnosis_cycle=False, pending_child=False, covered=False, unknown_query=False,
-                     editorial_diagnosis=False, wrong_parent_time=False, protected_author=False):
+                     editorial_diagnosis=False, wrong_parent_time=False, protected_author=False, extent_target=(6, 10)):
     """Use normal snapshots, native journals and actual scoped MCP state reads."""
     import test_production_strategy as strategy_fixture
     from test_release import setup_batch
@@ -270,7 +317,8 @@ def coverage_fixture(kernel, monkeypatch, *, diagnosis_cycle=False, pending_chil
         return setup_batch(kernel, fixture={**definition, **created}, **kwargs)
     monkeypatch.setattr(strategy_fixture, "setup_batch", uncovered_batch)
     gateway, owner, wr, calls, diagnoses = synthetic_production(kernel, monkeypatch,
-        **({"lengths": [1, 5, 3, 2, 2, 7]} if diagnosis_cycle else {}), editorial=editorial_diagnosis)
+        **({"lengths": [1, 5, 3, 2, 7], "story_failures": True} if diagnosis_cycle else {}), editorial=editorial_diagnosis,
+        target=extent_target)
     with kernel.db.uow(write=False) as repo:
         board = current_board(kernel, wr)
         writer = next(node for node in board["nodes"].values() if node["stage"] == "draft")
@@ -458,21 +506,23 @@ def test_coverage_child_cannot_commission_an_unbounded_grandchild(kernel_env, mo
     assert len(calls) == before
 
 
-def test_coverage_diagnosis_preserves_slot_and_still_enforces_current_extent(kernel_env, monkeypatch):
+def test_coverage_diagnosis_preserves_slot_without_rewriting_for_current_extent(kernel_env, monkeypatch):
     kernel = kernel_env["kernel"]
-    gateway, owner, wr, calls, diagnoses, observed = coverage_fixture(kernel, monkeypatch, diagnosis_cycle=True)
+    gateway, owner, wr, calls, diagnoses, observed = coverage_fixture(kernel, monkeypatch,
+        editorial_diagnosis=True, extent_target=(1, 2))
     try:
         board, cursor = drive_coverage(kernel, gateway, owner, wr, ticks=200)
     except pytest.fail.Exception as error:
         error.add_note("Coverage diagnosis reads: " + json.dumps(observed))
         raise
-    assert cursor["state"] == "FROZEN" and len(diagnoses) == 2
+    assert cursor["state"] == "FROZEN" and len(diagnoses) == 1
     assert len(observed) == 2
     writer = board["nodes"][observed[0]["case"]["target"]]
-    assert len(writer["reassessments"]) == 2
-    assert writer["revision_feedback"]["adopted_world_ref"] == observed[1]["case"]["world_ref"]
-    assert writer["revision_feedback"]["findings"][-1]["actual_han"] == 2
-    assert len([identity for identity, _, _ in calls if identity["role_id"] == "writer"]) == 6
+    assert len(writer["reassessments"]) == 1
+    assert writer["output_ref"] == observed[1]["case"]["source_draft_ref"]
+    assert writer["revision_count"] == observed[1]["case"]["revision_count"]
+    assert writer["extent_observation"]["actual_han"] > writer["han_characters"]["max"]
+    assert len([identity for identity, _, _ in calls if identity["role_id"] == "writer"]) == writer["revision_count"] + 1
 
 
 def test_evaluated_unknown_waits_for_evidence_without_claiming_missing_registration(kernel_env, monkeypatch):

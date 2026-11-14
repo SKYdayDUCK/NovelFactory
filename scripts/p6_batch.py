@@ -255,7 +255,7 @@ def writing_step(kernel, gateway, project, allowance):
             selected = repo.one("selections", {"work_id": work, "selection_kind": "P6_ROLLING:" + branch})
         if selected:
             cursor = rolling_status(kernel, owner, work, branch)
-            complete_text = cursor["frozen_chapters"] == cursor["target_chapters"]
+            complete_text = cursor["frozen_chapters"] == cursor["chapter_count"]
             if cursor["state"] == "FROZEN" and (complete_text or cursor["reason"] == "RELEASE_INCOMPLETE"):
                 edit = frozen_editing.start(kernel, owner, work, branch)
                 if edit["status"] == "EDITORIAL_APPROVED" and complete_text:

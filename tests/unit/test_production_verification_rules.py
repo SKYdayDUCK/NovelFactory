@@ -10,13 +10,55 @@ from novel_factory.domain.errors import DomainError
 
 
 def test_exhausted_revision_budget_is_checked_before_consuming_any_receipt(monkeypatch):
+    from types import SimpleNamespace
+
     board = {"nodes": {"draft": {"stage": "draft", "revision_count": 12, "state": "STOPPED"},
         "verification": {"stage": "internal_verification", "state": RESOLVED,
-                         "internal_case": {"target": "draft", "source_kind": "DIAGNOSIS"}}}}
+                         "output_ref": {}, "internal_case": {"target": "draft", "source_kind": "DIAGNOSIS",
+                             "world_ref": {"work_id": "work"}}}}}
     monkeypatch.setattr(flow, "consume_resolution", lambda *a: pytest.fail("Exhausted repair consumed its one-time receipt"))
-    assert flow.consume_verification(None, None, None, board) == "verification"
+    kernel = SimpleNamespace(artifact=lambda *_args, **_kwargs: {"payload": {"answers": [{"status": "CONFIRMED_CONFLICT"}]}})
+    assert flow.consume_verification(kernel, None, None, board) == "verification"
     assert board["nodes"]["draft"]["reason"] == "REPAIR_BUDGET_EXHAUSTED"
     assert board["nodes"]["verification"]["state"] == "VERIFICATION_HELD"
+
+
+@pytest.mark.parametrize("conflict,stage,mixed,rewrites", [(False, "extent", False, False),
+    (True, "extent", False, True), (False, "review", False, True), (False, "extent", True, True)])
+def test_only_verified_length_only_diagnosis_resumes_same_draft(monkeypatch, conflict, stage, mixed, rewrites):
+    from types import SimpleNamespace
+
+    from novel_factory.application import production_pipeline
+
+    target, wr, draft = "draft:scene", {"work_id": "work"}, ref("source-draft")
+    request = {"target": target, "source_kind": "DIAGNOSIS", "source_draft_ref": draft,
+               "world_ref": wr, "source_ref": ref("diagnosis")}
+    writer = {"stage": "draft", "state": "STOPPED", "reason": "INTERNAL_VERIFICATION_PENDING",
+              "output_ref": draft, "task_id": "writer", "generation": 1, "chapter_id": "chapter",
+              "revision_count": 0 if rewrites else 12, "han_characters": {"min": 6, "max": 10}}
+    readings = {key: {"stage": stage, "state": "STOPPED", "reason": "PREDECESSOR_STOPPED"} for key, stage in
+                (("knowledge:scene", "epistemic"), ("facts:scene", "facts"), ("review:chapter", "review"))}
+    node = {"stage": "internal_verification", "state": RESOLVED, "internal_case": request, "output_ref": ref("resolution")}
+    board = {"world_ref": wr, "nodes": {target: writer, "verification": node, **readings}}
+    findings = [{"actual_han": 20, "target_han": {"min": 6, "max": 10}}]
+    if mixed:
+        findings.append({"story_conflict": "Synthetic independent literary defect"})
+    source = {"request": {"review_stage": stage, "source_draft_ref": draft, "findings": findings}}
+    record = {"method": "Synthetic precise internal method", "answers": [{"status": "CONFIRMED_CONFLICT" if conflict else "NO_CONFLICT"}]}
+    kernel = SimpleNamespace(artifact=lambda *_args, kind, **_kwargs: {"payload": source if kind == "PRODUCTION_REASSESSMENT" else record})
+    consumed, saved = [], []
+    monkeypatch.setattr(flow, "consume_resolution", lambda *_args: consumed.append(True) or {
+        "consumed_now": True, "method": record["method"], "answers": record["answers"]})
+    monkeypatch.setattr(production_pipeline, "_artifact", lambda *_args: saved.append(True) or {})
+    assert flow.consume_verification(kernel, None, None, board) == "verification"
+    assert len(consumed) == len(saved) == 1
+    assert writer["revision_count"] == (1 if rewrites else 12)
+    if rewrites:
+        assert writer["state"] == "PENDING" and writer["prior_draft_ref"] == draft
+    else:
+        assert writer["state"] == "DRAFT_STORED" and writer["output_ref"] == draft
+        assert node["reason"] == "SAME_DRAFT_ADVISORY_REREAD"
+        assert all(value["state"] == "PENDING" for value in readings.values())
 
 
 def test_queue_exhaustion_returns_one_changed_marker_for_persistence():

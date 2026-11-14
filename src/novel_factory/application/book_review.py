@@ -89,13 +89,14 @@ def _ordered_texts(kernel, repo, owner, request, entries):
     if cursor:
         require(
             cursor["final_volume_id"] == request["volume_id"]
-            and cursor["frozen_chapters"]
-            == cursor["chapter_count"]
-            == cursor.get("target_chapters", cursor["chapter_count"]),
+            and cursor["frozen_chapters"] == cursor["chapter_count"],
             "RELEASE_INCOMPLETE",
             "The final blind review needs every frozen chapter",
         )
         _match_frozen_volume(kernel, repo, cursor, request["volume_id"], entries)
+        from .story_completion import require_complete
+
+        require_complete(kernel, repo, cursor)
         for release in cursor["release_refs"]:
             record = kernel.artifact(repo, release, work, kind="RELEASE_RECORD")["payload"]
             require(

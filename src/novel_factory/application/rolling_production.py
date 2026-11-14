@@ -8,6 +8,7 @@ from sqlalchemy import text
 from ..contracts.registry import validate_contract
 from ..domain.canonical import fingerprint
 from ..domain.errors import DomainError
+from ..domain.temporal import point_key
 from . import production_pipeline as boards
 from .kernel import require
 from .planning import PlanningService
@@ -310,26 +311,13 @@ def register_rolling(
             "Rolling input world changed",
         )
         provenance = kernel._prior(repo, owner, work, "P6_IDEA_PROVENANCE", "initial", {})
-        extent = (provenance or {}).get("creative_input", {}).get("length", {})
-        if isinstance(extent, dict) and extent.get("unit") == "chapters":
-            from .production_extent import within_length
-            target_chapters = extent["min"] if requested_extent is None else requested_extent
-            require(
-                within_length(extent, target_chapters),
-                "INVALID_ARGUMENT",
-                "Target exceeds the approved chapter range",
-            )
-        else:
-            target_chapters = initial_chapters if requested_extent is None else requested_extent
-            require(
-                target_chapters == initial_chapters,
-                "VIEW_DENIED",
-                "Additional chapters require a chapter-scoped native intake",
-            )
+        # The selected scene plans authorize the chapter structure. An estimated
+        # extent remains useful metadata, but cannot add or discard story goals.
+        target_chapters = initial_chapters if requested_extent is None else requested_extent
         require(
-            type(target_chapters) is int and target_chapters >= initial_chapters,
+            type(target_chapters) is int and target_chapters >= 1,
             "INVALID_ARGUMENT",
-            "Target is shorter than the registered plan",
+            "Invalid estimated chapter count",
         )
         refs = bind_profile(kernel, repo, owner, world_ref, effective)
         old = _load(kernel, repo, work, branch)
@@ -598,6 +586,10 @@ def frozen_volume_scenes(kernel, repo, cursor, volume):
 
 
 def _verify_volume(kernel, repo, cursor, volume, *, crossing):
+    if not crossing:
+        from .story_completion import require_complete
+
+        require_complete(kernel, repo, cursor)
     wr = cursor["world_ref"]
     work = wr["work_id"]
     ref = _selected(repo, work, "RELEASE:" + volume)
@@ -676,11 +668,6 @@ def advance_rolling(kernel, gateway, controller, work, branch):
                     _open(bound, repo, gateway, owner, cursor)
                 else:
                     final = cursor["index"] + 1 == cursor["window_count"]
-                    require(
-                        not final or cursor["chapter_count"] == cursor["target_chapters"],
-                        "NEXT_PLAN_REQUIRED",
-                        "An approved next-volume plan is required",
-                    )
                     next_window = (
                         None
                         if final
@@ -824,16 +811,16 @@ def retry_rolling(kernel, owner, *, world_ref, run_id, window_index, node_id, id
         return result
 
 
-def append_generated_volume(kernel, repo, owner, cursor, volume):
+def append_generated_volume(kernel, repo, owner, cursor, volume, *, authorization_ref):
     """Called in the reviewed native planner's transaction after it adopts a new volume plan.
 
-    The registered scope and chapter budget remain immutable. The cursor stays at
+    The registered scope and financial allowance remain immutable. The cursor stays at
     its frozen window until the previous volume's release and continuity actually exist.
     """
     wr = cursor["world_ref"]
     work, branch = wr["work_id"], wr["branch_id"]
     repo.one("works", {"work_id": work}, lock="update")
-    kernel.authorize(repo, owner, work, "ADMIN", branch)
+    grant = kernel.authorize(repo, owner, work, "ADMIN", branch)
     latest = _load(kernel, repo, work, branch)
     require(
         latest == cursor
@@ -846,11 +833,6 @@ def append_generated_volume(kernel, repo, owner, cursor, volume):
     boards._current_owner(kernel, repo, cursor)
     windows = partition_volumes([volume], cursor["profile"]["window_chapters"])
     count = len(volume["chapters"])
-    require(
-        cursor["chapter_count"] + count <= cursor["target_chapters"],
-        "CAPACITY_LIMIT",
-        "Continuation exceeds the authorized book extent",
-    )
     established = [_payload(kernel, repo, wr, ref, "ROLLING_WINDOW") for ref in cursor["windows"]]
     existing_chapters = {c["chapter_id"] for w in established for c in w["chapters"]}
     existing_scenes = {
@@ -876,6 +858,25 @@ def append_generated_volume(kernel, repo, owner, cursor, volume):
     require(ref, "STALE_PLAN", "Continuation requires a selected native plan")
     plan = _payload(kernel, repo, head, ref, "PLAN_REVISION")
     require(plan["input_world_ref"] == head, "STALE_PLAN", "Continuation plan was superseded")
+    authorization = _payload(kernel, repo, head, authorization_ref, "STORY_CONTINUATION_AUTHORIZATION")
+    from .story_completion import current_decision
+
+    completion = current_decision(kernel, repo, cursor)
+    key = cursor["run_id"] + ":" + str(cursor["chapter_count"])
+    receipt = kernel._prior(repo, owner, work, "STORY_CONTINUATION_ADOPT", key, authorization)
+    planner = repo.one("tasks", {"task_id": authorization["plan_task"], "work_id": work, "branch_id": branch})
+    reviewer = repo.one("tasks", {"task_id": authorization["review_task"], "work_id": work, "branch_id": branch})
+    require(completion and completion["advice"]["decision"] == "CONTINUE"
+            and authorization["story_completion_ref"] == completion["decision_ref"]
+            and authorization["run_id"] == cursor["run_id"] and authorization["work_head"] == head
+            and authorization["checkpoint"] == cursor["last_checkpoint"]
+            and authorization["volume_id"] == volume["volume_id"] and authorization["adopted_plan_ref"] == ref
+            and receipt == {"authorization_ref": authorization_ref}
+            and planner and reviewer and planner["state"] == reviewer["state"] == "ACCEPTED"
+            and planner["role_id"] == "volume_director" and reviewer["role_id"] == "reviewer"
+            and planner["principal_id"] != reviewer["principal_id"],
+            "REVIEW_REQUIRED", "Continuation needs an accepted independent plan review against the unfinished story")
+    ends = []
     for window in windows:
         boards._nodes(
             kernel,
@@ -890,6 +891,22 @@ def append_generated_volume(kernel, repo, owner, cursor, volume):
             cursor["allowance"]["predicates"],
             rolling=True,
         )
+        for chapter in window["chapters"]:
+            for slot in chapter["scenes"]:
+                scene = _payload(kernel, repo, head, slot["scene_ref"], "SCENE_PLAN")
+                ends.append(scene["scene_contract"]["story_interval"]["end"])
+    adopted_time = max([cursor["allowance"]["story_time"], *ends], key=point_key)
+    require(point_key(adopted_time) <= point_key(grant["max_story_time"]), "VIEW_DENIED",
+            "The adopted continuation exceeds the existing owner's story-time grant")
+    if adopted_time != cursor["allowance"]["story_time"]:
+        extension = {"run_id": cursor["run_id"], "authorization_ref": authorization_ref,
+                     "plan_ref": ref, "from_story_time": cursor["allowance"]["story_time"],
+                     "to_story_time": adopted_time, "grant_id": owner.grant_id, "grant_epoch": grant["epoch"]}
+        extension_ref = _store(kernel, repo, owner, head, "ROLLING_STORY_TIME_EXTENSION", extension)
+        kernel._receipt(repo, owner, head, "ROLLING_STORY_TIME_EXTENSION", key, extension,
+                        {"extension_ref": extension_ref})
+        cursor["allowance"]["story_time"] = adopted_time
+        cursor["story_time_extension_ref"] = extension_ref
     cursor["windows"].extend(_store(kernel, repo, owner, wr, "ROLLING_WINDOW", w) for w in windows)
     cursor.update(
         window_count=len(cursor["windows"]),
