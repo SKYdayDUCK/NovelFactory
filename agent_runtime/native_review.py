@@ -18,6 +18,12 @@ from .protocol import ModelCallFailure, ModelResponse
 
 REQUIRED_TOOLS = {"nf_context_get", "nf_query_batch"}
 TOOLS = REQUIRED_TOOLS | {"nf_review_material"}
+REVIEW_TRANSPORT_REVISION = "task-bound-code-mode-v1"
+
+
+def review_host_options():
+    """Only the task-bound reviewer enables the pinned Host's dynamic bridge."""
+    return host_options(task_bound_review=True)
 
 
 def _authorize_model(profile):
@@ -48,7 +54,7 @@ def generate(profile, request, *, authorize, record, broker):
 
 
 async def _session(profile, request, directory, authorize, record, broker):
-    proc = await start_host(resolve_host_binary(), "app-server", "--listen", "stdio://", *host_options(),
+    proc = await start_host(resolve_host_binary(), "app-server", "--listen", "stdio://", *review_host_options(),
         cwd=directory, env=host_environment(), stdin=asyncio.subprocess.PIPE,
         stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.DEVNULL, limit=4_000_000)
     sequence, sent = 0, False
@@ -94,7 +100,8 @@ async def _session(profile, request, directory, authorize, record, broker):
             if (account.get("account") or {}).get("type") != "chatgpt":
                 raise ModelCallFailure("CODEX_HOST_LOGIN_REQUIRED", sent=False)
             session = await rpc("thread/start", {"cwd": directory, "model": profile.model, "ephemeral": True,
-                "sandbox": "read-only", "approvalPolicy": "never", "dynamicTools": broker.tool_specs,
+                "sandbox": "read-only", "approvalPolicy": "never", "environments": [],
+                "runtimeWorkspaceRoots": [], "selectedCapabilityRoots": [], "dynamicTools": broker.tool_specs,
                 "baseInstructions": "Execute only the frozen NovelFactory reading task in the supplied messages. "
                 + ("This task has literary-material access only. Personally call nf_context_get and nf_review_material; do not seek hidden world facts. "
                    if "nf_query_batch" not in required_tools else
@@ -164,6 +171,7 @@ async def _session(profile, request, directory, authorize, record, broker):
                         cached_input_tokens=usage_value(usage.get("cachedInputTokens")), raw_response={
                             "codex_thread_id": thread, "codex_turn_id": turn_id, "model": session["model"],
                             "auth_mode": "host-login", "billing": "SUBSCRIPTION_AMOUNT_UNKNOWN",
+                            "native_review_transport_revision": REVIEW_TRANSPORT_REVISION,
                             "review_mcp_receipt_refs": list(broker.receipt_refs)})
     except ModelCallFailure:
         raise

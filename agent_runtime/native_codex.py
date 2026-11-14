@@ -16,7 +16,9 @@ from .host_process import ISOLATED_PLUGIN_OPTIONS, resolve_host_binary, start_ho
 from .protocol import ModelCallFailure, ModelResponse
 
 
-def host_options():
+def host_options(*, task_bound_review=False):
+    if type(task_bound_review) is not bool:
+        raise ValueError("Native review mode must be explicit")
     home = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex"))
     config = home / "config.toml"
     configured = tomllib.loads(config.read_text(encoding="utf-8")) if config.is_file() else {}
@@ -27,9 +29,14 @@ def host_options():
         if not name.replace("_", "").replace("-", "").isalnum():
             raise ValueError("Unsupported local MCP configuration name")
         settings['mcp_servers.' + name + '.enabled'] = False
-    for feature in ("apps", "browser_use", "computer_use", "shell_tool", "unified_exec", "multi_agent",
-                    "view_image", "image_generation", "hooks", "code_mode", "code_mode_host"):
+    for feature in ("apps", "browser_use", "computer_use", "shell_tool", "unified_exec", "multi_agent", "multi_agent_v2",
+                    "view_image", "image_generation", "hooks", "code_mode_only", "code_mode_tool_search"):
         settings["features." + feature] = False
+    # The pinned Host exposes client dynamic tools through its isolated Code
+    # Mode runtime. Enable that bridge only for the private read-tool broker;
+    # text-only turns must retain the original tool-free configuration.
+    settings["features.code_mode"] = task_bound_review
+    settings["features.code_mode_host"] = task_bound_review
     for key, value in settings.items():
         options.extend(["-c", key + "=" + json.dumps(value)])
     return options

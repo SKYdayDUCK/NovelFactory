@@ -219,6 +219,10 @@ def _register(kernel, gateway, owner, *, world_ref, series_id, volume_id, chapte
                 for call in repo.many("call_attempts", {"task_id": previous_tasks,
                                                         "state": ["PREPARED", "SENT", "UNKNOWN"]}):
                     task = repo.one("tasks", {"task_id": call["task_id"]})
+                    if task["state"] == "CANCELLED" and call["state"] == "UNKNOWN":
+                        from .native_tooling_recovery import verify_superseded_tooling_return
+                        if verify_superseded_tooling_return(kernel, repo, gateway, active, task, call):
+                            continue
                     require(call["state"] == "UNKNOWN" and task["state"] == "ACCEPTED"
                             and call["generation"] == task["generation"]
                             and call["call_key"] == "supervised-candidate", "CALL_RECONCILIATION_REQUIRED",
@@ -351,7 +355,8 @@ def _ready(board):
     if any(n["state"] == "STOPPED" and n.get("reason") in {
             "REVIEW_EVIDENCE_REPAIR_EXHAUSTED", "TECHNICAL_REPAIR_BUDGET_EXHAUSTED",
             "INTERNAL_VERIFICATION_REPAIR_EXHAUSTED", "INTERNAL_VERIFICATION_EXHAUSTED",
-            "REPAIR_BUDGET_EXHAUSTED", "NEEDS_WORLD_INPUT", "NEEDS_AUTHOR_DECISION"}
+            "REPAIR_BUDGET_EXHAUSTED", "NEEDS_WORLD_INPUT", "NEEDS_AUTHOR_DECISION",
+            "NATIVE_REVIEW_TOOLS_UNUSED", "NATIVE_REVIEW_TOOL_REPAIR_EXHAUSTED"}
            for n in nodes.values()):
         return None
     busy = Counter(n["stage"] for n in nodes.values() if n["state"] == "ENROLLED")
@@ -1024,6 +1029,14 @@ def advance_pipeline(kernel, gateway, controller, work, branch):
         nodes = board["nodes"]
         expired = repo.now() >= datetime.fromisoformat(board["authorization"]["deadline"])
         if not expired:
+            from .native_tooling_recovery import recover_toolless_native_reading
+            owner = _current_owner(bound, repo, board)
+            for identity, node in nodes.items():
+                if node["state"] in {"ENROLLED", "STOPPED"} and recover_toolless_native_reading(
+                        bound, repo, gateway.with_kernel(bound), owner, board, identity):
+                    return {"status": "NATIVE_REVIEW_TOOLING_UPDATED", "node_id": identity,
+                            "state": node["state"], "reason": node.get("reason"),
+                            "board_ref": _save(bound, repo, controller, board)}
             from .production_verification import consume_verification, queue_verification
             if verified := consume_verification(bound, repo, _current_owner(bound, repo, board), board):
                 return {"status": "INTERNAL_VERIFICATION_UPDATED", "node_id": verified,

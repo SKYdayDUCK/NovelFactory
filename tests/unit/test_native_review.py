@@ -44,6 +44,7 @@ for line in sys.stdin:
     elif method=='thread/start':
         assert {x['name'] for x in params['dynamicTools']}==({'nf_context_get','nf_review_material'} if MODE in {'blind','blind_query'} else {'nf_context_get','nf_query_batch'})
         assert params['ephemeral'] and params['sandbox']=='read-only' and params['approvalPolicy']=='never'
+        assert params['environments']==params['runtimeWorkspaceRoots']==params['selectedCapabilityRoots']==[]
         result={'thread':{'id':'thread-fixture'},'model':'fixture-review','modelProvider':'openai'}
     elif method=='mcpServerStatus/list':result={'data':[{'runtimeStatus':'ready'}] if MODE=='ambient_mcp' else []}
     elif method=='turn/start':result={'turn':{'id':'turn-fixture'}}
@@ -81,7 +82,7 @@ def run_host(tmp_path, monkeypatch, mode="valid", authorize=lambda _: True):
     monkeypatch.setattr(providers.Profile, "preflight", lambda _: None)
     monkeypatch.setenv("NF_RUNTIME_LIVE_APPROVED", "1")
     monkeypatch.setenv("NF_RUNTIME_ALLOWED_MODELS", json.dumps({"codex-cli": ["fixture-review"]}))
-    monkeypatch.setattr(native_review, "host_options", list)
+    monkeypatch.setattr(native_review, "host_options", lambda **_kwargs: [])
     monkeypatch.setattr(native_review, "resolve_host_binary", lambda: sys.executable)
     async def start(*args, **kwargs):
         return await real_start(sys.executable, str(stub), **kwargs)
@@ -161,3 +162,27 @@ def test_independent_send_guard_survives_a_mocked_profile_preflight(monkeypatch,
         native_review.generate(profile, ModelRequest(({"role": "user", "content": "Review"},), "a" * 64, 300, "attempt-fixture"),
             authorize=lambda _: True, record=lambda *args: None, broker=BrokerFixture())
     assert failure.value.code == code and not failure.value.sent
+
+
+def test_only_private_review_bridge_enables_code_mode_and_keeps_ambient_tools_off(tmp_path, monkeypatch):
+    monkeypatch.setenv("CODEX_HOME", str(tmp_path))
+    (tmp_path / "config.toml").write_text('[features]\nshell_tool=true\nmulti_agent_v2=true\n'
+        '[mcp_servers.ambient]\ncommand="forbidden"\n', encoding="utf-8")
+
+    def settings(options):
+        assert len(options) % 2 == 0
+        assert all(options[index] == "-c" for index in range(0, len(options), 2))
+        return {key: json.loads(value) for key, value in (row.split("=", 1) for row in options[1::2])}
+
+    text, review = settings(native_codex.host_options()), settings(native_review.review_host_options())
+    assert text["features.code_mode"] is text["features.code_mode_host"] is False
+    assert review["features.code_mode"] is review["features.code_mode_host"] is True
+    assert {key: value for key, value in text.items() if key not in {"features.code_mode", "features.code_mode_host"}} == {
+        key: value for key, value in review.items() if key not in {"features.code_mode", "features.code_mode_host"}}
+    for name in ("shell_tool", "unified_exec", "apps", "browser_use", "computer_use", "multi_agent", "multi_agent_v2",
+                 "view_image", "image_generation", "hooks", "plugins", "remote_plugin", "plugin_sharing",
+                 "code_mode_only", "code_mode_tool_search"):
+        assert review["features." + name] is False
+    assert review["mcp_servers.ambient.enabled"] is False and review["web_search"] == "disabled"
+    assert review["project_doc_max_bytes"] == 0
+    assert native_review.REVIEW_TRANSPORT_REVISION == "task-bound-code-mode-v1"

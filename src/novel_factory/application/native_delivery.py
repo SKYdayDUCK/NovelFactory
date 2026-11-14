@@ -11,7 +11,7 @@ from .prompt_schema import validated_payload
 
 def require_native_delivery(kernel, repo, task, call, audit_row, response_row, candidate_row,
                             *, design_revision_read=False, ending_plan_read=False, needs_input_read=False,
-                            allow_unresolved_review=False):
+                            allow_unresolved_review=False, tooling_recovery_read=False):
     """Verify frozen bytes and the trusted Host journal; do not settle or redispatch."""
     audit, response, candidate = audit_row["payload"], response_row["payload"], candidate_row["payload"]
     config, usage = audit["model_configuration"], audit["usage"]
@@ -19,6 +19,18 @@ def require_native_delivery(kernel, repo, task, call, audit_row, response_row, c
     host = repo.one("host_turns", {"attempt_id": attempt})
     task_input = repo.one("task_inputs", {"task_id": task["task_id"], "generation": task["generation"]})
     expected_status = "NEEDS_INPUT" if needs_input_read else "SUCCEEDED"
+    _check(type(tooling_recovery_read) is bool and not (tooling_recovery_read and any(
+        (design_revision_read, ending_plan_read, needs_input_read, allow_unresolved_review))))
+    if tooling_recovery_read:
+        # Transport proof for administrative replacement only. No missing-tool
+        # result can become an approved reading through this exception.
+        expected_status = audit["result_status"]
+        _check((task["role_id"], task["task_kind"]) in {
+            ("reviewer", "literary"), ("reviewer", "epistemic"), ("reviewer", "verification"),
+            ("evidence_maintainer", "assertion_extract")}
+            and expected_status in {"SUCCEEDED", "NEEDS_INPUT"}
+            and task["state"] in {"CANCELLED", "BLOCKED" if expected_status == "NEEDS_INPUT" else "RESULT_STORED"}
+            and task["current_result_id"] == str(uuid5(UUID(attempt), "task-result")))
     _check(type(allow_unresolved_review) is bool and not (needs_input_read and allow_unresolved_review))
     if allow_unresolved_review:
         # An administrator may verify this completed return to commission a new
@@ -83,7 +95,8 @@ def require_native_delivery(kernel, repo, task, call, audit_row, response_row, c
                and bound_input["output_contract"] == {"name": "AgentReviewOutput", "version": "agent"})
     _check(_transport_identity(envelope, audit, task, structural_source=False)
            and envelope["status"] == expected_status
-           and ((needs_input_read or allow_unresolved_review) and bool(envelope["unresolved_questions"])
+           and (tooling_recovery_read and (expected_status == "SUCCEEDED" or bool(envelope["unresolved_questions"]))
+                or (needs_input_read or allow_unresolved_review) and bool(envelope["unresolved_questions"])
                 or not needs_input_read and not envelope["unresolved_questions"] or design_revision_read
                 and (task["role_id"], task["task_kind"]) == ("reviewer", "fact")
                 and bound_input["output_contract"] == {"name": "ShortDesignReview", "version": "production_profile"}

@@ -56,11 +56,11 @@ uv run --no-sync python scripts/with_postgres.py --migrate -- \
 
 | 范围 | 已取得的结果 |
 | --- | --- |
-| 核心行为与恢复 | 本轮单元/契约 823 项通过，另有 17 项子测试；PostgreSQL 分片与补测按当前清单汇总为 923 项通过、22 项平台相关跳过。双服务、历史升级、Redis Streams 与 WAL/PITR 的历史证据保留。[本轮范围](reports/runtime-coverage-recovery-20261114.md) |
+| 核心行为与恢复 | 本轮单元/契约 824 项通过，另有 17 项子测试；PostgreSQL 分片与补测覆盖及平台限制单独记录。双服务、历史升级、Redis Streams 与 WAL/PITR 的历史证据保留。[本轮范围](reports/runtime-coverage-recovery-20261114.md) |
 | 容量 | 两轮 500 Agent、每轮 10 分钟的读测试各完成 12,000 次请求。200 Agent 过载及 1000 Agent 开放到达仍未达到原门槛。 |
 | 文学与费用 | 短卷和供应商故障测试使用合成输入。真人全文评分与商业模型账单需要单独取证。 |
 | 离线整书流程 | 多章多版本的 50 组双书各八章全部最终冻结；37 类、740 个场景的不变量检查通过。[最新恢复验收](reports/runtime-coverage-recovery-20261114.md) · [历史记录](reports/dry_run/README.md) |
-| 本机真实生成 | A、B 使用 Codex 审核与 Flash 写作。此前完成 601.8 秒真实观察，后续暂停并修复实际 MCP 取证及多章版本交接；小说尚未完本。[最新恢复验收](reports/runtime-coverage-recovery-20261114.md) · [前轮运行](reports/runtime-automation-20261114.md) |
+| 本机真实生成 | A、B 使用 Codex 审核与 Flash 写作。首次新版本观察暴露审核宿主工具关闭，已优雅停止并通过真实工程 MCP 验收；小说尚未完本，无人值守生产验收仍在进行。[真实工具与恢复](reports/runtime-native-tools-20261114.md) · [流程验收](reports/runtime-coverage-recovery-20261114.md) |
 
 项目使用 Python、SQLAlchemy、PostgreSQL 17、可选的 Redis Streams、MCP stdio 和 HTTP。可先运行 `python scripts/nf.py dry-run --books 3 --chapters 5 --seed 42`，经过真实 Harness 边界模拟规划、写作、随机审核、返工、双路全文审核及整书最终冻结，数据库和上游模型调用均为 0。默认命令必须达到全部小说最终冻结才返回成功。[Dry Run 与生命周期](docs/zh-CN/11-Dry-Run与程序生命周期.md)
 
