@@ -1,5 +1,6 @@
 """Private PG17 startup is owner-bound, idempotent and shell-free."""
 import importlib.util
+import json
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -58,3 +59,13 @@ def test_old_deployment_without_private_clusters_is_compatible(monkeypatch):
     monkeypatch.setattr(runtime.subprocess, "run", lambda command, **kwargs: calls.append(command))
     runtime.start_services({"wsl_distribution": "NovelFactory"})
     assert len(calls) == 2
+
+
+def test_test_redis_uses_disposable_database_separate_from_production(monkeypatch):
+    config = {"databases": {}, "redis_password_ref": "REDIS_TEST_REF", "redis_port": 56379}
+    monkeypatch.setattr(runtime, "read_private_bytes", lambda *args: json.dumps(config).encode())
+    monkeypatch.setattr(runtime, "resolve", lambda _: "synthetic-only-password")
+    _, env = runtime.environment(Path("synthetic-private-config"))
+    assert env["NF_REDIS_URL"].endswith("/0") and env["AW_REDIS_URL"] == env["NF_REDIS_URL"]
+    assert env["NF_TEST_REDIS_URL"].endswith("/15")
+    assert env["NF_TEST_REDIS_URL"].rsplit("/", 1)[0] == env["NF_REDIS_URL"].rsplit("/", 1)[0]

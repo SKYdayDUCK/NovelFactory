@@ -61,7 +61,7 @@ def environment(path):
     if not password:
         raise ValueError("REDIS_CREDENTIAL_NOT_CONFIGURED")
     env["NF_REDIS_URL"] = f"redis://:{quote(password, safe='')}@127.0.0.1:{config['redis_port']}/0"
-    env["NF_TEST_REDIS_URL"] = env["NF_REDIS_URL"]
+    env["NF_TEST_REDIS_URL"] = env["NF_REDIS_URL"].rsplit("/", 1)[0] + "/15"
     env["AW_REDIS_URL"] = env["NF_REDIS_URL"]
     env.update(config.get("environment", {}))
     env["PYTHONPATH"] = os.pathsep.join([str(ROOT / "workshop/src"), env.get("PYTHONPATH", "")])
