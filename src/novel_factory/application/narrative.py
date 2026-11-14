@@ -55,7 +55,8 @@ class NarrativeService:
     def _task(self, repo, principal, task_id, generation, capability="READ", *, allow_accepted=False):
         self.kernel._task_owner(repo, principal, task_id, capability)
         repo.one("tasks", {"task_id": task_id}, lock="share")
-        task, grant, spec = WorldQueryService(self.kernel)._task(repo, principal, task_id, generation, capability)
+        task, grant, spec = WorldQueryService(self.kernel)._task(
+            repo, principal, task_id, generation, capability, historical_accepted=allow_accepted)
         require(task["state"] != "ACCEPTED" or allow_accepted, "TASK_NOT_ACCEPTABLE", "Task is already complete")
         require(task["context_bundle_id"] is not None, "CONTEXT_REQUIRED", "A fixed context is required")
         context = repo.one("contexts", {"context_bundle_id": task["context_bundle_id"], "task_id": task_id,
@@ -578,7 +579,12 @@ class NarrativeService:
         origin, origin_grant, _, context = self._origin(repo, draft)
         require(repo.ancestor(draft["input_world_ref"], wr), "BRANCH_CHANGED", "Alignment requires a successor of the exact source branch")
         scene = self._scene(repo, draft["scene_ref"], wr["work_id"])
-        extraction, extraction_task, extraction_grant = self._extraction(repo, extraction_ref, draft_ref, draft)
+        # Reconciliation reuses an immutable extraction as historical evidence;
+        # it does not reopen the completed reader or allow another submission.
+        # Generation, authorization, exact delivery and acceptance dependencies
+        # remain fenced by _extraction and _validate_for_acceptance.
+        extraction, extraction_task, extraction_grant = self._extraction(
+            repo, extraction_ref, draft_ref, draft, allow_accepted=True)
         revision = self.kernel.revision(repo, wr)
         require(revision["interpretation_ref"] == repo.one("works", {"work_id": wr["work_id"]})["interpretation_ref"],
                 "NARRATIVE_ALIGNMENT_REQUIRED", "World interpretation requires renewed validation")
@@ -945,6 +951,9 @@ class NarrativeService:
                 require(len(matches) == 1, "VIEW_DENIED", "Text is not an unambiguous assigned draft")
                 draft_ref = matches[0]
         delivery = self.read_text(principal, task_id, generation, draft_ref)
+        with self.kernel.db.uow(write=False) as repo:
+            scene = self._scene(repo, delivery["scene_ref"], task["work_id"])
+            delivery["scene_story_interval"] = deepcopy(scene["scene_contract"]["story_interval"])
         if (task["role_id"], task["task_kind"]) == ("evidence_maintainer", "assertion_extract") and (
             delivery["scene_ref"] in spec["input_artifacts"]
         ):

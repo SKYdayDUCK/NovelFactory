@@ -87,8 +87,10 @@ def returned_fixture(kernel, monkeypatch, *, unchanged=False, scenes=1, failures
                 with kernel.db.uow(write=False) as repo:
                     query = next(ref for ref in metadata["review_mcp_receipt_refs"]
                         if kernel.artifact(repo, ref, work)["payload"]["tool"] == "nf_query_batch")
+                read = json.loads(user["authorized_materials"][0]["content"])
                 citations = [{"kind": "ARTIFACT", "artifact_ref": query},
-                             {"kind": "ARTIFACT", "artifact_ref": request_case["report_ref"]}]
+                             *[{"kind": "ARTIFACT", "artifact_ref": read["text_ref"],
+                                "span": span_for(read["text"], start, start + 1)} for start in range(2)]]
                 answers = [{"index": item["index"], "status": "NO_CONFLICT", "explanation": "Synthetic current-draft inquiry.",
                             "correction": None, "evidence_refs": citations} for item in request_case["questions"]]
                 payload = {"decision": json.dumps({"case_hash": request_case["case_hash"], "answers": answers}),

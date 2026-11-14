@@ -18,6 +18,18 @@ def _archive(node):
     node["state"] = "PENDING"
 
 
+def _writer_world(kernel, repo, board, writer):
+    """A registered historical writer retains its independently proved source."""
+    wr = writer.get("world_ref", board["world_ref"])
+    if wr != board["world_ref"]:
+        from .world_coverage_recovery import prove_pure_coverage
+
+        require(board.get("writer_source_world_ref") == wr
+                and board.get("coverage_registration_proof") == prove_pure_coverage(kernel, repo, wr, board["world_ref"]),
+                "INVALID_EVIDENCE", "Writer source cut lacks its registered coverage compatibility")
+    return wr
+
+
 def revise_scene(kernel, repo, board):
     nodes = board["nodes"]
     work = board["world_ref"]["work_id"]
@@ -112,7 +124,7 @@ def resume_extent_revision(kernel, repo, owner, board, identity):
     if not (writer["stage"] == "draft" and writer["state"] == "STOPPED" and writer.get("reason") == PAUSED
             and history and history[-1]["decision"] == PAUSED and writer.get("output_ref")):
         return False
-    wr = board["world_ref"]
+    wr = _writer_world(kernel, repo, board, writer)
     require(not repo.one("selections", {"work_id":wr["work_id"], "selection_kind":"NARRATIVE_SCENE:" + identity[6:]}),
             "NARRATIVE_SELECTION_CONFLICT", "A frozen scene cannot be revised here")
     extent = writer["han_characters"]
@@ -140,7 +152,7 @@ def restore_unsent_extent_source(kernel, repo, board, identity, task):
             or records[-1].get("reason") != PAUSED or not records[-1].get("output_ref")
             or records[-1]["output_ref"] == writer["prior_draft_ref"]):
         return False
-    wr = board["world_ref"]
+    wr = _writer_world(kernel, repo, board, writer)
     require(not repo.many("call_attempts", {"task_id":task["task_id"]}), "CALL_RECONCILIATION_REQUIRED",
             "Old extent task has provider accounting and needs reconciliation")
     latest = records[-1]

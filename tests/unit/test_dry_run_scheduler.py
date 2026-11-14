@@ -25,7 +25,7 @@ def test_each_fault_path_preserves_scheduling_invariants(scenario):
         unknown = next(row for row in report["trace"] if row["event"] == "UNKNOWN_HELD")
         assert sum(row["event"] == "HARNESS_REQUEST" and row["task"] == unknown["task"] for row in report["trace"]) == 1
     elif scenario in {"authorization_revoked", "budget_exhausted", "review_exhausted", "dependencies", "needs_input", "review_questions",
-                      "review_mcp_exhausted", "verification_unknown"}:
+                      "review_mcp_exhausted", "verification_unknown", "coverage_semantic_changed"}:
         assert report["workflow_status"] == "STOPPED_WITH_BLOCKERS"
     else:
         assert report["workflow_status"] == "COMPLETED" and report["frozen_chapters"] == 3
@@ -104,6 +104,162 @@ def test_internal_question_runs_bound_query_and_verification_before_continuing_t
         assert resolved["resolution"] == "CONFIRMED_CONFLICT" and report["stage_counts"]["strategy"] == 1
         assert report["stage_counts"]["draft"] == report["stage_counts"]["epistemic"] == 2
         assert report["chapter_manifests"][0]["revision"] == 1
+
+
+@pytest.mark.parametrize("scenario", ["stale_finding_provenance", "world_coverage_recovery", "world_coverage_blocked"])
+def test_version_or_coverage_recovery_keeps_the_draft_and_freezes_after_fresh_readings(scenario):
+    simulation = Simulation(scenario=scenario, books=2, chapters=2, review_pass_rate=1)
+    report = simulation.run()
+    assert report["status"] == "PASS" and report["frozen_books"] == 2
+    assert report["stage_counts"]["draft"] == 4
+    assert report["stage_counts"]["facts"] == report["stage_counts"]["epistemic"] == 5
+    trace = report["trace"]
+    reread = next(row for row in trace if row["event"] == "SAME_DRAFT_REREAD_ENROLLED")
+    original = simulation.jobs[reread["source_task"]]
+    assert simulation._subject(original) == reread["source_ref"]
+    frozen = next(row for row in report["chapter_manifests"] if row["book"] == original.book and row["chapter"] == original.chapter)
+    fresh_fact = simulation.jobs[frozen["facts_task"]]
+    assert fresh_fact.stage == "facts" and fresh_fact.state == "ACCEPTED"
+    assert fresh_fact.id != uid_for_test(original.book, original.chapter, "facts", original.revision)
+    if scenario == "stale_finding_provenance":
+        assert any(row["event"] == "SIMULATED_FINDING_PROVENANCE_READ" for row in trace)
+        assert not any(row["event"] == "SIMULATED_FORMAL_COVERAGE_ACCEPTED" for row in trace)
+        assert next(row for row in trace if row["event"] == "INTERNAL_QUESTION_RESOLVED")["resolution"] == "STALE_REPORT"
+    else:
+        closures = [row for row in trace if row["event"] == "SIMULATED_FORMAL_COVERAGE_ACCEPTED"]
+        assert len(closures) == 1 and closures[0]["canonical_effects_applied"] == 0
+        assert closures[0]["from_world"] != closures[0]["to_world"] and closures[0]["allowance_changed"] is False
+        assert fresh_fact.reading_world == closures[0]["to_world"]
+        assert len([row for row in trace if row["event"] == "COVERAGE_CHILD_ENROLLED"]) == 1
+    if scenario == "world_coverage_blocked":
+        held = next(row for row in trace if row["event"] == "WORLD_PROCESS_WAIT")
+        woke = next(row for row in trace if row["event"] == "REGISTERED_WORLD_PROCESS_COMPLETED")
+        assert held["at"] < woke["at"]
+        assert not any(row["event"] in {"HARNESS_REQUEST", "SIMULATED_FORMAL_COVERAGE_ACCEPTED"}
+                       for row in trace[trace.index(held) + 1:trace.index(woke)])
+
+
+def uid_for_test(book, chapter, stage, revision):
+    from novel_factory.simulation.scheduler import uid
+    return uid(f"{book}:{chapter}:{stage}:{revision}")
+
+
+def test_stale_simulated_report_cannot_claim_the_current_version_even_with_a_new_hash():
+    class CurrentSource(Simulation):
+        def _dispatch(self, job):
+            super()._dispatch(job)
+            if job.stage == "query_verification" and job.query_receipt:
+                job.query_receipt["finding_provenance"]["same_version"] = True
+                job.query_receipt["sha256"] = self._receipt_hash(job.query_receipt)
+
+    report = CurrentSource(scenario="stale_finding_provenance", chapters=1, review_pass_rate=1).run()
+    assert report["status"] == "FAIL" and report["frozen_books"] == 0
+    assert "INTERNAL_RESOLUTION_WITHOUT_QUERY_PROOF" in report["invariant_failures"]
+
+
+def test_coverage_reread_cannot_freeze_using_an_epistemic_result_from_the_old_cut():
+    class WrongCut(Simulation):
+        def _dispatch(self, job):
+            if job.stage == "freeze" and any(row["event"] == "COVERAGE_CHILD_ENROLLED" for row in self.trace):
+                decision = self.jobs[job.dependencies[0]]
+                reconciled = next(self.jobs[key] for key in decision.dependencies if self.jobs[key].stage == "reconcile")
+                facts = self.jobs[reconciled.dependencies[0]]
+                knowledge = next(self.jobs[key] for key in facts.dependencies if self.jobs[key].stage == "epistemic")
+                knowledge.reading_world = None
+            super()._dispatch(job)
+
+    report = WrongCut(scenario="world_coverage_recovery", chapters=1, review_pass_rate=1).run()
+    assert report["status"] == "FAIL" and report["frozen_books"] == report["frozen_chapters"] == 0
+    assert "READING_WORLD_CUT_MISMATCH" in report["invariant_failures"]
+
+
+def test_multichapter_coverage_preserves_predecessor_and_frozen_source_cuts_through_full_editing():
+    simulation = Simulation(scenario="multi_chapter_coverage", books=2, chapters=8, review_pass_rate=1)
+    report = simulation.run()
+    assert report["status"] == "PASS" and report["frozen_books"] == 2
+    trace = report["trace"]
+    assert len([row for row in trace if row["event"] == "SIMULATED_FORMAL_COVERAGE_ACCEPTED"]) == 16
+    handoffs = [row for row in trace if row["event"] == "PREDECESSOR_HANDOFF_PROVEN"]
+    assert len(handoffs) == 14
+    assert all(row["source_world"] != row["predecessor_world"] for row in handoffs)
+    for book in range(2):
+        volume = simulation.volume_manifests[book]
+        cuts = {item["reading_world"] for item in volume["chapters"]}
+        assert len(cuts) == 8 and volume["adopted_world"] in cuts
+        assert len({item["source_world"] for item in volume["chapters"]}) == 1
+        assert all(simulation._pure_coverage_chain(cut, volume["adopted_world"]) for cut in cuts)
+    assert len([row for row in trace if row["event"] == "MULTI_CHAPTER_FREEZE_PROVEN"]) == 2
+    editing = [row for row in trace if row["event"] == "FULL_VOLUME_SOURCE_CUTS_PROVEN"]
+    assert editing and all(len(set(row["reading_worlds"])) == 8 for row in editing)
+    assert all(row["source_worlds"] != row["reading_worlds"] for row in editing)
+
+
+@pytest.mark.parametrize("fault", ["source_cut", "draft", "scene", "branch"])
+def test_predecessor_handoff_cannot_use_a_rehashed_receipt_with_wrong_source_lineage(fault):
+    class WrongPredecessor(Simulation):
+        def _dispatch(self, job):
+            if job.stage == "draft" and job.chapter == 1:
+                previous = self.chapter_manifests[job.book, 0]
+                if fault == "source_cut":
+                    previous["source_world"] = previous["reading_world"]
+                elif fault == "draft":
+                    previous["draft_ref"] = {**previous["draft_ref"], "sha256": "f" * 64}
+                elif fault == "scene":
+                    previous["scene_ref"] = "OTHER_SCENE"
+                else:
+                    world = self.world_cuts[previous["reading_world"]]
+                    world["branch"] = "OTHER_BRANCH"
+                    world["closure"]["sha256"] = self._receipt_hash(world["closure"])
+                previous["sha256"] = self._receipt_hash(previous)
+            super()._dispatch(job)
+
+    simulation = WrongPredecessor(scenario="multi_chapter_coverage", chapters=2, review_pass_rate=1)
+    report = simulation.run()
+    assert report["status"] == "PASS" and report["frozen_books"] == 0
+    assert any(row["event"] == "PREDECESSOR_HANDOFF_REJECTED" for row in report["trace"])
+    assert not any(row["event"] == "HARNESS_REQUEST" and simulation.jobs[row["task"]].stage == "draft"
+                   and simulation.jobs[row["task"]].chapter == 1 for row in report["trace"])
+
+
+@pytest.mark.parametrize("boundary", ["volume_freeze", "book_structure"])
+@pytest.mark.parametrize("fault", ["canon", "registry", "interpretation", "record_operations"])
+def test_volume_freeze_and_editing_refuse_semantic_changes_even_with_rehashed_closure(boundary, fault):
+    class ChangedWorld(Simulation):
+        def _dispatch(self, job):
+            if job.stage == boundary:
+                cut = self.world_cuts[self.world_heads[job.book]]
+                if fault == "record_operations":
+                    cut["closure"]["record_operations"] = [{"kind": "NEW_REGISTERED_PROCESS"}]
+                else:
+                    cut[fault] = "CHANGED"
+                cut["closure"]["sha256"] = self._receipt_hash(cut["closure"])
+            super()._dispatch(job)
+
+    report = ChangedWorld(scenario="multi_chapter_coverage", chapters=2, review_pass_rate=1).run()
+    assert report["status"] == "PASS" and report["frozen_books"] == 0
+    event = "MULTI_CHAPTER_FREEZE_REJECTED" if boundary == "volume_freeze" else "FULL_VOLUME_EDITING_REJECTED"
+    assert any(row["event"] == event for row in report["trace"])
+
+
+@pytest.mark.parametrize("pending", [True, False])
+def test_pending_or_unknown_facts_do_not_turn_clear_after_pure_coverage(pending):
+    class UnresolvedFacts(Simulation):
+        def _invoke(self, job_id, generation, attempt, outcome):
+            response = super()._invoke(job_id, generation, attempt, outcome)
+            job = self.jobs[job_id]
+            if job.stage == "facts" and job.reading_world:
+                envelope = json.loads(response.text)
+                observation = envelope["payload"]["world_observation"]
+                observation.update(value_status="UNRESOLVED", knowledge_status="UNKNOWN",
+                                   evaluation_status="PENDING" if pending else "EVALUATED")
+                observation["sha256"] = self._receipt_hash(observation)
+                from dataclasses import replace
+                return replace(response, text=json.dumps(envelope))
+            return response
+
+    report = UnresolvedFacts(scenario="world_coverage_recovery", chapters=1, review_pass_rate=1).run()
+    assert report["status"] == "PASS" and report["frozen_books"] == report["frozen_chapters"] == 0
+    assert any(row["event"] == "FACT_WORLD_EVIDENCE_REJECTED" for row in report["trace"])
 
 
 @pytest.mark.parametrize("scenario", ["review_mcp_recovery", "review_mcp_exhausted"])

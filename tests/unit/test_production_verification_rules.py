@@ -93,10 +93,20 @@ def gate_case(monkeypatch, *, lookups=None, question=None, report_read=True, cit
     text = "甲有七两。乙只有三两。"
     text_ref = ref("current-text")
     references = [query, ref("material-draft"), ref("material-report")]
+    def state_item(index, lookup):
+        value = value_statuses[index] if value_statuses else "VALUE"
+        known = value in {"VALUE", "NONE", "NOT_APPLICABLE"}
+        return {"item_id": str(index), "status": "SUCCESS", "payload": {"kind": "STATE", "state_items": [{
+            "subject_id": lookup["subject_id"], "predicate": lookup["predicate"], "answer": {
+                "world_ref": {}, "story_time": lookup.get("at", {"tick": 1, "phase": 0}),
+                "plane": lookup.get("plane", "WORLD"), "value_status": value,
+                "evaluation_status": "EVALUATED" if known else "PENDING",
+                "knowledge_status": "KNOWN" if known else "UNKNOWN", "freshness": "CURRENT",
+                "truth_status": "DETERMINED" if known else "UNDETERMINED",
+                "data": {"kind": "STRING", "value": "owner"} if value == "VALUE" else None}}]}}
     receipts = [{"tool": "nf_query_batch", "outcome": "OK", "arguments": {"lookups": lookups},
                  "result": {"structuredContent": {"all_items_succeeded": True, "items": [
-                     {"item_id": str(i), "status": "SUCCESS", "payload": {"state_items": [{"subject_id": lookup["subject_id"],
-                         "predicate": lookup["predicate"], "answer": {"value_status": value_statuses[i] if value_statuses else "VALUE"}}]}}
+                     state_item(i, lookup)
                      for i, lookup in enumerate(lookups)]}}},
                 {"tool": "nf_review_material", "outcome": "OK", "arguments": {"artifact_ref": draft},
                  "result": {"structuredContent": {"draft_ref": draft, "text_ref": text_ref, "text": text}}}]
@@ -109,7 +119,8 @@ def gate_case(monkeypatch, *, lookups=None, question=None, report_read=True, cit
         "provider_response_json": json.dumps({"review_mcp_receipt_refs": references})}}})()
     request = {"world_ref": {}, "source_draft_ref": draft, "report_ref": report, "story_time": {"tick": 1, "phase": 0},
                "questions": [question or {"index": 0, "world_check": {"subject_id": "subject", "predicate": "owner", "plane": "WORLD",
-                    "at": {"tick": 1, "phase": 0}, "actor_id": None, "known_at": None}}]}
+                    "at": {"tick": 1, "phase": 0}, "actor_id": None, "known_at": None,
+                    "expected_status": "VALUE", "expected_value": {"kind": "STRING", "value": "owner"}}}]}
     citations = [{"kind": "ARTIFACT", "artifact_ref": query}]
     if cite_report:
         citations.append({"kind": "ARTIFACT", "artifact_ref": report})
@@ -137,7 +148,8 @@ def test_bound_default_time_world_query_can_answer_its_matching_check(monkeypatc
 
 def test_knowledge_check_needs_belief_actor_and_world_evidence_when_claimed_known(monkeypatch):
     question = {"index": 0, "knowledge_use": {"mode": "KNOWS", "subject_id": "subject", "predicate": "owner",
-                                              "actor_id": "actor", "at": {"tick": 1, "phase": 0}}}
+                                              "actor_id": "actor", "at": {"tick": 1, "phase": 0},
+                                              "value": {"kind": "STRING", "value": "owner"}}}
     with pytest.raises(DomainError, match="does not cover"):
         gate_case(monkeypatch, question=question)()
     lookups = [{"subject_id": "subject", "predicate": "owner"},
@@ -159,7 +171,7 @@ def test_unstructured_question_requires_actual_current_material_and_a_citation(m
 
 def test_unknown_question_cannot_borrow_another_batch_items_known_value(monkeypatch):
     lookups = [{"subject_id": "someone-else", "predicate": "owner"}, {"subject_id": "subject", "predicate": "owner"}]
-    with pytest.raises(DomainError, match="Unknown query"):
+    with pytest.raises(DomainError, match="conflict needs"):
         gate_case(monkeypatch, lookups=lookups, value_statuses=["VALUE", "UNRESOLVED"], answer_status="CONFIRMED_CONFLICT")()
     assert gate_case(monkeypatch, lookups=lookups, value_statuses=["UNRESOLVED", "NONE"], answer_status="CONFIRMED_CONFLICT")()
 
@@ -173,7 +185,7 @@ def test_textual_arithmetic_conflict_needs_two_distinct_exact_current_spans(monk
     second = {"kind": "ARTIFACT", "artifact_ref": ref("current-text"), "span": span_for(text, split, len(text))}
     question = {"index": 0, "question": "Compare these two exact amounts in this version."}
     for spans in ([first], [first, first]):
-        with pytest.raises(DomainError, match="two verified"):
+        with pytest.raises(DomainError, match="two independent"):
             gate_case(monkeypatch, question=question, cite_report=False, answer_status="CONFIRMED_CONFLICT", span_sources=spans)()
     assert gate_case(monkeypatch, question=question, cite_report=False, answer_status="CONFIRMED_CONFLICT", span_sources=[first, second])()
     wrong = {**second, "artifact_ref": ref("older-text")}

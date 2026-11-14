@@ -16,7 +16,7 @@ from .narrative import NarrativeService
 from .planning import PlanningService
 from .production_pipeline import _artifact, _current_owner
 from .quality_memory import PAUSED, plan_repair, reflect_repair
-from .rolling_production import _load, _window, frozen_volume_scenes
+from .rolling_production import _load, _window
 from .runtime_tasks import RuntimeTaskService
 from .volume_successor import _selected
 
@@ -72,8 +72,10 @@ def start(kernel, owner, work, branch):
                 "RELEASE_INCOMPLETE",
                 "Future chapters are still authorized",
             )
-        scenes = frozen_volume_scenes(kernel, repo, cursor, volume)
         wr = kernel.head(repo, work, branch)
+        from .rolling_production import revalidate_frozen_volume
+
+        scenes = revalidate_frozen_volume(kernel.in_transaction(repo), repo, owner, cursor, volume, wr)
         releases = [s["acceptance_ref"] for s in scenes]
         previous = _state(kernel, repo, work, branch)
         if (

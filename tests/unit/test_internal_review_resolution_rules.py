@@ -91,11 +91,12 @@ def test_all_questions_answered_without_turning_unknown_into_conflict(statuses, 
     assert parse_resolution(request, response(request, statuses))["outcome"] == outcome
 
 
-def test_new_internal_question_does_not_automatically_escalate_to_author():
+def test_new_internal_question_cannot_bypass_the_frozen_typed_answers():
     request = request_from_blocked(*case())
     candidate = response(request)
     candidate["deferred_questions"] = ["仍缺一项内部登记资料。"]
-    assert parse_resolution(request, candidate)["outcome"] == WORLD_INPUT
+    with pytest.raises(DomainError, match="Extra deferred questions"):
+        parse_resolution(request, candidate)
 
 
 def test_resolved_diagnosis_cannot_be_accepted_without_a_consumable_method():

@@ -35,6 +35,10 @@ def synthetic_production(kernel, monkeypatch, *, lengths=None, target=(6, 10), d
     params["profile"]["overrides"]["production_mode"] = "quality"
     params["routes"] = {"draft": "creative", "review": "review", "plan": "review"}
     params["token_reservation"] = token_reservation
+    if diagnosis == "needs_input":
+        # Intentionally wrong model: it calls pending coverage UNKNOWN.
+        # The actual query and finite correction gate must reject that claim.
+        params["predicates"] = ["synthetic_unknown_predicate", *params["predicates"]]
     with kernel.objects.lock(), kernel.db.uow() as repo:
         bind_extent(kernel, repo, owner, wr,
                     {"preset": "short", "unit": "han_characters", "min": target[0], "max": target[1]})
@@ -60,7 +64,11 @@ def synthetic_production(kernel, monkeypatch, *, lengths=None, target=(6, 10), d
             with kernel.db.uow(write=False) as repo:
                 job = repo.one("supervisor_jobs", {"task_id": identity["task_id"]})
             if job and job["config"].get("required_review_mcp"):
-                raw["review_mcp_receipt_refs"] = run_review_mcp(kernel, packet, thread, turn)
+                query_options = ({"query_at": {"tick": 0, "phase": 0},
+                                  "query_predicate": "synthetic_unknown_predicate"}
+                                 if task_kind == "verification" and diagnosis == "needs_input" else {})
+                raw["review_mcp_receipt_refs"] = run_review_mcp(kernel, packet, thread, turn,
+                                                               **query_options)
                 user = materialize_review_input(kernel, user, raw["review_mcp_receipt_refs"])
         calls.append(({**identity, "task_kind": task_kind}, deepcopy(user), profile.kind))
         result = answer(user)
@@ -96,9 +104,9 @@ def synthetic_production(kernel, monkeypatch, *, lengths=None, target=(6, 10), d
                 citations = [{"kind": "ARTIFACT", "artifact_ref": query},
                              {"kind": "ARTIFACT", "artifact_ref": case["report_ref"]}]
                 envelope["payload"] = {"decision": json.dumps({"case_hash": case["case_hash"], "answers": [
-                    {"index": question["index"], "status": "UNREGISTERED", "explanation": "Synthetic unresolved registration after actual query",
+                    {"index": question["index"], "status": "UNKNOWN", "explanation": "Synthetic evaluated predicate remains unknown after actual query",
                      "correction": None, "evidence_refs": citations} for question in case["questions"]]}),
-                    "reason": "Synthetic world-input hold after one internal verification", "deferred_questions": [], "evidence_refs": citations}
+                    "reason": "Synthetic evidence hold after one internal verification", "deferred_questions": [], "evidence_refs": citations}
             record(packet.attempt_id, thread, turn, "COMPLETED")
             raw.update(codex_thread_id=thread, codex_turn_id=turn, auth_mode="host-login",
                        billing="SUBSCRIPTION_AMOUNT_UNKNOWN")
@@ -194,13 +202,18 @@ def test_diagnosis_without_new_solution_stops_without_more_paid_work(kernel_env,
     assert writer["state"] == "STOPPED" and len(diagnoses) == (2 if diagnosis == "repeat_after_first" else 1)
     assert cursor["frozen_chapters"] == 0
     before = len(calls)
-    for _ in range(8):
+    for _ in range(16):
         RuntimeSupervisor(kernel, gateway).run_once(owner, wr["work_id"], wr["branch_id"])
-    assert len(calls) == before + int(diagnosis == "needs_input")
+    debug = current_board(kernel, wr)
+    assert len(calls) == before + 3 * int(diagnosis == "needs_input"), [
+        {"state": n["state"], "reason": n.get("reason"),
+         "repairs": [r.get("diagnostic") for r in n.get("evidence_repairs", [])]}
+        for n in debug["nodes"].values() if n["stage"] == "internal_verification"]
     if diagnosis == "needs_input":
-        assert len([row for row in calls if row[0]["task_kind"] == "verification"]) == 1
+        assert len([row for row in calls if row[0]["task_kind"] == "verification"]) == 3
         held = current_board(kernel, wr)
-        assert next(n for n in held["nodes"].values() if n["stage"] == "draft")["reason"] == "NEEDS_WORLD_INPUT"
+        assert any(n.get("reason") == "INTERNAL_VERIFICATION_REPAIR_EXHAUSTED"
+                   for n in held["nodes"].values() if n["stage"] == "internal_verification")
         settled = len(calls)
         for _ in range(8):
             RuntimeSupervisor(kernel, gateway).run_once(owner, wr["work_id"], wr["branch_id"])

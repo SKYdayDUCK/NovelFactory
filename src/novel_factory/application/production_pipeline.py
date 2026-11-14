@@ -209,7 +209,8 @@ def _register(kernel, gateway, owner, *, world_ref, series_id, volume_id, chapte
             require(not cursor or cursor["state"] == "COMPLETED", "CAPACITY_LIMIT", "A rolling allowance owns this branch")
         active = _load(kernel, repo, work, branch)
         require(not active or all(n["state"] in {"DRAFT_STORED", "ADVISORY_REVIEW", "WINDOW_TRANSFERRED",
-                "REPLAN_REQUIRED", "KNOWLEDGE_CLEAR", "FACTS_ACCEPTED", "STOPPED"} for n in active["nodes"].values()), "CAPACITY_LIMIT",
+                "REPLAN_REQUIRED", "KNOWLEDGE_CLEAR", "FACTS_ACCEPTED", "STOPPED",
+                "COVERAGE_TRANSITIONED", "VERIFICATION_CONSUMED"} for n in active["nodes"].values()), "CAPACITY_LIMIT",
                 "The branch has an unfinished production allowance")
         if active:
             previous_tasks = [record["task_id"] for n in active["nodes"].values() for record in [n, *n.get("history", [])]
@@ -223,7 +224,36 @@ def _register(kernel, gateway, owner, *, world_ref, series_id, volume_id, chapte
                             and call["call_key"] == "supervised-candidate", "CALL_RECONCILIATION_REQUIRED",
                             "Reconcile unresolved dispatches before replacing this production allowance")
                     CandidateDelivery(kernel, gateway).audited_candidate(repo, task, production_accounting=True)
-        require(kernel.head(repo, work, branch) == wr and repo.one("budgets", {"work_id": work, "budget_id": budget_id}),
+        head = kernel.head(repo, work, branch)
+        coverage_registration = None
+        coverage_deadline = None
+        if head != wr:
+            # Only the program's selected rolling continuation may retain the
+            # immutable scene/plan writer cut after formal empty coverage.
+            # Public registration continues to require the exact current head.
+            from .rolling_production import _load as rolling_cursor
+            from .rolling_production import _window
+            from .world_coverage_recovery import prove_pure_coverage
+
+            cursor = rolling_cursor(kernel, repo, work, branch)
+            require(rolling and cursor and cursor["state"] == "OPEN_NEXT" and cursor["index"] > 0
+                    and rolling == {"run_id": cursor["run_id"], "index": cursor["index"]}
+                    and series_id == cursor["series_id"] and not future
+                    and _window(kernel, repo, cursor) == {"volume_id": volume_id, "chapters": chapters}
+                    and cursor["allowance"]["budget_id"] == budget_id
+                    and cursor["allowance"]["routes"] == routes
+                    and all(request.get(key) == value for key, value in cursor["allowance"].items()
+                            if key != "story_time")
+                    and point_key(story_time) <= point_key(cursor["allowance"]["story_time"])
+                    and cursor["authorization"]["grant_id"] == owner.grant_id
+                    and cursor["authorization"]["principal_id"] == owner.principal_id,
+                    "VIEW_DENIED", "Historical source registration needs its exact selected rolling window")
+            _current_owner(kernel, repo, cursor)
+            PlanningService(kernel)._authorize(repo, owner, head, capability="ADMIN")
+            coverage_registration = prove_pure_coverage(kernel, repo, wr, head)
+            coverage_deadline = datetime.fromisoformat(cursor["authorization"]["deadline"])
+        require((head == wr or coverage_registration is not None)
+                and repo.one("budgets", {"work_id": work, "budget_id": budget_id}),
                 "VIEW_DENIED", "Current work head and a work-owned budget are required")
         plan_ref = _selected(repo, work, PlanningService.selection_key(volume_id))
         manifest = _selected(repo, work, "PLAN_MANIFEST:" + volume_id)
@@ -242,16 +272,26 @@ def _register(kernel, gateway, owner, *, world_ref, series_id, volume_id, chapte
         board = {k: v for k, v in request.items() if k not in {"chapters", "future", "deadline_seconds"}}
         if rolling is not None:
             board["rolling"] = rolling
+            if coverage_registration:
+                board["coverage_registration_proof"] = coverage_registration
+                board["writer_source_world_ref"] = wr
+                board["world_ref"] = head
+                for node in nodes.values():
+                    if node["stage"] == "draft":
+                        node["world_ref"] = wr
             if quality:
                 board["production_mode"] = "quality"
             if max_reworks:
                 board["max_reworks"] = max_reworks
             if continuity_ref:
                 board["continuity_ref"] = continuity_ref
+        deadline = repo.now() + timedelta(seconds=deadline_seconds)
+        if coverage_deadline is not None:
+            deadline = min(deadline, coverage_deadline)
         board.update(nodes=nodes, plan_ref=plan_ref, manifest_ref=manifest, authorization={
             "grant_id": owner.grant_id, "principal_id": owner.principal_id, "epoch": grant["epoch"],
             "policy_version": current_work["policy_version"],
-            "deadline": (repo.now() + timedelta(seconds=deadline_seconds)).isoformat()})
+            "deadline": deadline.isoformat()})
         from .production_profiles import load_profile
         binding = load_profile(kernel, repo, owner, work, branch)
         if binding and binding["profile"].get("production_mode") == "quality":
@@ -316,8 +356,18 @@ def _ready(board):
         return None
     busy = Counter(n["stage"] for n in nodes.values() if n["state"] == "ENROLLED")
     diagnoses = sorted(k for k, n in nodes.items() if n["stage"] in {"reassessment", "internal_verification"} and n["state"] == "PENDING")
+    world_wait = any(n["state"] in {"WAITING_WORLD_COVERAGE", "WAITING_WORLD_EVIDENCE",
+                                   "NEEDS_WORLD_COVERAGE", "NEEDS_WORLD_EVIDENCE"}
+                     or n["state"] == "STOPPED" and n.get("reason") in {
+                         "NEEDS_WORLD_COVERAGE", "NEEDS_WORLD_EVIDENCE", "COVERAGE_RETRY_EXHAUSTED"}
+                     for n in nodes.values())
+    if world_wait:
+        diagnoses = [key for key in diagnoses if nodes[key].get("coverage_transition_ref")
+                     and nodes[key].get("internal_case", {}).get("parent_case_hash")]
     if diagnoses and sum(busy[s] for s in READING_STAGES | {"reassessment", "internal_verification"}) < limits["review"]:
         return diagnoses[0]
+    if world_wait:
+        return None
     reviews = [k for k, n in nodes.items() if n["stage"] in READING_STAGES and n["state"] == "PENDING"
                and all(nodes[p]["state"] == "DRAFT_STORED" for p in n["parents"])
                and ("knowledge_node" not in n or nodes[n["knowledge_node"]]["state"] == "KNOWLEDGE_CLEAR")]
@@ -348,11 +398,53 @@ def _ready(board):
     return None
 
 
+def registered_author_protection(kernel, repo, board, request):
+    """Project only the protected clauses of this exact scene's volume contract."""
+    work = board["world_ref"]["work_id"]
+    draft = kernel.artifact(repo, request["source_draft_ref"], work, kind="NARRATIVE_DRAFT")["payload"]
+    scene = kernel.artifact(repo, draft["scene_ref"], work, kind="SCENE_PLAN")["payload"]
+    require(draft["scene_ref"] == board["nodes"][request["target"]]["scene_ref"],
+            "VIEW_DENIED", "Author protection belongs to another source scene")
+    plan = kernel.artifact(repo, scene["plan_ref"], work, kind="PLAN_REVISION")["payload"]
+    contract_ref = plan["volume_contract_ref"]
+    contract = kernel.artifact(repo, contract_ref, work, kind="VOLUME_CONTRACT")["payload"]
+    require(contract["volume_id"] == plan["volume_id"] == board["volume_id"]
+            and contract["input_world_ref"]["branch_id"] == request["world_ref"]["branch_id"]
+            and repo.ancestor(contract["input_world_ref"], request["world_ref"]),
+            "VIEW_DENIED", "Author protection is outside the assigned volume or world cut")
+    if not contract["protected_commitments"]:
+        return None
+    return contract_ref, {"source_ref": contract_ref, "projection": "REGISTERED_AUTHOR_PROTECTION",
+        "volume_id": contract["volume_id"], "contract_revision_id": contract["contract_revision_id"],
+        "protected_commitments": contract["protected_commitments"]}
+
+
 def _enroll(kernel, repo, gateway, owner, board, identity, *, frozen_assignment=None):
     from novel_factory.application.supervisor import RuntimeSupervisor
 
     node = board["nodes"][identity]
     wr, stage = node.get("world_ref", board["world_ref"]), node["stage"]
+    if node.get("reading_world_ref") is not None:
+        require(stage in {"facts", "epistemic", "review", "internal_verification"},
+                "VIEW_DENIED", "Coverage transitions only authorize a fresh independent reading")
+        from .world_coverage_recovery import TRANSITION_KIND, validate_reading_world
+        if stage != "internal_verification":
+            transition = kernel.artifact(repo, node["coverage_transition_ref"], board["world_ref"]["work_id"],
+                                         kind=TRANSITION_KIND)["payload"]
+            source = transition["request"]["source_identity"]
+            writer = board["nodes"][source["target"]]
+            if (source["source_draft_ref"] != writer.get("output_ref")
+                    or source["writer_task_id"] != writer.get("task_id")
+                    or source["writer_generation"] != writer.get("generation")
+                    or source["revision_count"] != writer.get("revision_count", 0)):
+                from .world_coverage_recovery import renew_reading_transition
+                renewed = renew_reading_transition(kernel, repo, owner, board, target=source["target"],
+                    prior_transition_ref=node["coverage_transition_ref"],
+                    idempotency_key="reading-lineage:" + fingerprint(
+                        [source["target"], writer.get("output_ref"), node["coverage_transition_ref"]]))
+                node.update(coverage_transition_ref=renewed["coverage_transition_ref"],
+                            reading_world_ref=renewed["reading_world_ref"])
+        wr = validate_reading_world(kernel, repo, board, node)
     work = wr["work_id"]
     cut, refs, materials = {"plane": "WORLD"}, [], []
     story_time = board["story_time"]
@@ -381,10 +473,17 @@ def _enroll(kernel, repo, gateway, owner, board, identity, *, frozen_assignment=
         materials = [request["source_draft_ref"], request["report_ref"]]
         refs = [request["report_ref"], *([manifest_ref] if stage == "reassessment" else [])]
         if stage == "internal_verification":
-            for key in ("source_ref", "extraction_ref"):
+            for key in ("source_ref", "extraction_ref", "parent_resolution_ref", "coverage_transition_ref"):
                 if request.get(key) and request[key] not in refs:
                     refs.append(request[key])
         assignment = verification_assignment(request) if stage == "internal_verification" else reassessment_assignment(request)
+        if stage == "internal_verification" and (protection := registered_author_protection(kernel, repo, board, request)):
+            protection_ref, _ = protection
+            refs.append(protection_ref)
+            materials.append(protection_ref)
+            assignment = ("作者保护仅以亲自调用nf_review_material读取以下本卷契约投影为准；"
+                          "需要作者裁决时引用此精确契约及原文条款，不能凭猜测："
+                          + json.dumps(protection_ref, separators=(",", ":")) + "\n" + assignment)
     elif stage == "draft":
         scene = kernel.artifact(repo, node["scene_ref"], work, kind="SCENE_PLAN")["payload"]
         materials = [node["scene_ref"]]
@@ -420,6 +519,7 @@ def _enroll(kernel, repo, gateway, owner, board, identity, *, frozen_assignment=
         scene = kernel.artifact(repo, parent["scene_ref"], work, kind="SCENE_PLAN")["payload"]
         story_time = scene["scene_contract"]["story_interval"]["end"]
         assignment = "独立通读本场正文，逐项核查人物所知、获知来源及披露时序。把无来源、时序矛盾或无法判断的知识归为问题，引用原句及可用证据。明确区分可验证的硬性认知矛盾、疑问和可选的文学建议，标注准确的严重程度与处置状态。"
+        assignment += "正文材料的scene_story_interval是实际发生区间；MCP状态查询须显式选择区间内原文对应的at，任务story_time是授权上限，不是默认发生点。"
         role, kind = "reviewer", "epistemic"
     elif stage == "internal_verification":
         role, kind = "reviewer", "verification"
@@ -563,6 +663,11 @@ def production_material_reader(kernel):
                         and any(a.get("case_hash") == request["case_hash"] for a in assigned),
                         "VIEW_DENIED", "Internal evidence is outside its exact frozen verification case")
                 source = kernel.artifact(repo, artifact_ref, task["work_id"])
+                if source["kind"] == "VOLUME_CONTRACT":
+                    protection = registered_author_protection(kernel, repo, board, request)
+                    require(protection and protection[0] == artifact_ref, "VIEW_DENIED",
+                            "Only the current scene's registered protected clauses are readable")
+                    return canonical_bytes(protection[1])
                 diagnostic_source = {}
                 if request["source_kind"] == "DIAGNOSIS":
                     diagnosis = kernel.artifact(repo, request["source_ref"], task["work_id"], kind="PRODUCTION_REASSESSMENT")["payload"]

@@ -1,0 +1,45 @@
+{
+  "schema_version": "nf.sanitized-dry-run-evidence.v1",
+  "source_sha256": {
+    "src/novel_factory/simulation/scheduler.py": "22e135b1f135db328d9a9f40b98649f1acabed8e774c9ec989986b4ed56e3cf6",
+    "scripts/nf_dry_run.py": "214adafc31f7c0a3ceb88da96398173180695f9dd7d24d3480dbebb934e60e67"
+  },
+  "completion": {
+    "status": "PASS",
+    "seed": 7,
+    "runs": 50,
+    "scenario_count": 50,
+    "harness_requests_total": 13452,
+    "completion_required": true,
+    "upstream_model_calls": 0,
+    "database_connections": 0,
+    "scope": "Program scheduling and Harness simulation; no production DB, billing or literary acceptance is proven",
+    "raw_report_sha256": "6def771ea1ab7438abd488685406d0212a3de4f2f3ae6b6cd194f4975b6922ea",
+    "workflow_outcomes": {
+      "COMPLETED": 50
+    },
+    "invariant_failures": 0,
+    "books_per_seed": 2,
+    "chapters_per_book": 8,
+    "frozen_books": 100,
+    "review_pass_rate": 0.7,
+    "max_reworks": 12
+  },
+  "fault_matrix": {
+    "status": "PASS",
+    "seed": 7,
+    "runs": 20,
+    "scenario_count": 740,
+    "harness_requests_total": 109401,
+    "completion_required": false,
+    "upstream_model_calls": 0,
+    "database_connections": 0,
+    "scope": "Program scheduling and Harness simulation; no production DB, billing or literary acceptance is proven",
+    "raw_report_sha256": "d5a7a5428bca5f73402a87ce535ee33815a6e022988b020531643662622587f8",
+    "workflow_outcomes": {
+      "COMPLETED": 396,
+      "STOPPED_WITH_BLOCKERS": 344
+    },
+    "invariant_failures": 0
+  }
+}

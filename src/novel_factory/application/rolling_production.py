@@ -1,5 +1,6 @@
 """A durable cursor over small native production boards and immutable chapter receipts."""
 
+from copy import deepcopy
 from datetime import datetime, timedelta
 
 from sqlalchemy import text
@@ -151,7 +152,8 @@ def rolling_status(kernel, owner, work, branch):
 def _open(kernel, repo, gateway, owner, cursor):
     window = _window(kernel, repo, cursor)
     request = dict(cursor["allowance"])
-    wr = kernel.head(repo, cursor["world_ref"]["work_id"], cursor["world_ref"]["branch_id"])
+    head = kernel.head(repo, cursor["world_ref"]["work_id"], cursor["world_ref"]["branch_id"])
+    wr = head
     remaining = int(
         (datetime.fromisoformat(cursor["authorization"]["deadline"]) - repo.now()).total_seconds()
     )
@@ -160,9 +162,14 @@ def _open(kernel, repo, gateway, owner, cursor):
     first_ordinal = None
     ordering = []
     ends = []
+    source_world_ref = None
     for chapter in window["chapters"]:
         for slot in chapter["scenes"]:
             card = _payload(kernel, repo, wr, slot["scene_ref"], "SCENE_PLAN")["scene_contract"]
+            if source_world_ref is None:
+                source_world_ref = card["input_world_ref"]
+            require(card["input_world_ref"] == source_world_ref, "STALE_PLAN",
+                    "One writing window must retain its exact common source cut")
             require(
                 card["scene_id"] not in seen
                 and not _selected(repo, wr["work_id"], "P6_FROZEN_SCENE:" + card["scene_id"]),
@@ -172,6 +179,11 @@ def _open(kernel, repo, gateway, owner, cursor):
             seen.add(card["scene_id"])
             ordering.append(card["reader_cut_ordinal"])
             ends.append(card["story_interval"]["end"])
+    from .world_coverage_recovery import prove_pure_coverage
+
+    require(source_world_ref is not None, "STALE_PLAN", "Writing window has no source scene")
+    prove_pure_coverage(kernel, repo, source_world_ref, head)
+    wr = source_world_ref
     from ..domain.temporal import point_key
 
     end = max(ends, key=point_key)
@@ -375,6 +387,7 @@ def _freeze_window(kernel, repo, owner, cursor, board, window):
     wr = board["world_ref"]
     head = kernel.head(repo, wr["work_id"], wr["branch_id"])
     records = []
+    refreshed_board = False
     for chapter in window["chapters"]:
         review = board["nodes"]["review:" + chapter["chapter_id"]]
         require(
@@ -410,6 +423,15 @@ def _freeze_window(kernel, repo, owner, cursor, board, window):
                     "EPISTEMIC_REVIEW_REQUIRED",
                     "Factual acceptance must cite the reviewed text",
                 )
+            source_report_ref = facts["output_ref"]
+            from .rolling_facts import revalidate_fact_reading
+
+            refreshed_ref, report = revalidate_fact_reading(
+                kernel.in_transaction(repo), repo, owner, source_report_ref, head)
+            if refreshed_ref != source_report_ref:
+                facts["output_ref"] = refreshed_ref
+                refreshed_board = True
+                selected = report["acceptance_ref"]
             accepted, _ = _load_acceptance(repo, kernel, owner, selected, head)
             reviewed_draft_ref = node["output_ref"]
             reviewed_draft = _payload(kernel, repo, wr, reviewed_draft_ref, "NARRATIVE_DRAFT")
@@ -428,6 +450,9 @@ def _freeze_window(kernel, repo, owner, cursor, board, window):
                     "draft_ref": node["output_ref"],
                     "text_ref": accepted["text_ref"],
                     "acceptance_ref": selected,
+                    "facts_report_ref": refreshed_ref,
+                    **({"coverage_revalidation_ref": report["coverage_revalidation_ref"]}
+                       if report.get("coverage_revalidation_ref") else {}),
                     **({"knowledge_ref": report["knowledge_ref"]} if "knowledge_ref" in report else {}),
                 }
             )
@@ -464,6 +489,84 @@ def _freeze_window(kernel, repo, owner, cursor, board, window):
             )
             PlanningService(kernel)._select(repo, wr, key, ref)
     cursor.update(last_checkpoint=ref, frozen_chapters=cursor["frozen_chapters"] + len(records))
+    if refreshed_board:
+        boards._save(kernel, repo, owner, board)
+
+
+def revalidate_frozen_volume(kernel, repo, owner, cursor, volume, target_world_ref):
+    """Create immutable checkpoint overlays at the current editorial reading cut.
+
+    Only formally empty coverage is eligible. Old manuscript/checkpoint/MCP
+    records remain intact; each changed scene cites its original factual report
+    and the server's explicit reading-compatibility evidence.
+    """
+    from .rolling_facts import revalidate_fact_reading
+
+    wr = cursor["world_ref"]
+    kernel.authorize(repo, owner, wr["work_id"], "ADMIN", wr["branch_id"])
+    require(kernel.head(repo, wr["work_id"], wr["branch_id"]) == target_world_ref,
+            "BRANCH_CHANGED", "Frozen reading adoption requires the locked current branch head")
+    chain, ref = [], cursor["last_checkpoint"]
+    while ref:
+        checkpoint = _payload(kernel, repo, wr, ref, "ROLLING_CHECKPOINT")
+        if checkpoint["volume_id"] != volume:
+            break
+        require(checkpoint["run_id"] == cursor["run_id"] and checkpoint["series_id"] == cursor["series_id"],
+                "INVALID_EVIDENCE", "Frozen checkpoint belongs to another production lineage")
+        chain.append((ref, checkpoint))
+        ref = checkpoint["previous"]
+    require(chain, "RELEASE_INCOMPLETE", "No frozen chapter checkpoint exists for this volume")
+    previous, changed = ref, False
+    for source_ref, source in reversed(chain):
+        checkpoint = deepcopy(source)
+        checkpoint_changed = previous != source["previous"]
+        for chapter in checkpoint["chapters"]:
+            for scene in chapter["scenes"]:
+                acceptance = _payload(kernel, repo, wr, scene["acceptance_ref"], "NARRATIVE_ACCEPTANCE")
+                require(acceptance["draft_ref"] == scene["draft_ref"] and acceptance["text_ref"] == scene["text_ref"]
+                        and acceptance["scene_ref"] == scene["scene_ref"], "INVALID_EVIDENCE",
+                        "Frozen scene does not bind its exact accepted manuscript")
+                if acceptance["world_ref"] == target_world_ref:
+                    _load_acceptance(repo, kernel, owner, scene["acceptance_ref"], target_world_ref)
+                    continue
+                report_ref = scene.get("facts_report_ref")
+                if report_ref is None:
+                    # Legacy checkpoints did not include the factual wrapper.
+                    # Recover only an unambiguous exact immutable source.
+                    rows = repo.many("artifacts", {"work_id": wr["work_id"], "kind": "ROLLING_FACT_REPORT"})
+                    matches = [row for row in rows if row["payload"].get("acceptance_ref") == scene["acceptance_ref"]]
+                    require(len(matches) == 1, "INVALID_EVIDENCE",
+                            "Historical checkpoint needs one exact factual-reading source")
+                    report_ref = {key: matches[0][key] for key in ("artifact_id", "artifact_revision_id", "sha256")}
+                old_report = _payload(kernel, repo, wr, report_ref, "ROLLING_FACT_REPORT")
+                require(old_report.get("acceptance_ref") == scene["acceptance_ref"]
+                        and old_report.get("knowledge_ref") == scene.get("knowledge_ref"), "INVALID_EVIDENCE",
+                        "Frozen factual and epistemic sources differ from the checkpoint")
+                new_ref, report = revalidate_fact_reading(kernel.in_transaction(repo), repo, owner, report_ref, target_world_ref)
+                renewed, _ = _load_acceptance(repo, kernel, owner, report["acceptance_ref"], target_world_ref)
+                require(all(renewed[key] == acceptance[key] for key in ("draft_ref", "text_ref", "scene_ref")),
+                        "SERIAL_PREFIX_PROTECTED", "Coverage adoption cannot replace a frozen manuscript")
+                scene.update(source_acceptance_ref=scene["acceptance_ref"], acceptance_ref=report["acceptance_ref"],
+                             facts_report_ref=new_ref, coverage_revalidation_ref=report["coverage_revalidation_ref"])
+                checkpoint_changed = True
+        if checkpoint_changed:
+            checkpoint.update(world_ref=target_world_ref, previous=previous, source_checkpoint_ref=source_ref,
+                              revalidation_kind="PURE_FORMAL_COVERAGE")
+            current_ref = _store(kernel, repo, owner, wr, "ROLLING_CHECKPOINT", checkpoint)
+            for chapter in checkpoint["chapters"]:
+                for scene in chapter["scenes"]:
+                    key = "P6_FROZEN_SCENE:" + scene["scene_id"]
+                    require(_selected(repo, wr["work_id"], key) == source_ref, "NARRATIVE_SELECTION_CONFLICT",
+                            "Frozen scene selection changed before the checkpoint overlay")
+                    PlanningService(kernel)._select(repo, wr, key, current_ref)
+            changed = True
+        else:
+            current_ref = source_ref
+        previous = current_ref
+    if changed:
+        cursor["last_checkpoint"] = previous
+        _save(kernel, repo, owner, cursor)
+    return frozen_volume_scenes(kernel, repo, cursor, volume)
 
 
 def protect_chapter(kernel, repo, wr, scene_id, draft_ref):

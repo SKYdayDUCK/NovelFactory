@@ -17,7 +17,10 @@ from .kernel import require
 RESOLVED = "RESOLVED_INTERNAL"
 WORLD_INPUT = "NEEDS_WORLD_INPUT"
 AUTHOR_DECISION = "NEEDS_AUTHOR_DECISION"
-STATUSES = {"CONFIRMED_CONFLICT", "NO_CONFLICT", "STALE_REPORT", "UNREGISTERED", "EXTERNAL_DECISION_REQUIRED"}
+WORLD_COVERAGE = "NEEDS_WORLD_COVERAGE"
+WORLD_EVIDENCE = "NEEDS_WORLD_EVIDENCE"
+STATUSES = {"CONFIRMED_CONFLICT", "NO_CONFLICT", "STALE_REPORT", "UNREGISTERED", "EXTERNAL_DECISION_REQUIRED",
+            "PENDING_EVALUATION", "UNKNOWN"}
 KIND = "INTERNAL_REVIEW_RESOLUTION"
 COMMAND = "INTERNAL_REVIEW_RESOLUTION_CONSUME"
 
@@ -44,7 +47,8 @@ def _current(board, request):
             and len(writer.get("reassessments", [])) == request["diagnosis_round"],
             "STALE_GENERATION", "Internal question no longer belongs to the selected draft and diagnosis slot")
     if request["source_kind"] == "DIAGNOSIS":
-        require(request["world_ref"] == request["board_world_ref"] and request["diagnosis_round"] >= 1
+        bridged = all(key in request for key in ("parent_case_hash", "parent_resolution_ref", "coverage_transition_ref"))
+        require((request["world_ref"] == request["board_world_ref"] or bridged) and request["diagnosis_round"] >= 1
                 and writer["reassessments"][request["diagnosis_round"] - 1]["node_id"] == request["source_node_id"],
                 "STALE_GENERATION", "Diagnosis no longer owns its reserved slot")
     else:
@@ -92,6 +96,33 @@ def request_from_blocked(board, target, diagnosis_node, record):
     request["case_hash"] = _case_hash(request)
     _current(board, request)
     return deepcopy(request)
+
+
+def request_after_coverage(kernel, repo, board, parent_resolution_ref, reading_world_ref, transition_ref):
+    """Commission a separate fixed-cut inquiry; never relabel the parent case."""
+    from .world_coverage_recovery import TRANSITION_KIND, validate_reading_world
+    parent = kernel.artifact(repo, parent_resolution_ref, board["world_ref"]["work_id"], kind=KIND)["payload"]
+    original = parent["request"]
+    require(parent["outcome"] == WORLD_COVERAGE and not original.get("parent_case_hash"),
+            "COVERAGE_RETRY_EXHAUSTED", "A pending coverage case permits one independent child inquiry")
+    _current(board, original)
+    node = {"parents": [original["target"]], "reading_world_ref": reading_world_ref, "coverage_transition_ref": transition_ref}
+    require(validate_reading_world(kernel, repo, board, node) == reading_world_ref,
+            "INVALID_EVIDENCE", "Coverage inquiry requires its accepted reading transition")
+    transition = kernel.artifact(repo, transition_ref, board["world_ref"]["work_id"], kind=TRANSITION_KIND)["payload"]
+    require(transition["request"]["parent_case_hash"] == original["case_hash"]
+            and transition["request"]["parent_resolution_ref"] == parent_resolution_ref
+            and transition["request"].get("parent_query_world_ref", transition["request"]["source_world_ref"]) == original["world_ref"],
+            "INVALID_EVIDENCE", "Coverage transition belongs to another parent case or source cut")
+    request = {**deepcopy(original), "world_ref": reading_world_ref, "parent_case_hash": original["case_hash"],
+               "parent_resolution_ref": parent_resolution_ref, "coverage_transition_ref": transition_ref}
+    scene = kernel.artifact(repo, transition["request"]["source_identity"]["source_scene_ref"],
+                            board["world_ref"]["work_id"], kind="SCENE_PLAN")["payload"]
+    request.update(covered_scene_interval=scene["scene_contract"]["story_interval"],
+                   covered_world_lookups=[deepcopy(item["selector"]) for item in transition["request"]["pending_queries"]])
+    request["case_hash"] = _case_hash(request)
+    _current(board, request)
+    return request
 
 
 def request_from_fact_report(board, target, facts_node, report_ref, report_payload, extraction_payload, *, attempt_id=None,
@@ -158,7 +189,8 @@ def request_from_fact_report(board, target, facts_node, report_ref, report_paylo
 
 def _source_refs(request):
     return [request["source_draft_ref"], request["report_ref"], request["source_ref"],
-            *([request["extraction_ref"]] if "extraction_ref" in request else [])]
+            *([request["extraction_ref"]] if "extraction_ref" in request else []),
+            *([request["parent_resolution_ref"], request["coverage_transition_ref"]] if "parent_case_hash" in request else [])]
 
 
 def assignment(request):
@@ -170,16 +202,27 @@ def assignment(request):
     for key in ("question_start", "full_questions_sha256"):
         if key in request:
             metadata[key] = request[key]
+    for key in ("parent_case_hash", "parent_resolution_ref", "coverage_transition_ref",
+                "covered_scene_interval", "covered_world_lookups"):
+        if key in request:
+            metadata[key] = request[key]
     text = (
         "只核查本次内部生产问题，必须通过实际获准MCP只读工具逐题查阅固定WorldRef、原稿及报告版次。"
         "完整case及问题材料由获准MCP材料端口投递，先通读完整case，不能只凭下列精简元数据猜测问题。"
         "不可改写正文、登记新设定、接受世界事件、清除旧报告、批准完本或续加任何预算。"
-        "未登记身份或谓词须明确UNREGISTERED，不能推断矛盾或编造登记；只有实际查到已登记作者保护策略并确实需要作者决定时才用EXTERNAL_DECISION_REQUIRED。"
+        "只有真实查询item返回ENTITY_NOT_FOUND/UNKNOWN_PREDICATE等登记类ERROR才用UNREGISTERED，VIEW_DENIED不证明缺登记。"
+        "成功STATE查询须同时读evaluation_status、knowledge_status、value_status；UNRESOLVED不是未登记。"
+        "覆盖后的子核查以covered_world_lookups中的实际场景at逐项重查，covered_scene_interval为发生时段；story_time只是授权上限，不能替代场景发生时点。"
+        "确实需要世界真值而evaluation_status=PENDING时用PENDING_EVALUATION，等待正式coverage；已求值但知识UNKNOWN用UNKNOWN，等待内部证据。"
+        "不为回答本稿算术或报告版次而强迫世界推进；只有实际查到作者保护策略并确实需要作者决定时才用EXTERNAL_DECISION_REQUIRED。"
         "区分文本内算术或表述自洽与受保护世界事实：前者可在现有授权局部核查提出修正步骤，不能捏造canon数字来充当证据。"
-        "旧报告若不属于本版原稿，说明版次证据并用STALE_REPORT；仍需独立复审，不能直接宣告正文通过。"
+        "世界查询PENDING/UNKNOWN时，纯文本自洽或矛盾结论必须引用本版text_ref至少两个位置独立且不重叠的精确span，不能重复同一跨度。"
+        "旧报告若不属于本版原稿，用STALE_REPORT；必须引用真实MCP返回的finding_provenance_ref和其中明确旧report_ref，逐题区分具体source_draft版本；不能把另一份当前报告也笼统说成过期。"
+        "仍需独立复审，不能直接宣告正文通过。"
         "按AgentDecisionOutput返回，decision为JSON字符串，严格包含case_hash、answers和可选method。"
         "answers必须按原问题顺序全部回答，每项严格包含index、status、explanation、correction、evidence_refs。"
-        "status仅CONFIRMED_CONFLICT、NO_CONFLICT、STALE_REPORT、UNREGISTERED、EXTERNAL_DECISION_REQUIRED。"
+        "本次冻结问题之外的deferred_questions不能替代逐题状态或自动请求世界输入；全部已解决时该数组必须为空。"
+        "status仅CONFIRMED_CONFLICT、NO_CONFLICT、STALE_REPORT、UNREGISTERED、EXTERNAL_DECISION_REQUIRED、PENDING_EVALUATION、UNKNOWN。"
         "explanation说明查询所得，最长256字；correction为核查或局部修订步骤字符串或null，最长256字，确认矛盾时必须非空；"
         "同一窗口可把各题所需主体、谓词、at及BELIEF的actor_id/known_at组合放在一次nf_query_batch中；每题引用确实覆盖该题selector的回执，不用重复同一查询。"
         "每题evidence_refs最多3条，引用实际查询回执、原文span或报告的标准EvidenceRef，详细查询保留在可信回执中，外层evidence_refs也须包含这些引用。"
@@ -224,7 +267,12 @@ def parse_resolution(request, candidate):
             "INVALID_ARGUMENT", "Internal method must be a nonempty instruction of at most 1000 characters")
     statuses = {answer["status"] for answer in answers}
     outcome = (AUTHOR_DECISION if "EXTERNAL_DECISION_REQUIRED" in statuses
-               else WORLD_INPUT if "UNREGISTERED" in statuses or candidate["deferred_questions"] else RESOLVED)
+               else WORLD_INPUT if "UNREGISTERED" in statuses
+               else WORLD_COVERAGE if "PENDING_EVALUATION" in statuses
+               else WORLD_EVIDENCE if "UNKNOWN" in statuses
+               else RESOLVED)
+    require(outcome != RESOLVED or not candidate["deferred_questions"],
+            "INVALID_ARGUMENT", "Extra deferred questions cannot replace evidence-backed frozen answer statuses")
     require(request["source_kind"] != "DIAGNOSIS" or outcome != RESOLVED or method is not None,
             "INVALID_ARGUMENT", "A resolved diagnosis requires its concrete continuation method")
     return {"answers": deepcopy(answers), "method": method, "outcome": outcome,
@@ -253,7 +301,10 @@ def record_resolution(kernel, repo, owner, board, request, task, evidence, candi
     repo.one("works", {"work_id": wr["work_id"]}, lock="update")
     kernel.authorize(repo, owner, wr["work_id"], "ADMIN", wr["branch_id"])
     _current(board, request)
-    if request["source_kind"] == "DIAGNOSIS":
+    if request.get("parent_case_hash"):
+        current = request_after_coverage(kernel, repo, board, request["parent_resolution_ref"],
+                                         request["world_ref"], request["coverage_transition_ref"])
+    elif request["source_kind"] == "DIAGNOSIS":
         original = kernel.artifact(repo, request["source_ref"], wr["work_id"], kind="PRODUCTION_REASSESSMENT")["payload"]
         current = request_from_blocked(board, request["target"], board["nodes"][request["source_node_id"]], original)
     else:
@@ -307,8 +358,10 @@ def record_resolution(kernel, repo, owner, board, request, task, evidence, candi
                "query_receipt_ref": query_receipt_ref, "task_id": task["task_id"], "generation": task["generation"],
                "attempt_id": evidence["attempt_id"], "candidate_ref": evidence["output_ref"],
                "provider_calls_sent": 0, "world_effects_applied": 0, "reusable": False}
-    identity = uuid5(UUID(request["source_task_id"]), "internal-resolution:" + fingerprint(
-        [request["source_ref"], request["report_ref"], request.get("question_start")]))
+    identity_parts = [request["source_ref"], request["report_ref"], request.get("question_start")]
+    if request.get("parent_case_hash"):
+        identity_parts.append(request["case_hash"])
+    identity = uuid5(UUID(request["source_task_id"]), "internal-resolution:" + fingerprint(identity_parts))
     ref = {"artifact_id": str(identity), "artifact_revision_id": str(uuid5(identity, "revision")), "sha256": fingerprint(payload)}
     old = repo.one("artifacts", {"work_id": wr["work_id"], "artifact_revision_id": ref["artifact_revision_id"]})
     require(not old or old["sha256"] == ref["sha256"], "INTERNAL_REVIEW_ALREADY_RECORDED", "This case already has its immutable internal resolution")
@@ -337,6 +390,10 @@ def consume_resolution(kernel, repo, owner, board, request, resolution_ref):
         require(previous["request_hash"] == fingerprint(intent), "IDEMPOTENCY_MISMATCH", "Case was consumed with another resolution")
         return {**previous["payload"], "consumed_now": False}
     _current(board, request)
+    if request.get("parent_case_hash"):
+        require(request_after_coverage(kernel, repo, board, request["parent_resolution_ref"],
+                                       request["world_ref"], request["coverage_transition_ref"]) == request,
+                "INVALID_EVIDENCE", "Coverage child changed before its continuation")
     payload = kernel.artifact(repo, resolution_ref, wr["work_id"], kind=KIND)["payload"]
     require(payload["request"] == request and payload["outcome"] == RESOLVED,
             "INTERNAL_REVIEW_UNRESOLVED", "World or author input is still required; no continuation is authorized")
@@ -344,6 +401,9 @@ def consume_resolution(kernel, repo, owner, board, request, resolution_ref):
               "resolution_ref": resolution_ref, "diagnosis_round": request["diagnosis_round"],
               "source_draft_ref": request["source_draft_ref"], "answers": payload["answers"], "method": payload["method"],
               "provider_calls_sent": 0, "world_effects_applied": 0, "allowance_changed": False}
+    if request.get("parent_case_hash"):
+        result.update(parent_case_hash=request["parent_case_hash"], adopted_world_ref=request["world_ref"],
+                      coverage_transition_ref=request["coverage_transition_ref"])
     if request["source_kind"] == "FACT_RECONCILIATION":
         next_start = request["question_start"] + len(request["questions"])
         result.update(question_start=request["question_start"], question_total=request["question_total"],

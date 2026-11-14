@@ -84,6 +84,36 @@ def _load_acceptance(repo, kernel, principal, ref, wr, *, revalidate=True, scope
     return acceptance, checked
 
 
+def _load_predecessor_acceptance(repo, kernel, principal, ref, source_wr, batch_ref, *, scoped_handoff=False):
+    """Accept a fixed manuscript handoff across proven scheduling-only closure.
+
+    This exception belongs only to an exact writing batch's predecessor inputs;
+    ordinary release/adoption callers retain `_load_acceptance`'s exact cut.
+    """
+    acceptance = _payload(repo, kernel, ref, source_wr["work_id"], "NARRATIVE_ACCEPTANCE")
+    adopted = acceptance["world_ref"]
+    if adopted != source_wr:
+        from .world_coverage_recovery import prove_pure_coverage
+
+        batch = _payload(repo, kernel, batch_ref, source_wr["work_id"], "WRITING_BATCH", "WritingBatch")
+        draft = _payload(repo, kernel, acceptance["draft_ref"], source_wr["work_id"], "NARRATIVE_DRAFT")
+        scene = _payload(repo, kernel, draft["scene_ref"], source_wr["work_id"], "SCENE_PLAN")
+        origin = repo.one("tasks", {"task_id": draft["task_id"]})
+        receipt = repo.one("receipts", {"work_id": source_wr["work_id"], "branch_id": source_wr["branch_id"],
+                                       "command_type": "NARRATIVE_ACCEPT", "payload": ref})
+        require(batch["world_ref"] == draft["input_world_ref"] == source_wr
+                and scene["scene_contract"]["input_world_ref"] == source_wr
+                and scene["batch_ref"] == batch_ref and scene["plan_ref"] == batch["plan_ref"]
+                and acceptance["plan_ref"] == batch["plan_ref"]
+                and acceptance["scene_ref"] == draft["scene_ref"] and acceptance["text_ref"] == draft["text_ref"]
+                and acceptance["task_id"] == draft["task_id"] and acceptance["generation"] == draft["generation"]
+                and origin and origin["state"] == "ACCEPTED" and origin["generation"] == draft["generation"]
+                and receipt,
+                "NARRATIVE_ALIGNMENT_REQUIRED", "Coverage handoff must retain its exact accepted source manuscript and batch")
+        prove_pure_coverage(kernel, repo, source_wr, adopted)
+    return _load_acceptance(repo, kernel, principal, ref, adopted, scoped_handoff=scoped_handoff)
+
+
 def validate_writing_task_binding(repo, kernel, task, scene_ref):
     """A fixed task generation cannot skip or silently replace predecessor text.
 
@@ -119,7 +149,8 @@ def validate_writing_task_binding(repo, kernel, task, scene_ref):
     principal = Principal(task["grant_id"], task["principal_id"])
     parents = []
     for ref in binding["predecessor_acceptance_refs"]:
-        _, checked = _load_acceptance(repo, kernel, principal, ref, batch["world_ref"], scoped_handoff=True)
+        _, checked = _load_predecessor_acceptance(repo, kernel, principal, ref, batch["world_ref"],
+                                                 scene["batch_ref"], scoped_handoff=True)
         parent = checked["scene"]
         require(parent["batch_ref"] == scene["batch_ref"], "BATCH_BINDING_MISMATCH", "Predecessor uses another writing batch")
         parents.append(parent["scene_contract"]["scene_id"])
@@ -215,7 +246,7 @@ class ReleaseService:
             self._plan(repo, wr, batch["plan_ref"], batch["volume_id"])
             accepted = []
             for ref in predecessor_acceptance_refs:
-                _, checked = _load_acceptance(repo, self.kernel, principal, ref, wr)
+                _, checked = _load_predecessor_acceptance(repo, self.kernel, principal, ref, wr, batch_ref)
                 require(checked["scene"]["batch_ref"] == batch_ref, "BATCH_BINDING_MISMATCH", "Handoff uses another batch")
                 accepted.append(checked["scene"]["scene_contract"]["scene_id"])
             require(len(accepted) == len(set(accepted)), "INVALID_ARGUMENT", "Duplicate accepted scene handoff")
@@ -325,8 +356,10 @@ class ReleaseService:
                 parent = _payload(repo, self.kernel, prior_ref, wid, "NARRATIVE_ACCEPTANCE")
                 parent_scene = _payload(repo, self.kernel, parent["scene_ref"], wid, "SCENE_PLAN")["scene_contract"]["scene_id"]
                 selected = by_scene[parent_scene]["acceptance"]
-                require(all(parent[field] == selected[field] for field in ("draft_ref", "scene_ref", "text_ref")),
-                        "STALE_SCENE_HANDOFF", "Successor was written against a different predecessor text or contract")
+                if not all(parent[field] == selected[field] for field in ("draft_ref", "scene_ref", "text_ref")):
+                    from .returned_edition_acceptance import accepted_edition_handoff
+                    require(accepted_edition_handoff(self.kernel, repo, entry, parent, selected),
+                            "STALE_SCENE_HANDOFF", "Successor was written against a different predecessor text or contract")
         from novel_factory.application.editorial import ReviewService
         approval = ReviewService(self.kernel).validate_editorial_approval(
             repo, principal, request["editorial_approval_ref"], wr,

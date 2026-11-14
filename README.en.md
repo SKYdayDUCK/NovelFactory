@@ -36,6 +36,10 @@ flowchart TD
 
 ## Run a six-scene volume
 
+The manager is a program that sleeps when idle and wakes workers from durable task changes. Codex handles planning, complex decisions and independent reviews through actual scoped MCP reads; DeepSeek Flash handles prose and roleplay. Missing evidence, unevaluated story time and genuine author decisions have distinct recovery paths. Later coverage revisions preserve original manuscripts and model receipts, with explicit server revalidation before chapter and book acceptance.
+
+The offline `python scripts/nf.py dry-run --books 2 --chapters 8 --seed 42` command uses the real Harness boundary with simulated responses and no database or provider connection. It checks the path through independent reviews and final book freezing. A simulated completion does not establish the literary quality or completion of a live novel. [Lifecycle and dry-run guide](docs/zh-CN/11-Dry-Run与程序生命周期.md)
+
 Start in a Linux checkout with Python 3.12, uv and the PostgreSQL 17 server tools installed. Set `PG_BIN` to the directory containing `initdb`. This command creates a temporary database and writes a short volume using a deterministic model fixture.
 
 ```bash

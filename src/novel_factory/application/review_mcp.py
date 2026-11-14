@@ -22,8 +22,140 @@ REQUIRED_TOOLS = frozenset({"nf_context_get", "nf_query_batch"})
 TOOLS = REQUIRED_TOOLS | {"nf_review_material"}
 BLIND_TOOLS = frozenset({"nf_context_get", "nf_review_material"})
 RECEIPT_KIND = "NATIVE_REVIEW_TOOL_RECEIPT"
+PROVENANCE_KIND = "NATIVE_REVIEW_FINDING_PROVENANCE"
 MAX_CALLS = 16
 MAX_RESULT_BYTES = 1_000_000
+
+
+def _provenance_source(kernel, repo, ref, work, kind):
+    payload = kernel.artifact(repo, ref, work, kind=kind)["payload"]
+    require(fingerprint(payload) == ref["sha256"], "INVALID_EVIDENCE", "Historical source bytes do not match their fixed hash")
+    return payload
+
+
+def _provenance_metadata(kernel, repo, task, scope):
+    """Freeze version associations, never a judgment about the current prose.
+
+    Only this writer's already recorded fact-reading history is eligible. Exact
+    matching summaries can have several sources; return each verifiable version
+    and leave the substantive judgment to the independent reader.
+    """
+    from .internal_review_resolution import _assignment_case_hash, _current
+    from .production_pipeline import _load
+    from .world_coverage_recovery import validate_reading_world
+
+    job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})
+    identity = job and job["config"].get("production_node")
+    if (task["role_id"], task["task_kind"]) != ("reviewer", "verification") or not identity:
+        return None
+    board = _load(kernel, repo, task["work_id"], task["branch_id"])
+    node = board and board["nodes"].get(identity)
+    require(node and node["stage"] == "internal_verification" and node["state"] == "ENROLLED"
+            and node.get("task_id") == task["task_id"], "VIEW_DENIED", "Verification provenance has no active case")
+    request = node["internal_case"]
+    if request["source_kind"] != "DIAGNOSIS":
+        return None
+    writer = _current(board, request)
+    frozen = kernel.artifact(repo, scope["input_ref"], task["work_id"], kind="AGENT_INPUT")["payload"]
+    require(board["world_ref"] == request["board_world_ref"]
+            and validate_reading_world(kernel, repo, board, node) == request["world_ref"] == scope["world_ref"]
+            and _assignment_case_hash(frozen["assignment"]) == request["case_hash"]
+            and all(request[key] in frozen["material_refs"] for key in ("source_draft_ref", "report_ref")),
+            "VIEW_DENIED", "Provenance must belong to the frozen diagnosis and materials")
+    diagnosis = _provenance_source(kernel, repo, request["source_ref"], task["work_id"], "PRODUCTION_REASSESSMENT")
+    original = diagnosis["request"]
+    require(original["source_draft_ref"] == request["source_draft_ref"]
+            and original["report_ref"] == request["report_ref"] and original["target"] == request["target"]
+            and fingerprint(original) == request["diagnosis_request_sha256"],
+            "INVALID_EVIDENCE", "Diagnosis provenance source changed")
+    work, branch = task["work_id"], task["branch_id"]
+    current = _provenance_source(kernel, repo, request["source_draft_ref"], work, "NARRATIVE_DRAFT")
+    scene = _provenance_source(kernel, repo, current["scene_ref"], work, "SCENE_PLAN")
+    findings = original["findings"]
+    hashes = [{"finding_sha256": fingerprint(item), "summary_sha256": fingerprint(item["passage"])
+               if isinstance(item.get("passage"), str) else None} for item in findings]
+    allowed_drafts = {fingerprint(entry["output_ref"]): entry for entry in [writer, *writer.get("history", [])]
+                      if entry.get("output_ref")}
+    fact_node = board["nodes"].get("facts:" + request["target"].removeprefix("draft:"))
+    require(fact_node and fact_node["stage"] == "facts" and fact_node["parents"] == [request["target"]],
+            "INVALID_EVIDENCE", "Fact history is outside this writer's scene")
+    candidates, seen = [], set()
+    for entry in [fact_node, *fact_node.get("history", [])]:
+        ref = entry.get("output_ref")
+        if not ref or fingerprint(ref) in seen:
+            continue
+        seen.add(fingerprint(ref))
+        wrapper = _provenance_source(kernel, repo, ref, work, "ROLLING_FACT_REPORT")
+        extraction = _provenance_source(kernel, repo, wrapper["extraction_ref"], work, "ASSERTION_EXTRACTION")
+        report = _provenance_source(kernel, repo, wrapper["reconciliation_ref"], work, "RECONCILIATION_REPORT")
+        source = _provenance_source(kernel, repo, extraction["draft_ref"], work, "NARRATIVE_DRAFT")
+        source_writer = allowed_drafts.get(fingerprint(extraction["draft_ref"]))
+        reader = repo.one("tasks", {"task_id": extraction["task_id"], "work_id": work, "branch_id": branch})
+        origin = repo.one("tasks", {"task_id": source["task_id"], "work_id": work, "branch_id": branch})
+        reader_input = repo.one("task_inputs", {"task_id": extraction["task_id"], "generation": extraction["generation"]})
+        writer_input = repo.one("task_inputs", {"task_id": source["task_id"], "generation": source["generation"]})
+        old_scene = _provenance_source(kernel, repo, source["scene_ref"], work, "SCENE_PLAN")
+        require(source_writer and source_writer.get("task_id") == source["task_id"]
+                and source_writer.get("generation", source["generation"]) == source["generation"]
+                and reader and reader["role_id"] == "evidence_maintainer"
+                and origin and origin["role_id"] == "writer" and writer_input
+                and writer_input["spec"]["world_ref"] == source["input_world_ref"]
+                and reader_input and reader_input["spec"]["world_ref"]["work_id"] == work
+                and reader_input["spec"]["world_ref"]["branch_id"] == branch
+                and entry.get("task_id") == extraction["task_id"]
+                and entry.get("generation", extraction["generation"]) == extraction["generation"]
+                and reader["generation"] >= extraction["generation"]
+                and report["extraction_ref"] == wrapper["extraction_ref"]
+                and report["draft_ref"] == extraction["draft_ref"]
+                and report["text_ref"] == extraction["text_ref"] == source["text_ref"]
+                and source["input_world_ref"]["work_id"] == work and source["input_world_ref"]["branch_id"] == branch
+                and report["adopted_world_ref"]["work_id"] == work and report["adopted_world_ref"]["branch_id"] == branch
+                and old_scene["scene_contract"]["scene_id"] == scene["scene_contract"]["scene_id"],
+                "INVALID_EVIDENCE", "Historical fact report has a different writer, reader or text version")
+        summary_hashes = {fingerprint(assertion["summary"]) for assertion in extraction["assertions"]}
+        matched = [index for index, item in enumerate(hashes) if item["summary_sha256"] in summary_hashes]
+        if matched:
+            candidates.append({"report_ref": ref, "extraction_ref": wrapper["extraction_ref"],
+                "reconciliation_ref": wrapper["reconciliation_ref"], "source_draft_ref": extraction["draft_ref"],
+                "text_ref": source["text_ref"], "matched_finding_indices": matched,
+                "matches_current": extraction["draft_ref"] == request["source_draft_ref"],
+                "report_binding": {key: report[key] for key in ("draft_ref", "text_ref", "extraction_ref", "status")}})
+    return {"version": 1, "case_hash": request["case_hash"], "report_ref": request["report_ref"], "current_draft_ref": request["source_draft_ref"],
+            "current_text_ref": current["text_ref"], "source_scene_ref": current["scene_ref"],
+            "scene_story_interval": scene["scene_contract"]["story_interval"], "diagnosis_ref": request["source_ref"],
+            "finding_hashes": hashes, "candidates": candidates}
+
+
+class _ReviewRuntime(McpRuntime):
+    """Add only frozen version metadata to a legitimately read case report."""
+    provenance = None
+
+    def review_material(self, artifact_ref):
+        value = super().review_material(artifact_ref)
+        if not self.provenance or artifact_ref != self.provenance["report_ref"]:
+            return value
+        with self.kernel.db.uow(write=False) as repo:
+            task, _, _, _ = self._bound_state(repo)
+            record = self.kernel.artifact(repo, self.provenance["ref"], task["work_id"], kind=PROVENANCE_KIND)["payload"]
+            require(all(record[key] == task[key] for key in ("task_id", "generation", "context_bundle_id")),
+                    "VIEW_DENIED", "Historical version metadata belongs to another review")
+        return {**value, "finding_provenance": record["provenance"], "finding_provenance_ref": self.provenance["ref"]}
+
+
+def _completed_registration_query(value, arguments):
+    """A completed verification lookup can report a typed missing registration.
+
+    Denial, unavailable infrastructure and successfully returned UNKNOWN/PENDING
+    values are distinct. They cannot be recast as missing registrations here.
+    """
+    items, lookups = value.get("items"), arguments.get("lookups")
+    if value.get("all_items_succeeded") is not False or not isinstance(items, list) or not lookups:
+        return False
+    if len(items) != len(lookups) or {item.get("item_id") for item in items} != {str(i) for i in range(len(lookups))}:
+        return False
+    return (any(item.get("status") == "ERROR" for item in items)
+            and all(item.get("status") == "SUCCESS" or item.get("status") == "ERROR"
+                    and item.get("error", {}).get("code") in {"ENTITY_NOT_FOUND", "UNKNOWN_PREDICATE"} for item in items))
 
 
 def _audit_rows(repo, task_id, generation, name, request_hash):
@@ -77,7 +209,7 @@ class ReviewMcpBroker:
                     and prompt["model_configuration"].get("auth_mode") == "host-login",
                     "VIEW_DENIED", "Native tools do not match the frozen prompt")
             principal = Principal(task["grant_id"], task["principal_id"])
-            runtime = McpRuntime(kernel, principal, TaskBinding(task["task_id"], task["generation"], task["lease_owner"]))
+            runtime = _ReviewRuntime(kernel, principal, TaskBinding(task["task_id"], task["generation"], task["lease_owner"]))
             task, grant, context, spec = runtime._bound_state(repo)
             require(isinstance(task["lease_owner"], str) and bool(task["lease_owner"]),
                     "VIEW_DENIED", "A native read broker requires an owned execution lease")
@@ -107,7 +239,17 @@ class ReviewMcpBroker:
         # Retain the authenticated worker binding after acceptance clears the
         # mutable lease fields. This is controller-owned evidence, not model input.
         with kernel.objects.lock(), kernel.db.uow() as repo:
-            runtime._bound_state(repo)
+            repo.one("works", {"work_id": scope["work_id"]}, lock="share")
+            current_task, _, _, _ = runtime._bound_state(repo)
+            provenance = _provenance_metadata(kernel, repo, current_task, scope)
+            if provenance:
+                report_ref = provenance["report_ref"]
+                record = {**{key: scope[key] for key in ("task_id", "generation", "context_bundle_id", "attempt_id",
+                           "request_sha256", "input_ref", "world_ref")}, "report_ref": report_ref, "provenance": provenance}
+                provenance_ref = _record(kernel, repo, scope["work_id"], principal.principal_id, request.attempt_id,
+                                         "review-finding-provenance", record, PROVENANCE_KIND)
+                scope.update(provenance_ref=provenance_ref, provenance_report_ref=report_ref)
+                runtime.provenance = {"ref": provenance_ref, "report_ref": report_ref}
             binding_ref = _record(kernel, repo, scope["work_id"], principal.principal_id, request.attempt_id,
                                   "review-mcp-binding", scope, "NATIVE_REVIEW_TOOL_BINDING")
         return cls(kernel, runtime, {**scope, "binding_ref": binding_ref})
@@ -141,6 +283,9 @@ class ReviewMcpBroker:
                     lookup["subject_id"]["enum"] = self.scope["query_scope"]["subject_ids"]
                     lookup["predicate"]["enum"] = self.scope["query_scope"]["predicates"]
                     tool["description"] += " Fixed query plane: " + self.scope["query_scope"]["plane"] + "."
+                elif tool["name"] == "nf_review_material":
+                    tool["description"] += (" A diagnosis report may include frozen finding_provenance: exact historical report/draft"
+                                            " versions and matching finding hashes, not a stale/current verdict. Compare all candidates.")
             self._result_limit = self.scope["result_byte_limit"] - len(canonical_bytes(self.tool_specs)) - 4096
             require(self._result_limit > 0, "CAPACITY_LIMIT", "Native tool schemas exceed the reserved input allowance")
             return self
@@ -278,12 +423,31 @@ def _require_review_queries(kernel, repo, task, evidence, *, receipt_refs):
                 require(value.get("world_ref") == spec["world_ref"] and value.get("context_bundle_id") == task["context_bundle_id"],
                         "REVIEW_QUERY_REQUIRED", "MCP context result belongs to another cut")
                 successes.add(receipt["tool"])
-            elif value.get("all_items_succeeded") is True and value.get("items") and receipt["arguments"].get("lookups"):
+            elif (receipt["tool"] == "nf_query_batch" and (
+                    value.get("all_items_succeeded") is True and value.get("items") and receipt["arguments"].get("lookups")
+                    or task["role_id"] == "reviewer" and task["task_kind"] == "verification"
+                    and _completed_registration_query(value, receipt["arguments"]))):
                 successes.add(receipt["tool"])
             elif receipt["tool"] == "nf_review_material":
                 material_ref = receipt["arguments"].get("artifact_ref")
                 require(material_ref in frozen_input["material_refs"], "REVIEW_QUERY_REQUIRED", "MCP material is outside the frozen review inputs")
                 require(isinstance(value, dict) and bool(value), "REVIEW_QUERY_REQUIRED", "MCP material result is empty")
+                if binding.get("provenance_ref"):
+                    require(receipt.get("provenance_ref") == binding["provenance_ref"]
+                            and receipt.get("provenance_report_ref") == binding["provenance_report_ref"],
+                            "REVIEW_QUERY_REQUIRED", "Finding provenance belongs to another frozen binding")
+                    if material_ref == binding["provenance_report_ref"]:
+                        provenance_ref = binding["provenance_ref"]
+                        provenance = kernel.artifact(repo, provenance_ref, task["work_id"], kind=PROVENANCE_KIND)["payload"]
+                        require(provenance_ref["artifact_revision_id"] == str(uuid5(UUID(evidence["attempt_id"]),
+                                    "review-finding-provenance:revision"))
+                                and fingerprint(provenance) == provenance_ref["sha256"]
+                                and all(provenance[key] == binding[key] for key in ("task_id", "generation", "context_bundle_id",
+                                    "attempt_id", "request_sha256", "input_ref", "world_ref"))
+                                and provenance["report_ref"] == material_ref
+                                and value.get("finding_provenance_ref") == provenance_ref
+                                and value.get("finding_provenance") == provenance["provenance"],
+                                "REVIEW_QUERY_REQUIRED", "Finding metadata was not returned by this bound MCP material read")
                 read_materials.add(fingerprint(material_ref))
                 if material_only:
                     successes.add("nf_review_material")

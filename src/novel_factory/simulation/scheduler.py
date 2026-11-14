@@ -20,12 +20,16 @@ SCENARIOS = ("novel", "idle", "normal", "review_return", "review_exhausted", "ra
              "late_result", "lease_expired", "restart", "authorization_revoked", "budget_exhausted", "dependencies",
              "storage_disconnect", "worker_pool_failure", "context_mismatch", "book_review_return", "needs_input",
              "review_questions", "internal_question_reread", "internal_question_strategy",
-             "review_mcp_recovery", "review_mcp_exhausted", "verification_unknown")
-INTERNAL_SCENARIOS = {"internal_question_reread", "internal_question_strategy", "verification_unknown"}
+             "review_mcp_recovery", "review_mcp_exhausted", "verification_unknown",
+             "stale_finding_provenance", "world_coverage_recovery", "world_coverage_blocked",
+             "multi_chapter_coverage", "coverage_semantic_changed")
+COVERAGE_SCENARIOS = {"world_coverage_recovery", "world_coverage_blocked", "multi_chapter_coverage", "coverage_semantic_changed"}
+VERSION_SCENARIOS = COVERAGE_SCENARIOS | {"stale_finding_provenance"}
+INTERNAL_SCENARIOS = {"internal_question_reread", "internal_question_strategy", "verification_unknown"} | VERSION_SCENARIOS
 MCP_SCENARIOS = {"review_mcp_recovery", "review_mcp_exhausted"}
 TERMINAL = {"ACCEPTED", "FAILED", "CANCELLED"}
 PROGRAM_STAGES = {"marker", "reconcile", "freeze", "continuity", "assemble", "book_reconcile", "book_freeze",
-                  "query_verification"}
+                  "query_verification", "world_coverage", "volume_freeze"}
 ROLE_STAGES = {
     "plan": "world_designer", "volume_plan": "volume_director", "scene_plan": "volume_director",
     "roleplay": "character_actor", "adjudicate": "adjudication_advisor", "draft": "writer",
@@ -59,6 +63,7 @@ class Job:
     approved: bool | None = None
     source_task: str | None = None
     query_receipt: dict | None = None
+    reading_world: str | None = None
 
 
 class VirtualPool:
@@ -122,11 +127,19 @@ class Simulation:
         self.used_faults, self.acceptances, self.frozen = set(), {}, set()
         self.releases, self.handled_book_reviews = {}, set()
         self.chapter_manifests = {}
+        self.world_cuts, self.world_heads, self.volume_manifests = {}, {}, {}
+        for book in range(self.books):
+            base = {"id": uid(f"world:{book}"), "work": uid(f"work:{book}"), "branch": uid(f"branch:{book}"),
+                    "parent": None, "frontier": {"tick": 0, "phase": 0}, "canon": sha256(f"canon:{book}".encode()).hexdigest(),
+                    "registry": sha256(f"registry:{book}".encode()).hexdigest(), "interpretation": "DRY_RUN_INTERPRETATION_V1"}
+            self.world_cuts[base["id"]] = base
+            self.world_heads[book] = base["id"]
         self.late_results = self.duplicate_results = self.max_inflight = 0
         self.wake_delays, self.problems = [], []
         self.next_scan, self.poll_seconds, self.notified = 0.0, 5.0, False
         self.worker_events = []
         self.storage_available = True
+        self.coverage_waiting = set()
         self.lifecycle = self.new_lifecycle()
         self._build()
 
@@ -178,7 +191,8 @@ class Simulation:
                 chapter_freezes.append(frozen.id)
                 memory = self.add("memory", book, chapter, dependencies=(frozen.id,))
                 previous = self.add("continuity", book, chapter, dependencies=(memory.id,))
-            assembled = self.add("assemble", book, dependencies=(*chapter_freezes, previous.id))
+            volume = self.add("volume_freeze", book, dependencies=(*chapter_freezes, previous.id))
+            assembled = self.add("assemble", book, dependencies=(volume.id,))
             editor = self._book_edition(book, 0, assembled.id)
             self.add("book_freeze", book, dependencies=(editor.id,))
         if self.scenario == "lost_notification":
@@ -192,12 +206,14 @@ class Simulation:
                 self.emit("NOTIFICATION_DROPPED")
             self.schedule(1, ready)
 
-    def _chapter_candidate(self, book, chapter, revision, predecessor):
+    def _chapter_candidate(self, book, chapter, revision, predecessor, *, reading_world=None):
         draft = self.add("draft", book, chapter, revision, dependencies=(predecessor,))
         knowledge = self.add("epistemic", book, chapter, revision, dependencies=(draft.id,))
         facts = self.add("facts", book, chapter, revision, dependencies=(draft.id, knowledge.id))
         reconciled = self.add("reconcile", book, chapter, revision, dependencies=(facts.id,))
         review = self.add("review", book, chapter, revision, dependencies=(draft.id, reconciled.id))
+        for reading in (knowledge, facts, reconciled, review):
+            reading.reading_world = reading_world
         return self.add("chapter_decision", book, chapter, revision, dependencies=(review.id, reconciled.id))
 
     def _book_edition(self, book, edition, predecessor):
@@ -237,8 +253,9 @@ class Simulation:
     def _outcome(self, job):
         fault_stage = job.stage == "draft"
         fault = self.scenario
-        if fault in INTERNAL_SCENARIOS and job.stage == "review" and "internal_question" not in self.used_faults:
-            self.used_faults.add("internal_question")
+        question_fault = f"internal_question:{job.book}:{job.chapter}" if fault == "multi_chapter_coverage" else "internal_question"
+        if fault in INTERNAL_SCENARIOS and job.stage == "review" and question_fault not in self.used_faults:
+            self.used_faults.update({"internal_question", question_fault})
             self.emit("FAULT_INJECTED", fault="internal_question", task=job.id)
             return "review_questions"
         if fault == "verification_unknown" and job.stage == "internal_verification":
@@ -261,7 +278,7 @@ class Simulation:
                     "context_bundle_id": uid(f"{job.id}:{generation}:context"), "role_id": role,
                     "actor_id": uid(f"actor:{job.book}") if role == "character_actor" else None,
                     "world_ref": {"work_id": uid(f"work:{job.book}"), "branch_id": uid(f"branch:{job.book}"),
-                                  "world_revision_id": uid(f"world:{job.book}")}}
+                                  "world_revision_id": job.reading_world or uid(f"world:{job.book}")}}
         messages = role_messages("DRY_RUN: isolated role, simulated JSON output only.",
             {"assignment": "Simulate the assigned stage", "context": identity,
              "dry_run_subject_ref": self._subject(job),
@@ -280,6 +297,10 @@ class Simulation:
         if role == "chief_editor":
             payload = {"decision": "DRY_RUN_CHANGE_METHOD" if job.stage == "strategy" else "DRY_RUN_APPROVE",
                        "reason": "DRY_RUN_POLICY_DECISION", "deferred_questions": [], "evidence_refs": []}
+        if job.stage == "internal_verification" and self.scenario in VERSION_SCENARIOS:
+            payload["verification_status"] = self.jobs[job.dependencies[0]].query_receipt["result"]
+        if job.stage == "facts":
+            payload["world_observation"] = self._factual_observation(job)
         spec = DryRunSpec(self.seed, rate, outcome, payload)
         simple = role in {"writer", "character_actor"} or job.stage == "memory"
         maximum = 8192 if simple else 262144
@@ -331,6 +352,11 @@ class Simulation:
 
     def _dispatch(self, job):
         if job.stage in PROGRAM_STAGES:
+            if job.stage in {"volume_freeze", "assemble"} and not self._volume_gate(job):
+                return
+            if job.stage == "world_coverage":
+                self._coverage(job)
+                return
             if job.stage == "query_verification":
                 source = self.jobs[job.source_task]
                 if (source.state != "PAUSED" or source.reason != "INTERNAL_QUESTION_PENDING"
@@ -338,9 +364,23 @@ class Simulation:
                     job.state, job.reason = "FAILED", "VERIFICATION_SOURCE_MISMATCH"
                     self.problems.append(job.reason)
                     return
+                outcome = ("PENDING_EVALUATION" if self.scenario in COVERAGE_SCENARIOS and not job.reading_world else
+                           "STALE_REPORT" if self.scenario == "stale_finding_provenance" else
+                           "CONTRADICTORY" if self.scenario == "internal_question_strategy" else "CONSISTENT")
                 receipt = {"transport": "DRY_RUN_MEMORY", "source_task": source.id,
                            "source_ref": self._subject(source), "query_task": job.id,
-                           "result": "CONTRADICTORY" if self.scenario == "internal_question_strategy" else "CONSISTENT"}
+                           "reading_world": job.reading_world or uid(f"world:{job.book}"), "result": outcome}
+                receipt["state_answer"] = {"value_status": "UNRESOLVED" if outcome == "PENDING_EVALUATION" else "VALUE",
+                    "evaluation_status": "PENDING" if outcome == "PENDING_EVALUATION" else "EVALUATED",
+                    "knowledge_status": "UNKNOWN" if outcome == "PENDING_EVALUATION" else "KNOWN"}
+                if outcome == "STALE_REPORT":
+                    receipt["finding_provenance"] = {"current_source_ref": self._subject(source),
+                        "matched_report_source_ref": {**self._subject(source),
+                            "artifact_revision_id": uid("prior-draft:" + source.id),
+                            "sha256": sha256(("prior-draft:" + source.id).encode()).hexdigest()},
+                        "same_version": False, "transport": "DRY_RUN_MEMORY"}
+                    self.emit("SIMULATED_FINDING_PROVENANCE_READ", task=job.id,
+                              current_source_ref=self._subject(source), old_report_same_version=False)
                 receipt["sha256"] = self._receipt_hash(receipt)
                 job.query_receipt = receipt
                 self.emit("SIMULATED_QUERY_VERIFICATION", task=job.id, source_task=source.id,
@@ -350,6 +390,14 @@ class Simulation:
                 reviews = [self.jobs[key] for key in decision.dependencies if self.jobs[key].stage == "review"]
                 if decision.state != "ACCEPTED" or len(reviews) != 1 or reviews[0].approved is not True:
                     job.state, job.reason = "FAILED", "CHAPTER_FREEZE_GATE_REJECTED"
+                    self.problems.append(job.reason)
+                    return
+                reconciled = next(self.jobs[key] for key in decision.dependencies if self.jobs[key].stage == "reconcile")
+                factual = self.jobs[reconciled.dependencies[0]]
+                draft = next(self.jobs[key] for key in factual.dependencies if self.jobs[key].stage == "draft")
+                knowledge = next(self.jobs[key] for key in factual.dependencies if self.jobs[key].stage == "epistemic")
+                if factual.reading_world != reviews[0].reading_world or knowledge.reading_world != factual.reading_world:
+                    job.state, job.reason = "FAILED", "READING_WORLD_CUT_MISMATCH"
                     self.problems.append(job.reason)
                     return
             if job.stage == "book_freeze":
@@ -371,9 +419,16 @@ class Simulation:
                 revision = reviews[0].revision
                 self.chapter_manifests[job.book, job.chapter] = {
                     "book": job.book, "chapter": job.chapter, "revision": revision,
-                    "draft_task": uid(f"{job.book}:{job.chapter}:draft:{revision}"),
-                    "facts_task": uid(f"{job.book}:{job.chapter}:facts:{revision}"),
-                    "review_task": reviews[0].id, "editor_task": decision.id}
+                    "draft_task": draft.id, "facts_task": factual.id,
+                    "reconciliation_task": reconciled.id,
+                    "review_task": reviews[0].id, "editor_task": decision.id,
+                    "reading_world": factual.reading_world or uid(f"world:{job.book}"),
+                    "source_world": uid(f"world:{job.book}"), "draft_ref": self._subject(draft),
+                    "factual_observation_sha256": factual.query_receipt["sha256"],
+                    "scene_ref": uid(f"scene:{job.book}:{job.chapter}"), "batch_ref": uid(f"batch:{job.book}"),
+                    "plan_ref": uid(f"plan:{job.book}")}
+                manifest = self.chapter_manifests[job.book, job.chapter]
+                manifest["sha256"] = self._receipt_hash(manifest)
                 self.emit("CHAPTER_FROZEN", book=job.book, chapter=job.chapter)
             if job.stage == "book_freeze":
                 editor = self.jobs[job.dependencies[0]]
@@ -386,6 +441,11 @@ class Simulation:
                     "reviewed_edition_ref": self._subject(editor)}
                 self.releases[job.book] = {**manifest, "manifest_sha256": sha256(json.dumps(manifest, sort_keys=True).encode()).hexdigest()}
                 self.emit("BOOK_RELEASE_FROZEN", **self.releases[job.book])
+            return
+        if job.stage == "draft" and job.chapter and not self._predecessor_gate(job):
+            return
+        if ((job.stage.startswith("book_") or job.stage in {"reader_1", "reader_2", "final_editor"})
+                and not self._editing_gate(job)):
             return
         if self.scenario == "budget_exhausted" and job.stage == "draft":
             job.state, job.reason = "PAUSED", "BUDGET_EXCEEDED"
@@ -400,6 +460,121 @@ class Simulation:
         self.pending[future] = (job.id, job.generation, attempt)
         self.max_inflight = max(self.max_inflight, len(self.pending))
 
+    def _pure_coverage_chain(self, source, target):
+        """Synthetic counterpart of scoped formal SCHEDULE_ADVANCE compatibility.
+
+        Keep original cuts in every source receipt. Matching hashes alone do
+        not prove ancestry, registration, interpretation or accepted closures.
+        """
+        original = self.world_cuts.get(source)
+        if original is None:
+            return False
+        seen = set()
+        while target != source:
+            current = self.world_cuts.get(target)
+            if not current or target in seen or len(seen) >= len(self.world_cuts):
+                return False
+            seen.add(target)
+            parent = self.world_cuts.get(current.get("parent"))
+            proof = current.get("closure")
+            if (not parent or not isinstance(proof, dict) or proof.get("sha256") != self._receipt_hash(proof)
+                    or proof.get("transport") != "DRY_RUN_MEMORY" or proof.get("template") != "SCHEDULE_ADVANCE"
+                    or proof.get("accepted") is not True or proof.get("event_refs") != []
+                    or proof.get("from_world") != parent["id"] or proof.get("to_world") != current["id"]
+                    or proof.get("target_frontier") != current["frontier"]
+                    or (parent["frontier"]["tick"], parent["frontier"]["phase"]) >=
+                       (current["frontier"]["tick"], current["frontier"]["phase"])
+                    or any(proof.get(key) != [] for key in ("event_candidates", "event_operations", "record_operations", "trigger_evaluations"))
+                    or any(current[key] != parent[key] or current[key] != original[key]
+                           for key in ("work", "branch", "canon", "registry", "interpretation"))):
+                return False
+            target = current["parent"]
+        return True
+
+    def _factual_observation(self, job):
+        world = job.reading_world or uid(f"world:{job.book}")
+        cut = self.world_cuts[world]
+        receipt = {"transport": "DRY_RUN_MEMORY", "source_ref": self._subject(job), "reading_world": world,
+                   "value_status": "VALUE", "evaluation_status": "EVALUATED", "knowledge_status": "KNOWN",
+                   "canon": cut["canon"], "registry": cut["registry"], "interpretation": cut["interpretation"]}
+        receipt["sha256"] = self._receipt_hash(receipt)
+        return receipt
+
+    def _chapter_proof(self, book, chapter, target):
+        manifest = self.chapter_manifests.get((book, chapter))
+        if not manifest or manifest.get("sha256") != self._receipt_hash(manifest):
+            return False
+        draft = self.jobs.get(manifest.get("draft_task"))
+        facts = self.jobs.get(manifest.get("facts_task"))
+        review = self.jobs.get(manifest.get("review_task"))
+        reconciled = self.jobs.get(manifest.get("reconciliation_task"))
+        editor = self.jobs.get(manifest.get("editor_task"))
+        return (manifest["book"] == book and manifest["chapter"] == chapter
+                and manifest["source_world"] == uid(f"world:{book}")
+                and manifest["scene_ref"] == uid(f"scene:{book}:{chapter}")
+                and manifest["batch_ref"] == uid(f"batch:{book}") and manifest["plan_ref"] == uid(f"plan:{book}")
+                and draft is not None and draft.state == "ACCEPTED" and self._subject(draft) == manifest["draft_ref"]
+                and draft.book == book and draft.chapter == chapter and draft.revision == manifest["revision"]
+                and facts is not None and facts.state == "ACCEPTED" and facts.book == book and facts.chapter == chapter
+                and facts.revision == manifest["revision"] and draft.id in facts.dependencies
+                and facts.query_receipt == self._factual_observation(facts)
+                and manifest.get("factual_observation_sha256") == facts.query_receipt["sha256"]
+                and review is not None and review.state == "ACCEPTED" and review.approved is True
+                and review.book == book and review.chapter == chapter and review.revision == manifest["revision"]
+                and reconciled is not None and reconciled.state == "ACCEPTED" and reconciled.dependencies == [facts.id]
+                and draft.id in review.dependencies and reconciled.id in review.dependencies
+                and editor is not None and editor.state == "ACCEPTED" and editor.book == book and editor.chapter == chapter
+                and editor.revision == manifest["revision"] and review.id in editor.dependencies and reconciled.id in editor.dependencies
+                and facts.reading_world == review.reading_world
+                and (facts.reading_world or uid(f"world:{book}")) == manifest["reading_world"]
+                and self._pure_coverage_chain(manifest["source_world"], manifest["reading_world"])
+                and self._pure_coverage_chain(manifest["reading_world"], target))
+
+    def _predecessor_gate(self, job):
+        previous = self.chapter_manifests.get((job.book, job.chapter - 1))
+        if not previous or not self._chapter_proof(job.book, job.chapter - 1, previous["reading_world"]):
+            job.state, job.reason = "PAUSED", "PREDECESSOR_SOURCE_CUT_MISMATCH"
+            self.emit("PREDECESSOR_HANDOFF_REJECTED", task=job.id, reason=job.reason)
+            return False
+        self.emit("PREDECESSOR_HANDOFF_PROVEN", task=job.id, source_world=uid(f"world:{job.book}"),
+                  predecessor_world=previous["reading_world"], predecessor_draft_ref=previous["draft_ref"],
+                  compatibility="SCOPED_PURE_COVERAGE_CHAIN")
+        return True
+
+    def _volume_gate(self, job):
+        target = self.world_heads[job.book]
+        chapters = [self.chapter_manifests.get((job.book, chapter)) for chapter in range(self.chapters)]
+        if (any(item is None for item in chapters)
+                or not all(self._chapter_proof(job.book, chapter, target) for chapter in range(self.chapters))):
+            job.state, job.reason = "PAUSED", "VOLUME_SOURCE_CUT_MISMATCH"
+            self.emit("MULTI_CHAPTER_FREEZE_REJECTED", task=job.id, reason=job.reason)
+            return False
+        if job.stage == "volume_freeze":
+            receipt = {"transport": "DRY_RUN_MEMORY", "book": job.book, "adopted_world": target,
+                "chapters": [{key: item[key] for key in ("chapter", "source_world", "reading_world", "draft_ref", "sha256")}
+                             for item in chapters]}
+            receipt["sha256"] = self._receipt_hash(receipt)
+            self.volume_manifests[job.book] = receipt
+            self.emit("MULTI_CHAPTER_FREEZE_PROVEN", task=job.id, adopted_world=target,
+                      original_reading_worlds=[item["reading_world"] for item in chapters])
+        return True
+
+    def _editing_gate(self, job):
+        volume = self.volume_manifests.get(job.book)
+        if (not volume or volume.get("sha256") != self._receipt_hash(volume)
+                or len(volume.get("chapters", [])) != self.chapters
+                or not self._pure_coverage_chain(volume["adopted_world"], self.world_heads[job.book])
+                or any(not self._chapter_proof(job.book, chapter, volume["adopted_world"])
+                       for chapter in range(self.chapters))):
+            job.state, job.reason = "PAUSED", "FULL_VOLUME_SOURCE_CUT_MISMATCH"
+            self.emit("FULL_VOLUME_EDITING_REJECTED", task=job.id, reason=job.reason)
+            return False
+        job.reading_world = volume["adopted_world"]
+        self.emit("FULL_VOLUME_SOURCE_CUTS_PROVEN", task=job.id, adopted_world=job.reading_world,
+                  source_worlds=[item["source_world"] for item in volume["chapters"]],
+                  reading_worlds=[item["reading_world"] for item in volume["chapters"]], edition=job.revision)
+        return True
+
     def _accept(self, job):
         if job.state == "ACCEPTED":
             self.duplicate_results += 1
@@ -408,6 +583,67 @@ class Simulation:
         self.acceptances[job.id] = self.acceptances.get(job.id, 0) + 1
         self.emit("TASK_ACCEPTED", task=job.id, generation=job.generation)
         self._wake()
+
+    def _coverage(self, job):
+        source = self.jobs[job.source_task]
+        verifier = self.jobs[job.dependencies[0]]
+        query = self.jobs[verifier.dependencies[0]]
+        if (verifier.state != "ACCEPTED" or query.query_receipt["result"] != "PENDING_EVALUATION"
+                or not self._valid_internal_query(verifier)):
+            job.state, job.reason = "FAILED", "COVERAGE_QUERY_PROOF_REQUIRED"
+            self.problems.append(job.reason)
+            return
+        if self.scenario == "world_coverage_blocked" and "world_process_wait" not in self.used_faults:
+            self.used_faults.add("world_process_wait")
+            self.coverage_waiting.add(job.id)
+            job.state, job.reason = "PAUSED", "WAITING_WORLD_PROCESS"
+            self.emit("WORLD_PROCESS_WAIT", task=job.id, source_ref=self._subject(source))
+            def completed():
+                self.coverage_waiting.remove(job.id)
+                job.state, job.reason, job.ready_at = "READY", None, self.now
+                self.emit("REGISTERED_WORLD_PROCESS_COMPLETED", task=job.id)
+                self._wake()
+            self.schedule(8, completed)
+            return
+        if self.coverage_waiting:
+            self.problems.append("COVERAGE_ADVANCED_OVER_WORLD_BLOCKER")
+            return
+        source_head = self.world_heads[job.book]
+        if self.scenario == "coverage_semantic_changed":
+            changed = {**self.world_cuts[source_head], "id": uid("changed-canon:" + source.id),
+                       "parent": source_head, "canon": sha256(b"EXTERNAL_CANON_CHANGE").hexdigest(), "closure": None}
+            self.world_cuts[changed["id"]] = changed
+            self.world_heads[job.book] = changed["id"]
+            source_head = changed["id"]
+        if not self._pure_coverage_chain(query.query_receipt["reading_world"], source_head):
+            job.state, job.reason = "PAUSED", "WAITING_WORLD_REVALIDATION"
+            self.emit("SEMANTIC_WORLD_CHANGE_REJECTED", task=job.id, reason=job.reason)
+            return
+        job.reading_world = uid("coverage-world:" + source.id)
+        target = {"tick": job.chapter + 1, "phase": 1}
+        proof = {"transport": "DRY_RUN_MEMORY", "from_world": source_head, "to_world": job.reading_world,
+                 "template": "SCHEDULE_ADVANCE", "target_frontier": target,
+                 "accepted": True, "event_refs": [], "event_candidates": [], "event_operations": [],
+                 "record_operations": [], "trigger_evaluations": []}
+        proof["sha256"] = self._receipt_hash(proof)
+        self.world_cuts[job.reading_world] = {**self.world_cuts[source_head], "id": job.reading_world,
+            "parent": source_head, "frontier": target, "closure": proof}
+        self.world_heads[job.book] = job.reading_world
+        receipt = {"transport": "DRY_RUN_MEMORY", "source_task": source.id,
+            "source_ref": self._subject(source), "from_world": source_head,
+            "to_world": job.reading_world, "canonical_effects_applied": 0, "allowance_changed": False}
+        receipt["sha256"] = self._receipt_hash(receipt)
+        job.query_receipt = receipt
+        self.emit("SIMULATED_FORMAL_COVERAGE_ACCEPTED", task=job.id, **receipt)
+        self._accept(job)
+        followup = self.add("query_verification", source.book, source.chapter, source.revision,
+            dependencies=(job.id,), tag="coverage-child", source_task=source.id)
+        followup.reading_world = job.reading_world
+        child = self.add("internal_verification", source.book, source.chapter, source.revision,
+            dependencies=(followup.id,), tag="coverage-child", source_task=source.id)
+        child.reading_world = job.reading_world
+        self.emit("COVERAGE_CHILD_ENROLLED", task=child.id, parent_task=verifier.id,
+                  source_ref=self._subject(source), reading_world=job.reading_world)
 
     def _retry(self, job, reason):
         if job.tries >= 3:
@@ -481,6 +717,19 @@ class Simulation:
             job.state, job.reason = "PAUSED", "VERIFICATION_EVIDENCE_REQUIRED"
             self.problems.append("INTERNAL_RESOLUTION_WITHOUT_QUERY_PROOF")
             return
+        if job.stage == "facts":
+            observation = envelope["payload"].get("world_observation")
+            if observation != self._factual_observation(job):
+                job.state, job.reason = "PAUSED", "FACT_WORLD_EVIDENCE_UNRESOLVED"
+                self.emit("FACT_WORLD_EVIDENCE_REJECTED", task=job.id, source_ref=self._subject(job))
+                self._wake()
+                return
+            job.query_receipt = observation
+        if (job.stage == "internal_verification" and self.scenario in VERSION_SCENARIOS
+                and envelope["payload"].get("verification_status") != self.jobs[job.dependencies[0]].query_receipt["result"]):
+            job.state, job.reason = "PAUSED", "VERIFICATION_EVIDENCE_REQUIRED"
+            self.problems.append("INTERNAL_RESOLUTION_STATUS_MISMATCH")
+            return
         role = ROLE_STAGES[job.stage]
         job.approved = (not blocking_review_issues(envelope["payload"]["issues"]) if role == "reviewer" else
                         envelope["payload"].get("decision") == "DRY_RUN_APPROVE" if role == "chief_editor" else None)
@@ -501,23 +750,44 @@ class Simulation:
         source = self.jobs[verifier.source_task]
         query = self.jobs[verifier.dependencies[0]]
         receipt = query.query_receipt
+        if isinstance(receipt, dict):
+            pending = receipt.get("result") == "PENDING_EVALUATION"
+            if receipt.get("state_answer") != {"value_status": "UNRESOLVED" if pending else "VALUE",
+                "evaluation_status": "PENDING" if pending else "EVALUATED", "knowledge_status": "UNKNOWN" if pending else "KNOWN"}:
+                return False
+        if isinstance(receipt, dict) and receipt.get("result") == "STALE_REPORT":
+            provenance = receipt.get("finding_provenance")
+            if (not isinstance(provenance, dict) or provenance.get("transport") != "DRY_RUN_MEMORY"
+                    or provenance.get("current_source_ref") != self._subject(source)
+                    or provenance.get("same_version") is not False
+                    or provenance.get("matched_report_source_ref") != {**self._subject(source),
+                        "artifact_revision_id": uid("prior-draft:" + source.id),
+                        "sha256": sha256(("prior-draft:" + source.id).encode()).hexdigest()}):
+                return False
         return (query.stage == "query_verification" and query.state == "ACCEPTED" and isinstance(receipt, dict)
                 and source.state == "PAUSED" and source.reason == "INTERNAL_QUESTION_PENDING"
                 and receipt.get("transport") == "DRY_RUN_MEMORY" and receipt.get("query_task") == query.id
                 and receipt.get("sha256") == self._receipt_hash(receipt)
                 and receipt.get("source_task") == source.id and receipt.get("source_ref") == self._subject(source)
                 and self._subject(verifier) == self._subject(source)
-                and receipt.get("result") in {"CONSISTENT", "CONTRADICTORY"})
+                and receipt.get("reading_world") == (verifier.reading_world or uid(f"world:{verifier.book}"))
+                and receipt.get("result") in {"CONSISTENT", "CONTRADICTORY", "PENDING_EVALUATION", "STALE_REPORT"})
 
     def _continue_internal_question(self, verifier):
         source = self.jobs[verifier.source_task]
         query = self.jobs[verifier.dependencies[0]]
         receipt = query.query_receipt
+        if receipt["result"] == "PENDING_EVALUATION":
+            closure = self.add("world_coverage", source.book, source.chapter, source.revision,
+                               dependencies=(verifier.id,), source_task=source.id)
+            self.emit("WORLD_COVERAGE_ENROLLED", task=closure.id, source_ref=self._subject(source))
+            return
         source.state, source.reason = "CANCELLED", "INTERNAL_QUESTION_RESOLVED"
         freeze = self.jobs[uid(f"{source.book}:{source.chapter}:freeze:0")]
         old_decision = self.jobs[freeze.dependencies[0]]
         old_decision.state, old_decision.reason = "CANCELLED", "SUPERSEDED_INTERNAL_QUESTION"
-        resolution = "CONFIRMED_CONFLICT" if receipt["result"] == "CONTRADICTORY" else "NO_CONFLICT"
+        resolution = ("CONFIRMED_CONFLICT" if receipt["result"] == "CONTRADICTORY" else
+                      "STALE_REPORT" if receipt["result"] == "STALE_REPORT" else "NO_CONFLICT")
         self.emit("INTERNAL_QUESTION_RESOLVED", task=source.id, verification_task=verifier.id,
                   resolution=resolution, source_ref=self._subject(source), world_effects_applied=0)
         if resolution == "CONFIRMED_CONFLICT":
@@ -526,10 +796,25 @@ class Simulation:
             freeze.dependencies = [strategy.id]
             self.emit("STRATEGY_REASSESSMENT_ENROLLED", task=strategy.id, source_task=source.id)
         else:
+            dependencies = [verifier.id, *source.dependencies]
+            if self.scenario in VERSION_SCENARIOS:
+                draft = uid(f"{source.book}:{source.chapter}:draft:{source.revision}")
+                knowledge = self.add("epistemic", source.book, source.chapter, source.revision,
+                    dependencies=(draft, verifier.id), tag="version-reread")
+                facts = self.add("facts", source.book, source.chapter, source.revision,
+                    dependencies=(draft, knowledge.id), tag="version-reread")
+                reconciled = self.add("reconcile", source.book, source.chapter, source.revision,
+                    dependencies=(facts.id,), tag="version-reread")
+                for reading in (knowledge, facts, reconciled):
+                    reading.reading_world = verifier.reading_world
+                dependencies = [verifier.id, draft, reconciled.id]
             review = self.add("review", source.book, source.chapter, source.revision,
-                dependencies=(verifier.id, *source.dependencies), tag="internal-reread", source_task=source.id)
+                dependencies=dependencies, tag="internal-reread", source_task=source.id)
+            review.reading_world = verifier.reading_world
             decision = self.add("chapter_decision", source.book, source.chapter, source.revision,
-                dependencies=(review.id, *[key for key in old_decision.dependencies if key != source.id]), tag="internal-reread")
+                dependencies=(review.id, *[key for key in dependencies if self.jobs[key].stage == "reconcile"]), tag="internal-reread")
+            if self.scenario not in VERSION_SCENARIOS:
+                decision.dependencies = [review.id, *[key for key in old_decision.dependencies if key != source.id]]
             freeze.dependencies = [decision.id]
             self.emit("SAME_DRAFT_REREAD_ENROLLED", task=review.id, source_task=source.id, source_ref=self._subject(source))
 
@@ -549,7 +834,11 @@ class Simulation:
             freeze.dependencies = [strategy.id]
             self.emit("STRATEGY_REASSESSMENT_ENROLLED", task=strategy.id)
         else:
-            decision = self._chapter_candidate(job.book, job.chapter, revision, job.id)
+            decision = self._chapter_candidate(job.book, job.chapter, revision, job.id, reading_world=job.reading_world)
+            if job.reading_world:
+                self.emit("SIMULATED_COVERAGE_LINEAGE_RENEWED", source_ref=self._subject(job),
+                          successor_ref=self._subject(self.jobs[uid(f"{job.book}:{job.chapter}:draft:{revision}")]),
+                          reading_world=job.reading_world, canonical_effects_applied=0)
             freeze.dependencies = [decision.id]
         self.emit("REWORK_ENROLLED", book=job.book, chapter=job.chapter, revision=revision)
 
@@ -652,7 +941,7 @@ class Simulation:
                         for job in list(self.jobs.values()):
                             if len(self.pending) >= self.workers:
                                 break
-                            if job.state == "READY":
+                            if job.state == "READY" and (not self.coverage_waiting or job.stage in PROGRAM_STAGES):
                                 self._dispatch(job)
                 self._check()
                 if not self.pending and not self.events and not any(job.state == "READY" for job in self.jobs.values()):
@@ -711,6 +1000,13 @@ class Simulation:
                 self.problems.append("INTERNAL_QUERY_PATH_NOT_EXERCISED")
             if self.scenario in MCP_SCENARIOS and not any(row["event"] == "REVIEW_MCP_EVIDENCE_MISSING" for row in self.trace):
                 self.problems.append("MCP_RECOVERY_PATH_NOT_EXERCISED")
+            expected_coverage = (sum(row["event"] == "WORLD_COVERAGE_ENROLLED" for row in self.trace)
+                                 if self.scenario == "multi_chapter_coverage" else 1)
+            if (self.scenario in COVERAGE_SCENARIOS - {"coverage_semantic_changed"}
+                    and sum(row["event"] == "SIMULATED_FORMAL_COVERAGE_ACCEPTED" for row in self.trace) != expected_coverage):
+                self.problems.append("FORMAL_COVERAGE_PATH_NOT_EXERCISED")
+            if self.scenario == "coverage_semantic_changed" and not any(row["event"] == "SEMANTIC_WORLD_CHANGE_REJECTED" for row in self.trace):
+                self.problems.append("SEMANTIC_CHANGE_REFUSAL_NOT_EXERCISED")
 
     def report(self):
         complete = (all(job.state in TERMINAL for job in self.jobs.values())

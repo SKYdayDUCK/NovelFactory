@@ -6,19 +6,26 @@ Every delivery (including a cache hit) rechecks the live grant and task fence.
 """
 from __future__ import annotations
 
+import json
+import threading
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 from collections import OrderedDict, deque
 from copy import deepcopy
-import json
-import threading
-from uuid import UUID, uuid4, uuid5
 from time import monotonic
+from uuid import UUID, uuid4, uuid5
 
 from novel_factory.contracts.registry import validate_contract
 from novel_factory.domain.canonical import canonical_bytes, fingerprint, strict_json_loads
 from novel_factory.domain.errors import DomainError
-from novel_factory.domain.temporal import point_key, contains, validate_interval
-from novel_factory.domain.world import (state_at, lifecycle_at, PREDICATES, ALIASES, PROJECTION_VERSION)
+from novel_factory.domain.temporal import contains, point_key, validate_interval
+from novel_factory.domain.world import (
+    ALIASES,
+    PREDICATES,
+    PROJECTION_VERSION,
+    lifecycle_at,
+    state_at,
+)
+
 from .query_policy import check_profile
 from .semantic_dependencies import record_query
 
@@ -68,23 +75,28 @@ class WorldQueryService:
         self._cache_lock = threading.RLock()
         self.cache_hits = self.cache_misses = 0
 
-    def _task(self, repo, principal, task_id, generation, capability='READ', *, lock=None):
+    def _task(self, repo, principal, task_id, generation, capability='READ', *, lock=None,
+              historical_accepted=False):
         task = repo.one('tasks', {'task_id': task_id}, lock=lock)
         _require(task, 'VIEW_DENIED', 'Task is unavailable')
         work, grant = self.kernel._authorize_with_work(repo, principal, task['work_id'], capability, task['branch_id'])
-        return self._qualify_task(repo, principal, task, generation, grant, work=work)
+        return self._qualify_task(repo, principal, task, generation, grant, work=work,
+                                  historical_accepted=historical_accepted)
 
-    def _qualify_task(self, repo, principal, task, generation, grant, *, work):
+    def _qualify_task(self, repo, principal, task, generation, grant, *, work, historical_accepted=False):
         _require(task['principal_id'] == principal.principal_id and task['grant_id'] == principal.grant_id,
                  'VIEW_DENIED', 'Task is unavailable')
         _require(task['generation'] == generation, 'STALE_GENERATION', 'Task generation is no longer current')
         _require(task['state'] in {'READY', 'RUNNING', 'RESULT_STORED', 'VALIDATING', 'WAITING_REVIEW', 'ACCEPTED'},
                  'TASK_NOT_ACCEPTABLE', 'Task has no current read qualification')
-        now = repo.now()
-        _require(task['deadline'] > now, 'DEADLINE_EXCEEDED', 'Task deadline has passed')
-        if task['state'] == 'RUNNING':
-            _require(task['lease_expiry'] is not None and task['lease_expiry'] > now,
-                     'LEASE_EXPIRED', 'Task execution lease has expired')
+        # Internal immutable-source validation may outlive an accepted reader's
+        # execution window. Public queries never opt into this historical path.
+        if not (historical_accepted and task['state'] == 'ACCEPTED'):
+            now = repo.now()
+            _require(task['deadline'] > now, 'DEADLINE_EXCEEDED', 'Task deadline has passed')
+            if task['state'] == 'RUNNING':
+                _require(task['lease_expiry'] is not None and task['lease_expiry'] > now,
+                         'LEASE_EXPIRED', 'Task execution lease has expired')
         record = repo.one('task_inputs', {'task_id': task['task_id'], 'generation': generation})
         _require(record, 'TASK_NOT_ACCEPTABLE', 'Task input is unavailable')
         spec = record['spec']

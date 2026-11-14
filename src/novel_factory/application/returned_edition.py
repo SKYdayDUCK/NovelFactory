@@ -60,6 +60,44 @@ def _guard(kernel, repo, state, cursor):
     return scenes
 
 
+def _writer_source(kernel, repo, owner, state, scene):
+    """Retain the immutable writing card; adopt only through fresh child checks."""
+    adopted = state["binding"]["world_ref"]
+    work = adopted["work_id"]
+    card = kernel.artifact(repo, scene["scene_ref"], work, kind="SCENE_PLAN")["payload"]
+    plan = kernel.artifact(repo, card["plan_ref"], work, kind="PLAN_REVISION")["payload"]
+    parent = kernel.artifact(repo, scene["draft_ref"], work, kind="NARRATIVE_DRAFT")["payload"]
+    source = card["scene_contract"]["input_world_ref"]
+    acceptance = kernel.artifact(repo, scene["acceptance_ref"], work, kind="NARRATIVE_ACCEPTANCE")["payload"]
+    require(plan["input_world_ref"] == parent["input_world_ref"] == source
+            and parent["scene_ref"] == scene["scene_ref"] and parent["text_ref"] == scene["text_ref"]
+            and repo.ancestor(source, adopted)
+            and acceptance["draft_ref"] == scene["draft_ref"] and acceptance["scene_ref"] == scene["scene_ref"]
+            and acceptance["text_ref"] == scene["text_ref"] and acceptance["plan_ref"] == card["plan_ref"]
+            and acceptance["world_ref"] == adopted,
+            "TASK_REBIND_REQUIRED", "Returned writer source must be the frozen parent's exact ancestral scene and plan")
+    checked = NarrativeService(kernel).validate_for_acceptance(
+        repo, owner, scene["draft_ref"], acceptance["reconciliation_ref"], adopted)
+    require(checked["alignment_ref"] == acceptance["alignment_ref"],
+            "NARRATIVE_ALIGNMENT_REQUIRED", "Frozen parent lacks its executed adopted-world alignment")
+    return {"writer_source_world_ref": source, "adopted_world_ref": adopted,
+            "parent_acceptance_ref": scene["acceptance_ref"], "scene_ref": scene["scene_ref"]}
+
+
+def _write_job_world(kernel, repo, owner, state, scene, task):
+    binding = _writer_source(kernel, repo, owner, state, scene)
+    job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})
+    spec = repo.one("task_inputs", {"task_id": task["task_id"], "generation": task["generation"]})
+    require(job and job["config"].get("returned_writer_binding") == binding
+            and job["config"].get("returned_edition") == {
+                "parent_session": state["session"], "phase": "write", "scene": state["edition"]["scene_index"]}
+            and (task["role_id"], task["task_kind"]) == ("writer", "targeted_revision")
+            and spec and spec["spec"]["world_ref"] == binding["writer_source_world_ref"]
+            and scene["scene_ref"] in spec["spec"]["input_artifacts"],
+            "TASK_REBIND_REQUIRED", "Returned writing result lost its frozen source and adopted-world binding")
+    return binding["writer_source_world_ref"]
+
+
 def _assign(kernel, repo, gateway, owner, state, cursor, scene):
     from .supervisor import RuntimeSupervisor
 
@@ -68,6 +106,8 @@ def _assign(kernel, repo, gateway, owner, state, cursor, scene):
     work = wr["work_id"]
     phase = ed["phase"]
     reading = phase != "write"
+    writer_binding = None if reading else _writer_source(kernel, repo, owner, state, scene)
+    task_wr = wr if reading else writer_binding["writer_source_world_ref"]
     role, kind = {"write": ("writer", "targeted_revision"), "read": ("reviewer", "literary"),
                   "epistemic": ("reviewer", "epistemic"), "facts": ("evidence_maintainer", "assertion_extract"),
                   "verify": ("reviewer", "verification")}[phase]
@@ -75,6 +115,13 @@ def _assign(kernel, repo, gateway, owner, state, cursor, scene):
     require(deadline > 0, "TASK_EXPIRED", "Returned edition allowance expired")
     auth = cursor["allowance"]
     prior = kernel.artifact(repo, scene["draft_ref"], work, kind="NARRATIVE_DRAFT")["payload"]
+    packet_ref, predecessors = None, []
+    if not reading:
+        from .returned_edition_acceptance import PACKET_KIND, predecessor_packet
+        packet = predecessor_packet(kernel, repo, owner, state, scene)
+        if packet:
+            packet_ref = _artifact(kernel, repo, work, owner, PACKET_KIND, packet)
+            predecessors = [item["draft_ref"] for item in packet["predecessors"]]
     assignment = {"operation": "read_returned_edition" if phase == "read" else "revise_returned_edition" if not reading else phase,
                   "volume_scene_ordinal": ed["scene_index"] + 1,
                   "instructions": ("先读原稿，再读本次候选；核对是否回应退回意见、保留视角与既有事件。报告仍有的问题。"
@@ -98,6 +145,9 @@ def _assign(kernel, repo, gateway, owner, state, cursor, scene):
         materials = [mate, request["report_ref"]]
     if phase != "verify":
         materials += [ref for ref in extra if ref not in materials]
+    if packet_ref:
+        materials += [packet_ref, *predecessors]
+        assignment["instructions"] += "先通读本版前驱子稿及其已通过三审的交接包；以下续写必须衔接本版前驱，旧正式接受回执仅保留历史，不代表本版正文。"
     if phase == "epistemic":
         assignment["instructions"] = "独立通读本次候选，核对人物认知来源与披露时序；只将有固定原文和系统查询反证的问题标为硬冲突，未知事项交待核查。"
     elif phase == "facts":
@@ -106,6 +156,8 @@ def _assign(kernel, repo, gateway, owner, state, cursor, scene):
     card = kernel.artifact(repo, scene["scene_ref"], work, kind="SCENE_PLAN")["payload"]
     refs = [card["plan_ref"], card["batch_ref"], scene["scene_ref"], original, ed["editor_output_ref"],
             *prior["handoff_refs"], *([mate] if reading else []), *extra]
+    if packet_ref:
+        refs += [packet_ref, *predecessors]
     correction = state.get("technical_correction")
     if correction:
         if isinstance(assignment, str):
@@ -113,7 +165,7 @@ def _assign(kernel, repo, gateway, owner, state, cursor, scene):
         else:
             assignment.update(repair_strategy=correction["method"], validation_errors=[correction["diagnostic"]])
     prepared = RuntimeTaskService(kernel, gateway).prepare(
-        owner, wr, role_id=role, task_kind=kind, assignment=assignment if isinstance(assignment, str) else json.dumps(assignment, ensure_ascii=False),
+        owner, task_wr, role_id=role, task_kind=kind, assignment=assignment if isinstance(assignment, str) else json.dumps(assignment, ensure_ascii=False),
         review_belief=phase in {"epistemic", "verify"},
         knowledge_reread_reason="known_error" if correction else None,
         adapter_id=auth["routes"]["review" if reading else "draft"], subject_ids=auth["subject_ids"],
@@ -128,6 +180,10 @@ def _assign(kernel, repo, gateway, owner, state, cursor, scene):
         input_ref=prepared.agent_input["input_ref"], budget_id=auth["budget_id"],
         reserve_amount=auth["reserve_amount"], token_reservation=auth["token_reservation"])
     config["returned_edition"] = {"parent_session": state["session"], "phase": ed["phase"], "scene": ed["scene_index"]}
+    if writer_binding:
+        config["returned_writer_binding"] = writer_binding
+    if packet_ref:
+        config["returned_predecessor_packet_ref"] = packet_ref
     if reading:
         frozen = kernel.artifact(repo, prepared.agent_input["input_ref"], work, kind="AGENT_INPUT")["payload"]
         require(gateway.adapters[frozen["adapter_id"]].configuration.get("adapter_kind") == "codex-cli",
@@ -162,6 +218,7 @@ def prepare_materials(kernel, task, mark):
         orig = scene["draft_ref"]
         refs = [orig]
         if mark["phase"] == "write":
+            _write_job_world(bound, repo, owner, state, scene, task)
             prior = bound.artifact(repo, orig, work, kind="NARRATIVE_DRAFT")["payload"]
             card = bound.artifact(repo, scene["scene_ref"], work, kind="SCENE_PLAN")["payload"]
             PlanningService(bound).bind_task_for_controller(owner, task["task_id"], task["generation"],
@@ -170,6 +227,11 @@ def prepare_materials(kernel, task, mark):
                 task["task_id"], task["generation"], scene["scene_ref"], prior["handoff_refs"], key)
             if state["edition"].get("failed_draft_ref"):
                 refs.append(state["edition"]["failed_draft_ref"])
+            job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})["config"]
+            if job.get("returned_predecessor_packet_ref"):
+                from .returned_edition_acceptance import PACKET_KIND
+                packet = bound.artifact(repo, job["returned_predecessor_packet_ref"], work, kind=PACKET_KIND)["payload"]
+                refs += [item["draft_ref"] for item in packet["predecessors"]]
         else:
             child = state["edition"]["candidates"][mark["scene"]]
             source = repo.one("tasks", {"work_id": work, "task_id": child["writer_task_id"]})
@@ -221,6 +283,9 @@ def material(kernel, principal, task_id, generation, context_bundle_id, artifact
         allowed = [ed["editor_output_ref"], *ed.get("internal_resolution_refs", []),
                    *([ed["retry_feedback_ref"]] if ed.get("retry_feedback_ref") else []),
                    *([ed["verification_request"]["report_ref"]] if ed.get("phase") == "verify" else [])]
+        packet_ref = job["config"].get("returned_predecessor_packet_ref")
+        if packet_ref:
+            allowed.append(packet_ref)
         if artifact_ref not in allowed:
             return None
         require(state["status"] == "EDITION_REVISING" and state["active"] == task_id
@@ -228,6 +293,14 @@ def material(kernel, principal, task_id, generation, context_bundle_id, artifact
                 and mark == {"parent_session": state["session"], "phase": state["edition"]["phase"], "scene": state["edition"]["scene_index"]},
                 "VIEW_DENIED", "Editorial feedback is outside this child task")
         cursor = _load(kernel, repo, task["work_id"], task["branch_id"])
+        if artifact_ref == packet_ref:
+            from .returned_edition_acceptance import PACKET_KIND, predecessor_packet
+            scene = _guard(kernel, repo, state, cursor)[mark["scene"]]
+            actual = kernel.artifact(repo, packet_ref, task["work_id"], kind=PACKET_KIND)["payload"]
+            require(mark["phase"] == "write" and actual == predecessor_packet(
+                kernel, repo, _current_owner(kernel, repo, cursor), state, scene),
+                "VIEW_DENIED", "Edition handoff packet is outside this exact current writer")
+            return canonical_bytes(actual)
         scene = _guard(kernel, repo, state, cursor)[mark["scene"]]
         if ed.get("phase") == "verify" and artifact_ref == ed["verification_request"]["report_ref"]:
             from .internal_review_resolution import _assignment_case_hash
@@ -378,7 +451,10 @@ def advance(kernel, repo, gateway, owner, state, cursor):
             return True
         return False
     try:
-        proof, output = _audited_design_result(kernel, gateway, repo, task, state["binding"]["world_ref"])
+        result_wr = (_write_job_world(kernel, repo, owner, state, scene, task)
+                     if ed["phase"] == "write" else state["binding"]["world_ref"])
+        proof, output = _audited_design_result(kernel, gateway, repo, task, result_wr)
+        require(proof["world_ref"] == result_wr, "TASK_REBIND_REQUIRED", "Child audit differs from its fixed task cut")
         if ed["phase"] != "write":
             from .review_mcp import require_review_queries
             require_review_queries(kernel, repo, task, proof)
@@ -400,10 +476,15 @@ def advance(kernel, repo, gateway, owner, state, cursor):
             prior_draft_ref=scene["draft_ref"], handoff_refs=prior["handoff_refs"], title=prior["title"],
             declared_important_deltas=output["important_deltas"], agent_output_ref=proof["output_ref"])
         payload = kernel.artifact(repo, draft, work, kind="NARRATIVE_DRAFT")["payload"]
+        from .returned_edition_acceptance import record_handoff
+        handoff = record_handoff(kernel, repo, owner, task, proof, draft)
         ed["candidates"].append({"scene_id": scene["scene_id"], "parent_ref": scene["draft_ref"], "draft_ref": draft,
                                 "text_ref": payload["text_ref"], "changed": scene["text_ref"]["sha256"] != payload["text_ref"]["sha256"],
                                 "writer_task_id": task["task_id"], "writer_generation": task["generation"],
+                                "writer_source_world_ref": result_wr, "adopted_world_ref": state["binding"]["world_ref"],
                                 "attempt_id": proof["attempt_id"]})
+        if handoff:
+            ed["candidates"][-1]["handoff_proof_ref"] = handoff
         ed["phase"] = "epistemic"
         ed["fact_rereads"] = 0
     elif ed["phase"] == "epistemic":

@@ -42,7 +42,7 @@ def materialize_review_input(kernel, packet, receipt_refs):
     return view
 
 
-def run_review_mcp(kernel, request, thread, turn):
+def run_review_mcp(kernel, request, thread, turn, *, query_at=None, query_predicate=None):
     async def run():
         async with ReviewMcpBroker.from_attempt(kernel, request) as broker:
             broker.bind(thread, turn)
@@ -54,9 +54,14 @@ def run_review_mcp(kernel, request, thread, turn):
                     manifest = next(kernel.artifact(repo, ref, broker.scope["work_id"])["payload"]
                         for ref in task_input["spec"]["input_artifacts"]
                         if kernel.artifact(repo, ref, broker.scope["work_id"])["kind"] == "INPUT_MANIFEST")
+                lookup = {"subject_id": manifest["subject_ids"][0], "predicate": manifest["predicates"][0]}
+                if query_predicate is not None:
+                    assert query_predicate in manifest["predicates"]
+                    lookup["predicate"] = query_predicate
+                if query_at is not None:
+                    lookup["at"] = query_at
                 await broker.call({"threadId": thread, "turnId": turn, "callId": "synthetic-query",
-                    "tool": "nf_query_batch", "arguments": {"lookups": [{"subject_id": manifest["subject_ids"][0],
-                                                                           "predicate": manifest["predicates"][0]}]}})
+                    "tool": "nf_query_batch", "arguments": {"lookups": [lookup]}})
             for index, ref in enumerate(broker.scope["material_refs"]):
                 await broker.call({"threadId": thread, "turnId": turn, "callId": "synthetic-material-" + str(index),
                     "tool": "nf_review_material", "arguments": {"artifact_ref": ref}})
