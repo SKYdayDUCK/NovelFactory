@@ -7,7 +7,7 @@ operations. No model is called until a caller separately dispatches the task.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from novel_factory.application.authorization import Principal
@@ -50,7 +50,7 @@ class RuntimeTaskService:
                 max_amount="1", token_budget=200_000,
                 currency="USD", lease_seconds=600, deadline_seconds=3600,
                 skill_name=None, queue_state=None, dynamic_instance_ref=None, routing_override=None,
-                knowledge_reread_reason=None):
+                knowledge_reread_reason=None, review_belief=False):
         """Freeze authorized inputs and issue a fresh role grant, without enqueueing work.
 
         The controller must possess ADMIN already. Runtime grants receive only
@@ -71,6 +71,9 @@ class RuntimeTaskService:
                                 if role_id == "character_actor" else {"plane": "WORLD"})
         validate_contract("KnowledgeCut", cut, "2.1")
         require(cut["plane"] in role["allowed_planes"], "VIEW_DENIED", "Selected cut is outside the runtime role")
+        require(type(review_belief) is bool and (not review_belief or
+                (role_id == "reviewer" and task_kind in {"epistemic", "verification"} and cut["plane"] == "WORLD")),
+                "VIEW_DENIED", "Supplementary belief access is limited to independent knowledge verification")
         if role_id == "character_actor":
             require(actor_id is not None and cut["plane"] == "BELIEF" and cut["actor_id"] == actor_id,
                     "VIEW_DENIED", "A character task requires its own knowledge cut")
@@ -90,7 +93,7 @@ class RuntimeTaskService:
             caps.append("PLAN_READ")
         granted = self.kernel.issue_grant(controller, world_ref["work_id"], role_id=role_id,
             actor_id=actor_id, branch_ids=[world_ref["branch_id"]], capabilities=caps,
-            planes=[cut["plane"]], max_story_time=story_time)
+            planes=[cut["plane"], *(["BELIEF"] if review_belief else [])], max_story_time=story_time)
         principal = granted["principal"]
         inputs = []
         for ref in [manifest, prepared["input_ref"], *input_artifacts, *material_refs]:
@@ -102,7 +105,7 @@ class RuntimeTaskService:
             "dependency_fingerprint": None, "runtime_contract_version": prepared["runtime_contract_version"],
             "capability_grant_id": principal.grant_id, "input_artifacts": inputs,
             "budget": {"currency": currency, "max_amount": max_amount, "token_budget": token_budget},
-            "wall_deadline": (datetime.now(timezone.utc) + timedelta(seconds=deadline_seconds)).isoformat()}
+            "wall_deadline": (datetime.now(UTC) + timedelta(seconds=deadline_seconds)).isoformat()}
         return RuntimeDefinition(principal, spec, prepared, manifest, cut, granted["token"])
 
     def prepare(self, controller, world_ref, *, context_token_budget=20_000, lease_seconds=600,

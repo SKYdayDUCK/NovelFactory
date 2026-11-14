@@ -2,10 +2,11 @@
 import json
 
 import pytest
+from native_review_helpers import materialize_review_input, run_review_mcp
 from test_p6_rolling_production import answer, request
 from test_release import setup_batch
 
-from agent_runtime import native_codex, providers
+from agent_runtime import native_codex, native_review, providers
 from agent_runtime.protocol import ModelResponse
 from novel_factory.application import production_pipeline as boards
 from novel_factory.application import rolling_production as rolling
@@ -43,6 +44,11 @@ def stopped_reviews(kernel, monkeypatch, *, kinds=("literary",), mode="valid"):
         thread, turn = "synthetic-thread-" + packet.attempt_id, "synthetic-turn-" + packet.attempt_id
         record(packet.attempt_id, thread, None, "THREAD_STARTED")
         record(packet.attempt_id, thread, turn, "TURN_STARTED")
+        with kernel.db.uow(write=False) as repo:
+            job = repo.one("supervisor_jobs", {"task_id": identity["task_id"]})
+        refs = run_review_mcp(kernel, packet, thread, turn) if job and job["config"].get("required_review_mcp") else None
+        if refs is not None:
+            user = materialize_review_input(kernel, user, refs)
         if not target or mode != "incomplete":
             record(packet.attempt_id, thread, turn, "COMPLETED")
         envelope = {**identity, "status": "SUCCEEDED", "payload": answer(user),
@@ -51,7 +57,8 @@ def stopped_reviews(kernel, monkeypatch, *, kinds=("literary",), mode="valid"):
             provider_receipt=turn, input_tokens=25, output_tokens=40, cached_input_tokens=0,
             actual_amount=None, currency=None,
             raw_response={"codex_thread_id": thread, "codex_turn_id": "different" if target and mode == "wrong_turn" else turn,
-                          "model": profile.model, "auth_mode": "host-login", "billing": "SUBSCRIPTION_AMOUNT_UNKNOWN"})
+                          "model": profile.model, "auth_mode": "host-login", "billing": "SUBSCRIPTION_AMOUNT_UNKNOWN",
+                          **({"review_mcp_receipt_refs": refs} if refs is not None else {})})
 
     monkeypatch.setattr(runtime_providers, "invoke", invoke)
     monkeypatch.setattr(RuntimeModelAdapter, "generate", lambda adapter, packet: invoke(adapter.profile, packet,
@@ -59,6 +66,8 @@ def stopped_reviews(kernel, monkeypatch, *, kinds=("literary",), mode="valid"):
     forbidden = lambda *args, **kwargs: pytest.fail("Synthetic test reached a live transport boundary")
     monkeypatch.setattr(native_codex, "generate", forbidden)
     monkeypatch.setattr(native_codex, "start_host", forbidden)
+    monkeypatch.setattr(native_review, "generate", forbidden)
+    monkeypatch.setattr(native_review, "start_host", forbidden)
     monkeypatch.setattr(providers, "post", forbidden)
     monkeypatch.setattr(providers.Profile, "preflight", lambda _: None)
     profile = providers.Profile("codex-cli", "gpt-6.1-sol", "SYNTHETIC_NO_CREDENTIAL", 1024,

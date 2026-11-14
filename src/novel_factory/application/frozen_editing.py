@@ -1,4 +1,4 @@
-"""Explicitly authorized Pro reviews and editorial decisions on the frozen volume."""
+"""Authorized independent reviews and editorial decisions on the frozen volume."""
 
 import itertools
 import json
@@ -154,6 +154,7 @@ def start(kernel, owner, work, branch):
             "receipts": [],
             "active": None,
             "index": 0,
+            "book_rework_history": previous.get("book_rework_history", []) if previous else [],
         }
         return _save(bound, repo, owner, state)
 
@@ -206,6 +207,14 @@ def _assign(kernel, repo, gateway, owner, state, cursor):
             assignment["instructions"] = (
                 "通读原文、正式分维度审核与三阶段编辑决定。给出最终编辑批准 APPROVED 或退回 RETURNED，并提供理由。"
             )
+        elif phase == "BOOK_REWORK":
+            assignment["instructions"] = (
+                "整书双路盲评未通过。亲自通过MCP读取原稿及两份评分，逐条核对低分和否决项的原句及当前版本。"
+                "decision填写RETURNED，reason给出明确且有证据的退修方法、需保留部分及逐场修改范围，"
+                "证据不足的意见只说明不能证实，不能编造矛盾；不写正文。deferred_questions仅用于真实作者决策。"
+            )
+            assignment["book_review_refs"] = job["review_refs"]
+            gateway.output_contracts[(role, kind)] = ("AgentDecisionOutput", "agent")
         else:
             assignment["instructions"] = (
                 "独立审议本阶段，仅原文可维持时决定 APPROVED，需改写则 RETURNED。STRUCTURE 按原文顺序填写每场 scene（从1起）、功能和唯一的原句 quote，提供至少两种有代价的选项，仅选一种。余阶段上述两数组留空。逐项裁定所列问题，不重复前一阶段处置。"
@@ -234,7 +243,7 @@ def _assign(kernel, repo, gateway, owner, state, cursor):
         "input_artifacts": [*binding["ordered_draft_refs"], *extra],
         "knowledge_cut": cut,
         "knowledge_reread_reason": "known_error" if correction else None,
-        "material_refs": job["scope"],
+        "material_refs": [*job["scope"], *job.get("review_refs", [])],
         "max_amount": auth["reserve_amount"],
         "token_budget": auth["token_reservation"],
         "currency": repo.one("budgets", {"budget_id": auth["budget_id"]})["currency"],
@@ -247,9 +256,15 @@ def _assign(kernel, repo, gateway, owner, state, cursor):
         wr,
         role_id=role,
         task_kind=kind,
+        review_belief=role == "reviewer" and kind == "epistemic",
         assignment=json.dumps(assignment, ensure_ascii=False),
         **kwargs,
     )
+    if correction and "runtime_sha256" in correction:
+        new_input = kernel.artifact(repo, prepared.agent_input["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]
+        require(all(new_input[key] == correction[key] for key in
+                    ("runtime_sha256", "model_config_sha256", "output_contract")),
+                "TASK_REBIND_REQUIRED", "Editor format correction cannot change the role, model or contract")
     sup = RuntimeSupervisor(kernel, gateway)
     config, _ = sup.dispatch_config(
         repo,
@@ -267,7 +282,11 @@ def _assign(kernel, repo, gateway, owner, state, cursor):
         "session_ref": state["session"],
         "index": state["index"],
         "scope": job["scope"],
+        **({"review_refs": job["review_refs"]} if job.get("review_refs") else {}),
     }
+    frozen_input = kernel.artifact(repo, prepared.agent_input["input_ref"], wr["work_id"], kind="AGENT_INPUT")["payload"]
+    if gateway.adapters[frozen_input["adapter_id"]].configuration.get("auth_mode") == "host-login":
+        config["required_review_mcp"] = True
     sup.install_job(repo, prepared.task, config)
     state["active"] = prepared.task["task_id"]
 
@@ -311,6 +330,9 @@ def prepare_read(kernel, task, mark):
 def material(kernel, principal, task, ref, mark):
     with kernel.db.uow(write=False) as repo:
         _current_job(kernel, repo, task, mark)
+    if ref in mark.get("review_refs", []):
+        from .book_rework import material as book_material
+        return book_material(kernel, principal, task, ref, mark)
     require(ref in mark["scope"], "VIEW_DENIED", "Draft outside frozen editing scope")
     delivered = ReviewService(kernel).read_text(
         principal,
@@ -351,6 +373,14 @@ def _deliver(kernel, repo, owner, state, task, proof, output):
         require(previous, "READING_COVERAGE_INCOMPLETE", "Missing actual task delivery")
         covers.append(previous["coverage_ref"])
     phase = job.get("phase")
+    if phase == "BOOK_REWORK":
+        require(output["decision"] == "RETURNED" and output["reason"].strip() and not output["deferred_questions"],
+                "INVALID_EVIDENCE", "Book revision needs a concrete editor decision against the failed round")
+        kernel.tasks.accept_in_transaction(repo.conn, task["task_id"], task["generation"])
+        state.update(index=state["index"] + 1, active=None, status="EDITING_RETURNED")
+        from .returned_edition import begin
+        begin(kernel, repo, owner, state, _load(kernel, repo, wr["work_id"], wr["branch_id"]), task, proof, output)
+        return
     if not phase:
         report = review.submit_review(
             actor,
@@ -453,8 +483,10 @@ def _deliver(kernel, repo, owner, state, task, proof, output):
 def advance(kernel, gateway, controller, work, branch):
     with kernel.db.uow(write=False) as repo:
         state = _state(kernel, repo, work, branch)
-        if not state or state["status"] not in {"EDITING_ACTIVE", "EDITION_REVISING"}:
+        if not state or state["status"] not in {"EDITING_ACTIVE", "EDITION_REVISING", "EDITION_ACCEPTED"}:
             return None
+    if state["status"] == "EDITION_ACCEPTED":
+        return start(kernel, controller, work, branch)
     with kernel.objects.lock(), kernel.db.uow() as repo:
         repo.one("works", {"work_id": work}, lock="update")
         kernel.authorize(repo, controller, work, "ADMIN", branch)
@@ -479,6 +511,13 @@ def advance(kernel, gateway, controller, work, branch):
                         return None
                 elif state["active"]:
                     task = repo.one("tasks", {"task_id": state["active"]})
+                    if task["state"] == "FAILED":
+                        from .frozen_format_recovery import recover
+                        recover(bound, repo, gateway, owner, state, task)
+                        return _save(bound, repo, owner, state)
+                    if task["state"] in {"PAUSED", "STALE", "CANCELLED", "WAITING_REVIEW"}:
+                        state.update(status="EDITING_BLOCKED", reason="TASK_" + task["state"])
+                        return _save(bound, repo, owner, state)
                     if task["state"] != "RESULT_STORED":
                         return None
                     proof, output = _audited_design_result(bound, gateway.with_kernel(bound), repo, task, state["binding"]["world_ref"])
@@ -490,9 +529,28 @@ def advance(kernel, gateway, controller, work, branch):
                     _assign(bound, repo, gateway.with_kernel(bound), owner, state, cursor)
         except DomainError as error:
             if error.code == "CALL_RECONCILIATION_REQUIRED":
+                if task and task["state"] == "FAILED":
+                    state = _state(bound, repo, work, branch)
+                    state.update(status="EDITING_BLOCKED", reason=error.code)
+                    return _save(bound, repo, owner, state)
                 return None
             state = _state(bound, repo, work, branch)
-            if (cursor["profile"].get("production_mode") == "quality" and proof and state["active"] == task["task_id"]
+            index = str(state["index"])
+            repairs_used = sum(len(state.get(name, {}).get(index, [])) for name in
+                               ("format_history", "evidence_repairs", "technical_history"))
+            if repairs_used >= 6:
+                state.update(status="EDITING_BLOCKED", reason="TECHNICAL_REPAIR_BUDGET_EXHAUSTED")
+                return _save(bound, repo, owner, state)
+            from .review_recovery import ERRORS, recover_review
+            if task and error.code in ERRORS and state["active"] == task["task_id"]:
+                history = state.setdefault("evidence_repairs", {}).setdefault(str(state["index"]), [])
+                review_node = {"task_id": task["task_id"], "state": "ENROLLED", "evidence_repairs": history}
+                if recover_review(bound, repo, gateway, review_node, task, error) and review_node["state"] == "PENDING":
+                    state.update(active=None, technical_correction={"method": history[-1]["method"],
+                        "diagnostic": {"code": error.code}, "attempt_id": history[-1]["attempt_id"]})
+                else:
+                    state.update(status="EDITING_BLOCKED", reason=review_node.get("reason", error.code))
+            elif (cursor["profile"].get("production_mode") == "quality" and proof and state["active"] == task["task_id"]
                     and error.code in {"INVALID_EVIDENCE", "INVALID_ARGUMENT", "INVALID_MODEL_OUTPUT"}):
                 # Semantic validation of a *completed* structured return failed. The exact
                 # candidate and transport/accounting evidence must still pass native delivery.

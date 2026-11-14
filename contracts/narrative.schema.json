@@ -292,6 +292,7 @@
             "EXISTING_EVENT_PRESENTATION",
             "SURFACE_DETAIL",
             "SPEECH_OR_BELIEF",
+            "ATTRIBUTED_STATEMENT",
             "NEW_WORLD_EFFECT",
             "HISTORICAL_CONFLICT",
             "READER_DISCLOSURE_CHANGE",
@@ -383,6 +384,26 @@
       ],
       "additionalProperties": false,
       "allOf": [
+        {
+          "if": {
+            "properties": {
+              "classification": {
+                "const": "ATTRIBUTED_STATEMENT"
+              }
+            }
+          },
+          "then": {
+            "description": "Only an attributed saying, inference or displayed message in this exact draft; not a world truth, accepted speech occurrence, persistent belief, disclosure or effect. Requires independent current-draft epistemic evidence verified by the application, never a model-supplied permission.",
+            "properties": {
+              "event_ref": {"type": "null"},
+              "world_check": {"type": "null"},
+              "knowledge_use": {"type": "null"},
+              "proposed_command": {"type": "null"},
+              "disclosure_id": {"type": "null"},
+              "declared_delta_index": {"type": "null"}
+            }
+          }
+        },
         {
           "if": {
             "properties": {
@@ -1074,6 +1095,7 @@
                   "EXISTING_EVENT_PRESENTATION",
                   "SURFACE_DETAIL",
                   "SPEECH_OR_BELIEF",
+                  "ATTRIBUTED_STATEMENT",
                   "NEW_WORLD_EFFECT",
                   "HISTORICAL_CONFLICT",
                   "READER_DISCLOSURE_CHANGE",

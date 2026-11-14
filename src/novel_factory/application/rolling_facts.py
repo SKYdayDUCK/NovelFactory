@@ -40,6 +40,9 @@ def assignment():
         "按原文顺序引用，覆盖整场正文的每个非空白字符，包括标点。摘引须逐字复制对应正文，"
         "不可用省略号或摘要替代；可将连续同类描写合并为一段。有台词的段落区分说法与已证事实。"
         "只标识确有文本依据的非持久感官细节为 SURFACE_DETAIL。缺乏事实证据时标为 UNCERTAIN。"
+        "普通台词、人物推测或设备显示仅作为本稿有归属的说法、并不主张其内容为世界真值时，可用ATTRIBUTED_STATEMENT。"
+        "该类event_ref、world_check、knowledge_use、proposed_command、disclosure_id、declared_delta_index必须全部null，"
+        "须由本版独立认知审读与实际MCP查询证明；重要资源、持久状态、必需事件或披露变化不得这样降格。"
         "SPEECH_OR_BELIEF 需要完整 knowledge_use，区分有来源的知识、推测与外部发言。"
         "若所需来源缺失，保留未决事实并说明缺少的证据，勿伪造。declared_delta_index 每项只可映射一次。"
         "FACT_READING_SCOPE 的实体名称仅是固定版本登记映射，不证明状态已成立。"
@@ -80,6 +83,11 @@ def record_knowledge(kernel, repo, owner, board, node, task, evidence, candidate
         "status": "CLEAR" if clear else "BLOCKED",
     }
     ref = _artifact(kernel, repo, task["work_id"], owner, "EPISTEMIC_READING", receipt)
+    job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})
+    if clear and job["config"].get("required_review_mcp"):
+        from .planning import PlanningService
+        PlanningService(kernel)._select(repo, board["world_ref"],
+            "MCP_EPISTEMIC:" + draft_ref["artifact_revision_id"], ref)
     return ref, "KNOWLEDGE_CLEAR" if clear else "STOPPED"
 
 
@@ -191,7 +199,8 @@ def extract_assertions(body, value, key, *, declared_count=None):
     return assertions
 
 
-def audit(kernel, repo, owner, board, node, task, candidate):
+def audit(kernel, repo, owner, board, node, task, candidate, *, defer_accept=False):
+    require(type(defer_accept) is bool, "INVALID_ARGUMENT", "Invalid internal acceptance mode")
     source = board["nodes"][node["parents"][0]]
     draft_ref = source["output_ref"]
     knowledge_ref = None
@@ -229,7 +238,7 @@ def audit(kernel, repo, owner, board, node, task, candidate):
         **({"knowledge_ref": knowledge_ref} if knowledge_ref else {}),
         **result,
     }
-    if result["status"] == "CLEAR":
+    if result["status"] == "CLEAR" and not defer_accept:
         evidence["acceptance_ref"] = service.accept_narrative(
             owner,
             draft_ref,

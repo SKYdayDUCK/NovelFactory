@@ -19,9 +19,13 @@ SCENARIOS = ("novel", "idle", "normal", "review_return", "review_exhausted", "ra
              "truncated", "lost_notification", "duplicate_notification", "duplicate_result",
              "late_result", "lease_expired", "restart", "authorization_revoked", "budget_exhausted", "dependencies",
              "storage_disconnect", "worker_pool_failure", "context_mismatch", "book_review_return", "needs_input",
-             "review_questions")
+             "review_questions", "internal_question_reread", "internal_question_strategy",
+             "review_mcp_recovery", "review_mcp_exhausted", "verification_unknown")
+INTERNAL_SCENARIOS = {"internal_question_reread", "internal_question_strategy", "verification_unknown"}
+MCP_SCENARIOS = {"review_mcp_recovery", "review_mcp_exhausted"}
 TERMINAL = {"ACCEPTED", "FAILED", "CANCELLED"}
-PROGRAM_STAGES = {"marker", "reconcile", "freeze", "continuity", "assemble", "book_reconcile", "book_freeze"}
+PROGRAM_STAGES = {"marker", "reconcile", "freeze", "continuity", "assemble", "book_reconcile", "book_freeze",
+                  "query_verification"}
 ROLE_STAGES = {
     "plan": "world_designer", "volume_plan": "volume_director", "scene_plan": "volume_director",
     "roleplay": "character_actor", "adjudicate": "adjudication_advisor", "draft": "writer",
@@ -30,6 +34,7 @@ ROLE_STAGES = {
     "book_structure": "literary_editor", "book_seam": "literary_editor", "book_cross_volume": "literary_editor",
     "book_revision": "writer", "book_facts": "evidence_maintainer",
     "reader_1": "reviewer", "reader_2": "reviewer", "final_editor": "chief_editor",
+    "internal_verification": "reviewer",
 }
 
 
@@ -52,6 +57,8 @@ class Job:
     ready_at: float = 0
     reason: str | None = None
     approved: bool | None = None
+    source_task: str | None = None
+    query_receipt: dict | None = None
 
 
 class VirtualPool:
@@ -134,11 +141,13 @@ class Simulation:
         self.sequence += 1
         heapq.heappush(self.events, (self.now + delay, self.sequence, action))
 
-    def add(self, stage, book, chapter=0, revision=0, dependencies=(), state=None):
-        identity = uid(f"{book}:{chapter}:{stage}:{revision}")
+    def add(self, stage, book, chapter=0, revision=0, dependencies=(), state=None, *, tag=None, source_task=None):
+        key = f"{book}:{chapter}:{stage}:{revision}"
+        identity = uid(key if tag is None else key + ":" + tag)
         job = Job(identity, stage, book, chapter, revision, list(dependencies),
                   state=state or ("BLOCKED" if dependencies else "READY"), ready_at=self.now)
         self.jobs[identity] = job
+        job.source_task = source_task
         return job
 
     def _build(self):
@@ -228,6 +237,12 @@ class Simulation:
     def _outcome(self, job):
         fault_stage = job.stage == "draft"
         fault = self.scenario
+        if fault in INTERNAL_SCENARIOS and job.stage == "review" and "internal_question" not in self.used_faults:
+            self.used_faults.add("internal_question")
+            self.emit("FAULT_INJECTED", fault="internal_question", task=job.id)
+            return "review_questions"
+        if fault == "verification_unknown" and job.stage == "internal_verification":
+            return "timeout"
         if fault == "review_questions" and job.stage == "review" and fault not in self.used_faults:
             self.used_faults.add(fault)
             self.emit("FAULT_INJECTED", fault=fault, task=job.id)
@@ -251,7 +266,7 @@ class Simulation:
             {"assignment": "Simulate the assigned stage", "context": identity,
              "dry_run_subject_ref": self._subject(job),
              "knowledge_cut": {"plane": "BELIEF" if role == "character_actor" else "WORLD"}}, identity)
-        rate = 1 if job.stage == "epistemic" else self.pass_rate
+        rate = 1 if job.stage in {"epistemic", "internal_verification"} else self.pass_rate
         if job.stage == "reader_1" and self.scenario == "book_review_return" and "book_review_return" not in self.used_faults:
             rate = 0
             self.used_faults.add("book_review_return")
@@ -279,7 +294,7 @@ class Simulation:
         self.emit("HARNESS_REQUEST", task=job.id, generation=generation, attempt=attempt,
                   dry_run=request.dry_run, adapter=profile.kind, model=profile.model, outcome=outcome,
                   stage=job.stage, source_ref=self._subject(job),
-                  logical_agent_id=uid(f"agent:{job.book}:{job.stage if job.stage in {'reader_1','reader_2'} else role}"))
+                  logical_agent_id=uid(f"agent:{job.book}:{job.stage if job.stage in {'reader_1','reader_2','internal_verification'} else role}"))
         # The normal production adapter forwards dry_run to the normal provider
         # dispatcher. Only its final execution backend is substituted.
         adapter = RuntimeModelAdapter(profile, MemoryJournal(self, job.id, generation, attempt))
@@ -287,10 +302,49 @@ class Simulation:
         response = adapter.generate(request)
         if not response.dry_run:
             raise AssertionError("Dry-run Harness returned a live response")
+        if job.stage in {"review", "internal_verification"} and self.scenario in INTERNAL_SCENARIOS | MCP_SCENARIOS:
+            missing = (job.stage == "review" and self.scenario in MCP_SCENARIOS
+                       and (self.scenario == "review_mcp_exhausted" or job.tries < 3))
+            if not missing:
+                receipt = {"transport": "DRY_RUN_MEMORY", "task": job.id, "generation": generation,
+                    "request_sha256": digest, "source_ref": self._subject(job),
+                    "tools": ["nf_context_get", "nf_query_batch", "nf_review_material"]}
+                receipt["sha256"] = self._receipt_hash(receipt)
+                response.raw_response["simulated_review_mcp_receipt"] = receipt
+                self.emit("SIMULATED_REVIEW_MCP_READS", task=job.id, generation=generation,
+                          source_ref=self._subject(job), receipt_sha256=receipt["sha256"])
         return response
+
+    @staticmethod
+    def _receipt_hash(receipt):
+        return sha256(json.dumps({key: value for key, value in receipt.items() if key != "sha256"},
+                                 sort_keys=True).encode()).hexdigest()
+
+    def _valid_review_receipt(self, job, generation, call, response):
+        receipt = response.raw_response.get("simulated_review_mcp_receipt")
+        return (isinstance(receipt, dict) and receipt.get("transport") == "DRY_RUN_MEMORY"
+                and receipt.get("task") == job.id and receipt.get("generation") == generation
+                and receipt.get("request_sha256") == call["request_sha256"]
+                and receipt.get("source_ref") == self._subject(job)
+                and receipt.get("tools") == ["nf_context_get", "nf_query_batch", "nf_review_material"]
+                and receipt.get("sha256") == self._receipt_hash(receipt))
 
     def _dispatch(self, job):
         if job.stage in PROGRAM_STAGES:
+            if job.stage == "query_verification":
+                source = self.jobs[job.source_task]
+                if (source.state != "PAUSED" or source.reason != "INTERNAL_QUESTION_PENDING"
+                        or self._subject(source) != self._subject(job)):
+                    job.state, job.reason = "FAILED", "VERIFICATION_SOURCE_MISMATCH"
+                    self.problems.append(job.reason)
+                    return
+                receipt = {"transport": "DRY_RUN_MEMORY", "source_task": source.id,
+                           "source_ref": self._subject(source), "query_task": job.id,
+                           "result": "CONTRADICTORY" if self.scenario == "internal_question_strategy" else "CONSISTENT"}
+                receipt["sha256"] = self._receipt_hash(receipt)
+                job.query_receipt = receipt
+                self.emit("SIMULATED_QUERY_VERIFICATION", task=job.id, source_task=source.id,
+                          source_ref=receipt["source_ref"], result=receipt["result"], receipt_sha256=receipt["sha256"])
             if job.stage == "freeze":
                 decision = self.jobs[job.dependencies[0]]
                 reviews = [self.jobs[key] for key in decision.dependencies if self.jobs[key].stage == "review"]
@@ -403,13 +457,37 @@ class Simulation:
             call["unresolved_questions"] = list(envelope["unresolved_questions"])
             self.emit("REVIEW_REQUIRED", task=job.id, generation=generation, attempt=attempt,
                       unresolved_questions=list(envelope["unresolved_questions"]))
+            if self.scenario in INTERNAL_SCENARIOS:
+                job.reason = "INTERNAL_QUESTION_PENDING"
+                query = self.add("query_verification", job.book, job.chapter, job.revision,
+                    dependencies=(uid(f"{job.book}:{job.chapter}:draft:{job.revision}"),), source_task=job.id)
+                verifier = self.add("internal_verification", job.book, job.chapter, job.revision,
+                    dependencies=(query.id,), source_task=job.id)
+                self.emit("INTERNAL_QUESTION_ENROLLED", task=job.id, query_task=query.id, verification_task=verifier.id)
             self._wake()
+            return
+        if (job.stage in {"review", "internal_verification"} and self.scenario in INTERNAL_SCENARIOS | MCP_SCENARIOS
+                and not self._valid_review_receipt(job, generation, call, response)):
+            job.approved = None
+            self.emit("REVIEW_MCP_EVIDENCE_MISSING", task=job.id, generation=generation, attempt=attempt)
+            if job.tries < 3:
+                self._retry(job, "REVIEW_QUERY_REQUIRED")
+                self.emit("REVIEW_MCP_REREAD_ENROLLED", task=job.id, reread=job.tries)
+            else:
+                job.state, job.reason = "PAUSED", "REVIEW_QUERY_RETRIES_EXHAUSTED"
+                self.emit("REVIEW_MCP_HOLD", task=job.id, attempt=attempt)
+            return
+        if job.stage == "internal_verification" and not self._valid_internal_query(job):
+            job.state, job.reason = "PAUSED", "VERIFICATION_EVIDENCE_REQUIRED"
+            self.problems.append("INTERNAL_RESOLUTION_WITHOUT_QUERY_PROOF")
             return
         role = ROLE_STAGES[job.stage]
         job.approved = (not blocking_review_issues(envelope["payload"]["issues"]) if role == "reviewer" else
                         envelope["payload"].get("decision") == "DRY_RUN_APPROVE" if role == "chief_editor" else None)
         self._accept(job)
-        if job.stage == "review" and not job.approved:
+        if job.stage == "internal_verification":
+            self._continue_internal_question(job)
+        elif job.stage == "review" and not job.approved:
             self._return_chapter(job)
         elif job.stage == "strategy":
             decision = self._chapter_candidate(job.book, job.chapter, job.revision, job.id)
@@ -418,6 +496,42 @@ class Simulation:
             self._book_review(job)
         if self.scenario == "duplicate_result":
             self._accept(job)
+
+    def _valid_internal_query(self, verifier):
+        source = self.jobs[verifier.source_task]
+        query = self.jobs[verifier.dependencies[0]]
+        receipt = query.query_receipt
+        return (query.stage == "query_verification" and query.state == "ACCEPTED" and isinstance(receipt, dict)
+                and source.state == "PAUSED" and source.reason == "INTERNAL_QUESTION_PENDING"
+                and receipt.get("transport") == "DRY_RUN_MEMORY" and receipt.get("query_task") == query.id
+                and receipt.get("sha256") == self._receipt_hash(receipt)
+                and receipt.get("source_task") == source.id and receipt.get("source_ref") == self._subject(source)
+                and self._subject(verifier) == self._subject(source)
+                and receipt.get("result") in {"CONSISTENT", "CONTRADICTORY"})
+
+    def _continue_internal_question(self, verifier):
+        source = self.jobs[verifier.source_task]
+        query = self.jobs[verifier.dependencies[0]]
+        receipt = query.query_receipt
+        source.state, source.reason = "CANCELLED", "INTERNAL_QUESTION_RESOLVED"
+        freeze = self.jobs[uid(f"{source.book}:{source.chapter}:freeze:0")]
+        old_decision = self.jobs[freeze.dependencies[0]]
+        old_decision.state, old_decision.reason = "CANCELLED", "SUPERSEDED_INTERNAL_QUESTION"
+        resolution = "CONFIRMED_CONFLICT" if receipt["result"] == "CONTRADICTORY" else "NO_CONFLICT"
+        self.emit("INTERNAL_QUESTION_RESOLVED", task=source.id, verification_task=verifier.id,
+                  resolution=resolution, source_ref=self._subject(source), world_effects_applied=0)
+        if resolution == "CONFIRMED_CONFLICT":
+            strategy = self.add("strategy", source.book, source.chapter, source.revision + 1,
+                                dependencies=(verifier.id,))
+            freeze.dependencies = [strategy.id]
+            self.emit("STRATEGY_REASSESSMENT_ENROLLED", task=strategy.id, source_task=source.id)
+        else:
+            review = self.add("review", source.book, source.chapter, source.revision,
+                dependencies=(verifier.id, *source.dependencies), tag="internal-reread", source_task=source.id)
+            decision = self.add("chapter_decision", source.book, source.chapter, source.revision,
+                dependencies=(review.id, *[key for key in old_decision.dependencies if key != source.id]), tag="internal-reread")
+            freeze.dependencies = [decision.id]
+            self.emit("SAME_DRAFT_REREAD_ENROLLED", task=review.id, source_task=source.id, source_ref=self._subject(source))
 
     def _return_chapter(self, job):
         freeze = self.jobs[uid(f"{job.book}:{job.chapter}:freeze:0")]
@@ -593,6 +707,10 @@ class Simulation:
                 self.problems.append("LATE_RESULT_FENCE_NOT_EXERCISED")
             if self.scenario == "restart" and "restart" not in self.used_faults:
                 self.problems.append("RESTART_NOT_EXERCISED")
+            if self.scenario in INTERNAL_SCENARIOS and "internal_question" not in self.used_faults:
+                self.problems.append("INTERNAL_QUERY_PATH_NOT_EXERCISED")
+            if self.scenario in MCP_SCENARIOS and not any(row["event"] == "REVIEW_MCP_EVIDENCE_MISSING" for row in self.trace):
+                self.problems.append("MCP_RECOVERY_PATH_NOT_EXERCISED")
 
     def report(self):
         complete = (all(job.state in TERMINAL for job in self.jobs.values())

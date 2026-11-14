@@ -14,6 +14,11 @@ from novel_factory.infrastructure.database import Database
 from novel_factory.infrastructure.objects import ObjectStore
 
 
+class KernelEnvironment(dict):
+    def __repr__(self):
+        return "KernelEnvironment(<isolated PostgreSQL credentials redacted>)"
+
+
 @pytest.fixture(autouse=True)
 def isolate_model_authorization(monkeypatch):
     # Local deployment runners may carry production approval. A test that
@@ -33,7 +38,7 @@ def kernel_env(tmp_path_factory):
     root=Path(__file__).resolve().parents[1]
     subprocess.run([sys.executable,"-m","alembic","upgrade","head"],cwd=root,env={**os.environ,"NF_DATABASE_URL":target},check=True)
     db=Database(target,pool_size=8);store=ObjectStore(tmp_path_factory.mktemp("kernel_objects"));kernel=Kernel(db,store)
-    yield {"db":db,"store":store,"kernel":kernel,"url":target,"admin":admin}
+    yield KernelEnvironment(db=db,store=store,kernel=kernel,url=target,admin=admin)
     db.close()
     with admin.connect() as c:c.execute(text(f'DROP DATABASE "{name}" WITH (FORCE)'))
     admin.dispose()

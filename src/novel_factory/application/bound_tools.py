@@ -4,9 +4,9 @@ from time import monotonic
 from uuid import uuid4
 
 from novel_factory.domain.errors import DomainError
+
 from .audit_log import LogService
 from .tool_catalog import _TOOLS, _VALIDATORS
-
 
 _METHODS = {
     "nf_harness_metrics": "creative_metrics",
@@ -21,6 +21,7 @@ _METHODS = {
     "nf_task_get": "task_get",
     "nf_context_get": "context_get",
     "nf_query_batch": "query_batch",
+    "nf_review_material": "review_material",
     "nf_artifact_put": "artifact_put",
 }
 
@@ -64,7 +65,7 @@ def invoke_bound_tool(runtime, name, arguments, *, ceiling=None, request_id=None
             runtime, name if name in _TOOLS else "UNREGISTERED",
             uuid4() if request_id is None else request_id, transport=transport,
         )
-    except Exception:
+    except Exception:  # noqa: BLE001 - audit failures must not disclose backend credentials or query data.
         raise DomainError("SERVICE_UNAVAILABLE", "Tool audit is temporarily unavailable") from None
     error = None
     evidence = None
@@ -79,13 +80,13 @@ def invoke_bound_tool(runtime, name, arguments, *, ceiling=None, request_id=None
     except DomainError as exc:
         error = exc.code
         raise
-    except Exception:
+    except Exception:  # noqa: BLE001 - public tools expose stable errors, never private backend exceptions.
         error = "SERVICE_UNAVAILABLE"
         raise DomainError(error, "Tool is temporarily unavailable") from None
     finally:
         try:
             LogService.finish_tool(runtime, invocation, scope, error, round((monotonic() - started) * 1000, 3),
                                    evidence, transport=transport)
-        except Exception:
+        except Exception:  # noqa: BLE001 - retain the committed business receipt when diagnostic storage fails.
             # A missing diagnostic cannot invalidate the authoritative business receipt.
             logging.getLogger(__name__).warning("Bound tool completion audit unavailable")

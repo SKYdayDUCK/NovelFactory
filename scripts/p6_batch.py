@@ -249,7 +249,7 @@ def writing_step(kernel, gateway, project, allowance):
             and result.get("reason") in {"STRATEGY_REASSESSMENT_REQUIRED", "CALL_RECONCILIATION_REQUIRED"}):
         return {**result, "status": "PAUSED"}
     # Re-read authoritative state even after a crash between a checkpoint and editor enrollment.
-    if result["status"] in {"IDLE", "ROLLING_HANDOFF", "EDITORIAL_APPROVED"}:
+    if result["status"] in {"IDLE", "ROLLING_HANDOFF", "EDITORIAL_APPROVED", "EDITION_ACCEPTED"}:
         with kernel.db.uow(write=False) as repo:
             kernel.authorize(repo, owner, work, "ADMIN", branch)
             selected = repo.one("selections", {"work_id": work, "selection_kind": "P6_ROLLING:" + branch})
@@ -259,10 +259,8 @@ def writing_step(kernel, gateway, project, allowance):
             if cursor["state"] == "FROZEN" and (complete_text or cursor["reason"] == "RELEASE_INCOMPLETE"):
                 edit = frozen_editing.start(kernel, owner, work, branch)
                 if edit["status"] == "EDITORIAL_APPROVED" and complete_text:
-                    from novel_factory.application.rolling_publication import queue_final_readers
-                    queued = queue_final_readers(kernel, owner, work, branch)
-                    return {"status": "AWAITING_INDEPENDENT_REVIEW", "frozen_chapters": cursor["frozen_chapters"],
-                            **queued}
+                    from novel_factory.application.final_book_automation import advance
+                    return advance(kernel, gateway, owner, work, branch)
                 if edit["status"] in PAUSES:
                     return edit
             if result["status"] == "IDLE" and cursor["state"] == "WAITING_ACCEPTANCE":

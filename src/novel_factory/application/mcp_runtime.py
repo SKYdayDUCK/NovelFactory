@@ -1,7 +1,11 @@
 """Application boundary for a server-provisioned stdio binding."""
 from dataclasses import dataclass
 
-from novel_factory.application.dynamic_runtime import assignment_from_inputs, matching_inputs, refresh
+from novel_factory.application.dynamic_runtime import (
+    assignment_from_inputs,
+    matching_inputs,
+    refresh,
+)
 from novel_factory.application.kernel import require
 from novel_factory.application.planning import validate_task_plan_binding
 from novel_factory.application.queries import WorldQueryService
@@ -106,6 +110,12 @@ class McpRuntime:
                    "artifact_put": "ARTIFACT_WRITE"}
         names = ["nf_" + name for name, cap in ceiling.items()
                  if name in requested and cap in caps]
+        job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})
+        if job and job["config"].get("review_mcp_blind"):
+            names = [name for name in names if name == "nf_context_get"]
+        if ("READ" in caps and "evidence_read" in requested
+                and grant["role_id"] in {"reviewer", "evidence_maintainer", "chief_editor", "literary_editor"}):
+            names.append("nf_review_material")
         if creative_enabled and "ARTIFACT_WRITE" in caps:
             role = grant["role_id"]
             if role in {"reviewer", "literary_editor", "chief_editor", "writer"} and "evidence_read" in requested:
@@ -121,15 +131,15 @@ class McpRuntime:
             if (creative_enabled and grant["role_id"] == "volume_director"
                     and "plan_propose" in requested and context["read_cut"]["knowledge_cut"]["plane"] == "PLAN"):
                 names.append("nf_harness_plan_propose")
-            if (grant["role_id"], task["task_kind"]) == ("volume_director", "volume_review"):
-                if "volume-director-review" in skills and "plan_propose" in requested:
-                    names.append("nf_change_point_request")
-            if (grant["role_id"], task["task_kind"]) == ("volume_director", "replan"):
-                if "roll-window" in skills and "plan_propose" in requested:
-                    names.append("nf_rolling_window_submit")
-            if (grant["role_id"], task["task_kind"]) == ("chief_editor", "editorial_decision"):
-                if "review-change-point" in skills and "review_submit" in requested:
-                    names.append("nf_change_point_review")
+            if ((grant["role_id"], task["task_kind"]) == ("volume_director", "volume_review")
+                    and "volume-director-review" in skills and "plan_propose" in requested):
+                names.append("nf_change_point_request")
+            if ((grant["role_id"], task["task_kind"]) == ("volume_director", "replan")
+                    and "roll-window" in skills and "plan_propose" in requested):
+                names.append("nf_rolling_window_submit")
+            if ((grant["role_id"], task["task_kind"]) == ("chief_editor", "editorial_decision")
+                    and "review-change-point" in skills and "review_submit" in requested):
+                names.append("nf_change_point_review")
         return names
 
     def _role_proof(self):
@@ -337,32 +347,114 @@ class McpRuntime:
     def context_get(self):
         proof = self._role_proof()
         with self.kernel.db.uow(write=False) as repo:
-            _, _, ctx = self._role_task(repo, "nf_context_get", proof)
+            task, _, ctx = self._role_task(repo, "nf_context_get", proof)
+            job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})
+            if job and job["config"].get("review_mcp_blind"):
+                from .book_review import guard_job
+                guard_job(self.kernel, repo, task, job["config"])
+                return {"task_id": task["task_id"], "generation": task["generation"],
+                        "context_bundle_id": task["context_bundle_id"], "world_ref": ctx["payload"]["world_ref"],
+                        "material_refs": [job["config"]["book_review_packet"]], "blind_review": True}
             return ctx["payload"]
+
+    def review_material(self, artifact_ref):
+        """Use the same fixed material scope as model delivery; listing a UUID grants nothing."""
+        import json
+
+        from ..domain.reconciliation import span_for
+        from .narrative import NarrativeService
+        from .production_pipeline import production_material_reader
+        from .rolling_facts import passage_index
+
+        proof = self._role_proof()
+        with self.kernel.db.uow(write=False) as repo:
+            task, _, _ = self._role_task(repo, "nf_review_material", proof)
+            require(any(artifact_ref in data["material_refs"]
+                        for data in matching_inputs(repo, task, repo.one("task_inputs", {
+                            "task_id": task["task_id"], "generation": task["generation"]})["spec"])),
+                    "VIEW_DENIED", "Material is outside the fixed review inputs")
+            identity = {"task_id": task["task_id"], "generation": task["generation"],
+                        "context_bundle_id": task["context_bundle_id"]}
+            job = repo.one("supervisor_jobs", {"task_id": task["task_id"]})
+            config = job["config"] if job else {}
+            if config.get("review_mcp_blind"):
+                from .book_review import guard_job
+                guard_job(self.kernel, repo, task, config)
+                require(artifact_ref == config["book_review_packet"], "VIEW_DENIED", "Unbound blind reading packet")
+                return self.kernel.artifact(repo, artifact_ref, task["work_id"], kind="BOOK_READER_PACKET")["payload"]
+        if "frozen_editing" in config:
+            from .frozen_editing import material
+            raw = material(self.kernel, self.principal, task, artifact_ref, config["frozen_editing"])
+        else:
+            raw = production_material_reader(self.kernel)(self.principal, artifact_ref=artifact_ref, **identity)
+        if raw is None:
+            raw = NarrativeService(self.kernel).read_agent_material(self.principal, artifact_ref=artifact_ref, **identity)
+        require(isinstance(raw, bytes), "VIEW_DENIED", "This material has no authorized review reader")
+        result = json.loads(raw)
+        if isinstance(result, dict) and isinstance(result.get("text"), str) and "text_ref" in result:
+            extracting = (task["role_id"], task["task_kind"]) == ("evidence_maintainer", "assertion_extract")
+            result["passages"] = [{"id": p["id"], "text": p["text"],
+                                   **({} if extracting else {"span": span_for(result["text"], p["start"], p["end"])})}
+                                  for p in passage_index(result["text"])]
+        with self.kernel.db.uow(write=False) as repo:
+            self._role_task(repo, "nf_review_material", proof)
+        return result
 
     def query_batch(self, lookups):
         proof = self._role_proof()
+        requests = {}
         with self.kernel.db.uow(write=False) as repo:
             task, grant, ctx = self._role_task(repo, "nf_query_batch", proof)
             cut = ctx["read_cut"]
-            check_profile(grant, cut["knowledge_cut"]["plane"], operation="STATE")
+            plan = cut["knowledge_cut"]["plane"] == "PLAN"
+            check_profile(grant, cut["knowledge_cut"]["plane"], operation="TIMELINE" if plan else "STATE")
             compiled = self.kernel.artifact(repo, ctx["artifact_ref"], task["work_id"], kind="COMPILED_CONTEXT")
             manifest = self.kernel.artifact(repo, compiled["payload"]["input_manifest_ref"],
                                             task["work_id"], kind="INPUT_MANIFEST")["payload"]
             require(all(item["subject_id"] in manifest["subject_ids"] and item["predicate"] in manifest["predicates"]
                         for item in lookups), "VIEW_DENIED", "Requested material outside the task")
-            request = {"schema_version": "2.1", "task_id": task["task_id"], "generation": task["generation"],
-                       "knowledge_cut": cut["knowledge_cut"],
-                       "read_contract": {"revision": {"mode": "FIXED", "world_ref": cut["world_ref"]},
-                                         "process_policy": "ALLOW_PARTIAL", "index_policy": "AUTHORITATIVE", "max_wait_ms": 0},
-                       "items": [{"item_id": str(index), "subject_time": {"kind": "POINT", "at": ctx["payload"]["story_time"]},
-                                  "query": {"kind": "STATE", "subject_ids": [item["subject_id"]],
-                                            "predicates": [item["predicate"]]}, "page_size": 1}
-                                 for index, item in enumerate(lookups)]}
-        response = self.queries.batch(self.principal, request)
+            for index, item in enumerate(lookups):
+                knowledge = cut["knowledge_cut"]
+                selected_plane = item.get("plane", knowledge["plane"])
+                if selected_plane != knowledge["plane"]:
+                    require(knowledge["plane"] == "WORLD" and selected_plane == "BELIEF"
+                            and task["role_id"] == "reviewer" and task["task_kind"] in {"epistemic", "verification"},
+                            "VIEW_DENIED", "This task cannot switch knowledge planes")
+                if selected_plane == "BELIEF":
+                    actor = item.get("actor_id", knowledge.get("actor_id"))
+                    known_at = item.get("known_at", knowledge.get("known_at"))
+                    require(known_at is not None, "VIEW_DENIED", "A fixed knowledge time is required")
+                    if knowledge["plane"] == "BELIEF":
+                        require(actor == knowledge["actor_id"] and point_key(known_at) <= point_key(knowledge["known_at"]),
+                                "VIEW_DENIED", "Cannot extend the bound actor's knowledge")
+                    else:
+                        require(actor in manifest["subject_ids"], "VIEW_DENIED",
+                                "The selected belief actor must be in the fixed reviewer scope")
+                    knowledge = {"plane": "BELIEF", "actor_id": actor, "known_at": known_at}
+                    check_profile(grant, "BELIEF", operation="STATE")
+                else:
+                    require("actor_id" not in item and "known_at" not in item, "INVALID_ARGUMENT",
+                            "Actor knowledge selectors require BELIEF")
+                at = item.get("at", ctx["payload"]["story_time"])
+                require(point_key(at) <= point_key(ctx["payload"]["story_time"]), "VIEW_DENIED",
+                        "MCP review cannot query beyond its bound story time")
+                key = fingerprint(knowledge)
+                request = requests.setdefault(key, {"schema_version": "2.1", "task_id": task["task_id"],
+                    "generation": task["generation"], "knowledge_cut": knowledge,
+                    "read_contract": {"revision": {"mode": "FIXED", "world_ref": cut["world_ref"]},
+                                      "process_policy": "ALLOW_PARTIAL", "index_policy": "AUTHORITATIVE", "max_wait_ms": 0},
+                    "items": []})
+                request["items"].append({"item_id": str(index), "subject_time": {"kind": "POINT", "at": at},
+                    "query": ({"kind": "TIMELINE", "subject_ids": [item["subject_id"]], "entry_kinds": ["PLAN"],
+                               "time_axis": "TARGET", "include_inactive": False} if plan else
+                              {"kind": "STATE", "subject_ids": [item["subject_id"]], "predicates": [item["predicate"]]}),
+                    "page_size": 1})
+        responses = [self.queries.batch(self.principal, request) for request in requests.values()]
         with self.kernel.db.uow(write=False) as repo:
             self._role_task(repo, "nf_query_batch", proof)
-        return {"items": response["items"], "all_items_succeeded": response["all_items_succeeded"]}
+        return {"items": sorted([item for response in responses for item in response["items"]],
+                                key=lambda item: int(item["item_id"])),
+                "all_items_succeeded": all(response["all_items_succeeded"] for response in responses)}
 
     def artifact_put(self, content, idempotency_key):
         proof = self._role_proof()

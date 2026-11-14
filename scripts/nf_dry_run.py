@@ -16,7 +16,9 @@ def main(argv=None):
         "rate_limit", "timeout", "unknown_reconciled", "crash_before_send", "crash_after_send", "invalid_json",
         "truncated", "lost_notification", "duplicate_notification", "duplicate_result", "late_result", "lease_expired",
         "restart", "authorization_revoked", "budget_exhausted", "dependencies", "storage_disconnect",
-        "worker_pool_failure", "context_mismatch", "book_review_return", "needs_input", "review_questions"), default="novel")
+        "worker_pool_failure", "context_mismatch", "book_review_return", "needs_input", "review_questions",
+        "internal_question_reread", "internal_question_strategy", "review_mcp_recovery", "review_mcp_exhausted",
+        "verification_unknown"), default="novel")
     parser.add_argument("--seed", type=int, default=7)
     parser.add_argument("--runs", type=int, default=1, help="Repeat with consecutive seeds")
     parser.add_argument("--books", type=int, default=1)

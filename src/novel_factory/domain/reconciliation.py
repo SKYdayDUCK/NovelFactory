@@ -84,14 +84,18 @@ def knowledge_check(revision, use):
     return "PASS"
 
 
-def evaluate(revision, scene, draft, assertions, text, resolved_assertions=()):
+def evaluate(revision, scene, draft, assertions, text, resolved_assertions=(), *, attributed_assertions=()):
     """Return deterministic checks, blockers, and links; never world mutations.
 
     Resolution identities are supplied only after the application has matched
     the accepted event's command closure to the exact proposed command.
+    Attributed identities are supplied only after the application has verified
+    independent current-draft epistemic/query evidence. They attest to an
+    attributed passage, never its proposition's truth or any world effect.
     """
     checks, blockers, events = [], [], {}
     resolved = set(resolved_assertions)
+    attributed = set(attributed_assertions)
     seen, declared = set(), set()
 
     def record(key, category, status, message, assertion=None, evidence=None):
@@ -110,6 +114,16 @@ def evaluate(revision, scene, draft, assertions, text, resolved_assertions=()):
         seen.add(aid)
         verify_span(text, assertion["span"])
         record(aid + ":span", "TEXT_SPAN", "PASS", "Exact text span hash verified", aid)
+        if category == "ATTRIBUTED_STATEMENT":
+            effect_free = all(assertion[key] is None for key in (
+                "event_ref", "world_check", "knowledge_use", "proposed_command", "disclosure_id", "declared_delta_index"))
+            if not effect_free:
+                record(aid + ":attribution", "IMPORTANT_EFFECT_COVERAGE", "FAIL",
+                       "An attributed passage cannot stand in for world effects, belief, disclosure or required event coverage", aid)
+            else:
+                record(aid + ":attribution", "KNOWLEDGE", "PASS" if aid in attributed else "UNRESOLVED",
+                       "Attribution requires independently verified current-draft epistemic and query evidence; it does not prove the statement true", aid)
+            continue
         if assertion["declared_delta_index"] is not None:
             index = assertion["declared_delta_index"]
             if index >= len(draft["declared_important_deltas"]) or index in declared:
@@ -135,9 +149,14 @@ def evaluate(revision, scene, draft, assertions, text, resolved_assertions=()):
                 status = "FAIL"
             record(aid + ":knowledge", "KNOWLEDGE", status,
                    "Character knowledge must be acquired legally before this scene's exclusive end", aid)
-        if category in {"HISTORICAL_CONFLICT", "UNCERTAIN"}:
-            record(aid + ":classification", "STATE", "FAIL" if category == "HISTORICAL_CONFLICT" else "UNRESOLVED",
-                   "Historical conflict or uncertain important text requires revision or review", aid)
+        if category == "HISTORICAL_CONFLICT":
+            check = assertion["world_check"]
+            confirmed = check is not None and state_check(revision, check) == "FAIL"
+            record(aid + ":classification", "STATE", "FAIL" if confirmed else "UNRESOLVED",
+                   "Historical conflict needs contradictory fixed-cut state evidence; missing evidence requires internal verification", aid)
+        elif category == "UNCERTAIN":
+            record(aid + ":classification", "STATE", "UNRESOLVED",
+                   "Unverified important text requires internal evidence collection, not an assumed factual contradiction", aid)
         if assertion["proposed_command"] is not None and aid not in resolved:
             record(aid + ":new", "IMPORTANT_EFFECT_COVERAGE", "FAIL", "New world effect remains pending formal acceptance", aid)
         if category == "SPEECH_OR_BELIEF":

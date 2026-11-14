@@ -2,6 +2,7 @@
 from jsonschema import Draft202012Validator, FormatChecker
 
 from novel_factory.domain.creative_review import RUBRICS
+
 from .prompt_schema import inline_schema as _inline_schema
 
 
@@ -10,8 +11,12 @@ def object_schema(*, optional=(), **properties):
             "additionalProperties": False}
 
 
-_LOOKUP = object_schema(subject_id={"type": "string", "format": "uuid"},
-                        predicate={"type": "string", "minLength": 1, "maxLength": 128})
+_LOOKUP = object_schema(optional=("at", "plane", "actor_id", "known_at"),
+                        subject_id={"type": "string", "format": "uuid"},
+                        predicate={"type": "string", "minLength": 1, "maxLength": 128},
+                        at=_inline_schema("StoryPoint", "2.0"), plane={"enum": ["WORLD", "BELIEF"]},
+                        actor_id={"type": "string", "format": "uuid"},
+                        known_at=_inline_schema("StoryPoint", "2.0"))
 _UUID = {"type": "string", "format": "uuid"}
 _ARTIFACT = object_schema(artifact_id=_UUID, artifact_revision_id=_UUID,
                           sha256={"type": "string", "pattern": "^[a-f0-9]{64}$"})
@@ -158,8 +163,12 @@ _TOOLS = {
     "nf_resume_project": ("Recover eligible work and wake satisfied waits in the configured branch.", object_schema()),
     "nf_task_get": ("Read the bound task's current execution identity.", object_schema()),
     "nf_context_get": ("Read the bound task's authorized context.", object_schema()),
-    "nf_query_batch": ("Read selected state values at this task's bound time and knowledge cut.",
+    "nf_query_batch": (("Read fixed-version authorized values. Optional at selects an authorized story time. "
+                       "A WORLD reviewer may request BELIEF only for an authorized actor with known_at; "
+                       "each knowledge cut is checked and executed separately, without changing WorldRef."),
                        object_schema(lookups={"type": "array", "minItems": 1, "maxItems": 32, "items": _LOOKUP})),
+    "nf_review_material": ("Read one exact assigned manuscript or report. Manuscript passages include exact Unicode spans for review citations.",
+                           object_schema(artifact_ref=_ARTIFACT)),
     "nf_artifact_put": ("Store a task candidate with a stable idempotency key.",
                         object_schema(content={"type": "string", "minLength": 1, "maxLength": 32_768},
                                       idempotency_key={"type": "string", "minLength": 1, "maxLength": 96})),

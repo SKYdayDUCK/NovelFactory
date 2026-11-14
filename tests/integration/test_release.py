@@ -124,12 +124,13 @@ def writer_for(k, f, index, parents=(), *, extra_inputs=()):
     return writer, task
 
 
-def write_scene(k, f, index, text, parents=(), *, prior_draft_ref=None):
+def write_scene(k, f, index, text, parents=(), *, prior_draft_ref=None, declared_important_deltas=()):
     writer, task = writer_for(k, f, index, parents, extra_inputs=[prior_draft_ref] if prior_draft_ref else [])
     ReleaseService(k).bind_writer_task(writer, task["task_id"], task["generation"], f["scene_refs"][index],
         list(parents), "writebind:" + task["task_id"])
     ref = NarrativeService(k).store_draft(writer, task["task_id"], task["generation"], f["scene_refs"][index], text,
-        "draft:" + task["task_id"], handoff_refs=list(parents), prior_draft_ref=prior_draft_ref)
+        "draft:" + task["task_id"], handoff_refs=list(parents), prior_draft_ref=prior_draft_ref,
+        declared_important_deltas=list(declared_important_deltas))
     return {"writer": writer, "task": task, "draft_ref": ref, "text": text}
 
 

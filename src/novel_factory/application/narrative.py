@@ -252,7 +252,7 @@ class NarrativeService:
         proof = refresh_task(self.kernel, principal, task_id, generation) if agent_output_ref is not None else None
 
         def check(repo):
-            task, grant, spec, context, scene = self._writer_binding(repo, principal, task_id, generation, scene_ref)
+            task, _grant, spec, _context, scene = self._writer_binding(repo, principal, task_id, generation, scene_ref)
             if agent_output_ref is not None:
                 output = self._artifact(repo, agent_output_ref, task["work_id"], "AGENT_CANDIDATE")
                 result = repo.one("task_results", {"result_id": task["current_result_id"]}) if task["current_result_id"] else None
@@ -588,6 +588,11 @@ class NarrativeService:
 
     @staticmethod
     def _issue(draft_ref, blocker):
+        if blocker["code"].startswith("UNRESOLVED_"):
+            return {"issue_id": _id(), "category": "CONTINUITY", "severity": "QUESTION", "subject_ref": draft_ref,
+                    "description": blocker["message"], "evidence_refs": [],
+                    "suggested_change": "Query the fixed world and exact manuscript before deciding whether a correction is needed",
+                    "disposition": "DEFER", "issue_kind": "SEMANTIC_CONCERN"}
         return {"issue_id": _id(), "category": "HARD_CONSISTENCY", "severity": "BLOCKER", "subject_ref": draft_ref,
                 "description": blocker["message"], "evidence_refs": [], "suggested_change": "Revise the text or complete the authorized world and narrative review",
                 "disposition": "OPEN", "issue_kind": "HARD_CONFLICT"}
@@ -604,7 +609,11 @@ class NarrativeService:
             data = self._report_inputs(repo, principal, draft_ref, extraction_ref, world_ref, resolutions)
         draft, scene, extraction, revision, resolved, resolution_events, origin, origin_grant, ext_task, ext_grant, context = data
         text = self.kernel.objects.read(draft["text_ref"]["sha256"]).decode("utf-8")
-        result = evaluate(revision, scene, draft, extraction["assertions"], text, resolved)
+        from .attribution_evidence import attributed_assertions
+        with self.kernel.db.uow(write=False) as repo:
+            attributed = attributed_assertions(self.kernel, repo, draft_ref, draft, extraction, world_ref)
+        result = evaluate(revision, scene, draft, extraction["assertions"], text, resolved,
+                          attributed_assertions=attributed)
         linked = {(e["occurrence_id"], e["event_version_id"]): e for e in [*result["event_refs"], *resolution_events]}
         result["event_refs"] = [linked[key] for key in sorted(linked)]
         pending, staged = [], []
@@ -738,7 +747,10 @@ class NarrativeService:
         for style_ref in scene["scene_contract"]["style_refs"]:
             self._artifact(repo, style_ref, wid, "STYLE_GUIDE")
         if scene["batch_ref"] is not None:
-            from novel_factory.application.release import validate_scene_batch, validate_writing_task_binding
+            from novel_factory.application.release import (
+                validate_scene_batch,
+                validate_writing_task_binding,
+            )
             validate_scene_batch(repo, self.kernel, scene)
             validate_writing_task_binding(repo, self.kernel, origin, draft["scene_ref"])
         revision = self.kernel.revision(repo, world_ref)
@@ -750,7 +762,10 @@ class NarrativeService:
         self._validate_knowledge_evidence(repo, revision, extraction["assertions"])
         resolved, resolution_events = self._resolved(repo, revision, extraction["assertions"], report["resolutions"])
         text = self.kernel.objects.read(draft["text_ref"]["sha256"]).decode("utf-8")
-        result = evaluate(revision, scene, draft, extraction["assertions"], text, resolved)
+        from .attribution_evidence import attributed_assertions
+        attributed = attributed_assertions(self.kernel, repo, draft_ref, draft, extraction, world_ref)
+        result = evaluate(revision, scene, draft, extraction["assertions"], text, resolved,
+                          attributed_assertions=attributed)
         links = {(e["occurrence_id"], e["event_version_id"]): e for e in [*result["event_refs"], *resolution_events]}
         require(not result["blockers"] and result["checks"] == report["critical_commitment_checks"] == proof["boundary_checks"]
                 and fingerprint(result["checks"]) == report["boundary_checks_sha256"]
@@ -764,7 +779,8 @@ class NarrativeService:
         require(all(selected(current, ref) for ref in report["event_refs"]), "NARRATIVE_ALIGNMENT_REQUIRED", "Referenced world event is no longer current")
         # Unrelated HEAD progress is valid; actual text facts, cognition and
         # scene boundaries are synchronously checked against current history.
-        current_result = evaluate(current, scene, draft, extraction["assertions"], text, resolved)
+        current_result = evaluate(current, scene, draft, extraction["assertions"], text, resolved,
+                                  attributed_assertions=attributed)
         require(not current_result["blockers"], "NARRATIVE_ALIGNMENT_REQUIRED", "Relevant accepted world changes require explicit realignment")
         return {"draft": draft, "scene": scene, "reconciliation": report, "alignment_ref": execution["alignment_ref"]}
 
@@ -772,9 +788,13 @@ class NarrativeService:
         self._controller(repo, principal, world_ref)
         return self._validate_for_acceptance(repo, draft_ref, reconciliation_ref, world_ref)
 
-    def accept_narrative(self, principal, draft_ref, reconciliation_ref, world_ref, idempotency_key, *, alignment_ref=None):
+    def accept_narrative(self, principal, draft_ref, reconciliation_ref, world_ref, idempotency_key, *, alignment_ref=None,
+                         edition_ref=None):
         self._key(idempotency_key)
         request = {"draft_ref": draft_ref, "reconciliation_ref": reconciliation_ref, "world_ref": world_ref, "alignment_ref": alignment_ref}
+        if edition_ref is not None:
+            validate_contract("ArtifactRef", edition_ref)
+            request["edition_ref"] = edition_ref
         with self.kernel.db.uow(write=False) as repo:
             self._controller(repo, principal, world_ref, "ACCEPT")
             old = self.kernel._prior(repo, principal, world_ref["work_id"], "NARRATIVE_ACCEPT", idempotency_key, request)
@@ -807,7 +827,12 @@ class NarrativeService:
                 return old
             self.validate_for_acceptance(repo, principal, draft_ref, reconciliation_ref, world_ref)
             from .rolling_production import protect_chapter
-            protect_chapter(self.kernel, repo, world_ref, contract["scene_id"], draft_ref)
+            if edition_ref is None:
+                protect_chapter(self.kernel, repo, world_ref, contract["scene_id"], draft_ref)
+            else:
+                from .returned_edition_acceptance import guard_child
+                require(guard_child(self.kernel, repo, principal, world_ref, draft_ref, edition_ref),
+                        "NARRATIVE_SELECTION_CONFLICT", "The child edition has no current scoped acceptance authorization")
             key = "NARRATIVE_SCENE:" + contract["scene_id"]
             selection = repo.one("selections", {"work_id": world_ref["work_id"], "selection_kind": key})
             if selection:

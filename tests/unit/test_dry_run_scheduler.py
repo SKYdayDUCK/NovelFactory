@@ -24,7 +24,8 @@ def test_each_fault_path_preserves_scheduling_invariants(scenario):
         assert report["unknown_reservations_held"] == 1
         unknown = next(row for row in report["trace"] if row["event"] == "UNKNOWN_HELD")
         assert sum(row["event"] == "HARNESS_REQUEST" and row["task"] == unknown["task"] for row in report["trace"]) == 1
-    elif scenario in {"authorization_revoked", "budget_exhausted", "review_exhausted", "dependencies", "needs_input", "review_questions"}:
+    elif scenario in {"authorization_revoked", "budget_exhausted", "review_exhausted", "dependencies", "needs_input", "review_questions",
+                      "review_mcp_exhausted", "verification_unknown"}:
         assert report["workflow_status"] == "STOPPED_WITH_BLOCKERS"
     else:
         assert report["workflow_status"] == "COMPLETED" and report["frozen_chapters"] == 3
@@ -65,7 +66,7 @@ def test_legal_needs_input_holds_without_accepting_payload_or_retrying_its_call(
 def test_succeeded_review_with_outer_questions_pauses_without_acceptance_retry_or_freeze():
     simulation = Simulation(scenario="review_questions", review_pass_rate=1)
     report = simulation.run()
-    assert len(SCENARIOS) == 27
+    assert len(SCENARIOS) == len(set(SCENARIOS))
     assert report["status"] == "PASS" and report["workflow_status"] == "STOPPED_WITH_BLOCKERS"
     held = next(row for row in report["trace"] if row["event"] == "REVIEW_REQUIRED")
     task = simulation.jobs[held["task"]]
@@ -79,6 +80,93 @@ def test_succeeded_review_with_outer_questions_pauses_without_acceptance_retry_o
     assert call["state"] == "SUCCEEDED" and call["unresolved_questions"] == held["unresolved_questions"]
     assert held["unresolved_questions"] == ["DRY_RUN_OUTSIDE_REVIEW_DECISION_REQUIRED"]
     assert report["frozen_chapters"] == report["frozen_books"] == report["unknown_reservations_held"] == 0
+
+
+@pytest.mark.parametrize("scenario", ["internal_question_reread", "internal_question_strategy"])
+def test_internal_question_runs_bound_query_and_verification_before_continuing_to_book_freeze(scenario):
+    simulation = Simulation(scenario=scenario, chapters=1, review_pass_rate=1)
+    report = simulation.run()
+    assert report["status"] == "PASS" and report["frozen_books"] == 1
+    trace = report["trace"]
+    question = next(row for row in trace if row["event"] == "INTERNAL_QUESTION_ENROLLED")
+    query = next(row for row in trace if row["event"] == "SIMULATED_QUERY_VERIFICATION")
+    resolved = next(row for row in trace if row["event"] == "INTERNAL_QUESTION_RESOLVED")
+    assert question["task"] == query["source_task"] == resolved["task"]
+    assert query["source_ref"] == resolved["source_ref"] and resolved["world_effects_applied"] == 0
+    assert trace.index(query) < trace.index(resolved) < next(i for i, row in enumerate(trace) if row["event"] == "CHAPTER_FROZEN")
+    assert simulation.jobs[question["task"]].state == "CANCELLED"
+    assert question["task"] not in simulation.acceptances
+    if scenario == "internal_question_reread":
+        reread = next(row for row in trace if row["event"] == "SAME_DRAFT_REREAD_ENROLLED")
+        assert resolved["resolution"] == "NO_CONFLICT" and reread["source_ref"] == query["source_ref"]
+        assert reread["task"] != question["task"] and report["stage_counts"]["draft"] == 1
+    else:
+        assert resolved["resolution"] == "CONFIRMED_CONFLICT" and report["stage_counts"]["strategy"] == 1
+        assert report["stage_counts"]["draft"] == report["stage_counts"]["epistemic"] == 2
+        assert report["chapter_manifests"][0]["revision"] == 1
+
+
+@pytest.mark.parametrize("scenario", ["review_mcp_recovery", "review_mcp_exhausted"])
+def test_missing_review_mcp_evidence_allows_only_two_rereads_and_keeps_known_call_receipts(scenario):
+    simulation = Simulation(scenario=scenario, chapters=1, review_pass_rate=1)
+    report = simulation.run()
+    missing = [row for row in report["trace"] if row["event"] == "REVIEW_MCP_EVIDENCE_MISSING"]
+    task = simulation.jobs[missing[0]["task"]]
+    assert task.tries == 3
+    assert sum(row["event"] == "REVIEW_MCP_REREAD_ENROLLED" for row in report["trace"]) == 2
+    calls = [row for row in simulation.ledger.values() if row["task"] == task.id]
+    assert len(calls) == 3 and all(row["state"] == "SUCCEEDED" and row["reserved"] == 0 for row in calls)
+    if scenario == "review_mcp_recovery":
+        assert len(missing) == 2 and task.state == "ACCEPTED" and report["frozen_books"] == 1
+    else:
+        assert len(missing) == 3 and task.state == "PAUSED" and task.approved is None
+        assert task.reason == "REVIEW_QUERY_RETRIES_EXHAUSTED" and task.id not in simulation.acceptances
+        assert report["frozen_chapters"] == report["frozen_books"] == 0
+
+
+def test_unknown_verification_call_is_held_without_resend_or_manufactured_resolution():
+    simulation = Simulation(scenario="verification_unknown", chapters=1, review_pass_rate=1)
+    report = simulation.run()
+    held = next(row for row in report["trace"] if row["event"] == "UNKNOWN_HELD")
+    task = simulation.jobs[held["task"]]
+    assert task.stage == "internal_verification" and task.state == "PAUSED" and task.tries == 1
+    assert simulation.ledger[held["attempt"]]["state"] == "UNKNOWN" and report["unknown_reservations_held"] == 1
+    assert sum(row["event"] == "HARNESS_REQUEST" and row["task"] == task.id for row in report["trace"]) == 1
+    assert not any(row["event"] == "INTERNAL_QUESTION_RESOLVED" for row in report["trace"])
+    assert report["frozen_books"] == report["frozen_chapters"] == 0
+
+
+def test_query_receipt_from_another_source_cannot_resolve_an_internal_question():
+    class WrongSource(Simulation):
+        def _dispatch(self, job):
+            super()._dispatch(job)
+            if job.stage == "query_verification":
+                job.query_receipt["source_ref"] = {"artifact_id": "another-draft"}
+                job.query_receipt["sha256"] = self._receipt_hash(job.query_receipt)
+
+    simulation = WrongSource(scenario="internal_question_reread", chapters=1, review_pass_rate=1)
+    report = simulation.run()
+    verifier = next(job for job in simulation.jobs.values() if job.stage == "internal_verification")
+    assert verifier.state == "PAUSED" and verifier.id not in simulation.acceptances
+    assert "INTERNAL_RESOLUTION_WITHOUT_QUERY_PROOF" in report["invariant_failures"]
+    assert not any(row["event"] == "INTERNAL_QUESTION_RESOLVED" for row in report["trace"])
+
+
+def test_hash_valid_but_wrong_source_review_mcp_receipt_does_not_pass_the_gate():
+    class WrongReviewSource(Simulation):
+        def _invoke(self, job_id, generation, attempt, outcome):
+            response = super()._invoke(job_id, generation, attempt, outcome)
+            receipt = response.raw_response.get("simulated_review_mcp_receipt")
+            if receipt:
+                receipt["source_ref"] = {"artifact_id": "another-draft"}
+                receipt["sha256"] = self._receipt_hash(receipt)
+            return response
+
+    simulation = WrongReviewSource(scenario="review_mcp_recovery", chapters=1, review_pass_rate=1)
+    report = simulation.run()
+    assert report["status"] == "PASS" and report["workflow_status"] == "STOPPED_WITH_BLOCKERS"
+    assert any(job.reason == "REVIEW_QUERY_RETRIES_EXHAUSTED" for job in simulation.jobs.values())
+    assert report["frozen_books"] == 0
 
 
 def test_real_model_routing_is_simulated_through_the_normal_adapter():

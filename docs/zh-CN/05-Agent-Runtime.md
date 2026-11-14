@@ -121,3 +121,11 @@ stateDiagram-v2
 Token 用量、供应商回执和实付金额分别记录。Token 已知但金额缺失、币种或金额越界，以及发送后失去可核对的结果，都可能留下 `UNKNOWN`。原预留继续占用相应预算，同一任务不会自动重发这次调用。其他任务有独立授权且有可用额度时可以继续。运维人员以账单标识和该次请求的证据对账，可用 `.venv/bin/python scripts/p6_reconcile_invoice.py --help` 查看入口。合成适配器验收记录、真实网络调用记录和供应商账单可分别通过测试结果、调用审计和账本核查。
 
 [配置与宿主协议](../../agent_runtime/providers.py) · [路由优先级](../../agent_runtime/routing.py) · [模型切换](../../src/novel_factory/application/model_routing.py) · [费用登记](../../src/novel_factory/application/agent_gateway.py)
+
+## 原生审核的 MCP 与上下文
+
+原生审核通过 Codex app-server 的动态工具协议连接真正的 MCP ClientSession/Server。宿主只获得本任务允许的只读工具，NF 凭据留在控制进程；Shell、文件系统工具、浏览器和其他 MCP 连接不开放。正常核查使用 `nf_context_get`、`nf_query_batch`、`nf_review_material`；文学编辑和整书盲读只获得其岗位允许的上下文与材料。
+
+初始模型请求只登记授权材料引用，正文与报告由模型实际调用 MCP 读取一次。程序预检仍校验原始来源与权限，快照、工具结果及完整审计均留存。八题核查窗口和证据引用字典减少重复材料；字典索引可以无损还原原 EvidenceRef，不能通过删问题或提高原额度掩盖超长上下文。
+
+工具 Schema、原始消息、输出上限与 MCP 返回内容共享本次已预留额度。缓存以供应商实际返回的 cached/input tokens 统计，不能把本地读取复用或材料压缩当作供应商缓存命中。Flash 的稳定角色与 Schema 前缀继续复用，易变身份保留在尾部。

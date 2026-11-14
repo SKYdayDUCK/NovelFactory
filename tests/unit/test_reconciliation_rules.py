@@ -4,8 +4,15 @@ from uuid import uuid4
 
 import pytest
 
+from novel_factory.contracts.registry import validate_contract
 from novel_factory.domain.errors import DomainError
-from novel_factory.domain.reconciliation import evaluate, knowledge_check, span_for, state_check, verify_span
+from novel_factory.domain.reconciliation import (
+    evaluate,
+    knowledge_check,
+    span_for,
+    state_check,
+    verify_span,
+)
 from novel_factory.domain.reducer import replay
 from novel_factory.fixtures import fixture_definition, point
 
@@ -134,3 +141,77 @@ def test_belief_citations_are_bound_to_that_actor_and_acquisition_time():
     assert knowledge_check(revision, premature) == "UNRESOLVED"
     guessed = deepcopy(forged); guessed["mode"] = "GUESSES"
     assert knowledge_check(revision, guessed) == "FAIL"
+
+
+def test_attributed_statement_requires_server_verified_independent_evidence_and_changes_no_world():
+    revision, scene, draft, _ = context()
+    text = "工程样例：他说剑已经属于自己。"
+    claim = assertion(text, classification="ATTRIBUTED_STATEMENT")
+    validate_contract("AssertionCandidate", claim, "narrative")
+    before = deepcopy(revision)
+    unverified = evaluate(revision, scene, draft, [claim], text)
+    assert any(item["code"] == "UNRESOLVED_KNOWLEDGE" for item in unverified["blockers"])
+    accepted = evaluate(revision, scene, draft, [claim], text, attributed_assertions={claim["assertion_id"]})
+    assert not accepted["blockers"] and accepted["event_refs"] == []
+    assert revision == before
+
+
+@pytest.mark.parametrize("field,value", [
+    ("event_ref", {"occurrence_id": "unused", "event_version_id": "unused"}),
+    ("world_check", {}), ("knowledge_use", {}), ("proposed_command", {}),
+    ("disclosure_id", "unused"), ("declared_delta_index", 0),
+])
+def test_attributed_statement_cannot_smuggle_effect_fields_even_with_server_allowset(field, value):
+    revision, scene, draft, _ = context()
+    text = "工程样例：显示屏上写着待核实的消息。"
+    claim = assertion(text, classification="ATTRIBUTED_STATEMENT", **{field: value})
+    with pytest.raises(DomainError):
+        validate_contract("AssertionCandidate", claim, "narrative")
+    result = evaluate(revision, scene, draft, [claim], text, attributed_assertions={claim["assertion_id"]})
+    assert any(item["code"] == "IMPORTANT_EFFECT_COVERAGE_CONFLICT" for item in result["blockers"])
+    assert result["event_refs"] == []
+
+
+def test_attribution_never_covers_declared_deltas_or_required_events():
+    revision, scene, draft, _ = context()
+    text = "工程样例：他声称物品已经交付。"
+    claim = assertion(text, classification="ATTRIBUTED_STATEMENT")
+    draft["declared_important_deltas"] = ["Ownership changed"]
+    event = {"occurrence_id": uid(), "event_version_id": uid()}
+    scene["required_event_refs"] = [event]
+    revision["selection"][event["occurrence_id"]] = event["event_version_id"]
+    result = evaluate(revision, scene, draft, [claim], text, attributed_assertions={claim["assertion_id"]})
+    assert {item["code"] for item in result["blockers"]} == {
+        "DECLARED_DELTA_COVERAGE_CONFLICT", "IMPORTANT_EFFECT_COVERAGE_CONFLICT"}
+
+
+def test_legacy_says_cannot_use_an_arbitrary_selected_event_or_attribution_allowset():
+    revision, scene, draft, ids = context()
+    text = "工程样例：他说出一条消息。"
+    event = {"occurrence_id": uid(), "event_version_id": uid()}
+    revision["selection"][event["occurrence_id"]] = event["event_version_id"]
+    claim = assertion(text, classification="SPEECH_OR_BELIEF", event_ref=event, knowledge_use={
+        "actor_id": ids["protagonist"], "subject_id": ids["sword"], "predicate": "legal_owner", "at": point(1),
+        "mode": "SAYS", "value": {"kind": "ENTITY", "entity_id": ids["protagonist"]}, "evidence_refs": []})
+    result = evaluate(revision, scene, draft, [claim], text, {claim["assertion_id"]},
+                      attributed_assertions={claim["assertion_id"]})
+    assert any(item["code"] == "UNRESOLVED_KNOWLEDGE" for item in result["blockers"])
+
+
+@pytest.mark.parametrize("category", ["HISTORICAL_CONFLICT", "UNCERTAIN"])
+def test_missing_counterevidence_is_an_internal_verification_need_not_a_confirmed_conflict(category):
+    revision, scene, draft, _ = context()
+    text = "工程样例：尚未核实的陈述。"
+    claim = assertion(text, classification=category)
+    result = evaluate(revision, scene, draft, [claim], text, attributed_assertions={claim["assertion_id"]})
+    assert {item["code"] for item in result["blockers"]} == {"UNRESOLVED_STATE"}
+
+
+def test_unadvanced_counterevidence_cannot_turn_an_asserted_conflict_into_a_false_world_fact():
+    revision, scene, draft, ids = context()
+    text = "工程样例：将来状态仍待核查。"
+    check = {"plane": "WORLD", "subject_id": ids["sword"], "predicate": "active_use", "at": point(40),
+             "expected_status": "NONE", "expected_value": None, "actor_id": None, "known_at": None}
+    claim = assertion(text, classification="HISTORICAL_CONFLICT", world_check=check)
+    result = evaluate(revision, scene, draft, [claim], text)
+    assert {item["code"] for item in result["blockers"]} == {"UNRESOLVED_STATE"}

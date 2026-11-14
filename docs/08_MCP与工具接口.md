@@ -183,6 +183,14 @@ HTTP/MCP适配器实例不持有权威task状态或世界锁；所有实例共�
 
 同一合法请求分别经内部服务、REST、MCP取得相同领域结果；传输可以不同，但版本/权限/幂等语义必须相同。MCP服务器重启不应丢失任务或推进世界。R1增加：一次batch跨多个SQL但WorldRef不漂移；同传输交错角色任务不串权限；RYW遇落后副本回主库；FIXED+未来未求值不自动推进；guarded无关HEAD变化通过、相关token变化拒绝；429/503背压下预算/队列有界。没有完成该组测试前，标记“设计支持，未完成Host验证”。
 
+## 原生审核的受限 MCP 桥
+
+Codex 原生审核通过动态工具请求调用实际 MCP ClientSession/Server。`nf_review_material(artifact_ref)` 只读取当前冻结 AGENT_INPUT.material_refs 中、由对应生产/编辑服务准许的资料；正文返回精确 Unicode 原文区间，报告按绑定核查窗口投影并保留源 hash。模型不能借任意 UUID 读取原始数据库产物。
+
+`nf_query_batch.lookups` 保留必填 subject_id/predicate，新增可选 at、plane、actor_id、known_at。每个 KnowledgeCut 分别调用同切面的原有 QueryBatch，各批固定同一 WorldRef，不允许在一个底层 batch 中混入不同知识平面。实体与谓词须属于冻结 manifest，查询不能越过授权故事时点。仅明确授予 WORLD/BELIEF 的 reviewer.epistemic 或 reviewer.verification 可从 WORLD 核查指定人物 BELIEF；已有 BELIEF 任务不能换人物或扩大 known_at。PLAN 编辑只能查询获准计划视图。
+
+每次 MCP 调用留下真实 started/finished 审计及绑定 Host turn 的不可变工具回执。验收复核当前 grant、任务、原稿、调用、查询结果 hash 和所有指定材料的实际读取记录。整书盲读只提供任务身份与固定正文包，不提供世界查询；文学编辑也不因接入桥而获得 WORLD 权限。
+
 ## 报告载荷与内部控制面补充
 
 准备 Retcon 和推广使用 core.schema.json 中的 `PrepareRetconRequest/PromotionRequest`，由受权内部控制面调用，未向普通角色增加 MCP 权限。[report_templates.md](../contracts/report_templates.md) 规定修订、影响、重验证及正文对账报告的内部字段；报告 DTO 尚待 P1/P2 实现，不能用任意 JSON 或模型自报 PASS 替代。完整交接顺序见 [HANDOFF_EXERCISE](../validation/HANDOFF_EXERCISE.md)。

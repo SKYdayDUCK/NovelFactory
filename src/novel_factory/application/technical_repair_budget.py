@@ -13,7 +13,7 @@ def repair_count(node):
             "INVALID_ARGUMENT", "Invalid technical repair history")
     # Review format reassessments amend their original row. Fact format
     # reassessments are separate rows already; do not count them twice.
-    return len(schema) + sum(bool(row.get("reassessment")) for row in schema) + len(facts)
+    return len(schema) + sum(bool(row.get("reassessment")) for row in schema) + len(facts) + len(node.get("evidence_repairs", []))
 
 
 def technical_repair_budget(node):

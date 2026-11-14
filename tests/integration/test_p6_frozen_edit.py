@@ -47,7 +47,9 @@ def test_one_frozen_volume_needs_actual_model_opinions_and_a_separate_decision(
         def judgment(packet):
             assignment = json.loads(packet["assignment"])
             if assignment.get("operation") == "revise_returned_edition":
-                assert assignment["editor_reason"] and packet["context"]["role_id"] == "writer"
+                assert packet["context"]["role_id"] == "writer"
+                scoped_feedback = json.loads(packet["authorized_materials"][-1]["content"])
+                assert scoped_feedback["editor_reason"] and scoped_feedback["source_draft_ref"]
                 assert any("北窗" in p["content"] for p in packet["authorized_materials"])
                 original_output = answer(packet)
                 return {**original_output, "text": original_output["text"] + ("。" if return_final == "child_edition" else "")}
@@ -120,12 +122,15 @@ def test_one_frozen_volume_needs_actual_model_opinions_and_a_separate_decision(
             if state["status"] not in {"EDITING_ACTIVE", "EDITION_REVISING"} or turn.get("status") == "BLOCKED":
                 break
         if child_case:
-            assert state["status"] == "EDITION_HANDOFF_REQUIRED", (state["status"], state["reason"], observed[-5:])
-            expected_reason = "CANDIDATE_ACCEPTANCE_REQUIRED" if return_final == "child_edition" else "EDITORIAL_NO_PROGRESS"
-            assert state["reason"] == expected_reason and state["approval_ref"] is None
+            # This legacy HTTP-only fixture is deliberately not a native MCP
+            # reader. Preserve its child, but never accept it without that proof.
+            assert state["status"] == "EDITION_REVISION_BLOCKED", (state["status"], state["reason"], observed[-5:])
+            assert state["reason"] == "MODEL_UNAVAILABLE" and state["approval_ref"] is None
             from novel_factory.application.volume_successor import _selected
             with kernel.db.uow(write=False) as repo:
-                edition = kernel.artifact(repo, state["edition_ref"], work, kind="P6_RETURNED_EDITION_CANDIDATE")["payload"]
+                full = frozen_editing._state(kernel, repo, work, branch)
+                edition = full["edition"]
+                frozen_ref = _selected(repo, work, "P6_FROZEN_EDITING:" + branch)
                 child = edition["candidates"][0]
                 assert _selected(repo, work, "P6_FROZEN_SCENE:" + child["scene_id"]) == edition["parent_checkpoint"]
                 original = kernel.artifact(repo, _selected(repo, work, "NARRATIVE_SCENE:" + child["scene_id"]), work)["payload"]
@@ -134,14 +139,17 @@ def test_one_frozen_volume_needs_actual_model_opinions_and_a_separate_decision(
                 assert (original["text_ref"]["sha256"] != candidate["text_ref"]["sha256"]) == (return_final == "child_edition")
                 reflection = kernel.artifact(repo, edition["reflection_ref"], work, kind="P6_REFLECTION_RECORD")["payload"]
                 assert reflection["error_ref"] == edition["error_ref"] and reflection["attempt_id"] == edition["editor_attempt_id"]
-                assert edition["editor_output_ref"] == state["returned_ref"]
-                assert edition["readings"][0]["attempt_id"] != child["attempt_id"]
-                assert not _selected(repo, work, "RELEASE:" + edition["volume"])
+                assert edition["editor_output_ref"] == state["returned_ref"] and edition["readings"] == []
+                assert not _selected(repo, work, "RELEASE:" + full["volume"])
             ordinary = kernel.issue_grant(owner, work, role_id="writer", branch_ids=[branch], planes=["WORLD"])["principal"]
             with pytest.raises(DomainError):
-                kernel.get_artifact(ordinary, work, state["edition_ref"])
-            assert json.loads(kernel.get_artifact(owner, work, state["edition_ref"])) == edition
-            assert frozen_editing.start(kernel, owner, work, branch)["status"] == "EDITION_HANDOFF_REQUIRED"
+                kernel.get_artifact(ordinary, work, frozen_ref)
+            assert json.loads(kernel.get_artifact(owner, work, frozen_ref))["edition"] == edition
+            assert frozen_editing.start(kernel, owner, work, branch)["status"] == "EDITION_REVISION_BLOCKED"
+            sent = len(calls)
+            for _ in range(3):
+                RuntimeSupervisor(kernel, gateway).run_once(owner, work, branch)
+            assert len(calls) == sent
             with pytest.raises(DomainError, match="editorial approval is missing"):
                 final_review_request(kernel, owner, work, branch)
             return

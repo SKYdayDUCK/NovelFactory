@@ -6,12 +6,20 @@ import json
 from dataclasses import replace
 
 import pytest
+from native_review_helpers import materialize_review_input, run_review_mcp
 from test_native_delivery import NativeProtocolFixture
 from test_p6_postpaid_delivery import fake_transport
 
-from agent_runtime import native_codex, providers
+from agent_runtime import native_codex, native_review, providers
 from novel_factory.application.agent_gateway import AgentGateway
-from novel_factory.application.quality_memory import METHODS, plan_repair, reflect_repair, verify_method, recall, task_scope
+from novel_factory.application.quality_memory import (
+    METHODS,
+    plan_repair,
+    recall,
+    reflect_repair,
+    task_scope,
+    verify_method,
+)
 from novel_factory.application.runtime_tasks import RuntimeTaskService
 from novel_factory.fixtures import load_fixture, point
 
@@ -24,12 +32,28 @@ class NativeReading(NativeProtocolFixture):
         return {**super().configuration, "model": "gpt-6.1-sol"}
 
     def generate(self, request):
-        response = super().generate(request)
+        model_view = json.loads(request.messages[1]["content"])
+        with self.journal.kernel.db.uow(write=False) as repo:
+            call = repo.one("call_attempts", {"attempt_id": request.attempt_id})
+            job = repo.one("supervisor_jobs", {"task_id": call["task_id"]})
+        if job and job["config"].get("required_review_mcp"):
+            original = self.mode
+            self.mode = "incomplete"
+            try:
+                response = super().generate(request)
+            finally:
+                self.mode = original
+            refs = run_review_mcp(self.journal.kernel, request, "thread-" + request.attempt_id, "turn-" + request.attempt_id)
+            model_view = materialize_review_input(self.journal.kernel, model_view, refs)
+            self.journal.record(request.attempt_id, "thread-" + request.attempt_id, "turn-" + request.attempt_id, "COMPLETED")
+            response = replace(response, raw_response={**response.raw_response, "review_mcp_receipt_refs": refs})
+        else:
+            response = super().generate(request)
         envelope = json.loads(response.text)
         envelope["payload"] = {"summary": "Synthetic independent reading", "issues": [],
                                "counterinterpretations": [], "evidence_refs": []}
         if hasattr(self, "respond"):
-            envelope["payload"] = self.respond(json.loads(request.messages[1]["content"]))
+            envelope["payload"] = self.respond(model_view)
         if self.mode == "unresolved":
             envelope["unresolved_questions"] = ["Synthetic missing prerequisite"]
         if self.mode == "blocker":
@@ -79,6 +103,8 @@ def test_flash_repair_native_reading_requires_exact_independent_delivery(kernel_
     forbidden = lambda *args, **kwargs: pytest.fail("Synthetic experience test reached native transport")
     monkeypatch.setattr(native_codex, "generate", forbidden)
     monkeypatch.setattr(native_codex, "start_host", forbidden)
+    monkeypatch.setattr(native_review, "generate", forbidden)
+    monkeypatch.setattr(native_review, "start_host", forbidden)
     native = NativeReading(kernel, mode)
     gateway = AgentGateway(kernel, {"flash": flash, "native": native})
     fixed = dispatch(kernel, gateway, owner, wr, world, role="writer", kind="targeted_revision",
@@ -96,8 +122,9 @@ def test_flash_repair_native_reading_requires_exact_independent_delivery(kernel_
             writer = repo.one("tasks", {"task_id": fix_audit["task_id"]})
             repo.change("tasks", {"task_id": review_audit["task_id"]}, {"principal_id": writer["principal_id"]})
         if mode == "missing_wire":
-            from novel_factory.infrastructure.wire_receipts import destination
             from pathlib import Path
+
+            from novel_factory.infrastructure.wire_receipts import destination
             Path(destination(kernel.objects, fixed["attempt_id"])).unlink()
         evidence = {**fix_audit}
         if mode == "wrong_generation":
@@ -138,12 +165,13 @@ def test_flash_repair_native_reading_requires_exact_independent_delivery(kernel_
 
 def test_flash_scene_revision_codex_reading_promotes_only_repaired_draft(kernel_env, monkeypatch):
     from uuid import uuid4
+
     from test_p6_rolling_production import answer, request
     from test_release import setup_batch
+
     from novel_factory.application import production_pipeline as boards
     from novel_factory.application.rolling_production import register_rolling, rolling_status
-    from novel_factory.application.supervisor import RuntimeSupervisor
-    from novel_factory.application.supervisor import HostJournal
+    from novel_factory.application.supervisor import HostJournal, RuntimeSupervisor
     from novel_factory.infrastructure.runtime_providers import RuntimeModelAdapter
 
     kernel = kernel_env["kernel"]
@@ -170,14 +198,19 @@ def test_flash_scene_revision_codex_reading_promotes_only_repaired_draft(kernel_
     forbidden = lambda *args, **kwargs: pytest.fail("Synthetic scene test reached native transport")
     monkeypatch.setattr(native_codex, "generate", forbidden)
     monkeypatch.setattr(native_codex, "start_host", forbidden)
+    monkeypatch.setattr(native_review, "generate", forbidden)
+    monkeypatch.setattr(native_review, "start_host", forbidden)
     native = NativeReading(kernel, "valid")
     def reading(packet):
+        from novel_factory.domain.reconciliation import span_for
         result = answer(packet)
         if len(writes) == 1 and "人物所知" in packet["assignment"]:
             source = json.loads(packet["authorized_materials"][0]["content"])
             result["issues"] = [{"issue_id": str(uuid4()), "category": "CONTINUITY", "severity": "BLOCKER",
                 "subject_ref": source["draft_ref"], "description": "Synthetic unsupported observation",
-                "evidence_refs": [], "suggested_change": "Synthetic exact visible detail",
+                "evidence_refs": [{"kind": "ARTIFACT", "artifact_ref": source["text_ref"],
+                                   "span": span_for(source["text"], 0, len(source["text"]))}],
+                "suggested_change": "Synthetic exact visible detail",
                 "disposition": "OPEN", "issue_kind": "CHANGE_REQUEST"}]
         return result
     native.respond = reading

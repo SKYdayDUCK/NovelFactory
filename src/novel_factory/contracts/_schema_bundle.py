@@ -1,5 +1,5 @@
 # Generated from contracts/*.schema.json. Do not edit by hand.
-SOURCE_SHA256 = {'agent.schema.json': '0e833ffb3ebf17af950c2d3161aae9d5e5adfa2b38f2a6c26c50586144480c5d', 'commands.schema.json': '3dff553f8b7b1b3b4ab3cc4b77ce8a97ca96b7c1253a99a976e477a2add671fd', 'continuity.schema.json': 'cd0138779ce4a89557b0a6fb955891309d4190e5d47202ecb79861874d1dd446', 'core.schema.json': '472bfa809db9270b7b212969a3896f1567295c0fd68f70e94d9a404dd53ac552', 'editorial.schema.json': '87e7c1d571150431e96c27dac67a2615f980c01040f75560e2f80ddc3823798b', 'harness.schema.json': 'f6fb1a29844f6a1eaf15ef906c849a085f1e842c13272cf3c1d8d5eec240fac1', 'http.schema.json': '52251014597789e4ee23a51bd37833cf8118a8245dcde2ed22e2da9633267df9', 'kernel.schema.json': '46584afa0183147b02acfea6bf1f75ddb9b6375f91e7117ee463f189ebef24e0', 'literary.schema.json': 'aea5e58465ee3ba008ab9de54002a304cddac6e405c3195201157a278c1433cc', 'narrative.schema.json': 'd9145f2ebe4508294c460b8ab98f2ca94315d2dc5ccfeec1be6b6e121fb72c5b', 'planning.schema.json': 'de0e7a051dbec434fb68057b6c15adb58cc2dfd67fd55a8412c513a7600d912d', 'production_profile.schema.json': '868ebe6979406281f923de3f6a6a98e9e1de0d302909f1197daa3b3d7f8f7431', 'refinement.schema.json': '88affbc5697427ec9ab4c56764ec0d753c5f0b25a7b1095087a6036be3cfcca3', 'release.schema.json': '0b2841b2daec82911486c42de02863be33478b2ebf37795d2be4cccc0d08f6bc', 'simulation.schema.json': '67c95aef637756785643ab50bc5f3a2027ab7768769e0baea7296946b2e002b4', 'temporal_concurrency.schema.json': '677118bb3ea9ef7a89ac1fbd8a82a71ce611ac9efa00d67de566e7070b83d749', 'upgrades.schema.json': '6ec08ef373a5de1870db24e10f100d335e9bc35b7180bd39a1acd413e9619932'}
+SOURCE_SHA256 = {'agent.schema.json': '0e833ffb3ebf17af950c2d3161aae9d5e5adfa2b38f2a6c26c50586144480c5d', 'commands.schema.json': '3dff553f8b7b1b3b4ab3cc4b77ce8a97ca96b7c1253a99a976e477a2add671fd', 'continuity.schema.json': 'cd0138779ce4a89557b0a6fb955891309d4190e5d47202ecb79861874d1dd446', 'core.schema.json': '472bfa809db9270b7b212969a3896f1567295c0fd68f70e94d9a404dd53ac552', 'editorial.schema.json': '87e7c1d571150431e96c27dac67a2615f980c01040f75560e2f80ddc3823798b', 'harness.schema.json': 'f6fb1a29844f6a1eaf15ef906c849a085f1e842c13272cf3c1d8d5eec240fac1', 'http.schema.json': '52251014597789e4ee23a51bd37833cf8118a8245dcde2ed22e2da9633267df9', 'kernel.schema.json': '46584afa0183147b02acfea6bf1f75ddb9b6375f91e7117ee463f189ebef24e0', 'literary.schema.json': 'aea5e58465ee3ba008ab9de54002a304cddac6e405c3195201157a278c1433cc', 'narrative.schema.json': 'b7fd989332597f842c9e8920018f3f633fd5e2ad7b990ae09ebcf6522df4af93', 'planning.schema.json': 'de0e7a051dbec434fb68057b6c15adb58cc2dfd67fd55a8412c513a7600d912d', 'production_profile.schema.json': '868ebe6979406281f923de3f6a6a98e9e1de0d302909f1197daa3b3d7f8f7431', 'refinement.schema.json': '88affbc5697427ec9ab4c56764ec0d753c5f0b25a7b1095087a6036be3cfcca3', 'release.schema.json': '0b2841b2daec82911486c42de02863be33478b2ebf37795d2be4cccc0d08f6bc', 'simulation.schema.json': '67c95aef637756785643ab50bc5f3a2027ab7768769e0baea7296946b2e002b4', 'temporal_concurrency.schema.json': '677118bb3ea9ef7a89ac1fbd8a82a71ce611ac9efa00d67de566e7070b83d749', 'upgrades.schema.json': '6ec08ef373a5de1870db24e10f100d335e9bc35b7180bd39a1acd413e9619932'}
 SCHEMAS = {'agent.schema.json': {'$defs': {'AgentDecisionOutput': {'additionalProperties': False,
                                                          'properties': {'decision': {'maxLength': 64000,
                                                                                      'minLength': 1,
@@ -4186,6 +4186,7 @@ SCHEMAS = {'agent.schema.json': {'$defs': {'AgentDecisionOutput': {'additionalPr
                                                                                                'properties': {'classification': {'enum': ['EXISTING_EVENT_PRESENTATION',
                                                                                                                                           'SURFACE_DETAIL',
                                                                                                                                           'SPEECH_OR_BELIEF',
+                                                                                                                                          'ATTRIBUTED_STATEMENT',
                                                                                                                                           'NEW_WORLD_EFFECT',
                                                                                                                                           'HISTORICAL_CONFLICT',
                                                                                                                                           'READER_DISCLOSURE_CHANGE',
@@ -4280,7 +4281,41 @@ SCHEMAS = {'agent.schema.json': {'$defs': {'AgentDecisionOutput': {'additionalPr
                                                                         'world_check'],
                                                            'type': 'object'},
                                      'AssertionCandidate': {'additionalProperties': False,
-                                                            'allOf': [{'if': {'properties': {'classification': {'const': 'EXISTING_EVENT_PRESENTATION'}}},
+                                                            'allOf': [{'if': {'properties': {'classification': {'const': 'ATTRIBUTED_STATEMENT'}}},
+                                                                       'then': {'description': 'Only an '
+                                                                                               'attributed '
+                                                                                               'saying, '
+                                                                                               'inference or '
+                                                                                               'displayed '
+                                                                                               'message in '
+                                                                                               'this exact '
+                                                                                               'draft; not a '
+                                                                                               'world truth, '
+                                                                                               'accepted '
+                                                                                               'speech '
+                                                                                               'occurrence, '
+                                                                                               'persistent '
+                                                                                               'belief, '
+                                                                                               'disclosure '
+                                                                                               'or effect. '
+                                                                                               'Requires '
+                                                                                               'independent '
+                                                                                               'current-draft '
+                                                                                               'epistemic '
+                                                                                               'evidence '
+                                                                                               'verified by '
+                                                                                               'the '
+                                                                                               'application, '
+                                                                                               'never a '
+                                                                                               'model-supplied '
+                                                                                               'permission.',
+                                                                                'properties': {'declared_delta_index': {'type': 'null'},
+                                                                                               'disclosure_id': {'type': 'null'},
+                                                                                               'event_ref': {'type': 'null'},
+                                                                                               'knowledge_use': {'type': 'null'},
+                                                                                               'proposed_command': {'type': 'null'},
+                                                                                               'world_check': {'type': 'null'}}}},
+                                                                      {'if': {'properties': {'classification': {'const': 'EXISTING_EVENT_PRESENTATION'}}},
                                                                        'then': {'properties': {'event_ref': {'$ref': 'https://novel-factory.example/contracts/2.0/core.schema.json#/$defs/EventRef'}}}},
                                                                       {'if': {'properties': {'classification': {'const': 'NEW_WORLD_EFFECT'}}},
                                                                        'then': {'properties': {'proposed_command': {'$ref': 'https://novel-factory.example/contracts/p1/commands.schema.json#/$defs/TemplateCommand'}}}},
@@ -4294,6 +4329,7 @@ SCHEMAS = {'agent.schema.json': {'$defs': {'AgentDecisionOutput': {'additionalPr
                                                                            'classification': {'enum': ['EXISTING_EVENT_PRESENTATION',
                                                                                                        'SURFACE_DETAIL',
                                                                                                        'SPEECH_OR_BELIEF',
+                                                                                                       'ATTRIBUTED_STATEMENT',
                                                                                                        'NEW_WORLD_EFFECT',
                                                                                                        'HISTORICAL_CONFLICT',
                                                                                                        'READER_DISCLOSURE_CHANGE',

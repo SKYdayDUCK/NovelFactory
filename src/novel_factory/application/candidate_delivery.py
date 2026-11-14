@@ -48,7 +48,9 @@ class CandidateDelivery:
             key = f"{self.route}:{task_id}:{generation}"
             try:
                 with repo.conn.begin_nested():
-                    from novel_factory.application.semantic_dependencies import check_task_dependencies
+                    from novel_factory.application.semantic_dependencies import (
+                        check_task_dependencies,
+                    )
                     check_task_dependencies(repo, task_id, generation)
                     if proof_error:
                         raise proof_error
@@ -140,4 +142,8 @@ class CandidateDelivery:
                 verify_delivery(self.kernel, repo, task, call, audit, response, candidate)
         if questions:
             evidence = {**evidence, "revision_questions": questions}
+        job = repo.one("supervisor_jobs", {"task_id": task_id})
+        if job and job["config"].get("required_review_mcp"):
+            from .review_evidence import require_review_evidence
+            require_review_evidence(self.kernel, repo, task, evidence, candidate["payload"])
         return evidence, candidate["payload"]

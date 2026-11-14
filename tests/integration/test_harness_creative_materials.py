@@ -1,9 +1,11 @@
 """Exercise literary material projection through the production NF readers and model gateway."""
-from copy import deepcopy
 import json
+from copy import deepcopy
 from uuid import uuid4
 
 import pytest
+from test_harness_context import EnvelopeFixture, configured
+from test_release import setup_batch, write_scene
 
 from novel_factory.application.agent_gateway import AgentGateway
 from novel_factory.application.editorial import ReviewService
@@ -13,9 +15,6 @@ from novel_factory.application.release import ReleaseService
 from novel_factory.application.runtime_tasks import RuntimeTaskService
 from novel_factory.domain.reconciliation import span_for
 from novel_factory.fixtures import point
-from test_harness_context import EnvelopeFixture, configured
-from test_release import setup_batch, write_scene
-
 
 pytestmark = [pytest.mark.postgres, pytest.mark.integration]
 
@@ -105,7 +104,15 @@ def test_fact_extractor_receives_only_its_bound_draft_obligations(kernel_env, mo
     assert receipt["validation_status"] == "VALIDATED_CANDIDATE"
     packet = json.loads(adapter.calls[0].messages[1]["content"])
     assert packet["creative_materials"]["prose"] == [prior["text"]]
-    assert packet["structured_evidence"] == [
+    scopes = [item["value"] for item in packet["structured_evidence"]
+              if item["value"].get("kind") == "FACT_READING_SCOPE"]
+    assert len(scopes) == 1
+    scope = scopes[0]
+    assert scope["world_ref"] == world and scope["story_time"] == point(1, 1)
+    assert scope["identity_semantics"] == "REGISTERED_LABELS_NOT_STATE_FACTS"
+    assert [entity["entity_id"] for entity in scope["entities"]] == [work["ids"]["sword"]]
+    assert scope["state_items"]
+    assert packet["structured_evidence"][-1:] == [
         {"ref": prior["draft_ref"], "value": {"draft_ref": prior["draft_ref"], "required_event_refs": [],
                                               "declared_important_deltas": [],
                                               "passage_index": [{"id": 1, "start": 0, "end": 7, "text": "门帘被风撩起。"}]}}

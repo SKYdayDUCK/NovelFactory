@@ -27,6 +27,15 @@ class RuntimeModelAdapter:
         if request.dry_run != bool(getattr(self.journal, "dry_run", False)):
             raise ModelCallFailure("DRY_RUN_MODE_MISMATCH", sent=False)
         try:
+            if self.profile.kind == "codex-cli" and not request.dry_run:
+                with self.journal.kernel.db.uow(write=False) as repo:
+                    call = repo.one("call_attempts", {"attempt_id": request.attempt_id})
+                    job = call and repo.one("supervisor_jobs", {"task_id": call["task_id"]})
+                if job and job["config"].get("required_review_mcp"):
+                    from agent_runtime.native_review import generate
+                    from novel_factory.application.review_mcp import ReviewMcpBroker
+                    return generate(self.profile, request, authorize=self.journal.authorize_send,
+                        record=self.journal.record, broker=ReviewMcpBroker.from_attempt(self.journal.kernel, request))
             receipt_target = None
             if self.profile.kind == "deepseek" and not request.dry_run:
                 from .wire_receipts import destination

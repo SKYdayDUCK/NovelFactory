@@ -57,7 +57,12 @@ def revise_scene(kernel, repo, board):
                 require(report["draft_ref"] == prior, "NARRATIVE_SELECTION_CONFLICT", "Fact report belongs to another draft")
                 extracted = kernel.artifact(repo, record["extraction_ref"], work)["payload"]["assertions"]
                 summaries = {a["assertion_id"]: a["summary"] for a in extracted}
-                issues = [{"reason": b["message"], "passage": summaries.get(b["assertion_id"])} for b in report["hard_blockers"]]
+                unresolved = [b for b in report["hard_blockers"] if b["code"].startswith("UNRESOLVED_")]
+                if unresolved:
+                    reader.update(reason="FACT_VERIFICATION_REQUIRED")
+                    return next(key for key, value in nodes.items() if value is reader)
+                issues = [{"code": b["code"], "reason": b["message"],
+                           "passage": summaries.get(b["assertion_id"])} for b in report["hard_blockers"]]
             else:
                 kind = "EPISTEMIC_READING" if reader["stage"] == "epistemic" else "CHAPTER_READING_ADVICE"
                 record = kernel.artifact(repo, reader["output_ref"], work, kind=kind)["payload"]
@@ -70,7 +75,7 @@ def revise_scene(kernel, repo, board):
                     issues = [i for i in editorial_blockers(report["issues"])
                               if by_draft.get(i["subject_ref"]["artifact_revision_id"]) == target]
                 issues = [{k: i[k] for k in ("description", "suggested_change")} for i in issues]
-            feedback = {"report_ref": reader["output_ref"], "findings": issues}
+            feedback = {"report_ref": reader["output_ref"], "source_draft_ref": prior, "findings": issues}
             if board.get("production_mode") == "quality":
                 # Hash the diagnosed findings as well as their count. Different unresolved issues are
                 # progress even when a review still reports the same number of blockers.
@@ -110,10 +115,6 @@ def resume_extent_revision(kernel, repo, owner, board, identity):
     wr = board["world_ref"]
     require(not repo.one("selections", {"work_id":wr["work_id"], "selection_kind":"NARRATIVE_SCENE:" + identity[6:]}),
             "NARRATIVE_SELECTION_CONFLICT", "A frozen scene cannot be revised here")
-    def editorial_findings(record):
-        return [f for f in record.get("revision_feedback", {}).get("findings", [])
-                if not isinstance(f, dict) or "actual_han" not in f]
-    findings = editorial_findings(writer)
     extent = writer["han_characters"]
     current = writer["output_ref"]
     draft = kernel.artifact(repo, current, wr["work_id"], kind="NARRATIVE_DRAFT")["payload"]
@@ -125,7 +126,7 @@ def resume_extent_revision(kernel, repo, owner, board, identity):
     require(task and task["state"] == "ACCEPTED", "INVALID_EVIDENCE", "Length recovery requires an accepted writer task")
     from .production_strategy import request_strategy
     request_strategy(board, identity, writer,
-                     [*findings, {"actual_han": measured, "target_han": extent}], history[-1])
+                     [{"actual_han": measured, "target_han": extent}], history[-1])
     return True
 
 
@@ -181,12 +182,15 @@ def repair_scene_extent(kernel, repo, owner, board, writer, task, audit, draft_r
     if chosen["decision"] == PAUSED:
         writer.update(state="STOPPED", reason=PAUSED)
         return True
-    old = writer.get("revision_feedback", {}).get("findings", [])
+    old = writer.get("revision_feedback", {})
+    historical = list(old.get("historical_report_refs", []))
+    if old.get("report_ref") and old["report_ref"] not in historical:
+        historical.append(old["report_ref"])
     _archive(writer)
-    findings = [finding for finding in old if not isinstance(finding, dict) or "actual_han" not in finding]
-    findings.append({"actual_han": actual, "target_han": extent})
+    findings = [{"actual_han": actual, "target_han": extent}]
     writer.update(prior_draft_ref=draft_ref, revision_count=writer.get("revision_count", 0) + 1,
                   revision_feedback={"report_ref": chosen["reflection_ref"], "findings": findings,
+                                     "source_draft_ref": draft_ref, "historical_report_refs": historical,
                                      "reflection_ref": chosen["reflection_ref"], "error_ref": chosen["error_ref"],
                                      "strategy_instruction": chosen["method"]})
     return True

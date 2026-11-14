@@ -5,10 +5,11 @@ from decimal import Decimal
 from uuid import uuid4
 
 import pytest
+from native_review_helpers import materialize_review_input, run_review_mcp
 from test_p6_rolling_production import answer, request
 from test_release import setup_batch
 
-from agent_runtime import native_codex, providers
+from agent_runtime import native_codex, native_review, providers
 from agent_runtime.protocol import ModelResponse
 from novel_factory.application import production_pipeline as boards
 from novel_factory.application.agent_gateway import AgentGateway
@@ -16,6 +17,7 @@ from novel_factory.application.rolling_production import register_rolling, rolli
 from novel_factory.application.supervisor import HostJournal, RuntimeSupervisor
 from novel_factory.domain.canonical import fingerprint
 from novel_factory.domain.errors import DomainError
+from novel_factory.domain.reconciliation import span_for
 from novel_factory.infrastructure import runtime_providers
 from novel_factory.infrastructure.creative_config import CreativeHarnessConfig
 from novel_factory.infrastructure.runtime_providers import RuntimeModelAdapter
@@ -49,6 +51,17 @@ def synthetic_production(kernel, monkeypatch, *, lengths=None, target=(6, 10), d
         native = profile.kind == "codex-cli"
         assert native if identity["role_id"] != "writer" else profile.model == "deepseek-flash"
         assert authorize(packet.attempt_id) is not False
+        turn = "synthetic-turn-" + packet.attempt_id
+        raw = {"model": profile.model}
+        if native:
+            thread = "synthetic-thread-" + packet.attempt_id
+            record(packet.attempt_id, thread, None, "THREAD_STARTED")
+            record(packet.attempt_id, thread, turn, "TURN_STARTED")
+            with kernel.db.uow(write=False) as repo:
+                job = repo.one("supervisor_jobs", {"task_id": identity["task_id"]})
+            if job and job["config"].get("required_review_mcp"):
+                raw["review_mcp_receipt_refs"] = run_review_mcp(kernel, packet, thread, turn)
+                user = materialize_review_input(kernel, user, raw["review_mcp_receipt_refs"])
         calls.append(({**identity, "task_kind": task_kind}, deepcopy(user), profile.kind))
         result = answer(user)
         if identity["role_id"] == "writer" and sizes is not None:
@@ -64,18 +77,28 @@ def synthetic_production(kernel, monkeypatch, *, lengths=None, target=(6, 10), d
                       "evidence_refs": [{"kind": "ARTIFACT", "artifact_ref": frozen[key]}
                                         for key in ("source_draft_ref", "report_ref")]}
         elif editorial and identity["role_id"] == "reviewer" and task_kind == "literary" and not diagnoses:
-            source = json.loads(user["authorized_materials"][0]["content"])["draft_ref"]
+            delivered = json.loads(user["authorized_materials"][0]["content"])
+            source = delivered["draft_ref"]
             result["issues"] = [{"issue_id": str(uuid4()), "category": "LITERARY", "severity": "BLOCKER",
                 "subject_ref": source, "description": "Synthetic recurring editorial issue",
-                "evidence_refs": [{"kind": "ARTIFACT", "artifact_ref": source}],
+                "evidence_refs": [{"kind": "ARTIFACT", "artifact_ref": delivered["text_ref"],
+                                   "span": span_for(delivered["text"], 0, len(delivered["text"]))}],
                 "suggested_change": "Resolve the synthetic issue", "disposition": "OPEN", "issue_kind": "CHANGE_REQUEST"}]
         envelope = {**identity, "status": "SUCCEEDED", "payload": result, "unresolved_questions": []}
-        turn = "synthetic-turn-" + packet.attempt_id
-        raw = {"model": profile.model}
         if native:
-            thread = "synthetic-thread-" + packet.attempt_id
-            record(packet.attempt_id, thread, None, "THREAD_STARTED")
-            record(packet.attempt_id, thread, turn, "TURN_STARTED")
+            if job and job["config"].get("required_review_mcp") and task_kind == "verification":
+                with kernel.db.uow(write=False) as repo:
+                    tools = [(ref, kernel.artifact(repo, ref, identity["world_ref"]["work_id"])["payload"])
+                             for ref in raw["review_mcp_receipt_refs"]]
+                case = next(receipt["result"]["structuredContent"]["case"] for _, receipt in tools
+                            if receipt["tool"] == "nf_review_material" and "case" in receipt["result"]["structuredContent"])
+                query = next(ref for ref, receipt in tools if receipt["tool"] == "nf_query_batch")
+                citations = [{"kind": "ARTIFACT", "artifact_ref": query},
+                             {"kind": "ARTIFACT", "artifact_ref": case["report_ref"]}]
+                envelope["payload"] = {"decision": json.dumps({"case_hash": case["case_hash"], "answers": [
+                    {"index": question["index"], "status": "UNREGISTERED", "explanation": "Synthetic unresolved registration after actual query",
+                     "correction": None, "evidence_refs": citations} for question in case["questions"]]}),
+                    "reason": "Synthetic world-input hold after one internal verification", "deferred_questions": [], "evidence_refs": citations}
             record(packet.attempt_id, thread, turn, "COMPLETED")
             raw.update(codex_thread_id=thread, codex_turn_id=turn, auth_mode="host-login",
                        billing="SUBSCRIPTION_AMOUNT_UNKNOWN")
@@ -88,6 +111,8 @@ def synthetic_production(kernel, monkeypatch, *, lengths=None, target=(6, 10), d
 
     monkeypatch.setattr(native_codex, "generate", forbidden)
     monkeypatch.setattr(native_codex, "start_host", forbidden)
+    monkeypatch.setattr(native_review, "generate", forbidden)
+    monkeypatch.setattr(native_review, "start_host", forbidden)
     monkeypatch.setattr(providers, "post", forbidden)
     monkeypatch.setattr(providers.Profile, "preflight", lambda _: None)
     monkeypatch.setattr(runtime_providers, "invoke", invoke)
@@ -171,7 +196,15 @@ def test_diagnosis_without_new_solution_stops_without_more_paid_work(kernel_env,
     before = len(calls)
     for _ in range(8):
         RuntimeSupervisor(kernel, gateway).run_once(owner, wr["work_id"], wr["branch_id"])
-    assert len(calls) == before
+    assert len(calls) == before + int(diagnosis == "needs_input")
+    if diagnosis == "needs_input":
+        assert len([row for row in calls if row[0]["task_kind"] == "verification"]) == 1
+        held = current_board(kernel, wr)
+        assert next(n for n in held["nodes"].values() if n["stage"] == "draft")["reason"] == "NEEDS_WORLD_INPUT"
+        settled = len(calls)
+        for _ in range(8):
+            RuntimeSupervisor(kernel, gateway).run_once(owner, wr["work_id"], wr["branch_id"])
+        assert len(calls) == settled
 
 
 @pytest.mark.parametrize("mode", ["plateau", "improving"])
@@ -267,4 +300,5 @@ def test_long_legacy_history_resumes_one_unsent_diagnosis_and_delivers_complete_
         snapshots = repo.many("artifacts", {"work_id": wr["work_id"], "kind": "CREATIVE_CONTEXT_SNAPSHOT"})
         model_input = next(row["payload"]["model_input"] for row in snapshots
                            if row["payload"]["packet"]["scope"]["task_id"] == tasks[0]["task_id"])
-        assert any(item["value"].get("findings") == findings for item in model_input["structured_evidence"])
+        deferred = next(item["value"] for item in model_input["structured_evidence"] if item["ref"] == frozen["report_ref"])
+        assert deferred["delivery"] == "MCP_REQUIRED" and "findings" not in deferred

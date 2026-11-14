@@ -298,6 +298,8 @@ def pipeline_status(kernel, owner, work, branch, *, include_outputs=False):
                                                                       kind="AGENT_CANDIDATE")["payload"]}
             elif stage == "reassessment":
                 outputs[key] = kernel.artifact(repo, ref, work, kind="PRODUCTION_REASSESSMENT")["payload"]
+            elif stage == "internal_verification":
+                outputs[key] = kernel.artifact(repo, ref, work, kind="INTERNAL_REVIEW_RESOLUTION")["payload"]
             else:
                 outputs[key] = kernel.artifact(repo, ref, work, kind="AGENT_CANDIDATE")["payload"]
         return {"world_ref": board["world_ref"], "volume_id": board["volume_id"], "nodes": nodes,
@@ -306,9 +308,15 @@ def pipeline_status(kernel, owner, work, branch, *, include_outputs=False):
 
 def _ready(board):
     nodes, limits = board["nodes"], board["limits"]
+    if any(n["state"] == "STOPPED" and n.get("reason") in {
+            "REVIEW_EVIDENCE_REPAIR_EXHAUSTED", "TECHNICAL_REPAIR_BUDGET_EXHAUSTED",
+            "INTERNAL_VERIFICATION_REPAIR_EXHAUSTED", "INTERNAL_VERIFICATION_EXHAUSTED",
+            "REPAIR_BUDGET_EXHAUSTED", "NEEDS_WORLD_INPUT", "NEEDS_AUTHOR_DECISION"}
+           for n in nodes.values()):
+        return None
     busy = Counter(n["stage"] for n in nodes.values() if n["state"] == "ENROLLED")
-    diagnoses = sorted(k for k, n in nodes.items() if n["stage"] == "reassessment" and n["state"] == "PENDING")
-    if diagnoses and sum(busy[s] for s in READING_STAGES | {"reassessment"}) < limits["review"]:
+    diagnoses = sorted(k for k, n in nodes.items() if n["stage"] in {"reassessment", "internal_verification"} and n["state"] == "PENDING")
+    if diagnoses and sum(busy[s] for s in READING_STAGES | {"reassessment", "internal_verification"}) < limits["review"]:
         return diagnoses[0]
     reviews = [k for k, n in nodes.items() if n["stage"] in READING_STAGES and n["state"] == "PENDING"
                and all(nodes[p]["state"] == "DRAFT_STORED" for p in n["parents"])
@@ -327,7 +335,7 @@ def _ready(board):
                 for parent in chapter["parents"]
             )
         reviews = [key for key in reviews if chapter_ready(key)]
-    reading_wip = sum(busy[s] for s in READING_STAGES | {"reassessment"})
+    reading_wip = sum(busy[s] for s in READING_STAGES | {"reassessment", "internal_verification"})
     if reviews and reading_wip < limits["review"]:
         return min(reviews)
     if len(reviews) + reading_wip >= limits["review_backlog"]:
@@ -361,16 +369,22 @@ def _enroll(kernel, repo, gateway, owner, board, identity, *, frozen_assignment=
                                     "assumptions": node["dependencies"], "goal_limit": board["limits"]["window_goals"],
                                     "authorized_subject_ids": board["subject_ids"]},
                                    ensure_ascii=False))
-    elif stage == "reassessment":
+    elif stage in {"reassessment", "internal_verification"}:
+        from .internal_review_resolution import assignment as verification_assignment
         from .production_reassessment import reassessment_assignment
-        request = node["reassessment_request"]
+        request = node["internal_case"] if stage == "internal_verification" else node["reassessment_request"]
         manifest_ref = board["manifest_ref"]
-        require(_selected(repo, work, "PLAN_MANIFEST:" + board["volume_id"]) == manifest_ref,
-                "STALE_PLAN", "Diagnosis plan changed before enrollment")
-        cut = {"plane": "PLAN", "plan_manifest_ref": manifest_ref}
+        if stage == "reassessment":
+            require(_selected(repo, work, "PLAN_MANIFEST:" + board["volume_id"]) == manifest_ref,
+                    "STALE_PLAN", "Diagnosis plan changed before enrollment")
+            cut = {"plane": "PLAN", "plan_manifest_ref": manifest_ref}
         materials = [request["source_draft_ref"], request["report_ref"]]
-        refs = [manifest_ref, request["report_ref"]]
-        assignment = reassessment_assignment(request)
+        refs = [request["report_ref"], *([manifest_ref] if stage == "reassessment" else [])]
+        if stage == "internal_verification":
+            for key in ("source_ref", "extraction_ref"):
+                if request.get(key) and request[key] not in refs:
+                    refs.append(request[key])
+        assignment = verification_assignment(request) if stage == "internal_verification" else reassessment_assignment(request)
     elif stage == "draft":
         scene = kernel.artifact(repo, node["scene_ref"], work, kind="SCENE_PLAN")["payload"]
         materials = [node["scene_ref"]]
@@ -396,6 +410,10 @@ def _enroll(kernel, repo, gateway, owner, board, identity, *, frozen_assignment=
         assignment = fact_assignment() + "\n可核对的本场标识与时段：" + json.dumps(scope, ensure_ascii=False)
         # Qualify the source of reconciliation obligations for this exact draft.
         refs.append(board["nodes"][node["parents"][0]]["scene_ref"])
+        for ref in node.get("internal_resolution_refs", []):
+            resolved = kernel.artifact(repo, ref, work, kind="INTERNAL_REVIEW_RESOLUTION")["payload"]["request"]
+            if resolved["source_draft_ref"] == parent.get("output_ref") and resolved["world_ref"] == wr:
+                materials.append(ref)
         role, kind = "evidence_maintainer", "assertion_extract"
     elif stage == "epistemic":
         parent = board["nodes"][node["parents"][0]]
@@ -403,6 +421,8 @@ def _enroll(kernel, repo, gateway, owner, board, identity, *, frozen_assignment=
         story_time = scene["scene_contract"]["story_interval"]["end"]
         assignment = "独立通读本场正文，逐项核查人物所知、获知来源及披露时序。把无来源、时序矛盾或无法判断的知识归为问题，引用原句及可用证据。明确区分可验证的硬性认知矛盾、疑问和可选的文学建议，标注准确的严重程度与处置状态。"
         role, kind = "reviewer", "epistemic"
+    elif stage == "internal_verification":
+        role, kind = "reviewer", "verification"
     elif stage == "reassessment":
         role, kind = "chief_editor", "editorial_decision"
     else:
@@ -435,6 +455,8 @@ def _enroll(kernel, repo, gateway, owner, board, identity, *, frozen_assignment=
     seconds = int((datetime.fromisoformat(board["authorization"]["deadline"]) - repo.now()).total_seconds())
     require(seconds > 0, "TASK_EXPIRED", "No time remains")
     repair = (node.get("schema_repairs") or [None])[-1]
+    if node.get("reason") == "READING_POLICY_UPGRADED":
+        repair = None
     if stage == "facts" and node.get("reason") == "FACT_FORMAT_REPAIR_REQUESTED":
         repair = node["fact_format_repairs"][-1]
         require(repair["source_draft_ref"] == materials[0], "STALE_GENERATION", "Repaired reading source changed")
@@ -443,22 +465,36 @@ def _enroll(kernel, repo, gateway, owner, board, identity, *, frozen_assignment=
     if repair:
         assignment += "\n上一次任务的结构化输出诊断与修复方法：" + json.dumps(
             {"diagnostic": repair["diagnostic"], "method": repair.get("reassessment", repair)["method"]}, ensure_ascii=False)
+    evidence_repair = node.get("reason") == "REVIEW_EVIDENCE_REREAD"
+    if evidence_repair:
+        assignment += "\n审核证据补查：" + node["evidence_repairs"][-1]["method"]
+    verification_repair = node.get("reason") == "INTERNAL_VERIFICATION_REPAIR_REQUIRED"
+    if verification_repair:
+        require(node["verification_repair"]["case_hash"] == node["internal_case"]["case_hash"],
+                "STALE_GENERATION", "Internal correction changed its frozen questions")
+        assignment += "\n核查答复校正：" + node["verification_repair"]["method"]
     if frozen_assignment is not None:
         # Only the administrator lost-review recovery supplies this already
         # authenticated immutable input. Do not regenerate historical wording.
         assignment = frozen_assignment
     task = RuntimeTaskService(kernel, gateway).prepare(owner, wr, role_id=role, task_kind=kind,
         skill_name="edit-volume" if stage == "reassessment" else None,
-        knowledge_reread_reason="known_error" if repair else None,
+        review_belief=stage in {"epistemic", "internal_verification"},
+        knowledge_reread_reason="known_error" if repair or evidence_repair or verification_repair
+        or node.get("reason") == "READING_POLICY_UPGRADED" else None,
         assignment=assignment, knowledge_cut=cut, subject_ids=board["subject_ids"], predicates=board["predicates"],
         story_time=story_time, material_refs=materials, input_artifacts=refs,
-        adapter_id=board["routes"]["review" if stage in READING_STAGES | {"reassessment"} else stage], max_amount=board["reserve_amount"], token_budget=board["token_reservation"],
+        adapter_id=board["routes"]["review" if stage in READING_STAGES | {"reassessment", "internal_verification"} else stage], max_amount=board["reserve_amount"], token_budget=board["token_reservation"],
         currency=repo.one("budgets", {"work_id": work, "budget_id": board["budget_id"]})["currency"],
         queue_state="READY", lease_seconds=min(600, seconds), deadline_seconds=seconds)
-    if stage == "reassessment":
+    if stage in {"reassessment", "internal_verification"}:
         frozen_input = kernel.artifact(repo, task.agent_input["input_ref"], work, kind="AGENT_INPUT")["payload"]
         require(gateway.adapters[frozen_input["adapter_id"]].configuration.get("adapter_kind") == "codex-cli",
                 "MODEL_UNAVAILABLE", "Production strategy diagnosis requires Codex")
+        if verification_repair:
+            require(all(frozen_input[key] == node["verification_repair"][key]
+                        for key in ("runtime_sha256", "model_config_sha256", "output_contract")),
+                    "TASK_REBIND_REQUIRED", "Internal correction cannot change its role, model or output contract")
     if repair:
         node["active_format_repair"] = {
             "history": "fact_format_repairs" if stage == "facts" and node.get("reason") == "FACT_FORMAT_REPAIR_REQUESTED" else "schema_repairs",
@@ -475,6 +511,9 @@ def _enroll(kernel, repo, gateway, owner, board, identity, *, frozen_assignment=
         input_ref=task.agent_input["input_ref"],
         budget_id=board["budget_id"], reserve_amount=board["reserve_amount"], token_reservation=board["token_reservation"])
     supervisor.install_job(repo, task.task, {**config, "production_node": identity,
+        **({"required_review_mcp": True} if stage in READING_STAGES | {"reassessment", "internal_verification"}
+           and gateway.adapters[kernel.artifact(repo, task.agent_input["input_ref"], work)["payload"]["adapter_id"]]
+               .configuration.get("adapter_kind") == "codex-cli" else {}),
         **({"production_revision_brief_ref": node["revision_brief_ref"]}
            if stage == "draft" and node.get("revision_brief_ref") else {})})
     node.update(state="ENROLLED", task_id=task.task["task_id"], enrolled_at=repo.now().isoformat())
@@ -503,9 +542,64 @@ def production_material_reader(kernel):
             job = repo.one("supervisor_jobs", {"task_id": task_id})
             if not job or not ({"production_node", "returned_edition"} & job["config"].keys()):
                 return None
+            if "returned_edition" in job["config"]:
+                from .returned_edition import material
+                value = material(kernel, owner, task_id, generation, context_bundle_id, artifact_ref)
+                if value is not None:
+                    return value
             task = repo.one("tasks", {"task_id": task_id})
             board = _load(kernel, repo, task["work_id"], task["branch_id"])
             node = board and board["nodes"].get(job["config"].get("production_node"))
+            if node and node["stage"] == "internal_verification" and artifact_ref != node["internal_case"]["source_draft_ref"]:
+                task, _, spec, _ = NarrativeService(kernel)._task(repo, owner, task_id, generation)
+                request = node["internal_case"]
+                frozen = kernel.artifact(repo, job["config"]["dispatch"]["input_ref"], task["work_id"], kind="AGENT_INPUT")["payload"]
+                assigned = [strict_json_loads(line) for line in frozen["assignment"].splitlines() if line.startswith("{")]
+                require(node["state"] == "ENROLLED" and node.get("task_id") == task_id
+                        and task["context_bundle_id"] == context_bundle_id
+                        and (task["role_id"], task["task_kind"]) == ("reviewer", "verification")
+                        and artifact_ref in frozen["material_refs"] and artifact_ref in spec["input_artifacts"]
+                        and spec["world_ref"] == request["world_ref"]
+                        and any(a.get("case_hash") == request["case_hash"] for a in assigned),
+                        "VIEW_DENIED", "Internal evidence is outside its exact frozen verification case")
+                source = kernel.artifact(repo, artifact_ref, task["work_id"])
+                diagnostic_source = {}
+                if request["source_kind"] == "DIAGNOSIS":
+                    diagnosis = kernel.artifact(repo, request["source_ref"], task["work_id"], kind="PRODUCTION_REASSESSMENT")["payload"]
+                    original = diagnosis["request"]
+                    diagnostic_source = {"diagnosis_source_ref": request["source_ref"],
+                        "diagnosis_request_sha256": fingerprint(original),
+                        "diagnosis_source": {k: original[k] for k in
+                                             ("world_ref", "source_draft_ref", "report_ref", "findings")},
+                        "diagnosis_outcome": diagnosis["outcome"], "diagnosis_reason": diagnosis["reason"]}
+                return canonical_bytes({"source_ref": artifact_ref, "source_kind": source["kind"],
+                    "projection": "INTERNAL_CASE_WINDOW", "source_payload_sha256": fingerprint(source["payload"]),
+                    "case": request, **diagnostic_source,
+                    **({"report": source["payload"]} if request["source_kind"] == "DIAGNOSIS" else {})})
+            if node and node["stage"] == "facts" and artifact_ref in node.get("internal_resolution_refs", []):
+                task, _, spec, _ = NarrativeService(kernel)._task(repo, owner, task_id, generation)
+                require(node["state"] == "ENROLLED" and node.get("task_id") == task_id
+                        and task["context_bundle_id"] == context_bundle_id
+                        and artifact_ref in spec["input_artifacts"], "VIEW_DENIED", "Unassigned internal resolution")
+                record = kernel.artifact(repo, artifact_ref, task["work_id"], kind="INTERNAL_REVIEW_RESOLUTION")["payload"]
+                require(record["request"]["source_draft_ref"] == board["nodes"][node["parents"][0]]["output_ref"],
+                        "STALE_GENERATION", "Internal resolution belongs to another draft")
+                questions = {q["index"]: q for q in record["request"]["questions"]}
+                evidence_table, answers = [], []
+                for answer in record["answers"]:
+                    indices = []
+                    for cited in answer["evidence_refs"]:
+                        if cited not in evidence_table:
+                            evidence_table.append(cited)
+                        indices.append(evidence_table.index(cited))
+                    answers.append({**{k: v for k, v in answer.items() if k != "evidence_refs"},
+                        "evidence_indices": indices, "assertion_id": questions[answer["index"]].get("assertion_id"),
+                        "span": questions[answer["index"]].get("span")})
+                return canonical_bytes({"source_ref": artifact_ref, "projection": "VERIFIED_FINDINGS",
+                    "resolution": {"case_hash": record["request"]["case_hash"],
+                        "source_draft_ref": record["request"]["source_draft_ref"], "world_ref": record["request"]["world_ref"],
+                        "outcome": record["outcome"], "method": record["method"],
+                        "evidence_table": evidence_table, "answers": answers}})
             brief_ref = job["config"].get("production_revision_brief_ref")
             if brief_ref and artifact_ref == brief_ref:
                 task, _, spec, _ = NarrativeService(kernel)._task(repo, owner, task_id, generation)
@@ -556,7 +650,7 @@ def prepare_materials(kernel, task, config):
             ReleaseService(bound).bind_writer_task(actor, tid, gen, node["scene_ref"], node["handoff_refs"], key)
             if node.get("prior_draft_ref"):
                 NarrativeService(bound).bind_reader_task(owner, tid, gen, [node["prior_draft_ref"]], key)
-        elif node["stage"] in READING_STAGES | {"reassessment"}:
+        elif node["stage"] in READING_STAGES | {"reassessment", "internal_verification"}:
             drafts = [board["nodes"][p]["output_ref"] for p in node["parents"]]
             for parent in node["parents"]:
                 source = repo.one("tasks", {"task_id": board["nodes"][parent]["task_id"]})
@@ -587,6 +681,9 @@ def _deliver(kernel, repo, gateway, board, node, task):
             kernel.tasks.accept_in_transaction(repo.conn, task["task_id"], task["generation"])
             return
         state = "DRAFT_STORED"
+    elif node["stage"] == "internal_verification":
+        from .production_verification import deliver_verification
+        ref, state = deliver_verification(kernel, repo, owner, board, node, task, evidence, candidate)
     elif node["stage"] == "reassessment":
         from .production_reassessment import record_reassessment
         ref, state = record_reassessment(kernel, repo, owner, board, node, task, evidence, candidate)
@@ -822,6 +919,13 @@ def advance_pipeline(kernel, gateway, controller, work, branch):
         nodes = board["nodes"]
         expired = repo.now() >= datetime.fromisoformat(board["authorization"]["deadline"])
         if not expired:
+            from .production_verification import consume_verification, queue_verification
+            if verified := consume_verification(bound, repo, _current_owner(bound, repo, board), board):
+                return {"status": "INTERNAL_VERIFICATION_UPDATED", "node_id": verified,
+                        "board_ref": _save(bound, repo, controller, board)}
+            if queued := queue_verification(bound, repo, board):
+                return {"status": "INTERNAL_VERIFICATION_QUEUED", "node_id": queued,
+                        "board_ref": _save(bound, repo, controller, board)}
             from .production_strategy import consume_strategy, resume_unsent_strategy
             if consumed := consume_strategy(bound, repo, board):
                 return {"status": "STRATEGY_CONSUMED", "node_id": consumed,
@@ -914,7 +1018,11 @@ def advance_pipeline(kernel, gateway, controller, work, branch):
                     except DomainError as error:
                         if error.code == "CALL_RECONCILIATION_REQUIRED":
                             continue
-                        node.update(state="STOPPED", reason=error.code)
+                        from .production_verification import recover_verification
+                        from .review_recovery import recover_review
+                        if not (recover_review(bound, repo, gateway, node, task, error)
+                                or recover_verification(bound, repo, gateway, node, task, error)):
+                            node.update(state="STOPPED", reason=error.code)
                 elif expired and task["state"] in {"READY", "BLOCKED", "RUNNING"}:
                     node.update(state="STOPPED", reason="TASK_EXPIRED")
                 else:

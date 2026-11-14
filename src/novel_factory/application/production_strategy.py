@@ -80,6 +80,7 @@ def consume_strategy(kernel, repo, board):
             writer.update(prior_draft_ref=request["source_draft_ref"],
                 revision_count=writer.get("revision_count", 0) + 1,
                 revision_feedback={"report_ref": request["report_ref"], "findings": request["findings"],
+                    "source_draft_ref": request["source_draft_ref"],
                     "reflection_ref": node["output_ref"],
                     **({"error_ref": writer["repair_plans"][-1]["error_ref"]}
                        if request["review_stage"] != "extent" else {}),
